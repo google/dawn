@@ -3,8 +3,9 @@ fn acos_8e2acf() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   acos_8e2acf();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

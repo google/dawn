@@ -27,8 +27,9 @@ fn acos_a610c4() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   acos_a610c4();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

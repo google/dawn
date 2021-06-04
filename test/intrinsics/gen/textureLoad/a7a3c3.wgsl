@@ -28,8 +28,9 @@ fn textureLoad_a7a3c3() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   textureLoad_a7a3c3();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

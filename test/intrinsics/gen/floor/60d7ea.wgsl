@@ -27,8 +27,9 @@ fn floor_60d7ea() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   floor_60d7ea();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

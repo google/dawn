@@ -5,8 +5,9 @@ fn textureStore_f8dead() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   textureStore_f8dead();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

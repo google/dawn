@@ -27,8 +27,9 @@ fn clamp_2bde41() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   clamp_2bde41();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

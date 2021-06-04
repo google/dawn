@@ -5,8 +5,9 @@ fn textureNumSamples_42f8bb() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   textureNumSamples_42f8bb();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

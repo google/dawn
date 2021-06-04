@@ -27,8 +27,9 @@ fn unpack2x16unorm_7699c0() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   unpack2x16unorm_7699c0();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

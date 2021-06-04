@@ -5,8 +5,9 @@ fn textureDimensions_c2215f() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   textureDimensions_c2215f();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

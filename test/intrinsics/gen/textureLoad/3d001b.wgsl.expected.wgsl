@@ -5,8 +5,9 @@ fn textureLoad_3d001b() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   textureLoad_3d001b();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

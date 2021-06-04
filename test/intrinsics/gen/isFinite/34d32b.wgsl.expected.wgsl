@@ -3,8 +3,9 @@ fn isFinite_34d32b() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   isFinite_34d32b();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

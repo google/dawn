@@ -3,8 +3,9 @@ fn fwidth_df38ef() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   fwidth_df38ef();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

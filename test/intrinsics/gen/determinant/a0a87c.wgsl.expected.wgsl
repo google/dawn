@@ -3,8 +3,9 @@ fn determinant_a0a87c() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   determinant_a0a87c();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

@@ -27,8 +27,9 @@ fn all_986c7b() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   all_986c7b();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

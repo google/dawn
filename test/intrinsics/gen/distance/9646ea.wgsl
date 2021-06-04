@@ -27,8 +27,9 @@ fn distance_9646ea() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   distance_9646ea();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

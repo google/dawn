@@ -3,8 +3,9 @@ fn trunc_e183aa() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   trunc_e183aa();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

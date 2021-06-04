@@ -27,8 +27,9 @@ fn mix_6f8adc() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   mix_6f8adc();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

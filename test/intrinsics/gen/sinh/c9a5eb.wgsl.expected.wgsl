@@ -3,8 +3,9 @@ fn sinh_c9a5eb() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   sinh_c9a5eb();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

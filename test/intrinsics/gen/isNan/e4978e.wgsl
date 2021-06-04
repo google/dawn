@@ -27,8 +27,9 @@ fn isNan_e4978e() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   isNan_e4978e();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

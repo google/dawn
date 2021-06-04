@@ -1,10 +1,15 @@
+struct tint_symbol {
+  float4 value : SV_Position;
+};
+
 void all_bd2dba() {
   bool res = all(vector<bool, 3>(false, false, false));
 }
 
-void vertex_main() {
+tint_symbol vertex_main() {
   all_bd2dba();
-  return;
+  const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  return tint_symbol_1;
 }
 
 void fragment_main() {

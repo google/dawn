@@ -27,8 +27,9 @@ fn fwidth_b83ebb() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   fwidth_b83ebb();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

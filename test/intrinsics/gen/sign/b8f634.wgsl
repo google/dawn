@@ -27,8 +27,9 @@ fn sign_b8f634() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   sign_b8f634();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

@@ -5,8 +5,9 @@ fn textureLoad_ecc823() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   textureLoad_ecc823();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

@@ -27,8 +27,9 @@ fn unpack4x8unorm_750c74() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   unpack4x8unorm_750c74();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

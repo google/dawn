@@ -28,8 +28,9 @@ fn frexp_1d6b62() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   frexp_1d6b62();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

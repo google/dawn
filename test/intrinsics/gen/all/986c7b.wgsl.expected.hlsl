@@ -1,10 +1,15 @@
+struct tint_symbol {
+  float4 value : SV_Position;
+};
+
 void all_986c7b() {
   bool res = all(vector<bool, 4>(false, false, false, false));
 }
 
-void vertex_main() {
+tint_symbol vertex_main() {
   all_986c7b();
-  return;
+  const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  return tint_symbol_1;
 }
 
 void fragment_main() {

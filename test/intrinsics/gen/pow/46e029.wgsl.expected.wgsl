@@ -3,8 +3,9 @@ fn pow_46e029() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   pow_46e029();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

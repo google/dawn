@@ -4,8 +4,9 @@ fn frexp_4b73e3() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   frexp_4b73e3();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

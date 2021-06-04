@@ -32,8 +32,9 @@ fn arrayLength_647a40() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   arrayLength_647a40();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

@@ -1,10 +1,15 @@
+struct tint_symbol {
+  float4 value : SV_Position;
+};
+
 void clamp_bd43ce() {
   uint4 res = clamp(uint4(0u, 0u, 0u, 0u), uint4(0u, 0u, 0u, 0u), uint4(0u, 0u, 0u, 0u));
 }
 
-void vertex_main() {
+tint_symbol vertex_main() {
   clamp_bd43ce();
-  return;
+  const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  return tint_symbol_1;
 }
 
 void fragment_main() {

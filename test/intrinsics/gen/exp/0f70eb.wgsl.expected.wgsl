@@ -3,8 +3,9 @@ fn exp_0f70eb() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   exp_0f70eb();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

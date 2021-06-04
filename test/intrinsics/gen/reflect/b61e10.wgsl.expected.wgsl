@@ -3,8 +3,9 @@ fn reflect_b61e10() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   reflect_b61e10();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

@@ -3,8 +3,9 @@ fn acos_489247() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   acos_489247();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

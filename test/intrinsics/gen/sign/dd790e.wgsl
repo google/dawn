@@ -27,8 +27,9 @@ fn sign_dd790e() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   sign_dd790e();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

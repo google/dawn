@@ -4,8 +4,9 @@ fn modf_f9f98c() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   modf_f9f98c();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

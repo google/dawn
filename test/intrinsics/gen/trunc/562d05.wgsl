@@ -27,8 +27,9 @@ fn trunc_562d05() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   trunc_562d05();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

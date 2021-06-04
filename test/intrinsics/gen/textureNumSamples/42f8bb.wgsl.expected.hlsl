@@ -1,3 +1,7 @@
+struct tint_symbol {
+  float4 value : SV_Position;
+};
+
 Texture2DMS<uint4> arg_0 : register(t0, space1);
 
 void textureNumSamples_42f8bb() {
@@ -6,9 +10,10 @@ void textureNumSamples_42f8bb() {
   int res = tint_tmp.z;
 }
 
-void vertex_main() {
+tint_symbol vertex_main() {
   textureNumSamples_42f8bb();
-  return;
+  const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  return tint_symbol_1;
 }
 
 void fragment_main() {

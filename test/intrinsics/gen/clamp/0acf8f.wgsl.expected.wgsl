@@ -3,8 +3,9 @@ fn clamp_0acf8f() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   clamp_0acf8f();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

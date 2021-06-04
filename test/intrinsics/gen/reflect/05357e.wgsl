@@ -27,8 +27,9 @@ fn reflect_05357e() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   reflect_05357e();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

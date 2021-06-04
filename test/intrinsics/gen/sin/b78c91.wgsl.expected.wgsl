@@ -3,8 +3,9 @@ fn sin_b78c91() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   sin_b78c91();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

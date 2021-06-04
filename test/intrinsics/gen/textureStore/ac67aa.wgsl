@@ -28,8 +28,9 @@ fn textureStore_ac67aa() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   textureStore_ac67aa();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

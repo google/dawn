@@ -28,8 +28,9 @@ fn textureNumLayers_68a65b() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   textureNumLayers_68a65b();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

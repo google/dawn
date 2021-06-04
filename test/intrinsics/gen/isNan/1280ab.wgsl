@@ -27,8 +27,9 @@ fn isNan_1280ab() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   isNan_1280ab();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

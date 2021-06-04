@@ -27,8 +27,9 @@ fn tanh_c15fdb() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   tanh_c15fdb();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

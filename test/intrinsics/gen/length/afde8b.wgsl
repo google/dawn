@@ -27,8 +27,9 @@ fn length_afde8b() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   length_afde8b();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

@@ -27,8 +27,9 @@ fn countOneBits_65d2ae() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   countOneBits_65d2ae();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

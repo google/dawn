@@ -3,8 +3,9 @@ fn distance_0657d4() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   distance_0657d4();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

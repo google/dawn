@@ -27,8 +27,9 @@ fn pack2x16snorm_6c169b() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   pack2x16snorm_6c169b();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

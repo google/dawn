@@ -3,8 +3,9 @@ fn isNormal_863dcd() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   isNormal_863dcd();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

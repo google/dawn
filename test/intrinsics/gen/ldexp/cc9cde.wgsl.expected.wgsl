@@ -3,8 +3,9 @@ fn ldexp_cc9cde() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   ldexp_cc9cde();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

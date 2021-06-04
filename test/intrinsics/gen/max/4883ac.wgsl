@@ -27,8 +27,9 @@ fn max_4883ac() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   max_4883ac();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

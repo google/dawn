@@ -3,8 +3,9 @@ fn ldexp_2cb32a() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   ldexp_2cb32a();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

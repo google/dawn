@@ -1,10 +1,15 @@
+struct tint_symbol {
+  float4 value : SV_Position;
+};
+
 void max_a93419() {
   float4 res = max(float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
-void vertex_main() {
+tint_symbol vertex_main() {
   max_a93419();
-  return;
+  const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  return tint_symbol_1;
 }
 
 void fragment_main() {

@@ -27,8 +27,9 @@ fn select_ed8a15() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   select_ed8a15();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

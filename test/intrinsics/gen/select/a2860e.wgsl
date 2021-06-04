@@ -27,8 +27,9 @@ fn select_a2860e() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   select_a2860e();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

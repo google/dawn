@@ -3,8 +3,9 @@ fn floor_66f154() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   floor_66f154();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

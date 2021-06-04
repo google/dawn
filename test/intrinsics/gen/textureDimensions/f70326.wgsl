@@ -28,8 +28,9 @@ fn textureDimensions_f70326() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   textureDimensions_f70326();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

@@ -27,8 +27,9 @@ fn asin_7b6a44() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   asin_7b6a44();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

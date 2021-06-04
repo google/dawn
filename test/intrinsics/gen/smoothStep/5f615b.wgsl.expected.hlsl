@@ -1,10 +1,15 @@
+struct tint_symbol {
+  float4 value : SV_Position;
+};
+
 void smoothStep_5f615b() {
   float4 res = smoothstep(float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
-void vertex_main() {
+tint_symbol vertex_main() {
   smoothStep_5f615b();
-  return;
+  const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  return tint_symbol_1;
 }
 
 void fragment_main() {

@@ -27,8 +27,9 @@ fn select_bb8aae() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   select_bb8aae();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

@@ -3,8 +3,9 @@ fn ceil_34064b() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   ceil_34064b();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

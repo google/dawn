@@ -27,8 +27,9 @@ fn fwidthFine_ff6aa0() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   fwidthFine_ff6aa0();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

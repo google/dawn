@@ -1,10 +1,15 @@
+struct tint_symbol {
+  float4 value : SV_Position;
+};
+
 void atan_a8b696() {
   float4 res = atan(float4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
-void vertex_main() {
+tint_symbol vertex_main() {
   atan_a8b696();
-  return;
+  const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  return tint_symbol_1;
 }
 
 void fragment_main() {

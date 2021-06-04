@@ -1,53 +1,67 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 25
+; Bound: 32
 ; Schema: 0
                OpCapability Shader
-         %11 = OpExtInstImport "GLSL.std.450"
+         %14 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Vertex %vertex_main "vertex_main" %tint_pointsize
+               OpEntryPoint Vertex %vertex_main "vertex_main" %tint_pointsize %tint_symbol_1
                OpEntryPoint Fragment %fragment_main "fragment_main"
                OpEntryPoint GLCompute %compute_main "compute_main"
                OpExecutionMode %fragment_main OriginUpperLeft
                OpExecutionMode %compute_main LocalSize 1 1 1
                OpName %tint_pointsize "tint_pointsize"
+               OpName %tint_symbol_1 "tint_symbol_1"
                OpName %faceForward_b316e5 "faceForward_b316e5"
                OpName %res "res"
+               OpName %tint_symbol_2 "tint_symbol_2"
+               OpName %tint_symbol "tint_symbol"
                OpName %vertex_main "vertex_main"
                OpName %fragment_main "fragment_main"
                OpName %compute_main "compute_main"
                OpDecorate %tint_pointsize BuiltIn PointSize
+               OpDecorate %tint_symbol_1 BuiltIn Position
       %float = OpTypeFloat 32
 %_ptr_Output_float = OpTypePointer Output %float
           %4 = OpConstantNull %float
 %tint_pointsize = OpVariable %_ptr_Output_float Output %4
-       %void = OpTypeVoid
-          %5 = OpTypeFunction %void
     %v4float = OpTypeVector %float 4
-         %12 = OpConstantNull %v4float
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %8 = OpConstantNull %v4float
+%tint_symbol_1 = OpVariable %_ptr_Output_v4float Output %8
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
 %_ptr_Function_v4float = OpTypePointer Function %v4float
+         %17 = OpTypeFunction %void %v4float
     %float_1 = OpConstant %float 1
-%faceForward_b316e5 = OpFunction %void None %5
-          %8 = OpLabel
-        %res = OpVariable %_ptr_Function_v4float Function %12
-          %9 = OpExtInst %v4float %11 FaceForward %12 %12 %12
-               OpStore %res %9
+%faceForward_b316e5 = OpFunction %void None %9
+         %12 = OpLabel
+        %res = OpVariable %_ptr_Function_v4float Function %8
+         %13 = OpExtInst %v4float %14 FaceForward %8 %8 %8
+               OpStore %res %13
                OpReturn
                OpFunctionEnd
-%vertex_main = OpFunction %void None %5
-         %16 = OpLabel
-               OpStore %tint_pointsize %float_1
-         %18 = OpFunctionCall %void %faceForward_b316e5
-               OpReturn
-               OpFunctionEnd
-%fragment_main = OpFunction %void None %5
+%tint_symbol_2 = OpFunction %void None %17
+%tint_symbol = OpFunctionParameter %v4float
          %20 = OpLabel
-         %21 = OpFunctionCall %void %faceForward_b316e5
+               OpStore %tint_symbol_1 %tint_symbol
                OpReturn
                OpFunctionEnd
-%compute_main = OpFunction %void None %5
-         %23 = OpLabel
+%vertex_main = OpFunction %void None %9
+         %22 = OpLabel
+               OpStore %tint_pointsize %float_1
          %24 = OpFunctionCall %void %faceForward_b316e5
+         %25 = OpFunctionCall %void %tint_symbol_2 %8
+               OpReturn
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %9
+         %27 = OpLabel
+         %28 = OpFunctionCall %void %faceForward_b316e5
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %9
+         %30 = OpLabel
+         %31 = OpFunctionCall %void %faceForward_b316e5
                OpReturn
                OpFunctionEnd

@@ -28,8 +28,9 @@ fn textureLoad_dee8e7() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   textureLoad_dee8e7();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

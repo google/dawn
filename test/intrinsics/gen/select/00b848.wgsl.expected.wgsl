@@ -3,8 +3,9 @@ fn select_00b848() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   select_00b848();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

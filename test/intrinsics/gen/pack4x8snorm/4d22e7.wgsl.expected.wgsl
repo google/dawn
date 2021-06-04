@@ -3,8 +3,9 @@ fn pack4x8snorm_4d22e7() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   pack4x8snorm_4d22e7();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

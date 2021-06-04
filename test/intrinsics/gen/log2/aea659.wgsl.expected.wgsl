@@ -3,8 +3,9 @@ fn log2_aea659() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   log2_aea659();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

@@ -1,3 +1,7 @@
+struct tint_symbol {
+  float4 value : SV_Position;
+};
+
 Texture2DArray<int4> arg_0 : register(t0, space1);
 
 void textureNumLevels_d004a9() {
@@ -6,9 +10,10 @@ void textureNumLevels_d004a9() {
   int res = tint_tmp.w;
 }
 
-void vertex_main() {
+tint_symbol vertex_main() {
   textureNumLevels_d004a9();
-  return;
+  const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  return tint_symbol_1;
 }
 
 void fragment_main() {

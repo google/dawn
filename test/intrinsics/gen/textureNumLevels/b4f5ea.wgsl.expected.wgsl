@@ -5,8 +5,9 @@ fn textureNumLevels_b4f5ea() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   textureNumLevels_b4f5ea();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

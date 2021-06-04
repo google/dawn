@@ -3,8 +3,9 @@ fn normalize_fc2ef1() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   normalize_fc2ef1();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

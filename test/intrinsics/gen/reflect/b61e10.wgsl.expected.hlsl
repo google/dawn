@@ -1,10 +1,15 @@
+struct tint_symbol {
+  float4 value : SV_Position;
+};
+
 void reflect_b61e10() {
   float2 res = reflect(float2(0.0f, 0.0f), float2(0.0f, 0.0f));
 }
 
-void vertex_main() {
+tint_symbol vertex_main() {
   reflect_b61e10();
-  return;
+  const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  return tint_symbol_1;
 }
 
 void fragment_main() {

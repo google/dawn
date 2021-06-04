@@ -3,8 +3,9 @@ fn isInf_a46d6f() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   isInf_a46d6f();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

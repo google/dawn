@@ -3,8 +3,9 @@ fn cosh_e0c1de() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   cosh_e0c1de();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

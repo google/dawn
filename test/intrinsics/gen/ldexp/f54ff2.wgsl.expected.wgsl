@@ -3,8 +3,9 @@ fn ldexp_f54ff2() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   ldexp_f54ff2();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

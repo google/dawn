@@ -27,8 +27,9 @@ fn ldexp_7bc2fd() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   ldexp_7bc2fd();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

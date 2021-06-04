@@ -27,8 +27,9 @@ fn distance_cfed73() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   distance_cfed73();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

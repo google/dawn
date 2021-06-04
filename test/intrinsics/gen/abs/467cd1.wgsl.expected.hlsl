@@ -1,10 +1,15 @@
+struct tint_symbol {
+  float4 value : SV_Position;
+};
+
 void abs_467cd1() {
   uint res = abs(1u);
 }
 
-void vertex_main() {
+tint_symbol vertex_main() {
   abs_467cd1();
-  return;
+  const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  return tint_symbol_1;
 }
 
 void fragment_main() {

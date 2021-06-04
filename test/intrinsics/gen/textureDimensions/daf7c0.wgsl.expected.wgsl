@@ -5,8 +5,9 @@ fn textureDimensions_daf7c0() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   textureDimensions_daf7c0();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

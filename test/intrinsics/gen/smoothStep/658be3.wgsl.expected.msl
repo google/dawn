@@ -1,13 +1,18 @@
 #include <metal_stdlib>
 
 using namespace metal;
+struct tint_symbol {
+  float4 value [[position]];
+};
+
 void smoothStep_658be3() {
   float3 res =   smoothstep(float3(), float3(), float3());
 }
 
-vertex void vertex_main() {
+vertex tint_symbol vertex_main() {
   smoothStep_658be3();
-  return;
+  tint_symbol const tint_symbol_1 = {.value=float4()};
+  return tint_symbol_1;
 }
 
 fragment void fragment_main() {

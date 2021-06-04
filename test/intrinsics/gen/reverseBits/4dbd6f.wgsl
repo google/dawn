@@ -27,8 +27,9 @@ fn reverseBits_4dbd6f() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   reverseBits_4dbd6f();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

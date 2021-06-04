@@ -27,8 +27,9 @@ fn any_e755c1() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   any_e755c1();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

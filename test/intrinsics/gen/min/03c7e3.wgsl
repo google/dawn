@@ -27,8 +27,9 @@ fn min_03c7e3() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   min_03c7e3();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

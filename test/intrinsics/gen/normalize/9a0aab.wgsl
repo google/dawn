@@ -27,8 +27,9 @@ fn normalize_9a0aab() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   normalize_9a0aab();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

@@ -27,8 +27,9 @@ fn select_266aff() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   select_266aff();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

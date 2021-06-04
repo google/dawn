@@ -3,8 +3,9 @@ fn isInf_666f2a() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   isInf_666f2a();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

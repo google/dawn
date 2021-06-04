@@ -27,8 +27,9 @@ fn tan_8ce3e9() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   tan_8ce3e9();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

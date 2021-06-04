@@ -27,8 +27,9 @@ fn select_01e2cd() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   select_01e2cd();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

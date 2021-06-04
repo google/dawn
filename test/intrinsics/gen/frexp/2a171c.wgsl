@@ -28,8 +28,9 @@ fn frexp_2a171c() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   frexp_2a171c();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

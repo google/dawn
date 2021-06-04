@@ -3,8 +3,9 @@ fn dot_883f0e() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   dot_883f0e();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

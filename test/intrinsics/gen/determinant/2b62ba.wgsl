@@ -27,8 +27,9 @@ fn determinant_2b62ba() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   determinant_2b62ba();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

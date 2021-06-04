@@ -27,8 +27,9 @@ fn reverseBits_e31adf() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   reverseBits_e31adf();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

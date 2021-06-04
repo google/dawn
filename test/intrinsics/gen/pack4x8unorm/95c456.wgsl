@@ -27,8 +27,9 @@ fn pack4x8unorm_95c456() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   pack4x8unorm_95c456();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

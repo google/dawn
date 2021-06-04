@@ -3,8 +3,9 @@ fn tanh_9f9fb9() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   tanh_9f9fb9();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

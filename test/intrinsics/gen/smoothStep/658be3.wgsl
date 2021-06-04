@@ -27,8 +27,9 @@ fn smoothStep_658be3() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   smoothStep_658be3();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

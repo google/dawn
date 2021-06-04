@@ -28,8 +28,9 @@ fn textureStore_6cff2e() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   textureStore_6cff2e();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

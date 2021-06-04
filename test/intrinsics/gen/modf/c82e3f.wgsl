@@ -28,8 +28,9 @@ fn modf_c82e3f() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   modf_c82e3f();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

@@ -27,8 +27,9 @@ fn log_b2ce28() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   log_b2ce28();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

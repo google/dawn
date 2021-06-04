@@ -27,8 +27,9 @@ fn fma_c10ba3() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   fma_c10ba3();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

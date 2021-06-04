@@ -1,12 +1,17 @@
+struct tint_symbol {
+  float4 value : SV_Position;
+};
+
 RWTexture1D<int4> arg_0 : register(u0, space1);
 
 void textureStore_d73b5c() {
   arg_0[1] = int4(0, 0, 0, 0);
 }
 
-void vertex_main() {
+tint_symbol vertex_main() {
   textureStore_d73b5c();
-  return;
+  const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  return tint_symbol_1;
 }
 
 void fragment_main() {

@@ -1,3 +1,7 @@
+struct tint_symbol {
+  float4 value : SV_Position;
+};
+
 Texture2DArray<float4> arg_0 : register(t0, space1);
 
 void textureDimensions_1a58e7() {
@@ -6,9 +10,10 @@ void textureDimensions_1a58e7() {
   int2 res = tint_tmp.xy;
 }
 
-void vertex_main() {
+tint_symbol vertex_main() {
   textureDimensions_1a58e7();
-  return;
+  const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  return tint_symbol_1;
 }
 
 void fragment_main() {

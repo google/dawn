@@ -3,8 +3,9 @@ fn step_334303() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   step_334303();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

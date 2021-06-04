@@ -28,8 +28,9 @@ fn textureNumLevels_5101cf() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   textureNumLevels_5101cf();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

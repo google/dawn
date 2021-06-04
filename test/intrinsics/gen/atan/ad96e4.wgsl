@@ -27,8 +27,9 @@ fn atan_ad96e4() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   atan_ad96e4();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

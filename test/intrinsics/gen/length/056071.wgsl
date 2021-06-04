@@ -27,8 +27,9 @@ fn length_056071() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   length_056071();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

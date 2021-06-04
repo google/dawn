@@ -27,8 +27,9 @@ fn min_aa28ad() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   min_aa28ad();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

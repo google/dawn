@@ -1,10 +1,15 @@
+struct tint_symbol {
+  float4 value : SV_Position;
+};
+
 void reverseBits_7c4269() {
   int res = reversebits(1);
 }
 
-void vertex_main() {
+tint_symbol vertex_main() {
   reverseBits_7c4269();
-  return;
+  const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  return tint_symbol_1;
 }
 
 void fragment_main() {

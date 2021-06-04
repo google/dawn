@@ -3,8 +3,9 @@ fn mix_0c8c33() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   mix_0c8c33();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

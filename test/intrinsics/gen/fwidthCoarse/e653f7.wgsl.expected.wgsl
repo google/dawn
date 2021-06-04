@@ -3,8 +3,9 @@ fn fwidthCoarse_e653f7() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   fwidthCoarse_e653f7();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

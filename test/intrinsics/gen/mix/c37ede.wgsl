@@ -27,8 +27,9 @@ fn mix_c37ede() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   mix_c37ede();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

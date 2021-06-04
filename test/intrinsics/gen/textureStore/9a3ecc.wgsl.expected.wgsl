@@ -5,8 +5,9 @@ fn textureStore_9a3ecc() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   textureStore_9a3ecc();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

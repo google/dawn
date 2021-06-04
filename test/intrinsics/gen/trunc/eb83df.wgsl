@@ -27,8 +27,9 @@ fn trunc_eb83df() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   trunc_eb83df();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

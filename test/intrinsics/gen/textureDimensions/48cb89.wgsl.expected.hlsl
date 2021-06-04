@@ -1,3 +1,7 @@
+struct tint_symbol {
+  float4 value : SV_Position;
+};
+
 RWTexture2D<float4> arg_0 : register(u0, space1);
 
 void textureDimensions_48cb89() {
@@ -6,9 +10,10 @@ void textureDimensions_48cb89() {
   int2 res = tint_tmp;
 }
 
-void vertex_main() {
+tint_symbol vertex_main() {
   textureDimensions_48cb89();
-  return;
+  const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  return tint_symbol_1;
 }
 
 void fragment_main() {

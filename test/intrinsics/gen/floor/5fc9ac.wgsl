@@ -27,8 +27,9 @@ fn floor_5fc9ac() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   floor_5fc9ac();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

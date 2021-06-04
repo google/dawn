@@ -1,10 +1,15 @@
+struct tint_symbol {
+  float4 value : SV_Position;
+};
+
 void ldexp_f54ff2() {
   float res = ldexp(1.0f, 1u);
 }
 
-void vertex_main() {
+tint_symbol vertex_main() {
   ldexp_f54ff2();
-  return;
+  const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  return tint_symbol_1;
 }
 
 void fragment_main() {

@@ -27,8 +27,9 @@ fn select_cb9301() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   select_cb9301();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

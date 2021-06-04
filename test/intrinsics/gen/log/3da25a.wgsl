@@ -27,8 +27,9 @@ fn log_3da25a() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   log_3da25a();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

@@ -28,8 +28,9 @@ fn textureDimensions_dba47c() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   textureDimensions_dba47c();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

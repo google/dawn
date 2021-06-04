@@ -1,13 +1,18 @@
 #include <metal_stdlib>
 
 using namespace metal;
+struct tint_symbol {
+  float4 value [[position]];
+};
+
 void normalize_9a0aab() {
   float4 res =   normalize(float4());
 }
 
-vertex void vertex_main() {
+vertex tint_symbol vertex_main() {
   normalize_9a0aab();
-  return;
+  tint_symbol const tint_symbol_1 = {.value=float4()};
+  return tint_symbol_1;
 }
 
 fragment void fragment_main() {

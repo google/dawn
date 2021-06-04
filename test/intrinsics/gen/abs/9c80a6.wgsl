@@ -27,8 +27,9 @@ fn abs_9c80a6() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   abs_9c80a6();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

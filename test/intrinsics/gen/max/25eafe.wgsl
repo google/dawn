@@ -27,8 +27,9 @@ fn max_25eafe() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   max_25eafe();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

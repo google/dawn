@@ -3,8 +3,9 @@ fn fwidthFine_68f4ef() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   fwidthFine_68f4ef();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

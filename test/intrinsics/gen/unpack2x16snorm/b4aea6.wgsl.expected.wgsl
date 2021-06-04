@@ -3,8 +3,9 @@ fn unpack2x16snorm_b4aea6() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   unpack2x16snorm_b4aea6();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

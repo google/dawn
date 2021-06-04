@@ -3,8 +3,9 @@ fn inverseSqrt_8f2bd2() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   inverseSqrt_8f2bd2();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

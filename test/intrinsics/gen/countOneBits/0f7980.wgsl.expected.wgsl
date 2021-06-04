@@ -3,8 +3,9 @@ fn countOneBits_0f7980() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   countOneBits_0f7980();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

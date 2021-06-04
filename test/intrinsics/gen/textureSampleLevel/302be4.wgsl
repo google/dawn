@@ -29,8 +29,9 @@ fn textureSampleLevel_302be4() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   textureSampleLevel_302be4();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

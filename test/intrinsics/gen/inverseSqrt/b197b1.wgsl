@@ -27,8 +27,9 @@ fn inverseSqrt_b197b1() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   inverseSqrt_b197b1();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

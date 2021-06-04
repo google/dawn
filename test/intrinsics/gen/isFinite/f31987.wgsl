@@ -27,8 +27,9 @@ fn isFinite_f31987() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   isFinite_f31987();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

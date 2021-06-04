@@ -27,8 +27,9 @@ fn pack2x16float_0e97b3() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   pack2x16float_0e97b3();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

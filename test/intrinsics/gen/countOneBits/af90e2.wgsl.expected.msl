@@ -1,13 +1,18 @@
 #include <metal_stdlib>
 
 using namespace metal;
+struct tint_symbol {
+  float4 value [[position]];
+};
+
 void countOneBits_af90e2() {
   int2 res =   popcount(int2());
 }
 
-vertex void vertex_main() {
+vertex tint_symbol vertex_main() {
   countOneBits_af90e2();
-  return;
+  tint_symbol const tint_symbol_1 = {.value=float4()};
+  return tint_symbol_1;
 }
 
 fragment void fragment_main() {

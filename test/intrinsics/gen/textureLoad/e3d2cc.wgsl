@@ -28,8 +28,9 @@ fn textureLoad_e3d2cc() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   textureLoad_e3d2cc();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

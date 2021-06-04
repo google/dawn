@@ -29,8 +29,9 @@ fn textureSampleGrad_2ecd8f() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   textureSampleGrad_2ecd8f();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

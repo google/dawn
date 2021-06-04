@@ -3,8 +3,9 @@ fn log_f4c570() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   log_f4c570();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

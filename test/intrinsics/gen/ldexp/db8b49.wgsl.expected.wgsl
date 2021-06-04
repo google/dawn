@@ -3,8 +3,9 @@ fn ldexp_db8b49() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   ldexp_db8b49();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

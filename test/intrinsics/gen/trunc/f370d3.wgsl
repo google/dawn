@@ -27,8 +27,9 @@ fn trunc_f370d3() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   trunc_f370d3();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

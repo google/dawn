@@ -3,8 +3,9 @@ fn clamp_7706d7() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   clamp_7706d7();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

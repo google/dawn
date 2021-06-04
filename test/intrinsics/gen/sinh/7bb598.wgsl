@@ -27,8 +27,9 @@ fn sinh_7bb598() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   sinh_7bb598();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]

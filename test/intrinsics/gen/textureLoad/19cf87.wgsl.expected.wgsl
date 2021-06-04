@@ -5,8 +5,9 @@ fn textureLoad_19cf87() {
 }
 
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
   textureLoad_19cf87();
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]
