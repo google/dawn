@@ -52,19 +52,11 @@ namespace utils {
         }
         layout.rowsPerImage = rowsPerImage;
 
-        layout.bytesPerImage = layout.bytesPerRow * rowsPerImage;
+        uint32_t appliedRowsPerImage = rowsPerImage > 0 ? rowsPerImage : layout.mipSize.height;
+        layout.bytesPerImage = layout.bytesPerRow * appliedRowsPerImage;
 
-        // TODO(kainino@chromium.org): Remove this intermediate variable.
-        // It is currently needed because of an issue in the D3D12 copy splitter
-        // (or maybe in D3D12 itself?) which requires there to be enough room in the
-        // buffer for the last image to have a height of `rowsPerImage` instead of
-        // the actual height.
-        wgpu::Extent3D mipSizeWithHeightWorkaround = layout.mipSize;
-        mipSizeWithHeightWorkaround.height =
-            rowsPerImage * utils::GetTextureFormatBlockHeight(format);
-
-        layout.byteLength = RequiredBytesInCopy(layout.bytesPerRow, rowsPerImage,
-                                                mipSizeWithHeightWorkaround, format);
+        layout.byteLength =
+            RequiredBytesInCopy(layout.bytesPerRow, appliedRowsPerImage, layout.mipSize, format);
 
         const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(format);
         layout.texelBlocksPerRow = layout.bytesPerRow / bytesPerTexel;
