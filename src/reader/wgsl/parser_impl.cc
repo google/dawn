@@ -496,7 +496,7 @@ Maybe<ast::Variable*> ParserImpl::global_constant_decl(
 
   const char* use = "let declaration";
 
-  auto decl = expect_variable_ident_decl(use);
+  auto decl = expect_variable_ident_decl(use, /* allow_inferred = */ true);
   if (decl.errored)
     return Failure::kErrored;
 
@@ -520,7 +520,7 @@ Maybe<ast::Variable*> ParserImpl::global_constant_decl(
 
 // variable_decl
 //   : VAR variable_storage_decoration? variable_ident_decl
-Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
+Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl(bool allow_inferred) {
   if (!match(Token::Type::kVar))
     return Failure::kNoMatch;
 
@@ -544,7 +544,8 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
     }
   }
 
-  auto decl = expect_variable_ident_decl("variable declaration");
+  auto decl =
+      expect_variable_ident_decl("variable declaration", allow_inferred);
   if (decl.errored)
     return Failure::kErrored;
 
@@ -898,10 +899,15 @@ Expect<ast::ImageFormat> ParserImpl::expect_image_storage_type(
 // variable_ident_decl
 //   : IDENT COLON variable_decoration_list* type_decl
 Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
-    const std::string& use) {
+    const std::string& use,
+    bool allow_inferred) {
   auto ident = expect_ident(use);
   if (ident.errored)
     return Failure::kErrored;
+
+  if (allow_inferred && !peek().Is(Token::Type::kColon)) {
+    return TypedIdentifier{nullptr, ident.value, ident.source};
+  }
 
   if (!expect(use, Token::Type::kColon))
     return Failure::kErrored;
@@ -1689,7 +1695,8 @@ Maybe<ast::ReturnStatement*> ParserImpl::return_stmt() {
 //   | CONST variable_ident_decl EQUAL logical_or_expression
 Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
   if (match(Token::Type::kLet)) {
-    auto decl = expect_variable_ident_decl("let declaration");
+    auto decl = expect_variable_ident_decl("let declaration",
+                                           /*allow_inferred = */ true);
     if (decl.errored)
       return Failure::kErrored;
 
@@ -1714,7 +1721,7 @@ Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
     return create<ast::VariableDeclStatement>(decl->source, var);
   }
 
-  auto decl = variable_decl();
+  auto decl = variable_decl(/*allow_inferred = */ true);
   if (decl.errored)
     return Failure::kErrored;
   if (!decl.matched)

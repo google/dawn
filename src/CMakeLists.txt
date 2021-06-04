@@ -580,6 +580,7 @@ if(${TINT_BUILD_TESTS})
     resolver/entry_point_validation_test.cc
     resolver/function_validation_test.cc
     resolver/host_shareable_validation_test.cc
+    resolver/inferred_type_test.cc
     resolver/intrinsic_test.cc
     resolver/intrinsic_validation_test.cc
     resolver/is_host_shareable_test.cc

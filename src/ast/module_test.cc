@@ -55,15 +55,6 @@ TEST_F(ModuleTest, Assert_Null_GlobalVariable) {
       "internal compiler error");
 }
 
-TEST_F(ModuleTest, Assert_Invalid_GlobalVariable) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder builder;
-        builder.Global("var", nullptr, StorageClass::kInput);
-      },
-      "internal compiler error");
-}
-
 TEST_F(ModuleTest, Assert_Null_ConstructedType) {
   EXPECT_FATAL_FAILURE(
       {

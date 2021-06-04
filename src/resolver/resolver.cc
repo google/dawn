@@ -417,6 +417,12 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
 
     // If the variable has no declared type, infer it from the RHS
     if (!storage_type) {
+      if (!var->is_const() && kind == VariableKind::kGlobal) {
+        diagnostics_.add_error("global var declaration must specify a type",
+                               var->source());
+        return nullptr;
+      }
+
       type_name = rhs_type_name;
       storage_type = rhs_type->UnwrapRef();  // Implicit load of RHS
     }

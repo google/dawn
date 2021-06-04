@@ -71,15 +71,6 @@ TEST_F(VariableTest, Assert_MissingSymbol) {
       "internal compiler error");
 }
 
-TEST_F(VariableTest, Assert_Null_Type) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b;
-        b.Var("x", nullptr, StorageClass::kNone);
-      },
-      "internal compiler error");
-}
-
 TEST_F(VariableTest, Assert_DifferentProgramID_Symbol) {
   EXPECT_FATAL_FAILURE(
       {

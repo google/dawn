@@ -214,8 +214,8 @@ class ParserImpl {
     /// Destructor
     ~TypedIdentifier();
 
-    /// Parsed type.
-    ast::Type* type;
+    /// Parsed type. May be nullptr for inferred types.
+    ast::Type* type = nullptr;
     /// Parsed identifier.
     std::string name;
     /// Source to the identifier.
@@ -387,13 +387,19 @@ class ParserImpl {
   /// @param decos the list of decorations for the constant declaration.
   Maybe<ast::Variable*> global_constant_decl(ast::DecorationList& decos);
   /// Parses a `variable_decl` grammar element
+  /// @param allow_inferred if true, do not fail if variable decl does not
+  /// specify type
   /// @returns the parsed variable declaration info
-  Maybe<VarDeclInfo> variable_decl();
+  Maybe<VarDeclInfo> variable_decl(bool allow_inferred = false);
   /// Parses a `variable_ident_decl` grammar element, erroring on parse
   /// failure.
   /// @param use a description of what was being parsed if an error was raised.
+  /// @param allow_inferred if true, do not fail if variable decl does not
+  /// specify type
   /// @returns the identifier and type parsed or empty otherwise
-  Expect<TypedIdentifier> expect_variable_ident_decl(const std::string& use);
+  Expect<TypedIdentifier> expect_variable_ident_decl(
+      const std::string& use,
+      bool allow_inferred = false);
   /// Parses a `variable_storage_decoration` grammar element
   /// @returns the storage class or StorageClass::kNone if none matched
   Maybe<ast::StorageClass> variable_storage_decoration();

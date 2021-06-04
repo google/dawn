@@ -33,6 +33,18 @@ TEST_F(ParserImplTest, VariableDecl_Parses) {
   EXPECT_EQ(v->type->source().range, (Source::Range{{1u, 14u}, {1u, 17u}}));
 }
 
+TEST_F(ParserImplTest, VariableDecl_Inferred_Parses) {
+  auto p = parser("var my_var = 1.0");
+  auto v = p->variable_decl(/*allow_inferred = */ true);
+  EXPECT_FALSE(p->has_error());
+  EXPECT_TRUE(v.matched);
+  EXPECT_FALSE(v.errored);
+  EXPECT_EQ(v->name, "my_var");
+  EXPECT_EQ(v->type, nullptr);
+
+  EXPECT_EQ(v->source.range, (Source::Range{{1u, 5u}, {1u, 11u}}));
+}
+
 TEST_F(ParserImplTest, VariableDecl_MissingVar) {
   auto p = parser("my_var : f32");
   auto v = p->variable_decl();

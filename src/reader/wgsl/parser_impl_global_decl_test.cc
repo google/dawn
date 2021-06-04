@@ -37,6 +37,13 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable) {
   EXPECT_EQ(v->symbol(), program.Symbols().Get("a"));
 }
 
+TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_Inferred_Invalid) {
+  auto p = parser("var<private> a = vec2<i32>(1, 2);");
+  p->expect_global_decl();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:16: expected ':' for variable declaration");
+}
+
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_Invalid) {
   auto p = parser("var<private> a : vec2<invalid>;");
   p->expect_global_decl();

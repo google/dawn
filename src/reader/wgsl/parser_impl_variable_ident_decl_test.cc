@@ -33,6 +33,17 @@ TEST_F(ParserImplTest, VariableIdentDecl_Parses) {
   EXPECT_EQ(decl->type->source().range, (Source::Range{{1u, 10u}, {1u, 13u}}));
 }
 
+TEST_F(ParserImplTest, VariableIdentDecl_Inferred_Parses) {
+  auto p = parser("my_var = 1.0");
+  auto decl = p->expect_variable_ident_decl("test", /*allow_inferred = */ true);
+  ASSERT_FALSE(p->has_error()) << p->error();
+  ASSERT_FALSE(decl.errored);
+  ASSERT_EQ(decl->name, "my_var");
+  ASSERT_EQ(decl->type, nullptr);
+
+  EXPECT_EQ(decl->source.range, (Source::Range{{1u, 1u}, {1u, 7u}}));
+}
+
 TEST_F(ParserImplTest, VariableIdentDecl_MissingIdent) {
   auto p = parser(": f32");
   auto decl = p->expect_variable_ident_decl("test");
