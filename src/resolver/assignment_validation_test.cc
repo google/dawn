@@ -136,8 +136,8 @@ TEST_F(ResolverAssignmentValidationTest, AssignThroughPointer_Pass) {
   // let b : ptr<function,i32> = &a;
   // *b = 2;
   const auto func = ast::StorageClass::kFunction;
-  auto* var_a = Var("a", ty.i32(), func, Expr(2), {});
-  auto* var_b = Const("b", ty.pointer<int>(func), AddressOf(Expr("a")), {});
+  auto* var_a = Var("a", ty.i32(), func, Expr(2));
+  auto* var_b = Const("b", ty.pointer<int>(func), AddressOf(Expr("a")));
   WrapInFunction(var_a, var_b, Assign(Source{{12, 34}}, Deref("b"), 2));
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -166,13 +166,13 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonStorable_Fail) {
     return ty.access(ast::AccessControl::kRead, tex_type);
   };
 
-  Global("a", make_type(), ast::StorageClass::kNone, nullptr,
-         {
+  Global("a", make_type(), ast::StorageClass::kNone,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });
-  Global("b", make_type(), ast::StorageClass::kNone, nullptr,
-         {
+  Global("b", make_type(), ast::StorageClass::kNone,
+         ast::DecorationList{
              create<ast::BindingDecoration>(1),
              create<ast::GroupDecoration>(0),
          });

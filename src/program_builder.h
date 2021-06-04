@@ -91,6 +91,32 @@ class CloneContext;
 /// To construct a Program, populate the builder and then `std::move` it to a
 /// Program.
 class ProgramBuilder {
+  /// VarOptionals is a helper for accepting a number of optional, extra
+  /// arguments for Var() and Global().
+  struct VarOptionals {
+    template <typename... ARGS>
+    explicit VarOptionals(ARGS&&... args) {
+      Apply(std::forward<ARGS>(args)...);
+    }
+    ~VarOptionals();
+
+    ast::StorageClass storage = ast::StorageClass::kNone;
+    ast::Expression* constructor = nullptr;
+    ast::DecorationList decorations = {};
+
+   private:
+    void Set(ast::StorageClass sc) { storage = sc; }
+    void Set(ast::Expression* c) { constructor = c; }
+    void Set(const ast::DecorationList& l) { decorations = l; }
+
+    template <typename FIRST, typename... ARGS>
+    void Apply(FIRST&& first, ARGS&&... args) {
+      Set(std::forward<FIRST>(first));
+      Apply(std::forward<ARGS>(args)...);
+    }
+    void Apply() {}
+  };
+
  public:
   /// ASTNodeAllocator is an alias to BlockAllocator<ast::Node>
   using ASTNodeAllocator = BlockAllocator<ast::Node>;
@@ -1187,38 +1213,47 @@ class ProgramBuilder {
 
   /// @param name the variable name
   /// @param type the variable type
-  /// @param storage the variable storage class
-  /// @param constructor constructor expression
-  /// @param decorations variable decorations
-  /// @returns a `ast::Variable` with the given name, storage and type
-  template <typename NAME>
+  /// @param optional the optional variable settings.
+  /// Can be any of the following, in any order:
+  ///   * ast::StorageClass   - specifies the variable storage class
+  ///   * ast::Expression*    - specifies the variable's initializer expression
+  ///   * ast::DecorationList - specifies the variable's decorations
+  /// Note that repeated arguments of the same type will use the last argument's
+  /// value.
+  /// @returns a `ast::Variable` with the given name, type and additional
+  /// options
+  template <typename NAME, typename... OPTIONAL>
   ast::Variable* Var(NAME&& name,
                      const ast::Type* type,
-                     ast::StorageClass storage = ast::StorageClass::kNone,
-                     ast::Expression* constructor = nullptr,
-                     ast::DecorationList decorations = {}) {
+                     OPTIONAL&&... optional) {
     type = ty.MaybeCreateTypename(type);
-    return create<ast::Variable>(Sym(std::forward<NAME>(name)), storage, type,
-                                 false, constructor, decorations);
+    VarOptionals opts(std::forward<OPTIONAL>(optional)...);
+    return create<ast::Variable>(Sym(std::forward<NAME>(name)), opts.storage,
+                                 type, false, opts.constructor,
+                                 std::move(opts.decorations));
   }
 
   /// @param source the variable source
   /// @param name the variable name
   /// @param type the variable type
-  /// @param storage the variable storage class
-  /// @param constructor constructor expression
-  /// @param decorations variable decorations
+  /// @param optional the optional variable settings.
+  /// Can be any of the following, in any order:
+  ///   * ast::StorageClass   - specifies the variable storage class
+  ///   * ast::Expression*    - specifies the variable's initializer expression
+  ///   * ast::DecorationList - specifies the variable's decorations
+  /// Note that repeated arguments of the same type will use the last argument's
+  /// value.
   /// @returns a `ast::Variable` with the given name, storage and type
-  template <typename NAME>
+  template <typename NAME, typename... OPTIONAL>
   ast::Variable* Var(const Source& source,
                      NAME&& name,
                      const ast::Type* type,
-                     ast::StorageClass storage = ast::StorageClass::kNone,
-                     ast::Expression* constructor = nullptr,
-                     ast::DecorationList decorations = {}) {
+                     OPTIONAL&&... optional) {
     type = ty.MaybeCreateTypename(type);
-    return create<ast::Variable>(source, Sym(std::forward<NAME>(name)), storage,
-                                 type, false, constructor, decorations);
+    VarOptionals opts(std::forward<OPTIONAL>(optional)...);
+    return create<ast::Variable>(source, Sym(std::forward<NAME>(name)),
+                                 opts.storage, type, false, opts.constructor,
+                                 std::move(opts.decorations));
   }
 
   /// @param name the variable name
@@ -1287,19 +1322,21 @@ class ProgramBuilder {
 
   /// @param name the variable name
   /// @param type the variable type
-  /// @param storage the variable storage class
-  /// @param constructor constructor expression
-  /// @param decorations variable decorations
+  /// @param optional the optional variable settings.
+  /// Can be any of the following, in any order:
+  ///   * ast::StorageClass   - specifies the variable storage class
+  ///   * ast::Expression*    - specifies the variable's initializer expression
+  ///   * ast::DecorationList - specifies the variable's decorations
+  /// Note that repeated arguments of the same type will use the last argument's
+  /// value.
   /// @returns a new `ast::Variable`, which is automatically registered as a
   /// global variable with the ast::Module.
-  template <typename NAME>
+  template <typename NAME, typename... OPTIONAL>
   ast::Variable* Global(NAME&& name,
                         const ast::Type* type,
-                        ast::StorageClass storage,
-                        ast::Expression* constructor = nullptr,
-                        ast::DecorationList decorations = {}) {
-    auto* var =
-        Var(std::forward<NAME>(name), type, storage, constructor, decorations);
+                        OPTIONAL&&... optional) {
+    auto* var = Var(std::forward<NAME>(name), type,
+                    std::forward<OPTIONAL>(optional)...);
     AST().AddGlobalVariable(var);
     return var;
   }
@@ -1307,20 +1344,22 @@ class ProgramBuilder {
   /// @param source the variable source
   /// @param name the variable name
   /// @param type the variable type
-  /// @param storage the variable storage class
-  /// @param constructor constructor expression
-  /// @param decorations variable decorations
+  /// @param optional the optional variable settings.
+  /// Can be any of the following, in any order:
+  ///   * ast::StorageClass   - specifies the variable storage class
+  ///   * ast::Expression*    - specifies the variable's initializer expression
+  ///   * ast::DecorationList - specifies the variable's decorations
+  /// Note that repeated arguments of the same type will use the last argument's
+  /// value.
   /// @returns a new `ast::Variable`, which is automatically registered as a
   /// global variable with the ast::Module.
-  template <typename NAME>
+  template <typename NAME, typename... OPTIONAL>
   ast::Variable* Global(const Source& source,
                         NAME&& name,
                         ast::Type* type,
-                        ast::StorageClass storage,
-                        ast::Expression* constructor = nullptr,
-                        ast::DecorationList decorations = {}) {
-    auto* var = Var(source, std::forward<NAME>(name), type, storage,
-                    constructor, decorations);
+                        OPTIONAL&&... optional) {
+    auto* var = Var(source, std::forward<NAME>(name), type,
+                    std::forward<OPTIONAL>(optional)...);
     AST().AddGlobalVariable(var);
     return var;
   }

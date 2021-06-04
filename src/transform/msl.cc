@@ -152,7 +152,7 @@ void Msl::HandlePrivateAndWorkgroupVariables(CloneContext& ctx) const {
         auto* constructor = ctx.Clone(var->Declaration()->constructor());
         auto* local_var =
             ctx.dst->Var(ctx.dst->Sym(), store_type, var->StorageClass(),
-                         constructor, {disable_validation});
+                         constructor, ast::DecorationList{disable_validation});
         ctx.InsertBefore(func_ast->body()->statements(),
                          *func_ast->body()->begin(), ctx.dst->Decl(local_var));
 

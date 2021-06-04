@@ -677,8 +677,8 @@ TEST_F(ResolverTest, Expr_Identifier_FunctionVariable) {
   auto* my_var_b = Expr("my_var");
   auto* assign = Assign(my_var_a, my_var_b);
 
-  auto* var = Var("my_var", ty.f32(), ast::StorageClass::kNone, nullptr,
-                  {
+  auto* var = Var("my_var", ty.f32(),
+                  ast::DecorationList{
                       create<ast::BindingDecoration>(0),
                       create<ast::GroupDecoration>(0),
                   });
@@ -788,8 +788,8 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
 
   auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
   auto* out_var = Global("out_var", ty.f32(), ast::StorageClass::kOutput);
-  auto* sb_var = Global("sb_var", a, ast::StorageClass::kStorage, nullptr,
-                        {
+  auto* sb_var = Global("sb_var", a, ast::StorageClass::kStorage,
+                        ast::DecorationList{
                             create<ast::BindingDecoration>(0),
                             create<ast::GroupDecoration>(0),
                         });
@@ -827,8 +827,8 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
 
   auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
   auto* out_var = Global("out_var", ty.f32(), ast::StorageClass::kOutput);
-  auto* sb_var = Global("sb_var", a, ast::StorageClass::kStorage, nullptr,
-                        {
+  auto* sb_var = Global("sb_var", a, ast::StorageClass::kStorage,
+                        ast::DecorationList{
                             create<ast::BindingDecoration>(0),
                             create<ast::GroupDecoration>(0),
                         });
@@ -1727,8 +1727,8 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest,
                                          ast::UnaryOp::kNot));
 
 TEST_F(ResolverTest, StorageClass_SetsIfMissing) {
-  auto* var = Var("var", ty.i32(), ast::StorageClass::kNone, nullptr,
-                  {
+  auto* var = Var("var", ty.i32(),
+                  ast::DecorationList{
                       create<ast::BindingDecoration>(0),
                       create<ast::GroupDecoration>(0),
                   });
@@ -1743,8 +1743,8 @@ TEST_F(ResolverTest, StorageClass_SetsIfMissing) {
 
 TEST_F(ResolverTest, StorageClass_SetForSampler) {
   auto* t = ty.sampler(ast::SamplerKind::kSampler);
-  auto* var = Global("var", t, ast::StorageClass::kNone, nullptr,
-                     {
+  auto* var = Global("var", t,
+                     ast::DecorationList{
                          create<ast::BindingDecoration>(0),
                          create<ast::GroupDecoration>(0),
                      });
@@ -1758,8 +1758,8 @@ TEST_F(ResolverTest, StorageClass_SetForSampler) {
 TEST_F(ResolverTest, StorageClass_SetForTexture) {
   auto* t = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
   auto* ac = ty.access(ast::AccessControl::kRead, t);
-  auto* var = Global("var", ac, ast::StorageClass::kNone, nullptr,
-                     {
+  auto* var = Global("var", ac,
+                     ast::DecorationList{
                          create<ast::BindingDecoration>(0),
                          create<ast::GroupDecoration>(0),
                      });

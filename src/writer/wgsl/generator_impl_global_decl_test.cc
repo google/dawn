@@ -100,9 +100,11 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Global_Sampler) {
-  Global("s", ty.sampler(ast::SamplerKind::kSampler), ast::StorageClass::kNone,
-         nullptr,
-         {create<ast::GroupDecoration>(0), create<ast::BindingDecoration>(0)});
+  Global("s", ty.sampler(ast::SamplerKind::kSampler),
+         ast::DecorationList{
+             create<ast::GroupDecoration>(0),
+             create<ast::BindingDecoration>(0),
+         });
 
   GeneratorImpl& gen = Build();
 
@@ -115,8 +117,10 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Sampler) {
 TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
   auto* st = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
   Global("t", ty.access(ast::AccessControl::kRead, st),
-         ast::StorageClass::kNone, nullptr,
-         {create<ast::GroupDecoration>(0), create<ast::BindingDecoration>(0)});
+         ast::DecorationList{
+             create<ast::GroupDecoration>(0),
+             create<ast::BindingDecoration>(0),
+         });
 
   GeneratorImpl& gen = Build();
 

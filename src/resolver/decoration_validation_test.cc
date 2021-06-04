@@ -554,8 +554,8 @@ TEST_F(ResourceDecorationTest, SamplerMissingBinding) {
 
 TEST_F(ResourceDecorationTest, BindingPairMissingBinding) {
   Global(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler),
-         ast::StorageClass::kNone, nullptr,
-         {
+         ast::StorageClass::kNone,
+         ast::DecorationList{
              create<ast::GroupDecoration>(1),
          });
 
@@ -567,8 +567,8 @@ TEST_F(ResourceDecorationTest, BindingPairMissingBinding) {
 
 TEST_F(ResourceDecorationTest, BindingPairMissingGroup) {
   Global(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler),
-         ast::StorageClass::kNone, nullptr,
-         {
+         ast::StorageClass::kNone,
+         ast::DecorationList{
              create<ast::BindingDecoration>(1),
          });
 
@@ -581,15 +581,15 @@ TEST_F(ResourceDecorationTest, BindingPairMissingGroup) {
 TEST_F(ResourceDecorationTest, BindingPointUsedTwiceByEntryPoint) {
   Global(Source{{12, 34}}, "A",
          ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
-         ast::StorageClass::kNone, nullptr,
-         {
+         ast::StorageClass::kNone,
+         ast::DecorationList{
              create<ast::BindingDecoration>(1),
              create<ast::GroupDecoration>(2),
          });
   Global(Source{{56, 78}}, "B",
          ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
-         ast::StorageClass::kNone, nullptr,
-         {
+         ast::StorageClass::kNone,
+         ast::DecorationList{
              create<ast::BindingDecoration>(1),
              create<ast::GroupDecoration>(2),
          });
@@ -613,15 +613,15 @@ TEST_F(ResourceDecorationTest, BindingPointUsedTwiceByEntryPoint) {
 TEST_F(ResourceDecorationTest, BindingPointUsedTwiceByDifferentEntryPoints) {
   Global(Source{{12, 34}}, "A",
          ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
-         ast::StorageClass::kNone, nullptr,
-         {
+         ast::StorageClass::kNone,
+         ast::DecorationList{
              create<ast::BindingDecoration>(1),
              create<ast::GroupDecoration>(2),
          });
   Global(Source{{56, 78}}, "B",
          ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
-         ast::StorageClass::kNone, nullptr,
-         {
+         ast::StorageClass::kNone,
+         ast::DecorationList{
              create<ast::BindingDecoration>(1),
              create<ast::GroupDecoration>(2),
          });
@@ -643,8 +643,8 @@ TEST_F(ResourceDecorationTest, BindingPointUsedTwiceByDifferentEntryPoints) {
 }
 
 TEST_F(ResourceDecorationTest, BindingPointOnNonResource) {
-  Global(Source{{12, 34}}, "G", ty.f32(), ast::StorageClass::kPrivate, nullptr,
-         {
+  Global(Source{{12, 34}}, "G", ty.f32(), ast::StorageClass::kPrivate,
+         ast::DecorationList{
              create<ast::BindingDecoration>(1),
              create<ast::GroupDecoration>(2),
          });

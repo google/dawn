@@ -190,8 +190,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
                       },
                       {create<ast::StructBlockDecoration>()});
   Global("g", ty.access(ast::AccessControl::kReadWrite, s),
-         ast::StorageClass::kStorage, nullptr,
-         {
+         ast::StorageClass::kStorage,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });

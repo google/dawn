@@ -29,8 +29,8 @@ TEST_F(ResolverHostShareableValidationTest, BoolMember) {
   auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.bool_())},
                       {create<ast::StructBlockDecoration>()});
   auto* a = ty.access(ast::AccessControl::kRead, s);
-  Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage, nullptr,
-         {
+  Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });
@@ -48,8 +48,8 @@ TEST_F(ResolverHostShareableValidationTest, BoolVectorMember) {
   auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.vec3<bool>())},
                       {create<ast::StructBlockDecoration>()});
   auto* a = ty.access(ast::AccessControl::kRead, s);
-  Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage, nullptr,
-         {
+  Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });
@@ -71,8 +71,8 @@ TEST_F(ResolverHostShareableValidationTest, Aliases) {
   auto* ac = ty.access(ast::AccessControl::kRead, s);
   auto* a2 = ty.alias("a2", ac);
   AST().AddConstructedType(a2);
-  Global(Source{{56, 78}}, "g", a2, ast::StorageClass::kStorage, nullptr,
-         {
+  Global(Source{{56, 78}}, "g", a2, ast::StorageClass::kStorage,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });
@@ -94,8 +94,8 @@ TEST_F(ResolverHostShareableValidationTest, NestedStructures) {
   auto* s = Structure("S", {Member(Source{{7, 8}}, "m", i3)},
                       {create<ast::StructBlockDecoration>()});
   auto* a = ty.access(ast::AccessControl::kRead, s);
-  Global(Source{{9, 10}}, "g", a, ast::StorageClass::kStorage, nullptr,
-         {
+  Global(Source{{9, 10}}, "g", a, ast::StorageClass::kStorage,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });
@@ -136,8 +136,8 @@ TEST_F(ResolverHostShareableValidationTest, NoError) {
   auto* s = Structure("S", {Member(Source{{7, 8}}, "m", i3)},
                       {create<ast::StructBlockDecoration>()});
   auto* a = ty.access(ast::AccessControl::kRead, s);
-  Global(Source{{9, 10}}, "g", a, ast::StorageClass::kStorage, nullptr,
-         {
+  Global(Source{{9, 10}}, "g", a, ast::StorageClass::kStorage,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });

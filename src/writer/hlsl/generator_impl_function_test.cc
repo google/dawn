@@ -327,9 +327,11 @@ TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_With_Uniform) {
   auto* ubo_ty = Structure("UBO", {Member("coord", ty.vec4<f32>())},
                            {create<ast::StructBlockDecoration>()});
-  auto* ubo = Global(
-      "ubo", ubo_ty, ast::StorageClass::kUniform, nullptr,
-      {create<ast::BindingDecoration>(0), create<ast::GroupDecoration>(1)});
+  auto* ubo = Global("ubo", ubo_ty, ast::StorageClass::kUniform,
+                     ast::DecorationList{
+                         create<ast::BindingDecoration>(0),
+                         create<ast::GroupDecoration>(1),
+                     });
 
   Func("sub_func",
        {
@@ -380,8 +382,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* s = Structure("Uniforms", {Member("coord", ty.vec4<f32>())},
                       {create<ast::StructBlockDecoration>()});
 
-  Global("uniforms", s, ast::StorageClass::kUniform, nullptr,
-         {
+  Global("uniforms", s, ast::StorageClass::kUniform,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
          });
@@ -428,8 +430,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   auto* ac = ty.access(ast::AccessControl::kReadWrite, s);
 
-  Global("coord", ac, ast::StorageClass::kStorage, nullptr,
-         {
+  Global("coord", ac, ast::StorageClass::kStorage,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
          });
@@ -474,8 +476,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   auto* ac = ty.access(ast::AccessControl::kRead, s);
 
-  Global("coord", ac, ast::StorageClass::kStorage, nullptr,
-         {
+  Global("coord", ac, ast::StorageClass::kStorage,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
          });
@@ -520,8 +522,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   auto* ac = ty.access(ast::AccessControl::kWrite, s);
 
-  Global("coord", ac, ast::StorageClass::kStorage, nullptr,
-         {
+  Global("coord", ac, ast::StorageClass::kStorage,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
          });
@@ -563,8 +565,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   auto* ac = ty.access(ast::AccessControl::kReadWrite, s);
 
-  Global("coord", ac, ast::StorageClass::kStorage, nullptr,
-         {
+  Global("coord", ac, ast::StorageClass::kStorage,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
          });
@@ -599,18 +601,18 @@ void frag_main() {
 TEST_F(
     HlslGeneratorImplTest_Function,
     Emit_Decoration_Called_By_EntryPoints_WithLocationGlobals_And_Params) {  // NOLINT
-  Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
-         {
+  Global("foo", ty.f32(), ast::StorageClass::kInput,
+         ast::DecorationList{
              Location(0),
          });
 
-  Global("bar", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         {
+  Global("bar", ty.f32(), ast::StorageClass::kOutput,
+         ast::DecorationList{
              Location(1),
          });
 
-  Global("val", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         {
+  Global("val", ty.f32(), ast::StorageClass::kOutput,
+         ast::DecorationList{
              Location(0),
          });
 
@@ -661,8 +663,8 @@ ep_1_out ep_1(ep_1_in tint_in) {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_Called_By_EntryPoints_NoUsedGlobals) {
-  Global("depth", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         {
+  Global("depth", ty.f32(), ast::StorageClass::kOutput,
+         ast::DecorationList{
              Builtin(ast::Builtin::kFragDepth),
          });
 
@@ -706,13 +708,13 @@ ep_1_out ep_1() {
 TEST_F(
     HlslGeneratorImplTest_Function,
     Emit_Decoration_Called_By_EntryPoints_WithBuiltinGlobals_And_Params) {  // NOLINT
-  Global("coord", ty.vec4<f32>(), ast::StorageClass::kInput, nullptr,
-         {
+  Global("coord", ty.vec4<f32>(), ast::StorageClass::kInput,
+         ast::DecorationList{
              Builtin(ast::Builtin::kPosition),
          });
 
-  Global("depth", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         {
+  Global("depth", ty.f32(), ast::StorageClass::kOutput,
+         ast::DecorationList{
              Builtin(ast::Builtin::kFragDepth),
          });
 
@@ -762,8 +764,8 @@ TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_Called_By_EntryPoint_With_Uniform) {
   auto* s = Structure("S", {Member("x", ty.f32())},
                       {create<ast::StructBlockDecoration>()});
-  Global("coord", s, ast::StorageClass::kUniform, nullptr,
-         {
+  Global("coord", s, ast::StorageClass::kUniform,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
          });
@@ -813,8 +815,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* s = Structure("S", {Member("x", ty.f32())},
                       {create<ast::StructBlockDecoration>()});
   auto* ac = ty.access(ast::AccessControl::kReadWrite, s);
-  Global("coord", ac, ast::StorageClass::kStorage, nullptr,
-         {
+  Global("coord", ac, ast::StorageClass::kStorage,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
          });
@@ -859,8 +861,8 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoints_WithGlobal_Nested_Return) {
-  Global("bar", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         {
+  Global("bar", ty.f32(), ast::StorageClass::kOutput,
+         ast::DecorationList{
              Location(1),
          });
 
@@ -1064,8 +1066,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   auto* ac = ty.access(ast::AccessControl::kReadWrite, s);
 
-  Global("data", ac, ast::StorageClass::kStorage, nullptr,
-         {
+  Global("data", ac, ast::StorageClass::kStorage,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });

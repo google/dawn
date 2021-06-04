@@ -24,6 +24,8 @@
 
 namespace tint {
 
+ProgramBuilder::VarOptionals::~VarOptionals() = default;
+
 ProgramBuilder::ProgramBuilder()
     : id_(ProgramID::New()),
       ast_(ast_nodes_.Create<ast::Module>(id_, Source{})) {}

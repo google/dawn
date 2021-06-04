@@ -264,8 +264,9 @@ void Spirv::EmitVertexPointSize(CloneContext& ctx) const {
 
   // Create a module-scope pointsize builtin output variable.
   Symbol pointsize = ctx.dst->Symbols().New("tint_pointsize");
-  ctx.dst->Global(pointsize, ctx.dst->ty.f32(), ast::StorageClass::kOutput,
-                  nullptr, {ctx.dst->Builtin(ast::Builtin::kPointSize)});
+  ctx.dst->Global(
+      pointsize, ctx.dst->ty.f32(), ast::StorageClass::kOutput,
+      ast::DecorationList{ctx.dst->Builtin(ast::Builtin::kPointSize)});
 
   // Assign 1.0 to the global at the start of all vertex shader entry points.
   ctx.ReplaceAll([&ctx, pointsize](ast::Function* func) -> ast::Function* {

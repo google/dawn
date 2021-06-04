@@ -31,8 +31,8 @@ TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
   auto* str = Structure("S", {Member("x", ary)},
                         {create<ast::StructBlockDecoration>()});
   auto* ac = ty.access(ast::AccessControl::kRead, str);
-  Global("a", ac, ast::StorageClass::kStorage, nullptr,
-         {
+  Global("a", ac, ast::StorageClass::kStorage,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });
@@ -53,8 +53,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
   auto* str = Structure("S", {Member("x", ary)},
                         {create<ast::StructBlockDecoration>()});
   auto* ac = ty.access(ast::AccessControl::kRead, str);
-  Global("a", ac, ast::StorageClass::kStorage, nullptr,
-         {
+  Global("a", ac, ast::StorageClass::kStorage,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });
@@ -834,8 +834,8 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_1d) {
                                ast::ImageFormat::kR32Float);
   auto* ac = ty.access(ast::AccessControl::kRead, s);
 
-  Global("test_var", ac, ast::StorageClass::kNone, nullptr,
-         {
+  Global("test_var", ac,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });
@@ -854,8 +854,8 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_2d) {
                                ast::ImageFormat::kR32Float);
   auto* ac = ty.access(ast::AccessControl::kRead, s);
 
-  Global("test_var", ac, ast::StorageClass::kNone, nullptr,
-         {
+  Global("test_var", ac,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });
@@ -874,8 +874,8 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_2dArray) {
                                ast::ImageFormat::kR32Float);
   auto* ac = ty.access(ast::AccessControl::kRead, s);
 
-  Global("test_var", ac, ast::StorageClass::kNone, nullptr,
-         {
+  Global("test_var", ac,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });
@@ -894,8 +894,8 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_3d) {
                                ast::ImageFormat::kR32Float);
   auto* ac = ty.access(ast::AccessControl::kRead, s);
 
-  Global("test_var", ac, ast::StorageClass::kNone, nullptr,
-         {
+  Global("test_var", ac,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });
@@ -915,8 +915,8 @@ TEST_F(BuilderTest_Type,
                                ast::ImageFormat::kR32Float);
   auto* ac = ty.access(ast::AccessControl::kRead, s);
 
-  Global("test_var", ac, ast::StorageClass::kNone, nullptr,
-         {
+  Global("test_var", ac,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });
@@ -936,8 +936,8 @@ TEST_F(BuilderTest_Type,
                                ast::ImageFormat::kR32Sint);
   auto* ac = ty.access(ast::AccessControl::kRead, s);
 
-  Global("test_var", ac, ast::StorageClass::kNone, nullptr,
-         {
+  Global("test_var", ac,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });
@@ -957,8 +957,8 @@ TEST_F(BuilderTest_Type,
                                ast::ImageFormat::kR32Uint);
   auto* ac = ty.access(ast::AccessControl::kRead, s);
 
-  Global("test_var", ac, ast::StorageClass::kNone, nullptr,
-         {
+  Global("test_var", ac,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });

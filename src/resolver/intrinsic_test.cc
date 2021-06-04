@@ -245,8 +245,8 @@ class ResolverIntrinsicTest_TextureOperation
                       const ast::Type* type,
                       ast::ExpressionList* call_params) {
     if (type->UnwrapAll()->is_handle()) {
-      Global(name, type, ast::StorageClass::kNone, nullptr,
-             {
+      Global(name, type,
+             ast::DecorationList{
                  create<ast::BindingDecoration>(0),
                  create<ast::GroupDecoration>(0),
              });
@@ -770,8 +770,8 @@ TEST_F(ResolverIntrinsicDataTest, ArrayLength_Vector) {
   auto* str = Structure("S", {Member("x", ary)},
                         {create<ast::StructBlockDecoration>()});
   auto* ac = ty.access(ast::AccessControl::kRead, str);
-  Global("a", ac, ast::StorageClass::kStorage, nullptr,
-         {
+  Global("a", ac, ast::StorageClass::kStorage,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });

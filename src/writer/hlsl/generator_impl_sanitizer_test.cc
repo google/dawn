@@ -35,8 +35,8 @@ TEST_F(HlslSanitizerTest, ArrayLength) {
                           });
   auto* ac_ty = ty.access(ast::AccessControl::kRead, sb_ty);
 
-  Global("sb", ac_ty, ast::StorageClass::kStorage, nullptr,
-         {
+  Global("sb", ac_ty, ast::StorageClass::kStorage,
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
          });
