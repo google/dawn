@@ -180,6 +180,7 @@ TEST_F(SpvParserMemoryTest, EmitStatement_LoadBool) {
   VariableConst{
     x_2
     none
+    undefined
     __bool
     {
       Identifier[not set]{x_1}
@@ -210,6 +211,7 @@ TEST_F(SpvParserMemoryTest, EmitStatement_LoadScalar) {
   VariableConst{
     x_2
     none
+    undefined
     __u32
     {
       Identifier[not set]{x_1}
@@ -220,6 +222,7 @@ VariableDeclStatement{
   VariableConst{
     x_3
     none
+    undefined
     __u32
     {
       Identifier[not set]{x_1}
@@ -252,6 +255,7 @@ TEST_F(SpvParserMemoryTest, EmitStatement_UseLoadedScalarTwice) {
   VariableConst{
     x_2
     none
+    undefined
     __u32
     {
       Identifier[not set]{x_1}
@@ -873,7 +877,8 @@ TEST_F(SpvParserMemoryTest, RemapStorageBuffer_TypesAndVarDeclarations) {
     }
     myvar
     storage
-    __access_control_read_write__type_name_S
+    read_write
+    __type_name_S
   })"));
 }
 
@@ -1017,6 +1022,7 @@ TEST_F(SpvParserMemoryTest,
   VariableConst{
     x_2
     none
+    undefined
     __ptr_storage__u32
     {
       UnaryOp[not set]{
@@ -1078,6 +1084,7 @@ TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughCopyObject_WithHoisting) {
   Variable{
     x_2
     none
+    undefined
     __ptr_storage__u32
   }
 }
@@ -1176,6 +1183,7 @@ TEST_F(SpvParserMemoryTest, ArrayLength) {
   VariableConst{
     x_1
     none
+    undefined
     __u32
     {
       Call[not set]{

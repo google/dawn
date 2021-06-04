@@ -1,4 +1,4 @@
-[[group(1), binding(0)]] var arg_0 : [[access(write)]] texture_storage_2d_array<rgba8sint>;
+[[group(1), binding(0)]] var arg_0 : texture_storage_2d_array<rgba8sint, write>;
 
 fn textureDimensions_16036c() {
   var res : vec2<i32> = textureDimensions(arg_0);

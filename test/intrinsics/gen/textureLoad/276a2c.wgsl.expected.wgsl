@@ -1,4 +1,4 @@
-[[group(1), binding(0)]] var arg_0 : [[access(read)]] texture_storage_1d<rgba32uint>;
+[[group(1), binding(0)]] var arg_0 : texture_storage_1d<rgba32uint, read>;
 
 fn textureLoad_276a2c() {
   var res : vec4<u32> = textureLoad(arg_0, 1);

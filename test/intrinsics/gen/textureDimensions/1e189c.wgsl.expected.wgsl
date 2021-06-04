@@ -1,4 +1,4 @@
-[[group(1), binding(0)]] var arg_0 : [[access(read)]] texture_storage_3d<r32sint>;
+[[group(1), binding(0)]] var arg_0 : texture_storage_3d<r32sint, read>;
 
 fn textureDimensions_1e189c() {
   var res : vec3<i32> = textureDimensions(arg_0);

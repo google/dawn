@@ -188,6 +188,7 @@ TEST_P(SpvParserTest_GlslStd450_Float_Floating, Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __f32
     {
       Call[not set]{
@@ -219,6 +220,7 @@ TEST_P(SpvParserTest_GlslStd450_Float_Floating, Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __f32
     {
       Call[not set]{
@@ -250,6 +252,7 @@ TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __f32
     {
       Call[not set]{
@@ -282,6 +285,7 @@ TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __f32
     {
       Call[not set]{
@@ -314,6 +318,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __f32
     {
       Call[not set]{
@@ -345,6 +350,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__f32
     {
       Call[not set]{
@@ -376,6 +382,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __f32
     {
       Call[not set]{
@@ -408,6 +415,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__f32
     {
       Call[not set]{
@@ -440,6 +448,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __f32
     {
       Call[not set]{
@@ -474,6 +483,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__f32
     {
       Call[not set]{
@@ -507,6 +517,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingUinting, Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __f32
     {
       Call[not set]{
@@ -540,6 +551,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingUinting, Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__f32
     {
       Call[not set]{
@@ -572,6 +584,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingInting, Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __f32
     {
       Call[not set]{
@@ -605,6 +618,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingInting, Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__f32
     {
       Call[not set]{
@@ -638,6 +652,7 @@ TEST_P(SpvParserTest_GlslStd450_Float3_Float3Float3, Samples) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_3__f32
     {
       Call[not set]{
@@ -744,6 +759,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_Inting, Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __i32
     {
       Call[not set]{
@@ -776,6 +792,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_Inting, Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__i32
     {
       Call[not set]{
@@ -808,6 +825,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingInting, Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __i32
     {
       Call[not set]{
@@ -841,6 +859,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingInting, Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__i32
     {
       Call[not set]{
@@ -874,6 +893,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __i32
     {
       Call[not set]{
@@ -908,6 +928,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__i32
     {
       Call[not set]{
@@ -954,6 +975,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUinting, Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __u32
     {
       Call[not set]{
@@ -987,6 +1009,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUinting, Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__u32
     {
       Call[not set]{
@@ -1019,6 +1042,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __u32
     {
       Call[not set]{
@@ -1053,6 +1077,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__u32
     {
       Call[not set]{
@@ -1099,6 +1124,7 @@ TEST_F(SpvParserTest, Normalize_Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __f32
     {
       ScalarConstructor[not set]{1.000000}
@@ -1123,6 +1149,7 @@ TEST_F(SpvParserTest, Normalize_Vector2) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__f32
     {
       Call[not set]{
@@ -1152,6 +1179,7 @@ TEST_F(SpvParserTest, Normalize_Vector3) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_3__f32
     {
       Call[not set]{
@@ -1181,6 +1209,7 @@ TEST_F(SpvParserTest, Normalize_Vector4) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_4__f32
     {
       Call[not set]{
@@ -1213,6 +1242,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SAbs) {
   VariableConst{
     x_1
     none
+    undefined
     __u32
     {
       Bitcast[not set]<__u32>{
@@ -1232,6 +1262,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SAbs) {
   VariableConst{
     x_2
     none
+    undefined
     __vec_2__u32
     {
       Bitcast[not set]<__vec_2__u32>{
@@ -1265,6 +1296,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SMax) {
   VariableConst{
     x_1
     none
+    undefined
     __u32
     {
       Bitcast[not set]<__u32>{
@@ -1287,6 +1319,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SMax) {
   VariableConst{
     x_2
     none
+    undefined
     __vec_2__u32
     {
       Bitcast[not set]<__vec_2__u32>{
@@ -1323,6 +1356,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SMin) {
   VariableConst{
     x_1
     none
+    undefined
     __u32
     {
       Bitcast[not set]<__u32>{
@@ -1345,6 +1379,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SMin) {
   VariableConst{
     x_2
     none
+    undefined
     __vec_2__u32
     {
       Bitcast[not set]<__vec_2__u32>{
@@ -1381,6 +1416,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SClamp) {
   VariableConst{
     x_1
     none
+    undefined
     __u32
     {
       Bitcast[not set]<__u32>{
@@ -1404,6 +1440,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SClamp) {
   VariableConst{
     x_2
     none
+    undefined
     __vec_2__u32
     {
       Bitcast[not set]<__vec_2__u32>{
@@ -1441,6 +1478,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_UMax) {
   VariableConst{
     x_1
     none
+    undefined
     __i32
     {
       Bitcast[not set]<__i32>{
@@ -1463,6 +1501,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_UMax) {
   VariableConst{
     x_2
     none
+    undefined
     __vec_2__i32
     {
       Bitcast[not set]<__vec_2__i32>{
@@ -1499,6 +1538,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_UMin) {
   VariableConst{
     x_1
     none
+    undefined
     __i32
     {
       Bitcast[not set]<__i32>{
@@ -1521,6 +1561,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_UMin) {
   VariableConst{
     x_2
     none
+    undefined
     __vec_2__i32
     {
       Bitcast[not set]<__vec_2__i32>{
@@ -1557,6 +1598,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_UClamp) {
   VariableConst{
     x_1
     none
+    undefined
     __i32
     {
       Bitcast[not set]<__i32>{
@@ -1580,6 +1622,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_UClamp) {
   VariableConst{
     x_2
     none
+    undefined
     __vec_2__i32
     {
       Bitcast[not set]<__vec_2__i32>{
@@ -1633,6 +1676,7 @@ TEST_P(SpvParserTest_GlslStd450_DataPacking, Valid) {
   VariableConst{
     x_1
     none
+    undefined
     __u32
     {
       Call[not set]{
@@ -1677,6 +1721,7 @@ TEST_P(SpvParserTest_GlslStd450_DataUnpacking, Valid) {
   VariableConst{
     x_1
     none
+    undefined
     )" + std::string(param.vec_size == 2 ? "__vec_2__f32" : "__vec_4__f32") +
                               R"(
     {

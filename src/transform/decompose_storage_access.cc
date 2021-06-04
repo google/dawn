@@ -360,17 +360,6 @@ struct Store {
   StorageBufferAccess target;            // The target for the write
 };
 
-ast::Type* MaybeCreateASTAccessControl(CloneContext* ctx,
-                                       const sem::VariableUser* var_user,
-                                       ast::Type* ty) {
-  if (var_user &&
-      var_user->Variable()->StorageClass() == ast::StorageClass::kStorage) {
-    return ctx->dst->create<ast::AccessControl>(
-        var_user->Variable()->AccessControl(), ty);
-  }
-  return ty;
-}
-
 }  // namespace
 
 /// State holds the current transform state
@@ -431,14 +420,14 @@ struct DecomposeStorageAccess::State {
                   const sem::VariableUser* var_user) {
     return utils::GetOrCreate(load_funcs, TypePair{buf_ty, el_ty}, [&] {
       auto* buf_ast_ty = CreateASTTypeFor(&ctx, buf_ty);
-      buf_ast_ty = MaybeCreateASTAccessControl(&ctx, var_user, buf_ast_ty);
 
       ast::VariableList params = {
           // Note: The buffer parameter requires the kStorage StorageClass in
           // order for HLSL to emit this as a ByteAddressBuffer.
           ctx.dst->create<ast::Variable>(
-              ctx.dst->Sym("buffer"), ast::StorageClass::kStorage, buf_ast_ty,
-              true, nullptr, ast::DecorationList{}),
+              ctx.dst->Sym("buffer"), ast::StorageClass::kStorage,
+              var_user->Variable()->Access(), buf_ast_ty, true, nullptr,
+              ast::DecorationList{}),
           ctx.dst->Param("offset", ctx.dst->ty.u32()),
       };
 
@@ -507,14 +496,14 @@ struct DecomposeStorageAccess::State {
                    const sem::VariableUser* var_user) {
     return utils::GetOrCreate(store_funcs, TypePair{buf_ty, el_ty}, [&] {
       auto* buf_ast_ty = CreateASTTypeFor(&ctx, buf_ty);
-      buf_ast_ty = MaybeCreateASTAccessControl(&ctx, var_user, buf_ast_ty);
       auto* el_ast_ty = CreateASTTypeFor(&ctx, el_ty);
       ast::VariableList params{
           // Note: The buffer parameter requires the kStorage StorageClass in
           // order for HLSL to emit this as a ByteAddressBuffer.
           ctx.dst->create<ast::Variable>(
-              ctx.dst->Sym("buffer"), ast::StorageClass::kStorage, buf_ast_ty,
-              true, nullptr, ast::DecorationList{}),
+              ctx.dst->Sym("buffer"), ast::StorageClass::kStorage,
+              var_user->Variable()->Access(), buf_ast_ty, true, nullptr,
+              ast::DecorationList{}),
           ctx.dst->Param("offset", ctx.dst->ty.u32()),
           ctx.dst->Param("value", el_ast_ty),
       };

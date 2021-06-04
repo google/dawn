@@ -78,6 +78,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_BeforeFunction_Scalar) {
   VariableConst{
     x_11
     none
+    undefined
     __bool
     {
       ScalarConstructor[not set]{false}
@@ -88,6 +89,7 @@ VariableDeclStatement{
   VariableConst{
     x_12
     none
+    undefined
     __u32
     {
       ScalarConstructor[not set]{0u}
@@ -98,6 +100,7 @@ VariableDeclStatement{
   VariableConst{
     x_13
     none
+    undefined
     __i32
     {
       ScalarConstructor[not set]{0}
@@ -108,6 +111,7 @@ VariableDeclStatement{
   VariableConst{
     x_14
     none
+    undefined
     __f32
     {
       ScalarConstructor[not set]{0.000000}
@@ -142,6 +146,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_BeforeFunction_Vector) {
   VariableConst{
     x_14
     none
+    undefined
     __vec_2__bool
     {
       TypeConstructor[not set]{
@@ -156,6 +161,7 @@ VariableDeclStatement{
   VariableConst{
     x_11
     none
+    undefined
     __vec_2__u32
     {
       TypeConstructor[not set]{
@@ -170,6 +176,7 @@ VariableDeclStatement{
   VariableConst{
     x_12
     none
+    undefined
     __vec_2__i32
     {
       TypeConstructor[not set]{
@@ -184,6 +191,7 @@ VariableDeclStatement{
   VariableConst{
     x_13
     none
+    undefined
     __vec_2__f32
     {
       TypeConstructor[not set]{
@@ -221,6 +229,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Scalar) {
   VariableConst{
     x_11
     none
+    undefined
     __bool
     {
       ScalarConstructor[not set]{false}
@@ -231,6 +240,7 @@ VariableDeclStatement{
   VariableConst{
     x_12
     none
+    undefined
     __u32
     {
       ScalarConstructor[not set]{0u}
@@ -241,6 +251,7 @@ VariableDeclStatement{
   VariableConst{
     x_13
     none
+    undefined
     __i32
     {
       ScalarConstructor[not set]{0}
@@ -251,6 +262,7 @@ VariableDeclStatement{
   VariableConst{
     x_14
     none
+    undefined
     __f32
     {
       ScalarConstructor[not set]{0.000000}
@@ -282,6 +294,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Vector) {
   VariableConst{
     x_11
     none
+    undefined
     __vec_2__u32
     {
       TypeConstructor[not set]{
@@ -296,6 +309,7 @@ VariableDeclStatement{
   VariableConst{
     x_12
     none
+    undefined
     __vec_2__i32
     {
       TypeConstructor[not set]{
@@ -310,6 +324,7 @@ VariableDeclStatement{
   VariableConst{
     x_13
     none
+    undefined
     __vec_2__f32
     {
       TypeConstructor[not set]{
@@ -343,6 +358,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Matrix) {
   VariableConst{
     x_11
     none
+    undefined
     __mat_2_2__f32
     {
       TypeConstructor[not set]{
@@ -385,6 +401,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Array) {
   VariableConst{
     x_11
     none
+    undefined
     __array__u32_2
     {
       TypeConstructor[not set]{
@@ -418,6 +435,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Struct) {
   VariableConst{
     x_11
     none
+    undefined
     __type_name_S
     {
       TypeConstructor[not set]{
@@ -541,6 +559,7 @@ TEST_F(SpvParserTest, ValueFromBlockNotInBlockOrder) {
       VariableConst{
         x_81
         none
+        undefined
         __f32
         {
           Binary[not set]{

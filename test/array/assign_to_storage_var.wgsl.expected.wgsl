@@ -16,11 +16,11 @@ var<workgroup> src_workgroup : ArrayType;
 
 [[group(0), binding(0)]] var<uniform> src_uniform : S;
 
-[[group(0), binding(1)]] var<storage> src_storage : [[access(read_write)]] S;
+[[group(0), binding(1)]] var<storage, read_write> src_storage : S;
 
-[[group(0), binding(2)]] var<storage> dst : [[access(read_write)]] S;
+[[group(0), binding(2)]] var<storage, read_write> dst : S;
 
-[[group(0), binding(3)]] var<storage> dst_nested : [[access(read_write)]] S_nested;
+[[group(0), binding(3)]] var<storage, read_write> dst_nested : S_nested;
 
 fn ret_arr() -> ArrayType {
   return ArrayType();

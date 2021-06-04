@@ -46,7 +46,7 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferBool) {
 
   EXPECT_EQ(
       r()->error(),
-      R"(56:78 error: variables declared in the <storage> storage class must be of an [[access]] qualified structure type)");
+      R"(56:78 error: variables declared in the <storage> storage class must be of a structure type)");
 }
 
 TEST_F(ResolverStorageClassValidationTest, StorageBufferPointer) {
@@ -62,15 +62,15 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferPointer) {
 
   EXPECT_EQ(
       r()->error(),
-      R"(56:78 error: variables declared in the <storage> storage class must be of an [[access]] qualified structure type)");
+      R"(56:78 error: variables declared in the <storage> storage class must be of a structure type)");
 }
 
 TEST_F(ResolverStorageClassValidationTest, StorageBufferArray) {
-  // var<storage> g : [[access(read)]] array<S, 3>;
+  // var<storage, read> g : array<S, 3>;
   auto* s = Structure("S", {Member("a", ty.f32())});
   auto* a = ty.array(s, 3);
-  auto* ac = ty.access(ast::AccessControl::kRead, a);
-  Global(Source{{56, 78}}, "g", ac, ast::StorageClass::kStorage,
+  Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage,
+         ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -80,12 +80,12 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferArray) {
 
   EXPECT_EQ(
       r()->error(),
-      R"(56:78 error: variables declared in the <storage> storage class must be of an [[access]] qualified structure type)");
+      R"(56:78 error: variables declared in the <storage> storage class must be of a structure type)");
 }
 
 TEST_F(ResolverStorageClassValidationTest, StorageBufferBoolAlias) {
   // type a = bool;
-  // var<storage> g : [[access(read)]] a;
+  // var<storage, read> g : a;
   auto* a = ty.alias("a", ty.bool_());
   AST().AddConstructedType(a);
   Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage,
@@ -98,31 +98,15 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferBoolAlias) {
 
   EXPECT_EQ(
       r()->error(),
-      R"(56:78 error: variables declared in the <storage> storage class must be of an [[access]] qualified structure type)");
-}
-
-TEST_F(ResolverStorageClassValidationTest, StorageBufferNoAccessControl) {
-  // var<storage> g : S;
-  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())});
-  Global(Source{{56, 78}}, "g", s, ast::StorageClass::kStorage,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
-         });
-
-  ASSERT_FALSE(r()->Resolve());
-
-  EXPECT_EQ(
-      r()->error(),
-      R"(56:78 error: variables declared in the <storage> storage class must be of an [[access]] qualified structure type)");
+      R"(56:78 error: variables declared in the <storage> storage class must be of a structure type)");
 }
 
 TEST_F(ResolverStorageClassValidationTest, StorageBufferNoBlockDecoration) {
   // struct S { x : i32 };
-  // var<storage> g : [[access(read)]] S;
+  // var<storage, read> g : S;
   auto* s = Structure(Source{{12, 34}}, "S", {Member("x", ty.i32())});
-  auto* a = ty.access(ast::AccessControl::kRead, s);
-  Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage,
+  Global(Source{{56, 78}}, "g", s, ast::StorageClass::kStorage,
+         ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -138,11 +122,11 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferNoBlockDecoration) {
 
 TEST_F(ResolverStorageClassValidationTest, StorageBufferNoError_Basic) {
   // [[block]] struct S { x : i32 };
-  // var<storage> g : [[access(read)]] S;
+  // var<storage, read> g : S;
   auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* a = ty.access(ast::AccessControl::kRead, s);
-  Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage,
+  Global(Source{{56, 78}}, "g", s, ast::StorageClass::kStorage,
+         ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -154,16 +138,15 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferNoError_Basic) {
 TEST_F(ResolverStorageClassValidationTest, StorageBufferNoError_Aliases) {
   // [[block]] struct S { x : i32 };
   // type a1 = S;
-  // type a2 = [[access(read)]] a1;
-  // var<storage> g : a2;
+  // var<storage, read> g : a1;
   auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
   auto* a1 = ty.alias("a1", s);
   AST().AddConstructedType(a1);
-  auto* ac = ty.access(ast::AccessControl::kRead, a1);
-  auto* a2 = ty.alias("a2", ac);
+  auto* a2 = ty.alias("a2", a1);
   AST().AddConstructedType(a2);
   Global(Source{{56, 78}}, "g", a2, ast::StorageClass::kStorage,
+         ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -206,11 +189,10 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferPointer) {
 }
 
 TEST_F(ResolverStorageClassValidationTest, UniformBufferArray) {
-  // var<uniform> g : [[access(read)]] array<S, 3>;
+  // var<uniform> g : array<S, 3>;
   auto* s = Structure("S", {Member("a", ty.f32())});
   auto* a = ty.array(s, 3);
-  auto* ac = ty.access(ast::AccessControl::kRead, a);
-  Global(Source{{56, 78}}, "g", ac, ast::StorageClass::kUniform,
+  Global(Source{{56, 78}}, "g", a, ast::StorageClass::kUniform,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -225,7 +207,7 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferArray) {
 
 TEST_F(ResolverStorageClassValidationTest, UniformBufferBoolAlias) {
   // type a = bool;
-  // var<uniform> g : [[access(read)]] a;
+  // var<uniform> g : a;
   auto* a = ty.alias("a", ty.bool_());
   AST().AddConstructedType(a);
   Global(Source{{56, 78}}, "g", a, ast::StorageClass::kUniform,

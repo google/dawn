@@ -45,32 +45,6 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array) {
   EXPECT_EQ(gen.result(), "array<bool, 4>");
 }
 
-TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_Read) {
-  auto* s = Structure("S", {Member("a", ty.i32())},
-                      {create<ast::StructBlockDecoration>()});
-
-  auto* a = ty.access(ast::AccessControl::kRead, s);
-  AST().AddConstructedType(ty.alias("make_type_reachable", a));
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_TRUE(gen.EmitType(a)) << gen.error();
-  EXPECT_EQ(gen.result(), "[[access(read)]] S");
-}
-
-TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_ReadWrite) {
-  auto* s = Structure("S", {Member("a", ty.i32())},
-                      {create<ast::StructBlockDecoration>()});
-
-  auto* a = ty.access(ast::AccessControl::kReadWrite, s);
-  AST().AddConstructedType(ty.alias("make_type_reachable", a));
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_TRUE(gen.EmitType(a)) << gen.error();
-  EXPECT_EQ(gen.result(), "[[access(read_write)]] S");
-}
-
 TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {
   auto* a = ty.array(ty.bool_(), 4, 16u);
   AST().AddConstructedType(ty.alias("make_type_reachable", a));
@@ -416,7 +390,7 @@ INSTANTIATE_TEST_SUITE_P(WgslGeneratorImplTest,
 struct StorageTextureData {
   ast::ImageFormat fmt;
   ast::TextureDimension dim;
-  ast::AccessControl::Access access;
+  ast::Access access;
   const char* name;
 };
 inline std::ostream& operator<<(std::ostream& out, StorageTextureData data) {
@@ -427,12 +401,11 @@ using WgslGenerator_StorageTextureTest = TestParamHelper<StorageTextureData>;
 TEST_P(WgslGenerator_StorageTextureTest, EmitType_StorageTexture) {
   auto param = GetParam();
 
-  auto* t = ty.storage_texture(param.dim, param.fmt);
-  auto* ac = ty.access(param.access, t);
+  auto* t = ty.storage_texture(param.dim, param.fmt, param.access);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ac)) << gen.error();
+  ASSERT_TRUE(gen.EmitType(t)) << gen.error();
   EXPECT_EQ(gen.result(), param.name);
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -440,37 +413,29 @@ INSTANTIATE_TEST_SUITE_P(
     WgslGenerator_StorageTextureTest,
     testing::Values(
         StorageTextureData{ast::ImageFormat::kR8Unorm,
-                           ast::TextureDimension::k1d,
-                           ast::AccessControl::kRead,
-                           "[[access(read)]] texture_storage_1d<r8unorm>"},
+                           ast::TextureDimension::k1d, ast::Access::kRead,
+                           "texture_storage_1d<r8unorm, read>"},
         StorageTextureData{ast::ImageFormat::kR8Unorm,
-                           ast::TextureDimension::k2d,
-                           ast::AccessControl::kRead,
-                           "[[access(read)]] texture_storage_2d<r8unorm>"},
-        StorageTextureData{
-            ast::ImageFormat::kR8Unorm, ast::TextureDimension::k2dArray,
-            ast::AccessControl::kRead,
-            "[[access(read)]] texture_storage_2d_array<r8unorm>"},
+                           ast::TextureDimension::k2d, ast::Access::kRead,
+                           "texture_storage_2d<r8unorm, read>"},
         StorageTextureData{ast::ImageFormat::kR8Unorm,
-                           ast::TextureDimension::k3d,
-                           ast::AccessControl::kRead,
-                           "[[access(read)]] texture_storage_3d<r8unorm>"},
+                           ast::TextureDimension::k2dArray, ast::Access::kRead,
+                           "texture_storage_2d_array<r8unorm, read>"},
         StorageTextureData{ast::ImageFormat::kR8Unorm,
-                           ast::TextureDimension::k1d,
-                           ast::AccessControl::kWrite,
-                           "[[access(write)]] texture_storage_1d<r8unorm>"},
+                           ast::TextureDimension::k3d, ast::Access::kRead,
+                           "texture_storage_3d<r8unorm, read>"},
         StorageTextureData{ast::ImageFormat::kR8Unorm,
-                           ast::TextureDimension::k2d,
-                           ast::AccessControl::kWrite,
-                           "[[access(write)]] texture_storage_2d<r8unorm>"},
-        StorageTextureData{
-            ast::ImageFormat::kR8Unorm, ast::TextureDimension::k2dArray,
-            ast::AccessControl::kWrite,
-            "[[access(write)]] texture_storage_2d_array<r8unorm>"},
+                           ast::TextureDimension::k1d, ast::Access::kWrite,
+                           "texture_storage_1d<r8unorm, write>"},
         StorageTextureData{ast::ImageFormat::kR8Unorm,
-                           ast::TextureDimension::k3d,
-                           ast::AccessControl::kWrite,
-                           "[[access(write)]] texture_storage_3d<r8unorm>"}));
+                           ast::TextureDimension::k2d, ast::Access::kWrite,
+                           "texture_storage_2d<r8unorm, write>"},
+        StorageTextureData{ast::ImageFormat::kR8Unorm,
+                           ast::TextureDimension::k2dArray, ast::Access::kWrite,
+                           "texture_storage_2d_array<r8unorm, write>"},
+        StorageTextureData{ast::ImageFormat::kR8Unorm,
+                           ast::TextureDimension::k3d, ast::Access::kWrite,
+                           "texture_storage_3d<r8unorm, write>"}));
 
 struct ImageFormatData {
   ast::ImageFormat fmt;

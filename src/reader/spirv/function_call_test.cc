@@ -92,6 +92,7 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParams) {
   VariableConst{
     x_1
     none
+    undefined
     __u32
     {
       Call[not set]{
@@ -148,6 +149,7 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParamsUsedTwice) {
   Variable{
     x_10
     none
+    undefined
     __u32
   }
 }
@@ -155,6 +157,7 @@ VariableDeclStatement{
   VariableConst{
     x_1
     none
+    undefined
     __u32
     {
       Call[not set]{
@@ -218,11 +221,13 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
     VariableConst{
       x_51
       none
+      undefined
       __u32
     }
     VariableConst{
       x_52
       none
+      undefined
       __u32
     }
   )
@@ -244,6 +249,7 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
       VariableConst{
         x_1
         none
+        undefined
         __u32
         {
           Call[not set]{

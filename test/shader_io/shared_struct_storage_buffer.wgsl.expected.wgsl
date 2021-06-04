@@ -8,7 +8,7 @@ struct S {
   v : vec4<f32>;
 };
 
-[[group(0), binding(0)]] var<storage> output : [[access(write)]] S;
+[[group(0), binding(0)]] var<storage, write> output : S;
 
 [[stage(fragment)]]
 fn frag_main(input : S) {

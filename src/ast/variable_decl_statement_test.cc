@@ -76,6 +76,7 @@ TEST_F(VariableDeclStatementTest, ToStr) {
   Variable{
     a
     none
+    undefined
     __f32
   }
 }

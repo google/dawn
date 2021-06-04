@@ -1,4 +1,4 @@
-[[group(1), binding(0)]] var arg_0 : [[access(write)]] texture_storage_3d<r32sint>;
+[[group(1), binding(0)]] var arg_0 : texture_storage_3d<r32sint, write>;
 
 fn textureStore_eb78b9() {
   textureStore(arg_0, vec3<i32>(), vec4<i32>());

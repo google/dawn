@@ -15,26 +15,25 @@
 #ifndef SRC_AST_ACCESS_DECORATION_H_
 #define SRC_AST_ACCESS_DECORATION_H_
 
-#include "src/ast/access_control.h"
+#include "src/ast/access.h"
 #include "src/ast/decoration.h"
 
 namespace tint {
 namespace ast {
 
 /// An access decoration
+/// [DEPRECATED]: TODO(crbug.com/tint/846): Remove this class
 class AccessDecoration : public Castable<AccessDecoration, Decoration> {
  public:
   /// constructor
   /// @param program_id the identifier of the program that owns this node
   /// @param source the source of this decoration
   /// @param value the access value
-  AccessDecoration(ProgramID program_id,
-                   const Source& source,
-                   AccessControl::Access value);
+  AccessDecoration(ProgramID program_id, const Source& source, Access value);
   ~AccessDecoration() override;
 
   /// @returns the access control value
-  AccessControl::Access value() const { return value_; }
+  Access value() const { return value_; }
 
   /// Outputs the decoration to the given stream
   /// @param sem the semantic info for the program
@@ -51,7 +50,7 @@ class AccessDecoration : public Castable<AccessDecoration, Decoration> {
   AccessDecoration* Clone(CloneContext* ctx) const override;
 
  private:
-  AccessControl::Access const value_;
+  Access const value_;
 };
 
 }  // namespace ast

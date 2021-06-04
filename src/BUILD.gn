@@ -292,8 +292,8 @@ template("libtint_source_set") {
 
 libtint_source_set("libtint_core_all_src") {
   sources = [
-    "ast/access_control.cc",
-    "ast/access_control.h",
+    "ast/access.cc",
+    "ast/access.h",
     "ast/access_decoration.cc",
     "ast/access_decoration.h",
     "ast/alias.cc",

@@ -276,12 +276,11 @@ TEST_P(ResolverIntrinsicTest_StorageTextureOperation, TextureLoadRo) {
   auto format = GetParam().format;
 
   auto* coords_type = GetCoordsType(dim, ty.i32());
-  auto* texture_type = ty.storage_texture(dim, format);
-  auto* ro_texture_type = ty.access(ast::AccessControl::kRead, texture_type);
+  auto* texture_type = ty.storage_texture(dim, format, ast::Access::kRead);
 
   ast::ExpressionList call_params;
 
-  add_call_param("texture", ro_texture_type, &call_params);
+  add_call_param("texture", texture_type, &call_params);
   add_call_param("coords", coords_type, &call_params);
 
   if (ast::IsTextureArray(dim)) {
@@ -769,8 +768,7 @@ TEST_F(ResolverIntrinsicDataTest, ArrayLength_Vector) {
   auto* ary = ty.array<i32>();
   auto* str = Structure("S", {Member("x", ary)},
                         {create<ast::StructBlockDecoration>()});
-  auto* ac = ty.access(ast::AccessControl::kRead, str);
-  Global("a", ac, ast::StorageClass::kStorage,
+  Global("a", str, ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),

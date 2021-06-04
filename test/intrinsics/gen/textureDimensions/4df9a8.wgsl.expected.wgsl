@@ -1,4 +1,4 @@
-[[group(1), binding(0)]] var arg_0 : [[access(write)]] texture_storage_1d<rg32uint>;
+[[group(1), binding(0)]] var arg_0 : texture_storage_1d<rg32uint, write>;
 
 fn textureDimensions_4df9a8() {
   var res : i32 = textureDimensions(arg_0);

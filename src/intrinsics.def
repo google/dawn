@@ -34,7 +34,7 @@ enum storage_class {
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#memory-access-mode
-enum access_control {
+enum access {
   read
   write
   read_write
@@ -89,10 +89,10 @@ type texture_depth_2d
 type texture_depth_2d_array
 type texture_depth_cube
 type texture_depth_cube_array
-type texture_storage_1d<F: texel_format, A: access_control>
-type texture_storage_2d<F: texel_format, A: access_control>
-type texture_storage_2d_array<F: texel_format, A: access_control>
-type texture_storage_3d<F: texel_format, A: access_control>
+type texture_storage_1d<F: texel_format, A: access>
+type texture_storage_2d<F: texel_format, A: access>
+type texture_storage_2d_array<F: texel_format, A: access>
+type texture_storage_3d<F: texel_format, A: access>
 type texture_external
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -245,7 +245,7 @@ match read_or_write: read | write
 //     - Single parameter of vector type with open-number size N and element  //
 //       open-type T                                                          //
 //                                                                            //
-//   fn F<A: access_control>(texture_storage_1d<f32_texel_format, A>)         //
+//   fn F<A: access>(texture_storage_1d<f32_texel_format, A>)                 //
 //     - Single parameter of texture_storage_1d type with open-number         //
 //       access-control C, and of a texel format that is listed in            //
 //       f32_texel_format                                                     //

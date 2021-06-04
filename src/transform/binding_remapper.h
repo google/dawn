@@ -17,7 +17,7 @@
 
 #include <unordered_map>
 
-#include "src/ast/access_control.h"
+#include "src/ast/access.h"
 #include "src/sem/binding_point.h"
 #include "src/transform/transform.h"
 
@@ -35,8 +35,7 @@ class BindingRemapper : public Transform {
   using BindingPoints = std::unordered_map<BindingPoint, BindingPoint>;
 
   /// AccessControls is a map of old binding point to new access control
-  using AccessControls =
-      std::unordered_map<BindingPoint, ast::AccessControl::Access>;
+  using AccessControls = std::unordered_map<BindingPoint, ast::Access>;
 
   /// Remappings is consumed by the BindingRemapper transform.
   /// Data holds information about shader usage and constant buffer offsets.

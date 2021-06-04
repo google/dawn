@@ -428,9 +428,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  auto* ac = ty.access(ast::AccessControl::kReadWrite, s);
-
-  Global("coord", ac, ast::StorageClass::kStorage,
+  Global("coord", s, ast::StorageClass::kStorage, ast::Access::kReadWrite,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
@@ -474,9 +472,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  auto* ac = ty.access(ast::AccessControl::kRead, s);
-
-  Global("coord", ac, ast::StorageClass::kStorage,
+  Global("coord", s, ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
@@ -520,9 +516,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  auto* ac = ty.access(ast::AccessControl::kWrite, s);
-
-  Global("coord", ac, ast::StorageClass::kStorage,
+  Global("coord", s, ast::StorageClass::kStorage, ast::Access::kWrite,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
@@ -563,9 +557,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  auto* ac = ty.access(ast::AccessControl::kReadWrite, s);
-
-  Global("coord", ac, ast::StorageClass::kStorage,
+  Global("coord", s, ast::StorageClass::kStorage, ast::Access::kReadWrite,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
@@ -814,8 +806,7 @@ TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_Called_By_EntryPoint_With_StorageBuffer) {
   auto* s = Structure("S", {Member("x", ty.f32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* ac = ty.access(ast::AccessControl::kReadWrite, s);
-  Global("coord", ac, ast::StorageClass::kStorage,
+  Global("coord", s, ast::StorageClass::kStorage, ast::Access::kReadWrite,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
@@ -1064,9 +1055,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* s = Structure("Data", {Member("d", ty.f32())},
                       {create<ast::StructBlockDecoration>()});
 
-  auto* ac = ty.access(ast::AccessControl::kReadWrite, s);
-
-  Global("data", ac, ast::StorageClass::kStorage,
+  Global("data", s, ast::StorageClass::kStorage, ast::Access::kReadWrite,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),

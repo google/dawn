@@ -77,7 +77,11 @@ func run() error {
 	testResultsPath := filepath.Join(tmpDir, "test-results.json")
 
 	// Run the tests
-	switch err := exec.Command(exe, "--gtest_output=json:"+testResultsPath).Run().(type) {
+	testArgs := []string{"--gtest_output=json:" + testResultsPath}
+	if len(args) > 1 {
+		testArgs = append(testArgs, args[1:]...)
+	}
+	switch err := exec.Command(exe, testArgs...).Run().(type) {
 	default:
 		return err
 	case nil:

@@ -235,47 +235,12 @@ class InspectorHelper : public ProgramBuilder {
   /// Generates types appropriate for using in a storage buffer
   /// @param name name for the type
   /// @param member_types a vector of member types
-  /// @returns a function that returns an ast::AccessControl to the created
-  /// structure.
-  std::function<ast::AccessControl*()> MakeStorageBufferTypes(
+  /// @returns a function that returns the created structure.
+  std::function<ast::TypeName*()> MakeStorageBufferTypes(
       const std::string& name,
       std::vector<ast::Type*> member_types) {
     MakeStructType(name, member_types, true);
-    return [this, name] {
-      return ty.access(ast::AccessControl::kReadWrite, ty.type_name(name));
-    };
-  }
-
-  /// Generates types appropriate for using in a read-only storage buffer
-  /// @param name name for the type
-  /// @param member_types a vector of member types
-  /// @returns a function that returns an ast::AccessControl to the created
-  /// structure.
-  std::function<ast::AccessControl*()> MakeReadOnlyStorageBufferTypes(
-      const std::string& name,
-      std::vector<ast::Type*> member_types) {
-    MakeStructType(name, member_types, true);
-    return [this, name] {
-      return ty.access(ast::AccessControl::kRead, ty.type_name(name));
-    };
-  }
-
-  /// Adds a binding variable with a struct type to the program
-  /// @param name the name of the variable
-  /// @param type the type to use
-  /// @param storage_class the storage class to use
-  /// @param group the binding and group to use for the uniform buffer
-  /// @param binding the binding number to use for the uniform buffer
-  void AddBinding(const std::string& name,
-                  ast::Type* type,
-                  ast::StorageClass storage_class,
-                  uint32_t group,
-                  uint32_t binding) {
-    Global(name, type, storage_class, nullptr,
-           ast::DecorationList{
-               create<ast::BindingDecoration>(binding),
-               create<ast::GroupDecoration>(group),
-           });
+    return [this, name] { return ty.type_name(name); };
   }
 
   /// Adds an uniform buffer variable to the program
@@ -287,19 +252,29 @@ class InspectorHelper : public ProgramBuilder {
                         ast::Type* type,
                         uint32_t group,
                         uint32_t binding) {
-    AddBinding(name, type, ast::StorageClass::kUniform, group, binding);
+    Global(name, type, ast::StorageClass::kUniform,
+           ast::DecorationList{
+               create<ast::BindingDecoration>(binding),
+               create<ast::GroupDecoration>(group),
+           });
   }
 
   /// Adds a storage buffer variable to the program
   /// @param name the name of the variable
   /// @param type the type to use
+  /// @param access the storage buffer access control
   /// @param group the binding/group to use for the storage buffer
   /// @param binding the binding number to use for the storage buffer
   void AddStorageBuffer(const std::string& name,
                         ast::Type* type,
+                        ast::Access access,
                         uint32_t group,
                         uint32_t binding) {
-    AddBinding(name, type, ast::StorageClass::kStorage, group, binding);
+    Global(name, type, ast::StorageClass::kStorage, access,
+           ast::DecorationList{
+               create<ast::BindingDecoration>(binding),
+               create<ast::GroupDecoration>(group),
+           });
   }
 
   /// Generates a function that references a specific struct variable
@@ -341,7 +316,11 @@ class InspectorHelper : public ProgramBuilder {
   /// @param group the binding/group to use for the storage buffer
   /// @param binding the binding number to use for the storage buffer
   void AddSampler(const std::string& name, uint32_t group, uint32_t binding) {
-    AddBinding(name, sampler_type(), ast::StorageClass::kNone, group, binding);
+    Global(name, sampler_type(),
+           ast::DecorationList{
+               create<ast::BindingDecoration>(binding),
+               create<ast::GroupDecoration>(group),
+           });
   }
 
   /// Adds a comparison sampler variable to the program
@@ -351,8 +330,11 @@ class InspectorHelper : public ProgramBuilder {
   void AddComparisonSampler(const std::string& name,
                             uint32_t group,
                             uint32_t binding) {
-    AddBinding(name, comparison_sampler_type(), ast::StorageClass::kNone, group,
-               binding);
+    Global(name, comparison_sampler_type(),
+           ast::DecorationList{
+               create<ast::BindingDecoration>(binding),
+               create<ast::GroupDecoration>(group),
+           });
   }
 
   /// Generates a SampledTexture appropriate for the params
@@ -396,7 +378,11 @@ class InspectorHelper : public ProgramBuilder {
                          ast::Type* type,
                          uint32_t group,
                          uint32_t binding) {
-    AddBinding(name, type, ast::StorageClass::kNone, group, binding);
+    Global(name, type,
+           ast::DecorationList{
+               create<ast::BindingDecoration>(binding),
+               create<ast::GroupDecoration>(group),
+           });
   }
 
   /// Adds a multi-sampled texture variable to the program
@@ -408,7 +394,11 @@ class InspectorHelper : public ProgramBuilder {
                               ast::Type* type,
                               uint32_t group,
                               uint32_t binding) {
-    AddBinding(name, type, ast::StorageClass::kNone, group, binding);
+    Global(name, type,
+           ast::DecorationList{
+               create<ast::BindingDecoration>(binding),
+               create<ast::GroupDecoration>(group),
+           });
   }
 
   void AddGlobalVariable(const std::string& name, ast::Type* type) {
@@ -424,7 +414,11 @@ class InspectorHelper : public ProgramBuilder {
                        ast::Type* type,
                        uint32_t group,
                        uint32_t binding) {
-    AddBinding(name, type, ast::StorageClass::kNone, group, binding);
+    Global(name, type,
+           ast::DecorationList{
+               create<ast::BindingDecoration>(binding),
+               create<ast::GroupDecoration>(group),
+           });
   }
 
   /// Adds an external texture variable to the program
@@ -436,7 +430,11 @@ class InspectorHelper : public ProgramBuilder {
                           ast::Type* type,
                           uint32_t group,
                           uint32_t binding) {
-    AddBinding(name, type, ast::StorageClass::kNone, group, binding);
+    Global(name, type,
+           ast::DecorationList{
+               create<ast::BindingDecoration>(binding),
+               create<ast::GroupDecoration>(group),
+           });
   }
 
   /// Generates a function that references a specific sampler variable
@@ -571,15 +569,12 @@ class InspectorHelper : public ProgramBuilder {
   /// @param dim the texture dimension of the storage texture
   /// @param format the image format of the storage texture
   /// @param read_only should the access type be read only, otherwise write only
-  /// @returns the storage texture type, subtype & access control type
+  /// @returns the storage texture type
   ast::Type* MakeStorageTextureTypes(ast::TextureDimension dim,
                                      ast::ImageFormat format,
                                      bool read_only) {
-    auto ac =
-        read_only ? ast::AccessControl::kRead : ast::AccessControl::kWrite;
-    auto* tex = ty.storage_texture(dim, format);
-
-    return ty.access(ac, tex);
+    auto access = read_only ? ast::Access::kRead : ast::Access::kWrite;
+    return ty.storage_texture(dim, format, access);
   }
 
   /// Adds a storage texture variable to the program
@@ -591,7 +586,11 @@ class InspectorHelper : public ProgramBuilder {
                          ast::Type* type,
                          uint32_t group,
                          uint32_t binding) {
-    AddBinding(name, type, ast::StorageClass::kNone, group, binding);
+    Global(name, type,
+           ast::DecorationList{
+               create<ast::BindingDecoration>(binding),
+               create<ast::GroupDecoration>(group),
+           });
   }
 
   /// Generates a function that references a storage texture variable.
@@ -1664,11 +1663,11 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
   MakeStructVariableReferenceBodyFunction("ub_func", "ub_var", {{0, ty.i32()}});
 
   auto sb = MakeStorageBufferTypes("sb_type", {ty.i32()});
-  AddStorageBuffer("sb_var", sb(), 1, 0);
+  AddStorageBuffer("sb_var", sb(), ast::Access::kReadWrite, 1, 0);
   MakeStructVariableReferenceBodyFunction("sb_func", "sb_var", {{0, ty.i32()}});
 
-  auto ro_sb = MakeReadOnlyStorageBufferTypes("rosb_type", {ty.i32()});
-  AddStorageBuffer("rosb_var", ro_sb(), 1, 1);
+  auto ro_sb = MakeStorageBufferTypes("rosb_type", {ty.i32()});
+  AddStorageBuffer("rosb_var", ro_sb(), ast::Access::kRead, 1, 1);
   MakeStructVariableReferenceBodyFunction("rosb_func", "rosb_var",
                                           {{0, ty.i32()}});
 
@@ -1949,7 +1948,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
   auto foo_struct_type = MakeStorageBufferTypes("foo_type", {ty.i32()});
-  AddStorageBuffer("foo_sb", foo_struct_type(), 0, 0);
+  AddStorageBuffer("foo_sb", foo_struct_type(), ast::Access::kReadWrite, 0, 0);
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
@@ -1978,7 +1977,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
                                                                 ty.u32(),
                                                                 ty.f32(),
                                                             });
-  AddStorageBuffer("foo_sb", foo_struct_type(), 0, 0);
+  AddStorageBuffer("foo_sb", foo_struct_type(), ast::Access::kReadWrite, 0, 0);
 
   MakeStructVariableReferenceBodyFunction(
       "sb_func", "foo_sb", {{0, ty.i32()}, {1, ty.u32()}, {2, ty.f32()}});
@@ -2008,9 +2007,9 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
                                                               ty.u32(),
                                                               ty.f32(),
                                                           });
-  AddStorageBuffer("sb_foo", sb_struct_type(), 0, 0);
-  AddStorageBuffer("sb_bar", sb_struct_type(), 0, 1);
-  AddStorageBuffer("sb_baz", sb_struct_type(), 2, 0);
+  AddStorageBuffer("sb_foo", sb_struct_type(), ast::Access::kReadWrite, 0, 0);
+  AddStorageBuffer("sb_bar", sb_struct_type(), ast::Access::kReadWrite, 0, 1);
+  AddStorageBuffer("sb_baz", sb_struct_type(), ast::Access::kReadWrite, 2, 0);
 
   auto AddReferenceFunc = [this](const std::string& func_name,
                                  const std::string& var_name) {
@@ -2067,7 +2066,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
   auto foo_struct_type =
       MakeStorageBufferTypes("foo_type", {ty.i32(), ty.array<u32, 4>()});
-  AddStorageBuffer("foo_sb", foo_struct_type(), 0, 0);
+  AddStorageBuffer("foo_sb", foo_struct_type(), ast::Access::kReadWrite, 0, 0);
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
@@ -2095,7 +2094,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
                                                                 ty.i32(),
                                                                 ty.array<u32>(),
                                                             });
-  AddStorageBuffer("foo_sb", foo_struct_type(), 0, 0);
+  AddStorageBuffer("foo_sb", foo_struct_type(), ast::Access::kReadWrite, 0, 0);
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
@@ -2120,7 +2119,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingPadding) {
   auto foo_struct_type = MakeStorageBufferTypes("foo_type", {ty.vec3<f32>()});
-  AddStorageBuffer("foo_sb", foo_struct_type(), 0, 0);
+  AddStorageBuffer("foo_sb", foo_struct_type(), ast::Access::kReadWrite, 0, 0);
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                           {{0, ty.vec3<f32>()}});
@@ -2145,8 +2144,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingPadding) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
-  auto foo_struct_type = MakeReadOnlyStorageBufferTypes("foo_type", {ty.i32()});
-  AddStorageBuffer("foo_sb", foo_struct_type(), 0, 0);
+  auto foo_struct_type = MakeStorageBufferTypes("foo_type", {ty.i32()});
+  AddStorageBuffer("foo_sb", foo_struct_type(), ast::Access::kRead, 0, 0);
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
@@ -2163,8 +2162,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
-  auto foo_struct_type = MakeReadOnlyStorageBufferTypes("foo_type", {ty.i32()});
-  AddStorageBuffer("foo_sb", foo_struct_type(), 0, 0);
+  auto foo_struct_type = MakeStorageBufferTypes("foo_type", {ty.i32()});
+  AddStorageBuffer("foo_sb", foo_struct_type(), ast::Access::kRead, 0, 0);
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
@@ -2189,14 +2188,14 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
        MultipleStorageBuffers) {
-  auto sb_struct_type = MakeReadOnlyStorageBufferTypes("sb_type", {
-                                                                      ty.i32(),
-                                                                      ty.u32(),
-                                                                      ty.f32(),
-                                                                  });
-  AddStorageBuffer("sb_foo", sb_struct_type(), 0, 0);
-  AddStorageBuffer("sb_bar", sb_struct_type(), 0, 1);
-  AddStorageBuffer("sb_baz", sb_struct_type(), 2, 0);
+  auto sb_struct_type = MakeStorageBufferTypes("sb_type", {
+                                                              ty.i32(),
+                                                              ty.u32(),
+                                                              ty.f32(),
+                                                          });
+  AddStorageBuffer("sb_foo", sb_struct_type(), ast::Access::kRead, 0, 0);
+  AddStorageBuffer("sb_bar", sb_struct_type(), ast::Access::kRead, 0, 1);
+  AddStorageBuffer("sb_baz", sb_struct_type(), ast::Access::kRead, 2, 0);
 
   auto AddReferenceFunc = [this](const std::string& func_name,
                                  const std::string& var_name) {
@@ -2252,11 +2251,11 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
   auto foo_struct_type =
-      MakeReadOnlyStorageBufferTypes("foo_type", {
-                                                     ty.i32(),
-                                                     ty.array<u32, 4>(),
-                                                 });
-  AddStorageBuffer("foo_sb", foo_struct_type(), 0, 0);
+      MakeStorageBufferTypes("foo_type", {
+                                             ty.i32(),
+                                             ty.array<u32, 4>(),
+                                         });
+  AddStorageBuffer("foo_sb", foo_struct_type(), ast::Access::kRead, 0, 0);
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
@@ -2281,12 +2280,11 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
        ContainingRuntimeArray) {
-  auto foo_struct_type =
-      MakeReadOnlyStorageBufferTypes("foo_type", {
-                                                     ty.i32(),
-                                                     ty.array<u32>(),
-                                                 });
-  AddStorageBuffer("foo_sb", foo_struct_type(), 0, 0);
+  auto foo_struct_type = MakeStorageBufferTypes("foo_type", {
+                                                                ty.i32(),
+                                                                ty.array<u32>(),
+                                                            });
+  AddStorageBuffer("foo_sb", foo_struct_type(), ast::Access::kRead, 0, 0);
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
@@ -2311,7 +2309,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, SkipNonReadOnly) {
   auto foo_struct_type = MakeStorageBufferTypes("foo_type", {ty.i32()});
-  AddStorageBuffer("foo_sb", foo_struct_type(), 0, 0);
+  AddStorageBuffer("foo_sb", foo_struct_type(), ast::Access::kReadWrite, 0, 0);
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 

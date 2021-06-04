@@ -84,7 +84,9 @@ TEST_F(ParserImplTest, VariableIdentDecl_InvalidType) {
   ASSERT_EQ(p->error(), "1:10: unknown constructed type 'invalid'");
 }
 
-TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithTextureAccessDeco_Read) {
+// TODO(crbug.com/tint/846): Remove
+TEST_F(ParserImplTest,
+       VariableIdentDecl_ParsesWithTextureAccessDeco_Read_DEPRECATED) {
   auto p = parser("my_var : [[access(read)]] texture_storage_1d<r32float>");
 
   auto decl = p->expect_variable_ident_decl("test");
@@ -92,13 +94,17 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithTextureAccessDeco_Read) {
   ASSERT_FALSE(decl.errored);
   ASSERT_EQ(decl->name, "my_var");
   ASSERT_NE(decl->type, nullptr);
-  ASSERT_TRUE(decl->type->Is<ast::AccessControl>());
-  EXPECT_TRUE(decl->type->As<ast::AccessControl>()->IsReadOnly());
-  ASSERT_TRUE(
-      decl->type->As<ast::AccessControl>()->type()->Is<ast::StorageTexture>());
+  ASSERT_TRUE(decl->type->Is<ast::StorageTexture>());
+  EXPECT_TRUE(decl->type->As<ast::StorageTexture>()->is_read_only());
+
+  EXPECT_EQ(p->error(),
+            "1:54: use of deprecated language feature: access control is "
+            "expected as last parameter of storage textures");
 }
 
-TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithTextureAccessDeco_Write) {
+// TODO(crbug.com/tint/846): Remove
+TEST_F(ParserImplTest,
+       VariableIdentDecl_ParsesWithTextureAccessDeco_Write_DEPRECATED) {
   auto p = parser("my_var : [[access(write)]] texture_storage_1d<r32float>");
 
   auto decl = p->expect_variable_ident_decl("test");
@@ -106,14 +112,17 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithTextureAccessDeco_Write) {
   ASSERT_FALSE(decl.errored);
   ASSERT_EQ(decl->name, "my_var");
   ASSERT_NE(decl->type, nullptr);
-  ASSERT_TRUE(decl->type->Is<ast::AccessControl>());
-  EXPECT_TRUE(decl->type->As<ast::AccessControl>()->IsWriteOnly());
-  ASSERT_TRUE(
-      decl->type->As<ast::AccessControl>()->type()->Is<ast::StorageTexture>());
+  ASSERT_TRUE(decl->type->Is<ast::StorageTexture>());
+  EXPECT_TRUE(decl->type->As<ast::StorageTexture>()->is_write_only());
+
+  EXPECT_EQ(p->error(),
+            "1:55: use of deprecated language feature: access control is "
+            "expected as last parameter of storage textures");
 }
 
-TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
-  auto p = parser("my_var : [[access(read)]] S");
+// TODO(crbug.com/tint/846): Remove
+TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read_DEPRECATED) {
+  auto p = parser("var my_var : [[access(read)]] S;");
 
   auto* mem = Member("a", ty.i32(), ast::DecorationList{});
   ast::StructMemberList members;
@@ -127,17 +136,25 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
 
   p->register_constructed("S", s);
 
-  auto decl = p->expect_variable_ident_decl("test");
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_FALSE(decl.errored);
-  ASSERT_EQ(decl->name, "my_var");
-  ASSERT_NE(decl->type, nullptr);
-  ASSERT_TRUE(decl->type->Is<ast::AccessControl>());
-  EXPECT_TRUE(decl->type->As<ast::AccessControl>()->IsReadOnly());
+  auto res = p->expect_global_decl();
+  ASSERT_FALSE(res.errored) << p->error();
+  ASSERT_NE(p->builder().AST().GlobalVariables().size(), 0u);
+  auto* decl = p->builder().AST().GlobalVariables()[0];
+  ASSERT_NE(decl, nullptr);
+  ASSERT_EQ(decl->symbol(), p->builder().Symbols().Get("my_var"));
+  ASSERT_NE(decl->type(), nullptr);
+  EXPECT_TRUE(decl->type()->Is<ast::TypeName>());
+  EXPECT_EQ(decl->declared_access(), ast::Access::kRead);
+
+  EXPECT_EQ(p->error(),
+            "1:1: use of deprecated language feature: declare access with "
+            "var<none, read> instead of using [[access]] decoration");
 }
 
-TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
-  auto p = parser("my_var : [[access(read_write)]] S");
+// TODO(crbug.com/tint/846): Remove
+TEST_F(ParserImplTest,
+       VariableIdentDecl_ParsesWithAccessDeco_ReadWrite_DEPRECATED) {
+  auto p = parser("var my_var : [[access(read_write)]] S;");
 
   auto* mem = Member("a", ty.i32(), ast::DecorationList{});
   ast::StructMemberList members;
@@ -151,16 +168,23 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
 
   p->register_constructed("S", s);
 
-  auto decl = p->expect_variable_ident_decl("test");
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_FALSE(decl.errored);
-  ASSERT_EQ(decl->name, "my_var");
-  ASSERT_NE(decl->type, nullptr);
-  ASSERT_TRUE(decl->type->Is<ast::AccessControl>());
-  EXPECT_TRUE(decl->type->As<ast::AccessControl>()->IsReadWrite());
+  auto res = p->expect_global_decl();
+  ASSERT_FALSE(res.errored) << p->error();
+  ASSERT_NE(p->builder().AST().GlobalVariables().size(), 0u);
+  auto* decl = p->builder().AST().GlobalVariables()[0];
+  ASSERT_NE(decl, nullptr);
+  ASSERT_EQ(decl->symbol(), p->builder().Symbols().Get("my_var"));
+  ASSERT_NE(decl->type(), nullptr);
+  EXPECT_TRUE(decl->type()->Is<ast::TypeName>());
+  EXPECT_EQ(decl->declared_access(), ast::Access::kReadWrite);
+
+  EXPECT_EQ(p->error(),
+            "1:1: use of deprecated language feature: declare access with "
+            "var<none, read_write> instead of using [[access]] decoration");
 }
 
-TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail) {
+// TODO(crbug.com/tint/846): Remove
+TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail_DEPRECATED) {
   auto p = parser("my_var : [[access(read), access(read_write)]] S");
 
   auto* mem = Member("a", ty.i32(), ast::DecorationList{});
@@ -181,7 +205,9 @@ TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail) {
   ASSERT_EQ(p->error(), "1:1: multiple access decorations not allowed");
 }
 
-TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDeco_MultiBlock_Fail) {
+// TODO(crbug.com/tint/846): Remove
+TEST_F(ParserImplTest,
+       VariableIdentDecl_MultipleAccessDeco_MultiBlock_Fail_DEPRECATED) {
   auto p = parser("my_var : [[access(read)]][[access(read_write)]] S");
 
   auto* mem = Member("a", ty.i32(), ast::DecorationList{});
@@ -202,7 +228,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDeco_MultiBlock_Fail) {
   ASSERT_EQ(p->error(), "1:1: multiple access decorations not allowed");
 }
 
-TEST_F(ParserImplTest, VariableIdentDecl_AccessDecoBadValue) {
+// TODO(crbug.com/tint/846): Remove
+TEST_F(ParserImplTest, VariableIdentDecl_AccessDecoBadValue_DEPRECATED) {
   auto p = parser("my_var : [[access(unknown)]] S");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
@@ -210,12 +237,13 @@ TEST_F(ParserImplTest, VariableIdentDecl_AccessDecoBadValue) {
   ASSERT_EQ(p->error(), "1:19: invalid value for access decoration");
 }
 
-TEST_F(ParserImplTest, VariableIdentDecl_AccessDecoIllegalValue) {
+// TODO(crbug.com/tint/846): Remove
+TEST_F(ParserImplTest, VariableIdentDecl_AccessDecoIllegalValue_DEPRECATED) {
   auto p = parser("my_var : [[access(1)]] S");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
-  ASSERT_EQ(p->error(), "1:19: expected identifier for access_type");
+  ASSERT_EQ(p->error(), "1:19: expected identifier for access control");
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_NonAccessDecoFail) {
@@ -240,27 +268,27 @@ TEST_F(ParserImplTest, VariableIdentDecl_NonAccessDecoFail) {
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_DecorationMissingRightBlock) {
-  auto p = parser("my_var : [[access(read) S");
+  auto p = parser("my_var : [[stride(4) S");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
-  ASSERT_EQ(p->error(), "1:25: expected ']]' for decoration list");
+  ASSERT_EQ(p->error(), "1:22: expected ']]' for decoration list");
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_DecorationMissingRightParen) {
-  auto p = parser("my_var : [[access(read]] S");
+  auto p = parser("my_var : [[stride(4]] S");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
-  ASSERT_EQ(p->error(), "1:23: expected ')' for access decoration");
+  ASSERT_EQ(p->error(), "1:20: expected ')' for stride decoration");
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_DecorationMissingLeftParen) {
-  auto p = parser("my_var : [[access read)]] S");
+  auto p = parser("my_var : [[stride 4)]] S");
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
-  ASSERT_EQ(p->error(), "1:19: expected '(' for access decoration");
+  ASSERT_EQ(p->error(), "1:19: expected '(' for stride decoration");
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_DecorationEmpty) {

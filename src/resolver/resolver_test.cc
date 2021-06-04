@@ -784,15 +784,15 @@ TEST_F(ResolverTest, Function_Parameters) {
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
   auto* s = Structure("S", {Member("m", ty.u32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* a = ty.access(ast::AccessControl::kRead, s);
 
   auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
   auto* out_var = Global("out_var", ty.f32(), ast::StorageClass::kOutput);
-  auto* sb_var = Global("sb_var", a, ast::StorageClass::kStorage,
-                        ast::DecorationList{
-                            create<ast::BindingDecoration>(0),
-                            create<ast::GroupDecoration>(0),
-                        });
+  auto* sb_var =
+      Global("sb_var", s, ast::StorageClass::kStorage, ast::Access::kRead,
+             ast::DecorationList{
+                 create<ast::BindingDecoration>(0),
+                 create<ast::GroupDecoration>(0),
+             });
   auto* wg_var = Global("wg_var", ty.f32(), ast::StorageClass::kWorkgroup);
   auto* priv_var = Global("priv_var", ty.f32(), ast::StorageClass::kPrivate);
 
@@ -823,15 +823,15 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
   auto* s = Structure("S", {Member("m", ty.u32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* a = ty.access(ast::AccessControl::kRead, s);
 
   auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
   auto* out_var = Global("out_var", ty.f32(), ast::StorageClass::kOutput);
-  auto* sb_var = Global("sb_var", a, ast::StorageClass::kStorage,
-                        ast::DecorationList{
-                            create<ast::BindingDecoration>(0),
-                            create<ast::GroupDecoration>(0),
-                        });
+  auto* sb_var =
+      Global("sb_var", s, ast::StorageClass::kStorage, ast::Access::kRead,
+             ast::DecorationList{
+                 create<ast::BindingDecoration>(0),
+                 create<ast::GroupDecoration>(0),
+             });
   auto* wg_var = Global("wg_var", ty.f32(), ast::StorageClass::kWorkgroup);
   auto* priv_var = Global("priv_var", ty.f32(), ast::StorageClass::kPrivate);
 
@@ -1757,8 +1757,7 @@ TEST_F(ResolverTest, StorageClass_SetForSampler) {
 
 TEST_F(ResolverTest, StorageClass_SetForTexture) {
   auto* t = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
-  auto* ac = ty.access(ast::AccessControl::kRead, t);
-  auto* var = Global("var", ac,
+  auto* var = Global("var", t,
                      ast::DecorationList{
                          create<ast::BindingDecoration>(0),
                          create<ast::GroupDecoration>(0),
@@ -1778,6 +1777,22 @@ TEST_F(ResolverTest, StorageClass_DoesNotSetOnConst) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   EXPECT_EQ(Sem().Get(var)->StorageClass(), ast::StorageClass::kNone);
+}
+
+TEST_F(ResolverTest, Access_SetForStorageBuffer) {
+  // [[block]] struct S { x : i32 };
+  // var<storage> g : S;
+  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
+                      {create<ast::StructBlockDecoration>()});
+  auto* var = Global(Source{{56, 78}}, "g", s, ast::StorageClass::kStorage,
+                     ast::DecorationList{
+                         create<ast::BindingDecoration>(0),
+                         create<ast::GroupDecoration>(0),
+                     });
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  EXPECT_EQ(Sem().Get(var)->Access(), ast::Access::kRead);
 }
 
 TEST_F(ResolverTest, Function_EntryPoints_StageDecoration) {

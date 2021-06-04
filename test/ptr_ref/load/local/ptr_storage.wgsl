@@ -4,7 +4,7 @@ struct S {
 };
 
 [[group(0), binding(0)]]
-var<storage> v : [[access(read_write)]] S;
+var<storage, read_write> v : S;
 
 [[stage(compute)]]
 fn main() {

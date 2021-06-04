@@ -1,0 +1,38 @@
+deprecated/access_deco/storage_texture.wgsl:1:84 warning: use of deprecated language feature: access control is expected as last parameter of storage textures
+[[group(0), binding(0)]] var tex : [[access(write)]] texture_storage_2d<rgba32float>;
+                                                                                   ^
+
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 16
+; Schema: 0
+               OpCapability Shader
+               OpCapability ImageQuery
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %tex "tex"
+               OpName %main "main"
+               OpName %x "x"
+               OpDecorate %tex NonReadable
+               OpDecorate %tex DescriptorSet 0
+               OpDecorate %tex Binding 0
+      %float = OpTypeFloat 32
+          %3 = OpTypeImage %float 2D 0 0 0 2 Rgba32f
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+        %tex = OpVariable %_ptr_UniformConstant_3 UniformConstant
+       %void = OpTypeVoid
+          %5 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+%_ptr_Function_v2int = OpTypePointer Function %v2int
+         %15 = OpConstantNull %v2int
+       %main = OpFunction %void None %5
+          %8 = OpLabel
+          %x = OpVariable %_ptr_Function_v2int Function %15
+         %12 = OpLoad %3 %tex
+          %9 = OpImageQuerySize %v2int %12
+               OpStore %x %9
+               OpReturn
+               OpFunctionEnd

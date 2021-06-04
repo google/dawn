@@ -172,13 +172,12 @@ TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalArray) {
 TEST_F(ResolverStorageClassUseTest, StructMultipleStorageClassUses) {
   auto* s = Structure("S", {Member("a", ty.f32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* ac = ty.access(ast::AccessControl::kRead, s);
   Global("x", s, ast::StorageClass::kUniform,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });
-  Global("y", ac, ast::StorageClass::kStorage,
+  Global("y", s, ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(1),
              create<ast::GroupDecoration>(0),

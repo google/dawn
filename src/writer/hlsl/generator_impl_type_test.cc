@@ -38,7 +38,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Array) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone,
-                           ast::AccessControl::kReadWrite, "ary"))
+                           ast::Access::kReadWrite, "ary"))
       << gen.error();
   EXPECT_EQ(result(), "bool ary[4]");
 }
@@ -50,7 +50,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone,
-                           ast::AccessControl::kReadWrite, "ary"))
+                           ast::Access::kReadWrite, "ary"))
       << gen.error();
   EXPECT_EQ(result(), "bool ary[5][4]");
 }
@@ -64,7 +64,7 @@ TEST_F(HlslGeneratorImplTest_Type,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone,
-                           ast::AccessControl::kReadWrite, "ary"))
+                           ast::Access::kReadWrite, "ary"))
       << gen.error();
   EXPECT_EQ(result(), "bool ary[5][4][1]");
 }
@@ -76,7 +76,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone,
-                           ast::AccessControl::kReadWrite, "ary"))
+                           ast::Access::kReadWrite, "ary"))
       << gen.error();
   EXPECT_EQ(result(), "bool ary[6][5][4]");
 }
@@ -88,7 +88,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Array_WithoutName) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone,
-                           ast::AccessControl::kReadWrite, ""))
+                           ast::Access::kReadWrite, ""))
       << gen.error();
   EXPECT_EQ(result(), "bool[4]");
 }
@@ -100,7 +100,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_RuntimeArray) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone,
-                           ast::AccessControl::kReadWrite, "ary"))
+                           ast::Access::kReadWrite, "ary"))
       << gen.error();
   EXPECT_EQ(result(), "bool ary[]");
 }
@@ -111,7 +111,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Bool) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(out, bool_, ast::StorageClass::kNone,
-                           ast::AccessControl::kReadWrite, ""))
+                           ast::Access::kReadWrite, ""))
       << gen.error();
   EXPECT_EQ(result(), "bool");
 }
@@ -122,7 +122,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_F32) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(out, f32, ast::StorageClass::kNone,
-                           ast::AccessControl::kReadWrite, ""))
+                           ast::Access::kReadWrite, ""))
       << gen.error();
   EXPECT_EQ(result(), "float");
 }
@@ -133,7 +133,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_I32) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(out, i32, ast::StorageClass::kNone,
-                           ast::AccessControl::kReadWrite, ""))
+                           ast::Access::kReadWrite, ""))
       << gen.error();
   EXPECT_EQ(result(), "int");
 }
@@ -146,7 +146,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Matrix) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(out, mat2x3, ast::StorageClass::kNone,
-                           ast::AccessControl::kReadWrite, ""))
+                           ast::Access::kReadWrite, ""))
       << gen.error();
   EXPECT_EQ(result(), "float2x3");
 }
@@ -159,7 +159,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Pointer) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(out, p, ast::StorageClass::kNone,
-                           ast::AccessControl::kReadWrite, ""))
+                           ast::Access::kReadWrite, ""))
       << gen.error();
   EXPECT_EQ(result(), "float*");
 }
@@ -189,8 +189,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
                           Member("b", ty.f32()),
                       },
                       {create<ast::StructBlockDecoration>()});
-  Global("g", ty.access(ast::AccessControl::kReadWrite, s),
-         ast::StorageClass::kStorage,
+  Global("g", s, ast::StorageClass::kStorage, ast::Access::kReadWrite,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -214,7 +213,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
 
   auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
   ASSERT_TRUE(gen.EmitType(out, sem_s, ast::StorageClass::kNone,
-                           ast::AccessControl::kReadWrite, ""))
+                           ast::Access::kReadWrite, ""))
       << gen.error();
   EXPECT_EQ(result(), "S");
 }
@@ -234,7 +233,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
 
   auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
   ASSERT_TRUE(gen.EmitType(out, sem_s, ast::StorageClass::kNone,
-                           ast::AccessControl::kReadWrite, ""))
+                           ast::Access::kReadWrite, ""))
       << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
   int a;
@@ -290,7 +289,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_U32) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(out, u32, ast::StorageClass::kNone,
-                           ast::AccessControl::kReadWrite, ""))
+                           ast::Access::kReadWrite, ""))
       << gen.error();
   EXPECT_EQ(result(), "uint");
 }
@@ -302,7 +301,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Vector) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(out, vec3, ast::StorageClass::kNone,
-                           ast::AccessControl::kReadWrite, ""))
+                           ast::Access::kReadWrite, ""))
       << gen.error();
   EXPECT_EQ(result(), "float3");
 }
@@ -313,7 +312,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Void) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(out, void_, ast::StorageClass::kNone,
-                           ast::AccessControl::kReadWrite, ""))
+                           ast::Access::kReadWrite, ""))
       << gen.error();
   EXPECT_EQ(result(), "void");
 }
@@ -324,7 +323,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitSampler) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(out, sampler, ast::StorageClass::kNone,
-                           ast::AccessControl::kReadWrite, ""))
+                           ast::Access::kReadWrite, ""))
       << gen.error();
   EXPECT_EQ(result(), "SamplerState");
 }
@@ -335,7 +334,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitSamplerComparison) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(out, sampler, ast::StorageClass::kNone,
-                           ast::AccessControl::kReadWrite, ""))
+                           ast::Access::kReadWrite, ""))
       << gen.error();
   EXPECT_EQ(result(), "SamplerComparisonState");
 }
@@ -354,7 +353,7 @@ TEST_P(HlslDepthTexturesTest, Emit) {
 
   auto* t = ty.depth_texture(params.dim);
 
-  Global("tex", t, ast::StorageClass::kNone, nullptr,
+  Global("tex", t,
          ast::DecorationList{
              create<ast::BindingDecoration>(1),
              create<ast::GroupDecoration>(2),
@@ -413,7 +412,7 @@ TEST_P(HlslSampledTexturesTest, Emit) {
   }
   auto* t = ty.sampled_texture(params.dim, datatype);
 
-  Global("tex", t, ast::StorageClass::kNone, nullptr,
+  Global("tex", t,
          ast::DecorationList{
              create<ast::BindingDecoration>(1),
              create<ast::GroupDecoration>(2),
@@ -532,7 +531,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitMultisampledTexture) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(out, s, ast::StorageClass::kNone,
-                           ast::AccessControl::kReadWrite, ""))
+                           ast::Access::kReadWrite, ""))
       << gen.error();
   EXPECT_EQ(result(), "Texture2DMS<float4>");
 }
@@ -552,11 +551,11 @@ using HlslStorageTexturesTest = TestParamHelper<HlslStorageTextureData>;
 TEST_P(HlslStorageTexturesTest, Emit) {
   auto params = GetParam();
 
-  auto* t = ty.storage_texture(params.dim, params.imgfmt);
-  auto* ac = ty.access(
-      params.ro ? ast::AccessControl::kRead : ast::AccessControl::kWrite, t);
+  auto* t =
+      ty.storage_texture(params.dim, params.imgfmt,
+                         params.ro ? ast::Access::kRead : ast::Access::kWrite);
 
-  Global("tex", ac, ast::StorageClass::kNone, nullptr,
+  Global("tex", t,
          ast::DecorationList{
              create<ast::BindingDecoration>(1),
              create<ast::GroupDecoration>(2),

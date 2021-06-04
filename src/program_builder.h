@@ -101,11 +101,13 @@ class ProgramBuilder {
     ~VarOptionals();
 
     ast::StorageClass storage = ast::StorageClass::kNone;
+    ast::Access access = ast::Access::kUndefined;
     ast::Expression* constructor = nullptr;
     ast::DecorationList decorations = {};
 
    private:
     void Set(ast::StorageClass sc) { storage = sc; }
+    void Set(ast::Access ac) { access = ac; }
     void Set(ast::Expression* c) { constructor = c; }
     void Set(const ast::DecorationList& l) { decorations = l; }
 
@@ -708,29 +710,6 @@ class ProgramBuilder {
       return builder->create<ast::Alias>(source, sym, type);
     }
 
-    /// Creates an access control qualifier type
-    /// @param access the access control
-    /// @param type the inner type
-    /// @returns the access control qualifier type
-    ast::AccessControl* access(ast::AccessControl::Access access,
-                               const ast::Type* type) const {
-      type = MaybeCreateTypename(type);
-      return type ? builder->create<ast::AccessControl>(access, type) : nullptr;
-    }
-
-    /// Creates an access control qualifier type
-    /// @param source the Source of the node
-    /// @param access the access control
-    /// @param type the inner type
-    /// @returns the access control qualifier type
-    ast::AccessControl* access(const Source& source,
-                               ast::AccessControl::Access access,
-                               const ast::Type* type) const {
-      type = MaybeCreateTypename(type);
-      return type ? builder->create<ast::AccessControl>(source, access, type)
-                  : nullptr;
-    }
-
     /// @param type the type of the pointer
     /// @param storage_class the storage class of the pointer
     /// @return the pointer to `type` with the given ast::StorageClass
@@ -823,23 +802,28 @@ class ProgramBuilder {
 
     /// @param dims the dimensionality of the texture
     /// @param format the image format of the texture
+    /// @param access the access control of the texture
     /// @returns the storage texture
     ast::StorageTexture* storage_texture(ast::TextureDimension dims,
-                                         ast::ImageFormat format) const {
+                                         ast::ImageFormat format,
+                                         ast::Access access) const {
       auto* subtype = ast::StorageTexture::SubtypeFor(format, *builder);
-      return builder->create<ast::StorageTexture>(dims, format, subtype);
+      return builder->create<ast::StorageTexture>(dims, format, subtype,
+                                                  access);
     }
 
     /// @param source the Source of the node
     /// @param dims the dimensionality of the texture
     /// @param format the image format of the texture
+    /// @param access the access control of the texture
     /// @returns the storage texture
     ast::StorageTexture* storage_texture(const Source& source,
                                          ast::TextureDimension dims,
-                                         ast::ImageFormat format) const {
+                                         ast::ImageFormat format,
+                                         ast::Access access) const {
       auto* subtype = ast::StorageTexture::SubtypeFor(format, *builder);
-      return builder->create<ast::StorageTexture>(source, dims, format,
-                                                  subtype);
+      return builder->create<ast::StorageTexture>(source, dims, format, subtype,
+                                                  access);
     }
 
     /// @returns the external texture
@@ -1216,6 +1200,7 @@ class ProgramBuilder {
   /// @param optional the optional variable settings.
   /// Can be any of the following, in any order:
   ///   * ast::StorageClass   - specifies the variable storage class
+  ///   * ast::Access         - specifies the variable's access control
   ///   * ast::Expression*    - specifies the variable's initializer expression
   ///   * ast::DecorationList - specifies the variable's decorations
   /// Note that repeated arguments of the same type will use the last argument's
@@ -1229,7 +1214,7 @@ class ProgramBuilder {
     type = ty.MaybeCreateTypename(type);
     VarOptionals opts(std::forward<OPTIONAL>(optional)...);
     return create<ast::Variable>(Sym(std::forward<NAME>(name)), opts.storage,
-                                 type, false, opts.constructor,
+                                 opts.access, type, false, opts.constructor,
                                  std::move(opts.decorations));
   }
 
@@ -1239,6 +1224,7 @@ class ProgramBuilder {
   /// @param optional the optional variable settings.
   /// Can be any of the following, in any order:
   ///   * ast::StorageClass   - specifies the variable storage class
+  ///   * ast::Access         - specifies the variable's access control
   ///   * ast::Expression*    - specifies the variable's initializer expression
   ///   * ast::DecorationList - specifies the variable's decorations
   /// Note that repeated arguments of the same type will use the last argument's
@@ -1252,8 +1238,8 @@ class ProgramBuilder {
     type = ty.MaybeCreateTypename(type);
     VarOptionals opts(std::forward<OPTIONAL>(optional)...);
     return create<ast::Variable>(source, Sym(std::forward<NAME>(name)),
-                                 opts.storage, type, false, opts.constructor,
-                                 std::move(opts.decorations));
+                                 opts.storage, opts.access, type, false,
+                                 opts.constructor, std::move(opts.decorations));
   }
 
   /// @param name the variable name
@@ -1267,9 +1253,9 @@ class ProgramBuilder {
                        ast::Expression* constructor,
                        ast::DecorationList decorations = {}) {
     type = ty.MaybeCreateTypename(type);
-    return create<ast::Variable>(Sym(std::forward<NAME>(name)),
-                                 ast::StorageClass::kNone, type, true,
-                                 constructor, decorations);
+    return create<ast::Variable>(
+        Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
+        ast::Access::kUndefined, type, true, constructor, decorations);
   }
 
   /// @param source the variable source
@@ -1285,9 +1271,9 @@ class ProgramBuilder {
                        ast::Expression* constructor,
                        ast::DecorationList decorations = {}) {
     type = ty.MaybeCreateTypename(type);
-    return create<ast::Variable>(source, Sym(std::forward<NAME>(name)),
-                                 ast::StorageClass::kNone, type, true,
-                                 constructor, decorations);
+    return create<ast::Variable>(
+        source, Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
+        ast::Access::kUndefined, type, true, constructor, decorations);
   }
 
   /// @param name the parameter name
@@ -1299,9 +1285,9 @@ class ProgramBuilder {
                        ast::Type* type,
                        ast::DecorationList decorations = {}) {
     type = ty.MaybeCreateTypename(type);
-    return create<ast::Variable>(Sym(std::forward<NAME>(name)),
-                                 ast::StorageClass::kNone, type, true, nullptr,
-                                 decorations);
+    return create<ast::Variable>(
+        Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
+        ast::Access::kUndefined, type, true, nullptr, decorations);
   }
 
   /// @param source the parameter source
@@ -1315,9 +1301,9 @@ class ProgramBuilder {
                        ast::Type* type,
                        ast::DecorationList decorations = {}) {
     type = ty.MaybeCreateTypename(type);
-    return create<ast::Variable>(source, Sym(std::forward<NAME>(name)),
-                                 ast::StorageClass::kNone, type, true, nullptr,
-                                 decorations);
+    return create<ast::Variable>(
+        source, Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
+        ast::Access::kUndefined, type, true, nullptr, decorations);
   }
 
   /// @param name the variable name
@@ -1325,6 +1311,7 @@ class ProgramBuilder {
   /// @param optional the optional variable settings.
   /// Can be any of the following, in any order:
   ///   * ast::StorageClass   - specifies the variable storage class
+  ///   * ast::Access         - specifies the variable's access control
   ///   * ast::Expression*    - specifies the variable's initializer expression
   ///   * ast::DecorationList - specifies the variable's decorations
   /// Note that repeated arguments of the same type will use the last argument's
@@ -1347,6 +1334,7 @@ class ProgramBuilder {
   /// @param optional the optional variable settings.
   /// Can be any of the following, in any order:
   ///   * ast::StorageClass   - specifies the variable storage class
+  ///   * ast::Access         - specifies the variable's access control
   ///   * ast::Expression*    - specifies the variable's initializer expression
   ///   * ast::DecorationList - specifies the variable's decorations
   /// Note that repeated arguments of the same type will use the last argument's

@@ -156,14 +156,14 @@ TEST_F(ResolverAssignmentValidationTest, AssignToConstant_Fail) {
 }
 
 TEST_F(ResolverAssignmentValidationTest, AssignNonStorable_Fail) {
-  // var a : [[access(read)]] texture_storage_1d<rgba8unorm>;
-  // var b : [[access(read)]] texture_storage_1d<rgba8unorm>;
+  // var a : texture_storage_1d<rgba8unorm, read>;
+  // var b : texture_storage_1d<rgba8unorm, read>;
   // a = b;
 
   auto make_type = [&] {
-    auto* tex_type = ty.storage_texture(ast::TextureDimension::k1d,
-                                        ast::ImageFormat::kRgba8Unorm);
-    return ty.access(ast::AccessControl::kRead, tex_type);
+    return ty.storage_texture(ast::TextureDimension::k1d,
+                              ast::ImageFormat::kRgba8Unorm,
+                              ast::Access::kRead);
   };
 
   Global("a", make_type(), ast::StorageClass::kNone,
@@ -182,7 +182,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonStorable_Fail) {
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
-      R"(12:34 error: '[[access(read)]] texture_storage_1d<rgba8unorm>' is not storable)");
+      R"(12:34 error: 'texture_storage_1d<rgba8unorm, read>' is not storable)");
 }
 
 }  // namespace

@@ -23,7 +23,7 @@ namespace ast {
 
 AccessDecoration::AccessDecoration(ProgramID program_id,
                                    const Source& source,
-                                   AccessControl::Access val)
+                                   Access val)
     : Base(program_id, source), value_(val) {}
 
 AccessDecoration::~AccessDecoration() = default;

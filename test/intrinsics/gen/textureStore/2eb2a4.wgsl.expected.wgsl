@@ -1,4 +1,4 @@
-[[group(1), binding(0)]] var arg_0 : [[access(write)]] texture_storage_1d<rgba16uint>;
+[[group(1), binding(0)]] var arg_0 : texture_storage_1d<rgba16uint, write>;
 
 fn textureStore_2eb2a4() {
   textureStore(arg_0, 1, vec4<u32>());

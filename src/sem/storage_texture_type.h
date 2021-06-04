@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/ast/access_control.h"
+#include "src/ast/access.h"
 #include "src/ast/storage_texture.h"
 #include "src/sem/texture_type.h"
 
@@ -32,11 +32,11 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
   /// Constructor
   /// @param dim the dimensionality of the texture
   /// @param format the image format of the texture
-  /// @param access_control the access control type of the texture
+  /// @param access the access control type of the texture
   /// @param subtype the storage subtype. Use SubtypeFor() to calculate this.
   StorageTexture(ast::TextureDimension dim,
                  ast::ImageFormat format,
-                 ast::AccessControl::Access access_control,
+                 ast::Access access,
                  sem::Type* subtype);
 
   /// Move constructor
@@ -50,7 +50,7 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
   ast::ImageFormat image_format() const { return image_format_; }
 
   /// @returns the access control
-  ast::AccessControl::Access access_control() const { return access_control_; }
+  ast::Access access() const { return access_; }
 
   /// @returns the name for this type
   std::string type_name() const override;
@@ -67,7 +67,7 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
 
  private:
   ast::ImageFormat const image_format_;
-  ast::AccessControl::Access const access_control_;
+  ast::Access const access_;
   Type* const subtype_;
 };
 

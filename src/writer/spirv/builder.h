@@ -263,9 +263,9 @@ class Builder {
   /// @param type the type to generate for
   /// @param struct_id the struct id
   /// @param member_idx the member index
-  void GenerateMemberAccessControlIfNeeded(const sem::Type* type,
-                                           uint32_t struct_id,
-                                           uint32_t member_idx);
+  void GenerateMemberAccessIfNeeded(const sem::Type* type,
+                                    uint32_t struct_id,
+                                    uint32_t member_idx);
   /// Generates a function variable
   /// @param var the variable
   /// @returns true if the variable was generated

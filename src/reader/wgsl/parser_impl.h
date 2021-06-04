@@ -22,7 +22,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/ast/access_control.h"
+#include "src/ast/access.h"
 #include "src/program_builder.h"
 #include "src/reader/wgsl/parser_impl_detail.h"
 #include "src/reader/wgsl/token.h"
@@ -208,14 +208,20 @@ class ParserImpl {
     TypedIdentifier(const TypedIdentifier& other);
     /// Constructor
     /// @param type_in parsed type
+    /// @param access_in parsed access
     /// @param name_in parsed identifier
     /// @param source_in source to the identifier
-    TypedIdentifier(ast::Type* type_in, std::string name_in, Source source_in);
+    TypedIdentifier(ast::Type* type_in,
+                    ast::Access access_in,
+                    std::string name_in,
+                    Source source_in);
     /// Destructor
     ~TypedIdentifier();
 
     /// Parsed type. May be nullptr for inferred types.
     ast::Type* type = nullptr;
+    /// The access control. TODO(crbug.com/tint/846): Remove
+    ast::Access access = ast::Access::kUndefined;
     /// Parsed identifier.
     std::string name;
     /// Source to the identifier.
@@ -270,10 +276,12 @@ class ParserImpl {
     /// @param source_in variable declaration source
     /// @param name_in variable name
     /// @param storage_class_in variable storage class
+    /// @param access_in variable access control
     /// @param type_in variable type
     VarDeclInfo(Source source_in,
                 std::string name_in,
                 ast::StorageClass storage_class_in,
+                ast::Access access_in,
                 ast::Type* type_in);
     /// Destructor
     ~VarDeclInfo();
@@ -283,9 +291,19 @@ class ParserImpl {
     /// Variable name
     std::string name;
     /// Variable storage class
-    ast::StorageClass storage_class;
+    ast::StorageClass storage_class = ast::StorageClass::kNone;
+    /// Variable access control
+    ast::Access access = ast::Access::kUndefined;
     /// Variable type
     ast::Type* type = nullptr;
+  };
+
+  /// VariableQualifier contains the parsed information for a variable qualifier
+  struct VariableQualifier {
+    /// The variable's storage class
+    ast::StorageClass storage_class = ast::StorageClass::kNone;
+    /// The variable's access control
+    ast::Access access = ast::Access::kUndefined;
   };
 
   /// Creates a new parser using the given file
@@ -400,9 +418,9 @@ class ParserImpl {
   Expect<TypedIdentifier> expect_variable_ident_decl(
       const std::string& use,
       bool allow_inferred = false);
-  /// Parses a `variable_storage_decoration` grammar element
-  /// @returns the storage class or StorageClass::kNone if none matched
-  Maybe<ast::StorageClass> variable_storage_decoration();
+  /// Parses a `variable_qualifier` grammar element
+  /// @returns the variable qualifier information
+  Maybe<VariableQualifier> variable_qualifier();
   /// Parses a `type_alias` grammar element
   /// @returns the type alias or nullptr on error
   Maybe<ast::Alias*> type_alias();
@@ -438,8 +456,10 @@ class ParserImpl {
   /// @returns the parsed function, nullptr otherwise
   Maybe<ast::Function*> function_decl(ast::DecorationList& decos);
   /// Parses a `texture_sampler_types` grammar element
+  /// TODO(crbug.com/tint/864): Remove decos parameter
+  /// @param decos the list of decorations for the type declaration.
   /// @returns the parsed Type or nullptr if none matched.
-  Maybe<ast::Type*> texture_sampler_types();
+  Maybe<ast::Type*> texture_sampler_types(ast::DecorationList& decos);
   /// Parses a `sampler_type` grammar element
   /// @returns the parsed Type or nullptr if none matched.
   Maybe<ast::Type*> sampler_type();
@@ -477,10 +497,11 @@ class ParserImpl {
   /// not match a stage name.
   /// @returns the pipeline stage.
   Expect<ast::PipelineStage> expect_pipeline_stage();
-  /// Parses an access type identifier, erroring if the next token does not
-  /// match a valid access type name.
+  /// Parses an access control identifier, erroring if the next token does not
+  /// match a valid access control.
+  /// @param use a description of what was being parsed if an error was raised
   /// @returns the parsed access control.
-  Expect<ast::AccessControl::Access> expect_access_type();
+  Expect<ast::Access> expect_access(const std::string& use);
   /// Parses a builtin identifier, erroring if the next token does not match a
   /// valid builtin name.
   /// @returns the parsed builtin.

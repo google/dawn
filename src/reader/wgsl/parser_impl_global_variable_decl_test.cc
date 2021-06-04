@@ -165,7 +165,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidVariableDecl) {
   EXPECT_TRUE(e.errored);
   EXPECT_FALSE(e.matched);
   EXPECT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:5: invalid storage class for variable decoration");
+  EXPECT_EQ(p->error(), "1:5: invalid storage class for variable declaration");
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_StorageClassIn_Deprecated) {

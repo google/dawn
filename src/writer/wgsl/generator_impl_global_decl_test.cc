@@ -116,7 +116,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Sampler) {
 
 TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
   auto* st = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
-  Global("t", ty.access(ast::AccessControl::kRead, st),
+  Global("t", st,
          ast::DecorationList{
              create<ast::GroupDecoration>(0),
              create<ast::BindingDecoration>(0),
@@ -127,9 +127,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(
-      gen.result(),
-      "  [[group(0), binding(0)]] var t : [[access(read)]] texture_1d<f32>;\n");
+  EXPECT_EQ(gen.result(),
+            "  [[group(0), binding(0)]] var t : texture_1d<f32>;\n");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_OverridableConstants) {

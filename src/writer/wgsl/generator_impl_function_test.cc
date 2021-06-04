@@ -175,9 +175,7 @@ TEST_F(WgslGeneratorImplTest,
   auto* s = Structure("Data", {Member("d", ty.f32())},
                       {create<ast::StructBlockDecoration>()});
 
-  auto* ac = ty.access(ast::AccessControl::kReadWrite, s);
-
-  Global("data", ac, ast::StorageClass::kStorage, nullptr,
+  Global("data", s, ast::StorageClass::kStorage, ast::Access::kReadWrite,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -219,7 +217,7 @@ struct Data {
   d : f32;
 };
 
-[[binding(0), group(0)]] var<storage> data : [[access(read_write)]] Data;
+[[binding(0), group(0)]] var<storage, read_write> data : Data;
 
 [[stage(compute)]]
 fn a() {

@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <limits>
 
-#include "src/ast/access_control.h"
+#include "src/ast/access.h"
 #include "src/ast/alias.h"
 #include "src/ast/array.h"
 #include "src/ast/bool.h"
@@ -355,25 +355,26 @@ bool GeneratorImpl::EmitImageFormat(const ast::ImageFormat fmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitType(const ast::Type* ty) {
-  if (auto* ac = ty->As<ast::AccessControl>()) {
-    out_ << "[[access(";
-    if (ac->IsReadOnly()) {
+bool GeneratorImpl::EmitAccess(const ast::Access access) {
+  switch (access) {
+    case ast::Access::kRead:
       out_ << "read";
-    } else if (ac->IsWriteOnly()) {
+      return true;
+    case ast::Access::kWrite:
       out_ << "write";
-    } else if (ac->IsReadWrite()) {
+      return true;
+    case ast::Access::kReadWrite:
       out_ << "read_write";
-    } else {
-      diagnostics_.add_error("invalid access control");
-      return false;
-    }
-    out_ << ")]] ";
-    if (!EmitType(ac->type())) {
-      return false;
-    }
-    return true;
-  } else if (auto* alias = ty->As<ast::Alias>()) {
+      return true;
+    default:
+      break;
+  }
+  diagnostics_.add_error("unknown access");
+  return false;
+}
+
+bool GeneratorImpl::EmitType(const ast::Type* ty) {
+  if (auto* alias = ty->As<ast::Alias>()) {
     out_ << program_->Symbols().NameFor(alias->symbol());
   } else if (auto* ary = ty->As<ast::Array>()) {
     for (auto* deco : ary->decorations()) {
@@ -475,6 +476,10 @@ bool GeneratorImpl::EmitType(const ast::Type* ty) {
     } else if (auto* storage = texture->As<ast::StorageTexture>()) {
       out_ << "<";
       if (!EmitImageFormat(storage->image_format())) {
+        return false;
+      }
+      out_ << ", ";
+      if (!EmitAccess(storage->access())) {
         return false;
       }
       out_ << ">";
@@ -580,8 +585,16 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
   } else {
     out_ << "var";
     auto sc = var->declared_storage_class();
-    if (sc != ast::StorageClass::kNone) {
-      out_ << "<" << sc << ">";
+    auto ac = var->declared_access();
+    if (sc != ast::StorageClass::kNone || ac != ast::Access::kUndefined) {
+      out_ << "<" << sc;
+      if (ac != ast::Access::kUndefined) {
+        out_ << ", ";
+        if (!EmitAccess(ac)) {
+          return false;
+        }
+      }
+      out_ << ">";
     }
   }
 

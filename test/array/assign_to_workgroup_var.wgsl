@@ -8,7 +8,7 @@ struct S {
 var<private> src_private : ArrayType;
 var<workgroup> src_workgroup : ArrayType;
 [[group(0), binding(0)]] var<uniform> src_uniform : S;
-[[group(0), binding(1)]] var<storage> src_storage : [[access(read_write)]] S;
+[[group(0), binding(1)]] var<storage, read_write> src_storage : S;
 
 var<workgroup> dst : ArrayType;
 var<workgroup> dst_nested : array<array<array<i32, 2>, 3>, 4>;

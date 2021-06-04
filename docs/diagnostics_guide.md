@@ -96,21 +96,21 @@ analysis, but can also greatly aid simple diagnostics like symbol collision erro
 **Don't:**
 
 ```
-shader.wgsl:7:1 error: the originating variable of the left-hand side must not have an access(read) access attribute.
+shader.wgsl:7:1 error: the originating variable of the left-hand side of an assignment expression must not be declared with read access control.
 ```
 
 **Do:**
 
 ```
-shader.wgsl:7:1 error: cannot assign to variable with [[access(read)]] decoration
+shader.wgsl:7:1 error: cannot assign to variable with read access control
 
-x = 1;
-^
+x.y = 1;
+^^^^^^^
 
-shader.wgsl:2:8 note: [[access(read)]] declared here
+shader.wgsl:2:8 note: read access control declared here
 
-var x : [[access(read)]] i32;
-        ^^^^^^^^^^^^^^^^
+var<storage, read> x : i32;
+             ^^^^
 ```
 
 **Justification:**

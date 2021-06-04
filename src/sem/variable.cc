@@ -26,11 +26,11 @@ namespace sem {
 Variable::Variable(const ast::Variable* declaration,
                    const sem::Type* type,
                    ast::StorageClass storage_class,
-                   ast::AccessControl::Access access_control)
+                   ast::Access access)
     : declaration_(declaration),
       type_(type),
       storage_class_(storage_class),
-      access_control_(access_control),
+      access_(access),
       is_pipeline_constant_(false) {}
 
 Variable::Variable(const ast::Variable* declaration,
@@ -39,7 +39,7 @@ Variable::Variable(const ast::Variable* declaration,
     : declaration_(declaration),
       type_(type),
       storage_class_(ast::StorageClass::kNone),
-      access_control_(ast::AccessControl::kReadWrite),
+      access_(ast::Access::kReadWrite),
       is_pipeline_constant_(true),
       constant_id_(constant_id) {}
 

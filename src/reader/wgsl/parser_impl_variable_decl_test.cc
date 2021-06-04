@@ -87,7 +87,7 @@ TEST_F(ParserImplTest, VariableDecl_InvalidStorageClass) {
   EXPECT_FALSE(v.matched);
   EXPECT_TRUE(v.errored);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:5: invalid storage class for variable decoration");
+  EXPECT_EQ(p->error(), "1:5: invalid storage class for variable declaration");
 }
 
 }  // namespace

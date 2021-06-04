@@ -220,6 +220,7 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
       VariableConst{
         leaf_result
         none
+        undefined
         __u32
         {
           Call[not set]{
@@ -243,6 +244,7 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
       VariableConst{
         branch_result
         none
+        undefined
         __u32
         {
           Call[not set]{
@@ -307,16 +309,19 @@ TEST_F(SpvParserTest, EmitFunctions_MixedParamTypes) {
     VariableConst{
       a
       none
+      undefined
       __u32
     }
     VariableConst{
       b
       none
+      undefined
       __f32
     }
     VariableConst{
       c
       none
+      undefined
       __i32
     }
   )
@@ -347,16 +352,19 @@ TEST_F(SpvParserTest, EmitFunctions_GenerateParamNames) {
     VariableConst{
       x_14
       none
+      undefined
       __u32
     }
     VariableConst{
       x_15
       none
+      undefined
       __f32
     }
     VariableConst{
       x_16
       none
+      undefined
       __i32
     }
   )

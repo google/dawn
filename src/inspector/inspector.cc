@@ -641,7 +641,7 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
     auto* var = rsv.first;
     auto binding_info = rsv.second;
 
-    if (read_only != (var->AccessControl() == ast::AccessControl::kRead)) {
+    if (read_only != (var->Access() == ast::Access::kRead)) {
       continue;
     }
 
@@ -723,8 +723,7 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
 
     auto* texture_type = var->Type()->UnwrapRef()->As<sem::StorageTexture>();
 
-    if (read_only !=
-        (texture_type->access_control() == ast::AccessControl::kRead)) {
+    if (read_only != (texture_type->access() == ast::Access::kRead)) {
       continue;
     }
 

@@ -98,9 +98,7 @@ class HlslGeneratorImplTest_MemberAccessorBase : public BASE {
     auto* s =
         b.Structure("Data", members, {b.create<ast::StructBlockDecoration>()});
 
-    auto* ac_ty = b.ty.access(ast::AccessControl::kReadWrite, s);
-
-    b.Global("data", ac_ty, ast::StorageClass::kStorage, nullptr,
+    b.Global("data", s, ast::StorageClass::kStorage, ast::Access::kReadWrite,
              ast::DecorationList{
                  b.create<ast::BindingDecoration>(0),
                  b.create<ast::GroupDecoration>(1),

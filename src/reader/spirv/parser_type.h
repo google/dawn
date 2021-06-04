@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-#include "src/ast/access_control.h"
+#include "src/ast/access.h"
 #include "src/ast/sampler.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/storage_texture.h"
@@ -55,9 +55,6 @@ class Type : public Castable<Type> {
 
   /// @returns the inner most aliased type if this is an alias, `this` otherwise
   const Type* UnwrapAlias() const;
-
-  /// @returns the type with all aliasing and access control removed
-  const Type* UnwrapAliasAndAccess() const;
 
   /// @returns the type with all aliasing, access control and pointers removed
   const Type* UnwrapAll() const;
@@ -290,33 +287,6 @@ struct Array : public Castable<Array, Type> {
   uint32_t const stride;
 };
 
-/// `[[access]]` type
-struct AccessControl : public Castable<AccessControl, Type> {
-  /// Constructor
-  /// @param ty the inner type
-  /// @param ac the access control
-  AccessControl(const Type* ty, ast::AccessControl::Access ac);
-
-  /// Copy constructor
-  /// @param other the other type to copy
-  AccessControl(const AccessControl& other);
-
-  /// @return the
-  /// @param b the ProgramBuilder used to construct the AST types
-  /// @returns the constructed ast::Type node for the given type
-  ast::Type* Build(ProgramBuilder& b) const override;
-
-#ifndef NDEBUG
-  /// @returns a string representation of the type, for debug purposes only
-  std::string String() const override;
-#endif  // NDEBUG
-
-  /// the inner type
-  Type const* const type;
-  /// the access control
-  ast::AccessControl::Access const access;
-};
-
 /// `sampler` type
 struct Sampler : public Castable<Sampler, Type> {
   /// Constructor
@@ -427,7 +397,8 @@ struct StorageTexture : public Castable<StorageTexture, Texture> {
   /// Constructor
   /// @param d the texture dimensions
   /// @param f the storage image format
-  StorageTexture(ast::TextureDimension d, ast::ImageFormat f);
+  /// @param a the access control
+  StorageTexture(ast::TextureDimension d, ast::ImageFormat f, ast::Access a);
 
   /// Copy constructor
   /// @param other the other type to copy
@@ -444,6 +415,9 @@ struct StorageTexture : public Castable<StorageTexture, Texture> {
 
   /// the storage image format
   ast::ImageFormat const format;
+
+  /// the access control
+  ast::Access const access;
 };
 
 /// Base class for named types
@@ -556,12 +530,6 @@ class TypeManager {
   /// @return a Array type. Repeated calls with the same arguments will return
   /// the same pointer.
   const spirv::Array* Array(const Type* el, uint32_t sz, uint32_t st);
-  /// @param ty the inner type
-  /// @param ac the access control
-  /// @return a AccessControl type. Repeated calls with the same arguments will
-  /// return the same pointer.
-  const spirv::AccessControl* AccessControl(const Type* ty,
-                                            ast::AccessControl::Access ac);
   /// @param n the alias name
   /// @param t the aliased type
   /// @return a Alias type. Repeated calls with the same arguments will return
@@ -594,10 +562,12 @@ class TypeManager {
                                               const Type* t);
   /// @param d the texture dimensions
   /// @param f the storage image format
+  /// @param a the access control
   /// @return a StorageTexture type. Repeated calls with the same arguments will
   /// return the same pointer.
   const spirv::StorageTexture* StorageTexture(ast::TextureDimension d,
-                                              ast::ImageFormat f);
+                                              ast::ImageFormat f,
+                                              ast::Access a);
 
  private:
   struct State;

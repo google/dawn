@@ -1,4 +1,4 @@
-[[group(1), binding(0)]] var arg_0 : [[access(write)]] texture_storage_3d<r32float>;
+[[group(1), binding(0)]] var arg_0 : texture_storage_3d<r32float, write>;
 
 fn textureDimensions_8028f3() {
   var res : vec3<i32> = textureDimensions(arg_0);

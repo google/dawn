@@ -86,6 +86,7 @@ TEST_F(SpvUnaryConversionTest, Bitcast_Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __u32
     {
       Bitcast[not set]<__u32>{
@@ -111,6 +112,7 @@ TEST_F(SpvUnaryConversionTest, Bitcast_Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__f32
     {
       Bitcast[not set]<__vec_2__f32>{
@@ -239,6 +241,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromSigned) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_1
     none
+    undefined
     __f32
     {
       TypeConstructor[not set]{
@@ -265,6 +268,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromUnsigned) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_1
     none
+    undefined
     __f32
     {
       TypeConstructor[not set]{
@@ -293,6 +297,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromSigned) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_1
     none
+    undefined
     __vec_2__f32
     {
       TypeConstructor[not set]{
@@ -319,6 +324,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromUnsigned) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_1
     none
+    undefined
     __vec_2__f32
     {
       TypeConstructor[not set]{
@@ -382,6 +388,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromSigned) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_1
     none
+    undefined
     __f32
     {
       TypeConstructor[not set]{
@@ -410,6 +417,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromUnsigned) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_1
     none
+    undefined
     __f32
     {
       TypeConstructor[not set]{
@@ -436,6 +444,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromSigned) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_1
     none
+    undefined
     __vec_2__f32
     {
       TypeConstructor[not set]{
@@ -464,6 +473,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromUnsigned) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_1
     none
+    undefined
     __vec_2__f32
     {
       TypeConstructor[not set]{
@@ -526,6 +536,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToSigned) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_1
     none
+    undefined
     __i32
     {
       TypeConstructor[not set]{
@@ -552,6 +563,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToUnsigned) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_1
     none
+    undefined
     __u32
     {
       Bitcast[not set]<__u32>{
@@ -580,6 +592,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToSigned) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_1
     none
+    undefined
     __vec_2__i32
     {
       TypeConstructor[not set]{
@@ -606,6 +619,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToUnsigned) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_1
     none
+    undefined
     __vec_2__u32
     {
       Bitcast[not set]<__vec_2__u32>{
@@ -686,6 +700,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToUnsigned) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_1
     none
+    undefined
     __u32
     {
       TypeConstructor[not set]{
@@ -728,6 +743,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToUnsigned) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_1
     none
+    undefined
     __vec_2__u32
     {
       TypeConstructor[not set]{
@@ -778,6 +794,7 @@ OpFunctionEnd
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
         x_82
         none
+        undefined
         __u32
         {
           TypeConstructor[not set]{

@@ -196,6 +196,7 @@ TEST_F(SpvModuleScopeVarParserTest, AnonWorkgroupVar) {
   Variable{
     x_52
     workgroup
+    undefined
     __f32
   })"));
 }
@@ -217,6 +218,7 @@ TEST_F(SpvModuleScopeVarParserTest, NamedWorkgroupVar) {
   Variable{
     the_counter
     workgroup
+    undefined
     __f32
   })"));
 }
@@ -238,6 +240,7 @@ TEST_F(SpvModuleScopeVarParserTest, PrivateVar) {
   Variable{
     my_own_private_idaho
     private
+    undefined
     __f32
   })"));
 }
@@ -267,6 +270,7 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinVertexIndex) {
     }
     x_52
     in
+    undefined
     __u32
   })"));
 }
@@ -322,6 +326,7 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_MapsToModuleScopeVec4Var) {
     }
     gl_Position
     out
+    undefined
     __vec_4__f32
   })"))
       << module_str;
@@ -547,6 +552,7 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Write1_IsErased) {
     }
     gl_Position
     out
+    undefined
     __vec_4__f32
   }
   Function main -> __void
@@ -601,6 +607,7 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_ReadReplaced) {
   Variable{
     x_900
     private
+    undefined
     __f32
   }
   Variable{
@@ -609,6 +616,7 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_ReadReplaced) {
     }
     gl_Position
     out
+    undefined
     __vec_4__f32
   }
   Function main -> __void
@@ -672,6 +680,7 @@ TEST_F(SpvModuleScopeVarParserTest,
     }
     gl_Position
     out
+    undefined
     __vec_4__f32
   }
   Function main -> __void
@@ -770,6 +779,7 @@ TEST_F(SpvModuleScopeVarParserTest,
   Variable{
     x_900
     private
+    undefined
     __f32
   }
   Function main -> __void
@@ -961,6 +971,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarInitializers) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_1
     private
+    undefined
     __bool
     {
       ScalarConstructor[not set]{true}
@@ -969,6 +980,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarInitializers) {
   Variable{
     x_2
     private
+    undefined
     __bool
     {
       ScalarConstructor[not set]{false}
@@ -977,6 +989,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarInitializers) {
   Variable{
     x_3
     private
+    undefined
     __i32
     {
       ScalarConstructor[not set]{-1}
@@ -985,6 +998,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarInitializers) {
   Variable{
     x_4
     private
+    undefined
     __u32
     {
       ScalarConstructor[not set]{1u}
@@ -993,6 +1007,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarInitializers) {
   Variable{
     x_5
     private
+    undefined
     __f32
     {
       ScalarConstructor[not set]{1.500000}
@@ -1018,6 +1033,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarNullInitializers) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_1
     private
+    undefined
     __bool
     {
       ScalarConstructor[not set]{false}
@@ -1026,6 +1042,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarNullInitializers) {
   Variable{
     x_2
     private
+    undefined
     __i32
     {
       ScalarConstructor[not set]{0}
@@ -1034,6 +1051,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarNullInitializers) {
   Variable{
     x_3
     private
+    undefined
     __u32
     {
       ScalarConstructor[not set]{0u}
@@ -1042,6 +1060,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarNullInitializers) {
   Variable{
     x_4
     private
+    undefined
     __f32
     {
       ScalarConstructor[not set]{0.000000}
@@ -1067,6 +1086,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarUndefInitializers) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_1
     private
+    undefined
     __bool
     {
       ScalarConstructor[not set]{false}
@@ -1075,6 +1095,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarUndefInitializers) {
   Variable{
     x_2
     private
+    undefined
     __i32
     {
       ScalarConstructor[not set]{0}
@@ -1083,6 +1104,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarUndefInitializers) {
   Variable{
     x_3
     private
+    undefined
     __u32
     {
       ScalarConstructor[not set]{0u}
@@ -1091,6 +1113,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarUndefInitializers) {
   Variable{
     x_4
     private
+    undefined
     __f32
     {
       ScalarConstructor[not set]{0.000000}
@@ -1114,6 +1137,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
+    undefined
     __vec_2__f32
     {
       TypeConstructor[not set]{
@@ -1137,6 +1161,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorBoolNullInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
+    undefined
     __vec_2__bool
     {
       TypeConstructor[not set]{
@@ -1160,6 +1185,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorBoolUndefInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
+    undefined
     __vec_2__bool
     {
       TypeConstructor[not set]{
@@ -1186,6 +1212,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorUintNullInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
+    undefined
     __vec_2__u32
     {
       TypeConstructor[not set]{
@@ -1209,6 +1236,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorUintUndefInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
+    undefined
     __vec_2__u32
     {
       TypeConstructor[not set]{
@@ -1235,6 +1263,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorIntNullInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
+    undefined
     __vec_2__i32
     {
       TypeConstructor[not set]{
@@ -1258,6 +1287,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorIntUndefInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
+    undefined
     __vec_2__i32
     {
       TypeConstructor[not set]{
@@ -1284,6 +1314,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorFloatNullInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
+    undefined
     __vec_2__f32
     {
       TypeConstructor[not set]{
@@ -1307,6 +1338,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorFloatUndefInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
+    undefined
     __vec_2__f32
     {
       TypeConstructor[not set]{
@@ -1339,6 +1371,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
+    undefined
     __mat_2_3__f32
     {
       TypeConstructor[not set]{
@@ -1375,6 +1408,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixNullInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
+    undefined
     __mat_2_3__f32
     {
       TypeConstructor[not set]{
@@ -1411,6 +1445,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixUndefInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
+    undefined
     __mat_2_3__f32
     {
       TypeConstructor[not set]{
@@ -1451,6 +1486,7 @@ TEST_F(SpvModuleScopeVarParserTest, ArrayInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
+    undefined
     __array__u32_2
     {
       TypeConstructor[not set]{
@@ -1474,6 +1510,7 @@ TEST_F(SpvModuleScopeVarParserTest, ArrayNullInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
+    undefined
     __array__u32_2
     {
       TypeConstructor[not set]{
@@ -1497,6 +1534,7 @@ TEST_F(SpvModuleScopeVarParserTest, ArrayUndefInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
+    undefined
     __array__u32_2
     {
       TypeConstructor[not set]{
@@ -1525,6 +1563,7 @@ TEST_F(SpvModuleScopeVarParserTest, StructInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
+    undefined
     __type_name_S
     {
       TypeConstructor[not set]{
@@ -1554,6 +1593,7 @@ TEST_F(SpvModuleScopeVarParserTest, StructNullInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
+    undefined
     __type_name_S
     {
       TypeConstructor[not set]{
@@ -1585,6 +1625,7 @@ TEST_F(SpvModuleScopeVarParserTest, StructUndefInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
+    undefined
     __type_name_S
     {
       TypeConstructor[not set]{
@@ -1623,6 +1664,7 @@ TEST_F(SpvModuleScopeVarParserTest, LocationDecoration_Valid) {
     }
     myvar
     in
+    undefined
     __u32
   })"))
       << module_str;
@@ -1674,7 +1716,8 @@ TEST_F(SpvModuleScopeVarParserTest, DescriptorGroupDecoration_Valid) {
     }
     x_1
     storage
-    __access_control_read_write__type_name_S
+    read_write
+    __type_name_S
   })"))
       << module_str;
 }
@@ -1727,7 +1770,8 @@ TEST_F(SpvModuleScopeVarParserTest, BindingDecoration_Valid) {
     }
     x_1
     storage
-    __access_control_read_write__type_name_S
+    read_write
+    __type_name_S
   })"))
       << module_str;
 }
@@ -1784,7 +1828,8 @@ TEST_F(SpvModuleScopeVarParserTest,
   Variable{
     x_1
     storage
-    __access_control_read_write__type_name_S
+    read_write
+    __type_name_S
   }
 )")) << module_str;
 }
@@ -1817,7 +1862,8 @@ TEST_F(SpvModuleScopeVarParserTest, ColMajorDecoration_Dropped) {
   Variable{
     myvar
     storage
-    __access_control_read_write__type_name_S
+    read_write
+    __type_name_S
   }
 })")) << module_str;
 }
@@ -1849,7 +1895,8 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Dropped) {
   Variable{
     myvar
     storage
-    __access_control_read_write__type_name_S
+    read_write
+    __type_name_S
   }
 })")) << module_str;
 }
@@ -1905,7 +1952,8 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_AllMembers) {
   Variable{
     x_1
     storage
-    __access_control_read_only__type_name_S
+    read
+    __type_name_S
   }
 })")) << module_str;
 }
@@ -1937,7 +1985,8 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_NotAllMembers) {
   Variable{
     x_1
     storage
-    __access_control_read_write__type_name_S
+    read_write
+    __type_name_S
   }
 })")) << module_str;
 }
@@ -1972,7 +2021,8 @@ TEST_F(
   Variable{
     x_1
     storage
-    __access_control_read_write__type_name_S
+    read_write
+    __type_name_S
   }
 })")) << module_str;
 }
@@ -1996,6 +2046,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_True) {
     }
     myconst
     none
+    undefined
     __bool
     {
       ScalarConstructor[not set]{true}
@@ -2023,6 +2074,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_False) {
     }
     myconst
     none
+    undefined
     __bool
     {
       ScalarConstructor[not set]{false}
@@ -2050,6 +2102,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_U32) {
     }
     myconst
     none
+    undefined
     __u32
     {
       ScalarConstructor[not set]{42u}
@@ -2077,6 +2130,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_I32) {
     }
     myconst
     none
+    undefined
     __i32
     {
       ScalarConstructor[not set]{42}
@@ -2104,6 +2158,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_F32) {
     }
     myconst
     none
+    undefined
     __f32
     {
       ScalarConstructor[not set]{2.500000}
@@ -2129,6 +2184,7 @@ TEST_F(SpvModuleScopeVarParserTest,
   VariableConst{
     myconst
     none
+    undefined
     __f32
     {
       ScalarConstructor[not set]{2.500000}
@@ -2212,6 +2268,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_Direct) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -2221,6 +2278,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_Direct) {
       VariableConst{
         x_2
         none
+        undefined
         __i32
         {
           TypeConstructor[not set]{
@@ -2254,6 +2312,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_CopyObject) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -2263,6 +2322,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_CopyObject) {
       VariableConst{
         x_2
         none
+        undefined
         __i32
         {
           TypeConstructor[not set]{
@@ -2296,6 +2356,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_AccessChain) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -2305,6 +2366,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_AccessChain) {
       VariableConst{
         x_2
         none
+        undefined
         __i32
         {
           TypeConstructor[not set]{
@@ -2363,6 +2425,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_Direct) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -2372,6 +2435,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_Direct) {
       VariableConst{
         x_2
         none
+        undefined
         __u32
         {
           Identifier[not set]{x_1}
@@ -2402,6 +2466,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_CopyObject) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -2411,6 +2476,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_CopyObject) {
       VariableConst{
         x_11
         none
+        undefined
         __ptr_in__u32
         {
           UnaryOp[not set]{
@@ -2424,6 +2490,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_CopyObject) {
       VariableConst{
         x_2
         none
+        undefined
         __u32
         {
           UnaryOp[not set]{
@@ -2457,6 +2524,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_AccessChain) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -2466,6 +2534,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_AccessChain) {
       VariableConst{
         x_2
         none
+        undefined
         __u32
         {
           Identifier[not set]{x_1}
@@ -2574,6 +2643,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_Direct) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -2583,6 +2653,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_Direct) {
       VariableConst{
         x_3
         none
+        undefined
         __u32
         {
           Identifier[not set]{x_1}
@@ -2616,6 +2687,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_CopyObject) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -2625,6 +2697,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_CopyObject) {
       VariableConst{
         x_4
         none
+        undefined
         __u32
         {
           Identifier[not set]{x_1}
@@ -2658,6 +2731,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_AccessChain) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -2667,6 +2741,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_AccessChain) {
       VariableConst{
         x_4
         none
+        undefined
         __u32
         {
           Identifier[not set]{x_1}
@@ -2699,6 +2774,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_Direct) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -2708,6 +2784,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_Direct) {
       VariableConst{
         x_3
         none
+        undefined
         __i32
         {
           TypeConstructor[not set]{
@@ -2744,6 +2821,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_CopyObject) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -2753,6 +2831,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_CopyObject) {
       VariableConst{
         x_4
         none
+        undefined
         __i32
         {
           TypeConstructor[not set]{
@@ -2789,6 +2868,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_AccessChain) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -2798,6 +2878,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_AccessChain) {
       VariableConst{
         x_4
         none
+        undefined
         __i32
         {
           TypeConstructor[not set]{
@@ -2852,6 +2933,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_U32_Direct) {
     }
     x_1
     out
+    undefined
     __u32
   })"));
 
@@ -2888,6 +2970,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_U32_CopyObject) {
     }
     x_1
     out
+    undefined
     __u32
   })"));
 
@@ -2924,6 +3007,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_U32_AccessChain) {
     }
     x_1
     out
+    undefined
     __u32
   })"));
 
@@ -2959,6 +3043,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_I32_Direct) {
     }
     x_1
     out
+    undefined
     __u32
   })"));
 
@@ -3001,6 +3086,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_I32_CopyObject) {
     }
     x_1
     out
+    undefined
     __u32
   })"));
 
@@ -3043,6 +3129,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_I32_AccessChain) {
     }
     x_1
     out
+    undefined
     __u32
   })"));
 
@@ -3100,6 +3187,7 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_Direct) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -3109,6 +3197,7 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_Direct) {
       VariableConst{
         x_2
         none
+        undefined
         __i32
         {
           TypeConstructor[not set]{
@@ -3142,6 +3231,7 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_CopyObject) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -3151,6 +3241,7 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_CopyObject) {
       VariableConst{
         x_2
         none
+        undefined
         __i32
         {
           TypeConstructor[not set]{
@@ -3184,6 +3275,7 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_AccessChain) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -3193,6 +3285,7 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_AccessChain) {
       VariableConst{
         x_2
         none
+        undefined
         __i32
         {
           TypeConstructor[not set]{
@@ -3251,6 +3344,7 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_Direct) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -3260,6 +3354,7 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_Direct) {
       VariableConst{
         x_2
         none
+        undefined
         __u32
         {
           Identifier[not set]{x_1}
@@ -3290,6 +3385,7 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_CopyObject) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -3299,6 +3395,7 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_CopyObject) {
       VariableConst{
         x_11
         none
+        undefined
         __ptr_in__u32
         {
           UnaryOp[not set]{
@@ -3312,6 +3409,7 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_CopyObject) {
       VariableConst{
         x_2
         none
+        undefined
         __u32
         {
           UnaryOp[not set]{
@@ -3345,6 +3443,7 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_AccessChain) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -3354,6 +3453,7 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_AccessChain) {
       VariableConst{
         x_2
         none
+        undefined
         __u32
         {
           Identifier[not set]{x_1}
@@ -3427,6 +3527,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_Direct) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -3436,6 +3537,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_Direct) {
       VariableConst{
         x_2
         none
+        undefined
         __i32
         {
           TypeConstructor[not set]{
@@ -3469,6 +3571,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_CopyObject) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -3478,6 +3581,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_CopyObject) {
       VariableConst{
         x_2
         none
+        undefined
         __i32
         {
           TypeConstructor[not set]{
@@ -3511,6 +3615,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_AccessChain) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -3520,6 +3625,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_AccessChain) {
       VariableConst{
         x_2
         none
+        undefined
         __i32
         {
           TypeConstructor[not set]{
@@ -3576,6 +3682,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_Direct) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -3585,6 +3692,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_Direct) {
       VariableConst{
         x_2
         none
+        undefined
         __u32
         {
           Identifier[not set]{x_1}
@@ -3615,6 +3723,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_CopyObject) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -3624,6 +3733,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_CopyObject) {
       VariableConst{
         x_11
         none
+        undefined
         __ptr_in__u32
         {
           UnaryOp[not set]{
@@ -3637,6 +3747,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_CopyObject) {
       VariableConst{
         x_2
         none
+        undefined
         __u32
         {
           UnaryOp[not set]{
@@ -3670,6 +3781,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_AccessChain) {
     }
     x_1
     in
+    undefined
     __u32
   })"));
 
@@ -3679,6 +3791,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_AccessChain) {
       VariableConst{
         x_2
         none
+        undefined
         __u32
         {
           Identifier[not set]{x_1}
@@ -3832,6 +3945,7 @@ TEST_F(SpvModuleScopeVarParserTest, InputVarsConvertedToPrivate) {
       R"(Variable{
     x_1
     private
+    undefined
     __u32
   }
 )";
@@ -3856,6 +3970,7 @@ TEST_F(SpvModuleScopeVarParserTest, OutputVarsConvertedToPrivate) {
       R"(Variable{
     x_1
     private
+    undefined
     __u32
   }
 )";
@@ -3903,21 +4018,25 @@ TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_IOLocations) {
   Variable{
     x_1
     private
+    undefined
     __u32
   }
   Variable{
     x_2
     private
+    undefined
     __u32
   }
   Variable{
     x_3
     private
+    undefined
     __u32
   }
   Variable{
     x_4
     private
+    undefined
     __u32
   }
   Function main_1 -> __void
@@ -3934,6 +4053,7 @@ TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_IOLocations) {
       }
       x_1_param
       none
+      undefined
       __u32
     }
     VariableConst{
@@ -3942,6 +4062,7 @@ TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_IOLocations) {
       }
       x_3_param
       none
+      undefined
       __u32
     }
   )

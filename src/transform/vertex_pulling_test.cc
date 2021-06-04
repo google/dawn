@@ -121,7 +121,7 @@ struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]] TintVertexData;
+[[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
 [[stage(vertex)]]
 fn main([[builtin(vertex_index)]] tint_pulling_vertex_index : u32) -> [[builtin(position)]] vec4<f32> {
@@ -161,7 +161,7 @@ struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]] TintVertexData;
+[[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
 [[stage(vertex)]]
 fn main([[builtin(instance_index)]] tint_pulling_instance_index : u32) -> [[builtin(position)]] vec4<f32> {
@@ -201,7 +201,7 @@ struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(5)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]] TintVertexData;
+[[binding(0), group(5)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
 [[stage(vertex)]]
 fn main([[builtin(vertex_index)]] tint_pulling_vertex_index : u32) -> [[builtin(position)]] vec4<f32> {
@@ -246,7 +246,7 @@ struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]] TintVertexData;
+[[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
 struct Inputs {
   [[location(0)]]
@@ -296,9 +296,9 @@ struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]] TintVertexData;
+[[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
-[[binding(1), group(4)]] var<storage> tint_pulling_vertex_buffer_1 : [[access(read)]] TintVertexData;
+[[binding(1), group(4)]] var<storage, read> tint_pulling_vertex_buffer_1 : TintVertexData;
 
 [[stage(vertex)]]
 fn main([[builtin(vertex_index)]] custom_vertex_index : u32, [[builtin(instance_index)]] custom_instance_index : u32) -> [[builtin(position)]] vec4<f32> {
@@ -358,9 +358,9 @@ struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]] TintVertexData;
+[[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
-[[binding(1), group(4)]] var<storage> tint_pulling_vertex_buffer_1 : [[access(read)]] TintVertexData;
+[[binding(1), group(4)]] var<storage, read> tint_pulling_vertex_buffer_1 : TintVertexData;
 
 struct tint_symbol {
   [[builtin(vertex_index)]]
@@ -442,9 +442,9 @@ struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]] TintVertexData;
+[[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
-[[binding(1), group(4)]] var<storage> tint_pulling_vertex_buffer_1 : [[access(read)]] TintVertexData;
+[[binding(1), group(4)]] var<storage, read> tint_pulling_vertex_buffer_1 : TintVertexData;
 
 struct Inputs {
   [[location(0)]]
@@ -511,7 +511,7 @@ struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]] TintVertexData;
+[[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
 [[stage(vertex)]]
 fn main([[builtin(vertex_index)]] tint_pulling_vertex_index : u32) -> [[builtin(position)]] vec4<f32> {
@@ -559,11 +559,11 @@ struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]] TintVertexData;
+[[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
-[[binding(1), group(4)]] var<storage> tint_pulling_vertex_buffer_1 : [[access(read)]] TintVertexData;
+[[binding(1), group(4)]] var<storage, read> tint_pulling_vertex_buffer_1 : TintVertexData;
 
-[[binding(2), group(4)]] var<storage> tint_pulling_vertex_buffer_2 : [[access(read)]] TintVertexData;
+[[binding(2), group(4)]] var<storage, read> tint_pulling_vertex_buffer_2 : TintVertexData;
 
 [[stage(vertex)]]
 fn main([[builtin(vertex_index)]] tint_pulling_vertex_index : u32) -> [[builtin(position)]] vec4<f32> {
@@ -617,7 +617,7 @@ struct TintVertexData {
   tint_vertex_data_1 : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0_1 : [[access(read)]] TintVertexData;
+[[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0_1 : TintVertexData;
 
 [[stage(vertex)]]
 fn main([[builtin(vertex_index)]] tint_pulling_vertex_index_1 : u32) -> [[builtin(position)]] vec4<f32> {
@@ -671,7 +671,7 @@ struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(5)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]] TintVertexData;
+[[binding(0), group(5)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
 var<private> var_a : f32;
 
@@ -720,9 +720,9 @@ struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]] TintVertexData;
+[[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
-[[binding(1), group(4)]] var<storage> tint_pulling_vertex_buffer_1 : [[access(read)]] TintVertexData;
+[[binding(1), group(4)]] var<storage, read> tint_pulling_vertex_buffer_1 : TintVertexData;
 
 var<private> var_a : f32;
 
@@ -787,7 +787,7 @@ struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]] TintVertexData;
+[[binding(0), group(4)]] var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
 var<private> var_a : f32;
 

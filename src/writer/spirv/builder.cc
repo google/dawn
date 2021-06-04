@@ -786,20 +786,23 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
   if (var->has_constructor()) {
     ops.push_back(Operand::Int(init_id));
   } else {
-    if (type->Is<sem::StorageTexture>() || type->Is<sem::Struct>()) {
+    auto* st = type->As<sem::StorageTexture>();
+    if (st || type->Is<sem::Struct>()) {
       // type is a sem::Struct or a sem::StorageTexture
-      switch (sem->AccessControl()) {
-        case ast::AccessControl::kWrite:
+      auto access = st ? st->access() : sem->Access();
+      switch (access) {
+        case ast::Access::kWrite:
           push_annot(
               spv::Op::OpDecorate,
               {Operand::Int(var_id), Operand::Int(SpvDecorationNonReadable)});
           break;
-        case ast::AccessControl::kRead:
+        case ast::Access::kRead:
           push_annot(
               spv::Op::OpDecorate,
               {Operand::Int(var_id), Operand::Int(SpvDecorationNonWritable)});
           break;
-        case ast::AccessControl::kReadWrite:
+        case ast::Access::kUndefined:
+        case ast::Access::kReadWrite:
           break;
       }
     }
@@ -3287,17 +3290,17 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
         type_name_to_id_[builder_
                              .create<sem::StorageTexture>(
                                  st->dim(), st->image_format(),
-                                 ast::AccessControl::kRead, st->type())
+                                 ast::Access::kRead, st->type())
                              ->type_name()] = id;
         type_name_to_id_[builder_
                              .create<sem::StorageTexture>(
                                  st->dim(), st->image_format(),
-                                 ast::AccessControl::kWrite, st->type())
+                                 ast::Access::kWrite, st->type())
                              ->type_name()] = id;
         type_name_to_id_[builder_
                              .create<sem::StorageTexture>(
                                  st->dim(), st->image_format(),
-                                 ast::AccessControl::kReadWrite, st->type())
+                                 ast::Access::kReadWrite, st->type())
                              ->type_name()] = id;
       }
 

@@ -18,6 +18,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/ast/access.h"
 #include "src/ast/decoration.h"
 #include "src/ast/expression.h"
 #include "src/ast/storage_class.h"
@@ -103,6 +104,7 @@ class Variable : public Castable<Variable, Node> {
   /// @param source the variable source
   /// @param sym the variable symbol
   /// @param declared_storage_class the declared storage class
+  /// @param declared_access the declared access control
   /// @param type the declared variable type
   /// @param is_const true if the variable is const
   /// @param constructor the constructor expression
@@ -111,6 +113,7 @@ class Variable : public Castable<Variable, Node> {
            const Source& source,
            const Symbol& sym,
            StorageClass declared_storage_class,
+           Access declared_access,
            const ast::Type* type,
            bool is_const,
            Expression* constructor,
@@ -130,6 +133,10 @@ class Variable : public Castable<Variable, Node> {
   StorageClass declared_storage_class() const {
     return declared_storage_class_;
   }
+
+  /// @returns the declared access control
+  Access declared_access() const { return declared_access_; }
+
   /// @returns the constructor expression or nullptr if none set
   Expression* constructor() const { return constructor_; }
   /// @returns true if the variable has an constructor
@@ -184,6 +191,7 @@ class Variable : public Castable<Variable, Node> {
   Expression* const constructor_;
   DecorationList const decorations_;
   StorageClass const declared_storage_class_;
+  Access const declared_access_;
 };
 
 /// A list of variables

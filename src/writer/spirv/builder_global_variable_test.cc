@@ -394,7 +394,7 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
   // struct A {
   //   a : i32;
   // };
-  // var b : [[access(read)]] A
+  // var b<storage, read> : A
 
   auto* A = Structure("A",
                       {
@@ -402,9 +402,8 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
                           Member("b", ty.i32()),
                       },
                       {create<ast::StructBlockDecoration>()});
-  auto* ac = ty.access(ast::AccessControl::kRead, A);
 
-  auto* var = Global("b", ac, ast::StorageClass::kStorage,
+  auto* var = Global("b", A, ast::StorageClass::kStorage, ast::Access::kRead,
                      ast::DecorationList{
                          create<ast::BindingDecoration>(0),
                          create<ast::GroupDecoration>(0),
@@ -438,14 +437,13 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
   //   a : i32;
   // };
   // type B = A;
-  // var b : [[access(read)]] B
+  // var b<storage, read> : B
 
   auto* A = Structure("A", {Member("a", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
   auto* B = ty.alias("B", A);
   AST().AddConstructedType(B);
-  auto* ac = ty.access(ast::AccessControl::kRead, B);
-  auto* var = Global("b", ac, ast::StorageClass::kStorage,
+  auto* var = Global("b", B, ast::StorageClass::kStorage, ast::Access::kRead,
                      ast::DecorationList{
                          create<ast::BindingDecoration>(0),
                          create<ast::GroupDecoration>(0),
@@ -476,15 +474,14 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
   // struct A {
   //   a : i32;
   // };
-  // type B = [[access(read)]] A;
-  // var b : B
+  // type B = A;
+  // var<storage, read> b : B
 
   auto* A = Structure("A", {Member("a", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* ac = ty.access(ast::AccessControl::kRead, A);
-  auto* B = ty.alias("B", ac);
+  auto* B = ty.alias("B", A);
   AST().AddConstructedType(B);
-  auto* var = Global("b", B, ast::StorageClass::kStorage,
+  auto* var = Global("b", B, ast::StorageClass::kStorage, ast::Access::kRead,
                      ast::DecorationList{
                          create<ast::BindingDecoration>(0),
                          create<ast::GroupDecoration>(0),
@@ -515,24 +512,22 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
   // struct A {
   //   a : i32;
   // };
-  // var b : [[access(read)]] A
-  // var c : [[access(read_write)]] A
+  // var<storage, read> b : A
+  // var<storage, read_write> c : A
 
   auto* A = Structure("A", {Member("a", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* read = ty.access(ast::AccessControl::kRead, A);
-  auto* rw = ty.access(ast::AccessControl::kReadWrite, A);
-
-  auto* var_b = Global("b", read, ast::StorageClass::kStorage,
+  auto* var_b = Global("b", A, ast::StorageClass::kStorage, ast::Access::kRead,
                        ast::DecorationList{
                            create<ast::GroupDecoration>(0),
                            create<ast::BindingDecoration>(0),
                        });
-  auto* var_c = Global("c", rw, ast::StorageClass::kStorage,
-                       ast::DecorationList{
-                           create<ast::GroupDecoration>(1),
-                           create<ast::BindingDecoration>(0),
-                       });
+  auto* var_c =
+      Global("c", A, ast::StorageClass::kStorage, ast::Access::kReadWrite,
+             ast::DecorationList{
+                 create<ast::GroupDecoration>(1),
+                 create<ast::BindingDecoration>(0),
+             });
 
   spirv::Builder& b = Build();
 
@@ -562,14 +557,13 @@ OpName %5 "c"
 }
 
 TEST_F(BuilderTest, GlobalVar_TextureStorageReadOnly) {
-  // var<uniform_constant> a : [[access(read)]] texture_storage_2d<r32uint>;
+  // var<uniform_constant> a : texture_storage_2d<r32uint, read>;
 
-  auto* type = ty.storage_texture(ast::TextureDimension::k2d,
-                                  ast::ImageFormat::kR32Uint);
+  auto* type =
+      ty.storage_texture(ast::TextureDimension::k2d, ast::ImageFormat::kR32Uint,
+                         ast::Access::kRead);
 
-  auto* ac = ty.access(ast::AccessControl::kRead, type);
-
-  auto* var_a = Global("a", ac, ast::StorageClass::kNone,
+  auto* var_a = Global("a", type,
                        ast::DecorationList{
                            create<ast::BindingDecoration>(0),
                            create<ast::GroupDecoration>(0),
@@ -591,14 +585,13 @@ OpDecorate %1 DescriptorSet 0
 }
 
 TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
-  // var<uniform_constant> a : [[access(write)]] texture_storage_2d<r32uint>;
+  // var<uniform_constant> a : texture_storage_2d<r32uint, write>;
 
-  auto* type = ty.storage_texture(ast::TextureDimension::k2d,
-                                  ast::ImageFormat::kR32Uint);
+  auto* type =
+      ty.storage_texture(ast::TextureDimension::k2d, ast::ImageFormat::kR32Uint,
+                         ast::Access::kWrite);
 
-  auto* ac = ty.access(ast::AccessControl::kWrite, type);
-
-  auto* var_a = Global("a", ac, ast::StorageClass::kNone,
+  auto* var_a = Global("a", type,
                        ast::DecorationList{
                            create<ast::BindingDecoration>(0),
                            create<ast::GroupDecoration>(0),
@@ -622,21 +615,21 @@ OpDecorate %1 DescriptorSet 0
 // Check that multiple texture_storage types with different access modifiers
 // only produces a single OpTypeImage.
 TEST_F(BuilderTest, GlobalVar_TextureStorageWithDifferentAccess) {
-  // var<uniform_constant> a : [[access(read)]] texture_storage_2d<r32uint>;
-  // var<uniform_constant> b : [[access(write)]] texture_storage_2d<r32uint>;
+  // var<uniform_constant> a : texture_storage_2d<r32uint, read>;
+  // var<uniform_constant> b : texture_storage_2d<r32uint, write>;
 
-  auto* type_a = ty.access(ast::AccessControl::kRead,
-                           ty.storage_texture(ast::TextureDimension::k2d,
-                                              ast::ImageFormat::kR32Uint));
+  auto* type_a =
+      ty.storage_texture(ast::TextureDimension::k2d, ast::ImageFormat::kR32Uint,
+                         ast::Access::kRead);
   auto* var_a = Global("a", type_a, ast::StorageClass::kNone,
                        ast::DecorationList{
                            create<ast::BindingDecoration>(0),
                            create<ast::GroupDecoration>(0),
                        });
 
-  auto* type_b = ty.access(ast::AccessControl::kWrite,
-                           ty.storage_texture(ast::TextureDimension::k2d,
-                                              ast::ImageFormat::kR32Uint));
+  auto* type_b =
+      ty.storage_texture(ast::TextureDimension::k2d, ast::ImageFormat::kR32Uint,
+                         ast::Access::kWrite);
   auto* var_b = Global("b", type_b, ast::StorageClass::kNone,
                        ast::DecorationList{
                            create<ast::BindingDecoration>(1),

@@ -146,7 +146,6 @@ tint_unittests_source_set("tint_unittests_core_sem_src") {
 
 tint_unittests_source_set("tint_unittests_core_src") {
   sources = [
-    "../src/ast/access_control_test.cc",
     "../src/ast/access_decoration_test.cc",
     "../src/ast/alias_test.cc",
     "../src/ast/array_accessor_expression_test.cc",
@@ -467,7 +466,7 @@ tint_unittests_source_set("tint_unittests_wgsl_reader_src") {
     "../src/reader/wgsl/parser_impl_variable_decoration_test.cc",
     "../src/reader/wgsl/parser_impl_variable_ident_decl_test.cc",
     "../src/reader/wgsl/parser_impl_variable_stmt_test.cc",
-    "../src/reader/wgsl/parser_impl_variable_storage_decoration_test.cc",
+    "../src/reader/wgsl/parser_impl_variable_qualifier_test.cc",
     "../src/reader/wgsl/parser_test.cc",
     "../src/reader/wgsl/token_test.cc",
   ]

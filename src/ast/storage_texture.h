@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "src/ast/access.h"
 #include "src/ast/texture.h"
 
 namespace tint {
@@ -78,21 +79,33 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
   /// @param dim the dimensionality of the texture
   /// @param format the image format of the texture
   /// @param subtype the storage subtype. Use SubtypeFor() to calculate this.
+  /// @param access_control the access control for the texture.
   StorageTexture(ProgramID program_id,
                  const Source& source,
                  TextureDimension dim,
                  ImageFormat format,
-                 Type* subtype);
+                 Type* subtype,
+                 Access access_control);
 
   /// Move constructor
   StorageTexture(StorageTexture&&);
   ~StorageTexture() override;
 
+  /// @returns the image format
+  ImageFormat image_format() const { return image_format_; }
+
   /// @returns the storage subtype
   Type* type() const { return subtype_; }
 
-  /// @returns the image format
-  ImageFormat image_format() const { return image_format_; }
+  /// @returns the access control
+  Access access() const { return access_; }
+
+  /// @returns true if the access control is read only
+  bool is_read_only() const { return access_ == Access::kRead; }
+  /// @returns true if the access control is write only
+  bool is_write_only() const { return access_ == Access::kWrite; }
+  /// @returns true if the access control is read/write
+  bool is_read_write() const { return access_ == Access::kReadWrite; }
 
   /// @returns the name for this type
   std::string type_name() const override;
@@ -115,6 +128,7 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
  private:
   ImageFormat const image_format_;
   Type* const subtype_;
+  Access const access_;
 };
 
 }  // namespace ast

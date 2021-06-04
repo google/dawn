@@ -1,4 +1,4 @@
-[[group(1), binding(0)]] var arg_0 : [[access(read)]] texture_storage_2d_array<rgba16float>;
+[[group(1), binding(0)]] var arg_0 : texture_storage_2d_array<rgba16float, read>;
 
 fn textureNumLayers_be1d70() {
   var res : i32 = textureNumLayers(arg_0);

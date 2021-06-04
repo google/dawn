@@ -89,14 +89,14 @@ class Resolver {
                  sem::Type* type,
                  const std::string& type_name,
                  ast::StorageClass storage_class,
-                 const ast::AccessControl* ac);
+                 ast::Access ac);
     ~VariableInfo();
 
     ast::Variable const* const declaration;
     sem::Type* type;
     std::string const type_name;
     ast::StorageClass storage_class;
-    ast::AccessControl const* const access_control;
+    ast::Access const access;
     std::vector<ast::IdentifierExpression*> users;
     sem::BindingPoint binding_point;
   };
@@ -255,6 +255,7 @@ class Resolver {
                                  const sem::Matrix* matrix_type);
   bool ValidateParameter(const VariableInfo* info);
   bool ValidateReturn(const ast::ReturnStatement* ret);
+  bool ValidateStorageTexture(const ast::StorageTexture* t);
   bool ValidateStructure(const sem::Struct* str);
   bool ValidateSwitch(const ast::SwitchStatement* s);
   bool ValidateVariable(const VariableInfo* info);
@@ -394,7 +395,6 @@ class Resolver {
 
   FunctionInfo* current_function_ = nullptr;
   sem::Statement* current_statement_ = nullptr;
-  const ast::AccessControl* current_access_control_ = nullptr;
   BlockAllocator<VariableInfo> variable_infos_;
   BlockAllocator<FunctionInfo> function_infos_;
 };

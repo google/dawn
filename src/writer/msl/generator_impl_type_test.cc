@@ -232,8 +232,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
                 },
                 {create<ast::StructBlockDecoration>()});
 
-  Global("G", ty.access(ast::AccessControl::kRead, s),
-         ast::StorageClass::kStorage,
+  Global("G", s, ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -342,8 +341,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_Structures) {
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  Global("G", ty.access(ast::AccessControl::kRead, s),
-         ast::StorageClass::kStorage,
+  Global("G", s, ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -437,8 +435,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
                 },
                 ast::DecorationList{create<ast::StructBlockDecoration>()});
 
-  Global("G", ty.access(ast::AccessControl::kRead, s),
-         ast::StorageClass::kStorage,
+  Global("G", s, ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -551,8 +548,7 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
       },
       {create<ast::StructBlockDecoration>()});
 
-  Global("G", ty.access(ast::AccessControl::kRead, s),
-         ast::StorageClass::kStorage,
+  Global("G", s, ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -617,8 +613,7 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  Global("G", ty.access(ast::AccessControl::kRead, s),
-         ast::StorageClass::kStorage,
+  Global("G", s, ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -771,10 +766,10 @@ using MslStorageTexturesTest = TestParamHelper<MslStorageTextureData>;
 TEST_P(MslStorageTexturesTest, Emit) {
   auto params = GetParam();
 
-  auto* s = ty.storage_texture(params.dim, ast::ImageFormat::kR32Float);
-  auto* ac = ty.access(
-      params.ro ? ast::AccessControl::kRead : ast::AccessControl::kWrite, s);
-  Global("test_var", ac,
+  auto* s =
+      ty.storage_texture(params.dim, ast::ImageFormat::kR32Float,
+                         params.ro ? ast::Access::kRead : ast::Access::kWrite);
+  Global("test_var", s,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -782,7 +777,7 @@ TEST_P(MslStorageTexturesTest, Emit) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(program->TypeOf(ac), "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(program->TypeOf(s), "")) << gen.error();
   EXPECT_EQ(gen.result(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(

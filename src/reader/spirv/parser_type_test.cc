@@ -35,8 +35,6 @@ TEST(SpvParserTypeTest, SameArgumentsGivesSamePointer) {
   EXPECT_EQ(ty.Vector(ty.I32(), 3), ty.Vector(ty.I32(), 3));
   EXPECT_EQ(ty.Matrix(ty.I32(), 3, 2), ty.Matrix(ty.I32(), 3, 2));
   EXPECT_EQ(ty.Array(ty.I32(), 3, 2), ty.Array(ty.I32(), 3, 2));
-  EXPECT_EQ(ty.AccessControl(ty.I32(), ast::AccessControl::kRead),
-            ty.AccessControl(ty.I32(), ast::AccessControl::kRead));
   EXPECT_EQ(ty.Alias(sym, ty.I32()), ty.Alias(sym, ty.I32()));
   EXPECT_EQ(ty.Struct(sym, {ty.I32()}), ty.Struct(sym, {ty.I32()}));
   EXPECT_EQ(ty.Sampler(ast::SamplerKind::kSampler),
@@ -47,10 +45,10 @@ TEST(SpvParserTypeTest, SameArgumentsGivesSamePointer) {
             ty.MultisampledTexture(ast::TextureDimension::k2d, ty.I32()));
   EXPECT_EQ(ty.SampledTexture(ast::TextureDimension::k2d, ty.I32()),
             ty.SampledTexture(ast::TextureDimension::k2d, ty.I32()));
-  EXPECT_EQ(
-      ty.StorageTexture(ast::TextureDimension::k2d, ast::ImageFormat::kR16Sint),
-      ty.StorageTexture(ast::TextureDimension::k2d,
-                        ast::ImageFormat::kR16Sint));
+  EXPECT_EQ(ty.StorageTexture(ast::TextureDimension::k2d,
+                              ast::ImageFormat::kR16Sint, ast::Access::kRead),
+            ty.StorageTexture(ast::TextureDimension::k2d,
+                              ast::ImageFormat::kR16Sint, ast::Access::kRead));
 }
 
 TEST(SpvParserTypeTest, DifferentArgumentsGivesDifferentPointer) {
@@ -70,10 +68,6 @@ TEST(SpvParserTypeTest, DifferentArgumentsGivesDifferentPointer) {
   EXPECT_NE(ty.Array(ty.I32(), 3, 2), ty.Array(ty.U32(), 3, 2));
   EXPECT_NE(ty.Array(ty.I32(), 3, 2), ty.Array(ty.I32(), 2, 2));
   EXPECT_NE(ty.Array(ty.I32(), 3, 2), ty.Array(ty.I32(), 3, 3));
-  EXPECT_NE(ty.AccessControl(ty.I32(), ast::AccessControl::kRead),
-            ty.AccessControl(ty.U32(), ast::AccessControl::kRead));
-  EXPECT_NE(ty.AccessControl(ty.I32(), ast::AccessControl::kRead),
-            ty.AccessControl(ty.I32(), ast::AccessControl::kWrite));
   EXPECT_NE(ty.Alias(sym_a, ty.I32()), ty.Alias(sym_b, ty.I32()));
   EXPECT_NE(ty.Struct(sym_a, {ty.I32()}), ty.Struct(sym_b, {ty.I32()}));
   EXPECT_NE(ty.Sampler(ast::SamplerKind::kSampler),
@@ -88,14 +82,18 @@ TEST(SpvParserTypeTest, DifferentArgumentsGivesDifferentPointer) {
             ty.SampledTexture(ast::TextureDimension::k3d, ty.I32()));
   EXPECT_NE(ty.SampledTexture(ast::TextureDimension::k2d, ty.I32()),
             ty.SampledTexture(ast::TextureDimension::k2d, ty.U32()));
-  EXPECT_NE(
-      ty.StorageTexture(ast::TextureDimension::k2d, ast::ImageFormat::kR16Sint),
-      ty.StorageTexture(ast::TextureDimension::k3d,
-                        ast::ImageFormat::kR16Sint));
-  EXPECT_NE(
-      ty.StorageTexture(ast::TextureDimension::k2d, ast::ImageFormat::kR16Sint),
-      ty.StorageTexture(ast::TextureDimension::k2d,
-                        ast::ImageFormat::kR32Sint));
+  EXPECT_NE(ty.StorageTexture(ast::TextureDimension::k2d,
+                              ast::ImageFormat::kR16Sint, ast::Access::kRead),
+            ty.StorageTexture(ast::TextureDimension::k3d,
+                              ast::ImageFormat::kR16Sint, ast::Access::kRead));
+  EXPECT_NE(ty.StorageTexture(ast::TextureDimension::k2d,
+                              ast::ImageFormat::kR16Sint, ast::Access::kRead),
+            ty.StorageTexture(ast::TextureDimension::k2d,
+                              ast::ImageFormat::kR32Sint, ast::Access::kRead));
+  EXPECT_NE(ty.StorageTexture(ast::TextureDimension::k2d,
+                              ast::ImageFormat::kR16Sint, ast::Access::kRead),
+            ty.StorageTexture(ast::TextureDimension::k2d,
+                              ast::ImageFormat::kR16Sint, ast::Access::kWrite));
 }
 
 }  // namespace

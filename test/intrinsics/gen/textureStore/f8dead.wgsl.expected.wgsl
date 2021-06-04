@@ -1,4 +1,4 @@
-[[group(1), binding(0)]] var arg_0 : [[access(write)]] texture_storage_3d<rgba8uint>;
+[[group(1), binding(0)]] var arg_0 : texture_storage_3d<rgba8uint, write>;
 
 fn textureStore_f8dead() {
   textureStore(arg_0, vec3<i32>(), vec4<u32>());

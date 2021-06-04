@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "src/ast/matrix.h"
-#include "src/ast/access_control.h"
+#include "src/ast/access.h"
 #include "src/ast/alias.h"
 #include "src/ast/array.h"
 #include "src/ast/bool.h"

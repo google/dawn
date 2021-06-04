@@ -91,7 +91,8 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
               // in order for HLSL to emit this as a ByteAddressBuffer.
               ctx.dst->create<ast::Variable>(
                   ctx.dst->Sym("buffer"), ast::StorageClass::kStorage,
-                  buffer_typename, true, nullptr, ast::DecorationList{}),
+                  ast::Access::kUndefined, buffer_typename, true, nullptr,
+                  ast::DecorationList{}),
               ctx.dst->Param("result",
                              ctx.dst->ty.pointer(ctx.dst->ty.u32(),
                                                  ast::StorageClass::kFunction)),

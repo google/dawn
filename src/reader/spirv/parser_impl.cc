@@ -1354,6 +1354,7 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
     return nullptr;
   }
 
+  ast::Access access = ast::Access::kUndefined;
   if (sc == ast::StorageClass::kStorage) {
     bool read_only = false;
     if (auto* tn = storage_type->As<Named>()) {
@@ -1361,9 +1362,7 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
     }
 
     // Apply the access(read) or access(read_write) modifier.
-    auto access =
-        read_only ? ast::AccessControl::kRead : ast::AccessControl::kReadWrite;
-    storage_type = ty_.AccessControl(storage_type, access);
+    access = read_only ? ast::Access::kRead : ast::Access::kReadWrite;
   }
 
   // Handle variables (textures and samplers) are always in the handle
@@ -1387,7 +1386,7 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
   // `var` declarations will have a resolved type of ref<storage>, but at the
   // AST level both `var` and `let` are declared with the same type.
   return create<ast::Variable>(Source{}, builder_.Symbols().Register(name), sc,
-                               storage_type->Build(builder_), is_const,
+                               access, storage_type->Build(builder_), is_const,
                                constructor, decorations);
 }
 
@@ -1501,7 +1500,7 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
   }
 
   auto source = GetSourceForInst(inst);
-  auto* ast_type = original_ast_type->UnwrapAliasAndAccess();
+  auto* ast_type = original_ast_type->UnwrapAlias();
 
   // TODO(dneto): Note: NullConstant for int, uint, float map to a regular 0.
   // So canonicalization should map that way too.
@@ -1577,7 +1576,7 @@ ast::Expression* ParserImpl::MakeNullValue(const Type* type) {
   }
 
   auto* original_type = type;
-  type = type->UnwrapAliasAndAccess();
+  type = type->UnwrapAlias();
 
   if (type->Is<Bool>()) {
     return create<ast::ScalarConstructorExpression>(
@@ -2123,15 +2122,13 @@ const Pointer* ParserImpl::GetTypeForHandleVar(
         ast_store_type = ty_.SampledTexture(dim, ast_sampled_component_type);
       }
     } else {
-      const auto access = usage.IsStorageReadTexture()
-                              ? ast::AccessControl::kRead
-                              : ast::AccessControl::kWrite;
+      const auto access = usage.IsStorageReadTexture() ? ast::Access::kRead
+                                                       : ast::Access::kWrite;
       const auto format = enum_converter_.ToImageFormat(image_type->format());
       if (format == ast::ImageFormat::kNone) {
         return nullptr;
       }
-      ast_store_type =
-          ty_.AccessControl(ty_.StorageTexture(dim, format), access);
+      ast_store_type = ty_.StorageTexture(dim, format, access);
     }
   } else {
     Fail() << "unsupported: UniformConstant variable is not a recognized "

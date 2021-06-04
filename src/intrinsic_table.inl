@@ -1184,9 +1184,9 @@ class ReadOrWrite : public NumberMatcher {
 };
 
 Number ReadOrWrite::Match(MatchState&, Number number) const {
-  switch (static_cast<AccessControl>(number.Value())) {
-    case AccessControl::kRead:
-    case AccessControl::kWrite:
+  switch (static_cast<Access>(number.Value())) {
+    case Access::kRead:
+    case Access::kWrite:
       return number;
     default:
       return Number::invalid;
@@ -1212,8 +1212,8 @@ class Write : public NumberMatcher {
 };
 
 Number Write::Match(MatchState&, Number number) const {
-  if (number.IsAny() || number.Value() == static_cast<uint32_t>(AccessControl::kWrite)) {
-    return Number(AccessControl::kWrite);
+  if (number.IsAny() || number.Value() == static_cast<uint32_t>(Access::kWrite)) {
+    return Number(Access::kWrite);
   }
   return Number::invalid;
 }
@@ -1237,8 +1237,8 @@ class Read : public NumberMatcher {
 };
 
 Number Read::Match(MatchState&, Number number) const {
-  if (number.IsAny() || number.Value() == static_cast<uint32_t>(AccessControl::kRead)) {
-    return Number(AccessControl::kRead);
+  if (number.IsAny() || number.Value() == static_cast<uint32_t>(Access::kRead)) {
+    return Number(Access::kRead);
   }
   return Number::invalid;
 }

@@ -66,9 +66,9 @@ const char kVertexStage[] = "vertex";
 const char kFragmentStage[] = "fragment";
 const char kComputeStage[] = "compute";
 
-const char kReadAccessControl[] = "read";
-const char kWriteAccessControl[] = "write";
-const char kReadWriteAccessControl[] = "read_write";
+const char kReadAccess[] = "read";
+const char kWriteAccess[] = "write";
+const char kReadWriteAccess[] = "read_write";
 
 ast::Builtin ident_to_builtin(const std::string& str) {
   if (str == "position") {
@@ -204,9 +204,13 @@ ParserImpl::TypedIdentifier::TypedIdentifier() = default;
 ParserImpl::TypedIdentifier::TypedIdentifier(const TypedIdentifier&) = default;
 
 ParserImpl::TypedIdentifier::TypedIdentifier(ast::Type* type_in,
+                                             ast::Access access_in,
                                              std::string name_in,
                                              Source source_in)
-    : type(type_in), name(std::move(name_in)), source(std::move(source_in)) {}
+    : type(type_in),
+      access(access_in),
+      name(std::move(name_in)),
+      source(std::move(source_in)) {}
 
 ParserImpl::TypedIdentifier::~TypedIdentifier() = default;
 
@@ -237,10 +241,12 @@ ParserImpl::VarDeclInfo::VarDeclInfo(const VarDeclInfo&) = default;
 ParserImpl::VarDeclInfo::VarDeclInfo(Source source_in,
                                      std::string name_in,
                                      ast::StorageClass storage_class_in,
+                                     ast::Access access_in,
                                      ast::Type* type_in)
     : source(std::move(source_in)),
       name(std::move(name_in)),
       storage_class(storage_class_in),
+      access(access_in),
       type(type_in) {}
 
 ParserImpl::VarDeclInfo::~VarDeclInfo() = default;
@@ -477,7 +483,8 @@ Maybe<ast::Variable*> ParserImpl::global_variable_decl(
   return create<ast::Variable>(
       decl->source,                             // source
       builder_.Symbols().Register(decl->name),  // symbol
-      decl->storage_class,                      // storage_class
+      decl->storage_class,                      // storage class
+      decl->access,                             // access control
       decl->type,                               // type
       false,                                    // is_const
       constructor,                              // constructor
@@ -511,7 +518,8 @@ Maybe<ast::Variable*> ParserImpl::global_constant_decl(
   return create<ast::Variable>(
       decl->source,                             // source
       builder_.Symbols().Register(decl->name),  // symbol
-      ast::StorageClass::kNone,                 // storage_class
+      ast::StorageClass::kNone,                 // storage class
+      ast::Access::kUndefined,                  // access control
       decl->type,                               // type
       true,                                     // is_const
       initializer,                              // constructor
@@ -519,26 +527,27 @@ Maybe<ast::Variable*> ParserImpl::global_constant_decl(
 }
 
 // variable_decl
-//   : VAR variable_storage_decoration? variable_ident_decl
+//   : VAR variable_qualifier? variable_ident_decl
 Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl(bool allow_inferred) {
-  if (!match(Token::Type::kVar))
+  Source source;
+  if (!match(Token::Type::kVar, &source))
     return Failure::kNoMatch;
 
-  ast::StorageClass sc = ast::StorageClass::kNone;
-  auto explicit_sc = variable_storage_decoration();
-  if (explicit_sc.errored)
+  VariableQualifier vq;
+  auto explicit_vq = variable_qualifier();
+  if (explicit_vq.errored)
     return Failure::kErrored;
-  if (explicit_sc.matched) {
-    sc = explicit_sc.value;
+  if (explicit_vq.matched) {
+    vq = explicit_vq.value;
 
     // TODO(crbug.com/tint/697): Remove this.
-    if (sc == ast::StorageClass::kInput) {
-      deprecated(explicit_sc.source,
+    if (vq.storage_class == ast::StorageClass::kInput) {
+      deprecated(explicit_vq.source,
                  "use an entry point parameter instead of a variable in the "
                  "`in` storage class");
     }
-    if (sc == ast::StorageClass::kOutput) {
-      deprecated(explicit_sc.source,
+    if (vq.storage_class == ast::StorageClass::kOutput) {
+      deprecated(explicit_vq.source,
                  "use an entry point return value instead of a variable in the "
                  "`out` storage class");
     }
@@ -549,7 +558,20 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl(bool allow_inferred) {
   if (decl.errored)
     return Failure::kErrored;
 
-  return VarDeclInfo{decl->source, decl->name, sc, decl->type};
+  auto access = vq.access;
+
+  if (access == ast::Access::kUndefined &&
+      decl->access != ast::Access::kUndefined) {
+    // TODO(crbug.com/tint/846): Remove this
+    access = decl->access;
+    std::stringstream msg;
+    msg << "declare access with var<" << vq.storage_class << ", " << access
+        << "> instead of using [[access]] decoration";
+    deprecated(source, msg.str());
+  }
+
+  return VarDeclInfo{decl->source, decl->name, vq.storage_class, access,
+                     decl->type};
 }
 
 // texture_sampler_types
@@ -559,7 +581,8 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl(bool allow_inferred) {
 //  | multisampled_texture_type LESS_THAN type_decl GREATER_THAN
 //  | storage_texture_type LESS_THAN image_storage_type
 //                         COMMA access GREATER_THAN
-Maybe<ast::Type*> ParserImpl::texture_sampler_types() {
+Maybe<ast::Type*> ParserImpl::texture_sampler_types(
+    ast::DecorationList& decos) {
   auto type = sampler_type();
   if (type.matched)
     return type;
@@ -601,7 +624,7 @@ Maybe<ast::Type*> ParserImpl::texture_sampler_types() {
   if (storage.matched) {
     const char* use = "storage texture type";
     using StorageTextureInfo =
-        std::pair<tint::ast::ImageFormat, tint::ast::AccessControl::Access>;
+        std::pair<tint::ast::ImageFormat, tint::ast::Access>;
     auto params = expect_lt_gt_block(use, [&]() -> Expect<StorageTextureInfo> {
       auto format = expect_image_storage_type(use);
       if (format.errored) {
@@ -609,14 +632,23 @@ Maybe<ast::Type*> ParserImpl::texture_sampler_types() {
       }
 
       if (!match(Token::Type::kComma)) {
+        // TODO(crbug.com/tint/846): Remove this, along with the decos parameter
+        auto access_decos = take_decorations<ast::AccessDecoration>(decos);
+        if (access_decos.size() > 1) {
+          return add_error(access_decos[1]->source(),
+                           "multiple access decorations not allowed");
+        }
+        if (access_decos.size() == 0) {
+          return add_error(source_range, "expected access control");
+        }
+
         deprecated(
             peek().source(),
             "access control is expected as last parameter of storage textures");
-        return std::make_pair(format.value,
-                              tint::ast::AccessControl::kReadWrite);
+        return std::make_pair(format.value, access_decos[0]->value());
       }
 
-      auto access = expect_access_type();
+      auto access = expect_access("access control");
       if (access.errored) {
         return Failure::kErrored;
       }
@@ -628,19 +660,8 @@ Maybe<ast::Type*> ParserImpl::texture_sampler_types() {
       return Failure::kErrored;
     }
 
-    ast::Type* ty =
-        builder_.ty.storage_texture(source_range, storage.value, params->first);
-
-    if (params->second != tint::ast::AccessControl::kReadWrite) {
-      // TODO(crbug.com/tint/846): The ast::AccessControl decoration is
-      // deprecated, but while we're migrating existing WGSL over to the new
-      // style of having the access part of the storage texture, we need to
-      // support both old and new styles. For now, have the new syntax emulate
-      // the old style AST.
-      ty = builder_.ty.access(params->second, ty);
-    }
-
-    return ty;
+    return builder_.ty.storage_texture(source_range, storage.value,
+                                       params->first, params->second);
   }
 
   return Failure::kNoMatch;
@@ -906,7 +927,8 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
     return Failure::kErrored;
 
   if (allow_inferred && !peek().Is(Token::Type::kColon)) {
-    return TypedIdentifier{nullptr, ident.value, ident.source};
+    return TypedIdentifier{nullptr, ast::Access::kUndefined, ident.value,
+                           ident.source};
   }
 
   if (!expect(use, Token::Type::kColon))
@@ -916,8 +938,6 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
   if (decos.errored)
     return Failure::kErrored;
 
-  auto access_decos = take_decorations<ast::AccessDecoration>(decos.value);
-
   auto t = peek();
   auto type = type_decl(decos.value);
   if (type.errored)
@@ -925,52 +945,65 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
   if (!type.matched)
     return add_error(t.source(), "invalid type", use);
 
+  auto access_decos = take_decorations<ast::AccessDecoration>(decos.value);
+
   if (!expect_decorations_consumed(decos.value))
     return Failure::kErrored;
 
   if (access_decos.size() > 1)
     return add_error(ident.source, "multiple access decorations not allowed");
 
-  ast::Type* ty = type.value;
+  auto access =
+      access_decos.empty() ? ast::Access::kUndefined : access_decos[0]->value();
 
-  for (auto* deco : access_decos) {
-    // If we have an access control decoration then we take it and wrap our
-    // type up with that decoration
-    ty = builder_.ty.access(deco->source(),
-                            deco->As<ast::AccessDecoration>()->value(), ty);
-  }
-  return TypedIdentifier{ty, ident.value, ident.source};
+  return TypedIdentifier{type.value, access, ident.value, ident.source};
 }
 
-Expect<ast::AccessControl::Access> ParserImpl::expect_access_type() {
-  auto ident = expect_ident("access_type");
+Expect<ast::Access> ParserImpl::expect_access(const std::string& use) {
+  auto ident = expect_ident(use);
   if (ident.errored)
     return Failure::kErrored;
 
-  if (ident.value == kReadAccessControl)
-    return {ast::AccessControl::kRead, ident.source};
-  if (ident.value == kWriteAccessControl)
-    return {ast::AccessControl::kWrite, ident.source};
-  if (ident.value == kReadWriteAccessControl)
-    return {ast::AccessControl::kReadWrite, ident.source};
+  if (ident.value == kReadAccess)
+    return {ast::Access::kRead, ident.source};
+  if (ident.value == kWriteAccess)
+    return {ast::Access::kWrite, ident.source};
+  if (ident.value == kReadWriteAccess)
+    return {ast::Access::kReadWrite, ident.source};
 
   return add_error(ident.source, "invalid value for access decoration");
 }
 
-// variable_storage_decoration
-//   : LESS_THAN storage_class GREATER_THAN
-Maybe<ast::StorageClass> ParserImpl::variable_storage_decoration() {
-  if (!peek().IsLessThan())
+// variable_qualifier
+//   : LESS_THAN storage_class (COMMA access_mode)? GREATER_THAN
+Maybe<ParserImpl::VariableQualifier> ParserImpl::variable_qualifier() {
+  if (!peek().IsLessThan()) {
     return Failure::kNoMatch;
+  }
 
-  const char* use = "variable decoration";
+  auto* use = "variable declaration";
+  auto vq = expect_lt_gt_block(use, [&]() -> Expect<VariableQualifier> {
+    auto source = make_source_range();
+    auto sc = expect_storage_class(use);
+    if (sc.errored) {
+      return Failure::kErrored;
+    }
+    if (match(Token::Type::kComma)) {
+      auto ac = expect_access(use);
+      if (ac.errored) {
+        return Failure::kErrored;
+      }
+      return VariableQualifier{sc.value, ac.value};
+    }
+    return Expect<VariableQualifier>{
+        VariableQualifier{sc.value, ast::Access::kUndefined}, source};
+  });
 
-  auto sc = expect_lt_gt_block(use, [&] { return expect_storage_class(use); });
-
-  if (sc.errored)
+  if (vq.errored) {
     return Failure::kErrored;
+  }
 
-  return sc;
+  return vq;
 }
 
 // type_alias
@@ -1088,7 +1121,7 @@ Maybe<ast::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
     return expect_type_decl_matrix(t);
   }
 
-  auto texture_or_sampler = texture_sampler_types();
+  auto texture_or_sampler = texture_sampler_types(decos);
   if (texture_or_sampler.errored)
     return Failure::kErrored;
   if (texture_or_sampler.matched)
@@ -1449,7 +1482,8 @@ Expect<ast::Variable*> ParserImpl::expect_param() {
   auto* var =
       create<ast::Variable>(decl->source,                             // source
                             builder_.Symbols().Register(decl->name),  // symbol
-                            ast::StorageClass::kNone,  // storage_class
+                            ast::StorageClass::kNone,  // storage class
+                            ast::Access::kUndefined,   // access control
                             decl->type,                // type
                             true,                      // is_const
                             nullptr,                   // constructor
@@ -1712,7 +1746,8 @@ Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
     auto* var = create<ast::Variable>(
         decl->source,                             // source
         builder_.Symbols().Register(decl->name),  // symbol
-        ast::StorageClass::kNone,                 // storage_class
+        ast::StorageClass::kNone,                 // storage class
+        ast::Access::kUndefined,                  // access control
         decl->type,                               // type
         true,                                     // is_const
         constructor.value,                        // constructor
@@ -1741,7 +1776,8 @@ Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
   auto* var =
       create<ast::Variable>(decl->source,                             // source
                             builder_.Symbols().Register(decl->name),  // symbol
-                            decl->storage_class,     // storage_class
+                            decl->storage_class,     // storage class
+                            decl->access,            // access control
                             decl->type,              // type
                             false,                   // is_const
                             constructor,             // constructor
@@ -2947,7 +2983,7 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
   if (s == kAccessDecoration) {
     const char* use = "access decoration";
     return expect_paren_block(use, [&]() -> Result {
-      auto val = expect_access_type();
+      auto val = expect_access("access control");
       if (val.errored)
         return Failure::kErrored;
 

@@ -17,7 +17,7 @@
 
 #include <vector>
 
-#include "src/ast/access_control.h"
+#include "src/ast/access.h"
 #include "src/ast/storage_class.h"
 #include "src/sem/expression.h"
 
@@ -42,11 +42,11 @@ class Variable : public Castable<Variable, Node> {
   /// @param declaration the AST declaration node
   /// @param type the variable type
   /// @param storage_class the variable storage class
-  /// @param access_control the variable access control type
+  /// @param access the variable access control type
   Variable(const ast::Variable* declaration,
            const sem::Type* type,
            ast::StorageClass storage_class,
-           ast::AccessControl::Access access_control);
+           ast::Access access);
 
   /// Constructor for overridable pipeline constants
   /// @param declaration the AST declaration node
@@ -69,7 +69,7 @@ class Variable : public Castable<Variable, Node> {
   ast::StorageClass StorageClass() const { return storage_class_; }
 
   /// @returns the access control for the variable
-  ast::AccessControl::Access AccessControl() const { return access_control_; }
+  ast::Access Access() const { return access_; }
 
   /// @returns the expressions that use the variable
   const std::vector<const VariableUser*>& Users() const { return users_; }
@@ -87,7 +87,7 @@ class Variable : public Castable<Variable, Node> {
   const ast::Variable* const declaration_;
   const sem::Type* const type_;
   ast::StorageClass const storage_class_;
-  ast::AccessControl::Access const access_control_;
+  ast::Access const access_;
   std::vector<const VariableUser*> users_;
   const bool is_pipeline_constant_;
   const uint16_t constant_id_ = 0;

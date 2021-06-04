@@ -210,6 +210,7 @@ TEST_F(SpvUnaryLogicalTest, LogicalNot_Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __bool
     {
       UnaryOp[not set]{
@@ -236,6 +237,7 @@ TEST_F(SpvUnaryLogicalTest, LogicalNot_Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__bool
     {
       UnaryOp[not set]{
@@ -290,6 +292,7 @@ TEST_P(SpvBinaryLogicalTest, EmitExpression) {
   ss << R"(VariableConst{
     x_1
     none
+    undefined
     )"
      << GetParam().ast_type << "\n    {\n      Binary[not set]{"
      << "\n        " << GetParam().ast_lhs << "\n        " << GetParam().ast_op
@@ -728,6 +731,7 @@ TEST_F(SpvFUnordTest, FUnordEqual_Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __bool
     {
       UnaryOp[not set]{
@@ -758,6 +762,7 @@ TEST_F(SpvFUnordTest, FUnordEqual_Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__bool
     {
       UnaryOp[not set]{
@@ -796,6 +801,7 @@ TEST_F(SpvFUnordTest, FUnordNotEqual_Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __bool
     {
       UnaryOp[not set]{
@@ -826,6 +832,7 @@ TEST_F(SpvFUnordTest, FUnordNotEqual_Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__bool
     {
       UnaryOp[not set]{
@@ -864,6 +871,7 @@ TEST_F(SpvFUnordTest, FUnordLessThan_Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __bool
     {
       UnaryOp[not set]{
@@ -894,6 +902,7 @@ TEST_F(SpvFUnordTest, FUnordLessThan_Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__bool
     {
       UnaryOp[not set]{
@@ -932,6 +941,7 @@ TEST_F(SpvFUnordTest, FUnordLessThanEqual_Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __bool
     {
       UnaryOp[not set]{
@@ -962,6 +972,7 @@ TEST_F(SpvFUnordTest, FUnordLessThanEqual_Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__bool
     {
       UnaryOp[not set]{
@@ -1000,6 +1011,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThan_Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __bool
     {
       UnaryOp[not set]{
@@ -1030,6 +1042,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThan_Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__bool
     {
       UnaryOp[not set]{
@@ -1068,6 +1081,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __bool
     {
       UnaryOp[not set]{
@@ -1098,6 +1112,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__bool
     {
       UnaryOp[not set]{
@@ -1139,6 +1154,7 @@ TEST_F(SpvLogicalTest, Select_BoolCond_BoolParams) {
   VariableConst{
     x_1
     none
+    undefined
     __bool
     {
       Call[not set]{
@@ -1171,6 +1187,7 @@ TEST_F(SpvLogicalTest, Select_BoolCond_IntScalarParams) {
   VariableConst{
     x_1
     none
+    undefined
     __u32
     {
       Call[not set]{
@@ -1203,6 +1220,7 @@ TEST_F(SpvLogicalTest, Select_BoolCond_FloatScalarParams) {
   VariableConst{
     x_1
     none
+    undefined
     __f32
     {
       Call[not set]{
@@ -1238,6 +1256,7 @@ TEST_F(SpvLogicalTest, Select_BoolCond_VectorParams) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__u32
     {
       Call[not set]{
@@ -1284,6 +1303,7 @@ TEST_F(SpvLogicalTest, Select_VecBoolCond_VectorParams) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__u32
     {
       Call[not set]{
@@ -1328,6 +1348,7 @@ TEST_F(SpvLogicalTest, Any) {
   VariableConst{
     x_1
     none
+    undefined
     __bool
     {
       Call[not set]{
@@ -1362,6 +1383,7 @@ TEST_F(SpvLogicalTest, All) {
   VariableConst{
     x_1
     none
+    undefined
     __bool
     {
       Call[not set]{
@@ -1396,6 +1418,7 @@ TEST_F(SpvLogicalTest, IsNan_Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __bool
     {
       Call[not set]{
@@ -1426,6 +1449,7 @@ TEST_F(SpvLogicalTest, IsNan_Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__bool
     {
       Call[not set]{
@@ -1460,6 +1484,7 @@ TEST_F(SpvLogicalTest, IsInf_Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __bool
     {
       Call[not set]{
@@ -1490,6 +1515,7 @@ TEST_F(SpvLogicalTest, IsInf_Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__bool
     {
       Call[not set]{

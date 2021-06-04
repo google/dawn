@@ -287,13 +287,6 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
     if (ty->Is<ast::F32>()) {
       return builder_->create<sem::F32>();
     }
-    if (auto* t = ty->As<ast::AccessControl>()) {
-      TINT_SCOPED_ASSIGNMENT(current_access_control_, t);
-      if (auto* el = Type(t->type())) {
-        return el;
-      }
-      return nullptr;
-    }
     if (auto* t = ty->As<ast::Vector>()) {
       if (auto* el = Type(t->type())) {
         return builder_->create<sem::Vector>(const_cast<sem::Type*>(el),
@@ -341,14 +334,11 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
     }
     if (auto* t = ty->As<ast::StorageTexture>()) {
       if (auto* el = Type(t->type())) {
-        if (!current_access_control_) {
-          diagnostics_.add_error("storage textures must have access control",
-                                 t->source());
+        if (!ValidateStorageTexture(t)) {
           return nullptr;
         }
         return builder_->create<sem::StorageTexture>(
-            t->dim(), t->image_format(),
-            current_access_control_->access_control(),
+            t->dim(), t->image_format(), t->access(),
             const_cast<sem::Type*>(el));
       }
       return nullptr;
@@ -375,6 +365,39 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
     builder_->Sem().Add(ty, s);
   }
   return s;
+}
+
+bool Resolver::ValidateStorageTexture(const ast::StorageTexture* t) {
+  switch (t->access()) {
+    case ast::Access::kUndefined:
+      diagnostics_.add_error("storage textures must have access control",
+                             t->source());
+      return false;
+    case ast::Access::kReadWrite:
+      diagnostics_.add_error(
+          "storage textures only support read-only and write-only access",
+          t->source());
+      return false;
+
+    case ast::Access::kRead:
+    case ast::Access::kWrite:
+      break;
+  }
+
+  if (!IsValidStorageTextureDimension(t->dim())) {
+    diagnostics_.add_error(
+        "cube dimensions for storage textures are not supported", t->source());
+    return false;
+  }
+
+  if (!IsValidStorageTextureImageFormat(t->image_format())) {
+    diagnostics_.add_error(
+        "image format must be one of the texel formats specified for storage "
+        "textues in https://gpuweb.github.io/gpuweb/wgsl/#texel-formats",
+        t->source());
+    return false;
+  }
+  return true;
 }
 
 Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
@@ -466,35 +489,17 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
     return nullptr;
   }
 
-  // TODO(crbug.com/tint/802): Temporary while ast::AccessControl exits.
-  auto find_first_access_control =
-      [this](const ast::Type* ty) -> const ast::AccessControl* {
-    if (ty == nullptr) {
-      return nullptr;
-    }
-    if (const ast::AccessControl* ac = ty->As<ast::AccessControl>()) {
-      return ac;
-    }
-    while (auto* tn = ty->As<ast::TypeName>()) {
-      auto it = named_type_info_.find(tn->name());
-      if (it == named_type_info_.end()) {
-        break;
-      }
-      auto* alias = it->second.ast->As<ast::Alias>();
-      if (!alias) {
-        break;
-      }
-      ty = alias->type();
-      if (auto* ac = ty->As<ast::AccessControl>()) {
-        return ac;
-      }
-    }
-    return nullptr;
-  };
+  auto access = var->declared_access();
+  if (access == ast::Access::kUndefined &&
+      storage_class == ast::StorageClass::kStorage) {
+    // https://gpuweb.github.io/gpuweb/wgsl/#access-mode-defaults
+    // For the storage storage class, the access mode is optional, and defaults
+    // to read.
+    access = ast::Access::kRead;
+  }
 
-  auto* access_control = find_first_access_control(var->type());
   auto* info = variable_infos_.Create(var, const_cast<sem::Type*>(type),
-                                      type_name, storage_class, access_control);
+                                      type_name, storage_class, access);
   variable_to_info_.emplace(var, info);
 
   return info;
@@ -658,25 +663,31 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
       }
   }
 
+  // https://gpuweb.github.io/gpuweb/wgsl/#variable-declaration
+  // The access mode always has a default, and except for variables in the
+  // storage storage class, must not be written.
+  if (info->storage_class != ast::StorageClass::kStorage &&
+      info->declaration->declared_access() != ast::Access::kUndefined) {
+    diagnostics_.add_error(
+        "variables declared not declared in the <storage> storage class must "
+        "not declare an access control",
+        info->declaration->source());
+    return false;
+  }
+
   switch (info->storage_class) {
     case ast::StorageClass::kStorage: {
-      // https://gpuweb.github.io/gpuweb/wgsl/#variable-declaration
-      // Variables in the storage storage class and variables with a storage
-      // texture type must have an access attribute applied to the store type.
-
       // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
       // A variable in the storage storage class is a storage buffer variable.
       // Its store type must be a host-shareable structure type with block
       // attribute, satisfying the storage class constraints.
 
-      auto* str = info->access_control
-                      ? info->type->UnwrapRef()->As<sem::Struct>()
-                      : nullptr;
+      auto* str = info->type->UnwrapRef()->As<sem::Struct>();
 
       if (!str) {
         diagnostics_.add_error(
-            "variables declared in the <storage> storage class must be of an "
-            "[[access]] qualified structure type",
+            "variables declared in the <storage> storage class must be of a "
+            "structure type",
             info->declaration->source());
         return false;
       }
@@ -751,33 +762,6 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
     if (!r->type()->UnwrapRef()->is_numeric_scalar()) {
       diagnostics_.add_error(
           "texture_multisampled_2d<type>: type must be f32, i32 or u32",
-          var->source());
-      return false;
-    }
-  }
-
-  if (auto* storage_tex = info->type->UnwrapRef()->As<sem::StorageTexture>()) {
-    if (info->access_control->access_control() ==
-        ast::AccessControl::kReadWrite) {
-      diagnostics_.add_error(
-          "storage textures only support read-only and write-only access",
-          var->source());
-      return false;
-    }
-
-    if (!IsValidStorageTextureDimension(storage_tex->dim())) {
-      diagnostics_.add_error(
-          "cube dimensions for storage textures are not "
-          "supported",
-          var->source());
-      return false;
-    }
-
-    if (!IsValidStorageTextureImageFormat(storage_tex->image_format())) {
-      diagnostics_.add_error(
-          "image format must be one of the texel formats specified for "
-          "storage textues in "
-          "https://gpuweb.github.io/gpuweb/wgsl/#texel-formats",
           var->source());
       return false;
     }
@@ -2584,9 +2568,7 @@ void Resolver::CreateSemanticNodes() const {
       sem_var = builder_->create<sem::Variable>(var, info->type, constant_id);
     } else {
       sem_var = builder_->create<sem::Variable>(
-          var, info->type, info->storage_class,
-          info->access_control ? info->access_control->access_control()
-                               : ast::AccessControl::kReadWrite);
+          var, info->type, info->storage_class, info->access);
     }
 
     std::vector<const sem::VariableUser*> users;
@@ -3274,12 +3256,12 @@ Resolver::VariableInfo::VariableInfo(const ast::Variable* decl,
                                      sem::Type* ty,
                                      const std::string& tn,
                                      ast::StorageClass sc,
-                                     const ast::AccessControl* ac)
+                                     ast::Access ac)
     : declaration(decl),
       type(ty),
       type_name(tn),
       storage_class(sc),
-      access_control(ac) {}
+      access(ac) {}
 
 Resolver::VariableInfo::~VariableInfo() = default;
 

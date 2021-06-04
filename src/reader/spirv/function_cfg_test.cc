@@ -7910,6 +7910,7 @@ VariableDeclStatement{
   Variable{
     guard10
     none
+    undefined
     __bool
     {
       ScalarConstructor[not set]{true}
@@ -8022,6 +8023,7 @@ VariableDeclStatement{
   Variable{
     guard10
     none
+    undefined
     __bool
     {
       ScalarConstructor[not set]{true}
@@ -8149,6 +8151,7 @@ VariableDeclStatement{
   Variable{
     guard10
     none
+    undefined
     __bool
     {
       ScalarConstructor[not set]{true}

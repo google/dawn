@@ -189,6 +189,7 @@ TEST_F(FunctionTest, ToStr_WithParams) {
   VariableConst{
     var
     none
+    undefined
     __i32
   }
 )

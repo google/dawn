@@ -962,7 +962,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
     const auto param_name = namer_.MakeDerivedName(var_name + "_param");
     const auto param_sym = builder_.Symbols().Register(param_name);
     auto* param = create<ast::Variable>(
-        source, param_sym, ast::StorageClass::kNone,
+        source, param_sym, ast::StorageClass::kNone, ast::Access::kUndefined,
         forced_store_type->Build(builder_), true /* is const */,
         nullptr /* no constructor */, param_decos);
     decl.params.push_back(param);
@@ -2542,9 +2542,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
   if (!guard_name.empty()) {
     // Declare the guard variable just before the "if", initialized to true.
     auto* guard_var =
-        create<ast::Variable>(Source{}, builder_.Symbols().Register(guard_name),
-                              ast::StorageClass::kNone, builder_.ty.bool_(),
-                              false, MakeTrue(Source{}), ast::DecorationList{});
+        builder_.Var(guard_name, builder_.ty.bool_(), MakeTrue(Source{}));
     auto* guard_decl = create<ast::VariableDeclStatement>(Source{}, guard_var);
     AddStatement(guard_decl);
   }
@@ -3102,11 +3100,9 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     TINT_ASSERT(def_inst);
     const auto phi_var_name = GetDefInfo(id)->phi_var;
     TINT_ASSERT(!phi_var_name.empty());
-    auto* var = create<ast::Variable>(
-        Source{}, builder_.Symbols().Register(phi_var_name),
-        ast::StorageClass::kNone,
-        parser_impl_.ConvertType(def_inst->type_id())->Build(builder_), false,
-        nullptr, ast::DecorationList{});
+    auto* var = builder_.Var(
+        phi_var_name,
+        parser_impl_.ConvertType(def_inst->type_id())->Build(builder_));
     AddStatement(create<ast::VariableDeclStatement>(Source{}, var));
   }
 
@@ -5401,7 +5397,8 @@ bool FunctionEmitter::MakeVectorInsertDynamic(
 
   auto* temp_var = create<ast::Variable>(
       Source{}, registered_temp_name, ast::StorageClass::kNone,
-      ast_type->Build(builder_), false, src_vector.expr, ast::DecorationList{});
+      ast::Access::kUndefined, ast_type->Build(builder_), false,
+      src_vector.expr, ast::DecorationList{});
   AddStatement(create<ast::VariableDeclStatement>(Source{}, temp_var));
 
   auto* lhs = create<ast::ArrayAccessorExpression>(
@@ -5429,7 +5426,7 @@ bool FunctionEmitter::MakeCompositeInsert(
   // like this avoids constantly reloading the value many times.
   //
   // This technique is a combination of:
-  // - making a temporary variable and constant declaration, like  what we do
+  // - making a temporary variable and constant declaration, like what we do
   //   for VectorInsertDynamic, and
   // - building up an access-chain like access like for CompositeExtract, but
   //   on the left-hand side of the assignment.
@@ -5445,10 +5442,10 @@ bool FunctionEmitter::MakeCompositeInsert(
   auto temp_name = namer_.MakeDerivedName(result_name);
   auto registered_temp_name = builder_.Symbols().Register(temp_name);
 
-  auto* temp_var =
-      create<ast::Variable>(Source{}, registered_temp_name,
-                            ast::StorageClass::kNone, ast_type->Build(builder_),
-                            false, src_composite.expr, ast::DecorationList{});
+  auto* temp_var = create<ast::Variable>(
+      Source{}, registered_temp_name, ast::StorageClass::kNone,
+      ast::Access::kUndefined, ast_type->Build(builder_), false,
+      src_composite.expr, ast::DecorationList{});
   AddStatement(create<ast::VariableDeclStatement>(Source{}, temp_var));
 
   TypedExpression seed_expr{ast_type, create<ast::IdentifierExpression>(

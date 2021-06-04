@@ -159,6 +159,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Int_Int) {
   VariableConst{
     x_1
     none
+    undefined
     __i32
     {
       UnaryOp[not set]{
@@ -187,6 +188,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Int_Uint) {
   VariableConst{
     x_1
     none
+    undefined
     __i32
     {
       UnaryOp[not set]{
@@ -217,6 +219,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Uint_Int) {
   VariableConst{
     x_1
     none
+    undefined
     __u32
     {
       Bitcast[not set]<__u32>{
@@ -247,6 +250,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Uint_Uint) {
   VariableConst{
     x_1
     none
+    undefined
     __u32
     {
       Bitcast[not set]<__u32>{
@@ -279,6 +283,7 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_SignedVec) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__i32
     {
       UnaryOp[not set]{
@@ -311,6 +316,7 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_UnsignedVec) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__i32
     {
       UnaryOp[not set]{
@@ -345,6 +351,7 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_SignedVec) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__u32
     {
       Bitcast[not set]<__vec_2__u32>{
@@ -379,6 +386,7 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_UnsignedVec) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__u32
     {
       Bitcast[not set]<__vec_2__u32>{
@@ -415,6 +423,7 @@ TEST_F(SpvUnaryArithTest, FNegate_Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __f32
     {
       UnaryOp[not set]{
@@ -443,6 +452,7 @@ TEST_F(SpvUnaryArithTest, FNegate_Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__f32
     {
       UnaryOp[not set]{
@@ -498,6 +508,7 @@ TEST_P(SpvBinaryArithTest, EmitExpression) {
   ss << R"(VariableConst{
     x_1
     none
+    undefined
     )"
      << GetParam().ast_type << "\n    {\n      Binary[not set]{"
      << "\n        " << GetParam().ast_lhs << "\n        " << GetParam().ast_op
@@ -543,6 +554,7 @@ TEST_P(SpvBinaryArithGeneralTest, EmitExpression) {
   ss << R"(VariableConst{
     x_1
     none
+    undefined
     )"
      << GetParam().expected;
   auto got = ToString(p->builder(), fe.ast_body());
@@ -1021,6 +1033,7 @@ TEST_F(SpvBinaryArithTestBasic, SDiv_Scalar_UnsignedResult) {
   VariableConst{
     x_1
     none
+    undefined
     __u32
     {
       Bitcast[not set]<__u32>{
@@ -1056,6 +1069,7 @@ TEST_F(SpvBinaryArithTestBasic, SDiv_Vector_UnsignedResult) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__u32
     {
       Bitcast[not set]<__vec_2__u32>{
@@ -1166,6 +1180,7 @@ TEST_F(SpvBinaryArithTestBasic, SMod_Scalar_UnsignedResult) {
   VariableConst{
     x_1
     none
+    undefined
     __u32
     {
       Bitcast[not set]<__u32>{
@@ -1201,6 +1216,7 @@ TEST_F(SpvBinaryArithTestBasic, SMod_Vector_UnsignedResult) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__u32
     {
       Bitcast[not set]<__vec_2__u32>{
@@ -1253,6 +1269,7 @@ TEST_F(SpvBinaryArithTestBasic, VectorTimesScalar) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
+    undefined
     __vec_2__f32
     {
       Binary[not set]{
@@ -1282,6 +1299,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesScalar) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
+    undefined
     __mat_2_2__f32
     {
       Binary[not set]{
@@ -1311,6 +1329,7 @@ TEST_F(SpvBinaryArithTestBasic, VectorTimesMatrix) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
+    undefined
     __vec_2__f32
     {
       Binary[not set]{
@@ -1340,6 +1359,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesVector) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
+    undefined
     __vec_2__f32
     {
       Binary[not set]{
@@ -1369,6 +1389,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesMatrix) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
+    undefined
     __mat_2_2__f32
     {
       Binary[not set]{
@@ -1398,6 +1419,7 @@ TEST_F(SpvBinaryArithTestBasic, Dot) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_3
     none
+    undefined
     __f32
     {
       Call[not set]{
@@ -1432,6 +1454,7 @@ TEST_F(SpvBinaryArithTestBasic, OuterProduct) {
   EXPECT_THAT(got, HasSubstr(R"(VariableConst{
     x_3
     none
+    undefined
     __mat_3_2__f32
     {
       TypeConstructor[not set]{
@@ -1560,6 +1583,7 @@ TEST_P(SpvBinaryDerivativeTest, Derivatives) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_2
     none
+    undefined
     )" + arg.ast_type + R"(
     {
       Call[not set]{
@@ -1610,6 +1634,7 @@ VariableDeclStatement{
   VariableConst{
     x_2
     none
+    undefined
     __mat_2_2__f32
     {
       Call[not set]{
@@ -1648,6 +1673,7 @@ VariableDeclStatement{
   VariableConst{
     x_2
     none
+    undefined
     __mat_2_3__f32
     {
       Call[not set]{
@@ -1683,6 +1709,7 @@ VariableDeclStatement{
   VariableConst{
     x_2
     none
+    undefined
     __mat_3_2__f32
     {
       Call[not set]{

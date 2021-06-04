@@ -174,6 +174,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param fmt the format to generate
   /// @returns true if the format is emitted
   bool EmitImageFormat(const ast::ImageFormat fmt);
+  /// Handles emitting an access control
+  /// @param access the access to generate
+  /// @returns true if the access is emitted
+  bool EmitAccess(const ast::Access access);
   /// Handles emitting a type constructor
   /// @param expr the type constructor expression
   /// @returns true if the constructor is emitted

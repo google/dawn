@@ -30,7 +30,7 @@ TEST_F(StorageTextureTest, Dim) {
       StorageTexture::SubtypeFor(ast::ImageFormat::kRgba32Float, Types());
   auto* s = create<StorageTexture>(ast::TextureDimension::k2dArray,
                                    ast::ImageFormat::kRgba32Float,
-                                   ast::AccessControl::kReadWrite, subtype);
+                                   ast::Access::kReadWrite, subtype);
   EXPECT_EQ(s->dim(), ast::TextureDimension::k2dArray);
 }
 
@@ -39,7 +39,7 @@ TEST_F(StorageTextureTest, Format) {
       StorageTexture::SubtypeFor(ast::ImageFormat::kRgba32Float, Types());
   auto* s = create<StorageTexture>(ast::TextureDimension::k2dArray,
                                    ast::ImageFormat::kRgba32Float,
-                                   ast::AccessControl::kReadWrite, subtype);
+                                   ast::Access::kReadWrite, subtype);
   EXPECT_EQ(s->image_format(), ast::ImageFormat::kRgba32Float);
 }
 
@@ -48,7 +48,7 @@ TEST_F(StorageTextureTest, TypeName) {
       StorageTexture::SubtypeFor(ast::ImageFormat::kRgba32Float, Types());
   auto* s = create<StorageTexture>(ast::TextureDimension::k2dArray,
                                    ast::ImageFormat::kRgba32Float,
-                                   ast::AccessControl::kReadWrite, subtype);
+                                   ast::Access::kReadWrite, subtype);
   EXPECT_EQ(s->type_name(),
             "__storage_texture_2d_array_rgba32float_read_write");
 }
@@ -58,7 +58,7 @@ TEST_F(StorageTextureTest, FriendlyName) {
       StorageTexture::SubtypeFor(ast::ImageFormat::kRgba32Float, Types());
   auto* s = create<StorageTexture>(ast::TextureDimension::k2dArray,
                                    ast::ImageFormat::kRgba32Float,
-                                   ast::AccessControl::kReadWrite, subtype);
+                                   ast::Access::kReadWrite, subtype);
   EXPECT_EQ(s->FriendlyName(Symbols()),
             "texture_storage_2d_array<rgba32float, read_write>");
 }
@@ -68,7 +68,7 @@ TEST_F(StorageTextureTest, F32) {
       sem::StorageTexture::SubtypeFor(ast::ImageFormat::kRgba32Float, Types());
   Type* s = create<StorageTexture>(ast::TextureDimension::k2dArray,
                                    ast::ImageFormat::kRgba32Float,
-                                   ast::AccessControl::kReadWrite, subtype);
+                                   ast::Access::kReadWrite, subtype);
 
   auto program = Build();
 
@@ -83,7 +83,7 @@ TEST_F(StorageTextureTest, U32) {
       sem::StorageTexture::SubtypeFor(ast::ImageFormat::kRg32Uint, Types());
   Type* s = create<StorageTexture>(ast::TextureDimension::k2dArray,
                                    ast::ImageFormat::kRg32Uint,
-                                   ast::AccessControl::kReadWrite, subtype);
+                                   ast::Access::kReadWrite, subtype);
 
   auto program = Build();
 
@@ -98,7 +98,7 @@ TEST_F(StorageTextureTest, I32) {
       sem::StorageTexture::SubtypeFor(ast::ImageFormat::kRgba32Sint, Types());
   Type* s = create<StorageTexture>(ast::TextureDimension::k2dArray,
                                    ast::ImageFormat::kRgba32Sint,
-                                   ast::AccessControl::kReadWrite, subtype);
+                                   ast::Access::kReadWrite, subtype);
 
   auto program = Build();
 

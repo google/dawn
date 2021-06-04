@@ -92,10 +92,12 @@ TEST_F(VariableTest, Assert_DifferentProgramID_Constructor) {
 }
 
 TEST_F(VariableTest, to_str) {
-  auto* v = Var("my_var", ty.f32(), StorageClass::kFunction);
+  auto* v =
+      Var("my_var", ty.f32(), StorageClass::kFunction, ast::Access::kReadWrite);
   EXPECT_EQ(str(v), R"(Variable{
   my_var
   function
+  read_write
   __f32
 }
 )");
@@ -161,7 +163,8 @@ TEST_F(VariableTest, BindingPointMissingBindingDecoration) {
 }
 
 TEST_F(VariableTest, Decorated_to_str) {
-  auto* var = Var("my_var", ty.f32(), StorageClass::kFunction, Expr("expr"),
+  auto* var = Var("my_var", ty.f32(), StorageClass::kFunction,
+                  ast::Access::kRead, Expr("expr"),
                   DecorationList{
                       create<BindingDecoration>(2),
                       create<GroupDecoration>(1),
@@ -174,6 +177,7 @@ TEST_F(VariableTest, Decorated_to_str) {
   }
   my_var
   function
+  read
   __f32
   {
     Identifier[not set]{expr}

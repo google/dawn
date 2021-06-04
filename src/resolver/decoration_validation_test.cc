@@ -30,7 +30,6 @@ namespace DecorationTests {
 namespace {
 
 enum class DecorationKind {
-  kAccess,
   kAlign,
   kBinding,
   kBuiltin,
@@ -68,9 +67,6 @@ static ast::DecorationList createDecorations(const Source& source,
                                              ProgramBuilder& builder,
                                              DecorationKind kind) {
   switch (kind) {
-    case DecorationKind::kAccess:
-      return {builder.create<ast::AccessDecoration>(source,
-                                                    ast::AccessControl::kRead)};
     case DecorationKind::kAlign:
       return {builder.create<ast::StructMemberAlignDecoration>(source, 4u)};
     case DecorationKind::kBinding:
@@ -122,8 +118,7 @@ TEST_P(FunctionReturnTypeDecorationTest, IsValid) {
 INSTANTIATE_TEST_SUITE_P(
     ResolverDecorationValidationTest,
     FunctionReturnTypeDecorationTest,
-    testing::Values(TestParams{DecorationKind::kAccess, false},
-                    TestParams{DecorationKind::kAlign, false},
+    testing::Values(TestParams{DecorationKind::kAlign, false},
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, true},
                     TestParams{DecorationKind::kGroup, false},
@@ -162,8 +157,7 @@ TEST_P(ArrayDecorationTest, IsValid) {
 INSTANTIATE_TEST_SUITE_P(
     ResolverDecorationValidationTest,
     ArrayDecorationTest,
-    testing::Values(TestParams{DecorationKind::kAccess, false},
-                    TestParams{DecorationKind::kAlign, false},
+    testing::Values(TestParams{DecorationKind::kAlign, false},
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, false},
                     TestParams{DecorationKind::kGroup, false},
@@ -197,8 +191,7 @@ TEST_P(StructDecorationTest, IsValid) {
 INSTANTIATE_TEST_SUITE_P(
     ResolverDecorationValidationTest,
     StructDecorationTest,
-    testing::Values(TestParams{DecorationKind::kAccess, false},
-                    TestParams{DecorationKind::kAlign, false},
+    testing::Values(TestParams{DecorationKind::kAlign, false},
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, false},
                     TestParams{DecorationKind::kGroup, false},
@@ -234,8 +227,7 @@ TEST_P(StructMemberDecorationTest, IsValid) {
 INSTANTIATE_TEST_SUITE_P(
     ResolverDecorationValidationTest,
     StructMemberDecorationTest,
-    testing::Values(TestParams{DecorationKind::kAccess, false},
-                    TestParams{DecorationKind::kAlign, true},
+    testing::Values(TestParams{DecorationKind::kAlign, true},
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, true},
                     TestParams{DecorationKind::kGroup, false},
@@ -277,8 +269,7 @@ TEST_P(VariableDecorationTest, IsValid) {
 INSTANTIATE_TEST_SUITE_P(
     ResolverDecorationValidationTest,
     VariableDecorationTest,
-    testing::Values(TestParams{DecorationKind::kAccess, false},
-                    TestParams{DecorationKind::kAlign, false},
+    testing::Values(TestParams{DecorationKind::kAlign, false},
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, true},
                     TestParams{DecorationKind::kGroup, false},
@@ -312,8 +303,7 @@ TEST_P(ConstantDecorationTest, IsValid) {
 INSTANTIATE_TEST_SUITE_P(
     ResolverDecorationValidationTest,
     ConstantDecorationTest,
-    testing::Values(TestParams{DecorationKind::kAccess, false},
-                    TestParams{DecorationKind::kAlign, false},
+    testing::Values(TestParams{DecorationKind::kAlign, false},
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, false},
                     TestParams{DecorationKind::kGroup, false},
@@ -346,8 +336,7 @@ TEST_P(FunctionDecorationTest, IsValid) {
 INSTANTIATE_TEST_SUITE_P(
     ResolverDecorationValidationTest,
     FunctionDecorationTest,
-    testing::Values(TestParams{DecorationKind::kAccess, false},
-                    TestParams{DecorationKind::kAlign, false},
+    testing::Values(TestParams{DecorationKind::kAlign, false},
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, false},
                     TestParams{DecorationKind::kGroup, false},
@@ -523,8 +512,8 @@ TEST_F(ResourceDecorationTest, UniformBufferMissingBinding) {
 TEST_F(ResourceDecorationTest, StorageBufferMissingBinding) {
   auto* s = Structure("S", {Member("x", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* ac = ty.access(ast::AccessControl::kRead, s);
-  Global(Source{{12, 34}}, "G", ac, ast::StorageClass::kStorage);
+  Global(Source{{12, 34}}, "G", s, ast::StorageClass::kStorage,
+         ast::Access::kRead);
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),

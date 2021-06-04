@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "src/ast/alias.h"
-#include "src/ast/access_control.h"
+#include "src/ast/access.h"
 #include "src/ast/array.h"
 #include "src/ast/bool.h"
 #include "src/ast/f32.h"
@@ -74,23 +74,6 @@ TEST_F(AstAliasTest, UnwrapAll_TwiceAliasPointerTwiceAlias) {
   EXPECT_EQ(aapaa->symbol(), Symbol(4, ID()));
   EXPECT_EQ(aapaa->type(), apaa);
   EXPECT_EQ(aapaa->UnwrapAll(), u32);
-}
-
-TEST_F(AstAliasTest, UnwrapAll_AccessControlPointer) {
-  auto* u32 = create<U32>();
-  auto* a = create<AccessControl>(AccessControl::kRead, u32);
-  auto* pa = create<Pointer>(a, StorageClass::kUniform);
-  EXPECT_EQ(pa->type(), a);
-  EXPECT_EQ(pa->UnwrapAll(), u32);
-}
-
-TEST_F(AstAliasTest, UnwrapAll_PointerAccessControl) {
-  auto* u32 = create<U32>();
-  auto* p = create<Pointer>(u32, StorageClass::kUniform);
-  auto* a = create<AccessControl>(AccessControl::kRead, p);
-
-  EXPECT_EQ(a->type(), p);
-  EXPECT_EQ(a->UnwrapAll(), u32);
 }
 
 }  // namespace

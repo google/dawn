@@ -1270,6 +1270,7 @@ INSTANTIATE_TEST_SUITE_P(Samplers,
     }
     x_10
     none
+    undefined
     __sampler_sampler
   })"}));
 
@@ -1288,6 +1289,7 @@ INSTANTIATE_TEST_SUITE_P(Images,
     }
     x_10
     none
+    undefined
     __sampled_texture_1d__f32
   })"},
                              DeclUnderspecifiedHandleCase{R"(
@@ -1304,7 +1306,8 @@ INSTANTIATE_TEST_SUITE_P(Images,
     }
     x_10
     none
-    __access_control_read_only__storage_texture_1d_rg32float
+    undefined
+    __storage_texture_1d_rg32float_read
   })"},
                              DeclUnderspecifiedHandleCase{R"(
          OpDecorate %10 NonReadable
@@ -1320,7 +1323,8 @@ INSTANTIATE_TEST_SUITE_P(Images,
     }
     x_10
     none
-    __access_control_write_only__storage_texture_1d_rg32float
+    undefined
+    __storage_texture_1d_rg32float_write
   })"}));
 
 // Test handle declaration or error, when there is an image access.
@@ -1453,6 +1457,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __multisampled_texture_2d__f32
   }
 )"},
@@ -1639,6 +1644,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -1648,6 +1654,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d__f32
   })",
                         R"(
@@ -1672,6 +1679,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -1681,6 +1689,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d_array__f32
   })",
                         R"(
@@ -1716,6 +1725,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -1725,6 +1735,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d__f32
   })",
             R"(
@@ -1755,6 +1766,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -1764,6 +1776,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d_array__f32
   })",
             R"(
@@ -1803,6 +1816,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -1812,6 +1826,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d__f32
   })",
                         R"(
@@ -1837,6 +1852,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -1846,6 +1862,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d_array__f32
   })",
                         R"(
@@ -1882,6 +1899,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -1891,6 +1909,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d__f32
   })",
                         R"(
@@ -1923,6 +1942,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -1932,6 +1952,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d__f32
   })",
                         R"(
@@ -1965,6 +1986,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -1974,6 +1996,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d_array__f32
   })",
                         R"(
@@ -2026,6 +2049,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -2035,6 +2059,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __depth_texture_2d
   }
   Variable{
@@ -2044,6 +2069,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_30
     none
+    undefined
     __sampler_comparison
   })",
                         R"(
@@ -2051,6 +2077,7 @@ INSTANTIATE_TEST_SUITE_P(
       VariableConst{
         x_200
         none
+        undefined
         __vec_4__f32
         {
           TypeConstructor[not set]{
@@ -2074,6 +2101,7 @@ INSTANTIATE_TEST_SUITE_P(
       VariableConst{
         x_210
         none
+        undefined
         __f32
         {
           Call[not set]{
@@ -2105,6 +2133,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_comparison
   }
   Variable{
@@ -2114,6 +2143,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __depth_texture_2d
   })",
                         R"(
@@ -2138,6 +2168,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_comparison
   }
   Variable{
@@ -2147,6 +2178,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __depth_texture_2d_array
   })",
                         R"(
@@ -2182,6 +2214,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_comparison
   }
   Variable{
@@ -2191,6 +2224,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __depth_texture_2d
   })",
             R"(
@@ -2221,6 +2255,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_comparison
   }
   Variable{
@@ -2230,6 +2265,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __depth_texture_2d_array
   })",
             R"(
@@ -2276,6 +2312,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_comparison
   }
   Variable{
@@ -2285,6 +2322,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __depth_texture_2d
   })",
                         R"(
@@ -2309,6 +2347,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_comparison
   }
   Variable{
@@ -2318,6 +2357,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __depth_texture_2d_array
   })",
                         R"(
@@ -2353,6 +2393,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_comparison
   }
   Variable{
@@ -2362,6 +2403,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __depth_texture_2d
   })",
                         R"(
@@ -2392,6 +2434,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_comparison
   }
   Variable{
@@ -2401,6 +2444,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __depth_texture_2d_array
   })",
                         R"(
@@ -2440,6 +2484,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_comparison
   }
   Variable{
@@ -2449,6 +2494,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __depth_texture_cube
   })",
                         R"(
@@ -2473,6 +2519,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_comparison
   }
   Variable{
@@ -2482,6 +2529,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __depth_texture_cube_array
   })",
                         R"(
@@ -2522,6 +2570,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -2531,6 +2580,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d__f32
   })",
                         R"(
@@ -2556,6 +2606,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -2565,6 +2616,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d_array__f32
   })",
                         R"(
@@ -2601,6 +2653,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -2610,6 +2663,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d__f32
   })",
                         R"(
@@ -2642,6 +2696,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -2651,6 +2706,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d__f32
   })",
                         R"(
@@ -2685,6 +2741,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -2694,6 +2751,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d_array__f32
   })",
                         R"(
@@ -2739,6 +2797,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -2748,6 +2807,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d__f32
   })",
                         R"(
@@ -2774,6 +2834,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -2783,6 +2844,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d_array__f32
   })",
                         R"(
@@ -2820,6 +2882,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -2829,6 +2892,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d__f32
   })",
                         R"(
@@ -2861,6 +2925,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -2870,6 +2935,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d__f32
   })",
                         R"(
@@ -2905,6 +2971,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -2914,6 +2981,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d_array__f32
   })",
                         R"(
@@ -2957,6 +3025,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -2966,6 +3035,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d_array__f32
   })",
                         R"(
@@ -3020,6 +3090,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -3029,6 +3100,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d__f32
   })",
          R"(
@@ -3053,6 +3125,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -3062,6 +3135,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __depth_texture_2d
   })",
          R"(
@@ -3165,7 +3239,8 @@ INSTANTIATE_TEST_SUITE_P(ImageWrite_OptionalParams,
     }
     x_20
     none
-    __access_control_write_only__storage_texture_2d_rgba32float
+    undefined
+    __storage_texture_2d_rgba32float_write
   })",
                               R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -3195,7 +3270,8 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_write_only__storage_texture_2d_r32float
+    undefined
+    __storage_texture_2d_r32float_write
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -3221,7 +3297,8 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_write_only__storage_texture_2d_r32float
+    undefined
+    __storage_texture_2d_r32float_write
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -3246,7 +3323,8 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_write_only__storage_texture_2d_r32float
+    undefined
+    __storage_texture_2d_r32float_write
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -3270,7 +3348,8 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_write_only__storage_texture_2d_r32float
+    undefined
+    __storage_texture_2d_r32float_write
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -3290,7 +3369,8 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_write_only__storage_texture_2d_rg32float
+    undefined
+    __storage_texture_2d_rg32float_write
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -3315,7 +3395,8 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_write_only__storage_texture_2d_rg32float
+    undefined
+    __storage_texture_2d_rg32float_write
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -3339,7 +3420,8 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_write_only__storage_texture_2d_rg32float
+    undefined
+    __storage_texture_2d_rg32float_write
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -3360,7 +3442,8 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_write_only__storage_texture_2d_rgba32float
+    undefined
+    __storage_texture_2d_rgba32float_write
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -3456,7 +3539,8 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_write_only__storage_texture_2d_rgba32uint
+    undefined
+    __storage_texture_2d_rgba32uint_write
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -3476,7 +3560,8 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_write_only__storage_texture_2d_rgba32sint
+    undefined
+    __storage_texture_2d_rgba32sint_write
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -3506,7 +3591,8 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_write_only__storage_texture_2d_rgba32float
+    undefined
+    __storage_texture_2d_rgba32float_write
   })"},
         // Sampled type is float, texel is unsigned int
         {"%int 2D 0 0 0 2 Rgba32f", "OpImageWrite %im %vi12 %vu1234",
@@ -3521,7 +3607,8 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_write_only__storage_texture_2d_rgba32float
+    undefined
+    __storage_texture_2d_rgba32float_write
   })"},
         // Sampled type is unsigned int, texel is float
         {"%uint 2D 0 0 0 2 Rgba32ui", "OpImageWrite %im %vi12 %vf1234",
@@ -3536,7 +3623,8 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_write_only__storage_texture_2d_rgba32uint
+    undefined
+    __storage_texture_2d_rgba32uint_write
   })"},
         // Sampled type is signed int, texel is float
         {"%int 2D 0 0 0 2 Rgba32i", "OpImageWrite %im %vi12 %vf1234",
@@ -3551,7 +3639,8 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_write_only__storage_texture_2d_rgba32sint
+    undefined
+    __storage_texture_2d_rgba32sint_write
   })"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -3573,7 +3662,8 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_write_only__storage_texture_2d_rgba32uint
+    undefined
+    __storage_texture_2d_rgba32uint_write
   })"},
         // Sampled type is signed int, texel is unsigned int
         {"%int 2D 0 0 0 2 Rgba32i", "OpImageWrite %im %vi12 %vu1234",
@@ -3588,7 +3678,8 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_write_only__storage_texture_2d_rgba32sint
+    undefined
+    __storage_texture_2d_rgba32sint_write
   })"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -3607,7 +3698,8 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_write_only__storage_texture_2d_r32uint
+    undefined
+    __storage_texture_2d_r32uint_write
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -3632,7 +3724,8 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_write_only__storage_texture_2d_r32sint
+    undefined
+    __storage_texture_2d_r32sint_write
   })",
          R"(Call[not set]{
       Identifier[not set]{textureStore}
@@ -3661,12 +3754,14 @@ INSTANTIATE_TEST_SUITE_P(ImageRead_OptionalParams,
     }
     x_20
     none
-    __access_control_read_only__storage_texture_2d_rgba32float
+    undefined
+    __storage_texture_2d_rgba32float_read
   })",
                               R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_4__f32
         {
           Call[not set]{
@@ -3694,12 +3789,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d__f32
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_4__f32
         {
           Call[not set]{
@@ -3723,12 +3820,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d__f32
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_4__f32
         {
           Call[not set]{
@@ -3752,12 +3851,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __depth_texture_2d
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_4__f32
         {
           TypeConstructor[not set]{
@@ -3787,12 +3888,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __depth_texture_2d
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_4__f32
         {
           TypeConstructor[not set]{
@@ -3830,12 +3933,14 @@ INSTANTIATE_TEST_SUITE_P(ImageFetch_Depth,
     }
     x_20
     none
+    undefined
     __depth_texture_2d
   })",
                               R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_4__f32
         {
           TypeConstructor[not set]{
@@ -3876,12 +3981,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __multisampled_texture_2d__f32
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_4__f32
         {
           Call[not set]{
@@ -3909,12 +4016,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __multisampled_texture_2d__f32
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_4__f32
         {
           Call[not set]{
@@ -3959,12 +4068,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d__f32
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_4__f32
         {
           Call[not set]{
@@ -3987,12 +4098,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d__u32
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_4__u32
         {
           Call[not set]{
@@ -4020,12 +4133,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d__i32
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_4__i32
         {
           Call[not set]{
@@ -4057,12 +4172,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_read_only__storage_texture_2d_rgba32float
+    undefined
+    __storage_texture_2d_rgba32float_read
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_4__f32
         {
           Call[not set]{
@@ -4084,12 +4201,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_read_only__storage_texture_2d_rgba32uint
+    undefined
+    __storage_texture_2d_rgba32uint_read
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_4__u32
         {
           Call[not set]{
@@ -4117,12 +4236,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_read_only__storage_texture_2d_rgba32sint
+    undefined
+    __storage_texture_2d_rgba32sint_read
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_4__i32
         {
           Call[not set]{
@@ -4158,6 +4279,7 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_10
     none
+    undefined
     __sampler_sampler
   }
   Variable{
@@ -4167,12 +4289,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d__f32
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_4__f32
         {
           Call[not set]{
@@ -4206,12 +4330,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_read_only__storage_texture_1d_rgba32float
+    undefined
+    __storage_texture_1d_rgba32float_read
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __i32
         {
           TypeConstructor[not set]{
@@ -4238,12 +4364,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_read_only__storage_texture_2d_rgba32float
+    undefined
+    __storage_texture_2d_rgba32float_read
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_2__i32
         {
           TypeConstructor[not set]{
@@ -4270,12 +4398,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_read_only__storage_texture_3d_rgba32float
+    undefined
+    __storage_texture_3d_rgba32float_read
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_3__i32
         {
           TypeConstructor[not set]{
@@ -4300,12 +4430,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __multisampled_texture_2d__f32
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_2__i32
         {
           TypeConstructor[not set]{
@@ -4341,12 +4473,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
-    __access_control_read_only__storage_texture_2d_array_rgba32float
+    undefined
+    __storage_texture_2d_array_rgba32float_read
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_3__i32
         {
           TypeConstructor[not set]{
@@ -4388,12 +4522,14 @@ INSTANTIATE_TEST_SUITE_P(ImageQuerySizeLod_NonArrayed_SignedResult_SignedLevel,
     }
     x_20
     none
+    undefined
     __sampled_texture_1d__f32
   })",
                               R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __i32
         {
           TypeConstructor[not set]{
@@ -4420,12 +4556,14 @@ INSTANTIATE_TEST_SUITE_P(ImageQuerySizeLod_NonArrayed_SignedResult_SignedLevel,
     }
     x_20
     none
+    undefined
     __sampled_texture_2d__f32
   })",
                               R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_2__i32
         {
           TypeConstructor[not set]{
@@ -4452,12 +4590,14 @@ INSTANTIATE_TEST_SUITE_P(ImageQuerySizeLod_NonArrayed_SignedResult_SignedLevel,
     }
     x_20
     none
+    undefined
     __sampled_texture_3d__f32
   })",
                               R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_3__i32
         {
           TypeConstructor[not set]{
@@ -4484,12 +4624,14 @@ INSTANTIATE_TEST_SUITE_P(ImageQuerySizeLod_NonArrayed_SignedResult_SignedLevel,
     }
     x_20
     none
+    undefined
     __sampled_texture_cube__f32
   })",
                               R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_2__i32
         {
           TypeConstructor[not set]{
@@ -4519,12 +4661,14 @@ INSTANTIATE_TEST_SUITE_P(ImageQuerySizeLod_NonArrayed_SignedResult_SignedLevel,
     }
     x_20
     none
+    undefined
     __depth_texture_2d
   })",
                               R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_2__i32
         {
           TypeConstructor[not set]{
@@ -4551,12 +4695,14 @@ INSTANTIATE_TEST_SUITE_P(ImageQuerySizeLod_NonArrayed_SignedResult_SignedLevel,
     }
     x_20
     none
+    undefined
     __depth_texture_cube
   })",
                               R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_2__i32
         {
           TypeConstructor[not set]{
@@ -4596,12 +4742,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d_array__f32
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_3__i32
         {
           TypeConstructor[not set]{
@@ -4640,12 +4788,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_cube_array__f32
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_3__i32
         {
           TypeConstructor[not set]{
@@ -4681,12 +4831,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __depth_texture_2d_array
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_3__i32
         {
           TypeConstructor[not set]{
@@ -4723,12 +4875,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __depth_texture_cube_array
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __vec_3__i32
         {
           TypeConstructor[not set]{
@@ -4771,12 +4925,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_1d__f32
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __i32
         {
           TypeConstructor[not set]{
@@ -4814,12 +4970,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_1d__f32
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __u32
         {
           TypeConstructor[not set]{
@@ -4854,12 +5012,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d__f32
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __i32
         {
           Call[not set]{
@@ -4881,12 +5041,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d_array__f32
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __i32
         {
           Call[not set]{
@@ -4908,12 +5070,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_3d__f32
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __i32
         {
           Call[not set]{
@@ -4935,12 +5099,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_cube__f32
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __i32
         {
           Call[not set]{
@@ -4962,12 +5128,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_cube_array__f32
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __i32
         {
           Call[not set]{
@@ -4989,12 +5157,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __depth_texture_2d
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __i32
         {
           Call[not set]{
@@ -5016,12 +5186,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __depth_texture_2d_array
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __i32
         {
           Call[not set]{
@@ -5043,12 +5215,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __depth_texture_cube
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __i32
         {
           Call[not set]{
@@ -5070,12 +5244,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __depth_texture_cube_array
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __i32
         {
           Call[not set]{
@@ -5102,12 +5278,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __sampled_texture_2d__f32
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __u32
         {
           TypeConstructor[not set]{
@@ -5136,12 +5314,14 @@ INSTANTIATE_TEST_SUITE_P(ImageQuerySamples_SignedResult,
     }
     x_20
     none
+    undefined
     __multisampled_texture_2d__f32
   })",
                               R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __i32
         {
           Call[not set]{
@@ -5172,12 +5352,14 @@ INSTANTIATE_TEST_SUITE_P(
     }
     x_20
     none
+    undefined
     __multisampled_texture_2d__f32
   })",
          R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
+        undefined
         __u32
         {
           TypeConstructor[not set]{
@@ -6231,6 +6413,7 @@ TEST_F(SpvParserHandleTest,
   Variable{
     var_1
     none
+    undefined
     __vec_4__f32
   }
 }
@@ -6238,6 +6421,7 @@ VariableDeclStatement{
   VariableConst{
     x_22
     none
+    undefined
     __vec_4__f32
     {
       Call[not set]{
@@ -6259,6 +6443,7 @@ VariableDeclStatement{
   VariableConst{
     x_26
     none
+    undefined
     __vec_4__f32
     {
       Call[not set]{

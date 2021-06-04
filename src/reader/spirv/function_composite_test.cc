@@ -92,6 +92,7 @@ TEST_F(SpvParserTest_Composite_Construct, Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__u32
     {
       TypeConstructor[not set]{
@@ -106,6 +107,7 @@ VariableDeclStatement{
   VariableConst{
     x_2
     none
+    undefined
     __vec_2__i32
     {
       TypeConstructor[not set]{
@@ -120,6 +122,7 @@ VariableDeclStatement{
   VariableConst{
     x_3
     none
+    undefined
     __vec_2__f32
     {
       TypeConstructor[not set]{
@@ -148,6 +151,7 @@ TEST_F(SpvParserTest_Composite_Construct, Matrix) {
   VariableConst{
     x_1
     none
+    undefined
     __mat_2_3__f32
     {
       TypeConstructor[not set]{
@@ -188,6 +192,7 @@ TEST_F(SpvParserTest_Composite_Construct, Array) {
   VariableConst{
     x_1
     none
+    undefined
     __array__u32_5
     {
       TypeConstructor[not set]{
@@ -218,6 +223,7 @@ TEST_F(SpvParserTest_Composite_Construct, Struct) {
   VariableConst{
     x_1
     none
+    undefined
     __type_name_S
     {
       TypeConstructor[not set]{
@@ -252,6 +258,7 @@ TEST_F(SpvParserTest_CompositeExtract, Vector) {
   VariableConst{
     x_1
     none
+    undefined
     __f32
     {
       MemberAccessor[not set]{
@@ -302,6 +309,7 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix) {
   VariableConst{
     x_2
     none
+    undefined
     __vec_2__f32
     {
       ArrayAccessor[not set]{
@@ -352,6 +360,7 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix_Vector) {
   VariableConst{
     x_2
     none
+    undefined
     __f32
     {
       MemberAccessor[not set]{
@@ -385,6 +394,7 @@ TEST_F(SpvParserTest_CompositeExtract, Array) {
   VariableConst{
     x_2
     none
+    undefined
     __u32
     {
       ArrayAccessor[not set]{
@@ -436,6 +446,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct) {
   VariableConst{
     x_2
     none
+    undefined
     __i32
     {
       MemberAccessor[not set]{
@@ -478,6 +489,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
   VariableConst{
     x_2
     none
+    undefined
     __u32
     {
       MemberAccessor[not set]{
@@ -491,6 +503,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
   VariableConst{
     x_4
     none
+    undefined
     __u32
     {
       MemberAccessor[not set]{
@@ -544,6 +557,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_Array_Matrix_Vector) {
   VariableConst{
     x_2
     none
+    undefined
     __f32
     {
       MemberAccessor[not set]{
@@ -582,6 +596,7 @@ TEST_F(SpvParserTest_CompositeInsert, Vector) {
   Variable{
     x_1_1
     none
+    undefined
     __vec_2__f32
     {
       TypeConstructor[not set]{
@@ -603,6 +618,7 @@ VariableDeclStatement{
   VariableConst{
     x_1
     none
+    undefined
     __vec_2__f32
     {
       Identifier[not set]{x_1_1}
@@ -648,6 +664,7 @@ TEST_F(SpvParserTest_CompositeInsert, Matrix) {
   Variable{
     x_2_1
     none
+    undefined
     __mat_2_3__f32
     {
       Identifier[not set]{x_1}
@@ -669,6 +686,7 @@ VariableDeclStatement{
   VariableConst{
     x_2
     none
+    undefined
     __mat_2_3__f32
     {
       Identifier[not set]{x_2_1}
@@ -718,6 +736,7 @@ TEST_F(SpvParserTest_CompositeInsert, Matrix_Vector) {
   Variable{
     x_2_1
     none
+    undefined
     __mat_2_3__f32
     {
       Identifier[not set]{x_1}
@@ -739,6 +758,7 @@ VariableDeclStatement{
   VariableConst{
     x_2
     none
+    undefined
     __mat_2_3__f32
     {
       Identifier[not set]{x_2_1}
@@ -768,6 +788,7 @@ TEST_F(SpvParserTest_CompositeInsert, Array) {
   Variable{
     x_2_1
     none
+    undefined
     __array__u32_5
     {
       Identifier[not set]{x_1}
@@ -785,6 +806,7 @@ VariableDeclStatement{
   VariableConst{
     x_2
     none
+    undefined
     __array__u32_5
     {
       Identifier[not set]{x_2_1}
@@ -835,6 +857,7 @@ TEST_F(SpvParserTest_CompositeInsert, Struct) {
   Variable{
     x_35
     none
+    undefined
     __type_name_S
   }
 }
@@ -842,6 +865,7 @@ VariableDeclStatement{
   VariableConst{
     x_1
     none
+    undefined
     __type_name_S
     {
       Identifier[not set]{x_35}
@@ -852,6 +876,7 @@ VariableDeclStatement{
   Variable{
     x_2_1
     none
+    undefined
     __type_name_S
     {
       Identifier[not set]{x_1}
@@ -869,6 +894,7 @@ VariableDeclStatement{
   VariableConst{
     x_2
     none
+    undefined
     __type_name_S
     {
       Identifier[not set]{x_2_1}
@@ -909,6 +935,7 @@ TEST_F(SpvParserTest_CompositeInsert, Struct_DifferOnlyInMemberName) {
   Variable{
     x_40
     none
+    undefined
     __type_name_S_2
   }
 }
@@ -916,6 +943,7 @@ VariableDeclStatement{
   Variable{
     x_41
     none
+    undefined
     __type_name_S_2
   }
 }
@@ -923,6 +951,7 @@ VariableDeclStatement{
   VariableConst{
     x_1
     none
+    undefined
     __type_name_S_2
     {
       Identifier[not set]{x_40}
@@ -933,6 +962,7 @@ VariableDeclStatement{
   Variable{
     x_2_1
     none
+    undefined
     __type_name_S_1
     {
       Identifier[not set]{x_1}
@@ -950,6 +980,7 @@ VariableDeclStatement{
   VariableConst{
     x_2
     none
+    undefined
     __type_name_S_1
     {
       Identifier[not set]{x_2_1}
@@ -960,6 +991,7 @@ VariableDeclStatement{
   VariableConst{
     x_3
     none
+    undefined
     __type_name_S_2
     {
       Identifier[not set]{x_41}
@@ -970,6 +1002,7 @@ VariableDeclStatement{
   Variable{
     x_4_1
     none
+    undefined
     __type_name_S_2
     {
       Identifier[not set]{x_3}
@@ -987,6 +1020,7 @@ VariableDeclStatement{
   VariableConst{
     x_4
     none
+    undefined
     __type_name_S_2
     {
       Identifier[not set]{x_4_1}
@@ -998,6 +1032,7 @@ VariableDeclStatement{
   Variable{
     x_4_1
     none
+    undefined
     __type_name_S_2
     {
       Identifier[not set]{x_3}
@@ -1015,6 +1050,7 @@ VariableDeclStatement{
   VariableConst{
     x_4
     none
+    undefined
     __type_name_S_2
     {
       Identifier[not set]{x_4_1}
@@ -1066,6 +1102,7 @@ TEST_F(SpvParserTest_CompositeInsert, Struct_Array_Matrix_Vector) {
   Variable{
     x_37
     none
+    undefined
     __type_name_S_1
   }
 }
@@ -1073,6 +1110,7 @@ VariableDeclStatement{
   VariableConst{
     x_1
     none
+    undefined
     __type_name_S_1
     {
       Identifier[not set]{x_37}
@@ -1083,6 +1121,7 @@ VariableDeclStatement{
   Variable{
     x_2_1
     none
+    undefined
     __type_name_S_1
     {
       Identifier[not set]{x_1}
@@ -1109,6 +1148,7 @@ VariableDeclStatement{
   VariableConst{
     x_2
     none
+    undefined
     __type_name_S_1
     {
       Identifier[not set]{x_2_1}
@@ -1137,6 +1177,7 @@ TEST_F(SpvParserTest_CopyObject, Scalar) {
   VariableConst{
     x_1
     none
+    undefined
     __u32
     {
       ScalarConstructor[not set]{3u}
@@ -1147,6 +1188,7 @@ VariableDeclStatement{
   VariableConst{
     x_2
     none
+    undefined
     __u32
     {
       Identifier[not set]{x_1}
@@ -1176,6 +1218,7 @@ TEST_F(SpvParserTest_CopyObject, Pointer) {
   VariableConst{
     x_1
     none
+    undefined
     __ptr_function__u32
     {
       UnaryOp[not set]{
@@ -1189,6 +1232,7 @@ VariableDeclStatement{
   VariableConst{
     x_2
     none
+    undefined
     __ptr_function__u32
     {
       Identifier[not set]{x_1}
@@ -1218,6 +1262,7 @@ TEST_F(SpvParserTest_VectorShuffle, FunctionScopeOperands_UseBoth) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
+    undefined
     __vec_4__u32
     {
       TypeConstructor[not set]{
@@ -1260,6 +1305,7 @@ TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_UseBoth) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
+    undefined
     __vec_4__u32
     {
       TypeConstructor[not set]{
@@ -1318,6 +1364,7 @@ TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_AllOnesMapToNull) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
+    undefined
     __vec_2__u32
     {
       TypeConstructor[not set]{
@@ -1370,6 +1417,7 @@ TEST_F(SpvParserTest_VectorExtractDynamic, SignedIndex) {
   EXPECT_THAT(got, HasSubstr(R"(VariableConst{
     x_10
     none
+    undefined
     __u32
     {
       ArrayAccessor[not set]{
@@ -1400,6 +1448,7 @@ TEST_F(SpvParserTest_VectorExtractDynamic, UnsignedIndex) {
   EXPECT_THAT(got, HasSubstr(R"(VariableConst{
     x_10
     none
+    undefined
     __u32
     {
       ArrayAccessor[not set]{
@@ -1435,6 +1484,7 @@ VariableDeclStatement{
   Variable{
     x_10_1
     none
+    undefined
     __vec_2__u32
     {
       Identifier[not set]{x_1}
@@ -1452,6 +1502,7 @@ VariableDeclStatement{
   VariableConst{
     x_10
     none
+    undefined
     __vec_2__u32
     {
       Identifier[not set]{x_10_1}

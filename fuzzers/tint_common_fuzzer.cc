@@ -101,20 +101,19 @@ void ExtractBindingRemapperInputs(Reader* r, tint::transform::DataMap* inputs) {
     uint8_t old_binding;
     uint8_t new_group;
     uint8_t new_binding;
-    ast::AccessControl::Access new_ac;
+    ast::Access new_access;
   };
 
   std::vector<Config> configs = r->vector<Config>();
   transform::BindingRemapper::BindingPoints binding_points;
-  transform::BindingRemapper::AccessControls access_controls;
+  transform::BindingRemapper::Accesses accesses;
   for (const auto& config : configs) {
     binding_points[{config.old_binding, config.old_group}] = {
         config.new_binding, config.new_group};
-    access_controls[{config.old_binding, config.old_group}] = config.new_ac;
+    accesss[{config.old_binding, config.old_group}] = config.new_access;
   }
 
-  inputs->Add<transform::BindingRemapper::Remappings>(binding_points,
-                                                      access_controls);
+  inputs->Add<transform::BindingRemapper::Remappings>(binding_points, accesss);
 }
 
 void ExtractFirstIndexOffsetInputs(Reader* r,

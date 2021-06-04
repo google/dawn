@@ -248,8 +248,8 @@ bool GeneratorImpl::EmitBitcast(std::ostream& pre,
   }
 
   out << "as";
-  if (!EmitType(out, type, ast::StorageClass::kNone,
-                ast::AccessControl::kReadWrite, "")) {
+  if (!EmitType(out, type, ast::StorageClass::kNone, ast::Access::kReadWrite,
+                "")) {
     return false;
   }
   out << "(";
@@ -1303,8 +1303,8 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
   if (brackets) {
     out << "{";
   } else {
-    if (!EmitType(out, type, ast::StorageClass::kNone,
-                  ast::AccessControl::kReadWrite, "")) {
+    if (!EmitType(out, type, ast::StorageClass::kNone, ast::Access::kReadWrite,
+                  "")) {
       return false;
     }
     out << "(";
@@ -1566,7 +1566,7 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
   auto* func = builder_.Sem().Get(func_ast);
 
   if (!EmitType(out, func->ReturnType(), ast::StorageClass::kNone,
-                ast::AccessControl::kReadWrite, "")) {
+                ast::Access::kReadWrite, "")) {
     return false;
   }
 
@@ -1633,7 +1633,7 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
     // buffers. These functions have a storage buffer parameter with
     // StorageClass::kStorage. This is required to correctly translate the
     // parameter to [RW]ByteAddressBuffer.
-    if (!EmitType(out, type, v->StorageClass(), v->AccessControl(),
+    if (!EmitType(out, type, v->StorageClass(), v->Access(),
                   builder_.Symbols().NameFor(v->Declaration()->symbol()))) {
       return false;
     }
@@ -1720,7 +1720,7 @@ bool GeneratorImpl::EmitEntryPointData(
 
       increment_indent();
       make_indent(out);
-      if (!EmitType(out, type, var->StorageClass(), var->AccessControl(), "")) {
+      if (!EmitType(out, type, var->StorageClass(), var->Access(), "")) {
         return false;
       }
       out << " " << builder_.Symbols().NameFor(decl->symbol()) << ";"
@@ -1746,15 +1746,13 @@ bool GeneratorImpl::EmitEntryPointData(
     }
 
     auto* type = var->Type()->UnwrapRef();
-    if (!EmitType(out, type, ast::StorageClass::kStorage, var->AccessControl(),
-                  "")) {
+    if (!EmitType(out, type, ast::StorageClass::kStorage, var->Access(), "")) {
       return false;
     }
 
     out << " " << builder_.Symbols().NameFor(decl->symbol())
-        << RegisterAndSpace(
-               var->AccessControl() == ast::AccessControl::kRead ? 't' : 'u',
-               binding_point)
+        << RegisterAndSpace(var->Access() == ast::Access::kRead ? 't' : 'u',
+                            binding_point)
         << ";" << std::endl;
     emitted_storagebuffer = true;
   }
@@ -1781,7 +1779,7 @@ bool GeneratorImpl::EmitEntryPointData(
       auto* type = sem->Type()->UnwrapRef();
 
       make_indent(out);
-      if (!EmitType(out, type, sem->StorageClass(), sem->AccessControl(),
+      if (!EmitType(out, type, sem->StorageClass(), sem->Access(),
                     builder_.Symbols().NameFor(var->symbol()))) {
         return false;
       }
@@ -1832,7 +1830,7 @@ bool GeneratorImpl::EmitEntryPointData(
       auto* type = sem->Type()->UnwrapRef();
 
       make_indent(out);
-      if (!EmitType(out, type, sem->StorageClass(), sem->AccessControl(),
+      if (!EmitType(out, type, sem->StorageClass(), sem->Access(),
                     builder_.Symbols().NameFor(var->symbol()))) {
         return false;
       }
@@ -1903,8 +1901,7 @@ bool GeneratorImpl::EmitEntryPointData(
 
       auto name = builder_.Symbols().NameFor(decl->symbol());
       auto* type = var->Type()->UnwrapRef();
-      if (!EmitType(out, type, var->StorageClass(), var->AccessControl(),
-                    name)) {
+      if (!EmitType(out, type, var->StorageClass(), var->Access(), name)) {
         return false;
       }
       if (!type->Is<sem::Array>()) {
@@ -1916,7 +1913,7 @@ bool GeneratorImpl::EmitEntryPointData(
       if (unwrapped_type->Is<sem::Texture>()) {
         register_space = "t";
         if (auto* storage_tex = unwrapped_type->As<sem::StorageTexture>()) {
-          if (storage_tex->access_control() != ast::AccessControl::kRead) {
+          if (storage_tex->access() != ast::Access::kRead) {
             register_space = "u";
           }
         }
@@ -2043,7 +2040,7 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
     }
     first = false;
 
-    if (!EmitType(out, type, sem->StorageClass(), sem->AccessControl(), "")) {
+    if (!EmitType(out, type, sem->StorageClass(), sem->Access(), "")) {
       return false;
     }
 
@@ -2111,8 +2108,8 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
   } else if (type->Is<sem::U32>()) {
     out << "0u";
   } else if (auto* vec = type->As<sem::Vector>()) {
-    if (!EmitType(out, type, ast::StorageClass::kNone,
-                  ast::AccessControl::kReadWrite, "")) {
+    if (!EmitType(out, type, ast::StorageClass::kNone, ast::Access::kReadWrite,
+                  "")) {
       return false;
     }
     ScopedParen sp(out);
@@ -2125,8 +2122,8 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
       }
     }
   } else if (auto* mat = type->As<sem::Matrix>()) {
-    if (!EmitType(out, type, ast::StorageClass::kNone,
-                  ast::AccessControl::kReadWrite, "")) {
+    if (!EmitType(out, type, ast::StorageClass::kNone, ast::Access::kReadWrite,
+                  "")) {
       return false;
     }
     ScopedParen sp(out);
@@ -2326,10 +2323,10 @@ bool GeneratorImpl::EmitSwitch(std::ostream& out, ast::SwitchStatement* stmt) {
 bool GeneratorImpl::EmitType(std::ostream& out,
                              const sem::Type* type,
                              ast::StorageClass storage_class,
-                             ast::AccessControl::Access access_control,
+                             ast::Access access,
                              const std::string& name) {
   if (storage_class == ast::StorageClass::kStorage) {
-    if (access_control != ast::AccessControl::kRead) {
+    if (access != ast::Access::kRead) {
       out << "RW";
     }
     out << "ByteAddressBuffer";
@@ -2349,7 +2346,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
       sizes.push_back(arr->Count());
       base_type = arr->ElemType();
     }
-    if (!EmitType(out, base_type, storage_class, access_control, "")) {
+    if (!EmitType(out, base_type, storage_class, access, "")) {
       return false;
     }
     if (!name.empty()) {
@@ -2365,7 +2362,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
   } else if (type->Is<sem::I32>()) {
     out << "int";
   } else if (auto* mat = type->As<sem::Matrix>()) {
-    if (!EmitType(out, mat->type(), storage_class, access_control, "")) {
+    if (!EmitType(out, mat->type(), storage_class, access, "")) {
       return false;
     }
     // Note: HLSL's matrices are declared as <type>NxM, where N is the number of
@@ -2394,10 +2391,8 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     auto* multism = tex->As<sem::MultisampledTexture>();
     auto* sampled = tex->As<sem::SampledTexture>();
 
-    if (storage) {
-      if (access_control != ast::AccessControl::kRead) {
-        out << "RW";
-      }
+    if (storage && storage->access() != ast::Access::kRead) {
+      out << "RW";
     }
     out << "Texture";
 
@@ -2461,7 +2456,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
       out << "uint" << size;
     } else {
       out << "vector<";
-      if (!EmitType(out, vec->type(), storage_class, access_control, "")) {
+      if (!EmitType(out, vec->type(), storage_class, access, "")) {
         return false;
       }
       out << ", " << size << ">";
@@ -2498,7 +2493,7 @@ bool GeneratorImpl::EmitStructType(std::ostream& out,
 
     auto mem_name = builder_.Symbols().NameFor(mem->Declaration()->symbol());
     if (!EmitType(out, mem->Type(), ast::StorageClass::kNone,
-                  ast::AccessControl::kReadWrite, mem_name)) {
+                  ast::Access::kReadWrite, mem_name)) {
       return false;
     }
     // Array member name will be output with the type
@@ -2602,7 +2597,7 @@ bool GeneratorImpl::EmitVariable(std::ostream& out, ast::Variable* var) {
   if (var->is_const()) {
     out << "const ";
   }
-  if (!EmitType(out, type, sem->StorageClass(), sem->AccessControl(),
+  if (!EmitType(out, type, sem->StorageClass(), sem->Access(),
                 builder_.Symbols().NameFor(var->symbol()))) {
     return false;
   }
@@ -2655,7 +2650,7 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
     }
     out << "#endif" << std::endl;
     out << "static const ";
-    if (!EmitType(out, type, sem->StorageClass(), sem->AccessControl(),
+    if (!EmitType(out, type, sem->StorageClass(), sem->Access(),
                   builder_.Symbols().NameFor(var->symbol()))) {
       return false;
     }
@@ -2663,7 +2658,7 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
         << kSpecConstantPrefix << const_id << ";" << std::endl;
   } else {
     out << "static const ";
-    if (!EmitType(out, type, sem->StorageClass(), sem->AccessControl(),
+    if (!EmitType(out, type, sem->StorageClass(), sem->Access(),
                   builder_.Symbols().NameFor(var->symbol()))) {
       return false;
     }

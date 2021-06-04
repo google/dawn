@@ -26,7 +26,7 @@
 struct SB {
   arg_0: array<u32>;
 };
-[[group(0), binding(0)]] var<storage> sb : [[access(read)]] SB;
+[[group(0), binding(0)]] var<storage, read> sb : SB;
 fn arrayLength_647a40() {
   var res: u32 = arrayLength(sb.arg_0);
 }

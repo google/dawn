@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/ast/access_decoration.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
@@ -24,7 +25,8 @@ namespace {
 
 TEST_F(ParserImplTest, TextureSamplerTypes_Invalid) {
   auto p = parser("1234");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -33,7 +35,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_Invalid) {
 
 TEST_F(ParserImplTest, TextureSamplerTypes_Sampler) {
   auto p = parser("sampler");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -45,7 +48,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_Sampler) {
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SamplerComparison) {
   auto p = parser("sampler_comparison");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -57,7 +61,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SamplerComparison) {
 
 TEST_F(ParserImplTest, TextureSamplerTypes_DepthTexture) {
   auto p = parser("texture_depth_2d");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -70,7 +75,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_DepthTexture) {
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_F32) {
   auto p = parser("texture_1d<f32>");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -84,7 +90,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_F32) {
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_I32) {
   auto p = parser("texture_2d<i32>");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -98,7 +105,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_I32) {
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_U32) {
   auto p = parser("texture_3d<u32>");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -112,7 +120,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_U32) {
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_Invalid) {
   auto p = parser("texture_1d<abc>");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
@@ -122,7 +131,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_Invalid) {
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingType) {
   auto p = parser("texture_1d<>");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
@@ -132,7 +142,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingType) {
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingLessThan) {
   auto p = parser("texture_1d");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
@@ -142,7 +153,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingLessThan) {
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingGreaterThan) {
   auto p = parser("texture_1d<u32");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
@@ -152,7 +164,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingGreaterThan) {
 
 TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_I32) {
   auto p = parser("texture_multisampled_2d<i32>");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -166,7 +179,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_I32) {
 
 TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_Invalid) {
   auto p = parser("texture_multisampled_2d<abc>");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
@@ -176,7 +190,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_Invalid) {
 
 TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_MissingType) {
   auto p = parser("texture_multisampled_2d<>");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
@@ -187,7 +202,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_MissingType) {
 TEST_F(ParserImplTest,
        TextureSamplerTypes_MultisampledTexture_MissingLessThan) {
   auto p = parser("texture_multisampled_2d");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
   EXPECT_TRUE(t.errored);
@@ -197,7 +213,8 @@ TEST_F(ParserImplTest,
 TEST_F(ParserImplTest,
        TextureSamplerTypes_MultisampledTexture_MissingGreaterThan) {
   auto p = parser("texture_multisampled_2d<u32");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
   EXPECT_TRUE(t.errored);
@@ -208,7 +225,8 @@ TEST_F(ParserImplTest,
 TEST_F(ParserImplTest,
        TextureSamplerTypes_StorageTexture_Readonly1dR8Unorm_DEPRECATED) {
   auto p = parser("texture_storage_1d<r8unorm>");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos{create<ast::AccessDecoration>(ast::Access::kRead)};
+  auto t = p->texture_sampler_types(decos);
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -218,26 +236,25 @@ TEST_F(ParserImplTest,
   ASSERT_TRUE(t->Is<ast::StorageTexture>());
   EXPECT_EQ(t->As<ast::StorageTexture>()->image_format(),
             ast::ImageFormat::kR8Unorm);
+  EXPECT_EQ(t->As<ast::StorageTexture>()->access(), ast::Access::kRead);
   EXPECT_EQ(t->As<ast::Texture>()->dim(), ast::TextureDimension::k1d);
   EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 28u}}));
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Readonly1dR8Unorm) {
   auto p = parser("texture_storage_1d<r8unorm, read>");
-  auto a = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   ASSERT_FALSE(p->has_error()) << p->error();
-  EXPECT_TRUE(a.matched);
-  EXPECT_FALSE(a.errored);
-  ASSERT_NE(a.value, nullptr);
+  EXPECT_TRUE(t.matched);
+  EXPECT_FALSE(t.errored);
+  ASSERT_NE(t.value, nullptr);
 
-  ASSERT_TRUE(a->Is<ast::AccessControl>());
-  EXPECT_TRUE(a->As<ast::AccessControl>()->IsReadOnly());
-
-  auto* t = a->As<ast::AccessControl>()->type();
   ASSERT_TRUE(t->Is<ast::Texture>());
   ASSERT_TRUE(t->Is<ast::StorageTexture>());
   EXPECT_EQ(t->As<ast::StorageTexture>()->image_format(),
             ast::ImageFormat::kR8Unorm);
+  EXPECT_EQ(t->As<ast::StorageTexture>()->access(), ast::Access::kRead);
   EXPECT_EQ(t->As<ast::Texture>()->dim(), ast::TextureDimension::k1d);
   EXPECT_EQ(t->source().range, (Source::Range{{1u, 1u}, {1u, 34u}}));
 }
@@ -246,7 +263,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Readonly1dR8Unorm) {
 TEST_F(ParserImplTest,
        TextureSamplerTypes_StorageTexture_Writeonly2dR16Float_DEPRECATED) {
   auto p = parser("texture_storage_2d<r16float>");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos{create<ast::AccessDecoration>(ast::Access::kWrite)};
+  auto t = p->texture_sampler_types(decos);
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
@@ -256,33 +274,33 @@ TEST_F(ParserImplTest,
   ASSERT_TRUE(t->Is<ast::StorageTexture>());
   EXPECT_EQ(t->As<ast::StorageTexture>()->image_format(),
             ast::ImageFormat::kR16Float);
+  EXPECT_EQ(t->As<ast::StorageTexture>()->access(), ast::Access::kWrite);
   EXPECT_EQ(t->As<ast::Texture>()->dim(), ast::TextureDimension::k2d);
   EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 29u}}));
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Writeonly2dR16Float) {
   auto p = parser("texture_storage_2d<r16float, write>");
-  auto a = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   ASSERT_FALSE(p->has_error()) << p->error();
-  EXPECT_TRUE(a.matched);
-  EXPECT_FALSE(a.errored);
-  ASSERT_NE(a.value, nullptr);
+  EXPECT_TRUE(t.matched);
+  EXPECT_FALSE(t.errored);
+  ASSERT_NE(t.value, nullptr);
 
-  ASSERT_TRUE(a->Is<ast::AccessControl>());
-  EXPECT_TRUE(a->As<ast::AccessControl>()->IsWriteOnly());
-
-  auto* t = a->As<ast::AccessControl>()->type();
   ASSERT_TRUE(t->Is<ast::Texture>());
   ASSERT_TRUE(t->Is<ast::StorageTexture>());
   EXPECT_EQ(t->As<ast::StorageTexture>()->image_format(),
             ast::ImageFormat::kR16Float);
+  EXPECT_EQ(t->As<ast::StorageTexture>()->access(), ast::Access::kWrite);
   EXPECT_EQ(t->As<ast::Texture>()->dim(), ast::TextureDimension::k2d);
   EXPECT_EQ(t->source().range, (Source::Range{{1u, 1u}, {1u, 36u}}));
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_InvalidType) {
   auto p = parser("texture_storage_1d<abc, read>");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
   EXPECT_TRUE(t.errored);
@@ -291,7 +309,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_InvalidType) {
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_InvalidAccess) {
   auto p = parser("texture_storage_1d<r16float, abc>");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
   EXPECT_TRUE(t.errored);
@@ -300,7 +319,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_InvalidAccess) {
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingType) {
   auto p = parser("texture_storage_1d<>");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
   EXPECT_TRUE(t.errored);
@@ -309,7 +329,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingType) {
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingLessThan) {
   auto p = parser("texture_storage_1d");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
   EXPECT_TRUE(t.errored);
@@ -318,7 +339,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingLessThan) {
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingGreaterThan) {
   auto p = parser("texture_storage_1d<r8unorm, read");
-  auto t = p->texture_sampler_types();
+  ast::DecorationList decos;
+  auto t = p->texture_sampler_types(decos);
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
   EXPECT_TRUE(t.errored);

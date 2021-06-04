@@ -6,7 +6,7 @@ struct S {
 };
 
 [[group(0), binding(0)]]
-var<storage> output : [[access(write)]] S;
+var<storage, write> output : S;
 
 [[stage(fragment)]]
 fn frag_main(input : S) {

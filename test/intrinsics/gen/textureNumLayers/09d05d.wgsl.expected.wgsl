@@ -1,4 +1,4 @@
-[[group(1), binding(0)]] var arg_0 : [[access(write)]] texture_storage_2d_array<rgba8unorm>;
+[[group(1), binding(0)]] var arg_0 : texture_storage_2d_array<rgba8unorm, write>;
 
 fn textureNumLayers_09d05d() {
   var res : i32 = textureNumLayers(arg_0);

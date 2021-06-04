@@ -38,8 +38,8 @@ endfunction()
 
 set(TINT_LIB_SRCS
   ../include/tint/tint.h
-  ast/access_control.cc
-  ast/access_control.h
+  ast/access.cc
+  ast/access.h
   ast/access_decoration.cc
   ast/access_decoration.h
   ast/alias.cc
@@ -496,7 +496,6 @@ endif()
 
 if(${TINT_BUILD_TESTS})
   set(TINT_TEST_SRCS
-    ast/access_control_test.cc
     ast/access_decoration_test.cc
     ast/alias_test.cc
     ast/array_accessor_expression_test.cc
@@ -748,7 +747,7 @@ if(${TINT_BUILD_TESTS})
       reader/wgsl/parser_impl_variable_decoration_test.cc
       reader/wgsl/parser_impl_variable_ident_decl_test.cc
       reader/wgsl/parser_impl_variable_stmt_test.cc
-      reader/wgsl/parser_impl_variable_storage_decoration_test.cc
+      reader/wgsl/parser_impl_variable_qualifier_test.cc
       reader/wgsl/token_test.cc
     )
   endif()

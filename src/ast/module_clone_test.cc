@@ -42,15 +42,15 @@ type t1 = array<vec4<f32>>;
 var<private> g0 : u32 = 20u;
 var<private> g1 : f32 = 123.0;
 [[group(0), binding(0)]] var g2 : texture_2d<f32>;
-[[group(1), binding(0)]] var g3 : [[access(read)]] texture_storage_2d<r32uint>;
-[[group(2), binding(0)]] var g4 : [[access(write)]] texture_storage_2d<rg32float>;
-[[group(3), binding(0)]] var g5 : [[access(read)]] texture_storage_2d<r32uint>;
-[[group(4), binding(0)]] var g6 : [[access(write)]] texture_storage_2d<rg32float>;
+[[group(1), binding(0)]] var g3 : texture_storage_2d<r32uint, read>;
+[[group(2), binding(0)]] var g4 : texture_storage_2d<rg32float, write>;
+[[group(3), binding(0)]] var g5 : texture_storage_2d<r32uint, read>;
+[[group(4), binding(0)]] var g6 : texture_storage_2d<rg32float, write>;
 
 var<private> g7 : vec3<f32>;
-[[group(0), binding(1)]] var<storage> g8 : [[access(write)]] S;
-[[group(1), binding(1)]] var<storage> g9 : [[access(read)]] S;
-[[group(2), binding(1)]] var<storage> g10 : [[access(read_write)]] S;
+[[group(0), binding(1)]] var<storage, write> g8 : S;
+[[group(1), binding(1)]] var<storage, read> g9 : S;
+[[group(2), binding(1)]] var<storage, read_write> g10 : S;
 
 fn f0(p0 : bool) -> f32 {
   if (p0) {

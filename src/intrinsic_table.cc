@@ -286,7 +286,7 @@ class OpenNumberMatcher : public NumberMatcher {
 // template
 ////////////////////////////////////////////////////////////////////////////////
 using TexelFormat = ast::ImageFormat;
-using AccessControl = ast::AccessControl::Access;
+using Access = ast::Access;
 using StorageClass = ast::StorageClass;
 using ParameterUsage = sem::ParameterUsage;
 using PipelineStageSet = sem::PipelineStageSet;
@@ -577,7 +577,7 @@ bool match_texture_storage(const sem::Type* ty,
   if (auto* v = ty->As<sem::StorageTexture>()) {
     if (v->dim() == dim) {
       F = Number(static_cast<uint32_t>(v->image_format()));
-      A = Number(static_cast<uint32_t>(v->access_control()));
+      A = Number(static_cast<uint32_t>(v->access()));
       return true;
     }
   }
@@ -592,7 +592,7 @@ bool match_texture_storage(const sem::Type* ty,
   const sem::StorageTexture* JOIN(build_texture_storage_, suffix)(            \
       MatchState & state, Number F, Number A) {                               \
     auto format = static_cast<TexelFormat>(F.Value());                        \
-    auto access = static_cast<AccessControl>(A.Value());                      \
+    auto access = static_cast<Access>(A.Value());                             \
     auto* T = sem::StorageTexture::SubtypeFor(format, state.builder.Types()); \
     return state.builder.create<sem::StorageTexture>(dim, format, access, T); \
   }

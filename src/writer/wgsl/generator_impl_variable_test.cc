@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/ast/override_decoration.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
@@ -42,6 +43,54 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_StorageClass) {
 )");
 }
 
+TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Read) {
+  auto* s = Structure("S", {Member("a", ty.i32())},
+                      {create<ast::StructBlockDecoration>()});
+  auto* v = Global("a", s, ast::StorageClass::kStorage, ast::Access::kRead,
+                   ast::DecorationList{
+                       create<ast::BindingDecoration>(0),
+                       create<ast::GroupDecoration>(0),
+                   });
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
+  EXPECT_EQ(gen.result(), R"([[binding(0), group(0)]] var<storage, read> a : S;
+)");
+}
+
+TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Write) {
+  auto* s = Structure("S", {Member("a", ty.i32())},
+                      {create<ast::StructBlockDecoration>()});
+  auto* v = Global("a", s, ast::StorageClass::kStorage, ast::Access::kWrite,
+                   ast::DecorationList{
+                       create<ast::BindingDecoration>(0),
+                       create<ast::GroupDecoration>(0),
+                   });
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
+  EXPECT_EQ(gen.result(), R"([[binding(0), group(0)]] var<storage, write> a : S;
+)");
+}
+
+TEST_F(WgslGeneratorImplTest, EmitVariable_Access_ReadWrite) {
+  auto* s = Structure("S", {Member("a", ty.i32())},
+                      {create<ast::StructBlockDecoration>()});
+  auto* v = Global("a", s, ast::StorageClass::kStorage, ast::Access::kReadWrite,
+                   ast::DecorationList{
+                       create<ast::BindingDecoration>(0),
+                       create<ast::GroupDecoration>(0),
+                   });
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
+  EXPECT_EQ(gen.result(),
+            R"([[binding(0), group(0)]] var<storage, read_write> a : S;
+)");
+}
 TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
   auto* v = Global("a", ty.f32(), ast::StorageClass::kPrivate, nullptr,
                    ast::DecorationList{
@@ -65,9 +114,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
-  EXPECT_EQ(
-      gen.result(),
-      R"([[builtin(position), location(2)]] var<private> a : f32;
+  EXPECT_EQ(gen.result(),
+            R"([[builtin(position), location(2)]] var<private> a : f32;
 )");
 }
 
