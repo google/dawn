@@ -107,6 +107,9 @@ struct tint_symbol_1 {
 
 [[stage(fragment)]]
 fn frag_main(tint_symbol : tint_symbol_1) {
+  let loc1 : f32 = tint_symbol.loc1;
+  let loc2 : vec4<u32> = tint_symbol.loc2;
+  let coord : vec4<f32> = tint_symbol.coord;
 }
 )";
 
@@ -583,6 +586,10 @@ struct tint_symbol_3 {
 
 [[stage(fragment)]]
 fn frag_main(tint_symbol_2 : tint_symbol_3) {
+  let ff : bool = tint_symbol_2.ff;
+  let c : i32 = tint_symbol_2.c;
+  let inputs : FragmentInputExtra = FragmentInputExtra(tint_symbol_2.d, tint_symbol_2.pos, tint_symbol_2.a);
+  let b : u32 = tint_symbol_2.b;
 }
 )";
 
@@ -606,6 +613,7 @@ struct tint_symbol_2 {
 
 [[stage(fragment)]]
 fn tint_symbol_1(tint_symbol : tint_symbol_2) {
+  let col : f32 = tint_symbol.col;
 }
 )";
 
