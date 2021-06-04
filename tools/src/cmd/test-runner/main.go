@@ -99,6 +99,10 @@ func run() error {
 	if !fileutils.IsExe(exe) {
 		return fmt.Errorf("'%s' not found or is not executable", exe)
 	}
+	exe, err := filepath.Abs(exe)
+	if err != nil {
+		return err
+	}
 
 	// Split the --filter flag up by ',', trimming any whitespace at the start and end
 	globIncludes := strings.Split(filter, ",")
@@ -200,7 +204,7 @@ func run() error {
 		go func() {
 			defer wg.Done()
 			for job := range jobs {
-				job.run(exe, dxcPath, xcrunPath, generateExpected, generateSkip)
+				job.run(dir, exe, dxcPath, xcrunPath, generateExpected, generateSkip)
 			}
 		}()
 	}
@@ -356,7 +360,7 @@ type job struct {
 	result *status
 }
 
-func (j job) run(exe, dxcPath, xcrunPath string, generateExpected, generateSkip bool) {
+func (j job) run(wd, exe, dxcPath, xcrunPath string, generateExpected, generateSkip bool) {
 	// Is there an expected output?
 	expected := loadExpectedFile(j.file, j.format)
 	skipped := false
@@ -366,7 +370,15 @@ func (j job) run(exe, dxcPath, xcrunPath string, generateExpected, generateSkip 
 
 	expected = strings.ReplaceAll(expected, "\r\n", "\n")
 
-	args := []string{j.file, "--format", string(j.format)}
+	file, err := filepath.Rel(wd, j.file)
+	if err != nil {
+		file = j.file
+	}
+
+	args := []string{
+		file,
+		"--format", string(j.format),
+	}
 
 	// Can we validate?
 	switch j.format {
@@ -383,7 +395,7 @@ func (j job) run(exe, dxcPath, xcrunPath string, generateExpected, generateSkip 
 	}
 
 	// Invoke the compiler...
-	ok, out := invoke(exe, args...)
+	ok, out := invoke(wd, exe, args...)
 	out = strings.ReplaceAll(out, "\r\n", "\n")
 	matched := expected == "" || expected == out
 
@@ -507,8 +519,9 @@ func formatWidth(b outputFormat) int {
 }
 
 // invoke runs the executable 'exe' with the provided arguments.
-func invoke(exe string, args ...string) (ok bool, output string) {
+func invoke(wd, exe string, args ...string) (ok bool, output string) {
 	cmd := exec.Command(exe, args...)
+	cmd.Dir = wd
 	out, err := cmd.CombinedOutput()
 	str := string(out)
 	if err != nil {
