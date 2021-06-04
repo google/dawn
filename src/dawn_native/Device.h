@@ -210,6 +210,7 @@ namespace dawn_native {
 
         void APISetDeviceLostCallback(wgpu::DeviceLostCallback callback, void* userdata);
         void APISetUncapturedErrorCallback(wgpu::ErrorCallback callback, void* userdata);
+        void APISetLoggingCallback(wgpu::LoggingCallback callback, void* userdata);
         void APIPushErrorScope(wgpu::ErrorFilter filter);
         bool APIPopErrorScope(wgpu::ErrorCallback callback, void* userdata);
 
@@ -262,6 +263,8 @@ namespace dawn_native {
         void IncrementLazyClearCountForTesting();
         size_t GetDeprecationWarningCountForTesting();
         void EmitDeprecationWarning(const char* warning);
+        void EmitLog(const char* message);
+        void EmitLog(WGPULoggingType loggingType, const char* message);
         void APILoseForTesting();
         QueueBase* GetQueue() const;
 
@@ -392,6 +395,9 @@ namespace dawn_native {
 
         wgpu::ErrorCallback mUncapturedErrorCallback = nullptr;
         void* mUncapturedErrorUserdata = nullptr;
+
+        wgpu::LoggingCallback mLoggingCallback = nullptr;
+        void* mLoggingUserdata = nullptr;
 
         wgpu::DeviceLostCallback mDeviceLostCallback = nullptr;
         void* mDeviceLostUserdata = nullptr;

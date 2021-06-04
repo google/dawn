@@ -35,6 +35,7 @@ TEST_F(WireInjectDeviceTests, CallAfterReserveInject) {
     WGPUDevice serverDevice = api.GetNewDevice();
     EXPECT_CALL(api, DeviceReference(serverDevice));
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice, _, _));
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice, _, _));
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice, _, _));
     ASSERT_TRUE(
         GetWireServer()->InjectDevice(serverDevice, reservation.id, reservation.generation));
@@ -48,6 +49,7 @@ TEST_F(WireInjectDeviceTests, CallAfterReserveInject) {
     // Called on shutdown.
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice, nullptr, nullptr))
         .Times(Exactly(1));
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice, nullptr, nullptr)).Times(Exactly(1));
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice, nullptr, nullptr))
         .Times(Exactly(1));
 }
@@ -68,6 +70,7 @@ TEST_F(WireInjectDeviceTests, InjectExistingID) {
     WGPUDevice serverDevice = api.GetNewDevice();
     EXPECT_CALL(api, DeviceReference(serverDevice));
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice, _, _));
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice, _, _));
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice, _, _));
     ASSERT_TRUE(
         GetWireServer()->InjectDevice(serverDevice, reservation.id, reservation.generation));
@@ -79,6 +82,7 @@ TEST_F(WireInjectDeviceTests, InjectExistingID) {
     // Called on shutdown.
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice, nullptr, nullptr))
         .Times(Exactly(1));
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice, nullptr, nullptr)).Times(Exactly(1));
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice, nullptr, nullptr))
         .Times(Exactly(1));
 }
@@ -91,6 +95,7 @@ TEST_F(WireInjectDeviceTests, InjectedDeviceLifetime) {
     WGPUDevice serverDevice = api.GetNewDevice();
     EXPECT_CALL(api, DeviceReference(serverDevice));
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice, _, _));
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice, _, _));
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice, _, _));
     ASSERT_TRUE(
         GetWireServer()->InjectDevice(serverDevice, reservation.id, reservation.generation));
@@ -99,6 +104,7 @@ TEST_F(WireInjectDeviceTests, InjectedDeviceLifetime) {
     wgpuDeviceRelease(reservation.device);
     EXPECT_CALL(api, DeviceRelease(serverDevice));
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice, nullptr, nullptr)).Times(1);
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice, nullptr, nullptr)).Times(1);
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice, nullptr, nullptr)).Times(1);
     FlushClient();
 
@@ -124,6 +130,7 @@ TEST_F(WireInjectDeviceTests, GetQueueAfterInject) {
     WGPUDevice serverDevice = api.GetNewDevice();
     EXPECT_CALL(api, DeviceReference(serverDevice));
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice, _, _));
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice, _, _));
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice, _, _));
     ASSERT_TRUE(
         GetWireServer()->InjectDevice(serverDevice, reservation.id, reservation.generation));
@@ -137,6 +144,7 @@ TEST_F(WireInjectDeviceTests, GetQueueAfterInject) {
     // Called on shutdown.
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice, nullptr, nullptr))
         .Times(Exactly(1));
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice, nullptr, nullptr)).Times(Exactly(1));
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice, nullptr, nullptr))
         .Times(Exactly(1));
 }
@@ -152,6 +160,7 @@ TEST_F(WireInjectDeviceTests, ReflectLiveDevices) {
     WGPUDevice serverDevice1 = api.GetNewDevice();
     EXPECT_CALL(api, DeviceReference(serverDevice1));
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice1, _, _));
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice1, _, _));
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice1, _, _));
     ASSERT_TRUE(
         GetWireServer()->InjectDevice(serverDevice1, reservation1.id, reservation1.generation));
@@ -159,6 +168,7 @@ TEST_F(WireInjectDeviceTests, ReflectLiveDevices) {
     WGPUDevice serverDevice2 = api.GetNewDevice();
     EXPECT_CALL(api, DeviceReference(serverDevice2));
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice2, _, _));
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice2, _, _));
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice2, _, _));
     ASSERT_TRUE(
         GetWireServer()->InjectDevice(serverDevice2, reservation2.id, reservation2.generation));
@@ -171,6 +181,7 @@ TEST_F(WireInjectDeviceTests, ReflectLiveDevices) {
     wgpuDeviceRelease(reservation1.device);
     EXPECT_CALL(api, DeviceRelease(serverDevice1));
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice1, nullptr, nullptr)).Times(1);
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice1, nullptr, nullptr)).Times(1);
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice1, nullptr, nullptr)).Times(1);
     FlushClient();
 
@@ -180,6 +191,7 @@ TEST_F(WireInjectDeviceTests, ReflectLiveDevices) {
 
     // Called on shutdown.
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice2, nullptr, nullptr)).Times(1);
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice2, nullptr, nullptr)).Times(1);
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice2, nullptr, nullptr)).Times(1);
 }
 
@@ -193,6 +205,7 @@ TEST_F(WireInjectDeviceTests, TrackChildObjectsWithTwoReservedDevices) {
     WGPUDevice serverDevice1 = api.GetNewDevice();
     EXPECT_CALL(api, DeviceReference(serverDevice1));
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice1, _, _));
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice1, _, _));
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice1, _, _));
     ASSERT_TRUE(
         GetWireServer()->InjectDevice(serverDevice1, reservation1.id, reservation1.generation));
@@ -211,6 +224,7 @@ TEST_F(WireInjectDeviceTests, TrackChildObjectsWithTwoReservedDevices) {
     WGPUDevice serverDevice2 = api.GetNewDevice();
     EXPECT_CALL(api, DeviceReference(serverDevice2));
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice2, _, _));
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice2, _, _));
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice2, _, _));
     ASSERT_TRUE(
         GetWireServer()->InjectDevice(serverDevice2, reservation2.id, reservation2.generation));
@@ -224,8 +238,10 @@ TEST_F(WireInjectDeviceTests, TrackChildObjectsWithTwoReservedDevices) {
 
     // Called on shutdown.
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice1, nullptr, nullptr)).Times(1);
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice1, nullptr, nullptr)).Times(1);
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice1, nullptr, nullptr)).Times(1);
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(serverDevice2, nullptr, nullptr)).Times(1);
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(serverDevice2, nullptr, nullptr)).Times(1);
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(serverDevice2, nullptr, nullptr)).Times(1);
 }
 

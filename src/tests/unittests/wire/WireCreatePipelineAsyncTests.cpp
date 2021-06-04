@@ -363,6 +363,9 @@ TEST_F(WireCreatePipelineAsyncTest, DeviceDeletedBeforeCallback) {
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr))
         .Times(1)
         .InSequence(s1, s2);
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr))
+        .Times(1)
+        .InSequence(s1, s2);
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(apiDevice, nullptr, nullptr))
         .Times(1)
         .InSequence(s1, s2);

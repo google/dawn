@@ -133,6 +133,15 @@ namespace dawn_wire { namespace server {
                 info->server->OnUncapturedError(info->self, type, message);
             },
             data->info.get());
+        // Set callback to post warning and other infomation to client.
+        // Almost the same with UncapturedError.
+        mProcs.deviceSetLoggingCallback(
+            device,
+            [](WGPULoggingType type, const char* message, void* userdata) {
+                DeviceInfo* info = static_cast<DeviceInfo*>(userdata);
+                info->server->OnLogging(info->self, type, message);
+            },
+            data->info.get());
         mProcs.deviceSetDeviceLostCallback(
             device,
             [](const char* message, void* userdata) {
@@ -156,6 +165,7 @@ namespace dawn_wire { namespace server {
         // Un-set the error and lost callbacks since we cannot forward them
         // after the server has been destroyed.
         mProcs.deviceSetUncapturedErrorCallback(device, nullptr, nullptr);
+        mProcs.deviceSetLoggingCallback(device, nullptr, nullptr);
         mProcs.deviceSetDeviceLostCallback(device, nullptr, nullptr);
     }
 

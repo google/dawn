@@ -44,6 +44,16 @@ namespace {
         mockDevicePopErrorScopeCallback->Call(type, message, userdata);
     }
 
+    class MockDeviceLoggingCallback {
+      public:
+        MOCK_METHOD(void, Call, (WGPULoggingType type, const char* message, void* userdata));
+    };
+
+    std::unique_ptr<StrictMock<MockDeviceLoggingCallback>> mockDeviceLoggingCallback;
+    void ToMockDeviceLoggingCallback(WGPULoggingType type, const char* message, void* userdata) {
+        mockDeviceLoggingCallback->Call(type, message, userdata);
+    }
+
     class MockDeviceLostCallback {
       public:
         MOCK_METHOD(void, Call, (const char* message, void* userdata));
@@ -66,6 +76,7 @@ class WireErrorCallbackTests : public WireTest {
         WireTest::SetUp();
 
         mockDeviceErrorCallback = std::make_unique<StrictMock<MockDeviceErrorCallback>>();
+        mockDeviceLoggingCallback = std::make_unique<StrictMock<MockDeviceLoggingCallback>>();
         mockDevicePopErrorScopeCallback =
             std::make_unique<StrictMock<MockDevicePopErrorScopeCallback>>();
         mockDeviceLostCallback = std::make_unique<StrictMock<MockDeviceLostCallback>>();
@@ -75,6 +86,7 @@ class WireErrorCallbackTests : public WireTest {
         WireTest::TearDown();
 
         mockDeviceErrorCallback = nullptr;
+        mockDeviceLoggingCallback = nullptr;
         mockDevicePopErrorScopeCallback = nullptr;
         mockDeviceLostCallback = nullptr;
     }
@@ -101,6 +113,23 @@ TEST_F(WireErrorCallbackTests, DeviceErrorCallback) {
 
     EXPECT_CALL(*mockDeviceErrorCallback,
                 Call(WGPUErrorType_Validation, StrEq("Some error message"), this))
+        .Times(1);
+
+    FlushServer();
+}
+
+// Test the return wire for device user warning callbacks
+TEST_F(WireErrorCallbackTests, DeviceLoggingCallback) {
+    wgpuDeviceSetLoggingCallback(device, ToMockDeviceLoggingCallback, this);
+
+    // Setting the injected warning callback should stay on the client side and do nothing
+    FlushClient();
+
+    // Calling the callback on the server side will result in the callback being called on the
+    // client side
+    api.CallDeviceSetLoggingCallbackCallback(apiDevice, WGPULoggingType_Info, "Some message");
+
+    EXPECT_CALL(*mockDeviceLoggingCallback, Call(WGPULoggingType_Info, StrEq("Some message"), this))
         .Times(1);
 
     FlushServer();

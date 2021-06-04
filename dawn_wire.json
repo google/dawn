@@ -109,6 +109,11 @@
             { "name": "type", "type": "error type"},
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
         ],
+        "device logging callback": [
+            { "name": "device", "type": "ObjectHandle", "handle_type": "device" },
+            { "name": "type", "type": "logging type"},
+            { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
+        ],
         "device lost callback" : [
             { "name": "device", "type": "ObjectHandle", "handle_type": "device" },
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
@@ -148,6 +153,7 @@
             "DevicePopErrorScope",
             "DeviceSetDeviceLostCallback",
             "DeviceSetUncapturedErrorCallback",
+            "DeviceSetLoggingCallback",
             "ShaderModuleGetCompilationInfo",
             "QueueOnSubmittedWorkDone",
             "QueueWriteBuffer",

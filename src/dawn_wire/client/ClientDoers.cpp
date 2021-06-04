@@ -33,7 +33,22 @@ namespace dawn_wire { namespace client {
             default:
                 return false;
         }
+        if (device == nullptr) {
+            // The device might have been deleted or recreated so this isn't an error.
+            return true;
+        }
         device->HandleError(errorType, message);
+        return true;
+    }
+
+    bool Client::DoDeviceLoggingCallback(Device* device,
+                                         WGPULoggingType loggingType,
+                                         const char* message) {
+        if (device == nullptr) {
+            // The device might have been deleted or recreated so this isn't an error.
+            return true;
+        }
+        device->HandleLogging(loggingType, message);
         return true;
     }
 

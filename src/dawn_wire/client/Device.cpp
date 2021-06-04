@@ -76,6 +76,13 @@ namespace dawn_wire { namespace client {
         }
     }
 
+    void Device::HandleLogging(WGPULoggingType loggingType, const char* message) {
+        if (mLoggingCallback) {
+            // Since client always run in single thread, calling the callback directly is safe.
+            mLoggingCallback(loggingType, message, mLoggingUserdata);
+        }
+    }
+
     void Device::HandleDeviceLost(const char* message) {
         if (mDeviceLostCallback && !mDidRunLostCallback) {
             mDidRunLostCallback = true;
@@ -112,6 +119,11 @@ namespace dawn_wire { namespace client {
     void Device::SetUncapturedErrorCallback(WGPUErrorCallback errorCallback, void* errorUserdata) {
         mErrorCallback = errorCallback;
         mErrorUserdata = errorUserdata;
+    }
+
+    void Device::SetLoggingCallback(WGPULoggingCallback callback, void* userdata) {
+        mLoggingCallback = callback;
+        mLoggingUserdata = userdata;
     }
 
     void Device::SetDeviceLostCallback(WGPUDeviceLostCallback callback, void* userdata) {

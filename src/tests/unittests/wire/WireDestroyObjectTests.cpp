@@ -39,6 +39,9 @@ TEST_F(WireDestroyObjectTests, DestroyDeviceDestroysChildren) {
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr))
         .Times(1)
         .InSequence(s1, s2);
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr))
+        .Times(1)
+        .InSequence(s1, s2);
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(apiDevice, nullptr, nullptr))
         .Times(1)
         .InSequence(s1, s2);
@@ -92,6 +95,9 @@ TEST_F(WireDestroyObjectTests, ImplicitInjectErrorAfterDestroyDevice) {
         EXPECT_CALL(api, BufferRelease(apiBuffer)).InSequence(s1);
         EXPECT_CALL(api, QueueRelease(apiQueue)).InSequence(s2);
         EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr))
+            .Times(1)
+            .InSequence(s1, s2);
+        EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr))
             .Times(1)
             .InSequence(s1, s2);
         EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(apiDevice, nullptr, nullptr))
