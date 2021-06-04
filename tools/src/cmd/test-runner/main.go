@@ -381,16 +381,20 @@ func (j job) run(wd, exe, dxcPath, xcrunPath string, generateExpected, generateS
 	}
 
 	// Can we validate?
+	validate := false
 	switch j.format {
 	case spvasm:
 		args = append(args, "--validate") // spirv-val is statically linked, always available
+		validate = true
 	case hlsl:
 		if dxcPath != "" {
 			args = append(args, "--dxc", dxcPath)
+			validate = true
 		}
 	case msl:
 		if xcrunPath != "" {
 			args = append(args, "--xcrun", xcrunPath)
+			validate = true
 		}
 	}
 
@@ -399,7 +403,7 @@ func (j job) run(wd, exe, dxcPath, xcrunPath string, generateExpected, generateS
 	out = strings.ReplaceAll(out, "\r\n", "\n")
 	matched := expected == "" || expected == out
 
-	if ok && generateExpected {
+	if ok && generateExpected && (validate || !skipped) {
 		saveExpectedFile(j.file, j.format, out)
 		matched = true
 	}
