@@ -24,6 +24,8 @@
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::CanonicalizeEntryPointIO::Config);
+
 namespace tint {
 namespace transform {
 
@@ -60,9 +62,16 @@ bool StructMemberComparator(const ast::StructMember* a,
 
 }  // namespace
 
-Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
+Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap& data) {
   ProgramBuilder out;
   CloneContext ctx(&out, in);
+
+  auto* cfg = data.Get<Config>();
+  if (cfg == nullptr) {
+    out.Diagnostics().add_error(
+        "missing transform data for CanonicalizeEntryPointIO");
+    return Output(Program(std::move(out)));
+  }
 
   // Strip entry point IO decorations from struct declarations.
   // TODO(jrprice): This code is duplicated with the SPIR-V transform.
@@ -104,6 +113,16 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
       auto new_struct_param_symbol = ctx.dst->Sym();
       ast::StructMemberList new_struct_members;
       for (auto* param : func->Parameters()) {
+        if (cfg->builtin_style == BuiltinStyle::kParameter &&
+            ast::HasDecoration<ast::BuiltinDecoration>(
+                param->Declaration()->decorations())) {
+          // If this parameter is a builtin and we are emitting those as
+          // parameters, then just clone it as is.
+          new_parameters.push_back(
+              ctx.Clone(const_cast<ast::Variable*>(param->Declaration())));
+          continue;
+        }
+
         auto param_name = ctx.Clone(param->Declaration()->symbol());
         auto* param_ty = param->Type();
         auto* param_declared_ty = param->Declaration()->type();
@@ -116,6 +135,20 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
           for (auto* member : str->Members()) {
             if (member->Type()->Is<sem::Struct>()) {
               TINT_ICE(ctx.dst->Diagnostics()) << "nested pipeline IO struct";
+            }
+
+            if (cfg->builtin_style == BuiltinStyle::kParameter &&
+                ast::HasDecoration<ast::BuiltinDecoration>(
+                    member->Declaration()->decorations())) {
+              // If this struct member is a builtin and we are emitting those as
+              // parameters, then move it to the parameter list.
+              auto* member_ty = CreateASTTypeFor(&ctx, member->Type());
+              auto new_param_name = ctx.dst->Sym();
+              new_parameters.push_back(ctx.dst->Param(
+                  new_param_name, member_ty,
+                  ctx.Clone(member->Declaration()->decorations())));
+              init_values.push_back(ctx.dst->Expr(new_param_name));
+              continue;
             }
 
             ast::DecorationList new_decorations = RemoveDecorations(
@@ -161,21 +194,23 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
         }
       }
 
-      // Sort struct members to satisfy HLSL interfacing matching rules.
-      std::sort(new_struct_members.begin(), new_struct_members.end(),
-                StructMemberComparator);
+      if (!new_struct_members.empty()) {
+        // Sort struct members to satisfy HLSL interfacing matching rules.
+        std::sort(new_struct_members.begin(), new_struct_members.end(),
+                  StructMemberComparator);
 
-      // Create the new struct type.
-      auto in_struct_name = ctx.dst->Sym();
-      auto* in_struct = ctx.dst->create<ast::Struct>(
-          in_struct_name, new_struct_members, ast::DecorationList{});
-      ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func_ast,
-                       in_struct);
+        // Create the new struct type.
+        auto in_struct_name = ctx.dst->Sym();
+        auto* in_struct = ctx.dst->create<ast::Struct>(
+            in_struct_name, new_struct_members, ast::DecorationList{});
+        ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func_ast,
+                         in_struct);
 
-      // Create a new function parameter using this struct type.
-      auto* struct_param = ctx.dst->Param(
-          new_struct_param_symbol, ctx.dst->ty.type_name(in_struct_name));
-      new_parameters.push_back(struct_param);
+        // Create a new function parameter using this struct type.
+        auto* struct_param = ctx.dst->Param(
+            new_struct_param_symbol, ctx.dst->ty.type_name(in_struct_name));
+        new_parameters.push_back(struct_param);
+      }
     }
 
     // Handle return type.
@@ -272,6 +307,14 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
   ctx.Clone();
   return Output(Program(std::move(out)));
 }
+
+CanonicalizeEntryPointIO::Config::Config(BuiltinStyle builtins)
+    : builtin_style(builtins) {}
+
+CanonicalizeEntryPointIO::Config::Config(const Config&) = default;
+CanonicalizeEntryPointIO::Config::~Config() = default;
+CanonicalizeEntryPointIO::Config& CanonicalizeEntryPointIO::Config::operator=(
+    const Config&) = default;
 
 }  // namespace transform
 }  // namespace tint

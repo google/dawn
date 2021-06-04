@@ -70,6 +70,34 @@ namespace transform {
 /// ```
 class CanonicalizeEntryPointIO : public Transform {
  public:
+  /// BuiltinStyle is an enumerator of different ways to emit builtins.
+  enum class BuiltinStyle {
+    /// Use non-struct function parameters for all builtins.
+    kParameter,
+    /// Use struct members for all builtins.
+    kStructMember,
+  };
+
+  /// Configuration options for the transform.
+  struct Config : public Castable<Config, Data> {
+    /// Constructor
+    /// @param builtins the approach to use for emitting builtins.
+    explicit Config(BuiltinStyle builtins);
+
+    /// Copy constructor
+    Config(const Config&);
+
+    /// Destructor
+    ~Config() override;
+
+    /// Assignment operator
+    /// @returns this Config
+    Config& operator=(const Config&);
+
+    /// The approach to use for emitting builtins.
+    BuiltinStyle builtin_style;
+  };
+
   /// Constructor
   CanonicalizeEntryPointIO();
   ~CanonicalizeEntryPointIO() override;

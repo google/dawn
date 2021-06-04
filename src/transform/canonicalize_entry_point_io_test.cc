@@ -22,7 +22,51 @@ namespace {
 
 using CanonicalizeEntryPointIOTest = TransformTest;
 
-TEST_F(CanonicalizeEntryPointIOTest, Parameters) {
+TEST_F(CanonicalizeEntryPointIOTest, Error_MissingTransformData) {
+  auto* src = "";
+
+  auto* expect = "error: missing transform data for CanonicalizeEntryPointIO";
+
+  auto got = Run<CanonicalizeEntryPointIO>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, Parameters_BuiltinsAsParameters) {
+  auto* src = R"(
+[[stage(fragment)]]
+fn frag_main([[location(1)]] loc1 : f32,
+             [[location(2)]] loc2 : vec4<u32>,
+             [[builtin(position)]] coord : vec4<f32>) {
+  var col : f32 = (coord.x * loc1);
+}
+)";
+
+  auto* expect = R"(
+struct tint_symbol_1 {
+  [[location(1)]]
+  loc1 : f32;
+  [[location(2)]]
+  loc2 : vec4<u32>;
+};
+
+[[stage(fragment)]]
+fn frag_main([[builtin(position)]] coord : vec4<f32>, tint_symbol : tint_symbol_1) {
+  let loc1 : f32 = tint_symbol.loc1;
+  let loc2 : vec4<u32> = tint_symbol.loc2;
+  var col : f32 = (coord.x * loc1);
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, Parameters_BuiltinsAsStructMembers) {
   auto* src = R"(
 [[stage(fragment)]]
 fn frag_main([[location(1)]] loc1 : f32,
@@ -51,7 +95,10 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 }
 )";
 
-  auto got = Run<CanonicalizeEntryPointIO>(src);
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kStructMember);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -81,12 +128,49 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 }
 )";
 
-  auto got = Run<CanonicalizeEntryPointIO>(src);
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(CanonicalizeEntryPointIOTest, Parameters_EmptyBody) {
+TEST_F(CanonicalizeEntryPointIOTest,
+       Parameters_EmptyBody_BuiltinsAsParameters) {
+  auto* src = R"(
+[[stage(fragment)]]
+fn frag_main([[location(1)]] loc1 : f32,
+             [[location(2)]] loc2 : vec4<u32>,
+             [[builtin(position)]] coord : vec4<f32>) {
+}
+)";
+
+  auto* expect = R"(
+struct tint_symbol_1 {
+  [[location(1)]]
+  loc1 : f32;
+  [[location(2)]]
+  loc2 : vec4<u32>;
+};
+
+[[stage(fragment)]]
+fn frag_main([[builtin(position)]] coord : vec4<f32>, tint_symbol : tint_symbol_1) {
+  let loc1 : f32 = tint_symbol.loc1;
+  let loc2 : vec4<u32> = tint_symbol.loc2;
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest,
+       Parameters_EmptyBody_BuiltinsAsStructMembers) {
   auto* src = R"(
 [[stage(fragment)]]
 fn frag_main([[location(1)]] loc1 : f32,
@@ -113,12 +197,69 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 }
 )";
 
-  auto got = Run<CanonicalizeEntryPointIO>(src);
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kStructMember);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(CanonicalizeEntryPointIOTest, StructParameters) {
+TEST_F(CanonicalizeEntryPointIOTest, StructParameters_BuiltinsAsParameters) {
+  auto* src = R"(
+struct FragBuiltins {
+  [[builtin(position)]] coord : vec4<f32>;
+};
+struct FragLocations {
+  [[location(1)]] loc1 : f32;
+  [[location(2)]] loc2 : vec4<u32>;
+};
+
+[[stage(fragment)]]
+fn frag_main([[location(0)]] loc0 : f32,
+             locations : FragLocations,
+             builtins : FragBuiltins) {
+  var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
+}
+)";
+
+  auto* expect = R"(
+struct FragBuiltins {
+  coord : vec4<f32>;
+};
+
+struct FragLocations {
+  loc1 : f32;
+  loc2 : vec4<u32>;
+};
+
+struct tint_symbol_2 {
+  [[location(0)]]
+  loc0 : f32;
+  [[location(1)]]
+  loc1 : f32;
+  [[location(2)]]
+  loc2 : vec4<u32>;
+};
+
+[[stage(fragment)]]
+fn frag_main([[builtin(position)]] tint_symbol_1 : vec4<f32>, tint_symbol : tint_symbol_2) {
+  let loc0 : f32 = tint_symbol.loc0;
+  let locations : FragLocations = FragLocations(tint_symbol.loc1, tint_symbol.loc2);
+  let builtins : FragBuiltins = FragBuiltins(tint_symbol_1);
+  var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, StructParameters_BuiltinsAsStructMembers) {
   auto* src = R"(
 struct FragBuiltins {
   [[builtin(position)]] coord : vec4<f32>;
@@ -166,7 +307,10 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 }
 )";
 
-  auto got = Run<CanonicalizeEntryPointIO>(src);
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kStructMember);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -191,7 +335,10 @@ fn frag_main() -> tint_symbol {
 }
 )";
 
-  auto got = Run<CanonicalizeEntryPointIO>(src);
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -240,7 +387,10 @@ fn frag_main() -> tint_symbol {
 }
 )";
 
-  auto got = Run<CanonicalizeEntryPointIO>(src);
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -304,7 +454,10 @@ fn frag_main2(tint_symbol_2 : tint_symbol_3) {
 }
 )";
 
-  auto got = Run<CanonicalizeEntryPointIO>(src);
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -366,7 +519,10 @@ fn frag_main1(tint_symbol : tint_symbol_1) {
 }
 )";
 
-  auto got = Run<CanonicalizeEntryPointIO>(src);
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -444,7 +600,10 @@ fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
 }
 )";
 
-  auto got = Run<CanonicalizeEntryPointIO>(src);
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -501,7 +660,10 @@ fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
 }
 )";
 
-  auto got = Run<CanonicalizeEntryPointIO>(src);
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kStructMember);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -593,7 +755,10 @@ fn frag_main(tint_symbol_2 : tint_symbol_3) {
 }
 )";
 
-  auto got = Run<CanonicalizeEntryPointIO>(src);
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kStructMember);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -617,7 +782,10 @@ fn tint_symbol_1(tint_symbol : tint_symbol_2) {
 }
 )";
 
-  auto got = Run<CanonicalizeEntryPointIO>(src);
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }

@@ -1,18 +1,7 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol_2 {
-  float4 position [[position]];
-  bool front_facing [[front_facing]];
-  uint sample_index [[sample_id]];
-  uint sample_mask [[sample_mask]];
-};
-
-fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  float4 const position = tint_symbol_1.position;
-  bool const front_facing = tint_symbol_1.front_facing;
-  uint const sample_index = tint_symbol_1.sample_index;
-  uint const sample_mask = tint_symbol_1.sample_mask;
+fragment void tint_symbol(float4 position [[position]], bool front_facing [[front_facing]], uint sample_index [[sample_id]], uint sample_mask [[sample_mask]]) {
   if (front_facing) {
     float4 const foo = position;
     uint const bar = (sample_index + sample_mask);

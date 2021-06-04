@@ -8,14 +8,13 @@ struct S {
   /* 0x0080 */ packed_float4 v;
   /* 0x0090 */ int8_t tint_pad_1[112];
 };
-struct tint_symbol_1 {
+struct tint_symbol_2 {
   float f [[user(locn0)]];
   uint u [[user(locn1)]];
-  float4 v [[position]];
 };
 
-fragment void frag_main(tint_symbol_1 tint_symbol [[stage_in]], device S& output [[buffer(0)]]) {
-  S const input = {.f=tint_symbol.f, .u=tint_symbol.u, .v=tint_symbol.v};
+fragment void frag_main(float4 tint_symbol_1 [[position]], tint_symbol_2 tint_symbol [[stage_in]], device S& output [[buffer(0)]]) {
+  S const input = {.f=tint_symbol.f, .u=tint_symbol.u, .v=tint_symbol_1};
   float const f = input.f;
   uint const u = input.u;
   float4 const v = input.v;

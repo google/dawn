@@ -7,15 +7,9 @@ struct FragmentInputs {
   uint sample_index;
   uint sample_mask;
 };
-struct tint_symbol_2 {
-  float4 position [[position]];
-  bool front_facing [[front_facing]];
-  uint sample_index [[sample_id]];
-  uint sample_mask [[sample_mask]];
-};
 
-fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  FragmentInputs const inputs = {.position=tint_symbol_1.position, .front_facing=tint_symbol_1.front_facing, .sample_index=tint_symbol_1.sample_index, .sample_mask=tint_symbol_1.sample_mask};
+fragment void tint_symbol(float4 tint_symbol_2 [[position]], bool tint_symbol_3 [[front_facing]], uint tint_symbol_4 [[sample_id]], uint tint_symbol_5 [[sample_mask]]) {
+  FragmentInputs const inputs = {.position=tint_symbol_2, .front_facing=tint_symbol_3, .sample_index=tint_symbol_4, .sample_mask=tint_symbol_5};
   if (inputs.front_facing) {
     float4 const foo = inputs.position;
     uint const bar = (inputs.sample_index + inputs.sample_mask);

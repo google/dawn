@@ -1,5 +1,3 @@
-SKIP: crbug.com/tint/817
-
 #include <metal_stdlib>
 
 using namespace metal;
@@ -27,11 +25,11 @@ struct SimParams {
   /* 0x0014 */ float rule2Scale;
   /* 0x0018 */ float rule3Scale;
 };
-struct Particles {
-  /* 0x0000 */ Particle particles[5];
+struct tint_array_wrapper_0 {
+  Particle array[5];
 };
-struct tint_symbol_5 {
-  uint3 gl_GlobalInvocationID [[thread_position_in_grid]];
+struct Particles {
+  /* 0x0000 */ tint_array_wrapper_0 particles;
 };
 
 vertex tint_symbol_2 vert_main(tint_symbol_1 tint_symbol [[stage_in]]) {
@@ -40,21 +38,22 @@ vertex tint_symbol_2 vert_main(tint_symbol_1 tint_symbol [[stage_in]]) {
   float2 const a_pos = tint_symbol.a_pos;
   float angle = -(  atan2(a_particleVel.x, a_particleVel.y));
   float2 pos = float2(((a_pos.x *   cos(angle)) - (a_pos.y *   sin(angle))), ((a_pos.x *   sin(angle)) + (a_pos.y *   cos(angle))));
-  return {float4((pos + a_particlePos), 0.0f, 1.0f)};
+  tint_symbol_2 const tint_symbol_5 = {.value=float4((pos + a_particlePos), 0.0f, 1.0f)};
+  return tint_symbol_5;
 }
 
 fragment tint_symbol_3 frag_main() {
-  return {float4(1.0f, 1.0f, 1.0f, 1.0f)};
+  tint_symbol_3 const tint_symbol_6 = {.value=float4(1.0f, 1.0f, 1.0f, 1.0f)};
+  return tint_symbol_6;
 }
 
-kernel void comp_main(tint_symbol_5 tint_symbol_4 [[stage_in]], constant SimParams& params [[buffer(0)]], device Particles& particlesA [[buffer(1)]], device Particles& particlesB [[buffer(2)]]) {
-  uint3 const gl_GlobalInvocationID = tint_symbol_4.gl_GlobalInvocationID;
+kernel void comp_main(uint3 gl_GlobalInvocationID [[thread_position_in_grid]], constant SimParams& params [[buffer(0)]], device Particles& particlesA [[buffer(1)]], device Particles& particlesB [[buffer(2)]]) {
   uint index = gl_GlobalInvocationID.x;
   if ((index >= 5u)) {
     return;
   }
-  float2 vPos = particlesA.particles[index].pos;
-  float2 vVel = particlesA.particles[index].vel;
+  float2 vPos = particlesA.particles.array[index].pos;
+  float2 vVel = particlesA.particles.array[index].vel;
   float2 cMass = float2(0.0f, 0.0f);
   float2 cVel = float2(0.0f, 0.0f);
   float2 colVel = float2(0.0f, 0.0f);
@@ -78,8 +77,8 @@ kernel void comp_main(tint_symbol_5 tint_symbol_4 [[stage_in]], constant SimPara
         if ((i == index)) {
           continue;
         }
-        pos = particlesA.particles[i].pos.xy;
-        vel = particlesA.particles[i].vel.xy;
+        pos = particlesA.particles.array[i].pos.xy;
+        vel = particlesA.particles.array[i].vel.xy;
         if ((        distance(pos, vPos) < params.rule1Distance)) {
           cMass = (cMass + pos);
           cMassCount = (cMassCount + 1);
@@ -115,8 +114,8 @@ kernel void comp_main(tint_symbol_5 tint_symbol_4 [[stage_in]], constant SimPara
   if ((vPos.y > 1.0f)) {
     vPos.y = -1.0f;
   }
-  particlesB.particles[index].pos = vPos;
-  particlesB.particles[index].vel = vVel;
+  particlesB.particles.array[index].pos = vPos;
+  particlesB.particles.array[index].vel = vVel;
   return;
 }
 

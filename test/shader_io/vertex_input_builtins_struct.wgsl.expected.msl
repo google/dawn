@@ -1,1 +1,18 @@
-SKIP: crbug.com/tint/817 attribute only applies to parameters
+#include <metal_stdlib>
+
+using namespace metal;
+struct VertexInputs {
+  uint vertex_index;
+  uint instance_index;
+};
+struct tint_symbol_4 {
+  float4 value [[position]];
+};
+
+vertex tint_symbol_4 tint_symbol(uint tint_symbol_2 [[vertex_id]], uint tint_symbol_3 [[instance_id]]) {
+  VertexInputs const inputs = {.vertex_index=tint_symbol_2, .instance_index=tint_symbol_3};
+  uint const foo = (inputs.vertex_index + inputs.instance_index);
+  tint_symbol_4 const tint_symbol_5 = {.value=float4()};
+  return tint_symbol_5;
+}
+

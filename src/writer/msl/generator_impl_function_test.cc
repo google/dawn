@@ -140,16 +140,12 @@ TEST_F(MslGeneratorImplTest, Emit_Decoration_EntryPoint_WithInOut_Builtins) {
 
 using namespace metal;
 struct tint_symbol_1 {
-  float4 coord [[position]];
-};
-struct tint_symbol_2 {
   float value [[depth(any)]];
 };
 
-fragment tint_symbol_2 frag_main(tint_symbol_1 tint_symbol [[stage_in]]) {
-  float4 const coord = tint_symbol.coord;
-  tint_symbol_2 const tint_symbol_3 = {.value=coord.x};
-  return tint_symbol_3;
+fragment tint_symbol_1 frag_main(float4 coord [[position]]) {
+  tint_symbol_1 const tint_symbol_2 = {.value=coord.x};
+  return tint_symbol_2;
 }
 
 )");
@@ -209,20 +205,19 @@ struct tint_symbol {
   float col2 [[user(locn2)]];
   float4 pos [[position]];
 };
-struct tint_symbol_3 {
+struct tint_symbol_4 {
   float col1 [[user(locn1)]];
   float col2 [[user(locn2)]];
-  float4 pos [[position]];
 };
 
 vertex tint_symbol vert_main() {
   Interface const tint_symbol_1 = {.col1=0.5f, .col2=0.25f, .pos=float4()};
-  tint_symbol const tint_symbol_4 = {.col1=tint_symbol_1.col1, .col2=tint_symbol_1.col2, .pos=tint_symbol_1.pos};
-  return tint_symbol_4;
+  tint_symbol const tint_symbol_5 = {.col1=tint_symbol_1.col1, .col2=tint_symbol_1.col2, .pos=tint_symbol_1.pos};
+  return tint_symbol_5;
 }
 
-fragment void frag_main(tint_symbol_3 tint_symbol_2 [[stage_in]]) {
-  Interface const colors = {.col1=tint_symbol_2.col1, .col2=tint_symbol_2.col2, .pos=tint_symbol_2.pos};
+fragment void frag_main(float4 tint_symbol_3 [[position]], tint_symbol_4 tint_symbol_2 [[stage_in]]) {
+  Interface const colors = {.col1=tint_symbol_2.col1, .col2=tint_symbol_2.col2, .pos=tint_symbol_3};
   float const r = colors.col1;
   float const g = colors.col2;
   return;

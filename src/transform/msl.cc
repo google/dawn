@@ -35,11 +35,14 @@ namespace transform {
 Msl::Msl() = default;
 Msl::~Msl() = default;
 
-Output Msl::Run(const Program* in, const DataMap& data) {
+Output Msl::Run(const Program* in, const DataMap&) {
   Manager manager;
+  DataMap data;
   manager.Add<CanonicalizeEntryPointIO>();
   manager.Add<ExternalTextureTransform>();
   manager.Add<PromoteInitializersToConstVar>();
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
   auto out = manager.Run(in, data);
   if (!out.program.IsValid()) {
     return out;
