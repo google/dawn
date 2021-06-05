@@ -19,12 +19,15 @@
 #include <string>
 #include <vector>
 
-#include "src/writer/spirv/binary_writer.h"
 #include "src/writer/writer.h"
 
 namespace tint {
 namespace writer {
 namespace spirv {
+
+/// Forward declarations
+class Builder;
+class BinaryWriter;
 
 /// Class to generate SPIR-V from a Tint program
 class Generator : public writer::Writer {
@@ -41,7 +44,7 @@ class Generator : public writer::Writer {
   bool Generate() override;
 
   /// @returns the result data
-  const std::vector<uint32_t>& result() const { return writer_->result(); }
+  const std::vector<uint32_t>& result() const;
 
  private:
   std::unique_ptr<Builder> builder_;

@@ -78,6 +78,10 @@
 #include "src/sem/vector_type.h"
 #include "src/sem/void_type.h"
 
+#ifdef INCLUDE_TINT_TINT_H_
+#error "internal tint header being #included from tint.h"
+#endif
+
 namespace tint {
 
 // Forward declarations

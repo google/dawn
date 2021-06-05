@@ -18,12 +18,14 @@
 #include <memory>
 #include <string>
 
-#include "src/writer/hlsl/generator_impl.h"
 #include "src/writer/text.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
+
+// Forward declarations
+class GeneratorImpl;
 
 /// Class to generate HLSL source
 class Generator : public Text {

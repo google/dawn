@@ -14,6 +14,8 @@
 
 #include "src/writer/spirv/generator.h"
 
+#include "src/writer/spirv/binary_writer.h"
+
 namespace tint {
 namespace writer {
 namespace spirv {
@@ -33,6 +35,10 @@ bool Generator::Generate() {
   writer_->WriteHeader(builder_->id_bound());
   writer_->WriteBuilder(builder_.get());
   return true;
+}
+
+const std::vector<uint32_t>& Generator::result() const {
+  return writer_->result();
 }
 
 }  // namespace spirv
