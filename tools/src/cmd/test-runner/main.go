@@ -380,6 +380,10 @@ func (j job) run(wd, exe, dxcPath, xcrunPath string, generateExpected, generateS
 		file = j.file
 	}
 
+	// Make relative paths use forward slash separators (on Windows) so that paths in tint
+	// output match expected output that contain errors
+	file = strings.ReplaceAll(file, `\`, `/`)
+
 	args := []string{
 		file,
 		"--format", string(j.format),
