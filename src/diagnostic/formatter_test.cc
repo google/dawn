@@ -216,6 +216,17 @@ the  snail  says  ???
   ASSERT_EQ(expect, got);
 }
 
+TEST_F(DiagFormatterTest, RangeOOB) {
+  Formatter fmt{{true, true, true, true}};
+  diag::List list;
+  list.add_error("oob", Source{{{10, 20}, {30, 20}}, &file});
+  auto got = fmt.format(list);
+  auto* expect = R"(file.name:10:20 error: oob
+
+)";
+  ASSERT_EQ(expect, got);
+}
+
 }  // namespace
 }  // namespace diag
 }  // namespace tint

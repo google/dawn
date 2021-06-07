@@ -212,7 +212,8 @@ void Formatter::format(const Diagnostic& diag, State& state) const {
     state.set_style({Color::kDefault, false});
 
     for (size_t line_num = rng.begin.line;
-         (line_num <= rng.end.line) && (src.file_content->lines.size() + 1);
+         (line_num <= rng.end.line) &&
+         (line_num <= src.file_content->lines.size());
          line_num++) {
       auto& line = src.file_content->lines[line_num - 1];
       auto line_len = line.size();
