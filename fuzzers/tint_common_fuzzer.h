@@ -15,6 +15,7 @@
 #ifndef FUZZERS_TINT_COMMON_FUZZER_H_
 #define FUZZERS_TINT_COMMON_FUZZER_H_
 
+#include <cstring>
 #include <string>
 #include <utility>
 #include <vector>

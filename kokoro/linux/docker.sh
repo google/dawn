@@ -89,6 +89,7 @@ if [ "$BUILD_SYSTEM" == "cmake" ]; then
 
     if [ "$BUILD_TOOLCHAIN" == "clang" ]; then
         using clang-10.0.0
+        COMMON_CMAKE_FLAGS+=" -DTINT_BUILD_FUZZERS=1"
     elif [ "$BUILD_TOOLCHAIN" == "gcc" ]; then
         using gcc-9
     fi

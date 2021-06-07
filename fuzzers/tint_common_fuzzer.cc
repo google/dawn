@@ -14,6 +14,7 @@
 
 #include "fuzzers/tint_common_fuzzer.h"
 
+#include <cstring>
 #include <memory>
 #include <string>
 #include <utility>
@@ -21,7 +22,6 @@
 
 #include "src/ast/module.h"
 #include "src/program.h"
-#include "src/program_builder.h"
 
 namespace tint {
 namespace fuzzers {
@@ -106,14 +106,14 @@ void ExtractBindingRemapperInputs(Reader* r, tint::transform::DataMap* inputs) {
 
   std::vector<Config> configs = r->vector<Config>();
   transform::BindingRemapper::BindingPoints binding_points;
-  transform::BindingRemapper::Accesses accesses;
+  transform::BindingRemapper::AccessControls accesses;
   for (const auto& config : configs) {
     binding_points[{config.old_binding, config.old_group}] = {
         config.new_binding, config.new_group};
-    accesss[{config.old_binding, config.old_group}] = config.new_access;
+    accesses[{config.old_binding, config.old_group}] = config.new_access;
   }
 
-  inputs->Add<transform::BindingRemapper::Remappings>(binding_points, accesss);
+  inputs->Add<transform::BindingRemapper::Remappings>(binding_points, accesses);
 }
 
 void ExtractFirstIndexOffsetInputs(Reader* r,
