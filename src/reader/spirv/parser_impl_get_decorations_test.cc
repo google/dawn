@@ -98,6 +98,19 @@ TEST_F(SpvParserGetDecorationsTest,
   EXPECT_TRUE(p->error().empty());
 }
 
+TEST_F(SpvParserGetDecorationsTest, GetDecorationsForMember_RelaxedPrecision) {
+  auto p = parser(test::Assemble(R"(
+    OpMemberDecorate %10 0 RelaxedPrecision
+    %float = OpTypeFloat 32
+    %10 = OpTypeStruct %float
+  )"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
+  auto decorations = p->GetDecorationsForMember(10, 0);
+  EXPECT_THAT(decorations,
+              UnorderedElementsAre(Decoration{SpvDecorationRelaxedPrecision}));
+  EXPECT_TRUE(p->error().empty());
+}
+
 // TODO(dneto): Enable when ArrayStride is handled
 TEST_F(SpvParserGetDecorationsTest,
        DISABLED_GetDecorationsForMember_OneDecoration) {

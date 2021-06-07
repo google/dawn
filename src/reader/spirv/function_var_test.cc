@@ -72,15 +72,21 @@ std::string CommonTypes() {
   )";
 }
 
-// Returns the SPIR-V assembly for a vertex shader, optionally
-// with OpName decorations for certain SPIR-V IDs
-std::string PreambleNames(std::vector<std::string> ids) {
+// Returns the SPIR-V assembly for capabilities, the memory model,
+// a vertex shader entry point declaration, and name declarations
+// for specified IDs.
+std::string Caps(std::vector<std::string> ids = {}) {
   return R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
     OpEntryPoint Vertex %100 "main"
-)" + Names(ids) +
-         CommonTypes();
+)" + Names(ids);
+}
+
+// Returns the SPIR-V assembly for a vertex shader, optionally
+// with OpName decorations for certain SPIR-V IDs
+std::string PreambleNames(std::vector<std::string> ids) {
+  return Caps(ids) + CommonTypes();
 }
 
 std::string Preamble() {
@@ -678,6 +684,77 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_StructInitializer_Null) {
   }
 }
 )"));
+}
+
+TEST_F(SpvParserFunctionVarTest,
+       EmitFunctionVariables_Decorate_RelaxedPrecision) {
+  // RelaxedPrecisionis dropped
+  auto p = parser(test::Assemble(Caps({"myvar"}) + R"(
+     OpDecorate %myvar RelaxedPrecision
+
+     %float = OpTypeFloat 32
+     %ptr = OpTypePointer Function %float
+
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %myvar = OpVariable %ptr Function
+     OpReturn
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitFunctionVariables());
+
+  const auto got = ToString(p->builder(), fe.ast_body());
+  EXPECT_EQ(got, R"(VariableDeclStatement{
+  Variable{
+    myvar
+    none
+    undefined
+    __f32
+  }
+}
+)") << got;
+}
+
+TEST_F(SpvParserFunctionVarTest,
+       EmitFunctionVariables_MemberDecorate_RelaxedPrecision) {
+  // RelaxedPrecisionis dropped
+  const auto assembly = Caps({"myvar", "strct"}) + R"(
+     OpMemberDecorate %strct 0 RelaxedPrecision
+
+     %float = OpTypeFloat 32
+     %strct = OpTypeStruct %float
+     %ptr = OpTypePointer Function %strct
+
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %myvar = OpVariable %ptr Function
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << assembly << p->error() << std::endl;
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitFunctionVariables());
+
+  const auto got = ToString(p->builder(), fe.ast_body());
+  EXPECT_EQ(got, R"(VariableDeclStatement{
+  Variable{
+    myvar
+    none
+    undefined
+    __type_name_strct
+  }
+}
+)") << got;
 }
 
 TEST_F(SpvParserFunctionVarTest,

@@ -445,6 +445,9 @@ ast::Decoration* ParserImpl::ConvertMemberDecoration(
     case SpvDecorationColMajor:
       // WGSL only supports column major matrices.
       return nullptr;
+    case SpvDecorationRelaxedPrecision:
+      // WGSL doesn't support relaxed precision.
+      return nullptr;
     case SpvDecorationRowMajor:
       Fail() << "WGSL does not support row-major matrices: can't "
                 "translate member "

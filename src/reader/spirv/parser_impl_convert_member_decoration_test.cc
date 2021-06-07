@@ -61,6 +61,18 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_Offset) {
   EXPECT_TRUE(p->error().empty());
 }
 
+TEST_F(SpvParserTest, ConvertMemberDecoration_RelaxedPrecision) {
+  // WGSL does not support relaxed precision. Drop it.
+  // It's functionally correct to use full precision f32 instead of
+  // relaxed precision f32.
+  auto p = parser(std::vector<uint32_t>{});
+
+  auto* result =
+      p->ConvertMemberDecoration(1, 1, {SpvDecorationRelaxedPrecision});
+  EXPECT_EQ(result, nullptr);
+  EXPECT_TRUE(p->error().empty());
+}
+
 TEST_F(SpvParserTest, ConvertMemberDecoration_UnhandledDecoration) {
   auto p = parser(std::vector<uint32_t>{});
 
