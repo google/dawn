@@ -42,6 +42,69 @@
 
 namespace dawn_native { namespace metal {
 
+    namespace {
+
+        // The time interval for each round of kalman filter
+        static constexpr uint64_t kFilterIntervalInMs = static_cast<uint64_t>(NSEC_PER_SEC / 10);
+
+        struct KalmanInfo {
+            float filterValue;  // The estimation value
+            float kalmanGain;   // The kalman gain
+            float R;            // The covariance of the observation noise
+            float P;            // The a posteriori estimate covariance
+        };
+
+        // A simplified kalman filter for estimating timestamp period based on measured values
+        float KalmanFilter(KalmanInfo* info, float measuredValue) {
+            // Optimize kalman gain
+            info->kalmanGain = info->P / (info->P + info->R);
+
+            // Correct filter value
+            info->filterValue =
+                info->kalmanGain * measuredValue + (1.0 - info->kalmanGain) * info->filterValue;
+            // Update estimate covariance
+            info->P = (1.0f - info->kalmanGain) * info->P;
+            return info->filterValue;
+        }
+
+        void API_AVAILABLE(macos(10.15), ios(14))
+            UpdateTimestampPeriod(id<MTLDevice> device,
+                                  KalmanInfo* info,
+                                  MTLTimestamp* cpuTimestampStart,
+                                  MTLTimestamp* gpuTimestampStart,
+                                  float* timestampPeriod) {
+            // The filter value is converged to an optimal value when the kalman gain is less than
+            // 0.01. At this time, the weight of the measured value is too small to change the next
+            // filter value, the sampling and calculations do not need to continue anymore.
+            if (info->kalmanGain < 0.01f) {
+                return;
+            }
+
+            MTLTimestamp cpuTimestampEnd = 0, gpuTimestampEnd = 0;
+            [device sampleTimestamps:&cpuTimestampEnd gpuTimestamp:&gpuTimestampEnd];
+
+            // Update the timestamp start values when timestamp reset happens
+            if (cpuTimestampEnd < *cpuTimestampStart || gpuTimestampEnd < *gpuTimestampStart) {
+                *cpuTimestampStart = cpuTimestampEnd;
+                *gpuTimestampStart = gpuTimestampEnd;
+                return;
+            }
+
+            if (cpuTimestampEnd - *cpuTimestampStart >= kFilterIntervalInMs) {
+                // The measured timestamp period
+                float measurement = (cpuTimestampEnd - *cpuTimestampStart) /
+                                    static_cast<float>(gpuTimestampEnd - *gpuTimestampStart);
+
+                // Measurement update
+                *timestampPeriod = KalmanFilter(info, measurement);
+
+                *cpuTimestampStart = cpuTimestampEnd;
+                *gpuTimestampStart = gpuTimestampEnd;
+            }
+        }
+
+    }  // namespace
+
     // static
     ResultOrError<Device*> Device::Create(AdapterBase* adapter,
                                           NSPRef<id<MTLDevice>> mtlDevice,
@@ -69,6 +132,27 @@ namespace dawn_native { namespace metal {
         }
 
         mCommandQueue.Acquire([*mMtlDevice newCommandQueue]);
+
+        if (GetAdapter()->GetSupportedExtensions().IsEnabled(Extension::TimestampQuery)) {
+            // Make a best guess of timestamp period based on device vendor info, and converge it to
+            // an accurate value by the following calculations.
+            mTimestampPeriod =
+                gpu_info::IsIntel(GetAdapter()->GetPCIInfo().vendorId) ? 83.333f : 1.0f;
+
+            // Initialize kalman filter parameters
+            mKalmanInfo = std::make_unique<KalmanInfo>();
+            mKalmanInfo->filterValue = 0.0f;
+            mKalmanInfo->kalmanGain = 0.5f;
+            mKalmanInfo->R =
+                0.0001f;  // The smaller this value is, the smaller the error of measured value is,
+                          // the more we can trust the measured value.
+            mKalmanInfo->P = 1.0f;
+
+            if (@available(macos 10.15, iOS 14.0, *)) {
+                // Sample CPU timestamp and GPU timestamp for first time at device creation
+                [*mMtlDevice sampleTimestamps:&mCpuTimestamp gpuTimestamp:&mGpuTimestamp];
+            }
+        }
 
         return DeviceBase::Initialize(new Queue(this));
     }
@@ -191,6 +275,14 @@ namespace dawn_native { namespace metal {
     MaybeError Device::TickImpl() {
         if (mCommandContext.GetCommands() != nullptr) {
             SubmitPendingCommandBuffer();
+        }
+
+        // Just run timestamp period calculation when timestamp extension is enabled.
+        if (GetAdapter()->GetSupportedExtensions().IsEnabled(Extension::TimestampQuery)) {
+            if (@available(macos 10.15, iOS 14.0, *)) {
+                UpdateTimestampPeriod(GetMTLDevice(), mKalmanInfo.get(), &mCpuTimestamp,
+                                      &mGpuTimestamp, &mTimestampPeriod);
+            }
         }
 
         return {};
@@ -372,7 +464,7 @@ namespace dawn_native { namespace metal {
     }
 
     float Device::GetTimestampPeriodInNS() const {
-        return 1.0f;
+        return mTimestampPeriod;
     }
 
 }}  // namespace dawn_native::metal

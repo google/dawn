@@ -221,10 +221,9 @@ namespace dawn_native { namespace metal {
                 if ([*mDevice supportsFamily:MTLGPUFamilyMac2] ||
                     [*mDevice supportsFamily:MTLGPUFamilyApple5]) {
                     mSupportedExtensions.EnableExtension(Extension::PipelineStatisticsQuery);
-
-                    // TODO(crbug.com/dawn/434): Not enable timestamp query here becuase it's not
-                    // clear how to convert timestamps to nanoseconds on Metal.
-                    // See https://github.com/gpuweb/gpuweb/issues/1325
+                    // TODO(crbug.com/dawn/545): Crash occurs if we only call WriteTimestamp in a
+                    // command encoder without any copy commands on Metal on AMD GPU.
+                    mSupportedExtensions.EnableExtension(Extension::TimestampQuery);
                 }
             }
             if (@available(macOS 10.11, iOS 11.0, *)) {
