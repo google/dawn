@@ -587,8 +587,7 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
       return EmitTextureCall(pre, out, expr, intrinsic);
     }
     if (intrinsic->Type() == sem::IntrinsicType::kSelect) {
-      diagnostics_.add_error("select not supported in HLSL backend yet");
-      return false;
+      return EmitSelectCall(pre, out, expr);
     } else if (intrinsic->Type() == sem::IntrinsicType::kIsNormal) {
       diagnostics_.add_error("is_normal not supported in HLSL backend yet");
       return false;
@@ -672,6 +671,32 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
   }
 
   out << ")";
+
+  return true;
+}
+
+bool GeneratorImpl::EmitSelectCall(std::ostream& pre,
+                                   std::ostream& out,
+                                   ast::CallExpression* expr) {
+  auto* expr_true = expr->params()[0];
+  auto* expr_false = expr->params()[1];
+  auto* expr_cond = expr->params()[2];
+  ScopedParen paren(out);
+  if (!EmitExpression(pre, out, expr_cond)) {
+    return false;
+  }
+
+  out << " ? ";
+
+  if (!EmitExpression(pre, out, expr_true)) {
+    return false;
+  }
+
+  out << " : ";
+
+  if (!EmitExpression(pre, out, expr_false)) {
+    return false;
+  }
 
   return true;
 }

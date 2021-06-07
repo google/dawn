@@ -1,23 +1,25 @@
-SKIP: FAILED
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
-
-fn select_1e960b() {
-  var res : vec2<u32> = select(vec2<u32>(), vec2<u32>(), vec2<bool>());
+void select_1e960b() {
+  uint2 res = (vector<bool, 2>(false, false) ? uint2(0u, 0u) : uint2(0u, 0u));
 }
 
-[[stage(vertex)]]
-fn vertex_main() {
+tint_symbol vertex_main() {
   select_1e960b();
+  const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  return tint_symbol_1;
 }
 
-[[stage(fragment)]]
-fn fragment_main() {
+void fragment_main() {
   select_1e960b();
+  return;
 }
 
-[[stage(compute)]]
-fn compute_main() {
+[numthreads(1, 1, 1)]
+void compute_main() {
   select_1e960b();
+  return;
 }
 
-Failed to generate: error: select not supported in HLSL backend yet

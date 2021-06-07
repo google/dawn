@@ -272,6 +272,28 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Call) {
   EXPECT_EQ(result(), "dot(param1, param2)");
 }
 
+TEST_F(HlslGeneratorImplTest_Intrinsic, Select_Scalar) {
+  auto* call = Call("select", 1.0f, 2.0f, true);
+  WrapInFunction(call);
+  GeneratorImpl& gen = Build();
+
+  gen.increment_indent();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
+  EXPECT_EQ(result(), "(true ? 1.0f : 2.0f)");
+}
+
+TEST_F(HlslGeneratorImplTest_Intrinsic, Select_Vector) {
+  auto* call =
+      Call("select", vec2<i32>(1, 2), vec2<i32>(3, 4), vec2<bool>(true, false));
+  WrapInFunction(call);
+  GeneratorImpl& gen = Build();
+
+  gen.increment_indent();
+  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
+  EXPECT_EQ(result(),
+            "(vector<bool, 2>(true, false) ? int2(1, 2) : int2(3, 4))");
+}
+
 TEST_F(HlslGeneratorImplTest_Intrinsic, Pack4x8Snorm) {
   auto* call = Call("pack4x8snorm", "p1");
   Global("p1", ty.vec4<f32>(), ast::StorageClass::kPrivate);
