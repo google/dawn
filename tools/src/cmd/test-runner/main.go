@@ -104,9 +104,14 @@ func run() error {
 		return err
 	}
 
+	// Allow using '/' in the filter on Windows
+	filter = strings.ReplaceAll(filter, "/", string(filepath.Separator));
+
 	// Split the --filter flag up by ',', trimming any whitespace at the start and end
 	globIncludes := strings.Split(filter, ",")
 	for i, s := range globIncludes {
+		// Escape backslashes for the glob config
+		s = strings.ReplaceAll(s, `\`, `\\`)
 		globIncludes[i] = `"` + strings.TrimSpace(s) + `"`
 	}
 
