@@ -511,7 +511,6 @@ ast::AccessControl Resolver::DefaultAccessForStorageClass(
   // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
   switch (storage_class) {
     case ast::StorageClass::kStorage:
-      return ast::Access::kRead;
     case ast::StorageClass::kUniform:
     case ast::StorageClass::kUniformConstant:
       return ast::Access::kRead;

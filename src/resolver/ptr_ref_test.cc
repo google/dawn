@@ -58,7 +58,7 @@ TEST_F(ResolverPtrRefTest, AddressOfThenDeref) {
   EXPECT_TRUE(TypeOf(expr)->As<sem::Reference>()->StoreType()->Is<sem::I32>());
 }
 
-TEST_F(ResolverPtrRefTest, DefaultStorageClass) {
+TEST_F(ResolverPtrRefTest, DefaultPtrStorageClass) {
   // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
 
   auto* buf = Structure("S", {Member("m", ty.i32())},
@@ -76,91 +76,44 @@ TEST_F(ResolverPtrRefTest, DefaultStorageClass) {
                              create<ast::BindingDecoration>(1),
                              create<ast::GroupDecoration>(0),
                          });
-  auto* handle = Global("h", ty.depth_texture(ast::TextureDimension::k2d),
-                        ast::DecorationList{
-                            create<ast::BindingDecoration>(2),
-                            create<ast::GroupDecoration>(0),
-                        });
 
-  WrapInFunction(function);
+  auto* function_ptr =
+      Const("f_ptr", ty.pointer(ty.i32(), ast::StorageClass::kFunction),
+            AddressOf(function));
+  auto* private_ptr =
+      Const("p_ptr", ty.pointer(ty.i32(), ast::StorageClass::kPrivate),
+            AddressOf(private_));
+  auto* workgroup_ptr =
+      Const("w_ptr", ty.pointer(ty.i32(), ast::StorageClass::kWorkgroup),
+            AddressOf(workgroup));
+  auto* uniform_ptr =
+      Const("ub_ptr", ty.pointer(buf, ast::StorageClass::kUniform),
+            AddressOf(uniform));
+  auto* storage_ptr =
+      Const("sb_ptr", ty.pointer(buf, ast::StorageClass::kStorage),
+            AddressOf(storage));
+
+  WrapInFunction(function, function_ptr, private_ptr, workgroup_ptr,
+                 uniform_ptr, storage_ptr);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-  ASSERT_TRUE(TypeOf(function)->Is<sem::Reference>());
-  ASSERT_TRUE(TypeOf(private_)->Is<sem::Reference>());
-  ASSERT_TRUE(TypeOf(workgroup)->Is<sem::Reference>());
-  ASSERT_TRUE(TypeOf(uniform)->Is<sem::Reference>());
-  ASSERT_TRUE(TypeOf(storage)->Is<sem::Reference>());
-  ASSERT_TRUE(TypeOf(handle)->Is<sem::Reference>());
+  ASSERT_TRUE(TypeOf(function_ptr)->Is<sem::Pointer>());
+  ASSERT_TRUE(TypeOf(private_ptr)->Is<sem::Pointer>());
+  ASSERT_TRUE(TypeOf(workgroup_ptr)->Is<sem::Pointer>());
+  ASSERT_TRUE(TypeOf(uniform_ptr)->Is<sem::Pointer>());
+  ASSERT_TRUE(TypeOf(storage_ptr)->Is<sem::Pointer>());
 
-  EXPECT_EQ(TypeOf(function)->As<sem::Reference>()->Access(),
+  EXPECT_EQ(TypeOf(function_ptr)->As<sem::Pointer>()->Access(),
             ast::Access::kReadWrite);
-  EXPECT_EQ(TypeOf(private_)->As<sem::Reference>()->Access(),
+  EXPECT_EQ(TypeOf(private_ptr)->As<sem::Pointer>()->Access(),
             ast::Access::kReadWrite);
-  EXPECT_EQ(TypeOf(workgroup)->As<sem::Reference>()->Access(),
+  EXPECT_EQ(TypeOf(workgroup_ptr)->As<sem::Pointer>()->Access(),
             ast::Access::kReadWrite);
-  EXPECT_EQ(TypeOf(uniform)->As<sem::Reference>()->Access(),
+  EXPECT_EQ(TypeOf(uniform_ptr)->As<sem::Pointer>()->Access(),
             ast::Access::kRead);
-  EXPECT_EQ(TypeOf(storage)->As<sem::Reference>()->Access(),
+  EXPECT_EQ(TypeOf(storage_ptr)->As<sem::Pointer>()->Access(),
             ast::Access::kRead);
-  EXPECT_EQ(TypeOf(handle)->As<sem::Reference>()->Access(), ast::Access::kRead);
-}
-
-TEST_F(ResolverPtrRefTest, ExplicitStorageClass) {
-  // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
-
-  auto* buf = Structure("S", {Member("m", ty.i32())},
-                        {create<ast::StructBlockDecoration>()});
-  auto* storage =
-      Global("sb", buf, ast::StorageClass::kStorage, ast::Access::kReadWrite,
-             ast::DecorationList{
-                 create<ast::BindingDecoration>(1),
-                 create<ast::GroupDecoration>(0),
-             });
-
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
-
-  ASSERT_TRUE(TypeOf(storage)->Is<sem::Reference>());
-
-  EXPECT_EQ(TypeOf(storage)->As<sem::Reference>()->Access(),
-            ast::Access::kReadWrite);
-}
-
-TEST_F(ResolverPtrRefTest, InheritsAccessFromOriginatingVariable) {
-  // struct Inner {
-  //    arr: array<i32, 4>;
-  // }
-  // [[block]] struct S {
-  //    inner: Inner;
-  // }
-  // [[group(0), binding(0)]] var<storage, read_write> s : S;
-  // fn f() {
-  //   let p = &s.inner.arr[2];
-  // }
-  auto* inner = Structure("Inner", {Member("arr", ty.array<i32, 4>())});
-  auto* buf = Structure("S", {Member("inner", inner)},
-                        {create<ast::StructBlockDecoration>()});
-  auto* storage =
-      Global("s", buf, ast::StorageClass::kStorage, ast::Access::kReadWrite,
-             ast::DecorationList{
-                 create<ast::BindingDecoration>(0),
-                 create<ast::GroupDecoration>(0),
-             });
-
-  auto* expr =
-      IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 4);
-  auto* ptr = Const("p", nullptr, AddressOf(expr));
-
-  WrapInFunction(ptr);
-
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
-
-  ASSERT_TRUE(TypeOf(expr)->Is<sem::Reference>());
-  ASSERT_TRUE(TypeOf(ptr)->Is<sem::Pointer>());
-
-  EXPECT_EQ(TypeOf(expr)->As<sem::Reference>()->Access(),
-            ast::Access::kReadWrite);
-  EXPECT_EQ(TypeOf(ptr)->As<sem::Pointer>()->Access(), ast::Access::kReadWrite);
 }
 
 }  // namespace

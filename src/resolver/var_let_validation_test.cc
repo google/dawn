@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/ast/struct_block_decoration.h"
 #include "src/resolver/resolver.h"
 #include "src/resolver/resolver_test_helper.h"
 
@@ -214,6 +215,42 @@ TEST_F(ResolverVarLetValidationTest, VarRedeclaredInIfBlock) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(), "12:34 error v-0014: redeclared identifier 'v'");
+}
+
+TEST_F(ResolverVarLetValidationTest, InferredPtrStorageAccessMismatch) {
+  // struct Inner {
+  //    arr: array<i32, 4>;
+  // }
+  // [[block]] struct S {
+  //    inner: Inner;
+  // }
+  // [[group(0), binding(0)]] var<storage> s : S;
+  // fn f() {
+  //   let p : pointer<storage, i32, read_write> = &s.inner.arr[2];
+  // }
+  auto* inner = Structure("Inner", {Member("arr", ty.array<i32, 4>())});
+  auto* buf = Structure("S", {Member("inner", inner)},
+                        {create<ast::StructBlockDecoration>()});
+  auto* storage = Global("s", buf, ast::StorageClass::kStorage,
+                         ast::DecorationList{
+                             create<ast::BindingDecoration>(0),
+                             create<ast::GroupDecoration>(0),
+                         });
+
+  auto* expr =
+      IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 4);
+  auto* ptr = Const(
+      Source{{12, 34}}, "p",
+      ty.pointer<i32>(ast::StorageClass::kStorage, ast::Access::kReadWrite),
+      AddressOf(expr));
+
+  WrapInFunction(ptr);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: cannot initialize let of type "
+            "'ptr<storage, i32, read_write>' with value of type "
+            "'ptr<storage, i32, read>'");
 }
 
 }  // namespace

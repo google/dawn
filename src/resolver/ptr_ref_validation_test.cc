@@ -78,40 +78,40 @@ TEST_F(ResolverPtrRefValidationTest, DerefOfVar) {
             "12:34 error: cannot dereference expression of type 'i32'");
 }
 
-TEST_F(ResolverPtrRefValidationTest, InferredAccessMismatch) {
+TEST_F(ResolverPtrRefValidationTest, InferredPtrAccessMismatch) {
   // struct Inner {
   //    arr: array<i32, 4>;
   // }
   // [[block]] struct S {
   //    inner: Inner;
   // }
-  // [[group(0), binding(0)]] var<storage> s : S;
+  // [[group(0), binding(0)]] var<storage, read_write> s : S;
   // fn f() {
-  //   let p : pointer<storage, i32, read_write> = &s.inner.arr[2];
+  //   let p : pointer<storage, i32> = &s.inner.arr[2];
   // }
   auto* inner = Structure("Inner", {Member("arr", ty.array<i32, 4>())});
   auto* buf = Structure("S", {Member("inner", inner)},
                         {create<ast::StructBlockDecoration>()});
-  auto* storage = Global("s", buf, ast::StorageClass::kStorage,
-                         ast::DecorationList{
-                             create<ast::BindingDecoration>(0),
-                             create<ast::GroupDecoration>(0),
-                         });
+  auto* storage =
+      Global("s", buf, ast::StorageClass::kStorage, ast::Access::kReadWrite,
+             ast::DecorationList{
+                 create<ast::BindingDecoration>(0),
+                 create<ast::GroupDecoration>(0),
+             });
 
   auto* expr =
       IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 4);
-  auto* ptr = Const(
-      Source{{12, 34}}, "p",
-      ty.pointer<i32>(ast::StorageClass::kStorage, ast::Access::kReadWrite),
-      AddressOf(expr));
+  auto* ptr =
+      Const(Source{{12, 34}}, "p", ty.pointer<i32>(ast::StorageClass::kStorage),
+            AddressOf(expr));
 
   WrapInFunction(ptr);
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
             "12:34 error: cannot initialize let of type "
-            "'ptr<storage, i32, read_write>' with value of type "
-            "'ptr<storage, i32, read>'");
+            "'ptr<storage, i32>' with value of type "
+            "'ptr<storage, i32, read_write>'");
 }
 
 }  // namespace
