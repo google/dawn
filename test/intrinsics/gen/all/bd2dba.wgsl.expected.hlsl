@@ -3,7 +3,7 @@ struct tint_symbol {
 };
 
 void all_bd2dba() {
-  bool res = all(vector<bool, 3>(false, false, false));
+  bool res = all(bool3(false, false, false));
 }
 
 tint_symbol vertex_main() {

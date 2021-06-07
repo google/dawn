@@ -2479,6 +2479,8 @@ bool GeneratorImpl::EmitType(std::ostream& out,
       out << "int" << size;
     } else if (vec->type()->Is<sem::U32>() && size >= 1 && size <= 4) {
       out << "uint" << size;
+    } else if (vec->type()->Is<sem::Bool>() && size >= 1 && size <= 4) {
+      out << "bool" << size;
     } else {
       out << "vector<";
       if (!EmitType(out, vec->type(), storage_class, access, "")) {

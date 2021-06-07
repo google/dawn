@@ -3,7 +3,7 @@ struct tint_symbol {
 };
 
 void any_e755c1() {
-  bool res = any(vector<bool, 3>(false, false, false));
+  bool res = any(bool3(false, false, false));
 }
 
 tint_symbol vertex_main() {

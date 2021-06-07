@@ -3,7 +3,7 @@ struct tint_symbol {
 };
 
 void select_a2860e() {
-  int4 res = (vector<bool, 4>(false, false, false, false) ? int4(0, 0, 0, 0) : int4(0, 0, 0, 0));
+  int4 res = (bool4(false, false, false, false) ? int4(0, 0, 0, 0) : int4(0, 0, 0, 0));
 }
 
 tint_symbol vertex_main() {

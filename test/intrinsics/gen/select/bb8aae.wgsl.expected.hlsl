@@ -3,7 +3,7 @@ struct tint_symbol {
 };
 
 void select_bb8aae() {
-  float4 res = (vector<bool, 4>(false, false, false, false) ? float4(0.0f, 0.0f, 0.0f, 0.0f) : float4(0.0f, 0.0f, 0.0f, 0.0f));
+  float4 res = (bool4(false, false, false, false) ? float4(0.0f, 0.0f, 0.0f, 0.0f) : float4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 tint_symbol vertex_main() {

@@ -3,7 +3,7 @@ struct tint_symbol {
 };
 
 void select_00b848() {
-  int2 res = (vector<bool, 2>(false, false) ? int2(0, 0) : int2(0, 0));
+  int2 res = (bool2(false, false) ? int2(0, 0) : int2(0, 0));
 }
 
 tint_symbol vertex_main() {

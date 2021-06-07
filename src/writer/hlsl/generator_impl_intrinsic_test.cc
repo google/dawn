@@ -290,8 +290,7 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Select_Vector) {
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_EQ(result(),
-            "(vector<bool, 2>(true, false) ? int2(1, 2) : int2(3, 4))");
+  EXPECT_EQ(result(), "(bool2(true, false) ? int2(1, 2) : int2(3, 4))");
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Pack4x8Snorm) {

@@ -3,7 +3,7 @@ struct tint_symbol {
 };
 
 void isInf_7e81b5() {
-  vector<bool, 4> res = isinf(float4(0.0f, 0.0f, 0.0f, 0.0f));
+  bool4 res = isinf(float4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 tint_symbol vertex_main() {

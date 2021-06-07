@@ -3,7 +3,7 @@ struct tint_symbol {
 };
 
 void select_266aff() {
-  float2 res = (vector<bool, 2>(false, false) ? float2(0.0f, 0.0f) : float2(0.0f, 0.0f));
+  float2 res = (bool2(false, false) ? float2(0.0f, 0.0f) : float2(0.0f, 0.0f));
 }
 
 tint_symbol vertex_main() {

@@ -3,7 +3,7 @@ struct tint_symbol {
 };
 
 void isInf_666f2a() {
-  vector<bool, 3> res = isinf(float3(0.0f, 0.0f, 0.0f));
+  bool3 res = isinf(float3(0.0f, 0.0f, 0.0f));
 }
 
 tint_symbol vertex_main() {

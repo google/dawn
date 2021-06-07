@@ -3,7 +3,7 @@ struct tint_symbol {
 };
 
 void isFinite_34d32b() {
-  vector<bool, 2> res = isfinite(float2(0.0f, 0.0f));
+  bool2 res = isfinite(float2(0.0f, 0.0f));
 }
 
 tint_symbol vertex_main() {

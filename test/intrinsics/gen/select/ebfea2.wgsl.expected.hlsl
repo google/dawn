@@ -3,7 +3,7 @@ struct tint_symbol {
 };
 
 void select_ebfea2() {
-  float3 res = (vector<bool, 3>(false, false, false) ? float3(0.0f, 0.0f, 0.0f) : float3(0.0f, 0.0f, 0.0f));
+  float3 res = (bool3(false, false, false) ? float3(0.0f, 0.0f, 0.0f) : float3(0.0f, 0.0f, 0.0f));
 }
 
 tint_symbol vertex_main() {
