@@ -122,7 +122,13 @@ call :status "Running tint_unittests"
 %BUILD_TYPE%\tint_unittests.exe --validate-hlsl || goto :error
 @echo off
 
-@rem TODO(amaiorano): test-all.sh for Windows
+call :status "Testing test/test-all.sh"
+@echo on
+cd /d %SRC_DIR% || goto :error
+set PATH=C:\Program Files\Metal Developer Tools\macos\bin;%PATH%
+where metal.exe
+git bash -- ./test/test-all.sh ../tint-build/%BUILD_TYPE%/tint.exe
+@echo off
 
 call :status "Done"
 exit /b 0
