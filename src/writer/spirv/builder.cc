@@ -2349,9 +2349,22 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
     case IntrinsicType::kReverseBits:
       op = spv::Op::OpBitReverse;
       break;
-    case IntrinsicType::kSelect:
-      op = spv::Op::OpSelect;
-      break;
+    case IntrinsicType::kSelect: {
+      // Note: Argument order is different in WGSL and SPIR-V
+      auto cond_id = get_param_as_value_id(2);
+      auto true_id = get_param_as_value_id(0);
+      auto false_id = get_param_as_value_id(1);
+      if (!cond_id || !true_id || !false_id) {
+        return 0;
+      }
+      if (!push_function_inst(
+              spv::Op::OpSelect,
+              {Operand::Int(result_type_id), result, Operand::Int(cond_id),
+               Operand::Int(true_id), Operand::Int(false_id)})) {
+        return 0;
+      }
+      return result_id;
+    }
     default: {
       auto set_id = GetGLSLstd450Import();
       auto inst_id = intrinsic_to_glsl_method(intrinsic);

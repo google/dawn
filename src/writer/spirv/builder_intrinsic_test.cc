@@ -509,9 +509,9 @@ TEST_F(IntrinsicBuilderTest, Call_Select) {
 %6 = OpVariable %7 Private %10
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%12 = OpLoad %3 %1
+            R"(%12 = OpLoad %8 %6
 %13 = OpLoad %3 %1
-%14 = OpLoad %8 %6
+%14 = OpLoad %3 %1
 %11 = OpSelect %3 %12 %13 %14
 )");
 }
