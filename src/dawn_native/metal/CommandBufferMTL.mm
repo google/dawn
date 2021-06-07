@@ -359,7 +359,7 @@ namespace dawn_native { namespace metal {
                                     PipelineLayout* pipelineLayout) {
                 uint32_t currentDynamicBufferIndex = 0;
 
-                // TODO(kainino@chromium.org): Maintain buffers and offsets arrays in BindGroup
+                // TODO(crbug.com/dawn/854): Maintain buffers and offsets arrays in BindGroup
                 // so that we only have to do one setVertexBuffers and one setFragmentBuffers
                 // call here.
                 for (BindingIndex bindingIndex{0};
@@ -398,7 +398,7 @@ namespace dawn_native { namespace metal {
                             const id<MTLBuffer> buffer = ToBackend(binding.buffer)->GetMTLBuffer();
                             NSUInteger offset = binding.offset;
 
-                            // TODO(shaobo.yan@intel.com): Record bound buffer status to use
+                            // TODO(crbug.com/dawn/854): Record bound buffer status to use
                             // setBufferOffset to achieve better performance.
                             if (bindingInfo.buffer.hasDynamicOffset) {
                                 offset += dynamicOffsets[currentDynamicBufferIndex];
@@ -823,7 +823,7 @@ namespace dawn_native { namespace metal {
                     EnsureDestinationTextureInitialized(commandContext, dstTexture,
                                                         copy->destination, copy->copySize);
 
-                    // TODO(jiawei.shao@intel.com): support copies with 1D textures.
+                    // TODO(crbug.com/dawn/814): support copies with 1D textures.
                     ASSERT(srcTexture->GetDimension() != wgpu::TextureDimension::e1D &&
                            dstTexture->GetDimension() != wgpu::TextureDimension::e1D);
 

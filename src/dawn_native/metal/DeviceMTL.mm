@@ -189,10 +189,10 @@ namespace dawn_native { namespace metal {
             SetToggle(Toggle::DisableBaseInstance, !haveBaseVertexBaseInstance);
         }
 
-        // TODO(jiawei.shao@intel.com): tighten this workaround when the driver bug is fixed.
+        // TODO(crbug.com/dawn/846): tighten this workaround when the driver bug is fixed.
         SetToggle(Toggle::AlwaysResolveIntoZeroLevelAndLayer, true);
 
-        // TODO(hao.x.li@intel.com): Use MTLStorageModeShared instead of MTLStorageModePrivate when
+        // TODO(crbug.com/dawn/847): Use MTLStorageModeShared instead of MTLStorageModePrivate when
         // creating MTLCounterSampleBuffer in QuerySet on Intel platforms, otherwise it fails to
         // create the buffer. Change to use MTLStorageModePrivate when the bug is fixed.
         if (@available(macOS 10.15, iOS 14.0, *)) {

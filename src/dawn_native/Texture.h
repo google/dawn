@@ -106,7 +106,7 @@ namespace dawn_native {
         wgpu::TextureUsage mUsage = wgpu::TextureUsage::None;
         TextureState mState;
 
-        // TODO(natlee@microsoft.com): Use a more optimized data structure to save space
+        // TODO(crbug.com/dawn/845): Use a more optimized data structure to save space
         std::vector<bool> mIsSubresourceContentInitializedAtIndex;
     };
 

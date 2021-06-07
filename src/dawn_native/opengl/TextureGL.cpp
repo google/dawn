@@ -210,7 +210,7 @@ namespace dawn_native { namespace opengl {
 
     MaybeError Texture::ClearTexture(const SubresourceRange& range,
                                      TextureBase::ClearValue clearValue) {
-        // TODO(jiawei.shao@intel.com): initialize the textures with compressed formats.
+        // TODO(crbug.com/dawn/850): initialize the textures with compressed formats.
         if (GetFormat().isCompressed) {
             return {};
         }
@@ -539,7 +539,7 @@ namespace dawn_native { namespace opengl {
             mHandle = ToBackend(texture)->GetHandle();
         } else {
             // glTextureView() is supported on OpenGL version >= 4.3
-            // TODO(jiawei.shao@intel.com): support texture view on OpenGL version <= 4.2
+            // TODO(crbug.com/dawn/593): support texture view on OpenGL version <= 4.2 and ES
             const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
             mHandle = GenTexture(gl);
             const Texture* textureGL = ToBackend(texture);

@@ -137,7 +137,6 @@ namespace dawn_native { namespace d3d12 {
                 continue;
             }
 
-            // TODO(shaobo.yan@intel.com): Implement dynamic buffer offset.
             // TODO(dawn:728) In the future, special handling will be needed here for external
             // textures because they encompass multiple views.
             DescriptorType descriptorType = WGPUBindingInfoToDescriptorType(bindingInfo);

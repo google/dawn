@@ -48,13 +48,13 @@ namespace dawn_native { namespace vulkan {
             if (!chooseSwapPresentMode(info.presentModes, turnOffVsync, &presentMode)) {
                 return false;
             }
-            // TODO(cwallez@chromium.org): For now this is hardcoded to what works with one NVIDIA
+            // TODO(crbug.com/dawn/269): For now this is hardcoded to what works with one NVIDIA
             // driver. Need to generalize
             config->nativeFormat = VK_FORMAT_B8G8R8A8_UNORM;
             config->colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
             config->format = wgpu::TextureFormat::BGRA8Unorm;
             config->minImageCount = 3;
-            // TODO(cwallez@chromium.org): This is upside down compared to what we want, at least
+            // TODO(crbug.com/dawn/269): This is upside down compared to what we want, at least
             // on Linux
             config->preTransform = info.capabilities.currentTransform;
             config->presentMode = presentMode;
@@ -109,7 +109,7 @@ namespace dawn_native { namespace vulkan {
         ASSERT(mInfo.capabilities.maxImageExtent.height >= height);
 
         ASSERT(format == static_cast<WGPUTextureFormat>(GetPreferredFormat()));
-        // TODO(cwallez@chromium.org): need to check usage works too
+        // TODO(crbug.com/dawn/269): need to check usage works too
 
         // Create the swapchain with the configuration we chose
         VkSwapchainKHR oldSwapchain = mSwapChain;

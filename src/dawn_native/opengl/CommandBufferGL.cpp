@@ -774,7 +774,7 @@ namespace dawn_native { namespace opengl {
                     auto& src = copy->source;
                     auto& dst = copy->destination;
 
-                    // TODO(jiawei.shao@intel.com): add workaround for the case that imageExtentSrc
+                    // TODO(crbug.com/dawn/817): add workaround for the case that imageExtentSrc
                     // is not equal to imageExtentDst. For example when copySize fits in the virtual
                     // size of the source image but does not fit in the one of the destination
                     // image.
@@ -805,7 +805,7 @@ namespace dawn_native { namespace opengl {
                 }
 
                 case Command::ResolveQuerySet: {
-                    // TODO(hao.x.li@intel.com): Resolve non-precise occlusion query.
+                    // TODO(crbug.com/dawn/434): Resolve non-precise occlusion query.
                     SkipCommand(&mCommands, type);
                     break;
                 }
@@ -849,7 +849,6 @@ namespace dawn_native { namespace opengl {
                     bindGroupTracker.Apply(gl);
 
                     gl.DispatchCompute(dispatch->x, dispatch->y, dispatch->z);
-                    // TODO(cwallez@chromium.org): add barriers to the API
                     gl.MemoryBarrier(GL_ALL_BARRIER_BITS);
                     break;
                 }
@@ -863,7 +862,6 @@ namespace dawn_native { namespace opengl {
 
                     gl.BindBuffer(GL_DISPATCH_INDIRECT_BUFFER, indirectBuffer->GetHandle());
                     gl.DispatchComputeIndirect(static_cast<GLintptr>(indirectBufferOffset));
-                    // TODO(cwallez@chromium.org): add barriers to the API
                     gl.MemoryBarrier(GL_ALL_BARRIER_BITS);
                     break;
                 }
@@ -964,8 +962,6 @@ namespace dawn_native { namespace opengl {
 
                 // Attach depth/stencil buffer.
                 GLenum glAttachment = 0;
-                // TODO(kainino@chromium.org): it may be valid to just always use
-                // GL_DEPTH_STENCIL_ATTACHMENT here.
                 if (format.aspects == (Aspect::Depth | Aspect::Stencil)) {
                     glAttachment = GL_DEPTH_STENCIL_ATTACHMENT;
                 } else if (format.aspects == Aspect::Depth) {

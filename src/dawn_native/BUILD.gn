@@ -63,7 +63,7 @@ config("dawn_native_internal") {
   # aren't on 10.11 it means we are on 10.11 and above, and Metal is available.
   # Skipping this check on 10.11 and above is important as it allows getting
   # proper compilation warning when using 10.12 and above feature for example.
-  # TODO(cwallez@chromium.org): Consider using API_AVAILABLE annotations on all
+  # TODO(crbug.com/1004024): Consider using API_AVAILABLE annotations on all
   # metal code in dawn once crbug.com/1004024 is sorted out if Chromium still
   # supports 10.10 then.
   if (is_mac && mac_deployment_target == "10.10.0") {

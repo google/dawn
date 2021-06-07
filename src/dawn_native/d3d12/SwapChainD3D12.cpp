@@ -289,7 +289,7 @@ namespace dawn_native { namespace d3d12 {
         Device* device = ToBackend(GetDevice());
 
         // Transition the texture to the present state as required by IDXGISwapChain1::Present()
-        // TODO(cwallez@chromium.org): Remove the need for this by eagerly transitioning the
+        // TODO(crbug.com/dawn/269): Remove the need for this by eagerly transitioning the
         // presentable texture to present at the end of submits that use them.
         CommandRecordingContext* commandContext;
         DAWN_TRY_ASSIGN(commandContext, device->GetPendingCommandContext());
@@ -320,7 +320,7 @@ namespace dawn_native { namespace d3d12 {
 
         // Synchronously wait until previous operations on the next swapchain buffer are finished.
         // This is the logic that performs frame pacing.
-        // TODO(cwallez@chromium.org): Consider whether this should  be lifted for Mailbox so that
+        // TODO(crbug.com/dawn/269): Consider whether this should  be lifted for Mailbox so that
         // there is not frame pacing.
         mCurrentBuffer = mDXGISwapChain->GetCurrentBackBufferIndex();
         DAWN_TRY(device->WaitForSerial(mBufferLastUsedSerials[mCurrentBuffer]));

@@ -36,7 +36,7 @@ namespace utils {
         wgpu::Extent3D textureSizeAtLevel0,
         uint32_t mipmapLevel,
         uint32_t rowsPerImage) {
-        // TODO(jiawei.shao@intel.com): support compressed texture formats
+        // Compressed texture formats not supported in this function yet.
         ASSERT(utils::GetTextureFormatBlockWidth(format) == 1);
 
         TextureDataCopyLayout layout;

@@ -26,7 +26,6 @@
 // only two indices that keep increasing (unbounded) but can be still indexed using bit masks.
 // However, this 1) requires the size to always be a power-of-two and 2) remove tests that check
 // used bytes.
-// TODO(bryan.bernhart@intel.com): Follow-up with ringbuffer optimization.
 namespace dawn_native {
 
     RingBufferAllocator::RingBufferAllocator(uint64_t maxSize) : mMaxBlockSize(maxSize) {

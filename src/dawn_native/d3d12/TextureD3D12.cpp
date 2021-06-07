@@ -499,7 +499,6 @@ namespace dawn_native { namespace d3d12 {
         resourceDescriptor.MipLevels = static_cast<UINT16>(GetNumMipLevels());
         resourceDescriptor.Format = dxgiFormat;
         resourceDescriptor.SampleDesc.Count = GetSampleCount();
-        // TODO(bryan.bernhart@intel.com): investigate how to specify standard MSAA sample pattern.
         resourceDescriptor.SampleDesc.Quality = 0;
         resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
         resourceDescriptor.Flags =
@@ -652,7 +651,6 @@ namespace dawn_native { namespace d3d12 {
                                              ExecutionSerial pendingCommandSerial) const {
         // Reuse the subresource(s) directly and avoid transition when it isn't needed, and
         // return false.
-        // TODO(cwallez@chromium.org): Need some form of UAV barriers at some point.
         if (state->lastState == newState) {
             return;
         }
@@ -1102,7 +1100,7 @@ namespace dawn_native { namespace d3d12 {
         // D3D12_SRV_DIMENSION_TEXTURE2DMS.
         // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_srv
         // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_array_srv
-        // TODO(jiawei.shao@intel.com): support more texture view dimensions.
+        // TODO(crbug.com/dawn/814): support 1D textures.
         if (GetTexture()->IsMultisampledTexture()) {
             switch (descriptor->dimension) {
                 case wgpu::TextureViewDimension::e2DArray:

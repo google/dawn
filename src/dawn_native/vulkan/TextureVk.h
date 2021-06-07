@@ -66,17 +66,10 @@ namespace dawn_native { namespace vulkan {
 
         // Transitions the texture to be used as `usage`, recording any necessary barrier in
         // `commands`.
-        // TODO(cwallez@chromium.org): coalesce barriers and do them early when possible.
+        // TODO(crbug.com/dawn/851): coalesce barriers and do them early when possible.
         void TransitionUsageNow(CommandRecordingContext* recordingContext,
                                 wgpu::TextureUsage usage,
                                 const SubresourceRange& range);
-        // TODO(cwallez@chromium.org): This function should be an implementation detail of
-        // vulkan::Texture but it is currently used by the barrier tracking for compute passes.
-        void TransitionUsageAndGetResourceBarrier(wgpu::TextureUsage usage,
-                                                  const SubresourceRange& range,
-                                                  std::vector<VkImageMemoryBarrier>* imageBarriers,
-                                                  VkPipelineStageFlags* srcStages,
-                                                  VkPipelineStageFlags* dstStages);
         void TransitionUsageForPass(CommandRecordingContext* recordingContext,
                                     const TextureSubresourceUsage& textureUsages,
                                     std::vector<VkImageMemoryBarrier>* imageBarriers,
@@ -115,6 +108,11 @@ namespace dawn_native { namespace vulkan {
                                 TextureBase::ClearValue);
 
         // Implementation details of the barrier computations for the texture.
+        void TransitionUsageAndGetResourceBarrier(wgpu::TextureUsage usage,
+                                                  const SubresourceRange& range,
+                                                  std::vector<VkImageMemoryBarrier>* imageBarriers,
+                                                  VkPipelineStageFlags* srcStages,
+                                                  VkPipelineStageFlags* dstStages);
         void TransitionUsageForPassImpl(
             CommandRecordingContext* recordingContext,
             const SubresourceStorage<wgpu::TextureUsage>& subresourceUsages,

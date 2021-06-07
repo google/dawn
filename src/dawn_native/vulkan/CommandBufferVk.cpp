@@ -91,7 +91,7 @@ namespace dawn_native { namespace vulkan {
                     region.srcOffset.z = srcCopy.origin.z;
                     break;
                 case wgpu::TextureDimension::e1D:
-                    // TODO(jiawei.shao@intel.com): support 1D textures
+                    // TODO(crbug.com/dawn/814): support 1D textures
                     UNREACHABLE();
             }
 
@@ -110,7 +110,7 @@ namespace dawn_native { namespace vulkan {
                     region.dstOffset.z = dstCopy.origin.z;
                     break;
                 case wgpu::TextureDimension::e1D:
-                    // TODO(jiawei.shao@intel.com): support 1D textures
+                    // TODO(crbug.com/dawn/814): support 1D textures
                     UNREACHABLE();
             }
 

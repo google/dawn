@@ -449,7 +449,7 @@ namespace dawn_native { namespace vulkan {
     }
 
     void Device::InitTogglesFromDriver() {
-        // TODO(jiawei.shao@intel.com): tighten this workaround when this issue is fixed in both
+        // TODO(crbug.com/dawn/857): tighten this workaround when this issue is fixed in both
         // Vulkan SPEC and drivers.
         SetToggle(Toggle::UseTemporaryBufferInCompressedTextureToTextureCopy, true);
 

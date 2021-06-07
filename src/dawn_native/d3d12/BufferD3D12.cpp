@@ -422,7 +422,7 @@ namespace dawn_native { namespace d3d12 {
         ASSERT(GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse));
         ASSERT(!IsDataInitialized());
 
-        // TODO(jiawei.shao@intel.com): skip initializing the buffer when it is created on a heap
+        // TODO(crbug.com/dawn/484): skip initializing the buffer when it is created on a heap
         // that has already been zero initialized.
         DAWN_TRY(ClearBuffer(commandContext, uint8_t(0u)));
         SetIsDataInitialized();
@@ -441,7 +441,7 @@ namespace dawn_native { namespace d3d12 {
             memset(mMappedData, clearValue, GetSize());
             UnmapImpl();
         } else {
-            // TODO(jiawei.shao@intel.com): use ClearUnorderedAccessView*() when the buffer usage
+            // TODO(crbug.com/dawn/852): use ClearUnorderedAccessView*() when the buffer usage
             // includes STORAGE.
             DynamicUploader* uploader = device->GetDynamicUploader();
             UploadHandle uploadHandle;

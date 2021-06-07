@@ -26,7 +26,7 @@ namespace dawn_native { namespace vulkan {
 
     namespace {
 
-        // TODO(cwallez@chromium.org): This is a hardcoded heurstic to choose when to
+        // TODO(crbug.com/dawn/849): This is a hardcoded heurstic to choose when to
         // suballocate but it should ideally depend on the size of the memory heaps and other
         // factors.
         constexpr uint64_t kMaxSizeForSubAllocation = 4ull * 1024ull * 1024ull;  // 4MiB
@@ -134,7 +134,7 @@ namespace dawn_native { namespace vulkan {
 
         // Sub-allocate non-mappable resources because at the moment the mapped pointer
         // is part of the resource and not the heap, which doesn't match the Vulkan model.
-        // TODO(cwallez@chromium.org): allow sub-allocating mappable resources, maybe.
+        // TODO(crbug.com/dawn/849): allow sub-allocating mappable resources, maybe.
         if (requirements.size < kMaxSizeForSubAllocation && !mappable) {
             ResourceMemoryAllocation subAllocation;
             DAWN_TRY_ASSIGN(subAllocation,
@@ -185,7 +185,7 @@ namespace dawn_native { namespace vulkan {
 
             // Suballocations aren't freed immediately, otherwise another resource allocation could
             // happen just after that aliases the old one and would require a barrier.
-            // TODO(cwallez@chromium.org): Maybe we can produce the correct barriers to reduce the
+            // TODO(crbug.com/dawn/851): Maybe we can produce the correct barriers to reduce the
             // latency to reclaim memory.
             case AllocationMethod::kSubAllocated:
                 mSubAllocationsToDelete.Enqueue(*allocation, mDevice->GetPendingCommandSerial());

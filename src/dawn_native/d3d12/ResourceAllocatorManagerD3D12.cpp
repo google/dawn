@@ -194,7 +194,7 @@ namespace dawn_native { namespace d3d12 {
             optimizedClearValue = &zero;
         }
 
-        // TODO(bryan.bernhart@intel.com): Conditionally disable sub-allocation.
+        // TODO(crbug.com/dawn/849): Conditionally disable sub-allocation.
         // For very large resources, there is no benefit to suballocate.
         // For very small resources, it is inefficent to suballocate given the min. heap
         // size could be much larger then the resource allocation.

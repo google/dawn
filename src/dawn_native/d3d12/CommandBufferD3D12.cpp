@@ -208,7 +208,7 @@ namespace dawn_native { namespace d3d12 {
             for (size_t i = 0; i < usages.buffers.size(); ++i) {
                 Buffer* buffer = ToBackend(usages.buffers[i]);
 
-                // TODO(jiawei.shao@intel.com): clear storage buffers with
+                // TODO(crbug.com/dawn/852): clear storage buffers with
                 // ClearUnorderedAccessView*().
                 buffer->GetDevice()->ConsumedError(buffer->EnsureDataInitialized(commandContext));
 
@@ -285,7 +285,6 @@ namespace dawn_native { namespace d3d12 {
             // the signal to change the bounded heaps.
             // Re-populating all bindgroups after the last one fails causes duplicated allocations
             // to occur on overflow.
-            // TODO(bryan.bernhart@intel.com): Consider further optimization.
             bool didCreateBindGroupViews = true;
             bool didCreateBindGroupSamplers = true;
             for (BindGroupIndex index : IterateBitSet(mDirtyBindGroups)) {
@@ -793,9 +792,6 @@ namespace dawn_native { namespace d3d12 {
                         cmd->firstQuery, cmd->queryCount, destination->GetD3D12Resource(),
                         cmd->destinationOffset);
 
-                    // TODO(hao.x.li@intel.com): Add compute shader to convert the query result
-                    // (ticks) to timestamp (ns)
-
                     break;
                 }
 
@@ -1109,8 +1105,6 @@ namespace dawn_native { namespace d3d12 {
                             ->StencilBeginningAccess.Clear.ClearValue.DepthStencil.Stencil;
                 }
 
-                // TODO(kainino@chromium.org): investigate: should the Dawn clear
-                // stencil type be uint8_t?
                 if (clearFlags) {
                     commandList->ClearDepthStencilView(
                         renderPassBuilder->GetRenderPassDepthStencilDescriptor()->cpuDescriptor,

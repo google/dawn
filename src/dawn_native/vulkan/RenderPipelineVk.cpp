@@ -457,7 +457,6 @@ namespace dawn_native { namespace vulkan {
         // LogicOp isn't supported so we disable it.
         colorBlend.logicOpEnable = VK_FALSE;
         colorBlend.logicOp = VK_LOGIC_OP_CLEAR;
-        // TODO(cwallez@chromium.org): Do we allow holes in the color attachments?
         colorBlend.attachmentCount = static_cast<uint32_t>(GetColorAttachmentsMask().count());
         colorBlend.pAttachments = colorBlendAttachments.data();
         // The blend constant is always dynamic so we fill in a dummy value

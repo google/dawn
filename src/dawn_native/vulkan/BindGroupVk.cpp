@@ -138,7 +138,7 @@ namespace dawn_native { namespace vulkan {
             numWrites++;
         }
 
-        // TODO(cwallez@chromium.org): Batch these updates
+        // TODO(crbug.com/dawn/855): Batch these updates
         device->fn.UpdateDescriptorSets(device->GetVkDevice(), numWrites, writes.data(), 0,
                                         nullptr);
     }

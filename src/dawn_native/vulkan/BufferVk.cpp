@@ -153,8 +153,6 @@ namespace dawn_native { namespace vulkan {
         createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
-        // TODO(cwallez@chromium.org): Have a global "zero" buffer that can do everything instead
-        // of creating a new 4-byte buffer?
         createInfo.size = std::max(GetSize(), uint64_t(4u));
         // Add CopyDst for non-mappable buffer initialization with mappedAtCreation
         // and robust resource initialization.
@@ -263,7 +261,7 @@ namespace dawn_native { namespace vulkan {
 
         CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
 
-        // TODO(jiawei.shao@intel.com): initialize mapped buffer in CPU side.
+        // TODO(crbug.com/dawn/852): initialize mapped buffer in CPU side.
         EnsureDataInitialized(recordingContext);
 
         if (mode & wgpu::MapMode::Read) {
@@ -352,8 +350,8 @@ namespace dawn_native { namespace vulkan {
         TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopyDst);
 
         Device* device = ToBackend(GetDevice());
-        // TODO(jiawei.shao@intel.com): find out why VK_WHOLE_SIZE doesn't work on old Windows Intel
-        // Vulkan drivers.
+        // This code is fine. According to jiawei.shao@intel.com, VK_WHOLE_SIZE doesn't work
+        // on old Windows Intel Vulkan drivers, so we don't use it.
         device->fn.CmdFillBuffer(recordingContext->commandBuffer, mHandle, 0, GetSize(),
                                  clearValue);
     }

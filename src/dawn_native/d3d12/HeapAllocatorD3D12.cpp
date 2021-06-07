@@ -42,7 +42,7 @@ namespace dawn_native { namespace d3d12 {
         // It is preferred to use a size that is a multiple of the alignment.
         // However, MSAA heaps are always aligned to 4MB instead of 64KB. This means
         // if the heap size is too small, the VMM would fragment.
-        // TODO(bryan.bernhart@intel.com): Consider having MSAA vs non-MSAA heaps.
+        // TODO(crbug.com/dawn/849): Consider having MSAA vs non-MSAA heaps.
         heapDesc.Alignment = D3D12_DEFAULT_MSAA_RESOURCE_PLACEMENT_ALIGNMENT;
         heapDesc.Flags = mHeapFlags;
 

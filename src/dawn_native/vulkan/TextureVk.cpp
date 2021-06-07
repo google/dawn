@@ -55,7 +55,7 @@ namespace dawn_native { namespace vulkan {
         }
 
         // Computes which vulkan access type could be required for the given Dawn usage.
-        // TODO(cwallez@chromium.org): We shouldn't need any access usages for srcAccessMask when
+        // TODO(crbug.com/dawn/269): We shouldn't need any access usages for srcAccessMask when
         // the previous usage is readonly because an execution dependency is sufficient.
         VkAccessFlags VulkanAccessFlags(wgpu::TextureUsage usage, const Format& format) {
             VkAccessFlags flags = 0;
@@ -119,7 +119,7 @@ namespace dawn_native { namespace vulkan {
                 flags |= VK_PIPELINE_STAGE_TRANSFER_BIT;
             }
             if (usage & (wgpu::TextureUsage::Sampled | kReadOnlyStorageTexture)) {
-                // TODO(cwallez@chromium.org): Only transition to the usage we care about to avoid
+                // TODO(crbug.com/dawn/851): Only transition to the usage we care about to avoid
                 // introducing FS -> VS dependencies that would prevent parallelization on tiler
                 // GPUs
                 flags |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT |
@@ -134,7 +134,7 @@ namespace dawn_native { namespace vulkan {
                 if (format.HasDepthOrStencil()) {
                     flags |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
                              VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-                    // TODO(cwallez@chromium.org): This is missing the stage where the depth and
+                    // TODO(crbug.com/dawn/853): This is missing the stage where the depth and
                     // stencil values are written, but it isn't clear which one it is.
                 } else {
                     flags |= VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -410,7 +410,7 @@ namespace dawn_native { namespace vulkan {
                 // or a combination with something else, the texture could be in a combination of
                 // GENERAL and TRANSFER_SRC_OPTIMAL. This would be a problem, so we make CopySrc use
                 // GENERAL.
-                // TODO(cwallez@chromium.org): We no longer need to transition resources all at
+                // TODO(crbug.com/dawn/851): We no longer need to transition resources all at
                 // once and can instead track subresources so we should lift this limitation.
             case wgpu::TextureUsage::CopySrc:
                 // Read-only and write-only storage textures must use general layout because load

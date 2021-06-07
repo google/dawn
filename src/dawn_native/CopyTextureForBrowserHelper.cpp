@@ -32,7 +32,7 @@
 
 namespace dawn_native {
     namespace {
-        // TODO(shaobo.yan@intel.com) : Support premultiplay-alpha
+        // TODO(crbug.com/dawn/856) : Support premultiply-alpha
         static const char sCopyTextureForBrowserVertex[] = R"(
             [[block]] struct Uniforms {
                 u_scale : vec2<f32>;
@@ -101,7 +101,7 @@ namespace dawn_native {
             }
         )";
 
-        // TODO(shaobo.yan@intel.com): Expand copyTextureForBrowser to support any
+        // TODO(crbug.com/dawn/856): Expand copyTextureForBrowser to support any
         // non-depth, non-stencil, non-compressed texture format pair copy. Now this API
         // supports CopyImageBitmapToTexture normal format pairs.
         MaybeError ValidateCopyTextureFormatConversion(const wgpu::TextureFormat srcFormat,
@@ -281,7 +281,7 @@ namespace dawn_native {
                                        const ImageCopyTexture* destination,
                                        const Extent3D* copySize,
                                        const CopyTextureForBrowserOptions* options) {
-        // TODO(shaobo.yan@intel.com): In D3D12 and Vulkan, compatible texture format can directly
+        // TODO(crbug.com/dawn/856): In D3D12 and Vulkan, compatible texture format can directly
         // copy to each other. This can be a potential fast path.
 
         // Noop copy
