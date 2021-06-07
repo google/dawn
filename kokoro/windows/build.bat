@@ -62,13 +62,14 @@ mkdir %TEMP_DIR% || goto :error
 
 call :status "Fetching DXC"
 @echo on
-curl -L https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.5.2010/dxc_2020_10-22.zip --output %TEMP_DIR%\dxc.zip || goto :error
+set DXC_LATEST_ARTIFACT="https://ci.appveyor.com/api/projects/dnovillo/directxshadercompiler/artifacts/build%%2FRelease%%2Fdxc-artifacts.zip?branch=master&pr=false&job=image%%3A%%20Visual%%20Studio%%202019"
+curl -L %DXC_LATEST_ARTIFACT% --output "%TEMP_DIR%\dxc.zip" || goto :error
 @echo off
 
 call :status "Unpacking DXC"
 @echo on
 powershell.exe -Command "Expand-Archive -LiteralPath '%TEMP_DIR%\dxc.zip' -DestinationPath '%TEMP_DIR%\dxc'" || goto :error
-set PATH=%TEMP_DIR%\dxc\bin\x64;%PATH%
+set PATH=%TEMP_DIR%\dxc\bin;%PATH%
 @echo off
 
 call :status "Installing depot_tools"
