@@ -26,12 +26,15 @@ using ::testing::UnorderedElementsAre;
 
 using SpvParserGetDecorationsTest = SpvParserTest;
 
+const char* kSkipReason = "This example is deliberately a SPIR-V fragment";
+
 TEST_F(SpvParserGetDecorationsTest, GetDecorationsFor_NotAnId) {
   auto p = parser(test::Assemble(""));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   auto decorations = p->GetDecorationsFor(42);
   EXPECT_TRUE(decorations.empty());
   EXPECT_TRUE(p->error().empty());
+  p->SkipDumpingPending(kSkipReason);
 }
 
 TEST_F(SpvParserGetDecorationsTest, GetDecorationsFor_NoDecorations) {
@@ -40,6 +43,7 @@ TEST_F(SpvParserGetDecorationsTest, GetDecorationsFor_NoDecorations) {
   auto decorations = p->GetDecorationsFor(1);
   EXPECT_TRUE(decorations.empty());
   EXPECT_TRUE(p->error().empty());
+  p->SkipDumpingPending(kSkipReason);
 }
 
 TEST_F(SpvParserGetDecorationsTest, GetDecorationsFor_OneDecoration) {
@@ -53,6 +57,7 @@ TEST_F(SpvParserGetDecorationsTest, GetDecorationsFor_OneDecoration) {
   EXPECT_THAT(decorations,
               UnorderedElementsAre(Decoration{SpvDecorationBlock}));
   EXPECT_TRUE(p->error().empty());
+  p->SkipDumpingPending(kSkipReason);
 }
 
 TEST_F(SpvParserGetDecorationsTest, GetDecorationsFor_MultiDecoration) {
@@ -68,6 +73,7 @@ TEST_F(SpvParserGetDecorationsTest, GetDecorationsFor_MultiDecoration) {
               UnorderedElementsAre(Decoration{SpvDecorationRelaxedPrecision},
                                    Decoration{SpvDecorationLocation, 7}));
   EXPECT_TRUE(p->error().empty());
+  p->SkipDumpingPending(kSkipReason);
 }
 
 TEST_F(SpvParserGetDecorationsTest, GetDecorationsForMember_NotAnId) {
@@ -76,6 +82,7 @@ TEST_F(SpvParserGetDecorationsTest, GetDecorationsForMember_NotAnId) {
   auto decorations = p->GetDecorationsForMember(42, 9);
   EXPECT_TRUE(decorations.empty());
   EXPECT_TRUE(p->error().empty());
+  p->SkipDumpingPending(kSkipReason);
 }
 
 TEST_F(SpvParserGetDecorationsTest, GetDecorationsForMember_NotAStruct) {
@@ -84,6 +91,7 @@ TEST_F(SpvParserGetDecorationsTest, GetDecorationsForMember_NotAStruct) {
   auto decorations = p->GetDecorationsFor(1);
   EXPECT_TRUE(decorations.empty());
   EXPECT_TRUE(p->error().empty());
+  p->SkipDumpingPending(kSkipReason);
 }
 
 TEST_F(SpvParserGetDecorationsTest,
@@ -96,6 +104,7 @@ TEST_F(SpvParserGetDecorationsTest,
   auto decorations = p->GetDecorationsForMember(10, 0);
   EXPECT_TRUE(decorations.empty());
   EXPECT_TRUE(p->error().empty());
+  p->SkipDumpingPending(kSkipReason);
 }
 
 TEST_F(SpvParserGetDecorationsTest, GetDecorationsForMember_RelaxedPrecision) {

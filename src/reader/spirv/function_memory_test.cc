@@ -306,7 +306,7 @@ TEST_F(SpvParserMemoryTest,
      %ptr_wg_ty = OpTypePointer Workgroup %ty
      %ptr_priv_ty = OpTypePointer Private %ty
      %1 = OpVariable %ptr_wg_ty Workgroup
-     %2 = OpVariable %ptr_priv_ty Workgroup
+     %2 = OpVariable %ptr_priv_ty Private
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      OpCopyMemory %2 %1
@@ -1048,6 +1048,10 @@ Assignment{
 }
 
 TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughCopyObject_WithHoisting) {
+  // TODO(dneto): Hoisting non-storable values (pointers) is not yet supported.
+  // It's debatable whether this test should run at all.
+  // crbug.com/tint/98
+
   // Like the previous test, but the declaration for the copy-object
   // has its declaration hoisted.
   const auto assembly = OldStorageBufferPreamble() + R"(
@@ -1119,6 +1123,7 @@ Assignment{
 }
 Return{}
 )") << p->error();
+  p->SkipDumpingPending("crbug.com/tint/98");
 }
 
 TEST_F(SpvParserMemoryTest, DISABLED_RemapStorageBuffer_ThroughFunctionCall) {

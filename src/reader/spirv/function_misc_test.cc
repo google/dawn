@@ -130,7 +130,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_BeforeFunction_Vector) {
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
 
-     %14 = OpCopyObject %v2uint %4
+     %14 = OpCopyObject %v2bool %4
      %11 = OpCopyObject %v2uint %1
      %12 = OpCopyObject %v2int %2
      %13 = OpCopyObject %v2float %3

@@ -1951,7 +1951,7 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_FromElseAndThen) {
      OpBranch %89
 
      %89 = OpLabel
-     %2 = OpPhi %uint %uint_0 %30 %uint_1 %40
+     %2 = OpPhi %uint %uint_0 %30 %uint_1 %40 %uint_0 %79
      OpStore %1 %2
      OpBranch %10
 
@@ -2025,6 +2025,10 @@ Loop{
       }
       Continue{}
     }
+  }
+  Assignment{
+    Identifier[not set]{x_2_phi}
+    ScalarConstructor[not set]{0u}
   }
   continuing {
     VariableDeclStatement{

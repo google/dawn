@@ -25,13 +25,17 @@ namespace {
 using ::testing::Eq;
 using ::testing::HasSubstr;
 
-std::string Preamble() {
+std::string Caps() {
   return R"(
   OpCapability Shader
   OpMemoryModel Logical Simple
   OpEntryPoint GLCompute %100 "main"
   OpExecutionMode %100 LocalSize 1 1 1
+)";
+}
 
+std::string CommonTypes() {
+  return R"(
   %void = OpTypeVoid
   %voidfn = OpTypeFunction %void
 
@@ -69,6 +73,10 @@ std::string Preamble() {
   %v2float_60_50 = OpConstantComposite %v2float %float_60 %float_50
   %v2float_70_70 = OpConstantComposite %v2float %float_70 %float_70
 )";
+}
+
+std::string Preamble() {
+  return Caps() + CommonTypes();
 }
 
 using SpvParserTest_Composite_Construct = SpvParserTest;
@@ -458,12 +466,12 @@ TEST_F(SpvParserTest_CompositeExtract, Struct) {
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
-  const auto assembly =
-      R"(
+  const auto assembly = Caps() +
+                        R"(
       OpMemberName %s0 0 "algo"
       OpMemberName %s1 0 "rithm"
-)" + Preamble() +
-      R"(
+)" + CommonTypes() +
+                        R"(
      %s0 = OpTypeStruct %uint
      %s1 = OpTypeStruct %uint
      %ptr0 = OpTypePointer Function %s0
@@ -513,6 +521,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
     }
   })"))
       << ToString(p->builder(), got);
+  p->SkipDumpingPending("crbug.com/tint/863");
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Struct_IndexTooBigError) {
@@ -904,12 +913,12 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTest_CompositeInsert, Struct_DifferOnlyInMemberName) {
-  const auto assembly =
-      R"(
+  const auto assembly = Caps() +
+                        R"(
       OpMemberName %s0 0 "algo"
       OpMemberName %s1 0 "rithm"
-)" + Preamble() +
-      R"(
+)" + CommonTypes() +
+                        R"(
      %s0 = OpTypeStruct %uint
      %s1 = OpTypeStruct %uint
      %ptr0 = OpTypePointer Function %s0
@@ -1057,6 +1066,7 @@ VariableDeclStatement{
     }
   }
 })")) << body_str;
+  p->SkipDumpingPending("crbug.com/tint/863");
 }
 
 TEST_F(SpvParserTest_CompositeInsert, Struct_IndexTooBigError) {

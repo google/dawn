@@ -25,8 +25,16 @@ namespace {
 using ::testing::Eq;
 using ::testing::HasSubstr;
 
+std::string Preamble() {
+  return R"(
+     OpCapability Shader
+     OpMemoryModel Logical Simple
+     OpEntryPoint Vertex %100 "x_100"
+)";
+}
+
 TEST_F(SpvParserTest, EmitStatement_VoidCallNoParams) {
-  auto p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(Preamble() + R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
 
@@ -50,6 +58,7 @@ TEST_F(SpvParserTest, EmitStatement_VoidCallNoParams) {
     Return{}
   }
   Function $2 -> __void
+  StageDecoration{vertex}
   ()
   {
     Call[not set]{
@@ -65,7 +74,7 @@ TEST_F(SpvParserTest, EmitStatement_VoidCallNoParams) {
 }
 
 TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParams) {
-  auto p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(Preamble() + R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %uint = OpTypeInt 32 0
@@ -118,7 +127,7 @@ Return{})"));
 }
 
 TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParamsUsedTwice) {
-  auto p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(Preamble() + R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %uint = OpTypeInt 32 0
@@ -190,7 +199,7 @@ Return{})"));
 }
 
 TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
-  auto p = parser(test::Assemble(R"(
+  auto p = parser(test::Assemble(Preamble() + R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %uint = OpTypeInt 32 0
@@ -243,6 +252,7 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
     }
   }
   Function x_100 -> __void
+  StageDecoration{vertex}
   ()
   {
     VariableDeclStatement{

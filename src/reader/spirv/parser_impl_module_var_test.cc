@@ -1701,6 +1701,7 @@ TEST_F(SpvModuleScopeVarParserTest,
 TEST_F(SpvModuleScopeVarParserTest, DescriptorGroupDecoration_Valid) {
   auto p = parser(test::Assemble(Preamble() + FragMain() + CommonLayout() + R"(
      OpDecorate %1 DescriptorSet 3
+     OpDecorate %1 Binding 9 ; Required to pass WGSL validation
      OpDecorate %strct Block
 )" + CommonTypes() + R"(
      %ptr_sb_strct = OpTypePointer StorageBuffer %strct
@@ -1713,6 +1714,7 @@ TEST_F(SpvModuleScopeVarParserTest, DescriptorGroupDecoration_Valid) {
   Variable{
     Decorations{
       GroupDecoration{3}
+      BindingDecoration{9}
     }
     x_1
     storage
@@ -1753,6 +1755,7 @@ TEST_F(SpvModuleScopeVarParserTest,
 
 TEST_F(SpvModuleScopeVarParserTest, BindingDecoration_Valid) {
   auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+     OpDecorate %1 DescriptorSet 0 ; WGSL validation requires this already
      OpDecorate %1 Binding 3
      OpDecorate %strct Block
 )" + CommonLayout() + CommonTypes() +
@@ -1766,6 +1769,7 @@ TEST_F(SpvModuleScopeVarParserTest, BindingDecoration_Valid) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
+      GroupDecoration{0}
       BindingDecoration{3}
     }
     x_1
@@ -1807,10 +1811,13 @@ TEST_F(SpvModuleScopeVarParserTest, BindingDecoration_TwoOperandsWontAssemble) {
 
 TEST_F(SpvModuleScopeVarParserTest,
        StructMember_NonReadableDecoration_Dropped) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonLayout() + R"(
+  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+     OpDecorate %1 DescriptorSet 0
+     OpDecorate %1 Binding 0
      OpDecorate %strct Block
      OpMemberDecorate %strct 0 NonReadable
-)" + CommonTypes() + R"(
+)" + CommonLayout() + CommonTypes() +
+                                 R"(
      %ptr_sb_strct = OpTypePointer StorageBuffer %strct
      %1 = OpVariable %ptr_sb_strct StorageBuffer
   )" + MainBody()));
@@ -1826,6 +1833,10 @@ TEST_F(SpvModuleScopeVarParserTest,
     StructMember{[[ offset 8 ]] field2: __type_name_Arr}
   }
   Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
     x_1
     storage
     read_write
@@ -1837,6 +1848,8 @@ TEST_F(SpvModuleScopeVarParserTest,
 TEST_F(SpvModuleScopeVarParserTest, ColMajorDecoration_Dropped) {
   auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpName %myvar "myvar"
+     OpDecorate %myvar DescriptorSet 0
+     OpDecorate %myvar Binding 0
      OpDecorate %s Block
      OpMemberDecorate %s 0 ColMajor
      OpMemberDecorate %s 0 Offset 0
@@ -1860,6 +1873,10 @@ TEST_F(SpvModuleScopeVarParserTest, ColMajorDecoration_Dropped) {
     StructMember{[[ offset 0 ]] field0: __mat_2_3__f32}
   }
   Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
     myvar
     storage
     read_write
@@ -1871,6 +1888,8 @@ TEST_F(SpvModuleScopeVarParserTest, ColMajorDecoration_Dropped) {
 TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Dropped) {
   auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpName %myvar "myvar"
+     OpDecorate %myvar DescriptorSet 0
+     OpDecorate %myvar Binding 0
      OpDecorate %s Block
      OpMemberDecorate %s 0 MatrixStride 8
      OpMemberDecorate %s 0 Offset 0
@@ -1893,6 +1912,10 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Dropped) {
     StructMember{[[ offset 0 ]] field0: __mat_2_3__f32}
   }
   Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
     myvar
     storage
     read_write
@@ -1928,6 +1951,8 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_AllMembers) {
   // Variable should have access(read)
   auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpDecorate %s Block
+     OpDecorate %1 DescriptorSet 0
+     OpDecorate %1 Binding 0
      OpMemberDecorate %s 0 NonWritable
      OpMemberDecorate %s 1 NonWritable
      OpMemberDecorate %s 0 Offset 0
@@ -1950,6 +1975,10 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_AllMembers) {
     StructMember{[[ offset 4 ]] field1: __f32}
   }
   Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
     x_1
     storage
     read
@@ -1961,6 +1990,8 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_AllMembers) {
 TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_NotAllMembers) {
   // Variable should have access(read_write)
   auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+     OpDecorate %1 DescriptorSet 0
+     OpDecorate %1 Binding 0
      OpDecorate %s Block
      OpMemberDecorate %s 0 NonWritable
      OpMemberDecorate %s 0 Offset 0
@@ -1983,6 +2014,10 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_NotAllMembers) {
     StructMember{[[ offset 4 ]] field1: __f32}
   }
   Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
     x_1
     storage
     read_write
@@ -1997,6 +2032,8 @@ TEST_F(
   // Variable should have access(read_write)
   auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpDecorate %s Block
+     OpDecorate %1 DescriptorSet 0
+     OpDecorate %1 Binding 0
      OpMemberDecorate %s 0 NonWritable
      OpMemberDecorate %s 0 NonWritable ; same member. Don't double-count it
      OpMemberDecorate %s 0 Offset 0
@@ -2019,6 +2056,10 @@ TEST_F(
     StructMember{[[ offset 4 ]] field1: __f32}
   }
   Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
     x_1
     storage
     read_write

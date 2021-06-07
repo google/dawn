@@ -23,6 +23,28 @@ namespace {
 
 using ::testing::HasSubstr;
 
+std::string Caps() {
+  return R"(
+    OpCapability Shader
+    OpMemoryModel Logical Simple
+  )";
+}
+
+std::string Preamble() {
+  return Caps() + R"(
+    OpEntryPoint Vertex %main "x_100"
+  )";
+}
+
+std::string MainBody() {
+  return R"(
+    %main = OpFunction %void None %voidfn
+    %main_entry = OpLabel
+    OpReturn
+    OpFunctionEnd
+  )";
+}
+
 /// @returns a SPIR-V assembly segment which assigns debug names
 /// to particular IDs.
 std::string Names(std::vector<std::string> ids) {
@@ -45,16 +67,22 @@ std::string CommonTypes() {
 }
 
 TEST_F(SpvParserTest, EmitFunctions_NoFunctions) {
-  auto p = parser(test::Assemble(CommonTypes()));
+  auto p = parser(test::Assemble(
+      R"(
+     OpCapability Shader
+     OpMemoryModel Logical Simple
+)" + CommonTypes()));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   Program program = p->program();
   const auto program_ast = program.to_str(false);
   EXPECT_THAT(program_ast, Not(HasSubstr("Function{")));
+  p->SkipDumpingPending("Not valid for Vulkan: needs an entry point");
 }
 
 TEST_F(SpvParserTest, EmitFunctions_FunctionWithoutBody) {
-  auto p = parser(test::Assemble(Names({"main"}) + CommonTypes() + R"(
+  auto p =
+      parser(test::Assemble(Preamble() + Names({"main"}) + CommonTypes() + R"(
      %main = OpFunction %void None %voidfn
      OpFunctionEnd
   )"));
@@ -63,11 +91,12 @@ TEST_F(SpvParserTest, EmitFunctions_FunctionWithoutBody) {
   Program program = p->program();
   const auto program_ast = program.to_str(false);
   EXPECT_THAT(program_ast, Not(HasSubstr("Function{")));
+  p->SkipDumpingPending("Missing an entry point body requires Linkage");
 }
 
 TEST_F(SpvParserTest, EmitFunctions_Function_EntryPoint_Vertex) {
-  std::string input = Names({"main"}) + R"(OpEntryPoint Vertex %main "main"
-)" + CommonTypes() + R"(
+  std::string input = Caps() + R"(OpEntryPoint Vertex %main "main" )" +
+                      Names({"main"}) + CommonTypes() + R"(
 %main = OpFunction %void None %voidfn
 %entry = OpLabel
 OpReturn
@@ -87,12 +116,11 @@ OpFunctionEnd)";
 }
 
 TEST_F(SpvParserTest, EmitFunctions_Function_EntryPoint_Fragment) {
-  std::string input = Names({"main"}) + R"(OpEntryPoint Fragment %main "main"
-)" + CommonTypes() + R"(
-%main = OpFunction %void None %voidfn
-%entry = OpLabel
-OpReturn
-OpFunctionEnd)";
+  std::string input = Caps() + R"(
+     OpEntryPoint Fragment %main "main"
+     OpExecutionMode %main OriginUpperLeft
+)" + Names({"main"}) + CommonTypes() +
+                      MainBody();
 
   auto p = parser(test::Assemble(input));
   ASSERT_TRUE(p->BuildAndParseInternalModule());
@@ -108,12 +136,11 @@ OpFunctionEnd)";
 }
 
 TEST_F(SpvParserTest, EmitFunctions_Function_EntryPoint_GLCompute) {
-  std::string input = Names({"main"}) + R"(OpEntryPoint GLCompute %main "main"
-)" + CommonTypes() + R"(
-%main = OpFunction %void None %voidfn
-%entry = OpLabel
-OpReturn
-OpFunctionEnd)";
+  std::string input = Caps() + R"(
+      OpEntryPoint GLCompute %main "main"
+      OpExecutionMode %main LocalSize 1 1 1
+)" + Names({"main"}) + CommonTypes() +
+                      MainBody();
 
   auto p = parser(test::Assemble(input));
   ASSERT_TRUE(p->BuildAndParseInternalModule());
@@ -129,14 +156,12 @@ OpFunctionEnd)";
 }
 
 TEST_F(SpvParserTest, EmitFunctions_Function_EntryPoint_MultipleEntryPoints) {
-  std::string input = Names({"main"}) +
-                      R"(OpEntryPoint GLCompute %main "comp_main"
-OpEntryPoint Fragment %main "frag_main"
-)" + CommonTypes() + R"(
-%main = OpFunction %void None %voidfn
-%entry = OpLabel
-OpReturn
-OpFunctionEnd)";
+  std::string input = Caps() +
+                      R"(
+OpEntryPoint Vertex %main "first_shader"
+OpEntryPoint Vertex %main "second_shader"
+)" + Names({"main"}) + CommonTypes() +
+                      MainBody();
 
   auto p = parser(test::Assemble(input));
   ASSERT_TRUE(p->BuildAndParseInternalModule());
@@ -144,32 +169,33 @@ OpFunctionEnd)";
   Program program = p->program();
   const auto program_ast = program.to_str(false);
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + program.Symbols().Get("frag_main").to_str() +
+  Function )" + program.Symbols().Get("first_shader").to_str() +
                                      R"( -> __void
-  StageDecoration{fragment}
+  StageDecoration{vertex}
   ()
   {)"));
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + program.Symbols().Get("comp_main").to_str() +
+  Function )" + program.Symbols().Get("second_shader").to_str() +
                                      R"( -> __void
-  StageDecoration{compute}
+  StageDecoration{vertex}
   ()
   {)"));
 }
 
 TEST_F(SpvParserTest, EmitFunctions_VoidFunctionWithoutParams) {
-  auto p = parser(test::Assemble(Names({"main"}) + CommonTypes() + R"(
-     %main = OpFunction %void None %voidfn
-     %entry = OpLabel
-     OpReturn
-     OpFunctionEnd
-  )"));
+  auto p = parser(test::Assemble(Preamble() + Names({"another_function"}) +
+                                 CommonTypes() + R"(
+    %another_function = OpFunction %void None %voidfn
+    %entry = OpLabel
+    OpReturn
+    OpFunctionEnd
+)" + MainBody()));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   Program program = p->program();
   const auto program_ast = program.to_str(false);
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + program.Symbols().Get("main").to_str() +
+  Function )" + program.Symbols().Get("another_function").to_str() +
                                      R"( -> __void
   ()
   {)"));
@@ -177,6 +203,7 @@ TEST_F(SpvParserTest, EmitFunctions_VoidFunctionWithoutParams) {
 
 TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
   auto p = parser(test::Assemble(
+      Preamble() +
       Names({"root", "branch", "leaf", "leaf_result", "branch_result"}) +
       CommonTypes() + R"(
      %uintfn = OpTypeFunction %uint
@@ -198,7 +225,7 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
      %leaf_entry = OpLabel
      OpReturnValue %uint_0
      OpFunctionEnd
-  )"));
+  )" + MainBody()));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   Program program = p->program();
@@ -257,18 +284,25 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
     }
     Return{}
   }
+  Function x_100 -> __void
+  StageDecoration{vertex}
+  ()
+  {
+    Return{}
+  }
 })")) << program_ast;
 }
 
 TEST_F(SpvParserTest, EmitFunctions_NonVoidResultType) {
-  auto p = parser(test::Assemble(Names({"ret_float"}) + CommonTypes() + R"(
+  auto p = parser(
+      test::Assemble(Preamble() + Names({"ret_float"}) + CommonTypes() + R"(
      %fn_ret_float = OpTypeFunction %float
 
      %ret_float = OpFunction %float None %fn_ret_float
      %ret_float_entry = OpLabel
      OpReturnValue %float_0
      OpFunctionEnd
-  )"));
+)" + MainBody()));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   Program program = p->program();
@@ -287,9 +321,9 @@ TEST_F(SpvParserTest, EmitFunctions_NonVoidResultType) {
 }
 
 TEST_F(SpvParserTest, EmitFunctions_MixedParamTypes) {
-  auto p = parser(test::Assemble(Names({"mixed_params", "a", "b", "c"}) +
-                                 CommonTypes() + R"(
-     %fn_mixed_params = OpTypeFunction %float %uint %float %int
+  auto p = parser(test::Assemble(
+      Preamble() + Names({"mixed_params", "a", "b", "c"}) + CommonTypes() + R"(
+     %fn_mixed_params = OpTypeFunction %void %uint %float %int
 
      %mixed_params = OpFunction %void None %fn_mixed_params
      %a = OpFunctionParameter %uint
@@ -298,7 +332,7 @@ TEST_F(SpvParserTest, EmitFunctions_MixedParamTypes) {
      %mixed_entry = OpLabel
      OpReturn
      OpFunctionEnd
-  )"));
+  )" + MainBody()));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   Program program = p->program();
@@ -331,8 +365,9 @@ TEST_F(SpvParserTest, EmitFunctions_MixedParamTypes) {
 }
 
 TEST_F(SpvParserTest, EmitFunctions_GenerateParamNames) {
-  auto p = parser(test::Assemble(Names({"mixed_params"}) + CommonTypes() + R"(
-     %fn_mixed_params = OpTypeFunction %float %uint %float %int
+  auto p = parser(
+      test::Assemble(Preamble() + Names({"mixed_params"}) + CommonTypes() + R"(
+     %fn_mixed_params = OpTypeFunction %void %uint %float %int
 
      %mixed_params = OpFunction %void None %fn_mixed_params
      %14 = OpFunctionParameter %uint
@@ -341,7 +376,7 @@ TEST_F(SpvParserTest, EmitFunctions_GenerateParamNames) {
      %mixed_entry = OpLabel
      OpReturn
      OpFunctionEnd
-  )"));
+  )" + MainBody()));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   Program program = p->program();
