@@ -59,6 +59,79 @@ TEST_F(ResolverFunctionValidationTest,
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverFunctionValidationTest,
+       DISABLED_FunctionNameSameAsGlobalVariableName_Fail) {
+  // var foo:f32 = 3.14;
+  // fn foo() -> void {}
+
+  auto* global_var = Var(Source{Source::Location{56, 78}}, "foo", ty.f32(),
+                         ast::StorageClass::kPrivate, Expr(3.14f));
+  AST().AddGlobalVariable(global_var);
+
+  Func(Source{Source::Location{12, 34}}, "foo", ast::VariableList{}, ty.void_(),
+       ast::StatementList{}, ast::DecorationList{});
+
+  EXPECT_FALSE(r()->Resolve()) << r()->error();
+  EXPECT_EQ(r()->error(),
+            "12:34 error v-2000: duplicate declaration 'foo'\n56:78 note: "
+            "'foo' first declared here:");
+}
+
+TEST_F(ResolverFunctionValidationTest,
+       DISABLED_GlobalVariableNameSameAFunctionName_Fail) {
+  // fn foo() -> void {}
+  // var<private> foo:f32 = 3.14;
+
+  Func(Source{Source::Location{12, 34}}, "foo", ast::VariableList{}, ty.void_(),
+       ast::StatementList{}, ast::DecorationList{});
+  auto* global_var =
+      Var("foo", ty.f32(), ast::StorageClass::kPrivate, Expr(3.14f));
+  AST().AddGlobalVariable(global_var);
+
+  EXPECT_FALSE(r()->Resolve()) << r()->error();
+  EXPECT_EQ(r()->error(),
+            "error v-2000: duplicate declaration 'foo'\n12:34 note: 'foo' "
+            "first declared here:");
+}
+
+TEST_F(ResolverFunctionValidationTest, FunctionUsingSameVariableName_Pass) {
+  // fn func() -> i32 {
+  //   var func:i32 = 0;
+  //   return func;
+  // }
+
+  auto* var = Var("func", ty.i32(), ast::StorageClass::kNone, Expr(0));
+  Func("func", ast::VariableList{}, ty.i32(),
+       ast::StatementList{
+           Decl(var),
+           Return(Source{Source::Location{12, 34}}, Expr("func")),
+       },
+       ast::DecorationList{});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverFunctionValidationTest,
+       FunctionNameSameAsFunctionScopeVariableName_Pass) {
+  // fn a() -> void { var b:i32 = 0; }
+  // fn b() -> i32 { return 2; }
+
+  auto* var = Var("b", ty.i32(), ast::StorageClass::kNone, Expr(0));
+  Func("a", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           Decl(var),
+       },
+       ast::DecorationList{});
+
+  Func(Source{Source::Location{12, 34}}, "b", ast::VariableList{}, ty.i32(),
+       ast::StatementList{
+           Return(2),
+       },
+       ast::DecorationList{});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
 TEST_F(ResolverFunctionValidationTest, FunctionEndWithoutReturnStatement_Fail) {
   // fn func -> int { var a:i32 = 2; }
 
