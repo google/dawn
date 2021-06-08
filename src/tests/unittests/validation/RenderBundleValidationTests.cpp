@@ -46,7 +46,7 @@ namespace {
                 [[block]] struct Storage {
                     dummy : array<f32>;
                 };
-                [[group(1), binding(1)]] var<storage> ssbo : [[access(read_write)]] Storage;
+                [[group(1), binding(1)]] var<storage, read_write> ssbo : Storage;
 
                 [[stage(fragment)]] fn main() {
                 })");

@@ -1278,8 +1278,8 @@ class SetBindGroupValidationTest : public ValidationTest {
 
                 [[group(0), binding(0)]] var<uniform> uBufferDynamic : S;
                 [[group(0), binding(1)]] var<uniform> uBuffer : S;
-                [[group(0), binding(2)]] var<storage> sBufferDynamic : [[access(read_write)]] S;
-                [[group(0), binding(3)]] var<storage> sReadonlyBufferDynamic : [[access(read)]] S;
+                [[group(0), binding(2)]] var<storage, read_write> sBufferDynamic : S;
+                [[group(0), binding(3)]] var<storage, read> sReadonlyBufferDynamic : S;
 
                 [[stage(fragment)]] fn main() {
                 })");
@@ -1301,8 +1301,8 @@ class SetBindGroupValidationTest : public ValidationTest {
 
                 [[group(0), binding(0)]] var<uniform> uBufferDynamic : S;
                 [[group(0), binding(1)]] var<uniform> uBuffer : S;
-                [[group(0), binding(2)]] var<storage> sBufferDynamic : [[access(read_write)]] S;
-                [[group(0), binding(3)]] var<storage> sReadonlyBufferDynamic : [[access(read)]] S;
+                [[group(0), binding(2)]] var<storage, read_write> sBufferDynamic : S;
+                [[group(0), binding(3)]] var<storage, read> sReadonlyBufferDynamic : S;
 
                 [[stage(compute), workgroup_size(4, 4, 1)]] fn main() {
                 })");
@@ -1728,8 +1728,7 @@ class SetBindGroupPersistenceValidationTest : public ValidationTest {
                 ss << "[[group(" << l << "), binding(" << b << ")]] ";
                 switch (binding) {
                     case wgpu::BufferBindingType::Storage:
-                        ss << "var<storage> set" << l << "_binding" << b
-                           << " : [[access(read_write)]] S;";
+                        ss << "var<storage, read_write> set" << l << "_binding" << b << " : S;";
                         break;
                     case wgpu::BufferBindingType::Uniform:
                         ss << "var<uniform> set" << l << "_binding" << b << " : S;";
@@ -1897,8 +1896,8 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
                 value : vec2<f32>;
             };
 
-            [[group(0), binding(0)]] var<storage> sBufferDynamic : [[access(read_write)]] S;
-            [[group(1), binding(0)]] var<storage> sReadonlyBufferDynamic : [[access(read)]] S;
+            [[group(0), binding(0)]] var<storage, read_write> sBufferDynamic : S;
+            [[group(1), binding(0)]] var<storage, read> sReadonlyBufferDynamic : S;
 
             [[stage(fragment)]] fn main() {
                 var val : vec2<f32> = sBufferDynamic.value;
@@ -1932,8 +1931,8 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
                 value : vec2<f32>;
             };
 
-            [[group(0), binding(0)]] var<storage> sBufferDynamic : [[access(read_write)]] S;
-            [[group(1), binding(0)]] var<storage> sReadonlyBufferDynamic : [[access(read)]] S;
+            [[group(0), binding(0)]] var<storage, read_write> sBufferDynamic : S;
+            [[group(1), binding(0)]] var<storage, read> sReadonlyBufferDynamic : S;
 
             [[stage(compute), workgroup_size(4, 4, 1)]] fn main() {
                 var val : vec2<f32> = sBufferDynamic.value;

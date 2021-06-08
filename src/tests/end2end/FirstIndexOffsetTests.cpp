@@ -132,7 +132,7 @@ struct VertexOutputs {
   vertex_index : u32;
   instance_index : u32;
 };
-[[group(0), binding(0)]] var<storage> idx_vals : [[access(read_write)]] IndexVals;
+[[group(0), binding(0)]] var<storage, read_write> idx_vals : IndexVals;
 
 struct FragInputs {
 )" + fragmentInputs.str() + R"(

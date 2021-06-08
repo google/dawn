@@ -166,8 +166,8 @@ void initSim() {
             particles : array<Particle>;
         };
         [[binding(0), group(0)]] var<uniform> params : SimParams;
-        [[binding(1), group(0)]] var<storage> particlesA : [[access(read)]] Particles;
-        [[binding(2), group(0)]] var<storage> particlesB : [[access(read_write)]] Particles;
+        [[binding(1), group(0)]] var<storage, read> particlesA : Particles;
+        [[binding(2), group(0)]] var<storage, read_write> particlesB : Particles;
 
         // https://github.com/austinEng/Project6-Vulkan-Flocking/blob/master/data/shaders/computeparticles/particle.comp
         [[stage(compute)]]

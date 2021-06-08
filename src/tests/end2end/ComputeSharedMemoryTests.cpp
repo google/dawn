@@ -78,7 +78,7 @@ TEST_P(ComputeSharedMemoryTests, Basic) {
             x : u32;
         };
 
-        [[group(0), binding(0)]] var<storage> dst : [[access(write)]] Dst;
+        [[group(0), binding(0)]] var<storage, write> dst : Dst;
         var<workgroup> tmp : u32;
 
         [[stage(compute), workgroup_size(4,4,1)]]

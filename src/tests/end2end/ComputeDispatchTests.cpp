@@ -37,7 +37,7 @@ class ComputeDispatchTests : public DawnTest {
             };
 
             [[group(0), binding(0)]] var<uniform> input : InputBuf;
-            [[group(0), binding(1)]] var<storage> output : [[access(read_write)]] OutputBuf;
+            [[group(0), binding(1)]] var<storage, read_write> output : OutputBuf;
 
             [[stage(compute), workgroup_size(1, 1, 1)]]
             fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {

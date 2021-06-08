@@ -146,7 +146,7 @@ class CopyTextureForBrowserTests : public DawnTest {
             };
             [[group(0), binding(0)]] var src : texture_2d<f32>;
             [[group(0), binding(1)]] var dst : texture_2d<f32>;
-            [[group(0), binding(2)]] var<storage> output : [[access(read_write)]] OutputBuf;
+            [[group(0), binding(2)]] var<storage, read_write> output : OutputBuf;
             [[group(0), binding(3)]] var<uniform> uniforms : Uniforms;
             fn aboutEqual(value : f32, expect : f32) -> bool {
                 // The value diff should be smaller than the hard coded tolerance.
@@ -389,7 +389,6 @@ class CopyTextureForBrowserTests : public DawnTest {
 // Verify CopyTextureForBrowserTests works with internal pipeline.
 // The case do copy without any transform.
 TEST_P(CopyTextureForBrowserTests, PassthroughCopy) {
-
     constexpr uint32_t kWidth = 10;
     constexpr uint32_t kHeight = 1;
 
@@ -420,7 +419,6 @@ TEST_P(CopyTextureForBrowserTests, VerifyCopyOnYDirection) {
 }
 
 TEST_P(CopyTextureForBrowserTests, VerifyCopyFromLargeTexture) {
-
     constexpr uint32_t kWidth = 899;
     constexpr uint32_t kHeight = 999;
 

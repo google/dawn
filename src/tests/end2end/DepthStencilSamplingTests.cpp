@@ -141,8 +141,8 @@ class DepthStencilSamplingTest : public DawnTest {
                                  << " : texture_2d<f32>;\n";
 
                     shaderSource << "[[group(0), binding(" << 2 * index + 1
-                                 << ")]] var<storage> result" << index
-                                 << " : [[access(read_write)]] DepthResult;\n";
+                                 << ")]] var<storage, read_write> result" << index
+                                 << " : DepthResult;\n";
 
                     shaderBody << "\nresult" << index << ".value = textureLoad(tex" << index
                                << ", vec2<i32>(0, 0), 0)[" << componentIndex << "];";
@@ -152,8 +152,8 @@ class DepthStencilSamplingTest : public DawnTest {
                                  << " : texture_2d<u32>;\n";
 
                     shaderSource << "[[group(0), binding(" << 2 * index + 1
-                                 << ")]] var<storage> result" << index
-                                 << " : [[access(read_write)]] StencilResult;\n";
+                                 << ")]] var<storage, read_write> result" << index
+                                 << " : StencilResult;\n";
 
                     shaderBody << "\nresult" << index << ".value = textureLoad(tex" << index
                                << ", vec2<i32>(0, 0), 0)[" << componentIndex << "];";
@@ -221,7 +221,7 @@ class DepthStencilSamplingTest : public DawnTest {
             [[block]] struct SamplerResult {
                 value : f32;
             };
-            [[group(0), binding(3)]] var<storage> samplerResult : [[access(read_write)]] SamplerResult;
+            [[group(0), binding(3)]] var<storage, read_write> samplerResult : SamplerResult;
 
             [[stage(compute)]] fn main() {
                 samplerResult.value = textureSampleCompare(tex, samp, vec2<f32>(0.5, 0.5), uniforms.compareRef);

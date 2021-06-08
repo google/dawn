@@ -78,7 +78,7 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateComputePipelineAsync) {
         [[block]] struct SSBO {
             value : u32;
         };
-        [[group(0), binding(0)]] var<storage> ssbo : [[access(read_write)]] SSBO;
+        [[group(0), binding(0)]] var<storage, read_write> ssbo : SSBO;
 
         [[stage(compute)]] fn main() {
             ssbo.value = 1u;
@@ -113,7 +113,7 @@ TEST_P(CreatePipelineAsyncTest, CreateComputePipelineFailed) {
         [[block]] struct SSBO {
             value : u32;
         };
-        [[group(0), binding(0)]] var<storage> ssbo : [[access(read_write)]] SSBO;
+        [[group(0), binding(0)]] var<storage, read_write> ssbo : SSBO;
 
         [[stage(compute)]] fn main() {
             ssbo.value = 1u;
@@ -312,7 +312,7 @@ TEST_P(CreatePipelineAsyncTest, CreateSameComputePipelineTwice) {
         [[block]] struct SSBO {
             value : u32;
         };
-        [[group(0), binding(0)]] var<storage> ssbo : [[access(read_write)]] SSBO;
+        [[group(0), binding(0)]] var<storage, read_write> ssbo : SSBO;
 
         [[stage(compute)]] fn main() {
             ssbo.value = 1u;
@@ -353,7 +353,7 @@ TEST_P(CreatePipelineAsyncTest, CreateSamePipelineTwiceAtSameTime) {
         [[block]] struct SSBO {
             value : u32;
         };
-        [[group(0), binding(0)]] var<storage> ssbo : [[access(read_write)]] SSBO;
+        [[group(0), binding(0)]] var<storage, read_write> ssbo : SSBO;
 
         [[stage(compute)]] fn main() {
             ssbo.value = 1u;

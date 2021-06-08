@@ -82,9 +82,8 @@ class StorageTextureValidationTests : public ValidationTest {
         }
 
         std::ostringstream ostream;
-        ostream << "[[group(0), binding(0)]] var image0 : "
-                << "[[access(" << access << ")]] " << imageTypeDeclaration << "<"
-                << imageFormatQualifier
+        ostream << "[[group(0), binding(0)]] var image0 : " << imageTypeDeclaration << "<"
+                << imageFormatQualifier << ", " << access
                 << ">;\n"
                    "[[stage(compute)]] fn main() {\n"
                    "    textureDimensions(image0);\n"
@@ -193,7 +192,7 @@ TEST_F(StorageTextureValidationTests, ComputePipeline) {
             [[block]] struct Buf {
                 data : f32;
             };
-            [[group(0), binding(1)]] var<storage> buf : [[access(read_write)]] Buf;
+            [[group(0), binding(1)]] var<storage, read_write> buf : Buf;
 
             [[stage(compute)]] fn main([[builtin(local_invocation_id)]] LocalInvocationID : vec3<u32>) {
                  buf.data = textureLoad(image0, vec2<i32>(LocalInvocationID.xy)).x;

@@ -234,7 +234,7 @@ namespace dawn_native { namespace d3d12 {
                      bgl->GetBindingInfo(bindingIndex).buffer.type ==
                          wgpu::BufferBindingType::Storage);
                 if (forceStorageBufferAsUAV) {
-                    accessControls.emplace(srcBindingPoint, tint::ast::AccessControl::kReadWrite);
+                    accessControls.emplace(srcBindingPoint, tint::ast::Access::kReadWrite);
                 }
             }
         }

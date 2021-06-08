@@ -80,12 +80,10 @@ namespace {
                     ostream << "var<uniform> b" << index << " : S" << index << ";\n";
                     break;
                 case wgpu::BufferBindingType::Storage:
-                    ostream << "var<storage> b" << index << " : [[access(read_write)]] S" << index
-                            << ";\n";
+                    ostream << "var<storage, read_write> b" << index << " : S" << index << ";\n";
                     break;
                 case wgpu::BufferBindingType::ReadOnlyStorage:
-                    ostream << "var<storage> b" << index << " : [[access(read)]] S" << index
-                            << ";\n";
+                    ostream << "var<storage, read> b" << index << " : S" << index << ";\n";
                     break;
                 default:
                     UNREACHABLE();

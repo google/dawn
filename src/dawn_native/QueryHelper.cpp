@@ -55,9 +55,9 @@ namespace dawn_native {
             };
 
             [[group(0), binding(0)]]
-                var<storage> timestamps : [[access(read_write)]] TimestampArr;
+                var<storage, read_write> timestamps : TimestampArr;
             [[group(0), binding(1)]]
-                var<storage> availability : [[access(read)]] AvailabilityArr;
+                var<storage, read> availability : AvailabilityArr;
             [[group(0), binding(2)]] var<uniform> params : TimestampParams;
 
 

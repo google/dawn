@@ -167,12 +167,12 @@ class StorageTextureTests : public DawnTest {
         std::ostringstream ostream;
         ostream << "[[group(0), binding(" << binding << ")]] "
                 << "var storageImage" << binding << " : "
-                << "[[access(" << accessQualifier << ")]] "
                 << "texture_storage_2d";
         if (is2DArray) {
             ostream << "_array";
         }
-        ostream << "<" << utils::GetWGSLImageFormatQualifier(format) << ">;";
+        ostream << "<" << utils::GetWGSLImageFormatQualifier(format) << ", ";
+        ostream << accessQualifier << ">;";
         return ostream.str();
     }
 
@@ -710,7 +710,7 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInComputeShader) {
   result : u32;
 };
 
-[[group(0), binding(1)]] var<storage> dstBuffer : [[access(read_write)]] DstBuffer;
+[[group(0), binding(1)]] var<storage, read_write> dstBuffer : DstBuffer;
 )" << CommonReadOnlyTestCode(format)
                  << R"(
 [[stage(compute)]] fn main() {
@@ -934,7 +934,7 @@ TEST_P(StorageTextureTests, Readonly2DArrayStorageTexture) {
   result : u32;
 };
 
-[[group(0), binding(1)]] var<storage> dstBuffer : [[access(read_write)]] DstBuffer;
+[[group(0), binding(1)]] var<storage, read_write> dstBuffer : DstBuffer;
 )" << CommonReadOnlyTestCode(kTextureFormat, true)
              << R"(
 [[stage(compute)]] fn main() {
@@ -1202,7 +1202,7 @@ TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInComputeP
 };
 
 [[group(0), binding(0)]] var srcImage : texture_storage_2d<r32uint, read>;
-[[group(0), binding(1)]] var<storage> dstBuffer : [[access(read_write)]] DstBuffer;
+[[group(0), binding(1)]] var<storage, read_write> dstBuffer : DstBuffer;
 )") + kCommonReadOnlyZeroInitTestCode + R"(
 [[stage(compute)]] fn main() {
   if (doTest()) {

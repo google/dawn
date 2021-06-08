@@ -66,7 +66,7 @@ TEST_F(GetBindGroupLayoutTests, SameObject) {
         [[block]] struct S3 {
             pos : mat4x4<f32>;
         };
-        [[group(3), binding(0)]] var<storage> storage3 : [[access(read_write)]] S3;
+        [[group(3), binding(0)]] var<storage, read_write> storage3 : S3;
 
         [[stage(fragment)]] fn main() {
             var pos_u : vec4<f32> = uniform2.pos;
@@ -202,7 +202,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
             [[block]] struct S {
                 pos : vec4<f32>;
             };
-            [[group(0), binding(0)]] var<storage> ssbo : [[access(read_write)]] S;
+            [[group(0), binding(0)]] var<storage, read_write> ssbo : S;
 
             [[stage(fragment)]] fn main() {
                 var pos : vec4<f32> = ssbo.pos;
@@ -229,7 +229,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
             [[block]] struct S {
                 pos : vec4<f32>;
             };
-            [[group(0), binding(0)]] var<storage> ssbo : [[access(read)]] S;
+            [[group(0), binding(0)]] var<storage, read> ssbo : S;
 
             [[stage(fragment)]] fn main() {
                 var pos : vec4<f32> = ssbo.pos;
@@ -707,7 +707,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingType) {
         [[block]] struct S {
             pos : vec4<f32>;
         };
-        [[group(0), binding(0)]] var<storage> ssbo : [[access(read_write)]] S;
+        [[group(0), binding(0)]] var<storage, read_write> ssbo : S;
 
         [[stage(fragment)]] fn main() {
             var pos : vec4<f32> = ssbo.pos;
@@ -912,8 +912,8 @@ TEST_F(GetBindGroupLayoutTests, FromCorrectEntryPoint) {
         [[block]] struct Data {
             data : f32;
         };
-        [[group(0), binding(0)]] var<storage> data0 : [[access(read_write)]] Data;
-        [[group(0), binding(1)]] var<storage> data1 : [[access(read_write)]] Data;
+        [[group(0), binding(0)]] var<storage, read_write> data0 : Data;
+        [[group(0), binding(1)]] var<storage, read_write> data1 : Data;
 
         [[stage(compute)]] fn compute0() {
             data0.data = 0.0;

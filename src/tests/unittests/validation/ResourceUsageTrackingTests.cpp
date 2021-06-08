@@ -762,7 +762,7 @@ namespace {
                 [[block]] struct RBuffer {
                     value : f32;
                 };
-                [[group(0), binding(0)]] var<storage> rBuffer : [[access(read)]] RBuffer;
+                [[group(0), binding(0)]] var<storage, read> rBuffer : RBuffer;
                 [[stage(fragment)]] fn main() {
                 })");
             utils::ComboRenderPipelineDescriptor pipelineDescriptor;
