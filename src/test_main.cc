@@ -102,6 +102,9 @@ int main(int argc, char** argv) {
 #endif  // TINT_BUILD_HLSL_WRITER
 
 #if TINT_BUILD_MSL_WRITER
+#ifdef TINT_ENABLE_MSL_VALIDATION_USING_METAL_API
+  std::cout << "MSL validation with metal API enabled" << std::endl;
+#else
   // This must be kept alive for the duration of RUN_ALL_TESTS() as the c_str()
   // is passed into tint::writer::msl::EnableMSLValidation(), which does not
   // make a copy. This is to work around Chromium's strict rules on globals
@@ -124,6 +127,7 @@ int main(int argc, char** argv) {
   } else {
     std::cout << "MSL validation with XCode SDK is not enabled" << std::endl;
   }
+#endif  // TINT_ENABLE_MSL_VALIDATION_USING_METAL_API
 #endif  // TINT_BUILD_MSL_WRITER
 
 #if TINT_BUILD_SPV_READER

@@ -52,6 +52,14 @@ Result Hlsl(const std::string& dxc_path,
 /// @return the result of the compile
 Result Msl(const std::string& xcrun_path, const std::string& source);
 
+#ifdef TINT_ENABLE_MSL_VALIDATION_USING_METAL_API
+/// Msl attempts to compile the shader with the runtime Metal Shader Compiler
+/// API, verifying that the shader compiles successfully.
+/// @param source the generated MSL source
+/// @return the result of the compile
+Result MslUsingMetalAPI(const std::string& source);
+#endif  // TINT_ENABLE_MSL_VALIDATION_USING_METAL_API
+
 }  // namespace val
 }  // namespace tint
 

@@ -462,9 +462,24 @@ tint_default_compile_options(tint_utils_io)
 
 ## Tint validation utilities. Used by tests and the tint executable.
 add_library(tint_val
-  val/val.cc
+  val/hlsl.cc
+  val/msl.cc
   val/val.h
 )
+
+# If we're building on mac / ios and we have CoreGraphics, then we can use the
+# metal API to validate our shaders. This is roughly 4x faster than invoking
+# the metal shader compiler executable.
+if(APPLE)
+  find_library(LIB_CORE_GRAPHICS CoreGraphics)
+  if(LIB_CORE_GRAPHICS)
+    target_sources(tint_val PRIVATE "val/msl_metal.mm")
+    target_compile_definitions(tint_val PUBLIC "-DTINT_ENABLE_MSL_VALIDATION_USING_METAL_API=1")
+    target_compile_options(tint_val PRIVATE "-fmodules" "-fcxx-modules")
+    target_link_options(tint_val PUBLIC "-framework" "CoreGraphics")
+  endif()
+endif()
+
 tint_default_compile_options(tint_val)
 target_link_libraries(tint_val tint_utils_io)
 

@@ -89,45 +89,5 @@ Result Hlsl(const std::string& dxc_path,
   return result;
 }
 
-Result Msl(const std::string& xcrun_path, const std::string& source) {
-  Result result;
-
-  auto xcrun = utils::Command(xcrun_path);
-  if (!xcrun.Found()) {
-    result.output = "xcrun not found at '" + std::string(xcrun_path) + "'";
-    result.failed = true;
-    return result;
-  }
-
-  result.source = source;
-
-  utils::TmpFile file(".metal");
-  file << result.source;
-
-#ifdef _WIN32
-  // On Windows, we should actually be running metal.exe from the Metal
-  // Developer Tools for Windows
-  auto res = xcrun("-x", "metal", "-c", "-o", "NUL", file.Path());
-#else
-  auto res =
-      xcrun("-sdk", "macosx", "metal", "-o", "/dev/null", "-c", file.Path());
-#endif
-  if (!res.out.empty()) {
-    if (!result.output.empty()) {
-      result.output += "\n";
-    }
-    result.output += res.out;
-  }
-  if (!res.err.empty()) {
-    if (!result.output.empty()) {
-      result.output += "\n";
-    }
-    result.output += res.err;
-  }
-  result.failed = (res.error_code != 0);
-
-  return result;
-}
-
 }  // namespace val
 }  // namespace tint

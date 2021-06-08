@@ -239,7 +239,8 @@ source_set("tint_utils_io") {
 ###############################################################################
 source_set("tint_val") {
   sources = [
-    "val/val.cc",
+    "val/hlsl.cc",
+    "val/msl.cc",
     "val/val.h",
   ]
   public_deps = [ ":tint_utils_io" ]

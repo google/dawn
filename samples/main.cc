@@ -892,6 +892,16 @@ int main(int argc, const char** argv) {
 #endif  // TINT_BUILD_HLSL_WRITER
 #if TINT_BUILD_MSL_WRITER
       case Format::kMsl: {
+        auto* w = static_cast<tint::writer::Text*>(writer.get());
+        auto msl = w->result();
+#ifdef TINT_ENABLE_MSL_VALIDATION_USING_METAL_API
+        auto res = tint::val::MslUsingMetalAPI(msl);
+        if (res.failed) {
+          validation_failed = true;
+          validation_msgs << res.source << std::endl;
+          validation_msgs << res.output;
+        }
+#else
 #ifdef _WIN32
         const char* default_xcrun_exe = "metal.exe";
 #else
@@ -901,8 +911,6 @@ int main(int argc, const char** argv) {
                                                         ? default_xcrun_exe
                                                         : options.xcrun_path);
         if (xcrun.Found()) {
-          auto* w = static_cast<tint::writer::Text*>(writer.get());
-          auto msl = w->result();
           auto res = tint::val::Msl(xcrun.Path(), msl);
           if (res.failed) {
             validation_failed = true;
@@ -913,8 +921,10 @@ int main(int argc, const char** argv) {
           validation_failed = true;
           validation_msgs << "xcrun executable not found. Cannot validate";
         }
+#endif  // TINT_ENABLE_MSL_VALIDATION_USING_METAL_API
         break;
       }
+
 #endif  // TINT_BUILD_MSL_WRITER
       default:
         break;

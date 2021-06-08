@@ -32,6 +32,13 @@ void EnableMSLValidation(const char* xcrun) {
 }
 
 val::Result Validate(Program* program) {
+#ifdef TINT_ENABLE_MSL_VALIDATION_USING_METAL_API
+  auto gen = std::make_unique<GeneratorImpl>(program);
+  if (!gen->Generate()) {
+    return {true, gen->error(), ""};
+  }
+  return tint::val::MslUsingMetalAPI(gen->result());
+#else   // TINT_ENABLE_MSL_VALIDATION_USING_METAL_API
   if (!xcrun_path) {
     return val::Result{};
   }
@@ -41,6 +48,7 @@ val::Result Validate(Program* program) {
     return {true, gen->error(), ""};
   }
   return val::Msl(xcrun_path, gen->result());
+#endif  // TINT_ENABLE_MSL_VALIDATION_USING_METAL_API
 }
 
 }  // namespace msl
