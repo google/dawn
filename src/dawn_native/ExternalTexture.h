@@ -31,7 +31,6 @@ namespace dawn_native {
 
     class ExternalTextureBase : public ObjectBase {
       public:
-        enum class ExternalTextureState { Alive, Destroyed };
         static ResultOrError<Ref<ExternalTextureBase>> Create(
             DeviceBase* device,
             const ExternalTextureDescriptor* descriptor);
@@ -45,6 +44,7 @@ namespace dawn_native {
         void APIDestroy();
 
       private:
+        enum class ExternalTextureState { Alive, Destroyed };
         ExternalTextureBase(DeviceBase* device, const ExternalTextureDescriptor* descriptor);
         ExternalTextureBase(DeviceBase* device, ObjectBase::ErrorTag tag);
         std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat> textureViews;

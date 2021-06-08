@@ -40,30 +40,6 @@ namespace {
             queue = device.GetQueue();
         }
 
-        wgpu::RenderPipeline CreateBasicRenderPipeline(wgpu::ExternalTexture externalTexture) {
-            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-                device, {{0, wgpu::ShaderStage::Fragment, &utils::kExternalTextureBindingLayout}});
-
-            bindGroup = utils::MakeBindGroup(device, bgl, {{0, externalTexture}});
-
-            wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-            [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
-                return vec4<f32>();
-            })");
-            wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-            [[group(0), binding(0)]] var myExternalTexture: texture_external;
-            [[stage(fragment)]] fn main() {
-                textureDimensions(myExternalTexture);
-            })");
-
-            utils::ComboRenderPipelineDescriptor pipelineDescriptor;
-            pipelineDescriptor.vertex.module = vsModule;
-            pipelineDescriptor.cFragment.module = fsModule;
-            wgpu::PipelineLayout pipelineLayout = utils::MakeBasicPipelineLayout(device, &bgl);
-            pipelineDescriptor.layout = pipelineLayout;
-            return device.CreateRenderPipeline(&pipelineDescriptor);
-        }
-
         static constexpr uint32_t kWidth = 32;
         static constexpr uint32_t kHeight = 32;
         static constexpr uint32_t kDefaultDepth = 1;
@@ -74,8 +50,6 @@ namespace {
             wgpu::TextureFormat::RGBA8Unorm;
 
         wgpu::Queue queue;
-        wgpu::RenderPipeline renderPipeline;
-        wgpu::BindGroup bindGroup;
     };
 
     TEST_F(ExternalTextureTest, CreateExternalTextureValidation) {
@@ -149,9 +123,9 @@ namespace {
         }
     }
 
-    // Test that submitting a command encoder that contains a destroyed external texture results in
+    // Test that submitting a render pass that contains a destroyed external texture results in
     // an error.
-    TEST_F(ExternalTextureTest, SubmitDestroyedExternalTexture) {
+    TEST_F(ExternalTextureTest, SubmitDestroyedExternalTextureInRenderPass) {
         wgpu::TextureDescriptor textureDescriptor = CreateDefaultTextureDescriptor();
         wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
 
@@ -160,7 +134,10 @@ namespace {
         externalDesc.plane0 = texture.CreateView();
         wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
 
-        wgpu::RenderPipeline pipeline = CreateBasicRenderPipeline(externalTexture);
+        // Create a bind group that contains the external texture.
+        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, &utils::kExternalTextureBindingLayout}});
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {{0, externalTexture}});
 
         // Create another texture to use as a color attachment.
         wgpu::TextureDescriptor renderTextureDescriptor = CreateDefaultTextureDescriptor();
@@ -174,9 +151,7 @@ namespace {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
             {
-                pass.SetPipeline(pipeline);
                 pass.SetBindGroup(0, bindGroup);
-                pass.Draw(1);
                 pass.EndPass();
             }
 
@@ -191,9 +166,7 @@ namespace {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
             {
-                pass.SetPipeline(pipeline);
                 pass.SetBindGroup(0, bindGroup);
-                pass.Draw(1);
                 pass.EndPass();
             }
 
@@ -202,9 +175,9 @@ namespace {
         }
     }
 
-    // Test that submitting a command encoder that contains a destroyed external texture plane
+    // Test that submitting a render pass that contains a destroyed external texture plane
     // results in an error.
-    TEST_F(ExternalTextureTest, SubmitDestroyedExternalTexturePlane) {
+    TEST_F(ExternalTextureTest, SubmitDestroyedExternalTexturePlaneInRenderPass) {
         wgpu::TextureDescriptor textureDescriptor = CreateDefaultTextureDescriptor();
         wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
 
@@ -213,7 +186,10 @@ namespace {
         externalDesc.plane0 = texture.CreateView();
         wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
 
-        wgpu::RenderPipeline pipeline = CreateBasicRenderPipeline(externalTexture);
+        // Create a bind group that contains the external texture.
+        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, &utils::kExternalTextureBindingLayout}});
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {{0, externalTexture}});
 
         // Create another texture to use as a color attachment.
         wgpu::TextureDescriptor renderTextureDescriptor = CreateDefaultTextureDescriptor();
@@ -227,9 +203,7 @@ namespace {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
             {
-                pass.SetPipeline(pipeline);
                 pass.SetBindGroup(0, bindGroup);
-                pass.Draw(1);
                 pass.EndPass();
             }
 
@@ -244,9 +218,7 @@ namespace {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
             {
-                pass.SetPipeline(pipeline);
                 pass.SetBindGroup(0, bindGroup);
-                pass.Draw(1);
                 pass.EndPass();
             }
 
@@ -255,4 +227,96 @@ namespace {
         }
     }
 
+    // Test that submitting a compute pass that contains a destroyed external texture results in
+    // an error.
+    TEST_F(ExternalTextureTest, SubmitDestroyedExternalTextureInComputePass) {
+        wgpu::TextureDescriptor textureDescriptor = CreateDefaultTextureDescriptor();
+        wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
+
+        wgpu::ExternalTextureDescriptor externalDesc;
+        externalDesc.format = kDefaultTextureFormat;
+        externalDesc.plane0 = texture.CreateView();
+        wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
+
+        // Create a bind group that contains the external texture.
+        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, &utils::kExternalTextureBindingLayout}});
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {{0, externalTexture}});
+
+        wgpu::ComputePassDescriptor computePass;
+
+        // Control case should succeed.
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass(&computePass);
+            {
+                pass.SetBindGroup(0, bindGroup);
+                pass.EndPass();
+            }
+
+            wgpu::CommandBuffer commands = encoder.Finish();
+
+            queue.Submit(1, &commands);
+        }
+
+        // Destroying the external texture should result in an error.
+        {
+            externalTexture.Destroy();
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass(&computePass);
+            {
+                pass.SetBindGroup(0, bindGroup);
+                pass.EndPass();
+            }
+
+            wgpu::CommandBuffer commands = encoder.Finish();
+            ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+        }
+    }
+
+    // Test that submitting a compute pass that contains a destroyed external texture plane
+    // results in an error.
+    TEST_F(ExternalTextureTest, SubmitDestroyedExternalTexturePlaneInComputePass) {
+        wgpu::TextureDescriptor textureDescriptor = CreateDefaultTextureDescriptor();
+        wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
+
+        wgpu::ExternalTextureDescriptor externalDesc;
+        externalDesc.format = kDefaultTextureFormat;
+        externalDesc.plane0 = texture.CreateView();
+        wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
+
+        // Create a bind group that contains the external texture.
+        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, &utils::kExternalTextureBindingLayout}});
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {{0, externalTexture}});
+
+        wgpu::ComputePassDescriptor computePass;
+
+        // Control case should succeed.
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass(&computePass);
+            {
+                pass.SetBindGroup(0, bindGroup);
+                pass.EndPass();
+            }
+
+            wgpu::CommandBuffer commands = encoder.Finish();
+            queue.Submit(1, &commands);
+        }
+
+        // Destroying an external texture underlying plane should result in an error.
+        {
+            texture.Destroy();
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass(&computePass);
+            {
+                pass.SetBindGroup(0, bindGroup);
+                pass.EndPass();
+            }
+
+            wgpu::CommandBuffer commands = encoder.Finish();
+            ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+        }
+    }
 }  // namespace
