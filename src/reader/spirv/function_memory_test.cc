@@ -820,6 +820,81 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_InvalidPointeeType) {
                         "%60: %60 = OpTypePointer Workgroup %55"));
 }
 
+TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_DereferenceBase) {
+  // The base operand to OpAccessChain may have to be dereferenced first.
+  // crbug.com/tint/737
+  const std::string assembly = Preamble() + R"(
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+
+     %uint = OpTypeInt 32 0
+     %v2uint = OpTypeVector %uint 2
+     %elem_ty = OpTypePointer Private %uint
+     %vec_ty = OpTypePointer Private %v2uint
+
+     %ptrfn = OpTypeFunction %void %vec_ty
+
+     %uint_0 = OpConstant %uint 0
+
+     ; The shortest way to make a pointer example is as a function parameter.
+     %200 = OpFunction %void None %ptrfn
+     %1 = OpFunctionParameter %vec_ty
+     %entry = OpLabel
+     %2 = OpAccessChain %elem_ty %1 %uint_0
+     %3 = OpLoad %uint %2
+     OpReturn
+     OpFunctionEnd
+
+     %100 = OpFunction %void None %voidfn
+     %main_entry = OpLabel
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  std::cout << assembly << std::endl;
+  ASSERT_TRUE(p->BuildAndParseInternalModule());
+  const auto got = p->program().to_str();
+  const std::string expected = R"(Module{
+  Function x_200 -> __void
+  (
+    VariableConst{
+      x_1
+      none
+      undefined
+      __ptr_private__vec_2__u32
+    }
+  )
+  {
+    VariableDeclStatement{
+      VariableConst{
+        x_3
+        none
+        undefined
+        __u32
+        {
+          MemberAccessor[not set]{
+            UnaryOp[not set]{
+              indirection
+              Identifier[not set]{x_1}
+            }
+            Identifier[not set]{x}
+          }
+        }
+      }
+    }
+    Return{}
+  }
+  Function main -> __void
+  StageDecoration{vertex}
+  ()
+  {
+    Return{}
+  }
+}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
+
 std::string OldStorageBufferPreamble() {
   return Preamble() + R"(
      OpName %myvar "myvar"

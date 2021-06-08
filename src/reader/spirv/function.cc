@@ -3837,6 +3837,9 @@ TypedExpression FunctionEmitter::MakeAccessChain(
   // for the base, and then bury that inside nested indexing expressions.
   if (!current_expr) {
     current_expr = MakeOperand(inst, 0);
+    if (current_expr.type->Is<Pointer>()) {
+      current_expr = Dereference(current_expr);
+    }
   }
   const auto constants = constant_mgr_->GetOperandConstants(&inst);
 
