@@ -422,12 +422,14 @@ namespace dawn_native { namespace d3d12 {
                                                              const TextureDescriptor* descriptor,
                                                              ComPtr<ID3D12Resource> d3d12Texture,
                                                              ExternalMutexSerial acquireMutexKey,
+                                                             ExternalMutexSerial releaseMutexKey,
                                                              bool isSwapChainTexture,
                                                              bool isInitialized) {
         Ref<Texture> dawnTexture =
             AcquireRef(new Texture(device, descriptor, TextureState::OwnedExternal));
         DAWN_TRY(dawnTexture->InitializeAsExternalTexture(descriptor, std::move(d3d12Texture),
-                                                          acquireMutexKey, isSwapChainTexture));
+                                                          acquireMutexKey, releaseMutexKey,
+                                                          isSwapChainTexture));
 
         // Importing a multi-planar format must be initialized. This is required because
         // a shared multi-planar format cannot be initialized by Dawn.
@@ -454,6 +456,7 @@ namespace dawn_native { namespace d3d12 {
     MaybeError Texture::InitializeAsExternalTexture(const TextureDescriptor* descriptor,
                                                     ComPtr<ID3D12Resource> d3d12Texture,
                                                     ExternalMutexSerial acquireMutexKey,
+                                                    ExternalMutexSerial releaseMutexKey,
                                                     bool isSwapChainTexture) {
         Device* dawnDevice = ToBackend(GetDevice());
 
@@ -464,6 +467,7 @@ namespace dawn_native { namespace d3d12 {
                               "D3D12 acquiring shared mutex"));
 
         mAcquireMutexKey = acquireMutexKey;
+        mReleaseMutexKey = releaseMutexKey;
         mDxgiKeyedMutex = std::move(dxgiKeyedMutex);
         mSwapChainTexture = isSwapChainTexture;
 
@@ -528,7 +532,7 @@ namespace dawn_native { namespace d3d12 {
         // When creating the ResourceHeapAllocation, the resource heap is set to nullptr because the
         // texture is owned externally. The texture's owning entity must remain responsible for
         // memory management.
-        mResourceAllocation = { info, 0, std::move(d3d12Texture), nullptr };
+        mResourceAllocation = {info, 0, std::move(d3d12Texture), nullptr};
         return {};
     }
 
@@ -569,7 +573,7 @@ namespace dawn_native { namespace d3d12 {
         mSwapChainTexture = false;
 
         if (mDxgiKeyedMutex != nullptr) {
-            mDxgiKeyedMutex->ReleaseSync(uint64_t(mAcquireMutexKey) + 1);
+            mDxgiKeyedMutex->ReleaseSync(uint64_t(mReleaseMutexKey));
             device->ReleaseKeyedMutexForTexture(std::move(mDxgiKeyedMutex));
         }
     }
@@ -788,18 +792,17 @@ namespace dawn_native { namespace d3d12 {
         // This transitions assume it is a 2D texture
         ASSERT(GetDimension() == wgpu::TextureDimension::e2D);
 
-        mSubresourceStateAndDecay.Merge(
-            textureUsages, [&](const SubresourceRange& mergeRange, StateAndDecay* state,
-                               wgpu::TextureUsage usage) {
-                // Skip if this subresource is not used during the current pass
-                if (usage == wgpu::TextureUsage::None) {
-                    return;
-                }
+        mSubresourceStateAndDecay.Merge(textureUsages, [&](const SubresourceRange& mergeRange,
+                                                           StateAndDecay* state,
+                                                           wgpu::TextureUsage usage) {
+            // Skip if this subresource is not used during the current pass
+            if (usage == wgpu::TextureUsage::None) {
+                return;
+            }
 
-                D3D12_RESOURCE_STATES newState = D3D12TextureUsage(usage, GetFormat());
-                TransitionSubresourceRange(barriers, mergeRange, state, newState,
-                                           pendingCommandSerial);
-            });
+            D3D12_RESOURCE_STATES newState = D3D12TextureUsage(usage, GetFormat());
+            TransitionSubresourceRange(barriers, mergeRange, state, newState, pendingCommandSerial);
+        });
     }
 
     D3D12_RENDER_TARGET_VIEW_DESC Texture::GetRTVDescriptor(uint32_t mipLevel,
@@ -869,7 +872,6 @@ namespace dawn_native { namespace d3d12 {
     MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                                      const SubresourceRange& range,
                                      TextureBase::ClearValue clearValue) {
-
         ID3D12GraphicsCommandList* commandList = commandContext->GetCommandList();
 
         Device* device = ToBackend(GetDevice());
