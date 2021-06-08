@@ -300,30 +300,6 @@ def tint_standalone_builder(name, clang, debug, cpu):
         builder = "tint:try/" + name,
     )
 
-def add_dawn_tryjob(name):
-    """ Add a specfic Dawn tryjob to the CQ
-
-    Args:
-      name: string of the name of the tryjob
-    """
-    luci.cq_tryjob_verifier(
-        cq_group = "Tint-CQ",
-        builder = "dawn:try/" + name,
-    )
-
-def dawn_tryjob(os):
-    """Adds a tryjob that tests against Dawn's CQ
-
-    Args:
-      os: string for the OS, should be one or linux|mac|win
-    """
-    if os == "linux" or os == "win":
-        add_dawn_tryjob(os + "-clang-dbg-x64")
-    if os == "win":
-        add_dawn_tryjob("win-msvc-dbg-x64")
-    if os == "mac":
-        add_dawn_tryjob("mac-dbg")
-
 luci.gitiles_poller(
     name = "primary-poller",
     bucket = "ci",
@@ -374,10 +350,6 @@ tint_standalone_builder("win-clang-dbg-x86", True, True, "x86")
 tint_standalone_builder("win-clang-rel-x86", True, False, "x86")
 tint_standalone_builder("win-msvc-dbg-x64", False, True, "x64")
 tint_standalone_builder("win-msvc-rel-x64", False, False, "x64")
-
-dawn_tryjob("linux")
-dawn_tryjob("win")
-dawn_tryjob("mac")
 
 # Views
 
