@@ -60,7 +60,7 @@ TEST_F(ResolverFunctionValidationTest,
 }
 
 TEST_F(ResolverFunctionValidationTest,
-       DISABLED_FunctionNameSameAsGlobalVariableName_Fail) {
+       FunctionNameSameAsGlobalVariableName_Fail) {
   // var foo:f32 = 3.14;
   // fn foo() -> void {}
 
@@ -78,7 +78,7 @@ TEST_F(ResolverFunctionValidationTest,
 }
 
 TEST_F(ResolverFunctionValidationTest,
-       DISABLED_GlobalVariableNameSameAFunctionName_Fail) {
+       GlobalVariableNameSameAFunctionName_Fail) {
   // fn foo() -> void {}
   // var<private> foo:f32 = 3.14;
 

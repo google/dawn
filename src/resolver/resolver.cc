@@ -606,6 +606,20 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
 }
 
 bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
+  auto duplicate_func = symbol_to_function_.find(info->declaration->symbol());
+  if (duplicate_func != symbol_to_function_.end()) {
+    diagnostics_.add_error(
+        "v-2000",
+        "duplicate declaration '" +
+            builder_->Symbols().NameFor(info->declaration->symbol()) + "'",
+        info->declaration->source());
+    diagnostics_.add_note(
+        "'" + builder_->Symbols().NameFor(info->declaration->symbol()) +
+            "' first declared here:",
+        duplicate_func->second->declaration->source());
+    return false;
+  }
+
   for (auto* deco : info->declaration->decorations()) {
     if (info->declaration->is_const()) {
       if (auto* override_deco = deco->As<ast::OverrideDecoration>()) {
@@ -810,6 +824,22 @@ bool Resolver::ValidateFunction(const ast::Function* func,
                                "'",
                            func->source());
     return false;
+  }
+
+  bool is_global = false;
+  VariableInfo* var;
+  if (variable_stack_.get(func->symbol(), &var, &is_global)) {
+    if (is_global) {
+      diagnostics_.add_error("v-2000",
+                             "duplicate declaration '" +
+                                 builder_->Symbols().NameFor(func->symbol()) +
+                                 "'",
+                             func->source());
+      diagnostics_.add_note("'" + builder_->Symbols().NameFor(func->symbol()) +
+                                "' first declared here:",
+                            var->declaration->source());
+      return false;
+    }
   }
 
   auto stage_deco_count = 0;
