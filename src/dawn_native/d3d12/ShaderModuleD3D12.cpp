@@ -393,6 +393,12 @@ namespace dawn_native { namespace d3d12 {
             entryPointName = "main";
         }
 
+        if (device->IsToggleEnabled(Toggle::DumpTranslatedShaders)) {
+            std::ostringstream dumpedMsg;
+            dumpedMsg << "/* Dumped generated HLSL */" << std::endl << hlslSource;
+            GetDevice()->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());
+        }
+
         // Use HLSL source as the input for the key since it does need to know about the pipeline
         // layout. The pipeline layout is only required if we key from WGSL: two different pipeline
         // layouts could be used to produce different shader blobs and the wrong shader blob could

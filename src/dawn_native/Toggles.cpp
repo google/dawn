@@ -189,6 +189,12 @@ namespace dawn_native {
               "This is useful to prevent a Chromium renderer process from successfully sending"
               "SPIR-V code to be compiled in the GPU process.",
               "https://crbug.com/1214923"}},
+            {Toggle::DumpTranslatedShaders,
+             {"dump_translated_shaders",
+              "Dump generated shaders for debug propose, dumped shaders will be log via "
+              "EmitLog, thus printed in Chrome console or consumed by user-defined callback "
+              "function.",
+              "https://crbug.com/dawn/792"}}
             // Dummy comment to separate the }} so it is clearer what to copy-paste to add a toggle.
         }};
     }  // anonymous namespace

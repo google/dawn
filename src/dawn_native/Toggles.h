@@ -53,6 +53,7 @@ namespace dawn_native {
         UseTempBufferInSmallFormatTextureToTextureCopyFromGreaterToLessMipLevel,
         EmitHLSLDebugSymbols,
         DisallowSpirv,
+        DumpTranslatedShaders,
 
         EnumCount,
         InvalidEnum = EnumCount,
