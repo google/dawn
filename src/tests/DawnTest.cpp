@@ -1144,7 +1144,137 @@ std::ostringstream& DawnTestBase::ExpectSampledDepthData(wgpu::Texture texture,
     wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
-    return EXPECT_BUFFER_FLOAT_RANGE_EQ(expected.data(), readbackBuffer, 0, expected.size());
+    return EXPECT_BUFFER_FLOAT_RANGE_ABOUT_EQ(expected.data(), readbackBuffer, 0, expected.size(),
+                                              0.00001);
+}
+
+std::ostringstream& DawnTestBase::ExpectAttachmentDepthStencilTestData(
+    wgpu::Texture texture,
+    wgpu::TextureFormat format,
+    uint32_t width,
+    uint32_t height,
+    uint32_t arrayLayer,
+    uint32_t mipLevel,
+    std::vector<float> expectedDepth,
+    uint8_t* expectedStencil) {
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+
+    // Make the color attachment that we'll use to read back.
+    wgpu::TextureDescriptor colorTexDesc = {};
+    colorTexDesc.size = {width, height, 1};
+    colorTexDesc.format = wgpu::TextureFormat::R32Uint;
+    colorTexDesc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
+    wgpu::Texture colorTexture = device.CreateTexture(&colorTexDesc);
+
+    wgpu::Texture depthDataTexture = nullptr;
+    if (expectedDepth.size() > 0) {
+        // Make a sampleable texture to store the depth data. We'll sample this in the
+        // shader to output depth.
+        wgpu::TextureDescriptor depthDataDesc = {};
+        depthDataDesc.size = {width, height, 1};
+        depthDataDesc.format = wgpu::TextureFormat::R32Float;
+        depthDataDesc.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::CopyDst;
+        depthDataTexture = device.CreateTexture(&depthDataDesc);
+
+        // Upload the depth data.
+        wgpu::ImageCopyTexture imageCopyTexture =
+            utils::CreateImageCopyTexture(depthDataTexture, 0, {0, 0, 0});
+        wgpu::TextureDataLayout textureDataLayout =
+            utils::CreateTextureDataLayout(0, sizeof(float) * width);
+        wgpu::Extent3D copyExtent = {width, height, 1};
+
+        queue.WriteTexture(&imageCopyTexture, expectedDepth.data(),
+                           sizeof(float) * expectedDepth.size(), &textureDataLayout, &copyExtent);
+    }
+
+    // Pipeline for a full screen quad.
+    utils::ComboRenderPipelineDescriptor pipelineDescriptor;
+
+    pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
+        [[stage(vertex)]]
+        fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+            let pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+                vec2<f32>(-1.0, -1.0),
+                vec2<f32>( 3.0, -1.0),
+                vec2<f32>(-1.0,  3.0));
+            return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+        })");
+
+    if (depthDataTexture) {
+        // Sample the input texture and write out depth. |result| will only be set to 1 if we
+        // pass the depth test.
+        pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
+            [[group(0), binding(0)]] var texture0 : texture_2d<f32>;
+
+            struct FragmentOut {
+                [[location(0)]] result : u32;
+                [[builtin(frag_depth)]] fragDepth : f32;
+            };
+
+            [[stage(fragment)]]
+            fn main([[builtin(position)]] FragCoord : vec4<f32>) -> FragmentOut {
+                var output : FragmentOut;
+                output.result = 1u;
+                output.fragDepth = textureLoad(texture0, vec2<i32>(FragCoord.xy), 0)[0];
+                return output;
+            })");
+    } else {
+        pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
+            [[stage(fragment)]]
+            fn main() -> [[location(0)]] u32 {
+                return 1u;
+            })");
+    }
+
+    wgpu::DepthStencilState* depthStencil = pipelineDescriptor.EnableDepthStencil(format);
+    if (depthDataTexture) {
+        // Pass the depth test only if the depth is equal.
+        depthStencil->depthCompare = wgpu::CompareFunction::Equal;
+
+        // TODO(jiawei.shao@intel.com): The Intel Mesa Vulkan driver can't set gl_FragDepth unless
+        // depthWriteEnabled == true. This either needs to be fixed in the driver or restricted by
+        // the WebGPU API.
+        depthStencil->depthWriteEnabled = true;
+    }
+
+    if (expectedStencil != nullptr) {
+        // Pass the stencil test only if the stencil is equal.
+        depthStencil->stencilFront.compare = wgpu::CompareFunction::Equal;
+    }
+
+    pipelineDescriptor.cTargets[0].format = colorTexDesc.format;
+
+    wgpu::TextureViewDescriptor viewDesc = {};
+    viewDesc.baseMipLevel = mipLevel;
+    viewDesc.mipLevelCount = 1;
+    viewDesc.baseArrayLayer = arrayLayer;
+    viewDesc.arrayLayerCount = 1;
+
+    utils::ComboRenderPassDescriptor passDescriptor({colorTexture.CreateView()},
+                                                    texture.CreateView(&viewDesc));
+    passDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
+    passDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
+
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+
+    wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
+    if (expectedStencil != nullptr) {
+        pass.SetStencilReference(*expectedStencil);
+    }
+    pass.SetPipeline(pipeline);
+    if (depthDataTexture) {
+        // Bind the depth data texture.
+        pass.SetBindGroup(0, utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                  {{0, depthDataTexture.CreateView()}}));
+    }
+    pass.Draw(3);
+    pass.EndPass();
+
+    wgpu::CommandBuffer commands = commandEncoder.Finish();
+    queue.Submit(1, &commands);
+
+    std::vector<uint32_t> colorData(width * height, 1u);
+    return EXPECT_TEXTURE_EQ(colorData.data(), colorTexture, {0, 0}, {width, height});
 }
 
 void DawnTestBase::WaitABit() {
@@ -1301,27 +1431,53 @@ namespace detail {
     // Helper classes to set expectations
 
     template <typename T>
-    ExpectEq<T>::ExpectEq(T singleValue) {
+    ExpectEq<T>::ExpectEq(T singleValue, T tolerance) : mTolerance(tolerance) {
         mExpected.push_back(singleValue);
     }
 
     template <typename T>
-    ExpectEq<T>::ExpectEq(const T* values, const unsigned int count) {
+    ExpectEq<T>::ExpectEq(const T* values, const unsigned int count, T tolerance)
+        : mTolerance(tolerance) {
         mExpected.assign(values, values + count);
     }
+
+    namespace {
+
+        template <typename T>
+        testing::AssertionResult CheckImpl(const T& expected, const T& actual, const T& tolerance) {
+            ASSERT(tolerance == T{});
+            if (expected != actual) {
+                return testing::AssertionFailure() << expected << ", actual " << actual;
+            }
+            return testing::AssertionSuccess();
+        }
+
+        template <>
+        testing::AssertionResult CheckImpl<float>(const float& expected,
+                                                  const float& actual,
+                                                  const float& tolerance) {
+            if (abs(expected - actual) > tolerance) {
+                return tolerance == 0.0
+                           ? testing::AssertionFailure() << expected << ", actual " << actual
+                           : testing::AssertionFailure() << "within " << tolerance << " of "
+                                                         << expected << ", actual " << actual;
+            }
+            return testing::AssertionSuccess();
+        }
+
+    }  // namespace
 
     template <typename T>
     testing::AssertionResult ExpectEq<T>::Check(const void* data, size_t size) {
         DAWN_ASSERT(size == sizeof(T) * mExpected.size());
-
         const T* actual = static_cast<const T*>(data);
 
         for (size_t i = 0; i < mExpected.size(); ++i) {
-            if (actual[i] != mExpected[i]) {
+            testing::AssertionResult check = CheckImpl(mExpected[i], actual[i], mTolerance);
+            if (!check) {
                 testing::AssertionResult result = testing::AssertionFailure()
                                                   << "Expected data[" << i << "] to be "
-                                                  << mExpected[i] << ", actual " << actual[i]
-                                                  << std::endl;
+                                                  << check.message() << std::endl;
 
                 if (mExpected.size() <= 1024) {
                     result << "Expected:" << std::endl;
@@ -1334,7 +1490,6 @@ namespace detail {
                 return result;
             }
         }
-
         return testing::AssertionSuccess();
     }
 

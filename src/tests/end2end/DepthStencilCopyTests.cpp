@@ -182,126 +182,6 @@ class DepthStencilCopyTests : public DawnTest {
         return dst;
     }
 
-    // Check depth by uploading expected data to a sampled texture, writing it out as a depth
-    // attachment, and then using the "equals" depth test to check the contents are the same.
-    void ExpectDepthData(wgpu::Texture depthTexture,
-                         wgpu::TextureFormat depthFormat,
-                         uint32_t width,
-                         uint32_t height,
-                         uint32_t mipLevel,
-                         std::vector<float> expected) {
-        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-
-        // Make the color attachment that we'll use to read back.
-        wgpu::TextureDescriptor colorTexDesc = {};
-        colorTexDesc.size = {width, height, 1};
-        colorTexDesc.format = wgpu::TextureFormat::R32Uint;
-        colorTexDesc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
-        wgpu::Texture colorTexture = device.CreateTexture(&colorTexDesc);
-
-        // Make a sampleable texture to store the depth data. We'll sample this in the
-        // shader to output depth.
-        wgpu::TextureDescriptor depthDataDesc = {};
-        depthDataDesc.size = {width, height, 1};
-        depthDataDesc.format = wgpu::TextureFormat::R32Float;
-        depthDataDesc.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::CopyDst;
-        wgpu::Texture depthDataTexture = device.CreateTexture(&depthDataDesc);
-
-        // Upload the depth data.
-        uint32_t bytesPerRow = utils::GetMinimumBytesPerRow(wgpu::TextureFormat::R32Float, width);
-        wgpu::BufferDescriptor uploadBufferDesc = {};
-        uploadBufferDesc.size = utils::RequiredBytesInCopy(bytesPerRow, height, depthDataDesc.size,
-                                                           wgpu::TextureFormat::R32Float);
-        uploadBufferDesc.usage = wgpu::BufferUsage::CopySrc;
-        uploadBufferDesc.mappedAtCreation = true;
-
-        // TODO(crbug.com/dawn/822): Use WriteTexture when implemented on OpenGL.
-        wgpu::Buffer uploadBuffer = device.CreateBuffer(&uploadBufferDesc);
-        uint8_t* dst = static_cast<uint8_t*>(uploadBuffer.GetMappedRange());
-        float* src = expected.data();
-        for (uint32_t y = 0; y < height; ++y) {
-            memcpy(dst, src, width * sizeof(float));
-            dst += bytesPerRow;
-            src += width;
-        }
-        uploadBuffer.Unmap();
-
-        wgpu::ImageCopyBuffer bufferCopy =
-            utils::CreateImageCopyBuffer(uploadBuffer, 0, bytesPerRow, height);
-        wgpu::ImageCopyTexture textureCopy =
-            utils::CreateImageCopyTexture(depthDataTexture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
-        commandEncoder.CopyBufferToTexture(&bufferCopy, &textureCopy, &depthDataDesc.size);
-
-        // Pipeline for a full screen quad.
-        utils::ComboRenderPipelineDescriptor pipelineDescriptor;
-
-        pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
-            [[stage(vertex)]]
-            fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
-                let pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
-                    vec2<f32>(-1.0, -1.0),
-                    vec2<f32>( 3.0, -1.0),
-                    vec2<f32>(-1.0,  3.0));
-                return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
-            })");
-
-        // Sample the input texture and write out depth. |result| will only be set to 1 if we
-        // pass the depth test.
-        pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-            [[group(0), binding(0)]] var texture0 : texture_2d<f32>;
-
-            struct FragmentOut {
-                [[location(0)]] result : u32;
-                [[builtin(frag_depth)]] fragDepth : f32;
-            };
-
-            [[stage(fragment)]]
-            fn main([[builtin(position)]] FragCoord : vec4<f32>) -> FragmentOut {
-                var output : FragmentOut;
-                output.result = 1u;
-                output.fragDepth = textureLoad(texture0, vec2<i32>(FragCoord.xy), 0)[0];
-                return output;
-            })");
-
-        // Pass the depth test only if the depth is equal.
-        pipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
-        wgpu::DepthStencilState* depthStencil = pipelineDescriptor.EnableDepthStencil(depthFormat);
-        depthStencil->depthCompare = wgpu::CompareFunction::Equal;
-        pipelineDescriptor.cTargets[0].format = colorTexDesc.format;
-
-        // TODO(crbug.com/dawn/821): The Intel Mesa Vulkan driver can't set gl_FragDepth unless
-        // depthWriteEnabled == true. This either needs to be fixed in the driver or restricted by
-        // the WebGPU API.
-        depthStencil->depthWriteEnabled = true;
-
-        wgpu::TextureViewDescriptor viewDesc = {};
-        viewDesc.baseMipLevel = mipLevel;
-        viewDesc.mipLevelCount = 1;
-
-        utils::ComboRenderPassDescriptor passDescriptor({colorTexture.CreateView()},
-                                                        depthTexture.CreateView(&viewDesc));
-        passDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
-        passDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
-
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
-
-        // Bind the depth data texture.
-        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
-                                                         {{0, depthDataTexture.CreateView()}});
-
-        wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
-        pass.SetPipeline(pipeline);
-        pass.SetBindGroup(0, bindGroup);
-        pass.Draw(3);
-        pass.EndPass();
-
-        wgpu::CommandBuffer commands = commandEncoder.Finish();
-        queue.Submit(1, &commands);
-
-        std::vector<uint32_t> colorData(width * height, 1u);
-        EXPECT_TEXTURE_EQ(colorData.data(), colorTexture, {0, 0}, {width, height});
-    }
-
     wgpu::ShaderModule mVertexModule;
 };
 
@@ -481,13 +361,14 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyDepth) {
         0.1f, 0.3f, 1u, 3u, kWidth, kHeight, wgpu::TextureUsage::RenderAttachment);
 
     // Check the depth
-    ExpectDepthData(texture, wgpu::TextureFormat::Depth24PlusStencil8, kWidth, kHeight, 0,
-                    {
-                        0.1, 0.1, 0.1, 0.1,  //
-                        0.1, 0.1, 0.1, 0.1,  //
-                        0.3, 0.3, 0.1, 0.1,  //
-                        0.3, 0.3, 0.1, 0.1,  //
-                    });
+    ExpectAttachmentDepthTestData(texture, wgpu::TextureFormat::Depth24PlusStencil8, kWidth,
+                                  kHeight, 0, 0,
+                                  {
+                                      0.1, 0.1, 0.1, 0.1,  //
+                                      0.1, 0.1, 0.1, 0.1,  //
+                                      0.3, 0.3, 0.1, 0.1,  //
+                                      0.3, 0.3, 0.1, 0.1,  //
+                                  });
 }
 
 // Test copying both aspects in a T2T copy, then copying only depth at a nonzero mip.
@@ -496,13 +377,13 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonZeroMipDepth) {
         0.1f, 0.3f, 1u, 3u, 8, 8, wgpu::TextureUsage::RenderAttachment, 1);
 
     // Check the depth
-    ExpectDepthData(texture, wgpu::TextureFormat::Depth24PlusStencil8, 4, 4, 1,
-                    {
-                        0.1, 0.1, 0.1, 0.1,  //
-                        0.1, 0.1, 0.1, 0.1,  //
-                        0.3, 0.3, 0.1, 0.1,  //
-                        0.3, 0.3, 0.1, 0.1,  //
-                    });
+    ExpectAttachmentDepthTestData(texture, wgpu::TextureFormat::Depth24PlusStencil8, 4, 4, 0, 1,
+                                  {
+                                      0.1, 0.1, 0.1, 0.1,  //
+                                      0.1, 0.1, 0.1, 0.1,  //
+                                      0.3, 0.3, 0.1, 0.1,  //
+                                      0.3, 0.3, 0.1, 0.1,  //
+                                  });
 }
 
 // Test copying both aspects in a T2T copy, then copying stencil, then copying depth
@@ -528,13 +409,14 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyStencilThenDepth) {
                       wgpu::TextureAspect::StencilOnly);
 
     // Check the depth
-    ExpectDepthData(texture, wgpu::TextureFormat::Depth24PlusStencil8, kWidth, kHeight, 0,
-                    {
-                        0.1, 0.1, 0.1, 0.1,  //
-                        0.1, 0.1, 0.1, 0.1,  //
-                        0.3, 0.3, 0.1, 0.1,  //
-                        0.3, 0.3, 0.1, 0.1,  //
-                    });
+    ExpectAttachmentDepthTestData(texture, wgpu::TextureFormat::Depth24PlusStencil8, kWidth,
+                                  kHeight, 0, 0,
+                                  {
+                                      0.1, 0.1, 0.1, 0.1,  //
+                                      0.1, 0.1, 0.1, 0.1,  //
+                                      0.3, 0.3, 0.1, 0.1,  //
+                                      0.3, 0.3, 0.1, 0.1,  //
+                                  });
 }
 
 // Test copying both aspects in a T2T copy, then copying depth, then copying stencil
@@ -558,13 +440,14 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyDepthThenStencil) {
         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
 
     // Check the depth
-    ExpectDepthData(texture, wgpu::TextureFormat::Depth24PlusStencil8, kWidth, kHeight, 0,
-                    {
-                        0.1, 0.1, 0.1, 0.1,  //
-                        0.1, 0.1, 0.1, 0.1,  //
-                        0.3, 0.3, 0.1, 0.1,  //
-                        0.3, 0.3, 0.1, 0.1,  //
-                    });
+    ExpectAttachmentDepthTestData(texture, wgpu::TextureFormat::Depth24PlusStencil8, kWidth,
+                                  kHeight, 0, 0,
+                                  {
+                                      0.1, 0.1, 0.1, 0.1,  //
+                                      0.1, 0.1, 0.1, 0.1,  //
+                                      0.3, 0.3, 0.1, 0.1,  //
+                                      0.3, 0.3, 0.1, 0.1,  //
+                                  });
 
     // Check the stencil
     std::vector<uint8_t> expectedData = {
@@ -674,14 +557,14 @@ TEST_P(DepthStencilCopyTests, ToStencilAspect) {
     EXPECT_TEXTURE_EQ(expectedStencilData.data(), depthStencilTexture, {0, 0}, {kWidth, kHeight}, 0,
                       wgpu::TextureAspect::StencilOnly);
 
-    ExpectDepthData(depthStencilTexture, wgpu::TextureFormat::Depth24PlusStencil8, kWidth, kHeight,
-                    0,
-                    {
-                        0.7, 0.7, 0.7, 0.7,  //
-                        0.7, 0.7, 0.7, 0.7,  //
-                        0.7, 0.7, 0.7, 0.7,  //
-                        0.7, 0.7, 0.7, 0.7,  //
-                    });
+    ExpectAttachmentDepthTestData(depthStencilTexture, wgpu::TextureFormat::Depth24PlusStencil8,
+                                  kWidth, kHeight, 0, 0,
+                                  {
+                                      0.7, 0.7, 0.7, 0.7,  //
+                                      0.7, 0.7, 0.7, 0.7,  //
+                                      0.7, 0.7, 0.7, 0.7,  //
+                                      0.7, 0.7, 0.7, 0.7,  //
+                                  });
 }
 
 DAWN_INSTANTIATE_TEST(DepthStencilCopyTests,

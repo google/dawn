@@ -74,6 +74,10 @@
     EXPECT_BUFFER(buffer, offset, sizeof(float) * (count),            \
                   new ::detail::ExpectEq<float>(expected, count))
 
+#define EXPECT_BUFFER_FLOAT_RANGE_ABOUT_EQ(expected, buffer, offset, count, tolerance) \
+    EXPECT_BUFFER(buffer, offset, sizeof(float) * (count),                             \
+                  new ::detail::ExpectEq<float>(expected, count, tolerance))
+
 // Test a pixel of the mip level 0 of a 2D texture.
 #define EXPECT_PIXEL_RGBA8_EQ(expected, texture, x, y) \
     AddTextureExpectation(__FILE__, __LINE__, expected, texture, {x, y})
@@ -408,6 +412,42 @@ class DawnTestBase {
                                                uint32_t mipLevel,
                                                const std::vector<float>& expected);
 
+    // Check depth by uploading expected data to a sampled texture, writing it out as a depth
+    // attachment, and then using the "equals" depth test to check the contents are the same.
+    // Check stencil by rendering a full screen quad and using the "equals" stencil test with
+    // a stencil reference value. Note that checking stencil checks that the entire stencil
+    // buffer is equal to the expected stencil value.
+    std::ostringstream& ExpectAttachmentDepthStencilTestData(wgpu::Texture texture,
+                                                             wgpu::TextureFormat format,
+                                                             uint32_t width,
+                                                             uint32_t height,
+                                                             uint32_t arrayLayer,
+                                                             uint32_t mipLevel,
+                                                             std::vector<float> expectedDepth,
+                                                             uint8_t* expectedStencil);
+
+    std::ostringstream& ExpectAttachmentDepthTestData(wgpu::Texture texture,
+                                                      wgpu::TextureFormat format,
+                                                      uint32_t width,
+                                                      uint32_t height,
+                                                      uint32_t arrayLayer,
+                                                      uint32_t mipLevel,
+                                                      std::vector<float> expectedDepth) {
+        return ExpectAttachmentDepthStencilTestData(texture, format, width, height, arrayLayer,
+                                                    mipLevel, std::move(expectedDepth), nullptr);
+    }
+
+    std::ostringstream& ExpectAttachmentStencilTestData(wgpu::Texture texture,
+                                                        wgpu::TextureFormat format,
+                                                        uint32_t width,
+                                                        uint32_t height,
+                                                        uint32_t arrayLayer,
+                                                        uint32_t mipLevel,
+                                                        uint8_t expectedStencil) {
+        return ExpectAttachmentDepthStencilTestData(texture, format, width, height, arrayLayer,
+                                                    mipLevel, {}, &expectedStencil);
+    }
+
     void WaitABit();
     void FlushWire();
     void WaitForAllOperations();
@@ -630,13 +670,14 @@ namespace detail {
     template <typename T>
     class ExpectEq : public Expectation {
       public:
-        ExpectEq(T singleValue);
-        ExpectEq(const T* values, const unsigned int count);
+        ExpectEq(T singleValue, T tolerance = {});
+        ExpectEq(const T* values, const unsigned int count, T tolerance = {});
 
         testing::AssertionResult Check(const void* data, size_t size) override;
 
       private:
         std::vector<T> mExpected;
+        T mTolerance;
     };
     extern template class ExpectEq<uint8_t>;
     extern template class ExpectEq<int16_t>;
