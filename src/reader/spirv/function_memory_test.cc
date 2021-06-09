@@ -851,7 +851,6 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_DereferenceBase) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  std::cout << assembly << std::endl;
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   const auto got = p->program().to_str();
   const std::string expected = R"(Module{
