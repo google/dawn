@@ -689,7 +689,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_StructInitializer_Null) {
 TEST_F(SpvParserFunctionVarTest,
        EmitFunctionVariables_Decorate_RelaxedPrecision) {
   // RelaxedPrecisionis dropped
-  auto p = parser(test::Assemble(Caps({"myvar"}) + R"(
+  const auto assembly = Caps({"myvar"}) + R"(
      OpDecorate %myvar RelaxedPrecision
 
      %float = OpTypeFloat 32
@@ -703,7 +703,8 @@ TEST_F(SpvParserFunctionVarTest,
      %myvar = OpVariable %ptr Function
      OpReturn
      OpFunctionEnd
-  )"));
+  )";
+  auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitFunctionVariables());
@@ -755,6 +756,55 @@ TEST_F(SpvParserFunctionVarTest,
   }
 }
 )") << got;
+}
+
+TEST_F(SpvParserFunctionVarTest,
+       EmitFunctionVariables_StructDifferOnlyInMemberName) {
+  auto p = parser(test::Assemble(R"(
+      OpCapability Shader
+      OpMemoryModel Logical Simple
+      OpEntryPoint Vertex %100 "main"
+      OpName %_struct_5 "S"
+      OpName %_struct_6 "S"
+      OpMemberName %_struct_5 0 "algo"
+      OpMemberName %_struct_6 0 "rithm"
+
+      %void = OpTypeVoid
+      %voidfn = OpTypeFunction %void
+      %uint = OpTypeInt 32 0
+
+      %_struct_5 = OpTypeStruct %uint
+      %_struct_6 = OpTypeStruct %uint
+      %_ptr_Function__struct_5 = OpTypePointer Function %_struct_5
+      %_ptr_Function__struct_6 = OpTypePointer Function %_struct_6
+      %100 = OpFunction %void None %voidfn
+      %39 = OpLabel
+      %40 = OpVariable %_ptr_Function__struct_5 Function
+      %41 = OpVariable %_ptr_Function__struct_6 Function
+      OpReturn
+      OpFunctionEnd)"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitFunctionVariables());
+
+  const auto got = ToString(p->builder(), fe.ast_body());
+  EXPECT_THAT(got, HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_40
+    none
+    undefined
+    __type_name_S
+  }
+}
+VariableDeclStatement{
+  Variable{
+    x_41
+    none
+    undefined
+    __type_name_S_1
+  }
+}
+)"));
 }
 
 TEST_F(SpvParserFunctionVarTest,

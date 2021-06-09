@@ -466,12 +466,19 @@ TEST_F(SpvParserTest_CompositeExtract, Struct) {
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
-  const auto assembly = Caps() +
-                        R"(
-      OpMemberName %s0 0 "algo"
-      OpMemberName %s1 0 "rithm"
-)" + CommonTypes() +
-                        R"(
+  const std::string assembly = R"(
+     OpCapability Shader
+     OpMemoryModel Logical Simple
+     OpEntryPoint Vertex %100 "main"
+
+     OpMemberName %s0 0 "algo"
+     OpMemberName %s1 0 "rithm"
+
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+
+     %uint = OpTypeInt 32 0
+
      %s0 = OpTypeStruct %uint
      %s1 = OpTypeStruct %uint
      %ptr0 = OpTypePointer Function %s0
@@ -913,12 +920,23 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTest_CompositeInsert, Struct_DifferOnlyInMemberName) {
-  const auto assembly = Caps() +
-                        R"(
-      OpMemberName %s0 0 "algo"
-      OpMemberName %s1 0 "rithm"
-)" + CommonTypes() +
-                        R"(
+  const std::string assembly = R"(
+     OpCapability Shader
+     OpMemoryModel Logical Simple
+     OpEntryPoint Vertex %100 "main"
+
+     OpName %var0 "var0"
+     OpName %var1 "var1"
+     OpMemberName %s0 0 "algo"
+     OpMemberName %s1 0 "rithm"
+
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+
+     %uint = OpTypeInt 32 0
+     %uint_10 = OpConstant %uint 10
+     %uint_11 = OpConstant %uint 11
+
      %s0 = OpTypeStruct %uint
      %s1 = OpTypeStruct %uint
      %ptr0 = OpTypePointer Function %s0
@@ -931,7 +949,7 @@ TEST_F(SpvParserTest_CompositeInsert, Struct_DifferOnlyInMemberName) {
      %1 = OpLoad %s0 %var0
      %2 = OpCompositeInsert %s0 %uint_10 %1 0
      %3 = OpLoad %s1 %var1
-     %4 = OpCompositeInsert %s1 %uint_10 %3 0
+     %4 = OpCompositeInsert %s1 %uint_11 %3 0
      OpReturn
      OpFunctionEnd
   )";
@@ -939,21 +957,21 @@ TEST_F(SpvParserTest_CompositeInsert, Struct_DifferOnlyInMemberName) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto body_str = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
+  const auto got = ToString(p->builder(), fe.ast_body());
+  const std::string expected = R"(VariableDeclStatement{
   Variable{
-    x_40
+    var0
     none
     undefined
-    __type_name_S_2
+    __type_name_S
   }
 }
 VariableDeclStatement{
   Variable{
-    x_41
+    var1
     none
     undefined
-    __type_name_S_2
+    __type_name_S_1
   }
 }
 VariableDeclStatement{
@@ -961,9 +979,9 @@ VariableDeclStatement{
     x_1
     none
     undefined
-    __type_name_S_2
+    __type_name_S
     {
-      Identifier[not set]{x_40}
+      Identifier[not set]{var0}
     }
   }
 }
@@ -972,7 +990,7 @@ VariableDeclStatement{
     x_2_1
     none
     undefined
-    __type_name_S_1
+    __type_name_S
     {
       Identifier[not set]{x_1}
     }
@@ -990,7 +1008,7 @@ VariableDeclStatement{
     x_2
     none
     undefined
-    __type_name_S_1
+    __type_name_S
     {
       Identifier[not set]{x_2_1}
     }
@@ -1001,9 +1019,9 @@ VariableDeclStatement{
     x_3
     none
     undefined
-    __type_name_S_2
+    __type_name_S_1
     {
-      Identifier[not set]{x_41}
+      Identifier[not set]{var1}
     }
   }
 }
@@ -1012,7 +1030,7 @@ VariableDeclStatement{
     x_4_1
     none
     undefined
-    __type_name_S_2
+    __type_name_S_1
     {
       Identifier[not set]{x_3}
     }
@@ -1023,50 +1041,22 @@ Assignment{
     Identifier[not set]{x_4_1}
     Identifier[not set]{rithm}
   }
-  ScalarConstructor[not set]{10u}
+  ScalarConstructor[not set]{11u}
 }
 VariableDeclStatement{
   VariableConst{
     x_4
     none
     undefined
-    __type_name_S_2
+    __type_name_S_1
     {
       Identifier[not set]{x_4_1}
     }
   }
 }
-)")) << body_str;
-  EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
-  Variable{
-    x_4_1
-    none
-    undefined
-    __type_name_S_2
-    {
-      Identifier[not set]{x_3}
-    }
-  }
-}
-Assignment{
-  MemberAccessor[not set]{
-    Identifier[not set]{x_4_1}
-    Identifier[not set]{rithm}
-  }
-  ScalarConstructor[not set]{10u}
-}
-VariableDeclStatement{
-  VariableConst{
-    x_4
-    none
-    undefined
-    __type_name_S_2
-    {
-      Identifier[not set]{x_4_1}
-    }
-  }
-})")) << body_str;
-  p->SkipDumpingPending("crbug.com/tint/863");
+Return{}
+)";
+  EXPECT_EQ(got, expected) << got;
 }
 
 TEST_F(SpvParserTest_CompositeInsert, Struct_IndexTooBigError) {

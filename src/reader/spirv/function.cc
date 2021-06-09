@@ -1116,20 +1116,16 @@ bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
 const Type* FunctionEmitter::GetVariableStoreType(
     const spvtools::opt::Instruction& var_decl_inst) {
   const auto type_id = var_decl_inst.type_id();
-  auto* var_ref_type = type_mgr_->GetType(type_id);
-  if (!var_ref_type) {
-    Fail() << "internal error: variable type id " << type_id
-           << " has no registered type";
-    return nullptr;
-  }
-  auto* var_ref_ptr_type = var_ref_type->AsPointer();
-  if (!var_ref_ptr_type) {
-    Fail() << "internal error: variable type id " << type_id
-           << " is not a pointer type";
-    return nullptr;
-  }
-  auto var_store_type_id = type_mgr_->GetId(var_ref_ptr_type->pointee_type());
-  return parser_impl_.ConvertType(var_store_type_id);
+  // Normally we use the SPIRV-Tools optimizer to manage types.
+  // But when two struct types have the same member types and decorations,
+  // but differ only in member names, the two struct types will be
+  // represented by a single common internal struct type.
+  // So avoid the optimizer's representation and instead follow the
+  // SPIR-V instructions themselves.
+  const auto* ptr_ty = def_use_mgr_->GetDef(type_id);
+  const auto store_ty_id = ptr_ty->GetSingleWordInOperand(1);
+  const auto* result = parser_impl_.ConvertType(store_ty_id);
+  return result;
 }
 
 bool FunctionEmitter::EmitBody() {
