@@ -229,6 +229,9 @@ IntrinsicType ParseIntrinsicType(const std::string& name) {
   if (name == "tanh") {
     return IntrinsicType::kTanh;
   }
+  if (name == "transpose") {
+    return IntrinsicType::kTranspose;
+  }
   if (name == "trunc") {
     return IntrinsicType::kTrunc;
   }
@@ -424,6 +427,8 @@ const char* str(IntrinsicType i) {
       return "tan";
     case IntrinsicType::kTanh:
       return "tanh";
+    case IntrinsicType::kTranspose:
+      return "transpose";
     case IntrinsicType::kTrunc:
       return "trunc";
     case IntrinsicType::kUnpack2x16float:

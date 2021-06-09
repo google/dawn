@@ -2373,6 +2373,9 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
       }
       return result_id;
     }
+    case IntrinsicType::kTranspose:
+      op = spv::Op::OpTranspose;
+      break;
     default: {
       auto set_id = GetGLSLstd450Import();
       auto inst_id = intrinsic_to_glsl_method(intrinsic);

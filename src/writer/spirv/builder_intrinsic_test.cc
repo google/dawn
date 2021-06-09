@@ -1534,6 +1534,43 @@ OpFunctionEnd
 )");
 }
 
+TEST_F(IntrinsicBuilderTest, Call_Transpose) {
+  auto* var = Global("var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
+
+  auto* expr = Call("transpose", "var");
+  WrapInFunction(expr);
+
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
+                    ast::StatementList{}, ast::DecorationList{});
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 11u) << b.error();
+
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
+OpName %5 "var"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%9 = OpTypeFloat 32
+%8 = OpTypeVector %9 3
+%7 = OpTypeMatrix %8 2
+%6 = OpTypePointer Private %7
+%10 = OpConstantNull %7
+%5 = OpVariable %6 Private %10
+%13 = OpTypeVector %9 2
+%12 = OpTypeMatrix %13 3
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%14 = OpLoad %7 %5
+%11 = OpTranspose %12 %14
+OpReturn
+OpFunctionEnd
+)");
+}
+
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
   auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))},
                       {create<ast::StructBlockDecoration>()});

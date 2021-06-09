@@ -157,6 +157,8 @@ ast::CallExpression* GenerateCall(IntrinsicType intrinsic,
       return builder->Call(str.str(), "u1");
     case IntrinsicType::kWorkgroupBarrier:
       return builder->Call(str.str());
+    case IntrinsicType::kTranspose:
+      return builder->Call(str.str(), "m3x2");
     default:
       break;
   }
@@ -174,6 +176,7 @@ TEST_P(MslIntrinsicTest, Emit) {
   Global("u2", ty.vec2<unsigned int>(), ast::StorageClass::kPrivate);
   Global("b2", ty.vec2<bool>(), ast::StorageClass::kPrivate);
   Global("m2x2", ty.mat2x2<float>(), ast::StorageClass::kPrivate);
+  Global("m3x2", ty.mat3x2<float>(), ast::StorageClass::kPrivate);
 
   auto* call = GenerateCall(param.intrinsic, param.type, this);
   ASSERT_NE(nullptr, call) << "Unhandled intrinsic";
@@ -268,6 +271,7 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{IntrinsicType::kStep, ParamType::kF32, "step"},
         IntrinsicData{IntrinsicType::kTan, ParamType::kF32, "tan"},
         IntrinsicData{IntrinsicType::kTanh, ParamType::kF32, "tanh"},
+        IntrinsicData{IntrinsicType::kTranspose, ParamType::kF32, "transpose"},
         IntrinsicData{IntrinsicType::kTrunc, ParamType::kF32, "trunc"},
         IntrinsicData{IntrinsicType::kUnpack4x8snorm, ParamType::kU32,
                       "unpack_snorm4x8_to_float"},

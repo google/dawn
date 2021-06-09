@@ -1,0 +1,27 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+void transpose_2585cd() {
+  float3x4 res =   transpose(float4x3());
+}
+
+vertex tint_symbol vertex_main() {
+  transpose_2585cd();
+  tint_symbol const tint_symbol_1 = {.value=float4()};
+  return tint_symbol_1;
+}
+
+fragment void fragment_main() {
+  transpose_2585cd();
+  return;
+}
+
+kernel void compute_main() {
+  transpose_2585cd();
+  return;
+}
+

@@ -146,6 +146,8 @@ ast::CallExpression* GenerateCall(IntrinsicType intrinsic,
       return builder->Call(str.str(), "f2", "f2", "b2");
     case IntrinsicType::kDeterminant:
       return builder->Call(str.str(), "m2x2");
+    case IntrinsicType::kTranspose:
+      return builder->Call(str.str(), "m3x2");
     default:
       break;
   }
@@ -160,6 +162,7 @@ TEST_P(HlslIntrinsicTest, Emit) {
   Global("u2", ty.vec2<unsigned int>(), ast::StorageClass::kPrivate);
   Global("b2", ty.vec2<bool>(), ast::StorageClass::kPrivate);
   Global("m2x2", ty.mat2x2<float>(), ast::StorageClass::kPrivate);
+  Global("m3x2", ty.mat3x2<float>(), ast::StorageClass::kPrivate);
 
   auto* call = GenerateCall(param.intrinsic, param.type, this);
   ASSERT_NE(nullptr, call) << "Unhandled intrinsic";
@@ -247,6 +250,7 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{IntrinsicType::kStep, ParamType::kF32, "step"},
         IntrinsicData{IntrinsicType::kTan, ParamType::kF32, "tan"},
         IntrinsicData{IntrinsicType::kTanh, ParamType::kF32, "tanh"},
+        IntrinsicData{IntrinsicType::kTranspose, ParamType::kF32, "transpose"},
         IntrinsicData{IntrinsicType::kTrunc, ParamType::kF32, "trunc"}));
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, DISABLED_Intrinsic_IsNormal) {
@@ -416,10 +420,9 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack2x16Unorm) {
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
   EXPECT_THAT(pre_result(), HasSubstr("uint tint_tmp_1 = p1;"));
-  EXPECT_THAT(
-      pre_result(),
-      HasSubstr(
-          "uint2 tint_tmp = uint2(tint_tmp_1 & 0xffff, tint_tmp_1 >> 16);"));
+  EXPECT_THAT(pre_result(),
+              HasSubstr("uint2 tint_tmp = uint2(tint_tmp_1 & 0xffff, "
+                        "tint_tmp_1 >> 16);"));
   EXPECT_THAT(result(), HasSubstr("float2(tint_tmp) / 65535.0"));
 }
 

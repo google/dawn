@@ -373,6 +373,7 @@ fn tan(f32) -> f32
 fn tan<N: num>(vec<N, f32>) -> vec<N, f32>
 fn tanh(f32) -> f32
 fn tanh<N: num>(vec<N, f32>) -> vec<N, f32>
+fn transpose<M: num, N: num>(mat<M, N, f32>) -> mat<N, M, f32>
 fn trunc(f32) -> f32
 fn trunc<N: num>(vec<N, f32>) -> vec<N, f32>
 fn unpack2x16float(u32) -> vec2<f32>
@@ -381,6 +382,7 @@ fn unpack2x16unorm(u32) -> vec2<f32>
 fn unpack4x8snorm(u32) -> vec4<f32>
 fn unpack4x8unorm(u32) -> vec4<f32>
 [[stage("compute")]] fn workgroupBarrier()
+
 fn textureDimensions<T: fiu32>(texture: texture_1d<T>) -> i32
 fn textureDimensions<T: fiu32>(texture: texture_2d<T>) -> vec2<i32>
 fn textureDimensions<T: fiu32>(texture: texture_2d<T>, level: i32) -> vec2<i32>

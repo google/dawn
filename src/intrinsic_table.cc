@@ -403,8 +403,8 @@ const sem::Matrix* build_mat(MatchState& state,
                              Number N,
                              Number M,
                              const sem::Type* T) {
-  auto* column_type = state.builder.create<sem::Vector>(T, N.Value());
-  return state.builder.create<sem::Matrix>(column_type, M.Value());
+  auto* column_type = state.builder.create<sem::Vector>(T, M.Value());
+  return state.builder.create<sem::Matrix>(column_type, N.Value());
 }
 
 bool match_array(const sem::Type* ty, const sem::Type*& T) {

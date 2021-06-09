@@ -100,6 +100,7 @@ enum class IntrinsicType {
   kStorageBarrier,
   kTan,
   kTanh,
+  kTranspose,
   kTrunc,
   kUnpack2x16float,
   kUnpack2x16snorm,

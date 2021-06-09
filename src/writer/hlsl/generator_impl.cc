@@ -1181,6 +1181,7 @@ std::string GeneratorImpl::generate_builtin_name(
     case sem::IntrinsicType::kStep:
     case sem::IntrinsicType::kTan:
     case sem::IntrinsicType::kTanh:
+    case sem::IntrinsicType::kTranspose:
     case sem::IntrinsicType::kTrunc:
     case sem::IntrinsicType::kSign:
     case sem::IntrinsicType::kAbs:
