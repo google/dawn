@@ -66,7 +66,7 @@ fn f1(p0 : f32, p1 : i32) -> f32 {
   var l3 : vec2<u32> = vec2<u32>(u32(l0), u32(l1));
   var l4 : S;
   var l5 : u32 = l4.m1[5];
-  var l6 : ptr<private, u32>;
+  let l6 : ptr<private, u32> = &g0;
   loop {
     l0 = (p1 + 2);
     if (((l0 % 4) == 0)) {

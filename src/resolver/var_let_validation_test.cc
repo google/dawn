@@ -43,18 +43,19 @@ TEST_F(ResolverVarLetValidationTest, GlobalLetNoInitializer) {
             "12:34 error: let declarations must have initializers");
 }
 
-TEST_F(ResolverVarLetValidationTest, VarConstructorNotStorable) {
+TEST_F(ResolverVarLetValidationTest, VarTypeNotStorable) {
   // var i : i32;
   // var p : pointer<function, i32> = &v;
   auto* i = Var("i", ty.i32(), ast::StorageClass::kNone);
-  auto* p = Var("a", ty.i32(), ast::StorageClass::kNone,
-                AddressOf(Source{{12, 34}}, "i"));
+  auto* p =
+      Var(Source{{56, 78}}, "a", ty.pointer<i32>(ast::StorageClass::kFunction),
+          ast::StorageClass::kNone, AddressOf(Source{{12, 34}}, "i"));
   WrapInFunction(i, p);
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: 'ptr<function, i32, read_write>' is not storable for "
-            "assignment");
+            "56:78 error: ptr<function, i32, read_write> cannot be used as the "
+            "type of a var");
 }
 
 TEST_F(ResolverVarLetValidationTest, LetConstructorWrongType) {

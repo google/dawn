@@ -74,6 +74,10 @@ class Resolver {
   bool Resolve();
 
   /// @param type the given type
+  /// @returns true if the given type is a plain type
+  bool IsPlain(const sem::Type* type);
+
+  /// @param type the given type
   /// @returns true if the given type is storable
   bool IsStorable(const sem::Type* type);
 

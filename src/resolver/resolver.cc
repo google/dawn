@@ -165,20 +165,18 @@ bool Resolver::Resolve() {
   return result;
 }
 
-// https://gpuweb.github.io/gpuweb/wgsl.html#storable-types
-bool Resolver::IsStorable(const sem::Type* type) {
-  if (type->is_scalar() || type->Is<sem::Vector>() || type->Is<sem::Matrix>()) {
+// https://gpuweb.github.io/gpuweb/wgsl/#plain-types-section
+bool Resolver::IsPlain(const sem::Type* type) {
+  if (type->is_scalar() || type->Is<sem::Vector>() || type->Is<sem::Matrix>() ||
+      type->Is<sem::Array>() || type->Is<sem::Struct>()) {
     return true;
   }
-  if (auto* arr = type->As<sem::Array>()) {
-    return IsStorable(arr->ElemType());
-  }
-  if (auto* str = type->As<sem::Struct>()) {
-    for (const auto* member : str->Members()) {
-      if (!IsStorable(member->Type())) {
-        return false;
-      }
-    }
+  return false;
+}
+
+// https://gpuweb.github.io/gpuweb/wgsl.html#storable-types
+bool Resolver::IsStorable(const sem::Type* type) {
+  if (IsPlain(type) || type->Is<sem::Texture>() || type->Is<sem::Sampler>()) {
     return true;
   }
   return false;
@@ -525,14 +523,6 @@ bool Resolver::ValidateVariableConstructor(const ast::Variable* var,
                                            const std::string& rhs_type_name) {
   auto* value_type = rhs_type->UnwrapRef();  // Implicit load of RHS
 
-  // RHS needs to be of a storable type
-  if (!var->is_const() && !IsStorable(value_type)) {
-    diagnostics_.add_error(
-        "'" + rhs_type_name + "' is not storable for assignment",
-        var->constructor()->source());
-    return false;
-  }
-
   // Value type has to match storage type
   if (storage_type != value_type) {
     std::string decl = var->is_const() ? "let" : "var";
@@ -769,6 +759,14 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
 bool Resolver::ValidateVariable(const VariableInfo* info) {
   auto* var = info->declaration;
   auto* storage_type = info->type->UnwrapRef();
+
+  if (!var->is_const() && !IsStorable(storage_type)) {
+    diagnostics_.add_error(storage_type->FriendlyName(builder_->Symbols()) +
+                               " cannot be used as the type of a var",
+                           var->source());
+    return false;
+  }
+
   if (auto* r = storage_type->As<sem::Array>()) {
     if (r->IsRuntimeSized()) {
       diagnostics_.add_error(
@@ -2750,7 +2748,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
     return nullptr;
   }
 
-  if (!IsStorable(el_ty)) {  // Check must come before DefaultAlignAndSize()
+  if (!IsPlain(el_ty)) {  // Check must come before DefaultAlignAndSize()
     builder_->Diagnostics().add_error(
         el_ty->FriendlyName(builder_->Symbols()) +
             " cannot be used as an element type of an array",
@@ -2924,7 +2922,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     }
 
     // Validate member type
-    if (!IsStorable(type)) {
+    if (!IsPlain(type)) {
       diagnostics_.add_error(
           type->FriendlyName(builder_->Symbols()) +
           " cannot be used as the type of a structure member");
@@ -3166,13 +3164,6 @@ bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
   // https://gpuweb.github.io/gpuweb/wgsl/#assignment
 
   auto* value_type = rhs_type->UnwrapRef();  // Implicit load of RHS
-
-  // RHS needs to be of a storable type
-  if (!IsStorable(value_type)) {
-    diagnostics_.add_error("'" + TypeNameOf(a->rhs()) + "' is not storable",
-                           a->rhs()->source());
-    return false;
-  }
 
   // Value type has to match storage type
   if (storage_type != value_type) {
