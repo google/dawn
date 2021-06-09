@@ -31,10 +31,11 @@ namespace utils {
         return Align(bytesPerBlock * (width / blockWidth), kTextureBytesPerRowAlignment);
     }
 
-    TextureDataCopyLayout GetTextureDataCopyLayoutForTexture2DAtLevel(
+    TextureDataCopyLayout GetTextureDataCopyLayoutForTextureAtLevel(
         wgpu::TextureFormat format,
         wgpu::Extent3D textureSizeAtLevel0,
         uint32_t mipmapLevel,
+        wgpu::TextureDimension dimension,
         uint32_t rowsPerImage) {
         // Compressed texture formats not supported in this function yet.
         ASSERT(utils::GetTextureFormatBlockWidth(format) == 1);
@@ -44,6 +45,11 @@ namespace utils {
         layout.mipSize = {std::max(textureSizeAtLevel0.width >> mipmapLevel, 1u),
                           std::max(textureSizeAtLevel0.height >> mipmapLevel, 1u),
                           textureSizeAtLevel0.depthOrArrayLayers};
+
+        if (dimension == wgpu::TextureDimension::e3D) {
+            layout.mipSize.depthOrArrayLayers =
+                std::max(textureSizeAtLevel0.depthOrArrayLayers >> mipmapLevel, 1u);
+        }
 
         layout.bytesPerRow = GetMinimumBytesPerRow(format, layout.mipSize.width);
 

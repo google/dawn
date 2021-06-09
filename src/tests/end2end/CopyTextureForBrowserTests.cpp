@@ -247,7 +247,7 @@ class CopyTextureForBrowserTests : public DawnTest {
         wgpu::Texture srcTexture = device.CreateTexture(&srcDescriptor);
 
         const utils::TextureDataCopyLayout srcCopyLayout =
-            utils::GetTextureDataCopyLayoutForTexture2DAtLevel(
+            utils::GetTextureDataCopyLayoutForTextureAtLevel(
                 kTextureFormat,
                 {srcSpec.textureSize.width, srcSpec.textureSize.height,
                  copySize.depthOrArrayLayers},
@@ -293,7 +293,7 @@ class CopyTextureForBrowserTests : public DawnTest {
         if (testSubRectCopy) {
             // For subrect copy tests, dst texture use kTextureFormat always.
             const utils::TextureDataCopyLayout dstCopyLayout =
-                utils::GetTextureDataCopyLayoutForTexture2DAtLevel(
+                utils::GetTextureDataCopyLayoutForTextureAtLevel(
                     kTextureFormat,
                     {dstSpec.textureSize.width, dstSpec.textureSize.height,
                      copySize.depthOrArrayLayers},

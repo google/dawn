@@ -151,8 +151,8 @@ class CopyTests_T2B : public CopyTests {
         // Layout for initial data upload to texture.
         // Some parts of this result are also reused later.
         const utils::TextureDataCopyLayout copyLayout =
-            utils::GetTextureDataCopyLayoutForTexture2DAtLevel(
-                textureSpec.format, textureSpec.textureSize, textureSpec.copyLevel);
+            utils::GetTextureDataCopyLayoutForTextureAtLevel(
+                textureSpec.format, textureSpec.textureSize, textureSpec.copyLevel, dimension);
 
         // Initialize the source texture
         std::vector<RGBA8> textureArrayData = GetExpectedTextureDataRGBA8(copyLayout);
@@ -279,8 +279,8 @@ class CopyTests_B2T : public CopyTests {
         queue.Submit(1, &commands);
 
         const utils::TextureDataCopyLayout copyLayout =
-            utils::GetTextureDataCopyLayoutForTexture2DAtLevel(
-                textureSpec.format, textureSpec.textureSize, textureSpec.copyLevel,
+            utils::GetTextureDataCopyLayoutForTextureAtLevel(
+                textureSpec.format, textureSpec.textureSize, textureSpec.copyLevel, dimension,
                 bufferSpec.rowsPerImage);
 
         uint32_t copyLayer = copySize.depthOrArrayLayers;
@@ -367,11 +367,11 @@ class CopyTests_T2T : public CopyTests {
         // Create an upload buffer and use it to populate the current slice of the texture in
         // `level` mip level
         const utils::TextureDataCopyLayout srcDataCopyLayout =
-            utils::GetTextureDataCopyLayoutForTexture2DAtLevel(
+            utils::GetTextureDataCopyLayoutForTextureAtLevel(
                 format,
                 {srcSpec.textureSize.width, srcSpec.textureSize.height,
                  copySize.depthOrArrayLayers},
-                srcSpec.copyLevel);
+                srcSpec.copyLevel, srcDimension);
 
         // Initialize the source texture
         const std::vector<uint8_t> srcTextureCopyData = GetExpectedTextureData(srcDataCopyLayout);
@@ -397,11 +397,11 @@ class CopyTests_T2T : public CopyTests {
         // Copy the data from the srcSpec.copyOrigin.z-th layer to (srcSpec.copyOrigin.z +
         // copySize.depthOrArrayLayers)-th layer of dstTexture to outputBuffer
         const utils::TextureDataCopyLayout dstDataCopyLayout =
-            utils::GetTextureDataCopyLayoutForTexture2DAtLevel(
+            utils::GetTextureDataCopyLayoutForTextureAtLevel(
                 format,
                 {dstSpec.textureSize.width, dstSpec.textureSize.height,
                  copySize.depthOrArrayLayers},
-                dstSpec.copyLevel);
+                dstSpec.copyLevel, dstDimension);
         wgpu::BufferDescriptor outputBufferDescriptor;
         outputBufferDescriptor.size = dstDataCopyLayout.byteLength;
         outputBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
@@ -1161,6 +1161,44 @@ TEST_P(CopyTests_T2B, Texture3DCopyHeightIsOneCopyWidthIsSmall) {
     DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kDepth}, wgpu::TextureDimension::e3D);
 }
 
+// Test that copying texture 3D array mips with 256-byte aligned sizes works
+TEST_P(CopyTests_T2B, Texture3DMipAligned) {
+    constexpr uint32_t kWidth = 256;
+    constexpr uint32_t kHeight = 128;
+    constexpr uint32_t kDepth = 64u;
+
+    TextureSpec defaultTextureSpec;
+    defaultTextureSpec.textureSize = {kWidth, kHeight, kDepth};
+
+    for (unsigned int i = 1; i < 6; ++i) {
+        TextureSpec textureSpec = defaultTextureSpec;
+        textureSpec.copyLevel = i;
+        textureSpec.levelCount = i + 1;
+
+        DoTest(textureSpec, MinimumBufferSpec(kWidth >> i, kHeight >> i, kDepth >> i),
+               {kWidth >> i, kHeight >> i, kDepth >> i}, wgpu::TextureDimension::e3D);
+    }
+}
+
+// Test that copying texture 3D array mips with 256-byte unaligned sizes works
+TEST_P(CopyTests_T2B, Texture3DMipUnaligned) {
+    constexpr uint32_t kWidth = 261;
+    constexpr uint32_t kHeight = 123;
+    constexpr uint32_t kDepth = 69u;
+
+    TextureSpec defaultTextureSpec;
+    defaultTextureSpec.textureSize = {kWidth, kHeight, kDepth};
+
+    for (unsigned int i = 1; i < 6; ++i) {
+        TextureSpec textureSpec = defaultTextureSpec;
+        textureSpec.copyLevel = i;
+        textureSpec.levelCount = i + 1;
+
+        DoTest(textureSpec, MinimumBufferSpec(kWidth >> i, kHeight >> i, kDepth >> i),
+               {kWidth >> i, kHeight >> i, kDepth >> i}, wgpu::TextureDimension::e3D);
+    }
+}
+
 // TODO(yunchao.he@intel.com): add T2B tests for 3D textures, like RowPitch,
 // RowsPerImage, buffer offset, partial depth range, non-zero level, etc.
 
@@ -1738,6 +1776,44 @@ TEST_P(CopyTests_B2T, Texture3DCopyHeightIsOneCopyWidthIsSmall) {
     bufferSpec.offset = 160;
     bufferSpec.size += bufferSpec.offset;
     DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kDepth}, wgpu::TextureDimension::e3D);
+}
+
+// Test that copying texture 3D array mips with 256-byte aligned sizes works
+TEST_P(CopyTests_B2T, Texture3DMipAligned) {
+    constexpr uint32_t kWidth = 256;
+    constexpr uint32_t kHeight = 128;
+    constexpr uint32_t kDepth = 64u;
+
+    TextureSpec defaultTextureSpec;
+    defaultTextureSpec.textureSize = {kWidth, kHeight, kDepth};
+
+    for (unsigned int i = 1; i < 6; ++i) {
+        TextureSpec textureSpec = defaultTextureSpec;
+        textureSpec.copyLevel = i;
+        textureSpec.levelCount = i + 1;
+
+        DoTest(textureSpec, MinimumBufferSpec(kWidth >> i, kHeight >> i, kDepth >> i),
+               {kWidth >> i, kHeight >> i, kDepth >> i}, wgpu::TextureDimension::e3D);
+    }
+}
+
+// Test that copying texture 3D array mips with 256-byte unaligned sizes works
+TEST_P(CopyTests_B2T, Texture3DMipUnaligned) {
+    constexpr uint32_t kWidth = 261;
+    constexpr uint32_t kHeight = 123;
+    constexpr uint32_t kDepth = 69u;
+
+    TextureSpec defaultTextureSpec;
+    defaultTextureSpec.textureSize = {kWidth, kHeight, kDepth};
+
+    for (unsigned int i = 1; i < 6; ++i) {
+        TextureSpec textureSpec = defaultTextureSpec;
+        textureSpec.copyLevel = i;
+        textureSpec.levelCount = i + 1;
+
+        DoTest(textureSpec, MinimumBufferSpec(kWidth >> i, kHeight >> i, kDepth >> i),
+               {kWidth >> i, kHeight >> i, kDepth >> i}, wgpu::TextureDimension::e3D);
+    }
 }
 
 // TODO(yunchao.he@intel.com): add more tests like RowPitch, RowsPerImage, buffer offset, partial
