@@ -201,3 +201,35 @@ TEST_F(UnsafeAPIValidationTest, DynamicStorageBuffer) {
         ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&desc));
     }
 }
+
+class UnsafeQueryAPIValidationTest : public ValidationTest {
+  protected:
+    WGPUDevice CreateTestDevice() override {
+        dawn_native::DeviceDescriptor descriptor;
+        descriptor.requiredExtensions.push_back("pipeline_statistics_query");
+        descriptor.forceEnabledToggles.push_back("disallow_unsafe_apis");
+        return adapter.CreateDevice(&descriptor);
+    }
+};
+
+// Check that pipeline statistics query are disallowed.
+TEST_F(UnsafeQueryAPIValidationTest, PipelineStatisticsDisallowed) {
+    wgpu::QuerySetDescriptor descriptor;
+    descriptor.count = 1;
+
+    // Control case: occlusion query creation is allowed.
+    {
+        descriptor.type = wgpu::QueryType::Occlusion;
+        device.CreateQuerySet(&descriptor);
+    }
+
+    // Error case: pipeline statistics query creation is disallowed.
+    {
+        descriptor.type = wgpu::QueryType::PipelineStatistics;
+        std::vector<wgpu::PipelineStatisticName> pipelineStatistics = {
+            wgpu::PipelineStatisticName::VertexShaderInvocations};
+        descriptor.pipelineStatistics = pipelineStatistics.data();
+        descriptor.pipelineStatisticsCount = pipelineStatistics.size();
+        ASSERT_DEVICE_ERROR(device.CreateQuerySet(&descriptor));
+    }
+}
