@@ -586,6 +586,9 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
     }
     if (intrinsic->Type() == sem::IntrinsicType::kSelect) {
       return EmitSelectCall(pre, out, expr);
+    }
+    if (intrinsic->Type() == sem::IntrinsicType::kFrexp) {
+      return EmitFrexpCall(pre, out, expr, intrinsic);
     } else if (intrinsic->Type() == sem::IntrinsicType::kIsNormal) {
       diagnostics_.add_error("is_normal not supported in HLSL backend yet");
       return false;
@@ -698,6 +701,52 @@ bool GeneratorImpl::EmitSelectCall(std::ostream& pre,
     return false;
   }
 
+  return true;
+}
+
+bool GeneratorImpl::EmitFrexpCall(std::ostream& pre,
+                                  std::ostream& out,
+                                  ast::CallExpression* expr,
+                                  const sem::Intrinsic* intrinsic) {
+  // Exponent is an integer in WGSL, but HLSL wants a float.
+  // We need to make the call with a temporary float, and then cast.
+
+  auto signficand = intrinsic->Parameters()[0];
+  auto exponent = intrinsic->Parameters()[1];
+
+  std::string width;
+  if (auto* vec = signficand.type->As<sem::Vector>()) {
+    width = std::to_string(vec->size());
+  }
+
+  // Exponent is an integer, which HLSL does not have an overload for.
+  // We need to cast from a float.
+  std::stringstream ss;
+  auto float_exp = generate_name(kTempNamePrefix);
+  ss << "float" << width << " " << float_exp << ";";
+
+  make_indent(ss << std::endl);
+  auto significand = generate_name(kTempNamePrefix);
+  ss << "float" << width << " " << significand << " = frexp(";
+  if (!EmitExpression(pre, ss, expr->params()[0])) {
+    return false;
+  }
+  ss << ", " << float_exp << ");";
+
+  make_indent(ss << std::endl);
+  if (!EmitExpression(pre, ss, expr->params()[1])) {
+    return false;
+  }
+  ss << " = ";
+  if (!EmitType(ss, exponent.type->UnwrapPtr(), ast::StorageClass::kNone,
+                ast::Access::kUndefined, "")) {
+    return false;
+  }
+  ss << "(" << float_exp << ");";
+
+  make_indent(ss << std::endl);
+  pre << ss.str();
+  out << significand;
   return true;
 }
 
@@ -1150,13 +1199,15 @@ std::string GeneratorImpl::generate_builtin_name(
     const sem::Intrinsic* intrinsic) {
   std::string out;
   switch (intrinsic->Type()) {
+    case sem::IntrinsicType::kAbs:
     case sem::IntrinsicType::kAcos:
-    case sem::IntrinsicType::kAny:
     case sem::IntrinsicType::kAll:
+    case sem::IntrinsicType::kAny:
     case sem::IntrinsicType::kAsin:
     case sem::IntrinsicType::kAtan:
     case sem::IntrinsicType::kAtan2:
     case sem::IntrinsicType::kCeil:
+    case sem::IntrinsicType::kClamp:
     case sem::IntrinsicType::kCos:
     case sem::IntrinsicType::kCosh:
     case sem::IntrinsicType::kCross:
@@ -1167,14 +1218,19 @@ std::string GeneratorImpl::generate_builtin_name(
     case sem::IntrinsicType::kExp2:
     case sem::IntrinsicType::kFloor:
     case sem::IntrinsicType::kFma:
+    case sem::IntrinsicType::kFrexp:
     case sem::IntrinsicType::kLdexp:
     case sem::IntrinsicType::kLength:
     case sem::IntrinsicType::kLog:
     case sem::IntrinsicType::kLog2:
+    case sem::IntrinsicType::kMax:
+    case sem::IntrinsicType::kMin:
+    case sem::IntrinsicType::kModf:
     case sem::IntrinsicType::kNormalize:
     case sem::IntrinsicType::kPow:
     case sem::IntrinsicType::kReflect:
     case sem::IntrinsicType::kRound:
+    case sem::IntrinsicType::kSign:
     case sem::IntrinsicType::kSin:
     case sem::IntrinsicType::kSinh:
     case sem::IntrinsicType::kSqrt:
@@ -1183,11 +1239,6 @@ std::string GeneratorImpl::generate_builtin_name(
     case sem::IntrinsicType::kTanh:
     case sem::IntrinsicType::kTranspose:
     case sem::IntrinsicType::kTrunc:
-    case sem::IntrinsicType::kSign:
-    case sem::IntrinsicType::kAbs:
-    case sem::IntrinsicType::kMax:
-    case sem::IntrinsicType::kMin:
-    case sem::IntrinsicType::kClamp:
       out = intrinsic->str();
       break;
     case sem::IntrinsicType::kCountOneBits:

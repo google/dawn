@@ -1,31 +1,26 @@
-SKIP: FAILED
-
-
-fn modf_3b79d5() {
-  var arg_1 : vec3<f32>;
-  var res : vec3<f32> = modf(vec3<f32>(), &(arg_1));
-}
-
 struct tint_symbol {
-  [[builtin(position)]]
-  value : vec4<f32>;
+  float4 value : SV_Position;
 };
 
-[[stage(vertex)]]
-fn vertex_main() -> tint_symbol {
+void modf_3b79d5() {
+  float3 arg_1 = float3(0.0f, 0.0f, 0.0f);
+  float3 res = modf(float3(0.0f, 0.0f, 0.0f), arg_1);
+}
+
+tint_symbol vertex_main() {
   modf_3b79d5();
-  let tint_symbol_1 : tint_symbol = tint_symbol(vec4<f32>());
+  const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
   return tint_symbol_1;
 }
 
-[[stage(fragment)]]
-fn fragment_main() {
+void fragment_main() {
   modf_3b79d5();
+  return;
 }
 
-[[stage(compute)]]
-fn compute_main() {
+[numthreads(1, 1, 1)]
+void compute_main() {
   modf_3b79d5();
+  return;
 }
 
-Failed to generate: error: Unknown builtin method: modf

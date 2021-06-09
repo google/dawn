@@ -139,7 +139,6 @@ class GeneratorImpl : public TextGenerator {
                        std::ostream& out,
                        ast::CallExpression* expr,
                        const sem::Intrinsic* intrinsic);
-
   /// Handles generating a call to the `select()` intrinsic
   /// @param pre the preamble of the expression stream
   /// @param out the output of the expression stream
@@ -148,7 +147,16 @@ class GeneratorImpl : public TextGenerator {
   bool EmitSelectCall(std::ostream& pre,
                       std::ostream& out,
                       ast::CallExpression* expr);
-
+  /// Handles generating a call to the `frexp()` intrinsic
+  /// @param pre the preamble of the expression stream
+  /// @param out the output of the expression stream
+  /// @param expr the call expression
+  /// @param intrinsic the semantic information for the intrinsic
+  /// @returns true if the call expression is emitted
+  bool EmitFrexpCall(std::ostream& pre,
+                     std::ostream& out,
+                     ast::CallExpression* expr,
+                     const sem::Intrinsic* intrinsic);
   /// Handles generating a call to data packing intrinsic
   /// @param pre the preamble of the expression stream
   /// @param out the output of the expression stream

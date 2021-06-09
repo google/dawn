@@ -257,10 +257,6 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, DISABLED_Intrinsic_IsNormal) {
   FAIL();
 }
 
-TEST_F(HlslGeneratorImplTest_Intrinsic, DISABLED_Intrinsic_Select) {
-  FAIL();
-}
-
 TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Call) {
   auto* call = Call("dot", "param1", "param2");
 
@@ -295,6 +291,60 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Select_Vector) {
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
   EXPECT_EQ(result(), "(bool2(true, false) ? int2(1, 2) : int2(3, 4))");
+}
+
+TEST_F(HlslGeneratorImplTest_Intrinsic, Modf_Scalar) {
+  auto* res = Var("res", ty.f32());
+  auto* call = Call("modf", 1.0f, AddressOf(res));
+  WrapInFunction(res, call);
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr("modf(1.0f, res)"));
+}
+
+TEST_F(HlslGeneratorImplTest_Intrinsic, Modf_Vector) {
+  auto* res = Var("res", ty.vec3<f32>());
+  auto* call = Call("modf", vec3<f32>(), AddressOf(res));
+  WrapInFunction(res, call);
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr("modf(float3(0.0f, 0.0f, 0.0f), res)"));
+}
+
+TEST_F(HlslGeneratorImplTest_Intrinsic, Frexp_Scalar_i32) {
+  auto* exp = Var("exp", ty.i32());
+  auto* call = Call("frexp", 1.0f, AddressOf(exp));
+  WrapInFunction(exp, call);
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr(R"(
+  float tint_tmp;
+  float tint_tmp_1 = frexp(1.0f, tint_tmp);
+  exp = int(tint_tmp);
+  (void) tint_tmp_1;
+)"));
+}
+
+TEST_F(HlslGeneratorImplTest_Intrinsic, Frexp_Vector_i32) {
+  auto* res = Var("res", ty.vec3<i32>());
+  auto* call = Call("frexp", vec3<f32>(), AddressOf(res));
+  WrapInFunction(res, call);
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr(R"(
+  float3 tint_tmp;
+  float3 tint_tmp_1 = frexp(float3(0.0f, 0.0f, 0.0f), tint_tmp);
+  res = int3(tint_tmp);
+  (void) tint_tmp_1;
+)"));
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Pack4x8Snorm) {

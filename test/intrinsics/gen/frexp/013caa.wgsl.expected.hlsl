@@ -1,31 +1,29 @@
-SKIP: FAILED
-
-
-fn frexp_013caa() {
-  var arg_1 : vec4<i32>;
-  var res : vec4<f32> = frexp(vec4<f32>(), &(arg_1));
-}
-
 struct tint_symbol {
-  [[builtin(position)]]
-  value : vec4<f32>;
+  float4 value : SV_Position;
 };
 
-[[stage(vertex)]]
-fn vertex_main() -> tint_symbol {
+void frexp_013caa() {
+  int4 arg_1 = int4(0, 0, 0, 0);
+  float4 tint_tmp;
+  float4 tint_tmp_1 = frexp(float4(0.0f, 0.0f, 0.0f, 0.0f), tint_tmp);
+  arg_1 = int4(tint_tmp);
+  float4 res = tint_tmp_1;
+}
+
+tint_symbol vertex_main() {
   frexp_013caa();
-  let tint_symbol_1 : tint_symbol = tint_symbol(vec4<f32>());
+  const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
   return tint_symbol_1;
 }
 
-[[stage(fragment)]]
-fn fragment_main() {
+void fragment_main() {
   frexp_013caa();
+  return;
 }
 
-[[stage(compute)]]
-fn compute_main() {
+[numthreads(1, 1, 1)]
+void compute_main() {
   frexp_013caa();
+  return;
 }
 
-Failed to generate: error: Unknown builtin method: frexp
