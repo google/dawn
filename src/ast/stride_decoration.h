@@ -15,6 +15,8 @@
 #ifndef SRC_AST_STRIDE_DECORATION_H_
 #define SRC_AST_STRIDE_DECORATION_H_
 
+#include <string>
+
 #include "src/ast/decoration.h"
 
 namespace tint {
@@ -32,6 +34,9 @@ class StrideDecoration : public Castable<StrideDecoration, Decoration> {
 
   /// @returns the stride value
   uint32_t stride() const { return stride_; }
+
+  /// @returns the WGSL name for the decoration
+  std::string name() const override;
 
   /// Outputs the decoration to the given stream
   /// @param sem the semantic info for the program

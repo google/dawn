@@ -28,7 +28,7 @@ DisableValidationDecoration::DisableValidationDecoration(
 
 DisableValidationDecoration::~DisableValidationDecoration() = default;
 
-std::string DisableValidationDecoration::Name() const {
+std::string DisableValidationDecoration::InternalName() const {
   switch (validation_) {
     case DisabledValidation::kFunctionHasNoBody:
       return "disable_validation__function_has_no_body";

@@ -267,14 +267,14 @@ TEST_F(ResolverFunctionValidationTest, PipelineStage_MustBeUnique_Fail) {
            Return(),
        },
        ast::DecorationList{
-           Stage(ast::PipelineStage::kVertex),
-           Stage(ast::PipelineStage::kFragment),
+           Stage(Source{{12, 34}}, ast::PipelineStage::kVertex),
+           Stage(Source{{56, 78}}, ast::PipelineStage::kFragment),
        });
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error v-0020: only one stage decoration permitted per entry "
-            "point");
+            R"(56:78 error: duplicate stage decoration
+12:34 note: first decoration declared here)");
 }
 
 TEST_F(ResolverFunctionValidationTest, NoPipelineEntryPoints) {

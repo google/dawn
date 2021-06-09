@@ -159,6 +159,20 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kWorkgroup, false},
                     TestParams{DecorationKind::kBindingAndGroup, false}));
 
+TEST_F(FunctionReturnTypeDecorationTest, DuplicateDecoration) {
+  Func("main", ast::VariableList{}, ty.f32(), ast::StatementList{Return(1.f)},
+       ast::DecorationList{Stage(ast::PipelineStage::kCompute)},
+       ast::DecorationList{
+           Location(Source{{12, 34}}, 2),
+           Location(Source{{56, 78}}, 3),
+       });
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            R"(56:78 error: duplicate location decoration
+12:34 note: first decoration declared here)");
+}
+
 using ArrayDecorationTest = TestWithParams;
 TEST_P(ArrayDecorationTest, IsValid) {
   auto& params = GetParam();
@@ -232,6 +246,24 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kWorkgroup, false},
                     TestParams{DecorationKind::kBindingAndGroup, false}));
 
+TEST_F(StructDecorationTest, DuplicateDecoration) {
+  Structure("mystruct",
+            {
+                Member("a", ty.i32()),
+            },
+            {
+                create<ast::StructBlockDecoration>(Source{{12, 34}}),
+                create<ast::StructBlockDecoration>(Source{{56, 78}}),
+            });
+
+  WrapInFunction();
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            R"(56:78 error: duplicate block decoration
+12:34 note: first decoration declared here)");
+}
+
 using StructMemberDecorationTest = TestWithParams;
 TEST_P(StructMemberDecorationTest, IsValid) {
   auto& params = GetParam();
@@ -267,6 +299,25 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kStructBlock, false},
                     TestParams{DecorationKind::kWorkgroup, false},
                     TestParams{DecorationKind::kBindingAndGroup, false}));
+
+TEST_F(StructMemberDecorationTest, DuplicateDecoration) {
+  Structure("mystruct", {
+                            Member("a", ty.i32(),
+                                   {
+                                       create<ast::StructMemberAlignDecoration>(
+                                           Source{{12, 34}}, 4u),
+                                       create<ast::StructMemberAlignDecoration>(
+                                           Source{{56, 78}}, 8u),
+                                   }),
+                        });
+
+  WrapInFunction();
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            R"(56:78 error: duplicate align decoration
+12:34 note: first decoration declared here)");
+}
 
 using VariableDecorationTest = TestWithParams;
 TEST_P(VariableDecorationTest, IsValid) {
@@ -310,6 +361,22 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kWorkgroup, false},
                     TestParams{DecorationKind::kBindingAndGroup, true}));
 
+TEST_F(VariableDecorationTest, DuplicateDecoration) {
+  Global("a", ty.sampler(ast::SamplerKind::kSampler),
+         ast::DecorationList{
+             create<ast::BindingDecoration>(Source{{12, 34}}, 2),
+             create<ast::GroupDecoration>(2),
+             create<ast::BindingDecoration>(Source{{56, 78}}, 3),
+         });
+
+  WrapInFunction();
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            R"(56:78 error: duplicate binding decoration
+12:34 note: first decoration declared here)");
+}
+
 using ConstantDecorationTest = TestWithParams;
 TEST_P(ConstantDecorationTest, IsValid) {
   auto& params = GetParam();
@@ -343,6 +410,21 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kStructBlock, false},
                     TestParams{DecorationKind::kWorkgroup, false},
                     TestParams{DecorationKind::kBindingAndGroup, false}));
+
+TEST_F(ConstantDecorationTest, DuplicateDecoration) {
+  GlobalConst("a", ty.f32(), Expr(1.23f),
+              ast::DecorationList{
+                  create<ast::OverrideDecoration>(Source{{12, 34}}),
+                  create<ast::OverrideDecoration>(Source{{56, 78}}, 1),
+              });
+
+  WrapInFunction();
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            R"(56:78 error: duplicate override decoration
+12:34 note: first decoration declared here)");
+}
 
 using FunctionDecorationTest = TestWithParams;
 TEST_P(FunctionDecorationTest, IsValid) {
@@ -485,18 +567,19 @@ INSTANTIATE_TEST_SUITE_P(
         ParamsFor<mat3x3<f32>>((default_mat3x3.align - 1) * 7, false),
         ParamsFor<mat4x4<f32>>((default_mat4x4.align - 1) * 7, false)));
 
-TEST_F(ArrayStrideTest, MultipleDecorations) {
+TEST_F(ArrayStrideTest, DuplicateDecoration) {
   auto* arr = ty.array(Source{{12, 34}}, ty.i32(), 4,
                        {
-                           create<ast::StrideDecoration>(4),
-                           create<ast::StrideDecoration>(4),
+                           create<ast::StrideDecoration>(Source{{12, 34}}, 4),
+                           create<ast::StrideDecoration>(Source{{56, 78}}, 4),
                        });
 
   Global("myarray", arr, ast::StorageClass::kInput);
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: array must have at most one [[stride]] decoration");
+            R"(56:78 error: duplicate stride decoration
+12:34 note: first decoration declared here)");
 }
 
 }  // namespace
@@ -700,15 +783,18 @@ TEST_F(WorkgroupDecoration, NotAComputeShader) {
             "compute stages");
 }
 
-TEST_F(WorkgroupDecoration, MultipleAttributes) {
+TEST_F(WorkgroupDecoration, DuplicateDecoration) {
   Func(Source{{12, 34}}, "main", {}, ty.void_(), {},
-       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1),
-        WorkgroupSize(2)});
+       {
+           Stage(ast::PipelineStage::kCompute),
+           WorkgroupSize(Source{{12, 34}}, 1, nullptr, nullptr),
+           WorkgroupSize(Source{{56, 78}}, 2, nullptr, nullptr),
+       });
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: only one workgroup_size attribute permitted per "
-            "entry point");
+            R"(56:78 error: duplicate workgroup_size decoration
+12:34 note: first decoration declared here)");
 }
 
 }  // namespace

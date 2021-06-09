@@ -14,6 +14,8 @@
 
 #include "src/ast/workgroup_decoration.h"
 
+#include <string>
+
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::WorkgroupDecoration);
@@ -29,6 +31,10 @@ WorkgroupDecoration::WorkgroupDecoration(ProgramID program_id,
     : Base(program_id, source), x_(x), y_(y), z_(z) {}
 
 WorkgroupDecoration::~WorkgroupDecoration() = default;
+
+std::string WorkgroupDecoration::name() const {
+  return "workgroup_size";
+}
 
 void WorkgroupDecoration::to_str(const sem::Info& sem,
                                  std::ostream& out,

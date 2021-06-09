@@ -14,6 +14,8 @@
 
 #include "src/ast/group_decoration.h"
 
+#include <string>
+
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::GroupDecoration);
@@ -27,6 +29,10 @@ GroupDecoration::GroupDecoration(ProgramID program_id,
     : Base(program_id, source), value_(val) {}
 
 GroupDecoration::~GroupDecoration() = default;
+
+std::string GroupDecoration::name() const {
+  return "group";
+}
 
 void GroupDecoration::to_str(const sem::Info&,
                              std::ostream& out,

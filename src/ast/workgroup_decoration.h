@@ -16,6 +16,7 @@
 #define SRC_AST_WORKGROUP_DECORATION_H_
 
 #include <array>
+#include <string>
 
 #include "src/ast/decoration.h"
 
@@ -44,6 +45,9 @@ class WorkgroupDecoration : public Castable<WorkgroupDecoration, Decoration> {
 
   /// @returns the workgroup dimensions
   std::array<ast::Expression*, 3> values() const { return {x_, y_, z_}; }
+
+  /// @returns the WGSL name for the decoration
+  std::string name() const override;
 
   /// Outputs the decoration to the given stream
   /// @param sem the semantic info for the program

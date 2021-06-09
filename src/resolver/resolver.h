@@ -271,6 +271,7 @@ class Resolver {
   bool ValidateVectorConstructor(const ast::TypeConstructorExpression* ctor,
                                  const sem::Vector* vec_type);
   bool ValidateTypeDecl(const ast::TypeDecl* named_type) const;
+  bool ValidateNoDuplicateDecorations(const ast::DecorationList& decorations);
 
   /// @returns the sem::Type for the ast::Type `ty`, building it if it
   /// hasn't been constructed already. If an error is raised, nullptr is

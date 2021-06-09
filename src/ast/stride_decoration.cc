@@ -14,6 +14,8 @@
 
 #include "src/ast/stride_decoration.h"
 
+#include <string>
+
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::StrideDecoration);
@@ -27,6 +29,10 @@ StrideDecoration::StrideDecoration(ProgramID program_id,
     : Base(program_id, source), stride_(stride) {}
 
 StrideDecoration::~StrideDecoration() = default;
+
+std::string StrideDecoration::name() const {
+  return "stride";
+}
 
 void StrideDecoration::to_str(const sem::Info&,
                               std::ostream& out,

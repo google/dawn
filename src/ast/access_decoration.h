@@ -15,6 +15,8 @@
 #ifndef SRC_AST_ACCESS_DECORATION_H_
 #define SRC_AST_ACCESS_DECORATION_H_
 
+#include <string>
+
 #include "src/ast/access.h"
 #include "src/ast/decoration.h"
 
@@ -34,6 +36,9 @@ class AccessDecoration : public Castable<AccessDecoration, Decoration> {
 
   /// @returns the access control value
   Access value() const { return value_; }
+
+  /// @returns the WGSL name for the decoration
+  std::string name() const override;
 
   /// Outputs the decoration to the given stream
   /// @param sem the semantic info for the program

@@ -14,6 +14,8 @@
 
 #include "src/ast/struct_member_size_decoration.h"
 
+#include <string>
+
 #include "src/clone_context.h"
 #include "src/program_builder.h"
 
@@ -28,6 +30,10 @@ StructMemberSizeDecoration::StructMemberSizeDecoration(ProgramID program_id,
     : Base(program_id, source), size_(size) {}
 
 StructMemberSizeDecoration::~StructMemberSizeDecoration() = default;
+
+std::string StructMemberSizeDecoration::name() const {
+  return "size";
+}
 
 void StructMemberSizeDecoration::to_str(const sem::Info&,
                                         std::ostream& out,

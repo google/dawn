@@ -14,6 +14,8 @@
 
 #include "src/ast/builtin_decoration.h"
 
+#include <string>
+
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::BuiltinDecoration);
@@ -27,6 +29,10 @@ BuiltinDecoration::BuiltinDecoration(ProgramID program_id,
     : Base(program_id, source), builtin_(builtin) {}
 
 BuiltinDecoration::~BuiltinDecoration() = default;
+
+std::string BuiltinDecoration::name() const {
+  return "builtin";
+}
 
 void BuiltinDecoration::to_str(const sem::Info&,
                                std::ostream& out,

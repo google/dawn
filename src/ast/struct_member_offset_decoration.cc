@@ -14,6 +14,8 @@
 
 #include "src/ast/struct_member_offset_decoration.h"
 
+#include <string>
+
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::StructMemberOffsetDecoration);
@@ -27,6 +29,10 @@ StructMemberOffsetDecoration::StructMemberOffsetDecoration(ProgramID program_id,
     : Base(program_id, source), offset_(offset) {}
 
 StructMemberOffsetDecoration::~StructMemberOffsetDecoration() = default;
+
+std::string StructMemberOffsetDecoration::name() const {
+  return "offset";
+}
 
 void StructMemberOffsetDecoration::to_str(const sem::Info&,
                                           std::ostream& out,

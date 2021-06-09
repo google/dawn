@@ -14,6 +14,8 @@
 
 #include "src/ast/access_decoration.h"
 
+#include <string>
+
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::AccessDecoration);
@@ -27,6 +29,10 @@ AccessDecoration::AccessDecoration(ProgramID program_id,
     : Base(program_id, source), value_(val) {}
 
 AccessDecoration::~AccessDecoration() = default;
+
+std::string AccessDecoration::name() const {
+  return "access";
+}
 
 void AccessDecoration::to_str(const sem::Info&,
                               std::ostream& out,

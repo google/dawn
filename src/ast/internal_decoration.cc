@@ -24,11 +24,15 @@ InternalDecoration::InternalDecoration(ProgramID program_id)
 
 InternalDecoration::~InternalDecoration() = default;
 
+std::string InternalDecoration::name() const {
+  return "internal";
+}
+
 void InternalDecoration::to_str(const sem::Info&,
                                 std::ostream& out,
                                 size_t indent) const {
   make_indent(out, indent);
-  out << "tint_internal(" << Name() << ")" << std::endl;
+  out << "tint_internal(" << InternalName() << ")" << std::endl;
 }
 
 }  // namespace ast

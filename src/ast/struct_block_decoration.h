@@ -15,6 +15,7 @@
 #ifndef SRC_AST_STRUCT_BLOCK_DECORATION_H_
 #define SRC_AST_STRUCT_BLOCK_DECORATION_H_
 
+#include <string>
 #include <vector>
 
 #include "src/ast/decoration.h"
@@ -31,6 +32,9 @@ class StructBlockDecoration
   /// @param source the source of this decoration
   StructBlockDecoration(ProgramID program_id, const Source& source);
   ~StructBlockDecoration() override;
+
+  /// @returns the WGSL name for the decoration
+  std::string name() const override;
 
   /// Outputs the decoration to the given stream
   /// @param sem the semantic info for the program

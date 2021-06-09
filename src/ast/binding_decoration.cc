@@ -14,6 +14,8 @@
 
 #include "src/ast/binding_decoration.h"
 
+#include <string>
+
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::BindingDecoration);
@@ -27,6 +29,10 @@ BindingDecoration::BindingDecoration(ProgramID program_id,
     : Base(program_id, source), value_(val) {}
 
 BindingDecoration::~BindingDecoration() = default;
+
+std::string BindingDecoration::name() const {
+  return "binding";
+}
 
 void BindingDecoration::to_str(const sem::Info&,
                                std::ostream& out,

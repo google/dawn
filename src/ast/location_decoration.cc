@@ -14,6 +14,8 @@
 
 #include "src/ast/location_decoration.h"
 
+#include <string>
+
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::LocationDecoration);
@@ -27,6 +29,10 @@ LocationDecoration::LocationDecoration(ProgramID program_id,
     : Base(program_id, source), value_(val) {}
 
 LocationDecoration::~LocationDecoration() = default;
+
+std::string LocationDecoration::name() const {
+  return "location";
+}
 
 void LocationDecoration::to_str(const sem::Info&,
                                 std::ostream& out,

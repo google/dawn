@@ -56,7 +56,7 @@ CalculateArrayLength::BufferSizeIntrinsic::BufferSizeIntrinsic(
     ProgramID program_id)
     : Base(program_id) {}
 CalculateArrayLength::BufferSizeIntrinsic::~BufferSizeIntrinsic() = default;
-std::string CalculateArrayLength::BufferSizeIntrinsic::Name() const {
+std::string CalculateArrayLength::BufferSizeIntrinsic::InternalName() const {
   return "intrinsic_buffer_size";
 }
 

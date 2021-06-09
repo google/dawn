@@ -15,6 +15,7 @@
 #ifndef SRC_AST_DECORATION_H_
 #define SRC_AST_DECORATION_H_
 
+#include <string>
 #include <vector>
 
 #include "src/ast/node.h"
@@ -26,6 +27,9 @@ namespace ast {
 class Decoration : public Castable<Decoration, Node> {
  public:
   ~Decoration() override;
+
+  /// @returns the WGSL name for the decoration
+  virtual std::string name() const = 0;
 
  protected:
   /// Constructor

@@ -74,7 +74,7 @@ class DecomposeStorageAccess : public Transform {
 
     /// @return a short description of the internal decoration which will be
     /// displayed as `[[internal(<name>)]]`
-    std::string Name() const override;
+    std::string InternalName() const override;
 
     /// Performs a deep clone of this object using the CloneContext `ctx`.
     /// @param ctx the clone context

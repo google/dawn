@@ -573,6 +573,10 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
     }
   }
 
+  if (!ValidateNoDuplicateDecorations(var->decorations())) {
+    return false;
+  }
+
   if (auto bp = var->binding_point()) {
     info->binding_point = {bp.group->value(), bp.binding->value()};
   }
@@ -605,6 +609,10 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
         "'" + builder_->Symbols().NameFor(info->declaration->symbol()) +
             "' first declared here:",
         duplicate_func->second->declaration->source());
+    return false;
+  }
+
+  if (!ValidateNoDuplicateDecorations(info->declaration->decorations())) {
     return false;
   }
 
@@ -871,18 +879,6 @@ bool Resolver::ValidateFunction(const ast::Function* func,
                              deco->source());
       return false;
     }
-  }
-  if (stage_deco_count > 1) {
-    diagnostics_.add_error(
-        "v-0020", "only one stage decoration permitted per entry point",
-        func->source());
-    return false;
-  }
-  if (workgroup_deco_count > 1) {
-    diagnostics_.add_error(
-        "only one workgroup_size attribute permitted per entry point",
-        func->source());
-    return false;
   }
 
   for (auto* param : func->params()) {
@@ -1197,6 +1193,9 @@ bool Resolver::Function(ast::Function* func) {
     for (auto* deco : param->decorations()) {
       Mark(deco);
     }
+    if (!ValidateNoDuplicateDecorations(param->decorations())) {
+      return false;
+    }
 
     variable_stack_.set(param->symbol(), param_info);
     info->parameters.emplace_back(param_info);
@@ -1282,8 +1281,15 @@ bool Resolver::Function(ast::Function* func) {
   for (auto* deco : func->decorations()) {
     Mark(deco);
   }
+  if (!ValidateNoDuplicateDecorations(func->decorations())) {
+    return false;
+  }
+
   for (auto* deco : func->return_type_decorations()) {
     Mark(deco);
+  }
+  if (!ValidateNoDuplicateDecorations(func->return_type_decorations())) {
+    return false;
   }
 
   // Set work-group size defaults.
@@ -2777,16 +2783,15 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
     return nullptr;
   }
 
+  if (!ValidateNoDuplicateDecorations(arr->decorations())) {
+    return nullptr;
+  }
+
   // Look for explicit stride via [[stride(n)]] decoration
   uint32_t explicit_stride = 0;
   for (auto* deco : arr->decorations()) {
     Mark(deco);
     if (auto* sd = deco->As<ast::StrideDecoration>()) {
-      if (explicit_stride) {
-        diagnostics_.add_error(
-            "array must have at most one [[stride]] decoration", source);
-        return nullptr;
-      }
       explicit_stride = sd->stride();
       if (!ValidateArrayStrideDecoration(sd, el_size, el_align, source)) {
         return nullptr;
@@ -2916,6 +2921,9 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
 }
 
 sem::Struct* Resolver::Structure(const ast::Struct* str) {
+  if (!ValidateNoDuplicateDecorations(str->decorations())) {
+    return nullptr;
+  }
   for (auto* deco : str->decorations()) {
     Mark(deco);
   }
@@ -2958,6 +2966,10 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     uint32_t align = 0;
     uint32_t size = 0;
     if (!DefaultAlignAndSize(type, align, size)) {
+      return nullptr;
+    }
+
+    if (!ValidateNoDuplicateDecorations(member->decorations())) {
       return nullptr;
     }
 
@@ -3198,6 +3210,22 @@ bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
     return false;
   }
 
+  return true;
+}
+
+bool Resolver::ValidateNoDuplicateDecorations(
+    const ast::DecorationList& decorations) {
+  std::unordered_map<const TypeInfo*, Source> seen;
+  for (auto* d : decorations) {
+    auto res = seen.emplace(&d->TypeInfo(), d->source());
+    if (!res.second) {
+      diagnostics_.add_error("duplicate " + d->name() + " decoration",
+                             d->source());
+      diagnostics_.add_note("first decoration declared here",
+                            res.first->second);
+      return false;
+    }
+  }
   return true;
 }
 

@@ -667,7 +667,7 @@ bool GeneratorImpl::EmitDecorations(const ast::DecorationList& decos) {
     } else if (auto* align = deco->As<ast::StructMemberAlignDecoration>()) {
       out_ << "align(" << align->align() << ")";
     } else if (auto* internal = deco->As<ast::InternalDecoration>()) {
-      out_ << "internal(" << internal->Name() << ")";
+      out_ << "internal(" << internal->InternalName() << ")";
     } else {
       TINT_ICE(diagnostics_)
           << "Unsupported decoration '" << deco->TypeInfo().name << "'";

@@ -14,6 +14,8 @@
 
 #include "src/ast/override_decoration.h"
 
+#include <string>
+
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::OverrideDecoration);
@@ -31,6 +33,10 @@ OverrideDecoration::OverrideDecoration(ProgramID program_id,
     : Base(program_id, source), has_value_(true), value_(val) {}
 
 OverrideDecoration::~OverrideDecoration() = default;
+
+std::string OverrideDecoration::name() const {
+  return "override";
+}
 
 void OverrideDecoration::to_str(const sem::Info&,
                                 std::ostream& out,

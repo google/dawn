@@ -15,6 +15,8 @@
 #ifndef SRC_AST_GROUP_DECORATION_H_
 #define SRC_AST_GROUP_DECORATION_H_
 
+#include <string>
+
 #include "src/ast/decoration.h"
 
 namespace tint {
@@ -32,6 +34,9 @@ class GroupDecoration : public Castable<GroupDecoration, Decoration> {
 
   /// @returns the group value
   uint32_t value() const { return value_; }
+
+  /// @returns the WGSL name for the decoration
+  std::string name() const override;
 
   /// Outputs the decoration to the given stream
   /// @param sem the semantic info for the program

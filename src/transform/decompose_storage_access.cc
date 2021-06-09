@@ -564,7 +564,7 @@ struct DecomposeStorageAccess::State {
 DecomposeStorageAccess::Intrinsic::Intrinsic(ProgramID program_id, Type ty)
     : Base(program_id), type(ty) {}
 DecomposeStorageAccess::Intrinsic::~Intrinsic() = default;
-std::string DecomposeStorageAccess::Intrinsic::Name() const {
+std::string DecomposeStorageAccess::Intrinsic::InternalName() const {
   switch (type) {
     case kLoadU32:
       return "intrinsic_load_u32";

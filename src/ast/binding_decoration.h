@@ -15,6 +15,8 @@
 #ifndef SRC_AST_BINDING_DECORATION_H_
 #define SRC_AST_BINDING_DECORATION_H_
 
+#include <string>
+
 #include "src/ast/decoration.h"
 
 namespace tint {
@@ -32,6 +34,9 @@ class BindingDecoration : public Castable<BindingDecoration, Decoration> {
 
   /// @returns the binding value
   uint32_t value() const { return value_; }
+
+  /// @returns the WGSL name for the decoration
+  std::string name() const override;
 
   /// Outputs the decoration to the given stream
   /// @param sem the semantic info for the program

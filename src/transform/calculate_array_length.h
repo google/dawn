@@ -43,7 +43,7 @@ class CalculateArrayLength : public Transform {
     ~BufferSizeIntrinsic() override;
 
     /// @return "buffer_size"
-    std::string Name() const override;
+    std::string InternalName() const override;
 
     /// Performs a deep clone of this object using the CloneContext `ctx`.
     /// @param ctx the clone context

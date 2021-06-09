@@ -16,6 +16,7 @@
 #define SRC_AST_STRUCT_MEMBER_ALIGN_DECORATION_H_
 
 #include <stddef.h>
+#include <string>
 
 #include "src/ast/decoration.h"
 
@@ -37,6 +38,9 @@ class StructMemberAlignDecoration
 
   /// @returns the align value
   uint32_t align() const { return align_; }
+
+  /// @returns the WGSL name for the decoration
+  std::string name() const override;
 
   /// Outputs the decoration to the given stream
   /// @param sem the semantic info for the program

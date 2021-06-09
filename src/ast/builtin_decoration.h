@@ -15,6 +15,8 @@
 #ifndef SRC_AST_BUILTIN_DECORATION_H_
 #define SRC_AST_BUILTIN_DECORATION_H_
 
+#include <string>
+
 #include "src/ast/builtin.h"
 #include "src/ast/decoration.h"
 
@@ -35,6 +37,9 @@ class BuiltinDecoration : public Castable<BuiltinDecoration, Decoration> {
 
   /// @returns the builtin value
   Builtin value() const { return builtin_; }
+
+  /// @returns the WGSL name for the decoration
+  std::string name() const override;
 
   /// Outputs the decoration to the given stream
   /// @param sem the semantic info for the program

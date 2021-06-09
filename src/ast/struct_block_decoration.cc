@@ -14,6 +14,8 @@
 
 #include "src/ast/struct_block_decoration.h"
 
+#include <string>
+
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::StructBlockDecoration);
@@ -26,6 +28,10 @@ StructBlockDecoration::StructBlockDecoration(ProgramID program_id,
     : Base(program_id, source) {}
 
 StructBlockDecoration::~StructBlockDecoration() = default;
+
+std::string StructBlockDecoration::name() const {
+  return "block";
+}
 
 void StructBlockDecoration::to_str(const sem::Info&,
                                    std::ostream& out,

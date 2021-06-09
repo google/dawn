@@ -1909,6 +1909,22 @@ class ProgramBuilder {
   }
 
   /// Creates an ast::WorkgroupDecoration
+  /// @param source the source information
+  /// @param x the x dimension expression
+  /// @param y the y dimension expression
+  /// @param z the z dimension expression
+  /// @returns the workgroup decoration pointer
+  template <typename EXPR_X, typename EXPR_Y, typename EXPR_Z>
+  ast::WorkgroupDecoration* WorkgroupSize(const Source& source,
+                                          EXPR_X&& x,
+                                          EXPR_Y&& y,
+                                          EXPR_Z&& z) {
+    return create<ast::WorkgroupDecoration>(
+        source, Expr(std::forward<EXPR_X>(x)), Expr(std::forward<EXPR_Y>(y)),
+        Expr(std::forward<EXPR_Z>(z)));
+  }
+
+  /// Creates an ast::WorkgroupDecoration
   /// @param x the x dimension expression
   /// @param y the y dimension expression
   /// @param z the z dimension expression

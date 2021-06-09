@@ -16,6 +16,7 @@
 #define SRC_AST_STRUCT_MEMBER_SIZE_DECORATION_H_
 
 #include <stddef.h>
+#include <string>
 
 #include "src/ast/decoration.h"
 
@@ -37,6 +38,9 @@ class StructMemberSizeDecoration
 
   /// @returns the size value
   uint32_t size() const { return size_; }
+
+  /// @returns the WGSL name for the decoration
+  std::string name() const override;
 
   /// Outputs the decoration to the given stream
   /// @param sem the semantic info for the program

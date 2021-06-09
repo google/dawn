@@ -14,6 +14,8 @@
 
 #include "src/ast/struct_member_align_decoration.h"
 
+#include <string>
+
 #include "src/clone_context.h"
 #include "src/program_builder.h"
 
@@ -28,6 +30,10 @@ StructMemberAlignDecoration::StructMemberAlignDecoration(ProgramID program_id,
     : Base(program_id, source), align_(align) {}
 
 StructMemberAlignDecoration::~StructMemberAlignDecoration() = default;
+
+std::string StructMemberAlignDecoration::name() const {
+  return "align";
+}
 
 void StructMemberAlignDecoration::to_str(const sem::Info&,
                                          std::ostream& out,

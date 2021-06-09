@@ -14,6 +14,8 @@
 
 #include "src/ast/stage_decoration.h"
 
+#include <string>
+
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::StageDecoration);
@@ -27,6 +29,10 @@ StageDecoration::StageDecoration(ProgramID program_id,
     : Base(program_id, source), stage_(stage) {}
 
 StageDecoration::~StageDecoration() = default;
+
+std::string StageDecoration::name() const {
+  return "stage";
+}
 
 void StageDecoration::to_str(const sem::Info&,
                              std::ostream& out,

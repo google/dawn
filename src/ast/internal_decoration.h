@@ -36,7 +36,10 @@ class InternalDecoration : public Castable<InternalDecoration, Decoration> {
 
   /// @return a short description of the internal decoration which will be
   /// displayed in WGSL as `[[internal(<name>)]]` (but is not parsable).
-  virtual std::string Name() const = 0;
+  virtual std::string InternalName() const = 0;
+
+  /// @returns the WGSL name for the decoration
+  std::string name() const override;
 
   /// Writes a representation of the node to the output stream
   /// @param sem the semantic info for the program
