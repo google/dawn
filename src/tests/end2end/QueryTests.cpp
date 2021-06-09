@@ -534,10 +534,6 @@ TEST_P(TimestampQueryTests, QuerySetCreation) {
 
 // Test calling timestamp query from command encoder
 TEST_P(TimestampQueryTests, TimestampOnCommandEncoder) {
-    // TODO(crbug.com/dawn/545): Crash occurs if we only call WriteTimestamp in a command encoder
-    // without any copy commands on Metal on AMD GPU.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsAMD());
-
     constexpr uint32_t kQueryCount = 2;
 
     // Write timestamp with different query indexes
@@ -759,10 +755,6 @@ TEST_P(TimestampQueryTests, ResolveToBufferWithOffset) {
     // vkCmdFillBuffer and vkCmdCopyQueryPoolResults are not executed in order, skip it util
     // the issue is fixed.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
-
-    // TODO(crbug.com/dawn/545): Crash occurs if we only call WriteTimestamp in a command encoder
-    // without any copy commands on Metal on AMD GPU.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsAMD());
 
     constexpr uint32_t kQueryCount = 2;
     constexpr uint64_t kZero = 0;

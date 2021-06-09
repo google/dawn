@@ -221,9 +221,14 @@ namespace dawn_native { namespace metal {
                 if ([*mDevice supportsFamily:MTLGPUFamilyMac2] ||
                     [*mDevice supportsFamily:MTLGPUFamilyApple5]) {
                     mSupportedExtensions.EnableExtension(Extension::PipelineStatisticsQuery);
-                    // TODO(crbug.com/dawn/545): Crash occurs if we only call WriteTimestamp in a
-                    // command encoder without any copy commands on Metal on AMD GPU.
-                    mSupportedExtensions.EnableExtension(Extension::TimestampQuery);
+
+                    // Disable timestamp query on macOS 10.15 on AMD GPU because WriteTimestamp
+                    // fails to call without any copy commands on MTLBlitCommandEncoder. This issue
+                    // has been fixed on macOS 11.0. See crbug.com/dawn/545
+                    if (!gpu_info::IsAMD(GetPCIInfo().vendorId) ||
+                        [NSProcessInfo.processInfo isOperatingSystemAtLeastVersion:{11, 0, 0}]) {
+                        mSupportedExtensions.EnableExtension(Extension::TimestampQuery);
+                    }
                 }
             }
             if (@available(macOS 10.11, iOS 11.0, *)) {
