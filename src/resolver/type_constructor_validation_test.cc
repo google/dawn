@@ -19,30 +19,47 @@ namespace tint {
 namespace resolver {
 namespace {
 
-/// @return the element type of `type` for vec and mat, otherwise `type` itself
-ast::Type* ElementTypeOf(ast::Type* type) {
-  if (auto* v = type->As<ast::Vector>()) {
-    return v->type();
-  }
-  if (auto* m = type->As<ast::Matrix>()) {
-    return m->type();
-  }
-  return type;
-}
+// Helpers and typedefs
+template <typename T>
+using DataType = builder::DataType<T>;
+template <typename T>
+using vec2 = builder::vec2<T>;
+template <typename T>
+using vec3 = builder::vec3<T>;
+template <typename T>
+using vec4 = builder::vec4<T>;
+template <typename T>
+using mat2x2 = builder::mat2x2<T>;
+template <typename T>
+using mat3x3 = builder::mat3x3<T>;
+template <typename T>
+using mat4x4 = builder::mat4x4<T>;
+template <typename T>
+using alias = builder::alias<T>;
+template <typename T>
+using alias1 = builder::alias1<T>;
+template <typename T>
+using alias2 = builder::alias2<T>;
+template <typename T>
+using alias3 = builder::alias3<T>;
+using f32 = builder::f32;
+using i32 = builder::i32;
+using u32 = builder::u32;
 
 class ResolverTypeConstructorValidationTest : public resolver::TestHelper,
                                               public testing::Test {};
 
 namespace InferTypeTest {
 struct Params {
-  create_ast_type_func_ptr create_rhs_ast_type;
-  create_sem_type_func_ptr create_rhs_sem_type;
+  builder::ast_type_func_ptr create_rhs_ast_type;
+  builder::ast_expr_func_ptr create_rhs_ast_value;
+  builder::sem_type_func_ptr create_rhs_sem_type;
 };
 
-// Helpers and typedefs
-using i32 = ProgramBuilder::i32;
-using u32 = ProgramBuilder::u32;
-using f32 = ProgramBuilder::f32;
+template <typename T>
+constexpr Params ParamsFor() {
+  return Params{DataType<T>::AST, DataType<T>::Expr, DataType<T>::Sem};
+}
 
 TEST_F(ResolverTypeConstructorValidationTest, InferTypeTest_Simple) {
   // var a = 1;
@@ -75,8 +92,7 @@ TEST_P(InferTypeTest_FromConstructorExpression, All) {
   // }
   auto& params = GetParam();
 
-  auto* rhs_type = params.create_rhs_ast_type(ty);
-  auto* constructor_expr = ConstructValueFilledWith(rhs_type, 0);
+  auto* constructor_expr = params.create_rhs_ast_value(*this, 0);
 
   auto* a = Var("a", nullptr, ast::StorageClass::kNone, constructor_expr);
   // Self-assign 'a' to force the expression to be resolved so we can test its
@@ -86,7 +102,7 @@ TEST_P(InferTypeTest_FromConstructorExpression, All) {
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
   auto* got = TypeOf(a_ident);
-  auto* expected = create<sem::Reference>(params.create_rhs_sem_type(ty),
+  auto* expected = create<sem::Reference>(params.create_rhs_sem_type(*this),
                                           ast::StorageClass::kFunction,
                                           ast::Access::kReadWrite);
   ASSERT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
@@ -94,26 +110,26 @@ TEST_P(InferTypeTest_FromConstructorExpression, All) {
 }
 
 static constexpr Params from_constructor_expression_cases[] = {
-    Params{ast_bool, sem_bool},
-    Params{ast_i32, sem_i32},
-    Params{ast_u32, sem_u32},
-    Params{ast_f32, sem_f32},
-    Params{ast_vec3<i32>, sem_vec3<sem_i32>},
-    Params{ast_vec3<u32>, sem_vec3<sem_u32>},
-    Params{ast_vec3<f32>, sem_vec3<sem_f32>},
-    Params{ast_mat3x3<i32>, sem_mat3x3<sem_i32>},
-    Params{ast_mat3x3<u32>, sem_mat3x3<sem_u32>},
-    Params{ast_mat3x3<f32>, sem_mat3x3<sem_f32>},
-    Params{ast_alias<ast_bool>, sem_bool},
-    Params{ast_alias<ast_i32>, sem_i32},
-    Params{ast_alias<ast_u32>, sem_u32},
-    Params{ast_alias<ast_f32>, sem_f32},
-    Params{ast_alias<ast_vec3<i32>>, sem_vec3<sem_i32>},
-    Params{ast_alias<ast_vec3<u32>>, sem_vec3<sem_u32>},
-    Params{ast_alias<ast_vec3<f32>>, sem_vec3<sem_f32>},
-    Params{ast_alias<ast_mat3x3<i32>>, sem_mat3x3<sem_i32>},
-    Params{ast_alias<ast_mat3x3<u32>>, sem_mat3x3<sem_u32>},
-    Params{ast_alias<ast_mat3x3<f32>>, sem_mat3x3<sem_f32>},
+    ParamsFor<bool>(),
+    ParamsFor<i32>(),
+    ParamsFor<u32>(),
+    ParamsFor<f32>(),
+    ParamsFor<vec3<i32>>(),
+    ParamsFor<vec3<u32>>(),
+    ParamsFor<vec3<f32>>(),
+    ParamsFor<mat3x3<i32>>(),
+    ParamsFor<mat3x3<u32>>(),
+    ParamsFor<mat3x3<f32>>(),
+    ParamsFor<alias<bool>>(),
+    ParamsFor<alias<i32>>(),
+    ParamsFor<alias<u32>>(),
+    ParamsFor<alias<f32>>(),
+    ParamsFor<alias<vec3<i32>>>(),
+    ParamsFor<alias<vec3<u32>>>(),
+    ParamsFor<alias<vec3<f32>>>(),
+    ParamsFor<alias<mat3x3<i32>>>(),
+    ParamsFor<alias<mat3x3<u32>>>(),
+    ParamsFor<alias<mat3x3<f32>>>(),
 };
 INSTANTIATE_TEST_SUITE_P(ResolverTypeConstructorValidationTest,
                          InferTypeTest_FromConstructorExpression,
@@ -127,13 +143,11 @@ TEST_P(InferTypeTest_FromArithmeticExpression, All) {
   // }
   auto& params = GetParam();
 
-  auto* rhs_type = params.create_rhs_ast_type(ty);
-
-  auto* arith_lhs_expr = ConstructValueFilledWith(rhs_type, 2);
-  auto* arith_rhs_expr = ConstructValueFilledWith(ElementTypeOf(rhs_type), 3);
+  auto* arith_lhs_expr = params.create_rhs_ast_value(*this, 2);
+  auto* arith_rhs_expr = params.create_rhs_ast_value(*this, 3);
   auto* constructor_expr = Mul(arith_lhs_expr, arith_rhs_expr);
 
-  auto* a = Var("a", nullptr, ast::StorageClass::kNone, constructor_expr);
+  auto* a = Var("a", nullptr, constructor_expr);
   // Self-assign 'a' to force the expression to be resolved so we can test its
   // type below
   auto* a_ident = Expr("a");
@@ -141,25 +155,22 @@ TEST_P(InferTypeTest_FromArithmeticExpression, All) {
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
   auto* got = TypeOf(a_ident);
-  auto* expected = create<sem::Reference>(params.create_rhs_sem_type(ty),
+  auto* expected = create<sem::Reference>(params.create_rhs_sem_type(*this),
                                           ast::StorageClass::kFunction,
                                           ast::Access::kReadWrite);
   ASSERT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
                            << "expected: " << FriendlyName(expected) << "\n";
 }
 static constexpr Params from_arithmetic_expression_cases[] = {
-    Params{ast_i32, sem_i32},
-    Params{ast_u32, sem_u32},
-    Params{ast_f32, sem_f32},
-    Params{ast_vec3<f32>, sem_vec3<sem_f32>},
-    Params{ast_mat3x3<f32>, sem_mat3x3<sem_f32>},
+    ParamsFor<i32>(),       ParamsFor<u32>(),         ParamsFor<f32>(),
+    ParamsFor<vec3<f32>>(), ParamsFor<mat3x3<f32>>(),
 
     // TODO(amaiorano): Uncomment once https://crbug.com/tint/680 is fixed
-    // Params{ty_alias<ty_i32>},
-    // Params{ty_alias<ty_u32>},
-    // Params{ty_alias<ty_f32>},
-    // Params{ty_alias<ty_vec3<f32>>},
-    // Params{ty_alias<ty_mat3x3<f32>>},
+    // ParamsFor<alias<ty_i32>>(),
+    // ParamsFor<alias<ty_u32>>(),
+    // ParamsFor<alias<ty_f32>>(),
+    // ParamsFor<alias<ty_vec3<f32>>>(),
+    // ParamsFor<alias<ty_mat3x3<f32>>>(),
 };
 INSTANTIATE_TEST_SUITE_P(ResolverTypeConstructorValidationTest,
                          InferTypeTest_FromArithmeticExpression,
@@ -170,7 +181,7 @@ TEST_P(InferTypeTest_FromCallExpression, All) {
   // e.g. for vec3<f32>
   //
   // fn foo() -> vec3<f32> {
-  //   return vec3<f32>(0.0, 0.0, 0.0);
+  //   return vec3<f32>();
   // }
   //
   // fn bar()
@@ -179,11 +190,10 @@ TEST_P(InferTypeTest_FromCallExpression, All) {
   // }
   auto& params = GetParam();
 
-  Func("foo", {}, params.create_rhs_ast_type(ty),
-       {Return(ConstructValueFilledWith(params.create_rhs_ast_type(ty), 0))},
-       {});
+  Func("foo", {}, params.create_rhs_ast_type(*this),
+       {Return(Construct(params.create_rhs_ast_type(*this)))}, {});
 
-  auto* a = Var("a", nullptr, ast::StorageClass::kNone, Call(Expr("foo")));
+  auto* a = Var("a", nullptr, Call("foo"));
   // Self-assign 'a' to force the expression to be resolved so we can test its
   // type below
   auto* a_ident = Expr("a");
@@ -191,33 +201,33 @@ TEST_P(InferTypeTest_FromCallExpression, All) {
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
   auto* got = TypeOf(a_ident);
-  auto* expected = create<sem::Reference>(params.create_rhs_sem_type(ty),
+  auto* expected = create<sem::Reference>(params.create_rhs_sem_type(*this),
                                           ast::StorageClass::kFunction,
                                           ast::Access::kReadWrite);
   ASSERT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
                            << "expected: " << FriendlyName(expected) << "\n";
 }
 static constexpr Params from_call_expression_cases[] = {
-    Params{ast_bool, sem_bool},
-    Params{ast_i32, sem_i32},
-    Params{ast_u32, sem_u32},
-    Params{ast_f32, sem_f32},
-    Params{ast_vec3<i32>, sem_vec3<sem_i32>},
-    Params{ast_vec3<u32>, sem_vec3<sem_u32>},
-    Params{ast_vec3<f32>, sem_vec3<sem_f32>},
-    Params{ast_mat3x3<i32>, sem_mat3x3<sem_i32>},
-    Params{ast_mat3x3<u32>, sem_mat3x3<sem_u32>},
-    Params{ast_mat3x3<f32>, sem_mat3x3<sem_f32>},
-    Params{ast_alias<ast_bool>, sem_bool},
-    Params{ast_alias<ast_i32>, sem_i32},
-    Params{ast_alias<ast_u32>, sem_u32},
-    Params{ast_alias<ast_f32>, sem_f32},
-    Params{ast_alias<ast_vec3<i32>>, sem_vec3<sem_i32>},
-    Params{ast_alias<ast_vec3<u32>>, sem_vec3<sem_u32>},
-    Params{ast_alias<ast_vec3<f32>>, sem_vec3<sem_f32>},
-    Params{ast_alias<ast_mat3x3<i32>>, sem_mat3x3<sem_i32>},
-    Params{ast_alias<ast_mat3x3<u32>>, sem_mat3x3<sem_u32>},
-    Params{ast_alias<ast_mat3x3<f32>>, sem_mat3x3<sem_f32>},
+    ParamsFor<bool>(),
+    ParamsFor<i32>(),
+    ParamsFor<u32>(),
+    ParamsFor<f32>(),
+    ParamsFor<vec3<i32>>(),
+    ParamsFor<vec3<u32>>(),
+    ParamsFor<vec3<f32>>(),
+    ParamsFor<mat3x3<i32>>(),
+    ParamsFor<mat3x3<u32>>(),
+    ParamsFor<mat3x3<f32>>(),
+    ParamsFor<alias<bool>>(),
+    ParamsFor<alias<i32>>(),
+    ParamsFor<alias<u32>>(),
+    ParamsFor<alias<f32>>(),
+    ParamsFor<alias<vec3<i32>>>(),
+    ParamsFor<alias<vec3<u32>>>(),
+    ParamsFor<alias<vec3<f32>>>(),
+    ParamsFor<alias<mat3x3<i32>>>(),
+    ParamsFor<alias<mat3x3<u32>>>(),
+    ParamsFor<alias<mat3x3<f32>>>(),
 };
 INSTANTIATE_TEST_SUITE_P(ResolverTypeConstructorValidationTest,
                          InferTypeTest_FromCallExpression,

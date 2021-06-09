@@ -250,6 +250,7 @@ struct S {
 
 TEST_F(WgslGeneratorImplTest, EmitType_U32) {
   auto* u32 = ty.u32();
+  AST().AddConstructedType(ty.alias("make_type_reachable", u32));
 
   GeneratorImpl& gen = Build();
 
@@ -402,6 +403,11 @@ TEST_P(WgslGenerator_StorageTextureTest, EmitType_StorageTexture) {
   auto param = GetParam();
 
   auto* t = ty.storage_texture(param.dim, param.fmt, param.access);
+  Global("g", t,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(2),
+         });
 
   GeneratorImpl& gen = Build();
 
@@ -412,30 +418,30 @@ INSTANTIATE_TEST_SUITE_P(
     WgslGeneratorImplTest,
     WgslGenerator_StorageTextureTest,
     testing::Values(
-        StorageTextureData{ast::ImageFormat::kR8Unorm,
+        StorageTextureData{ast::ImageFormat::kRgba8Sint,
                            ast::TextureDimension::k1d, ast::Access::kRead,
-                           "texture_storage_1d<r8unorm, read>"},
-        StorageTextureData{ast::ImageFormat::kR8Unorm,
+                           "texture_storage_1d<rgba8sint, read>"},
+        StorageTextureData{ast::ImageFormat::kRgba8Sint,
                            ast::TextureDimension::k2d, ast::Access::kRead,
-                           "texture_storage_2d<r8unorm, read>"},
-        StorageTextureData{ast::ImageFormat::kR8Unorm,
+                           "texture_storage_2d<rgba8sint, read>"},
+        StorageTextureData{ast::ImageFormat::kRgba8Sint,
                            ast::TextureDimension::k2dArray, ast::Access::kRead,
-                           "texture_storage_2d_array<r8unorm, read>"},
-        StorageTextureData{ast::ImageFormat::kR8Unorm,
+                           "texture_storage_2d_array<rgba8sint, read>"},
+        StorageTextureData{ast::ImageFormat::kRgba8Sint,
                            ast::TextureDimension::k3d, ast::Access::kRead,
-                           "texture_storage_3d<r8unorm, read>"},
-        StorageTextureData{ast::ImageFormat::kR8Unorm,
+                           "texture_storage_3d<rgba8sint, read>"},
+        StorageTextureData{ast::ImageFormat::kRgba8Sint,
                            ast::TextureDimension::k1d, ast::Access::kWrite,
-                           "texture_storage_1d<r8unorm, write>"},
-        StorageTextureData{ast::ImageFormat::kR8Unorm,
+                           "texture_storage_1d<rgba8sint, write>"},
+        StorageTextureData{ast::ImageFormat::kRgba8Sint,
                            ast::TextureDimension::k2d, ast::Access::kWrite,
-                           "texture_storage_2d<r8unorm, write>"},
-        StorageTextureData{ast::ImageFormat::kR8Unorm,
+                           "texture_storage_2d<rgba8sint, write>"},
+        StorageTextureData{ast::ImageFormat::kRgba8Sint,
                            ast::TextureDimension::k2dArray, ast::Access::kWrite,
-                           "texture_storage_2d_array<r8unorm, write>"},
-        StorageTextureData{ast::ImageFormat::kR8Unorm,
+                           "texture_storage_2d_array<rgba8sint, write>"},
+        StorageTextureData{ast::ImageFormat::kRgba8Sint,
                            ast::TextureDimension::k3d, ast::Access::kWrite,
-                           "texture_storage_3d<r8unorm, write>"}));
+                           "texture_storage_3d<rgba8sint, write>"}));
 
 struct ImageFormatData {
   ast::ImageFormat fmt;

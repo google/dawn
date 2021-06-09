@@ -1078,17 +1078,6 @@ class ProgramBuilder {
         type, ExprList(std::forward<ARGS>(args)...));
   }
 
-  /// Creates a constructor expression that constructs an object of
-  /// `type` filled with `elem_value`. For example,
-  /// ConstructValueFilledWith(ty.mat3x4<float>(), 5) returns a
-  /// TypeConstructorExpression for a Mat3x4 filled with 5.0f values.
-  /// @param type the type to construct
-  /// @param elem_value the initial or element value (for vec and mat) to
-  /// construct with
-  /// @return the constructor expression
-  ast::ConstructorExpression* ConstructValueFilledWith(const ast::Type* type,
-                                                       int elem_value = 0);
-
   /// @param args the arguments for the vector constructor
   /// @return an `ast::TypeConstructorExpression` of a 2-element vector of type
   /// `T`, constructed with the values `args`.

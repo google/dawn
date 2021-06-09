@@ -102,59 +102,6 @@ const sem::Type* ProgramBuilder::TypeOf(const ast::Type* type) const {
   return Sem().Get(type);
 }
 
-ast::ConstructorExpression* ProgramBuilder::ConstructValueFilledWith(
-    const ast::Type* type,
-    int elem_value) {
-  CloneContext ctx(this);
-
-  if (type->Is<ast::Bool>()) {
-    return create<ast::ScalarConstructorExpression>(
-        create<ast::BoolLiteral>(elem_value == 0 ? false : true));
-  }
-  if (type->Is<ast::I32>()) {
-    return create<ast::ScalarConstructorExpression>(
-        create<ast::SintLiteral>(static_cast<i32>(elem_value)));
-  }
-  if (type->Is<ast::U32>()) {
-    return create<ast::ScalarConstructorExpression>(
-        create<ast::UintLiteral>(static_cast<u32>(elem_value)));
-  }
-  if (type->Is<ast::F32>()) {
-    return create<ast::ScalarConstructorExpression>(
-        create<ast::FloatLiteral>(static_cast<f32>(elem_value)));
-  }
-  if (auto* v = type->As<ast::Vector>()) {
-    ast::ExpressionList el(v->size());
-    for (size_t i = 0; i < el.size(); i++) {
-      el[i] = ConstructValueFilledWith(ctx.Clone(v->type()), elem_value);
-    }
-    return create<ast::TypeConstructorExpression>(const_cast<ast::Type*>(type),
-                                                  std::move(el));
-  }
-  if (auto* m = type->As<ast::Matrix>()) {
-    ast::ExpressionList el(m->columns());
-    for (size_t i = 0; i < el.size(); i++) {
-      auto* col_vec_type = create<ast::Vector>(ctx.Clone(m->type()), m->rows());
-      el[i] = ConstructValueFilledWith(col_vec_type, elem_value);
-    }
-    return create<ast::TypeConstructorExpression>(const_cast<ast::Type*>(type),
-                                                  std::move(el));
-  }
-  if (auto* tn = type->As<ast::TypeName>()) {
-    if (auto* lookup = AST().LookupType(tn->name())) {
-      if (auto* alias = lookup->As<ast::Alias>()) {
-        return ConstructValueFilledWith(ctx.Clone(alias->type()), elem_value);
-      }
-    }
-    TINT_ICE(diagnostics_) << "unable to find NamedType '"
-                           << Symbols().NameFor(tn->name()) << "'";
-    return nullptr;
-  }
-
-  TINT_ICE(diagnostics_) << "unhandled type: " << type->TypeInfo().name;
-  return nullptr;
-}
-
 ast::Type* ProgramBuilder::TypesBuilder::MaybeCreateTypename(
     ast::Type* type) const {
   if (auto* nt = As<ast::NamedType>(type)) {

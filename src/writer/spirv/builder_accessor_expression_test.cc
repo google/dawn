@@ -378,10 +378,11 @@ TEST_F(BuilderTest, MemberAccessor_Nested_NonPointer) {
 }
 
 TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
-  // type Inner = struct {
+  // struct Inner {
   //   a : f32
   //   b : f32
-  // }
+  // };
+  // type Alias = Inner;
   // my_struct {
   //   inner : Inner
   // }
@@ -393,7 +394,8 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
                                               Member("b", ty.f32()),
                                           });
 
-  auto* alias = ty.alias("Inner", inner_struct);
+  auto* alias = ty.alias("Alias", inner_struct);
+  AST().AddConstructedType(alias);
   auto* s_type = Structure("Outer", {Member("inner", alias)});
 
   auto* var = Var("ident", s_type);

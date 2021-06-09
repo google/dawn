@@ -120,172 +120,271 @@ template <typename T>
 class ResolverTestWithParam : public TestHelper,
                               public testing::TestWithParam<T> {};
 
-inline ast::Type* ast_bool(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.bool_();
-}
-inline ast::Type* ast_i32(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.i32();
-}
-inline ast::Type* ast_u32(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.u32();
-}
-inline ast::Type* ast_f32(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.f32();
-}
+namespace builder {
 
-using create_ast_type_func_ptr =
-    ast::Type* (*)(const ProgramBuilder::TypesBuilder& ty);
+using i32 = ProgramBuilder::i32;
+using u32 = ProgramBuilder::u32;
+using f32 = ProgramBuilder::f32;
+
+template <int N, typename T>
+struct vec {};
 
 template <typename T>
-ast::Type* ast_vec2(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.vec2<T>();
-}
-
-template <create_ast_type_func_ptr create_type>
-ast::Type* ast_vec2(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.vec2(create_type(ty));
-}
+using vec2 = vec<2, T>;
 
 template <typename T>
-ast::Type* ast_vec3(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.vec3<T>();
-}
-
-template <create_ast_type_func_ptr create_type>
-ast::Type* ast_vec3(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.vec3(create_type(ty));
-}
+using vec3 = vec<3, T>;
 
 template <typename T>
-ast::Type* ast_vec4(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.vec4<T>();
-}
+using vec4 = vec<4, T>;
 
-template <create_ast_type_func_ptr create_type>
-ast::Type* ast_vec4(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.vec4(create_type(ty));
-}
+template <int N, int M, typename T>
+struct mat {};
 
 template <typename T>
-ast::Type* ast_mat2x2(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.mat2x2<T>();
-}
-
-template <create_ast_type_func_ptr create_type>
-ast::Type* ast_mat2x2(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.mat2x2(create_type(ty));
-}
+using mat2x2 = mat<2, 2, T>;
 
 template <typename T>
-ast::Type* ast_mat2x3(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.mat2x3<T>();
-}
-
-template <create_ast_type_func_ptr create_type>
-ast::Type* ast_mat2x3(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.mat2x3(create_type(ty));
-}
+using mat2x3 = mat<2, 3, T>;
 
 template <typename T>
-ast::Type* ast_mat3x2(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.mat3x2<T>();
-}
-
-template <create_ast_type_func_ptr create_type>
-ast::Type* ast_mat3x2(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.mat3x2(create_type(ty));
-}
+using mat3x2 = mat<3, 2, T>;
 
 template <typename T>
-ast::Type* ast_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.mat3x3<T>();
-}
-
-template <create_ast_type_func_ptr create_type>
-ast::Type* ast_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.mat3x3(create_type(ty));
-}
+using mat3x3 = mat<3, 3, T>;
 
 template <typename T>
-ast::Type* ast_mat4x4(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.mat4x4<T>();
-}
+using mat4x4 = mat<4, 4, T>;
 
-template <create_ast_type_func_ptr create_type>
-ast::Type* ast_mat4x4(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.mat4x4(create_type(ty));
-}
+template <typename TO, int ID = 0>
+struct alias {};
 
-template <create_ast_type_func_ptr create_type>
-ast::Type* ast_alias(const ProgramBuilder::TypesBuilder& ty) {
-  auto* type = create_type(ty);
-  auto name = ty.builder->Symbols().Register("alias_" + type->type_name());
-  if (!ty.builder->AST().LookupType(name)) {
-    ty.builder->AST().AddConstructedType(ty.alias(name, type));
+template <typename TO>
+using alias1 = alias<TO, 1>;
+
+template <typename TO>
+using alias2 = alias<TO, 2>;
+
+template <typename TO>
+using alias3 = alias<TO, 3>;
+
+using ast_type_func_ptr = ast::Type* (*)(ProgramBuilder& b);
+using ast_expr_func_ptr = ast::Expression* (*)(ProgramBuilder& b,
+                                               int elem_value);
+using sem_type_func_ptr = sem::Type* (*)(ProgramBuilder& b);
+
+template <typename T>
+struct DataType {};
+
+/// Helper for building bool types and expressions
+template <>
+struct DataType<bool> {
+  /// false as bool is not a composite type
+  static constexpr bool is_composite = false;
+
+  /// @param b the ProgramBuilder
+  /// @return a new AST bool type
+  static inline ast::Type* AST(ProgramBuilder& b) { return b.ty.bool_(); }
+  /// @param b the ProgramBuilder
+  /// @return the semantic bool type
+  static inline sem::Type* Sem(ProgramBuilder& b) {
+    return b.create<sem::Bool>();
   }
-  return ty.builder->create<ast::TypeName>(name);
-}
+  /// @param b the ProgramBuilder
+  /// @param elem_value the b
+  /// @return a new AST expression of the bool type
+  static inline ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+    return b.Expr(elem_value == 0);
+  }
+};
 
-inline sem::Type* sem_bool(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.builder->create<sem::Bool>();
-}
-inline sem::Type* sem_i32(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.builder->create<sem::I32>();
-}
-inline sem::Type* sem_u32(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.builder->create<sem::U32>();
-}
-inline sem::Type* sem_f32(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.builder->create<sem::F32>();
-}
+/// Helper for building i32 types and expressions
+template <>
+struct DataType<i32> {
+  /// false as i32 is not a composite type
+  static constexpr bool is_composite = false;
 
-using create_sem_type_func_ptr =
-    sem::Type* (*)(const ProgramBuilder::TypesBuilder& ty);
+  /// @param b the ProgramBuilder
+  /// @return a new AST i32 type
+  static inline ast::Type* AST(ProgramBuilder& b) { return b.ty.i32(); }
+  /// @param b the ProgramBuilder
+  /// @return the semantic i32 type
+  static inline sem::Type* Sem(ProgramBuilder& b) {
+    return b.create<sem::I32>();
+  }
+  /// @param b the ProgramBuilder
+  /// @param elem_value the value i32 will be initialized with
+  /// @return a new AST i32 literal value expression
+  static inline ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+    return b.Expr(static_cast<i32>(elem_value));
+  }
+};
 
-template <create_sem_type_func_ptr create_type>
-sem::Type* sem_vec2(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.builder->create<sem::Vector>(create_type(ty), 2);
-}
+/// Helper for building u32 types and expressions
+template <>
+struct DataType<u32> {
+  /// false as u32 is not a composite type
+  static constexpr bool is_composite = false;
 
-template <create_sem_type_func_ptr create_type>
-sem::Type* sem_vec3(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.builder->create<sem::Vector>(create_type(ty), 3);
-}
+  /// @param b the ProgramBuilder
+  /// @return a new AST u32 type
+  static inline ast::Type* AST(ProgramBuilder& b) { return b.ty.u32(); }
+  /// @param b the ProgramBuilder
+  /// @return the semantic u32 type
+  static inline sem::Type* Sem(ProgramBuilder& b) {
+    return b.create<sem::U32>();
+  }
+  /// @param b the ProgramBuilder
+  /// @param elem_value the value u32 will be initialized with
+  /// @return a new AST u32 literal value expression
+  static inline ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+    return b.Expr(static_cast<u32>(elem_value));
+  }
+};
 
-template <create_sem_type_func_ptr create_type>
-sem::Type* sem_vec4(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.builder->create<sem::Vector>(create_type(ty), 4);
-}
+/// Helper for building f32 types and expressions
+template <>
+struct DataType<f32> {
+  /// false as f32 is not a composite type
+  static constexpr bool is_composite = false;
 
-template <create_sem_type_func_ptr create_type>
-sem::Type* sem_mat2x2(const ProgramBuilder::TypesBuilder& ty) {
-  auto* column_type = ty.builder->create<sem::Vector>(create_type(ty), 2u);
-  return ty.builder->create<sem::Matrix>(column_type, 2u);
-}
+  /// @param b the ProgramBuilder
+  /// @return a new AST f32 type
+  static inline ast::Type* AST(ProgramBuilder& b) { return b.ty.f32(); }
+  /// @param b the ProgramBuilder
+  /// @return the semantic f32 type
+  static inline sem::Type* Sem(ProgramBuilder& b) {
+    return b.create<sem::F32>();
+  }
+  /// @param b the ProgramBuilder
+  /// @param elem_value the value f32 will be initialized with
+  /// @return a new AST f32 literal value expression
+  static inline ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+    return b.Expr(static_cast<f32>(elem_value));
+  }
+};
 
-template <create_sem_type_func_ptr create_type>
-sem::Type* sem_mat2x3(const ProgramBuilder::TypesBuilder& ty) {
-  auto* column_type = ty.builder->create<sem::Vector>(create_type(ty), 3u);
-  return ty.builder->create<sem::Matrix>(column_type, 2u);
-}
+/// Helper for building vector types and expressions
+template <int N, typename T>
+struct DataType<vec<N, T>> {
+  /// true as vectors are a composite type
+  static constexpr bool is_composite = true;
 
-template <create_sem_type_func_ptr create_type>
-sem::Type* sem_mat3x2(const ProgramBuilder::TypesBuilder& ty) {
-  auto* column_type = ty.builder->create<sem::Vector>(create_type(ty), 2u);
-  return ty.builder->create<sem::Matrix>(column_type, 3u);
-}
+  /// @param b the ProgramBuilder
+  /// @return a new AST vector type
+  static inline ast::Type* AST(ProgramBuilder& b) {
+    return b.ty.vec(DataType<T>::AST(b), N);
+  }
+  /// @param b the ProgramBuilder
+  /// @return the semantic vector type
+  static inline sem::Type* Sem(ProgramBuilder& b) {
+    return b.create<sem::Vector>(DataType<T>::Sem(b), N);
+  }
+  /// @param b the ProgramBuilder
+  /// @param elem_value the value each element in the vector will be initialized
+  /// with
+  /// @return a new AST vector value expression
+  static inline ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+    return b.Construct(AST(b), ExprArgs(b, elem_value));
+  }
 
-template <create_sem_type_func_ptr create_type>
-sem::Type* sem_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
-  auto* column_type = ty.builder->create<sem::Vector>(create_type(ty), 3u);
-  return ty.builder->create<sem::Matrix>(column_type, 3u);
-}
+  /// @param b the ProgramBuilder
+  /// @param elem_value the value each element will be initialized with
+  /// @return the list of expressions that are used to construct the vector
+  static inline ast::ExpressionList ExprArgs(ProgramBuilder& b,
+                                             int elem_value) {
+    ast::ExpressionList args;
+    for (int i = 0; i < N; i++) {
+      args.emplace_back(DataType<T>::Expr(b, elem_value));
+    }
+    return args;
+  }
+};
 
-template <create_sem_type_func_ptr create_type>
-sem::Type* sem_mat4x4(const ProgramBuilder::TypesBuilder& ty) {
-  auto* column_type = ty.builder->create<sem::Vector>(create_type(ty), 4u);
-  return ty.builder->create<sem::Matrix>(column_type, 4u);
-}
+/// Helper for building matrix types and expressions
+template <int N, int M, typename T>
+struct DataType<mat<N, M, T>> {
+  /// true as matrices are a composite type
+  static constexpr bool is_composite = true;
+
+  /// @param b the ProgramBuilder
+  /// @return a new AST matrix type
+  static inline ast::Type* AST(ProgramBuilder& b) {
+    return b.ty.mat(DataType<T>::AST(b), N, M);
+  }
+  /// @param b the ProgramBuilder
+  /// @return the semantic matrix type
+  static inline sem::Type* Sem(ProgramBuilder& b) {
+    auto* column_type = b.create<sem::Vector>(DataType<T>::Sem(b), M);
+    return b.create<sem::Matrix>(column_type, N);
+  }
+  /// @param b the ProgramBuilder
+  /// @param elem_value the value each element in the matrix will be initialized
+  /// with
+  /// @return a new AST matrix value expression
+  static inline ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+    return b.Construct(AST(b), ExprArgs(b, elem_value));
+  }
+
+  /// @param b the ProgramBuilder
+  /// @param elem_value the value each element will be initialized with
+  /// @return the list of expressions that are used to construct the matrix
+  static inline ast::ExpressionList ExprArgs(ProgramBuilder& b,
+                                             int elem_value) {
+    ast::ExpressionList args;
+    for (int i = 0; i < N; i++) {
+      args.emplace_back(DataType<vec<M, T>>::Expr(b, elem_value));
+    }
+    return args;
+  }
+};
+
+/// Helper for building alias types and expressions
+template <typename T, int ID>
+struct DataType<alias<T, ID>> {
+  /// true if the aliased type is a composite type
+  static constexpr bool is_composite = DataType<T>::is_composite;
+
+  /// @param b the ProgramBuilder
+  /// @return a new AST alias type
+  static inline ast::Type* AST(ProgramBuilder& b) {
+    auto name = b.Symbols().Register("alias_" + std::to_string(ID));
+    if (!b.AST().LookupType(name)) {
+      auto* type = DataType<T>::AST(b);
+      b.AST().AddConstructedType(b.ty.alias(name, type));
+    }
+    return b.create<ast::TypeName>(name);
+  }
+  /// @param b the ProgramBuilder
+  /// @return the semantic aliased type
+  static inline sem::Type* Sem(ProgramBuilder& b) {
+    return DataType<T>::Sem(b);
+  }
+
+  /// @param b the ProgramBuilder
+  /// @param elem_value the value nested elements will be initialized with
+  /// @return a new AST expression of the alias type
+  template <bool IS_COMPOSITE = is_composite>
+  static inline traits::EnableIf<!IS_COMPOSITE, ast::Expression*> Expr(
+      ProgramBuilder& b,
+      int elem_value) {
+    // Cast
+    return b.Construct(AST(b), DataType<T>::Expr(b, elem_value));
+  }
+
+  /// @param b the ProgramBuilder
+  /// @param elem_value the value nested elements will be initialized with
+  /// @return a new AST expression of the alias type
+  template <bool IS_COMPOSITE = is_composite>
+  static inline traits::EnableIf<IS_COMPOSITE, ast::Expression*> Expr(
+      ProgramBuilder& b,
+      int elem_value) {
+    // Construct
+    return b.Construct(AST(b), DataType<T>::ExprArgs(b, elem_value));
+  }
+};
+
+}  // namespace builder
 
 }  // namespace resolver
 }  // namespace tint

@@ -26,6 +26,27 @@ namespace tint {
 namespace resolver {
 namespace {
 
+// Helpers and typedefs
+template <typename T>
+using DataType = builder::DataType<T>;
+template <typename T>
+using vec2 = builder::vec2<T>;
+template <typename T>
+using vec3 = builder::vec3<T>;
+template <typename T>
+using vec4 = builder::vec4<T>;
+template <typename T>
+using mat2x2 = builder::mat2x2<T>;
+template <typename T>
+using mat3x3 = builder::mat3x3<T>;
+template <typename T>
+using mat4x4 = builder::mat4x4<T>;
+template <typename T>
+using alias = builder::alias<T>;
+using f32 = builder::f32;
+using i32 = builder::i32;
+using u32 = builder::u32;
+
 class ResolverEntryPointValidationTest : public TestHelper,
                                          public testing::Test {};
 
@@ -517,43 +538,48 @@ TEST_F(ResolverEntryPointValidationTest,
 
 namespace TypeValidationTests {
 struct Params {
-  create_ast_type_func_ptr create_ast_type;
+  builder::ast_type_func_ptr create_ast_type;
   bool is_valid;
 };
+
+template <typename T>
+constexpr Params ParamsFor(bool is_valid) {
+  return Params{DataType<T>::AST, is_valid};
+}
 
 using TypeValidationTest = resolver::ResolverTestWithParam<Params>;
 
 static constexpr Params cases[] = {
-    {ast_f32, true},
-    {ast_i32, true},
-    {ast_u32, true},
-    {ast_bool, false},
-    {ast_vec2<ast_f32>, true},
-    {ast_vec3<ast_f32>, true},
-    {ast_vec4<ast_f32>, true},
-    {ast_mat2x2<ast_f32>, false},
-    {ast_mat2x2<ast_i32>, false},
-    {ast_mat2x2<ast_u32>, false},
-    {ast_mat2x2<ast_bool>, false},
-    {ast_mat3x3<ast_f32>, false},
-    {ast_mat3x3<ast_i32>, false},
-    {ast_mat3x3<ast_u32>, false},
-    {ast_mat3x3<ast_bool>, false},
-    {ast_mat4x4<ast_f32>, false},
-    {ast_mat4x4<ast_i32>, false},
-    {ast_mat4x4<ast_u32>, false},
-    {ast_mat4x4<ast_bool>, false},
-    {ast_alias<ast_f32>, true},
-    {ast_alias<ast_i32>, true},
-    {ast_alias<ast_u32>, true},
-    {ast_alias<ast_bool>, false},
+    ParamsFor<f32>(true),            //
+    ParamsFor<i32>(true),            //
+    ParamsFor<u32>(true),            //
+    ParamsFor<bool>(false),          //
+    ParamsFor<vec2<f32>>(true),      //
+    ParamsFor<vec3<f32>>(true),      //
+    ParamsFor<vec4<f32>>(true),      //
+    ParamsFor<mat2x2<f32>>(false),   //
+    ParamsFor<mat2x2<i32>>(false),   //
+    ParamsFor<mat2x2<u32>>(false),   //
+    ParamsFor<mat2x2<bool>>(false),  //
+    ParamsFor<mat3x3<f32>>(false),   //
+    ParamsFor<mat3x3<i32>>(false),   //
+    ParamsFor<mat3x3<u32>>(false),   //
+    ParamsFor<mat3x3<bool>>(false),  //
+    ParamsFor<mat4x4<f32>>(false),   //
+    ParamsFor<mat4x4<i32>>(false),   //
+    ParamsFor<mat4x4<u32>>(false),   //
+    ParamsFor<mat4x4<bool>>(false),  //
+    ParamsFor<alias<f32>>(true),     //
+    ParamsFor<alias<i32>>(true),     //
+    ParamsFor<alias<u32>>(true),     //
+    ParamsFor<alias<bool>>(false),   //
 };
 
 TEST_P(TypeValidationTest, BareInputs) {
   // [[stage(fragment)]]
   // fn main([[location(0)]] a : *) {}
   auto params = GetParam();
-  auto* a = Param("a", params.create_ast_type(ty), {Location(0)});
+  auto* a = Param("a", params.create_ast_type(*this), {Location(0)});
   Func(Source{{12, 34}}, "main", {a}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
 
@@ -572,7 +598,7 @@ TEST_P(TypeValidationTest, StructInputs) {
   // fn main(a : Input) {}
   auto params = GetParam();
   auto* input = Structure(
-      "Input", {Member("a", params.create_ast_type(ty), {Location(0)})});
+      "Input", {Member("a", params.create_ast_type(*this), {Location(0)})});
   auto* a = Param("a", input, {});
   Func(Source{{12, 34}}, "main", {a}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
@@ -590,8 +616,8 @@ TEST_P(TypeValidationTest, BareOutputs) {
   //   return *();
   // }
   auto params = GetParam();
-  Func(Source{{12, 34}}, "main", {}, params.create_ast_type(ty),
-       {Return(Construct(params.create_ast_type(ty)))},
+  Func(Source{{12, 34}}, "main", {}, params.create_ast_type(*this),
+       {Return(Construct(params.create_ast_type(*this)))},
        {Stage(ast::PipelineStage::kFragment)}, {Location(0)});
 
   if (params.is_valid) {
@@ -611,7 +637,7 @@ TEST_P(TypeValidationTest, StructOutputs) {
   // }
   auto params = GetParam();
   auto* output = Structure(
-      "Output", {Member("a", params.create_ast_type(ty), {Location(0)})});
+      "Output", {Member("a", params.create_ast_type(*this), {Location(0)})});
   Func(Source{{12, 34}}, "main", {}, output, {Return(Construct(output))},
        {Stage(ast::PipelineStage::kFragment)});
 

@@ -23,42 +23,62 @@ namespace resolver {
 namespace {
 
 // Helpers and typedefs
-using i32 = ProgramBuilder::i32;
-using u32 = ProgramBuilder::u32;
-using f32 = ProgramBuilder::f32;
+template <typename T>
+using DataType = builder::DataType<T>;
+template <typename T>
+using vec2 = builder::vec2<T>;
+template <typename T>
+using vec3 = builder::vec3<T>;
+template <typename T>
+using vec4 = builder::vec4<T>;
+template <typename T>
+using mat2x2 = builder::mat2x2<T>;
+template <typename T>
+using mat3x3 = builder::mat3x3<T>;
+template <typename T>
+using mat4x4 = builder::mat4x4<T>;
+template <typename T>
+using alias = builder::alias<T>;
+using f32 = builder::f32;
+using i32 = builder::i32;
+using u32 = builder::u32;
 
 struct ResolverInferredTypeTest : public resolver::TestHelper,
                                   public testing::Test {};
 
 struct Params {
-  create_ast_type_func_ptr create_type;
-  create_sem_type_func_ptr create_expected_type;
+  builder::ast_expr_func_ptr create_value;
+  builder::sem_type_func_ptr create_expected_type;
 };
 
-Params all_cases[] = {
-    {ast_bool, sem_bool},
-    {ast_u32, sem_u32},
-    {ast_i32, sem_i32},
-    {ast_f32, sem_f32},
-    {ast_vec3<bool>, sem_vec3<sem_bool>},
-    {ast_vec3<i32>, sem_vec3<sem_i32>},
-    {ast_vec3<u32>, sem_vec3<sem_u32>},
-    {ast_vec3<f32>, sem_vec3<sem_f32>},
-    {ast_mat3x3<i32>, sem_mat3x3<sem_i32>},
-    {ast_mat3x3<u32>, sem_mat3x3<sem_u32>},
-    {ast_mat3x3<f32>, sem_mat3x3<sem_f32>},
+template <typename T>
+constexpr Params ParamsFor() {
+  return Params{DataType<T>::Expr, DataType<T>::Sem};
+}
 
-    {ast_alias<ast_bool>, sem_bool},
-    {ast_alias<ast_u32>, sem_u32},
-    {ast_alias<ast_i32>, sem_i32},
-    {ast_alias<ast_f32>, sem_f32},
-    {ast_alias<ast_vec3<bool>>, sem_vec3<sem_bool>},
-    {ast_alias<ast_vec3<i32>>, sem_vec3<sem_i32>},
-    {ast_alias<ast_vec3<u32>>, sem_vec3<sem_u32>},
-    {ast_alias<ast_vec3<f32>>, sem_vec3<sem_f32>},
-    {ast_alias<ast_mat3x3<i32>>, sem_mat3x3<sem_i32>},
-    {ast_alias<ast_mat3x3<u32>>, sem_mat3x3<sem_u32>},
-    {ast_alias<ast_mat3x3<f32>>, sem_mat3x3<sem_f32>},
+Params all_cases[] = {
+    ParamsFor<bool>(),                //
+    ParamsFor<u32>(),                 //
+    ParamsFor<i32>(),                 //
+    ParamsFor<f32>(),                 //
+    ParamsFor<vec3<bool>>(),          //
+    ParamsFor<vec3<i32>>(),           //
+    ParamsFor<vec3<u32>>(),           //
+    ParamsFor<vec3<f32>>(),           //
+    ParamsFor<mat3x3<i32>>(),         //
+    ParamsFor<mat3x3<u32>>(),         //
+    ParamsFor<mat3x3<f32>>(),         //
+    ParamsFor<alias<bool>>(),         //
+    ParamsFor<alias<u32>>(),          //
+    ParamsFor<alias<i32>>(),          //
+    ParamsFor<alias<f32>>(),          //
+    ParamsFor<alias<vec3<bool>>>(),   //
+    ParamsFor<alias<vec3<i32>>>(),    //
+    ParamsFor<alias<vec3<u32>>>(),    //
+    ParamsFor<alias<vec3<f32>>>(),    //
+    ParamsFor<alias<mat3x3<i32>>>(),  //
+    ParamsFor<alias<mat3x3<u32>>>(),  //
+    ParamsFor<alias<mat3x3<f32>>>(),  //
 };
 
 using ResolverInferredTypeParamTest = ResolverTestWithParam<Params>;
@@ -66,11 +86,10 @@ using ResolverInferredTypeParamTest = ResolverTestWithParam<Params>;
 TEST_P(ResolverInferredTypeParamTest, GlobalLet_Pass) {
   auto& params = GetParam();
 
-  auto* type = params.create_type(ty);
-  auto* expected_type = params.create_expected_type(ty);
+  auto* expected_type = params.create_expected_type(*this);
 
   // let a = <type constructor>;
-  auto* ctor_expr = ConstructValueFilledWith(type);
+  auto* ctor_expr = params.create_value(*this, 0);
   auto* var = GlobalConst("a", nullptr, ctor_expr);
   WrapInFunction();
 
@@ -81,10 +100,8 @@ TEST_P(ResolverInferredTypeParamTest, GlobalLet_Pass) {
 TEST_P(ResolverInferredTypeParamTest, GlobalVar_Fail) {
   auto& params = GetParam();
 
-  auto* type = params.create_type(ty);
-
   // var a = <type constructor>;
-  auto* ctor_expr = ConstructValueFilledWith(type);
+  auto* ctor_expr = params.create_value(*this, 0);
   Global(Source{{12, 34}}, "a", nullptr, ast::StorageClass::kPrivate,
          ctor_expr);
   WrapInFunction();
@@ -97,11 +114,10 @@ TEST_P(ResolverInferredTypeParamTest, GlobalVar_Fail) {
 TEST_P(ResolverInferredTypeParamTest, LocalLet_Pass) {
   auto& params = GetParam();
 
-  auto* type = params.create_type(ty);
-  auto* expected_type = params.create_expected_type(ty);
+  auto* expected_type = params.create_expected_type(*this);
 
   // let a = <type constructor>;
-  auto* ctor_expr = ConstructValueFilledWith(type);
+  auto* ctor_expr = params.create_value(*this, 0);
   auto* var = Const("a", nullptr, ctor_expr);
   WrapInFunction(var);
 
@@ -112,11 +128,10 @@ TEST_P(ResolverInferredTypeParamTest, LocalLet_Pass) {
 TEST_P(ResolverInferredTypeParamTest, LocalVar_Pass) {
   auto& params = GetParam();
 
-  auto* type = params.create_type(ty);
-  auto* expected_type = params.create_expected_type(ty);
+  auto* expected_type = params.create_expected_type(*this);
 
   // var a = <type constructor>;
-  auto* ctor_expr = ConstructValueFilledWith(type);
+  auto* ctor_expr = params.create_value(*this, 0);
   auto* var = Var("a", nullptr, ast::StorageClass::kFunction, ctor_expr);
   WrapInFunction(var);
 

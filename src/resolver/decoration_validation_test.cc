@@ -26,6 +26,33 @@
 namespace tint {
 namespace resolver {
 
+// Helpers and typedefs
+template <typename T>
+using DataType = builder::DataType<T>;
+template <typename T>
+using vec2 = builder::vec2<T>;
+template <typename T>
+using vec3 = builder::vec3<T>;
+template <typename T>
+using vec4 = builder::vec4<T>;
+template <typename T>
+using mat2x2 = builder::mat2x2<T>;
+template <typename T>
+using mat3x3 = builder::mat3x3<T>;
+template <typename T>
+using mat4x4 = builder::mat4x4<T>;
+template <typename T, int ID = 0>
+using alias = builder::alias<T, ID>;
+template <typename T>
+using alias1 = builder::alias1<T>;
+template <typename T>
+using alias2 = builder::alias2<T>;
+template <typename T>
+using alias3 = builder::alias3<T>;
+using f32 = builder::f32;
+using i32 = builder::i32;
+using u32 = builder::u32;
+
 namespace DecorationTests {
 namespace {
 
@@ -357,17 +384,22 @@ namespace ArrayStrideTests {
 namespace {
 
 struct Params {
-  create_ast_type_func_ptr create_el_type;
+  builder::ast_type_func_ptr create_el_type;
   uint32_t stride;
   bool should_pass;
 };
+
+template <typename T>
+constexpr Params ParamsFor(uint32_t stride, bool should_pass) {
+  return Params{DataType<T>::AST, stride, should_pass};
+}
 
 struct TestWithParams : ResolverTestWithParam<Params> {};
 
 using ArrayStrideTest = TestWithParams;
 TEST_P(ArrayStrideTest, All) {
   auto& params = GetParam();
-  auto* el_ty = params.create_el_type(ty);
+  auto* el_ty = params.create_el_type(*this);
 
   std::stringstream ss;
   ss << "el_ty: " << FriendlyName(el_ty) << ", stride: " << params.stride
@@ -389,11 +421,6 @@ TEST_P(ArrayStrideTest, All) {
   }
 }
 
-// Helpers and typedefs
-using i32 = ProgramBuilder::i32;
-using u32 = ProgramBuilder::u32;
-using f32 = ProgramBuilder::f32;
-
 struct SizeAndAlignment {
   uint32_t size;
   uint32_t align;
@@ -414,49 +441,49 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(
         // Succeed because stride >= element size (while being multiple of
         // element alignment)
-        Params{ast_u32, default_u32.size, true},
-        Params{ast_i32, default_i32.size, true},
-        Params{ast_f32, default_f32.size, true},
-        Params{ast_vec2<f32>, default_vec2.size, true},
+        ParamsFor<u32>(default_u32.size, true),
+        ParamsFor<i32>(default_i32.size, true),
+        ParamsFor<f32>(default_f32.size, true),
+        ParamsFor<vec2<f32>>(default_vec2.size, true),
         // vec3's default size is not a multiple of its alignment
-        // Params{ast_vec3<f32>, default_vec3.size, true},
-        Params{ast_vec4<f32>, default_vec4.size, true},
-        Params{ast_mat2x2<f32>, default_mat2x2.size, true},
-        Params{ast_mat3x3<f32>, default_mat3x3.size, true},
-        Params{ast_mat4x4<f32>, default_mat4x4.size, true},
+        // ParamsFor<vec3<f32>, default_vec3.size, true},
+        ParamsFor<vec4<f32>>(default_vec4.size, true),
+        ParamsFor<mat2x2<f32>>(default_mat2x2.size, true),
+        ParamsFor<mat3x3<f32>>(default_mat3x3.size, true),
+        ParamsFor<mat4x4<f32>>(default_mat4x4.size, true),
 
         // Fail because stride is < element size
-        Params{ast_u32, default_u32.size - 1, false},
-        Params{ast_i32, default_i32.size - 1, false},
-        Params{ast_f32, default_f32.size - 1, false},
-        Params{ast_vec2<f32>, default_vec2.size - 1, false},
-        Params{ast_vec3<f32>, default_vec3.size - 1, false},
-        Params{ast_vec4<f32>, default_vec4.size - 1, false},
-        Params{ast_mat2x2<f32>, default_mat2x2.size - 1, false},
-        Params{ast_mat3x3<f32>, default_mat3x3.size - 1, false},
-        Params{ast_mat4x4<f32>, default_mat4x4.size - 1, false},
+        ParamsFor<u32>(default_u32.size - 1, false),
+        ParamsFor<i32>(default_i32.size - 1, false),
+        ParamsFor<f32>(default_f32.size - 1, false),
+        ParamsFor<vec2<f32>>(default_vec2.size - 1, false),
+        ParamsFor<vec3<f32>>(default_vec3.size - 1, false),
+        ParamsFor<vec4<f32>>(default_vec4.size - 1, false),
+        ParamsFor<mat2x2<f32>>(default_mat2x2.size - 1, false),
+        ParamsFor<mat3x3<f32>>(default_mat3x3.size - 1, false),
+        ParamsFor<mat4x4<f32>>(default_mat4x4.size - 1, false),
 
         // Succeed because stride equals multiple of element alignment
-        Params{ast_u32, default_u32.align * 7, true},
-        Params{ast_i32, default_i32.align * 7, true},
-        Params{ast_f32, default_f32.align * 7, true},
-        Params{ast_vec2<f32>, default_vec2.align * 7, true},
-        Params{ast_vec3<f32>, default_vec3.align * 7, true},
-        Params{ast_vec4<f32>, default_vec4.align * 7, true},
-        Params{ast_mat2x2<f32>, default_mat2x2.align * 7, true},
-        Params{ast_mat3x3<f32>, default_mat3x3.align * 7, true},
-        Params{ast_mat4x4<f32>, default_mat4x4.align * 7, true},
+        ParamsFor<u32>(default_u32.align * 7, true),
+        ParamsFor<i32>(default_i32.align * 7, true),
+        ParamsFor<f32>(default_f32.align * 7, true),
+        ParamsFor<vec2<f32>>(default_vec2.align * 7, true),
+        ParamsFor<vec3<f32>>(default_vec3.align * 7, true),
+        ParamsFor<vec4<f32>>(default_vec4.align * 7, true),
+        ParamsFor<mat2x2<f32>>(default_mat2x2.align * 7, true),
+        ParamsFor<mat3x3<f32>>(default_mat3x3.align * 7, true),
+        ParamsFor<mat4x4<f32>>(default_mat4x4.align * 7, true),
 
         // Fail because stride is not multiple of element alignment
-        Params{ast_u32, (default_u32.align - 1) * 7, false},
-        Params{ast_i32, (default_i32.align - 1) * 7, false},
-        Params{ast_f32, (default_f32.align - 1) * 7, false},
-        Params{ast_vec2<f32>, (default_vec2.align - 1) * 7, false},
-        Params{ast_vec3<f32>, (default_vec3.align - 1) * 7, false},
-        Params{ast_vec4<f32>, (default_vec4.align - 1) * 7, false},
-        Params{ast_mat2x2<f32>, (default_mat2x2.align - 1) * 7, false},
-        Params{ast_mat3x3<f32>, (default_mat3x3.align - 1) * 7, false},
-        Params{ast_mat4x4<f32>, (default_mat4x4.align - 1) * 7, false}));
+        ParamsFor<u32>((default_u32.align - 1) * 7, false),
+        ParamsFor<i32>((default_i32.align - 1) * 7, false),
+        ParamsFor<f32>((default_f32.align - 1) * 7, false),
+        ParamsFor<vec2<f32>>((default_vec2.align - 1) * 7, false),
+        ParamsFor<vec3<f32>>((default_vec3.align - 1) * 7, false),
+        ParamsFor<vec4<f32>>((default_vec4.align - 1) * 7, false),
+        ParamsFor<mat2x2<f32>>((default_mat2x2.align - 1) * 7, false),
+        ParamsFor<mat3x3<f32>>((default_mat3x3.align - 1) * 7, false),
+        ParamsFor<mat4x4<f32>>((default_mat4x4.align - 1) * 7, false)));
 
 TEST_F(ArrayStrideTest, MultipleDecorations) {
   auto* arr = ty.array(Source{{12, 34}}, ty.i32(), 4,

@@ -23,6 +23,7 @@ using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitAlias_F32) {
   auto* alias = ty.alias("a", ty.f32());
+  AST().AddConstructedType(alias);
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitConstructedType(alias)) << gen.error();
@@ -37,6 +38,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructedType_Struct) {
                            });
 
   auto* alias = ty.alias("B", s);
+  AST().AddConstructedType(alias);
 
   GeneratorImpl& gen = Build();
 
@@ -57,6 +59,7 @@ TEST_F(WgslGeneratorImplTest, EmitAlias_ToStruct) {
                            });
 
   auto* alias = ty.alias("B", s);
+  AST().AddConstructedType(alias);
 
   GeneratorImpl& gen = Build();
 

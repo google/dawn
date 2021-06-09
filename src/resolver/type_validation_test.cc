@@ -27,6 +27,33 @@ namespace tint {
 namespace resolver {
 namespace {
 
+// Helpers and typedefs
+template <typename T>
+using DataType = builder::DataType<T>;
+template <typename T>
+using vec2 = builder::vec2<T>;
+template <typename T>
+using vec3 = builder::vec3<T>;
+template <typename T>
+using vec4 = builder::vec4<T>;
+template <typename T>
+using mat2x2 = builder::mat2x2<T>;
+template <typename T>
+using mat3x3 = builder::mat3x3<T>;
+template <typename T>
+using mat4x4 = builder::mat4x4<T>;
+template <typename T>
+using alias = builder::alias<T>;
+template <typename T>
+using alias1 = builder::alias1<T>;
+template <typename T>
+using alias2 = builder::alias2<T>;
+template <typename T>
+using alias3 = builder::alias3<T>;
+using f32 = builder::f32;
+using i32 = builder::i32;
+using u32 = builder::u32;
+
 class ResolverTypeValidationTest : public resolver::TestHelper,
                                    public testing::Test {};
 
@@ -366,43 +393,44 @@ TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableType) {
 
 namespace GetCanonicalTests {
 struct Params {
-  create_ast_type_func_ptr create_ast_type;
-  create_sem_type_func_ptr create_sem_type;
+  builder::ast_type_func_ptr create_ast_type;
+  builder::sem_type_func_ptr create_sem_type;
 };
 
+template <typename T>
+constexpr Params ParamsFor() {
+  return Params{DataType<T>::AST, DataType<T>::Sem};
+}
+
 static constexpr Params cases[] = {
-    Params{ast_bool, sem_bool},
-    Params{ast_alias<ast_bool>, sem_bool},
-    Params{ast_alias<ast_alias<ast_bool>>, sem_bool},
+    ParamsFor<bool>(),
+    ParamsFor<alias<bool>>(),
+    ParamsFor<alias1<alias<bool>>>(),
 
-    Params{ast_vec3<ast_f32>, sem_vec3<sem_f32>},
-    Params{ast_alias<ast_vec3<ast_f32>>, sem_vec3<sem_f32>},
-    Params{ast_alias<ast_alias<ast_vec3<ast_f32>>>, sem_vec3<sem_f32>},
+    ParamsFor<vec3<f32>>(),
+    ParamsFor<alias<vec3<f32>>>(),
+    ParamsFor<alias1<alias<vec3<f32>>>>(),
 
-    Params{ast_vec3<ast_alias<ast_f32>>, sem_vec3<sem_f32>},
-    Params{ast_alias<ast_vec3<ast_alias<ast_f32>>>, sem_vec3<sem_f32>},
-    Params{ast_alias<ast_alias<ast_vec3<ast_alias<ast_f32>>>>,
-           sem_vec3<sem_f32>},
-    Params{ast_alias<ast_alias<ast_vec3<ast_alias<ast_alias<ast_f32>>>>>,
-           sem_vec3<sem_f32>},
+    ParamsFor<vec3<alias<f32>>>(),
+    ParamsFor<alias1<vec3<alias<f32>>>>(),
+    ParamsFor<alias2<alias1<vec3<alias<f32>>>>>(),
+    ParamsFor<alias3<alias2<vec3<alias1<alias<f32>>>>>>(),
 
-    Params{ast_mat3x3<ast_alias<ast_f32>>, sem_mat3x3<sem_f32>},
-    Params{ast_alias<ast_mat3x3<ast_alias<ast_f32>>>, sem_mat3x3<sem_f32>},
-    Params{ast_alias<ast_alias<ast_mat3x3<ast_alias<ast_f32>>>>,
-           sem_mat3x3<sem_f32>},
-    Params{ast_alias<ast_alias<ast_mat3x3<ast_alias<ast_alias<ast_f32>>>>>,
-           sem_mat3x3<sem_f32>},
+    ParamsFor<mat3x3<alias<f32>>>(),
+    ParamsFor<alias1<mat3x3<alias<f32>>>>(),
+    ParamsFor<alias2<alias1<mat3x3<alias<f32>>>>>(),
+    ParamsFor<alias3<alias2<mat3x3<alias1<alias<f32>>>>>>(),
 
-    Params{ast_alias<ast_alias<ast_bool>>, sem_bool},
-    Params{ast_alias<ast_alias<ast_vec3<ast_f32>>>, sem_vec3<sem_f32>},
-    Params{ast_alias<ast_alias<ast_mat3x3<ast_f32>>>, sem_mat3x3<sem_f32>},
+    ParamsFor<alias1<alias<bool>>>(),
+    ParamsFor<alias1<alias<vec3<f32>>>>(),
+    ParamsFor<alias1<alias<mat3x3<f32>>>>(),
 };
 
 using CanonicalTest = ResolverTestWithParam<Params>;
 TEST_P(CanonicalTest, All) {
   auto& params = GetParam();
 
-  auto* type = params.create_ast_type(ty);
+  auto* type = params.create_ast_type(*this);
 
   auto* var = Var("v", type);
   auto* expr = Expr("v");
@@ -411,7 +439,7 @@ TEST_P(CanonicalTest, All) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   auto* got = TypeOf(expr)->UnwrapRef();
-  auto* expected = params.create_sem_type(ty);
+  auto* expected = params.create_sem_type(*this);
 
   EXPECT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
                            << "expected: " << FriendlyName(expected) << "\n";
@@ -459,38 +487,44 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
                          testing::ValuesIn(dimension_cases));
 
 struct TypeParams {
-  create_ast_type_func_ptr type_func;
+  builder::ast_type_func_ptr type_func;
   bool is_valid;
 };
 
+template <typename T>
+constexpr TypeParams TypeParamsFor(bool is_valid) {
+  return TypeParams{DataType<T>::AST, is_valid};
+}
+
 static constexpr TypeParams type_cases[] = {
-    TypeParams{ast_bool, false},
-    TypeParams{ast_i32, true},
-    TypeParams{ast_u32, true},
-    TypeParams{ast_f32, true},
+    TypeParamsFor<bool>(false),
+    TypeParamsFor<i32>(true),
+    TypeParamsFor<u32>(true),
+    TypeParamsFor<f32>(true),
 
-    TypeParams{ast_alias<ast_bool>, false},
-    TypeParams{ast_alias<ast_i32>, true},
-    TypeParams{ast_alias<ast_u32>, true},
-    TypeParams{ast_alias<ast_f32>, true},
+    TypeParamsFor<alias<bool>>(false),
+    TypeParamsFor<alias<i32>>(true),
+    TypeParamsFor<alias<u32>>(true),
+    TypeParamsFor<alias<f32>>(true),
 
-    TypeParams{ast_vec3<ast_f32>, false},
-    TypeParams{ast_mat3x3<ast_f32>, false},
+    TypeParamsFor<vec3<f32>>(false),
+    TypeParamsFor<mat3x3<f32>>(false),
 
-    TypeParams{ast_alias<ast_vec3<ast_f32>>, false},
-    TypeParams{ast_alias<ast_mat3x3<ast_f32>>, false}};
+    TypeParamsFor<alias<vec3<f32>>>(false),
+    TypeParamsFor<alias<mat3x3<f32>>>(false),
+};
 
 using MultisampledTextureTypeTest = ResolverTestWithParam<TypeParams>;
 TEST_P(MultisampledTextureTypeTest, All) {
   auto& params = GetParam();
-  Global(
-      Source{{12, 34}}, "a",
-      ty.multisampled_texture(ast::TextureDimension::k2d, params.type_func(ty)),
-      ast::StorageClass::kNone, nullptr,
-      ast::DecorationList{
-          create<ast::BindingDecoration>(0),
-          create<ast::GroupDecoration>(0),
-      });
+  Global(Source{{12, 34}}, "a",
+         ty.multisampled_texture(ast::TextureDimension::k2d,
+                                 params.type_func(*this)),
+         ast::StorageClass::kNone, nullptr,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
 
   if (params.is_valid) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
