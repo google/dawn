@@ -86,6 +86,9 @@ class Resolver {
   bool IsHostShareable(const sem::Type* type);
 
  private:
+  /// Describes the context in which a variable is declared
+  enum class VariableKind { kParameter, kLocal, kGlobal };
+
   /// Structure holding semantic information about a variable.
   /// Used to build the sem::Variable nodes at the end of resolving.
   struct VariableInfo {
@@ -93,7 +96,8 @@ class Resolver {
                  sem::Type* type,
                  const std::string& type_name,
                  ast::StorageClass storage_class,
-                 ast::Access ac);
+                 ast::Access ac,
+                 VariableKind k);
     ~VariableInfo();
 
     ast::Variable const* const declaration;
@@ -103,6 +107,7 @@ class Resolver {
     ast::Access const access;
     std::vector<ast::IdentifierExpression*> users;
     sem::BindingPoint binding_point;
+    VariableKind kind;
   };
 
   struct IntrinsicCallInfo {
@@ -189,9 +194,6 @@ class Resolver {
     ast::TypeDecl const* const ast;
     sem::Type* const sem;
   };
-
-  /// Describes the context in which a variable is declared
-  enum class VariableKind { kParameter, kLocal, kGlobal };
 
   /// Resolves the program, without creating final the semantic nodes.
   /// @returns true on success, false on error

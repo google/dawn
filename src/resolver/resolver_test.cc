@@ -23,6 +23,7 @@
 #include "src/ast/break_statement.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/continue_statement.h"
+#include "src/ast/float_literal.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/intrinsic_texture_helper_test.h"
 #include "src/ast/loop_statement.h"
@@ -894,6 +895,33 @@ TEST_F(ResolverTest, Function_NotRegisterFunctionVariable) {
                         Assign("var", 1.f),
                     });
 
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  auto* func_sem = Sem().Get(func);
+  ASSERT_NE(func_sem, nullptr);
+
+  EXPECT_EQ(func_sem->ReferencedModuleVariables().size(), 0u);
+  EXPECT_TRUE(func_sem->ReturnType()->Is<sem::Void>());
+}
+
+TEST_F(ResolverTest, Function_NotRegisterFunctionConstant) {
+  auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
+                    {
+                        Decl(Const("var", ty.f32(), Construct(ty.f32()))),
+                    });
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  auto* func_sem = Sem().Get(func);
+  ASSERT_NE(func_sem, nullptr);
+
+  EXPECT_EQ(func_sem->ReferencedModuleVariables().size(), 0u);
+  EXPECT_TRUE(func_sem->ReturnType()->Is<sem::Void>());
+}
+
+TEST_F(ResolverTest, Function_NotRegisterFunctionParams) {
+  auto* func = Func("my_func", {Const("var", ty.f32(), Construct(ty.f32()))},
+                    ty.void_(), {});
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   auto* func_sem = Sem().Get(func);

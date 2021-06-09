@@ -148,10 +148,10 @@ class InspectorHelper : public ProgramBuilder {
   ///            will be added.
   /// @returns the constant that was created
   template <class T>
-  ast::Variable* AddConstantWithID(std::string name,
-                                   uint32_t id,
-                                   ast::Type* type,
-                                   T* val) {
+  ast::Variable* AddOverridableConstantWithID(std::string name,
+                                              uint32_t id,
+                                              ast::Type* type,
+                                              T* val) {
     ast::Expression* constructor = nullptr;
     if (val) {
       constructor = Expr(*val);
@@ -169,9 +169,9 @@ class InspectorHelper : public ProgramBuilder {
   ///            will be added.
   /// @returns the constant that was created
   template <class T>
-  ast::Variable* AddConstantWithoutID(std::string name,
-                                      ast::Type* type,
-                                      T* val) {
+  ast::Variable* AddOverridableConstantWithoutID(std::string name,
+                                                 ast::Type* type,
+                                                 T* val) {
     ast::Expression* constructor = nullptr;
     if (val) {
       constructor = Expr(*val);
@@ -180,6 +180,25 @@ class InspectorHelper : public ProgramBuilder {
                        ast::DecorationList{
                            Override(),
                        });
+  }
+
+  /// Generates a function that references module constant
+  /// @param func name of the function created
+  /// @param var name of the constant to be reference
+  /// @param type type of the const being referenced
+  /// @param decorations the function decorations
+  /// @returns a function object
+  ast::Function* MakeConstReferenceBodyFunction(
+      std::string func,
+      std::string var,
+      ast::Type* type,
+      ast::DecorationList decorations) {
+    ast::StatementList stmts;
+    stmts.emplace_back(Decl(Var("local_" + var, type)));
+    stmts.emplace_back(Assign("local_" + var, var));
+    stmts.emplace_back(Return());
+
+    return Func(func, ast::VariableList(), ty.void_(), stmts, decorations);
   }
 
   /// @param vec Vector of StageVariable to be searched
@@ -1446,6 +1465,81 @@ TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables_Legacy) {
   EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[0].component_type);
 }
 
+TEST_F(InspectorGetEntryPointTest, OverridableConstantUnreferenced) {
+  AddOverridableConstantWithoutID<float>("foo", ty.f32(), nullptr);
+  MakeEmptyBodyFunction("ep_func", {Stage(ast::PipelineStage::kCompute)});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_EQ(0u, result[0].overridable_constants.size());
+}
+
+TEST_F(InspectorGetEntryPointTest, OverridableConstantReferencedByEntryPoint) {
+  AddOverridableConstantWithoutID<float>("foo", ty.f32(), nullptr);
+  MakeConstReferenceBodyFunction("ep_func", "foo", ty.f32(),
+                                 {Stage(ast::PipelineStage::kCompute)});
+
+  Inspector& inspector = Build();
+
+  tint::writer::wgsl::Generator writer(program_.get());
+  writer.Generate();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  ASSERT_EQ(1u, result[0].overridable_constants.size());
+  EXPECT_EQ("foo", result[0].overridable_constants[0].name);
+}
+
+TEST_F(InspectorGetEntryPointTest, OverridableConstantReferencedByCallee) {
+  AddOverridableConstantWithoutID<float>("foo", ty.f32(), nullptr);
+  MakeConstReferenceBodyFunction("callee_func", "foo", ty.f32(), {});
+  MakeCallerBodyFunction("ep_func", {"callee_func"},
+                         {Stage(ast::PipelineStage::kCompute)});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  ASSERT_EQ(1u, result[0].overridable_constants.size());
+  EXPECT_EQ("foo", result[0].overridable_constants[0].name);
+}
+
+TEST_F(InspectorGetEntryPointTest, OverridableConstantSomeReferenced) {
+  AddOverridableConstantWithID<float>("foo", 1, ty.f32(), nullptr);
+  AddOverridableConstantWithID<float>("bar", 2, ty.f32(), nullptr);
+  MakeConstReferenceBodyFunction("callee_func", "foo", ty.f32(), {});
+  MakeCallerBodyFunction("ep_func", {"callee_func"},
+                         {Stage(ast::PipelineStage::kCompute)});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  ASSERT_EQ(1u, result[0].overridable_constants.size());
+  EXPECT_EQ("foo", result[0].overridable_constants[0].name);
+}
+
+TEST_F(InspectorGetEntryPointTest, NonOverridableConstantSkipped) {
+  ast::Struct* foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
+  AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
+  MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
+  MakeCallerBodyFunction("ep_func", {"ub_func"},
+                         {Stage(ast::PipelineStage::kFragment)});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_EQ(0u, result[0].overridable_constants.size());
+}
+
 // TODO(rharrison): Reenable once GetRemappedNameForEntryPoint isn't a pass
 // through
 TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_NoFunctions) {
@@ -1518,9 +1612,9 @@ TEST_F(InspectorGetRemappedNameForEntryPointTest,
 TEST_F(InspectorGetConstantIDsTest, Bool) {
   bool val_true = true;
   bool val_false = false;
-  AddConstantWithID<bool>("foo", 1, ty.bool_(), nullptr);
-  AddConstantWithID<bool>("bar", 20, ty.bool_(), &val_true);
-  AddConstantWithID<bool>("baz", 300, ty.bool_(), &val_false);
+  AddOverridableConstantWithID<bool>("foo", 1, ty.bool_(), nullptr);
+  AddOverridableConstantWithID<bool>("bar", 20, ty.bool_(), &val_true);
+  AddOverridableConstantWithID<bool>("baz", 300, ty.bool_(), &val_false);
 
   Inspector& inspector = Build();
 
@@ -1541,8 +1635,8 @@ TEST_F(InspectorGetConstantIDsTest, Bool) {
 
 TEST_F(InspectorGetConstantIDsTest, U32) {
   uint32_t val = 42;
-  AddConstantWithID<uint32_t>("foo", 1, ty.u32(), nullptr);
-  AddConstantWithID<uint32_t>("bar", 20, ty.u32(), &val);
+  AddOverridableConstantWithID<uint32_t>("foo", 1, ty.u32(), nullptr);
+  AddOverridableConstantWithID<uint32_t>("bar", 20, ty.u32(), &val);
 
   Inspector& inspector = Build();
 
@@ -1560,9 +1654,9 @@ TEST_F(InspectorGetConstantIDsTest, U32) {
 TEST_F(InspectorGetConstantIDsTest, I32) {
   int32_t val_neg = -42;
   int32_t val_pos = 42;
-  AddConstantWithID<int32_t>("foo", 1, ty.i32(), nullptr);
-  AddConstantWithID<int32_t>("bar", 20, ty.i32(), &val_neg);
-  AddConstantWithID<int32_t>("baz", 300, ty.i32(), &val_pos);
+  AddOverridableConstantWithID<int32_t>("foo", 1, ty.i32(), nullptr);
+  AddOverridableConstantWithID<int32_t>("bar", 20, ty.i32(), &val_neg);
+  AddOverridableConstantWithID<int32_t>("baz", 300, ty.i32(), &val_pos);
 
   Inspector& inspector = Build();
 
@@ -1585,10 +1679,10 @@ TEST_F(InspectorGetConstantIDsTest, Float) {
   float val_zero = 0.0f;
   float val_neg = -10.0f;
   float val_pos = 15.0f;
-  AddConstantWithID<float>("foo", 1, ty.f32(), nullptr);
-  AddConstantWithID<float>("bar", 20, ty.f32(), &val_zero);
-  AddConstantWithID<float>("baz", 300, ty.f32(), &val_neg);
-  AddConstantWithID<float>("x", 4000, ty.f32(), &val_pos);
+  AddOverridableConstantWithID<float>("foo", 1, ty.f32(), nullptr);
+  AddOverridableConstantWithID<float>("bar", 20, ty.f32(), &val_zero);
+  AddOverridableConstantWithID<float>("baz", 300, ty.f32(), &val_neg);
+  AddOverridableConstantWithID<float>("x", 4000, ty.f32(), &val_pos);
 
   Inspector& inspector = Build();
 
@@ -1612,12 +1706,12 @@ TEST_F(InspectorGetConstantIDsTest, Float) {
 }
 
 TEST_F(InspectorGetConstantNameToIdMapTest, WithAndWithoutIds) {
-  AddConstantWithID<float>("v1", 1, ty.f32(), nullptr);
-  AddConstantWithID<float>("v20", 20, ty.f32(), nullptr);
-  AddConstantWithID<float>("v300", 300, ty.f32(), nullptr);
-  auto* a = AddConstantWithoutID<float>("a", ty.f32(), nullptr);
-  auto* b = AddConstantWithoutID<float>("b", ty.f32(), nullptr);
-  auto* c = AddConstantWithoutID<float>("c", ty.f32(), nullptr);
+  AddOverridableConstantWithID<float>("v1", 1, ty.f32(), nullptr);
+  AddOverridableConstantWithID<float>("v20", 20, ty.f32(), nullptr);
+  AddOverridableConstantWithID<float>("v300", 300, ty.f32(), nullptr);
+  auto* a = AddOverridableConstantWithoutID<float>("a", ty.f32(), nullptr);
+  auto* b = AddOverridableConstantWithoutID<float>("b", ty.f32(), nullptr);
+  auto* c = AddOverridableConstantWithoutID<float>("c", ty.f32(), nullptr);
 
   Inspector& inspector = Build();
 

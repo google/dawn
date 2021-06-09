@@ -45,6 +45,13 @@ struct StageVariable {
   ComponentType component_type;
 };
 
+/// Reflection data about a pipeline overridable constant referenced by an entry
+/// point
+struct OverridableConstant {
+  /// Name of the constant
+  std::string name;
+};
+
 /// Reflection data for an entry point in the shader.
 struct EntryPoint {
   /// Constructors
@@ -71,6 +78,8 @@ struct EntryPoint {
   std::vector<StageVariable> input_variables;
   /// List of the output variable accessed via this entry point.
   std::vector<StageVariable> output_variables;
+  /// List of the pipeline overridable constants accessed via this entry point.
+  std::vector<OverridableConstant> overridable_constants;
 
   /// @returns the size of the workgroup in {x,y,z} format
   std::tuple<uint32_t, uint32_t, uint32_t> workgroup_size() {

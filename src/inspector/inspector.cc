@@ -222,7 +222,6 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
                                   entry_point.output_variables);
     }
 
-    // TODO(crbug.com/tint/697): Remove this.
     for (auto* var : sem->ReferencedModuleVariables()) {
       auto* decl = var->Declaration();
 
@@ -231,32 +230,43 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
         continue;
       }
 
-      StageVariable stage_variable;
-      stage_variable.name = name;
+      // TODO(crbug.com/tint/697): Remove this.
+      {
+        StageVariable stage_variable;
+        stage_variable.name = name;
 
-      stage_variable.component_type = ComponentType::kUnknown;
-      auto* type = var->Type()->UnwrapRef();
-      if (type->is_float_scalar_or_vector() || type->is_float_matrix()) {
-        stage_variable.component_type = ComponentType::kFloat;
-      } else if (type->is_unsigned_scalar_or_vector()) {
-        stage_variable.component_type = ComponentType::kUInt;
-      } else if (type->is_signed_scalar_or_vector()) {
-        stage_variable.component_type = ComponentType::kSInt;
+        stage_variable.component_type = ComponentType::kUnknown;
+        auto* type = var->Type()->UnwrapRef();
+        if (type->is_float_scalar_or_vector() || type->is_float_matrix()) {
+          stage_variable.component_type = ComponentType::kFloat;
+        } else if (type->is_unsigned_scalar_or_vector()) {
+          stage_variable.component_type = ComponentType::kUInt;
+        } else if (type->is_signed_scalar_or_vector()) {
+          stage_variable.component_type = ComponentType::kSInt;
+        }
+
+        auto* location_decoration =
+            ast::GetDecoration<ast::LocationDecoration>(decl->decorations());
+        if (location_decoration) {
+          stage_variable.has_location_decoration = true;
+          stage_variable.location_decoration = location_decoration->value();
+        } else {
+          stage_variable.has_location_decoration = false;
+        }
+
+        if (var->StorageClass() == ast::StorageClass::kInput) {
+          entry_point.input_variables.push_back(stage_variable);
+        } else if (var->StorageClass() == ast::StorageClass::kOutput) {
+          entry_point.output_variables.push_back(stage_variable);
+        }
       }
 
-      auto* location_decoration =
-          ast::GetDecoration<ast::LocationDecoration>(decl->decorations());
-      if (location_decoration) {
-        stage_variable.has_location_decoration = true;
-        stage_variable.location_decoration = location_decoration->value();
-      } else {
-        stage_variable.has_location_decoration = false;
-      }
-
-      if (var->StorageClass() == ast::StorageClass::kInput) {
-        entry_point.input_variables.push_back(stage_variable);
-      } else if (var->StorageClass() == ast::StorageClass::kOutput) {
-        entry_point.output_variables.push_back(stage_variable);
+      {
+        if (var->IsPipelineConstant()) {
+          OverridableConstant overridable_constant;
+          overridable_constant.name = name;
+          entry_point.overridable_constants.push_back(overridable_constant);
+        }
       }
     }
 

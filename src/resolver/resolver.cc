@@ -135,8 +135,8 @@ void Resolver::set_referenced_from_function_if_needed(VariableInfo* var,
   if (current_function_ == nullptr) {
     return;
   }
-  if (var->storage_class == ast::StorageClass::kNone ||
-      var->storage_class == ast::StorageClass::kFunction) {
+
+  if (var->kind != VariableKind::kGlobal) {
     return;
   }
 
@@ -496,7 +496,7 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
   }
 
   auto* info = variable_infos_.Create(var, const_cast<sem::Type*>(type),
-                                      type_name, storage_class, access);
+                                      type_name, storage_class, access, kind);
   variable_to_info_.emplace(var, info);
 
   return info;
@@ -3377,12 +3377,14 @@ Resolver::VariableInfo::VariableInfo(const ast::Variable* decl,
                                      sem::Type* ty,
                                      const std::string& tn,
                                      ast::StorageClass sc,
-                                     ast::Access ac)
+                                     ast::Access ac,
+                                     VariableKind k)
     : declaration(decl),
       type(ty),
       type_name(tn),
       storage_class(sc),
-      access(ac) {}
+      access(ac),
+      kind(k) {}
 
 Resolver::VariableInfo::~VariableInfo() = default;
 
