@@ -36,26 +36,27 @@ This style matches the style found in most other compilers.
 **Don't:**
 
 ```
-shader.wgsl:5:7 error: structure 'UBO' requires block decoration
+shader.wgsl:5:7 error: cannot multiply 'expr_a * expr_b' with types i32 and f32
 
-struct UBO {
-       ^^^
+var res : f32 = expr_a * expr_b
+                ^^^^^^^^^^^^^^^
 ```
 
 **Do:**
 
 ```
-shader.wgsl:5:7 error: structure requires block decoration
+shader.wgsl:5:7 error: cannot multiply types i32 and f32
 
-struct UBO {
-       ^^^
+var res : f32 = expr_a * expr_b
+                ^^^^^^^^^^^^^^^
 ```
 
 **Justification:**
 
 The highlighted line provides even more contextual information than the quoted
 source, and duplicating this information doesn't provide any more help to the
-developer.
+developer. \
+Quoting single word identifiers or keywords from the source is not discouraged.
 
 ## Use `note` diagnostics for providing additional links to relevant code
 
