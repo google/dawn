@@ -196,11 +196,12 @@ TEST_F(BuilderTest, EntryPoint_SharedStruct) {
                  ast::DecorationList{Builtin(ast::Builtin::kPosition)}),
       });
 
-  auto* vert_retval = Construct(interface, 42.f, Construct(ty.vec4<f32>()));
-  Func("vert_main", ast::VariableList{}, interface, {Return(vert_retval)},
-       {Stage(ast::PipelineStage::kVertex)});
+  auto* vert_retval =
+      Construct(ty.Of(interface), 42.f, Construct(ty.vec4<f32>()));
+  Func("vert_main", ast::VariableList{}, ty.Of(interface),
+       {Return(vert_retval)}, {Stage(ast::PipelineStage::kVertex)});
 
-  auto* frag_inputs = Param("inputs", interface);
+  auto* frag_inputs = Param("inputs", ty.Of(interface));
   Func("frag_main", ast::VariableList{frag_inputs}, ty.f32(),
        {Return(MemberAccessor(Expr("inputs"), "value"))},
        {Stage(ast::PipelineStage::kFragment)},

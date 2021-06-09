@@ -201,7 +201,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Struct) {
                                  Member("c", ty.vec3<i32>()),
                              });
 
-  WrapInFunction(Construct(str, 1, 2.0f, vec3<i32>(3, 4, 5)));
+  WrapInFunction(Construct(ty.Of(str), 1, 2.0f, vec3<i32>(3, 4, 5)));
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -218,7 +218,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Struct_Empty) {
                                  Member("c", ty.vec3<i32>()),
                              });
 
-  WrapInFunction(Construct(str));
+  WrapInFunction(Construct(ty.Of(str)));
 
   GeneratorImpl& gen = SanitizeAndBuild();
 

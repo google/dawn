@@ -87,9 +87,9 @@ bool GeneratorImpl::Generate() {
     global_variables_.set(global->symbol(), sem);
   }
 
-  for (auto* const ty : program_->AST().ConstructedTypes()) {
-    if (!ty->Is<ast::Alias>()) {
-      if (!EmitConstructedType(TypeOf(ty))) {
+  for (auto* const type_decl : program_->AST().ConstructedTypes()) {
+    if (!type_decl->Is<ast::Alias>()) {
+      if (!EmitConstructedType(TypeOf(type_decl))) {
         return false;
       }
     }

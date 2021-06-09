@@ -68,7 +68,7 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferPointer) {
 TEST_F(ResolverStorageClassValidationTest, StorageBufferArray) {
   // var<storage, read> g : array<S, 3>;
   auto* s = Structure("S", {Member("a", ty.f32())});
-  auto* a = ty.array(s, 3);
+  auto* a = ty.array(ty.Of(s), 3);
   Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage,
          ast::Access::kRead,
          ast::DecorationList{
@@ -87,7 +87,7 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferBoolAlias) {
   // type a = bool;
   // var<storage, read> g : a;
   auto* a = Alias("a", ty.bool_());
-  Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage,
+  Global(Source{{56, 78}}, "g", ty.Of(a), ast::StorageClass::kStorage,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -104,7 +104,7 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferNoBlockDecoration) {
   // struct S { x : i32 };
   // var<storage, read> g : S;
   auto* s = Structure(Source{{12, 34}}, "S", {Member("x", ty.i32())});
-  Global(Source{{56, 78}}, "g", s, ast::StorageClass::kStorage,
+  Global(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
@@ -124,7 +124,7 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferNoError_Basic) {
   // var<storage, read> g : S;
   auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  Global(Source{{56, 78}}, "g", s, ast::StorageClass::kStorage,
+  Global(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
@@ -140,9 +140,9 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferNoError_Aliases) {
   // var<storage, read> g : a1;
   auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* a1 = Alias("a1", s);
-  auto* a2 = Alias("a2", a1);
-  Global(Source{{56, 78}}, "g", a2, ast::StorageClass::kStorage,
+  auto* a1 = Alias("a1", ty.Of(s));
+  auto* a2 = Alias("a2", ty.Of(a1));
+  Global(Source{{56, 78}}, "g", ty.Of(a2), ast::StorageClass::kStorage,
          ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
@@ -188,7 +188,7 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferPointer) {
 TEST_F(ResolverStorageClassValidationTest, UniformBufferArray) {
   // var<uniform> g : array<S, 3>;
   auto* s = Structure("S", {Member("a", ty.f32())});
-  auto* a = ty.array(s, 3);
+  auto* a = ty.array(ty.Of(s), 3);
   Global(Source{{56, 78}}, "g", a, ast::StorageClass::kUniform,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
@@ -206,7 +206,7 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferBoolAlias) {
   // type a = bool;
   // var<uniform> g : a;
   auto* a = Alias("a", ty.bool_());
-  Global(Source{{56, 78}}, "g", a, ast::StorageClass::kUniform,
+  Global(Source{{56, 78}}, "g", ty.Of(a), ast::StorageClass::kUniform,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -223,7 +223,7 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferNoBlockDecoration) {
   // struct S { x : i32 };
   // var<uniform> g : S;
   auto* s = Structure(Source{{12, 34}}, "S", {Member("x", ty.i32())});
-  Global(Source{{56, 78}}, "g", s, ast::StorageClass::kUniform,
+  Global(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kUniform,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -242,7 +242,7 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferNoError_Basic) {
   // var<uniform> g :  S;
   auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  Global(Source{{56, 78}}, "g", s, ast::StorageClass::kUniform,
+  Global(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kUniform,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -257,8 +257,8 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferNoError_Aliases) {
   // var<uniform> g : a1;
   auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* a1 = Alias("a1", s);
-  Global(Source{{56, 78}}, "g", a1, ast::StorageClass::kUniform,
+  auto* a1 = Alias("a1", ty.Of(s));
+  Global(Source{{56, 78}}, "g", ty.Of(a1), ast::StorageClass::kUniform,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),

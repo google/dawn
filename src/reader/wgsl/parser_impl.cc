@@ -313,11 +313,11 @@ Token ParserImpl::last_token() const {
 }
 
 void ParserImpl::register_constructed(const std::string& name,
-                                      const ast::Type* type) {
-  registered_constructs_[name] = type;
+                                      const ast::TypeDecl* type_decl) {
+  registered_constructs_[name] = type_decl;
 }
 
-const ast::Type* ParserImpl::get_constructed(const std::string& name) {
+const ast::TypeDecl* ParserImpl::get_constructed(const std::string& name) {
   if (registered_constructs_.find(name) == registered_constructs_.end()) {
     return nullptr;
   }

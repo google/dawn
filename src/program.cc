@@ -110,6 +110,10 @@ const sem::Type* Program::TypeOf(const ast::Type* type) const {
   return Sem().Get(type);
 }
 
+const sem::Type* Program::TypeOf(const ast::TypeDecl* type_decl) const {
+  return Sem().Get(type_decl);
+}
+
 std::string Program::to_str(bool demangle) const {
   AssertNotMoved();
   auto str = ast_->to_str(Sem());

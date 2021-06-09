@@ -53,11 +53,11 @@ fn main() ->  {  // missing return type
 
 TEST_F(ParserImplTest, GetRegisteredType) {
   auto p = parser("");
-  p->register_constructed("my_alias", ty.i32());
+  auto* alias = create<ast::Alias>(Sym("my_alias"), ty.i32());
+  p->register_constructed("my_alias", alias);
 
-  auto* alias = p->get_constructed("my_alias");
-  ASSERT_NE(alias, nullptr);
-  EXPECT_TRUE(alias->Is<ast::I32>());
+  auto* got = p->get_constructed("my_alias");
+  EXPECT_EQ(got, alias);
 }
 
 TEST_F(ParserImplTest, GetUnregisteredType) {

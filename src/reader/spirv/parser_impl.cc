@@ -1037,10 +1037,10 @@ const Type* ParserImpl::ConvertType(
   return ty_.Struct(sym, std::move(ast_member_types));
 }
 
-void ParserImpl::AddConstructedType(Symbol name, ast::NamedType* type) {
+void ParserImpl::AddConstructedType(Symbol name, ast::TypeDecl* decl) {
   auto iter = constructed_types_.insert(name);
   if (iter.second) {
-    builder_.AST().AddConstructedType(type);
+    builder_.AST().AddConstructedType(decl);
   }
 }
 

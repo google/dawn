@@ -70,7 +70,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
                                Member("b", ty.f32()),
                            });
 
-  auto* var = Var("a", s, ast::StorageClass::kNone);
+  auto* var = Var("a", ty.Of(s), ast::StorageClass::kNone);
   auto* stmt = Decl(var);
   WrapInFunction(stmt);
 

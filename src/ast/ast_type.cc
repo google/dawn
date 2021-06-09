@@ -40,9 +40,7 @@ Type::~Type() = default;
 Type* Type::UnwrapAll() {
   auto* type = this;
   while (true) {
-    if (auto* alias = type->As<Alias>()) {
-      type = alias->type();
-    } else if (auto* ptr = type->As<Pointer>()) {
+    if (auto* ptr = type->As<Pointer>()) {
       type = ptr->type();
     } else {
       break;

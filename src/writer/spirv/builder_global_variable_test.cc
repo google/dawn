@@ -403,11 +403,12 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  auto* var = Global("b", A, ast::StorageClass::kStorage, ast::Access::kRead,
-                     ast::DecorationList{
-                         create<ast::BindingDecoration>(0),
-                         create<ast::GroupDecoration>(0),
-                     });
+  auto* var =
+      Global("b", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kRead,
+             ast::DecorationList{
+                 create<ast::BindingDecoration>(0),
+                 create<ast::GroupDecoration>(0),
+             });
 
   spirv::Builder& b = Build();
 
@@ -441,12 +442,13 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
 
   auto* A = Structure("A", {Member("a", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* B = Alias("B", A);
-  auto* var = Global("b", B, ast::StorageClass::kStorage, ast::Access::kRead,
-                     ast::DecorationList{
-                         create<ast::BindingDecoration>(0),
-                         create<ast::GroupDecoration>(0),
-                     });
+  auto* B = Alias("B", ty.Of(A));
+  auto* var =
+      Global("b", ty.Of(B), ast::StorageClass::kStorage, ast::Access::kRead,
+             ast::DecorationList{
+                 create<ast::BindingDecoration>(0),
+                 create<ast::GroupDecoration>(0),
+             });
 
   spirv::Builder& b = Build();
 
@@ -478,12 +480,13 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
 
   auto* A = Structure("A", {Member("a", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* B = Alias("B", A);
-  auto* var = Global("b", B, ast::StorageClass::kStorage, ast::Access::kRead,
-                     ast::DecorationList{
-                         create<ast::BindingDecoration>(0),
-                         create<ast::GroupDecoration>(0),
-                     });
+  auto* B = Alias("B", ty.Of(A));
+  auto* var =
+      Global("b", ty.Of(B), ast::StorageClass::kStorage, ast::Access::kRead,
+             ast::DecorationList{
+                 create<ast::BindingDecoration>(0),
+                 create<ast::GroupDecoration>(0),
+             });
 
   spirv::Builder& b = Build();
 
@@ -515,17 +518,18 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
 
   auto* A = Structure("A", {Member("a", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* var_b = Global("b", A, ast::StorageClass::kStorage, ast::Access::kRead,
-                       ast::DecorationList{
-                           create<ast::GroupDecoration>(0),
-                           create<ast::BindingDecoration>(0),
-                       });
-  auto* var_c =
-      Global("c", A, ast::StorageClass::kStorage, ast::Access::kReadWrite,
+  auto* var_b =
+      Global("b", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kRead,
              ast::DecorationList{
-                 create<ast::GroupDecoration>(1),
+                 create<ast::GroupDecoration>(0),
                  create<ast::BindingDecoration>(0),
              });
+  auto* var_c = Global("c", ty.Of(A), ast::StorageClass::kStorage,
+                       ast::Access::kReadWrite,
+                       ast::DecorationList{
+                           create<ast::GroupDecoration>(1),
+                           create<ast::BindingDecoration>(0),
+                       });
 
   spirv::Builder& b = Build();
 

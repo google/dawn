@@ -81,7 +81,7 @@ TEST_F(ResolverVarLetValidationTest, VarConstructorWrongType) {
 
 TEST_F(ResolverVarLetValidationTest, LetConstructorWrongTypeViaAlias) {
   auto* a = Alias("I32", ty.i32());
-  WrapInFunction(Const(Source{{3, 3}}, "v", a, Expr(2u)));
+  WrapInFunction(Const(Source{{3, 3}}, "v", ty.Of(a), Expr(2u)));
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
@@ -92,7 +92,7 @@ TEST_F(ResolverVarLetValidationTest, LetConstructorWrongTypeViaAlias) {
 TEST_F(ResolverVarLetValidationTest, VarConstructorWrongTypeViaAlias) {
   auto* a = Alias("I32", ty.i32());
   WrapInFunction(
-      Var(Source{{3, 3}}, "v", a, ast::StorageClass::kNone, Expr(2u)));
+      Var(Source{{3, 3}}, "v", ty.Of(a), ast::StorageClass::kNone, Expr(2u)));
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
@@ -228,9 +228,9 @@ TEST_F(ResolverVarLetValidationTest, InferredPtrStorageAccessMismatch) {
   //   let p : pointer<storage, i32, read_write> = &s.inner.arr[2];
   // }
   auto* inner = Structure("Inner", {Member("arr", ty.array<i32, 4>())});
-  auto* buf = Structure("S", {Member("inner", inner)},
+  auto* buf = Structure("S", {Member("inner", ty.Of(inner))},
                         {create<ast::StructBlockDecoration>()});
-  auto* storage = Global("s", buf, ast::StorageClass::kStorage,
+  auto* storage = Global("s", ty.Of(buf), ast::StorageClass::kStorage,
                          ast::DecorationList{
                              create<ast::BindingDecoration>(0),
                              create<ast::GroupDecoration>(0),

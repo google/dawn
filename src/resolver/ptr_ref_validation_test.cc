@@ -90,14 +90,14 @@ TEST_F(ResolverPtrRefValidationTest, InferredPtrAccessMismatch) {
   //   let p : pointer<storage, i32> = &s.inner.arr[2];
   // }
   auto* inner = Structure("Inner", {Member("arr", ty.array<i32, 4>())});
-  auto* buf = Structure("S", {Member("inner", inner)},
+  auto* buf = Structure("S", {Member("inner", ty.Of(inner))},
                         {create<ast::StructBlockDecoration>()});
-  auto* storage =
-      Global("s", buf, ast::StorageClass::kStorage, ast::Access::kReadWrite,
-             ast::DecorationList{
-                 create<ast::BindingDecoration>(0),
-                 create<ast::GroupDecoration>(0),
-             });
+  auto* storage = Global("s", ty.Of(buf), ast::StorageClass::kStorage,
+                         ast::Access::kReadWrite,
+                         ast::DecorationList{
+                             create<ast::BindingDecoration>(0),
+                             create<ast::GroupDecoration>(0),
+                         });
 
   auto* expr =
       IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 4);

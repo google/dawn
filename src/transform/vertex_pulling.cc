@@ -216,8 +216,8 @@ struct State {
     for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
       // The decorated variable with struct type
       ctx.dst->Global(
-          GetVertexBufferName(i), struct_type, ast::StorageClass::kStorage,
-          ast::Access::kRead,
+          GetVertexBufferName(i), ctx.dst->ty.Of(struct_type),
+          ast::StorageClass::kStorage, ast::Access::kRead,
           ast::DecorationList{
               ctx.dst->create<ast::BindingDecoration>(i),
               ctx.dst->create<ast::GroupDecoration>(cfg.pulling_group),
@@ -485,7 +485,8 @@ struct State {
       auto* new_struct = ctx.dst->Structure(ctx.dst->Sym(), new_members);
 
       // Create a new function parameter with this struct.
-      auto* new_param = ctx.dst->Param(ctx.dst->Sym(), new_struct);
+      auto* new_param =
+          ctx.dst->Param(ctx.dst->Sym(), ctx.dst->ty.Of(new_struct));
       new_function_parameters.push_back(new_param);
 
       // Copy values from the new parameter to the function-scope variable.

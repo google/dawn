@@ -102,20 +102,17 @@ const sem::Type* ProgramBuilder::TypeOf(const ast::Type* type) const {
   return Sem().Get(type);
 }
 
-ast::Type* ProgramBuilder::TypesBuilder::MaybeCreateTypename(
-    ast::Type* type) const {
-  if (auto* nt = As<ast::NamedType>(type)) {
-    return type_name(nt->name());
-  }
-  return type;
+const sem::Type* ProgramBuilder::TypeOf(const ast::TypeDecl* type_decl) const {
+  return Sem().Get(type_decl);
 }
 
-const ast::Type* ProgramBuilder::TypesBuilder::MaybeCreateTypename(
-    const ast::Type* type) const {
-  if (auto* nt = As<ast::NamedType>(type)) {
-    return type_name(nt->name());
-  }
-  return type;
+ast::TypeName* ProgramBuilder::TypesBuilder::Of(ast::TypeDecl* decl) const {
+  return type_name(decl->name());
+}
+
+const ast::TypeName* ProgramBuilder::TypesBuilder::Of(
+    const ast::TypeDecl* decl) const {
+  return type_name(decl->name());
 }
 
 ProgramBuilder::TypesBuilder::TypesBuilder(ProgramBuilder* pb) : builder(pb) {}

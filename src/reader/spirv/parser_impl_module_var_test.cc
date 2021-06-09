@@ -4085,7 +4085,7 @@ TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_IOLocations) {
   {
     Return{}
   }
-  Function main -> __struct_main_out
+  Function main -> __type_name_main_out
   StageDecoration{vertex}
   (
     VariableConst{
@@ -4124,7 +4124,7 @@ TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_IOLocations) {
     Return{
       {
         TypeConstructor[not set]{
-          __struct_main_out
+          __type_name_main_out
           Identifier[not set]{x_2}
           Identifier[not set]{x_4}
         }

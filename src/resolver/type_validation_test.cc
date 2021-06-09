@@ -341,7 +341,7 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsNotLast_Fail) {
   auto* alias = Alias("RTArr", ty.array<u32>());
   Structure("s",
             {
-                Member(Source{{12, 34}}, "b", alias),
+                Member(Source{{12, 34}}, "b", ty.Of(alias)),
                 Member("a", ty.u32()),
             },
             {create<ast::StructBlockDecoration>()});
@@ -367,7 +367,7 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsLast_Pass) {
   Structure("s",
             {
                 Member("a", ty.u32()),
-                Member("b", alias),
+                Member("b", ty.Of(alias)),
             },
             {create<ast::StructBlockDecoration>()});
 

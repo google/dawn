@@ -30,7 +30,7 @@ TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
   auto* ary = ty.array(ty.i32(), 0);
   auto* str = Structure("S", {Member("x", ary)},
                         {create<ast::StructBlockDecoration>()});
-  Global("a", str, ast::StorageClass::kStorage, ast::Access::kRead,
+  Global("a", ty.Of(str), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -51,7 +51,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
   auto* ary = ty.array(ty.i32(), 0);
   auto* str = Structure("S", {Member("x", ary)},
                         {create<ast::StructBlockDecoration>()});
-  Global("a", str, ast::StorageClass::kStorage, ast::Access::kRead,
+  Global("a", ty.Of(str), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),

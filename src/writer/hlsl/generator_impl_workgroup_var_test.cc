@@ -41,7 +41,7 @@ TEST_F(HlslGeneratorImplTest_WorkgroupVar, Basic) {
 TEST_F(HlslGeneratorImplTest_WorkgroupVar, Aliased) {
   auto* alias = Alias("F32", ty.f32());
 
-  Global("wg", alias, ast::StorageClass::kWorkgroup);
+  Global("wg", ty.Of(alias), ast::StorageClass::kWorkgroup);
 
   Func("main", {}, ty.void_(), {Assign("wg", 1.2f)},
        {Stage(ast::PipelineStage::kCompute)});

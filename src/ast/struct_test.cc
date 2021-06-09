@@ -144,13 +144,6 @@ TEST_F(AstStructTest, TypeName) {
   EXPECT_EQ(s->type_name(), "__struct_$1");
 }
 
-TEST_F(AstStructTest, FriendlyName) {
-  auto name = Sym("my_struct");
-  auto* s =
-      create<ast::Struct>(name, ast::StructMemberList{}, ast::DecorationList{});
-  EXPECT_EQ(s->FriendlyName(Symbols()), "my_struct");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

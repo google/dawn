@@ -61,8 +61,8 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
 
   Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           Decl(Var("s0", s0)),
-           Decl(Var("s1", s1)),
+           Decl(Var("s0", ty.Of(s0))),
+           Decl(Var("s1", ty.Of(s1))),
            Assign("a1", Call("func")),
        },
        ast::DecorationList{

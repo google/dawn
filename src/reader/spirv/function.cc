@@ -1042,10 +1042,10 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
     }
 
     // Create and register the result type.
-    return_type = create<ast::Struct>(Source{}, return_struct_sym,
-                                      return_members, ast::DecorationList{});
-    parser_impl_.AddConstructedType(return_struct_sym,
-                                    return_type->As<ast::NamedType>());
+    auto* str = create<ast::Struct>(Source{}, return_struct_sym, return_members,
+                                    ast::DecorationList{});
+    parser_impl_.AddConstructedType(return_struct_sym, str);
+    return_type = builder_.ty.Of(str);
 
     // Add the return-value statement.
     stmts.push_back(create<ast::ReturnStatement>(

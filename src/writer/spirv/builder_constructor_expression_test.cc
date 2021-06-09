@@ -94,7 +94,7 @@ TEST_F(SpvBuilderConstructorTest, Type_WithAlias) {
   // cast<Int>(2.3f)
 
   auto* alias = Alias("Int", ty.i32());
-  auto* cast = Construct(alias, 2.3f);
+  auto* cast = Construct(ty.Of(alias), 2.3f);
   WrapInFunction(cast);
 
   spirv::Builder& b = Build();
@@ -1056,7 +1056,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Struct) {
                                        Member("b", ty.vec3<f32>()),
                                    });
 
-  auto* t = Construct(s, 2.0f, vec3<f32>(2.0f, 2.0f, 2.0f));
+  auto* t = Construct(ty.Of(s), 2.0f, vec3<f32>(2.0f, 2.0f, 2.0f));
   WrapInFunction(t);
 
   spirv::Builder& b = Build();
@@ -1202,7 +1202,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Array) {
 
 TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Struct) {
   auto* s = Structure("my_struct", {Member("a", ty.f32())});
-  auto* t = Construct(s);
+  auto* t = Construct(ty.Of(s));
   WrapInFunction(t);
 
   spirv::Builder& b = Build();
@@ -1626,7 +1626,7 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
                                        Member("b", ty.vec3<f32>()),
                                    });
 
-  auto* t = Construct(s, 2.f, vec3<f32>(2.f, 2.f, 2.f));
+  auto* t = Construct(ty.Of(s), 2.f, vec3<f32>(2.f, 2.f, 2.f));
   WrapInFunction(t);
 
   spirv::Builder& b = Build();
@@ -1645,7 +1645,7 @@ TEST_F(SpvBuilderConstructorTest,
   Global("a", ty.f32(), ast::StorageClass::kPrivate);
   Global("b", ty.f32(), ast::StorageClass::kPrivate);
 
-  auto* t = Construct(s, 2.f, "a", 2.f);
+  auto* t = Construct(ty.Of(s), 2.f, "a", 2.f);
   WrapInFunction(t);
 
   spirv::Builder& b = Build();

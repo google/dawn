@@ -46,11 +46,12 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_StorageClass) {
 TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Read) {
   auto* s = Structure("S", {Member("a", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* v = Global("a", s, ast::StorageClass::kStorage, ast::Access::kRead,
-                   ast::DecorationList{
-                       create<ast::BindingDecoration>(0),
-                       create<ast::GroupDecoration>(0),
-                   });
+  auto* v =
+      Global("a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+             ast::DecorationList{
+                 create<ast::BindingDecoration>(0),
+                 create<ast::GroupDecoration>(0),
+             });
 
   GeneratorImpl& gen = Build();
 
@@ -62,11 +63,12 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Read) {
 TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Write) {
   auto* s = Structure("S", {Member("a", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* v = Global("a", s, ast::StorageClass::kStorage, ast::Access::kWrite,
-                   ast::DecorationList{
-                       create<ast::BindingDecoration>(0),
-                       create<ast::GroupDecoration>(0),
-                   });
+  auto* v =
+      Global("a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kWrite,
+             ast::DecorationList{
+                 create<ast::BindingDecoration>(0),
+                 create<ast::GroupDecoration>(0),
+             });
 
   GeneratorImpl& gen = Build();
 
@@ -78,7 +80,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Write) {
 TEST_F(WgslGeneratorImplTest, EmitVariable_Access_ReadWrite) {
   auto* s = Structure("S", {Member("a", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* v = Global("a", s, ast::StorageClass::kStorage, ast::Access::kReadWrite,
+  auto* v = Global("a", ty.Of(s), ast::StorageClass::kStorage,
+                   ast::Access::kReadWrite,
                    ast::DecorationList{
                        create<ast::BindingDecoration>(0),
                        create<ast::GroupDecoration>(0),

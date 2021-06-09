@@ -12,26 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/named_type.h"
+#include "src/ast/type_decl.h"
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::NamedType);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::TypeDecl);
 
 namespace tint {
 namespace ast {
 
-NamedType::NamedType(ProgramID program_id, const Source& source, Symbol name)
+TypeDecl::TypeDecl(ProgramID program_id, const Source& source, Symbol name)
     : Base(program_id, source), name_(name) {
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(name, program_id);
 }
 
-NamedType::NamedType(NamedType&&) = default;
+TypeDecl::TypeDecl(TypeDecl&&) = default;
 
-NamedType::~NamedType() = default;
+TypeDecl::~TypeDecl() = default;
 
-std::string NamedType::FriendlyName(const SymbolTable& symbols) const {
-  return symbols.NameFor(name());
+void TypeDecl::to_str(const sem::Info&,
+                      std::ostream& out,
+                      size_t indent) const {
+  make_indent(out, indent);
+  out << type_name();
 }
 
 }  // namespace ast

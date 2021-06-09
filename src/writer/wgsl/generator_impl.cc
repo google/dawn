@@ -66,8 +66,8 @@ GeneratorImpl::~GeneratorImpl() = default;
 bool GeneratorImpl::Generate() {
   // Generate global declarations in the order they appear in the module.
   for (auto* decl : program_->AST().GlobalDeclarations()) {
-    if (auto* ty = decl->As<ast::Type>()) {
-      if (!EmitConstructedType(ty)) {
+    if (auto* td = decl->As<ast::TypeDecl>()) {
+      if (!EmitConstructedType(td)) {
         return false;
       }
     } else if (auto* func = decl->As<ast::Function>()) {
@@ -91,7 +91,7 @@ bool GeneratorImpl::Generate() {
   return true;
 }
 
-bool GeneratorImpl::EmitConstructedType(const ast::Type* ty) {
+bool GeneratorImpl::EmitConstructedType(const ast::TypeDecl* ty) {
   make_indent();
 
   if (auto* alias = ty->As<ast::Alias>()) {
@@ -105,7 +105,8 @@ bool GeneratorImpl::EmitConstructedType(const ast::Type* ty) {
       return false;
     }
   } else {
-    diagnostics_.add_error("unknown constructed type: " + ty->type_name());
+    diagnostics_.add_error("unknown constructed type: " +
+                           std::string(ty->TypeInfo().name));
     return false;
   }
   return true;
@@ -374,9 +375,7 @@ bool GeneratorImpl::EmitAccess(const ast::Access access) {
 }
 
 bool GeneratorImpl::EmitType(const ast::Type* ty) {
-  if (auto* alias = ty->As<ast::Alias>()) {
-    out_ << program_->Symbols().NameFor(alias->symbol());
-  } else if (auto* ary = ty->As<ast::Array>()) {
+  if (auto* ary = ty->As<ast::Array>()) {
     for (auto* deco : ary->decorations()) {
       if (auto* stride = deco->As<ast::StrideDecoration>()) {
         out_ << "[[stride(" << stride->stride() << ")]] ";
@@ -416,10 +415,6 @@ bool GeneratorImpl::EmitType(const ast::Type* ty) {
     if (sampler->IsComparison()) {
       out_ << "_comparison";
     }
-  } else if (auto* str = ty->As<ast::Struct>()) {
-    // The struct, as a type, is just the name. We should have already emitted
-    // the declaration through a call to |EmitStructType| earlier.
-    out_ << program_->Symbols().NameFor(str->name());
   } else if (ty->Is<ast::ExternalTexture>()) {
     out_ << "external_texture";
   } else if (auto* texture = ty->As<ast::Texture>()) {

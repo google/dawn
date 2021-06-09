@@ -286,6 +286,12 @@ class GeneratorImpl : public TextGenerator {
     return program_->TypeOf(type);
   }
 
+  /// @returns the resolved type of the ast::TypeDecl `type_decl`
+  /// @param type_decl the type declaration
+  const sem::Type* TypeOf(const ast::TypeDecl* type_decl) const {
+    return program_->TypeOf(type_decl);
+  }
+
   // A pair of byte size and alignment `uint32_t`s.
   struct SizeAndAlign {
     uint32_t size;

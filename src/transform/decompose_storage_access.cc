@@ -332,7 +332,7 @@ void InsertGlobal(CloneContext& ctx,
 }
 
 /// @returns the unwrapped, user-declared constructed type of ty.
-const ast::NamedType* ConstructedTypeOf(const sem::Type* ty) {
+const ast::TypeDecl* ConstructedTypeOf(const sem::Type* ty) {
   while (true) {
     if (auto* ref = ty->As<sem::Reference>()) {
       ty = ref->StoreType();
@@ -414,7 +414,7 @@ struct DecomposeStorageAccess::State {
   /// @param var_user the variable user
   /// @return the name of the function that performs the load
   Symbol LoadFunc(CloneContext& ctx,
-                  const ast::NamedType* insert_after,
+                  const ast::TypeDecl* insert_after,
                   const sem::Type* buf_ty,
                   const sem::Type* el_ty,
                   const sem::VariableUser* var_user) {
@@ -490,7 +490,7 @@ struct DecomposeStorageAccess::State {
   /// @param var_user the variable user
   /// @return the name of the function that performs the store
   Symbol StoreFunc(CloneContext& ctx,
-                   const ast::NamedType* insert_after,
+                   const ast::TypeDecl* insert_after,
                    const sem::Type* buf_ty,
                    const sem::Type* el_ty,
                    const sem::VariableUser* var_user) {

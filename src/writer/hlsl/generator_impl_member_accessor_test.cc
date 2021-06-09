@@ -98,7 +98,8 @@ class HlslGeneratorImplTest_MemberAccessorBase : public BASE {
     auto* s =
         b.Structure("Data", members, {b.create<ast::StructBlockDecoration>()});
 
-    b.Global("data", s, ast::StorageClass::kStorage, ast::Access::kReadWrite,
+    b.Global("data", b.ty.Of(s), ast::StorageClass::kStorage,
+             ast::Access::kReadWrite,
              ast::DecorationList{
                  b.create<ast::BindingDecoration>(0),
                  b.create<ast::GroupDecoration>(1),
@@ -123,7 +124,7 @@ using HlslGeneratorImplTest_MemberAccessorWithParam =
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
   auto* s = Structure("Data", {Member("mem", ty.f32())});
-  Global("str", s, ast::StorageClass::kPrivate);
+  Global("str", ty.Of(s), ast::StorageClass::kPrivate);
 
   auto* expr = MemberAccessor("str", "mem");
   WrapInFunction(Var("expr", ty.f32(), ast::StorageClass::kNone, expr));
@@ -521,7 +522,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel) {
                                    });
 
   SetupStorageBuffer({
-      Member("c", ty.array(inner, 4, 32)),
+      Member("c", ty.array(ty.Of(inner), 4, 32)),
   });
 
   SetupFunction({
@@ -567,7 +568,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                                    });
 
   SetupStorageBuffer({
-      Member("c", ty.array(inner, 4, 32)),
+      Member("c", ty.array(ty.Of(inner), 4, 32)),
   });
 
   SetupFunction({
@@ -615,7 +616,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                                    });
 
   SetupStorageBuffer({
-      Member("c", ty.array(inner, 4, 32)),
+      Member("c", ty.array(ty.Of(inner), 4, 32)),
   });
 
   SetupFunction({
@@ -663,7 +664,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                                    });
 
   SetupStorageBuffer({
-      Member("c", ty.array(inner, 4, 32)),
+      Member("c", ty.array(ty.Of(inner), 4, 32)),
   });
 
   SetupFunction({
@@ -710,7 +711,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_MultiLevel) {
                                    });
 
   SetupStorageBuffer({
-      Member("c", ty.array(inner, 4, 32)),
+      Member("c", ty.array(ty.Of(inner), 4, 32)),
   });
 
   SetupFunction({
@@ -755,7 +756,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                                    });
 
   SetupStorageBuffer({
-      Member("c", ty.array(inner, 4, 32)),
+      Member("c", ty.array(ty.Of(inner), 4, 32)),
   });
 
   SetupFunction({

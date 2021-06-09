@@ -1006,8 +1006,8 @@ TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
 
 TEST_F(InspectorGetEntryPointTest, InOutStruct) {
   auto* interface = MakeInOutStruct("interface", {{"a", 0u}, {"b", 1u}});
-  Func("foo", {Param("param", interface)}, interface, {Return("param")},
-       {Stage(ast::PipelineStage::kFragment)});
+  Func("foo", {Param("param", ty.Of(interface))}, ty.Of(interface),
+       {Return("param")}, {Stage(ast::PipelineStage::kFragment)});
   Inspector& inspector = Build();
 
   auto result = inspector.GetEntryPoints();
@@ -1038,9 +1038,9 @@ TEST_F(InspectorGetEntryPointTest, InOutStruct) {
 
 TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutSharedStruct) {
   auto* interface = MakeInOutStruct("interface", {{"a", 0u}, {"b", 1u}});
-  Func("foo", {}, interface, {Return(Construct(interface))},
+  Func("foo", {}, ty.Of(interface), {Return(Construct(ty.Of(interface)))},
        {Stage(ast::PipelineStage::kFragment)});
-  Func("bar", {Param("param", interface)}, ty.void_(), {},
+  Func("bar", {Param("param", ty.Of(interface))}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
   Inspector& inspector = Build();
 
@@ -1078,10 +1078,11 @@ TEST_F(InspectorGetEntryPointTest, MixInOutVariablesAndStruct) {
   auto* struct_a = MakeInOutStruct("struct_a", {{"a", 0u}, {"b", 1u}});
   auto* struct_b = MakeInOutStruct("struct_b", {{"a", 2u}});
   Func("foo",
-       {Param("param_a", struct_a), Param("param_b", struct_b),
+       {Param("param_a", ty.Of(struct_a)), Param("param_b", ty.Of(struct_b)),
         Param("param_c", ty.f32(), {Location(3u)}),
         Param("param_d", ty.f32(), {Location(4u)})},
-       struct_a, {Return("param_a")}, {Stage(ast::PipelineStage::kFragment)});
+       ty.Of(struct_a), {Return("param_a")},
+       {Stage(ast::PipelineStage::kFragment)});
   Inspector& inspector = Build();
 
   auto result = inspector.GetEntryPoints();
@@ -1660,7 +1661,7 @@ TEST_F(InspectorGetResourceBindingsTest, Empty) {
 
 TEST_F(InspectorGetResourceBindingsTest, Simple) {
   ast::Struct* ub_struct_type = MakeUniformBufferType("ub_type", {ty.i32()});
-  AddUniformBuffer("ub_var", ub_struct_type, 0, 0);
+  AddUniformBuffer("ub_var", ty.Of(ub_struct_type), 0, 0);
   MakeStructVariableReferenceBodyFunction("ub_func", "ub_var", {{0, ty.i32()}});
 
   auto sb = MakeStorageBufferTypes("sb_type", {ty.i32()});
@@ -1768,7 +1769,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingEntryPoint) {
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
   ast::Struct* foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
-  AddUniformBuffer("foo_ub", foo_struct_type, 0, 0);
+  AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
 
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
 
@@ -1786,7 +1787,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
   ast::Struct* foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
-  AddUniformBuffer("foo_ub", foo_struct_type, 0, 0);
+  AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
 
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
 
@@ -1812,7 +1813,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
   ast::Struct* foo_struct_type =
       MakeUniformBufferType("foo_type", {ty.i32(), ty.u32(), ty.f32()});
-  AddUniformBuffer("foo_ub", foo_struct_type, 0, 0);
+  AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
 
   MakeStructVariableReferenceBodyFunction(
       "ub_func", "foo_ub", {{0, ty.i32()}, {1, ty.u32()}, {2, ty.f32()}});
@@ -1839,7 +1840,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingPadding) {
   ast::Struct* foo_struct_type =
       MakeUniformBufferType("foo_type", {ty.vec3<f32>()});
-  AddUniformBuffer("foo_ub", foo_struct_type, 0, 0);
+  AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
 
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub",
                                           {{0, ty.vec3<f32>()}});
@@ -1866,9 +1867,9 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingPadding) {
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
   ast::Struct* ub_struct_type =
       MakeUniformBufferType("ub_type", {ty.i32(), ty.u32(), ty.f32()});
-  AddUniformBuffer("ub_foo", ub_struct_type, 0, 0);
-  AddUniformBuffer("ub_bar", ub_struct_type, 0, 1);
-  AddUniformBuffer("ub_baz", ub_struct_type, 2, 0);
+  AddUniformBuffer("ub_foo", ty.Of(ub_struct_type), 0, 0);
+  AddUniformBuffer("ub_bar", ty.Of(ub_struct_type), 0, 1);
+  AddUniformBuffer("ub_baz", ty.Of(ub_struct_type), 2, 0);
 
   auto AddReferenceFunc = [this](const std::string& func_name,
                                  const std::string& var_name) {
@@ -1924,7 +1925,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
   // and will need to be fixed.
   ast::Struct* foo_struct_type =
       MakeUniformBufferType("foo_type", {ty.i32(), ty.array<u32, 4>()});
-  AddUniformBuffer("foo_ub", foo_struct_type, 0, 0);
+  AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
 
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
 

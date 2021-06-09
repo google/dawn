@@ -66,12 +66,12 @@ TEST_F(ResolverPtrRefTest, DefaultPtrStorageClass) {
   auto* function = Var("f", ty.i32());
   auto* private_ = Global("p", ty.i32(), ast::StorageClass::kPrivate);
   auto* workgroup = Global("w", ty.i32(), ast::StorageClass::kWorkgroup);
-  auto* uniform = Global("ub", buf, ast::StorageClass::kUniform,
+  auto* uniform = Global("ub", ty.Of(buf), ast::StorageClass::kUniform,
                          ast::DecorationList{
                              create<ast::BindingDecoration>(0),
                              create<ast::GroupDecoration>(0),
                          });
-  auto* storage = Global("sb", buf, ast::StorageClass::kStorage,
+  auto* storage = Global("sb", ty.Of(buf), ast::StorageClass::kStorage,
                          ast::DecorationList{
                              create<ast::BindingDecoration>(1),
                              create<ast::GroupDecoration>(0),
@@ -87,10 +87,10 @@ TEST_F(ResolverPtrRefTest, DefaultPtrStorageClass) {
       Const("w_ptr", ty.pointer(ty.i32(), ast::StorageClass::kWorkgroup),
             AddressOf(workgroup));
   auto* uniform_ptr =
-      Const("ub_ptr", ty.pointer(buf, ast::StorageClass::kUniform),
+      Const("ub_ptr", ty.pointer(ty.Of(buf), ast::StorageClass::kUniform),
             AddressOf(uniform));
   auto* storage_ptr =
-      Const("sb_ptr", ty.pointer(buf, ast::StorageClass::kStorage),
+      Const("sb_ptr", ty.pointer(ty.Of(buf), ast::StorageClass::kStorage),
             AddressOf(storage));
 
   WrapInFunction(function, function_ptr, private_ptr, workgroup_ptr,

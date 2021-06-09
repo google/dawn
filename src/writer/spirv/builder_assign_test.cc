@@ -181,7 +181,7 @@ TEST_F(BuilderTest, Assign_StructMember) {
                                        Member("b", ty.f32()),
                                    });
 
-  auto* v = Var("ident", s);
+  auto* v = Var("ident", ty.Of(s));
 
   auto* assign = Assign(MemberAccessor("ident", "b"), Expr(4.f));
 

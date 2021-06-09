@@ -17,13 +17,13 @@
 
 #include <string>
 
-#include "src/ast/named_type.h"
+#include "src/ast/type_decl.h"
 
 namespace tint {
 namespace ast {
 
 /// A type alias type. Holds a name and pointer to another type.
-class Alias : public Castable<Alias, NamedType> {
+class Alias : public Castable<Alias, TypeDecl> {
  public:
   /// Constructor
   /// @param program_id the identifier of the program that owns this node

@@ -158,15 +158,15 @@ TEST_F(ResolverInferredTypeTest, InferArray_Pass) {
 
 TEST_F(ResolverInferredTypeTest, InferStruct_Pass) {
   auto* member = Member("x", ty.i32());
-  auto* type = Structure("S", {member}, {create<ast::StructBlockDecoration>()});
+  auto* str = Structure("S", {member}, {create<ast::StructBlockDecoration>()});
 
   auto* expected_type =
-      create<sem::Struct>(type,
+      create<sem::Struct>(str,
                           sem::StructMemberList{create<sem::StructMember>(
                               member, create<sem::I32>(), 0, 0, 0, 4)},
                           0, 4, 4);
 
-  auto* ctor_expr = Construct(type);
+  auto* ctor_expr = Construct(ty.Of(str));
 
   auto* var = Var("a", nullptr, ast::StorageClass::kFunction, ctor_expr);
   WrapInFunction(var);

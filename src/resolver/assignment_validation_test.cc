@@ -112,7 +112,7 @@ TEST_F(ResolverAssignmentValidationTest,
   // var a : myint = 2;
   // a = 2
   auto* myint = Alias("myint", ty.i32());
-  auto* var = Var("a", myint, ast::StorageClass::kNone, Expr(2));
+  auto* var = Var("a", ty.Of(myint), ast::StorageClass::kNone, Expr(2));
   WrapInFunction(var, Assign(Source{{12, 34}}, "a", 2));
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();

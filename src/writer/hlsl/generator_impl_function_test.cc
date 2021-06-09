@@ -205,12 +205,12 @@ TEST_F(HlslGeneratorImplTest_Function,
           Member("col2", ty.f32(), {Location(2)}),
       });
 
-  Func("vert_main", {}, interface_struct,
-       {Return(Construct(interface_struct, Construct(ty.vec4<f32>()),
+  Func("vert_main", {}, ty.Of(interface_struct),
+       {Return(Construct(ty.Of(interface_struct), Construct(ty.vec4<f32>()),
                          Expr(0.5f), Expr(0.25f)))},
        {Stage(ast::PipelineStage::kVertex)});
 
-  Func("frag_main", {Param("inputs", interface_struct)}, ty.void_(),
+  Func("frag_main", {Param("inputs", ty.Of(interface_struct))}, ty.void_(),
        {
            Decl(Const("r", ty.f32(), MemberAccessor("inputs", "col1"))),
            Decl(Const("g", ty.f32(), MemberAccessor("inputs", "col2"))),
@@ -274,19 +274,20 @@ TEST_F(HlslGeneratorImplTest_Function,
       "VertexOutput",
       {Member("pos", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)})});
 
-  Func("foo", {Param("x", ty.f32())}, vertex_output_struct,
-       {Return(Construct(vertex_output_struct,
+  Func("foo", {Param("x", ty.f32())}, ty.Of(vertex_output_struct),
+       {Return(Construct(ty.Of(vertex_output_struct),
                          Construct(ty.vec4<f32>(), "x", "x", "x", Expr(1.f))))},
        {});
 
-  Func("vert_main1", {}, vertex_output_struct,
-       {Return(Construct(vertex_output_struct, Expr(Call("foo", Expr(0.5f)))))},
+  Func("vert_main1", {}, ty.Of(vertex_output_struct),
+       {Return(Construct(ty.Of(vertex_output_struct),
+                         Expr(Call("foo", Expr(0.5f)))))},
        {Stage(ast::PipelineStage::kVertex)});
 
-  Func(
-      "vert_main2", {}, vertex_output_struct,
-      {Return(Construct(vertex_output_struct, Expr(Call("foo", Expr(0.25f)))))},
-      {Stage(ast::PipelineStage::kVertex)});
+  Func("vert_main2", {}, ty.Of(vertex_output_struct),
+       {Return(Construct(ty.Of(vertex_output_struct),
+                         Expr(Call("foo", Expr(0.25f)))))},
+       {Stage(ast::PipelineStage::kVertex)});
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -327,7 +328,7 @@ TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_With_Uniform) {
   auto* ubo_ty = Structure("UBO", {Member("coord", ty.vec4<f32>())},
                            {create<ast::StructBlockDecoration>()});
-  auto* ubo = Global("ubo", ubo_ty, ast::StorageClass::kUniform,
+  auto* ubo = Global("ubo", ty.Of(ubo_ty), ast::StorageClass::kUniform,
                      ast::DecorationList{
                          create<ast::BindingDecoration>(0),
                          create<ast::GroupDecoration>(1),
@@ -382,7 +383,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* s = Structure("Uniforms", {Member("coord", ty.vec4<f32>())},
                       {create<ast::StructBlockDecoration>()});
 
-  Global("uniforms", s, ast::StorageClass::kUniform,
+  Global("uniforms", ty.Of(s), ast::StorageClass::kUniform,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
@@ -428,7 +429,8 @@ TEST_F(HlslGeneratorImplTest_Function,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  Global("coord", s, ast::StorageClass::kStorage, ast::Access::kReadWrite,
+  Global("coord", ty.Of(s), ast::StorageClass::kStorage,
+         ast::Access::kReadWrite,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
@@ -472,7 +474,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  Global("coord", s, ast::StorageClass::kStorage, ast::Access::kRead,
+  Global("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
@@ -516,7 +518,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  Global("coord", s, ast::StorageClass::kStorage, ast::Access::kWrite,
+  Global("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kWrite,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
@@ -557,7 +559,8 @@ TEST_F(HlslGeneratorImplTest_Function,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  Global("coord", s, ast::StorageClass::kStorage, ast::Access::kReadWrite,
+  Global("coord", ty.Of(s), ast::StorageClass::kStorage,
+         ast::Access::kReadWrite,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
@@ -756,7 +759,7 @@ TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_Called_By_EntryPoint_With_Uniform) {
   auto* s = Structure("S", {Member("x", ty.f32())},
                       {create<ast::StructBlockDecoration>()});
-  Global("coord", s, ast::StorageClass::kUniform,
+  Global("coord", ty.Of(s), ast::StorageClass::kUniform,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
@@ -806,7 +809,8 @@ TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_Called_By_EntryPoint_With_StorageBuffer) {
   auto* s = Structure("S", {Member("x", ty.f32())},
                       {create<ast::StructBlockDecoration>()});
-  Global("coord", s, ast::StorageClass::kStorage, ast::Access::kReadWrite,
+  Global("coord", ty.Of(s), ast::StorageClass::kStorage,
+         ast::Access::kReadWrite,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
@@ -1055,7 +1059,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto* s = Structure("Data", {Member("d", ty.f32())},
                       {create<ast::StructBlockDecoration>()});
 
-  Global("data", s, ast::StorageClass::kStorage, ast::Access::kReadWrite,
+  Global("data", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),

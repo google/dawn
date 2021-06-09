@@ -224,7 +224,7 @@ TEST_F(BuilderTest, MemberAccessor) {
                                        Member("b", ty.f32()),
                                    });
 
-  auto* var = Var("ident", s);
+  auto* var = Var("ident", ty.Of(s));
 
   auto* expr = MemberAccessor("ident", "b");
   WrapInFunction(var, expr);
@@ -268,9 +268,9 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
                                               Member("b", ty.f32()),
                                           });
 
-  auto* s_type = Structure("my_struct", {Member("inner", inner_struct)});
+  auto* s_type = Structure("my_struct", {Member("inner", ty.Of(inner_struct))});
 
-  auto* var = Var("ident", s_type);
+  auto* var = Var("ident", ty.Of(s_type));
   auto* expr = MemberAccessor(MemberAccessor("ident", "inner"), "b");
   WrapInFunction(var, expr);
 
@@ -312,7 +312,7 @@ TEST_F(BuilderTest, MemberAccessor_NonPointer) {
                                        Member("b", ty.f32()),
                                    });
 
-  auto* var = Const("ident", s, Construct(s, 0.f, 0.f));
+  auto* var = Const("ident", ty.Of(s), Construct(ty.Of(s), 0.f, 0.f));
 
   auto* expr = MemberAccessor("ident", "b");
   WrapInFunction(var, expr);
@@ -350,10 +350,11 @@ TEST_F(BuilderTest, MemberAccessor_Nested_NonPointer) {
                                               Member("b", ty.f32()),
                                           });
 
-  auto* s_type = Structure("my_struct", {Member("inner", inner_struct)});
+  auto* s_type = Structure("my_struct", {Member("inner", ty.Of(inner_struct))});
 
-  auto* var = Const("ident", s_type,
-                    Construct(s_type, Construct(inner_struct, 0.f, 0.f)));
+  auto* var =
+      Const("ident", ty.Of(s_type),
+            Construct(ty.Of(s_type), Construct(ty.Of(inner_struct), 0.f, 0.f)));
   auto* expr = MemberAccessor(MemberAccessor("ident", "inner"), "b");
   WrapInFunction(var, expr);
 
@@ -394,10 +395,10 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
                                               Member("b", ty.f32()),
                                           });
 
-  auto* alias = Alias("Alias", inner_struct);
-  auto* s_type = Structure("Outer", {Member("inner", alias)});
+  auto* alias = Alias("Alias", ty.Of(inner_struct));
+  auto* s_type = Structure("Outer", {Member("inner", ty.Of(alias))});
 
-  auto* var = Var("ident", s_type);
+  auto* var = Var("ident", ty.Of(s_type));
   auto* expr = MemberAccessor(MemberAccessor("ident", "inner"), "a");
   WrapInFunction(var, expr);
 
@@ -440,9 +441,9 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
                                               Member("b", ty.f32()),
                                           });
 
-  auto* s_type = Structure("my_struct", {Member("inner", inner_struct)});
+  auto* s_type = Structure("my_struct", {Member("inner", ty.Of(inner_struct))});
 
-  auto* var = Var("ident", s_type);
+  auto* var = Var("ident", ty.Of(s_type));
   auto* expr =
       Assign(MemberAccessor(MemberAccessor("ident", "inner"), "a"), Expr(2.0f));
   WrapInFunction(var, expr);
@@ -489,9 +490,9 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
                                               Member("b", ty.f32()),
                                           });
 
-  auto* s_type = Structure("my_struct", {Member("inner", inner_struct)});
+  auto* s_type = Structure("my_struct", {Member("inner", ty.Of(inner_struct))});
 
-  auto* var = Var("ident", s_type);
+  auto* var = Var("ident", ty.Of(s_type));
   auto* store = Var("store", ty.f32());
 
   auto* rhs = MemberAccessor(MemberAccessor("ident", "inner"), "a");
@@ -696,11 +697,11 @@ TEST_F(BuilderTest, ArrayAccessor_Mixed_ArrayAndMember) {
 
   auto* c_type = Structure("C", {Member("baz", ty.vec3<f32>())});
 
-  auto* b_type = Structure("B", {Member("bar", c_type)});
-  auto* b_ary_type = ty.array(b_type, 3);
+  auto* b_type = Structure("B", {Member("bar", ty.Of(c_type))});
+  auto* b_ary_type = ty.array(ty.Of(b_type), 3);
   auto* a_type = Structure("A", {Member("foo", b_ary_type)});
 
-  auto* a_ary_type = ty.array(a_type, 2);
+  auto* a_ary_type = ty.array(ty.Of(a_type), 2);
   auto* var = Var("index", a_ary_type);
   auto* expr = MemberAccessor(
       MemberAccessor(

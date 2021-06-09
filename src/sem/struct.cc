@@ -13,10 +13,12 @@
 // limitations under the License.
 
 #include "src/sem/struct.h"
-#include "src/ast/struct_member.h"
 
 #include <string>
 #include <utility>
+
+#include "src/ast/struct_member.h"
+#include "src/symbol_table.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Struct);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::StructMember);
@@ -51,7 +53,7 @@ std::string Struct::type_name() const {
 }
 
 std::string Struct::FriendlyName(const SymbolTable& symbols) const {
-  return declaration_->FriendlyName(symbols);
+  return symbols.NameFor(declaration_->name());
 }
 
 StructMember::StructMember(ast::StructMember* declaration,

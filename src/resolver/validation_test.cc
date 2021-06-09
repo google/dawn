@@ -1709,7 +1709,7 @@ TEST_F(ResolverValidationTest,
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Error) {
   auto* alias = Alias("UnsignedInt", ty.u32());
-  Global("uint_var", alias, ast::StorageClass::kInput);
+  Global("uint_var", ty.Of(alias), ast::StorageClass::kInput);
 
   auto* tc = vec2<f32>(Expr(Source{{12, 34}}, "uint_var"));
   WrapInFunction(tc);
@@ -1723,8 +1723,8 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Error) {
 TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Success) {
   auto* f32_alias = Alias("Float32", ty.f32());
   auto* vec2_alias = Alias("VectorFloat2", ty.vec2<f32>());
-  Global("my_f32", f32_alias, ast::StorageClass::kInput);
-  Global("my_vec2", vec2_alias, ast::StorageClass::kInput);
+  Global("my_f32", ty.Of(f32_alias), ast::StorageClass::kInput);
+  Global("my_vec2", ty.Of(vec2_alias), ast::StorageClass::kInput);
 
   auto* tc = vec3<f32>("my_vec2", "my_f32");
   WrapInFunction(tc);
@@ -1735,7 +1735,7 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vector_ElementTypeAlias_Error) {
   auto* f32_alias = Alias("Float32", ty.f32());
 
   // vec2<Float32>(1.0f, 1u)
-  auto* vec_type = ty.vec(f32_alias, 2);
+  auto* vec_type = ty.vec(ty.Of(f32_alias), 2);
   auto* tc = create<ast::TypeConstructorExpression>(
       Source{{12, 34}}, vec_type,
       ExprList(1.0f, create<ast::ScalarConstructorExpression>(Source{{12, 40}},
@@ -1753,7 +1753,7 @@ TEST_F(ResolverValidationTest,
   auto* f32_alias = Alias("Float32", ty.f32());
 
   // vec2<Float32>(1.0f, 1.0f)
-  auto* vec_type = ty.vec(f32_alias, 2);
+  auto* vec_type = ty.vec(ty.Of(f32_alias), 2);
   auto* tc = create<ast::TypeConstructorExpression>(Source{{12, 34}}, vec_type,
                                                     ExprList(1.0f, 1.0f));
   WrapInFunction(tc);
@@ -1766,7 +1766,7 @@ TEST_F(ResolverValidationTest,
   auto* f32_alias = Alias("Float32", ty.f32());
 
   // vec3<u32>(vec<Float32>(), 1.0f)
-  auto* vec_type = ty.vec(f32_alias, 2);
+  auto* vec_type = ty.vec(ty.Of(f32_alias), 2);
   auto* tc = vec3<u32>(create<ast::TypeConstructorExpression>(
                            Source{{12, 34}}, vec_type, ExprList()),
                        1.0f);
@@ -1783,7 +1783,7 @@ TEST_F(ResolverValidationTest,
   auto* f32_alias = Alias("Float32", ty.f32());
 
   // vec3<f32>(vec<Float32>(), 1.0f)
-  auto* vec_type = ty.vec(f32_alias, 2);
+  auto* vec_type = ty.vec(ty.Of(f32_alias), 2);
   auto* tc = vec3<f32>(create<ast::TypeConstructorExpression>(
                            Source{{12, 34}}, vec_type, ExprList()),
                        1.0f);
@@ -2019,7 +2019,7 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Error) {
         Source{{12, i}}, vec_type, ExprList()));
   }
 
-  auto* matrix_type = ty.mat(f32_alias, param.columns, param.rows);
+  auto* matrix_type = ty.mat(ty.Of(f32_alias), param.columns, param.rows);
   auto* tc = create<ast::TypeConstructorExpression>(Source{}, matrix_type,
                                                     std::move(args));
   WrapInFunction(tc);
@@ -2044,7 +2044,7 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Success) {
         Source{{12, i}}, vec_type, ExprList()));
   }
 
-  auto* matrix_type = ty.mat(f32_alias, param.columns, param.rows);
+  auto* matrix_type = ty.mat(ty.Of(f32_alias), param.columns, param.rows);
   auto* tc = create<ast::TypeConstructorExpression>(Source{}, matrix_type,
                                                     std::move(args));
   WrapInFunction(tc);
@@ -2054,10 +2054,9 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Success) {
 
 TEST_F(ResolverValidationTest, Expr_MatrixConstructor_ArgumentTypeAlias_Error) {
   auto* alias = Alias("VectorUnsigned2", ty.vec2<u32>());
-  auto* tc = mat2x2<f32>(
-      create<ast::TypeConstructorExpression>(
-          Source{{12, 34}}, ty.MaybeCreateTypename(alias), ExprList()),
-      vec2<f32>());
+  auto* tc = mat2x2<f32>(create<ast::TypeConstructorExpression>(
+                             Source{{12, 34}}, ty.Of(alias), ExprList()),
+                         vec2<f32>());
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -2075,7 +2074,7 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentTypeAlias_Success) {
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
     args.push_back(create<ast::TypeConstructorExpression>(
-        Source{{12, i}}, ty.MaybeCreateTypename(vec_alias), ExprList()));
+        Source{{12, i}}, ty.Of(vec_alias), ExprList()));
   }
 
   auto* tc = create<ast::TypeConstructorExpression>(Source{}, matrix_type,
@@ -2092,7 +2091,7 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentElementTypeAlias_Error) {
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
-    auto* vec_type = ty.vec(f32_alias, param.rows);
+    auto* vec_type = ty.vec(ty.Of(f32_alias), param.rows);
     args.push_back(create<ast::TypeConstructorExpression>(
         Source{{12, i}}, vec_type, ExprList()));
   }
@@ -2115,7 +2114,7 @@ TEST_P(MatrixConstructorTest,
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
-    auto* vec_type = ty.vec(f32_alias, param.rows);
+    auto* vec_type = ty.vec(ty.Of(f32_alias), param.rows);
     args.push_back(create<ast::TypeConstructorExpression>(
         Source{{12, i}}, vec_type, ExprList()));
   }

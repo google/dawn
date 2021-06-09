@@ -233,7 +233,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
                 },
                 {create<ast::StructBlockDecoration>()});
 
-  Global("G", s, ast::StorageClass::kStorage, ast::Access::kRead,
+  Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -335,14 +335,14 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_Structures) {
   auto* s = Structure("S",
                       {
                           Member("a", ty.i32()),
-                          Member("b", inner_x),
+                          Member("b", ty.Of(inner_x)),
                           Member("c", ty.f32()),
-                          Member("d", inner_y),
+                          Member("d", ty.Of(inner_y)),
                           Member("e", ty.f32()),
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  Global("G", s, ast::StorageClass::kStorage, ast::Access::kRead,
+  Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -419,7 +419,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
   auto* array_x = ty.array<f32, 7>();
 
   // array_y: size(4096), align(512)
-  auto* array_y = ty.array(inner, 4);
+  auto* array_y = ty.array(ty.Of(inner), 4);
 
   // array_z: size(4), align(4)
   auto* array_z = ty.array<f32>();
@@ -436,7 +436,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
                 },
                 ast::DecorationList{create<ast::StructBlockDecoration>()});
 
-  Global("G", s, ast::StorageClass::kStorage, ast::Access::kRead,
+  Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -549,7 +549,7 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
       },
       {create<ast::StructBlockDecoration>()});
 
-  Global("G", s, ast::StorageClass::kStorage, ast::Access::kRead,
+  Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -614,7 +614,7 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  Global("G", s, ast::StorageClass::kStorage, ast::Access::kRead,
+  Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),

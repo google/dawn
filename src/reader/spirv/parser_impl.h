@@ -192,8 +192,8 @@ class ParserImpl : Reader {
 
   /// Adds `type` as a constructed type if it hasn't been added yet.
   /// @param name the type's unique name
-  /// @param type the type to add
-  void AddConstructedType(Symbol name, ast::NamedType* type);
+  /// @param decl the type declaration to add
+  void AddConstructedType(Symbol name, ast::TypeDecl* decl);
 
   /// @returns the fail stream object
   FailStream& fail_stream() { return fail_stream_; }

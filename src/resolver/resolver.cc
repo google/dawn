@@ -213,9 +213,9 @@ bool Resolver::ResolveInternal() {
   // Process everything else in the order they appear in the module. This is
   // necessary for validation of use-before-declaration.
   for (auto* decl : builder_->AST().GlobalDeclarations()) {
-    if (auto* ty = decl->As<ast::NamedType>()) {
-      Mark(ty);
-      if (!NamedType(ty)) {
+    if (auto* td = decl->As<ast::TypeDecl>()) {
+      Mark(td);
+      if (!TypeDecl(td)) {
         return false;
       }
     } else if (auto* func = decl->As<ast::Function>()) {
@@ -2418,14 +2418,14 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
   return true;
 }
 
-sem::Type* Resolver::NamedType(const ast::NamedType* named_type) {
+sem::Type* Resolver::TypeDecl(const ast::TypeDecl* named_type) {
   sem::Type* result = nullptr;
   if (auto* alias = named_type->As<ast::Alias>()) {
     result = Type(alias->type());
   } else if (auto* str = named_type->As<ast::Struct>()) {
     result = Structure(str);
   } else {
-    TINT_UNREACHABLE(diagnostics_) << "Unhandled NamedType";
+    TINT_UNREACHABLE(diagnostics_) << "Unhandled TypeDecl";
   }
 
   if (!result) {
@@ -2433,9 +2433,9 @@ sem::Type* Resolver::NamedType(const ast::NamedType* named_type) {
   }
 
   named_type_info_.emplace(named_type->name(),
-                           NamedTypeInfo{named_type, result});
+                           TypeDeclInfo{named_type, result});
 
-  if (!ValidateNamedType(named_type)) {
+  if (!ValidateTypeDecl(named_type)) {
     return nullptr;
   }
 
@@ -2443,10 +2443,10 @@ sem::Type* Resolver::NamedType(const ast::NamedType* named_type) {
   return result;
 }
 
-bool Resolver::ValidateNamedType(const ast::NamedType* named_type) const {
+bool Resolver::ValidateTypeDecl(const ast::TypeDecl* named_type) const {
   auto iter = named_type_info_.find(named_type->name());
   if (iter == named_type_info_.end()) {
-    TINT_ICE(diagnostics_) << "ValidateNamedType called() before NamedType()";
+    TINT_ICE(diagnostics_) << "ValidateTypeDecl called() before TypeDecl()";
   }
   if (iter->second.ast != named_type) {
     diagnostics_.add_error("type with the name '" +

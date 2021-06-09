@@ -509,7 +509,7 @@ using StructBlockTest = ResolverTest;
 TEST_F(StructBlockTest, StructUsedAsArrayElement) {
   auto* s = Structure("S", {Member("x", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* a = ty.array(s, 4);
+  auto* a = ty.array(ty.Of(s), 4);
   Global("G", a, ast::StorageClass::kPrivate);
 
   EXPECT_FALSE(r()->Resolve());
@@ -528,7 +528,7 @@ using ResourceDecorationTest = ResolverTest;
 TEST_F(ResourceDecorationTest, UniformBufferMissingBinding) {
   auto* s = Structure("S", {Member("x", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  Global(Source{{12, 34}}, "G", s, ast::StorageClass::kUniform);
+  Global(Source{{12, 34}}, "G", ty.Of(s), ast::StorageClass::kUniform);
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
@@ -539,7 +539,7 @@ TEST_F(ResourceDecorationTest, UniformBufferMissingBinding) {
 TEST_F(ResourceDecorationTest, StorageBufferMissingBinding) {
   auto* s = Structure("S", {Member("x", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  Global(Source{{12, 34}}, "G", s, ast::StorageClass::kStorage,
+  Global(Source{{12, 34}}, "G", ty.Of(s), ast::StorageClass::kStorage,
          ast::Access::kRead);
 
   EXPECT_FALSE(r()->Resolve());

@@ -126,8 +126,6 @@ set(TINT_LIB_SRCS
   ast/module.h
   ast/multisampled_texture.cc
   ast/multisampled_texture.h
-  ast/named_type.cc
-  ast/named_type.h
   ast/node.cc
   ast/node.h
   ast/override_decoration.cc
@@ -178,6 +176,8 @@ set(TINT_LIB_SRCS
   ast/type_name.h
   ast/ast_type.cc  # TODO(bclayton) - rename to type.cc
   ast/type.h
+  ast/type_decl.cc
+  ast/type_decl.h
   ast/type_name.cc
   ast/type_name.h
   ast/u32.cc

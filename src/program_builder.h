@@ -434,7 +434,6 @@ class ProgramBuilder {
     /// @param n vector width in elements
     /// @return the tint AST type for a `n`-element vector of `type`.
     ast::Vector* vec(ast::Type* type, uint32_t n) const {
-      type = MaybeCreateTypename(type);
       return builder->create<ast::Vector>(type, n);
     }
 
@@ -443,7 +442,6 @@ class ProgramBuilder {
     /// @param n vector width in elements
     /// @return the tint AST type for a `n`-element vector of `type`.
     ast::Vector* vec(const Source& source, ast::Type* type, uint32_t n) const {
-      type = MaybeCreateTypename(type);
       return builder->create<ast::Vector>(source, type, n);
     }
 
@@ -489,7 +487,6 @@ class ProgramBuilder {
     /// @param rows number of rows for the matrix
     /// @return the tint AST type for a matrix of `type`
     ast::Matrix* mat(ast::Type* type, uint32_t columns, uint32_t rows) const {
-      type = MaybeCreateTypename(type);
       return builder->create<ast::Matrix>(type, rows, columns);
     }
 
@@ -610,7 +607,6 @@ class ProgramBuilder {
     ast::Array* array(ast::Type* subtype,
                       uint32_t n = 0,
                       ast::DecorationList decos = {}) const {
-      subtype = MaybeCreateTypename(subtype);
       return builder->create<ast::Array>(subtype, n, decos);
     }
 
@@ -623,7 +619,6 @@ class ProgramBuilder {
                       ast::Type* subtype,
                       uint32_t n = 0,
                       ast::DecorationList decos = {}) const {
-      subtype = MaybeCreateTypename(subtype);
       return builder->create<ast::Array>(source, subtype, n, decos);
     }
 
@@ -632,7 +627,6 @@ class ProgramBuilder {
     /// @param stride the array stride. 0 represents implicit stride
     /// @return the tint AST type for a array of size `n` of type `T`
     ast::Array* array(ast::Type* subtype, uint32_t n, uint32_t stride) const {
-      subtype = MaybeCreateTypename(subtype);
       ast::DecorationList decos;
       if (stride) {
         decos.emplace_back(builder->create<ast::StrideDecoration>(stride));
@@ -649,7 +643,6 @@ class ProgramBuilder {
                       ast::Type* subtype,
                       uint32_t n,
                       uint32_t stride) const {
-      subtype = MaybeCreateTypename(subtype);
       ast::DecorationList decos;
       if (stride) {
         decos.emplace_back(builder->create<ast::StrideDecoration>(stride));
@@ -695,7 +688,6 @@ class ProgramBuilder {
     /// @returns the alias pointer
     template <typename NAME>
     ast::Alias* alias(NAME&& name, ast::Type* type) const {
-      type = MaybeCreateTypename(type);
       auto sym = builder->Sym(std::forward<NAME>(name));
       return builder->create<ast::Alias>(sym, type);
     }
@@ -709,7 +701,6 @@ class ProgramBuilder {
     ast::Alias* alias(const Source& source,
                       NAME&& name,
                       ast::Type* type) const {
-      type = MaybeCreateTypename(type);
       auto sym = builder->Sym(std::forward<NAME>(name));
       return builder->create<ast::Alias>(source, sym, type);
     }
@@ -721,7 +712,6 @@ class ProgramBuilder {
     ast::Pointer* pointer(ast::Type* type,
                           ast::StorageClass storage_class,
                           ast::Access access = ast::Access::kUndefined) const {
-      type = MaybeCreateTypename(type);
       return builder->create<ast::Pointer>(type, storage_class, access);
     }
 
@@ -734,7 +724,6 @@ class ProgramBuilder {
                           ast::Type* type,
                           ast::StorageClass storage_class,
                           ast::Access access = ast::Access::kUndefined) const {
-      type = MaybeCreateTypename(type);
       return builder->create<ast::Pointer>(source, type, storage_class, access);
     }
 
@@ -848,17 +837,15 @@ class ProgramBuilder {
     }
 
     /// [DEPRECATED]: TODO(crbug.com/tint/745): Migrate to const AST pointers.
-    /// If ty is a ast::Struct or ast::Alias, the returned type is an
-    /// ast::TypeName of the given type's name, otherwise  type is returned.
+    /// Constructs a TypeName for the type declaration.
     /// @param type the type
     /// @return either type or a pointer to a new ast::TypeName
-    ast::Type* MaybeCreateTypename(ast::Type* type) const;
+    ast::TypeName* Of(ast::TypeDecl* type) const;
 
-    /// If ty is a ast::Struct or ast::Alias, the returned type is an
-    /// ast::TypeName of the given type's name, otherwise  type is returned.
+    /// Constructs a TypeName for the type declaration.
     /// @param type the type
     /// @return either type or a pointer to a new ast::TypeName
-    const ast::Type* MaybeCreateTypename(const ast::Type* type) const;
+    const ast::TypeName* Of(const ast::TypeDecl* type) const;
 
     /// The ProgramBuilder
     ProgramBuilder* const builder;
@@ -1073,7 +1060,6 @@ class ProgramBuilder {
   /// values `args`.
   template <typename... ARGS>
   ast::TypeConstructorExpression* Construct(ast::Type* type, ARGS&&... args) {
-    type = ty.MaybeCreateTypename(type);
     return create<ast::TypeConstructorExpression>(
         type, ExprList(std::forward<ARGS>(args)...));
   }
@@ -1210,7 +1196,6 @@ class ProgramBuilder {
   ast::Variable* Var(NAME&& name,
                      const ast::Type* type,
                      OPTIONAL&&... optional) {
-    type = ty.MaybeCreateTypename(type);
     VarOptionals opts(std::forward<OPTIONAL>(optional)...);
     return create<ast::Variable>(Sym(std::forward<NAME>(name)), opts.storage,
                                  opts.access, type, false, opts.constructor,
@@ -1234,7 +1219,6 @@ class ProgramBuilder {
                      NAME&& name,
                      const ast::Type* type,
                      OPTIONAL&&... optional) {
-    type = ty.MaybeCreateTypename(type);
     VarOptionals opts(std::forward<OPTIONAL>(optional)...);
     return create<ast::Variable>(source, Sym(std::forward<NAME>(name)),
                                  opts.storage, opts.access, type, false,
@@ -1251,7 +1235,6 @@ class ProgramBuilder {
                        ast::Type* type,
                        ast::Expression* constructor,
                        ast::DecorationList decorations = {}) {
-    type = ty.MaybeCreateTypename(type);
     return create<ast::Variable>(
         Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
         ast::Access::kUndefined, type, true, constructor, decorations);
@@ -1269,7 +1252,6 @@ class ProgramBuilder {
                        ast::Type* type,
                        ast::Expression* constructor,
                        ast::DecorationList decorations = {}) {
-    type = ty.MaybeCreateTypename(type);
     return create<ast::Variable>(
         source, Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
         ast::Access::kUndefined, type, true, constructor, decorations);
@@ -1283,7 +1265,6 @@ class ProgramBuilder {
   ast::Variable* Param(NAME&& name,
                        ast::Type* type,
                        ast::DecorationList decorations = {}) {
-    type = ty.MaybeCreateTypename(type);
     return create<ast::Variable>(
         Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
         ast::Access::kUndefined, type, true, nullptr, decorations);
@@ -1299,7 +1280,6 @@ class ProgramBuilder {
                        NAME&& name,
                        ast::Type* type,
                        ast::DecorationList decorations = {}) {
-    type = ty.MaybeCreateTypename(type);
     return create<ast::Variable>(
         source, Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
         ast::Access::kUndefined, type, true, nullptr, decorations);
@@ -1559,7 +1539,6 @@ class ProgramBuilder {
                       ast::StatementList body,
                       ast::DecorationList decorations = {},
                       ast::DecorationList return_type_decorations = {}) {
-    type = ty.MaybeCreateTypename(type);
     auto* func =
         create<ast::Function>(source, Sym(std::forward<NAME>(name)), params,
                               type, create<ast::BlockStatement>(body),
@@ -1584,7 +1563,6 @@ class ProgramBuilder {
                       ast::StatementList body,
                       ast::DecorationList decorations = {},
                       ast::DecorationList return_type_decorations = {}) {
-    type = ty.MaybeCreateTypename(type);
     auto* func = create<ast::Function>(Sym(std::forward<NAME>(name)), params,
                                        type, create<ast::BlockStatement>(body),
                                        decorations, return_type_decorations);
@@ -1688,7 +1666,6 @@ class ProgramBuilder {
                             NAME&& name,
                             ast::Type* type,
                             ast::DecorationList decorations = {}) {
-    type = ty.MaybeCreateTypename(type);
     return create<ast::StructMember>(source, Sym(std::forward<NAME>(name)),
                                      type, std::move(decorations));
   }
@@ -1702,7 +1679,6 @@ class ProgramBuilder {
   ast::StructMember* Member(NAME&& name,
                             ast::Type* type,
                             ast::DecorationList decorations = {}) {
-    type = ty.MaybeCreateTypename(type);
     return create<ast::StructMember>(source_, Sym(std::forward<NAME>(name)),
                                      type, std::move(decorations));
   }
@@ -1714,7 +1690,6 @@ class ProgramBuilder {
   /// @returns the struct member pointer
   template <typename NAME>
   ast::StructMember* Member(uint32_t offset, NAME&& name, ast::Type* type) {
-    type = ty.MaybeCreateTypename(type);
     return create<ast::StructMember>(
         source_, Sym(std::forward<NAME>(name)), type,
         ast::DecorationList{
@@ -1978,10 +1953,19 @@ class ProgramBuilder {
   /// Helper for returning the resolved semantic type of the AST type `type`.
   /// @note As the Resolver is run when the Program is built, this will only be
   /// useful for the Resolver itself and tests that use their own Resolver.
-  /// @param expr the AST type
+  /// @param type the AST type
   /// @return the resolved semantic type for the type, or nullptr if the type
   /// has no resolved type.
-  const sem::Type* TypeOf(const ast::Type* expr) const;
+  const sem::Type* TypeOf(const ast::Type* type) const;
+
+  /// Helper for returning the resolved semantic type of the AST type
+  /// declaration `type_decl`.
+  /// @note As the Resolver is run when the Program is built, this will only be
+  /// useful for the Resolver itself and tests that use their own Resolver.
+  /// @param type_decl the AST type declaration
+  /// @return the resolved semantic type for the type declaration, or nullptr if
+  /// the type declaration has no resolved type.
+  const sem::Type* TypeOf(const ast::TypeDecl* type_decl) const;
 
   /// Wraps the ast::Literal in a statement. This is used by tests that
   /// construct a partial AST and require the Resolver to reach these

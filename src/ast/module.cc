@@ -16,7 +16,7 @@
 
 #include <utility>
 
-#include "src/ast/named_type.h"
+#include "src/ast/type_decl.h"
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Module);
@@ -36,7 +36,7 @@ Module::Module(ProgramID program_id,
       continue;
     }
 
-    if (auto* ty = decl->As<ast::NamedType>()) {
+    if (auto* ty = decl->As<ast::TypeDecl>()) {
       constructed_types_.push_back(ty);
     } else if (auto* func = decl->As<Function>()) {
       functions_.push_back(func);
@@ -51,7 +51,7 @@ Module::Module(ProgramID program_id,
 
 Module::~Module() = default;
 
-const ast::NamedType* Module::LookupType(Symbol name) const {
+const ast::TypeDecl* Module::LookupType(Symbol name) const {
   for (auto* ty : ConstructedTypes()) {
     if (ty->name() == name) {
       return ty;
@@ -67,7 +67,7 @@ void Module::AddGlobalVariable(ast::Variable* var) {
   global_declarations_.push_back(var);
 }
 
-void Module::AddConstructedType(ast::NamedType* type) {
+void Module::AddConstructedType(ast::TypeDecl* type) {
   TINT_ASSERT(type);
   constructed_types_.push_back(type);
   global_declarations_.push_back(type);
@@ -92,7 +92,7 @@ void Module::Copy(CloneContext* ctx, const Module* src) {
       TINT_ICE(ctx->dst->Diagnostics()) << "src global declaration was nullptr";
       continue;
     }
-    if (auto* ty = decl->As<ast::NamedType>()) {
+    if (auto* ty = decl->As<ast::TypeDecl>()) {
       AddConstructedType(ty);
     } else if (auto* func = decl->As<Function>()) {
       AddFunction(func);
@@ -115,9 +115,6 @@ void Module::to_str(const sem::Info& sem,
     if (auto* alias = ty->As<ast::Alias>()) {
       out << alias->symbol().to_str() << " -> " << alias->type()->type_name()
           << std::endl;
-      if (auto* str = alias->type()->As<ast::Struct>()) {
-        str->to_str(sem, out, indent);
-      }
     } else if (auto* str = ty->As<ast::Struct>()) {
       str->to_str(sem, out, indent);
     }

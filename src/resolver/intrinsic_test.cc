@@ -768,7 +768,7 @@ TEST_F(ResolverIntrinsicDataTest, ArrayLength_Vector) {
   auto* ary = ty.array<i32>();
   auto* str = Structure("S", {Member("x", ary)},
                         {create<ast::StructBlockDecoration>()});
-  Global("a", str, ast::StorageClass::kStorage, ast::Access::kRead,
+  Global("a", ty.Of(str), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),

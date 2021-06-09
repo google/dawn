@@ -39,14 +39,14 @@ TEST_F(ResolverVarLetTest, TypeOfVar) {
   // }
 
   auto* S = Structure("S", {Member("i", ty.i32())});
-  auto* A = Alias("A", S);
+  auto* A = Alias("A", ty.Of(S));
 
   auto* i = Var("i", ty.i32(), ast::StorageClass::kNone);
   auto* u = Var("u", ty.u32(), ast::StorageClass::kNone);
   auto* f = Var("f", ty.f32(), ast::StorageClass::kNone);
   auto* b = Var("b", ty.bool_(), ast::StorageClass::kNone);
-  auto* s = Var("s", S, ast::StorageClass::kNone);
-  auto* a = Var("a", A, ast::StorageClass::kNone);
+  auto* s = Var("s", ty.Of(S), ast::StorageClass::kNone);
+  auto* a = Var("a", ty.Of(A), ast::StorageClass::kNone);
 
   Func("F", {}, ty.void_(),
        {
@@ -90,15 +90,15 @@ TEST_F(ResolverVarLetTest, TypeOfLet) {
   // }
 
   auto* S = Structure("S", {Member("i", ty.i32())});
-  auto* A = Alias("A", S);
+  auto* A = Alias("A", ty.Of(S));
 
   auto* v = Var("v", ty.i32(), ast::StorageClass::kNone);
   auto* i = Const("i", ty.i32(), Expr(1));
   auto* u = Const("u", ty.u32(), Expr(1u));
   auto* f = Const("f", ty.f32(), Expr(1.f));
   auto* b = Const("b", ty.bool_(), Expr(true));
-  auto* s = Const("s", S, Construct(S, Expr(1)));
-  auto* a = Const("a", A, Construct(A, Expr(1)));
+  auto* s = Const("s", ty.Of(S), Construct(ty.Of(S), Expr(1)));
+  auto* a = Const("a", ty.Of(A), Construct(ty.Of(A), Expr(1)));
   auto* p =
       Const("p", ty.pointer<i32>(ast::StorageClass::kFunction), AddressOf(v));
 
@@ -135,12 +135,12 @@ TEST_F(ResolverVarLetTest, DefaultVarStorageClass) {
   auto* function = Var("f", ty.i32());
   auto* private_ = Global("p", ty.i32(), ast::StorageClass::kPrivate);
   auto* workgroup = Global("w", ty.i32(), ast::StorageClass::kWorkgroup);
-  auto* uniform = Global("ub", buf, ast::StorageClass::kUniform,
+  auto* uniform = Global("ub", ty.Of(buf), ast::StorageClass::kUniform,
                          ast::DecorationList{
                              create<ast::BindingDecoration>(0),
                              create<ast::GroupDecoration>(0),
                          });
-  auto* storage = Global("sb", buf, ast::StorageClass::kStorage,
+  auto* storage = Global("sb", ty.Of(buf), ast::StorageClass::kStorage,
                          ast::DecorationList{
                              create<ast::BindingDecoration>(1),
                              create<ast::GroupDecoration>(0),
@@ -180,12 +180,12 @@ TEST_F(ResolverVarLetTest, ExplicitVarStorageClass) {
 
   auto* buf = Structure("S", {Member("m", ty.i32())},
                         {create<ast::StructBlockDecoration>()});
-  auto* storage =
-      Global("sb", buf, ast::StorageClass::kStorage, ast::Access::kReadWrite,
-             ast::DecorationList{
-                 create<ast::BindingDecoration>(1),
-                 create<ast::GroupDecoration>(0),
-             });
+  auto* storage = Global("sb", ty.Of(buf), ast::StorageClass::kStorage,
+                         ast::Access::kReadWrite,
+                         ast::DecorationList{
+                             create<ast::BindingDecoration>(1),
+                             create<ast::GroupDecoration>(0),
+                         });
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -207,14 +207,14 @@ TEST_F(ResolverVarLetTest, LetInheritsAccessFromOriginatingVariable) {
   //   let p = &s.inner.arr[2];
   // }
   auto* inner = Structure("Inner", {Member("arr", ty.array<i32, 4>())});
-  auto* buf = Structure("S", {Member("inner", inner)},
+  auto* buf = Structure("S", {Member("inner", ty.Of(inner))},
                         {create<ast::StructBlockDecoration>()});
-  auto* storage =
-      Global("s", buf, ast::StorageClass::kStorage, ast::Access::kReadWrite,
-             ast::DecorationList{
-                 create<ast::BindingDecoration>(0),
-                 create<ast::GroupDecoration>(0),
-             });
+  auto* storage = Global("s", ty.Of(buf), ast::StorageClass::kStorage,
+                         ast::Access::kReadWrite,
+                         ast::DecorationList{
+                             create<ast::BindingDecoration>(0),
+                             create<ast::GroupDecoration>(0),
+                         });
 
   auto* expr =
       IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 4);

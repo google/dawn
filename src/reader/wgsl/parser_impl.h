@@ -381,13 +381,14 @@ class ParserImpl {
   /// Registers a constructed type into the parser
   /// TODO(crbug.com/tint/724): Remove
   /// @param name the constructed name
-  /// @param type the constructed type
-  void register_constructed(const std::string& name, const ast::Type* type);
+  /// @param type_decl the constructed type declaration
+  void register_constructed(const std::string& name,
+                            const ast::TypeDecl* type_decl);
   /// Retrieves a constructed type
   /// TODO(crbug.com/tint/724): Remove
   /// @param name The name to lookup
   /// @returns the constructed type for `name` or `nullptr` if not found
-  const ast::Type* get_constructed(const std::string& name);
+  const ast::TypeDecl* get_constructed(const std::string& name);
 
   /// Parses the `translation_unit` grammar element
   void translation_unit();
@@ -881,7 +882,7 @@ class ParserImpl {
   uint32_t sync_depth_ = 0;
   std::vector<Token::Type> sync_tokens_;
   int silence_errors_ = 0;
-  std::unordered_map<std::string, const ast::Type*> registered_constructs_;
+  std::unordered_map<std::string, const ast::TypeDecl*> registered_constructs_;
   ProgramBuilder builder_;
   size_t max_errors_ = 25;
 };

@@ -294,7 +294,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl) {
 
 TEST_F(ResolverTest, Stmt_VariableDecl_Alias) {
   auto* my_int = Alias("MyInt", ty.i32());
-  auto* var = Var("my_var", my_int, ast::StorageClass::kNone, Expr(2));
+  auto* var = Var("my_var", ty.Of(my_int), ast::StorageClass::kNone, Expr(2));
   auto* init = var->constructor();
 
   auto* decl = Decl(var);
@@ -449,7 +449,7 @@ TEST_F(ResolverTest, Expr_ArrayAccessor_Array) {
 TEST_F(ResolverTest, Expr_ArrayAccessor_Alias_Array) {
   auto* aary = Alias("myarrty", ty.array<f32, 3>());
 
-  Global("my_var", aary, ast::StorageClass::kPrivate);
+  Global("my_var", ty.Of(aary), ast::StorageClass::kPrivate);
 
   auto* acc = IndexAccessor("my_var", 2);
   WrapInFunction(acc);
@@ -813,12 +813,12 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
 
   auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
   auto* out_var = Global("out_var", ty.f32(), ast::StorageClass::kOutput);
-  auto* sb_var =
-      Global("sb_var", s, ast::StorageClass::kStorage, ast::Access::kRead,
-             ast::DecorationList{
-                 create<ast::BindingDecoration>(0),
-                 create<ast::GroupDecoration>(0),
-             });
+  auto* sb_var = Global("sb_var", ty.Of(s), ast::StorageClass::kStorage,
+                        ast::Access::kRead,
+                        ast::DecorationList{
+                            create<ast::BindingDecoration>(0),
+                            create<ast::GroupDecoration>(0),
+                        });
   auto* wg_var = Global("wg_var", ty.f32(), ast::StorageClass::kWorkgroup);
   auto* priv_var = Global("priv_var", ty.f32(), ast::StorageClass::kPrivate);
 
@@ -852,12 +852,12 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
 
   auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
   auto* out_var = Global("out_var", ty.f32(), ast::StorageClass::kOutput);
-  auto* sb_var =
-      Global("sb_var", s, ast::StorageClass::kStorage, ast::Access::kRead,
-             ast::DecorationList{
-                 create<ast::BindingDecoration>(0),
-                 create<ast::GroupDecoration>(0),
-             });
+  auto* sb_var = Global("sb_var", ty.Of(s), ast::StorageClass::kStorage,
+                        ast::Access::kRead,
+                        ast::DecorationList{
+                            create<ast::BindingDecoration>(0),
+                            create<ast::GroupDecoration>(0),
+                        });
   auto* wg_var = Global("wg_var", ty.f32(), ast::StorageClass::kWorkgroup);
   auto* priv_var = Global("priv_var", ty.f32(), ast::StorageClass::kPrivate);
 
@@ -1097,7 +1097,7 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Mixed) {
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
   auto* st = Structure("S", {Member("first_member", ty.i32()),
                              Member("second_member", ty.f32())});
-  Global("my_struct", st, ast::StorageClass::kInput);
+  Global("my_struct", ty.Of(st), ast::StorageClass::kInput);
 
   auto* mem = MemberAccessor("my_struct", "second_member");
   WrapInFunction(mem);
@@ -1120,8 +1120,8 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
   auto* st = Structure("S", {Member("first_member", ty.i32()),
                              Member("second_member", ty.f32())});
-  auto* alias = Alias("alias", st);
-  Global("my_struct", alias, ast::StorageClass::kInput);
+  auto* alias = Alias("alias", ty.Of(st));
+  Global("my_struct", ty.Of(alias), ast::StorageClass::kInput);
 
   auto* mem = MemberAccessor("my_struct", "second_member");
   WrapInFunction(mem);
@@ -1200,8 +1200,8 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
   //
 
   auto* stB = Structure("B", {Member("foo", ty.vec4<f32>())});
-  auto* stA = Structure("A", {Member("mem", ty.vec(stB, 3))});
-  Global("c", stA, ast::StorageClass::kInput);
+  auto* stA = Structure("A", {Member("mem", ty.vec(ty.Of(stB), 3))});
+  Global("c", ty.Of(stA), ast::StorageClass::kInput);
 
   auto* mem = MemberAccessor(
       MemberAccessor(IndexAccessor(MemberAccessor("c", "mem"), 0), "foo"),
@@ -1220,7 +1220,7 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
 TEST_F(ResolverTest, Expr_MemberAccessor_InBinaryOp) {
   auto* st = Structure("S", {Member("first_member", ty.f32()),
                              Member("second_member", ty.f32())});
-  Global("my_struct", st, ast::StorageClass::kInput);
+  Global("my_struct", ty.Of(st), ast::StorageClass::kInput);
 
   auto* expr = Add(MemberAccessor("my_struct", "first_member"),
                    MemberAccessor("my_struct", "second_member"));
@@ -1819,11 +1819,12 @@ TEST_F(ResolverTest, Access_SetForStorageBuffer) {
   // var<storage> g : S;
   auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* var = Global(Source{{56, 78}}, "g", s, ast::StorageClass::kStorage,
-                     ast::DecorationList{
-                         create<ast::BindingDecoration>(0),
-                         create<ast::GroupDecoration>(0),
-                     });
+  auto* var =
+      Global(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage,
+             ast::DecorationList{
+                 create<ast::BindingDecoration>(0),
+                 create<ast::GroupDecoration>(0),
+             });
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 

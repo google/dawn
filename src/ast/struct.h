@@ -19,14 +19,14 @@
 #include <utility>
 
 #include "src/ast/decoration.h"
-#include "src/ast/named_type.h"
 #include "src/ast/struct_member.h"
+#include "src/ast/type_decl.h"
 
 namespace tint {
 namespace ast {
 
 /// A struct statement.
-class Struct : public Castable<Struct, NamedType> {
+class Struct : public Castable<Struct, TypeDecl> {
  public:
   /// Create a new struct statement
   /// @param program_id the identifier of the program that owns this node

@@ -27,10 +27,12 @@ using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitType_Alias) {
   auto* alias = Alias("alias", ty.f32());
+  auto* alias_ty = ty.Of(alias);
+  WrapInFunction(Var("make_reachable", alias_ty));
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(alias)) << gen.error();
+  ASSERT_TRUE(gen.EmitType(alias_ty)) << gen.error();
   EXPECT_EQ(gen.result(), "alias");
 }
 
@@ -119,10 +121,12 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
                                Member("a", ty.i32()),
                                Member("b", ty.f32()),
                            });
+  auto* s_ty = ty.Of(s);
+  WrapInFunction(Var("make_reachable", s_ty));
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(s)) << gen.error();
+  ASSERT_TRUE(gen.EmitType(s_ty)) << gen.error();
   EXPECT_EQ(gen.result(), "S");
 }
 

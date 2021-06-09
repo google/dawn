@@ -105,7 +105,7 @@ TEST_F(ResolverIsStorableTest, Struct_NestedStorable) {
                                          });
   Structure("S", {
                      Member("a", ty.i32()),
-                     Member("b", storable),
+                     Member("b", ty.Of(storable)),
                  });
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -120,7 +120,7 @@ TEST_F(ResolverIsStorableTest, Struct_NestedNonStorable) {
                 });
   Structure("S", {
                      Member("a", ty.i32()),
-                     Member("b", non_storable),
+                     Member("b", ty.Of(non_storable)),
                  });
 
   EXPECT_FALSE(r()->Resolve());

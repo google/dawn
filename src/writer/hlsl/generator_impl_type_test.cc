@@ -170,7 +170,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
                                Member("a", ty.i32()),
                                Member("b", ty.f32()),
                            });
-  Global("g", s, ast::StorageClass::kPrivate);
+  Global("g", ty.Of(s), ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
@@ -190,7 +190,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
                           Member("b", ty.f32()),
                       },
                       {create<ast::StructBlockDecoration>()});
-  Global("g", s, ast::StorageClass::kStorage, ast::Access::kReadWrite,
+  Global("g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -208,7 +208,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
                                Member("a", ty.i32()),
                                Member("b", ty.f32()),
                            });
-  Global("g", s, ast::StorageClass::kPrivate);
+  Global("g", ty.Of(s), ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
@@ -228,7 +228,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
                Member("b", ty.f32()),
                Member("c", ty.f32(), {MemberAlign(128), MemberSize(128)}),
            });
-  Global("g", s, ast::StorageClass::kPrivate);
+  Global("g", ty.Of(s), ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
@@ -252,7 +252,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
                                Member("double", ty.i32()),
                                Member("float", ty.f32()),
                            });
-  Global("g", s, ast::StorageClass::kPrivate);
+  Global("g", ty.Of(s), ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -272,7 +272,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
                           Member("b", ty.f32()),
                       },
                       {create<ast::StructBlockDecoration>()});
-  Global("g", s, ast::StorageClass::kPrivate);
+  Global("g", ty.Of(s), ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 

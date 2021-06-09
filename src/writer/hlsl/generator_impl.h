@@ -392,6 +392,12 @@ class GeneratorImpl : public TextGenerator {
     return builder_.TypeOf(type);
   }
 
+  /// @returns the resolved type of the ast::TypeDecl `type_decl`
+  /// @param type_decl the type
+  const sem::Type* TypeOf(const ast::TypeDecl* type_decl) const {
+    return builder_.TypeOf(type_decl);
+  }
+
   /// Emits `prefix`, followed by an opening brace `{`, then calls `cb` to emit
   /// the block body, then finally emits the closing brace `}`.
   /// @param out the output stream

@@ -34,7 +34,7 @@ TEST_F(HlslSanitizerTest, ArrayLength) {
                               create<ast::StructBlockDecoration>(),
                           });
 
-  Global("sb", sb_ty, ast::StorageClass::kStorage, ast::Access::kRead,
+  Global("sb", ty.Of(sb_ty), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
@@ -103,7 +103,7 @@ TEST_F(HlslSanitizerTest, PromoteStructInitializerToConstVar) {
                                  Member("b", ty.vec3<f32>()),
                                  Member("c", ty.i32()),
                              });
-  auto* struct_init = Construct(str, 1, vec3<f32>(2.f, 3.f, 4.f), 4);
+  auto* struct_init = Construct(ty.Of(str), 1, vec3<f32>(2.f, 3.f, 4.f), 4);
   auto* struct_access = MemberAccessor(struct_init, "b");
   auto* pos =
       Var("pos", ty.vec3<f32>(), ast::StorageClass::kNone, struct_access);

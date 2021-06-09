@@ -133,14 +133,14 @@ Output FirstIndexOffset::Run(const Program* in, const DataMap& data) {
       instance_index_offset = offset;
       offset += 4;
     }
-    auto* struct_type =
+    auto* struct_ =
         ctx.dst->Structure(ctx.dst->Sym(), std::move(members),
                            {ctx.dst->create<ast::StructBlockDecoration>()});
 
     // Create a global to hold the uniform buffer
     Symbol buffer_name = ctx.dst->Sym();
-    ctx.dst->Global(buffer_name, struct_type, ast::StorageClass::kUniform,
-                    nullptr,
+    ctx.dst->Global(buffer_name, ctx.dst->ty.Of(struct_),
+                    ast::StorageClass::kUniform, nullptr,
                     ast::DecorationList{
                         ctx.dst->create<ast::BindingDecoration>(ub_binding),
                         ctx.dst->create<ast::GroupDecoration>(ub_group),
