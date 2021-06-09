@@ -20,6 +20,73 @@ namespace {
 class ResolverBuiltinsValidationTest : public resolver::TestHelper,
                                        public testing::Test {};
 
+TEST_F(ResolverBuiltinsValidationTest, FrontFacingParamIsBool_Pass) {
+  // [[stage(fragment)]]
+  // fn fs_main(
+  //   [[builtin(front_facing)]] is_front: bool
+  // ) -> [[location(0)]] f32 { return 1.0; }
+  auto* is_front =
+      Param("is_front", ty.bool_(),
+            ast::DecorationList{Builtin(ast::Builtin::kFrontFacing)});
+  Func("fs_main", ast::VariableList{is_front}, ty.f32(), {Return(1.0f)},
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)},
+       {Location(0)});
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverBuiltinsValidationTest, FrontFacingMemberIsBool_Pass) {
+  // struct MyInputs {
+  //   [[builtin(front_facing)]] pos: bool;
+  // };
+  // [[stage(fragment)]]
+  // fn fragShader(is_front: MyInputs) -> [[location(0)]] f32 { return 1.0; }
+
+  auto* s = Structure(
+      "MyInputs",
+      {Member("pos", ty.bool_(),
+              ast::DecorationList{Builtin(ast::Builtin::kFrontFacing)})});
+  Func("fragShader", {Param("is_front", ty.Of(s))}, ty.f32(), {Return(1.0f)},
+       {Stage(ast::PipelineStage::kFragment)}, {Location(0)});
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverBuiltinsValidationTest, FrontFacingParamIsNotBool_Fail) {
+  // [[stage(fragment)]]
+  // fn fs_main(
+  //   [[builtin(front_facing)]] is_front: i32;
+  // ) -> [[location(0)]] f32 { return 1.0; }
+
+  auto* is_front = Param("is_front", ty.i32(),
+                         ast::DecorationList{Builtin(
+                             Source{{12, 34}}, ast::Builtin::kFrontFacing)});
+  Func("fs_main", ast::VariableList{is_front}, ty.f32(), {Return(1.0f)},
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)},
+       {Location(0)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error v-15001: front_facing builtin must be boolean");
+}
+
+TEST_F(ResolverBuiltinsValidationTest, FrontFacingMemberIsNotBool_Fail) {
+  // struct MyInputs {
+  //   [[builtin(front_facing)]] pos: f32;
+  // };
+  // [[stage(fragment)]]
+  // fn fragShader(is_front: MyInputs) -> [[location(0)]] f32 { return 1.0; }
+
+  auto* s = Structure(
+      "MyInputs", {Member("pos", ty.f32(),
+                          ast::DecorationList{Builtin(
+                              Source{{12, 34}}, ast::Builtin::kFrontFacing)})});
+  Func("fragShader", {Param("is_front", ty.Of(s))}, ty.f32(), {Return(1.0f)},
+       {Stage(ast::PipelineStage::kFragment)}, {Location(0)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error v-15001: front_facing builtin must be boolean");
+}
+
 TEST_F(ResolverBuiltinsValidationTest, Length_Float_Scalar) {
   auto* builtin = Call("length", 1.0f);
   WrapInFunction(builtin);

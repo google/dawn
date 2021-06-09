@@ -808,6 +808,21 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
 }
 
 bool Resolver::ValidateParameter(const VariableInfo* info) {
+  auto* var = info->declaration;
+  for (auto* deco : var->decorations()) {
+    if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+      if (builtin->value() == ast::Builtin::kFrontFacing) {
+        auto* storage_type = info->type->UnwrapRef();
+        if (!(storage_type->Is<sem::Bool>())) {
+          diagnostics_.add_error("v-15001",
+                                 "front_facing builtin must be boolean",
+                                 deco->source());
+          return false;
+        }
+      }
+    }
+  }
+
   return ValidateVariable(info);
 }
 
@@ -2875,6 +2890,16 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
         diagnostics_.add_error("decoration is not valid for structure members",
                                deco->source());
         return false;
+      }
+      if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+        if (builtin->value() == ast::Builtin::kFrontFacing) {
+          if (!(member->Type()->Is<sem::Bool>())) {
+            diagnostics_.add_error("v-15001",
+                                   "front_facing builtin must be boolean",
+                                   deco->source());
+            return false;
+          }
+        }
       }
     }
   }
