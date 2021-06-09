@@ -31,6 +31,45 @@
 
 namespace dawn_native { namespace vulkan {
 
+    ShaderModule::ConcurrentTransformedShaderModuleCache::ConcurrentTransformedShaderModuleCache(
+        Device* device)
+        : mDevice(device) {
+    }
+
+    ShaderModule::ConcurrentTransformedShaderModuleCache::
+        ~ConcurrentTransformedShaderModuleCache() {
+        std::lock_guard<std::mutex> lock(mMutex);
+        for (const auto& iter : mTransformedShaderModuleCache) {
+            mDevice->GetFencedDeleter()->DeleteWhenUnused(iter.second);
+        }
+    }
+
+    VkShaderModule ShaderModule::ConcurrentTransformedShaderModuleCache::FindShaderModule(
+        const PipelineLayoutEntryPointPair& key) {
+        std::lock_guard<std::mutex> lock(mMutex);
+        auto iter = mTransformedShaderModuleCache.find(key);
+        if (iter != mTransformedShaderModuleCache.end()) {
+            auto cached = iter->second;
+            return cached;
+        }
+        return VK_NULL_HANDLE;
+    }
+
+    VkShaderModule ShaderModule::ConcurrentTransformedShaderModuleCache::AddOrGetCachedShaderModule(
+        const PipelineLayoutEntryPointPair& key,
+        VkShaderModule value) {
+        ASSERT(value != VK_NULL_HANDLE);
+        std::lock_guard<std::mutex> lock(mMutex);
+        auto iter = mTransformedShaderModuleCache.find(key);
+        if (iter == mTransformedShaderModuleCache.end()) {
+            mTransformedShaderModuleCache.emplace(key, value);
+            return value;
+        } else {
+            mDevice->GetFencedDeleter()->DeleteWhenUnused(value);
+            return iter->second;
+        }
+    }
+
     // static
     ResultOrError<Ref<ShaderModule>> ShaderModule::Create(Device* device,
                                                           const ShaderModuleDescriptor* descriptor,
@@ -41,7 +80,7 @@ namespace dawn_native { namespace vulkan {
     }
 
     ShaderModule::ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor)
-        : ShaderModuleBase(device, descriptor) {
+        : ShaderModuleBase(device, descriptor), mTransformedShaderModuleCache(device) {
     }
 
     MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
@@ -112,10 +151,6 @@ namespace dawn_native { namespace vulkan {
             device->GetFencedDeleter()->DeleteWhenUnused(mHandle);
             mHandle = VK_NULL_HANDLE;
         }
-
-        for (const auto& iter : mTransformedShaderModuleCache) {
-            device->GetFencedDeleter()->DeleteWhenUnused(iter.second);
-        }
     }
 
     VkShaderModule ShaderModule::GetHandle() const {
@@ -131,10 +166,10 @@ namespace dawn_native { namespace vulkan {
         ASSERT(GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator));
 
         auto cacheKey = std::make_pair(layout, entryPointName);
-        auto iter = mTransformedShaderModuleCache.find(cacheKey);
-        if (iter != mTransformedShaderModuleCache.end()) {
-            auto cached = iter->second;
-            return cached;
+        VkShaderModule cachedShaderModule =
+            mTransformedShaderModuleCache.FindShaderModule(cacheKey);
+        if (cachedShaderModule != VK_NULL_HANDLE) {
+            return cachedShaderModule;
         }
 
         // Creation of VkShaderModule is deferred to this point when using tint generator
@@ -204,7 +239,8 @@ namespace dawn_native { namespace vulkan {
             device->fn.CreateShaderModule(device->GetVkDevice(), &createInfo, nullptr, &*newHandle),
             "CreateShaderModule"));
         if (newHandle != VK_NULL_HANDLE) {
-            mTransformedShaderModuleCache.emplace(cacheKey, newHandle);
+            newHandle =
+                mTransformedShaderModuleCache.AddOrGetCachedShaderModule(cacheKey, newHandle);
         }
 
         return newHandle;

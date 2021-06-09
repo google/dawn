@@ -14,6 +14,7 @@
 
 #include "dawn_native/vulkan/ComputePipelineVk.h"
 
+#include "dawn_native/CreatePipelineAsyncTask.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
 #include "dawn_native/vulkan/PipelineLayoutVk.h"
@@ -86,6 +87,18 @@ namespace dawn_native { namespace vulkan {
 
     VkPipeline ComputePipeline::GetHandle() const {
         return mHandle;
+    }
+
+    void ComputePipeline::CreateAsync(Device* device,
+                                      const ComputePipelineDescriptor* descriptor,
+                                      size_t blueprintHash,
+                                      WGPUCreateComputePipelineAsyncCallback callback,
+                                      void* userdata) {
+        Ref<ComputePipeline> pipeline = AcquireRef(new ComputePipeline(device, descriptor));
+        std::unique_ptr<CreateComputePipelineAsyncTask> asyncTask =
+            std::make_unique<CreateComputePipelineAsyncTask>(pipeline, descriptor, blueprintHash,
+                                                             callback, userdata);
+        CreateComputePipelineAsyncTask::RunAsync(std::move(asyncTask));
     }
 
 }}  // namespace dawn_native::vulkan

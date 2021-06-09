@@ -160,6 +160,12 @@ namespace dawn_native { namespace vulkan {
         const TextureViewDescriptor* descriptor) {
         return TextureView::Create(texture, descriptor);
     }
+    void Device::CreateComputePipelineAsyncImpl(const ComputePipelineDescriptor* descriptor,
+                                                size_t blueprintHash,
+                                                WGPUCreateComputePipelineAsyncCallback callback,
+                                                void* userdata) {
+        ComputePipeline::CreateAsync(this, descriptor, blueprintHash, callback, userdata);
+    }
 
     MaybeError Device::TickImpl() {
         RecycleCompletedCommands();

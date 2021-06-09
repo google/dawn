@@ -14,7 +14,6 @@
 
 #include "dawn_native/d3d12/ComputePipelineD3D12.h"
 
-#include "dawn_native/AsyncTask.h"
 #include "dawn_native/CreatePipelineAsyncTask.h"
 #include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
