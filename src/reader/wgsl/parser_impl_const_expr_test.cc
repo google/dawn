@@ -134,7 +134,7 @@ TEST_F(ParserImplTest, ConstExpr_ConstLiteral_Invalid) {
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(e.errored);
   ASSERT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:1: unknown constructed type 'invalid'");
+  EXPECT_EQ(p->error(), "1:1: unknown type 'invalid'");
 }
 
 TEST_F(ParserImplTest, ConstExpr_Recursion) {

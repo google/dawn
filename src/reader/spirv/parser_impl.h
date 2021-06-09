@@ -190,10 +190,10 @@ class ParserImpl : Reader {
                                  const spvtools::opt::analysis::Type* type,
                                  const Type* ast_type);
 
-  /// Adds `type` as a constructed type if it hasn't been added yet.
+  /// Adds `decl` as a declared type if it hasn't been added yet.
   /// @param name the type's unique name
   /// @param decl the type declaration to add
-  void AddConstructedType(Symbol name, ast::TypeDecl* decl);
+  void AddTypeDecl(Symbol name, ast::TypeDecl* decl);
 
   /// @returns the fail stream object
   FailStream& fail_stream() { return fail_stream_; }
@@ -760,9 +760,9 @@ class ParserImpl : Reader {
   std::unordered_map<const spvtools::opt::Instruction*, const Pointer*>
       handle_type_;
 
-  // Set of symbols of constructed types that have been added, used to avoid
+  // Set of symbols of declared type that have been added, used to avoid
   // adding duplicates.
-  std::unordered_set<Symbol> constructed_types_;
+  std::unordered_set<Symbol> declared_types_;
 
   /// Maps the SPIR-V ID of a module-scope builtin variable that should be
   /// ignored or type-converted, to its builtin kind.

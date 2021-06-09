@@ -38,7 +38,7 @@ TEST_F(ParserImplTest, TypeDecl_Identifier) {
 
   auto& builder = p->builder();
   auto* alias_type = builder.ty.alias("A", builder.ty.i32());
-  p->register_constructed("A", alias_type);
+  p->register_type("A", alias_type);
 
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
@@ -58,7 +58,7 @@ TEST_F(ParserImplTest, TypeDecl_Identifier_NotFound) {
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:1: unknown constructed type 'B'");
+  EXPECT_EQ(p->error(), "1:1: unknown type 'B'");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Bool) {
@@ -182,7 +182,7 @@ TEST_P(VecBadType, Handles_Unknown_Type) {
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:6: unknown constructed type 'unknown'");
+  ASSERT_EQ(p->error(), "1:6: unknown type 'unknown'");
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          VecBadType,
@@ -365,7 +365,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_BadType) {
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:15: unknown constructed type 'unknown'");
+  ASSERT_EQ(p->error(), "1:15: unknown type 'unknown'");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_BadAccess) {
@@ -599,7 +599,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_BadType) {
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:7: unknown constructed type 'unknown'");
+  ASSERT_EQ(p->error(), "1:7: unknown type 'unknown'");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_ZeroSize) {
@@ -761,7 +761,7 @@ TEST_P(MatrixBadType, Handles_Unknown_Type) {
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:8: unknown constructed type 'unknown'");
+  ASSERT_EQ(p->error(), "1:8: unknown type 'unknown'");
 }
 INSTANTIATE_TEST_SUITE_P(
     ParserImplTest,

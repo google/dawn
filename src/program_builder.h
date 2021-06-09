@@ -1598,7 +1598,7 @@ class ProgramBuilder {
     return create<ast::ReturnStatement>(Expr(std::forward<EXPR>(val)));
   }
 
-  /// Creates a ast::Alias registering it with the AST().ConstructedTypes().
+  /// Creates a ast::Alias registering it with the AST().TypeDecls().
   /// @param source the source information
   /// @param name the alias name
   /// @param type the alias target type
@@ -1606,22 +1606,22 @@ class ProgramBuilder {
   template <typename NAME>
   ast::Alias* Alias(const Source& source, NAME&& name, ast::Type* type) {
     auto* out = ty.alias(source, std::forward<NAME>(name), type);
-    AST().AddConstructedType(out);
+    AST().AddTypeDecl(out);
     return out;
   }
 
-  /// Creates a ast::Alias registering it with the AST().ConstructedTypes().
+  /// Creates a ast::Alias registering it with the AST().TypeDecls().
   /// @param name the alias name
   /// @param type the alias target type
   /// @returns the alias type
   template <typename NAME>
   ast::Alias* Alias(NAME&& name, ast::Type* type) {
     auto* out = ty.alias(std::forward<NAME>(name), type);
-    AST().AddConstructedType(out);
+    AST().AddTypeDecl(out);
     return out;
   }
 
-  /// Creates a ast::Struct registering it with the AST().ConstructedTypes().
+  /// Creates a ast::Struct registering it with the AST().TypeDecls().
   /// @param source the source information
   /// @param name the struct name
   /// @param members the struct members
@@ -1635,11 +1635,11 @@ class ProgramBuilder {
     auto sym = Sym(std::forward<NAME>(name));
     auto* type = create<ast::Struct>(source, sym, std::move(members),
                                      std::move(decorations));
-    AST().AddConstructedType(type);
+    AST().AddTypeDecl(type);
     return type;
   }
 
-  /// Creates a ast::Struct registering it with the AST().ConstructedTypes().
+  /// Creates a ast::Struct registering it with the AST().TypeDecls().
   /// @param name the struct name
   /// @param members the struct members
   /// @param decorations the optional struct decorations
@@ -1651,7 +1651,7 @@ class ProgramBuilder {
     auto sym = Sym(std::forward<NAME>(name));
     auto* type =
         create<ast::Struct>(sym, std::move(members), std::move(decorations));
-    AST().AddConstructedType(type);
+    AST().AddTypeDecl(type);
     return type;
   }
 

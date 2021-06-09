@@ -57,11 +57,11 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true on successful generation; false otherwise
   bool Generate(std::ostream& out);
 
-  /// Handles generating a constructed type
+  /// Handles generating a declared type
   /// @param out the output stream
-  /// @param ty the constructed type to generate
-  /// @returns true if the constructed type was emitted
-  bool EmitConstructedType(std::ostream& out, const sem::Type* ty);
+  /// @param ty the declared type to generate
+  /// @returns true if the declared type was emitted
+  bool EmitTypeDecl(std::ostream& out, const sem::Type* ty);
   /// Handles an array accessor expression
   /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream

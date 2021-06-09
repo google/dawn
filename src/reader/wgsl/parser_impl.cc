@@ -312,16 +312,16 @@ Token ParserImpl::last_token() const {
   return last_token_;
 }
 
-void ParserImpl::register_constructed(const std::string& name,
-                                      const ast::TypeDecl* type_decl) {
-  registered_constructs_[name] = type_decl;
+void ParserImpl::register_type(const std::string& name,
+                               const ast::TypeDecl* type_decl) {
+  registered_types_[name] = type_decl;
 }
 
-const ast::TypeDecl* ParserImpl::get_constructed(const std::string& name) {
-  if (registered_constructs_.find(name) == registered_constructs_.end()) {
+const ast::TypeDecl* ParserImpl::get_type(const std::string& name) {
+  if (registered_types_.find(name) == registered_types_.end()) {
     return nullptr;
   }
-  return registered_constructs_[name];
+  return registered_types_[name];
 }
 
 bool ParserImpl::Parse() {
@@ -397,7 +397,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
       if (!expect("type alias", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      builder_.AST().AddConstructedType(const_cast<ast::Alias*>(ta.value));
+      builder_.AST().AddTypeDecl(const_cast<ast::Alias*>(ta.value));
       return true;
     }
 
@@ -409,9 +409,8 @@ Expect<bool> ParserImpl::expect_global_decl() {
       if (!expect("struct declaration", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      register_constructed(builder_.Symbols().NameFor(str.value->name()),
-                           str.value);
-      builder_.AST().AddConstructedType(str.value);
+      register_type(builder_.Symbols().NameFor(str.value->name()), str.value);
+      builder_.AST().AddTypeDecl(str.value);
       return true;
     }
 
@@ -1032,7 +1031,7 @@ Maybe<ast::Alias*> ParserImpl::type_alias() {
 
   auto* alias = builder_.ty.alias(make_source_range_from(t.source()),
                                   name.value, type.value);
-  register_constructed(name.value, alias);
+  register_type(name.value, alias);
   return alias;
 }
 
@@ -1082,9 +1081,9 @@ Maybe<ast::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
   Source source;
   if (match(Token::Type::kIdentifier, &source)) {
     // TODO(crbug.com/tint/697): Remove
-    auto* ty = get_constructed(t.to_str());
+    auto* ty = get_type(t.to_str());
     if (ty == nullptr)
-      return add_error(t, "unknown constructed type '" + t.to_str() + "'");
+      return add_error(t, "unknown type '" + t.to_str() + "'");
 
     return builder_.create<ast::TypeName>(
         source, builder_.Symbols().Register(t.to_str()));
@@ -2242,7 +2241,7 @@ Maybe<ast::Expression*> ParserImpl::primary_expression() {
     return create<ast::BitcastExpression>(source, type.value, params.value);
   }
 
-  if (t.IsIdentifier() && !get_constructed(t.to_str())) {
+  if (t.IsIdentifier() && !get_type(t.to_str())) {
     next();
 
     auto* ident = create<ast::IdentifierExpression>(

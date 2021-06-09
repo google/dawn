@@ -55,11 +55,11 @@ TEST_F(ModuleTest, Assert_Null_GlobalVariable) {
       "internal compiler error");
 }
 
-TEST_F(ModuleTest, Assert_Null_ConstructedType) {
+TEST_F(ModuleTest, Assert_Null_TypeDecl) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder builder;
-        builder.AST().AddConstructedType(nullptr);
+        builder.AST().AddTypeDecl(nullptr);
       },
       "internal compiler error");
 }

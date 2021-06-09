@@ -112,7 +112,7 @@ TEST_F(ParserImplTest, FunctionHeader_InvalidReturnType) {
   EXPECT_FALSE(f.matched);
   EXPECT_TRUE(f.errored);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:14: unknown constructed type 'invalid'");
+  EXPECT_EQ(p->error(), "1:14: unknown type 'invalid'");
 }
 
 TEST_F(ParserImplTest, FunctionHeader_MissingReturnType) {

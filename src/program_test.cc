@@ -68,11 +68,11 @@ TEST_F(ProgramTest, Assert_NullGlobalVariable) {
       "internal compiler error");
 }
 
-TEST_F(ProgramTest, Assert_NullConstructedType) {
+TEST_F(ProgramTest, Assert_NullTypeDecl) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
-        b.AST().AddConstructedType(nullptr);
+        b.AST().AddTypeDecl(nullptr);
       },
       "internal compiler error");
 }

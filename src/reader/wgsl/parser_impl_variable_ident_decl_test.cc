@@ -81,7 +81,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_InvalidType) {
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
-  ASSERT_EQ(p->error(), "1:10: unknown constructed type 'invalid'");
+  ASSERT_EQ(p->error(), "1:10: unknown type 'invalid'");
 }
 
 // TODO(crbug.com/tint/846): Remove
@@ -134,7 +134,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read_DEPRECATED) {
 
   auto* s = Structure(Sym("S"), members, decos);
 
-  p->register_constructed("S", s);
+  p->register_type("S", s);
 
   auto res = p->expect_global_decl();
   ASSERT_FALSE(res.errored) << p->error();
@@ -166,7 +166,7 @@ TEST_F(ParserImplTest,
 
   auto* s = Structure(Sym("S"), members, decos);
 
-  p->register_constructed("S", s);
+  p->register_type("S", s);
 
   auto res = p->expect_global_decl();
   ASSERT_FALSE(res.errored) << p->error();
@@ -197,7 +197,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail_DEPRECATED) {
 
   auto* s = Structure(Sym("S"), members, decos);
 
-  p->register_constructed("S", s);
+  p->register_type("S", s);
 
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
@@ -220,7 +220,7 @@ TEST_F(ParserImplTest,
 
   auto* s = Structure(Sym("S"), members, decos);
 
-  p->register_constructed("S", s);
+  p->register_type("S", s);
 
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
@@ -259,7 +259,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_NonAccessDecoFail) {
 
   auto* s = Structure(Sym("S"), members, decos);
 
-  p->register_constructed("S", s);
+  p->register_type("S", s);
 
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());

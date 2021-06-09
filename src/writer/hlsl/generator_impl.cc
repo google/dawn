@@ -120,15 +120,15 @@ bool GeneratorImpl::Generate(std::ostream& out) {
     register_global(global);
   }
 
-  for (auto* const ty : builder_.AST().ConstructedTypes()) {
+  for (auto* const ty : builder_.AST().TypeDecls()) {
     if (ty->Is<ast::Alias>()) {
       continue;
     }
-    if (!EmitConstructedType(out, TypeOf(ty))) {
+    if (!EmitTypeDecl(out, TypeOf(ty))) {
       return false;
     }
   }
-  if (!builder_.AST().ConstructedTypes().empty()) {
+  if (!builder_.AST().TypeDecls().empty()) {
     out << std::endl;
   }
 
@@ -204,8 +204,7 @@ std::string GeneratorImpl::current_ep_var_name(VarType type) {
   return name;
 }
 
-bool GeneratorImpl::EmitConstructedType(std::ostream& out,
-                                        const sem::Type* ty) {
+bool GeneratorImpl::EmitTypeDecl(std::ostream& out, const sem::Type* ty) {
   make_indent(out);
 
   if (auto* str = ty->As<sem::Struct>()) {
@@ -214,8 +213,7 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
       return false;
     }
   } else {
-    TINT_UNREACHABLE(diagnostics_)
-        << "constructed type: " << ty->TypeInfo().name;
+    TINT_UNREACHABLE(diagnostics_) << "declared type: " << ty->TypeInfo().name;
     return false;
   }
 

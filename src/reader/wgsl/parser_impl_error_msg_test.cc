@@ -420,7 +420,7 @@ TEST_F(ParserImplErrorTest, FunctionMissingOpenLine) {
   var a : f32 = bar[0];
   return;
 })",
-         "test.wgsl:2:17 error: unknown constructed type 'bar'\n"
+         "test.wgsl:2:17 error: unknown type 'bar'\n"
          "  var a : f32 = bar[0];\n"
          "                ^^^\n"
          "\n"
@@ -733,7 +733,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclTypeAliasMissingSemicolon) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclTypeInvalid) {
   EXPECT("var x : fish;",
-         "test.wgsl:1:9 error: unknown constructed type 'fish'\n"
+         "test.wgsl:1:9 error: unknown type 'fish'\n"
          "var x : fish;\n"
          "        ^^^^\n");
 }

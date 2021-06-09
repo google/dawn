@@ -152,7 +152,7 @@ TEST_F(ParserImplTest, StructDecl_InvalidStructBody) {
   EXPECT_EQ(s.value, nullptr);
 
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:16: unknown constructed type 'B'");
+  EXPECT_EQ(p->error(), "1:16: unknown type 'B'");
 }
 
 TEST_F(ParserImplTest, StructDecl_InvalidDecorationDecl) {

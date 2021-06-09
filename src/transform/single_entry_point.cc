@@ -71,7 +71,7 @@ Output SingleEntryPoint::Run(const Program* in, const DataMap& data) {
   for (auto* decl : in->AST().GlobalDeclarations()) {
     if (auto* ty = decl->As<ast::TypeDecl>()) {
       // TODO(jrprice): Strip unused types.
-      out.AST().AddConstructedType(ctx.Clone(ty));
+      out.AST().AddTypeDecl(ctx.Clone(ty));
     } else if (auto* var = decl->As<ast::Variable>()) {
       if (var->is_const() || referenced_vars.count(var)) {
         out.AST().AddGlobalVariable(ctx.Clone(var));

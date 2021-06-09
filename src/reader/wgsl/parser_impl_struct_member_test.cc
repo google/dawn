@@ -202,7 +202,7 @@ TEST_F(ParserImplTest, StructMember_InvalidVariable) {
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(m.errored);
   ASSERT_EQ(m.value, nullptr);
-  EXPECT_EQ(p->error(), "1:17: unknown constructed type 'B'");
+  EXPECT_EQ(p->error(), "1:17: unknown type 'B'");
 }
 
 TEST_F(ParserImplTest, StructMember_MissingSemicolon) {

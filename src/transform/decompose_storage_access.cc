@@ -331,8 +331,8 @@ void InsertGlobal(CloneContext& ctx,
   }
 }
 
-/// @returns the unwrapped, user-declared constructed type of ty.
-const ast::TypeDecl* ConstructedTypeOf(const sem::Type* ty) {
+/// @returns the unwrapped, user-declared type of ty.
+const ast::TypeDecl* TypeDeclOf(const sem::Type* ty) {
   while (true) {
     if (auto* ref = ty->As<sem::Reference>()) {
       ty = ref->StoreType();
@@ -341,7 +341,7 @@ const ast::TypeDecl* ConstructedTypeOf(const sem::Type* ty) {
     if (auto* str = ty->As<sem::Struct>()) {
       return str->Declaration();
     }
-    // Not a constructed type
+    // Not a declared type
     return nullptr;
   }
 }
@@ -762,7 +762,7 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
     auto* offset = access.offset->Build(ctx);
     auto* buf_ty = access.var->Type()->UnwrapRef();
     auto* el_ty = access.type->UnwrapRef();
-    auto* insert_after = ConstructedTypeOf(access.var->Type());
+    auto* insert_after = TypeDeclOf(access.var->Type());
     Symbol func = state.LoadFunc(ctx, insert_after, buf_ty, el_ty,
                                  access.var->As<sem::VariableUser>());
 
@@ -778,7 +778,7 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
     auto* buf_ty = store.target.var->Type()->UnwrapRef();
     auto* el_ty = store.target.type->UnwrapRef();
     auto* value = store.assignment->rhs();
-    auto* insert_after = ConstructedTypeOf(store.target.var->Type());
+    auto* insert_after = TypeDeclOf(store.target.var->Type());
     Symbol func = state.StoreFunc(ctx, insert_after, buf_ty, el_ty,
                                   store.target.var->As<sem::VariableUser>());
 

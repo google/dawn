@@ -87,9 +87,9 @@ bool GeneratorImpl::Generate() {
     global_variables_.set(global->symbol(), sem);
   }
 
-  for (auto* const type_decl : program_->AST().ConstructedTypes()) {
+  for (auto* const type_decl : program_->AST().TypeDecls()) {
     if (!type_decl->Is<ast::Alias>()) {
-      if (!EmitConstructedType(TypeOf(type_decl))) {
+      if (!EmitTypeDecl(TypeOf(type_decl))) {
         return false;
       }
     }
@@ -105,7 +105,7 @@ bool GeneratorImpl::Generate() {
     }
   }
 
-  if (!program_->AST().ConstructedTypes().empty() || array_wrappers_.size()) {
+  if (!program_->AST().TypeDecls().empty() || array_wrappers_.size()) {
     out_ << std::endl;
   }
 
@@ -160,7 +160,7 @@ bool GeneratorImpl::Generate() {
   return true;
 }
 
-bool GeneratorImpl::EmitConstructedType(const sem::Type* ty) {
+bool GeneratorImpl::EmitTypeDecl(const sem::Type* ty) {
   make_indent();
 
   if (auto* str = ty->As<sem::Struct>()) {
@@ -2011,7 +2011,7 @@ bool GeneratorImpl::EmitType(const sem::Type* type, const std::string& name) {
     out_ << "sampler";
   } else if (auto* str = type->As<sem::Struct>()) {
     // The struct type emits as just the name. The declaration would be emitted
-    // as part of emitting the constructed types.
+    // as part of emitting the declared types.
     out_ << program_->Symbols().NameFor(str->Declaration()->name());
   } else if (auto* tex = type->As<sem::Texture>()) {
     if (tex->Is<sem::DepthTexture>()) {

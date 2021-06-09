@@ -126,7 +126,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_Invalid) {
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
   EXPECT_TRUE(t.errored);
-  EXPECT_EQ(p->error(), "1:12: unknown constructed type 'abc'");
+  EXPECT_EQ(p->error(), "1:12: unknown type 'abc'");
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_SampledTexture_MissingType) {
@@ -185,7 +185,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_Invalid) {
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
   EXPECT_TRUE(t.errored);
-  EXPECT_EQ(p->error(), "1:25: unknown constructed type 'abc'");
+  EXPECT_EQ(p->error(), "1:25: unknown type 'abc'");
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_MultisampledTexture_MissingType) {

@@ -48,7 +48,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_Invalid) {
   auto p = parser("var<private> a : vec2<invalid>;");
   p->expect_global_decl();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:23: unknown constructed type 'invalid'");
+  EXPECT_EQ(p->error(), "1:23: unknown type 'invalid'");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_MissingSemicolon) {
@@ -90,12 +90,11 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto program = p->program();
-  ASSERT_EQ(program.AST().ConstructedTypes().size(), 1u);
-  ASSERT_TRUE(program.AST().ConstructedTypes()[0]->Is<ast::Alias>());
-  EXPECT_EQ(
-      program.Symbols().NameFor(
-          program.AST().ConstructedTypes()[0]->As<ast::Alias>()->symbol()),
-      "A");
+  ASSERT_EQ(program.AST().TypeDecls().size(), 1u);
+  ASSERT_TRUE(program.AST().TypeDecls()[0]->Is<ast::Alias>());
+  EXPECT_EQ(program.Symbols().NameFor(
+                program.AST().TypeDecls()[0]->As<ast::Alias>()->symbol()),
+            "A");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_StructIdent) {
@@ -108,13 +107,13 @@ type B = A;)");
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto program = p->program();
-  ASSERT_EQ(program.AST().ConstructedTypes().size(), 2u);
-  ASSERT_TRUE(program.AST().ConstructedTypes()[0]->Is<ast::Struct>());
-  auto* str = program.AST().ConstructedTypes()[0]->As<ast::Struct>();
+  ASSERT_EQ(program.AST().TypeDecls().size(), 2u);
+  ASSERT_TRUE(program.AST().TypeDecls()[0]->Is<ast::Struct>());
+  auto* str = program.AST().TypeDecls()[0]->As<ast::Struct>();
   EXPECT_EQ(str->name(), program.Symbols().Get("A"));
 
-  ASSERT_TRUE(program.AST().ConstructedTypes()[1]->Is<ast::Alias>());
-  auto* alias = program.AST().ConstructedTypes()[1]->As<ast::Alias>();
+  ASSERT_TRUE(program.AST().TypeDecls()[1]->Is<ast::Alias>());
+  auto* alias = program.AST().TypeDecls()[1]->As<ast::Alias>();
   EXPECT_EQ(alias->symbol(), program.Symbols().Get("B"));
   auto* tn = alias->type()->As<ast::TypeName>();
   EXPECT_NE(tn, nullptr);
@@ -125,7 +124,7 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias_Invalid) {
   auto p = parser("type A = invalid;");
   p->expect_global_decl();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:10: unknown constructed type 'invalid'");
+  EXPECT_EQ(p->error(), "1:10: unknown type 'invalid'");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_MissingSemicolon) {
@@ -170,9 +169,9 @@ TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto program = p->program();
-  ASSERT_EQ(program.AST().ConstructedTypes().size(), 1u);
+  ASSERT_EQ(program.AST().TypeDecls().size(), 1u);
 
-  auto* t = program.AST().ConstructedTypes()[0];
+  auto* t = program.AST().TypeDecls()[0];
   ASSERT_NE(t, nullptr);
   ASSERT_TRUE(t->Is<ast::Struct>());
 
@@ -188,9 +187,9 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto program = p->program();
-  ASSERT_EQ(program.AST().ConstructedTypes().size(), 1u);
+  ASSERT_EQ(program.AST().TypeDecls().size(), 1u);
 
-  auto* t = program.AST().ConstructedTypes()[0];
+  auto* t = program.AST().TypeDecls()[0];
   ASSERT_NE(t, nullptr);
   ASSERT_TRUE(t->Is<ast::Struct>());
 
@@ -215,9 +214,9 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithDecoration) {
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto program = p->program();
-  ASSERT_EQ(program.AST().ConstructedTypes().size(), 1u);
+  ASSERT_EQ(program.AST().TypeDecls().size(), 1u);
 
-  auto* t = program.AST().ConstructedTypes()[0];
+  auto* t = program.AST().TypeDecls()[0];
   ASSERT_NE(t, nullptr);
   ASSERT_TRUE(t->Is<ast::Struct>());
 

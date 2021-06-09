@@ -67,7 +67,7 @@ bool GeneratorImpl::Generate() {
   // Generate global declarations in the order they appear in the module.
   for (auto* decl : program_->AST().GlobalDeclarations()) {
     if (auto* td = decl->As<ast::TypeDecl>()) {
-      if (!EmitConstructedType(td)) {
+      if (!EmitTypeDecl(td)) {
         return false;
       }
     } else if (auto* func = decl->As<ast::Function>()) {
@@ -91,7 +91,7 @@ bool GeneratorImpl::Generate() {
   return true;
 }
 
-bool GeneratorImpl::EmitConstructedType(const ast::TypeDecl* ty) {
+bool GeneratorImpl::EmitTypeDecl(const ast::TypeDecl* ty) {
   make_indent();
 
   if (auto* alias = ty->As<ast::Alias>()) {
@@ -105,7 +105,7 @@ bool GeneratorImpl::EmitConstructedType(const ast::TypeDecl* ty) {
       return false;
     }
   } else {
-    diagnostics_.add_error("unknown constructed type: " +
+    diagnostics_.add_error("unknown declared type: " +
                            std::string(ty->TypeInfo().name));
     return false;
   }

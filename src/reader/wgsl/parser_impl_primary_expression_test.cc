@@ -300,7 +300,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast_InvalidType) {
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:9: unknown constructed type 'invalid'");
+  EXPECT_EQ(p->error(), "1:9: unknown type 'invalid'");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast_MissingLeftParen) {

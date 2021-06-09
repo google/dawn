@@ -65,7 +65,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_Invalid) {
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:9: unknown constructed type 'invalid'");
+  EXPECT_EQ(p->error(), "1:9: unknown type 'invalid'");
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_ConstructorInvalid) {
@@ -160,7 +160,7 @@ TEST_F(ParserImplTest, VariableStmt_Let_InvalidVarIdent) {
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:9: unknown constructed type 'invalid'");
+  EXPECT_EQ(p->error(), "1:9: unknown type 'invalid'");
 }
 
 TEST_F(ParserImplTest, VariableStmt_Let_MissingEqual) {

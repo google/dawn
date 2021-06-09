@@ -351,7 +351,7 @@ struct DataType<alias<T, ID>> {
     auto name = b.Symbols().Register("alias_" + std::to_string(ID));
     if (!b.AST().LookupType(name)) {
       auto* type = DataType<T>::AST(b);
-      b.AST().AddConstructedType(b.ty.alias(name, type));
+      b.AST().AddTypeDecl(b.ty.alias(name, type));
     }
     return b.create<ast::TypeName>(name);
   }

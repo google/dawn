@@ -85,7 +85,7 @@ TEST_F(ParserImplTest, GlobalConstantDecl_InvalidVariable) {
   EXPECT_TRUE(e.errored);
   EXPECT_FALSE(e.matched);
   EXPECT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:9: unknown constructed type 'invalid'");
+  EXPECT_EQ(p->error(), "1:9: unknown type 'invalid'");
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_InvalidExpression) {

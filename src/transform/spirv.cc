@@ -127,7 +127,7 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
   // ```
 
   // Strip entry point IO decorations from struct declarations.
-  for (auto* ty : ctx.src->AST().ConstructedTypes()) {
+  for (auto* ty : ctx.src->AST().TypeDecls()) {
     if (auto* struct_ty = ty->As<ast::Struct>()) {
       // Build new list of struct members without entry point IO decorations.
       ast::StructMemberList new_struct_members;

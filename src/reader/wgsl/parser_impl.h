@@ -378,17 +378,16 @@ class ParserImpl {
   /// @param source the source to associate the error with
   /// @param msg the warning message
   void deprecated(const Source& source, const std::string& msg);
-  /// Registers a constructed type into the parser
+  /// Registers a declared type into the parser
   /// TODO(crbug.com/tint/724): Remove
-  /// @param name the constructed name
-  /// @param type_decl the constructed type declaration
-  void register_constructed(const std::string& name,
-                            const ast::TypeDecl* type_decl);
-  /// Retrieves a constructed type
+  /// @param name the type name
+  /// @param type_decl the type declaration
+  void register_type(const std::string& name, const ast::TypeDecl* type_decl);
+  /// Retrieves a declared type
   /// TODO(crbug.com/tint/724): Remove
   /// @param name The name to lookup
-  /// @returns the constructed type for `name` or `nullptr` if not found
-  const ast::TypeDecl* get_constructed(const std::string& name);
+  /// @returns the declared type for `name` or `nullptr` if not found
+  const ast::TypeDecl* get_type(const std::string& name);
 
   /// Parses the `translation_unit` grammar element
   void translation_unit();
@@ -882,7 +881,7 @@ class ParserImpl {
   uint32_t sync_depth_ = 0;
   std::vector<Token::Type> sync_tokens_;
   int silence_errors_ = 0;
-  std::unordered_map<std::string, const ast::TypeDecl*> registered_constructs_;
+  std::unordered_map<std::string, const ast::TypeDecl*> registered_types_;
   ProgramBuilder builder_;
   size_t max_errors_ = 25;
 };

@@ -54,10 +54,10 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true on successful generation; false otherwise
   bool Generate();
 
-  /// Handles generating a constructed type
-  /// @param ty the constructed to generate
-  /// @returns true if the constructed was emitted
-  bool EmitConstructedType(const ast::TypeDecl* ty);
+  /// Handles generating a declared type
+  /// @param ty the declared type to generate
+  /// @returns true if the declared type was emitted
+  bool EmitTypeDecl(const ast::TypeDecl* ty);
   /// Handles an array accessor expression
   /// @param expr the expression to emit
   /// @returns true if the array accessor was emitted

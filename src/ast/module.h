@@ -74,17 +74,15 @@ class Module : public Castable<Module, Node> {
   VariableList& GlobalVariables() { return global_variables_; }
 
   /// Adds a type declaration to the Builder.
-  /// @param decl the constructed type declaration to add
-  void AddConstructedType(ast::TypeDecl* decl);
+  /// @param decl the type declaration to add
+  void AddTypeDecl(ast::TypeDecl* decl);
 
-  /// @returns the TypeDecl registered as a ConstructedType()
+  /// @returns the TypeDecl registered as a TypeDecl()
   /// @param name the name of the type to search for
   const ast::TypeDecl* LookupType(Symbol name) const;
 
-  /// @returns the constructed types in the translation unit
-  const std::vector<ast::TypeDecl*>& ConstructedTypes() const {
-    return constructed_types_;
-  }
+  /// @returns the declared types in the translation unit
+  const std::vector<ast::TypeDecl*>& TypeDecls() const { return type_decls_; }
 
   /// Add a function to the Builder
   /// @param func the function to add
@@ -118,7 +116,7 @@ class Module : public Castable<Module, Node> {
 
  private:
   std::vector<ast::Node*> global_declarations_;
-  std::vector<ast::TypeDecl*> constructed_types_;
+  std::vector<ast::TypeDecl*> type_decls_;
   FunctionList functions_;
   VariableList global_variables_;
 };

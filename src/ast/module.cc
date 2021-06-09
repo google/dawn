@@ -37,7 +37,7 @@ Module::Module(ProgramID program_id,
     }
 
     if (auto* ty = decl->As<ast::TypeDecl>()) {
-      constructed_types_.push_back(ty);
+      type_decls_.push_back(ty);
     } else if (auto* func = decl->As<Function>()) {
       functions_.push_back(func);
     } else if (auto* var = decl->As<Variable>()) {
@@ -52,7 +52,7 @@ Module::Module(ProgramID program_id,
 Module::~Module() = default;
 
 const ast::TypeDecl* Module::LookupType(Symbol name) const {
-  for (auto* ty : ConstructedTypes()) {
+  for (auto* ty : TypeDecls()) {
     if (ty->name() == name) {
       return ty;
     }
@@ -67,9 +67,9 @@ void Module::AddGlobalVariable(ast::Variable* var) {
   global_declarations_.push_back(var);
 }
 
-void Module::AddConstructedType(ast::TypeDecl* type) {
+void Module::AddTypeDecl(ast::TypeDecl* type) {
   TINT_ASSERT(type);
-  constructed_types_.push_back(type);
+  type_decls_.push_back(type);
   global_declarations_.push_back(type);
 }
 
@@ -93,7 +93,7 @@ void Module::Copy(CloneContext* ctx, const Module* src) {
       continue;
     }
     if (auto* ty = decl->As<ast::TypeDecl>()) {
-      AddConstructedType(ty);
+      AddTypeDecl(ty);
     } else if (auto* func = decl->As<Function>()) {
       AddFunction(func);
     } else if (auto* var = decl->As<Variable>()) {
@@ -110,7 +110,7 @@ void Module::to_str(const sem::Info& sem,
   make_indent(out, indent);
   out << "Module{" << std::endl;
   indent += 2;
-  for (auto* ty : constructed_types_) {
+  for (auto* ty : type_decls_) {
     make_indent(out, indent);
     if (auto* alias = ty->As<ast::Alias>()) {
       out << alias->symbol().to_str() << " -> " << alias->type()->type_name()
