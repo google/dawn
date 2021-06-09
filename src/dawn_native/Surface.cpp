@@ -21,6 +21,7 @@
 
 #if defined(DAWN_PLATFORM_WINDOWS)
 #    include <windows.ui.core.h>
+#    include <windows.ui.xaml.controls.h>
 #endif  // defined(DAWN_PLATFORM_WINDOWS)
 
 #if defined(DAWN_USE_X11)
@@ -43,6 +44,7 @@ namespace dawn_native {
                                      wgpu::SType::SurfaceDescriptorFromMetalLayer,
                                      wgpu::SType::SurfaceDescriptorFromWindowsHWND,
                                      wgpu::SType::SurfaceDescriptorFromWindowsCoreWindow,
+                                     wgpu::SType::SurfaceDescriptorFromWindowsSwapChainPanel,
                                      wgpu::SType::SurfaceDescriptorFromXlib));
 
 #if defined(DAWN_ENABLE_BACKEND_METAL)
@@ -80,6 +82,18 @@ namespace dawn_native {
             }
             return {};
         }
+        const SurfaceDescriptorFromWindowsSwapChainPanel* swapChainPanelDesc = nullptr;
+        FindInChain(descriptor->nextInChain, &swapChainPanelDesc);
+        if (swapChainPanelDesc) {
+            // Validate the swapChainPanel by querying for ISwapChainPanel interface
+            ComPtr<ABI::Windows::UI::Xaml::Controls::ISwapChainPanel> swapChainPanel;
+            if (swapChainPanelDesc->swapChainPanel == nullptr ||
+                FAILED(static_cast<IUnknown*>(swapChainPanelDesc->swapChainPanel)
+                           ->QueryInterface(IID_PPV_ARGS(&swapChainPanel)))) {
+                return DAWN_VALIDATION_ERROR("Invalid SwapChainPanel");
+            }
+            return {};
+        }
         return DAWN_VALIDATION_ERROR("Unsupported sType");
 #endif  // defined(DAWN_PLATFORM_WINDOWS)
 
@@ -114,10 +128,12 @@ namespace dawn_native {
         const SurfaceDescriptorFromMetalLayer* metalDesc = nullptr;
         const SurfaceDescriptorFromWindowsHWND* hwndDesc = nullptr;
         const SurfaceDescriptorFromWindowsCoreWindow* coreWindowDesc = nullptr;
+        const SurfaceDescriptorFromWindowsSwapChainPanel* swapChainPanelDesc = nullptr;
         const SurfaceDescriptorFromXlib* xDesc = nullptr;
         FindInChain(descriptor->nextInChain, &metalDesc);
         FindInChain(descriptor->nextInChain, &hwndDesc);
         FindInChain(descriptor->nextInChain, &coreWindowDesc);
+        FindInChain(descriptor->nextInChain, &swapChainPanelDesc);
         FindInChain(descriptor->nextInChain, &xDesc);
         ASSERT(metalDesc || hwndDesc || xDesc);
         if (metalDesc) {
@@ -131,6 +147,11 @@ namespace dawn_native {
 #if defined(DAWN_PLATFORM_WINDOWS)
             mType = Type::WindowsCoreWindow;
             mCoreWindow = static_cast<IUnknown*>(coreWindowDesc->coreWindow);
+#endif  // defined(DAWN_PLATFORM_WINDOWS)
+        } else if (swapChainPanelDesc) {
+#if defined(DAWN_PLATFORM_WINDOWS)
+            mType = Type::WindowsSwapChainPanel;
+            mSwapChainPanel = static_cast<IUnknown*>(swapChainPanelDesc->swapChainPanel);
 #endif  // defined(DAWN_PLATFORM_WINDOWS)
         } else if (xDesc) {
             mType = Type::Xlib;
@@ -182,6 +203,15 @@ namespace dawn_native {
         ASSERT(mType == Type::WindowsCoreWindow);
 #if defined(DAWN_PLATFORM_WINDOWS)
         return mCoreWindow.Get();
+#else
+        return nullptr;
+#endif
+    }
+
+    IUnknown* Surface::GetSwapChainPanel() const {
+        ASSERT(mType == Type::WindowsSwapChainPanel);
+#if defined(DAWN_PLATFORM_WINDOWS)
+        return mSwapChainPanel.Get();
 #else
         return nullptr;
 #endif

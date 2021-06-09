@@ -21,6 +21,8 @@
 
 #include <dawn/dawn_wsi.h>
 
+#include <windows.ui.xaml.media.dxinterop.h>
+
 namespace dawn_native { namespace d3d12 {
     namespace {
 
@@ -259,6 +261,19 @@ namespace dawn_native { namespace d3d12 {
                                                            GetSurface()->GetCoreWindow(),
                                                            &swapChainDesc, nullptr, &swapChain1),
                     "Creating the IDXGISwapChain1"));
+                break;
+            }
+            case Surface::Type::WindowsSwapChainPanel: {
+                DAWN_TRY(CheckHRESULT(
+                    factory2->CreateSwapChainForComposition(device->GetCommandQueue().Get(),
+                                                            &swapChainDesc, nullptr, &swapChain1),
+                    "Creating the IDXGISwapChain1"));
+                ComPtr<ISwapChainPanelNative> swapChainPanelNative;
+                DAWN_TRY(CheckHRESULT(GetSurface()->GetSwapChainPanel()->QueryInterface(
+                                          IID_PPV_ARGS(&swapChainPanelNative)),
+                                      "Getting ISwapChainPanelNative"));
+                DAWN_TRY(CheckHRESULT(swapChainPanelNative->SetSwapChain(swapChain1.Get()),
+                                      "Setting SwapChain"));
                 break;
             }
             default:

@@ -50,7 +50,7 @@ namespace dawn_native {
         NewSwapChainBase* GetAttachedSwapChain();
 
         // These are valid to call on all Surfaces.
-        enum class Type { MetalLayer, WindowsHWND, WindowsCoreWindow, Xlib };
+        enum class Type { MetalLayer, WindowsHWND, WindowsCoreWindow, WindowsSwapChainPanel, Xlib };
         Type GetType() const;
         InstanceBase* GetInstance();
 
@@ -63,6 +63,9 @@ namespace dawn_native {
 
         // Valid to call if the type is WindowsCoreWindow
         IUnknown* GetCoreWindow() const;
+
+        // Valid to call if the type is WindowsSwapChainPanel
+        IUnknown* GetSwapChainPanel() const;
 
         // Valid to call if the type is WindowsXlib
         void* GetXDisplay() const;
@@ -87,6 +90,9 @@ namespace dawn_native {
 #if defined(DAWN_PLATFORM_WINDOWS)
         // WindowsCoreWindow
         ComPtr<IUnknown> mCoreWindow;
+
+        // WindowsSwapChainPanel
+        ComPtr<IUnknown> mSwapChainPanel;
 #endif  // defined(DAWN_PLATFORM_WINDOWS)
 
         // Xlib

@@ -141,7 +141,8 @@
             "SurfaceDescriptorFromMetalLayer",
             "SurfaceDescriptorFromWindowsHWND",
             "SurfaceDescriptorFromXlib",
-            "SurfaceDescriptorFromWindowsCoreWindow"
+            "SurfaceDescriptorFromWindowsCoreWindow",
+            "SurfaceDescriptorFromWindowsSwapChainPanel"
         ],
         "client_side_commands": [
             "BufferMapAsync",

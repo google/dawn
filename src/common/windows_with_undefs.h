@@ -32,4 +32,7 @@
 // Macros defined to produce compiler intrinsics
 #undef MemoryBarrier
 
+// Macro defined as an alias of GetTickCount
+#undef GetCurrentTime
+
 #endif  // COMMON_WINDOWS_WITH_UNDEFS_H_

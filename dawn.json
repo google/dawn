@@ -1784,6 +1784,14 @@
             {"name": "core window", "type": "void", "annotation": "*"}
         ]
     },
+    "surface descriptor from windows swap chain panel": {
+        "category": "structure",
+        "chained": true,
+        "javascript": false,
+        "members": [
+            {"name": "swap chain panel", "type": "void", "annotation": "*"}
+        ]
+    },
     "swap chain": {
         "category": "object",
         "methods": [
@@ -1827,7 +1835,8 @@
             {"value": 7, "name": "primitive depth clamping state"},
             {"value": 8, "name": "surface descriptor from windows core window"},
             {"value": 9, "name": "external texture binding entry"},
-            {"value": 10, "name": "external texture binding layout"}
+            {"value": 10, "name": "external texture binding layout"},
+            {"value": 11, "name": "surface descriptor from windows swap chain panel"}
         ]
     },
     "texture": {
