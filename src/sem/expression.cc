@@ -19,7 +19,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Expression);
 namespace tint {
 namespace sem {
 
-Expression::Expression(ast::Expression* declaration,
+Expression::Expression(const ast::Expression* declaration,
                        const sem::Type* type,
                        Statement* statement)
     : declaration_(declaration), type_(type), statement_(statement) {

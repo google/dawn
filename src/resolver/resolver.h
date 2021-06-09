@@ -234,6 +234,7 @@ class Resolver {
   bool Identifier(ast::IdentifierExpression*);
   bool IfStatement(ast::IfStatement*);
   bool IntrinsicCall(ast::CallExpression*, sem::IntrinsicType);
+  bool FunctionCall(const ast::CallExpression* call);
   bool LoopStatement(ast::LoopStatement*);
   bool MemberAccessor(ast::MemberAccessorExpression*);
   bool Parameter(ast::Variable* param);
@@ -345,7 +346,7 @@ class Resolver {
   /// assigns this semantic node to the expression `expr`.
   /// @param expr the expression
   /// @param type the resolved type
-  void SetType(ast::Expression* expr, const sem::Type* type);
+  void SetType(const ast::Expression* expr, const sem::Type* type);
 
   /// Creates a sem::Expression node with the resolved type `type`, the declared
   /// type name `type_name` and assigns this semantic node to the expression
@@ -353,7 +354,7 @@ class Resolver {
   /// @param expr the expression
   /// @param type the resolved type
   /// @param type_name the declared type name
-  void SetType(ast::Expression* expr,
+  void SetType(const ast::Expression* expr,
                const sem::Type* type,
                const std::string& type_name);
 
@@ -396,7 +397,8 @@ class Resolver {
   std::vector<FunctionInfo*> entry_points_;
   std::unordered_map<const ast::Function*, FunctionInfo*> function_to_info_;
   std::unordered_map<const ast::Variable*, VariableInfo*> variable_to_info_;
-  std::unordered_map<ast::CallExpression*, FunctionCallInfo> function_calls_;
+  std::unordered_map<const ast::CallExpression*, FunctionCallInfo>
+      function_calls_;
   std::unordered_map<const ast::Expression*, ExpressionInfo> expr_info_;
   std::unordered_map<Symbol, TypeDeclInfo> named_type_info_;
 

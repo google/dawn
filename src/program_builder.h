@@ -1403,11 +1403,24 @@ class ProgramBuilder {
                                           Expr(std::forward<EXPR>(expr)));
   }
 
+  /// @param source the source information
   /// @param func the function name
   /// @param args the function call arguments
   /// @returns a `ast::CallExpression` to the function `func`, with the
   /// arguments of `args` converted to `ast::Expression`s using `Expr()`.
   template <typename NAME, typename... ARGS>
+  ast::CallExpression* Call(const Source& source, NAME&& func, ARGS&&... args) {
+    return create<ast::CallExpression>(source, Expr(func),
+                                       ExprList(std::forward<ARGS>(args)...));
+  }
+
+  /// @param func the function name
+  /// @param args the function call arguments
+  /// @returns a `ast::CallExpression` to the function `func`, with the
+  /// arguments of `args` converted to `ast::Expression`s using `Expr()`.
+  template <typename NAME,
+            typename... ARGS,
+            traits::EnableIfIsNotType<traits::Decay<NAME>, Source>* = nullptr>
   ast::CallExpression* Call(NAME&& func, ARGS&&... args) {
     return create<ast::CallExpression>(Expr(func),
                                        ExprList(std::forward<ARGS>(args)...));

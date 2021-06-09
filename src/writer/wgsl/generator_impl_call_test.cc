@@ -36,8 +36,12 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithParams) {
-  Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
-       ast::DecorationList{});
+  Func("my_func",
+       {
+           Param(Sym(), ty.f32()),
+           Param(Sym(), ty.f32()),
+       },
+       ty.void_(), ast::StatementList{}, ast::DecorationList{});
   Global("param1", ty.f32(), ast::StorageClass::kPrivate);
   Global("param2", ty.f32(), ast::StorageClass::kPrivate);
 
@@ -51,8 +55,12 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithParams) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitStatement_Call) {
-  Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
-       ast::DecorationList{});
+  Func("my_func",
+       {
+           Param(Sym(), ty.f32()),
+           Param(Sym(), ty.f32()),
+       },
+       ty.void_(), ast::StatementList{}, ast::DecorationList{});
   Global("param1", ty.f32(), ast::StorageClass::kPrivate);
   Global("param2", ty.f32(), ast::StorageClass::kPrivate);
 

@@ -560,8 +560,7 @@ TEST_F(ResolverTest, Expr_Call_InBinaryOp) {
 }
 
 TEST_F(ResolverTest, Expr_Call_WithParams) {
-  ast::VariableList params;
-  Func("my_func", params, ty.f32(),
+  Func("my_func", {Param(Sym(), ty.f32())}, ty.f32(),
        {
            Return(1.2f),
        });

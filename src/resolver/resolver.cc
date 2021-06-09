@@ -1701,51 +1701,9 @@ bool Resolver::Call(ast::CallExpression* call) {
       return false;
     }
   } else {
-    if (current_function_) {
-      auto callee_func_it = symbol_to_function_.find(ident->symbol());
-      if (callee_func_it == symbol_to_function_.end()) {
-        if (current_function_->declaration->symbol() == ident->symbol()) {
-          diagnostics_.add_error("v-0004",
-                                 "recursion is not permitted. '" + name +
-                                     "' attempted to call itself.",
-                                 call->source());
-        } else {
-          diagnostics_.add_error(
-              "v-0006: unable to find called function: " + name,
-              call->source());
-        }
-        return false;
-      }
-      auto* callee_func = callee_func_it->second;
-
-      callee_func->callsites.push_back(call);
-
-      // Note: Requires called functions to be resolved first.
-      // This is currently guaranteed as functions must be declared before
-      // use.
-      current_function_->transitive_calls.add(callee_func);
-      for (auto* transitive_call : callee_func->transitive_calls) {
-        current_function_->transitive_calls.add(transitive_call);
-      }
-
-      // We inherit any referenced variables from the callee.
-      for (auto* var : callee_func->referenced_module_vars) {
-        set_referenced_from_function_if_needed(var, false);
-      }
-    }
-
-    auto iter = symbol_to_function_.find(ident->symbol());
-    if (iter == symbol_to_function_.end()) {
-      diagnostics_.add_error(
-          "v-0005: function must be declared before use: '" + name + "'",
-          call->source());
+    if (!FunctionCall(call)) {
       return false;
     }
-
-    auto* function = iter->second;
-    function_calls_.emplace(call,
-                            FunctionCallInfo{function, current_statement_});
-    SetType(call, function->return_type, function->return_type_name);
   }
 
   return true;
@@ -1771,6 +1729,79 @@ bool Resolver::IntrinsicCall(ast::CallExpression* call,
 
   current_function_->intrinsic_calls.emplace_back(
       IntrinsicCallInfo{call, result});
+
+  return true;
+}
+
+bool Resolver::FunctionCall(const ast::CallExpression* call) {
+  auto* ident = call->func();
+  auto name = builder_->Symbols().NameFor(ident->symbol());
+
+  auto callee_func_it = symbol_to_function_.find(ident->symbol());
+  if (callee_func_it == symbol_to_function_.end()) {
+    if (current_function_ &&
+        current_function_->declaration->symbol() == ident->symbol()) {
+      diagnostics_.add_error("v-0004",
+                             "recursion is not permitted. '" + name +
+                                 "' attempted to call itself.",
+                             call->source());
+    } else {
+      diagnostics_.add_error("v-0006: unable to find called function: " + name,
+                             call->source());
+    }
+    return false;
+  }
+  auto* callee_func = callee_func_it->second;
+
+  if (current_function_) {
+    callee_func->callsites.push_back(call);
+
+    // Note: Requires called functions to be resolved first.
+    // This is currently guaranteed as functions must be declared before
+    // use.
+    current_function_->transitive_calls.add(callee_func);
+    for (auto* transitive_call : callee_func->transitive_calls) {
+      current_function_->transitive_calls.add(transitive_call);
+    }
+
+    // We inherit any referenced variables from the callee.
+    for (auto* var : callee_func->referenced_module_vars) {
+      set_referenced_from_function_if_needed(var, false);
+    }
+  }
+
+  // Validate number of arguments match number of parameters
+  if (call->params().size() != callee_func->parameters.size()) {
+    bool more = call->params().size() > callee_func->parameters.size();
+    diagnostics_.add_error(
+        "too " + (more ? std::string("many") : std::string("few")) +
+            " arguments in call to '" + name + "', expected " +
+            std::to_string(callee_func->parameters.size()) + ", got " +
+            std::to_string(call->params().size()),
+        call->source());
+    return false;
+  }
+
+  // Validate arguments match parameter types
+  for (size_t i = 0; i < call->params().size(); ++i) {
+    const VariableInfo* param = callee_func->parameters[i];
+    const ast::Expression* arg_expr = call->params()[i];
+    auto* arg_type = TypeOf(arg_expr)->UnwrapRef();
+
+    if (param->type != arg_type) {
+      diagnostics_.add_error(
+          "type mismatch for argument " + std::to_string(i + 1) +
+              " in call to '" + name + "', expected '" +
+              param->type->FriendlyName(builder_->Symbols()) + "', got '" +
+              arg_type->FriendlyName(builder_->Symbols()) + "'",
+          arg_expr->source());
+      return false;
+    }
+  }
+
+  function_calls_.emplace(call,
+                          FunctionCallInfo{callee_func, current_statement_});
+  SetType(call, callee_func->return_type, callee_func->return_type_name);
 
   return true;
 }
@@ -2514,11 +2545,11 @@ sem::Type* Resolver::TypeOf(const ast::Literal* lit) {
   return nullptr;
 }
 
-void Resolver::SetType(ast::Expression* expr, const sem::Type* type) {
+void Resolver::SetType(const ast::Expression* expr, const sem::Type* type) {
   SetType(expr, type, type->FriendlyName(builder_->Symbols()));
 }
 
-void Resolver::SetType(ast::Expression* expr,
+void Resolver::SetType(const ast::Expression* expr,
                        const sem::Type* type,
                        const std::string& type_name) {
   if (expr_info_.count(expr)) {

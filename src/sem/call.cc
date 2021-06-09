@@ -19,7 +19,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Call);
 namespace tint {
 namespace sem {
 
-Call::Call(ast::Expression* declaration,
+Call::Call(const ast::Expression* declaration,
            const CallTarget* target,
            Statement* statement)
     : Base(declaration, target->ReturnType(), statement), target_(target) {}

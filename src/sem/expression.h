@@ -31,7 +31,7 @@ class Expression : public Castable<Expression, Node> {
   /// @param declaration the AST node
   /// @param type the resolved type of the expression
   /// @param statement the statement that owns this expression
-  Expression(ast::Expression* declaration,
+  Expression(const ast::Expression* declaration,
              const sem::Type* type,
              Statement* statement);
 
@@ -42,10 +42,12 @@ class Expression : public Castable<Expression, Node> {
   Statement* Stmt() const { return statement_; }
 
   /// @returns the AST node
-  ast::Expression* Declaration() const { return declaration_; }
+  ast::Expression* Declaration() const {
+    return const_cast<ast::Expression*>(declaration_);
+  }
 
  private:
-  ast::Expression* declaration_;
+  const ast::Expression* declaration_;
   const sem::Type* const type_;
   Statement* const statement_;
 };

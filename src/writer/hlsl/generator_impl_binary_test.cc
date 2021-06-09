@@ -483,8 +483,13 @@ if (tint_tmp) {
 TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
   // foo(a && b, c || d, (a || c) && (b || d))
 
-  Func("foo", ast::VariableList{}, ty.void_(), ast::StatementList{},
-       ast::DecorationList{});
+  Func("foo",
+       {
+           Param(Sym(), ty.bool_()),
+           Param(Sym(), ty.bool_()),
+           Param(Sym(), ty.bool_()),
+       },
+       ty.void_(), ast::StatementList{}, ast::DecorationList{});
   Global("a", ty.bool_(), ast::StorageClass::kPrivate);
   Global("b", ty.bool_(), ast::StorageClass::kPrivate);
   Global("c", ty.bool_(), ast::StorageClass::kPrivate);

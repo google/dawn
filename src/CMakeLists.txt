@@ -589,6 +589,7 @@ if(${TINT_BUILD_TESTS})
     resolver/assignment_validation_test.cc
     resolver/block_test.cc
     resolver/builtins_validation_test.cc
+    resolver/call_test.cc
     resolver/control_block_validation_test.cc
     resolver/decoration_validation_test.cc
     resolver/entry_point_validation_test.cc

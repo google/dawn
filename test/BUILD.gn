@@ -225,6 +225,7 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/resolver/assignment_validation_test.cc",
     "../src/resolver/block_test.cc",
     "../src/resolver/builtins_validation_test.cc",
+    "../src/resolver/call_test.cc",
     "../src/resolver/control_block_validation_test.cc",
     "../src/resolver/decoration_validation_test.cc",
     "../src/resolver/entry_point_validation_test.cc",
@@ -465,8 +466,8 @@ tint_unittests_source_set("tint_unittests_wgsl_reader_src") {
     "../src/reader/wgsl/parser_impl_variable_decoration_list_test.cc",
     "../src/reader/wgsl/parser_impl_variable_decoration_test.cc",
     "../src/reader/wgsl/parser_impl_variable_ident_decl_test.cc",
-    "../src/reader/wgsl/parser_impl_variable_stmt_test.cc",
     "../src/reader/wgsl/parser_impl_variable_qualifier_test.cc",
+    "../src/reader/wgsl/parser_impl_variable_stmt_test.cc",
     "../src/reader/wgsl/parser_test.cc",
     "../src/reader/wgsl/token_test.cc",
   ]

@@ -53,7 +53,7 @@ fn tint_symbol(buffer : SB, result : ptr<function, u32>)
 [[stage(compute)]]
 fn main() {
   var tint_symbol_1 : u32 = 0u;
-  tint_symbol(sb, tint_symbol_1);
+  tint_symbol(sb, &(tint_symbol_1));
   let tint_symbol_2 : u32 = ((tint_symbol_1 - 4u) / 4u);
   var len : u32 = tint_symbol_2;
 }
@@ -97,7 +97,7 @@ fn tint_symbol(buffer : SB, result : ptr<function, u32>)
 [[stage(compute)]]
 fn main() {
   var tint_symbol_1 : u32 = 0u;
-  tint_symbol(sb, tint_symbol_1);
+  tint_symbol(sb, &(tint_symbol_1));
   let tint_symbol_2 : u32 = ((tint_symbol_1 - 4u) / 4u);
   var a : u32 = tint_symbol_2;
   var b : u32 = tint_symbol_2;
@@ -143,7 +143,7 @@ fn tint_symbol(buffer : SB, result : ptr<function, u32>)
 [[stage(compute)]]
 fn main() {
   var tint_symbol_1 : u32 = 0u;
-  tint_symbol(sb, tint_symbol_1);
+  tint_symbol(sb, &(tint_symbol_1));
   let tint_symbol_2 : u32 = ((tint_symbol_1 - 8u) / 64u);
   var len : u32 = tint_symbol_2;
 }
@@ -192,13 +192,13 @@ fn tint_symbol(buffer : SB, result : ptr<function, u32>)
 fn main() {
   if (true) {
     var tint_symbol_1 : u32 = 0u;
-    tint_symbol(sb, tint_symbol_1);
+    tint_symbol(sb, &(tint_symbol_1));
     let tint_symbol_2 : u32 = ((tint_symbol_1 - 4u) / 4u);
     var len : u32 = tint_symbol_2;
   } else {
     if (true) {
       var tint_symbol_3 : u32 = 0u;
-      tint_symbol(sb, tint_symbol_3);
+      tint_symbol(sb, &(tint_symbol_3));
       let tint_symbol_4 : u32 = ((tint_symbol_3 - 4u) / 4u);
       var len : u32 = tint_symbol_4;
     }
@@ -263,10 +263,10 @@ fn tint_symbol_3(buffer : SB2, result : ptr<function, u32>)
 [[stage(compute)]]
 fn main() {
   var tint_symbol_1 : u32 = 0u;
-  tint_symbol(sb1, tint_symbol_1);
+  tint_symbol(sb1, &(tint_symbol_1));
   let tint_symbol_2 : u32 = ((tint_symbol_1 - 4u) / 4u);
   var tint_symbol_4 : u32 = 0u;
-  tint_symbol_3(sb2, tint_symbol_4);
+  tint_symbol_3(sb2, &(tint_symbol_4));
   let tint_symbol_5 : u32 = ((tint_symbol_4 - 16u) / 16u);
   var len1 : u32 = tint_symbol_2;
   var len2 : u32 = tint_symbol_5;

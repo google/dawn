@@ -83,56 +83,6 @@ TEST_F(ResolverValidationTest, Stmt_Error_Unknown) {
             "2:30 error: unknown statement type for type determination: Fake");
 }
 
-TEST_F(ResolverValidationTest, Stmt_Call_undeclared) {
-  // fn main() {func(); return; }
-  // fn func() { return; }
-
-  SetSource(Source::Location{12, 34});
-  auto* call_expr = Call("func");
-  ast::VariableList params0;
-
-  Func("main", params0, ty.f32(),
-       ast::StatementList{
-           create<ast::CallStatement>(call_expr),
-           Return(),
-       },
-       ast::DecorationList{});
-
-  Func("func", params0, ty.f32(),
-       ast::StatementList{
-           Return(),
-       },
-       ast::DecorationList{});
-
-  EXPECT_FALSE(r()->Resolve());
-
-  EXPECT_EQ(r()->error(),
-            "12:34 error: v-0006: unable to find called function: func");
-}
-
-TEST_F(ResolverValidationTest, Stmt_Call_recursive) {
-  // fn main() {main(); }
-
-  SetSource(Source::Location{12, 34});
-  auto* call_expr = Call("main");
-  ast::VariableList params0;
-
-  Func("main", params0, ty.void_(),
-       ast::StatementList{
-           create<ast::CallStatement>(call_expr),
-       },
-       ast::DecorationList{
-           Stage(ast::PipelineStage::kVertex),
-       });
-
-  EXPECT_FALSE(r()->Resolve());
-
-  EXPECT_EQ(r()->error(),
-            "12:34 error v-0004: recursion is not permitted. 'main' attempted "
-            "to call "
-            "itself.");
-}
-
 TEST_F(ResolverValidationTest, Stmt_If_NonBool) {
   // if (1.23f) {}
 

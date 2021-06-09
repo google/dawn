@@ -29,7 +29,7 @@ class Call : public Castable<Call, Expression> {
   /// @param declaration the AST node
   /// @param target the call target
   /// @param statement the statement that owns this expression
-  Call(ast::Expression* declaration,
+  Call(const ast::Expression* declaration,
        const CallTarget* target,
        Statement* statement);
 
