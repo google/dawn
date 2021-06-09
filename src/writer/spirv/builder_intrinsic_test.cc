@@ -1818,6 +1818,43 @@ TEST_F(IntrinsicBuilderTest, Call_StorageBarrier) {
   Validate(b);
 }
 
+TEST_F(IntrinsicBuilderTest, Call_Ignore) {
+  Func("f", {Param("a", ty.i32()), Param("b", ty.i32()), Param("c", ty.i32())},
+       ty.i32(), {Return(Mul(Add("a", "b"), "c"))});
+
+  Func("main", {}, ty.void_(),
+       {
+           create<ast::CallStatement>(Call("ignore", Call("f", 1, 2, 3))),
+       },
+       {
+           Stage(ast::PipelineStage::kCompute),
+       });
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.Build()) << b.error();
+
+  ASSERT_EQ(b.functions().size(), 2u);
+
+  auto* expected_types = R"(%2 = OpTypeInt 32 1
+%1 = OpTypeFunction %2 %2 %2 %2
+%11 = OpTypeVoid
+%10 = OpTypeFunction %11
+%16 = OpConstant %2 1
+%17 = OpConstant %2 2
+%18 = OpConstant %2 3
+)";
+  auto got_types = DumpInstructions(b.types());
+  EXPECT_EQ(expected_types, got_types);
+
+  auto* expected_instructions = R"(%15 = OpFunctionCall %2 %3 %16 %17 %18
+)";
+  auto got_instructions = DumpInstructions(b.functions()[1].instructions());
+  EXPECT_EQ(expected_instructions, got_instructions);
+
+  Validate(b);
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace writer

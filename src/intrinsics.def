@@ -313,6 +313,7 @@ fn fwidthCoarse(f32) -> f32
 fn fwidthCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
 fn fwidthFine(f32) -> f32
 fn fwidthFine<N: num>(vec<N, f32>) -> vec<N, f32>
+fn ignore<T>(T)
 fn inverseSqrt(f32) -> f32
 fn inverseSqrt<N: num>(vec<N, f32>) -> vec<N, f32>
 fn isFinite(f32) -> bool

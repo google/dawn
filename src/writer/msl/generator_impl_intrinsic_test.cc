@@ -338,6 +338,34 @@ TEST_F(MslGeneratorImplTest, Unpack2x16Float) {
   EXPECT_EQ(gen.result(), "  float2(as_type<half2>(p1))");
 }
 
+TEST_F(MslGeneratorImplTest, Ignore) {
+  Func("f", {Param("a", ty.i32()), Param("b", ty.i32()), Param("c", ty.i32())},
+       ty.i32(), {Return(Mul(Add("a", "b"), "c"))});
+
+  Func("main", {}, ty.void_(),
+       {create<ast::CallStatement>(Call("ignore", Call("f", 1, 2, 3)))},
+       {Stage(ast::PipelineStage::kCompute)});
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+
+using namespace metal;
+int f(int a, int b, int c) {
+  return ((a + b) * c);
+}
+
+kernel void main() {
+  (void) f(1, 2, 3);
+  return;
+}
+
+)");
+
+  Validate();
+}
+
 }  // namespace
 }  // namespace msl
 }  // namespace writer

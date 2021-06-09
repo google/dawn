@@ -591,6 +591,8 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
     } else if (intrinsic->Type() == sem::IntrinsicType::kIsNormal) {
       diagnostics_.add_error("is_normal not supported in HLSL backend yet");
       return false;
+    } else if (intrinsic->Type() == sem::IntrinsicType::kIgnore) {
+      return EmitExpression(pre, out, expr->params()[0]);
     } else if (intrinsic->IsDataPacking()) {
       return EmitDataPackingCall(pre, out, expr, intrinsic);
     } else if (intrinsic->IsDataUnpacking()) {

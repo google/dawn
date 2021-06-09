@@ -354,58 +354,7 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
   auto* ident = expr->func();
   auto* call = program_->Sem().Get(expr);
   if (auto* intrinsic = call->Target()->As<sem::Intrinsic>()) {
-    if (intrinsic->IsTexture()) {
-      return EmitTextureCall(expr, intrinsic);
-    }
-    if (intrinsic->Type() == sem::IntrinsicType::kPack2x16float ||
-        intrinsic->Type() == sem::IntrinsicType::kUnpack2x16float) {
-      make_indent();
-      if (intrinsic->Type() == sem::IntrinsicType::kPack2x16float) {
-        out_ << "as_type<uint>(half2(";
-      } else {
-        out_ << "float2(as_type<half2>(";
-      }
-      if (!EmitExpression(expr->params()[0])) {
-        return false;
-      }
-      out_ << "))";
-      return true;
-    }
-    // TODO(crbug.com/tint/661): Combine sequential barriers to a single
-    // instruction.
-    if (intrinsic->Type() == sem::IntrinsicType::kStorageBarrier) {
-      make_indent();
-      out_ << "threadgroup_barrier(mem_flags::mem_device)";
-      return true;
-    }
-    if (intrinsic->Type() == sem::IntrinsicType::kWorkgroupBarrier) {
-      make_indent();
-      out_ << "threadgroup_barrier(mem_flags::mem_threadgroup)";
-      return true;
-    }
-    auto name = generate_builtin_name(intrinsic);
-    if (name.empty()) {
-      return false;
-    }
-
-    make_indent();
-    out_ << name << "(";
-
-    bool first = true;
-    const auto& params = expr->params();
-    for (auto* param : params) {
-      if (!first) {
-        out_ << ", ";
-      }
-      first = false;
-
-      if (!EmitExpression(param)) {
-        return false;
-      }
-    }
-
-    out_ << ")";
-    return true;
+    return EmitIntrinsicCall(expr, intrinsic);
   }
 
   auto name = program_->Symbols().NameFor(ident->symbol());
@@ -489,6 +438,75 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
 
   out_ << ")";
 
+  return true;
+}
+
+bool GeneratorImpl::EmitIntrinsicCall(ast::CallExpression* expr,
+                                      const sem::Intrinsic* intrinsic) {
+  if (intrinsic->IsTexture()) {
+    return EmitTextureCall(expr, intrinsic);
+  }
+
+  switch (intrinsic->Type()) {
+    case sem::IntrinsicType::kPack2x16float:
+    case sem::IntrinsicType::kUnpack2x16float: {
+      make_indent();
+      if (intrinsic->Type() == sem::IntrinsicType::kPack2x16float) {
+        out_ << "as_type<uint>(half2(";
+      } else {
+        out_ << "float2(as_type<half2>(";
+      }
+      if (!EmitExpression(expr->params()[0])) {
+        return false;
+      }
+      out_ << "))";
+      return true;
+    }
+    // TODO(crbug.com/tint/661): Combine sequential barriers to a single
+    // instruction.
+    case sem::IntrinsicType::kStorageBarrier: {
+      make_indent();
+      out_ << "threadgroup_barrier(mem_flags::mem_device)";
+      return true;
+    }
+    case sem::IntrinsicType::kWorkgroupBarrier: {
+      make_indent();
+      out_ << "threadgroup_barrier(mem_flags::mem_threadgroup)";
+      return true;
+    }
+    case sem::IntrinsicType::kIgnore: {
+      out_ << "(void) ";
+      if (!EmitExpression(expr->params()[0])) {
+        return false;
+      }
+      return true;
+    }
+    default:
+      break;
+  }
+
+  auto name = generate_builtin_name(intrinsic);
+  if (name.empty()) {
+    return false;
+  }
+
+  make_indent();
+  out_ << name << "(";
+
+  bool first = true;
+  const auto& params = expr->params();
+  for (auto* param : params) {
+    if (!first) {
+      out_ << ", ";
+    }
+    first = false;
+
+    if (!EmitExpression(param)) {
+      return false;
+    }
+  }
+
+  out_ << ")";
   return true;
 }
 

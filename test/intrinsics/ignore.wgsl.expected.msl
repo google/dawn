@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+
+using namespace metal;
+int f(int a, int b, int c) {
+  return ((a * b) + c);
+}
+
+kernel void tint_symbol() {
+  (void) f(1, 2, 3);
+  return;
+}
+

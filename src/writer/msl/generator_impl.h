@@ -101,6 +101,12 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the call expression
   /// @returns true if the call expression is emitted
   bool EmitCall(ast::CallExpression* expr);
+  /// Handles generating an intrinsic call expression
+  /// @param expr the call expression
+  /// @param intrinsic the intrinsic being called
+  /// @returns true if the call expression is emitted
+  bool EmitIntrinsicCall(ast::CallExpression* expr,
+                         const sem::Intrinsic* intrinsic);
   /// Handles generating a call to a texture function (`textureSample`,
   /// `textureSampleGrad`, etc)
   /// @param expr the call expression

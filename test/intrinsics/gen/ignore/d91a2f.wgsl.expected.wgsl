@@ -1,0 +1,19 @@
+fn ignore_d91a2f() {
+  ignore(1.0);
+}
+
+[[stage(vertex)]]
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+  ignore_d91a2f();
+  return vec4<f32>();
+}
+
+[[stage(fragment)]]
+fn fragment_main() {
+  ignore_d91a2f();
+}
+
+[[stage(compute)]]
+fn compute_main() {
+  ignore_d91a2f();
+}
