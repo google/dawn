@@ -346,7 +346,7 @@ TEST_F(MslGeneratorImplTest, Ignore) {
   Func("f", {Param("a", ty.i32()), Param("b", ty.i32()), Param("c", ty.i32())},
        ty.i32(), {Return(Mul(Add("a", "b"), "c"))});
 
-  Func("main", {}, ty.void_(),
+  Func("func", {}, ty.void_(),
        {create<ast::CallStatement>(Call("ignore", Call("f", 1, 2, 3)))},
        {Stage(ast::PipelineStage::kCompute)});
 
@@ -360,7 +360,7 @@ int f(int a, int b, int c) {
   return ((a + b) * c);
 }
 
-kernel void main() {
+kernel void func() {
   (void) f(1, 2, 3);
   return;
 }
