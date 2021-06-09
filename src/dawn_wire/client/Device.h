@@ -43,6 +43,7 @@ namespace dawn_wire { namespace client {
         bool PopErrorScope(WGPUErrorCallback callback, void* userdata);
         WGPUBuffer CreateBuffer(const WGPUBufferDescriptor* descriptor);
         WGPUBuffer CreateErrorBuffer();
+        WGPUComputePipeline CreateComputePipeline(WGPUComputePipelineDescriptor const* descriptor);
         void CreateComputePipelineAsync(WGPUComputePipelineDescriptor const* descriptor,
                                         WGPUCreateComputePipelineAsyncCallback callback,
                                         void* userdata);

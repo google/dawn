@@ -132,8 +132,8 @@ TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
         })");
 
     wgpu::ComputePipelineDescriptor cpDesc;
-    cpDesc.computeStage.module = module;
-    cpDesc.computeStage.entryPoint = "main";
+    cpDesc.compute.module = module;
+    cpDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline cp = device.CreateComputePipeline(&cpDesc);
 
     wgpu::BufferDescriptor bufferDesc;
@@ -818,7 +818,7 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
                                                      });
 
     wgpu::ComputePipelineDescriptor pipelineDescriptor;
-    pipelineDescriptor.computeStage.module = utils::CreateShaderModule(device, R"(
+    pipelineDescriptor.compute.module = utils::CreateShaderModule(device, R"(
         // TODO(crbug.com/tint/386): Use the same struct
         [[block]] struct Buffer0 {
             value : u32;
@@ -844,7 +844,7 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
         [[stage(compute)]] fn main() {
             outputBuffer.value = vec3<u32>(buffer0.value, buffer2.value, buffer3.value);
         })");
-    pipelineDescriptor.computeStage.entryPoint = "main";
+    pipelineDescriptor.compute.entryPoint = "main";
     pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDescriptor);
 
@@ -1064,8 +1064,8 @@ TEST_P(BindGroupTests, EmptyLayout) {
 
     wgpu::ComputePipelineDescriptor pipelineDesc;
     pipelineDesc.layout = utils::MakeBasicPipelineLayout(device, &bgl);
-    pipelineDesc.computeStage.entryPoint = "main";
-    pipelineDesc.computeStage.module = utils::CreateShaderModule(device, R"(
+    pipelineDesc.compute.entryPoint = "main";
+    pipelineDesc.compute.module = utils::CreateShaderModule(device, R"(
         [[stage(compute)]] fn main() {
         })");
 
@@ -1262,8 +1262,8 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
 
     std::string shader = interface.str() + "[[stage(compute)]] fn main() {\n" + body.str() + "}\n";
     wgpu::ComputePipelineDescriptor cpDesc;
-    cpDesc.computeStage.module = utils::CreateShaderModule(device, shader.c_str());
-    cpDesc.computeStage.entryPoint = "main";
+    cpDesc.compute.module = utils::CreateShaderModule(device, shader.c_str());
+    cpDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline cp = device.CreateComputePipeline(&cpDesc);
 
     wgpu::BindGroupDescriptor bgDesc = {};

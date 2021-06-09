@@ -464,8 +464,8 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         wgpu::ShaderModule csModule = utils::CreateShaderModule(device, computeShader);
         wgpu::ComputePipelineDescriptor computeDescriptor;
         computeDescriptor.layout = nullptr;
-        computeDescriptor.computeStage.module = csModule;
-        computeDescriptor.computeStage.entryPoint = "main";
+        computeDescriptor.compute.module = csModule;
+        computeDescriptor.compute.entryPoint = "main";
         return device.CreateComputePipeline(&computeDescriptor);
     }
 
@@ -990,8 +990,8 @@ TEST_P(StorageTextureTests, ReadonlyAndWriteonlyStorageTexturePingPong) {
     )");
 
     wgpu::ComputePipelineDescriptor pipelineDesc = {};
-    pipelineDesc.computeStage.module = module;
-    pipelineDesc.computeStage.entryPoint = "main";
+    pipelineDesc.compute.module = module;
+    pipelineDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
     // In bindGroupA storageTexture1 is bound as read-only storage texture and storageTexture2 is
@@ -1064,8 +1064,8 @@ TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
     )");
 
     wgpu::ComputePipelineDescriptor pipelineDesc = {};
-    pipelineDesc.computeStage.module = module;
-    pipelineDesc.computeStage.entryPoint = "main";
+    pipelineDesc.compute.module = module;
+    pipelineDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
     // In bindGroupA storageTexture1 is bound as read-only storage texture and storageTexture2 is

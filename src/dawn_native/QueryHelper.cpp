@@ -125,8 +125,8 @@ namespace dawn_native {
                 ComputePipelineDescriptor computePipelineDesc = {};
                 // Generate the layout based on shader module.
                 computePipelineDesc.layout = nullptr;
-                computePipelineDesc.computeStage.module = store->timestampCS.Get();
-                computePipelineDesc.computeStage.entryPoint = "main";
+                computePipelineDesc.compute.module = store->timestampCS.Get();
+                computePipelineDesc.compute.entryPoint = "main";
 
                 DAWN_TRY_ASSIGN(store->timestampComputePipeline,
                                 device->CreateComputePipeline(&computePipelineDesc));

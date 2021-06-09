@@ -31,8 +31,8 @@ class ComputeIndirectValidationTest : public ValidationTest {
 
         wgpu::ComputePipelineDescriptor csDesc;
         csDesc.layout = pl;
-        csDesc.computeStage.module = computeModule;
-        csDesc.computeStage.entryPoint = "main";
+        csDesc.compute.module = computeModule;
+        csDesc.compute.entryPoint = "main";
         pipeline = device.CreateComputePipeline(&csDesc);
     }
 

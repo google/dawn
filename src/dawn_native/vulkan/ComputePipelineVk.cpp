@@ -49,13 +49,13 @@ namespace dawn_native { namespace vulkan {
         if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
             // Generate a new VkShaderModule with BindingRemapper tint transform for each pipeline
             DAWN_TRY_ASSIGN(createInfo.stage.module,
-                            ToBackend(descriptor->computeStage.module)
-                                ->GetTransformedModuleHandle(descriptor->computeStage.entryPoint,
+                            ToBackend(descriptor->compute.module)
+                                ->GetTransformedModuleHandle(descriptor->compute.entryPoint,
                                                              ToBackend(GetLayout())));
         } else {
-            createInfo.stage.module = ToBackend(descriptor->computeStage.module)->GetHandle();
+            createInfo.stage.module = ToBackend(descriptor->compute.module)->GetHandle();
         }
-        createInfo.stage.pName = descriptor->computeStage.entryPoint;
+        createInfo.stage.pName = descriptor->compute.entryPoint;
         createInfo.stage.pSpecializationInfo = nullptr;
 
         Device* device = ToBackend(GetDevice());

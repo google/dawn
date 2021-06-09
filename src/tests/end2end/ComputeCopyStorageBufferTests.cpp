@@ -32,8 +32,8 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
     auto module = utils::CreateShaderModule(device, shader);
 
     wgpu::ComputePipelineDescriptor csDesc;
-    csDesc.computeStage.module = module;
-    csDesc.computeStage.entryPoint = "main";
+    csDesc.compute.module = module;
+    csDesc.compute.entryPoint = "main";
 
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
 

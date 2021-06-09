@@ -171,8 +171,8 @@ class MinBufferSizeTestsBase : public ValidationTest {
             descriptor.bindGroupLayouts = layouts.data();
             csDesc.layout = device.CreatePipelineLayout(&descriptor);
         }
-        csDesc.computeStage.module = csModule;
-        csDesc.computeStage.entryPoint = "main";
+        csDesc.compute.module = csModule;
+        csDesc.compute.entryPoint = "main";
 
         return device.CreateComputePipeline(&csDesc);
     }

@@ -54,8 +54,8 @@ class ComputeDispatchTests : public DawnTest {
             })");
 
         wgpu::ComputePipelineDescriptor csDesc;
-        csDesc.computeStage.module = module;
-        csDesc.computeStage.entryPoint = "main";
+        csDesc.compute.module = module;
+        csDesc.compute.entryPoint = "main";
         pipeline = device.CreateComputePipeline(&csDesc);
     }
 

@@ -134,8 +134,8 @@ TEST_F(UnsafeAPIValidationTest, DispatchIndirectDisallowed) {
 
     // Create the dummy compute pipeline.
     wgpu::ComputePipelineDescriptor pipelineDesc;
-    pipelineDesc.computeStage.entryPoint = "main";
-    pipelineDesc.computeStage.module =
+    pipelineDesc.compute.entryPoint = "main";
+    pipelineDesc.compute.module =
         utils::CreateShaderModule(device, "[[stage(compute)]] fn main() {}");
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 

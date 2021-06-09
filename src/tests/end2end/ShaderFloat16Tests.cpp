@@ -147,8 +147,8 @@ TEST_P(ShaderFloat16Tests, Basic16BitFloatFeaturesTest) {
     )");
 
     wgpu::ComputePipelineDescriptor csDesc;
-    csDesc.computeStage.module = module;
-    csDesc.computeStage.entryPoint = "main";
+    csDesc.compute.module = module;
+    csDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
 
     wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),

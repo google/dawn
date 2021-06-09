@@ -218,8 +218,8 @@ class DynamicBufferOffsetTests : public DawnTest {
         wgpu::ShaderModule csModule = utils::CreateShaderModule(device, cs.str().c_str());
 
         wgpu::ComputePipelineDescriptor csDesc;
-        csDesc.computeStage.module = csModule;
-        csDesc.computeStage.entryPoint = "main";
+        csDesc.compute.module = csModule;
+        csDesc.compute.entryPoint = "main";
 
         wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor;
         if (isInheritedPipeline) {

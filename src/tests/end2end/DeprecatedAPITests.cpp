@@ -85,6 +85,18 @@ TEST_P(DeprecationTests, SetAttachmentDescriptorAttachment) {
     pass.EndPass();
 }
 
+// Test that setting computeStage in a ComputePipelineDescriptor is deprecated.
+TEST_P(DeprecationTests, ComputeStage) {
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.computeStage.module = utils::CreateShaderModule(device, R"(
+        [[stage(compute)]] fn main() {
+        })");
+    csDesc.computeStage.entryPoint = "main";
+
+    wgpu::ComputePipeline pipeline;
+    EXPECT_DEPRECATION_WARNING(pipeline = device.CreateComputePipeline(&csDesc));
+}
+
 DAWN_INSTANTIATE_TEST(DeprecationTests,
                       D3D12Backend(),
                       MetalBackend(),

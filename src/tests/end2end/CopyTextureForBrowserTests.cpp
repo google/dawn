@@ -207,8 +207,8 @@ class CopyTextureForBrowserTests : public DawnTest {
          )");
 
         wgpu::ComputePipelineDescriptor csDesc;
-        csDesc.computeStage.module = csModule;
-        csDesc.computeStage.entryPoint = "main";
+        csDesc.compute.module = csModule;
+        csDesc.compute.entryPoint = "main";
 
         return device.CreateComputePipeline(&csDesc);
     }

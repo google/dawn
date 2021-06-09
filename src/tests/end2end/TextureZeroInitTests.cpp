@@ -973,7 +973,7 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
 
     // Create compute pipeline
     wgpu::ComputePipelineDescriptor computePipelineDescriptor;
-    wgpu::ProgrammableStageDescriptor computeStage;
+    wgpu::ProgrammableStageDescriptor compute;
     const char* cs = R"(
         [[group(0), binding(0)]] var tex : texture_2d<f32>;
         [[block]] struct Result {
@@ -984,8 +984,8 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
            result.value = textureLoad(tex, vec2<i32>(0,0), 0);
         }
     )";
-    computePipelineDescriptor.computeStage.module = utils::CreateShaderModule(device, cs);
-    computePipelineDescriptor.computeStage.entryPoint = "main";
+    computePipelineDescriptor.compute.module = utils::CreateShaderModule(device, cs);
+    computePipelineDescriptor.compute.entryPoint = "main";
     wgpu::ComputePipeline computePipeline =
         device.CreateComputePipeline(&computePipelineDescriptor);
 

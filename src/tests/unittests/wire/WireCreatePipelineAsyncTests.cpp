@@ -100,8 +100,8 @@ TEST_F(WireCreatePipelineAsyncTest, CreateComputePipelineAsyncSuccess) {
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiCsModule));
 
     WGPUComputePipelineDescriptor descriptor{};
-    descriptor.computeStage.module = csModule;
-    descriptor.computeStage.entryPoint = "main";
+    descriptor.compute.module = csModule;
+    descriptor.compute.entryPoint = "main";
 
     wgpuDeviceCreateComputePipelineAsync(device, &descriptor,
                                          ToMockCreateComputePipelineAsyncCallback, this);
@@ -129,8 +129,8 @@ TEST_F(WireCreatePipelineAsyncTest, CreateComputePipelineAsyncError) {
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiCsModule));
 
     WGPUComputePipelineDescriptor descriptor{};
-    descriptor.computeStage.module = csModule;
-    descriptor.computeStage.entryPoint = "main";
+    descriptor.compute.module = csModule;
+    descriptor.compute.entryPoint = "main";
 
     wgpuDeviceCreateComputePipelineAsync(device, &descriptor,
                                          ToMockCreateComputePipelineAsyncCallback, this);
@@ -258,8 +258,8 @@ TEST_F(WireCreatePipelineAsyncTest, CreateComputePipelineAsyncThenDisconnect) {
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiCsModule));
 
     WGPUComputePipelineDescriptor descriptor{};
-    descriptor.computeStage.module = csModule;
-    descriptor.computeStage.entryPoint = "main";
+    descriptor.compute.module = csModule;
+    descriptor.compute.entryPoint = "main";
 
     wgpuDeviceCreateComputePipelineAsync(device, &descriptor,
                                          ToMockCreateComputePipelineAsyncCallback, this);
@@ -314,8 +314,8 @@ TEST_F(WireCreatePipelineAsyncTest, CreateComputePipelineAsyncAfterDisconnect) {
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiCsModule));
 
     WGPUComputePipelineDescriptor descriptor{};
-    descriptor.computeStage.module = csModule;
-    descriptor.computeStage.entryPoint = "main";
+    descriptor.compute.module = csModule;
+    descriptor.compute.entryPoint = "main";
 
     FlushClient();
 

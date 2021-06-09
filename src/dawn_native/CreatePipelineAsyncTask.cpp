@@ -113,8 +113,8 @@ namespace dawn_native {
           mUserdata(userdata),
           mLabel(descriptor->label != nullptr ? descriptor->label : ""),
           mLayout(descriptor->layout),
-          mEntryPoint(descriptor->computeStage.entryPoint),
-          mComputeShaderModule(descriptor->computeStage.module) {
+          mEntryPoint(descriptor->compute.entryPoint),
+          mComputeShaderModule(descriptor->compute.module) {
         ASSERT(mComputePipeline != nullptr);
 
         // TODO(jiawei.shao@intel.com): save nextInChain when it is supported in Dawn.
@@ -126,9 +126,9 @@ namespace dawn_native {
         if (!mLabel.empty()) {
             descriptor.label = mLabel.c_str();
         }
-        descriptor.computeStage.entryPoint = mEntryPoint.c_str();
+        descriptor.compute.entryPoint = mEntryPoint.c_str();
         descriptor.layout = mLayout.Get();
-        descriptor.computeStage.module = mComputeShaderModule.Get();
+        descriptor.compute.module = mComputeShaderModule.Get();
         MaybeError maybeError = mComputePipeline->Initialize(&descriptor);
         std::string errorMessage;
         if (maybeError.IsError()) {

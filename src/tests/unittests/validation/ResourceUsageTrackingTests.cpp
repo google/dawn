@@ -67,8 +67,8 @@ namespace {
                 })");
             wgpu::ComputePipelineDescriptor pipelineDescriptor;
             pipelineDescriptor.layout = utils::MakePipelineLayout(device, std::move(bgls));
-            pipelineDescriptor.computeStage.module = csModule;
-            pipelineDescriptor.computeStage.entryPoint = "main";
+            pipelineDescriptor.compute.module = csModule;
+            pipelineDescriptor.compute.entryPoint = "main";
             return device.CreateComputePipeline(&pipelineDescriptor);
         }
 

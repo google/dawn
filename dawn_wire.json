@@ -163,6 +163,7 @@
         "client_handwritten_commands": [
             "BufferDestroy",
             "BufferUnmap",
+            "DeviceCreateComputePipeline",
             "DeviceCreateErrorBuffer",
             "DeviceGetDefaultQueue",
             "DeviceGetQueue",

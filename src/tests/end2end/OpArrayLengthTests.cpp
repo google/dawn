@@ -123,8 +123,8 @@ TEST_P(OpArrayLengthTest, Compute) {
 
     wgpu::ComputePipelineDescriptor pipelineDesc;
     pipelineDesc.layout = pl;
-    pipelineDesc.computeStage.entryPoint = "main";
-    pipelineDesc.computeStage.module = utils::CreateShaderModule(device, (R"(
+    pipelineDesc.compute.entryPoint = "main";
+    pipelineDesc.compute.module = utils::CreateShaderModule(device, (R"(
         [[block]] struct ResultBuffer {
             data : [[stride(4)]] array<u32, 3>;
         };
@@ -135,7 +135,7 @@ TEST_P(OpArrayLengthTest, Compute) {
             result.data[1] = arrayLength(buffer2.data);
             result.data[2] = arrayLength(buffer3.data);
         })")
-                                                                             .c_str());
+                                                                        .c_str());
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
     // Run a single instance of the compute shader

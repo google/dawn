@@ -74,7 +74,7 @@ class CreatePipelineAsyncTest : public DawnTest {
 // Verify the basic use of CreateComputePipelineAsync works on all backends.
 TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateComputePipelineAsync) {
     wgpu::ComputePipelineDescriptor csDesc;
-    csDesc.computeStage.module = utils::CreateShaderModule(device, R"(
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
         [[block]] struct SSBO {
             value : u32;
         };
@@ -83,7 +83,7 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateComputePipelineAsync) {
         [[stage(compute)]] fn main() {
             ssbo.value = 1u;
         })");
-    csDesc.computeStage.entryPoint = "main";
+    csDesc.compute.entryPoint = "main";
 
     device.CreateComputePipelineAsync(
         &csDesc,
@@ -109,7 +109,7 @@ TEST_P(CreatePipelineAsyncTest, CreateComputePipelineFailed) {
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
     wgpu::ComputePipelineDescriptor csDesc;
-    csDesc.computeStage.module = utils::CreateShaderModule(device, R"(
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
         [[block]] struct SSBO {
             value : u32;
         };
@@ -118,7 +118,7 @@ TEST_P(CreatePipelineAsyncTest, CreateComputePipelineFailed) {
         [[stage(compute)]] fn main() {
             ssbo.value = 1u;
         })");
-    csDesc.computeStage.entryPoint = "main0";
+    csDesc.compute.entryPoint = "main0";
 
     device.CreateComputePipelineAsync(
         &csDesc,
@@ -252,10 +252,10 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineFailed) {
 // CreateComputePipelineAsync() is called.
 TEST_P(CreatePipelineAsyncTest, ReleaseDeviceBeforeCallbackOfCreateComputePipelineAsync) {
     wgpu::ComputePipelineDescriptor csDesc;
-    csDesc.computeStage.module = utils::CreateShaderModule(device, R"(
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
         [[stage(compute)]] fn main() {
         })");
-    csDesc.computeStage.entryPoint = "main";
+    csDesc.compute.entryPoint = "main";
 
     device.CreateComputePipelineAsync(
         &csDesc,
@@ -308,7 +308,7 @@ TEST_P(CreatePipelineAsyncTest, ReleaseDeviceBeforeCallbackOfCreateRenderPipelin
 // object from cache works correctly.
 TEST_P(CreatePipelineAsyncTest, CreateSameComputePipelineTwice) {
     wgpu::ComputePipelineDescriptor csDesc;
-    csDesc.computeStage.module = utils::CreateShaderModule(device, R"(
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
         [[block]] struct SSBO {
             value : u32;
         };
@@ -317,7 +317,7 @@ TEST_P(CreatePipelineAsyncTest, CreateSameComputePipelineTwice) {
         [[stage(compute)]] fn main() {
             ssbo.value = 1u;
         })");
-    csDesc.computeStage.entryPoint = "main";
+    csDesc.compute.entryPoint = "main";
 
     auto callback = [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline returnPipeline,
                        const char* message, void* userdata) {
@@ -349,7 +349,7 @@ TEST_P(CreatePipelineAsyncTest, CreateSameComputePipelineTwice) {
 // same time works correctly.
 TEST_P(CreatePipelineAsyncTest, CreateSamePipelineTwiceAtSameTime) {
     wgpu::ComputePipelineDescriptor csDesc;
-    csDesc.computeStage.module = utils::CreateShaderModule(device, R"(
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
         [[block]] struct SSBO {
             value : u32;
         };
@@ -358,7 +358,7 @@ TEST_P(CreatePipelineAsyncTest, CreateSamePipelineTwiceAtSameTime) {
         [[stage(compute)]] fn main() {
             ssbo.value = 1u;
         })");
-    csDesc.computeStage.entryPoint = "main";
+    csDesc.compute.entryPoint = "main";
 
     auto callback = [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline returnPipeline,
                        const char* message, void* userdata) {

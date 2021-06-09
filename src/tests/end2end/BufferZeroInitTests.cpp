@@ -168,8 +168,8 @@ class BufferZeroInitTest : public DawnTest {
                                        const std::vector<uint32_t>& expectedBufferData) {
         wgpu::ComputePipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.layout = nullptr;
-        pipelineDescriptor.computeStage.module = module;
-        pipelineDescriptor.computeStage.entryPoint = "main";
+        pipelineDescriptor.compute.module = module;
+        pipelineDescriptor.compute.entryPoint = "main";
         wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDescriptor);
 
         const uint64_t bufferSize = expectedBufferData.size() * sizeof(uint32_t);
@@ -433,8 +433,8 @@ class BufferZeroInitTest : public DawnTest {
 
         wgpu::ComputePipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.layout = nullptr;
-        pipelineDescriptor.computeStage.module = utils::CreateShaderModule(device, computeShader);
-        pipelineDescriptor.computeStage.entryPoint = "main";
+        pipelineDescriptor.compute.module = utils::CreateShaderModule(device, computeShader);
+        pipelineDescriptor.compute.entryPoint = "main";
         wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDescriptor);
 
         // Clear the color of outputTexture to green.

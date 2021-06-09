@@ -253,8 +253,8 @@ void initSim() {
 
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.layout = pl;
-    csDesc.computeStage.module = module;
-    csDesc.computeStage.entryPoint = "main";
+    csDesc.compute.module = module;
+    csDesc.compute.entryPoint = "main";
     updatePipeline = device.CreateComputePipeline(&csDesc);
 
     for (uint32_t i = 0; i < 2; ++i) {

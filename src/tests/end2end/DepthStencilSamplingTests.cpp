@@ -168,8 +168,8 @@ class DepthStencilSamplingTest : public DawnTest {
         wgpu::ShaderModule csModule = utils::CreateShaderModule(device, shaderSource.str().c_str());
 
         wgpu::ComputePipelineDescriptor pipelineDescriptor;
-        pipelineDescriptor.computeStage.module = csModule;
-        pipelineDescriptor.computeStage.entryPoint = "main";
+        pipelineDescriptor.compute.module = csModule;
+        pipelineDescriptor.compute.entryPoint = "main";
 
         return device.CreateComputePipeline(&pipelineDescriptor);
     }
@@ -236,8 +236,8 @@ class DepthStencilSamplingTest : public DawnTest {
 
         wgpu::ComputePipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
-        pipelineDescriptor.computeStage.module = csModule;
-        pipelineDescriptor.computeStage.entryPoint = "main";
+        pipelineDescriptor.compute.module = csModule;
+        pipelineDescriptor.compute.entryPoint = "main";
 
         return device.CreateComputePipeline(&pipelineDescriptor);
     }

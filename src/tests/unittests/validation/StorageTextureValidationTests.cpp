@@ -200,8 +200,8 @@ TEST_F(StorageTextureValidationTests, ComputePipeline) {
 
         wgpu::ComputePipelineDescriptor descriptor;
         descriptor.layout = nullptr;
-        descriptor.computeStage.module = csModule;
-        descriptor.computeStage.entryPoint = "main";
+        descriptor.compute.module = csModule;
+        descriptor.compute.entryPoint = "main";
 
         device.CreateComputePipeline(&descriptor);
     }
@@ -217,8 +217,8 @@ TEST_F(StorageTextureValidationTests, ComputePipeline) {
 
         wgpu::ComputePipelineDescriptor descriptor;
         descriptor.layout = nullptr;
-        descriptor.computeStage.module = csModule;
-        descriptor.computeStage.entryPoint = "main";
+        descriptor.compute.module = csModule;
+        descriptor.compute.entryPoint = "main";
 
         device.CreateComputePipeline(&descriptor);
     }
@@ -402,8 +402,8 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutEntryTypeMatchesShaderDecla
 
         // Set common fields of compute pipeline descriptor.
         wgpu::ComputePipelineDescriptor defaultComputePipelineDescriptor;
-        defaultComputePipelineDescriptor.computeStage.module = csModule;
-        defaultComputePipelineDescriptor.computeStage.entryPoint = "main";
+        defaultComputePipelineDescriptor.compute.module = csModule;
+        defaultComputePipelineDescriptor.compute.entryPoint = "main";
 
         for (utils::BindingLayoutEntryInitializationHelper bindingLayoutEntry :
              kSupportedBindingTypes) {
@@ -478,8 +478,8 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutStorageTextureFormatMatches
 
             // Set common fields of compute pipeline descriptor.
             wgpu::ComputePipelineDescriptor defaultComputePipelineDescriptor;
-            defaultComputePipelineDescriptor.computeStage.module = csModule;
-            defaultComputePipelineDescriptor.computeStage.entryPoint = "main";
+            defaultComputePipelineDescriptor.compute.module = csModule;
+            defaultComputePipelineDescriptor.compute.entryPoint = "main";
 
             // Set common fileds of bind group layout binding.
             utils::BindingLayoutEntryInitializationHelper defaultBindGroupLayoutEntry = {
@@ -534,8 +534,8 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutViewDimensionMatchesShaderD
 
             // Set common fields of compute pipeline descriptor.
             wgpu::ComputePipelineDescriptor defaultComputePipelineDescriptor;
-            defaultComputePipelineDescriptor.computeStage.module = csModule;
-            defaultComputePipelineDescriptor.computeStage.entryPoint = "main";
+            defaultComputePipelineDescriptor.compute.module = csModule;
+            defaultComputePipelineDescriptor.compute.entryPoint = "main";
 
             // Set common fields of bind group layout binding.
             utils::BindingLayoutEntryInitializationHelper defaultBindGroupLayoutEntry = {

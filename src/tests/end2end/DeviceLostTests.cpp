@@ -115,8 +115,8 @@ TEST_P(DeviceLostTest, GetBindGroupLayoutFails) {
 
     wgpu::ComputePipelineDescriptor descriptor;
     descriptor.layout = nullptr;
-    descriptor.computeStage.module = csModule;
-    descriptor.computeStage.entryPoint = "main";
+    descriptor.compute.module = csModule;
+    descriptor.compute.entryPoint = "main";
 
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&descriptor);
 
@@ -169,7 +169,7 @@ TEST_P(DeviceLostTest, CreateComputePipelineFails) {
 
     wgpu::ComputePipelineDescriptor descriptor = {};
     descriptor.layout = nullptr;
-    descriptor.computeStage.module = nullptr;
+    descriptor.compute.module = nullptr;
     ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&descriptor));
 }
 
@@ -452,8 +452,8 @@ TEST_P(DeviceLostTest, DeviceLostBeforeCreatePipelineAsyncCallback) {
         })");
 
     wgpu::ComputePipelineDescriptor descriptor;
-    descriptor.computeStage.module = csModule;
-    descriptor.computeStage.entryPoint = "main";
+    descriptor.compute.module = csModule;
+    descriptor.compute.entryPoint = "main";
 
     auto callback = [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline returnPipeline,
                        const char* message, void* userdata) {

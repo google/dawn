@@ -29,9 +29,19 @@ namespace dawn_native {
             DAWN_TRY(device->ValidateObject(descriptor->layout));
         }
 
-        DAWN_TRY(ValidateProgrammableStage(device, descriptor->computeStage.module,
-                                           descriptor->computeStage.entryPoint, descriptor->layout,
-                                           SingleShaderStage::Compute));
+        if (descriptor->compute.module != nullptr) {
+            DAWN_TRY(ValidateProgrammableStage(device, descriptor->compute.module,
+                                               descriptor->compute.entryPoint, descriptor->layout,
+                                               SingleShaderStage::Compute));
+        } else {
+            // TODO(dawn:800): Remove after deprecation period.
+            device->EmitDeprecationWarning(
+                "computeStage has been deprecated. Please begin using compute instead.");
+            DAWN_TRY(ValidateProgrammableStage(device, descriptor->computeStage.module,
+                                               descriptor->computeStage.entryPoint,
+                                               descriptor->layout, SingleShaderStage::Compute));
+        }
+
         return {};
     }
 
@@ -41,8 +51,8 @@ namespace dawn_native {
                                              const ComputePipelineDescriptor* descriptor)
         : PipelineBase(device,
                        descriptor->layout,
-                       {{SingleShaderStage::Compute, descriptor->computeStage.module,
-                         descriptor->computeStage.entryPoint}}) {
+                       {{SingleShaderStage::Compute, descriptor->compute.module,
+                         descriptor->compute.entryPoint}}) {
     }
 
     ComputePipelineBase::ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)

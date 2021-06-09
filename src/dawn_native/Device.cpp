@@ -1115,11 +1115,18 @@ namespace dawn_native {
         ComputePipelineDescriptor* outDescriptor) {
         Ref<PipelineLayoutBase> layoutRef;
         *outDescriptor = descriptor;
+        // TODO(dawn:800): Remove after deprecation period.
+        if (outDescriptor->compute.module == nullptr &&
+            outDescriptor->computeStage.module != nullptr) {
+            outDescriptor->compute.module = outDescriptor->computeStage.module;
+            outDescriptor->compute.entryPoint = outDescriptor->computeStage.entryPoint;
+        }
+
         if (outDescriptor->layout == nullptr) {
-            DAWN_TRY_ASSIGN(layoutRef, PipelineLayoutBase::CreateDefault(
-                                           this, {{SingleShaderStage::Compute,
-                                                   outDescriptor->computeStage.module,
-                                                   outDescriptor->computeStage.entryPoint}}));
+            DAWN_TRY_ASSIGN(layoutRef,
+                            PipelineLayoutBase::CreateDefault(
+                                this, {{SingleShaderStage::Compute, outDescriptor->compute.module,
+                                        outDescriptor->compute.entryPoint}}));
             outDescriptor->layout = layoutRef.Get();
         }
 

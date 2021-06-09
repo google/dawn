@@ -233,6 +233,34 @@ namespace dawn_wire { namespace client {
         return GetQueue();
     }
 
+    // TODO(dawn:800): Once the deprecated computeStage field is removed this method will no longer
+    // be needed and DeviceCreateComputePipeline can be removed from client_handwritten_commands in
+    // dawn_wire.json
+    WGPUComputePipeline Device::CreateComputePipeline(
+        WGPUComputePipelineDescriptor const* descriptor) {
+        DeviceCreateComputePipelineCmd cmd;
+        cmd.self = ToAPI(this);
+
+        auto* allocation = client->ComputePipelineAllocator().New(client);
+        cmd.result = ObjectHandle{allocation->object->id, allocation->generation};
+
+        // Copy compute to the deprecated computeStage or visa-versa, depending on which one is
+        // populated, so that serialization doesn't fail.
+        WGPUComputePipelineDescriptor localDescriptor = *descriptor;
+        if (localDescriptor.computeStage.module == nullptr) {
+            localDescriptor.computeStage.module = localDescriptor.compute.module;
+            localDescriptor.computeStage.entryPoint = localDescriptor.compute.entryPoint;
+        } else if (localDescriptor.compute.module == nullptr) {
+            localDescriptor.compute.module = localDescriptor.computeStage.module;
+            localDescriptor.compute.entryPoint = localDescriptor.computeStage.entryPoint;
+        }
+
+        cmd.descriptor = &localDescriptor;
+        client->SerializeCommand(cmd);
+
+        return ToAPI(allocation->object.get());
+    }
+
     void Device::CreateComputePipelineAsync(WGPUComputePipelineDescriptor const* descriptor,
                                             WGPUCreateComputePipelineAsyncCallback callback,
                                             void* userdata) {
@@ -243,7 +271,20 @@ namespace dawn_wire { namespace client {
 
         DeviceCreateComputePipelineAsyncCmd cmd;
         cmd.deviceId = this->id;
-        cmd.descriptor = descriptor;
+
+        // Copy compute to the deprecated computeStage or visa-versa, depending on which one is
+        // populated, so that serialization doesn't fail.
+        // TODO(dawn:800): Remove once computeStage is removed.
+        WGPUComputePipelineDescriptor localDescriptor = *descriptor;
+        if (localDescriptor.computeStage.module == nullptr) {
+            localDescriptor.computeStage.module = localDescriptor.compute.module;
+            localDescriptor.computeStage.entryPoint = localDescriptor.compute.entryPoint;
+        } else if (localDescriptor.compute.module == nullptr) {
+            localDescriptor.compute.module = localDescriptor.computeStage.module;
+            localDescriptor.compute.entryPoint = localDescriptor.computeStage.entryPoint;
+        }
+
+        cmd.descriptor = &localDescriptor;
 
         uint64_t serial = mCreatePipelineAsyncRequestSerial++;
         ASSERT(mCreatePipelineAsyncRequests.find(serial) == mCreatePipelineAsyncRequests.end());

@@ -43,15 +43,15 @@ namespace dawn_native { namespace d3d12 {
         // SPRIV-cross does matrix multiplication expecting row major matrices
         compileFlags |= D3DCOMPILE_PACK_MATRIX_ROW_MAJOR;
 
-        ShaderModule* module = ToBackend(descriptor->computeStage.module);
+        ShaderModule* module = ToBackend(descriptor->compute.module);
 
         D3D12_COMPUTE_PIPELINE_STATE_DESC d3dDesc = {};
         d3dDesc.pRootSignature = ToBackend(GetLayout())->GetRootSignature();
 
         CompiledShader compiledShader;
-        DAWN_TRY_ASSIGN(compiledShader, module->Compile(descriptor->computeStage.entryPoint,
-                                                        SingleShaderStage::Compute,
-                                                        ToBackend(GetLayout()), compileFlags));
+        DAWN_TRY_ASSIGN(compiledShader,
+                        module->Compile(descriptor->compute.entryPoint, SingleShaderStage::Compute,
+                                        ToBackend(GetLayout()), compileFlags));
         d3dDesc.CS = compiledShader.GetD3D12ShaderBytecode();
         auto* d3d12Device = device->GetD3D12Device();
         DAWN_TRY(CheckHRESULT(

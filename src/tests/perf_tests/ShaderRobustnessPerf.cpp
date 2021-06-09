@@ -460,8 +460,8 @@ void ShaderRobustnessPerf::SetUp() {
     }
 
     wgpu::ComputePipelineDescriptor csDesc;
-    csDesc.computeStage.module = module;
-    csDesc.computeStage.entryPoint = "main";
+    csDesc.compute.module = module;
+    csDesc.compute.entryPoint = "main";
     mPipeline = device.CreateComputePipeline(&csDesc);
 
     mBindGroup = utils::MakeBindGroup(device, mPipeline.GetBindGroupLayout(0),

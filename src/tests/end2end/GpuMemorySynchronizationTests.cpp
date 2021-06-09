@@ -45,8 +45,8 @@ class GpuMemorySyncTests : public DawnTest {
             })");
 
         wgpu::ComputePipelineDescriptor cpDesc;
-        cpDesc.computeStage.module = csModule;
-        cpDesc.computeStage.entryPoint = "main";
+        cpDesc.compute.module = csModule;
+        cpDesc.compute.entryPoint = "main";
         wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&cpDesc);
 
         wgpu::BindGroup bindGroup =
@@ -249,8 +249,8 @@ TEST_P(GpuMemorySyncTests, SampledAndROStorageTextureInComputePass) {
 
     // Create a pipeline that loads the texture from both the sampled and storage paths.
     wgpu::ComputePipelineDescriptor pipelineDesc;
-    pipelineDesc.computeStage.entryPoint = "main";
-    pipelineDesc.computeStage.module = utils::CreateShaderModule(device, R"(
+    pipelineDesc.compute.entryPoint = "main";
+    pipelineDesc.compute.module = utils::CreateShaderModule(device, R"(
         [[block]] struct Output {
             sampledOut: u32;
             storageOut: u32;
@@ -321,8 +321,8 @@ class StorageToUniformSyncTests : public DawnTest {
             })");
 
         wgpu::ComputePipelineDescriptor cpDesc;
-        cpDesc.computeStage.module = csModule;
-        cpDesc.computeStage.entryPoint = "main";
+        cpDesc.compute.module = csModule;
+        cpDesc.compute.entryPoint = "main";
         wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&cpDesc);
 
         wgpu::BindGroup bindGroup =
@@ -542,8 +542,8 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
         })");
 
     wgpu::ComputePipelineDescriptor cpDesc;
-    cpDesc.computeStage.module = csModule;
-    cpDesc.computeStage.entryPoint = "main";
+    cpDesc.compute.module = csModule;
+    cpDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline cp = device.CreateComputePipeline(&cpDesc);
     wgpu::Buffer vertexBuffer = CreateZeroedBuffer(
         kVertexBufferStride * 4,
@@ -657,8 +657,8 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
         })");
 
     wgpu::ComputePipelineDescriptor cpDesc;
-    cpDesc.computeStage.module = csModule;
-    cpDesc.computeStage.entryPoint = "main";
+    cpDesc.compute.module = csModule;
+    cpDesc.compute.entryPoint = "main";
     wgpu::ComputePipeline cp = device.CreateComputePipeline(&cpDesc);
     struct Data {
         float pos[4][4];

@@ -142,16 +142,16 @@ TEST_P(ObjectCachingTest, ComputePipelineDeduplicationOnShaderModule) {
     wgpu::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, nullptr);
 
     wgpu::ComputePipelineDescriptor desc;
-    desc.computeStage.entryPoint = "main";
+    desc.compute.entryPoint = "main";
     desc.layout = layout;
 
-    desc.computeStage.module = module;
+    desc.compute.module = module;
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&desc);
 
-    desc.computeStage.module = sameModule;
+    desc.compute.module = sameModule;
     wgpu::ComputePipeline samePipeline = device.CreateComputePipeline(&desc);
 
-    desc.computeStage.module = otherModule;
+    desc.compute.module = otherModule;
     wgpu::ComputePipeline otherPipeline = device.CreateComputePipeline(&desc);
 
     EXPECT_NE(pipeline.Get(), otherPipeline.Get());
@@ -173,8 +173,8 @@ TEST_P(ObjectCachingTest, ComputePipelineDeduplicationOnLayout) {
     EXPECT_EQ(pl.Get() == samePl.Get(), !UsesWire());
 
     wgpu::ComputePipelineDescriptor desc;
-    desc.computeStage.entryPoint = "main";
-    desc.computeStage.module = utils::CreateShaderModule(device, R"(
+    desc.compute.entryPoint = "main";
+    desc.compute.module = utils::CreateShaderModule(device, R"(
             var<workgroup> i : u32;
             [[stage(compute)]] fn main() {
                 i = 0u;

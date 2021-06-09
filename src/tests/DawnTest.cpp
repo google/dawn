@@ -1111,8 +1111,8 @@ std::ostringstream& DawnTestBase::ExpectSampledDepthData(wgpu::Texture texture,
     wgpu::ShaderModule csModule = utils::CreateShaderModule(device, shaderSource.str().c_str());
 
     wgpu::ComputePipelineDescriptor pipelineDescriptor;
-    pipelineDescriptor.computeStage.module = csModule;
-    pipelineDescriptor.computeStage.entryPoint = "main";
+    pipelineDescriptor.compute.module = csModule;
+    pipelineDescriptor.compute.entryPoint = "main";
 
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDescriptor);
 

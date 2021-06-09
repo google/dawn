@@ -1312,8 +1312,8 @@ class SetBindGroupValidationTest : public ValidationTest {
 
         wgpu::ComputePipelineDescriptor csDesc;
         csDesc.layout = pipelineLayout;
-        csDesc.computeStage.module = csModule;
-        csDesc.computeStage.entryPoint = "main";
+        csDesc.compute.module = csModule;
+        csDesc.compute.entryPoint = "main";
 
         return device.CreateComputePipeline(&csDesc);
     }
@@ -1918,8 +1918,8 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
 
         wgpu::ComputePipelineDescriptor csDesc;
         csDesc.layout = pipelineLayout;
-        csDesc.computeStage.module = csModule;
-        csDesc.computeStage.entryPoint = "main";
+        csDesc.compute.module = csModule;
+        csDesc.compute.entryPoint = "main";
 
         return device.CreateComputePipeline(&csDesc);
     }

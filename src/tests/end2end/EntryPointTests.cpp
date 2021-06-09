@@ -79,12 +79,12 @@ TEST_P(EntryPointTests, TwoComputeInModule) {
 
     // Create both pipelines from the module.
     wgpu::ComputePipelineDescriptor pipelineDesc;
-    pipelineDesc.computeStage.module = module;
+    pipelineDesc.compute.module = module;
 
-    pipelineDesc.computeStage.entryPoint = "write1";
+    pipelineDesc.compute.entryPoint = "write1";
     wgpu::ComputePipeline write1 = device.CreateComputePipeline(&pipelineDesc);
 
-    pipelineDesc.computeStage.entryPoint = "write42";
+    pipelineDesc.compute.entryPoint = "write42";
     wgpu::ComputePipeline write42 = device.CreateComputePipeline(&pipelineDesc);
 
     // Create the bindGroup.

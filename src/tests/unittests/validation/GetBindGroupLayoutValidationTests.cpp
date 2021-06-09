@@ -158,8 +158,8 @@ TEST_F(GetBindGroupLayoutTests, ComputePipeline) {
 
     wgpu::ComputePipelineDescriptor descriptor;
     descriptor.layout = nullptr;
-    descriptor.computeStage.module = csModule;
-    descriptor.computeStage.entryPoint = "main";
+    descriptor.compute.module = csModule;
+    descriptor.compute.entryPoint = "main";
 
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&descriptor);
 
@@ -925,14 +925,14 @@ TEST_F(GetBindGroupLayoutTests, FromCorrectEntryPoint) {
     )");
 
     wgpu::ComputePipelineDescriptor pipelineDesc;
-    pipelineDesc.computeStage.module = module;
+    pipelineDesc.compute.module = module;
 
     // Get each entryPoint's BGL.
-    pipelineDesc.computeStage.entryPoint = "compute0";
+    pipelineDesc.compute.entryPoint = "compute0";
     wgpu::ComputePipeline pipeline0 = device.CreateComputePipeline(&pipelineDesc);
     wgpu::BindGroupLayout bgl0 = pipeline0.GetBindGroupLayout(0);
 
-    pipelineDesc.computeStage.entryPoint = "compute1";
+    pipelineDesc.compute.entryPoint = "compute1";
     wgpu::ComputePipeline pipeline1 = device.CreateComputePipeline(&pipelineDesc);
     wgpu::BindGroupLayout bgl1 = pipeline1.GetBindGroupLayout(0);
 
