@@ -30,6 +30,11 @@ namespace dawn_native { namespace metal {
         static ResultOrError<Ref<ComputePipeline>> Create(
             Device* device,
             const ComputePipelineDescriptor* descriptor);
+        static void CreateAsync(Device* device,
+                                const ComputePipelineDescriptor* descriptor,
+                                size_t blueprintHash,
+                                WGPUCreateComputePipelineAsyncCallback callback,
+                                void* userdata);
 
         void Encode(id<MTLComputeCommandEncoder> encoder);
         MTLSize GetLocalWorkGroupSize() const;

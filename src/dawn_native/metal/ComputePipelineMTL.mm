@@ -14,6 +14,7 @@
 
 #include "dawn_native/metal/ComputePipelineMTL.h"
 
+#include "dawn_native/CreatePipelineAsyncTask.h"
 #include "dawn_native/metal/DeviceMTL.h"
 #include "dawn_native/metal/ShaderModuleMTL.h"
 
@@ -64,6 +65,18 @@ namespace dawn_native { namespace metal {
 
     bool ComputePipeline::RequiresStorageBufferLength() const {
         return mRequiresStorageBufferLength;
+    }
+
+    void ComputePipeline::CreateAsync(Device* device,
+                                      const ComputePipelineDescriptor* descriptor,
+                                      size_t blueprintHash,
+                                      WGPUCreateComputePipelineAsyncCallback callback,
+                                      void* userdata) {
+        Ref<ComputePipeline> pipeline = AcquireRef(new ComputePipeline(device, descriptor));
+        std::unique_ptr<CreateComputePipelineAsyncTask> asyncTask =
+            std::make_unique<CreateComputePipelineAsyncTask>(pipeline, descriptor, blueprintHash,
+                                                             callback, userdata);
+        CreateComputePipelineAsyncTask::RunAsync(std::move(asyncTask));
     }
 
 }}  // namespace dawn_native::metal
