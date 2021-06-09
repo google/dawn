@@ -26,7 +26,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"sync"
 	"unicode/utf8"
 
 	"dawn.googlesource.com/tint/tools/src/fileutils"
@@ -105,7 +104,7 @@ func run() error {
 	}
 
 	// Allow using '/' in the filter on Windows
-	filter = strings.ReplaceAll(filter, "/", string(filepath.Separator));
+	filter = strings.ReplaceAll(filter, "/", string(filepath.Separator))
 
 	// Split the --filter flag up by ',', trimming any whitespace at the start and end
 	globIncludes := strings.Split(filter, ",")
@@ -199,62 +198,51 @@ func run() error {
 	}
 	fmt.Println()
 
-	results := make([]map[outputFormat]*status, len(files))
-	jobs := make(chan job, 256)
+	// Build the list of results.
+	// These hold the chans used to report the job results.
+	results := make([]map[outputFormat]chan status, len(files))
+	for i := range files {
+		fileResults := map[outputFormat]chan status{}
+		for _, format := range formats {
+			fileResults[format] = make(chan status, 1)
+		}
+		results[i] = fileResults
+	}
+
+	pendingJobs := make(chan job, 256)
 
 	// Spawn numCPU job runners...
-	wg := sync.WaitGroup{}
-	wg.Add(numCPU)
 	for cpu := 0; cpu < numCPU; cpu++ {
 		go func() {
-			defer wg.Done()
-			for job := range jobs {
+			for job := range pendingJobs {
 				job.run(dir, exe, dxcPath, xcrunPath, generateExpected, generateSkip)
 			}
 		}()
 	}
 
 	// Issue the jobs...
-	for i, file := range files { // For each test file...
-		file := filepath.Join(dir, file)
-		fileResults := map[outputFormat]*status{}
-		for _, format := range formats { // For each output format...
-			result := &status{}
-			jobs <- job{
-				file:   file,
-				format: format,
-				result: result,
-			}
-			fileResults[format] = result
-		}
-		results[i] = fileResults
-	}
-
-	// Wait for the jobs to all finish...
-	close(jobs)
-	wg.Wait()
-
-	// Time to print the outputs
-
-	// Start by printing the error message for any file x format combinations
-	// that failed...
-	for i, file := range files {
-		results := results[i]
-		for _, format := range formats {
-			if err := results[format].err; err != nil {
-				color.Set(color.FgBlue)
-				fmt.Printf("%s ", file)
-				color.Set(color.FgCyan)
-				fmt.Printf("%s ", format)
-				color.Set(color.FgRed)
-				fmt.Println("FAIL")
-				color.Unset()
-				fmt.Println(indent(err.Error(), 4))
+	go func() {
+		for i, file := range files { // For each test file...
+			file := filepath.Join(dir, file)
+			for _, format := range formats { // For each output format...
+				pendingJobs <- job{
+					file:   file,
+					format: format,
+					result: results[i][format],
+				}
 			}
 		}
+		close(pendingJobs)
+	}()
+
+	type failure struct {
+		file   string
+		format outputFormat
+		err    error
 	}
 
-	// Now print the table of file x format
+	// Print the table of file x format
+	failures := []failure{}
 	numTests, numPass, numSkip, numFail := 0, 0, 0, 0
 	filenameFmt := columnFormat(maxStringLen(files), false)
 
@@ -285,8 +273,13 @@ func run() error {
 		fmt.Printf(" ┃ ")
 		for _, format := range formats {
 			formatFmt := columnFormat(formatWidth(format), true)
-			result := results[format]
+			result := <-results[format]
 			numTests++
+			if err := result.err; err != nil {
+				failures = append(failures, failure{
+					file: file, format: format, err: err,
+				})
+			}
 			switch result.code {
 			case pass:
 				color.Set(color.FgGreen)
@@ -309,6 +302,20 @@ func run() error {
 		fmt.Println()
 	}
 	fmt.Println()
+
+	for _, f := range failures {
+		color.Set(color.FgBlue)
+		fmt.Printf("%s ", f.file)
+		color.Set(color.FgCyan)
+		fmt.Printf("%s ", f.format)
+		color.Set(color.FgRed)
+		fmt.Println("FAIL")
+		color.Unset()
+		fmt.Println(indent(f.err.Error(), 4))
+	}
+	if len(failures) > 0 {
+		fmt.Println()
+	}
 
 	fmt.Printf("%d tests run", numTests)
 	if numPass > 0 {
@@ -362,95 +369,93 @@ type status struct {
 type job struct {
 	file   string
 	format outputFormat
-	result *status
+	result chan status
 }
 
 func (j job) run(wd, exe, dxcPath, xcrunPath string, generateExpected, generateSkip bool) {
-	// Is there an expected output?
-	expected := loadExpectedFile(j.file, j.format)
-	skipped := false
-	if strings.HasPrefix(expected, "SKIP") { // Special SKIP token
-		skipped = true
-	}
+	j.result <- func() status {
+		// Is there an expected output?
+		expected := loadExpectedFile(j.file, j.format)
+		skipped := false
+		if strings.HasPrefix(expected, "SKIP") { // Special SKIP token
+			skipped = true
+		}
 
-	expected = strings.ReplaceAll(expected, "\r\n", "\n")
+		expected = strings.ReplaceAll(expected, "\r\n", "\n")
 
-	file, err := filepath.Rel(wd, j.file)
-	if err != nil {
-		file = j.file
-	}
+		file, err := filepath.Rel(wd, j.file)
+		if err != nil {
+			file = j.file
+		}
 
-	// Make relative paths use forward slash separators (on Windows) so that paths in tint
-	// output match expected output that contain errors
-	file = strings.ReplaceAll(file, `\`, `/`)
+		// Make relative paths use forward slash separators (on Windows) so that paths in tint
+		// output match expected output that contain errors
+		file = strings.ReplaceAll(file, `\`, `/`)
 
-	args := []string{
-		file,
-		"--format", string(j.format),
-	}
+		args := []string{
+			file,
+			"--format", string(j.format),
+		}
 
-	// Can we validate?
-	validate := false
-	switch j.format {
-	case spvasm:
-		args = append(args, "--validate") // spirv-val is statically linked, always available
-		validate = true
-	case hlsl:
-		if dxcPath != "" {
-			args = append(args, "--dxc", dxcPath)
+		// Can we validate?
+		validate := false
+		switch j.format {
+		case spvasm:
+			args = append(args, "--validate") // spirv-val is statically linked, always available
 			validate = true
-		}
-	case msl:
-		if xcrunPath != "" {
-			args = append(args, "--xcrun", xcrunPath)
-			validate = true
-		}
-	}
-
-	// Invoke the compiler...
-	ok, out := invoke(wd, exe, args...)
-	out = strings.ReplaceAll(out, "\r\n", "\n")
-	matched := expected == "" || expected == out
-
-	if ok && generateExpected && (validate || !skipped) {
-		saveExpectedFile(j.file, j.format, out)
-		matched = true
-	}
-
-	switch {
-	case ok && matched:
-		// Test passed
-		*j.result = status{code: pass}
-		return
-
-		//       --- Below this point the test has failed ---
-
-	case skipped:
-		if generateSkip {
-			saveExpectedFile(j.file, j.format, "SKIP: FAILED\n\n"+out)
-		}
-		*j.result = status{code: skip}
-		return
-
-	case !ok:
-		// Compiler returned non-zero exit code
-		if generateSkip {
-			saveExpectedFile(j.file, j.format, "SKIP: FAILED\n\n"+out)
-		}
-		err := fmt.Errorf("%s", out)
-		*j.result = status{code: fail, err: err}
-		return
-
-	default:
-		// Compiler returned zero exit code, or output was not as expected
-		if generateSkip {
-			saveExpectedFile(j.file, j.format, "SKIP: FAILED\n\n"+out)
+		case hlsl:
+			if dxcPath != "" {
+				args = append(args, "--dxc", dxcPath)
+				validate = true
+			}
+		case msl:
+			if xcrunPath != "" {
+				args = append(args, "--xcrun", xcrunPath)
+				validate = true
+			}
 		}
 
-		// Expected output did not match
-		dmp := diffmatchpatch.New()
-		diff := dmp.DiffPrettyText(dmp.DiffMain(expected, out, true))
-		err := fmt.Errorf(`Output was not as expected
+		// Invoke the compiler...
+		ok, out := invoke(wd, exe, args...)
+		out = strings.ReplaceAll(out, "\r\n", "\n")
+		matched := expected == "" || expected == out
+
+		if ok && generateExpected && (validate || !skipped) {
+			saveExpectedFile(j.file, j.format, out)
+			matched = true
+		}
+
+		switch {
+		case ok && matched:
+			// Test passed
+			return status{code: pass}
+
+			//       --- Below this point the test has failed ---
+
+		case skipped:
+			if generateSkip {
+				saveExpectedFile(j.file, j.format, "SKIP: FAILED\n\n"+out)
+			}
+			return status{code: skip}
+
+		case !ok:
+			// Compiler returned non-zero exit code
+			if generateSkip {
+				saveExpectedFile(j.file, j.format, "SKIP: FAILED\n\n"+out)
+			}
+			err := fmt.Errorf("%s", out)
+			return status{code: fail, err: err}
+
+		default:
+			// Compiler returned zero exit code, or output was not as expected
+			if generateSkip {
+				saveExpectedFile(j.file, j.format, "SKIP: FAILED\n\n"+out)
+			}
+
+			// Expected output did not match
+			dmp := diffmatchpatch.New()
+			diff := dmp.DiffPrettyText(dmp.DiffMain(expected, out, true))
+			err := fmt.Errorf(`Output was not as expected
 
 --------------------------------------------------------------------------------
 -- Expected:                                                                  --
@@ -466,10 +471,10 @@ func (j job) run(wd, exe, dxcPath, xcrunPath string, generateExpected, generateS
 -- Diff:                                                                      --
 --------------------------------------------------------------------------------
 %s`,
-			expected, out, diff)
-		*j.result = status{code: fail, err: err}
-		return
-	}
+				expected, out, diff)
+			return status{code: fail, err: err}
+		}
+	}()
 }
 
 // loadExpectedFile loads the expected output file for the test file at 'path'
