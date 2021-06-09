@@ -394,8 +394,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
                                               Member("b", ty.f32()),
                                           });
 
-  auto* alias = ty.alias("Alias", inner_struct);
-  AST().AddConstructedType(alias);
+  auto* alias = Alias("Alias", inner_struct);
   auto* s_type = Structure("Outer", {Member("inner", alias)});
 
   auto* var = Var("ident", s_type);

@@ -293,8 +293,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl) {
 }
 
 TEST_F(ResolverTest, Stmt_VariableDecl_Alias) {
-  auto* my_int = ty.alias("MyInt", ty.i32());
-  AST().AddConstructedType(my_int);
+  auto* my_int = Alias("MyInt", ty.i32());
   auto* var = Var("my_var", my_int, ast::StorageClass::kNone, Expr(2));
   auto* init = var->constructor();
 
@@ -308,10 +307,8 @@ TEST_F(ResolverTest, Stmt_VariableDecl_Alias) {
 }
 
 TEST_F(ResolverTest, Stmt_VariableDecl_AliasRedeclared) {
-  auto* my_int1 = ty.alias(Source{{12, 34}}, "MyInt", ty.i32());
-  auto* my_int2 = ty.alias(Source{{56, 78}}, "MyInt", ty.i32());
-  AST().AddConstructedType(my_int1);
-  AST().AddConstructedType(my_int2);
+  Alias(Source{{12, 34}}, "MyInt", ty.i32());
+  Alias(Source{{56, 78}}, "MyInt", ty.i32());
   WrapInFunction();
 
   EXPECT_FALSE(r()->Resolve());
@@ -450,8 +447,7 @@ TEST_F(ResolverTest, Expr_ArrayAccessor_Array) {
 }
 
 TEST_F(ResolverTest, Expr_ArrayAccessor_Alias_Array) {
-  auto* aary = ty.alias("myarrty", ty.array<f32, 3>());
-  AST().AddConstructedType(aary);
+  auto* aary = Alias("myarrty", ty.array<f32, 3>());
 
   Global("my_var", aary, ast::StorageClass::kPrivate);
 
@@ -1124,8 +1120,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
   auto* st = Structure("S", {Member("first_member", ty.i32()),
                              Member("second_member", ty.f32())});
-  auto* alias = ty.alias("alias", st);
-  AST().AddConstructedType(alias);
+  auto* alias = Alias("alias", st);
   Global("my_struct", alias, ast::StorageClass::kInput);
 
   auto* mem = MemberAccessor("my_struct", "second_member");

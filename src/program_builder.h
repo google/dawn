@@ -1620,6 +1620,29 @@ class ProgramBuilder {
     return create<ast::ReturnStatement>(Expr(std::forward<EXPR>(val)));
   }
 
+  /// Creates a ast::Alias registering it with the AST().ConstructedTypes().
+  /// @param source the source information
+  /// @param name the alias name
+  /// @param type the alias target type
+  /// @returns the alias type
+  template <typename NAME>
+  ast::Alias* Alias(const Source& source, NAME&& name, ast::Type* type) {
+    auto* out = ty.alias(source, std::forward<NAME>(name), type);
+    AST().AddConstructedType(out);
+    return out;
+  }
+
+  /// Creates a ast::Alias registering it with the AST().ConstructedTypes().
+  /// @param name the alias name
+  /// @param type the alias target type
+  /// @returns the alias type
+  template <typename NAME>
+  ast::Alias* Alias(NAME&& name, ast::Type* type) {
+    auto* out = ty.alias(std::forward<NAME>(name), type);
+    AST().AddConstructedType(out);
+    return out;
+  }
+
   /// Creates a ast::Struct registering it with the AST().ConstructedTypes().
   /// @param source the source information
   /// @param name the struct name

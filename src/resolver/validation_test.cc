@@ -1708,8 +1708,7 @@ TEST_F(ResolverValidationTest,
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Error) {
-  auto* alias = ty.alias("UnsignedInt", ty.u32());
-  AST().AddConstructedType(alias);
+  auto* alias = Alias("UnsignedInt", ty.u32());
   Global("uint_var", alias, ast::StorageClass::kInput);
 
   auto* tc = vec2<f32>(Expr(Source{{12, 34}}, "uint_var"));
@@ -1722,10 +1721,8 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Error) {
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Success) {
-  auto* f32_alias = ty.alias("Float32", ty.f32());
-  auto* vec2_alias = ty.alias("VectorFloat2", ty.vec2<f32>());
-  AST().AddConstructedType(f32_alias);
-  AST().AddConstructedType(vec2_alias);
+  auto* f32_alias = Alias("Float32", ty.f32());
+  auto* vec2_alias = Alias("VectorFloat2", ty.vec2<f32>());
   Global("my_f32", f32_alias, ast::StorageClass::kInput);
   Global("my_vec2", vec2_alias, ast::StorageClass::kInput);
 
@@ -1735,8 +1732,7 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Success) {
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vector_ElementTypeAlias_Error) {
-  auto* f32_alias = ty.alias("Float32", ty.f32());
-  AST().AddConstructedType(f32_alias);
+  auto* f32_alias = Alias("Float32", ty.f32());
 
   // vec2<Float32>(1.0f, 1u)
   auto* vec_type = ty.vec(f32_alias, 2);
@@ -1754,8 +1750,7 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vector_ElementTypeAlias_Error) {
 
 TEST_F(ResolverValidationTest,
        Expr_Constructor_Vector_ElementTypeAlias_Success) {
-  auto* f32_alias = ty.alias("Float32", ty.f32());
-  AST().AddConstructedType(f32_alias);
+  auto* f32_alias = Alias("Float32", ty.f32());
 
   // vec2<Float32>(1.0f, 1.0f)
   auto* vec_type = ty.vec(f32_alias, 2);
@@ -1768,8 +1763,7 @@ TEST_F(ResolverValidationTest,
 
 TEST_F(ResolverValidationTest,
        Expr_Constructor_Vector_ArgumentElementTypeAlias_Error) {
-  auto* f32_alias = ty.alias("Float32", ty.f32());
-  AST().AddConstructedType(f32_alias);
+  auto* f32_alias = Alias("Float32", ty.f32());
 
   // vec3<u32>(vec<Float32>(), 1.0f)
   auto* vec_type = ty.vec(f32_alias, 2);
@@ -1786,8 +1780,7 @@ TEST_F(ResolverValidationTest,
 
 TEST_F(ResolverValidationTest,
        Expr_Constructor_Vector_ArgumentElementTypeAlias_Success) {
-  auto* f32_alias = ty.alias("Float32", ty.f32());
-  AST().AddConstructedType(f32_alias);
+  auto* f32_alias = Alias("Float32", ty.f32());
 
   // vec3<f32>(vec<Float32>(), 1.0f)
   auto* vec_type = ty.vec(f32_alias, 2);
@@ -2017,8 +2010,7 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Error) {
   // matNxM<Float32>(vecM<u32>(), ...); with N arguments
 
   const auto param = GetParam();
-  auto* f32_alias = ty.alias("Float32", ty.f32());
-  AST().AddConstructedType(f32_alias);
+  auto* f32_alias = Alias("Float32", ty.f32());
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
@@ -2043,8 +2035,7 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Success) {
   // matNxM<Float32>(vecM<f32>(), ...); with N arguments
 
   const auto param = GetParam();
-  auto* f32_alias = ty.alias("Float32", ty.f32());
-  AST().AddConstructedType(f32_alias);
+  auto* f32_alias = Alias("Float32", ty.f32());
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
@@ -2062,8 +2053,7 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Success) {
 }
 
 TEST_F(ResolverValidationTest, Expr_MatrixConstructor_ArgumentTypeAlias_Error) {
-  auto* alias = ty.alias("VectorUnsigned2", ty.vec2<u32>());
-  AST().AddConstructedType(alias);
+  auto* alias = Alias("VectorUnsigned2", ty.vec2<u32>());
   auto* tc = mat2x2<f32>(
       create<ast::TypeConstructorExpression>(
           Source{{12, 34}}, ty.MaybeCreateTypename(alias), ExprList()),
@@ -2080,8 +2070,7 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentTypeAlias_Success) {
   const auto param = GetParam();
   auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
   auto* vec_type = ty.vec<f32>(param.rows);
-  auto* vec_alias = ty.alias("VectorFloat2", vec_type);
-  AST().AddConstructedType(vec_alias);
+  auto* vec_alias = Alias("VectorFloat2", vec_type);
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
@@ -2099,8 +2088,7 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentTypeAlias_Success) {
 TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentElementTypeAlias_Error) {
   const auto param = GetParam();
   auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
-  auto* f32_alias = ty.alias("UnsignedInt", ty.u32());
-  AST().AddConstructedType(f32_alias);
+  auto* f32_alias = Alias("UnsignedInt", ty.u32());
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
@@ -2123,8 +2111,7 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentElementTypeAlias_Error) {
 TEST_P(MatrixConstructorTest,
        Expr_Constructor_ArgumentElementTypeAlias_Success) {
   const auto param = GetParam();
-  auto* f32_alias = ty.alias("Float32", ty.f32());
-  AST().AddConstructedType(f32_alias);
+  auto* f32_alias = Alias("Float32", ty.f32());
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {

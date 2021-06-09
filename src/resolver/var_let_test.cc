@@ -39,8 +39,7 @@ TEST_F(ResolverVarLetTest, TypeOfVar) {
   // }
 
   auto* S = Structure("S", {Member("i", ty.i32())});
-  auto* A = ty.alias("A", S);
-  AST().AddConstructedType(A);
+  auto* A = Alias("A", S);
 
   auto* i = Var("i", ty.i32(), ast::StorageClass::kNone);
   auto* u = Var("u", ty.u32(), ast::StorageClass::kNone);
@@ -91,8 +90,7 @@ TEST_F(ResolverVarLetTest, TypeOfLet) {
   // }
 
   auto* S = Structure("S", {Member("i", ty.i32())});
-  auto* A = ty.alias("A", S);
-  AST().AddConstructedType(A);
+  auto* A = Alias("A", S);
 
   auto* v = Var("v", ty.i32(), ast::StorageClass::kNone);
   auto* i = Const("i", ty.i32(), Expr(1));

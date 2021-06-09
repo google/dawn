@@ -80,8 +80,7 @@ TEST_F(ResolverVarLetValidationTest, VarConstructorWrongType) {
 }
 
 TEST_F(ResolverVarLetValidationTest, LetConstructorWrongTypeViaAlias) {
-  auto* a = ty.alias("I32", ty.i32());
-  AST().AddConstructedType(a);
+  auto* a = Alias("I32", ty.i32());
   WrapInFunction(Const(Source{{3, 3}}, "v", a, Expr(2u)));
 
   EXPECT_FALSE(r()->Resolve());
@@ -91,8 +90,7 @@ TEST_F(ResolverVarLetValidationTest, LetConstructorWrongTypeViaAlias) {
 }
 
 TEST_F(ResolverVarLetValidationTest, VarConstructorWrongTypeViaAlias) {
-  auto* a = ty.alias("I32", ty.i32());
-  AST().AddConstructedType(a);
+  auto* a = Alias("I32", ty.i32());
   WrapInFunction(
       Var(Source{{3, 3}}, "v", a, ast::StorageClass::kNone, Expr(2u)));
 

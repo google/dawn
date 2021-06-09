@@ -66,12 +66,10 @@ TEST_F(ResolverHostShareableValidationTest, BoolVectorMember) {
 }
 
 TEST_F(ResolverHostShareableValidationTest, Aliases) {
-  auto* a1 = ty.alias("a1", ty.bool_());
-  AST().AddConstructedType(a1);
+  auto* a1 = Alias("a1", ty.bool_());
   auto* s = Structure("S", {Member(Source{{12, 34}}, "x", a1)},
                       {create<ast::StructBlockDecoration>()});
-  auto* a2 = ty.alias("a2", s);
-  AST().AddConstructedType(a2);
+  auto* a2 = Alias("a2", s);
   Global(Source{{56, 78}}, "g", a2, ast::StorageClass::kStorage,
          ast::Access::kRead,
          ast::DecorationList{
@@ -122,14 +120,12 @@ TEST_F(ResolverHostShareableValidationTest, NoError) {
                           Member(Source{{2, 1}}, "y1", ty.vec3<f32>()),
                           Member(Source{{3, 1}}, "z1", ty.array<i32, 4>()),
                       });
-  auto* a1 = ty.alias("a1", i1);
-  AST().AddConstructedType(a1);
+  auto* a1 = Alias("a1", i1);
   auto* i2 = Structure("I2", {
                                  Member(Source{{4, 1}}, "x2", ty.mat2x2<f32>()),
                                  Member(Source{{5, 1}}, "y2", i1),
                              });
-  auto* a2 = ty.alias("a2", i2);
-  AST().AddConstructedType(a2);
+  auto* a2 = Alias("a2", i2);
   auto* i3 = Structure("I3", {
                                  Member(Source{{4, 1}}, "x3", a1),
                                  Member(Source{{5, 1}}, "y3", i2),

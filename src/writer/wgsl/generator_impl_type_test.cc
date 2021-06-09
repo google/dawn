@@ -26,8 +26,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitType_Alias) {
-  auto* alias = ty.alias("alias", ty.f32());
-  AST().AddConstructedType(alias);
+  auto* alias = Alias("alias", ty.f32());
 
   GeneratorImpl& gen = Build();
 
@@ -37,7 +36,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Alias) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array) {
   auto* arr = ty.array<bool, 4>();
-  AST().AddConstructedType(ty.alias("make_type_reachable", arr));
+  Alias("make_type_reachable", arr);
 
   GeneratorImpl& gen = Build();
 
@@ -47,7 +46,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {
   auto* a = ty.array(ty.bool_(), 4, 16u);
-  AST().AddConstructedType(ty.alias("make_type_reachable", a));
+  Alias("make_type_reachable", a);
 
   GeneratorImpl& gen = Build();
 
@@ -57,7 +56,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_RuntimeArray) {
   auto* a = ty.array(ty.bool_(), 0);
-  AST().AddConstructedType(ty.alias("make_type_reachable", a));
+  Alias("make_type_reachable", a);
 
   GeneratorImpl& gen = Build();
 
@@ -67,7 +66,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_RuntimeArray) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_Bool) {
   auto* bool_ = ty.bool_();
-  AST().AddConstructedType(ty.alias("make_type_reachable", bool_));
+  Alias("make_type_reachable", bool_);
 
   GeneratorImpl& gen = Build();
 
@@ -77,7 +76,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Bool) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_F32) {
   auto* f32 = ty.f32();
-  AST().AddConstructedType(ty.alias("make_type_reachable", f32));
+  Alias("make_type_reachable", f32);
 
   GeneratorImpl& gen = Build();
 
@@ -87,7 +86,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_F32) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_I32) {
   auto* i32 = ty.i32();
-  AST().AddConstructedType(ty.alias("make_type_reachable", i32));
+  Alias("make_type_reachable", i32);
 
   GeneratorImpl& gen = Build();
 
@@ -97,7 +96,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_I32) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_Matrix) {
   auto* mat2x3 = ty.mat2x3<f32>();
-  AST().AddConstructedType(ty.alias("make_type_reachable", mat2x3));
+  Alias("make_type_reachable", mat2x3);
 
   GeneratorImpl& gen = Build();
 
@@ -107,7 +106,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Matrix) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_Pointer) {
   auto* p = ty.pointer<f32>(ast::StorageClass::kWorkgroup);
-  AST().AddConstructedType(ty.alias("make_type_reachable", p));
+  Alias("make_type_reachable", p);
 
   GeneratorImpl& gen = Build();
 
@@ -250,7 +249,7 @@ struct S {
 
 TEST_F(WgslGeneratorImplTest, EmitType_U32) {
   auto* u32 = ty.u32();
-  AST().AddConstructedType(ty.alias("make_type_reachable", u32));
+  Alias("make_type_reachable", u32);
 
   GeneratorImpl& gen = Build();
 
@@ -260,7 +259,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_U32) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_Vector) {
   auto* vec3 = ty.vec3<f32>();
-  AST().AddConstructedType(ty.alias("make_type_reachable", vec3));
+  Alias("make_type_reachable", vec3);
 
   GeneratorImpl& gen = Build();
 
@@ -282,7 +281,7 @@ TEST_P(WgslGenerator_DepthTextureTest, EmitType_DepthTexture) {
   auto param = GetParam();
 
   auto* d = ty.depth_texture(param.dim);
-  AST().AddConstructedType(ty.alias("make_type_reachable", d));
+  Alias("make_type_reachable", d);
 
   GeneratorImpl& gen = Build();
 
@@ -304,7 +303,7 @@ TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_F32) {
   auto param = GetParam();
 
   auto* t = ty.sampled_texture(param.dim, ty.f32());
-  AST().AddConstructedType(ty.alias("make_type_reachable", t));
+  Alias("make_type_reachable", t);
 
   GeneratorImpl& gen = Build();
 
@@ -316,7 +315,7 @@ TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_I32) {
   auto param = GetParam();
 
   auto* t = ty.sampled_texture(param.dim, ty.i32());
-  AST().AddConstructedType(ty.alias("make_type_reachable", t));
+  Alias("make_type_reachable", t);
 
   GeneratorImpl& gen = Build();
 
@@ -328,7 +327,7 @@ TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_U32) {
   auto param = GetParam();
 
   auto* t = ty.sampled_texture(param.dim, ty.u32());
-  AST().AddConstructedType(ty.alias("make_type_reachable", t));
+  Alias("make_type_reachable", t);
 
   GeneratorImpl& gen = Build();
 
@@ -351,7 +350,7 @@ TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_F32) {
   auto param = GetParam();
 
   auto* t = ty.multisampled_texture(param.dim, ty.f32());
-  AST().AddConstructedType(ty.alias("make_type_reachable", t));
+  Alias("make_type_reachable", t);
 
   GeneratorImpl& gen = Build();
 
@@ -363,7 +362,7 @@ TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_I32) {
   auto param = GetParam();
 
   auto* t = ty.multisampled_texture(param.dim, ty.i32());
-  AST().AddConstructedType(ty.alias("make_type_reachable", t));
+  Alias("make_type_reachable", t);
 
   GeneratorImpl& gen = Build();
 
@@ -375,7 +374,7 @@ TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_U32) {
   auto param = GetParam();
 
   auto* t = ty.multisampled_texture(param.dim, ty.u32());
-  AST().AddConstructedType(ty.alias("make_type_reachable", t));
+  Alias("make_type_reachable", t);
 
   GeneratorImpl& gen = Build();
 
@@ -503,7 +502,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_F(WgslGeneratorImplTest, EmitType_Sampler) {
   auto* sampler = ty.sampler(ast::SamplerKind::kSampler);
-  AST().AddConstructedType(ty.alias("make_type_reachable", sampler));
+  Alias("make_type_reachable", sampler);
 
   GeneratorImpl& gen = Build();
 
@@ -513,7 +512,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Sampler) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_SamplerComparison) {
   auto* sampler = ty.sampler(ast::SamplerKind::kComparisonSampler);
-  AST().AddConstructedType(ty.alias("make_type_reachable", sampler));
+  Alias("make_type_reachable", sampler);
 
   GeneratorImpl& gen = Build();
 

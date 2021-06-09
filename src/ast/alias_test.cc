@@ -35,7 +35,7 @@ using AstAliasTest = TestHelper;
 
 TEST_F(AstAliasTest, Create) {
   auto* u32 = create<U32>();
-  auto* a = create<Alias>(Sym("a_type"), u32);
+  auto* a = Alias("a_type", u32);
   EXPECT_EQ(a->symbol(), Symbol(1, ID()));
   EXPECT_EQ(a->type(), u32);
 }
@@ -46,7 +46,7 @@ TEST_F(AstAliasTest, Create) {
 TEST_F(AstAliasTest, TypeName_LinearTime) {
   Type* type = ty.i32();
   for (int i = 0; i < 1024; i++) {
-    type = create<Alias>(Symbols().New(), type);
+    type = Alias(Symbols().New(), type);
   }
   for (int i = 0; i < 16384; i++) {
     type->type_name();
@@ -54,22 +54,22 @@ TEST_F(AstAliasTest, TypeName_LinearTime) {
 }
 
 TEST_F(AstAliasTest, TypeName) {
-  auto* at = create<Alias>(Sym("Particle"), create<I32>());
+  auto* at = Alias("Particle", create<I32>());
   EXPECT_EQ(at->type_name(), "__alias_$1__i32");
 }
 
 TEST_F(AstAliasTest, FriendlyName) {
-  auto* at = create<Alias>(Sym("Particle"), create<I32>());
+  auto* at = Alias("Particle", create<I32>());
   EXPECT_EQ(at->FriendlyName(Symbols()), "Particle");
 }
 
 TEST_F(AstAliasTest, UnwrapAll_TwiceAliasPointerTwiceAlias) {
   auto* u32 = create<U32>();
-  auto* a = create<Alias>(Sym("a_type"), u32);
-  auto* aa = create<Alias>(Sym("aa_type"), a);
+  auto* a = create<ast::Alias>(Sym("a_type"), u32);
+  auto* aa = create<ast::Alias>(Sym("aa_type"), a);
   auto* paa = create<Pointer>(aa, StorageClass::kUniform, Access::kUndefined);
-  auto* apaa = create<Alias>(Sym("paa_type"), paa);
-  auto* aapaa = create<Alias>(Sym("aapaa_type"), apaa);
+  auto* apaa = create<ast::Alias>(Sym("paa_type"), paa);
+  auto* aapaa = create<ast::Alias>(Sym("aapaa_type"), apaa);
 
   EXPECT_EQ(aapaa->symbol(), Symbol(4, ID()));
   EXPECT_EQ(aapaa->type(), apaa);

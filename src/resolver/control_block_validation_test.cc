@@ -294,7 +294,7 @@ TEST_F(ResolverControlBlockValidationTest, SwitchCaseAlias_Pass) {
   //   default: {}
   // }
 
-  auto* my_int = ty.alias("MyInt", ty.u32());
+  auto* my_int = Alias("MyInt", ty.u32());
   auto* var = Var("a", my_int, ast::StorageClass::kNone, Expr(2u));
 
   ast::CaseSelectorList default_csl;
@@ -304,7 +304,6 @@ TEST_F(ResolverControlBlockValidationTest, SwitchCaseAlias_Pass) {
                                             default_csl, block_default));
 
   auto* block = Block(Decl(var), create<ast::SwitchStatement>(Expr("a"), body));
-  AST().AddConstructedType(my_int);
 
   WrapInFunction(block);
 
