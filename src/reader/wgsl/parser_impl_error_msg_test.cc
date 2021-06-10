@@ -86,6 +86,13 @@ TEST_F(ParserImplErrorTest, AssignmentStmtMissingSemicolon) {
          "               ^\n");
 }
 
+TEST_F(ParserImplErrorTest, AssignmentStmtInvalidLHS_IntrinsicFunctionName) {
+  EXPECT("normalize = 5;",
+         "test.wgsl:1:1 error: statement found outside of function body\n"
+         "normalize = 5;\n"
+         "^^^^^^^^^\n");
+}
+
 TEST_F(ParserImplErrorTest, AssignmentStmtInvalidRHS) {
   EXPECT("fn f() { a = >; }",
          "test.wgsl:1:14 error: unable to parse right side of assignment\n"

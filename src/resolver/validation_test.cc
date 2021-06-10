@@ -141,6 +141,19 @@ TEST_F(ResolverValidationTest, Expr_DontCall_Intrinsic) {
   EXPECT_EQ(r()->error(), "3:8 error: missing '(' for intrinsic call");
 }
 
+TEST_F(ResolverValidationTest,
+       AssignmentStmt_InvalidLHS_IntrinsicFunctionName) {
+  // normalize = 2;
+
+  auto* lhs = Expr(Source{{12, 34}}, "normalize");
+  auto* rhs = Expr(2);
+  auto* assign = Assign(lhs, rhs);
+  WrapInFunction(assign);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: missing '(' for intrinsic call");
+}
+
 TEST_F(ResolverValidationTest, UsingUndefinedVariable_Fail) {
   // b = 2;
 
