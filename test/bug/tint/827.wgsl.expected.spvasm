@@ -1,0 +1,73 @@
+bug/tint/827.wgsl:8:26 warning: use of deprecated language feature: declare access with var<storage, read_write> instead of using [[access]] decoration
+[[group(0), binding(1)]] var<storage> result : [[access(read_write)]] Result;
+                         ^^^
+
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 43
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main" %tint_symbol
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %width "width"
+               OpName %tex "tex"
+               OpName %Result "Result"
+               OpMemberName %Result 0 "values"
+               OpName %result "result"
+               OpName %tint_symbol "tint_symbol"
+               OpName %main "main"
+               OpDecorate %tex DescriptorSet 0
+               OpDecorate %tex Binding 0
+               OpDecorate %Result Block
+               OpMemberDecorate %Result 0 Offset 0
+               OpDecorate %_runtimearr_float ArrayStride 4
+               OpDecorate %result DescriptorSet 0
+               OpDecorate %result Binding 1
+               OpDecorate %tint_symbol BuiltIn GlobalInvocationId
+       %uint = OpTypeInt 32 0
+      %width = OpConstant %uint 128
+      %float = OpTypeFloat 32
+          %5 = OpTypeImage %float 2D 1 0 0 1 Unknown
+%_ptr_UniformConstant_5 = OpTypePointer UniformConstant %5
+        %tex = OpVariable %_ptr_UniformConstant_5 UniformConstant
+%_runtimearr_float = OpTypeRuntimeArray %float
+     %Result = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_Result = OpTypePointer StorageBuffer %Result
+     %result = OpVariable %_ptr_StorageBuffer_Result StorageBuffer
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Input_v3uint = OpTypePointer Input %v3uint
+%tint_symbol = OpVariable %_ptr_Input_v3uint Input
+       %void = OpTypeVoid
+         %14 = OpTypeFunction %void
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+%_ptr_Input_uint = OpTypePointer Input %uint
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+    %v4float = OpTypeVector %float 4
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+      %int_0 = OpConstant %int 0
+       %main = OpFunction %void None %14
+         %17 = OpLabel
+         %21 = OpAccessChain %_ptr_Input_uint %tint_symbol %uint_1
+         %22 = OpLoad %uint %21
+         %23 = OpIMul %uint %22 %width
+         %24 = OpAccessChain %_ptr_Input_uint %tint_symbol %uint_0
+         %25 = OpLoad %uint %24
+         %26 = OpIAdd %uint %23 %25
+         %28 = OpAccessChain %_ptr_StorageBuffer_float %result %uint_0 %26
+         %32 = OpLoad %5 %tex
+         %36 = OpAccessChain %_ptr_Input_uint %tint_symbol %uint_0
+         %37 = OpLoad %uint %36
+         %35 = OpBitcast %int %37
+         %39 = OpAccessChain %_ptr_Input_uint %tint_symbol %uint_1
+         %40 = OpLoad %uint %39
+         %38 = OpBitcast %int %40
+         %41 = OpCompositeConstruct %v2int %35 %38
+         %30 = OpImageFetch %v4float %32 %41 Lod %int_0
+         %29 = OpCompositeExtract %float %30 0
+               OpStore %28 %29
+               OpReturn
+               OpFunctionEnd

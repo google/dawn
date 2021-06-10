@@ -1,35 +1,18 @@
-SKIP: crbug.com/tint/833 loop emission is broken
+SKIP: FAILED
 
-#include <metal_stdlib>
 
-using namespace metal;
-struct Buf {
-  /* 0x0000 */ uint count;
-  /* 0x0004 */ uint data[50];
-};
 
-kernel void tint_symbol(device Buf& b [[buffer(0)]]) {
-  uint i = 0u;
-  {
-    bool tint_msl_is_first_1 = true;
+Validation Failure:
+
+Compilation failed: 
+
+program_source:16:24: error: default initialization of an object of const type 'device uint *const' (aka 'device unsigned int *const')
     device uint* const p;
-    for(;;) {
-      if (!tint_msl_is_first_1) {
-        *(p) = (*(p) * 2u);
-        i = (i + 1u);
-      }
-      tint_msl_is_first_1 = false;
-
-      if ((i >= b.count)) {
-        break;
-      }
-      p = &(b.data[i]);
-      if (((i % 2u) == 0u)) {
-        continue;
-      }
-      *(p) = 0u;
-    }
-  }
-  return;
-}
-
+                       ^
+                         = nullptr
+program_source:27:9: error: cannot assign to variable 'p' with const-qualified type 'device uint *const' (aka 'device unsigned int *const')
+      p = &(b.data.array[i]);
+      ~ ^
+program_source:16:24: note: variable 'p' declared const here
+    device uint* const p;
+    ~~~~~~~~~~~~~~~~~~~^

@@ -1,0 +1,17 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+
+Compilation failed: 
+
+program_source:6:22: error: use of undeclared identifier 'Src'
+  uint4 const x_18 = Src.read(int2(0, 0));
+                     ^
+program_source:8:29: error: address of vector element requested
+  thread uint* const x_21 = &(srcValue.x);
+                            ^ ~~~~~~~~~~
+program_source:12:3: error: use of undeclared identifier 'Dst'
+  Dst.write(x_27, int2(0, 0));
+  ^

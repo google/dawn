@@ -1,49 +1,28 @@
-SKIP: crbug.com/tint/833 loop emission is broken
+SKIP: FAILED
 
-#include <metal_stdlib>
 
-using namespace metal;
-struct Uniforms {
-  /* 0x0000 */ packed_uint2 aShape;
-  /* 0x0008 */ packed_uint2 bShape;
-  /* 0x0010 */ packed_uint2 outShape;
-};
-struct Matrix {
-  /* 0x0000 */ uint numbers[1];
-};
-struct tint_symbol_2 {
-  uint3 global_id [[thread_position_in_grid]];
-};
 
-kernel void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]], constant Uniforms& uniforms [[buffer(3)]], const device Matrix& firstMatrix [[buffer(0)]], const device Matrix& secondMatrix [[buffer(1)]], device Matrix& resultMatrix [[buffer(2)]]) {
-  uint3 const global_id = tint_symbol_1.global_id;
-  uint2 const resultCell = uint2(global_id.y, global_id.x);
-  uint const dimInner = uniforms.aShape.y;
-  uint const dimOutter = uniforms.outShape.y;
-  uint result = 0u;
-  {
-    uint i = 0u;
-    {
-      bool tint_msl_is_first_1 = true;
+Validation Failure:
+
+Compilation failed: 
+
+program_source:22:18: error: default initialization of an object of const type 'const uint' (aka 'const unsigned int')
       uint const a;
+                 ^
+                   = 0
+program_source:23:18: error: default initialization of an object of const type 'const uint' (aka 'const unsigned int')
       uint const b;
-      for(;;) {
-        if (!tint_msl_is_first_1) {
-          i = (i + 1u);
-        }
-        tint_msl_is_first_1 = false;
-
-        if (!((i < dimInner))) {
-          break;
-        }
+                 ^
+                   = 0
+program_source:33:11: error: cannot assign to variable 'a' with const-qualified type 'const uint' (aka 'const unsigned int')
         a = (i + (resultCell.x * dimInner));
+        ~ ^
+program_source:22:18: note: variable 'a' declared const here
+      uint const a;
+      ~~~~~~~~~~~^
+program_source:34:11: error: cannot assign to variable 'b' with const-qualified type 'const uint' (aka 'const unsigned int')
         b = (resultCell.y + (i * dimOutter));
-        result = (result + (firstMatrix.numbers[a] * secondMatrix.numbers[b]));
-      }
-    }
-  }
-  uint const index = (resultCell.y + (resultCell.x * dimOutter));
-  resultMatrix.numbers[index] = result;
-  return;
-}
-
+        ~ ^
+program_source:23:18: note: variable 'b' declared const here
+      uint const b;
+      ~~~~~~~~~~~^

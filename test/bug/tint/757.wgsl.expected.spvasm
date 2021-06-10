@@ -1,0 +1,141 @@
+SKIP: FAILED
+
+bug/tint/757.wgsl:3:5 warning: use of deprecated language feature: [[offset]] has been replaced with [[size]] and [[align]]
+  [[offset(0)]] level : i32;
+    ^^^^^^
+
+bug/tint/757.wgsl:10:5 warning: use of deprecated language feature: [[offset]] has been replaced with [[size]] and [[align]]
+  [[offset(0)]] values : [[stride(4)]] array<f32>;
+    ^^^^^^
+
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 76
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main" %tint_symbol
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %Constants "Constants"
+               OpMemberName %Constants 0 "level"
+               OpName %constants "constants"
+               OpName %myTexture "myTexture"
+               OpName %Result "Result"
+               OpMemberName %Result 0 "values"
+               OpName %result "result"
+               OpName %tint_symbol "tint_symbol"
+               OpName %main "main"
+               OpName %flatIndex "flatIndex"
+               OpName %texel "texel"
+               OpName %i "i"
+               OpDecorate %Constants Block
+               OpMemberDecorate %Constants 0 Offset 0
+               OpDecorate %constants NonWritable
+               OpDecorate %constants DescriptorSet 0
+               OpDecorate %constants Binding 0
+               OpDecorate %myTexture DescriptorSet 0
+               OpDecorate %myTexture Binding 1
+               OpDecorate %Result Block
+               OpMemberDecorate %Result 0 Offset 0
+               OpDecorate %_runtimearr_float ArrayStride 4
+               OpDecorate %result DescriptorSet 0
+               OpDecorate %result Binding 3
+               OpDecorate %tint_symbol BuiltIn GlobalInvocationId
+        %int = OpTypeInt 32 1
+  %Constants = OpTypeStruct %int
+%_ptr_Uniform_Constants = OpTypePointer Uniform %Constants
+  %constants = OpVariable %_ptr_Uniform_Constants Uniform
+      %float = OpTypeFloat 32
+          %7 = OpTypeImage %float 2D 0 1 0 1 Unknown
+%_ptr_UniformConstant_7 = OpTypePointer UniformConstant %7
+  %myTexture = OpVariable %_ptr_UniformConstant_7 UniformConstant
+%_runtimearr_float = OpTypeRuntimeArray %float
+     %Result = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_Result = OpTypePointer StorageBuffer %Result
+     %result = OpVariable %_ptr_StorageBuffer_Result StorageBuffer
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Input_v3uint = OpTypePointer Input %v3uint
+%tint_symbol = OpVariable %_ptr_Input_v3uint Input
+       %void = OpTypeVoid
+         %17 = OpTypeFunction %void
+     %uint_2 = OpConstant %uint 2
+%_ptr_Input_uint = OpTypePointer Input %uint
+     %uint_1 = OpConstant %uint 1
+     %uint_0 = OpConstant %uint 0
+%_ptr_Function_uint = OpTypePointer Function %uint
+         %38 = OpConstantNull %uint
+    %v4float = OpTypeVector %float 4
+      %v3int = OpTypeVector %int 3
+     %v2uint = OpTypeVector %uint 2
+      %int_0 = OpConstant %int 0
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+         %54 = OpConstantNull %v4float
+       %bool = OpTypeBool
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+%_ptr_Function_float = OpTypePointer Function %float
+       %main = OpFunction %void None %17
+         %20 = OpLabel
+  %flatIndex = OpVariable %_ptr_Function_uint Function %38
+      %texel = OpVariable %_ptr_Function_v4float Function %54
+          %i = OpVariable %_ptr_Function_uint Function %38
+         %22 = OpIMul %uint %uint_2 %uint_2
+         %24 = OpAccessChain %_ptr_Input_uint %tint_symbol %uint_2
+         %25 = OpLoad %uint %24
+         %26 = OpIMul %uint %22 %25
+         %28 = OpAccessChain %_ptr_Input_uint %tint_symbol %uint_1
+         %29 = OpLoad %uint %28
+         %30 = OpIMul %uint %uint_2 %29
+         %31 = OpIAdd %uint %26 %30
+         %33 = OpAccessChain %_ptr_Input_uint %tint_symbol %uint_0
+         %34 = OpLoad %uint %33
+         %35 = OpIAdd %uint %31 %34
+               OpStore %flatIndex %35
+         %39 = OpLoad %uint %flatIndex
+         %40 = OpIMul %uint %39 %uint_1
+               OpStore %flatIndex %40
+         %43 = OpLoad %7 %myTexture
+         %46 = OpLoad %v3uint %tint_symbol
+         %47 = OpVectorShuffle %v2uint %46 %46 0 1
+         %48 = OpCompositeExtract %uint %47 0
+         %49 = OpCompositeExtract %uint %47 1
+         %51 = OpCompositeConstruct %v3int %48 %49 %int_0
+         %41 = OpImageFetch %v4float %43 %51 Lod %int_0
+               OpStore %texel %41
+               OpStore %i %uint_0
+               OpBranch %56
+         %56 = OpLabel
+               OpLoopMerge %57 %58 None
+               OpBranch %59
+         %59 = OpLabel
+         %61 = OpLoad %uint %i
+         %62 = OpULessThan %bool %61 %uint_1
+         %60 = OpLogicalNot %bool %62
+               OpSelectionMerge %64 None
+               OpBranchConditional %60 %65 %64
+         %65 = OpLabel
+               OpBranch %57
+         %64 = OpLabel
+         %66 = OpLoad %uint %flatIndex
+         %67 = OpLoad %uint %i
+         %68 = OpIAdd %uint %66 %67
+         %70 = OpAccessChain %_ptr_StorageBuffer_float %result %uint_0 %68
+         %72 = OpAccessChain %_ptr_Function_float %texel %uint_0
+         %73 = OpLoad %float %72
+               OpStore %70 %73
+               OpBranch %58
+         %58 = OpLabel
+         %74 = OpLoad %uint %i
+         %75 = OpIAdd %uint %74 %uint_1
+               OpStore %i %75
+               OpBranch %56
+         %57 = OpLabel
+               OpReturn
+               OpFunctionEnd
+
+
+Validation Failure:
+1:1: Expected Constituents to be scalars or vectors of the same type as Result Type components
+  %51 = OpCompositeConstruct %v3int %48 %49 %int_0
+

@@ -1,0 +1,15 @@
+SKIP: FAILED
+
+bug/tint/827.wgsl:8:26 warning: use of deprecated language feature: declare access with var<storage, read_write> instead of using [[access]] decoration
+[[group(0), binding(1)]] var<storage> result : [[access(read_write)]] Result;
+                         ^^^
+
+
+
+Validation Failure:
+
+Compilation failed: 
+
+program_source:10:76: error: use of undeclared identifier 'tex'
+  result.values[((GlobalInvocationId.y * width) + GlobalInvocationId.x)] = tex.read(int2(int(GlobalInvocationId.x), int(GlobalInvocationId.y)), 0);
+                                                                           ^

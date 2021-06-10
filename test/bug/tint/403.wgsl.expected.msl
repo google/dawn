@@ -1,0 +1,19 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+
+Compilation failed: 
+
+program_source:17:55: error: type 'int' is not valid for attribute 'vertex_id'
+vertex tint_symbol_2 tint_symbol(int gl_VertexIndex [[vertex_id]], constant vertexUniformBuffer1& x_20 [[buffer(0)]], constant vertexUniformBuffer2& x_26 [[buffer(0)]]) {
+                                                      ^~~~~~~~~
+program_source:18:37: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 indexable = {0.0f};
+                                    ^~~~
+                                    {   }
+program_source:22:47: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_3 = {float2(-1.0f, 1.0f), float2(1.0f, 1.0f), float2(-1.0f, -1.0f)};
+                                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                              {                                                            }

@@ -1,1 +1,1750 @@
-SKIP: crbug.com/tint/833 loop emission is broken
+SKIP: FAILED
+
+
+
+Validation Failure:
+
+Compilation failed: 
+
+program_source:66:47: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_1 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                              {                           }
+program_source:75:47: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_3 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                              {                           }
+program_source:100:47: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_5 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                              {                           }
+program_source:104:16: warning: unused variable 'x_532'
+  float3 const x_532 = float3(x_528.x, x_528.y, x_528.x);
+               ^
+program_source:95:16: warning: unused variable 'x_531'
+  float3 const x_531 = float3(x_527.x, x_526.y, x_526.x);
+               ^
+program_source:87:16: warning: unused variable 'x_530'
+  float2 const x_530 = float2(x_529.z, x_529.y);
+               ^
+program_source:158:47: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_7 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                              {                           }
+program_source:164:15: error: default initialization of an object of const type 'const int'
+    int const x_961;
+              ^
+                    = 0
+program_source:165:15: error: default initialization of an object of const type 'const int'
+    int const x_962;
+              ^
+                    = 0
+program_source:166:15: error: default initialization of an object of const type 'const int'
+    int const x_55;
+              ^
+                   = 0
+program_source:167:15: error: default initialization of an object of const type 'const int'
+    int const x_963;
+              ^
+                    = 0
+program_source:168:27: error: default initialization of an object of const type 'const QuicksortObject' without a user-provided default constructor
+    QuicksortObject const x_964;
+                          ^
+                               {}
+program_source:169:32: error: default initialization of an object of const type 'const tint_array_wrapper_0' without a user-provided default constructor
+    tint_array_wrapper_0 const tint_symbol_9;
+                               ^
+                                            {}
+program_source:170:27: error: default initialization of an object of const type 'const QuicksortObject' without a user-provided default constructor
+    QuicksortObject const tint_symbol_10;
+                          ^
+                                        {}
+program_source:171:15: error: default initialization of an object of const type 'const int'
+    int const x_56;
+              ^
+                   = 0
+program_source:172:15: error: default initialization of an object of const type 'const int'
+    int const x_965;
+              ^
+                    = 0
+program_source:173:15: error: default initialization of an object of const type 'const int'
+    int const x_966;
+              ^
+                    = 0
+program_source:174:15: error: default initialization of an object of const type 'const int'
+    int const x_967;
+              ^
+                    = 0
+program_source:175:15: error: default initialization of an object of const type 'const int'
+    int const x_968;
+              ^
+                    = 0
+program_source:176:15: error: default initialization of an object of const type 'const int'
+    int const x_60;
+              ^
+                   = 0
+program_source:177:15: error: default initialization of an object of const type 'const int'
+    int const x_969;
+              ^
+                    = 0
+program_source:178:23: error: default initialization of an object of const type 'int *const'
+    thread int* const x_61;
+                      ^
+                           = nullptr
+program_source:179:15: error: default initialization of an object of const type 'const int'
+    int const x_970;
+              ^
+                    = 0
+program_source:180:18: error: default initialization of an object of const type 'const float3' (vector of 3 'float' values)
+    float3 const x_539;
+                 ^
+program_source:181:15: error: default initialization of an object of const type 'const int'
+    int const x_971;
+              ^
+                    = 0
+program_source:182:15: error: default initialization of an object of const type 'const int'
+    int const x_62;
+              ^
+                   = 0
+program_source:183:27: error: default initialization of an object of const type 'const QuicksortObject' without a user-provided default constructor
+    QuicksortObject const x_972;
+                          ^
+                               {}
+program_source:184:32: error: default initialization of an object of const type 'const tint_array_wrapper_0' without a user-provided default constructor
+    tint_array_wrapper_0 const tint_symbol_11;
+                               ^
+                                             {}
+program_source:185:27: error: default initialization of an object of const type 'const QuicksortObject' without a user-provided default constructor
+    QuicksortObject const tint_symbol_12;
+                          ^
+                                        {}
+program_source:186:15: error: default initialization of an object of const type 'const int'
+    int const x_63;
+              ^
+                   = 0
+program_source:187:18: error: default initialization of an object of const type 'const float2' (vector of 2 'float' values)
+    float2 const x_540;
+                 ^
+program_source:188:15: error: default initialization of an object of const type 'const int'
+    int const x_973;
+              ^
+                    = 0
+program_source:189:15: error: default initialization of an object of const type 'const int'
+    int const x_974;
+              ^
+                    = 0
+program_source:190:18: error: default initialization of an object of const type 'const float3' (vector of 3 'float' values)
+    float3 const x_541;
+                 ^
+program_source:191:15: error: default initialization of an object of const type 'const int'
+    int const x_975;
+              ^
+                    = 0
+program_source:192:27: error: default initialization of an object of const type 'const QuicksortObject' without a user-provided default constructor
+    QuicksortObject const x_986;
+                          ^
+                               {}
+program_source:193:32: error: default initialization of an object of const type 'const tint_array_wrapper_0' without a user-provided default constructor
+    tint_array_wrapper_0 const tint_symbol_13;
+                               ^
+                                             {}
+program_source:194:27: error: default initialization of an object of const type 'const QuicksortObject' without a user-provided default constructor
+    QuicksortObject const tint_symbol_14;
+                          ^
+                                        {}
+program_source:204:22: warning: unused variable 'x_547'
+        float3 const x_547 = float3(x_539.x, x_541.z, x_541.z);
+                     ^
+program_source:215:22: warning: unused variable 'x_548'
+        float3 const x_548 = float3(x_541.y, x_541.z, x_541.x);
+                     ^
+program_source:222:13: error: cannot assign to variable 'x_961' with const-qualified type 'const int'
+      x_961 = pivot;
+      ~~~~~ ^
+program_source:164:15: note: variable 'x_961' declared const here
+    int const x_961;
+    ~~~~~~~~~~^~~~~
+program_source:225:13: error: cannot assign to variable 'x_962' with const-qualified type 'const int'
+      x_962 = param_1;
+      ~~~~~ ^
+program_source:165:15: note: variable 'x_962' declared const here
+    int const x_962;
+    ~~~~~~~~~~^~~~~
+program_source:228:12: error: cannot assign to variable 'x_55' with const-qualified type 'const int'
+      x_55 = j_1;
+      ~~~~ ^
+program_source:166:15: note: variable 'x_55' declared const here
+    int const x_55;
+    ~~~~~~~~~~^~~~
+program_source:229:13: error: cannot assign to variable 'x_963' with const-qualified type 'const int'
+      x_963 = pivot;
+      ~~~~~ ^
+program_source:167:15: note: variable 'x_963' declared const here
+    int const x_963;
+    ~~~~~~~~~~^~~~~
+program_source:233:13: error: no viable overloaded '='
+      x_964 = *(tint_symbol_80);
+      ~~~~~ ^ ~~~~~~~~~~~~~~~~~
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+struct QuicksortObject {
+       ^
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:234:21: error: no viable overloaded '='
+      tint_symbol_9 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+      ~~~~~~~~~~~~~ ^ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+struct tint_array_wrapper_0 {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:235:22: error: no viable overloaded '='
+      tint_symbol_10 = {.numbers=tint_symbol_9};
+      ~~~~~~~~~~~~~~ ^ ~~~~~~~~~~~~~~~~~~~~~~~~
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+struct QuicksortObject {
+       ^
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:238:12: error: cannot assign to variable 'x_56' with const-qualified type 'const int'
+      x_56 = *(h);
+      ~~~~ ^
+program_source:171:15: note: variable 'x_56' declared const here
+    int const x_56;
+    ~~~~~~~~~~^~~~
+program_source:239:13: error: cannot assign to variable 'x_965' with const-qualified type 'const int'
+      x_965 = *(h);
+      ~~~~~ ^
+program_source:172:15: note: variable 'x_965' declared const here
+    int const x_965;
+    ~~~~~~~~~~^~~~~
+program_source:242:13: error: cannot assign to variable 'x_966' with const-qualified type 'const int'
+      x_966 = param;
+      ~~~~~ ^
+program_source:173:15: note: variable 'x_966' declared const here
+    int const x_966;
+    ~~~~~~~~~~^~~~~
+program_source:245:13: error: cannot assign to variable 'x_967' with const-qualified type 'const int'
+      x_967 = j_1;
+      ~~~~~ ^
+program_source:174:15: note: variable 'x_967' declared const here
+    int const x_967;
+    ~~~~~~~~~~^~~~~
+program_source:249:13: error: cannot assign to variable 'x_968' with const-qualified type 'const int'
+      x_968 = param;
+      ~~~~~ ^
+program_source:175:15: note: variable 'x_968' declared const here
+    int const x_968;
+    ~~~~~~~~~~^~~~~
+program_source:256:12: error: cannot assign to variable 'x_60' with const-qualified type 'const int'
+      x_60 = j_1;
+      ~~~~ ^
+program_source:176:15: note: variable 'x_60' declared const here
+    int const x_60;
+    ~~~~~~~~~~^~~~
+program_source:257:13: error: cannot assign to variable 'x_969' with const-qualified type 'const int'
+      x_969 = *(x_42);
+      ~~~~~ ^
+program_source:177:15: note: variable 'x_969' declared const here
+    int const x_969;
+    ~~~~~~~~~~^~~~~
+program_source:260:12: error: cannot assign to variable 'x_61' with const-qualified type 'int *const'
+      x_61 = &((*(tint_symbol_80)).numbers.array[x_60]);
+      ~~~~ ^
+program_source:178:23: note: variable 'x_61' declared const here
+    thread int* const x_61;
+    ~~~~~~~~~~~~~~~~~~^~~~
+program_source:261:13: error: cannot assign to variable 'x_970' with const-qualified type 'const int'
+      x_970 = *(h);
+      ~~~~~ ^
+program_source:179:15: note: variable 'x_970' declared const here
+    int const x_970;
+    ~~~~~~~~~~^~~~~
+program_source:265:13: error: cannot assign to variable 'x_971' with const-qualified type 'const int'
+      x_971 = param_1;
+      ~~~~~ ^
+program_source:181:15: note: variable 'x_971' declared const here
+    int const x_971;
+    ~~~~~~~~~~^~~~~
+program_source:268:12: error: cannot assign to variable 'x_62' with const-qualified type 'const int'
+      x_62 = *(x_61);
+      ~~~~ ^
+program_source:182:15: note: variable 'x_62' declared const here
+    int const x_62;
+    ~~~~~~~~~~^~~~
+program_source:269:13: error: no viable overloaded '='
+      x_972 = *(tint_symbol_80);
+      ~~~~~ ^ ~~~~~~~~~~~~~~~~~
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+struct QuicksortObject {
+       ^
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:270:22: error: no viable overloaded '='
+      tint_symbol_11 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+      ~~~~~~~~~~~~~~ ^ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+struct tint_array_wrapper_0 {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:271:22: error: no viable overloaded '='
+      tint_symbol_12 = {.numbers=tint_symbol_11};
+      ~~~~~~~~~~~~~~ ^ ~~~~~~~~~~~~~~~~~~~~~~~~~
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+struct QuicksortObject {
+       ^
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:274:12: error: cannot assign to variable 'x_63' with const-qualified type 'const int'
+      x_63 = pivot;
+      ~~~~ ^
+program_source:186:15: note: variable 'x_63' declared const here
+    int const x_63;
+    ~~~~~~~~~~^~~~
+program_source:276:13: error: cannot assign to variable 'x_973' with const-qualified type 'const int'
+      x_973 = i_1;
+      ~~~~~ ^
+program_source:188:15: note: variable 'x_973' declared const here
+    int const x_973;
+    ~~~~~~~~~~^~~~~
+program_source:279:13: error: cannot assign to variable 'x_974' with const-qualified type 'const int'
+      x_974 = *(l);
+      ~~~~~ ^
+program_source:189:15: note: variable 'x_974' declared const here
+    int const x_974;
+    ~~~~~~~~~~^~~~~
+program_source:283:13: error: cannot assign to variable 'x_975' with const-qualified type 'const int'
+      x_975 = pivot;
+      ~~~~~ ^
+program_source:191:15: note: variable 'x_975' declared const here
+    int const x_975;
+    ~~~~~~~~~~^~~~~
+program_source:287:22: warning: unused variable 'x_542'
+        float3 const x_542 = float3(x_541.z, x_541.x, x_541.x);
+                     ^
+program_source:295:22: warning: unused variable 'x_543'
+        float2 const x_543 = float2(x_539.x, x_541.y);
+                     ^
+program_source:306:22: warning: unused variable 'x_544'
+        float3 const x_544 = float3(float3(1.0f, 2.0f, 3.0f).z, float3(1.0f, 2.0f, 3.0f).y, x_540.x);
+                     ^
+program_source:316:22: warning: unused variable 'x_546'
+        float2 const x_546 = float2(x_545.x, x_545.x);
+                     ^
+program_source:330:13: error: no viable overloaded '='
+      x_986 = *(tint_symbol_80);
+      ~~~~~ ^ ~~~~~~~~~~~~~~~~~
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+struct QuicksortObject {
+       ^
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:331:22: error: no viable overloaded '='
+      tint_symbol_13 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+      ~~~~~~~~~~~~~~ ^ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+struct tint_array_wrapper_0 {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:332:22: error: no viable overloaded '='
+      tint_symbol_14 = {.numbers=tint_symbol_13};
+      ~~~~~~~~~~~~~~ ^ ~~~~~~~~~~~~~~~~~~~~~~~~~
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+struct QuicksortObject {
+       ^
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:343:48: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_15 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                               {                           }
+program_source:405:33: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 stack = {0};
+                                ^
+                                {}
+program_source:413:48: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_17 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                               {                           }
+program_source:447:48: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_18 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                               {                           }
+program_source:454:48: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_20 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                               {                           }
+program_source:501:18: error: default initialization of an object of const type 'const float3' (vector of 3 'float' values)
+    float3 const x_566;
+                 ^
+program_source:502:15: error: default initialization of an object of const type 'const int'
+    int const x_1028;
+              ^
+                     = 0
+program_source:503:32: error: default initialization of an object of const type 'const tint_array_wrapper_0' without a user-provided default constructor
+    tint_array_wrapper_0 const x_1029;
+                               ^
+                                     {}
+program_source:504:32: error: default initialization of an object of const type 'const tint_array_wrapper_0' without a user-provided default constructor
+    tint_array_wrapper_0 const tint_symbol_21;
+                               ^
+                                             {}
+program_source:505:15: error: default initialization of an object of const type 'const int'
+    int const x_106;
+              ^
+                    = 0
+program_source:506:32: error: default initialization of an object of const type 'const tint_array_wrapper_0' without a user-provided default constructor
+    tint_array_wrapper_0 const x_1030;
+                               ^
+                                     {}
+program_source:507:32: error: default initialization of an object of const type 'const tint_array_wrapper_0' without a user-provided default constructor
+    tint_array_wrapper_0 const tint_symbol_22;
+                               ^
+                                             {}
+program_source:508:18: error: default initialization of an object of const type 'const float2' (vector of 2 'float' values)
+    float2 const x_567;
+                 ^
+program_source:509:15: error: default initialization of an object of const type 'const int'
+    int const x_1031;
+              ^
+                     = 0
+program_source:510:27: error: default initialization of an object of const type 'const QuicksortObject' without a user-provided default constructor
+    QuicksortObject const x_1032;
+                          ^
+                                {}
+program_source:511:32: error: default initialization of an object of const type 'const tint_array_wrapper_0' without a user-provided default constructor
+    tint_array_wrapper_0 const tint_symbol_23;
+                               ^
+                                             {}
+program_source:512:27: error: default initialization of an object of const type 'const QuicksortObject' without a user-provided default constructor
+    QuicksortObject const tint_symbol_24;
+                          ^
+                                        {}
+program_source:513:18: error: default initialization of an object of const type 'const float3' (vector of 3 'float' values)
+    float3 const x_568;
+                 ^
+program_source:514:15: error: default initialization of an object of const type 'const int'
+    int const x_1033;
+              ^
+                     = 0
+program_source:515:15: error: default initialization of an object of const type 'const int'
+    int const x_108;
+              ^
+                    = 0
+program_source:516:18: error: default initialization of an object of const type 'const float3' (vector of 3 'float' values)
+    float3 const x_569;
+                 ^
+program_source:517:15: error: default initialization of an object of const type 'const int'
+    int const x_1034;
+              ^
+                     = 0
+program_source:518:18: error: default initialization of an object of const type 'const float2' (vector of 2 'float' values)
+    float2 const x_570;
+                 ^
+program_source:519:15: error: default initialization of an object of const type 'const int'
+    int const x_1035;
+              ^
+                     = 0
+program_source:520:15: error: default initialization of an object of const type 'const int'
+    int const x_1036;
+              ^
+                     = 0
+program_source:521:23: error: default initialization of an object of const type 'int *const'
+    thread int* const x_110;
+                      ^
+                            = nullptr
+program_source:522:15: error: default initialization of an object of const type 'const int'
+    int const x_1037;
+              ^
+                     = 0
+program_source:523:15: error: default initialization of an object of const type 'const int'
+    int const x_111;
+              ^
+                    = 0
+program_source:524:32: error: default initialization of an object of const type 'const tint_array_wrapper_0' without a user-provided default constructor
+    tint_array_wrapper_0 const x_1038;
+                               ^
+                                     {}
+program_source:525:32: error: default initialization of an object of const type 'const tint_array_wrapper_0' without a user-provided default constructor
+    tint_array_wrapper_0 const tint_symbol_25;
+                               ^
+                                             {}
+program_source:526:18: error: default initialization of an object of const type 'const float3' (vector of 3 'float' values)
+    float3 const x_571;
+                 ^
+program_source:527:15: error: default initialization of an object of const type 'const int'
+    int const x_1039;
+              ^
+                     = 0
+program_source:528:32: error: default initialization of an object of const type 'const tint_array_wrapper_0' without a user-provided default constructor
+    tint_array_wrapper_0 const x_1040;
+                               ^
+                                     {}
+program_source:529:32: error: default initialization of an object of const type 'const tint_array_wrapper_0' without a user-provided default constructor
+    tint_array_wrapper_0 const tint_symbol_26;
+                               ^
+                                             {}
+program_source:530:18: error: default initialization of an object of const type 'const float2' (vector of 2 'float' values)
+    float2 const x_572;
+                 ^
+program_source:531:15: error: default initialization of an object of const type 'const int'
+    int const x_1041;
+              ^
+                     = 0
+program_source:532:15: error: default initialization of an object of const type 'const int'
+    int const x_112;
+              ^
+                    = 0
+program_source:533:15: error: default initialization of an object of const type 'const int'
+    int const x_1042;
+              ^
+                     = 0
+program_source:534:15: error: default initialization of an object of const type 'const int'
+    int const x_1043;
+              ^
+                     = 0
+program_source:535:18: error: default initialization of an object of const type 'const float2' (vector of 2 'float' values)
+    float2 const x_573;
+                 ^
+program_source:536:15: error: default initialization of an object of const type 'const int'
+    int const x_1044;
+              ^
+                     = 0
+program_source:537:18: error: default initialization of an object of const type 'const float3' (vector of 3 'float' values)
+    float3 const x_574;
+                 ^
+program_source:538:15: error: default initialization of an object of const type 'const int'
+    int const x_1045;
+              ^
+                     = 0
+program_source:539:23: error: default initialization of an object of const type 'int *const'
+    thread int* const x_114;
+                      ^
+                            = nullptr
+program_source:540:18: error: default initialization of an object of const type 'const float2' (vector of 2 'float' values)
+    float2 const x_575;
+                 ^
+program_source:541:15: error: default initialization of an object of const type 'const int'
+    int const x_1046;
+              ^
+                     = 0
+program_source:542:15: error: default initialization of an object of const type 'const int'
+    int const x_115;
+              ^
+                    = 0
+program_source:543:15: error: default initialization of an object of const type 'const int'
+    int const x_1047;
+              ^
+                     = 0
+program_source:544:18: error: default initialization of an object of const type 'const float3' (vector of 3 'float' values)
+    float3 const x_576;
+                 ^
+program_source:545:15: error: default initialization of an object of const type 'const int'
+    int const x_1048;
+              ^
+                     = 0
+program_source:546:15: error: default initialization of an object of const type 'const int'
+    int const x_1049;
+              ^
+                     = 0
+program_source:547:15: error: default initialization of an object of const type 'const int'
+    int const x_118;
+              ^
+                    = 0
+program_source:548:15: error: default initialization of an object of const type 'const int'
+    int const x_1050;
+              ^
+                     = 0
+program_source:549:18: error: default initialization of an object of const type 'const float2' (vector of 2 'float' values)
+    float2 const x_577;
+                 ^
+program_source:550:15: error: default initialization of an object of const type 'const int'
+    int const x_120;
+              ^
+                    = 0
+program_source:551:18: error: default initialization of an object of const type 'const float2' (vector of 2 'float' values)
+    float2 const x_578;
+                 ^
+program_source:552:15: error: default initialization of an object of const type 'const int'
+    int const x_1051;
+              ^
+                     = 0
+program_source:553:15: error: default initialization of an object of const type 'const int'
+    int const x_121;
+              ^
+                    = 0
+program_source:554:18: error: default initialization of an object of const type 'const float2' (vector of 2 'float' values)
+    float2 const x_579;
+                 ^
+program_source:555:15: error: default initialization of an object of const type 'const int'
+    int const x_1052;
+              ^
+                     = 0
+program_source:556:15: error: default initialization of an object of const type 'const int'
+    int const x_1053;
+              ^
+                     = 0
+program_source:557:15: error: default initialization of an object of const type 'const int'
+    int const x_122;
+              ^
+                    = 0
+program_source:558:15: error: default initialization of an object of const type 'const int'
+    int const x_1054;
+              ^
+                     = 0
+program_source:559:18: error: default initialization of an object of const type 'const float2' (vector of 2 'float' values)
+    float2 const x_580;
+                 ^
+program_source:560:15: error: default initialization of an object of const type 'const int'
+    int const x_1055;
+              ^
+                     = 0
+program_source:561:15: error: default initialization of an object of const type 'const int'
+    int const x_1056;
+              ^
+                     = 0
+program_source:562:15: error: default initialization of an object of const type 'const int'
+    int const x_124;
+              ^
+                    = 0
+program_source:563:15: error: default initialization of an object of const type 'const int'
+    int const x_1057;
+              ^
+                     = 0
+program_source:564:15: error: default initialization of an object of const type 'const int'
+    int const x_1058;
+              ^
+                     = 0
+program_source:565:18: error: default initialization of an object of const type 'const float2' (vector of 2 'float' values)
+    float2 const x_582;
+                 ^
+program_source:566:15: error: default initialization of an object of const type 'const int'
+    int const x_1059;
+              ^
+                     = 0
+program_source:567:15: error: default initialization of an object of const type 'const int'
+    int const x_1076;
+              ^
+                     = 0
+program_source:568:18: error: default initialization of an object of const type 'const float2' (vector of 2 'float' values)
+    float2 const x_592;
+                 ^
+program_source:569:27: error: default initialization of an object of const type 'const QuicksortObject' without a user-provided default constructor
+    QuicksortObject const x_1077;
+                          ^
+                                {}
+program_source:570:32: error: default initialization of an object of const type 'const tint_array_wrapper_0' without a user-provided default constructor
+    tint_array_wrapper_0 const tint_symbol_29;
+                               ^
+                                             {}
+program_source:571:27: error: default initialization of an object of const type 'const QuicksortObject' without a user-provided default constructor
+    QuicksortObject const tint_symbol_30;
+                          ^
+                                        {}
+program_source:572:15: error: default initialization of an object of const type 'const int'
+    int const x_137;
+              ^
+                    = 0
+program_source:573:15: error: default initialization of an object of const type 'const int'
+    int const x_1078;
+              ^
+                     = 0
+program_source:574:18: error: default initialization of an object of const type 'const float3' (vector of 3 'float' values)
+    float3 const x_593;
+                 ^
+program_source:575:15: error: default initialization of an object of const type 'const int'
+    int const x_1079;
+              ^
+                     = 0
+program_source:576:18: error: default initialization of an object of const type 'const float3' (vector of 3 'float' values)
+    float3 const x_594;
+                 ^
+program_source:577:15: error: default initialization of an object of const type 'const int'
+    int const x_1080;
+              ^
+                     = 0
+program_source:578:15: error: default initialization of an object of const type 'const int'
+    int const x_139;
+              ^
+                    = 0
+program_source:579:15: error: default initialization of an object of const type 'const int'
+    int const x_1081;
+              ^
+                     = 0
+program_source:580:18: error: default initialization of an object of const type 'const float3' (vector of 3 'float' values)
+    float3 const x_595;
+                 ^
+program_source:581:15: error: default initialization of an object of const type 'const int'
+    int const x_1082;
+              ^
+                     = 0
+program_source:582:15: error: default initialization of an object of const type 'const int'
+    int const x_1083;
+              ^
+                     = 0
+program_source:583:15: error: default initialization of an object of const type 'const int'
+    int const x_1102;
+              ^
+                     = 0
+program_source:591:54: warning: suggest braces around initialization of subobject
+        tint_array_wrapper_0 const tint_symbol_33 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                     {                           }
+program_source:589:22: warning: unused variable 'x_604'
+        float2 const x_604 = float2(x_563.z, x_564.x);
+                     ^
+program_source:599:14: error: cannot assign to variable 'x_1028' with const-qualified type 'const int'
+      x_1028 = h_1;
+      ~~~~~~ ^
+program_source:502:15: note: variable 'x_1028' declared const here
+    int const x_1028;
+    ~~~~~~~~~~^~~~~~
+program_source:602:14: error: no viable overloaded '='
+      x_1029 = stack;
+      ~~~~~~ ^ ~~~~~
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+struct tint_array_wrapper_0 {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:603:22: error: no viable overloaded '='
+      tint_symbol_21 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+      ~~~~~~~~~~~~~~ ^ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+struct tint_array_wrapper_0 {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:606:13: error: cannot assign to variable 'x_106' with const-qualified type 'const int'
+      x_106 = top;
+      ~~~~~ ^
+program_source:505:15: note: variable 'x_106' declared const here
+    int const x_106;
+    ~~~~~~~~~~^~~~~
+program_source:607:14: error: no viable overloaded '='
+      x_1030 = stack;
+      ~~~~~~ ^ ~~~~~
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+struct tint_array_wrapper_0 {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:608:22: error: no viable overloaded '='
+      tint_symbol_22 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+      ~~~~~~~~~~~~~~ ^ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+struct tint_array_wrapper_0 {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:612:14: error: cannot assign to variable 'x_1031' with const-qualified type 'const int'
+      x_1031 = param_4;
+      ~~~~~~ ^
+program_source:509:15: note: variable 'x_1031' declared const here
+    int const x_1031;
+    ~~~~~~~~~~^~~~~~
+program_source:619:14: error: no viable overloaded '='
+      x_1032 = *(tint_symbol_81);
+      ~~~~~~ ^ ~~~~~~~~~~~~~~~~~
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+struct QuicksortObject {
+       ^
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:620:22: error: no viable overloaded '='
+      tint_symbol_23 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+      ~~~~~~~~~~~~~~ ^ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+struct tint_array_wrapper_0 {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:621:22: error: no viable overloaded '='
+      tint_symbol_24 = {.numbers=tint_symbol_23};
+      ~~~~~~~~~~~~~~ ^ ~~~~~~~~~~~~~~~~~~~~~~~~~
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+struct QuicksortObject {
+       ^
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:625:14: error: cannot assign to variable 'x_1033' with const-qualified type 'const int'
+      x_1033 = param_4;
+      ~~~~~~ ^
+program_source:514:15: note: variable 'x_1033' declared const here
+    int const x_1033;
+    ~~~~~~~~~~^~~~~~
+program_source:628:13: error: cannot assign to variable 'x_108' with const-qualified type 'const int'
+      x_108 = top;
+      ~~~~~ ^
+program_source:515:15: note: variable 'x_108' declared const here
+    int const x_108;
+    ~~~~~~~~~~^~~~~
+program_source:630:14: error: cannot assign to variable 'x_1034' with const-qualified type 'const int'
+      x_1034 = h_1;
+      ~~~~~~ ^
+program_source:517:15: note: variable 'x_1034' declared const here
+    int const x_1034;
+    ~~~~~~~~~~^~~~~~
+program_source:634:14: error: cannot assign to variable 'x_1035' with const-qualified type 'const int'
+      x_1035 = p;
+      ~~~~~~ ^
+program_source:519:15: note: variable 'x_1035' declared const here
+    int const x_1035;
+    ~~~~~~~~~~^~~~~~
+program_source:638:14: error: cannot assign to variable 'x_1036' with const-qualified type 'const int'
+      x_1036 = p;
+      ~~~~~~ ^
+program_source:520:15: note: variable 'x_1036' declared const here
+    int const x_1036;
+    ~~~~~~~~~~^~~~~~
+program_source:641:13: error: cannot assign to variable 'x_110' with const-qualified type 'int *const'
+      x_110 = &(stack.array[x_108]);
+      ~~~~~ ^
+program_source:521:23: note: variable 'x_110' declared const here
+    thread int* const x_110;
+    ~~~~~~~~~~~~~~~~~~^~~~~
+program_source:642:14: error: cannot assign to variable 'x_1037' with const-qualified type 'const int'
+      x_1037 = *(x_96);
+      ~~~~~~ ^
+program_source:522:15: note: variable 'x_1037' declared const here
+    int const x_1037;
+    ~~~~~~~~~~^~~~~~
+program_source:645:13: error: cannot assign to variable 'x_111' with const-qualified type 'const int'
+      x_111 = *(x_110);
+      ~~~~~ ^
+program_source:523:15: note: variable 'x_111' declared const here
+    int const x_111;
+    ~~~~~~~~~~^~~~~
+program_source:646:14: error: no viable overloaded '='
+      x_1038 = stack;
+      ~~~~~~ ^ ~~~~~
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+struct tint_array_wrapper_0 {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:647:22: error: no viable overloaded '='
+      tint_symbol_25 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+      ~~~~~~~~~~~~~~ ^ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+struct tint_array_wrapper_0 {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:651:14: error: cannot assign to variable 'x_1039' with const-qualified type 'const int'
+      x_1039 = l_1;
+      ~~~~~~ ^
+program_source:527:15: note: variable 'x_1039' declared const here
+    int const x_1039;
+    ~~~~~~~~~~^~~~~~
+program_source:655:14: error: no viable overloaded '='
+      x_1040 = stack;
+      ~~~~~~ ^ ~~~~~
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+struct tint_array_wrapper_0 {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:656:22: error: no viable overloaded '='
+      tint_symbol_26 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+      ~~~~~~~~~~~~~~ ^ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+struct tint_array_wrapper_0 {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:660:14: error: cannot assign to variable 'x_1041' with const-qualified type 'const int'
+      x_1041 = p;
+      ~~~~~~ ^
+program_source:531:15: note: variable 'x_1041' declared const here
+    int const x_1041;
+    ~~~~~~~~~~^~~~~~
+program_source:663:13: error: cannot assign to variable 'x_112' with const-qualified type 'const int'
+      x_112 = top;
+      ~~~~~ ^
+program_source:532:15: note: variable 'x_112' declared const here
+    int const x_112;
+    ~~~~~~~~~~^~~~~
+program_source:664:14: error: cannot assign to variable 'x_1042' with const-qualified type 'const int'
+      x_1042 = param_4;
+      ~~~~~~ ^
+program_source:533:15: note: variable 'x_1042' declared const here
+    int const x_1042;
+    ~~~~~~~~~~^~~~~~
+program_source:667:14: error: cannot assign to variable 'x_1043' with const-qualified type 'const int'
+      x_1043 = *(x_100);
+      ~~~~~~ ^
+program_source:534:15: note: variable 'x_1043' declared const here
+    int const x_1043;
+    ~~~~~~~~~~^~~~~~
+program_source:672:14: error: cannot assign to variable 'x_1044' with const-qualified type 'const int'
+      x_1044 = param_5;
+      ~~~~~~ ^
+program_source:536:15: note: variable 'x_1044' declared const here
+    int const x_1044;
+    ~~~~~~~~~~^~~~~~
+program_source:676:14: error: cannot assign to variable 'x_1045' with const-qualified type 'const int'
+      x_1045 = h_1;
+      ~~~~~~ ^
+program_source:538:15: note: variable 'x_1045' declared const here
+    int const x_1045;
+    ~~~~~~~~~~^~~~~~
+program_source:679:13: error: cannot assign to variable 'x_114' with const-qualified type 'int *const'
+      x_114 = &(stack.array[x_112]);
+      ~~~~~ ^
+program_source:539:23: note: variable 'x_114' declared const here
+    thread int* const x_114;
+    ~~~~~~~~~~~~~~~~~~^~~~~
+program_source:681:14: error: cannot assign to variable 'x_1046' with const-qualified type 'const int'
+      x_1046 = *(x_100);
+      ~~~~~~ ^
+program_source:541:15: note: variable 'x_1046' declared const here
+    int const x_1046;
+    ~~~~~~~~~~^~~~~~
+program_source:684:13: error: cannot assign to variable 'x_115' with const-qualified type 'const int'
+      x_115 = *(x_114);
+      ~~~~~ ^
+program_source:542:15: note: variable 'x_115' declared const here
+    int const x_115;
+    ~~~~~~~~~~^~~~~
+program_source:685:14: error: cannot assign to variable 'x_1047' with const-qualified type 'const int'
+      x_1047 = p;
+      ~~~~~~ ^
+program_source:543:15: note: variable 'x_1047' declared const here
+    int const x_1047;
+    ~~~~~~~~~~^~~~~~
+program_source:689:14: error: cannot assign to variable 'x_1048' with const-qualified type 'const int'
+      x_1048 = param_5;
+      ~~~~~~ ^
+program_source:545:15: note: variable 'x_1048' declared const here
+    int const x_1048;
+    ~~~~~~~~~~^~~~~~
+program_source:693:14: error: cannot assign to variable 'x_1049' with const-qualified type 'const int'
+      x_1049 = top;
+      ~~~~~~ ^
+program_source:546:15: note: variable 'x_1049' declared const here
+    int const x_1049;
+    ~~~~~~~~~~^~~~~~
+program_source:696:13: error: cannot assign to variable 'x_118' with const-qualified type 'const int'
+      x_118 = l_1;
+      ~~~~~ ^
+program_source:547:15: note: variable 'x_118' declared const here
+    int const x_118;
+    ~~~~~~~~~~^~~~~
+program_source:698:14: error: cannot assign to variable 'x_1050' with const-qualified type 'const int'
+      x_1050 = *(x_110);
+      ~~~~~~ ^
+program_source:548:15: note: variable 'x_1050' declared const here
+    int const x_1050;
+    ~~~~~~~~~~^~~~~~
+program_source:702:13: error: cannot assign to variable 'x_120' with const-qualified type 'const int'
+      x_120 = h_1;
+      ~~~~~ ^
+program_source:550:15: note: variable 'x_120' declared const here
+    int const x_120;
+    ~~~~~~~~~~^~~~~
+program_source:705:14: error: cannot assign to variable 'x_1051' with const-qualified type 'const int'
+      x_1051 = *(x_100);
+      ~~~~~~ ^
+program_source:552:15: note: variable 'x_1051' declared const here
+    int const x_1051;
+    ~~~~~~~~~~^~~~~~
+program_source:708:13: error: cannot assign to variable 'x_121' with const-qualified type 'const int'
+      x_121 = performPartition_i1_i1_(&(param_4), &(param_5), tint_symbol_81);
+      ~~~~~ ^
+program_source:553:15: note: variable 'x_121' declared const here
+    int const x_121;
+    ~~~~~~~~~~^~~~~
+program_source:710:14: error: cannot assign to variable 'x_1052' with const-qualified type 'const int'
+      x_1052 = param_5;
+      ~~~~~~ ^
+program_source:555:15: note: variable 'x_1052' declared const here
+    int const x_1052;
+    ~~~~~~~~~~^~~~~~
+program_source:714:14: error: cannot assign to variable 'x_1053' with const-qualified type 'const int'
+      x_1053 = param_4;
+      ~~~~~~ ^
+program_source:556:15: note: variable 'x_1053' declared const here
+    int const x_1053;
+    ~~~~~~~~~~^~~~~~
+program_source:717:13: error: cannot assign to variable 'x_122' with const-qualified type 'const int'
+      x_122 = p;
+      ~~~~~ ^
+program_source:557:15: note: variable 'x_122' declared const here
+    int const x_122;
+    ~~~~~~~~~~^~~~~
+program_source:718:14: error: cannot assign to variable 'x_1054' with const-qualified type 'const int'
+      x_1054 = h_1;
+      ~~~~~~ ^
+program_source:558:15: note: variable 'x_1054' declared const here
+    int const x_1054;
+    ~~~~~~~~~~^~~~~~
+program_source:722:14: error: cannot assign to variable 'x_1055' with const-qualified type 'const int'
+      x_1055 = l_1;
+      ~~~~~~ ^
+program_source:560:15: note: variable 'x_1055' declared const here
+    int const x_1055;
+    ~~~~~~~~~~^~~~~~
+program_source:725:14: error: cannot assign to variable 'x_1056' with const-qualified type 'const int'
+      x_1056 = h_1;
+      ~~~~~~ ^
+program_source:561:15: note: variable 'x_1056' declared const here
+    int const x_1056;
+    ~~~~~~~~~~^~~~~~
+program_source:728:13: error: cannot assign to variable 'x_124' with const-qualified type 'const int'
+      x_124 = l_1;
+      ~~~~~ ^
+program_source:562:15: note: variable 'x_124' declared const here
+    int const x_124;
+    ~~~~~~~~~~^~~~~
+program_source:729:14: error: cannot assign to variable 'x_1057' with const-qualified type 'const int'
+      x_1057 = *(x_110);
+      ~~~~~~ ^
+program_source:563:15: note: variable 'x_1057' declared const here
+    int const x_1057;
+    ~~~~~~~~~~^~~~~~
+program_source:732:14: error: cannot assign to variable 'x_1058' with const-qualified type 'const int'
+      x_1058 = h_1;
+      ~~~~~~ ^
+program_source:564:15: note: variable 'x_1058' declared const here
+    int const x_1058;
+    ~~~~~~~~~~^~~~~~
+program_source:736:14: error: cannot assign to variable 'x_1059' with const-qualified type 'const int'
+      x_1059 = *(x_100);
+      ~~~~~~ ^
+program_source:566:15: note: variable 'x_1059' declared const here
+    int const x_1059;
+    ~~~~~~~~~~^~~~~~
+program_source:749:54: warning: suggest braces around initialization of subobject
+        tint_array_wrapper_0 const tint_symbol_27 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                     {                           }
+program_source:789:54: warning: suggest braces around initialization of subobject
+        tint_array_wrapper_0 const tint_symbol_28 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                     {                           }
+program_source:758:22: warning: unused variable 'x_586'
+        float2 const x_586 = float2(x_564.x, x_585.x);
+                     ^
+program_source:793:22: warning: unused variable 'x_590'
+        float2 const x_590 = float2(x_576.x, x_573.y);
+                     ^
+program_source:766:22: warning: unused variable 'x_587'
+        float3 const x_587 = float3(x_566.y, x_566.y, x_563.x);
+                     ^
+program_source:744:22: warning: unused variable 'x_583'
+        float2 const x_583 = float2(x_571.y, x_556.y);
+                     ^
+program_source:805:22: warning: unused variable 'x_591'
+        float2 const x_591 = float2(x_569.z, x_569.y);
+                     ^
+program_source:752:22: warning: unused variable 'x_584'
+        float2 const x_584 = float2(x_569.z, x_569.y);
+                     ^
+program_source:783:22: warning: unused variable 'x_589'
+        float3 const x_589 = float3(x_576.z, x_588.y, x_576.z);
+                     ^
+program_source:810:14: error: cannot assign to variable 'x_1076' with const-qualified type 'const int'
+      x_1076 = *(x_96);
+      ~~~~~~ ^
+program_source:567:15: note: variable 'x_1076' declared const here
+    int const x_1076;
+    ~~~~~~~~~~^~~~~~
+program_source:814:14: error: no viable overloaded '='
+      x_1077 = *(tint_symbol_81);
+      ~~~~~~ ^ ~~~~~~~~~~~~~~~~~
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+struct QuicksortObject {
+       ^
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:815:22: error: no viable overloaded '='
+      tint_symbol_29 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+      ~~~~~~~~~~~~~~ ^ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+struct tint_array_wrapper_0 {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const tint_array_wrapper_0', but method is not marked const
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space device
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const tint_array_wrapper_0') is in address space 0, but parameter must be in address space threadgroup
+program_source:816:22: error: no viable overloaded '='
+      tint_symbol_30 = {.numbers=tint_symbol_29};
+      ~~~~~~~~~~~~~~ ^ ~~~~~~~~~~~~~~~~~~~~~~~~~
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+struct QuicksortObject {
+       ^
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument has type 'const QuicksortObject', but method is not marked const
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space device
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:7:8: note: candidate function (the implicit move assignment operator) not viable: 'this' argument ('const QuicksortObject') is in address space 0, but parameter must be in address space threadgroup
+program_source:819:13: error: cannot assign to variable 'x_137' with const-qualified type 'const int'
+      x_137 = p;
+      ~~~~~ ^
+program_source:572:15: note: variable 'x_137' declared const here
+    int const x_137;
+    ~~~~~~~~~~^~~~~
+program_source:820:14: error: cannot assign to variable 'x_1078' with const-qualified type 'const int'
+      x_1078 = *(x_114);
+      ~~~~~~ ^
+program_source:573:15: note: variable 'x_1078' declared const here
+    int const x_1078;
+    ~~~~~~~~~~^~~~~~
+program_source:824:14: error: cannot assign to variable 'x_1079' with const-qualified type 'const int'
+      x_1079 = p;
+      ~~~~~~ ^
+program_source:575:15: note: variable 'x_1079' declared const here
+    int const x_1079;
+    ~~~~~~~~~~^~~~~~
+program_source:828:14: error: cannot assign to variable 'x_1080' with const-qualified type 'const int'
+      x_1080 = *(x_114);
+      ~~~~~~ ^
+program_source:577:15: note: variable 'x_1080' declared const here
+    int const x_1080;
+    ~~~~~~~~~~^~~~~~
+program_source:831:13: error: cannot assign to variable 'x_139' with const-qualified type 'const int'
+      x_139 = h_1;
+      ~~~~~ ^
+program_source:578:15: note: variable 'x_139' declared const here
+    int const x_139;
+    ~~~~~~~~~~^~~~~
+program_source:832:14: error: cannot assign to variable 'x_1081' with const-qualified type 'const int'
+      x_1081 = top;
+      ~~~~~~ ^
+program_source:579:15: note: variable 'x_1081' declared const here
+    int const x_1081;
+    ~~~~~~~~~~^~~~~~
+program_source:836:14: error: cannot assign to variable 'x_1082' with const-qualified type 'const int'
+      x_1082 = *(x_100);
+      ~~~~~~ ^
+program_source:581:15: note: variable 'x_1082' declared const here
+    int const x_1082;
+    ~~~~~~~~~~^~~~~~
+program_source:839:14: error: cannot assign to variable 'x_1083' with const-qualified type 'const int'
+      x_1083 = p;
+      ~~~~~~ ^
+program_source:582:15: note: variable 'x_1083' declared const here
+    int const x_1083;
+    ~~~~~~~~~~^~~~~~
+program_source:882:54: warning: suggest braces around initialization of subobject
+        tint_array_wrapper_0 const tint_symbol_31 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                     {                           }
+program_source:891:54: warning: suggest braces around initialization of subobject
+        tint_array_wrapper_0 const tint_symbol_32 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                     {                           }
+program_source:889:22: warning: unused variable 'x_602'
+        float2 const x_602 = float2(x_565.y, x_599.y);
+                     ^
+program_source:871:22: warning: unused variable 'x_600'
+        float3 const x_600 = float3(x_556.x, x_580.x, x_580.x);
+                     ^
+program_source:879:22: warning: unused variable 'x_601'
+        float2 const x_601 = float2(x_563.x, x_563.y);
+                     ^
+program_source:846:22: warning: unused variable 'x_596'
+        float2 const x_596 = float2(x_592.y, x_582.x);
+                     ^
+program_source:913:22: warning: unused variable 'x_603'
+        float3 const x_603 = float3(x_568.y, x_564.x, x_564.x);
+                     ^
+program_source:854:22: warning: unused variable 'x_597'
+        float3 const x_597 = float3(x_562.y, x_560.y, x_560.y);
+                     ^
+program_source:918:14: error: cannot assign to variable 'x_1102' with const-qualified type 'const int'
+      x_1102 = *(x_100);
+      ~~~~~~ ^
+program_source:583:15: note: variable 'x_1102' declared const here
+    int const x_1102;
+    ~~~~~~~~~~^~~~~~
+program_source:941:48: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_35 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                               {                           }
+program_source:947:50: warning: suggest braces around initialization of subobject
+    tint_array_wrapper_0 const tint_symbol_37 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                 {                           }
+program_source:961:50: warning: suggest braces around initialization of subobject
+    tint_array_wrapper_0 const tint_symbol_39 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                 {                           }
+program_source:952:15: warning: unused variable 'x_158'
+    int const x_158 = i_2;
+              ^
+program_source:959:18: warning: unused variable 'x_432'
+    float2 const x_432 = float2(x_431.y, x_431.y);
+                 ^
+program_source:967:48: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_41 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                               {                           }
+program_source:977:48: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_43 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                               {                           }
+program_source:992:48: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_45 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                               {                           }
+program_source:1001:48: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_47 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                               {                           }
+program_source:1011:48: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_49 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                               {                           }
+program_source:1029:48: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_51 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                               {                           }
+program_source:1039:48: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_53 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                               {                           }
+program_source:1043:31: error: address of vector element requested
+  thread float* const x_205 = &(color.x);
+                              ^ ~~~~~~~
+program_source:1056:48: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_55 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                               {                           }
+program_source:1060:31: error: address of vector element requested
+  thread float* const x_208 = &(color.x);
+                              ^ ~~~~~~~
+program_source:1066:31: error: address of vector element requested
+  thread float* const x_209 = &(uv.x);
+                              ^ ~~~~
+program_source:1077:48: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_57 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                               {                           }
+program_source:1094:50: warning: suggest braces around initialization of subobject
+    tint_array_wrapper_0 const tint_symbol_59 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                 {                           }
+program_source:1102:33: error: address of vector element requested
+    thread float* const x_218 = &(color[0]);
+                                ^ ~~~~~~~~
+program_source:1104:50: warning: suggest braces around initialization of subobject
+    tint_array_wrapper_0 const tint_symbol_61 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                 {                           }
+program_source:1134:31: error: address of vector element requested
+  thread float* const x_222 = &(uv.x);
+                              ^ ~~~~
+program_source:1176:33: error: address of vector element requested
+    thread float* const x_233 = &(color.y);
+                                ^ ~~~~~~~
+program_source:1204:31: error: address of vector element requested
+  thread float* const x_237 = &(uv[0]);
+                              ^ ~~~~~
+program_source:1228:50: warning: suggest braces around initialization of subobject
+    tint_array_wrapper_0 const tint_symbol_63 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                 {                           }
+program_source:1236:33: error: address of vector element requested
+    thread float* const x_248 = &(color.z);
+                                ^ ~~~~~~~
+program_source:1277:31: error: address of vector element requested
+  thread float* const x_256 = &(color.y);
+                              ^ ~~~~~~~
+program_source:1290:31: error: address of vector element requested
+  thread float* const x_259 = &(color.y);
+                              ^ ~~~~~~~
+program_source:1300:31: error: address of vector element requested
+  thread float* const x_260 = &(uv.y);
+                              ^ ~~~~
+program_source:1344:50: warning: suggest braces around initialization of subobject
+    tint_array_wrapper_0 const tint_symbol_65 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                 {                           }
+program_source:1324:18: warning: unused variable 'x_481'
+    float2 const x_481 = float2(x_447.x, x_480.z);
+                 ^
+program_source:1342:18: warning: unused variable 'x_482'
+    float3 const x_482 = float3(x_455.x, x_475.y, x_455.y);
+                 ^
+program_source:1354:18: warning: unused variable 'x_483'
+    float3 const x_483 = float3(x_184.w, x_184.w, x_192.x);
+                 ^
+program_source:1359:18: warning: unused variable 'x_484'
+    float3 const x_484 = float3(x_454.y, x_450.x, x_454.y);
+                 ^
+program_source:1371:31: error: address of vector element requested
+  thread float* const x_273 = &(uv.y);
+                              ^ ~~~~
+program_source:1419:50: warning: suggest braces around initialization of subobject
+    tint_array_wrapper_0 const tint_symbol_67 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                 {                           }
+program_source:1383:18: warning: unused variable 'x_486'
+    float2 const x_486 = float2(x_480.y, x_455.y);
+                 ^
+program_source:1388:18: warning: unused variable 'x_487'
+    float2 const x_487 = float2(x_449.z, x_449.y);
+                 ^
+program_source:1402:18: warning: unused variable 'x_488'
+    float2 const x_488 = float2(x_473.z, x_473.y);
+                 ^
+program_source:1410:18: warning: unused variable 'x_489'
+    float2 const x_489 = float2(x_475.y, x_475.x);
+                 ^
+program_source:1417:18: warning: unused variable 'x_490'
+    float2 const x_490 = float2(x_480.z, x_480.z);
+                 ^
+program_source:1427:18: warning: unused variable 'x_491'
+    float2 const x_491 = float2(float3(1.0f, 2.0f, 3.0f).y, x_454.x);
+                 ^
+program_source:1436:31: error: address of vector element requested
+  thread float* const x_286 = &(uv.y);
+                              ^ ~~~~
+program_source:1439:48: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_69 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                               {                           }
+program_source:1495:33: error: address of vector element requested
+    thread float* const x_298 = &(color.z);
+                                ^ ~~~~~~~
+program_source:1535:31: error: address of vector element requested
+  thread float* const x_303 = &(color.z);
+                              ^ ~~~~~~~
+program_source:1555:31: error: address of vector element requested
+  thread float* const x_306 = &(color.z);
+                              ^ ~~~~~~~
+program_source:1571:31: error: address of vector element requested
+  thread float* const x_309 = &(uv.y);
+                              ^ ~~~~
+program_source:1606:50: warning: suggest braces around initialization of subobject
+    tint_array_wrapper_0 const tint_symbol_71 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                 {                           }
+program_source:1634:33: error: address of vector element requested
+    thread float* const x_322 = &(color.x);
+                                ^ ~~~~~~~
+program_source:1661:48: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_73 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                               {                           }
+program_source:1666:48: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_75 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                               {                           }
+program_source:1687:48: warning: suggest braces around initialization of subobject
+  tint_array_wrapper_0 const tint_symbol_77 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                               {                           }
