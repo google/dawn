@@ -98,6 +98,8 @@ type Overload struct {
 	ReturnMatcherIndicesOffset *int
 	// StageUses describes the stages an overload can be used in
 	CanBeUsedInStage sem.StageUses
+	// True if the overload is marked as deprecated
+	IsDeprecated bool
 }
 
 // Function is used to create the C++ IntrinsicInfo structure
@@ -196,6 +198,7 @@ func (b *intrinsicTableBuilder) buildOverload(o *sem.Overload) (Overload, error)
 		ParametersOffset:           b.lut.parameters.Add(ob.parameters),
 		ReturnMatcherIndicesOffset: ob.returnTypeMatcherIndicesOffset,
 		CanBeUsedInStage:           o.CanBeUsedInStage,
+		IsDeprecated:               o.IsDeprecated,
 	}, nil
 }
 

@@ -663,10 +663,12 @@ struct OverloadInfo {
   ParameterInfo const* const parameters;
   /// Pointer to a list of matcher indices that index on Matchers::type and
   /// Matchers::number, used to build the return type. If the function has no
-  /// return type then this is null.
+  /// return type then this is null
   MatcherIndex const* const return_matcher_indices;
-  /// The pipeline stages that this overload can be used in.
+  /// The pipeline stages that this overload can be used in
   PipelineStageSet supported_stages;
+  /// True if the overload is marked as deprecated
+  bool is_deprecated;
 };
 
 /// IntrinsicInfo describes an intrinsic function
@@ -878,7 +880,7 @@ const sem::Intrinsic* Impl::Match(sem::IntrinsicType intrinsic_type,
 
   return builder.create<sem::Intrinsic>(
       intrinsic_type, const_cast<sem::Type*>(return_type),
-      std::move(parameters), overload.supported_stages);
+      std::move(parameters), overload.supported_stages, overload.is_deprecated);
 }
 
 MatchState Impl::Match(ClosedState& closed,

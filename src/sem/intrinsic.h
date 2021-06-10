@@ -78,10 +78,13 @@ class Intrinsic : public Castable<Intrinsic, CallTarget> {
   /// @param parameters the parameters for the intrinsic overload
   /// @param supported_stages the pipeline stages that this intrinsic can be
   /// used in
+  /// @param is_deprecated true if the particular overload is considered
+  /// deprecated
   Intrinsic(IntrinsicType type,
             sem::Type* return_type,
             const ParameterList& parameters,
-            PipelineStageSet supported_stages);
+            PipelineStageSet supported_stages,
+            bool is_deprecated);
 
   /// Destructor
   ~Intrinsic() override;
@@ -91,6 +94,9 @@ class Intrinsic : public Castable<Intrinsic, CallTarget> {
 
   /// @return the pipeline stages that this intrinsic can be used in
   PipelineStageSet SupportedStages() const { return supported_stages_; }
+
+  /// @return true if the intrinsic overload is considered deprecated
+  bool IsDeprecated() const { return is_deprecated_; }
 
   /// @returns the name of the intrinsic function type. The spelling, including
   /// case, matches the name in the WGSL spec.
@@ -126,6 +132,7 @@ class Intrinsic : public Castable<Intrinsic, CallTarget> {
  private:
   IntrinsicType const type_;
   PipelineStageSet const supported_stages_;
+  bool const is_deprecated_;
 };
 
 /// Emits the name of the intrinsic function type. The spelling, including case,

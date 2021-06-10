@@ -275,6 +275,12 @@ func (r *resolver) function(a ast.FunctionDecl) error {
 			Compute:  true,
 		}
 	}
+	if deprecated := a.Decorations.Take("deprecated"); deprecated != nil {
+		overload.IsDeprecated = true
+		if len(deprecated.Values) != 0 {
+			return fmt.Errorf("%v unexpected value for deprecated decoration", deprecated.Source)
+		}
+	}
 	if len(a.Decorations) != 0 {
 		return fmt.Errorf("%v unknown decoration", a.Decorations[0].Source)
 	}

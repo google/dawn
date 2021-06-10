@@ -1723,6 +1723,10 @@ bool Resolver::IntrinsicCall(ast::CallExpression* call,
     return false;
   }
 
+  if (result->IsDeprecated()) {
+    diagnostics_.add_warning("use of deprecated intrinsic", call->source());
+  }
+
   builder_->Sem().Add(
       call, builder_->create<sem::Call>(call, result, current_statement_));
   SetType(call, result->ReturnType());

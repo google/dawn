@@ -137,6 +137,7 @@ type Overload struct {
 	ReturnType       *FullyQualifiedName
 	Parameters       []Parameter
 	CanBeUsedInStage StageUses
+	IsDeprecated     bool // True if this overload is deprecated
 }
 
 // StageUses describes the stages an overload can be used in
