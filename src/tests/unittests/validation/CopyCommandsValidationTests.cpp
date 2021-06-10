@@ -226,6 +226,22 @@ TEST_F(CopyCommandTest_B2B, Success) {
     }
 }
 
+// Test a successful B2B copy where the last external reference is dropped.
+// This is a regression test for crbug.com/1217741 where submitting a command
+// buffer with dropped resources when the copy size is 0 was a use-after-free.
+TEST_F(CopyCommandTest_B2B, DroppedBuffer) {
+    wgpu::Buffer source = CreateBuffer(16, wgpu::BufferUsage::CopySrc);
+    wgpu::Buffer destination = CreateBuffer(16, wgpu::BufferUsage::CopyDst);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyBufferToBuffer(source, 0, destination, 0, 0);
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+
+    source = nullptr;
+    destination = nullptr;
+    device.GetQueue().Submit(1, &commandBuffer);
+}
+
 // Test B2B copies with OOB
 TEST_F(CopyCommandTest_B2B, OutOfBounds) {
     wgpu::Buffer source = CreateBuffer(16, wgpu::BufferUsage::CopySrc);
