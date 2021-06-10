@@ -259,7 +259,8 @@ fn acos(f32) -> f32
 fn acos<N: num>(vec<N, f32>) -> vec<N, f32>
 fn all<N: num>(vec<N, bool>) -> bool
 fn any<N: num>(vec<N, bool>) -> bool
-fn arrayLength<T>(array<T>) -> u32
+[[deprecated]] fn arrayLength<T>(array<T>) -> u32
+fn arrayLength<T, A: access>(ptr<storage, array<T>, A>) -> u32
 fn asin(f32) -> f32
 fn asin<N: num>(vec<N, f32>) -> vec<N, f32>
 fn atan(f32) -> f32

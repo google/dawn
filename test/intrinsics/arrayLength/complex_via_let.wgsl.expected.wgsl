@@ -7,4 +7,7 @@ struct S {
 
 [[stage(compute)]]
 fn main() {
+  let p = &(G);
+  let p2 = &((*(p)).a);
+  let l1 : u32 = arrayLength(p2);
 }

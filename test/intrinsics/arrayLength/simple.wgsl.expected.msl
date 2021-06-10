@@ -1,0 +1,16 @@
+SKIP: FAILED
+
+
+[[block]]
+struct S {
+  a : array<i32>;
+};
+
+[[group(0), binding(0)]] var<storage, read> G : S;
+
+[[stage(compute)]]
+fn tint_symbol() {
+  let l1 : u32 = arrayLength(&(G.a));
+}
+
+Failed to generate: error: Unknown import method: arrayLength

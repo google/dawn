@@ -119,20 +119,29 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
         if (intrinsic->Type() == sem::IntrinsicType::kArrayLength) {
           // We're dealing with an arrayLength() call
 
-          // https://gpuweb.github.io/gpuweb/wgsl.html#array-types states:
+          // https://gpuweb.github.io/gpuweb/wgsl/#array-types states:
           //
           // * The last member of the structure type defining the store type for
           //   a variable in the storage storage class may be a runtime-sized
           //   array.
           // * A runtime-sized array must not be used as the store type or
           //   contained within a store type in any other cases.
-          // * The type of an expression must not be a runtime-sized array type.
-          //   arrayLength()
+          // * An expression must not evaluate to a runtime-sized array type.
           //
           // We can assume that the arrayLength() call has a single argument of
-          // the form: arrayLength(X.Y) where X is an expression that resolves
-          // to the storage buffer structure, and Y is the runtime sized array.
+          // the form: arrayLength(&X.Y) or the now deprecated form
+          // arrayLength(X.Y) where X is an expression that resolves to the
+          // storage buffer structure, and Y is the runtime sized array.
           auto* array_expr = call_expr->params()[0];
+
+          // TODO(crbug.com/tint/806): Once the deprecated arrayLength()
+          // overload is removed,  this can safely assume a pointer arg.
+          if (auto* address_of = array_expr->As<ast::UnaryOpExpression>()) {
+            if (address_of->op() == ast::UnaryOp::kAddressOf) {
+              array_expr = address_of->expr();
+            }
+          }
+
           auto* accessor = array_expr->As<ast::MemberAccessorExpression>();
           if (!accessor) {
             TINT_ICE(ctx.dst->Diagnostics())

@@ -2187,9 +2187,17 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
       }
       auto* arg = call->params()[0];
 
+      // TODO(crbug.com/tint/806): Once the deprecated arrayLength()
+      // overload is removed, this can safely assume a pointer arg.
+      if (auto* address_of = arg->As<ast::UnaryOpExpression>()) {
+        arg = address_of->expr();
+      }
+
       auto* accessor = arg->As<ast::MemberAccessorExpression>();
       if (accessor == nullptr) {
-        error_ = "invalid expression for array length";
+        // The InlinePtrLets and Simplify transforms should have sanitized any
+        // lets, or &*&*& noise.
+        error_ = "expected argument to arrayLength() to be a member accessor";
         return 0;
       }
 

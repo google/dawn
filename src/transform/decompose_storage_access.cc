@@ -30,6 +30,7 @@
 #include "src/sem/call.h"
 #include "src/sem/member_accessor_expression.h"
 #include "src/sem/reference_type.h"
+#include "src/sem/statement.h"
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
 #include "src/utils/get_or_create.h"
@@ -742,7 +743,14 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
           // arrayLength(X)
           // Don't convert X into a load, this actually requires the real
           // reference.
-          state.TakeAccess(call_expr->params()[0]);
+          auto* arg = call_expr->params()[0];
+
+          // TODO(crbug.com/tint/806): Once the deprecated arrayLength()
+          // overload is removed,  this can safely assume a pointer arg.
+          if (auto* address_of = arg->As<ast::UnaryOpExpression>()) {
+            arg = address_of->expr();
+          }
+          state.TakeAccess(arg);
         }
       }
     }

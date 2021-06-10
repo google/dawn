@@ -1,3 +1,7 @@
+intrinsics/gen/arrayLength/b083be.wgsl:31:18 warning: use of deprecated intrinsic
+  var res: u32 = arrayLength(sb.arg_0);
+                 ^^^^^^^^^^^
+
 [[block]]
 struct SB {
   arg_0 : array<f32>;

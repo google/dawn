@@ -792,8 +792,9 @@ TEST_F(ResolverIntrinsicDataTest, ArrayLength_Error_ArraySized) {
 
   EXPECT_EQ(r()->error(),
             "error: no matching call to arrayLength(array<i32, 4>)\n\n"
-            "1 candidate function:\n"
-            "  arrayLength(array<T>) -> u32\n");
+            "2 candidate functions:\n"
+            "  arrayLength(array<T>) -> u32\n"
+            "  arrayLength(ptr<array<T>>) -> u32\n");
 }
 
 TEST_F(ResolverIntrinsicDataTest, Normalize_Vector) {

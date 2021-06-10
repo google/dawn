@@ -7,6 +7,7 @@ struct S {
 
 [[stage(compute)]]
 fn main() {
-    // TODO(crbug.com/tint/806): arrayLength signature is currently wrong
-    // let l : i32 = arrayLength(&G.a);
+    let p = &G;
+    let p2 = &((*p).a);
+    let l1 : u32 = arrayLength(p2);
 }

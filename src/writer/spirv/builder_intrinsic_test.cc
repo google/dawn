@@ -1571,7 +1571,8 @@ OpFunctionEnd
 )");
 }
 
-TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
+// TODO(crbug.com/tint/806): Remove
+TEST_F(IntrinsicBuilderTest, Call_ArrayLength_DEPRECATED) {
   auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))},
                       {create<ast::StructBlockDecoration>()});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
@@ -1581,6 +1582,101 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
          });
 
   auto* expr = Call("arrayLength", MemberAccessor("b", "a"));
+
+  Func("a_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::CallStatement>(expr),
+       },
+       ast::DecorationList{
+           Stage(ast::PipelineStage::kFragment),
+       });
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.Build()) << b.error();
+
+  ASSERT_EQ(b.functions().size(), 1u);
+
+  auto* expected_types = R"(%5 = OpTypeFloat 32
+%4 = OpTypeRuntimeArray %5
+%3 = OpTypeStruct %4
+%2 = OpTypePointer StorageBuffer %3
+%1 = OpVariable %2 StorageBuffer
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
+%11 = OpTypeInt 32 0
+)";
+  auto got_types = DumpInstructions(b.types());
+  EXPECT_EQ(expected_types, got_types);
+
+  auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 0
+)";
+  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+  EXPECT_EQ(expected_instructions, got_instructions);
+
+  Validate(b);
+}
+
+// TODO(crbug.com/tint/806): Remove
+TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct_DEPRECATED) {
+  auto* s = Structure("my_struct",
+                      {
+                          Member(0, "z", ty.f32()),
+                          Member(4, "a", ty.array<f32>(4)),
+                      },
+                      {create<ast::StructBlockDecoration>()});
+  Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(2),
+         });
+
+  auto* expr = Call("arrayLength", MemberAccessor("b", "a"));
+
+  Func("a_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::CallStatement>(expr),
+       },
+       ast::DecorationList{
+           Stage(ast::PipelineStage::kFragment),
+       });
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.Build()) << b.error();
+
+  ASSERT_EQ(b.functions().size(), 1u);
+
+  auto* expected_types = R"(%4 = OpTypeFloat 32
+%5 = OpTypeRuntimeArray %4
+%3 = OpTypeStruct %4 %5
+%2 = OpTypePointer StorageBuffer %3
+%1 = OpVariable %2 StorageBuffer
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
+%11 = OpTypeInt 32 0
+)";
+  auto got_types = DumpInstructions(b.types());
+  EXPECT_EQ(expected_types, got_types);
+
+  auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 1
+)";
+  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+  EXPECT_EQ(expected_instructions, got_instructions);
+
+  Validate(b);
+}
+
+TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
+  auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))},
+                      {create<ast::StructBlockDecoration>()});
+  Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(2),
+         });
+
+  auto* expr = Call("arrayLength", AddressOf(MemberAccessor("b", "a")));
 
   Func("a_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -1629,7 +1725,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
              create<ast::GroupDecoration>(2),
          });
 
-  auto* expr = Call("arrayLength", MemberAccessor("b", "a"));
+  auto* expr = Call("arrayLength", AddressOf(MemberAccessor("b", "a")));
 
   Func("a_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -1658,6 +1754,116 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
   EXPECT_EQ(expected_types, got_types);
 
   auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 1
+)";
+  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+  EXPECT_EQ(expected_instructions, got_instructions);
+
+  Validate(b);
+}
+
+TEST_F(IntrinsicBuilderTest, Call_ArrayLength_ViaLets) {
+  auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))},
+                      {create<ast::StructBlockDecoration>()});
+  Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(2),
+         });
+
+  auto* p = Const("p", nullptr, AddressOf("b"));
+  auto* p2 = Const("p2", nullptr, AddressOf(MemberAccessor(Deref(p), "a")));
+  auto* expr = Call("arrayLength", p2);
+
+  Func("a_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           Decl(p),
+           Decl(p2),
+           create<ast::CallStatement>(expr),
+       },
+       ast::DecorationList{
+           Stage(ast::PipelineStage::kFragment),
+       });
+
+  spirv::Builder& b = SanitizeAndBuild();
+
+  ASSERT_TRUE(b.Build()) << b.error();
+
+  ASSERT_EQ(b.functions().size(), 1u);
+
+  auto* expected_types = R"(%5 = OpTypeFloat 32
+%4 = OpTypeRuntimeArray %5
+%3 = OpTypeStruct %4
+%2 = OpTypePointer StorageBuffer %3
+%1 = OpVariable %2 StorageBuffer
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
+%11 = OpTypeInt 32 0
+)";
+  auto got_types = DumpInstructions(b.types());
+  EXPECT_EQ(expected_types, got_types);
+
+  auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 0
+)";
+  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+  EXPECT_EQ(expected_instructions, got_instructions);
+
+  Validate(b);
+}
+
+TEST_F(IntrinsicBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
+  // struct my_struct {
+  //   a : [[stride(4)]] array<f32>;
+  // }
+  //
+  // fn a_func() {
+  //   let p = &*&b;
+  //   let p2 = &*p;
+  //   let p3 = &((*p).a);
+  //   arrayLength(&*p3);
+  // }
+  auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))},
+                      {create<ast::StructBlockDecoration>()});
+  Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(2),
+         });
+
+  auto* p = Const("p", nullptr, AddressOf(Deref(AddressOf("b"))));
+  auto* p2 = Const("p2", nullptr, AddressOf(Deref(p)));
+  auto* p3 = Const("p3", nullptr, AddressOf(MemberAccessor(Deref(p2), "a")));
+  auto* expr = Call("arrayLength", AddressOf(Deref(p3)));
+
+  Func("a_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           Decl(p),
+           Decl(p2),
+           Decl(p3),
+           create<ast::CallStatement>(expr),
+       },
+       ast::DecorationList{
+           Stage(ast::PipelineStage::kFragment),
+       });
+
+  spirv::Builder& b = SanitizeAndBuild();
+
+  ASSERT_TRUE(b.Build()) << b.error();
+
+  ASSERT_EQ(b.functions().size(), 1u);
+
+  auto* expected_types = R"(%5 = OpTypeFloat 32
+%4 = OpTypeRuntimeArray %5
+%3 = OpTypeStruct %4
+%2 = OpTypePointer StorageBuffer %3
+%1 = OpVariable %2 StorageBuffer
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
+%11 = OpTypeInt 32 0
+)";
+  auto got_types = DumpInstructions(b.types());
+  EXPECT_EQ(expected_types, got_types);
+
+  auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 0
 )";
   auto got_instructions = DumpInstructions(b.functions()[0].instructions());
   EXPECT_EQ(expected_instructions, got_instructions);

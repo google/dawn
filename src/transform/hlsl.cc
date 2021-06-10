@@ -44,6 +44,9 @@ Output Hlsl::Run(const Program* in, const DataMap&) {
   // after Simplify, as we need to fold away the address-of and defers of
   // `*(&(intrinsic_load()))` expressions.
   manager.Add<DecomposeStorageAccess>();
+  // CalculateArrayLength must come after DecomposeStorageAccess, as
+  // DecomposeStorageAccess special-cases the arrayLength() intrinsic, which
+  // will be transformed by CalculateArrayLength
   manager.Add<CalculateArrayLength>();
   manager.Add<ExternalTextureTransform>();
   manager.Add<PromoteInitializersToConstVar>();
