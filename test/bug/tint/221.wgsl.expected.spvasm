@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 44
+; Bound: 42
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -32,8 +32,8 @@
          %14 = OpConstantNull %uint
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
        %bool = OpTypeBool
-     %uint_1 = OpConstant %uint 1
      %uint_2 = OpConstant %uint 2
+     %uint_1 = OpConstant %uint 1
        %main = OpFunction %void None %7
          %10 = OpLabel
           %i = OpVariable %_ptr_Function_uint Function %14
@@ -52,25 +52,27 @@
          %26 = OpLabel
                OpBranch %16
          %25 = OpLabel
-         %29 = OpLoad %uint %i
-         %30 = OpAccessChain %_ptr_StorageBuffer_uint %b %uint_1 %29
-         %31 = OpLoad %uint %i
-         %33 = OpUMod %uint %31 %uint_2
-         %34 = OpIEqual %bool %33 %uint_0
-               OpSelectionMerge %35 None
-               OpBranchConditional %34 %36 %35
-         %36 = OpLabel
+         %27 = OpLoad %uint %i
+         %28 = OpLoad %uint %i
+         %30 = OpUMod %uint %28 %uint_2
+         %31 = OpIEqual %bool %30 %uint_0
+               OpSelectionMerge %32 None
+               OpBranchConditional %31 %33 %32
+         %33 = OpLabel
                OpBranch %17
-         %35 = OpLabel
-               OpStore %30 %uint_0
+         %32 = OpLabel
+         %35 = OpAccessChain %_ptr_StorageBuffer_uint %b %uint_1 %27
+               OpStore %35 %uint_0
                OpBranch %17
          %17 = OpLabel
-         %40 = OpLoad %uint %30
-         %41 = OpIMul %uint %40 %uint_2
-               OpStore %30 %41
-         %42 = OpLoad %uint %i
-         %43 = OpIAdd %uint %42 %uint_1
-               OpStore %i %43
+         %36 = OpAccessChain %_ptr_StorageBuffer_uint %b %uint_1 %27
+         %37 = OpAccessChain %_ptr_StorageBuffer_uint %b %uint_1 %27
+         %38 = OpLoad %uint %37
+         %39 = OpIMul %uint %38 %uint_2
+               OpStore %36 %39
+         %40 = OpLoad %uint %i
+         %41 = OpIAdd %uint %40 %uint_1
+               OpStore %i %41
                OpBranch %15
          %16 = OpLabel
                OpReturn

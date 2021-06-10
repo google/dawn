@@ -27,7 +27,9 @@
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
 #include "src/transform/external_texture_transform.h"
+#include "src/transform/inline_pointer_lets.h"
 #include "src/transform/manager.h"
+#include "src/transform/simplify.h"
 #include "src/transform/var_for_dynamic_index.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Spirv::Config);
@@ -40,6 +42,8 @@ Spirv::~Spirv() = default;
 
 Output Spirv::Run(const Program* in, const DataMap& data) {
   Manager manager;
+  manager.Add<InlinePointerLets>();  // Required for arrayLength()
+  manager.Add<Simplify>();           // Required for arrayLength()
   manager.Add<ExternalTextureTransform>();
   manager.Add<VarForDynamicIndex>();
   auto transformedInput = manager.Run(in, data);
