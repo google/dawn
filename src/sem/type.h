@@ -85,6 +85,8 @@ class Type : public Castable<Type, Node> {
   bool is_bool_scalar_or_vector() const;
   /// @returns true if this type is a numeric vector
   bool is_numeric_vector() const;
+  /// @returns true if this type is a vector of scalar type
+  bool is_scalar_vector() const;
   /// @returns true if this type is a numeric scale or vector
   bool is_numeric_scalar_or_vector() const;
   /// @returns true if this type is a handle type

@@ -135,6 +135,54 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_Empty) {
   Validate();
 }
 
+TEST_F(HlslGeneratorImplTest_Constructor,
+       EmitConstructor_Type_Vec_SingleScalar_Float) {
+  WrapInFunction(vec3<f32>(2.0f));
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr("float3((2.0f).xxx)"));
+
+  Validate();
+}
+
+TEST_F(HlslGeneratorImplTest_Constructor,
+       EmitConstructor_Type_Vec_SingleScalar_Bool) {
+  WrapInFunction(vec3<bool>(true));
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr("bool3((true).xxx)"));
+
+  Validate();
+}
+
+TEST_F(HlslGeneratorImplTest_Constructor,
+       EmitConstructor_Type_Vec_SingleScalar_Int) {
+  WrapInFunction(vec3<i32>(2));
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr("int3((2).xxx)"));
+
+  Validate();
+}
+
+TEST_F(HlslGeneratorImplTest_Constructor,
+       EmitConstructor_Type_Vec_SingleScalar_UInt) {
+  WrapInFunction(vec3<u32>(2u));
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr("uint3((2u).xxx)"));
+
+  Validate();
+}
+
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Mat) {
   WrapInFunction(
       mat2x3<f32>(vec3<f32>(1.f, 2.f, 3.f), vec3<f32>(3.f, 4.f, 5.f)));

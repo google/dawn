@@ -241,6 +241,38 @@ TEST_F(SpvBuilderConstructorTest, Type_F32_With_F32) {
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
+TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_Bool) {
+  auto* cast = vec2<bool>(true);
+  WrapInFunction(cast);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateExpression(cast), 4u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
+%1 = OpTypeVector %2 2
+%3 = OpConstantTrue %2
+%4 = OpConstantComposite %1 %3 %3
+)");
+}
+
+TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32) {
+  auto* cast = vec2<f32>(2.0f);
+  WrapInFunction(cast);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateExpression(cast), 4u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeVector %2 2
+%3 = OpConstant %2 2
+%4 = OpConstantComposite %1 %3 %3
+)");
+}
+
 TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32_F32) {
   auto* cast = vec2<f32>(2.0f, 2.0f);
   WrapInFunction(cast);
@@ -273,6 +305,38 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_Vec2) {
 %5 = OpConstantComposite %2 %4 %4
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
+}
+
+TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32) {
+  auto* cast = vec3<f32>(2.0f);
+  WrapInFunction(cast);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateExpression(cast), 4u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeVector %2 3
+%3 = OpConstant %2 2
+%4 = OpConstantComposite %1 %3 %3 %3
+)");
+}
+
+TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Bool) {
+  auto* cast = vec3<bool>(true);
+  WrapInFunction(cast);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateExpression(cast), 4u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
+%1 = OpTypeVector %2 3
+%3 = OpConstantTrue %2
+%4 = OpConstantComposite %1 %3 %3 %3
+)");
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_F32_F32) {
@@ -351,6 +415,38 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Vec3) {
 %5 = OpConstantComposite %2 %4 %4 %4
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
+}
+
+TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Bool) {
+  auto* cast = vec4<bool>(true);
+  WrapInFunction(cast);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateExpression(cast), 4u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
+%1 = OpTypeVector %2 4
+%3 = OpConstantTrue %2
+%4 = OpConstantComposite %1 %3 %3 %3 %3
+)");
+}
+
+TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32) {
+  auto* cast = vec4<f32>(2.0f);
+  WrapInFunction(cast);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateExpression(cast), 4u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeVector %2 4
+%3 = OpConstant %2 2
+%4 = OpConstantComposite %1 %3 %3 %3 %3
+)");
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_F32_F32_F32) {
@@ -523,6 +619,22 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec4) {
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
+TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec2_With_F32) {
+  auto* cast = vec2<f32>(2.0f);
+  WrapInFunction(cast);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 4u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeVector %2 2
+%3 = OpConstant %2 2
+%4 = OpConstantComposite %1 %3 %3
+)");
+}
+
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec2_With_Vec2) {
   auto* cast = vec2<f32>(vec2<f32>(2.0f, 2.0f));
   WrapInFunction(cast);
@@ -571,6 +683,22 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec4) {
 )");
 }
 
+TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_F32) {
+  auto* cast = vec3<f32>(2.0f);
+  WrapInFunction(cast);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 4u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeVector %2 3
+%3 = OpConstant %2 2
+%4 = OpConstantComposite %1 %3 %3 %3
+)");
+}
+
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_F32_Vec2) {
   auto* cast = vec3<f32>(2.0f, vec2<f32>(2.0f, 2.0f));
   WrapInFunction(cast);
@@ -614,6 +742,22 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_Vec2_F32) {
 %10 = OpConstant %7 1
 %9 = OpSpecConstantOp %2 CompositeExtract %5 10
 %11 = OpSpecConstantComposite %1 %6 %9 %4
+)");
+}
+
+TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32) {
+  auto* cast = vec4<f32>(2.0f);
+  WrapInFunction(cast);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 4u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeVector %2 4
+%3 = OpConstant %2 2
+%4 = OpConstantComposite %1 %3 %3 %3 %3
 )");
 }
 

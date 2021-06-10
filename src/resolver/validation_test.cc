@@ -777,18 +777,6 @@ TEST_F(ResolverValidationTest,
 }
 
 TEST_F(ResolverValidationTest,
-       Expr_Constructor_Vec2_Error_TooFewArgumentsScalar) {
-  auto* tc = vec2<f32>(create<ast::ScalarConstructorExpression>(
-      Source{{12, 34}}, Literal(1.0f)));
-  WrapInFunction(tc);
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error: attempted to construct 'vec2<f32>' with 1 component(s)");
-}
-
-TEST_F(ResolverValidationTest,
        Expr_Constructor_Vec2_Error_TooManyArgumentsScalar) {
   auto* tc = vec2<f32>(
       create<ast::ScalarConstructorExpression>(Source{{12, 34}}, Literal(1.0f)),
@@ -1632,16 +1620,16 @@ TEST_F(ResolverValidationTest,
 
 TEST_F(ResolverValidationTest,
        Expr_Constructor_NestedVectorConstructors_InnerError) {
-  auto* tc = vec4<f32>(
-      vec3<f32>(1.0f, vec2<f32>(create<ast::ScalarConstructorExpression>(
-                          Source{{12, 34}}, Literal(1.0f)))),
-      1.0f);
+  auto* tc = vec4<f32>(vec4<f32>(1.0f, 1.0f,
+                                 vec3<f32>(Expr(Source{{12, 34}}, 1.0f),
+                                           Expr(Source{{12, 34}}, 1.0f))),
+                       1.0f);
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
-      "12:34 error: attempted to construct 'vec2<f32>' with 1 component(s)");
+      "12:34 error: attempted to construct 'vec3<f32>' with 2 component(s)");
 }
 
 TEST_F(ResolverValidationTest,

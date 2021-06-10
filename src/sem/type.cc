@@ -119,6 +119,10 @@ bool Type::is_numeric_vector() const {
       [](const Vector* v) { return v->type()->is_numeric_scalar(); });
 }
 
+bool Type::is_scalar_vector() const {
+  return Is<Vector>([](const Vector* v) { return v->type()->is_scalar(); });
+}
+
 bool Type::is_numeric_scalar_or_vector() const {
   return is_numeric_scalar() || is_numeric_vector();
 }

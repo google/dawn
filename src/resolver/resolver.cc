@@ -1895,10 +1895,10 @@ bool Resolver::ValidateVectorConstructor(
     }
   }
 
-  // A correct vector constructor must either be a zero-value expression
-  // or the number of components of all constructor arguments must add up
-  // to the vector cardinality.
-  if (value_cardinality_sum > 0 && value_cardinality_sum != vec_type->size()) {
+  // A correct vector constructor must either be a zero-value expression,
+  // a single-value initializer (splat) expression, or the number of components
+  // of all constructor arguments must add up to the vector cardinality.
+  if (value_cardinality_sum > 1 && value_cardinality_sum != vec_type->size()) {
     if (values.empty()) {
       TINT_ICE(diagnostics_)
           << "constructor arguments expected to be non-empty!";

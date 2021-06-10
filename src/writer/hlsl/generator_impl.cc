@@ -1377,6 +1377,12 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
 
   bool brackets = type->IsAnyOf<sem::Array, sem::Struct>();
 
+  // For single-value vector initializers, swizzle the scalar to the right
+  // vector dimension using .x
+  const bool is_single_value_vector_init =
+      type->is_scalar_vector() && expr->values().size() == 1 &&
+      TypeOf(expr->values()[0])->is_scalar();
+
   if (brackets) {
     out << "{";
   } else {
@@ -1384,6 +1390,10 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
                   "")) {
       return false;
     }
+    out << "(";
+  }
+
+  if (is_single_value_vector_init) {
     out << "(";
   }
 
@@ -1397,6 +1407,10 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
     if (!EmitExpression(pre, out, e)) {
       return false;
     }
+  }
+
+  if (is_single_value_vector_init) {
+    out << ")." << std::string(type->As<sem::Vector>()->size(), 'x');
   }
 
   out << (brackets ? "}" : ")");

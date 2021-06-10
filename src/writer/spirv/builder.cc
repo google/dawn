@@ -1430,6 +1430,16 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     }
   }
 
+  // For a single-value vector initializer, splat the initializer value.
+  auto* const init_result_type = TypeOf(init)->UnwrapRef();
+  if (values.size() == 1 && init_result_type->is_scalar_vector() &&
+      TypeOf(values[0])->is_scalar()) {
+    size_t vec_size = init_result_type->As<sem::Vector>()->size();
+    for (size_t i = 0; i < (vec_size - 1); ++i) {
+      ops.push_back(ops[0]);
+    }
+  }
+
   auto str = out.str();
   auto val = type_constructor_to_id_.find(str);
   if (val != type_constructor_to_id_.end()) {
