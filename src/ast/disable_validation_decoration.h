@@ -34,6 +34,9 @@ enum class DisabledValidation {
   /// When applied to a function-scoped variable, the validator will not
   /// complain if the storage class is not `function`.
   kFunctionVarStorageClass,
+  /// When applied to an entry-point function parameter, the validator will not
+  /// check for entry IO decorations.
+  kEntryPointParameter,
 };
 
 /// An internal decoration used to tell the validator to ignore specific

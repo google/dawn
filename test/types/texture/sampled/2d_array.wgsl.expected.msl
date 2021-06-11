@@ -1,0 +1,10 @@
+#include <metal_stdlib>
+
+using namespace metal;
+kernel void tint_symbol(texture2d_array<float, access::sample> tint_symbol_1 [[texture(0)]], texture2d_array<int, access::sample> tint_symbol_2 [[texture(1)]], texture2d_array<uint, access::sample> tint_symbol_3 [[texture(2)]]) {
+  (void) tint_symbol_1;
+  (void) tint_symbol_2;
+  (void) tint_symbol_3;
+  return;
+}
+

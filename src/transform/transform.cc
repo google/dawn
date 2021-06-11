@@ -111,6 +111,25 @@ ast::Type* Transform::CreateASTTypeFor(CloneContext* ctx, const sem::Type* ty) {
   if (auto* s = ty->As<sem::Reference>()) {
     return CreateASTTypeFor(ctx, s->StoreType());
   }
+  if (auto* t = ty->As<sem::DepthTexture>()) {
+    return ctx->dst->create<ast::DepthTexture>(t->dim());
+  }
+  if (auto* t = ty->As<sem::MultisampledTexture>()) {
+    return ctx->dst->create<ast::MultisampledTexture>(
+        t->dim(), CreateASTTypeFor(ctx, t->type()));
+  }
+  if (auto* t = ty->As<sem::SampledTexture>()) {
+    return ctx->dst->create<ast::SampledTexture>(
+        t->dim(), CreateASTTypeFor(ctx, t->type()));
+  }
+  if (auto* t = ty->As<sem::StorageTexture>()) {
+    return ctx->dst->create<ast::StorageTexture>(
+        t->dim(), t->image_format(), CreateASTTypeFor(ctx, t->type()),
+        t->access());
+  }
+  if (auto* s = ty->As<sem::Sampler>()) {
+    return ctx->dst->create<ast::Sampler>(s->kind());
+  }
   TINT_UNREACHABLE(ctx->dst->Diagnostics())
       << "Unhandled type: " << ty->TypeInfo().name;
   return nullptr;

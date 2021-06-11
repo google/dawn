@@ -751,7 +751,7 @@ TEST_F(MslGeneratorImplTest, Emit_TypeMultisampledTexture) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(ms, "")) << gen.error();
-  EXPECT_EQ(gen.result(), "texture2d_ms<uint, access::sample>");
+  EXPECT_EQ(gen.result(), "texture2d_ms<uint, access::read>");
 }
 
 struct MslStorageTextureData {

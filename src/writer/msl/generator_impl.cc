@@ -1470,6 +1470,22 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
 
     if (type->Is<sem::Struct>()) {
       out_ << " [[stage_in]]";
+    } else if (var->type()->is_handle()) {
+      auto* binding =
+          ast::GetDecoration<ast::BindingDecoration>(var->decorations());
+      if (binding == nullptr) {
+        TINT_ICE(diagnostics_)
+            << "missing binding attribute for entry point parameter";
+        return false;
+      }
+      if (var->type()->Is<ast::Sampler>()) {
+        out_ << " [[sampler(" << binding->value() << ")]]";
+      } else if (var->type()->Is<ast::Texture>()) {
+        out_ << " [[texture(" << binding->value() << ")]]";
+      } else {
+        TINT_ICE(diagnostics_) << "invalid handle type entry point parameter";
+        return false;
+      }
     } else {
       auto& decos = var->decorations();
       bool builtin_found = false;
@@ -1982,6 +1998,7 @@ bool GeneratorImpl::EmitType(const sem::Type* type, const std::string& name) {
     switch (ptr->StorageClass()) {
       case ast::StorageClass::kFunction:
       case ast::StorageClass::kPrivate:
+      case ast::StorageClass::kUniformConstant:
         out_ << "thread ";
         break;
       case ast::StorageClass::kWorkgroup:
@@ -2068,7 +2085,7 @@ bool GeneratorImpl::EmitType(const sem::Type* type, const std::string& name) {
       if (!EmitType(ms->type(), "")) {
         return false;
       }
-      out_ << ", access::sample";
+      out_ << ", access::read";
     } else if (auto* sampled = tex->As<sem::SampledTexture>()) {
       if (!EmitType(sampled->type(), "")) {
         return false;
@@ -2292,6 +2309,7 @@ bool GeneratorImpl::EmitVariable(const sem::Variable* var,
 
   switch (var->StorageClass()) {
     case ast::StorageClass::kFunction:
+    case ast::StorageClass::kUniformConstant:
     case ast::StorageClass::kNone:
       break;
     case ast::StorageClass::kPrivate:

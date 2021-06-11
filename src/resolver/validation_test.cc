@@ -292,8 +292,21 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableDifferentScope_Fail) {
             "12:34 error: v-0006: identifier must be declared before use: a");
 }
 
-TEST_F(ResolverValidationTest, StorageClass_NonFunctionClassError) {
+TEST_F(ResolverValidationTest, StorageClass_FunctionVariableWorkgroupClass) {
   auto* var = Var("var", ty.i32(), ast::StorageClass::kWorkgroup);
+
+  auto* stmt = Decl(var);
+  Func("func", ast::VariableList{}, ty.void_(), ast::StatementList{stmt},
+       ast::DecorationList{});
+
+  EXPECT_FALSE(r()->Resolve());
+
+  EXPECT_EQ(r()->error(),
+            "error: function variable has a non-function storage class");
+}
+
+TEST_F(ResolverValidationTest, StorageClass_FunctionVariableHandleClass) {
+  auto* var = Var("s", ty.sampler(ast::SamplerKind::kSampler));
 
   auto* stmt = Decl(var);
   Func("func", ast::VariableList{}, ty.void_(), ast::StatementList{stmt},

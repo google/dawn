@@ -1011,7 +1011,8 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
                 pipeline_io_attribute->source());
             return false;
           }
-        } else {
+        } else if (!IsValidationDisabled(
+                       decos, ast::DisabledValidation::kEntryPointParameter)) {
           if (!pipeline_io_attribute) {
             std::string err = "missing entry point IO attribute";
             if (!is_struct_member) {

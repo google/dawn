@@ -22,7 +22,7 @@ namespace {
 
 using MslTest = TransformTest;
 
-TEST_F(MslTest, HandlePrivateAndWorkgroupVariables_Basic) {
+TEST_F(MslTest, HandleModuleScopeVariables_Basic) {
   auto* src = R"(
 var<private> p : f32;
 var<workgroup> w : f32;
@@ -47,7 +47,7 @@ fn main() {
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(MslTest, HandlePrivateAndWorkgroupVariables_FunctionCalls) {
+TEST_F(MslTest, HandleModuleScopeVariables_FunctionCalls) {
   auto* src = R"(
 var<private> p : f32;
 var<workgroup> w : f32;
@@ -100,7 +100,7 @@ fn main() {
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(MslTest, HandlePrivateAndWorkgroupVariables_Constructors) {
+TEST_F(MslTest, HandleModuleScopeVariables_Constructors) {
   auto* src = R"(
 var<private> a : f32 = 1.0;
 var<private> b : f32 = f32();
@@ -125,7 +125,7 @@ fn main() {
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(MslTest, HandlePrivateAndWorkgroupVariables_Pointers) {
+TEST_F(MslTest, HandleModuleScopeVariables_Pointers) {
   auto* src = R"(
 var<private> p : f32;
 var<workgroup> w : f32;
@@ -156,7 +156,7 @@ fn main() {
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(MslTest, HandlePrivateAndWorkgroupVariables_UnusedVariables) {
+TEST_F(MslTest, HandleModuleScopeVariables_UnusedVariables) {
   auto* src = R"(
 var<private> p : f32;
 var<workgroup> w : f32;
@@ -177,7 +177,7 @@ fn main() {
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(MslTest, HandlePrivateAndWorkgroupVariables_OtherVariables) {
+TEST_F(MslTest, HandleModuleScopeVariables_OtherVariables) {
   auto* src = R"(
 [[block]]
 struct S {
@@ -208,7 +208,85 @@ fn main() {
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(MslTest, HandlePrivateAndWorkgroupVariables_EmtpyModule) {
+TEST_F(MslTest, HandleModuleScopeVariables_HandleTypes_Basic) {
+  auto* src = R"(
+[[group(0), binding(0)]] var t : texture_2d<f32>;
+[[group(0), binding(1)]] var s : sampler;
+
+[[stage(compute)]]
+fn main() {
+  ignore(t);
+  ignore(s);
+}
+)";
+
+  auto* expect = R"(
+[[stage(compute)]]
+fn main([[group(0), binding(0), internal(disable_validation__entry_point_parameter)]] tint_symbol : texture_2d<f32>, [[group(0), binding(1), internal(disable_validation__entry_point_parameter)]] tint_symbol_1 : sampler) {
+  ignore(tint_symbol);
+  ignore(tint_symbol_1);
+}
+)";
+
+  auto got = Run<Msl>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(MslTest, HandleModuleScopeVariables_HandleTypes_FunctionCalls) {
+  auto* src = R"(
+[[group(0), binding(0)]] var t : texture_2d<f32>;
+[[group(0), binding(1)]] var s : sampler;
+
+fn no_uses() {
+}
+
+fn bar(a : f32, b : f32) {
+  ignore(t);
+  ignore(s);
+}
+
+fn foo(a : f32) {
+  let b : f32 = 2.0;
+  ignore(t);
+  bar(a, b);
+  no_uses();
+}
+
+[[stage(compute)]]
+fn main() {
+  foo(1.0);
+}
+)";
+
+  auto* expect = R"(
+fn no_uses() {
+}
+
+fn bar(a : f32, b : f32, tint_symbol : texture_2d<f32>, tint_symbol_1 : sampler) {
+  ignore(tint_symbol);
+  ignore(tint_symbol_1);
+}
+
+fn foo(a : f32, tint_symbol_2 : texture_2d<f32>, tint_symbol_3 : sampler) {
+  let b : f32 = 2.0;
+  ignore(tint_symbol_2);
+  bar(a, b, tint_symbol_2, tint_symbol_3);
+  no_uses();
+}
+
+[[stage(compute)]]
+fn main([[group(0), binding(0), internal(disable_validation__entry_point_parameter)]] tint_symbol_4 : texture_2d<f32>, [[group(0), binding(1), internal(disable_validation__entry_point_parameter)]] tint_symbol_5 : sampler) {
+  foo(1.0, tint_symbol_4, tint_symbol_5);
+}
+)";
+
+  auto got = Run<Msl>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(MslTest, HandleModuleScopeVariables_EmtpyModule) {
   auto* src = "";
 
   auto got = Run<Msl>(src);
