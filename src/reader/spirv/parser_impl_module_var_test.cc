@@ -80,6 +80,7 @@ std::string CommonTypes() {
     %float_1p5 = OpConstant %float 1.5
     %uint_1 = OpConstant %uint 1
     %int_m1 = OpConstant %int -1
+    %int_14 = OpConstant %int 14
     %uint_2 = OpConstant %uint 2
 
     %v2bool = OpTypeVector %bool 2
@@ -4018,6 +4019,157 @@ TEST_F(SpvModuleScopeVarParserTest, OutputVarsConvertedToPrivate) {
   EXPECT_THAT(got, HasSubstr(expected)) << got;
 }
 
+TEST_F(SpvModuleScopeVarParserTest,
+       OutputVarsConvertedToPrivate_WithInitializer) {
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
+     %ptr_out_uint = OpTypePointer Output %uint
+     %1 = OpVariable %ptr_out_uint Output %uint_1
+  )" + MainBody();
+  auto p = parser(test::Assemble(assembly));
+
+  // TODO(crbug.com/tint/508): Remove this when everything is converted
+  // to HLSL style pipeline IO.
+  p->SetHLSLStylePipelineIO();
+
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  EXPECT_TRUE(p->error().empty());
+  const auto got = p->program().to_str();
+  const std::string expected =
+      R"(Variable{
+    x_1
+    private
+    undefined
+    __u32
+    {
+      ScalarConstructor[not set]{1u}
+    }
+  }
+)";
+  EXPECT_THAT(got, HasSubstr(expected)) << got;
+}
+
+TEST_F(SpvModuleScopeVarParserTest,
+       Builtin_Output_Initializer_SameSignednessAsWGSL) {
+  // Only outputs can have initializers.
+  // WGSL sample_mask store type is u32.
+  const auto assembly = Preamble() + FragMain() + R"(
+     OpDecorate %1 BuiltIn SampleMask
+)" + CommonTypes() + R"(
+     %ptr_ty = OpTypePointer Output %uint
+     %1 = OpVariable %ptr_ty Output %uint_1
+  )" + MainBody();
+  auto p = parser(test::Assemble(assembly));
+
+  // TODO(crbug.com/tint/508): Remove this when everything is converted
+  // to HLSL style pipeline IO.
+  p->SetHLSLStylePipelineIO();
+
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  EXPECT_TRUE(p->error().empty());
+  const auto got = p->program().to_str();
+  const std::string expected =
+      R"(Variable{
+    x_1
+    private
+    undefined
+    __u32
+    {
+      ScalarConstructor[not set]{1u}
+    }
+  }
+)";
+  EXPECT_THAT(got, HasSubstr(expected)) << got;
+}
+
+TEST_F(SpvModuleScopeVarParserTest,
+       Builtin_Output_Initializer_OppositeSignednessAsWGSL) {
+  // Only outputs can have initializers.
+  // WGSL sample_mask store type is u32.  Use i32 in SPIR-V
+  const auto assembly = Preamble() + FragMain() + R"(
+     OpDecorate %1 BuiltIn SampleMask
+)" + CommonTypes() + R"(
+     %ptr_ty = OpTypePointer Output %int
+     %1 = OpVariable %ptr_ty Output %int_14
+  )" + MainBody();
+  auto p = parser(test::Assemble(assembly));
+
+  // TODO(crbug.com/tint/508): Remove this when everything is converted
+  // to HLSL style pipeline IO.
+  p->SetHLSLStylePipelineIO();
+
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  EXPECT_TRUE(p->error().empty());
+  const auto got = p->program().to_str();
+  const std::string expected =
+      R"(Variable{
+    x_1
+    private
+    undefined
+    __i32
+    {
+      ScalarConstructor[not set]{14}
+    }
+  }
+)";
+  EXPECT_THAT(got, HasSubstr(expected)) << got;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, Builtin_Input_SameSignednessAsWGSL) {
+  // WGSL vertex_index store type is u32.
+  const auto assembly = Preamble() + FragMain() + R"(
+     OpDecorate %1 BuiltIn VertexIndex
+)" + CommonTypes() + R"(
+     %ptr_ty = OpTypePointer Input %uint
+     %1 = OpVariable %ptr_ty Input
+  )" + MainBody();
+  auto p = parser(test::Assemble(assembly));
+
+  // TODO(crbug.com/tint/508): Remove this when everything is converted
+  // to HLSL style pipeline IO.
+  p->SetHLSLStylePipelineIO();
+
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  EXPECT_TRUE(p->error().empty());
+  const auto got = p->program().to_str();
+  const std::string expected =
+      R"(Variable{
+    x_1
+    private
+    undefined
+    __u32
+  }
+)";
+  EXPECT_THAT(got, HasSubstr(expected)) << got;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, Builtin_Input_OppositeSignednessAsWGSL) {
+  // WGSL vertex_index store type is u32.  Use i32 in SPIR-V.
+  const auto assembly = Preamble() + FragMain() + R"(
+     OpDecorate %1 BuiltIn VertexIndex
+)" + CommonTypes() + R"(
+     %ptr_ty = OpTypePointer Input %int
+     %1 = OpVariable %ptr_ty Input
+  )" + MainBody();
+  auto p = parser(test::Assemble(assembly));
+
+  // TODO(crbug.com/tint/508): Remove this when everything is converted
+  // to HLSL style pipeline IO.
+  p->SetHLSLStylePipelineIO();
+
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  EXPECT_TRUE(p->error().empty());
+  const auto got = p->program().to_str();
+  const std::string expected =
+      R"(Variable{
+    x_1
+    private
+    undefined
+    __i32
+  }
+)";
+  EXPECT_THAT(got, HasSubstr(expected)) << got;
+}
+
 TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_IOLocations) {
   const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Vertex %main "main" %1 %2 %3 %4
@@ -4135,6 +4287,12 @@ TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_IOLocations) {
 )";
   EXPECT_THAT(got, HasSubstr(expected)) << got;
 }
+
+// TODO(dneto): pipeline IO: convert signedness on builtin inputs in the wrapper
+// body
+// TODO(dneto): pipeline IO: convert signedness on builtin outputs in the
+// wrapper body
+// TODO(dneto): pipeline IO: flatten structures, and distribute locations
 
 // TODO(dneto): Test passing pointer to SampleMask as function parameter,
 // both input case and output case.

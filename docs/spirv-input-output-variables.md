@@ -36,19 +36,22 @@ inputs and outputs, and two functions:
   is the same as the original SPIR-V entry point.
 - Original input variables are mapped to pseudo-in Private variables
   with the same store types, but no other attributes or properties copied.
+  In Vulkan, Input variables don't have initalizers.
 - Original output variables are mapped to pseudo-out Private variables
-  with the same store types, but no other attributes or properties are copied.
+  with the same store types and optional initializer, but no other attributes
+  or properties are copied.
 - A wrapper entry point function whose arguments correspond in type, location
   and builtin attributes the original input variables, and whose return type is
   a structure containing members correspond in type, location, and builtin
   attributes to the original output variables.
   The body of the wrapper function the following phases:
   - Copy formal parameter values into pseudo-in variables.
-  - Use stores to initialize pseudo-out variables:
-    - If the original variable had an initializer, store that value.
-    - Otherwise, store a zero value for the store type.
+    - Insert a bitcast if the WGSL builtin variable has different signedness
+      from the SPIR-V declared type.
   - Execute the inner function.
   - Copy pseudo-out variables into the return structure.
+    - Insert a bitcast if the WGSL builtin variable has different signedness
+      from the SPIR-V declared type.
   - Return the return structure.
 
 - Replace uses of the the original input/output variables to the pseudo-in and

@@ -957,6 +957,8 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
       continue;
     }
 
+    // In Vulkan SPIR-V, Input variables must not have an initializer.
+
     const auto var_name = namer_.GetName(var_id);
     const auto var_sym = builder_.Symbols().Register(var_name);
     const auto param_name = namer_.MakeDerivedName(var_name + "_param");
