@@ -1978,12 +1978,12 @@ TEST_F(BindGroupLayoutCompatibilityTest, TextureViewDimension) {
     constexpr char kTexture2DShaderFS[] = R"(
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
         [[stage(fragment)]] fn main() {
-            textureDimensions(myTexture);
+            ignore(textureDimensions(myTexture));
         })";
     constexpr char kTexture2DShaderCS[] = R"(
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
         [[stage(compute)]] fn main() {
-           textureDimensions(myTexture);
+            ignore(textureDimensions(myTexture));
         })";
 
     // Render: Test that 2D texture with 2D view dimension works
@@ -2017,12 +2017,12 @@ TEST_F(BindGroupLayoutCompatibilityTest, TextureViewDimension) {
     constexpr char kTexture2DArrayShaderFS[] = R"(
         [[group(0), binding(0)]] var myTexture : texture_2d_array<f32>;
         [[stage(fragment)]] fn main() {
-           textureDimensions(myTexture);
+            ignore(textureDimensions(myTexture));
         })";
     constexpr char kTexture2DArrayShaderCS[] = R"(
         [[group(0), binding(0)]] var myTexture : texture_2d_array<f32>;
         [[stage(compute)]] fn main() {
-           textureDimensions(myTexture);
+            ignore(textureDimensions(myTexture));
         })";
 
     // Render: Test that 2D texture array with 2D array view dimension works
@@ -2071,7 +2071,7 @@ TEST_F(BindGroupLayoutCompatibilityTest, DISABLED_ExternalTextureBindGroupLayout
     ASSERT_DEVICE_ERROR(CreateFSRenderPipeline(R"(
             [[group(0), binding(0)]] var myTexture: texture_2d<f32>;
             [[stage(fragment)]] fn main() {
-                textureDimensions(myTexture);
+            ignore(textureDimensions(myTexture));
             })",
                                                {bgl}));
 }

@@ -245,7 +245,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
             [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
             [[stage(fragment)]] fn main() {
-                textureDimensions(myTexture);
+                ignore(textureDimensions(myTexture));
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -256,7 +256,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
             [[group(0), binding(0)]] var myTexture : texture_multisampled_2d<f32>;
 
             [[stage(fragment)]] fn main() {
-                textureDimensions(myTexture);
+                ignore(textureDimensions(myTexture));
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -323,7 +323,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
             [[group(0), binding(0)]] var myTexture : texture_1d<f32>;
 
             [[stage(fragment)]] fn main() {
-                textureDimensions(myTexture);
+                ignore(textureDimensions(myTexture));
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -334,7 +334,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
             [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
             [[stage(fragment)]] fn main() {
-                textureDimensions(myTexture);
+                ignore(textureDimensions(myTexture));
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -345,7 +345,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
             [[group(0), binding(0)]] var myTexture : texture_2d_array<f32>;
 
             [[stage(fragment)]] fn main() {
-                textureDimensions(myTexture);
+                ignore(textureDimensions(myTexture));
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -356,7 +356,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
             [[group(0), binding(0)]] var myTexture : texture_3d<f32>;
 
             [[stage(fragment)]] fn main() {
-                textureDimensions(myTexture);
+                ignore(textureDimensions(myTexture));
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -367,7 +367,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
             [[group(0), binding(0)]] var myTexture : texture_cube<f32>;
 
             [[stage(fragment)]] fn main() {
-                textureDimensions(myTexture);
+                ignore(textureDimensions(myTexture));
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -378,7 +378,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
             [[group(0), binding(0)]] var myTexture : texture_cube_array<f32>;
 
             [[stage(fragment)]] fn main() {
-                textureDimensions(myTexture);
+                ignore(textureDimensions(myTexture));
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -405,7 +405,7 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
             [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
             [[stage(fragment)]] fn main() {
-                textureDimensions(myTexture);
+                ignore(textureDimensions(myTexture));
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -416,7 +416,7 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
             [[group(0), binding(0)]] var myTexture : texture_2d<i32>;
 
             [[stage(fragment)]] fn main() {
-                textureDimensions(myTexture);
+                ignore(textureDimensions(myTexture));
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -427,7 +427,7 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
             [[group(0), binding(0)]] var myTexture : texture_2d<u32>;
 
             [[stage(fragment)]] fn main() {
-                textureDimensions(myTexture);
+                ignore(textureDimensions(myTexture));
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -727,7 +727,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureMultisampling) {
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
         [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
-            textureDimensions(myTexture);
+            ignore(textureDimensions(myTexture));
             return vec4<f32>();
         })");
 
@@ -735,7 +735,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureMultisampling) {
         [[group(0), binding(0)]] var myTexture : texture_multisampled_2d<f32>;
 
         [[stage(fragment)]] fn main() {
-            textureDimensions(myTexture);
+            ignore(textureDimensions(myTexture));
         })");
 
     utils::ComboRenderPipelineDescriptor descriptor;
@@ -752,7 +752,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingViewDimension) {
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
         [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
-            textureDimensions(myTexture);
+            ignore(textureDimensions(myTexture));
             return vec4<f32>();
         })");
 
@@ -760,7 +760,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingViewDimension) {
         [[group(0), binding(0)]] var myTexture : texture_3d<f32>;
 
         [[stage(fragment)]] fn main() {
-            textureDimensions(myTexture);
+            ignore(textureDimensions(myTexture));
         })");
 
     utils::ComboRenderPipelineDescriptor descriptor;
@@ -777,7 +777,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureComponentType) {
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
         [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
-            textureDimensions(myTexture);
+            ignore(textureDimensions(myTexture));
             return vec4<f32>();
         })");
 
@@ -785,7 +785,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureComponentType) {
         [[group(0), binding(0)]] var myTexture : texture_2d<i32>;
 
         [[stage(fragment)]] fn main() {
-            textureDimensions(myTexture);
+            ignore(textureDimensions(myTexture));
         })");
 
     utils::ComboRenderPipelineDescriptor descriptor;
