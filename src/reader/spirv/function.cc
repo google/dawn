@@ -994,7 +994,9 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
               source, builder_.Symbols().Register(ep_info_->inner_name)),
           ast::ExpressionList{})));
 
+  // Pipeline outputs are mapped to the return value.
   if (ep_info_->outputs.empty()) {
+    // There is nothing to return.
     return_type = ty_.Void()->Build(builder_);
   } else {
     // Pipeline outputs are converted to a structure that is written
@@ -1018,6 +1020,10 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
       if (!parser_impl_.ConvertDecorationsForVariable(
               var_id, &forced_store_type, &out_decos)) {
         // This occurs, and is not an error, for the PointSize builtin.
+        if (!success()) {
+          // But exit early if an error was logged.
+          return false;
+        }
         continue;
       }
 

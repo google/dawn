@@ -427,6 +427,8 @@ class FunctionEmitter {
   ParserImpl* parser() { return &parser_impl_; }
 
   /// Emits the entry point as a wrapper around its implementation function.
+  /// Pipeline inputs become formal parameters, and pipeline outputs become
+  /// return values.
   /// @returns false if emission failed.
   bool EmitEntryPointAsWrapper();
 
