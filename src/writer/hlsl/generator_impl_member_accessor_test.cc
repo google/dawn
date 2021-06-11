@@ -184,8 +184,6 @@ TEST_P(HlslGeneratorImplTest_MemberAccessor_StorageBufferLoad, Test) {
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_THAT(result(), HasSubstr(p.expected));
-
-  Validate();
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -259,8 +257,6 @@ TEST_P(HlslGeneratorImplTest_MemberAccessor_StorageBufferStore, Test) {
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_THAT(result(), HasSubstr(p.expected));
-
-  Validate();
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -361,8 +357,6 @@ void main() {
 
 )";
   EXPECT_EQ(result(), expected);
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -399,8 +393,6 @@ void main() {
 
 )";
   EXPECT_EQ(result(), expected);
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -545,8 +537,6 @@ void main() {
 
 )";
   EXPECT_EQ(result(), expected);
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -593,8 +583,6 @@ void main() {
 
 )";
   EXPECT_EQ(result(), expected);
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -641,8 +629,6 @@ void main() {
 
 )";
   EXPECT_EQ(result(), expected);
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -689,8 +675,6 @@ void main() {
 
 )";
   EXPECT_EQ(result(), expected);
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_MultiLevel) {
@@ -733,8 +717,6 @@ void main() {
 
 )";
   EXPECT_EQ(result(), expected);
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -781,8 +763,6 @@ void main() {
 
 )";
   EXPECT_EQ(result(), expected);
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, Swizzle_xyz) {
@@ -794,8 +774,6 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, Swizzle_xyz) {
   GeneratorImpl& gen = SanitizeAndBuild();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_THAT(result(), HasSubstr("my_vec.xyz"));
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, Swizzle_gbr) {
@@ -807,8 +785,6 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, Swizzle_gbr) {
   GeneratorImpl& gen = SanitizeAndBuild();
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_THAT(result(), HasSubstr("my_vec.gbr"));
-
-  Validate();
 }
 
 }  // namespace

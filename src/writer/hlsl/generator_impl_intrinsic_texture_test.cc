@@ -375,8 +375,6 @@ TEST_P(HlslGeneratorIntrinsicTextureTest, Call) {
 
   EXPECT_THAT(result(), HasSubstr(expected.pre));
   EXPECT_THAT(result(), HasSubstr(expected.out));
-
-  Validate();
 }
 
 INSTANTIATE_TEST_SUITE_P(

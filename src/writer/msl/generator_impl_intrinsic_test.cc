@@ -365,8 +365,6 @@ kernel void func() {
 }
 
 )");
-
-  Validate();
 }
 
 }  // namespace

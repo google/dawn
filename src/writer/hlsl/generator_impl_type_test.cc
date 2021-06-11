@@ -367,8 +367,6 @@ TEST_P(HlslDepthTexturesTest, Emit) {
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_THAT(result(), HasSubstr(params.result));
-
-  Validate();
 }
 INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest_Type,
@@ -425,8 +423,6 @@ TEST_P(HlslSampledTexturesTest, Emit) {
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_THAT(result(), HasSubstr(params.result));
-
-  Validate();
 }
 INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest_Type,
@@ -567,8 +563,6 @@ TEST_P(HlslStorageTexturesTest, Emit) {
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_THAT(result(), HasSubstr(params.result));
-
-  Validate();
 }
 INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest_Type,

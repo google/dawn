@@ -504,8 +504,6 @@ void main() {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, WorkgroupBarrier) {
@@ -523,8 +521,6 @@ void main() {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Ignore) {
@@ -549,8 +545,6 @@ void main() {
 }
 
 )");
-
-  Validate();
 }
 
 }  // namespace

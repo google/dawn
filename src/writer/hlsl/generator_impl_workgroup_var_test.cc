@@ -34,8 +34,6 @@ TEST_F(HlslGeneratorImplTest_WorkgroupVar, Basic) {
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_THAT(result(), HasSubstr("groupshared float wg;\n"));
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_WorkgroupVar, Aliased) {
@@ -49,8 +47,6 @@ TEST_F(HlslGeneratorImplTest_WorkgroupVar, Aliased) {
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_THAT(result(), HasSubstr("groupshared float wg;\n"));
-
-  Validate();
 }
 
 }  // namespace

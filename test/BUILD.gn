@@ -94,7 +94,6 @@ source_set("tint_unittests_main") {
       ":tint_unittests_msl_writer_src",
       ":tint_unittests_spv_reader_src",
       "${tint_root_dir}/src:libtint",
-      "${tint_root_dir}/src:tint_val",
     ]
   }
 }
@@ -135,7 +134,7 @@ template("tint_unittests_source_set") {
     deps += [
       ":gmock_and_gtest",
       "${tint_root_dir}/src:libtint",
-      "${tint_root_dir}/src:tint_val",
+      "${tint_root_dir}/src:tint_utils_io",
     ]
   }
 }
@@ -549,7 +548,6 @@ tint_unittests_source_set("tint_unittests_msl_writer_src") {
     "../src/writer/msl/generator_impl_type_test.cc",
     "../src/writer/msl/generator_impl_unary_op_test.cc",
     "../src/writer/msl/generator_impl_variable_decl_statement_test.cc",
-    "../src/writer/msl/test_helper.cc",
     "../src/writer/msl/test_helper.h",
   ]
 
@@ -592,7 +590,6 @@ tint_unittests_source_set("tint_unittests_hlsl_writer_src") {
     "../src/writer/hlsl/generator_impl_unary_op_test.cc",
     "../src/writer/hlsl/generator_impl_variable_decl_statement_test.cc",
     "../src/writer/hlsl/generator_impl_workgroup_var_test.cc",
-    "../src/writer/hlsl/test_helper.cc",
     "../src/writer/hlsl/test_helper.h",
   ]
 

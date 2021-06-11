@@ -118,8 +118,6 @@ fragment tint_symbol_2 frag_main(tint_symbol_1 tint_symbol [[stage_in]]) {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Decoration_EntryPoint_WithInOut_Builtins) {
@@ -149,8 +147,6 @@ fragment tint_symbol_1 frag_main(float4 coord [[position]]) {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(MslGeneratorImplTest,
@@ -224,8 +220,6 @@ fragment void frag_main(float4 tint_symbol_3 [[position]], tint_symbol_4 tint_sy
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(MslGeneratorImplTest,
@@ -293,8 +287,6 @@ vertex tint_symbol_2 vert_main2() {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(MslGeneratorImplTest,

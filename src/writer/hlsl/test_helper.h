@@ -23,23 +23,11 @@
 #include "src/transform/hlsl.h"
 #include "src/transform/manager.h"
 #include "src/transform/renamer.h"
-#include "src/val/val.h"
 #include "src/writer/hlsl/generator_impl.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
-
-/// EnableHLSLValidation enables verification of HLSL shaders by running DXC and
-/// checking no errors are reported.
-/// @param dxc_path the path to the DXC executable
-void EnableHLSLValidation(const char* dxc_path);
-
-/// Validate attempts to compile the shader with DXC if found on PATH.
-/// @param program the HLSL program
-/// @param generator the HLSL generator
-/// @return the result of the compile
-val::Result Validate(Program* program, GeneratorImpl* generator);
 
 /// Helper class for testing
 template <typename BODY>
@@ -104,19 +92,6 @@ class TestHelperBase : public BODY, public ProgramBuilder {
     *program = std::move(result.program);
     gen_ = std::make_unique<GeneratorImpl>(program.get());
     return *gen_;
-  }
-
-  /// Validate passes the generated HLSL from the generator to the DXC compiler
-  /// on `PATH` for checking the program can be compiled.
-  /// If DXC finds problems the test will fail.
-  /// If DXC is not on `PATH` then Validate() does nothing.
-  void Validate() const {
-    auto res = hlsl::Validate(program.get(), gen_.get());
-    if (res.failed) {
-      FAIL() << "HLSL Validation failed.\n\n"
-             << res.source << "\n\n"
-             << res.output;
-    }
   }
 
   /// @returns the result string

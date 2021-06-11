@@ -96,8 +96,6 @@ TEST_F(HlslGeneratorImplTest_Function,
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function, PtrParameter) {
@@ -115,8 +113,6 @@ TEST_F(HlslGeneratorImplTest_Function, PtrParameter) {
 }
 
 )"));
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
@@ -145,8 +141,6 @@ tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
@@ -178,8 +172,6 @@ tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
@@ -252,8 +244,6 @@ void frag_main(tint_symbol_3 tint_symbol_2) {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
@@ -320,8 +310,6 @@ tint_symbol_2 vert_main2() {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
@@ -374,8 +362,6 @@ void frag_main() {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
@@ -416,8 +402,6 @@ void frag_main() {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
@@ -461,8 +445,6 @@ void frag_main() {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
@@ -505,8 +487,6 @@ void frag_main() {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
@@ -546,8 +526,6 @@ void frag_main() {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
@@ -588,8 +566,6 @@ void frag_main() {
 }
 
 )");
-
-  Validate();
 }
 
 // TODO(crbug.com/tint/697): Remove this test
@@ -652,8 +628,6 @@ ep_1_out ep_1(ep_1_in tint_in) {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
@@ -695,8 +669,6 @@ ep_1_out ep_1() {
 }
 
 )");
-
-  Validate();
 }
 
 // TODO(crbug.com/tint/697): Remove this test
@@ -751,8 +723,6 @@ ep_1_out ep_1(ep_1_in tint_in) {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
@@ -801,8 +771,6 @@ void frag_main() {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
@@ -850,8 +818,6 @@ void frag_main() {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
@@ -891,8 +857,6 @@ ep_1_out ep_1() {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
@@ -930,8 +894,6 @@ void main() {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
@@ -951,8 +913,6 @@ void main() {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
@@ -978,8 +938,6 @@ void main() {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
@@ -1014,8 +972,6 @@ void main() {
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
@@ -1112,8 +1068,6 @@ void b() {
 }
 
 )");
-
-  Validate();
 }
 
 }  // namespace

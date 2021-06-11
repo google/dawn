@@ -119,7 +119,7 @@ cmake --build . --config %BUILD_TYPE% || goto :error
 
 call :status "Running tint_unittests"
 @echo on
-%BUILD_TYPE%\tint_unittests.exe --validate-hlsl || goto :error
+%BUILD_TYPE%\tint_unittests.exe || goto :error
 @echo off
 
 call :status "Testing test/test-all.sh"

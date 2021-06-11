@@ -22,22 +22,11 @@
 #include "gtest/gtest.h"
 #include "src/program_builder.h"
 #include "src/transform/msl.h"
-#include "src/val/val.h"
 #include "src/writer/msl/generator_impl.h"
 
 namespace tint {
 namespace writer {
 namespace msl {
-
-/// Enables verification of MSL shaders by running the Metal compiler and
-/// checking no errors are reported.
-/// @param xcrun_path the path to the `xcrun` executable
-void EnableMSLValidation(const char* xcrun_path);
-
-/// Validate attempts to compile the shader with DXC if found on PATH.
-/// @param program the MSL program
-/// @return the result of the compile
-val::Result Validate(Program* program);
 
 /// Helper class for testing
 template <typename BASE>
@@ -94,22 +83,6 @@ class TestHelperBase : public BASE, public ProgramBuilder {
     *program = std::move(result.program);
     gen_ = std::make_unique<GeneratorImpl>(program.get());
     return *gen_;
-  }
-
-  /// Validate generates MSL code for the current contents of `program` and
-  /// passes the output of the generator to the XCode SDK Metal compiler.
-  ///
-  /// If the Metal compiler finds problems, then any GTest test case that
-  /// invokes this function test will fail.
-  /// This function does nothing, if the Metal compiler path has not been
-  /// configured by calling `EnableMSLValidation()`.
-  void Validate() {
-    auto res = msl::Validate(program.get());
-    if (res.failed) {
-      FAIL() << "MSL Validation failed.\n\n"
-             << res.source << "\n\n"
-             << res.output;
-    }
   }
 
   /// The program built with a call to Build()
