@@ -6,9 +6,8 @@ struct S {
 };
 
 kernel void tint_symbol() {
-  thread S tint_symbol_2 = {};
-  thread S* const tint_symbol_1 = &(tint_symbol_2);
-  int const i = (*(tint_symbol_1)).i;
+  thread S tint_symbol_1 = {};
+  int const i = tint_symbol_1.i;
   return;
 }
 

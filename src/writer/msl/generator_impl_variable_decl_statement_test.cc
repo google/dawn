@@ -120,7 +120,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("thread float tint_symbol_2 = 0.0f;\n"));
+  EXPECT_THAT(gen.result(), HasSubstr("thread float tint_symbol_1 = 0.0f;\n"));
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
@@ -133,7 +133,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_THAT(gen.result(),
-              HasSubstr("thread float tint_symbol_2 = initializer;\n"));
+              HasSubstr("thread float tint_symbol_1 = initializer;\n"));
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Workgroup) {
@@ -147,7 +147,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Workgroup) {
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_THAT(gen.result(),
-              HasSubstr("threadgroup float tint_symbol_2 = 0.0f;\n"));
+              HasSubstr("threadgroup float tint_symbol_1 = 0.0f;\n"));
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {

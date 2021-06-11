@@ -36,11 +36,9 @@ fn main() {
   auto* expect = R"(
 [[stage(compute)]]
 fn main() {
-  [[internal(disable_validation__function_var_storage_class)]] var<workgroup> tint_symbol_1 : f32;
-  let tint_symbol = &(tint_symbol_1);
-  [[internal(disable_validation__function_var_storage_class)]] var<private> tint_symbol_3 : f32;
-  let tint_symbol_2 = &(tint_symbol_3);
-  *(tint_symbol) = *(tint_symbol_2);
+  [[internal(disable_validation__function_var_storage_class)]] var<workgroup> tint_symbol : f32;
+  [[internal(disable_validation__function_var_storage_class)]] var<private> tint_symbol_1 : f32;
+  tint_symbol = tint_symbol_1;
 }
 )";
 
@@ -91,11 +89,9 @@ fn foo(a : f32, tint_symbol_2 : ptr<private, f32>, tint_symbol_3 : ptr<workgroup
 
 [[stage(compute)]]
 fn main() {
-  [[internal(disable_validation__function_var_storage_class)]] var<private> tint_symbol_5 : f32;
-  let tint_symbol_4 = &(tint_symbol_5);
-  [[internal(disable_validation__function_var_storage_class)]] var<workgroup> tint_symbol_7 : f32;
-  let tint_symbol_6 = &(tint_symbol_7);
-  foo(1.0, tint_symbol_4, tint_symbol_6);
+  [[internal(disable_validation__function_var_storage_class)]] var<private> tint_symbol_4 : f32;
+  [[internal(disable_validation__function_var_storage_class)]] var<workgroup> tint_symbol_5 : f32;
+  foo(1.0, &(tint_symbol_4), &(tint_symbol_5));
 }
 )";
 
@@ -118,11 +114,9 @@ fn main() {
   auto* expect = R"(
 [[stage(compute)]]
 fn main() {
-  [[internal(disable_validation__function_var_storage_class)]] var<private> tint_symbol_1 : f32 = 1.0;
-  let tint_symbol = &(tint_symbol_1);
-  [[internal(disable_validation__function_var_storage_class)]] var<private> tint_symbol_3 : f32 = f32();
-  let tint_symbol_2 = &(tint_symbol_3);
-  let x : f32 = (*(tint_symbol) + *(tint_symbol_2));
+  [[internal(disable_validation__function_var_storage_class)]] var<private> tint_symbol : f32 = 1.0;
+  [[internal(disable_validation__function_var_storage_class)]] var<private> tint_symbol_1 : f32 = f32();
+  let x : f32 = (tint_symbol + tint_symbol_1);
 }
 )";
 
@@ -148,12 +142,10 @@ fn main() {
   auto* expect = R"(
 [[stage(compute)]]
 fn main() {
-  [[internal(disable_validation__function_var_storage_class)]] var<private> tint_symbol_1 : f32;
-  let tint_symbol = &(tint_symbol_1);
-  [[internal(disable_validation__function_var_storage_class)]] var<workgroup> tint_symbol_3 : f32;
-  let tint_symbol_2 = &(tint_symbol_3);
-  let p_ptr : ptr<private, f32> = &(*(tint_symbol));
-  let w_ptr : ptr<workgroup, f32> = &(*(tint_symbol_2));
+  [[internal(disable_validation__function_var_storage_class)]] var<private> tint_symbol : f32;
+  [[internal(disable_validation__function_var_storage_class)]] var<workgroup> tint_symbol_1 : f32;
+  let p_ptr : ptr<private, f32> = &(tint_symbol);
+  let w_ptr : ptr<workgroup, f32> = &(tint_symbol_1);
   let x : f32 = (*(p_ptr) + *(w_ptr));
   *(p_ptr) = x;
 }

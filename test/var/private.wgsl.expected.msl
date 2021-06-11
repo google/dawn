@@ -25,27 +25,23 @@ void outer(thread int* const tint_symbol_4, thread int* const tint_symbol_5) {
 }
 
 kernel void main1() {
-  thread int tint_symbol_7 = 0;
-  thread int* const tint_symbol_6 = &(tint_symbol_7);
-  *(tint_symbol_6) = 42;
-  uses_a(tint_symbol_6);
+  thread int tint_symbol_6 = 0;
+  tint_symbol_6 = 42;
+  uses_a(&(tint_symbol_6));
   return;
 }
 
 kernel void main2() {
-  thread int tint_symbol_9 = 0;
-  thread int* const tint_symbol_8 = &(tint_symbol_9);
-  *(tint_symbol_8) = 7;
-  uses_b(tint_symbol_8);
+  thread int tint_symbol_7 = 0;
+  tint_symbol_7 = 7;
+  uses_b(&(tint_symbol_7));
   return;
 }
 
 kernel void main3() {
-  thread int tint_symbol_11 = 0;
-  thread int* const tint_symbol_10 = &(tint_symbol_11);
-  thread int tint_symbol_13 = 0;
-  thread int* const tint_symbol_12 = &(tint_symbol_13);
-  outer(tint_symbol_10, tint_symbol_12);
+  thread int tint_symbol_8 = 0;
+  thread int tint_symbol_9 = 0;
+  outer(&(tint_symbol_8), &(tint_symbol_9));
   no_uses();
   return;
 }

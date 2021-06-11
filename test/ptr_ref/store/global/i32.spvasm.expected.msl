@@ -2,10 +2,9 @@
 
 using namespace metal;
 kernel void tint_symbol() {
-  thread int tint_symbol_2 = 0;
-  thread int* const tint_symbol_1 = &(tint_symbol_2);
-  *(tint_symbol_1) = 123;
-  *(tint_symbol_1) = ((100 + 20) + 3);
+  thread int tint_symbol_1 = 0;
+  tint_symbol_1 = 123;
+  tint_symbol_1 = ((100 + 20) + 3);
   return;
 }
 
