@@ -266,7 +266,7 @@ TEST_F(ResolverTest, Stmt_Switch) {
 
 TEST_F(ResolverTest, Stmt_Call) {
   ast::VariableList params;
-  Func("my_func", params, ty.f32(), {Return(0.0f)}, ast::DecorationList{});
+  Func("my_func", params, ty.void_(), {Return()}, ast::DecorationList{});
 
   auto* expr = Call("my_func");
 
@@ -276,7 +276,7 @@ TEST_F(ResolverTest, Stmt_Call) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
-  EXPECT_TRUE(TypeOf(expr)->Is<sem::F32>());
+  EXPECT_TRUE(TypeOf(expr)->Is<sem::Void>());
   EXPECT_EQ(StmtOf(expr), call);
 }
 

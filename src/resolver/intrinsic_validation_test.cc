@@ -53,8 +53,7 @@ TEST_F(ResolverIntrinsicValidationTest, InvalidPipelineStageDirect) {
 
   auto* dpdx = create<ast::CallExpression>(Source{{3, 4}}, Expr("dpdx"),
                                            ast::ExpressionList{Expr(1.0f)});
-  Func(Source{{1, 2}}, "func", ast::VariableList{}, ty.void_(),
-       {create<ast::CallStatement>(dpdx)},
+  Func(Source{{1, 2}}, "func", ast::VariableList{}, ty.void_(), {Ignore(dpdx)},
        {Stage(ast::PipelineStage::kCompute)});
 
   EXPECT_FALSE(r()->Resolve());
@@ -70,18 +69,16 @@ TEST_F(ResolverIntrinsicValidationTest, InvalidPipelineStageIndirect) {
 
   auto* dpdx = create<ast::CallExpression>(Source{{3, 4}}, Expr("dpdx"),
                                            ast::ExpressionList{Expr(1.0f)});
-  Func(Source{{1, 2}}, "f0", ast::VariableList{}, ty.void_(),
-       {create<ast::CallStatement>(dpdx)});
+  Func(Source{{1, 2}}, "f0", ast::VariableList{}, ty.void_(), {Ignore(dpdx)});
 
   Func(Source{{3, 4}}, "f1", ast::VariableList{}, ty.void_(),
-       {create<ast::CallStatement>(Call("f0"))});
+       {Ignore(Call("f0"))});
 
   Func(Source{{5, 6}}, "f2", ast::VariableList{}, ty.void_(),
-       {create<ast::CallStatement>(Call("f1"))});
+       {Ignore(Call("f1"))});
 
   Func(Source{{7, 8}}, "main", ast::VariableList{}, ty.void_(),
-       {create<ast::CallStatement>(Call("f2"))},
-       {Stage(ast::PipelineStage::kCompute)});
+       {Ignore(Call("f2"))}, {Stage(ast::PipelineStage::kCompute)});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),

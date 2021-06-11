@@ -50,7 +50,7 @@ fn test() -> u32 {
 
 [[stage(vertex)]]
 fn entry() -> [[builtin(position)]] vec4<f32>  {
-  test();
+  ignore(test());
   return vec4<f32>();
 }
 )";
@@ -64,7 +64,7 @@ fn tint_symbol_1() -> u32 {
 
 [[stage(vertex)]]
 fn tint_symbol_2() -> [[builtin(position)]] vec4<f32> {
-  tint_symbol_1();
+  ignore(tint_symbol_1());
   return vec4<f32>();
 }
 )";

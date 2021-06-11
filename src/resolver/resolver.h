@@ -39,6 +39,7 @@ class BinaryExpression;
 class BitcastExpression;
 class CallExpression;
 class CaseStatement;
+class CallStatement;
 class ConstructorExpression;
 class Function;
 class IdentifierExpression;
@@ -255,6 +256,7 @@ class Resolver {
                                      uint32_t el_align,
                                      const Source& source);
   bool ValidateAssignment(const ast::AssignmentStatement* a);
+  bool ValidateCallStatement(ast::CallStatement* stmt);
   bool ValidateEntryPoint(const ast::Function* func, const FunctionInfo* info);
   bool ValidateFunction(const ast::Function* func, const FunctionInfo* info);
   bool ValidateGlobalVariable(const VariableInfo* var);

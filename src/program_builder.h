@@ -26,6 +26,7 @@
 #include "src/ast/bool.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/call_expression.h"
+#include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/depth_texture.h"
 #include "src/ast/external_texture.h"
@@ -1424,6 +1425,14 @@ class ProgramBuilder {
   ast::CallExpression* Call(NAME&& func, ARGS&&... args) {
     return create<ast::CallExpression>(Expr(func),
                                        ExprList(std::forward<ARGS>(args)...));
+  }
+
+  /// @param expr the expression to ignore
+  /// @returns a `ast::CallStatement` that calls the `ignore` intrinsic which is
+  /// passed the single `expr` argument
+  template <typename EXPR>
+  ast::CallStatement* Ignore(EXPR&& expr) {
+    return create<ast::CallStatement>(Call("ignore", Expr(expr)));
   }
 
   /// @param lhs the left hand argument to the addition operation

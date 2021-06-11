@@ -180,7 +180,7 @@ TEST_P(MslIntrinsicTest, Emit) {
 
   auto* call = GenerateCall(param.intrinsic, param.type, this);
   ASSERT_NE(nullptr, call) << "Unhandled intrinsic";
-  Func("func", {}, ty.void_(), {create<ast::CallStatement>(call)},
+  Func("func", {}, ty.void_(), {Ignore(call)},
        {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   GeneratorImpl& gen = Build();
@@ -346,8 +346,7 @@ TEST_F(MslGeneratorImplTest, Ignore) {
   Func("f", {Param("a", ty.i32()), Param("b", ty.i32()), Param("c", ty.i32())},
        ty.i32(), {Return(Mul(Add("a", "b"), "c"))});
 
-  Func("func", {}, ty.void_(),
-       {create<ast::CallStatement>(Call("ignore", Call("f", 1, 2, 3)))},
+  Func("func", {}, ty.void_(), {Ignore(Call("f", 1, 2, 3))},
        {Stage(ast::PipelineStage::kCompute)});
 
   GeneratorImpl& gen = Build();

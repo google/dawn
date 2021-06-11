@@ -2755,8 +2755,8 @@ TEST_P(InspectorGetMultisampledTextureResourceBindingsTestWithParam,
 
   Func("ep", ast::VariableList(), ty.void_(),
        ast::StatementList{
-           create<ast::CallStatement>(Call("textureLoad", "foo_texture",
-                                           "foo_coords", "foo_sample_index")),
+           Ignore(Call("textureLoad", "foo_texture", "foo_coords",
+                       "foo_sample_index")),
        },
        ast::DecorationList{
            Stage(ast::PipelineStage::kFragment),
@@ -3013,8 +3013,7 @@ TEST_P(InspectorGetDepthTextureResourceBindingsTestWithParam,
 
   Func("ep", ast::VariableList(), ty.void_(),
        ast::StatementList{
-           create<ast::CallStatement>(
-               Call("textureDimensions", "dt", "dt_level")),
+           Ignore(Call("textureDimensions", "dt", "dt_level")),
        },
        ast::DecorationList{
            Stage(ast::PipelineStage::kFragment),
@@ -3056,7 +3055,7 @@ TEST_F(InspectorGetExternalTextureResourceBindingsTest, Simple) {
 
   Func("ep", ast::VariableList(), ty.void_(),
        ast::StatementList{
-           create<ast::CallStatement>(Call("textureDimensions", "et")),
+           Ignore(Call("textureDimensions", "et")),
        },
        ast::DecorationList{
            Stage(ast::PipelineStage::kFragment),

@@ -414,7 +414,7 @@ TEST_P(IntrinsicDeriveTest, Call_Derivative_Scalar) {
   auto* var = Global("v", ty.f32(), ast::StorageClass::kPrivate);
 
   auto* expr = Call(param.name, "v");
-  Func("func", {}, ty.void_(), {create<ast::CallStatement>(expr)},
+  Func("func", {}, ty.void_(), {Ignore(expr)},
        {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   spirv::Builder& b = Build();
@@ -440,7 +440,7 @@ TEST_P(IntrinsicDeriveTest, Call_Derivative_Vector) {
   auto* var = Global("v", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
   auto* expr = Call(param.name, "v");
-  Func("func", {}, ty.void_(), {create<ast::CallStatement>(expr)},
+  Func("func", {}, ty.void_(), {Ignore(expr)},
        {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   spirv::Builder& b = Build();
@@ -538,8 +538,8 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare_Twice) {
   auto* expr2 = Call("textureSampleCompare", "texture", "sampler",
                      vec2<f32>(1.0f, 2.0f), 2.0f);
 
-  Func("f1", {}, ty.void_(), {create<ast::CallStatement>(expr1)}, {});
-  Func("f2", {}, ty.void_(), {create<ast::CallStatement>(expr2)}, {});
+  Func("f1", {}, ty.void_(), {Ignore(expr1)}, {});
+  Func("f2", {}, ty.void_(), {Ignore(expr2)}, {});
 
   spirv::Builder& b = Build();
 
@@ -1414,7 +1414,7 @@ TEST_F(IntrinsicBuilderTest, Call_Modf) {
   Func("a_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
            Decl(out),
-           create<ast::CallStatement>(expr),
+           Ignore(expr),
        },
        ast::DecorationList{
            Stage(ast::PipelineStage::kFragment),
@@ -1425,7 +1425,7 @@ TEST_F(IntrinsicBuilderTest, Call_Modf) {
   ASSERT_TRUE(b.Build()) << b.error();
   auto got = DumpBuilder(b);
   auto* expect = R"(OpCapability Shader
-%11 = OpExtInstImport "GLSL.std.450"
+%12 = OpExtInstImport "GLSL.std.450"
 OpMemoryModel Logical GLSL450
 OpEntryPoint Fragment %3 "a_func"
 OpExecutionMode %3 OriginUpperLeft
@@ -1437,13 +1437,13 @@ OpName %5 "out"
 %7 = OpTypeVector %8 2
 %6 = OpTypePointer Function %7
 %9 = OpConstantNull %7
-%12 = OpConstant %8 1
-%13 = OpConstant %8 2
-%14 = OpConstantComposite %7 %12 %13
+%13 = OpConstant %8 1
+%14 = OpConstant %8 2
+%15 = OpConstantComposite %7 %13 %14
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpVariable %6 Function %9
-%10 = OpExtInst %7 %11 Modf %14 %5
+%11 = OpExtInst %7 %12 Modf %15 %5
 OpReturn
 OpFunctionEnd
 )";
@@ -1458,7 +1458,7 @@ TEST_F(IntrinsicBuilderTest, Call_Frexp) {
   Func("a_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
            Decl(out),
-           create<ast::CallStatement>(expr),
+           Ignore(expr),
        },
        ast::DecorationList{
            Stage(ast::PipelineStage::kFragment),
@@ -1469,7 +1469,7 @@ TEST_F(IntrinsicBuilderTest, Call_Frexp) {
   ASSERT_TRUE(b.Build()) << b.error();
   auto got = DumpBuilder(b);
   auto* expect = R"(OpCapability Shader
-%13 = OpExtInstImport "GLSL.std.450"
+%14 = OpExtInstImport "GLSL.std.450"
 OpMemoryModel Logical GLSL450
 OpEntryPoint Fragment %3 "a_func"
 OpExecutionMode %3 OriginUpperLeft
@@ -1481,15 +1481,15 @@ OpName %5 "out"
 %7 = OpTypeVector %8 2
 %6 = OpTypePointer Function %7
 %9 = OpConstantNull %7
-%12 = OpTypeFloat 32
-%11 = OpTypeVector %12 2
-%14 = OpConstant %12 1
-%15 = OpConstant %12 2
-%16 = OpConstantComposite %11 %14 %15
+%13 = OpTypeFloat 32
+%12 = OpTypeVector %13 2
+%15 = OpConstant %13 1
+%16 = OpConstant %13 2
+%17 = OpConstantComposite %12 %15 %16
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpVariable %6 Function %9
-%10 = OpExtInst %11 %13 Frexp %16 %5
+%11 = OpExtInst %12 %14 Frexp %17 %5
 OpReturn
 OpFunctionEnd
 )";
@@ -1585,7 +1585,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_DEPRECATED) {
 
   Func("a_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::CallStatement>(expr),
+           Ignore(expr),
        },
        ast::DecorationList{
            Stage(ast::PipelineStage::kFragment),
@@ -1604,12 +1604,12 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_DEPRECATED) {
 %1 = OpVariable %2 StorageBuffer
 %7 = OpTypeVoid
 %6 = OpTypeFunction %7
-%11 = OpTypeInt 32 0
+%12 = OpTypeInt 32 0
 )";
   auto got_types = DumpInstructions(b.types());
   EXPECT_EQ(expected_types, got_types);
 
-  auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 0
+  auto* expected_instructions = R"(%11 = OpArrayLength %12 %1 0
 )";
   auto got_instructions = DumpInstructions(b.functions()[0].instructions());
   EXPECT_EQ(expected_instructions, got_instructions);
@@ -1635,7 +1635,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct_DEPRECATED) {
 
   Func("a_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::CallStatement>(expr),
+           Ignore(expr),
        },
        ast::DecorationList{
            Stage(ast::PipelineStage::kFragment),
@@ -1654,12 +1654,12 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct_DEPRECATED) {
 %1 = OpVariable %2 StorageBuffer
 %7 = OpTypeVoid
 %6 = OpTypeFunction %7
-%11 = OpTypeInt 32 0
+%12 = OpTypeInt 32 0
 )";
   auto got_types = DumpInstructions(b.types());
   EXPECT_EQ(expected_types, got_types);
 
-  auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 1
+  auto* expected_instructions = R"(%11 = OpArrayLength %12 %1 1
 )";
   auto got_instructions = DumpInstructions(b.functions()[0].instructions());
   EXPECT_EQ(expected_instructions, got_instructions);
@@ -1680,7 +1680,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
 
   Func("a_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::CallStatement>(expr),
+           Ignore(expr),
        },
        ast::DecorationList{
            Stage(ast::PipelineStage::kFragment),
@@ -1699,12 +1699,12 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
 %1 = OpVariable %2 StorageBuffer
 %7 = OpTypeVoid
 %6 = OpTypeFunction %7
-%11 = OpTypeInt 32 0
+%12 = OpTypeInt 32 0
 )";
   auto got_types = DumpInstructions(b.types());
   EXPECT_EQ(expected_types, got_types);
 
-  auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 0
+  auto* expected_instructions = R"(%11 = OpArrayLength %12 %1 0
 )";
   auto got_instructions = DumpInstructions(b.functions()[0].instructions());
   EXPECT_EQ(expected_instructions, got_instructions);
@@ -1729,7 +1729,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
 
   Func("a_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::CallStatement>(expr),
+           Ignore(expr),
        },
        ast::DecorationList{
            Stage(ast::PipelineStage::kFragment),
@@ -1748,12 +1748,12 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
 %1 = OpVariable %2 StorageBuffer
 %7 = OpTypeVoid
 %6 = OpTypeFunction %7
-%11 = OpTypeInt 32 0
+%12 = OpTypeInt 32 0
 )";
   auto got_types = DumpInstructions(b.types());
   EXPECT_EQ(expected_types, got_types);
 
-  auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 1
+  auto* expected_instructions = R"(%11 = OpArrayLength %12 %1 1
 )";
   auto got_instructions = DumpInstructions(b.functions()[0].instructions());
   EXPECT_EQ(expected_instructions, got_instructions);
@@ -1778,7 +1778,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_ViaLets) {
        ast::StatementList{
            Decl(p),
            Decl(p2),
-           create<ast::CallStatement>(expr),
+           Ignore(expr),
        },
        ast::DecorationList{
            Stage(ast::PipelineStage::kFragment),
@@ -1797,12 +1797,12 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_ViaLets) {
 %1 = OpVariable %2 StorageBuffer
 %7 = OpTypeVoid
 %6 = OpTypeFunction %7
-%11 = OpTypeInt 32 0
+%12 = OpTypeInt 32 0
 )";
   auto got_types = DumpInstructions(b.types());
   EXPECT_EQ(expected_types, got_types);
 
-  auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 0
+  auto* expected_instructions = R"(%11 = OpArrayLength %12 %1 0
 )";
   auto got_instructions = DumpInstructions(b.functions()[0].instructions());
   EXPECT_EQ(expected_instructions, got_instructions);
@@ -1839,7 +1839,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
            Decl(p),
            Decl(p2),
            Decl(p3),
-           create<ast::CallStatement>(expr),
+           Ignore(expr),
        },
        ast::DecorationList{
            Stage(ast::PipelineStage::kFragment),
@@ -1858,12 +1858,12 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
 %1 = OpVariable %2 StorageBuffer
 %7 = OpTypeVoid
 %6 = OpTypeFunction %7
-%11 = OpTypeInt 32 0
+%12 = OpTypeInt 32 0
 )";
   auto got_types = DumpInstructions(b.types());
   EXPECT_EQ(expected_types, got_types);
 
-  auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 0
+  auto* expected_instructions = R"(%11 = OpArrayLength %12 %1 0
 )";
   auto got_instructions = DumpInstructions(b.functions()[0].instructions());
   EXPECT_EQ(expected_instructions, got_instructions);

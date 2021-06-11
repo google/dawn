@@ -97,7 +97,7 @@ fn f1(p0 : f32, p1 : i32) -> f32 {
 
 [[stage(fragment)]]
 fn main() {
-  f1(1.0, 2);
+  ignore(f1(1.0, 2));
 }
 
 let declaration_order_check_0 : i32 = 1;

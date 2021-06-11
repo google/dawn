@@ -166,7 +166,7 @@ TEST_P(HlslIntrinsicTest, Emit) {
 
   auto* call = GenerateCall(param.intrinsic, param.type, this);
   ASSERT_NE(nullptr, call) << "Unhandled intrinsic";
-  Func("func", {}, ty.void_(), {create<ast::CallStatement>(call)},
+  Func("func", {}, ty.void_(), {Ignore(call)},
        {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   GeneratorImpl& gen = Build();
@@ -327,7 +327,7 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Frexp_Scalar_i32) {
   float tint_tmp;
   float tint_tmp_1 = frexp(1.0f, tint_tmp);
   exp = int(tint_tmp);
-  (void) tint_tmp_1;
+  tint_tmp_1;
 )"));
 }
 
@@ -343,7 +343,7 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Frexp_Vector_i32) {
   float3 tint_tmp;
   float3 tint_tmp_1 = frexp(float3(0.0f, 0.0f, 0.0f), tint_tmp);
   res = int3(tint_tmp);
-  (void) tint_tmp_1;
+  tint_tmp_1;
 )"));
 }
 

@@ -82,7 +82,7 @@ TEST_F(BuilderTest, Statement_Call) {
   auto* func =
       Func("main", {}, ty.void_(), ast::StatementList{}, ast::DecorationList{});
 
-  auto* expr = create<ast::CallStatement>(Call("a_func", 1.f, 1.f));
+  auto* expr = Ignore(Call("a_func", 1.f, 1.f));
 
   WrapInFunction(expr);
 
@@ -100,7 +100,7 @@ OpName %10 "main"
 %1 = OpTypeFunction %2 %2 %2
 %9 = OpTypeVoid
 %8 = OpTypeFunction %9
-%13 = OpConstant %2 1
+%14 = OpConstant %2 1
 %3 = OpFunction %2 None %1
 %4 = OpFunctionParameter %2
 %5 = OpFunctionParameter %2
@@ -110,7 +110,7 @@ OpReturnValue %7
 OpFunctionEnd
 %10 = OpFunction %9 None %8
 %11 = OpLabel
-%12 = OpFunctionCall %2 %3 %13 %13
+%13 = OpFunctionCall %2 %3 %14 %14
 OpReturn
 OpFunctionEnd
 )");

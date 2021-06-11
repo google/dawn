@@ -58,56 +58,6 @@ using u32 = builder::u32;
 
 using ResolverCallTest = ResolverTest;
 
-TEST_F(ResolverCallTest, Recursive_Invalid) {
-  // fn main() {main(); }
-
-  SetSource(Source::Location{12, 34});
-  auto* call_expr = Call("main");
-  ast::VariableList params0;
-
-  Func("main", params0, ty.void_(),
-       ast::StatementList{
-           create<ast::CallStatement>(call_expr),
-       },
-       ast::DecorationList{
-           Stage(ast::PipelineStage::kVertex),
-       });
-
-  EXPECT_FALSE(r()->Resolve());
-
-  EXPECT_EQ(r()->error(),
-            "12:34 error v-0004: recursion is not permitted. 'main' attempted "
-            "to call "
-            "itself.");
-}
-
-TEST_F(ResolverCallTest, Undeclared_Invalid) {
-  // fn main() {func(); return; }
-  // fn func() { return; }
-
-  SetSource(Source::Location{12, 34});
-  auto* call_expr = Call("func");
-  ast::VariableList params0;
-
-  Func("main", params0, ty.f32(),
-       ast::StatementList{
-           create<ast::CallStatement>(call_expr),
-           Return(),
-       },
-       ast::DecorationList{});
-
-  Func("func", params0, ty.f32(),
-       ast::StatementList{
-           Return(),
-       },
-       ast::DecorationList{});
-
-  EXPECT_FALSE(r()->Resolve());
-
-  EXPECT_EQ(r()->error(),
-            "12:34 error: v-0006: unable to find called function: func");
-}
-
 struct Params {
   builder::ast_expr_func_ptr create_value;
   builder::ast_type_func_ptr create_type;
@@ -151,42 +101,6 @@ TEST_F(ResolverCallTest, Valid) {
   WrapInFunction(call);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
-}
-
-TEST_F(ResolverCallTest, TooFewArgs) {
-  Func("foo", {Param(Sym(), ty.i32()), Param(Sym(), ty.f32())}, ty.void_(),
-       {Return()});
-  auto* call = Call(Source{{12, 34}}, "foo", 1);
-  WrapInFunction(call);
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error: too few arguments in call to 'foo', expected 2, got 1");
-}
-
-TEST_F(ResolverCallTest, TooManyArgs) {
-  Func("foo", {Param(Sym(), ty.i32()), Param(Sym(), ty.f32())}, ty.void_(),
-       {Return()});
-  auto* call = Call(Source{{12, 34}}, "foo", 1, 1.0f, 1.0f);
-  WrapInFunction(call);
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error: too many arguments in call to 'foo', expected 2, got 3");
-}
-
-TEST_F(ResolverCallTest, MismatchedArgs) {
-  Func("foo", {Param(Sym(), ty.i32()), Param(Sym(), ty.f32())}, ty.void_(),
-       {Return()});
-  auto* call = Call("foo", Expr(Source{{12, 34}}, true), 1.0f);
-  WrapInFunction(call);
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: type mismatch for argument 1 in call to 'foo', "
-            "expected 'i32', got 'bool'");
 }
 
 }  // namespace

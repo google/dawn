@@ -361,7 +361,7 @@ TEST_P(HlslGeneratorIntrinsicTextureTest, Call) {
 
   Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::CallStatement>(call),
+           Ignore(call),
        },
        ast::DecorationList{
            Stage(ast::PipelineStage::kFragment),

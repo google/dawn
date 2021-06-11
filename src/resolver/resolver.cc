@@ -1436,7 +1436,13 @@ bool Resolver::Statement(ast::Statement* stmt) {
   }
   if (auto* c = stmt->As<ast::CallStatement>()) {
     Mark(c->expr());
-    return Expression(c->expr());
+    if (!Expression(c->expr())) {
+      return false;
+    }
+    if (!ValidateCallStatement(c)) {
+      return false;
+    }
+    return true;
   }
   if (auto* c = stmt->As<ast::CaseStatement>()) {
     return CaseStatement(c);
@@ -1707,6 +1713,40 @@ bool Resolver::Call(ast::CallExpression* call) {
     }
   }
 
+  return true;
+}
+
+bool Resolver::ValidateCallStatement(ast::CallStatement* stmt) {
+  const sem::Type* return_type = nullptr;
+  // A function call is made to either a user declared function or an intrinsic.
+  // function_calls_ only maps CallExpression to user declared functions
+  auto it = function_calls_.find(stmt->expr());
+  if (it != function_calls_.end()) {
+    return_type = it->second.function->return_type;
+  } else {
+    // Must be an intrinsic call
+    auto* target = builder_->Sem().Get(stmt->expr())->Target();
+    if (auto* intrinsic = target->As<sem::Intrinsic>()) {
+      return_type = intrinsic->ReturnType();
+    } else {
+      TINT_ICE(diagnostics_) << "call target was not an intrinsic, but a "
+                             << intrinsic->TypeInfo().name;
+    }
+  }
+
+  if (!return_type->Is<sem::Void>()) {
+    // https://gpuweb.github.io/gpuweb/wgsl/#function-call-statement
+    // A function call statement executes a function call where the called
+    // function does not return a value. If the called function returns a value,
+    // that value must be consumed either through assignment, evaluation in
+    // another expression or through use of the ignore built-in function (see
+    // § 16.13 Value-steering functions).
+    diagnostics_.add_error(
+        "result of called function was not used. If this was intentional wrap "
+        "the function call in ignore()",
+        stmt->source());
+    return false;
+  }
   return true;
 }
 

@@ -3460,10 +3460,9 @@ TEST_P(IntrinsicTextureTest, Call) {
   auto* texture = param.buildTextureVariable(this);
   auto* sampler = param.buildSamplerVariable(this);
 
-  auto* call =
-      create<ast::CallExpression>(Expr(param.function), param.args(this));
+  auto* call = Call(param.function, param.args(this));
 
-  Func("func", {}, ty.void_(), {create<ast::CallStatement>(call)},
+  Func("func", {}, ty.void_(), {Ignore(call)},
        {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   spirv::Builder& b = Build();
@@ -3488,12 +3487,11 @@ TEST_P(IntrinsicTextureTest, ValidateSPIRV) {
   param.buildTextureVariable(this);
   param.buildSamplerVariable(this);
 
-  auto* call =
-      create<ast::CallExpression>(Expr(param.function), param.args(this));
+  auto* call = Call(param.function, param.args(this));
 
   Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::CallStatement>(call),
+           Ignore(call),
        },
        ast::DecorationList{
            Stage(ast::PipelineStage::kFragment),
@@ -3515,9 +3513,8 @@ TEST_P(IntrinsicTextureTest, OutsideFunction_IsError) {
   auto* texture = param.buildTextureVariable(this);
   auto* sampler = param.buildSamplerVariable(this);
 
-  auto* call =
-      create<ast::CallExpression>(Expr(param.function), param.args(this));
-  Func("func", {}, ty.void_(), {create<ast::CallStatement>(call)},
+  auto* call = Call(param.function, param.args(this));
+  Func("func", {}, ty.void_(), {Ignore(call)},
        {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   spirv::Builder& b = Build();
