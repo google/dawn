@@ -728,6 +728,208 @@ TEST_F(ResolverValidationTest, OffsetAndAlignAndSizeDecoration) {
             "decorations");
 }
 
+TEST_F(ResolverValidationTest, Expr_Constructor_Array_ZeroValue_Pass) {
+  // array<u32, 10>();
+  auto* tc = array<u32, 10>();
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve());
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Array_type_match) {
+  // array<u32, 3>(0u, 10u. 20u);
+  auto* tc =
+      array<u32, 3>(create<ast::ScalarConstructorExpression>(Literal(0u)),
+                    create<ast::ScalarConstructorExpression>(Literal(10u)),
+                    create<ast::ScalarConstructorExpression>(Literal(20u)));
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve());
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Array_type_Mismatch_U32F32) {
+  // array<u32, 3>(0u, 1.0f, 20u);
+  auto* tc = array<u32, 3>(
+      create<ast::ScalarConstructorExpression>(Literal(0u)),
+      create<ast::ScalarConstructorExpression>(Source{{12, 34}}, Literal(1.0f)),
+      create<ast::ScalarConstructorExpression>(Literal(20u)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in array constructor does not match array type: "
+            "expected 'u32', found 'f32'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Array_ScalarArgumentTypeMismatch_F32I32) {
+  // array<f32, 1>(1);
+  auto* tc = array<f32, 1>(
+      create<ast::ScalarConstructorExpression>(Source{{12, 34}}, Literal(1)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in array constructor does not match array type: "
+            "expected 'f32', found 'i32'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Array_ScalarArgumentTypeMismatch_U32I32) {
+  // array<u32, 6>(1, 0u, 0u, 0u, 0u, 0u);
+  auto* tc = array<u32, 1>(
+      create<ast::ScalarConstructorExpression>(Source{{12, 34}}, Literal(1)),
+      create<ast::ScalarConstructorExpression>(Literal(0u)),
+      create<ast::ScalarConstructorExpression>(Literal(0u)),
+      create<ast::ScalarConstructorExpression>(Literal(0u)),
+      create<ast::ScalarConstructorExpression>(Literal(0u)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in array constructor does not match array type: "
+            "expected 'u32', found 'i32'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Array_ScalarArgumentTypeMismatch_Vec2) {
+  // array<i32, 3>(1, vec2<i32>());
+  auto* tc = array<i32, 3>(create<ast::ScalarConstructorExpression>(Literal(1)),
+                           create<ast::TypeConstructorExpression>(
+                               Source{{12, 34}}, ty.vec2<i32>(), ExprList()));
+  WrapInFunction(tc);
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in array constructor does not match array type: "
+            "expected 'i32', found 'vec2<i32>'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_ArrayOfVector_SubElemTypeMismatch_I32U32) {
+  // array<vec3<i32>, 2>(vec3<i32>(), vec3<u32>());
+  auto* e0 = vec3<i32>();
+  SetSource(Source::Location({12, 34}));
+  auto* e1 = vec3<u32>();
+  auto* t = Construct(ty.array(ty.vec3<i32>(), 2), e0, e1);
+  WrapInFunction(t);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in array constructor does not match array type: "
+            "expected 'vec3<i32>', found 'vec3<u32>'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_ArrayOfVector_SubElemTypeMismatch_I32Bool) {
+  // array<vec3<i32>, 2>(vec3<i32>(), vec3<bool>(true, true, false));
+  SetSource(Source::Location({12, 34}));
+  auto* e0 = vec3<bool>(true, true, false);
+  auto* e1 = vec3<i32>();
+  auto* t = Construct(ty.array(ty.vec3<i32>(), 2), e0, e1);
+  WrapInFunction(t);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in array constructor does not match array type: "
+            "expected 'vec3<i32>', found 'vec3<bool>'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_ArrayOfArray_SubElemSizeMismatch) {
+  // array<array<i32, 2>, 2>(array<i32, 3>(), array<i32, 2>());
+  SetSource(Source::Location({12, 34}));
+  auto* e0 = array<i32, 3>();
+  auto* e1 = array<i32, 2>();
+  auto* t = Construct(ty.array(ty.array<i32, 2>(), 2), e0, e1);
+  WrapInFunction(t);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in array constructor does not match array type: "
+            "expected 'array<i32, 2>', found 'array<i32, 3>'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_ArrayOfArray_SubElemTypeMismatch) {
+  // array<array<i32, 2>, 2>(array<i32, 2>(), array<u32, 2>());
+  auto* e0 = array<i32, 2>();
+  SetSource(Source::Location({12, 34}));
+  auto* e1 = array<u32, 2>();
+  auto* t = Construct(ty.array(ty.array<i32, 2>(), 2), e0, e1);
+  WrapInFunction(t);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in array constructor does not match array type: "
+            "expected 'array<i32, 2>', found 'array<u32, 2>'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_ArrayOfMatrix_SubElemTypeMismatch) {
+  // array<mat2x2<f32>, 2>(mat2x2<f32>(), mat2x2<i32>());
+  auto* e0 = mat2x2<f32>();
+  SetSource(Source::Location({12, 34}));
+  auto* e1 = mat2x2<i32>();
+  auto* t = Construct(ty.array(ty.mat2x2<f32>(), 2), e0, e1);
+  WrapInFunction(t);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in array constructor does not match array type: "
+            "expected 'mat2x2<f32>', found 'mat2x2<i32>'");
+}
+TEST_F(ResolverValidationTest, Expr_Constructor_Array_TooFewElements) {
+  // array<i32, 4>(1, 2, 3);
+  SetSource(Source::Location({12, 34}));
+  auto* tc =
+      array<i32, 4>(create<ast::ScalarConstructorExpression>(Literal(1)),
+                    create<ast::ScalarConstructorExpression>(Literal(2)),
+                    create<ast::ScalarConstructorExpression>(Literal(3)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: array constructor has too few elements: expected 4, "
+            "found 3");
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Array_TooManyElements) {
+  // array<i32, 4>(1, 2, 3, 4, 5);
+  SetSource(Source::Location({12, 34}));
+  auto* tc =
+      array<i32, 4>(create<ast::ScalarConstructorExpression>(Literal(1)),
+                    create<ast::ScalarConstructorExpression>(Literal(2)),
+                    create<ast::ScalarConstructorExpression>(Literal(3)),
+                    create<ast::ScalarConstructorExpression>(Literal(4)),
+                    create<ast::ScalarConstructorExpression>(Literal(5)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: array constructor has too many "
+            "elements: expected 4, "
+            "found 5");
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Array_Runtime) {
+  // array<f32>(1);
+  auto* tc = array<i32>(
+      create<ast::ScalarConstructorExpression>(Source{{12, 34}}, Literal(1)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "error: cannot init a runtime-sized array");
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Array_RuntimeZeroValue) {
+  // array<f32>();
+  auto* tc = array<i32>();
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "error: cannot init a runtime-sized array");
+}
+
 TEST_F(ResolverValidationTest,
        Expr_Constructor_Vec2F32_Error_ScalarArgumentTypeMismatch) {
   auto* tc = vec2<f32>(

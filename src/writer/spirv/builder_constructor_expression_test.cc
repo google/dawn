@@ -1098,23 +1098,24 @@ TEST_F(SpvBuilderConstructorTest, Type_Array_5_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Array_2_Vec3) {
-  auto* cast =
-      array<f32, 2>(vec3<f32>(2.0f, 2.0f, 2.0f), vec3<f32>(2.0f, 2.0f, 2.0f));
-  WrapInFunction(cast);
-
+  auto* first = vec3<f32>(1.f, 2.f, 3.f);
+  auto* second = vec3<f32>(1.f, 2.f, 3.f);
+  auto* t = Construct(ty.array(ty.vec3<f32>(), 2), first, second);
+  WrapInFunction(t);
   spirv::Builder& b = Build();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateExpression(cast), 8u);
-
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%3 = OpTypeInt 32 0
-%4 = OpConstant %3 2
-%1 = OpTypeArray %2 %4
-%5 = OpTypeVector %2 3
-%6 = OpConstant %2 2
-%7 = OpConstantComposite %5 %6 %6 %6
-%8 = OpConstantComposite %1 %7 %7
+  EXPECT_EQ(b.GenerateExpression(t), 10u);
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypeVector %3 3
+%4 = OpTypeInt 32 0
+%5 = OpConstant %4 2
+%1 = OpTypeArray %2 %5
+%6 = OpConstant %3 1
+%7 = OpConstant %3 2
+%8 = OpConstant %3 3
+%9 = OpConstantComposite %2 %6 %7 %8
+%10 = OpConstantComposite %1 %9 %9
 )");
 }
 
@@ -1169,7 +1170,7 @@ TEST_F(SpvBuilderConstructorTest, CommonInitializer_Array_VecArray) {
   // different OpConstantComposite instructions.
   // crbug.com/tint/777
   auto* a1 = array<f32, 2>(1.0f, 2.0f);
-  auto* a2 = array<f32, 2>(vec2<f32>(1.0f, 2.0f), vec2<f32>(1.0f, 2.0f));
+  auto* a2 = vec2<f32>(1.0f, 2.0f);
   ast::StatementList stmts = {
       WrapInStatement(a1),
       WrapInStatement(a2),
@@ -1179,7 +1180,7 @@ TEST_F(SpvBuilderConstructorTest, CommonInitializer_Array_VecArray) {
 
   b.push_function(Function{});
   EXPECT_EQ(b.GenerateExpression(a1), 7u);
-  EXPECT_EQ(b.GenerateExpression(a2), 10u);
+  EXPECT_EQ(b.GenerateExpression(a2), 9u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %3 = OpTypeInt 32 0
@@ -1190,7 +1191,6 @@ TEST_F(SpvBuilderConstructorTest, CommonInitializer_Array_VecArray) {
 %7 = OpConstantComposite %1 %5 %6
 %8 = OpTypeVector %2 2
 %9 = OpConstantComposite %8 %5 %6
-%10 = OpConstantComposite %1 %9 %9
 )");
 }
 
@@ -1659,7 +1659,7 @@ TEST_F(SpvBuilderConstructorTest,
        IsConstructorConst_GlobalArrayWithAllConstConstructors) {
   // array<vec3<f32>, 2>(vec3<f32>(1.0, 2.0, 3.0), vec3<f32>(1.0, 2.0, 3.0))
   //   -> true
-  auto* t = Construct(ty.array(ty.vec2<f32>(), 2), vec3<f32>(1.f, 2.f, 3.f),
+  auto* t = Construct(ty.array(ty.vec3<f32>(), 2), vec3<f32>(1.f, 2.f, 3.f),
                       vec3<f32>(1.f, 2.f, 3.f));
   WrapInFunction(t);
 

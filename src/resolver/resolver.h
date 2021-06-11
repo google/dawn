@@ -275,6 +275,8 @@ class Resolver {
                                    const std::string& rhs_type_name);
   bool ValidateVectorConstructor(const ast::TypeConstructorExpression* ctor,
                                  const sem::Vector* vec_type);
+  bool ValidateArrayConstructor(const ast::TypeConstructorExpression* ctor,
+                                const sem::Array* arr_type);
   bool ValidateTypeDecl(const ast::TypeDecl* named_type) const;
   bool ValidateNoDuplicateDecorations(const ast::DecorationList& decorations);
 

@@ -1876,7 +1876,9 @@ bool Resolver::Constructor(ast::ConstructorExpression* expr) {
     if (auto* mat_type = type->As<sem::Matrix>()) {
       return ValidateMatrixConstructor(type_ctor, mat_type);
     }
-    // TODO(crbug.com/tint/634): Validate array constructor
+    if (auto* arr_type = type->As<sem::Array>()) {
+      return ValidateArrayConstructor(type_ctor, arr_type);
+    }
   } else if (auto* scalar_ctor = expr->As<ast::ScalarConstructorExpression>()) {
     Mark(scalar_ctor->literal());
     auto* type = TypeOf(scalar_ctor->literal());
@@ -1886,6 +1888,46 @@ bool Resolver::Constructor(ast::ConstructorExpression* expr) {
     SetType(expr, type);
   } else {
     TINT_ICE(diagnostics_) << "unexpected constructor expression type";
+  }
+  return true;
+}
+
+bool Resolver::ValidateArrayConstructor(
+    const ast::TypeConstructorExpression* ctor,
+    const sem::Array* array_type) {
+  auto& values = ctor->values();
+  auto* elem_type = array_type->ElemType();
+  for (auto* value : values) {
+    auto* value_type = TypeOf(value)->UnwrapRef();
+    if (value_type != elem_type) {
+      diagnostics_.add_error(
+          "type in array constructor does not match array type: "
+          "expected '" +
+              elem_type->FriendlyName(builder_->Symbols()) + "', found '" +
+              TypeNameOf(value) + "'",
+          value->source());
+      return false;
+    }
+  }
+
+  if (array_type->IsRuntimeSized()) {
+    diagnostics_.add_error("cannot init a runtime-sized array", ctor->source());
+    return false;
+  } else if (!values.empty() && (values.size() != array_type->Count())) {
+    std::string fm = values.size() < array_type->Count() ? "few" : "many";
+    diagnostics_.add_error("array constructor has too " + fm +
+                               " elements: expected " +
+                               std::to_string(array_type->Count()) +
+                               ", found " + std::to_string(values.size()),
+                           ctor->source());
+    return false;
+  } else if (values.size() > array_type->Count()) {
+    diagnostics_.add_error(
+        "array constructor has too many elements: expected " +
+            std::to_string(array_type->Count()) + ", found " +
+            std::to_string(values.size()),
+        ctor->source());
+    return false;
   }
   return true;
 }
