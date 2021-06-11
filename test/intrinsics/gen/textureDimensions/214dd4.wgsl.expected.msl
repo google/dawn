@@ -1,38 +1,27 @@
-SKIP: FAILED
-
-
-
-Validation Failure:
 #include <metal_stdlib>
 
 using namespace metal;
-void textureDimensions_214dd4() {
-  int3 res = int3(arg_0.get_width(), arg_0.get_height(), arg_0.get_depth());
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+void textureDimensions_214dd4(texture3d<int, access::write> tint_symbol_2) {
+  int3 res = int3(tint_symbol_2.get_width(), tint_symbol_2.get_height(), tint_symbol_2.get_depth());
 }
 
-vertex void vertex_main() {
-  textureDimensions_214dd4();
+vertex tint_symbol vertex_main(texture3d<int, access::write> tint_symbol_3 [[texture(0)]]) {
+  textureDimensions_214dd4(tint_symbol_3);
+  tint_symbol const tint_symbol_1 = {.value=float4()};
+  return tint_symbol_1;
+}
+
+fragment void fragment_main(texture3d<int, access::write> tint_symbol_4 [[texture(0)]]) {
+  textureDimensions_214dd4(tint_symbol_4);
   return;
 }
 
-fragment void fragment_main() {
-  textureDimensions_214dd4();
+kernel void compute_main(texture3d<int, access::write> tint_symbol_5 [[texture(0)]]) {
+  textureDimensions_214dd4(tint_symbol_5);
   return;
 }
 
-kernel void compute_main() {
-  textureDimensions_214dd4();
-  return;
-}
-
-
-tint_RuhGmN.metal:5:19: error: use of undeclared identifier 'arg_0'
-  int3 res = int3(arg_0.get_width(), arg_0.get_height(), arg_0.get_depth());
-                  ^
-tint_RuhGmN.metal:5:38: error: use of undeclared identifier 'arg_0'
-  int3 res = int3(arg_0.get_width(), arg_0.get_height(), arg_0.get_depth());
-                                     ^
-tint_RuhGmN.metal:5:58: error: use of undeclared identifier 'arg_0'
-  int3 res = int3(arg_0.get_width(), arg_0.get_height(), arg_0.get_depth());
-                                                         ^
-3 errors generated.

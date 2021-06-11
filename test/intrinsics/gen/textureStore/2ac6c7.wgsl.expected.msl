@@ -1,32 +1,27 @@
-SKIP: FAILED
-
-
-
-Validation Failure:
 #include <metal_stdlib>
 
 using namespace metal;
-void textureStore_2ac6c7() {
-  arg_0.write(float4(), 1);
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+void textureStore_2ac6c7(texture1d<float, access::write> tint_symbol_2) {
+  tint_symbol_2.write(float4(), uint(1));
 }
 
-vertex void vertex_main() {
-  textureStore_2ac6c7();
+vertex tint_symbol vertex_main(texture1d<float, access::write> tint_symbol_3 [[texture(0)]]) {
+  textureStore_2ac6c7(tint_symbol_3);
+  tint_symbol const tint_symbol_1 = {.value=float4()};
+  return tint_symbol_1;
+}
+
+fragment void fragment_main(texture1d<float, access::write> tint_symbol_4 [[texture(0)]]) {
+  textureStore_2ac6c7(tint_symbol_4);
   return;
 }
 
-fragment void fragment_main() {
-  textureStore_2ac6c7();
+kernel void compute_main(texture1d<float, access::write> tint_symbol_5 [[texture(0)]]) {
+  textureStore_2ac6c7(tint_symbol_5);
   return;
 }
 
-kernel void compute_main() {
-  textureStore_2ac6c7();
-  return;
-}
-
-
-tint_FUFaCJ.metal:5:3: error: use of undeclared identifier 'arg_0'
-  arg_0.write(float4(), 1);
-  ^
-1 error generated.

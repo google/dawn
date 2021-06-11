@@ -181,41 +181,41 @@ std::string expected_texture_overload(
     case ValidTextureOverload::kSampleCompareDepthCubeArrayF32:
       return R"(texture.sample_compare(sampler, float3(1.0f, 2.0f, 3.0f), 4, 5.0f))";
     case ValidTextureOverload::kLoad1dLevelF32:
-      return R"(texture.read(1, 3))";
+      return R"(texture.read(uint(1), 3))";
     case ValidTextureOverload::kLoad1dLevelU32:
-      return R"(texture.read(1, 3))";
+      return R"(texture.read(uint(1), 3))";
     case ValidTextureOverload::kLoad1dLevelI32:
-      return R"(texture.read(1, 3))";
+      return R"(texture.read(uint(1), 3))";
     case ValidTextureOverload::kLoad2dLevelF32:
-      return R"(texture.read(int2(1, 2), 3))";
+      return R"(texture.read(uint2(int2(1, 2)), 3))";
     case ValidTextureOverload::kLoad2dLevelU32:
-      return R"(texture.read(int2(1, 2), 3))";
+      return R"(texture.read(uint2(int2(1, 2)), 3))";
     case ValidTextureOverload::kLoad2dLevelI32:
-      return R"(texture.read(int2(1, 2), 3))";
+      return R"(texture.read(uint2(int2(1, 2)), 3))";
     case ValidTextureOverload::kLoad2dArrayLevelF32:
-      return R"(texture.read(int2(1, 2), 3, 4))";
+      return R"(texture.read(uint2(int2(1, 2)), 3, 4))";
     case ValidTextureOverload::kLoad2dArrayLevelU32:
-      return R"(texture.read(int2(1, 2), 3, 4))";
+      return R"(texture.read(uint2(int2(1, 2)), 3, 4))";
     case ValidTextureOverload::kLoad2dArrayLevelI32:
-      return R"(texture.read(int2(1, 2), 3, 4))";
+      return R"(texture.read(uint2(int2(1, 2)), 3, 4))";
     case ValidTextureOverload::kLoad3dLevelF32:
-      return R"(texture.read(int3(1, 2, 3), 4))";
+      return R"(texture.read(uint3(int3(1, 2, 3)), 4))";
     case ValidTextureOverload::kLoad3dLevelU32:
-      return R"(texture.read(int3(1, 2, 3), 4))";
+      return R"(texture.read(uint3(int3(1, 2, 3)), 4))";
     case ValidTextureOverload::kLoad3dLevelI32:
-      return R"(texture.read(int3(1, 2, 3), 4))";
+      return R"(texture.read(uint3(int3(1, 2, 3)), 4))";
     case ValidTextureOverload::kLoadMultisampled2dF32:
-      return R"(texture.read(int2(1, 2), 3))";
+      return R"(texture.read(uint2(int2(1, 2)), 3))";
     case ValidTextureOverload::kLoadMultisampled2dU32:
-      return R"(texture.read(int2(1, 2), 3))";
+      return R"(texture.read(uint2(int2(1, 2)), 3))";
     case ValidTextureOverload::kLoadMultisampled2dI32:
-      return R"(texture.read(int2(1, 2), 3))";
+      return R"(texture.read(uint2(int2(1, 2)), 3))";
     case ValidTextureOverload::kLoadDepth2dLevelF32:
-      return R"(texture.read(int2(1, 2), 3))";
+      return R"(texture.read(uint2(int2(1, 2)), 3))";
     case ValidTextureOverload::kLoadDepth2dArrayLevelF32:
-      return R"(texture.read(int2(1, 2), 3, 4))";
+      return R"(texture.read(uint2(int2(1, 2)), 3, 4))";
     case ValidTextureOverload::kLoadStorageRO1dRgba32float:
-      return R"(texture.read(1))";
+      return R"(texture.read(uint(1)))";
     case ValidTextureOverload::kLoadStorageRO2dRgba8unorm:
     case ValidTextureOverload::kLoadStorageRO2dRgba8snorm:
     case ValidTextureOverload::kLoadStorageRO2dRgba8uint:
@@ -232,19 +232,19 @@ std::string expected_texture_overload(
     case ValidTextureOverload::kLoadStorageRO2dRgba32uint:
     case ValidTextureOverload::kLoadStorageRO2dRgba32sint:
     case ValidTextureOverload::kLoadStorageRO2dRgba32float:
-      return R"(texture.read(int2(1, 2)))";
+      return R"(texture.read(uint2(int2(1, 2))))";
     case ValidTextureOverload::kLoadStorageRO2dArrayRgba32float:
-      return R"(texture.read(int2(1, 2), 3))";
+      return R"(texture.read(uint2(int2(1, 2)), 3))";
     case ValidTextureOverload::kLoadStorageRO3dRgba32float:
-      return R"(texture.read(int3(1, 2, 3)))";
+      return R"(texture.read(uint3(int3(1, 2, 3))))";
     case ValidTextureOverload::kStoreWO1dRgba32float:
-      return R"(texture.write(float4(2.0f, 3.0f, 4.0f, 5.0f), 1))";
+      return R"(texture.write(float4(2.0f, 3.0f, 4.0f, 5.0f), uint(1)))";
     case ValidTextureOverload::kStoreWO2dRgba32float:
-      return R"(texture.write(float4(3.0f, 4.0f, 5.0f, 6.0f), int2(1, 2)))";
+      return R"(texture.write(float4(3.0f, 4.0f, 5.0f, 6.0f), uint2(int2(1, 2))))";
     case ValidTextureOverload::kStoreWO2dArrayRgba32float:
-      return R"(texture.write(float4(4.0f, 5.0f, 6.0f, 7.0f), int2(1, 2), 3))";
+      return R"(texture.write(float4(4.0f, 5.0f, 6.0f, 7.0f), uint2(int2(1, 2)), 3))";
     case ValidTextureOverload::kStoreWO3dRgba32float:
-      return R"(texture.write(float4(4.0f, 5.0f, 6.0f, 7.0f), int3(1, 2, 3)))";
+      return R"(texture.write(float4(4.0f, 5.0f, 6.0f, 7.0f), uint3(int3(1, 2, 3))))";
   }
   return "<unmatched texture overload>";
 }  // NOLINT - Ignore the length of this function

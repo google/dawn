@@ -531,6 +531,27 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
 
   auto* texture_type = TypeOf(texture)->UnwrapRef()->As<sem::Texture>();
 
+  // Helper to emit the texture expression, wrapped in parentheses if the
+  // expression includes an operator with lower precedence than the member
+  // accessor used for the function calls.
+  auto texture_expr = [&]() {
+    bool paren_lhs =
+        !texture
+             ->IsAnyOf<ast::ArrayAccessorExpression, ast::CallExpression,
+                       ast::IdentifierExpression, ast::MemberAccessorExpression,
+                       ast::TypeConstructorExpression>();
+    if (paren_lhs) {
+      out_ << "(";
+    }
+    if (!EmitExpression(texture)) {
+      return false;
+    }
+    if (paren_lhs) {
+      out_ << ")";
+    }
+    return true;
+  };
+
   switch (intrinsic->Type()) {
     case sem::IntrinsicType::kTextureDimensions: {
       std::vector<const char*> dims;
@@ -557,7 +578,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
       }
 
       auto get_dim = [&](const char* name) {
-        if (!EmitExpression(texture)) {
+        if (!texture_expr()) {
           return false;
         }
         out_ << ".get_" << name << "(";
@@ -589,7 +610,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
     }
     case sem::IntrinsicType::kTextureNumLayers: {
       out_ << "int(";
-      if (!EmitExpression(texture)) {
+      if (!texture_expr()) {
         return false;
       }
       out_ << ".get_array_size())";
@@ -597,7 +618,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
     }
     case sem::IntrinsicType::kTextureNumLevels: {
       out_ << "int(";
-      if (!EmitExpression(texture)) {
+      if (!texture_expr()) {
         return false;
       }
       out_ << ".get_num_mip_levels())";
@@ -605,7 +626,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
     }
     case sem::IntrinsicType::kTextureNumSamples: {
       out_ << "int(";
-      if (!EmitExpression(texture)) {
+      if (!texture_expr()) {
         return false;
       }
       out_ << ".get_num_samples())";
@@ -615,8 +636,9 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
       break;
   }
 
-  if (!EmitExpression(texture))
+  if (!texture_expr()) {
     return false;
+  }
 
   bool lod_param_is_named = true;
 
@@ -655,9 +677,38 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
        {Usage::kValue, Usage::kSampler, Usage::kCoords, Usage::kArrayIndex,
         Usage::kDepthRef, Usage::kSampleIndex}) {
     if (auto* e = arg(usage)) {
+      auto* sem_e = program_->Sem().Get(e);
+
       maybe_write_comma();
+
+      // Cast the coordinates to unsigned integers if necessary.
+      bool casted = false;
+      if (usage == Usage::kCoords &&
+          sem_e->Type()->UnwrapRef()->is_integer_scalar_or_vector()) {
+        casted = true;
+        switch (texture_type->dim()) {
+          case ast::TextureDimension::k1d:
+            out_ << "uint(";
+            break;
+          case ast::TextureDimension::k2d:
+          case ast::TextureDimension::k2dArray:
+            out_ << "uint2(";
+            break;
+          case ast::TextureDimension::k3d:
+            out_ << "uint3(";
+            break;
+          default:
+            TINT_ICE(diagnostics_) << "unhandled texture dimensionality";
+            break;
+        }
+      }
+
       if (!EmitExpression(e))
         return false;
+
+      if (casted) {
+        out_ << ")";
+      }
     }
   }
 

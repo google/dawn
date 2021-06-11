@@ -1,25 +1,12 @@
-SKIP: FAILED
-
-
-
-Validation Failure:
 #include <metal_stdlib>
 
 using namespace metal;
-void textureSampleCompare_a3ca7e() {
-  float res = arg_0.sample_compare(arg_1, float3(), 1, 1.0f);
+void textureSampleCompare_a3ca7e(depthcube_array<float, access::sample> tint_symbol, sampler tint_symbol_1) {
+  float res = tint_symbol.sample_compare(tint_symbol_1, float3(), 1, 1.0f);
 }
 
-fragment void fragment_main() {
-  textureSampleCompare_a3ca7e();
+fragment void fragment_main(depthcube_array<float, access::sample> tint_symbol_2 [[texture(0)]], sampler tint_symbol_3 [[sampler(1)]]) {
+  textureSampleCompare_a3ca7e(tint_symbol_2, tint_symbol_3);
   return;
 }
 
-
-tint_9kTJOr.metal:5:15: error: use of undeclared identifier 'arg_0'
-  float res = arg_0.sample_compare(arg_1, float3(), 1, 1.0f);
-              ^
-tint_9kTJOr.metal:5:36: error: use of undeclared identifier 'arg_1'
-  float res = arg_0.sample_compare(arg_1, float3(), 1, 1.0f);
-                                   ^
-2 errors generated.

@@ -1,25 +1,12 @@
-SKIP: FAILED
-
 deprecated/access_deco/storage_texture.wgsl:1:84 warning: use of deprecated language feature: access control is expected as last parameter of storage textures
 [[group(0), binding(0)]] var tex : [[access(write)]] texture_storage_2d<rgba32float>;
                                                                                    ^
 
-
-
-Validation Failure:
 #include <metal_stdlib>
 
 using namespace metal;
-kernel void tint_symbol() {
-  int2 x = int2(tex.get_width(), tex.get_height());
+kernel void tint_symbol(texture2d<float, access::write> tint_symbol_1 [[texture(0)]]) {
+  int2 x = int2(tint_symbol_1.get_width(), tint_symbol_1.get_height());
   return;
 }
 
-
-tint_Aillrb.metal:5:17: error: use of undeclared identifier 'tex'
-  int2 x = int2(tex.get_width(), tex.get_height());
-                ^
-tint_Aillrb.metal:5:34: error: use of undeclared identifier 'tex'
-  int2 x = int2(tex.get_width(), tex.get_height());
-                                 ^
-2 errors generated.

@@ -1,35 +1,27 @@
-SKIP: FAILED
-
-
-
-Validation Failure:
 #include <metal_stdlib>
 
 using namespace metal;
-void textureSampleLevel_979816() {
-  float4 res = arg_0.sample(arg_1, float2(), level(0.0f));
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+void textureSampleLevel_979816(texture2d<float, access::sample> tint_symbol_2, sampler tint_symbol_3) {
+  float4 res = tint_symbol_2.sample(tint_symbol_3, float2(), level(0.0f));
 }
 
-vertex void vertex_main() {
-  textureSampleLevel_979816();
+vertex tint_symbol vertex_main(texture2d<float, access::sample> tint_symbol_4 [[texture(0)]], sampler tint_symbol_5 [[sampler(1)]]) {
+  textureSampleLevel_979816(tint_symbol_4, tint_symbol_5);
+  tint_symbol const tint_symbol_1 = {.value=float4()};
+  return tint_symbol_1;
+}
+
+fragment void fragment_main(texture2d<float, access::sample> tint_symbol_6 [[texture(0)]], sampler tint_symbol_7 [[sampler(1)]]) {
+  textureSampleLevel_979816(tint_symbol_6, tint_symbol_7);
   return;
 }
 
-fragment void fragment_main() {
-  textureSampleLevel_979816();
+kernel void compute_main(texture2d<float, access::sample> tint_symbol_8 [[texture(0)]], sampler tint_symbol_9 [[sampler(1)]]) {
+  textureSampleLevel_979816(tint_symbol_8, tint_symbol_9);
   return;
 }
 
-kernel void compute_main() {
-  textureSampleLevel_979816();
-  return;
-}
-
-
-tint_iGu5by.metal:5:16: error: use of undeclared identifier 'arg_0'
-  float4 res = arg_0.sample(arg_1, float2(), level(0.0f));
-               ^
-tint_iGu5by.metal:5:29: error: use of undeclared identifier 'arg_1'
-  float4 res = arg_0.sample(arg_1, float2(), level(0.0f));
-                            ^
-2 errors generated.

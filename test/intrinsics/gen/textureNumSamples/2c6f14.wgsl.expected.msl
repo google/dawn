@@ -1,32 +1,27 @@
-SKIP: FAILED
-
-
-
-Validation Failure:
 #include <metal_stdlib>
 
 using namespace metal;
-void textureNumSamples_2c6f14() {
-  int res = int(arg_0.get_num_samples());
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+void textureNumSamples_2c6f14(texture2d_ms<float, access::read> tint_symbol_2) {
+  int res = int(tint_symbol_2.get_num_samples());
 }
 
-vertex void vertex_main() {
-  textureNumSamples_2c6f14();
+vertex tint_symbol vertex_main(texture2d_ms<float, access::read> tint_symbol_3 [[texture(0)]]) {
+  textureNumSamples_2c6f14(tint_symbol_3);
+  tint_symbol const tint_symbol_1 = {.value=float4()};
+  return tint_symbol_1;
+}
+
+fragment void fragment_main(texture2d_ms<float, access::read> tint_symbol_4 [[texture(0)]]) {
+  textureNumSamples_2c6f14(tint_symbol_4);
   return;
 }
 
-fragment void fragment_main() {
-  textureNumSamples_2c6f14();
+kernel void compute_main(texture2d_ms<float, access::read> tint_symbol_5 [[texture(0)]]) {
+  textureNumSamples_2c6f14(tint_symbol_5);
   return;
 }
 
-kernel void compute_main() {
-  textureNumSamples_2c6f14();
-  return;
-}
-
-
-tint_TdWxzV.metal:5:17: error: use of undeclared identifier 'arg_0'
-  int res = int(arg_0.get_num_samples());
-                ^
-1 error generated.

@@ -1,25 +1,12 @@
-SKIP: FAILED
-
-
-
-Validation Failure:
 #include <metal_stdlib>
 
 using namespace metal;
-void textureSampleBias_65ac50() {
-  float4 res = arg_0.sample(arg_1, float2(), 1, bias(1.0f), int2());
+void textureSampleBias_65ac50(texture2d_array<float, access::sample> tint_symbol, sampler tint_symbol_1) {
+  float4 res = tint_symbol.sample(tint_symbol_1, float2(), 1, bias(1.0f), int2());
 }
 
-fragment void fragment_main() {
-  textureSampleBias_65ac50();
+fragment void fragment_main(texture2d_array<float, access::sample> tint_symbol_2 [[texture(0)]], sampler tint_symbol_3 [[sampler(1)]]) {
+  textureSampleBias_65ac50(tint_symbol_2, tint_symbol_3);
   return;
 }
 
-
-tint_VENNtZ.metal:5:16: error: use of undeclared identifier 'arg_0'
-  float4 res = arg_0.sample(arg_1, float2(), 1, bias(1.0f), int2());
-               ^
-tint_VENNtZ.metal:5:29: error: use of undeclared identifier 'arg_1'
-  float4 res = arg_0.sample(arg_1, float2(), 1, bias(1.0f), int2());
-                            ^
-2 errors generated.

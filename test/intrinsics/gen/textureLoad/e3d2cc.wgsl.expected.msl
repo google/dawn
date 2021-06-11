@@ -1,32 +1,27 @@
-SKIP: FAILED
-
-
-
-Validation Failure:
 #include <metal_stdlib>
 
 using namespace metal;
-void textureLoad_e3d2cc() {
-  int4 res = arg_0.read(int2(), 1);
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+void textureLoad_e3d2cc(texture2d_ms<int, access::read> tint_symbol_2) {
+  int4 res = tint_symbol_2.read(uint2(int2()), 1);
 }
 
-vertex void vertex_main() {
-  textureLoad_e3d2cc();
+vertex tint_symbol vertex_main(texture2d_ms<int, access::read> tint_symbol_3 [[texture(0)]]) {
+  textureLoad_e3d2cc(tint_symbol_3);
+  tint_symbol const tint_symbol_1 = {.value=float4()};
+  return tint_symbol_1;
+}
+
+fragment void fragment_main(texture2d_ms<int, access::read> tint_symbol_4 [[texture(0)]]) {
+  textureLoad_e3d2cc(tint_symbol_4);
   return;
 }
 
-fragment void fragment_main() {
-  textureLoad_e3d2cc();
+kernel void compute_main(texture2d_ms<int, access::read> tint_symbol_5 [[texture(0)]]) {
+  textureLoad_e3d2cc(tint_symbol_5);
   return;
 }
 
-kernel void compute_main() {
-  textureLoad_e3d2cc();
-  return;
-}
-
-
-tint_lPhrIU.metal:5:14: error: use of undeclared identifier 'arg_0'
-  int4 res = arg_0.read(int2(), 1);
-             ^
-1 error generated.
