@@ -880,6 +880,62 @@ namespace {
         }
     }
 
+    // Check that the depth stencil attachment must use all aspects.
+    TEST_F(RenderPassDescriptorValidationTest, ValidateDepthStencilAllAspects) {
+        wgpu::TextureDescriptor texDesc;
+        texDesc.usage = wgpu::TextureUsage::RenderAttachment;
+        texDesc.size = {1, 1, 1};
+
+        wgpu::TextureViewDescriptor viewDesc;
+        viewDesc.baseMipLevel = 0;
+        viewDesc.mipLevelCount = 1;
+        viewDesc.baseArrayLayer = 0;
+        viewDesc.arrayLayerCount = 1;
+
+        // Using all aspects of a depth+stencil texture is allowed.
+        {
+            texDesc.format = wgpu::TextureFormat::Depth24PlusStencil8;
+            viewDesc.aspect = wgpu::TextureAspect::All;
+
+            wgpu::TextureView view = device.CreateTexture(&texDesc).CreateView(&viewDesc);
+            utils::ComboRenderPassDescriptor renderPass({}, view);
+            AssertBeginRenderPassSuccess(&renderPass);
+        }
+
+        // Using only depth of a depth+stencil texture is an error.
+        {
+            texDesc.format = wgpu::TextureFormat::Depth24PlusStencil8;
+            viewDesc.aspect = wgpu::TextureAspect::DepthOnly;
+
+            wgpu::TextureView view = device.CreateTexture(&texDesc).CreateView(&viewDesc);
+            utils::ComboRenderPassDescriptor renderPass({}, view);
+            AssertBeginRenderPassError(&renderPass);
+        }
+
+        // Using only stencil of a depth+stencil texture is an error.
+        {
+            texDesc.format = wgpu::TextureFormat::Depth24PlusStencil8;
+            viewDesc.aspect = wgpu::TextureAspect::StencilOnly;
+
+            wgpu::TextureView view = device.CreateTexture(&texDesc).CreateView(&viewDesc);
+            utils::ComboRenderPassDescriptor renderPass({}, view);
+            AssertBeginRenderPassError(&renderPass);
+        }
+
+        // Using DepthOnly of a depth only texture us allowed.
+        {
+            texDesc.format = wgpu::TextureFormat::Depth24Plus;
+            viewDesc.aspect = wgpu::TextureAspect::DepthOnly;
+
+            wgpu::TextureView view = device.CreateTexture(&texDesc).CreateView(&viewDesc);
+            utils::ComboRenderPassDescriptor renderPass({}, view);
+            AssertBeginRenderPassSuccess(&renderPass);
+        }
+
+        // TODO(https://crbug.com/dawn/666): Add a test case for stencil-only on stencil8 once this
+        // format is supported.
+    }
+
     // TODO(cwallez@chromium.org): Constraints on attachment aliasing?
 
 }  // anonymous namespace

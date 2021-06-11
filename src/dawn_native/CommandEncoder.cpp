@@ -286,11 +286,22 @@ namespace dawn_native {
             DAWN_TRY(
                 ValidateCanUseAs(attachment->GetTexture(), wgpu::TextureUsage::RenderAttachment));
 
-            if ((attachment->GetAspects() & (Aspect::Depth | Aspect::Stencil)) == Aspect::None ||
-                !attachment->GetFormat().isRenderable) {
+            const Format& format = attachment->GetFormat();
+            if (!format.HasDepthOrStencil()) {
                 return DAWN_VALIDATION_ERROR(
                     "The format of the texture view used as depth stencil attachment is not a "
                     "depth stencil format");
+            }
+            if (!format.isRenderable) {
+                return DAWN_VALIDATION_ERROR(
+                    "The format of the texture view used as depth stencil attachment is not "
+                    "renderable");
+            }
+            if (attachment->GetAspects() != format.aspects) {
+                // TODO(https://crbug.com/dawn/812): Investigate if this limitation should be added
+                // to the WebGPU spec of lifted from Dawn.
+                return DAWN_VALIDATION_ERROR(
+                    "The texture view used as depth stencil view must encompass all aspects");
             }
 
             DAWN_TRY(ValidateLoadOp(depthStencilAttachment->depthLoadOp));
