@@ -2069,6 +2069,35 @@ TEST_F(
 })")) << module_str;
 }
 
+TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_Id_TooBig) {
+  // Override IDs must be between 0 and 65535
+  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+     OpDecorate %1 SpecId 65536
+     %bool = OpTypeBool
+     %1 = OpSpecConstantTrue %bool
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+  )" + MainBody()));
+  EXPECT_FALSE(p->Parse());
+  EXPECT_EQ(p->error(),
+            "SpecId too large. WGSL override IDs must be between 0 and 65535: "
+            "ID %1 has SpecId 65536");
+}
+
+TEST_F(SpvModuleScopeVarParserTest,
+       ScalarSpecConstant_DeclareConst_Id_MaxValid) {
+  // Override IDs must be between 0 and 65535
+  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+     OpDecorate %1 SpecId 65535
+     %bool = OpTypeBool
+     %1 = OpSpecConstantTrue %bool
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+  )" + MainBody()));
+  EXPECT_TRUE(p->Parse());
+  EXPECT_EQ(p->error(), "");
+}
+
 TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_True) {
   auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpName %c "myconst"

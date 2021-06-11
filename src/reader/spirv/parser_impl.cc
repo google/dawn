@@ -1166,7 +1166,13 @@ bool ParserImpl::EmitScalarSpecConstants() {
       ast::DecorationList spec_id_decos;
       for (const auto& deco : GetDecorationsFor(inst.result_id())) {
         if ((deco.size() == 2) && (deco[0] == SpvDecorationSpecId)) {
-          auto* cid = create<ast::OverrideDecoration>(Source{}, deco[1]);
+          const uint32_t id = deco[1];
+          if (id > 65535) {
+            return Fail() << "SpecId too large. WGSL override IDs must be "
+                             "between 0 and 65535: ID %"
+                          << inst.result_id() << " has SpecId " << id;
+          }
+          auto* cid = create<ast::OverrideDecoration>(Source{}, id);
           spec_id_decos.push_back(cid);
           break;
         }
