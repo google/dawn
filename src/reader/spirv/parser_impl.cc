@@ -1420,8 +1420,13 @@ bool ParserImpl::ConvertDecorationsForVariable(
         case SpvBuiltInSampleId:
         case SpvBuiltInVertexIndex:
         case SpvBuiltInInstanceIndex:
-          // The SPIR-V variable is likely to be signed (because GLSL
-          // requires signed), but WGSL requires unsigned.  Handle specially
+        case SpvBuiltInLocalInvocationId:
+        case SpvBuiltInLocalInvocationIndex:
+        case SpvBuiltInGlobalInvocationId:
+        case SpvBuiltInWorkgroupId:
+        case SpvBuiltInNumWorkgroups:
+          // The SPIR-V variable may signed (because GLSL requires signed for
+          // some of these), but WGSL requires unsigned.  Handle specially
           // so we always perform the conversion at load and store.
           if (auto* forced_type = UnsignedTypeFor(*type)) {
             // Requires conversion and special handling in code generation.

@@ -978,8 +978,10 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
       const auto cast_name = namer_.MakeDerivedName(param_name + "_cast");
       const auto cast_sym = builder_.Symbols().Register(cast_name);
 
+      // The parameter will have the WGSL type, but we need to add
+      // a bitcast to the variable store type.
       param_value = create<ast::BitcastExpression>(
-          source, forced_store_type->Build(builder_), param_value);
+          source, store_type->Build(builder_), param_value);
     }
 
     stmts.push_back(create<ast::AssignmentStatement>(
