@@ -685,6 +685,15 @@ struct LoopStatementBuilder
   ast::BlockStatement* continuing = nullptr;
 };
 
+/// @param decos a list of parsed decorations
+/// @returns true if the decorations include a SampleMask builtin
+bool HasBuiltinSampleMask(const ast::DecorationList& decos) {
+  if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(decos)) {
+    return builtin->value() == ast::Builtin::kSampleMask;
+  }
+  return false;
+}
+
 }  // namespace
 
 BlockInfo::BlockInfo(const spvtools::opt::BasicBlock& bb)
@@ -973,11 +982,17 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
     // variable.
     ast::Expression* param_value =
         create<ast::IdentifierExpression>(source, param_sym);
-    if (forced_store_type != store_type) {
-      // Insert a bitcast if needed.
-      const auto cast_name = namer_.MakeDerivedName(param_name + "_cast");
-      const auto cast_sym = builder_.Symbols().Register(cast_name);
-
+    if (HasBuiltinSampleMask(param_decos)) {
+      // In Vulkan SPIR-V, the sample mask is an array. In WGSL it's a scalar.
+      // Use the first element only.
+      param_value = create<ast::ArrayAccessorExpression>(
+          source, param_value, parser_impl_.MakeNullValue(ty_.I32()));
+      if (store_type->As<Array>()->type->IsSignedScalarOrVector()) {
+        // sample_mask is unsigned in WGSL. Bitcast it.
+        param_value = create<ast::BitcastExpression>(
+            source, ty_.I32()->Build(builder_), param_value);
+      }
+    } else if (forced_store_type != store_type) {
       // The parameter will have the WGSL type, but we need to add
       // a bitcast to the variable store type.
       param_value = create<ast::BitcastExpression>(
@@ -1046,9 +1061,15 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
           std::move(out_decos));
       return_members.push_back(return_member);
 
+      ast::Expression* return_member_value =
+          create<ast::IdentifierExpression>(source, var_sym);
+      if (forced_store_type != store_type) {
+        // We need to cast from the variable store type to the member type.
+        return_member_value = create<ast::BitcastExpression>(
+            source, forced_store_type->Build(builder_), return_member_value);
+      }
       // Save the expression.
-      return_exprs.push_back(
-          create<ast::IdentifierExpression>(source, var_sym));
+      return_exprs.push_back(return_member_value);
     }
 
     // Create and register the result type.

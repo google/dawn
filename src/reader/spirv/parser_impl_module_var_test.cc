@@ -4470,13 +4470,155 @@ TEST_F(SpvModuleScopeVarParserTest,
 
 // SampleMask is an array in Vulkan SPIR-V, but a scalar in WGSL.
 TEST_F(SpvModuleScopeVarParserTest,
-       DISABLED_EntryPointWrapping_BuiltinVar_SampleMask_U) {}
+       EntryPointWrapping_BuiltinVar_SampleMask_In_Unsigned) {
+  // SampleMask is u32 in WGSL.
+  // Use unsigned array element in Vulkan.
+  const auto assembly = CommonCapabilities() + R"(
+     OpEntryPoint Fragment %main "main" %1
+     OpExecutionMode %main OriginUpperLeft
+     OpDecorate %1 BuiltIn SampleMask
+)" + CommonTypes() +
+                        R"(
+     %arr = OpTypeArray %uint %uint_1
+     %ptr_ty = OpTypePointer Input %arr
+     %1 = OpVariable %ptr_ty Input
+
+     %main = OpFunction %void None %voidfn
+     %entry = OpLabel
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+
+  // TODO(crbug.com/tint/508): Remove this when everything is converted
+  // to HLSL style pipeline IO.
+  p->SetHLSLStylePipelineIO();
+
+  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+  const auto got = p->program().to_str();
+  const std::string expected = R"(Module{
+  Variable{
+    x_1
+    private
+    undefined
+    __array__u32_1
+  }
+  Function main_1 -> __void
+  ()
+  {
+    Return{}
+  }
+  Function main -> __void
+  StageDecoration{fragment}
+  (
+    VariableConst{
+      Decorations{
+        BuiltinDecoration{sample_mask}
+      }
+      x_1_param
+      none
+      undefined
+      __u32
+    }
+  )
+  {
+    Assignment{
+      Identifier[not set]{x_1}
+      ArrayAccessor[not set]{
+        Identifier[not set]{x_1_param}
+        ScalarConstructor[not set]{0}
+      }
+    }
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+  }
+}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
+
 TEST_F(SpvModuleScopeVarParserTest,
-       DISABLED_EntryPointWrapping_BuiltinVar_SampleMask_U_Initializer) {}
+       EntryPointWrapping_BuiltinVar_SampleMask_In_Signed) {
+  // SampleMask is u32 in WGSL.
+  // Use signed array element in Vulkan.
+  const auto assembly = CommonCapabilities() + R"(
+     OpEntryPoint Fragment %main "main" %1
+     OpExecutionMode %main OriginUpperLeft
+     OpDecorate %1 BuiltIn SampleMask
+)" + CommonTypes() +
+                        R"(
+     %arr = OpTypeArray %int %uint_1
+     %ptr_ty = OpTypePointer Input %arr
+     %1 = OpVariable %ptr_ty Input
+
+     %main = OpFunction %void None %voidfn
+     %entry = OpLabel
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+
+  // TODO(crbug.com/tint/508): Remove this when everything is converted
+  // to HLSL style pipeline IO.
+  p->SetHLSLStylePipelineIO();
+
+  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+  const auto got = p->program().to_str();
+  const std::string expected = R"(Module{
+  Variable{
+    x_1
+    private
+    undefined
+    __array__i32_1
+  }
+  Function main_1 -> __void
+  ()
+  {
+    Return{}
+  }
+  Function main -> __void
+  StageDecoration{fragment}
+  (
+    VariableConst{
+      Decorations{
+        BuiltinDecoration{sample_mask}
+      }
+      x_1_param
+      none
+      undefined
+      __u32
+    }
+  )
+  {
+    Assignment{
+      Identifier[not set]{x_1}
+      Bitcast[not set]<__i32>{
+        ArrayAccessor[not set]{
+          Identifier[not set]{x_1_param}
+          ScalarConstructor[not set]{0}
+        }
+      }
+    }
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+  }
+}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
+
 TEST_F(SpvModuleScopeVarParserTest,
-       DISABLED_EntryPointWrapping_BuiltinVar_SampleMask_S) {}
+       DISABLED_EntryPointWrapping_BuiltinVar_SampleMask_Out_U) {}
 TEST_F(SpvModuleScopeVarParserTest,
-       DISABLED_EntryPointWrapping_BuiltinVar_SampleMask_S_Initializer) {}
+       DISABLED_EntryPointWrapping_BuiltinVar_SampleMask_Out_S) {}
 
 // TODO(dneto): pipeline IO: flatten structures, and distribute locations
 
