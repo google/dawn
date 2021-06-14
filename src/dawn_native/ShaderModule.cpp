@@ -886,6 +886,11 @@ namespace dawn_native {
             for (auto& entryPoint : entryPoints) {
                 ASSERT(result.count(entryPoint.name) == 0);
 
+                if (!entryPoint.overridable_constants.empty()) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Pipeline overridable constants are not implemented yet");
+                }
+
                 auto metadata = std::make_unique<EntryPointMetadata>();
 
                 DAWN_TRY_ASSIGN(metadata->stage, TintPipelineStageToShaderStage(entryPoint.stage));

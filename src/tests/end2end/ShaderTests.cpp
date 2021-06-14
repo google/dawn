@@ -305,6 +305,23 @@ fn fragmentMain(input : VertexOut) -> [[location(0)]] vec4<f32> {
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
 }
 
+// Feature currently not implemented in Tint, so should fail validation.
+TEST_P(ShaderTests, PipelineOverridableUsed) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+    DAWN_TEST_UNSUPPORTED_IF(!HasToggleEnabled("use_tint_generator"));
+
+    std::string shader = R"(
+[[override]] let foo : f32;
+
+[[stage(compute)]]
+fn ep_func() {
+  var local_foo : f32;
+  local_foo = foo;
+  return;
+})";
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, shader.c_str()));
+}
+
 DAWN_INSTANTIATE_TEST(ShaderTests,
                       D3D12Backend(),
                       MetalBackend(),
