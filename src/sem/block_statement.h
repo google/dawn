@@ -15,6 +15,7 @@
 #ifndef SRC_SEM_BLOCK_STATEMENT_H_
 #define SRC_SEM_BLOCK_STATEMENT_H_
 
+#include <cstddef>
 #include <vector>
 
 #include "src/sem/statement.h"
