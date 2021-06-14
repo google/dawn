@@ -41,7 +41,7 @@
          %16 = OpSampledImage %15 %14 %13
          %19 = OpConvertSToF %float %int_1
          %22 = OpCompositeConstruct %v3float %float_0 %float_0 %19
-         %12 = OpImageSampleDrefExplicitLod %float %16 %22 %float_1 Lod %float_0
+         %12 = OpImageSampleDrefImplicitLod %float %16 %22 %float_1
                OpStore %res %12
                OpReturn
                OpFunctionEnd

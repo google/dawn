@@ -274,6 +274,9 @@ IntrinsicType ParseIntrinsicType(const std::string& name) {
   if (name == "textureSampleCompare") {
     return IntrinsicType::kTextureSampleCompare;
   }
+  if (name == "textureSampleCompareLevel") {
+    return IntrinsicType::kTextureSampleCompareLevel;
+  }
   if (name == "textureSampleGrad") {
     return IntrinsicType::kTextureSampleGrad;
   }
@@ -457,6 +460,8 @@ const char* str(IntrinsicType i) {
       return "textureSampleBias";
     case IntrinsicType::kTextureSampleCompare:
       return "textureSampleCompare";
+    case IntrinsicType::kTextureSampleCompareLevel:
+      return "textureSampleCompareLevel";
     case IntrinsicType::kTextureSampleGrad:
       return "textureSampleGrad";
     case IntrinsicType::kTextureSampleLevel:

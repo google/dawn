@@ -549,7 +549,7 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare_Twice) {
   ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
   EXPECT_EQ(b.GenerateExpression(expr1), 8u) << b.error();
-  EXPECT_EQ(b.GenerateExpression(expr2), 18u) << b.error();
+  EXPECT_EQ(b.GenerateExpression(expr2), 17u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 0 0 1 Unknown
@@ -563,18 +563,17 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare_Twice) {
 %14 = OpConstant %4 1
 %15 = OpConstant %4 2
 %16 = OpConstantComposite %13 %14 %15
-%17 = OpConstant %4 0
 )");
 
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             R"(%9 = OpLoad %7 %5
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
-%8 = OpImageSampleDrefExplicitLod %4 %12 %16 %15 Lod %17
-%19 = OpLoad %7 %5
-%20 = OpLoad %3 %1
-%21 = OpSampledImage %11 %20 %19
-%18 = OpImageSampleDrefExplicitLod %4 %21 %16 %15 Lod %17
+%8 = OpImageSampleDrefImplicitLod %4 %12 %16 %15
+%18 = OpLoad %7 %5
+%19 = OpLoad %3 %1
+%20 = OpSampledImage %11 %19 %18
+%17 = OpImageSampleDrefImplicitLod %4 %20 %16 %15
 )");
 }
 

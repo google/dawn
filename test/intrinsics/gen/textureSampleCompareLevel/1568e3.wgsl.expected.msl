@@ -1,0 +1,14 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+
+Compilation failed: 
+
+program_source:9:15: error: use of undeclared identifier 'arg_0'
+  float res = arg_0.sample_compare(arg_1, float3(), 1.0f, level(0));
+              ^
+program_source:9:36: error: use of undeclared identifier 'arg_1'
+  float res = arg_0.sample_compare(arg_1, float3(), 1.0f, level(0));
+                                   ^

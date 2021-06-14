@@ -55,6 +55,7 @@ bool IsTextureIntrinsic(IntrinsicType i) {
          i == IntrinsicType::kTextureSampleLevel ||
          i == IntrinsicType::kTextureSampleBias ||
          i == IntrinsicType::kTextureSampleCompare ||
+         i == IntrinsicType::kTextureSampleCompareLevel ||
          i == IntrinsicType::kTextureSampleGrad ||
          i == IntrinsicType::kTextureStore;
 }

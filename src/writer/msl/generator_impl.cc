@@ -650,6 +650,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
       out_ << ".sample(";
       break;
     case sem::IntrinsicType::kTextureSampleCompare:
+    case sem::IntrinsicType::kTextureSampleCompareLevel:
       out_ << ".sample_compare(";
       break;
     case sem::IntrinsicType::kTextureLoad:
@@ -731,6 +732,10 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
     if (lod_param_is_named) {
       out_ << ")";
     }
+  }
+  if (intrinsic->Type() == sem::IntrinsicType::kTextureSampleCompareLevel) {
+    maybe_write_comma();
+    out_ << "level(0)";
   }
   if (auto* ddx = arg(Usage::kDdx)) {
     auto dim = texture_type->dim();

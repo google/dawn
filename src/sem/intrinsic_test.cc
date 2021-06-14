@@ -111,6 +111,8 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{"textureSampleBias", IntrinsicType::kTextureSampleBias},
         IntrinsicData{"textureSampleCompare",
                       IntrinsicType::kTextureSampleCompare},
+        IntrinsicData{"textureSampleCompareLevel",
+                      IntrinsicType::kTextureSampleCompareLevel},
         IntrinsicData{"textureSampleGrad", IntrinsicType::kTextureSampleGrad},
         IntrinsicData{"textureSampleLevel", IntrinsicType::kTextureSampleLevel},
         IntrinsicData{"trunc", IntrinsicType::kTrunc},

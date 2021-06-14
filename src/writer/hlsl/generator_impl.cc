@@ -1117,6 +1117,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
       out << ".SampleGrad(";
       break;
     case sem::IntrinsicType::kTextureSampleCompare:
+      out << ".SampleCmp(";
+      break;
+    case sem::IntrinsicType::kTextureSampleCompareLevel:
       out << ".SampleCmpLevelZero(";
       break;
     case sem::IntrinsicType::kTextureLoad:

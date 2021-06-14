@@ -115,6 +115,7 @@ enum class IntrinsicType {
   kTextureSample,
   kTextureSampleBias,
   kTextureSampleCompare,
+  kTextureSampleCompareLevel,
   kTextureSampleGrad,
   kTextureSampleLevel,
   kTextureStore,

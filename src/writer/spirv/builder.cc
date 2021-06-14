@@ -2783,6 +2783,15 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
       break;
     }
     case IntrinsicType::kTextureSampleCompare: {
+      op = spv::Op::OpImageSampleDrefImplicitLod;
+      append_result_type_and_id_to_spirv_params();
+      if (!append_image_and_coords_to_spirv_params()) {
+        return false;
+      }
+      spirv_params.emplace_back(gen_arg(Usage::kDepthRef));
+      break;
+    }
+    case IntrinsicType::kTextureSampleCompareLevel: {
       op = spv::Op::OpImageSampleDrefExplicitLod;
       append_result_type_and_id_to_spirv_params();
       if (!append_image_and_coords_to_spirv_params()) {

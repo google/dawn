@@ -1862,6 +1862,18 @@ const char* expected_texture_overload(
       return R"(textureSampleCompare(texture, sampler, coords, depth_ref))";
     case ValidTextureOverload::kSampleCompareDepthCubeArrayF32:
       return R"(textureSampleCompare(texture, sampler, coords, array_index, depth_ref))";
+    case ValidTextureOverload::kSampleCompareLevelDepth2dF32:
+      return R"(textureSampleCompare(texture, sampler, coords, depth_ref))";
+    case ValidTextureOverload::kSampleCompareLevelDepth2dOffsetF32:
+      return R"(textureSampleCompare(texture, sampler, coords, depth_ref, offset))";
+    case ValidTextureOverload::kSampleCompareLevelDepth2dArrayF32:
+      return R"(textureSampleCompare(texture, sampler, coords, array_index, depth_ref))";
+    case ValidTextureOverload::kSampleCompareLevelDepth2dArrayOffsetF32:
+      return R"(textureSampleCompare(texture, sampler, coords, array_index, depth_ref, offset))";
+    case ValidTextureOverload::kSampleCompareLevelDepthCubeF32:
+      return R"(textureSampleCompare(texture, sampler, coords, depth_ref))";
+    case ValidTextureOverload::kSampleCompareLevelDepthCubeArrayF32:
+      return R"(textureSampleCompare(texture, sampler, coords, array_index, depth_ref))";
     case ValidTextureOverload::kLoad1dLevelF32:
       return R"(textureLoad(texture, coords, level))";
     case ValidTextureOverload::kLoad1dLevelU32:
