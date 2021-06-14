@@ -300,6 +300,17 @@ def tint_standalone_builder(name, clang, debug, cpu):
         builder = "tint:try/" + name,
     )
 
+def dawn_tryjob(name):
+    """Adds a tryjob that tests against Dawn's CQ
+
+    Args:
+      name: string of the name of the tryjob
+    """
+    luci.cq_tryjob_verifier(
+        cq_group = "Tint-CQ",
+        builder = "dawn:try/" + name,
+    )
+
 luci.gitiles_poller(
     name = "primary-poller",
     bucket = "ci",
@@ -350,6 +361,11 @@ tint_standalone_builder("win-clang-dbg-x86", True, True, "x86")
 tint_standalone_builder("win-clang-rel-x86", True, False, "x86")
 tint_standalone_builder("win-msvc-dbg-x64", False, True, "x64")
 tint_standalone_builder("win-msvc-rel-x64", False, False, "x64")
+
+dawn_tryjob("linux-tint-rel")
+dawn_tryjob("mac-tint-rel")
+dawn_tryjob("win-tint-rel")
+dawn_tryjob("msvc-tint-rel")
 
 # Views
 
