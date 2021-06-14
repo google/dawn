@@ -836,12 +836,15 @@ bool Resolver::ValidateParameter(const VariableInfo* info) {
 
 bool Resolver::ValidateFunction(const ast::Function* func,
                                 const FunctionInfo* info) {
-  if (symbol_to_function_.find(func->symbol()) != symbol_to_function_.end()) {
+  auto func_it = symbol_to_function_.find(func->symbol());
+  if (func_it != symbol_to_function_.end()) {
     diagnostics_.add_error("v-0016",
-                           "function names must be unique '" +
+                           "duplicate function named '" +
                                builder_->Symbols().NameFor(func->symbol()) +
                                "'",
                            func->source());
+    diagnostics_.add_note("first function declared here",
+                          func_it->second->declaration->source());
     return false;
   }
 

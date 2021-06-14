@@ -42,7 +42,8 @@ TEST_F(ResolverFunctionValidationTest, FunctionNamesMustBeUnique_fail) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error v-0016: function names must be unique 'func'");
+            R"(12:34 error v-0016: duplicate function named 'func'
+note: first function declared here)");
 }
 
 TEST_F(ResolverFunctionValidationTest,
