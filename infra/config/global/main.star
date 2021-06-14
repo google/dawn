@@ -70,7 +70,6 @@ luci.bucket(
             acl.BUILDBUCKET_TRIGGERER,
             groups = [
                 "project-dawn-tryjob-access",
-                "project-tint-tryjob-access",
                 "service-account-cq",
             ],
         ),
@@ -334,25 +333,6 @@ def chromium_dawn_tryjob(os):
         builder = "chromium:try/" + os + "-dawn-rel",
     )
 
-def dawn_tint_builder(name, clang = True):
-    """Adds builder(s) for Tint to run Dawn tests in its CQ.
-
-    These builders have the same configuration as the standard Dawn
-    try bots, but different names, so they don't collide with the
-    names used by Tint's CQ.
-
-    Args:
-      name: builder's name in string form
-      clang: Use llvm compiler
-    """
-    os = get_os_from_arg(name)
-
-    add_try_builder(name, os, clang, False, "x64", False)
-    luci.list_view_entry(
-        list_view = "try",
-        builder = "try/" + name,
-    )
-
 luci.gitiles_poller(
     name = "primary-poller",
     bucket = "ci",
@@ -404,11 +384,6 @@ dawn_standalone_builder("cron-linux-clang-rel-x64", True, False, "x64", True)
 chromium_dawn_tryjob("linux")
 chromium_dawn_tryjob("mac")
 chromium_dawn_tryjob("win")
-
-dawn_tint_builder("linux-tint-rel")
-dawn_tint_builder("mac-tint-rel")
-dawn_tint_builder("win-tint-rel")
-dawn_tint_builder("msvc-tint-rel", False)
 
 # Views
 
