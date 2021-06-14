@@ -131,9 +131,9 @@ TEST_P(OpArrayLengthTest, Compute) {
         [[group(1), binding(0)]] var<storage, read_write> result : ResultBuffer;
         )" + mShaderInterface + R"(
         [[stage(compute)]] fn main() {
-            result.data[0] = arrayLength(buffer1.data);
-            result.data[1] = arrayLength(buffer2.data);
-            result.data[2] = arrayLength(buffer3.data);
+            result.data[0] = arrayLength(&buffer1.data);
+            result.data[1] = arrayLength(&buffer2.data);
+            result.data[2] = arrayLength(&buffer3.data);
         })")
                                                                         .c_str());
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
@@ -171,9 +171,9 @@ TEST_P(OpArrayLengthTest, Fragment) {
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, (mShaderInterface + R"(
         [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
             var fragColor : vec4<f32>;
-            fragColor.r = f32(arrayLength(buffer1.data)) / 255.0;
-            fragColor.g = f32(arrayLength(buffer2.data)) / 255.0;
-            fragColor.b = f32(arrayLength(buffer3.data)) / 255.0;
+            fragColor.r = f32(arrayLength(&buffer1.data)) / 255.0;
+            fragColor.g = f32(arrayLength(&buffer2.data)) / 255.0;
+            fragColor.b = f32(arrayLength(&buffer3.data)) / 255.0;
             fragColor.a = 0.0;
             return fragColor;
         })")
@@ -223,9 +223,9 @@ TEST_P(OpArrayLengthTest, Vertex) {
 
         [[stage(vertex)]] fn main() -> VertexOut {
             var output : VertexOut;
-            output.color.r = f32(arrayLength(buffer1.data)) / 255.0;
-            output.color.g = f32(arrayLength(buffer2.data)) / 255.0;
-            output.color.b = f32(arrayLength(buffer3.data)) / 255.0;
+            output.color.r = f32(arrayLength(&buffer1.data)) / 255.0;
+            output.color.g = f32(arrayLength(&buffer2.data)) / 255.0;
+            output.color.b = f32(arrayLength(&buffer3.data)) / 255.0;
             output.color.a = 0.0;
 
             output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
