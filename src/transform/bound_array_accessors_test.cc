@@ -557,7 +557,7 @@ struct S {
 [[group(0), binding(0)]] var<storage, read> s : S;
 
 fn f() {
-  var d : f32 = s.b[min(u32(25), (arrayLength(s.b) - 1u))];
+  var d : f32 = s.b[min(u32(25), (arrayLength(&(s.b)) - 1u))];
 }
 )";
 
@@ -624,7 +624,7 @@ struct S {
 let c : u32 = 1u;
 
 fn f() {
-  let b : f32 = s.b[min(u32(c), (arrayLength(s.b) - 1u))];
+  let b : f32 = s.b[min(u32(c), (arrayLength(&(s.b)) - 1u))];
   let x : i32 = min(1, 2);
   let y : u32 = arrayLength(s.b);
 }
