@@ -3340,7 +3340,7 @@ bool Resolver::ValidateNoDuplicateDecorations(
   std::unordered_map<const TypeInfo*, Source> seen;
   for (auto* d : decorations) {
     auto res = seen.emplace(&d->TypeInfo(), d->source());
-    if (!res.second) {
+    if (!res.second && !d->Is<ast::InternalDecoration>()) {
       diagnostics_.add_error("duplicate " + d->name() + " decoration",
                              d->source());
       diagnostics_.add_note("first decoration declared here",

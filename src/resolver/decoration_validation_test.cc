@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/ast/access_decoration.h"
+#include "src/ast/disable_validation_decoration.h"
 #include "src/ast/override_decoration.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/stage_decoration.h"
@@ -375,6 +376,22 @@ TEST_F(VariableDecorationTest, DuplicateDecoration) {
   EXPECT_EQ(r()->error(),
             R"(56:78 error: duplicate binding decoration
 12:34 note: first decoration declared here)");
+}
+
+TEST_F(VariableDecorationTest, DuplicateInternalDecoration) {
+  auto* s =
+      Param("s", ty.sampler(ast::SamplerKind::kSampler),
+            ast::DecorationList{
+                create<ast::BindingDecoration>(0),
+                create<ast::GroupDecoration>(0),
+                ASTNodes().Create<ast::DisableValidationDecoration>(
+                    ID(), ast::DisabledValidation::kBindingPointCollision),
+                ASTNodes().Create<ast::DisableValidationDecoration>(
+                    ID(), ast::DisabledValidation::kEntryPointParameter),
+            });
+  Func("f", {s}, ty.void_(), {});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 using ConstantDecorationTest = TestWithParams;
