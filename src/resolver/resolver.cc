@@ -3317,11 +3317,6 @@ bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
   }
 
   auto* storage_type = lhs_ref->StoreType();
-
-  // TODO(crbug.com/tint/809): The originating variable of the left-hand side
-  // must not have an access(read) access attribute.
-  // https://gpuweb.github.io/gpuweb/wgsl/#assignment
-
   auto* value_type = rhs_type->UnwrapRef();  // Implicit load of RHS
 
   // Value type has to match storage type
@@ -3331,7 +3326,12 @@ bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
                            a->source());
     return false;
   }
-
+  if (lhs_ref->Access() == ast::Access::kRead) {
+    diagnostics_.add_error(
+        "cannot store into a read-only type '" + TypeNameOf(a->lhs()) + "'",
+        a->source());
+    return false;
+  }
   return true;
 }
 

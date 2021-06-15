@@ -15,6 +15,7 @@
 #include "src/resolver/resolver.h"
 
 #include "gmock/gmock.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/resolver/resolver_test_helper.h"
 #include "src/sem/storage_texture_type.h"
 
@@ -23,6 +24,27 @@ namespace resolver {
 namespace {
 
 using ResolverAssignmentValidationTest = ResolverTest;
+
+TEST_F(ResolverAssignmentValidationTest, ReadOnlyBuffer) {
+  // [[block]] struct S { m : i32 };
+  // [[group(0), binding(0)]]
+  // var<storage,read> a : S;
+  auto* s = Structure("S", {Member("m", ty.i32())},
+                      {create<ast::StructBlockDecoration>()});
+  Global(Source{{12, 34}}, "a", ty.Of(s), ast::StorageClass::kStorage,
+         ast::Access::kRead,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
+
+  WrapInFunction(Assign(Source{{56, 78}}, MemberAccessor("a", "m"), 1));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "56:78 error: cannot store into a read-only type 'ref<storage, "
+            "i32, read>'");
+}
 
 TEST_F(ResolverAssignmentValidationTest, AssignIncompatibleTypes) {
   // {
@@ -154,10 +176,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignToConstant_Fail) {
   EXPECT_EQ(r()->error(), "12:34 error: cannot assign to value of type 'i32'");
 }
 
-// TODO(crbug.com/tint/809): The var has an implicit access::read, and so this
-// test will pass again when we start validating the access mode on the LHS of
-// an assignment.
-TEST_F(ResolverAssignmentValidationTest, DISABLED_AssignNonStorable_Fail) {
+TEST_F(ResolverAssignmentValidationTest, AssignNonStorable_Fail) {
   // var a : texture_storage_1d<rgba8unorm, read>;
   // var b : texture_storage_1d<rgba8unorm, read>;
   // a = b;
@@ -179,12 +198,12 @@ TEST_F(ResolverAssignmentValidationTest, DISABLED_AssignNonStorable_Fail) {
              create<ast::GroupDecoration>(0),
          });
 
-  WrapInFunction(Assign("a", Expr(Source{{12, 34}}, "b")));
+  WrapInFunction(Assign(Source{{56, 78}}, "a", "b"));
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      R"(12:34 error: 'texture_storage_1d<rgba8unorm, read>' is not storable)");
+  EXPECT_EQ(r()->error(),
+            "56:78 error: cannot store into a read-only type "
+            "'texture_storage_1d<rgba8unorm, read>'");
 }
 
 }  // namespace

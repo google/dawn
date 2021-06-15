@@ -814,7 +814,7 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
   auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
   auto* out_var = Global("out_var", ty.f32(), ast::StorageClass::kOutput);
   auto* sb_var = Global("sb_var", ty.Of(s), ast::StorageClass::kStorage,
-                        ast::Access::kRead,
+                        ast::Access::kReadWrite,
                         ast::DecorationList{
                             create<ast::BindingDecoration>(0),
                             create<ast::GroupDecoration>(0),
@@ -853,7 +853,7 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
   auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
   auto* out_var = Global("out_var", ty.f32(), ast::StorageClass::kOutput);
   auto* sb_var = Global("sb_var", ty.Of(s), ast::StorageClass::kStorage,
-                        ast::Access::kRead,
+                        ast::Access::kReadWrite,
                         ast::DecorationList{
                             create<ast::BindingDecoration>(0),
                             create<ast::GroupDecoration>(0),
