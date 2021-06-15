@@ -201,6 +201,21 @@ TEST_F(ResolverFunctionValidationTest,
 }
 
 TEST_F(ResolverFunctionValidationTest,
+       FunctionTypeMustMatchReturnStatementTypeMissing_fail) {
+  // fn func -> f32 { return; }
+  Func("func", ast::VariableList{}, ty.f32(),
+       ast::StatementList{
+           Return(Source{Source::Location{12, 34}}, nullptr),
+       },
+       ast::DecorationList{});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error v-000y: return statement type must match its function "
+            "return type, returned 'void', expected 'f32'");
+}
+
+TEST_F(ResolverFunctionValidationTest,
        FunctionTypeMustMatchReturnStatementTypeF32_pass) {
   // fn func -> f32 { return 2.0; }
   Func("func", ast::VariableList{}, ty.f32(),

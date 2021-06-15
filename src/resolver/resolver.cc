@@ -3189,13 +3189,14 @@ bool Resolver::Return(ast::ReturnStatement* ret) {
 
   if (auto* value = ret->value()) {
     Mark(value);
-
-    // Validate after processing the return value expression so that its type
-    // is available for validation
-    return Expression(value) && ValidateReturn(ret);
+    if (!Expression(value)) {
+      return false;
+    }
   }
 
-  return true;
+  // Validate after processing the return value expression so that its type is
+  // available for validation.
+  return ValidateReturn(ret);
 }
 
 bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
