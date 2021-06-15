@@ -173,19 +173,23 @@ func processFailure(test, wd, failure string) error {
 		fix = func(testSource string) (string, error) {
 			// We don't know if a or b is the expected, so just try flipping the string
 			// to the other form.
+
+			if len(b) > len(a) { // Go with the longer match, in case both are found
+				a, b = b, a
+			}
 			switch {
 			case strings.Contains(testSource, a):
-				testSource = strings.Replace(testSource, a, b, -1)
+				testSource = strings.ReplaceAll(testSource, a, b)
 			case strings.Contains(testSource, b):
-				testSource = strings.Replace(testSource, b, a, -1)
+				testSource = strings.ReplaceAll(testSource, b, a)
 			default:
 				// Try escaping for R"(...)" strings
 				a, b = escape(a), escape(b)
 				switch {
 				case strings.Contains(testSource, a):
-					testSource = strings.Replace(testSource, a, b, -1)
+					testSource = strings.ReplaceAll(testSource, a, b)
 				case strings.Contains(testSource, b):
-					testSource = strings.Replace(testSource, b, a, -1)
+					testSource = strings.ReplaceAll(testSource, b, a)
 				default:
 					return "", fmt.Errorf("Could not fix 'EXPECT_EQ' pattern in '%v'", file)
 				}
