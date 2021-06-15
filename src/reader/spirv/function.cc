@@ -20,6 +20,8 @@
 #include "src/ast/assignment_statement.h"
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/break_statement.h"
+#include "src/ast/builtin.h"
+#include "src/ast/builtin_decoration.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/discard_statement.h"
@@ -1026,24 +1028,37 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
     const auto return_struct_sym =
         builder_.Symbols().Register(return_struct_name);
 
+    const auto& builtin_position_info = parser_impl_.GetBuiltInPositionInfo();
+
     // Define the structure.
     ast::ExpressionList return_exprs;
     std::vector<ast::StructMember*> return_members;
     for (uint32_t var_id : ep_info_->outputs) {
-      const auto* var = def_use_mgr_->GetDef(var_id);
-      TINT_ASSERT(var != nullptr);
-      TINT_ASSERT(var->opcode() == SpvOpVariable);
-      const auto* store_type = GetVariableStoreType(*var);
-      const auto* forced_store_type = store_type;
+      const Type* param_type = nullptr;
+      const Type* store_type = nullptr;
       ast::DecorationList out_decos;
-      if (!parser_impl_.ConvertDecorationsForVariable(
-              var_id, &forced_store_type, &out_decos)) {
-        // This occurs, and is not an error, for the PointSize builtin.
-        if (!success()) {
-          // But exit early if an error was logged.
-          return false;
+      if (var_id == builtin_position_info.per_vertex_var_id) {
+        // The SPIR-V gl_PerVertex variable has already been remapped to
+        // a gl_Position variable.
+        // Substitute the type.
+        param_type = ty_.Vector(ty_.F32(), 4);
+        out_decos.emplace_back(
+            create<ast::BuiltinDecoration>(source, ast::Builtin::kPosition));
+      } else {
+        const auto* var = def_use_mgr_->GetDef(var_id);
+        TINT_ASSERT(var != nullptr);
+        TINT_ASSERT(var->opcode() == SpvOpVariable);
+        store_type = GetVariableStoreType(*var);
+        param_type = store_type;
+        if (!parser_impl_.ConvertDecorationsForVariable(var_id, &param_type,
+                                                        &out_decos)) {
+          // This occurs, and is not an error, for the PointSize builtin.
+          if (!success()) {
+            // But exit early if an error was logged.
+            return false;
+          }
+          continue;
         }
-        continue;
       }
 
       // TODO(dneto): flatten structs and arrays to vectors or scalars.
@@ -1057,7 +1072,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
       // Form the member type.
       // Reuse the var name for the member name. They can't clash.
       ast::StructMember* return_member = create<ast::StructMember>(
-          Source{}, var_sym, forced_store_type->Build(builder_), out_decos);
+          Source{}, var_sym, param_type->Build(builder_), out_decos);
       return_members.push_back(return_member);
 
       ast::Expression* return_member_value =
@@ -1070,7 +1085,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
         if (store_type->As<Array>()->type->IsSignedScalarOrVector()) {
           // sample_mask is unsigned in WGSL. Bitcast it.
           return_member_value = create<ast::BitcastExpression>(
-              source, forced_store_type->Build(builder_), return_member_value);
+              source, param_type->Build(builder_), return_member_value);
         }
       } else {
         // No other builtin outputs need signedness conversion.

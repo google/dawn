@@ -1053,7 +1053,8 @@ const Type* ParserImpl::ConvertType(uint32_t type_id,
 
   if (pointee_type_id == builtin_position_.struct_type_id) {
     builtin_position_.pointer_type_id = type_id;
-    builtin_position_.storage_class = storage_class;
+    builtin_position_.storage_class =
+        hlsl_style_pipeline_io_ ? SpvStorageClassPrivate : storage_class;
     return nullptr;
   }
   auto* ast_elem_ty = ConvertType(pointee_type_id, PtrAs::Ptr);
@@ -1314,13 +1315,18 @@ bool ParserImpl::EmitModuleScopeVariables() {
     // Make sure the variable has a name.
     namer_.SuggestSanitizedName(builtin_position_.per_vertex_var_id,
                                 "gl_Position");
+    ast::DecorationList decos;
+    if (!hlsl_style_pipeline_io_) {
+      // When doing HLSL-style pipeline IO, the decoration goes on the
+      // parameter, not the variable.
+      decos.push_back(
+          create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kPosition));
+    }
     auto* var = MakeVariable(
         builtin_position_.per_vertex_var_id,
         enum_converter_.ToStorageClass(builtin_position_.storage_class),
         ConvertType(builtin_position_.position_member_type_id), false, nullptr,
-        ast::DecorationList{
-            create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kPosition),
-        });
+        std::move(decos));
 
     builder_.AST().AddGlobalVariable(var);
   }

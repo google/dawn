@@ -4841,6 +4841,68 @@ TEST_F(SpvModuleScopeVarParserTest,
   EXPECT_EQ(got, expected) << got;
 }
 
+TEST_F(SpvModuleScopeVarParserTest,
+       BuiltinPosition_BuiltIn_Position_MapsToVec4) {
+  // In Vulkan SPIR-V, Position is the first member of gl_PerVertex
+  const std::string assembly = PerVertexPreamble() + R"(
+  %main = OpFunction %void None %voidfn
+  %entry = OpLabel
+  OpReturn
+  OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+
+  // TODO(crbug.com/tint/508): Remove this when everything is converted
+  // to HLSL style pipeline IO.
+  p->SetHLSLStylePipelineIO();
+
+  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+
+  const auto got = p->program().to_str();
+  const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] gl_Position: __vec_4__f32}
+  }
+  Variable{
+    gl_Position
+    private
+    undefined
+    __vec_4__f32
+  }
+  Function main_1 -> __void
+  ()
+  {
+    Return{}
+  }
+  Function main -> __type_name_main_out
+  StageDecoration{vertex}
+  ()
+  {
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{gl_Position}
+        }
+      }
+    }
+  }
+}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
+
+// TODO(dneto): pipeline IO: gl_Position, with initializer
+// TODO(dneto): pipeline IO: read PointSize
+// TODO(dneto): pipeline IO: write PointSize
+
 // TODO(dneto): pipeline IO: flatten structures, and distribute locations
 
 }  // namespace
