@@ -1057,16 +1057,23 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
       // Form the member type.
       // Reuse the var name for the member name. They can't clash.
       ast::StructMember* return_member = create<ast::StructMember>(
-          Source{}, var_sym, forced_store_type->Build(builder_),
-          std::move(out_decos));
+          Source{}, var_sym, forced_store_type->Build(builder_), out_decos);
       return_members.push_back(return_member);
 
       ast::Expression* return_member_value =
           create<ast::IdentifierExpression>(source, var_sym);
-      if (forced_store_type != store_type) {
-        // We need to cast from the variable store type to the member type.
-        return_member_value = create<ast::BitcastExpression>(
-            source, forced_store_type->Build(builder_), return_member_value);
+      if (HasBuiltinSampleMask(out_decos)) {
+        // In Vulkan SPIR-V, the sample mask is an array. In WGSL it's a scalar.
+        // Get the first element only.
+        return_member_value = create<ast::ArrayAccessorExpression>(
+            source, return_member_value, parser_impl_.MakeNullValue(ty_.I32()));
+        if (store_type->As<Array>()->type->IsSignedScalarOrVector()) {
+          // sample_mask is unsigned in WGSL. Bitcast it.
+          return_member_value = create<ast::BitcastExpression>(
+              source, forced_store_type->Build(builder_), return_member_value);
+        }
+      } else {
+        // No other builtin outputs need signedness conversion.
       }
       // Save the expression.
       return_exprs.push_back(return_member_value);

@@ -4616,14 +4616,232 @@ TEST_F(SpvModuleScopeVarParserTest,
 }
 
 TEST_F(SpvModuleScopeVarParserTest,
-       DISABLED_EntryPointWrapping_BuiltinVar_SampleMask_Out_U) {}
+       EntryPointWrapping_BuiltinVar_SampleMask_Out_Unsigned_Initializer) {
+  // SampleMask is u32 in WGSL.
+  // Use unsigned array element in Vulkan.
+  const auto assembly = CommonCapabilities() + R"(
+     OpEntryPoint Fragment %main "main" %1
+     OpExecutionMode %main OriginUpperLeft
+     OpDecorate %1 BuiltIn SampleMask
+)" + CommonTypes() +
+                        R"(
+     %arr = OpTypeArray %uint %uint_1
+     %ptr_ty = OpTypePointer Output %arr
+     %zero = OpConstantNull %arr
+     %1 = OpVariable %ptr_ty Output %zero
+
+     %main = OpFunction %void None %voidfn
+     %entry = OpLabel
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+
+  // TODO(crbug.com/tint/508): Remove this when everything is converted
+  // to HLSL style pipeline IO.
+  p->SetHLSLStylePipelineIO();
+
+  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+  const auto got = p->program().to_str();
+  const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{sample_mask}
+ ]] x_1: __u32}
+  }
+  Variable{
+    x_1
+    private
+    undefined
+    __array__u32_1
+    {
+      TypeConstructor[not set]{
+        __array__u32_1
+        ScalarConstructor[not set]{0u}
+      }
+    }
+  }
+  Function main_1 -> __void
+  ()
+  {
+    Return{}
+  }
+  Function main -> __type_name_main_out
+  StageDecoration{fragment}
+  ()
+  {
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          ArrayAccessor[not set]{
+            Identifier[not set]{x_1}
+            ScalarConstructor[not set]{0}
+          }
+        }
+      }
+    }
+  }
+}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
+
 TEST_F(SpvModuleScopeVarParserTest,
-       DISABLED_EntryPointWrapping_BuiltinVar_SampleMask_Out_S) {}
+       EntryPointWrapping_BuiltinVar_SampleMask_Out_Signed_Initializer) {
+  // SampleMask is u32 in WGSL.
+  // Use signed array element in Vulkan.
+  const auto assembly = CommonCapabilities() + R"(
+     OpEntryPoint Fragment %main "main" %1
+     OpExecutionMode %main OriginUpperLeft
+     OpDecorate %1 BuiltIn SampleMask
+)" + CommonTypes() +
+                        R"(
+     %arr = OpTypeArray %int %uint_1
+     %ptr_ty = OpTypePointer Output %arr
+     %zero = OpConstantNull %arr
+     %1 = OpVariable %ptr_ty Output %zero
+
+     %main = OpFunction %void None %voidfn
+     %entry = OpLabel
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+
+  // TODO(crbug.com/tint/508): Remove this when everything is converted
+  // to HLSL style pipeline IO.
+  p->SetHLSLStylePipelineIO();
+
+  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+  const auto got = p->program().to_str();
+  const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{sample_mask}
+ ]] x_1: __u32}
+  }
+  Variable{
+    x_1
+    private
+    undefined
+    __array__i32_1
+    {
+      TypeConstructor[not set]{
+        __array__i32_1
+        ScalarConstructor[not set]{0}
+      }
+    }
+  }
+  Function main_1 -> __void
+  ()
+  {
+    Return{}
+  }
+  Function main -> __type_name_main_out
+  StageDecoration{fragment}
+  ()
+  {
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Bitcast[not set]<__u32>{
+            ArrayAccessor[not set]{
+              Identifier[not set]{x_1}
+              ScalarConstructor[not set]{0}
+            }
+          }
+        }
+      }
+    }
+  }
+}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
+
+TEST_F(SpvModuleScopeVarParserTest,
+       EntryPointWrapping_BuiltinVar_FragDepth_Out_Initializer) {
+  // FragDepth does not require conversion, because it's f32.
+  // The member of the return type is just the identifier corresponding
+  // to the module-scope private variable.
+  const auto assembly = CommonCapabilities() + R"(
+     OpEntryPoint Fragment %main "main" %1
+     OpExecutionMode %main OriginUpperLeft
+     OpDecorate %1 BuiltIn FragDepth
+)" + CommonTypes() +
+                        R"(
+     %ptr_ty = OpTypePointer Output %float
+     %1 = OpVariable %ptr_ty Output %float_0
+
+     %main = OpFunction %void None %voidfn
+     %entry = OpLabel
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+
+  // TODO(crbug.com/tint/508): Remove this when everything is converted
+  // to HLSL style pipeline IO.
+  p->SetHLSLStylePipelineIO();
+
+  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+  const auto got = p->program().to_str();
+  const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{frag_depth}
+ ]] x_1: __f32}
+  }
+  Variable{
+    x_1
+    private
+    undefined
+    __f32
+    {
+      ScalarConstructor[not set]{0.000000}
+    }
+  }
+  Function main_1 -> __void
+  ()
+  {
+    Return{}
+  }
+  Function main -> __type_name_main_out
+  StageDecoration{fragment}
+  ()
+  {
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{x_1}
+        }
+      }
+    }
+  }
+}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
 
 // TODO(dneto): pipeline IO: flatten structures, and distribute locations
-
-// TODO(dneto): Test passing pointer to SampleMask as function parameter,
-// both input case and output case.
 
 }  // namespace
 }  // namespace spirv
