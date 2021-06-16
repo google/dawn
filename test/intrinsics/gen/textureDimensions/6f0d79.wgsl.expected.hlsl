@@ -1,7 +1,3 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 RWTexture2DArray<float4> arg_0 : register(u0, space1);
 
 void textureDimensions_6f0d79() {
@@ -9,6 +5,10 @@ void textureDimensions_6f0d79() {
   arg_0.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z);
   int2 res = tint_tmp.xy;
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   textureDimensions_6f0d79();
@@ -26,4 +26,3 @@ void compute_main() {
   textureDimensions_6f0d79();
   return;
 }
-

@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void sinh_b9860e() {
   float2 res = sinh(float2(0.0f, 0.0f));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   sinh_b9860e();
@@ -22,4 +22,3 @@ void compute_main() {
   sinh_b9860e();
   return;
 }
-

@@ -9,15 +9,16 @@ struct vertexUniformBuffer1 {
 struct vertexUniformBuffer2 {
   float2x2 transform2;
 };
+
+ConstantBuffer<vertexUniformBuffer1> x_20 : register(b0, space0);
+ConstantBuffer<vertexUniformBuffer2> x_26 : register(b0, space1);
+
 struct tint_symbol_1 {
   int gl_VertexIndex : SV_VertexID;
 };
 struct tint_symbol_2 {
   float4 value : SV_Position;
 };
-
-ConstantBuffer<vertexUniformBuffer1> x_20 : register(b0, space0);
-ConstantBuffer<vertexUniformBuffer2> x_26 : register(b0, space1);
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   const int gl_VertexIndex = tint_symbol.gl_VertexIndex;
@@ -32,7 +33,6 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   const tint_symbol_2 tint_symbol_4 = {float4(x_52.x, x_52.y, 0.0f, 1.0f)};
   return tint_symbol_4;
 }
-
 
 warning: DXIL.dll not found.  Resulting DXIL will not be signed for use in release environments.
 

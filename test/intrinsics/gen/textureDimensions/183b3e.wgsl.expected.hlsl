@@ -1,7 +1,3 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 TextureCubeArray<uint4> arg_0 : register(t0, space1);
 
 void textureDimensions_183b3e() {
@@ -9,6 +5,10 @@ void textureDimensions_183b3e() {
   arg_0.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z);
   int3 res = tint_tmp.xyy;
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   textureDimensions_183b3e();
@@ -26,4 +26,3 @@ void compute_main() {
   textureDimensions_183b3e();
   return;
 }
-

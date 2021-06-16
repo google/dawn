@@ -4,4 +4,3 @@ void main() {
   const float tint_symbol = modf(1.230000019f, whole);
   return;
 }
-

@@ -502,7 +502,6 @@ void main() {
   DeviceMemoryBarrierWithGroupSync();
   return;
 }
-
 )");
 }
 
@@ -519,7 +518,6 @@ void main() {
   GroupMemoryBarrierWithGroupSync();
   return;
 }
-
 )");
 }
 
@@ -543,7 +541,6 @@ void main() {
   f(1, 2, 3);
   return;
 }
-
 )");
 }
 

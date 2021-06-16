@@ -8,4 +8,3 @@ void main() {
   const float3 x_19 = float3(x_18.x, x_18.z, x_18.y);
   return;
 }
-

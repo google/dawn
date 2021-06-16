@@ -20,4 +20,3 @@ void main(tint_symbol_1 tint_symbol) {
   const uint foo = (((inputs0.local_invocation_id.x + local_invocation_index) + global_invocation_id.x) + inputs1.workgroup_id.x);
   return;
 }
-

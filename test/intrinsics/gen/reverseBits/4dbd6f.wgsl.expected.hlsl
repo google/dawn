@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void reverseBits_4dbd6f() {
   int4 res = reversebits(int4(0, 0, 0, 0));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   reverseBits_4dbd6f();
@@ -22,4 +22,3 @@ void compute_main() {
   reverseBits_4dbd6f();
   return;
 }
-

@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void tan_244e2a() {
   float4 res = tan(float4(0.0f, 0.0f, 0.0f, 0.0f));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   tan_244e2a();
@@ -22,4 +22,3 @@ void compute_main() {
   tan_244e2a();
   return;
 }
-

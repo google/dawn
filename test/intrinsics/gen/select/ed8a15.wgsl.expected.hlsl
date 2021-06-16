@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void select_ed8a15() {
   int res = (false ? 1 : 1);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   select_ed8a15();
@@ -22,4 +22,3 @@ void compute_main() {
   select_ed8a15();
   return;
 }
-

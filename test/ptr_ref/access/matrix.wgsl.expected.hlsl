@@ -4,4 +4,3 @@ void main() {
   m[1] = float3(5.0f, 5.0f, 5.0f);
   return;
 }
-

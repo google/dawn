@@ -16,4 +16,3 @@ void main(tint_symbol_1 tint_symbol) {
   const float4 v = loc3;
   return;
 }
-

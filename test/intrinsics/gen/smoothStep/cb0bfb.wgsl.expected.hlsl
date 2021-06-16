@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void smoothStep_cb0bfb() {
   float res = smoothstep(1.0f, 1.0f, 1.0f);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   smoothStep_cb0bfb();
@@ -22,4 +22,3 @@ void compute_main() {
   smoothStep_cb0bfb();
   return;
 }
-

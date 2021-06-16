@@ -1,13 +1,13 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 Texture2D arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 
 void textureSampleLevel_02be59() {
   float res = arg_0.SampleLevel(arg_1, float2(0.0f, 0.0f), 1);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   textureSampleLevel_02be59();
@@ -25,4 +25,3 @@ void compute_main() {
   textureSampleLevel_02be59();
   return;
 }
-

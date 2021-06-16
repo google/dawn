@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void ignore_6698df() {
   1u;
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   ignore_6698df();
@@ -22,4 +22,3 @@ void compute_main() {
   ignore_6698df();
   return;
 }
-

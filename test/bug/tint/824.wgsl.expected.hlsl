@@ -23,4 +23,3 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   const tint_symbol_2 tint_symbol_3 = {output.color, output.Position};
   return tint_symbol_3;
 }
-

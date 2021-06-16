@@ -6,4 +6,3 @@ void fragment_main() {
   dpdyCoarse_870a7e();
   return;
 }
-

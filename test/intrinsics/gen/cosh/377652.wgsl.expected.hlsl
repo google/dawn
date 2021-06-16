@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void cosh_377652() {
   float3 res = cosh(float3(0.0f, 0.0f, 0.0f));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   cosh_377652();
@@ -22,4 +22,3 @@ void compute_main() {
   cosh_377652();
   return;
 }
-

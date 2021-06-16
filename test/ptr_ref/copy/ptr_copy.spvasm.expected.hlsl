@@ -3,4 +3,3 @@ void main() {
   uint x_10 = 0u;
   return;
 }
-

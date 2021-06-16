@@ -7,4 +7,3 @@ void main() {
   const float significand = tint_tmp_1;
   return;
 }
-

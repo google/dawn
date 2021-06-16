@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void abs_7326de() {
   uint3 res = abs(uint3(0u, 0u, 0u));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   abs_7326de();
@@ -22,4 +22,3 @@ void compute_main() {
   abs_7326de();
   return;
 }
-

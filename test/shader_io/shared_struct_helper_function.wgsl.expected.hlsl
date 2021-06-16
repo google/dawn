@@ -1,3 +1,8 @@
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+  return;
+}
+
 struct VertexOutput {
   float4 pos;
   int loc0;
@@ -15,9 +20,3 @@ VertexOutput vert_main1() {
 VertexOutput vert_main2() {
   return foo(0.25f);
 }
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
-  return;
-}
-

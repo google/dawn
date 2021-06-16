@@ -11,4 +11,3 @@ void main() {
   int2 x = tint_tmp;
   return;
 }
-

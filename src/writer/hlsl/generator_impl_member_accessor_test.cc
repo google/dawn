@@ -143,7 +143,6 @@ void test_function() {
   float expr = str.mem;
   return;
 }
-
 )");
 }
 
@@ -342,19 +341,17 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_Matrix_Empty) {
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   auto* expected =
-      R"(
-RWByteAddressBuffer data : register(u0, space1);
-
-void tint_symbol_1(RWByteAddressBuffer buffer, uint offset, float2x3 value) {
+      R"(void tint_symbol_1(RWByteAddressBuffer buffer, uint offset, float2x3 value) {
   buffer.Store3((offset + 0u), asuint(value[0u]));
   buffer.Store3((offset + 16u), asuint(value[1u]));
 }
+
+RWByteAddressBuffer data : register(u0, space1);
 
 void main() {
   tint_symbol_1(data, 16u, float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
   return;
 }
-
 )";
   EXPECT_EQ(result(), expected);
 }
@@ -383,14 +380,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   auto* expected =
-      R"(
-RWByteAddressBuffer data : register(u0, space1);
+      R"(RWByteAddressBuffer data : register(u0, space1);
 
 void main() {
   float x = asfloat(data.Load(52u));
   return;
 }
-
 )";
   EXPECT_EQ(result(), expected);
 }
@@ -417,14 +412,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   auto* expected =
-      R"(
-RWByteAddressBuffer data : register(u0, space1);
+      R"(RWByteAddressBuffer data : register(u0, space1);
 
 void main() {
   int x = asint(data.Load(12u));
   return;
 }
-
 )";
   EXPECT_EQ(result(), expected);
 }
@@ -452,14 +445,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   auto* expected =
-      R"(
-RWByteAddressBuffer data : register(u0, space1);
+      R"(RWByteAddressBuffer data : register(u0, space1);
 
 void main() {
   int x = asint(data.Load((4u + (4u * uint(((2 + 4) - 3))))));
   return;
 }
-
 )";
   EXPECT_EQ(result(), expected);
 }
@@ -484,14 +475,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_ToArray) {
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   auto* expected =
-      R"(
-RWByteAddressBuffer data : register(u0, space1);
+      R"(RWByteAddressBuffer data : register(u0, space1);
 
 void main() {
   data.Store(12u, asuint(2));
   return;
 }
-
 )";
   EXPECT_EQ(result(), expected);
 }
@@ -527,14 +516,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel) {
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   auto* expected =
-      R"(
-RWByteAddressBuffer data : register(u0, space1);
+      R"(RWByteAddressBuffer data : register(u0, space1);
 
 void main() {
   float3 x = asfloat(data.Load3(80u));
   return;
 }
-
 )";
   EXPECT_EQ(result(), expected);
 }
@@ -573,14 +560,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   auto* expected =
-      R"(
-RWByteAddressBuffer data : register(u0, space1);
+      R"(RWByteAddressBuffer data : register(u0, space1);
 
 void main() {
   float2 x = asfloat(data.Load3(80u)).xy;
   return;
 }
-
 )";
   EXPECT_EQ(result(), expected);
 }
@@ -619,14 +604,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   auto* expected =
-      R"(
-RWByteAddressBuffer data : register(u0, space1);
+      R"(RWByteAddressBuffer data : register(u0, space1);
 
 void main() {
   float x = asfloat(data.Load(84u));
   return;
 }
-
 )";
   EXPECT_EQ(result(), expected);
 }
@@ -665,14 +648,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   auto* expected =
-      R"(
-RWByteAddressBuffer data : register(u0, space1);
+      R"(RWByteAddressBuffer data : register(u0, space1);
 
 void main() {
   float x = asfloat(data.Load(84u));
   return;
 }
-
 )";
   EXPECT_EQ(result(), expected);
 }
@@ -707,14 +688,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_MultiLevel) {
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   auto* expected =
-      R"(
-RWByteAddressBuffer data : register(u0, space1);
+      R"(RWByteAddressBuffer data : register(u0, space1);
 
 void main() {
   data.Store3(80u, asuint(float3(1.0f, 2.0f, 3.0f)));
   return;
 }
-
 )";
   EXPECT_EQ(result(), expected);
 }
@@ -753,14 +732,12 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   auto* expected =
-      R"(
-RWByteAddressBuffer data : register(u0, space1);
+      R"(RWByteAddressBuffer data : register(u0, space1);
 
 void main() {
   data.Store(84u, asuint(1.0f));
   return;
 }
-
 )";
   EXPECT_EQ(result(), expected);
 }

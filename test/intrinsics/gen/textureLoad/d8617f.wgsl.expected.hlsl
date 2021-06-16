@@ -1,12 +1,12 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 Texture2DArray<int4> arg_0 : register(t0, space1);
 
 void textureLoad_d8617f() {
   int4 res = arg_0.Load(int4(0, 0, 1, 0));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   textureLoad_d8617f();
@@ -24,4 +24,3 @@ void compute_main() {
   textureLoad_d8617f();
   return;
 }
-

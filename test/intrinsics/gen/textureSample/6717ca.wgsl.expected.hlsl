@@ -9,4 +9,3 @@ void fragment_main() {
   textureSample_6717ca();
   return;
 }
-

@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void isFinite_34d32b() {
   bool2 res = isfinite(float2(0.0f, 0.0f));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   isFinite_34d32b();
@@ -22,4 +22,3 @@ void compute_main() {
   isFinite_34d32b();
   return;
 }
-

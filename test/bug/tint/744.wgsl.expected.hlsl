@@ -3,15 +3,15 @@ struct Uniforms {
   uint2 bShape;
   uint2 outShape;
 };
-struct tint_symbol_1 {
-  uint3 global_id : SV_DispatchThreadID;
-};
-
-ConstantBuffer<Uniforms> uniforms : register(b3, space0);
 
 ByteAddressBuffer firstMatrix : register(t0, space0);
 ByteAddressBuffer secondMatrix : register(t1, space0);
 RWByteAddressBuffer resultMatrix : register(u2, space0);
+ConstantBuffer<Uniforms> uniforms : register(b3, space0);
+
+struct tint_symbol_1 {
+  uint3 global_id : SV_DispatchThreadID;
+};
 
 [numthreads(2, 2, 1)]
 void main(tint_symbol_1 tint_symbol) {
@@ -38,4 +38,3 @@ void main(tint_symbol_1 tint_symbol) {
   resultMatrix.Store((4u * index), asuint(result));
   return;
 }
-

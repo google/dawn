@@ -42,7 +42,6 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function) {
   EXPECT_EQ(result(), R"(  void my_func() {
     return;
   }
-
 )");
 }
 
@@ -77,7 +76,6 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithParams) {
   EXPECT_EQ(result(), R"(  void my_func(float a, int b) {
     return;
   }
-
 )");
 }
 
@@ -94,7 +92,6 @@ TEST_F(HlslGeneratorImplTest_Function,
   EXPECT_EQ(result(), R"(void main() {
   return;
 }
-
 )");
 }
 
@@ -111,7 +108,6 @@ TEST_F(HlslGeneratorImplTest_Function, PtrParameter) {
   EXPECT_THAT(result(), HasSubstr(R"(float f(inout float foo) {
   return foo;
 }
-
 )"));
 }
 
@@ -139,7 +135,6 @@ tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
   const tint_symbol_2 tint_symbol_3 = {foo};
   return tint_symbol_3;
 }
-
 )");
 }
 
@@ -170,7 +165,6 @@ tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
   const tint_symbol_2 tint_symbol_3 = {coord.x};
   return tint_symbol_3;
 }
-
 )");
 }
 
@@ -223,17 +217,18 @@ struct tint_symbol {
   float col2 : TEXCOORD2;
   float4 pos : SV_Position;
 };
-struct tint_symbol_3 {
-  float col1 : TEXCOORD1;
-  float col2 : TEXCOORD2;
-  float4 pos : SV_Position;
-};
 
 tint_symbol vert_main() {
   const Interface tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f), 0.5f, 0.25f};
   const tint_symbol tint_symbol_4 = {tint_symbol_1.col1, tint_symbol_1.col2, tint_symbol_1.pos};
   return tint_symbol_4;
 }
+
+struct tint_symbol_3 {
+  float col1 : TEXCOORD1;
+  float col2 : TEXCOORD2;
+  float4 pos : SV_Position;
+};
 
 void frag_main(tint_symbol_3 tint_symbol_2) {
   const Interface inputs = {tint_symbol_2.pos, tint_symbol_2.col1, tint_symbol_2.col2};
@@ -242,7 +237,6 @@ void frag_main(tint_symbol_3 tint_symbol_2) {
   const float4 p = inputs.pos;
   return;
 }
-
 )");
 }
 
@@ -285,17 +279,15 @@ TEST_F(HlslGeneratorImplTest_Function,
   EXPECT_EQ(result(), R"(struct VertexOutput {
   float4 pos;
 };
-struct tint_symbol {
-  float4 pos : SV_Position;
-};
-struct tint_symbol_2 {
-  float4 pos : SV_Position;
-};
 
 VertexOutput foo(float x) {
   const VertexOutput tint_symbol_4 = {float4(x, x, x, 1.0f)};
   return tint_symbol_4;
 }
+
+struct tint_symbol {
+  float4 pos : SV_Position;
+};
 
 tint_symbol vert_main1() {
   const VertexOutput tint_symbol_1 = {foo(0.5f)};
@@ -303,12 +295,15 @@ tint_symbol vert_main1() {
   return tint_symbol_5;
 }
 
+struct tint_symbol_2 {
+  float4 pos : SV_Position;
+};
+
 tint_symbol_2 vert_main2() {
   const VertexOutput tint_symbol_3 = {foo(0.25f)};
   const tint_symbol_2 tint_symbol_6 = {tint_symbol_3.pos};
   return tint_symbol_6;
 }
-
 )");
 }
 
@@ -360,7 +355,6 @@ void frag_main() {
   float v = sub_func(1.0f);
   return;
 }
-
 )");
 }
 
@@ -400,7 +394,6 @@ void frag_main() {
   float v = uniforms.coord.x;
   return;
 }
-
 )");
 }
 
@@ -436,14 +429,12 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(),
-            R"(
-RWByteAddressBuffer coord : register(u0, space1);
+            R"(RWByteAddressBuffer coord : register(u0, space1);
 
 void frag_main() {
   float v = asfloat(coord.Load(4u));
   return;
 }
-
 )");
 }
 
@@ -478,14 +469,12 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(),
-            R"(
-ByteAddressBuffer coord : register(t0, space1);
+            R"(ByteAddressBuffer coord : register(t0, space1);
 
 void frag_main() {
   float v = asfloat(coord.Load(4u));
   return;
 }
-
 )");
 }
 
@@ -517,14 +506,12 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(),
-            R"(
-RWByteAddressBuffer coord : register(u0, space1);
+            R"(RWByteAddressBuffer coord : register(u0, space1);
 
 void frag_main() {
   coord.Store(4u, asuint(2.0f));
   return;
 }
-
 )");
 }
 
@@ -557,171 +544,12 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(),
-            R"(
-RWByteAddressBuffer coord : register(u0, space1);
+            R"(RWByteAddressBuffer coord : register(u0, space1);
 
 void frag_main() {
   coord.Store(4u, asuint(2.0f));
   return;
 }
-
-)");
-}
-
-// TODO(crbug.com/tint/697): Remove this test
-TEST_F(
-    HlslGeneratorImplTest_Function,
-    Emit_Decoration_Called_By_EntryPoints_WithLocationGlobals_And_Params) {  // NOLINT
-  Global("foo", ty.f32(), ast::StorageClass::kInput,
-         ast::DecorationList{
-             Location(0),
-         });
-
-  Global("bar", ty.f32(), ast::StorageClass::kOutput,
-         ast::DecorationList{
-             Location(1),
-         });
-
-  Global("val", ty.f32(), ast::StorageClass::kOutput,
-         ast::DecorationList{
-             Location(0),
-         });
-
-  Func("sub_func", ast::VariableList{Param("param", ty.f32())}, ty.f32(),
-       {
-           Assign("bar", "foo"),
-           Assign("val", "param"),
-           Return("foo"),
-       });
-
-  Func("ep_1", ast::VariableList{}, ty.void_(),
-       {
-           Assign("bar", Call("sub_func", 1.0f)),
-           Return(),
-       },
-       {
-           Stage(ast::PipelineStage::kFragment),
-       });
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct ep_1_in {
-  float foo : TEXCOORD0;
-};
-
-struct ep_1_out {
-  float bar : SV_Target1;
-  float val : SV_Target0;
-};
-
-float sub_func_ep_1(in ep_1_in tint_in, out ep_1_out tint_out, float param) {
-  tint_out.bar = tint_in.foo;
-  tint_out.val = param;
-  return tint_in.foo;
-}
-
-ep_1_out ep_1(ep_1_in tint_in) {
-  ep_1_out tint_out = (ep_1_out)0;
-  tint_out.bar = sub_func_ep_1(tint_in, tint_out, 1.0f);
-  return tint_out;
-}
-
-)");
-}
-
-TEST_F(HlslGeneratorImplTest_Function,
-       Emit_Decoration_Called_By_EntryPoints_NoUsedGlobals) {
-  Global("depth", ty.f32(), ast::StorageClass::kOutput,
-         ast::DecorationList{
-             Builtin(ast::Builtin::kFragDepth),
-         });
-
-  Func("sub_func", ast::VariableList{Param("param", ty.f32())}, ty.f32(),
-       {
-           Return("param"),
-       });
-
-  Func("ep_1", ast::VariableList{}, ty.void_(),
-       {
-           Assign("depth", Call("sub_func", 1.0f)),
-           Return(),
-       },
-       {
-           Stage(ast::PipelineStage::kFragment),
-       });
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct ep_1_out {
-  float depth : SV_Depth;
-};
-
-float sub_func(float param) {
-  return param;
-}
-
-ep_1_out ep_1() {
-  ep_1_out tint_out = (ep_1_out)0;
-  tint_out.depth = sub_func(1.0f);
-  return tint_out;
-}
-
-)");
-}
-
-// TODO(crbug.com/tint/697): Remove this test
-TEST_F(
-    HlslGeneratorImplTest_Function,
-    Emit_Decoration_Called_By_EntryPoints_WithBuiltinGlobals_And_Params) {  // NOLINT
-  Global("coord", ty.vec4<f32>(), ast::StorageClass::kInput,
-         ast::DecorationList{
-             Builtin(ast::Builtin::kPosition),
-         });
-
-  Global("depth", ty.f32(), ast::StorageClass::kOutput,
-         ast::DecorationList{
-             Builtin(ast::Builtin::kFragDepth),
-         });
-
-  Func("sub_func", ast::VariableList{Param("param", ty.f32())}, ty.f32(),
-       {
-           Assign("depth", MemberAccessor("coord", "x")),
-           Return("param"),
-       });
-
-  Func("ep_1", ast::VariableList{}, ty.void_(),
-       {
-           Assign("depth", Call("sub_func", 1.0f)),
-           Return(),
-       },
-       {
-           Stage(ast::PipelineStage::kFragment),
-       });
-
-  GeneratorImpl& gen = SanitizeAndBuild();
-
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct ep_1_in {
-  float4 coord : SV_Position;
-};
-
-struct ep_1_out {
-  float depth : SV_Depth;
-};
-
-float sub_func_ep_1(in ep_1_in tint_in, out ep_1_out tint_out, float param) {
-  tint_out.depth = tint_in.coord.x;
-  return param;
-}
-
-ep_1_out ep_1(ep_1_in tint_in) {
-  ep_1_out tint_out = (ep_1_out)0;
-  tint_out.depth = sub_func_ep_1(tint_in, tint_out, 1.0f);
-  return tint_out;
-}
-
 )");
 }
 
@@ -769,7 +597,6 @@ void frag_main() {
   float v = sub_func(1.0f);
   return;
 }
-
 )");
 }
 
@@ -805,8 +632,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(),
-            R"(
-RWByteAddressBuffer coord : register(u0, space1);
+            R"(RWByteAddressBuffer coord : register(u0, space1);
 
 float sub_func(float param) {
   return asfloat(coord.Load(0u));
@@ -816,46 +642,6 @@ void frag_main() {
   float v = sub_func(1.0f);
   return;
 }
-
-)");
-}
-
-TEST_F(HlslGeneratorImplTest_Function,
-       Emit_Decoration_EntryPoints_WithGlobal_Nested_Return) {
-  Global("bar", ty.f32(), ast::StorageClass::kOutput,
-         ast::DecorationList{
-             Location(1),
-         });
-
-  Func(
-      "ep_1", ast::VariableList{}, ty.void_(),
-      {
-          Assign("bar", Expr(1.0f)),
-          create<ast::IfStatement>(create<ast::BinaryExpression>(
-                                       ast::BinaryOp::kEqual, Expr(1), Expr(1)),
-                                   Block(Return()), ast::ElseStatementList{}),
-          Return(),
-      },
-      {
-          Stage(ast::PipelineStage::kFragment),
-      });
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct ep_1_out {
-  float bar : SV_Target1;
-};
-
-ep_1_out ep_1() {
-  ep_1_out tint_out = (ep_1_out)0;
-  tint_out.bar = 1.0f;
-  if ((1 == 1)) {
-    return tint_out;
-  }
-  return tint_out;
-}
-
 )");
 }
 
@@ -872,7 +658,6 @@ TEST_F(HlslGeneratorImplTest_Function,
   EXPECT_EQ(result(), R"(void tint_symbol() {
   return;
 }
-
 )");
 }
 
@@ -892,7 +677,6 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Decoration_EntryPoint_Compute) {
 void main() {
   return;
 }
-
 )");
 }
 
@@ -911,7 +695,6 @@ TEST_F(HlslGeneratorImplTest_Function,
 void main() {
   return;
 }
-
 )");
 }
 
@@ -932,11 +715,11 @@ TEST_F(HlslGeneratorImplTest_Function,
   EXPECT_EQ(result(), R"(static const int width = int(2);
 static const int height = int(3);
 static const int depth = int(4);
+
 [numthreads(2, 3, 4)]
 void main() {
   return;
 }
-
 )");
 }
 
@@ -966,11 +749,11 @@ static const int height = WGSL_SPEC_CONSTANT_8;
 #define WGSL_SPEC_CONSTANT_9 int(4)
 #endif
 static const int depth = WGSL_SPEC_CONSTANT_9;
+
 [numthreads(WGSL_SPEC_CONSTANT_7, WGSL_SPEC_CONSTANT_8, WGSL_SPEC_CONSTANT_9)]
 void main() {
   return;
 }
-
 )");
 }
 
@@ -988,7 +771,6 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
   EXPECT_EQ(result(), R"(  void my_func(float a[5]) {
     return;
   }
-
 )");
 }
 
@@ -1052,8 +834,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(
-RWByteAddressBuffer data : register(u0, space0);
+  EXPECT_EQ(result(), R"(RWByteAddressBuffer data : register(u0, space0);
 
 [numthreads(1, 1, 1)]
 void a() {
@@ -1066,7 +847,6 @@ void b() {
   float v = asfloat(data.Load(0u));
   return;
 }
-
 )");
 }
 

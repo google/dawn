@@ -1,6 +1,6 @@
-struct tint_symbol {
-  float4 value : SV_Target0;
-};
+static float2 g_v2 = float2((1.0f).xx);
+static float3 g_v3 = float3((1.0f).xxx);
+static float4 g_v4 = float4((1.0f).xxxx);
 
 void from_immediate_bool() {
   bool2 v2 = bool2((true).xx);
@@ -96,8 +96,11 @@ void with_swizzle() {
   float c = float4((1.0f).xxxx).w;
 }
 
+struct tint_symbol {
+  float4 value : SV_Target0;
+};
+
 tint_symbol main() {
   const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
   return tint_symbol_1;
 }
-

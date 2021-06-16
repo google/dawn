@@ -2,10 +2,6 @@ intrinsics/gen/arrayLength/647a40.wgsl:31:18 warning: use of deprecated intrinsi
   var res: u32 = arrayLength(sb.arg_0);
                  ^^^^^^^^^^^
 
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 ByteAddressBuffer sb : register(t0, space0);
 
 void arrayLength_647a40() {
@@ -14,6 +10,10 @@ void arrayLength_647a40() {
   const uint tint_symbol_3 = ((tint_symbol_2 - 0u) / 4u);
   uint res = tint_symbol_3;
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   arrayLength_647a40();
@@ -31,4 +31,3 @@ void compute_main() {
   arrayLength_647a40();
   return;
 }
-

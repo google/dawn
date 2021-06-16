@@ -9,4 +9,3 @@ void fragment_main() {
   textureSample_51b514();
   return;
 }
-

@@ -6,4 +6,3 @@ void main() {
   const int x_11 = (x_9 + 1);
   return;
 }
-

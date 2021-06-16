@@ -35,4 +35,3 @@ void main() {
   const int subexpr_nested_nonempty_with_expr[4] = tint_symbol_19[1];
   return;
 }
-

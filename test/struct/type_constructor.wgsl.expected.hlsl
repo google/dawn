@@ -56,4 +56,3 @@ void main() {
   const T aosoa_nonempty_with_expr[2] = {tint_symbol_18, aosoa_nonempty[1]};
   return;
 }
-

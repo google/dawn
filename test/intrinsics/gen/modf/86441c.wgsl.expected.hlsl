@@ -1,11 +1,11 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void modf_86441c() {
   float2 arg_1 = float2(0.0f, 0.0f);
   float2 res = modf(float2(0.0f, 0.0f), arg_1);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   modf_86441c();
@@ -23,4 +23,3 @@ void compute_main() {
   modf_86441c();
   return;
 }
-

@@ -10,4 +10,3 @@ tint_symbol main() {
   const tint_symbol tint_symbol_2 = {tint_symbol_1.position};
   return tint_symbol_2;
 }
-

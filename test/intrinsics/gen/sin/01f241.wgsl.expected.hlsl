@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void sin_01f241() {
   float3 res = sin(float3(0.0f, 0.0f, 0.0f));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   sin_01f241();
@@ -22,4 +22,3 @@ void compute_main() {
   sin_01f241();
   return;
 }
-

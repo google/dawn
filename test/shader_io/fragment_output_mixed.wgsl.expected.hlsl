@@ -20,4 +20,3 @@ tint_symbol main() {
   const tint_symbol tint_symbol_2 = {tint_symbol_1.loc0, tint_symbol_1.loc1, tint_symbol_1.loc2, tint_symbol_1.loc3, tint_symbol_1.frag_depth, tint_symbol_1.sample_mask};
   return tint_symbol_2;
 }
-

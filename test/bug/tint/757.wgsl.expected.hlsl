@@ -9,13 +9,15 @@ bug/tint/757.wgsl:10:5 warning: use of deprecated language feature: [[offset]] h
 struct Constants {
   int level;
 };
-struct tint_symbol_1 {
-  uint3 GlobalInvocationID : SV_DispatchThreadID;
-};
+
+ConstantBuffer<Constants> constants : register(b0, space0);
+Texture2DArray<float4> myTexture : register(t1, space0);
 
 RWByteAddressBuffer result : register(u3, space0);
 
-Texture2DArray<float4> myTexture : register(t1, space0);
+struct tint_symbol_1 {
+  uint3 GlobalInvocationID : SV_DispatchThreadID;
+};
 
 [numthreads(1, 1, 1)]
 void main(tint_symbol_1 tint_symbol) {
@@ -37,4 +39,3 @@ void main(tint_symbol_1 tint_symbol) {
   }
   return;
 }
-

@@ -1,12 +1,12 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 Texture3D<int4> arg_0 : register(t0, space1);
 
 void textureLoad_3d001b() {
   int4 res = arg_0.Load(int4(0, 0, 0, 0));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   textureLoad_3d001b();
@@ -24,4 +24,3 @@ void compute_main() {
   textureLoad_3d001b();
   return;
 }
-

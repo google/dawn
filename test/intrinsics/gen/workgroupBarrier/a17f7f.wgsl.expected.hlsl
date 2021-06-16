@@ -7,4 +7,3 @@ void compute_main() {
   workgroupBarrier_a17f7f();
   return;
 }
-

@@ -9,4 +9,3 @@ void main() {
   const int use = (v.a + 1);
   return;
 }
-

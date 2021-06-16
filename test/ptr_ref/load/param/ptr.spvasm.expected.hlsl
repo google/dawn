@@ -11,4 +11,3 @@ void main() {
   const int x_18 = func(x_19, i);
   return;
 }
-

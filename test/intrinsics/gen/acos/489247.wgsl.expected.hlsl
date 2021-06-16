@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void acos_489247() {
   float res = acos(1.0f);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   acos_489247();
@@ -22,4 +22,3 @@ void compute_main() {
   acos_489247();
   return;
 }
-

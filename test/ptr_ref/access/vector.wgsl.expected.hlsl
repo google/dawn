@@ -4,4 +4,3 @@ void main() {
   v.y = 5.0f;
   return;
 }
-

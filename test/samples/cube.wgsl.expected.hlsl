@@ -1,6 +1,9 @@
 struct Uniforms {
   float4x4 modelViewProjectionMatrix;
 };
+
+ConstantBuffer<Uniforms> uniforms : register(b0, space0);
+
 struct VertexInput {
   float4 cur_position;
   float4 color;
@@ -17,14 +20,6 @@ struct tint_symbol_2 {
   float4 vtxFragColor : TEXCOORD0;
   float4 Position : SV_Position;
 };
-struct tint_symbol_4 {
-  float4 fragColor : TEXCOORD0;
-};
-struct tint_symbol_5 {
-  float4 value : SV_Target0;
-};
-
-ConstantBuffer<Uniforms> uniforms : register(b0, space0);
 
 tint_symbol_2 vtx_main(tint_symbol_1 tint_symbol) {
   const VertexInput input = {tint_symbol.cur_position, tint_symbol.color};
@@ -35,9 +30,15 @@ tint_symbol_2 vtx_main(tint_symbol_1 tint_symbol) {
   return tint_symbol_6;
 }
 
+struct tint_symbol_4 {
+  float4 fragColor : TEXCOORD0;
+};
+struct tint_symbol_5 {
+  float4 value : SV_Target0;
+};
+
 tint_symbol_5 frag_main(tint_symbol_4 tint_symbol_3) {
   const float4 fragColor = tint_symbol_3.fragColor;
   const tint_symbol_5 tint_symbol_7 = {fragColor};
   return tint_symbol_7;
 }
-

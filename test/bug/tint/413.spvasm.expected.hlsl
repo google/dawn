@@ -12,4 +12,3 @@ void main() {
   Dst[int2(0, 0)] = x_27;
   return;
 }
-

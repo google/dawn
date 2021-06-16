@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void transpose_4ce359() {
   float4x2 res = transpose(float2x4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   transpose_4ce359();
@@ -22,4 +22,3 @@ void compute_main() {
   transpose_4ce359();
   return;
 }
-

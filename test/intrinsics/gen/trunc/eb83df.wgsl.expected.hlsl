@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void trunc_eb83df() {
   float res = trunc(1.0f);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   trunc_eb83df();
@@ -22,4 +22,3 @@ void compute_main() {
   trunc_eb83df();
   return;
 }
-

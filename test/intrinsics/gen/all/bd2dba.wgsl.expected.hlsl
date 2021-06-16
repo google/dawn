@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void all_bd2dba() {
   bool res = all(bool3(false, false, false));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   all_bd2dba();
@@ -22,4 +22,3 @@ void compute_main() {
   all_bd2dba();
   return;
 }
-

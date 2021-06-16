@@ -1,12 +1,12 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 Texture2DMS<uint4> arg_0 : register(t0, space1);
 
 void textureLoad_c378ee() {
   uint4 res = arg_0.Load(int3(0, 0, 0), 1);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   textureLoad_c378ee();
@@ -24,4 +24,3 @@ void compute_main() {
   textureLoad_c378ee();
   return;
 }
-

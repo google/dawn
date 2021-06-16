@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void fwidthCoarse_159c8a() {
   float res = fwidth(1.0f);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   fwidthCoarse_159c8a();
@@ -22,4 +22,3 @@ void compute_main() {
   fwidthCoarse_159c8a();
   return;
 }
-

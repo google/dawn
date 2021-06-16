@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void atan_02979a() {
   float res = atan(1.0f);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   atan_02979a();
@@ -22,4 +22,3 @@ void compute_main() {
   atan_02979a();
   return;
 }
-

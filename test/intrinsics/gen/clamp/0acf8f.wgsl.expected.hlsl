@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void clamp_0acf8f() {
   float2 res = clamp(float2(0.0f, 0.0f), float2(0.0f, 0.0f), float2(0.0f, 0.0f));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   clamp_0acf8f();
@@ -22,4 +22,3 @@ void compute_main() {
   clamp_0acf8f();
   return;
 }
-

@@ -43,10 +43,6 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-const char kInStructNameSuffix[] = "in";
-const char kOutStructNameSuffix[] = "out";
-const char kTintStructInVarPrefix[] = "tint_in";
-const char kTintStructOutVarPrefix[] = "tint_out";
 const char kTempNamePrefix[] = "tint_tmp";
 const char kSpecConstantPrefix[] = "WGSL_SPEC_CONSTANT_";
 
@@ -116,108 +112,57 @@ GeneratorImpl::GeneratorImpl(const Program* program)
 GeneratorImpl::~GeneratorImpl() = default;
 
 bool GeneratorImpl::Generate(std::ostream& out) {
-  for (auto* global : builder_.AST().GlobalVariables()) {
-    register_global(global);
-  }
+  std::stringstream pending;
+  const TypeInfo* last_kind = nullptr;
 
-  for (auto* const ty : builder_.AST().TypeDecls()) {
-    if (ty->Is<ast::Alias>()) {
-      continue;
+  for (auto* decl : builder_.AST().GlobalDeclarations()) {
+    if (decl->Is<ast::Alias>()) {
+      continue;  // Ignore aliases.
     }
-    if (!EmitTypeDecl(out, TypeOf(ty))) {
+
+    // Emit a new line between declarations if the type of declaration has
+    // changed, or we're about to emit a function
+    auto* kind = &decl->TypeInfo();
+    if (pending.str().length() &&
+        (last_kind != kind || decl->Is<ast::Function>())) {
+      out << pending.str() << std::endl;
+      pending.str(std::string());
+      make_indent(out);
+    }
+    last_kind = kind;
+
+    if (auto* global = decl->As<ast::Variable>()) {
+      if (!EmitGlobalVariable(pending, global)) {
+        return false;
+      }
+    } else if (auto* str = decl->As<ast::Struct>()) {
+      if (!EmitStructType(pending, builder_.Sem().Get(str))) {
+        return false;
+      }
+    } else if (auto* func = decl->As<ast::Function>()) {
+      if (func->IsEntryPoint()) {
+        if (!EmitEntryPointFunction(pending, func)) {
+          return false;
+        }
+      } else {
+        if (!EmitFunction(pending, func)) {
+          return false;
+        }
+      }
+    } else {
+      TINT_ICE(diagnostics_)
+          << "unhandled module-scope declaration: " << decl->TypeInfo().name;
       return false;
     }
   }
-  if (!builder_.AST().TypeDecls().empty()) {
-    out << std::endl;
-  }
 
-  for (auto* var : builder_.AST().GlobalVariables()) {
-    if (!var->is_const()) {
-      continue;
-    }
-    if (!EmitProgramConstVariable(out, var)) {
-      return false;
-    }
-  }
+  out << pending.str();
 
-  // emitted_globals is a set used to ensure that globals are emitted once even
-  // if they are used by multiple entry points.
-  std::unordered_set<Symbol> emitted_globals;
-
-  // Make sure all entry point data is emitted before the entry point functions
-  for (auto* func : builder_.AST().Functions()) {
-    if (!func->IsEntryPoint()) {
-      continue;
-    }
-
-    if (!EmitEntryPointData(out, func, emitted_globals)) {
-      return false;
-    }
-  }
-
-  for (auto* func : builder_.AST().Functions()) {
-    if (!EmitFunction(out, func)) {
-      return false;
-    }
-  }
-
-  for (auto* func : builder_.AST().Functions()) {
-    if (!func->IsEntryPoint()) {
-      continue;
-    }
-    if (!EmitEntryPointFunction(out, func)) {
-      return false;
-    }
-    out << std::endl;
-  }
   return true;
-}
-
-void GeneratorImpl::register_global(ast::Variable* global) {
-  auto* sem = builder_.Sem().Get(global);
-  global_variables_.set(global->symbol(), sem);
 }
 
 std::string GeneratorImpl::generate_name(const std::string& prefix) {
   return builder_.Symbols().NameFor(builder_.Symbols().New(prefix));
-}
-
-std::string GeneratorImpl::current_ep_var_name(VarType type) {
-  std::string name = "";
-  switch (type) {
-    case VarType::kIn: {
-      auto in_it = ep_sym_to_in_data_.find(current_ep_sym_);
-      if (in_it != ep_sym_to_in_data_.end()) {
-        name = in_it->second.var_name;
-      }
-      break;
-    }
-    case VarType::kOut: {
-      auto outit = ep_sym_to_out_data_.find(current_ep_sym_);
-      if (outit != ep_sym_to_out_data_.end()) {
-        name = outit->second.var_name;
-      }
-      break;
-    }
-  }
-  return name;
-}
-
-bool GeneratorImpl::EmitTypeDecl(std::ostream& out, const sem::Type* ty) {
-  make_indent(out);
-
-  if (auto* str = ty->As<sem::Struct>()) {
-    if (!EmitStructType(
-            out, str, builder_.Symbols().NameFor(str->Declaration()->name()))) {
-      return false;
-    }
-  } else {
-    TINT_UNREACHABLE(diagnostics_) << "declared type: " << ty->TypeInfo().name;
-    return false;
-  }
-
-  return true;
 }
 
 bool GeneratorImpl::EmitArrayAccessor(std::ostream& pre,
@@ -626,11 +571,6 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
 
   auto name = builder_.Symbols().NameFor(ident->symbol());
   auto caller_sym = ident->symbol();
-  auto it = ep_func_name_remapped_.find(current_ep_sym_.to_str() + "_" +
-                                        caller_sym.to_str());
-  if (it != ep_func_name_remapped_.end()) {
-    name = it->second;
-  }
 
   auto* func = builder_.AST().Functions().Find(ident->symbol());
   if (func == nullptr) {
@@ -641,27 +581,7 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
 
   out << name << "(";
 
-  auto* func_sem = builder_.Sem().Get(func);
-
   bool first = true;
-  if (has_referenced_in_var_needing_struct(func_sem)) {
-    auto var_name = current_ep_var_name(VarType::kIn);
-    if (!var_name.empty()) {
-      out << var_name;
-      first = false;
-    }
-  }
-  if (has_referenced_out_var_needing_struct(func_sem)) {
-    auto var_name = current_ep_var_name(VarType::kOut);
-    if (!var_name.empty()) {
-      if (!first) {
-        out << ", ";
-      }
-      first = false;
-      out << var_name;
-    }
-  }
-
   for (auto* param : params) {
     if (!first) {
       out << ", ";
@@ -1469,37 +1389,10 @@ bool GeneratorImpl::EmitExpression(std::ostream& pre,
   return false;
 }
 
-bool GeneratorImpl::global_is_in_struct(const sem::Variable* var) const {
-  auto& decorations = var->Declaration()->decorations();
-  if (ast::HasDecoration<ast::LocationDecoration>(decorations) ||
-      ast::HasDecoration<ast::BuiltinDecoration>(decorations)) {
-    return var->StorageClass() == ast::StorageClass::kInput ||
-           var->StorageClass() == ast::StorageClass::kOutput;
-  }
-  return false;
-}
-
 bool GeneratorImpl::EmitIdentifier(std::ostream&,
                                    std::ostream& out,
                                    ast::IdentifierExpression* expr) {
-  auto* ident = expr->As<ast::IdentifierExpression>();
-  const sem::Variable* var = nullptr;
-  if (global_variables_.get(ident->symbol(), &var)) {
-    if (global_is_in_struct(var)) {
-      auto var_type = var->StorageClass() == ast::StorageClass::kInput
-                          ? VarType::kIn
-                          : VarType::kOut;
-      auto name = current_ep_var_name(var_type);
-      if (name.empty()) {
-        diagnostics_.add_error("unable to find entry point data for variable");
-        return false;
-      }
-      out << name << ".";
-    }
-  }
-
-  out << builder_.Symbols().NameFor(ident->symbol());
-
+  out << builder_.Symbols().NameFor(expr->symbol());
   return true;
 }
 
@@ -1558,154 +1451,28 @@ bool GeneratorImpl::EmitIf(std::ostream& out, ast::IfStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::has_referenced_in_var_needing_struct(
-    const sem::Function* func) {
-  for (auto data : func->ReferencedLocationVariables()) {
-    auto* var = data.first;
-    if (var->StorageClass() == ast::StorageClass::kInput) {
-      return true;
-    }
-  }
-
-  for (auto data : func->ReferencedBuiltinVariables()) {
-    auto* var = data.first;
-    if (var->StorageClass() == ast::StorageClass::kInput) {
-      return true;
-    }
-  }
-  return false;
-}
-
-bool GeneratorImpl::has_referenced_out_var_needing_struct(
-    const sem::Function* func) {
-  for (auto data : func->ReferencedLocationVariables()) {
-    auto* var = data.first;
-    if (var->StorageClass() == ast::StorageClass::kOutput) {
-      return true;
-    }
-  }
-
-  for (auto data : func->ReferencedBuiltinVariables()) {
-    auto* var = data.first;
-    if (var->StorageClass() == ast::StorageClass::kOutput) {
-      return true;
-    }
-  }
-  return false;
-}
-
-bool GeneratorImpl::has_referenced_var_needing_struct(
-    const sem::Function* func) {
-  for (auto data : func->ReferencedLocationVariables()) {
-    auto* var = data.first;
-    if (var->StorageClass() == ast::StorageClass::kOutput ||
-        var->StorageClass() == ast::StorageClass::kInput) {
-      return true;
-    }
-  }
-
-  for (auto data : func->ReferencedBuiltinVariables()) {
-    auto* var = data.first;
-    if (var->StorageClass() == ast::StorageClass::kOutput ||
-        var->StorageClass() == ast::StorageClass::kInput) {
-      return true;
-    }
-  }
-  return false;
-}
-
 bool GeneratorImpl::EmitFunction(std::ostream& out, ast::Function* func) {
   make_indent(out);
 
-  // Entry points will be emitted later, skip for now.
-  if (func->IsEntryPoint()) {
-    return true;
-  }
-
-  auto* func_sem = builder_.Sem().Get(func);
+  auto* sem = builder_.Sem().Get(func);
 
   if (ast::HasDecoration<ast::InternalDecoration>(func->decorations())) {
     // An internal function. Do not emit.
     return true;
   }
 
-  // TODO(dsinclair): This could be smarter. If the input/outputs for multiple
-  // entry points are the same we could generate a single struct and then have
-  // this determine it's the same struct and just emit once.
-  bool emit_duplicate_functions = func_sem->AncestorEntryPoints().size() > 0 &&
-                                  has_referenced_var_needing_struct(func_sem);
-
-  if (emit_duplicate_functions) {
-    for (const auto& ep_sym : func_sem->AncestorEntryPoints()) {
-      if (!EmitFunctionInternal(out, func, emit_duplicate_functions, ep_sym)) {
-        return false;
-      }
-      out << std::endl;
-    }
-  } else {
-    // Emit as non-duplicated
-    if (!EmitFunctionInternal(out, func, false, Symbol())) {
-      return false;
-    }
-    out << std::endl;
-  }
-
-  return true;
-}
-
-bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
-                                         ast::Function* func_ast,
-                                         bool emit_duplicate_functions,
-                                         Symbol ep_sym) {
-  auto* func = builder_.Sem().Get(func_ast);
-
-  if (!EmitType(out, func->ReturnType(), ast::StorageClass::kNone,
+  if (!EmitType(out, sem->ReturnType(), ast::StorageClass::kNone,
                 ast::Access::kReadWrite, "")) {
     return false;
   }
 
   out << " ";
 
-  std::string name;
-  if (emit_duplicate_functions) {
-    auto ep_name = ep_sym.to_str();
-    // TODO(dsinclair): The SymbolToName should go away and just use
-    // to_str() here when the conversion is complete.
-    name = generate_name(builder_.Symbols().NameFor(func_ast->symbol()) + "_" +
-                         builder_.Symbols().NameFor(ep_sym));
-    ep_func_name_remapped_[ep_name + "_" + func_ast->symbol().to_str()] = name;
-  } else {
-    name = builder_.Symbols().NameFor(func_ast->symbol());
-  }
-
-  out << name << "(";
+  out << builder_.Symbols().NameFor(func->symbol()) << "(";
 
   bool first = true;
 
-  // If we're emitting duplicate functions that means the function takes
-  // the stage_in or stage_out value from the entry point, emit them.
-  //
-  // We emit both of them if they're there regardless of if they're both used.
-  if (emit_duplicate_functions) {
-    auto in_it = ep_sym_to_in_data_.find(ep_sym);
-    if (in_it != ep_sym_to_in_data_.end()) {
-      out << "in " << in_it->second.struct_name << " "
-          << in_it->second.var_name;
-      first = false;
-    }
-
-    auto outit = ep_sym_to_out_data_.find(ep_sym);
-    if (outit != ep_sym_to_out_data_.end()) {
-      if (!first) {
-        out << ", ";
-      }
-      out << "out " << outit->second.struct_name << " "
-          << outit->second.var_name;
-      first = false;
-    }
-  }
-
-  for (auto* v : func->Parameters()) {
+  for (auto* v : sem->Parameters()) {
     if (!first) {
       out << ", ";
     }
@@ -1739,301 +1506,199 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
 
   out << ") ";
 
-  current_ep_sym_ = ep_sym;
-
-  if (!EmitBlockAndNewline(out, func_ast->body())) {
+  if (!EmitBlockAndNewline(out, func->body())) {
     return false;
   }
-
-  current_ep_sym_ = Symbol();
 
   return true;
 }
 
-bool GeneratorImpl::EmitEntryPointData(
-    std::ostream& out,
-    ast::Function* func,
-    std::unordered_set<Symbol>& emitted_globals) {
-  std::vector<std::pair<const ast::Variable*, ast::Decoration*>> in_variables;
-  std::vector<std::pair<const ast::Variable*, ast::Decoration*>> outvariables;
-  auto* func_sem = builder_.Sem().Get(func);
-  auto func_sym = func->symbol();
-
-  // TODO(crbug.com/tint/697): Remove this.
-  for (auto data : func_sem->ReferencedLocationVariables()) {
-    auto* var = data.first;
-    auto* decl = var->Declaration();
-    auto* deco = data.second;
-
-    if (var->StorageClass() == ast::StorageClass::kInput) {
-      in_variables.push_back({decl, deco});
-    } else if (var->StorageClass() == ast::StorageClass::kOutput) {
-      outvariables.push_back({decl, deco});
-    }
+bool GeneratorImpl::EmitGlobalVariable(std::ostream& out,
+                                       ast::Variable* global) {
+  if (global->is_const()) {
+    return EmitProgramConstVariable(out, global);
   }
 
-  // TODO(crbug.com/tint/697): Remove this.
-  for (auto data : func_sem->ReferencedBuiltinVariables()) {
-    auto* var = data.first;
-    auto* decl = var->Declaration();
-    auto* deco = data.second;
-
-    if (var->StorageClass() == ast::StorageClass::kInput) {
-      in_variables.push_back({decl, deco});
-    } else if (var->StorageClass() == ast::StorageClass::kOutput) {
-      outvariables.push_back({decl, deco});
-    }
+  auto* sem = builder_.Sem().Get(global);
+  switch (sem->StorageClass()) {
+    case ast::StorageClass::kUniform:
+      return EmitUniformVariable(out, sem);
+    case ast::StorageClass::kStorage:
+      return EmitStorageVariable(out, sem);
+    case ast::StorageClass::kUniformConstant:
+      return EmitHandleVariable(out, sem);
+    case ast::StorageClass::kPrivate:
+      return EmitPrivateVariable(out, sem);
+    case ast::StorageClass::kWorkgroup:
+      return EmitWorkgroupVariable(out, sem);
+    default:
+      break;
   }
 
-  bool emitted_uniform = false;
-  for (auto data : func_sem->ReferencedUniformVariables()) {
-    auto* var = data.first;
-    auto& binding_point = data.second;
-    auto* decl = var->Declaration();
+  TINT_ICE(diagnostics_) << "unhandled storage class " << sem->StorageClass();
+  return false;
+}
 
-    if (!emitted_globals.emplace(decl->symbol()).second) {
-      continue;  // Global already emitted
-    }
+bool GeneratorImpl::EmitUniformVariable(std::ostream& out,
+                                        const sem::Variable* var) {
+  make_indent(out);
 
-    auto* type = var->Type()->UnwrapRef();
-    if (auto* strct = type->As<sem::Struct>()) {
-      out << "ConstantBuffer<"
-          << builder_.Symbols().NameFor(strct->Declaration()->name()) << "> "
-          << builder_.Symbols().NameFor(decl->symbol())
-          << RegisterAndSpace('b', binding_point) << ";" << std::endl;
-    } else {
-      // TODO(dsinclair): There is outstanding spec work to require all uniform
-      // buffers to be [[block]] decorated, which means structs. This is
-      // currently not the case, so this code handles the cases where the data
-      // is not a block.
-      // Relevant: https://github.com/gpuweb/gpuweb/issues/1004
-      //           https://github.com/gpuweb/gpuweb/issues/1008
-      auto name = "cbuffer_" + builder_.Symbols().NameFor(decl->symbol());
-      out << "cbuffer " << name << RegisterAndSpace('b', binding_point) << " {"
-          << std::endl;
+  auto* decl = var->Declaration();
+  auto binding_point = decl->binding_point();
+  auto* type = var->Type()->UnwrapRef();
 
-      increment_indent();
-      make_indent(out);
-      if (!EmitType(out, type, var->StorageClass(), var->Access(), "")) {
-        return false;
-      }
-      out << " " << builder_.Symbols().NameFor(decl->symbol()) << ";"
-          << std::endl;
-      decrement_indent();
-      out << "};" << std::endl;
-    }
+  if (auto* strct = type->As<sem::Struct>()) {
+    out << "ConstantBuffer<"
+        << builder_.Symbols().NameFor(strct->Declaration()->name()) << "> "
+        << builder_.Symbols().NameFor(decl->symbol())
+        << RegisterAndSpace('b', binding_point) << ";" << std::endl;
+  } else {
+    auto name = "cbuffer_" + builder_.Symbols().NameFor(decl->symbol());
+    out << "cbuffer " << name << RegisterAndSpace('b', binding_point) << " {"
+        << std::endl;
 
-    emitted_uniform = true;
-  }
-  if (emitted_uniform) {
-    out << std::endl;
-  }
-
-  bool emitted_storagebuffer = false;
-  for (auto data : func_sem->ReferencedStorageBufferVariables()) {
-    auto* var = data.first;
-    auto& binding_point = data.second;
-    auto* decl = var->Declaration();
-
-    if (!emitted_globals.emplace(decl->symbol()).second) {
-      continue;  // Global already emitted
-    }
-
-    auto* type = var->Type()->UnwrapRef();
-    if (!EmitType(out, type, ast::StorageClass::kStorage, var->Access(), "")) {
+    increment_indent();
+    make_indent(out);
+    if (!EmitType(out, type, var->StorageClass(), var->Access(), "")) {
       return false;
     }
-
-    out << " " << builder_.Symbols().NameFor(decl->symbol())
-        << RegisterAndSpace(var->Access() == ast::Access::kRead ? 't' : 'u',
-                            binding_point)
-        << ";" << std::endl;
-    emitted_storagebuffer = true;
-  }
-  if (emitted_storagebuffer) {
-    out << std::endl;
-  }
-
-  // TODO(crbug.com/tint/697): Remove this.
-  if (!in_variables.empty()) {
-    auto in_struct_name = generate_name(builder_.Symbols().NameFor(func_sym) +
-                                        "_" + kInStructNameSuffix);
-    auto in_var_name = generate_name(kTintStructInVarPrefix);
-    ep_sym_to_in_data_[func_sym] = {in_struct_name, in_var_name};
-
-    make_indent(out);
-    out << "struct " << in_struct_name << " {" << std::endl;
-
-    increment_indent();
-
-    for (auto& data : in_variables) {
-      auto* var = data.first;
-      auto* deco = data.second;
-      auto* sem = builder_.Sem().Get(var);
-      auto* type = sem->Type()->UnwrapRef();
-
-      make_indent(out);
-      if (!EmitType(out, type, sem->StorageClass(), sem->Access(),
-                    builder_.Symbols().NameFor(var->symbol()))) {
-        return false;
-      }
-
-      out << " " << builder_.Symbols().NameFor(var->symbol()) << " : ";
-      if (auto* location = deco->As<ast::LocationDecoration>()) {
-        if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
-          diagnostics_.add_error(
-              "invalid location variable for pipeline stage");
-          return false;
-        }
-        out << "TEXCOORD" << location->value();
-      } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
-        auto attr = builtin_to_attribute(builtin->value());
-        if (attr.empty()) {
-          diagnostics_.add_error("unsupported builtin");
-          return false;
-        }
-        out << attr;
-      } else {
-        diagnostics_.add_error(
-            "unsupported variable decoration for entry point output");
-        return false;
-      }
-      out << ";" << std::endl;
-    }
+    out << " " << builder_.Symbols().NameFor(decl->symbol()) << ";"
+        << std::endl;
     decrement_indent();
-    make_indent(out);
+    out << "};" << std::endl;
+  }
+  return true;
+}
 
-    out << "};" << std::endl << std::endl;
+bool GeneratorImpl::EmitStorageVariable(std::ostream& out,
+                                        const sem::Variable* var) {
+  make_indent(out);
+
+  auto* decl = var->Declaration();
+  auto* type = var->Type()->UnwrapRef();
+  if (!EmitType(out, type, ast::StorageClass::kStorage, var->Access(), "")) {
+    return false;
   }
 
-  // TODO(crbug.com/tint/697): Remove this.
-  if (!outvariables.empty()) {
-    auto outstruct_name = generate_name(builder_.Symbols().NameFor(func_sym) +
-                                        "_" + kOutStructNameSuffix);
-    auto outvar_name = generate_name(kTintStructOutVarPrefix);
-    ep_sym_to_out_data_[func_sym] = {outstruct_name, outvar_name};
+  out << " " << builder_.Symbols().NameFor(decl->symbol())
+      << RegisterAndSpace(var->Access() == ast::Access::kRead ? 't' : 'u',
+                          decl->binding_point())
+      << ";" << std::endl;
 
-    make_indent(out);
-    out << "struct " << outstruct_name << " {" << std::endl;
+  return true;
+}
 
-    increment_indent();
-    for (auto& data : outvariables) {
-      auto* var = data.first;
-      auto* deco = data.second;
-      auto* sem = builder_.Sem().Get(var);
-      auto* type = sem->Type()->UnwrapRef();
+bool GeneratorImpl::EmitHandleVariable(std::ostream& out,
+                                       const sem::Variable* var) {
+  make_indent(out);
 
-      make_indent(out);
-      if (!EmitType(out, type, sem->StorageClass(), sem->Access(),
-                    builder_.Symbols().NameFor(var->symbol()))) {
-        return false;
-      }
+  auto* decl = var->Declaration();
+  auto* unwrapped_type = var->Type()->UnwrapRef();
 
-      out << " " << builder_.Symbols().NameFor(var->symbol()) << " : ";
-
-      if (auto* location = deco->As<ast::LocationDecoration>()) {
-        auto loc = location->value();
-        if (func->pipeline_stage() == ast::PipelineStage::kVertex) {
-          out << "TEXCOORD" << loc;
-        } else if (func->pipeline_stage() == ast::PipelineStage::kFragment) {
-          out << "SV_Target" << loc << "";
-        } else {
-          diagnostics_.add_error(
-              "invalid location variable for pipeline stage");
-          return false;
-        }
-      } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
-        auto attr = builtin_to_attribute(builtin->value());
-        if (attr.empty()) {
-          diagnostics_.add_error("unsupported builtin");
-          return false;
-        }
-        out << attr;
-      } else {
-        diagnostics_.add_error(
-            "unsupported variable decoration for entry point output");
-        return false;
-      }
-      out << ";" << std::endl;
-    }
-    decrement_indent();
-    make_indent(out);
-    out << "};" << std::endl << std::endl;
-  }
-
-  {
-    bool add_newline = false;
-    for (auto* var : func_sem->ReferencedModuleVariables()) {
-      auto* decl = var->Declaration();
-
-      auto* unwrapped_type = var->Type()->UnwrapRef();
-      if (!emitted_globals.emplace(decl->symbol()).second) {
-        continue;  // Global already emitted
-      }
-
-      make_indent(out);
-
-      std::ostringstream constructor_out;
-      if (auto* constructor = decl->constructor()) {
-        if (!EmitExpression(out, constructor_out, constructor)) {
-          return false;
-        }
-      }
-
-      switch (var->StorageClass()) {
-        case ast::StorageClass::kUniformConstant:
-          break;
-        case ast::StorageClass::kPrivate:
-          out << "static ";
-          break;
-        case ast::StorageClass::kWorkgroup:
-          out << "groupshared ";
-          break;
-        default:
-          continue;  // Not interested in this storage class
-      }
-
-      auto name = builder_.Symbols().NameFor(decl->symbol());
-      auto* type = var->Type()->UnwrapRef();
-      if (!EmitType(out, type, var->StorageClass(), var->Access(), name)) {
-        return false;
-      }
-      if (!type->Is<sem::Array>()) {
-        out << " " << name;
-      }
-
-      const char* register_space = nullptr;
-
-      if (unwrapped_type->Is<sem::Texture>()) {
-        register_space = "t";
-        if (auto* storage_tex = unwrapped_type->As<sem::StorageTexture>()) {
-          if (storage_tex->access() != ast::Access::kRead) {
-            register_space = "u";
-          }
-        }
-      } else if (unwrapped_type->Is<sem::Sampler>()) {
-        register_space = "s";
-      }
-
-      if (register_space) {
-        auto bp = decl->binding_point();
-        out << " : register(" << register_space << bp.binding->value()
-            << ", space" << bp.group->value() << ")";
-      }
-
-      if (constructor_out.str().length()) {
-        out << " = " << constructor_out.str();
-      }
-
-      out << ";" << std::endl;
-
-      add_newline = true;
-    }
-    if (add_newline) {
-      out << std::endl;
+  std::ostringstream constructor_out;
+  if (auto* constructor = decl->constructor()) {
+    if (!EmitExpression(out, constructor_out, constructor)) {
+      return false;
     }
   }
 
+  auto name = builder_.Symbols().NameFor(decl->symbol());
+  auto* type = var->Type()->UnwrapRef();
+  if (!EmitType(out, type, var->StorageClass(), var->Access(), name)) {
+    return false;
+  }
+  if (!type->Is<sem::Array>()) {
+    out << " " << name;
+  }
+
+  const char* register_space = nullptr;
+
+  if (unwrapped_type->Is<sem::Texture>()) {
+    register_space = "t";
+    if (auto* storage_tex = unwrapped_type->As<sem::StorageTexture>()) {
+      if (storage_tex->access() != ast::Access::kRead) {
+        register_space = "u";
+      }
+    }
+  } else if (unwrapped_type->Is<sem::Sampler>()) {
+    register_space = "s";
+  }
+
+  if (register_space) {
+    auto bp = decl->binding_point();
+    out << " : register(" << register_space << bp.binding->value() << ", space"
+        << bp.group->value() << ")";
+  }
+
+  if (constructor_out.str().length()) {
+    out << " = " << constructor_out.str();
+  }
+
+  out << ";" << std::endl;
+  return true;
+}
+
+bool GeneratorImpl::EmitPrivateVariable(std::ostream& out,
+                                        const sem::Variable* var) {
+  make_indent(out);
+
+  auto* decl = var->Declaration();
+
+  std::ostringstream constructor_out;
+  if (auto* constructor = decl->constructor()) {
+    if (!EmitExpression(out, constructor_out, constructor)) {
+      return false;
+    }
+  }
+
+  out << "static ";
+
+  auto name = builder_.Symbols().NameFor(decl->symbol());
+  auto* type = var->Type()->UnwrapRef();
+  if (!EmitType(out, type, var->StorageClass(), var->Access(), name)) {
+    return false;
+  }
+  if (!type->Is<sem::Array>()) {
+    out << " " << name;
+  }
+
+  if (constructor_out.str().length()) {
+    out << " = " << constructor_out.str();
+  }
+
+  out << ";" << std::endl;
+  return true;
+}
+
+bool GeneratorImpl::EmitWorkgroupVariable(std::ostream& out,
+                                          const sem::Variable* var) {
+  make_indent(out);
+
+  auto* decl = var->Declaration();
+
+  std::ostringstream constructor_out;
+  if (auto* constructor = decl->constructor()) {
+    if (!EmitExpression(out, constructor_out, constructor)) {
+      return false;
+    }
+  }
+
+  out << "groupshared ";
+
+  auto name = builder_.Symbols().NameFor(decl->symbol());
+  auto* type = var->Type()->UnwrapRef();
+  if (!EmitType(out, type, var->StorageClass(), var->Access(), name)) {
+    return false;
+  }
+  if (!type->Is<sem::Array>()) {
+    out << " " << name;
+  }
+
+  if (constructor_out.str().length()) {
+    out << " = " << constructor_out.str();
+  }
+
+  out << ";" << std::endl;
   return true;
 }
 
@@ -2071,7 +1736,6 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
                                            ast::Function* func) {
   make_indent(out);
 
-  current_ep_sym_ = func->symbol();
   auto* func_sem = builder_.Sem().Get(func);
 
   if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
@@ -2098,28 +1762,11 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
     make_indent(out);
   }
 
-  auto outdata = ep_sym_to_out_data_.find(current_ep_sym_);
-  bool has_outdata = outdata != ep_sym_to_out_data_.end();
-  if (has_outdata) {
-    // TODO(crbug.com/tint/697): Remove this.
-    if (!func->return_type()->Is<ast::Void>()) {
-      TINT_ICE(diagnostics_) << "Mixing module-scope variables and return "
-                                "types for shader outputs";
-    }
-    out << outdata->second.struct_name;
-  } else {
-    out << func->return_type()->FriendlyName(builder_.Symbols());
-  }
-  // TODO(dsinclair): This should output the remapped name
-  out << " " << builder_.Symbols().NameFor(current_ep_sym_) << "(";
+  out << func->return_type()->FriendlyName(builder_.Symbols());
+
+  out << " " << builder_.Symbols().NameFor(func->symbol()) << "(";
 
   bool first = true;
-  // TODO(crbug.com/tint/697): Remove this.
-  auto in_data = ep_sym_to_in_data_.find(current_ep_sym_);
-  if (in_data != ep_sym_to_in_data_.end()) {
-    out << in_data->second.struct_name << " " << in_data->second.var_name;
-    first = false;
-  }
 
   // Emit entry point parameters.
   for (auto* var : func->params()) {
@@ -2145,13 +1792,6 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
 
   increment_indent();
 
-  if (has_outdata) {
-    make_indent(out);
-    out << outdata->second.struct_name << " " << outdata->second.var_name
-        << " = (" << outdata->second.struct_name << ")0;" << std::endl;
-  }
-
-  generating_entry_point_ = true;
   for (auto* s : *func->body()) {
     if (!EmitStatement(out, s)) {
       return false;
@@ -2165,13 +1805,10 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
       return false;
     }
   }
-  generating_entry_point_ = false;
 
   decrement_indent();
   make_indent(out);
   out << "}" << std::endl;
-
-  current_ep_sym_ = Symbol();
 
   return true;
 }
@@ -2318,13 +1955,6 @@ bool GeneratorImpl::EmitReturn(std::ostream& out, ast::ReturnStatement* stmt) {
     }
     out << pre.str();
     out << "return " << ret_out.str();
-  } else if (generating_entry_point_) {
-    // TODO(crbug.com/tint/697): Remove this (and generating_entry_point_)
-    out << "return";
-    auto outdata = ep_sym_to_out_data_.find(current_ep_sym_);
-    if (outdata != ep_sym_to_out_data_.end()) {
-      out << " " << outdata->second.var_name;
-    }
   } else {
     out << "return";
   }
@@ -2567,9 +2197,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
   return true;
 }
 
-bool GeneratorImpl::EmitStructType(std::ostream& out,
-                                   const sem::Struct* str,
-                                   const std::string& name) {
+bool GeneratorImpl::EmitStructType(std::ostream& out, const sem::Struct* str) {
   auto storage_class_uses = str->StorageClassUsage();
   if (storage_class_uses.size() ==
       storage_class_uses.count(ast::StorageClass::kStorage)) {
@@ -2579,6 +2207,7 @@ bool GeneratorImpl::EmitStructType(std::ostream& out,
     return true;
   }
 
+  auto name = builder_.Symbols().NameFor(str->Declaration()->name());
   out << "struct " << name << " {" << std::endl;
 
   increment_indent();

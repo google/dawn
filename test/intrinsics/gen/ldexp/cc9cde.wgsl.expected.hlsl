@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void ldexp_cc9cde() {
   float4 res = ldexp(float4(0.0f, 0.0f, 0.0f, 0.0f), int4(0, 0, 0, 0));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   ldexp_cc9cde();
@@ -22,4 +22,3 @@ void compute_main() {
   ldexp_cc9cde();
   return;
 }
-

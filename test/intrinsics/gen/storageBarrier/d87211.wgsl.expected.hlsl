@@ -7,4 +7,3 @@ void compute_main() {
   storageBarrier_d87211();
   return;
 }
-

@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void min_03c7e3() {
   int2 res = min(int2(0, 0), int2(0, 0));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   min_03c7e3();
@@ -22,4 +22,3 @@ void compute_main() {
   min_03c7e3();
   return;
 }
-

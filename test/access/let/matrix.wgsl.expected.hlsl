@@ -5,4 +5,3 @@ void main() {
   const float f = v[1];
   return;
 }
-

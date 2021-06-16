@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void faceForward_e6908b() {
   float2 res = faceforward(float2(0.0f, 0.0f), float2(0.0f, 0.0f), float2(0.0f, 0.0f));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   faceForward_e6908b();
@@ -22,4 +22,3 @@ void compute_main() {
   faceForward_e6908b();
   return;
 }
-

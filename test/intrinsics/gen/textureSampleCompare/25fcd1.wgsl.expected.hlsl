@@ -9,4 +9,3 @@ void fragment_main() {
   textureSampleCompare_25fcd1();
   return;
 }
-

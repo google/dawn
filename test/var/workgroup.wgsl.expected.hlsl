@@ -1,6 +1,6 @@
 groupshared int a;
-
 groupshared int b;
+groupshared int c;
 
 void uses_a() {
   a = (a + 1);
@@ -51,4 +51,3 @@ void main4() {
   no_uses();
   return;
 }
-

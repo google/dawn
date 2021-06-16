@@ -5,4 +5,3 @@ void main() {
   const float x_16 = x_15.y;
   return;
 }
-

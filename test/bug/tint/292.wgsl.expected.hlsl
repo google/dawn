@@ -3,4 +3,3 @@ void main() {
   float3 negative_light = -(light);
   return;
 }
-

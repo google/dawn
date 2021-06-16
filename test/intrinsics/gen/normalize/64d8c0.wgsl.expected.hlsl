@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void normalize_64d8c0() {
   float3 res = normalize(float3(0.0f, 0.0f, 0.0f));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   normalize_64d8c0();
@@ -22,4 +22,3 @@ void compute_main() {
   normalize_64d8c0();
   return;
 }
-

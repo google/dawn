@@ -11,8 +11,8 @@ static const float4 v4f32_let = float4(0.0f, 0.0f, 0.0f, 0.0f);
 static const float3x4 m3x4_let = float3x4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 static const float arr_let[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 static const S struct_let = {};
+
 [numthreads(1, 1, 1)]
 void main() {
   return;
 }
-

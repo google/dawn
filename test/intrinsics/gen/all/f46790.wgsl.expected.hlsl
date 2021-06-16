@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void all_f46790() {
   bool res = all(bool2(false, false));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   all_f46790();
@@ -22,4 +22,3 @@ void compute_main() {
   all_f46790();
   return;
 }
-

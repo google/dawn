@@ -4,28 +4,33 @@ SKIP: FAILED
 
 Validation Failure:
 void isNan_4d280d() {
-  vector<bool, 4> res = isnan(float4(0.0f, 0.0f, 0.0f, 0.0f));
+  bool4 res = isnan(float4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
-void vertex_main() {
+struct tint_symbol {
+  float4 value : SV_Position;
+};
+
+tint_symbol vertex_main() {
   isNan_4d280d();
-  return;
+  const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  return tint_symbol_1;
 }
-
 void fragment_main() {
   isNan_4d280d();
   return;
 }
-
 [numthreads(1, 1, 1)]
 void compute_main() {
   isNan_4d280d();
   return;
 }
 
+Internal Compiler error: cast<X>() argument of incompatible type!
 
-dxc: /build/directxshadercompiler-1.4.0.2274-413-1lunarg18.04/include/llvm/Support/Casting.h:238: typename llvm::cast_retty<X, Y*>::ret_type llvm::cast(Y*) [with X = llvm::ConstantFP; Y = llvm::Value; typename llvm::cast_retty<X, Y*>::ret_type = llvm::ConstantFP*]: Assertion `isa<X>(Val) && "cast<Ty>() argument of incompatible type!"' failed.
 
-dxc: /build/directxshadercompiler-1.4.0.2274-413-1lunarg18.04/include/llvm/Support/Casting.h:238: typename llvm::cast_retty<X, Y*>::ret_type llvm::cast(Y*) [with X = llvm::ConstantFP; Y = llvm::Value; typename llvm::cast_retty<X, Y*>::ret_type = llvm::ConstantFP*]: Assertion `isa<X>(Val) && "cast<Ty>() argument of incompatible type!"' failed.
+Internal Compiler error: cast<X>() argument of incompatible type!
 
-dxc: /build/directxshadercompiler-1.4.0.2274-413-1lunarg18.04/include/llvm/Support/Casting.h:238: typename llvm::cast_retty<X, Y*>::ret_type llvm::cast(Y*) [with X = llvm::ConstantFP; Y = llvm::Value; typename llvm::cast_retty<X, Y*>::ret_type = llvm::ConstantFP*]: Assertion `isa<X>(Val) && "cast<Ty>() argument of incompatible type!"' failed.
+
+Internal Compiler error: cast<X>() argument of incompatible type!
+

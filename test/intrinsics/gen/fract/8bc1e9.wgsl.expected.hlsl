@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void fract_8bc1e9() {
   float4 res = frac(float4(0.0f, 0.0f, 0.0f, 0.0f));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   fract_8bc1e9();
@@ -22,4 +22,3 @@ void compute_main() {
   fract_8bc1e9();
   return;
 }
-

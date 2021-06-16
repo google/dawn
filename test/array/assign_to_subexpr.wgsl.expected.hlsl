@@ -1,3 +1,8 @@
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+  return;
+}
+
 struct S {
   int arr[4];
 };
@@ -13,9 +18,3 @@ void foo() {
   dst_struct.arr = src;
   dst_array[0] = src;
 }
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
-  return;
-}
-

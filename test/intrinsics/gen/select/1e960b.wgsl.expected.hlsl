@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void select_1e960b() {
   uint2 res = (bool2(false, false) ? uint2(0u, 0u) : uint2(0u, 0u));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   select_1e960b();
@@ -22,4 +22,3 @@ void compute_main() {
   select_1e960b();
   return;
 }
-

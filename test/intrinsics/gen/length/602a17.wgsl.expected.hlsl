@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void length_602a17() {
   float res = length(1.0f);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   length_602a17();
@@ -22,4 +22,3 @@ void compute_main() {
   length_602a17();
   return;
 }
-

@@ -8,4 +8,3 @@ void main() {
   const int r = func(i, i);
   return;
 }
-

@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void cosh_da92dd() {
   float res = cosh(1.0f);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   cosh_da92dd();
@@ -22,4 +22,3 @@ void compute_main() {
   cosh_da92dd();
   return;
 }
-

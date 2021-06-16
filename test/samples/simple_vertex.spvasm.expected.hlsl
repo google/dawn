@@ -1,10 +1,10 @@
-struct main_out {
-  float4 gl_Position : SV_Position;
-};
+SKIP: FAILED
 
-main_out main() {
-  main_out tint_out = (main_out)0;
-  tint_out.gl_Position = float4(0.0f, 0.0f, 0.0f, 0.0f);
-  return tint_out;
-}
+../src/writer/hlsl/generator_impl.cc:1726 internal compiler error: unhandled storage class out
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
 

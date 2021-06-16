@@ -10,4 +10,3 @@ void main() {
   func(123, i);
   return;
 }
-

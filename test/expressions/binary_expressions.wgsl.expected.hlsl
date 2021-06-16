@@ -1,7 +1,3 @@
-struct tint_symbol {
-  float4 value : SV_Target0;
-};
-
 void bitwise_i32() {
   int s1 = 0;
   int s2 = 0;
@@ -103,8 +99,11 @@ void matrix_matrix_f32() {
   m44 = mul(m43, m34);
 }
 
+struct tint_symbol {
+  float4 value : SV_Target0;
+};
+
 tint_symbol main() {
   const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
   return tint_symbol_1;
 }
-

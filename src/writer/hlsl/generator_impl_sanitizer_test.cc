@@ -56,8 +56,7 @@ TEST_F(HlslSanitizerTest, ArrayLength_DEPRECATED) {
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
 
   auto got = result();
-  auto* expect = R"(
-ByteAddressBuffer sb : register(t0, space1);
+  auto* expect = R"(ByteAddressBuffer sb : register(t0, space1);
 
 void main() {
   uint tint_symbol_1 = 0u;
@@ -66,7 +65,6 @@ void main() {
   uint len = tint_symbol_2;
   return;
 }
-
 )";
   EXPECT_EQ(expect, got);
 }
@@ -94,8 +92,7 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength) {
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
 
   auto got = result();
-  auto* expect = R"(
-ByteAddressBuffer b : register(t1, space2);
+  auto* expect = R"(ByteAddressBuffer b : register(t1, space2);
 
 void a_func() {
   uint tint_symbol_1 = 0u;
@@ -104,7 +101,6 @@ void a_func() {
   uint len = tint_symbol_2;
   return;
 }
-
 )";
   EXPECT_EQ(expect, got);
 }
@@ -136,8 +132,7 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
 
   auto got = result();
-  auto* expect = R"(
-ByteAddressBuffer b : register(t1, space2);
+  auto* expect = R"(ByteAddressBuffer b : register(t1, space2);
 
 void a_func() {
   uint tint_symbol_1 = 0u;
@@ -146,7 +141,6 @@ void a_func() {
   uint len = tint_symbol_2;
   return;
 }
-
 )";
 
   EXPECT_EQ(expect, got);
@@ -180,8 +174,7 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_ViaLets) {
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
 
   auto got = result();
-  auto* expect = R"(
-ByteAddressBuffer b : register(t1, space2);
+  auto* expect = R"(ByteAddressBuffer b : register(t1, space2);
 
 void a_func() {
   uint tint_symbol_1 = 0u;
@@ -190,7 +183,6 @@ void a_func() {
   uint len = tint_symbol_2;
   return;
 }
-
 )";
 
   EXPECT_EQ(expect, got);
@@ -219,7 +211,6 @@ TEST_F(HlslSanitizerTest, PromoteArrayInitializerToConstVar) {
   int pos = tint_symbol[3];
   return;
 }
-
 )";
   EXPECT_EQ(expect, got);
 }
@@ -259,7 +250,6 @@ void main() {
   float3 pos = tint_symbol.b;
   return;
 }
-
 )";
   EXPECT_EQ(expect, got);
 }
@@ -293,7 +283,6 @@ TEST_F(HlslSanitizerTest, InlinePtrLetsBasic) {
   int x = v;
   return;
 }
-
 )";
   EXPECT_EQ(expect, got);
 }
@@ -337,7 +326,6 @@ TEST_F(HlslSanitizerTest, InlinePtrLetsComplexChain) {
   float f = m[2][1];
   return;
 }
-
 )";
   EXPECT_EQ(expect, got);
 }
@@ -386,7 +374,6 @@ void main() {
   int r = x(v);
   return;
 }
-
 )";
   EXPECT_EQ(expect, got);
 }

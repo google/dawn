@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void countOneBits_0d0e46() {
   uint4 res = countbits(uint4(0u, 0u, 0u, 0u));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   countOneBits_0d0e46();
@@ -22,4 +22,3 @@ void compute_main() {
   countOneBits_0d0e46();
   return;
 }
-

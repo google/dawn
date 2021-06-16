@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void tanh_c15fdb() {
   float res = tanh(1.0f);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   tanh_c15fdb();
@@ -22,4 +22,3 @@ void compute_main() {
   tanh_c15fdb();
   return;
 }
-

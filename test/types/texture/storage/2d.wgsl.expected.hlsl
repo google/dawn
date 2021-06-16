@@ -67,4 +67,3 @@ void main() {
   t_rgba32float_w;
   return;
 }
-

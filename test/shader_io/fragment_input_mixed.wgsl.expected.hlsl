@@ -34,4 +34,3 @@ void main(tint_symbol_1 tint_symbol) {
   }
   return;
 }
-

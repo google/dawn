@@ -5,4 +5,3 @@ void main() {
   const float3 x_14 = float3(float3(1.0f, 2.0f, 3.0f).x, float3(1.0f, 2.0f, 3.0f).z, float3(1.0f, 2.0f, 3.0f).y);
   return;
 }
-

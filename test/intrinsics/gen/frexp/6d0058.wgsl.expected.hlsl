@@ -1,7 +1,3 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void frexp_6d0058() {
   int3 arg_1 = int3(0, 0, 0);
   float3 tint_tmp;
@@ -9,6 +5,10 @@ void frexp_6d0058() {
   arg_1 = int3(tint_tmp);
   float3 res = tint_tmp_1;
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   frexp_6d0058();
@@ -26,4 +26,3 @@ void compute_main() {
   frexp_6d0058();
   return;
 }
-

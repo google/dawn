@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void cos_c5c28e() {
   float res = cos(1.0f);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   cos_c5c28e();
@@ -22,4 +22,3 @@ void compute_main() {
   cos_c5c28e();
   return;
 }
-

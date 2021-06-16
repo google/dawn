@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void round_9edc38() {
   float res = round(1.0f);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   round_9edc38();
@@ -22,4 +22,3 @@ void compute_main() {
   round_9edc38();
   return;
 }
-

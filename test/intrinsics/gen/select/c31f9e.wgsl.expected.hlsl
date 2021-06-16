@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void select_c31f9e() {
   bool res = (false ? false : false);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   select_c31f9e();
@@ -22,4 +22,3 @@ void compute_main() {
   select_c31f9e();
   return;
 }
-

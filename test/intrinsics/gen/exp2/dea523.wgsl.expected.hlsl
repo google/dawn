@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void exp2_dea523() {
   float res = exp2(1.0f);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   exp2_dea523();
@@ -22,4 +22,3 @@ void compute_main() {
   exp2_dea523();
   return;
 }
-

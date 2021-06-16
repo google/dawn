@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void isNan_e4978e() {
   bool res = isnan(1.0f);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   isNan_e4978e();
@@ -22,4 +22,3 @@ void compute_main() {
   isNan_e4978e();
   return;
 }
-

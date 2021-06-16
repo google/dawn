@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void mix_6f8adc() {
   float2 res = lerp(float2(0.0f, 0.0f), float2(0.0f, 0.0f), float2(0.0f, 0.0f));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   mix_6f8adc();
@@ -22,4 +22,3 @@ void compute_main() {
   mix_6f8adc();
   return;
 }
-

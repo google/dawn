@@ -28,4 +28,3 @@ void main() {
   struct_var = tint_symbol_1;
   return;
 }
-

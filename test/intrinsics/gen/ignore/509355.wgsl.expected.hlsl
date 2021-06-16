@@ -1,12 +1,12 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 TextureCube arg_0 : register(t0, space1);
 
 void ignore_509355() {
   arg_0;
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   ignore_509355();
@@ -24,4 +24,3 @@ void compute_main() {
   ignore_509355();
   return;
 }
-

@@ -1,12 +1,12 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 RWTexture2DArray<int4> arg_0 : register(u0, space1);
 
 void textureStore_fbf53f() {
   arg_0[int3(0, 0, 1)] = int4(0, 0, 0, 0);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   textureStore_fbf53f();
@@ -24,4 +24,3 @@ void compute_main() {
   textureStore_fbf53f();
   return;
 }
-

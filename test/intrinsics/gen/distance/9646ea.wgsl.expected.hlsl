@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void distance_9646ea() {
   float res = distance(float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   distance_9646ea();
@@ -22,4 +22,3 @@ void compute_main() {
   distance_9646ea();
   return;
 }
-

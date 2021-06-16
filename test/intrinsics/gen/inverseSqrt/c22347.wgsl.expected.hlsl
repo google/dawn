@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void inverseSqrt_c22347() {
   float4 res = rsqrt(float4(0.0f, 0.0f, 0.0f, 0.0f));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   inverseSqrt_c22347();
@@ -22,4 +22,3 @@ void compute_main() {
   inverseSqrt_c22347();
   return;
 }
-

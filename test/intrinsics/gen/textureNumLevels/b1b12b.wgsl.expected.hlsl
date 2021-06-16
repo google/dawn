@@ -1,7 +1,3 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 Texture2D arg_0 : register(t0, space1);
 
 void textureNumLevels_b1b12b() {
@@ -9,6 +5,10 @@ void textureNumLevels_b1b12b() {
   arg_0.GetDimensions(0, tint_tmp.x, tint_tmp.y, tint_tmp.z);
   int res = tint_tmp.z;
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   textureNumLevels_b1b12b();
@@ -26,4 +26,3 @@ void compute_main() {
   textureNumLevels_b1b12b();
   return;
 }
-

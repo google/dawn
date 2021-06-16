@@ -9,4 +9,3 @@ void fragment_main() {
   textureSampleCompare_dd431d();
   return;
 }
-

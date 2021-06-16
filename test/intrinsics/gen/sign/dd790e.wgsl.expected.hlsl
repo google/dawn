@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void sign_dd790e() {
   float res = sign(1.0f);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   sign_dd790e();
@@ -22,4 +22,3 @@ void compute_main() {
   sign_dd790e();
   return;
 }
-

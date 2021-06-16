@@ -26,6 +26,7 @@ class Expression;
 class Function;
 class MemberAccessorExpression;
 class Statement;
+class Struct;
 class StructMember;
 class Type;
 class TypeDecl;
@@ -59,6 +60,7 @@ struct TypeMappings {
   StructMember* operator()(ast::StructMember*);
   Type* operator()(ast::Type*);
   Type* operator()(ast::TypeDecl*);
+  Struct* operator()(ast::Struct*);
   Variable* operator()(ast::Variable*);
   //! @endcond
 };

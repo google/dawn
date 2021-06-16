@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void sqrt_8c7024() {
   float2 res = sqrt(float2(0.0f, 0.0f));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   sqrt_8c7024();
@@ -22,4 +22,3 @@ void compute_main() {
   sqrt_8c7024();
   return;
 }
-

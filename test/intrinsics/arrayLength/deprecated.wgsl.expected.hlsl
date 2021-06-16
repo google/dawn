@@ -1,4 +1,3 @@
-
 ByteAddressBuffer G : register(t0, space0);
 
 [numthreads(1, 1, 1)]
@@ -10,4 +9,3 @@ void main() {
   const uint l2 = tint_symbol_2;
   return;
 }
-

@@ -8,4 +8,3 @@ void foo(bool param_bool, int param_i32, uint param_u32, float param_f32, int2 p
 void main() {
   return;
 }
-

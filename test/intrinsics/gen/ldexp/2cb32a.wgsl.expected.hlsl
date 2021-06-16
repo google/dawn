@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void ldexp_2cb32a() {
   float3 res = ldexp(float3(0.0f, 0.0f, 0.0f), uint3(0u, 0u, 0u));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   ldexp_2cb32a();
@@ -22,4 +22,3 @@ void compute_main() {
   ldexp_2cb32a();
   return;
 }
-

@@ -25,4 +25,3 @@ void main() {
   const S struct_let = {};
   return;
 }
-

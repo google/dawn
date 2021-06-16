@@ -6,26 +6,6 @@ struct tint_symbol_1 {
 struct tint_symbol_2 {
   float4 value : SV_Position;
 };
-struct tint_symbol_3 {
-  float4 value : SV_Target0;
-};
-struct SimParams {
-  float deltaT;
-  float rule1Distance;
-  float rule2Distance;
-  float rule3Distance;
-  float rule1Scale;
-  float rule2Scale;
-  float rule3Scale;
-};
-struct tint_symbol_5 {
-  uint3 gl_GlobalInvocationID : SV_DispatchThreadID;
-};
-
-ConstantBuffer<SimParams> params : register(b0, space0);
-
-RWByteAddressBuffer particlesA : register(u1, space0);
-RWByteAddressBuffer particlesB : register(u2, space0);
 
 tint_symbol_2 vert_main(tint_symbol_1 tint_symbol) {
   const float2 a_particlePos = tint_symbol.a_particlePos;
@@ -37,10 +17,32 @@ tint_symbol_2 vert_main(tint_symbol_1 tint_symbol) {
   return tint_symbol_8;
 }
 
+struct tint_symbol_3 {
+  float4 value : SV_Target0;
+};
+
 tint_symbol_3 frag_main() {
   const tint_symbol_3 tint_symbol_9 = {float4(1.0f, 1.0f, 1.0f, 1.0f)};
   return tint_symbol_9;
 }
+
+struct SimParams {
+  float deltaT;
+  float rule1Distance;
+  float rule2Distance;
+  float rule3Distance;
+  float rule1Scale;
+  float rule2Scale;
+  float rule3Scale;
+};
+
+ConstantBuffer<SimParams> params : register(b0, space0);
+RWByteAddressBuffer particlesA : register(u1, space0);
+RWByteAddressBuffer particlesB : register(u2, space0);
+
+struct tint_symbol_5 {
+  uint3 gl_GlobalInvocationID : SV_DispatchThreadID;
+};
 
 [numthreads(1, 1, 1)]
 void comp_main(tint_symbol_5 tint_symbol_4) {
@@ -113,4 +115,3 @@ void comp_main(tint_symbol_5 tint_symbol_4) {
   particlesB.Store2(((16u * index) + 8u), asuint(vVel));
   return;
 }
-

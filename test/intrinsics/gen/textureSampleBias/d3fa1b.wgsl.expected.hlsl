@@ -9,4 +9,3 @@ void fragment_main() {
   textureSampleBias_d3fa1b();
   return;
 }
-

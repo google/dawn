@@ -20,4 +20,3 @@ void main() {
   const float v3 = f3(a3);
   return;
 }
-

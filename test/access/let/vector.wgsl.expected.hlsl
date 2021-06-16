@@ -6,4 +6,3 @@ void main() {
   const float3 swizzle3 = v.xzy;
   return;
 }
-

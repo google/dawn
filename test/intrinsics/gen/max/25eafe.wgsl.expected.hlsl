@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void max_25eafe() {
   int3 res = max(int3(0, 0, 0), int3(0, 0, 0));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   max_25eafe();
@@ -22,4 +22,3 @@ void compute_main() {
   max_25eafe();
   return;
 }
-

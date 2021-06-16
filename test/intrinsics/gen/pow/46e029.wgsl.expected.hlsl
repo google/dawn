@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void pow_46e029() {
   float res = pow(1.0f, 1.0f);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   pow_46e029();
@@ -22,4 +22,3 @@ void compute_main() {
   pow_46e029();
   return;
 }
-

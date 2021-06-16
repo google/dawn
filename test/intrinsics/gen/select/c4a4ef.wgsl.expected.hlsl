@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void select_c4a4ef() {
   uint4 res = (bool4(false, false, false, false) ? uint4(0u, 0u, 0u, 0u) : uint4(0u, 0u, 0u, 0u));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   select_c4a4ef();
@@ -22,4 +22,3 @@ void compute_main() {
   select_c4a4ef();
   return;
 }
-

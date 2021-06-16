@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void log2_902988() {
   float4 res = log2(float4(0.0f, 0.0f, 0.0f, 0.0f));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   log2_902988();
@@ -22,4 +22,3 @@ void compute_main() {
   log2_902988();
   return;
 }
-

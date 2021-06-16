@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void abs_b96037() {
   float res = abs(1.0f);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   abs_b96037();
@@ -22,4 +22,3 @@ void compute_main() {
   abs_b96037();
   return;
 }
-

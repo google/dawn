@@ -57,11 +57,6 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true on successful generation; false otherwise
   bool Generate(std::ostream& out);
 
-  /// Handles generating a declared type
-  /// @param out the output stream
-  /// @param ty the declared type to generate
-  /// @returns true if the declared type was emitted
-  bool EmitTypeDecl(std::ostream& out, const sem::Type* ty);
   /// Handles an array accessor expression
   /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
@@ -229,25 +224,43 @@ class GeneratorImpl : public TextGenerator {
   /// @param func the function to generate
   /// @returns true if the function was emitted
   bool EmitFunction(std::ostream& out, ast::Function* func);
-  /// Internal helper for emitting functions
+
+  /// Handles emitting a global variable
   /// @param out the output stream
-  /// @param func the function to emit
-  /// @param emit_duplicate_functions set true if we need to duplicate per entry
-  /// point
-  /// @param ep_sym the current entry point or symbol::kInvalid if none set
-  /// @returns true if the function was emitted.
-  bool EmitFunctionInternal(std::ostream& out,
-                            ast::Function* func,
-                            bool emit_duplicate_functions,
-                            Symbol ep_sym);
-  /// Handles emitting information for an entry point
+  /// @param global the global variable
+  /// @returns true on success
+  bool EmitGlobalVariable(std::ostream& out, ast::Variable* global);
+
+  /// Handles emitting a global variable with the uniform storage class
   /// @param out the output stream
-  /// @param func the entry point
-  /// @param emitted_globals the set of globals emitted over all entry points
-  /// @returns true if the entry point data was emitted
-  bool EmitEntryPointData(std::ostream& out,
-                          ast::Function* func,
-                          std::unordered_set<Symbol>& emitted_globals);
+  /// @param var the global variable
+  /// @returns true on success
+  bool EmitUniformVariable(std::ostream& out, const sem::Variable* var);
+
+  /// Handles emitting a global variable with the storage storage class
+  /// @param out the output stream
+  /// @param var the global variable
+  /// @returns true on success
+  bool EmitStorageVariable(std::ostream& out, const sem::Variable* var);
+
+  /// Handles emitting a global variable with the handle storage class
+  /// @param out the output stream
+  /// @param var the global variable
+  /// @returns true on success
+  bool EmitHandleVariable(std::ostream& out, const sem::Variable* var);
+
+  /// Handles emitting a global variable with the private storage class
+  /// @param out the output stream
+  /// @param var the global variable
+  /// @returns true on success
+  bool EmitPrivateVariable(std::ostream& out, const sem::Variable* var);
+
+  /// Handles emitting a global variable with the workgroup storage class
+  /// @param out the output stream
+  /// @param var the global variable
+  /// @returns true on success
+  bool EmitWorkgroupVariable(std::ostream& out, const sem::Variable* var);
+
   /// Handles emitting the entry point function
   /// @param out the output stream
   /// @param func the entry point
@@ -314,11 +327,8 @@ class GeneratorImpl : public TextGenerator {
   /// Handles generating a structure declaration
   /// @param out the output stream
   /// @param ty the struct to generate
-  /// @param name the struct name
   /// @returns true if the struct is emitted
-  bool EmitStructType(std::ostream& out,
-                      const sem::Struct* ty,
-                      const std::string& name);
+  bool EmitStructType(std::ostream& out, const sem::Struct* ty);
   /// Handles a unary op expression
   /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
@@ -343,13 +353,6 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true if the variable was emitted
   bool EmitProgramConstVariable(std::ostream& out, const ast::Variable* var);
 
-  /// Registers the given global with the generator
-  /// @param global the global to register
-  void register_global(ast::Variable* global);
-  /// Checks if the global variable is in an input or output struct
-  /// @param var the variable to check
-  /// @returns true if the global is in an input or output struct
-  bool global_is_in_struct(const sem::Variable* var) const;
   /// Handles generating a builtin method name
   /// @param intrinsic the semantic info for the intrinsic
   /// @returns the name or "" if not valid
@@ -358,19 +361,6 @@ class GeneratorImpl : public TextGenerator {
   /// @param builtin the builtin to convert
   /// @returns the string name of the builtin or blank on error
   std::string builtin_to_attribute(ast::Builtin builtin) const;
-  /// Determines if the function needs the input struct passed to it.
-  /// @param func the function to check
-  /// @returns true if there are input struct variables used in the function
-  bool has_referenced_in_var_needing_struct(const sem::Function* func);
-  /// Determines if the function needs the output struct passed to it.
-  /// @param func the function to check
-  /// @returns true if there are output struct variables used in the function
-  bool has_referenced_out_var_needing_struct(const sem::Function* func);
-  /// Determines if any used program variable requires an input or output
-  /// struct.
-  /// @param func the function to check
-  /// @returns true if an input or output struct is required.
-  bool has_referenced_var_needing_struct(const sem::Function* func);
 
   /// Generate a unique name
   /// @param prefix the name prefix
@@ -385,7 +375,6 @@ class GeneratorImpl : public TextGenerator {
     std::string var_name;
   };
 
-  std::string current_ep_var_name(VarType type);
   std::string get_buffer_name(ast::Expression* expr);
 
   /// @returns the resolved type of the ast::Expression `expr`
@@ -428,17 +417,7 @@ class GeneratorImpl : public TextGenerator {
   }
 
   ProgramBuilder builder_;
-  Symbol current_ep_sym_;
-  bool generating_entry_point_ = false;
   std::function<bool(std::ostream& out)> emit_continuing_;
-  ScopeStack<const sem::Variable*> global_variables_;
-  std::unordered_map<Symbol, EntryPointData> ep_sym_to_in_data_;
-  std::unordered_map<Symbol, EntryPointData> ep_sym_to_out_data_;
-
-  // This maps an input of "<entry_point_name>_<function_name>" to a remapped
-  // function name. If there is no entry for a given key then function did
-  // not need to be remapped for the entry point and can be emitted directly.
-  std::unordered_map<std::string, std::string> ep_func_name_remapped_;
 };
 
 }  // namespace hlsl

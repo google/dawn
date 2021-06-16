@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void isInf_7bd98f() {
   bool res = isinf(1.0f);
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   isInf_7bd98f();
@@ -22,4 +22,3 @@ void compute_main() {
   isInf_7bd98f();
   return;
 }
-

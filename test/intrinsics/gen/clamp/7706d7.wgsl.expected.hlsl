@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void clamp_7706d7() {
   uint2 res = clamp(uint2(0u, 0u), uint2(0u, 0u), uint2(0u, 0u));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   clamp_7706d7();
@@ -22,4 +22,3 @@ void compute_main() {
   clamp_7706d7();
   return;
 }
-

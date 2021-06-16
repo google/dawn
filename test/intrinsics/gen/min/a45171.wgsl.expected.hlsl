@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void min_a45171() {
   int3 res = min(int3(0, 0, 0), int3(0, 0, 0));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   min_a45171();
@@ -22,4 +22,3 @@ void compute_main() {
   min_a45171();
   return;
 }
-

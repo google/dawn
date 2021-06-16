@@ -6,4 +6,3 @@ void fragment_main() {
   dpdyFine_1fb7ab();
   return;
 }
-

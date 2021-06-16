@@ -1,10 +1,10 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 void any_e755c1() {
   bool res = any(bool3(false, false, false));
 }
+
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
 tint_symbol vertex_main() {
   any_e755c1();
@@ -22,4 +22,3 @@ void compute_main() {
   any_e755c1();
   return;
 }
-
