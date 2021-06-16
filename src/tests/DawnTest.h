@@ -295,6 +295,8 @@ class DawnTestBase {
     bool IsBackendValidationEnabled() const;
     bool RunSuppressedTests() const;
 
+    bool IsDXC() const;
+
     bool IsAsan() const;
 
     bool HasToggleEnabled(const char* workaround) const;

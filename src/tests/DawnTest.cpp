@@ -819,6 +819,10 @@ bool DawnTestBase::RunSuppressedTests() const {
     return gTestEnv->RunSuppressedTests();
 }
 
+bool DawnTestBase::IsDXC() const {
+    return HasToggleEnabled("use_dxc");
+}
+
 bool DawnTestBase::IsAsan() const {
 #if defined(ADDRESS_SANITIZER)
     return true;

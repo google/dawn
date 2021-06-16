@@ -692,6 +692,9 @@ TEST_P(VertexFormatTest, Float16x2) {
     // Fails on NVIDIA's Vulkan drivers on CQ but passes locally.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
 
+    // TODO(crbug.com/tint/904): FXC emits bad output for this test
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && !IsDXC());
+
     std::vector<uint16_t> vertexData =
         Float32ToFloat16(std::vector<float>({14.8f, -0.0f, 22.5f, 1.3f, +0.0f, -24.8f}));
 
