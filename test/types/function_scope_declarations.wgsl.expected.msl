@@ -3,8 +3,8 @@
 using namespace metal;
 struct S {
 };
-struct tint_array_wrapper_0 {
-  float array[4];
+struct tint_array_wrapper {
+  float arr[4];
 };
 
 kernel void tint_symbol() {
@@ -24,13 +24,13 @@ kernel void tint_symbol() {
   float4 const v4f32_let = float4();
   float2x3 m2x3_var = float2x3();
   float3x4 const m3x4_let = float3x4();
-  tint_array_wrapper_0 arr_var = {};
-  tint_array_wrapper_0 const arr_let = {};
+  tint_array_wrapper arr_var = {.arr={}};
+  tint_array_wrapper const arr_let = {.arr={}};
   S struct_var = {};
   S const struct_let = {};
   thread float* const ptr_f32 = &(f32_var);
   thread float4* const ptr_vec = &(v4f32_var);
-  thread tint_array_wrapper_0* const ptr_arr = &(arr_var);
+  thread tint_array_wrapper* const ptr_arr = &(arr_var);
   return;
 }
 

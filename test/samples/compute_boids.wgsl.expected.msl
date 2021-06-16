@@ -25,11 +25,11 @@ struct SimParams {
   /* 0x0014 */ float rule2Scale;
   /* 0x0018 */ float rule3Scale;
 };
-struct tint_array_wrapper_0 {
-  Particle array[5];
+struct tint_array_wrapper {
+  /* 0x0000 */ Particle arr[5];
 };
 struct Particles {
-  /* 0x0000 */ tint_array_wrapper_0 particles;
+  /* 0x0000 */ tint_array_wrapper particles;
 };
 
 vertex tint_symbol_2 vert_main(tint_symbol_1 tint_symbol [[stage_in]]) {
@@ -52,8 +52,8 @@ kernel void comp_main(uint3 gl_GlobalInvocationID [[thread_position_in_grid]], c
   if ((index >= 5u)) {
     return;
   }
-  float2 vPos = particlesA.particles.array[index].pos;
-  float2 vVel = particlesA.particles.array[index].vel;
+  float2 vPos = particlesA.particles.arr[index].pos;
+  float2 vVel = particlesA.particles.arr[index].vel;
   float2 cMass = float2(0.0f, 0.0f);
   float2 cVel = float2(0.0f, 0.0f);
   float2 colVel = float2(0.0f, 0.0f);
@@ -77,8 +77,8 @@ kernel void comp_main(uint3 gl_GlobalInvocationID [[thread_position_in_grid]], c
         if ((i == index)) {
           continue;
         }
-        pos = particlesA.particles.array[i].pos.xy;
-        vel = particlesA.particles.array[i].vel.xy;
+        pos = particlesA.particles.arr[i].pos.xy;
+        vel = particlesA.particles.arr[i].vel.xy;
         if ((        distance(pos, vPos) < params.rule1Distance)) {
           cMass = (cMass + pos);
           cMassCount = (cMassCount + 1);
@@ -114,8 +114,8 @@ kernel void comp_main(uint3 gl_GlobalInvocationID [[thread_position_in_grid]], c
   if ((vPos.y > 1.0f)) {
     vPos.y = -1.0f;
   }
-  particlesB.particles.array[index].pos = vPos;
-  particlesB.particles.array[index].vel = vVel;
+  particlesB.particles.arr[index].pos = vPos;
+  particlesB.particles.arr[index].vel = vVel;
   return;
 }
 

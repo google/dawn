@@ -4,11 +4,11 @@ using namespace metal;
 struct MyStruct {
   float f1;
 };
+struct tint_array_wrapper {
+  float arr[10];
+};
 struct tint_symbol_1 {
   float4 value [[color(0)]];
-};
-struct tint_array_wrapper_0 {
-  float array[10];
 };
 
 int ret_i32() {
@@ -28,8 +28,8 @@ MyStruct ret_MyStruct() {
   return tint_symbol_2;
 }
 
-tint_array_wrapper_0 ret_MyArray() {
-  tint_array_wrapper_0 const tint_symbol_3 = {};
+tint_array_wrapper ret_MyArray() {
+  tint_array_wrapper const tint_symbol_3 = {.arr={}};
   return tint_symbol_3;
 }
 
@@ -42,13 +42,13 @@ void var_decls() {
   float3 v6 = float3(1.0f, 1.0f, 1.0f);
   float3x3 v7 = float3x3(v6, v6, v6);
   MyStruct v8 = {.f1=1.0f};
-  tint_array_wrapper_0 v9 = {};
+  tint_array_wrapper v9 = {.arr={}};
   int v10 = ret_i32();
   uint v11 = ret_u32();
   float v12 = ret_f32();
   MyStruct v13 = ret_MyStruct();
   MyStruct v14 = ret_MyStruct();
-  tint_array_wrapper_0 v15 = ret_MyArray();
+  tint_array_wrapper v15 = ret_MyArray();
 }
 
 fragment tint_symbol_1 tint_symbol() {

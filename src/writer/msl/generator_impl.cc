@@ -95,17 +95,7 @@ bool GeneratorImpl::Generate() {
     }
   }
 
-  // Generate wrappers for array types.
-  for (auto* ty : program_->Types()) {
-    auto* arr = ty->As<sem::Array>();
-    if (arr && !arr->IsRuntimeSized()) {
-      if (!EmitArrayWrapper(arr)) {
-        return false;
-      }
-    }
-  }
-
-  if (!program_->AST().TypeDecls().empty() || array_wrappers_.size()) {
+  if (!program_->AST().TypeDecls().empty()) {
     out_ << std::endl;
   }
 
@@ -189,13 +179,6 @@ bool GeneratorImpl::EmitArrayAccessor(ast::ArrayAccessorExpression* expr) {
   }
   if (paren_lhs) {
     out_ << ")";
-  }
-
-  // If the array has been wrapped in a struct, emit a member accessor to get to
-  // the actual array.
-  auto* sem_ty = program_->Sem().Get(expr->array())->Type()->UnwrapRef();
-  if (array_wrappers_.count(sem_ty)) {
-    out_ << ".array";
   }
 
   out_ << "[";
@@ -2010,16 +1993,6 @@ bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
 
 bool GeneratorImpl::EmitType(const sem::Type* type, const std::string& name) {
   if (auto* ary = type->As<sem::Array>()) {
-    if (array_wrappers_.count(type)) {
-      // If the array has been wrapped in a struct, emit the struct name instead
-      // of the array type.
-      out_ << array_wrappers_[type];
-      if (!name.empty()) {
-        out_ << " " << name;
-      }
-      return true;
-    }
-
     const sem::Type* base_type = ary;
     std::vector<uint32_t> sizes;
     while (auto* arr = base_type->As<sem::Array>()) {
@@ -2069,8 +2042,7 @@ bool GeneratorImpl::EmitType(const sem::Type* type, const std::string& name) {
       default:
         TINT_ICE(diagnostics_) << "unhandled storage class for pointer";
     }
-    if (ptr->StoreType()->Is<sem::Array>() &&
-        !array_wrappers_.count(ptr->StoreType())) {
+    if (ptr->StoreType()->Is<sem::Array>()) {
       std::string inner = "(*" + name + ")";
       if (!EmitType(ptr->StoreType(), inner)) {
         return false;
@@ -2185,16 +2157,6 @@ bool GeneratorImpl::EmitPackedType(const sem::Type* type,
 }
 
 bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
-  // Generate wrappers for any struct members that have an array type.
-  for (auto* mem : str->Members()) {
-    auto* arr = mem->Type()->As<sem::Array>();
-    if (arr && !arr->IsRuntimeSized()) {
-      if (!EmitArrayWrapper(arr)) {
-        return false;
-      }
-    }
-  }
-
   // TODO(dsinclair): Block decoration?
   // if (str->impl()->decoration() != ast::Decoration::kNone) {
   // }
@@ -2515,36 +2477,6 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
 
   TINT_UNREACHABLE(diagnostics_) << "Unhandled type " << ty->TypeInfo().name;
   return {};
-}
-
-bool GeneratorImpl::EmitArrayWrapper(const sem::Array* arr) {
-  // We may have created a wrapper for this array while emitting structs.
-  if (array_wrappers_.count(arr)) {
-    return true;
-  }
-
-  // Find a unique name for the new structure.
-  uint32_t i = static_cast<uint32_t>(array_wrappers_.size());
-  std::string struct_name;
-  do {
-    struct_name = "tint_array_wrapper_" + std::to_string(i++);
-    if (i == 0) {
-      TINT_ICE(diagnostics_) << "unable to allocate name for array wrapper";
-    }
-  } while (program_->Symbols().Get(struct_name).IsValid());
-
-  // Generate a struct with a single member with the same type as the array.
-  out_ << "struct " << struct_name << " {" << std::endl;
-  out_ << "  ";
-  if (!EmitType(arr->ElemType(), "")) {
-    return false;
-  }
-  out_ << " array[" << arr->Count() << "];" << std::endl;
-  out_ << "};" << std::endl;
-
-  array_wrappers_.emplace(arr, struct_name);
-
-  return true;
 }
 
 }  // namespace msl

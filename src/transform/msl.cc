@@ -28,6 +28,7 @@
 #include "src/transform/external_texture_transform.h"
 #include "src/transform/manager.h"
 #include "src/transform/promote_initializers_to_const_var.h"
+#include "src/transform/wrap_arrays_in_structs.h"
 
 namespace tint {
 namespace transform {
@@ -41,6 +42,7 @@ Output Msl::Run(const Program* in, const DataMap&) {
   manager.Add<CanonicalizeEntryPointIO>();
   manager.Add<ExternalTextureTransform>();
   manager.Add<PromoteInitializersToConstVar>();
+  manager.Add<WrapArraysInStructs>();
   data.Add<CanonicalizeEntryPointIO::Config>(
       CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
   auto out = manager.Run(in, data);

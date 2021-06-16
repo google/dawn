@@ -765,12 +765,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
   params.push_back(Param("a", ty.array<f32, 5>()));
 
   Func("my_func", params, ty.void_(),
-       ast::StatementList{
+       {
            Return(),
-       },
-       {});
+       });
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   gen.increment_indent();
 
@@ -778,12 +777,38 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
-struct tint_array_wrapper_0 {
-  float array[5];
-};
+  struct tint_array_wrapper {
+    float arr[5];
+  };
 
-  void my_func(tint_array_wrapper_0 const a) {
+  void my_func(tint_array_wrapper a) {
     return;
+  }
+
+)");
+}
+
+TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayReturn) {
+  Func("my_func", {}, ty.array<f32, 5>(),
+       {
+           Return(Construct(ty.array<f32, 5>())),
+       });
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  gen.increment_indent();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+
+using namespace metal;
+  struct tint_array_wrapper {
+    float arr[5];
+  };
+
+  tint_array_wrapper my_func() {
+    tint_array_wrapper const tint_symbol = {.arr={}};
+    return tint_symbol;
   }
 
 )");

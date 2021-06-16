@@ -1486,6 +1486,18 @@ class ProgramBuilder {
                                          Expr(std::forward<RHS>(rhs)));
   }
 
+  /// @param source the source information
+  /// @param arr the array argument for the array accessor expression
+  /// @param idx the index argument for the array accessor expression
+  /// @returns a `ast::ArrayAccessorExpression` that indexes `arr` with `idx`
+  template <typename ARR, typename IDX>
+  ast::ArrayAccessorExpression* IndexAccessor(const Source& source,
+                                              ARR&& arr,
+                                              IDX&& idx) {
+    return create<ast::ArrayAccessorExpression>(
+        source, Expr(std::forward<ARR>(arr)), Expr(std::forward<IDX>(idx)));
+  }
+
   /// @param arr the array argument for the array accessor expression
   /// @param idx the index argument for the array accessor expression
   /// @returns a `ast::ArrayAccessorExpression` that indexes `arr` with `idx`

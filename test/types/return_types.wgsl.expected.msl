@@ -3,8 +3,8 @@
 using namespace metal;
 struct S {
 };
-struct tint_array_wrapper_0 {
-  float array[4];
+struct tint_array_wrapper {
+  float arr[4];
 };
 
 bool ret_bool() {
@@ -39,8 +39,8 @@ float2x3 ret_m2x3() {
   return float2x3();
 }
 
-tint_array_wrapper_0 ret_arr() {
-  tint_array_wrapper_0 const tint_symbol_1 = {};
+tint_array_wrapper ret_arr() {
+  tint_array_wrapper const tint_symbol_1 = {.arr={}};
   return tint_symbol_1;
 }
 

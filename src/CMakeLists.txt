@@ -300,6 +300,8 @@ set(TINT_LIB_SRCS
   transform/var_for_dynamic_index.h
   transform/vertex_pulling.cc
   transform/vertex_pulling.h
+  transform/wrap_arrays_in_structs.cc
+  transform/wrap_arrays_in_structs.h
   sem/bool_type.cc
   sem/bool_type.h
   sem/depth_texture_type.cc
@@ -859,6 +861,7 @@ if(${TINT_BUILD_TESTS})
       transform/test_helper.h
       transform/var_for_dynamic_index_test.cc
       transform/vertex_pulling_test.cc
+      transform/wrap_arrays_in_structs_test.cc
     )
   endif()
 

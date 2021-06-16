@@ -288,6 +288,7 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/transform/transform_test.cc",
     "../src/transform/var_for_dynamic_index_test.cc",
     "../src/transform/vertex_pulling_test.cc",
+    "../src/transform/wrap_arrays_in_structs_test.cc",
     "../src/utils/enum_set_test.cc",
     "../src/utils/get_or_create_test.cc",
     "../src/utils/hash_test.cc",

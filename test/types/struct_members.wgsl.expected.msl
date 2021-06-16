@@ -3,8 +3,8 @@
 using namespace metal;
 struct S_inner {
 };
-struct tint_array_wrapper_0 {
-  float array[4];
+struct tint_array_wrapper {
+  float arr[4];
 };
 struct S {
   bool member_bool;
@@ -15,7 +15,7 @@ struct S {
   uint3 member_v3u32;
   float4 member_v4f32;
   float2x3 member_m2x3;
-  tint_array_wrapper_0 member_arr;
+  tint_array_wrapper member_arr;
   S_inner member_struct;
 };
 
