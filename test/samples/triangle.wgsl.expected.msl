@@ -1,18 +1,18 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_array_wrapper {
-  float2 arr[3];
-};
 struct tint_symbol_1 {
   float4 value [[position]];
+};
+struct tint_array_wrapper {
+  float2 arr[3];
 };
 struct tint_symbol_2 {
   float4 value [[color(0)]];
 };
 
-constant tint_array_wrapper pos = {.arr={float2(0.0f, 0.5f), float2(-0.5f, -0.5f), float2(0.5f, -0.5f)}};
 vertex tint_symbol_1 vtx_main(uint VertexIndex [[vertex_id]]) {
+  tint_array_wrapper pos = {.arr={float2(0.0f, 0.5f), float2(-0.5f, -0.5f), float2(0.5f, -0.5f)}};
   tint_symbol_1 const tint_symbol_3 = {.value=float4(pos.arr[VertexIndex], 0.0f, 1.0f)};
   return tint_symbol_3;
 }

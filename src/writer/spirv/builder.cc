@@ -1077,17 +1077,6 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
   }
   info.source_type = TypeOf(source);
 
-  if (auto* access = accessors[0]->As<ast::ArrayAccessorExpression>()) {
-    auto* array = TypeOf(access->array())->As<sem::Array>();
-    bool literal_index =
-        array && access->idx_expr()->Is<ast::ScalarConstructorExpression>();
-    if (array && !literal_index) {
-      TINT_ICE(builder_.Diagnostics())
-          << "Dynamic index on array value should have been promoted to "
-             "storage with the VarForDynamicIndex transform";
-    }
-  }
-
   for (auto* accessor : accessors) {
     if (auto* array = accessor->As<ast::ArrayAccessorExpression>()) {
       if (!GenerateArrayAccessor(array, &info)) {

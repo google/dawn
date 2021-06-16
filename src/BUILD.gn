@@ -571,8 +571,6 @@ libtint_source_set("libtint_core_all_src") {
     "transform/single_entry_point.h",
     "transform/transform.cc",
     "transform/transform.h",
-    "transform/var_for_dynamic_index.cc",
-    "transform/var_for_dynamic_index.h",
     "transform/vertex_pulling.cc",
     "transform/vertex_pulling.h",
     "transform/wrap_arrays_in_structs.cc",

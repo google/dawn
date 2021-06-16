@@ -9,65 +9,64 @@
                OpEntryPoint Fragment %frag_main "frag_main" %tint_symbol_5
                OpExecutionMode %frag_main OriginUpperLeft
                OpName %tint_pointsize "tint_pointsize"
-               OpName %pos "pos"
                OpName %tint_symbol "tint_symbol"
                OpName %tint_symbol_2 "tint_symbol_2"
                OpName %tint_symbol_5 "tint_symbol_5"
                OpName %tint_symbol_3 "tint_symbol_3"
                OpName %tint_symbol_1 "tint_symbol_1"
                OpName %vtx_main "vtx_main"
-               OpName %var_for_index "var_for_index"
+               OpName %pos "pos"
                OpName %tint_symbol_6 "tint_symbol_6"
                OpName %tint_symbol_4 "tint_symbol_4"
                OpName %frag_main "frag_main"
                OpDecorate %tint_pointsize BuiltIn PointSize
-               OpDecorate %_arr_v2float_uint_3 ArrayStride 8
                OpDecorate %tint_symbol BuiltIn VertexIndex
                OpDecorate %tint_symbol_2 BuiltIn Position
                OpDecorate %tint_symbol_5 Location 0
+               OpDecorate %_arr_v2float_uint_3 ArrayStride 8
       %float = OpTypeFloat 32
 %_ptr_Output_float = OpTypePointer Output %float
           %4 = OpConstantNull %float
 %tint_pointsize = OpVariable %_ptr_Output_float Output %4
-    %v2float = OpTypeVector %float 2
        %uint = OpTypeInt 32 0
-     %uint_3 = OpConstant %uint 3
-%_arr_v2float_uint_3 = OpTypeArray %v2float %uint_3
-    %float_0 = OpConstant %float 0
-  %float_0_5 = OpConstant %float 0.5
-         %11 = OpConstantComposite %v2float %float_0 %float_0_5
- %float_n0_5 = OpConstant %float -0.5
-         %13 = OpConstantComposite %v2float %float_n0_5 %float_n0_5
-         %14 = OpConstantComposite %v2float %float_0_5 %float_n0_5
-        %pos = OpConstantComposite %_arr_v2float_uint_3 %11 %13 %14
 %_ptr_Input_uint = OpTypePointer Input %uint
 %tint_symbol = OpVariable %_ptr_Input_uint Input
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float
-         %21 = OpConstantNull %v4float
-%tint_symbol_2 = OpVariable %_ptr_Output_v4float Output %21
-%tint_symbol_5 = OpVariable %_ptr_Output_v4float Output %21
+         %11 = OpConstantNull %v4float
+%tint_symbol_2 = OpVariable %_ptr_Output_v4float Output %11
+%tint_symbol_5 = OpVariable %_ptr_Output_v4float Output %11
        %void = OpTypeVoid
-         %23 = OpTypeFunction %void %v4float
-         %28 = OpTypeFunction %void
+         %13 = OpTypeFunction %void %v4float
+         %18 = OpTypeFunction %void
     %float_1 = OpConstant %float 1
+    %v2float = OpTypeVector %float 2
+     %uint_3 = OpConstant %uint 3
+%_arr_v2float_uint_3 = OpTypeArray %v2float %uint_3
+    %float_0 = OpConstant %float 0
+  %float_0_5 = OpConstant %float 0.5
+         %27 = OpConstantComposite %v2float %float_0 %float_0_5
+ %float_n0_5 = OpConstant %float -0.5
+         %29 = OpConstantComposite %v2float %float_n0_5 %float_n0_5
+         %30 = OpConstantComposite %v2float %float_0_5 %float_n0_5
+         %31 = OpConstantComposite %_arr_v2float_uint_3 %27 %29 %30
 %_ptr_Function__arr_v2float_uint_3 = OpTypePointer Function %_arr_v2float_uint_3
          %34 = OpConstantNull %_arr_v2float_uint_3
 %_ptr_Function_v2float = OpTypePointer Function %v2float
          %49 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
-%tint_symbol_3 = OpFunction %void None %23
+%tint_symbol_3 = OpFunction %void None %13
 %tint_symbol_1 = OpFunctionParameter %v4float
-         %27 = OpLabel
+         %17 = OpLabel
                OpStore %tint_symbol_2 %tint_symbol_1
                OpReturn
                OpFunctionEnd
-   %vtx_main = OpFunction %void None %28
-         %30 = OpLabel
-%var_for_index = OpVariable %_ptr_Function__arr_v2float_uint_3 Function %34
+   %vtx_main = OpFunction %void None %18
+         %20 = OpLabel
+        %pos = OpVariable %_ptr_Function__arr_v2float_uint_3 Function %34
                OpStore %tint_pointsize %float_1
-               OpStore %var_for_index %pos
+               OpStore %pos %31
          %36 = OpLoad %uint %tint_symbol
-         %38 = OpAccessChain %_ptr_Function_v2float %var_for_index %36
+         %38 = OpAccessChain %_ptr_Function_v2float %pos %36
          %39 = OpLoad %v2float %38
          %40 = OpCompositeExtract %float %39 0
          %41 = OpCompositeExtract %float %39 1
@@ -75,13 +74,13 @@
          %35 = OpFunctionCall %void %tint_symbol_3 %42
                OpReturn
                OpFunctionEnd
-%tint_symbol_6 = OpFunction %void None %23
+%tint_symbol_6 = OpFunction %void None %13
 %tint_symbol_4 = OpFunctionParameter %v4float
          %45 = OpLabel
                OpStore %tint_symbol_5 %tint_symbol_4
                OpReturn
                OpFunctionEnd
-  %frag_main = OpFunction %void None %28
+  %frag_main = OpFunction %void None %18
          %47 = OpLabel
          %48 = OpFunctionCall %void %tint_symbol_6 %49
                OpReturn

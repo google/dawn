@@ -17,9 +17,9 @@
                OpName %tint_symbol_5 "tint_symbol_5"
                OpName %tint_symbol_2 "tint_symbol_2"
                OpName %main "main"
-               OpName %var_for_index "var_for_index"
+               OpName %zv "zv"
                OpName %output "output"
-               OpName %var_for_index_1 "var_for_index_1"
+               OpName %colors "colors"
                OpDecorate %tint_pointsize BuiltIn PointSize
                OpDecorate %tint_symbol BuiltIn VertexIndex
                OpDecorate %tint_symbol_1 BuiltIn InstanceIndex
@@ -88,21 +88,21 @@
                OpFunctionEnd
        %main = OpFunction %void None %22
          %24 = OpLabel
-%var_for_index = OpVariable %_ptr_Function__arr_v2float_uint_4 Function %40
+         %zv = OpVariable %_ptr_Function__arr_v2float_uint_4 Function %40
      %output = OpVariable %_ptr_Function_Output Function %48
-%var_for_index_1 = OpVariable %_ptr_Function__arr_v4float_uint_4 Function %62
+     %colors = OpVariable %_ptr_Function__arr_v4float_uint_4 Function %62
                OpStore %tint_pointsize %float_1
-               OpStore %var_for_index %37
+               OpStore %zv %37
          %41 = OpLoad %uint %tint_symbol_1
-         %44 = OpAccessChain %_ptr_Function_float %var_for_index %41 %uint_0
+         %44 = OpAccessChain %_ptr_Function_float %zv %41 %uint_0
          %45 = OpLoad %float %44
          %50 = OpAccessChain %_ptr_Function_v4float %output %uint_0
          %52 = OpCompositeConstruct %v4float %float_0_5 %float_0_5 %45 %float_1
                OpStore %50 %52
-               OpStore %var_for_index_1 %59
+               OpStore %colors %59
          %64 = OpAccessChain %_ptr_Function_v4float %output %uint_1
          %65 = OpLoad %uint %tint_symbol_1
-         %66 = OpAccessChain %_ptr_Function_v4float %var_for_index_1 %65
+         %66 = OpAccessChain %_ptr_Function_v4float %colors %65
          %67 = OpLoad %v4float %66
                OpStore %64 %67
          %69 = OpLoad %Output %output
