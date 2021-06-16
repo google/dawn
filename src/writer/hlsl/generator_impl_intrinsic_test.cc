@@ -347,6 +347,36 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Frexp_Vector_i32) {
 )"));
 }
 
+TEST_F(HlslGeneratorImplTest_Intrinsic, IsNormal_Scalar) {
+  auto* val = Var("val", ty.f32());
+  auto* call = Call("isNormal", val);
+  WrapInFunction(val, call);
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr(R"(
+  uint tint_isnormal_exponent = asuint(val) & 0x7f80000;
+  uint tint_isnormal_clamped = clamp(tint_isnormal_exponent, 0x0080000, 0x7f00000);
+  (tint_isnormal_clamped == tint_isnormal_exponent);
+)"));
+}
+
+TEST_F(HlslGeneratorImplTest_Intrinsic, IsNormal_Vector) {
+  auto* val = Var("val", ty.vec3<f32>());
+  auto* call = Call("isNormal", val);
+  WrapInFunction(val, call);
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr(R"(
+  uint3 tint_isnormal_exponent = asuint(val) & 0x7f80000;
+  uint3 tint_isnormal_clamped = clamp(tint_isnormal_exponent, 0x0080000, 0x7f00000);
+  (tint_isnormal_clamped == tint_isnormal_exponent);
+)"));
+}
+
 TEST_F(HlslGeneratorImplTest_Intrinsic, Pack4x8Snorm) {
   auto* call = Call("pack4x8snorm", "p1");
   Global("p1", ty.vec4<f32>(), ast::StorageClass::kPrivate);

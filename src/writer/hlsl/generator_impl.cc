@@ -535,8 +535,7 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
     if (intrinsic->Type() == sem::IntrinsicType::kFrexp) {
       return EmitFrexpCall(pre, out, expr, intrinsic);
     } else if (intrinsic->Type() == sem::IntrinsicType::kIsNormal) {
-      diagnostics_.add_error("is_normal not supported in HLSL backend yet");
-      return false;
+      return EmitIsNormalCall(pre, out, expr, intrinsic);
     } else if (intrinsic->Type() == sem::IntrinsicType::kIgnore) {
       return EmitExpression(pre, out, expr->params()[0]);
     } else if (intrinsic->IsDataPacking()) {
@@ -667,6 +666,44 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& pre,
   make_indent(ss << std::endl);
   pre << ss.str();
   out << significand;
+  return true;
+}
+
+bool GeneratorImpl::EmitIsNormalCall(std::ostream& pre,
+                                     std::ostream& out,
+                                     ast::CallExpression* expr,
+                                     const sem::Intrinsic* intrinsic) {
+  // HLSL doesn't have a isNormal intrinsic, we need to emulate
+  auto input = intrinsic->Parameters()[0];
+
+  std::string width;
+  if (auto* vec = input.type->As<sem::Vector>()) {
+    width = std::to_string(vec->size());
+  }
+
+  constexpr auto* kExponentMask = "0x7f80000";
+  constexpr auto* kMinNormalExponent = "0x0080000";
+  constexpr auto* kMaxNormalExponent = "0x7f00000";
+
+  auto exponent = generate_name("tint_isnormal_exponent");
+  auto clamped = generate_name("tint_isnormal_clamped");
+
+  std::stringstream ss;
+  ss << "uint" << width << " " << exponent << " = asuint(";
+  if (!EmitExpression(pre, ss, expr->params()[0])) {
+    return false;
+  }
+  ss << ") & " << kExponentMask << ";";
+
+  make_indent(ss << std::endl);
+  ss << "uint" << width << " " << clamped << " = "
+     << "clamp(" << exponent << ", " << kMinNormalExponent << ", "
+     << kMaxNormalExponent << ");";
+
+  make_indent(ss << std::endl);
+  pre << ss.str();
+
+  out << "(" << clamped << " == " << exponent << ")";
   return true;
 }
 

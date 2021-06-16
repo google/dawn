@@ -1,30 +1,26 @@
-SKIP: FAILED
-
-
-fn isNormal_b00ab1() {
-  var res : vec2<bool> = isNormal(vec2<f32>());
+void isNormal_b00ab1() {
+  uint2 tint_isnormal_exponent = asuint(float2(0.0f, 0.0f)) & 0x7f80000;
+  uint2 tint_isnormal_clamped = clamp(tint_isnormal_exponent, 0x0080000, 0x7f00000);
+  bool2 res = (tint_isnormal_clamped == tint_isnormal_exponent);
 }
 
 struct tint_symbol {
-  [[builtin(position)]]
-  value : vec4<f32>;
+  float4 value : SV_Position;
 };
 
-[[stage(vertex)]]
-fn vertex_main() -> tint_symbol {
+tint_symbol vertex_main() {
   isNormal_b00ab1();
-  let tint_symbol_1 : tint_symbol = tint_symbol(vec4<f32>());
+  const tint_symbol tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
   return tint_symbol_1;
 }
 
-[[stage(fragment)]]
-fn fragment_main() {
+void fragment_main() {
   isNormal_b00ab1();
+  return;
 }
 
-[[stage(compute)]]
-fn compute_main() {
+[numthreads(1, 1, 1)]
+void compute_main() {
   isNormal_b00ab1();
+  return;
 }
-
-Failed to generate: error: is_normal not supported in HLSL backend yet

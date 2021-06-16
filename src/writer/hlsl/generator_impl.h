@@ -152,6 +152,16 @@ class GeneratorImpl : public TextGenerator {
                      std::ostream& out,
                      ast::CallExpression* expr,
                      const sem::Intrinsic* intrinsic);
+  /// Handles generating a call to the `isNormal()` intrinsic
+  /// @param pre the preamble of the expression stream
+  /// @param out the output of the expression stream
+  /// @param expr the call expression
+  /// @param intrinsic the semantic information for the intrinsic
+  /// @returns true if the call expression is emitted
+  bool EmitIsNormalCall(std::ostream& pre,
+                        std::ostream& out,
+                        ast::CallExpression* expr,
+                        const sem::Intrinsic* intrinsic);
   /// Handles generating a call to data packing intrinsic
   /// @param pre the preamble of the expression stream
   /// @param out the output of the expression stream
