@@ -69,6 +69,37 @@ namespace dawn_native { namespace metal {
         std::ostringstream errorStream;
         errorStream << "Tint MSL failure:" << std::endl;
 
+        // Remap BindingNumber to BindingIndex in WGSL shader
+        using BindingRemapper = tint::transform::BindingRemapper;
+        using BindingPoint = tint::transform::BindingPoint;
+        BindingRemapper::BindingPoints bindingPoints;
+        BindingRemapper::AccessControls accessControls;
+
+        for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
+            const BindGroupLayoutBase::BindingMap& bindingMap =
+                layout->GetBindGroupLayout(group)->GetBindingMap();
+            for (const auto& it : bindingMap) {
+                BindingNumber bindingNumber = it.first;
+                BindingIndex bindingIndex = it.second;
+
+                const BindingInfo& bindingInfo =
+                    layout->GetBindGroupLayout(group)->GetBindingInfo(bindingIndex);
+
+                if (!(bindingInfo.visibility & StageBit(stage))) {
+                    continue;
+                }
+
+                uint32_t shaderIndex = layout->GetBindingIndexInfo(stage)[group][bindingIndex];
+
+                BindingPoint srcBindingPoint{static_cast<uint32_t>(group),
+                                             static_cast<uint32_t>(bindingNumber)};
+                BindingPoint dstBindingPoint{0, shaderIndex};
+                if (srcBindingPoint != dstBindingPoint) {
+                    bindingPoints.emplace(srcBindingPoint, dstBindingPoint);
+                }
+            }
+        }
+
         tint::transform::Manager transformManager;
         tint::transform::DataMap transformInputs;
 
@@ -88,8 +119,13 @@ namespace dawn_native { namespace metal {
         if (GetDevice()->IsRobustnessEnabled()) {
             transformManager.Add<tint::transform::BoundArrayAccessors>();
         }
+        transformManager.Add<tint::transform::BindingRemapper>();
         transformManager.Add<tint::transform::Renamer>();
         transformManager.Add<tint::transform::Msl>();
+
+        transformInputs.Add<BindingRemapper::Remappings>(std::move(bindingPoints),
+                                                         std::move(accessControls),
+                                                         /* mayCollide */ true);
 
         tint::Program program;
         tint::transform::DataMap transformOutputs;
