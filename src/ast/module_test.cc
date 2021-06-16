@@ -14,6 +14,7 @@
 
 #include "gtest/gtest-spi.h"
 #include "src/ast/test_helper.h"
+#include "src/clone_context.h"
 
 namespace tint {
 namespace ast {
@@ -94,6 +95,53 @@ TEST_F(ModuleTest, Assert_Null_Function) {
         builder.AST().AddFunction(nullptr);
       },
       "internal compiler error");
+}
+
+TEST_F(ModuleTest, CloneOrder) {
+  // Create a program with a function, alias decl and var decl.
+  Program p = [] {
+    ProgramBuilder b;
+    b.Func("F", {}, b.ty.void_(), {});
+    b.Alias("A", b.ty.u32());
+    b.Global("V", b.ty.i32(), ast::StorageClass::kPrivate);
+    return Program(std::move(b));
+  }();
+
+  // Clone the program, using ReplaceAll() to create new module-scope
+  // declarations. We want to test that these are added just before the
+  // declaration that triggered the ReplaceAll().
+  ProgramBuilder cloned;
+  CloneContext ctx(&cloned, &p);
+  ctx.ReplaceAll([&](ast::Function*) -> ast::Function* {
+    ctx.dst->Alias("inserted_before_F", cloned.ty.u32());
+    return nullptr;
+  });
+  ctx.ReplaceAll([&](ast::Alias*) -> ast::Alias* {
+    ctx.dst->Alias("inserted_before_A", cloned.ty.u32());
+    return nullptr;
+  });
+  ctx.ReplaceAll([&](ast::Variable*) -> ast::Variable* {
+    ctx.dst->Alias("inserted_before_V", cloned.ty.u32());
+    return nullptr;
+  });
+  ctx.Clone();
+
+  auto& decls = cloned.AST().GlobalDeclarations();
+  ASSERT_EQ(decls.size(), 6u);
+  EXPECT_TRUE(decls[1]->Is<ast::Function>());
+  EXPECT_TRUE(decls[3]->Is<ast::Alias>());
+  EXPECT_TRUE(decls[5]->Is<ast::Variable>());
+
+  ASSERT_TRUE(decls[0]->Is<ast::Alias>());
+  ASSERT_TRUE(decls[2]->Is<ast::Alias>());
+  ASSERT_TRUE(decls[4]->Is<ast::Alias>());
+
+  ASSERT_EQ(cloned.Symbols().NameFor(decls[0]->As<ast::Alias>()->name()),
+            "inserted_before_F");
+  ASSERT_EQ(cloned.Symbols().NameFor(decls[2]->As<ast::Alias>()->name()),
+            "inserted_before_A");
+  ASSERT_EQ(cloned.Symbols().NameFor(decls[4]->As<ast::Alias>()->name()),
+            "inserted_before_V");
 }
 
 }  // namespace

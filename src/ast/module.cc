@@ -69,6 +69,7 @@ void Module::AddGlobalVariable(ast::Variable* var) {
 
 void Module::AddTypeDecl(ast::TypeDecl* type) {
   TINT_ASSERT(type);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(type, program_id());
   type_decls_.push_back(type);
   global_declarations_.push_back(type);
 }
@@ -87,17 +88,21 @@ Module* Module::Clone(CloneContext* ctx) const {
 }
 
 void Module::Copy(CloneContext* ctx, const Module* src) {
-  for (auto* decl : ctx->Clone(src->global_declarations_)) {
+  ctx->Clone(global_declarations_, src->global_declarations_);
+  for (auto* decl : global_declarations_) {
     if (!decl) {
       TINT_ICE(ctx->dst->Diagnostics()) << "src global declaration was nullptr";
       continue;
     }
-    if (auto* ty = decl->As<ast::TypeDecl>()) {
-      AddTypeDecl(ty);
+    if (auto* type = decl->As<ast::TypeDecl>()) {
+      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(type, program_id());
+      type_decls_.push_back(type);
     } else if (auto* func = decl->As<Function>()) {
-      AddFunction(func);
+      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(func, program_id());
+      functions_.push_back(func);
     } else if (auto* var = decl->As<Variable>()) {
-      AddGlobalVariable(var);
+      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(var, program_id());
+      global_variables_.push_back(var);
     } else {
       TINT_ICE(ctx->dst->Diagnostics()) << "Unknown global declaration type";
     }

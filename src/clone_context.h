@@ -210,7 +210,7 @@ class CloneContext {
     return out;
   }
 
-  /// Clones each of the elements of the vector `v` into the ProgramBuilder
+  /// Clones each of the elements of the vector `v` using the ProgramBuilder
   /// #dst, inserting any additional elements into the list that were registered
   /// with calls to InsertBefore().
   ///
@@ -221,40 +221,53 @@ class CloneContext {
   template <typename T>
   std::vector<T*> Clone(const std::vector<T*>& v) {
     std::vector<T*> out;
-    out.reserve(v.size());
+    Clone(out, v);
+    return out;
+  }
 
-    auto list_transform_it = list_transforms_.find(&v);
+  /// Clones each of the elements of the vector `from` into the vector `to`,
+  /// inserting any additional elements into the list that were registered with
+  /// calls to InsertBefore().
+  ///
+  /// All the elements of the vector `from` must be owned by the Program #src.
+  ///
+  /// @param from the vector to clone
+  /// @param to the cloned result
+  template <typename T>
+  void Clone(std::vector<T*>& to, const std::vector<T*>& from) {
+    to.reserve(from.size());
+
+    auto list_transform_it = list_transforms_.find(&from);
     if (list_transform_it != list_transforms_.end()) {
       const auto& transforms = list_transform_it->second;
       for (auto* o : transforms.insert_front_) {
-        out.emplace_back(CheckedCast<T>(o));
+        to.emplace_back(CheckedCast<T>(o));
       }
-      for (auto& el : v) {
+      for (auto& el : from) {
         auto insert_before_it = transforms.insert_before_.find(el);
         if (insert_before_it != transforms.insert_before_.end()) {
           for (auto insert : insert_before_it->second) {
-            out.emplace_back(CheckedCast<T>(insert));
+            to.emplace_back(CheckedCast<T>(insert));
           }
         }
         if (transforms.remove_.count(el) == 0) {
-          out.emplace_back(Clone(el));
+          to.emplace_back(Clone(el));
         }
         auto insert_after_it = transforms.insert_after_.find(el);
         if (insert_after_it != transforms.insert_after_.end()) {
           for (auto insert : insert_after_it->second) {
-            out.emplace_back(CheckedCast<T>(insert));
+            to.emplace_back(CheckedCast<T>(insert));
           }
         }
       }
       for (auto* o : transforms.insert_back_) {
-        out.emplace_back(CheckedCast<T>(o));
+        to.emplace_back(CheckedCast<T>(o));
       }
     } else {
-      for (auto& el : v) {
-        out.emplace_back(Clone(el));
+      for (auto& el : from) {
+        to.emplace_back(Clone(el));
       }
     }
-    return out;
   }
 
   /// Clones each of the elements of the vector `v` into the ProgramBuilder
