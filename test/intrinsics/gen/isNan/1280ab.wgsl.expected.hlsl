@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: https://github.com/microsoft/DirectXShaderCompiler/issues/3823
 
 
 
