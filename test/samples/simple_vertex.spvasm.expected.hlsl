@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-../src/writer/hlsl/generator_impl.cc:1726 internal compiler error: unhandled storage class out
+../src/writer/hlsl/generator_impl.cc:1547 internal compiler error: unhandled storage class out
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

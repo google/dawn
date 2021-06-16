@@ -206,9 +206,13 @@ TEST_F(HlslSanitizerTest, PromoteArrayInitializerToConstVar) {
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
 
   auto got = result();
-  auto* expect = R"(void main() {
-  const int tint_symbol[4] = {1, 2, 3, 4};
-  int pos = tint_symbol[3];
+  auto* expect = R"(struct tint_array_wrapper {
+  int arr[4];
+};
+
+void main() {
+  const tint_array_wrapper tint_symbol = {{1, 2, 3, 4}};
+  int pos = tint_symbol.arr[3];
   return;
 }
 )";

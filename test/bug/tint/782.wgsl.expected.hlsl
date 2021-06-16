@@ -3,8 +3,12 @@ void unused_entry_point() {
   return;
 }
 
+struct tint_array_wrapper {
+  int arr[2];
+};
+
 void foo() {
-  int tint_symbol[2] = {0, 0};
-  int implict[2] = {0, 0};
+  tint_array_wrapper tint_symbol = {{0, 0}};
+  tint_array_wrapper implict = {{0, 0}};
   implict = tint_symbol;
 }
