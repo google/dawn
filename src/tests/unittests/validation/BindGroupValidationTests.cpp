@@ -544,8 +544,7 @@ TEST_F(BindGroupValidationTest, BufferUsageReadonlySSBO) {
 }
 
 // Check that a resolve buffer with internal storge usage cannot be used as SSBO
-// TODO(hao.x.li@intel.com): Disable until internal storage usage is implemented
-TEST_F(BindGroupValidationTest, DISABLED_BufferUsageQueryResolve) {
+TEST_F(BindGroupValidationTest, BufferUsageQueryResolve) {
     wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
         device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage}});
 

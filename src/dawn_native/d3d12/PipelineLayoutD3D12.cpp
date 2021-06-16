@@ -45,6 +45,7 @@ namespace dawn_native { namespace d3d12 {
                 case wgpu::BufferBindingType::Uniform:
                     return D3D12_ROOT_PARAMETER_TYPE_CBV;
                 case wgpu::BufferBindingType::Storage:
+                case kInternalStorageBufferBinding:
                     return D3D12_ROOT_PARAMETER_TYPE_UAV;
                 case wgpu::BufferBindingType::ReadOnlyStorage:
                     return D3D12_ROOT_PARAMETER_TYPE_SRV;

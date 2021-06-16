@@ -30,6 +30,7 @@ namespace dawn_native { namespace d3d12 {
                         case wgpu::BufferBindingType::Uniform:
                             return BindGroupLayout::DescriptorType::CBV;
                         case wgpu::BufferBindingType::Storage:
+                        case kInternalStorageBufferBinding:
                             return BindGroupLayout::DescriptorType::UAV;
                         case wgpu::BufferBindingType::ReadOnlyStorage:
                             return BindGroupLayout::DescriptorType::SRV;

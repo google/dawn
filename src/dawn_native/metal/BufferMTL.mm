@@ -53,7 +53,8 @@ namespace dawn_native { namespace metal {
         // Metal validation layer requires the size of uniform buffer and storage buffer to be no
         // less than the size of the buffer block defined in shader, and the overall size of the
         // buffer must be aligned to the largest alignment of its members.
-        if (GetUsage() & (wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage)) {
+        if (GetUsage() &
+            (wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage | kInternalStorageBuffer)) {
             if (currentSize >
                 std::numeric_limits<NSUInteger>::max() - kMinUniformOrStorageBufferAlignment) {
                 // Alignment would overlow.

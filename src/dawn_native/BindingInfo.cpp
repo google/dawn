@@ -40,6 +40,7 @@ namespace dawn_native {
                     break;
 
                 case wgpu::BufferBindingType::Storage:
+                case kInternalStorageBufferBinding:
                 case wgpu::BufferBindingType::ReadOnlyStorage:
                     if (buffer.hasDynamicOffset) {
                         ++bindingCounts->dynamicStorageBufferCount;

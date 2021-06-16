@@ -392,6 +392,7 @@ namespace dawn_native { namespace d3d12 {
                             }
                             break;
                         case wgpu::BufferBindingType::Storage:
+                        case kInternalStorageBufferBinding:
                             if (mInCompute) {
                                 commandList->SetComputeRootUnorderedAccessView(parameterIndex,
                                                                                bufferLocation);

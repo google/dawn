@@ -78,7 +78,8 @@ namespace dawn_native { namespace d3d12 {
                                                                  bindingOffsets[bindingIndex]));
                             break;
                         }
-                        case wgpu::BufferBindingType::Storage: {
+                        case wgpu::BufferBindingType::Storage:
+                        case kInternalStorageBufferBinding: {
                             // Since SPIRV-Cross outputs HLSL shaders with RWByteAddressBuffer,
                             // we must use D3D12_BUFFER_UAV_FLAG_RAW when making the
                             // UNORDERED_ACCESS_VIEW_DESC. Using D3D12_BUFFER_UAV_FLAG_RAW requires

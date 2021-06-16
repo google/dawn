@@ -43,6 +43,7 @@ namespace dawn_native { namespace opengl {
                                 uboIndex++;
                                 break;
                             case wgpu::BufferBindingType::Storage:
+                            case kInternalStorageBufferBinding:
                             case wgpu::BufferBindingType::ReadOnlyStorage:
                                 mIndexInfo[group][bindingIndex] = ssboIndex;
                                 ssboIndex++;

@@ -56,6 +56,7 @@ namespace dawn_native { namespace vulkan {
                         }
                         return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
                     case wgpu::BufferBindingType::Storage:
+                    case kInternalStorageBufferBinding:
                     case wgpu::BufferBindingType::ReadOnlyStorage:
                         if (bindingInfo.buffer.hasDynamicOffset) {
                             return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;

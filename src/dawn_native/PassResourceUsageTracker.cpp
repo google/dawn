@@ -80,6 +80,9 @@ namespace dawn_native {
                         case wgpu::BufferBindingType::Storage:
                             BufferUsedAs(buffer, wgpu::BufferUsage::Storage);
                             break;
+                        case kInternalStorageBufferBinding:
+                            BufferUsedAs(buffer, kInternalStorageBuffer);
+                            break;
                         case wgpu::BufferBindingType::ReadOnlyStorage:
                             BufferUsedAs(buffer, kReadOnlyStorageBuffer);
                             break;

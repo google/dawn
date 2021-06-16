@@ -265,6 +265,7 @@ namespace dawn_native { namespace opengl {
                                     target = GL_UNIFORM_BUFFER;
                                     break;
                                 case wgpu::BufferBindingType::Storage:
+                                case kInternalStorageBufferBinding:
                                 case wgpu::BufferBindingType::ReadOnlyStorage:
                                     target = GL_SHADER_STORAGE_BUFFER;
                                     break;

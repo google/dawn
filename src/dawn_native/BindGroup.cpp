@@ -54,6 +54,10 @@ namespace dawn_native {
                     requiredUsage = wgpu::BufferUsage::Storage;
                     maxBindingSize = std::numeric_limits<uint64_t>::max();
                     break;
+                case kInternalStorageBufferBinding:
+                    requiredUsage = kInternalStorageBuffer;
+                    maxBindingSize = std::numeric_limits<uint64_t>::max();
+                    break;
                 case wgpu::BufferBindingType::Undefined:
                     UNREACHABLE();
             }

@@ -138,12 +138,11 @@ namespace dawn_native {
             mUsage |= kReadOnlyStorageBuffer;
         }
 
-        // TODO(crbug.com/dawn/434): This is just a workaround to make QueryResolve buffer pass the
-        // binding group validation when used as an internal resource. Instead the buffer made with
-        // QueryResolve usage would implicitly get StorageInternal usage which is only compatible
-        // with StorageBufferInternal binding type in BGL, not StorageBuffer binding type.
+        // The buffer made with QueryResolve usage implicitly get InternalStorage usage which is
+        // only compatible with InternalStorageBuffer binding type in BGL, not StorageBuffer binding
+        // type.
         if (mUsage & wgpu::BufferUsage::QueryResolve) {
-            mUsage |= wgpu::BufferUsage::Storage;
+            mUsage |= kInternalStorageBuffer;
         }
     }
 

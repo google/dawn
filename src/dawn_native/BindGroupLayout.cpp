@@ -85,9 +85,15 @@ namespace dawn_native {
             if (entry.buffer.type != wgpu::BufferBindingType::Undefined) {
                 bindingMemberCount++;
                 const BufferBindingLayout& buffer = entry.buffer;
-                DAWN_TRY(ValidateBufferBindingType(buffer.type));
 
-                if (buffer.type == wgpu::BufferBindingType::Storage) {
+                // The kInternalStorageBufferBinding is used internally and not a value
+                // in wgpu::BufferBindingType.
+                if (buffer.type != kInternalStorageBufferBinding) {
+                    DAWN_TRY(ValidateBufferBindingType(buffer.type));
+                }
+
+                if (buffer.type == wgpu::BufferBindingType::Storage ||
+                    buffer.type == kInternalStorageBufferBinding) {
                     allowedStages &= ~wgpu::ShaderStage::Vertex;
                 }
 
@@ -96,6 +102,7 @@ namespace dawn_native {
                 if (device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs) &&
                     buffer.hasDynamicOffset &&
                     (buffer.type == wgpu::BufferBindingType::Storage ||
+                     buffer.type == kInternalStorageBufferBinding ||
                      buffer.type == wgpu::BufferBindingType::ReadOnlyStorage)) {
                     return DAWN_VALIDATION_ERROR(
                         "Dynamic storage buffers are disallowed because they aren't secure yet. "

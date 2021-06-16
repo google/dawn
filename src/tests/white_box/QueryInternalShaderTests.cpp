@@ -122,7 +122,7 @@ TEST_P(QueryInternalShaderTests, TimestampComputeShader) {
     wgpu::BufferDescriptor timestampsDesc;
     timestampsDesc.size = kTimestampCount * sizeof(uint64_t);
     timestampsDesc.usage =
-        wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+        wgpu::BufferUsage::QueryResolve | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
     wgpu::Buffer timestampsBuffer = device.CreateBuffer(&timestampsDesc);
 
     auto PrepareExpectedResults = [&](uint32_t first, uint32_t count,

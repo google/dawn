@@ -121,10 +121,33 @@ namespace dawn_native {
                     DAWN_TRY_ASSIGN(store->timestampCS, device->CreateShaderModule(&descriptor));
                 }
 
+                // Create binding group layout
+                std::array<BindGroupLayoutEntry, 3> entries = {};
+                for (uint32_t i = 0; i < entries.size(); i++) {
+                    entries[i].binding = i;
+                    entries[i].visibility = wgpu::ShaderStage::Compute;
+                }
+                entries[0].buffer.type = kInternalStorageBufferBinding;
+                entries[1].buffer.type = wgpu::BufferBindingType::ReadOnlyStorage;
+                entries[2].buffer.type = wgpu::BufferBindingType::Uniform;
+
+                BindGroupLayoutDescriptor bglDesc;
+                bglDesc.entryCount = static_cast<uint32_t>(entries.size());
+                bglDesc.entries = entries.data();
+                Ref<BindGroupLayoutBase> bgl;
+                DAWN_TRY_ASSIGN(bgl, device->CreateBindGroupLayout(&bglDesc));
+
+                // Create pipeline layout
+                PipelineLayoutDescriptor plDesc;
+                plDesc.bindGroupLayoutCount = 1;
+                plDesc.bindGroupLayouts = &bgl.Get();
+                Ref<PipelineLayoutBase> layout;
+                DAWN_TRY_ASSIGN(layout, device->CreatePipelineLayout(&plDesc));
+
                 // Create ComputePipeline.
                 ComputePipelineDescriptor computePipelineDesc = {};
                 // Generate the layout based on shader module.
-                computePipelineDesc.layout = nullptr;
+                computePipelineDesc.layout = layout.Get();
                 computePipelineDesc.compute.module = store->timestampCS.Get();
                 computePipelineDesc.compute.entryPoint = "main";
 
