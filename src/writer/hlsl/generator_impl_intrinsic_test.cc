@@ -217,7 +217,7 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{IntrinsicType::kFaceForward, ParamType::kF32,
                       "faceforward"},
         IntrinsicData{IntrinsicType::kFloor, ParamType::kF32, "floor"},
-        IntrinsicData{IntrinsicType::kFma, ParamType::kF32, "fma"},
+        IntrinsicData{IntrinsicType::kFma, ParamType::kF32, "mad"},
         IntrinsicData{IntrinsicType::kFract, ParamType::kF32, "frac"},
         IntrinsicData{IntrinsicType::kFwidth, ParamType::kF32, "fwidth"},
         IntrinsicData{IntrinsicType::kFwidthCoarse, ParamType::kF32, "fwidth"},

@@ -528,11 +528,9 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
   if (auto* intrinsic = call->Target()->As<sem::Intrinsic>()) {
     if (intrinsic->IsTexture()) {
       return EmitTextureCall(pre, out, expr, intrinsic);
-    }
-    if (intrinsic->Type() == sem::IntrinsicType::kSelect) {
+    } else if (intrinsic->Type() == sem::IntrinsicType::kSelect) {
       return EmitSelectCall(pre, out, expr);
-    }
-    if (intrinsic->Type() == sem::IntrinsicType::kFrexp) {
+    } else if (intrinsic->Type() == sem::IntrinsicType::kFrexp) {
       return EmitFrexpCall(pre, out, expr, intrinsic);
     } else if (intrinsic->Type() == sem::IntrinsicType::kIsNormal) {
       return EmitIsNormalCall(pre, out, expr, intrinsic);
@@ -1177,7 +1175,6 @@ std::string GeneratorImpl::generate_builtin_name(
     case sem::IntrinsicType::kExp:
     case sem::IntrinsicType::kExp2:
     case sem::IntrinsicType::kFloor:
-    case sem::IntrinsicType::kFma:
     case sem::IntrinsicType::kFrexp:
     case sem::IntrinsicType::kLdexp:
     case sem::IntrinsicType::kLength:
@@ -1227,6 +1224,9 @@ std::string GeneratorImpl::generate_builtin_name(
       break;
     case sem::IntrinsicType::kFract:
       out = "frac";
+      break;
+    case sem::IntrinsicType::kFma:
+      out = "mad";
       break;
     case sem::IntrinsicType::kFwidth:
     case sem::IntrinsicType::kFwidthCoarse:

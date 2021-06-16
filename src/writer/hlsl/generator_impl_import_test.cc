@@ -201,7 +201,7 @@ INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest_Import,
     HlslImportData_TripleParamTest,
     testing::Values(HlslImportData{"faceForward", "faceforward"},
-                    HlslImportData{"fma", "fma"},
+                    HlslImportData{"fma", "mad"},
                     HlslImportData{"clamp", "clamp"},
                     HlslImportData{"smoothStep", "smoothstep"}));
 

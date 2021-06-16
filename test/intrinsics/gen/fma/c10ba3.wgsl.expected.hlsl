@@ -1,10 +1,5 @@
-SKIP: FAILED
-
-
-
-Validation Failure:
 void fma_c10ba3() {
-  float res = fma(1.0f, 1.0f, 1.0f);
+  float res = mad(1.0f, 1.0f, 1.0f);
 }
 
 struct tint_symbol {
@@ -27,21 +22,3 @@ void compute_main() {
   fma_c10ba3();
   return;
 }
-
-tint_tqaLcU:2:15: error: no matching function for call to 'fma'
-  float res = fma(1.0f, 1.0f, 1.0f);
-              ^~~
-note: candidate function not viable: no known conversion from 'float' to 'double' for 1st argument
-
-
-tint_tqaLcU:2:15: error: no matching function for call to 'fma'
-  float res = fma(1.0f, 1.0f, 1.0f);
-              ^~~
-note: candidate function not viable: no known conversion from 'float' to 'double' for 1st argument
-
-
-tint_tqaLcU:2:15: error: no matching function for call to 'fma'
-  float res = fma(1.0f, 1.0f, 1.0f);
-              ^~~
-note: candidate function not viable: no known conversion from 'float' to 'double' for 1st argument
-
