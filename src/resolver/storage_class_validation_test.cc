@@ -152,7 +152,24 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferNoError_Aliases) {
   ASSERT_TRUE(r()->Resolve());
 }
 
-///
+TEST_F(ResolverStorageClassValidationTest, UniformBuffer_Struct_Runtime) {
+  // [[block]] struct S { m:  array<f32>; };
+  // [[set(0), binding(0)]] var<uniform, > svar : S;
+
+  auto* s = Structure(Source{{12, 34}}, "S", {Member("m", ty.array<i32>())},
+                      {create<ast::StructBlockDecoration>()});
+
+  Global(Source{{56, 78}}, "svar", ty.Of(s), ast::StorageClass::kUniform,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
+
+  ASSERT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "56:78 error: structure containing a runtime sized array cannot be "
+            "used as a uniform buffer\n12:34 note: structure is declared here");
+}
 
 TEST_F(ResolverStorageClassValidationTest, UniformBufferBool) {
   // var<uniform> g : bool;
