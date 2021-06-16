@@ -1,11 +1,3 @@
-bug/tint/757.wgsl:3:5 warning: use of deprecated language feature: [[offset]] has been replaced with [[size]] and [[align]]
-  [[offset(0)]] level : i32;
-    ^^^^^^
-
-bug/tint/757.wgsl:10:5 warning: use of deprecated language feature: [[offset]] has been replaced with [[size]] and [[align]]
-  [[offset(0)]] values : [[stride(4)]] array<f32>;
-    ^^^^^^
-
 [[block]]
 struct Constants {
   level : i32;

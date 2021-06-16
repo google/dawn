@@ -40,8 +40,6 @@ set(TINT_LIB_SRCS
   ../include/tint/tint.h
   ast/access.cc
   ast/access.h
-  ast/access_decoration.cc
-  ast/access_decoration.h
   ast/alias.cc
   ast/alias.h
   ast/array_accessor_expression.cc
@@ -513,7 +511,6 @@ endif()
 
 if(${TINT_BUILD_TESTS})
   set(TINT_TEST_SRCS
-    ast/access_decoration_test.cc
     ast/alias_test.cc
     ast/array_accessor_expression_test.cc
     ast/array_test.cc

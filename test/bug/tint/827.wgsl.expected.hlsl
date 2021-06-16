@@ -1,7 +1,3 @@
-bug/tint/827.wgsl:8:26 warning: use of deprecated language feature: declare access with var<storage, read_write> instead of using [[access]] decoration
-[[group(0), binding(1)]] var<storage> result : [[access(read_write)]] Result;
-                         ^^^
-
 static const uint width = 128u;
 Texture2D tex : register(t0, space0);
 RWByteAddressBuffer result : register(u1, space0);

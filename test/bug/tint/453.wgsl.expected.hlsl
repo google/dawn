@@ -1,11 +1,3 @@
-bug/tint/453.wgsl:1:79 warning: use of deprecated language feature: access control is expected as last parameter of storage textures
-[[group(0), binding(0)]] var Src : [[access(read)]] texture_storage_2d<r32uint>;
-                                                                              ^
-
-bug/tint/453.wgsl:2:80 warning: use of deprecated language feature: access control is expected as last parameter of storage textures
-[[group(0), binding(1)]] var Dst : [[access(write)]] texture_storage_2d<r32uint>;
-                                                                               ^
-
 Texture2D<uint4> Src : register(t0, space0);
 RWTexture2D<uint4> Dst : register(u1, space0);
 

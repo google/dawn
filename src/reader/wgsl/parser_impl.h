@@ -208,20 +208,14 @@ class ParserImpl {
     TypedIdentifier(const TypedIdentifier& other);
     /// Constructor
     /// @param type_in parsed type
-    /// @param access_in parsed access
     /// @param name_in parsed identifier
     /// @param source_in source to the identifier
-    TypedIdentifier(ast::Type* type_in,
-                    ast::Access access_in,
-                    std::string name_in,
-                    Source source_in);
+    TypedIdentifier(ast::Type* type_in, std::string name_in, Source source_in);
     /// Destructor
     ~TypedIdentifier();
 
     /// Parsed type. May be nullptr for inferred types.
     ast::Type* type = nullptr;
-    /// The access control. TODO(crbug.com/tint/846): Remove
-    ast::Access access = ast::Access::kUndefined;
     /// Parsed identifier.
     std::string name;
     /// Source to the identifier.
@@ -456,10 +450,8 @@ class ParserImpl {
   /// @returns the parsed function, nullptr otherwise
   Maybe<ast::Function*> function_decl(ast::DecorationList& decos);
   /// Parses a `texture_sampler_types` grammar element
-  /// TODO(crbug.com/tint/864): Remove decos parameter
-  /// @param decos the list of decorations for the type declaration.
   /// @returns the parsed Type or nullptr if none matched.
-  Maybe<ast::Type*> texture_sampler_types(ast::DecorationList& decos);
+  Maybe<ast::Type*> texture_sampler_types();
   /// Parses a `sampler_type` grammar element
   /// @returns the parsed Type or nullptr if none matched.
   Maybe<ast::Type*> sampler_type();

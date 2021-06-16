@@ -145,7 +145,6 @@ tint_unittests_source_set("tint_unittests_core_sem_src") {
 
 tint_unittests_source_set("tint_unittests_core_src") {
   sources = [
-    "../src/ast/access_decoration_test.cc",
     "../src/ast/alias_test.cc",
     "../src/ast/array_accessor_expression_test.cc",
     "../src/ast/array_test.cc",

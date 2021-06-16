@@ -14,7 +14,6 @@
 
 #include "src/reader/wgsl/parser_impl.h"
 
-#include "src/ast/access_decoration.h"
 #include "src/ast/array.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/bitcast_expression.h"
@@ -107,14 +106,12 @@ ast::Builtin ident_to_builtin(const std::string& str) {
   return ast::Builtin::kNone;
 }
 
-const char kAccessDecoration[] = "access";
 const char kBindingDecoration[] = "binding";
 const char kBlockDecoration[] = "block";
 const char kBuiltinDecoration[] = "builtin";
 const char kGroupDecoration[] = "group";
 const char kLocationDecoration[] = "location";
 const char kOverrideDecoration[] = "override";
-const char kOffsetDecoration[] = "offset";  // DEPRECATED
 const char kSizeDecoration[] = "size";
 const char kAlignDecoration[] = "align";
 const char kSetDecoration[] = "set";
@@ -127,11 +124,10 @@ bool is_decoration(Token t) {
     return false;
 
   auto s = t.to_str();
-  return s == kAccessDecoration || s == kAlignDecoration ||
-         s == kBindingDecoration || s == kBlockDecoration ||
-         s == kBuiltinDecoration || s == kGroupDecoration ||
-         s == kLocationDecoration || s == kOverrideDecoration ||
-         s == kOffsetDecoration || s == kSetDecoration ||
+  return s == kAlignDecoration || s == kBindingDecoration ||
+         s == kBlockDecoration || s == kBuiltinDecoration ||
+         s == kGroupDecoration || s == kLocationDecoration ||
+         s == kOverrideDecoration || s == kSetDecoration ||
          s == kSizeDecoration || s == kStageDecoration ||
          s == kStrideDecoration || s == kWorkgroupSizeDecoration;
 }
@@ -204,13 +200,9 @@ ParserImpl::TypedIdentifier::TypedIdentifier() = default;
 ParserImpl::TypedIdentifier::TypedIdentifier(const TypedIdentifier&) = default;
 
 ParserImpl::TypedIdentifier::TypedIdentifier(ast::Type* type_in,
-                                             ast::Access access_in,
                                              std::string name_in,
                                              Source source_in)
-    : type(type_in),
-      access(access_in),
-      name(std::move(name_in)),
-      source(std::move(source_in)) {}
+    : type(type_in), name(std::move(name_in)), source(std::move(source_in)) {}
 
 ParserImpl::TypedIdentifier::~TypedIdentifier() = default;
 
@@ -557,19 +549,7 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl(bool allow_inferred) {
   if (decl.errored)
     return Failure::kErrored;
 
-  auto access = vq.access;
-
-  if (access == ast::Access::kUndefined &&
-      decl->access != ast::Access::kUndefined) {
-    // TODO(crbug.com/tint/846): Remove this
-    access = decl->access;
-    std::stringstream msg;
-    msg << "declare access with var<" << vq.storage_class << ", " << access
-        << "> instead of using [[access]] decoration";
-    deprecated(source, msg.str());
-  }
-
-  return VarDeclInfo{decl->source, decl->name, vq.storage_class, access,
+  return VarDeclInfo{decl->source, decl->name, vq.storage_class, vq.access,
                      decl->type};
 }
 
@@ -580,8 +560,7 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl(bool allow_inferred) {
 //  | multisampled_texture_type LESS_THAN type_decl GREATER_THAN
 //  | storage_texture_type LESS_THAN image_storage_type
 //                         COMMA access GREATER_THAN
-Maybe<ast::Type*> ParserImpl::texture_sampler_types(
-    ast::DecorationList& decos) {
+Maybe<ast::Type*> ParserImpl::texture_sampler_types() {
   auto type = sampler_type();
   if (type.matched)
     return type;
@@ -630,21 +609,8 @@ Maybe<ast::Type*> ParserImpl::texture_sampler_types(
         return Failure::kErrored;
       }
 
-      if (!match(Token::Type::kComma)) {
-        // TODO(crbug.com/tint/846): Remove this, along with the decos parameter
-        auto access_decos = take_decorations<ast::AccessDecoration>(decos);
-        if (access_decos.size() > 1) {
-          return add_error(access_decos[1]->source(),
-                           "multiple access decorations not allowed");
-        }
-        if (access_decos.size() == 0) {
-          return add_error(source_range, "expected access control");
-        }
-
-        deprecated(
-            peek().source(),
-            "access control is expected as last parameter of storage textures");
-        return std::make_pair(format.value, access_decos[0]->value());
+      if (!expect("access control", Token::Type::kComma)) {
+        return Failure::kErrored;
       }
 
       auto access = expect_access("access control");
@@ -926,8 +892,7 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
     return Failure::kErrored;
 
   if (allow_inferred && !peek().Is(Token::Type::kColon)) {
-    return TypedIdentifier{nullptr, ast::Access::kUndefined, ident.value,
-                           ident.source};
+    return TypedIdentifier{nullptr, ident.value, ident.source};
   }
 
   if (!expect(use, Token::Type::kColon))
@@ -944,18 +909,10 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
   if (!type.matched)
     return add_error(t.source(), "invalid type", use);
 
-  auto access_decos = take_decorations<ast::AccessDecoration>(decos.value);
-
   if (!expect_decorations_consumed(decos.value))
     return Failure::kErrored;
 
-  if (access_decos.size() > 1)
-    return add_error(ident.source, "multiple access decorations not allowed");
-
-  auto access =
-      access_decos.empty() ? ast::Access::kUndefined : access_decos[0]->value();
-
-  return TypedIdentifier{type.value, access, ident.value, ident.source};
+  return TypedIdentifier{type.value, ident.value, ident.source};
 }
 
 Expect<ast::Access> ParserImpl::expect_access(const std::string& use) {
@@ -1120,7 +1077,7 @@ Maybe<ast::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
     return expect_type_decl_matrix(t);
   }
 
-  auto texture_or_sampler = texture_sampler_types(decos);
+  auto texture_or_sampler = texture_sampler_types();
   if (texture_or_sampler.errored)
     return Failure::kErrored;
   if (texture_or_sampler.matched)
@@ -2991,16 +2948,6 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
   }
 
   auto s = t.to_str();
-  if (s == kAccessDecoration) {
-    const char* use = "access decoration";
-    return expect_paren_block(use, [&]() -> Result {
-      auto val = expect_access("access control");
-      if (val.errored)
-        return Failure::kErrored;
-
-      return create<ast::AccessDecoration>(t.source(), val.value);
-    });
-  }
 
   if (s == kLocationDecoration) {
     const char* use = "location decoration";
@@ -3105,20 +3052,6 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
         return Failure::kErrored;
 
       return create<ast::StrideDecoration>(t.source(), val.value);
-    });
-  }
-
-  if (s == kOffsetDecoration) {
-    deprecated(t.source(),
-               "[[offset]] has been replaced with [[size]] and [[align]]");
-
-    const char* use = "offset decoration";
-    return expect_paren_block(use, [&]() -> Result {
-      auto val = expect_positive_sint(use);
-      if (val.errored)
-        return Failure::kErrored;
-
-      return create<ast::StructMemberOffsetDecoration>(t.source(), val.value);
     });
   }
 

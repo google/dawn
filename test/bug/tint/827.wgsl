@@ -5,7 +5,7 @@
 let width : u32 = 128u;
 
 [[group(0), binding(0)]] var tex : texture_depth_2d;
-[[group(0), binding(1)]] var<storage> result : [[access(read_write)]] Result;
+[[group(0), binding(1)]] var<storage, read_write> result : Result;
 
 [[stage(compute)]] fn main(
     [[builtin(global_invocation_id)]] GlobalInvocationId : vec3<u32>

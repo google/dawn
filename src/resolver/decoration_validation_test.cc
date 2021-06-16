@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/access_decoration.h"
 #include "src/ast/disable_validation_decoration.h"
 #include "src/ast/override_decoration.h"
 #include "src/ast/return_statement.h"

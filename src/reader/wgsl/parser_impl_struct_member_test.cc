@@ -42,33 +42,6 @@ TEST_F(ParserImplTest, StructMember_Parses) {
   EXPECT_EQ(m->type()->source().range, (Source::Range{{1u, 5u}, {1u, 8u}}));
 }
 
-TEST_F(ParserImplTest, StructMember_ParsesWithOffsetDecoration_DEPRECATED) {
-  auto p = parser("[[offset(2)]] a : i32;");
-
-  auto& builder = p->builder();
-
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_TRUE(decos.matched);
-  EXPECT_EQ(decos.value.size(), 1u);
-
-  auto m = p->expect_struct_member(decos.value);
-  ASSERT_FALSE(p->has_error());
-  ASSERT_FALSE(m.errored);
-  ASSERT_NE(m.value, nullptr);
-
-  EXPECT_EQ(m->symbol(), builder.Symbols().Get("a"));
-  EXPECT_TRUE(m->type()->Is<ast::I32>());
-  EXPECT_EQ(m->decorations().size(), 1u);
-  EXPECT_TRUE(m->decorations()[0]->Is<ast::StructMemberOffsetDecoration>());
-  EXPECT_EQ(
-      m->decorations()[0]->As<ast::StructMemberOffsetDecoration>()->offset(),
-      2u);
-
-  EXPECT_EQ(m->source().range, (Source::Range{{1u, 15u}, {1u, 16u}}));
-  EXPECT_EQ(m->type()->source().range, (Source::Range{{1u, 19u}, {1u, 22u}}));
-}
-
 TEST_F(ParserImplTest, StructMember_ParsesWithAlignDecoration) {
   auto p = parser("[[align(2)]] a : i32;");
 

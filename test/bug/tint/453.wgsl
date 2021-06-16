@@ -1,5 +1,5 @@
-[[group(0), binding(0)]] var Src : [[access(read)]] texture_storage_2d<r32uint>;
-[[group(0), binding(1)]] var Dst : [[access(write)]] texture_storage_2d<r32uint>;
+[[group(0), binding(0)]] var Src : texture_storage_2d<r32uint, read>;
+[[group(0), binding(1)]] var Dst : texture_storage_2d<r32uint, write>;
 
 [[stage(compute)]]
 fn main() {
