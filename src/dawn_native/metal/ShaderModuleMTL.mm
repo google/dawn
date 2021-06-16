@@ -105,6 +105,7 @@ namespace dawn_native { namespace metal {
 
         if (stage == SingleShaderStage::Vertex &&
             GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling)) {
+            transformManager.Add<tint::transform::VertexPulling>();
             AddVertexPullingTransformConfig(*vertexState, entryPointName, kPullingBufferBindingSet,
                                             &transformInputs);
 
