@@ -14,6 +14,8 @@
 
 #include "src/writer/hlsl/generator_impl.h"
 
+#include <algorithm>
+#include <iomanip>
 #include <utility>
 #include <vector>
 
@@ -1343,7 +1345,11 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
       type->is_scalar_vector() && expr->values().size() == 1 &&
       TypeOf(expr->values()[0])->is_scalar();
 
-  if (brackets) {
+  auto it = structure_builders_.find(As<sem::Struct>(type));
+  if (it != structure_builders_.end()) {
+    out << it->second << "(";
+    brackets = false;
+  } else if (brackets) {
     out << "{";
   } else {
     if (!EmitType(out, type, ast::StorageClass::kNone, ast::Access::kReadWrite,
@@ -1904,7 +1910,13 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
       }
     }
   } else if (auto* str = type->As<sem::Struct>()) {
-    out << "{";
+    auto it = structure_builders_.find(str);
+    if (it != structure_builders_.end()) {
+      out << it->second << "(";
+    } else {
+      out << "{";
+    }
+
     bool first = true;
     for (auto* member : str->Members()) {
       if (!first) {
@@ -1915,7 +1927,8 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
         return false;
       }
     }
-    out << "}";
+
+    out << (it != structure_builders_.end() ? ")" : "}");
   } else if (auto* arr = type->As<sem::Array>()) {
     out << "{";
     auto* elem = arr->ElemType();
@@ -2244,23 +2257,75 @@ bool GeneratorImpl::EmitStructType(std::ostream& out, const sem::Struct* str) {
     return true;
   }
 
-  auto name = builder_.Symbols().NameFor(str->Declaration()->name());
-  out << "struct " << name << " {" << std::endl;
+  bool is_host_shareable = str->IsHostShareable();
+  uint32_t hlsl_offset = 0;
+
+  // Emits a `/* 0xnnnn */` byte offset comment for a struct member.
+  auto add_byte_offset_comment = [&](uint32_t offset) {
+    std::ios_base::fmtflags saved_flag_state(out.flags());
+    out << "/* 0x" << std::hex << std::setfill('0') << std::setw(4) << offset
+        << " */ ";
+    out.flags(saved_flag_state);
+  };
+
+  uint32_t pad_count = 0;
+  auto add_padding = [&](uint32_t size) {
+    if (size & 3) {
+      TINT_ICE(builder_.Diagnostics())
+          << "attempting to pad field with " << size
+          << " bytes, but we require a multiple of 4 bytes";
+      return false;
+    }
+    std::string name;
+    do {
+      name = "tint_pad_" + std::to_string(pad_count++);
+    } while (str->FindMember(builder_.Symbols().Get(name)));
+
+    out << "int " << name << "[" << (size / 4) << "];" << std::endl;
+    return true;
+  };
+
+  auto struct_name = builder_.Symbols().NameFor(str->Declaration()->name());
+  out << "struct " << struct_name << " {" << std::endl;
 
   increment_indent();
   for (auto* mem : str->Members()) {
     make_indent(out);
-    // TODO(dsinclair): Handle [[offset]] annotation on structs
-    // https://bugs.chromium.org/p/tint/issues/detail?id=184
 
-    auto mem_name = builder_.Symbols().NameFor(mem->Declaration()->symbol());
-    if (!EmitType(out, mem->Type(), ast::StorageClass::kNone,
-                  ast::Access::kReadWrite, mem_name)) {
+    auto name = builder_.Symbols().NameFor(mem->Declaration()->symbol());
+    auto wgsl_offset = mem->Offset();
+
+    if (is_host_shareable) {
+      if (wgsl_offset < hlsl_offset) {
+        // Unimplementable layout
+        TINT_ICE(diagnostics_)
+            << "Structure member WGSL offset (" << wgsl_offset
+            << ") is behind HLSL offset (" << hlsl_offset << ")";
+        return false;
+      }
+
+      // Generate padding if required
+      if (auto padding = wgsl_offset - hlsl_offset) {
+        add_byte_offset_comment(hlsl_offset);
+        if (!add_padding(padding)) {
+          return false;
+        }
+        hlsl_offset += padding;
+        make_indent(out);
+      }
+
+      add_byte_offset_comment(hlsl_offset);
+    }
+
+    auto* ty = mem->Type();
+
+    if (!EmitType(out, ty, ast::StorageClass::kNone, ast::Access::kReadWrite,
+                  name)) {
       return false;
     }
     // Array member name will be output with the type
-    if (!mem->Type()->Is<sem::Array>()) {
-      out << " " << mem_name;
+    if (!ty->Is<sem::Array>()) {
+      out << " " << name;
     }
 
     for (auto* deco : mem->Declaration()->decorations()) {
@@ -2295,11 +2360,83 @@ bool GeneratorImpl::EmitStructType(std::ostream& out, const sem::Struct* str) {
     }
 
     out << ";" << std::endl;
+
+    if (is_host_shareable) {
+      // Calculate new HLSL offset
+      auto size_align = HlslPackedTypeSizeAndAlign(ty);
+      if (hlsl_offset % size_align.align) {
+        TINT_ICE(diagnostics_)
+            << "Misaligned HLSL structure member "
+            << ty->FriendlyName(builder_.Symbols()) << " " << name;
+        return false;
+      }
+      hlsl_offset += size_align.size;
+    }
   }
+
+  if (is_host_shareable && str->Size() != hlsl_offset) {
+    make_indent(out);
+    add_byte_offset_comment(hlsl_offset);
+    if (!add_padding(str->Size() - hlsl_offset)) {
+      return false;
+    }
+  }
+
   decrement_indent();
   make_indent(out);
 
   out << "};" << std::endl;
+
+  // If the structure has padding members, create a helper function for building
+  // the structure.
+  if (pad_count) {
+    auto builder_name = generate_name("make_" + struct_name);
+
+    out << std::endl;
+    out << struct_name << " " << builder_name << "(";
+    uint32_t idx = 0;
+    for (auto* mem : str->Members()) {
+      if (idx > 0) {
+        out << ",";
+        make_indent(out << std::endl);
+        out << std::string(struct_name.length() + builder_name.length() + 2,
+                           ' ');
+      }
+      auto name = "param_" + std::to_string(idx++);
+      auto* ty = mem->Type();
+      if (!EmitType(out, ty, ast::StorageClass::kNone, ast::Access::kReadWrite,
+                    name)) {
+        return false;
+      }
+
+      // Array member name will be output with the type
+      if (!ty->Is<sem::Array>()) {
+        out << " " << name;
+      }
+    }
+    out << ") {";
+    increment_indent();
+    make_indent(out << std::endl);
+
+    out << struct_name << " output;";
+    make_indent(out << std::endl);
+    idx = 0;
+    for (auto* mem : str->Members()) {
+      out << "output."
+          << builder_.Symbols().NameFor(mem->Declaration()->symbol()) << " = "
+          << "param_" + std::to_string(idx++) << ";";
+      make_indent(out << std::endl);
+    }
+    out << "return output;";
+
+    decrement_indent();
+    make_indent(out << std::endl);
+    out << "}";
+
+    make_indent(out << std::endl);
+
+    structure_builders_[str] = builder_name;
+  }
 
   return true;
 }
@@ -2467,6 +2604,63 @@ bool GeneratorImpl::EmitBlockBraces(std::ostream& out,
   make_indent(out);
   out << "}";
   return true;
+}
+
+// https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-packing-rules
+// TODO(crbug.com/tint/898): We need CTS and / or Dawn e2e tests for this logic.
+GeneratorImpl::SizeAndAlign GeneratorImpl::HlslPackedTypeSizeAndAlign(
+    const sem::Type* ty) {
+  if (ty->IsAnyOf<sem::U32, sem::I32, sem::F32>()) {
+    return {4, 4};
+  }
+
+  if (auto* vec = ty->As<sem::Vector>()) {
+    auto num_els = vec->size();
+    auto* el_ty = vec->type();
+    if (el_ty->IsAnyOf<sem::U32, sem::I32, sem::F32>()) {
+      return SizeAndAlign{num_els * 4, 4};
+    }
+  }
+
+  if (auto* mat = ty->As<sem::Matrix>()) {
+    auto cols = mat->columns();
+    auto rows = mat->rows();
+    auto* el_ty = mat->type();
+    if (el_ty->IsAnyOf<sem::U32, sem::I32, sem::F32>()) {
+      static constexpr SizeAndAlign table[] = {
+          /* float2x2 */ {16, 8},
+          /* float2x3 */ {32, 16},
+          /* float2x4 */ {32, 16},
+          /* float3x2 */ {24, 8},
+          /* float3x3 */ {48, 16},
+          /* float3x4 */ {48, 16},
+          /* float4x2 */ {32, 8},
+          /* float4x3 */ {64, 16},
+          /* float4x4 */ {64, 16},
+      };
+      if (cols >= 2 && cols <= 4 && rows >= 2 && rows <= 4) {
+        return table[(3 * (cols - 2)) + (rows - 2)];
+      }
+    }
+  }
+
+  if (auto* arr = ty->As<sem::Array>()) {
+    auto el_size_align = HlslPackedTypeSizeAndAlign(arr->ElemType());
+    if (!arr->IsStrideImplicit()) {
+      TINT_ICE(diagnostics_) << "arrays with explicit strides should have "
+                                "removed with the PadArrayElements transform";
+      return {};
+    }
+    auto num_els = std::max<uint32_t>(arr->Count(), 1);
+    return SizeAndAlign{el_size_align.size * num_els, el_size_align.align};
+  }
+
+  if (auto* str = ty->As<sem::Struct>()) {
+    return SizeAndAlign{str->Size(), str->Align()};
+  }
+
+  TINT_UNREACHABLE(diagnostics_) << "Unhandled type " << ty->TypeInfo().name;
+  return {};
 }
 
 }  // namespace hlsl

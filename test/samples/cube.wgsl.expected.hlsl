@@ -1,5 +1,5 @@
 struct Uniforms {
-  float4x4 modelViewProjectionMatrix;
+  /* 0x0000 */ float4x4 modelViewProjectionMatrix;
 };
 
 ConstantBuffer<Uniforms> uniforms : register(b0, space0);

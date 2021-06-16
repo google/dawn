@@ -426,8 +426,19 @@ class GeneratorImpl : public TextGenerator {
     return EmitBlockBraces(out, "", std::forward<F>(cb));
   }
 
+  // A pair of byte size and alignment `uint32_t`s.
+  struct SizeAndAlign {
+    uint32_t size;
+    uint32_t align;
+  };
+
+  /// @returns the HLSL packed type size and alignment in bytes for the given
+  /// type.
+  SizeAndAlign HlslPackedTypeSizeAndAlign(const sem::Type* ty);
+
   ProgramBuilder builder_;
   std::function<bool(std::ostream& out)> emit_continuing_;
+  std::unordered_map<const sem::Struct*, std::string> structure_builders_;
 };
 
 }  // namespace hlsl

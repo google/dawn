@@ -93,16 +93,29 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Array_WithoutName) {
   EXPECT_EQ(result(), "bool[4]");
 }
 
-TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_RuntimeArray) {
-  auto* arr = ty.array<bool>();
-  Global("G", arr, ast::StorageClass::kPrivate);
+TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayWithStride) {
+  auto* s = Structure("s", {Member("arr", ty.array<f32, 4>(64))},
+                      {create<ast::StructBlockDecoration>()});
+  auto* ubo = Global("ubo", ty.Of(s), ast::StorageClass::kUniform,
+                     ast::DecorationList{
+                         create<ast::GroupDecoration>(1),
+                         create<ast::BindingDecoration>(1),
+                     });
+  WrapInFunction(MemberAccessor(ubo, "arr"));
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone,
-                           ast::Access::kReadWrite, "ary"))
-      << gen.error();
-  EXPECT_EQ(result(), "bool ary[]");
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr(R"(struct tint_padded_array_element {
+  /* 0x0000 */ float el;
+  /* 0x0004 */ int tint_pad_0[15];
+};)"));
+  EXPECT_THAT(result(), HasSubstr(R"(struct tint_array_wrapper {
+  /* 0x0000 */ tint_padded_array_element arr[4];
+};)"));
+  EXPECT_THAT(result(), HasSubstr(R"(struct s {
+  /* 0x0000 */ tint_array_wrapper arr;
+};)"));
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Bool) {
@@ -219,31 +232,427 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
   EXPECT_EQ(result(), "S");
 }
 
-/// TODO(bclayton): Enable this, fix it, add tests for vector, matrix, array and
-/// nested structures.
-TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
-  auto* s = Structure(
-      "S", {
-               Member("a", ty.i32(), {MemberSize(32)}),
-               Member("b", ty.f32()),
-               Member("c", ty.f32(), {MemberAlign(128), MemberSize(128)}),
-           });
-  Global("g", ty.Of(s), ast::StorageClass::kPrivate);
+TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_Layout_NonComposites) {
+  auto* s =
+      Structure("S",
+                {
+                    Member("a", ty.i32(), {MemberSize(32)}),
+                    Member("b", ty.f32(), {MemberAlign(128), MemberSize(128)}),
+                    Member("c", ty.vec2<f32>()),
+                    Member("d", ty.u32()),
+                    Member("e", ty.vec3<f32>()),
+                    Member("f", ty.u32()),
+                    Member("g", ty.vec4<f32>()),
+                    Member("h", ty.u32()),
+                    Member("i", ty.mat2x2<f32>()),
+                    Member("j", ty.u32()),
+                    Member("k", ty.mat2x3<f32>()),
+                    Member("l", ty.u32()),
+                    Member("m", ty.mat2x4<f32>()),
+                    Member("n", ty.u32()),
+                    Member("o", ty.mat3x2<f32>()),
+                    Member("p", ty.u32()),
+                    Member("q", ty.mat3x3<f32>()),
+                    Member("r", ty.u32()),
+                    Member("s", ty.mat3x4<f32>()),
+                    Member("t", ty.u32()),
+                    Member("u", ty.mat4x2<f32>()),
+                    Member("v", ty.u32()),
+                    Member("w", ty.mat4x3<f32>()),
+                    Member("x", ty.u32()),
+                    Member("y", ty.mat4x4<f32>()),
+                    Member("z", ty.f32()),
+                },
+                {create<ast::StructBlockDecoration>()});
+
+  Global("G", ty.Of(s), ast::StorageClass::kUniform,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
 
   GeneratorImpl& gen = Build();
 
   auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
-  ASSERT_TRUE(gen.EmitType(out, sem_s, ast::StorageClass::kNone,
-                           ast::Access::kReadWrite, ""))
-      << gen.error();
-  EXPECT_EQ(gen.result(), R"(struct S {
-  int a;
-  int8_t pad_0[28];
-  float b;
-  int8_t pad_1[92];
-  float c;
-  int8_t pad_2[124];
+  ASSERT_TRUE(gen.EmitStructType(out, sem_s)) << gen.error();
+
+  auto* expect = R"(struct S {
+  /* 0x0000 */ int a;
+  /* 0x0004 */ int tint_pad_0[31];
+  /* 0x0080 */ float b;
+  /* 0x0084 */ int tint_pad_1[31];
+  /* 0x0100 */ float2 c;
+  /* 0x0108 */ uint d;
+  /* 0x010c */ int tint_pad_2[1];
+  /* 0x0110 */ float3 e;
+  /* 0x011c */ uint f;
+  /* 0x0120 */ float4 g;
+  /* 0x0130 */ uint h;
+  /* 0x0134 */ int tint_pad_3[1];
+  /* 0x0138 */ float2x2 i;
+  /* 0x0148 */ uint j;
+  /* 0x014c */ int tint_pad_4[1];
+  /* 0x0150 */ float2x3 k;
+  /* 0x0170 */ uint l;
+  /* 0x0174 */ int tint_pad_5[3];
+  /* 0x0180 */ float2x4 m;
+  /* 0x01a0 */ uint n;
+  /* 0x01a4 */ int tint_pad_6[1];
+  /* 0x01a8 */ float3x2 o;
+  /* 0x01c0 */ uint p;
+  /* 0x01c4 */ int tint_pad_7[3];
+  /* 0x01d0 */ float3x3 q;
+  /* 0x0200 */ uint r;
+  /* 0x0204 */ int tint_pad_8[3];
+  /* 0x0210 */ float3x4 s;
+  /* 0x0240 */ uint t;
+  /* 0x0244 */ int tint_pad_9[1];
+  /* 0x0248 */ float4x2 u;
+  /* 0x0268 */ uint v;
+  /* 0x026c */ int tint_pad_10[1];
+  /* 0x0270 */ float4x3 w;
+  /* 0x02b0 */ uint x;
+  /* 0x02b4 */ int tint_pad_11[3];
+  /* 0x02c0 */ float4x4 y;
+  /* 0x0300 */ float z;
+  /* 0x0304 */ int tint_pad_12[31];
 };
+
+S make_S(int param_0,
+         float param_1,
+         float2 param_2,
+         uint param_3,
+         float3 param_4,
+         uint param_5,
+         float4 param_6,
+         uint param_7,
+         float2x2 param_8,
+         uint param_9,
+         float2x3 param_10,
+         uint param_11,
+         float2x4 param_12,
+         uint param_13,
+         float3x2 param_14,
+         uint param_15,
+         float3x3 param_16,
+         uint param_17,
+         float3x4 param_18,
+         uint param_19,
+         float4x2 param_20,
+         uint param_21,
+         float4x3 param_22,
+         uint param_23,
+         float4x4 param_24,
+         float param_25) {
+  S output;
+  output.a = param_0;
+  output.b = param_1;
+  output.c = param_2;
+  output.d = param_3;
+  output.e = param_4;
+  output.f = param_5;
+  output.g = param_6;
+  output.h = param_7;
+  output.i = param_8;
+  output.j = param_9;
+  output.k = param_10;
+  output.l = param_11;
+  output.m = param_12;
+  output.n = param_13;
+  output.o = param_14;
+  output.p = param_15;
+  output.q = param_16;
+  output.r = param_17;
+  output.s = param_18;
+  output.t = param_19;
+  output.u = param_20;
+  output.v = param_21;
+  output.w = param_22;
+  output.x = param_23;
+  output.y = param_24;
+  output.z = param_25;
+  return output;
+}
+)";
+
+  EXPECT_EQ(result(), expect);
+}
+
+TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_Layout_Structures) {
+  // inner_x: size(1024), align(512)
+  auto* inner_x =
+      Structure("inner_x", {
+                               Member("a", ty.i32()),
+                               Member("b", ty.f32(), {MemberAlign(512)}),
+                           });
+
+  // inner_y: size(516), align(4)
+  auto* inner_y =
+      Structure("inner_y", {
+                               Member("a", ty.i32(), {MemberSize(512)}),
+                               Member("b", ty.f32()),
+                           });
+
+  auto* s = Structure("S",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", ty.Of(inner_x)),
+                          Member("c", ty.f32()),
+                          Member("d", ty.Of(inner_y)),
+                          Member("e", ty.f32()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
+
+  Global("G", ty.Of(s), ast::StorageClass::kUniform,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
+
+  GeneratorImpl& gen = Build();
+
+  auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+  ASSERT_TRUE(gen.EmitStructType(out, sem_s)) << gen.error();
+
+  auto* expect = R"(struct S {
+  /* 0x0000 */ int a;
+  /* 0x0004 */ int tint_pad_0[127];
+  /* 0x0200 */ inner_x b;
+  /* 0x0600 */ float c;
+  /* 0x0604 */ inner_y d;
+  /* 0x0808 */ float e;
+  /* 0x080c */ int tint_pad_1[125];
+};
+
+S make_S(int param_0,
+         inner_x param_1,
+         float param_2,
+         inner_y param_3,
+         float param_4) {
+  S output;
+  output.a = param_0;
+  output.b = param_1;
+  output.c = param_2;
+  output.d = param_3;
+  output.e = param_4;
+  return output;
+}
+)";
+  EXPECT_EQ(result(), expect);
+}
+
+TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_Layout_ArrayDefaultStride) {
+  // inner: size(1024), align(512)
+  auto* inner =
+      Structure("inner", {
+                             Member("a", ty.i32()),
+                             Member("b", ty.f32(), {MemberAlign(512)}),
+                         });
+
+  // array_x: size(28), align(4)
+  auto* array_x = ty.array<f32, 7>();
+
+  // array_y: size(4096), align(512)
+  auto* array_y = ty.array(ty.Of(inner), 4);
+
+  // array_z: size(4), align(4)
+  auto* array_z = ty.array<f32, 1>();
+
+  auto* s =
+      Structure("S",
+                {
+                    Member("a", ty.i32()),
+                    Member("b", array_x),
+                    Member("c", ty.f32()),
+                    Member("d", array_y),
+                    Member("e", ty.f32()),
+                    Member("f", array_z),
+                },
+                ast::DecorationList{create<ast::StructBlockDecoration>()});
+
+  Global("G", ty.Of(s), ast::StorageClass::kUniform,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
+
+  GeneratorImpl& gen = Build();
+
+  auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+  ASSERT_TRUE(gen.EmitStructType(out, sem_s)) << gen.error();
+
+  auto* expect = R"(struct S {
+  /* 0x0000 */ int a;
+  /* 0x0004 */ float b[7];
+  /* 0x0020 */ float c;
+  /* 0x0024 */ int tint_pad_0[119];
+  /* 0x0200 */ inner d[4];
+  /* 0x1200 */ float e;
+  /* 0x1204 */ float f[1];
+  /* 0x1208 */ int tint_pad_1[126];
+};
+
+S make_S(int param_0,
+         float param_1[7],
+         float param_2,
+         inner param_3[4],
+         float param_4,
+         float param_5[1]) {
+  S output;
+  output.a = param_0;
+  output.b = param_1;
+  output.c = param_2;
+  output.d = param_3;
+  output.e = param_4;
+  output.f = param_5;
+  return output;
+}
+)";
+
+  EXPECT_EQ(result(), expect);
+}
+
+TEST_F(HlslGeneratorImplTest_Type, AttemptTintPadSymbolCollision) {
+  auto* s = Structure(
+      "S",
+      {
+          // uses symbols tint_pad_[0..9] and tint_pad_[20..35]
+          Member("tint_pad_2", ty.i32(), {MemberSize(32)}),
+          Member("tint_pad_20", ty.f32(), {MemberAlign(128), MemberSize(128)}),
+          Member("tint_pad_33", ty.vec2<f32>()),
+          Member("tint_pad_1", ty.u32()),
+          Member("tint_pad_3", ty.vec3<f32>()),
+          Member("tint_pad_7", ty.u32()),
+          Member("tint_pad_25", ty.vec4<f32>()),
+          Member("tint_pad_5", ty.u32()),
+          Member("tint_pad_27", ty.mat2x2<f32>()),
+          Member("tint_pad_24", ty.u32()),
+          Member("tint_pad_23", ty.mat2x3<f32>()),
+          Member("tint_pad_0", ty.u32()),
+          Member("tint_pad_8", ty.mat2x4<f32>()),
+          Member("tint_pad_26", ty.u32()),
+          Member("tint_pad_29", ty.mat3x2<f32>()),
+          Member("tint_pad_6", ty.u32()),
+          Member("tint_pad_22", ty.mat3x3<f32>()),
+          Member("tint_pad_32", ty.u32()),
+          Member("tint_pad_34", ty.mat3x4<f32>()),
+          Member("tint_pad_35", ty.u32()),
+          Member("tint_pad_30", ty.mat4x2<f32>()),
+          Member("tint_pad_9", ty.u32()),
+          Member("tint_pad_31", ty.mat4x3<f32>()),
+          Member("tint_pad_28", ty.u32()),
+          Member("tint_pad_4", ty.mat4x4<f32>()),
+          Member("tint_pad_21", ty.f32()),
+      },
+      {create<ast::StructBlockDecoration>()});
+
+  Global("G", ty.Of(s), ast::StorageClass::kUniform,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
+
+  GeneratorImpl& gen = Build();
+
+  auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+  ASSERT_TRUE(gen.EmitStructType(out, sem_s)) << gen.error();
+  EXPECT_EQ(result(), R"(struct S {
+  /* 0x0000 */ int tint_pad_2;
+  /* 0x0004 */ int tint_pad_10[31];
+  /* 0x0080 */ float tint_pad_20;
+  /* 0x0084 */ int tint_pad_11[31];
+  /* 0x0100 */ float2 tint_pad_33;
+  /* 0x0108 */ uint tint_pad_1;
+  /* 0x010c */ int tint_pad_12[1];
+  /* 0x0110 */ float3 tint_pad_3;
+  /* 0x011c */ uint tint_pad_7;
+  /* 0x0120 */ float4 tint_pad_25;
+  /* 0x0130 */ uint tint_pad_5;
+  /* 0x0134 */ int tint_pad_13[1];
+  /* 0x0138 */ float2x2 tint_pad_27;
+  /* 0x0148 */ uint tint_pad_24;
+  /* 0x014c */ int tint_pad_14[1];
+  /* 0x0150 */ float2x3 tint_pad_23;
+  /* 0x0170 */ uint tint_pad_0;
+  /* 0x0174 */ int tint_pad_15[3];
+  /* 0x0180 */ float2x4 tint_pad_8;
+  /* 0x01a0 */ uint tint_pad_26;
+  /* 0x01a4 */ int tint_pad_16[1];
+  /* 0x01a8 */ float3x2 tint_pad_29;
+  /* 0x01c0 */ uint tint_pad_6;
+  /* 0x01c4 */ int tint_pad_17[3];
+  /* 0x01d0 */ float3x3 tint_pad_22;
+  /* 0x0200 */ uint tint_pad_32;
+  /* 0x0204 */ int tint_pad_18[3];
+  /* 0x0210 */ float3x4 tint_pad_34;
+  /* 0x0240 */ uint tint_pad_35;
+  /* 0x0244 */ int tint_pad_19[1];
+  /* 0x0248 */ float4x2 tint_pad_30;
+  /* 0x0268 */ uint tint_pad_9;
+  /* 0x026c */ int tint_pad_36[1];
+  /* 0x0270 */ float4x3 tint_pad_31;
+  /* 0x02b0 */ uint tint_pad_28;
+  /* 0x02b4 */ int tint_pad_37[3];
+  /* 0x02c0 */ float4x4 tint_pad_4;
+  /* 0x0300 */ float tint_pad_21;
+  /* 0x0304 */ int tint_pad_38[31];
+};
+
+S make_S(int param_0,
+         float param_1,
+         float2 param_2,
+         uint param_3,
+         float3 param_4,
+         uint param_5,
+         float4 param_6,
+         uint param_7,
+         float2x2 param_8,
+         uint param_9,
+         float2x3 param_10,
+         uint param_11,
+         float2x4 param_12,
+         uint param_13,
+         float3x2 param_14,
+         uint param_15,
+         float3x3 param_16,
+         uint param_17,
+         float3x4 param_18,
+         uint param_19,
+         float4x2 param_20,
+         uint param_21,
+         float4x3 param_22,
+         uint param_23,
+         float4x4 param_24,
+         float param_25) {
+  S output;
+  output.tint_pad_2 = param_0;
+  output.tint_pad_20 = param_1;
+  output.tint_pad_33 = param_2;
+  output.tint_pad_1 = param_3;
+  output.tint_pad_3 = param_4;
+  output.tint_pad_7 = param_5;
+  output.tint_pad_25 = param_6;
+  output.tint_pad_5 = param_7;
+  output.tint_pad_27 = param_8;
+  output.tint_pad_24 = param_9;
+  output.tint_pad_23 = param_10;
+  output.tint_pad_0 = param_11;
+  output.tint_pad_8 = param_12;
+  output.tint_pad_26 = param_13;
+  output.tint_pad_29 = param_14;
+  output.tint_pad_6 = param_15;
+  output.tint_pad_22 = param_16;
+  output.tint_pad_32 = param_17;
+  output.tint_pad_34 = param_18;
+  output.tint_pad_35 = param_19;
+  output.tint_pad_30 = param_20;
+  output.tint_pad_9 = param_21;
+  output.tint_pad_31 = param_22;
+  output.tint_pad_28 = param_23;
+  output.tint_pad_4 = param_24;
+  output.tint_pad_21 = param_25;
+  return output;
+}
 )");
 }
 

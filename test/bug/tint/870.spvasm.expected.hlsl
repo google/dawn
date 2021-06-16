@@ -1,5 +1,5 @@
 struct tint_array_wrapper {
-  int arr[6];
+  /* 0x0000 */ int arr[6];
 };
 
 tint_array_wrapper tint_symbol_1(ByteAddressBuffer buffer, uint offset) {

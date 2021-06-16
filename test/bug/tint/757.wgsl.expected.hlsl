@@ -1,5 +1,5 @@
 struct Constants {
-  int level;
+  /* 0x0000 */ int level;
 };
 
 ConstantBuffer<Constants> constants : register(b0, space0);

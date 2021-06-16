@@ -27,13 +27,13 @@ tint_symbol_3 frag_main() {
 }
 
 struct SimParams {
-  float deltaT;
-  float rule1Distance;
-  float rule2Distance;
-  float rule3Distance;
-  float rule1Scale;
-  float rule2Scale;
-  float rule3Scale;
+  /* 0x0000 */ float deltaT;
+  /* 0x0004 */ float rule1Distance;
+  /* 0x0008 */ float rule2Distance;
+  /* 0x000c */ float rule3Distance;
+  /* 0x0010 */ float rule1Scale;
+  /* 0x0014 */ float rule2Scale;
+  /* 0x0018 */ float rule3Scale;
 };
 
 ConstantBuffer<SimParams> params : register(b0, space0);

@@ -1,7 +1,7 @@
 struct Uniforms {
-  uint2 aShape;
-  uint2 bShape;
-  uint2 outShape;
+  /* 0x0000 */ uint2 aShape;
+  /* 0x0008 */ uint2 bShape;
+  /* 0x0010 */ uint2 outShape;
 };
 
 ByteAddressBuffer firstMatrix : register(t0, space0);

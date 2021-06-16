@@ -1,5 +1,5 @@
 struct S {
-  int a;
+  /* 0x0000 */ int a;
 };
 
 ConstantBuffer<S> v : register(b0, space0);

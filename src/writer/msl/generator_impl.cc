@@ -2410,6 +2410,7 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
   return true;
 }
 
+// TODO(crbug.com/tint/898): We need CTS and / or Dawn e2e tests for this logic.
 GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
     const sem::Type* ty) {
   if (ty->IsAnyOf<sem::U32, sem::I32, sem::F32>()) {

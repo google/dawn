@@ -342,7 +342,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct UBO {
-  float4 coord;
+  /* 0x0000 */ float4 coord;
 };
 
 ConstantBuffer<UBO> ubo : register(b0, space1);
@@ -385,7 +385,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct Uniforms {
-  float4 coord;
+  /* 0x0000 */ float4 coord;
 };
 
 ConstantBuffer<Uniforms> uniforms : register(b0, space1);
@@ -584,7 +584,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct S {
-  float x;
+  /* 0x0000 */ float x;
 };
 
 ConstantBuffer<S> coord : register(b0, space1);
