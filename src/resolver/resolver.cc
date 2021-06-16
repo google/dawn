@@ -1680,6 +1680,10 @@ bool Resolver::Bitcast(ast::BitcastExpression* expr) {
   if (!ty) {
     return false;
   }
+  if (ty->Is<sem::Pointer>()) {
+    diagnostics_.add_error("cannot cast to a pointer", expr->source());
+    return false;
+  }
   SetType(expr, ty, expr->type()->FriendlyName(builder_->Symbols()));
   return true;
 }
@@ -1861,6 +1865,10 @@ bool Resolver::Constructor(ast::ConstructorExpression* expr) {
     // Now that the argument types have been determined, make sure that they
     // obey the constructor type rules laid out in
     // https://gpuweb.github.io/gpuweb/wgsl.html#type-constructor-expr.
+    if (type->Is<sem::Pointer>()) {
+      diagnostics_.add_error("cannot cast to a pointer", expr->source());
+      return false;
+    }
     if (auto* vec_type = type->As<sem::Vector>()) {
       return ValidateVectorConstructor(type_ctor, vec_type);
     }

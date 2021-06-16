@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/ast/bitcast_expression.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/resolver/resolver.h"
 #include "src/resolver/resolver_test_helper.h"
@@ -112,6 +113,19 @@ TEST_F(ResolverPtrRefValidationTest, InferredPtrAccessMismatch) {
             "12:34 error: cannot initialize let of type "
             "'ptr<storage, i32>' with value of type "
             "'ptr<storage, i32, read_write>'");
+}
+
+TEST_F(ResolverTest, Expr_Bitcast_ptr) {
+  auto* vf = Var("vf", ty.f32());
+  auto* bitcast = create<ast::BitcastExpression>(
+      Source{{12, 34}}, ty.pointer<i32>(ast::StorageClass::kFunction),
+      Expr("vf"));
+  auto* ip =
+      Const("ip", ty.pointer<i32>(ast::StorageClass::kFunction), bitcast);
+  WrapInFunction(Decl(vf), Decl(ip));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: cannot cast to a pointer");
 }
 
 }  // namespace
