@@ -27,6 +27,7 @@
 #include "src/transform/canonicalize_entry_point_io.h"
 #include "src/transform/external_texture_transform.h"
 #include "src/transform/manager.h"
+#include "src/transform/pad_array_elements.h"
 #include "src/transform/promote_initializers_to_const_var.h"
 #include "src/transform/wrap_arrays_in_structs.h"
 
@@ -43,6 +44,7 @@ Output Msl::Run(const Program* in, const DataMap&) {
   manager.Add<ExternalTextureTransform>();
   manager.Add<PromoteInitializersToConstVar>();
   manager.Add<WrapArraysInStructs>();
+  manager.Add<PadArrayElements>();
   data.Add<CanonicalizeEntryPointIO::Config>(
       CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
   auto out = manager.Run(in, data);

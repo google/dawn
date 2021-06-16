@@ -2157,9 +2157,6 @@ bool GeneratorImpl::EmitPackedType(const sem::Type* type,
 }
 
 bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
-  // TODO(dsinclair): Block decoration?
-  // if (str->impl()->decoration() != ast::Decoration::kNone) {
-  // }
   out_ << "struct " << program_->Symbols().NameFor(str->Declaration()->name())
        << " {" << std::endl;
 
@@ -2457,12 +2454,9 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
 
   if (auto* arr = ty->As<sem::Array>()) {
     auto el_size_align = MslPackedTypeSizeAndAlign(arr->ElemType());
-    if (arr->Stride() != el_size_align.size) {
-      // TODO(crbug.com/tint/649): transform::Msl needs to replace these arrays
-      // with a new array type that has the element type padded to the required
-      // stride.
-      TINT_UNIMPLEMENTED(diagnostics_)
-          << "Arrays with custom strides not yet implemented";
+    if (!arr->IsStrideImplicit()) {
+      TINT_ICE(diagnostics_) << "arrays with explicit strides should have "
+                                "removed with the PadArrayElements transform";
       return {};
     }
     auto num_els = std::max<uint32_t>(arr->Count(), 1);

@@ -559,6 +559,8 @@ libtint_source_set("libtint_core_all_src") {
     "transform/inline_pointer_lets.h",
     "transform/manager.cc",
     "transform/manager.h",
+    "transform/pad_array_elements.cc",
+    "transform/pad_array_elements.h",
     "transform/promote_initializers_to_const_var.cc",
     "transform/promote_initializers_to_const_var.h",
     "transform/renamer.cc",

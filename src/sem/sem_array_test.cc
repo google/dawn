@@ -23,57 +23,59 @@ using ArrayTest = TestHelper;
 
 TEST_F(ArrayTest, CreateSizedArray) {
   U32 u32;
-  auto* arr = create<Array>(&u32, 2, 4, 8, 16, true);
+  auto* arr = create<Array>(&u32, 2, 4, 8, 32, 16);
   EXPECT_EQ(arr->ElemType(), &u32);
   EXPECT_EQ(arr->Count(), 2u);
   EXPECT_EQ(arr->Align(), 4u);
   EXPECT_EQ(arr->SizeInBytes(), 8u);
-  EXPECT_EQ(arr->Stride(), 16u);
-  EXPECT_TRUE(arr->IsStrideImplicit());
+  EXPECT_EQ(arr->Stride(), 32u);
+  EXPECT_EQ(arr->ImplicitStride(), 16u);
+  EXPECT_FALSE(arr->IsStrideImplicit());
   EXPECT_FALSE(arr->IsRuntimeSized());
 }
 
 TEST_F(ArrayTest, CreateRuntimeArray) {
   U32 u32;
-  auto* arr = create<Array>(&u32, 0, 4, 8, 16, true);
+  auto* arr = create<Array>(&u32, 0, 4, 8, 32, 32);
   EXPECT_EQ(arr->ElemType(), &u32);
   EXPECT_EQ(arr->Count(), 0u);
   EXPECT_EQ(arr->Align(), 4u);
   EXPECT_EQ(arr->SizeInBytes(), 8u);
-  EXPECT_EQ(arr->Stride(), 16u);
+  EXPECT_EQ(arr->Stride(), 32u);
+  EXPECT_EQ(arr->ImplicitStride(), 32u);
   EXPECT_TRUE(arr->IsStrideImplicit());
   EXPECT_TRUE(arr->IsRuntimeSized());
 }
 
 TEST_F(ArrayTest, TypeName) {
   I32 i32;
-  auto* arr = create<Array>(&i32, 2, 0, 4, 4, true);
+  auto* arr = create<Array>(&i32, 2, 0, 4, 4, 4);
   EXPECT_EQ(arr->type_name(), "__array__i32_count_2_align_0_size_4_stride_4");
 }
 
 TEST_F(ArrayTest, FriendlyNameRuntimeSized) {
-  auto* arr = create<Array>(create<I32>(), 0, 0, 4, 4, true);
+  auto* arr = create<Array>(create<I32>(), 0, 0, 4, 4, 4);
   EXPECT_EQ(arr->FriendlyName(Symbols()), "array<i32>");
 }
 
 TEST_F(ArrayTest, FriendlyNameStaticSized) {
-  auto* arr = create<Array>(create<I32>(), 5, 4, 20, 4, true);
+  auto* arr = create<Array>(create<I32>(), 5, 4, 20, 4, 4);
   EXPECT_EQ(arr->FriendlyName(Symbols()), "array<i32, 5>");
 }
 
 TEST_F(ArrayTest, FriendlyNameRuntimeSizedNonImplicitStride) {
-  auto* arr = create<Array>(create<I32>(), 0, 0, 4, 4, false);
-  EXPECT_EQ(arr->FriendlyName(Symbols()), "[[stride(4)]] array<i32>");
+  auto* arr = create<Array>(create<I32>(), 0, 0, 4, 8, 4);
+  EXPECT_EQ(arr->FriendlyName(Symbols()), "[[stride(8)]] array<i32>");
 }
 
 TEST_F(ArrayTest, FriendlyNameStaticSizedNonImplicitStride) {
-  auto* arr = create<Array>(create<I32>(), 5, 4, 20, 4, false);
-  EXPECT_EQ(arr->FriendlyName(Symbols()), "[[stride(4)]] array<i32, 5>");
+  auto* arr = create<Array>(create<I32>(), 5, 4, 20, 8, 4);
+  EXPECT_EQ(arr->FriendlyName(Symbols()), "[[stride(8)]] array<i32, 5>");
 }
 
 TEST_F(ArrayTest, TypeName_RuntimeArray) {
   I32 i32;
-  auto* arr = create<Array>(&i32, 2, 4, 8, 16, true);
+  auto* arr = create<Array>(&i32, 2, 4, 8, 16, 16);
   EXPECT_EQ(arr->type_name(), "__array__i32_count_2_align_4_size_8_stride_16");
 }
 

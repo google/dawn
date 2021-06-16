@@ -2922,7 +2922,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
   // records an element count of 0 for it.
   auto size = std::max<uint32_t>(arr->size(), 1) * stride;
   auto* sem = builder_->create<sem::Array>(el_ty, arr->size(), el_align, size,
-                                           stride, stride == implicit_stride);
+                                           stride, implicit_stride);
 
   if (!ValidateArray(sem, source)) {
     return nullptr;

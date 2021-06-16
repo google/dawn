@@ -284,6 +284,8 @@ set(TINT_LIB_SRCS
   transform/inline_pointer_lets.h
   transform/manager.cc
   transform/manager.h
+  transform/pad_array_elements.cc
+  transform/pad_array_elements.h
   transform/promote_initializers_to_const_var.cc
   transform/promote_initializers_to_const_var.h
   transform/renamer.cc
@@ -851,6 +853,7 @@ if(${TINT_BUILD_TESTS})
       transform/external_texture_transform_test.cc
       transform/first_index_offset_test.cc
       transform/inline_pointer_lets_test.cc
+      transform/pad_array_elements_test.cc
       transform/promote_initializers_to_const_var_test.cc
       transform/renamer_test.cc
       transform/simplify_test.cc

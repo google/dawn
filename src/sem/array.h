@@ -42,14 +42,15 @@ class Array : public Castable<Array, Type> {
   /// @param size the byte size of the array
   /// @param stride the number of bytes from the start of one element of the
   /// array to the start of the next element
-  /// @param stride_implicit is true if the value of `stride` matches the
-  /// element's natural stride.
+  /// @param implicit_stride the number of bytes from the start of one element
+  /// of the array to the start of the next element, if there was no [[stride]]
+  /// decoration applied.
   Array(Type const* element,
         uint32_t count,
         uint32_t align,
         uint32_t size,
         uint32_t stride,
-        bool stride_implicit);
+        uint32_t implicit_stride);
 
   /// @return the array element type
   Type const* ElemType() const { return element_; }
@@ -72,9 +73,14 @@ class Array : public Castable<Array, Type> {
   /// array to the start of the next element
   uint32_t Stride() const { return stride_; }
 
-  /// @returns true if the value returned by Stride() does matches the
-  /// element's natural stride
-  bool IsStrideImplicit() const { return stride_implicit_; }
+  /// @returns the number of bytes from the start of one element of the
+  /// array to the start of the next element, if there was no [[stride]]
+  /// decoration applied
+  uint32_t ImplicitStride() const { return implicit_stride_; }
+
+  /// @returns true if the value returned by Stride() matches the element's
+  /// natural stride
+  bool IsStrideImplicit() const { return stride_ == implicit_stride_; }
 
   /// @returns true if this array is runtime sized
   bool IsRuntimeSized() const { return count_ == 0; }
@@ -93,7 +99,7 @@ class Array : public Castable<Array, Type> {
   uint32_t const align_;
   uint32_t const size_;
   uint32_t const stride_;
-  bool const stride_implicit_;
+  uint32_t const implicit_stride_;
 };
 
 }  // namespace sem

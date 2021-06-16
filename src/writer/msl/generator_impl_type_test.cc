@@ -14,6 +14,8 @@
 
 #include <array>
 
+#include "gmock/gmock.h"
+
 #include "src/ast/struct_block_decoration.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
@@ -25,6 +27,8 @@ namespace tint {
 namespace writer {
 namespace msl {
 namespace {
+
+using ::testing::HasSubstr;
 
 #define CHECK_TYPE_SIZE_AND_ALIGN(TYPE, SIZE, ALIGN)    \
   static_assert(sizeof(TYPE) == SIZE, "Bad type size"); \
@@ -77,19 +81,6 @@ TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArray) {
   EXPECT_EQ(gen.result(), "bool ary[5][4]");
 }
 
-// TODO(dsinclair): Is this possible? What order should it output in?
-TEST_F(MslGeneratorImplTest, DISABLED_EmitType_ArrayOfArrayOfRuntimeArray) {
-  auto* a = ty.array<bool, 4>();
-  auto* b = ty.array(a, 5);
-  auto* c = ty.array(b, 0);
-  Global("G", c, ast::StorageClass::kPrivate);
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_TRUE(gen.EmitType(program->TypeOf(c), "ary")) << gen.error();
-  EXPECT_EQ(gen.result(), "bool ary[5][4][1]");
-}
-
 TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
   auto* a = ty.array<bool, 4>();
   auto* b = ty.array(a, 5);
@@ -120,6 +111,31 @@ TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
 
   ASSERT_TRUE(gen.EmitType(program->TypeOf(arr), "ary")) << gen.error();
   EXPECT_EQ(gen.result(), "bool ary[1]");
+}
+
+TEST_F(MslGeneratorImplTest, EmitType_ArrayWithStride) {
+  auto* s = Structure("s", {Member("arr", ty.array<f32, 4>(64))},
+                      {create<ast::StructBlockDecoration>()});
+  auto* ubo = Global("ubo", ty.Of(s), ast::StorageClass::kUniform,
+                     ast::DecorationList{
+                         create<ast::GroupDecoration>(1),
+                         create<ast::BindingDecoration>(1),
+                     });
+  WrapInFunction(MemberAccessor(ubo, "arr"));
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr(R"(struct tint_padded_array_element {
+  /* 0x0000 */ float el;
+  /* 0x0004 */ int8_t tint_pad_0[60];
+};)"));
+  EXPECT_THAT(gen.result(), HasSubstr(R"(struct tint_array_wrapper {
+  /* 0x0000 */ tint_padded_array_element arr[4];
+};)"));
+  EXPECT_THAT(gen.result(), HasSubstr(R"(struct s {
+  /* 0x0000 */ tint_array_wrapper arr;
+};)"));
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Bool) {
@@ -595,8 +611,6 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
 };
 )");
 }
-
-// TODO(crbug.com/tint/649): Add tests for array with explicit stride.
 
 // TODO(dsinclair): How to translate [[block]]
 TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {

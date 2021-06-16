@@ -28,13 +28,13 @@ Array::Array(const Type* element,
              uint32_t align,
              uint32_t size,
              uint32_t stride,
-             bool stride_implicit)
+             uint32_t implicit_stride)
     : element_(element),
       count_(count),
       align_(align),
       size_(size),
       stride_(stride),
-      stride_implicit_(stride_implicit) {
+      implicit_stride_(implicit_stride) {
   TINT_ASSERT(element_);
 }
 
@@ -44,14 +44,14 @@ std::string Array::type_name() const {
   type_name += "_align_" + std::to_string(align_);
   type_name += "_size_" + std::to_string(size_);
   type_name += "_stride_" + std::to_string(stride_);
-  // Note: stride_implicit is not part of the type_name string as this is a
-  // property derived from the other fields.
+  // Note: implicit_stride is not part of the type_name string as this is
+  // derived from the element type
   return type_name;
 }
 
 std::string Array::FriendlyName(const SymbolTable& symbols) const {
   std::ostringstream out;
-  if (!stride_implicit_) {
+  if (!IsStrideImplicit()) {
     out << "[[stride(" << stride_ << ")]] ";
   }
   out << "array<" << element_->FriendlyName(symbols);
