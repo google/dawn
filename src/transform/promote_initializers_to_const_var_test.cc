@@ -225,58 +225,6 @@ let module_str : S = S(1, 2.0, 3);
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(PromoteInitializersToConstVarTest, Bug406Array) {
-  // See crbug.com/tint/406
-  auto* src = R"(
-[[block]]
-struct Uniforms {
-  transform : mat2x2<f32>;
-};
-
-[[group(0), binding(0)]] var<uniform> ubo : Uniforms;
-
-[[builtin(vertex_index)]] var<in> vertex_index : u32;
-
-[[builtin(position)]] var<out> position : vec4<f32>;
-
-[[stage(vertex)]]
-fn main() {
-  let transform : mat2x2<f32> = ubo.transform;
-  var coord : vec2<f32> = array<vec2<f32>, 3>(
-      vec2<f32>(-1.0,  1.0),
-      vec2<f32>( 1.0,  1.0),
-      vec2<f32>(-1.0, -1.0)
-  )[vertex_index];
-  position = vec4<f32>(transform * coord, 0.0, 1.0);
-}
-)";
-
-  auto* expect = R"(
-[[block]]
-struct Uniforms {
-  transform : mat2x2<f32>;
-};
-
-[[group(0), binding(0)]] var<uniform> ubo : Uniforms;
-
-[[builtin(vertex_index)]] var<in> vertex_index : u32;
-
-[[builtin(position)]] var<out> position : vec4<f32>;
-
-[[stage(vertex)]]
-fn main() {
-  let transform : mat2x2<f32> = ubo.transform;
-  let tint_symbol : array<vec2<f32>, 3> = array<vec2<f32>, 3>(vec2<f32>(-1.0, 1.0), vec2<f32>(1.0, 1.0), vec2<f32>(-1.0, -1.0));
-  var coord : vec2<f32> = tint_symbol[vertex_index];
-  position = vec4<f32>((transform * coord), 0.0, 1.0);
-}
-)";
-
-  auto got = Run<PromoteInitializersToConstVar>(src);
-
-  EXPECT_EQ(expect, str(got));
-}
-
 TEST_F(PromoteInitializersToConstVarTest, EmptyModule) {
   auto* src = "";
   auto* expect = "";

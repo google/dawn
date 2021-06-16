@@ -2063,7 +2063,7 @@ TEST_P(MatrixConstructorTest,
 
   const auto param = GetParam();
 
-  // Skip the test if parameters would have resuled in an invalid vec1 type.
+  // Skip the test if parameters would have resulted in an invalid vec1 type.
   if (param.rows == 2) {
     return;
   }

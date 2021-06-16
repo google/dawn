@@ -52,7 +52,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
   auto* src = R"(
 var<private> a : array<f32, 3>;
 
-var<private> b : array<f32, 5>;
+var<private> b : array<i32, 5>;
 
 var<private> i : u32;
 
@@ -64,7 +64,7 @@ fn f() {
   auto* expect = R"(
 var<private> a : array<f32, 3>;
 
-var<private> b : array<f32, 5>;
+var<private> b : array<i32, 5>;
 
 var<private> i : u32;
 

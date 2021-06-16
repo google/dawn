@@ -1640,8 +1640,9 @@ bool Resolver::ArrayAccessor(ast::ArrayAccessorExpression* expr) {
   if (!Expression(expr->array())) {
     return false;
   }
-  Mark(expr->idx_expr());
-  if (!Expression(expr->idx_expr())) {
+  auto* idx = expr->idx_expr();
+  Mark(idx);
+  if (!Expression(idx)) {
     return false;
   }
 
@@ -1659,6 +1660,26 @@ bool Resolver::ArrayAccessor(ast::ArrayAccessorExpression* expr) {
                                ") in array accessor",
                            expr->source());
     return false;
+  }
+
+  if (!TypeOf(idx)->UnwrapRef()->IsAnyOf<sem::I32, sem::U32>()) {
+    diagnostics_.add_error("index must be of type 'i32' or 'u32', found: '" +
+                               TypeNameOf(idx) + "'",
+                           idx->source());
+    return false;
+  }
+
+  if (parent_type->Is<sem::Array>() || parent_type->Is<sem::Matrix>()) {
+    if (!res->Is<sem::Reference>()) {
+      // TODO(bclayton): expand this to allow any const_expr expression
+      // https://github.com/gpuweb/gpuweb/issues/1272
+      auto* scalar = idx->As<ast::ScalarConstructorExpression>();
+      if (!scalar || !scalar->literal()->As<ast::IntLiteral>()) {
+        diagnostics_.add_error(
+            "index must be signed or unsigned integer literal", idx->source());
+        return false;
+      }
+    }
   }
 
   // If we're extracting from a reference, we return a reference.
