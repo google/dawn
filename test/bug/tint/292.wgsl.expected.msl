@@ -1,9 +1,14 @@
 #include <metal_stdlib>
 
 using namespace metal;
-vertex void tint_symbol() {
+struct tint_symbol_1 {
+  float4 value [[position]];
+};
+
+vertex tint_symbol_1 tint_symbol() {
   float3 light = float3(1.200000048f, 1.0f, 2.0f);
   float3 negative_light = -(light);
-  return;
+  tint_symbol_1 const tint_symbol_2 = {.value=float4()};
+  return tint_symbol_2;
 }
 

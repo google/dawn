@@ -103,7 +103,8 @@ fn main() {
 TEST_F(SingleEntryPointTest, MultipleEntryPoints) {
   auto* src = R"(
 [[stage(vertex)]]
-fn vert_main() {
+fn vert_main() -> [[builtin(position)]] vec4<f32> {
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]
@@ -145,8 +146,9 @@ var<private> c : f32;
 var<private> d : f32;
 
 [[stage(vertex)]]
-fn vert_main() {
+fn vert_main() -> [[builtin(position)]] vec4<f32> {
   a = 0.0;
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]
@@ -194,8 +196,9 @@ let c : f32 = 1.0;
 let d : f32 = 1.0;
 
 [[stage(vertex)]]
-fn vert_main() {
+fn vert_main() -> [[builtin(position)]] vec4<f32> {
   let local_a : f32 = a;
+  return vec4<f32>();
 }
 
 [[stage(fragment)]]
