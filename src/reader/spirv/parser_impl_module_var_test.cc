@@ -4899,7 +4899,106 @@ TEST_F(SpvModuleScopeVarParserTest,
   EXPECT_EQ(got, expected) << got;
 }
 
-// TODO(dneto): pipeline IO: gl_Position, with initializer
+TEST_F(SpvModuleScopeVarParserTest,
+       BuiltinPosition_BuiltIn_Position_Initializer) {
+  const std::string assembly = R"(
+    OpCapability Shader
+    OpMemoryModel Logical Simple
+    OpEntryPoint Vertex %main "main" %1
+
+    OpMemberDecorate %10 0 BuiltIn Position
+    OpMemberDecorate %10 1 BuiltIn PointSize
+    OpMemberDecorate %10 2 BuiltIn ClipDistance
+    OpMemberDecorate %10 3 BuiltIn CullDistance
+    %void = OpTypeVoid
+    %voidfn = OpTypeFunction %void
+    %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+    %uint = OpTypeInt 32 0
+    %uint_0 = OpConstant %uint 0
+    %uint_1 = OpConstant %uint 1
+    %arr = OpTypeArray %float %uint_1
+    %10 = OpTypeStruct %v4float %float %arr %arr
+    %11 = OpTypePointer Output %10
+
+    %float_1 = OpConstant %float 1
+    %float_2 = OpConstant %float 2
+    %float_3 = OpConstant %float 3
+    %float_4 = OpConstant %float 4
+    %float_5 = OpConstant %float 5
+    %float_6 = OpConstant %float 6
+    %float_7 = OpConstant %float 7
+
+    %init_pos = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
+    %init_clip = OpConstantComposite %arr %float_6
+    %init_cull = OpConstantComposite %arr %float_7
+    %init_per_vertex = OpConstantComposite %10 %init_pos %float_5 %init_clip %init_cull
+
+    %1 = OpVariable %11 Output %init_per_vertex
+
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    OpReturn
+    OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+
+  // TODO(crbug.com/tint/508): Remove this when everything is converted
+  // to HLSL style pipeline IO.
+  p->SetHLSLStylePipelineIO();
+
+  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+
+  const auto got = p->program().to_str();
+  const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] gl_Position: __vec_4__f32}
+  }
+  Variable{
+    gl_Position
+    private
+    undefined
+    __vec_4__f32
+    {
+      TypeConstructor[not set]{
+        __vec_4__f32
+        ScalarConstructor[not set]{1.000000}
+        ScalarConstructor[not set]{2.000000}
+        ScalarConstructor[not set]{3.000000}
+        ScalarConstructor[not set]{4.000000}
+      }
+    }
+  }
+  Function main_1 -> __void
+  ()
+  {
+    Return{}
+  }
+  Function main -> __type_name_main_out
+  StageDecoration{vertex}
+  ()
+  {
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{gl_Position}
+        }
+      }
+    }
+  }
+}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
+
 // TODO(dneto): pipeline IO: read PointSize
 // TODO(dneto): pipeline IO: write PointSize
 

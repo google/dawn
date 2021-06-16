@@ -1250,6 +1250,8 @@ bool ParserImpl::EmitModuleScopeVariables() {
          (spirv_storage_class == SpvStorageClassOutput))) {
       // Skip emitting gl_PerVertex.
       builtin_position_.per_vertex_var_id = var.result_id();
+      builtin_position_.per_vertex_var_init_id =
+          var.NumInOperands() > 1 ? var.GetSingleWordInOperand(1) : 0u;
       continue;
     }
     switch (enum_converter_.ToStorageClass(spirv_storage_class)) {
@@ -1322,13 +1324,33 @@ bool ParserImpl::EmitModuleScopeVariables() {
       decos.push_back(
           create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kPosition));
     }
-    auto* var = MakeVariable(
+    ast::Expression* ast_constructor = nullptr;
+    if (builtin_position_.per_vertex_var_init_id) {
+      // The initializer is complex.
+      const auto* init =
+          def_use_mgr_->GetDef(builtin_position_.per_vertex_var_init_id);
+      switch (init->opcode()) {
+        case SpvOpConstantComposite:
+        case SpvOpSpecConstantComposite:
+          ast_constructor = MakeConstantExpression(
+                                init->GetSingleWordInOperand(
+                                    builtin_position_.position_member_index))
+                                .expr;
+          break;
+        default:
+          return Fail() << "gl_PerVertex initializer too complex. only "
+                           "OpCompositeConstruct and OpSpecConstantComposite "
+                           "are supported: "
+                        << init->PrettyPrint();
+      }
+    }
+    auto* ast_var = MakeVariable(
         builtin_position_.per_vertex_var_id,
         enum_converter_.ToStorageClass(builtin_position_.storage_class),
-        ConvertType(builtin_position_.position_member_type_id), false, nullptr,
-        std::move(decos));
+        ConvertType(builtin_position_.position_member_type_id), false,
+        ast_constructor, std::move(decos));
 
-    builder_.AST().AddGlobalVariable(var);
+    builder_.AST().AddGlobalVariable(ast_var);
   }
   return success_;
 }

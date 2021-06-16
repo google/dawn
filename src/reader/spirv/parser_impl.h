@@ -478,6 +478,8 @@ class ParserImpl : Reader {
     /// The ID of the gl_PerVertex variable, if it was declared.
     /// We'll use this for the gl_Position variable instead.
     uint32_t per_vertex_var_id = 0;
+    /// The ID of the initializer to gl_PerVertex, if any.
+    uint32_t per_vertex_var_init_id = 0;
   };
   /// @returns info about the gl_Position builtin variable.
   const BuiltInPositionInfo& GetBuiltInPositionInfo() {

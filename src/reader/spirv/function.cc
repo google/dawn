@@ -1041,7 +1041,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
         // The SPIR-V gl_PerVertex variable has already been remapped to
         // a gl_Position variable.
         // Substitute the type.
-        param_type = ty_.Vector(ty_.F32(), 4);
+        store_type = param_type = ty_.Vector(ty_.F32(), 4);
         out_decos.emplace_back(
             create<ast::BuiltinDecoration>(source, ast::Builtin::kPosition));
       } else {
