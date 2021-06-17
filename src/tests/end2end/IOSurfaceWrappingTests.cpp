@@ -255,7 +255,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
 
                 [[stage(vertex)]]
                 fn main([[builtin(vertex_index)]] VertexIndex : u32) -> VertexOut {
-                    let pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+                    var pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
                         vec2<f32>(-2.0, -2.0),
                         vec2<f32>(-2.0,  2.0),
                         vec2<f32>( 2.0, -2.0),
@@ -263,7 +263,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
                         vec2<f32>( 2.0, -2.0),
                         vec2<f32>( 2.0,  2.0));
 
-                    let texCoord : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+                    var texCoord : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
                         vec2<f32>(0.0, 0.0),
                         vec2<f32>(0.0, 1.0),
                         vec2<f32>(1.0, 0.0),

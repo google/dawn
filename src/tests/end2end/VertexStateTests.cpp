@@ -84,7 +84,7 @@ class VertexStateTest : public DawnTest {
                 [[builtin(vertex_index)]] VertexIndex : u32;
                 [[builtin(instance_index)]] InstanceIndex : u32;
             };
-            
+
             struct VertexOut {
                 [[location(0)]] color : vec4<f32>;
                 [[builtin(position)]] position : vec4<f32>;
@@ -96,7 +96,7 @@ class VertexStateTest : public DawnTest {
 
         // Hard code the triangle in the shader so that we don't have to add a vertex input for it.
         // Also this places the triangle in the grid based on its VertexID and InstanceID
-        vs << "    let pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(\n"
+        vs << "    var pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(\n"
               "         vec2<f32>(0.5, 1.0), vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 0.0));\n";
         vs << "    var offset : vec2<f32> = vec2<f32>(f32(input.VertexIndex / 3u), "
               "f32(input.InstanceIndex));\n";

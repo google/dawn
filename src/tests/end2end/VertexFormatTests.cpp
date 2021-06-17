@@ -266,7 +266,7 @@ class VertexFormatTest : public DawnTest {
 
             [[stage(vertex)]]
             fn main(input : VertexIn) -> VertexOut {
-                let pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+                var pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0, -1.0),
                     vec2<f32>( 2.0,  0.0),
                     vec2<f32>( 0.0,  2.0));

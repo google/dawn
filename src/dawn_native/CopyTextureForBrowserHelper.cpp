@@ -40,11 +40,6 @@ namespace dawn_native {
             };
             [[binding(0), group(0)]] var<uniform> uniforms : Uniforms;
 
-            let texcoord : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
-                vec2<f32>(-0.5, 0.0),
-                vec2<f32>( 1.5, 0.0),
-                vec2<f32>( 0.5, 2.0));
-
             struct VertexOutputs {
                 [[location(0)]] texcoords : vec2<f32>;
                 [[builtin(position)]] position : vec4<f32>;
@@ -53,6 +48,11 @@ namespace dawn_native {
             [[stage(vertex)]] fn main(
                 [[builtin(vertex_index)]] VertexIndex : u32
             ) -> VertexOutputs {
+                var texcoord : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+                    vec2<f32>(-0.5, 0.0),
+                    vec2<f32>( 1.5, 0.0),
+                    vec2<f32>( 0.5, 2.0));
+
                 var output : VertexOutputs;
                 output.position = vec4<f32>((texcoord[VertexIndex] * 2.0 - vec2<f32>(1.0, 1.0)), 0.0, 1.0);
 
