@@ -487,6 +487,8 @@ libtint_source_set("libtint_core_all_src") {
     "resolver/resolver.h",
     "scope_stack.h",
     "sem/array.h",
+    "sem/atomic_type.cc",
+    "sem/atomic_type.h",
     "sem/binding_point.h",
     "sem/bool_type.cc",
     "sem/bool_type.h",

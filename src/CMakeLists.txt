@@ -235,6 +235,8 @@ set(TINT_LIB_SRCS
   scope_stack.h
   sem/array.cc
   sem/array.h
+  sem/atomic_type.cc
+  sem/atomic_type.h
   sem/binding_point.h
   sem/block_statement.cc
   sem/block_statement.h
@@ -624,6 +626,7 @@ if(${TINT_BUILD_TESTS})
     symbol_test.cc
     transform/transform_test.cc
     test_main.cc
+    sem/atomic_type_test.cc
     sem/bool_type_test.cc
     sem/depth_texture_type_test.cc
     sem/external_texture_type_test.cc
