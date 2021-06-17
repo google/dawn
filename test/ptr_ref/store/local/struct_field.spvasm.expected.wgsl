@@ -2,9 +2,13 @@ struct S {
   i : i32;
 };
 
-[[stage(compute)]]
-fn main() {
+fn main_1() {
   var V : S;
   V.i = 5;
   return;
+}
+
+[[stage(compute)]]
+fn main() {
+  main_1();
 }

@@ -9,11 +9,11 @@ struct buf0 {
 
 var<private> obj : QuicksortObject;
 
-[[builtin(position)]] var<in> gl_FragCoord : vec4<f32>;
+var<private> gl_FragCoord : vec4<f32>;
 
 [[group(0), binding(0)]] var<uniform> x_188 : buf0;
 
-[[location(0)]] var<out> x_GLF_color : vec4<f32>;
+var<private> x_GLF_color : vec4<f32>;
 
 fn swap_i1_i1_(i : ptr<function, i32>, j : ptr<function, i32>) {
   var temp : i32;
@@ -770,8 +770,7 @@ fn quicksort_() {
   return;
 }
 
-[[stage(fragment)]]
-fn main() {
+fn main_1() {
   var color : vec3<f32>;
   var i_2 : i32;
   var uv : vec2<f32>;
@@ -1491,4 +1490,16 @@ fn main() {
   *(x_208) = 0.0;
   *(x_208) = x_931;
   return;
+}
+
+struct main_out {
+  [[location(0)]]
+  x_GLF_color : vec4<f32>;
+};
+
+[[stage(fragment)]]
+fn main([[builtin(position)]] gl_FragCoord_param : vec4<f32>) -> main_out {
+  gl_FragCoord = gl_FragCoord_param;
+  main_1();
+  return main_out(x_GLF_color);
 }

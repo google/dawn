@@ -961,7 +961,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
     auto* forced_store_type = store_type;
     ast::DecorationList param_decos;
     if (!parser_impl_.ConvertDecorationsForVariable(var_id, &forced_store_type,
-                                                    &param_decos)) {
+                                                    &param_decos, true)) {
       // This occurs, and is not an error, for the PointSize builtin.
       if (!success()) {
         // But exit early if an error was logged.
@@ -986,15 +986,23 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
     // variable.
     ast::Expression* param_value =
         create<ast::IdentifierExpression>(source, param_sym);
+    ast::Expression* store_dest =
+        create<ast::IdentifierExpression>(source, var_sym);
     if (HasBuiltinSampleMask(param_decos)) {
       // In Vulkan SPIR-V, the sample mask is an array. In WGSL it's a scalar.
       // Use the first element only.
-      param_value = create<ast::ArrayAccessorExpression>(
-          source, param_value, parser_impl_.MakeNullValue(ty_.I32()));
-      if (store_type->As<Array>()->type->IsSignedScalarOrVector()) {
-        // sample_mask is unsigned in WGSL. Bitcast it.
-        param_value = create<ast::BitcastExpression>(
-            source, ty_.I32()->Build(builder_), param_value);
+      store_dest = create<ast::ArrayAccessorExpression>(
+          source, store_dest, parser_impl_.MakeNullValue(ty_.I32()));
+      if (const auto* arr_ty = store_type->UnwrapAlias()->As<Array>()) {
+        if (arr_ty->type->IsSignedScalarOrVector()) {
+          // sample_mask is unsigned in WGSL. Bitcast it.
+          param_value = create<ast::BitcastExpression>(
+              source, ty_.I32()->Build(builder_), param_value);
+        }
+      } else {
+        // Vulkan SPIR-V requires this. Validation should have failed already.
+        return Fail()
+               << "expected SampleMask to be an array of integer scalars";
       }
     } else if (forced_store_type != store_type) {
       // The parameter will have the WGSL type, but we need to add
@@ -1003,9 +1011,8 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
           source, store_type->Build(builder_), param_value);
     }
 
-    stmts.push_back(create<ast::AssignmentStatement>(
-        source, create<ast::IdentifierExpression>(source, var_sym),
-        param_value));
+    stmts.push_back(
+        create<ast::AssignmentStatement>(source, store_dest, param_value));
   }
 
   // Call the inner function.  It has no parameters.
@@ -1053,7 +1060,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
         store_type = GetVariableStoreType(*var);
         param_type = store_type;
         if (!parser_impl_.ConvertDecorationsForVariable(var_id, &param_type,
-                                                        &out_decos)) {
+                                                        &out_decos, true)) {
           // This occurs, and is not an error, for the PointSize builtin.
           if (!success()) {
             // But exit early if an error was logged.
@@ -1084,10 +1091,16 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
         // Get the first element only.
         return_member_value = create<ast::ArrayAccessorExpression>(
             source, return_member_value, parser_impl_.MakeNullValue(ty_.I32()));
-        if (store_type->As<Array>()->type->IsSignedScalarOrVector()) {
-          // sample_mask is unsigned in WGSL. Bitcast it.
-          return_member_value = create<ast::BitcastExpression>(
-              source, param_type->Build(builder_), return_member_value);
+        if (const auto* arr_ty = store_type->UnwrapAlias()->As<Array>()) {
+          if (arr_ty->type->IsSignedScalarOrVector()) {
+            // sample_mask is unsigned in WGSL. Bitcast it.
+            return_member_value = create<ast::BitcastExpression>(
+                source, param_type->Build(builder_), return_member_value);
+          }
+        } else {
+          // Vulkan SPIR-V requires this. Validation should have failed already.
+          return Fail()
+                 << "expected SampleMask to be an array of integer scalars";
         }
       } else {
         // No other builtin outputs need signedness conversion.
@@ -1096,16 +1109,22 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
       return_exprs.push_back(return_member_value);
     }
 
-    // Create and register the result type.
-    auto* str = create<ast::Struct>(Source{}, return_struct_sym, return_members,
-                                    ast::DecorationList{});
-    parser_impl_.AddTypeDecl(return_struct_sym, str);
-    return_type = builder_.ty.Of(str);
+    if (return_members.empty()) {
+      // This can occur if only the PointSize member is accessed, because we
+      // never emit it.
+      return_type = ty_.Void()->Build(builder_);
+    } else {
+      // Create and register the result type.
+      auto* str = create<ast::Struct>(Source{}, return_struct_sym,
+                                      return_members, ast::DecorationList{});
+      parser_impl_.AddTypeDecl(return_struct_sym, str);
+      return_type = builder_.ty.Of(str);
 
-    // Add the return-value statement.
-    stmts.push_back(create<ast::ReturnStatement>(
-        source, create<ast::TypeConstructorExpression>(
-                    source, return_type, std::move(return_exprs))));
+      // Add the return-value statement.
+      stmts.push_back(create<ast::ReturnStatement>(
+          source, create<ast::TypeConstructorExpression>(
+                      source, return_type, std::move(return_exprs))));
+    }
   }
 
   auto* body = create<ast::BlockStatement>(source, stmts);
@@ -3320,6 +3339,8 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
         return false;
       }
 
+      TypedExpression lhs;
+
       // Handle exceptional cases
       switch (GetSkipReason(ptr_id)) {
         case SkipReason::kPointSizeBuiltinPointer:
@@ -3332,13 +3353,33 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
                         << inst.PrettyPrint();
 
         case SkipReason::kSampleMaskOutBuiltinPointer:
-          ptr_id = sample_mask_out_id;
-          if (!rhs.type->Is<U32>()) {
-            // WGSL requires sample_mask_out to be signed.
-            rhs = TypedExpression{ty_.U32(),
-                                  create<ast::TypeConstructorExpression>(
-                                      Source{}, builder_.ty.u32(),
-                                      ast::ExpressionList{rhs.expr})};
+          lhs = MakeExpression(sample_mask_out_id);
+          if (lhs.type->Is<Pointer>()) {
+            // LHS of an assignment must be a reference type.
+            // Convert the LHS to a reference by dereferencing it.
+            lhs = Dereference(lhs);
+          }
+          if (parser_impl_.UseHLSLStylePipelineIO()) {
+            // In the HLSL-style pipeline IO case, the private variable is an
+            // array whose element type is already of the same type as the value
+            // being stored into it.  Form the reference into the first element.
+            lhs.expr = create<ast::ArrayAccessorExpression>(
+                Source{}, lhs.expr, parser_impl_.MakeNullValue(ty_.I32()));
+            if (auto* ref = lhs.type->As<Reference>()) {
+              lhs.type = ref->type;
+            }
+            if (auto* arr = lhs.type->As<Array>()) {
+              lhs.type = arr->type;
+            }
+            TINT_ASSERT(lhs.type);
+          } else {
+            if (!rhs.type->Is<U32>()) {
+              // WGSL requires sample_mask_out to be unsigned.
+              rhs = TypedExpression{ty_.U32(),
+                                    create<ast::TypeConstructorExpression>(
+                                        Source{}, builder_.ty.u32(),
+                                        ast::ExpressionList{rhs.expr})};
+            }
           }
           break;
         default:
@@ -3346,7 +3387,9 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       }
 
       // Handle an ordinary store as an assignment.
-      auto lhs = MakeExpression(ptr_id);
+      if (!lhs) {
+        lhs = MakeExpression(ptr_id);
+      }
       if (!lhs) {
         return false;
       }
@@ -3367,6 +3410,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       // So represent a load by a new const definition.
       const auto ptr_id = inst.GetSingleWordInOperand(0);
       const auto skip_reason = GetSkipReason(ptr_id);
+
       switch (skip_reason) {
         case SkipReason::kPointSizeBuiltinPointer:
           GetDefInfo(inst.result_id())->skip =
@@ -3375,7 +3419,6 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
         case SkipReason::kSampleIdBuiltinPointer:
         case SkipReason::kVertexIndexBuiltinPointer:
         case SkipReason::kInstanceIndexBuiltinPointer: {
-          // The SPIR-V variable is i32, but WGSL requires u32.
           auto name = NameForSpecialInputBuiltin(skip_reason);
           if (name.empty()) {
             return Fail() << "internal error: unhandled special input builtin "
@@ -3384,30 +3427,30 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
           }
           ast::Expression* id_expr = create<ast::IdentifierExpression>(
               Source{}, builder_.Symbols().Register(name));
-          auto expr = TypedExpression{
-              ty_.I32(),
-              create<ast::TypeConstructorExpression>(
-                  Source{}, builder_.ty.i32(), ast::ExpressionList{id_expr})};
+
+          auto* loaded_type = parser_impl_.ConvertType(inst.type_id());
+          auto expr = TypedExpression{loaded_type, id_expr};
           return EmitConstDefinition(inst, expr);
         }
         case SkipReason::kSampleMaskInBuiltinPointer: {
           auto name = namer_.Name(sample_mask_in_id);
           ast::Expression* id_expr = create<ast::IdentifierExpression>(
               Source{}, builder_.Symbols().Register(name));
-          auto* load_result_type = parser_impl_.ConvertType(inst.type_id());
-          ast::Expression* ast_expr = nullptr;
-          if (load_result_type->Is<I32>()) {
-            ast_expr = create<ast::TypeConstructorExpression>(
-                Source{}, builder_.ty.i32(), ast::ExpressionList{id_expr});
-          } else if (load_result_type->Is<U32>()) {
-            ast_expr = id_expr;
-          } else {
+          // SampleMask is an array in Vulkan SPIR-V. Always access the first
+          // element.
+          id_expr = create<ast::ArrayAccessorExpression>(
+              Source{}, id_expr, parser_impl_.MakeNullValue(ty_.I32()));
+
+          auto* loaded_type = parser_impl_.ConvertType(inst.type_id());
+
+          if (!loaded_type->IsIntegerScalar()) {
             return Fail() << "loading the whole SampleMask input array is not "
                              "supported: "
                           << inst.PrettyPrint();
           }
-          return EmitConstDefinition(
-              inst, TypedExpression{load_result_type, ast_expr});
+
+          auto expr = TypedExpression{loaded_type, id_expr};
+          return EmitConstDefinition(inst, expr);
         }
         default:
           break;

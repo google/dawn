@@ -672,7 +672,7 @@ TEST_F(SpvParserTest, ConvertType_PointerInput) {
   auto* ptr_ty = type->As<Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
   EXPECT_TRUE(ptr_ty->type->Is<F32>());
-  EXPECT_EQ(ptr_ty->storage_class, ast::StorageClass::kInput);
+  EXPECT_EQ(ptr_ty->storage_class, ast::StorageClass::kPrivate);
   EXPECT_TRUE(p->error().empty());
 }
 
@@ -688,7 +688,7 @@ TEST_F(SpvParserTest, ConvertType_PointerOutput) {
   auto* ptr_ty = type->As<Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
   EXPECT_TRUE(ptr_ty->type->Is<F32>());
-  EXPECT_EQ(ptr_ty->storage_class, ast::StorageClass::kOutput);
+  EXPECT_EQ(ptr_ty->storage_class, ast::StorageClass::kPrivate);
   EXPECT_TRUE(p->error().empty());
 }
 
@@ -819,12 +819,12 @@ TEST_F(SpvParserTest, ConvertType_PointerToPointer) {
 
   auto* ptr_ty = type->As<Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
-  EXPECT_EQ(ptr_ty->storage_class, ast::StorageClass::kInput);
+  EXPECT_EQ(ptr_ty->storage_class, ast::StorageClass::kPrivate);
   EXPECT_TRUE(ptr_ty->type->Is<Pointer>());
 
   auto* ptr_ptr_ty = ptr_ty->type->As<Pointer>();
   EXPECT_NE(ptr_ptr_ty, nullptr);
-  EXPECT_EQ(ptr_ptr_ty->storage_class, ast::StorageClass::kOutput);
+  EXPECT_EQ(ptr_ptr_ty->storage_class, ast::StorageClass::kPrivate);
   EXPECT_TRUE(ptr_ptr_ty->type->Is<F32>());
 
   EXPECT_TRUE(p->error().empty());

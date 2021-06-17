@@ -58,7 +58,6 @@ TEST_F(SpvParserTest, EmitStatement_VoidCallNoParams) {
     Return{}
   }
   Function $2 -> __void
-  StageDecoration{vertex}
   ()
   {
     Call[not set]{
@@ -67,6 +66,16 @@ TEST_F(SpvParserTest, EmitStatement_VoidCallNoParams) {
       )
     }
     Return{}
+  }
+  Function $3 -> __void
+  StageDecoration{vertex}
+  ()
+  {
+    Call[not set]{
+      Identifier[not set]{$2}
+      (
+      )
+    }
   }
 }
 )";
@@ -224,7 +233,7 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error();
   EXPECT_TRUE(p->error().empty());
   const auto program_ast_str = p->program().to_str();
-  EXPECT_THAT(program_ast_str, HasSubstr(R"(Module{
+  const std::string expected = R"(Module{
   Function x_50 -> __u32
   (
     VariableConst{
@@ -251,8 +260,7 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
       }
     }
   }
-  Function x_100 -> __void
-  StageDecoration{vertex}
+  Function x_100_1 -> __void
   ()
   {
     VariableDeclStatement{
@@ -274,7 +282,19 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
     }
     Return{}
   }
-})")) << program_ast_str;
+  Function x_100 -> __void
+  StageDecoration{vertex}
+  ()
+  {
+    Call[not set]{
+      Identifier[not set]{x_100_1}
+      (
+      )
+    }
+  }
+}
+)";
+  EXPECT_EQ(program_ast_str, expected);
 }
 
 }  // namespace

@@ -1,15 +1,13 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-bug/tint/827.wgsl:8:26 warning: use of deprecated language feature: declare access with var<storage, read_write> instead of using [[access]] decoration
-[[group(0), binding(1)]] var<storage> result : [[access(read_write)]] Result;
-                         ^^^
+using namespace metal;
+struct Result {
+  /* 0x0000 */ float values[1];
+};
 
+constant uint width = 128u;
+kernel void tint_symbol(depth2d<float, access::sample> tint_symbol_2 [[texture(0)]], uint3 GlobalInvocationId [[thread_position_in_grid]], device Result& result [[buffer(1)]]) {
+  result.values[((GlobalInvocationId.y * width) + GlobalInvocationId.x)] = tint_symbol_2.read(uint2(int2(int(GlobalInvocationId.x), int(GlobalInvocationId.y))), 0);
+  return;
+}
 
-
-Validation Failure:
-
-Compilation failed: 
-
-program_source:10:76: error: use of undeclared identifier 'tex'
-  result.values[((GlobalInvocationId.y * width) + GlobalInvocationId.x)] = tex.read(int2(int(GlobalInvocationId.x), int(GlobalInvocationId.y)), 0);
-                                                                           ^

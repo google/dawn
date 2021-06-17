@@ -883,11 +883,20 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_DereferenceBase) {
     }
     Return{}
   }
+  Function main_1 -> __void
+  ()
+  {
+    Return{}
+  }
   Function main -> __void
   StageDecoration{vertex}
   ()
   {
-    Return{}
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
   }
 }
 )";

@@ -226,13 +226,16 @@ class ParserImpl : Reader {
   /// a diagnostic), or when the variable should not be emitted, e.g. for a
   /// PointSize builtin.
   /// @param id the ID of the SPIR-V variable
-  /// @param type the WGSL store type for the variable, which should be
+  /// @param store_type the WGSL store type for the variable, which should be
   /// prepopulatd
   /// @param ast_decos the decoration list to populate
+  /// @param transfer_pipeline_io true if pipeline IO decorations (builtins,
+  /// or locations) will update the store type and the decorations list
   /// @returns false when the variable should not be emitted as a variable
   bool ConvertDecorationsForVariable(uint32_t id,
-                                     const Type** type,
-                                     ast::DecorationList* ast_decos);
+                                     const Type** store_type,
+                                     ast::DecorationList* ast_decos,
+                                     bool transfer_pipeline_io);
 
   /// Converts a SPIR-V struct member decoration. If the decoration is
   /// recognized but deliberately dropped, then returns nullptr without a

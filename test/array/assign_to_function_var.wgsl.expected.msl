@@ -1,1 +1,53 @@
-SKIP: crbug.com/tint/649
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_padded_array_element {
+  /* 0x0000 */ int el;
+  /* 0x0004 */ int8_t tint_pad_0[12];
+};
+struct tint_array_wrapper {
+  /* 0x0000 */ tint_padded_array_element arr[4];
+};
+struct S {
+  /* 0x0000 */ tint_array_wrapper arr;
+};
+struct tint_array_wrapper_3 {
+  int arr[2];
+};
+struct tint_array_wrapper_2 {
+  tint_array_wrapper_3 arr[3];
+};
+struct tint_array_wrapper_1 {
+  tint_array_wrapper_2 arr[4];
+};
+
+tint_array_wrapper ret_arr() {
+  tint_array_wrapper const tint_symbol = {.arr={}};
+  return tint_symbol;
+}
+
+S ret_struct_arr() {
+  S const tint_symbol_1 = {};
+  return tint_symbol_1;
+}
+
+void foo(constant S& src_uniform, device S& src_storage, tint_array_wrapper src_param, thread tint_array_wrapper* const tint_symbol_3, threadgroup tint_array_wrapper* const tint_symbol_4) {
+  tint_array_wrapper src_function = {};
+  tint_array_wrapper dst = {};
+  tint_array_wrapper const tint_symbol_2 = {.arr={{.el=1}, {.el=2}, {.el=3}, {.el=3}}};
+  dst = tint_symbol_2;
+  dst = src_param;
+  dst = ret_arr();
+  tint_array_wrapper const src_let = {.arr={}};
+  dst = src_let;
+  dst = src_function;
+  dst = *(tint_symbol_3);
+  dst = *(tint_symbol_4);
+  dst = ret_struct_arr().arr;
+  dst = src_uniform.arr;
+  dst = src_storage.arr;
+  tint_array_wrapper_1 dst_nested = {};
+  tint_array_wrapper_1 src_nested = {};
+  dst_nested = src_nested;
+}
+

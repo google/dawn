@@ -1,10 +1,15 @@
 #include <metal_stdlib>
 
 using namespace metal;
-kernel void tint_symbol() {
+void main_1() {
   float3 v = float3(0.0f, 0.0f, 0.0f);
   v = float3(1.0f, 2.0f, 3.0f);
   v.y = 5.0f;
+  return;
+}
+
+kernel void tint_symbol() {
+  main_1();
   return;
 }
 

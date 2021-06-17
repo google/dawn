@@ -1,19 +1,34 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-bug/tint/757.wgsl:3:5 warning: use of deprecated language feature: [[offset]] has been replaced with [[size]] and [[align]]
-  [[offset(0)]] level : i32;
-    ^^^^^^
+using namespace metal;
+struct Constants {
+  /* 0x0000 */ int level;
+};
+struct Result {
+  /* 0x0000 */ float values[1];
+};
 
-bug/tint/757.wgsl:10:5 warning: use of deprecated language feature: [[offset]] has been replaced with [[size]] and [[align]]
-  [[offset(0)]] values : [[stride(4)]] array<f32>;
-    ^^^^^^
+kernel void tint_symbol(texture2d_array<float, access::sample> tint_symbol_2 [[texture(1)]], uint3 GlobalInvocationID [[thread_position_in_grid]], device Result& result [[buffer(3)]]) {
+  uint flatIndex = ((((2u * 2u) * GlobalInvocationID.z) + (2u * GlobalInvocationID.y)) + GlobalInvocationID.x);
+  flatIndex = (flatIndex * 1u);
+  float4 texel = tint_symbol_2.read(uint2(int2(GlobalInvocationID.xy)), 0, 0);
+  {
+    uint i = 0u;
+    {
+      bool tint_msl_is_first_1 = true;
+      for(;;) {
+        if (!tint_msl_is_first_1) {
+          i = (i + 1u);
+        }
+        tint_msl_is_first_1 = false;
 
+        if (!((i < 1u))) {
+          break;
+        }
+        result.values[(flatIndex + i)] = texel.r;
+      }
+    }
+  }
+  return;
+}
 
-
-Validation Failure:
-
-Compilation failed: 
-
-program_source:14:18: error: use of undeclared identifier 'myTexture'
-  float4 texel = myTexture.read(int2(GlobalInvocationID.xy), 0, 0);
-                 ^

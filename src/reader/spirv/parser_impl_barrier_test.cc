@@ -48,22 +48,28 @@ Program ParseAndBuild(std::string spirv) {
 
 TEST_F(SpvParserTest, WorkgroupBarrier) {
   auto program = ParseAndBuild(R"(
+               OpName %helper "helper"
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
-       %main = OpFunction %void None %1
+     %helper = OpFunction %void None %1
           %4 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
                OpReturn
                OpFunctionEnd
+     %main = OpFunction %void None %1
+          %5 = OpLabel
+               OpReturn
+               OpFunctionEnd
   )");
   ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
-  auto* main = program.AST().Functions().Find(program.Symbols().Get("main"));
-  ASSERT_NE(main, nullptr);
-  ASSERT_GT(main->body()->size(), 0u);
-  auto* call = main->body()->get(0)->As<ast::CallStatement>();
+  auto* helper =
+      program.AST().Functions().Find(program.Symbols().Get("helper"));
+  ASSERT_NE(helper, nullptr);
+  ASSERT_GT(helper->body()->size(), 0u);
+  auto* call = helper->body()->get(0)->As<ast::CallStatement>();
   ASSERT_NE(call, nullptr);
   EXPECT_EQ(call->expr()->params().size(), 0u);
   auto* sem_call = program.Sem().Get(call->expr());
@@ -75,23 +81,29 @@ TEST_F(SpvParserTest, WorkgroupBarrier) {
 
 TEST_F(SpvParserTest, StorageBarrier) {
   auto program = ParseAndBuild(R"(
+               OpName %helper "helper"
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
      %uint_2 = OpConstant %uint 2
      %uint_1 = OpConstant %uint 1
     %uint_72 = OpConstant %uint 72
-       %main = OpFunction %void None %1
+     %helper = OpFunction %void None %1
           %4 = OpLabel
                OpControlBarrier %uint_2 %uint_1 %uint_72
                OpReturn
                OpFunctionEnd
+       %main = OpFunction %void None %1
+          %5 = OpLabel
+               OpReturn
+               OpFunctionEnd
   )");
   ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
-  auto* main = program.AST().Functions().Find(program.Symbols().Get("main"));
-  ASSERT_NE(main, nullptr);
-  ASSERT_GT(main->body()->size(), 0u);
-  auto* call = main->body()->get(0)->As<ast::CallStatement>();
+  auto* helper =
+      program.AST().Functions().Find(program.Symbols().Get("helper"));
+  ASSERT_NE(helper, nullptr);
+  ASSERT_GT(helper->body()->size(), 0u);
+  auto* call = helper->body()->get(0)->As<ast::CallStatement>();
   ASSERT_NE(call, nullptr);
   EXPECT_EQ(call->expr()->params().size(), 0u);
   auto* sem_call = program.Sem().Get(call->expr());

@@ -250,6 +250,7 @@ ParserImpl::ParserImpl(const std::vector<uint32_t>& spv_binary)
       namer_(fail_stream_),
       enum_converter_(fail_stream_),
       tools_context_(kInputEnv) {
+  hlsl_style_pipeline_io_ = true;
   // Create a message consumer to propagate error messages from SPIRV-Tools
   // out as our own failures.
   message_consumer_ = [this](spv_message_level_t level, const char* /*source*/,
@@ -1408,12 +1409,9 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
     sc = ast::StorageClass::kNone;
   }
 
-  // In almost all cases, copy the decorations from SPIR-V to the variable.
-  // But avoid doing so when converting pipeline IO to private variables.
-  if (sc != ast::StorageClass::kPrivate) {
-    if (!ConvertDecorationsForVariable(id, &storage_type, &decorations)) {
-      return nullptr;
-    }
+  if (!ConvertDecorationsForVariable(id, &storage_type, &decorations,
+                                     sc != ast::StorageClass::kPrivate)) {
+    return nullptr;
   }
 
   std::string name = namer_.Name(id);
@@ -1427,10 +1425,10 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
                                constructor, decorations);
 }
 
-bool ParserImpl::ConvertDecorationsForVariable(
-    uint32_t id,
-    const Type** type,
-    ast::DecorationList* decorations) {
+bool ParserImpl::ConvertDecorationsForVariable(uint32_t id,
+                                               const Type** store_type,
+                                               ast::DecorationList* decorations,
+                                               bool transfer_pipeline_io) {
   for (auto& deco : GetDecorationsFor(id)) {
     if (deco.empty()) {
       return Fail() << "malformed decoration on ID " << id << ": it is empty";
@@ -1456,10 +1454,12 @@ bool ParserImpl::ConvertDecorationsForVariable(
           // The SPIR-V variable may signed (because GLSL requires signed for
           // some of these), but WGSL requires unsigned.  Handle specially
           // so we always perform the conversion at load and store.
-          if (auto* forced_type = UnsignedTypeFor(*type)) {
+          special_builtins_[id] = spv_builtin;
+          if (auto* forced_type = UnsignedTypeFor(*store_type)) {
             // Requires conversion and special handling in code generation.
-            special_builtins_[id] = spv_builtin;
-            *type = forced_type;
+            if (transfer_pipeline_io) {
+              *store_type = forced_type;
+            }
           }
           break;
         case SpvBuiltInSampleMask: {
@@ -1473,7 +1473,9 @@ bool ParserImpl::ConvertDecorationsForVariable(
                       "SampleMask must be an array of 1 element.";
           }
           special_builtins_[id] = spv_builtin;
-          *type = ty_.U32();
+          if (transfer_pipeline_io) {
+            *store_type = ty_.U32();
+          }
           break;
         }
         default:
@@ -1484,16 +1486,20 @@ bool ParserImpl::ConvertDecorationsForVariable(
         // A diagnostic has already been emitted.
         return false;
       }
-      decorations->emplace_back(
-          create<ast::BuiltinDecoration>(Source{}, ast_builtin));
+      if (transfer_pipeline_io) {
+        decorations->emplace_back(
+            create<ast::BuiltinDecoration>(Source{}, ast_builtin));
+      }
     }
     if (deco[0] == SpvDecorationLocation) {
       if (deco.size() != 2) {
         return Fail() << "malformed Location decoration on ID " << id
                       << ": requires one literal operand";
       }
-      decorations->emplace_back(
-          create<ast::LocationDecoration>(Source{}, deco[1]));
+      if (transfer_pipeline_io) {
+        decorations->emplace_back(
+            create<ast::LocationDecoration>(Source{}, deco[1]));
+      }
     }
     if (deco[0] == SpvDecorationDescriptorSet) {
       if (deco.size() == 1) {

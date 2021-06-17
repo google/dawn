@@ -1,11 +1,16 @@
 #include <metal_stdlib>
 
 using namespace metal;
-kernel void tint_symbol() {
+void main_1() {
   int i = 0;
   i = 123;
   i = 123;
   i = ((100 + 20) + 3);
+  return;
+}
+
+kernel void tint_symbol() {
+  main_1();
   return;
 }
 

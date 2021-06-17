@@ -1,14 +1,27 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
+using namespace metal;
+struct tint_symbol {
+  float4 value [[position]];
+};
 
+void textureSampleCompareLevel_1568e3(depthcube<float, access::sample> tint_symbol_2, sampler tint_symbol_3) {
+  float res = tint_symbol_2.sample_compare(tint_symbol_3, float3(), 1.0f, level(0));
+}
 
-Validation Failure:
+vertex tint_symbol vertex_main(depthcube<float, access::sample> tint_symbol_4 [[texture(0)]], sampler tint_symbol_5 [[sampler(1)]]) {
+  textureSampleCompareLevel_1568e3(tint_symbol_4, tint_symbol_5);
+  tint_symbol const tint_symbol_1 = {.value=float4()};
+  return tint_symbol_1;
+}
 
-Compilation failed: 
+fragment void fragment_main(depthcube<float, access::sample> tint_symbol_6 [[texture(0)]], sampler tint_symbol_7 [[sampler(1)]]) {
+  textureSampleCompareLevel_1568e3(tint_symbol_6, tint_symbol_7);
+  return;
+}
 
-program_source:9:15: error: use of undeclared identifier 'arg_0'
-  float res = arg_0.sample_compare(arg_1, float3(), 1.0f, level(0));
-              ^
-program_source:9:36: error: use of undeclared identifier 'arg_1'
-  float res = arg_0.sample_compare(arg_1, float3(), 1.0f, level(0));
-                                   ^
+kernel void compute_main(depthcube<float, access::sample> tint_symbol_8 [[texture(0)]], sampler tint_symbol_9 [[sampler(1)]]) {
+  textureSampleCompareLevel_1568e3(tint_symbol_8, tint_symbol_9);
+  return;
+}
+

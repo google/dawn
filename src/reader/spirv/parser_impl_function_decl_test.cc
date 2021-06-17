@@ -283,14 +283,7 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
       }
     }
     Return{}
-  }
-  Function x_100 -> __void
-  StageDecoration{vertex}
-  ()
-  {
-    Return{}
-  }
-})")) << program_ast;
+  })")) << program_ast;
 }
 
 TEST_F(SpvParserTest, EmitFunctions_NonVoidResultType) {

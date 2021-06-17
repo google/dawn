@@ -4,8 +4,13 @@ struct S {
 
 static S V;
 
+void main_1() {
+  V.i = 5;
+  return;
+}
+
 [numthreads(1, 1, 1)]
 void main() {
-  V.i = 5;
+  main_1();
   return;
 }

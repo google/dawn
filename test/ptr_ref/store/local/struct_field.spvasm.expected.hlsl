@@ -2,9 +2,14 @@ struct S {
   int i;
 };
 
-[numthreads(1, 1, 1)]
-void main() {
+void main_1() {
   S V = {0};
   V.i = 5;
+  return;
+}
+
+[numthreads(1, 1, 1)]
+void main() {
+  main_1();
   return;
 }

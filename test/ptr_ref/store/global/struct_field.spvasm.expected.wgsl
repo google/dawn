@@ -4,8 +4,12 @@ struct S {
 
 var<private> V : S;
 
-[[stage(compute)]]
-fn main() {
+fn main_1() {
   V.i = 5;
   return;
+}
+
+[[stage(compute)]]
+fn main() {
+  main_1();
 }
