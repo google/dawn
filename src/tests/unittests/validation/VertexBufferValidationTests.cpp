@@ -328,3 +328,29 @@ TEST_F(VertexBufferValidationTest, InvalidUsage) {
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 }
+
+// Check the alignment constraint on the index buffer offset.
+TEST_F(VertexBufferValidationTest, OffsetAlignment) {
+    wgpu::Buffer vertexBuffer = MakeVertexBuffer();
+
+    DummyRenderPass renderPass(device);
+    // Control cases: vertex buffer offset is a multiple of 4
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetVertexBuffer(0, vertexBuffer, 0);
+        pass.SetVertexBuffer(0, vertexBuffer, 4);
+        pass.SetVertexBuffer(0, vertexBuffer, 12);
+        pass.EndPass();
+        encoder.Finish();
+    }
+
+    // Error case: vertex buffer offset isn't a multiple of 4
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetVertexBuffer(0, vertexBuffer, 2);
+        pass.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
