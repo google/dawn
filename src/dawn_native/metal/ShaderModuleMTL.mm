@@ -112,9 +112,14 @@ namespace dawn_native { namespace metal {
             for (VertexBufferSlot slot :
                  IterateBitSet(renderPipeline->GetVertexBufferSlotsUsed())) {
                 uint32_t metalIndex = renderPipeline->GetMtlVertexBufferIndex(slot);
-                DAWN_UNUSED(metalIndex);
-                // TODO(crbug.com/tint/104): Tell Tint to map (kPullingBufferBindingSet, slot) to
-                // this MSL buffer index.
+
+                // Tell Tint to map (kPullingBufferBindingSet, slot) to this MSL buffer index.
+                BindingPoint srcBindingPoint{static_cast<uint32_t>(kPullingBufferBindingSet),
+                                             static_cast<uint8_t>(slot)};
+                BindingPoint dstBindingPoint{0, metalIndex};
+                if (srcBindingPoint != dstBindingPoint) {
+                    bindingPoints.emplace(srcBindingPoint, dstBindingPoint);
+                }
             }
         }
         if (GetDevice()->IsRobustnessEnabled()) {
