@@ -400,6 +400,8 @@ func (j job) run(wd, exe, dxcPath, xcrunPath string, generateExpected, generateS
 		// Can we validate?
 		validate := false
 		switch j.format {
+		case wgsl:
+			validate = true
 		case spvasm:
 			args = append(args, "--validate") // spirv-val is statically linked, always available
 			validate = true
