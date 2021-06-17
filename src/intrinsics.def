@@ -74,7 +74,7 @@ type vec3<T>
 type vec4<T>
 [[display("vec{N}<{T}>")]]     type vec<N: num, T>
 [[display("mat{N}x{M}<{T}>")]] type mat<N: num, M: num, T>
-[[display("ptr<{T}>")]]        type ptr<S: storage_class, T, A: access>
+type ptr<S: storage_class, T, A: access>
 type array<T>
 type sampler
 type sampler_comparison

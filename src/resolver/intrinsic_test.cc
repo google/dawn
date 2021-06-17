@@ -794,7 +794,7 @@ TEST_F(ResolverIntrinsicDataTest, ArrayLength_Error_ArraySized) {
 
 2 candidate functions:
   arrayLength(array<T>) -> u32
-  arrayLength(ptr<array<T>>) -> u32
+  arrayLength(ptr<storage, array<T>, A>) -> u32
 )");
 }
 
@@ -857,8 +857,8 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_FirstParamInt) {
       R"(error: no matching call to frexp(i32, ptr<workgroup, i32, read_write>)
 
 2 candidate functions:
-  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32, S is function, private or workgroup
-  frexp(vecN<f32>, ptr<vecN<T>>) -> vecN<f32>  where: T is i32 or u32, S is function, private or workgroup
+  frexp(f32, ptr<S, T, A>) -> f32  where: T is i32 or u32, S is function, private or workgroup
+  frexp(vecN<f32>, ptr<S, vecN<T>, A>) -> vecN<f32>  where: T is i32 or u32, S is function, private or workgroup
 )");
 }
 
@@ -874,8 +874,8 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_SecondParamFloatPtr) {
       R"(error: no matching call to frexp(f32, ptr<workgroup, f32, read_write>)
 
 2 candidate functions:
-  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32, S is function, private or workgroup
-  frexp(vecN<f32>, ptr<vecN<T>>) -> vecN<f32>  where: T is i32 or u32, S is function, private or workgroup
+  frexp(f32, ptr<S, T, A>) -> f32  where: T is i32 or u32, S is function, private or workgroup
+  frexp(vecN<f32>, ptr<S, vecN<T>, A>) -> vecN<f32>  where: T is i32 or u32, S is function, private or workgroup
 )");
 }
 
@@ -888,8 +888,8 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_SecondParamNotAPointer) {
   EXPECT_EQ(r()->error(), R"(error: no matching call to frexp(f32, i32)
 
 2 candidate functions:
-  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32, S is function, private or workgroup
-  frexp(vecN<f32>, ptr<vecN<T>>) -> vecN<f32>  where: T is i32 or u32, S is function, private or workgroup
+  frexp(f32, ptr<S, T, A>) -> f32  where: T is i32 or u32, S is function, private or workgroup
+  frexp(vecN<f32>, ptr<S, vecN<T>, A>) -> vecN<f32>  where: T is i32 or u32, S is function, private or workgroup
 )");
 }
 
@@ -905,8 +905,8 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_VectorSizesDontMatch) {
       R"(error: no matching call to frexp(vec2<f32>, ptr<workgroup, vec4<i32>, read_write>)
 
 2 candidate functions:
-  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32, S is function, private or workgroup
-  frexp(vecN<f32>, ptr<vecN<T>>) -> vecN<f32>  where: T is i32 or u32, S is function, private or workgroup
+  frexp(f32, ptr<S, T, A>) -> f32  where: T is i32 or u32, S is function, private or workgroup
+  frexp(vecN<f32>, ptr<S, vecN<T>, A>) -> vecN<f32>  where: T is i32 or u32, S is function, private or workgroup
 )");
 }
 
@@ -945,8 +945,8 @@ TEST_F(ResolverIntrinsicDataTest, Modf_Error_FirstParamInt) {
       R"(error: no matching call to modf(i32, ptr<workgroup, f32, read_write>)
 
 2 candidate functions:
-  modf(f32, ptr<f32>) -> f32  where: S is function, private or workgroup
-  modf(vecN<f32>, ptr<vecN<f32>>) -> vecN<f32>  where: S is function, private or workgroup
+  modf(f32, ptr<S, f32, A>) -> f32  where: S is function, private or workgroup
+  modf(vecN<f32>, ptr<S, vecN<f32>, A>) -> vecN<f32>  where: S is function, private or workgroup
 )");
 }
 
@@ -962,8 +962,8 @@ TEST_F(ResolverIntrinsicDataTest, Modf_Error_SecondParamIntPtr) {
       R"(error: no matching call to modf(f32, ptr<workgroup, i32, read_write>)
 
 2 candidate functions:
-  modf(f32, ptr<f32>) -> f32  where: S is function, private or workgroup
-  modf(vecN<f32>, ptr<vecN<f32>>) -> vecN<f32>  where: S is function, private or workgroup
+  modf(f32, ptr<S, f32, A>) -> f32  where: S is function, private or workgroup
+  modf(vecN<f32>, ptr<S, vecN<f32>, A>) -> vecN<f32>  where: S is function, private or workgroup
 )");
 }
 
@@ -976,8 +976,8 @@ TEST_F(ResolverIntrinsicDataTest, Modf_Error_SecondParamNotAPointer) {
   EXPECT_EQ(r()->error(), R"(error: no matching call to modf(f32, f32)
 
 2 candidate functions:
-  modf(f32, ptr<f32>) -> f32  where: S is function, private or workgroup
-  modf(vecN<f32>, ptr<vecN<f32>>) -> vecN<f32>  where: S is function, private or workgroup
+  modf(f32, ptr<S, f32, A>) -> f32  where: S is function, private or workgroup
+  modf(vecN<f32>, ptr<S, vecN<f32>, A>) -> vecN<f32>  where: S is function, private or workgroup
 )");
 }
 
@@ -993,8 +993,8 @@ TEST_F(ResolverIntrinsicDataTest, Modf_Error_VectorSizesDontMatch) {
       R"(error: no matching call to modf(vec2<f32>, ptr<workgroup, vec4<f32>, read_write>)
 
 2 candidate functions:
-  modf(vecN<f32>, ptr<vecN<f32>>) -> vecN<f32>  where: S is function, private or workgroup
-  modf(f32, ptr<f32>) -> f32  where: S is function, private or workgroup
+  modf(vecN<f32>, ptr<S, vecN<f32>, A>) -> vecN<f32>  where: S is function, private or workgroup
+  modf(f32, ptr<S, f32, A>) -> f32  where: S is function, private or workgroup
 )");
 }
 

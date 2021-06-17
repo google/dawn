@@ -320,7 +320,7 @@ std::string Mat::String(MatchState& state) const {
 }
 
 /// TypeMatcher for 'type ptr'
-/// @see src/intrinsics.def:77:37
+/// @see src/intrinsics.def:77:6
 class Ptr : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -361,9 +361,7 @@ std::string Ptr::String(MatchState& state) const {
   const std::string S = state.NumName();
   const std::string T = state.TypeName();
   const std::string A = state.NumName();
-  std::stringstream ss;
-  ss << "ptr<" << T << ">";
-  return ss.str();
+  return "ptr<" + S + ", " + T + ", " + A + ">";
 }
 
 /// TypeMatcher for 'type array'
