@@ -48,7 +48,7 @@ class BindGroupTests : public DawnTest {
         return utils::CreateShaderModule(device, R"(
         [[stage(vertex)]]
         fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
-             var pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+             var pos = array<vec2<f32>, 3>(
                 vec2<f32>(-1.0, 1.0),
                 vec2<f32>( 1.0, 1.0),
                 vec2<f32>(-1.0, -1.0));
@@ -165,12 +165,12 @@ TEST_P(BindGroupTests, ReusedUBO) {
 
         [[stage(vertex)]]
         fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
-            var pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+            var pos = array<vec2<f32>, 3>(
                 vec2<f32>(-1.0, 1.0),
                 vec2<f32>( 1.0, 1.0),
                 vec2<f32>(-1.0, -1.0));
 
-            var transform : mat2x2<f32> = mat2x2<f32>(vertexUbo.transform.xy, vertexUbo.transform.zw);
+            var transform = mat2x2<f32>(vertexUbo.transform.xy, vertexUbo.transform.zw);
             return vec4<f32>(transform * pos[VertexIndex], 0.0, 1.0);
         })");
 
@@ -242,12 +242,12 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
 
         [[stage(vertex)]]
         fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
-            var pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+            var pos = array<vec2<f32>, 3>(
                 vec2<f32>(-1.0, 1.0),
                 vec2<f32>( 1.0, 1.0),
                 vec2<f32>(-1.0, -1.0));
 
-            var transform : mat2x2<f32> = mat2x2<f32>(vertexUbo.transform.xy, vertexUbo.transform.zw);
+            var transform = mat2x2<f32>(vertexUbo.transform.xy, vertexUbo.transform.zw);
             return vec4<f32>(transform * pos[VertexIndex], 0.0, 1.0);
         })");
 
@@ -353,7 +353,7 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
 
         [[stage(vertex)]]
         fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
-            var pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+            var pos = array<vec2<f32>, 3>(
                 vec2<f32>(-1.0, 1.0),
                 vec2<f32>( 1.0, 1.0),
                 vec2<f32>(-1.0, -1.0));
@@ -939,7 +939,7 @@ TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[stage(vertex)]]
         fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
-            var pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+            var pos = array<vec2<f32>, 3>(
                 vec2<f32>(-1.0, 1.0),
                 vec2<f32>( 1.0, 1.0),
                 vec2<f32>(-1.0, -1.0));
@@ -1091,7 +1091,7 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
     pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
         [[stage(vertex)]]
         fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
-            var pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+            var pos = array<vec2<f32>, 3>(
                 vec2<f32>(-1.0, 1.0),
                 vec2<f32>( 1.0, 1.0),
                 vec2<f32>(-1.0, -1.0));

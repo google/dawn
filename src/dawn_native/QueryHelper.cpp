@@ -67,9 +67,9 @@ namespace dawn_native {
             fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
                 if (GlobalInvocationID.x >= params.count) { return; }
 
-                var index : u32 = GlobalInvocationID.x + params.offset / sizeofTimestamp;
+                var index = GlobalInvocationID.x + params.offset / sizeofTimestamp;
 
-                var timestamp : Timestamp = timestamps.t[index];
+                var timestamp = timestamps.t[index];
 
                 // Return 0 for the unavailable value.
                 if (availability.v[GlobalInvocationID.x + params.first] == 0u) {
@@ -79,8 +79,8 @@ namespace dawn_native {
                 }
 
                 // Multiply the values in timestamps buffer by the period.
-                var period : f32 = params.period;
-                var w : u32 = 0u;
+                var period = params.period;
+                var w = 0u;
 
                 // If the product of low 32-bits and the period does not exceed the maximum of u32,
                 // directly do the multiplication, otherwise, use two u32 to represent the high
@@ -88,14 +88,14 @@ namespace dawn_native {
                 if (timestamp.low <= u32(f32(0xFFFFFFFFu) / period)) {
                     timestamps.t[index].low = u32(round(f32(timestamp.low) * period));
                 } else {
-                    var lo : u32 = timestamp.low & 0xFFFFu;
-                    var hi : u32 = timestamp.low >> 16u;
+                    var lo = timestamp.low & 0xFFFFu;
+                    var hi = timestamp.low >> 16u;
 
-                    var t0 : u32 = u32(round(f32(lo) * period));
-                    var t1 : u32 = u32(round(f32(hi) * period)) + (t0 >> 16u);
+                    var t0 = u32(round(f32(lo) * period));
+                    var t1 = u32(round(f32(hi) * period)) + (t0 >> 16u);
                     w = t1 >> 16u;
 
-                    var result : u32 = t1 << 16u;
+                    var result = t1 << 16u;
                     result = result | (t0 & 0xFFFFu);
                     timestamps.t[index].low = result;
                 }

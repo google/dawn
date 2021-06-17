@@ -28,7 +28,7 @@ class ClipSpaceTest : public DawnTest {
         pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
             [[stage(vertex)]]
             fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
-                var pos : array<vec3<f32>, 6> = array<vec3<f32>, 6>(
+                var pos = array<vec3<f32>, 6>(
                     vec3<f32>(-1.0,  1.0, 1.0),
                     vec3<f32>(-1.0, -1.0, 0.5),
                     vec3<f32>( 1.0,  1.0, 0.5),

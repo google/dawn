@@ -96,17 +96,17 @@ class VertexStateTest : public DawnTest {
 
         // Hard code the triangle in the shader so that we don't have to add a vertex input for it.
         // Also this places the triangle in the grid based on its VertexID and InstanceID
-        vs << "    var pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(\n"
+        vs << "    var pos = array<vec2<f32>, 3>(\n"
               "         vec2<f32>(0.5, 1.0), vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 0.0));\n";
         vs << "    var offset : vec2<f32> = vec2<f32>(f32(input.VertexIndex / 3u), "
               "f32(input.InstanceIndex));\n";
-        vs << "    var worldPos : vec2<f32> = pos[input.VertexIndex % 3u] + offset;\n";
-        vs << "    var position : vec4<f32> = vec4<f32>(0.5 * worldPos - vec2<f32>(1.0, 1.0), 0.0, "
+        vs << "    var worldPos = pos[input.VertexIndex % 3u] + offset;\n";
+        vs << "    var position = vec4<f32>(0.5 * worldPos - vec2<f32>(1.0, 1.0), 0.0, "
               "1.0);\n";
         vs << "    output.position = vec4<f32>(position.x, -position.y, position.z, position.w);\n";
 
         // Perform the checks by successively ANDing a boolean
-        vs << "    var success : bool = true;\n";
+        vs << "    var success = true;\n";
         for (const auto& input : testSpec) {
             for (int component = 0; component < 4; ++component) {
                 vs << "    success = success && (input.input" << input.location << "[" << component

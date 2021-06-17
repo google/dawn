@@ -37,7 +37,7 @@ class ColorStateTest : public DawnTest {
         vsModule = utils::CreateShaderModule(device, R"(
                 [[stage(vertex)]]
                 fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
-                    var pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+                    var pos = array<vec2<f32>, 3>(
                         vec2<f32>(-1.0, -1.0),
                         vec2<f32>(3.0, -1.0),
                         vec2<f32>(-1.0, 3.0));

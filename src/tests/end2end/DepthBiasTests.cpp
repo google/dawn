@@ -38,7 +38,7 @@ class DepthBiasTests : public DawnTest {
                 vertexSource = R"(
     [[stage(vertex)]]
     fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
-        var pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+        var pos = array<vec2<f32>, 6>(
             vec2<f32>(-1.0, -1.0),
             vec2<f32>( 1.0, -1.0),
             vec2<f32>(-1.0,  1.0),
@@ -54,7 +54,7 @@ class DepthBiasTests : public DawnTest {
                 vertexSource = R"(
     [[stage(vertex)]]
     fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
-        var pos : array<vec3<f32>, 6> = array<vec3<f32>, 6>(
+        var pos = array<vec3<f32>, 6>(
             vec3<f32>(-1.0, -1.0, 0.0),
             vec3<f32>( 1.0, -1.0, 0.0),
             vec3<f32>(-1.0,  1.0, 0.5),

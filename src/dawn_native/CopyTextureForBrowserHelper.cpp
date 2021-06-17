@@ -48,7 +48,7 @@ namespace dawn_native {
             [[stage(vertex)]] fn main(
                 [[builtin(vertex_index)]] VertexIndex : u32
             ) -> VertexOutputs {
-                var texcoord : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+                var texcoord = array<vec2<f32>, 3>(
                     vec2<f32>(-0.5, 0.0),
                     vec2<f32>( 1.5, 0.0),
                     vec2<f32>( 0.5, 2.0));
@@ -58,7 +58,7 @@ namespace dawn_native {
 
                 // Y component of scale is calculated by the copySizeHeight / textureHeight. Only
                 // flipY case can get negative number.
-                var flipY : bool = uniforms.u_scale.y < 0.0;
+                var flipY = uniforms.u_scale.y < 0.0;
 
                 // Texture coordinate takes top-left as origin point. We need to map the
                 // texture to triangle carefully.
@@ -88,13 +88,13 @@ namespace dawn_native {
                 [[location(0)]] texcoord : vec2<f32>
             ) -> [[location(0)]] vec4<f32> {
                 // Clamp the texcoord and discard the out-of-bound pixels.
-                var clampedTexcoord : vec2<f32> =
+                var clampedTexcoord =
                     clamp(texcoord, vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 1.0));
                 if (!all(clampedTexcoord == texcoord)) {
                     discard;
                 }
 
-                var srcColor : vec4<f32> = textureSample(myTexture, mySampler, texcoord);
+                var srcColor = textureSample(myTexture, mySampler, texcoord);
                 // Swizzling of texture formats when sampling / rendering is handled by the
                 // hardware so we don't need special logic in this shader. This is covered by tests.
                 return srcColor;
