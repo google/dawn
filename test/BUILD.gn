@@ -149,6 +149,7 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/ast/array_accessor_expression_test.cc",
     "../src/ast/array_test.cc",
     "../src/ast/assignment_statement_test.cc",
+    "../src/ast/atomic_test.cc",
     "../src/ast/binary_expression_test.cc",
     "../src/ast/binding_decoration_test.cc",
     "../src/ast/bitcast_expression_test.cc",

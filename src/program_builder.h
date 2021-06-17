@@ -22,6 +22,7 @@
 #include "src/ast/array.h"
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
+#include "src/ast/atomic.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/bool.h"
 #include "src/ast/bool_literal.h"
@@ -735,6 +736,19 @@ class ProgramBuilder {
     ast::Pointer* pointer(ast::StorageClass storage_class,
                           ast::Access access = ast::Access::kUndefined) const {
       return pointer(Of<T>(), storage_class, access);
+    }
+
+    /// @param source the Source of the node
+    /// @param type the type of the atomic
+    /// @return the atomic to `type`
+    ast::Atomic* atomic(const Source& source, ast::Type* type) const {
+      return builder->create<ast::Atomic>(source, type);
+    }
+
+    /// @return the atomic to type `T`
+    template <typename T>
+    ast::Atomic* atomic() const {
+      return atomic(Of<T>());
     }
 
     /// @param kind the kind of sampler

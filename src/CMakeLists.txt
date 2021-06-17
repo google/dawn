@@ -48,6 +48,8 @@ set(TINT_LIB_SRCS
   ast/array.h
   ast/assignment_statement.cc
   ast/assignment_statement.h
+  ast/atomic.cc
+  ast/atomic.h
   ast/binary_expression.cc
   ast/binary_expression.h
   ast/binding_decoration.cc
@@ -515,6 +517,7 @@ if(${TINT_BUILD_TESTS})
     ast/array_accessor_expression_test.cc
     ast/array_test.cc
     ast/assignment_statement_test.cc
+    ast/atomic_test.cc
     ast/binary_expression_test.cc
     ast/binding_decoration_test.cc
     ast/bitcast_expression_test.cc
