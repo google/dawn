@@ -361,6 +361,10 @@ namespace {
             {% set memberName = as_varName(member.name) %}
 
             {% if member.type.category != "object" and member.optional %}
+                //* Non-constant length optional members use length=0 to denote they aren't present.
+                //* Otherwise we could have length=N and has_member=false, causing reads from an
+                //* uninitialized pointer.
+                {{ assert(member.length == "constant") }}
                 bool has_{{memberName}} = transfer->has_{{memberName}};
                 record->{{memberName}} = nullptr;
                 if (has_{{memberName}})
