@@ -374,7 +374,7 @@ namespace dawn_native { namespace d3d12 {
         // Copy 0: copy copySize.height - 1 rows
         TextureCopySubresource::CopyInfo& copy0 = copy.copies[i];
         copy0.copySize.height = copySize.height - blockInfo.height;
-        copy0.bufferSize.height = rowsPerImage;
+        copy0.bufferSize.height = rowsPerImage * blockInfo.height;  // rowsPerImageInTexels
 
         // Copy 1: move down 2 rows and copy the last row on image 0, and expand to all depth slices
         // but the last one.
