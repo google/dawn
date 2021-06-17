@@ -217,6 +217,9 @@ set(TINT_LIB_SRCS
   inspector/entry_point.h
   inspector/inspector.cc
   inspector/inspector.h
+  inspector/resource_binding.cc
+  inspector/resource_binding.h
+  inspector/sampler_texture_pair.h
   inspector/scalar.cc
   inspector/scalar.h
   intrinsic_table.cc

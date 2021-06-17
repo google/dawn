@@ -475,11 +475,10 @@ class InspectorHelper : public ProgramBuilder {
     std::string result_name = "sampler_result";
 
     ast::StatementList stmts;
-    stmts.emplace_back(Decl(Var("sampler_result", ty.vec(base_type, 4))));
+    stmts.emplace_back(Decl(Var(result_name, ty.vec(base_type, 4))));
 
-    stmts.emplace_back(
-        Assign("sampler_result",
-               Call("textureSample", texture_name, sampler_name, coords_name)));
+    stmts.emplace_back(Assign(result_name, Call("textureSample", texture_name,
+                                                sampler_name, coords_name)));
     stmts.emplace_back(Return());
 
     return Func(func_name, ast::VariableList(), ty.void_(), stmts, decorations);
@@ -736,6 +735,9 @@ class InspectorGetStorageTextureResourceBindingsTestWithParam
 
 class InspectorGetExternalTextureResourceBindingsTest : public InspectorHelper,
                                                         public testing::Test {};
+
+class InspectorGetSamplerTextureUsesTest : public InspectorHelper,
+                                           public testing::Test {};
 
 TEST_F(InspectorGetEntryPointTest, NoFunctions) {
   Inspector& inspector = Build();
@@ -3071,6 +3073,96 @@ TEST_F(InspectorGetExternalTextureResourceBindingsTest, Simple) {
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
+}
+
+TEST_F(InspectorGetSamplerTextureUsesTest, None) {
+  MakeEmptyBodyFunction("ep_func", ast::DecorationList{
+                                       Stage(ast::PipelineStage::kFragment),
+                                   });
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetSamplerTextureUses("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  ASSERT_EQ(0u, result.size());
+}
+
+TEST_F(InspectorGetSamplerTextureUsesTest, Simple) {
+  auto* sampled_texture_type =
+      MakeSampledTextureType(ast::TextureDimension::k1d, ty.f32());
+  AddSampledTexture("foo_texture", sampled_texture_type, 0, 10);
+  AddSampler("foo_sampler", 0, 1);
+  AddGlobalVariable("foo_coords", ty.f32());
+
+  MakeSamplerReferenceBodyFunction("ep_func", "foo_texture", "foo_sampler",
+                                   "foo_coords", ty.f32(),
+                                   ast::DecorationList{
+                                       Stage(ast::PipelineStage::kFragment),
+                                   });
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetSamplerTextureUses("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  ASSERT_EQ(1u, result.size());
+
+  EXPECT_EQ(0u, result[0].sampler_binding_point.group);
+  EXPECT_EQ(1u, result[0].sampler_binding_point.binding);
+  EXPECT_EQ(0u, result[0].texture_binding_point.group);
+  EXPECT_EQ(10u, result[0].texture_binding_point.binding);
+}
+
+TEST_F(InspectorGetSamplerTextureUsesTest, MultipleCalls) {
+  auto* sampled_texture_type =
+      MakeSampledTextureType(ast::TextureDimension::k1d, ty.f32());
+  AddSampledTexture("foo_texture", sampled_texture_type, 0, 10);
+  AddSampler("foo_sampler", 0, 1);
+  AddGlobalVariable("foo_coords", ty.f32());
+
+  MakeSamplerReferenceBodyFunction("ep_func", "foo_texture", "foo_sampler",
+                                   "foo_coords", ty.f32(),
+                                   ast::DecorationList{
+                                       Stage(ast::PipelineStage::kFragment),
+                                   });
+
+  Inspector& inspector = Build();
+
+  auto result_0 = inspector.GetSamplerTextureUses("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  auto result_1 = inspector.GetSamplerTextureUses("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  EXPECT_EQ(result_0, result_1);
+}
+
+TEST_F(InspectorGetSamplerTextureUsesTest, InFunction) {
+  auto* sampled_texture_type =
+      MakeSampledTextureType(ast::TextureDimension::k1d, ty.f32());
+  AddSampledTexture("foo_texture", sampled_texture_type, 0, 0);
+  AddSampler("foo_sampler", 0, 1);
+  AddGlobalVariable("foo_coords", ty.f32());
+
+  MakeSamplerReferenceBodyFunction("foo_func", "foo_texture", "foo_sampler",
+                                   "foo_coords", ty.f32(), {});
+
+  MakeCallerBodyFunction("ep_func", {"foo_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetSamplerTextureUses("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_EQ(0u, result[0].sampler_binding_point.group);
+  EXPECT_EQ(1u, result[0].sampler_binding_point.binding);
+  EXPECT_EQ(0u, result[0].texture_binding_point.group);
+  EXPECT_EQ(0u, result[0].texture_binding_point.binding);
 }
 
 }  // namespace

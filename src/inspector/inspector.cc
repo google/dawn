@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "src/ast/bool_literal.h"
+#include "src/ast/call_expression.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/module.h"
 #include "src/ast/override_decoration.h"
@@ -24,12 +25,14 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/uint_literal.h"
 #include "src/sem/array.h"
+#include "src/sem/call.h"
 #include "src/sem/f32_type.h"
 #include "src/sem/function.h"
 #include "src/sem/i32_type.h"
 #include "src/sem/matrix_type.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/sampled_texture_type.h"
+#include "src/sem/statement.h"
 #include "src/sem/storage_texture_type.h"
 #include "src/sem/struct.h"
 #include "src/sem/u32_type.h"
@@ -51,131 +54,6 @@ void AppendResourceBindings(std::vector<ResourceBinding>* dest,
 
   dest->reserve(dest->size() + orig.size());
   dest->insert(dest->end(), orig.begin(), orig.end());
-}
-
-ResourceBinding::TextureDimension
-TypeTextureDimensionToResourceBindingTextureDimension(
-    const ast::TextureDimension& type_dim) {
-  switch (type_dim) {
-    case ast::TextureDimension::k1d:
-      return ResourceBinding::TextureDimension::k1d;
-    case ast::TextureDimension::k2d:
-      return ResourceBinding::TextureDimension::k2d;
-    case ast::TextureDimension::k2dArray:
-      return ResourceBinding::TextureDimension::k2dArray;
-    case ast::TextureDimension::k3d:
-      return ResourceBinding::TextureDimension::k3d;
-    case ast::TextureDimension::kCube:
-      return ResourceBinding::TextureDimension::kCube;
-    case ast::TextureDimension::kCubeArray:
-      return ResourceBinding::TextureDimension::kCubeArray;
-    case ast::TextureDimension::kNone:
-      return ResourceBinding::TextureDimension::kNone;
-  }
-  return ResourceBinding::TextureDimension::kNone;
-}
-
-ResourceBinding::SampledKind BaseTypeToSampledKind(const sem::Type* base_type) {
-  if (!base_type) {
-    return ResourceBinding::SampledKind::kUnknown;
-  }
-
-  if (auto* at = base_type->As<sem::Array>()) {
-    base_type = const_cast<sem::Type*>(at->ElemType());
-  } else if (auto* mt = base_type->As<sem::Matrix>()) {
-    base_type = mt->type();
-  } else if (auto* vt = base_type->As<sem::Vector>()) {
-    base_type = vt->type();
-  }
-
-  if (base_type->Is<sem::F32>()) {
-    return ResourceBinding::SampledKind::kFloat;
-  } else if (base_type->Is<sem::U32>()) {
-    return ResourceBinding::SampledKind::kUInt;
-  } else if (base_type->Is<sem::I32>()) {
-    return ResourceBinding::SampledKind::kSInt;
-  } else {
-    return ResourceBinding::SampledKind::kUnknown;
-  }
-}
-
-ResourceBinding::ImageFormat TypeImageFormatToResourceBindingImageFormat(
-    const ast::ImageFormat& image_format) {
-  switch (image_format) {
-    case ast::ImageFormat::kR8Unorm:
-      return ResourceBinding::ImageFormat::kR8Unorm;
-    case ast::ImageFormat::kR8Snorm:
-      return ResourceBinding::ImageFormat::kR8Snorm;
-    case ast::ImageFormat::kR8Uint:
-      return ResourceBinding::ImageFormat::kR8Uint;
-    case ast::ImageFormat::kR8Sint:
-      return ResourceBinding::ImageFormat::kR8Sint;
-    case ast::ImageFormat::kR16Uint:
-      return ResourceBinding::ImageFormat::kR16Uint;
-    case ast::ImageFormat::kR16Sint:
-      return ResourceBinding::ImageFormat::kR16Sint;
-    case ast::ImageFormat::kR16Float:
-      return ResourceBinding::ImageFormat::kR16Float;
-    case ast::ImageFormat::kRg8Unorm:
-      return ResourceBinding::ImageFormat::kRg8Unorm;
-    case ast::ImageFormat::kRg8Snorm:
-      return ResourceBinding::ImageFormat::kRg8Snorm;
-    case ast::ImageFormat::kRg8Uint:
-      return ResourceBinding::ImageFormat::kRg8Uint;
-    case ast::ImageFormat::kRg8Sint:
-      return ResourceBinding::ImageFormat::kRg8Sint;
-    case ast::ImageFormat::kR32Uint:
-      return ResourceBinding::ImageFormat::kR32Uint;
-    case ast::ImageFormat::kR32Sint:
-      return ResourceBinding::ImageFormat::kR32Sint;
-    case ast::ImageFormat::kR32Float:
-      return ResourceBinding::ImageFormat::kR32Float;
-    case ast::ImageFormat::kRg16Uint:
-      return ResourceBinding::ImageFormat::kRg16Uint;
-    case ast::ImageFormat::kRg16Sint:
-      return ResourceBinding::ImageFormat::kRg16Sint;
-    case ast::ImageFormat::kRg16Float:
-      return ResourceBinding::ImageFormat::kRg16Float;
-    case ast::ImageFormat::kRgba8Unorm:
-      return ResourceBinding::ImageFormat::kRgba8Unorm;
-    case ast::ImageFormat::kRgba8UnormSrgb:
-      return ResourceBinding::ImageFormat::kRgba8UnormSrgb;
-    case ast::ImageFormat::kRgba8Snorm:
-      return ResourceBinding::ImageFormat::kRgba8Snorm;
-    case ast::ImageFormat::kRgba8Uint:
-      return ResourceBinding::ImageFormat::kRgba8Uint;
-    case ast::ImageFormat::kRgba8Sint:
-      return ResourceBinding::ImageFormat::kRgba8Sint;
-    case ast::ImageFormat::kBgra8Unorm:
-      return ResourceBinding::ImageFormat::kBgra8Unorm;
-    case ast::ImageFormat::kBgra8UnormSrgb:
-      return ResourceBinding::ImageFormat::kBgra8UnormSrgb;
-    case ast::ImageFormat::kRgb10A2Unorm:
-      return ResourceBinding::ImageFormat::kRgb10A2Unorm;
-    case ast::ImageFormat::kRg11B10Float:
-      return ResourceBinding::ImageFormat::kRg11B10Float;
-    case ast::ImageFormat::kRg32Uint:
-      return ResourceBinding::ImageFormat::kRg32Uint;
-    case ast::ImageFormat::kRg32Sint:
-      return ResourceBinding::ImageFormat::kRg32Sint;
-    case ast::ImageFormat::kRg32Float:
-      return ResourceBinding::ImageFormat::kRg32Float;
-    case ast::ImageFormat::kRgba16Uint:
-      return ResourceBinding::ImageFormat::kRgba16Uint;
-    case ast::ImageFormat::kRgba16Sint:
-      return ResourceBinding::ImageFormat::kRgba16Sint;
-    case ast::ImageFormat::kRgba16Float:
-      return ResourceBinding::ImageFormat::kRgba16Float;
-    case ast::ImageFormat::kRgba32Uint:
-      return ResourceBinding::ImageFormat::kRgba32Uint;
-    case ast::ImageFormat::kRgba32Sint:
-      return ResourceBinding::ImageFormat::kRgba32Sint;
-    case ast::ImageFormat::kRgba32Float:
-      return ResourceBinding::ImageFormat::kRgba32Float;
-    case ast::ImageFormat::kNone:
-      return ResourceBinding::ImageFormat::kNone;
-  }
-  return ResourceBinding::ImageFormat::kNone;
 }
 
 }  // namespace
@@ -459,6 +337,8 @@ std::vector<ResourceBinding> Inspector::GetSamplerResourceBindings(
     return {};
   }
 
+  GenerateSamplerTargets();
+
   std::vector<ResourceBinding> result;
 
   auto* func_sem = program_->Sem().Get(func);
@@ -482,6 +362,8 @@ std::vector<ResourceBinding> Inspector::GetComparisonSamplerResourceBindings(
   if (!func) {
     return {};
   }
+
+  GenerateSamplerTargets();
 
   std::vector<ResourceBinding> result;
 
@@ -575,6 +457,22 @@ std::vector<ResourceBinding> Inspector::GetExternalTextureResourceBindings(
     result.push_back(entry);
   }
   return result;
+}
+
+std::vector<SamplerTexturePair> Inspector::GetSamplerTextureUses(
+    const std::string& entry_point) {
+  auto* func = FindEntryPointByName(entry_point);
+  if (!func) {
+    return {};
+  }
+
+  GenerateSamplerTargets();
+
+  auto it = sampler_targets_->find(entry_point);
+  if (it == sampler_targets_->end()) {
+    return {};
+  }
+  return it->second;
 }
 
 ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
@@ -756,6 +654,77 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
   }
 
   return result;
+}
+
+void Inspector::GenerateSamplerTargets() {
+  // Do not re-generate, since |program_| should not change during the lifetime
+  // of the inspector.
+  if (sampler_targets_ != nullptr) {
+    return;
+  }
+
+  sampler_targets_ = std::make_unique<
+      std::unordered_map<std::string, UniqueVector<SamplerTexturePair>>>();
+
+  auto& sem = program_->Sem();
+
+  for (auto* node : program_->ASTNodes().Objects()) {
+    auto* c = node->As<ast::CallExpression>();
+    if (!c) {
+      continue;
+    }
+
+    auto* call = sem.Get(c);
+    if (!call) {
+      continue;
+    }
+
+    auto* i = call->Target()->As<sem::Intrinsic>();
+    if (!i) {
+      continue;
+    }
+
+    const auto& params = i->Parameters();
+    int sampler_index = sem::IndexOf(params, sem::ParameterUsage::kSampler);
+    if (sampler_index == -1) {
+      continue;
+    }
+
+    int texture_index = sem::IndexOf(params, sem::ParameterUsage::kTexture);
+    if (texture_index == -1) {
+      continue;
+    }
+
+    auto* call_func = call->Stmt()->Function();
+    std::vector<Symbol> entry_points;
+    if (call_func->IsEntryPoint()) {
+      entry_points = {call_func->symbol()};
+    } else {
+      entry_points = sem.Get(call_func)->AncestorEntryPoints();
+    }
+
+    if (entry_points.empty()) {
+      continue;
+    }
+
+    auto* s = c->params()[sampler_index];
+    auto* sampler = sem.Get<sem::VariableUser>(s)->Variable();
+    sem::BindingPoint sampler_binding_point = {
+        sampler->Declaration()->binding_point().group->value(),
+        sampler->Declaration()->binding_point().binding->value()};
+
+    auto* t = c->params()[texture_index];
+    auto* texture = sem.Get<sem::VariableUser>(t)->Variable();
+    sem::BindingPoint texture_binding_point = {
+        texture->Declaration()->binding_point().group->value(),
+        texture->Declaration()->binding_point().binding->value()};
+
+    for (auto entry_point : entry_points) {
+      const auto& ep_name = program_->Symbols().NameFor(entry_point);
+      (*sampler_targets_)[ep_name].add(
+          {sampler_binding_point, texture_binding_point});
+    }
+  }
 }
 
 }  // namespace inspector
