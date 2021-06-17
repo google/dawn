@@ -222,6 +222,8 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/program_builder_test.cc",
     "../src/program_test.cc",
     "../src/resolver/assignment_validation_test.cc",
+    "../src/resolver/atomics_test.cc",
+    "../src/resolver/atomics_validation_test.cc",
     "../src/resolver/block_test.cc",
     "../src/resolver/builtins_validation_test.cc",
     "../src/resolver/call_test.cc",

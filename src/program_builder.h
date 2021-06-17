@@ -745,6 +745,12 @@ class ProgramBuilder {
       return builder->create<ast::Atomic>(source, type);
     }
 
+    /// @param type the type of the atomic
+    /// @return the atomic to `type`
+    ast::Atomic* atomic(ast::Type* type) const {
+      return builder->create<ast::Atomic>(type);
+    }
+
     /// @return the atomic to type `T`
     template <typename T>
     ast::Atomic* atomic() const {
@@ -1077,6 +1083,19 @@ class ProgramBuilder {
   ast::TypeConstructorExpression* Construct(ast::Type* type, ARGS&&... args) {
     return create<ast::TypeConstructorExpression>(
         type, ExprList(std::forward<ARGS>(args)...));
+  }
+
+  /// @param source the source information
+  /// @param type the type to construct
+  /// @param args the arguments for the constructor
+  /// @return an `ast::TypeConstructorExpression` of `type` constructed with the
+  /// values `args`.
+  template <typename... ARGS>
+  ast::TypeConstructorExpression* Construct(const Source& source,
+                                            ast::Type* type,
+                                            ARGS&&... args) {
+    return create<ast::TypeConstructorExpression>(
+        source, type, ExprList(std::forward<ARGS>(args)...));
   }
 
   /// @param args the arguments for the vector constructor

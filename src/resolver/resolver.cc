@@ -46,6 +46,7 @@
 #include "src/ast/vector.h"
 #include "src/ast/workgroup_decoration.h"
 #include "src/sem/array.h"
+#include "src/sem/atomic_type.h"
 #include "src/sem/call.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/function.h"
@@ -166,19 +167,14 @@ bool Resolver::Resolve() {
 
 // https://gpuweb.github.io/gpuweb/wgsl/#plain-types-section
 bool Resolver::IsPlain(const sem::Type* type) {
-  if (type->is_scalar() || type->Is<sem::Vector>() || type->Is<sem::Matrix>() ||
-      type->Is<sem::Array>() || type->Is<sem::Struct>()) {
-    return true;
-  }
-  return false;
+  return type->is_scalar() || type->Is<sem::Atomic>() ||
+         type->Is<sem::Vector>() || type->Is<sem::Matrix>() ||
+         type->Is<sem::Array>() || type->Is<sem::Struct>();
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#storable-types
 bool Resolver::IsStorable(const sem::Type* type) {
-  if (IsPlain(type) || type->Is<sem::Texture>() || type->Is<sem::Sampler>()) {
-    return true;
-  }
-  return false;
+  return IsPlain(type) || type->Is<sem::Texture>() || type->Is<sem::Sampler>();
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#host-shareable-types
@@ -202,6 +198,9 @@ bool Resolver::IsHostShareable(const sem::Type* type) {
       }
     }
     return true;
+  }
+  if (auto* atomic = type->As<sem::Atomic>()) {
+    return IsHostShareable(atomic->Type());
   }
   return false;
 }
@@ -235,6 +234,9 @@ bool Resolver::ResolveInternal() {
   }
 
   if (!ValidatePipelineStages()) {
+    return false;
+  }
+  if (!ValidateAtomicUses()) {
     return false;
   }
 
@@ -289,6 +291,16 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
     }
     if (auto* t = ty->As<ast::Array>()) {
       return Array(t);
+    }
+    if (auto* t = ty->As<ast::Atomic>()) {
+      if (auto* el = Type(t->type())) {
+        auto* a = builder_->create<sem::Atomic>(const_cast<sem::Type*>(el));
+        if (!ValidateAtomic(t, a)) {
+          return nullptr;
+        }
+        return a;
+      }
+      return nullptr;
     }
     if (auto* t = ty->As<ast::Pointer>()) {
       if (auto* el = Type(t->type())) {
@@ -354,6 +366,45 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
     builder_->Sem().Add(ty, s);
   }
   return s;
+}
+
+bool Resolver::ValidateAtomic(const ast::Atomic* a, const sem::Atomic* s) {
+  // https://gpuweb.github.io/gpuweb/wgsl/#atomic-types
+  // T must be either u32 or i32.
+  if (!s->Type()->IsAnyOf<sem::U32, sem::I32>()) {
+    diagnostics_.add_error("atomic only supports i32 or u32 types",
+                           a->type()->source());
+    return false;
+  }
+  return true;
+}
+
+bool Resolver::ValidateAtomicUses() {
+  // https://gpuweb.github.io/gpuweb/wgsl/#atomic-types
+  // Atomic types may only be instantiated by variables in the workgroup storage
+  // class or by storage buffer variables with a read_write access mode.
+  for (auto sm : atomic_members_) {
+    auto* structure = sm.structure;
+    for (auto usage : structure->StorageClassUsage()) {
+      if (usage == ast::StorageClass::kWorkgroup) {
+        continue;
+      }
+      if (usage != ast::StorageClass::kStorage) {
+        // TODO(crbug.com/tint/901): Validate that the access mode is
+        // read_write.
+        auto* member = structure->Members()[sm.index];
+        diagnostics_.add_error(
+            "atomic types can only be used in storage classes workgroup or "
+            "storage, but was used by storage class " +
+                std::string(ast::str(usage)),
+            member->Declaration()->type()->source());
+        // TODO(crbug.com/tint/901): Add note pointing at where the usage came
+        // from.
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 bool Resolver::ValidateStorageTexture(const ast::StorageTexture* t) {
@@ -814,6 +865,26 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
                                "' must not have a storage class",
                            var->source());
     return false;
+  }
+
+  // https://gpuweb.github.io/gpuweb/wgsl/#atomic-types
+  // Atomic types may only be instantiated by variables in the workgroup storage
+  // class or by storage buffer variables with a read_write access mode.
+  if (info->type->UnwrapRef()->Is<sem::Atomic>()) {
+    if (info->kind != VariableKind::kGlobal) {
+      // Neither storage nor workgroup storage classes can be used in function
+      // scopes.
+      diagnostics_.add_error("cannot declare an atomic var in a function scope",
+                             info->declaration->type()->source());
+      return false;
+    }
+    if (info->storage_class != ast::StorageClass::kWorkgroup) {
+      // Storage buffers require a structure, so just check for workgroup
+      // storage here.
+      diagnostics_.add_error("atomic var requires workgroup storage",
+                             info->declaration->type()->source());
+      return false;
+    }
   }
 
   return true;
@@ -1620,34 +1691,40 @@ bool Resolver::Expression(ast::Expression* expr) {
     return true;  // Already resolved
   }
 
-  if (auto* a = expr->As<ast::ArrayAccessorExpression>()) {
-    return ArrayAccessor(a);
-  }
-  if (auto* b = expr->As<ast::BinaryExpression>()) {
-    return Binary(b);
-  }
-  if (auto* b = expr->As<ast::BitcastExpression>()) {
-    return Bitcast(b);
-  }
-  if (auto* c = expr->As<ast::CallExpression>()) {
-    return Call(c);
-  }
-  if (auto* c = expr->As<ast::ConstructorExpression>()) {
-    return Constructor(c);
-  }
-  if (auto* i = expr->As<ast::IdentifierExpression>()) {
-    return Identifier(i);
-  }
-  if (auto* m = expr->As<ast::MemberAccessorExpression>()) {
-    return MemberAccessor(m);
-  }
-  if (auto* u = expr->As<ast::UnaryOpExpression>()) {
-    return UnaryOp(u);
+  bool ok = false;
+  if (auto* array = expr->As<ast::ArrayAccessorExpression>()) {
+    ok = ArrayAccessor(array);
+  } else if (auto* bin_op = expr->As<ast::BinaryExpression>()) {
+    ok = Binary(bin_op);
+  } else if (auto* bitcast = expr->As<ast::BitcastExpression>()) {
+    ok = Bitcast(bitcast);
+  } else if (auto* call = expr->As<ast::CallExpression>()) {
+    ok = Call(call);
+  } else if (auto* ctor = expr->As<ast::ConstructorExpression>()) {
+    ok = Constructor(ctor);
+  } else if (auto* ident = expr->As<ast::IdentifierExpression>()) {
+    ok = Identifier(ident);
+  } else if (auto* member = expr->As<ast::MemberAccessorExpression>()) {
+    ok = MemberAccessor(member);
+  } else if (auto* unary = expr->As<ast::UnaryOpExpression>()) {
+    ok = UnaryOp(unary);
+  } else {
+    diagnostics_.add_error("unknown expression for type determination",
+                           expr->source());
   }
 
-  diagnostics_.add_error("unknown expression for type determination",
-                         expr->source());
-  return false;
+  if (!ok) {
+    return false;
+  }
+
+  auto* ty = TypeOf(expr);
+  if (ty->Is<sem::Atomic>()) {
+    diagnostics_.add_error("an expression must not evaluate to an atomic type",
+                           expr->source());
+    return false;
+  }
+
+  return true;
 }
 
 bool Resolver::ArrayAccessor(ast::ArrayAccessorExpression* expr) {
@@ -2883,7 +2960,8 @@ bool Resolver::DefaultAlignAndSize(const sem::Type* ty,
     align = 4;
     size = 4;
     return true;
-  } else if (auto* vec = ty->As<sem::Vector>()) {
+  }
+  if (auto* vec = ty->As<sem::Vector>()) {
     if (vec->size() < 2 || vec->size() > 4) {
       TINT_UNREACHABLE(diagnostics_)
           << "Invalid vector size: vec" << vec->size();
@@ -2892,7 +2970,8 @@ bool Resolver::DefaultAlignAndSize(const sem::Type* ty,
     align = vector_align[vec->size()];
     size = vector_size[vec->size()];
     return true;
-  } else if (auto* mat = ty->As<sem::Matrix>()) {
+  }
+  if (auto* mat = ty->As<sem::Matrix>()) {
     if (mat->columns() < 2 || mat->columns() > 4 || mat->rows() < 2 ||
         mat->rows() > 4) {
       TINT_UNREACHABLE(diagnostics_)
@@ -2902,14 +2981,19 @@ bool Resolver::DefaultAlignAndSize(const sem::Type* ty,
     align = vector_align[mat->rows()];
     size = vector_align[mat->rows()] * mat->columns();
     return true;
-  } else if (auto* s = ty->As<sem::Struct>()) {
+  }
+  if (auto* s = ty->As<sem::Struct>()) {
     align = s->Align();
     size = s->Size();
     return true;
-  } else if (auto* a = ty->As<sem::Array>()) {
+  }
+  if (auto* a = ty->As<sem::Array>()) {
     align = a->Align();
     size = a->SizeInBytes();
     return true;
+  }
+  if (auto* a = ty->As<sem::Atomic>()) {
+    return DefaultAlignAndSize(a->Type(), align, size);
   }
   TINT_UNREACHABLE(diagnostics_) << "invalid type " << ty->TypeInfo().name;
   return false;
@@ -3187,8 +3271,16 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
   auto size_no_padding = struct_size;
   struct_size = utils::RoundUp(struct_align, struct_size);
 
-  auto* out = builder_->create<sem::Struct>(
-      str, std::move(sem_members), struct_align, struct_size, size_no_padding);
+  auto* out = builder_->create<sem::Struct>(str, sem_members, struct_align,
+                                            struct_size, size_no_padding);
+
+  // Keep track of atomic members for validation after all usages have been
+  // determined.
+  for (size_t i = 0; i < sem_members.size(); i++) {
+    if (sem_members[i]->Type()->Is<sem::Atomic>()) {
+      atomic_members_.emplace_back(StructMember{out, i});
+    }
+  }
 
   if (!ValidateStructure(out)) {
     return nullptr;

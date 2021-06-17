@@ -16,6 +16,7 @@
 
 #include "gmock/gmock.h"
 #include "src/resolver/resolver_test_helper.h"
+#include "src/sem/atomic_type.h"
 
 namespace tint {
 namespace resolver {
@@ -90,6 +91,11 @@ TEST_F(ResolverIsHostShareable, Pointer) {
   auto* ptr = create<sem::Pointer>(
       create<sem::I32>(), ast::StorageClass::kPrivate, ast::Access::kReadWrite);
   EXPECT_FALSE(r()->IsHostShareable(ptr));
+}
+
+TEST_F(ResolverIsHostShareable, Atomic) {
+  EXPECT_TRUE(r()->IsHostShareable(create<sem::Atomic>(create<sem::I32>())));
+  EXPECT_TRUE(r()->IsHostShareable(create<sem::Atomic>(create<sem::U32>())));
 }
 
 TEST_F(ResolverIsHostShareable, ArraySizedOfHostShareable) {

@@ -52,6 +52,7 @@ class Variable;
 }  // namespace ast
 namespace sem {
 class Array;
+class Atomic;
 class Intrinsic;
 class Statement;
 }  // namespace sem
@@ -196,6 +197,13 @@ class Resolver {
     sem::Type* const sem;
   };
 
+  // Structure holding a pointer to the sem::Struct and an index to a member of
+  // that structure.
+  struct StructMember {
+    sem::Struct* structure;
+    size_t index;
+  };
+
   /// Resolves the program, without creating final the semantic nodes.
   /// @returns true on success, false on error
   bool ResolveInternal();
@@ -255,6 +263,8 @@ class Resolver {
                                      uint32_t el_size,
                                      uint32_t el_align,
                                      const Source& source);
+  bool ValidateAtomic(const ast::Atomic* a, const sem::Atomic* s);
+  bool ValidateAtomicUses();
   bool ValidateAssignment(const ast::AssignmentStatement* a);
   bool ValidateCallStatement(ast::CallStatement* stmt);
   bool ValidateEntryPoint(const ast::Function* func, const FunctionInfo* info);
@@ -401,6 +411,7 @@ class Resolver {
   ScopeStack<VariableInfo*> variable_stack_;
   std::unordered_map<Symbol, FunctionInfo*> symbol_to_function_;
   std::vector<FunctionInfo*> entry_points_;
+  std::vector<StructMember> atomic_members_;
   std::unordered_map<const ast::Function*, FunctionInfo*> function_to_info_;
   std::unordered_map<const ast::Variable*, VariableInfo*> variable_to_info_;
   std::unordered_map<const ast::CallExpression*, FunctionCallInfo>

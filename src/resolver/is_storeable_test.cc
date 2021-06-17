@@ -16,6 +16,7 @@
 
 #include "gmock/gmock.h"
 #include "src/resolver/resolver_test_helper.h"
+#include "src/sem/atomic_type.h"
 
 namespace tint {
 namespace resolver {
@@ -65,6 +66,11 @@ TEST_F(ResolverIsStorableTest, Pointer) {
   auto* ptr = create<sem::Pointer>(
       create<sem::I32>(), ast::StorageClass::kPrivate, ast::Access::kReadWrite);
   EXPECT_FALSE(r()->IsStorable(ptr));
+}
+
+TEST_F(ResolverIsStorableTest, Atomic) {
+  EXPECT_TRUE(r()->IsStorable(create<sem::Atomic>(create<sem::I32>())));
+  EXPECT_TRUE(r()->IsStorable(create<sem::Atomic>(create<sem::U32>())));
 }
 
 TEST_F(ResolverIsStorableTest, ArraySizedOfStorable) {
