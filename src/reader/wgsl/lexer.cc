@@ -474,6 +474,8 @@ Token Lexer::try_punctuation() {
 Token Lexer::check_keyword(const Source& source, const std::string& str) {
   if (str == "array")
     return {Token::Type::kArray, source, "array"};
+  if (str == "atomic")
+    return {Token::Type::kAtomic, source, "atomic"};
   if (str == "bitcast")
     return {Token::Type::kBitcast, source, "bitcast"};
   if (str == "bool")

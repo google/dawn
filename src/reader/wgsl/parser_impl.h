@@ -843,6 +843,7 @@ class ParserImpl {
   bool expect_decorations_consumed(const ast::DecorationList& list);
 
   Expect<ast::Type*> expect_type_decl_pointer(Token t);
+  Expect<ast::Type*> expect_type_decl_atomic(Token t);
   Expect<ast::Type*> expect_type_decl_vector(Token t);
   Expect<ast::Type*> expect_type_decl_array(Token t, ast::DecorationList decos);
   Expect<ast::Type*> expect_type_decl_matrix(Token t);

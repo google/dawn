@@ -117,6 +117,8 @@ class Token {
 
     /// A 'array'
     kArray,
+    /// A 'atomic'
+    kAtomic,
     /// A 'bitcast'
     kBitcast,
     /// A 'bool'

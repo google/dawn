@@ -1023,6 +1023,20 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingType) {
          "                ^\n");
 }
 
+TEST_F(ParserImplErrorTest, GlobalDeclVarAtomicMissingLessThan) {
+  EXPECT("var i : atomic;",
+         "test.wgsl:1:15 error: expected '<' for atomic declaration\n"
+         "var i : atomic;\n"
+         "              ^\n");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclVarAtomicMissingGreaterThan) {
+  EXPECT("var i : atomic<u32 x;",
+         "test.wgsl:1:20 error: expected '>' for atomic declaration\n"
+         "var i : atomic<u32 x;\n"
+         "                   ^\n");
+}
+
 TEST_F(ParserImplErrorTest, GlobalDeclVarStorageDeclInvalidClass) {
   EXPECT("var<fish> i : i32",
          "test.wgsl:1:5 error: invalid storage class for variable declaration\n"

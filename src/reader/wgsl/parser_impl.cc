@@ -1063,8 +1063,13 @@ Maybe<ast::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
     return expect_type_decl_vector(t);
   }
 
-  if (match(Token::Type::kPtr))
+  if (match(Token::Type::kPtr)) {
     return expect_type_decl_pointer(t);
+  }
+
+  if (match(Token::Type::kAtomic)) {
+    return expect_type_decl_atomic(t);
+  }
 
   if (match(Token::Type::kArray, &source)) {
     return expect_type_decl_array(t, std::move(decos));
@@ -1134,6 +1139,17 @@ Expect<ast::Type*> ParserImpl::expect_type_decl_pointer(Token t) {
 
   return builder_.ty.pointer(make_source_range_from(t.source()), subtype.value,
                              storage_class, access);
+}
+
+Expect<ast::Type*> ParserImpl::expect_type_decl_atomic(Token t) {
+  const char* use = "atomic declaration";
+
+  auto subtype = expect_lt_gt_block(use, [&] { return expect_type(use); });
+  if (subtype.errored) {
+    return Failure::kErrored;
+  }
+
+  return builder_.ty.atomic(make_source_range_from(t.source()), subtype.value);
 }
 
 Expect<ast::Type*> ParserImpl::expect_type_decl_vector(Token t) {

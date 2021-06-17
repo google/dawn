@@ -378,6 +378,68 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_BadAccess) {
   ASSERT_EQ(p->error(), "1:20: invalid value for access control");
 }
 
+TEST_F(ParserImplTest, TypeDecl_Atomic) {
+  auto p = parser("atomic<f32>");
+  auto t = p->type_decl();
+  EXPECT_TRUE(t.matched);
+  EXPECT_FALSE(t.errored);
+  ASSERT_NE(t.value, nullptr) << p->error();
+  ASSERT_FALSE(p->has_error());
+  ASSERT_TRUE(t.value->Is<ast::Atomic>());
+
+  auto* atomic = t.value->As<ast::Atomic>();
+  ASSERT_TRUE(atomic->type()->Is<ast::F32>());
+  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 12u}}));
+}
+
+TEST_F(ParserImplTest, TypeDecl_Atomic_ToVec) {
+  auto p = parser("atomic<vec2<f32>>");
+  auto t = p->type_decl();
+  EXPECT_TRUE(t.matched);
+  EXPECT_FALSE(t.errored);
+  ASSERT_NE(t.value, nullptr) << p->error();
+  ASSERT_FALSE(p->has_error());
+  ASSERT_TRUE(t.value->Is<ast::Atomic>());
+
+  auto* atomic = t.value->As<ast::Atomic>();
+  ASSERT_TRUE(atomic->type()->Is<ast::Vector>());
+
+  auto* vec = atomic->type()->As<ast::Vector>();
+  ASSERT_EQ(vec->size(), 2u);
+  ASSERT_TRUE(vec->type()->Is<ast::F32>());
+  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 18u}}));
+}
+
+TEST_F(ParserImplTest, TypeDecl_Atomic_MissingLessThan) {
+  auto p = parser("atomic f32>");
+  auto t = p->type_decl();
+  EXPECT_TRUE(t.errored);
+  EXPECT_FALSE(t.matched);
+  ASSERT_EQ(t.value, nullptr);
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(p->error(), "1:8: expected '<' for atomic declaration");
+}
+
+TEST_F(ParserImplTest, TypeDecl_Atomic_MissingGreaterThan) {
+  auto p = parser("atomic<f32");
+  auto t = p->type_decl();
+  EXPECT_TRUE(t.errored);
+  EXPECT_FALSE(t.matched);
+  ASSERT_EQ(t.value, nullptr);
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(p->error(), "1:11: expected '>' for atomic declaration");
+}
+
+TEST_F(ParserImplTest, TypeDecl_Atomic_MissingType) {
+  auto p = parser("atomic<>");
+  auto t = p->type_decl();
+  EXPECT_TRUE(t.errored);
+  EXPECT_FALSE(t.matched);
+  ASSERT_EQ(t.value, nullptr);
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(p->error(), "1:8: invalid type for atomic declaration");
+}
+
 TEST_F(ParserImplTest, TypeDecl_Array) {
   auto p = parser("array<f32, 5>");
   auto t = p->type_decl();

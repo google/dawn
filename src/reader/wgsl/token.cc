@@ -109,6 +109,8 @@ std::string Token::TypeToName(Type type) {
 
     case Token::Type::kArray:
       return "array";
+    case Token::Type::kAtomic:
+      return "atomic";
     case Token::Type::kBitcast:
       return "bitcast";
     case Token::Type::kBool:

@@ -943,7 +943,7 @@ INSTANTIATE_TEST_SUITE_P(RenamerTestMsl,
                              // "array",  // Also used in WGSL
                              "array_ref",
                              "as_type",
-                             "atomic",
+                             // "atomic",  // Also used in WGSL
                              "atomic_bool",
                              "atomic_int",
                              "atomic_uint",
