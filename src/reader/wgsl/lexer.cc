@@ -456,6 +456,10 @@ Token Lexer::try_punctuation() {
     type = Token::Type::kStar;
     pos_ += 1;
     location_.column += 1;
+  } else if (matches(pos_, "~")) {
+    type = Token::Type::kTilde;
+    pos_ += 1;
+    location_.column += 1;
   } else if (matches(pos_, "^")) {
     type = Token::Type::kXor;
     pos_ += 1;

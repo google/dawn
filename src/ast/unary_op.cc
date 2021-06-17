@@ -23,6 +23,10 @@ std::ostream& operator<<(std::ostream& out, UnaryOp mod) {
       out << "address-of";
       break;
     }
+    case UnaryOp::kComplement: {
+      out << "complement";
+      break;
+    }
     case UnaryOp::kIndirection: {
       out << "indirection";
       break;

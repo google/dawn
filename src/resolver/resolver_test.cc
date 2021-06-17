@@ -1946,7 +1946,8 @@ TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          UnaryOpExpressionTest,
-                         testing::Values(ast::UnaryOp::kNegation,
+                         testing::Values(ast::UnaryOp::kComplement,
+                                         ast::UnaryOp::kNegation,
                                          ast::UnaryOp::kNot));
 
 TEST_F(ResolverTest, StorageClass_SetsIfMissing) {

@@ -110,6 +110,8 @@ class Token {
     kSemicolon,
     /// A '*'
     kStar,
+    /// A '~'
+    kTilde,
     /// A '^'
     kXor,
 
@@ -445,6 +447,8 @@ class Token {
   bool IsSemicolon() const { return type_ == Type::kSemicolon; }
   /// @returns true if token is a '*'
   bool IsStar() const { return type_ == Type::kStar; }
+  /// @returns true if token is a '~'
+  bool IsTilde() const { return type_ == Type::kTilde; }
   /// @returns true if token is a '^'
   bool IsXor() const { return type_ == Type::kXor; }
 

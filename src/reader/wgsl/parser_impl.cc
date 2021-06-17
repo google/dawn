@@ -2308,6 +2308,7 @@ Expect<ast::ExpressionList> ParserImpl::expect_argument_expression_list(
 //   : singular_expression
 //   | MINUS unary_expression
 //   | BANG unary_expression
+//   | TILDE unary_expression
 //   | STAR unary_expression
 //   | AND unary_expression
 Maybe<ast::Expression*> ParserImpl::unary_expression() {
@@ -2318,6 +2319,8 @@ Maybe<ast::Expression*> ParserImpl::unary_expression() {
     op = ast::UnaryOp::kNegation;
   } else if (match(Token::Type::kBang)) {
     op = ast::UnaryOp::kNot;
+  } else if (match(Token::Type::kTilde)) {
+    op = ast::UnaryOp::kComplement;
   } else if (match(Token::Type::kStar)) {
     op = ast::UnaryOp::kIndirection;
   } else if (match(Token::Type::kAnd)) {

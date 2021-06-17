@@ -2500,6 +2500,7 @@ bool Resolver::UnaryOp(ast::UnaryOpExpression* unary) {
   const sem::Type* type = nullptr;
 
   switch (unary->op()) {
+    case ast::UnaryOp::kComplement:
     case ast::UnaryOp::kNegation:
     case ast::UnaryOp::kNot:
       // Result type matches the deref'd inner type.

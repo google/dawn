@@ -1158,6 +1158,9 @@ uint32_t Builder::GenerateUnaryOpExpression(ast::UnaryOpExpression* expr) {
 
   spv::Op op = spv::Op::OpNop;
   switch (expr->op()) {
+    case ast::UnaryOp::kComplement:
+      op = spv::Op::OpNot;
+      break;
     case ast::UnaryOp::kNegation:
       if (TypeOf(expr)->is_float_scalar_or_vector()) {
         op = spv::Op::OpFNegate;

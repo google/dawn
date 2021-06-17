@@ -1136,7 +1136,7 @@ TEST_F(SpvUnaryBitTest, Not_Int_Int) {
     __i32
     {
       UnaryOp[not set]{
-        not
+        complement
         ScalarConstructor[not set]{30}
       }
     }
@@ -1164,7 +1164,7 @@ TEST_F(SpvUnaryBitTest, Not_Int_Uint) {
     {
       Bitcast[not set]<__i32>{
         UnaryOp[not set]{
-          not
+          complement
           ScalarConstructor[not set]{10u}
         }
       }
@@ -1193,7 +1193,7 @@ TEST_F(SpvUnaryBitTest, Not_Uint_Int) {
     {
       Bitcast[not set]<__u32>{
         UnaryOp[not set]{
-          not
+          complement
           ScalarConstructor[not set]{30}
         }
       }
@@ -1221,7 +1221,7 @@ TEST_F(SpvUnaryBitTest, Not_Uint_Uint) {
     __u32
     {
       UnaryOp[not set]{
-        not
+        complement
         ScalarConstructor[not set]{10u}
       }
     }
@@ -1248,7 +1248,7 @@ TEST_F(SpvUnaryBitTest, Not_SignedVec_SignedVec) {
     __vec_2__i32
     {
       UnaryOp[not set]{
-        not
+        complement
         TypeConstructor[not set]{
           __vec_2__i32
           ScalarConstructor[not set]{30}
@@ -1280,7 +1280,7 @@ TEST_F(SpvUnaryBitTest, Not_SignedVec_UnsignedVec) {
     {
       Bitcast[not set]<__vec_2__i32>{
         UnaryOp[not set]{
-          not
+          complement
           TypeConstructor[not set]{
             __vec_2__u32
             ScalarConstructor[not set]{10u}
@@ -1313,7 +1313,7 @@ TEST_F(SpvUnaryBitTest, Not_UnsignedVec_SignedVec) {
     {
       Bitcast[not set]<__vec_2__u32>{
         UnaryOp[not set]{
-          not
+          complement
           TypeConstructor[not set]{
             __vec_2__i32
             ScalarConstructor[not set]{30}
@@ -1344,7 +1344,7 @@ TEST_F(SpvUnaryBitTest, Not_UnsignedVec_UnsignedVec) {
     __vec_2__u32
     {
       UnaryOp[not set]{
-        not
+        complement
         TypeConstructor[not set]{
           __vec_2__u32
           ScalarConstructor[not set]{10u}

@@ -2288,6 +2288,9 @@ bool GeneratorImpl::EmitUnaryOp(ast::UnaryOpExpression* expr) {
     case ast::UnaryOp::kAddressOf:
       out_ << "&";
       break;
+    case ast::UnaryOp::kComplement:
+      out_ << "~";
+      break;
     case ast::UnaryOp::kIndirection:
       out_ << "*";
       break;

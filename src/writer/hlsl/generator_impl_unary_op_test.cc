@@ -33,6 +33,18 @@ TEST_F(HlslUnaryOpTest, AddressOf) {
   EXPECT_EQ(result(), "expr");
 }
 
+TEST_F(HlslUnaryOpTest, Complement) {
+  Global("expr", ty.f32(), ast::StorageClass::kPrivate);
+  auto* op =
+      create<ast::UnaryOpExpression>(ast::UnaryOp::kComplement, Expr("expr"));
+  WrapInFunction(op);
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitExpression(pre, out, op)) << gen.error();
+  EXPECT_EQ(result(), "~(expr)");
+}
+
 TEST_F(HlslUnaryOpTest, Indirection) {
   Global("G", ty.f32(), ast::StorageClass::kPrivate);
   auto* p = Const(

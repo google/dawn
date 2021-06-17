@@ -102,6 +102,8 @@ std::string Token::TypeToName(Type type) {
       return ";";
     case Token::Type::kStar:
       return "*";
+    case Token::Type::kTilde:
+      return "~";
     case Token::Type::kXor:
       return "^";
 

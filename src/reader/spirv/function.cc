@@ -155,8 +155,10 @@ bool GetUnaryOp(SpvOp opcode, ast::UnaryOp* ast_unary_op) {
       *ast_unary_op = ast::UnaryOp::kNegation;
       return true;
     case SpvOpLogicalNot:
-    case SpvOpNot:
       *ast_unary_op = ast::UnaryOp::kNot;
+      return true;
+    case SpvOpNot:
+      *ast_unary_op = ast::UnaryOp::kComplement;
       return true;
     default:
       break;

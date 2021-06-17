@@ -2448,6 +2448,9 @@ bool GeneratorImpl::EmitUnaryOp(std::ostream& pre,
     case ast::UnaryOp::kIndirection:
     case ast::UnaryOp::kAddressOf:
       return EmitExpression(pre, out, expr->expr());
+    case ast::UnaryOp::kComplement:
+      out << "~";
+      break;
     case ast::UnaryOp::kNot:
       out << "!";
       break;

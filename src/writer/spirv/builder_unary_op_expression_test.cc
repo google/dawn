@@ -55,6 +55,23 @@ TEST_F(BuilderTest, UnaryOp_Negation_Float) {
 )");
 }
 
+TEST_F(BuilderTest, UnaryOp_Complement) {
+  auto* expr =
+      create<ast::UnaryOpExpression>(ast::UnaryOp::kComplement, Expr(1));
+  WrapInFunction(expr);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+%3 = OpConstant %2 1
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%1 = OpNot %2 %3
+)");
+}
+
 TEST_F(BuilderTest, UnaryOp_Not) {
   auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, Expr(false));
   WrapInFunction(expr);
