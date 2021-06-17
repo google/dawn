@@ -790,11 +790,12 @@ TEST_F(ResolverIntrinsicDataTest, ArrayLength_Error_ArraySized) {
 
   EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(r()->error(),
-            "error: no matching call to arrayLength(array<i32, 4>)\n\n"
-            "2 candidate functions:\n"
-            "  arrayLength(array<T>) -> u32\n"
-            "  arrayLength(ptr<array<T>>) -> u32\n");
+  EXPECT_EQ(r()->error(), R"(error: no matching call to arrayLength(array<i32, 4>)
+
+2 candidate functions:
+  arrayLength(array<T>) -> u32
+  arrayLength(ptr<array<T>>) -> u32
+)");
 }
 
 TEST_F(ResolverIntrinsicDataTest, Normalize_Vector) {
@@ -814,10 +815,11 @@ TEST_F(ResolverIntrinsicDataTest, Normalize_Error_NoParams) {
 
   EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(r()->error(),
-            "error: no matching call to normalize()\n\n"
-            "1 candidate function:\n"
-            "  normalize(vecN<f32>) -> vecN<f32>\n");
+  EXPECT_EQ(r()->error(), R"(error: no matching call to normalize()
+
+1 candidate function:
+  normalize(vecN<f32>) -> vecN<f32>
+)");
 }
 
 TEST_F(ResolverIntrinsicDataTest, FrexpScalar) {
@@ -855,8 +857,8 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_FirstParamInt) {
       R"(error: no matching call to frexp(i32, ptr<workgroup, i32, read_write>)
 
 2 candidate functions:
-  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32
-  frexp(vecN<f32>, ptr<vecN<T>>) -> vecN<f32>  where: T is i32 or u32
+  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32, S is function, private or workgroup
+  frexp(vecN<f32>, ptr<vecN<T>>) -> vecN<f32>  where: T is i32 or u32, S is function, private or workgroup
 )");
 }
 
@@ -872,8 +874,8 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_SecondParamFloatPtr) {
       R"(error: no matching call to frexp(f32, ptr<workgroup, f32, read_write>)
 
 2 candidate functions:
-  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32
-  frexp(vecN<f32>, ptr<vecN<T>>) -> vecN<f32>  where: T is i32 or u32
+  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32, S is function, private or workgroup
+  frexp(vecN<f32>, ptr<vecN<T>>) -> vecN<f32>  where: T is i32 or u32, S is function, private or workgroup
 )");
 }
 
@@ -883,12 +885,12 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_SecondParamNotAPointer) {
 
   EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(r()->error(),
-            "error: no matching call to frexp(f32, i32)\n\n"
-            "2 candidate functions:\n"
-            "  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32\n"
-            "  frexp(vecN<f32>, ptr<vecN<T>>) -> vecN<f32>  "
-            "where: T is i32 or u32\n");
+  EXPECT_EQ(r()->error(), R"(error: no matching call to frexp(f32, i32)
+
+2 candidate functions:
+  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32, S is function, private or workgroup
+  frexp(vecN<f32>, ptr<vecN<T>>) -> vecN<f32>  where: T is i32 or u32, S is function, private or workgroup
+)");
 }
 
 TEST_F(ResolverIntrinsicDataTest, Frexp_Error_VectorSizesDontMatch) {
@@ -903,8 +905,8 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_VectorSizesDontMatch) {
       R"(error: no matching call to frexp(vec2<f32>, ptr<workgroup, vec4<i32>, read_write>)
 
 2 candidate functions:
-  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32
-  frexp(vecN<f32>, ptr<vecN<T>>) -> vecN<f32>  where: T is i32 or u32
+  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32, S is function, private or workgroup
+  frexp(vecN<f32>, ptr<vecN<T>>) -> vecN<f32>  where: T is i32 or u32, S is function, private or workgroup
 )");
 }
 
@@ -943,8 +945,8 @@ TEST_F(ResolverIntrinsicDataTest, Modf_Error_FirstParamInt) {
       R"(error: no matching call to modf(i32, ptr<workgroup, f32, read_write>)
 
 2 candidate functions:
-  modf(f32, ptr<f32>) -> f32
-  modf(vecN<f32>, ptr<vecN<f32>>) -> vecN<f32>
+  modf(f32, ptr<f32>) -> f32  where: S is function, private or workgroup
+  modf(vecN<f32>, ptr<vecN<f32>>) -> vecN<f32>  where: S is function, private or workgroup
 )");
 }
 
@@ -960,8 +962,8 @@ TEST_F(ResolverIntrinsicDataTest, Modf_Error_SecondParamIntPtr) {
       R"(error: no matching call to modf(f32, ptr<workgroup, i32, read_write>)
 
 2 candidate functions:
-  modf(f32, ptr<f32>) -> f32
-  modf(vecN<f32>, ptr<vecN<f32>>) -> vecN<f32>
+  modf(f32, ptr<f32>) -> f32  where: S is function, private or workgroup
+  modf(vecN<f32>, ptr<vecN<f32>>) -> vecN<f32>  where: S is function, private or workgroup
 )");
 }
 
@@ -971,11 +973,12 @@ TEST_F(ResolverIntrinsicDataTest, Modf_Error_SecondParamNotAPointer) {
 
   EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(r()->error(),
-            "error: no matching call to modf(f32, f32)\n\n"
-            "2 candidate functions:\n"
-            "  modf(f32, ptr<f32>) -> f32\n"
-            "  modf(vecN<f32>, ptr<vecN<f32>>) -> vecN<f32>\n");
+  EXPECT_EQ(r()->error(), R"(error: no matching call to modf(f32, f32)
+
+2 candidate functions:
+  modf(f32, ptr<f32>) -> f32  where: S is function, private or workgroup
+  modf(vecN<f32>, ptr<vecN<f32>>) -> vecN<f32>  where: S is function, private or workgroup
+)");
 }
 
 TEST_F(ResolverIntrinsicDataTest, Modf_Error_VectorSizesDontMatch) {
@@ -990,8 +993,8 @@ TEST_F(ResolverIntrinsicDataTest, Modf_Error_VectorSizesDontMatch) {
       R"(error: no matching call to modf(vec2<f32>, ptr<workgroup, vec4<f32>, read_write>)
 
 2 candidate functions:
-  modf(vecN<f32>, ptr<vecN<f32>>) -> vecN<f32>
-  modf(f32, ptr<f32>) -> f32
+  modf(vecN<f32>, ptr<vecN<f32>>) -> vecN<f32>  where: S is function, private or workgroup
+  modf(f32, ptr<f32>) -> f32  where: S is function, private or workgroup
 )");
 }
 
@@ -1664,10 +1667,11 @@ TEST_F(ResolverIntrinsicTest, Determinant_NotSquare) {
 
   EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(r()->error(),
-            "error: no matching call to determinant(mat2x3<f32>)\n\n"
-            "1 candidate function:\n"
-            "  determinant(matNxN<f32>) -> f32\n");
+  EXPECT_EQ(r()->error(), R"(error: no matching call to determinant(mat2x3<f32>)
+
+1 candidate function:
+  determinant(matNxN<f32>) -> f32
+)");
 }
 
 TEST_F(ResolverIntrinsicTest, Determinant_NotMatrix) {
@@ -1678,10 +1682,11 @@ TEST_F(ResolverIntrinsicTest, Determinant_NotMatrix) {
 
   EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(r()->error(),
-            "error: no matching call to determinant(f32)\n\n"
-            "1 candidate function:\n"
-            "  determinant(matNxN<f32>) -> f32\n");
+  EXPECT_EQ(r()->error(), R"(error: no matching call to determinant(f32)
+
+1 candidate function:
+  determinant(matNxN<f32>) -> f32
+)");
 }
 
 using ResolverIntrinsicTest_Texture =
