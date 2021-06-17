@@ -381,7 +381,7 @@ namespace dawn_native { namespace d3d12 {
         TextureCopySubresource::CopyInfo* copy1 = copy.AddCopy();
         *copy1 = copy0;
         copy1->alignedOffset += 2 * bytesPerRow;
-        copy1->textureOffset.y = copySize.height - blockInfo.height;
+        copy1->textureOffset.y += copySize.height - blockInfo.height;
         // Offset two rows from the copy height for the bufferOffset (See the figure above):
         //   - one for the row we advanced in the buffer: row (N + 4).
         //   - one for the last row we want to copy: row (N + 3) itself.
