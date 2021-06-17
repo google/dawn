@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn all(vec<4, bool>) -> bool
 fn all_986c7b() {
   var res: bool = all(vec4<bool>());
 }

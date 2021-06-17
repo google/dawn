@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn sqrt(vec<4, f32>) -> vec<4, f32>
 fn sqrt_aa0d7a() {
   var res: vec4<f32> = sqrt(vec4<f32>());
 }

@@ -1,4 +1,4 @@
-intrinsics/gen/arrayLength/647a40.wgsl:31:18 warning: use of deprecated intrinsic
+intrinsics/gen/arrayLength/647a40.wgsl:33:18 warning: use of deprecated intrinsic
   var res: u32 = arrayLength(sb.arg_0);
                  ^^^^^^^^^^^
 

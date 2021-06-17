@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn inverseSqrt(f32) -> f32
 fn inverseSqrt_84407e() {
   var res: f32 = inverseSqrt(1.0);
 }

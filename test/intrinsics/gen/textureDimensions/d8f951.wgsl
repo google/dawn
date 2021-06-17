@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_storage_1d<r32float, read>;
+
+// fn textureDimensions(texture: texture_storage_1d<r32float, read>) -> i32
 fn textureDimensions_d8f951() {
   var res: i32 = textureDimensions(arg_0);
 }

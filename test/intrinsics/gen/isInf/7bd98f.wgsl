@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn isInf(f32) -> bool
 fn isInf_7bd98f() {
   var res: bool = isInf(1.0);
 }

@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_external;
+
+// fn ignore(texture_external)
 fn ignore_5c9edf() {
   ignore(arg_0);
 }

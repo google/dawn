@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_storage_1d<rgba32uint, write>;
+
+// fn textureStore(texture: texture_storage_1d<rgba32uint, write>, coords: i32, value: vec4<u32>)
 fn textureStore_fb9a8f() {
   textureStore(arg_0, 1, vec4<u32>());
 }

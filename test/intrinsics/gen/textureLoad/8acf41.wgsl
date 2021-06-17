@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_external;
+
+// fn textureLoad(texture: texture_external, coords: vec2<i32>) -> vec4<f32>
 fn textureLoad_8acf41() {
   var res: vec4<f32> = textureLoad(arg_0, vec2<i32>());
 }

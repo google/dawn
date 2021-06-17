@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn max(u32, u32) -> u32
 fn max_0c0aae() {
   var res: u32 = max(1u, 1u);
 }

@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn step(vec<4, f32>, vec<4, f32>) -> vec<4, f32>
 fn step_e2b337() {
   var res: vec4<f32> = step(vec4<f32>(), vec4<f32>());
 }

@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_1d<i32>;
+
+// fn textureDimensions(texture: texture_1d<i32>) -> i32
 fn textureDimensions_423f99() {
   var res: i32 = textureDimensions(arg_0);
 }

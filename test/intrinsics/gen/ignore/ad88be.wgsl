@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_depth_cube_array;
+
+// fn ignore(texture_depth_cube_array)
 fn ignore_ad88be() {
   ignore(arg_0);
 }

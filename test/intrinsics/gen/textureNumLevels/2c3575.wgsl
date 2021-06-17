@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_depth_cube_array;
+
+// fn textureNumLevels(texture: texture_depth_cube_array) -> i32
 fn textureNumLevels_2c3575() {
   var res: i32 = textureNumLevels(arg_0);
 }

@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn isNormal(f32) -> bool
 fn isNormal_c6e880() {
   var res: bool = isNormal(1.0);
 }

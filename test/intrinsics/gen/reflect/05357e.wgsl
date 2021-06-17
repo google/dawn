@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn reflect(vec<4, f32>, vec<4, f32>) -> vec<4, f32>
 fn reflect_05357e() {
   var res: vec4<f32> = reflect(vec4<f32>(), vec4<f32>());
 }

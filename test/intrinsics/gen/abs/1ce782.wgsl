@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn abs(vec<4, u32>) -> vec<4, u32>
 fn abs_1ce782() {
   var res: vec4<u32> = abs(vec4<u32>());
 }

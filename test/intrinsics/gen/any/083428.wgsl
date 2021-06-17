@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn any(vec<4, bool>) -> bool
 fn any_083428() {
   var res: bool = any(vec4<bool>());
 }

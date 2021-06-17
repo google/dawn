@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn reverseBits(u32) -> u32
 fn reverseBits_e31adf() {
   var res: u32 = reverseBits(1u);
 }

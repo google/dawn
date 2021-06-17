@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn exp(vec<2, f32>) -> vec<2, f32>
 fn exp_1951e7() {
   var res: vec2<f32> = exp(vec2<f32>());
 }

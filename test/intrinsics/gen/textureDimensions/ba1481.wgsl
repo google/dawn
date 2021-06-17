@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_external;
+
+// fn textureDimensions(texture: texture_external) -> vec2<i32>
 fn textureDimensions_ba1481() {
   var res: vec2<i32> = textureDimensions(arg_0);
 }

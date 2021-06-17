@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn tanh(vec<3, f32>) -> vec<3, f32>
 fn tanh_9f9fb9() {
   var res: vec3<f32> = tanh(vec3<f32>());
 }

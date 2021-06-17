@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn modf(vec<4, f32>, ptr<function, vec<4, f32>, read_write>) -> vec<4, f32>
 fn modf_4bb324() {
   var arg_1: vec4<f32>;
   var res: vec4<f32> = modf(vec4<f32>(), &arg_1);

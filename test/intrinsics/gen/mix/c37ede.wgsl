@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn mix(vec<4, f32>, vec<4, f32>, vec<4, f32>) -> vec<4, f32>
 fn mix_c37ede() {
   var res: vec4<f32> = mix(vec4<f32>(), vec4<f32>(), vec4<f32>());
 }

@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn clamp(u32, u32, u32) -> u32
 fn clamp_a2de25() {
   var res: u32 = clamp(1u, 1u, 1u);
 }

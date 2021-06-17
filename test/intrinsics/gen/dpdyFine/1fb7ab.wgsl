@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn dpdyFine(vec<3, f32>) -> vec<3, f32>
 fn dpdyFine_1fb7ab() {
   var res: vec3<f32> = dpdyFine(vec3<f32>());
 }

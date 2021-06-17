@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn select(bool, bool, bool) -> bool
 fn select_c31f9e() {
   var res: bool = select(bool(), bool(), bool());
 }

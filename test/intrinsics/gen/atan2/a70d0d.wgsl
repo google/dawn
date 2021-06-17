@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn atan2(vec<3, f32>, vec<3, f32>) -> vec<3, f32>
 fn atan2_a70d0d() {
   var res: vec3<f32> = atan2(vec3<f32>(), vec3<f32>());
 }

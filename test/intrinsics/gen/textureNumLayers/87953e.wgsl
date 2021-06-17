@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_2d_array<u32>;
+
+// fn textureNumLayers(texture: texture_2d_array<u32>) -> i32
 fn textureNumLayers_87953e() {
   var res: i32 = textureNumLayers(arg_0);
 }

@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn cross(vec3<f32>, vec3<f32>) -> vec3<f32>
 fn cross_041cb0() {
   var res: vec3<f32> = cross(vec3<f32>(), vec3<f32>());
 }

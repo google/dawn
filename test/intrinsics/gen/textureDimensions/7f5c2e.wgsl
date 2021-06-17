@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_storage_2d<rg32sint, write>;
+
+// fn textureDimensions(texture: texture_storage_2d<rg32sint, write>) -> vec2<i32>
 fn textureDimensions_7f5c2e() {
   var res: vec2<i32> = textureDimensions(arg_0);
 }

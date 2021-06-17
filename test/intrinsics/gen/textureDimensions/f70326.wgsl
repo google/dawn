@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_cube_array<i32>;
+
+// fn textureDimensions(texture: texture_cube_array<i32>) -> vec3<i32>
 fn textureDimensions_f70326() {
   var res: vec3<i32> = textureDimensions(arg_0);
 }

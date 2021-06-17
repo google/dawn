@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn frexp(f32, ptr<function, i32, write>) -> f32
 fn frexp_e061dd() {
   var arg_1: i32;
   var res: f32 = frexp(1.0, &arg_1);

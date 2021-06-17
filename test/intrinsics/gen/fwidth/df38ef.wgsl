@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn fwidth(f32) -> f32
 fn fwidth_df38ef() {
   var res: f32 = fwidth(1.0);
 }

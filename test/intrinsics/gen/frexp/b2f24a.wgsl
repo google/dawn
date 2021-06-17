@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn frexp(f32, ptr<function, u32, read_write>) -> f32
 fn frexp_b2f24a() {
   var arg_1: u32;
   var res: f32 = frexp(1.0, &arg_1);

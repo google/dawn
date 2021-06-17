@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_multisampled_2d<i32>;
+
+// fn textureDimensions(texture: texture_multisampled_2d<i32>) -> vec2<i32>
 fn textureDimensions_daf7c0() {
   var res: vec2<i32> = textureDimensions(arg_0);
 }

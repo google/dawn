@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn cosh(vec<4, f32>) -> vec<4, f32>
 fn cosh_e0c1de() {
   var res: vec4<f32> = cosh(vec4<f32>());
 }

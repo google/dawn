@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn storageBarrier()
 fn storageBarrier_d87211() {
   storageBarrier();
 }

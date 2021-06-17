@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn isNormal(vec<4, f32>) -> vec<4, bool>
 fn isNormal_863dcd() {
   var res: vec4<bool> = isNormal(vec4<f32>());
 }

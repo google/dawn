@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_depth_2d;
+
+// fn textureDimensions(texture: texture_depth_2d, level: i32) -> vec2<i32>
 fn textureDimensions_12c9bb() {
   var res: vec2<i32> = textureDimensions(arg_0, 1);
 }

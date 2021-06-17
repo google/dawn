@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn determinant(mat<3, 3, f32>) -> f32
 fn determinant_2b62ba() {
   var res: f32 = determinant(mat3x3<f32>());
 }

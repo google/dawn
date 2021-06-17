@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn inverseSqrt(vec<3, f32>) -> vec<3, f32>
 fn inverseSqrt_b197b1() {
   var res: vec3<f32> = inverseSqrt(vec3<f32>());
 }

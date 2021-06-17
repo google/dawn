@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn isInf(vec<3, f32>) -> vec<3, bool>
 fn isInf_666f2a() {
   var res: vec3<bool> = isInf(vec3<f32>());
 }

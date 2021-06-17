@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: sampler_comparison;
+
+// fn ignore(sampler_comparison)
 fn ignore_b469af() {
   ignore(arg_0);
 }

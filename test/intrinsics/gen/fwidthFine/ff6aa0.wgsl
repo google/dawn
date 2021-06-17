@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn fwidthFine(vec<2, f32>) -> vec<2, f32>
 fn fwidthFine_ff6aa0() {
   var res: vec2<f32> = fwidthFine(vec2<f32>());
 }

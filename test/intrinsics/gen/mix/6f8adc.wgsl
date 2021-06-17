@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn mix(vec<2, f32>, vec<2, f32>, vec<2, f32>) -> vec<2, f32>
 fn mix_6f8adc() {
   var res: vec2<f32> = mix(vec2<f32>(), vec2<f32>(), vec2<f32>());
 }

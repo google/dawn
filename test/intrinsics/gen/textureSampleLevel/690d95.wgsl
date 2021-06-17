@@ -24,6 +24,8 @@
 
 [[group(1), binding(0)]] var arg_0: texture_2d<f32>;
 [[group(1), binding(1)]] var arg_1: sampler;
+
+// fn textureSampleLevel(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, level: f32, offset: vec2<i32>) -> vec4<f32>
 fn textureSampleLevel_690d95() {
   var res: vec4<f32> = textureSampleLevel(arg_0, arg_1, vec2<f32>(), 1.0, vec2<i32>());
 }

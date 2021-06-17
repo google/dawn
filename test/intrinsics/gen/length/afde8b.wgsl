@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn length(vec<2, f32>) -> f32
 fn length_afde8b() {
   var res: f32 = length(vec2<f32>());
 }

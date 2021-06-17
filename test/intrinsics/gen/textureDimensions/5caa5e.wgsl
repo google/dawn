@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_storage_1d<rgba32uint, write>;
+
+// fn textureDimensions(texture: texture_storage_1d<rgba32uint, write>) -> i32
 fn textureDimensions_5caa5e() {
   var res: i32 = textureDimensions(arg_0);
 }

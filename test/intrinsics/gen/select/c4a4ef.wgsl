@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn select(vec<4, u32>, vec<4, u32>, vec<4, bool>) -> vec<4, u32>
 fn select_c4a4ef() {
   var res: vec4<u32> = select(vec4<u32>(), vec4<u32>(), vec4<bool>());
 }

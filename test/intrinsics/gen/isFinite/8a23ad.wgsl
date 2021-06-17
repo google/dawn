@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn isFinite(vec<3, f32>) -> vec<3, bool>
 fn isFinite_8a23ad() {
   var res: vec3<bool> = isFinite(vec3<f32>());
 }

@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn frexp(vec<3, f32>, ptr<function, vec<3, u32>, read>) -> vec<3, f32>
 fn frexp_64e816() {
   var arg_1: vec3<u32>;
   var res: vec3<f32> = frexp(vec3<f32>(), &arg_1);

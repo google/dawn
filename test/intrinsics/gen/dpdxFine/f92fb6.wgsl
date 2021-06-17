@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn dpdxFine(vec<3, f32>) -> vec<3, f32>
 fn dpdxFine_f92fb6() {
   var res: vec3<f32> = dpdxFine(vec3<f32>());
 }

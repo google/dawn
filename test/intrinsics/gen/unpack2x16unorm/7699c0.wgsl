@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn unpack2x16unorm(u32) -> vec2<f32>
 fn unpack2x16unorm_7699c0() {
   var res: vec2<f32> = unpack2x16unorm(1u);
 }

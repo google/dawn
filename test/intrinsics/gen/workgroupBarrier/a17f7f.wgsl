@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn workgroupBarrier()
 fn workgroupBarrier_a17f7f() {
   workgroupBarrier();
 }

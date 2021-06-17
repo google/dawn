@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn smoothStep(f32, f32, f32) -> f32
 fn smoothStep_cb0bfb() {
   var res: f32 = smoothStep(1.0, 1.0, 1.0);
 }

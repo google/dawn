@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn modf(f32, ptr<function, f32, read_write>) -> f32
 fn modf_546e09() {
   var arg_1: f32;
   var res: f32 = modf(1.0, &arg_1);

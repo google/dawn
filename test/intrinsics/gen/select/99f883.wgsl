@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn select(u32, u32, bool) -> u32
 fn select_99f883() {
   var res: u32 = select(1u, 1u, bool());
 }

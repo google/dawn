@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn select(i32, i32, bool) -> i32
 fn select_ed8a15() {
   var res: i32 = select(1, 1, bool());
 }

@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn transpose(mat<3, 2, f32>) -> mat<2, 3, f32>
 fn transpose_ed4bdc() {
   var res: mat2x3<f32> = transpose(mat3x2<f32>());
 }

@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn select(vec<4, i32>, vec<4, i32>, vec<4, bool>) -> vec<4, i32>
 fn select_a2860e() {
   var res: vec4<i32> = select(vec4<i32>(), vec4<i32>(), vec4<bool>());
 }

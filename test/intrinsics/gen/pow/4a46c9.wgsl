@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn pow(vec<3, f32>, vec<3, f32>) -> vec<3, f32>
 fn pow_4a46c9() {
   var res: vec3<f32> = pow(vec3<f32>(), vec3<f32>());
 }

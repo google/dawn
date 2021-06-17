@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn sinh(vec<2, f32>) -> vec<2, f32>
 fn sinh_b9860e() {
   var res: vec2<f32> = sinh(vec2<f32>());
 }

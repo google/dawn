@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn unpack4x8snorm(u32) -> vec4<f32>
 fn unpack4x8snorm_523fb3() {
   var res: vec4<f32> = unpack4x8snorm(1u);
 }

@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn isFinite(f32) -> bool
 fn isFinite_426f9f() {
   var res: bool = isFinite(1.0);
 }

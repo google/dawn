@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn normalize(vec<3, f32>) -> vec<3, f32>
 fn normalize_64d8c0() {
   var res: vec3<f32> = normalize(vec3<f32>());
 }

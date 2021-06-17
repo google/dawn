@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn sinh(vec<4, f32>) -> vec<4, f32>
 fn sinh_445e33() {
   var res: vec4<f32> = sinh(vec4<f32>());
 }

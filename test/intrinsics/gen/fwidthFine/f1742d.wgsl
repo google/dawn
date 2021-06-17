@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn fwidthFine(f32) -> f32
 fn fwidthFine_f1742d() {
   var res: f32 = fwidthFine(1.0);
 }

@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn isNan(f32) -> bool
 fn isNan_e4978e() {
   var res: bool = isNan(1.0);
 }

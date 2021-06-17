@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_storage_2d<r32sint, read>;
+
+// fn textureLoad(texture: texture_storage_2d<r32sint, read>, coords: vec2<i32>) -> vec4<i32>
 fn textureLoad_eb573b() {
   var res: vec4<i32> = textureLoad(arg_0, vec2<i32>());
 }

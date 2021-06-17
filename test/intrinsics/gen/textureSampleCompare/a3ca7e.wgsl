@@ -24,6 +24,8 @@
 
 [[group(1), binding(0)]] var arg_0: texture_depth_cube_array;
 [[group(1), binding(1)]] var arg_1: sampler_comparison;
+
+// fn textureSampleCompare(texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: i32, depth_ref: f32) -> f32
 fn textureSampleCompare_a3ca7e() {
   var res: f32 = textureSampleCompare(arg_0, arg_1, vec3<f32>(), 1, 1.0);
 }

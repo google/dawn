@@ -56,6 +56,8 @@ struct SB {
 {{-   end -}}
 
 {{- /* Generate the function that calls the intrinsic */ -}}
+{{- /*newline*/}}
+// {{$.Overload}}
 fn {{$permutation}}() {
 {{/* Build the parameters either as 'var' or inline values */ -}}
 {{-   range $i, $p := .Parameters -}}

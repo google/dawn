@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn trunc(vec<4, f32>) -> vec<4, f32>
 fn trunc_e183aa() {
   var res: vec4<f32> = trunc(vec4<f32>());
 }

@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_2d_array<u32>;
+
+// fn textureLoad(texture: texture_2d_array<u32>, coords: vec2<i32>, array_index: i32, level: i32) -> vec4<u32>
 fn textureLoad_7c90e5() {
   var res: vec4<u32> = textureLoad(arg_0, vec2<i32>(), 1, 1);
 }

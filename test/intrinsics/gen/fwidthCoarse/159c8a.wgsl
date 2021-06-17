@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn fwidthCoarse(f32) -> f32
 fn fwidthCoarse_159c8a() {
   var res: f32 = fwidthCoarse(1.0);
 }

@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_storage_2d<rgba8snorm, read>;
+
+// fn textureDimensions(texture: texture_storage_2d<rgba8snorm, read>) -> vec2<i32>
 fn textureDimensions_2e0662() {
   var res: vec2<i32> = textureDimensions(arg_0);
 }

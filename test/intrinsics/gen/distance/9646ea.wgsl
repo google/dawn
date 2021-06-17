@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn distance(vec<4, f32>, vec<4, f32>) -> f32
 fn distance_9646ea() {
   var res: f32 = distance(vec4<f32>(), vec4<f32>());
 }

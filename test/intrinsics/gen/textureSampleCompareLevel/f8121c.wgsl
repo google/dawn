@@ -24,6 +24,8 @@
 
 [[group(1), binding(0)]] var arg_0: texture_depth_2d;
 [[group(1), binding(1)]] var arg_1: sampler_comparison;
+
+// fn textureSampleCompareLevel(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32, offset: vec2<i32>) -> f32
 fn textureSampleCompareLevel_f8121c() {
   var res: f32 = textureSampleCompareLevel(arg_0, arg_1, vec2<f32>(), 1.0, vec2<i32>());
 }

@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn min(vec<4, i32>, vec<4, i32>) -> vec<4, i32>
 fn min_3941e1() {
   var res: vec4<i32> = min(vec4<i32>(), vec4<i32>());
 }

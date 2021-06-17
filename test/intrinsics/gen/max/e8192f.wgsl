@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn max(vec<2, i32>, vec<2, i32>) -> vec<2, i32>
 fn max_e8192f() {
   var res: vec2<i32> = max(vec2<i32>(), vec2<i32>());
 }

@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn dpdy(vec<2, f32>) -> vec<2, f32>
 fn dpdy_a8b56e() {
   var res: vec2<f32> = dpdy(vec2<f32>());
 }

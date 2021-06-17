@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn isNan(vec<3, f32>) -> vec<3, bool>
 fn isNan_1280ab() {
   var res: vec3<bool> = isNan(vec3<f32>());
 }

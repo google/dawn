@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn tan(vec<3, f32>) -> vec<3, f32>
 fn tan_7ea104() {
   var res: vec3<f32> = tan(vec3<f32>());
 }

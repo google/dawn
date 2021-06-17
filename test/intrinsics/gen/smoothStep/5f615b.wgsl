@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn smoothStep(vec<4, f32>, vec<4, f32>, vec<4, f32>) -> vec<4, f32>
 fn smoothStep_5f615b() {
   var res: vec4<f32> = smoothStep(vec4<f32>(), vec4<f32>(), vec4<f32>());
 }

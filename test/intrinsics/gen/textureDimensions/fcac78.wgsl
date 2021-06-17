@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_storage_3d<rgba8uint, write>;
+
+// fn textureDimensions(texture: texture_storage_3d<rgba8uint, write>) -> vec3<i32>
 fn textureDimensions_fcac78() {
   var res: vec3<i32> = textureDimensions(arg_0);
 }

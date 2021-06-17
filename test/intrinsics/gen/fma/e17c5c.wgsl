@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn fma(vec<3, f32>, vec<3, f32>, vec<3, f32>) -> vec<3, f32>
 fn fma_e17c5c() {
   var res: vec3<f32> = fma(vec3<f32>(), vec3<f32>(), vec3<f32>());
 }

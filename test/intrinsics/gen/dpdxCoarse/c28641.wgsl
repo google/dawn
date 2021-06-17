@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn dpdxCoarse(vec<4, f32>) -> vec<4, f32>
 fn dpdxCoarse_c28641() {
   var res: vec4<f32> = dpdxCoarse(vec4<f32>());
 }

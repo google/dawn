@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn ceil(vec<3, f32>) -> vec<3, f32>
 fn ceil_34064b() {
   var res: vec3<f32> = ceil(vec3<f32>());
 }

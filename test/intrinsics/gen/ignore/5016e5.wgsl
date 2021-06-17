@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: sampler;
+
+// fn ignore(sampler)
 fn ignore_5016e5() {
   ignore(arg_0);
 }

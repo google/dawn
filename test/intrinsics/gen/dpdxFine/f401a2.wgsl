@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn dpdxFine(f32) -> f32
 fn dpdxFine_f401a2() {
   var res: f32 = dpdxFine(1.0);
 }

@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn countOneBits(i32) -> i32
 fn countOneBits_fd88b2() {
   var res: i32 = countOneBits(1);
 }

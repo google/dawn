@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn select(vec<3, i32>, vec<3, i32>, vec<3, bool>) -> vec<3, i32>
 fn select_01e2cd() {
   var res: vec3<i32> = select(vec3<i32>(), vec3<i32>(), vec3<bool>());
 }

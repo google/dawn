@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn clamp(vec<2, i32>, vec<2, i32>, vec<2, i32>) -> vec<2, i32>
 fn clamp_6c1749() {
   var res: vec2<i32> = clamp(vec2<i32>(), vec2<i32>(), vec2<i32>());
 }

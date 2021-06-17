@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn pack4x8unorm(vec4<f32>) -> u32
 fn pack4x8unorm_95c456() {
   var res: u32 = pack4x8unorm(vec4<f32>());
 }

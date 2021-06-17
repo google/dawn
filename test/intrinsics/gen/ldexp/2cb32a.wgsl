@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn ldexp(vec<3, f32>, vec<3, u32>) -> vec<3, f32>
 fn ldexp_2cb32a() {
   var res: vec3<f32> = ldexp(vec3<f32>(), vec3<u32>());
 }

@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn length(vec<3, f32>) -> f32
 fn length_056071() {
   var res: f32 = length(vec3<f32>());
 }

@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_multisampled_2d<u32>;
+
+// fn textureNumSamples(texture: texture_multisampled_2d<u32>) -> i32
 fn textureNumSamples_42f8bb() {
   var res: i32 = textureNumSamples(arg_0);
 }

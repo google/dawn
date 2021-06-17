@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn cosh(f32) -> f32
 fn cosh_da92dd() {
   var res: f32 = cosh(1.0);
 }

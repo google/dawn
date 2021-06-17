@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_depth_cube;
+
+// fn ignore(texture_depth_cube)
 fn ignore_509355() {
   ignore(arg_0);
 }

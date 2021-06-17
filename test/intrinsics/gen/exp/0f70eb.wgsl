@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn exp(vec<4, f32>) -> vec<4, f32>
 fn exp_0f70eb() {
   var res: vec4<f32> = exp(vec4<f32>());
 }

@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_depth_2d_array;
+
+// fn textureLoad(texture: texture_depth_2d_array, coords: vec2<i32>, array_index: i32, level: i32) -> f32
 fn textureLoad_9b2667() {
   var res: f32 = textureLoad(arg_0, vec2<i32>(), 1, 1);
 }

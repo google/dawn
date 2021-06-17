@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn select(f32, f32, bool) -> f32
 fn select_416e14() {
   var res: f32 = select(1.0, 1.0, bool());
 }

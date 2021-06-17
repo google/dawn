@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn log2(vec<2, f32>) -> vec<2, f32>
 fn log2_aea659() {
   var res: vec2<f32> = log2(vec2<f32>());
 }

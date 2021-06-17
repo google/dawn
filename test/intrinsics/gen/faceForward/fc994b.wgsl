@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn faceForward(f32, f32, f32) -> f32
 fn faceForward_fc994b() {
   var res: f32 = faceForward(1.0, 1.0, 1.0);
 }

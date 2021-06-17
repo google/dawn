@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn reverseBits(vec<3, i32>) -> vec<3, i32>
 fn reverseBits_c21bc1() {
   var res: vec3<i32> = reverseBits(vec3<i32>());
 }

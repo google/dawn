@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_depth_2d_array;
+
+// fn ignore(texture_depth_2d_array)
 fn ignore_c8a0ee() {
   ignore(arg_0);
 }

@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn ldexp(f32, i32) -> f32
 fn ldexp_db8b49() {
   var res: f32 = ldexp(1.0, 1);
 }

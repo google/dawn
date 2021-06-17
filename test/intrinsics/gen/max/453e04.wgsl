@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn max(vec<4, u32>, vec<4, u32>) -> vec<4, u32>
 fn max_453e04() {
   var res: vec4<u32> = max(vec4<u32>(), vec4<u32>());
 }

@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn unpack2x16float(u32) -> vec2<f32>
 fn unpack2x16float_32a5cf() {
   var res: vec2<f32> = unpack2x16float(1u);
 }

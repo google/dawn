@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn floor(f32) -> f32
 fn floor_66f154() {
   var res: f32 = floor(1.0);
 }

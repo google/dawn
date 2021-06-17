@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn min(vec<3, u32>, vec<3, u32>) -> vec<3, u32>
 fn min_c70bb7() {
   var res: vec3<u32> = min(vec3<u32>(), vec3<u32>());
 }

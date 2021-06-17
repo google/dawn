@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn sign(vec<3, f32>) -> vec<3, f32>
 fn sign_159665() {
   var res: vec3<f32> = sign(vec3<f32>());
 }

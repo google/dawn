@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn faceForward(vec<2, f32>, vec<2, f32>, vec<2, f32>) -> vec<2, f32>
 fn faceForward_e6908b() {
   var res: vec2<f32> = faceForward(vec2<f32>(), vec2<f32>(), vec2<f32>());
 }

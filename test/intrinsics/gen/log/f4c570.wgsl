@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn log(vec<3, f32>) -> vec<3, f32>
 fn log_f4c570() {
   var res: vec3<f32> = log(vec3<f32>());
 }

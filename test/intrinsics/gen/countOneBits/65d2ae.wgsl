@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn countOneBits(vec<3, i32>) -> vec<3, i32>
 fn countOneBits_65d2ae() {
   var res: vec3<i32> = countOneBits(vec3<i32>());
 }

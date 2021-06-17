@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn fract(vec<3, f32>) -> vec<3, f32>
 fn fract_a49758() {
   var res: vec3<f32> = fract(vec3<f32>());
 }

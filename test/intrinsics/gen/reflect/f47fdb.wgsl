@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn reflect(vec<3, f32>, vec<3, f32>) -> vec<3, f32>
 fn reflect_f47fdb() {
   var res: vec3<f32> = reflect(vec3<f32>(), vec3<f32>());
 }

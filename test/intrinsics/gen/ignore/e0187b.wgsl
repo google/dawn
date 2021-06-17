@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_depth_2d;
+
+// fn ignore(texture_depth_2d)
 fn ignore_e0187b() {
   ignore(arg_0);
 }

@@ -23,6 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[group(1), binding(0)]] var arg_0: texture_2d_array<u32>;
+
+// fn textureNumLevels(texture: texture_2d_array<u32>) -> i32
 fn textureNumLevels_5101cf() {
   var res: i32 = textureNumLevels(arg_0);
 }

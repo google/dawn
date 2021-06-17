@@ -22,6 +22,8 @@
 // Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// fn dpdx(f32) -> f32
 fn dpdx_e263de() {
   var res: f32 = dpdx(1.0);
 }
