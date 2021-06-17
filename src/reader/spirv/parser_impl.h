@@ -85,6 +85,29 @@ struct TypedExpression {
   ast::Expression* expr = nullptr;
 };
 
+/// Info about the WorkgroupSize builtin.
+struct WorkgroupSizeInfo {
+  /// Constructor
+  WorkgroupSizeInfo();
+  /// Destructor
+  ~WorkgroupSizeInfo();
+  /// The SPIR-V ID of the WorkgroupSize builtin, if any.
+  uint32_t id = 0u;
+  /// The SPIR-V type ID of the WorkgroupSize builtin, if any.
+  uint32_t type_id = 0u;
+  /// The SPIR-V type IDs of the x, y, and z components.
+  uint32_t component_type_id = 0u;
+  /// The SPIR-V IDs of the X, Y, and Z components of the workgroup size
+  /// builtin.
+  uint32_t x_id = 0u;
+  uint32_t y_id = 0u;
+  uint32_t z_id = 0u;
+  /// The effective workgroup size, if this is a compute shader.
+  uint32_t x_value = 0u;
+  uint32_t y_value = 0u;
+  uint32_t z_value = 0u;
+};
+
 /// Parser implementation for SPIR-V.
 class ParserImpl : Reader {
  public:
@@ -306,6 +329,14 @@ class ParserImpl : Reader {
   /// @returns true if parser is still successful.
   bool RegisterUserAndStructMemberNames();
 
+  /// Register the WorkgroupSize builtin and its associated constant value.
+  /// @returns true if parser is still successful.
+  bool RegisterWorkgroupSizeBuiltin();
+
+  const WorkgroupSizeInfo& workgroup_size_builtin() {
+    return workgroup_size_builtin_;
+  }
+
   /// Register entry point information.
   /// This is a no-op if the parser has already failed.
   /// @returns true if parser is still successful.
@@ -366,10 +397,26 @@ class ParserImpl : Reader {
                               ast::Expression* constructor,
                               ast::DecorationList decorations);
 
-  /// Creates an AST expression node for a SPIR-V constant.
+  /// Returns true if a constant expression can be generated.
+  /// @param id the SPIR-V ID of the value
+  /// @returns true if a constant expression can be generated
+  bool CanMakeConstantExpression(uint32_t id);
+
+  /// Creates an AST expression node for a SPIR-V ID.  This is valid to call
+  /// when `CanMakeConstantExpression` returns true.
   /// @param id the SPIR-V ID of the constant
   /// @returns a new expression
   TypedExpression MakeConstantExpression(uint32_t id);
+
+  /// Creates an AST expression node for a SPIR-V constant.
+  /// @param source the source location
+  /// @param ast_type the AST type for the value
+  /// @param spirv_const the internal representation of the SPIR-V constant.
+  /// @returns a new expression
+  TypedExpression MakeConstantExpressionForSpirvConstant(
+      Source source,
+      const Type* ast_type,
+      const spvtools::opt::analysis::Constant* spirv_const);
 
   /// Creates an AST expression node for the null value for the given type.
   /// @param type the AST type
@@ -778,6 +825,11 @@ class ParserImpl : Reader {
   /// This is temporary while this module is converted to use the new style
   /// of pipeline IO.
   bool hlsl_style_pipeline_io_ = false;
+
+  /// Info about the WorkgroupSize builtin. If it's not present, then the 'id'
+  /// field will be 0. Sadly, in SPIR-V right now, there's only one workgroup
+  /// size object in the module.
+  WorkgroupSizeInfo workgroup_size_builtin_;
 };
 
 }  // namespace spirv

@@ -1131,6 +1131,19 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
   ast::DecorationList fn_decos;
   fn_decos.emplace_back(create<ast::StageDecoration>(source, ep_info_->stage));
 
+  if (ep_info_->stage == ast::PipelineStage::kCompute) {
+    auto& size = ep_info_->workgroup_size;
+    if (size.x != 0 && size.y != 0 && size.z != 0) {
+      ast::Expression* x = builder_.Expr(static_cast<int>(size.x));
+      ast::Expression* y =
+          size.y ? builder_.Expr(static_cast<int>(size.y)) : nullptr;
+      ast::Expression* z =
+          size.z ? builder_.Expr(static_cast<int>(size.z)) : nullptr;
+      fn_decos.emplace_back(
+          create<ast::WorkgroupDecoration>(Source{}, x, y, z));
+    }
+  }
+
   builder_.AST().AddFunction(
       create<ast::Function>(source, builder_.Symbols().Register(ep_info_->name),
                             std::move(decl.params), return_type, body,
@@ -2261,6 +2274,9 @@ bool FunctionEmitter::EmitFunctionVariables() {
       constructor =
           parser_impl_.MakeConstantExpression(inst.GetSingleWordInOperand(1))
               .expr;
+      if (!constructor) {
+        return false;
+      }
     }
     auto* var = parser_impl_.MakeVariable(
         inst.result_id(), ast::StorageClass::kNone, var_store_type, false,

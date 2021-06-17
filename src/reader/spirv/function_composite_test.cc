@@ -1462,7 +1462,7 @@ TEST_F(SpvParserTest_VectorExtractDynamic, UnsignedIndex) {
 
 using SpvParserTest_VectorInsertDynamic = SpvParserTest;
 
-TEST_F(SpvParserTest_VectorExtractDynamic, Sample) {
+TEST_F(SpvParserTest_VectorInsertDynamic, Sample) {
   const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
@@ -1510,6 +1510,125 @@ VariableDeclStatement{
   }
 })")) << got
       << assembly;
+}
+
+TEST_F(SpvParserTest, DISABLED_WorkgroupSize_Overridable) {
+  // TODO(dneto): Support specializable workgroup size. crbug.com/tint/504
+  const auto* assembly = R"(
+  OpCapability Shader
+  OpMemoryModel Logical Simple
+  OpEntryPoint GLCompute %100 "main"
+  OpDecorate %1 BuiltIn WorkgroupSize
+  OpDecorate %uint_2 SpecId 0
+  OpDecorate %uint_4 SpecId 1
+  OpDecorate %uint_8 SpecId 2
+
+  %uint = OpTypeInt 32 0
+  %uint_2 = OpSpecConstant %uint 2
+  %uint_4 = OpSpecConstant %uint 4
+  %uint_8 = OpSpecConstant %uint 8
+  %v3uint = OpTypeVector %uint 3
+  %1 = OpSpecConstantComposite %v3uint %uint_2 %uint_4 %uint_8
+  %void = OpTypeVoid
+  %voidfn = OpTypeFunction %void
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %10 = OpCopyObject %v3uint %1
+     %11 = OpCopyObject %uint %uint_2
+     %12 = OpCopyObject %uint %uint_4
+     %13 = OpCopyObject %uint %uint_8
+     OpReturn
+     OpFunctionEnd
+)";
+
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.Emit()) << p->error();
+  const auto got = p->program().to_str();
+  EXPECT_THAT(got, HasSubstr(R"(
+  VariableConst{
+    Decorations{
+      OverrideDecoration{0}
+    }
+    x_2
+    none
+    __u32
+    {
+      ScalarConstructor[not set]{2}
+    }
+  }
+  VariableConst{
+    Decorations{
+      OverrideDecoration{1}
+    }
+    x_3
+    none
+    __u32
+    {
+      ScalarConstructor[not set]{4}
+    }
+  }
+  VariableConst{
+    Decorations{
+      OverrideDecoration{2}
+    }
+    x_4
+    none
+    __u32
+    {
+      ScalarConstructor[not set]{8}
+    }
+  }
+)")) << got;
+  EXPECT_THAT(got, HasSubstr(R"(
+    VariableDeclStatement{
+      VariableConst{
+        x_10
+        none
+        __vec_3__u32
+        {
+          TypeConstructor[not set]{
+            __vec_3__u32
+            ScalarConstructor[not set]{2}
+            ScalarConstructor[not set]{4}
+            ScalarConstructor[not set]{8}
+          }
+        }
+      }
+    }
+    VariableDeclStatement{
+      VariableConst{
+        x_11
+        none
+        __u32
+        {
+          Identifier[not set]{x_2}
+        }
+      }
+    }
+    VariableDeclStatement{
+      VariableConst{
+        x_12
+        none
+        __u32
+        {
+          Identifier[not set]{x_3}
+        }
+      }
+    }
+    VariableDeclStatement{
+      VariableConst{
+        x_13
+        none
+        __u32
+        {
+          Identifier[not set]{x_4}
+        }
+      }
+    })"))
+      << got << assembly;
 }
 
 }  // namespace

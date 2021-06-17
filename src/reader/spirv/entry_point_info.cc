@@ -25,13 +25,15 @@ EntryPointInfo::EntryPointInfo(std::string the_name,
                                bool the_owns_inner_implementation,
                                std::string the_inner_name,
                                std::vector<uint32_t>&& the_inputs,
-                               std::vector<uint32_t>&& the_outputs)
+                               std::vector<uint32_t>&& the_outputs,
+                               GridSize the_wg_size)
     : name(the_name),
       stage(the_stage),
       owns_inner_implementation(the_owns_inner_implementation),
       inner_name(std::move(the_inner_name)),
       inputs(std::move(the_inputs)),
-      outputs(std::move(the_outputs)) {}
+      outputs(std::move(the_outputs)),
+      workgroup_size(the_wg_size) {}
 
 EntryPointInfo::EntryPointInfo(const EntryPointInfo&) = default;
 

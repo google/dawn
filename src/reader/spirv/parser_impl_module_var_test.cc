@@ -4903,6 +4903,11 @@ TEST_P(SpvModuleScopeVarParserTest_ComputeBuiltin, Load_Direct) {
   }
   Function main -> __void
   StageDecoration{compute}
+  WorkgroupDecoration{
+    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1}
+  }
   (
     VariableConst{
       Decorations{
@@ -4919,10 +4924,10 @@ TEST_P(SpvModuleScopeVarParserTest_ComputeBuiltin, Load_Direct) {
     Assignment{
       Identifier[not set]{x_1})" +
                                (wgsl_type == unsigned_wgsl_type ?
-                                                              R"(
+                                                                R"(
       Identifier[not set]{x_1_param})"
-                                                              :
-                                                              R"(
+                                                                :
+                                                                R"(
       Bitcast[not set]<)" + signed_wgsl_type + R"(>{
         Identifier[not set]{x_1_param}
       })") + R"(
@@ -5001,6 +5006,11 @@ TEST_P(SpvModuleScopeVarParserTest_ComputeBuiltin, Load_CopyObject) {
   }
   Function main -> __void
   StageDecoration{compute}
+  WorkgroupDecoration{
+    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1}
+  }
   (
     VariableConst{
       Decorations{
@@ -5017,10 +5027,10 @@ TEST_P(SpvModuleScopeVarParserTest_ComputeBuiltin, Load_CopyObject) {
     Assignment{
       Identifier[not set]{x_1})" +
                                (wgsl_type == unsigned_wgsl_type ?
-                                                              R"(
+                                                                R"(
       Identifier[not set]{x_1_param})"
-                                                              :
-                                                              R"(
+                                                                :
+                                                                R"(
       Bitcast[not set]<)" + signed_wgsl_type + R"(>{
         Identifier[not set]{x_1_param}
       })") + R"(
@@ -5081,6 +5091,11 @@ TEST_P(SpvModuleScopeVarParserTest_ComputeBuiltin, Load_AccessChain) {
   }
   Function main -> __void
   StageDecoration{compute}
+  WorkgroupDecoration{
+    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1}
+  }
   (
     VariableConst{
       Decorations{
@@ -5097,10 +5112,10 @@ TEST_P(SpvModuleScopeVarParserTest_ComputeBuiltin, Load_AccessChain) {
     Assignment{
       Identifier[not set]{x_1})" +
                                (wgsl_type == unsigned_wgsl_type ?
-                                                              R"(
+                                                                R"(
       Identifier[not set]{x_1_param})"
-                                                              :
-                                                              R"(
+                                                                :
+                                                                R"(
       Bitcast[not set]<)" + signed_wgsl_type + R"(>{
         Identifier[not set]{x_1_param}
       })") + R"(

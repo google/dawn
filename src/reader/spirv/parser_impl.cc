@@ -580,6 +580,9 @@ bool ParserImpl::ParseInternalModuleExceptFunctions() {
   if (!RegisterUserAndStructMemberNames()) {
     return false;
   }
+  if (!RegisterWorkgroupSizeBuiltin()) {
+    return false;
+  }
   if (!RegisterEntryPoints()) {
     return false;
   }
@@ -720,13 +723,102 @@ bool ParserImpl::IsValidIdentifier(const std::string& str) {
   return true;
 }
 
+bool ParserImpl::RegisterWorkgroupSizeBuiltin() {
+  WorkgroupSizeInfo& info = workgroup_size_builtin_;
+  for (const spvtools::opt::Instruction& inst : module_->annotations()) {
+    if (inst.opcode() != SpvOpDecorate) {
+      continue;
+    }
+    if (inst.GetSingleWordInOperand(1) != SpvDecorationBuiltIn) {
+      continue;
+    }
+    if (inst.GetSingleWordInOperand(2) != SpvBuiltInWorkgroupSize) {
+      continue;
+    }
+    info.id = inst.GetSingleWordInOperand(0);
+  }
+  if (info.id == 0) {
+    return true;
+  }
+  // Gather the values.
+  const spvtools::opt::Instruction* composite_def =
+      def_use_mgr_->GetDef(info.id);
+  if (!composite_def) {
+    return Fail() << "Invalid WorkgroupSize builtin value";
+  }
+  // SPIR-V validation checks that the result is a 3-element vector of 32-bit
+  // integer scalars (signed or unsigned).  Rely on validation to check the
+  // type.  In theory the instruction could be OpConstantNull and still
+  // pass validation, but that would be non-sensical.  Be a little more
+  // stringent here and check for specific opcodes.  WGSL does not support
+  // const-expr yet, so avoid supporting OpSpecConstantOp here.
+  // TODO(dneto): See https://github.com/gpuweb/gpuweb/issues/1272 for WGSL
+  // const_expr proposals.
+  if ((composite_def->opcode() != SpvOpSpecConstantComposite &&
+       composite_def->opcode() != SpvOpConstantComposite)) {
+    return Fail() << "Invalid WorkgroupSize builtin.  Expected 3-element "
+                     "OpSpecConstantComposite or OpConstantComposite:  "
+                  << composite_def->PrettyPrint();
+  }
+  info.type_id = composite_def->type_id();
+  // Extract the component type from the vector type.
+  info.component_type_id =
+      def_use_mgr_->GetDef(info.type_id)->GetSingleWordInOperand(0);
+
+  /// Sets the ID and value of the index'th member of the composite constant.
+  /// Returns false and emits a diagnostic on error.
+  auto set_param = [this, composite_def](uint32_t* id_ptr, uint32_t* value_ptr,
+                                         int index) -> bool {
+    const auto id = composite_def->GetSingleWordInOperand(index);
+    const auto* def = def_use_mgr_->GetDef(id);
+    if (!def ||
+        (def->opcode() != SpvOpSpecConstant &&
+         def->opcode() != SpvOpConstant) ||
+        (def->NumInOperands() != 1)) {
+      return Fail() << "invalid component " << index << " of workgroupsize "
+                    << (def ? def->PrettyPrint()
+                            : std::string("no definition"));
+    }
+    *id_ptr = id;
+    // Use the default value of a spec constant.
+    *value_ptr = def->GetSingleWordInOperand(0);
+    return true;
+  };
+
+  return set_param(&info.x_id, &info.x_value, 0) &&
+         set_param(&info.y_id, &info.y_value, 1) &&
+         set_param(&info.z_id, &info.z_value, 2);
+}
+
 bool ParserImpl::RegisterEntryPoints() {
+  // Mapping from entry point ID to GridSize computed from LocalSize
+  // decorations.
+  std::unordered_map<uint32_t, GridSize> local_size;
+  for (const spvtools::opt::Instruction& inst : module_->execution_modes()) {
+    auto mode = static_cast<SpvExecutionMode>(inst.GetSingleWordInOperand(1));
+    if (mode == SpvExecutionModeLocalSize) {
+      if (inst.NumInOperands() != 5) {
+        // This won't even get past SPIR-V binary parsing.
+        return Fail() << "invalid LocalSize execution mode: "
+                      << inst.PrettyPrint();
+      }
+      uint32_t function_id = inst.GetSingleWordInOperand(0);
+      local_size[function_id] = GridSize{inst.GetSingleWordInOperand(2),
+                                         inst.GetSingleWordInOperand(3),
+                                         inst.GetSingleWordInOperand(4)};
+    }
+  }
+
   for (const spvtools::opt::Instruction& entry_point :
        module_->entry_points()) {
     const auto stage = SpvExecutionModel(entry_point.GetSingleWordInOperand(0));
     const uint32_t function_id = entry_point.GetSingleWordInOperand(1);
 
     const std::string ep_name = entry_point.GetOperand(2).AsString();
+    if (!IsValidIdentifier(ep_name)) {
+      return Fail() << "entry point name is not a valid WGSL identifier: "
+                    << ep_name;
+    }
 
     bool owns_inner_implementation = false;
     std::string inner_implementation_name;
@@ -769,11 +861,30 @@ bool ParserImpl::RegisterEntryPoints() {
     std::vector<uint32_t> sorted_outputs(outputs.begin(), outputs.end());
     std::sort(sorted_inputs.begin(), sorted_inputs.end());
 
+    const auto ast_stage = enum_converter_.ToPipelineStage(stage);
+    GridSize wgsize;
+    if (ast_stage == ast::PipelineStage::kCompute) {
+      if (workgroup_size_builtin_.id) {
+        // Store the default values.
+        // WGSL allows specializing these, but this code doesn't support that
+        // yet. https://github.com/gpuweb/gpuweb/issues/1442
+        wgsize = GridSize{workgroup_size_builtin_.x_value,
+                          workgroup_size_builtin_.y_value,
+                          workgroup_size_builtin_.z_value};
+      } else {
+        // Use the LocalSize execution mode.  This is the second choice.
+        auto where = local_size.find(function_id);
+        if (where != local_size.end()) {
+          wgsize = where->second;
+        }
+      }
+    }
     function_to_ep_info_[function_id].emplace_back(
-        ep_name, enum_converter_.ToPipelineStage(stage),
-        owns_inner_implementation, inner_implementation_name,
-        std::move(sorted_inputs), std::move(sorted_outputs));
+        ep_name, ast_stage, owns_inner_implementation,
+        inner_implementation_name, std::move(sorted_inputs),
+        std::move(sorted_outputs), wgsize);
   }
+
   // The enum conversion could have failed, so return the existing status value.
   return success_;
 }
@@ -1521,10 +1632,59 @@ bool ParserImpl::ConvertDecorationsForVariable(uint32_t id,
   return success();
 }
 
+bool ParserImpl::CanMakeConstantExpression(uint32_t id) {
+  if ((id == workgroup_size_builtin_.id) ||
+      (id == workgroup_size_builtin_.x_id) ||
+      (id == workgroup_size_builtin_.y_id) ||
+      (id == workgroup_size_builtin_.z_id)) {
+    return true;
+  }
+  const auto* inst = def_use_mgr_->GetDef(id);
+  if (!inst) {
+    return false;
+  }
+  if (inst->opcode() == SpvOpUndef) {
+    return true;
+  }
+  return nullptr != constant_mgr_->FindDeclaredConstant(id);
+}
+
 TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
   if (!success_) {
     return {};
   }
+
+  // Handle the special cases for workgroup sizing.
+  if (id == workgroup_size_builtin_.id) {
+    auto x = MakeConstantExpression(workgroup_size_builtin_.x_id);
+    auto y = MakeConstantExpression(workgroup_size_builtin_.y_id);
+    auto z = MakeConstantExpression(workgroup_size_builtin_.z_id);
+    auto* ast_type = ty_.Vector(x.type, 3);
+    return {ast_type, create<ast::TypeConstructorExpression>(
+                          Source{}, ast_type->Build(builder_),
+                          ast::ExpressionList{x.expr, y.expr, z.expr})};
+  } else if (id == workgroup_size_builtin_.x_id) {
+    return MakeConstantExpressionForSpirvConstant(
+        Source{}, ConvertType(workgroup_size_builtin_.component_type_id),
+        constant_mgr_->GetConstant(
+            type_mgr_->GetType(workgroup_size_builtin_.component_type_id),
+            {workgroup_size_builtin_.x_value}));
+  } else if (id == workgroup_size_builtin_.y_id) {
+    return MakeConstantExpressionForSpirvConstant(
+        Source{}, ConvertType(workgroup_size_builtin_.component_type_id),
+        constant_mgr_->GetConstant(
+            type_mgr_->GetType(workgroup_size_builtin_.component_type_id),
+            {workgroup_size_builtin_.y_value}));
+  } else if (id == workgroup_size_builtin_.z_id) {
+    return MakeConstantExpressionForSpirvConstant(
+        Source{}, ConvertType(workgroup_size_builtin_.component_type_id),
+        constant_mgr_->GetConstant(
+            type_mgr_->GetType(workgroup_size_builtin_.component_type_id),
+            {workgroup_size_builtin_.z_value}));
+  }
+
+  // Handle the general case where a constant is already registered
+  // with the SPIR-V optimizer's analysis framework.
   const auto* inst = def_use_mgr_->GetDef(id);
   if (inst == nullptr) {
     Fail() << "ID " << id << " is not a registered instruction";
@@ -1548,6 +1708,14 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
   }
 
   auto source = GetSourceForInst(inst);
+  return MakeConstantExpressionForSpirvConstant(source, original_ast_type,
+                                                spirv_const);
+}
+
+TypedExpression ParserImpl::MakeConstantExpressionForSpirvConstant(
+    Source source,
+    const Type* original_ast_type,
+    const spvtools::opt::analysis::Constant* spirv_const) {
   auto* ast_type = original_ast_type->UnwrapAlias();
 
   // TODO(dneto): Note: NullConstant for int, uint, float map to a regular 0.
@@ -1603,12 +1771,10 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
                                    Source{}, original_ast_type->Build(builder_),
                                    std::move(ast_components))};
   }
-  auto* spirv_null_const = spirv_const->AsNullConstant();
-  if (spirv_null_const != nullptr) {
+  if (spirv_const->AsNullConstant()) {
     return {original_ast_type, MakeNullValue(original_ast_type)};
   }
-  Fail() << "Unhandled constant type " << inst->type_id() << " for value ID "
-         << id;
+  Fail() << "Unhandled constant type ";
   return {};
 }
 
@@ -2463,6 +2629,10 @@ const spvtools::opt::Instruction* ParserImpl::GetInstructionForTest(
     uint32_t id) const {
   return def_use_mgr_ ? def_use_mgr_->GetDef(id) : nullptr;
 }
+
+WorkgroupSizeInfo::WorkgroupSizeInfo() = default;
+
+WorkgroupSizeInfo::~WorkgroupSizeInfo() = default;
 
 }  // namespace spirv
 }  // namespace reader

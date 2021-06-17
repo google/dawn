@@ -151,6 +151,11 @@ TEST_F(SpvParserTest, EmitFunctions_Function_EntryPoint_GLCompute) {
   Function )" + program.Symbols().Get("main").to_str() +
                                      R"( -> __void
   StageDecoration{compute}
+  WorkgroupDecoration{
+    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1}
+  }
   ()
   {)"));
 }
@@ -180,6 +185,189 @@ OpEntryPoint Vertex %main "second_shader"
   StageDecoration{vertex}
   ()
   {)"));
+}
+
+TEST_F(SpvParserTest,
+       EmitFunctions_Function_EntryPoint_GLCompute_LocalSize_Only) {
+  std::string input = Caps() + Names({"main"}) +
+                      R"(OpEntryPoint GLCompute %main "comp_main"
+OpExecutionMode %main LocalSize 2 4 8
+)" + CommonTypes() + R"(
+%main = OpFunction %void None %voidfn
+%entry = OpLabel
+OpReturn
+OpFunctionEnd)";
+
+  auto p = parser(test::Assemble(input));
+  ASSERT_TRUE(p->BuildAndParseInternalModule());
+  ASSERT_TRUE(p->error().empty()) << p->error();
+  Program program = p->program();
+  const auto program_ast = program.to_str(false);
+  EXPECT_THAT(program_ast, HasSubstr(R"(
+  Function )" + program.Symbols().Get("comp_main").to_str() +
+                                     R"( -> __void
+  StageDecoration{compute}
+  WorkgroupDecoration{
+    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{4}
+    ScalarConstructor[not set]{8}
+  }
+  ()
+  {)"))
+      << program_ast;
+}
+
+TEST_F(SpvParserTest,
+       EmitFunctions_Function_EntryPoint_WorkgroupSizeBuiltin_Constant_Only) {
+  std::string input = Caps() + R"(OpEntryPoint GLCompute %main "comp_main"
+OpDecorate %wgsize BuiltIn WorkgroupSize
+)" + CommonTypes() + R"(
+%uvec3 = OpTypeVector %uint 3
+%uint_3 = OpConstant %uint 3
+%uint_5 = OpConstant %uint 5
+%uint_7 = OpConstant %uint 7
+%wgsize = OpConstantComposite %uvec3 %uint_3 %uint_5 %uint_7
+%main = OpFunction %void None %voidfn
+%entry = OpLabel
+OpReturn
+OpFunctionEnd)";
+
+  auto p = parser(test::Assemble(input));
+  ASSERT_TRUE(p->BuildAndParseInternalModule());
+  ASSERT_TRUE(p->error().empty()) << p->error();
+  Program program = p->program();
+  const auto program_ast = program.to_str(false);
+  EXPECT_THAT(program_ast, HasSubstr(R"(
+  Function )" + program.Symbols().Get("comp_main").to_str() +
+                                     R"( -> __void
+  StageDecoration{compute}
+  WorkgroupDecoration{
+    ScalarConstructor[not set]{3}
+    ScalarConstructor[not set]{5}
+    ScalarConstructor[not set]{7}
+  }
+  ()
+  {)"))
+      << program_ast;
+}
+
+TEST_F(
+    SpvParserTest,
+    EmitFunctions_Function_EntryPoint_WorkgroupSizeBuiltin_SpecConstant_Only) {
+  std::string input = Caps() +
+                      R"(OpEntryPoint GLCompute %main "comp_main"
+OpDecorate %wgsize BuiltIn WorkgroupSize
+OpDecorate %uint_3 SpecId 0
+OpDecorate %uint_5 SpecId 1
+OpDecorate %uint_7 SpecId 2
+)" + CommonTypes() + R"(
+%uvec3 = OpTypeVector %uint 3
+%uint_3 = OpSpecConstant %uint 3
+%uint_5 = OpSpecConstant %uint 5
+%uint_7 = OpSpecConstant %uint 7
+%wgsize = OpSpecConstantComposite %uvec3 %uint_3 %uint_5 %uint_7
+%main = OpFunction %void None %voidfn
+%entry = OpLabel
+OpReturn
+OpFunctionEnd)";
+
+  auto p = parser(test::Assemble(input));
+  ASSERT_TRUE(p->BuildAndParseInternalModule());
+  ASSERT_TRUE(p->error().empty()) << p->error();
+  Program program = p->program();
+  const auto program_ast = program.to_str(false);
+  EXPECT_THAT(program_ast, HasSubstr(R"(
+  Function )" + program.Symbols().Get("comp_main").to_str() +
+                                     R"( -> __void
+  StageDecoration{compute}
+  WorkgroupDecoration{
+    ScalarConstructor[not set]{3}
+    ScalarConstructor[not set]{5}
+    ScalarConstructor[not set]{7}
+  }
+  ()
+  {)"))
+      << program_ast;
+}
+
+TEST_F(
+    SpvParserTest,
+    EmitFunctions_Function_EntryPoint_WorkgroupSize_MixedConstantSpecConstant) {
+  std::string input = Caps() +
+                      R"(OpEntryPoint GLCompute %main "comp_main"
+OpDecorate %wgsize BuiltIn WorkgroupSize
+OpDecorate %uint_3 SpecId 0
+OpDecorate %uint_7 SpecId 2
+)" + CommonTypes() + R"(
+%uvec3 = OpTypeVector %uint 3
+%uint_3 = OpSpecConstant %uint 3
+%uint_5 = OpConstant %uint 5
+%uint_7 = OpSpecConstant %uint 7
+%wgsize = OpSpecConstantComposite %uvec3 %uint_3 %uint_5 %uint_7
+%main = OpFunction %void None %voidfn
+%entry = OpLabel
+OpReturn
+OpFunctionEnd)";
+
+  auto p = parser(test::Assemble(input));
+  ASSERT_TRUE(p->BuildAndParseInternalModule());
+  ASSERT_TRUE(p->error().empty()) << p->error();
+  Program program = p->program();
+  const auto program_ast = program.to_str(false);
+  EXPECT_THAT(program_ast, HasSubstr(R"(
+  Function )" + program.Symbols().Get("comp_main").to_str() +
+                                     R"( -> __void
+  StageDecoration{compute}
+  WorkgroupDecoration{
+    ScalarConstructor[not set]{3}
+    ScalarConstructor[not set]{5}
+    ScalarConstructor[not set]{7}
+  }
+  ()
+  {)"))
+      << program_ast;
+}
+
+TEST_F(
+    SpvParserTest,
+    // I had to shorten the name to pass the linter.
+    EmitFunctions_Function_EntryPoint_LocalSize_And_WGSBuiltin_SpecConstant) {
+  // WorkgroupSize builtin wins.
+  std::string input = Caps() +
+                      R"(OpEntryPoint GLCompute %main "comp_main"
+OpExecutionMode %main LocalSize 2 4 8
+OpDecorate %wgsize BuiltIn WorkgroupSize
+OpDecorate %uint_3 SpecId 0
+OpDecorate %uint_5 SpecId 1
+OpDecorate %uint_7 SpecId 2
+)" + CommonTypes() + R"(
+%uvec3 = OpTypeVector %uint 3
+%uint_3 = OpSpecConstant %uint 3
+%uint_5 = OpSpecConstant %uint 5
+%uint_7 = OpSpecConstant %uint 7
+%wgsize = OpSpecConstantComposite %uvec3 %uint_3 %uint_5 %uint_7
+%main = OpFunction %void None %voidfn
+%entry = OpLabel
+OpReturn
+OpFunctionEnd)";
+
+  auto p = parser(test::Assemble(input));
+  ASSERT_TRUE(p->BuildAndParseInternalModule());
+  ASSERT_TRUE(p->error().empty()) << p->error();
+  Program program = p->program();
+  const auto program_ast = program.to_str(false);
+  EXPECT_THAT(program_ast, HasSubstr(R"(
+  Function )" + program.Symbols().Get("comp_main").to_str() +
+                                     R"( -> __void
+  StageDecoration{compute}
+  WorkgroupDecoration{
+    ScalarConstructor[not set]{3}
+    ScalarConstructor[not set]{5}
+    ScalarConstructor[not set]{7}
+  }
+  ()
+  {)"))
+      << program_ast;
 }
 
 TEST_F(SpvParserTest, EmitFunctions_VoidFunctionWithoutParams) {

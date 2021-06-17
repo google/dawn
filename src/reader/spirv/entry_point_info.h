@@ -24,6 +24,13 @@ namespace tint {
 namespace reader {
 namespace spirv {
 
+/// The size of an integer-coordinate grid, in the x, y, and z dimensions.
+struct GridSize {
+  uint32_t x = 0;
+  uint32_t y = 0;
+  uint32_t z = 0;
+};
+
 /// Entry point information for a function
 struct EntryPointInfo {
   /// Constructor.
@@ -35,12 +42,14 @@ struct EntryPointInfo {
   /// entry point
   /// @param the_inputs list of IDs for Input variables used by the shader
   /// @param the_outputs list of IDs for Output variables used by the shader
+  /// @param the_wg_size the workgroup_size, for a compute shader
   EntryPointInfo(std::string the_name,
                  ast::PipelineStage the_stage,
                  bool the_owns_inner_implementation,
                  std::string the_inner_name,
                  std::vector<uint32_t>&& the_inputs,
-                 std::vector<uint32_t>&& the_outputs);
+                 std::vector<uint32_t>&& the_outputs,
+                 GridSize the_wg_size);
   /// Copy constructor
   /// @param other the other entry point info to be built from
   EntryPointInfo(const EntryPointInfo& other);
@@ -55,6 +64,7 @@ struct EntryPointInfo {
   std::string name;
   /// The entry point stage
   ast::PipelineStage stage = ast::PipelineStage::kNone;
+
   /// True when this entry point is responsible for generating the
   /// inner implementation function.  False when this is the second entry
   /// point encountered for the same function in SPIR-V. It's unusual, but
@@ -67,6 +77,12 @@ struct EntryPointInfo {
   std::vector<uint32_t> inputs;
   /// IDs of pipeline output variables, sorted and without duplicates.
   std::vector<uint32_t> outputs;
+
+  /// If this is a compute shader, this is the workgroup size in the x, y,
+  /// and z dimensions set via LocalSize, or via the composite value
+  /// decorated as the WorkgroupSize BuiltIn.  The WorkgroupSize builtin
+  /// takes priority.
+  GridSize workgroup_size;
 };
 
 }  // namespace spirv
