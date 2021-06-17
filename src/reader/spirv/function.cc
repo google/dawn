@@ -2312,12 +2312,13 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
           << "unhandled use of a pointer to the SampleMask builtin, with ID: "
           << id;
       return {};
-    case SkipReason::kSampleMaskOutBuiltinPointer:
+    case SkipReason::kSampleMaskOutBuiltinPointer: {
       // The result type is always u32.
       auto name = namer_.Name(sample_mask_out_id);
       return TypedExpression{ty_.U32(),
                              create<ast::IdentifierExpression>(
                                  Source{}, builder_.Symbols().Register(name))};
+    }
   }
   auto type_it = identifier_types_.find(id);
   if (type_it != identifier_types_.end()) {
@@ -4294,6 +4295,12 @@ bool FunctionEmitter::RegisterSpecialBuiltInVariables() {
         }
         break;
       }
+      case SpvBuiltInLocalInvocationIndex:
+      case SpvBuiltInLocalInvocationId:
+      case SpvBuiltInGlobalInvocationId:
+      case SpvBuiltInWorkgroupId:
+      case SpvBuiltInNumWorkgroups:
+        break;
       default:
         return Fail() << "unrecognized special builtin: " << int(builtin);
     }

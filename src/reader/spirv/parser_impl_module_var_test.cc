@@ -4774,6 +4774,368 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_FunctParam) {
               HasSubstr("Invalid storage class for pointer operand 1"));
 }
 
+// Returns the start of a shader for testing LocalInvocationIndex,
+// parameterized by store type of %int or %uint
+std::string ComputeBuiltinInputPreamble(std::string builtin,
+                                        std::string store_type) {
+  return R"(
+    OpCapability Shader
+    OpMemoryModel Logical Simple
+    OpEntryPoint GLCompute %main "main" %1
+    OpExecutionMode %main LocalSize 1 1 1
+    OpDecorate %1 BuiltIn )" +
+         builtin + R"(
+    %void = OpTypeVoid
+    %voidfn = OpTypeFunction %void
+    %float = OpTypeFloat 32
+    %uint = OpTypeInt 32 0
+    %int = OpTypeInt 32 1
+    %v3uint = OpTypeVector %uint 3
+    %v3int = OpTypeVector %int 3
+    %ptr_ty = OpTypePointer Input )" +
+         store_type + R"(
+    %1 = OpVariable %ptr_ty Input
+)";
+}
+
+struct ComputeBuiltinInputCase {
+  std::string spirv_builtin;
+  std::string spirv_store_type;
+  std::string wgsl_builtin;
+};
+inline std::ostream& operator<<(std::ostream& o, ComputeBuiltinInputCase c) {
+  return o << "ComputeBuiltinInputCase(" << c.spirv_builtin << " "
+           << c.spirv_store_type << " " << c.wgsl_builtin << ")";
+}
+
+std::string WgslType(std::string spirv_type) {
+  if (spirv_type == "%uint") {
+    return "__u32";
+  }
+  if (spirv_type == "%int") {
+    return "__i32";
+  }
+  if (spirv_type == "%v3uint") {
+    return "__vec_3__u32";
+  }
+  if (spirv_type == "%v3int") {
+    return "__vec_3__i32";
+  }
+  return "error";
+}
+
+std::string UnsignedWgslType(std::string wgsl_type) {
+  if (wgsl_type == "__u32") {
+    return "__u32";
+  }
+  if (wgsl_type == "__i32") {
+    return "__u32";
+  }
+  if (wgsl_type == "__vec_3__u32") {
+    return "__vec_3__u32";
+  }
+  if (wgsl_type == "__vec_3__i32") {
+    return "__vec_3__u32";
+  }
+  return "error";
+}
+
+std::string SignedWgslType(std::string wgsl_type) {
+  if (wgsl_type == "__u32") {
+    return "__i32";
+  }
+  if (wgsl_type == "__i32") {
+    return "__i32";
+  }
+  if (wgsl_type == "__vec_3__u32") {
+    return "__vec_3__i32";
+  }
+  if (wgsl_type == "__vec_3__i32") {
+    return "__vec_3__i32";
+  }
+  return "error";
+}
+
+using SpvModuleScopeVarParserTest_ComputeBuiltin =
+    SpvParserTestBase<::testing::TestWithParam<ComputeBuiltinInputCase>>;
+
+TEST_P(SpvModuleScopeVarParserTest_ComputeBuiltin, Load_Direct) {
+  const auto wgsl_type = WgslType(GetParam().spirv_store_type);
+  const auto unsigned_wgsl_type = UnsignedWgslType(wgsl_type);
+  const auto signed_wgsl_type = SignedWgslType(wgsl_type);
+  const std::string assembly =
+      ComputeBuiltinInputPreamble(GetParam().spirv_builtin,
+                                  GetParam().spirv_store_type) +
+      R"(
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    %2 = OpLoad )" +
+      GetParam().spirv_store_type + R"( %1
+    OpReturn
+    OpFunctionEnd
+ )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->program().to_str();
+  const std::string expected = R"(Module{
+  Variable{
+    x_1
+    private
+    undefined
+    )" + wgsl_type + R"(
+  }
+  Function main_1 -> __void
+  ()
+  {
+    VariableDeclStatement{
+      VariableConst{
+        x_2
+        none
+        undefined
+        )" + wgsl_type + R"(
+        {
+          Identifier[not set]{x_1}
+        }
+      }
+    }
+    Return{}
+  }
+  Function main -> __void
+  StageDecoration{compute}
+  (
+    VariableConst{
+      Decorations{
+        BuiltinDecoration{)" + GetParam().wgsl_builtin +
+                               R"(}
+      }
+      x_1_param
+      none
+      undefined
+      )" + unsigned_wgsl_type + R"(
+    }
+  )
+  {
+    Assignment{
+      Identifier[not set]{x_1})" +
+                               (wgsl_type == unsigned_wgsl_type ?
+                                                              R"(
+      Identifier[not set]{x_1_param})"
+                                                              :
+                                                              R"(
+      Bitcast[not set]<)" + signed_wgsl_type + R"(>{
+        Identifier[not set]{x_1_param}
+      })") + R"(
+    }
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+  }
+}
+)";
+  EXPECT_EQ(module_str, expected) << module_str;
+}
+
+TEST_P(SpvModuleScopeVarParserTest_ComputeBuiltin, Load_CopyObject) {
+  const auto wgsl_type = WgslType(GetParam().spirv_store_type);
+  const auto unsigned_wgsl_type = UnsignedWgslType(wgsl_type);
+  const auto signed_wgsl_type = SignedWgslType(wgsl_type);
+  const std::string assembly =
+      ComputeBuiltinInputPreamble(GetParam().spirv_builtin,
+                                  GetParam().spirv_store_type) +
+      R"(
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    %13 = OpCopyObject %ptr_ty %1
+    %2 = OpLoad )" +
+      GetParam().spirv_store_type + R"( %13
+    OpReturn
+    OpFunctionEnd
+ )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->program().to_str();
+  const std::string expected = R"(Module{
+  Variable{
+    x_1
+    private
+    undefined
+    )" + wgsl_type + R"(
+  }
+  Function main_1 -> __void
+  ()
+  {
+    VariableDeclStatement{
+      VariableConst{
+        x_13
+        none
+        undefined
+        __ptr_none)" + wgsl_type +
+                               R"(
+        {
+          UnaryOp[not set]{
+            address-of
+            Identifier[not set]{x_1}
+          }
+        }
+      }
+    }
+    VariableDeclStatement{
+      VariableConst{
+        x_2
+        none
+        undefined
+        )" + wgsl_type + R"(
+        {
+          UnaryOp[not set]{
+            indirection
+            Identifier[not set]{x_13}
+          }
+        }
+      }
+    }
+    Return{}
+  }
+  Function main -> __void
+  StageDecoration{compute}
+  (
+    VariableConst{
+      Decorations{
+        BuiltinDecoration{)" + GetParam().wgsl_builtin +
+                               R"(}
+      }
+      x_1_param
+      none
+      undefined
+      )" + unsigned_wgsl_type + R"(
+    }
+  )
+  {
+    Assignment{
+      Identifier[not set]{x_1})" +
+                               (wgsl_type == unsigned_wgsl_type ?
+                                                              R"(
+      Identifier[not set]{x_1_param})"
+                                                              :
+                                                              R"(
+      Bitcast[not set]<)" + signed_wgsl_type + R"(>{
+        Identifier[not set]{x_1_param}
+      })") + R"(
+    }
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+  }
+}
+)";
+  EXPECT_EQ(module_str, expected) << module_str;
+}
+
+TEST_P(SpvModuleScopeVarParserTest_ComputeBuiltin, Load_AccessChain) {
+  const auto wgsl_type = WgslType(GetParam().spirv_store_type);
+  const auto unsigned_wgsl_type = UnsignedWgslType(wgsl_type);
+  const auto signed_wgsl_type = SignedWgslType(wgsl_type);
+  const std::string assembly =
+      ComputeBuiltinInputPreamble(GetParam().spirv_builtin,
+                                  GetParam().spirv_store_type) +
+      R"(
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    %13 = OpAccessChain %ptr_ty %1
+    %2 = OpLoad )" +
+      GetParam().spirv_store_type + R"( %13
+    OpReturn
+    OpFunctionEnd
+ )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->program().to_str();
+  const std::string expected = R"(Module{
+  Variable{
+    x_1
+    private
+    undefined
+    )" + wgsl_type + R"(
+  }
+  Function main_1 -> __void
+  ()
+  {
+    VariableDeclStatement{
+      VariableConst{
+        x_2
+        none
+        undefined
+        )" + wgsl_type + R"(
+        {
+          Identifier[not set]{x_1}
+        }
+      }
+    }
+    Return{}
+  }
+  Function main -> __void
+  StageDecoration{compute}
+  (
+    VariableConst{
+      Decorations{
+        BuiltinDecoration{)" + GetParam().wgsl_builtin +
+                               R"(}
+      }
+      x_1_param
+      none
+      undefined
+      )" + unsigned_wgsl_type + R"(
+    }
+  )
+  {
+    Assignment{
+      Identifier[not set]{x_1})" +
+                               (wgsl_type == unsigned_wgsl_type ?
+                                                              R"(
+      Identifier[not set]{x_1_param})"
+                                                              :
+                                                              R"(
+      Bitcast[not set]<)" + signed_wgsl_type + R"(>{
+        Identifier[not set]{x_1_param}
+      })") + R"(
+    }
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+  }
+}
+)";
+  EXPECT_EQ(module_str, expected) << module_str;
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    Samples,
+    SpvModuleScopeVarParserTest_ComputeBuiltin,
+    ::testing::ValuesIn(std::vector<ComputeBuiltinInputCase>{
+        {"LocalInvocationIndex", "%uint", "local_invocation_index"},
+        {"LocalInvocationIndex", "%int", "local_invocation_index"},
+        {"LocalInvocationId", "%v3uint", "local_invocation_id"},
+        {"LocalInvocationId", "%v3int", "local_invocation_id"},
+        {"GlobalInvocationId", "%v3uint", "global_invocation_id"},
+        {"GlobalInvocationId", "%v3int", "global_invocation_id"},
+        {"WorkgroupId", "%v3uint", "workgroup_id"},
+        {"WorkgroupId", "%v3int", "workgroup_id"}}));
+
+// TODO(dneto): crbug.com/tint/752
+// NumWorkgroups support is blocked by crbug.com/tint/752
+// When the AST supports NumWorkgroups, add these cases:
+//        {"NumWorkgroups", "%uint", "num_workgroups"}
+//        {"NumWorkgroups", "%int", "num_workgroups"}
+
+
 TEST_F(SpvModuleScopeVarParserTest, RegisterInputOutputVars) {
   const std::string assembly =
       R"(
@@ -5897,8 +6259,6 @@ TEST_F(SpvModuleScopeVarParserTest,
 }
 
 // TODO(dneto): pipeline IO: flatten structures, and distribute locations
-
-// TODO(dneto): Translate Builtin LocalInvocationIndex crbug.com/tint/900
 
 }  // namespace
 }  // namespace spirv
