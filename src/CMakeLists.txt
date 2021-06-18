@@ -309,6 +309,8 @@ set(TINT_LIB_SRCS
   transform/vertex_pulling.h
   transform/wrap_arrays_in_structs.cc
   transform/wrap_arrays_in_structs.h
+  transform/zero_init_workgroup_memory.cc
+  transform/zero_init_workgroup_memory.h
   sem/bool_type.cc
   sem/bool_type.h
   sem/depth_texture_type.cc
@@ -873,6 +875,7 @@ if(${TINT_BUILD_TESTS})
       transform/test_helper.h
       transform/vertex_pulling_test.cc
       transform/wrap_arrays_in_structs_test.cc
+      transform/zero_init_workgroup_memory_test.cc
     )
   endif()
 
