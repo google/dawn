@@ -13,8 +13,8 @@ tint_symbol_2 vert_main(tint_symbol_1 tint_symbol) {
   const float2 a_pos = tint_symbol.a_pos;
   float angle = -(atan2(a_particleVel.x, a_particleVel.y));
   float2 pos = float2(((a_pos.x * cos(angle)) - (a_pos.y * sin(angle))), ((a_pos.x * sin(angle)) + (a_pos.y * cos(angle))));
-  const tint_symbol_2 tint_symbol_8 = {float4((pos + a_particlePos), 0.0f, 1.0f)};
-  return tint_symbol_8;
+  const tint_symbol_2 tint_symbol_9 = {float4((pos + a_particlePos), 0.0f, 1.0f)};
+  return tint_symbol_9;
 }
 
 struct tint_symbol_3 {
@@ -22,21 +22,13 @@ struct tint_symbol_3 {
 };
 
 tint_symbol_3 frag_main() {
-  const tint_symbol_3 tint_symbol_9 = {float4(1.0f, 1.0f, 1.0f, 1.0f)};
-  return tint_symbol_9;
+  const tint_symbol_3 tint_symbol_10 = {float4(1.0f, 1.0f, 1.0f, 1.0f)};
+  return tint_symbol_10;
 }
 
-struct SimParams {
-  /* 0x0000 */ float deltaT;
-  /* 0x0004 */ float rule1Distance;
-  /* 0x0008 */ float rule2Distance;
-  /* 0x000c */ float rule3Distance;
-  /* 0x0010 */ float rule1Scale;
-  /* 0x0014 */ float rule2Scale;
-  /* 0x0018 */ float rule3Scale;
+cbuffer cbuffer_params : register(b0, space0) {
+  uint4 params[2];
 };
-
-ConstantBuffer<SimParams> params : register(b0, space0);
 RWByteAddressBuffer particlesA : register(u1, space0);
 RWByteAddressBuffer particlesB : register(u2, space0);
 
@@ -74,14 +66,17 @@ void comp_main(tint_symbol_5 tint_symbol_4) {
       }
       pos = asfloat(particlesA.Load2((16u * i))).xy;
       vel = asfloat(particlesA.Load2(((16u * i) + 8u))).xy;
-      if ((distance(pos, vPos) < params.rule1Distance)) {
+      const int scalar_offset = (4u) / 4;
+      if ((distance(pos, vPos) < asfloat(params[scalar_offset / 4][scalar_offset % 4]))) {
         cMass = (cMass + pos);
         cMassCount = (cMassCount + 1);
       }
-      if ((distance(pos, vPos) < params.rule2Distance)) {
+      const int scalar_offset_1 = (8u) / 4;
+      if ((distance(pos, vPos) < asfloat(params[scalar_offset_1 / 4][scalar_offset_1 % 4]))) {
         colVel = (colVel - (pos - vPos));
       }
-      if ((distance(pos, vPos) < params.rule3Distance)) {
+      const int scalar_offset_2 = (12u) / 4;
+      if ((distance(pos, vPos) < asfloat(params[scalar_offset_2 / 4][scalar_offset_2 % 4]))) {
         cVel = (cVel + vel);
         cVelCount = (cVelCount + 1);
       }
@@ -96,9 +91,13 @@ void comp_main(tint_symbol_5 tint_symbol_4) {
   if ((cVelCount > 0)) {
     cVel = (cVel / float2(float(cVelCount), float(cVelCount)));
   }
-  vVel = (((vVel + (cMass * params.rule1Scale)) + (colVel * params.rule2Scale)) + (cVel * params.rule3Scale));
+  const int scalar_offset_3 = (16u) / 4;
+  const int scalar_offset_4 = (20u) / 4;
+  const int scalar_offset_5 = (24u) / 4;
+  vVel = (((vVel + (cMass * asfloat(params[scalar_offset_3 / 4][scalar_offset_3 % 4]))) + (colVel * asfloat(params[scalar_offset_4 / 4][scalar_offset_4 % 4]))) + (cVel * asfloat(params[scalar_offset_5 / 4][scalar_offset_5 % 4])));
   vVel = (normalize(vVel) * clamp(length(vVel), 0.0f, 0.100000001f));
-  vPos = (vPos + (vVel * params.deltaT));
+  const int scalar_offset_6 = (0u) / 4;
+  vPos = (vPos + (vVel * asfloat(params[scalar_offset_6 / 4][scalar_offset_6 % 4])));
   if ((vPos.x < -1.0f)) {
     vPos.x = 1.0f;
   }

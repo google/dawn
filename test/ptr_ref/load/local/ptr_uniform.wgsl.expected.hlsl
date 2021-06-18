@@ -1,11 +1,10 @@
-struct S {
-  /* 0x0000 */ int a;
+cbuffer cbuffer_v : register(b0, space0) {
+  uint4 v[1];
 };
-
-ConstantBuffer<S> v : register(b0, space0);
 
 [numthreads(1, 1, 1)]
 void main() {
-  const int use = (v.a + 1);
+  const int scalar_offset = (0u) / 4;
+  const int use = (asint(v[scalar_offset / 4][scalar_offset % 4]) + 1);
   return;
 }

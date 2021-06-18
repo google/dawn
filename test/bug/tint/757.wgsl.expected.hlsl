@@ -1,8 +1,6 @@
-struct Constants {
-  /* 0x0000 */ int level;
+cbuffer cbuffer_constants : register(b0, space0) {
+  uint4 constants[1];
 };
-
-ConstantBuffer<Constants> constants : register(b0, space0);
 Texture2DArray<float4> myTexture : register(t1, space0);
 
 RWByteAddressBuffer result : register(u3, space0);

@@ -281,8 +281,8 @@ set(TINT_LIB_SRCS
   transform/calculate_array_length.h
   transform/canonicalize_entry_point_io.cc
   transform/canonicalize_entry_point_io.h
-  transform/decompose_storage_access.cc
-  transform/decompose_storage_access.h
+  transform/decompose_memory_access.cc
+  transform/decompose_memory_access.h
   transform/external_texture_transform.cc
   transform/external_texture_transform.h
   transform/first_index_offset.cc
@@ -860,7 +860,7 @@ if(${TINT_BUILD_TESTS})
       transform/bound_array_accessors_test.cc
       transform/calculate_array_length_test.cc
       transform/canonicalize_entry_point_io_test.cc
-      transform/decompose_storage_access_test.cc
+      transform/decompose_memory_access_test.cc
       transform/external_texture_transform_test.cc
       transform/first_index_offset_test.cc
       transform/fold_constants_test.cc

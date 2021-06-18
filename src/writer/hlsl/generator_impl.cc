@@ -429,9 +429,19 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
     }
 
     if (auto* intrinsic =
-            ast::GetDecoration<transform::DecomposeStorageAccess::Intrinsic>(
+            ast::GetDecoration<transform::DecomposeMemoryAccess::Intrinsic>(
                 func->Declaration()->decorations())) {
-      return EmitDecomposeStorageAccessIntrinsic(pre, out, expr, intrinsic);
+      switch (intrinsic->storage_class) {
+        case ast::StorageClass::kUniform:
+          return EmitUniformBufferAccess(pre, out, expr, intrinsic);
+        case ast::StorageClass::kStorage:
+          return EmitStorageBufferAccess(pre, out, expr, intrinsic);
+        default:
+          TINT_UNREACHABLE(diagnostics_)
+              << "unsupported DecomposeMemoryAccess::Intrinsic storage class:"
+              << intrinsic->storage_class;
+          return false;
+      }
     }
   }
 
@@ -507,15 +517,122 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
   return true;
 }
 
-bool GeneratorImpl::EmitDecomposeStorageAccessIntrinsic(
+bool GeneratorImpl::EmitUniformBufferAccess(
     std::ostream& pre,
     std::ostream& out,
     ast::CallExpression* expr,
-    const transform::DecomposeStorageAccess::Intrinsic* intrinsic) {
+    const transform::DecomposeMemoryAccess::Intrinsic* intrinsic) {
   const auto& params = expr->params();
 
-  using Op = transform::DecomposeStorageAccess::Intrinsic::Op;
-  using DataType = transform::DecomposeStorageAccess::Intrinsic::DataType;
+  std::string scalar_offset = generate_name("scalar_offset");
+  {
+    std::stringstream ss;
+    ss << "const int " << scalar_offset << " = (";
+    if (!EmitExpression(pre, ss, params[1])) {  // offset
+      return false;
+    }
+    make_indent(ss << ") / 4;" << std::endl);
+    pre << ss.str();
+  }
+
+  using Op = transform::DecomposeMemoryAccess::Intrinsic::Op;
+  using DataType = transform::DecomposeMemoryAccess::Intrinsic::DataType;
+  switch (intrinsic->op) {
+    case Op::kLoad: {
+      auto cast = [&](const char* to, auto&& load) {
+        out << to << "(";
+        auto result = load();
+        out << ")";
+        return result;
+      };
+      auto load_scalar = [&]() {
+        if (!EmitExpression(pre, out, params[0])) {  // buffer
+          return false;
+        }
+        out << "[" << scalar_offset << " / 4][" << scalar_offset << " % 4]";
+        return true;
+      };
+      // Has a minimum alignment of 8 bytes, so is either .xy or .zw
+      auto load_vec2 = [&] {
+        std::string ubo_load = generate_name("ubo_load");
+        std::stringstream ss;
+        ss << "uint4 " << ubo_load << " = ";
+        if (!EmitExpression(pre, ss, params[0])) {  // buffer
+          return false;
+        }
+        ss << "[" << scalar_offset << " / 4]";
+        make_indent(ss << ";" << std::endl);
+        pre << ss.str();
+
+        out << "(" << scalar_offset << " & 2) ? " << ubo_load
+            << ".zw : " << ubo_load << ".xy";
+        return true;
+      };
+      // vec3 has a minimum alignment of 16 bytes, so is just a .xyz swizzle
+      auto load_vec3 = [&] {
+        if (!EmitExpression(pre, out, params[0])) {  // buffer
+          return false;
+        }
+        out << "[" << scalar_offset << " / 4].xyz";
+        return true;
+      };
+      // vec4 has a minimum alignment of 16 bytes, easiest case
+      auto load_vec4 = [&] {
+        if (!EmitExpression(pre, out, params[0])) {  // buffer
+          return false;
+        }
+        out << "[" << scalar_offset << " / 4]";
+        return true;
+      };
+      switch (intrinsic->type) {
+        case DataType::kU32:
+          return load_scalar();
+        case DataType::kF32:
+          return cast("asfloat", load_scalar);
+        case DataType::kI32:
+          return cast("asint", load_scalar);
+        case DataType::kVec2U32:
+          return load_vec2();
+        case DataType::kVec2F32:
+          return cast("asfloat", load_vec2);
+        case DataType::kVec2I32:
+          return cast("asint", load_vec2);
+        case DataType::kVec3U32:
+          return load_vec3();
+        case DataType::kVec3F32:
+          return cast("asfloat", load_vec3);
+        case DataType::kVec3I32:
+          return cast("asint", load_vec3);
+        case DataType::kVec4U32:
+          return load_vec4();
+        case DataType::kVec4F32:
+          return cast("asfloat", load_vec4);
+        case DataType::kVec4I32:
+          return cast("asint", load_vec4);
+      }
+      TINT_UNREACHABLE(diagnostics_)
+          << "unsupported DecomposeMemoryAccess::Intrinsic::DataType: "
+          << static_cast<int>(intrinsic->type);
+      return false;
+    }
+    default:
+      break;
+  }
+  TINT_UNREACHABLE(diagnostics_)
+      << "unsupported DecomposeMemoryAccess::Intrinsic::Op: "
+      << static_cast<int>(intrinsic->op);
+  return false;
+}
+
+bool GeneratorImpl::EmitStorageBufferAccess(
+    std::ostream& pre,
+    std::ostream& out,
+    ast::CallExpression* expr,
+    const transform::DecomposeMemoryAccess::Intrinsic* intrinsic) {
+  const auto& params = expr->params();
+
+  using Op = transform::DecomposeMemoryAccess::Intrinsic::Op;
+  using DataType = transform::DecomposeMemoryAccess::Intrinsic::DataType;
   switch (intrinsic->op) {
     case Op::kLoad: {
       auto load = [&](const char* cast, int n) {
@@ -565,7 +682,7 @@ bool GeneratorImpl::EmitDecomposeStorageAccessIntrinsic(
           return load("asint", 4);
       }
       TINT_UNREACHABLE(diagnostics_)
-          << "unsupported DecomposeStorageAccess::Intrinsic::DataType: "
+          << "unsupported DecomposeMemoryAccess::Intrinsic::DataType: "
           << static_cast<int>(intrinsic->type);
       return false;
     }
@@ -617,7 +734,7 @@ bool GeneratorImpl::EmitDecomposeStorageAccessIntrinsic(
           return store(4);
       }
       TINT_UNREACHABLE(diagnostics_)
-          << "unsupported DecomposeStorageAccess::Intrinsic::DataType: "
+          << "unsupported DecomposeMemoryAccess::Intrinsic::DataType: "
           << static_cast<int>(intrinsic->type);
       return false;
     }
@@ -636,7 +753,7 @@ bool GeneratorImpl::EmitDecomposeStorageAccessIntrinsic(
   }
 
   TINT_UNREACHABLE(diagnostics_)
-      << "unsupported DecomposeStorageAccess::Intrinsic::Op: "
+      << "unsupported DecomposeMemoryAccess::Intrinsic::Op: "
       << static_cast<int>(intrinsic->op);
   return false;
 }
@@ -645,19 +762,19 @@ bool GeneratorImpl::EmitStorageAtomicCall(
     std::ostream& pre,
     std::ostream& out,
     ast::CallExpression* expr,
-    transform::DecomposeStorageAccess::Intrinsic::Op op) {
-  using Op = transform::DecomposeStorageAccess::Intrinsic::Op;
+    transform::DecomposeMemoryAccess::Intrinsic::Op op) {
+  using Op = transform::DecomposeMemoryAccess::Intrinsic::Op;
 
   std::stringstream ss;
   std::string result = generate_name("atomic_result");
 
   auto* result_ty = TypeOf(expr);
   if (!result_ty->Is<sem::Void>()) {
-    if (!EmitType(ss, TypeOf(expr), ast::StorageClass::kNone,
-                  ast::Access::kUndefined, "")) {
+    if (!EmitTypeAndName(ss, TypeOf(expr), ast::StorageClass::kNone,
+                         ast::Access::kUndefined, result)) {
       return false;
     }
-    ss << " " << result << " = ";
+    ss << " = ";
     if (!EmitZeroValue(ss, result_ty)) {
       return false;
     }
@@ -693,11 +810,11 @@ bool GeneratorImpl::EmitStorageAtomicCall(
       // InterlockedExchange and discard the returned value
       auto* value = expr->params()[2];
       auto* value_ty = TypeOf(value);
-      if (!EmitType(pre, value_ty, ast::StorageClass::kNone,
-                    ast::Access::kUndefined, "")) {
+      if (!EmitTypeAndName(pre, value_ty, ast::StorageClass::kNone,
+                           ast::Access::kUndefined, result)) {
         return false;
       }
-      pre << " " << result << " = ";
+      pre << " = ";
       if (!EmitZeroValue(pre, value_ty)) {
         return false;
       }
@@ -725,11 +842,11 @@ bool GeneratorImpl::EmitStorageAtomicCall(
       auto* value = expr->params()[3];
 
       std::string compare = generate_name("atomic_compare_value");
-      if (!EmitType(ss, TypeOf(compare_value), ast::StorageClass::kNone,
-                    ast::Access::kUndefined, "")) {
+      if (!EmitTypeAndName(ss, TypeOf(compare_value), ast::StorageClass::kNone,
+                           ast::Access::kUndefined, compare)) {
         return false;
       }
-      ss << " " << compare << " = ";
+      ss << " = ";
       if (!EmitExpression(pre, ss, compare_value)) {
         return false;
       }
@@ -805,7 +922,7 @@ bool GeneratorImpl::EmitStorageAtomicCall(
 
     default:
       TINT_UNREACHABLE(diagnostics_)
-          << "unsupported atomic DecomposeStorageAccess::Intrinsic::Op: "
+          << "unsupported atomic DecomposeMemoryAccess::Intrinsic::Op: "
           << static_cast<int>(op);
       return false;
   }
@@ -842,11 +959,11 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& pre,
   std::string result = generate_name("atomic_result");
 
   if (!intrinsic->ReturnType()->Is<sem::Void>()) {
-    if (!EmitType(ss, intrinsic->ReturnType(), ast::StorageClass::kNone,
-                  ast::Access::kUndefined, "")) {
+    if (!EmitTypeAndName(ss, intrinsic->ReturnType(), ast::StorageClass::kNone,
+                         ast::Access::kUndefined, result)) {
       return false;
     }
-    ss << " " << result << " = ";
+    ss << " = ";
     if (!EmitZeroValue(ss, intrinsic->ReturnType())) {
       return false;
     }
@@ -875,11 +992,11 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& pre,
       // HLSL does not have an InterlockedStore, so we emulate it with
       // InterlockedExchange and discard the returned value
       auto* value_ty = intrinsic->Parameters()[1].type;
-      if (!EmitType(pre, value_ty, ast::StorageClass::kNone,
-                    ast::Access::kUndefined, "")) {
+      if (!EmitTypeAndName(pre, value_ty, ast::StorageClass::kNone,
+                           ast::Access::kUndefined, result)) {
         return false;
       }
-      pre << " " << result << " = ";
+      pre << " = ";
       if (!EmitZeroValue(pre, value_ty)) {
         return false;
       }
@@ -905,11 +1022,11 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& pre,
       auto* value = expr->params()[2];
 
       std::string compare = generate_name("atomic_compare_value");
-      if (!EmitType(ss, TypeOf(compare_value), ast::StorageClass::kNone,
-                    ast::Access::kUndefined, "")) {
+      if (!EmitTypeAndName(ss, TypeOf(compare_value), ast::StorageClass::kNone,
+                           ast::Access::kUndefined, compare)) {
         return false;
       }
-      ss << " " << compare << " = ";
+      ss << " = ";
       if (!EmitExpression(pre, ss, compare_value)) {
         return false;
       }
@@ -1902,17 +2019,15 @@ bool GeneratorImpl::EmitFunction(std::ostream& out, ast::Function* func) {
     }
 
     // Note: WGSL only allows for StorageClass::kNone on parameters, however the
-    // sanitizer transforms generates load / store functions for storage
-    // buffers. These functions have a storage buffer parameter with
-    // StorageClass::kStorage. This is required to correctly translate the
-    // parameter to [RW]ByteAddressBuffer.
-    if (!EmitType(out, type, v->StorageClass(), v->Access(),
-                  builder_.Symbols().NameFor(v->Declaration()->symbol()))) {
+    // sanitizer transforms generates load / store functions for storage or
+    // uniform buffers. These functions have a buffer parameter with
+    // StorageClass::kStorage or StorageClass::kUniform. This is required to
+    // correctly translate the parameter to a [RW]ByteAddressBuffer for storage
+    // buffers and a uint4[N] for uniform buffers.
+    if (!EmitTypeAndName(
+            out, type, v->StorageClass(), v->Access(),
+            builder_.Symbols().NameFor(v->Declaration()->symbol()))) {
       return false;
-    }
-    // Array name is output as part of the type
-    if (!type->Is<sem::Array>()) {
-      out << " " << builder_.Symbols().NameFor(v->Declaration()->symbol());
     }
   }
 
@@ -1959,26 +2074,28 @@ bool GeneratorImpl::EmitUniformVariable(std::ostream& out,
   auto binding_point = decl->binding_point();
   auto* type = var->Type()->UnwrapRef();
 
-  if (auto* strct = type->As<sem::Struct>()) {
-    out << "ConstantBuffer<"
-        << builder_.Symbols().NameFor(strct->Declaration()->name()) << "> "
-        << builder_.Symbols().NameFor(decl->symbol())
-        << RegisterAndSpace('b', binding_point) << ";" << std::endl;
-  } else {
-    auto name = "cbuffer_" + builder_.Symbols().NameFor(decl->symbol());
-    out << "cbuffer " << name << RegisterAndSpace('b', binding_point) << " {"
-        << std::endl;
-
-    increment_indent();
-    make_indent(out);
-    if (!EmitType(out, type, var->StorageClass(), var->Access(), "")) {
-      return false;
-    }
-    out << " " << builder_.Symbols().NameFor(decl->symbol()) << ";"
-        << std::endl;
-    decrement_indent();
-    out << "};" << std::endl;
+  auto* str = type->As<sem::Struct>();
+  if (!str) {
+    // https://www.w3.org/TR/WGSL/#module-scope-variables
+    TINT_ICE(diagnostics_)
+        << "variables with uniform storage must be structure";
   }
+
+  auto name = builder_.Symbols().NameFor(decl->symbol());
+  out << "cbuffer cbuffer_" << name << RegisterAndSpace('b', binding_point)
+      << " {" << std::endl;
+
+  increment_indent();
+  make_indent(out);
+
+  if (!EmitTypeAndName(out, type, ast::StorageClass::kUniform, var->Access(),
+                       name)) {
+    return false;
+  }
+  out << ";" << std::endl;
+  decrement_indent();
+  out << "};" << std::endl;
+
   return true;
 }
 
@@ -1988,12 +2105,12 @@ bool GeneratorImpl::EmitStorageVariable(std::ostream& out,
 
   auto* decl = var->Declaration();
   auto* type = var->Type()->UnwrapRef();
-  if (!EmitType(out, type, ast::StorageClass::kStorage, var->Access(), "")) {
+  if (!EmitTypeAndName(out, type, ast::StorageClass::kStorage, var->Access(),
+                       builder_.Symbols().NameFor(decl->symbol()))) {
     return false;
   }
 
-  out << " " << builder_.Symbols().NameFor(decl->symbol())
-      << RegisterAndSpace(var->Access() == ast::Access::kRead ? 't' : 'u',
+  out << RegisterAndSpace(var->Access() == ast::Access::kRead ? 't' : 'u',
                           decl->binding_point())
       << ";" << std::endl;
 
@@ -2016,11 +2133,8 @@ bool GeneratorImpl::EmitHandleVariable(std::ostream& out,
 
   auto name = builder_.Symbols().NameFor(decl->symbol());
   auto* type = var->Type()->UnwrapRef();
-  if (!EmitType(out, type, var->StorageClass(), var->Access(), name)) {
+  if (!EmitTypeAndName(out, type, var->StorageClass(), var->Access(), name)) {
     return false;
-  }
-  if (!type->Is<sem::Array>()) {
-    out << " " << name;
   }
 
   const char* register_space = nullptr;
@@ -2067,11 +2181,8 @@ bool GeneratorImpl::EmitPrivateVariable(std::ostream& out,
 
   auto name = builder_.Symbols().NameFor(decl->symbol());
   auto* type = var->Type()->UnwrapRef();
-  if (!EmitType(out, type, var->StorageClass(), var->Access(), name)) {
+  if (!EmitTypeAndName(out, type, var->StorageClass(), var->Access(), name)) {
     return false;
-  }
-  if (!type->Is<sem::Array>()) {
-    out << " " << name;
   }
 
   if (constructor_out.str().length()) {
@@ -2099,11 +2210,8 @@ bool GeneratorImpl::EmitWorkgroupVariable(std::ostream& out,
 
   auto name = builder_.Symbols().NameFor(decl->symbol());
   auto* type = var->Type()->UnwrapRef();
-  if (!EmitType(out, type, var->StorageClass(), var->Access(), name)) {
+  if (!EmitTypeAndName(out, type, var->StorageClass(), var->Access(), name)) {
     return false;
-  }
-  if (!type->Is<sem::Array>()) {
-    out << " " << name;
   }
 
   if (constructor_out.str().length()) {
@@ -2193,11 +2301,10 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
     }
     first = false;
 
-    if (!EmitType(out, type, sem->StorageClass(), sem->Access(), "")) {
+    if (!EmitTypeAndName(out, type, sem->StorageClass(), sem->Access(),
+                         builder_.Symbols().NameFor(var->symbol()))) {
       return false;
     }
-
-    out << " " << builder_.Symbols().NameFor(var->symbol());
   }
 
   out << ") {" << std::endl;
@@ -2467,13 +2574,31 @@ bool GeneratorImpl::EmitType(std::ostream& out,
                              const sem::Type* type,
                              ast::StorageClass storage_class,
                              ast::Access access,
-                             const std::string& name) {
-  if (storage_class == ast::StorageClass::kStorage) {
-    if (access != ast::Access::kRead) {
-      out << "RW";
+                             const std::string& name,
+                             bool* name_printed /* = nullptr */) {
+  switch (storage_class) {
+    case ast::StorageClass::kStorage:
+      if (access != ast::Access::kRead) {
+        out << "RW";
+      }
+      out << "ByteAddressBuffer";
+      return true;
+    case ast::StorageClass::kUniform: {
+      auto* str = type->As<sem::Struct>();
+      if (!str) {
+        // https://www.w3.org/TR/WGSL/#module-scope-variables
+        TINT_ICE(diagnostics_)
+            << "variables with uniform storage must be structure";
+      }
+      auto array_length = (str->Size() + 15) / 16;
+      out << "uint4 " << name << "[" << array_length << "]";
+      if (name_printed) {
+        *name_printed = true;
+      }
+      return true;
     }
-    out << "ByteAddressBuffer";
-    return true;
+    default:
+      break;
   }
 
   if (auto* ary = type->As<sem::Array>()) {
@@ -2494,6 +2619,9 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     }
     if (!name.empty()) {
       out << " " << name;
+      if (name_printed) {
+        *name_printed = true;
+      }
     }
     for (uint32_t size : sizes) {
       out << "[" << size << "]";
@@ -2620,43 +2748,34 @@ bool GeneratorImpl::EmitType(std::ostream& out,
   return true;
 }
 
+bool GeneratorImpl::EmitTypeAndName(std::ostream& out,
+                                    const sem::Type* type,
+                                    ast::StorageClass storage_class,
+                                    ast::Access access,
+                                    const std::string& name) {
+  bool printed_name = false;
+  if (!EmitType(out, type, storage_class, access, name, &printed_name)) {
+    return false;
+  }
+  if (!name.empty() && !printed_name) {
+    out << " " << name;
+  }
+  return true;
+}
+
 bool GeneratorImpl::EmitStructType(std::ostream& out, const sem::Struct* str) {
   auto storage_class_uses = str->StorageClassUsage();
   if (storage_class_uses.size() ==
-      storage_class_uses.count(ast::StorageClass::kStorage)) {
-    // The only use of the structure is as a storage buffer.
+      (storage_class_uses.count(ast::StorageClass::kStorage) +
+       storage_class_uses.count(ast::StorageClass::kUniform))) {
+    // The only use of the structure is as a storage buffer and / or uniform
+    // buffer.
     // Structures used as storage buffer are read and written to via a
     // ByteAddressBuffer instead of true structure.
+    // Structures used as uniform buffer are read from an array of vectors
+    // instead of true structure.
     return true;
   }
-
-  bool is_host_shareable = str->IsHostShareable();
-  uint32_t hlsl_offset = 0;
-
-  // Emits a `/* 0xnnnn */` byte offset comment for a struct member.
-  auto add_byte_offset_comment = [&](uint32_t offset) {
-    std::ios_base::fmtflags saved_flag_state(out.flags());
-    out << "/* 0x" << std::hex << std::setfill('0') << std::setw(4) << offset
-        << " */ ";
-    out.flags(saved_flag_state);
-  };
-
-  uint32_t pad_count = 0;
-  auto add_padding = [&](uint32_t size) {
-    if (size & 3) {
-      TINT_ICE(builder_.Diagnostics())
-          << "attempting to pad field with " << size
-          << " bytes, but we require a multiple of 4 bytes";
-      return false;
-    }
-    std::string name;
-    do {
-      name = "tint_pad_" + std::to_string(pad_count++);
-    } while (str->FindMember(builder_.Symbols().Get(name)));
-
-    out << "int " << name << "[" << (size / 4) << "];" << std::endl;
-    return true;
-  };
 
   auto struct_name = builder_.Symbols().NameFor(str->Declaration()->name());
   out << "struct " << struct_name << " {" << std::endl;
@@ -2666,39 +2785,12 @@ bool GeneratorImpl::EmitStructType(std::ostream& out, const sem::Struct* str) {
     make_indent(out);
 
     auto name = builder_.Symbols().NameFor(mem->Declaration()->symbol());
-    auto wgsl_offset = mem->Offset();
-
-    if (is_host_shareable) {
-      if (wgsl_offset < hlsl_offset) {
-        // Unimplementable layout
-        TINT_ICE(diagnostics_)
-            << "Structure member WGSL offset (" << wgsl_offset
-            << ") is behind HLSL offset (" << hlsl_offset << ")";
-        return false;
-      }
-
-      // Generate padding if required
-      if (auto padding = wgsl_offset - hlsl_offset) {
-        add_byte_offset_comment(hlsl_offset);
-        if (!add_padding(padding)) {
-          return false;
-        }
-        hlsl_offset += padding;
-        make_indent(out);
-      }
-
-      add_byte_offset_comment(hlsl_offset);
-    }
 
     auto* ty = mem->Type();
 
-    if (!EmitType(out, ty, ast::StorageClass::kNone, ast::Access::kReadWrite,
-                  name)) {
+    if (!EmitTypeAndName(out, ty, ast::StorageClass::kNone,
+                         ast::Access::kReadWrite, name)) {
       return false;
-    }
-    // Array member name will be output with the type
-    if (!ty->Is<sem::Array>()) {
-      out << " " << name;
     }
 
     for (auto* deco : mem->Declaration()->decorations()) {
@@ -2733,83 +2825,12 @@ bool GeneratorImpl::EmitStructType(std::ostream& out, const sem::Struct* str) {
     }
 
     out << ";" << std::endl;
-
-    if (is_host_shareable) {
-      // Calculate new HLSL offset
-      auto size_align = HlslPackedTypeSizeAndAlign(ty);
-      if (hlsl_offset % size_align.align) {
-        TINT_ICE(diagnostics_)
-            << "Misaligned HLSL structure member "
-            << ty->FriendlyName(builder_.Symbols()) << " " << name;
-        return false;
-      }
-      hlsl_offset += size_align.size;
-    }
-  }
-
-  if (is_host_shareable && str->Size() != hlsl_offset) {
-    make_indent(out);
-    add_byte_offset_comment(hlsl_offset);
-    if (!add_padding(str->Size() - hlsl_offset)) {
-      return false;
-    }
   }
 
   decrement_indent();
   make_indent(out);
 
   out << "};" << std::endl;
-
-  // If the structure has padding members, create a helper function for building
-  // the structure.
-  if (pad_count) {
-    auto builder_name = generate_name("make_" + struct_name);
-
-    out << std::endl;
-    out << struct_name << " " << builder_name << "(";
-    uint32_t idx = 0;
-    for (auto* mem : str->Members()) {
-      if (idx > 0) {
-        out << ",";
-        make_indent(out << std::endl);
-        out << std::string(struct_name.length() + builder_name.length() + 2,
-                           ' ');
-      }
-      auto name = "param_" + std::to_string(idx++);
-      auto* ty = mem->Type();
-      if (!EmitType(out, ty, ast::StorageClass::kNone, ast::Access::kReadWrite,
-                    name)) {
-        return false;
-      }
-
-      // Array member name will be output with the type
-      if (!ty->Is<sem::Array>()) {
-        out << " " << name;
-      }
-    }
-    out << ") {";
-    increment_indent();
-    make_indent(out << std::endl);
-
-    out << struct_name << " output;";
-    make_indent(out << std::endl);
-    idx = 0;
-    for (auto* mem : str->Members()) {
-      out << "output."
-          << builder_.Symbols().NameFor(mem->Declaration()->symbol()) << " = "
-          << "param_" + std::to_string(idx++) << ";";
-      make_indent(out << std::endl);
-    }
-    out << "return output;";
-
-    decrement_indent();
-    make_indent(out << std::endl);
-    out << "}";
-
-    make_indent(out << std::endl);
-
-    structure_builders_[str] = builder_name;
-  }
 
   return true;
 }
@@ -2872,12 +2893,9 @@ bool GeneratorImpl::EmitVariable(std::ostream& out, ast::Variable* var) {
   if (var->is_const()) {
     out << "const ";
   }
-  if (!EmitType(out, type, sem->StorageClass(), sem->Access(),
-                builder_.Symbols().NameFor(var->symbol()))) {
+  if (!EmitTypeAndName(out, type, sem->StorageClass(), sem->Access(),
+                       builder_.Symbols().NameFor(var->symbol()))) {
     return false;
-  }
-  if (!type->Is<sem::Array>()) {
-    out << " " << builder_.Symbols().NameFor(var->symbol());
   }
   out << constructor_out.str() << ";" << std::endl;
 
@@ -2925,20 +2943,16 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
     }
     out << "#endif" << std::endl;
     out << "static const ";
-    if (!EmitType(out, type, sem->StorageClass(), sem->Access(),
-                  builder_.Symbols().NameFor(var->symbol()))) {
+    if (!EmitTypeAndName(out, type, sem->StorageClass(), sem->Access(),
+                         builder_.Symbols().NameFor(var->symbol()))) {
       return false;
     }
-    out << " " << builder_.Symbols().NameFor(var->symbol()) << " = "
-        << kSpecConstantPrefix << const_id << ";" << std::endl;
+    out << " = " << kSpecConstantPrefix << const_id << ";" << std::endl;
   } else {
     out << "static const ";
-    if (!EmitType(out, type, sem->StorageClass(), sem->Access(),
-                  builder_.Symbols().NameFor(var->symbol()))) {
+    if (!EmitTypeAndName(out, type, sem->StorageClass(), sem->Access(),
+                         builder_.Symbols().NameFor(var->symbol()))) {
       return false;
-    }
-    if (!type->Is<sem::Array>()) {
-      out << " " << builder_.Symbols().NameFor(var->symbol());
     }
 
     if (var->constructor() != nullptr) {
@@ -2980,63 +2994,6 @@ bool GeneratorImpl::EmitBlockBraces(std::ostream& out,
   make_indent(out);
   out << "}";
   return true;
-}
-
-// https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-packing-rules
-// TODO(crbug.com/tint/898): We need CTS and / or Dawn e2e tests for this logic.
-GeneratorImpl::SizeAndAlign GeneratorImpl::HlslPackedTypeSizeAndAlign(
-    const sem::Type* ty) {
-  if (ty->IsAnyOf<sem::U32, sem::I32, sem::F32>()) {
-    return {4, 4};
-  }
-
-  if (auto* vec = ty->As<sem::Vector>()) {
-    auto num_els = vec->size();
-    auto* el_ty = vec->type();
-    if (el_ty->IsAnyOf<sem::U32, sem::I32, sem::F32>()) {
-      return SizeAndAlign{num_els * 4, 4};
-    }
-  }
-
-  if (auto* mat = ty->As<sem::Matrix>()) {
-    auto cols = mat->columns();
-    auto rows = mat->rows();
-    auto* el_ty = mat->type();
-    if (el_ty->IsAnyOf<sem::U32, sem::I32, sem::F32>()) {
-      static constexpr SizeAndAlign table[] = {
-          /* float2x2 */ {16, 8},
-          /* float2x3 */ {32, 16},
-          /* float2x4 */ {32, 16},
-          /* float3x2 */ {24, 8},
-          /* float3x3 */ {48, 16},
-          /* float3x4 */ {48, 16},
-          /* float4x2 */ {32, 8},
-          /* float4x3 */ {64, 16},
-          /* float4x4 */ {64, 16},
-      };
-      if (cols >= 2 && cols <= 4 && rows >= 2 && rows <= 4) {
-        return table[(3 * (cols - 2)) + (rows - 2)];
-      }
-    }
-  }
-
-  if (auto* arr = ty->As<sem::Array>()) {
-    auto el_size_align = HlslPackedTypeSizeAndAlign(arr->ElemType());
-    if (!arr->IsStrideImplicit()) {
-      TINT_ICE(diagnostics_) << "arrays with explicit strides should have "
-                                "removed with the PadArrayElements transform";
-      return {};
-    }
-    auto num_els = std::max<uint32_t>(arr->Count(), 1);
-    return SizeAndAlign{el_size_align.size * num_els, el_size_align.align};
-  }
-
-  if (auto* str = ty->As<sem::Struct>()) {
-    return SizeAndAlign{str->Size(), str->Align()};
-  }
-
-  TINT_UNREACHABLE(diagnostics_) << "Unhandled type " << ty->TypeInfo().name;
-  return {};
 }
 
 }  // namespace hlsl

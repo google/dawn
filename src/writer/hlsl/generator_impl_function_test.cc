@@ -341,11 +341,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct UBO {
-  /* 0x0000 */ float4 coord;
+  EXPECT_EQ(result(), R"(cbuffer cbuffer_ubo : register(b0, space1) {
+  uint4 ubo[1];
 };
-
-ConstantBuffer<UBO> ubo : register(b0, space1);
 
 float sub_func(float param) {
   return ubo.coord.x;
@@ -384,11 +382,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct Uniforms {
-  /* 0x0000 */ float4 coord;
+  EXPECT_EQ(result(), R"(cbuffer cbuffer_uniforms : register(b0, space1) {
+  uint4 uniforms[1];
 };
-
-ConstantBuffer<Uniforms> uniforms : register(b0, space1);
 
 void frag_main() {
   float v = uniforms.coord.x;
@@ -583,11 +579,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct S {
-  /* 0x0000 */ float x;
+  EXPECT_EQ(result(), R"(cbuffer cbuffer_coord : register(b0, space1) {
+  uint4 coord[1];
 };
-
-ConstantBuffer<S> coord : register(b0, space1);
 
 float sub_func(float param) {
   return coord.x;

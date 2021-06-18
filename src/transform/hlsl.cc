@@ -19,7 +19,7 @@
 #include "src/program_builder.h"
 #include "src/transform/calculate_array_length.h"
 #include "src/transform/canonicalize_entry_point_io.h"
-#include "src/transform/decompose_storage_access.h"
+#include "src/transform/decompose_memory_access.h"
 #include "src/transform/external_texture_transform.h"
 #include "src/transform/inline_pointer_lets.h"
 #include "src/transform/manager.h"
@@ -41,13 +41,13 @@ Output Hlsl::Run(const Program* in, const DataMap&) {
   manager.Add<InlinePointerLets>();
   // Simplify cleans up messy `*(&(expr))` expressions from InlinePointerLets.
   manager.Add<Simplify>();
-  // DecomposeStorageAccess must come after InlinePointerLets as we cannot take
-  // the address of calls to DecomposeStorageAccess::Intrinsic. Must also come
+  // DecomposeMemoryAccess must come after InlinePointerLets as we cannot take
+  // the address of calls to DecomposeMemoryAccess::Intrinsic. Must also come
   // after Simplify, as we need to fold away the address-of and defers of
   // `*(&(intrinsic_load()))` expressions.
-  manager.Add<DecomposeStorageAccess>();
-  // CalculateArrayLength must come after DecomposeStorageAccess, as
-  // DecomposeStorageAccess special-cases the arrayLength() intrinsic, which
+  manager.Add<DecomposeMemoryAccess>();
+  // CalculateArrayLength must come after DecomposeMemoryAccess, as
+  // DecomposeMemoryAccess special-cases the arrayLength() intrinsic, which
   // will be transformed by CalculateArrayLength
   manager.Add<CalculateArrayLength>();
   manager.Add<ExternalTextureTransform>();

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/transform/decompose_storage_access.h"
+#include "src/transform/decompose_memory_access.h"
 
 #include <memory>
 #include <string>
@@ -38,7 +38,7 @@
 #include "src/utils/get_or_create.h"
 #include "src/utils/hash.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::DecomposeStorageAccess::Intrinsic);
+TINT_INSTANTIATE_TYPEINFO(tint::transform::DecomposeMemoryAccess::Intrinsic);
 
 namespace tint {
 namespace transform {
@@ -46,7 +46,7 @@ namespace transform {
 namespace {
 
 /// Offset is a simple ast::Expression builder interface, used to build byte
-/// offsets for storage buffer accesses.
+/// offsets for storage and uniform buffer accesses.
 struct Offset : Castable<Offset> {
   /// @returns builds and returns the ast::Expression in `ctx.dst`
   virtual ast::Expression* Build(CloneContext& ctx) = 0;
@@ -179,14 +179,16 @@ std::unique_ptr<Offset> Mul(LHS&& lhs_, RHS&& rhs_) {
 
 /// LoadStoreKey is the unordered map key to a load or store intrinsic.
 struct LoadStoreKey {
-  sem::Type const* buf_ty;  // buffer type
-  sem::Type const* el_ty;   // element type
+  ast::StorageClass const storage_class;  // buffer storage class
+  sem::Type const* buf_ty;                // buffer type
+  sem::Type const* el_ty;                 // element type
   bool operator==(const LoadStoreKey& rhs) const {
-    return buf_ty == rhs.buf_ty && el_ty == rhs.el_ty;
+    return storage_class == rhs.storage_class && buf_ty == rhs.buf_ty &&
+           el_ty == rhs.el_ty;
   }
   struct Hasher {
     inline std::size_t operator()(const LoadStoreKey& u) const {
-      return utils::Hash(u.buf_ty, u.el_ty);
+      return utils::Hash(u.storage_class, u.buf_ty, u.el_ty);
     }
   };
 };
@@ -218,60 +220,60 @@ uint32_t MatrixColumnStride(const sem::Matrix* mat) {
 }
 
 bool IntrinsicDataTypeFor(const sem::Type* ty,
-                          DecomposeStorageAccess::Intrinsic::DataType& out) {
+                          DecomposeMemoryAccess::Intrinsic::DataType& out) {
   if (ty->Is<sem::I32>()) {
-    out = DecomposeStorageAccess::Intrinsic::DataType::kI32;
+    out = DecomposeMemoryAccess::Intrinsic::DataType::kI32;
     return true;
   }
   if (ty->Is<sem::U32>()) {
-    out = DecomposeStorageAccess::Intrinsic::DataType::kU32;
+    out = DecomposeMemoryAccess::Intrinsic::DataType::kU32;
     return true;
   }
   if (ty->Is<sem::F32>()) {
-    out = DecomposeStorageAccess::Intrinsic::DataType::kF32;
+    out = DecomposeMemoryAccess::Intrinsic::DataType::kF32;
     return true;
   }
   if (auto* vec = ty->As<sem::Vector>()) {
     switch (vec->size()) {
       case 2:
         if (vec->type()->Is<sem::I32>()) {
-          out = DecomposeStorageAccess::Intrinsic::DataType::kVec2I32;
+          out = DecomposeMemoryAccess::Intrinsic::DataType::kVec2I32;
           return true;
         }
         if (vec->type()->Is<sem::U32>()) {
-          out = DecomposeStorageAccess::Intrinsic::DataType::kVec2U32;
+          out = DecomposeMemoryAccess::Intrinsic::DataType::kVec2U32;
           return true;
         }
         if (vec->type()->Is<sem::F32>()) {
-          out = DecomposeStorageAccess::Intrinsic::DataType::kVec2F32;
+          out = DecomposeMemoryAccess::Intrinsic::DataType::kVec2F32;
           return true;
         }
         break;
       case 3:
         if (vec->type()->Is<sem::I32>()) {
-          out = DecomposeStorageAccess::Intrinsic::DataType::kVec3I32;
+          out = DecomposeMemoryAccess::Intrinsic::DataType::kVec3I32;
           return true;
         }
         if (vec->type()->Is<sem::U32>()) {
-          out = DecomposeStorageAccess::Intrinsic::DataType::kVec3U32;
+          out = DecomposeMemoryAccess::Intrinsic::DataType::kVec3U32;
           return true;
         }
         if (vec->type()->Is<sem::F32>()) {
-          out = DecomposeStorageAccess::Intrinsic::DataType::kVec3F32;
+          out = DecomposeMemoryAccess::Intrinsic::DataType::kVec3F32;
           return true;
         }
         break;
       case 4:
         if (vec->type()->Is<sem::I32>()) {
-          out = DecomposeStorageAccess::Intrinsic::DataType::kVec4I32;
+          out = DecomposeMemoryAccess::Intrinsic::DataType::kVec4I32;
           return true;
         }
         if (vec->type()->Is<sem::U32>()) {
-          out = DecomposeStorageAccess::Intrinsic::DataType::kVec4U32;
+          out = DecomposeMemoryAccess::Intrinsic::DataType::kVec4U32;
           return true;
         }
         if (vec->type()->Is<sem::F32>()) {
-          out = DecomposeStorageAccess::Intrinsic::DataType::kVec4F32;
+          out = DecomposeMemoryAccess::Intrinsic::DataType::kVec4F32;
           return true;
         }
         break;
@@ -282,80 +284,86 @@ bool IntrinsicDataTypeFor(const sem::Type* ty,
   return false;
 }
 
-/// @returns a DecomposeStorageAccess::Intrinsic decoration that can be applied
+/// @returns a DecomposeMemoryAccess::Intrinsic decoration that can be applied
 /// to a stub function to load the type `ty`.
-DecomposeStorageAccess::Intrinsic* IntrinsicLoadFor(ProgramBuilder* builder,
-                                                    const sem::Type* ty) {
-  DecomposeStorageAccess::Intrinsic::DataType type;
+DecomposeMemoryAccess::Intrinsic* IntrinsicLoadFor(
+    ProgramBuilder* builder,
+    ast::StorageClass storage_class,
+    const sem::Type* ty) {
+  DecomposeMemoryAccess::Intrinsic::DataType type;
   if (!IntrinsicDataTypeFor(ty, type)) {
     return nullptr;
   }
-  return builder->ASTNodes().Create<DecomposeStorageAccess::Intrinsic>(
-      builder->ID(), DecomposeStorageAccess::Intrinsic::Op::kLoad, type);
+  return builder->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(
+      builder->ID(), DecomposeMemoryAccess::Intrinsic::Op::kLoad, storage_class,
+      type);
 }
 
-/// @returns a DecomposeStorageAccess::Intrinsic decoration that can be applied
+/// @returns a DecomposeMemoryAccess::Intrinsic decoration that can be applied
 /// to a stub function to store the type `ty`.
-DecomposeStorageAccess::Intrinsic* IntrinsicStoreFor(ProgramBuilder* builder,
-                                                     const sem::Type* ty) {
-  DecomposeStorageAccess::Intrinsic::DataType type;
+DecomposeMemoryAccess::Intrinsic* IntrinsicStoreFor(
+    ProgramBuilder* builder,
+    ast::StorageClass storage_class,
+    const sem::Type* ty) {
+  DecomposeMemoryAccess::Intrinsic::DataType type;
   if (!IntrinsicDataTypeFor(ty, type)) {
     return nullptr;
   }
-  return builder->ASTNodes().Create<DecomposeStorageAccess::Intrinsic>(
-      builder->ID(), DecomposeStorageAccess::Intrinsic::Op::kStore, type);
+  return builder->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(
+      builder->ID(), DecomposeMemoryAccess::Intrinsic::Op::kStore,
+      storage_class, type);
 }
 
-/// @returns a DecomposeStorageAccess::Intrinsic decoration that can be applied
+/// @returns a DecomposeMemoryAccess::Intrinsic decoration that can be applied
 /// to a stub function for the atomic op and the type `ty`.
-DecomposeStorageAccess::Intrinsic* IntrinsicAtomicFor(ProgramBuilder* builder,
-                                                      sem::IntrinsicType ity,
-                                                      const sem::Type* ty) {
-  auto op = DecomposeStorageAccess::Intrinsic::Op::kAtomicLoad;
+DecomposeMemoryAccess::Intrinsic* IntrinsicAtomicFor(ProgramBuilder* builder,
+                                                     sem::IntrinsicType ity,
+                                                     const sem::Type* ty) {
+  auto op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicLoad;
   switch (ity) {
     case sem::IntrinsicType::kAtomicLoad:
-      op = DecomposeStorageAccess::Intrinsic::Op::kAtomicLoad;
+      op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicLoad;
       break;
     case sem::IntrinsicType::kAtomicStore:
-      op = DecomposeStorageAccess::Intrinsic::Op::kAtomicStore;
+      op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicStore;
       break;
     case sem::IntrinsicType::kAtomicAdd:
-      op = DecomposeStorageAccess::Intrinsic::Op::kAtomicAdd;
+      op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicAdd;
       break;
     case sem::IntrinsicType::kAtomicMax:
-      op = DecomposeStorageAccess::Intrinsic::Op::kAtomicMax;
+      op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicMax;
       break;
     case sem::IntrinsicType::kAtomicMin:
-      op = DecomposeStorageAccess::Intrinsic::Op::kAtomicMin;
+      op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicMin;
       break;
     case sem::IntrinsicType::kAtomicAnd:
-      op = DecomposeStorageAccess::Intrinsic::Op::kAtomicAnd;
+      op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicAnd;
       break;
     case sem::IntrinsicType::kAtomicOr:
-      op = DecomposeStorageAccess::Intrinsic::Op::kAtomicOr;
+      op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicOr;
       break;
     case sem::IntrinsicType::kAtomicXor:
-      op = DecomposeStorageAccess::Intrinsic::Op::kAtomicXor;
+      op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicXor;
       break;
     case sem::IntrinsicType::kAtomicExchange:
-      op = DecomposeStorageAccess::Intrinsic::Op::kAtomicExchange;
+      op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicExchange;
       break;
     case sem::IntrinsicType::kAtomicCompareExchangeWeak:
-      op = DecomposeStorageAccess::Intrinsic::Op::kAtomicCompareExchangeWeak;
+      op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicCompareExchangeWeak;
       break;
     default:
       TINT_ICE(builder->Diagnostics())
-          << "invalid IntrinsicType for DecomposeStorageAccess::Intrinsic: "
+          << "invalid IntrinsicType for DecomposeMemoryAccess::Intrinsic: "
           << ty->type_name();
       break;
   }
 
-  DecomposeStorageAccess::Intrinsic::DataType type;
+  DecomposeMemoryAccess::Intrinsic::DataType type;
   if (!IntrinsicDataTypeFor(ty, type)) {
     return nullptr;
   }
-  return builder->ASTNodes().Create<DecomposeStorageAccess::Intrinsic>(
-      builder->ID(), op, type);
+  return builder->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(
+      builder->ID(), op, ast::StorageClass::kStorage, type);
 }
 
 /// Inserts `node` before `insert_after` in the global declarations of
@@ -387,30 +395,30 @@ const ast::TypeDecl* TypeDeclOf(const sem::Type* ty) {
   }
 }
 
-/// StorageBufferAccess describes a single storage buffer access
-struct StorageBufferAccess {
+/// BufferAccess describes a single storage or uniform buffer access
+struct BufferAccess {
   sem::Expression const* var = nullptr;  // Storage buffer variable
   std::unique_ptr<Offset> offset;        // The byte offset on var
   sem::Type const* type = nullptr;       // The type of the access
   operator bool() const { return var; }  // Returns true if valid
 };
 
-/// Store describes a single storage buffer write
+/// Store describes a single storage or uniform buffer write
 struct Store {
   ast::AssignmentStatement* assignment;  // The AST assignment statement
-  StorageBufferAccess target;            // The target for the write
+  BufferAccess target;                   // The target for the write
 };
 
 }  // namespace
 
 /// State holds the current transform state
-struct DecomposeStorageAccess::State {
-  /// Map of AST expression to storage buffer access
+struct DecomposeMemoryAccess::State {
+  /// Map of AST expression to storage or uniform buffer access
   /// This map has entries added when encountered, and removed when outer
   /// expressions chain the access.
   /// Subset of #expression_order, as expressions are not removed from
   /// #expression_order.
-  std::unordered_map<ast::Expression*, StorageBufferAccess> accesses;
+  std::unordered_map<ast::Expression*, BufferAccess> accesses;
   /// The visited order of AST expressions (superset of #accesses)
   std::vector<ast::Expression*> expression_order;
   /// [buffer-type, element-type] -> load function name
@@ -419,25 +427,25 @@ struct DecomposeStorageAccess::State {
   std::unordered_map<LoadStoreKey, Symbol, LoadStoreKey::Hasher> store_funcs;
   /// [buffer-type, element-type, atomic-op] -> load function name
   std::unordered_map<AtomicKey, Symbol, AtomicKey::Hasher> atomic_funcs;
-  /// List of storage buffer writes
+  /// List of storage or uniform buffer writes
   std::vector<Store> stores;
 
   /// AddAccess() adds the `expr -> access` map item to #accesses, and `expr`
   /// to #expression_order.
   /// @param expr the expression that performs the access
   /// @param access the access
-  void AddAccess(ast::Expression* expr, StorageBufferAccess&& access) {
+  void AddAccess(ast::Expression* expr, BufferAccess&& access) {
     TINT_ASSERT(access.type);
     accesses.emplace(expr, std::move(access));
     expression_order.emplace_back(expr);
   }
 
   /// TakeAccess() removes the `node` item from #accesses (if it exists),
-  /// returning the StorageBufferAccess. If #accesses does not hold an item for
-  /// `node`, an invalid StorageBufferAccess is returned.
+  /// returning the BufferAccess. If #accesses does not hold an item for
+  /// `node`, an invalid BufferAccess is returned.
   /// @param node the expression that performed an access
-  /// @return the StorageBufferAccess for the given expression
-  StorageBufferAccess TakeAccess(ast::Expression* node) {
+  /// @return the BufferAccess for the given expression
+  BufferAccess TakeAccess(ast::Expression* node) {
     auto lhs_it = accesses.find(node);
     if (lhs_it == accesses.end()) {
       return {};
@@ -448,12 +456,13 @@ struct DecomposeStorageAccess::State {
   }
 
   /// LoadFunc() returns a symbol to an intrinsic function that loads an element
-  /// of type `el_ty` from a storage buffer of type `buf_ty`. The function has
-  /// the signature: `fn load(buf : buf_ty, offset : u32) -> el_ty`
+  /// of type `el_ty` from a storage or uniform buffer of type `buf_ty`.
+  /// The emitted function has the signature:
+  ///   `fn load(buf : buf_ty, offset : u32) -> el_ty`
   /// @param ctx the CloneContext
   /// @param insert_after the user-declared type to insert the function after
-  /// @param buf_ty the storage buffer type
-  /// @param el_ty the storage buffer element type
+  /// @param buf_ty the storage or uniform buffer type
+  /// @param el_ty the storage or uniform buffer element type
   /// @param var_user the variable user
   /// @return the name of the function that performs the load
   Symbol LoadFunc(CloneContext& ctx,
@@ -461,71 +470,79 @@ struct DecomposeStorageAccess::State {
                   const sem::Type* buf_ty,
                   const sem::Type* el_ty,
                   const sem::VariableUser* var_user) {
-    return utils::GetOrCreate(load_funcs, LoadStoreKey{buf_ty, el_ty}, [&] {
-      auto* buf_ast_ty = CreateASTTypeFor(&ctx, buf_ty);
+    auto storage_class = var_user->Variable()->StorageClass();
+    return utils::GetOrCreate(
+        load_funcs, LoadStoreKey{storage_class, buf_ty, el_ty}, [&] {
+          auto* buf_ast_ty = CreateASTTypeFor(&ctx, buf_ty);
 
-      ast::VariableList params = {
-          // Note: The buffer parameter requires the kStorage StorageClass in
-          // order for HLSL to emit this as a ByteAddressBuffer.
-          ctx.dst->create<ast::Variable>(
-              ctx.dst->Sym("buffer"), ast::StorageClass::kStorage,
-              var_user->Variable()->Access(), buf_ast_ty, true, nullptr,
-              ast::DecorationList{}),
-          ctx.dst->Param("offset", ctx.dst->ty.u32()),
-      };
+          ast::VariableList params = {
+              // Note: The buffer parameter requires the StorageClass in
+              // order for HLSL to emit this as a ByteAddressBuffer or cbuffer
+              // array.
+              ctx.dst->create<ast::Variable>(
+                  ctx.dst->Sym("buffer"), storage_class,
+                  var_user->Variable()->Access(), buf_ast_ty, true, nullptr,
+                  ast::DecorationList{}),
+              ctx.dst->Param("offset", ctx.dst->ty.u32()),
+          };
 
-      ast::Function* func = nullptr;
-      if (auto* intrinsic = IntrinsicLoadFor(ctx.dst, el_ty)) {
-        auto* el_ast_ty = CreateASTTypeFor(&ctx, el_ty);
-        func = ctx.dst->create<ast::Function>(
-            ctx.dst->Sym(), params, el_ast_ty, nullptr,
-            ast::DecorationList{
-                intrinsic,
-                ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
-                    ctx.dst->ID(), ast::DisabledValidation::kFunctionHasNoBody),
-            },
-            ast::DecorationList{});
-      } else {
-        ast::ExpressionList values;
-        if (auto* mat_ty = el_ty->As<sem::Matrix>()) {
-          auto* vec_ty = mat_ty->ColumnType();
-          Symbol load = LoadFunc(ctx, insert_after, buf_ty, vec_ty, var_user);
-          for (uint32_t i = 0; i < mat_ty->columns(); i++) {
-            auto* offset =
-                ctx.dst->Add("offset", i * MatrixColumnStride(mat_ty));
-            values.emplace_back(ctx.dst->Call(load, "buffer", offset));
+          ast::Function* func = nullptr;
+          if (auto* intrinsic =
+                  IntrinsicLoadFor(ctx.dst, storage_class, el_ty)) {
+            auto* el_ast_ty = CreateASTTypeFor(&ctx, el_ty);
+            func = ctx.dst->create<ast::Function>(
+                ctx.dst->Sym(), params, el_ast_ty, nullptr,
+                ast::DecorationList{
+                    intrinsic,
+                    ctx.dst->ASTNodes()
+                        .Create<ast::DisableValidationDecoration>(
+                            ctx.dst->ID(),
+                            ast::DisabledValidation::kFunctionHasNoBody),
+                },
+                ast::DecorationList{});
+          } else {
+            ast::ExpressionList values;
+            if (auto* mat_ty = el_ty->As<sem::Matrix>()) {
+              auto* vec_ty = mat_ty->ColumnType();
+              Symbol load =
+                  LoadFunc(ctx, insert_after, buf_ty, vec_ty, var_user);
+              for (uint32_t i = 0; i < mat_ty->columns(); i++) {
+                auto* offset =
+                    ctx.dst->Add("offset", i * MatrixColumnStride(mat_ty));
+                values.emplace_back(ctx.dst->Call(load, "buffer", offset));
+              }
+            } else if (auto* str = el_ty->As<sem::Struct>()) {
+              for (auto* member : str->Members()) {
+                auto* offset = ctx.dst->Add("offset", member->Offset());
+                Symbol load = LoadFunc(ctx, insert_after, buf_ty,
+                                       member->Type()->UnwrapRef(), var_user);
+                values.emplace_back(ctx.dst->Call(load, "buffer", offset));
+              }
+            } else if (auto* arr = el_ty->As<sem::Array>()) {
+              for (uint32_t i = 0; i < arr->Count(); i++) {
+                auto* offset = ctx.dst->Add("offset", arr->Stride() * i);
+                Symbol load = LoadFunc(ctx, insert_after, buf_ty,
+                                       arr->ElemType()->UnwrapRef(), var_user);
+                values.emplace_back(ctx.dst->Call(load, "buffer", offset));
+              }
+            }
+            auto* el_ast_ty = CreateASTTypeFor(&ctx, el_ty);
+            func = ctx.dst->create<ast::Function>(
+                ctx.dst->Sym(), params, el_ast_ty,
+                ctx.dst->Block(ctx.dst->Return(
+                    ctx.dst->create<ast::TypeConstructorExpression>(
+                        CreateASTTypeFor(&ctx, el_ty), values))),
+                ast::DecorationList{}, ast::DecorationList{});
           }
-        } else if (auto* str = el_ty->As<sem::Struct>()) {
-          for (auto* member : str->Members()) {
-            auto* offset = ctx.dst->Add("offset", member->Offset());
-            Symbol load = LoadFunc(ctx, insert_after, buf_ty,
-                                   member->Type()->UnwrapRef(), var_user);
-            values.emplace_back(ctx.dst->Call(load, "buffer", offset));
-          }
-        } else if (auto* arr = el_ty->As<sem::Array>()) {
-          for (uint32_t i = 0; i < arr->Count(); i++) {
-            auto* offset = ctx.dst->Add("offset", arr->Stride() * i);
-            Symbol load = LoadFunc(ctx, insert_after, buf_ty,
-                                   arr->ElemType()->UnwrapRef(), var_user);
-            values.emplace_back(ctx.dst->Call(load, "buffer", offset));
-          }
-        }
-        auto* el_ast_ty = CreateASTTypeFor(&ctx, el_ty);
-        func = ctx.dst->create<ast::Function>(
-            ctx.dst->Sym(), params, el_ast_ty,
-            ctx.dst->Block(
-                ctx.dst->Return(ctx.dst->create<ast::TypeConstructorExpression>(
-                    CreateASTTypeFor(&ctx, el_ty), values))),
-            ast::DecorationList{}, ast::DecorationList{});
-      }
-      InsertGlobal(ctx, insert_after, func);
-      return func->symbol();
-    });
+          InsertGlobal(ctx, insert_after, func);
+          return func->symbol();
+        });
   }
 
   /// StoreFunc() returns a symbol to an intrinsic function that stores an
-  /// element of type `el_ty` to a storage buffer of type `buf_ty`. The function
-  /// has the signature: `fn store(buf : buf_ty, offset : u32, value : el_ty)`
+  /// element of type `el_ty` to a storage buffer of type `buf_ty`.
+  /// The function has the signature:
+  ///   `fn store(buf : buf_ty, offset : u32, value : el_ty)`
   /// @param ctx the CloneContext
   /// @param insert_after the user-declared type to insert the function after
   /// @param buf_ty the storage buffer type
@@ -537,70 +554,79 @@ struct DecomposeStorageAccess::State {
                    const sem::Type* buf_ty,
                    const sem::Type* el_ty,
                    const sem::VariableUser* var_user) {
-    return utils::GetOrCreate(store_funcs, LoadStoreKey{buf_ty, el_ty}, [&] {
-      auto* buf_ast_ty = CreateASTTypeFor(&ctx, buf_ty);
-      auto* el_ast_ty = CreateASTTypeFor(&ctx, el_ty);
-      ast::VariableList params{
-          // Note: The buffer parameter requires the kStorage StorageClass in
-          // order for HLSL to emit this as a ByteAddressBuffer.
-          ctx.dst->create<ast::Variable>(
-              ctx.dst->Sym("buffer"), ast::StorageClass::kStorage,
-              var_user->Variable()->Access(), buf_ast_ty, true, nullptr,
-              ast::DecorationList{}),
-          ctx.dst->Param("offset", ctx.dst->ty.u32()),
-          ctx.dst->Param("value", el_ast_ty),
-      };
-      ast::Function* func = nullptr;
-      if (auto* intrinsic = IntrinsicStoreFor(ctx.dst, el_ty)) {
-        func = ctx.dst->create<ast::Function>(
-            ctx.dst->Sym(), params, ctx.dst->ty.void_(), nullptr,
-            ast::DecorationList{
-                intrinsic,
-                ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
-                    ctx.dst->ID(), ast::DisabledValidation::kFunctionHasNoBody),
-            },
-            ast::DecorationList{});
+    auto storage_class = var_user->Variable()->StorageClass();
+    return utils::GetOrCreate(
+        store_funcs, LoadStoreKey{storage_class, buf_ty, el_ty}, [&] {
+          auto* buf_ast_ty = CreateASTTypeFor(&ctx, buf_ty);
+          auto* el_ast_ty = CreateASTTypeFor(&ctx, el_ty);
+          ast::VariableList params{
+              // Note: The buffer parameter requires the StorageClass in
+              // order for HLSL to emit this as a ByteAddressBuffer.
+              ctx.dst->create<ast::Variable>(
+                  ctx.dst->Sym("buffer"), storage_class,
+                  var_user->Variable()->Access(), buf_ast_ty, true, nullptr,
+                  ast::DecorationList{}),
+              ctx.dst->Param("offset", ctx.dst->ty.u32()),
+              ctx.dst->Param("value", el_ast_ty),
+          };
+          ast::Function* func = nullptr;
+          if (auto* intrinsic =
+                  IntrinsicStoreFor(ctx.dst, storage_class, el_ty)) {
+            func = ctx.dst->create<ast::Function>(
+                ctx.dst->Sym(), params, ctx.dst->ty.void_(), nullptr,
+                ast::DecorationList{
+                    intrinsic,
+                    ctx.dst->ASTNodes()
+                        .Create<ast::DisableValidationDecoration>(
+                            ctx.dst->ID(),
+                            ast::DisabledValidation::kFunctionHasNoBody),
+                },
+                ast::DecorationList{});
 
-      } else {
-        ast::StatementList body;
-        if (auto* mat_ty = el_ty->As<sem::Matrix>()) {
-          auto* vec_ty = mat_ty->ColumnType();
-          Symbol store = StoreFunc(ctx, insert_after, buf_ty, vec_ty, var_user);
-          for (uint32_t i = 0; i < mat_ty->columns(); i++) {
-            auto* offset =
-                ctx.dst->Add("offset", i * MatrixColumnStride(mat_ty));
-            auto* access = ctx.dst->IndexAccessor("value", i);
-            auto* call = ctx.dst->Call(store, "buffer", offset, access);
-            body.emplace_back(ctx.dst->create<ast::CallStatement>(call));
+          } else {
+            ast::StatementList body;
+            if (auto* mat_ty = el_ty->As<sem::Matrix>()) {
+              auto* vec_ty = mat_ty->ColumnType();
+              Symbol store =
+                  StoreFunc(ctx, insert_after, buf_ty, vec_ty, var_user);
+              for (uint32_t i = 0; i < mat_ty->columns(); i++) {
+                auto* offset =
+                    ctx.dst->Add("offset", i * MatrixColumnStride(mat_ty));
+                auto* access = ctx.dst->IndexAccessor("value", i);
+                auto* call = ctx.dst->Call(store, "buffer", offset, access);
+                body.emplace_back(ctx.dst->create<ast::CallStatement>(call));
+              }
+            } else if (auto* str = el_ty->As<sem::Struct>()) {
+              for (auto* member : str->Members()) {
+                auto* offset = ctx.dst->Add("offset", member->Offset());
+                auto* access = ctx.dst->MemberAccessor(
+                    "value", ctx.Clone(member->Declaration()->symbol()));
+                Symbol store = StoreFunc(ctx, insert_after, buf_ty,
+                                         member->Type()->UnwrapRef(), var_user);
+                auto* call = ctx.dst->Call(store, "buffer", offset, access);
+                body.emplace_back(ctx.dst->create<ast::CallStatement>(call));
+              }
+            } else if (auto* arr = el_ty->As<sem::Array>()) {
+              for (uint32_t i = 0; i < arr->Count(); i++) {
+                auto* offset = ctx.dst->Add("offset", arr->Stride() * i);
+                auto* access =
+                    ctx.dst->IndexAccessor("value", ctx.dst->Expr(i));
+                Symbol store =
+                    StoreFunc(ctx, insert_after, buf_ty,
+                              arr->ElemType()->UnwrapRef(), var_user);
+                auto* call = ctx.dst->Call(store, "buffer", offset, access);
+                body.emplace_back(ctx.dst->create<ast::CallStatement>(call));
+              }
+            }
+            func = ctx.dst->create<ast::Function>(
+                ctx.dst->Sym(), params, ctx.dst->ty.void_(),
+                ctx.dst->Block(body), ast::DecorationList{},
+                ast::DecorationList{});
           }
-        } else if (auto* str = el_ty->As<sem::Struct>()) {
-          for (auto* member : str->Members()) {
-            auto* offset = ctx.dst->Add("offset", member->Offset());
-            auto* access = ctx.dst->MemberAccessor(
-                "value", ctx.Clone(member->Declaration()->symbol()));
-            Symbol store = StoreFunc(ctx, insert_after, buf_ty,
-                                     member->Type()->UnwrapRef(), var_user);
-            auto* call = ctx.dst->Call(store, "buffer", offset, access);
-            body.emplace_back(ctx.dst->create<ast::CallStatement>(call));
-          }
-        } else if (auto* arr = el_ty->As<sem::Array>()) {
-          for (uint32_t i = 0; i < arr->Count(); i++) {
-            auto* offset = ctx.dst->Add("offset", arr->Stride() * i);
-            auto* access = ctx.dst->IndexAccessor("value", ctx.dst->Expr(i));
-            Symbol store = StoreFunc(ctx, insert_after, buf_ty,
-                                     arr->ElemType()->UnwrapRef(), var_user);
-            auto* call = ctx.dst->Call(store, "buffer", offset, access);
-            body.emplace_back(ctx.dst->create<ast::CallStatement>(call));
-          }
-        }
-        func = ctx.dst->create<ast::Function>(
-            ctx.dst->Sym(), params, ctx.dst->ty.void_(), ctx.dst->Block(body),
-            ast::DecorationList{}, ast::DecorationList{});
-      }
 
-      InsertGlobal(ctx, insert_after, func);
-      return func->symbol();
-    });
+          InsertGlobal(ctx, insert_after, func);
+          return func->symbol();
+        });
   }
 
   /// AtomicFunc() returns a symbol to an intrinsic function that performs an
@@ -667,12 +693,13 @@ struct DecomposeStorageAccess::State {
   }
 };
 
-DecomposeStorageAccess::Intrinsic::Intrinsic(ProgramID program_id,
-                                             Op o,
-                                             DataType ty)
-    : Base(program_id), op(o), type(ty) {}
-DecomposeStorageAccess::Intrinsic::~Intrinsic() = default;
-std::string DecomposeStorageAccess::Intrinsic::InternalName() const {
+DecomposeMemoryAccess::Intrinsic::Intrinsic(ProgramID program_id,
+                                            Op o,
+                                            ast::StorageClass sc,
+                                            DataType ty)
+    : Base(program_id), op(o), storage_class(sc), type(ty) {}
+DecomposeMemoryAccess::Intrinsic::~Intrinsic() = default;
+std::string DecomposeMemoryAccess::Intrinsic::InternalName() const {
   std::stringstream ss;
   switch (op) {
     case Op::kLoad:
@@ -712,6 +739,7 @@ std::string DecomposeStorageAccess::Intrinsic::InternalName() const {
       ss << "intrinsic_atomic_compare_exchange_weak_";
       break;
   }
+  ss << storage_class << "_";
   switch (type) {
     case DataType::kU32:
       ss << "u32";
@@ -753,16 +781,16 @@ std::string DecomposeStorageAccess::Intrinsic::InternalName() const {
   return ss.str();
 }
 
-DecomposeStorageAccess::Intrinsic* DecomposeStorageAccess::Intrinsic::Clone(
+DecomposeMemoryAccess::Intrinsic* DecomposeMemoryAccess::Intrinsic::Clone(
     CloneContext* ctx) const {
-  return ctx->dst->ASTNodes().Create<DecomposeStorageAccess::Intrinsic>(
-      ctx->dst->ID(), op, type);
+  return ctx->dst->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(
+      ctx->dst->ID(), op, storage_class, type);
 }
 
-DecomposeStorageAccess::DecomposeStorageAccess() = default;
-DecomposeStorageAccess::~DecomposeStorageAccess() = default;
+DecomposeMemoryAccess::DecomposeMemoryAccess() = default;
+DecomposeMemoryAccess::~DecomposeMemoryAccess() = default;
 
-Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
+Output DecomposeMemoryAccess::Run(const Program* in, const DataMap&) {
   ProgramBuilder out;
   CloneContext ctx(&out, in);
 
@@ -770,9 +798,10 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
 
   State state;
 
-  // Scan the AST nodes for storage buffer accesses. Complex expression chains
-  // (e.g. `storage_buffer.foo.bar[20].x`) are handled by maintaining an offset
-  // chain via the `state.TakeAccess()`, `state.AddAccess()` methods.
+  // Scan the AST nodes for storage and uniform buffer accesses. Complex
+  // expression chains (e.g. `storage_buffer.foo.bar[20].x`) are handled by
+  // maintaining an offset chain via the `state.TakeAccess()`,
+  // `state.AddAccess()` methods.
   //
   // Inner-most expression nodes are guaranteed to be visited first because AST
   // nodes are fully immutable and require their children to be constructed
@@ -781,8 +810,9 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
     if (auto* ident = node->As<ast::IdentifierExpression>()) {
       // X
       if (auto* var = sem.Get<sem::VariableUser>(ident)) {
-        if (var->Variable()->StorageClass() == ast::StorageClass::kStorage) {
-          // Variable to a storage buffer
+        if (var->Variable()->StorageClass() == ast::StorageClass::kStorage ||
+            var->Variable()->StorageClass() == ast::StorageClass::kUniform) {
+          // Variable to a storage or uniform buffer
           state.AddAccess(ident, {
                                      var,
                                      ToOffset(0u),
@@ -940,7 +970,7 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
     ctx.Replace(expr, load);
   }
 
-  // And replace all storage buffer assignments with stores
+  // And replace all storage and uniform buffer assignments with stores
   for (auto& store : state.stores) {
     auto* buf = store.target.var->Declaration();
     auto* offset = store.target.offset->Build(ctx);

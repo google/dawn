@@ -1,20 +1,8 @@
 struct S {
-  /* 0x0000 */ float f;
-  /* 0x0004 */ uint u;
-  /* 0x0008 */ int tint_pad_0[30];
-  /* 0x0080 */ float4 v;
-  /* 0x0090 */ int tint_pad_1[28];
+  float f;
+  uint u;
+  float4 v;
 };
-
-S make_S(float param_0,
-         uint param_1,
-         float4 param_2) {
-  S output;
-  output.f = param_0;
-  output.u = param_1;
-  output.v = param_2;
-  return output;
-}
 
 void tint_symbol_5(RWByteAddressBuffer buffer, uint offset, S value) {
   buffer.Store((offset + 0u), asuint(value.f));
@@ -31,7 +19,7 @@ struct tint_symbol_1 {
 };
 
 void frag_main(tint_symbol_1 tint_symbol) {
-  const S input = make_S(tint_symbol.f, tint_symbol.u, tint_symbol.v);
+  const S input = {tint_symbol.f, tint_symbol.u, tint_symbol.v};
   const float f = input.f;
   const uint u = input.u;
   const float4 v = input.v;

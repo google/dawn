@@ -32,7 +32,7 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/program_builder.h"
 #include "src/scope_stack.h"
-#include "src/transform/decompose_storage_access.h"
+#include "src/transform/decompose_memory_access.h"
 #include "src/writer/text_generator.h"
 
 namespace tint {
@@ -117,17 +117,29 @@ class GeneratorImpl : public TextGenerator {
                 std::ostream& out,
                 ast::CallExpression* expr);
   /// Handles generating a call expression to a
-  /// transform::DecomposeStorageAccess::Intrinsic
+  /// transform::DecomposeMemoryAccess::Intrinsic for a uniform buffer
   /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
   /// @param expr the call expression
-  /// @param intrinsic the transform::DecomposeStorageAccess::Intrinsic
+  /// @param intrinsic the transform::DecomposeMemoryAccess::Intrinsic
   /// @returns true if the call expression is emitted
-  bool EmitDecomposeStorageAccessIntrinsic(
+  bool EmitUniformBufferAccess(
       std::ostream& pre,
       std::ostream& out,
       ast::CallExpression* expr,
-      const transform::DecomposeStorageAccess::Intrinsic* intrinsic);
+      const transform::DecomposeMemoryAccess::Intrinsic* intrinsic);
+  /// Handles generating a call expression to a
+  /// transform::DecomposeMemoryAccess::Intrinsic for a storage buffer
+  /// @param pre the preamble for the expression stream
+  /// @param out the output of the expression stream
+  /// @param expr the call expression
+  /// @param intrinsic the transform::DecomposeMemoryAccess::Intrinsic
+  /// @returns true if the call expression is emitted
+  bool EmitStorageBufferAccess(
+      std::ostream& pre,
+      std::ostream& out,
+      ast::CallExpression* expr,
+      const transform::DecomposeMemoryAccess::Intrinsic* intrinsic);
   /// Handles generating a barrier intrinsic call
   /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
@@ -146,7 +158,7 @@ class GeneratorImpl : public TextGenerator {
       std::ostream& pre,
       std::ostream& out,
       ast::CallExpression* expr,
-      transform::DecomposeStorageAccess::Intrinsic::Op op);
+      transform::DecomposeMemoryAccess::Intrinsic::Op op);
   /// Handles generating an atomic intrinsic call for a workgroup variable
   /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
@@ -361,13 +373,28 @@ class GeneratorImpl : public TextGenerator {
   /// @param type the type to generate
   /// @param storage_class the storage class of the variable
   /// @param access the access control type of the variable
-  /// @param name the name of the variable, only used for array emission
+  /// @param name the name of the variable, used for array emission.
+  /// @param name_printed (optional) if not nullptr and an array was printed
+  /// then the boolean is set to true.
   /// @returns true if the type is emitted
   bool EmitType(std::ostream& out,
                 const sem::Type* type,
                 ast::StorageClass storage_class,
                 ast::Access access,
-                const std::string& name);
+                const std::string& name,
+                bool* name_printed = nullptr);
+  /// Handles generating type and name
+  /// @param out the output stream
+  /// @param type the type to generate
+  /// @param storage_class the storage class of the variable
+  /// @param access the access control type of the variable
+  /// @param name the name of the variable, used for array emission.
+  /// @returns true if the type is emitted
+  bool EmitTypeAndName(std::ostream& out,
+                       const sem::Type* type,
+                       ast::StorageClass storage_class,
+                       ast::Access access,
+                       const std::string& name);
   /// Handles generating a structure declaration
   /// @param out the output stream
   /// @param ty the struct to generate
@@ -459,16 +486,6 @@ class GeneratorImpl : public TextGenerator {
   bool EmitBlockBraces(std::ostream& out, F&& cb) {
     return EmitBlockBraces(out, "", std::forward<F>(cb));
   }
-
-  // A pair of byte size and alignment `uint32_t`s.
-  struct SizeAndAlign {
-    uint32_t size;
-    uint32_t align;
-  };
-
-  /// @returns the HLSL packed type size and alignment in bytes for the given
-  /// type.
-  SizeAndAlign HlslPackedTypeSizeAndAlign(const sem::Type* ty);
 
   ProgramBuilder builder_;
   std::function<bool(std::ostream& out)> emit_continuing_;

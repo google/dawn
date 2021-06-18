@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TRANSFORM_DECOMPOSE_STORAGE_ACCESS_H_
-#define SRC_TRANSFORM_DECOMPOSE_STORAGE_ACCESS_H_
+#ifndef SRC_TRANSFORM_DECOMPOSE_MEMORY_ACCESS_H_
+#define SRC_TRANSFORM_DECOMPOSE_MEMORY_ACCESS_H_
 
 #include <string>
 
@@ -27,10 +27,10 @@ class CloneContext;
 
 namespace transform {
 
-/// DecomposeStorageAccess is a transform used to replace storage buffer
-/// accesses with a combination of load, store or atomic functions on primitive
-/// types.
-class DecomposeStorageAccess : public Transform {
+/// DecomposeMemoryAccess is a transform used to replace storage and uniform
+/// buffer accesses with a combination of load, store or atomic functions on
+/// primitive types.
+class DecomposeMemoryAccess : public Transform {
  public:
   /// Intrinsic is an InternalDecoration that's used to decorate a stub function
   /// so that the HLSL transforms this into calls to
@@ -73,8 +73,9 @@ class DecomposeStorageAccess : public Transform {
     /// Constructor
     /// @param program_id the identifier of the program that owns this node
     /// @param o the op of the intrinsic
+    /// @param sc the storage class of the buffer
     /// @param ty the data type of the intrinsic
-    Intrinsic(ProgramID program_id, Op o, DataType ty);
+    Intrinsic(ProgramID program_id, Op o, ast::StorageClass sc, DataType ty);
     /// Destructor
     ~Intrinsic() override;
 
@@ -90,14 +91,17 @@ class DecomposeStorageAccess : public Transform {
     /// The op of the intrinsic
     Op const op;
 
+    /// The storage class of the buffer this intrinsic operates on
+    ast::StorageClass const storage_class;
+
     /// The type of the intrinsic
     DataType const type;
   };
 
   /// Constructor
-  DecomposeStorageAccess();
+  DecomposeMemoryAccess();
   /// Destructor
-  ~DecomposeStorageAccess() override;
+  ~DecomposeMemoryAccess() override;
 
   /// Runs the transform on `program`, returning the transformation result.
   /// @param program the source program to transform
@@ -111,4 +115,4 @@ class DecomposeStorageAccess : public Transform {
 }  // namespace transform
 }  // namespace tint
 
-#endif  // SRC_TRANSFORM_DECOMPOSE_STORAGE_ACCESS_H_
+#endif  // SRC_TRANSFORM_DECOMPOSE_MEMORY_ACCESS_H_
