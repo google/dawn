@@ -147,14 +147,6 @@ class ParserImpl : Reader {
   /// @returns the accumulated error string
   const std::string error() { return errors_.str(); }
 
-  /// Changes pipeline IO to be HLSL-style: as entry point parameters and
-  /// return.
-  /// TODO(crbug.com/tint/508): Once all this support has landed, switch
-  /// over to that, and remove the old support.
-  void SetHLSLStylePipelineIO() { hlsl_style_pipeline_io_ = true; }
-  /// @returns true if HLSL-style IO should be used.
-  bool UseHLSLStylePipelineIO() const { return hlsl_style_pipeline_io_; }
-
   /// Builds an internal representation of the SPIR-V binary,
   /// and parses it into a Tint AST module.  Diagnostics are emitted
   /// to the error stream.
@@ -821,10 +813,6 @@ class ParserImpl : Reader {
   /// See also BuiltInPositionInfo which is a separate mechanism for a more
   /// complex case of replacing an entire structure.
   BuiltInsMap special_builtins_;
-
-  /// This is temporary while this module is converted to use the new style
-  /// of pipeline IO.
-  bool hlsl_style_pipeline_io_ = false;
 
   /// Info about the WorkgroupSize builtin. If it's not present, then the 'id'
   /// field will be 0. Sadly, in SPIR-V right now, there's only one workgroup

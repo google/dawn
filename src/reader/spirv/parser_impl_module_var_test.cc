@@ -5260,10 +5260,6 @@ TEST_F(SpvModuleScopeVarParserTest, InputVarsConvertedToPrivate) {
   )" + MainBody();
   auto p = parser(test::Assemble(assembly));
 
-  // TODO(crbug.com/tint/508): Remove this when everything is converted
-  // to HLSL style pipeline IO.
-  p->SetHLSLStylePipelineIO();
-
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
   const auto got = p->program().to_str();
@@ -5284,10 +5280,6 @@ TEST_F(SpvModuleScopeVarParserTest, OutputVarsConvertedToPrivate) {
      %1 = OpVariable %ptr_out_uint Output
   )" + MainBody();
   auto p = parser(test::Assemble(assembly));
-
-  // TODO(crbug.com/tint/508): Remove this when everything is converted
-  // to HLSL style pipeline IO.
-  p->SetHLSLStylePipelineIO();
 
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
@@ -5310,10 +5302,6 @@ TEST_F(SpvModuleScopeVarParserTest,
      %1 = OpVariable %ptr_out_uint Output %uint_1
   )" + MainBody();
   auto p = parser(test::Assemble(assembly));
-
-  // TODO(crbug.com/tint/508): Remove this when everything is converted
-  // to HLSL style pipeline IO.
-  p->SetHLSLStylePipelineIO();
 
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
@@ -5345,10 +5333,6 @@ TEST_F(SpvModuleScopeVarParserTest,
      %1 = OpVariable %ptr_ty Output %arr_init
   )" + MainBody();
   auto p = parser(test::Assemble(assembly));
-
-  // TODO(crbug.com/tint/508): Remove this when everything is converted
-  // to HLSL style pipeline IO.
-  p->SetHLSLStylePipelineIO();
 
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
@@ -5384,10 +5368,6 @@ TEST_F(SpvModuleScopeVarParserTest,
   )" + MainBody();
   auto p = parser(test::Assemble(assembly));
 
-  // TODO(crbug.com/tint/508): Remove this when everything is converted
-  // to HLSL style pipeline IO.
-  p->SetHLSLStylePipelineIO();
-
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
   const auto got = p->program().to_str();
@@ -5418,10 +5398,6 @@ TEST_F(SpvModuleScopeVarParserTest, Builtin_Input_SameSignednessAsWGSL) {
   )" + MainBody();
   auto p = parser(test::Assemble(assembly));
 
-  // TODO(crbug.com/tint/508): Remove this when everything is converted
-  // to HLSL style pipeline IO.
-  p->SetHLSLStylePipelineIO();
-
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
   const auto got = p->program().to_str();
@@ -5445,10 +5421,6 @@ TEST_F(SpvModuleScopeVarParserTest, Builtin_Input_OppositeSignednessAsWGSL) {
      %1 = OpVariable %ptr_ty Input
   )" + MainBody();
   auto p = parser(test::Assemble(assembly));
-
-  // TODO(crbug.com/tint/508): Remove this when everything is converted
-  // to HLSL style pipeline IO.
-  p->SetHLSLStylePipelineIO();
 
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
@@ -5486,10 +5458,6 @@ TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_IOLocations) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-
-  // TODO(crbug.com/tint/508): Remove this when everything is converted
-  // to HLSL style pipeline IO.
-  p->SetHLSLStylePipelineIO();
 
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
@@ -5603,10 +5571,6 @@ TEST_F(SpvModuleScopeVarParserTest,
   )";
   auto p = parser(test::Assemble(assembly));
 
-  // TODO(crbug.com/tint/508): Remove this when everything is converted
-  // to HLSL style pipeline IO.
-  p->SetHLSLStylePipelineIO();
-
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
   const auto got = p->program().to_str();
@@ -5681,10 +5645,6 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-
-  // TODO(crbug.com/tint/508): Remove this when everything is converted
-  // to HLSL style pipeline IO.
-  p->SetHLSLStylePipelineIO();
 
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
@@ -5765,10 +5725,6 @@ TEST_F(SpvModuleScopeVarParserTest,
   )";
   auto p = parser(test::Assemble(assembly));
 
-  // TODO(crbug.com/tint/508): Remove this when everything is converted
-  // to HLSL style pipeline IO.
-  p->SetHLSLStylePipelineIO();
-
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
   const auto got = p->program().to_str();
@@ -5836,10 +5792,6 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-
-  // TODO(crbug.com/tint/508): Remove this when everything is converted
-  // to HLSL style pipeline IO.
-  p->SetHLSLStylePipelineIO();
 
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
@@ -5911,10 +5863,6 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-
-  // TODO(crbug.com/tint/508): Remove this when everything is converted
-  // to HLSL style pipeline IO.
-  p->SetHLSLStylePipelineIO();
 
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
@@ -5988,10 +5936,6 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-
-  // TODO(crbug.com/tint/508): Remove this when everything is converted
-  // to HLSL style pipeline IO.
-  p->SetHLSLStylePipelineIO();
 
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
@@ -6067,10 +6011,6 @@ TEST_F(SpvModuleScopeVarParserTest,
   )";
   auto p = parser(test::Assemble(assembly));
 
-  // TODO(crbug.com/tint/508): Remove this when everything is converted
-  // to HLSL style pipeline IO.
-  p->SetHLSLStylePipelineIO();
-
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
   const auto got = p->program().to_str();
@@ -6125,10 +6065,6 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_BuiltIn_Position) {
   OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
-
-  // TODO(crbug.com/tint/508): Remove this when everything is converted
-  // to HLSL style pipeline IO.
-  p->SetHLSLStylePipelineIO();
 
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
@@ -6216,10 +6152,6 @@ TEST_F(SpvModuleScopeVarParserTest,
     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
-
-  // TODO(crbug.com/tint/508): Remove this when everything is converted
-  // to HLSL style pipeline IO.
-  p->SetHLSLStylePipelineIO();
 
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());

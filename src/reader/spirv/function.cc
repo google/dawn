@@ -3376,28 +3376,18 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
             // Convert the LHS to a reference by dereferencing it.
             lhs = Dereference(lhs);
           }
-          if (parser_impl_.UseHLSLStylePipelineIO()) {
-            // In the HLSL-style pipeline IO case, the private variable is an
-            // array whose element type is already of the same type as the value
-            // being stored into it.  Form the reference into the first element.
-            lhs.expr = create<ast::ArrayAccessorExpression>(
-                Source{}, lhs.expr, parser_impl_.MakeNullValue(ty_.I32()));
-            if (auto* ref = lhs.type->As<Reference>()) {
-              lhs.type = ref->type;
-            }
-            if (auto* arr = lhs.type->As<Array>()) {
-              lhs.type = arr->type;
-            }
-            TINT_ASSERT(lhs.type);
-          } else {
-            if (!rhs.type->Is<U32>()) {
-              // WGSL requires sample_mask_out to be unsigned.
-              rhs = TypedExpression{ty_.U32(),
-                                    create<ast::TypeConstructorExpression>(
-                                        Source{}, builder_.ty.u32(),
-                                        ast::ExpressionList{rhs.expr})};
-            }
+          // The private variable is an array whose element type is already of
+          // the same type as the value being stored into it.  Form the
+          // reference into the first element.
+          lhs.expr = create<ast::ArrayAccessorExpression>(
+              Source{}, lhs.expr, parser_impl_.MakeNullValue(ty_.I32()));
+          if (auto* ref = lhs.type->As<Reference>()) {
+            lhs.type = ref->type;
           }
+          if (auto* arr = lhs.type->As<Array>()) {
+            lhs.type = arr->type;
+          }
+          TINT_ASSERT(lhs.type);
           break;
         default:
           break;

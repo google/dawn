@@ -248,15 +248,6 @@ class ParserImplWrapperForTest {
     return impl_.GetSourceForResultIdForTest(id);
   }
 
-  /// Changes pipeline IO to be HLSL-style: as entry point parameters and
-  /// return.
-  /// TODO(crbug.com/tint/508): Once all this support has landed, switch
-  /// over to that, and remove the old support.
-  void SetHLSLStylePipelineIO() { impl_.SetHLSLStylePipelineIO(); }
-
-  /// @returns true if HLSL-style IO should be used.
-  bool UseHLSLStylePipelineIO() const { return impl_.UseHLSLStylePipelineIO(); }
-
  private:
   ParserImpl impl_;
   /// When true, indicates the input SPIR-V module should not be emitted.

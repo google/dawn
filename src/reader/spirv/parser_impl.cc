@@ -250,7 +250,6 @@ ParserImpl::ParserImpl(const std::vector<uint32_t>& spv_binary)
       namer_(fail_stream_),
       enum_converter_(fail_stream_),
       tools_context_(kInputEnv) {
-  hlsl_style_pipeline_io_ = true;
   // Create a message consumer to propagate error messages from SPIRV-Tools
   // out as our own failures.
   message_consumer_ = [this](spv_message_level_t level, const char* /*source*/,
@@ -823,18 +822,16 @@ bool ParserImpl::RegisterEntryPoints() {
     bool owns_inner_implementation = false;
     std::string inner_implementation_name;
 
-    if (hlsl_style_pipeline_io_) {
-      auto where = function_to_ep_info_.find(function_id);
-      if (where == function_to_ep_info_.end()) {
-        // If this is the first entry point to have function_id as its
-        // implementation, then this entry point is responsible for generating
-        // the inner implementation.
-        owns_inner_implementation = true;
-        inner_implementation_name = namer_.MakeDerivedName(ep_name);
-      } else {
-        // Reuse the inner implementation owned by the first entry point.
-        inner_implementation_name = where->second[0].inner_name;
-      }
+    auto where = function_to_ep_info_.find(function_id);
+    if (where == function_to_ep_info_.end()) {
+      // If this is the first entry point to have function_id as its
+      // implementation, then this entry point is responsible for generating
+      // the inner implementation.
+      owns_inner_implementation = true;
+      inner_implementation_name = namer_.MakeDerivedName(ep_name);
+    } else {
+      // Reuse the inner implementation owned by the first entry point.
+      inner_implementation_name = where->second[0].inner_name;
     }
     TINT_ASSERT(ep_name != inner_implementation_name);
 
@@ -873,9 +870,9 @@ bool ParserImpl::RegisterEntryPoints() {
                           workgroup_size_builtin_.z_value};
       } else {
         // Use the LocalSize execution mode.  This is the second choice.
-        auto where = local_size.find(function_id);
-        if (where != local_size.end()) {
-          wgsize = where->second;
+        auto where_local_size = local_size.find(function_id);
+        if (where_local_size != local_size.end()) {
+          wgsize = where_local_size->second;
         }
       }
     }
@@ -1165,8 +1162,8 @@ const Type* ParserImpl::ConvertType(uint32_t type_id,
 
   if (pointee_type_id == builtin_position_.struct_type_id) {
     builtin_position_.pointer_type_id = type_id;
-    builtin_position_.storage_class =
-        hlsl_style_pipeline_io_ ? SpvStorageClassPrivate : storage_class;
+    // Pipeline IO builtins map to private variables.
+    builtin_position_.storage_class = SpvStorageClassPrivate;
     return nullptr;
   }
   auto* ast_elem_ty = ConvertType(pointee_type_id, PtrAs::Ptr);
@@ -1189,13 +1186,10 @@ const Type* ParserImpl::ConvertType(uint32_t type_id,
     remap_buffer_block_type_.insert(type_id);
   }
 
-  if (hlsl_style_pipeline_io_) {
-    // When using HLSL-style pipeline IO, intput and output variables
-    // are mapped to private variables.
-    if (ast_storage_class == ast::StorageClass::kInput ||
-        ast_storage_class == ast::StorageClass::kOutput) {
-      ast_storage_class = ast::StorageClass::kPrivate;
-    }
+  // Pipeline intput and output variables map to private variables.
+  if (ast_storage_class == ast::StorageClass::kInput ||
+      ast_storage_class == ast::StorageClass::kOutput) {
+    ast_storage_class = ast::StorageClass::kPrivate;
   }
   switch (ptr_as) {
     case PtrAs::Ref:
@@ -1429,13 +1423,6 @@ bool ParserImpl::EmitModuleScopeVariables() {
     // Make sure the variable has a name.
     namer_.SuggestSanitizedName(builtin_position_.per_vertex_var_id,
                                 "gl_Position");
-    ast::DecorationList decos;
-    if (!hlsl_style_pipeline_io_) {
-      // When doing HLSL-style pipeline IO, the decoration goes on the
-      // parameter, not the variable.
-      decos.push_back(
-          create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kPosition));
-    }
     ast::Expression* ast_constructor = nullptr;
     if (builtin_position_.per_vertex_var_init_id) {
       // The initializer is complex.
@@ -1460,7 +1447,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
         builtin_position_.per_vertex_var_id,
         enum_converter_.ToStorageClass(builtin_position_.storage_class),
         ConvertType(builtin_position_.position_member_type_id), false,
-        ast_constructor, std::move(decos));
+        ast_constructor, {});
 
     builder_.AST().AddGlobalVariable(ast_var);
   }

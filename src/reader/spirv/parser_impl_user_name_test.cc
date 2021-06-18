@@ -186,9 +186,6 @@ TEST_F(SpvParserUserNameTest, EntryPointNames_DistinctFromInnerNames) {
 )";
   auto p = parser(test::Assemble(assembly));
 
-  // TODO(crbug.com/tint/508): Remove this when switchover complete.
-  p->SetHLSLStylePipelineIO();
-
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   // The first entry point grabs the best name, "main"
   EXPECT_THAT(p->namer().Name(100), Eq("main"));
