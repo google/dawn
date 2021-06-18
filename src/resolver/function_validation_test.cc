@@ -331,6 +331,14 @@ TEST_F(ResolverFunctionValidationTest, FunctionConstInitWithParam) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverFunctionValidationTest, FunctionParamsConst) {
+  Func("foo", {Param(Sym("arg"), ty.i32())}, ty.void_(),
+       {Assign(Expr(Source{{12, 34}}, "arg"), Expr(1)), Return()});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: cannot assign to value of type 'i32'");
+}
+
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_BadType) {
   // [[stage(compute), workgroup_size(64.0)]
   // fn main() {}
