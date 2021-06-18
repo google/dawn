@@ -761,34 +761,76 @@ namespace dawn_native { namespace d3d12 {
                     if (CanUseCopyResource(copy->source, copy->destination, copy->copySize)) {
                         commandList->CopyResource(destination->GetD3D12Resource(),
                                                   source->GetD3D12Resource());
+                    } else if (source->GetDimension() == wgpu::TextureDimension::e3D &&
+                               destination->GetDimension() == wgpu::TextureDimension::e3D) {
+                        for (Aspect aspect : IterateEnumMask(srcRange.aspects)) {
+                            D3D12_TEXTURE_COPY_LOCATION srcLocation =
+                                ComputeTextureCopyLocationForTexture(source, copy->source.mipLevel,
+                                                                     0, aspect);
+                            D3D12_TEXTURE_COPY_LOCATION dstLocation =
+                                ComputeTextureCopyLocationForTexture(
+                                    destination, copy->destination.mipLevel, 0, aspect);
+
+                            D3D12_BOX sourceRegion = ComputeD3D12BoxFromOffsetAndSize(
+                                copy->source.origin, copy->copySize);
+
+                            commandList->CopyTextureRegion(&dstLocation, copy->destination.origin.x,
+                                                           copy->destination.origin.y,
+                                                           copy->destination.origin.z, &srcLocation,
+                                                           &sourceRegion);
+                        }
                     } else {
                         // TODO(crbug.com/dawn/814): support copying with 1D.
-                        ASSERT(source->GetDimension() == wgpu::TextureDimension::e2D &&
-                               destination->GetDimension() == wgpu::TextureDimension::e2D);
+                        ASSERT(source->GetDimension() != wgpu::TextureDimension::e1D &&
+                               destination->GetDimension() != wgpu::TextureDimension::e1D);
                         const dawn_native::Extent3D copyExtentOneSlice = {
                             copy->copySize.width, copy->copySize.height, 1u};
 
                         for (Aspect aspect : IterateEnumMask(srcRange.aspects)) {
-                            for (uint32_t layer = 0; layer < copy->copySize.depthOrArrayLayers;
-                                 ++layer) {
+                            for (uint32_t z = 0; z < copy->copySize.depthOrArrayLayers; ++z) {
+                                uint32_t sourceLayer = 0;
+                                uint32_t sourceZ = 0;
+                                switch (source->GetDimension()) {
+                                    case wgpu::TextureDimension::e2D:
+                                        sourceLayer = copy->source.origin.z + z;
+                                        break;
+                                    case wgpu::TextureDimension::e3D:
+                                        sourceZ = copy->source.origin.z + z;
+                                        break;
+                                    case wgpu::TextureDimension::e1D:
+                                        UNREACHABLE();
+                                }
+
+                                uint32_t destinationLayer = 0;
+                                uint32_t destinationZ = 0;
+                                switch (destination->GetDimension()) {
+                                    case wgpu::TextureDimension::e2D:
+                                        destinationLayer = copy->destination.origin.z + z;
+                                        break;
+                                    case wgpu::TextureDimension::e3D:
+                                        destinationZ = copy->destination.origin.z + z;
+                                        break;
+                                    case wgpu::TextureDimension::e1D:
+                                        UNREACHABLE();
+                                }
                                 D3D12_TEXTURE_COPY_LOCATION srcLocation =
                                     ComputeTextureCopyLocationForTexture(
-                                        source, copy->source.mipLevel,
-                                        copy->source.origin.z + layer, aspect);
+                                        source, copy->source.mipLevel, sourceLayer, aspect);
 
                                 D3D12_TEXTURE_COPY_LOCATION dstLocation =
-                                    ComputeTextureCopyLocationForTexture(
-                                        destination, copy->destination.mipLevel,
-                                        copy->destination.origin.z + layer, aspect);
+                                    ComputeTextureCopyLocationForTexture(destination,
+                                                                         copy->destination.mipLevel,
+                                                                         destinationLayer, aspect);
 
                                 Origin3D sourceOriginInSubresource = copy->source.origin;
-                                sourceOriginInSubresource.z = 0;
+                                sourceOriginInSubresource.z = sourceZ;
                                 D3D12_BOX sourceRegion = ComputeD3D12BoxFromOffsetAndSize(
                                     sourceOriginInSubresource, copyExtentOneSlice);
 
                                 commandList->CopyTextureRegion(
                                     &dstLocation, copy->destination.origin.x,
-                                    copy->destination.origin.y, 0, &srcLocation, &sourceRegion);
+                                    copy->destination.origin.y, destinationZ, &srcLocation,
+                                    &sourceRegion);
                             }
                         }
                     }

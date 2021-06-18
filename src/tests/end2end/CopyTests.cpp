@@ -2135,8 +2135,6 @@ TEST_P(CopyTests_T2T, Texture3DFull) {
 
 // Test that copying whole 3D texture to a 2D array in one texture-to-texture-copy works.
 TEST_P(CopyTests_T2T, Texture3DTo2DArrayFull) {
-    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
-
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kDepth = 6u;
@@ -2150,8 +2148,6 @@ TEST_P(CopyTests_T2T, Texture3DTo2DArrayFull) {
 
 // Test that copying whole 2D array to a 3D texture in one texture-to-texture-copy works.
 TEST_P(CopyTests_T2T, Texture2DArrayTo3DFull) {
-    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
-
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kDepth = 6u;
@@ -2165,9 +2161,7 @@ TEST_P(CopyTests_T2T, Texture2DArrayTo3DFull) {
 
 // Test that copying subregion of a 3D texture in one texture-to-texture-copy works.
 TEST_P(CopyTests_T2T, Texture3DSubRegion) {
-    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
     DAWN_TEST_UNSUPPORTED_IF(IsANGLE());  // TODO(crbug.com/angleproject/5967)
-
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kDepth = 6u;
@@ -2181,8 +2175,6 @@ TEST_P(CopyTests_T2T, Texture3DSubRegion) {
 
 // Test that copying subregion of a 3D texture to a 2D array in one texture-to-texture-copy works.
 TEST_P(CopyTests_T2T, Texture3DTo2DArraySubRegion) {
-    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
-
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kDepth = 6u;
@@ -2197,9 +2189,7 @@ TEST_P(CopyTests_T2T, Texture3DTo2DArraySubRegion) {
 // Test that copying subregion of a 2D array to a 3D texture to in one texture-to-texture-copy
 // works.
 TEST_P(CopyTests_T2T, Texture2DArrayTo3DSubRegion) {
-    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
     DAWN_TEST_UNSUPPORTED_IF(IsANGLE());  // TODO(crbug.com/angleproject/5967)
-
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kDepth = 6u;
