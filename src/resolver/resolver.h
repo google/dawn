@@ -266,6 +266,8 @@ class Resolver {
   bool ValidateAtomic(const ast::Atomic* a, const sem::Atomic* s);
   bool ValidateAtomicUses();
   bool ValidateAssignment(const ast::AssignmentStatement* a);
+  bool ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
+                                 const sem::Type* storage_type);
   bool ValidateCallStatement(ast::CallStatement* stmt);
   bool ValidateEntryPoint(const ast::Function* func, const FunctionInfo* info);
   bool ValidateFunction(const ast::Function* func, const FunctionInfo* info);

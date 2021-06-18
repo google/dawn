@@ -370,7 +370,7 @@ TEST_F(ResolverEntryPointValidationTest,
   // fn main(param : Input) {}
   auto* input = Structure(
       "Input",
-      {Member("a", ty.f32(),
+      {Member("a", ty.u32(),
               {Location(Source{{13, 43}}, 0),
                Builtin(Source{{14, 52}}, ast::Builtin::kSampleIndex)})});
   auto* param = Param("param", ty.Of(input));

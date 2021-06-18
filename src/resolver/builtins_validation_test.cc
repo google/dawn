@@ -20,31 +20,112 @@ namespace {
 class ResolverBuiltinsValidationTest : public resolver::TestHelper,
                                        public testing::Test {};
 
-TEST_F(ResolverBuiltinsValidationTest, FrontFacingParamIsBool_Pass) {
+TEST_F(ResolverBuiltinsValidationTest, SampleMaskNotU32_Struct_Fail) {
+  // struct MyInputs {
+  //   [[builtin(sample_mask)]] m: f32;
+  // };
+  // [[stage(fragment)]]
+  // fn fragShader(is_front: MyInputs) -> [[location(0)]] f32 { return 1.0; }
+
+  auto* s = Structure(
+      "MyInputs", {Member("m", ty.f32(),
+                          ast::DecorationList{Builtin(
+                              Source{{12, 34}}, ast::Builtin::kSampleMask)})});
+  Func("fragShader", {Param("arg", ty.Of(s))}, ty.f32(), {Return(1.0f)},
+       {Stage(ast::PipelineStage::kFragment)}, {Location(0)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: store type of builtin(sample_mask) must be 'u32'");
+}
+
+TEST_F(ResolverBuiltinsValidationTest, SampleMaskIsNotU32_Fail) {
   // [[stage(fragment)]]
   // fn fs_main(
-  //   [[builtin(front_facing)]] is_front: bool
+  //   [[builtin(sample_mask)]] arg: bool
   // ) -> [[location(0)]] f32 { return 1.0; }
-  auto* is_front =
-      Param("is_front", ty.bool_(),
-            ast::DecorationList{Builtin(ast::Builtin::kFrontFacing)});
-  Func("fs_main", ast::VariableList{is_front}, ty.f32(), {Return(1.0f)},
+  auto* arg = Param("arg", ty.bool_(),
+                    ast::DecorationList{
+                        Builtin(Source{{12, 34}}, ast::Builtin::kSampleMask)});
+  Func("fs_main", ast::VariableList{arg}, ty.f32(), {Return(1.0f)},
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)},
+       {Location(0)});
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: store type of builtin(sample_mask) must be 'u32'");
+}
+
+TEST_F(ResolverBuiltinsValidationTest, SampleIndexIsNotU32_Struct_Fail) {
+  // struct MyInputs {
+  //   [[builtin(sample_index)]] m: f32;
+  // };
+  // [[stage(fragment)]]
+  // fn fragShader(is_front: MyInputs) -> [[location(0)]] f32 { return 1.0; }
+
+  auto* s = Structure(
+      "MyInputs", {Member("m", ty.f32(),
+                          ast::DecorationList{Builtin(
+                              Source{{12, 34}}, ast::Builtin::kSampleIndex)})});
+  Func("fragShader", {Param("arg", ty.Of(s))}, ty.f32(), {Return(1.0f)},
+       {Stage(ast::PipelineStage::kFragment)}, {Location(0)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: store type of builtin(sample_index) must be 'u32'");
+}
+
+TEST_F(ResolverBuiltinsValidationTest, SampleIndexIsNotU32_Fail) {
+  // [[stage(fragment)]]
+  // fn fs_main(
+  //   [[builtin(sample_index)]] arg: bool
+  // ) -> [[location(0)]] f32 { return 1.0; }
+  auto* arg = Param("arg", ty.bool_(),
+                    ast::DecorationList{
+                        Builtin(Source{{12, 34}}, ast::Builtin::kSampleIndex)});
+  Func("fs_main", ast::VariableList{arg}, ty.f32(), {Return(1.0f)},
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)},
+       {Location(0)});
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: store type of builtin(sample_index) must be 'u32'");
+}
+
+TEST_F(ResolverBuiltinsValidationTest, FragmentBuiltin_Pass) {
+  // [[stage(fragment)]]
+  // fn fs_main(
+  //   [[builtin(front_facing)]] ff : bool,
+  //   [[builtin(sample_index)]] si: u32,
+  //   [[builtin(sample_mask)]] sm : u32
+  // ) -> [[location(0)]] f32 { return 1.0; }
+  auto* ff = Param("ff", ty.bool_(),
+                   ast::DecorationList{Builtin(ast::Builtin::kFrontFacing)});
+  auto* si = Param("si", ty.u32(),
+                   ast::DecorationList{Builtin(ast::Builtin::kSampleIndex)});
+  auto* sm = Param("sm", ty.u32(),
+                   ast::DecorationList{Builtin(ast::Builtin::kSampleMask)});
+  Func("fs_main", ast::VariableList{ff, si, sm}, ty.f32(), {Return(1.0f)},
        ast::DecorationList{Stage(ast::PipelineStage::kFragment)},
        {Location(0)});
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverBuiltinsValidationTest, FrontFacingMemberIsBool_Pass) {
-  // struct MyInputs {
-  //   [[builtin(front_facing)]] pos: bool;
+TEST_F(ResolverBuiltinsValidationTest, FragmentBuiltinStruct_Pass) {
+  // Struct MyInputs {
+  //   [[builtin(front_facing)]] ff: bool;
+  //   [[builtin(sample_index)]] si: u32;
+  //   [[builtin(sample_mask)]] sm : u32;
   // };
   // [[stage(fragment)]]
   // fn fragShader(is_front: MyInputs) -> [[location(0)]] f32 { return 1.0; }
 
   auto* s = Structure(
       "MyInputs",
-      {Member("pos", ty.bool_(),
-              ast::DecorationList{Builtin(ast::Builtin::kFrontFacing)})});
+      {Member("ff", ty.bool_(),
+              ast::DecorationList{Builtin(ast::Builtin::kFrontFacing)}),
+       Member("si", ty.u32(),
+              ast::DecorationList{Builtin(ast::Builtin::kSampleIndex)}),
+       Member("sm", ty.u32(),
+              ast::DecorationList{Builtin(ast::Builtin::kSampleMask)})});
   Func("fragShader", {Param("is_front", ty.Of(s))}, ty.f32(), {Return(1.0f)},
        {Stage(ast::PipelineStage::kFragment)}, {Location(0)});
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -65,7 +146,7 @@ TEST_F(ResolverBuiltinsValidationTest, FrontFacingParamIsNotBool_Fail) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error v-15001: front_facing builtin must be boolean");
+            "12:34 error: store type of builtin(front_facing) must be 'bool'");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, FrontFacingMemberIsNotBool_Fail) {
@@ -84,7 +165,7 @@ TEST_F(ResolverBuiltinsValidationTest, FrontFacingMemberIsNotBool_Fail) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error v-15001: front_facing builtin must be boolean");
+            "12:34 error: store type of builtin(front_facing) must be 'bool'");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Length_Float_Scalar) {

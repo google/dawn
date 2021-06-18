@@ -121,6 +121,16 @@ bool IsValidationDisabled(const ast::DecorationList& decorations,
   return false;
 }
 
+// Helper to stringify a pipeline IO decoration.
+std::string deco_to_str(const ast::Decoration* deco) {
+  std::stringstream str;
+  if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+    str << "builtin(" << builtin->value() << ")";
+  } else if (auto* location = deco->As<ast::LocationDecoration>()) {
+    str << "location(" << location->value() << ")";
+  }
+  return str.str();
+}
 }  // namespace
 
 Resolver::Resolver(ProgramBuilder* builder)
@@ -891,22 +901,44 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
 }
 
 bool Resolver::ValidateParameter(const VariableInfo* info) {
-  auto* var = info->declaration;
-  for (auto* deco : var->decorations()) {
+  if (!ValidateVariable(info)) {
+    return false;
+  }
+  for (auto* deco : info->declaration->decorations()) {
     if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
-      if (builtin->value() == ast::Builtin::kFrontFacing) {
-        auto* storage_type = info->type->UnwrapRef();
-        if (!(storage_type->Is<sem::Bool>())) {
-          diagnostics_.add_error("v-15001",
-                                 "front_facing builtin must be boolean",
-                                 deco->source());
-          return false;
-        }
+      if (!ValidateBuiltinDecoration(builtin, info->type)) {
+        return false;
       }
     }
   }
+  return true;
+}
 
-  return ValidateVariable(info);
+bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
+                                         const sem::Type* storage_type) {
+  auto* type = storage_type->UnwrapRef();
+  switch (deco->value()) {
+    case ast::Builtin::kFrontFacing:
+      if (!type->Is<sem::Bool>()) {
+        diagnostics_.add_error(
+            "store type of " + deco_to_str(deco) + " must be 'bool'",
+            deco->source());
+        return false;
+      }
+      break;
+    case ast::Builtin::kSampleMask:
+    case ast::Builtin::kSampleIndex:
+      if (!type->Is<sem::U32>()) {
+        diagnostics_.add_error(
+            "store type of " + deco_to_str(deco) + " must be 'u32'",
+            deco->source());
+        return false;
+      }
+      break;
+    default:
+      break;
+  }
+  return true;
 }
 
 bool Resolver::ValidateFunction(const ast::Function* func,
@@ -1014,16 +1046,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
     kParameter,
     kReturnType,
   };
-  // Helper to stringify a pipeline IO decoration.
-  auto deco_to_str = [](const ast::Decoration* deco) {
-    std::stringstream str;
-    if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
-      str << "builtin(" << builtin->value() << ")";
-    } else if (auto* location = deco->As<ast::LocationDecoration>()) {
-      str << "location(" << location->value() << ")";
-    }
-    return str.str();
-  };
+
   // Inner lambda that is applied to a type and all of its members.
   auto validate_entry_point_decorations_inner =
       [&](const ast::DecorationList& decos, sem::Type* ty, Source source,
@@ -3178,13 +3201,8 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
         return false;
       }
       if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
-        if (builtin->value() == ast::Builtin::kFrontFacing) {
-          if (!(member->Type()->Is<sem::Bool>())) {
-            diagnostics_.add_error("v-15001",
-                                   "front_facing builtin must be boolean",
-                                   deco->source());
-            return false;
-          }
+        if (!ValidateBuiltinDecoration(builtin, member->Type())) {
+          return false;
         }
       }
     }
