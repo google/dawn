@@ -6,8 +6,7 @@ struct S {
 };
 
 kernel void tint_symbol(device S& buf [[buffer(0)]]) {
-  device int* const p = &(buf.a);
-  *(p) = 12;
+  buf.a = 12;
   return;
 }
 

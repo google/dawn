@@ -16,13 +16,10 @@ void foo() {
   tint_array_wrapper dst = {};
   S dst_struct = {};
   tint_array_wrapper_1 dst_array = {};
-  thread tint_array_wrapper* const dst_ptr = &(dst);
-  thread S* const dst_struct_ptr = &(dst_struct);
-  thread tint_array_wrapper_1* const dst_array_ptr = &(dst_array);
   dst_struct.arr = src;
   dst_array.arr[1] = src;
-  *(dst_ptr) = src;
-  (*(dst_struct_ptr)).arr = src;
-  (*(dst_array_ptr)).arr[0] = src;
+  dst = src;
+  dst_struct.arr = src;
+  dst_array.arr[0] = src;
 }
 

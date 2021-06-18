@@ -28,9 +28,6 @@ kernel void tint_symbol() {
   tint_array_wrapper const arr_let = {.arr={}};
   S struct_var = {};
   S const struct_let = {};
-  thread float* const ptr_f32 = &(f32_var);
-  thread float4* const ptr_vec = &(v4f32_var);
-  thread tint_array_wrapper* const ptr_arr = &(arr_var);
   return;
 }
 

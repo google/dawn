@@ -3,8 +3,7 @@
 using namespace metal;
 kernel void tint_symbol() {
   int i = 123;
-  thread int* const p = &(i);
-  int const use = (*(p) + 1);
+  int const use = (i + 1);
   return;
 }
 

@@ -1,25 +1,14 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-bug/tint/453.wgsl:1:79 warning: use of deprecated language feature: access control is expected as last parameter of storage textures
-[[group(0), binding(0)]] var Src : [[access(read)]] texture_storage_2d<r32uint>;
-                                                                              ^
+using namespace metal;
+kernel void tint_symbol(texture2d<uint, access::read> tint_symbol_1 [[texture(0)]], texture2d<uint, access::write> tint_symbol_2 [[texture(1)]]) {
+  uint4 srcValue = 0u;
+  uint4 const x_22 = tint_symbol_1.read(uint2(int2(0, 0)));
+  srcValue = x_22;
+  uint const x_24 = srcValue.x;
+  uint const x_25 = (x_24 + 1u);
+  uint4 const x_27 = srcValue;
+  tint_symbol_2.write(x_27.xxxx, uint2(int2(0, 0)));
+  return;
+}
 
-bug/tint/453.wgsl:2:80 warning: use of deprecated language feature: access control is expected as last parameter of storage textures
-[[group(0), binding(1)]] var Dst : [[access(write)]] texture_storage_2d<r32uint>;
-                                                                               ^
-
-
-
-Validation Failure:
-
-Compilation failed: 
-
-program_source:6:22: error: use of undeclared identifier 'Src'
-  uint4 const x_22 = Src.read(int2(0, 0));
-                     ^
-program_source:8:29: error: address of vector element requested
-  thread uint* const x_23 = &(srcValue.x);
-                            ^ ~~~~~~~~~~
-program_source:12:3: error: use of undeclared identifier 'Dst'
-  Dst.write(x_27.xxxx, int2(0, 0));
-  ^

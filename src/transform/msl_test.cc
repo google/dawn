@@ -144,10 +144,8 @@ fn main() {
 fn main() {
   [[internal(disable_validation__function_var_storage_class)]] var<private> tint_symbol : f32;
   [[internal(disable_validation__function_var_storage_class)]] var<workgroup> tint_symbol_1 : f32;
-  let p_ptr : ptr<private, f32> = &(tint_symbol);
-  let w_ptr : ptr<workgroup, f32> = &(tint_symbol_1);
-  let x : f32 = (*(p_ptr) + *(w_ptr));
-  *(p_ptr) = x;
+  let x : f32 = (tint_symbol + tint_symbol_1);
+  tint_symbol = x;
 }
 )";
 
