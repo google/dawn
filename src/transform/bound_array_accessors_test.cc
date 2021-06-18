@@ -608,7 +608,7 @@ let c : u32 = 1u;
 fn f() {
   let b : f32 = s.b[c];
   let x : i32 = min(1, 2);
-  let y : u32 = arrayLength(s.b);
+  let y : u32 = arrayLength(&s.b);
 }
 )";
 
@@ -626,7 +626,7 @@ let c : u32 = 1u;
 fn f() {
   let b : f32 = s.b[min(u32(c), (arrayLength(&(s.b)) - 1u))];
   let x : i32 = min(1, 2);
-  let y : u32 = arrayLength(s.b);
+  let y : u32 = arrayLength(&(s.b));
 }
 )";
 

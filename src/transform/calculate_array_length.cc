@@ -129,23 +129,22 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
           // * An expression must not evaluate to a runtime-sized array type.
           //
           // We can assume that the arrayLength() call has a single argument of
-          // the form: arrayLength(&X.Y) or the now deprecated form
-          // arrayLength(X.Y) where X is an expression that resolves to the
-          // storage buffer structure, and Y is the runtime sized array.
-          auto* array_expr = call_expr->params()[0];
-
-          // TODO(crbug.com/tint/806): Once the deprecated arrayLength()
-          // overload is removed,  this can safely assume a pointer arg.
-          if (auto* address_of = array_expr->As<ast::UnaryOpExpression>()) {
-            if (address_of->op() == ast::UnaryOp::kAddressOf) {
-              array_expr = address_of->expr();
-            }
+          // the form: arrayLength(&X.Y) where X is an expression that resolves
+          // to the storage buffer structure, and Y is the runtime sized array.
+          auto* arg = call_expr->params()[0];
+          auto* address_of = arg->As<ast::UnaryOpExpression>();
+          if (!address_of || address_of->op() != ast::UnaryOp::kAddressOf) {
+            TINT_ICE(ctx.dst->Diagnostics())
+                << "arrayLength() expected pointer to member access, got "
+                << address_of->TypeInfo().name;
           }
+          auto* array_expr = address_of->expr();
 
           auto* accessor = array_expr->As<ast::MemberAccessorExpression>();
           if (!accessor) {
             TINT_ICE(ctx.dst->Diagnostics())
-                << "arrayLength() expected ast::MemberAccessorExpression, got "
+                << "arrayLength() expected pointer to member access, got "
+                   "pointer to "
                 << array_expr->TypeInfo().name;
             break;
           }

@@ -774,7 +774,7 @@ TEST_F(ResolverIntrinsicDataTest, ArrayLength_Vector) {
              create<ast::GroupDecoration>(0),
          });
 
-  auto* call = Call("arrayLength", MemberAccessor("a", "x"));
+  auto* call = Call("arrayLength", AddressOf(MemberAccessor("a", "x")));
   WrapInFunction(call);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -785,15 +785,16 @@ TEST_F(ResolverIntrinsicDataTest, ArrayLength_Vector) {
 
 TEST_F(ResolverIntrinsicDataTest, ArrayLength_Error_ArraySized) {
   Global("arr", ty.array<int, 4>(), ast::StorageClass::kInput);
-  auto* call = Call("arrayLength", "arr");
+  auto* call = Call("arrayLength", AddressOf("arr"));
   WrapInFunction(call);
 
   EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(r()->error(), R"(error: no matching call to arrayLength(array<i32, 4>)
+  EXPECT_EQ(
+      r()->error(),
+      R"(error: no matching call to arrayLength(ptr<in, array<i32, 4>, read_write>)
 
-2 candidate functions:
-  arrayLength(array<T>) -> u32
+1 candidate function:
   arrayLength(ptr<storage, array<T>, A>) -> u32
 )");
 }

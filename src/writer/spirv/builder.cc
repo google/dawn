@@ -2230,17 +2230,19 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
       }
       auto* arg = call->params()[0];
 
-      // TODO(crbug.com/tint/806): Once the deprecated arrayLength()
-      // overload is removed, this can safely assume a pointer arg.
-      if (auto* address_of = arg->As<ast::UnaryOpExpression>()) {
-        arg = address_of->expr();
+      auto* address_of = arg->As<ast::UnaryOpExpression>();
+      if (!address_of || address_of->op() != ast::UnaryOp::kAddressOf) {
+        error_ = "arrayLength() expected pointer to member access, got " +
+                 std::string(address_of->TypeInfo().name);
+        return 0;
       }
+      auto* array_expr = address_of->expr();
 
-      auto* accessor = arg->As<ast::MemberAccessorExpression>();
-      if (accessor == nullptr) {
-        // The InlinePtrLets and Simplify transforms should have sanitized any
-        // lets, or &*&*& noise.
-        error_ = "expected argument to arrayLength() to be a member accessor";
+      auto* accessor = array_expr->As<ast::MemberAccessorExpression>();
+      if (!accessor) {
+        error_ =
+            "arrayLength() expected pointer to member access, got pointer to " +
+            std::string(array_expr->TypeInfo().name);
         return 0;
       }
 

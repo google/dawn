@@ -25,50 +25,6 @@ namespace {
 
 using HlslSanitizerTest = TestHelper;
 
-// TODO(crbug.com/tint/806): Remove
-TEST_F(HlslSanitizerTest, ArrayLength_DEPRECATED) {
-  auto* sb_ty = Structure("SB",
-                          {
-                              Member("x", ty.f32()),
-                              Member("arr", ty.array(ty.vec4<f32>())),
-                          },
-                          {
-                              create<ast::StructBlockDecoration>(),
-                          });
-
-  Global("sb", ty.Of(sb_ty), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(1),
-         });
-
-  Func("main", ast::VariableList{}, ty.void_(),
-       {
-           Decl(Var("len", ty.u32(), ast::StorageClass::kNone,
-                    Call("arrayLength", MemberAccessor("sb", "arr")))),
-       },
-       {
-           Stage(ast::PipelineStage::kFragment),
-       });
-
-  GeneratorImpl& gen = SanitizeAndBuild();
-
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-
-  auto got = result();
-  auto* expect = R"(ByteAddressBuffer sb : register(t0, space1);
-
-void main() {
-  uint tint_symbol_1 = 0u;
-  sb.GetDimensions(tint_symbol_1);
-  const uint tint_symbol_2 = ((tint_symbol_1 - 16u) / 16u);
-  uint len = tint_symbol_2;
-  return;
-}
-)";
-  EXPECT_EQ(expect, got);
-}
-
 TEST_F(HlslSanitizerTest, Call_ArrayLength) {
   auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))},
                       {create<ast::StructBlockDecoration>()});

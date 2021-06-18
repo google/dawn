@@ -216,13 +216,18 @@ TEST_F(IntrinsicTableTest, MismatchPointer) {
 
 TEST_F(IntrinsicTableTest, MatchArray) {
   auto* arr = create<sem::Array>(create<sem::U32>(), 0, 4, 4, 4, true);
-  auto* result = table->Lookup(IntrinsicType::kArrayLength, {arr}, Source{});
+  auto* arr_ptr = create<sem::Pointer>(arr, ast::StorageClass::kStorage,
+                                       ast::Access::kReadWrite);
+  auto* result =
+      table->Lookup(IntrinsicType::kArrayLength, {arr_ptr}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
   EXPECT_THAT(result->Type(), IntrinsicType::kArrayLength);
   EXPECT_TRUE(result->ReturnType()->Is<sem::U32>());
   ASSERT_EQ(result->Parameters().size(), 1u);
-  EXPECT_TRUE(result->Parameters()[0].type->Is<sem::Array>());
+  auto* param_type = result->Parameters()[0].type;
+  ASSERT_TRUE(param_type->Is<sem::Pointer>());
+  EXPECT_TRUE(param_type->As<sem::Pointer>()->StoreType()->Is<sem::Array>());
 }
 
 TEST_F(IntrinsicTableTest, MismatchArray) {
