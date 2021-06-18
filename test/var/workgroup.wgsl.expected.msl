@@ -1,47 +1,60 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void uses_a(threadgroup int* const tint_symbol) {
-  *(tint_symbol) = (*(tint_symbol) + 1);
+void uses_a(threadgroup int* const tint_symbol_3) {
+  *(tint_symbol_3) = (*(tint_symbol_3) + 1);
 }
 
-void uses_b(threadgroup int* const tint_symbol_1) {
-  *(tint_symbol_1) = (*(tint_symbol_1) * 2);
+void uses_b(threadgroup int* const tint_symbol_4) {
+  *(tint_symbol_4) = (*(tint_symbol_4) * 2);
 }
 
-void uses_a_and_b(threadgroup int* const tint_symbol_2, threadgroup int* const tint_symbol_3) {
-  *(tint_symbol_2) = *(tint_symbol_3);
+void uses_a_and_b(threadgroup int* const tint_symbol_5, threadgroup int* const tint_symbol_6) {
+  *(tint_symbol_5) = *(tint_symbol_6);
 }
 
 void no_uses() {
 }
 
-void outer(threadgroup int* const tint_symbol_4, threadgroup int* const tint_symbol_5) {
-  *(tint_symbol_4) = 0;
-  uses_a(tint_symbol_4);
-  uses_a_and_b(tint_symbol_5, tint_symbol_4);
-  uses_b(tint_symbol_5);
+void outer(threadgroup int* const tint_symbol_7, threadgroup int* const tint_symbol_8) {
+  *(tint_symbol_7) = 0;
+  uses_a(tint_symbol_7);
+  uses_a_and_b(tint_symbol_8, tint_symbol_7);
+  uses_b(tint_symbol_8);
   no_uses();
 }
 
-kernel void main1() {
-  threadgroup int tint_symbol_6 = 0;
-  tint_symbol_6 = 42;
-  uses_a(&(tint_symbol_6));
+kernel void main1(uint local_invocation_index [[thread_index_in_threadgroup]]) {
+  threadgroup int tint_symbol_9;
+  if ((local_invocation_index == 0u)) {
+    tint_symbol_9 = int();
+  }
+    threadgroup_barrier(mem_flags::mem_threadgroup);
+  tint_symbol_9 = 42;
+  uses_a(&(tint_symbol_9));
   return;
 }
 
-kernel void main2() {
-  threadgroup int tint_symbol_7 = 0;
-  tint_symbol_7 = 7;
-  uses_b(&(tint_symbol_7));
+kernel void main2(uint local_invocation_index_1 [[thread_index_in_threadgroup]]) {
+  threadgroup int tint_symbol_10;
+  if ((local_invocation_index_1 == 0u)) {
+    tint_symbol_10 = int();
+  }
+    threadgroup_barrier(mem_flags::mem_threadgroup);
+  tint_symbol_10 = 7;
+  uses_b(&(tint_symbol_10));
   return;
 }
 
-kernel void main3() {
-  threadgroup int tint_symbol_8 = 0;
-  threadgroup int tint_symbol_9 = 0;
-  outer(&(tint_symbol_8), &(tint_symbol_9));
+kernel void main3(uint local_invocation_index_2 [[thread_index_in_threadgroup]]) {
+  threadgroup int tint_symbol_11;
+  threadgroup int tint_symbol_12;
+  if ((local_invocation_index_2 == 0u)) {
+    tint_symbol_11 = int();
+    tint_symbol_12 = int();
+  }
+    threadgroup_barrier(mem_flags::mem_threadgroup);
+  outer(&(tint_symbol_11), &(tint_symbol_12));
   no_uses();
   return;
 }

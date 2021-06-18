@@ -2293,6 +2293,8 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
     auto* sem = builder_.Sem().Get(var);
     auto* type = sem->Type();
     if (!type->Is<sem::Struct>()) {
+      // ICE likely indicates that the CanonicalizeEntryPointIO transform was
+      // not run, or a builtin parameter was added after it was run.
       TINT_ICE(diagnostics_) << "Unsupported non-struct entry point parameter";
     }
 

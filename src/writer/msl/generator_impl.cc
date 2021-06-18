@@ -2356,16 +2356,16 @@ bool GeneratorImpl::EmitVariable(const sem::Variable* var,
   }
 
   if (!skip_constructor) {
-    out_ << " = ";
     if (decl->constructor() != nullptr) {
+      out_ << " = ";
       if (!EmitExpression(decl->constructor())) {
         return false;
       }
     } else if (var->StorageClass() == ast::StorageClass::kPrivate ||
                var->StorageClass() == ast::StorageClass::kFunction ||
-               var->StorageClass() == ast::StorageClass::kWorkgroup ||
                var->StorageClass() == ast::StorageClass::kNone ||
                var->StorageClass() == ast::StorageClass::kOutput) {
+      out_ << " = ";
       if (!EmitZeroValue(type)) {
         return false;
       }

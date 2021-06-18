@@ -27,6 +27,7 @@
 #include "src/transform/promote_initializers_to_const_var.h"
 #include "src/transform/simplify.h"
 #include "src/transform/wrap_arrays_in_structs.h"
+#include "src/transform/zero_init_workgroup_memory.h"
 
 namespace tint {
 namespace transform {
@@ -37,6 +38,9 @@ Hlsl::~Hlsl() = default;
 Output Hlsl::Run(const Program* in, const DataMap&) {
   Manager manager;
   DataMap data;
+  // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as
+  // ZeroInitWorkgroupMemory may inject new builtin parameters.
+  manager.Add<ZeroInitWorkgroupMemory>();
   manager.Add<CanonicalizeEntryPointIO>();
   manager.Add<InlinePointerLets>();
   // Simplify cleans up messy `*(&(expr))` expressions from InlinePointerLets.

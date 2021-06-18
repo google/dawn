@@ -31,6 +31,7 @@
 #include "src/transform/inline_pointer_lets.h"
 #include "src/transform/manager.h"
 #include "src/transform/simplify.h"
+#include "src/transform/zero_init_workgroup_memory.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Spirv::Config);
 
@@ -42,6 +43,7 @@ Spirv::~Spirv() = default;
 
 Output Spirv::Run(const Program* in, const DataMap& data) {
   Manager manager;
+  manager.Add<ZeroInitWorkgroupMemory>();
   manager.Add<InlinePointerLets>();  // Required for arrayLength()
   manager.Add<Simplify>();           // Required for arrayLength()
   manager.Add<FoldConstants>();

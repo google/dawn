@@ -32,6 +32,7 @@
 #include "src/transform/promote_initializers_to_const_var.h"
 #include "src/transform/simplify.h"
 #include "src/transform/wrap_arrays_in_structs.h"
+#include "src/transform/zero_init_workgroup_memory.h"
 
 namespace tint {
 namespace transform {
@@ -42,6 +43,9 @@ Msl::~Msl() = default;
 Output Msl::Run(const Program* in, const DataMap&) {
   Manager manager;
   DataMap data;
+  // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as
+  // ZeroInitWorkgroupMemory may inject new builtin parameters.
+  manager.Add<ZeroInitWorkgroupMemory>();
   manager.Add<CanonicalizeEntryPointIO>();
   manager.Add<ExternalTextureTransform>();
   manager.Add<PromoteInitializersToConstVar>();
@@ -173,9 +177,9 @@ void Msl::HandleModuleScopeVariables(CloneContext& ctx) const {
                   ctx.dst->ID(),
                   ast::DisabledValidation::kFunctionVarStorageClass);
           auto* constructor = ctx.Clone(var->Declaration()->constructor());
-          auto* local_var = ctx.dst->Var(new_var_symbol, store_type,
-                                   var->StorageClass(), constructor,
-                                   ast::DecorationList{disable_validation});
+          auto* local_var = ctx.dst->Var(
+              new_var_symbol, store_type, var->StorageClass(), constructor,
+              ast::DecorationList{disable_validation});
           ctx.InsertFront(func_ast->body()->statements(),
                           ctx.dst->Decl(local_var));
         }

@@ -1,35 +1,50 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 19
+; Bound: 30
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpEntryPoint GLCompute %compute_main "compute_main" %tint_symbol
                OpExecutionMode %compute_main LocalSize 1 1 1
                OpName %arg_0 "arg_0"
+               OpName %tint_symbol "tint_symbol"
                OpName %atomicAnd_34edd3 "atomicAnd_34edd3"
                OpName %res "res"
                OpName %compute_main "compute_main"
+               OpDecorate %tint_symbol BuiltIn LocalInvocationIndex
        %uint = OpTypeInt 32 0
 %_ptr_Workgroup_uint = OpTypePointer Workgroup %uint
       %arg_0 = OpVariable %_ptr_Workgroup_uint Workgroup
+%_ptr_Input_uint = OpTypePointer Input %uint
+%tint_symbol = OpVariable %_ptr_Input_uint Input
        %void = OpTypeVoid
-          %4 = OpTypeFunction %void
+          %6 = OpTypeFunction %void
      %uint_2 = OpConstant %uint 2
      %uint_0 = OpConstant %uint 0
      %uint_1 = OpConstant %uint 1
 %_ptr_Function_uint = OpTypePointer Function %uint
-         %15 = OpConstantNull %uint
-%atomicAnd_34edd3 = OpFunction %void None %4
-          %7 = OpLabel
-        %res = OpVariable %_ptr_Function_uint Function %15
-          %8 = OpAtomicAnd %uint %arg_0 %uint_2 %uint_0 %uint_1
-               OpStore %res %8
+         %17 = OpConstantNull %uint
+       %bool = OpTypeBool
+   %uint_264 = OpConstant %uint 264
+%atomicAnd_34edd3 = OpFunction %void None %6
+          %9 = OpLabel
+        %res = OpVariable %_ptr_Function_uint Function %17
+         %10 = OpAtomicAnd %uint %arg_0 %uint_2 %uint_0 %uint_1
+               OpStore %res %10
                OpReturn
                OpFunctionEnd
-%compute_main = OpFunction %void None %4
-         %17 = OpLabel
-         %18 = OpFunctionCall %void %atomicAnd_34edd3
+%compute_main = OpFunction %void None %6
+         %19 = OpLabel
+         %20 = OpLoad %uint %tint_symbol
+         %21 = OpIEqual %bool %20 %uint_0
+               OpSelectionMerge %23 None
+               OpBranchConditional %21 %24 %23
+         %24 = OpLabel
+               OpAtomicStore %arg_0 %uint_2 %uint_0 %17
+               OpBranch %23
+         %23 = OpLabel
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+         %29 = OpFunctionCall %void %atomicAnd_34edd3
                OpReturn
                OpFunctionEnd
