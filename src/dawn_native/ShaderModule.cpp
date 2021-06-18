@@ -1293,13 +1293,13 @@ namespace dawn_native {
 
     void ShaderModuleBase::InjectCompilationMessages(
         std::unique_ptr<OwnedCompilationMessages> compilationMessages) {
-        // TODO(zhaoming.jiang@intel.com): ensure the InjectCompilationMessages is properly
-        // handled for shader module returned from cache.
-        // InjectCompilationMessages should be called only once for a shader module, after
-        // it is created. However currently InjectCompilationMessages may be called on a
-        // shader module returned from cache rather than newly created, and violate the rule.
-        // We just skip the injection in this case for now, but a proper solution including
-        // ensure the cache goes before the validation is required.
+        // TODO(dawn:944): ensure the InjectCompilationMessages is properly handled for shader
+        // module returned from cache.
+        // InjectCompilationMessages should be called only once for a shader module, after it is
+        // created. However currently InjectCompilationMessages may be called on a shader module
+        // returned from cache rather than newly created, and violate the rule. We just skip the
+        // injection in this case for now, but a proper solution including ensure the cache goes
+        // before the validation is required.
         if (mCompilationMessages != nullptr) {
             return;
         }
