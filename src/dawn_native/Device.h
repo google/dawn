@@ -133,7 +133,8 @@ namespace dawn_native {
 
         ResultOrError<Ref<ShaderModuleBase>> GetOrCreateShaderModule(
             const ShaderModuleDescriptor* descriptor,
-            ShaderModuleParseResult* parseResult);
+            ShaderModuleParseResult* parseResult,
+            OwnedCompilationMessages* compilationMessages);
         void UncacheShaderModule(ShaderModuleBase* obj);
 
         Ref<AttachmentState> GetOrCreateAttachmentState(AttachmentStateBlueprint* blueprint);
@@ -166,7 +167,7 @@ namespace dawn_native {
         ResultOrError<Ref<SamplerBase>> CreateSampler(const SamplerDescriptor* descriptor);
         ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(
             const ShaderModuleDescriptor* descriptor,
-            ShaderModuleParseResult* parseResult = nullptr);
+            OwnedCompilationMessages* compilationMessages = nullptr);
         ResultOrError<Ref<SwapChainBase>> CreateSwapChain(Surface* surface,
                                                           const SwapChainDescriptor* descriptor);
         ResultOrError<Ref<TextureBase>> CreateTexture(const TextureDescriptor* descriptor);

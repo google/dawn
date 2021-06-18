@@ -34,22 +34,27 @@ namespace dawn_native {
         OwnedCompilationMessages();
         ~OwnedCompilationMessages() = default;
 
-        void AddMessage(std::string message,
-                        wgpu::CompilationMessageType type = wgpu::CompilationMessageType::Info,
-                        uint64_t lineNum = 0,
-                        uint64_t linePos = 0,
-                        uint64_t offset = 0,
-                        uint64_t length = 0);
-        void AddMessage(const tint::diag::Diagnostic& diagnostic);
+        void AddMessageForTesting(
+            std::string message,
+            wgpu::CompilationMessageType type = wgpu::CompilationMessageType::Info,
+            uint64_t lineNum = 0,
+            uint64_t linePos = 0,
+            uint64_t offset = 0,
+            uint64_t length = 0);
         void AddMessages(const tint::diag::List& diagnostics);
         void ClearMessages();
 
         const WGPUCompilationInfo* GetCompilationInfo();
+        const std::vector<std::string>& GetFormattedTintMessages();
 
       private:
+        void AddMessage(const tint::diag::Diagnostic& diagnostic);
+        void AddFormattedTintMessages(const tint::diag::List& diagnostics);
+
         WGPUCompilationInfo mCompilationInfo;
         std::vector<std::string> mMessageStrings;
         std::vector<WGPUCompilationMessage> mMessages;
+        std::vector<std::string> mFormattedTintMessages;
     };
 
 }  // namespace dawn_native

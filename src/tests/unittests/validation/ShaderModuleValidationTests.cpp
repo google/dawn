@@ -171,9 +171,9 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
         reinterpret_cast<dawn_native::ShaderModuleBase*>(shaderModule.Get());
     dawn_native::OwnedCompilationMessages* messages = shaderModuleBase->GetCompilationMessages();
     messages->ClearMessages();
-    messages->AddMessage("Info Message");
-    messages->AddMessage("Warning Message", wgpu::CompilationMessageType::Warning);
-    messages->AddMessage("Error Message", wgpu::CompilationMessageType::Error, 3, 4);
+    messages->AddMessageForTesting("Info Message");
+    messages->AddMessageForTesting("Warning Message", wgpu::CompilationMessageType::Warning);
+    messages->AddMessageForTesting("Error Message", wgpu::CompilationMessageType::Error, 3, 4);
 
     auto callback = [](WGPUCompilationInfoRequestStatus status, const WGPUCompilationInfo* info,
                        void* userdata) {

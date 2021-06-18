@@ -649,7 +649,8 @@ namespace dawn_native {
 
     ResultOrError<Ref<ShaderModuleBase>> DeviceBase::GetOrCreateShaderModule(
         const ShaderModuleDescriptor* descriptor,
-        ShaderModuleParseResult* parseResult) {
+        ShaderModuleParseResult* parseResult,
+        OwnedCompilationMessages* compilationMessages) {
         ASSERT(parseResult != nullptr);
 
         ShaderModuleBase blueprint(this, descriptor);
@@ -668,7 +669,8 @@ namespace dawn_native {
                 // now, so call validate. Most of |ValidateShaderModuleDescriptor| is parsing, but
                 // we can consider splitting it if additional validation is added.
                 ASSERT(!IsValidationEnabled());
-                DAWN_TRY(ValidateShaderModuleDescriptor(this, descriptor, parseResult));
+                DAWN_TRY(ValidateShaderModuleDescriptor(this, descriptor, parseResult,
+                                                        compilationMessages));
             }
             DAWN_TRY_ASSIGN(result, CreateShaderModuleImpl(descriptor, parseResult));
             result->SetIsCachedReference();
@@ -839,10 +841,15 @@ namespace dawn_native {
     }
     ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor* descriptor) {
         Ref<ShaderModuleBase> result;
-        ShaderModuleParseResult parseResult = {};
-        if (ConsumedError(CreateShaderModule(descriptor, &parseResult), &result)) {
-            return ShaderModuleBase::MakeError(this, std::move(parseResult.compilationMessages));
+        std::unique_ptr<OwnedCompilationMessages> compilationMessages(
+            std::make_unique<OwnedCompilationMessages>());
+        if (ConsumedError(CreateShaderModule(descriptor, compilationMessages.get()), &result)) {
+            result = ShaderModuleBase::MakeError(this);
         }
+        // Move compilation messages into ShaderModuleBase and emit tint errors and warnings
+        // after all other operations are finished successfully.
+        result->InjectCompilationMessages(std::move(compilationMessages));
+
         return result.Detach();
     }
     SwapChainBase* DeviceBase::APICreateSwapChain(Surface* surface,
@@ -1228,22 +1235,20 @@ namespace dawn_native {
 
     ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
         const ShaderModuleDescriptor* descriptor,
-        ShaderModuleParseResult* parseResult) {
+        OwnedCompilationMessages* compilationMessages) {
         DAWN_TRY(ValidateIsAlive());
 
-        // ShaderModule can be called from inside dawn_native. If that's the case handle the error
-        // directly in Dawn and don't need the parse results since there should be no validation
-        // errors.
-        ShaderModuleParseResult ignoredResults;
-        if (parseResult == nullptr) {
-            parseResult = &ignoredResults;
-        }
+        // CreateShaderModule can be called from inside dawn_native. If that's the case handle the
+        // error directly in Dawn and no compilationMessages held in the shader module. It is ok as
+        // long as dawn_native don't use the compilationMessages of these internal shader modules.
+        ShaderModuleParseResult parseResult;
 
         if (IsValidationEnabled()) {
-            DAWN_TRY(ValidateShaderModuleDescriptor(this, descriptor, parseResult));
+            DAWN_TRY(ValidateShaderModuleDescriptor(this, descriptor, &parseResult,
+                                                    compilationMessages));
         }
 
-        return GetOrCreateShaderModule(descriptor, parseResult);
+        return GetOrCreateShaderModule(descriptor, &parseResult, compilationMessages);
     }
 
     ResultOrError<Ref<SwapChainBase>> DeviceBase::CreateSwapChain(
