@@ -1,15 +1,31 @@
-SKIP: FAILED
-
-
-var<workgroup> arg_0 : atomic<i32>;
-
-fn atomicStore_8bea94() {
-  atomicStore(&(arg_0), 1);
-}
-
-[[stage(compute)]]
-fn compute_main() {
-  atomicStore_8bea94();
-}
-
-Failed to generate: unable to convert type: __atomic__i32
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 17
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpName %arg_0 "arg_0"
+               OpName %atomicStore_8bea94 "atomicStore_8bea94"
+               OpName %compute_main "compute_main"
+        %int = OpTypeInt 32 1
+%_ptr_Workgroup_int = OpTypePointer Workgroup %int
+      %arg_0 = OpVariable %_ptr_Workgroup_int Workgroup
+       %void = OpTypeVoid
+          %4 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+     %uint_2 = OpConstant %uint 2
+     %uint_0 = OpConstant %uint 0
+      %int_1 = OpConstant %int 1
+%atomicStore_8bea94 = OpFunction %void None %4
+          %7 = OpLabel
+               OpAtomicStore %arg_0 %uint_2 %uint_0 %int_1
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %4
+         %15 = OpLabel
+         %16 = OpFunctionCall %void %atomicStore_8bea94
+               OpReturn
+               OpFunctionEnd

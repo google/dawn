@@ -1,15 +1,35 @@
-SKIP: FAILED
-
-
-var<workgroup> arg_0 : atomic<i32>;
-
-fn atomicLoad_afcc03() {
-  var res : i32 = atomicLoad(&(arg_0));
-}
-
-[[stage(compute)]]
-fn compute_main() {
-  atomicLoad_afcc03();
-}
-
-Failed to generate: unable to convert type: __atomic__i32
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 19
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpName %arg_0 "arg_0"
+               OpName %atomicLoad_afcc03 "atomicLoad_afcc03"
+               OpName %res "res"
+               OpName %compute_main "compute_main"
+        %int = OpTypeInt 32 1
+%_ptr_Workgroup_int = OpTypePointer Workgroup %int
+      %arg_0 = OpVariable %_ptr_Workgroup_int Workgroup
+       %void = OpTypeVoid
+          %4 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+     %uint_2 = OpConstant %uint 2
+     %uint_0 = OpConstant %uint 0
+%_ptr_Function_int = OpTypePointer Function %int
+         %15 = OpConstantNull %int
+%atomicLoad_afcc03 = OpFunction %void None %4
+          %7 = OpLabel
+        %res = OpVariable %_ptr_Function_int Function %15
+          %8 = OpAtomicLoad %int %arg_0 %uint_2 %uint_0
+               OpStore %res %8
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %4
+         %17 = OpLabel
+         %18 = OpFunctionCall %void %atomicLoad_afcc03
+               OpReturn
+               OpFunctionEnd

@@ -22,6 +22,7 @@
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/override_decoration.h"
 #include "src/sem/array.h"
+#include "src/sem/atomic_type.h"
 #include "src/sem/call.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/function.h"
@@ -2188,6 +2189,14 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
     return result_id;
   }
 
+  if (intrinsic->IsAtomic()) {
+    if (!GenerateAtomicIntrinsic(call, intrinsic, Operand::Int(result_type_id),
+                                 result)) {
+      return 0;
+    }
+    return result_id;
+  }
+
   // Generates the SPIR-V ID for the expression for the indexed call parameter,
   // and loads it if necessary. Returns 0 on error.
   auto get_param_as_value_id = [&](size_t i) -> uint32_t {
@@ -2915,6 +2924,236 @@ bool Builder::GenerateControlBarrierIntrinsic(const sem::Intrinsic* intrinsic) {
                                 });
 }
 
+bool Builder::GenerateAtomicIntrinsic(ast::CallExpression* call,
+                                      const sem::Intrinsic* intrinsic,
+                                      Operand result_type,
+                                      Operand result_id) {
+  auto is_value_signed = [&] {
+    return intrinsic->Parameters()[1].type->Is<sem::I32>();
+  };
+
+  auto storage_class =
+      intrinsic->Parameters()[0].type->As<sem::Pointer>()->StorageClass();
+
+  uint32_t memory_id = 0;
+  switch (intrinsic->Parameters()[0].type->As<sem::Pointer>()->StorageClass()) {
+    case ast::StorageClass::kWorkgroup:
+      memory_id = GenerateConstantIfNeeded(
+          ScalarConstant::U32(static_cast<uint32_t>(spv::Scope::Workgroup)));
+      break;
+    case ast::StorageClass::kStorage:
+      memory_id = GenerateConstantIfNeeded(
+          ScalarConstant::U32(static_cast<uint32_t>(spv::Scope::Device)));
+      break;
+    default:
+      TINT_UNREACHABLE(builder_.Diagnostics())
+          << "unhandled atomic storage class " << storage_class;
+      return false;
+  }
+  if (memory_id == 0) {
+    return false;
+  }
+
+  uint32_t semantics_id = GenerateConstantIfNeeded(ScalarConstant::U32(
+      static_cast<uint32_t>(spv::MemorySemanticsMask::MaskNone)));
+  if (semantics_id == 0) {
+    return false;
+  }
+
+  uint32_t pointer_id = GenerateExpression(call->params()[0]);
+  if (pointer_id == 0) {
+    return false;
+  }
+
+  uint32_t value_id = 0;
+  if (call->params().size() > 1) {
+    value_id = GenerateExpression(call->params().back());
+    if (value_id == 0) {
+      return false;
+    }
+  }
+
+  Operand pointer = Operand::Int(pointer_id);
+  Operand value = Operand::Int(value_id);
+  Operand memory = Operand::Int(memory_id);
+  Operand semantics = Operand::Int(semantics_id);
+
+  switch (intrinsic->Type()) {
+    case sem::IntrinsicType::kAtomicLoad:
+      return push_function_inst(spv::Op::OpAtomicLoad, {
+                                                           result_type,
+                                                           result_id,
+                                                           pointer,
+                                                           memory,
+                                                           semantics,
+                                                       });
+    case sem::IntrinsicType::kAtomicStore:
+      return push_function_inst(spv::Op::OpAtomicStore, {
+                                                            pointer,
+                                                            memory,
+                                                            semantics,
+                                                            value,
+                                                        });
+    case sem::IntrinsicType::kAtomicAdd:
+      return push_function_inst(spv::Op::OpAtomicIAdd, {
+                                                           result_type,
+                                                           result_id,
+                                                           pointer,
+                                                           memory,
+                                                           semantics,
+                                                           value,
+                                                       });
+    case sem::IntrinsicType::kAtomicMax:
+      return push_function_inst(
+          is_value_signed() ? spv::Op::OpAtomicSMax : spv::Op::OpAtomicUMax,
+          {
+              result_type,
+              result_id,
+              pointer,
+              memory,
+              semantics,
+              value,
+          });
+    case sem::IntrinsicType::kAtomicMin:
+      return push_function_inst(
+          is_value_signed() ? spv::Op::OpAtomicSMin : spv::Op::OpAtomicUMin,
+          {
+              result_type,
+              result_id,
+              pointer,
+              memory,
+              semantics,
+              value,
+          });
+    case sem::IntrinsicType::kAtomicAnd:
+      return push_function_inst(spv::Op::OpAtomicAnd, {
+                                                          result_type,
+                                                          result_id,
+                                                          pointer,
+                                                          memory,
+                                                          semantics,
+                                                          value,
+                                                      });
+    case sem::IntrinsicType::kAtomicOr:
+      return push_function_inst(spv::Op::OpAtomicOr, {
+                                                         result_type,
+                                                         result_id,
+                                                         pointer,
+                                                         memory,
+                                                         semantics,
+                                                         value,
+                                                     });
+    case sem::IntrinsicType::kAtomicXor:
+      return push_function_inst(spv::Op::OpAtomicXor, {
+                                                          result_type,
+                                                          result_id,
+                                                          pointer,
+                                                          memory,
+                                                          semantics,
+                                                          value,
+                                                      });
+    case sem::IntrinsicType::kAtomicExchange:
+      return push_function_inst(spv::Op::OpAtomicExchange, {
+                                                               result_type,
+                                                               result_id,
+                                                               pointer,
+                                                               memory,
+                                                               semantics,
+                                                               value,
+                                                           });
+    case sem::IntrinsicType::kAtomicCompareExchangeWeak: {
+      auto comparator = GenerateExpression(call->params()[1]);
+      if (comparator == 0) {
+        return false;
+      }
+
+      auto* value_sem_type = TypeOf(call->params()[2]);
+
+      auto value_type = GenerateTypeIfNeeded(value_sem_type);
+      if (value_type == 0) {
+        return false;
+      }
+
+      sem::Bool bool_sem_type;
+      auto bool_type = GenerateTypeIfNeeded(&bool_sem_type);
+      if (bool_type == 0) {
+        return false;
+      }
+
+      // original_value := OpAtomicCompareExchange(pointer, memory, semantics,
+      //                                           semantics, value, comparator)
+      auto original_value = result_op();
+      if (!push_function_inst(spv::Op::OpAtomicCompareExchange,
+                              {
+                                  Operand::Int(value_type),
+                                  original_value,
+                                  pointer,
+                                  memory,
+                                  semantics,
+                                  semantics,
+                                  value,
+                                  Operand::Int(comparator),
+                              })) {
+        return false;
+      }
+
+      // values_equal := original_value == value
+      auto values_equal = result_op();
+      if (!push_function_inst(spv::Op::OpIEqual, {
+                                                     Operand::Int(bool_type),
+                                                     values_equal,
+                                                     original_value,
+                                                     value,
+                                                 })) {
+        return false;
+      }
+
+      // zero := T(0)
+      // one := T(1)
+      uint32_t zero = 0;
+      uint32_t one = 0;
+      if (value_sem_type->Is<sem::I32>()) {
+        zero = GenerateConstantIfNeeded(ScalarConstant::I32(0u));
+        one = GenerateConstantIfNeeded(ScalarConstant::I32(1u));
+      } else if (value_sem_type->Is<sem::U32>()) {
+        zero = GenerateConstantIfNeeded(ScalarConstant::U32(0u));
+        one = GenerateConstantIfNeeded(ScalarConstant::U32(1u));
+      } else {
+        TINT_UNREACHABLE(builder_.Diagnostics())
+            << "unsupported atomic type " << value_sem_type->TypeInfo().name;
+      }
+      if (zero == 0 || one == 0) {
+        return false;
+      }
+
+      // xchg_success := values_equal ? one : zero
+      auto xchg_success = result_op();
+      if (!push_function_inst(spv::Op::OpSelect, {
+                                                     Operand::Int(value_type),
+                                                     xchg_success,
+                                                     values_equal,
+                                                     Operand::Int(one),
+                                                     Operand::Int(zero),
+                                                 })) {
+        return false;
+      }
+
+      // result := vec2<T>(original_value, xchg_success)
+      return push_function_inst(spv::Op::OpCompositeConstruct,
+                                {
+                                    result_type,
+                                    result_id,
+                                    original_value,
+                                    xchg_success,
+                                });
+    }
+    default:
+      TINT_UNREACHABLE(builder_.Diagnostics())
+          << "unhandled atomic intrinsic " << intrinsic->Type();
+      return false;
+  }
+}
+
 uint32_t Builder::GenerateSampledImage(const sem::Type* texture_type,
                                        Operand texture_operand,
                                        Operand sampler_operand) {
@@ -3311,6 +3550,12 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
   if (type == nullptr) {
     error_ = "attempting to generate type from null type";
     return 0;
+  }
+
+  // Atomics are a type in WGSL, but aren't a distinct type in SPIR-V.
+  // Just emit the type inside the atomic.
+  if (auto* atomic = type->As<sem::Atomic>()) {
+    return GenerateTypeIfNeeded(atomic->Type());
   }
 
   // Pointers and references with differing accesses should not result in a

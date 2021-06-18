@@ -1,15 +1,35 @@
-SKIP: FAILED
-
-
-var<workgroup> arg_0 : atomic<u32>;
-
-fn atomicAdd_d5db1d() {
-  var res : u32 = atomicAdd(&(arg_0), 1u);
-}
-
-[[stage(compute)]]
-fn compute_main() {
-  atomicAdd_d5db1d();
-}
-
-Failed to generate: unable to convert type: __atomic__u32
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 19
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpName %arg_0 "arg_0"
+               OpName %atomicAdd_d5db1d "atomicAdd_d5db1d"
+               OpName %res "res"
+               OpName %compute_main "compute_main"
+       %uint = OpTypeInt 32 0
+%_ptr_Workgroup_uint = OpTypePointer Workgroup %uint
+      %arg_0 = OpVariable %_ptr_Workgroup_uint Workgroup
+       %void = OpTypeVoid
+          %4 = OpTypeFunction %void
+     %uint_2 = OpConstant %uint 2
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+%_ptr_Function_uint = OpTypePointer Function %uint
+         %15 = OpConstantNull %uint
+%atomicAdd_d5db1d = OpFunction %void None %4
+          %7 = OpLabel
+        %res = OpVariable %_ptr_Function_uint Function %15
+          %8 = OpAtomicIAdd %uint %arg_0 %uint_2 %uint_0 %uint_1
+               OpStore %res %8
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %4
+         %17 = OpLabel
+         %18 = OpFunctionCall %void %atomicAdd_d5db1d
+               OpReturn
+               OpFunctionEnd

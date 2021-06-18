@@ -365,10 +365,19 @@ class Builder {
                                 spirv::Operand result_type,
                                 spirv::Operand result_id);
   /// Generates a control barrier statement.
-  /// @param intrinsic the semantic information for the barrier intrinsic
-  /// parameters
+  /// @param intrinsic the semantic information for the barrier intrinsic call
   /// @returns true on success
   bool GenerateControlBarrierIntrinsic(const sem::Intrinsic* intrinsic);
+  /// Generates an atomic intrinsic call.
+  /// @param call the call expression
+  /// @param intrinsic the semantic information for the atomic intrinsic call
+  /// @param result_type result type operand of the texture instruction
+  /// @param result_id result identifier operand of the texture instruction
+  /// @returns true on success
+  bool GenerateAtomicIntrinsic(ast::CallExpression* call,
+                               const sem::Intrinsic* intrinsic,
+                               Operand result_type,
+                               Operand result_id);
   /// Generates a sampled image
   /// @param texture_type the texture type
   /// @param texture_operand the texture operand

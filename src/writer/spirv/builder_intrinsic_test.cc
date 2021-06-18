@@ -1572,7 +1572,7 @@ OpFunctionEnd
 
 // TODO(crbug.com/tint/806): Remove
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength_DEPRECATED) {
-  auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))},
+  auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))},
                       {create<ast::StructBlockDecoration>()});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
@@ -1620,7 +1620,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_DEPRECATED) {
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct_DEPRECATED) {
   auto* s = Structure("my_struct",
                       {
-                          Member(0, "z", ty.f32()),
+                          Member("z", ty.f32()),
                           Member(4, "a", ty.array<f32>(4)),
                       },
                       {create<ast::StructBlockDecoration>()});
@@ -1667,7 +1667,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct_DEPRECATED) {
 }
 
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
-  auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))},
+  auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))},
                       {create<ast::StructBlockDecoration>()});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
@@ -1714,7 +1714,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
   auto* s = Structure("my_struct",
                       {
-                          Member(0, "z", ty.f32()),
+                          Member("z", ty.f32()),
                           Member(4, "a", ty.array<f32>(4)),
                       },
                       {create<ast::StructBlockDecoration>()});
@@ -1761,7 +1761,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
 }
 
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength_ViaLets) {
-  auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))},
+  auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))},
                       {create<ast::StructBlockDecoration>()});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
@@ -1810,9 +1810,10 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_ViaLets) {
 }
 
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
-  // struct my_struct {
+  // [[block]] struct my_struct {
   //   a : [[stride(4)]] array<f32>;
-  // }
+  // };
+  // [[binding(1), group(2)]] var<storage, read> b : my_struct;
   //
   // fn a_func() {
   //   let p = &*&b;
@@ -1820,7 +1821,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
   //   let p3 = &((*p).a);
   //   arrayLength(&*p3);
   // }
-  auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))},
+  auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))},
                       {create<ast::StructBlockDecoration>()});
   Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
          ast::DecorationList{
@@ -1863,6 +1864,427 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
   EXPECT_EQ(expected_types, got_types);
 
   auto* expected_instructions = R"(%11 = OpArrayLength %12 %1 0
+)";
+  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+  EXPECT_EQ(expected_instructions, got_instructions);
+
+  Validate(b);
+}
+
+TEST_F(IntrinsicBuilderTest, Call_AtomicLoad) {
+  // [[block]] struct S {
+  //   u : atomic<u32>;
+  //   i : atomic<i32>;
+  // }
+  //
+  // [[binding(1), group(2)]] var<storage, read_write> b : S;
+  //
+  // fn a_func() {
+  //   let u : u32 = atomicLoad(&b.u);
+  //   let i : i32 = atomicLoad(&b.i);
+  // }
+  auto* s = Structure("S",
+                      {
+                          Member("u", ty.atomic<u32>()),
+                          Member("i", ty.atomic<i32>()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
+  Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(2),
+         });
+
+  Func("a_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           Decl(Const("u", ty.u32(),
+                      Call("atomicLoad", AddressOf(MemberAccessor("b", "u"))))),
+           Decl(Const("i", ty.i32(),
+                      Call("atomicLoad", AddressOf(MemberAccessor("b", "i"))))),
+       },
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.Build()) << b.error();
+
+  ASSERT_EQ(b.functions().size(), 1u);
+
+  auto* expected_types = R"(%4 = OpTypeInt 32 0
+%5 = OpTypeInt 32 1
+%3 = OpTypeStruct %4 %5
+%2 = OpTypePointer StorageBuffer %3
+%1 = OpVariable %2 StorageBuffer
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
+%11 = OpConstant %4 1
+%12 = OpConstant %4 0
+%14 = OpTypePointer StorageBuffer %4
+%18 = OpTypePointer StorageBuffer %5
+)";
+  auto got_types = DumpInstructions(b.types());
+  EXPECT_EQ(expected_types, got_types);
+
+  auto* expected_instructions = R"(%15 = OpAccessChain %14 %1 %12
+%10 = OpAtomicLoad %4 %15 %11 %12
+%19 = OpAccessChain %18 %1 %11
+%16 = OpAtomicLoad %5 %19 %11 %12
+)";
+  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+  EXPECT_EQ(expected_instructions, got_instructions);
+
+  Validate(b);
+}
+
+TEST_F(IntrinsicBuilderTest, Call_AtomicStore) {
+  // [[block]] struct S {
+  //   u : atomic<u32>;
+  //   i : atomic<i32>;
+  // }
+  //
+  // [[binding(1), group(2)]] var<storage, read_write> b : S;
+  //
+  // fn a_func() {
+  //   let u : u32 = atomicStore(&b.u, 1u);
+  //   let i : i32 = atomicStore(&b.i, 2);
+  // }
+  auto* s = Structure("S",
+                      {
+                          Member("u", ty.atomic<u32>()),
+                          Member("i", ty.atomic<i32>()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
+  Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(2),
+         });
+
+  Func("a_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::CallStatement>(
+               Call("atomicStore", AddressOf(MemberAccessor("b", "u")), 1u)),
+           create<ast::CallStatement>(
+               Call("atomicStore", AddressOf(MemberAccessor("b", "i")), 2)),
+       },
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.Build()) << b.error();
+
+  ASSERT_EQ(b.functions().size(), 1u);
+
+  auto* expected_types = R"(%4 = OpTypeInt 32 0
+%5 = OpTypeInt 32 1
+%3 = OpTypeStruct %4 %5
+%2 = OpTypePointer StorageBuffer %3
+%1 = OpVariable %2 StorageBuffer
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
+%11 = OpConstant %4 1
+%12 = OpConstant %4 0
+%14 = OpTypePointer StorageBuffer %4
+%18 = OpTypePointer StorageBuffer %5
+%20 = OpConstant %5 2
+)";
+  auto got_types = DumpInstructions(b.types());
+  EXPECT_EQ(expected_types, got_types);
+
+  auto* expected_instructions = R"(%15 = OpAccessChain %14 %1 %12
+OpAtomicStore %15 %11 %12 %11
+%19 = OpAccessChain %18 %1 %11
+OpAtomicStore %19 %11 %12 %20
+)";
+  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+  EXPECT_EQ(expected_instructions, got_instructions);
+
+  Validate(b);
+}
+
+using Intrinsic_Builtin_AtomicRMW_i32 =
+    IntrinsicBuilderTestWithParam<IntrinsicData>;
+TEST_P(Intrinsic_Builtin_AtomicRMW_i32, Test) {
+  // [[block]] struct S {
+  //   v : atomic<i32>;
+  // }
+  //
+  // [[binding(1), group(2)]] var<storage, read_write> b : S;
+  //
+  // fn a_func() {
+  //   let x : i32 = atomicOP(&b.v);
+  // }
+  auto* s = Structure("S",
+                      {
+                          Member("v", ty.atomic<i32>()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
+  Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(2),
+         });
+
+  Func("a_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           Decl(Const(
+               "x", ty.i32(),
+               Call(GetParam().name, AddressOf(MemberAccessor("b", "v")), 10))),
+       },
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.Build()) << b.error();
+
+  ASSERT_EQ(b.functions().size(), 1u);
+
+  std::string expected_types = R"(%4 = OpTypeInt 32 1
+%3 = OpTypeStruct %4
+%2 = OpTypePointer StorageBuffer %3
+%1 = OpVariable %2 StorageBuffer
+%6 = OpTypeVoid
+%5 = OpTypeFunction %6
+%10 = OpTypeInt 32 0
+%11 = OpConstant %10 1
+%12 = OpConstant %10 0
+%14 = OpTypePointer StorageBuffer %4
+%16 = OpConstant %4 10
+)";
+  auto got_types = DumpInstructions(b.types());
+  EXPECT_EQ(expected_types, got_types);
+
+  std::string expected_instructions = "%15 = OpAccessChain %14 %1 %12\n";
+  expected_instructions += "%9 = " + GetParam().op + " %4 %15 %11 %12 %16\n";
+
+  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+  EXPECT_EQ(expected_instructions, got_instructions);
+
+  Validate(b);
+}
+INSTANTIATE_TEST_SUITE_P(
+    IntrinsicBuilderTest,
+    Intrinsic_Builtin_AtomicRMW_i32,
+    testing::Values(IntrinsicData{"atomicAdd", "OpAtomicIAdd"},
+                    IntrinsicData{"atomicMax", "OpAtomicSMax"},
+                    IntrinsicData{"atomicMin", "OpAtomicSMin"},
+                    IntrinsicData{"atomicAnd", "OpAtomicAnd"},
+                    IntrinsicData{"atomicOr", "OpAtomicOr"},
+                    IntrinsicData{"atomicXor", "OpAtomicXor"}));
+
+using Intrinsic_Builtin_AtomicRMW_u32 =
+    IntrinsicBuilderTestWithParam<IntrinsicData>;
+TEST_P(Intrinsic_Builtin_AtomicRMW_u32, Test) {
+  // [[block]] struct S {
+  //   v : atomic<u32>;
+  // }
+  //
+  // [[binding(1), group(2)]] var<storage, read_write> b : S;
+  //
+  // fn a_func() {
+  //   let x : u32 = atomicOP(&b.v);
+  // }
+  auto* s = Structure("S",
+                      {
+                          Member("v", ty.atomic<u32>()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
+  Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(2),
+         });
+
+  Func("a_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           Decl(Const("x", ty.u32(),
+                      Call(GetParam().name, AddressOf(MemberAccessor("b", "v")),
+                           10u))),
+       },
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.Build()) << b.error();
+
+  ASSERT_EQ(b.functions().size(), 1u);
+
+  std::string expected_types = R"(%4 = OpTypeInt 32 0
+%3 = OpTypeStruct %4
+%2 = OpTypePointer StorageBuffer %3
+%1 = OpVariable %2 StorageBuffer
+%6 = OpTypeVoid
+%5 = OpTypeFunction %6
+%10 = OpConstant %4 1
+%11 = OpConstant %4 0
+%13 = OpTypePointer StorageBuffer %4
+%15 = OpConstant %4 10
+)";
+  auto got_types = DumpInstructions(b.types());
+  EXPECT_EQ(expected_types, got_types);
+
+  std::string expected_instructions = "%14 = OpAccessChain %13 %1 %11\n";
+  expected_instructions += "%9 = " + GetParam().op + " %4 %14 %10 %11 %15\n";
+
+  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+  EXPECT_EQ(expected_instructions, got_instructions);
+
+  Validate(b);
+}
+INSTANTIATE_TEST_SUITE_P(
+    IntrinsicBuilderTest,
+    Intrinsic_Builtin_AtomicRMW_u32,
+    testing::Values(IntrinsicData{"atomicAdd", "OpAtomicIAdd"},
+                    IntrinsicData{"atomicMax", "OpAtomicUMax"},
+                    IntrinsicData{"atomicMin", "OpAtomicUMin"},
+                    IntrinsicData{"atomicAnd", "OpAtomicAnd"},
+                    IntrinsicData{"atomicOr", "OpAtomicOr"},
+                    IntrinsicData{"atomicXor", "OpAtomicXor"}));
+
+TEST_F(IntrinsicBuilderTest, Call_AtomicExchange) {
+  // [[block]] struct S {
+  //   u : atomic<u32>;
+  //   i : atomic<i32>;
+  // }
+  //
+  // [[binding(1), group(2)]] var<storage, read_write> b : S;
+  //
+  // fn a_func() {
+  //   let u : u32 = atomicExchange(&b.u, 10u);
+  //   let i : i32 = atomicExchange(&b.i, 10);
+  // }
+  auto* s = Structure("S",
+                      {
+                          Member("u", ty.atomic<u32>()),
+                          Member("i", ty.atomic<i32>()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
+  Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(2),
+         });
+
+  Func("a_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           Decl(Const("u", ty.u32(),
+                      Call("atomicExchange",
+                           AddressOf(MemberAccessor("b", "u")), 10u))),
+           Decl(Const("i", ty.i32(),
+                      Call("atomicExchange",
+                           AddressOf(MemberAccessor("b", "i")), 10))),
+       },
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.Build()) << b.error();
+
+  ASSERT_EQ(b.functions().size(), 1u);
+
+  auto* expected_types = R"(%4 = OpTypeInt 32 0
+%5 = OpTypeInt 32 1
+%3 = OpTypeStruct %4 %5
+%2 = OpTypePointer StorageBuffer %3
+%1 = OpVariable %2 StorageBuffer
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
+%11 = OpConstant %4 1
+%12 = OpConstant %4 0
+%14 = OpTypePointer StorageBuffer %4
+%16 = OpConstant %4 10
+%19 = OpTypePointer StorageBuffer %5
+%21 = OpConstant %5 10
+)";
+  auto got_types = DumpInstructions(b.types());
+  EXPECT_EQ(expected_types, got_types);
+
+  auto* expected_instructions = R"(%15 = OpAccessChain %14 %1 %12
+%10 = OpAtomicExchange %4 %15 %11 %12 %16
+%20 = OpAccessChain %19 %1 %11
+%17 = OpAtomicExchange %5 %20 %11 %12 %21
+)";
+  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+  EXPECT_EQ(expected_instructions, got_instructions);
+
+  Validate(b);
+}
+
+TEST_F(IntrinsicBuilderTest, Call_AtomicCompareExchangeWeak) {
+  // [[block]] struct S {
+  //   u : atomic<u32>;
+  //   i : atomic<i32>;
+  // }
+  //
+  // [[binding(1), group(2)]] var<storage, read_write> b : S;
+  //
+  // fn a_func() {
+  //   let u : vec2<u32> = atomicCompareExchangeWeak(&b.u, 10u);
+  //   let i : vec2<i32> = atomicCompareExchangeWeak(&b.i, 10);
+  // }
+  auto* s = Structure("S",
+                      {
+                          Member("u", ty.atomic<u32>()),
+                          Member("i", ty.atomic<i32>()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
+  Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(2),
+         });
+
+  Func("a_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           Decl(Const("u", ty.vec2<u32>(),
+                      Call("atomicCompareExchangeWeak",
+                           AddressOf(MemberAccessor("b", "u")), 10u, 20u))),
+           Decl(Const("i", ty.vec2<i32>(),
+                      Call("atomicCompareExchangeWeak",
+                           AddressOf(MemberAccessor("b", "i")), 10, 20))),
+       },
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.Build()) << b.error();
+
+  ASSERT_EQ(b.functions().size(), 1u);
+
+  auto* expected_types = R"(%4 = OpTypeInt 32 0
+%5 = OpTypeInt 32 1
+%3 = OpTypeStruct %4 %5
+%2 = OpTypePointer StorageBuffer %3
+%1 = OpVariable %2 StorageBuffer
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
+%11 = OpTypeVector %4 2
+%12 = OpConstant %4 1
+%13 = OpConstant %4 0
+%15 = OpTypePointer StorageBuffer %4
+%17 = OpConstant %4 20
+%18 = OpConstant %4 10
+%19 = OpTypeBool
+%24 = OpTypeVector %5 2
+%26 = OpTypePointer StorageBuffer %5
+%28 = OpConstant %5 20
+%29 = OpConstant %5 10
+%32 = OpConstant %5 0
+%33 = OpConstant %5 1
+)";
+  auto got_types = DumpInstructions(b.types());
+  EXPECT_EQ(expected_types, got_types);
+
+  auto* expected_instructions = R"(%16 = OpAccessChain %15 %1 %13
+%20 = OpAtomicCompareExchange %4 %16 %12 %13 %13 %17 %18
+%21 = OpIEqual %19 %20 %17
+%22 = OpSelect %4 %21 %12 %13
+%10 = OpCompositeConstruct %11 %20 %22
+%27 = OpAccessChain %26 %1 %12
+%30 = OpAtomicCompareExchange %5 %27 %12 %13 %13 %28 %29
+%31 = OpIEqual %19 %30 %28
+%34 = OpSelect %5 %31 %33 %32
+%23 = OpCompositeConstruct %24 %30 %34
 )";
   auto got_instructions = DumpInstructions(b.functions()[0].instructions());
   EXPECT_EQ(expected_instructions, got_instructions);
