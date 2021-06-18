@@ -1,15 +1,13 @@
-SKIP: FAILED
+groupshared int arg_0;
 
-
-var<workgroup> arg_0 : atomic<i32>;
-
-fn atomicOr_d09248() {
-  var res : i32 = atomicOr(&(arg_0), 1);
+void atomicOr_d09248() {
+  int atomic_result = 0;
+  InterlockedOr(arg_0, 1, atomic_result);
+  int res = atomic_result;
 }
 
-[[stage(compute)]]
-fn compute_main() {
+[numthreads(1, 1, 1)]
+void compute_main() {
   atomicOr_d09248();
+  return;
 }
-
-Failed to generate: error: unknown type in EmitType

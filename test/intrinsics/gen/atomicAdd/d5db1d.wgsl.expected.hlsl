@@ -1,15 +1,13 @@
-SKIP: FAILED
+groupshared uint arg_0;
 
-
-var<workgroup> arg_0 : atomic<u32>;
-
-fn atomicAdd_d5db1d() {
-  var res : u32 = atomicAdd(&(arg_0), 1u);
+void atomicAdd_d5db1d() {
+  uint atomic_result = 0u;
+  InterlockedAdd(arg_0, 1u, atomic_result);
+  uint res = atomic_result;
 }
 
-[[stage(compute)]]
-fn compute_main() {
+[numthreads(1, 1, 1)]
+void compute_main() {
   atomicAdd_d5db1d();
+  return;
 }
-
-Failed to generate: error: unknown type in EmitType

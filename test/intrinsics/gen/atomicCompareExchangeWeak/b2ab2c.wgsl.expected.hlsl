@@ -1,15 +1,15 @@
-SKIP: FAILED
+groupshared uint arg_0;
 
-
-var<workgroup> arg_0 : atomic<u32>;
-
-fn atomicCompareExchangeWeak_b2ab2c() {
-  var res : vec2<u32> = atomicCompareExchangeWeak(&(arg_0), 1u, 1u);
+void atomicCompareExchangeWeak_b2ab2c() {
+  uint2 atomic_result = uint2(0u, 0u);
+  uint atomic_compare_value = 1u;
+  InterlockedCompareExchange(arg_0, atomic_compare_value, 1u, atomic_result.x);
+  atomic_result.y = atomic_result.x == atomic_compare_value;
+  uint2 res = atomic_result;
 }
 
-[[stage(compute)]]
-fn compute_main() {
+[numthreads(1, 1, 1)]
+void compute_main() {
   atomicCompareExchangeWeak_b2ab2c();
+  return;
 }
-
-Failed to generate: error: unknown type in EmitType

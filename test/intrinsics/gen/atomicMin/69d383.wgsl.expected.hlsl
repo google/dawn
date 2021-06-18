@@ -1,15 +1,13 @@
-SKIP: FAILED
+groupshared uint arg_0;
 
-
-var<workgroup> arg_0 : atomic<u32>;
-
-fn atomicMin_69d383() {
-  var res : u32 = atomicMin(&(arg_0), 1u);
+void atomicMin_69d383() {
+  uint atomic_result = 0u;
+  InterlockedMin(arg_0, 1u, atomic_result);
+  uint res = atomic_result;
 }
 
-[[stage(compute)]]
-fn compute_main() {
+[numthreads(1, 1, 1)]
+void compute_main() {
   atomicMin_69d383();
+  return;
 }
-
-Failed to generate: error: unknown type in EmitType

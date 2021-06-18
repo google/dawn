@@ -1,15 +1,13 @@
-SKIP: FAILED
+groupshared int arg_0;
 
-
-var<workgroup> arg_0 : atomic<i32>;
-
-fn atomicMax_a89cc3() {
-  var res : i32 = atomicMax(&(arg_0), 1);
+void atomicMax_a89cc3() {
+  int atomic_result = 0;
+  InterlockedMax(arg_0, 1, atomic_result);
+  int res = atomic_result;
 }
 
-[[stage(compute)]]
-fn compute_main() {
+[numthreads(1, 1, 1)]
+void compute_main() {
   atomicMax_a89cc3();
+  return;
 }
-
-Failed to generate: error: unknown type in EmitType

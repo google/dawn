@@ -1,10 +1,18 @@
-SKIP: FAILED
+RWByteAddressBuffer sb_rw : register(u0, space0);
 
-../src/transform/transform.cc:133 internal compiler error: TINT_UNREACHABLE Unhandled type: tint::sem::Atomic
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+void atomicLoad_fe6cc3() {
+  uint atomic_result = 0u;
+  sb_rw.InterlockedOr(0u, 0, atomic_result);
+  uint res = atomic_result;
+}
 
+void fragment_main() {
+  atomicLoad_fe6cc3();
+  return;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  atomicLoad_fe6cc3();
+  return;
+}

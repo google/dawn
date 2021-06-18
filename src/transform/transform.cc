@@ -17,6 +17,7 @@
 #include <algorithm>
 
 #include "src/program_builder.h"
+#include "src/sem/atomic_type.h"
 #include "src/sem/reference_type.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Data);
@@ -110,6 +111,9 @@ ast::Type* Transform::CreateASTTypeFor(CloneContext* ctx, const sem::Type* ty) {
   }
   if (auto* s = ty->As<sem::Reference>()) {
     return CreateASTTypeFor(ctx, s->StoreType());
+  }
+  if (auto* a = ty->As<sem::Atomic>()) {
+    return ctx->dst->create<ast::Atomic>(CreateASTTypeFor(ctx, a->Type()));
   }
   if (auto* t = ty->As<sem::DepthTexture>()) {
     return ctx->dst->create<ast::DepthTexture>(t->dim());

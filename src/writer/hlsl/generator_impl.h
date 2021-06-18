@@ -32,6 +32,7 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/program_builder.h"
 #include "src/scope_stack.h"
+#include "src/transform/decompose_storage_access.h"
 #include "src/writer/text_generator.h"
 
 namespace tint {
@@ -115,6 +116,18 @@ class GeneratorImpl : public TextGenerator {
   bool EmitCall(std::ostream& pre,
                 std::ostream& out,
                 ast::CallExpression* expr);
+  /// Handles generating a call expression to a
+  /// transform::DecomposeStorageAccess::Intrinsic
+  /// @param pre the preamble for the expression stream
+  /// @param out the output of the expression stream
+  /// @param expr the call expression
+  /// @param intrinsic the transform::DecomposeStorageAccess::Intrinsic
+  /// @returns true if the call expression is emitted
+  bool EmitDecomposeStorageAccessIntrinsic(
+      std::ostream& pre,
+      std::ostream& out,
+      ast::CallExpression* expr,
+      const transform::DecomposeStorageAccess::Intrinsic* intrinsic);
   /// Handles generating a barrier intrinsic call
   /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
@@ -123,6 +136,27 @@ class GeneratorImpl : public TextGenerator {
   bool EmitBarrierCall(std::ostream& pre,
                        std::ostream& out,
                        const sem::Intrinsic* intrinsic);
+  /// Handles generating an atomic intrinsic call for a storage buffer variable
+  /// @param pre the preamble for the expression stream
+  /// @param out the output of the expression stream
+  /// @param expr the call expression
+  /// @param op the atomic op
+  /// @returns true if the call expression is emitted
+  bool EmitStorageAtomicCall(
+      std::ostream& pre,
+      std::ostream& out,
+      ast::CallExpression* expr,
+      transform::DecomposeStorageAccess::Intrinsic::Op op);
+  /// Handles generating an atomic intrinsic call for a workgroup variable
+  /// @param pre the preamble for the expression stream
+  /// @param out the output of the expression stream
+  /// @param expr the call expression
+  /// @param intrinsic the semantic information for the atomic intrinsic
+  /// @returns true if the call expression is emitted
+  bool EmitWorkgroupAtomicCall(std::ostream& pre,
+                               std::ostream& out,
+                               ast::CallExpression* expr,
+                               const sem::Intrinsic* intrinsic);
   /// Handles generating a call to a texture function (`textureSample`,
   /// `textureSampleGrad`, etc)
   /// @param pre the preamble for the expression stream

@@ -1,15 +1,13 @@
-SKIP: FAILED
+groupshared uint arg_0;
 
-
-var<workgroup> arg_0 : atomic<u32>;
-
-fn atomicXor_c8e6be() {
-  var res : u32 = atomicXor(&(arg_0), 1u);
+void atomicXor_c8e6be() {
+  uint atomic_result = 0u;
+  InterlockedXor(arg_0, 1u, atomic_result);
+  uint res = atomic_result;
 }
 
-[[stage(compute)]]
-fn compute_main() {
+[numthreads(1, 1, 1)]
+void compute_main() {
   atomicXor_c8e6be();
+  return;
 }
-
-Failed to generate: error: unknown type in EmitType

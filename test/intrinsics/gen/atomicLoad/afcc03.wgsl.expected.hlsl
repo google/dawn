@@ -1,15 +1,13 @@
-SKIP: FAILED
+groupshared int arg_0;
 
-
-var<workgroup> arg_0 : atomic<i32>;
-
-fn atomicLoad_afcc03() {
-  var res : i32 = atomicLoad(&(arg_0));
+void atomicLoad_afcc03() {
+  int atomic_result = 0;
+  InterlockedOr(arg_0, 0, atomic_result);
+  int res = atomic_result;
 }
 
-[[stage(compute)]]
-fn compute_main() {
+[numthreads(1, 1, 1)]
+void compute_main() {
   atomicLoad_afcc03();
+  return;
 }
-
-Failed to generate: error: unknown type in EmitType

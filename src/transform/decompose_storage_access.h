@@ -28,7 +28,8 @@ class CloneContext;
 namespace transform {
 
 /// DecomposeStorageAccess is a transform used to replace storage buffer
-/// accesses with a combination of load / store functions on primitive types.
+/// accesses with a combination of load, store or atomic functions on primitive
+/// types.
 class DecomposeStorageAccess : public Transform {
  public:
   /// Intrinsic is an InternalDecoration that's used to decorate a stub function
@@ -37,38 +38,43 @@ class DecomposeStorageAccess : public Transform {
   /// with a possible cast.
   class Intrinsic : public Castable<Intrinsic, ast::InternalDecoration> {
    public:
-    /// Storage access intrinsic type
-    enum Type {
-      kLoadU32,       // `[RW]ByteAddressBuffer.Load()`
-      kLoadF32,       // `asfloat([RW]ByteAddressBuffer.Load())`
-      kLoadI32,       // `asint([RW]ByteAddressBuffer.Load())`
-      kLoadVec2U32,   // `[RW]ByteAddressBuffer.Load2()`
-      kLoadVec2F32,   // `asfloat([RW]ByteAddressBuffer.Load2())`
-      kLoadVec2I32,   // `asint([RW]ByteAddressBuffer.Load2())`
-      kLoadVec3U32,   // `[RW]ByteAddressBuffer.Load3()`
-      kLoadVec3F32,   // `asfloat([RW]ByteAddressBuffer.Load3())`
-      kLoadVec3I32,   // `asint([RW]ByteAddressBuffer.Load3())`
-      kLoadVec4U32,   // `[RW]ByteAddressBuffer.Load4()`
-      kLoadVec4F32,   // `asfloat([RW]ByteAddressBuffer.Load4())`
-      kLoadVec4I32,   // `asint([RW]ByteAddressBuffer.Load4())`
-      kStoreU32,      // `RWByteAddressBuffer.Store()`
-      kStoreF32,      // `asfloat(RWByteAddressBuffer.Store())`
-      kStoreI32,      // `asint(RWByteAddressBuffer.Store())`
-      kStoreVec2U32,  // `RWByteAddressBuffer.Store2()`
-      kStoreVec2F32,  // `asfloat(RWByteAddressBuffer.Store2())`
-      kStoreVec2I32,  // `asint(RWByteAddressBuffer.Store2())`
-      kStoreVec3U32,  // `RWByteAddressBuffer.Store3()`
-      kStoreVec3F32,  // `asfloat(RWByteAddressBuffer.Store3())`
-      kStoreVec3I32,  // `asint(RWByteAddressBuffer.Store3())`
-      kStoreVec4U32,  // `RWByteAddressBuffer.Store4()`
-      kStoreVec4F32,  // `asfloat(RWByteAddressBuffer.Store4())`
-      kStoreVec4I32,  // `asint(RWByteAddressBuffer.Store4())`
+    /// Intrinsic op
+    enum class Op {
+      kLoad,
+      kStore,
+      kAtomicLoad,
+      kAtomicStore,
+      kAtomicAdd,
+      kAtomicMax,
+      kAtomicMin,
+      kAtomicAnd,
+      kAtomicOr,
+      kAtomicXor,
+      kAtomicExchange,
+      kAtomicCompareExchangeWeak,
+    };
+
+    /// Intrinsic data type
+    enum class DataType {
+      kU32,
+      kF32,
+      kI32,
+      kVec2U32,
+      kVec2F32,
+      kVec2I32,
+      kVec3U32,
+      kVec3F32,
+      kVec3I32,
+      kVec4U32,
+      kVec4F32,
+      kVec4I32,
     };
 
     /// Constructor
     /// @param program_id the identifier of the program that owns this node
-    /// @param ty the type of the intrinsic
-    Intrinsic(ProgramID program_id, Type ty);
+    /// @param o the op of the intrinsic
+    /// @param ty the data type of the intrinsic
+    Intrinsic(ProgramID program_id, Op o, DataType ty);
     /// Destructor
     ~Intrinsic() override;
 
@@ -81,8 +87,11 @@ class DecomposeStorageAccess : public Transform {
     /// @return the newly cloned object
     Intrinsic* Clone(CloneContext* ctx) const override;
 
+    /// The op of the intrinsic
+    Op const op;
+
     /// The type of the intrinsic
-    Type const type;
+    DataType const type;
   };
 
   /// Constructor

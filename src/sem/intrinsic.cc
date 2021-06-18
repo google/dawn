@@ -88,6 +88,19 @@ bool IsBarrierIntrinsic(IntrinsicType i) {
          i == IntrinsicType::kStorageBarrier;
 }
 
+bool IsAtomicIntrinsic(IntrinsicType i) {
+  return i == sem::IntrinsicType::kAtomicLoad ||
+         i == sem::IntrinsicType::kAtomicStore ||
+         i == sem::IntrinsicType::kAtomicAdd ||
+         i == sem::IntrinsicType::kAtomicMax ||
+         i == sem::IntrinsicType::kAtomicMin ||
+         i == sem::IntrinsicType::kAtomicAnd ||
+         i == sem::IntrinsicType::kAtomicOr ||
+         i == sem::IntrinsicType::kAtomicXor ||
+         i == sem::IntrinsicType::kAtomicExchange ||
+         i == sem::IntrinsicType::kAtomicCompareExchangeWeak;
+}
+
 Intrinsic::Intrinsic(IntrinsicType type,
                      sem::Type* return_type,
                      const ParameterList& parameters,
@@ -134,6 +147,10 @@ bool Intrinsic::IsDataUnpacking() const {
 
 bool Intrinsic::IsBarrier() const {
   return IsBarrierIntrinsic(type_);
+}
+
+bool Intrinsic::IsAtomic() const {
+  return IsAtomicIntrinsic(type_);
 }
 
 }  // namespace sem

@@ -1,15 +1,13 @@
-SKIP: FAILED
+groupshared uint arg_0;
 
-
-var<workgroup> arg_0 : atomic<u32>;
-
-fn atomicMax_beccfc() {
-  var res : u32 = atomicMax(&(arg_0), 1u);
+void atomicMax_beccfc() {
+  uint atomic_result = 0u;
+  InterlockedMax(arg_0, 1u, atomic_result);
+  uint res = atomic_result;
 }
 
-[[stage(compute)]]
-fn compute_main() {
+[numthreads(1, 1, 1)]
+void compute_main() {
   atomicMax_beccfc();
+  return;
 }
-
-Failed to generate: error: unknown type in EmitType

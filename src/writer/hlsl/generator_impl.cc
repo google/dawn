@@ -25,6 +25,7 @@
 #include "src/ast/override_decoration.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/sem/array.h"
+#include "src/sem/atomic_type.h"
 #include "src/sem/call.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/function.h"
@@ -35,7 +36,6 @@
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
 #include "src/transform/calculate_array_length.h"
-#include "src/transform/decompose_storage_access.h"
 #include "src/utils/scoped_assignment.h"
 #include "src/writer/append_vector.h"
 #include "src/writer/float_to_string.h"
@@ -431,99 +431,7 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
     if (auto* intrinsic =
             ast::GetDecoration<transform::DecomposeStorageAccess::Intrinsic>(
                 func->Declaration()->decorations())) {
-      auto load = [&](const char* cast, int n) {
-        if (cast) {
-          out << cast << "(";
-        }
-        if (!EmitExpression(pre, out, params[0])) {  // buffer
-          return false;
-        }
-        out << ".Load";
-        if (n > 1) {
-          out << n;
-        }
-        ScopedParen sp(out);
-        if (!EmitExpression(pre, out, params[1])) {  // offset
-          return false;
-        }
-        if (cast) {
-          out << ")";
-        }
-        return true;
-      };
-      auto store = [&](int n) {
-        if (!EmitExpression(pre, out, params[0])) {  // buffer
-          return false;
-        }
-        out << ".Store";
-        if (n > 1) {
-          out << n;
-        }
-        ScopedParen sp1(out);
-        if (!EmitExpression(pre, out, params[1])) {  // offset
-          return false;
-        }
-        out << ", asuint";
-        ScopedParen sp2(out);
-        if (!EmitExpression(pre, out, params[2])) {  // value
-          return false;
-        }
-        return true;
-      };
-
-      switch (intrinsic->type) {
-        case transform::DecomposeStorageAccess::Intrinsic::kLoadU32:
-          return load(nullptr, 1);
-        case transform::DecomposeStorageAccess::Intrinsic::kLoadF32:
-          return load("asfloat", 1);
-        case transform::DecomposeStorageAccess::Intrinsic::kLoadI32:
-          return load("asint", 1);
-        case transform::DecomposeStorageAccess::Intrinsic::kLoadVec2U32:
-          return load(nullptr, 2);
-        case transform::DecomposeStorageAccess::Intrinsic::kLoadVec2F32:
-          return load("asfloat", 2);
-        case transform::DecomposeStorageAccess::Intrinsic::kLoadVec2I32:
-          return load("asint", 2);
-        case transform::DecomposeStorageAccess::Intrinsic::kLoadVec3U32:
-          return load(nullptr, 3);
-        case transform::DecomposeStorageAccess::Intrinsic::kLoadVec3F32:
-          return load("asfloat", 3);
-        case transform::DecomposeStorageAccess::Intrinsic::kLoadVec3I32:
-          return load("asint", 3);
-        case transform::DecomposeStorageAccess::Intrinsic::kLoadVec4U32:
-          return load(nullptr, 4);
-        case transform::DecomposeStorageAccess::Intrinsic::kLoadVec4F32:
-          return load("asfloat", 4);
-        case transform::DecomposeStorageAccess::Intrinsic::kLoadVec4I32:
-          return load("asint", 4);
-        case transform::DecomposeStorageAccess::Intrinsic::kStoreU32:
-          return store(1);
-        case transform::DecomposeStorageAccess::Intrinsic::kStoreF32:
-          return store(1);
-        case transform::DecomposeStorageAccess::Intrinsic::kStoreI32:
-          return store(1);
-        case transform::DecomposeStorageAccess::Intrinsic::kStoreVec2U32:
-          return store(2);
-        case transform::DecomposeStorageAccess::Intrinsic::kStoreVec2F32:
-          return store(2);
-        case transform::DecomposeStorageAccess::Intrinsic::kStoreVec2I32:
-          return store(2);
-        case transform::DecomposeStorageAccess::Intrinsic::kStoreVec3U32:
-          return store(3);
-        case transform::DecomposeStorageAccess::Intrinsic::kStoreVec3F32:
-          return store(3);
-        case transform::DecomposeStorageAccess::Intrinsic::kStoreVec3I32:
-          return store(3);
-        case transform::DecomposeStorageAccess::Intrinsic::kStoreVec4U32:
-          return store(4);
-        case transform::DecomposeStorageAccess::Intrinsic::kStoreVec4F32:
-          return store(4);
-        case transform::DecomposeStorageAccess::Intrinsic::kStoreVec4I32:
-          return store(4);
-      }
-
-      TINT_UNIMPLEMENTED(diagnostics_) << static_cast<int>(intrinsic->type);
-      return false;
+      return EmitDecomposeStorageAccessIntrinsic(pre, out, expr, intrinsic);
     }
   }
 
@@ -544,6 +452,8 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
       return EmitDataUnpackingCall(pre, out, expr, intrinsic);
     } else if (intrinsic->IsBarrier()) {
       return EmitBarrierCall(pre, out, intrinsic);
+    } else if (intrinsic->IsAtomic()) {
+      return EmitWorkgroupAtomicCall(pre, out, expr, intrinsic);
     }
     auto name = generate_builtin_name(intrinsic);
     if (name.empty()) {
@@ -593,6 +503,486 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
   }
 
   out << ")";
+
+  return true;
+}
+
+bool GeneratorImpl::EmitDecomposeStorageAccessIntrinsic(
+    std::ostream& pre,
+    std::ostream& out,
+    ast::CallExpression* expr,
+    const transform::DecomposeStorageAccess::Intrinsic* intrinsic) {
+  const auto& params = expr->params();
+
+  using Op = transform::DecomposeStorageAccess::Intrinsic::Op;
+  using DataType = transform::DecomposeStorageAccess::Intrinsic::DataType;
+  switch (intrinsic->op) {
+    case Op::kLoad: {
+      auto load = [&](const char* cast, int n) {
+        if (cast) {
+          out << cast << "(";
+        }
+        if (!EmitExpression(pre, out, params[0])) {  // buffer
+          return false;
+        }
+        out << ".Load";
+        if (n > 1) {
+          out << n;
+        }
+        ScopedParen sp(out);
+        if (!EmitExpression(pre, out, params[1])) {  // offset
+          return false;
+        }
+        if (cast) {
+          out << ")";
+        }
+        return true;
+      };
+      switch (intrinsic->type) {
+        case DataType::kU32:
+          return load(nullptr, 1);
+        case DataType::kF32:
+          return load("asfloat", 1);
+        case DataType::kI32:
+          return load("asint", 1);
+        case DataType::kVec2U32:
+          return load(nullptr, 2);
+        case DataType::kVec2F32:
+          return load("asfloat", 2);
+        case DataType::kVec2I32:
+          return load("asint", 2);
+        case DataType::kVec3U32:
+          return load(nullptr, 3);
+        case DataType::kVec3F32:
+          return load("asfloat", 3);
+        case DataType::kVec3I32:
+          return load("asint", 3);
+        case DataType::kVec4U32:
+          return load(nullptr, 4);
+        case DataType::kVec4F32:
+          return load("asfloat", 4);
+        case DataType::kVec4I32:
+          return load("asint", 4);
+      }
+      TINT_UNREACHABLE(diagnostics_)
+          << "unsupported DecomposeStorageAccess::Intrinsic::DataType: "
+          << static_cast<int>(intrinsic->type);
+      return false;
+    }
+
+    case Op::kStore: {
+      auto store = [&](int n) {
+        if (!EmitExpression(pre, out, params[0])) {  // buffer
+          return false;
+        }
+        out << ".Store";
+        if (n > 1) {
+          out << n;
+        }
+        ScopedParen sp1(out);
+        if (!EmitExpression(pre, out, params[1])) {  // offset
+          return false;
+        }
+        out << ", asuint";
+        ScopedParen sp2(out);
+        if (!EmitExpression(pre, out, params[2])) {  // value
+          return false;
+        }
+        return true;
+      };
+      switch (intrinsic->type) {
+        case DataType::kU32:
+          return store(1);
+        case DataType::kF32:
+          return store(1);
+        case DataType::kI32:
+          return store(1);
+        case DataType::kVec2U32:
+          return store(2);
+        case DataType::kVec2F32:
+          return store(2);
+        case DataType::kVec2I32:
+          return store(2);
+        case DataType::kVec3U32:
+          return store(3);
+        case DataType::kVec3F32:
+          return store(3);
+        case DataType::kVec3I32:
+          return store(3);
+        case DataType::kVec4U32:
+          return store(4);
+        case DataType::kVec4F32:
+          return store(4);
+        case DataType::kVec4I32:
+          return store(4);
+      }
+      TINT_UNREACHABLE(diagnostics_)
+          << "unsupported DecomposeStorageAccess::Intrinsic::DataType: "
+          << static_cast<int>(intrinsic->type);
+      return false;
+    }
+
+    case Op::kAtomicLoad:
+    case Op::kAtomicStore:
+    case Op::kAtomicAdd:
+    case Op::kAtomicMax:
+    case Op::kAtomicMin:
+    case Op::kAtomicAnd:
+    case Op::kAtomicOr:
+    case Op::kAtomicXor:
+    case Op::kAtomicExchange:
+    case Op::kAtomicCompareExchangeWeak:
+      return EmitStorageAtomicCall(pre, out, expr, intrinsic->op);
+  }
+
+  TINT_UNREACHABLE(diagnostics_)
+      << "unsupported DecomposeStorageAccess::Intrinsic::Op: "
+      << static_cast<int>(intrinsic->op);
+  return false;
+}
+
+bool GeneratorImpl::EmitStorageAtomicCall(
+    std::ostream& pre,
+    std::ostream& out,
+    ast::CallExpression* expr,
+    transform::DecomposeStorageAccess::Intrinsic::Op op) {
+  using Op = transform::DecomposeStorageAccess::Intrinsic::Op;
+
+  std::stringstream ss;
+  std::string result = generate_name("atomic_result");
+
+  auto* result_ty = TypeOf(expr);
+  if (!result_ty->Is<sem::Void>()) {
+    if (!EmitType(ss, TypeOf(expr), ast::StorageClass::kNone,
+                  ast::Access::kUndefined, "")) {
+      return false;
+    }
+    ss << " " << result << " = ";
+    if (!EmitZeroValue(ss, result_ty)) {
+      return false;
+    }
+    make_indent(ss << ";" << std::endl);
+  }
+
+  auto* buffer = expr->params()[0];
+  auto* offset = expr->params()[1];
+
+  switch (op) {
+    case Op::kAtomicLoad: {
+      // HLSL does not have an InterlockedLoad, so we emulate it with
+      // InterlockedOr using 0 as the OR value
+      if (!EmitExpression(pre, ss, buffer)) {
+        return false;
+      }
+      ss << ".InterlockedOr";
+      {
+        ScopedParen sp(ss);
+        if (!EmitExpression(pre, ss, offset)) {
+          return false;
+        }
+        ss << ", 0, " << result;
+      }
+
+      make_indent(ss << ";" << std::endl);
+      pre << ss.str();
+      out << result;
+      return true;
+    }
+    case Op::kAtomicStore: {
+      // HLSL does not have an InterlockedStore, so we emulate it with
+      // InterlockedExchange and discard the returned value
+      auto* value = expr->params()[2];
+      auto* value_ty = TypeOf(value);
+      if (!EmitType(pre, value_ty, ast::StorageClass::kNone,
+                    ast::Access::kUndefined, "")) {
+        return false;
+      }
+      pre << " " << result << " = ";
+      if (!EmitZeroValue(pre, value_ty)) {
+        return false;
+      }
+      make_indent(pre << ";" << std::endl);
+
+      if (!EmitExpression(pre, out, buffer)) {
+        return false;
+      }
+      out << ".InterlockedExchange";
+      {
+        ScopedParen sp(out);
+        if (!EmitExpression(pre, out, offset)) {
+          return false;
+        }
+        out << ", ";
+        if (!EmitExpression(pre, out, value)) {
+          return false;
+        }
+        out << ", " << result;
+      }
+      return true;
+    }
+    case Op::kAtomicCompareExchangeWeak: {
+      auto* compare_value = expr->params()[2];
+      auto* value = expr->params()[3];
+
+      std::string compare = generate_name("atomic_compare_value");
+      if (!EmitType(ss, TypeOf(compare_value), ast::StorageClass::kNone,
+                    ast::Access::kUndefined, "")) {
+        return false;
+      }
+      ss << " " << compare << " = ";
+      if (!EmitExpression(pre, ss, compare_value)) {
+        return false;
+      }
+      make_indent(ss << ";" << std::endl);
+
+      if (!EmitExpression(pre, ss, buffer)) {
+        return false;
+      }
+      ss << ".InterlockedCompareExchange";
+      {
+        ScopedParen sp(ss);
+        if (!EmitExpression(pre, ss, offset)) {
+          return false;
+        }
+        ss << ", " << compare << ", ";
+        if (!EmitExpression(pre, ss, value)) {
+          return false;
+        }
+        ss << ", " << result << ".x";
+      }
+      make_indent(ss << ";" << std::endl);
+
+      ss << result << ".y = " << result << ".x == " << compare;
+      make_indent(ss << ";" << std::endl);
+
+      pre << ss.str();
+      out << result;
+      return true;
+    }
+
+    case Op::kAtomicAdd:
+      if (!EmitExpression(pre, ss, buffer)) {
+        return false;
+      }
+      ss << ".InterlockedAdd";
+      break;
+    case Op::kAtomicMax:
+      if (!EmitExpression(pre, ss, buffer)) {
+        return false;
+      }
+      ss << ".InterlockedMax";
+      break;
+    case Op::kAtomicMin:
+      if (!EmitExpression(pre, ss, buffer)) {
+        return false;
+      }
+      ss << ".InterlockedMin";
+      break;
+    case Op::kAtomicAnd:
+      if (!EmitExpression(pre, ss, buffer)) {
+        return false;
+      }
+      ss << ".InterlockedAnd";
+      break;
+    case Op::kAtomicOr:
+      if (!EmitExpression(pre, ss, buffer)) {
+        return false;
+      }
+      ss << ".InterlockedOr";
+      break;
+    case Op::kAtomicXor:
+      if (!EmitExpression(pre, ss, buffer)) {
+        return false;
+      }
+      ss << ".InterlockedXor";
+      break;
+    case Op::kAtomicExchange:
+      if (!EmitExpression(pre, ss, buffer)) {
+        return false;
+      }
+      ss << ".InterlockedExchange";
+      break;
+
+    default:
+      TINT_UNREACHABLE(diagnostics_)
+          << "unsupported atomic DecomposeStorageAccess::Intrinsic::Op: "
+          << static_cast<int>(op);
+      return false;
+  }
+
+  {
+    ScopedParen sp(ss);
+    if (!EmitExpression(pre, ss, offset)) {
+      return false;
+    }
+
+    for (size_t i = 1; i < expr->params().size() - 1; i++) {
+      auto* arg = expr->params()[i];
+      ss << ", ";
+      if (!EmitExpression(pre, ss, arg)) {
+        return false;
+      }
+    }
+
+    ss << ", " << result;
+  }
+
+  make_indent(ss << ";" << std::endl);
+  pre << ss.str();
+  out << result;
+
+  return true;
+}
+
+bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& pre,
+                                            std::ostream& out,
+                                            ast::CallExpression* expr,
+                                            const sem::Intrinsic* intrinsic) {
+  std::stringstream ss;
+  std::string result = generate_name("atomic_result");
+
+  if (!intrinsic->ReturnType()->Is<sem::Void>()) {
+    if (!EmitType(ss, intrinsic->ReturnType(), ast::StorageClass::kNone,
+                  ast::Access::kUndefined, "")) {
+      return false;
+    }
+    ss << " " << result << " = ";
+    if (!EmitZeroValue(ss, intrinsic->ReturnType())) {
+      return false;
+    }
+    make_indent(ss << ";" << std::endl);
+  }
+
+  switch (intrinsic->Type()) {
+    case sem::IntrinsicType::kAtomicLoad: {
+      // HLSL does not have an InterlockedLoad, so we emulate it with
+      // InterlockedOr using 0 as the OR value
+      ss << "InterlockedOr";
+      {
+        ScopedParen sp(ss);
+        if (!EmitExpression(pre, ss, expr->params()[0])) {
+          return false;
+        }
+        ss << ", 0, " << result;
+      }
+      make_indent(ss << ";" << std::endl);
+
+      pre << ss.str();
+      out << result;
+      return true;
+    }
+    case sem::IntrinsicType::kAtomicStore: {
+      // HLSL does not have an InterlockedStore, so we emulate it with
+      // InterlockedExchange and discard the returned value
+      auto* value_ty = intrinsic->Parameters()[1].type;
+      if (!EmitType(pre, value_ty, ast::StorageClass::kNone,
+                    ast::Access::kUndefined, "")) {
+        return false;
+      }
+      pre << " " << result << " = ";
+      if (!EmitZeroValue(pre, value_ty)) {
+        return false;
+      }
+      make_indent(pre << ";" << std::endl);
+
+      out << "InterlockedExchange";
+      {
+        ScopedParen sp(out);
+        if (!EmitExpression(pre, out, expr->params()[0])) {
+          return false;
+        }
+        out << ", ";
+        if (!EmitExpression(pre, out, expr->params()[1])) {
+          return false;
+        }
+        out << ", " << result;
+      }
+      return true;
+    }
+    case sem::IntrinsicType::kAtomicCompareExchangeWeak: {
+      auto* dest = expr->params()[0];
+      auto* compare_value = expr->params()[1];
+      auto* value = expr->params()[2];
+
+      std::string compare = generate_name("atomic_compare_value");
+      if (!EmitType(ss, TypeOf(compare_value), ast::StorageClass::kNone,
+                    ast::Access::kUndefined, "")) {
+        return false;
+      }
+      ss << " " << compare << " = ";
+      if (!EmitExpression(pre, ss, compare_value)) {
+        return false;
+      }
+      make_indent(ss << ";" << std::endl);
+
+      ss << "InterlockedCompareExchange";
+      {
+        ScopedParen sp(ss);
+        if (!EmitExpression(pre, ss, dest)) {
+          return false;
+        }
+        ss << ", " << compare << ", ";
+        if (!EmitExpression(pre, ss, value)) {
+          return false;
+        }
+        ss << ", " << result << ".x";
+      }
+      make_indent(ss << ";" << std::endl);
+
+      ss << result << ".y = " << result << ".x == " << compare;
+      make_indent(ss << ";" << std::endl);
+
+      pre << ss.str();
+      out << result;
+      return true;
+    }
+
+    case sem::IntrinsicType::kAtomicAdd:
+      ss << "InterlockedAdd";
+      break;
+    case sem::IntrinsicType::kAtomicMax:
+      ss << "InterlockedMax";
+      break;
+    case sem::IntrinsicType::kAtomicMin:
+      ss << "InterlockedMin";
+      break;
+    case sem::IntrinsicType::kAtomicAnd:
+      ss << "InterlockedAnd";
+      break;
+    case sem::IntrinsicType::kAtomicOr:
+      ss << "InterlockedOr";
+      break;
+    case sem::IntrinsicType::kAtomicXor:
+      ss << "InterlockedXor";
+      break;
+    case sem::IntrinsicType::kAtomicExchange:
+      ss << "InterlockedExchange";
+      break;
+
+    default:
+      TINT_UNREACHABLE(diagnostics_)
+          << "unsupported atomic intrinsic: " << intrinsic->Type();
+      return false;
+  }
+
+  {
+    ScopedParen sp(ss);
+    for (size_t i = 0; i < expr->params().size(); i++) {
+      auto* arg = expr->params()[i];
+      if (i > 0) {
+        ss << ", ";
+      }
+      if (!EmitExpression(pre, ss, arg)) {
+        return false;
+      }
+    }
+
+    ss << ", " << result;
+  }
+  make_indent(ss << ";" << std::endl);
+
+  pre << ss.str();
+  out << result;
 
   return true;
 }
@@ -1153,11 +1543,10 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
   }
 
   return true;
-}  // namespace hlsl
+}
 
 std::string GeneratorImpl::generate_builtin_name(
     const sem::Intrinsic* intrinsic) {
-  std::string out;
   switch (intrinsic->Type()) {
     case sem::IntrinsicType::kAbs:
     case sem::IntrinsicType::kAcos:
@@ -1198,71 +1587,51 @@ std::string GeneratorImpl::generate_builtin_name(
     case sem::IntrinsicType::kTanh:
     case sem::IntrinsicType::kTranspose:
     case sem::IntrinsicType::kTrunc:
-      out = intrinsic->str();
-      break;
+      return intrinsic->str();
     case sem::IntrinsicType::kCountOneBits:
-      out = "countbits";
-      break;
+      return "countbits";
     case sem::IntrinsicType::kDpdx:
-      out = "ddx";
-      break;
+      return "ddx";
     case sem::IntrinsicType::kDpdxCoarse:
-      out = "ddx_coarse";
-      break;
+      return "ddx_coarse";
     case sem::IntrinsicType::kDpdxFine:
-      out = "ddx_fine";
-      break;
+      return "ddx_fine";
     case sem::IntrinsicType::kDpdy:
-      out = "ddy";
-      break;
+      return "ddy";
     case sem::IntrinsicType::kDpdyCoarse:
-      out = "ddy_coarse";
-      break;
+      return "ddy_coarse";
     case sem::IntrinsicType::kDpdyFine:
-      out = "ddy_fine";
-      break;
+      return "ddy_fine";
     case sem::IntrinsicType::kFaceForward:
-      out = "faceforward";
-      break;
+      return "faceforward";
     case sem::IntrinsicType::kFract:
-      out = "frac";
-      break;
+      return "frac";
     case sem::IntrinsicType::kFma:
-      out = "mad";
-      break;
+      return "mad";
     case sem::IntrinsicType::kFwidth:
     case sem::IntrinsicType::kFwidthCoarse:
     case sem::IntrinsicType::kFwidthFine:
-      out = "fwidth";
-      break;
+      return "fwidth";
     case sem::IntrinsicType::kInverseSqrt:
-      out = "rsqrt";
-      break;
+      return "rsqrt";
     case sem::IntrinsicType::kIsFinite:
-      out = "isfinite";
-      break;
+      return "isfinite";
     case sem::IntrinsicType::kIsInf:
-      out = "isinf";
-      break;
+      return "isinf";
     case sem::IntrinsicType::kIsNan:
-      out = "isnan";
-      break;
+      return "isnan";
     case sem::IntrinsicType::kMix:
-      out = "lerp";
-      break;
+      return "lerp";
     case sem::IntrinsicType::kReverseBits:
-      out = "reversebits";
-      break;
+      return "reversebits";
     case sem::IntrinsicType::kSmoothStep:
-      out = "smoothstep";
-      break;
+      return "smoothstep";
     default:
       diagnostics_.add_error("Unknown builtin method: " +
                              std::string(intrinsic->str()));
-      return "";
   }
 
-  return out;
+  return "";
 }
 
 bool GeneratorImpl::EmitCase(std::ostream& out, ast::CaseStatement* stmt) {
@@ -2236,6 +2605,10 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         return false;
       }
       out << ", " << size << ">";
+    }
+  } else if (auto* atomic = type->As<sem::Atomic>()) {
+    if (!EmitType(out, atomic->Type(), storage_class, access, name)) {
+      return false;
     }
   } else if (type->Is<sem::Void>()) {
     out << "void";

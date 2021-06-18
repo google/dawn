@@ -1,15 +1,13 @@
-SKIP: FAILED
+groupshared uint arg_0;
 
-
-var<workgroup> arg_0 : atomic<u32>;
-
-fn atomicAnd_34edd3() {
-  var res : u32 = atomicAnd(&(arg_0), 1u);
+void atomicAnd_34edd3() {
+  uint atomic_result = 0u;
+  InterlockedAnd(arg_0, 1u, atomic_result);
+  uint res = atomic_result;
 }
 
-[[stage(compute)]]
-fn compute_main() {
+[numthreads(1, 1, 1)]
+void compute_main() {
   atomicAnd_34edd3();
+  return;
 }
-
-Failed to generate: error: unknown type in EmitType

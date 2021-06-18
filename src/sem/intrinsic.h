@@ -69,6 +69,11 @@ bool IsDataUnpackingIntrinsic(IntrinsicType i);
 /// @returns true if the given `i` is a barrier intrinsic
 bool IsBarrierIntrinsic(IntrinsicType i);
 
+/// Determines if the given `i` is a atomic intrinsic
+/// @param i the intrinsic
+/// @returns true if the given `i` is a atomic intrinsic
+bool IsAtomicIntrinsic(IntrinsicType i);
+
 /// Intrinsic holds the semantic information for an intrinsic function.
 class Intrinsic : public Castable<Intrinsic, CallTarget> {
  public:
@@ -128,6 +133,9 @@ class Intrinsic : public Castable<Intrinsic, CallTarget> {
 
   /// @returns true if intrinsic is a barrier intrinsic
   bool IsBarrier() const;
+
+  /// @returns true if intrinsic is a atomic intrinsic
+  bool IsAtomic() const;
 
  private:
   IntrinsicType const type_;

@@ -1,10 +1,14 @@
 SKIP: FAILED
 
-../src/transform/transform.cc:133 internal compiler error: TINT_UNREACHABLE Unhandled type: tint::sem::Atomic
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
 
+fn atomicAdd_d5db1d(tint_symbol : ptr<workgroup, atomic<u32>>) {
+  var res : u32 = atomicAdd(&(*(tint_symbol)), 1u);
+}
+
+[[stage(compute)]]
+fn compute_main() {
+  [[internal(disable_validation__function_var_storage_class)]] var<workgroup> tint_symbol_1 : atomic<u32>;
+  atomicAdd_d5db1d(&(tint_symbol_1));
+}
+
+error: cannot declare an atomic var in a function scope
