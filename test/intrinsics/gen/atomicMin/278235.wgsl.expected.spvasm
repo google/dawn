@@ -1,5 +1,15 @@
 SKIP: FAILED
 
 
-var<workgroup> arg_0 : 
+var<workgroup> arg_0 : atomic<i32>;
+
+fn atomicMin_278235() {
+  var res : i32 = atomicMin(&(arg_0), 1);
+}
+
+[[stage(compute)]]
+fn compute_main() {
+  atomicMin_278235();
+}
+
 Failed to generate: unable to convert type: __atomic__i32

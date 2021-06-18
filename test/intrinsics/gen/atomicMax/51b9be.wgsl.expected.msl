@@ -3,5 +3,23 @@ SKIP: FAILED
 
 [[block]]
 struct SB_RW {
-  arg_0 : 
+  arg_0 : atomic<u32>;
+};
+
+[[group(0), binding(0)]] var<storage, read_write> sb_rw : SB_RW;
+
+fn atomicMax_51b9be() {
+  var res : u32 = atomicMax(&(sb_rw.arg_0), 1u);
+}
+
+[[stage(fragment)]]
+fn fragment_main() {
+  atomicMax_51b9be();
+}
+
+[[stage(compute)]]
+fn compute_main() {
+  atomicMax_51b9be();
+}
+
 Failed to generate: error: unknown type in EmitType: __atomic__u32

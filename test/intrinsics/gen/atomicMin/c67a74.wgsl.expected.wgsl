@@ -1,7 +1,20 @@
-SKIP: FAILED
-
-
 [[block]]
 struct SB_RW {
-  arg_0 : 
-Failed to generate: error: unknown type in EmitType: __atomic__u32
+  arg_0 : atomic<u32>;
+};
+
+[[group(0), binding(0)]] var<storage, read_write> sb_rw : SB_RW;
+
+fn atomicMin_c67a74() {
+  var res : u32 = atomicMin(&(sb_rw.arg_0), 1u);
+}
+
+[[stage(fragment)]]
+fn fragment_main() {
+  atomicMin_c67a74();
+}
+
+[[stage(compute)]]
+fn compute_main() {
+  atomicMin_c67a74();
+}

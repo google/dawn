@@ -20,6 +20,7 @@
 #include "src/ast/access.h"
 #include "src/ast/alias.h"
 #include "src/ast/array.h"
+#include "src/ast/atomic.h"
 #include "src/ast/bool.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/call_statement.h"
@@ -406,6 +407,12 @@ bool GeneratorImpl::EmitType(const ast::Type* ty) {
   } else if (auto* ptr = ty->As<ast::Pointer>()) {
     out_ << "ptr<" << ptr->storage_class() << ", ";
     if (!EmitType(ptr->type())) {
+      return false;
+    }
+    out_ << ">";
+  } else if (auto* atomic = ty->As<ast::Atomic>()) {
+    out_ << "atomic<";
+    if (!EmitType(atomic->type())) {
       return false;
     }
     out_ << ">";
