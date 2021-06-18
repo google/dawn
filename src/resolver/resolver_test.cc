@@ -2020,6 +2020,22 @@ TEST_F(ResolverTest, Access_SetForStorageBuffer) {
   EXPECT_EQ(Sem().Get(var)->Access(), ast::Access::kRead);
 }
 
+TEST_F(ResolverTest, BindingPoint_SetForResources) {
+  // [[group(1), binding(2)]] var s1 : sampler;
+  // [[group(3), binding(4)]] var s2 : sampler;
+  auto* s1 = Global(Sym(), ty.sampler(ast::SamplerKind::kSampler),
+                    ast::DecorationList{create<ast::GroupDecoration>(1),
+                                        create<ast::BindingDecoration>(2)});
+  auto* s2 = Global(Sym(), ty.sampler(ast::SamplerKind::kSampler),
+                    ast::DecorationList{create<ast::GroupDecoration>(3),
+                                        create<ast::BindingDecoration>(4)});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  EXPECT_EQ(Sem().Get(s1)->BindingPoint(), (sem::BindingPoint{1u, 2u}));
+  EXPECT_EQ(Sem().Get(s2)->BindingPoint(), (sem::BindingPoint{3u, 4u}));
+}
+
 TEST_F(ResolverTest, Function_EntryPoints_StageDecoration) {
   // fn b() {}
   // fn c() { b(); }

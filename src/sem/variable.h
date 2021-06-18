@@ -19,6 +19,7 @@
 
 #include "src/ast/access.h"
 #include "src/ast/storage_class.h"
+#include "src/sem/binding_point.h"
 #include "src/sem/expression.h"
 
 namespace tint {
@@ -43,10 +44,12 @@ class Variable : public Castable<Variable, Node> {
   /// @param type the variable type
   /// @param storage_class the variable storage class
   /// @param access the variable access control type
+  /// @param binding_point the optional resource binding point of the variable
   Variable(const ast::Variable* declaration,
            const sem::Type* type,
            ast::StorageClass storage_class,
-           ast::Access access);
+           ast::Access access,
+           sem::BindingPoint binding_point = {});
 
   /// Constructor for overridable pipeline constants
   /// @param declaration the AST declaration node
@@ -71,6 +74,9 @@ class Variable : public Castable<Variable, Node> {
   /// @returns the access control for the variable
   ast::Access Access() const { return access_; }
 
+  /// @returns the resource binding point for the variable
+  sem::BindingPoint BindingPoint() const { return binding_point_; }
+
   /// @returns the expressions that use the variable
   const std::vector<const VariableUser*>& Users() const { return users_; }
 
@@ -88,6 +94,7 @@ class Variable : public Castable<Variable, Node> {
   const sem::Type* const type_;
   ast::StorageClass const storage_class_;
   ast::Access const access_;
+  sem::BindingPoint binding_point_;
   std::vector<const VariableUser*> users_;
   const bool is_pipeline_constant_;
   const uint16_t constant_id_ = 0;

@@ -26,11 +26,13 @@ namespace sem {
 Variable::Variable(const ast::Variable* declaration,
                    const sem::Type* type,
                    ast::StorageClass storage_class,
-                   ast::Access access)
+                   ast::Access access,
+                   sem::BindingPoint binding_point)
     : declaration_(declaration),
       type_(type),
       storage_class_(storage_class),
       access_(access),
+      binding_point_(binding_point),
       is_pipeline_constant_(false) {}
 
 Variable::Variable(const ast::Variable* declaration,

@@ -2863,8 +2863,9 @@ void Resolver::CreateSemanticNodes() const {
 
       sem_var = builder_->create<sem::Variable>(var, info->type, constant_id);
     } else {
-      sem_var = builder_->create<sem::Variable>(
-          var, info->type, info->storage_class, info->access);
+      sem_var =
+          builder_->create<sem::Variable>(var, info->type, info->storage_class,
+                                          info->access, info->binding_point);
     }
 
     std::vector<const sem::VariableUser*> users;
