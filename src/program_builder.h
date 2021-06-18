@@ -1099,6 +1099,18 @@ class ProgramBuilder {
   }
 
   /// @param args the arguments for the vector constructor
+  /// @param type the vector type
+  /// @param size the vector size
+  /// @return an `ast::TypeConstructorExpression` of a `size`-element vector of
+  /// type `type`, constructed with the values `args`.
+  template <typename... ARGS>
+  ast::TypeConstructorExpression* vec(ast::Type* type,
+                                      uint32_t size,
+                                      ARGS&&... args) {
+    return Construct(ty.vec(type, size), std::forward<ARGS>(args)...);
+  }
+
+  /// @param args the arguments for the vector constructor
   /// @return an `ast::TypeConstructorExpression` of a 2-element vector of type
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>

@@ -287,6 +287,8 @@ set(TINT_LIB_SRCS
   transform/external_texture_transform.h
   transform/first_index_offset.cc
   transform/first_index_offset.h
+  transform/fold_constants.cc
+  transform/fold_constants.h
   transform/inline_pointer_lets.cc
   transform/inline_pointer_lets.h
   transform/manager.cc
@@ -861,6 +863,7 @@ if(${TINT_BUILD_TESTS})
       transform/decompose_storage_access_test.cc
       transform/external_texture_transform_test.cc
       transform/first_index_offset_test.cc
+      transform/fold_constants_test.cc
       transform/inline_pointer_lets_test.cc
       transform/pad_array_elements_test.cc
       transform/promote_initializers_to_const_var_test.cc
