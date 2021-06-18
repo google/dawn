@@ -53,7 +53,7 @@ class VertexFormatTest : public DawnTest {
         DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
         // TODO(crbug.com/tint/904): FXC emits bad output for this test
-        DAWN_SUPPRESS_TEST_IF(IsD3D12() && !IsDXC());
+        DAWN_SUPPRESS_TEST_IF(IsD3D12() && !IsDXC() && HasToggleEnabled("use_tint_generator"));
 
         renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
     }

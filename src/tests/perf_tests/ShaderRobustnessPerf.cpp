@@ -409,6 +409,9 @@ void ShaderRobustnessPerf::SetUp() {
     // TODO(crbug.com/dawn/786): D3D12_Microsoft_Basic_Render_Driver_CPU
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
 
+    // TODO(crbug.com/tint/904): FXC emits bad output for this test
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && !IsDXC() && HasToggleEnabled("use_tint_generator"));
+
     const size_t dataASize = mDimAOuter * mDimInner;
     std::vector<float> dataA(dataASize);
     uint64_t byteASize = sizeof(float) * dataA.size();
