@@ -85,13 +85,32 @@ func (g *generator) generate(tmpl string, w io.Writer, writeFile WriteFile) erro
 
 // eval executes the sub-template with the given name and argument, returning
 // the generated output
-func (g *generator) eval(template string, arg interface{}) (string, error) {
+func (g *generator) eval(template string, args ...interface{}) (string, error) {
 	target := g.t.Lookup(template)
 	if target == nil {
 		return "", fmt.Errorf("template '%v' not found", template)
 	}
 	sb := strings.Builder{}
-	if err := target.Execute(&sb, arg); err != nil {
+
+	var err error
+	if len(args) == 1 {
+		err = target.Execute(&sb, args[0])
+	} else {
+		m := newMap()
+		if len(args)%2 != 0 {
+			return "", fmt.Errorf("Eval expects a single argument or list name-value pairs")
+		}
+		for i := 0; i < len(args); i += 2 {
+			name, ok := args[i].(string)
+			if !ok {
+				return "", fmt.Errorf("Eval argument %v is not a string", i)
+			}
+			m.Put(name, args[i+1])
+		}
+		err = target.Execute(&sb, m)
+	}
+
+	if err != nil {
 		return "", fmt.Errorf("while evaluating '%v': %v", template, err)
 	}
 	return sb.String(), nil

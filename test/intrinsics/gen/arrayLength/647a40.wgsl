@@ -23,14 +23,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 [[block]]
-struct SB {
+struct SB_RO {
   arg_0: array<u32>;
 };
-[[group(0), binding(0)]] var<storage, read> sb : SB;
+[[group(0), binding(1)]] var<storage, read> sb_ro : SB_RO;
 
 // fn arrayLength(array<u32>) -> u32
 fn arrayLength_647a40() {
-  var res: u32 = arrayLength(sb.arg_0);
+  var res: u32 = arrayLength(sb_ro.arg_0);
 }
 
 [[stage(vertex)]]

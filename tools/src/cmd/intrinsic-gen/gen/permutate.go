@@ -79,7 +79,7 @@ func (p *Permuter) Permute(overload *sem.Overload) ([]Permutation, error) {
 		}
 		for i, p := range overload.Parameters {
 			ty := state.parameters[i]
-			if !validate(ty) {
+			if !validate(ty, &o.CanBeUsedInStage) {
 				return nil
 			}
 			o.Parameters = append(o.Parameters, sem.Parameter{
@@ -321,7 +321,7 @@ func (s *permutationState) permutateFQN(in sem.FullyQualifiedName) ([]sem.FullyQ
 	return out, nil
 }
 
-func validate(fqn sem.FullyQualifiedName) bool {
+func validate(fqn sem.FullyQualifiedName, uses *sem.StageUses) bool {
 	switch fqn.Target.GetName() {
 	case "array":
 		elTy := fqn.TemplateArguments[0].(sem.FullyQualifiedName)
@@ -333,13 +333,40 @@ func validate(fqn sem.FullyQualifiedName) bool {
 			return false // Not storable
 		}
 	case "ptr":
-		storage := fqn.TemplateArguments[0].(sem.FullyQualifiedName).Target.(*sem.EnumEntry)
-		return storage.Name == "function"
+		// https://gpuweb.github.io/gpuweb/wgsl/#storage-class
+		access := fqn.TemplateArguments[2].(sem.FullyQualifiedName).Target.(*sem.EnumEntry).Name
+		storageClass := fqn.TemplateArguments[0].(sem.FullyQualifiedName).Target.(*sem.EnumEntry).Name
+		switch storageClass {
+		case "function", "private":
+			if access != "read_write" {
+				return false
+			}
+		case "workgroup":
+			uses.Vertex = false
+			uses.Fragment = false
+			if access != "read_write" {
+				return false
+			}
+		case "uniform":
+			if access != "read" {
+				return false
+			}
+		case "storage":
+			if access != "read_write" && access != "read" {
+				return false
+			}
+		case "handle":
+			if access != "read" {
+				return false
+			}
+		default:
+			return false
+		}
 	}
 
 	for _, arg := range fqn.TemplateArguments {
 		if argFQN, ok := arg.(sem.FullyQualifiedName); ok {
-			if !validate(argFQN) {
+			if !validate(argFQN, uses) {
 				return false
 			}
 		}

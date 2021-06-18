@@ -1,20 +1,31 @@
 SKIP: FAILED
 
+intrinsics/gen/arrayLength/647a40.wgsl:33:18 warning: use of deprecated intrinsic
+  var res: u32 = arrayLength(sb_ro.arg_0);
+                 ^^^^^^^^^^^
+
 
 [[block]]
-struct SB {
+struct SB_RO {
   arg_0 : array<u32>;
 };
 
-[[group(0), binding(0)]] var<storage> sb : [[access(read)]] SB;
+[[group(0), binding(1)]] var<storage, read> sb_ro : SB_RO;
 
 fn arrayLength_647a40() {
-  var res : u32 = arrayLength(sb.arg_0);
+  var res : u32 = arrayLength(sb_ro.arg_0);
 }
 
+struct tint_symbol {
+  [[builtin(position)]]
+  value : vec4<f32>;
+};
+
 [[stage(vertex)]]
-fn vertex_main() {
+fn vertex_main() -> tint_symbol {
   arrayLength_647a40();
+  let tint_symbol_1 : tint_symbol = tint_symbol(vec4<f32>());
+  return tint_symbol_1;
 }
 
 [[stage(fragment)]]

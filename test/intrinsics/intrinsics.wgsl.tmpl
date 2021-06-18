@@ -31,27 +31,75 @@ See:
 {{-   $permutation := printf "%v_%v" $function .Hash -}}
 {{-   $args        := Map -}}
 
-{{- /* Generate a storage buffer for runtime sized array parameters       */ -}}
-{{-   if (Eval "HasStorageBufferArgs" .) -}}
+{{- /* Generate RW storage buffer parameters */ -}}
+{{-   $sb_rw_fields := Eval "EmitBufferFields" "overload"    .
+                                               "var_name"    "sb_rw"
+                                               "storage"     "storage"
+                                               "access"      "read_write"
+                                               "args"        $args -}}
+{{-   if $sb_rw_fields -}}
 [[block]]
-struct SB {
-{{-     range $i, $p := .Parameters  }}
-{{-       $class := Eval "StorageClass" $p.Type -}}
-{{-       if eq "STORAGE_BUFFER" $class }}
-  arg_{{$i}}: {{template "Type" $p.Type}};
-{{          $args.Put $i (printf "sb.arg_%v" $i) -}}
-{{-       end -}}
-{{-     end -}}
+struct SB_RW {
+{{- $sb_rw_fields -}}
 };
-[[group(0), binding(0)]] var<storage, read> sb : SB;
+[[group(0), binding(0)]] var<storage, read_write> sb_rw : SB_RW;
 {{    end -}}
 
-{{- /* Generate module-scoped resource variables (textures, samplers, etc) */ -}}
+{{- /* Generate RO storage buffer parameters */ -}}
+{{-   $sb_ro_fields := Eval "EmitBufferFields" "overload"    .
+                                               "var_name"    "sb_ro"
+                                               "storage"     "storage"
+                                               "access"      "read"
+                                               "args"        $args -}}
+{{-   if $sb_ro_fields -}}
+[[block]]
+struct SB_RO {
+{{- $sb_ro_fields -}}
+};
+[[group(0), binding(1)]] var<storage, read> sb_ro : SB_RO;
+{{    end -}}
+
+{{- /* Generate uniform buffer parameters */ -}}
+{{-   $ub_fields := Eval "EmitBufferFields" "overload"    .
+                                            "var_name"    "ub"
+                                            "storage"     "uniform"
+                                            "access"      "read"
+                                            "args"        $args -}}
+{{-   if $ub_fields -}}
+[[block]]
+struct UB {
+{{- $ub_fields -}}
+};
+[[group(0), binding(1)]] var<uniform> ub : UB;
+{{    end -}}
+
+{{- /* Generate module-scoped handle variables */ -}}
 {{-   range $i, $p := .Parameters  }}
 {{-     $class := Eval "StorageClass" $p.Type -}}
-{{-     if eq "RESOURCE" $class -}}
-          [[group(1), binding({{$i}})]] var arg_{{$i}}: {{template "Type" $p.Type}};
-{{        $args.Put $i (printf "arg_%v" $i) -}}
+{{-     if eq "ptr" $p.Type.Target.Name -}}
+{{-       $el_type := Eval "Type" (index $p.Type.TemplateArguments 1)}}
+{{-       if eq "handle" $class -}}
+            [[group(1), binding({{$i}})]] var arg_{{$i}}: {{$el_type}};
+{{          $args.Put $i (printf "&arg_%v" $i) -}}
+{{-       else if eq "workgroup" $class -}}
+            var<workgroup> arg_{{$i}}: {{$el_type}};
+{{          $args.Put $i (printf "&arg_%v" $i) -}}
+{{-       else if eq "private" $class -}}
+            var<private> arg_{{$i}}: {{$el_type}};
+{{          $args.Put $i (printf "&arg_%v" $i) -}}
+{{-       end -}}
+{{-     else -}}
+{{-       $type := Eval "Type" $p.Type}}
+{{-       if eq "handle" $class -}}
+            [[group(1), binding({{$i}})]] var arg_{{$i}}: {{$type}};
+{{          $args.Put $i (printf "arg_%v" $i) -}}
+{{-       else if eq "workgroup" $class -}}
+            var<workgroup> arg_{{$i}}: {{$type}};
+{{          $args.Put $i (printf "arg_%v" $i) -}}
+{{-       else if eq "private" $class -}}
+            var<private> arg_{{$i}}: {{$type}};
+{{          $args.Put $i (printf "arg_%v" $i) -}}
+{{-       end -}}
 {{-     end -}}
 {{-   end -}}
 
@@ -62,7 +110,7 @@ fn {{$permutation}}() {
 {{/* Build the parameters either as 'var' or inline values */ -}}
 {{-   range $i, $p := .Parameters -}}
 {{-     $class := Eval "StorageClass" $p.Type -}}
-{{-     if eq "PRIVATE" $class  -}}
+{{-     if eq "function" $class -}}
 {{-       if eq "ptr" $p.Type.Target.Name -}}
 {{- /*indent*/}}  var arg_{{$i}}: {{template "Type" index $p.Type.TemplateArguments 1}};
 {{          $args.Put $i (printf "&arg_%v" $i) -}}
@@ -111,28 +159,67 @@ fn compute_main() {
 
 
 {{- /* ------------------------------------------------------------------ */ -}}
-{{-                       define "HasStorageBufferArgs"                      -}}
-{{- /* Returns a non-empty string if the given overload has parameters    */ -}}
-{{- /* that are in the STORAGE_BUFFER storage class                       */ -}}
+{{-                       define "EmitBufferFields"                          -}}
+{{- /* Emits a struct with the fields that match the given storage class  */ -}}
+{{- /* and access.                                                        */ -}}
+{{- /* Argument is a map with the following expected keys:                */ -}}
+{{- /*  'overload' - the current overload                                 */ -}}
+{{- /*  'var_name' - name of the variable of the structure type           */ -}}
+{{- /*  'storage'  - filtered storage class                               */ -}}
+{{- /*  'access'   - filtered access                                      */ -}}
+{{- /*  'args'     - argument map that's populated with the fields        */ -}}
 {{- /* ------------------------------------------------------------------ */ -}}
-{{-   range $i, $p := .Parameters  }}
-{{-     $class := Eval "StorageClass" $p.Type -}}
-{{-     if eq "STORAGE_BUFFER" $class -}}1
-{{      end -}}
+{{- $overload       := .Get "overload" -}}
+{{- $var_name       := .Get "var_name" -}}
+{{- $filter_storage := .Get "storage"  -}}
+{{- $filter_access  := .Get "access"   -}}
+{{- $args           := .Get "args"     -}}
+{{-   range $i, $p := $overload.Parameters  }}
+{{-     $storage := Eval "StorageClass" $p.Type -}}
+{{-     $access  := Eval "Access"       $p.Type -}}
+{{-     if and (eq $filter_storage $storage) (eq $filter_access $access) }}
+{{-       if eq "ptr" $p.Type.Target.Name  }}
+  arg_{{$i}}: {{template "Type" (index $p.Type.TemplateArguments 1)}};
+{{          $args.Put $i (printf "&%v.arg_%v" $var_name $i) -}}
+{{-       else  }}
+  arg_{{$i}}: {{template "Type" $p.Type}};
+{{          $args.Put $i (printf "%v.arg_%v" $var_name $i) -}}
+{{-       end -}}
+{{-     end -}}
+{{-   end -}}
+{{ end -}}
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                           define "StorageClass"                          -}}
+{{- /* Returns the storage class for the given Fully Qualified Name       */ -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-   $name := .Target.Name -}}
+{{-   if             eq $name "array"   -}}storage
+{{-   else if HasPrefix $name "texture" -}}handle
+{{-   else if HasPrefix $name "sampler" -}}handle
+{{-   else if        eq $name "ptr"     -}}{{(index .TemplateArguments 0).Target.Name}}
+{{-   else                              -}}function
 {{-   end -}}
 {{- end -}}
 
 
 {{- /* ------------------------------------------------------------------ */ -}}
-{{-                           define "StorageClass"                          -}}
-{{- /* Returns the storage classs STORAGE_BUFFER, RESOURCE, or PRIVATE    */ -}}
-{{- /* for the given Fully Qualified Name                                 */ -}}
+{{-                           define "Access"                                -}}
+{{- /* Returns the access for the given Fully Qualified Name              */ -}}
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-   $name := .Target.Name -}}
-{{-   if             eq $name "array"   -}}STORAGE_BUFFER
-{{-   else if HasPrefix $name "texture" -}}RESOURCE
-{{-   else if HasPrefix $name "sampler" -}}RESOURCE
-{{-   else                              -}}PRIVATE
+{{-   if eq $name "ptr"     -}}{{(index .TemplateArguments 2).Target.Name}}
+{{-   else -}}
+{{- /*  Emit the default for the storage class */ -}}
+{{- /*  https://gpuweb.github.io/gpuweb/wgsl/#storage-class */ -}}
+{{-     $storage := Eval "StorageClass" . -}}
+{{-          if eq $storage "function" -}}read_write
+{{-     else if eq $storage "private" -}}read_write
+{{-     else if eq $storage "workgroup" -}}read_write
+{{-     else if eq $storage "uniform" -}}read
+{{-     else if eq $storage "storage" -}}read
+{{-     else if eq $storage "handle" -}}read
+{{-     end -}}
 {{-   end -}}
 {{- end -}}
 

@@ -1,12 +1,12 @@
 intrinsics/gen/arrayLength/721c9d.wgsl:33:18 warning: use of deprecated intrinsic
-  var res: u32 = arrayLength(sb.arg_0);
+  var res: u32 = arrayLength(sb_ro.arg_0);
                  ^^^^^^^^^^^
 
-ByteAddressBuffer sb : register(t0, space0);
+ByteAddressBuffer sb_ro : register(t1, space0);
 
 void arrayLength_721c9d() {
   uint tint_symbol_2 = 0u;
-  sb.GetDimensions(tint_symbol_2);
+  sb_ro.GetDimensions(tint_symbol_2);
   const uint tint_symbol_3 = ((tint_symbol_2 - 0u) / 4u);
   uint res = tint_symbol_3;
 }

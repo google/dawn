@@ -1,0 +1,37 @@
+SKIP: FAILED
+
+
+[[block]]
+struct SB_RO {
+  arg_0 : array<u32>;
+};
+
+[[group(0), binding(1)]] var<storage, read> sb_ro : SB_RO;
+
+fn arrayLength_cfca0a() {
+  var res : u32 = arrayLength(&(sb_ro.arg_0));
+}
+
+struct tint_symbol {
+  [[builtin(position)]]
+  value : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn vertex_main() -> tint_symbol {
+  arrayLength_cfca0a();
+  let tint_symbol_1 : tint_symbol = tint_symbol(vec4<f32>());
+  return tint_symbol_1;
+}
+
+[[stage(fragment)]]
+fn fragment_main() {
+  arrayLength_cfca0a();
+}
+
+[[stage(compute)]]
+fn compute_main() {
+  arrayLength_cfca0a();
+}
+
+Failed to generate: error: Unknown import method: arrayLength

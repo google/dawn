@@ -1,0 +1,33 @@
+SKIP: FAILED
+
+
+fn frexp_e8b4d1(tint_symbol_2 : ptr<workgroup, vec2<u32>>) {
+  var res : vec2<f32> = frexp(vec2<f32>(), &(*(tint_symbol_2)));
+}
+
+struct tint_symbol {
+  [[builtin(position)]]
+  value : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn vertex_main() -> tint_symbol {
+  [[internal(disable_validation__function_var_storage_class)]] var<workgroup> tint_symbol_3 : vec2<u32>;
+  frexp_e8b4d1(&(tint_symbol_3));
+  let tint_symbol_1 : tint_symbol = tint_symbol(vec4<f32>());
+  return tint_symbol_1;
+}
+
+[[stage(fragment)]]
+fn fragment_main() {
+  [[internal(disable_validation__function_var_storage_class)]] var<workgroup> tint_symbol_4 : vec2<u32>;
+  frexp_e8b4d1(&(tint_symbol_4));
+}
+
+[[stage(compute)]]
+fn compute_main() {
+  [[internal(disable_validation__function_var_storage_class)]] var<workgroup> tint_symbol_5 : vec2<u32>;
+  frexp_e8b4d1(&(tint_symbol_5));
+}
+
+Failed to generate: error: Unknown import method: frexp

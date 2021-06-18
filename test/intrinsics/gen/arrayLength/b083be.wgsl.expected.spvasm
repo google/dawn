@@ -1,5 +1,5 @@
 intrinsics/gen/arrayLength/b083be.wgsl:33:18 warning: use of deprecated intrinsic
-  var res: u32 = arrayLength(sb.arg_0);
+  var res: u32 = arrayLength(sb_ro.arg_0);
                  ^^^^^^^^^^^
 
 ; SPIR-V
@@ -15,9 +15,9 @@ intrinsics/gen/arrayLength/b083be.wgsl:33:18 warning: use of deprecated intrinsi
                OpExecutionMode %fragment_main OriginUpperLeft
                OpExecutionMode %compute_main LocalSize 1 1 1
                OpName %tint_pointsize "tint_pointsize"
-               OpName %SB "SB"
-               OpMemberName %SB 0 "arg_0"
-               OpName %sb "sb"
+               OpName %SB_RO "SB_RO"
+               OpMemberName %SB_RO 0 "arg_0"
+               OpName %sb_ro "sb_ro"
                OpName %tint_symbol_1 "tint_symbol_1"
                OpName %arrayLength_b083be "arrayLength_b083be"
                OpName %res "res"
@@ -27,21 +27,21 @@ intrinsics/gen/arrayLength/b083be.wgsl:33:18 warning: use of deprecated intrinsi
                OpName %fragment_main "fragment_main"
                OpName %compute_main "compute_main"
                OpDecorate %tint_pointsize BuiltIn PointSize
-               OpDecorate %SB Block
-               OpMemberDecorate %SB 0 Offset 0
+               OpDecorate %SB_RO Block
+               OpMemberDecorate %SB_RO 0 Offset 0
                OpDecorate %_runtimearr_float ArrayStride 4
-               OpDecorate %sb NonWritable
-               OpDecorate %sb DescriptorSet 0
-               OpDecorate %sb Binding 0
+               OpDecorate %sb_ro NonWritable
+               OpDecorate %sb_ro DescriptorSet 0
+               OpDecorate %sb_ro Binding 1
                OpDecorate %tint_symbol_1 BuiltIn Position
       %float = OpTypeFloat 32
 %_ptr_Output_float = OpTypePointer Output %float
           %4 = OpConstantNull %float
 %tint_pointsize = OpVariable %_ptr_Output_float Output %4
 %_runtimearr_float = OpTypeRuntimeArray %float
-         %SB = OpTypeStruct %_runtimearr_float
-%_ptr_StorageBuffer_SB = OpTypePointer StorageBuffer %SB
-         %sb = OpVariable %_ptr_StorageBuffer_SB StorageBuffer
+      %SB_RO = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_SB_RO = OpTypePointer StorageBuffer %SB_RO
+      %sb_ro = OpVariable %_ptr_StorageBuffer_SB_RO StorageBuffer
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float
          %12 = OpConstantNull %v4float
@@ -56,7 +56,7 @@ intrinsics/gen/arrayLength/b083be.wgsl:33:18 warning: use of deprecated intrinsi
 %arrayLength_b083be = OpFunction %void None %13
          %16 = OpLabel
         %res = OpVariable %_ptr_Function_uint Function %21
-         %17 = OpArrayLength %uint %sb 0
+         %17 = OpArrayLength %uint %sb_ro 0
                OpStore %res %17
                OpReturn
                OpFunctionEnd
