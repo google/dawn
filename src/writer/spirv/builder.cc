@@ -1317,7 +1317,8 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   }
 
   if (can_cast_or_copy) {
-    return GenerateCastOrCopyOrPassthrough(result_type, values[0]);
+    return GenerateCastOrCopyOrPassthrough(result_type, values[0],
+                                           is_global_init);
   }
 
   auto type_id = GenerateTypeIfNeeded(result_type);
@@ -1361,7 +1362,8 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     // Both scalars, but not the same type so we need to generate a conversion
     // of the value.
     if (value_type->is_scalar() && result_type->is_scalar()) {
-      id = GenerateCastOrCopyOrPassthrough(result_type, values[0]);
+      id = GenerateCastOrCopyOrPassthrough(result_type, values[0],
+                                           is_global_init);
       out << "_" << id;
       ops.push_back(Operand::Int(id));
       continue;
@@ -1458,7 +1460,27 @@ uint32_t Builder::GenerateTypeConstructorExpression(
 }
 
 uint32_t Builder::GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
-                                                  ast::Expression* from_expr) {
+                                                  ast::Expression* from_expr,
+                                                  bool is_global_init) {
+  // This should not happen as we rely on constant folding to obviate
+  // casts/conversions for module-scope variables
+  if (is_global_init) {
+    TINT_ICE(builder_.Diagnostics())
+        << "Module-level conversions are not supported. Conversions should "
+           "have already been constant-folded by the FoldConstants transform.";
+    return 0;
+  }
+
+  auto elem_type_of = [](const sem::Type* t) -> const sem::Type* {
+    if (t->is_scalar()) {
+      return t;
+    }
+    if (auto* v = t->As<sem::Vector>()) {
+      return v->type();
+    }
+    return nullptr;
+  };
+
   auto result = result_op();
   auto result_id = result.to_i();
 
@@ -1504,7 +1526,27 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
              (from_type->is_unsigned_integer_vector() &&
               to_type->is_integer_scalar_or_vector())) {
     op = spv::Op::OpBitcast;
+  } else if ((from_type->is_numeric_scalar() && to_type->Is<sem::Bool>()) ||
+             (from_type->is_numeric_vector() && to_type->is_bool_vector())) {
+    // Convert scalar (vector) to bool (vector)
+
+    // Return the result of comparing from_expr with zero
+    uint32_t zero = GenerateConstantNullIfNeeded(from_type);
+    const auto* from_elem_type = elem_type_of(from_type);
+    op = from_elem_type->is_integer_scalar() ? spv::Op::OpINotEqual
+                                             : spv::Op::OpFUnordNotEqual;
+    if (!push_function_inst(
+            op, {Operand::Int(result_type_id), Operand::Int(result_id),
+                 Operand::Int(val_id), Operand::Int(zero)})) {
+      return 0;
+    }
+
+    return result_id;
+
+  } else {
+    TINT_ICE(builder_.Diagnostics()) << "Invalid from_type";
   }
+
   if (op == spv::Op::OpNop) {
     error_ = "unable to determine conversion type for cast, from: " +
              from_type->type_name() + " to: " + to_type->type_name();

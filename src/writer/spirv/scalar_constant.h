@@ -65,6 +65,24 @@ struct ScalarConstant {
     return c;
   }
 
+  /// @param value the value of the constant
+  /// @returns a new ScalarConstant with the provided value and kind Kind::kI32
+  static inline ScalarConstant I32(int32_t value) {
+    ScalarConstant c;
+    c.value.i32 = value;
+    c.kind = Kind::kI32;
+    return c;
+  }
+
+  /// @param value the value of the constant
+  /// @returns a new ScalarConstant with the provided value and kind Kind::kI32
+  static inline ScalarConstant F32(float value) {
+    ScalarConstant c;
+    c.value.f32 = value;
+    c.kind = Kind::kF32;
+    return c;
+  }
+
   /// Equality operator
   /// @param rhs the ScalarConstant to compare against
   /// @returns true if this ScalarConstant is equal to `rhs`

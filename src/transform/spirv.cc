@@ -27,6 +27,7 @@
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
 #include "src/transform/external_texture_transform.h"
+#include "src/transform/fold_constants.h"
 #include "src/transform/inline_pointer_lets.h"
 #include "src/transform/manager.h"
 #include "src/transform/simplify.h"
@@ -43,6 +44,7 @@ Output Spirv::Run(const Program* in, const DataMap& data) {
   Manager manager;
   manager.Add<InlinePointerLets>();  // Required for arrayLength()
   manager.Add<Simplify>();           // Required for arrayLength()
+  manager.Add<FoldConstants>();
   manager.Add<ExternalTextureTransform>();
   auto transformedInput = manager.Run(in, data);
 

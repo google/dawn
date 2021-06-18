@@ -1988,6 +1988,9 @@ bool Resolver::Constructor(ast::ConstructorExpression* expr) {
     if (auto* mat_type = type->As<sem::Matrix>()) {
       return ValidateMatrixConstructor(type_ctor, mat_type);
     }
+    if (type->is_scalar()) {
+      return ValidateScalarConstructor(type_ctor, type);
+    }
     if (auto* arr_type = type->As<sem::Array>()) {
       return ValidateArrayConstructor(type_ctor, arr_type);
     }
@@ -2149,6 +2152,45 @@ bool Resolver::ValidateMatrixConstructor(
                              value->source());
       return false;
     }
+  }
+
+  return true;
+}
+
+bool Resolver::ValidateScalarConstructor(
+    const ast::TypeConstructorExpression* ctor,
+    const sem::Type* type) {
+  if (ctor->values().size() == 0) {
+    return true;
+  }
+  if (ctor->values().size() > 1) {
+    diagnostics_.add_error("expected zero or one value in constructor, got " +
+                               std::to_string(ctor->values().size()),
+                           ctor->source());
+    return false;
+  }
+
+  // Validate constructor
+  auto* value = ctor->values()[0];
+  auto* value_type = TypeOf(value)->UnwrapRef();
+
+  using Bool = sem::Bool;
+  using I32 = sem::I32;
+  using U32 = sem::U32;
+  using F32 = sem::F32;
+
+  const bool is_valid =
+      (type->Is<Bool>() && value_type->IsAnyOf<Bool, I32, U32, F32>()) ||
+      (type->Is<I32>() && value_type->IsAnyOf<I32, U32, F32>()) ||
+      (type->Is<U32>() && value_type->IsAnyOf<I32, U32, F32>()) ||
+      (type->Is<F32>() && value_type->IsAnyOf<I32, U32, F32>());
+  if (!is_valid) {
+    diagnostics_.add_error("cannot construct '" + TypeNameOf(ctor) +
+                               "' with a value of type '" + TypeNameOf(value) +
+                               "'",
+                           ctor->source());
+
+    return false;
   }
 
   return true;

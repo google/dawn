@@ -384,6 +384,23 @@ struct DataType<alias<T, ID>> {
   }
 };
 
+/// Struct of all creation pointer types
+struct CreatePtrs {
+  /// ast node type create function
+  ast_type_func_ptr ast;
+  /// ast expression type create function
+  ast_expr_func_ptr expr;
+  /// sem type create function
+  sem_type_func_ptr sem;
+};
+
+/// Returns a CreatePtrs struct instance with all creation pointer types for
+/// type `T`
+template <typename T>
+constexpr CreatePtrs CreatePtrsFor() {
+  return {DataType<T>::AST, DataType<T>::Expr, DataType<T>::Sem};
+}
+
 }  // namespace builder
 
 }  // namespace resolver

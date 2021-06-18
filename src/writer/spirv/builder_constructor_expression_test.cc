@@ -637,50 +637,56 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec2_With_F32) {
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec2_With_Vec2) {
   auto* cast = vec2<f32>(vec2<f32>(2.0f, 2.0f));
-  WrapInFunction(cast);
+  GlobalConst("a", ty.vec2<f32>(), cast);
 
-  spirv::Builder& b = Build();
+  spirv::Builder& b = SanitizeAndBuild();
+  ASSERT_TRUE(b.Build());
 
-  b.push_function(Function{});
-  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 5u);
-
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
-%2 = OpTypeVector %3 2
-%4 = OpConstant %3 2
-%5 = OpConstantComposite %2 %4 %4
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeVector %2 2
+%3 = OpConstant %2 2
+%4 = OpConstantComposite %1 %3 %3
+%6 = OpTypeVoid
+%5 = OpTypeFunction %6
 )");
+
+  Validate(b);
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_Vec3) {
   auto* cast = vec3<f32>(vec3<f32>(2.0f, 2.0f, 2.0f));
-  WrapInFunction(cast);
+  GlobalConst("a", ty.vec3<f32>(), cast);
 
-  spirv::Builder& b = Build();
+  spirv::Builder& b = SanitizeAndBuild();
+  ASSERT_TRUE(b.Build());
 
-  b.push_function(Function{});
-  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 5u);
-
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
-%2 = OpTypeVector %3 3
-%4 = OpConstant %3 2
-%5 = OpConstantComposite %2 %4 %4 %4
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeVector %2 3
+%3 = OpConstant %2 2
+%4 = OpConstantComposite %1 %3 %3 %3
+%6 = OpTypeVoid
+%5 = OpTypeFunction %6
 )");
+
+  Validate(b);
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec4) {
   auto* cast = vec4<f32>(vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f));
-  WrapInFunction(cast);
+  GlobalConst("a", ty.vec4<f32>(), cast);
 
-  spirv::Builder& b = Build();
+  spirv::Builder& b = SanitizeAndBuild();
+  ASSERT_TRUE(b.Build());
 
-  b.push_function(Function{});
-  EXPECT_EQ(b.GenerateConstructorExpression(nullptr, cast, true), 5u);
-
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
-%2 = OpTypeVector %3 4
-%4 = OpConstant %3 2
-%5 = OpConstantComposite %2 %4 %4 %4 %4
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeVector %2 4
+%3 = OpConstant %2 2
+%4 = OpConstantComposite %1 %3 %3 %3 %3
+%6 = OpTypeVoid
+%5 = OpTypeFunction %6
 )");
+
+  Validate(b);
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_F32) {

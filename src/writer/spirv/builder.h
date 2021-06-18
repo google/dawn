@@ -382,9 +382,11 @@ class Builder {
   /// of the right type.
   /// @param to_type the type we're casting too
   /// @param from_expr the expression to cast
+  /// @param is_global_init if this is a global initializer
   /// @returns the expression ID on success or 0 otherwise
   uint32_t GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
-                                           ast::Expression* from_expr);
+                                           ast::Expression* from_expr,
+                                           bool is_global_init);
   /// Generates a loop statement
   /// @param stmt the statement to generate
   /// @returns true on successful generation
