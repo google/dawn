@@ -221,8 +221,6 @@ std::string Token::TypeToName(Type type) {
       return "image";
     case Token::Type::kImport:
       return "import";
-    case Token::Type::kIn:
-      return "in";
     case Token::Type::kLet:
       return "let";
     case Token::Type::kLoop:
@@ -245,8 +243,6 @@ std::string Token::TypeToName(Type type) {
       return "mat4x3";
     case Token::Type::kMat4x4:
       return "mat4x4";
-    case Token::Type::kOut:
-      return "out";
     case Token::Type::kPrivate:
       return "private";
     case Token::Type::kPtr:

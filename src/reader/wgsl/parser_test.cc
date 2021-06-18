@@ -34,11 +34,9 @@ TEST_F(ParserTest, Empty) {
 
 TEST_F(ParserTest, Parses) {
   Source::File file("test.wgsl", R"(
-[[location(0)]] var<out> gl_FragColor : vec4<f32>;
-
 [[stage(fragment)]]
-fn main() {
-  gl_FragColor = vec4<f32>(.4, .2, .3, 1.);
+fn main() -> [[location(0)]] vec4<f32> {
+  return vec4<f32>(.4, .2, .3, 1.);
 }
 )");
   auto program = Parse(&file);
@@ -46,7 +44,6 @@ fn main() {
   ASSERT_TRUE(program.IsValid()) << errs;
 
   ASSERT_EQ(1u, program.AST().Functions().size());
-  ASSERT_EQ(1u, program.AST().GlobalVariables().size());
 }
 
 TEST_F(ParserTest, HandlesError) {

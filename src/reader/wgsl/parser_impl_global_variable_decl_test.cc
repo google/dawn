@@ -168,48 +168,6 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidVariableDecl) {
   EXPECT_EQ(p->error(), "1:5: invalid storage class for variable declaration");
 }
 
-TEST_F(ParserImplTest, GlobalVariableDecl_StorageClassIn_Deprecated) {
-  auto p = parser("[[location(0)]] var<in> a : f32");
-  auto f = p->function_header();
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_TRUE(decos.matched);
-  auto e = p->global_variable_decl(decos.value);
-  ASSERT_FALSE(p->has_error()) << p->error();
-
-  EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("a"));
-  EXPECT_TRUE(e->type()->Is<ast::F32>());
-  EXPECT_EQ(e->declared_storage_class(), ast::StorageClass::kInput);
-
-  EXPECT_EQ(
-      p->builder().Diagnostics().str(),
-      R"(test.wgsl:1:21 warning: use of deprecated language feature: use an entry point parameter instead of a variable in the `in` storage class
-[[location(0)]] var<in> a : f32
-                    ^^
-)");
-}
-
-TEST_F(ParserImplTest, GlobalVariableDecl_StorageClassOut_Deprecated) {
-  auto p = parser("[[location(0)]] var<out> a : f32");
-  auto f = p->function_header();
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_TRUE(decos.matched);
-  auto e = p->global_variable_decl(decos.value);
-  ASSERT_FALSE(p->has_error()) << p->error();
-
-  EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("a"));
-  EXPECT_TRUE(e->type()->Is<ast::F32>());
-  EXPECT_EQ(e->declared_storage_class(), ast::StorageClass::kOutput);
-
-  EXPECT_EQ(
-      p->builder().Diagnostics().str(),
-      R"(test.wgsl:1:21 warning: use of deprecated language feature: use an entry point return value instead of a variable in the `out` storage class
-[[location(0)]] var<out> a : f32
-                    ^^^
-)");
-}
-
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader

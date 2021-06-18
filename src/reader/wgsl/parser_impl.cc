@@ -530,18 +530,6 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl(bool allow_inferred) {
     return Failure::kErrored;
   if (explicit_vq.matched) {
     vq = explicit_vq.value;
-
-    // TODO(crbug.com/tint/697): Remove this.
-    if (vq.storage_class == ast::StorageClass::kInput) {
-      deprecated(explicit_vq.source,
-                 "use an entry point parameter instead of a variable in the "
-                 "`in` storage class");
-    }
-    if (vq.storage_class == ast::StorageClass::kOutput) {
-      deprecated(explicit_vq.source,
-                 "use an entry point return value instead of a variable in the "
-                 "`out` storage class");
-    }
   }
 
   auto decl =
@@ -1235,12 +1223,6 @@ Expect<ast::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
 Expect<ast::StorageClass> ParserImpl::expect_storage_class(
     const std::string& use) {
   auto source = peek().source();
-
-  if (match(Token::Type::kIn))
-    return {ast::StorageClass::kInput, source};
-
-  if (match(Token::Type::kOut))
-    return {ast::StorageClass::kOutput, source};
 
   if (match(Token::Type::kUniform))
     return {ast::StorageClass::kUniform, source};

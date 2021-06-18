@@ -50,10 +50,6 @@ INSTANTIATE_TEST_SUITE_P(
     ParserImplTest,
     VariableQualifierTest,
     testing::Values(
-        VariableStorageData{"in", ast::StorageClass::kInput,
-                            ast::Access::kUndefined},
-        VariableStorageData{"out", ast::StorageClass::kOutput,
-                            ast::Access::kUndefined},
         VariableStorageData{"uniform", ast::StorageClass::kUniform,
                             ast::Access::kUndefined},
         VariableStorageData{"workgroup", ast::StorageClass::kWorkgroup,
@@ -94,34 +90,34 @@ TEST_F(ParserImplTest, VariableQualifier_Empty) {
 }
 
 TEST_F(ParserImplTest, VariableQualifier_MissingLessThan) {
-  auto p = parser("in>");
+  auto p = parser("private>");
   auto sc = p->variable_qualifier();
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(sc.errored);
   EXPECT_FALSE(sc.matched);
 
   auto t = p->next();
-  ASSERT_TRUE(t.IsIn());
+  ASSERT_TRUE(t.IsPrivate());
 }
 
 TEST_F(ParserImplTest, VariableQualifier_MissingLessThan_AfterSC) {
-  auto p = parser("in, >");
+  auto p = parser("private, >");
   auto sc = p->variable_qualifier();
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(sc.errored);
   EXPECT_FALSE(sc.matched);
 
   auto t = p->next();
-  ASSERT_TRUE(t.IsIn());
+  ASSERT_TRUE(t.IsPrivate());
 }
 
 TEST_F(ParserImplTest, VariableQualifier_MissingGreaterThan) {
-  auto p = parser("<in");
+  auto p = parser("<private");
   auto sc = p->variable_qualifier();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(sc.errored);
   EXPECT_FALSE(sc.matched);
-  EXPECT_EQ(p->error(), "1:4: expected '>' for variable declaration");
+  EXPECT_EQ(p->error(), "1:9: expected '>' for variable declaration");
 }
 
 }  // namespace

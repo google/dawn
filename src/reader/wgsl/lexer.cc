@@ -586,8 +586,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kImage, source, "image"};
   if (str == "import")
     return {Token::Type::kImport, source, "import"};
-  if (str == "in")
-    return {Token::Type::kIn, source, "in"};
   if (str == "let")
     return {Token::Type::kLet, source, "let"};
   if (str == "loop")
@@ -610,8 +608,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kMat4x3, source, "mat4x3"};
   if (str == "mat4x4")
     return {Token::Type::kMat4x4, source, "mat4x4"};
-  if (str == "out")
-    return {Token::Type::kOut, source, "out"};
   if (str == "private")
     return {Token::Type::kPrivate, source, "private"};
   if (str == "ptr")

@@ -46,8 +46,6 @@ INSTANTIATE_TEST_SUITE_P(
     ParserImplTest,
     StorageClassTest,
     testing::Values(
-        StorageClassData{"in", ast::StorageClass::kInput},
-        StorageClassData{"out", ast::StorageClass::kOutput},
         StorageClassData{"uniform", ast::StorageClass::kUniform},
         StorageClassData{"workgroup", ast::StorageClass::kWorkgroup},
         StorageClassData{"storage", ast::StorageClass::kStorage},

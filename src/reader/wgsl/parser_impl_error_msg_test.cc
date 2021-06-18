@@ -996,17 +996,17 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingLessThan) {
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingGreaterThan) {
-  EXPECT("var i : ptr<in, u32;",
-         "test.wgsl:1:20 error: expected '>' for ptr declaration\n"
-         "var i : ptr<in, u32;\n"
-         "                   ^\n");
+  EXPECT("var i : ptr<private, u32;",
+         "test.wgsl:1:25 error: expected '>' for ptr declaration\n"
+         "var i : ptr<private, u32;\n"
+         "                        ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingComma) {
-  EXPECT("var i : ptr<in u32>;",
-         "test.wgsl:1:16 error: expected ',' for ptr declaration\n"
-         "var i : ptr<in u32>;\n"
-         "               ^^^\n");
+  EXPECT("var i : ptr<private u32>;",
+         "test.wgsl:1:21 error: expected ',' for ptr declaration\n"
+         "var i : ptr<private u32>;\n"
+         "                    ^^^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingStorageClass) {
@@ -1017,10 +1017,10 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingStorageClass) {
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingType) {
-  EXPECT("var i : ptr<in, 1>;",
-         "test.wgsl:1:17 error: invalid type for ptr declaration\n"
-         "var i : ptr<in, 1>;\n"
-         "                ^\n");
+  EXPECT("var i : ptr<private, 1>;",
+         "test.wgsl:1:22 error: invalid type for ptr declaration\n"
+         "var i : ptr<private, 1>;\n"
+         "                     ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarAtomicMissingLessThan) {
@@ -1045,10 +1045,10 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarStorageDeclInvalidClass) {
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarStorageDeclMissingGThan) {
-  EXPECT("var<in i : i32",
-         "test.wgsl:1:8 error: expected '>' for variable declaration\n"
-         "var<in i : i32\n"
-         "       ^\n");
+  EXPECT("var<private i : i32",
+         "test.wgsl:1:13 error: expected '>' for variable declaration\n"
+         "var<private i : i32\n"
+         "            ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarVectorMissingLessThan) {

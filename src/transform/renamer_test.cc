@@ -42,29 +42,26 @@ TEST_F(RenamerTest, EmptyModule) {
 
 TEST_F(RenamerTest, BasicModuleVertexIndex) {
   auto* src = R"(
-[[builtin(vertex_index)]] var<in> vert_idx : u32;
-
-fn test() -> u32 {
+fn test(vert_idx : u32) -> u32 {
   return vert_idx;
 }
 
 [[stage(vertex)]]
-fn entry() -> [[builtin(position)]] vec4<f32>  {
-  ignore(test());
+fn entry([[builtin(vertex_index)]] vert_idx : u32
+        ) -> [[builtin(position)]] vec4<f32>  {
+  ignore(test(vert_idx));
   return vec4<f32>();
 }
 )";
 
   auto* expect = R"(
-[[builtin(vertex_index)]] var<in> tint_symbol : u32;
-
-fn tint_symbol_1() -> u32 {
-  return tint_symbol;
+fn tint_symbol(tint_symbol_1 : u32) -> u32 {
+  return tint_symbol_1;
 }
 
 [[stage(vertex)]]
-fn tint_symbol_2() -> [[builtin(position)]] vec4<f32> {
-  ignore(tint_symbol_1());
+fn tint_symbol_2([[builtin(vertex_index)]] tint_symbol_1 : u32) -> [[builtin(position)]] vec4<f32> {
+  ignore(tint_symbol(tint_symbol_1));
   return vec4<f32>();
 }
 )";
@@ -77,8 +74,8 @@ fn tint_symbol_2() -> [[builtin(position)]] vec4<f32> {
 
   ASSERT_NE(data, nullptr);
   Renamer::Data::Remappings expected_remappings = {
-      {"vert_idx", "tint_symbol"},
-      {"test", "tint_symbol_1"},
+      {"vert_idx", "tint_symbol_1"},
+      {"test", "tint_symbol"},
       {"entry", "tint_symbol_2"},
   };
   EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));

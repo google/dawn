@@ -229,8 +229,6 @@ class Token {
     kImage,
     /// A 'import'
     kImport,
-    /// A 'in'
-    kIn,
     /// A 'let'
     kLet,
     /// A 'loop'
@@ -253,8 +251,6 @@ class Token {
     kMat4x3,
     /// A 'mat4x4'
     kMat4x4,
-    /// A 'out'
-    kOut,
     /// A 'private'
     kPrivate,
     /// A 'ptr'
@@ -576,8 +572,6 @@ class Token {
   bool IsImage() const { return type_ == Type::kImage; }
   /// @returns true if token is a 'import'
   bool IsImport() const { return type_ == Type::kImport; }
-  /// @returns true if token is a 'in'
-  bool IsIn() const { return type_ == Type::kIn; }
   /// @returns true if token is a 'let'
   bool IsLet() const { return type_ == Type::kLet; }
   /// @returns true if token is a 'loop'
@@ -600,8 +594,6 @@ class Token {
   bool IsMat4x3() const { return type_ == Type::kMat4x3; }
   /// @returns true if token is a 'mat4x4'
   bool IsMat4x4() const { return type_ == Type::kMat4x4; }
-  /// @returns true if token is a 'out'
-  bool IsOut() const { return type_ == Type::kOut; }
   /// @returns true if token is a 'private'
   bool IsPrivate() const { return type_ == Type::kPrivate; }
   /// @returns true if token is a 'ptr'
