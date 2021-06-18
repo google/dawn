@@ -3188,6 +3188,19 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
         }
       }
     }
+
+    if (auto* member_struct_type = member->Type()->As<sem::Struct>()) {
+      if (auto* member_struct_type_block_decoration =
+              ast::GetDecoration<ast::StructBlockDecoration>(
+                  member_struct_type->Declaration()->decorations())) {
+        diagnostics_.add_error(
+            "structs must not contain [[block]] decorated struct members",
+            member->Declaration()->source());
+        diagnostics_.add_note("see member's struct decoration here",
+                              member_struct_type_block_decoration->source());
+        return false;
+      }
+    }
   }
 
   for (auto* deco : str->Declaration()->decorations()) {
