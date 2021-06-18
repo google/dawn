@@ -289,6 +289,36 @@ IntrinsicType ParseIntrinsicType(const std::string& name) {
   if (name == "textureLoad") {
     return IntrinsicType::kTextureLoad;
   }
+  if (name == "atomicLoad") {
+    return IntrinsicType::kAtomicLoad;
+  }
+  if (name == "atomicStore") {
+    return IntrinsicType::kAtomicStore;
+  }
+  if (name == "atomicAdd") {
+    return IntrinsicType::kAtomicAdd;
+  }
+  if (name == "atomicMax") {
+    return IntrinsicType::kAtomicMax;
+  }
+  if (name == "atomicMin") {
+    return IntrinsicType::kAtomicMin;
+  }
+  if (name == "atomicAnd") {
+    return IntrinsicType::kAtomicAnd;
+  }
+  if (name == "atomicOr") {
+    return IntrinsicType::kAtomicOr;
+  }
+  if (name == "atomicXor") {
+    return IntrinsicType::kAtomicXor;
+  }
+  if (name == "atomicExchange") {
+    return IntrinsicType::kAtomicExchange;
+  }
+  if (name == "atomicCompareExchangeWeak") {
+    return IntrinsicType::kAtomicCompareExchangeWeak;
+  }
   return IntrinsicType::kNone;
 }
 
@@ -470,6 +500,26 @@ const char* str(IntrinsicType i) {
       return "textureStore";
     case IntrinsicType::kTextureLoad:
       return "textureLoad";
+    case IntrinsicType::kAtomicLoad:
+      return "atomicLoad";
+    case IntrinsicType::kAtomicStore:
+      return "atomicStore";
+    case IntrinsicType::kAtomicAdd:
+      return "atomicAdd";
+    case IntrinsicType::kAtomicMax:
+      return "atomicMax";
+    case IntrinsicType::kAtomicMin:
+      return "atomicMin";
+    case IntrinsicType::kAtomicAnd:
+      return "atomicAnd";
+    case IntrinsicType::kAtomicOr:
+      return "atomicOr";
+    case IntrinsicType::kAtomicXor:
+      return "atomicXor";
+    case IntrinsicType::kAtomicExchange:
+      return "atomicExchange";
+    case IntrinsicType::kAtomicCompareExchangeWeak:
+      return "atomicCompareExchangeWeak";
   }
   return "<unknown>";
 }

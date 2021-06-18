@@ -1,0 +1,7 @@
+SKIP: FAILED
+
+
+[[block]]
+struct SB_RW {
+  arg_0 : 
+Failed to generate: unable to convert type: __atomic__u32

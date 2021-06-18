@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "src/program_builder.h"
+#include "src/sem/atomic_type.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/external_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
@@ -455,6 +456,23 @@ const sem::Pointer* build_ptr(MatchState& state,
   return state.builder.create<sem::Pointer>(
       T, static_cast<ast::StorageClass>(S.Value()),
       static_cast<ast::Access>(A.Value()));
+}
+
+bool match_atomic(const sem::Type* ty, const sem::Type*& T) {
+  if (ty->Is<Any>()) {
+    T = ty;
+    return true;
+  }
+
+  if (auto* a = ty->As<sem::Atomic>()) {
+    T = a->Type();
+    return true;
+  }
+  return false;
+}
+
+const sem::Atomic* build_atomic(MatchState& state, const sem::Type* T) {
+  return state.builder.create<sem::Atomic>(T);
 }
 
 bool match_sampler(const sem::Type* ty) {

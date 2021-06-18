@@ -120,6 +120,16 @@ enum class IntrinsicType {
   kTextureSampleLevel,
   kTextureStore,
   kTextureLoad,
+  kAtomicLoad,
+  kAtomicStore,
+  kAtomicAdd,
+  kAtomicMax,
+  kAtomicMin,
+  kAtomicAnd,
+  kAtomicOr,
+  kAtomicXor,
+  kAtomicExchange,
+  kAtomicCompareExchangeWeak,
 };
 
 /// Matches the IntrinsicType by name
