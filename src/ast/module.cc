@@ -89,6 +89,13 @@ Module* Module::Clone(CloneContext* ctx) const {
 
 void Module::Copy(CloneContext* ctx, const Module* src) {
   ctx->Clone(global_declarations_, src->global_declarations_);
+
+  // During the clone, declarations may have been placed into the module.
+  // Clear everything out, as we're about to re-bin the declarations.
+  type_decls_.clear();
+  functions_.clear();
+  global_variables_.clear();
+
   for (auto* decl : global_declarations_) {
     if (!decl) {
       TINT_ICE(ctx->dst->Diagnostics()) << "src global declaration was nullptr";
