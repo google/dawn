@@ -564,8 +564,8 @@ bool GeneratorImpl::EmitUniformBufferAccess(
         make_indent(ss << ";" << std::endl);
         pre << ss.str();
 
-        out << "(" << scalar_offset << " & 2) ? " << ubo_load
-            << ".zw : " << ubo_load << ".xy";
+        out << "((" << scalar_offset << " & 2) ? " << ubo_load
+            << ".zw : " << ubo_load << ".xy)";
         return true;
       };
       // vec3 has a minimum alignment of 16 bytes, so is just a .xyz swizzle

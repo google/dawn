@@ -868,7 +868,7 @@ void main_1() {
   uv = x_762;
   const int scalar_offset = (0u) / 4;
   uint4 ubo_load = x_188[scalar_offset / 4];
-  const float2 x_191 = asfloat((scalar_offset & 2) ? ubo_load.zw : ubo_load.xy);
+  const float2 x_191 = asfloat(((scalar_offset & 2) ? ubo_load.zw : ubo_load.xy));
   const QuicksortObject x_763 = obj;
   const tint_array_wrapper tint_symbol_51 = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
   const QuicksortObject tint_symbol_52 = {tint_symbol_51};
