@@ -25,6 +25,41 @@ namespace transform {
 /// behavior.
 class Msl : public Transform {
  public:
+  /// The default buffer slot to use for the storage buffer size buffer.
+  const uint32_t kDefaultBufferSizeUniformIndex = 30;
+
+  /// Configuration options for the Msl sanitizer transform.
+  struct Config : public Castable<Data, transform::Data> {
+    /// Constructor
+    /// @param buffer_size_ubo_idx the index to use for the buffer size UBO
+    explicit Config(uint32_t buffer_size_ubo_idx);
+
+    /// Copy constructor
+    Config(const Config&);
+
+    /// Destructor
+    ~Config() override;
+
+    /// The index to use when generating a UBO to receive storage buffer sizes.
+    uint32_t buffer_size_ubo_index;
+  };
+
+  /// Information produced by the sanitizer that users may need to act on.
+  struct Result : public Castable<Result, transform::Data> {
+    /// Constructor
+    /// @param needs_buffer_sizes True if the shader needs a UBO of buffer sizes
+    explicit Result(bool needs_buffer_sizes);
+
+    /// Copy constructor
+    Result(const Result&);
+
+    /// Destructor
+    ~Result() override;
+
+    /// True if the shader needs a UBO of buffer sizes.
+    bool const needs_storage_buffer_sizes;
+  };
+
   /// Constructor
   Msl();
   ~Msl() override;

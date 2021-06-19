@@ -548,6 +548,8 @@ libtint_source_set("libtint_core_all_src") {
     "symbol_table.cc",
     "symbol_table.h",
     "traits.h",
+    "transform/array_length_from_uniform.cc",
+    "transform/array_length_from_uniform.h",
     "transform/binding_remapper.cc",
     "transform/binding_remapper.h",
     "transform/bound_array_accessors.cc",

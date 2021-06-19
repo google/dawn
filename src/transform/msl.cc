@@ -14,6 +14,7 @@
 
 #include "src/transform/msl.h"
 
+#include <memory>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -24,6 +25,7 @@
 #include "src/sem/function.h"
 #include "src/sem/statement.h"
 #include "src/sem/variable.h"
+#include "src/transform/array_length_from_uniform.h"
 #include "src/transform/canonicalize_entry_point_io.h"
 #include "src/transform/external_texture_transform.h"
 #include "src/transform/inline_pointer_lets.h"
@@ -34,15 +36,38 @@
 #include "src/transform/wrap_arrays_in_structs.h"
 #include "src/transform/zero_init_workgroup_memory.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::Msl::Config);
+TINT_INSTANTIATE_TYPEINFO(tint::transform::Msl::Result);
+
 namespace tint {
 namespace transform {
 
 Msl::Msl() = default;
 Msl::~Msl() = default;
 
-Output Msl::Run(const Program* in, const DataMap&) {
+Output Msl::Run(const Program* in, const DataMap& inputs) {
   Manager manager;
-  DataMap data;
+  DataMap internal_inputs;
+
+  auto* cfg = inputs.Get<Config>();
+
+  // Build the config for the array length transform.
+  uint32_t buffer_size_ubo_index = kDefaultBufferSizeUniformIndex;
+  if (cfg) {
+    buffer_size_ubo_index = cfg->buffer_size_ubo_index;
+  }
+  auto array_length_from_uniform_cfg = ArrayLengthFromUniform::Config(
+      sem::BindingPoint{0, buffer_size_ubo_index});
+
+  // Use the SSBO binding numbers as the indices for the buffer size lookups.
+  for (auto* var : in->AST().GlobalVariables()) {
+    auto* sem_var = in->Sem().Get(var);
+    if (sem_var->StorageClass() == ast::StorageClass::kStorage) {
+      array_length_from_uniform_cfg.bindpoint_to_size_index.emplace(
+          sem_var->BindingPoint(), sem_var->BindingPoint().binding);
+    }
+  }
+
   // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as
   // ZeroInitWorkgroupMemory may inject new builtin parameters.
   manager.Add<ZeroInitWorkgroupMemory>();
@@ -53,9 +78,14 @@ Output Msl::Run(const Program* in, const DataMap&) {
   manager.Add<PadArrayElements>();
   manager.Add<InlinePointerLets>();
   manager.Add<Simplify>();
-  data.Add<CanonicalizeEntryPointIO::Config>(
+  // ArrayLengthFromUniform must come after InlinePointerLets and Simplify, as
+  // it assumes that the form of the array length argument is &var.array.
+  manager.Add<ArrayLengthFromUniform>();
+  internal_inputs.Add<ArrayLengthFromUniform::Config>(
+      std::move(array_length_from_uniform_cfg));
+  internal_inputs.Add<CanonicalizeEntryPointIO::Config>(
       CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
-  auto out = manager.Run(in, data);
+  auto out = manager.Run(in, internal_inputs);
   if (!out.program.IsValid()) {
     return out;
   }
@@ -66,7 +96,10 @@ Output Msl::Run(const Program* in, const DataMap&) {
   // storage class(es) as transform options.
   HandleModuleScopeVariables(ctx);
   ctx.Clone();
-  return Output{Program(std::move(builder))};
+
+  auto result = std::make_unique<Result>(
+      out.data.Get<ArrayLengthFromUniform::Result>()->needs_buffer_sizes);
+  return Output{Program(std::move(builder)), std::move(result)};
 }
 
 void Msl::HandleModuleScopeVariables(CloneContext& ctx) const {
@@ -240,6 +273,16 @@ void Msl::HandleModuleScopeVariables(CloneContext& ctx) const {
     }
   }
 }
+
+Msl::Config::Config(uint32_t buffer_size_ubo_idx)
+    : buffer_size_ubo_index(buffer_size_ubo_idx) {}
+Msl::Config::Config(const Config&) = default;
+Msl::Config::~Config() = default;
+
+Msl::Result::Result(bool needs_buffer_sizes)
+    : needs_storage_buffer_sizes(needs_buffer_sizes) {}
+Msl::Result::Result(const Result&) = default;
+Msl::Result::~Result() = default;
 
 }  // namespace transform
 }  // namespace tint

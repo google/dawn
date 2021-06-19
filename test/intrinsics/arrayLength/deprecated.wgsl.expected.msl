@@ -1,18 +1,16 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-
-[[block]]
+using namespace metal;
+struct tint_symbol_1 {
+  /* 0x0000 */ uint buffer_size[1];
+};
 struct S {
-  a : array<i32>;
+  /* 0x0000 */ int a[1];
 };
 
-[[group(0), binding(0)]] var<storage, read> G : S;
-
-[[stage(compute)]]
-fn tint_symbol() {
-  let l1 : u32 = arrayLength(&(G.a));
-  let p = &(G.a);
-  let l2 : u32 = arrayLength(p);
+kernel void tint_symbol(constant tint_symbol_1& tint_symbol_2 [[buffer(30)]]) {
+  uint const l1 = ((tint_symbol_2.buffer_size[0u] - 0u) / 4u);
+  uint const l2 = ((tint_symbol_2.buffer_size[0u] - 0u) / 4u);
+  return;
 }
 
-Failed to generate: error: Unknown import method: arrayLength
