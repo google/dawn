@@ -5,17 +5,29 @@ struct VertexOutput {
   float4 pos;
   int loc0;
 };
+struct tint_symbol {
+  int loc0 [[user(locn0)]];
+  float4 pos [[position]];
+};
+struct tint_symbol_2 {
+  int loc0 [[user(locn0)]];
+  float4 pos [[position]];
+};
 
 VertexOutput foo(float x) {
-  VertexOutput const tint_symbol = {.pos=float4(x, x, x, 1.0f), .loc0=42};
-  return tint_symbol;
+  VertexOutput const tint_symbol_4 = {.pos=float4(x, x, x, 1.0f), .loc0=42};
+  return tint_symbol_4;
 }
 
-VertexOutput vert_main1() {
-  return foo(0.5f);
+vertex tint_symbol vert_main1() {
+  VertexOutput const tint_symbol_1 = foo(0.5f);
+  tint_symbol const tint_symbol_5 = {.loc0=tint_symbol_1.loc0, .pos=tint_symbol_1.pos};
+  return tint_symbol_5;
 }
 
-VertexOutput vert_main2() {
-  return foo(0.25f);
+vertex tint_symbol_2 vert_main2() {
+  VertexOutput const tint_symbol_3 = foo(0.25f);
+  tint_symbol_2 const tint_symbol_6 = {.loc0=tint_symbol_3.loc0, .pos=tint_symbol_3.pos};
+  return tint_symbol_6;
 }
 
