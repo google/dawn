@@ -896,7 +896,6 @@ if(${TINT_BUILD_TESTS})
       writer/msl/generator_impl_constructor_test.cc
       writer/msl/generator_impl_continue_test.cc
       writer/msl/generator_impl_discard_test.cc
-      writer/msl/generator_impl_function_entry_point_data_test.cc
       writer/msl/generator_impl_function_test.cc
       writer/msl/generator_impl_identifier_test.cc
       writer/msl/generator_impl_if_test.cc

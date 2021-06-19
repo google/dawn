@@ -16,7 +16,6 @@
 #define SRC_WRITER_MSL_GENERATOR_IMPL_H_
 
 #include <string>
-#include <unordered_map>
 
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
@@ -133,10 +132,6 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
   bool EmitElse(ast::ElseStatement* stmt);
-  /// Handles emitting information for an entry point
-  /// @param func the entry point function
-  /// @returns true if the entry point data was emitted
-  bool EmitEntryPointData(ast::Function* func);
   /// Handles emitting the entry point function
   /// @param func the entry point function
   /// @returns true if the entry point function was emitted
@@ -149,15 +144,6 @@ class GeneratorImpl : public TextGenerator {
   /// @param func the function to generate
   /// @returns true if the function was emitted
   bool EmitFunction(ast::Function* func);
-  /// Internal helper for emitting functions
-  /// @param func the function to emit
-  /// @param emit_duplicate_functions set true if we need to duplicate per entry
-  /// point
-  /// @param ep_sym the current entry point or symbol::kInvalid if not set
-  /// @returns true if the function was emitted.
-  bool EmitFunctionInternal(ast::Function* func,
-                            bool emit_duplicate_functions,
-                            Symbol ep_sym);
   /// Handles generating an identifier expression
   /// @param expr the identifier expression
   /// @returns true if the identifier was emitted
@@ -235,28 +221,10 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true if the zero value was successfully emitted.
   bool EmitZeroValue(const sem::Type* type);
 
-  /// Determines if the function needs the input struct passed to it.
-  /// @param func the function to check
-  /// @returns true if there are input struct variables used in the function
-  bool has_referenced_in_var_needing_struct(ast::Function* func);
-  /// Determines if the function needs the output struct passed to it.
-  /// @param func the function to check
-  /// @returns true if there are output struct variables used in the function
-  bool has_referenced_out_var_needing_struct(ast::Function* func);
-  /// Determines if any used module variable requires an input or output struct.
-  /// @param func the function to check
-  /// @returns true if an input or output struct is required.
-  bool has_referenced_var_needing_struct(ast::Function* func);
-
   /// Handles generating a builtin name
   /// @param intrinsic the semantic info for the intrinsic
   /// @returns the name or "" if not valid
   std::string generate_builtin_name(const sem::Intrinsic* intrinsic);
-
-  /// Checks if the global variable is in an input or output struct
-  /// @param var the variable to check
-  /// @returns true if the global is in an input or output struct
-  bool global_is_in_struct(const sem::Variable* var) const;
 
   /// Converts a builtin to an attribute name
   /// @param builtin the builtin to convert
@@ -264,15 +232,6 @@ class GeneratorImpl : public TextGenerator {
   std::string builtin_to_attribute(ast::Builtin builtin) const;
 
  private:
-  enum class VarType { kIn, kOut };
-
-  struct EntryPointData {
-    std::string struct_name;
-    std::string var_name;
-  };
-
-  std::string current_ep_var_name(VarType type);
-
   /// @returns the resolved type of the ast::Expression `expr`
   /// @param expr the expression
   sem::Type* TypeOf(ast::Expression* expr) const {
@@ -301,19 +260,8 @@ class GeneratorImpl : public TextGenerator {
   /// type.
   SizeAndAlign MslPackedTypeSizeAndAlign(const sem::Type* ty);
 
-  ScopeStack<const sem::Variable*> global_variables_;
-  Symbol current_ep_sym_;
-  bool generating_entry_point_ = false;
   const Program* program_ = nullptr;
   uint32_t loop_emission_counter_ = 0;
-
-  std::unordered_map<Symbol, EntryPointData> ep_sym_to_in_data_;
-  std::unordered_map<Symbol, EntryPointData> ep_sym_to_out_data_;
-
-  // This maps an input of "<entry_point_name>_<function_name>" to a remapped
-  // function name. If there is no entry for a given key then function did
-  // not need to be remapped for the entry point and can be emitted directly.
-  std::unordered_map<std::string, std::string> ep_func_name_remapped_;
 };
 
 }  // namespace msl

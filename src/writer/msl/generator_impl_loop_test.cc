@@ -65,8 +65,8 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
-  Global("lhs", ty.f32(), ast::StorageClass::kInput);
-  Global("rhs", ty.f32(), ast::StorageClass::kInput);
+  Global("lhs", ty.f32(), ast::StorageClass::kPrivate);
+  Global("rhs", ty.f32(), ast::StorageClass::kPrivate);
 
   auto* body = Block(create<ast::DiscardStatement>());
   auto* continuing = Block(Return());
@@ -130,7 +130,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithVarUsedInContinuing) {
   //   }
   // }
 
-  Global("rhs", ty.f32(), ast::StorageClass::kInput);
+  Global("rhs", ty.f32(), ast::StorageClass::kPrivate);
 
   auto* var = Var("lhs", ty.f32(), ast::StorageClass::kNone, Expr(2.4f));
 

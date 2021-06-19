@@ -57,11 +57,6 @@ namespace writer {
 namespace msl {
 namespace {
 
-const char kInStructNameSuffix[] = "in";
-const char kOutStructNameSuffix[] = "out";
-const char kTintStructInVarPrefix[] = "_tint_in";
-const char kTintStructOutVarPrefix[] = "_tint_out";
-
 bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
   if (stmts->empty()) {
     return false;
@@ -81,11 +76,6 @@ GeneratorImpl::~GeneratorImpl() = default;
 bool GeneratorImpl::Generate() {
   out_ << "#include <metal_stdlib>" << std::endl << std::endl;
   out_ << "using namespace metal;" << std::endl;
-
-  for (auto* global : program_->AST().GlobalVariables()) {
-    auto* sem = program_->Sem().Get(global);
-    global_variables_.set(global->symbol(), sem);
-  }
 
   for (auto* const type_decl : program_->AST().TypeDecls()) {
     if (!type_decl->Is<ast::Alias>()) {
@@ -120,31 +110,16 @@ bool GeneratorImpl::Generate() {
     }
   }
 
-  // Make sure all entry point data is emitted before the entry point functions
   for (auto* func : program_->AST().Functions()) {
     if (!func->IsEntryPoint()) {
-      continue;
+      if (!EmitFunction(func)) {
+        return false;
+      }
+    } else {
+      if (!EmitEntryPointFunction(func)) {
+        return false;
+      }
     }
-
-    if (!EmitEntryPointData(func)) {
-      return false;
-    }
-  }
-
-  for (auto* func : program_->AST().Functions()) {
-    if (!EmitFunction(func)) {
-      return false;
-    }
-  }
-
-  for (auto* func : program_->AST().Functions()) {
-    if (!func->IsEntryPoint()) {
-      continue;
-    }
-    if (!EmitEntryPointFunction(func)) {
-      return false;
-    }
-    out_ << std::endl;
   }
 
   return true;
@@ -312,40 +287,11 @@ bool GeneratorImpl::EmitBreak(ast::BreakStatement*) {
   return true;
 }
 
-std::string GeneratorImpl::current_ep_var_name(VarType type) {
-  std::string name = "";
-  switch (type) {
-    case VarType::kIn: {
-      auto in_it = ep_sym_to_in_data_.find(current_ep_sym_);
-      if (in_it != ep_sym_to_in_data_.end()) {
-        name = in_it->second.var_name;
-      }
-      break;
-    }
-    case VarType::kOut: {
-      auto out_it = ep_sym_to_out_data_.find(current_ep_sym_);
-      if (out_it != ep_sym_to_out_data_.end()) {
-        name = out_it->second.var_name;
-      }
-      break;
-    }
-  }
-  return name;
-}
-
 bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
   auto* ident = expr->func();
   auto* call = program_->Sem().Get(expr);
   if (auto* intrinsic = call->Target()->As<sem::Intrinsic>()) {
     return EmitIntrinsicCall(expr, intrinsic);
-  }
-
-  auto name = program_->Symbols().NameFor(ident->symbol());
-  auto caller_sym = ident->symbol();
-  auto it = ep_func_name_remapped_.find(current_ep_sym_.to_str() + "_" +
-                                        caller_sym.to_str());
-  if (it != ep_func_name_remapped_.end()) {
-    name = it->second;
   }
 
   auto* func = program_->AST().Functions().Find(ident->symbol());
@@ -355,40 +301,10 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
     return false;
   }
 
-  out_ << name << "(";
+  out_ << program_->Symbols().NameFor(ident->symbol()) << "(";
 
   bool first = true;
-  if (has_referenced_in_var_needing_struct(func)) {
-    auto var_name = current_ep_var_name(VarType::kIn);
-    if (!var_name.empty()) {
-      out_ << var_name;
-      first = false;
-    }
-  }
-  if (has_referenced_out_var_needing_struct(func)) {
-    auto var_name = current_ep_var_name(VarType::kOut);
-    if (!var_name.empty()) {
-      if (!first) {
-        out_ << ", ";
-      }
-      first = false;
-      out_ << var_name;
-    }
-  }
-
   auto* func_sem = program_->Sem().Get(func);
-  for (const auto& data : func_sem->ReferencedBuiltinVariables()) {
-    auto* var = data.first;
-    if (var->StorageClass() != ast::StorageClass::kInput) {
-      continue;
-    }
-    if (!first) {
-      out_ << ", ";
-    }
-    first = false;
-    out_ << program_->Symbols().NameFor(var->Declaration()->symbol());
-  }
-
   for (const auto& data : func_sem->ReferencedUniformVariables()) {
     auto* var = data.first;
     if (!first) {
@@ -1061,127 +977,6 @@ bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
   return true;
 }
 
-// TODO(crbug.com/tint/697): Remove this when we remove support for entry point
-// params as module-scope globals.
-bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
-  auto* func_sem = program_->Sem().Get(func);
-
-  std::vector<std::pair<const ast::Variable*, uint32_t>> in_locations;
-  std::vector<std::pair<const ast::Variable*, ast::Decoration*>> out_variables;
-
-  for (auto data : func_sem->ReferencedLocationVariables()) {
-    auto* var = data.first;
-    auto* deco = data.second;
-
-    if (var->StorageClass() == ast::StorageClass::kInput) {
-      in_locations.push_back({var->Declaration(), deco->value()});
-    } else if (var->StorageClass() == ast::StorageClass::kOutput) {
-      out_variables.push_back({var->Declaration(), deco});
-    }
-  }
-
-  for (auto data : func_sem->ReferencedBuiltinVariables()) {
-    auto* var = data.first;
-    auto* deco = data.second;
-
-    if (var->StorageClass() == ast::StorageClass::kOutput) {
-      out_variables.push_back({var->Declaration(), deco});
-    }
-  }
-
-  if (!in_locations.empty()) {
-    auto in_struct_name =
-        program_->Symbols().NameFor(func->symbol()) + "_" + kInStructNameSuffix;
-    auto* in_var_name = kTintStructInVarPrefix;
-    ep_sym_to_in_data_[func->symbol()] = {in_struct_name, in_var_name};
-
-    make_indent();
-    out_ << "struct " << in_struct_name << " {" << std::endl;
-
-    increment_indent();
-
-    for (auto& data : in_locations) {
-      auto* var = data.first;
-      uint32_t loc = data.second;
-
-      make_indent();
-      if (!EmitType(program_->Sem().Get(var)->Type()->UnwrapRef(),
-                    program_->Symbols().NameFor(var->symbol()))) {
-        return false;
-      }
-
-      out_ << " " << program_->Symbols().NameFor(var->symbol()) << " [[";
-      if (func->pipeline_stage() == ast::PipelineStage::kVertex) {
-        out_ << "attribute(" << loc << ")";
-      } else if (func->pipeline_stage() == ast::PipelineStage::kFragment) {
-        out_ << "user(locn" << loc << ")";
-      } else {
-        diagnostics_.add_error("invalid location variable for pipeline stage");
-        return false;
-      }
-      out_ << "]];" << std::endl;
-    }
-    decrement_indent();
-    make_indent();
-
-    out_ << "};" << std::endl << std::endl;
-  }
-
-  if (!out_variables.empty()) {
-    auto out_struct_name = program_->Symbols().NameFor(func->symbol()) + "_" +
-                           kOutStructNameSuffix;
-    auto* out_var_name = kTintStructOutVarPrefix;
-    ep_sym_to_out_data_[func->symbol()] = {out_struct_name, out_var_name};
-
-    make_indent();
-    out_ << "struct " << out_struct_name << " {" << std::endl;
-
-    increment_indent();
-    for (auto& data : out_variables) {
-      auto* var = data.first;
-      auto* deco = data.second;
-
-      make_indent();
-      if (!EmitType(program_->Sem().Get(var)->Type()->UnwrapRef(),
-                    program_->Symbols().NameFor(var->symbol()))) {
-        return false;
-      }
-
-      out_ << " " << program_->Symbols().NameFor(var->symbol()) << " [[";
-
-      if (auto* location = deco->As<ast::LocationDecoration>()) {
-        auto loc = location->value();
-        if (func->pipeline_stage() == ast::PipelineStage::kVertex) {
-          out_ << "user(locn" << loc << ")";
-        } else if (func->pipeline_stage() == ast::PipelineStage::kFragment) {
-          out_ << "color(" << loc << ")";
-        } else {
-          diagnostics_.add_error(
-              "invalid location variable for pipeline stage");
-          return false;
-        }
-      } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
-        auto attr = builtin_to_attribute(builtin->value());
-        if (attr.empty()) {
-          diagnostics_.add_error("unsupported builtin");
-          return false;
-        }
-        out_ << attr;
-      } else {
-        diagnostics_.add_error(
-            "unsupported variable decoration for entry point output");
-        return false;
-      }
-      out_ << "]];" << std::endl;
-    }
-    decrement_indent();
-    make_indent();
-    out_ << "};" << std::endl << std::endl;
-  }
-
-  return true;
-}
-
 bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   if (auto* a = expr->As<ast::ArrayAccessorExpression>()) {
     return EmitArrayAccessor(a);
@@ -1229,139 +1024,17 @@ void GeneratorImpl::EmitStage(ast::PipelineStage stage) {
   return;
 }
 
-bool GeneratorImpl::has_referenced_in_var_needing_struct(ast::Function* func) {
-  auto* func_sem = program_->Sem().Get(func);
-  for (auto data : func_sem->ReferencedLocationVariables()) {
-    auto* var = data.first;
-    if (var->StorageClass() == ast::StorageClass::kInput) {
-      return true;
-    }
-  }
-  return false;
-}
-
-bool GeneratorImpl::has_referenced_out_var_needing_struct(ast::Function* func) {
-  auto* func_sem = program_->Sem().Get(func);
-
-  for (auto data : func_sem->ReferencedLocationVariables()) {
-    auto* var = data.first;
-    if (var->StorageClass() == ast::StorageClass::kOutput) {
-      return true;
-    }
-  }
-
-  for (auto data : func_sem->ReferencedBuiltinVariables()) {
-    auto* var = data.first;
-    if (var->StorageClass() == ast::StorageClass::kOutput) {
-      return true;
-    }
-  }
-  return false;
-}
-
-bool GeneratorImpl::has_referenced_var_needing_struct(ast::Function* func) {
-  return has_referenced_in_var_needing_struct(func) ||
-         has_referenced_out_var_needing_struct(func);
-}
-
 bool GeneratorImpl::EmitFunction(ast::Function* func) {
-  auto* func_sem = program_->Sem().Get(func);
-
   make_indent();
 
-  // Entry points will be emitted later, skip for now.
-  if (func->IsEntryPoint()) {
-    return true;
-  }
-
-  // TODO(dsinclair): This could be smarter. If the input/outputs for multiple
-  // entry points are the same we could generate a single struct and then have
-  // this determine it's the same struct and just emit once.
-  bool emit_duplicate_functions = func_sem->AncestorEntryPoints().size() > 0 &&
-                                  has_referenced_var_needing_struct(func);
-
-  if (emit_duplicate_functions) {
-    for (const auto& ep_sym : func_sem->AncestorEntryPoints()) {
-      if (!EmitFunctionInternal(func, emit_duplicate_functions, ep_sym)) {
-        return false;
-      }
-      out_ << std::endl;
-    }
-  } else {
-    // Emit as non-duplicated
-    if (!EmitFunctionInternal(func, false, Symbol())) {
-      return false;
-    }
-    out_ << std::endl;
-  }
-
-  return true;
-}
-
-bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
-                                         bool emit_duplicate_functions,
-                                         Symbol ep_sym) {
   auto* func_sem = program_->Sem().Get(func);
 
-  auto name = func->symbol().to_str();
   if (!EmitType(func_sem->ReturnType(), "")) {
     return false;
   }
-
-  out_ << " ";
-  if (emit_duplicate_functions) {
-    auto func_name = name;
-    auto ep_name = ep_sym.to_str();
-    name = program_->Symbols().NameFor(func->symbol()) + "_" +
-           program_->Symbols().NameFor(ep_sym);
-    ep_func_name_remapped_[ep_name + "_" + func_name] = name;
-  } else {
-    name = program_->Symbols().NameFor(func->symbol());
-  }
-  out_ << name << "(";
+  out_ << " " << program_->Symbols().NameFor(func->symbol()) << "(";
 
   bool first = true;
-
-  // If we're emitting duplicate functions that means the function takes
-  // the stage_in or stage_out value from the entry point, emit them.
-  //
-  // We emit both of them if they're there regardless of if they're both used.
-  if (emit_duplicate_functions) {
-    auto in_it = ep_sym_to_in_data_.find(ep_sym);
-    if (in_it != ep_sym_to_in_data_.end()) {
-      out_ << "thread " << in_it->second.struct_name << "& "
-           << in_it->second.var_name;
-      first = false;
-    }
-
-    auto out_it = ep_sym_to_out_data_.find(ep_sym);
-    if (out_it != ep_sym_to_out_data_.end()) {
-      if (!first) {
-        out_ << ", ";
-      }
-      out_ << "thread " << out_it->second.struct_name << "& "
-           << out_it->second.var_name;
-      first = false;
-    }
-  }
-
-  for (const auto& data : func_sem->ReferencedBuiltinVariables()) {
-    auto* var = data.first;
-    if (var->StorageClass() != ast::StorageClass::kInput) {
-      continue;
-    }
-    if (!first) {
-      out_ << ", ";
-    }
-    first = false;
-
-    out_ << "thread ";
-    if (!EmitType(var->Type()->UnwrapRef(), "")) {
-      return false;
-    }
-    out_ << "& " << program_->Symbols().NameFor(var->Declaration()->symbol());
-  }
-
   for (const auto& data : func_sem->ReferencedUniformVariables()) {
     auto* var = data.first;
     if (!first) {
@@ -1416,13 +1089,11 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
 
   out_ << ") ";
 
-  current_ep_sym_ = ep_sym;
-
   if (!EmitBlockAndNewline(func->body())) {
     return false;
   }
 
-  current_ep_sym_ = Symbol();
+  out_ << std::endl;
 
   return true;
 }
@@ -1462,37 +1133,12 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
 
   make_indent();
 
-  current_ep_sym_ = func->symbol();
-
   EmitStage(func->pipeline_stage());
-  out_ << " ";
-
-  // This is an entry point, the return type is the entry point output structure
-  // if one exists, or void otherwise.
-  auto out_data = ep_sym_to_out_data_.find(current_ep_sym_);
-  bool has_out_data = out_data != ep_sym_to_out_data_.end();
-  if (has_out_data) {
-    // TODO(crbug.com/tint/697): Remove this.
-    if (!func->return_type()->Is<ast::Void>()) {
-      TINT_ICE(diagnostics_) << "Mixing module-scope variables and return "
-                                "types for shader outputs";
-    }
-    out_ << out_data->second.struct_name;
-  } else {
-    out_ << func->return_type()->FriendlyName(program_->Symbols());
-  }
+  out_ << " " << func->return_type()->FriendlyName(program_->Symbols());
   out_ << " " << program_->Symbols().NameFor(func->symbol()) << "(";
 
-  bool first = true;
-  // TODO(crbug.com/tint/697): Remove this.
-  auto in_data = ep_sym_to_in_data_.find(current_ep_sym_);
-  if (in_data != ep_sym_to_in_data_.end()) {
-    out_ << in_data->second.struct_name << " " << in_data->second.var_name
-         << " [[stage_in]]";
-    first = false;
-  }
-
   // Emit entry point parameters.
+  bool first = true;
   for (auto* var : func->params()) {
     if (!first) {
       out_ << ", ";
@@ -1547,33 +1193,6 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
         TINT_ICE(diagnostics_) << "Unsupported entry point parameter";
       }
     }
-  }
-
-  // TODO(crbug.com/tint/697): Remove this.
-  for (auto data : func_sem->ReferencedBuiltinVariables()) {
-    auto* var = data.first;
-    if (var->StorageClass() != ast::StorageClass::kInput) {
-      continue;
-    }
-
-    if (!first) {
-      out_ << ", ";
-    }
-    first = false;
-
-    auto* builtin = data.second;
-
-    if (!EmitType(var->Type()->UnwrapRef(), "")) {
-      return false;
-    }
-
-    auto attr = builtin_to_attribute(builtin->value());
-    if (attr.empty()) {
-      diagnostics_.add_error("unknown builtin");
-      return false;
-    }
-    out_ << " " << program_->Symbols().NameFor(var->Declaration()->symbol())
-         << " [[" << attr << "]]";
   }
 
   for (auto data : func_sem->ReferencedUniformVariables()) {
@@ -1634,13 +1253,6 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
 
   increment_indent();
 
-  if (has_out_data) {
-    make_indent();
-    out_ << out_data->second.struct_name << " " << out_data->second.var_name
-         << " = {};" << std::endl;
-  }
-
-  generating_entry_point_ = true;
   for (auto* s : *func->body()) {
     if (!EmitStatement(s)) {
       return false;
@@ -1654,49 +1266,15 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
       return false;
     }
   }
-  generating_entry_point_ = false;
 
   decrement_indent();
   make_indent();
-  out_ << "}" << std::endl;
-
-  current_ep_sym_ = Symbol();
+  out_ << "}" << std::endl << std::endl;
   return true;
 }
 
-bool GeneratorImpl::global_is_in_struct(const sem::Variable* var) const {
-  auto& decorations = var->Declaration()->decorations();
-  bool in_or_out_struct_has_location =
-      var != nullptr &&
-      ast::HasDecoration<ast::LocationDecoration>(decorations) &&
-      (var->StorageClass() == ast::StorageClass::kInput ||
-       var->StorageClass() == ast::StorageClass::kOutput);
-  bool in_struct_has_builtin =
-      var != nullptr &&
-      ast::HasDecoration<ast::BuiltinDecoration>(decorations) &&
-      var->StorageClass() == ast::StorageClass::kOutput;
-  return in_or_out_struct_has_location || in_struct_has_builtin;
-}
-
 bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
-  auto* ident = expr->As<ast::IdentifierExpression>();
-  const sem::Variable* var = nullptr;
-  if (global_variables_.get(ident->symbol(), &var)) {
-    if (global_is_in_struct(var)) {
-      auto var_type = var->StorageClass() == ast::StorageClass::kInput
-                          ? VarType::kIn
-                          : VarType::kOut;
-      auto name = current_ep_var_name(var_type);
-      if (name.empty()) {
-        diagnostics_.add_error("unable to find entry point data for variable");
-        return false;
-      }
-      out_ << name << ".";
-    }
-  }
-
-  out_ << program_->Symbols().NameFor(ident->symbol());
-
+  out_ << program_->Symbols().NameFor(expr->symbol());
   return true;
 }
 
@@ -1865,14 +1443,6 @@ bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
   make_indent();
 
   out_ << "return";
-
-  // TODO(crbug.com/tint/697): Remove this conditional.
-  if (generating_entry_point_) {
-    auto out_data = ep_sym_to_out_data_.find(current_ep_sym_);
-    if (out_data != ep_sym_to_out_data_.end()) {
-      out_ << " " << out_data->second.var_name;
-    }
-  }
   if (stmt->has_value()) {
     out_ << " ";
     if (!EmitExpression(stmt->value())) {
@@ -2363,8 +1933,7 @@ bool GeneratorImpl::EmitVariable(const sem::Variable* var,
       }
     } else if (var->StorageClass() == ast::StorageClass::kPrivate ||
                var->StorageClass() == ast::StorageClass::kFunction ||
-               var->StorageClass() == ast::StorageClass::kNone ||
-               var->StorageClass() == ast::StorageClass::kOutput) {
+               var->StorageClass() == ast::StorageClass::kNone) {
       out_ << " = ";
       if (!EmitZeroValue(type)) {
         return false;
