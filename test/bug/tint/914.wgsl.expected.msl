@@ -1,0 +1,78 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+
+Compilation failed: 
+
+program_source:56:31: warning: equality comparison with extraneous parentheses
+  if ((local_invocation_index == 0u)) {
+       ~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+program_source:56:31: note: remove extraneous parentheses around the comparison to silence this warning
+  if ((local_invocation_index == 0u)) {
+      ~                       ^    ~
+program_source:56:31: note: use '=' to turn this equality comparison into an assignment
+  if ((local_invocation_index == 0u)) {
+                              ^~
+                              =
+program_source:122:30: error: default initialization of an object of const type 'const uint' (aka 'const unsigned int')
+                  uint const inputRow;
+                             ^
+                                      = 0
+program_source:123:30: error: default initialization of an object of const type 'const uint' (aka 'const unsigned int')
+                  uint const inputCol;
+                             ^
+                                      = 0
+program_source:133:30: error: cannot assign to variable 'inputRow' with const-qualified type 'const uint' (aka 'const unsigned int')
+                    inputRow = (tileRow + innerRow);
+                    ~~~~~~~~ ^
+program_source:122:30: note: variable 'inputRow' declared const here
+                  uint const inputRow;
+                  ~~~~~~~~~~~^~~~~~~~
+program_source:134:30: error: cannot assign to variable 'inputCol' with const-qualified type 'const uint' (aka 'const unsigned int')
+                    inputCol = (tileColA + innerCol);
+                    ~~~~~~~~ ^
+program_source:123:30: note: variable 'inputCol' declared const here
+                  uint const inputCol;
+                  ~~~~~~~~~~~^~~~~~~~
+program_source:159:30: error: default initialization of an object of const type 'const uint' (aka 'const unsigned int')
+                  uint const inputRow;
+                             ^
+                                      = 0
+program_source:160:30: error: default initialization of an object of const type 'const uint' (aka 'const unsigned int')
+                  uint const inputCol;
+                             ^
+                                      = 0
+program_source:170:30: error: cannot assign to variable 'inputRow' with const-qualified type 'const uint' (aka 'const unsigned int')
+                    inputRow = (tileRowB + innerRow);
+                    ~~~~~~~~ ^
+program_source:159:30: note: variable 'inputRow' declared const here
+                  uint const inputRow;
+                  ~~~~~~~~~~~^~~~~~~~
+program_source:171:30: error: cannot assign to variable 'inputCol' with const-qualified type 'const uint' (aka 'const unsigned int')
+                    inputCol = (tileCol + innerCol);
+                    ~~~~~~~~ ^
+program_source:160:30: note: variable 'inputCol' declared const here
+                  uint const inputCol;
+                  ~~~~~~~~~~~^~~~~~~~
+program_source:228:36: error: default initialization of an object of const type 'const uint' (aka 'const unsigned int')
+                        uint const index;
+                                   ^
+                                         = 0
+program_source:238:33: error: cannot assign to variable 'index' with const-qualified type 'const uint' (aka 'const unsigned int')
+                          index = ((innerRow * ColPerThread) + innerCol);
+                          ~~~~~ ^
+program_source:228:36: note: variable 'index' declared const here
+                        uint const index;
+                        ~~~~~~~~~~~^~~~~
+program_source:270:24: error: default initialization of an object of const type 'const uint' (aka 'const unsigned int')
+            uint const index;
+                       ^
+                             = 0
+program_source:280:21: error: cannot assign to variable 'index' with const-qualified type 'const uint' (aka 'const unsigned int')
+              index = ((innerRow * ColPerThread) + innerCol);
+              ~~~~~ ^
+program_source:270:24: note: variable 'index' declared const here
+            uint const index;
+            ~~~~~~~~~~~^~~~~
