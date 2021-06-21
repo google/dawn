@@ -2443,18 +2443,31 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_CopyObject) {
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
-
-  // Correct declaration
-  EXPECT_THAT(module_str, HasSubstr(R"(
+  const std::string expected =
+      R"(Module{
   Variable{
     x_1
     private
     undefined
     __i32
-  })")) <<module_str;
-
-  // Correct creation of value
-  EXPECT_THAT(module_str, HasSubstr(R"(
+  }
+  Function main_1 -> __void
+  ()
+  {
+    VariableDeclStatement{
+      VariableConst{
+        x_11
+        none
+        undefined
+        __ptr_none__i32
+        {
+          UnaryOp[not set]{
+            address-of
+            Identifier[not set]{x_1}
+          }
+        }
+      }
+    }
     VariableDeclStatement{
       VariableConst{
         x_2
@@ -2462,14 +2475,15 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_CopyObject) {
         undefined
         __i32
         {
-          Identifier[not set]{x_1}
+          UnaryOp[not set]{
+            indirection
+            Identifier[not set]{x_11}
+          }
         }
       }
-    })"))
-      << module_str;
-
-  // Correct parameter on entry point
-  EXPECT_THAT(module_str, HasSubstr(R"(
+    }
+    Return{}
+  }
   Function main -> __void
   StageDecoration{fragment}
   (
@@ -2489,8 +2503,15 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_CopyObject) {
       Bitcast[not set]<__i32>{
         Identifier[not set]{x_1_param}
       }
-    })"))
-      << module_str;
+    }
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+  }
+}
+)";
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_AccessChain) {
@@ -2670,12 +2691,29 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_CopyObject) {
   {
     VariableDeclStatement{
       VariableConst{
+        x_11
+        none
+        undefined
+        __ptr_none__u32
+        {
+          UnaryOp[not set]{
+            address-of
+            Identifier[not set]{x_1}
+          }
+        }
+      }
+    }
+    VariableDeclStatement{
+      VariableConst{
         x_2
         none
         undefined
         __u32
         {
-          Identifier[not set]{x_1}
+          UnaryOp[not set]{
+            indirection
+            Identifier[not set]{x_11}
+          }
         }
       }
     }
@@ -2944,18 +2982,16 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_CopyObject) {
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
-
-  // Correct declaration
-  EXPECT_THAT(module_str, HasSubstr(R"(
+  const std::string expected = R"(Module{
   Variable{
     x_1
     private
     undefined
     __array__u32_1
-  })")) <<module_str;
-
-  // Correct creation of value
-  EXPECT_THAT(module_str, HasSubstr(R"(
+  }
+  Function main_1 -> __void
+  ()
+  {
     VariableDeclStatement{
       VariableConst{
         x_4
@@ -2969,10 +3005,9 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_CopyObject) {
           }
         }
       }
-    })"));
-
-  // Correct parameter on entry point
-  EXPECT_THAT(module_str, HasSubstr(R"(
+    }
+    Return{}
+  }
   Function main -> __void
   StageDecoration{fragment}
   (
@@ -2993,8 +3028,16 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_CopyObject) {
         ScalarConstructor[not set]{0}
       }
       Identifier[not set]{x_1_param}
-    })"))
-      << module_str;
+    }
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+  }
+}
+)";
+  EXPECT_EQ(module_str, expected) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_AccessChain) {
@@ -3957,12 +4000,29 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_CopyObject) {
   {
     VariableDeclStatement{
       VariableConst{
+        x_11
+        none
+        undefined
+        __ptr_none__i32
+        {
+          UnaryOp[not set]{
+            address-of
+            Identifier[not set]{x_1}
+          }
+        }
+      }
+    }
+    VariableDeclStatement{
+      VariableConst{
         x_2
         none
         undefined
         __i32
         {
-          Identifier[not set]{x_1}
+          UnaryOp[not set]{
+            indirection
+            Identifier[not set]{x_11}
+          }
         }
       }
     }
@@ -4066,34 +4126,6 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_AccessChain) {
   EXPECT_EQ(module_str, expected);
 }
 
-TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_FunctParam) {
-  // TODO(dneto): Passing by pointer-to-input is not allowed.
-  // Remove this test.
-  const std::string assembly = VertexIndexPreamble("%int") + R"(
-    %helper_ty = OpTypeFunction %int %ptr_ty
-    %helper = OpFunction %int None %helper_ty
-    %param = OpFunctionParameter %ptr_ty
-    %helper_entry = OpLabel
-    %3 = OpLoad %int %param
-    OpReturnValue %3
-    OpFunctionEnd
-
-    %main = OpFunction %void None %voidfn
-    %entry = OpLabel
-    %result = OpFunctionCall %int %helper %1
-    OpReturn
-    OpFunctionEnd
- )";
-  auto p = parser(test::Assemble(assembly));
-  // TODO(dneto): We can handle this if we make a shadow variable and mutate
-  // the parameter type.
-  ASSERT_FALSE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(
-      p->error(),
-      HasSubstr(
-          "unhandled use of a pointer to the VertexIndex builtin, with ID: 1"));
-}
-
 TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_Direct) {
   const std::string assembly = VertexIndexPreamble("%uint") + R"(
     %main = OpFunction %void None %voidfn
@@ -4183,12 +4215,29 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_CopyObject) {
   {
     VariableDeclStatement{
       VariableConst{
+        x_11
+        none
+        undefined
+        __ptr_none__u32
+        {
+          UnaryOp[not set]{
+            address-of
+            Identifier[not set]{x_1}
+          }
+        }
+      }
+    }
+    VariableDeclStatement{
+      VariableConst{
         x_2
         none
         undefined
         __u32
         {
-          Identifier[not set]{x_1}
+          UnaryOp[not set]{
+            indirection
+            Identifier[not set]{x_11}
+          }
         }
       }
     }
@@ -4423,12 +4472,29 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_CopyObject) {
   {
     VariableDeclStatement{
       VariableConst{
+        x_11
+        none
+        undefined
+        __ptr_none__i32
+        {
+          UnaryOp[not set]{
+            address-of
+            Identifier[not set]{x_1}
+          }
+        }
+      }
+    }
+    VariableDeclStatement{
+      VariableConst{
         x_2
         none
         undefined
         __i32
         {
-          Identifier[not set]{x_1}
+          UnaryOp[not set]{
+            indirection
+            Identifier[not set]{x_11}
+          }
         }
       }
     }
@@ -4645,12 +4711,29 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_CopyObject) {
   {
     VariableDeclStatement{
       VariableConst{
+        x_11
+        none
+        undefined
+        __ptr_none__u32
+        {
+          UnaryOp[not set]{
+            address-of
+            Identifier[not set]{x_1}
+          }
+        }
+      }
+    }
+    VariableDeclStatement{
+      VariableConst{
         x_2
         none
         undefined
         __u32
         {
-          Identifier[not set]{x_1}
+          UnaryOp[not set]{
+            indirection
+            Identifier[not set]{x_11}
+          }
         }
       }
     }
