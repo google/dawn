@@ -86,117 +86,6 @@ struct State {
     return struct_buffer_name;
   }
 
-  /// Inserts vertex_index binding, or finds the existing one
-  void FindOrInsertVertexIndexIfUsed() {
-    bool uses_vertex_step_mode = false;
-    for (const VertexBufferLayoutDescriptor& buffer_layout : cfg.vertex_state) {
-      if (buffer_layout.step_mode == InputStepMode::kVertex) {
-        uses_vertex_step_mode = true;
-        break;
-      }
-    }
-    if (!uses_vertex_step_mode) {
-      return;
-    }
-
-    // Look for an existing vertex index builtin
-    for (auto* v : ctx.src->AST().GlobalVariables()) {
-      auto* sem = ctx.src->Sem().Get(v);
-      if (sem->StorageClass() != ast::StorageClass::kInput) {
-        continue;
-      }
-
-      for (auto* d : v->decorations()) {
-        if (auto* builtin = d->As<ast::BuiltinDecoration>()) {
-          if (builtin->value() == ast::Builtin::kVertexIndex) {
-            vertex_index_expr = [this, v]() {
-              return ctx.dst->Expr(ctx.Clone(v->symbol()));
-            };
-            return;
-          }
-        }
-      }
-    }
-
-    // We didn't find a vertex index builtin, so create one
-    auto name = ctx.dst->Symbols().New("tint_pulling_vertex_index");
-    vertex_index_expr = [this, name]() { return ctx.dst->Expr(name); };
-
-    ctx.dst->Global(name, ctx.dst->ty.u32(), ast::StorageClass::kInput, nullptr,
-                    ast::DecorationList{
-                        ctx.dst->Builtin(ast::Builtin::kVertexIndex),
-                    });
-  }
-
-  /// Inserts instance_index binding, or finds the existing one
-  void FindOrInsertInstanceIndexIfUsed() {
-    bool uses_instance_step_mode = false;
-    for (const VertexBufferLayoutDescriptor& buffer_layout : cfg.vertex_state) {
-      if (buffer_layout.step_mode == InputStepMode::kInstance) {
-        uses_instance_step_mode = true;
-        break;
-      }
-    }
-    if (!uses_instance_step_mode) {
-      return;
-    }
-
-    // Look for an existing instance index builtin
-    for (auto* v : ctx.src->AST().GlobalVariables()) {
-      auto* sem = ctx.src->Sem().Get(v);
-      if (sem->StorageClass() != ast::StorageClass::kInput) {
-        continue;
-      }
-
-      for (auto* d : v->decorations()) {
-        if (auto* builtin = d->As<ast::BuiltinDecoration>()) {
-          if (builtin->value() == ast::Builtin::kInstanceIndex) {
-            instance_index_expr = [this, v]() {
-              return ctx.dst->Expr(ctx.Clone(v->symbol()));
-            };
-            return;
-          }
-        }
-      }
-    }
-
-    // We didn't find an instance index builtin, so create one
-    auto name = ctx.dst->Symbols().New("tint_pulling_instance_index");
-    instance_index_expr = [this, name]() { return ctx.dst->Expr(name); };
-
-    ctx.dst->Global(name, ctx.dst->ty.u32(), ast::StorageClass::kInput, nullptr,
-                    ast::DecorationList{
-                        ctx.dst->Builtin(ast::Builtin::kInstanceIndex),
-                    });
-  }
-
-  /// Converts var<in> with a location decoration to var<private>
-  void ConvertVertexInputVariablesToPrivate() {
-    for (auto* v : ctx.src->AST().GlobalVariables()) {
-      auto* sem = ctx.src->Sem().Get(v);
-      if (sem->StorageClass() != ast::StorageClass::kInput) {
-        continue;
-      }
-
-      for (auto* d : v->decorations()) {
-        if (auto* l = d->As<ast::LocationDecoration>()) {
-          uint32_t location = l->value();
-          // This is where the replacement is created. Expressions use
-          // identifier strings instead of pointers, so we don't need to update
-          // any other place in the AST.
-          auto name = ctx.Clone(v->symbol());
-          auto* replacement = ctx.dst->Var(name, ctx.Clone(v->type()),
-                                           ast::StorageClass::kPrivate);
-          location_to_expr[location] = [this, name]() {
-            return ctx.dst->Expr(name);
-          };
-          ctx.Replace(v, replacement);
-          break;
-        }
-      }
-    }
-  }
-
   /// Adds storage buffer decorated variables for the vertex buffers
   void AddVertexStorageBuffers() {
     // TODO(idanr): Make this readonly
@@ -590,25 +479,8 @@ Output VertexPulling::Run(const Program* in, const DataMap& data) {
   CloneContext ctx(&out, in);
 
   State state{ctx, cfg};
-
-  if (func->params().empty()) {
-    // TODO(crbug.com/tint/697): Remove this path for the old shader IO syntax.
-    state.FindOrInsertVertexIndexIfUsed();
-    state.FindOrInsertInstanceIndexIfUsed();
-    state.ConvertVertexInputVariablesToPrivate();
-    state.AddVertexStorageBuffers();
-
-    ctx.ReplaceAll([&](ast::Function* f) -> ast::Function* {
-      if (f == func) {
-        return CloneWithStatementsAtStart(
-            &ctx, f, {state.CreateVertexPullingPreamble()});
-      }
-      return nullptr;  // Just clone func
-    });
-  } else {
-    state.AddVertexStorageBuffers();
-    state.Process(func);
-  }
+  state.AddVertexStorageBuffers();
+  state.Process(func);
 
   ctx.Clone();
 
