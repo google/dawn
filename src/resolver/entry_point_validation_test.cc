@@ -564,17 +564,8 @@ static constexpr Params cases[] = {
     ParamsFor<vec3<f32>>(true),      //
     ParamsFor<vec4<f32>>(true),      //
     ParamsFor<mat2x2<f32>>(false),   //
-    ParamsFor<mat2x2<i32>>(false),   //
-    ParamsFor<mat2x2<u32>>(false),   //
-    ParamsFor<mat2x2<bool>>(false),  //
     ParamsFor<mat3x3<f32>>(false),   //
-    ParamsFor<mat3x3<i32>>(false),   //
-    ParamsFor<mat3x3<u32>>(false),   //
-    ParamsFor<mat3x3<bool>>(false),  //
     ParamsFor<mat4x4<f32>>(false),   //
-    ParamsFor<mat4x4<i32>>(false),   //
-    ParamsFor<mat4x4<u32>>(false),   //
-    ParamsFor<mat4x4<bool>>(false),  //
     ParamsFor<alias<f32>>(true),     //
     ParamsFor<alias<i32>>(true),     //
     ParamsFor<alias<u32>>(true),     //

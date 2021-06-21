@@ -293,9 +293,15 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
     }
     if (auto* t = ty->As<ast::Matrix>()) {
       if (auto* el = Type(t->type())) {
-        auto* column_type = builder_->create<sem::Vector>(
-            const_cast<sem::Type*>(el), t->rows());
-        return builder_->create<sem::Matrix>(column_type, t->columns());
+        if (auto* column_type = builder_->create<sem::Vector>(
+                const_cast<sem::Type*>(el), t->rows())) {
+          if (auto* matrix_type =
+                  builder_->create<sem::Matrix>(column_type, t->columns())) {
+            if (ValidateMatrix(matrix_type, t->source())) {
+              return matrix_type;
+            }
+          }
+        }
       }
       return nullptr;
     }
@@ -2139,6 +2145,15 @@ bool Resolver::ValidateVectorConstructor(
   return true;
 }
 
+bool Resolver::ValidateMatrix(const sem::Matrix* matrix_type,
+                              const Source& source) {
+  if (!matrix_type->is_float_matrix()) {
+    diagnostics_.add_error("matrix element type must be 'f32'", source);
+    return false;
+  }
+  return true;
+}  // namespace resolver
+
 bool Resolver::ValidateMatrixConstructor(
     const ast::TypeConstructorExpression* ctor,
     const sem::Matrix* matrix_type) {
@@ -2146,6 +2161,10 @@ bool Resolver::ValidateMatrixConstructor(
   // Zero Value expression
   if (values.empty()) {
     return true;
+  }
+
+  if (!ValidateMatrix(matrix_type, ctor->source())) {
+    return false;
   }
 
   auto* elem_type = matrix_type->type();

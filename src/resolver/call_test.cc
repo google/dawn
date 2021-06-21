@@ -77,14 +77,8 @@ static constexpr Params all_param_types[] = {
     ParamsFor<vec3<i32>>(),    //
     ParamsFor<vec3<u32>>(),    //
     ParamsFor<vec3<f32>>(),    //
-    ParamsFor<mat3x3<i32>>(),  //
-    ParamsFor<mat3x3<u32>>(),  //
     ParamsFor<mat3x3<f32>>(),  //
-    ParamsFor<mat2x3<i32>>(),  //
-    ParamsFor<mat2x3<u32>>(),  //
     ParamsFor<mat2x3<f32>>(),  //
-    ParamsFor<mat3x2<i32>>(),  //
-    ParamsFor<mat3x2<u32>>(),  //
     ParamsFor<mat3x2<f32>>()   //
 };
 

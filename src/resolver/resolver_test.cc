@@ -496,7 +496,7 @@ TEST_F(ResolverTest, ArrayAccessor_Matrix_Dynamic_Ref) {
 }
 
 TEST_F(ResolverTest, ArrayAccessor_Matrix_BothDimensions_Dynamic_Ref) {
-  Global("my_var", ty.mat4x4<bool>(), ast::StorageClass::kOutput);
+  Global("my_var", ty.mat4x4<f32>(), ast::StorageClass::kOutput);
   auto* idx = Var("idx", ty.u32(), Expr(3u));
   auto* idy = Var("idy", ty.u32(), Expr(2u));
   auto* acc = IndexAccessor(IndexAccessor("my_var", idx), idy);
@@ -517,7 +517,7 @@ TEST_F(ResolverTest, ArrayAccessor_Matrix_Dynamic) {
 }
 
 TEST_F(ResolverTest, ArrayAccessor_Matrix_XDimension_Dynamic) {
-  GlobalConst("my_var", ty.mat4x4<bool>(), Construct(ty.mat4x4<bool>()));
+  GlobalConst("my_var", ty.mat4x4<f32>(), Construct(ty.mat4x4<f32>()));
   auto* idx = Var("idx", ty.u32(), Expr(3u));
   auto* acc = IndexAccessor("my_var", Expr(Source{{12, 34}}, idx));
   WrapInFunction(Decl(idx), acc);
@@ -528,7 +528,7 @@ TEST_F(ResolverTest, ArrayAccessor_Matrix_XDimension_Dynamic) {
 }
 
 TEST_F(ResolverTest, ArrayAccessor_Matrix_BothDimension_Dynamic) {
-  GlobalConst("my_var", ty.mat4x4<bool>(), Construct(ty.mat4x4<bool>()));
+  GlobalConst("my_var", ty.mat4x4<f32>(), Construct(ty.mat4x4<f32>()));
   auto* idx = Var("idy", ty.u32(), Expr(2u));
   auto* acc =
       IndexAccessor(IndexAccessor("my_var", Expr(Source{{12, 34}}, idx)), 1);
@@ -1486,14 +1486,8 @@ static constexpr builder::ast_type_func_ptr all_create_type_funcs[] = {
     DataType<vec3<i32>>::AST,    //
     DataType<vec3<u32>>::AST,    //
     DataType<vec3<f32>>::AST,    //
-    DataType<mat3x3<i32>>::AST,  //
-    DataType<mat3x3<u32>>::AST,  //
     DataType<mat3x3<f32>>::AST,  //
-    DataType<mat2x3<i32>>::AST,  //
-    DataType<mat2x3<u32>>::AST,  //
     DataType<mat2x3<f32>>::AST,  //
-    DataType<mat3x2<i32>>::AST,  //
-    DataType<mat3x2<u32>>::AST,  //
     DataType<mat3x2<f32>>::AST   //
 };
 

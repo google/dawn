@@ -876,20 +876,6 @@ TEST_F(ResolverValidationTest,
             "expected 'array<i32, 2>', found 'array<u32, 2>'");
 }
 
-TEST_F(ResolverValidationTest,
-       Expr_Constructor_ArrayOfMatrix_SubElemTypeMismatch) {
-  // array<mat2x2<f32>, 2>(mat2x2<f32>(), mat2x2<i32>());
-  auto* e0 = mat2x2<f32>();
-  SetSource(Source::Location({12, 34}));
-  auto* e1 = mat2x2<i32>();
-  auto* t = Construct(ty.array(ty.mat2x2<f32>(), 2), e0, e1);
-  WrapInFunction(t);
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: type in array constructor does not match array type: "
-            "expected 'mat2x2<f32>', found 'mat2x2<i32>'");
-}
 TEST_F(ResolverValidationTest, Expr_Constructor_Array_TooFewElements) {
   // array<i32, 4>(1, 2, 3);
   SetSource(Source::Location({12, 34}));
@@ -1986,6 +1972,17 @@ std::string VecStr(uint32_t dimensions, std::string subtype = "f32") {
 }
 
 using MatrixConstructorTest = ResolverTestWithParam<MatrixDimensions>;
+
+TEST_F(MatrixConstructorTest, Expr_Constructor_Matrix_NotF32) {
+  // m2x2<i32>()
+  SetSource(Source::Location({12, 34}));
+  auto* tc = mat2x2<i32>(
+      create<ast::TypeConstructorExpression>(ty.mat2x2<i32>(), ExprList()));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: matrix element type must be 'f32'");
+}
 
 TEST_P(MatrixConstructorTest, Expr_Constructor_Error_TooFewArguments) {
   // matNxM<f32>(vecM<f32>(), ...); with N - 1 arguments

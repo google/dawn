@@ -65,8 +65,6 @@ Params all_cases[] = {
     ParamsFor<vec3<i32>>(),           //
     ParamsFor<vec3<u32>>(),           //
     ParamsFor<vec3<f32>>(),           //
-    ParamsFor<mat3x3<i32>>(),         //
-    ParamsFor<mat3x3<u32>>(),         //
     ParamsFor<mat3x3<f32>>(),         //
     ParamsFor<alias<bool>>(),         //
     ParamsFor<alias<u32>>(),          //
@@ -76,8 +74,6 @@ Params all_cases[] = {
     ParamsFor<alias<vec3<i32>>>(),    //
     ParamsFor<alias<vec3<u32>>>(),    //
     ParamsFor<alias<vec3<f32>>>(),    //
-    ParamsFor<alias<mat3x3<i32>>>(),  //
-    ParamsFor<alias<mat3x3<u32>>>(),  //
     ParamsFor<alias<mat3x3<f32>>>(),  //
 };
 

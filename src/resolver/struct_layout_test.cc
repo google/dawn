@@ -242,15 +242,15 @@ TEST_F(ResolverStructLayoutTest, Vector) {
 
 TEST_F(ResolverStructLayoutTest, Matrix) {
   auto* s = Structure("S", {
-                               Member("a", ty.mat2x2<i32>()),
-                               Member("b", ty.mat2x3<i32>()),
-                               Member("c", ty.mat2x4<i32>()),
-                               Member("d", ty.mat3x2<i32>()),
-                               Member("e", ty.mat3x3<i32>()),
-                               Member("f", ty.mat3x4<i32>()),
-                               Member("g", ty.mat4x2<i32>()),
-                               Member("h", ty.mat4x3<i32>()),
-                               Member("i", ty.mat4x4<i32>()),
+                               Member("a", ty.mat2x2<f32>()),
+                               Member("b", ty.mat2x3<f32>()),
+                               Member("c", ty.mat2x4<f32>()),
+                               Member("d", ty.mat3x2<f32>()),
+                               Member("e", ty.mat3x3<f32>()),
+                               Member("f", ty.mat3x4<f32>()),
+                               Member("g", ty.mat4x2<f32>()),
+                               Member("h", ty.mat4x3<f32>()),
+                               Member("i", ty.mat4x4<f32>()),
                            });
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -292,7 +292,7 @@ TEST_F(ResolverStructLayoutTest, Matrix) {
 
 TEST_F(ResolverStructLayoutTest, NestedStruct) {
   auto* inner = Structure("Inner", {
-                                       Member("a", ty.mat3x3<i32>()),
+                                       Member("a", ty.mat3x3<f32>()),
                                    });
   auto* s = Structure("S", {
                                Member("a", ty.i32()),
