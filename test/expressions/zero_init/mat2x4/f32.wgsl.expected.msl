@@ -1,0 +1,7 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void f() {
+  float2x4 v = float2x4();
+}
+
