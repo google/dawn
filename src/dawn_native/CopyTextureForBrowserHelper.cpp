@@ -27,17 +27,25 @@
 #include "dawn_native/RenderPipeline.h"
 #include "dawn_native/Sampler.h"
 #include "dawn_native/Texture.h"
+#include "dawn_native/ValidationUtils_autogen.h"
 
 #include <unordered_set>
 
 namespace dawn_native {
     namespace {
-        // TODO(crbug.com/dawn/856) : Support premultiply-alpha
-        static const char sCopyTextureForBrowserVertex[] = R"(
+// TODO(crbug.com/1221110): Remove this header macro by merging vertex and
+// fragment shaders into one shader source. Now it blocks by
+// crbug.com/dawn/947 and crbug.com/tint/915
+#define HEADER \
+    R"(
             [[block]] struct Uniforms {
-                u_scale : vec2<f32>;
-                u_offset : vec2<f32>;
+                u_scale: vec2<f32>;
+                u_offset: vec2<f32>;
+                u_alphaOp: u32;
             };
+    )"
+
+        static const char sCopyTextureForBrowserVertex[] = HEADER R"(
             [[binding(0), group(0)]] var<uniform> uniforms : Uniforms;
 
             struct VertexOutputs {
@@ -80,7 +88,8 @@ namespace dawn_native {
             }
         )";
 
-        static const char sCopyTextureForBrowserFragment[] = R"(
+        static const char sCopyTextureForBrowserFragment[] = HEADER R"(
+            [[binding(0), group(0)]] var<uniform> uniforms : Uniforms;
             [[binding(1), group(0)]] var mySampler: sampler;
             [[binding(2), group(0)]] var myTexture: texture_2d<f32>;
 
@@ -94,12 +103,47 @@ namespace dawn_native {
                     discard;
                 }
 
-                var srcColor = textureSample(myTexture, mySampler, texcoord);
                 // Swizzling of texture formats when sampling / rendering is handled by the
                 // hardware so we don't need special logic in this shader. This is covered by tests.
+                var srcColor = textureSample(myTexture, mySampler, texcoord);
+
+                // Handle alpha. Alpha here helps on the source content and dst content have
+                // different alpha config. There are three possible ops: DontChange, Premultiply
+                // and Unpremultiply.
+                // TODO(crbug.com/1217153): if wgsl support `constexpr` and allow it
+                // to be case selector, Replace 0u/1u/2u with a constexpr variable with
+                // meaningful name.
+                switch(uniforms.u_alphaOp) {
+                    case 0u: { // AlphaOp: DontChange
+                        break;
+                    }
+                    case 1u: { // AlphaOp: Premultiply
+                        srcColor = vec4<f32>(srcColor.rgb * srcColor.a, srcColor.a);
+                        break;
+                    }
+                    case 2u: { // AlphaOp: Unpremultiply
+                        if (srcColor.a != 0.0) {
+                            srcColor = vec4<f32>(srcColor.rgb / srcColor.a, srcColor.a);
+                        }
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
+
                 return srcColor;
             }
         )";
+
+        struct Uniform {
+            float scaleX;
+            float scaleY;
+            float offsetX;
+            float offsetY;
+            wgpu::AlphaOp alphaOp;
+        };
+        static_assert(sizeof(Uniform) == 20, "");
 
         // TODO(crbug.com/dawn/856): Expand copyTextureForBrowser to support any
         // non-depth, non-stencil, non-compressed texture format pair copy. Now this API
@@ -138,6 +182,8 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR(
                     "CopyTextureForBrowserOptions: nextInChain must be nullptr");
             }
+
+            DAWN_TRY(ValidateAlphaOp(options->alphaOp));
 
             return {};
         }
@@ -307,20 +353,24 @@ namespace dawn_native {
         Extent3D srcTextureSize = source->texture->GetSize();
 
         // Prepare binding 0 resource: uniform buffer.
-        float uniformData[] = {
+        Uniform uniformData = {
             copySize->width / static_cast<float>(srcTextureSize.width),
             copySize->height / static_cast<float>(srcTextureSize.height),  // scale
             source->origin.x / static_cast<float>(srcTextureSize.width),
-            source->origin.y / static_cast<float>(srcTextureSize.height)  // offset
+            source->origin.y / static_cast<float>(srcTextureSize.height),  // offset
+            wgpu::AlphaOp::DontChange  // alphaOp default value: DontChange
         };
 
         // Handle flipY. FlipY here means we flip the source texture firstly and then
         // do copy. This helps on the case which source texture is flipped and the copy
         // need to unpack the flip.
-        if (options && options->flipY) {
-            uniformData[1] *= -1.0;
-            uniformData[3] += copySize->height / static_cast<float>(srcTextureSize.height);
+        if (options->flipY) {
+            uniformData.scaleY *= -1.0;
+            uniformData.offsetY += copySize->height / static_cast<float>(srcTextureSize.height);
         }
+
+        // Set alpha op.
+        uniformData.alphaOp = options->alphaOp;
 
         BufferDescriptor uniformDesc = {};
         uniformDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform;
@@ -328,7 +378,7 @@ namespace dawn_native {
         Ref<BufferBase> uniformBuffer;
         DAWN_TRY_ASSIGN(uniformBuffer, device->CreateBuffer(&uniformDesc));
 
-        DAWN_TRY(device->GetQueue()->WriteBuffer(uniformBuffer.Get(), 0, uniformData,
+        DAWN_TRY(device->GetQueue()->WriteBuffer(uniformBuffer.Get(), 0, &uniformData,
                                                  sizeof(uniformData)));
 
         // Prepare binding 1 resource: sampler
