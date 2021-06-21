@@ -736,7 +736,9 @@ TEST_P(D3D12DescriptorHeapTests, EncodeReuseUBOMultipleSubmits) {
 
 // Verify encoding many sampler and ubo worth of bindgroups.
 // Shader-visible heaps should switch out |kNumOfViewHeaps| times.
-TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
+// TODO(crbug.com/dawn/946): This test is currently disabled because the UBO
+// layout is incorrect. Reenable after next tint roll.
+TEST_P(D3D12DescriptorHeapTests, DISABLED_EncodeManyUBOAndSamplers) {
     DAWN_TEST_UNSUPPORTED_IF(!mD3DDevice->IsToggleEnabled(
         dawn_native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
 
@@ -812,8 +814,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 
         // Encode a heap worth of descriptors |kNumOfHeaps| times.
-        constexpr float dummy = 0.0f;
-        constexpr float transform[] = {1.f, 0.f, dummy, dummy, 0.f, 1.f, dummy, dummy};
+        constexpr float transform[] = {1.f, 0.f, 0.f, 1.f};
         wgpu::Buffer transformBuffer = utils::CreateBufferFromData(
             device, &transform, sizeof(transform), wgpu::BufferUsage::Uniform);
 
