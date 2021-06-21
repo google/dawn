@@ -133,6 +133,24 @@ TEST_F(ResolverFunctionValidationTest,
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverFunctionValidationTest, UnreachableCode_return) {
+  // fn func() -> {
+  //  return;
+  //  var a: i32 = 2;
+  //}
+  auto* decl = Decl(Source{{12, 34}},
+                    Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2)));
+
+  Func("func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           Return(),
+           decl,
+       },
+       ast::DecorationList{});
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
+}
+
 TEST_F(ResolverFunctionValidationTest, FunctionEndWithoutReturnStatement_Fail) {
   // fn func -> int { var a:i32 = 2; }
 

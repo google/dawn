@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/ast/break_statement.h"
+#include "src/ast/continue_statement.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/switch_statement.h"
 #include "src/resolver/resolver_test_helper.h"
@@ -106,6 +108,35 @@ TEST_F(ResolverControlBlockValidationTest, SwitchWithTwoDefault_Fail) {
       r()->error(),
       "12:34 error v-0008: switch statement must have exactly one default "
       "clause");
+}
+
+TEST_F(ResolverControlBlockValidationTest, UnreachableCode_continue) {
+  // loop {
+  //   continue;
+  //   var z : i32;
+  // }
+  WrapInFunction(Loop(Block(
+      create<ast::ContinueStatement>(),
+      Decl(Source{{12, 34}}, Var("z", ty.i32(), ast::StorageClass::kNone)))));
+
+  EXPECT_FALSE(r()->Resolve()) << r()->error();
+  EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
+}
+
+TEST_F(ResolverControlBlockValidationTest, UnreachableCode_break) {
+  // switch (a) {
+  //   case 1: { break; var a : u32 = 2;}
+  //   default: {}
+  // }
+  auto* decl = Decl(Source{{12, 34}},
+                    Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2)));
+
+  WrapInFunction(Loop(Block(Switch(
+      Expr(1), Case(Literal(1), Block(create<ast::BreakStatement>(), decl)),
+      DefaultCase()))));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
 }
 
 TEST_F(ResolverControlBlockValidationTest,

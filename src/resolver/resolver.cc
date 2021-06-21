@@ -1502,6 +1502,25 @@ bool Resolver::Statements(const ast::StatementList& stmts) {
       return false;
     }
   }
+  if (!ValidateStatements(stmts)) {
+    return false;
+  }
+
+  return true;
+}
+
+bool Resolver::ValidateStatements(const ast::StatementList& stmts) {
+  auto next_stmt = stmts.begin();
+  for (auto* stmt : stmts) {
+    next_stmt++;
+    if (stmt->IsAnyOf<ast::ReturnStatement, ast::BreakStatement,
+                      ast::ContinueStatement>()) {
+      if (stmt != stmts.back()) {
+        diagnostics_.add_error("code is unreachable", (*next_stmt)->source());
+        return false;
+      }
+    }
+  }
   return true;
 }
 
