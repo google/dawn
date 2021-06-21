@@ -59,13 +59,17 @@ std::string CommonTypes() {
     %uint_0 = OpConstant %uint 0
     %uint_1 = OpConstant %uint 1
     %int_m1 = OpConstant %int -1
+    %int_0 = OpConstant %int 0
     %uint_2 = OpConstant %uint 2
     %uint_3 = OpConstant %uint 3
     %uint_4 = OpConstant %uint 4
     %uint_5 = OpConstant %uint 5
 
+    %v2int = OpTypeVector %int 2
     %v2float = OpTypeVector %float 2
     %m3v2float = OpTypeMatrix %v2float 3
+
+    %v2int_null = OpConstantNull %v2int
 
     %arr2uint = OpTypeArray %uint %uint_2
     %strct = OpTypeStruct %uint %float %arr2uint
@@ -2282,7 +2286,7 @@ TEST_F(SpvParserFunctionVarTest,
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(VariableDeclStatement{
   Variable{
-    x_35_phi
+    x_38_phi
     none
     undefined
     __u32
@@ -2308,14 +2312,14 @@ Switch{
       Else{
         {
           Assignment{
-            Identifier[not set]{x_35_phi}
+            Identifier[not set]{x_38_phi}
             ScalarConstructor[not set]{0u}
           }
           Break{}
         }
       }
       Assignment{
-        Identifier[not set]{x_35_phi}
+        Identifier[not set]{x_38_phi}
         ScalarConstructor[not set]{1u}
       }
     }
@@ -2323,12 +2327,12 @@ Switch{
 }
 VariableDeclStatement{
   VariableConst{
-    x_35
+    x_38
     none
     undefined
     __u32
     {
-      Identifier[not set]{x_35_phi}
+      Identifier[not set]{x_38_phi}
     }
   }
 }
@@ -2511,6 +2515,84 @@ TEST_F(SpvParserFunctionVarTest,
           Identifier[not set]{x_81_phi_1}
         }
       }
+    }
+  }
+}
+Return{}
+)";
+  const auto got = ToString(p->builder(), fe.ast_body());
+  EXPECT_EQ(got, expected);
+}
+
+TEST_F(SpvParserFunctionVarTest, EmitStatement_Hoist_CompositeInsert) {
+  // From crbug.com/tint/804
+  const auto assembly = Preamble() + R"(
+    %100 = OpFunction %void None %voidfn
+
+    %10 = OpLabel
+    OpSelectionMerge %50 None
+    OpBranchConditional %true %20 %30
+
+      %20 = OpLabel
+      %200 = OpCompositeInsert %v2int %int_0 %v2int_null 0
+      OpBranch %50
+
+      %30 = OpLabel
+      OpReturn
+
+    %50 = OpLabel   ; dominated by %20, but %200 needs to be hoisted
+    %201 = OpCopyObject %v2int %200
+    OpReturn
+    OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  const auto* expected = R"(VariableDeclStatement{
+  Variable{
+    x_200
+    none
+    undefined
+    __vec_2__i32
+  }
+}
+If{
+  (
+    ScalarConstructor[not set]{true}
+  )
+  {
+    Assignment{
+      Identifier[not set]{x_200}
+      TypeConstructor[not set]{
+        __vec_2__i32
+        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0}
+      }
+    }
+    Assignment{
+      MemberAccessor[not set]{
+        Identifier[not set]{x_200}
+        Identifier[not set]{x}
+      }
+      ScalarConstructor[not set]{0}
+    }
+  }
+}
+Else{
+  {
+    Return{}
+  }
+}
+VariableDeclStatement{
+  VariableConst{
+    x_201
+    none
+    undefined
+    __vec_2__i32
+    {
+      Identifier[not set]{x_200}
     }
   }
 }

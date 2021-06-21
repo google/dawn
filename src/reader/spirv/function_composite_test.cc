@@ -607,8 +607,9 @@ TEST_F(SpvParserTest_CompositeInsert, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto body_str = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
+  auto got = ToString(p->builder(), fe.ast_body());
+  const auto* expected =
+      R"(VariableDeclStatement{
   Variable{
     x_1_1
     none
@@ -640,7 +641,10 @@ VariableDeclStatement{
       Identifier[not set]{x_1_1}
     }
   }
-})")) << body_str;
+}
+Return{}
+)";
+  EXPECT_EQ(got, expected);
 }
 
 TEST_F(SpvParserTest_CompositeInsert, Vector_IndexTooBigError) {

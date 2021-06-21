@@ -2289,6 +2289,19 @@ bool FunctionEmitter::EmitFunctionVariables() {
   return success();
 }
 
+TypedExpression FunctionEmitter::AddressOfIfNeeded(
+    TypedExpression expr,
+    const spvtools::opt::Instruction* inst) {
+  if (inst && expr) {
+    if (auto* spirv_type = type_mgr_->GetType(inst->type_id())) {
+      if (expr.type->Is<Reference>() && spirv_type->AsPointer()) {
+        return AddressOf(expr);
+      }
+    }
+  }
+  return expr;
+}
+
 TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
   if (failed()) {
     return {};
@@ -3227,11 +3240,7 @@ bool FunctionEmitter::EmitConstDefinition(
   if (!expr) {
     return false;
   }
-  if (expr.type->Is<Reference>()) {
-    // `let` declarations cannot hold references, so we need to take the address
-    // of the RHS, and make the `let` be a pointer.
-    expr = AddressOf(expr);
-  }
+  expr = AddressOfIfNeeded(expr, &inst);
   auto* ast_const = parser_impl_.MakeVariable(
       inst.result_id(), ast::StorageClass::kNone, expr.type, true, expr.expr,
       ast::DecorationList{});
@@ -3246,6 +3255,11 @@ bool FunctionEmitter::EmitConstDefinition(
 bool FunctionEmitter::EmitConstDefOrWriteToHoistedVar(
     const spvtools::opt::Instruction& inst,
     TypedExpression expr) {
+  return WriteIfHoistedVar(inst, expr) || EmitConstDefinition(inst, expr);
+}
+
+bool FunctionEmitter::WriteIfHoistedVar(const spvtools::opt::Instruction& inst,
+                                        TypedExpression expr) {
   const auto result_id = inst.result_id();
   const auto* def_info = GetDefInfo(result_id);
   if (def_info && def_info->requires_hoisted_def) {
@@ -3258,7 +3272,7 @@ bool FunctionEmitter::EmitConstDefOrWriteToHoistedVar(
         expr.expr));
     return true;
   }
-  return EmitConstDefinition(inst, expr);
+  return false;
 }
 
 bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
@@ -3490,14 +3504,9 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
         GetDefInfo(inst.result_id())->skip = skip;
         return true;
       }
-      auto expr = MakeExpression(value_id);
+      auto expr = AddressOfIfNeeded(MakeExpression(value_id), &inst);
       if (!expr) {
         return false;
-      }
-      if (expr.type->Is<Reference>()) {
-        // If the source is a reference, then we need to take the address of the
-        // expression.
-        expr = AddressOf(expr);
       }
       expr.type = RemapStorageClass(expr.type, result_id);
       return EmitConstDefOrWriteToHoistedVar(inst, expr);
@@ -3546,7 +3555,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
 TypedExpression FunctionEmitter::MakeOperand(
     const spvtools::opt::Instruction& inst,
     uint32_t operand_index) {
-  auto expr = this->MakeExpression(inst.GetSingleWordInOperand(operand_index));
+  auto expr = MakeExpression(inst.GetSingleWordInOperand(operand_index));
   if (!expr) {
     return {};
   }
@@ -4583,11 +4592,10 @@ bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
     if (!expr) {
       return false;
     }
-    if (expr.type->Is<Reference>()) {
-      // Functions cannot use references as parameters, so we need to pass by
-      // pointer.
-      expr = AddressOf(expr);
-    }
+    // Functions cannot use references as parameters, so we need to pass by
+    // pointer if the operand is of pointer type.
+    expr = AddressOfIfNeeded(
+        expr, def_use_mgr_->GetDef(inst.GetSingleWordInOperand(iarg)));
     args.emplace_back(expr.expr);
   }
   if (failed()) {
@@ -5435,6 +5443,9 @@ bool FunctionEmitter::MakeVectorInsertDynamic(
   // Then use result everywhere the original SPIR-V id is used.  Using a const
   // like this avoids constantly reloading the value many times.
 
+  // TODO(dneto): crbug.com/tint/804: handle the case where %src_vector is
+  // has been hoisted into a variable.
+
   auto* ast_type = parser_impl_.ConvertType(inst.type_id());
   auto src_vector = MakeOperand(inst, 0);
   auto component = MakeOperand(inst, 1);
@@ -5468,40 +5479,57 @@ bool FunctionEmitter::MakeCompositeInsert(
     const spvtools::opt::Instruction& inst) {
   // For
   //    %result = OpCompositeInsert %type %object %composite 1 2 3 ...
-  // generate statements like this:
+  // there are two cases.
+  //
+  // Case 1:
+  //   The %composite value has already been hoisted into a variable.
+  //   In this case, assign %composite to that variable, then write the
+  //   component into the right spot:
+  //
+  //    hoisted = composite;
+  //    hoisted[index].x = object;
+  //
+  // Case 2:
+  //   The %composite value is not hoisted. In this case, make a temporary
+  //   variable with the %composite contents, then write the component,
+  //   and then make a let-declaration that reads the value out:
   //
   //    var temp : type = composite;
   //    temp[index].x = object;
   //    let result : type = temp;
   //
-  // Then use result everywhere the original SPIR-V id is used.  Using a const
-  // like this avoids constantly reloading the value many times.
+  //   Then use result everywhere the original SPIR-V id is used.  Using a const
+  //   like this avoids constantly reloading the value many times.
   //
-  // This technique is a combination of:
-  // - making a temporary variable and constant declaration, like what we do
-  //   for VectorInsertDynamic, and
-  // - building up an access-chain like access like for CompositeExtract, but
-  //   on the left-hand side of the assignment.
+  //   This technique is a combination of:
+  //   - making a temporary variable and constant declaration, like what we do
+  //     for VectorInsertDynamic, and
+  //   - building up an access-chain like access like for CompositeExtract, but
+  //     on the left-hand side of the assignment.
 
-  auto* ast_type = parser_impl_.ConvertType(inst.type_id());
+  auto* type = parser_impl_.ConvertType(inst.type_id());
   auto component = MakeOperand(inst, 0);
   auto src_composite = MakeOperand(inst, 1);
 
-  // Synthesize the temporary variable.
-  // It doesn't correspond to a SPIR-V ID, so we don't use the ordinary
-  // API in parser_impl_.
-  auto result_name = namer_.Name(inst.result_id());
-  auto temp_name = namer_.MakeDerivedName(result_name);
-  auto registered_temp_name = builder_.Symbols().Register(temp_name);
+  std::string var_name;
+  auto original_value_name = namer_.Name(inst.result_id());
+  const bool hoisted = WriteIfHoistedVar(inst, src_composite);
+  if (hoisted) {
+    // The variable was already declared in an earlier block.
+    var_name = original_value_name;
+    // Assign the source composite value to it.
+    builder_.Assign({}, builder_.Expr(var_name), src_composite.expr);
+  } else {
+    // Synthesize a temporary variable.
+    // It doesn't correspond to a SPIR-V ID, so we don't use the ordinary
+    // API in parser_impl_.
+    var_name = namer_.MakeDerivedName(original_value_name);
+    auto* temp_var = builder_.Var(var_name, type->Build(builder_),
+                                  ast::StorageClass::kNone, src_composite.expr);
+    AddStatement(builder_.Decl({}, temp_var));
+  }
 
-  auto* temp_var = create<ast::Variable>(
-      Source{}, registered_temp_name, ast::StorageClass::kNone,
-      ast::Access::kUndefined, ast_type->Build(builder_), false,
-      src_composite.expr, ast::DecorationList{});
-  AddStatement(create<ast::VariableDeclStatement>(Source{}, temp_var));
-
-  TypedExpression seed_expr{ast_type, create<ast::IdentifierExpression>(
-                                          Source{}, registered_temp_name)};
+  TypedExpression seed_expr{type, builder_.Expr(var_name)};
 
   // The left-hand side of the assignment *looks* like a decomposition.
   TypedExpression lhs =
@@ -5513,9 +5541,13 @@ bool FunctionEmitter::MakeCompositeInsert(
   AddStatement(
       create<ast::AssignmentStatement>(Source{}, lhs.expr, component.expr));
 
-  return EmitConstDefinition(
-      inst,
-      {ast_type, create<ast::IdentifierExpression>(registered_temp_name)});
+  if (hoisted) {
+    // The hoisted variable itself stands for this result ID.
+    return success();
+  }
+  // Create a new let-declaration that is initialized by the contents
+  // of the temporary variable.
+  return EmitConstDefinition(inst, {type, builder_.Expr(var_name)});
 }
 
 TypedExpression FunctionEmitter::AddressOf(TypedExpression expr) {

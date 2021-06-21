@@ -162,8 +162,9 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParamsUsedTwice) {
   {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
-    EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
-                HasSubstr(R"(VariableDeclStatement{
+    const auto got = ToString(p->builder(), fe.ast_body());
+    const std::string expected =
+        R"(VariableDeclStatement{
   Variable{
     x_10
     none
@@ -194,7 +195,9 @@ Assignment{
   Identifier[not set]{x_10}
   Identifier[not set]{x_1}
 }
-Return{})"));
+Return{}
+)";
+    EXPECT_EQ(got, expected);
   }
   {
     auto fe = p->function_emitter(50);

@@ -281,7 +281,7 @@ struct DefInfo {
   /// to that variable, and each SPIR-V use becomes a WGSL read from the
   /// variable.
   /// TODO(dneto): This works for constants of storable type, but not, for
-  /// example, pointers.
+  /// example, pointers. crbug.com/tint/98
   bool requires_hoisted_def = false;
 
   /// If the definition is an OpPhi, then `phi_var` is the name of the
@@ -682,7 +682,17 @@ class FunctionEmitter {
   bool EmitConstDefOrWriteToHoistedVar(const spvtools::opt::Instruction& inst,
                                        TypedExpression ast_expr);
 
-  /// Makes an expression
+  /// If the result ID of the given instruction is hoisted, then emits
+  /// a statement to write the expression to the hoisted variable, and
+  /// returns true.  Otherwise return false.
+  /// @param inst the SPIR-V instruction defining a value.
+  /// @param ast_expr the expression to assign.
+  /// @returns true if the instruction has an associated hoisted variable.
+  bool WriteIfHoistedVar(const spvtools::opt::Instruction& inst,
+                         TypedExpression ast_expr);
+
+  /// Makes an expression from a SPIR-V ID.
+  /// if the SPIR-V result type is a pointer.
   /// @param id the SPIR-V ID of the value
   /// @returns true if emission has not yet failed.
   TypedExpression MakeExpression(uint32_t id);
@@ -1121,6 +1131,14 @@ class FunctionEmitter {
   /// @returns a TypedExpression that is the address-of `expr` (`&expr`)
   /// @note `expr` must be a reference type
   TypedExpression AddressOf(TypedExpression expr);
+
+  /// Returns AddressOf(expr) if expr is has reference type and
+  /// the instruction has a pointer result type.  Otherwise returns expr.
+  /// @param expr the expression to take the address of
+  /// @returns a TypedExpression that is the address-of `expr` (`&expr`)
+  /// @note `expr` must be a reference type
+  TypedExpression AddressOfIfNeeded(TypedExpression expr,
+                                    const spvtools::opt::Instruction* inst);
 
   /// @param expr the expression to dereference
   /// @returns a TypedExpression that is the dereference-of `expr` (`*expr`)
