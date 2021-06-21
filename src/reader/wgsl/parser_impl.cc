@@ -52,10 +52,10 @@ using Expect = ParserImpl::Expect<T>;
 template <typename T>
 using Maybe = ParserImpl::Maybe<T>;
 
-/// Controls the maximum number of times we'll call into the sync() function
-/// from itself. This is to guard against stack overflow when there is an
-/// excessive number of blocks.
-constexpr uint32_t kMaxSyncDepth = 128;
+/// Controls the maximum number of times we'll call into the sync() and
+/// unary_expression() functions from themselves. This is to guard against stack
+/// overflow when there is an excessive number of blocks.
+constexpr uint32_t kMaxParseDepth = 128;
 
 /// The maximum number of tokens to look ahead to try and sync the
 /// parser on error.
@@ -2327,7 +2327,18 @@ Maybe<ast::Expression*> ParserImpl::unary_expression() {
     return singular_expression();
   }
 
+  if (parse_depth_ >= kMaxParseDepth) {
+    // We've hit a maximum parser recursive depth.
+    // We can't call into unary_expression() as we might stack overflow.
+    // Instead, report an error
+    add_error(peek(), "maximum parser recursive depth reached");
+    return Failure::kErrored;
+  }
+
+  ++parse_depth_;
   auto expr = unary_expression();
+  --parse_depth_;
+
   if (expr.errored) {
     return Failure::kErrored;
   }
@@ -3268,7 +3279,7 @@ T ParserImpl::expect_lt_gt_block(const std::string& use, F&& body) {
 
 template <typename F, typename T>
 T ParserImpl::sync(Token::Type tok, F&& body) {
-  if (sync_depth_ >= kMaxSyncDepth) {
+  if (parse_depth_ >= kMaxParseDepth) {
     // We've hit a maximum parser recursive depth.
     // We can't call into body() as we might stack overflow.
     // Instead, report an error...
@@ -3282,9 +3293,9 @@ T ParserImpl::sync(Token::Type tok, F&& body) {
 
   sync_tokens_.push_back(tok);
 
-  ++sync_depth_;
+  ++parse_depth_;
   auto result = body();
-  --sync_depth_;
+  --parse_depth_;
 
   if (sync_tokens_.back() != tok) {
     TINT_ICE(builder_.Diagnostics()) << "sync_tokens is out of sync";

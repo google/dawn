@@ -871,7 +871,7 @@ class ParserImpl {
   std::deque<Token> token_queue_;
   Token last_token_;
   bool synchronized_ = true;
-  uint32_t sync_depth_ = 0;
+  uint32_t parse_depth_ = 0;
   std::vector<Token::Type> sync_tokens_;
   int silence_errors_ = 0;
   std::unordered_map<std::string, const ast::TypeDecl*> registered_types_;

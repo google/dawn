@@ -154,6 +154,20 @@ TEST_F(ParserImplTest, ConstExpr_Recursion) {
   EXPECT_EQ(p->error(), "1:517: maximum parser recursive depth reached");
 }
 
+TEST_F(ParserImplTest, UnaryOp_Recursion) {
+  std::stringstream out;
+  for (size_t i = 0; i < 200; i++) {
+    out << "!";
+  }
+  out << "1.0";
+  auto p = parser(out.str());
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(e.errored);
+  ASSERT_EQ(e.value, nullptr);
+  EXPECT_EQ(p->error(), "1:130: maximum parser recursive depth reached");
+}
+
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader
