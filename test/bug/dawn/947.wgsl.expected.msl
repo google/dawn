@@ -1,0 +1,50 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Uniforms {
+  /* 0x0000 */ packed_float2 u_scale;
+  /* 0x0008 */ packed_float2 u_offset;
+};
+struct VertexOutputs {
+  float2 texcoords;
+  float4 position;
+};
+struct tint_symbol_1 {
+  float2 texcoords [[user(locn0)]];
+  float4 position [[position]];
+};
+struct tint_array_wrapper {
+  float2 arr[3];
+};
+struct tint_symbol_3 {
+  float2 texcoord [[user(locn0)]];
+};
+struct tint_symbol_4 {
+  float4 value [[color(0)]];
+};
+
+vertex tint_symbol_1 vs_main(uint VertexIndex [[vertex_id]], constant Uniforms& uniforms [[buffer(0)]]) {
+  tint_array_wrapper texcoord = {.arr={float2(-0.5f, 0.0f), float2(1.5f, 0.0f), float2(0.5f, 2.0f)}};
+  VertexOutputs output = {};
+  output.position = float4(((texcoord.arr[VertexIndex] * 2.0f) - float2(1.0f, 1.0f)), 0.0f, 1.0f);
+  bool flipY = (uniforms.u_scale.y < 0.0f);
+  if (flipY) {
+    output.texcoords = ((((texcoord.arr[VertexIndex] * uniforms.u_scale) + uniforms.u_offset) * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f));
+  } else {
+    output.texcoords = ((((texcoord.arr[VertexIndex] * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f)) * uniforms.u_scale) + uniforms.u_offset);
+  }
+  tint_symbol_1 const tint_symbol_5 = {.texcoords=output.texcoords, .position=output.position};
+  return tint_symbol_5;
+}
+
+fragment tint_symbol_4 fs_main(texture2d<float, access::sample> tint_symbol_7 [[texture(2)]], sampler tint_symbol_8 [[sampler(1)]], tint_symbol_3 tint_symbol_2 [[stage_in]]) {
+  float2 const texcoord = tint_symbol_2.texcoord;
+  float2 clampedTexcoord =   clamp(texcoord, float2(0.0f, 0.0f), float2(1.0f, 1.0f));
+  if (!(  all((clampedTexcoord == texcoord)))) {
+    discard_fragment();
+  }
+  float4 srcColor = tint_symbol_7.sample(tint_symbol_8, texcoord);
+  tint_symbol_4 const tint_symbol_6 = {.value=srcColor};
+  return tint_symbol_6;
+}
+
