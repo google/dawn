@@ -14,18 +14,13 @@ kernel void tint_symbol(texture2d_array<float, access::sample> tint_symbol_2 [[t
   float4 texel = tint_symbol_2.read(uint2(int2(GlobalInvocationID.xy)), 0, 0);
   {
     uint i = 0u;
-    {
-      bool tint_msl_is_first_1 = true;
-      for(;;) {
-        if (!tint_msl_is_first_1) {
-          i = (i + 1u);
-        }
-        tint_msl_is_first_1 = false;
-
-        if (!((i < 1u))) {
-          break;
-        }
-        result.values[(flatIndex + i)] = texel.r;
+    while (true) {
+      if (!((i < 1u))) {
+        break;
+      }
+      result.values[(flatIndex + i)] = texel.r;
+      {
+        i = (i + 1u);
       }
     }
   }

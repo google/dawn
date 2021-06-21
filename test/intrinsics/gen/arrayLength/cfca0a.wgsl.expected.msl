@@ -1,37 +1,33 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-
-[[block]]
+using namespace metal;
+struct tint_symbol_2 {
+  /* 0x0000 */ uint buffer_size[2];
+};
 struct SB_RO {
-  arg_0 : array<u32>;
+  /* 0x0000 */ uint arg_0[1];
+};
+struct tint_symbol {
+  float4 value [[position]];
 };
 
-[[group(0), binding(1)]] var<storage, read> sb_ro : SB_RO;
-
-fn arrayLength_cfca0a() {
-  var res : u32 = arrayLength(&(sb_ro.arg_0));
+void arrayLength_cfca0a(constant tint_symbol_2& tint_symbol_3) {
+  uint res = ((tint_symbol_3.buffer_size[1u] - 0u) / 4u);
 }
 
-struct tint_symbol {
-  [[builtin(position)]]
-  value : vec4<f32>;
-};
-
-[[stage(vertex)]]
-fn vertex_main() -> tint_symbol {
-  arrayLength_cfca0a();
-  let tint_symbol_1 : tint_symbol = tint_symbol(vec4<f32>());
+vertex tint_symbol vertex_main(constant tint_symbol_2& tint_symbol_3 [[buffer(30)]]) {
+  arrayLength_cfca0a(tint_symbol_3);
+  tint_symbol const tint_symbol_1 = {.value=float4()};
   return tint_symbol_1;
 }
 
-[[stage(fragment)]]
-fn fragment_main() {
-  arrayLength_cfca0a();
+fragment void fragment_main(constant tint_symbol_2& tint_symbol_3 [[buffer(30)]]) {
+  arrayLength_cfca0a(tint_symbol_3);
+  return;
 }
 
-[[stage(compute)]]
-fn compute_main() {
-  arrayLength_cfca0a();
+kernel void compute_main(constant tint_symbol_2& tint_symbol_3 [[buffer(30)]]) {
+  arrayLength_cfca0a(tint_symbol_3);
+  return;
 }
 
-Failed to generate: error: Unknown import method: arrayLength

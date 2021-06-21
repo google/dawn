@@ -209,9 +209,8 @@ class GeneratorImpl : public TextGenerator {
   bool EmitUnaryOp(ast::UnaryOpExpression* expr);
   /// Handles generating a variable
   /// @param var the variable to generate
-  /// @param skip_constructor set true if the constructor should be skipped
   /// @returns true if the variable was emitted
-  bool EmitVariable(const sem::Variable* var, bool skip_constructor);
+  bool EmitVariable(const sem::Variable* var);
   /// Handles generating a program scope constant variable
   /// @param var the variable to emit
   /// @returns true if the variable was emitted
@@ -260,8 +259,17 @@ class GeneratorImpl : public TextGenerator {
   /// type.
   SizeAndAlign MslPackedTypeSizeAndAlign(const sem::Type* ty);
 
+  /// Emits `prefix`, followed by an opening brace `{`, then calls `cb` to emit
+  /// the block body, then finally emits the closing brace `}`.
+  /// @param prefix the string to emit before the opening brace
+  /// @param cb a function or function-like object with the signature `bool()`
+  /// that emits the block body.
+  /// @returns the return value of `cb`.
+  template <typename F>
+  bool EmitBlockBraces(const std::string& prefix, F&& cb);
+
   const Program* program_ = nullptr;
-  uint32_t loop_emission_counter_ = 0;
+  std::function<bool()> emit_continuing_;
 };
 
 }  // namespace msl

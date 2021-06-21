@@ -33,7 +33,7 @@ TEST_F(MslGeneratorImplTest, Emit_Loop) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  for(;;) {
+  EXPECT_EQ(gen.result(), R"(  while (true) {
     discard_fragment();
   }
 )");
@@ -50,15 +50,10 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  {
-    bool tint_msl_is_first_1 = true;
-    for(;;) {
-      if (!tint_msl_is_first_1) {
-        return;
-      }
-      tint_msl_is_first_1 = false;
-
-      discard_fragment();
+  EXPECT_EQ(gen.result(), R"(  while (true) {
+    discard_fragment();
+    {
+      return;
     }
   }
 )");
@@ -84,25 +79,15 @@ TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(outer)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  {
-    bool tint_msl_is_first_1 = true;
-    for(;;) {
-      if (!tint_msl_is_first_1) {
-        lhs = rhs;
-      }
-      tint_msl_is_first_1 = false;
-
+  EXPECT_EQ(gen.result(), R"(  while (true) {
+    while (true) {
+      discard_fragment();
       {
-        bool tint_msl_is_first_2 = true;
-        for(;;) {
-          if (!tint_msl_is_first_2) {
-            return;
-          }
-          tint_msl_is_first_2 = false;
-
-          discard_fragment();
-        }
+        return;
       }
+    }
+    {
+      lhs = rhs;
     }
   }
 )");
@@ -146,18 +131,11 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithVarUsedInContinuing) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(outer)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  {
-    bool tint_msl_is_first_1 = true;
-    float lhs;
-    float other;
-    for(;;) {
-      if (!tint_msl_is_first_1) {
-        lhs = rhs;
-      }
-      tint_msl_is_first_1 = false;
-
-      lhs = 2.400000095f;
-      other = 0.0f;
+  EXPECT_EQ(gen.result(), R"(  while (true) {
+    float lhs = 2.400000095f;
+    float other = 0.0f;
+    {
+      lhs = rhs;
     }
   }
 )");

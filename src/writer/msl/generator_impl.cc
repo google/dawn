@@ -50,6 +50,7 @@
 #include "src/sem/variable.h"
 #include "src/sem/vector_type.h"
 #include "src/sem/void_type.h"
+#include "src/utils/scoped_assignment.h"
 #include "src/writer/float_to_string.h"
 
 namespace tint {
@@ -875,6 +876,9 @@ bool GeneratorImpl::EmitConstructor(ast::ConstructorExpression* expr) {
 }
 
 bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
+  if (!emit_continuing_()) {
+    return false;
+  }
   make_indent();
   out_ << "continue;" << std::endl;
   return true;
@@ -1279,91 +1283,30 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
 }
 
 bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
-  loop_emission_counter_++;
-
-  std::string guard =
-      "tint_msl_is_first_" + std::to_string(loop_emission_counter_);
-
-  if (stmt->has_continuing()) {
-    make_indent();
-
-    // Continuing variables get their own scope.
-    out_ << "{" << std::endl;
-    increment_indent();
-
-    make_indent();
-    out_ << "bool " << guard << " = true;" << std::endl;
-
-    // A continuing block may use variables declared in the method body. As a
-    // first pass, if we have a continuing, we pull all declarations outside
-    // the for loop into the continuing scope. Then, the variable declarations
-    // will be turned into assignments.
-    for (auto* s : *(stmt->body())) {
-      if (auto* decl = s->As<ast::VariableDeclStatement>()) {
-        if (!EmitVariable(program_->Sem().Get(decl->variable()), true)) {
-          return false;
-        }
-      }
-    }
-  }
-
   make_indent();
-  out_ << "for(;;) {" << std::endl;
-  increment_indent();
 
-  if (stmt->has_continuing()) {
-    make_indent();
-    out_ << "if (!" << guard << ") ";
-
-    if (!EmitBlockAndNewline(stmt->continuing())) {
-      return false;
-    }
-
-    make_indent();
-    out_ << guard << " = false;" << std::endl;
-    out_ << std::endl;
-  }
-
-  for (auto* s : *(stmt->body())) {
-    // If we have a continuing block we've already emitted the variable
-    // declaration before the loop, so treat it as an assignment.
-    auto* decl = s->As<ast::VariableDeclStatement>();
-    if (decl != nullptr && stmt->has_continuing()) {
+  auto emit_continuing = [this, stmt]() {
+    if (stmt->has_continuing()) {
       make_indent();
-
-      auto* var = decl->variable();
-      out_ << program_->Symbols().NameFor(var->symbol()) << " = ";
-      if (var->constructor() != nullptr) {
-        if (!EmitExpression(var->constructor())) {
-          return false;
-        }
-      } else {
-        auto* type = program_->Sem().Get(var)->Type()->UnwrapRef();
-        if (!EmitZeroValue(type)) {
-          return false;
-        }
+      if (!EmitBlock(stmt->continuing())) {
+        return false;
       }
-      out_ << ";" << std::endl;
-      continue;
+      out_ << std::endl;
     }
+    return true;
+  };
 
-    if (!EmitStatement(s)) {
-      return false;
+  TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
+  bool ok = EmitBlockBraces("while (true)", [&] {
+    for (auto* s : stmt->body()->statements()) {
+      if (!EmitStatement(s)) {
+        return false;
+      }
     }
-  }
-
-  decrement_indent();
-  make_indent();
-  out_ << "}" << std::endl;
-
-  // Close the scope for any continuing variables.
-  if (stmt->has_continuing()) {
-    decrement_indent();
-    make_indent();
-    out_ << "}" << std::endl;
-  }
-
-  return true;
+    return emit_continuing();
+  });
+  out_ << std::endl;
+  return ok;
 }
 
 bool GeneratorImpl::EmitDiscard(ast::DiscardStatement*) {
@@ -1530,7 +1473,7 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   }
   if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
     auto* var = program_->Sem().Get(v->variable());
-    return EmitVariable(var, false);
+    return EmitVariable(var);
   }
 
   diagnostics_.add_error("unknown statement type: " + program_->str(stmt));
@@ -1882,8 +1825,7 @@ bool GeneratorImpl::EmitUnaryOp(ast::UnaryOpExpression* expr) {
   return true;
 }
 
-bool GeneratorImpl::EmitVariable(const sem::Variable* var,
-                                 bool skip_constructor) {
+bool GeneratorImpl::EmitVariable(const sem::Variable* var) {
   make_indent();
 
   auto* decl = var->Declaration();
@@ -1925,19 +1867,17 @@ bool GeneratorImpl::EmitVariable(const sem::Variable* var,
     out_ << " " << name;
   }
 
-  if (!skip_constructor) {
-    if (decl->constructor() != nullptr) {
-      out_ << " = ";
-      if (!EmitExpression(decl->constructor())) {
-        return false;
-      }
-    } else if (var->StorageClass() == ast::StorageClass::kPrivate ||
-               var->StorageClass() == ast::StorageClass::kFunction ||
-               var->StorageClass() == ast::StorageClass::kNone) {
-      out_ << " = ";
-      if (!EmitZeroValue(type)) {
-        return false;
-      }
+  if (decl->constructor() != nullptr) {
+    out_ << " = ";
+    if (!EmitExpression(decl->constructor())) {
+      return false;
+    }
+  } else if (var->StorageClass() == ast::StorageClass::kPrivate ||
+             var->StorageClass() == ast::StorageClass::kFunction ||
+             var->StorageClass() == ast::StorageClass::kNone) {
+    out_ << " = ";
+    if (!EmitZeroValue(type)) {
+      return false;
     }
   }
   out_ << ";" << std::endl;
@@ -2044,6 +1984,21 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
 
   TINT_UNREACHABLE(diagnostics_) << "Unhandled type " << ty->TypeInfo().name;
   return {};
+}
+
+template <typename F>
+bool GeneratorImpl::EmitBlockBraces(const std::string& prefix, F&& cb) {
+  out_ << prefix << (prefix.empty() ? "{" : " {") << std::endl;
+  increment_indent();
+
+  if (!cb()) {
+    return false;
+  }
+
+  decrement_indent();
+  make_indent();
+  out_ << "}";
+  return true;
 }
 
 }  // namespace msl

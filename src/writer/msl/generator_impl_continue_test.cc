@@ -22,15 +22,18 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Continue) {
-  auto* c = create<ast::ContinueStatement>();
-  WrapInFunction(Loop(Block(c)));
+  auto* loop = Loop(Block(create<ast::ContinueStatement>()));
+  WrapInFunction(loop);
 
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(c)) << gen.error();
-  EXPECT_EQ(gen.result(), "  continue;\n");
+  ASSERT_TRUE(gen.EmitStatement(loop)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  while (true) {
+    continue;
+  }
+)");
 }
 
 }  // namespace
