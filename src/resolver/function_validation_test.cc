@@ -479,5 +479,47 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_NonConst) {
             "i32 module-scope constant");
 }
 
+TEST_F(ResolverFunctionValidationTest, ReturnIsAtomicFreePlain_NonPlain) {
+  auto* ret_type =
+      ty.pointer(Source{{12, 34}}, ty.i32(), ast::StorageClass::kFunction);
+  Func("f", {}, ret_type, {});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: function return type must be an atomic-free plain type");
+}
+
+TEST_F(ResolverFunctionValidationTest, ReturnIsAtomicFreePlain_AtomicInt) {
+  auto* ret_type = ty.atomic(Source{{12, 34}}, ty.i32());
+  Func("f", {}, ret_type, {});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: function return type must be an atomic-free plain type");
+}
+
+TEST_F(ResolverFunctionValidationTest, ReturnIsAtomicFreePlain_ArrayOfAtomic) {
+  auto* ret_type = ty.array(Source{{12, 34}}, ty.atomic(ty.i32()));
+  Func("f", {}, ret_type, {});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: function return type must be an atomic-free plain type");
+}
+
+TEST_F(ResolverFunctionValidationTest, ReturnIsAtomicFreePlain_StructOfAtomic) {
+  Structure("S", {Member("m", ty.atomic(ty.i32()))});
+  auto* ret_type = ty.type_name(Source{{12, 34}}, "S");
+  Func("f", {}, ret_type, {});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: function return type must be an atomic-free plain type");
+}
+
 }  // namespace
 }  // namespace tint

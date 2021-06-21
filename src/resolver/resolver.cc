@@ -176,19 +176,45 @@ bool Resolver::Resolve() {
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#plain-types-section
-bool Resolver::IsPlain(const sem::Type* type) {
+bool Resolver::IsPlain(const sem::Type* type) const {
   return type->is_scalar() || type->Is<sem::Atomic>() ||
          type->Is<sem::Vector>() || type->Is<sem::Matrix>() ||
          type->Is<sem::Array>() || type->Is<sem::Struct>();
 }
 
+// https://gpuweb.github.io/gpuweb/wgsl/#atomic-free
+bool Resolver::IsAtomicFreePlain(const sem::Type* type) const {
+  if (type->Is<sem::Atomic>()) {
+    return false;
+  }
+
+  if (type->is_scalar() || type->Is<sem::Vector>() || type->Is<sem::Matrix>()) {
+    return true;
+  }
+
+  if (auto* arr = type->As<sem::Array>()) {
+    return IsAtomicFreePlain(arr->ElemType());
+  }
+
+  if (auto* str = type->As<sem::Struct>()) {
+    for (auto* m : str->Members()) {
+      if (!IsAtomicFreePlain(m->Type())) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  return false;
+}
+
 // https://gpuweb.github.io/gpuweb/wgsl.html#storable-types
-bool Resolver::IsStorable(const sem::Type* type) {
+bool Resolver::IsStorable(const sem::Type* type) const {
   return IsPlain(type) || type->Is<sem::Texture>() || type->Is<sem::Sampler>();
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#host-shareable-types
-bool Resolver::IsHostShareable(const sem::Type* type) {
+bool Resolver::IsHostShareable(const sem::Type* type) const {
   if (type->IsAnyOf<sem::I32, sem::U32, sem::F32>()) {
     return true;
   }
@@ -1013,6 +1039,13 @@ bool Resolver::ValidateFunction(const ast::Function* func,
   }
 
   if (!info->return_type->Is<sem::Void>()) {
+    if (!IsAtomicFreePlain(info->return_type)) {
+      diagnostics_.add_error(
+          "function return type must be an atomic-free plain type",
+          func->return_type()->source());
+      return false;
+    }
+
     if (func->body()) {
       if (!func->get_last_statement() ||
           !func->get_last_statement()->Is<ast::ReturnStatement>()) {

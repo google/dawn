@@ -77,15 +77,19 @@ class Resolver {
 
   /// @param type the given type
   /// @returns true if the given type is a plain type
-  bool IsPlain(const sem::Type* type);
+  bool IsPlain(const sem::Type* type) const;
+
+  /// @param type the given type
+  /// @returns true if the given type is a atomic-free plain type
+  bool IsAtomicFreePlain(const sem::Type* type) const;
 
   /// @param type the given type
   /// @returns true if the given type is storable
-  bool IsStorable(const sem::Type* type);
+  bool IsStorable(const sem::Type* type) const;
 
   /// @param type the given type
   /// @returns true if the given type is host-shareable
-  bool IsHostShareable(const sem::Type* type);
+  bool IsHostShareable(const sem::Type* type) const;
 
  private:
   /// Describes the context in which a variable is declared
