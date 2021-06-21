@@ -18,6 +18,7 @@
 #include <utility>
 
 #include "src/ast/call_statement.h"
+#include "src/ast/disable_validation_decoration.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/stage_decoration.h"
 #include "src/program_builder.h"
@@ -272,7 +273,10 @@ void Spirv::EmitVertexPointSize(CloneContext& ctx) const {
   Symbol pointsize = ctx.dst->Symbols().New("tint_pointsize");
   ctx.dst->Global(
       pointsize, ctx.dst->ty.f32(), ast::StorageClass::kOutput,
-      ast::DecorationList{ctx.dst->Builtin(ast::Builtin::kPointSize)});
+      ast::DecorationList{
+          ctx.dst->Builtin(ast::Builtin::kPointSize),
+          ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
+              ctx.dst->ID(), ast::DisabledValidation::kIgnoreStorageClass)});
 
   // Assign 1.0 to the global at the start of all vertex shader entry points.
   ctx.ReplaceAll([&ctx, pointsize](ast::Function* func) -> ast::Function* {
@@ -309,6 +313,9 @@ Symbol Spirv::HoistToInputVariables(
           return !deco->IsAnyOf<ast::BuiltinDecoration,
                                 ast::LocationDecoration>();
         });
+    new_decorations.push_back(
+        ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
+            ctx.dst->ID(), ast::DisabledValidation::kIgnoreStorageClass));
     auto global_var_symbol = ctx.dst->Sym();
     auto* global_var =
         ctx.dst->Var(global_var_symbol, ctx.Clone(declared_ty),
@@ -363,6 +370,9 @@ void Spirv::HoistToOutputVariables(CloneContext& ctx,
           return !deco->IsAnyOf<ast::BuiltinDecoration,
                                 ast::LocationDecoration>();
         });
+    new_decorations.push_back(
+        ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
+            ctx.dst->ID(), ast::DisabledValidation::kIgnoreStorageClass));
     auto global_var_symbol = ctx.dst->Sym();
     auto* global_var =
         ctx.dst->Var(global_var_symbol, ctx.Clone(declared_ty),

@@ -883,6 +883,15 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
     return false;
   }
 
+  if (!IsValidationDisabled(var->decorations(),
+                            ast::DisabledValidation::kIgnoreStorageClass) &&
+      (var->declared_storage_class() == ast::StorageClass::kInput ||
+       var->declared_storage_class() == ast::StorageClass::kOutput)) {
+    diagnostics_.add_error("invalid use of input/output storage class",
+                           var->source());
+    return false;
+  }
+
   // https://gpuweb.github.io/gpuweb/wgsl/#atomic-types
   // Atomic types may only be instantiated by variables in the workgroup storage
   // class or by storage buffer variables with a read_write access mode.
@@ -2749,9 +2758,8 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
 
   if (!var->is_const()) {
     if (info->storage_class != ast::StorageClass::kFunction &&
-        !IsValidationDisabled(
-            var->decorations(),
-            ast::DisabledValidation::kFunctionVarStorageClass)) {
+        !IsValidationDisabled(var->decorations(),
+                              ast::DisabledValidation::kIgnoreStorageClass)) {
       if (info->storage_class != ast::StorageClass::kNone) {
         diagnostics_.add_error(
             "function variable has a non-function storage class",

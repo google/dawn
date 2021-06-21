@@ -207,8 +207,7 @@ void Msl::HandleModuleScopeVariables(CloneContext& ctx) const {
           // scope. Disable storage class validation on this variable.
           auto* disable_validation =
               ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
-                  ctx.dst->ID(),
-                  ast::DisabledValidation::kFunctionVarStorageClass);
+                  ctx.dst->ID(), ast::DisabledValidation::kIgnoreStorageClass);
           auto* constructor = ctx.Clone(var->Declaration()->constructor());
           auto* local_var = ctx.dst->Var(
               new_var_symbol, store_type, var->StorageClass(), constructor,

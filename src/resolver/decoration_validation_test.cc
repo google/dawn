@@ -84,6 +84,16 @@ bool IsBindingDecoration(DecorationKind kind) {
   }
 }
 
+bool IsShaderIODecoration(DecorationKind kind) {
+  switch (kind) {
+    case DecorationKind::kBuiltin:
+    case DecorationKind::kLocation:
+      return true;
+    default:
+      return false;
+  }
+}
+
 struct TestParams {
   DecorationKind kind;
   bool should_pass;
@@ -327,8 +337,16 @@ TEST_P(VariableDecorationTest, IsValid) {
     Global("a", ty.sampler(ast::SamplerKind::kSampler),
            ast::StorageClass::kNone, nullptr,
            createDecorations(Source{{12, 34}}, *this, params.kind));
+  } else if (IsShaderIODecoration(params.kind)) {
+    // Shader IO decorations are only valid on global variables when they have
+    // input/output storage classes, which are only generated internally by the
+    // SPIR-V sanitizer.
+    auto decos = createDecorations(Source{{12, 34}}, *this, params.kind);
+    decos.push_back(ASTNodes().Create<ast::DisableValidationDecoration>(
+        ID(), ast::DisabledValidation::kIgnoreStorageClass));
+    Global("a", ty.f32(), ast::StorageClass::kInput, nullptr, decos);
   } else {
-    Global("a", ty.f32(), ast::StorageClass::kInput, nullptr,
+    Global("a", ty.f32(), ast::StorageClass::kPrivate, nullptr,
            createDecorations(Source{{12, 34}}, *this, params.kind));
   }
 
@@ -506,7 +524,7 @@ TEST_P(ArrayStrideTest, All) {
 
   auto* arr = ty.array(Source{{12, 34}}, el_ty, 4, params.stride);
 
-  Global("myarray", arr, ast::StorageClass::kInput);
+  Global("myarray", arr, ast::StorageClass::kPrivate);
 
   if (params.should_pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -590,7 +608,7 @@ TEST_F(ArrayStrideTest, DuplicateDecoration) {
                            create<ast::StrideDecoration>(Source{{56, 78}}, 4),
                        });
 
-  Global("myarray", arr, ast::StorageClass::kInput);
+  Global("myarray", arr, ast::StorageClass::kPrivate);
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),

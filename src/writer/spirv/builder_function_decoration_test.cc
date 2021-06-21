@@ -51,17 +51,22 @@ TEST_P(Decoration_StageTest, Emit) {
   auto params = GetParam();
 
   ast::Variable* var = nullptr;
+  ast::Type* ret_type = nullptr;
+  ast::DecorationList ret_type_decos;
   ast::StatementList body;
   if (params.stage == ast::PipelineStage::kVertex) {
-    var = Global("pos", ty.vec4<f32>(), ast::StorageClass::kOutput, nullptr,
-                 ast::DecorationList{Builtin(ast::Builtin::kPosition)});
-    body.push_back(Assign("pos", Construct(ty.vec4<f32>())));
+    ret_type = ty.vec4<f32>();
+    ret_type_decos.push_back(Builtin(ast::Builtin::kPosition));
+    body.push_back(Return(Construct(ty.vec4<f32>())));
+  } else {
+    ret_type = ty.void_();
   }
 
-  auto* func = Func("main", {}, ty.void_(), body,
+  auto* func = Func("main", {}, ret_type, body,
                     ast::DecorationList{
                         Stage(params.stage),
-                    });
+                    },
+                    ret_type_decos);
 
   spirv::Builder& b = Build();
 
@@ -87,87 +92,6 @@ INSTANTIATE_TEST_SUITE_P(
                                       SpvExecutionModelFragment},
                     FunctionStageData{ast::PipelineStage::kCompute,
                                       SpvExecutionModelGLCompute}));
-
-TEST_F(BuilderTest, Decoration_Stage_WithUnusedInterfaceIds) {
-  auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
-                    ast::DecorationList{
-                        Stage(ast::PipelineStage::kFragment),
-                    });
-
-  auto* v_in = Global("my_in", ty.f32(), ast::StorageClass::kInput);
-  auto* v_out = Global("my_out", ty.f32(), ast::StorageClass::kOutput);
-  auto* v_wg = Global("my_wg", ty.f32(), ast::StorageClass::kWorkgroup);
-
-  spirv::Builder& b = Build();
-
-  EXPECT_TRUE(b.GenerateGlobalVariable(v_in)) << b.error();
-  EXPECT_TRUE(b.GenerateGlobalVariable(v_out)) << b.error();
-  EXPECT_TRUE(b.GenerateGlobalVariable(v_wg)) << b.error();
-
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "my_in"
-OpName %4 "my_out"
-OpName %7 "my_wg"
-OpName %11 "main"
-)");
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
-%2 = OpTypePointer Input %3
-%1 = OpVariable %2 Input
-%5 = OpTypePointer Output %3
-%6 = OpConstantNull %3
-%4 = OpVariable %5 Output %6
-%8 = OpTypePointer Workgroup %3
-%7 = OpVariable %8 Workgroup
-%10 = OpTypeVoid
-%9 = OpTypeFunction %10
-)");
-  EXPECT_EQ(DumpInstructions(b.entry_points()),
-            R"(OpEntryPoint Fragment %11 "main"
-)");
-}
-
-TEST_F(BuilderTest, Decoration_Stage_WithUsedInterfaceIds) {
-  auto* v_in = Global("my_in", ty.f32(), ast::StorageClass::kInput);
-  auto* v_out = Global("my_out", ty.f32(), ast::StorageClass::kOutput);
-  auto* v_wg = Global("my_wg", ty.f32(), ast::StorageClass::kWorkgroup);
-
-  auto* func = Func(
-      "main", {}, ty.void_(),
-      ast::StatementList{Assign("my_out", "my_in"), Assign("my_wg", "my_wg"),
-                         // Add duplicate usages so we show they
-                         // don't get output multiple times.
-                         Assign("my_out", "my_in")},
-      ast::DecorationList{
-          Stage(ast::PipelineStage::kFragment),
-      });
-
-  spirv::Builder& b = Build();
-
-  EXPECT_TRUE(b.GenerateGlobalVariable(v_in)) << b.error();
-  EXPECT_TRUE(b.GenerateGlobalVariable(v_out)) << b.error();
-  EXPECT_TRUE(b.GenerateGlobalVariable(v_wg)) << b.error();
-
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "my_in"
-OpName %4 "my_out"
-OpName %7 "my_wg"
-OpName %11 "main"
-)");
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
-%2 = OpTypePointer Input %3
-%1 = OpVariable %2 Input
-%5 = OpTypePointer Output %3
-%6 = OpConstantNull %3
-%4 = OpVariable %5 Output %6
-%8 = OpTypePointer Workgroup %3
-%7 = OpVariable %8 Workgroup
-%10 = OpTypeVoid
-%9 = OpTypeFunction %10
-)");
-  EXPECT_EQ(DumpInstructions(b.entry_points()),
-            R"(OpEntryPoint Fragment %11 "main" %4 %1
-)");
-}
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_Fragment_OriginUpperLeft) {
   auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
@@ -323,22 +247,22 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_FragDepth) {
-  Global("fragdepth", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         ast::DecorationList{
-             Builtin(ast::Builtin::kFragDepth),
-         });
+  Func("main", ast::VariableList{}, ty.f32(),
+       ast::StatementList{
+           Return(Expr(1.f)),
+       },
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)},
+       ast::DecorationList{
+           Builtin(ast::Builtin::kFragDepth),
+       });
 
-  auto* func = Func("main", ast::VariableList{}, ty.void_(),
-                    ast::StatementList{
-                        Assign("fragdepth", Expr(1.f)),
-                    },
-                    ast::DecorationList{});
+  spirv::Builder& b = SanitizeAndBuild();
 
-  spirv::Builder& b = Build();
+  ASSERT_TRUE(b.Build());
 
-  ASSERT_TRUE(b.GenerateExecutionModes(func, 3)) << b.error();
   EXPECT_EQ(DumpInstructions(b.execution_modes()),
-            R"(OpExecutionMode %3 DepthReplacing
+            R"(OpExecutionMode %11 OriginUpperLeft
+OpExecutionMode %11 DepthReplacing
 )");
 }
 

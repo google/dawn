@@ -70,7 +70,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
 
 TEST_F(BuilderTest_Type, GenerateArray) {
   auto* ary = ty.array(ty.i32(), 4);
-  Global("a", ary, ast::StorageClass::kInput);
+  Global("a", ary, ast::StorageClass::kPrivate);
 
   spirv::Builder& b = Build();
 
@@ -87,7 +87,7 @@ TEST_F(BuilderTest_Type, GenerateArray) {
 
 TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
   auto* ary = ty.array(ty.i32(), 4, 16u);
-  Global("a", ary, ast::StorageClass::kInput);
+  Global("a", ary, ast::StorageClass::kPrivate);
 
   spirv::Builder& b = Build();
 
@@ -107,7 +107,7 @@ TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedArray) {
   auto* ary = ty.array(ty.i32(), 4);
-  Global("a", ary, ast::StorageClass::kInput);
+  Global("a", ary, ast::StorageClass::kPrivate);
 
   spirv::Builder& b = Build();
 

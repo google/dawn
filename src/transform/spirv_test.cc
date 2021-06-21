@@ -38,18 +38,18 @@ fn compute_main([[builtin(local_invocation_id)]] local_id : vec3<u32>,
 )";
 
   auto* expect = R"(
-[[builtin(position)]] var<in> tint_symbol : vec4<f32>;
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol : vec4<f32>;
 
-[[location(1)]] var<in> tint_symbol_1 : f32;
+[[location(1), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_1 : f32;
 
 [[stage(fragment)]]
 fn frag_main() {
   var col : f32 = (tint_symbol.x * tint_symbol_1);
 }
 
-[[builtin(local_invocation_id)]] var<in> tint_symbol_2 : vec3<u32>;
+[[builtin(local_invocation_id), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_2 : vec3<u32>;
 
-[[builtin(local_invocation_index)]] var<in> tint_symbol_3 : u32;
+[[builtin(local_invocation_index), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_3 : u32;
 
 [[stage(compute)]]
 fn compute_main() {
@@ -74,7 +74,7 @@ fn frag_main([[location(1)]] loc1 : myf32) {
   auto* expect = R"(
 type myf32 = f32;
 
-[[location(1)]] var<in> tint_symbol : myf32;
+[[location(1), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol : myf32;
 
 [[stage(fragment)]]
 fn frag_main() {
@@ -95,7 +95,7 @@ fn vert_main() -> [[builtin(position)]] vec4<f32> {
 )";
 
   auto* expect = R"(
-[[builtin(position)]] var<out> tint_symbol_1 : vec4<f32>;
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_1 : vec4<f32>;
 
 fn tint_symbol_2(tint_symbol : vec4<f32>) {
   tint_symbol_1 = tint_symbol;
@@ -125,9 +125,9 @@ fn frag_main([[location(0)]] loc_in : u32) -> [[location(0)]] f32 {
 )";
 
   auto* expect = R"(
-[[location(0)]] var<in> tint_symbol : u32;
+[[location(0), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol : u32;
 
-[[location(0)]] var<out> tint_symbol_2 : f32;
+[[location(0), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_2 : f32;
 
 fn tint_symbol_3(tint_symbol_1 : f32) {
   tint_symbol_2 = tint_symbol_1;
@@ -165,9 +165,9 @@ fn frag_main([[location(0)]] loc_in : u32) -> [[location(0)]] myf32 {
   auto* expect = R"(
 type myf32 = f32;
 
-[[location(0)]] var<in> tint_symbol : u32;
+[[location(0), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol : u32;
 
-[[location(0)]] var<out> tint_symbol_2 : myf32;
+[[location(0), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_2 : myf32;
 
 fn tint_symbol_3(tint_symbol_1 : myf32) {
   tint_symbol_2 = tint_symbol_1;
@@ -208,9 +208,9 @@ struct FragmentInput {
   value : f32;
 };
 
-[[builtin(position)]] var<in> tint_symbol : vec4<f32>;
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol : vec4<f32>;
 
-[[location(1)]] var<in> tint_symbol_1 : f32;
+[[location(1), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_1 : f32;
 
 [[stage(fragment)]]
 fn frag_main() {
@@ -240,7 +240,7 @@ struct FragmentInput {
   value : f32;
 };
 
-[[location(1)]] var<in> tint_symbol : f32;
+[[location(1), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol : f32;
 
 [[stage(fragment)]]
 fn frag_main() {
@@ -275,9 +275,9 @@ struct VertexOutput {
   value : f32;
 };
 
-[[builtin(position)]] var<out> tint_symbol_1 : vec4<f32>;
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_1 : vec4<f32>;
 
-[[location(1)]] var<out> tint_symbol_2 : f32;
+[[location(1), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_2 : f32;
 
 fn tint_symbol_3(tint_symbol : VertexOutput) {
   tint_symbol_1 = tint_symbol.pos;
@@ -318,9 +318,9 @@ struct Interface {
   value : f32;
 };
 
-[[location(1)]] var<in> tint_symbol : f32;
+[[location(1), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol : f32;
 
-[[location(1)]] var<out> tint_symbol_3 : f32;
+[[location(1), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_3 : f32;
 
 fn tint_symbol_4(tint_symbol_2 : Interface) {
   tint_symbol_3 = tint_symbol_2.value;
@@ -363,9 +363,9 @@ struct Interface {
   value : f32;
 };
 
-[[builtin(position)]] var<out> tint_symbol_1 : vec4<f32>;
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_1 : vec4<f32>;
 
-[[location(1)]] var<out> tint_symbol_2 : f32;
+[[location(1), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_2 : f32;
 
 fn tint_symbol_3(tint_symbol : Interface) {
   tint_symbol_1 = tint_symbol.pos;
@@ -378,9 +378,9 @@ fn vert_main() {
   return;
 }
 
-[[builtin(position)]] var<in> tint_symbol_4 : vec4<f32>;
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_4 : vec4<f32>;
 
-[[location(1)]] var<in> tint_symbol_5 : f32;
+[[location(1), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_5 : f32;
 
 [[stage(fragment)]]
 fn frag_main() {
@@ -426,11 +426,11 @@ struct FragmentOutput {
   value : f32;
 };
 
-[[location(1)]] var<in> tint_symbol : f32;
+[[location(1), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol : f32;
 
-[[builtin(position)]] var<in> tint_symbol_1 : vec4<f32>;
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_1 : vec4<f32>;
 
-[[location(1)]] var<out> tint_symbol_4 : f32;
+[[location(1), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_4 : f32;
 
 fn tint_symbol_5(tint_symbol_3 : FragmentOutput) {
   tint_symbol_4 = tint_symbol_3.value;
@@ -472,7 +472,7 @@ struct VertexOutput {
   Position : vec4<f32>;
 };
 
-[[builtin(position)]] var<out> tint_symbol_1 : vec4<f32>;
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_1 : vec4<f32>;
 
 fn tint_symbol_2(tint_symbol : VertexOutput) {
   tint_symbol_1 = tint_symbol.Position;
@@ -501,11 +501,11 @@ fn main([[builtin(sample_index)]] sample_index : u32,
 )";
 
   auto* expect = R"(
-[[builtin(sample_index)]] var<in> tint_symbol : u32;
+[[builtin(sample_index), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol : u32;
 
-[[builtin(sample_mask)]] var<in> tint_symbol_1 : array<u32, 1>;
+[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_1 : array<u32, 1>;
 
-[[builtin(sample_mask)]] var<out> tint_symbol_3 : array<u32, 1>;
+[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_3 : array<u32, 1>;
 
 fn tint_symbol_4(tint_symbol_2 : u32) {
   tint_symbol_3[0] = tint_symbol_2;
@@ -549,9 +549,9 @@ fn set_mask(input : u32) -> u32 {
   return input;
 }
 
-[[builtin(sample_mask)]] var<in> tint_symbol : array<u32, 1>;
+[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol : array<u32, 1>;
 
-[[builtin(sample_mask)]] var<out> tint_symbol_2 : array<u32, 1>;
+[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_2 : array<u32, 1>;
 
 fn tint_symbol_3(tint_symbol_1 : u32) {
   tint_symbol_2[0] = tint_symbol_1;
@@ -582,12 +582,12 @@ fn main() -> [[builtin(position)]] vec4<f32> {
 )";
 
   auto* expect = R"(
-[[builtin(pointsize)]] var<out> tint_pointsize : f32;
+[[builtin(pointsize), internal(disable_validation__ignore_storage_class)]] var<out> tint_pointsize : f32;
 
 fn non_entry_point() {
 }
 
-[[builtin(position)]] var<out> tint_symbol_1 : vec4<f32>;
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_1 : vec4<f32>;
 
 fn tint_symbol_2(tint_symbol : vec4<f32>) {
   tint_symbol_1 = tint_symbol;
@@ -628,9 +628,9 @@ fn main3() -> [[builtin(position)]] vec4<f32> {
 )";
 
   auto* expect = R"(
-[[builtin(pointsize)]] var<out> tint_pointsize : f32;
+[[builtin(pointsize), internal(disable_validation__ignore_storage_class)]] var<out> tint_pointsize : f32;
 
-[[builtin(position)]] var<out> tint_symbol_1 : vec4<f32>;
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_1 : vec4<f32>;
 
 fn tint_symbol_2(tint_symbol : vec4<f32>) {
   tint_symbol_1 = tint_symbol;
@@ -643,7 +643,7 @@ fn main1() {
   return;
 }
 
-[[builtin(position)]] var<out> tint_symbol_4 : vec4<f32>;
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_4 : vec4<f32>;
 
 fn tint_symbol_5(tint_symbol_3 : vec4<f32>) {
   tint_symbol_4 = tint_symbol_3;
@@ -656,7 +656,7 @@ fn main2() {
   return;
 }
 
-[[builtin(position)]] var<out> tint_symbol_7 : vec4<f32>;
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_7 : vec4<f32>;
 
 fn tint_symbol_8(tint_symbol_6 : vec4<f32>) {
   tint_symbol_7 = tint_symbol_6;
@@ -722,9 +722,9 @@ fn frag_main([[builtin(sample_index)]] sample_index : u32,
 )";
 
   auto* expect = R"(
-[[builtin(pointsize)]] var<out> tint_pointsize : f32;
+[[builtin(pointsize), internal(disable_validation__ignore_storage_class)]] var<out> tint_pointsize : f32;
 
-[[builtin(position)]] var<out> tint_symbol_1 : vec4<f32>;
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_1 : vec4<f32>;
 
 fn tint_symbol_2(tint_symbol : vec4<f32>) {
   tint_symbol_1 = tint_symbol;
@@ -737,11 +737,11 @@ fn vert_main() {
   return;
 }
 
-[[builtin(sample_index)]] var<in> tint_symbol_3 : u32;
+[[builtin(sample_index), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_3 : u32;
 
-[[builtin(sample_mask)]] var<in> tint_symbol_4 : array<u32, 1>;
+[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_4 : array<u32, 1>;
 
-[[builtin(sample_mask)]] var<out> tint_symbol_6 : array<u32, 1>;
+[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_6 : array<u32, 1>;
 
 fn tint_symbol_7(tint_symbol_5 : u32) {
   tint_symbol_6[0] = tint_symbol_5;
