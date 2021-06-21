@@ -85,7 +85,10 @@ void Variable::info_to_str(const sem::Info& sem,
   make_indent(out, indent);
   out << declared_access_ << std::endl;
   make_indent(out, indent);
-  out << type_->type_name() << std::endl;
+  if (type_) {
+    out << type_->type_name();
+  }
+  out << std::endl;
 }
 
 void Variable::constructor_to_str(const sem::Info& sem,
