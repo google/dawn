@@ -27,13 +27,13 @@ tint_array_wrapper tint_symbol_4(RWByteAddressBuffer buffer, uint offset) {
   return tint_symbol_6;
 }
 
-static tint_array_wrapper src_private;
+static tint_array_wrapper src_private = {{{0}, {0}, {0}, {0}}};
 groupshared tint_array_wrapper src_workgroup;
 cbuffer cbuffer_src_uniform : register(b0, space0) {
   uint4 src_uniform[4];
 };
 RWByteAddressBuffer src_storage : register(u1, space0);
-static tint_array_wrapper tint_symbol;
+static tint_array_wrapper tint_symbol = {{{0}, {0}, {0}, {0}}};
 
 struct tint_array_wrapper_3 {
   int arr[2];
@@ -45,7 +45,7 @@ struct tint_array_wrapper_1 {
   tint_array_wrapper_2 arr[4];
 };
 
-static tint_array_wrapper_1 dst_nested;
+static tint_array_wrapper_1 dst_nested = {{{{{{0, 0}}, {{0, 0}}, {{0, 0}}}}, {{{{0, 0}}, {{0, 0}}, {{0, 0}}}}, {{{{0, 0}}, {{0, 0}}, {{0, 0}}}}, {{{{0, 0}}, {{0, 0}}, {{0, 0}}}}}};
 
 tint_array_wrapper ret_arr() {
   const tint_array_wrapper tint_symbol_7 = {{{0}, {0}, {0}, {0}}};

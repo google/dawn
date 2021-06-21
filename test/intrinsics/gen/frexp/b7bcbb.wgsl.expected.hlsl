@@ -1,4 +1,4 @@
-static uint arg_1;
+static uint arg_1 = 0u;
 
 void frexp_b7bcbb() {
   float tint_tmp;

@@ -1,4 +1,4 @@
-static int3 arg_1;
+static int3 arg_1 = int3(0, 0, 0);
 
 void frexp_6efa09() {
   float3 tint_tmp;

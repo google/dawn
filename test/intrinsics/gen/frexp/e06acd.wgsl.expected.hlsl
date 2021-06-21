@@ -1,4 +1,4 @@
-static uint2 arg_1;
+static uint2 arg_1 = uint2(0u, 0u);
 
 void frexp_e06acd() {
   float2 tint_tmp;

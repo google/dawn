@@ -1,4 +1,4 @@
-static uint3 arg_1;
+static uint3 arg_1 = uint3(0u, 0u, 0u);
 
 void frexp_53d417() {
   float3 tint_tmp;

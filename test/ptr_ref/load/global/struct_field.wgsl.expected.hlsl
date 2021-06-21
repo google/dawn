@@ -2,7 +2,7 @@ struct S {
   int i;
 };
 
-static S V;
+static S V = {0};
 
 [numthreads(1, 1, 1)]
 void main() {

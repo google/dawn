@@ -136,7 +136,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
   float mem;
 };
 
-static Data str;
+static Data str = {0.0f};
 
 [numthreads(1, 1, 1)]
 void test_function() {

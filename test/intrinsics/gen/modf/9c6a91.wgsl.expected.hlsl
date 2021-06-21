@@ -1,4 +1,4 @@
-static float2 arg_1;
+static float2 arg_1 = float2(0.0f, 0.0f);
 
 void modf_9c6a91() {
   float2 res = modf(float2(0.0f, 0.0f), arg_1);

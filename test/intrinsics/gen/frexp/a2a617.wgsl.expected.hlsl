@@ -1,4 +1,4 @@
-static int arg_1;
+static int arg_1 = 0;
 
 void frexp_a2a617() {
   float tint_tmp;

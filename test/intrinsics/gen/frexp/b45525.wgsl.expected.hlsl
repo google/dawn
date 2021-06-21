@@ -1,4 +1,4 @@
-static int4 arg_1;
+static int4 arg_1 = int4(0, 0, 0, 0);
 
 void frexp_b45525() {
   float4 tint_tmp;

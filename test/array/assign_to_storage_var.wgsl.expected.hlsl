@@ -62,7 +62,7 @@ void tint_symbol_10(RWByteAddressBuffer buffer, uint offset, tint_array_wrapper_
   tint_symbol_9(buffer, (offset + 72u), value.arr[3u]);
 }
 
-static tint_array_wrapper src_private;
+static tint_array_wrapper src_private = {{{0}, {0}, {0}, {0}}};
 groupshared tint_array_wrapper src_workgroup;
 cbuffer cbuffer_src_uniform : register(b0, space0) {
   uint4 src_uniform[4];

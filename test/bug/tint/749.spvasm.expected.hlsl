@@ -5,12 +5,12 @@ struct QuicksortObject {
   tint_array_wrapper numbers;
 };
 
-static QuicksortObject obj;
-static float4 gl_FragCoord;
+static QuicksortObject obj = {{{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}};
+static float4 gl_FragCoord = float4(0.0f, 0.0f, 0.0f, 0.0f);
 cbuffer cbuffer_x_188 : register(b0, space0) {
   uint4 x_188[1];
 };
-static float4 x_GLF_color;
+static float4 x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 void swap_i1_i1_(inout int i, inout int j) {
   int temp = 0;

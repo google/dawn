@@ -1,21 +1,21 @@
 struct S {
 };
 
-static bool bool_var;
-static int i32_var;
-static uint u32_var;
-static float f32_var;
-static int2 v2i32_var;
-static uint3 v3u32_var;
-static float4 v4f32_var;
-static float2x3 m2x3_var;
+static bool bool_var = false;
+static int i32_var = 0;
+static uint u32_var = 0u;
+static float f32_var = 0.0f;
+static int2 v2i32_var = int2(0, 0);
+static uint3 v3u32_var = uint3(0u, 0u, 0u);
+static float4 v4f32_var = float4(0.0f, 0.0f, 0.0f, 0.0f);
+static float2x3 m2x3_var = float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 struct tint_array_wrapper {
   float arr[4];
 };
 
-static tint_array_wrapper arr_var;
-static S struct_var;
+static tint_array_wrapper arr_var = {{0.0f, 0.0f, 0.0f, 0.0f}};
+static S struct_var = {};
 
 [numthreads(1, 1, 1)]
 void main() {

@@ -2119,13 +2119,6 @@ bool GeneratorImpl::EmitHandleVariable(std::ostream& out,
   auto* decl = var->Declaration();
   auto* unwrapped_type = var->Type()->UnwrapRef();
 
-  std::ostringstream constructor_out;
-  if (auto* constructor = decl->constructor()) {
-    if (!EmitExpression(out, constructor_out, constructor)) {
-      return false;
-    }
-  }
-
   auto name = builder_.Symbols().NameFor(decl->symbol());
   auto* type = var->Type()->UnwrapRef();
   if (!EmitTypeAndName(out, type, var->StorageClass(), var->Access(), name)) {
@@ -2151,10 +2144,6 @@ bool GeneratorImpl::EmitHandleVariable(std::ostream& out,
         << bp.group->value() << ")";
   }
 
-  if (constructor_out.str().length()) {
-    out << " = " << constructor_out.str();
-  }
-
   out << ";" << std::endl;
   return true;
 }
@@ -2168,6 +2157,10 @@ bool GeneratorImpl::EmitPrivateVariable(std::ostream& out,
   std::ostringstream constructor_out;
   if (auto* constructor = decl->constructor()) {
     if (!EmitExpression(out, constructor_out, constructor)) {
+      return false;
+    }
+  } else {
+    if (!EmitZeroValue(constructor_out, var->Type()->UnwrapRef())) {
       return false;
     }
   }
