@@ -1969,16 +1969,16 @@ TEST_P(ResolverIntrinsicTest_Texture, Call) {
         EXPECT_TRUE(TypeOf(call)->Is<sem::I32>());
         break;
       case ast::TextureDimension::k2d:
-      case ast::TextureDimension::k2dArray: {
+      case ast::TextureDimension::k2dArray:
+      case ast::TextureDimension::kCube:
+      case ast::TextureDimension::kCubeArray: {
         auto* vec = As<sem::Vector>(TypeOf(call));
         ASSERT_NE(vec, nullptr);
         EXPECT_EQ(vec->size(), 2u);
         EXPECT_TRUE(vec->type()->Is<sem::I32>());
         break;
       }
-      case ast::TextureDimension::k3d:
-      case ast::TextureDimension::kCube:
-      case ast::TextureDimension::kCubeArray: {
+      case ast::TextureDimension::k3d: {
         auto* vec = As<sem::Vector>(TypeOf(call));
         ASSERT_NE(vec, nullptr);
         EXPECT_EQ(vec->size(), 3u);

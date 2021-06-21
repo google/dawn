@@ -4874,7 +4874,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[1],
     /* open numbers */ &kOpenNumbers[7],
     /* parameters */ &kParameters[505],
-    /* return matcher indices */ &kMatcherIndices[138],
+    /* return matcher indices */ &kMatcherIndices[132],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -4886,7 +4886,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[1],
     /* open numbers */ &kOpenNumbers[7],
     /* parameters */ &kParameters[467],
-    /* return matcher indices */ &kMatcherIndices[138],
+    /* return matcher indices */ &kMatcherIndices[132],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -4898,7 +4898,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[1],
     /* open numbers */ &kOpenNumbers[7],
     /* parameters */ &kParameters[484],
-    /* return matcher indices */ &kMatcherIndices[138],
+    /* return matcher indices */ &kMatcherIndices[132],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -4910,7 +4910,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[1],
     /* open numbers */ &kOpenNumbers[7],
     /* parameters */ &kParameters[471],
-    /* return matcher indices */ &kMatcherIndices[138],
+    /* return matcher indices */ &kMatcherIndices[132],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -4982,7 +4982,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[4],
     /* open numbers */ &kOpenNumbers[7],
     /* parameters */ &kParameters[481],
-    /* return matcher indices */ &kMatcherIndices[138],
+    /* return matcher indices */ &kMatcherIndices[132],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -4994,7 +4994,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[4],
     /* open numbers */ &kOpenNumbers[7],
     /* parameters */ &kParameters[473],
-    /* return matcher indices */ &kMatcherIndices[138],
+    /* return matcher indices */ &kMatcherIndices[132],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -5006,7 +5006,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[4],
     /* open numbers */ &kOpenNumbers[7],
     /* parameters */ &kParameters[483],
-    /* return matcher indices */ &kMatcherIndices[138],
+    /* return matcher indices */ &kMatcherIndices[132],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -5018,7 +5018,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[4],
     /* open numbers */ &kOpenNumbers[7],
     /* parameters */ &kParameters[469],
-    /* return matcher indices */ &kMatcherIndices[138],
+    /* return matcher indices */ &kMatcherIndices[132],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -8538,19 +8538,19 @@ constexpr IntrinsicInfo kIntrinsics[] = {
     /* fn textureDimensions<T : fiu32>(texture: texture_2d_array<T>, level: i32) -> vec2<i32> */
     /* fn textureDimensions<T : fiu32>(texture: texture_3d<T>) -> vec3<i32> */
     /* fn textureDimensions<T : fiu32>(texture: texture_3d<T>, level: i32) -> vec3<i32> */
-    /* fn textureDimensions<T : fiu32>(texture: texture_cube<T>) -> vec3<i32> */
-    /* fn textureDimensions<T : fiu32>(texture: texture_cube<T>, level: i32) -> vec3<i32> */
-    /* fn textureDimensions<T : fiu32>(texture: texture_cube_array<T>) -> vec3<i32> */
-    /* fn textureDimensions<T : fiu32>(texture: texture_cube_array<T>, level: i32) -> vec3<i32> */
+    /* fn textureDimensions<T : fiu32>(texture: texture_cube<T>) -> vec2<i32> */
+    /* fn textureDimensions<T : fiu32>(texture: texture_cube<T>, level: i32) -> vec2<i32> */
+    /* fn textureDimensions<T : fiu32>(texture: texture_cube_array<T>) -> vec2<i32> */
+    /* fn textureDimensions<T : fiu32>(texture: texture_cube_array<T>, level: i32) -> vec2<i32> */
     /* fn textureDimensions<T : fiu32>(texture: texture_multisampled_2d<T>) -> vec2<i32> */
     /* fn textureDimensions(texture: texture_depth_2d) -> vec2<i32> */
     /* fn textureDimensions(texture: texture_depth_2d, level: i32) -> vec2<i32> */
     /* fn textureDimensions(texture: texture_depth_2d_array) -> vec2<i32> */
     /* fn textureDimensions(texture: texture_depth_2d_array, level: i32) -> vec2<i32> */
-    /* fn textureDimensions(texture: texture_depth_cube) -> vec3<i32> */
-    /* fn textureDimensions(texture: texture_depth_cube, level: i32) -> vec3<i32> */
-    /* fn textureDimensions(texture: texture_depth_cube_array) -> vec3<i32> */
-    /* fn textureDimensions(texture: texture_depth_cube_array, level: i32) -> vec3<i32> */
+    /* fn textureDimensions(texture: texture_depth_cube) -> vec2<i32> */
+    /* fn textureDimensions(texture: texture_depth_cube, level: i32) -> vec2<i32> */
+    /* fn textureDimensions(texture: texture_depth_cube_array) -> vec2<i32> */
+    /* fn textureDimensions(texture: texture_depth_cube_array, level: i32) -> vec2<i32> */
     /* fn textureDimensions<F : texel_format, A : read_or_write>(texture: texture_storage_1d<F, A>) -> i32 */
     /* fn textureDimensions<F : texel_format, A : read_or_write>(texture: texture_storage_2d<F, A>) -> vec2<i32> */
     /* fn textureDimensions<F : texel_format, A : read_or_write>(texture: texture_storage_2d_array<F, A>) -> vec2<i32> */

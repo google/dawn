@@ -464,16 +464,12 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
           break;
         case ast::TextureDimension::k2d:
         case ast::TextureDimension::k2dArray:
+        case ast::TextureDimension::kCube:
+        case ast::TextureDimension::kCubeArray:
           dims = {"width", "height"};
           break;
         case ast::TextureDimension::k3d:
           dims = {"width", "height", "depth"};
-          break;
-        case ast::TextureDimension::kCube:
-        case ast::TextureDimension::kCubeArray:
-          // width == height == depth for cubes
-          // See https://github.com/gpuweb/gpuweb/issues/1345
-          dims = {"width", "height", "height"};
           break;
       }
 

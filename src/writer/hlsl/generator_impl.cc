@@ -1415,16 +1415,11 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
               num_dimensions = 3;
               break;
             case ast::TextureDimension::kCube:
-              // width == height == depth for cubes
-              // See https://github.com/gpuweb/gpuweb/issues/1345
               num_dimensions = 2;
-              swizzle = ".xyy";  // [width, height, height]
               break;
             case ast::TextureDimension::kCubeArray:
-              // width == height == depth for cubes
-              // See https://github.com/gpuweb/gpuweb/issues/1345
               num_dimensions = 3;
-              swizzle = ".xyy";  // [width, height, height]
+              swizzle = ".xy";
               break;
           }
           break;

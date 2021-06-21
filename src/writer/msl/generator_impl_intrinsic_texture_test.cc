@@ -31,9 +31,13 @@ std::string expected_texture_overload(
       return R"(int(texture.get_width()))";
     case ValidTextureOverload::kDimensions2d:
     case ValidTextureOverload::kDimensions2dArray:
+    case ValidTextureOverload::kDimensionsCube:
+    case ValidTextureOverload::kDimensionsCubeArray:
     case ValidTextureOverload::kDimensionsMultisampled2d:
     case ValidTextureOverload::kDimensionsDepth2d:
     case ValidTextureOverload::kDimensionsDepth2dArray:
+    case ValidTextureOverload::kDimensionsDepthCube:
+    case ValidTextureOverload::kDimensionsDepthCubeArray:
     case ValidTextureOverload::kDimensionsStorageRO2d:
     case ValidTextureOverload::kDimensionsStorageRO2dArray:
     case ValidTextureOverload::kDimensionsStorageWO2d:
@@ -43,23 +47,17 @@ std::string expected_texture_overload(
     case ValidTextureOverload::kDimensionsStorageRO3d:
     case ValidTextureOverload::kDimensionsStorageWO3d:
       return R"(int3(texture.get_width(), texture.get_height(), texture.get_depth()))";
-    case ValidTextureOverload::kDimensionsCube:
-    case ValidTextureOverload::kDimensionsCubeArray:
-    case ValidTextureOverload::kDimensionsDepthCube:
-    case ValidTextureOverload::kDimensionsDepthCubeArray:
-      return R"(int3(texture.get_width(), texture.get_height(), texture.get_height()))";
     case ValidTextureOverload::kDimensions2dLevel:
+    case ValidTextureOverload::kDimensionsCubeLevel:
+    case ValidTextureOverload::kDimensionsCubeArrayLevel:
     case ValidTextureOverload::kDimensions2dArrayLevel:
     case ValidTextureOverload::kDimensionsDepth2dLevel:
     case ValidTextureOverload::kDimensionsDepth2dArrayLevel:
+    case ValidTextureOverload::kDimensionsDepthCubeLevel:
+    case ValidTextureOverload::kDimensionsDepthCubeArrayLevel:
       return R"(int2(texture.get_width(1), texture.get_height(1)))";
     case ValidTextureOverload::kDimensions3dLevel:
       return R"(int3(texture.get_width(1), texture.get_height(1), texture.get_depth(1)))";
-    case ValidTextureOverload::kDimensionsCubeLevel:
-    case ValidTextureOverload::kDimensionsCubeArrayLevel:
-    case ValidTextureOverload::kDimensionsDepthCubeLevel:
-    case ValidTextureOverload::kDimensionsDepthCubeArrayLevel:
-      return R"(int3(texture.get_width(1), texture.get_height(1), texture.get_height(1)))";
     case ValidTextureOverload::kNumLayers2dArray:
     case ValidTextureOverload::kNumLayersCubeArray:
     case ValidTextureOverload::kNumLayersDepth2dArray:

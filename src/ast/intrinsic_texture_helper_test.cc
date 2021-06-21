@@ -266,7 +266,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
       },
       {
           ValidTextureOverload::kDimensionsCube,
-          "textureDimensions(t : texture_cube<f32>) -> vec3<i32>",
+          "textureDimensions(t : texture_cube<f32>) -> vec2<i32>",
           TextureKind::kRegular,
           ast::SamplerKind::kSampler,
           ast::TextureDimension::kCube,
@@ -277,7 +277,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
       {
           ValidTextureOverload::kDimensionsCubeLevel,
           "textureDimensions(t     : texture_cube<f32>,\n"
-          "                  level : i32) -> vec3<i32>",
+          "                  level : i32) -> vec2<i32>",
           TextureKind::kRegular,
           ast::SamplerKind::kSampler,
           ast::TextureDimension::kCube,
@@ -287,7 +287,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
       },
       {
           ValidTextureOverload::kDimensionsCubeArray,
-          "textureDimensions(t : texture_cube_array<f32>) -> vec3<i32>",
+          "textureDimensions(t : texture_cube_array<f32>) -> vec2<i32>",
           TextureKind::kRegular,
           ast::SamplerKind::kSampler,
           ast::TextureDimension::kCubeArray,
@@ -298,7 +298,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
       {
           ValidTextureOverload::kDimensionsCubeArrayLevel,
           "textureDimensions(t     : texture_cube_array<f32>,\n"
-          "                  level : i32) -> vec3<i32>",
+          "                  level : i32) -> vec2<i32>",
           TextureKind::kRegular,
           ast::SamplerKind::kSampler,
           ast::TextureDimension::kCubeArray,
@@ -360,7 +360,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
       },
       {
           ValidTextureOverload::kDimensionsDepthCube,
-          "textureDimensions(t : texture_depth_cube) -> vec3<i32>",
+          "textureDimensions(t : texture_depth_cube) -> vec2<i32>",
           TextureKind::kDepth,
           ast::SamplerKind::kSampler,
           ast::TextureDimension::kCube,
@@ -371,7 +371,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
       {
           ValidTextureOverload::kDimensionsDepthCubeLevel,
           "textureDimensions(t     : texture_depth_cube,\n"
-          "                  level : i32) -> vec3<i32>",
+          "                  level : i32) -> vec2<i32>",
           TextureKind::kDepth,
           ast::SamplerKind::kSampler,
           ast::TextureDimension::kCube,
@@ -381,7 +381,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
       },
       {
           ValidTextureOverload::kDimensionsDepthCubeArray,
-          "textureDimensions(t : texture_depth_cube_array) -> vec3<i32>",
+          "textureDimensions(t : texture_depth_cube_array) -> vec2<i32>",
           TextureKind::kDepth,
           ast::SamplerKind::kSampler,
           ast::TextureDimension::kCubeArray,
@@ -392,7 +392,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
       {
           ValidTextureOverload::kDimensionsDepthCubeArrayLevel,
           "textureDimensions(t     : texture_depth_cube_array,\n"
-          "                  level : i32) -> vec3<i32>",
+          "                  level : i32) -> vec2<i32>",
           TextureKind::kDepth,
           ast::SamplerKind::kSampler,
           ast::TextureDimension::kCubeArray,

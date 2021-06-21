@@ -2662,18 +2662,12 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
         case ast::TextureDimension::k1d:
         case ast::TextureDimension::k2d:
         case ast::TextureDimension::k3d:
-          break;  // No swizzle needed
         case ast::TextureDimension::kCube:
-          swizzle = {0, 1, 1};  // Duplicate height for depth
-          spirv_dims = 2;       // [width, height]
-          break;
+          break;  // No swizzle needed
+        case ast::TextureDimension::kCubeArray:
         case ast::TextureDimension::k2dArray:
           swizzle = {0, 1};  // Strip array index
           spirv_dims = 3;    // [width, height, array_count]
-          break;
-        case ast::TextureDimension::kCubeArray:
-          swizzle = {0, 1, 1};  // Strip array index, duplicate height for depth
-          spirv_dims = 3;       // [width, height, array_count]
           break;
       }
 

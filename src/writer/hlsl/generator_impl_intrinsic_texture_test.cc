@@ -89,7 +89,7 @@ ExpectedResult expected_texture_overload(
           R"(int2 tint_tmp;
   tint_symbol.GetDimensions(tint_tmp.x, tint_tmp.y);
 )",
-          "tint_tmp.xyy",
+          "tint_tmp",
       };
     case ValidTextureOverload::kDimensionsCubeArray:
     case ValidTextureOverload::kDimensionsDepthCubeArray:
@@ -97,7 +97,7 @@ ExpectedResult expected_texture_overload(
           R"(int3 tint_tmp;
   tint_symbol.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z);
 )",
-          "tint_tmp.xyy",
+          "tint_tmp.xy",
       };
     case ValidTextureOverload::kDimensions2dLevel:
     case ValidTextureOverload::kDimensionsDepth2dLevel:
@@ -128,7 +128,7 @@ ExpectedResult expected_texture_overload(
           R"(int3 tint_tmp;
   tint_symbol.GetDimensions(1, tint_tmp.x, tint_tmp.y, tint_tmp.z);
 )",
-          "tint_tmp.xyy",
+          "tint_tmp.xy",
       };
     case ValidTextureOverload::kDimensionsCubeArrayLevel:
     case ValidTextureOverload::kDimensionsDepthCubeArrayLevel:
@@ -136,7 +136,7 @@ ExpectedResult expected_texture_overload(
           R"(int4 tint_tmp;
   tint_symbol.GetDimensions(1, tint_tmp.x, tint_tmp.y, tint_tmp.z, tint_tmp.w);
 )",
-          "tint_tmp.xyy",
+          "tint_tmp.xy",
       };
     case ValidTextureOverload::kNumLayers2dArray:
     case ValidTextureOverload::kNumLayersDepth2dArray:
