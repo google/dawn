@@ -1962,14 +1962,13 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
   }
 
   if (auto* arr = ty->As<sem::Array>()) {
-    auto el_size_align = MslPackedTypeSizeAndAlign(arr->ElemType());
     if (!arr->IsStrideImplicit()) {
       TINT_ICE(diagnostics_) << "arrays with explicit strides should have "
                                 "removed with the PadArrayElements transform";
       return {};
     }
     auto num_els = std::max<uint32_t>(arr->Count(), 1);
-    return SizeAndAlign{el_size_align.size * num_els, el_size_align.align};
+    return SizeAndAlign{arr->Stride() * num_els, arr->Align()};
   }
 
   if (auto* str = ty->As<sem::Struct>()) {

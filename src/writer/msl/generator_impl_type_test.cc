@@ -524,6 +524,47 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
 #undef ALL_FIELDS
 }
 
+TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
+  // array: size(64), align(16)
+  auto* array = ty.array(ty.vec3<f32>(), 4);
+
+  auto* s =
+      Structure("S",
+                {
+                    Member("a", ty.i32()),
+                    Member("b", array),
+                    Member("c", ty.i32()),
+                },
+                ast::DecorationList{create<ast::StructBlockDecoration>()});
+
+  Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
+
+  GeneratorImpl& gen = Build();
+
+  auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+  ASSERT_TRUE(gen.EmitStructType(sem_s)) << gen.error();
+
+  // ALL_FIELDS() calls the macro FIELD(ADDR, TYPE, NAME, SUFFIX)
+  // for each field of the structure s.
+#define ALL_FIELDS()                      \
+  FIELD(0x0000, int, a, /*NO SUFFIX*/)    \
+  FIELD(0x0004, int8_t, tint_pad_0, [12]) \
+  FIELD(0x0010, float3, b, [4])           \
+  FIELD(0x0050, int, c, /*NO SUFFIX*/)    \
+  FIELD(0x0054, int8_t, tint_pad_1, [12])
+
+  // Check that the generated string is as expected.
+#define FIELD(ADDR, TYPE, NAME, SUFFIX) \
+  "  /* " #ADDR " */ " #TYPE " " #NAME #SUFFIX ";\n"
+  auto* expect = "struct S {\n" ALL_FIELDS() "};\n";
+#undef FIELD
+  EXPECT_EQ(gen.result(), expect);
+}
+
 TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
   auto* s = Structure(
       "S",
