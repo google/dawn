@@ -60,6 +60,8 @@ std::string CommonTypes() {
     %uint_1 = OpConstant %uint 1
     %int_m1 = OpConstant %int -1
     %int_0 = OpConstant %int 0
+    %int_1 = OpConstant %int 1
+    %int_3 = OpConstant %int 3
     %uint_2 = OpConstant %uint 2
     %uint_3 = OpConstant %uint 3
     %uint_4 = OpConstant %uint 4
@@ -2286,7 +2288,7 @@ TEST_F(SpvParserFunctionVarTest,
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(VariableDeclStatement{
   Variable{
-    x_38_phi
+    x_41_phi
     none
     undefined
     __u32
@@ -2312,14 +2314,14 @@ Switch{
       Else{
         {
           Assignment{
-            Identifier[not set]{x_38_phi}
+            Identifier[not set]{x_41_phi}
             ScalarConstructor[not set]{0u}
           }
           Break{}
         }
       }
       Assignment{
-        Identifier[not set]{x_38_phi}
+        Identifier[not set]{x_41_phi}
         ScalarConstructor[not set]{1u}
       }
     }
@@ -2327,12 +2329,12 @@ Switch{
 }
 VariableDeclStatement{
   VariableConst{
-    x_38
+    x_41
     none
     undefined
     __u32
     {
-      Identifier[not set]{x_38_phi}
+      Identifier[not set]{x_41_phi}
     }
   }
 }
@@ -2600,6 +2602,84 @@ Return{}
 )";
   const auto got = ToString(p->builder(), fe.ast_body());
   EXPECT_EQ(got, expected);
+}
+
+TEST_F(SpvParserFunctionVarTest, EmitStatement_Hoist_VectorInsertDynamic) {
+  // Spawned from crbug.com/tint/804
+  const auto assembly = Preamble() + R"(
+    %100 = OpFunction %void None %voidfn
+
+    %10 = OpLabel
+    OpSelectionMerge %50 None
+    OpBranchConditional %true %20 %30
+
+      %20 = OpLabel
+      %200 = OpVectorInsertDynamic %v2int %v2int_null %int_3 %int_1
+      OpBranch %50
+
+      %30 = OpLabel
+      OpReturn
+
+    %50 = OpLabel   ; dominated by %20, but %200 needs to be hoisted
+    %201 = OpCopyObject %v2int %200
+    OpReturn
+    OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  const auto got = ToString(p->builder(), fe.ast_body());
+  const auto* expected = R"(VariableDeclStatement{
+  Variable{
+    x_200
+    none
+    undefined
+    __vec_2__i32
+  }
+}
+If{
+  (
+    ScalarConstructor[not set]{true}
+  )
+  {
+    Assignment{
+      Identifier[not set]{x_200}
+      TypeConstructor[not set]{
+        __vec_2__i32
+        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0}
+      }
+    }
+    Assignment{
+      ArrayAccessor[not set]{
+        Identifier[not set]{x_200}
+        ScalarConstructor[not set]{1}
+      }
+      ScalarConstructor[not set]{3}
+    }
+  }
+}
+Else{
+  {
+    Return{}
+  }
+}
+VariableDeclStatement{
+  VariableConst{
+    x_201
+    none
+    undefined
+    __vec_2__i32
+    {
+      Identifier[not set]{x_200}
+    }
+  }
+}
+Return{}
+)";
+  EXPECT_EQ(got, expected) << got;
 }
 
 }  // namespace

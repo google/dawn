@@ -5434,45 +5434,68 @@ bool FunctionEmitter::MakeVectorInsertDynamic(
     const spvtools::opt::Instruction& inst) {
   // For
   //    %result = OpVectorInsertDynamic %type %src_vector %component %index
-  // generate statements like this:
+  // there are two cases.
+  //
+  // Case 1:
+  //   The %src_vector value has already been hoisted into a variable.
+  //   In this case, assign %src_vector to that variable, then write the
+  //   component into the right spot:
+  //
+  //    hoisted = src_vector;
+  //    hoisted[index] = component;
+  //
+  // Case 2:
+  //   The %src_vector value is not hoisted. In this case, make a temporary
+  //   variable with the %src_vector contents, then write the component,
+  //   and then make a let-declaration that reads the value out:
   //
   //    var temp : type = src_vector;
   //    temp[index] = component;
   //    let result : type = temp;
   //
-  // Then use result everywhere the original SPIR-V id is used.  Using a const
-  // like this avoids constantly reloading the value many times.
+  //   Then use result everywhere the original SPIR-V id is used.  Using a const
+  //   like this avoids constantly reloading the value many times.
 
-  // TODO(dneto): crbug.com/tint/804: handle the case where %src_vector is
-  // has been hoisted into a variable.
-
-  auto* ast_type = parser_impl_.ConvertType(inst.type_id());
+  auto* type = parser_impl_.ConvertType(inst.type_id());
   auto src_vector = MakeOperand(inst, 0);
   auto component = MakeOperand(inst, 1);
   auto index = MakeOperand(inst, 2);
 
-  // Synthesize the temporary variable.
-  // It doesn't correspond to a SPIR-V ID, so we don't use the ordinary
-  // API in parser_impl_.
-  auto result_name = namer_.Name(inst.result_id());
-  auto temp_name = namer_.MakeDerivedName(result_name);
-  auto registered_temp_name = builder_.Symbols().Register(temp_name);
+  std::string var_name;
+  auto original_value_name = namer_.Name(inst.result_id());
+  const bool hoisted = WriteIfHoistedVar(inst, src_vector);
+  if (hoisted) {
+    // The variable was already declared in an earlier block.
+    var_name = original_value_name;
+    // Assign the source vector value to it.
+    builder_.Assign({}, builder_.Expr(var_name), src_vector.expr);
+  } else {
+    // Synthesize the temporary variable.
+    // It doesn't correspond to a SPIR-V ID, so we don't use the ordinary
+    // API in parser_impl_.
+    var_name = namer_.MakeDerivedName(original_value_name);
 
-  auto* temp_var = create<ast::Variable>(
-      Source{}, registered_temp_name, ast::StorageClass::kNone,
-      ast::Access::kUndefined, ast_type->Build(builder_), false,
-      src_vector.expr, ast::DecorationList{});
-  AddStatement(create<ast::VariableDeclStatement>(Source{}, temp_var));
+    auto* temp_var = builder_.Var(var_name, type->Build(builder_),
+                                  ast::StorageClass::kNone, src_vector.expr);
+
+    AddStatement(builder_.Decl({}, temp_var));
+  }
 
   auto* lhs = create<ast::ArrayAccessorExpression>(
-      Source{}, create<ast::IdentifierExpression>(registered_temp_name),
-      index.expr);
+      Source{}, builder_.Expr(var_name), index.expr);
+  if (!lhs) {
+    return false;
+  }
 
-  AddStatement(create<ast::AssignmentStatement>(Source{}, lhs, component.expr));
+  AddStatement(builder_.Assign(lhs, component.expr));
 
-  return EmitConstDefinition(
-      inst,
-      {ast_type, create<ast::IdentifierExpression>(registered_temp_name)});
+  if (hoisted) {
+    // The hoisted variable itself stands for this result ID.
+    return success();
+  }
+  // Create a new let-declaration that is initialized by the contents
+  // of the temporary variable.
+  return EmitConstDefinition(inst, {type, builder_.Expr(var_name)});
 }
 
 bool FunctionEmitter::MakeCompositeInsert(
@@ -5538,8 +5561,7 @@ bool FunctionEmitter::MakeCompositeInsert(
     return false;
   }
 
-  AddStatement(
-      create<ast::AssignmentStatement>(Source{}, lhs.expr, component.expr));
+  AddStatement(builder_.Assign(lhs.expr, component.expr));
 
   if (hoisted) {
     // The hoisted variable itself stands for this result ID.
