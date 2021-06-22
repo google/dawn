@@ -33,7 +33,8 @@ class Msl : public Transform {
     /// Constructor
     /// @param buffer_size_ubo_idx the index to use for the buffer size UBO
     /// @param sample_mask the fixed sample mask to use for fragment shaders
-    explicit Config(uint32_t buffer_size_ubo_idx, uint32_t sample_mask);
+    explicit Config(uint32_t buffer_size_ubo_idx,
+                    uint32_t sample_mask = 0xFFFFFFFF);
 
     /// Copy constructor
     Config(const Config&);
