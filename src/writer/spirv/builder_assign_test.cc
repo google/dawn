@@ -23,7 +23,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Assign_Var) {
-  auto* v = Global("var", ty.f32(), ast::StorageClass::kPrivate);
+  auto* v = Global("var", ty.f32(), ast::StorageClass::kOutput);
 
   auto* assign = Assign("var", 1.f);
 
@@ -39,9 +39,9 @@ TEST_F(BuilderTest, Assign_Var) {
   EXPECT_FALSE(b.has_error());
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
-%2 = OpTypePointer Private %3
+%2 = OpTypePointer Output %3
 %4 = OpConstantNull %3
-%1 = OpVariable %2 Private %4
+%1 = OpVariable %2 Output %4
 %5 = OpConstant %3 1
 )");
 
@@ -51,7 +51,7 @@ TEST_F(BuilderTest, Assign_Var) {
 }
 
 TEST_F(BuilderTest, Assign_Var_OutsideFunction_IsError) {
-  auto* v = Global("var", ty.f32(), ast::StorageClass::kPrivate);
+  auto* v = Global("var", ty.f32(), ast::StorageClass::kOutput);
 
   auto* assign = Assign("var", Expr(1.f));
 
@@ -70,7 +70,7 @@ TEST_F(BuilderTest, Assign_Var_OutsideFunction_IsError) {
 }
 
 TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
-  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kOutput);
 
   auto* val = vec3<f32>();
   auto* assign = Assign("var", val);
@@ -88,9 +88,9 @@ TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
-%2 = OpTypePointer Private %3
+%2 = OpTypePointer Output %3
 %5 = OpConstantNull %3
-%1 = OpVariable %2 Private %5
+%1 = OpVariable %2 Output %5
 )");
 
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
@@ -101,7 +101,7 @@ TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
 TEST_F(BuilderTest, Assign_Var_Complex_ConstructorWithExtract) {
   auto* init = vec3<f32>(vec2<f32>(1.f, 2.f), 3.f);
 
-  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kOutput);
 
   auto* assign = Assign("var", init);
 
@@ -118,9 +118,9 @@ TEST_F(BuilderTest, Assign_Var_Complex_ConstructorWithExtract) {
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
-%2 = OpTypePointer Private %3
+%2 = OpTypePointer Output %3
 %5 = OpConstantNull %3
-%1 = OpVariable %2 Private %5
+%1 = OpVariable %2 Output %5
 %6 = OpTypeVector %4 2
 %7 = OpConstant %4 1
 %8 = OpConstant %4 2
@@ -138,7 +138,7 @@ OpStore %1 %13
 TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
   auto* init = vec3<f32>(1.f, 2.f, 3.f);
 
-  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kOutput);
 
   auto* assign = Assign("var", init);
 
@@ -155,9 +155,9 @@ TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
-%2 = OpTypePointer Private %3
+%2 = OpTypePointer Output %3
 %5 = OpConstantNull %3
-%1 = OpVariable %2 Private %5
+%1 = OpVariable %2 Output %5
 %6 = OpConstant %4 1
 %7 = OpConstant %4 2
 %8 = OpConstant %4 3
@@ -213,7 +213,7 @@ OpStore %8 %9
 }
 
 TEST_F(BuilderTest, Assign_Vector) {
-  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kOutput);
 
   auto* val = vec3<f32>(1.f, 1.f, 3.f);
   auto* assign = Assign("var", val);
@@ -231,9 +231,9 @@ TEST_F(BuilderTest, Assign_Vector) {
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
-%2 = OpTypePointer Private %3
+%2 = OpTypePointer Output %3
 %5 = OpConstantNull %3
-%1 = OpVariable %2 Private %5
+%1 = OpVariable %2 Output %5
 %6 = OpConstant %4 1
 %7 = OpConstant %4 3
 %8 = OpConstantComposite %3 %6 %6 %7
@@ -247,7 +247,7 @@ TEST_F(BuilderTest, Assign_Vector) {
 TEST_F(BuilderTest, Assign_Vector_MemberByName) {
   // var.y = 1
 
-  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kOutput);
 
   auto* assign = Assign(MemberAccessor("var", "y"), Expr(1.f));
 
@@ -264,12 +264,12 @@ TEST_F(BuilderTest, Assign_Vector_MemberByName) {
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
-%2 = OpTypePointer Private %3
+%2 = OpTypePointer Output %3
 %5 = OpConstantNull %3
-%1 = OpVariable %2 Private %5
+%1 = OpVariable %2 Output %5
 %6 = OpTypeInt 32 0
 %7 = OpConstant %6 1
-%8 = OpTypePointer Private %4
+%8 = OpTypePointer Output %4
 %10 = OpConstant %4 1
 )");
 
@@ -282,7 +282,7 @@ OpStore %9 %10
 TEST_F(BuilderTest, Assign_Vector_MemberByIndex) {
   // var[1] = 1
 
-  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kOutput);
 
   auto* assign = Assign(IndexAccessor("var", 1), Expr(1.f));
 
@@ -299,12 +299,12 @@ TEST_F(BuilderTest, Assign_Vector_MemberByIndex) {
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
-%2 = OpTypePointer Private %3
+%2 = OpTypePointer Output %3
 %5 = OpConstantNull %3
-%1 = OpVariable %2 Private %5
+%1 = OpVariable %2 Output %5
 %6 = OpTypeInt 32 1
 %7 = OpConstant %6 1
-%8 = OpTypePointer Private %4
+%8 = OpTypePointer Output %4
 %10 = OpConstant %4 1
 )");
 

@@ -50,8 +50,9 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferBool) {
 }
 
 TEST_F(ResolverStorageClassValidationTest, StorageBufferPointer) {
-  // var<storage> g : vec4<f32>;
-  Global(Source{{56, 78}}, "g", ty.vec4<f32>(), ast::StorageClass::kStorage,
+  // var<storage> g : ptr<i32, input>;
+  Global(Source{{56, 78}}, "g", ty.pointer<i32>(ast::StorageClass::kInput),
+         ast::StorageClass::kStorage,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -186,8 +187,9 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferBool) {
 }
 
 TEST_F(ResolverStorageClassValidationTest, UniformBufferPointer) {
-  // var<uniform> g : vec4<f32>;
-  Global(Source{{56, 78}}, "g", ty.vec4<f32>(), ast::StorageClass::kUniform,
+  // var<uniform> g : ptr<i32, input>;
+  Global(Source{{56, 78}}, "g", ty.pointer<i32>(ast::StorageClass::kInput),
+         ast::StorageClass::kUniform,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),

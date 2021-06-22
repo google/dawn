@@ -34,8 +34,8 @@ std::string DisableValidationDecoration::InternalName() const {
       return "disable_validation__function_has_no_body";
     case DisabledValidation::kBindingPointCollision:
       return "disable_validation__binding_point_collision";
-    case DisabledValidation::kIgnoreStorageClass:
-      return "disable_validation__ignore_storage_class";
+    case DisabledValidation::kFunctionVarStorageClass:
+      return "disable_validation__function_var_storage_class";
     case DisabledValidation::kEntryPointParameter:
       return "disable_validation__entry_point_parameter";
   }

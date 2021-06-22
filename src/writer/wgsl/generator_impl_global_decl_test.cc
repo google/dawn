@@ -55,7 +55,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
        },
        ast::DecorationList{});
 
-  Global("a1", ty.f32(), ast::StorageClass::kPrivate);
+  Global("a1", ty.f32(), ast::StorageClass::kOutput);
 
   auto* s1 = Structure("S1", {Member("a", ty.i32())});
 
@@ -84,7 +84,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
     return a0;
   }
 
-  var<private> a1 : f32;
+  var<out> a1 : f32;
 
   struct S1 {
     a : i32;

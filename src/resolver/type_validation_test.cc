@@ -85,17 +85,17 @@ TEST_F(ResolverTypeValidationTest, GlobalConstantNoConstructor_Pass) {
 }
 
 TEST_F(ResolverTypeValidationTest, GlobalVariableWithStorageClass_Pass) {
-  // var<private> global_var: f32;
-  Global(Source{{12, 34}}, "global_var", ty.f32(), ast::StorageClass::kPrivate);
+  // var<in> global_var: f32;
+  Global(Source{{12, 34}}, "global_var", ty.f32(), ast::StorageClass::kInput);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTypeValidationTest, GlobalConstantWithStorageClass_Fail) {
-  // const<private> global_var: f32;
+  // const<in> global_var: f32;
   AST().AddGlobalVariable(create<ast::Variable>(
       Source{{12, 34}}, Symbols().Register("global_var"),
-      ast::StorageClass::kPrivate, ast::Access::kUndefined, ty.f32(), true,
+      ast::StorageClass::kInput, ast::Access::kUndefined, ty.f32(), true,
       Expr(1.23f), ast::DecorationList{}));
 
   EXPECT_FALSE(r()->Resolve());

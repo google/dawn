@@ -87,7 +87,7 @@ TEST_F(AppendVectorTest, Vec3i32_i32) {
 }
 
 TEST_F(AppendVectorTest, Vec2i32Var_i32) {
-  Global("vec_12", ty.vec2<i32>(), ast::StorageClass::kPrivate);
+  Global("vec_12", ty.vec2<i32>(), ast::StorageClass::kInput);
   auto* vec_12 = Expr("vec_12");
   auto* scalar_3 = Expr(3);
   WrapInFunction(vec_12, scalar_3);
@@ -104,7 +104,7 @@ TEST_F(AppendVectorTest, Vec2i32Var_i32) {
 }
 
 TEST_F(AppendVectorTest, Vec2i32_i32Var) {
-  Global("scalar_3", ty.i32(), ast::StorageClass::kPrivate);
+  Global("scalar_3", ty.i32(), ast::StorageClass::kInput);
   auto* scalar_1 = Expr(1);
   auto* scalar_2 = Expr(2);
   auto* scalar_3 = Expr("scalar_3");
@@ -124,8 +124,8 @@ TEST_F(AppendVectorTest, Vec2i32_i32Var) {
 }
 
 TEST_F(AppendVectorTest, Vec2i32Var_i32Var) {
-  Global("vec_12", ty.vec2<i32>(), ast::StorageClass::kPrivate);
-  Global("scalar_3", ty.i32(), ast::StorageClass::kPrivate);
+  Global("vec_12", ty.vec2<i32>(), ast::StorageClass::kInput);
+  Global("scalar_3", ty.i32(), ast::StorageClass::kInput);
   auto* vec_12 = Expr("vec_12");
   auto* scalar_3 = Expr("scalar_3");
   WrapInFunction(vec_12, scalar_3);
@@ -142,8 +142,8 @@ TEST_F(AppendVectorTest, Vec2i32Var_i32Var) {
 }
 
 TEST_F(AppendVectorTest, Vec2i32Var_f32Var) {
-  Global("vec_12", ty.vec2<i32>(), ast::StorageClass::kPrivate);
-  Global("scalar_3", ty.f32(), ast::StorageClass::kPrivate);
+  Global("vec_12", ty.vec2<i32>(), ast::StorageClass::kInput);
+  Global("scalar_3", ty.f32(), ast::StorageClass::kInput);
   auto* vec_12 = Expr("vec_12");
   auto* scalar_3 = Expr("scalar_3");
   WrapInFunction(vec_12, scalar_3);
@@ -163,8 +163,8 @@ TEST_F(AppendVectorTest, Vec2i32Var_f32Var) {
 }
 
 TEST_F(AppendVectorTest, Vec2boolVar_boolVar) {
-  Global("vec_12", ty.vec2<bool>(), ast::StorageClass::kPrivate);
-  Global("scalar_3", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("vec_12", ty.vec2<bool>(), ast::StorageClass::kInput);
+  Global("scalar_3", ty.bool_(), ast::StorageClass::kInput);
   auto* vec_12 = Expr("vec_12");
   auto* scalar_3 = Expr("scalar_3");
   WrapInFunction(vec_12, scalar_3);

@@ -26,7 +26,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, GlobalVar_WithStorageClass) {
-  auto* v = Global("var", ty.f32(), ast::StorageClass::kPrivate);
+  auto* v = Global("var", ty.f32(), ast::StorageClass::kOutput);
 
   spirv::Builder& b = Build();
 
@@ -34,16 +34,30 @@ TEST_F(BuilderTest, GlobalVar_WithStorageClass) {
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
-%2 = OpTypePointer Private %3
+%2 = OpTypePointer Output %3
 %4 = OpConstantNull %3
-%1 = OpVariable %2 Private %4
+%1 = OpVariable %2 Output %4
+)");
+}
+
+TEST_F(BuilderTest, GlobalVar_WithStorageClass_Input) {
+  auto* v = Global("var", ty.f32(), ast::StorageClass::kInput);
+
+  spirv::Builder& b = Build();
+
+  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
+)");
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypePointer Input %3
+%1 = OpVariable %2 Input
 )");
 }
 
 TEST_F(BuilderTest, GlobalVar_WithConstructor) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
 
-  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate, init);
+  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kOutput, init);
 
   spirv::Builder& b = Build();
 
@@ -57,8 +71,8 @@ TEST_F(BuilderTest, GlobalVar_WithConstructor) {
 %3 = OpConstant %2 1
 %4 = OpConstant %2 3
 %5 = OpConstantComposite %1 %3 %3 %4
-%7 = OpTypePointer Private %1
-%6 = OpVariable %7 Private %5
+%7 = OpTypePointer Output %1
+%6 = OpVariable %7 Output %5
 )");
 }
 
@@ -127,6 +141,26 @@ TEST_F(BuilderTest, GlobalVar_Complex_ConstructorWithExtract) {
 )");
 }
 
+TEST_F(BuilderTest, GlobalVar_WithLocation) {
+  auto* v = Global("var", ty.f32(), ast::StorageClass::kOutput, nullptr,
+                   ast::DecorationList{
+                       Location(5),
+                   });
+
+  spirv::Builder& b = Build();
+
+  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
+)");
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 Location 5
+)");
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypePointer Output %3
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Output %4
+)");
+}
+
 TEST_F(BuilderTest, GlobalVar_WithBindingAndGroup) {
   auto* v = Global("var", ty.sampler(ast::SamplerKind::kSampler),
                    ast::StorageClass::kNone, nullptr,
@@ -146,6 +180,26 @@ OpDecorate %1 DescriptorSet 3
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeSampler
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
+)");
+}
+
+TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
+  auto* v = Global("var", ty.f32(), ast::StorageClass::kOutput, nullptr,
+                   ast::DecorationList{
+                       Builtin(ast::Builtin::kPosition),
+                   });
+
+  spirv::Builder& b = Build();
+
+  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
+)");
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 BuiltIn Position
+)");
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypePointer Output %3
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Output %4
 )");
 }
 
@@ -604,6 +658,96 @@ OpDecorate %5 DescriptorSet 0
 %1 = OpVariable %2 UniformConstant
 %6 = OpTypePointer UniformConstant %3
 %5 = OpVariable %6 UniformConstant
+)");
+}
+
+TEST_F(BuilderTest, SampleIndex) {
+  auto* var =
+      Global("sample_index", ty.u32(), ast::StorageClass::kInput, nullptr,
+             ast::DecorationList{
+                 Builtin(ast::Builtin::kSampleIndex),
+             });
+
+  spirv::Builder& b = Build();
+
+  EXPECT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.capabilities()),
+            "OpCapability SampleRateShading\n");
+  EXPECT_EQ(DumpInstructions(b.annots()), "OpDecorate %1 BuiltIn SampleId\n");
+  EXPECT_EQ(DumpInstructions(b.types()),
+            "%3 = OpTypeInt 32 0\n"
+            "%2 = OpTypePointer Input %3\n"
+            "%1 = OpVariable %2 Input\n");
+}
+
+TEST_F(BuilderTest, SampleMask) {
+  // Input:
+  // [[builtin(sample_mask)]] var<in> mask_in : u32;
+  // [[builtin(sample_mask)]] var<out> mask_out : u32;
+  // [[stage(fragment)]]
+  // fn main() {
+  //   mask_out = mask_in;
+  // }
+
+  // After sanitization:
+  // [[builtin(sample_mask)]] var<in> mask_in : array<u32, 1>;
+  // [[builtin(sample_mask)]] var<out> mask_out : array<u32, 1>;
+  // [[stage(fragment)]]
+  // fn main() {
+  //   mask_out[0] = mask_in[0];
+  // }
+
+  Global("mask_in", ty.u32(), ast::StorageClass::kInput, nullptr,
+         ast::DecorationList{
+             Builtin(ast::Builtin::kSampleMask),
+         });
+  Global("mask_out", ty.u32(), ast::StorageClass::kOutput, nullptr,
+         ast::DecorationList{
+             Builtin(ast::Builtin::kSampleMask),
+         });
+  Func("main", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           Assign("mask_out", "mask_in"),
+       },
+       ast::DecorationList{
+           Stage(ast::PipelineStage::kCompute),
+       });
+
+  spirv::Builder& b = SanitizeAndBuild();
+
+  ASSERT_TRUE(b.Build());
+  EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
+OpMemoryModel Logical GLSL450
+OpEntryPoint GLCompute %11 "main" %6 %1
+OpExecutionMode %11 LocalSize 1 1 1
+OpName %1 "mask_in"
+OpName %6 "mask_out"
+OpName %11 "main"
+OpDecorate %3 ArrayStride 4
+OpDecorate %1 BuiltIn SampleMask
+OpDecorate %6 BuiltIn SampleMask
+%4 = OpTypeInt 32 0
+%5 = OpConstant %4 1
+%3 = OpTypeArray %4 %5
+%2 = OpTypePointer Input %3
+%1 = OpVariable %2 Input
+%7 = OpTypePointer Output %3
+%8 = OpConstantNull %3
+%6 = OpVariable %7 Output %8
+%10 = OpTypeVoid
+%9 = OpTypeFunction %10
+%13 = OpTypeInt 32 1
+%14 = OpConstant %13 0
+%15 = OpTypePointer Output %4
+%17 = OpTypePointer Input %4
+%11 = OpFunction %10 None %9
+%12 = OpLabel
+%16 = OpAccessChain %15 %6 %14
+%18 = OpAccessChain %17 %1 %14
+%19 = OpLoad %4 %18
+OpStore %16 %19
+OpReturn
+OpFunctionEnd
 )");
 }
 
