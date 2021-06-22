@@ -32,7 +32,8 @@ class Msl : public Transform {
   struct Config : public Castable<Data, transform::Data> {
     /// Constructor
     /// @param buffer_size_ubo_idx the index to use for the buffer size UBO
-    explicit Config(uint32_t buffer_size_ubo_idx);
+    /// @param sample_mask the fixed sample mask to use for fragment shaders
+    explicit Config(uint32_t buffer_size_ubo_idx, uint32_t sample_mask);
 
     /// Copy constructor
     Config(const Config&);
@@ -42,6 +43,9 @@ class Msl : public Transform {
 
     /// The index to use when generating a UBO to receive storage buffer sizes.
     uint32_t buffer_size_ubo_index;
+
+    /// The fixed sample mask to combine with fragment shader outputs.
+    uint32_t fixed_sample_mask;
   };
 
   /// Information produced by the sanitizer that users may need to act on.

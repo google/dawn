@@ -790,6 +790,276 @@ fn tint_symbol_1(tint_symbol : tint_symbol_2) {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_VoidNoReturn) {
+  auto* src = R"(
+[[stage(fragment)]]
+fn frag_main() {
+}
+)";
+
+  auto* expect = R"(
+struct tint_symbol_1 {
+  [[builtin(sample_mask)]]
+  tint_symbol : u32;
+};
+
+[[stage(fragment)]]
+fn frag_main() -> tint_symbol_1 {
+  return tint_symbol_1(3u);
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0x03u);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_VoidWithReturn) {
+  auto* src = R"(
+[[stage(fragment)]]
+fn frag_main() {
+  return;
+}
+)";
+
+  auto* expect = R"(
+struct tint_symbol_1 {
+  [[builtin(sample_mask)]]
+  tint_symbol : u32;
+};
+
+[[stage(fragment)]]
+fn frag_main() -> tint_symbol_1 {
+  return tint_symbol_1(3u);
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0x03u);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_WithAuthoredMask) {
+  auto* src = R"(
+[[stage(fragment)]]
+fn frag_main() -> [[builtin(sample_mask)]] u32 {
+  return 7u;
+}
+)";
+
+  auto* expect = R"(
+struct tint_symbol {
+  [[builtin(sample_mask)]]
+  value : u32;
+};
+
+[[stage(fragment)]]
+fn frag_main() -> tint_symbol {
+  return tint_symbol((7u & 3u));
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0x03u);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_WithoutAuthoredMask) {
+  auto* src = R"(
+[[stage(fragment)]]
+fn frag_main() -> [[location(0)]] f32 {
+  return 1.0;
+}
+)";
+
+  auto* expect = R"(
+struct tint_symbol_1 {
+  [[location(0)]]
+  value : f32;
+  [[builtin(sample_mask)]]
+  tint_symbol : u32;
+};
+
+[[stage(fragment)]]
+fn frag_main() -> tint_symbol_1 {
+  return tint_symbol_1(1.0, 3u);
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0x03u);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_StructWithAuthoredMask) {
+  auto* src = R"(
+struct Output {
+  [[builtin(frag_depth)]] depth : f32;
+  [[builtin(sample_mask)]] mask : u32;
+  [[location(0)]] value : f32;
+};
+
+[[stage(fragment)]]
+fn frag_main() -> Output {
+  return Output(0.5, 7u, 1.0);
+}
+)";
+
+  auto* expect = R"(
+struct Output {
+  depth : f32;
+  mask : u32;
+  value : f32;
+};
+
+struct tint_symbol {
+  [[location(0)]]
+  value : f32;
+  [[builtin(frag_depth)]]
+  depth : f32;
+  [[builtin(sample_mask)]]
+  mask : u32;
+};
+
+[[stage(fragment)]]
+fn frag_main() -> tint_symbol {
+  let tint_symbol_1 : Output = Output(0.5, 7u, 1.0);
+  return tint_symbol(tint_symbol_1.value, tint_symbol_1.depth, (tint_symbol_1.mask & 3u));
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0x03u);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest,
+       FixedSampleMask_StructWithoutAuthoredMask) {
+  auto* src = R"(
+struct Output {
+  [[builtin(frag_depth)]] depth : f32;
+  [[location(0)]] value : f32;
+};
+
+[[stage(fragment)]]
+fn frag_main() -> Output {
+  return Output(0.5, 1.0);
+}
+)";
+
+  auto* expect = R"(
+struct Output {
+  depth : f32;
+  value : f32;
+};
+
+struct tint_symbol_1 {
+  [[location(0)]]
+  value : f32;
+  [[builtin(frag_depth)]]
+  depth : f32;
+  [[builtin(sample_mask)]]
+  tint_symbol : u32;
+};
+
+[[stage(fragment)]]
+fn frag_main() -> tint_symbol_1 {
+  let tint_symbol_2 : Output = Output(0.5, 1.0);
+  return tint_symbol_1(tint_symbol_2.value, tint_symbol_2.depth, 3u);
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0x03u);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_MultipleShaders) {
+  auto* src = R"(
+[[stage(fragment)]]
+fn frag_main1() -> [[builtin(sample_mask)]] u32 {
+  return 7u;
+}
+
+[[stage(fragment)]]
+fn frag_main2() -> [[location(0)]] f32 {
+  return 1.0;
+}
+
+[[stage(vertex)]]
+fn vert_main1() -> [[builtin(position)]] vec4<f32> {
+  return vec4<f32>();
+}
+
+[[stage(compute)]]
+fn comp_main1() {
+}
+)";
+
+  auto* expect = R"(
+struct tint_symbol {
+  [[builtin(sample_mask)]]
+  value : u32;
+};
+
+[[stage(fragment)]]
+fn frag_main1() -> tint_symbol {
+  return tint_symbol((7u & 3u));
+}
+
+struct tint_symbol_2 {
+  [[location(0)]]
+  value : f32;
+  [[builtin(sample_mask)]]
+  tint_symbol_1 : u32;
+};
+
+[[stage(fragment)]]
+fn frag_main2() -> tint_symbol_2 {
+  return tint_symbol_2(1.0, 3u);
+}
+
+struct tint_symbol_3 {
+  [[builtin(position)]]
+  value : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn vert_main1() -> tint_symbol_3 {
+  return tint_symbol_3(vec4<f32>());
+}
+
+[[stage(compute)]]
+fn comp_main1() {
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0x03u);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace transform
 }  // namespace tint

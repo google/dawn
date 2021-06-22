@@ -99,12 +99,24 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap& data) {
     }
   }
 
+  // Returns true if `decos` contains a `sample_mask` builtin.
+  auto has_sample_mask_builtin = [](const ast::DecorationList& decos) {
+    if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(decos)) {
+      return builtin->value() == ast::Builtin::kSampleMask;
+    }
+    return false;
+  };
+
   for (auto* func_ast : ctx.src->AST().Functions()) {
     if (!func_ast->IsEntryPoint()) {
       continue;
     }
 
     auto* func = ctx.src->Sem().Get(func_ast);
+
+    bool needs_fixed_sample_mask =
+        func_ast->pipeline_stage() == ast::PipelineStage::kFragment &&
+        cfg->fixed_sample_mask != 0xFFFFFFFF;
 
     ast::VariableList new_parameters;
 
@@ -216,10 +228,12 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap& data) {
     // Handle return type.
     auto* ret_type = func->ReturnType();
     std::function<ast::Type*()> new_ret_type;
-    if (ret_type->Is<sem::Void>()) {
+    if (ret_type->Is<sem::Void>() && !needs_fixed_sample_mask) {
       new_ret_type = [&ctx] { return ctx.dst->ty.void_(); };
     } else {
       ast::StructMemberList new_struct_members;
+
+      bool has_authored_sample_mask = false;
 
       if (auto* str = ret_type->As<sem::Struct>()) {
         // Rebuild struct with only the entry point IO attributes.
@@ -238,12 +252,28 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap& data) {
           auto* member_ty = ctx.Clone(member->Declaration()->type());
           new_struct_members.push_back(
               ctx.dst->Member(symbol, member_ty, new_decorations));
+
+          if (has_sample_mask_builtin(new_decorations)) {
+            has_authored_sample_mask = true;
+          }
         }
-      } else {
+      } else if (!ret_type->Is<sem::Void>()) {
         auto* member_ty = ctx.Clone(func->Declaration()->return_type());
         auto decos = ctx.Clone(func_ast->return_type_decorations());
         new_struct_members.push_back(
             ctx.dst->Member("value", member_ty, std::move(decos)));
+
+        if (has_sample_mask_builtin(func_ast->return_type_decorations())) {
+          has_authored_sample_mask = true;
+        }
+      }
+
+      // If a sample mask builtin is required and the shader source did not
+      // contain one, create one now.
+      if (needs_fixed_sample_mask && !has_authored_sample_mask) {
+        new_struct_members.push_back(
+            ctx.dst->Member(ctx.dst->Sym(), ctx.dst->ty.u32(),
+                            {ctx.dst->Builtin(ast::Builtin::kSampleMask)}));
       }
 
       // Sort struct members to satisfy HLSL interfacing matching rules.
@@ -283,16 +313,53 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap& data) {
           }
 
           for (auto* member : new_struct_members) {
-            ret_values.push_back(
-                ctx.dst->MemberAccessor(new_ret_value(), member->symbol()));
+            ast::Expression* expr = nullptr;
+
+            if (needs_fixed_sample_mask &&
+                has_sample_mask_builtin(member->decorations())) {
+              // Use the fixed sample mask, combining it with the authored value
+              // if there is one.
+              expr = ctx.dst->Expr(cfg->fixed_sample_mask);
+              if (has_authored_sample_mask) {
+                expr = ctx.dst->And(
+                    ctx.dst->MemberAccessor(new_ret_value(), member->symbol()),
+                    expr);
+              }
+            } else {
+              expr = ctx.dst->MemberAccessor(new_ret_value(), member->symbol());
+            }
+            ret_values.push_back(expr);
           }
         } else {
-          ret_values.push_back(new_ret_value());
+          if (!ret_type->Is<sem::Void>()) {
+            ret_values.push_back(new_ret_value());
+          }
+
+          if (needs_fixed_sample_mask) {
+            // If the original return value was a sample mask, `and` it with the
+            // fixed mask and return the result.
+            // Otherwise, append the fixed mask to the list of return values,
+            // since it will be the last element of the output struct.
+            if (has_authored_sample_mask) {
+              ret_values[0] =
+                  ctx.dst->And(ret_values[0], cfg->fixed_sample_mask);
+            } else {
+              ret_values.push_back(ctx.dst->Expr(cfg->fixed_sample_mask));
+            }
+          }
         }
 
         auto* new_ret =
             ctx.dst->Return(ctx.dst->Construct(new_ret_type(), ret_values));
         ctx.Replace(ret, new_ret);
+      }
+
+      if (needs_fixed_sample_mask && func->ReturnStatements().empty()) {
+        // There we no return statements but we need to return a fixed sample
+        // mask, so add a return statement that does this.
+        ctx.InsertBack(func_ast->body()->statements(),
+                       ctx.dst->Return(ctx.dst->Construct(
+                           new_ret_type(), cfg->fixed_sample_mask)));
       }
     }
 
@@ -308,13 +375,12 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap& data) {
   return Output(Program(std::move(out)));
 }
 
-CanonicalizeEntryPointIO::Config::Config(BuiltinStyle builtins)
-    : builtin_style(builtins) {}
+CanonicalizeEntryPointIO::Config::Config(BuiltinStyle builtins,
+                                         uint32_t sample_mask)
+    : builtin_style(builtins), fixed_sample_mask(sample_mask) {}
 
 CanonicalizeEntryPointIO::Config::Config(const Config&) = default;
 CanonicalizeEntryPointIO::Config::~Config() = default;
-CanonicalizeEntryPointIO::Config& CanonicalizeEntryPointIO::Config::operator=(
-    const Config&) = default;
 
 }  // namespace transform
 }  // namespace tint

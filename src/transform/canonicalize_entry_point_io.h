@@ -82,7 +82,8 @@ class CanonicalizeEntryPointIO : public Transform {
   struct Config : public Castable<Config, Data> {
     /// Constructor
     /// @param builtins the approach to use for emitting builtins.
-    explicit Config(BuiltinStyle builtins);
+    /// @param sample_mask an optional sample mask to combine with shader masks
+    explicit Config(BuiltinStyle builtins, uint32_t sample_mask = 0xFFFFFFFF);
 
     /// Copy constructor
     Config(const Config&);
@@ -90,12 +91,11 @@ class CanonicalizeEntryPointIO : public Transform {
     /// Destructor
     ~Config() override;
 
-    /// Assignment operator
-    /// @returns this Config
-    Config& operator=(const Config&);
-
     /// The approach to use for emitting builtins.
-    BuiltinStyle builtin_style;
+    BuiltinStyle const builtin_style;
+
+    /// A fixed sample mask to combine into masks produced by fragment shaders.
+    uint32_t const fixed_sample_mask;
   };
 
   /// Constructor

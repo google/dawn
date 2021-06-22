@@ -1490,6 +1490,16 @@ class ProgramBuilder {
                                          Expr(std::forward<RHS>(rhs)));
   }
 
+  /// @param lhs the left hand argument to the and operation
+  /// @param rhs the right hand argument to the and operation
+  /// @returns a `ast::BinaryExpression` bitwise anding `lhs` and `rhs`
+  template <typename LHS, typename RHS>
+  ast::BinaryExpression* And(LHS&& lhs, RHS&& rhs) {
+    return create<ast::BinaryExpression>(ast::BinaryOp::kAnd,
+                                         Expr(std::forward<LHS>(lhs)),
+                                         Expr(std::forward<RHS>(rhs)));
+  }
+
   /// @param lhs the left hand argument to the subtraction operation
   /// @param rhs the right hand argument to the subtraction operation
   /// @returns a `ast::BinaryExpression` subtracting `rhs` from `lhs`

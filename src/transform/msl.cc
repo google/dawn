@@ -51,13 +51,17 @@ Output Msl::Run(const Program* in, const DataMap& inputs) {
 
   auto* cfg = inputs.Get<Config>();
 
-  // Build the config for the array length transform.
+  // Build the configs for the internal transforms.
   uint32_t buffer_size_ubo_index = kDefaultBufferSizeUniformIndex;
+  uint32_t fixed_sample_mask = 0xFFFFFFFF;
   if (cfg) {
     buffer_size_ubo_index = cfg->buffer_size_ubo_index;
+    fixed_sample_mask = cfg->fixed_sample_mask;
   }
   auto array_length_from_uniform_cfg = ArrayLengthFromUniform::Config(
       sem::BindingPoint{0, buffer_size_ubo_index});
+  auto entry_point_io_cfg = CanonicalizeEntryPointIO::Config(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, fixed_sample_mask);
 
   // Use the SSBO binding numbers as the indices for the buffer size lookups.
   for (auto* var : in->AST().GlobalVariables()) {
@@ -84,7 +88,7 @@ Output Msl::Run(const Program* in, const DataMap& inputs) {
   internal_inputs.Add<ArrayLengthFromUniform::Config>(
       std::move(array_length_from_uniform_cfg));
   internal_inputs.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+      std::move(entry_point_io_cfg));
   auto out = manager.Run(in, internal_inputs);
   if (!out.program.IsValid()) {
     return out;
@@ -274,8 +278,9 @@ void Msl::HandleModuleScopeVariables(CloneContext& ctx) const {
   }
 }
 
-Msl::Config::Config(uint32_t buffer_size_ubo_idx)
-    : buffer_size_ubo_index(buffer_size_ubo_idx) {}
+Msl::Config::Config(uint32_t buffer_size_ubo_idx, uint32_t sample_mask)
+    : buffer_size_ubo_index(buffer_size_ubo_idx),
+      fixed_sample_mask(sample_mask) {}
 Msl::Config::Config(const Config&) = default;
 Msl::Config::~Config() = default;
 
