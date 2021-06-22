@@ -877,13 +877,8 @@ bool FunctionEmitter::Emit() {
 
   bool make_body_function = true;
   if (ep_info_) {
-    if (ep_info_->inner_name.empty()) {
-      // This is an entry point, and we don't want to emit it as a wrapper
-      // around its own body.  Emit it as one function.
-      decl.name = ep_info_->name;
-      decl.decorations.emplace_back(
-          create<ast::StageDecoration>(Source{}, ep_info_->stage));
-    } else if (ep_info_->owns_inner_implementation) {
+    TINT_ASSERT(!ep_info_->inner_name.empty());
+    if (ep_info_->owns_inner_implementation) {
       // This is an entry point, and we want to emit it as a wrapper around
       // an implementation function.
       decl.name = ep_info_->inner_name;

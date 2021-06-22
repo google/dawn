@@ -833,6 +833,7 @@ bool ParserImpl::RegisterEntryPoints() {
       // Reuse the inner implementation owned by the first entry point.
       inner_implementation_name = where->second[0].inner_name;
     }
+    TINT_ASSERT(!inner_implementation_name.empty());
     TINT_ASSERT(ep_name != inner_implementation_name);
 
     tint::UniqueVector<uint32_t> inputs;
