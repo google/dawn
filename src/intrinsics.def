@@ -311,12 +311,12 @@ fn fract(f32) -> f32
 fn fract<N: num>(vec<N, f32>) -> vec<N, f32>
 fn frexp<T: iu32, S: function_private_workgroup, A: access>(f32, ptr<S, T, A>) -> f32
 fn frexp<N: num, T: iu32, S: function_private_workgroup, A: access>(vec<N, f32>, ptr<S, vec<N, T>, A>) -> vec<N, f32>
-fn fwidth(f32) -> f32
-fn fwidth<N: num>(vec<N, f32>) -> vec<N, f32>
-fn fwidthCoarse(f32) -> f32
-fn fwidthCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
-fn fwidthFine(f32) -> f32
-fn fwidthFine<N: num>(vec<N, f32>) -> vec<N, f32>
+[[stage("fragment")]] fn fwidth(f32) -> f32
+[[stage("fragment")]] fn fwidth<N: num>(vec<N, f32>) -> vec<N, f32>
+[[stage("fragment")]] fn fwidthCoarse(f32) -> f32
+[[stage("fragment")]] fn fwidthCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
+[[stage("fragment")]] fn fwidthFine(f32) -> f32
+[[stage("fragment")]] fn fwidthFine<N: num>(vec<N, f32>) -> vec<N, f32>
 fn ignore<T>(T)
 fn inverseSqrt(f32) -> f32
 fn inverseSqrt<N: num>(vec<N, f32>) -> vec<N, f32>

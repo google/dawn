@@ -1,63 +1,31 @@
-SKIP: FAILED
-
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 24
+; Bound: 14
 ; Schema: 0
                OpCapability Shader
                OpCapability DerivativeControl
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Vertex %vertex_main "vertex_main" %tint_pointsize
                OpEntryPoint Fragment %fragment_main "fragment_main"
-               OpEntryPoint GLCompute %compute_main "compute_main"
                OpExecutionMode %fragment_main OriginUpperLeft
-               OpExecutionMode %compute_main LocalSize 1 1 1
-               OpName %tint_pointsize "tint_pointsize"
                OpName %fwidthFine_ff6aa0 "fwidthFine_ff6aa0"
                OpName %res "res"
-               OpName %vertex_main "vertex_main"
                OpName %fragment_main "fragment_main"
-               OpName %compute_main "compute_main"
-               OpDecorate %tint_pointsize BuiltIn PointSize
-      %float = OpTypeFloat 32
-%_ptr_Output_float = OpTypePointer Output %float
-          %4 = OpConstantNull %float
-%tint_pointsize = OpVariable %_ptr_Output_float Output %4
        %void = OpTypeVoid
-          %5 = OpTypeFunction %void
+          %1 = OpTypeFunction %void
+      %float = OpTypeFloat 32
     %v2float = OpTypeVector %float 2
-         %11 = OpConstantNull %v2float
+          %8 = OpConstantNull %v2float
 %_ptr_Function_v2float = OpTypePointer Function %v2float
-    %float_1 = OpConstant %float 1
-%fwidthFine_ff6aa0 = OpFunction %void None %5
-          %8 = OpLabel
-        %res = OpVariable %_ptr_Function_v2float Function %11
-          %9 = OpFwidthFine %v2float %11
-               OpStore %res %9
+%fwidthFine_ff6aa0 = OpFunction %void None %1
+          %4 = OpLabel
+        %res = OpVariable %_ptr_Function_v2float Function %8
+          %5 = OpFwidthFine %v2float %8
+               OpStore %res %5
                OpReturn
                OpFunctionEnd
-%vertex_main = OpFunction %void None %5
-         %15 = OpLabel
-               OpStore %tint_pointsize %float_1
-         %17 = OpFunctionCall %void %fwidthFine_ff6aa0
+%fragment_main = OpFunction %void None %1
+         %12 = OpLabel
+         %13 = OpFunctionCall %void %fwidthFine_ff6aa0
                OpReturn
                OpFunctionEnd
-%fragment_main = OpFunction %void None %5
-         %19 = OpLabel
-         %20 = OpFunctionCall %void %fwidthFine_ff6aa0
-               OpReturn
-               OpFunctionEnd
-%compute_main = OpFunction %void None %5
-         %22 = OpLabel
-         %23 = OpFunctionCall %void %fwidthFine_ff6aa0
-               OpReturn
-               OpFunctionEnd
-
-
-Validation Failure:
-1:1: OpEntryPoint Entry Point <id> '14[%vertex_main]'s callgraph contains function <id> 7[%fwidthFine_ff6aa0], which cannot be used with the current execution model:
-Derivative instructions require Fragment or GLCompute execution model: FwidthFine
-
-  %fwidthFine_ff6aa0 = OpFunction %void None %5
-

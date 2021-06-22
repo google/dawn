@@ -1,8 +1,3 @@
-SKIP: FAILED
-
-
-
-Validation Failure:
 #include <metal_stdlib>
 
 using namespace metal;
@@ -10,31 +5,8 @@ void fwidth_df38ef() {
   float res =   fwidth(1.0f);
 }
 
-vertex void vertex_main() {
-  fwidth_df38ef();
-  return;
-}
-
 fragment void fragment_main() {
   fwidth_df38ef();
   return;
 }
 
-kernel void compute_main() {
-  fwidth_df38ef();
-  return;
-}
-
-
-tint_YeBAYS.metal:5:9: warning: unused variable 'res' [-Wunused-variable]
-  float res =   fwidth(1.0f);
-        ^
-tint_YeBAYS.metal:8:13: error: vertex function 'vertex_main' uses unsupported builtin functions
-vertex void vertex_main() {
-            ^
-note: function air.fwidth.f32 is not allowed within a vertex function
-tint_YeBAYS.metal:18:13: error: kernel function 'compute_main' uses unsupported builtin functions
-kernel void compute_main() {
-            ^
-note: function air.fwidth.f32 is not allowed within a kernel function
-1 warning and 2 errors generated.
