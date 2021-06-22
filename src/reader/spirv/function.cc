@@ -3540,6 +3540,14 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       }
       break;
 
+    case SpvOpIAddCarry:
+    case SpvOpISubBorrow:
+    case SpvOpUMulExtended:
+    case SpvOpSMulExtended:
+      return Fail() << "extended arithmetic is not finalized for WGSL: "
+                       "https://github.com/gpuweb/gpuweb/issues/1565: "
+                    << inst.PrettyPrint();
+
     default:
       break;
   }
