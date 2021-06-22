@@ -259,14 +259,15 @@ namespace dawn_native { namespace vulkan {
             }
 
             // For non-mappable resources, favor device local memory.
-            if (!mappable) {
-                if ((info.memoryTypes[bestType].propertyFlags &
-                     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) == 0 &&
-                    (info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) !=
-                        0) {
+            bool currentDeviceLocal =
+                info.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+            bool bestDeviceLocal =
+                info.memoryTypes[bestType].propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+            if (!mappable && (currentDeviceLocal != bestDeviceLocal)) {
+                if (currentDeviceLocal) {
                     bestType = static_cast<int>(i);
-                    continue;
                 }
+                continue;
             }
 
             // All things equal favor the memory in the biggest heap
