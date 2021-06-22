@@ -2682,6 +2682,156 @@ Return{}
   EXPECT_EQ(got, expected) << got;
 }
 
+TEST_F(SpvParserFunctionVarTest, EmitStatement_Hoist_UsedAsNonPtrArg) {
+  // Spawned from crbug.com/tint/804
+  const auto assembly = Preamble() + R"(
+    %fn_int = OpTypeFunction %void %int
+
+    %500 = OpFunction %void None %fn_int
+    %501 = OpFunctionParameter %int
+    %502 = OpLabel
+    OpReturn
+    OpFunctionEnd
+
+    %100 = OpFunction %void None %voidfn
+
+    %10 = OpLabel
+    OpSelectionMerge %50 None
+    OpBranchConditional %true %20 %30
+
+      %20 = OpLabel
+      %200 = OpCopyObject %int %int_1
+      OpBranch %50
+
+      %30 = OpLabel
+      OpReturn
+
+    %50 = OpLabel   ; dominated by %20, but %200 needs to be hoisted
+    %201 = OpFunctionCall %void %500 %200
+    OpReturn
+    OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  const auto got = ToString(p->builder(), fe.ast_body());
+  const auto* expected = R"(VariableDeclStatement{
+  Variable{
+    x_200
+    none
+    undefined
+    __i32
+  }
+}
+If{
+  (
+    ScalarConstructor[not set]{true}
+  )
+  {
+    Assignment{
+      Identifier[not set]{x_200}
+      ScalarConstructor[not set]{1}
+    }
+  }
+}
+Else{
+  {
+    Return{}
+  }
+}
+Call[not set]{
+  Identifier[not set]{x_500}
+  (
+    Identifier[not set]{x_200}
+  )
+}
+Return{}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
+
+TEST_F(SpvParserFunctionVarTest, DISABLED_EmitStatement_Hoist_UsedAsPtrArg) {
+  // Spawned from crbug.com/tint/804
+  // Blocked by crbug.com/tint/98: hoisting pointer types
+  const auto assembly = Preamble() + R"(
+
+    %fn_int = OpTypeFunction %void %ptr_int
+
+    %500 = OpFunction %void None %fn_int
+    %501 = OpFunctionParameter %ptr_int
+    %502 = OpLabel
+    OpReturn
+    OpFunctionEnd
+
+    %100 = OpFunction %void None %voidfn
+
+    %10 = OpLabel
+    %199 = OpVariable %ptr_int Function
+    OpSelectionMerge %50 None
+    OpBranchConditional %true %20 %30
+
+      %20 = OpLabel
+      %200 = OpCopyObject %ptr_int %199
+      OpBranch %50
+
+      %30 = OpLabel
+      OpReturn
+
+    %50 = OpLabel   ; dominated by %20, but %200 needs to be hoisted
+    %201 = OpFunctionCall %void %500 %200
+    OpReturn
+    OpFunctionEnd
+)";
+  std::cout << assembly << std::endl;
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  const auto got = ToString(p->builder(), fe.ast_body());
+  const auto* expected = R"(VariableDeclStatement{
+  Variable{
+    x_200
+    none
+    undefined
+    __i32
+  }
+  Variable{
+    x_199
+    none
+    undefined
+    __i32
+  }
+}
+If{
+  (
+    ScalarConstructor[not set]{true}
+  )
+  {
+    Assignment{
+      Identifier[not set]{x_200}
+      ScalarConstructor[not set]{1}
+    }
+  }
+}
+Else{
+  {
+    Return{}
+  }
+}
+Call[not set]{
+  Identifier[not set]{x_500}
+  (
+    Identifier[not set]{x_200}
+  )
+}
+Return{}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader
