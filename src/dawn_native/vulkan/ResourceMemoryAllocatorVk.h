@@ -29,28 +29,20 @@ namespace dawn_native { namespace vulkan {
 
     class Device;
 
-    // Various kinds of memory that influence the result of the allocation. For example, to take
-    // into account mappability and Vulkan's bufferImageGranularity.
-    enum class MemoryKind {
-        Linear,
-        LinearMappable,
-        Opaque,
-    };
-
     class ResourceMemoryAllocator {
       public:
         ResourceMemoryAllocator(Device* device);
         ~ResourceMemoryAllocator();
 
         ResultOrError<ResourceMemoryAllocation> Allocate(const VkMemoryRequirements& requirements,
-                                                         MemoryKind kind);
+                                                         bool mappable);
         void Deallocate(ResourceMemoryAllocation* allocation);
 
         void DestroyPool();
 
         void Tick(ExecutionSerial completedSerial);
 
-        int FindBestTypeIndex(VkMemoryRequirements requirements, MemoryKind kind);
+        int FindBestTypeIndex(VkMemoryRequirements requirements, bool mappable);
 
       private:
         Device* mDevice;

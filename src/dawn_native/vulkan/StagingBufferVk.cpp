@@ -16,7 +16,6 @@
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
 #include "dawn_native/vulkan/ResourceHeapVk.h"
-#include "dawn_native/vulkan/ResourceMemoryAllocatorVk.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
 namespace dawn_native { namespace vulkan {
@@ -43,8 +42,7 @@ namespace dawn_native { namespace vulkan {
         VkMemoryRequirements requirements;
         mDevice->fn.GetBufferMemoryRequirements(mDevice->GetVkDevice(), mBuffer, &requirements);
 
-        DAWN_TRY_ASSIGN(mAllocation, mDevice->GetResourceMemoryAllocator()->Allocate(
-                                         requirements, MemoryKind::LinearMappable));
+        DAWN_TRY_ASSIGN(mAllocation, mDevice->AllocateMemory(requirements, true));
 
         DAWN_TRY(CheckVkSuccess(
             mDevice->fn.BindBufferMemory(mDevice->GetVkDevice(), mBuffer,
@@ -63,7 +61,7 @@ namespace dawn_native { namespace vulkan {
     StagingBuffer::~StagingBuffer() {
         mMappedPointer = nullptr;
         mDevice->GetFencedDeleter()->DeleteWhenUnused(mBuffer);
-        mDevice->GetResourceMemoryAllocator()->Deallocate(&mAllocation);
+        mDevice->DeallocateMemory(&mAllocation);
     }
 
     VkBuffer StagingBuffer::GetBufferHandle() const {

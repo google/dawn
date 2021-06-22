@@ -90,8 +90,8 @@ namespace dawn_native { namespace vulkan {
                 externalInfo.pNext = nullptr;
                 externalInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
 
-                int bestType = deviceVk->GetResourceMemoryAllocator()->FindBestTypeIndex(
-                    requirements, MemoryKind::Opaque);
+                int bestType = deviceVk->GetResourceMemoryAllocatorForTesting()->FindBestTypeIndex(
+                    requirements, false);
                 VkMemoryAllocateInfo allocateInfo;
                 allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
                 allocateInfo.pNext = &externalInfo;

@@ -39,7 +39,7 @@ namespace dawn_native { namespace metal {
 
     MaybeError Buffer::Initialize(bool mappedAtCreation) {
         MTLResourceOptions storageMode;
-        if (GetUsage() & kMappableBufferUsages) {
+        if (GetUsage() & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) {
             storageMode = MTLResourceStorageModeShared;
         } else {
             storageMode = MTLResourceStorageModePrivate;
@@ -112,7 +112,7 @@ namespace dawn_native { namespace metal {
 
     bool Buffer::IsCPUWritableAtCreation() const {
         // TODO(enga): Handle CPU-visible memory on UMA
-        return GetUsage() & kMappableBufferUsages;
+        return (GetUsage() & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) != 0;
     }
 
     MaybeError Buffer::MapAtCreationImpl() {

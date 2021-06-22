@@ -26,7 +26,6 @@
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
 #include "dawn_native/vulkan/ResourceHeapVk.h"
-#include "dawn_native/vulkan/ResourceMemoryAllocatorVk.h"
 #include "dawn_native/vulkan/StagingBufferVk.h"
 #include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
@@ -565,8 +564,7 @@ namespace dawn_native { namespace vulkan {
         VkMemoryRequirements requirements;
         device->fn.GetImageMemoryRequirements(device->GetVkDevice(), mHandle, &requirements);
 
-        DAWN_TRY_ASSIGN(mMemoryAllocation, device->GetResourceMemoryAllocator()->Allocate(
-                                               requirements, MemoryKind::Opaque));
+        DAWN_TRY_ASSIGN(mMemoryAllocation, device->AllocateMemory(requirements, false));
 
         DAWN_TRY(CheckVkSuccess(
             device->fn.BindImageMemory(device->GetVkDevice(), mHandle,
@@ -728,7 +726,7 @@ namespace dawn_native { namespace vulkan {
 
             // For textures created from a VkImage, the allocation if kInvalid so the Device knows
             // to skip the deallocation of the (absence of) VkDeviceMemory.
-            device->GetResourceMemoryAllocator()->Deallocate(&mMemoryAllocation);
+            device->DeallocateMemory(&mMemoryAllocation);
 
             if (mHandle != VK_NULL_HANDLE) {
                 device->GetFencedDeleter()->DeleteWhenUnused(mHandle);

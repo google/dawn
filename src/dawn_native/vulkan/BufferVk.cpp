@@ -64,7 +64,7 @@ namespace dawn_native { namespace vulkan {
         VkPipelineStageFlags VulkanPipelineStage(wgpu::BufferUsage usage) {
             VkPipelineStageFlags flags = 0;
 
-            if (usage & kMappableBufferUsages) {
+            if (usage & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) {
                 flags |= VK_PIPELINE_STAGE_HOST_BIT;
             }
             if (usage & (wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst)) {
@@ -166,18 +166,13 @@ namespace dawn_native { namespace vulkan {
             device->fn.CreateBuffer(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
             "vkCreateBuffer"));
 
-        // Gather requirements for the buffer's memory and allocate it.
         VkMemoryRequirements requirements;
         device->fn.GetBufferMemoryRequirements(device->GetVkDevice(), mHandle, &requirements);
 
-        MemoryKind requestKind = MemoryKind::Linear;
-        if (GetUsage() & kMappableBufferUsages) {
-            requestKind = MemoryKind::LinearMappable;
-        }
-        DAWN_TRY_ASSIGN(mMemoryAllocation,
-                        device->GetResourceMemoryAllocator()->Allocate(requirements, requestKind));
+        bool requestMappable =
+            (GetUsage() & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) != 0;
+        DAWN_TRY_ASSIGN(mMemoryAllocation, device->AllocateMemory(requirements, requestMappable));
 
-        // Finally associate it with the buffer.
         DAWN_TRY(CheckVkSuccess(
             device->fn.BindBufferMemory(device->GetVkDevice(), mHandle,
                                         ToBackend(mMemoryAllocation.GetResourceHeap())->GetMemory(),
@@ -289,7 +284,7 @@ namespace dawn_native { namespace vulkan {
     }
 
     void Buffer::DestroyImpl() {
-        ToBackend(GetDevice())->GetResourceMemoryAllocator()->Deallocate(&mMemoryAllocation);
+        ToBackend(GetDevice())->DeallocateMemory(&mMemoryAllocation);
 
         if (mHandle != VK_NULL_HANDLE) {
             ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mHandle);
