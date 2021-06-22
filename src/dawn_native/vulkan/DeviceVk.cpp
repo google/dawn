@@ -219,6 +219,10 @@ namespace dawn_native { namespace vulkan {
         return mRenderPassCache.get();
     }
 
+    ResourceMemoryAllocator* Device::GetResourceMemoryAllocator() const {
+        return mResourceMemoryAllocator.get();
+    }
+
     void Device::EnqueueDeferredDeallocation(BindGroupLayout* bindGroupLayout) {
         mBindGroupLayoutsPendingDeallocation.Enqueue(bindGroupLayout, GetPendingCommandSerial());
     }
@@ -802,24 +806,6 @@ namespace dawn_native { namespace vulkan {
         }
 
         return result;
-    }
-
-    ResultOrError<ResourceMemoryAllocation> Device::AllocateMemory(
-        VkMemoryRequirements requirements,
-        bool mappable) {
-        return mResourceMemoryAllocator->Allocate(requirements, mappable);
-    }
-
-    void Device::DeallocateMemory(ResourceMemoryAllocation* allocation) {
-        mResourceMemoryAllocator->Deallocate(allocation);
-    }
-
-    int Device::FindBestMemoryTypeIndex(VkMemoryRequirements requirements, bool mappable) {
-        return mResourceMemoryAllocator->FindBestTypeIndex(requirements, mappable);
-    }
-
-    ResourceMemoryAllocator* Device::GetResourceMemoryAllocatorForTesting() const {
-        return mResourceMemoryAllocator.get();
     }
 
     uint32_t Device::GetComputeSubgroupSize() const {

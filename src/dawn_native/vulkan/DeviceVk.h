@@ -59,6 +59,7 @@ namespace dawn_native { namespace vulkan {
 
         FencedDeleter* GetFencedDeleter() const;
         RenderPassCache* GetRenderPassCache() const;
+        ResourceMemoryAllocator* GetResourceMemoryAllocator() const;
 
         CommandRecordingContext* GetPendingRecordingContext();
         MaybeError SubmitPendingCommands();
@@ -92,14 +93,6 @@ namespace dawn_native { namespace vulkan {
                                             const TextureDataLayout& src,
                                             TextureCopy* dst,
                                             const Extent3D& copySizePixels) override;
-
-        ResultOrError<ResourceMemoryAllocation> AllocateMemory(VkMemoryRequirements requirements,
-                                                               bool mappable);
-        void DeallocateMemory(ResourceMemoryAllocation* allocation);
-
-        int FindBestMemoryTypeIndex(VkMemoryRequirements requirements, bool mappable);
-
-        ResourceMemoryAllocator* GetResourceMemoryAllocatorForTesting() const;
 
         // Return the fixed subgroup size to use for compute shaders on this device or 0 if none
         // needs to be set.
