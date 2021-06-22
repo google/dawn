@@ -76,6 +76,70 @@ class InspectorHelper : public ProgramBuilder {
     return Structure(name, members);
   }
 
+  // TODO(crbug.com/tint/697): Remove this.
+  /// Add In/Out variables to the global variables
+  /// @param inout_vars tuples of {in, out} that will be added as entries to the
+  ///                   global variables
+  void AddInOutVariables(
+      std::vector<std::tuple<std::string, std::string>> inout_vars) {
+    uint32_t location = 0;
+    for (auto inout : inout_vars) {
+      std::string in, out;
+      std::tie(in, out) = inout;
+
+      Global(in, ty.u32(), ast::StorageClass::kInput, nullptr,
+             ast::DecorationList{Location(location++)});
+      Global(out, ty.u32(), ast::StorageClass::kOutput, nullptr,
+             ast::DecorationList{Location(location++)});
+    }
+  }
+
+  // TODO(crbug.com/tint/697): Remove this.
+  /// Generates a function that references in/out variables
+  /// @param name name of the function created
+  /// @param inout_vars tuples of {in, out} that will be converted into out = in
+  ///                   calls in the function body
+  /// @param decorations the function decorations
+  void MakeInOutVariableBodyFunction(
+      std::string name,
+      std::vector<std::tuple<std::string, std::string>> inout_vars,
+      ast::DecorationList decorations) {
+    ast::StatementList stmts;
+    for (auto inout : inout_vars) {
+      std::string in, out;
+      std::tie(in, out) = inout;
+      stmts.emplace_back(Assign(out, in));
+    }
+    stmts.emplace_back(Return());
+    Func(name, ast::VariableList(), ty.void_(), stmts, decorations);
+  }
+
+  // TODO(crbug.com/tint/697): Remove this.
+  /// Generates a function that references in/out variables and calls another
+  /// function.
+  /// @param caller name of the function created
+  /// @param callee name of the function to be called
+  /// @param inout_vars tuples of {in, out} that will be converted into out = in
+  ///                   calls in the function body
+  /// @param decorations the function decorations
+  /// @returns a function object
+  ast::Function* MakeInOutVariableCallerBodyFunction(
+      std::string caller,
+      std::string callee,
+      std::vector<std::tuple<std::string, std::string>> inout_vars,
+      ast::DecorationList decorations) {
+    ast::StatementList stmts;
+    for (auto inout : inout_vars) {
+      std::string in, out;
+      std::tie(in, out) = inout;
+      stmts.emplace_back(Assign(out, in));
+    }
+    stmts.emplace_back(create<ast::CallStatement>(Call(callee)));
+    stmts.emplace_back(Return());
+
+    return Func(caller, ast::VariableList(), ty.void_(), stmts, decorations);
+  }
+
   /// Add a pipeline constant to the global variables, with a specific ID.
   /// @param name name of the variable to add
   /// @param id id number for the constant id
@@ -135,6 +199,19 @@ class InspectorHelper : public ProgramBuilder {
     stmts.emplace_back(Return());
 
     return Func(func, ast::VariableList(), ty.void_(), stmts, decorations);
+  }
+
+  /// @param vec Vector of StageVariable to be searched
+  /// @param name Name to be searching for
+  /// @returns true if name is in vec, otherwise false
+  bool ContainsName(const std::vector<StageVariable>& vec,
+                    const std::string& name) {
+    for (auto& s : vec) {
+      if (s.name == name) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /// Builds a string for accessing a member in a generated struct
@@ -1065,6 +1142,329 @@ TEST_F(InspectorGetEntryPointTest, MixInOutVariablesAndStruct) {
   EXPECT_TRUE(result[0].output_variables[1].has_location_decoration);
   EXPECT_EQ(1u, result[0].output_variables[1].location_decoration);
   EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[1].component_type);
+}
+
+// TODO(crbug.com/tint/697): Remove this.
+TEST_F(InspectorGetEntryPointTest, EntryPointInOutVariables_Legacy) {
+  AddInOutVariables({{"in_var", "out_var"}});
+
+  MakeInOutVariableBodyFunction("foo", {{"in_var", "out_var"}},
+                                ast::DecorationList{
+                                    Stage(ast::PipelineStage::kFragment),
+                                });
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  ASSERT_EQ(1u, result.size());
+
+  ASSERT_EQ(1u, result[0].input_variables.size());
+  EXPECT_EQ("in_var", result[0].input_variables[0].name);
+  EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[0].component_type);
+
+  ASSERT_EQ(1u, result[0].output_variables.size());
+  EXPECT_EQ("out_var", result[0].output_variables[0].name);
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(1u, result[0].output_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[0].component_type);
+}
+
+// TODO(crbug.com/tint/697): Remove this.
+TEST_F(InspectorGetEntryPointTest, FunctionInOutVariables_Legacy) {
+  AddInOutVariables({{"in_var", "out_var"}});
+
+  MakeInOutVariableBodyFunction("func", {{"in_var", "out_var"}}, {});
+
+  MakeCallerBodyFunction("foo", {"func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  ASSERT_EQ(1u, result.size());
+
+  ASSERT_EQ(1u, result[0].input_variables.size());
+  EXPECT_EQ("in_var", result[0].input_variables[0].name);
+  EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[0].component_type);
+
+  ASSERT_EQ(1u, result[0].output_variables.size());
+  EXPECT_EQ("out_var", result[0].output_variables[0].name);
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(1u, result[0].output_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[0].component_type);
+}
+
+// TODO(crbug.com/tint/697): Remove this.
+TEST_F(InspectorGetEntryPointTest, RepeatedInOutVariables_Legacy) {
+  AddInOutVariables({{"in_var", "out_var"}});
+
+  MakeInOutVariableBodyFunction("func", {{"in_var", "out_var"}}, {});
+
+  MakeInOutVariableCallerBodyFunction("foo", "func", {{"in_var", "out_var"}},
+                                      ast::DecorationList{
+                                          Stage(ast::PipelineStage::kFragment),
+                                      });
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  ASSERT_EQ(1u, result.size());
+
+  ASSERT_EQ(1u, result[0].input_variables.size());
+  EXPECT_EQ("in_var", result[0].input_variables[0].name);
+  EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[0].component_type);
+
+  ASSERT_EQ(1u, result[0].output_variables.size());
+  EXPECT_EQ("out_var", result[0].output_variables[0].name);
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(1u, result[0].output_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[0].component_type);
+}
+
+// TODO(crbug.com/tint/697): Remove this.
+TEST_F(InspectorGetEntryPointTest, EntryPointMultipleInOutVariables_Legacy) {
+  AddInOutVariables({{"in_var", "out_var"}, {"in2_var", "out2_var"}});
+
+  MakeInOutVariableBodyFunction(
+      "foo", {{"in_var", "out_var"}, {"in2_var", "out2_var"}},
+      ast::DecorationList{
+          Stage(ast::PipelineStage::kFragment),
+      });
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  ASSERT_EQ(1u, result.size());
+
+  ASSERT_EQ(2u, result[0].input_variables.size());
+  EXPECT_TRUE(ContainsName(result[0].input_variables, "in_var"));
+  EXPECT_TRUE(ContainsName(result[0].input_variables, "in2_var"));
+  EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[0].component_type);
+  EXPECT_TRUE(result[0].input_variables[1].has_location_decoration);
+  EXPECT_EQ(2u, result[0].input_variables[1].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[1].component_type);
+
+  ASSERT_EQ(2u, result[0].output_variables.size());
+  EXPECT_TRUE(ContainsName(result[0].output_variables, "out_var"));
+  EXPECT_TRUE(ContainsName(result[0].output_variables, "out2_var"));
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(1u, result[0].output_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[0].component_type);
+  EXPECT_TRUE(result[0].output_variables[1].has_location_decoration);
+  EXPECT_EQ(3u, result[0].output_variables[1].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[1].component_type);
+}
+
+// TODO(crbug.com/tint/697): Remove this.
+TEST_F(InspectorGetEntryPointTest, FunctionMultipleInOutVariables_Legacy) {
+  AddInOutVariables({{"in_var", "out_var"}, {"in2_var", "out2_var"}});
+
+  MakeInOutVariableBodyFunction(
+      "func", {{"in_var", "out_var"}, {"in2_var", "out2_var"}}, {});
+
+  MakeCallerBodyFunction("foo", {"func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  ASSERT_EQ(1u, result.size());
+
+  ASSERT_EQ(2u, result[0].input_variables.size());
+  EXPECT_TRUE(ContainsName(result[0].input_variables, "in_var"));
+  EXPECT_TRUE(ContainsName(result[0].input_variables, "in2_var"));
+  EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[0].component_type);
+  EXPECT_TRUE(result[0].input_variables[1].has_location_decoration);
+  EXPECT_EQ(2u, result[0].input_variables[1].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[1].component_type);
+
+  ASSERT_EQ(2u, result[0].output_variables.size());
+  EXPECT_TRUE(ContainsName(result[0].output_variables, "out_var"));
+  EXPECT_TRUE(ContainsName(result[0].output_variables, "out2_var"));
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(1u, result[0].output_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[0].component_type);
+  EXPECT_TRUE(result[0].output_variables[1].has_location_decoration);
+  EXPECT_EQ(3u, result[0].output_variables[1].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[1].component_type);
+}
+
+// TODO(crbug.com/tint/697): Remove this.
+TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables_Legacy) {
+  AddInOutVariables({{"in_var", "out_var"}, {"in2_var", "out2_var"}});
+
+  MakeInOutVariableBodyFunction("foo", {{"in_var", "out2_var"}},
+                                ast::DecorationList{
+                                    Stage(ast::PipelineStage::kFragment),
+                                });
+
+  MakeInOutVariableBodyFunction("bar", {{"in2_var", "out_var"}},
+                                ast::DecorationList{
+                                    Stage(ast::PipelineStage::kCompute),
+                                });
+
+  // TODO(dsinclair): Update to run the namer transform when
+  // available.
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  ASSERT_EQ(2u, result.size());
+
+  ASSERT_EQ("foo", result[0].name);
+  ASSERT_EQ("foo", result[0].remapped_name);
+
+  ASSERT_EQ(1u, result[0].input_variables.size());
+  EXPECT_EQ("in_var", result[0].input_variables[0].name);
+  EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[0].component_type);
+
+  ASSERT_EQ(1u, result[0].output_variables.size());
+  EXPECT_EQ("out2_var", result[0].output_variables[0].name);
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(3u, result[0].output_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[0].component_type);
+
+  ASSERT_EQ("bar", result[1].name);
+  ASSERT_EQ("bar", result[1].remapped_name);
+
+  ASSERT_EQ(1u, result[1].input_variables.size());
+  EXPECT_EQ("in2_var", result[1].input_variables[0].name);
+  EXPECT_TRUE(result[1].input_variables[0].has_location_decoration);
+  EXPECT_EQ(2u, result[1].input_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[1].input_variables[0].component_type);
+
+  ASSERT_EQ(1u, result[1].output_variables.size());
+  EXPECT_EQ("out_var", result[1].output_variables[0].name);
+  EXPECT_TRUE(result[1].output_variables[0].has_location_decoration);
+  EXPECT_EQ(1u, result[1].output_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[1].output_variables[0].component_type);
+}
+
+// TODO(crbug.com/tint/697): Remove this.
+TEST_F(InspectorGetEntryPointTest,
+       MultipleEntryPointsSharedInOutVariables_Legacy) {
+  AddInOutVariables({{"in_var", "out_var"}, {"in2_var", "out2_var"}});
+
+  MakeInOutVariableBodyFunction("func", {{"in2_var", "out2_var"}}, {});
+
+  MakeInOutVariableCallerBodyFunction("foo", "func", {{"in_var", "out_var"}},
+                                      ast::DecorationList{
+                                          Stage(ast::PipelineStage::kFragment),
+                                      });
+
+  MakeCallerBodyFunction("bar", {"func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kCompute),
+                         });
+
+  // TODO(dsinclair): Update to run the namer transform when
+  // available.
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  ASSERT_EQ(2u, result.size());
+
+  ASSERT_EQ("foo", result[0].name);
+  ASSERT_EQ("foo", result[0].remapped_name);
+
+  ASSERT_EQ(2u, result[0].input_variables.size());
+  EXPECT_TRUE(ContainsName(result[0].input_variables, "in_var"));
+  EXPECT_TRUE(ContainsName(result[0].input_variables, "in2_var"));
+  EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[0].component_type);
+  EXPECT_TRUE(result[0].input_variables[1].has_location_decoration);
+  EXPECT_EQ(2u, result[0].input_variables[1].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[1].component_type);
+
+  ASSERT_EQ(2u, result[0].output_variables.size());
+  EXPECT_TRUE(ContainsName(result[0].output_variables, "out_var"));
+  EXPECT_TRUE(ContainsName(result[0].output_variables, "out2_var"));
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(1u, result[0].output_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[0].component_type);
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(3u, result[0].output_variables[1].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[1].component_type);
+
+  ASSERT_EQ("bar", result[1].name);
+  ASSERT_EQ("bar", result[1].remapped_name);
+
+  ASSERT_EQ(1u, result[1].input_variables.size());
+  EXPECT_EQ("in2_var", result[1].input_variables[0].name);
+  EXPECT_TRUE(result[1].input_variables[0].has_location_decoration);
+  EXPECT_EQ(2u, result[1].input_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[1].input_variables[0].component_type);
+
+  ASSERT_EQ(1u, result[1].output_variables.size());
+  EXPECT_EQ("out2_var", result[1].output_variables[0].name);
+  EXPECT_TRUE(result[1].output_variables[0].has_location_decoration);
+  EXPECT_EQ(3u, result[1].output_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[1].output_variables[0].component_type);
+}
+
+// TODO(crbug.com/tint/697): Remove this.
+TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables_Legacy) {
+  Global("in_var", ty.u32(), ast::StorageClass::kInput, nullptr,
+         ast::DecorationList{Builtin(ast::Builtin::kPosition)});
+  Global("out_var", ty.u32(), ast::StorageClass::kOutput, nullptr,
+         ast::DecorationList{Location(0)});
+
+  MakeInOutVariableBodyFunction("func", {{"in_var", "out_var"}}, {});
+
+  MakeCallerBodyFunction("foo", {"func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
+
+  // TODO(dsinclair): Update to run the namer transform when available.
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  ASSERT_EQ(1u, result.size());
+
+  ASSERT_EQ("foo", result[0].name);
+  ASSERT_EQ("foo", result[0].remapped_name);
+  EXPECT_EQ(0u, result[0].input_variables.size());
+  EXPECT_EQ(1u, result[0].output_variables.size());
+  EXPECT_TRUE(ContainsName(result[0].output_variables, "out_var"));
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].output_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[0].component_type);
 }
 
 TEST_F(InspectorGetEntryPointTest, OverridableConstantUnreferenced) {
