@@ -62,9 +62,8 @@ namespace dawn_native { namespace vulkan {
             mPooledMemoryAllocator.DestroyPool();
         }
 
-        ResultOrError<ResourceMemoryAllocation> AllocateMemory(
-            const VkMemoryRequirements& requirements) {
-            return mBuddySystem.Allocate(requirements.size, requirements.alignment);
+        ResultOrError<ResourceMemoryAllocation> AllocateMemory(uint64_t size, uint64_t alignment) {
+            return mBuddySystem.Allocate(size, alignment);
         }
 
         void DeallocateMemory(const ResourceMemoryAllocation& allocation) {
@@ -125,9 +124,9 @@ namespace dawn_native { namespace vulkan {
 
     ResultOrError<ResourceMemoryAllocation> ResourceMemoryAllocator::Allocate(
         const VkMemoryRequirements& requirements,
-        bool mappable) {
+        MemoryKind kind) {
         // The Vulkan spec guarantees at least on memory type is valid.
-        int memoryType = FindBestTypeIndex(requirements, mappable);
+        int memoryType = FindBestTypeIndex(requirements, kind);
         ASSERT(memoryType >= 0);
 
         VkDeviceSize size = requirements.size;
@@ -135,10 +134,25 @@ namespace dawn_native { namespace vulkan {
         // Sub-allocate non-mappable resources because at the moment the mapped pointer
         // is part of the resource and not the heap, which doesn't match the Vulkan model.
         // TODO(crbug.com/dawn/849): allow sub-allocating mappable resources, maybe.
-        if (requirements.size < kMaxSizeForSubAllocation && !mappable) {
+        if (requirements.size < kMaxSizeForSubAllocation && kind != MemoryKind::LinearMappable) {
+            // When sub-allocating, Vulkan requires that we respect bufferImageGranularity. Some
+            // hardware puts information on the memory's page table entry and allocating a linear
+            // resource in the same page as a non-linear (aka opaque) resource can cause issues.
+            // Probably because some texture compression flags are stored on the page table entry,
+            // and allocating a linear resource removes these flags.
+            //
+            // Anyway, just to be safe we ask that all sub-allocated resources are allocated with at
+            // least this alignment. TODO(crbug.com/dawn/849): this is suboptimal because multiple
+            // linear (resp. opaque) resources can coexist in the same page. In particular Nvidia
+            // GPUs often use a granularity of 64k which will lead to a lot of wasted spec. Revisit
+            // with a more efficient algorithm later.
+            uint64_t alignment =
+                std::max(requirements.alignment,
+                         mDevice->GetDeviceInfo().properties.limits.bufferImageGranularity);
+
             ResourceMemoryAllocation subAllocation;
-            DAWN_TRY_ASSIGN(subAllocation,
-                            mAllocatorsPerType[memoryType]->AllocateMemory(requirements));
+            DAWN_TRY_ASSIGN(subAllocation, mAllocatorsPerType[memoryType]->AllocateMemory(
+                                               requirements.size, alignment));
             if (subAllocation.GetInfo().mMethod != AllocationMethod::kInvalid) {
                 return std::move(subAllocation);
             }
@@ -149,7 +163,7 @@ namespace dawn_native { namespace vulkan {
         DAWN_TRY_ASSIGN(resourceHeap, mAllocatorsPerType[memoryType]->AllocateResourceHeap(size));
 
         void* mappedPointer = nullptr;
-        if (mappable) {
+        if (kind == MemoryKind::LinearMappable) {
             DAWN_TRY_WITH_CLEANUP(
                 CheckVkSuccess(mDevice->fn.MapMemory(mDevice->GetVkDevice(),
                                                      ToBackend(resourceHeap.get())->GetMemory(), 0,
@@ -214,8 +228,9 @@ namespace dawn_native { namespace vulkan {
     }
 
     int ResourceMemoryAllocator::FindBestTypeIndex(VkMemoryRequirements requirements,
-                                                   bool mappable) {
+                                                   MemoryKind kind) {
         const VulkanDeviceInfo& info = mDevice->GetDeviceInfo();
+        bool mappable = kind == MemoryKind::LinearMappable;
 
         // Find a suitable memory type for this allocation
         int bestType = -1;
