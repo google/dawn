@@ -19,6 +19,7 @@
 #include "common/Assert.h"
 #include "common/Constants.h"
 #include "common/Math.h"
+#include "dawn_native/Adapter.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/EnumMaskIterator.h"
 #include "dawn_native/PassResourceUsage.h"
@@ -288,6 +289,17 @@ namespace dawn_native {
         }
 
         DAWN_TRY(ValidateTextureSize(descriptor, format));
+
+        if (device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs) && format->HasStencil() &&
+            descriptor->mipLevelCount > 1 &&
+            device->GetAdapter()->GetBackendType() == wgpu::BackendType::Metal) {
+            // TODO(crbug.com/dawn/838): Implement a workaround for this issue.
+            // Readbacks from the non-zero mip of a stencil texture may contain
+            // garbage data.
+            return DAWN_VALIDATION_ERROR(
+                "crbug.com/dawn/838: Stencil textures with more than one mip level are "
+                "disabled on Metal.");
+        }
 
         return {};
     }
