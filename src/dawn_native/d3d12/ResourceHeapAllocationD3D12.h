@@ -30,6 +30,8 @@ namespace dawn_native { namespace d3d12 {
                                ComPtr<ID3D12Resource> resource,
                                Heap* heap);
         ~ResourceHeapAllocation() override = default;
+        ResourceHeapAllocation(const ResourceHeapAllocation&) = default;
+        ResourceHeapAllocation& operator=(const ResourceHeapAllocation&) = default;
 
         void Invalidate() override;
 

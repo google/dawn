@@ -105,6 +105,8 @@ namespace {
             memset(data_, 0, alignment);
         }
         ~AlignedData() = default;
+        AlignedData(const AlignedData&) = default;
+        AlignedData& operator=(const AlignedData&) = default;
         alignas(alignment) char data_[alignment];
     };
 

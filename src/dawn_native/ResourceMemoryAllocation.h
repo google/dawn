@@ -59,6 +59,9 @@ namespace dawn_native {
                                  uint8_t* mappedPointer = nullptr);
         virtual ~ResourceMemoryAllocation() = default;
 
+        ResourceMemoryAllocation(const ResourceMemoryAllocation&) = default;
+        ResourceMemoryAllocation& operator=(const ResourceMemoryAllocation&) = default;
+
         ResourceHeapBase* GetResourceHeap() const;
         uint64_t GetOffset() const;
         uint8_t* GetMappedPointer() const;
