@@ -152,7 +152,7 @@ TEST_F(GetBindGroupLayoutTests, ComputePipeline) {
         };
         [[group(0), binding(0)]] var<uniform> uniforms : S;
 
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
             var pos : vec4<f32> = uniforms.pos;
         })");
 
@@ -915,11 +915,11 @@ TEST_F(GetBindGroupLayoutTests, FromCorrectEntryPoint) {
         [[group(0), binding(0)]] var<storage, read_write> data0 : Data;
         [[group(0), binding(1)]] var<storage, read_write> data1 : Data;
 
-        [[stage(compute)]] fn compute0() {
+        [[stage(compute), workgroup_size(1)]] fn compute0() {
             data0.data = 0.0;
         }
 
-        [[stage(compute)]] fn compute1() {
+        [[stage(compute), workgroup_size(1)]] fn compute1() {
             data1.data = 0.0;
         }
     )");

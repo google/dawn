@@ -40,7 +40,7 @@ class GpuMemorySyncTests : public DawnTest {
                 a : i32;
             };
             [[group(0), binding(0)]] var<storage, read_write> data : Data;
-            [[stage(compute)]] fn main() {
+            [[stage(compute), workgroup_size(1)]] fn main() {
                 data.a = data.a + 1;
             })");
 
@@ -259,7 +259,7 @@ TEST_P(GpuMemorySyncTests, SampledAndROStorageTextureInComputePass) {
         [[group(0), binding(1)]] var sampledTex : texture_2d<u32>;
         [[group(0), binding(2)]] var storageTex : texture_storage_2d<r32uint, read>;
 
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
             output.sampledOut = textureLoad(sampledTex, vec2<i32>(0, 0), 0).x;
             output.storageOut = textureLoad(storageTex, vec2<i32>(0, 0)).x;
         }
@@ -316,7 +316,7 @@ class StorageToUniformSyncTests : public DawnTest {
                 a : f32;
             };
             [[group(0), binding(0)]] var<storage, read_write> data : Data;
-            [[stage(compute)]] fn main() {
+            [[stage(compute), workgroup_size(1)]] fn main() {
                 data.a = 1.0;
             })");
 
@@ -529,7 +529,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
         [[group(0), binding(2)]] var<storage, read_write> uniformContents : ColorContents1;
         [[group(0), binding(3)]] var<storage, read_write> storageContents : ColorContents2;
 
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
             vbContents.pos[0] = vec4<f32>(-1.0, 1.0, 0.0, 1.0);
             vbContents.pos[1] = vec4<f32>(1.0, 1.0, 0.0, 1.0);
             vbContents.pos[2] = vec4<f32>(1.0, -1.0, 0.0, 1.0);
@@ -644,7 +644,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
 
         [[group(0), binding(0)]] var<storage, read_write> contents : Contents;
 
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
             contents.pos[0] = vec4<f32>(-1.0, 1.0, 0.0, 1.0);
             contents.pos[1] = vec4<f32>(1.0, 1.0, 0.0, 1.0);
             contents.pos[2] = vec4<f32>(1.0, -1.0, 0.0, 1.0);

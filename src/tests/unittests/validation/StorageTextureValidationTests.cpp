@@ -85,7 +85,7 @@ class StorageTextureValidationTests : public ValidationTest {
         ostream << "[[group(0), binding(0)]] var image0 : " << imageTypeDeclaration << "<"
                 << imageFormatQualifier << ", " << access
                 << ">;\n"
-                   "[[stage(compute)]] fn main() {\n"
+                   "[[stage(compute), workgroup_size(1)]] fn main() {\n"
                    "    ignore(textureDimensions(image0));\n"
                    "}\n";
 
@@ -194,7 +194,7 @@ TEST_F(StorageTextureValidationTests, ComputePipeline) {
             };
             [[group(0), binding(1)]] var<storage, read_write> buf : Buf;
 
-            [[stage(compute)]] fn main([[builtin(local_invocation_id)]] LocalInvocationID : vec3<u32>) {
+            [[stage(compute), workgroup_size(1)]] fn main([[builtin(local_invocation_id)]] LocalInvocationID : vec3<u32>) {
                  buf.data = textureLoad(image0, vec2<i32>(LocalInvocationID.xy)).x;
             })");
 
@@ -211,7 +211,7 @@ TEST_F(StorageTextureValidationTests, ComputePipeline) {
         wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var image0 : texture_storage_2d<rgba8unorm, write>;
 
-            [[stage(compute)]] fn main([[builtin(local_invocation_id)]] LocalInvocationID : vec3<u32>) {
+            [[stage(compute), workgroup_size(1)]] fn main([[builtin(local_invocation_id)]] LocalInvocationID : vec3<u32>) {
                 textureStore(image0, vec2<i32>(LocalInvocationID.xy), vec4<f32>(0.0, 0.0, 0.0, 0.0));
             })");
 
@@ -248,7 +248,7 @@ TEST_F(StorageTextureValidationTests, ReadWriteStorageTexture) {
     {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var image0 : texture_storage_2d<rgba8unorm, read_write>;
-            [[stage(compute)]] fn main() {
+            [[stage(compute), workgroup_size(1)]] fn main() {
                 ignore(textureDimensions(image0));
             })"));
     }

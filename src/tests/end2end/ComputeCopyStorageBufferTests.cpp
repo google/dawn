@@ -99,7 +99,7 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfBasic) {
         [[set(0), binding(0)]] var<storage, read_write> src : Buf1;
         [[set(0), binding(1)]] var<storage, read_write> dst : Buf2;
 
-        [[stage(compute)]]
+        [[stage(compute), workgroup_size(1)]]
         fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
             let index : u32 = GlobalInvocationID.x;
             if (index >= 4u) { return; }
@@ -126,7 +126,7 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfStruct) {
         [[set(0), binding(0)]] var<storage, read_write> src : Buf1;
         [[set(0), binding(1)]] var<storage, read_write> dst : Buf2;
 
-        [[stage(compute)]]
+        [[stage(compute), workgroup_size(1)]]
         fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
             let index : u32 = GlobalInvocationID.x;
             if (index >= 4u) { return; }
@@ -148,7 +148,7 @@ TEST_P(ComputeCopyStorageBufferTests, UnsizedArrayOfBasic) {
         [[set(0), binding(0)]] var<storage, read_write> src : Buf1;
         [[set(0), binding(1)]] var<storage, read_write> dst : Buf2;
 
-        [[stage(compute)]]
+        [[stage(compute), workgroup_size(1)]]
         fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
             let index : u32 = GlobalInvocationID.x;
             if (index >= 4u) { return; }

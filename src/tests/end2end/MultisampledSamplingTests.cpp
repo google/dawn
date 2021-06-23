@@ -102,7 +102,7 @@ class MultisampledSamplingTest : public DawnTest {
                 };
                 [[group(0), binding(2)]] var<storage, read_write> results : Results;
 
-                [[stage(compute)]] fn main() {
+                [[stage(compute), workgroup_size(1)]] fn main() {
                     for (var i : i32 = 0; i < 4; i = i + 1) {
                         results.colorSamples[i] = textureLoad(texture0, vec2<i32>(0, 0), i).x;
                         results.depthSamples[i] = textureLoad(texture1, vec2<i32>(0, 0), i).x;

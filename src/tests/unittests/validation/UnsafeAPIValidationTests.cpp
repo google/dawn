@@ -136,7 +136,7 @@ TEST_F(UnsafeAPIValidationTest, DispatchIndirectDisallowed) {
     wgpu::ComputePipelineDescriptor pipelineDesc;
     pipelineDesc.compute.entryPoint = "main";
     pipelineDesc.compute.module =
-        utils::CreateShaderModule(device, "[[stage(compute)]] fn main() {}");
+        utils::CreateShaderModule(device, "[[stage(compute), workgroup_size(1)]] fn main() {}");
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
     // Control case: dispatch is allowed.

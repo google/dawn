@@ -63,7 +63,7 @@ namespace {
 
         wgpu::ComputePipeline CreateNoOpComputePipeline(std::vector<wgpu::BindGroupLayout> bgls) {
             wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
-                [[stage(compute)]] fn main() {
+                [[stage(compute), workgroup_size(1)]] fn main() {
                 })");
             wgpu::ComputePipelineDescriptor pipelineDescriptor;
             pipelineDescriptor.layout = utils::MakePipelineLayout(device, std::move(bgls));

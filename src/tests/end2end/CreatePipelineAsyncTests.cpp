@@ -80,7 +80,7 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateComputePipelineAsync) {
         };
         [[group(0), binding(0)]] var<storage, read_write> ssbo : SSBO;
 
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
             ssbo.value = 1u;
         })");
     csDesc.compute.entryPoint = "main";
@@ -115,7 +115,7 @@ TEST_P(CreatePipelineAsyncTest, CreateComputePipelineFailed) {
         };
         [[group(0), binding(0)]] var<storage, read_write> ssbo : SSBO;
 
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
             ssbo.value = 1u;
         })");
     csDesc.compute.entryPoint = "main0";
@@ -253,7 +253,7 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineFailed) {
 TEST_P(CreatePipelineAsyncTest, ReleaseDeviceBeforeCallbackOfCreateComputePipelineAsync) {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
         })");
     csDesc.compute.entryPoint = "main";
 
@@ -314,7 +314,7 @@ TEST_P(CreatePipelineAsyncTest, CreateSameComputePipelineTwice) {
         };
         [[group(0), binding(0)]] var<storage, read_write> ssbo : SSBO;
 
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
             ssbo.value = 1u;
         })");
     csDesc.compute.entryPoint = "main";
@@ -355,7 +355,7 @@ TEST_P(CreatePipelineAsyncTest, CreateSamePipelineTwiceAtSameTime) {
         };
         [[group(0), binding(0)]] var<storage, read_write> ssbo : SSBO;
 
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
             ssbo.value = 1u;
         })");
     csDesc.compute.entryPoint = "main";

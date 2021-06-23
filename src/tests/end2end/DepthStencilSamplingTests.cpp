@@ -163,7 +163,8 @@ class DepthStencilSamplingTest : public DawnTest {
             index++;
         }
 
-        shaderSource << "[[stage(compute)]] fn main() { " << shaderBody.str() << "\n}";
+        shaderSource << "[[stage(compute), workgroup_size(1)]] fn main() { " << shaderBody.str()
+                     << "\n}";
 
         wgpu::ShaderModule csModule = utils::CreateShaderModule(device, shaderSource.str().c_str());
 
@@ -223,7 +224,7 @@ class DepthStencilSamplingTest : public DawnTest {
             };
             [[group(0), binding(3)]] var<storage, read_write> samplerResult : SamplerResult;
 
-            [[stage(compute)]] fn main() {
+            [[stage(compute), workgroup_size(1)]] fn main() {
                 samplerResult.value = textureSampleCompare(tex, samp, vec2<f32>(0.5, 0.5), uniforms.compareRef);
             })");
 

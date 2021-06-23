@@ -124,16 +124,16 @@ TEST_P(ObjectCachingTest, ShaderModuleDeduplication) {
 TEST_P(ObjectCachingTest, ComputePipelineDeduplicationOnShaderModule) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         var<workgroup> i : u32;
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
             i = 0u;
         })");
     wgpu::ShaderModule sameModule = utils::CreateShaderModule(device, R"(
         var<workgroup> i : u32;
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
             i = 0u;
         })");
     wgpu::ShaderModule otherModule = utils::CreateShaderModule(device, R"(
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
         })");
 
     EXPECT_NE(module.Get(), otherModule.Get());
@@ -176,7 +176,7 @@ TEST_P(ObjectCachingTest, ComputePipelineDeduplicationOnLayout) {
     desc.compute.entryPoint = "main";
     desc.compute.module = utils::CreateShaderModule(device, R"(
             var<workgroup> i : u32;
-            [[stage(compute)]] fn main() {
+            [[stage(compute), workgroup_size(1)]] fn main() {
                 i = 0u;
             })");
 

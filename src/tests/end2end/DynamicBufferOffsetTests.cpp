@@ -209,7 +209,7 @@ class DynamicBufferOffsetTests : public DawnTest {
 
         cs << "let multipleNumber : u32 = " << multipleNumber << "u;\n";
         cs << R"(
-            [[stage(compute)]] fn main() {
+            [[stage(compute), workgroup_size(1)]] fn main() {
                 sBufferNotDynamic.value = uBufferNotDynamic.value.xy;
                 sBuffer.value = vec2<u32>(multipleNumber, multipleNumber) * (uBuffer.value.xy + sBufferNotDynamic.value.xy);
             }

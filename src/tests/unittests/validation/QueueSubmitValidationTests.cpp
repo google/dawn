@@ -211,7 +211,7 @@ namespace {
 
         wgpu::ComputePipelineDescriptor descriptor;
         descriptor.compute.module = utils::CreateShaderModule(device, R"(
-            [[stage(compute)]] fn main() {
+            [[stage(compute), workgroup_size(1)]] fn main() {
             })");
         descriptor.compute.entryPoint = "main";
         device.CreateComputePipelineAsync(&descriptor, callback, &callbackData);
@@ -236,7 +236,7 @@ namespace {
         cpDesc.layout = utils::MakePipelineLayout(device, {emptyBGL, testBGL});
         cpDesc.compute.entryPoint = "main";
         cpDesc.compute.module =
-            utils::CreateShaderModule(device, "[[stage(compute)]] fn main() {}");
+            utils::CreateShaderModule(device, "[[stage(compute), workgroup_size(1)]] fn main() {}");
         wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&cpDesc);
 
         wgpu::BufferDescriptor bufDesc;
@@ -304,7 +304,7 @@ namespace {
         cpDesc.layout = utils::MakePipelineLayout(device, {emptyBGL, emptyBGL, testBGL});
         cpDesc.compute.entryPoint = "main";
         cpDesc.compute.module =
-            utils::CreateShaderModule(device, "[[stage(compute)]] fn main() {}");
+            utils::CreateShaderModule(device, "[[stage(compute), workgroup_size(1)]] fn main() {}");
         wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&cpDesc);
 
         wgpu::TextureDescriptor texDesc;

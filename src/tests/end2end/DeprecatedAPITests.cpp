@@ -89,7 +89,7 @@ TEST_P(DeprecationTests, SetAttachmentDescriptorAttachment) {
 TEST_P(DeprecationTests, ComputeStage) {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.computeStage.module = utils::CreateShaderModule(device, R"(
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
         })");
     csDesc.computeStage.entryPoint = "main";
 

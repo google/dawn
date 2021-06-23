@@ -37,7 +37,7 @@ TEST_P(ShaderTests, ComputeLog2) {
 
 [[group(0), binding(0)]] var<storage, read_write> buf : Buf;
 
-[[stage(compute)]] fn main() {
+[[stage(compute), workgroup_size(1)]] fn main() {
     let factor : f32 = 1.0001;
 
     buf.data[0] = u32(log2(1.0 * factor));
@@ -313,7 +313,7 @@ TEST_P(ShaderTests, PipelineOverridableUsed) {
     std::string shader = R"(
 [[override]] let foo : f32;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn ep_func() {
   var local_foo : f32;
   local_foo = foo;

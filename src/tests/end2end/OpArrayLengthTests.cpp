@@ -130,7 +130,7 @@ TEST_P(OpArrayLengthTest, Compute) {
         };
         [[group(1), binding(0)]] var<storage, read_write> result : ResultBuffer;
         )" + mShaderInterface + R"(
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
             result.data[0] = arrayLength(&buffer1.data);
             result.data[1] = arrayLength(&buffer2.data);
             result.data[2] = arrayLength(&buffer3.data);

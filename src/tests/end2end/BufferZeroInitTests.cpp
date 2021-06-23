@@ -427,7 +427,7 @@ class BufferZeroInitTest : public DawnTest {
         const char* computeShader = R"(
             [[group(0), binding(0)]] var outImage : texture_storage_2d<rgba8unorm, write>;
 
-            [[stage(compute)]] fn main() {
+            [[stage(compute), workgroup_size(1)]] fn main() {
                 textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(1.0, 0.0, 0.0, 1.0));
             })";
 
@@ -999,7 +999,7 @@ TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
         [[group(0), binding(0)]] var<uniform> ubo : UBO;
         [[group(0), binding(1)]] var outImage : texture_storage_2d<rgba8unorm, write>;
 
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
             if (all(ubo.value == vec4<u32>(0u, 0u, 0u, 0u))) {
                 textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(0.0, 1.0, 0.0, 1.0));
             } else {
@@ -1038,7 +1038,7 @@ TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
         [[group(0), binding(0)]] var<storage, read_write> ssbo : SSBO;
         [[group(0), binding(1)]] var outImage : texture_storage_2d<rgba8unorm, write>;
 
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
             if (all(ssbo.value == vec4<u32>(0u, 0u, 0u, 0u))) {
                 textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(0.0, 1.0, 0.0, 1.0));
             } else {
@@ -1077,7 +1077,7 @@ TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
         [[group(0), binding(0)]] var<storage, read_write> ssbo : SSBO;
         [[group(0), binding(1)]] var outImage : texture_storage_2d<rgba8unorm, write>;
 
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
             if (all(ssbo.value[0] == vec4<u32>(0u, 0u, 0u, 0u)) &&
                 all(ssbo.value[1] == vec4<u32>(0u, 0u, 0u, 0u))) {
                 textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(0.0, 1.0, 0.0, 1.0));

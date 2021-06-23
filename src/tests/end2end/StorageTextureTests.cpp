@@ -358,7 +358,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         std::ostringstream ostream;
         ostream << GetImageDeclaration(format, "write", is2DArray, 0) << "\n";
         ostream << GetImageDeclaration(format, "read", is2DArray, 1) << "\n";
-        ostream << "[[stage(compute)]] fn main() {\n";
+        ostream << "[[stage(compute), workgroup_size(1)]] fn main() {\n";
         ostream << "  let size : vec2<i32> = textureDimensions(storageImage0);\n";
         ostream << "  let layerCount : i32 = " << layerCount << ";\n";
         ostream << "  for (var layer : i32 = 0; layer < layerCount; layer = layer + 1) {\n";
@@ -713,7 +713,7 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInComputeShader) {
 [[group(0), binding(1)]] var<storage, read_write> dstBuffer : DstBuffer;
 )" << CommonReadOnlyTestCode(format)
                  << R"(
-[[stage(compute)]] fn main() {
+[[stage(compute), workgroup_size(1)]] fn main() {
   if (doTest()) {
     dstBuffer.result = 1u;
   } else {
@@ -937,7 +937,7 @@ TEST_P(StorageTextureTests, Readonly2DArrayStorageTexture) {
 [[group(0), binding(1)]] var<storage, read_write> dstBuffer : DstBuffer;
 )" << CommonReadOnlyTestCode(kTextureFormat, true)
              << R"(
-[[stage(compute)]] fn main() {
+[[stage(compute), workgroup_size(1)]] fn main() {
   if (doTest()) {
     dstBuffer.result = 1u;
   } else {
@@ -982,7 +982,7 @@ TEST_P(StorageTextureTests, ReadonlyAndWriteonlyStorageTexturePingPong) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
 [[group(0), binding(0)]] var Src : texture_storage_2d<r32uint, read>;
 [[group(0), binding(1)]] var Dst : texture_storage_2d<r32uint, write>;
-[[stage(compute)]] fn main() {
+[[stage(compute), workgroup_size(1)]] fn main() {
   var srcValue : vec4<u32> = textureLoad(Src, vec2<i32>(0, 0));
   srcValue.x = srcValue.x + 1u;
   textureStore(Dst, vec2<i32>(0, 0), srcValue);
@@ -1056,7 +1056,7 @@ TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
 [[group(0), binding(0)]] var Src : texture_2d<u32>;
 [[group(0), binding(1)]] var Dst : texture_storage_2d<r32uint, write>;
-[[stage(compute)]] fn main() {
+[[stage(compute), workgroup_size(1)]] fn main() {
   var srcValue : vec4<u32> = textureLoad(Src, vec2<i32>(0, 0), 0);
   srcValue.x = srcValue.x + 1u;
   textureStore(Dst, vec2<i32>(0, 0), srcValue);
@@ -1161,7 +1161,7 @@ fn doTest() -> bool {
     const char* kCommonWriteOnlyZeroInitTestCodeCompute = R"(
 [[group(0), binding(0)]] var dstImage : texture_storage_2d<r32uint, write>;
 
-[[stage(compute)]] fn main() {
+[[stage(compute), workgroup_size(1)]] fn main() {
   textureStore(dstImage, vec2<i32>(0, 0), vec4<u32>(1u, 0u, 0u, 1u));
 })";
 };
@@ -1204,7 +1204,7 @@ TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInComputeP
 [[group(0), binding(0)]] var srcImage : texture_storage_2d<r32uint, read>;
 [[group(0), binding(1)]] var<storage, read_write> dstBuffer : DstBuffer;
 )") + kCommonReadOnlyZeroInitTestCode + R"(
-[[stage(compute)]] fn main() {
+[[stage(compute), workgroup_size(1)]] fn main() {
   if (doTest()) {
     dstBuffer.result = 1u;
   } else {

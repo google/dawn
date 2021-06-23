@@ -1104,7 +1104,7 @@ std::ostringstream& DawnTestBase::ExpectSampledDepthData(wgpu::Texture texture,
         [[group(0), binding(0)]] var tex : texture_depth_2d;
         [[group(0), binding(1)]] var<storage, read_write> result : Result;
 
-        [[stage(compute)]] fn main(
+        [[stage(compute), workgroup_size(1)]] fn main(
             [[builtin(global_invocation_id)]] GlobalInvocationId : vec3<u32>
         ) {
             result.values[GlobalInvocationId.y * width + GlobalInvocationId.x] = textureLoad(

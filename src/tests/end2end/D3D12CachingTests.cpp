@@ -213,11 +213,11 @@ TEST_P(D3D12CachingTests, ReuseShaderWithMultipleEntryPoints) {
         };
         [[binding(0), group(0)]] var<storage, read_write> data : Data;
 
-        [[stage(compute)]] fn write1() {
+        [[stage(compute), workgroup_size(1)]] fn write1() {
             data.data = 1u;
         }
 
-        [[stage(compute)]] fn write42() {
+        [[stage(compute), workgroup_size(1)]] fn write42() {
             data.data = 42u;
         }
     )");

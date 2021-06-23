@@ -127,7 +127,7 @@ TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
         };
         [[group(0), binding(0)]] var <uniform> contents: Contents;
 
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
           var f : f32 = contents.f;
         })");
 
@@ -841,7 +841,7 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
         [[group(0), binding(0)]] var<storage, read> buffer0 : Buffer0;
         [[group(0), binding(4)]] var<storage, read_write> outputBuffer : OutputBuffer;
 
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
             outputBuffer.value = vec3<u32>(buffer0.value, buffer2.value, buffer3.value);
         })");
     pipelineDescriptor.compute.entryPoint = "main";
@@ -1066,7 +1066,7 @@ TEST_P(BindGroupTests, EmptyLayout) {
     pipelineDesc.layout = utils::MakeBasicPipelineLayout(device, &bgl);
     pipelineDesc.compute.entryPoint = "main";
     pipelineDesc.compute.module = utils::CreateShaderModule(device, R"(
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
         })");
 
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
@@ -1260,7 +1260,8 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
 
     body << "result.value = 1u;\n";
 
-    std::string shader = interface.str() + "[[stage(compute)]] fn main() {\n" + body.str() + "}\n";
+    std::string shader = interface.str() + "[[stage(compute), workgroup_size(1)]] fn main() {\n" +
+                         body.str() + "}\n";
     wgpu::ComputePipelineDescriptor cpDesc;
     cpDesc.compute.module = utils::CreateShaderModule(device, shader.c_str());
     cpDesc.compute.entryPoint = "main";

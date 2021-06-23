@@ -1981,7 +1981,7 @@ TEST_F(BindGroupLayoutCompatibilityTest, TextureViewDimension) {
         })";
     constexpr char kTexture2DShaderCS[] = R"(
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
             ignore(textureDimensions(myTexture));
         })";
 
@@ -2020,7 +2020,7 @@ TEST_F(BindGroupLayoutCompatibilityTest, TextureViewDimension) {
         })";
     constexpr char kTexture2DArrayShaderCS[] = R"(
         [[group(0), binding(0)]] var myTexture : texture_2d_array<f32>;
-        [[stage(compute)]] fn main() {
+        [[stage(compute), workgroup_size(1)]] fn main() {
             ignore(textureDimensions(myTexture));
         })";
 
