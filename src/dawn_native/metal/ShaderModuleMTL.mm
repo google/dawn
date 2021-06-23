@@ -55,7 +55,6 @@ namespace dawn_native { namespace metal {
         const char* entryPointName,
         SingleShaderStage stage,
         const PipelineLayout* layout,
-        // TODO(crbug.com/tint/387): AND in a fixed sample mask in the shader.
         uint32_t sampleMask,
         const RenderPipeline* renderPipeline,
         const VertexState* vertexState,
@@ -130,7 +129,7 @@ namespace dawn_native { namespace metal {
                                                          std::move(accessControls),
                                                          /* mayCollide */ true);
 
-        transformInputs.Add<tint::transform::Msl::Config>(kBufferLengthBufferSlot);
+        transformInputs.Add<tint::transform::Msl::Config>(kBufferLengthBufferSlot, sampleMask);
 
         tint::Program program;
         tint::transform::DataMap transformOutputs;
