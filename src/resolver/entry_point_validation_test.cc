@@ -293,8 +293,7 @@ TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Location) {
 TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Builtin) {
   // [[stage(fragment)]]
   // fn main([[builtin(frag_depth)]] param : f32) {}
-  auto* param =
-      Param("param", ty.vec4<f32>(), {Builtin(ast::Builtin::kFragDepth)});
+  auto* param = Param("param", ty.f32(), {Builtin(ast::Builtin::kFragDepth)});
   Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
 

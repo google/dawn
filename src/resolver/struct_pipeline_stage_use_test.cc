@@ -79,7 +79,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderParam) {
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderReturnType) {
   auto* s = Structure(
-      "S", {Member("a", ty.f32(), {Builtin(ast::Builtin::kPosition)})});
+      "S", {Member("a", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)})});
 
   Func("main", {}, ty.Of(s), {Return(Construct(ty.Of(s), Expr(0.f)))},
        {Stage(ast::PipelineStage::kVertex)});
@@ -138,7 +138,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsComputeShaderParam) {
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedMultipleStages) {
   auto* s = Structure(
-      "S", {Member("a", ty.f32(), {Builtin(ast::Builtin::kPosition)})});
+      "S", {Member("a", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)})});
 
   Func("vert_main", {Param("param", ty.Of(s))}, ty.Of(s),
        {Return(Construct(ty.Of(s), Expr(0.f)))},

@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 64
+; Bound: 63
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -49,9 +49,9 @@
 %vertexUniformBuffer2 = OpTypeStruct %mat2v2float
 %_ptr_Uniform_vertexUniformBuffer2 = OpTypePointer Uniform %vertexUniformBuffer2
        %x_26 = OpVariable %_ptr_Uniform_vertexUniformBuffer2 Uniform
-        %int = OpTypeInt 32 1
-%_ptr_Input_int = OpTypePointer Input %int
-%tint_symbol = OpVariable %_ptr_Input_int Input
+       %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+%tint_symbol = OpVariable %_ptr_Input_uint Input
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float
          %19 = OpConstantNull %v4float
@@ -60,18 +60,17 @@
          %20 = OpTypeFunction %void %v4float
          %25 = OpTypeFunction %void
     %float_1 = OpConstant %float 1
-       %uint = OpTypeInt 32 0
      %uint_3 = OpConstant %uint 3
 %_arr_v2float_uint_3 = OpTypeArray %v2float %uint_3
 %_ptr_Function__arr_v2float_uint_3 = OpTypePointer Function %_arr_v2float_uint_3
-         %34 = OpConstantNull %_arr_v2float_uint_3
+         %33 = OpConstantNull %_arr_v2float_uint_3
      %uint_0 = OpConstant %uint 0
 %_ptr_Uniform_mat2v2float = OpTypePointer Uniform %mat2v2float
    %float_n1 = OpConstant %float -1
-         %43 = OpConstantComposite %v2float %float_n1 %float_1
-         %44 = OpConstantComposite %v2float %float_1 %float_1
-         %45 = OpConstantComposite %v2float %float_n1 %float_n1
-         %46 = OpConstantComposite %_arr_v2float_uint_3 %43 %44 %45
+         %42 = OpConstantComposite %v2float %float_n1 %float_1
+         %43 = OpConstantComposite %v2float %float_1 %float_1
+         %44 = OpConstantComposite %v2float %float_n1 %float_n1
+         %45 = OpConstantComposite %_arr_v2float_uint_3 %42 %43 %44
 %_ptr_Function_v2float = OpTypePointer Function %v2float
      %uint_1 = OpConstant %uint 1
     %float_0 = OpConstant %float 0
@@ -83,27 +82,27 @@
                OpFunctionEnd
        %main = OpFunction %void None %25
          %27 = OpLabel
-  %indexable = OpVariable %_ptr_Function__arr_v2float_uint_3 Function %34
+  %indexable = OpVariable %_ptr_Function__arr_v2float_uint_3 Function %33
                OpStore %tint_pointsize %float_1
-         %37 = OpAccessChain %_ptr_Uniform_mat2v2float %x_20 %uint_0
-         %38 = OpLoad %mat2v2float %37
-         %39 = OpAccessChain %_ptr_Uniform_mat2v2float %x_26 %uint_0
-         %40 = OpLoad %mat2v2float %39
-         %41 = OpLoad %int %tint_symbol
-               OpStore %indexable %46
-         %48 = OpAccessChain %_ptr_Function_v2float %indexable %41
-         %49 = OpLoad %v2float %48
-         %50 = OpCompositeExtract %v2float %38 0
-         %51 = OpCompositeExtract %v2float %40 0
-         %52 = OpFAdd %v2float %50 %51
-         %54 = OpCompositeExtract %v2float %38 1
-         %55 = OpCompositeExtract %v2float %40 1
-         %56 = OpFAdd %v2float %54 %55
-         %57 = OpCompositeConstruct %mat2v2float %52 %56
-         %58 = OpMatrixTimesVector %v2float %57 %49
-         %60 = OpCompositeExtract %float %58 0
-         %61 = OpCompositeExtract %float %58 1
-         %63 = OpCompositeConstruct %v4float %60 %61 %float_0 %float_1
-         %59 = OpFunctionCall %void %tint_symbol_3 %63
+         %36 = OpAccessChain %_ptr_Uniform_mat2v2float %x_20 %uint_0
+         %37 = OpLoad %mat2v2float %36
+         %38 = OpAccessChain %_ptr_Uniform_mat2v2float %x_26 %uint_0
+         %39 = OpLoad %mat2v2float %38
+         %40 = OpLoad %uint %tint_symbol
+               OpStore %indexable %45
+         %47 = OpAccessChain %_ptr_Function_v2float %indexable %40
+         %48 = OpLoad %v2float %47
+         %49 = OpCompositeExtract %v2float %37 0
+         %50 = OpCompositeExtract %v2float %39 0
+         %51 = OpFAdd %v2float %49 %50
+         %53 = OpCompositeExtract %v2float %37 1
+         %54 = OpCompositeExtract %v2float %39 1
+         %55 = OpFAdd %v2float %53 %54
+         %56 = OpCompositeConstruct %mat2v2float %51 %55
+         %57 = OpMatrixTimesVector %v2float %56 %48
+         %59 = OpCompositeExtract %float %57 0
+         %60 = OpCompositeExtract %float %57 1
+         %62 = OpCompositeConstruct %v4float %59 %60 %float_0 %float_1
+         %58 = OpFunctionCall %void %tint_symbol_3 %62
                OpReturn
                OpFunctionEnd

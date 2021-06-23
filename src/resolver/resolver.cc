@@ -950,6 +950,33 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
                                          const sem::Type* storage_type) {
   auto* type = storage_type->UnwrapRef();
   switch (deco->value()) {
+    case ast::Builtin::kPosition:
+      if (!(type->is_float_vector() && type->As<sem::Vector>()->size() == 4)) {
+        diagnostics_.add_error(
+            "store type of " + deco_to_str(deco) + " must be 'vec4<f32>'",
+            deco->source());
+        return false;
+      }
+      break;
+    case ast::Builtin::kGlobalInvocationId:
+    case ast::Builtin::kLocalInvocationId:
+    case ast::Builtin::kWorkgroupId:
+      if (!(type->is_unsigned_integer_vector() &&
+            type->As<sem::Vector>()->size() == 3)) {
+        diagnostics_.add_error(
+            "store type of " + deco_to_str(deco) + " must be 'vec3<u32>'",
+            deco->source());
+        return false;
+      }
+      break;
+    case ast::Builtin::kFragDepth:
+      if (!type->Is<sem::F32>()) {
+        diagnostics_.add_error(
+            "store type of " + deco_to_str(deco) + " must be 'f32'",
+            deco->source());
+        return false;
+      }
+      break;
     case ast::Builtin::kFrontFacing:
       if (!type->Is<sem::Bool>()) {
         diagnostics_.add_error(
@@ -958,6 +985,9 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
         return false;
       }
       break;
+    case ast::Builtin::kLocalInvocationIndex:
+    case ast::Builtin::kVertexIndex:
+    case ast::Builtin::kInstanceIndex:
     case ast::Builtin::kSampleMask:
     case ast::Builtin::kSampleIndex:
       if (!type->Is<sem::U32>()) {

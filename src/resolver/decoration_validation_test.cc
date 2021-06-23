@@ -268,8 +268,16 @@ using StructMemberDecorationTest = TestWithParams;
 TEST_P(StructMemberDecorationTest, IsValid) {
   auto& params = GetParam();
 
-  ast::StructMemberList members{Member(
-      "a", ty.i32(), createDecorations(Source{{12, 34}}, *this, params.kind))};
+  ast::StructMemberList members;
+  if (params.kind == DecorationKind::kBuiltin) {
+    members.push_back(
+        {Member("a", ty.vec4<f32>(),
+                createDecorations(Source{{12, 34}}, *this, params.kind))});
+  } else {
+    members.push_back(
+        {Member("a", ty.i32(),
+                createDecorations(Source{{12, 34}}, *this, params.kind))});
+  }
 
   Structure("mystruct", members);
 
