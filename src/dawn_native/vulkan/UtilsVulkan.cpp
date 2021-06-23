@@ -83,11 +83,13 @@ namespace dawn_native { namespace vulkan {
         Extent3D validTextureCopyExtent = copySize;
         const TextureBase* texture = textureCopy.texture.Get();
         Extent3D virtualSizeAtLevel = texture->GetMipLevelVirtualSize(textureCopy.mipLevel);
-        if (textureCopy.origin.x + copySize.width > virtualSizeAtLevel.width) {
+        ASSERT(textureCopy.origin.x <= virtualSizeAtLevel.width);
+        ASSERT(textureCopy.origin.y <= virtualSizeAtLevel.height);
+        if (copySize.width > virtualSizeAtLevel.width - textureCopy.origin.x) {
             ASSERT(texture->GetFormat().isCompressed);
             validTextureCopyExtent.width = virtualSizeAtLevel.width - textureCopy.origin.x;
         }
-        if (textureCopy.origin.y + copySize.height > virtualSizeAtLevel.height) {
+        if (copySize.height > virtualSizeAtLevel.height - textureCopy.origin.y) {
             ASSERT(texture->GetFormat().isCompressed);
             validTextureCopyExtent.height = virtualSizeAtLevel.height - textureCopy.origin.y;
         }

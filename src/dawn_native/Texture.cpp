@@ -592,8 +592,10 @@ namespace dawn_native {
 
         // Compressed Textures will have paddings if their width or height is not a multiple of
         // 4 at non-zero mipmap levels.
-        if (mFormat.isCompressed) {
-            // TODO(crbug.com/dawn/830): check if there are any overflows.
+        if (mFormat.isCompressed && level != 0) {
+            // If |level| is non-zero, then each dimension of |extent| is at most half of
+            // the max texture dimension. Computations here which add the block width/height
+            // to the extent cannot overflow.
             const TexelBlockInfo& blockInfo = mFormat.GetAspectInfo(wgpu::TextureAspect::All).block;
             extent.width = (extent.width + blockInfo.width - 1) / blockInfo.width * blockInfo.width;
             extent.height =
@@ -607,10 +609,12 @@ namespace dawn_native {
                                                      const Origin3D& origin,
                                                      const Extent3D& extent) const {
         const Extent3D virtualSizeAtLevel = GetMipLevelVirtualSize(level);
-        uint32_t clampedCopyExtentWidth = (origin.x + extent.width > virtualSizeAtLevel.width)
+        ASSERT(origin.x <= virtualSizeAtLevel.width);
+        ASSERT(origin.y <= virtualSizeAtLevel.height);
+        uint32_t clampedCopyExtentWidth = (extent.width > virtualSizeAtLevel.width - origin.x)
                                               ? (virtualSizeAtLevel.width - origin.x)
                                               : extent.width;
-        uint32_t clampedCopyExtentHeight = (origin.y + extent.height > virtualSizeAtLevel.height)
+        uint32_t clampedCopyExtentHeight = (extent.height > virtualSizeAtLevel.height - origin.y)
                                                ? (virtualSizeAtLevel.height - origin.y)
                                                : extent.height;
         return {clampedCopyExtentWidth, clampedCopyExtentHeight, extent.depthOrArrayLayers};

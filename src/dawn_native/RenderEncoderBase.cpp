@@ -127,7 +127,7 @@ namespace dawn_native {
                 }
 
                 if (indirectOffset >= indirectBuffer->GetSize() ||
-                    indirectOffset + kDrawIndirectSize > indirectBuffer->GetSize()) {
+                    kDrawIndirectSize > indirectBuffer->GetSize() - indirectOffset) {
                     return DAWN_VALIDATION_ERROR("Indirect offset out of bounds");
                 }
             }
@@ -165,7 +165,7 @@ namespace dawn_native {
                 }
 
                 if ((indirectOffset >= indirectBuffer->GetSize() ||
-                     indirectOffset + kDrawIndexedIndirectSize > indirectBuffer->GetSize())) {
+                     kDrawIndexedIndirectSize > indirectBuffer->GetSize() - indirectOffset)) {
                     return DAWN_VALIDATION_ERROR("Indirect offset out of bounds");
                 }
             }
