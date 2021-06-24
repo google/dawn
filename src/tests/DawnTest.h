@@ -23,6 +23,7 @@
 #include "dawn_native/DawnNative.h"
 #include "tests/ParamGenerator.h"
 #include "tests/ToggleParser.h"
+#include "utils/ScopedAutoreleasePool.h"
 
 #include <dawn_platform/DawnPlatform.h>
 #include <gtest/gtest.h>
@@ -478,6 +479,7 @@ class DawnTestBase {
     const wgpu::AdapterProperties& GetAdapterProperties() const;
 
   private:
+    utils::ScopedAutoreleasePool mObjCAutoreleasePool;
     AdapterTestParam mParam;
     std::unique_ptr<utils::WireHelper> mWireHelper;
 

@@ -308,7 +308,8 @@ namespace dawn_native { namespace metal {
             // The MTLCommandBuffer will be autoreleased by default.
             // The autorelease pool may drain before the command buffer is submitted. Retain so it
             // stays alive.
-            mCommandContext = CommandRecordingContext([*mCommandQueue commandBuffer]);
+            mCommandContext =
+                CommandRecordingContext(AcquireNSPRef([[*mCommandQueue commandBuffer] retain]));
         }
         return &mCommandContext;
     }

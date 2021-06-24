@@ -71,6 +71,7 @@ static_library("dawn_utils") {
     "ComboRenderPipelineDescriptor.cpp",
     "ComboRenderPipelineDescriptor.h",
     "PlatformDebugLogger.h",
+    "ScopedAutoreleasePool.h",
     "SystemUtils.cpp",
     "SystemUtils.h",
     "TerribleCommandBuffer.cpp",
@@ -112,6 +113,12 @@ static_library("dawn_utils") {
     frameworks += [ "QuartzCore.framework" ]
   } else {
     sources += [ "PosixTimer.cpp" ]
+  }
+
+  if (is_mac) {
+    sources += [ "ScopedAutoreleasePool.mm" ]
+  } else {
+    sources += [ "ScopedAutoreleasePool.cpp" ]
   }
 
   if (dawn_supports_glfw_for_windowing) {

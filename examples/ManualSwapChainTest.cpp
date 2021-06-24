@@ -55,6 +55,7 @@
 #include "common/Log.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/GLFWUtils.h"
+#include "utils/ScopedAutoreleasePool.h"
 #include "utils/WGPUHelpers.h"
 
 #include <dawn/dawn_proc.h>
@@ -334,6 +335,7 @@ int main(int argc, const char* argv[]) {
     AddWindow();
 
     while (windows.size() != 0) {
+        utils::ScopedAutoreleasePool pool;
         glfwPollEvents();
 
         for (auto it = windows.begin(); it != windows.end();) {
