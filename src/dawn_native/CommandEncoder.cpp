@@ -69,10 +69,19 @@ namespace dawn_native {
         }
 
         MaybeError ValidateLinearTextureCopyOffset(const TextureDataLayout& layout,
-                                                   const TexelBlockInfo& blockInfo) {
-            if (layout.offset % blockInfo.byteSize != 0) {
-                return DAWN_VALIDATION_ERROR(
-                    "offset must be a multiple of the texel block byte size.");
+                                                   const TexelBlockInfo& blockInfo,
+                                                   const bool hasDepthOrStencil) {
+            if (hasDepthOrStencil) {
+                // For depth-stencil texture, buffer offset must be a multiple of 4.
+                if (layout.offset % 4 != 0) {
+                    return DAWN_VALIDATION_ERROR(
+                        "offset must be a multiple of 4 for depth/stencil texture.");
+                }
+            } else {
+                if (layout.offset % blockInfo.byteSize != 0) {
+                    return DAWN_VALIDATION_ERROR(
+                        "offset must be a multiple of the texel block byte size.");
+                }
             }
             return {};
         }
@@ -680,7 +689,8 @@ namespace dawn_native {
             TextureDataLayout srcLayout = FixUpDeprecatedTextureDataLayoutOptions(
                 GetDevice(), source->layout, blockInfo, *copySize);
             if (GetDevice()->IsValidationEnabled()) {
-                DAWN_TRY(ValidateLinearTextureCopyOffset(srcLayout, blockInfo));
+                DAWN_TRY(ValidateLinearTextureCopyOffset(
+                    srcLayout, blockInfo, destination->texture->GetFormat().HasDepthOrStencil()));
                 DAWN_TRY(ValidateLinearTextureData(srcLayout, source->buffer->GetSize(), blockInfo,
                                                    *copySize));
 
@@ -731,7 +741,8 @@ namespace dawn_native {
             TextureDataLayout dstLayout = FixUpDeprecatedTextureDataLayoutOptions(
                 GetDevice(), destination->layout, blockInfo, *copySize);
             if (GetDevice()->IsValidationEnabled()) {
-                DAWN_TRY(ValidateLinearTextureCopyOffset(dstLayout, blockInfo));
+                DAWN_TRY(ValidateLinearTextureCopyOffset(
+                    dstLayout, blockInfo, source->texture->GetFormat().HasDepthOrStencil()));
                 DAWN_TRY(ValidateLinearTextureData(dstLayout, destination->buffer->GetSize(),
                                                    blockInfo, *copySize));
 

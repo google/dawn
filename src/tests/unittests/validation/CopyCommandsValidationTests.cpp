@@ -656,8 +656,8 @@ TEST_F(CopyCommandTest_B2T, RowsPerImageConstraints) {
                 {4, 4, 1});
 }
 
-// Test B2T copies with incorrect buffer offset usage
-TEST_F(CopyCommandTest_B2T, IncorrectBufferOffset) {
+// Test B2T copies with incorrect buffer offset usage for color texture
+TEST_F(CopyCommandTest_B2T, IncorrectBufferOffsetForColorTexture) {
     uint64_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
     wgpu::Buffer source = CreateBuffer(bufferSize, wgpu::BufferUsage::CopySrc);
     wgpu::Texture destination =
@@ -675,6 +675,33 @@ TEST_F(CopyCommandTest_B2T, IncorrectBufferOffset) {
                     {0, 0, 0}, {1, 1, 1});
         TestB2TCopy(utils::Expectation::Failure, source, bufferSize - 7, 256, 1, destination, 0,
                     {0, 0, 0}, {1, 1, 1});
+    }
+}
+
+// Test B2T copies with incorrect buffer offset usage for depth-stencil texture
+TEST_F(CopyCommandTest_B2T, IncorrectBufferOffsetForDepthStencilTexture) {
+    // TODO(dawn:570, dawn:666, dawn:690): List other valid parameters after missing texture formats
+    // are implemented, e.g. Stencil8 and depth16unorm.
+    std::array<std::tuple<wgpu::TextureFormat, wgpu::TextureAspect>, 1> params = {
+        std::make_tuple(wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureAspect::StencilOnly),
+    };
+
+    uint64_t bufferSize = BufferSizeForTextureCopy(32, 32, 1);
+    wgpu::Buffer source = CreateBuffer(bufferSize, wgpu::BufferUsage::CopySrc);
+
+    for (auto param : params) {
+        wgpu::TextureFormat textureFormat = std::get<0>(param);
+        wgpu::TextureAspect textureAspect = std::get<1>(param);
+
+        wgpu::Texture destination =
+            Create2DTexture(16, 16, 5, 1, textureFormat, wgpu::TextureUsage::CopyDst);
+
+        for (uint64_t srcOffset = 0; srcOffset < 8; srcOffset++) {
+            utils::Expectation expectation =
+                (srcOffset % 4 == 0) ? utils::Expectation::Success : utils::Expectation::Failure;
+            TestB2TCopy(expectation, source, srcOffset, 256, 16, destination, 0, {0, 0, 0},
+                        {16, 16, 1}, textureAspect);
+        }
     }
 }
 
@@ -1247,8 +1274,8 @@ TEST_F(CopyCommandTest_T2B, RowsPerImageConstraints) {
                 {4, 4, 1});
 }
 
-// Test T2B copies with incorrect buffer offset usage
-TEST_F(CopyCommandTest_T2B, IncorrectBufferOffset) {
+// Test T2B copies with incorrect buffer offset usage for color texture
+TEST_F(CopyCommandTest_T2B, IncorrectBufferOffsetForColorTexture) {
     uint64_t bufferSize = BufferSizeForTextureCopy(128, 16, 1);
     wgpu::Texture source = Create2DTexture(128, 16, 5, 1, wgpu::TextureFormat::RGBA8Unorm,
                                            wgpu::TextureUsage::CopySrc);
@@ -1265,6 +1292,35 @@ TEST_F(CopyCommandTest_T2B, IncorrectBufferOffset) {
                 1, {1, 1, 1});
     TestT2BCopy(utils::Expectation::Failure, source, 0, {0, 0, 0}, destination, bufferSize - 7, 256,
                 1, {1, 1, 1});
+}
+
+// Test T2B copies with incorrect buffer offset usage for depth-stencil texture
+TEST_F(CopyCommandTest_T2B, IncorrectBufferOffsetForDepthStencilTexture) {
+    // TODO(dawn:570, dawn:666, dawn:690): List other valid parameters after missing texture formats
+    // are implemented, e.g. Stencil8 and depth16unorm.
+    std::array<std::tuple<wgpu::TextureFormat, wgpu::TextureAspect>, 3> params = {
+        std::make_tuple(wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureAspect::StencilOnly),
+        std::make_tuple(wgpu::TextureFormat::Depth32Float, wgpu::TextureAspect::DepthOnly),
+        std::make_tuple(wgpu::TextureFormat::Depth32Float, wgpu::TextureAspect::All),
+    };
+
+    uint64_t bufferSize = BufferSizeForTextureCopy(32, 32, 1);
+    wgpu::Buffer destination = CreateBuffer(bufferSize, wgpu::BufferUsage::CopyDst);
+
+    for (auto param : params) {
+        wgpu::TextureFormat textureFormat = std::get<0>(param);
+        wgpu::TextureAspect textureAspect = std::get<1>(param);
+
+        wgpu::Texture source =
+            Create2DTexture(16, 16, 5, 1, textureFormat, wgpu::TextureUsage::CopySrc);
+
+        for (uint64_t dstOffset = 0; dstOffset < 8; dstOffset++) {
+            utils::Expectation expectation =
+                (dstOffset % 4 == 0) ? utils::Expectation::Success : utils::Expectation::Failure;
+            TestT2BCopy(expectation, source, 0, {0, 0, 0}, destination, dstOffset, 256, 16,
+                        {16, 16, 1}, textureAspect);
+        }
+    }
 }
 
 // Test multisampled textures cannot be used in T2B copies.
