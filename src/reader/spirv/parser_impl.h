@@ -99,13 +99,13 @@ struct WorkgroupSizeInfo {
   uint32_t component_type_id = 0u;
   /// The SPIR-V IDs of the X, Y, and Z components of the workgroup size
   /// builtin.
-  uint32_t x_id = 0u;
-  uint32_t y_id = 0u;
-  uint32_t z_id = 0u;
+  uint32_t x_id = 0u;  /// X component ID
+  uint32_t y_id = 0u;  /// Y component ID
+  uint32_t z_id = 0u;  /// Z component ID
   /// The effective workgroup size, if this is a compute shader.
-  uint32_t x_value = 0u;
-  uint32_t y_value = 0u;
-  uint32_t z_value = 0u;
+  uint32_t x_value = 0u;  /// X workgroup size
+  uint32_t y_value = 0u;  /// Y workgroup size
+  uint32_t z_value = 0u;  /// Z workgroup size
 };
 
 /// Parser implementation for SPIR-V.
@@ -325,6 +325,7 @@ class ParserImpl : Reader {
   /// @returns true if parser is still successful.
   bool RegisterWorkgroupSizeBuiltin();
 
+  /// @returns the workgroup size builtin
   const WorkgroupSizeInfo& workgroup_size_builtin() {
     return workgroup_size_builtin_;
   }

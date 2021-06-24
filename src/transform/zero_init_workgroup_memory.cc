@@ -26,7 +26,7 @@
 namespace tint {
 namespace transform {
 
-// PIMPL state for the ZeroInitWorkgroupMemory transform
+/// PIMPL state for the ZeroInitWorkgroupMemory transform
 struct ZeroInitWorkgroupMemory::State {
   /// The clone context
   CloneContext& ctx;

@@ -26,8 +26,11 @@ namespace spirv {
 
 /// The size of an integer-coordinate grid, in the x, y, and z dimensions.
 struct GridSize {
+  /// x value
   uint32_t x = 0;
+  /// y value
   uint32_t y = 0;
+  /// z value
   uint32_t z = 0;
 };
 
