@@ -1561,6 +1561,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
     return false;
 
   bool pack_mip_in_coords = false;
+  uint32_t hlsl_ret_width = 4u;
 
   switch (intrinsic->Type()) {
     case sem::IntrinsicType::kTextureSample:
@@ -1577,9 +1578,11 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
       break;
     case sem::IntrinsicType::kTextureSampleCompare:
       out << ".SampleCmp(";
+      hlsl_ret_width = 1;
       break;
     case sem::IntrinsicType::kTextureSampleCompareLevel:
       out << ".SampleCmpLevelZero(";
+      hlsl_ret_width = 1;
       break;
     case sem::IntrinsicType::kTextureLoad:
       out << ".Load(";
@@ -1630,28 +1633,52 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
     }
   } else if (pack_mip_in_coords) {
     // Mip level needs to be appended to the coordinates, but is always zero.
-    if (!emit_vector_appended_with_i32_zero(param_coords))
+    if (!emit_vector_appended_with_i32_zero(param_coords)) {
       return false;
+    }
   } else {
-    if (!EmitExpression(pre, out, param_coords))
+    if (!EmitExpression(pre, out, param_coords)) {
       return false;
+    }
   }
 
   for (auto usage : {Usage::kDepthRef, Usage::kBias, Usage::kLevel, Usage::kDdx,
                      Usage::kDdy, Usage::kSampleIndex, Usage::kOffset}) {
     if (auto* e = arg(usage)) {
       out << ", ";
-      if (!EmitExpression(pre, out, e))
+      if (!EmitExpression(pre, out, e)) {
         return false;
+      }
     }
   }
 
   if (intrinsic->Type() == sem::IntrinsicType::kTextureStore) {
     out << "] = ";
-    if (!EmitExpression(pre, out, arg(Usage::kValue)))
+    if (!EmitExpression(pre, out, arg(Usage::kValue))) {
       return false;
+    }
   } else {
     out << ")";
+
+    // If the intrinsic return type does not match the number of elements of the
+    // HLSL intrinsic, we need to swizzle the expression to generate the correct
+    // number of components.
+    uint32_t wgsl_ret_width = 1;
+    if (auto* vec = intrinsic->ReturnType()->As<sem::Vector>()) {
+      wgsl_ret_width = vec->size();
+    }
+    if (wgsl_ret_width < hlsl_ret_width) {
+      out << ".";
+      for (uint32_t i = 0; i < wgsl_ret_width; i++) {
+        out << "xyz"[i];
+      }
+    }
+    if (wgsl_ret_width > hlsl_ret_width) {
+      TINT_ICE(diagnostics_) << "WGSL return width (" << wgsl_ret_width
+                             << ") is wider than HLSL return width ("
+                             << hlsl_ret_width << ") for " << intrinsic->Type();
+      return false;
+    }
   }
 
   return true;
