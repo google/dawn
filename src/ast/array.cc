@@ -38,7 +38,7 @@ Array::Array(Array&&) = default;
 Array::~Array() = default;
 
 std::string Array::type_name() const {
-  TINT_ASSERT(subtype_);
+  TINT_ASSERT(AST, subtype_);
 
   std::string type_name = "__array" + subtype_->type_name();
   if (!IsRuntimeArray()) {

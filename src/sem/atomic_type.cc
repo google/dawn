@@ -23,7 +23,7 @@ namespace tint {
 namespace sem {
 
 Atomic::Atomic(const sem::Type* subtype) : subtype_(subtype) {
-  TINT_ASSERT(!subtype->Is<Reference>());
+  TINT_ASSERT(AST, !subtype->Is<Reference>());
 }
 
 std::string Atomic::type_name() const {

@@ -142,7 +142,7 @@ ast::Type* TextureOverloadCase::buildResultVectorComponentType(
       return b->ty.i32();
   }
 
-  TINT_UNREACHABLE(b->Diagnostics());
+  TINT_UNREACHABLE(AST, b->Diagnostics());
   return {};
 }
 
@@ -176,7 +176,7 @@ ast::Variable* TextureOverloadCase::buildTextureVariable(
     }
   }
 
-  TINT_UNREACHABLE(b->Diagnostics());
+  TINT_UNREACHABLE(AST, b->Diagnostics());
   return nullptr;
 }
 

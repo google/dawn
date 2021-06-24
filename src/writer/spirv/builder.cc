@@ -453,7 +453,7 @@ bool Builder::GenerateExecutionModes(ast::Function* func, uint32_t id) {
       if (has_overridable_workgroup_size_) {
         // Only one stage can have a pipeline-overridable workgroup size.
         // TODO(crbug.com/tint/810): Use LocalSizeId to handle this scenario.
-        TINT_ICE(builder_.Diagnostics())
+        TINT_ICE(Writer, builder_.Diagnostics())
             << "multiple stages using pipeline-overridable workgroup sizes";
       }
       has_overridable_workgroup_size_ = true;
@@ -477,7 +477,7 @@ bool Builder::GenerateExecutionModes(ast::Function* func, uint32_t id) {
           // Make the constant specializable.
           auto* sem_const = builder_.Sem().Get(wgsize[i].overridable_const);
           if (!sem_const->IsPipelineConstant()) {
-            TINT_ICE(builder_.Diagnostics())
+            TINT_ICE(Writer, builder_.Diagnostics())
                 << "expected a pipeline-overridable constant";
           }
           constant.is_spec_op = true;
@@ -885,7 +885,8 @@ bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
   if (auto* scalar = expr->idx_expr()->As<ast::ScalarConstructorExpression>()) {
     auto* literal = scalar->literal()->As<ast::IntLiteral>();
     if (!literal) {
-      TINT_ICE(builder_.Diagnostics()) << "bad literal in array accessor";
+      TINT_ICE(Writer, builder_.Diagnostics())
+          << "bad literal in array accessor";
       return false;
     }
 
@@ -917,7 +918,8 @@ bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
     return true;
   }
 
-  TINT_ICE(builder_.Diagnostics()) << "unsupported array accessor expression";
+  TINT_ICE(Writer, builder_.Diagnostics())
+      << "unsupported array accessor expression";
   return false;
 }
 
@@ -1042,7 +1044,7 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
     return true;
   }
 
-  TINT_ICE(builder_.Diagnostics())
+  TINT_ICE(Writer, builder_.Diagnostics())
       << "unhandled member index type: " << expr_sem->TypeInfo().name;
   return false;
 }
@@ -1050,7 +1052,7 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
 uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
   if (!expr->IsAnyOf<ast::ArrayAccessorExpression,
                      ast::MemberAccessorExpression>()) {
-    TINT_ICE(builder_.Diagnostics()) << "expression is not an accessor";
+    TINT_ICE(Writer, builder_.Diagnostics()) << "expression is not an accessor";
     return 0;
   }
 
@@ -1466,7 +1468,7 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
   // This should not happen as we rely on constant folding to obviate
   // casts/conversions for module-scope variables
   if (is_global_init) {
-    TINT_ICE(builder_.Diagnostics())
+    TINT_ICE(Writer, builder_.Diagnostics())
         << "Module-level conversions are not supported. Conversions should "
            "have already been constant-folded by the FoldConstants transform.";
     return 0;
@@ -1545,7 +1547,7 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
     return result_id;
 
   } else {
-    TINT_ICE(builder_.Diagnostics()) << "Invalid from_type";
+    TINT_ICE(Writer, builder_.Diagnostics()) << "Invalid from_type";
   }
 
   if (op == spv::Op::OpNop) {
@@ -2506,7 +2508,7 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
   auto gen_arg = [&](Usage usage) {
     auto* argument = arg(usage);
     if (!argument) {
-      TINT_ICE(builder_.Diagnostics())
+      TINT_ICE(Writer, builder_.Diagnostics())
           << "missing argument " << static_cast<int>(usage);
     }
     return gen(argument);
@@ -2514,7 +2516,7 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
 
   auto* texture = arg(Usage::kTexture);
   if (!texture) {
-    TINT_ICE(builder_.Diagnostics()) << "missing texture argument";
+    TINT_ICE(Writer, builder_.Diagnostics()) << "missing texture argument";
   }
 
   auto* texture_type = TypeOf(texture)->UnwrapRef()->As<sem::Texture>();
@@ -2845,7 +2847,7 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
       break;
     }
     default:
-      TINT_UNREACHABLE(builder_.Diagnostics());
+      TINT_UNREACHABLE(Writer, builder_.Diagnostics());
       return false;
   }
 
@@ -2942,7 +2944,7 @@ bool Builder::GenerateAtomicIntrinsic(ast::CallExpression* call,
           ScalarConstant::U32(static_cast<uint32_t>(spv::Scope::Device)));
       break;
     default:
-      TINT_UNREACHABLE(builder_.Diagnostics())
+      TINT_UNREACHABLE(Writer, builder_.Diagnostics())
           << "unhandled atomic storage class " << storage_class;
       return false;
   }
@@ -3115,7 +3117,7 @@ bool Builder::GenerateAtomicIntrinsic(ast::CallExpression* call,
         zero = GenerateConstantIfNeeded(ScalarConstant::U32(0u));
         one = GenerateConstantIfNeeded(ScalarConstant::U32(1u));
       } else {
-        TINT_UNREACHABLE(builder_.Diagnostics())
+        TINT_UNREACHABLE(Writer, builder_.Diagnostics())
             << "unsupported atomic type " << value_sem_type->TypeInfo().name;
       }
       if (zero == 0 || one == 0) {
@@ -3144,7 +3146,7 @@ bool Builder::GenerateAtomicIntrinsic(ast::CallExpression* call,
                                 });
     }
     default:
-      TINT_UNREACHABLE(builder_.Diagnostics())
+      TINT_UNREACHABLE(Writer, builder_.Diagnostics())
           << "unhandled atomic intrinsic " << intrinsic->Type();
       return false;
   }
@@ -3374,7 +3376,7 @@ bool Builder::GenerateSwitchStatement(ast::SwitchStatement* stmt) {
     if (LastIsFallthrough(item->body())) {
       if (i == (body.size() - 1)) {
         // This case is caught by Resolver validation
-        TINT_UNREACHABLE(builder_.Diagnostics());
+        TINT_UNREACHABLE(Writer, builder_.Diagnostics());
         return false;
       }
       if (!push_function_inst(spv::Op::OpBranch,
@@ -3938,7 +3940,8 @@ SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin,
       } else if (storage == ast::StorageClass::kOutput) {
         return SpvBuiltInPosition;
       } else {
-        TINT_ICE(builder_.Diagnostics()) << "invalid storage class for builtin";
+        TINT_ICE(Writer, builder_.Diagnostics())
+            << "invalid storage class for builtin";
         break;
       }
     case ast::Builtin::kVertexIndex:

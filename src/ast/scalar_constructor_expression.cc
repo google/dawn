@@ -25,8 +25,8 @@ ScalarConstructorExpression::ScalarConstructorExpression(ProgramID program_id,
                                                          const Source& source,
                                                          Literal* literal)
     : Base(program_id, source), literal_(literal) {
-  TINT_ASSERT(literal);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(literal, program_id);
+  TINT_ASSERT(AST, literal);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, literal, program_id);
 }
 
 ScalarConstructorExpression::ScalarConstructorExpression(

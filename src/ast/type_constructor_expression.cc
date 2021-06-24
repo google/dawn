@@ -26,10 +26,10 @@ TypeConstructorExpression::TypeConstructorExpression(ProgramID program_id,
                                                      ast::Type* type,
                                                      ExpressionList values)
     : Base(program_id, source), type_(type), values_(std::move(values)) {
-  TINT_ASSERT(type_);
+  TINT_ASSERT(AST, type_);
   for (auto* val : values_) {
-    TINT_ASSERT(val);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(val, program_id);
+    TINT_ASSERT(AST, val);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, val, program_id);
   }
 }
 

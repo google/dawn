@@ -25,8 +25,8 @@ VariableDeclStatement::VariableDeclStatement(ProgramID program_id,
                                              const Source& source,
                                              Variable* variable)
     : Base(program_id, source), variable_(variable) {
-  TINT_ASSERT(variable_);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(variable_, program_id);
+  TINT_ASSERT(AST, variable_);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, variable_, program_id);
 }
 
 VariableDeclStatement::VariableDeclStatement(VariableDeclStatement&&) = default;

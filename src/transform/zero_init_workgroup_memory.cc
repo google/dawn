@@ -78,7 +78,7 @@ struct ZeroInitWorkgroupMemory::State {
       return;
     }
 
-    TINT_UNREACHABLE(ctx.dst->Diagnostics())
+    TINT_UNREACHABLE(Transform, ctx.dst->Diagnostics())
         << "could not zero workgroup type: " << ty->type_name();
   }
 

@@ -26,10 +26,10 @@ MemberAccessorExpression::MemberAccessorExpression(ProgramID program_id,
                                                    Expression* structure,
                                                    IdentifierExpression* member)
     : Base(program_id, source), struct_(structure), member_(member) {
-  TINT_ASSERT(struct_);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(struct_, program_id);
-  TINT_ASSERT(member_);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(member_, program_id);
+  TINT_ASSERT(AST, struct_);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, struct_, program_id);
+  TINT_ASSERT(AST, member_);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, member_, program_id);
 }
 
 MemberAccessorExpression::MemberAccessorExpression(MemberAccessorExpression&&) =

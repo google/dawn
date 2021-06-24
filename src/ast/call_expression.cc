@@ -26,11 +26,11 @@ CallExpression::CallExpression(ProgramID program_id,
                                IdentifierExpression* func,
                                ExpressionList params)
     : Base(program_id, source), func_(func), params_(params) {
-  TINT_ASSERT(func_);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(func_, program_id);
+  TINT_ASSERT(AST, func_);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, func_, program_id);
   for (auto* param : params_) {
-    TINT_ASSERT(param);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(param, program_id);
+    TINT_ASSERT(AST, param);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, param, program_id);
   }
 }
 

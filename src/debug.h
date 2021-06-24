@@ -44,8 +44,12 @@ class InternalCompilerError {
   /// Constructor
   /// @param file the file containing the ICE
   /// @param line the line containing the ICE
+  /// @param system the Tint system that has raised the ICE
   /// @param diagnostics the list of diagnostics to append the ICE message to
-  InternalCompilerError(const char* file, size_t line, diag::List& diagnostics);
+  InternalCompilerError(const char* file,
+                        size_t line,
+                        diag::System system,
+                        diag::List& diagnostics);
 
   /// Destructor.
   /// Adds the internal compiler error message to the diagnostics list, and then
@@ -64,6 +68,7 @@ class InternalCompilerError {
  private:
   char const* const file_;
   size_t const line_;
+  diag::System system_;
   diag::List& diagnostics_;
   std::stringstream msg_;
 };
@@ -76,8 +81,9 @@ class InternalCompilerError {
 /// set.
 /// The ICE message contains the callsite's file and line.
 /// Use the `<<` operator to append an error message to the ICE.
-#define TINT_ICE(diagnostics) \
-  tint::InternalCompilerError(__FILE__, __LINE__, diagnostics)
+#define TINT_ICE(system, diagnostics)             \
+  tint::InternalCompilerError(__FILE__, __LINE__, \
+                              ::tint::diag::System::system, diagnostics)
 
 /// TINT_UNREACHABLE() is a macro for appending a "TINT_UNREACHABLE"
 /// internal compiler error message to the diagnostics list `diagnostics`, and
@@ -85,8 +91,8 @@ class InternalCompilerError {
 /// reporter is set.
 /// The ICE message contains the callsite's file and line.
 /// Use the `<<` operator to append an error message to the ICE.
-#define TINT_UNREACHABLE(diagnostics) \
-  TINT_ICE(diagnostics) << "TINT_UNREACHABLE "
+#define TINT_UNREACHABLE(system, diagnostics) \
+  TINT_ICE(system, diagnostics) << "TINT_UNREACHABLE "
 
 /// TINT_UNIMPLEMENTED() is a macro for appending a "TINT_UNIMPLEMENTED"
 /// internal compiler error message to the diagnostics list `diagnostics`, and
@@ -94,8 +100,8 @@ class InternalCompilerError {
 /// reporter is set.
 /// The ICE message contains the callsite's file and line.
 /// Use the `<<` operator to append an error message to the ICE.
-#define TINT_UNIMPLEMENTED(diagnostics) \
-  TINT_ICE(diagnostics) << "TINT_UNIMPLEMENTED "
+#define TINT_UNIMPLEMENTED(system, diagnostics) \
+  TINT_ICE(system, diagnostics) << "TINT_UNIMPLEMENTED "
 
 /// TINT_ASSERT() is a macro for checking the expression is true, triggering a
 /// TINT_ICE if it is not.
@@ -105,12 +111,12 @@ class InternalCompilerError {
 /// may silently fail in builds where SetInternalCompilerErrorReporter() is not
 /// called. Only use in places where there's no sensible place to put proper
 /// error handling.
-#define TINT_ASSERT(condition)                                      \
-  do {                                                              \
-    if (!(condition)) {                                             \
-      tint::diag::List diagnostics;                                 \
-      TINT_ICE(diagnostics) << "TINT_ASSERT(" << #condition << ")"; \
-    }                                                               \
+#define TINT_ASSERT(system, condition)                                      \
+  do {                                                                      \
+    if (!(condition)) {                                                     \
+      tint::diag::List diagnostics;                                         \
+      TINT_ICE(system, diagnostics) << "TINT_ASSERT(" << #condition << ")"; \
+    }                                                                       \
   } while (false)
 
 #endif  // SRC_DEBUG_H_

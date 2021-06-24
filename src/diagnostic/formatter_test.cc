@@ -33,18 +33,19 @@ class DiagFormatterTest : public testing::Test {
   Source::File file{"file.name", content};
   Diagnostic diag_note{Severity::Note,
                        Source{Source::Range{Source::Location{1, 14}}, &file},
-                       "purr"};
+                       "purr", System::Test};
   Diagnostic diag_warn{Severity::Warning,
-                       Source{Source::Range{{2, 14}, {2, 18}}, &file}, "grrr"};
+                       Source{Source::Range{{2, 14}, {2, 18}}, &file}, "grrr",
+                       System::Test};
   Diagnostic diag_err{Severity::Error,
                       Source{Source::Range{{3, 16}, {3, 21}}, &file}, "hiss",
-                      "abc123"};
+                      System::Test, "abc123"};
   Diagnostic diag_ice{Severity::InternalCompilerError,
                       Source{Source::Range{{4, 16}, {4, 19}}, &file},
-                      "unreachable"};
+                      "unreachable", System::Test};
   Diagnostic diag_fatal{Severity::Fatal,
                         Source{Source::Range{{4, 16}, {4, 19}}, &file},
-                        "nothing"};
+                        "nothing", System::Test};
 };
 
 TEST_F(DiagFormatterTest, Simple) {
@@ -68,7 +69,7 @@ TEST_F(DiagFormatterTest, SimpleNewlineAtEnd) {
 
 TEST_F(DiagFormatterTest, SimpleNoSource) {
   Formatter fmt{{false, false, false, false}};
-  Diagnostic diag{Severity::Note, Source{}, "no source!"};
+  Diagnostic diag{Severity::Note, Source{}, "no source!", System::Test};
   auto got = fmt.format(List{diag});
   auto* expect = "no source!";
   ASSERT_EQ(expect, got);
@@ -131,7 +132,7 @@ the  snake  says  quack
 TEST_F(DiagFormatterTest, BasicWithMultiLine) {
   Diagnostic multiline{Severity::Warning,
                        Source{Source::Range{{2, 9}, {4, 15}}, &file},
-                       "multiline"};
+                       "multiline", System::Test};
   Formatter fmt{{false, false, true, false}};
   auto got = fmt.format(List{multiline});
   auto* expect = R"(2:9: multiline
@@ -166,7 +167,7 @@ the    snake    says    quack
 TEST_F(DiagFormatterTest, BasicWithMultiLineTab4) {
   Diagnostic multiline{Severity::Warning,
                        Source{Source::Range{{2, 9}, {4, 15}}, &file},
-                       "multiline"};
+                       "multiline", System::Test};
   Formatter fmt{{false, false, true, false, 4u}};
   auto got = fmt.format(List{multiline});
   auto* expect = R"(2:9: multiline
@@ -219,7 +220,7 @@ the  snail  says  ???
 TEST_F(DiagFormatterTest, RangeOOB) {
   Formatter fmt{{true, true, true, true}};
   diag::List list;
-  list.add_error("oob", Source{{{10, 20}, {30, 20}}, &file});
+  list.add_error(System::Test, "oob", Source{{{10, 20}, {30, 20}}, &file});
   auto got = fmt.format(list);
   auto* expect = R"(file.name:10:20 error: oob
 

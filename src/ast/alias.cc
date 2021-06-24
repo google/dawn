@@ -28,7 +28,7 @@ Alias::Alias(ProgramID program_id,
     : Base(program_id, source, name),
       subtype_(subtype),
       type_name_("__alias_" + name.to_str() + subtype->type_name()) {
-  TINT_ASSERT(subtype_);
+  TINT_ASSERT(AST, subtype_);
 }
 
 Alias::Alias(Alias&&) = default;

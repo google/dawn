@@ -25,8 +25,8 @@ Reference::Reference(const Type* subtype,
                      ast::StorageClass storage_class,
                      ast::Access access)
     : subtype_(subtype), storage_class_(storage_class), access_(access) {
-  TINT_ASSERT(!subtype->Is<Reference>());
-  TINT_ASSERT(access != ast::Access::kUndefined);
+  TINT_ASSERT(Semantic, !subtype->Is<Reference>());
+  TINT_ASSERT(Semantic, access != ast::Access::kUndefined);
 }
 
 std::string Reference::type_name() const {

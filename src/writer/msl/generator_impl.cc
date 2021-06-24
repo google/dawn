@@ -101,7 +101,7 @@ bool GeneratorImpl::Generate() {
         case ast::StorageClass::kPrivate:
         case ast::StorageClass::kWorkgroup:
           // These are pushed into the entry point by the sanitizer.
-          TINT_ICE(diagnostics_)
+          TINT_ICE(Writer, diagnostics_)
               << "module-scope variables in the private/workgroup storage "
                  "class should have been handled by the MSL sanitizer";
           break;
@@ -134,7 +134,8 @@ bool GeneratorImpl::EmitTypeDecl(const sem::Type* ty) {
       return false;
     }
   } else {
-    diagnostics_.add_error("unknown alias type: " + ty->type_name());
+    diagnostics_.add_error(diag::System::Writer,
+                           "unknown alias type: " + ty->type_name());
     return false;
   }
 
@@ -269,7 +270,8 @@ bool GeneratorImpl::EmitBinary(ast::BinaryExpression* expr) {
       out_ << "%";
       break;
     case ast::BinaryOp::kNone:
-      diagnostics_.add_error("missing binary operation type");
+      diagnostics_.add_error(diag::System::Writer,
+                             "missing binary operation type");
       return false;
   }
   out_ << " ";
@@ -297,8 +299,9 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
 
   auto* func = program_->AST().Functions().Find(ident->symbol());
   if (func == nullptr) {
-    diagnostics_.add_error("Unable to find function: " +
-                           program_->Symbols().NameFor(ident->symbol()));
+    diagnostics_.add_error(diag::System::Writer,
+                           "Unable to find function: " +
+                               program_->Symbols().NameFor(ident->symbol()));
     return false;
   }
 
@@ -425,7 +428,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
 
   auto* texture = arg(Usage::kTexture);
   if (!texture) {
-    TINT_ICE(diagnostics_) << "missing texture arg";
+    TINT_ICE(Writer, diagnostics_) << "missing texture arg";
     return false;
   }
 
@@ -457,7 +460,8 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
       std::vector<const char*> dims;
       switch (texture_type->dim()) {
         case ast::TextureDimension::kNone:
-          diagnostics_.add_error("texture dimension is kNone");
+          diagnostics_.add_error(diag::System::Writer,
+                                 "texture dimension is kNone");
           return false;
         case ast::TextureDimension::k1d:
           dims = {"width"};
@@ -557,7 +561,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
       out_ << ".write(";
       break;
     default:
-      TINT_UNREACHABLE(diagnostics_)
+      TINT_UNREACHABLE(Writer, diagnostics_)
           << "Unhandled texture intrinsic '" << intrinsic->str() << "'";
       return false;
   }
@@ -595,7 +599,8 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
             out_ << "uint3(";
             break;
           default:
-            TINT_ICE(diagnostics_) << "unhandled texture dimensionality";
+            TINT_ICE(Writer, diagnostics_)
+                << "unhandled texture dimensionality";
             break;
         }
       }
@@ -653,7 +658,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
       default: {
         std::stringstream err;
         err << "MSL does not support gradients for " << dim << " textures";
-        diagnostics_.add_error(err.str());
+        diagnostics_.add_error(diag::System::Writer, err.str());
         return false;
       }
     }
@@ -813,8 +818,9 @@ std::string GeneratorImpl::generate_builtin_name(
       out += "unpack_unorm2x16_to_float";
       break;
     default:
-      diagnostics_.add_error("Unknown import method: " +
-                             std::string(intrinsic->str()));
+      diagnostics_.add_error(
+          diag::System::Writer,
+          "Unknown import method: " + std::string(intrinsic->str()));
       return "";
   }
   return out;
@@ -949,8 +955,9 @@ bool GeneratorImpl::EmitZeroValue(const sem::Type* type) {
   } else if (type->As<sem::Struct>()) {
     out_ << "{}";
   } else {
-    diagnostics_.add_error("Invalid type for zero emission: " +
-                           type->type_name());
+    diagnostics_.add_error(
+        diag::System::Writer,
+        "Invalid type for zero emission: " + type->type_name());
     return false;
   }
   return true;
@@ -971,7 +978,7 @@ bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
   } else if (auto* ul = lit->As<ast::UintLiteral>()) {
     out_ << ul->value() << "u";
   } else {
-    diagnostics_.add_error("unknown literal type");
+    diagnostics_.add_error(diag::System::Writer, "unknown literal type");
     return false;
   }
   return true;
@@ -1003,7 +1010,8 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
     return EmitUnaryOp(u);
   }
 
-  diagnostics_.add_error("unknown expression type: " + program_->str(expr));
+  diagnostics_.add_error(diag::System::Writer,
+                         "unknown expression type: " + program_->str(expr));
   return false;
 }
 
@@ -1159,7 +1167,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
       auto* binding =
           ast::GetDecoration<ast::BindingDecoration>(var->decorations());
       if (binding == nullptr) {
-        TINT_ICE(diagnostics_)
+        TINT_ICE(Writer, diagnostics_)
             << "missing binding attribute for entry point parameter";
         return false;
       }
@@ -1168,7 +1176,8 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
       } else if (var->type()->Is<ast::Texture>()) {
         out_ << " [[texture(" << binding->value() << ")]]";
       } else {
-        TINT_ICE(diagnostics_) << "invalid handle type entry point parameter";
+        TINT_ICE(Writer, diagnostics_)
+            << "invalid handle type entry point parameter";
         return false;
       }
     } else {
@@ -1184,13 +1193,13 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
 
         auto attr = builtin_to_attribute(builtin->value());
         if (attr.empty()) {
-          diagnostics_.add_error("unknown builtin");
+          diagnostics_.add_error(diag::System::Writer, "unknown builtin");
           return false;
         }
         out_ << " [[" << attr << "]]";
       }
       if (!builtin_found) {
-        TINT_ICE(diagnostics_) << "Unsupported entry point parameter";
+        TINT_ICE(Writer, diagnostics_) << "Unsupported entry point parameter";
       }
     }
   }
@@ -1208,8 +1217,9 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     auto* binding = data.second.binding;
     if (binding == nullptr) {
       diagnostics_.add_error(
+          diag::System::Writer,
           "unable to find binding information for uniform: " +
-          program_->Symbols().NameFor(var->Declaration()->symbol()));
+              program_->Symbols().NameFor(var->Declaration()->symbol()));
       return false;
     }
     // auto* set = data.second.set;
@@ -1472,7 +1482,8 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
     return EmitVariable(var);
   }
 
-  diagnostics_.add_error("unknown statement type: " + program_->str(stmt));
+  diagnostics_.add_error(diag::System::Writer,
+                         "unknown statement type: " + program_->str(stmt));
   return false;
 }
 
@@ -1549,7 +1560,7 @@ bool GeneratorImpl::EmitType(const sem::Type* type, const std::string& name) {
         out_ << "constant ";
         break;
       default:
-        TINT_ICE(diagnostics_) << "unhandled storage class for pointer";
+        TINT_ICE(Writer, diagnostics_) << "unhandled storage class for pointer";
     }
     if (ptr->StoreType()->Is<sem::Array>()) {
       std::string inner = "(*" + name + ")";
@@ -1595,7 +1606,8 @@ bool GeneratorImpl::EmitType(const sem::Type* type, const std::string& name) {
         out_ << "cube_array";
         break;
       default:
-        diagnostics_.add_error("Invalid texture dimensions");
+        diagnostics_.add_error(diag::System::Writer,
+                               "Invalid texture dimensions");
         return false;
     }
     if (tex->Is<sem::MultisampledTexture>()) {
@@ -1615,7 +1627,8 @@ bool GeneratorImpl::EmitType(const sem::Type* type, const std::string& name) {
       } else if (storage->access() == ast::Access::kWrite) {
         out_ << ", access::write";
       } else {
-        diagnostics_.add_error("Invalid access control for storage texture");
+        diagnostics_.add_error(diag::System::Writer,
+                               "Invalid access control for storage texture");
         return false;
       }
     } else if (auto* ms = tex->As<sem::MultisampledTexture>()) {
@@ -1629,7 +1642,7 @@ bool GeneratorImpl::EmitType(const sem::Type* type, const std::string& name) {
       }
       out_ << ", access::sample";
     } else {
-      diagnostics_.add_error("invalid texture type");
+      diagnostics_.add_error(diag::System::Writer, "invalid texture type");
       return false;
     }
     out_ << ">";
@@ -1644,7 +1657,8 @@ bool GeneratorImpl::EmitType(const sem::Type* type, const std::string& name) {
   } else if (type->Is<sem::Void>()) {
     out_ << "void";
   } else {
-    diagnostics_.add_error("unknown type in EmitType: " + type->type_name());
+    diagnostics_.add_error(diag::System::Writer,
+                           "unknown type in EmitType: " + type->type_name());
     return false;
   }
 
@@ -1700,7 +1714,7 @@ bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
     if (is_host_shareable) {
       if (wgsl_offset < msl_offset) {
         // Unimplementable layout
-        TINT_ICE(diagnostics_)
+        TINT_ICE(Writer, diagnostics_)
             << "Structure member WGSL offset (" << wgsl_offset
             << ") is behind MSL offset (" << msl_offset << ")";
         return false;
@@ -1737,14 +1751,15 @@ bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
       if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
         auto attr = builtin_to_attribute(builtin->value());
         if (attr.empty()) {
-          diagnostics_.add_error("unknown builtin");
+          diagnostics_.add_error(diag::System::Writer, "unknown builtin");
           return false;
         }
         out_ << " [[" << attr << "]]";
       } else if (auto* loc = deco->As<ast::LocationDecoration>()) {
         auto& pipeline_stage_uses = str->PipelineStageUses();
         if (pipeline_stage_uses.size() != 1) {
-          TINT_ICE(diagnostics_) << "invalid entry point IO struct uses";
+          TINT_ICE(Writer, diagnostics_)
+              << "invalid entry point IO struct uses";
         }
 
         if (pipeline_stage_uses.count(sem::PipelineStageUsage::kVertexInput)) {
@@ -1759,7 +1774,8 @@ bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
                        sem::PipelineStageUsage::kFragmentOutput)) {
           out_ << " [[color(" + std::to_string(loc->value()) + ")]]";
         } else {
-          TINT_ICE(diagnostics_) << "invalid use of location decoration";
+          TINT_ICE(Writer, diagnostics_)
+              << "invalid use of location decoration";
         }
       }
     }
@@ -1770,7 +1786,7 @@ bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
       // Calculate new MSL offset
       auto size_align = MslPackedTypeSizeAndAlign(ty);
       if (msl_offset % size_align.align) {
-        TINT_ICE(diagnostics_)
+        TINT_ICE(Writer, diagnostics_)
             << "Misaligned MSL structure member "
             << ty->FriendlyName(program_->Symbols()) << " " << name;
         return false;
@@ -1828,7 +1844,7 @@ bool GeneratorImpl::EmitVariable(const sem::Variable* var) {
 
   for (auto* deco : decl->decorations()) {
     if (!deco->Is<ast::InternalDecoration>()) {
-      TINT_ICE(diagnostics_) << "unexpected variable decoration";
+      TINT_ICE(Writer, diagnostics_) << "unexpected variable decoration";
       return false;
     }
   }
@@ -1845,7 +1861,7 @@ bool GeneratorImpl::EmitVariable(const sem::Variable* var) {
       out_ << "threadgroup ";
       break;
     default:
-      TINT_ICE(diagnostics_) << "unhandled variable storage class";
+      TINT_ICE(Writer, diagnostics_) << "unhandled variable storage class";
       return false;
   }
 
@@ -1886,12 +1902,13 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
 
   for (auto* d : var->decorations()) {
     if (!d->Is<ast::OverrideDecoration>()) {
-      diagnostics_.add_error("Decorated const values not valid");
+      diagnostics_.add_error(diag::System::Writer,
+                             "Decorated const values not valid");
       return false;
     }
   }
   if (!var->is_const()) {
-    diagnostics_.add_error("Expected a const value");
+    diagnostics_.add_error(diag::System::Writer, "Expected a const value");
     return false;
   }
 
@@ -1963,8 +1980,9 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
 
   if (auto* arr = ty->As<sem::Array>()) {
     if (!arr->IsStrideImplicit()) {
-      TINT_ICE(diagnostics_) << "arrays with explicit strides should have "
-                                "removed with the PadArrayElements transform";
+      TINT_ICE(Writer, diagnostics_)
+          << "arrays with explicit strides should have "
+             "removed with the PadArrayElements transform";
       return {};
     }
     auto num_els = std::max<uint32_t>(arr->Count(), 1);
@@ -1977,7 +1995,8 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
     return SizeAndAlign{str->Size(), str->Align()};
   }
 
-  TINT_UNREACHABLE(diagnostics_) << "Unhandled type " << ty->TypeInfo().name;
+  TINT_UNREACHABLE(Writer, diagnostics_)
+      << "Unhandled type " << ty->TypeInfo().name;
   return {};
 }
 

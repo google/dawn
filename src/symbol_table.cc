@@ -54,7 +54,7 @@ Symbol SymbolTable::Get(const std::string& name) const {
 }
 
 std::string SymbolTable::NameFor(const Symbol symbol) const {
-  TINT_ASSERT_PROGRAM_IDS_EQUAL(program_id_, symbol);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL(Symbol, program_id_, symbol);
   auto it = symbol_to_name_.find(symbol);
   if (it == symbol_to_name_.end()) {
     return symbol.to_str();

@@ -28,7 +28,7 @@ ReturnStatement::ReturnStatement(ProgramID program_id,
                                  const Source& source,
                                  Expression* value)
     : Base(program_id, source), value_(value) {
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(value_, program_id);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, value_, program_id);
 }
 
 ReturnStatement::ReturnStatement(ReturnStatement&&) = default;

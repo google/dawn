@@ -29,7 +29,7 @@ Program Parse(const std::vector<uint32_t>& input) {
   ProgramBuilder& builder = parser.builder();
   if (!parsed) {
     // TODO(bclayton): Migrate spirv::ParserImpl to using diagnostics.
-    builder.Diagnostics().add_error(parser.error());
+    builder.Diagnostics().add_error(diag::System::Reader, parser.error());
     return Program(std::move(builder));
   }
 

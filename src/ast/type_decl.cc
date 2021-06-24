@@ -23,7 +23,7 @@ namespace ast {
 
 TypeDecl::TypeDecl(ProgramID program_id, const Source& source, Symbol name)
     : Base(program_id, source), name_(name) {
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(name, program_id);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, name, program_id);
 }
 
 TypeDecl::TypeDecl(TypeDecl&&) = default;

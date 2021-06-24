@@ -352,7 +352,7 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicAtomicFor(ProgramBuilder* builder,
       op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicCompareExchangeWeak;
       break;
     default:
-      TINT_ICE(builder->Diagnostics())
+      TINT_ICE(Transform, builder->Diagnostics())
           << "invalid IntrinsicType for DecomposeMemoryAccess::Intrinsic: "
           << ty->type_name();
       break;
@@ -435,7 +435,7 @@ struct DecomposeMemoryAccess::State {
   /// @param expr the expression that performs the access
   /// @param access the access
   void AddAccess(ast::Expression* expr, BufferAccess&& access) {
-    TINT_ASSERT(access.type);
+    TINT_ASSERT(Transform, access.type);
     accesses.emplace(expr, std::move(access));
     expression_order.emplace_back(expr);
   }
@@ -672,7 +672,7 @@ struct DecomposeMemoryAccess::State {
 
       auto* atomic = IntrinsicAtomicFor(ctx.dst, op, el_ty);
       if (atomic == nullptr) {
-        TINT_ICE(ctx.dst->Diagnostics())
+        TINT_ICE(Transform, ctx.dst->Diagnostics())
             << "IntrinsicAtomicFor() returned nullptr for op " << op
             << " and type " << el_ty->type_name();
       }

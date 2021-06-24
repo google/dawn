@@ -40,7 +40,7 @@ Program ParseAndBuild(std::string spirv) {
   auto p = std::make_unique<ParserImpl>(test::Assemble(preamble + spirv));
   if (!p->BuildAndParseInternalModule()) {
     ProgramBuilder builder;
-    builder.Diagnostics().add_error(p->error());
+    builder.Diagnostics().add_error(diag::System::Reader, p->error());
     return Program(std::move(builder));
   }
   return p->program();

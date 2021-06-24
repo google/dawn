@@ -106,7 +106,7 @@ std::string FloatToBitPreservingString(float f) {
         }
       } else {
         // Subnormal, and not zero.
-        TINT_ASSERT(mantissa != 0);
+        TINT_ASSERT(Writer, mantissa != 0);
         const int kTopBit = (1 << kMantissaBits);
 
         // Shift left until we get 1.x

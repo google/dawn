@@ -63,7 +63,7 @@ Program::Program(ProgramBuilder&& builder) {
     // If the builder claims to be invalid, then we really should have an error
     // message generated. If we find a situation where the program is not valid
     // and there are no errors reported, add one here.
-    diagnostics_.add_error("invalid program generated");
+    diagnostics_.add_error(diag::System::Program, "invalid program generated");
   }
 }
 
@@ -128,7 +128,7 @@ std::string Program::str(const ast::Node* node) const {
 }
 
 void Program::AssertNotMoved() const {
-  TINT_ASSERT(!moved_);
+  TINT_ASSERT(Program, !moved_);
 }
 
 }  // namespace tint

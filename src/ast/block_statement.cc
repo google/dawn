@@ -26,8 +26,8 @@ BlockStatement::BlockStatement(ProgramID program_id,
                                const StatementList& statements)
     : Base(program_id, source), statements_(std::move(statements)) {
   for (auto* stmt : *this) {
-    TINT_ASSERT(stmt);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(stmt, program_id);
+    TINT_ASSERT(AST, stmt);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, stmt, program_id);
   }
 }
 

@@ -30,12 +30,12 @@ StructMember::StructMember(ProgramID program_id,
       symbol_(sym),
       type_(type),
       decorations_(std::move(decorations)) {
-  TINT_ASSERT(type);
-  TINT_ASSERT(symbol_.IsValid());
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(symbol_, program_id);
+  TINT_ASSERT(AST, type);
+  TINT_ASSERT(AST, symbol_.IsValid());
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, symbol_, program_id);
   for (auto* deco : decorations_) {
-    TINT_ASSERT(deco);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(deco, program_id);
+    TINT_ASSERT(AST, deco);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, deco, program_id);
   }
 }
 

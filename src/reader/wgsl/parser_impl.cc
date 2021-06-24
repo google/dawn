@@ -269,14 +269,15 @@ ParserImpl::Failure::Errored ParserImpl::add_error(const Token& t,
 ParserImpl::Failure::Errored ParserImpl::add_error(const Source& source,
                                                    const std::string& err) {
   if (silence_errors_ == 0) {
-    builder_.Diagnostics().add_error(err, source);
+    builder_.Diagnostics().add_error(diag::System::Reader, err, source);
   }
   return Failure::kErrored;
 }
 
 void ParserImpl::deprecated(const Source& source, const std::string& msg) {
   builder_.Diagnostics().add_warning(
-      "use of deprecated language feature: " + msg, source);
+      diag::System::Reader, "use of deprecated language feature: " + msg,
+      source);
 }
 
 Token ParserImpl::next() {
@@ -3298,7 +3299,7 @@ T ParserImpl::sync(Token::Type tok, F&& body) {
   --parse_depth_;
 
   if (sync_tokens_.back() != tok) {
-    TINT_ICE(builder_.Diagnostics()) << "sync_tokens is out of sync";
+    TINT_ICE(Reader, builder_.Diagnostics()) << "sync_tokens is out of sync";
   }
   sync_tokens_.pop_back();
 

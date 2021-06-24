@@ -27,10 +27,10 @@ Matrix::Matrix(Vector* column_type, uint32_t columns)
       column_type_(column_type),
       rows_(column_type->size()),
       columns_(columns) {
-  TINT_ASSERT(rows_ > 1);
-  TINT_ASSERT(rows_ < 5);
-  TINT_ASSERT(columns_ > 1);
-  TINT_ASSERT(columns_ < 5);
+  TINT_ASSERT(AST, rows_ > 1);
+  TINT_ASSERT(AST, rows_ < 5);
+  TINT_ASSERT(AST, columns_ > 1);
+  TINT_ASSERT(AST, columns_ < 5);
 }
 
 Matrix::Matrix(Matrix&&) = default;

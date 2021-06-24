@@ -152,7 +152,7 @@ bool GeneratorImpl::Generate(std::ostream& out) {
         }
       }
     } else {
-      TINT_ICE(diagnostics_)
+      TINT_ICE(Writer, diagnostics_)
           << "unhandled module-scope declaration: " << decl->TypeInfo().name;
       return false;
     }
@@ -188,7 +188,8 @@ bool GeneratorImpl::EmitBitcast(std::ostream& pre,
                                 ast::BitcastExpression* expr) {
   auto* type = TypeOf(expr);
   if (!type->is_integer_scalar() && !type->is_float_scalar()) {
-    diagnostics_.add_error("Unable to do bitcast to type " + type->type_name());
+    diagnostics_.add_error(diag::System::Writer,
+                           "Unable to do bitcast to type " + type->type_name());
     return false;
   }
 
@@ -305,7 +306,7 @@ bool GeneratorImpl::EmitBinary(std::ostream& pre,
     case ast::BinaryOp::kLogicalAnd:
     case ast::BinaryOp::kLogicalOr: {
       // These are both handled above.
-      TINT_UNREACHABLE(diagnostics_);
+      TINT_UNREACHABLE(Writer, diagnostics_);
       return false;
     }
     case ast::BinaryOp::kEqual:
@@ -353,7 +354,8 @@ bool GeneratorImpl::EmitBinary(std::ostream& pre,
       out << "%";
       break;
     case ast::BinaryOp::kNone:
-      diagnostics_.add_error("missing binary operation type");
+      diagnostics_.add_error(diag::System::Writer,
+                             "missing binary operation type");
       return false;
   }
   out << " ";
@@ -437,7 +439,7 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
         case ast::StorageClass::kStorage:
           return EmitStorageBufferAccess(pre, out, expr, intrinsic);
         default:
-          TINT_UNREACHABLE(diagnostics_)
+          TINT_UNREACHABLE(Writer, diagnostics_)
               << "unsupported DecomposeMemoryAccess::Intrinsic storage class:"
               << intrinsic->storage_class;
           return false;
@@ -493,8 +495,9 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
 
   auto* func = builder_.AST().Functions().Find(ident->symbol());
   if (func == nullptr) {
-    diagnostics_.add_error("Unable to find function: " +
-                           builder_.Symbols().NameFor(ident->symbol()));
+    diagnostics_.add_error(diag::System::Writer,
+                           "Unable to find function: " +
+                               builder_.Symbols().NameFor(ident->symbol()));
     return false;
   }
 
@@ -610,7 +613,7 @@ bool GeneratorImpl::EmitUniformBufferAccess(
         case DataType::kVec4I32:
           return cast("asint", load_vec4);
       }
-      TINT_UNREACHABLE(diagnostics_)
+      TINT_UNREACHABLE(Writer, diagnostics_)
           << "unsupported DecomposeMemoryAccess::Intrinsic::DataType: "
           << static_cast<int>(intrinsic->type);
       return false;
@@ -618,7 +621,7 @@ bool GeneratorImpl::EmitUniformBufferAccess(
     default:
       break;
   }
-  TINT_UNREACHABLE(diagnostics_)
+  TINT_UNREACHABLE(Writer, diagnostics_)
       << "unsupported DecomposeMemoryAccess::Intrinsic::Op: "
       << static_cast<int>(intrinsic->op);
   return false;
@@ -681,7 +684,7 @@ bool GeneratorImpl::EmitStorageBufferAccess(
         case DataType::kVec4I32:
           return load("asint", 4);
       }
-      TINT_UNREACHABLE(diagnostics_)
+      TINT_UNREACHABLE(Writer, diagnostics_)
           << "unsupported DecomposeMemoryAccess::Intrinsic::DataType: "
           << static_cast<int>(intrinsic->type);
       return false;
@@ -733,7 +736,7 @@ bool GeneratorImpl::EmitStorageBufferAccess(
         case DataType::kVec4I32:
           return store(4);
       }
-      TINT_UNREACHABLE(diagnostics_)
+      TINT_UNREACHABLE(Writer, diagnostics_)
           << "unsupported DecomposeMemoryAccess::Intrinsic::DataType: "
           << static_cast<int>(intrinsic->type);
       return false;
@@ -752,7 +755,7 @@ bool GeneratorImpl::EmitStorageBufferAccess(
       return EmitStorageAtomicCall(pre, out, expr, intrinsic->op);
   }
 
-  TINT_UNREACHABLE(diagnostics_)
+  TINT_UNREACHABLE(Writer, diagnostics_)
       << "unsupported DecomposeMemoryAccess::Intrinsic::Op: "
       << static_cast<int>(intrinsic->op);
   return false;
@@ -921,7 +924,7 @@ bool GeneratorImpl::EmitStorageAtomicCall(
       break;
 
     default:
-      TINT_UNREACHABLE(diagnostics_)
+      TINT_UNREACHABLE(Writer, diagnostics_)
           << "unsupported atomic DecomposeMemoryAccess::Intrinsic::Op: "
           << static_cast<int>(op);
       return false;
@@ -1077,7 +1080,7 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& pre,
       break;
 
     default:
-      TINT_UNREACHABLE(diagnostics_)
+      TINT_UNREACHABLE(Writer, diagnostics_)
           << "unsupported atomic intrinsic: " << intrinsic->Type();
       return false;
   }
@@ -1266,6 +1269,7 @@ bool GeneratorImpl::EmitDataPackingCall(std::ostream& pre,
       break;
     default:
       diagnostics_.add_error(
+          diag::System::Writer,
           "Internal error: unhandled data packing intrinsic");
       return false;
   }
@@ -1337,6 +1341,7 @@ bool GeneratorImpl::EmitDataUnpackingCall(std::ostream& pre,
       break;
     default:
       diagnostics_.add_error(
+          diag::System::Writer,
           "Internal error: unhandled data packing intrinsic");
       return false;
   }
@@ -1354,7 +1359,7 @@ bool GeneratorImpl::EmitBarrierCall(std::ostream&,
   } else if (intrinsic->Type() == sem::IntrinsicType::kStorageBarrier) {
     out << "DeviceMemoryBarrierWithGroupSync()";
   } else {
-    TINT_UNREACHABLE(diagnostics_)
+    TINT_UNREACHABLE(Writer, diagnostics_)
         << "unexpected barrier intrinsic type " << sem::str(intrinsic->Type());
     return false;
   }
@@ -1378,7 +1383,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
 
   auto* texture = arg(Usage::kTexture);
   if (!texture) {
-    TINT_ICE(diagnostics_) << "missing texture argument";
+    TINT_ICE(Writer, diagnostics_) << "missing texture argument";
     return false;
   }
 
@@ -1398,7 +1403,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
         case sem::IntrinsicType::kTextureDimensions:
           switch (texture_type->dim()) {
             case ast::TextureDimension::kNone:
-              TINT_ICE(diagnostics_) << "texture dimension is kNone";
+              TINT_ICE(Writer, diagnostics_) << "texture dimension is kNone";
               return false;
             case ast::TextureDimension::k1d:
               num_dimensions = 1;
@@ -1426,7 +1431,8 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
         case sem::IntrinsicType::kTextureNumLayers:
           switch (texture_type->dim()) {
             default:
-              TINT_ICE(diagnostics_) << "texture dimension is not arrayed";
+              TINT_ICE(Writer, diagnostics_)
+                  << "texture dimension is not arrayed";
               return false;
             case ast::TextureDimension::k2dArray:
               num_dimensions = is_ms ? 4 : 3;
@@ -1441,7 +1447,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
         case sem::IntrinsicType::kTextureNumLevels:
           switch (texture_type->dim()) {
             default:
-              TINT_ICE(diagnostics_)
+              TINT_ICE(Writer, diagnostics_)
                   << "texture dimension does not support mips";
               return false;
             case ast::TextureDimension::k2d:
@@ -1460,7 +1466,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
         case sem::IntrinsicType::kTextureNumSamples:
           switch (texture_type->dim()) {
             default:
-              TINT_ICE(diagnostics_)
+              TINT_ICE(Writer, diagnostics_)
                   << "texture dimension does not support multisampling";
               return false;
             case ast::TextureDimension::k2d:
@@ -1474,7 +1480,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
           }
           break;
         default:
-          TINT_ICE(diagnostics_) << "unexpected intrinsic";
+          TINT_ICE(Writer, diagnostics_) << "unexpected intrinsic";
           return false;
       }
 
@@ -1496,7 +1502,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
       }
 
       if (num_dimensions > 4) {
-        TINT_ICE(diagnostics_)
+        TINT_ICE(Writer, diagnostics_)
             << "Texture query intrinsic temporary vector has " << num_dimensions
             << " dimensions";
         return false;
@@ -1533,7 +1539,8 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
       } else {
         static constexpr char xyzw[] = {'x', 'y', 'z', 'w'};
         if (num_dimensions < 0 || num_dimensions > 4) {
-          TINT_ICE(diagnostics_) << "vector dimensions are " << num_dimensions;
+          TINT_ICE(Writer, diagnostics_)
+              << "vector dimensions are " << num_dimensions;
           return false;
         }
         for (int i = 0; i < num_dimensions; i++) {
@@ -1593,8 +1600,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
       break;
     default:
       diagnostics_.add_error(
+          diag::System::Writer,
           "Internal compiler error: Unhandled texture intrinsic '" +
-          std::string(intrinsic->str()) + "'");
+              std::string(intrinsic->str()) + "'");
       return false;
   }
 
@@ -1606,7 +1614,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
 
   auto* param_coords = arg(Usage::kCoords);
   if (!param_coords) {
-    TINT_ICE(diagnostics_) << "missing coords argument";
+    TINT_ICE(Writer, diagnostics_) << "missing coords argument";
     return false;
   }
 
@@ -1674,9 +1682,10 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
       }
     }
     if (wgsl_ret_width > hlsl_ret_width) {
-      TINT_ICE(diagnostics_) << "WGSL return width (" << wgsl_ret_width
-                             << ") is wider than HLSL return width ("
-                             << hlsl_ret_width << ") for " << intrinsic->Type();
+      TINT_ICE(Writer, diagnostics_)
+          << "WGSL return width (" << wgsl_ret_width
+          << ") is wider than HLSL return width (" << hlsl_ret_width << ") for "
+          << intrinsic->Type();
       return false;
     }
   }
@@ -1766,8 +1775,9 @@ std::string GeneratorImpl::generate_builtin_name(
     case sem::IntrinsicType::kSmoothStep:
       return "smoothstep";
     default:
-      diagnostics_.add_error("Unknown builtin method: " +
-                             std::string(intrinsic->str()));
+      diagnostics_.add_error(
+          diag::System::Writer,
+          "Unknown builtin method: " + std::string(intrinsic->str()));
   }
 
   return "";
@@ -1936,7 +1946,8 @@ bool GeneratorImpl::EmitExpression(std::ostream& pre,
     return EmitUnaryOp(pre, out, u);
   }
 
-  diagnostics_.add_error("unknown expression type: " + builder_.str(expr));
+  diagnostics_.add_error(diag::System::Writer,
+                         "unknown expression type: " + builder_.str(expr));
   return false;
 }
 
@@ -2084,7 +2095,8 @@ bool GeneratorImpl::EmitGlobalVariable(std::ostream& out,
       break;
   }
 
-  TINT_ICE(diagnostics_) << "unhandled storage class " << sem->StorageClass();
+  TINT_ICE(Writer, diagnostics_)
+      << "unhandled storage class " << sem->StorageClass();
   return false;
 }
 
@@ -2099,7 +2111,7 @@ bool GeneratorImpl::EmitUniformVariable(std::ostream& out,
   auto* str = type->As<sem::Struct>();
   if (!str) {
     // https://www.w3.org/TR/WGSL/#module-scope-variables
-    TINT_ICE(diagnostics_)
+    TINT_ICE(Writer, diagnostics_)
         << "variables with uniform storage must be structure";
   }
 
@@ -2285,7 +2297,7 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
       if (wgsize[i].overridable_const) {
         auto* sem_const = builder_.Sem().Get(wgsize[i].overridable_const);
         if (!sem_const->IsPipelineConstant()) {
-          TINT_ICE(builder_.Diagnostics())
+          TINT_ICE(Writer, builder_.Diagnostics())
               << "expected a pipeline-overridable constant";
         }
         out << kSpecConstantPrefix << sem_const->ConstantId();
@@ -2310,7 +2322,8 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
     if (!type->Is<sem::Struct>()) {
       // ICE likely indicates that the CanonicalizeEntryPointIO transform was
       // not run, or a builtin parameter was added after it was run.
-      TINT_ICE(diagnostics_) << "Unsupported non-struct entry point parameter";
+      TINT_ICE(Writer, diagnostics_)
+          << "Unsupported non-struct entry point parameter";
     }
 
     if (!first) {
@@ -2359,7 +2372,7 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, ast::Literal* lit) {
   } else if (auto* ul = lit->As<ast::UintLiteral>()) {
     out << ul->value() << "u";
   } else {
-    diagnostics_.add_error("unknown literal type");
+    diagnostics_.add_error(diag::System::Writer, "unknown literal type");
     return false;
   }
   return true;
@@ -2435,8 +2448,9 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
     }
     out << "}";
   } else {
-    diagnostics_.add_error("Invalid type for zero emission: " +
-                           type->type_name());
+    diagnostics_.add_error(
+        diag::System::Writer,
+        "Invalid type for zero emission: " + type->type_name());
     return false;
   }
   return true;
@@ -2556,7 +2570,8 @@ bool GeneratorImpl::EmitStatement(std::ostream& out, ast::Statement* stmt) {
     return EmitVariable(out, v->variable());
   }
 
-  diagnostics_.add_error("unknown statement type: " + builder_.str(stmt));
+  diagnostics_.add_error(diag::System::Writer,
+                         "unknown statement type: " + builder_.str(stmt));
   return false;
 }
 
@@ -2604,7 +2619,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
       auto* str = type->As<sem::Struct>();
       if (!str) {
         // https://www.w3.org/TR/WGSL/#module-scope-variables
-        TINT_ICE(diagnostics_)
+        TINT_ICE(Writer, diagnostics_)
             << "variables with uniform storage must be structure";
       }
       auto array_length = (str->Size() + 15) / 16;
@@ -2623,7 +2638,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     std::vector<uint32_t> sizes;
     while (auto* arr = base_type->As<sem::Array>()) {
       if (arr->IsRuntimeSized()) {
-        TINT_ICE(diagnostics_)
+        TINT_ICE(Writer, diagnostics_)
             << "Runtime arrays may only exist in storage buffers, which should "
                "have been transformed into a ByteAddressBuffer";
         return false;
@@ -2662,7 +2677,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     // https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-per-component-math#matrix-ordering
     out << mat->columns() << "x" << mat->rows();
   } else if (type->Is<sem::Pointer>()) {
-    TINT_ICE(diagnostics_)
+    TINT_ICE(Writer, diagnostics_)
         << "Attempting to emit pointer type. These should have been removed "
            "with the InlinePointerLets transform";
     return false;
@@ -2704,7 +2719,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         out << "CubeArray";
         break;
       default:
-        TINT_UNREACHABLE(diagnostics_)
+        TINT_UNREACHABLE(Writer, diagnostics_)
             << "unexpected TextureDimension " << tex->dim();
         return false;
     }
@@ -2712,8 +2727,9 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     if (storage) {
       auto* component = image_format_to_rwtexture_type(storage->image_format());
       if (component == nullptr) {
-        TINT_ICE(diagnostics_) << "Unsupported StorageTexture ImageFormat: "
-                               << static_cast<int>(storage->image_format());
+        TINT_ICE(Writer, diagnostics_)
+            << "Unsupported StorageTexture ImageFormat: "
+            << static_cast<int>(storage->image_format());
         return false;
       }
       out << "<" << component << ">";
@@ -2727,7 +2743,8 @@ bool GeneratorImpl::EmitType(std::ostream& out,
       } else if (subtype->Is<sem::U32>()) {
         out << "uint4";
       } else {
-        TINT_ICE(diagnostics_) << "Unsupported multisampled texture type";
+        TINT_ICE(Writer, diagnostics_)
+            << "Unsupported multisampled texture type";
         return false;
       }
       out << ">";
@@ -2758,7 +2775,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
   } else if (type->Is<sem::Void>()) {
     out << "void";
   } else {
-    diagnostics_.add_error("unknown type in EmitType");
+    diagnostics_.add_error(diag::System::Writer, "unknown type in EmitType");
     return false;
   }
 
@@ -2814,7 +2831,8 @@ bool GeneratorImpl::EmitStructType(std::ostream& out, const sem::Struct* str) {
       if (auto* location = deco->As<ast::LocationDecoration>()) {
         auto& pipeline_stage_uses = str->PipelineStageUses();
         if (pipeline_stage_uses.size() != 1) {
-          TINT_ICE(diagnostics_) << "invalid entry point IO struct uses";
+          TINT_ICE(Writer, diagnostics_)
+              << "invalid entry point IO struct uses";
         }
 
         if (pipeline_stage_uses.count(sem::PipelineStageUsage::kVertexInput)) {
@@ -2829,12 +2847,13 @@ bool GeneratorImpl::EmitStructType(std::ostream& out, const sem::Struct* str) {
                        sem::PipelineStageUsage::kFragmentOutput)) {
           out << " : SV_Target" + std::to_string(location->value());
         } else {
-          TINT_ICE(diagnostics_) << "invalid use of location decoration";
+          TINT_ICE(Writer, diagnostics_)
+              << "invalid use of location decoration";
         }
       } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
         auto attr = builtin_to_attribute(builtin->value());
         if (attr.empty()) {
-          diagnostics_.add_error("unsupported builtin");
+          diagnostics_.add_error(diag::System::Writer, "unsupported builtin");
           return false;
         }
         out << " : " << attr;
@@ -2888,7 +2907,8 @@ bool GeneratorImpl::EmitVariable(std::ostream& out, ast::Variable* var) {
 
   // TODO(dsinclair): Handle variable decorations
   if (!var->decorations().empty()) {
-    diagnostics_.add_error("Variable decorations are not handled yet");
+    diagnostics_.add_error(diag::System::Writer,
+                           "Variable decorations are not handled yet");
     return false;
   }
 
@@ -2925,12 +2945,13 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
 
   for (auto* d : var->decorations()) {
     if (!d->Is<ast::OverrideDecoration>()) {
-      diagnostics_.add_error("Decorated const values not valid");
+      diagnostics_.add_error(diag::System::Writer,
+                             "Decorated const values not valid");
       return false;
     }
   }
   if (!var->is_const()) {
-    diagnostics_.add_error("Expected a const value");
+    diagnostics_.add_error(diag::System::Writer, "Expected a const value");
     return false;
   }
 

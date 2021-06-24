@@ -26,7 +26,7 @@ MultisampledTexture::MultisampledTexture(ProgramID program_id,
                                          TextureDimension dim,
                                          Type* type)
     : Base(program_id, source, dim), type_(type) {
-  TINT_ASSERT(type_);
+  TINT_ASSERT(AST, type_);
 }
 
 MultisampledTexture::MultisampledTexture(MultisampledTexture&&) = default;

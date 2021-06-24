@@ -52,7 +52,7 @@ Output PromoteInitializersToConstVar::Run(const Program* in, const DataMap&) {
     if (auto* src_init = src_node->As<ast::TypeConstructorExpression>()) {
       auto* src_sem_expr = ctx.src->Sem().Get(src_init);
       if (!src_sem_expr) {
-        TINT_ICE(ctx.dst->Diagnostics())
+        TINT_ICE(Transform, ctx.dst->Diagnostics())
             << "ast::TypeConstructorExpression has no semantic expression node";
         continue;
       }

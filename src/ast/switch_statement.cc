@@ -26,11 +26,11 @@ SwitchStatement::SwitchStatement(ProgramID program_id,
                                  Expression* condition,
                                  CaseStatementList body)
     : Base(program_id, source), condition_(condition), body_(body) {
-  TINT_ASSERT(condition_);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(condition_, program_id);
+  TINT_ASSERT(AST, condition_);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, condition_, program_id);
   for (auto* stmt : body_) {
-    TINT_ASSERT(stmt);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(stmt, program_id);
+    TINT_ASSERT(AST, stmt);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, stmt, program_id);
   }
 }
 

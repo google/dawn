@@ -60,8 +60,9 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
   } else if (packed_el_sem_ty->Is<sem::Bool>()) {
     packed_el_ty = b->create<ast::Bool>();
   } else {
-    TINT_UNREACHABLE(b->Diagnostics()) << "unsupported vector element type: "
-                                       << packed_el_sem_ty->TypeInfo().name;
+    TINT_UNREACHABLE(Writer, b->Diagnostics())
+        << "unsupported vector element type: "
+        << packed_el_sem_ty->TypeInfo().name;
   }
 
   auto* statement = vector_sem->Stmt();
@@ -86,7 +87,7 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
         } else if (packed_el_sem_ty->Is<sem::Bool>()) {
           return b->Expr(false);
         } else {
-          TINT_UNREACHABLE(b->Diagnostics())
+          TINT_UNREACHABLE(Writer, b->Diagnostics())
               << "unsupported vector element type: "
               << packed_el_sem_ty->TypeInfo().name;
         }

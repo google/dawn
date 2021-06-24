@@ -67,7 +67,7 @@ struct Value {
   operator bool() const { return Valid(); }
 
   void Append(const Value& value) {
-    TINT_ASSERT(value.type == type);
+    TINT_ASSERT(Transform, value.type == type);
     elems.insert(elems.end(), value.elems.begin(), value.elems.end());
   }
 
@@ -89,7 +89,7 @@ struct Value {
         return func(elems[index].bool_);
       }
     }
-    TINT_ASSERT(false && "Unreachable");
+    TINT_ASSERT(Transform, false && "Unreachable");
     return func(~0);
   }
 };
@@ -105,7 +105,7 @@ Value::Type AstToValueType(ast::Type* t) {
   } else if (t->Is<ast::Bool>()) {
     return Value::Type::bool_;
   }
-  TINT_ASSERT(false && "Invalid type");
+  TINT_ASSERT(Transform, false && "Invalid type");
   return {};
 }
 
@@ -193,7 +193,7 @@ Value Fold(const ast::ScalarConstructorExpression* scalar_ctor) {
   if (auto* lit = literal->As<ast::BoolLiteral>()) {
     return {lit->IsTrue()};
   }
-  TINT_ASSERT(false && "Unreachable");
+  TINT_ASSERT(Transform, false && "Unreachable");
   return {};
 }
 

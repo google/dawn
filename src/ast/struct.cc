@@ -33,12 +33,12 @@ Struct::Struct(ProgramID program_id,
       members_(std::move(members)),
       decorations_(std::move(decorations)) {
   for (auto* mem : members_) {
-    TINT_ASSERT(mem);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(mem, program_id);
+    TINT_ASSERT(AST, mem);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, mem, program_id);
   }
   for (auto* deco : decorations_) {
-    TINT_ASSERT(deco);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(deco, program_id);
+    TINT_ASSERT(AST, deco);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, deco, program_id);
   }
 }
 

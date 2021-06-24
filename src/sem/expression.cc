@@ -23,7 +23,7 @@ Expression::Expression(const ast::Expression* declaration,
                        const sem::Type* type,
                        Statement* statement)
     : declaration_(declaration), type_(type), statement_(statement) {
-  TINT_ASSERT(type_);
+  TINT_ASSERT(Semantic, type_);
 }
 
 }  // namespace sem

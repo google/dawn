@@ -35,7 +35,7 @@ Array::Array(const Type* element,
       size_(size),
       stride_(stride),
       implicit_stride_(implicit_stride) {
-  TINT_ASSERT(element_);
+  TINT_ASSERT(Semantic, element_);
 }
 
 std::string Array::type_name() const {

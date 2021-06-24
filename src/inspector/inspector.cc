@@ -47,7 +47,7 @@ namespace {
 
 void AppendResourceBindings(std::vector<ResourceBinding>* dest,
                             const std::vector<ResourceBinding>& orig) {
-  TINT_ASSERT(dest);
+  TINT_ASSERT(Inspector, dest);
   if (!dest) {
     return;
   }
@@ -84,7 +84,7 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
     if (wgsize[0].overridable_const || wgsize[1].overridable_const ||
         wgsize[2].overridable_const) {
       // TODO(crbug.com/tint/713): Handle overridable constants.
-      TINT_ASSERT(false);
+      TINT_ASSERT(Inspector, false);
     }
 
     for (auto* param : sem->Parameters()) {
@@ -528,7 +528,7 @@ void Inspector::AddEntryPointInOutVariables(
   }
 
   auto* location = ast::GetDecoration<ast::LocationDecoration>(decorations);
-  TINT_ASSERT(location != nullptr);
+  TINT_ASSERT(Inspector, location != nullptr);
   stage_variable.has_location_decoration = true;
   stage_variable.location_decoration = location->value();
 

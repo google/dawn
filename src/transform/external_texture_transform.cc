@@ -58,7 +58,7 @@ Output ExternalTextureTransform::Run(const Program* in, const DataMap&) {
                     ->Is<sem::ExternalTexture>()) {
               if (intrinsic->Type() == sem::IntrinsicType::kTextureLoad &&
                   call_expr->params().size() != 2) {
-                TINT_ICE(ctx.dst->Diagnostics())
+                TINT_ICE(Transform, ctx.dst->Diagnostics())
                     << "expected textureLoad call with a texture_external to "
                        "have 2 parameters, found "
                     << call_expr->params().size() << " parameters";
@@ -67,7 +67,7 @@ Output ExternalTextureTransform::Run(const Program* in, const DataMap&) {
               if (intrinsic->Type() ==
                       sem::IntrinsicType::kTextureSampleLevel &&
                   call_expr->params().size() != 3) {
-                TINT_ICE(ctx.dst->Diagnostics())
+                TINT_ICE(Transform, ctx.dst->Diagnostics())
                     << "expected textureSampleLevel call with a "
                        "texture_external to have 3 parameters, found "
                     << call_expr->params().size() << " parameters";

@@ -40,9 +40,9 @@ Variable::Variable(ProgramID program_id,
       decorations_(std::move(decorations)),
       declared_storage_class_(declared_storage_class),
       declared_access_(declared_access) {
-  TINT_ASSERT(symbol_.IsValid());
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(symbol_, program_id);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(constructor, program_id);
+  TINT_ASSERT(AST, symbol_.IsValid());
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, symbol_, program_id);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, constructor, program_id);
 }
 
 Variable::Variable(Variable&&) = default;

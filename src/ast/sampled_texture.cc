@@ -26,7 +26,7 @@ SampledTexture::SampledTexture(ProgramID program_id,
                                TextureDimension dim,
                                Type const* type)
     : Base(program_id, source, dim), type_(type) {
-  TINT_ASSERT(type_);
+  TINT_ASSERT(AST, type_);
 }
 
 SampledTexture::SampledTexture(SampledTexture&&) = default;

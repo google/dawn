@@ -38,19 +38,19 @@ Function::Function(ProgramID program_id,
       body_(body),
       decorations_(std::move(decorations)),
       return_type_decorations_(std::move(return_type_decorations)) {
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(symbol_, program_id);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(body, program_id);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, symbol_, program_id);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body, program_id);
   for (auto* param : params_) {
-    TINT_ASSERT(param && param->is_const());
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(param, program_id);
+    TINT_ASSERT(AST, param && param->is_const());
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, param, program_id);
   }
-  TINT_ASSERT(symbol_.IsValid());
-  TINT_ASSERT(return_type_);
+  TINT_ASSERT(AST, symbol_.IsValid());
+  TINT_ASSERT(AST, return_type_);
   for (auto* deco : decorations_) {
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(deco, program_id);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, deco, program_id);
   }
   for (auto* deco : return_type_decorations_) {
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(deco, program_id);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, deco, program_id);
   }
 }
 

@@ -32,7 +32,8 @@ Symbol& Symbol::operator=(const Symbol& o) = default;
 Symbol& Symbol::operator=(Symbol&& o) = default;
 
 bool Symbol::operator==(const Symbol& other) const {
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(program_id_, other.program_id_);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Symbol, program_id_,
+                                         other.program_id_);
   return val_ == other.val_;
 }
 

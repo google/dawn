@@ -857,7 +857,7 @@ Output Renamer::Run(const Program* in, const DataMap&) {
     if (auto* member = node->As<ast::MemberAccessorExpression>()) {
       auto* sem = in->Sem().Get(member);
       if (!sem) {
-        TINT_ICE(out.Diagnostics())
+        TINT_ICE(Transform, out.Diagnostics())
             << "MemberAccessorExpression has no semantic info";
         continue;
       }
@@ -867,7 +867,8 @@ Output Renamer::Run(const Program* in, const DataMap&) {
     } else if (auto* call = node->As<ast::CallExpression>()) {
       auto* sem = in->Sem().Get(call);
       if (!sem) {
-        TINT_ICE(out.Diagnostics()) << "CallExpression has no semantic info";
+        TINT_ICE(Transform, out.Diagnostics())
+            << "CallExpression has no semantic info";
         continue;
       }
       if (sem->Target()->Is<sem::Intrinsic>()) {

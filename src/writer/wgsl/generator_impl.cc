@@ -80,7 +80,7 @@ bool GeneratorImpl::Generate() {
         return false;
       }
     } else {
-      TINT_UNREACHABLE(diagnostics_);
+      TINT_UNREACHABLE(Writer, diagnostics_);
       return false;
     }
 
@@ -106,8 +106,9 @@ bool GeneratorImpl::EmitTypeDecl(const ast::TypeDecl* ty) {
       return false;
     }
   } else {
-    diagnostics_.add_error("unknown declared type: " +
-                           std::string(ty->TypeInfo().name));
+    diagnostics_.add_error(
+        diag::System::Writer,
+        "unknown declared type: " + std::string(ty->TypeInfo().name));
     return false;
   }
   return true;
@@ -139,7 +140,7 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
     return EmitUnaryOp(u);
   }
 
-  diagnostics_.add_error("unknown expression type");
+  diagnostics_.add_error(diag::System::Writer, "unknown expression type");
   return false;
 }
 
@@ -273,7 +274,7 @@ bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
   } else if (auto* ul = lit->As<ast::UintLiteral>()) {
     out_ << ul->value() << "u";
   } else {
-    diagnostics_.add_error("unknown literal type");
+    diagnostics_.add_error(diag::System::Writer, "unknown literal type");
     return false;
   }
   return true;
@@ -349,7 +350,7 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
 bool GeneratorImpl::EmitImageFormat(const ast::ImageFormat fmt) {
   switch (fmt) {
     case ast::ImageFormat::kNone:
-      diagnostics_.add_error("unknown image format");
+      diagnostics_.add_error(diag::System::Writer, "unknown image format");
       return false;
     default:
       out_ << fmt;
@@ -371,7 +372,7 @@ bool GeneratorImpl::EmitAccess(const ast::Access access) {
     default:
       break;
   }
-  diagnostics_.add_error("unknown access");
+  diagnostics_.add_error(diag::System::Writer, "unknown access");
   return false;
 }
 
@@ -435,7 +436,7 @@ bool GeneratorImpl::EmitType(const ast::Type* ty) {
     } else if (texture->Is<ast::StorageTexture>()) {
       out_ << "storage_";
     } else {
-      diagnostics_.add_error("unknown texture type");
+      diagnostics_.add_error(diag::System::Writer, "unknown texture type");
       return false;
     }
 
@@ -459,7 +460,8 @@ bool GeneratorImpl::EmitType(const ast::Type* ty) {
         out_ << "cube_array";
         break;
       default:
-        diagnostics_.add_error("unknown texture dimension");
+        diagnostics_.add_error(diag::System::Writer,
+                               "unknown texture dimension");
         return false;
     }
 
@@ -500,7 +502,8 @@ bool GeneratorImpl::EmitType(const ast::Type* ty) {
   } else if (auto* tn = ty->As<ast::TypeName>()) {
     out_ << program_->Symbols().NameFor(tn->name());
   } else {
-    diagnostics_.add_error("unknown type in EmitType: " + ty->type_name());
+    diagnostics_.add_error(diag::System::Writer,
+                           "unknown type in EmitType: " + ty->type_name());
     return false;
   }
   return true;
@@ -647,7 +650,8 @@ bool GeneratorImpl::EmitDecorations(const ast::DecorationList& decos) {
               return false;
             }
           } else {
-            TINT_ICE(diagnostics_) << "Unsupported workgroup_size expression";
+            TINT_ICE(Writer, diagnostics_)
+                << "Unsupported workgroup_size expression";
           }
         }
       }
@@ -676,7 +680,7 @@ bool GeneratorImpl::EmitDecorations(const ast::DecorationList& decos) {
     } else if (auto* internal = deco->As<ast::InternalDecoration>()) {
       out_ << "internal(" << internal->InternalName() << ")";
     } else {
-      TINT_ICE(diagnostics_)
+      TINT_ICE(Writer, diagnostics_)
           << "Unsupported decoration '" << deco->TypeInfo().name << "'";
       return false;
     }
@@ -750,7 +754,8 @@ bool GeneratorImpl::EmitBinary(ast::BinaryExpression* expr) {
       out_ << "%";
       break;
     case ast::BinaryOp::kNone:
-      diagnostics_.add_error("missing binary operation type");
+      diagnostics_.add_error(diag::System::Writer,
+                             "missing binary operation type");
       return false;
   }
   out_ << " ";
@@ -870,7 +875,8 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
     return EmitVariable(v->variable());
   }
 
-  diagnostics_.add_error("unknown statement type: " + program_->str(stmt));
+  diagnostics_.add_error(diag::System::Writer,
+                         "unknown statement type: " + program_->str(stmt));
   return false;
 }
 
@@ -1059,7 +1065,8 @@ std::string GeneratorImpl::UniqueIdentifier(const std::string& suffix) {
       return ident;
     }
   }
-  diagnostics_.add_error("Unable to generate a unique WGSL identifier");
+  diagnostics_.add_error(diag::System::Writer,
+                         "Unable to generate a unique WGSL identifier");
   return "<invalid-ident>";
 }
 

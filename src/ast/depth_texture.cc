@@ -33,7 +33,7 @@ DepthTexture::DepthTexture(ProgramID program_id,
                            const Source& source,
                            TextureDimension dim)
     : Base(program_id, source, dim) {
-  TINT_ASSERT(IsValidDepthDimension(dim));
+  TINT_ASSERT(AST, IsValidDepthDimension(dim));
 }
 
 DepthTexture::DepthTexture(DepthTexture&&) = default;

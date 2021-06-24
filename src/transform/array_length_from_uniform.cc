@@ -38,6 +38,7 @@ Output ArrayLengthFromUniform::Run(const Program* in, const DataMap& data) {
   auto* cfg = data.Get<Config>();
   if (cfg == nullptr) {
     out.Diagnostics().add_error(
+        diag::System::Transform,
         "missing transform data for ArrayLengthFromUniform");
     return Output(Program(std::move(out)));
   }
@@ -95,13 +96,13 @@ Output ArrayLengthFromUniform::Run(const Program* in, const DataMap& data) {
     // have been run before this transform.
     auto* param = call_expr->params()[0]->As<ast::UnaryOpExpression>();
     if (!param || param->op() != ast::UnaryOp::kAddressOf) {
-      TINT_ICE(ctx.dst->Diagnostics())
+      TINT_ICE(Transform, ctx.dst->Diagnostics())
           << "expected form of arrayLength argument to be &resource.array";
       break;
     }
     auto* accessor = param->expr()->As<ast::MemberAccessorExpression>();
     if (!accessor) {
-      TINT_ICE(ctx.dst->Diagnostics())
+      TINT_ICE(Transform, ctx.dst->Diagnostics())
           << "expected form of arrayLength argument to be &resource.array";
       break;
     }
@@ -109,7 +110,7 @@ Output ArrayLengthFromUniform::Run(const Program* in, const DataMap& data) {
     auto* storage_buffer_sem =
         sem.Get(storage_buffer_expr)->As<sem::VariableUser>();
     if (!storage_buffer_sem) {
-      TINT_ICE(ctx.dst->Diagnostics())
+      TINT_ICE(Transform, ctx.dst->Diagnostics())
           << "expected form of arrayLength argument to be &resource.array";
       break;
     }
@@ -119,9 +120,10 @@ Output ArrayLengthFromUniform::Run(const Program* in, const DataMap& data) {
     auto idx_itr = cfg->bindpoint_to_size_index.find(binding);
     if (idx_itr == cfg->bindpoint_to_size_index.end()) {
       ctx.dst->Diagnostics().add_error(
+          diag::System::Transform,
           "missing size index mapping for binding point (" +
-          std::to_string(binding.group) + "," +
-          std::to_string(binding.binding) + ")");
+              std::to_string(binding.group) + "," +
+              std::to_string(binding.binding) + ")");
       continue;
     }
 

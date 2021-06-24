@@ -44,7 +44,7 @@ Module::Module(ProgramID program_id,
       global_variables_.push_back(var);
     } else {
       diag::List diagnostics;
-      TINT_ICE(diagnostics) << "Unknown global declaration type";
+      TINT_ICE(AST, diagnostics) << "Unknown global declaration type";
     }
   }
 }
@@ -61,22 +61,22 @@ const ast::TypeDecl* Module::LookupType(Symbol name) const {
 }
 
 void Module::AddGlobalVariable(ast::Variable* var) {
-  TINT_ASSERT(var);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(var, program_id());
+  TINT_ASSERT(AST, var);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, var, program_id());
   global_variables_.push_back(var);
   global_declarations_.push_back(var);
 }
 
 void Module::AddTypeDecl(ast::TypeDecl* type) {
-  TINT_ASSERT(type);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(type, program_id());
+  TINT_ASSERT(AST, type);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, type, program_id());
   type_decls_.push_back(type);
   global_declarations_.push_back(type);
 }
 
 void Module::AddFunction(ast::Function* func) {
-  TINT_ASSERT(func);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(func, program_id());
+  TINT_ASSERT(AST, func);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, func, program_id());
   functions_.push_back(func);
   global_declarations_.push_back(func);
 }
@@ -98,20 +98,22 @@ void Module::Copy(CloneContext* ctx, const Module* src) {
 
   for (auto* decl : global_declarations_) {
     if (!decl) {
-      TINT_ICE(ctx->dst->Diagnostics()) << "src global declaration was nullptr";
+      TINT_ICE(AST, ctx->dst->Diagnostics())
+          << "src global declaration was nullptr";
       continue;
     }
     if (auto* type = decl->As<ast::TypeDecl>()) {
-      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(type, program_id());
+      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, type, program_id());
       type_decls_.push_back(type);
     } else if (auto* func = decl->As<Function>()) {
-      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(func, program_id());
+      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, func, program_id());
       functions_.push_back(func);
     } else if (auto* var = decl->As<Variable>()) {
-      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(var, program_id());
+      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, var, program_id());
       global_variables_.push_back(var);
     } else {
-      TINT_ICE(ctx->dst->Diagnostics()) << "Unknown global declaration type";
+      TINT_ICE(AST, ctx->dst->Diagnostics())
+          << "Unknown global declaration type";
     }
   }
 }

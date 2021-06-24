@@ -123,7 +123,7 @@ std::string Namer::FindUnusedDerivedName(const std::string& base_name) const {
 std::string Namer::MakeDerivedName(const std::string& base_name) {
   auto result = FindUnusedDerivedName(base_name);
   const bool registered = RegisterWithoutId(result);
-  TINT_ASSERT(registered);
+  TINT_ASSERT(Reader, registered);
   return result;
 }
 

@@ -32,7 +32,7 @@ bool IsValidDepthDimension(ast::TextureDimension dim) {
 }  // namespace
 
 DepthTexture::DepthTexture(ast::TextureDimension dim) : Base(dim) {
-  TINT_ASSERT(IsValidDepthDimension(dim));
+  TINT_ASSERT(Semantic, IsValidDepthDimension(dim));
 }
 
 DepthTexture::DepthTexture(DepthTexture&&) = default;

@@ -45,6 +45,7 @@ Output BindingRemapper::Run(const Program* in, const DataMap& datamap) {
   auto* remappings = datamap.Get<Remappings>();
   if (!remappings) {
     out.Diagnostics().add_error(
+        diag::System::Transform,
         "BindingRemapper did not find the remapping data");
     return Output(Program(std::move(out)));
   }

@@ -105,7 +105,7 @@ class CloneContext {
     }
 
     if (src) {
-      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(src, a);
+      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, a);
     }
 
     // Was Replace() called for this object?
@@ -134,7 +134,7 @@ class CloneContext {
 
     auto* out = CheckedCast<T>(cloned);
 
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(dst, out);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, out);
 
     return out;
   }
@@ -160,7 +160,7 @@ class CloneContext {
     }
 
     if (src) {
-      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(src, a);
+      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, a);
     }
 
     // Have we seen this object before? If so, return the previously cloned
@@ -323,7 +323,7 @@ class CloneContext {
     for (auto& transform : transforms_) {
       if (transform.typeinfo->Is(TypeInfo::Of<T>()) ||
           TypeInfo::Of<T>().Is(*transform.typeinfo)) {
-        TINT_ICE(Diagnostics())
+        TINT_ICE(Clone, Diagnostics())
             << "ReplaceAll() called with a handler for type "
             << TypeInfo::Of<T>().name
             << " that is already handled by a handler for type "
@@ -349,8 +349,9 @@ class CloneContext {
   /// @returns this CloneContext so calls can be chained
   CloneContext& ReplaceAll(const SymbolTransform& replacer) {
     if (symbol_transform_) {
-      TINT_ICE(Diagnostics()) << "ReplaceAll(const SymbolTransform&) called "
-                                 "multiple times on the same CloneContext";
+      TINT_ICE(Clone, Diagnostics())
+          << "ReplaceAll(const SymbolTransform&) called "
+             "multiple times on the same CloneContext";
       return *this;
     }
     symbol_transform_ = replacer;
@@ -369,8 +370,8 @@ class CloneContext {
   /// @returns this CloneContext so calls can be chained
   template <typename WHAT, typename WITH>
   CloneContext& Replace(WHAT* what, WITH* with) {
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(src, what);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(dst, with);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, what);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, with);
     replacements_[what] = with;
     return *this;
   }
@@ -382,9 +383,9 @@ class CloneContext {
   /// @returns this CloneContext so calls can be chained
   template <typename T, typename OBJECT>
   CloneContext& Remove(const std::vector<T>& vector, OBJECT* object) {
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(src, object);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, object);
     if (std::find(vector.begin(), vector.end(), object) == vector.end()) {
-      TINT_ICE(Diagnostics())
+      TINT_ICE(Clone, Diagnostics())
           << "CloneContext::Remove() vector does not contain object";
       return *this;
     }
@@ -400,7 +401,7 @@ class CloneContext {
   /// @returns this CloneContext so calls can be chained
   template <typename T, typename OBJECT>
   CloneContext& InsertFront(const std::vector<T>& vector, OBJECT* object) {
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(dst, object);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, object);
     auto& transforms = list_transforms_[&vector];
     auto& list = transforms.insert_front_;
     list.emplace_back(object);
@@ -414,7 +415,7 @@ class CloneContext {
   /// @returns this CloneContext so calls can be chained
   template <typename T, typename OBJECT>
   CloneContext& InsertBack(const std::vector<T>& vector, OBJECT* object) {
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(dst, object);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, object);
     auto& transforms = list_transforms_[&vector];
     auto& list = transforms.insert_back_;
     list.emplace_back(object);
@@ -431,10 +432,10 @@ class CloneContext {
   CloneContext& InsertBefore(const std::vector<T>& vector,
                              const BEFORE* before,
                              OBJECT* object) {
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(src, before);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(dst, object);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, before);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, object);
     if (std::find(vector.begin(), vector.end(), before) == vector.end()) {
-      TINT_ICE(Diagnostics())
+      TINT_ICE(Clone, Diagnostics())
           << "CloneContext::InsertBefore() vector does not contain before";
       return *this;
     }
@@ -455,10 +456,10 @@ class CloneContext {
   CloneContext& InsertAfter(const std::vector<T>& vector,
                             const AFTER* after,
                             OBJECT* object) {
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(src, after);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(dst, object);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, after);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, object);
     if (std::find(vector.begin(), vector.end(), after) == vector.end()) {
-      TINT_ICE(Diagnostics())
+      TINT_ICE(Clone, Diagnostics())
           << "CloneContext::InsertAfter() vector does not contain after";
       return *this;
     }
@@ -505,7 +506,7 @@ class CloneContext {
     if (TO* cast = As<TO>(obj)) {
       return cast;
     }
-    TINT_ICE(Diagnostics())
+    TINT_ICE(Clone, Diagnostics())
         << "Cloned object was not of the expected type\n"
         << "got:      " << (obj ? obj->TypeInfo().name : "<null>") << "\n"
         << "expected: " << TypeInfo::Of<TO>().name;

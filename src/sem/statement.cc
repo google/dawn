@@ -47,7 +47,7 @@ Statement::Statement(const ast::Statement* declaration, const Statement* parent)
             }
           }
         }
-        TINT_ASSERT(statement_is_continuing_for_loop);
+        TINT_ASSERT(Semantic, statement_is_continuing_for_loop);
       }
     }
   }

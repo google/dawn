@@ -35,12 +35,13 @@ namespace {
   __builtin_trap();
 }
 
-[[noreturn]] void ValidityErrorReporter() {
+[[noreturn]] void ValidityErrorReporter(const tint::diag::List& diags) {
   auto printer = tint::diag::Printer::create(stderr, true);
   printer->write(
       "Fuzzing detected valid input program being transformed into an invalid "
       "output progam\n",
       {diag::Color::kRed, true});
+  tint::diag::Formatter().format(diags, printer.get());
   __builtin_trap();
 }
 
@@ -258,7 +259,14 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
   if (transform_manager_) {
     auto out = transform_manager_->Run(&program, transform_inputs_);
     if (!out.program.IsValid()) {
-      ValidityErrorReporter();
+      // Transforms can produce error messages for bad input.
+      // Catch ICEs and errors from non transform systems.
+      for (auto diag : out.program.Diagnostics()) {
+        if (diag.severity > diag::Severity::Error ||
+            diag.system != diag::System::Transform) {
+          ValidityErrorReporter(out.program.Diagnostics());
+        }
+      }
     }
 
     program = std::move(out.program);

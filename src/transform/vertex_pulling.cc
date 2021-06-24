@@ -304,7 +304,8 @@ struct State {
       }
       new_function_parameters.push_back(ctx.Clone(param));
     } else {
-      TINT_ICE(ctx.dst->Diagnostics()) << "Invalid entry point parameter";
+      TINT_ICE(Transform, ctx.dst->Diagnostics())
+          << "Invalid entry point parameter";
     }
   }
 
@@ -346,7 +347,8 @@ struct State {
         }
         members_to_clone.push_back(member);
       } else {
-        TINT_ICE(ctx.dst->Diagnostics()) << "Invalid entry point parameter";
+        TINT_ICE(Transform, ctx.dst->Diagnostics())
+            << "Invalid entry point parameter";
       }
     }
 
@@ -466,7 +468,8 @@ Output VertexPulling::Run(const Program* in, const DataMap& data) {
   auto* func = in->AST().Functions().Find(
       in->Symbols().Get(cfg.entry_point_name), ast::PipelineStage::kVertex);
   if (func == nullptr) {
-    out.Diagnostics().add_error("Vertex stage entry point not found");
+    out.Diagnostics().add_error(diag::System::Transform,
+                                "Vertex stage entry point not found");
     return Output(Program(std::move(out)));
   }
 

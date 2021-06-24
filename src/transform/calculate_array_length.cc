@@ -134,7 +134,7 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
           auto* arg = call_expr->params()[0];
           auto* address_of = arg->As<ast::UnaryOpExpression>();
           if (!address_of || address_of->op() != ast::UnaryOp::kAddressOf) {
-            TINT_ICE(ctx.dst->Diagnostics())
+            TINT_ICE(Transform, ctx.dst->Diagnostics())
                 << "arrayLength() expected pointer to member access, got "
                 << address_of->TypeInfo().name;
           }
@@ -142,7 +142,7 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
 
           auto* accessor = array_expr->As<ast::MemberAccessorExpression>();
           if (!accessor) {
-            TINT_ICE(ctx.dst->Diagnostics())
+            TINT_ICE(Transform, ctx.dst->Diagnostics())
                 << "arrayLength() expected pointer to member access, got "
                    "pointer to "
                 << array_expr->TypeInfo().name;
@@ -158,7 +158,7 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
           auto buffer_size = get_buffer_size_intrinsic(storage_buffer_type);
 
           if (!storage_buffer_type) {
-            TINT_ICE(ctx.dst->Diagnostics())
+            TINT_ICE(Transform, ctx.dst->Diagnostics())
                 << "arrayLength(X.Y) expected X to be sem::Struct, got "
                 << storage_buffer_type->FriendlyName(ctx.src->Symbols());
             break;

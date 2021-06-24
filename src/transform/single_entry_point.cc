@@ -35,7 +35,8 @@ Output SingleEntryPoint::Run(const Program* in, const DataMap& data) {
 
   auto* cfg = data.Get<Config>();
   if (cfg == nullptr) {
-    out.Diagnostics().add_error("missing transform data for SingleEntryPoint");
+    out.Diagnostics().add_error(diag::System::Transform,
+                                "missing transform data for SingleEntryPoint");
     return Output(Program(std::move(out)));
   }
 
@@ -51,8 +52,9 @@ Output SingleEntryPoint::Run(const Program* in, const DataMap& data) {
     }
   }
   if (entry_point == nullptr) {
-    out.Diagnostics().add_error("entry point '" + cfg->entry_point_name +
-                                "' not found");
+    out.Diagnostics().add_error(
+        diag::System::Transform,
+        "entry point '" + cfg->entry_point_name + "' not found");
     return Output(Program(std::move(out)));
   }
 
@@ -81,7 +83,7 @@ Output SingleEntryPoint::Run(const Program* in, const DataMap& data) {
         out.AST().AddFunction(ctx.Clone(func));
       }
     } else {
-      TINT_UNREACHABLE(out.Diagnostics())
+      TINT_UNREACHABLE(Transform, out.Diagnostics())
           << "unhandled global declaration: " << decl->TypeInfo().name;
       return Output(Program(std::move(out)));
     }

@@ -1017,7 +1017,7 @@ class FunctionEmitter {
   /// @return the built StatementBuilder
   template <typename T, typename... ARGS>
   T* AddStatementBuilder(ARGS&&... args) {
-    TINT_ASSERT(!statements_stack_.empty());
+    TINT_ASSERT(Reader, !statements_stack_.empty());
     return statements_stack_.back().AddStatementBuilder<T>(
         std::forward<ARGS>(args)...);
   }

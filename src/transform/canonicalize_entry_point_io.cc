@@ -69,6 +69,7 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap& data) {
   auto* cfg = data.Get<Config>();
   if (cfg == nullptr) {
     out.Diagnostics().add_error(
+        diag::System::Transform,
         "missing transform data for CanonicalizeEntryPointIO");
     return Output(Program(std::move(out)));
   }
@@ -146,7 +147,8 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap& data) {
           ast::ExpressionList init_values;
           for (auto* member : str->Members()) {
             if (member->Type()->Is<sem::Struct>()) {
-              TINT_ICE(ctx.dst->Diagnostics()) << "nested pipeline IO struct";
+              TINT_ICE(Transform, ctx.dst->Diagnostics())
+                  << "nested pipeline IO struct";
             }
 
             if (cfg->builtin_style == BuiltinStyle::kParameter &&
@@ -239,7 +241,8 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap& data) {
         // Rebuild struct with only the entry point IO attributes.
         for (auto* member : str->Members()) {
           if (member->Type()->Is<sem::Struct>()) {
-            TINT_ICE(ctx.dst->Diagnostics()) << "nested pipeline IO struct";
+            TINT_ICE(Transform, ctx.dst->Diagnostics())
+                << "nested pipeline IO struct";
           }
 
           ast::DecorationList new_decorations = RemoveDecorations(

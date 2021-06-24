@@ -24,7 +24,7 @@ namespace sem {
 MultisampledTexture::MultisampledTexture(ast::TextureDimension dim,
                                          const Type* type)
     : Base(dim), type_(type) {
-  TINT_ASSERT(type_);
+  TINT_ASSERT(Semantic, type_);
 }
 
 MultisampledTexture::MultisampledTexture(MultisampledTexture&&) = default;

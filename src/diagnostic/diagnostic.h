@@ -32,6 +32,24 @@ inline bool operator>=(Severity a, Severity b) {
   return static_cast<int>(a) >= static_cast<int>(b);
 }
 
+/// System is an enumerator of Tint systems that can be the originator of a
+/// diagnostic message.
+enum class System {
+  AST,
+  Clone,
+  Inspector,
+  Program,
+  ProgramBuilder,
+  Reader,
+  Resolver,
+  Semantic,
+  Symbol,
+  Test,
+  Transform,
+  Utils,
+  Writer,
+};
+
 /// Diagnostic holds all the information for a single compiler diagnostic
 /// message.
 class Diagnostic {
@@ -42,6 +60,8 @@ class Diagnostic {
   Source source;
   /// message is the text associated with the diagnostic.
   std::string message;
+  /// system is the Tint system that raised the diagnostic.
+  System system;
   /// code is the error code, for example a validation error might have the code
   /// `"v-0001"`.
   const char* code = nullptr;
@@ -98,42 +118,54 @@ class List {
   }
 
   /// adds the note message with the given Source to the end of this list.
+  /// @param system the system raising the note message
   /// @param note_msg the note message
   /// @param source the source of the note diagnostic
-  void add_note(const std::string& note_msg, const Source& source) {
-    diag::Diagnostic error{};
-    error.severity = diag::Severity::Note;
-    error.source = source;
-    error.message = note_msg;
-    add(std::move(error));
+  void add_note(System system,
+                const std::string& note_msg,
+                const Source& source) {
+    diag::Diagnostic note{};
+    note.severity = diag::Severity::Note;
+    note.system = system;
+    note.source = source;
+    note.message = note_msg;
+    add(std::move(note));
   }
 
   /// adds the warning message with the given Source to the end of this list.
+  /// @param system the system raising the warning message
   /// @param warning_msg the warning message
   /// @param source the source of the warning diagnostic
-  void add_warning(const std::string& warning_msg, const Source& source) {
-    diag::Diagnostic error{};
-    error.severity = diag::Severity::Warning;
-    error.source = source;
-    error.message = warning_msg;
-    add(std::move(error));
+  void add_warning(System system,
+                   const std::string& warning_msg,
+                   const Source& source) {
+    diag::Diagnostic warning{};
+    warning.severity = diag::Severity::Warning;
+    warning.system = system;
+    warning.source = source;
+    warning.message = warning_msg;
+    add(std::move(warning));
   }
 
   /// adds the error message without a source to the end of this list.
+  /// @param system the system raising the error message
   /// @param err_msg the error message
-  void add_error(std::string err_msg) {
+  void add_error(System system, std::string err_msg) {
     diag::Diagnostic error{};
     error.severity = diag::Severity::Error;
+    error.system = system;
     error.message = std::move(err_msg);
     add(std::move(error));
   }
 
   /// adds the error message with the given Source to the end of this list.
+  /// @param system the system raising the error message
   /// @param err_msg the error message
   /// @param source the source of the error diagnostic
-  void add_error(std::string err_msg, const Source& source) {
+  void add_error(System system, std::string err_msg, const Source& source) {
     diag::Diagnostic error{};
     error.severity = diag::Severity::Error;
+    error.system = system;
     error.source = source;
     error.message = std::move(err_msg);
     add(std::move(error));
@@ -141,24 +173,33 @@ class List {
 
   /// adds the error message with the given code and Source to the end of this
   /// list.
+  /// @param system the system raising the error message
   /// @param code the error code
   /// @param err_msg the error message
   /// @param source the source of the error diagnostic
-  void add_error(const char* code, std::string err_msg, const Source& source) {
+  void add_error(System system,
+                 const char* code,
+                 std::string err_msg,
+                 const Source& source) {
     diag::Diagnostic error{};
     error.code = code;
     error.severity = diag::Severity::Error;
+    error.system = system;
     error.source = source;
     error.message = std::move(err_msg);
     add(std::move(error));
   }
 
   /// adds an internal compiler error message to the end of this list.
+  /// @param system the system raising the error message
   /// @param err_msg the error message
   /// @param source the source of the internal compiler error
-  void add_ice(const std::string& err_msg, const Source& source) {
+  void add_ice(System system,
+               const std::string& err_msg,
+               const Source& source) {
     diag::Diagnostic ice{};
     ice.severity = diag::Severity::InternalCompilerError;
+    ice.system = system;
     ice.source = source;
     ice.message = err_msg;
     add(std::move(ice));

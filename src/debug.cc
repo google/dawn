@@ -27,12 +27,13 @@ void SetInternalCompilerErrorReporter(InternalCompilerErrorReporter* reporter) {
 
 InternalCompilerError::InternalCompilerError(const char* file,
                                              size_t line,
+                                             diag::System system,
                                              diag::List& diagnostics)
-    : file_(file), line_(line), diagnostics_(diagnostics) {}
+    : file_(file), line_(line), system_(system), diagnostics_(diagnostics) {}
 
 InternalCompilerError::~InternalCompilerError() {
   Source source{Source::Range{Source::Location{line_}}, file_};
-  diagnostics_.add_ice(msg_.str(), source);
+  diagnostics_.add_ice(system_, msg_.str(), source);
 
   if (ice_reporter) {
     ice_reporter(diagnostics_);

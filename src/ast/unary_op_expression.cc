@@ -26,8 +26,8 @@ UnaryOpExpression::UnaryOpExpression(ProgramID program_id,
                                      UnaryOp op,
                                      Expression* expr)
     : Base(program_id, source), op_(op), expr_(expr) {
-  TINT_ASSERT(expr_);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(expr_, program_id);
+  TINT_ASSERT(AST, expr_);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, expr_, program_id);
 }
 
 UnaryOpExpression::UnaryOpExpression(UnaryOpExpression&&) = default;

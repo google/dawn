@@ -30,13 +30,13 @@ IfStatement::IfStatement(ProgramID program_id,
       condition_(condition),
       body_(body),
       else_statements_(std::move(else_stmts)) {
-  TINT_ASSERT(condition_);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(condition_, program_id);
-  TINT_ASSERT(body_);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(body_, program_id);
+  TINT_ASSERT(AST, condition_);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, condition_, program_id);
+  TINT_ASSERT(AST, body_);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body_, program_id);
   for (auto* el : else_statements_) {
-    TINT_ASSERT(el);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(el, program_id);
+    TINT_ASSERT(AST, el);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, el, program_id);
   }
 }
 

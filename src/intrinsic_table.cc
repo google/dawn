@@ -120,11 +120,11 @@ class ClosedState {
   const sem::Type* Type(uint32_t idx) const {
     auto it = types_.find(idx);
     if (it == types_.end()) {
-      TINT_ICE(builder.Diagnostics())
+      TINT_ICE(Resolver, builder.Diagnostics())
           << "type with index " << idx << " is not closed";
       return nullptr;
     }
-    TINT_ASSERT(it != types_.end());
+    TINT_ASSERT(Resolver, it != types_.end());
     return it->second;
   }
 
@@ -133,7 +133,7 @@ class ClosedState {
   Number Num(uint32_t idx) const {
     auto it = numbers_.find(idx);
     if (it == numbers_.end()) {
-      TINT_ICE(builder.Diagnostics())
+      TINT_ICE(Resolver, builder.Diagnostics())
           << "number with index " << idx << " is not closed";
       return Number::invalid;
     }
@@ -802,7 +802,7 @@ const sem::Intrinsic* Impl::Lookup(sem::IntrinsicType intrinsic_type,
       ss << std::endl;
     }
   }
-  builder.Diagnostics().add_error(ss.str(), source);
+  builder.Diagnostics().add_error(diag::System::Resolver, ss.str(), source);
   return nullptr;
 }
 
@@ -888,7 +888,7 @@ const sem::Intrinsic* Impl::Match(sem::IntrinsicType intrinsic_type,
     if (!return_type) {
       std::stringstream ss;
       PrintOverload(ss, overload, intrinsic_type);
-      TINT_ICE(builder.Diagnostics())
+      TINT_ICE(Resolver, builder.Diagnostics())
           << "MatchState.Match() returned null for " << ss.str();
       return nullptr;
     }

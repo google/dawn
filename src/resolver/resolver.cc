@@ -164,7 +164,8 @@ bool Resolver::Resolve() {
   bool result = ResolveInternal();
 
   if (!result && !diagnostics_.contains_errors()) {
-    TINT_ICE(diagnostics_) << "resolving failed, but no error was raised";
+    TINT_ICE(Resolver, diagnostics_)
+        << "resolving failed, but no error was raised";
     return false;
   }
 
@@ -263,7 +264,7 @@ bool Resolver::ResolveInternal() {
         return false;
       }
     } else {
-      TINT_UNREACHABLE(diagnostics_)
+      TINT_UNREACHABLE(Resolver, diagnostics_)
           << "unhandled global declaration: " << decl->TypeInfo().name;
       return false;
     }
@@ -280,11 +281,12 @@ bool Resolver::ResolveInternal() {
 
   for (auto* node : builder_->ASTNodes().Objects()) {
     if (marked_.count(node) == 0) {
-      TINT_ICE(diagnostics_) << "AST node '" << node->TypeInfo().name
-                             << "' was not reached by the resolver\n"
-                             << "At: " << node->source() << "\n"
-                             << "Content: " << builder_->str(node) << "\n"
-                             << "Pointer: " << node;
+      TINT_ICE(Resolver, diagnostics_)
+          << "AST node '" << node->TypeInfo().name
+          << "' was not reached by the resolver\n"
+          << "At: " << node->source() << "\n"
+          << "Content: " << builder_->str(node) << "\n"
+          << "Pointer: " << node;
       result = false;
     }
   }
@@ -392,14 +394,14 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
     if (auto* t = ty->As<ast::TypeName>()) {
       auto it = named_type_info_.find(t->name());
       if (it == named_type_info_.end()) {
-        diagnostics_.add_error(
+        AddError(
             "unknown type '" + builder_->Symbols().NameFor(t->name()) + "'",
             t->source());
         return nullptr;
       }
       return it->second.sem;
     }
-    TINT_UNREACHABLE(diagnostics_)
+    TINT_UNREACHABLE(Resolver, diagnostics_)
         << "Unhandled ast::Type: " << ty->TypeInfo().name;
     return nullptr;
   }();
@@ -414,8 +416,7 @@ bool Resolver::ValidateAtomic(const ast::Atomic* a, const sem::Atomic* s) {
   // https://gpuweb.github.io/gpuweb/wgsl/#atomic-types
   // T must be either u32 or i32.
   if (!s->Type()->IsAnyOf<sem::U32, sem::I32>()) {
-    diagnostics_.add_error("atomic only supports i32 or u32 types",
-                           a->type()->source());
+    AddError("atomic only supports i32 or u32 types", a->type()->source());
     return false;
   }
   return true;
@@ -435,7 +436,7 @@ bool Resolver::ValidateAtomicUses() {
         // TODO(crbug.com/tint/901): Validate that the access mode is
         // read_write.
         auto* member = structure->Members()[sm.index];
-        diagnostics_.add_error(
+        AddError(
             "atomic types can only be used in storage classes workgroup or "
             "storage, but was used by storage class " +
                 std::string(ast::str(usage)),
@@ -452,13 +453,11 @@ bool Resolver::ValidateAtomicUses() {
 bool Resolver::ValidateStorageTexture(const ast::StorageTexture* t) {
   switch (t->access()) {
     case ast::Access::kUndefined:
-      diagnostics_.add_error("storage textures must have access control",
-                             t->source());
+      AddError("storage textures must have access control", t->source());
       return false;
     case ast::Access::kReadWrite:
-      diagnostics_.add_error(
-          "storage textures only support read-only and write-only access",
-          t->source());
+      AddError("storage textures only support read-only and write-only access",
+               t->source());
       return false;
 
     case ast::Access::kRead:
@@ -467,13 +466,13 @@ bool Resolver::ValidateStorageTexture(const ast::StorageTexture* t) {
   }
 
   if (!IsValidStorageTextureDimension(t->dim())) {
-    diagnostics_.add_error(
-        "cube dimensions for storage textures are not supported", t->source());
+    AddError("cube dimensions for storage textures are not supported",
+             t->source());
     return false;
   }
 
   if (!IsValidStorageTextureImageFormat(t->image_format())) {
-    diagnostics_.add_error(
+    AddError(
         "image format must be one of the texel formats specified for storage "
         "textues in https://gpuweb.github.io/gpuweb/wgsl/#texel-formats",
         t->source());
@@ -485,9 +484,9 @@ bool Resolver::ValidateStorageTexture(const ast::StorageTexture* t) {
 Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
                                            VariableKind kind) {
   if (variable_to_info_.count(var)) {
-    TINT_ICE(diagnostics_) << "Variable "
-                           << builder_->Symbols().NameFor(var->symbol())
-                           << " already resolved";
+    TINT_ICE(Resolver, diagnostics_)
+        << "Variable " << builder_->Symbols().NameFor(var->symbol())
+        << " already resolved";
     return nullptr;
   }
 
@@ -523,8 +522,7 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
     // If the variable has no declared type, infer it from the RHS
     if (!storage_type) {
       if (!var->is_const() && kind == VariableKind::kGlobal) {
-        diagnostics_.add_error("global var declaration must specify a type",
-                               var->source());
+        AddError("global var declaration must specify a type", var->source());
         return nullptr;
       }
 
@@ -533,13 +531,12 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
     }
   } else if (var->is_const() && kind != VariableKind::kParameter &&
              !ast::HasDecoration<ast::OverrideDecoration>(var->decorations())) {
-    diagnostics_.add_error("let declarations must have initializers",
-                           var->source());
+    AddError("let declarations must have initializers", var->source());
     return nullptr;
   }
 
   if (!storage_type) {
-    TINT_ICE(diagnostics_)
+    TINT_ICE(Resolver, diagnostics_)
         << "failed to determine storage type for variable '" +
                builder_->Symbols().NameFor(var->symbol()) + "'\n"
         << "Source: " << var->source();
@@ -608,10 +605,9 @@ bool Resolver::ValidateVariableConstructor(const ast::Variable* var,
   // Value type has to match storage type
   if (storage_type != value_type) {
     std::string decl = var->is_const() ? "let" : "var";
-    diagnostics_.add_error("cannot initialize " + decl + " of type '" +
-                               type_name + "' with value of type '" +
-                               rhs_type_name + "'",
-                           var->source());
+    AddError("cannot initialize " + decl + " of type '" + type_name +
+                 "' with value of type '" + rhs_type_name + "'",
+             var->source());
     return false;
   }
   return true;
@@ -619,10 +615,10 @@ bool Resolver::ValidateVariableConstructor(const ast::Variable* var,
 
 bool Resolver::GlobalVariable(ast::Variable* var) {
   if (variable_stack_.has(var->symbol())) {
-    diagnostics_.add_error("v-0011",
-                           "redeclared global identifier '" +
-                               builder_->Symbols().NameFor(var->symbol()) + "'",
-                           var->source());
+    AddError("v-0011",
+             "redeclared global identifier '" +
+                 builder_->Symbols().NameFor(var->symbol()) + "'",
+             var->source());
     return false;
   }
 
@@ -633,14 +629,13 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
   variable_stack_.set_global(var->symbol(), info);
 
   if (!var->is_const() && info->storage_class == ast::StorageClass::kNone) {
-    diagnostics_.add_error(
-        "v-0022", "global variables must have a storage class", var->source());
+    AddError("v-0022", "global variables must have a storage class",
+             var->source());
     return false;
   }
   if (var->is_const() && !(info->storage_class == ast::StorageClass::kNone)) {
-    diagnostics_.add_error("v-global01",
-                           "global constants shouldn't have a storage class",
-                           var->source());
+    AddError("v-global01", "global constants shouldn't have a storage class",
+             var->source());
     return false;
   }
 
@@ -670,9 +665,9 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
   if (!ApplyStorageClassUsageToType(
           info->storage_class, const_cast<sem::Type*>(info->type->UnwrapRef()),
           var->source())) {
-    diagnostics_.add_note("while instantiating variable " +
-                              builder_->Symbols().NameFor(var->symbol()),
-                          var->source());
+    AddNote("while instantiating variable " +
+                builder_->Symbols().NameFor(var->symbol()),
+            var->source());
     return false;
   }
 
@@ -682,15 +677,13 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
 bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
   auto duplicate_func = symbol_to_function_.find(info->declaration->symbol());
   if (duplicate_func != symbol_to_function_.end()) {
-    diagnostics_.add_error(
-        "v-2000",
-        "duplicate declaration '" +
-            builder_->Symbols().NameFor(info->declaration->symbol()) + "'",
-        info->declaration->source());
-    diagnostics_.add_note(
-        "'" + builder_->Symbols().NameFor(info->declaration->symbol()) +
-            "' first declared here:",
-        duplicate_func->second->declaration->source());
+    AddError("v-2000",
+             "duplicate declaration '" +
+                 builder_->Symbols().NameFor(info->declaration->symbol()) + "'",
+             info->declaration->source());
+    AddNote("'" + builder_->Symbols().NameFor(info->declaration->symbol()) +
+                "' first declared here:",
+            duplicate_func->second->declaration->source());
     return false;
   }
 
@@ -705,27 +698,23 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
           uint32_t id = override_deco->value();
           auto itr = constant_ids_.find(id);
           if (itr != constant_ids_.end() && itr->second != info) {
-            diagnostics_.add_error("pipeline constant IDs must be unique",
-                                   deco->source());
-            diagnostics_.add_note("a pipeline constant with an ID of " +
-                                      std::to_string(id) +
-                                      " was previously declared "
-                                      "here:",
-                                  ast::GetDecoration<ast::OverrideDecoration>(
-                                      itr->second->declaration->decorations())
-                                      ->source());
+            AddError("pipeline constant IDs must be unique", deco->source());
+            AddNote("a pipeline constant with an ID of " + std::to_string(id) +
+                        " was previously declared "
+                        "here:",
+                    ast::GetDecoration<ast::OverrideDecoration>(
+                        itr->second->declaration->decorations())
+                        ->source());
             return false;
           }
           if (id > 65535) {
-            diagnostics_.add_error(
-                "pipeline constant IDs must be between 0 and 65535",
-                deco->source());
+            AddError("pipeline constant IDs must be between 0 and 65535",
+                     deco->source());
             return false;
           }
         }
       } else {
-        diagnostics_.add_error("decoration is not valid for constants",
-                               deco->source());
+        AddError("decoration is not valid for constants", deco->source());
         return false;
       }
     } else {
@@ -734,8 +723,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
             deco->Is<ast::GroupDecoration>() ||
             deco->Is<ast::LocationDecoration>() ||
             deco->Is<ast::InternalDecoration>())) {
-        diagnostics_.add_error("decoration is not valid for variables",
-                               deco->source());
+        AddError("decoration is not valid for variables", deco->source());
         return false;
       }
     }
@@ -750,7 +738,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
       // Each resource variable must be declared with both group and binding
       // attributes.
       if (!binding_point) {
-        diagnostics_.add_error(
+        AddError(
             "resource variables require [[group]] and [[binding]] "
             "decorations",
             info->declaration->source());
@@ -762,7 +750,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
       if (binding_point.binding || binding_point.group) {
         // https://gpuweb.github.io/gpuweb/wgsl/#attribute-binding
         // Must only be applied to a resource variable
-        diagnostics_.add_error(
+        AddError(
             "non-resource variables must not have [[group]] or [[binding]] "
             "decorations",
             info->declaration->source());
@@ -775,7 +763,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
   // storage storage class, must not be written.
   if (info->storage_class != ast::StorageClass::kStorage &&
       info->declaration->declared_access() != ast::Access::kUndefined) {
-    diagnostics_.add_error(
+    AddError(
         "variables declared not declared in the <storage> storage class must "
         "not declare an access control",
         info->declaration->source());
@@ -792,7 +780,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
       auto* str = info->type->UnwrapRef()->As<sem::Struct>();
 
       if (!str) {
-        diagnostics_.add_error(
+        AddError(
             "variables declared in the <storage> storage class must be of a "
             "structure type",
             info->declaration->source());
@@ -800,13 +788,13 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
       }
 
       if (!str->IsBlockDecorated()) {
-        diagnostics_.add_error(
+        AddError(
             "structure used as a storage buffer must be declared with the "
             "[[block]] decoration",
             str->Declaration()->source());
         if (info->declaration->source().range.begin.line) {
-          diagnostics_.add_note("structure used as storage buffer here",
-                                info->declaration->source());
+          AddNote("structure used as storage buffer here",
+                  info->declaration->source());
         }
         return false;
       }
@@ -819,7 +807,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
       // attribute, satisfying the storage class constraints.
       auto* str = info->type->UnwrapRef()->As<sem::Struct>();
       if (!str) {
-        diagnostics_.add_error(
+        AddError(
             "variables declared in the <uniform> storage class must be of a "
             "structure type",
             info->declaration->source());
@@ -827,13 +815,13 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
       }
 
       if (!str->IsBlockDecorated()) {
-        diagnostics_.add_error(
+        AddError(
             "structure used as a uniform buffer must be declared with the "
             "[[block]] decoration",
             str->Declaration()->source());
         if (info->declaration->source().range.begin.line) {
-          diagnostics_.add_note("structure used as uniform buffer here",
-                                info->declaration->source());
+          AddNote("structure used as uniform buffer here",
+                  info->declaration->source());
         }
         return false;
       }
@@ -841,12 +829,11 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
       for (auto* member : str->Members()) {
         if (auto* arr = member->Type()->As<sem::Array>()) {
           if (arr->IsRuntimeSized()) {
-            diagnostics_.add_error(
+            AddError(
                 "structure containing a runtime sized array "
                 "cannot be used as a uniform buffer",
                 info->declaration->source());
-            diagnostics_.add_note("structure is declared here",
-                                  str->Declaration()->source());
+            AddNote("structure is declared here", str->Declaration()->source());
             return false;
           }
         }
@@ -866,33 +853,30 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
   auto* storage_type = info->type->UnwrapRef();
 
   if (!var->is_const() && !IsStorable(storage_type)) {
-    diagnostics_.add_error(storage_type->FriendlyName(builder_->Symbols()) +
-                               " cannot be used as the type of a var",
-                           var->source());
+    AddError(storage_type->FriendlyName(builder_->Symbols()) +
+                 " cannot be used as the type of a var",
+             var->source());
     return false;
   }
 
   if (auto* r = storage_type->As<sem::Array>()) {
     if (r->IsRuntimeSized()) {
-      diagnostics_.add_error(
-          "v-0015",
-          "runtime arrays may only appear as the last member of a struct",
-          var->source());
+      AddError("v-0015",
+               "runtime arrays may only appear as the last member of a struct",
+               var->source());
       return false;
     }
   }
 
   if (auto* r = storage_type->As<sem::MultisampledTexture>()) {
     if (r->dim() != ast::TextureDimension::k2d) {
-      diagnostics_.add_error("only 2d multisampled textures are supported",
-                             var->source());
+      AddError("only 2d multisampled textures are supported", var->source());
       return false;
     }
 
     if (!r->type()->UnwrapRef()->is_numeric_scalar()) {
-      diagnostics_.add_error(
-          "texture_multisampled_2d<type>: type must be f32, i32 or u32",
-          var->source());
+      AddError("texture_multisampled_2d<type>: type must be f32, i32 or u32",
+               var->source());
       return false;
     }
   }
@@ -903,9 +887,9 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
     // If the store type is a texture type or a sampler type, then the
     // variable declaration must not have a storage class decoration. The
     // storage class will always be handle.
-    diagnostics_.add_error("variables of type '" + info->type_name +
-                               "' must not have a storage class",
-                           var->source());
+    AddError("variables of type '" + info->type_name +
+                 "' must not have a storage class",
+             var->source());
     return false;
   }
 
@@ -916,15 +900,15 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
     if (info->kind != VariableKind::kGlobal) {
       // Neither storage nor workgroup storage classes can be used in function
       // scopes.
-      diagnostics_.add_error("cannot declare an atomic var in a function scope",
-                             info->declaration->type()->source());
+      AddError("cannot declare an atomic var in a function scope",
+               info->declaration->type()->source());
       return false;
     }
     if (info->storage_class != ast::StorageClass::kWorkgroup) {
       // Storage buffers require a structure, so just check for workgroup
       // storage here.
-      diagnostics_.add_error("atomic var requires workgroup storage",
-                             info->declaration->type()->source());
+      AddError("atomic var requires workgroup storage",
+               info->declaration->type()->source());
       return false;
     }
   }
@@ -952,9 +936,8 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
   switch (deco->value()) {
     case ast::Builtin::kPosition:
       if (!(type->is_float_vector() && type->As<sem::Vector>()->size() == 4)) {
-        diagnostics_.add_error(
-            "store type of " + deco_to_str(deco) + " must be 'vec4<f32>'",
-            deco->source());
+        AddError("store type of " + deco_to_str(deco) + " must be 'vec4<f32>'",
+                 deco->source());
         return false;
       }
       break;
@@ -963,25 +946,22 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
     case ast::Builtin::kWorkgroupId:
       if (!(type->is_unsigned_integer_vector() &&
             type->As<sem::Vector>()->size() == 3)) {
-        diagnostics_.add_error(
-            "store type of " + deco_to_str(deco) + " must be 'vec3<u32>'",
-            deco->source());
+        AddError("store type of " + deco_to_str(deco) + " must be 'vec3<u32>'",
+                 deco->source());
         return false;
       }
       break;
     case ast::Builtin::kFragDepth:
       if (!type->Is<sem::F32>()) {
-        diagnostics_.add_error(
-            "store type of " + deco_to_str(deco) + " must be 'f32'",
-            deco->source());
+        AddError("store type of " + deco_to_str(deco) + " must be 'f32'",
+                 deco->source());
         return false;
       }
       break;
     case ast::Builtin::kFrontFacing:
       if (!type->Is<sem::Bool>()) {
-        diagnostics_.add_error(
-            "store type of " + deco_to_str(deco) + " must be 'bool'",
-            deco->source());
+        AddError("store type of " + deco_to_str(deco) + " must be 'bool'",
+                 deco->source());
         return false;
       }
       break;
@@ -991,9 +971,8 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
     case ast::Builtin::kSampleMask:
     case ast::Builtin::kSampleIndex:
       if (!type->Is<sem::U32>()) {
-        diagnostics_.add_error(
-            "store type of " + deco_to_str(deco) + " must be 'u32'",
-            deco->source());
+        AddError("store type of " + deco_to_str(deco) + " must be 'u32'",
+                 deco->source());
         return false;
       }
       break;
@@ -1007,13 +986,12 @@ bool Resolver::ValidateFunction(const ast::Function* func,
                                 const FunctionInfo* info) {
   auto func_it = symbol_to_function_.find(func->symbol());
   if (func_it != symbol_to_function_.end()) {
-    diagnostics_.add_error("v-0016",
-                           "duplicate function named '" +
-                               builder_->Symbols().NameFor(func->symbol()) +
-                               "'",
-                           func->source());
-    diagnostics_.add_note("first function declared here",
-                          func_it->second->declaration->source());
+    AddError("v-0016",
+             "duplicate function named '" +
+                 builder_->Symbols().NameFor(func->symbol()) + "'",
+             func->source());
+    AddNote("first function declared here",
+            func_it->second->declaration->source());
     return false;
   }
 
@@ -1021,14 +999,13 @@ bool Resolver::ValidateFunction(const ast::Function* func,
   VariableInfo* var;
   if (variable_stack_.get(func->symbol(), &var, &is_global)) {
     if (is_global) {
-      diagnostics_.add_error("v-2000",
-                             "duplicate declaration '" +
-                                 builder_->Symbols().NameFor(func->symbol()) +
-                                 "'",
-                             func->source());
-      diagnostics_.add_note("'" + builder_->Symbols().NameFor(func->symbol()) +
-                                "' first declared here:",
-                            var->declaration->source());
+      AddError("v-2000",
+               "duplicate declaration '" +
+                   builder_->Symbols().NameFor(func->symbol()) + "'",
+               func->source());
+      AddNote("'" + builder_->Symbols().NameFor(func->symbol()) +
+                  "' first declared here:",
+              var->declaration->source());
       return false;
     }
   }
@@ -1041,14 +1018,13 @@ bool Resolver::ValidateFunction(const ast::Function* func,
     } else if (deco->Is<ast::WorkgroupDecoration>()) {
       workgroup_deco_count++;
       if (func->pipeline_stage() != ast::PipelineStage::kCompute) {
-        diagnostics_.add_error(
+        AddError(
             "the workgroup_size attribute is only valid for compute stages",
             deco->source());
         return false;
       }
     } else if (!deco->Is<ast::InternalDecoration>()) {
-      diagnostics_.add_error("decoration is not valid for functions",
-                             deco->source());
+      AddError("decoration is not valid for functions", deco->source());
       return false;
     }
   }
@@ -1061,33 +1037,30 @@ bool Resolver::ValidateFunction(const ast::Function* func,
 
   if (!info->return_type->Is<sem::Void>()) {
     if (!IsAtomicFreePlain(info->return_type)) {
-      diagnostics_.add_error(
-          "function return type must be an atomic-free plain type",
-          func->return_type()->source());
+      AddError("function return type must be an atomic-free plain type",
+               func->return_type()->source());
       return false;
     }
 
     if (func->body()) {
       if (!func->get_last_statement() ||
           !func->get_last_statement()->Is<ast::ReturnStatement>()) {
-        diagnostics_.add_error(
-            "v-0002", "non-void function must end with a return statement",
-            func->source());
+        AddError("v-0002", "non-void function must end with a return statement",
+                 func->source());
         return false;
       }
     } else if (!IsValidationDisabled(
                    func->decorations(),
                    ast::DisabledValidation::kFunctionHasNoBody)) {
-      TINT_ICE(diagnostics_)
+      TINT_ICE(Resolver, diagnostics_)
           << "Function " << builder_->Symbols().NameFor(func->symbol())
           << " has no body";
     }
 
     for (auto* deco : func->return_type_decorations()) {
       if (!deco->IsAnyOf<ast::BuiltinDecoration, ast::LocationDecoration>()) {
-        diagnostics_.add_error(
-            "decoration is not valid for function return types",
-            deco->source());
+        AddError("decoration is not valid for function return types",
+                 deco->source());
         return false;
       }
     }
@@ -1126,9 +1099,8 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
         for (auto* deco : decos) {
           if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
             if (pipeline_io_attribute) {
-              diagnostics_.add_error("multiple entry point IO attributes",
-                                     deco->source());
-              diagnostics_.add_note(
+              AddError("multiple entry point IO attributes", deco->source());
+              AddNote(
                   "previously consumed " + deco_to_str(pipeline_io_attribute),
                   pipeline_io_attribute->source());
               return false;
@@ -1136,7 +1108,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
             pipeline_io_attribute = deco;
 
             if (builtins.count(builtin->value())) {
-              diagnostics_.add_error(
+              AddError(
                   deco_to_str(builtin) +
                       " attribute appears multiple times as pipeline " +
                       (param_or_ret == ParamOrRetType::kParameter ? "input"
@@ -1148,9 +1120,8 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
 
           } else if (auto* location = deco->As<ast::LocationDecoration>()) {
             if (pipeline_io_attribute) {
-              diagnostics_.add_error("multiple entry point IO attributes",
-                                     deco->source());
-              diagnostics_.add_note(
+              AddError("multiple entry point IO attributes", deco->source());
+              AddNote(
                   "previously consumed " + deco_to_str(pipeline_io_attribute),
                   pipeline_io_attribute->source());
               return false;
@@ -1158,7 +1129,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
             pipeline_io_attribute = deco;
 
             if (locations.count(location->value())) {
-              diagnostics_.add_error(
+              AddError(
                   deco_to_str(location) +
                       " attribute appears multiple times as pipeline " +
                       (param_or_ret == ParamOrRetType::kParameter ? "input"
@@ -1173,7 +1144,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
         // Check that we saw a pipeline IO attribute iff we need one.
         if (ty->Is<sem::Struct>()) {
           if (pipeline_io_attribute) {
-            diagnostics_.add_error(
+            AddError(
                 "entry point IO attributes must not be used on structure " +
                     std::string(param_or_ret == ParamOrRetType::kParameter
                                     ? "parameters"
@@ -1190,7 +1161,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
                           ? " on parameter"
                           : " on return type");
             }
-            diagnostics_.add_error(err, source);
+            AddError(err, source);
             return false;
           }
 
@@ -1199,7 +1170,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
           // Testing for being a struct is handled by the if portion above.
           if (!pipeline_io_attribute->Is<ast::BuiltinDecoration>()) {
             if (!ty->is_numeric_scalar_or_vector()) {
-              diagnostics_.add_error(
+              AddError(
                   "User defined entry point IO types must be a numeric scalar, "
                   "a numeric vector, or a structure",
                   source);
@@ -1226,24 +1197,21 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
       // invalid member types.
       for (auto* member : str->Members()) {
         if (member->Type()->Is<sem::Struct>()) {
-          diagnostics_.add_error(
-              "entry point IO types cannot contain nested structures",
-              member->Declaration()->source());
-          diagnostics_.add_note("while analysing entry point " +
-                                    builder_->Symbols().NameFor(func->symbol()),
-                                func->source());
+          AddError("entry point IO types cannot contain nested structures",
+                   member->Declaration()->source());
+          AddNote("while analysing entry point " +
+                      builder_->Symbols().NameFor(func->symbol()),
+                  func->source());
           return false;
         }
 
         if (auto* arr = member->Type()->As<sem::Array>()) {
           if (arr->IsRuntimeSized()) {
-            diagnostics_.add_error(
-                "entry point IO types cannot contain runtime sized arrays",
-                member->Declaration()->source());
-            diagnostics_.add_note(
-                "while analysing entry point " +
-                    builder_->Symbols().NameFor(func->symbol()),
-                func->source());
+            AddError("entry point IO types cannot contain runtime sized arrays",
+                     member->Declaration()->source());
+            AddNote("while analysing entry point " +
+                        builder_->Symbols().NameFor(func->symbol()),
+                    func->source());
             return false;
           }
         }
@@ -1251,9 +1219,9 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
         if (!validate_entry_point_decorations_inner(
                 member->Declaration()->decorations(), member->Type(),
                 member->Declaration()->source(), param_or_ret, true)) {
-          diagnostics_.add_note("while analysing entry point " +
-                                    builder_->Symbols().NameFor(func->symbol()),
-                                func->source());
+          AddNote("while analysing entry point " +
+                      builder_->Symbols().NameFor(func->symbol()),
+                  func->source());
           return false;
         }
       }
@@ -1298,7 +1266,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
       }
     }
     if (!found) {
-      diagnostics_.add_error(
+      AddError(
           "a vertex shader must include the 'position' builtin in its return "
           "type",
           func->source());
@@ -1327,14 +1295,14 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
       // the same group and binding values, when considered as a pair of
       // values.
       auto func_name = builder_->Symbols().NameFor(info->declaration->symbol());
-      diagnostics_.add_error("entry point '" + func_name +
-                                 "' references multiple variables that use the "
-                                 "same resource binding [[group(" +
-                                 std::to_string(bp.group) + "), binding(" +
-                                 std::to_string(bp.binding) + ")]]",
-                             var_info->declaration->source());
-      diagnostics_.add_note("first resource binding usage declared here",
-                            res.first->second->source());
+      AddError("entry point '" + func_name +
+                   "' references multiple variables that use the "
+                   "same resource binding [[group(" +
+                   std::to_string(bp.group) + "), binding(" +
+                   std::to_string(bp.binding) + ")]]",
+               var_info->declaration->source());
+      AddNote("first resource binding usage declared here",
+              res.first->second->source());
       return false;
     }
   }
@@ -1372,9 +1340,9 @@ bool Resolver::Function(ast::Function* func) {
 
     if (!ApplyStorageClassUsageToType(param->declared_storage_class(),
                                       param_info->type, param->source())) {
-      diagnostics_.add_note("while instantiating parameter " +
-                                builder_->Symbols().NameFor(param->symbol()),
-                            param->source());
+      AddNote("while instantiating parameter " +
+                  builder_->Symbols().NameFor(param->symbol()),
+              param->source());
       return false;
     }
 
@@ -1410,9 +1378,9 @@ bool Resolver::Function(ast::Function* func) {
   if (auto* str = info->return_type->As<sem::Struct>()) {
     if (!ApplyStorageClassUsageToType(ast::StorageClass::kNone, str,
                                       func->source())) {
-      diagnostics_.add_note("while instantiating return type for " +
-                                builder_->Symbols().NameFor(func->symbol()),
-                            func->source());
+      AddNote("while instantiating return type for " +
+                  builder_->Symbols().NameFor(func->symbol()),
+              func->source());
       return false;
     }
 
@@ -1434,7 +1402,7 @@ bool Resolver::Function(ast::Function* func) {
   if (func->body()) {
     Mark(func->body());
     if (current_statement_) {
-      TINT_ICE(diagnostics_)
+      TINT_ICE(Resolver, diagnostics_)
           << "Resolver::Function() called with a current statement";
       return false;
     }
@@ -1492,7 +1460,7 @@ bool Resolver::Function(ast::Function* func) {
         VariableInfo* var;
         if (!variable_stack_.get(ident->symbol(), &var) ||
             !(var->declaration->is_const() && var->type->Is<sem::I32>())) {
-          diagnostics_.add_error(
+          AddError(
               "workgroup_size parameter must be a literal i32 or an i32 "
               "module-scope constant",
               values[i]->source());
@@ -1522,7 +1490,7 @@ bool Resolver::Function(ast::Function* func) {
         Mark(scalar->literal());
 
         if (!scalar->literal()->Is<ast::IntLiteral>()) {
-          diagnostics_.add_error(
+          AddError(
               "workgroup_size parameter must be a literal i32 or an i32 "
               "module-scope constant",
               values[i]->source());
@@ -1536,9 +1504,8 @@ bool Resolver::Function(ast::Function* func) {
 
       // Validate and set the default value for this dimension.
       if (value < 1) {
-        diagnostics_.add_error(
-            "workgroup_size parameter must be a positive i32 value",
-            values[i]->source());
+        AddError("workgroup_size parameter must be a positive i32 value",
+                 values[i]->source());
         return false;
       }
       info->workgroup_size[i].value = value;
@@ -1579,7 +1546,7 @@ bool Resolver::ValidateStatements(const ast::StatementList& stmts) {
     if (stmt->IsAnyOf<ast::ReturnStatement, ast::BreakStatement,
                       ast::ContinueStatement>()) {
       if (stmt != stmts.back()) {
-        diagnostics_.add_error("code is unreachable", (*next_stmt)->source());
+        AddError("code is unreachable", (*next_stmt)->source());
         return false;
       }
     }
@@ -1600,7 +1567,7 @@ bool Resolver::Statement(ast::Statement* stmt) {
   TINT_SCOPED_ASSIGNMENT(current_statement_, sem_statement);
 
   if (stmt->Is<ast::ElseStatement>()) {
-    TINT_ICE(diagnostics_)
+    TINT_ICE(Resolver, diagnostics_)
         << "Resolver::Statement() encountered an Else statement. Else "
            "statements are embedded in If statements, so should never be "
            "encountered as top-level statements";
@@ -1616,8 +1583,8 @@ bool Resolver::Statement(ast::Statement* stmt) {
   if (stmt->Is<ast::BreakStatement>()) {
     if (!current_block_->FindFirstParent<sem::LoopBlockStatement>() &&
         !current_block_->FindFirstParent<sem::SwitchCaseBlockStatement>()) {
-      diagnostics_.add_error("break statement must be in a loop or switch case",
-                             stmt->source());
+      AddError("break statement must be in a loop or switch case",
+               stmt->source());
       return false;
     }
     return true;
@@ -1644,8 +1611,7 @@ bool Resolver::Statement(ast::Statement* stmt) {
             ->SetFirstContinue(loop_block->Decls().size());
       }
     } else {
-      diagnostics_.add_error("continue statement must be in a loop",
-                             stmt->source());
+      AddError("continue statement must be in a loop", stmt->source());
       return false;
     }
 
@@ -1673,7 +1639,7 @@ bool Resolver::Statement(ast::Statement* stmt) {
     return VariableDeclStatement(v);
   }
 
-  diagnostics_.add_error(
+  AddError(
       "unknown statement type for type determination: " + builder_->str(stmt),
       stmt->source());
   return false;
@@ -1700,9 +1666,9 @@ bool Resolver::IfStatement(ast::IfStatement* stmt) {
 
   auto* cond_type = TypeOf(stmt->condition())->UnwrapRef();
   if (!cond_type->Is<sem::Bool>()) {
-    diagnostics_.add_error("if statement condition must be bool, got " +
-                               cond_type->FriendlyName(builder_->Symbols()),
-                           stmt->condition()->source());
+    AddError("if statement condition must be bool, got " +
+                 cond_type->FriendlyName(builder_->Symbols()),
+             stmt->condition()->source());
     return false;
   }
 
@@ -1732,10 +1698,9 @@ bool Resolver::IfStatement(ast::IfStatement* stmt) {
 
       auto* else_cond_type = TypeOf(cond)->UnwrapRef();
       if (!else_cond_type->Is<sem::Bool>()) {
-        diagnostics_.add_error(
-            "else statement condition must be bool, got " +
-                else_cond_type->FriendlyName(builder_->Symbols()),
-            cond->source());
+        AddError("else statement condition must be bool, got " +
+                     else_cond_type->FriendlyName(builder_->Symbols()),
+                 cond->source());
         return false;
       }
     }
@@ -1820,8 +1785,7 @@ bool Resolver::Expression(ast::Expression* expr) {
   } else if (auto* unary = expr->As<ast::UnaryOpExpression>()) {
     ok = UnaryOp(unary);
   } else {
-    diagnostics_.add_error("unknown expression for type determination",
-                           expr->source());
+    AddError("unknown expression for type determination", expr->source());
   }
 
   if (!ok) {
@@ -1830,8 +1794,8 @@ bool Resolver::Expression(ast::Expression* expr) {
 
   auto* ty = TypeOf(expr);
   if (ty->Is<sem::Atomic>()) {
-    diagnostics_.add_error("an expression must not evaluate to an atomic type",
-                           expr->source());
+    AddError("an expression must not evaluate to an atomic type",
+             expr->source());
     return false;
   }
 
@@ -1859,16 +1823,16 @@ bool Resolver::ArrayAccessor(ast::ArrayAccessorExpression* expr) {
   } else if (auto* mat = parent_type->As<sem::Matrix>()) {
     ret = builder_->create<sem::Vector>(mat->type(), mat->rows());
   } else {
-    diagnostics_.add_error("invalid parent type (" + parent_type->type_name() +
-                               ") in array accessor",
-                           expr->source());
+    AddError("invalid parent type (" + parent_type->type_name() +
+                 ") in array accessor",
+             expr->source());
     return false;
   }
 
   if (!TypeOf(idx)->UnwrapRef()->IsAnyOf<sem::I32, sem::U32>()) {
-    diagnostics_.add_error("index must be of type 'i32' or 'u32', found: '" +
-                               TypeNameOf(idx) + "'",
-                           idx->source());
+    AddError("index must be of type 'i32' or 'u32', found: '" +
+                 TypeNameOf(idx) + "'",
+             idx->source());
     return false;
   }
 
@@ -1878,8 +1842,8 @@ bool Resolver::ArrayAccessor(ast::ArrayAccessorExpression* expr) {
       // https://github.com/gpuweb/gpuweb/issues/1272
       auto* scalar = idx->As<ast::ScalarConstructorExpression>();
       if (!scalar || !scalar->literal()->As<ast::IntLiteral>()) {
-        diagnostics_.add_error(
-            "index must be signed or unsigned integer literal", idx->source());
+        AddError("index must be signed or unsigned integer literal",
+                 idx->source());
         return false;
       }
     }
@@ -1905,7 +1869,7 @@ bool Resolver::Bitcast(ast::BitcastExpression* expr) {
     return false;
   }
   if (ty->Is<sem::Pointer>()) {
-    diagnostics_.add_error("cannot cast to a pointer", expr->source());
+    AddError("cannot cast to a pointer", expr->source());
     return false;
   }
   SetType(expr, ty, expr->type()->FriendlyName(builder_->Symbols()));
@@ -1948,8 +1912,9 @@ bool Resolver::ValidateCallStatement(ast::CallStatement* stmt) {
     if (auto* intrinsic = target->As<sem::Intrinsic>()) {
       return_type = intrinsic->ReturnType();
     } else {
-      TINT_ICE(diagnostics_) << "call target was not an intrinsic, but a "
-                             << intrinsic->TypeInfo().name;
+      TINT_ICE(Resolver, diagnostics_)
+          << "call target was not an intrinsic, but a "
+          << intrinsic->TypeInfo().name;
     }
   }
 
@@ -1960,7 +1925,7 @@ bool Resolver::ValidateCallStatement(ast::CallStatement* stmt) {
     // that value must be consumed either through assignment, evaluation in
     // another expression or through use of the ignore built-in function (see
     // § 16.13 Value-steering functions).
-    diagnostics_.add_error(
+    AddError(
         "result of called function was not used. If this was intentional wrap "
         "the function call in ignore()",
         stmt->source());
@@ -1984,7 +1949,7 @@ bool Resolver::IntrinsicCall(ast::CallExpression* call,
   }
 
   if (result->IsDeprecated()) {
-    diagnostics_.add_warning("use of deprecated intrinsic", call->source());
+    AddWarning("use of deprecated intrinsic", call->source());
   }
 
   builder_->Sem().Add(
@@ -2005,13 +1970,13 @@ bool Resolver::FunctionCall(const ast::CallExpression* call) {
   if (callee_func_it == symbol_to_function_.end()) {
     if (current_function_ &&
         current_function_->declaration->symbol() == ident->symbol()) {
-      diagnostics_.add_error("v-0004",
-                             "recursion is not permitted. '" + name +
-                                 "' attempted to call itself.",
-                             call->source());
+      AddError("v-0004",
+               "recursion is not permitted. '" + name +
+                   "' attempted to call itself.",
+               call->source());
     } else {
-      diagnostics_.add_error("v-0006: unable to find called function: " + name,
-                             call->source());
+      AddError("v-0006: unable to find called function: " + name,
+               call->source());
     }
     return false;
   }
@@ -2037,12 +2002,11 @@ bool Resolver::FunctionCall(const ast::CallExpression* call) {
   // Validate number of arguments match number of parameters
   if (call->params().size() != callee_func->parameters.size()) {
     bool more = call->params().size() > callee_func->parameters.size();
-    diagnostics_.add_error(
-        "too " + (more ? std::string("many") : std::string("few")) +
-            " arguments in call to '" + name + "', expected " +
-            std::to_string(callee_func->parameters.size()) + ", got " +
-            std::to_string(call->params().size()),
-        call->source());
+    AddError("too " + (more ? std::string("many") : std::string("few")) +
+                 " arguments in call to '" + name + "', expected " +
+                 std::to_string(callee_func->parameters.size()) + ", got " +
+                 std::to_string(call->params().size()),
+             call->source());
     return false;
   }
 
@@ -2053,12 +2017,11 @@ bool Resolver::FunctionCall(const ast::CallExpression* call) {
     auto* arg_type = TypeOf(arg_expr)->UnwrapRef();
 
     if (param->type != arg_type) {
-      diagnostics_.add_error(
-          "type mismatch for argument " + std::to_string(i + 1) +
-              " in call to '" + name + "', expected '" +
-              param->type->FriendlyName(builder_->Symbols()) + "', got '" +
-              arg_type->FriendlyName(builder_->Symbols()) + "'",
-          arg_expr->source());
+      AddError("type mismatch for argument " + std::to_string(i + 1) +
+                   " in call to '" + name + "', expected '" +
+                   param->type->FriendlyName(builder_->Symbols()) + "', got '" +
+                   arg_type->FriendlyName(builder_->Symbols()) + "'",
+               arg_expr->source());
       return false;
     }
   }
@@ -2090,7 +2053,7 @@ bool Resolver::Constructor(ast::ConstructorExpression* expr) {
     // obey the constructor type rules laid out in
     // https://gpuweb.github.io/gpuweb/wgsl.html#type-constructor-expr.
     if (type->Is<sem::Pointer>()) {
-      diagnostics_.add_error("cannot cast to a pointer", expr->source());
+      AddError("cannot cast to a pointer", expr->source());
       return false;
     }
     if (auto* vec_type = type->As<sem::Vector>()) {
@@ -2113,7 +2076,8 @@ bool Resolver::Constructor(ast::ConstructorExpression* expr) {
     }
     SetType(expr, type);
   } else {
-    TINT_ICE(diagnostics_) << "unexpected constructor expression type";
+    TINT_ICE(Resolver, diagnostics_)
+        << "unexpected constructor expression type";
   }
   return true;
 }
@@ -2126,7 +2090,7 @@ bool Resolver::ValidateArrayConstructor(
   for (auto* value : values) {
     auto* value_type = TypeOf(value)->UnwrapRef();
     if (value_type != elem_type) {
-      diagnostics_.add_error(
+      AddError(
           "type in array constructor does not match array type: "
           "expected '" +
               elem_type->FriendlyName(builder_->Symbols()) + "', found '" +
@@ -2137,22 +2101,20 @@ bool Resolver::ValidateArrayConstructor(
   }
 
   if (array_type->IsRuntimeSized()) {
-    diagnostics_.add_error("cannot init a runtime-sized array", ctor->source());
+    AddError("cannot init a runtime-sized array", ctor->source());
     return false;
   } else if (!values.empty() && (values.size() != array_type->Count())) {
     std::string fm = values.size() < array_type->Count() ? "few" : "many";
-    diagnostics_.add_error("array constructor has too " + fm +
-                               " elements: expected " +
-                               std::to_string(array_type->Count()) +
-                               ", found " + std::to_string(values.size()),
-                           ctor->source());
+    AddError("array constructor has too " + fm + " elements: expected " +
+                 std::to_string(array_type->Count()) + ", found " +
+                 std::to_string(values.size()),
+             ctor->source());
     return false;
   } else if (values.size() > array_type->Count()) {
-    diagnostics_.add_error(
-        "array constructor has too many elements: expected " +
-            std::to_string(array_type->Count()) + ", found " +
-            std::to_string(values.size()),
-        ctor->source());
+    AddError("array constructor has too many elements: expected " +
+                 std::to_string(array_type->Count()) + ", found " +
+                 std::to_string(values.size()),
+             ctor->source());
     return false;
   }
   return true;
@@ -2168,7 +2130,7 @@ bool Resolver::ValidateVectorConstructor(
     auto* value_type = TypeOf(value)->UnwrapRef();
     if (value_type->is_scalar()) {
       if (elem_type != value_type) {
-        diagnostics_.add_error(
+        AddError(
             "type in vector constructor does not match vector type: "
             "expected '" +
                 elem_type->FriendlyName(builder_->Symbols()) + "', found '" +
@@ -2188,7 +2150,7 @@ bool Resolver::ValidateVectorConstructor(
       // https://gpuweb.github.io/gpuweb/wgsl.html#conversion-expr).
       if (elem_type != value_elem_type &&
           (values.size() > 1u || value_vec->is_bool_vector())) {
-        diagnostics_.add_error(
+        AddError(
             "type in vector constructor does not match vector type: "
             "expected '" +
                 elem_type->FriendlyName(builder_->Symbols()) + "', found '" +
@@ -2200,10 +2162,9 @@ bool Resolver::ValidateVectorConstructor(
       value_cardinality_sum += value_vec->size();
     } else {
       // A vector constructor can only accept vectors and scalars.
-      diagnostics_.add_error(
-          "expected vector or scalar type in vector constructor; found: " +
-              value_type->FriendlyName(builder_->Symbols()),
-          value->source());
+      AddError("expected vector or scalar type in vector constructor; found: " +
+                   value_type->FriendlyName(builder_->Symbols()),
+               value->source());
       return false;
     }
   }
@@ -2213,15 +2174,14 @@ bool Resolver::ValidateVectorConstructor(
   // of all constructor arguments must add up to the vector cardinality.
   if (value_cardinality_sum > 1 && value_cardinality_sum != vec_type->size()) {
     if (values.empty()) {
-      TINT_ICE(diagnostics_)
+      TINT_ICE(Resolver, diagnostics_)
           << "constructor arguments expected to be non-empty!";
     }
     const Source& values_start = values[0]->source();
     const Source& values_end = values[values.size() - 1]->source();
-    diagnostics_.add_error(
-        "attempted to construct '" + TypeNameOf(ctor) + "' with " +
-            std::to_string(value_cardinality_sum) + " component(s)",
-        Source::Combine(values_start, values_end));
+    AddError("attempted to construct '" + TypeNameOf(ctor) + "' with " +
+                 std::to_string(value_cardinality_sum) + " component(s)",
+             Source::Combine(values_start, values_end));
     return false;
   }
   return true;
@@ -2230,7 +2190,7 @@ bool Resolver::ValidateVectorConstructor(
 bool Resolver::ValidateMatrix(const sem::Matrix* matrix_type,
                               const Source& source) {
   if (!matrix_type->is_float_matrix()) {
-    diagnostics_.add_error("matrix element type must be 'f32'", source);
+    AddError("matrix element type must be 'f32'", source);
     return false;
   }
   return true;
@@ -2253,12 +2213,11 @@ bool Resolver::ValidateMatrixConstructor(
   if (matrix_type->columns() != values.size()) {
     const Source& values_start = values[0]->source();
     const Source& values_end = values[values.size() - 1]->source();
-    diagnostics_.add_error(
-        "expected " + std::to_string(matrix_type->columns()) + " '" +
-            VectorPretty(matrix_type->rows(), elem_type) + "' arguments in '" +
-            TypeNameOf(ctor) + "' constructor, found " +
-            std::to_string(values.size()),
-        Source::Combine(values_start, values_end));
+    AddError("expected " + std::to_string(matrix_type->columns()) + " '" +
+                 VectorPretty(matrix_type->rows(), elem_type) +
+                 "' arguments in '" + TypeNameOf(ctor) +
+                 "' constructor, found " + std::to_string(values.size()),
+             Source::Combine(values_start, values_end));
     return false;
   }
 
@@ -2268,12 +2227,11 @@ bool Resolver::ValidateMatrixConstructor(
 
     if (!value_vec || value_vec->size() != matrix_type->rows() ||
         elem_type != value_vec->type()) {
-      diagnostics_.add_error("expected argument type '" +
-                                 VectorPretty(matrix_type->rows(), elem_type) +
-                                 "' in '" + TypeNameOf(ctor) +
-                                 "' constructor, found '" + TypeNameOf(value) +
-                                 "'",
-                             value->source());
+      AddError("expected argument type '" +
+                   VectorPretty(matrix_type->rows(), elem_type) + "' in '" +
+                   TypeNameOf(ctor) + "' constructor, found '" +
+                   TypeNameOf(value) + "'",
+               value->source());
       return false;
     }
   }
@@ -2288,9 +2246,9 @@ bool Resolver::ValidateScalarConstructor(
     return true;
   }
   if (ctor->values().size() > 1) {
-    diagnostics_.add_error("expected zero or one value in constructor, got " +
-                               std::to_string(ctor->values().size()),
-                           ctor->source());
+    AddError("expected zero or one value in constructor, got " +
+                 std::to_string(ctor->values().size()),
+             ctor->source());
     return false;
   }
 
@@ -2309,10 +2267,9 @@ bool Resolver::ValidateScalarConstructor(
       (type->Is<U32>() && value_type->IsAnyOf<I32, U32, F32>()) ||
       (type->Is<F32>() && value_type->IsAnyOf<I32, U32, F32>());
   if (!is_valid) {
-    diagnostics_.add_error("cannot construct '" + TypeNameOf(ctor) +
-                               "' with a value of type '" + TypeNameOf(value) +
-                               "'",
-                           ctor->source());
+    AddError("cannot construct '" + TypeNameOf(ctor) +
+                 "' with a value of type '" + TypeNameOf(value) + "'",
+             ctor->source());
 
     return false;
   }
@@ -2349,11 +2306,10 @@ bool Resolver::Identifier(ast::IdentifierExpression* expr) {
             auto var_decl_index =
                 static_cast<size_t>(std::distance(decls.begin(), iter));
             if (var_decl_index >= loop_block->FirstContinue()) {
-              diagnostics_.add_error(
-                  "continue statement bypasses declaration of '" +
-                      builder_->Symbols().NameFor(symbol) +
-                      "' in continuing block",
-                  expr->source());
+              AddError("continue statement bypasses declaration of '" +
+                           builder_->Symbols().NameFor(symbol) +
+                           "' in continuing block",
+                       expr->source());
               return false;
             }
           }
@@ -2366,21 +2322,18 @@ bool Resolver::Identifier(ast::IdentifierExpression* expr) {
 
   auto iter = symbol_to_function_.find(symbol);
   if (iter != symbol_to_function_.end()) {
-    diagnostics_.add_error("missing '(' for function call",
-                           expr->source().End());
+    AddError("missing '(' for function call", expr->source().End());
     return false;
   }
 
   std::string name = builder_->Symbols().NameFor(symbol);
   if (sem::ParseIntrinsicType(name) != IntrinsicType::kNone) {
-    diagnostics_.add_error("missing '(' for intrinsic call",
-                           expr->source().End());
+    AddError("missing '(' for intrinsic call", expr->source().End());
     return false;
   }
 
-  diagnostics_.add_error(
-      "v-0006: identifier must be declared before use: " + name,
-      expr->source());
+  AddError("v-0006: identifier must be declared before use: " + name,
+           expr->source());
   return false;
 }
 
@@ -2410,7 +2363,7 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
     }
 
     if (ret == nullptr) {
-      diagnostics_.add_error(
+      AddError(
           "struct member " + builder_->Symbols().NameFor(symbol) + " not found",
           expr->source());
       return false;
@@ -2449,22 +2402,19 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
           swizzle.emplace_back(3);
           break;
         default:
-          diagnostics_.add_error(
-              "invalid vector swizzle character",
-              expr->member()->source().Begin() + swizzle.size());
+          AddError("invalid vector swizzle character",
+                   expr->member()->source().Begin() + swizzle.size());
           return false;
       }
 
       if (swizzle.back() >= vec->size()) {
-        diagnostics_.add_error("invalid vector swizzle member",
-                               expr->member()->source());
+        AddError("invalid vector swizzle member", expr->member()->source());
         return false;
       }
     }
 
     if (size < 1 || size > 4) {
-      diagnostics_.add_error("invalid vector swizzle size",
-                             expr->member()->source());
+      AddError("invalid vector swizzle size", expr->member()->source());
       return false;
     }
 
@@ -2477,9 +2427,8 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
     };
     if (!std::all_of(s.begin(), s.end(), is_rgba) &&
         !std::all_of(s.begin(), s.end(), is_xyzw)) {
-      diagnostics_.add_error(
-          "invalid mixing of vector swizzle characters rgba with xyzw",
-          expr->member()->source());
+      AddError("invalid mixing of vector swizzle characters rgba with xyzw",
+               expr->member()->source());
       return false;
     }
 
@@ -2501,10 +2450,9 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
         expr, builder_->create<sem::Swizzle>(expr, ret, current_statement_,
                                              std::move(swizzle)));
   } else {
-    diagnostics_.add_error(
-        "invalid use of member accessor on a non-vector/non-struct " +
-            TypeNameOf(expr->structure()),
-        expr->source());
+    AddError("invalid use of member accessor on a non-vector/non-struct " +
+                 TypeNameOf(expr->structure()),
+             expr->source());
     return false;
   }
 
@@ -2717,12 +2665,11 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
     }
   }
 
-  diagnostics_.add_error(
-      "Binary expression operand types are invalid for this operation: " +
-          lhs_type->FriendlyName(builder_->Symbols()) + " " +
-          FriendlyName(expr->op()) + " " +
-          rhs_type->FriendlyName(builder_->Symbols()),
-      expr->source());
+  AddError("Binary expression operand types are invalid for this operation: " +
+               lhs_type->FriendlyName(builder_->Symbols()) + " " +
+               FriendlyName(expr->op()) + " " +
+               rhs_type->FriendlyName(builder_->Symbols()),
+           expr->source());
   return false;
 }
 
@@ -2756,8 +2703,8 @@ bool Resolver::UnaryOp(ast::UnaryOpExpression* unary) {
         type = builder_->create<sem::Pointer>(
             ref->StoreType(), ref->StorageClass(), ref->Access());
       } else {
-        diagnostics_.add_error("cannot take the address of expression",
-                               unary->expr()->source());
+        AddError("cannot take the address of expression",
+                 unary->expr()->source());
         return false;
       }
       break;
@@ -2767,9 +2714,9 @@ bool Resolver::UnaryOp(ast::UnaryOpExpression* unary) {
         type = builder_->create<sem::Reference>(
             ptr->StoreType(), ptr->StorageClass(), ptr->Access());
       } else {
-        diagnostics_.add_error("cannot dereference expression of type '" +
-                                   TypeNameOf(unary->expr()) + "'",
-                               unary->expr()->source());
+        AddError("cannot dereference expression of type '" +
+                     TypeNameOf(unary->expr()) + "'",
+                 unary->expr()->source());
         return false;
       }
       break;
@@ -2786,10 +2733,10 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
   bool is_global = false;
   if (variable_stack_.get(var->symbol(), nullptr, &is_global)) {
     const char* error_code = is_global ? "v-0013" : "v-0014";
-    diagnostics_.add_error(error_code,
-                           "redeclared identifier '" +
-                               builder_->Symbols().NameFor(var->symbol()) + "'",
-                           var->source());
+    AddError(error_code,
+             "redeclared identifier '" +
+                 builder_->Symbols().NameFor(var->symbol()) + "'",
+             var->source());
     return false;
   }
 
@@ -2816,9 +2763,8 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
             var->decorations(),
             ast::DisabledValidation::kFunctionVarStorageClass)) {
       if (info->storage_class != ast::StorageClass::kNone) {
-        diagnostics_.add_error(
-            "function variable has a non-function storage class",
-            stmt->source());
+        AddError("function variable has a non-function storage class",
+                 stmt->source());
         return false;
       }
       info->storage_class = ast::StorageClass::kFunction;
@@ -2827,9 +2773,9 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
 
   if (!ApplyStorageClassUsageToType(info->storage_class, info->type,
                                     var->source())) {
-    diagnostics_.add_note("while instantiating variable " +
-                              builder_->Symbols().NameFor(var->symbol()),
-                          var->source());
+    AddNote("while instantiating variable " +
+                builder_->Symbols().NameFor(var->symbol()),
+            var->source());
     return false;
   }
 
@@ -2843,7 +2789,7 @@ sem::Type* Resolver::TypeDecl(const ast::TypeDecl* named_type) {
   } else if (auto* str = named_type->As<ast::Struct>()) {
     result = Structure(str);
   } else {
-    TINT_UNREACHABLE(diagnostics_) << "Unhandled TypeDecl";
+    TINT_UNREACHABLE(Resolver, diagnostics_) << "Unhandled TypeDecl";
   }
 
   if (!result) {
@@ -2864,14 +2810,15 @@ sem::Type* Resolver::TypeDecl(const ast::TypeDecl* named_type) {
 bool Resolver::ValidateTypeDecl(const ast::TypeDecl* named_type) const {
   auto iter = named_type_info_.find(named_type->name());
   if (iter == named_type_info_.end()) {
-    TINT_ICE(diagnostics_) << "ValidateTypeDecl called() before TypeDecl()";
+    TINT_ICE(Resolver, diagnostics_)
+        << "ValidateTypeDecl called() before TypeDecl()";
   }
   if (iter->second.ast != named_type) {
-    diagnostics_.add_error("type with the name '" +
-                               builder_->Symbols().NameFor(named_type->name()) +
-                               "' was already declared",
-                           named_type->source());
-    diagnostics_.add_note("first declared here", iter->second.ast->source());
+    AddError("type with the name '" +
+                 builder_->Symbols().NameFor(named_type->name()) +
+                 "' was already declared",
+             named_type->source());
+    AddNote("first declared here", iter->second.ast->source());
     return false;
   }
   return true;
@@ -2906,7 +2853,7 @@ sem::Type* Resolver::TypeOf(const ast::Literal* lit) {
   if (lit->Is<ast::BoolLiteral>()) {
     return builder_->create<sem::Bool>();
   }
-  TINT_UNREACHABLE(diagnostics_)
+  TINT_UNREACHABLE(Resolver, diagnostics_)
       << "Unhandled literal type: " << lit->TypeInfo().name;
   return nullptr;
 }
@@ -2919,7 +2866,8 @@ void Resolver::SetType(const ast::Expression* expr,
                        const sem::Type* type,
                        const std::string& type_name) {
   if (expr_info_.count(expr)) {
-    TINT_ICE(diagnostics_) << "SetType() called twice for the same expression";
+    TINT_ICE(Resolver, diagnostics_)
+        << "SetType() called twice for the same expression";
   }
   expr_info_.emplace(expr, ExpressionInfo{type, type_name, current_statement_});
 }
@@ -2938,28 +2886,27 @@ bool Resolver::ValidatePipelineStages() {
             if (it != expr_info_.end()) {
               if (func->declaration->symbol() ==
                   it->second.statement->Function()->symbol()) {
-                diagnostics_.add_error("workgroup memory cannot be used by " +
-                                           stage_name.str() + " pipeline stage",
-                                       user->source());
+                AddError("workgroup memory cannot be used by " +
+                             stage_name.str() + " pipeline stage",
+                         user->source());
                 break;
               }
             }
           }
-          diagnostics_.add_note("variable is declared here",
-                                var->declaration->source());
+          AddNote("variable is declared here", var->declaration->source());
           if (func != entry_point) {
             TraverseCallChain(entry_point, func, [&](FunctionInfo* f) {
-              diagnostics_.add_note(
+              AddNote(
                   "called by function '" +
                       builder_->Symbols().NameFor(f->declaration->symbol()) +
                       "'",
                   f->declaration->source());
             });
-            diagnostics_.add_note("called by entry point '" +
-                                      builder_->Symbols().NameFor(
-                                          entry_point->declaration->symbol()) +
-                                      "'",
-                                  entry_point->declaration->source());
+            AddNote("called by entry point '" +
+                        builder_->Symbols().NameFor(
+                            entry_point->declaration->symbol()) +
+                        "'",
+                    entry_point->declaration->source());
           }
           return false;
         }
@@ -2986,19 +2933,19 @@ bool Resolver::ValidatePipelineStages() {
       if (!call.intrinsic->SupportedStages().Contains(stage)) {
         std::stringstream err;
         err << "built-in cannot be used by " << stage << " pipeline stage";
-        diagnostics_.add_error(err.str(), call.call->source());
+        AddError(err.str(), call.call->source());
         if (func != entry_point) {
           TraverseCallChain(entry_point, func, [&](FunctionInfo* f) {
-            diagnostics_.add_note(
-                "called by function '" +
-                    builder_->Symbols().NameFor(f->declaration->symbol()) + "'",
-                f->declaration->source());
+            AddNote("called by function '" +
+                        builder_->Symbols().NameFor(f->declaration->symbol()) +
+                        "'",
+                    f->declaration->source());
           });
-          diagnostics_.add_note("called by entry point '" +
-                                    builder_->Symbols().NameFor(
-                                        entry_point->declaration->symbol()) +
-                                    "'",
-                                entry_point->declaration->source());
+          AddNote("called by entry point '" +
+                      builder_->Symbols().NameFor(
+                          entry_point->declaration->symbol()) +
+                      "'",
+                  entry_point->declaration->source());
         }
         return false;
       }
@@ -3034,7 +2981,7 @@ void Resolver::TraverseCallChain(FunctionInfo* from,
       return;
     }
   }
-  TINT_ICE(diagnostics_)
+  TINT_ICE(Resolver, diagnostics_)
       << "TraverseCallChain() 'from' does not transitively call 'to'";
 }
 
@@ -3072,7 +3019,7 @@ void Resolver::CreateSemanticNodes() const {
         constant_id = next_constant_id;
         while (constant_ids_.count(constant_id)) {
           if (constant_id == UINT16_MAX) {
-            TINT_ICE(builder_->Diagnostics())
+            TINT_ICE(Resolver, builder_->Diagnostics())
                 << "no more pipeline constant IDs available";
             return;
           }
@@ -3102,8 +3049,8 @@ void Resolver::CreateSemanticNodes() const {
       } else {
         auto* sem_user = sem_expr->As<sem::VariableUser>();
         if (!sem_user) {
-          TINT_ICE(diagnostics_) << "expected sem::VariableUser, got "
-                                 << sem_expr->TypeInfo().name;
+          TINT_ICE(Resolver, diagnostics_) << "expected sem::VariableUser, got "
+                                           << sem_expr->TypeInfo().name;
         }
         sem_var->AddUser(sem_user);
       }
@@ -3184,7 +3131,7 @@ bool Resolver::DefaultAlignAndSize(const sem::Type* ty,
   }
   if (auto* vec = ty->As<sem::Vector>()) {
     if (vec->size() < 2 || vec->size() > 4) {
-      TINT_UNREACHABLE(diagnostics_)
+      TINT_UNREACHABLE(Resolver, diagnostics_)
           << "Invalid vector size: vec" << vec->size();
       return false;
     }
@@ -3195,7 +3142,7 @@ bool Resolver::DefaultAlignAndSize(const sem::Type* ty,
   if (auto* mat = ty->As<sem::Matrix>()) {
     if (mat->columns() < 2 || mat->columns() > 4 || mat->rows() < 2 ||
         mat->rows() > 4) {
-      TINT_UNREACHABLE(diagnostics_)
+      TINT_UNREACHABLE(Resolver, diagnostics_)
           << "Invalid matrix size: mat" << mat->columns() << "x" << mat->rows();
       return false;
     }
@@ -3216,7 +3163,8 @@ bool Resolver::DefaultAlignAndSize(const sem::Type* ty,
   if (auto* a = ty->As<sem::Atomic>()) {
     return DefaultAlignAndSize(a->Type(), align, size);
   }
-  TINT_UNREACHABLE(diagnostics_) << "invalid type " << ty->TypeInfo().name;
+  TINT_UNREACHABLE(Resolver, diagnostics_)
+      << "invalid type " << ty->TypeInfo().name;
   return false;
 }
 
@@ -3229,10 +3177,9 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
   }
 
   if (!IsPlain(el_ty)) {  // Check must come before DefaultAlignAndSize()
-    builder_->Diagnostics().add_error(
-        el_ty->FriendlyName(builder_->Symbols()) +
-            " cannot be used as an element type of an array",
-        source);
+    AddError(el_ty->FriendlyName(builder_->Symbols()) +
+                 " cannot be used as an element type of an array",
+             source);
     return nullptr;
   }
 
@@ -3258,8 +3205,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
       continue;
     }
 
-    diagnostics_.add_error("decoration is not valid for array types",
-                           deco->source());
+    AddError("decoration is not valid for array types", deco->source());
     return nullptr;
   }
 
@@ -3290,7 +3236,7 @@ bool Resolver::ValidateArray(const sem::Array* arr, const Source& source) {
       // A structure type with the block attribute must not be:
       // * the element type of an array type
       // * the member type in another structure
-      diagnostics_.add_error(
+      AddError(
           "A structure type with a [[block]] decoration cannot be used as an "
           "element of an array",
           source);
@@ -3312,7 +3258,7 @@ bool Resolver::ValidateArrayStrideDecoration(const ast::StrideDecoration* deco,
     // Arrays decorated with the stride attribute must have a stride that is
     // at least the size of the element type, and be a multiple of the
     // element type's alignment value.
-    diagnostics_.add_error(
+    AddError(
         "arrays decorated with the stride attribute must have a stride "
         "that is at least the size of the element type, and be a multiple "
         "of the element type's alignment value.",
@@ -3327,19 +3273,19 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
     if (auto* r = member->Type()->As<sem::Array>()) {
       if (r->IsRuntimeSized()) {
         if (member != str->Members().back()) {
-          diagnostics_.add_error(
+          AddError(
               "v-0015",
               "runtime arrays may only appear as the last member of a struct",
               member->Declaration()->source());
           return false;
         }
         if (!str->IsBlockDecorated()) {
-          diagnostics_.add_error(
-              "v-0015",
-              "a struct containing a runtime-sized array "
-              "requires the [[block]] attribute: '" +
-                  builder_->Symbols().NameFor(str->Declaration()->name()) + "'",
-              member->Declaration()->source());
+          AddError("v-0015",
+                   "a struct containing a runtime-sized array "
+                   "requires the [[block]] attribute: '" +
+                       builder_->Symbols().NameFor(str->Declaration()->name()) +
+                       "'",
+                   member->Declaration()->source());
           return false;
         }
       }
@@ -3351,8 +3297,8 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
             deco->Is<ast::StructMemberOffsetDecoration>() ||
             deco->Is<ast::StructMemberSizeDecoration>() ||
             deco->Is<ast::StructMemberAlignDecoration>())) {
-        diagnostics_.add_error("decoration is not valid for structure members",
-                               deco->source());
+        AddError("decoration is not valid for structure members",
+                 deco->source());
         return false;
       }
       if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
@@ -3366,11 +3312,10 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
       if (auto* member_struct_type_block_decoration =
               ast::GetDecoration<ast::StructBlockDecoration>(
                   member_struct_type->Declaration()->decorations())) {
-        diagnostics_.add_error(
-            "structs must not contain [[block]] decorated struct members",
-            member->Declaration()->source());
-        diagnostics_.add_note("see member's struct decoration here",
-                              member_struct_type_block_decoration->source());
+        AddError("structs must not contain [[block]] decorated struct members",
+                 member->Declaration()->source());
+        AddNote("see member's struct decoration here",
+                member_struct_type_block_decoration->source());
         return false;
       }
     }
@@ -3378,8 +3323,8 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
 
   for (auto* deco : str->Declaration()->decorations()) {
     if (!(deco->Is<ast::StructBlockDecoration>())) {
-      diagnostics_.add_error("decoration is not valid for struct declarations",
-                             deco->source());
+      AddError("decoration is not valid for struct declarations",
+               deco->source());
       return false;
     }
   }
@@ -3423,9 +3368,9 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
 
     // Validate member type
     if (!IsPlain(type)) {
-      diagnostics_.add_error(
-          type->FriendlyName(builder_->Symbols()) +
-          " cannot be used as the type of a structure member");
+      AddError(type->FriendlyName(builder_->Symbols()) +
+                   " cannot be used as the type of a structure member",
+               member->source());
       return nullptr;
     }
 
@@ -3449,8 +3394,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         // Offset decorations are not part of the WGSL spec, but are emitted
         // by the SPIR-V reader.
         if (o->offset() < struct_size) {
-          diagnostics_.add_error("offsets must be in ascending order",
-                                 o->source());
+          AddError("offsets must be in ascending order", o->source());
           return nullptr;
         }
         offset = o->offset();
@@ -3458,19 +3402,17 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         has_offset_deco = true;
       } else if (auto* a = deco->As<ast::StructMemberAlignDecoration>()) {
         if (a->align() <= 0 || !utils::IsPowerOfTwo(a->align())) {
-          diagnostics_.add_error(
-              "align value must be a positive, power-of-two integer",
-              a->source());
+          AddError("align value must be a positive, power-of-two integer",
+                   a->source());
           return nullptr;
         }
         align = a->align();
         has_align_deco = true;
       } else if (auto* s = deco->As<ast::StructMemberSizeDecoration>()) {
         if (s->size() < size) {
-          diagnostics_.add_error(
-              "size must be at least as big as the type's size (" +
-                  std::to_string(size) + ")",
-              s->source());
+          AddError("size must be at least as big as the type's size (" +
+                       std::to_string(size) + ")",
+                   s->source());
           return nullptr;
         }
         size = s->size();
@@ -3479,7 +3421,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     }
 
     if (has_offset_deco && (has_align_deco || has_size_deco)) {
-      diagnostics_.add_error(
+      AddError(
           "offset decorations cannot be used with align or size decorations",
           member->source());
       return nullptr;
@@ -3525,13 +3467,12 @@ bool Resolver::ValidateReturn(const ast::ReturnStatement* ret) {
                                     : builder_->create<sem::Void>();
 
   if (func_type->UnwrapRef() != ret_type) {
-    diagnostics_.add_error("v-000y",
-                           "return statement type must match its function "
-                           "return type, returned '" +
-                               ret_type->FriendlyName(builder_->Symbols()) +
-                               "', expected '" +
-                               current_function_->return_type_name + "'",
-                           ret->source());
+    AddError("v-000y",
+             "return statement type must match its function "
+             "return type, returned '" +
+                 ret_type->FriendlyName(builder_->Symbols()) + "', expected '" +
+                 current_function_->return_type_name + "'",
+             ret->source());
     return false;
   }
 
@@ -3556,10 +3497,10 @@ bool Resolver::Return(ast::ReturnStatement* ret) {
 bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
   auto* cond_type = TypeOf(s->condition())->UnwrapRef();
   if (!cond_type->is_integer_scalar()) {
-    diagnostics_.add_error("v-0025",
-                           "switch statement selector expression must be of a "
-                           "scalar integer type",
-                           s->condition()->source());
+    AddError("v-0025",
+             "switch statement selector expression must be of a "
+             "scalar integer type",
+             s->condition()->source());
     return false;
   }
 
@@ -3570,9 +3511,9 @@ bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
     if (case_stmt->IsDefault()) {
       if (has_default) {
         // More than one default clause
-        diagnostics_.add_error(
-            "v-0008", "switch statement must have exactly one default clause",
-            case_stmt->source());
+        AddError("v-0008",
+                 "switch statement must have exactly one default clause",
+                 case_stmt->source());
         return false;
       }
       has_default = true;
@@ -3580,21 +3521,20 @@ bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
 
     for (auto* selector : case_stmt->selectors()) {
       if (cond_type != TypeOf(selector)) {
-        diagnostics_.add_error("v-0026",
-                               "the case selector values must have the same "
-                               "type as the selector expression.",
-                               case_stmt->source());
+        AddError("v-0026",
+                 "the case selector values must have the same "
+                 "type as the selector expression.",
+                 case_stmt->source());
         return false;
       }
 
       auto v = selector->value_as_u32();
       if (selector_set.find(v) != selector_set.end()) {
-        diagnostics_.add_error(
-            "v-0027",
-            "a literal value must not appear more than once in "
-            "the case selectors for a switch statement: '" +
-                builder_->str(selector) + "'",
-            case_stmt->source());
+        AddError("v-0027",
+                 "a literal value must not appear more than once in "
+                 "the case selectors for a switch statement: '" +
+                     builder_->str(selector) + "'",
+                 case_stmt->source());
         return false;
       }
       selector_set.emplace(v);
@@ -3603,8 +3543,7 @@ bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
 
   if (!has_default) {
     // No default clause
-    diagnostics_.add_error("switch statement must have a default clause",
-                           s->source());
+    AddError("switch statement must have a default clause", s->source());
     return false;
   }
 
@@ -3612,10 +3551,10 @@ bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
     auto* last_clause = s->body().back()->As<ast::CaseStatement>();
     auto* last_stmt = last_clause->body()->last();
     if (last_stmt && last_stmt->Is<ast::FallthroughStatement>()) {
-      diagnostics_.add_error("v-0028",
-                             "a fallthrough statement must not appear as "
-                             "the last statement in last clause of a switch",
-                             last_stmt->source());
+      AddError("v-0028",
+               "a fallthrough statement must not appear as "
+               "the last statement in last clause of a switch",
+               last_stmt->source());
       return false;
     }
   }
@@ -3663,9 +3602,8 @@ bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
   auto* lhs_ref = lhs_type->As<sem::Reference>();
   if (!lhs_ref) {
     // LHS is not a reference, so it has no storage.
-    diagnostics_.add_error(
-        "cannot assign to value of type '" + TypeNameOf(a->lhs()) + "'",
-        a->lhs()->source());
+    AddError("cannot assign to value of type '" + TypeNameOf(a->lhs()) + "'",
+             a->lhs()->source());
 
     return false;
   }
@@ -3675,13 +3613,13 @@ bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
 
   // Value type has to match storage type
   if (storage_type != value_type) {
-    diagnostics_.add_error("cannot assign '" + TypeNameOf(a->rhs()) + "' to '" +
-                               TypeNameOf(a->lhs()) + "'",
-                           a->source());
+    AddError("cannot assign '" + TypeNameOf(a->rhs()) + "' to '" +
+                 TypeNameOf(a->lhs()) + "'",
+             a->source());
     return false;
   }
   if (lhs_ref->Access() == ast::Access::kRead) {
-    diagnostics_.add_error(
+    AddError(
         "cannot store into a read-only type '" + TypeNameOf(a->lhs()) + "'",
         a->source());
     return false;
@@ -3695,10 +3633,8 @@ bool Resolver::ValidateNoDuplicateDecorations(
   for (auto* d : decorations) {
     auto res = seen.emplace(&d->TypeInfo(), d->source());
     if (!res.second && !d->Is<ast::InternalDecoration>()) {
-      diagnostics_.add_error("duplicate " + d->name() + " decoration",
-                             d->source());
-      diagnostics_.add_note("first decoration declared here",
-                            res.first->second);
+      AddError("duplicate " + d->name() + " decoration", d->source());
+      AddNote("first decoration declared here", res.first->second);
       return false;
     }
   }
@@ -3723,7 +3659,7 @@ bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
         err << "while analysing structure member "
             << str->FriendlyName(builder_->Symbols()) << "."
             << builder_->Symbols().NameFor(member->Declaration()->symbol());
-        diagnostics_.add_note(err.str(), member->Declaration()->source());
+        AddNote(err.str(), member->Declaration()->source());
         return false;
       }
     }
@@ -3740,7 +3676,7 @@ bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
     err << "Type '" << ty->FriendlyName(builder_->Symbols())
         << "' cannot be used in storage class '" << sc
         << "' as it is non-host-shareable";
-    diagnostics_.add_error(err.str(), usage);
+    AddError(err.str(), usage);
     return false;
   }
 
@@ -3758,7 +3694,7 @@ bool Resolver::GetScalarConstExprValue(ast::Expression* expr, T* result) {
       // Recurse into the constructor argument expression.
       return GetScalarConstExprValue(type_constructor->values()[0], result);
     } else {
-      TINT_ICE(diagnostics_) << "malformed scalar type constructor";
+      TINT_ICE(Resolver, diagnostics_) << "malformed scalar type constructor";
     }
   } else if (auto* scalar = expr->As<ast::ScalarConstructorExpression>()) {
     // Cast literal to result type.
@@ -3772,10 +3708,10 @@ bool Resolver::GetScalarConstExprValue(ast::Expression* expr, T* result) {
       *result = static_cast<T>(bool_lit->IsTrue());
       return true;
     } else {
-      TINT_ICE(diagnostics_) << "unhandled scalar constructor";
+      TINT_ICE(Resolver, diagnostics_) << "unhandled scalar constructor";
     }
   } else {
-    TINT_ICE(diagnostics_) << "unhandled constant expression";
+    TINT_ICE(Resolver, diagnostics_) << "unhandled constant expression";
   }
 
   return false;
@@ -3785,8 +3721,9 @@ template <typename F>
 bool Resolver::BlockScope(const ast::BlockStatement* block, F&& callback) {
   auto* sem_block = builder_->Sem().Get<sem::BlockStatement>(block);
   if (!sem_block) {
-    TINT_ICE(diagnostics_) << "Resolver::BlockScope() called on a block for "
-                              "which semantic information is not available";
+    TINT_ICE(Resolver, diagnostics_)
+        << "Resolver::BlockScope() called on a block for "
+           "which semantic information is not available";
     return false;
   }
   TINT_SCOPED_ASSIGNMENT(current_block_,
@@ -3805,17 +3742,35 @@ std::string Resolver::VectorPretty(uint32_t size,
 
 void Resolver::Mark(const ast::Node* node) {
   if (node == nullptr) {
-    TINT_ICE(diagnostics_) << "Resolver::Mark() called with nullptr";
+    TINT_ICE(Resolver, diagnostics_) << "Resolver::Mark() called with nullptr";
   }
   if (marked_.emplace(node).second) {
     return;
   }
-  TINT_ICE(diagnostics_)
+  TINT_ICE(Resolver, diagnostics_)
       << "AST node '" << node->TypeInfo().name
       << "' was encountered twice in the same AST of a Program\n"
       << "At: " << node->source() << "\n"
       << "Content: " << builder_->str(node) << "\n"
       << "Pointer: " << node;
+}
+
+void Resolver::AddError(const char* code,
+                        const std::string& msg,
+                        const Source& source) const {
+  diagnostics_.add_error(diag::System::Resolver, code, msg, source);
+}
+
+void Resolver::AddError(const std::string& msg, const Source& source) const {
+  diagnostics_.add_error(diag::System::Resolver, msg, source);
+}
+
+void Resolver::AddWarning(const std::string& msg, const Source& source) const {
+  diagnostics_.add_warning(diag::System::Resolver, msg, source);
+}
+
+void Resolver::AddNote(const std::string& msg, const Source& source) const {
+  diagnostics_.add_note(diag::System::Resolver, msg, source);
 }
 
 Resolver::VariableInfo::VariableInfo(const ast::Variable* decl,

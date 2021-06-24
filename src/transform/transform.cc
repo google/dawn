@@ -134,7 +134,7 @@ ast::Type* Transform::CreateASTTypeFor(CloneContext* ctx, const sem::Type* ty) {
   if (auto* s = ty->As<sem::Sampler>()) {
     return ctx->dst->create<ast::Sampler>(s->kind());
   }
-  TINT_UNREACHABLE(ctx->dst->Diagnostics())
+  TINT_UNREACHABLE(Transform, ctx->dst->Diagnostics())
       << "Unhandled type: " << ty->TypeInfo().name;
   return nullptr;
 }
