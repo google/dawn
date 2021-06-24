@@ -155,11 +155,10 @@ namespace dawn_native {
                     break;
                 }
                 case BindingInfoType::StorageTexture: {
-                    ASSERT(!texture->IsMultisampledTexture());
-
                     if (!(texture->GetUsage() & wgpu::TextureUsage::Storage)) {
                         return DAWN_VALIDATION_ERROR("Storage Texture binding usage mismatch");
                     }
+                    ASSERT(!texture->IsMultisampledTexture());
 
                     if (texture->GetFormat().format != bindingInfo.storageTexture.format) {
                         return DAWN_VALIDATION_ERROR("Storage texture format mismatch");

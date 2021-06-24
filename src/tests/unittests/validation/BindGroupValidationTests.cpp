@@ -388,7 +388,7 @@ TEST_F(BindGroupValidationTest, ExternalTextureBindingType) {
     }
 }
 
-// Check that a texture must have the correct usage
+// Check that a texture binding must have the correct usage
 TEST_F(BindGroupValidationTest, TextureUsage) {
     wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
         device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float}});
@@ -401,6 +401,38 @@ TEST_F(BindGroupValidationTest, TextureUsage) {
         CreateTexture(wgpu::TextureUsage::RenderAttachment, wgpu::TextureFormat::RGBA8Unorm, 1);
     wgpu::TextureView outputTextureView = outputTexture.CreateView();
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, outputTextureView}}));
+}
+
+// Check that a storage texture binding must have the correct usage
+TEST_F(BindGroupValidationTest, StorageTextureUsage) {
+    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadOnly,
+                  wgpu::TextureFormat::RGBA8Uint}});
+
+    wgpu::TextureDescriptor descriptor;
+    descriptor.dimension = wgpu::TextureDimension::e2D;
+    descriptor.size = {16, 16, 1};
+    descriptor.sampleCount = 1;
+    descriptor.mipLevelCount = 1;
+    descriptor.usage = wgpu::TextureUsage::Storage;
+    descriptor.format = wgpu::TextureFormat::RGBA8Uint;
+
+    wgpu::TextureView view = device.CreateTexture(&descriptor).CreateView();
+
+    // Control case: setting a storage texture view works.
+    utils::MakeBindGroup(device, layout, {{0, view}});
+
+    // Sampled texture is invalid with storage buffer binding
+    descriptor.usage = wgpu::TextureUsage::Sampled;
+    descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+    view = device.CreateTexture(&descriptor).CreateView();
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, view}}));
+
+    // Multisampled texture is invalid with storage buffer binding
+    // Regression case for crbug.com/dawn/614 where this hit an ASSERT.
+    descriptor.sampleCount = 4;
+    view = device.CreateTexture(&descriptor).CreateView();
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, view}}));
 }
 
 // Check that a texture must have the correct component type
