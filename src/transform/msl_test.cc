@@ -36,8 +36,8 @@ fn main() {
   auto* expect = R"(
 [[stage(compute)]]
 fn main([[builtin(local_invocation_index)]] local_invocation_index : u32) {
-  [[internal(disable_validation__function_var_storage_class)]] var<workgroup> tint_symbol_1 : f32;
-  [[internal(disable_validation__function_var_storage_class)]] var<private> tint_symbol_2 : f32;
+  [[internal(disable_validation__ignore_storage_class)]] var<workgroup> tint_symbol_1 : f32;
+  [[internal(disable_validation__ignore_storage_class)]] var<private> tint_symbol_2 : f32;
   if ((local_invocation_index == 0u)) {
     tint_symbol_1 = f32();
   }
@@ -93,8 +93,8 @@ fn foo(a : f32, tint_symbol_3 : ptr<private, f32>, tint_symbol_4 : ptr<workgroup
 
 [[stage(compute)]]
 fn main([[builtin(local_invocation_index)]] local_invocation_index : u32) {
-  [[internal(disable_validation__function_var_storage_class)]] var<workgroup> tint_symbol_5 : f32;
-  [[internal(disable_validation__function_var_storage_class)]] var<private> tint_symbol_6 : f32;
+  [[internal(disable_validation__ignore_storage_class)]] var<workgroup> tint_symbol_5 : f32;
+  [[internal(disable_validation__ignore_storage_class)]] var<private> tint_symbol_6 : f32;
   if ((local_invocation_index == 0u)) {
     tint_symbol_5 = f32();
   }
@@ -122,8 +122,8 @@ fn main() {
   auto* expect = R"(
 [[stage(compute)]]
 fn main() {
-  [[internal(disable_validation__function_var_storage_class)]] var<private> tint_symbol : f32 = 1.0;
-  [[internal(disable_validation__function_var_storage_class)]] var<private> tint_symbol_1 : f32 = f32();
+  [[internal(disable_validation__ignore_storage_class)]] var<private> tint_symbol : f32 = 1.0;
+  [[internal(disable_validation__ignore_storage_class)]] var<private> tint_symbol_1 : f32 = f32();
   let x : f32 = (tint_symbol + tint_symbol_1);
 }
 )";
@@ -150,8 +150,8 @@ fn main() {
   auto* expect = R"(
 [[stage(compute)]]
 fn main([[builtin(local_invocation_index)]] local_invocation_index : u32) {
-  [[internal(disable_validation__function_var_storage_class)]] var<workgroup> tint_symbol_1 : f32;
-  [[internal(disable_validation__function_var_storage_class)]] var<private> tint_symbol_2 : f32;
+  [[internal(disable_validation__ignore_storage_class)]] var<workgroup> tint_symbol_1 : f32;
+  [[internal(disable_validation__ignore_storage_class)]] var<private> tint_symbol_2 : f32;
   if ((local_invocation_index == 0u)) {
     tint_symbol_1 = f32();
   }

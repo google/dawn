@@ -718,11 +718,14 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
         return false;
       }
     } else {
-      if (!(deco->Is<ast::BindingDecoration>() ||
-            deco->Is<ast::BuiltinDecoration>() ||
-            deco->Is<ast::GroupDecoration>() ||
-            deco->Is<ast::LocationDecoration>() ||
-            deco->Is<ast::InternalDecoration>())) {
+      bool is_shader_io_decoration =
+          deco->IsAnyOf<ast::BuiltinDecoration, ast::LocationDecoration>();
+      bool has_io_storage_class =
+          info->storage_class == ast::StorageClass::kInput ||
+          info->storage_class == ast::StorageClass::kOutput;
+      if (!(deco->IsAnyOf<ast::BindingDecoration, ast::GroupDecoration,
+                          ast::InternalDecoration>()) &&
+          (!is_shader_io_decoration || !has_io_storage_class)) {
         AddError("decoration is not valid for variables", deco->source());
         return false;
       }
@@ -890,6 +893,14 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
     AddError("variables of type '" + info->type_name +
                  "' must not have a storage class",
              var->source());
+    return false;
+  }
+
+  if (!IsValidationDisabled(var->decorations(),
+                            ast::DisabledValidation::kIgnoreStorageClass) &&
+      (var->declared_storage_class() == ast::StorageClass::kInput ||
+       var->declared_storage_class() == ast::StorageClass::kOutput)) {
+    AddError("invalid use of input/output storage class", var->source());
     return false;
   }
 
@@ -2759,9 +2770,8 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
 
   if (!var->is_const()) {
     if (info->storage_class != ast::StorageClass::kFunction &&
-        !IsValidationDisabled(
-            var->decorations(),
-            ast::DisabledValidation::kFunctionVarStorageClass)) {
+        !IsValidationDisabled(var->decorations(),
+                              ast::DisabledValidation::kIgnoreStorageClass)) {
       if (info->storage_class != ast::StorageClass::kNone) {
         AddError("function variable has a non-function storage class",
                  stmt->source());

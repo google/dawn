@@ -20,6 +20,7 @@
 #include "spirv/unified1/GLSL.std.450.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/fallthrough_statement.h"
+#include "src/ast/internal_decoration.h"
 #include "src/ast/override_decoration.h"
 #include "src/sem/array.h"
 #include "src/sem/atomic_type.h"
@@ -843,7 +844,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
                                        Operand::Int(group->value())});
     } else if (deco->Is<ast::OverrideDecoration>()) {
       // Spec constants are handled elsewhere
-    } else {
+    } else if (!deco->Is<ast::InternalDecoration>()) {
       error_ = "unknown decoration";
       return false;
     }

@@ -94,31 +94,20 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_ReadWrite) {
             R"([[binding(0), group(0)]] var<storage, read_write> a : S;
 )");
 }
+
 TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
-  auto* v = Global("a", ty.f32(), ast::StorageClass::kPrivate, nullptr,
+  auto* v = Global("a", ty.sampler(ast::SamplerKind::kSampler),
+                   ast::StorageClass::kNone, nullptr,
                    ast::DecorationList{
-                       Location(2),
-                   });
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
-  EXPECT_EQ(gen.result(), R"([[location(2)]] var<private> a : f32;
-)");
-}
-
-TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
-  auto* v = Global("a", ty.f32(), ast::StorageClass::kPrivate, nullptr,
-                   ast::DecorationList{
-                       Builtin(ast::Builtin::kPosition),
-                       Location(2),
+                       create<ast::GroupDecoration>(1),
+                       create<ast::BindingDecoration>(2),
                    });
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
   EXPECT_EQ(gen.result(),
-            R"([[builtin(position), location(2)]] var<private> a : f32;
+            R"([[group(1), binding(2)]] var a : sampler;
 )");
 }
 

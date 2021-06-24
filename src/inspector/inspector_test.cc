@@ -14,6 +14,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/call_statement.h"
+#include "src/ast/disable_validation_decoration.h"
 #include "src/ast/override_decoration.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct_block_decoration.h"
@@ -88,9 +89,15 @@ class InspectorHelper : public ProgramBuilder {
       std::tie(in, out) = inout;
 
       Global(in, ty.u32(), ast::StorageClass::kInput, nullptr,
-             ast::DecorationList{Location(location++)});
+             ast::DecorationList{
+                 Location(location++),
+                 ASTNodes().Create<ast::DisableValidationDecoration>(
+                     ID(), ast::DisabledValidation::kIgnoreStorageClass)});
       Global(out, ty.u32(), ast::StorageClass::kOutput, nullptr,
-             ast::DecorationList{Location(location++)});
+             ast::DecorationList{
+                 Location(location++),
+                 ASTNodes().Create<ast::DisableValidationDecoration>(
+                     ID(), ast::DisabledValidation::kIgnoreStorageClass)});
     }
   }
 
@@ -1437,9 +1444,15 @@ TEST_F(InspectorGetEntryPointTest,
 // TODO(crbug.com/tint/697): Remove this.
 TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables_Legacy) {
   Global("in_var", ty.u32(), ast::StorageClass::kInput, nullptr,
-         ast::DecorationList{Builtin(ast::Builtin::kPosition)});
+         ast::DecorationList{
+             Builtin(ast::Builtin::kPosition),
+             ASTNodes().Create<ast::DisableValidationDecoration>(
+                 ID(), ast::DisabledValidation::kIgnoreStorageClass)});
   Global("out_var", ty.u32(), ast::StorageClass::kOutput, nullptr,
-         ast::DecorationList{Location(0)});
+         ast::DecorationList{
+             Location(0),
+             ASTNodes().Create<ast::DisableValidationDecoration>(
+                 ID(), ast::DisabledValidation::kIgnoreStorageClass)});
 
   MakeInOutVariableBodyFunction("func", {{"in_var", "out_var"}}, {});
 

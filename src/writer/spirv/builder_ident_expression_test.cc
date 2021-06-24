@@ -46,7 +46,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
-  auto* v = Global("var", ty.f32(), ast::StorageClass::kOutput);
+  auto* v = Global("var", ty.f32(), ast::StorageClass::kPrivate);
 
   auto* expr = Expr("var");
   WrapInFunction(expr);
@@ -58,9 +58,9 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
-%2 = OpTypePointer Output %3
+%2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
-%1 = OpVariable %2 Output %4
+%1 = OpVariable %2 Private %4
 )");
 
   EXPECT_EQ(b.GenerateIdentifierExpression(expr), 1u);

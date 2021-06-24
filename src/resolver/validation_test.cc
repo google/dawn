@@ -398,7 +398,7 @@ TEST_F(ResolverValidationTest, StorageClass_TextureExplicitStorageClass) {
 }
 
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {
-  Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kInput);
+  Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
   auto* ident = create<ast::IdentifierExpression>(
       Source{{Source::Location{3, 3}, Source::Location{3, 7}}},
@@ -412,7 +412,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {
 }
 
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_MixedChars) {
-  Global("my_vec", ty.vec4<f32>(), ast::StorageClass::kInput);
+  Global("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
 
   auto* ident = create<ast::IdentifierExpression>(
       Source{{Source::Location{3, 3}, Source::Location{3, 7}}},
@@ -428,7 +428,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_MixedChars) {
 }
 
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadLength) {
-  Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kInput);
+  Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
   auto* ident = create<ast::IdentifierExpression>(
       Source{{Source::Location{3, 3}, Source::Location{3, 8}}},
@@ -441,7 +441,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadLength) {
 }
 
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadIndex) {
-  Global("my_vec", ty.vec2<f32>(), ast::StorageClass::kInput);
+  Global("my_vec", ty.vec2<f32>(), ast::StorageClass::kPrivate);
 
   auto* ident = create<ast::IdentifierExpression>(Source{{3, 3}},
                                                   Symbols().Register("z"));
@@ -1897,7 +1897,7 @@ TEST_F(ResolverValidationTest,
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Error) {
   auto* alias = Alias("UnsignedInt", ty.u32());
-  Global("uint_var", ty.Of(alias), ast::StorageClass::kInput);
+  Global("uint_var", ty.Of(alias), ast::StorageClass::kPrivate);
 
   auto* tc = vec2<f32>(Expr(Source{{12, 34}}, "uint_var"));
   WrapInFunction(tc);
@@ -1911,8 +1911,8 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Error) {
 TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Success) {
   auto* f32_alias = Alias("Float32", ty.f32());
   auto* vec2_alias = Alias("VectorFloat2", ty.vec2<f32>());
-  Global("my_f32", ty.Of(f32_alias), ast::StorageClass::kInput);
-  Global("my_vec2", ty.Of(vec2_alias), ast::StorageClass::kInput);
+  Global("my_f32", ty.Of(f32_alias), ast::StorageClass::kPrivate);
+  Global("my_vec2", ty.Of(vec2_alias), ast::StorageClass::kPrivate);
 
   auto* tc = vec3<f32>("my_vec2", "my_f32");
   WrapInFunction(tc);

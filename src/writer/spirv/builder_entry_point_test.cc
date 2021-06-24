@@ -292,6 +292,22 @@ OpFunctionEnd
   Validate(b);
 }
 
+TEST_F(BuilderTest, SampleIndex_SampleRateShadingCapability) {
+  Func("main",
+       {Param("sample_index", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)})},
+       ty.void_(), {}, {Stage(ast::PipelineStage::kCompute)});
+
+  spirv::Builder& b = SanitizeAndBuild();
+
+  ASSERT_TRUE(b.Build()) << b.error();
+
+  // Make sure we generate the SampleRateShading capability.
+  EXPECT_EQ(DumpInstructions(b.capabilities()),
+            "OpCapability Shader\n"
+            "OpCapability SampleRateShading\n");
+  EXPECT_EQ(DumpInstructions(b.annots()), "OpDecorate %1 BuiltIn SampleId\n");
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace writer

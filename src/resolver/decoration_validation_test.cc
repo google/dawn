@@ -336,7 +336,7 @@ TEST_P(VariableDecorationTest, IsValid) {
            ast::StorageClass::kNone, nullptr,
            createDecorations(Source{{12, 34}}, *this, params.kind));
   } else {
-    Global("a", ty.f32(), ast::StorageClass::kInput, nullptr,
+    Global("a", ty.f32(), ast::StorageClass::kPrivate, nullptr,
            createDecorations(Source{{12, 34}}, *this, params.kind));
   }
 
@@ -357,9 +357,9 @@ INSTANTIATE_TEST_SUITE_P(
     VariableDecorationTest,
     testing::Values(TestParams{DecorationKind::kAlign, false},
                     TestParams{DecorationKind::kBinding, false},
-                    TestParams{DecorationKind::kBuiltin, true},
+                    TestParams{DecorationKind::kBuiltin, false},
                     TestParams{DecorationKind::kGroup, false},
-                    TestParams{DecorationKind::kLocation, true},
+                    TestParams{DecorationKind::kLocation, false},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
                     TestParams{DecorationKind::kSize, false},
@@ -514,7 +514,7 @@ TEST_P(ArrayStrideTest, All) {
 
   auto* arr = ty.array(Source{{12, 34}}, el_ty, 4, params.stride);
 
-  Global("myarray", arr, ast::StorageClass::kInput);
+  Global("myarray", arr, ast::StorageClass::kPrivate);
 
   if (params.should_pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -598,7 +598,7 @@ TEST_F(ArrayStrideTest, DuplicateDecoration) {
                            create<ast::StrideDecoration>(Source{{56, 78}}, 4),
                        });
 
-  Global("myarray", arr, ast::StorageClass::kInput);
+  Global("myarray", arr, ast::StorageClass::kPrivate);
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
