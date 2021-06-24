@@ -11,6 +11,7 @@ vars = {
   'clang_revision': 'eb5ab41f3801e2085208204fd71a490573d72dfd',
   'googletest_revision': '5c8ca58edfb304b2dd5e6061f83387470826dd87',
   'gpuweb_cts_revision': '177a4faf0a7ce6f8c64b42a715c634e363912a74',
+  'protobuf_revision': 'fde7cf7358ec7cd69e8db9be4f1fa6a5c431386a',
   'spirv_headers_revision': 'f5417a4b6633c3217c9a1bc2f0c70b1454975ba7',
   'spirv_tools_revision': 'ecdd9a3e6bd384bf51d096b507291faa10f14685',
   'testing_revision': '2691851e49de541c3fe42fa8692ddcdee938162f',
@@ -42,6 +43,9 @@ deps = {
 
   'third_party/googletest': Var('chromium_git') + Var('github') +
       '/google/googletest.git@' + Var('googletest_revision'),
+
+  'third_party/protobuf': Var('chromium_git') + Var('github') +
+        '/protocolbuffers/protobuf.git@' + Var('protobuf_revision'),
 }
 
 hooks = [

@@ -16,6 +16,7 @@
 #define FUZZERS_TINT_COMMON_FUZZER_H_
 
 #include <cstring>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -108,12 +109,20 @@ class CommonFuzzer {
 
   int Run(const uint8_t* data, size_t size);
 
+  const writer::Writer* GetWriter() const;
+
+  const std::string& GetErrors() const { return errors_; }
+
+  bool HasErrors() const { return !errors_.empty(); }
+
  private:
   InputFormat input_;
   OutputFormat output_;
+  std::unique_ptr<writer::Writer> writer_;
   transform::Manager* transform_manager_;
   transform::DataMap transform_inputs_;
   bool inspector_enabled_;
+  std::string errors_;
 };
 
 }  // namespace fuzzers

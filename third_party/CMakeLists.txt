@@ -17,6 +17,13 @@ if (${TINT_BUILD_TESTS} AND NOT TARGET gmock)
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/googletest EXCLUDE_FROM_ALL)
 endif()
 
+if (${TINT_BUILD_SPIRV_TOOLS_FUZZER} AND (NOT TARGET protobuf::libprotobuf OR NOT TARGET protobuf::protoc))
+  set(SPIRV_BUILD_FUZZER ON CACHE BOOL "Build spirv-fuzz")
+  set(protobuf_BUILD_TESTS OFF CACHE BOOL "Disable protobuf tests")
+  set(protobuf_MSVC_STATIC_RUNTIME OFF CACHE BOOL "Do not build protobuf static runtime")
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/protobuf/cmake)
+endif()
+
 if(${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
   if (NOT IS_DIRECTORY "${SPIRV-Headers_SOURCE_DIR}")
     set(SPIRV-Headers_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/spirv-headers CACHE STRING "")

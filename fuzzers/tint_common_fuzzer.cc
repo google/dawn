@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "src/ast/module.h"
+#include "src/diagnostic/formatter.h"
 #include "src/program.h"
 
 namespace tint {
@@ -191,6 +192,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
   }
 
   if (!program.IsValid()) {
+    errors_ = diag::Formatter().format(program.Diagnostics());
     return 0;
   }
 
@@ -199,58 +201,68 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 
     auto entry_points = inspector.GetEntryPoints();
     if (inspector.has_error()) {
+      errors_ = inspector.error();
       return 0;
     }
 
     for (auto& ep : entry_points) {
       auto remapped_name = inspector.GetRemappedNameForEntryPoint(ep.name);
       if (inspector.has_error()) {
+        errors_ = inspector.error();
         return 0;
       }
 
       auto constant_ids = inspector.GetConstantIDs();
       if (inspector.has_error()) {
+        errors_ = inspector.error();
         return 0;
       }
 
       auto uniform_bindings =
           inspector.GetUniformBufferResourceBindings(ep.name);
       if (inspector.has_error()) {
+        errors_ = inspector.error();
         return 0;
       }
 
       auto storage_bindings =
           inspector.GetStorageBufferResourceBindings(ep.name);
       if (inspector.has_error()) {
+        errors_ = inspector.error();
         return 0;
       }
 
       auto readonly_bindings =
           inspector.GetReadOnlyStorageBufferResourceBindings(ep.name);
       if (inspector.has_error()) {
+        errors_ = inspector.error();
         return 0;
       }
 
       auto sampler_bindings = inspector.GetSamplerResourceBindings(ep.name);
       if (inspector.has_error()) {
+        errors_ = inspector.error();
         return 0;
       }
 
       auto comparison_sampler_bindings =
           inspector.GetComparisonSamplerResourceBindings(ep.name);
       if (inspector.has_error()) {
+        errors_ = inspector.error();
         return 0;
       }
 
       auto sampled_texture_bindings =
           inspector.GetSampledTextureResourceBindings(ep.name);
       if (inspector.has_error()) {
+        errors_ = inspector.error();
         return 0;
       }
 
       auto multisampled_texture_bindings =
           inspector.GetMultisampledTextureResourceBindings(ep.name);
       if (inspector.has_error()) {
+        errors_ = inspector.error();
         return 0;
       }
     }
@@ -272,38 +284,43 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
     program = std::move(out.program);
   }
 
-  std::unique_ptr<writer::Writer> writer;
-
   switch (output_) {
     case OutputFormat::kWGSL:
 #if TINT_BUILD_WGSL_WRITER
-      writer = std::make_unique<writer::wgsl::Generator>(&program);
+      writer_ = std::make_unique<writer::wgsl::Generator>(&program);
 #endif  // TINT_BUILD_WGSL_WRITER
       break;
     case OutputFormat::kSpv:
 #if TINT_BUILD_SPV_WRITER
-      writer = std::make_unique<writer::spirv::Generator>(&program);
+      writer_ = std::make_unique<writer::spirv::Generator>(&program);
 #endif  // TINT_BUILD_SPV_WRITER
       break;
     case OutputFormat::kHLSL:
 #if TINT_BUILD_HLSL_WRITER
-      writer = std::make_unique<writer::hlsl::Generator>(&program);
+      writer_ = std::make_unique<writer::hlsl::Generator>(&program);
 #endif  // TINT_BUILD_HLSL_WRITER
       break;
     case OutputFormat::kMSL:
 #if TINT_BUILD_MSL_WRITER
-      writer = std::make_unique<writer::msl::Generator>(&program);
+      writer_ = std::make_unique<writer::msl::Generator>(&program);
 #endif  // TINT_BUILD_MSL_WRITER
       break;
     case OutputFormat::kNone:
       break;
   }
 
-  if (writer) {
-    writer->Generate();
+  if (writer_) {
+    if (!writer_->Generate()) {
+      errors_ = writer_->error();
+      return 0;
+    }
   }
 
   return 0;
+}
+
+const writer::Writer* CommonFuzzer::GetWriter() const {
+  return writer_.get();
 }
 
 }  // namespace fuzzers
