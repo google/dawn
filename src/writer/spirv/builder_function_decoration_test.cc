@@ -129,7 +129,7 @@ OpName %11 "main"
 TEST_F(BuilderTest, Decoration_Stage_WithUsedInterfaceIds) {
   auto* v_in = Global("my_in", ty.f32(), ast::StorageClass::kInput);
   auto* v_out = Global("my_out", ty.f32(), ast::StorageClass::kOutput);
-  auto* v_wg = Global("my_wg", ty.f32(), ast::StorageClass::kWorkgroup);
+  auto* v_wg = Global("my_wg", ty.f32(), ast::StorageClass::kPrivate);
 
   auto* func = Func(
       "main", {}, ty.void_(),
@@ -159,8 +159,8 @@ OpName %11 "main"
 %5 = OpTypePointer Output %3
 %6 = OpConstantNull %3
 %4 = OpVariable %5 Output %6
-%8 = OpTypePointer Workgroup %3
-%7 = OpVariable %8 Workgroup
+%8 = OpTypePointer Private %3
+%7 = OpVariable %8 Private %6
 %10 = OpTypeVoid
 %9 = OpTypeFunction %10
 )");

@@ -2925,6 +2925,60 @@ void Resolver::SetType(const ast::Expression* expr,
 }
 
 bool Resolver::ValidatePipelineStages() {
+  auto check_workgroup_storage = [&](FunctionInfo* func,
+                                     FunctionInfo* entry_point) {
+    auto stage = entry_point->declaration->pipeline_stage();
+    if (stage != ast::PipelineStage::kCompute) {
+      for (auto* var : func->local_referenced_module_vars) {
+        if (var->storage_class == ast::StorageClass::kWorkgroup) {
+          std::stringstream stage_name;
+          stage_name << stage;
+          for (auto* user : var->users) {
+            auto it = expr_info_.find(user->As<ast::Expression>());
+            if (it != expr_info_.end()) {
+              if (func->declaration->symbol() ==
+                  it->second.statement->Function()->symbol()) {
+                diagnostics_.add_error("workgroup memory cannot be used by " +
+                                           stage_name.str() + " pipeline stage",
+                                       user->source());
+                break;
+              }
+            }
+          }
+          diagnostics_.add_note("variable is declared here",
+                                var->declaration->source());
+          if (func != entry_point) {
+            TraverseCallChain(entry_point, func, [&](FunctionInfo* f) {
+              diagnostics_.add_note(
+                  "called by function '" +
+                      builder_->Symbols().NameFor(f->declaration->symbol()) +
+                      "'",
+                  f->declaration->source());
+            });
+            diagnostics_.add_note("called by entry point '" +
+                                      builder_->Symbols().NameFor(
+                                          entry_point->declaration->symbol()) +
+                                      "'",
+                                  entry_point->declaration->source());
+          }
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
+  for (auto* entry_point : entry_points_) {
+    if (!check_workgroup_storage(entry_point, entry_point)) {
+      return false;
+    }
+    for (auto* func : entry_point->transitive_calls) {
+      if (!check_workgroup_storage(func, entry_point)) {
+        return false;
+      }
+    }
+  }
+
   auto check_intrinsic_calls = [&](FunctionInfo* func,
                                    FunctionInfo* entry_point) {
     auto stage = entry_point->declaration->pipeline_stage();
