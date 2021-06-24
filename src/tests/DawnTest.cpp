@@ -1088,27 +1088,57 @@ std::ostringstream& DawnTestBase::AddTextureExpectationImpl(const char* file,
     return *(mDeferredExpectations.back().message.get());
 }
 
-std::ostringstream& DawnTestBase::ExpectSampledDepthData(wgpu::Texture texture,
-                                                         uint32_t width,
-                                                         uint32_t height,
-                                                         uint32_t arrayLayer,
-                                                         uint32_t mipLevel,
-                                                         const std::vector<float>& expected) {
+std::ostringstream& DawnTestBase::ExpectSampledFloatDataImpl(wgpu::TextureView textureView,
+                                                             const char* wgslTextureType,
+                                                             uint32_t width,
+                                                             uint32_t height,
+                                                             uint32_t componentCount,
+                                                             uint32_t sampleCount,
+                                                             detail::Expectation* expectation) {
     std::ostringstream shaderSource;
     shaderSource << "let width : u32 = " << width << "u;\n";
+    shaderSource << "[[group(0), binding(0)]] var tex : " << wgslTextureType << ";\n";
     shaderSource << R"(
         [[block]] struct Result {
             values : array<f32>;
         };
-
-        [[group(0), binding(0)]] var tex : texture_depth_2d;
         [[group(0), binding(1)]] var<storage, read_write> result : Result;
+    )";
+    shaderSource << "let componentCount : u32 = " << componentCount << "u;\n";
+    shaderSource << "let sampleCount : u32 = " << sampleCount << "u;\n";
 
+    shaderSource << "fn doTextureLoad(t: " << wgslTextureType
+                 << ", coord: vec2<i32>, sample: u32, component: u32) -> f32";
+    if (sampleCount > 1) {
+        shaderSource << R"({
+            return textureLoad(tex, coord, i32(sample))[component];
+        })";
+    } else {
+        if (strcmp(wgslTextureType, "texture_depth_2d") == 0) {
+            ASSERT(componentCount == 1);
+            shaderSource << R"({
+                return textureLoad(tex, coord, 0);
+            })";
+        } else {
+            shaderSource << R"({
+                return textureLoad(tex, coord, 0)[component];
+            })";
+        }
+    }
+    shaderSource << R"(
         [[stage(compute), workgroup_size(1)]] fn main(
             [[builtin(global_invocation_id)]] GlobalInvocationId : vec3<u32>
         ) {
-            result.values[GlobalInvocationId.y * width + GlobalInvocationId.x] = textureLoad(
-                tex, vec2<i32>(i32(GlobalInvocationId.x), i32(GlobalInvocationId.y)), 0);
+            let baseOutIndex = GlobalInvocationId.y * width + GlobalInvocationId.x;
+            for (var s = 0u; s < sampleCount; s = s + 1u) {
+                for (var c = 0u; c < componentCount; c = c + 1u) {
+                    result.values[
+                        baseOutIndex * sampleCount * componentCount +
+                        s * componentCount +
+                        c
+                    ] = doTextureLoad(tex, vec2<i32>(GlobalInvocationId.xy), s, c);
+                }
+            }
         }
     )";
 
@@ -1122,22 +1152,13 @@ std::ostringstream& DawnTestBase::ExpectSampledDepthData(wgpu::Texture texture,
 
     // Create and initialize the slot buffer so that it won't unexpectedly affect the count of
     // resources lazily cleared.
-    const std::vector<float> initialBufferData(width * height, 0.f);
+    const std::vector<float> initialBufferData(width * height * componentCount * sampleCount, 0.f);
     wgpu::Buffer readbackBuffer = utils::CreateBufferFromData(
-        device, initialBufferData.data(), sizeof(float) * width * height,
+        device, initialBufferData.data(), sizeof(float) * initialBufferData.size(),
         wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage);
 
-    wgpu::TextureViewDescriptor viewDesc = {};
-    viewDesc.aspect = wgpu::TextureAspect::DepthOnly;
-    viewDesc.dimension = wgpu::TextureViewDimension::e2D;
-    viewDesc.baseMipLevel = mipLevel;
-    viewDesc.mipLevelCount = 1;
-    viewDesc.baseArrayLayer = arrayLayer;
-    viewDesc.arrayLayerCount = 1;
-
-    wgpu::BindGroup bindGroup =
-        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
-                             {{0, texture.CreateView(&viewDesc)}, {1, readbackBuffer}});
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                     {{0, textureView}, {1, readbackBuffer}});
 
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     wgpu::ComputePassEncoder pass = commandEncoder.BeginComputePass();
@@ -1148,8 +1169,62 @@ std::ostringstream& DawnTestBase::ExpectSampledDepthData(wgpu::Texture texture,
     wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
-    return EXPECT_BUFFER_FLOAT_RANGE_ABOUT_EQ(expected.data(), readbackBuffer, 0, expected.size(),
-                                              0.00001);
+    return EXPECT_BUFFER(readbackBuffer, 0, initialBufferData.size() * sizeof(float), expectation);
+}
+
+std::ostringstream& DawnTestBase::ExpectSampledFloatData(wgpu::Texture texture,
+                                                         uint32_t width,
+                                                         uint32_t height,
+                                                         uint32_t componentCount,
+                                                         uint32_t arrayLayer,
+                                                         uint32_t mipLevel,
+                                                         detail::Expectation* expectation) {
+    wgpu::TextureViewDescriptor viewDesc = {};
+    viewDesc.dimension = wgpu::TextureViewDimension::e2D;
+    viewDesc.baseMipLevel = mipLevel;
+    viewDesc.mipLevelCount = 1;
+    viewDesc.baseArrayLayer = arrayLayer;
+    viewDesc.arrayLayerCount = 1;
+
+    return ExpectSampledFloatDataImpl(texture.CreateView(&viewDesc), "texture_2d<f32>", width,
+                                      height, componentCount, 1, expectation);
+}
+
+std::ostringstream& DawnTestBase::ExpectMultisampledFloatData(wgpu::Texture texture,
+                                                              uint32_t width,
+                                                              uint32_t height,
+                                                              uint32_t componentCount,
+                                                              uint32_t sampleCount,
+                                                              uint32_t arrayLayer,
+                                                              uint32_t mipLevel,
+                                                              detail::Expectation* expectation) {
+    wgpu::TextureViewDescriptor viewDesc = {};
+    viewDesc.dimension = wgpu::TextureViewDimension::e2D;
+    viewDesc.baseMipLevel = mipLevel;
+    viewDesc.mipLevelCount = 1;
+    viewDesc.baseArrayLayer = arrayLayer;
+    viewDesc.arrayLayerCount = 1;
+
+    return ExpectSampledFloatDataImpl(texture.CreateView(&viewDesc), "texture_multisampled_2d<f32>",
+                                      width, height, componentCount, sampleCount, expectation);
+}
+
+std::ostringstream& DawnTestBase::ExpectSampledDepthData(wgpu::Texture texture,
+                                                         uint32_t width,
+                                                         uint32_t height,
+                                                         uint32_t arrayLayer,
+                                                         uint32_t mipLevel,
+                                                         detail::Expectation* expectation) {
+    wgpu::TextureViewDescriptor viewDesc = {};
+    viewDesc.aspect = wgpu::TextureAspect::DepthOnly;
+    viewDesc.dimension = wgpu::TextureViewDimension::e2D;
+    viewDesc.baseMipLevel = mipLevel;
+    viewDesc.mipLevelCount = 1;
+    viewDesc.baseArrayLayer = arrayLayer;
+    viewDesc.arrayLayerCount = 1;
+
+    return ExpectSampledFloatDataImpl(texture.CreateView(&viewDesc), "texture_depth_2d", width,
+                                      height, 1, 1, expectation);
 }
 
 std::ostringstream& DawnTestBase::ExpectAttachmentDepthStencilTestData(

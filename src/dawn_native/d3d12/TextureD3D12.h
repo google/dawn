@@ -123,6 +123,7 @@ namespace dawn_native { namespace d3d12 {
 
         ResourceHeapAllocation mResourceAllocation;
         bool mSwapChainTexture = false;
+        D3D12_RESOURCE_FLAGS mD3D12ResourceFlags;
 
         ExternalMutexSerial mAcquireMutexKey = ExternalMutexSerial(0);
         ExternalMutexSerial mReleaseMutexKey = ExternalMutexSerial(0);

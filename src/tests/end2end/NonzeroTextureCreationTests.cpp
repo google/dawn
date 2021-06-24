@@ -27,9 +27,19 @@ namespace {
     using Usage = wgpu::TextureUsage;
     using Dimension = wgpu::TextureDimension;
     using DepthOrArrayLayers = uint32_t;
+    using MipCount = uint32_t;
     using Mip = uint32_t;
+    using SampleCount = uint32_t;
 
-    DAWN_TEST_PARAM_STRUCT(Params, Format, Aspect, Usage, Dimension, DepthOrArrayLayers, Mip)
+    DAWN_TEST_PARAM_STRUCT(Params,
+                           Format,
+                           Aspect,
+                           Usage,
+                           Dimension,
+                           DepthOrArrayLayers,
+                           MipCount,
+                           Mip,
+                           SampleCount)
 
     template <typename T>
     class ExpectNonZero : public detail::CustomTextureExpectation {
@@ -49,8 +59,8 @@ namespace {
             for (size_t i = 0; i < size / DataSize(); ++i) {
                 if (actual[i] != value) {
                     return testing::AssertionFailure()
-                           << "Expected data[" << i << "] to be " << value << ", actual "
-                           << actual[i] << std::endl;
+                           << "Expected data[" << i << "] to match non-zero value " << value
+                           << ", actual " << actual[i] << std::endl;
                 }
             }
 
@@ -64,7 +74,6 @@ namespace {
     class NonzeroTextureCreationTests : public DawnTestWithParams<Params> {
       protected:
         constexpr static uint32_t kSize = 128;
-        constexpr static uint32_t kMipLevelCount = 4;
 
         std::vector<const char*> GetRequiredExtensions() override {
             if (GetParam().mFormat == wgpu::TextureFormat::BC1RGBAUnorm &&
@@ -130,10 +139,10 @@ namespace {
             descriptor.size.width = kSize;
             descriptor.size.height = kSize;
             descriptor.size.depthOrArrayLayers = GetParam().mDepthOrArrayLayers;
-            descriptor.sampleCount = 1;
+            descriptor.sampleCount = GetParam().mSampleCount;
             descriptor.format = GetParam().mFormat;
             descriptor.usage = GetParam().mUsage;
-            descriptor.mipLevelCount = kMipLevelCount;
+            descriptor.mipLevelCount = GetParam().mMipCount;
 
             wgpu::Texture texture = device.CreateTexture(&descriptor);
 
@@ -142,22 +151,39 @@ namespace {
             uint32_t depthOrArrayLayers = GetParam().mDimension == wgpu::TextureDimension::e3D
                                               ? std::max(GetParam().mDepthOrArrayLayers >> mip, 1u)
                                               : GetParam().mDepthOrArrayLayers;
-
             switch (GetParam().mFormat) {
                 case wgpu::TextureFormat::R8Unorm: {
-                    EXPECT_TEXTURE_EQ(new ExpectNonZero<uint8_t>(), texture, {0, 0, 0},
-                                      {mipSize, mipSize, depthOrArrayLayers}, mip);
+                    if (GetParam().mSampleCount > 1) {
+                        ExpectMultisampledFloatData(texture, mipSize, mipSize, 1,
+                                                    GetParam().mSampleCount, 0, mip,
+                                                    new ExpectNonZero<float>());
+                    } else {
+                        EXPECT_TEXTURE_EQ(new ExpectNonZero<uint8_t>(), texture, {0, 0, 0},
+                                          {mipSize, mipSize, depthOrArrayLayers}, mip);
+                    }
                     break;
                 }
                 case wgpu::TextureFormat::RG8Unorm: {
-                    EXPECT_TEXTURE_EQ(new ExpectNonZero<uint16_t>(), texture, {0, 0, 0},
-                                      {mipSize, mipSize, depthOrArrayLayers}, mip);
+                    if (GetParam().mSampleCount > 1) {
+                        ExpectMultisampledFloatData(texture, mipSize, mipSize, 2,
+                                                    GetParam().mSampleCount, 0, mip,
+                                                    new ExpectNonZero<float>());
+                    } else {
+                        EXPECT_TEXTURE_EQ(new ExpectNonZero<uint16_t>(), texture, {0, 0, 0},
+                                          {mipSize, mipSize, depthOrArrayLayers}, mip);
+                    }
                     break;
                 }
                 case wgpu::TextureFormat::RGBA8Unorm:
                 case wgpu::TextureFormat::RGBA8Snorm: {
-                    EXPECT_TEXTURE_EQ(new ExpectNonZero<uint32_t>(), texture, {0, 0, 0},
-                                      {mipSize, mipSize, depthOrArrayLayers}, mip);
+                    if (GetParam().mSampleCount > 1) {
+                        ExpectMultisampledFloatData(texture, mipSize, mipSize, 4,
+                                                    GetParam().mSampleCount, 0, mip,
+                                                    new ExpectNonZero<float>());
+                    } else {
+                        EXPECT_TEXTURE_EQ(new ExpectNonZero<uint32_t>(), texture, {0, 0, 0},
+                                          {mipSize, mipSize, depthOrArrayLayers}, mip);
+                    }
                     break;
                 }
                 case wgpu::TextureFormat::Depth32Float: {
@@ -168,18 +194,10 @@ namespace {
                 case wgpu::TextureFormat::Depth24PlusStencil8: {
                     switch (GetParam().mAspect) {
                         case wgpu::TextureAspect::DepthOnly: {
-                            uint32_t value = 0x01010101;
-                            float fValue = *reinterpret_cast<float*>(&value);
-                            std::vector<float> expectedDepth(
-                                mipSize * mipSize,
-                                (IsVulkan() || IsOpenGL() ||
-                                 (GetParam().mUsage & wgpu::TextureUsage::RenderAttachment) != 0)
-                                    ? 1.f
-                                    : fValue);
                             for (uint32_t arrayLayer = 0;
                                  arrayLayer < GetParam().mDepthOrArrayLayers; ++arrayLayer) {
                                 ExpectSampledDepthData(texture, mipSize, mipSize, arrayLayer, mip,
-                                                       expectedDepth)
+                                                       new ExpectNonZero<float>())
                                     << "arrayLayer " << arrayLayer;
                             }
                             break;
@@ -250,6 +268,7 @@ namespace {
     class NonzeroCompressedTextureCreationTests : public NonzeroTextureCreationTests {};
     class NonzeroDepthTextureCreationTests : public NonzeroTextureCreationTests {};
     class NonzeroDepthStencilTextureCreationTests : public NonzeroTextureCreationTests {};
+    class NonzeroMultisampledTextureCreationTests : public NonzeroTextureCreationTests {};
 
 }  // anonymous namespace
 
@@ -278,7 +297,10 @@ TEST_P(NonzeroDepthStencilTextureCreationTests, TextureCreationClears) {
     Run();
 }
 
-// TODO(crbug.com/794): Test/implement texture initialization for multisampled textures.
+// Test that texture clears to a non-zero value because toggle is enabled.
+TEST_P(NonzeroMultisampledTextureCreationTests, TextureCreationClears) {
+    Run();
+}
 
 DAWN_INSTANTIATE_TEST_P(
     NonzeroTextureCreationTests,
@@ -297,8 +319,11 @@ DAWN_INSTANTIATE_TEST_P(
     {wgpu::TextureUsage(wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc),
      wgpu::TextureUsage::CopySrc},
     {wgpu::TextureDimension::e2D, wgpu::TextureDimension::e3D},
-    {1u, 7u},
-    {0u, 1u, 2u, 3u});
+    {1u, 7u},          // depth or array layers
+    {4u},              // mip count
+    {0u, 1u, 2u, 3u},  // mip
+    {1u}               // sample count
+);
 
 DAWN_INSTANTIATE_TEST_P(NonzeroNonrenderableTextureCreationTests,
                         {D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
@@ -315,8 +340,11 @@ DAWN_INSTANTIATE_TEST_P(NonzeroNonrenderableTextureCreationTests,
                         {wgpu::TextureAspect::All},
                         {wgpu::TextureUsage::CopySrc},
                         {wgpu::TextureDimension::e2D, wgpu::TextureDimension::e3D},
-                        {1u, 7u},
-                        {0u, 1u, 2u, 3u});
+                        {1u, 7u},          // depth or array layers
+                        {4u},              // mip count
+                        {0u, 1u, 2u, 3u},  // mip
+                        {1u}               // sample count
+);
 
 DAWN_INSTANTIATE_TEST_P(NonzeroCompressedTextureCreationTests,
                         {D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
@@ -333,8 +361,11 @@ DAWN_INSTANTIATE_TEST_P(NonzeroCompressedTextureCreationTests,
                         {wgpu::TextureAspect::All},
                         {wgpu::TextureUsage::CopySrc},
                         {wgpu::TextureDimension::e2D},
-                        {1u, 7u},
-                        {0u, 1u, 2u, 3u});
+                        {1u, 7u},          // depth or array layers
+                        {4u},              // mip count
+                        {0u, 1u, 2u, 3u},  // mip
+                        {1u}               // sample count
+);
 
 DAWN_INSTANTIATE_TEST_P(NonzeroDepthTextureCreationTests,
                         {D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
@@ -353,8 +384,11 @@ DAWN_INSTANTIATE_TEST_P(NonzeroDepthTextureCreationTests,
                                             wgpu::TextureUsage::CopySrc),
                          wgpu::TextureUsage::CopySrc},
                         {wgpu::TextureDimension::e2D},
-                        {1u, 7u},
-                        {0u, 1u, 2u, 3u});
+                        {1u, 7u},          // depth or array layers
+                        {4u},              // mip count
+                        {0u, 1u, 2u, 3u},  // mip
+                        {1u}               // sample count
+);
 
 DAWN_INSTANTIATE_TEST_P(
     NonzeroDepthStencilTextureCreationTests,
@@ -374,5 +408,31 @@ DAWN_INSTANTIATE_TEST_P(
                         wgpu::TextureUsage::Sampled),
      wgpu::TextureUsage(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::CopySrc)},
     {wgpu::TextureDimension::e2D},
-    {1u, 7u},
-    {0u, 1u, 2u, 3u});
+    {1u, 7u},          // depth or array layers
+    {4u},              // mip count
+    {0u, 1u, 2u, 3u},  // mip
+    {1u}               // sample count
+);
+
+DAWN_INSTANTIATE_TEST_P(
+    NonzeroMultisampledTextureCreationTests,
+    {D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
+                  {"lazy_clear_resource_on_first_use"}),
+     MetalBackend({"nonzero_clear_resources_on_creation_for_testing"},
+                  {"lazy_clear_resource_on_first_use"}),
+     OpenGLBackend({"nonzero_clear_resources_on_creation_for_testing"},
+                   {"lazy_clear_resource_on_first_use"}),
+     OpenGLESBackend({"nonzero_clear_resources_on_creation_for_testing"},
+                     {"lazy_clear_resource_on_first_use"}),
+     VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"},
+                   {"lazy_clear_resource_on_first_use"})},
+    {wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::RG8Unorm, wgpu::TextureFormat::RGBA8Unorm},
+    {wgpu::TextureAspect::All},
+    {wgpu::TextureUsage(wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::Sampled),
+     wgpu::TextureUsage::Sampled},
+    {wgpu::TextureDimension::e2D},
+    {1u},  // depth or array layers
+    {1u},  // mip count
+    {0u},  // mip
+    {4u}   // sample count
+);

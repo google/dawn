@@ -74,10 +74,6 @@
     EXPECT_BUFFER(buffer, offset, sizeof(float) * (count),            \
                   new ::detail::ExpectEq<float>(expected, count))
 
-#define EXPECT_BUFFER_FLOAT_RANGE_ABOUT_EQ(expected, buffer, offset, count, tolerance) \
-    EXPECT_BUFFER(buffer, offset, sizeof(float) * (count),                             \
-                  new ::detail::ExpectEq<float>(expected, count, tolerance))
-
 // Test a pixel of the mip level 0 of a 2D texture.
 #define EXPECT_PIXEL_RGBA8_EQ(expected, texture, x, y) \
     AddTextureExpectation(__FILE__, __LINE__, expected, texture, {x, y})
@@ -407,12 +403,29 @@ class DawnTestBase {
             level, aspect, sizeof(T), bytesPerRow);
     }
 
+    std::ostringstream& ExpectSampledFloatData(wgpu::Texture texture,
+                                               uint32_t width,
+                                               uint32_t height,
+                                               uint32_t componentCount,
+                                               uint32_t arrayLayer,
+                                               uint32_t mipLevel,
+                                               detail::Expectation* expectation);
+
+    std::ostringstream& ExpectMultisampledFloatData(wgpu::Texture texture,
+                                                    uint32_t width,
+                                                    uint32_t height,
+                                                    uint32_t componentCount,
+                                                    uint32_t sampleCount,
+                                                    uint32_t arrayLayer,
+                                                    uint32_t mipLevel,
+                                                    detail::Expectation* expectation);
+
     std::ostringstream& ExpectSampledDepthData(wgpu::Texture depthTexture,
                                                uint32_t width,
                                                uint32_t height,
                                                uint32_t arrayLayer,
                                                uint32_t mipLevel,
-                                               const std::vector<float>& expected);
+                                               detail::Expectation* expectation);
 
     // Check depth by uploading expected data to a sampled texture, writing it out as a depth
     // attachment, and then using the "equals" depth test to check the contents are the same.
@@ -484,6 +497,14 @@ class DawnTestBase {
                                                   wgpu::TextureAspect aspect,
                                                   uint32_t dataSize,
                                                   uint32_t bytesPerRow);
+
+    std::ostringstream& ExpectSampledFloatDataImpl(wgpu::TextureView textureView,
+                                                   const char* wgslTextureType,
+                                                   uint32_t width,
+                                                   uint32_t height,
+                                                   uint32_t componentCount,
+                                                   uint32_t sampleCount,
+                                                   detail::Expectation* expectation);
 
     // MapRead buffers used to get data for the expectations
     struct ReadbackSlot {

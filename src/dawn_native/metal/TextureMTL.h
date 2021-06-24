@@ -63,6 +63,7 @@ namespace dawn_native { namespace metal {
                                 TextureBase::ClearValue clearValue);
 
         NSPRef<id<MTLTexture>> mMtlTexture;
+        MTLTextureUsage mMtlUsage;
     };
 
     class TextureView final : public TextureViewBase {

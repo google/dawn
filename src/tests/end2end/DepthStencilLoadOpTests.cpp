@@ -100,7 +100,9 @@ namespace {
             switch (GetParam().mCheck) {
                 case Check::SampleDepth: {
                     std::vector<float> expectedDepth(mipSize * mipSize, kDepthValues[mipLevel]);
-                    ExpectSampledDepthData(texture, mipSize, mipSize, 0, mipLevel, expectedDepth)
+                    ExpectSampledDepthData(texture, mipSize, mipSize, 0, mipLevel,
+                                           new detail::ExpectEq<float>(
+                                               expectedDepth.data(), expectedDepth.size(), 0.0001))
                         << "sample depth mip " << mipLevel;
                     break;
                 }

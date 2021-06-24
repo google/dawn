@@ -471,6 +471,9 @@ namespace dawn_native { namespace d3d12 {
         mDxgiKeyedMutex = std::move(dxgiKeyedMutex);
         mSwapChainTexture = isSwapChainTexture;
 
+        D3D12_RESOURCE_DESC desc = d3d12Texture->GetDesc();
+        mD3D12ResourceFlags = desc.Flags;
+
         AllocationInfo info;
         info.mMethod = AllocationMethod::kExternal;
         // When creating the ResourceHeapAllocation, the resource heap is set to nullptr because the
@@ -507,6 +510,7 @@ namespace dawn_native { namespace d3d12 {
         resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
         resourceDescriptor.Flags =
             D3D12ResourceFlags(GetUsage(), GetFormat(), IsMultisampledTexture());
+        mD3D12ResourceFlags = resourceDescriptor.Flags;
 
         DAWN_TRY_ASSIGN(mResourceAllocation,
                         ToBackend(GetDevice())
@@ -879,82 +883,80 @@ namespace dawn_native { namespace d3d12 {
         uint8_t clearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0 : 1;
         float fClearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0.f : 1.f;
 
-        if ((GetUsage() & wgpu::TextureUsage::RenderAttachment) != 0) {
-            if (GetFormat().HasDepthOrStencil()) {
-                TrackUsageAndTransitionNow(commandContext, D3D12_RESOURCE_STATE_DEPTH_WRITE, range);
+        if ((mD3D12ResourceFlags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) != 0) {
+            TrackUsageAndTransitionNow(commandContext, D3D12_RESOURCE_STATE_DEPTH_WRITE, range);
 
-                for (uint32_t level = range.baseMipLevel;
-                     level < range.baseMipLevel + range.levelCount; ++level) {
-                    for (uint32_t layer = range.baseArrayLayer;
-                         layer < range.baseArrayLayer + range.layerCount; ++layer) {
-                        // Iterate the aspects individually to determine which clear flags to use.
-                        D3D12_CLEAR_FLAGS clearFlags = {};
-                        for (Aspect aspect : IterateEnumMask(range.aspects)) {
-                            if (clearValue == TextureBase::ClearValue::Zero &&
-                                IsSubresourceContentInitialized(
-                                    SubresourceRange::SingleMipAndLayer(level, layer, aspect))) {
-                                // Skip lazy clears if already initialized.
-                                continue;
-                            }
-
-                            switch (aspect) {
-                                case Aspect::Depth:
-                                    clearFlags |= D3D12_CLEAR_FLAG_DEPTH;
-                                    break;
-                                case Aspect::Stencil:
-                                    clearFlags |= D3D12_CLEAR_FLAG_STENCIL;
-                                    break;
-                                default:
-                                    UNREACHABLE();
-                            }
-                        }
-
-                        if (clearFlags == 0) {
-                            continue;
-                        }
-
-                        CPUDescriptorHeapAllocation dsvHandle;
-                        DAWN_TRY_ASSIGN(dsvHandle, device->GetDepthStencilViewAllocator()
-                                                       ->AllocateTransientCPUDescriptors());
-                        const D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor =
-                            dsvHandle.GetBaseDescriptor();
-                        D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = GetDSVDescriptor(level, layer, 1);
-                        device->GetD3D12Device()->CreateDepthStencilView(GetD3D12Resource(),
-                                                                         &dsvDesc, baseDescriptor);
-
-                        commandList->ClearDepthStencilView(baseDescriptor, clearFlags, fClearColor,
-                                                           clearColor, 0, nullptr);
-                    }
-                }
-            } else {
-                TrackUsageAndTransitionNow(commandContext, D3D12_RESOURCE_STATE_RENDER_TARGET,
-                                           range);
-
-                const float clearColorRGBA[4] = {fClearColor, fClearColor, fClearColor,
-                                                 fClearColor};
-
-                ASSERT(range.aspects == Aspect::Color);
-                for (uint32_t level = range.baseMipLevel;
-                     level < range.baseMipLevel + range.levelCount; ++level) {
-                    for (uint32_t layer = range.baseArrayLayer;
-                         layer < range.baseArrayLayer + range.layerCount; ++layer) {
+            for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
+                 ++level) {
+                for (uint32_t layer = range.baseArrayLayer;
+                     layer < range.baseArrayLayer + range.layerCount; ++layer) {
+                    // Iterate the aspects individually to determine which clear flags to use.
+                    D3D12_CLEAR_FLAGS clearFlags = {};
+                    for (Aspect aspect : IterateEnumMask(range.aspects)) {
                         if (clearValue == TextureBase::ClearValue::Zero &&
                             IsSubresourceContentInitialized(
-                                SubresourceRange::SingleMipAndLayer(level, layer, Aspect::Color))) {
+                                SubresourceRange::SingleMipAndLayer(level, layer, aspect))) {
                             // Skip lazy clears if already initialized.
                             continue;
                         }
 
-                        CPUDescriptorHeapAllocation rtvHeap;
-                        DAWN_TRY_ASSIGN(rtvHeap, device->GetRenderTargetViewAllocator()
-                                                     ->AllocateTransientCPUDescriptors());
-                        const D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap.GetBaseDescriptor();
-
-                        D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = GetRTVDescriptor(level, layer, 1);
-                        device->GetD3D12Device()->CreateRenderTargetView(GetD3D12Resource(),
-                                                                         &rtvDesc, rtvHandle);
-                        commandList->ClearRenderTargetView(rtvHandle, clearColorRGBA, 0, nullptr);
+                        switch (aspect) {
+                            case Aspect::Depth:
+                                clearFlags |= D3D12_CLEAR_FLAG_DEPTH;
+                                break;
+                            case Aspect::Stencil:
+                                clearFlags |= D3D12_CLEAR_FLAG_STENCIL;
+                                break;
+                            default:
+                                UNREACHABLE();
+                        }
                     }
+
+                    if (clearFlags == 0) {
+                        continue;
+                    }
+
+                    CPUDescriptorHeapAllocation dsvHandle;
+                    DAWN_TRY_ASSIGN(
+                        dsvHandle,
+                        device->GetDepthStencilViewAllocator()->AllocateTransientCPUDescriptors());
+                    const D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor =
+                        dsvHandle.GetBaseDescriptor();
+                    D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = GetDSVDescriptor(level, layer, 1);
+                    device->GetD3D12Device()->CreateDepthStencilView(GetD3D12Resource(), &dsvDesc,
+                                                                     baseDescriptor);
+
+                    commandList->ClearDepthStencilView(baseDescriptor, clearFlags, fClearColor,
+                                                       clearColor, 0, nullptr);
+                }
+            }
+        } else if ((mD3D12ResourceFlags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) != 0) {
+            TrackUsageAndTransitionNow(commandContext, D3D12_RESOURCE_STATE_RENDER_TARGET, range);
+
+            const float clearColorRGBA[4] = {fClearColor, fClearColor, fClearColor, fClearColor};
+
+            ASSERT(range.aspects == Aspect::Color);
+            for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
+                 ++level) {
+                for (uint32_t layer = range.baseArrayLayer;
+                     layer < range.baseArrayLayer + range.layerCount; ++layer) {
+                    if (clearValue == TextureBase::ClearValue::Zero &&
+                        IsSubresourceContentInitialized(
+                            SubresourceRange::SingleMipAndLayer(level, layer, Aspect::Color))) {
+                        // Skip lazy clears if already initialized.
+                        continue;
+                    }
+
+                    CPUDescriptorHeapAllocation rtvHeap;
+                    DAWN_TRY_ASSIGN(
+                        rtvHeap,
+                        device->GetRenderTargetViewAllocator()->AllocateTransientCPUDescriptors());
+                    const D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap.GetBaseDescriptor();
+
+                    D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = GetRTVDescriptor(level, layer, 1);
+                    device->GetD3D12Device()->CreateRenderTargetView(GetD3D12Resource(), &rtvDesc,
+                                                                     rtvHandle);
+                    commandList->ClearRenderTargetView(rtvHandle, clearColorRGBA, 0, nullptr);
                 }
             }
         } else {
