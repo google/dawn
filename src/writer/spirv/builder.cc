@@ -2970,6 +2970,10 @@ bool Builder::GenerateAtomicIntrinsic(ast::CallExpression* call,
     if (value_id == 0) {
       return false;
     }
+    value_id = GenerateLoadIfNeeded(TypeOf(call->params().back()), value_id);
+    if (value_id == 0) {
+      return false;
+    }
   }
 
   Operand pointer = Operand::Int(pointer_id);

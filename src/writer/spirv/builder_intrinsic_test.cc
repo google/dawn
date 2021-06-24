@@ -1849,8 +1849,10 @@ TEST_F(IntrinsicBuilderTest, Call_AtomicStore) {
   // [[binding(1), group(2)]] var<storage, read_write> b : S;
   //
   // fn a_func() {
-  //   let u : u32 = atomicStore(&b.u, 1u);
-  //   let i : i32 = atomicStore(&b.i, 2);
+  //   var u = 1u;
+  //   var i = 2;
+  //   atomicStore(&b.u, u);
+  //   atomicStore(&b.i, i);
   // }
   auto* s = Structure("S",
                       {
@@ -1866,10 +1868,12 @@ TEST_F(IntrinsicBuilderTest, Call_AtomicStore) {
 
   Func("a_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
+           Decl(Var("u", nullptr, Expr(1u))),
+           Decl(Var("i", nullptr, Expr(2))),
            create<ast::CallStatement>(
-               Call("atomicStore", AddressOf(MemberAccessor("b", "u")), 1u)),
+               Call("atomicStore", AddressOf(MemberAccessor("b", "u")), "u")),
            create<ast::CallStatement>(
-               Call("atomicStore", AddressOf(MemberAccessor("b", "i")), 2)),
+               Call("atomicStore", AddressOf(MemberAccessor("b", "i")), "i")),
        },
        ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
 
@@ -1886,19 +1890,27 @@ TEST_F(IntrinsicBuilderTest, Call_AtomicStore) {
 %1 = OpVariable %2 StorageBuffer
 %7 = OpTypeVoid
 %6 = OpTypeFunction %7
-%11 = OpConstant %4 1
-%12 = OpConstant %4 0
-%14 = OpTypePointer StorageBuffer %4
-%18 = OpTypePointer StorageBuffer %5
-%20 = OpConstant %5 2
+%10 = OpConstant %4 1
+%12 = OpTypePointer Function %4
+%13 = OpConstantNull %4
+%14 = OpConstant %5 2
+%16 = OpTypePointer Function %5
+%17 = OpConstantNull %5
+%19 = OpConstant %4 0
+%21 = OpTypePointer StorageBuffer %4
+%26 = OpTypePointer StorageBuffer %5
 )";
   auto got_types = DumpInstructions(b.types());
   EXPECT_EQ(expected_types, got_types);
 
-  auto* expected_instructions = R"(%15 = OpAccessChain %14 %1 %12
-OpAtomicStore %15 %11 %12 %11
-%19 = OpAccessChain %18 %1 %11
-OpAtomicStore %19 %11 %12 %20
+  auto* expected_instructions = R"(OpStore %11 %10
+OpStore %15 %14
+%22 = OpAccessChain %21 %1 %19
+%23 = OpLoad %4 %11
+OpAtomicStore %22 %10 %19 %23
+%27 = OpAccessChain %26 %1 %10
+%28 = OpLoad %5 %15
+OpAtomicStore %27 %10 %19 %28
 )";
   auto got_instructions = DumpInstructions(b.functions()[0].instructions());
   EXPECT_EQ(expected_instructions, got_instructions);
@@ -1916,7 +1928,8 @@ TEST_P(Intrinsic_Builtin_AtomicRMW_i32, Test) {
   // [[binding(1), group(2)]] var<storage, read_write> b : S;
   //
   // fn a_func() {
-  //   let x : i32 = atomicOP(&b.v);
+  //   var v = 10;
+  //   let x : i32 = atomicOP(&b.v, v);
   // }
   auto* s = Structure("S",
                       {
@@ -1931,9 +1944,10 @@ TEST_P(Intrinsic_Builtin_AtomicRMW_i32, Test) {
 
   Func("a_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           Decl(Const(
-               "x", ty.i32(),
-               Call(GetParam().name, AddressOf(MemberAccessor("b", "v")), 10))),
+           Decl(Var("v", nullptr, Expr(10))),
+           Decl(Const("x", ty.i32(),
+                      Call(GetParam().name, AddressOf(MemberAccessor("b", "v")),
+                           "v"))),
        },
        ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
 
@@ -1949,17 +1963,22 @@ TEST_P(Intrinsic_Builtin_AtomicRMW_i32, Test) {
 %1 = OpVariable %2 StorageBuffer
 %6 = OpTypeVoid
 %5 = OpTypeFunction %6
-%10 = OpTypeInt 32 0
-%11 = OpConstant %10 1
-%12 = OpConstant %10 0
-%14 = OpTypePointer StorageBuffer %4
-%16 = OpConstant %4 10
+%9 = OpConstant %4 10
+%11 = OpTypePointer Function %4
+%12 = OpConstantNull %4
+%14 = OpTypeInt 32 0
+%15 = OpConstant %14 1
+%16 = OpConstant %14 0
+%18 = OpTypePointer StorageBuffer %4
 )";
   auto got_types = DumpInstructions(b.types());
   EXPECT_EQ(expected_types, got_types);
 
-  std::string expected_instructions = "%15 = OpAccessChain %14 %1 %12\n";
-  expected_instructions += "%9 = " + GetParam().op + " %4 %15 %11 %12 %16\n";
+  std::string expected_instructions = R"(OpStore %10 %9
+%19 = OpAccessChain %18 %1 %16
+%20 = OpLoad %4 %10
+)";
+  expected_instructions += "%13 = " + GetParam().op + " %4 %19 %15 %16 %20\n";
 
   auto got_instructions = DumpInstructions(b.functions()[0].instructions());
   EXPECT_EQ(expected_instructions, got_instructions);
@@ -1986,7 +2005,8 @@ TEST_P(Intrinsic_Builtin_AtomicRMW_u32, Test) {
   // [[binding(1), group(2)]] var<storage, read_write> b : S;
   //
   // fn a_func() {
-  //   let x : u32 = atomicOP(&b.v);
+  //   var v = 10u;
+  //   let x : u32 = atomicOP(&b.v, v);
   // }
   auto* s = Structure("S",
                       {
@@ -2001,9 +2021,10 @@ TEST_P(Intrinsic_Builtin_AtomicRMW_u32, Test) {
 
   Func("a_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
+           Decl(Var("v", nullptr, Expr(10u))),
            Decl(Const("x", ty.u32(),
                       Call(GetParam().name, AddressOf(MemberAccessor("b", "v")),
-                           10u))),
+                           "v"))),
        },
        ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
 
@@ -2019,16 +2040,21 @@ TEST_P(Intrinsic_Builtin_AtomicRMW_u32, Test) {
 %1 = OpVariable %2 StorageBuffer
 %6 = OpTypeVoid
 %5 = OpTypeFunction %6
-%10 = OpConstant %4 1
-%11 = OpConstant %4 0
-%13 = OpTypePointer StorageBuffer %4
-%15 = OpConstant %4 10
+%9 = OpConstant %4 10
+%11 = OpTypePointer Function %4
+%12 = OpConstantNull %4
+%14 = OpConstant %4 1
+%15 = OpConstant %4 0
+%17 = OpTypePointer StorageBuffer %4
 )";
   auto got_types = DumpInstructions(b.types());
   EXPECT_EQ(expected_types, got_types);
 
-  std::string expected_instructions = "%14 = OpAccessChain %13 %1 %11\n";
-  expected_instructions += "%9 = " + GetParam().op + " %4 %14 %10 %11 %15\n";
+  std::string expected_instructions = R"(OpStore %10 %9
+%18 = OpAccessChain %17 %1 %15
+%19 = OpLoad %4 %10
+)";
+  expected_instructions += "%13 = " + GetParam().op + " %4 %18 %14 %15 %19\n";
 
   auto got_instructions = DumpInstructions(b.functions()[0].instructions());
   EXPECT_EQ(expected_instructions, got_instructions);
@@ -2054,8 +2080,10 @@ TEST_F(IntrinsicBuilderTest, Call_AtomicExchange) {
   // [[binding(1), group(2)]] var<storage, read_write> b : S;
   //
   // fn a_func() {
-  //   let u : u32 = atomicExchange(&b.u, 10u);
-  //   let i : i32 = atomicExchange(&b.i, 10);
+  //   var u = 10u;
+  //   var i = 10;
+  //   let r : u32 = atomicExchange(&b.u, u);
+  //   let s : i32 = atomicExchange(&b.i, i);
   // }
   auto* s = Structure("S",
                       {
@@ -2071,12 +2099,14 @@ TEST_F(IntrinsicBuilderTest, Call_AtomicExchange) {
 
   Func("a_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           Decl(Const("u", ty.u32(),
+           Decl(Var("u", nullptr, Expr(10u))),
+           Decl(Var("i", nullptr, Expr(10))),
+           Decl(Const("r", ty.u32(),
                       Call("atomicExchange",
-                           AddressOf(MemberAccessor("b", "u")), 10u))),
-           Decl(Const("i", ty.i32(),
+                           AddressOf(MemberAccessor("b", "u")), "u"))),
+           Decl(Const("s", ty.i32(),
                       Call("atomicExchange",
-                           AddressOf(MemberAccessor("b", "i")), 10))),
+                           AddressOf(MemberAccessor("b", "i")), "i"))),
        },
        ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
 
@@ -2093,20 +2123,28 @@ TEST_F(IntrinsicBuilderTest, Call_AtomicExchange) {
 %1 = OpVariable %2 StorageBuffer
 %7 = OpTypeVoid
 %6 = OpTypeFunction %7
-%11 = OpConstant %4 1
-%12 = OpConstant %4 0
-%14 = OpTypePointer StorageBuffer %4
-%16 = OpConstant %4 10
-%19 = OpTypePointer StorageBuffer %5
-%21 = OpConstant %5 10
+%10 = OpConstant %4 10
+%12 = OpTypePointer Function %4
+%13 = OpConstantNull %4
+%14 = OpConstant %5 10
+%16 = OpTypePointer Function %5
+%17 = OpConstantNull %5
+%19 = OpConstant %4 1
+%20 = OpConstant %4 0
+%22 = OpTypePointer StorageBuffer %4
+%27 = OpTypePointer StorageBuffer %5
 )";
   auto got_types = DumpInstructions(b.types());
   EXPECT_EQ(expected_types, got_types);
 
-  auto* expected_instructions = R"(%15 = OpAccessChain %14 %1 %12
-%10 = OpAtomicExchange %4 %15 %11 %12 %16
-%20 = OpAccessChain %19 %1 %11
-%17 = OpAtomicExchange %5 %20 %11 %12 %21
+  auto* expected_instructions = R"(OpStore %11 %10
+OpStore %15 %14
+%23 = OpAccessChain %22 %1 %20
+%24 = OpLoad %4 %11
+%18 = OpAtomicExchange %4 %23 %19 %20 %24
+%28 = OpAccessChain %27 %1 %19
+%29 = OpLoad %5 %15
+%25 = OpAtomicExchange %5 %28 %19 %20 %29
 )";
   auto got_instructions = DumpInstructions(b.functions()[0].instructions());
   EXPECT_EQ(expected_instructions, got_instructions);

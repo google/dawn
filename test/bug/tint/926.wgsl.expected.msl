@@ -1,0 +1,17 @@
+SKIP: FAILED
+
+
+[[block]]
+struct DrawIndirectArgs {
+  vertexCount : atomic<u32>;
+};
+
+[[group(0), binding(5)]] var<storage, read_write> drawOut : DrawIndirectArgs;
+
+[[stage(compute)]]
+fn computeMain([[builtin(global_invocation_id)]] global_id : vec3<u32>) {
+  [[internal(disable_validation__function_var_storage_class)]] var<private> tint_symbol_1 : u32 = 0u;
+  let firstVertex : u32 = atomicAdd(&(drawOut.vertexCount), tint_symbol_1);
+}
+
+Failed to generate: error: unknown type in EmitType: __atomic__u32
