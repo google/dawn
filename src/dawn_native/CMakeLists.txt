@@ -191,9 +191,21 @@ if (DAWN_USE_X11)
     )
 endif()
 
-if (WIN32)
+# Only win32 app needs to link with user32.lib
+# In UWP, all availiable APIs are defined in WindowsApp.lib 
+# and is automatically linked when WINDOWS_STORE set
+if (WIN32 AND NOT WINDOWS_STORE)
     target_link_libraries(dawn_native PRIVATE user32.lib)
 endif()
+
+# DXGIGetDebugInterface1 is defined in dxgi.lib
+# But this API is tagged as a development-only capability
+# which implies that linking to this function will cause
+# the application to fail Windows store certification
+# So we only link to it in debug build when compiling for UWP.
+# In win32 we load dxgi.dll using LoadLibrary
+# so no need for static linking.
+target_link_libraries(dawn_native PRIVATE debug dxgi.lib)
 
 if (DAWN_ENABLE_D3D12)
     target_sources(dawn_native PRIVATE
