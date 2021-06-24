@@ -151,6 +151,13 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap& data) {
                   << "nested pipeline IO struct";
             }
 
+            ast::DecorationList new_decorations = RemoveDecorations(
+                &ctx, member->Declaration()->decorations(),
+                [](const ast::Decoration* deco) {
+                  return !deco->IsAnyOf<ast::BuiltinDecoration,
+                                        ast::LocationDecoration>();
+                });
+
             if (cfg->builtin_style == BuiltinStyle::kParameter &&
                 ast::HasDecoration<ast::BuiltinDecoration>(
                     member->Declaration()->decorations())) {
@@ -158,19 +165,12 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap& data) {
               // parameters, then move it to the parameter list.
               auto* member_ty = CreateASTTypeFor(&ctx, member->Type());
               auto new_param_name = ctx.dst->Sym();
-              new_parameters.push_back(ctx.dst->Param(
-                  new_param_name, member_ty,
-                  ctx.Clone(member->Declaration()->decorations())));
+              new_parameters.push_back(
+                  ctx.dst->Param(new_param_name, member_ty, new_decorations));
               init_values.push_back(ctx.dst->Expr(new_param_name));
               continue;
             }
 
-            ast::DecorationList new_decorations = RemoveDecorations(
-                &ctx, member->Declaration()->decorations(),
-                [](const ast::Decoration* deco) {
-                  return !deco->IsAnyOf<ast::BuiltinDecoration,
-                                        ast::LocationDecoration>();
-                });
             auto member_name = ctx.Clone(member->Declaration()->symbol());
             auto* member_type = ctx.Clone(member->Declaration()->type());
             new_struct_members.push_back(

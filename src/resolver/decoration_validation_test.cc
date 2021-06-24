@@ -126,6 +126,105 @@ static ast::DecorationList createDecorations(const Source& source,
   return {};
 }
 
+using FunctionParameterDecorationTest = TestWithParams;
+TEST_P(FunctionParameterDecorationTest, IsValid) {
+  auto& params = GetParam();
+
+  Func("main",
+       ast::VariableList{Param("a", ty.vec4<f32>(),
+                               createDecorations({}, *this, params.kind))},
+       ty.void_(), {});
+
+  if (params.should_pass) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(),
+              "error: decoration is not valid for function parameters");
+  }
+}
+INSTANTIATE_TEST_SUITE_P(
+    ResolverDecorationValidationTest,
+    FunctionParameterDecorationTest,
+    testing::Values(TestParams{DecorationKind::kAlign, false},
+                    TestParams{DecorationKind::kBinding, false},
+                    TestParams{DecorationKind::kBuiltin, false},
+                    TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kLocation, false},
+                    TestParams{DecorationKind::kOverride, false},
+                    TestParams{DecorationKind::kOffset, false},
+                    TestParams{DecorationKind::kSize, false},
+                    TestParams{DecorationKind::kStage, false},
+                    TestParams{DecorationKind::kStride, false},
+                    TestParams{DecorationKind::kStructBlock, false},
+                    TestParams{DecorationKind::kWorkgroup, false},
+                    TestParams{DecorationKind::kBindingAndGroup, false}));
+
+using EntryPointParameterDecorationTest = TestWithParams;
+TEST_P(EntryPointParameterDecorationTest, IsValid) {
+  auto& params = GetParam();
+
+  Func("main",
+       ast::VariableList{Param("a", ty.vec4<f32>(),
+                               createDecorations({}, *this, params.kind))},
+       ty.void_(), {},
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
+
+  if (params.should_pass) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(),
+              "error: decoration is not valid for function parameters");
+  }
+}
+INSTANTIATE_TEST_SUITE_P(
+    ResolverDecorationValidationTest,
+    EntryPointParameterDecorationTest,
+    testing::Values(TestParams{DecorationKind::kAlign, false},
+                    TestParams{DecorationKind::kBinding, false},
+                    TestParams{DecorationKind::kBuiltin, true},
+                    TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kLocation, true},
+                    TestParams{DecorationKind::kOverride, false},
+                    TestParams{DecorationKind::kOffset, false},
+                    TestParams{DecorationKind::kSize, false},
+                    TestParams{DecorationKind::kStage, false},
+                    TestParams{DecorationKind::kStride, false},
+                    TestParams{DecorationKind::kStructBlock, false},
+                    TestParams{DecorationKind::kWorkgroup, false},
+                    TestParams{DecorationKind::kBindingAndGroup, false}));
+
+TEST_F(EntryPointParameterDecorationTest, DuplicateDecoration) {
+  Func("main", ast::VariableList{}, ty.f32(), ast::StatementList{Return(1.f)},
+       {Stage(ast::PipelineStage::kFragment)},
+       {
+           Location(Source{{12, 34}}, 2),
+           Location(Source{{56, 78}}, 3),
+       });
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            R"(56:78 error: duplicate location decoration
+12:34 note: first decoration declared here)");
+}
+
+TEST_F(EntryPointParameterDecorationTest, DuplicateInternalDecoration) {
+  auto* s =
+      Param("s", ty.sampler(ast::SamplerKind::kSampler),
+            ast::DecorationList{
+                create<ast::BindingDecoration>(0),
+                create<ast::GroupDecoration>(0),
+                ASTNodes().Create<ast::DisableValidationDecoration>(
+                    ID(), ast::DisabledValidation::kBindingPointCollision),
+                ASTNodes().Create<ast::DisableValidationDecoration>(
+                    ID(), ast::DisabledValidation::kEntryPointParameter),
+            });
+  Func("f", {s}, ty.void_(), {}, {Stage(ast::PipelineStage::kFragment)});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
 using FunctionReturnTypeDecorationTest = TestWithParams;
 TEST_P(FunctionReturnTypeDecorationTest, IsValid) {
   auto& params = GetParam();
@@ -383,22 +482,6 @@ TEST_F(VariableDecorationTest, DuplicateDecoration) {
   EXPECT_EQ(r()->error(),
             R"(56:78 error: duplicate binding decoration
 12:34 note: first decoration declared here)");
-}
-
-TEST_F(VariableDecorationTest, DuplicateInternalDecoration) {
-  auto* s =
-      Param("s", ty.sampler(ast::SamplerKind::kSampler),
-            ast::DecorationList{
-                create<ast::BindingDecoration>(0),
-                create<ast::GroupDecoration>(0),
-                ASTNodes().Create<ast::DisableValidationDecoration>(
-                    ID(), ast::DisabledValidation::kBindingPointCollision),
-                ASTNodes().Create<ast::DisableValidationDecoration>(
-                    ID(), ast::DisabledValidation::kEntryPointParameter),
-            });
-  Func("f", {s}, ty.void_(), {});
-
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 using ConstantDecorationTest = TestWithParams;

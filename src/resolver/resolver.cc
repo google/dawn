@@ -927,15 +927,30 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
   return true;
 }
 
-bool Resolver::ValidateParameter(const VariableInfo* info) {
+bool Resolver::ValidateParameter(const ast::Function* func,
+                                 const VariableInfo* info) {
   if (!ValidateVariable(info)) {
     return false;
   }
   for (auto* deco : info->declaration->decorations()) {
+    if (!func->IsEntryPoint()) {
+      AddError("decoration is not valid for function parameters",
+               deco->source());
+      return false;
+    }
+
     if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
       if (!ValidateBuiltinDecoration(builtin, info->type)) {
         return false;
       }
+    } else if (!deco->IsAnyOf<ast::LocationDecoration,
+                              ast::InternalDecoration>() &&
+               !IsValidationDisabled(
+                   info->declaration->decorations(),
+                   ast::DisabledValidation::kEntryPointParameter)) {
+      AddError("decoration is not valid for function parameters",
+               deco->source());
+      return false;
     }
   }
   return true;
@@ -1041,7 +1056,7 @@ bool Resolver::ValidateFunction(const ast::Function* func,
   }
 
   for (auto* param : func->params()) {
-    if (!ValidateParameter(variable_to_info_.at(param))) {
+    if (!ValidateParameter(func, variable_to_info_.at(param))) {
       return false;
     }
   }
