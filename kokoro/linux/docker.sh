@@ -86,6 +86,7 @@ if [ "$BUILD_SYSTEM" == "cmake" ]; then
 
     COMMON_CMAKE_FLAGS=""
     COMMON_CMAKE_FLAGS+=" -DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
+    COMMON_CMAKE_FLAGS+=" -DTINT_DOCS_WARN_AS_ERROR=ON"
 
     if [ "$BUILD_TOOLCHAIN" == "clang" ]; then
         using clang-10.0.0
@@ -103,10 +104,21 @@ if [ "$BUILD_SYSTEM" == "cmake" ]; then
 
     cd ${BUILD_DIR}
 
+    status "Running Doxygen"
+    echo "NOTE: This will fail on first warning. Run with -DTINT_DOCS_WARN_AS_ERROR=OFF to see all warnings".
+    echo ""
+    show_cmds
+        # NOTE: If we upgrade Doxygen to a more recent version, we can set DOXYGEN_WARN_AS_ERROR to
+        # "FAIL_ON_WARNINGS" instead of "YES" in our CMakeLists.txt so see all warnings, and then
+        # fail. See https://www.doxygen.nl/manual/config.html#cfg_warn_as_error
+        cmake ${SRC_DIR} ${CMAKE_FLAGS} ${COMMON_CMAKE_FLAGS}
+        cmake --build . --target tint-docs
+    hide_cmds
+
     status "Building tint"
     show_cmds
         cmake ${SRC_DIR} ${CMAKE_FLAGS} ${COMMON_CMAKE_FLAGS}
-        make --jobs=$(nproc)
+        cmake --build . -- --jobs=$(nproc)
     hide_cmds
 
     status "Running tint_unittests"
@@ -122,7 +134,7 @@ if [ "$BUILD_SYSTEM" == "cmake" ]; then
     status "Checking _other.cc files also build"
     show_cmds
         cmake ${SRC_DIR} ${CMAKE_FLAGS} ${COMMON_CMAKE_FLAGS} -DTINT_BUILD_AS_OTHER_OS=1
-        make --jobs=$(nproc)
+        cmake --build . -- --jobs=$(nproc)
     hide_cmds
 else
     status "Unsupported build system: $BUILD_SYSTEM"
