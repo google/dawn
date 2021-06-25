@@ -149,11 +149,18 @@ if(${TINT_BUILD_DOCS})
     if(TINT_DOCS_WARN_AS_ERROR)
       set(DOXYGEN_WARN_AS_ERROR YES)
     endif()
+
+    set(DOXYGEN_WARN_FORMAT "$file:$line: $text")
+    if (MSVC)
+      set(DOXYGEN_WARN_FORMAT "$file($line): $text")
+    endif()
+
     add_custom_target(tint-docs ALL
         COMMAND ${CMAKE_COMMAND}
           -E env
           "DOXYGEN_OUTPUT_DIRECTORY=${CMAKE_BINARY_DIR}/docs"
           "DOXYGEN_WARN_AS_ERROR=${DOXYGEN_WARN_AS_ERROR}"
+          "DOXYGEN_WARN_FORMAT=${DOXYGEN_WARN_FORMAT}"
           ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Generating API documentation"
