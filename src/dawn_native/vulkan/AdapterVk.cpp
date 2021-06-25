@@ -39,11 +39,7 @@ namespace dawn_native { namespace vulkan {
 
     MaybeError Adapter::Initialize() {
         DAWN_TRY_ASSIGN(mDeviceInfo, GatherDeviceInfo(*this));
-        if (!mDeviceInfo.HasExt(DeviceExt::Maintenance1)) {
-            return DAWN_INTERNAL_ERROR(
-                "Dawn requires Vulkan 1.1 or Vulkan 1.0 with KHR_Maintenance1 in order to support "
-                "viewport flipY");
-        }
+        DAWN_TRY(CheckCoreWebGPUSupport());
 
         if (mDeviceInfo.HasExt(DeviceExt::DriverProperties)) {
             mDriverDescription = mDeviceInfo.driverProperties.driverName;
@@ -74,6 +70,42 @@ namespace dawn_native { namespace vulkan {
             default:
                 mAdapterType = wgpu::AdapterType::Unknown;
                 break;
+        }
+
+        return {};
+    }
+
+    MaybeError Adapter::CheckCoreWebGPUSupport() {
+        // Needed for viewport Y-flip.
+        if (!mDeviceInfo.HasExt(DeviceExt::Maintenance1)) {
+            return DAWN_INTERNAL_ERROR("Vulkan 1.1 or Vulkan 1.0 with KHR_Maintenance1 required.");
+        }
+
+        // Needed for security
+        if (!mDeviceInfo.features.robustBufferAccess) {
+            return DAWN_INTERNAL_ERROR("Vulkan robustBufferAccess feature required.");
+        }
+
+        // TODO(crbug.com/dawn/955): Require BC || (ETC && ASTC) instead.
+        if (!mDeviceInfo.features.textureCompressionBC) {
+            return DAWN_INTERNAL_ERROR("Vulkan textureCompressionBC feature required.");
+        }
+
+        // Needed for the respective WebGPU features.
+        if (!mDeviceInfo.features.depthBiasClamp) {
+            return DAWN_INTERNAL_ERROR("Vulkan depthBiasClamp feature required.");
+        }
+        if (!mDeviceInfo.features.fragmentStoresAndAtomics) {
+            return DAWN_INTERNAL_ERROR("Vulkan fragmentStoresAndAtomics feature required.");
+        }
+        if (!mDeviceInfo.features.fullDrawIndexUint32) {
+            return DAWN_INTERNAL_ERROR("Vulkan fullDrawIndexUint32 feature required.");
+        }
+        if (!mDeviceInfo.features.imageCubeArray) {
+            return DAWN_INTERNAL_ERROR("Vulkan imageCubeArray feature required.");
+        }
+        if (!mDeviceInfo.features.independentBlend) {
+            return DAWN_INTERNAL_ERROR("Vulkan independentBlend feature required.");
         }
 
         return {};

@@ -315,14 +315,12 @@ namespace dawn_native { namespace vulkan {
         features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
         PNextChainBuilder featuresChain(&features2);
 
-        // Always require independentBlend because it is a core Dawn feature
-        usedKnobs.features.independentBlend = VK_TRUE;
-        // Always require imageCubeArray because it is a core Dawn feature
-        usedKnobs.features.imageCubeArray = VK_TRUE;
-        // Always require fragmentStoresAndAtomics because it is required by end2end tests.
-        usedKnobs.features.fragmentStoresAndAtomics = VK_TRUE;
-        // Always require depthBiasClamp because it is a core Dawn feature
+        // Required for core WebGPU features.
         usedKnobs.features.depthBiasClamp = VK_TRUE;
+        usedKnobs.features.fragmentStoresAndAtomics = VK_TRUE;
+        usedKnobs.features.fullDrawIndexUint32 = VK_TRUE;
+        usedKnobs.features.imageCubeArray = VK_TRUE;
+        usedKnobs.features.independentBlend = VK_TRUE;
 
         if (IsRobustnessEnabled()) {
             usedKnobs.features.robustBufferAccess = VK_TRUE;
