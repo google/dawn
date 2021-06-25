@@ -35,6 +35,7 @@
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
 #include "src/sem/vector_type.h"
+#include "src/transform/spirv.h"
 #include "src/utils/get_or_create.h"
 #include "src/writer/append_vector.h"
 
@@ -258,6 +259,13 @@ Builder::Builder(const Program* program)
 Builder::~Builder() = default;
 
 bool Builder::Build() {
+  if (!builder_.HasTransformApplied<transform::Spirv>()) {
+    error_ =
+        "SPIR-V writer requires the transform::Spirv sanitizer to have been "
+        "applied to the input program";
+    return false;
+  }
+
   push_capability(SpvCapabilityShader);
 
   push_memory_model(spv::Op::OpMemoryModel,

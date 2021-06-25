@@ -21,6 +21,8 @@
 #include "src/sem/expression.h"
 #include "src/sem/statement.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::PromoteInitializersToConstVar);
+
 namespace tint {
 namespace transform {
 
@@ -28,10 +30,9 @@ PromoteInitializersToConstVar::PromoteInitializersToConstVar() = default;
 
 PromoteInitializersToConstVar::~PromoteInitializersToConstVar() = default;
 
-Output PromoteInitializersToConstVar::Run(const Program* in, const DataMap&) {
-  ProgramBuilder out;
-  CloneContext ctx(&out, in);
-
+void PromoteInitializersToConstVar::Run(CloneContext& ctx,
+                                        const DataMap&,
+                                        DataMap&) {
   // Scan the AST nodes for array and structure initializers which
   // need to be promoted to their own constant declaration.
 
@@ -100,8 +101,6 @@ Output PromoteInitializersToConstVar::Run(const Program* in, const DataMap&) {
   }
 
   ctx.Clone();
-
-  return Output(Program(std::move(out)));
 }
 
 }  // namespace transform

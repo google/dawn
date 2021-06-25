@@ -860,7 +860,7 @@ if(${TINT_BUILD_TESTS})
 
   if(${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
     list(APPEND TINT_TEST_SRCS
-      transform/array_length_from_uniform.cc
+      transform/array_length_from_uniform_test.cc
       transform/binding_remapper_test.cc
       transform/bound_array_accessors_test.cc
       transform/calculate_array_length_test.cc

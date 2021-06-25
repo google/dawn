@@ -55,7 +55,7 @@ namespace transform {
 ///     return vert_idx;
 ///   }
 ///
-class FirstIndexOffset : public Transform {
+class FirstIndexOffset : public Castable<FirstIndexOffset, Transform> {
  public:
   /// BindingPoint is consumed by the FirstIndexOffset transform.
   /// BindingPoint specifies the binding point of the first index uniform
@@ -112,11 +112,14 @@ class FirstIndexOffset : public Transform {
   /// Destructor
   ~FirstIndexOffset() override;
 
-  /// Runs the transform on `program`, returning the transformation result.
-  /// @param program the source program to transform
-  /// @param data optional extra transform-specific input data
-  /// @returns the transformation result
-  Output Run(const Program* program, const DataMap& data = {}) override;
+ protected:
+  /// Runs the transform using the CloneContext built for transforming a
+  /// program. Run() is responsible for calling Clone() on the CloneContext.
+  /// @param ctx the CloneContext primed with the input program and
+  /// ProgramBuilder
+  /// @param inputs optional extra transform-specific input data
+  /// @param outputs optional extra transform-specific output data
+  void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) override;
 
  private:
   uint32_t binding_ = 0;

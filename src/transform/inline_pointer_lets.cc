@@ -25,6 +25,8 @@
 #include "src/sem/variable.h"
 #include "src/utils/scoped_assignment.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::InlinePointerLets);
+
 namespace tint {
 namespace transform {
 namespace {
@@ -79,10 +81,7 @@ InlinePointerLets::InlinePointerLets() = default;
 
 InlinePointerLets::~InlinePointerLets() = default;
 
-Output InlinePointerLets::Run(const Program* in, const DataMap&) {
-  ProgramBuilder out;
-  CloneContext ctx(&out, in);
-
+void InlinePointerLets::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   // If not null, current_ptr_let is the current PtrLet being operated on.
   PtrLet* current_ptr_let = nullptr;
   // A map of the AST `let` variable to the PtrLet
@@ -107,7 +106,7 @@ Output InlinePointerLets::Run(const Program* in, const DataMap&) {
       }
     }
     if (auto* ident = expr->As<ast::IdentifierExpression>()) {
-      if (auto* vu = in->Sem().Get<sem::VariableUser>(ident)) {
+      if (auto* vu = ctx.src->Sem().Get<sem::VariableUser>(ident)) {
         auto* var = vu->Variable()->Declaration();
         auto it = ptr_lets.find(var);
         if (it != ptr_lets.end()) {
@@ -130,13 +129,13 @@ Output InlinePointerLets::Run(const Program* in, const DataMap&) {
   // Find all the pointer-typed `let` declarations.
   // Note that these must be function-scoped, as module-scoped `let`s are not
   // permitted.
-  for (auto* node : in->ASTNodes().Objects()) {
+  for (auto* node : ctx.src->ASTNodes().Objects()) {
     if (auto* let = node->As<ast::VariableDeclStatement>()) {
       if (!let->variable()->is_const()) {
         continue;  // Not a `let` declaration. Ignore.
       }
 
-      auto* var = in->Sem().Get(let->variable());
+      auto* var = ctx.src->Sem().Get(let->variable());
       if (!var->Type()->Is<sem::Pointer>()) {
         continue;  // Not a pointer type. Ignore.
       }
@@ -183,8 +182,6 @@ Output InlinePointerLets::Run(const Program* in, const DataMap&) {
   }
 
   ctx.Clone();
-
-  return Output(Program(std::move(out)));
 }
 
 }  // namespace transform

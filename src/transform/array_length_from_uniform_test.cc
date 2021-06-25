@@ -16,6 +16,8 @@
 
 #include <utility>
 
+#include "src/transform/inline_pointer_lets.h"
+#include "src/transform/simplify.h"
 #include "src/transform/test_helper.h"
 
 namespace tint {
@@ -29,7 +31,31 @@ TEST_F(ArrayLengthFromUniformTest, Error_MissingTransformData) {
 
   auto* expect = "error: missing transform data for ArrayLengthFromUniform";
 
-  auto got = Run<ArrayLengthFromUniform>(src);
+  auto got = Run<InlinePointerLets, Simplify, ArrayLengthFromUniform>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ArrayLengthFromUniformTest, Error_MissingInlinePointerLets) {
+  auto* src = "";
+
+  auto* expect =
+      "error: tint::transform::ArrayLengthFromUniform depends on "
+      "tint::transform::InlinePointerLets but the dependency was not run";
+
+  auto got = Run<Simplify, ArrayLengthFromUniform>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ArrayLengthFromUniformTest, Error_MissingSimplify) {
+  auto* src = "";
+
+  auto* expect =
+      "error: tint::transform::ArrayLengthFromUniform depends on "
+      "tint::transform::Simplify but the dependency was not run";
+
+  auto got = Run<InlinePointerLets, ArrayLengthFromUniform>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -78,7 +104,8 @@ fn main() {
   DataMap data;
   data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
 
-  auto got = Run<ArrayLengthFromUniform>(src, data);
+  auto got =
+      Run<InlinePointerLets, Simplify, ArrayLengthFromUniform>(src, data);
 
   EXPECT_EQ(expect, str(got));
   EXPECT_TRUE(
@@ -131,7 +158,8 @@ fn main() {
   DataMap data;
   data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
 
-  auto got = Run<ArrayLengthFromUniform>(src, data);
+  auto got =
+      Run<InlinePointerLets, Simplify, ArrayLengthFromUniform>(src, data);
 
   EXPECT_EQ(expect, str(got));
   EXPECT_TRUE(
@@ -203,7 +231,8 @@ fn main() {
   DataMap data;
   data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
 
-  auto got = Run<ArrayLengthFromUniform>(src, data);
+  auto got =
+      Run<InlinePointerLets, Simplify, ArrayLengthFromUniform>(src, data);
 
   EXPECT_EQ(expect, str(got));
   EXPECT_TRUE(
@@ -232,7 +261,8 @@ fn main() {
   DataMap data;
   data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
 
-  auto got = Run<ArrayLengthFromUniform>(src, data);
+  auto got =
+      Run<InlinePointerLets, Simplify, ArrayLengthFromUniform>(src, data);
 
   EXPECT_EQ(src, str(got));
   EXPECT_FALSE(
@@ -273,7 +303,8 @@ fn main() {
   DataMap data;
   data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
 
-  auto got = Run<ArrayLengthFromUniform>(src, data);
+  auto got =
+      Run<InlinePointerLets, Simplify, ArrayLengthFromUniform>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }

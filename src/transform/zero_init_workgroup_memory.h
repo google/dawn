@@ -23,7 +23,8 @@ namespace transform {
 /// ZeroInitWorkgroupMemory is a transform that injects code at the top of entry
 /// points to zero-initialize workgroup memory used by that entry point (and all
 /// transitive functions called by that entry point)
-class ZeroInitWorkgroupMemory : public Transform {
+class ZeroInitWorkgroupMemory
+    : public Castable<ZeroInitWorkgroupMemory, Transform> {
  public:
   /// Constructor
   ZeroInitWorkgroupMemory();
@@ -31,11 +32,14 @@ class ZeroInitWorkgroupMemory : public Transform {
   /// Destructor
   ~ZeroInitWorkgroupMemory() override;
 
-  /// Runs the transform on `program`, returning the transformation result.
-  /// @param program the source program to transform
-  /// @param data optional extra transform-specific input data
-  /// @returns the transformation result
-  Output Run(const Program* program, const DataMap& data = {}) override;
+ protected:
+  /// Runs the transform using the CloneContext built for transforming a
+  /// program. Run() is responsible for calling Clone() on the CloneContext.
+  /// @param ctx the CloneContext primed with the input program and
+  /// ProgramBuilder
+  /// @param inputs optional extra transform-specific input data
+  /// @param outputs optional extra transform-specific output data
+  void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) override;
 
  private:
   struct State;

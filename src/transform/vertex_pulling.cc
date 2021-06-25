@@ -24,6 +24,7 @@
 #include "src/sem/variable.h"
 #include "src/utils/get_or_create.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::VertexPulling);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::VertexPulling::Config);
 
 namespace tint {
@@ -456,21 +457,20 @@ struct State {
 VertexPulling::VertexPulling() = default;
 VertexPulling::~VertexPulling() = default;
 
-Output VertexPulling::Run(const Program* in, const DataMap& data) {
-  ProgramBuilder out;
-
+void VertexPulling::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
   auto cfg = cfg_;
-  if (auto* cfg_data = data.Get<Config>()) {
+  if (auto* cfg_data = inputs.Get<Config>()) {
     cfg = *cfg_data;
   }
 
   // Find entry point
-  auto* func = in->AST().Functions().Find(
-      in->Symbols().Get(cfg.entry_point_name), ast::PipelineStage::kVertex);
+  auto* func = ctx.src->AST().Functions().Find(
+      ctx.src->Symbols().Get(cfg.entry_point_name),
+      ast::PipelineStage::kVertex);
   if (func == nullptr) {
-    out.Diagnostics().add_error(diag::System::Transform,
-                                "Vertex stage entry point not found");
-    return Output(Program(std::move(out)));
+    ctx.dst->Diagnostics().add_error(diag::System::Transform,
+                                     "Vertex stage entry point not found");
+    return;
   }
 
   // TODO(idanr): Need to check shader locations in descriptor cover all
@@ -479,15 +479,11 @@ Output VertexPulling::Run(const Program* in, const DataMap& data) {
   // TODO(idanr): Make sure we covered all error cases, to guarantee the
   // following stages will pass
 
-  CloneContext ctx(&out, in);
-
   State state{ctx, cfg};
   state.AddVertexStorageBuffers();
   state.Process(func);
 
   ctx.Clone();
-
-  return Output(Program(std::move(out)));
 }
 
 VertexPulling::Config::Config() = default;

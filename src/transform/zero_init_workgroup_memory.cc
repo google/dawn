@@ -23,6 +23,8 @@
 #include "src/sem/variable.h"
 #include "src/utils/get_or_create.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::ZeroInitWorkgroupMemory);
+
 namespace tint {
 namespace transform {
 
@@ -111,13 +113,10 @@ ZeroInitWorkgroupMemory::ZeroInitWorkgroupMemory() = default;
 
 ZeroInitWorkgroupMemory::~ZeroInitWorkgroupMemory() = default;
 
-Output ZeroInitWorkgroupMemory::Run(const Program* in, const DataMap&) {
-  ProgramBuilder out;
-  CloneContext ctx(&out, in);
-
+void ZeroInitWorkgroupMemory::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   auto& sem = ctx.src->Sem();
 
-  for (auto* ast_func : in->AST().Functions()) {
+  for (auto* ast_func : ctx.src->AST().Functions()) {
     if (!ast_func->IsEntryPoint()) {
       continue;
     }
@@ -192,8 +191,6 @@ Output ZeroInitWorkgroupMemory::Run(const Program* in, const DataMap&) {
   }
 
   ctx.Clone();
-
-  return Output(Program(std::move(out)));
 }
 
 }  // namespace transform

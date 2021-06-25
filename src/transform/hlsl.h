@@ -27,7 +27,7 @@ namespace transform {
 /// Hlsl is a transform used to sanitize a Program for use with the Hlsl writer.
 /// Passing a non-sanitized Program to the Hlsl writer will result in undefined
 /// behavior.
-class Hlsl : public Transform {
+class Hlsl : public Castable<Hlsl, Transform> {
  public:
   /// Constructor
   Hlsl();

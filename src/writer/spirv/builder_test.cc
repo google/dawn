@@ -22,6 +22,16 @@ namespace {
 
 using BuilderTest = TestHelper;
 
+TEST_F(BuilderTest, ErrorIfSanitizerNotRun) {
+  auto program = std::make_unique<Program>(std::move(*this));
+  spirv::Builder b(program.get());
+  EXPECT_FALSE(b.Build());
+  EXPECT_EQ(
+      b.error(),
+      "SPIR-V writer requires the transform::Spirv sanitizer to have been "
+      "applied to the input program");
+}
+
 TEST_F(BuilderTest, InsertsPreamble) {
   spirv::Builder& b = Build();
 

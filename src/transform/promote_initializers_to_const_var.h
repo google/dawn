@@ -23,7 +23,8 @@ namespace transform {
 /// A transform that hoists the array and structure initializers to a constant
 /// variable, declared just before the statement of usage. See
 /// crbug.com/tint/406 for more details.
-class PromoteInitializersToConstVar : public Transform {
+class PromoteInitializersToConstVar
+    : public Castable<PromoteInitializersToConstVar, Transform> {
  public:
   /// Constructor
   PromoteInitializersToConstVar();
@@ -31,11 +32,14 @@ class PromoteInitializersToConstVar : public Transform {
   /// Destructor
   ~PromoteInitializersToConstVar() override;
 
-  /// Runs the transform on `program`, returning the transformation result.
-  /// @param program the source program to transform
-  /// @param data optional extra transform-specific input data
-  /// @returns the transformation result
-  Output Run(const Program* program, const DataMap& data = {}) override;
+ protected:
+  /// Runs the transform using the CloneContext built for transforming a
+  /// program. Run() is responsible for calling Clone() on the CloneContext.
+  /// @param ctx the CloneContext primed with the input program and
+  /// ProgramBuilder
+  /// @param inputs optional extra transform-specific input data
+  /// @param outputs optional extra transform-specific output data
+  void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) override;
 };
 
 }  // namespace transform

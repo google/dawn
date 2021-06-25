@@ -36,6 +36,7 @@
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
 #include "src/transform/calculate_array_length.h"
+#include "src/transform/hlsl.h"
 #include "src/utils/scoped_assignment.h"
 #include "src/writer/append_vector.h"
 #include "src/writer/float_to_string.h"
@@ -114,6 +115,14 @@ GeneratorImpl::GeneratorImpl(const Program* program)
 GeneratorImpl::~GeneratorImpl() = default;
 
 bool GeneratorImpl::Generate(std::ostream& out) {
+  if (!builder_.HasTransformApplied<transform::Hlsl>()) {
+    diagnostics_.add_error(
+        diag::System::Writer,
+        "HLSL writer requires the transform::Hlsl sanitizer to have been "
+        "applied to the input program");
+    return false;
+  }
+
   std::stringstream pending;
   const TypeInfo* last_kind = nullptr;
 

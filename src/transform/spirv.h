@@ -29,7 +29,7 @@ namespace transform {
 /// Spirv is a transform used to sanitize a Program for use with the Spirv
 /// writer. Passing a non-sanitized Program to the Spirv writer will result in
 /// undefined behavior.
-class Spirv : public Transform {
+class Spirv : public Castable<Spirv, Transform> {
  public:
   /// Configuration options for the transform.
   struct Config : public Castable<Config, Data> {

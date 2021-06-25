@@ -38,6 +38,7 @@
 #include "src/utils/get_or_create.h"
 #include "src/utils/hash.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::DecomposeMemoryAccess);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::DecomposeMemoryAccess::Intrinsic);
 
 namespace tint {
@@ -790,10 +791,7 @@ DecomposeMemoryAccess::Intrinsic* DecomposeMemoryAccess::Intrinsic::Clone(
 DecomposeMemoryAccess::DecomposeMemoryAccess() = default;
 DecomposeMemoryAccess::~DecomposeMemoryAccess() = default;
 
-Output DecomposeMemoryAccess::Run(const Program* in, const DataMap&) {
-  ProgramBuilder out;
-  CloneContext ctx(&out, in);
-
+void DecomposeMemoryAccess::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   auto& sem = ctx.src->Sem();
 
   State state;
@@ -987,7 +985,6 @@ Output DecomposeMemoryAccess::Run(const Program* in, const DataMap&) {
   }
 
   ctx.Clone();
-  return Output{Program(std::move(out))};
 }
 
 }  // namespace transform

@@ -20,6 +20,8 @@
 
 #include "src/program_builder.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::FoldConstants);
+
 namespace tint {
 
 namespace {
@@ -318,10 +320,7 @@ FoldConstants::FoldConstants() = default;
 
 FoldConstants::~FoldConstants() = default;
 
-Output FoldConstants::Run(const Program* in, const DataMap&) {
-  ProgramBuilder out;
-  CloneContext ctx(&out, in);
-
+void FoldConstants::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   ExprToValue expr_to_value;
 
   // Visit inner expressions before outer expressions
@@ -345,8 +344,6 @@ Output FoldConstants::Run(const Program* in, const DataMap&) {
   }
 
   ctx.Clone();
-
-  return Output(Program(std::move(out)));
 }
 
 }  // namespace transform

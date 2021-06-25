@@ -20,20 +20,20 @@
 #include "src/program_builder.h"
 #include "src/sem/expression.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::BoundArrayAccessors);
+
 namespace tint {
 namespace transform {
 
 BoundArrayAccessors::BoundArrayAccessors() = default;
 BoundArrayAccessors::~BoundArrayAccessors() = default;
 
-Output BoundArrayAccessors::Run(const Program* in, const DataMap&) {
-  ProgramBuilder out;
-  CloneContext ctx(&out, in);
+void BoundArrayAccessors::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   ctx.ReplaceAll([&](ast::ArrayAccessorExpression* expr) {
     return Transform(expr, &ctx);
   });
+
   ctx.Clone();
-  return Output(Program(std::move(out)));
 }
 
 ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(

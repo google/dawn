@@ -36,6 +36,7 @@
 #include "src/transform/wrap_arrays_in_structs.h"
 #include "src/transform/zero_init_workgroup_memory.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::Msl);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Msl::Config);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Msl::Result);
 
@@ -103,6 +104,8 @@ Output Msl::Run(const Program* in, const DataMap& inputs) {
 
   auto result = std::make_unique<Result>(
       out.data.Get<ArrayLengthFromUniform::Result>()->needs_buffer_sizes);
+
+  builder.SetTransformApplied(this);
   return Output{Program(std::move(builder)), std::move(result)};
 }
 

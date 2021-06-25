@@ -29,7 +29,7 @@ using BindingPoint = sem::BindingPoint;
 
 /// BindingRemapper is a transform used to remap resource binding points and
 /// access controls.
-class BindingRemapper : public Transform {
+class BindingRemapper : public Castable<BindingRemapper, Transform> {
  public:
   /// BindingPoints is a map of old binding point to new binding point
   using BindingPoints = std::unordered_map<BindingPoint, BindingPoint>;
@@ -68,11 +68,14 @@ class BindingRemapper : public Transform {
   BindingRemapper();
   ~BindingRemapper() override;
 
-  /// Runs the transform on `program`, returning the transformation result.
-  /// @param program the source program to transform
-  /// @param data optional extra transform-specific input data
-  /// @returns the transformation result
-  Output Run(const Program* program, const DataMap& data = {}) override;
+ protected:
+  /// Runs the transform using the CloneContext built for transforming a
+  /// program. Run() is responsible for calling Clone() on the CloneContext.
+  /// @param ctx the CloneContext primed with the input program and
+  /// ProgramBuilder
+  /// @param inputs optional extra transform-specific input data
+  /// @param outputs optional extra transform-specific output data
+  void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) override;
 };
 
 }  // namespace transform

@@ -23,7 +23,7 @@ namespace transform {
 /// Msl is a transform used to sanitize a Program for use with the Msl writer.
 /// Passing a non-sanitized Program to the Msl writer will result in undefined
 /// behavior.
-class Msl : public Transform {
+class Msl : public Castable<Msl, Transform> {
  public:
   /// The default buffer slot to use for the storage buffer size buffer.
   const uint32_t kDefaultBufferSizeUniformIndex = 30;

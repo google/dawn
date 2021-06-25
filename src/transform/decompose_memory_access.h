@@ -30,7 +30,8 @@ namespace transform {
 /// DecomposeMemoryAccess is a transform used to replace storage and uniform
 /// buffer accesses with a combination of load, store or atomic functions on
 /// primitive types.
-class DecomposeMemoryAccess : public Transform {
+class DecomposeMemoryAccess
+    : public Castable<DecomposeMemoryAccess, Transform> {
  public:
   /// Intrinsic is an InternalDecoration that's used to decorate a stub function
   /// so that the HLSL transforms this into calls to
@@ -103,11 +104,14 @@ class DecomposeMemoryAccess : public Transform {
   /// Destructor
   ~DecomposeMemoryAccess() override;
 
-  /// Runs the transform on `program`, returning the transformation result.
-  /// @param program the source program to transform
-  /// @param data optional extra transform-specific data
-  /// @returns the transformation result
-  Output Run(const Program* program, const DataMap& data = {}) override;
+ protected:
+  /// Runs the transform using the CloneContext built for transforming a
+  /// program. Run() is responsible for calling Clone() on the CloneContext.
+  /// @param ctx the CloneContext primed with the input program and
+  /// ProgramBuilder
+  /// @param inputs optional extra transform-specific input data
+  /// @param outputs optional extra transform-specific output data
+  void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) override;
 
   struct State;
 };

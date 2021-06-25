@@ -27,6 +27,7 @@
 #include "src/utils/get_or_create.h"
 #include "src/utils/hash.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::CalculateArrayLength);
 TINT_INSTANTIATE_TYPEINFO(
     tint::transform::CalculateArrayLength::BufferSizeIntrinsic);
 
@@ -69,10 +70,7 @@ CalculateArrayLength::BufferSizeIntrinsic::Clone(CloneContext* ctx) const {
 CalculateArrayLength::CalculateArrayLength() = default;
 CalculateArrayLength::~CalculateArrayLength() = default;
 
-Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
-  ProgramBuilder out;
-  CloneContext ctx(&out, in);
-
+void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   auto& sem = ctx.src->Sem();
 
   // get_buffer_size_intrinsic() emits the function decorated with
@@ -232,8 +230,6 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
   }
 
   ctx.Clone();
-
-  return Output{Program(std::move(out))};
 }
 
 }  // namespace transform

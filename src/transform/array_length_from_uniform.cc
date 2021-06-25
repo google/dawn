@@ -21,7 +21,10 @@
 #include "src/program_builder.h"
 #include "src/sem/call.h"
 #include "src/sem/variable.h"
+#include "src/transform/inline_pointer_lets.h"
+#include "src/transform/simplify.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::ArrayLengthFromUniform);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::ArrayLengthFromUniform::Config);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::ArrayLengthFromUniform::Result);
 
@@ -31,16 +34,19 @@ namespace transform {
 ArrayLengthFromUniform::ArrayLengthFromUniform() = default;
 ArrayLengthFromUniform::~ArrayLengthFromUniform() = default;
 
-Output ArrayLengthFromUniform::Run(const Program* in, const DataMap& data) {
-  ProgramBuilder out;
-  CloneContext ctx(&out, in);
+void ArrayLengthFromUniform::Run(CloneContext& ctx,
+                                 const DataMap& inputs,
+                                 DataMap& outputs) {
+  if (!Requires<InlinePointerLets, Simplify>(ctx)) {
+    return;
+  }
 
-  auto* cfg = data.Get<Config>();
+  auto* cfg = inputs.Get<Config>();
   if (cfg == nullptr) {
-    out.Diagnostics().add_error(
+    ctx.dst->Diagnostics().add_error(
         diag::System::Transform,
         "missing transform data for ArrayLengthFromUniform");
-    return Output(Program(std::move(out)));
+    return;
   }
 
   auto& sem = ctx.src->Sem();
@@ -149,8 +155,7 @@ Output ArrayLengthFromUniform::Run(const Program* in, const DataMap& data) {
 
   ctx.Clone();
 
-  return Output{Program(std::move(out)),
-                std::make_unique<Result>(buffer_size_ubo ? true : false)};
+  outputs.Add<Result>(buffer_size_ubo ? true : false);
 }
 
 ArrayLengthFromUniform::Config::Config(sem::BindingPoint ubo_bp)

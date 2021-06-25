@@ -33,32 +33,6 @@ template <typename BASE>
 class TransformTestBase : public BASE {
  public:
   /// Transforms and returns the WGSL source `in`, transformed using
-  /// `transforms`.
-  /// @param in the input WGSL source
-  /// @param transforms the list of transforms to apply
-  /// @param data the optional DataMap to pass to Transform::Run()
-  /// @return the transformed output
-  Output Run(std::string in,
-             std::vector<std::unique_ptr<transform::Transform>> transforms,
-             const DataMap& data = {}) {
-    auto file = std::make_unique<Source::File>("test", in);
-    auto program = reader::wgsl::Parse(file.get());
-
-    // Keep this pointer alive after Transform() returns
-    files_.emplace_back(std::move(file));
-
-    if (!program.IsValid()) {
-      return Output(std::move(program));
-    }
-
-    Manager manager;
-    for (auto& transform : transforms) {
-      manager.append(std::move(transform));
-    }
-    return manager.Run(&program, data);
-  }
-
-  /// Transforms and returns the WGSL source `in`, transformed using
   /// `transform`.
   /// @param transform the transform to apply
   /// @param in the input WGSL source
@@ -77,9 +51,24 @@ class TransformTestBase : public BASE {
   /// @param in the input WGSL source
   /// @param data the optional DataMap to pass to Transform::Run()
   /// @return the transformed output
-  template <typename TRANSFORM>
+  template <typename... TRANSFORMS>
   Output Run(std::string in, const DataMap& data = {}) {
-    return Run(std::move(in), std::make_unique<TRANSFORM>(), data);
+    auto file = std::make_unique<Source::File>("test", in);
+    auto program = reader::wgsl::Parse(file.get());
+
+    // Keep this pointer alive after Transform() returns
+    files_.emplace_back(std::move(file));
+
+    if (!program.IsValid()) {
+      return Output(std::move(program));
+    }
+
+    Manager manager;
+    for (auto* transform_ptr :
+         std::initializer_list<Transform*>{new TRANSFORMS()...}) {
+      manager.append(std::unique_ptr<Transform>(transform_ptr));
+    }
+    return manager.Run(&program, data);
   }
 
   /// @param output the output of the transform

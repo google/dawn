@@ -25,6 +25,7 @@
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::FirstIndexOffset);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::FirstIndexOffset::BindingPoint);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::FirstIndexOffset::Data);
 
@@ -57,17 +58,16 @@ FirstIndexOffset::Data::~Data() = default;
 FirstIndexOffset::FirstIndexOffset() = default;
 FirstIndexOffset::~FirstIndexOffset() = default;
 
-Output FirstIndexOffset::Run(const Program* in, const DataMap& data) {
+void FirstIndexOffset::Run(CloneContext& ctx,
+                           const DataMap& inputs,
+                           DataMap& outputs) {
   // Get the uniform buffer binding point
   uint32_t ub_binding = binding_;
   uint32_t ub_group = group_;
-  if (auto* binding_point = data.Get<BindingPoint>()) {
+  if (auto* binding_point = inputs.Get<BindingPoint>()) {
     ub_binding = binding_point->binding;
     ub_group = binding_point->group;
   }
-
-  ProgramBuilder out;
-  CloneContext ctx(&out, in);
 
   // Map of builtin usages
   std::unordered_map<const sem::Variable*, const char*> builtin_vars;
@@ -78,7 +78,7 @@ Output FirstIndexOffset::Run(const Program* in, const DataMap& data) {
 
   // Traverse the AST scanning for builtin accesses via variables (includes
   // parameters) or structure member accesses.
-  for (auto* node : in->ASTNodes().Objects()) {
+  for (auto* node : ctx.src->ASTNodes().Objects()) {
     if (auto* var = node->As<ast::Variable>()) {
       for (ast::Decoration* dec : var->decorations()) {
         if (auto* builtin_dec = dec->As<ast::BuiltinDecoration>()) {
@@ -173,10 +173,8 @@ Output FirstIndexOffset::Run(const Program* in, const DataMap& data) {
 
   ctx.Clone();
 
-  return Output(
-      Program(std::move(out)),
-      std::make_unique<Data>(has_vertex_index, has_instance_index,
-                             vertex_index_offset, instance_index_offset));
+  outputs.Add<Data>(has_vertex_index, has_instance_index, vertex_index_offset,
+                    instance_index_offset);
 }
 
 }  // namespace transform

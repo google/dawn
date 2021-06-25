@@ -22,6 +22,8 @@
 #include "src/sem/expression.h"
 #include "src/utils/get_or_create.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::PadArrayElements);
+
 namespace tint {
 namespace transform {
 namespace {
@@ -89,10 +91,7 @@ PadArrayElements::PadArrayElements() = default;
 
 PadArrayElements::~PadArrayElements() = default;
 
-Output PadArrayElements::Run(const Program* in, const DataMap&) {
-  ProgramBuilder out;
-  CloneContext ctx(&out, in);
-
+void PadArrayElements::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   auto& sem = ctx.src->Sem();
 
   std::unordered_map<const sem::Array*, ArrayBuilder> padded_arrays;
@@ -149,8 +148,6 @@ Output PadArrayElements::Run(const Program* in, const DataMap&) {
   });
 
   ctx.Clone();
-
-  return Output(Program(std::move(out)));
 }
 
 }  // namespace transform

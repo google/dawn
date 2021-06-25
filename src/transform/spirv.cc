@@ -34,6 +34,7 @@
 #include "src/transform/simplify.h"
 #include "src/transform/zero_init_workgroup_memory.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::Spirv);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Spirv::Config);
 
 namespace tint {
@@ -70,6 +71,7 @@ Output Spirv::Run(const Program* in, const DataMap& data) {
   }
   ctx2.Clone();
 
+  out2.SetTransformApplied(this);
   return Output{Program(std::move(out2))};
 }
 

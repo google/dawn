@@ -24,6 +24,7 @@
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::CanonicalizeEntryPointIO);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::CanonicalizeEntryPointIO::Config);
 
 namespace tint {
@@ -62,16 +63,15 @@ bool StructMemberComparator(const ast::StructMember* a,
 
 }  // namespace
 
-Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap& data) {
-  ProgramBuilder out;
-  CloneContext ctx(&out, in);
-
-  auto* cfg = data.Get<Config>();
+void CanonicalizeEntryPointIO::Run(CloneContext& ctx,
+                                   const DataMap& inputs,
+                                   DataMap&) {
+  auto* cfg = inputs.Get<Config>();
   if (cfg == nullptr) {
-    out.Diagnostics().add_error(
+    ctx.dst->Diagnostics().add_error(
         diag::System::Transform,
         "missing transform data for CanonicalizeEntryPointIO");
-    return Output(Program(std::move(out)));
+    return;
   }
 
   // Strip entry point IO decorations from struct declarations.
@@ -375,7 +375,6 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap& data) {
   }
 
   ctx.Clone();
-  return Output(Program(std::move(out)));
 }
 
 CanonicalizeEntryPointIO::Config::Config(BuiltinStyle builtins,

@@ -15,11 +15,13 @@
 #include "src/transform/transform.h"
 
 #include <algorithm>
+#include <string>
 
 #include "src/program_builder.h"
 #include "src/sem/atomic_type.h"
 #include "src/sem/reference_type.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::Transform);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Data);
 
 namespace tint {
@@ -39,6 +41,35 @@ Output::Output() = default;
 Output::Output(Program&& p) : program(std::move(p)) {}
 Transform::Transform() = default;
 Transform::~Transform() = default;
+
+Output Transform::Run(const Program* program, const DataMap& data /* = {} */) {
+  ProgramBuilder builder;
+  CloneContext ctx(&builder, program);
+  Output output;
+  Run(ctx, data, output.data);
+  builder.SetTransformApplied(this);
+  output.program = Program(std::move(builder));
+  return output;
+}
+
+void Transform::Run(CloneContext& ctx, const DataMap&, DataMap&) {
+  TINT_UNIMPLEMENTED(Transform, ctx.dst->Diagnostics())
+      << "Transform::Run() unimplemented for " << TypeInfo().name;
+}
+
+bool Transform::Requires(CloneContext& ctx,
+                         std::initializer_list<const ::tint::TypeInfo*> deps) {
+  for (auto* dep : deps) {
+    if (!ctx.src->HasTransformApplied(dep)) {
+      ctx.dst->Diagnostics().add_error(
+          diag::System::Transform, std::string(TypeInfo().name) +
+                                       " depends on " + std::string(dep->name) +
+                                       " but the dependency was not run");
+      return false;
+    }
+  }
+  return true;
+}
 
 ast::Function* Transform::CloneWithStatementsAtStart(
     CloneContext* ctx,

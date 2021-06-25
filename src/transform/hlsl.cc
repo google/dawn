@@ -29,6 +29,8 @@
 #include "src/transform/wrap_arrays_in_structs.h"
 #include "src/transform/zero_init_workgroup_memory.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::Hlsl);
+
 namespace tint {
 namespace transform {
 
@@ -69,6 +71,7 @@ Output Hlsl::Run(const Program* in, const DataMap&) {
   CloneContext ctx(&builder, &out.program);
   AddEmptyEntryPoint(ctx);
   ctx.Clone();
+  builder.SetTransformApplied(this);
   return Output{Program(std::move(builder))};
 }
 

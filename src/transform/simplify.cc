@@ -25,6 +25,8 @@
 #include "src/sem/variable.h"
 #include "src/utils/scoped_assignment.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::Simplify);
+
 namespace tint {
 namespace transform {
 
@@ -32,10 +34,7 @@ Simplify::Simplify() = default;
 
 Simplify::~Simplify() = default;
 
-Output Simplify::Run(const Program* in, const DataMap&) {
-  ProgramBuilder out;
-  CloneContext ctx(&out, in);
-
+void Simplify::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   ctx.ReplaceAll([&](ast::Expression* expr) -> ast::Expression* {
     if (auto* outer = expr->As<ast::UnaryOpExpression>()) {
       if (auto* inner = outer->expr()->As<ast::UnaryOpExpression>()) {
@@ -55,8 +54,6 @@ Output Simplify::Run(const Program* in, const DataMap&) {
   });
 
   ctx.Clone();
-
-  return Output(Program(std::move(out)));
 }
 
 }  // namespace transform

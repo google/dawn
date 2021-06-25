@@ -22,7 +22,9 @@
 #include "src/sem/call.h"
 #include "src/sem/member_accessor_expression.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::Renamer);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Renamer::Data);
+TINT_INSTANTIATE_TYPEINFO(tint::transform::Renamer::Config);
 
 namespace tint {
 namespace transform {
@@ -835,18 +837,18 @@ const char* kReservedKeywordsMSL[] = {"access",
 }  // namespace
 
 Renamer::Data::Data(Remappings&& r) : remappings(std::move(r)) {}
-
 Renamer::Data::Data(const Data&) = default;
-
 Renamer::Data::~Data() = default;
 
-Renamer::Renamer() : cfg_{} {}
+Renamer::Config::Config(Target t) : target(t) {}
+Renamer::Config::Config(const Config&) = default;
+Renamer::Config::~Config() = default;
 
-Renamer::Renamer(const Config& config) : cfg_(config) {}
-
+Renamer::Renamer() : deprecated_cfg_(Target::kAll) {}
+Renamer::Renamer(const Config& config) : deprecated_cfg_(config) {}
 Renamer::~Renamer() = default;
 
-Output Renamer::Run(const Program* in, const DataMap&) {
+Output Renamer::Run(const Program* in, const DataMap& inputs) {
   ProgramBuilder out;
   // Disable auto-cloning of symbols, since we want to rename them.
   CloneContext ctx(&out, in, false);
@@ -879,9 +881,14 @@ Output Renamer::Run(const Program* in, const DataMap&) {
 
   Data::Remappings remappings;
 
+  auto* cfg = inputs.Get<Config>();
+  if (!cfg) {
+    cfg = &deprecated_cfg_;
+  }
+
   ctx.ReplaceAll([&](Symbol sym_in) {
     auto name_in = ctx.src->Symbols().NameFor(sym_in);
-    switch (cfg_.target) {
+    switch (cfg->target) {
       case Target::kAll:
         // Always rename.
         break;

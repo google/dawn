@@ -24,7 +24,7 @@ namespace tint {
 namespace transform {
 
 /// Renamer is a Transform that renames all the symbols in a program.
-class Renamer : public Transform {
+class Renamer : public Castable<Renamer, Transform> {
  public:
   /// Data is outputted by the Renamer transform.
   /// Data holds information about shader usage and constant buffer offsets.
@@ -57,16 +57,27 @@ class Renamer : public Transform {
   };
 
   /// Configuration options for the transform
-  struct Config {
+  struct Config : public Castable<Config, transform::Data> {
+    /// Constructor
+    /// @param tgt the targets to rename
+    explicit Config(Target tgt);
+
+    /// Copy constructor
+    Config(const Config&);
+
+    /// Destructor
+    ~Config() override;
+
     /// The targets to rename
-    Target target = Target::kAll;
+    Target const target = Target::kAll;
   };
 
-  /// Constructor using a default configuration
+  /// Constructor using a the configuration provided in the input Data
   Renamer();
 
   /// Constructor
   /// @param config the configuration for the transform
+  /// [DEPRECATED] Pass Config as input Data
   explicit Renamer(const Config& config);
 
   /// Destructor
@@ -79,7 +90,7 @@ class Renamer : public Transform {
   Output Run(const Program* program, const DataMap& data = {}) override;
 
  private:
-  Config const cfg_;
+  Config const deprecated_cfg_;
 };
 
 }  // namespace transform

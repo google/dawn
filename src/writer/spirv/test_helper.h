@@ -43,6 +43,9 @@ class TestHelperBase : public ProgramBuilder, public BASE {
     if (spirv_builder) {
       return *spirv_builder;
     }
+    // Fake that the SPIR-V sanitizer has been applied, so that we can unit test
+    // the writer without it erroring.
+    SetTransformApplied<transform::Spirv>();
     [&]() {
       ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
                              << diag::Formatter().format(Diagnostics());

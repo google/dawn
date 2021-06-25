@@ -21,6 +21,8 @@
 #include "src/sem/expression.h"
 #include "src/utils/get_or_create.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::WrapArraysInStructs);
+
 namespace tint {
 namespace transform {
 
@@ -33,10 +35,7 @@ WrapArraysInStructs::WrapArraysInStructs() = default;
 
 WrapArraysInStructs::~WrapArraysInStructs() = default;
 
-Output WrapArraysInStructs::Run(const Program* in, const DataMap&) {
-  ProgramBuilder out;
-  CloneContext ctx(&out, in);
-
+void WrapArraysInStructs::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   auto& sem = ctx.src->Sem();
 
   std::unordered_map<const sem::Array*, WrappedArrayInfo> wrapped_arrays;
@@ -60,8 +59,8 @@ Output WrapArraysInStructs::Run(const Program* in, const DataMap&) {
   // Fix up array accessors so `a[1]` becomes `a.arr[1]`
   ctx.ReplaceAll([&](ast::ArrayAccessorExpression* accessor)
                      -> ast::ArrayAccessorExpression* {
-    if (auto* array =
-            As<sem::Array>(sem.Get(accessor->array())->Type()->UnwrapRef())) {
+    if (auto* array = ::tint::As<sem::Array>(
+            sem.Get(accessor->array())->Type()->UnwrapRef())) {
       if (wrapper(array)) {
         // Array is wrapped in a structure. Emit a member accessor to get
         // to the actual array.
@@ -76,7 +75,8 @@ Output WrapArraysInStructs::Run(const Program* in, const DataMap&) {
 
   // Fix up array constructors so `A(1,2)` becomes `tint_array_wrapper(A(1,2))`
   ctx.ReplaceAll([&](ast::TypeConstructorExpression* ctor) -> ast::Expression* {
-    if (auto* array = As<sem::Array>(sem.Get(ctor)->Type()->UnwrapRef())) {
+    if (auto* array =
+            ::tint::As<sem::Array>(sem.Get(ctor)->Type()->UnwrapRef())) {
       if (auto w = wrapper(array)) {
         // Wrap the array type constructor with another constructor for
         // the wrapper
@@ -91,8 +91,6 @@ Output WrapArraysInStructs::Run(const Program* in, const DataMap&) {
   });
 
   ctx.Clone();
-
-  return Output(Program(std::move(out)));
 }
 
 WrapArraysInStructs::WrappedArrayInfo WrapArraysInStructs::WrapArray(

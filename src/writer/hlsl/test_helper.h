@@ -44,15 +44,17 @@ class TestHelperBase : public BODY, public ProgramBuilder {
     if (gen_) {
       return *gen_;
     }
-    diag::Formatter formatter;
+    // Fake that the HLSL sanitizer has been applied, so that we can unit test
+    // the writer without it erroring.
+    SetTransformApplied<transform::Hlsl>();
     [&]() {
       ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
-                             << formatter.format(Diagnostics());
+                             << diag::Formatter().format(Diagnostics());
     }();
     program = std::make_unique<Program>(std::move(*this));
     [&]() {
       ASSERT_TRUE(program->IsValid())
-          << formatter.format(program->Diagnostics());
+          << diag::Formatter().format(program->Diagnostics());
     }();
     gen_ = std::make_unique<GeneratorImpl>(program.get());
     return *gen_;

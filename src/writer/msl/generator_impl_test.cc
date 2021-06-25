@@ -22,6 +22,16 @@ namespace {
 
 using MslGeneratorImplTest = TestHelper;
 
+TEST_F(MslGeneratorImplTest, ErrorIfSanitizerNotRun) {
+  auto program = std::make_unique<Program>(std::move(*this));
+  GeneratorImpl gen(program.get());
+  EXPECT_FALSE(gen.Generate());
+  EXPECT_EQ(
+      gen.error(),
+      "error: MSL writer requires the transform::Msl sanitizer to have been "
+      "applied to the input program");
+}
+
 TEST_F(MslGeneratorImplTest, Generate) {
   Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
        ast::DecorationList{

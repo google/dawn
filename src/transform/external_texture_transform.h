@@ -27,18 +27,22 @@ namespace transform {
 /// This allows us to share SPIR-V/HLSL writer paths for sampled textures
 /// instead of adding dedicated writer paths for external textures.
 /// ExternalTextureTransform performs this transformation.
-class ExternalTextureTransform : public Transform {
+class ExternalTextureTransform
+    : public Castable<ExternalTextureTransform, Transform> {
  public:
   /// Constructor
   ExternalTextureTransform();
   /// Destructor
   ~ExternalTextureTransform() override;
 
-  /// Runs the transform on `program`, returning the transformation result.
-  /// @param program the source program to transform
-  /// @param data optional extra transform-specific data
-  /// @returns the transformation result
-  Output Run(const Program* program, const DataMap& data = {}) override;
+ protected:
+  /// Runs the transform using the CloneContext built for transforming a
+  /// program. Run() is responsible for calling Clone() on the CloneContext.
+  /// @param ctx the CloneContext primed with the input program and
+  /// ProgramBuilder
+  /// @param inputs optional extra transform-specific input data
+  /// @param outputs optional extra transform-specific output data
+  void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) override;
 };
 
 }  // namespace transform

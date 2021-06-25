@@ -207,8 +207,9 @@ fn frag_main() {
 }
 )";
 
-  Renamer::Config config{Renamer::Target::kHlslKeywords};
-  auto got = Run(src, std::make_unique<Renamer>(config));
+  DataMap inputs;
+  inputs.Add<Renamer::Config>(Renamer::Target::kHlslKeywords);
+  auto got = Run<Renamer>(src, inputs);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -231,8 +232,9 @@ fn frag_main() {
 }
 )";
 
-  Renamer::Config config{Renamer::Target::kMslKeywords};
-  auto got = Run(src, std::make_unique<Renamer>(config));
+  DataMap inputs;
+  inputs.Add<Renamer::Config>(Renamer::Target::kMslKeywords);
+  auto got = Run<Renamer>(src, inputs);
 
   EXPECT_EQ(expect, str(got));
 }

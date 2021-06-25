@@ -50,6 +50,7 @@
 #include "src/sem/variable.h"
 #include "src/sem/vector_type.h"
 #include "src/sem/void_type.h"
+#include "src/transform/msl.h"
 #include "src/utils/scoped_assignment.h"
 #include "src/writer/float_to_string.h"
 
@@ -75,6 +76,14 @@ GeneratorImpl::GeneratorImpl(const Program* program)
 GeneratorImpl::~GeneratorImpl() = default;
 
 bool GeneratorImpl::Generate() {
+  if (!program_->HasTransformApplied<transform::Msl>()) {
+    diagnostics_.add_error(
+        diag::System::Writer,
+        "MSL writer requires the transform::Msl sanitizer to have been "
+        "applied to the input program");
+    return false;
+  }
+
   out_ << "#include <metal_stdlib>" << std::endl << std::endl;
   out_ << "using namespace metal;" << std::endl;
 

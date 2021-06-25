@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "src/castable.h"
 #include "src/program.h"
 
 namespace tint {
@@ -145,20 +146,45 @@ class Output {
 };
 
 /// Interface for Program transforms
-class Transform {
+class Transform : public Castable<Transform> {
  public:
   /// Constructor
   Transform();
   /// Destructor
-  virtual ~Transform();
+  ~Transform() override;
 
   /// Runs the transform on `program`, returning the transformation result.
   /// @param program the source program to transform
   /// @param data optional extra transform-specific input data
   /// @returns the transformation result
-  virtual Output Run(const Program* program, const DataMap& data = {}) = 0;
+  virtual Output Run(const Program* program, const DataMap& data = {});
 
  protected:
+  /// Runs the transform using the CloneContext built for transforming a
+  /// program. Run() is responsible for calling Clone() on the CloneContext.
+  /// @param ctx the CloneContext primed with the input program and
+  /// ProgramBuilder
+  /// @param inputs optional extra transform-specific input data
+  /// @param outputs optional extra transform-specific output data
+  virtual void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs);
+
+  /// Requires appends an error diagnostic to `ctx.dst` if the template type
+  /// transforms were not already run on `ctx.src`.
+  /// @param ctx the CloneContext
+  /// @returns true if all dependency transforms have been run
+  template <typename... TRANSFORMS>
+  bool Requires(CloneContext& ctx) {
+    return Requires(ctx, {&::tint::TypeInfo::Of<TRANSFORMS>()...});
+  }
+
+  /// Requires appends an error diagnostic to `ctx.dst` if the list of
+  /// Transforms were not already run on `ctx.src`.
+  /// @param ctx the CloneContext
+  /// @param deps the list of Transform TypeInfos
+  /// @returns true if all dependency transforms have been run
+  bool Requires(CloneContext& ctx,
+                std::initializer_list<const ::tint::TypeInfo*> deps);
+
   /// Clones the function `in` adding `statements` to the beginning of the
   /// cloned function body.
   /// @param ctx the clone context

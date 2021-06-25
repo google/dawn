@@ -14,6 +14,8 @@
 
 #include "src/transform/manager.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::Manager);
+
 namespace tint {
 namespace transform {
 

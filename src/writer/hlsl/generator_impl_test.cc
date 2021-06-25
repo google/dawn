@@ -21,6 +21,16 @@ namespace {
 
 using HlslGeneratorImplTest = TestHelper;
 
+TEST_F(HlslGeneratorImplTest, ErrorIfSanitizerNotRun) {
+  auto program = std::make_unique<Program>(std::move(*this));
+  GeneratorImpl gen(program.get());
+  EXPECT_FALSE(gen.Generate(out));
+  EXPECT_EQ(
+      gen.error(),
+      "error: HLSL writer requires the transform::Hlsl sanitizer to have been "
+      "applied to the input program");
+}
+
 TEST_F(HlslGeneratorImplTest, Generate) {
   Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
        ast::DecorationList{});

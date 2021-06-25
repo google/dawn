@@ -57,6 +57,7 @@ Symbol CloneContext::Clone(Symbol s) {
 
 void CloneContext::Clone() {
   dst->AST().Copy(this, &src->AST());
+  dst->SetTransformApplied(src->TransformsApplied());
 }
 
 ast::FunctionList CloneContext::Clone(const ast::FunctionList& v) {
