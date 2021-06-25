@@ -20,6 +20,9 @@
 
 #include "source/fuzz/fuzzer.h"
 
+// TODO(vasniktel): Add doxygen comments.
+//! @cond Doxygen_Suppress
+
 namespace tint {
 namespace fuzzers {
 namespace spvtools_fuzzer {
@@ -120,5 +123,7 @@ MutatorDebuggerCliParams ParseMutatorDebuggerCliParams(int argc,
 }  // namespace spvtools_fuzzer
 }  // namespace fuzzers
 }  // namespace tint
+
+//! @endcond
 
 #endif  // FUZZERS_TINT_SPIRV_TOOLS_FUZZER_CLI_H_
