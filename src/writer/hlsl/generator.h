@@ -48,7 +48,6 @@ class Generator : public Text {
   std::string error() const;
 
  private:
-  std::ostringstream out_;
   std::unique_ptr<GeneratorImpl> impl_;
 };
 

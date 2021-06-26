@@ -38,8 +38,8 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(  void my_func() {
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  void my_func() {
     return;
   }
 )");
@@ -55,8 +55,8 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_Name_Collision) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(R"(  void tint_symbol() {
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr(R"(  void tint_symbol() {
     return;
   })"));
 }
@@ -72,8 +72,8 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithParams) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(  void my_func(float a, int b) {
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  void my_func(float a, int b) {
     return;
   }
 )");
@@ -88,8 +88,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(void main() {
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(void main() {
   return;
 }
 )");
@@ -104,8 +104,8 @@ TEST_F(HlslGeneratorImplTest_Function, PtrParameter) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(R"(float f(inout float foo) {
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr(R"(float f(inout float foo) {
   return foo;
 }
 )"));
@@ -122,8 +122,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct tint_symbol_1 {
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct tint_symbol_1 {
   float foo : TEXCOORD0;
 };
 struct tint_symbol_2 {
@@ -152,8 +152,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct tint_symbol_1 {
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct tint_symbol_1 {
   float4 coord : SV_Position;
 };
 struct tint_symbol_2 {
@@ -206,8 +206,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct Interface {
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct Interface {
   float4 pos;
   float col1;
   float col2;
@@ -275,8 +275,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct VertexOutput {
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct VertexOutput {
   float4 pos;
 };
 
@@ -340,8 +340,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(cbuffer cbuffer_ubo : register(b0, space1) {
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(cbuffer cbuffer_ubo : register(b0, space1) {
   uint4 ubo[1];
 };
 
@@ -381,8 +381,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(cbuffer cbuffer_uniforms : register(b0, space1) {
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(cbuffer cbuffer_uniforms : register(b0, space1) {
   uint4 uniforms[1];
 };
 
@@ -423,8 +423,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(),
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(),
             R"(RWByteAddressBuffer coord : register(u0, space1);
 
 void frag_main() {
@@ -463,8 +463,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(),
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(),
             R"(ByteAddressBuffer coord : register(t0, space1);
 
 void frag_main() {
@@ -500,8 +500,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(),
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(),
             R"(RWByteAddressBuffer coord : register(u0, space1);
 
 void frag_main() {
@@ -538,8 +538,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(),
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(),
             R"(RWByteAddressBuffer coord : register(u0, space1);
 
 void frag_main() {
@@ -578,8 +578,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(cbuffer cbuffer_coord : register(b0, space1) {
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(cbuffer cbuffer_coord : register(b0, space1) {
   uint4 coord[1];
 };
 
@@ -624,8 +624,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(),
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(),
             R"(RWByteAddressBuffer coord : register(u0, space1);
 
 float sub_func(float param) {
@@ -648,8 +648,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(void tint_symbol() {
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(void tint_symbol() {
   return;
 }
 )");
@@ -666,8 +666,8 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Decoration_EntryPoint_Compute) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"([numthreads(1, 1, 1)]
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"([numthreads(1, 1, 1)]
 void main() {
   return;
 }
@@ -684,8 +684,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"([numthreads(2, 4, 6)]
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"([numthreads(2, 4, 6)]
 void main() {
   return;
 }
@@ -705,8 +705,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(static const int width = int(2);
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(static const int width = int(2);
 static const int height = int(3);
 static const int depth = int(4);
 
@@ -730,8 +730,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(#ifndef WGSL_SPEC_CONSTANT_7
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#ifndef WGSL_SPEC_CONSTANT_7
 #define WGSL_SPEC_CONSTANT_7 int(2)
 #endif
 static const int width = WGSL_SPEC_CONSTANT_7;
@@ -759,8 +759,8 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(R"(
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr(R"(
 struct tint_array_wrapper {
   float arr[5];
 };
@@ -779,8 +779,8 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayReturn) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(R"(
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr(R"(
 struct tint_array_wrapper {
   float arr[5];
 };
@@ -851,8 +851,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(RWByteAddressBuffer data : register(u0, space0);
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(RWByteAddressBuffer data : register(u0, space0);
 
 [numthreads(1, 1, 1)]
 void a() {

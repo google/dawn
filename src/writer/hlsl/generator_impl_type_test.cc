@@ -37,10 +37,11 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Array) {
 
   GeneratorImpl& gen = Build();
 
+  std::stringstream out;
   ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone,
                            ast::Access::kReadWrite, "ary"))
       << gen.error();
-  EXPECT_EQ(result(), "bool ary[4]");
+  EXPECT_EQ(out.str(), "bool ary[4]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
@@ -49,10 +50,11 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
 
   GeneratorImpl& gen = Build();
 
+  std::stringstream out;
   ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone,
                            ast::Access::kReadWrite, "ary"))
       << gen.error();
-  EXPECT_EQ(result(), "bool ary[5][4]");
+  EXPECT_EQ(out.str(), "bool ary[5][4]");
 }
 
 // TODO(dsinclair): Is this possible? What order should it output in?
@@ -63,10 +65,11 @@ TEST_F(HlslGeneratorImplTest_Type,
 
   GeneratorImpl& gen = Build();
 
+  std::stringstream out;
   ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone,
                            ast::Access::kReadWrite, "ary"))
       << gen.error();
-  EXPECT_EQ(result(), "bool ary[5][4][1]");
+  EXPECT_EQ(out.str(), "bool ary[5][4][1]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
@@ -75,10 +78,11 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
 
   GeneratorImpl& gen = Build();
 
+  std::stringstream out;
   ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone,
                            ast::Access::kReadWrite, "ary"))
       << gen.error();
-  EXPECT_EQ(result(), "bool ary[6][5][4]");
+  EXPECT_EQ(out.str(), "bool ary[6][5][4]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Array_WithoutName) {
@@ -87,10 +91,11 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Array_WithoutName) {
 
   GeneratorImpl& gen = Build();
 
+  std::stringstream out;
   ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone,
                            ast::Access::kReadWrite, ""))
       << gen.error();
-  EXPECT_EQ(result(), "bool[4]");
+  EXPECT_EQ(out.str(), "bool[4]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Bool) {
@@ -98,10 +103,11 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Bool) {
 
   GeneratorImpl& gen = Build();
 
+  std::stringstream out;
   ASSERT_TRUE(gen.EmitType(out, bool_, ast::StorageClass::kNone,
                            ast::Access::kReadWrite, ""))
       << gen.error();
-  EXPECT_EQ(result(), "bool");
+  EXPECT_EQ(out.str(), "bool");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_F32) {
@@ -109,10 +115,11 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_F32) {
 
   GeneratorImpl& gen = Build();
 
+  std::stringstream out;
   ASSERT_TRUE(gen.EmitType(out, f32, ast::StorageClass::kNone,
                            ast::Access::kReadWrite, ""))
       << gen.error();
-  EXPECT_EQ(result(), "float");
+  EXPECT_EQ(out.str(), "float");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_I32) {
@@ -120,10 +127,11 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_I32) {
 
   GeneratorImpl& gen = Build();
 
+  std::stringstream out;
   ASSERT_TRUE(gen.EmitType(out, i32, ast::StorageClass::kNone,
                            ast::Access::kReadWrite, ""))
       << gen.error();
-  EXPECT_EQ(result(), "int");
+  EXPECT_EQ(out.str(), "int");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Matrix) {
@@ -133,10 +141,11 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Matrix) {
 
   GeneratorImpl& gen = Build();
 
+  std::stringstream out;
   ASSERT_TRUE(gen.EmitType(out, mat2x3, ast::StorageClass::kNone,
                            ast::Access::kReadWrite, ""))
       << gen.error();
-  EXPECT_EQ(result(), "float2x3");
+  EXPECT_EQ(out.str(), "float2x3");
 }
 
 // TODO(dsinclair): How to annotate as workgroup?
@@ -147,10 +156,11 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Pointer) {
 
   GeneratorImpl& gen = Build();
 
+  std::stringstream out;
   ASSERT_TRUE(gen.EmitType(out, p, ast::StorageClass::kNone,
                            ast::Access::kReadWrite, ""))
       << gen.error();
-  EXPECT_EQ(result(), "float*");
+  EXPECT_EQ(out.str(), "float*");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
@@ -163,8 +173,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
   GeneratorImpl& gen = Build();
 
   auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
-  ASSERT_TRUE(gen.EmitStructType(out, sem_s)) << gen.error();
-  EXPECT_EQ(result(), R"(struct S {
+  ASSERT_TRUE(gen.EmitStructType(sem_s)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct S {
   int a;
   float b;
 };
@@ -187,8 +197,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
   GeneratorImpl& gen = Build();
 
   auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
-  ASSERT_TRUE(gen.EmitStructType(out, sem_s)) << gen.error();
-  EXPECT_EQ(result(), "");
+  ASSERT_TRUE(gen.EmitStructType(sem_s)) << gen.error();
+  EXPECT_EQ(gen.result(), "");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
@@ -201,10 +211,11 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
   GeneratorImpl& gen = Build();
 
   auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+  std::stringstream out;
   ASSERT_TRUE(gen.EmitType(out, sem_s, ast::StorageClass::kNone,
                            ast::Access::kReadWrite, ""))
       << gen.error();
-  EXPECT_EQ(result(), "S");
+  EXPECT_EQ(out.str(), "S");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
@@ -216,8 +227,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(R"(struct S {
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr(R"(struct S {
   int tint_symbol;
   float tint_symbol_1;
 };
@@ -229,10 +240,11 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_U32) {
 
   GeneratorImpl& gen = Build();
 
+  std::stringstream out;
   ASSERT_TRUE(gen.EmitType(out, u32, ast::StorageClass::kNone,
                            ast::Access::kReadWrite, ""))
       << gen.error();
-  EXPECT_EQ(result(), "uint");
+  EXPECT_EQ(out.str(), "uint");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Vector) {
@@ -241,10 +253,11 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Vector) {
 
   GeneratorImpl& gen = Build();
 
+  std::stringstream out;
   ASSERT_TRUE(gen.EmitType(out, vec3, ast::StorageClass::kNone,
                            ast::Access::kReadWrite, ""))
       << gen.error();
-  EXPECT_EQ(result(), "float3");
+  EXPECT_EQ(out.str(), "float3");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Void) {
@@ -252,10 +265,11 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Void) {
 
   GeneratorImpl& gen = Build();
 
+  std::stringstream out;
   ASSERT_TRUE(gen.EmitType(out, void_, ast::StorageClass::kNone,
                            ast::Access::kReadWrite, ""))
       << gen.error();
-  EXPECT_EQ(result(), "void");
+  EXPECT_EQ(out.str(), "void");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitSampler) {
@@ -263,10 +277,11 @@ TEST_F(HlslGeneratorImplTest_Type, EmitSampler) {
 
   GeneratorImpl& gen = Build();
 
+  std::stringstream out;
   ASSERT_TRUE(gen.EmitType(out, sampler, ast::StorageClass::kNone,
                            ast::Access::kReadWrite, ""))
       << gen.error();
-  EXPECT_EQ(result(), "SamplerState");
+  EXPECT_EQ(out.str(), "SamplerState");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitSamplerComparison) {
@@ -274,10 +289,11 @@ TEST_F(HlslGeneratorImplTest_Type, EmitSamplerComparison) {
 
   GeneratorImpl& gen = Build();
 
+  std::stringstream out;
   ASSERT_TRUE(gen.EmitType(out, sampler, ast::StorageClass::kNone,
                            ast::Access::kReadWrite, ""))
       << gen.error();
-  EXPECT_EQ(result(), "SamplerComparisonState");
+  EXPECT_EQ(out.str(), "SamplerComparisonState");
 }
 
 struct HlslDepthTextureData {
@@ -305,8 +321,8 @@ TEST_P(HlslDepthTexturesTest, Emit) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(params.result));
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr(params.result));
 }
 INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest_Type,
@@ -361,8 +377,8 @@ TEST_P(HlslSampledTexturesTest, Emit) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(params.result));
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr(params.result));
 }
 INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest_Type,
@@ -465,10 +481,11 @@ TEST_F(HlslGeneratorImplTest_Type, EmitMultisampledTexture) {
 
   GeneratorImpl& gen = Build();
 
+  std::stringstream out;
   ASSERT_TRUE(gen.EmitType(out, s, ast::StorageClass::kNone,
                            ast::Access::kReadWrite, ""))
       << gen.error();
-  EXPECT_EQ(result(), "Texture2DMS<float4>");
+  EXPECT_EQ(out.str(), "Texture2DMS<float4>");
 }
 
 struct HlslStorageTextureData {
@@ -501,8 +518,8 @@ TEST_P(HlslStorageTexturesTest, Emit) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(params.result));
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr(params.result));
 }
 INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest_Type,

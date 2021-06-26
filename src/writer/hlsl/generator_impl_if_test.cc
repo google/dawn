@@ -32,8 +32,8 @@ TEST_F(HlslGeneratorImplTest_If, Emit_If) {
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
-  ASSERT_TRUE(gen.EmitStatement(out, i)) << gen.error();
-  EXPECT_EQ(result(), R"(  if (cond) {
+  ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
   }
 )");
@@ -57,8 +57,8 @@ TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElseIf) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, i)) << gen.error();
-  EXPECT_EQ(result(), R"(  if (cond) {
+  ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
   } else {
     if (else_cond) {
@@ -84,8 +84,8 @@ TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElse) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, i)) << gen.error();
-  EXPECT_EQ(result(), R"(  if (cond) {
+  ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
   } else {
     return;
@@ -116,8 +116,8 @@ TEST_F(HlslGeneratorImplTest_If, Emit_IfWithMultiple) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, i)) << gen.error();
-  EXPECT_EQ(result(), R"(  if (cond) {
+  ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
   } else {
     if (else_cond) {

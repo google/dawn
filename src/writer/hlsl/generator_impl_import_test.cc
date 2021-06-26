@@ -40,8 +40,9 @@ TEST_P(HlslImportData_SingleParamTest, FloatScalar) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitCall(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1.0f)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), std::string(param.hlsl_name) + "(1.0f)");
 }
 INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          HlslImportData_SingleParamTest,
@@ -78,8 +79,9 @@ TEST_P(HlslImportData_SingleIntParamTest, IntScalar) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitCall(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), std::string(param.hlsl_name) + "(1)");
 }
 INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          HlslImportData_SingleIntParamTest,
@@ -95,8 +97,9 @@ TEST_P(HlslImportData_SingleVectorParamTest, FloatVector) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitCall(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(),
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(),
             std::string(param.hlsl_name) + "(float3(1.0f, 2.0f, 3.0f))");
 }
 INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
@@ -136,8 +139,9 @@ TEST_P(HlslImportData_DualParamTest, FloatScalar) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitCall(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1.0f, 2.0f)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), std::string(param.hlsl_name) + "(1.0f, 2.0f)");
 }
 INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          HlslImportData_DualParamTest,
@@ -159,8 +163,9 @@ TEST_P(HlslImportData_DualParam_VectorTest, FloatVector) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitCall(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(),
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(),
             std::string(param.hlsl_name) +
                 "(float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f))");
 }
@@ -177,8 +182,9 @@ TEST_P(HlslImportData_DualParam_Int_Test, IntScalar) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitCall(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1, 2)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), std::string(param.hlsl_name) + "(1, 2)");
 }
 INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          HlslImportData_DualParam_Int_Test,
@@ -194,8 +200,9 @@ TEST_P(HlslImportData_TripleParamTest, FloatScalar) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitCall(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1.0f, 2.0f, 3.0f)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), std::string(param.hlsl_name) + "(1.0f, 2.0f, 3.0f)");
 }
 INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest_Import,
@@ -218,8 +225,9 @@ TEST_P(HlslImportData_TripleParam_Int_Test, IntScalar) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitCall(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), std::string(param.hlsl_name) + "(1, 2, 3)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), std::string(param.hlsl_name) + "(1, 2, 3)");
 }
 INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          HlslImportData_TripleParam_Int_Test,
@@ -233,8 +241,9 @@ TEST_F(HlslGeneratorImplTest_Import, HlslImportData_Determinant) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitCall(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), std::string("determinant(var)"));
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), std::string("determinant(var)"));
 }
 
 }  // namespace

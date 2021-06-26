@@ -29,8 +29,9 @@ TEST_F(HlslUnaryOpTest, AddressOf) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, op)) << gen.error();
-  EXPECT_EQ(result(), "expr");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.error();
+  EXPECT_EQ(out.str(), "expr");
 }
 
 TEST_F(HlslUnaryOpTest, Complement) {
@@ -41,8 +42,9 @@ TEST_F(HlslUnaryOpTest, Complement) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, op)) << gen.error();
-  EXPECT_EQ(result(), "~(expr)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.error();
+  EXPECT_EQ(out.str(), "~(expr)");
 }
 
 TEST_F(HlslUnaryOpTest, Indirection) {
@@ -56,8 +58,9 @@ TEST_F(HlslUnaryOpTest, Indirection) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, op)) << gen.error();
-  EXPECT_EQ(result(), "expr");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.error();
+  EXPECT_EQ(out.str(), "expr");
 }
 
 TEST_F(HlslUnaryOpTest, Not) {
@@ -67,8 +70,9 @@ TEST_F(HlslUnaryOpTest, Not) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, op)) << gen.error();
-  EXPECT_EQ(result(), "!(expr)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.error();
+  EXPECT_EQ(out.str(), "!(expr)");
 }
 
 TEST_F(HlslUnaryOpTest, Negation) {
@@ -79,8 +83,9 @@ TEST_F(HlslUnaryOpTest, Negation) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, op)) << gen.error();
-  EXPECT_EQ(result(), "-(expr)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.error();
+  EXPECT_EQ(out.str(), "-(expr)");
 }
 }  // namespace
 }  // namespace hlsl

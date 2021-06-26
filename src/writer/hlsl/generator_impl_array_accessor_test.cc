@@ -28,8 +28,9 @@ TEST_F(HlslGeneratorImplTest_Expression, ArrayAccessor) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "ary[5]");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), "ary[5]");
 }
 
 }  // namespace

@@ -33,8 +33,8 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_Loop) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, l)) << gen.error();
-  EXPECT_EQ(result(), R"(  while (true) {
+  ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  while (true) {
     discard;
   }
 )");
@@ -51,8 +51,8 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithContinuing) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, l)) << gen.error();
-  EXPECT_EQ(result(), R"(  while (true) {
+  ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  while (true) {
     discard;
     {
       return;
@@ -83,8 +83,8 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopNestedWithContinuing) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, outer)) << gen.error();
-  EXPECT_EQ(result(), R"(  while (true) {
+  ASSERT_TRUE(gen.EmitStatement(outer)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  while (true) {
     while (true) {
       discard;
       {
@@ -137,8 +137,8 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, outer)) << gen.error();
-  EXPECT_EQ(result(), R"(  while (true) {
+  ASSERT_TRUE(gen.EmitStatement(outer)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  while (true) {
     float lhs = 2.400000095f;
     float other = 0.0f;
     {

@@ -381,12 +381,12 @@ TEST_P(HlslGeneratorIntrinsicTextureTest, Call) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
 
   auto expected = expected_texture_overload(param.overload);
 
-  EXPECT_THAT(result(), HasSubstr(expected.pre));
-  EXPECT_THAT(result(), HasSubstr(expected.out));
+  EXPECT_THAT(gen.result(), HasSubstr(expected.pre));
+  EXPECT_THAT(gen.result(), HasSubstr(expected.out));
 }
 
 INSTANTIATE_TEST_SUITE_P(

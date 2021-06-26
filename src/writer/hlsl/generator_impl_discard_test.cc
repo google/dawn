@@ -29,8 +29,8 @@ TEST_F(HlslGeneratorImplTest_Discard, Emit_Discard) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
-  EXPECT_EQ(result(), "  discard;\n");
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+  EXPECT_EQ(gen.result(), "  discard;\n");
 }
 
 }  // namespace

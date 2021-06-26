@@ -31,5 +31,38 @@ void TextGenerator::make_indent(std::ostream& out) const {
   }
 }
 
+TextGenerator::LineWriter::LineWriter(TextGenerator* generator)
+    : gen(generator) {}
+
+TextGenerator::LineWriter::LineWriter(LineWriter&& other) {
+  gen = other.gen;
+  other.gen = nullptr;
+}
+
+TextGenerator::LineWriter::~LineWriter() {
+  if (gen) {
+    auto str = os.str();
+    if (!str.empty()) {
+      gen->make_indent();
+      gen->out_ << str << std::endl;
+    }
+  }
+}
+
+TextGenerator::ScopedParen::ScopedParen(std::ostream& stream) : s(stream) {
+  s << "(";
+}
+TextGenerator::ScopedParen::~ScopedParen() {
+  s << ")";
+}
+
+TextGenerator::ScopedIndent::ScopedIndent(TextGenerator* generator)
+    : gen(generator) {
+  gen->increment_indent();
+}
+TextGenerator::ScopedIndent::~ScopedIndent() {
+  gen->decrement_indent();
+}
+
 }  // namespace writer
 }  // namespace tint

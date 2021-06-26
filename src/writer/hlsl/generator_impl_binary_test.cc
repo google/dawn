@@ -56,8 +56,9 @@ TEST_P(HlslBinaryTest, Emit_f32) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), params.result);
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), params.result);
 }
 TEST_P(HlslBinaryTest, Emit_u32) {
   auto params = GetParam();
@@ -74,8 +75,9 @@ TEST_P(HlslBinaryTest, Emit_u32) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), params.result);
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), params.result);
 }
 TEST_P(HlslBinaryTest, Emit_i32) {
   auto params = GetParam();
@@ -98,8 +100,9 @@ TEST_P(HlslBinaryTest, Emit_i32) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), params.result);
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest,
@@ -133,8 +136,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar) {
 
   GeneratorImpl& gen = Build();
 
-  EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(),
+  std::stringstream out;
+  EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(),
             "(float3(1.0f, 1.0f, 1.0f) * "
             "1.0f)");
 }
@@ -150,8 +154,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector) {
 
   GeneratorImpl& gen = Build();
 
-  EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(),
+  std::stringstream out;
+  EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(),
             "(1.0f * float3(1.0f, 1.0f, "
             "1.0f))");
 }
@@ -167,8 +172,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
 
   GeneratorImpl& gen = Build();
 
-  EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "(mat * 1.0f)");
+  std::stringstream out;
+  EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), "(mat * 1.0f)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
@@ -182,8 +188,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
 
   GeneratorImpl& gen = Build();
 
-  EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "(1.0f * mat)");
+  std::stringstream out;
+  EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), "(1.0f * mat)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
@@ -197,8 +204,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
 
   GeneratorImpl& gen = Build();
 
-  EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "mul(float3(1.0f, 1.0f, 1.0f), mat)");
+  std::stringstream out;
+  EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), "mul(float3(1.0f, 1.0f, 1.0f), mat)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
@@ -212,8 +220,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
 
   GeneratorImpl& gen = Build();
 
-  EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "mul(mat, float3(1.0f, 1.0f, 1.0f))");
+  std::stringstream out;
+  EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), "mul(mat, float3(1.0f, 1.0f, 1.0f))");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixMatrix) {
@@ -226,8 +235,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixMatrix) {
 
   GeneratorImpl& gen = Build();
 
-  EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "mul(rhs, lhs)");
+  std::stringstream out;
+  EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), "mul(rhs, lhs)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Logical_And) {
@@ -240,9 +250,10 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_And) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "(tint_tmp)");
-  EXPECT_EQ(pre_result(), R"(bool tint_tmp = a;
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), "(tint_tmp)");
+  EXPECT_EQ(gen.result(), R"(bool tint_tmp = a;
 if (tint_tmp) {
   tint_tmp = b;
 }
@@ -266,19 +277,20 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_Multi) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "(tint_tmp_1)");
-  EXPECT_EQ(pre_result(), R"(bool tint_tmp = a;
-if (tint_tmp) {
-  tint_tmp = b;
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), "(tint_tmp)");
+  EXPECT_EQ(gen.result(), R"(bool tint_tmp_1 = a;
+if (tint_tmp_1) {
+  tint_tmp_1 = b;
 }
-bool tint_tmp_1 = (tint_tmp);
-if (!tint_tmp_1) {
+bool tint_tmp = (tint_tmp_1);
+if (!tint_tmp) {
   bool tint_tmp_2 = c;
   if (!tint_tmp_2) {
     tint_tmp_2 = d;
   }
-  tint_tmp_1 = (tint_tmp_2);
+  tint_tmp = (tint_tmp_2);
 }
 )");
 }
@@ -293,9 +305,10 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_Or) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "(tint_tmp)");
-  EXPECT_EQ(pre_result(), R"(bool tint_tmp = a;
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), "(tint_tmp)");
+  EXPECT_EQ(gen.result(), R"(bool tint_tmp = a;
 if (!tint_tmp) {
   tint_tmp = b;
 }
@@ -338,8 +351,8 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
-  EXPECT_EQ(result(), R"(bool tint_tmp = a;
+  ASSERT_TRUE(gen.EmitStatement(expr)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(bool tint_tmp = a;
 if (tint_tmp) {
   tint_tmp = b;
 }
@@ -375,16 +388,16 @@ TEST_F(HlslGeneratorImplTest_Binary, Return_WithLogical) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
-  EXPECT_EQ(result(), R"(bool tint_tmp = a;
-if (tint_tmp) {
-  tint_tmp = b;
+  ASSERT_TRUE(gen.EmitStatement(expr)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(bool tint_tmp_1 = a;
+if (tint_tmp_1) {
+  tint_tmp_1 = b;
 }
-bool tint_tmp_1 = (tint_tmp);
-if (!tint_tmp_1) {
-  tint_tmp_1 = c;
+bool tint_tmp = (tint_tmp_1);
+if (!tint_tmp) {
+  tint_tmp = c;
 }
-return (tint_tmp_1);
+return (tint_tmp);
 )");
 }
 
@@ -406,16 +419,16 @@ TEST_F(HlslGeneratorImplTest_Binary, Assign_WithLogical) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
-  EXPECT_EQ(result(), R"(bool tint_tmp = b;
-if (!tint_tmp) {
-  tint_tmp = c;
+  ASSERT_TRUE(gen.EmitStatement(expr)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(bool tint_tmp_1 = b;
+if (!tint_tmp_1) {
+  tint_tmp_1 = c;
 }
-bool tint_tmp_1 = (tint_tmp);
-if (tint_tmp_1) {
-  tint_tmp_1 = d;
+bool tint_tmp = (tint_tmp_1);
+if (tint_tmp) {
+  tint_tmp = d;
 }
-a = (tint_tmp_1);
+a = (tint_tmp);
 )");
 }
 
@@ -438,16 +451,16 @@ TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitStatement(out, decl)) << gen.error();
-  EXPECT_EQ(result(), R"(bool tint_tmp = b;
-if (tint_tmp) {
-  tint_tmp = c;
+  ASSERT_TRUE(gen.EmitStatement(decl)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(bool tint_tmp_1 = b;
+if (tint_tmp_1) {
+  tint_tmp_1 = c;
 }
-bool tint_tmp_1 = (tint_tmp);
-if (!tint_tmp_1) {
-  tint_tmp_1 = d;
+bool tint_tmp = (tint_tmp_1);
+if (!tint_tmp) {
+  tint_tmp = d;
 }
-bool a = (tint_tmp_1);
+bool a = (tint_tmp);
 )");
 }
 
@@ -467,8 +480,9 @@ TEST_F(HlslGeneratorImplTest_Binary, Bitcast_WithLogical) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(pre_result(), R"(bool tint_tmp = a;
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(bool tint_tmp = a;
 if (tint_tmp) {
   bool tint_tmp_1 = b;
   if (!tint_tmp_1) {
@@ -477,7 +491,7 @@ if (tint_tmp) {
   tint_tmp = (tint_tmp_1);
 }
 )");
-  EXPECT_EQ(result(), R"(asint((tint_tmp)))");
+  EXPECT_EQ(out.str(), R"(asint((tint_tmp)))");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
@@ -512,8 +526,8 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
-  EXPECT_EQ(result(), R"(bool tint_tmp = a;
+  ASSERT_TRUE(gen.EmitStatement(expr)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(bool tint_tmp = a;
 if (tint_tmp) {
   tint_tmp = b;
 }
@@ -521,19 +535,19 @@ bool tint_tmp_1 = c;
 if (!tint_tmp_1) {
   tint_tmp_1 = d;
 }
-bool tint_tmp_2 = a;
-if (!tint_tmp_2) {
-  tint_tmp_2 = c;
+bool tint_tmp_3 = a;
+if (!tint_tmp_3) {
+  tint_tmp_3 = c;
 }
-bool tint_tmp_3 = (tint_tmp_2);
-if (tint_tmp_3) {
+bool tint_tmp_2 = (tint_tmp_3);
+if (tint_tmp_2) {
   bool tint_tmp_4 = b;
   if (!tint_tmp_4) {
     tint_tmp_4 = d;
   }
-  tint_tmp_3 = (tint_tmp_4);
+  tint_tmp_2 = (tint_tmp_4);
 }
-foo((tint_tmp), (tint_tmp_1), (tint_tmp_3));
+foo((tint_tmp), (tint_tmp_1), (tint_tmp_2));
 )");
 }
 

@@ -29,25 +29,11 @@ TEST_F(HlslGeneratorImplTest_Block, Emit_Block) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, b)) << gen.error();
-  EXPECT_EQ(result(), R"(  {
+  ASSERT_TRUE(gen.EmitStatement(b)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  {
     discard;
   }
 )");
-}
-
-TEST_F(HlslGeneratorImplTest_Block, Emit_Block_WithoutNewline) {
-  auto* b = Block(create<ast::DiscardStatement>());
-  WrapInFunction(b);
-
-  GeneratorImpl& gen = Build();
-
-  gen.increment_indent();
-
-  ASSERT_TRUE(gen.EmitBlock(out, b)) << gen.error();
-  EXPECT_EQ(result(), R"({
-    discard;
-  })");
 }
 
 }  // namespace

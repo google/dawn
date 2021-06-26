@@ -29,8 +29,8 @@ TEST_F(HlslGeneratorImplTest_Return, Emit_Return) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, r)) << gen.error();
-  EXPECT_EQ(result(), "  return;\n");
+  ASSERT_TRUE(gen.EmitStatement(r)) << gen.error();
+  EXPECT_EQ(gen.result(), "  return;\n");
 }
 
 TEST_F(HlslGeneratorImplTest_Return, Emit_ReturnWithValue) {
@@ -41,8 +41,8 @@ TEST_F(HlslGeneratorImplTest_Return, Emit_ReturnWithValue) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, r)) << gen.error();
-  EXPECT_EQ(result(), "  return 123;\n");
+  ASSERT_TRUE(gen.EmitStatement(r)) << gen.error();
+  EXPECT_EQ(gen.result(), "  return 123;\n");
 }
 
 }  // namespace

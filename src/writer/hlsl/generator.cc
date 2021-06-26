@@ -26,7 +26,7 @@ Generator::Generator(const Program* program)
 Generator::~Generator() = default;
 
 bool Generator::Generate() {
-  auto ret = impl_->Generate(out_);
+  auto ret = impl_->Generate();
   if (!ret) {
     error_ = impl_->error();
   }
@@ -34,7 +34,7 @@ bool Generator::Generate() {
 }
 
 std::string Generator::result() const {
-  return out_.str();
+  return impl_->result();
 }
 
 std::string Generator::error() const {

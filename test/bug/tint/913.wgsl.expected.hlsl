@@ -26,29 +26,29 @@ void main(tint_symbol_2 tint_symbol_1) {
   const float4 nonCoveredColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
   bool success = true;
   const int scalar_offset = (16u) / 4;
-    bool tint_tmp_2 = (dstTexCoord.x < uniforms[scalar_offset / 4][scalar_offset % 4]);
-  if (!tint_tmp_2) {
-const int scalar_offset_1 = (20u) / 4;
-        tint_tmp_2 = (dstTexCoord.y < uniforms[scalar_offset_1 / 4][scalar_offset_1 % 4]);
-  }
-  bool tint_tmp_3 = (tint_tmp_2);
-  if (!tint_tmp_3) {
-const int scalar_offset_2 = (16u) / 4;
-    const int scalar_offset_3 = (24u) / 4;
-        tint_tmp_3 = (dstTexCoord.x >= (uniforms[scalar_offset_2 / 4][scalar_offset_2 % 4] + uniforms[scalar_offset_3 / 4][scalar_offset_3 % 4]));
-  }
-  bool tint_tmp_4 = (tint_tmp_3);
+  bool tint_tmp_4 = (dstTexCoord.x < uniforms[scalar_offset / 4][scalar_offset % 4]);
   if (!tint_tmp_4) {
-const int scalar_offset_4 = (20u) / 4;
-    const int scalar_offset_5 = (28u) / 4;
-        tint_tmp_4 = (dstTexCoord.y >= (uniforms[scalar_offset_4 / 4][scalar_offset_4 % 4] + uniforms[scalar_offset_5 / 4][scalar_offset_5 % 4]));
+    const int scalar_offset_1 = (20u) / 4;
+    tint_tmp_4 = (dstTexCoord.y < uniforms[scalar_offset_1 / 4][scalar_offset_1 % 4]);
   }
-if ((tint_tmp_4)) {
-        bool tint_tmp_5 = success;
+  bool tint_tmp_3 = (tint_tmp_4);
+  if (!tint_tmp_3) {
+    const int scalar_offset_2 = (16u) / 4;
+    const int scalar_offset_3 = (24u) / 4;
+    tint_tmp_3 = (dstTexCoord.x >= (uniforms[scalar_offset_2 / 4][scalar_offset_2 % 4] + uniforms[scalar_offset_3 / 4][scalar_offset_3 % 4]));
+  }
+  bool tint_tmp_2 = (tint_tmp_3);
+  if (!tint_tmp_2) {
+    const int scalar_offset_4 = (20u) / 4;
+    const int scalar_offset_5 = (28u) / 4;
+    tint_tmp_2 = (dstTexCoord.y >= (uniforms[scalar_offset_4 / 4][scalar_offset_4 % 4] + uniforms[scalar_offset_5 / 4][scalar_offset_5 % 4]));
+  }
+  if ((tint_tmp_2)) {
+    bool tint_tmp_5 = success;
     if (tint_tmp_5) {
       tint_tmp_5 = all((tint_symbol.Load(int3(dstTexCoord, 0), 0) == nonCoveredColor));
     }
-success = (tint_tmp_5);
+    success = (tint_tmp_5);
   } else {
     const int scalar_offset_6 = (16u) / 4;
     uint4 ubo_load = uniforms[scalar_offset_6 / 4];
@@ -63,33 +63,33 @@ success = (tint_tmp_5);
     const float4 dstColor = tint_symbol.Load(int3(dstTexCoord, 0), 0);
     const int scalar_offset_9 = (4u) / 4;
     if ((uniforms[scalar_offset_9 / 4][scalar_offset_9 % 4] == 2u)) {
-            bool tint_tmp_6 = success;
-      if (tint_tmp_6) {
-        tint_tmp_6 = aboutEqual(dstColor.r, srcColor.r);
-      }
-      bool tint_tmp_7 = (tint_tmp_6);
+      bool tint_tmp_7 = success;
       if (tint_tmp_7) {
-        tint_tmp_7 = aboutEqual(dstColor.g, srcColor.g);
+        tint_tmp_7 = aboutEqual(dstColor.r, srcColor.r);
       }
-success = (tint_tmp_7);
+      bool tint_tmp_6 = (tint_tmp_7);
+      if (tint_tmp_6) {
+        tint_tmp_6 = aboutEqual(dstColor.g, srcColor.g);
+      }
+      success = (tint_tmp_6);
     } else {
-            bool tint_tmp_8 = success;
-      if (tint_tmp_8) {
-        tint_tmp_8 = aboutEqual(dstColor.r, srcColor.r);
-      }
-      bool tint_tmp_9 = (tint_tmp_8);
-      if (tint_tmp_9) {
-        tint_tmp_9 = aboutEqual(dstColor.g, srcColor.g);
-      }
-      bool tint_tmp_10 = (tint_tmp_9);
-      if (tint_tmp_10) {
-        tint_tmp_10 = aboutEqual(dstColor.b, srcColor.b);
-      }
-      bool tint_tmp_11 = (tint_tmp_10);
+      bool tint_tmp_11 = success;
       if (tint_tmp_11) {
-        tint_tmp_11 = aboutEqual(dstColor.a, srcColor.a);
+        tint_tmp_11 = aboutEqual(dstColor.r, srcColor.r);
       }
-success = (tint_tmp_11);
+      bool tint_tmp_10 = (tint_tmp_11);
+      if (tint_tmp_10) {
+        tint_tmp_10 = aboutEqual(dstColor.g, srcColor.g);
+      }
+      bool tint_tmp_9 = (tint_tmp_10);
+      if (tint_tmp_9) {
+        tint_tmp_9 = aboutEqual(dstColor.b, srcColor.b);
+      }
+      bool tint_tmp_8 = (tint_tmp_9);
+      if (tint_tmp_8) {
+        tint_tmp_8 = aboutEqual(dstColor.a, srcColor.a);
+      }
+      success = (tint_tmp_8);
     }
   }
   const uint outputIndex = ((GlobalInvocationID.y * uint(dstSize.x)) + GlobalInvocationID.x);

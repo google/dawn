@@ -7,12 +7,12 @@ cbuffer cbuffer_uniforms : register(b3, space0) {
 
 float mm_readA(uint row, uint col) {
   const int scalar_offset = (0u) / 4;
-    bool tint_tmp = (row < uniforms[scalar_offset / 4][scalar_offset % 4]);
+  bool tint_tmp = (row < uniforms[scalar_offset / 4][scalar_offset % 4]);
   if (tint_tmp) {
-const int scalar_offset_1 = (4u) / 4;
-        tint_tmp = (col < uniforms[scalar_offset_1 / 4][scalar_offset_1 % 4]);
+    const int scalar_offset_1 = (4u) / 4;
+    tint_tmp = (col < uniforms[scalar_offset_1 / 4][scalar_offset_1 % 4]);
   }
-if ((tint_tmp)) {
+  if ((tint_tmp)) {
     const int scalar_offset_2 = (4u) / 4;
     const float result = asfloat(firstMatrix.Load((4u * ((row * uniforms[scalar_offset_2 / 4][scalar_offset_2 % 4]) + col))));
     return result;
@@ -22,12 +22,12 @@ if ((tint_tmp)) {
 
 float mm_readB(uint row, uint col) {
   const int scalar_offset_3 = (4u) / 4;
-    bool tint_tmp_1 = (row < uniforms[scalar_offset_3 / 4][scalar_offset_3 % 4]);
+  bool tint_tmp_1 = (row < uniforms[scalar_offset_3 / 4][scalar_offset_3 % 4]);
   if (tint_tmp_1) {
-const int scalar_offset_4 = (8u) / 4;
-        tint_tmp_1 = (col < uniforms[scalar_offset_4 / 4][scalar_offset_4 % 4]);
+    const int scalar_offset_4 = (8u) / 4;
+    tint_tmp_1 = (col < uniforms[scalar_offset_4 / 4][scalar_offset_4 % 4]);
   }
-if ((tint_tmp_1)) {
+  if ((tint_tmp_1)) {
     const int scalar_offset_5 = (8u) / 4;
     const float result = asfloat(secondMatrix.Load((4u * ((row * uniforms[scalar_offset_5 / 4][scalar_offset_5 % 4]) + col))));
     return result;
@@ -37,12 +37,12 @@ if ((tint_tmp_1)) {
 
 void mm_write(uint row, uint col, float value) {
   const int scalar_offset_6 = (0u) / 4;
-    bool tint_tmp_2 = (row < uniforms[scalar_offset_6 / 4][scalar_offset_6 % 4]);
+  bool tint_tmp_2 = (row < uniforms[scalar_offset_6 / 4][scalar_offset_6 % 4]);
   if (tint_tmp_2) {
-const int scalar_offset_7 = (8u) / 4;
-        tint_tmp_2 = (col < uniforms[scalar_offset_7 / 4][scalar_offset_7 % 4]);
+    const int scalar_offset_7 = (8u) / 4;
+    tint_tmp_2 = (col < uniforms[scalar_offset_7 / 4][scalar_offset_7 % 4]);
   }
-if ((tint_tmp_2)) {
+  if ((tint_tmp_2)) {
     const int scalar_offset_8 = (8u) / 4;
     const uint index = (col + (row * uniforms[scalar_offset_8 / 4][scalar_offset_8 % 4]));
     resultMatrix.Store((4u * index), asuint(value));

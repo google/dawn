@@ -34,8 +34,8 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
-  EXPECT_EQ(result(), "  float a = 0.0f;\n");
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+  EXPECT_EQ(gen.result(), "  float a = 0.0f;\n");
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
@@ -47,8 +47,8 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
-  EXPECT_EQ(result(), "  const float a = 0.0f;\n");
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+  EXPECT_EQ(gen.result(), "  const float a = 0.0f;\n");
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
@@ -60,8 +60,8 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(),
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(),
               HasSubstr("  float a[5] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f};\n"));
 }
 
@@ -74,8 +74,8 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr("  static float a = 0.0f;\n"));
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("  static float a = 0.0f;\n"));
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl,
@@ -87,8 +87,8 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(R"(float a = initializer;
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr(R"(float a = initializer;
 )"));
 }
 
@@ -101,8 +101,8 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
-  EXPECT_EQ(result(), R"(float3 a = float3(0.0f, 0.0f, 0.0f);
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(float3 a = float3(0.0f, 0.0f, 0.0f);
 )");
 }
 
@@ -116,8 +116,8 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
-  EXPECT_EQ(result(),
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+  EXPECT_EQ(gen.result(),
             R"(float2x3 a = float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 )");
 }

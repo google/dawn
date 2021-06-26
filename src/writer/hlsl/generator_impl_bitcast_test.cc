@@ -27,8 +27,9 @@ TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Float) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, bitcast)) << gen.error();
-  EXPECT_EQ(result(), "asfloat(1)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
+  EXPECT_EQ(out.str(), "asfloat(1)");
 }
 
 TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Int) {
@@ -37,8 +38,9 @@ TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Int) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, bitcast)) << gen.error();
-  EXPECT_EQ(result(), "asint(1u)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
+  EXPECT_EQ(out.str(), "asint(1u)");
 }
 
 TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Uint) {
@@ -47,8 +49,9 @@ TEST_F(HlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Uint) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, bitcast)) << gen.error();
-  EXPECT_EQ(result(), "asuint(1)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
+  EXPECT_EQ(out.str(), "asuint(1)");
 }
 
 }  // namespace

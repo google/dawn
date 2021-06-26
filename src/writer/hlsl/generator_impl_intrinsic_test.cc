@@ -268,8 +268,9 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Call) {
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
-  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_EQ(result(), "dot(param1, param2)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+  EXPECT_EQ(out.str(), "dot(param1, param2)");
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Select_Scalar) {
@@ -278,8 +279,9 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Select_Scalar) {
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
-  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_EQ(result(), "(true ? 1.0f : 2.0f)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+  EXPECT_EQ(out.str(), "(true ? 1.0f : 2.0f)");
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Select_Vector) {
@@ -289,8 +291,9 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Select_Vector) {
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
-  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_EQ(result(), "(bool2(true, false) ? int2(1, 2) : int2(3, 4))");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+  EXPECT_EQ(out.str(), "(bool2(true, false) ? int2(1, 2) : int2(3, 4))");
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Modf_Scalar) {
@@ -300,8 +303,8 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Modf_Scalar) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr("modf(1.0f, res)"));
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("modf(1.0f, res)"));
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Modf_Vector) {
@@ -311,8 +314,8 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Modf_Vector) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr("modf(float3(0.0f, 0.0f, 0.0f), res)"));
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("modf(float3(0.0f, 0.0f, 0.0f), res)"));
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Frexp_Scalar_i32) {
@@ -322,8 +325,8 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Frexp_Scalar_i32) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(R"(
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr(R"(
   float tint_tmp;
   float tint_tmp_1 = frexp(1.0f, tint_tmp);
   exp = int(tint_tmp);
@@ -338,8 +341,8 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Frexp_Vector_i32) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(R"(
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr(R"(
   float3 tint_tmp;
   float3 tint_tmp_1 = frexp(float3(0.0f, 0.0f, 0.0f), tint_tmp);
   res = int3(tint_tmp);
@@ -354,8 +357,8 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, IsNormal_Scalar) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(R"(
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr(R"(
   uint tint_isnormal_exponent = asuint(val) & 0x7f80000;
   uint tint_isnormal_clamped = clamp(tint_isnormal_exponent, 0x0080000, 0x7f00000);
   (tint_isnormal_clamped == tint_isnormal_exponent);
@@ -369,8 +372,8 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, IsNormal_Vector) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(R"(
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr(R"(
   uint3 tint_isnormal_exponent = asuint(val) & 0x7f80000;
   uint3 tint_isnormal_clamped = clamp(tint_isnormal_exponent, 0x0080000, 0x7f00000);
   (tint_isnormal_clamped == tint_isnormal_exponent);
@@ -384,11 +387,12 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Pack4x8Snorm) {
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
-  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_THAT(pre_result(), HasSubstr("int4 tint_tmp = int4(round(clamp(p1, "
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("int4 tint_tmp = int4(round(clamp(p1, "
                                       "-1.0, 1.0) * 127.0)) & 0xff;"));
-  EXPECT_THAT(result(), HasSubstr("asuint(tint_tmp.x | tint_tmp.y << 8 | "
-                                  "tint_tmp.z << 16 | tint_tmp.w << 24)"));
+  EXPECT_THAT(out.str(), HasSubstr("asuint(tint_tmp.x | tint_tmp.y << 8 | "
+                                   "tint_tmp.z << 16 | tint_tmp.w << 24)"));
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Pack4x8Unorm) {
@@ -398,11 +402,12 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Pack4x8Unorm) {
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
-  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_THAT(pre_result(), HasSubstr("uint4 tint_tmp = uint4(round(clamp(p1, "
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("uint4 tint_tmp = uint4(round(clamp(p1, "
                                       "0.0, 1.0) * 255.0));"));
-  EXPECT_THAT(result(), HasSubstr("(tint_tmp.x | tint_tmp.y << 8 | "
-                                  "tint_tmp.z << 16 | tint_tmp.w << 24)"));
+  EXPECT_THAT(out.str(), HasSubstr("(tint_tmp.x | tint_tmp.y << 8 | "
+                                   "tint_tmp.z << 16 | tint_tmp.w << 24)"));
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Pack2x16Snorm) {
@@ -412,10 +417,11 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Pack2x16Snorm) {
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
-  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_THAT(pre_result(), HasSubstr("int2 tint_tmp = int2(round(clamp(p1, "
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("int2 tint_tmp = int2(round(clamp(p1, "
                                       "-1.0, 1.0) * 32767.0)) & 0xffff;"));
-  EXPECT_THAT(result(), HasSubstr("asuint(tint_tmp.x | tint_tmp.y << 16)"));
+  EXPECT_THAT(out.str(), HasSubstr("asuint(tint_tmp.x | tint_tmp.y << 16)"));
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Pack2x16Unorm) {
@@ -425,10 +431,11 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Pack2x16Unorm) {
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
-  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_THAT(pre_result(), HasSubstr("uint2 tint_tmp = uint2(round(clamp(p1, "
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("uint2 tint_tmp = uint2(round(clamp(p1, "
                                       "0.0, 1.0) * 65535.0));"));
-  EXPECT_THAT(result(), HasSubstr("(tint_tmp.x | tint_tmp.y << 16)"));
+  EXPECT_THAT(out.str(), HasSubstr("(tint_tmp.x | tint_tmp.y << 16)"));
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Pack2x16Float) {
@@ -438,9 +445,10 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Pack2x16Float) {
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
-  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_THAT(pre_result(), HasSubstr("uint2 tint_tmp = f32tof16(p1);"));
-  EXPECT_THAT(result(), HasSubstr("(tint_tmp.x | tint_tmp.y << 16)"));
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("uint2 tint_tmp = f32tof16(p1);"));
+  EXPECT_THAT(out.str(), HasSubstr("(tint_tmp.x | tint_tmp.y << 16)"));
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack4x8Snorm) {
@@ -450,12 +458,13 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack4x8Snorm) {
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
-  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_THAT(pre_result(), HasSubstr("int tint_tmp_1 = int(p1);"));
-  EXPECT_THAT(pre_result(),
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("int tint_tmp_1 = int(p1);"));
+  EXPECT_THAT(gen.result(),
               HasSubstr("int4 tint_tmp = int4(tint_tmp_1 << 24, tint_tmp_1 "
                         "<< 16, tint_tmp_1 << 8, tint_tmp_1) >> 24;"));
-  EXPECT_THAT(result(),
+  EXPECT_THAT(out.str(),
               HasSubstr("clamp(float4(tint_tmp) / 127.0, -1.0, 1.0)"));
 }
 
@@ -466,13 +475,14 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack4x8Unorm) {
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
-  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_THAT(pre_result(), HasSubstr("uint tint_tmp_1 = p1;"));
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("uint tint_tmp_1 = p1;"));
   EXPECT_THAT(
-      pre_result(),
+      gen.result(),
       HasSubstr("uint4 tint_tmp = uint4(tint_tmp_1 & 0xff, (tint_tmp_1 >> "
                 "8) & 0xff, (tint_tmp_1 >> 16) & 0xff, tint_tmp_1 >> 24);"));
-  EXPECT_THAT(result(), HasSubstr("float4(tint_tmp) / 255.0"));
+  EXPECT_THAT(out.str(), HasSubstr("float4(tint_tmp) / 255.0"));
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack2x16Snorm) {
@@ -482,12 +492,13 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack2x16Snorm) {
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
-  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_THAT(pre_result(), HasSubstr("int tint_tmp_1 = int(p1);"));
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("int tint_tmp_1 = int(p1);"));
   EXPECT_THAT(
-      pre_result(),
+      gen.result(),
       HasSubstr("int2 tint_tmp = int2(tint_tmp_1 << 16, tint_tmp_1) >> 16;"));
-  EXPECT_THAT(result(),
+  EXPECT_THAT(out.str(),
               HasSubstr("clamp(float2(tint_tmp) / 32767.0, -1.0, 1.0)"));
 }
 
@@ -498,12 +509,13 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack2x16Unorm) {
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
-  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_THAT(pre_result(), HasSubstr("uint tint_tmp_1 = p1;"));
-  EXPECT_THAT(pre_result(),
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("uint tint_tmp_1 = p1;"));
+  EXPECT_THAT(gen.result(),
               HasSubstr("uint2 tint_tmp = uint2(tint_tmp_1 & 0xffff, "
                         "tint_tmp_1 >> 16);"));
-  EXPECT_THAT(result(), HasSubstr("float2(tint_tmp) / 65535.0"));
+  EXPECT_THAT(out.str(), HasSubstr("float2(tint_tmp) / 65535.0"));
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack2x16Float) {
@@ -513,9 +525,10 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack2x16Float) {
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
-  ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_THAT(pre_result(), HasSubstr("uint tint_tmp = p1;"));
-  EXPECT_THAT(result(),
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("uint tint_tmp = p1;"));
+  EXPECT_THAT(out.str(),
               HasSubstr("f16tof32(uint2(tint_tmp & 0xffff, tint_tmp >> 16))"));
 }
 
@@ -526,8 +539,8 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, StorageBarrier) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"([numthreads(1, 1, 1)]
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"([numthreads(1, 1, 1)]
 void main() {
   DeviceMemoryBarrierWithGroupSync();
   return;
@@ -542,8 +555,8 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, WorkgroupBarrier) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"([numthreads(1, 1, 1)]
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"([numthreads(1, 1, 1)]
 void main() {
   GroupMemoryBarrierWithGroupSync();
   return;
@@ -561,8 +574,8 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Ignore) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(int f(int a, int b, int c) {
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(int f(int a, int b, int c) {
   return ((a + b) * c);
 }
 

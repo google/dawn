@@ -131,8 +131,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct Data {
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct Data {
   float mem;
 };
 
@@ -181,8 +181,8 @@ TEST_P(HlslGeneratorImplTest_MemberAccessor_StorageBufferLoad, Test) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(p.expected));
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr(p.expected));
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -254,8 +254,8 @@ TEST_P(HlslGeneratorImplTest_MemberAccessor_StorageBufferStore, Test) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(p.expected));
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr(p.expected));
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -339,7 +339,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_Matrix_Empty) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   auto* expected =
       R"(void tint_symbol_1(RWByteAddressBuffer buffer, uint offset, float2x3 value) {
   buffer.Store3((offset + 0u), asuint(value[0u]));
@@ -353,7 +353,7 @@ void main() {
   return;
 }
 )";
-  EXPECT_EQ(result(), expected);
+  EXPECT_EQ(gen.result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -378,7 +378,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   auto* expected =
       R"(RWByteAddressBuffer data : register(u0, space1);
 
@@ -387,7 +387,7 @@ void main() {
   return;
 }
 )";
-  EXPECT_EQ(result(), expected);
+  EXPECT_EQ(gen.result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -410,7 +410,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   auto* expected =
       R"(RWByteAddressBuffer data : register(u0, space1);
 
@@ -419,7 +419,7 @@ void main() {
   return;
 }
 )";
-  EXPECT_EQ(result(), expected);
+  EXPECT_EQ(gen.result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -443,7 +443,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   auto* expected =
       R"(RWByteAddressBuffer data : register(u0, space1);
 
@@ -452,7 +452,7 @@ void main() {
   return;
 }
 )";
-  EXPECT_EQ(result(), expected);
+  EXPECT_EQ(gen.result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_ToArray) {
@@ -473,7 +473,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_ToArray) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   auto* expected =
       R"(RWByteAddressBuffer data : register(u0, space1);
 
@@ -482,7 +482,7 @@ void main() {
   return;
 }
 )";
-  EXPECT_EQ(result(), expected);
+  EXPECT_EQ(gen.result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel) {
@@ -514,7 +514,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   auto* expected =
       R"(RWByteAddressBuffer data : register(u0, space1);
 
@@ -523,7 +523,7 @@ void main() {
   return;
 }
 )";
-  EXPECT_EQ(result(), expected);
+  EXPECT_EQ(gen.result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -558,7 +558,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   auto* expected =
       R"(RWByteAddressBuffer data : register(u0, space1);
 
@@ -567,7 +567,7 @@ void main() {
   return;
 }
 )";
-  EXPECT_EQ(result(), expected);
+  EXPECT_EQ(gen.result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -602,7 +602,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   auto* expected =
       R"(RWByteAddressBuffer data : register(u0, space1);
 
@@ -611,7 +611,7 @@ void main() {
   return;
 }
 )";
-  EXPECT_EQ(result(), expected);
+  EXPECT_EQ(gen.result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -646,7 +646,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   auto* expected =
       R"(RWByteAddressBuffer data : register(u0, space1);
 
@@ -655,7 +655,7 @@ void main() {
   return;
 }
 )";
-  EXPECT_EQ(result(), expected);
+  EXPECT_EQ(gen.result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_MultiLevel) {
@@ -686,7 +686,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_MultiLevel) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   auto* expected =
       R"(RWByteAddressBuffer data : register(u0, space1);
 
@@ -695,7 +695,7 @@ void main() {
   return;
 }
 )";
-  EXPECT_EQ(result(), expected);
+  EXPECT_EQ(gen.result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -730,7 +730,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   auto* expected =
       R"(RWByteAddressBuffer data : register(u0, space1);
 
@@ -739,7 +739,7 @@ void main() {
   return;
 }
 )";
-  EXPECT_EQ(result(), expected);
+  EXPECT_EQ(gen.result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, Swizzle_xyz) {
@@ -749,8 +749,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, Swizzle_xyz) {
   WrapInFunction(var, expr);
 
   GeneratorImpl& gen = SanitizeAndBuild();
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr("my_vec.xyz"));
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("my_vec.xyz"));
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, Swizzle_gbr) {
@@ -760,8 +760,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, Swizzle_gbr) {
   WrapInFunction(var, expr);
 
   GeneratorImpl& gen = SanitizeAndBuild();
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr("my_vec.gbr"));
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("my_vec.gbr"));
 }
 
 }  // namespace

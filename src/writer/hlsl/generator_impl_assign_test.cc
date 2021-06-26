@@ -31,8 +31,8 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Assign) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
-  EXPECT_EQ(result(), "  lhs = rhs;\n");
+  ASSERT_TRUE(gen.EmitStatement(assign)) << gen.error();
+  EXPECT_EQ(gen.result(), "  lhs = rhs;\n");
 }
 
 }  // namespace

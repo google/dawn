@@ -29,8 +29,8 @@ TEST_F(HlslGeneratorImplTest_Break, Emit_Break) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, b)) << gen.error();
-  EXPECT_EQ(result(), "  break;\n");
+  ASSERT_TRUE(gen.EmitStatement(b)) << gen.error();
+  EXPECT_EQ(gen.result(), "  break;\n");
 }
 
 }  // namespace

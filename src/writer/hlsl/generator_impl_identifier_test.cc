@@ -29,8 +29,9 @@ TEST_F(HlslGeneratorImplTest_Identifier, EmitIdentifierExpression) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, i)) << gen.error();
-  EXPECT_EQ(result(), "foo");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, i)) << gen.error();
+  EXPECT_EQ(out.str(), "foo");
 }
 
 }  // namespace

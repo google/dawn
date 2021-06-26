@@ -32,8 +32,8 @@ TEST_F(HlslGeneratorImplTest_WorkgroupVar, Basic) {
        {Stage(ast::PipelineStage::kCompute)});
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr("groupshared float wg;\n"));
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("groupshared float wg;\n"));
 }
 
 TEST_F(HlslGeneratorImplTest_WorkgroupVar, Aliased) {
@@ -45,8 +45,8 @@ TEST_F(HlslGeneratorImplTest_WorkgroupVar, Aliased) {
        {Stage(ast::PipelineStage::kCompute)});
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr("groupshared float wg;\n"));
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("groupshared float wg;\n"));
 }
 
 }  // namespace

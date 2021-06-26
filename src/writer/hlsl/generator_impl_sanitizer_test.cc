@@ -45,9 +45,9 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
 
-  auto got = result();
+  auto got = gen.result();
   auto* expect = R"(ByteAddressBuffer b : register(t1, space2);
 
 void a_func() {
@@ -85,9 +85,9 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
 
-  auto got = result();
+  auto got = gen.result();
   auto* expect = R"(ByteAddressBuffer b : register(t1, space2);
 
 void a_func() {
@@ -127,9 +127,9 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_ViaLets) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
 
-  auto got = result();
+  auto got = gen.result();
   auto* expect = R"(ByteAddressBuffer b : register(t1, space2);
 
 void a_func() {
@@ -159,9 +159,9 @@ TEST_F(HlslSanitizerTest, PromoteArrayInitializerToConstVar) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
 
-  auto got = result();
+  auto got = gen.result();
   auto* expect = R"(struct tint_array_wrapper {
   int arr[4];
 };
@@ -196,9 +196,9 @@ TEST_F(HlslSanitizerTest, PromoteStructInitializerToConstVar) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
 
-  auto got = result();
+  auto got = gen.result();
   auto* expect = R"(struct S {
   int a;
   float3 b;
@@ -235,9 +235,9 @@ TEST_F(HlslSanitizerTest, InlinePtrLetsBasic) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
 
-  auto got = result();
+  auto got = gen.result();
   auto* expect = R"(void main() {
   int v = 0;
   int x = v;
@@ -278,9 +278,9 @@ TEST_F(HlslSanitizerTest, InlinePtrLetsComplexChain) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
 
-  auto got = result();
+  auto got = gen.result();
   auto* expect = R"(void main() {
   float4x4 m = float4x4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   float f = m[2][1];
@@ -322,9 +322,9 @@ TEST_F(HlslSanitizerTest, InlineParam) {
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
 
-  auto got = result();
+  auto got = gen.result();
   auto* expect = R"(int x(inout int p) {
   return p;
 }

@@ -54,320 +54,246 @@ class GeneratorImpl : public TextGenerator {
   explicit GeneratorImpl(const Program* program);
   ~GeneratorImpl();
 
-  /// @param out the output stream
   /// @returns true on successful generation; false otherwise
-  bool Generate(std::ostream& out);
+  bool Generate();
 
   /// Handles an array accessor expression
-  /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
   /// @param expr the expression to emit
   /// @returns true if the array accessor was emitted
-  bool EmitArrayAccessor(std::ostream& pre,
-                         std::ostream& out,
-                         ast::ArrayAccessorExpression* expr);
+  bool EmitArrayAccessor(std::ostream& out, ast::ArrayAccessorExpression* expr);
   /// Handles an assignment statement
-  /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
-  bool EmitAssign(std::ostream& out, ast::AssignmentStatement* stmt);
+  bool EmitAssign(ast::AssignmentStatement* stmt);
   /// Handles generating a binary expression
-  /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
   /// @param expr the binary expression
   /// @returns true if the expression was emitted, false otherwise
-  bool EmitBinary(std::ostream& pre,
-                  std::ostream& out,
-                  ast::BinaryExpression* expr);
+  bool EmitBinary(std::ostream& out, ast::BinaryExpression* expr);
   /// Handles generating a bitcast expression
-  /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
   /// @param expr the as expression
   /// @returns true if the bitcast was emitted
-  bool EmitBitcast(std::ostream& pre,
-                   std::ostream& out,
-                   ast::BitcastExpression* expr);
+  bool EmitBitcast(std::ostream& out, ast::BitcastExpression* expr);
+  /// Emits a list of statements
+  /// @param stmts the statement list
+  /// @returns true if the statements were emitted successfully
+  bool EmitStatements(const ast::StatementList& stmts);
+  /// Emits a list of statements with an indentation
+  /// @param stmts the statement list
+  /// @returns true if the statements were emitted successfully
+  bool EmitStatementsWithIndent(const ast::StatementList& stmts);
   /// Handles a block statement
-  /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
-  bool EmitBlock(std::ostream& out, const ast::BlockStatement* stmt);
-  /// Handles a block statement with a newline at the end
-  /// @param out the output stream
-  /// @param stmt the statement to emit
-  /// @returns true if the statement was emitted successfully
-  bool EmitIndentedBlockAndNewline(std::ostream& out,
-                                   ast::BlockStatement* stmt);
-  /// Handles a block statement with a newline at the end
-  /// @param out the output stream
-  /// @param stmt the statement to emit
-  /// @returns true if the statement was emitted successfully
-  bool EmitBlockAndNewline(std::ostream& out, const ast::BlockStatement* stmt);
+  bool EmitBlock(const ast::BlockStatement* stmt);
   /// Handles a break statement
-  /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
-  bool EmitBreak(std::ostream& out, ast::BreakStatement* stmt);
+  bool EmitBreak(ast::BreakStatement* stmt);
   /// Handles generating a call expression
-  /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
   /// @param expr the call expression
   /// @returns true if the call expression is emitted
-  bool EmitCall(std::ostream& pre,
-                std::ostream& out,
-                ast::CallExpression* expr);
+  bool EmitCall(std::ostream& out, ast::CallExpression* expr);
   /// Handles generating a call expression to a
   /// transform::DecomposeMemoryAccess::Intrinsic for a uniform buffer
-  /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
   /// @param expr the call expression
   /// @param intrinsic the transform::DecomposeMemoryAccess::Intrinsic
   /// @returns true if the call expression is emitted
   bool EmitUniformBufferAccess(
-      std::ostream& pre,
       std::ostream& out,
       ast::CallExpression* expr,
       const transform::DecomposeMemoryAccess::Intrinsic* intrinsic);
   /// Handles generating a call expression to a
   /// transform::DecomposeMemoryAccess::Intrinsic for a storage buffer
-  /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
   /// @param expr the call expression
   /// @param intrinsic the transform::DecomposeMemoryAccess::Intrinsic
   /// @returns true if the call expression is emitted
   bool EmitStorageBufferAccess(
-      std::ostream& pre,
       std::ostream& out,
       ast::CallExpression* expr,
       const transform::DecomposeMemoryAccess::Intrinsic* intrinsic);
   /// Handles generating a barrier intrinsic call
-  /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
   /// @param intrinsic the semantic information for the barrier intrinsic
   /// @returns true if the call expression is emitted
-  bool EmitBarrierCall(std::ostream& pre,
-                       std::ostream& out,
-                       const sem::Intrinsic* intrinsic);
+  bool EmitBarrierCall(std::ostream& out, const sem::Intrinsic* intrinsic);
   /// Handles generating an atomic intrinsic call for a storage buffer variable
-  /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
   /// @param expr the call expression
   /// @param op the atomic op
   /// @returns true if the call expression is emitted
   bool EmitStorageAtomicCall(
-      std::ostream& pre,
       std::ostream& out,
       ast::CallExpression* expr,
       transform::DecomposeMemoryAccess::Intrinsic::Op op);
   /// Handles generating an atomic intrinsic call for a workgroup variable
-  /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
   /// @param expr the call expression
   /// @param intrinsic the semantic information for the atomic intrinsic
   /// @returns true if the call expression is emitted
-  bool EmitWorkgroupAtomicCall(std::ostream& pre,
-                               std::ostream& out,
+  bool EmitWorkgroupAtomicCall(std::ostream& out,
                                ast::CallExpression* expr,
                                const sem::Intrinsic* intrinsic);
   /// Handles generating a call to a texture function (`textureSample`,
   /// `textureSampleGrad`, etc)
-  /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
   /// @param expr the call expression
   /// @param intrinsic the semantic information for the texture intrinsic
   /// @returns true if the call expression is emitted
-  bool EmitTextureCall(std::ostream& pre,
-                       std::ostream& out,
+  bool EmitTextureCall(std::ostream& out,
                        ast::CallExpression* expr,
                        const sem::Intrinsic* intrinsic);
   /// Handles generating a call to the `select()` intrinsic
-  /// @param pre the preamble of the expression stream
   /// @param out the output of the expression stream
   /// @param expr the call expression
   /// @returns true if the call expression is emitted
-  bool EmitSelectCall(std::ostream& pre,
-                      std::ostream& out,
-                      ast::CallExpression* expr);
+  bool EmitSelectCall(std::ostream& out, ast::CallExpression* expr);
   /// Handles generating a call to the `frexp()` intrinsic
-  /// @param pre the preamble of the expression stream
   /// @param out the output of the expression stream
   /// @param expr the call expression
   /// @param intrinsic the semantic information for the intrinsic
   /// @returns true if the call expression is emitted
-  bool EmitFrexpCall(std::ostream& pre,
-                     std::ostream& out,
+  bool EmitFrexpCall(std::ostream& out,
                      ast::CallExpression* expr,
                      const sem::Intrinsic* intrinsic);
   /// Handles generating a call to the `isNormal()` intrinsic
-  /// @param pre the preamble of the expression stream
   /// @param out the output of the expression stream
   /// @param expr the call expression
   /// @param intrinsic the semantic information for the intrinsic
   /// @returns true if the call expression is emitted
-  bool EmitIsNormalCall(std::ostream& pre,
-                        std::ostream& out,
+  bool EmitIsNormalCall(std::ostream& out,
                         ast::CallExpression* expr,
                         const sem::Intrinsic* intrinsic);
   /// Handles generating a call to data packing intrinsic
-  /// @param pre the preamble of the expression stream
   /// @param out the output of the expression stream
   /// @param expr the call expression
   /// @param intrinsic the semantic information for the texture intrinsic
   /// @returns true if the call expression is emitted
-  bool EmitDataPackingCall(std::ostream& pre,
-                           std::ostream& out,
+  bool EmitDataPackingCall(std::ostream& out,
                            ast::CallExpression* expr,
                            const sem::Intrinsic* intrinsic);
   /// Handles generating a call to data unpacking intrinsic
-  /// @param pre the preamble of the expression stream
   /// @param out the output of the expression stream
   /// @param expr the call expression
   /// @param intrinsic the semantic information for the texture intrinsic
   /// @returns true if the call expression is emitted
-  bool EmitDataUnpackingCall(std::ostream& pre,
-                             std::ostream& out,
+  bool EmitDataUnpackingCall(std::ostream& out,
                              ast::CallExpression* expr,
                              const sem::Intrinsic* intrinsic);
   /// Handles a case statement
-  /// @param out the output stream
   /// @param stmt the statement
-  /// @returns true if the statment was emitted successfully
-  bool EmitCase(std::ostream& out, ast::CaseStatement* stmt);
+  /// @returns true if the statement was emitted successfully
+  bool EmitCase(ast::CaseStatement* stmt);
   /// Handles generating constructor expressions
-  /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
   /// @param expr the constructor expression
   /// @returns true if the expression was emitted
-  bool EmitConstructor(std::ostream& pre,
-                       std::ostream& out,
-                       ast::ConstructorExpression* expr);
+  bool EmitConstructor(std::ostream& out, ast::ConstructorExpression* expr);
   /// Handles generating a discard statement
-  /// @param out the output stream
   /// @param stmt the discard statement
   /// @returns true if the statement was successfully emitted
-  bool EmitDiscard(std::ostream& out, ast::DiscardStatement* stmt);
+  bool EmitDiscard(ast::DiscardStatement* stmt);
   /// Handles generating a scalar constructor
-  /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
   /// @param expr the scalar constructor expression
   /// @returns true if the scalar constructor is emitted
-  bool EmitScalarConstructor(std::ostream& pre,
-                             std::ostream& out,
+  bool EmitScalarConstructor(std::ostream& out,
                              ast::ScalarConstructorExpression* expr);
   /// Handles emitting a type constructor
-  /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
   /// @param expr the type constructor expression
   /// @returns true if the constructor is emitted
-  bool EmitTypeConstructor(std::ostream& pre,
-                           std::ostream& out,
+  bool EmitTypeConstructor(std::ostream& out,
                            ast::TypeConstructorExpression* expr);
   /// Handles a continue statement
-  /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
-  bool EmitContinue(std::ostream& out, ast::ContinueStatement* stmt);
+  bool EmitContinue(ast::ContinueStatement* stmt);
   /// Handles generate an Expression
-  /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
   /// @param expr the expression
   /// @returns true if the expression was emitted
-  bool EmitExpression(std::ostream& pre,
-                      std::ostream& out,
-                      ast::Expression* expr);
+  bool EmitExpression(std::ostream& out, ast::Expression* expr);
   /// Handles generating a function
-  /// @param out the output stream
   /// @param func the function to generate
   /// @returns true if the function was emitted
-  bool EmitFunction(std::ostream& out, ast::Function* func);
+  bool EmitFunction(ast::Function* func);
 
   /// Handles emitting a global variable
-  /// @param out the output stream
   /// @param global the global variable
   /// @returns true on success
-  bool EmitGlobalVariable(std::ostream& out, ast::Variable* global);
+  bool EmitGlobalVariable(ast::Variable* global);
 
   /// Handles emitting a global variable with the uniform storage class
-  /// @param out the output stream
   /// @param var the global variable
   /// @returns true on success
-  bool EmitUniformVariable(std::ostream& out, const sem::Variable* var);
+  bool EmitUniformVariable(const sem::Variable* var);
 
   /// Handles emitting a global variable with the storage storage class
-  /// @param out the output stream
   /// @param var the global variable
   /// @returns true on success
-  bool EmitStorageVariable(std::ostream& out, const sem::Variable* var);
+  bool EmitStorageVariable(const sem::Variable* var);
 
   /// Handles emitting a global variable with the handle storage class
-  /// @param out the output stream
   /// @param var the global variable
   /// @returns true on success
-  bool EmitHandleVariable(std::ostream& out, const sem::Variable* var);
+  bool EmitHandleVariable(const sem::Variable* var);
 
   /// Handles emitting a global variable with the private storage class
-  /// @param out the output stream
   /// @param var the global variable
   /// @returns true on success
-  bool EmitPrivateVariable(std::ostream& out, const sem::Variable* var);
+  bool EmitPrivateVariable(const sem::Variable* var);
 
   /// Handles emitting a global variable with the workgroup storage class
-  /// @param out the output stream
   /// @param var the global variable
   /// @returns true on success
-  bool EmitWorkgroupVariable(std::ostream& out, const sem::Variable* var);
+  bool EmitWorkgroupVariable(const sem::Variable* var);
 
   /// Handles emitting the entry point function
-  /// @param out the output stream
   /// @param func the entry point
   /// @returns true if the entry point function was emitted
-  bool EmitEntryPointFunction(std::ostream& out, ast::Function* func);
+  bool EmitEntryPointFunction(ast::Function* func);
   /// Handles an if statement
-  /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
-  bool EmitIf(std::ostream& out, ast::IfStatement* stmt);
+  bool EmitIf(ast::IfStatement* stmt);
   /// Handles a literal
   /// @param out the output stream
   /// @param lit the literal to emit
   /// @returns true if the literal was successfully emitted
   bool EmitLiteral(std::ostream& out, ast::Literal* lit);
   /// Handles a loop statement
-  /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
-  bool EmitLoop(std::ostream& out, ast::LoopStatement* stmt);
+  bool EmitLoop(ast::LoopStatement* stmt);
   /// Handles generating an identifier expression
-  /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
   /// @param expr the identifier expression
   /// @returns true if the identifeir was emitted
-  bool EmitIdentifier(std::ostream& pre,
-                      std::ostream& out,
-                      ast::IdentifierExpression* expr);
+  bool EmitIdentifier(std::ostream& out, ast::IdentifierExpression* expr);
   /// Handles a member accessor expression
-  /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
   /// @param expr the member accessor expression
   /// @returns true if the member accessor was emitted
-  bool EmitMemberAccessor(std::ostream& pre,
-                          std::ostream& out,
+  bool EmitMemberAccessor(std::ostream& out,
                           ast::MemberAccessorExpression* expr);
   /// Handles return statements
-  /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
-  bool EmitReturn(std::ostream& out, ast::ReturnStatement* stmt);
+  bool EmitReturn(ast::ReturnStatement* stmt);
   /// Handles statement
-  /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
-  bool EmitStatement(std::ostream& out, ast::Statement* stmt);
+  bool EmitStatement(ast::Statement* stmt);
   /// Handles generating a switch statement
-  /// @param out the output stream
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
-  bool EmitSwitch(std::ostream& out, ast::SwitchStatement* stmt);
+  bool EmitSwitch(ast::SwitchStatement* stmt);
   /// Handles generating type
   /// @param out the output stream
   /// @param type the type to generate
@@ -396,33 +322,27 @@ class GeneratorImpl : public TextGenerator {
                        ast::Access access,
                        const std::string& name);
   /// Handles generating a structure declaration
-  /// @param out the output stream
   /// @param ty the struct to generate
   /// @returns true if the struct is emitted
-  bool EmitStructType(std::ostream& out, const sem::Struct* ty);
+  bool EmitStructType(const sem::Struct* ty);
   /// Handles a unary op expression
-  /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
   /// @param expr the expression to emit
   /// @returns true if the expression was emitted
-  bool EmitUnaryOp(std::ostream& pre,
-                   std::ostream& out,
-                   ast::UnaryOpExpression* expr);
+  bool EmitUnaryOp(std::ostream& out, ast::UnaryOpExpression* expr);
   /// Emits the zero value for the given type
   /// @param out the output stream
   /// @param type the type to emit the value for
   /// @returns true if the zero value was successfully emitted.
   bool EmitZeroValue(std::ostream& out, const sem::Type* type);
   /// Handles generating a variable
-  /// @param out the output stream
   /// @param var the variable to generate
   /// @returns true if the variable was emitted
-  bool EmitVariable(std::ostream& out, ast::Variable* var);
+  bool EmitVariable(ast::Variable* var);
   /// Handles generating a program scope constant variable
-  /// @param out the output stream
   /// @param var the variable to emit
   /// @returns true if the variable was emitted
-  bool EmitProgramConstVariable(std::ostream& out, const ast::Variable* var);
+  bool EmitProgramConstVariable(const ast::Variable* var);
 
   /// Handles generating a builtin method name
   /// @param intrinsic the semantic info for the intrinsic
@@ -466,29 +386,8 @@ class GeneratorImpl : public TextGenerator {
     return builder_.TypeOf(type_decl);
   }
 
-  /// Emits `prefix`, followed by an opening brace `{`, then calls `cb` to emit
-  /// the block body, then finally emits the closing brace `}`.
-  /// @param out the output stream
-  /// @param prefix the string to emit before the opening brace
-  /// @param cb a function or function-like object with the signature `bool()`
-  /// that emits the block body.
-  /// @returns the return value of `cb`.
-  template <typename F>
-  bool EmitBlockBraces(std::ostream& out, const std::string& prefix, F&& cb);
-
-  /// Emits an opening brace `{`, then calls `cb` to emit the block body, then
-  /// finally emits the closing brace `}`.
-  /// @param out the output stream
-  /// @param cb a function or function-like object with the signature `bool()`
-  /// that emits the block body.
-  /// @returns the return value of `cb`.
-  template <typename F>
-  bool EmitBlockBraces(std::ostream& out, F&& cb) {
-    return EmitBlockBraces(out, "", std::forward<F>(cb));
-  }
-
   ProgramBuilder builder_;
-  std::function<bool(std::ostream& out)> emit_continuing_;
+  std::function<bool()> emit_continuing_;
   std::unordered_map<const sem::Struct*, std::string> structure_builders_;
 };
 

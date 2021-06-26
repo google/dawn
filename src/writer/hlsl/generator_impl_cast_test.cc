@@ -27,8 +27,9 @@ TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Scalar) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, cast)) << gen.error();
-  EXPECT_EQ(result(), "float(1)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
+  EXPECT_EQ(out.str(), "float(1)");
 }
 
 TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Vector) {
@@ -37,8 +38,9 @@ TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Vector) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, cast)) << gen.error();
-  EXPECT_EQ(result(), "float3(int3(1, 2, 3))");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
+  EXPECT_EQ(out.str(), "float3(int3(1, 2, 3))");
 }
 
 }  // namespace

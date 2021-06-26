@@ -46,8 +46,8 @@ TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, s)) << gen.error();
-  EXPECT_EQ(result(), R"(  switch(cond) {
+  ASSERT_TRUE(gen.EmitStatement(s)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  switch(cond) {
     case 5: {
       break;
     }

@@ -96,16 +96,6 @@ class TestHelperBase : public BODY, public ProgramBuilder {
     return *gen_;
   }
 
-  /// @returns the result string
-  std::string result() const { return out.str(); }
-
-  /// @returns the pre result string
-  std::string pre_result() const { return pre.str(); }
-
-  /// The output stream
-  std::ostringstream out;
-  /// The pre-output stream
-  std::ostringstream pre;
   /// The program built with a call to Build()
   std::unique_ptr<Program> program;
 

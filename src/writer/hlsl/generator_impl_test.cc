@@ -24,7 +24,7 @@ using HlslGeneratorImplTest = TestHelper;
 TEST_F(HlslGeneratorImplTest, ErrorIfSanitizerNotRun) {
   auto program = std::make_unique<Program>(std::move(*this));
   GeneratorImpl gen(program.get());
-  EXPECT_FALSE(gen.Generate(out));
+  EXPECT_FALSE(gen.Generate());
   EXPECT_EQ(
       gen.error(),
       "error: HLSL writer requires the transform::Hlsl sanitizer to have been "
@@ -37,8 +37,8 @@ TEST_F(HlslGeneratorImplTest, Generate) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(void my_func() {
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(void my_func() {
 }
 )");
 }

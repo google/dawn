@@ -1,6 +1,6 @@
 void unpack2x16float_32a5cf() {
   uint tint_tmp = 1u;
-float2 res = f16tof32(uint2(tint_tmp & 0xffff, tint_tmp >> 16));
+  float2 res = f16tof32(uint2(tint_tmp & 0xffff, tint_tmp >> 16));
 }
 
 struct tint_symbol {
