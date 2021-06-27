@@ -56,6 +56,10 @@ namespace dawn_native { namespace opengl {
                                        const void* data,
                                        const TextureDataLayout& dataLayout,
                                        const Extent3D& writeSizePixel) {
+        if (destination.aspect == wgpu::TextureAspect::StencilOnly) {
+            return DAWN_VALIDATION_ERROR("Writes to stencil textures unsupported on OpenGL");
+        }
+
         TextureCopy textureCopy;
         textureCopy.texture = destination.texture;
         textureCopy.mipLevel = destination.mipLevel;
