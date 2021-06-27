@@ -1035,7 +1035,7 @@ TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
         [[block]] struct SSBO {
             value : vec4<u32>;
         };
-        [[group(0), binding(0)]] var<storage, read_write> ssbo : SSBO;
+        [[group(0), binding(0)]] var<storage, read> ssbo : SSBO;
         [[group(0), binding(1)]] var outImage : texture_storage_2d<rgba8unorm, write>;
 
         [[stage(compute), workgroup_size(1)]] fn main() {
