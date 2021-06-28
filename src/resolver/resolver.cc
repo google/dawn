@@ -1084,8 +1084,18 @@ bool Resolver::ValidateFunction(const ast::Function* func,
     }
 
     for (auto* deco : func->return_type_decorations()) {
-      if (!deco->IsAnyOf<ast::BuiltinDecoration, ast::LocationDecoration>()) {
+      if (!func->IsEntryPoint()) {
         AddError("decoration is not valid for function return types",
+                 deco->source());
+        return false;
+      }
+
+      if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+        if (!ValidateBuiltinDecoration(builtin, info->return_type)) {
+          return false;
+        }
+      } else if (!deco->Is<ast::LocationDecoration>()) {
+        AddError("decoration is not valid for entry point return types",
                  deco->source());
         return false;
       }

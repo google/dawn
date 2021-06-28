@@ -230,8 +230,7 @@ TEST_P(FunctionReturnTypeDecorationTest, IsValid) {
   auto& params = GetParam();
 
   Func("main", ast::VariableList{}, ty.f32(), ast::StatementList{Return(1.f)},
-       ast::DecorationList{Stage(ast::PipelineStage::kCompute)},
-       createDecorations({}, *this, params.kind));
+       {}, createDecorations({}, *this, params.kind));
 
   if (params.should_pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -246,6 +245,41 @@ INSTANTIATE_TEST_SUITE_P(
     FunctionReturnTypeDecorationTest,
     testing::Values(TestParams{DecorationKind::kAlign, false},
                     TestParams{DecorationKind::kBinding, false},
+                    TestParams{DecorationKind::kBuiltin, false},
+                    TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kLocation, false},
+                    TestParams{DecorationKind::kOverride, false},
+                    TestParams{DecorationKind::kOffset, false},
+                    TestParams{DecorationKind::kSize, false},
+                    TestParams{DecorationKind::kStage, false},
+                    TestParams{DecorationKind::kStride, false},
+                    TestParams{DecorationKind::kStructBlock, false},
+                    TestParams{DecorationKind::kWorkgroup, false},
+                    TestParams{DecorationKind::kBindingAndGroup, false}));
+
+using EntryPointReturnTypeDecorationTest = TestWithParams;
+TEST_P(EntryPointReturnTypeDecorationTest, IsValid) {
+  auto& params = GetParam();
+
+  Func("main", ast::VariableList{}, ty.vec4<f32>(),
+       {Return(Construct(ty.vec4<f32>(), 1.f))},
+       {Stage(ast::PipelineStage::kCompute)},
+       createDecorations({}, *this, params.kind));
+
+  if (params.should_pass) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(),
+              "error: decoration is not valid for entry point return types");
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ResolverDecorationValidationTest,
+    EntryPointReturnTypeDecorationTest,
+    testing::Values(TestParams{DecorationKind::kAlign, false},
+                    TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, true},
                     TestParams{DecorationKind::kGroup, false},
                     TestParams{DecorationKind::kLocation, true},
@@ -258,9 +292,9 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kWorkgroup, false},
                     TestParams{DecorationKind::kBindingAndGroup, false}));
 
-TEST_F(FunctionReturnTypeDecorationTest, DuplicateDecoration) {
+TEST_F(EntryPointReturnTypeDecorationTest, DuplicateDecoration) {
   Func("main", ast::VariableList{}, ty.f32(), ast::StatementList{Return(1.f)},
-       ast::DecorationList{Stage(ast::PipelineStage::kCompute)},
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)},
        ast::DecorationList{
            Location(Source{{12, 34}}, 2),
            Location(Source{{56, 78}}, 3),

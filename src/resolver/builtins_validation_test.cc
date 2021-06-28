@@ -39,6 +39,18 @@ TEST_F(ResolverBuiltinsValidationTest, PositionNotF32_Struct_Fail) {
             "12:34 error: store type of builtin(position) must be 'vec4<f32>'");
 }
 
+TEST_F(ResolverBuiltinsValidationTest, PositionNotF32_ReturnType_Fail) {
+  // [[stage(vertex)]]
+  // fn main() -> [[builtin(position)]] f32 { return 1.0; }
+  Func("main", {}, ty.f32(), {Return(1.0f)},
+       {Stage(ast::PipelineStage::kVertex)},
+       {Builtin(Source{{12, 34}}, ast::Builtin::kPosition)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: store type of builtin(position) must be 'vec4<f32>'");
+}
+
 TEST_F(ResolverBuiltinsValidationTest, FragDepthNotF32_Struct_Fail) {
   // struct MyInputs {
   //   [[builtin(kFragDepth)]] p: i32;
@@ -71,6 +83,18 @@ TEST_F(ResolverBuiltinsValidationTest, SampleMaskNotU32_Struct_Fail) {
                               Source{{12, 34}}, ast::Builtin::kSampleMask)})});
   Func("fragShader", {Param("arg", ty.Of(s))}, ty.f32(), {Return(1.0f)},
        {Stage(ast::PipelineStage::kFragment)}, {Location(0)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: store type of builtin(sample_mask) must be 'u32'");
+}
+
+TEST_F(ResolverBuiltinsValidationTest, SampleMaskNotU32_ReturnType_Fail) {
+  // [[stage(fragment)]]
+  // fn main() -> [[builtin(sample_mask)]] i32 { return 1; }
+  Func("main", {}, ty.i32(), {Return(1)},
+       {Stage(ast::PipelineStage::kFragment)},
+       {Builtin(Source{{12, 34}}, ast::Builtin::kSampleMask)});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
