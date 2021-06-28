@@ -205,7 +205,9 @@ endif()
 # So we only link to it in debug build when compiling for UWP.
 # In win32 we load dxgi.dll using LoadLibrary
 # so no need for static linking.
-target_link_libraries(dawn_native PRIVATE debug dxgi.lib)
+if (WINDOWS_STORE)
+    target_link_libraries(dawn_native PRIVATE debug dxgi.lib)
+endif()
 
 if (DAWN_ENABLE_D3D12)
     target_sources(dawn_native PRIVATE

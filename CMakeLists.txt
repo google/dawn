@@ -56,7 +56,7 @@ set(USE_X11 OFF)
 set(BUILD_EXAMPLE OFF)
 if (WIN32)
     set(ENABLE_D3D12 ON)
-    if (not WINDOWS_STORE)
+    if (NOT WINDOWS_STORE)
         # Enable Vulkan in win32 compilation only
         # since UWP only supports d3d
         set(ENABLE_VULKAN ON)
