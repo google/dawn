@@ -368,6 +368,8 @@ libtint_source_set("libtint_core_all_src") {
     "ast/int_literal.h",
     "ast/internal_decoration.cc",
     "ast/internal_decoration.h",
+    "ast/interpolate_decoration.cc",
+    "ast/interpolate_decoration.h",
     "ast/literal.cc",
     "ast/literal.h",
     "ast/location_decoration.cc",

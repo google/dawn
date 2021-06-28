@@ -175,6 +175,7 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/ast/identifier_expression_test.cc",
     "../src/ast/if_statement_test.cc",
     "../src/ast/int_literal_test.cc",
+    "../src/ast/interpolate_decoration_test.cc",
     "../src/ast/intrinsic_texture_helper_test.cc",
     "../src/ast/intrinsic_texture_helper_test.h",
     "../src/ast/location_decoration_test.cc",
