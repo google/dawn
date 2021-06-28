@@ -27,6 +27,7 @@
 #include "src/ast/continue_statement.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/interpolate_decoration.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/switch_statement.h"
@@ -207,6 +208,13 @@ class Builder {
   /// @param storage the storage class that this builtin is being used with
   /// @returns the SPIR-V builtin or SpvBuiltInMax on error.
   SpvBuiltIn ConvertBuiltin(ast::Builtin builtin, ast::StorageClass storage);
+
+  /// Converts an interpolate attribute to SPIR-V decorations and pushes a
+  /// capability if needed.
+  /// @param id the id to decorate
+  /// @param interpolate the interpolation attribute to convert
+  void AddInterpolationDecorations(uint32_t id,
+                                   ast::InterpolateDecoration* interpolate);
 
   /// Generates a label for the given id. Emits an error and returns false if
   /// we're currently outside a function.

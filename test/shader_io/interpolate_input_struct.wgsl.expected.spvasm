@@ -1,35 +1,51 @@
-SKIP: FAILED
-
-
-struct In {
-  none : f32;
-  flat : f32;
-  perspective_center : f32;
-  perspective_centroid : f32;
-  perspective_sample : f32;
-  linear_center : f32;
-  linear_centroid : f32;
-  linear_sample : f32;
-};
-
-[[location(0), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol : f32;
-
-[[location(1), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_1 : f32;
-
-[[location(2), interpolate(perspective, center), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_2 : f32;
-
-[[location(3), interpolate(perspective, centroid), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_3 : f32;
-
-[[location(4), interpolate(perspective, sample), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_4 : f32;
-
-[[location(5), interpolate(linear, center), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_5 : f32;
-
-[[location(6), interpolate(linear, centroid), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_6 : f32;
-
-[[location(7), interpolate(linear, sample), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_7 : f32;
-
-[[stage(fragment)]]
-fn main() {
-}
-
-Failed to generate: unknown decoration
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 15
+; Schema: 0
+               OpCapability Shader
+               OpCapability SampleRateShading
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %tint_symbol "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %tint_symbol_2 "tint_symbol_2"
+               OpName %tint_symbol_3 "tint_symbol_3"
+               OpName %tint_symbol_4 "tint_symbol_4"
+               OpName %tint_symbol_5 "tint_symbol_5"
+               OpName %tint_symbol_6 "tint_symbol_6"
+               OpName %tint_symbol_7 "tint_symbol_7"
+               OpName %main "main"
+               OpDecorate %tint_symbol Location 0
+               OpDecorate %tint_symbol_1 Location 1
+               OpDecorate %tint_symbol_1 Flat
+               OpDecorate %tint_symbol_2 Location 2
+               OpDecorate %tint_symbol_3 Location 3
+               OpDecorate %tint_symbol_3 Centroid
+               OpDecorate %tint_symbol_4 Location 4
+               OpDecorate %tint_symbol_4 Sample
+               OpDecorate %tint_symbol_5 Location 5
+               OpDecorate %tint_symbol_5 NoPerspective
+               OpDecorate %tint_symbol_6 Location 6
+               OpDecorate %tint_symbol_6 NoPerspective
+               OpDecorate %tint_symbol_6 Centroid
+               OpDecorate %tint_symbol_7 Location 7
+               OpDecorate %tint_symbol_7 NoPerspective
+               OpDecorate %tint_symbol_7 Sample
+      %float = OpTypeFloat 32
+%_ptr_Input_float = OpTypePointer Input %float
+%tint_symbol = OpVariable %_ptr_Input_float Input
+%tint_symbol_1 = OpVariable %_ptr_Input_float Input
+%tint_symbol_2 = OpVariable %_ptr_Input_float Input
+%tint_symbol_3 = OpVariable %_ptr_Input_float Input
+%tint_symbol_4 = OpVariable %_ptr_Input_float Input
+%tint_symbol_5 = OpVariable %_ptr_Input_float Input
+%tint_symbol_6 = OpVariable %_ptr_Input_float Input
+%tint_symbol_7 = OpVariable %_ptr_Input_float Input
+       %void = OpTypeVoid
+         %11 = OpTypeFunction %void
+       %main = OpFunction %void None %11
+         %14 = OpLabel
+               OpReturn
+               OpFunctionEnd

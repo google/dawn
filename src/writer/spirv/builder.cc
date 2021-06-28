@@ -842,6 +842,8 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
       push_annot(spv::Op::OpDecorate,
                  {Operand::Int(var_id), Operand::Int(SpvDecorationLocation),
                   Operand::Int(location->value())});
+    } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
+      AddInterpolationDecorations(var_id, interpolate);
     } else if (auto* binding = deco->As<ast::BindingDecoration>()) {
       push_annot(spv::Op::OpDecorate,
                  {Operand::Int(var_id), Operand::Int(SpvDecorationBinding),
@@ -3984,6 +3986,37 @@ SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin,
       break;
   }
   return SpvBuiltInMax;
+}
+
+void Builder::AddInterpolationDecorations(
+    uint32_t id,
+    ast::InterpolateDecoration* interpolate) {
+  switch (interpolate->type()) {
+    case ast::InterpolationType::kLinear:
+      push_annot(spv::Op::OpDecorate,
+                 {Operand::Int(id), Operand::Int(SpvDecorationNoPerspective)});
+      break;
+    case ast::InterpolationType::kFlat:
+      push_annot(spv::Op::OpDecorate,
+                 {Operand::Int(id), Operand::Int(SpvDecorationFlat)});
+      break;
+    case ast::InterpolationType::kPerspective:
+      break;
+  }
+  switch (interpolate->sampling()) {
+    case ast::InterpolationSampling::kCentroid:
+      push_annot(spv::Op::OpDecorate,
+                 {Operand::Int(id), Operand::Int(SpvDecorationCentroid)});
+      break;
+    case ast::InterpolationSampling::kSample:
+      push_capability(SpvCapabilitySampleRateShading);
+      push_annot(spv::Op::OpDecorate,
+                 {Operand::Int(id), Operand::Int(SpvDecorationSample)});
+      break;
+    case ast::InterpolationSampling::kCenter:
+    case ast::InterpolationSampling::kNone:
+      break;
+  }
 }
 
 SpvImageFormat Builder::convert_image_format_to_spv(
