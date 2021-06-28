@@ -41,6 +41,14 @@ namespace dawn_native {
 
     namespace {
 
+        MaybeError ValidateDeprecatedStoreOp(DeviceBase* device, wgpu::StoreOp value) {
+            if (value == wgpu::StoreOp::Clear) {
+                device->EmitDeprecationWarning(
+                    "The 'clear' storeOp is deprecated. Use 'discard' instead.");
+            }
+            return ValidateStoreOp(value);
+        }
+
         MaybeError ValidateB2BCopyAlignment(uint64_t dataSize,
                                             uint64_t srcOffset,
                                             uint64_t dstOffset) {
@@ -244,7 +252,7 @@ namespace dawn_native {
             }
 
             DAWN_TRY(ValidateLoadOp(colorAttachment.loadOp));
-            DAWN_TRY(ValidateStoreOp(colorAttachment.storeOp));
+            DAWN_TRY(ValidateDeprecatedStoreOp(device, colorAttachment.storeOp));
 
             if (colorAttachment.loadOp == wgpu::LoadOp::Clear) {
                 if (std::isnan(colorAttachment.clearColor.r) ||
@@ -315,8 +323,8 @@ namespace dawn_native {
 
             DAWN_TRY(ValidateLoadOp(depthStencilAttachment->depthLoadOp));
             DAWN_TRY(ValidateLoadOp(depthStencilAttachment->stencilLoadOp));
-            DAWN_TRY(ValidateStoreOp(depthStencilAttachment->depthStoreOp));
-            DAWN_TRY(ValidateStoreOp(depthStencilAttachment->stencilStoreOp));
+            DAWN_TRY(ValidateDeprecatedStoreOp(device, depthStencilAttachment->depthStoreOp));
+            DAWN_TRY(ValidateDeprecatedStoreOp(device, depthStencilAttachment->stencilStoreOp));
 
             if (attachment->GetAspects() == (Aspect::Depth | Aspect::Stencil) &&
                 depthStencilAttachment->depthReadOnly != depthStencilAttachment->stencilReadOnly) {

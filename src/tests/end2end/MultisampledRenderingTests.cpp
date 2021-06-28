@@ -291,7 +291,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTexture) {
     constexpr wgpu::Color kGreen = {0.0f, 0.8f, 0.0f, 0.8f};
 
     // storeOp should not affect the result in the resolve target.
-    for (wgpu::StoreOp storeOp : {wgpu::StoreOp::Store, wgpu::StoreOp::Clear}) {
+    for (wgpu::StoreOp storeOp : {wgpu::StoreOp::Store, wgpu::StoreOp::Discard}) {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
 
         // Draw a green triangle.

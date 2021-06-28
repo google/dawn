@@ -35,6 +35,7 @@ namespace dawn_native { namespace d3d12 {
 
         D3D12_RENDER_PASS_ENDING_ACCESS_TYPE D3D12EndingAccessType(wgpu::StoreOp storeOp) {
             switch (storeOp) {
+                case wgpu::StoreOp::Discard:
                 case wgpu::StoreOp::Clear:
                     return D3D12_RENDER_PASS_ENDING_ACCESS_TYPE_DISCARD;
                 case wgpu::StoreOp::Store:
@@ -55,7 +56,7 @@ namespace dawn_native { namespace d3d12 {
                 ToBackend(resolveDestination->GetTexture())->GetD3D12Resource();
 
             // Clear or preserve the resolve source.
-            if (storeOp == wgpu::StoreOp::Clear) {
+            if (storeOp == wgpu::StoreOp::Discard || storeOp == wgpu::StoreOp::Clear) {
                 resolveParameters.PreserveResolveSource = false;
             } else if (storeOp == wgpu::StoreOp::Store) {
                 resolveParameters.PreserveResolveSource = true;

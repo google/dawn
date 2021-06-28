@@ -257,8 +257,8 @@ namespace {
         // Base case: StoreOps match so render pass is a success
         {
             utils::ComboRenderPassDescriptor renderPass({}, depthStencilView);
-            renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Clear;
-            renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Clear;
+            renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Discard;
+            renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Discard;
             AssertBeginRenderPassSuccess(&renderPass);
         }
 
@@ -266,7 +266,7 @@ namespace {
         {
             utils::ComboRenderPassDescriptor renderPass({}, depthStencilView);
             renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
-            renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Clear;
+            renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Discard;
             AssertBeginRenderPassSuccess(&renderPass);
         }
     }
@@ -871,10 +871,10 @@ namespace {
         {
             utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilView);
             renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
-            renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Clear;
+            renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Discard;
             renderPass.cDepthStencilAttachmentInfo.depthReadOnly = true;
             renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
-            renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Clear;
+            renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Discard;
             renderPass.cDepthStencilAttachmentInfo.stencilReadOnly = true;
             AssertBeginRenderPassError(&renderPass);
         }

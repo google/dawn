@@ -600,7 +600,7 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilLoadAfterDiscard) {
         {
             utils::ComboRenderPassDescriptor renderPassDescriptor({},
                                                                   depthStencilTexture.CreateView());
-            renderPassDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Clear;
+            renderPassDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Discard;
             renderPassDescriptor.cDepthStencilAttachmentInfo.clearStencil = 2;
             renderPassDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
 
@@ -676,7 +676,8 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilLoadAfterDiscard) {
                                                                   depthStencilTexture.CreateView());
             renderPassDescriptor.cDepthStencilAttachmentInfo.clearDepth = 0.7;
             renderPassDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
-            renderPassDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Clear;
+            renderPassDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp =
+                wgpu::StoreOp::Discard;
 
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             auto pass = encoder.BeginRenderPass(&renderPassDescriptor);
@@ -761,7 +762,7 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilCopyAfterDiscard) {
         utils::ComboRenderPassDescriptor renderPassDescriptor({}, depthStencilTexture.CreateView());
         renderPassDescriptor.cDepthStencilAttachmentInfo.clearDepth = 0.3;
         renderPassDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
-        renderPassDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Clear;
+        renderPassDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Discard;
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         auto pass = encoder.BeginRenderPass(&renderPassDescriptor);
@@ -1157,7 +1158,7 @@ TEST_P(TextureZeroInitTest, RenderPassStoreOpClear) {
     utils::ComboRenderPassDescriptor renderPassDesc({renderTexture.CreateView()});
     renderPassDesc.cColorAttachments[0].clearColor = {0.0, 0.0, 0.0, 0.0};
     renderPassDesc.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
-    renderPassDesc.cColorAttachments[0].storeOp = wgpu::StoreOp::Clear;
+    renderPassDesc.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
     pass.SetPipeline(renderPipeline);
     pass.SetBindGroup(0, bindGroup);
@@ -1180,9 +1181,9 @@ TEST_P(TextureZeroInitTest, RenderPassStoreOpClear) {
 
 // This tests storeOp Clear on depth and stencil textures.
 // We put the depth stencil texture through 2 passes:
-// 1) LoadOp::Clear and StoreOp::Clear, fail the depth and stencil test set in the render pipeline.
-//      This means nothing is drawn and subresource is set as uninitialized.
-// 2) LoadOp::Load and StoreOp::Clear, pass the depth and stencil test set in the render pipeline.
+// 1) LoadOp::Clear and StoreOp::Discard, fail the depth and stencil test set in the render
+//      pipeline. This means nothing is drawn and subresource is set as uninitialized.
+// 2) LoadOp::Load and StoreOp::Discard, pass the depth and stencil test set in the render pipeline.
 //      Because LoadOp is Load and the subresource is uninitialized, the texture will be cleared to
 //      0's This means the depth and stencil test will pass and the red square is drawn.
 TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencilStoreOpClear) {
@@ -1209,8 +1210,8 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencilStoreOpClear) {
     renderPassDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Clear;
     renderPassDescriptor.cDepthStencilAttachmentInfo.clearDepth = 1.0f;
     renderPassDescriptor.cDepthStencilAttachmentInfo.clearStencil = 1u;
-    renderPassDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Clear;
-    renderPassDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Clear;
+    renderPassDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Discard;
+    renderPassDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Discard;
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDescriptor);
@@ -1303,7 +1304,7 @@ TEST_P(TextureZeroInitTest, PreservesInitializedMip) {
     utils::ComboRenderPassDescriptor renderPassDesc({renderTexture.CreateView()});
     renderPassDesc.cColorAttachments[0].clearColor = {0.0, 0.0, 0.0, 0.0};
     renderPassDesc.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
-    renderPassDesc.cColorAttachments[0].storeOp = wgpu::StoreOp::Clear;
+    renderPassDesc.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
     pass.SetPipeline(renderPipeline);
     pass.SetBindGroup(0, bindGroup);
@@ -1386,7 +1387,7 @@ TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
     utils::ComboRenderPassDescriptor renderPassDesc({renderTexture.CreateView()});
     renderPassDesc.cColorAttachments[0].clearColor = {0.0, 0.0, 0.0, 0.0};
     renderPassDesc.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
-    renderPassDesc.cColorAttachments[0].storeOp = wgpu::StoreOp::Clear;
+    renderPassDesc.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
     pass.SetPipeline(renderPipeline);
     pass.SetBindGroup(0, bindGroup);

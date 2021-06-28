@@ -97,6 +97,46 @@ TEST_P(DeprecationTests, ComputeStage) {
     EXPECT_DEPRECATION_WARNING(pipeline = device.CreateComputePipeline(&csDesc));
 }
 
+// Test that StoreOp::Clear is deprecated.
+TEST_P(DeprecationTests, StoreOpClear) {
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass;
+
+    // Check that a storeOp of Clear for color attachments raises a validation warning.
+    renderPass.renderPassInfo.cColorAttachments[0].storeOp = wgpu::StoreOp::Clear;
+
+    EXPECT_DEPRECATION_WARNING(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
+    pass.EndPass();
+
+    // Check that a storeOp of Clear for depth/stencil attachments raises a validation warning.
+    wgpu::TextureDescriptor descriptor;
+    descriptor.dimension = wgpu::TextureDimension::e2D;
+    descriptor.size = {1, 1, 1};
+    descriptor.sampleCount = 1;
+    descriptor.format = wgpu::TextureFormat::Depth24PlusStencil8;
+    descriptor.mipLevelCount = 1;
+    descriptor.usage = wgpu::TextureUsage::RenderAttachment;
+    wgpu::Texture depthStencil = device.CreateTexture(&descriptor);
+
+    wgpu::RenderPassDepthStencilAttachmentDescriptor* depthAttachment =
+        &renderPass.renderPassInfo.cDepthStencilAttachmentInfo;
+    renderPass.renderPassInfo.depthStencilAttachment = depthAttachment;
+    depthAttachment->view = depthStencil.CreateView();
+
+    renderPass.renderPassInfo.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
+    depthAttachment->depthStoreOp = wgpu::StoreOp::Clear;
+
+    EXPECT_DEPRECATION_WARNING(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
+    pass.EndPass();
+
+    depthAttachment->depthStoreOp = wgpu::StoreOp::Discard;
+    depthAttachment->stencilStoreOp = wgpu::StoreOp::Clear;
+
+    EXPECT_DEPRECATION_WARNING(pass = encoder.BeginRenderPass(&renderPass.renderPassInfo));
+    pass.EndPass();
+}
+
 DAWN_INSTANTIATE_TEST(DeprecationTests,
                       D3D12Backend(),
                       MetalBackend(),
