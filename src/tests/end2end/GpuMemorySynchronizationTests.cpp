@@ -668,6 +668,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
         float color0;
         char padding2[256 - sizeof(float)];
         float color1;
+        char padding3[256 - sizeof(float)];
     };
     wgpu::Buffer buffer = CreateZeroedBuffer(
         sizeof(Data), wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Index |
