@@ -1,0 +1,48 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 28
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %unused_entry_point "unused_entry_point"
+               OpName %f "f"
+               OpName %v2 "v2"
+               OpName %v3 "v3"
+               OpName %v4 "v4"
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+      %int_1 = OpConstant %int 1
+      %int_2 = OpConstant %int 2
+%_ptr_Function_v2int = OpTypePointer Function %v2int
+         %15 = OpConstantNull %v2int
+      %v3int = OpTypeVector %int 3
+%_ptr_Function_v3int = OpTypePointer Function %v3int
+         %21 = OpConstantNull %v3int
+      %v4int = OpTypeVector %int 4
+%_ptr_Function_v4int = OpTypePointer Function %v4int
+         %27 = OpConstantNull %v4int
+%unused_entry_point = OpFunction %void None %1
+          %4 = OpLabel
+               OpReturn
+               OpFunctionEnd
+          %f = OpFunction %void None %1
+          %6 = OpLabel
+         %v2 = OpVariable %_ptr_Function_v2int Function %15
+         %v3 = OpVariable %_ptr_Function_v3int Function %21
+         %v4 = OpVariable %_ptr_Function_v4int Function %27
+         %11 = OpIAdd %int %int_1 %int_2
+         %12 = OpCompositeConstruct %v2int %11 %11
+               OpStore %v2 %12
+         %17 = OpIAdd %int %int_1 %int_2
+         %18 = OpCompositeConstruct %v3int %17 %17 %17
+               OpStore %v3 %18
+         %23 = OpIAdd %int %int_1 %int_2
+         %24 = OpCompositeConstruct %v4int %23 %23 %23 %23
+               OpStore %v4 %24
+               OpReturn
+               OpFunctionEnd

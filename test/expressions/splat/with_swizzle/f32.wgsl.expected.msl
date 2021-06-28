@@ -1,0 +1,9 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void f() {
+  float a = float2(1.0f).y;
+  float b = float3(1.0f).z;
+  float c = float4(1.0f).w;
+}
+
