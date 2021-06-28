@@ -132,7 +132,13 @@ std::ostream& operator<<(std::ostream& o, Field field) {
 DAWN_TEST_PARAM_STRUCT(ComputeLayoutMemoryBufferTestParams, StorageClass, Field)
 
 class ComputeLayoutMemoryBufferTests
-    : public DawnTestWithParams<ComputeLayoutMemoryBufferTestParams> {};
+    : public DawnTestWithParams<ComputeLayoutMemoryBufferTestParams> {
+    void SetUp() override {
+        DawnTestBase::SetUp();
+        DAWN_TEST_UNSUPPORTED_IF((IsD3D12() || IsMetal()) &&
+                                 !HasToggleEnabled("use_tint_generator"));
+    }
+};
 
 TEST_P(ComputeLayoutMemoryBufferTests, Fields) {
     // Sentinel value markers codes used to check that the start and end of
@@ -342,8 +348,7 @@ namespace {
     auto GenerateParams() {
         auto params = MakeParamGenerator<ComputeLayoutMemoryBufferTestParams>(
             {
-                D3D12Backend({"use_tint_generator"}), MetalBackend({"use_tint_generator"}),
-                VulkanBackend(),
+                D3D12Backend(), MetalBackend(), VulkanBackend(),
                 // TODO(crbug.com/dawn/942)
                 // There was a compiler error: Buffer block cannot be expressed as any of std430,
                 // std140, scalar, even with enhanced layouts. You can try flattening this block to
