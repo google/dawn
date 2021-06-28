@@ -41,9 +41,18 @@ struct Result {
 /// @param source the generated HLSL source
 /// @param program the HLSL program
 /// @return the result of the compile
-Result Hlsl(const std::string& dxc_path,
-            const std::string& source,
-            Program* program);
+Result HlslUsingDXC(const std::string& dxc_path,
+                    const std::string& source,
+                    Program* program);
+
+#ifdef _WIN32
+/// Hlsl attempts to compile the shader with FXC, verifying that the shader
+/// compiles successfully.
+/// @param source the generated HLSL source
+/// @param program the HLSL program
+/// @return the result of the compile
+Result HlslUsingFXC(const std::string& source, Program* program);
+#endif  // _WIN32
 
 /// Msl attempts to compile the shader with the Metal Shader Compiler,
 /// verifying that the shader compiles successfully.

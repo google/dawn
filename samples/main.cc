@@ -65,6 +65,7 @@ struct Options {
 
   std::vector<std::string> transforms;
 
+  bool use_fxc = false;
   std::string dxc_path;
   std::string xcrun_path;
 };
@@ -95,8 +96,9 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
                                Affects AST dumping, and text-based output languages.
   --dump-inspector-bindings -- Dump reflection data about bindins to stdout.
   -h                        -- This help text
-  --validate                -- Validates generated SPIR-V with spirv-val.
-                               Has no effect on non-SPIRV outputs.
+  --validate                -- Validates the generated shader
+  --fxc                     -- Ask to validate HLSL output using FXC instead of DXC.
+                               When specified, automatically enables --validate
   --dxc                     -- Path to DXC executable, used to validate HLSL output.
                                When specified, automatically enables --validate
   --xcrun                   -- Path to xcrun executable, used to validate MSL output.
@@ -404,6 +406,9 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
       opts->dump_inspector_bindings = true;
     } else if (arg == "--validate") {
       opts->validate = true;
+    } else if (arg == "--fxc") {
+      opts->validate = true;
+      opts->use_fxc = true;
     } else if (arg == "--dxc") {
       ++i;
       if (i >= args.size()) {
@@ -872,20 +877,31 @@ int main(int argc, const char** argv) {
 #endif
 #if TINT_BUILD_HLSL_WRITER
       case Format::kHlsl: {
-        auto dxc = tint::utils::Command::LookPath(
-            options.dxc_path.empty() ? "dxc" : options.dxc_path);
-        if (dxc.Found()) {
-          auto* w = static_cast<tint::writer::Text*>(writer.get());
-          auto hlsl = w->result();
-          auto res = tint::val::Hlsl(dxc.Path(), hlsl, program.get());
-          if (res.failed) {
-            validation_failed = true;
-            validation_msgs << res.source << std::endl;
-            validation_msgs << res.output;
-          }
+        auto* w = static_cast<tint::writer::Text*>(writer.get());
+        auto hlsl = w->result();
+
+        tint::val::Result res;
+        if (options.use_fxc) {
+#ifdef _WIN32
+          res = tint::val::HlslUsingFXC(hlsl, program.get());
+#else
+          res.failed = true;
+          res.output = "FXC can only be used on Windows. Sorry :X";
+#endif  // _WIN32
         } else {
+          auto dxc = tint::utils::Command::LookPath(
+              options.dxc_path.empty() ? "dxc" : options.dxc_path);
+          if (dxc.Found()) {
+            res = tint::val::HlslUsingDXC(dxc.Path(), hlsl, program.get());
+          } else {
+            res.failed = true;
+            res.output = "DXC executable not found. Cannot validate";
+          }
+        }
+        if (res.failed) {
           validation_failed = true;
-          validation_msgs << "DXC executable not found. Cannot validate";
+          validation_msgs << res.source << std::endl;
+          validation_msgs << res.output;
         }
         break;
       }

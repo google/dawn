@@ -19,12 +19,21 @@
 #include "src/utils/io/command.h"
 #include "src/utils/io/tmpfile.h"
 
+#ifdef _WIN32
+#include <d3dcommon.h>
+#include <d3dcompiler.h>
+#include <windows.h>
+
+#include <wrl.h>
+using Microsoft::WRL::ComPtr;
+#endif  // _WIN32
+
 namespace tint {
 namespace val {
 
-Result Hlsl(const std::string& dxc_path,
-            const std::string& source,
-            Program* program) {
+Result HlslUsingDXC(const std::string& dxc_path,
+                    const std::string& source,
+                    Program* program) {
   Result result;
 
   auto dxc = utils::Command(dxc_path);
@@ -88,6 +97,78 @@ Result Hlsl(const std::string& dxc_path,
 
   return result;
 }
+
+#ifdef _WIN32
+Result HlslUsingFXC(const std::string& source, Program* program) {
+  Result result;
+
+  // This library leaks if an error happens in this function, but it is ok
+  // because it is loaded at most once, and the executables using HlslUsingFXC
+  // are short-lived.
+  HMODULE fxcLib = LoadLibraryA("d3dcompiler_47.dll");
+  if (fxcLib == nullptr) {
+    result.output = "Couldn't load FXC";
+    result.failed = true;
+    return result;
+  }
+
+  pD3DCompile d3dCompile =
+      reinterpret_cast<pD3DCompile>(GetProcAddress(fxcLib, "D3DCompile"));
+  if (d3dCompile == nullptr) {
+    result.output = "Couldn't load D3DCompile from FXC";
+    result.failed = true;
+    return result;
+  }
+
+  result.source = source;
+
+  bool found_an_entrypoint = false;
+  for (auto* func : program->AST().Functions()) {
+    if (func->IsEntryPoint()) {
+      found_an_entrypoint = true;
+
+      const char* profile = "";
+      switch (func->pipeline_stage()) {
+        case ast::PipelineStage::kNone:
+          result.output = "Invalid PipelineStage";
+          result.failed = true;
+          return result;
+        case ast::PipelineStage::kVertex:
+          profile = "vs_5_1";
+          break;
+        case ast::PipelineStage::kFragment:
+          profile = "ps_5_1";
+          break;
+        case ast::PipelineStage::kCompute:
+          profile = "cs_5_1";
+          break;
+      }
+
+      auto name = program->Symbols().NameFor(func->symbol());
+
+      ComPtr<ID3DBlob> compiledShader;
+      ComPtr<ID3DBlob> errors;
+      if (FAILED(d3dCompile(source.c_str(), source.length(), nullptr, nullptr,
+                            nullptr, name.c_str(), profile, 0, 0,
+                            &compiledShader, &errors))) {
+        result.output = static_cast<char*>(errors->GetBufferPointer());
+        result.failed = true;
+        return result;
+      }
+    }
+  }
+
+  FreeLibrary(fxcLib);
+
+  if (!found_an_entrypoint) {
+    result.output = "No entrypoint found";
+    result.failed = true;
+    return result;
+  }
+
+  return result;
+}
+#endif  // _WIN32
 
 }  // namespace val
 }  // namespace tint
