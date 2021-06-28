@@ -19,6 +19,7 @@
 #include "common/Compiler.h"
 
 #include <type_traits>
+#include <utility>
 
 // A common class for various smart-pointers acting on referenceable/releasable pointer-like
 // objects. Logic for each specialization can be customized using a Traits type that looks
