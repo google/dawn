@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void sinh_c9a5eb() {
-  float3 res =   sinh(float3());
+  float3 res = sinh(float3());
 }
 
 vertex tint_symbol vertex_main() {

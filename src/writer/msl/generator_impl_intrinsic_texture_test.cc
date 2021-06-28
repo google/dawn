@@ -281,10 +281,11 @@ TEST_P(MslGeneratorIntrinsicTextureTest, Call) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
 
   auto expected = expected_texture_overload(param.overload);
-  EXPECT_EQ(expected, gen.result());
+  EXPECT_EQ(expected, out.str());
 }
 
 INSTANTIATE_TEST_SUITE_P(

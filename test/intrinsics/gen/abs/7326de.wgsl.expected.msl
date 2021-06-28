@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void abs_7326de() {
-  uint3 res =   abs(uint3());
+  uint3 res = abs(uint3());
 }
 
 vertex tint_symbol vertex_main() {

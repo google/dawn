@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void pack4x8unorm_95c456() {
-  uint res =   pack_float_to_unorm4x8(float4());
+  uint res = pack_float_to_unorm4x8(float4());
 }
 
 vertex tint_symbol vertex_main() {

@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void abs_b96037() {
-  float res =   fabs(1.0f);
+  float res = fabs(1.0f);
 }
 
 vertex tint_symbol vertex_main() {

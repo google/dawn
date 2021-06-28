@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void faceForward_e6908b() {
-  float2 res =   faceforward(float2(), float2(), float2());
+  float2 res = faceforward(float2(), float2(), float2());
 }
 
 vertex tint_symbol vertex_main() {

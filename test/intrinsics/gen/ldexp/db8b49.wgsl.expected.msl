@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void ldexp_db8b49() {
-  float res =   ldexp(1.0f, 1);
+  float res = ldexp(1.0f, 1);
 }
 
 vertex tint_symbol vertex_main() {

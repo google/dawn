@@ -81,8 +81,9 @@ TEST_F(MslGeneratorImplTest, MslImportData_SingleParamTest_IntScalar) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitCall(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(abs(1))");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), R"(abs(1))");
 }
 
 using MslImportData_DualParamTest = TestParamHelper<MslImportData>;
@@ -94,8 +95,9 @@ TEST_P(MslImportData_DualParamTest, FloatScalar) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitCall(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), std::string(param.msl_name) + "(1.0f, 2.0f)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), std::string(param.msl_name) + "(1.0f, 2.0f)");
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                          MslImportData_DualParamTest,
@@ -117,10 +119,11 @@ TEST_P(MslImportData_DualParam_VectorTest, FloatVector) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitCall(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), std::string(param.msl_name) +
-                              "(float3(1.0f, 2.0f, 3.0f), "
-                              "float3(4.0f, 5.0f, 6.0f))");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), std::string(param.msl_name) +
+                           "(float3(1.0f, 2.0f, 3.0f), "
+                           "float3(4.0f, 5.0f, 6.0f))");
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                          MslImportData_DualParam_VectorTest,
@@ -135,8 +138,9 @@ TEST_P(MslImportData_DualParam_Int_Test, IntScalar) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitCall(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), std::string(param.msl_name) + "(1, 2)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), std::string(param.msl_name) + "(1, 2)");
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                          MslImportData_DualParam_Int_Test,
@@ -152,8 +156,9 @@ TEST_P(MslImportData_TripleParamTest, FloatScalar) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitCall(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), std::string(param.msl_name) + "(1.0f, 2.0f, 3.0f)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), std::string(param.msl_name) + "(1.0f, 2.0f, 3.0f)");
 }
 INSTANTIATE_TEST_SUITE_P(
     MslGeneratorImplTest,
@@ -173,8 +178,9 @@ TEST_P(MslImportData_TripleParam_Int_Test, IntScalar) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitCall(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), std::string(param.msl_name) + "(1, 2, 3)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), std::string(param.msl_name) + "(1, 2, 3)");
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                          MslImportData_TripleParam_Int_Test,
@@ -190,8 +196,9 @@ TEST_F(MslGeneratorImplTest, MslImportData_Determinant) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitCall(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), std::string("determinant(var)"));
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), std::string("determinant(var)"));
 }
 
 }  // namespace

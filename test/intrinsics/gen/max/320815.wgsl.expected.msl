@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void max_320815() {
-  uint2 res =   max(uint2(), uint2());
+  uint2 res = max(uint2(), uint2());
 }
 
 vertex tint_symbol vertex_main() {

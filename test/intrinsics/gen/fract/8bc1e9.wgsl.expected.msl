@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void fract_8bc1e9() {
-  float4 res =   fract(float4());
+  float4 res = fract(float4());
 }
 
 vertex tint_symbol vertex_main() {

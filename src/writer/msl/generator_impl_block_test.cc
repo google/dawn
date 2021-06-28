@@ -45,9 +45,10 @@ TEST_F(MslGeneratorImplTest, Emit_Block_WithoutNewline) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitBlock(b)) << gen.error();
-  EXPECT_EQ(gen.result(), R"({
+  EXPECT_EQ(gen.result(), R"(  {
     discard_fragment();
-  })");
+  }
+)");
 }
 
 }  // namespace

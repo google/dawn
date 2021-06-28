@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void abs_467cd1() {
-  uint res =   abs(1u);
+  uint res = abs(1u);
 }
 
 vertex tint_symbol vertex_main() {

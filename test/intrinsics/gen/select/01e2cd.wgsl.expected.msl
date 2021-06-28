@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void select_01e2cd() {
-  int3 res =   select(int3(), int3(), bool3());
+  int3 res = select(int3(), int3(), bool3());
 }
 
 vertex tint_symbol vertex_main() {

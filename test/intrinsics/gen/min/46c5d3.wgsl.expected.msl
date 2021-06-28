@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void min_46c5d3() {
-  uint res =   min(1u, 1u);
+  uint res = min(1u, 1u);
 }
 
 vertex tint_symbol vertex_main() {

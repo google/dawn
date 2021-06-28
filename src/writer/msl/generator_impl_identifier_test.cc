@@ -29,8 +29,9 @@ TEST_F(MslGeneratorImplTest, EmitIdentifierExpression) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(i)) << gen.error();
-  EXPECT_EQ(gen.result(), "foo");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, i)) << gen.error();
+  EXPECT_EQ(out.str(), "foo");
 }
 
 }  // namespace

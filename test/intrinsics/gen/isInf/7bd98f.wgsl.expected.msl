@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void isInf_7bd98f() {
-  bool res =   isinf(1.0f);
+  bool res = isinf(1.0f);
 }
 
 vertex tint_symbol vertex_main() {

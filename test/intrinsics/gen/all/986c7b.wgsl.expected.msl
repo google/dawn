@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void all_986c7b() {
-  bool res =   all(bool4());
+  bool res = all(bool4());
 }
 
 vertex tint_symbol vertex_main() {

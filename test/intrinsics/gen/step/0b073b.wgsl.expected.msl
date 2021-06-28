@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void step_0b073b() {
-  float res =   step(1.0f, 1.0f);
+  float res = step(1.0f, 1.0f);
 }
 
 vertex tint_symbol vertex_main() {

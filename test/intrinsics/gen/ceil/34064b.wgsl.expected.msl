@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void ceil_34064b() {
-  float3 res =   ceil(float3());
+  float3 res = ceil(float3());
 }
 
 vertex tint_symbol vertex_main() {

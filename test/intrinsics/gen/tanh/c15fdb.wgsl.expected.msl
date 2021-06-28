@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void tanh_c15fdb() {
-  float res =   tanh(1.0f);
+  float res = tanh(1.0f);
 }
 
 vertex tint_symbol vertex_main() {

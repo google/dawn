@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void clamp_b07c65() {
-  int res =   clamp(1, 1, 1);
+  int res = clamp(1, 1, 1);
 }
 
 vertex tint_symbol vertex_main() {

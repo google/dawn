@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void atan_02979a() {
-  float res =   atan(1.0f);
+  float res = atan(1.0f);
 }
 
 vertex tint_symbol vertex_main() {

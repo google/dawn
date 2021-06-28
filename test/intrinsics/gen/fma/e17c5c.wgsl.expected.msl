@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void fma_e17c5c() {
-  float3 res =   fma(float3(), float3(), float3());
+  float3 res = fma(float3(), float3(), float3());
 }
 
 vertex tint_symbol vertex_main() {

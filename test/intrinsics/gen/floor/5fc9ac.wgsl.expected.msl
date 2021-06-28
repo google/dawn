@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void floor_5fc9ac() {
-  float2 res =   floor(float2());
+  float2 res = floor(float2());
 }
 
 vertex tint_symbol vertex_main() {

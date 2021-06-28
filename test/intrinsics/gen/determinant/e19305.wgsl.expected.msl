@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void determinant_e19305() {
-  float res =   determinant(float2x2());
+  float res = determinant(float2x2());
 }
 
 vertex tint_symbol vertex_main() {

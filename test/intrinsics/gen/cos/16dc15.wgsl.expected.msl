@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void cos_16dc15() {
-  float3 res =   cos(float3());
+  float3 res = cos(float3());
 }
 
 vertex tint_symbol vertex_main() {

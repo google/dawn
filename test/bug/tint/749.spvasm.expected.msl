@@ -1451,7 +1451,7 @@ void main_1(constant buf0& x_188, thread QuicksortObject* const tint_symbol_86, 
   int const x_909 = (*(tint_symbol_86)).numbers.arr[4];
   (*(tint_symbol_86)).numbers.arr[4] = 0;
   (*(tint_symbol_86)).numbers.arr[4] = x_909;
-  if ((  fabs((x_308 - x_310)) < 0.25f)) {
+  if ((fabs((x_308 - x_310)) < 0.25f)) {
     float const x_910 = uv.x;
     uv.x = 0.0f;
     uv.x = x_910;
@@ -1505,7 +1505,7 @@ void main_1(constant buf0& x_188, thread QuicksortObject* const tint_symbol_86, 
   uv[0] = 0.0f;
   uv[0] = x_922;
   float3 const x_519 = float3(x_447.x, x_446.x, x_446.y);
-  float3 const x_326 =   normalize(x_325);
+  float3 const x_326 = normalize(x_325);
   float const x_923 = uv.x;
   uv.x = 0.0f;
   uv.x = x_923;

@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void countOneBits_94fd81() {
-  uint2 res =   popcount(uint2());
+  uint2 res = popcount(uint2());
 }
 
 vertex tint_symbol vertex_main() {

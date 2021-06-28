@@ -291,9 +291,9 @@ TEST_F(MslGeneratorImplTest, Intrinsic_Call) {
 
   GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
-  ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
-  EXPECT_EQ(gen.result(), "  dot(param1, param2)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+  EXPECT_EQ(out.str(), "dot(param1, param2)");
 }
 
 TEST_F(MslGeneratorImplTest, StorageBarrier) {
@@ -302,9 +302,9 @@ TEST_F(MslGeneratorImplTest, StorageBarrier) {
 
   GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
-  ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
-  EXPECT_EQ(gen.result(), "  threadgroup_barrier(mem_flags::mem_device)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+  EXPECT_EQ(out.str(), "threadgroup_barrier(mem_flags::mem_device)");
 }
 
 TEST_F(MslGeneratorImplTest, WorkgroupBarrier) {
@@ -313,9 +313,9 @@ TEST_F(MslGeneratorImplTest, WorkgroupBarrier) {
 
   GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
-  ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
-  EXPECT_EQ(gen.result(), "  threadgroup_barrier(mem_flags::mem_threadgroup)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+  EXPECT_EQ(out.str(), "threadgroup_barrier(mem_flags::mem_threadgroup)");
 }
 
 TEST_F(MslGeneratorImplTest, Pack2x16Float) {
@@ -325,9 +325,9 @@ TEST_F(MslGeneratorImplTest, Pack2x16Float) {
 
   GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
-  ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
-  EXPECT_EQ(gen.result(), "  as_type<uint>(half2(p1))");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+  EXPECT_EQ(out.str(), "as_type<uint>(half2(p1))");
 }
 
 TEST_F(MslGeneratorImplTest, Unpack2x16Float) {
@@ -337,9 +337,9 @@ TEST_F(MslGeneratorImplTest, Unpack2x16Float) {
 
   GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
-  ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
-  EXPECT_EQ(gen.result(), "  float2(as_type<half2>(p1))");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+  EXPECT_EQ(out.str(), "float2(as_type<half2>(p1))");
 }
 
 TEST_F(MslGeneratorImplTest, Ignore) {

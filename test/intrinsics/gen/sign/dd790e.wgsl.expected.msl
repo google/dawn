@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void sign_dd790e() {
-  float res =   sign(1.0f);
+  float res = sign(1.0f);
 }
 
 vertex tint_symbol vertex_main() {

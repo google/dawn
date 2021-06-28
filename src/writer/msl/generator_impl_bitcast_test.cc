@@ -27,8 +27,9 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Bitcast) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(bitcast)) << gen.error();
-  EXPECT_EQ(gen.result(), "as_type<float>(1)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
+  EXPECT_EQ(out.str(), "as_type<float>(1)");
 }
 
 }  // namespace

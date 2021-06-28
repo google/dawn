@@ -66,8 +66,9 @@ TEST_F(MslGeneratorImplTest, EmitType_Array) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(program->TypeOf(arr), "ary")) << gen.error();
-  EXPECT_EQ(gen.result(), "bool ary[4]");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), "ary")) << gen.error();
+  EXPECT_EQ(out.str(), "bool ary[4]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArray) {
@@ -77,8 +78,9 @@ TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArray) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(program->TypeOf(b), "ary")) << gen.error();
-  EXPECT_EQ(gen.result(), "bool ary[5][4]");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, program->TypeOf(b), "ary")) << gen.error();
+  EXPECT_EQ(out.str(), "bool ary[5][4]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
@@ -89,8 +91,9 @@ TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(program->TypeOf(c), "ary")) << gen.error();
-  EXPECT_EQ(gen.result(), "bool ary[6][5][4]");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, program->TypeOf(c), "ary")) << gen.error();
+  EXPECT_EQ(out.str(), "bool ary[6][5][4]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Array_WithoutName) {
@@ -99,8 +102,9 @@ TEST_F(MslGeneratorImplTest, EmitType_Array_WithoutName) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(program->TypeOf(arr), "")) << gen.error();
-  EXPECT_EQ(gen.result(), "bool[4]");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), "")) << gen.error();
+  EXPECT_EQ(out.str(), "bool[4]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
@@ -109,8 +113,9 @@ TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(program->TypeOf(arr), "ary")) << gen.error();
-  EXPECT_EQ(gen.result(), "bool ary[1]");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), "ary")) << gen.error();
+  EXPECT_EQ(out.str(), "bool ary[1]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_ArrayWithStride) {
@@ -143,8 +148,9 @@ TEST_F(MslGeneratorImplTest, EmitType_Bool) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(bool_, "")) << gen.error();
-  EXPECT_EQ(gen.result(), "bool");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, bool_, "")) << gen.error();
+  EXPECT_EQ(out.str(), "bool");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_F32) {
@@ -152,8 +158,9 @@ TEST_F(MslGeneratorImplTest, EmitType_F32) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(f32, "")) << gen.error();
-  EXPECT_EQ(gen.result(), "float");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, f32, "")) << gen.error();
+  EXPECT_EQ(out.str(), "float");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_I32) {
@@ -161,8 +168,9 @@ TEST_F(MslGeneratorImplTest, EmitType_I32) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(i32, "")) << gen.error();
-  EXPECT_EQ(gen.result(), "int");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, i32, "")) << gen.error();
+  EXPECT_EQ(out.str(), "int");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Matrix) {
@@ -172,8 +180,9 @@ TEST_F(MslGeneratorImplTest, EmitType_Matrix) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(mat2x3, "")) << gen.error();
-  EXPECT_EQ(gen.result(), "float2x3");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, mat2x3, "")) << gen.error();
+  EXPECT_EQ(out.str(), "float2x3");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Pointer) {
@@ -183,8 +192,9 @@ TEST_F(MslGeneratorImplTest, EmitType_Pointer) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(p, "")) << gen.error();
-  EXPECT_EQ(gen.result(), "threadgroup float* ");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, p, "")) << gen.error();
+  EXPECT_EQ(out.str(), "threadgroup float* ");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Struct) {
@@ -195,8 +205,9 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(program->TypeOf(s), "")) << gen.error();
-  EXPECT_EQ(gen.result(), "S");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, program->TypeOf(s), "")) << gen.error();
+  EXPECT_EQ(out.str(), "S");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
@@ -670,8 +681,9 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(program->TypeOf(s), "")) << gen.error();
-  EXPECT_EQ(gen.result(), R"(struct {
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, program->TypeOf(s), "")) << gen.error();
+  EXPECT_EQ(out.str(), R"(struct {
   /* 0x0000 */ int a;
   /* 0x0004 */ float b;
 })");
@@ -682,8 +694,9 @@ TEST_F(MslGeneratorImplTest, EmitType_U32) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(u32, "")) << gen.error();
-  EXPECT_EQ(gen.result(), "uint");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, u32, "")) << gen.error();
+  EXPECT_EQ(out.str(), "uint");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Vector) {
@@ -692,8 +705,9 @@ TEST_F(MslGeneratorImplTest, EmitType_Vector) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(vec3, "")) << gen.error();
-  EXPECT_EQ(gen.result(), "float3");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, vec3, "")) << gen.error();
+  EXPECT_EQ(out.str(), "float3");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Void) {
@@ -701,8 +715,9 @@ TEST_F(MslGeneratorImplTest, EmitType_Void) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(void_, "")) << gen.error();
-  EXPECT_EQ(gen.result(), "void");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, void_, "")) << gen.error();
+  EXPECT_EQ(out.str(), "void");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Sampler) {
@@ -710,8 +725,9 @@ TEST_F(MslGeneratorImplTest, EmitType_Sampler) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(sampler, "")) << gen.error();
-  EXPECT_EQ(gen.result(), "sampler");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, sampler, "")) << gen.error();
+  EXPECT_EQ(out.str(), "sampler");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_SamplerComparison) {
@@ -719,8 +735,9 @@ TEST_F(MslGeneratorImplTest, EmitType_SamplerComparison) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(sampler, "")) << gen.error();
-  EXPECT_EQ(gen.result(), "sampler");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, sampler, "")) << gen.error();
+  EXPECT_EQ(out.str(), "sampler");
 }
 
 struct MslDepthTextureData {
@@ -739,8 +756,9 @@ TEST_P(MslDepthTexturesTest, Emit) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(&s, "")) << gen.error();
-  EXPECT_EQ(gen.result(), params.result);
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.error();
+  EXPECT_EQ(out.str(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
     MslGeneratorImplTest,
@@ -772,8 +790,9 @@ TEST_P(MslSampledtexturesTest, Emit) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(s, "")) << gen.error();
-  EXPECT_EQ(gen.result(), params.result);
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, s, "")) << gen.error();
+  EXPECT_EQ(out.str(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
     MslGeneratorImplTest,
@@ -798,8 +817,9 @@ TEST_F(MslGeneratorImplTest, Emit_TypeMultisampledTexture) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ms, "")) << gen.error();
-  EXPECT_EQ(gen.result(), "texture2d_ms<uint, access::read>");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, ms, "")) << gen.error();
+  EXPECT_EQ(out.str(), "texture2d_ms<uint, access::read>");
 }
 
 struct MslStorageTextureData {
@@ -826,8 +846,9 @@ TEST_P(MslStorageTexturesTest, Emit) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(program->TypeOf(s), "")) << gen.error();
-  EXPECT_EQ(gen.result(), params.result);
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, program->TypeOf(s), "")) << gen.error();
+  EXPECT_EQ(out.str(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
     MslGeneratorImplTest,

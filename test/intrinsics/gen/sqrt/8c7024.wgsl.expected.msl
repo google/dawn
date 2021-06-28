@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void sqrt_8c7024() {
-  float2 res =   sqrt(float2());
+  float2 res = sqrt(float2());
 }
 
 vertex tint_symbol vertex_main() {

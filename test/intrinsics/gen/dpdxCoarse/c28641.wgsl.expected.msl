@@ -2,7 +2,7 @@
 
 using namespace metal;
 void dpdxCoarse_c28641() {
-  float4 res =   dfdx(float4());
+  float4 res = dfdx(float4());
 }
 
 fragment void fragment_main() {

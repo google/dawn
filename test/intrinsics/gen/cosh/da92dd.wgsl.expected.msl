@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void cosh_da92dd() {
-  float res =   cosh(1.0f);
+  float res = cosh(1.0f);
 }
 
 vertex tint_symbol vertex_main() {

@@ -59,7 +59,7 @@ kernel void tint_symbol(uint3 local_id [[thread_position_in_threadgroup]], uint3
     tint_array_wrapper const tint_symbol_3 = {.arr={}};
     tint_symbol_5 = tint_symbol_3;
   }
-    threadgroup_barrier(mem_flags::mem_threadgroup);
+  threadgroup_barrier(mem_flags::mem_threadgroup);
   uint const tileRow = (local_id.y * RowPerThread);
   uint const tileCol = (local_id.x * ColPerThread);
   uint const globalRow = (global_id.y * RowPerThread);
@@ -140,7 +140,7 @@ kernel void tint_symbol(uint3 local_id [[thread_position_in_threadgroup]], uint3
           }
         }
       }
-            threadgroup_barrier(mem_flags::mem_threadgroup);
+      threadgroup_barrier(mem_flags::mem_threadgroup);
       {
         uint k = 0u;
         while (true) {
@@ -189,7 +189,7 @@ kernel void tint_symbol(uint3 local_id [[thread_position_in_threadgroup]], uint3
           }
         }
       }
-            threadgroup_barrier(mem_flags::mem_threadgroup);
+      threadgroup_barrier(mem_flags::mem_threadgroup);
       {
         t = (t + 1u);
       }

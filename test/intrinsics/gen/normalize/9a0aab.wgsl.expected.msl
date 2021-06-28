@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void normalize_9a0aab() {
-  float4 res =   normalize(float4());
+  float4 res = normalize(float4());
 }
 
 vertex tint_symbol vertex_main() {

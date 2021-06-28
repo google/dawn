@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void transpose_4ce359() {
-  float4x2 res =   transpose(float2x4());
+  float4x2 res = transpose(float2x4());
 }
 
 vertex tint_symbol vertex_main() {

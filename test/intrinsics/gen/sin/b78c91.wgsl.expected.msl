@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void sin_b78c91() {
-  float res =   sin(1.0f);
+  float res = sin(1.0f);
 }
 
 vertex tint_symbol vertex_main() {

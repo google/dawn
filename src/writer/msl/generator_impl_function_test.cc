@@ -36,9 +36,9 @@ TEST_F(MslGeneratorImplTest, Emit_Function) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+  EXPECT_EQ(gen.result(), R"(  #include <metal_stdlib>
 
-using namespace metal;
+  using namespace metal;
   void my_func() {
     return;
   }
@@ -62,9 +62,9 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+  EXPECT_EQ(gen.result(), R"(  #include <metal_stdlib>
 
-using namespace metal;
+  using namespace metal;
   void my_func(float a, int b) {
     return;
   }
@@ -564,9 +564,9 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+  EXPECT_EQ(gen.result(), R"(  #include <metal_stdlib>
 
-using namespace metal;
+  using namespace metal;
   struct tint_array_wrapper {
     float arr[5];
   };
@@ -589,9 +589,9 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayReturn) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+  EXPECT_EQ(gen.result(), R"(  #include <metal_stdlib>
 
-using namespace metal;
+  using namespace metal;
   struct tint_array_wrapper {
     float arr[5];
   };

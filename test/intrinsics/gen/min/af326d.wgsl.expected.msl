@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void min_af326d() {
-  float res =   fmin(1.0f, 1.0f);
+  float res = fmin(1.0f, 1.0f);
 }
 
 vertex tint_symbol vertex_main() {

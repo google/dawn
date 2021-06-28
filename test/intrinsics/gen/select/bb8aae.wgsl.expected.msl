@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void select_bb8aae() {
-  float4 res =   select(float4(), float4(), bool4());
+  float4 res = select(float4(), float4(), bool4());
 }
 
 vertex tint_symbol vertex_main() {

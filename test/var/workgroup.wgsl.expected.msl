@@ -29,7 +29,7 @@ kernel void main1(uint local_invocation_index [[thread_index_in_threadgroup]]) {
   if ((local_invocation_index == 0u)) {
     tint_symbol_9 = int();
   }
-    threadgroup_barrier(mem_flags::mem_threadgroup);
+  threadgroup_barrier(mem_flags::mem_threadgroup);
   tint_symbol_9 = 42;
   uses_a(&(tint_symbol_9));
   return;
@@ -40,7 +40,7 @@ kernel void main2(uint local_invocation_index_1 [[thread_index_in_threadgroup]])
   if ((local_invocation_index_1 == 0u)) {
     tint_symbol_10 = int();
   }
-    threadgroup_barrier(mem_flags::mem_threadgroup);
+  threadgroup_barrier(mem_flags::mem_threadgroup);
   tint_symbol_10 = 7;
   uses_b(&(tint_symbol_10));
   return;
@@ -53,7 +53,7 @@ kernel void main3(uint local_invocation_index_2 [[thread_index_in_threadgroup]])
     tint_symbol_11 = int();
     tint_symbol_12 = int();
   }
-    threadgroup_barrier(mem_flags::mem_threadgroup);
+  threadgroup_barrier(mem_flags::mem_threadgroup);
   outer(&(tint_symbol_11), &(tint_symbol_12));
   no_uses();
   return;

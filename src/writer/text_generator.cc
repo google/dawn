@@ -44,8 +44,9 @@ TextGenerator::LineWriter::~LineWriter() {
     auto str = os.str();
     if (!str.empty()) {
       gen->make_indent();
-      gen->out_ << str << std::endl;
+      gen->out_ << str;
     }
+    gen->out_ << std::endl;
   }
 }
 

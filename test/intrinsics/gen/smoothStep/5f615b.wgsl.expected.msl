@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void smoothStep_5f615b() {
-  float4 res =   smoothstep(float4(), float4(), float4());
+  float4 res = smoothstep(float4(), float4(), float4());
 }
 
 vertex tint_symbol vertex_main() {

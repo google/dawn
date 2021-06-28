@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void any_0e3e58() {
-  bool res =   any(bool2());
+  bool res = any(bool2());
 }
 
 vertex tint_symbol vertex_main() {

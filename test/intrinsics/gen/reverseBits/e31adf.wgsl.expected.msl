@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void reverseBits_e31adf() {
-  uint res =   reverse_bits(1u);
+  uint res = reverse_bits(1u);
 }
 
 vertex tint_symbol vertex_main() {

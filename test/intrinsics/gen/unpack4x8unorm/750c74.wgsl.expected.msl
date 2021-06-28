@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void unpack4x8unorm_750c74() {
-  float4 res =   unpack_unorm4x8_to_float(1u);
+  float4 res = unpack_unorm4x8_to_float(1u);
 }
 
 vertex tint_symbol vertex_main() {

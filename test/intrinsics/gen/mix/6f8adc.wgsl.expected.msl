@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void mix_6f8adc() {
-  float2 res =   mix(float2(), float2(), float2());
+  float2 res = mix(float2(), float2(), float2());
 }
 
 vertex tint_symbol vertex_main() {

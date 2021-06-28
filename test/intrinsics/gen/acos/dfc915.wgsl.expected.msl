@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void acos_dfc915() {
-  float2 res =   acos(float2());
+  float2 res = acos(float2());
 }
 
 vertex tint_symbol vertex_main() {

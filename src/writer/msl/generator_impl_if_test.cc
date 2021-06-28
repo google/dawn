@@ -50,8 +50,10 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElseIf) {
   ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
-  } else if (else_cond) {
-    return;
+  } else {
+    if (else_cond) {
+      return;
+    }
   }
 )");
 }
@@ -88,10 +90,12 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithMultiple) {
   ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
-  } else if (else_cond) {
-    return;
   } else {
-    return;
+    if (else_cond) {
+      return;
+    } else {
+      return;
+    }
   }
 )");
 }

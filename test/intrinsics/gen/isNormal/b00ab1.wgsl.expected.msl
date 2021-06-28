@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void isNormal_b00ab1() {
-  bool2 res =   isnormal(float2());
+  bool2 res = isnormal(float2());
 }
 
 vertex tint_symbol vertex_main() {

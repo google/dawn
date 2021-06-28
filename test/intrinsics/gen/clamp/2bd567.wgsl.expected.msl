@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void clamp_2bd567() {
-  float res =   clamp(1.0f, 1.0f, 1.0f);
+  float res = clamp(1.0f, 1.0f, 1.0f);
 }
 
 vertex tint_symbol vertex_main() {

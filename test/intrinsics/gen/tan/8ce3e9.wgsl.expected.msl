@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void tan_8ce3e9() {
-  float2 res =   tan(float2());
+  float2 res = tan(float2());
 }
 
 vertex tint_symbol vertex_main() {

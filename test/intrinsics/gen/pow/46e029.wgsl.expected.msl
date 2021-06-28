@@ -6,7 +6,7 @@ struct tint_symbol {
 };
 
 void pow_46e029() {
-  float res =   pow(1.0f, 1.0f);
+  float res = pow(1.0f, 1.0f);
 }
 
 vertex tint_symbol vertex_main() {
