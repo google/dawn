@@ -824,6 +824,12 @@ class ParserImpl {
   /// @see sync().
   bool is_sync_token(const Token& t) const;
 
+  /// Sets synchronized_ to true if the number of reported errors is less than
+  /// #max_errors_.
+  /// @returns true if the number of reported errors is less than
+  /// #max_errors_, otherwise false.
+  bool maybe_set_synchronized();
+
   /// without_error() calls the function `func` muting any grammatical errors
   /// found while executing the function. This can be used as a best-effort to
   /// produce a meaningful error message when the parser is out of sync.

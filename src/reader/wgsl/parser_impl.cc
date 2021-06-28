@@ -3153,8 +3153,7 @@ bool ParserImpl::expect(const std::string& use, Token::Type tok) {
   auto t = peek();
   if (t.Is(tok)) {
     next();
-    synchronized_ = true;
-    return true;
+    return maybe_set_synchronized();
   }
 
   // Special case to split `>>` and `>=` tokens if we are looking for a `>`.
@@ -3165,13 +3164,13 @@ bool ParserImpl::expect(const std::string& use, Token::Type tok) {
     // Push the second character to the token queue.
     auto source = t.source();
     source.range.begin.column++;
-    if (t.IsShiftRight())
+    if (t.IsShiftRight()) {
       token_queue_.push_front(Token(Token::Type::kGreaterThan, source));
-    else if (t.IsGreaterThanEqual())
+    } else if (t.IsGreaterThanEqual()) {
       token_queue_.push_front(Token(Token::Type::kEqual, source));
+    }
 
-    synchronized_ = true;
-    return true;
+    return maybe_set_synchronized();
   }
 
   // Handle the case when `]` is expected but the actual token is `]]`.
@@ -3181,8 +3180,7 @@ bool ParserImpl::expect(const std::string& use, Token::Type tok) {
     auto source = t.source();
     source.range.begin.column++;
     token_queue_.push_front({Token::Type::kBracketRight, source});
-    synchronized_ = true;
-    return true;
+    return maybe_set_synchronized();
   }
 
   std::stringstream err;
@@ -3230,7 +3228,9 @@ Expect<uint32_t> ParserImpl::expect_nonzero_positive_sint(
 Expect<std::string> ParserImpl::expect_ident(const std::string& use) {
   auto t = peek();
   if (t.IsIdentifier()) {
-    synchronized_ = true;
+    if (!maybe_set_synchronized()) {
+      return Failure::kErrored;
+    }
     next();
     return {t.to_str(), t.source()};
   }
@@ -3333,10 +3333,10 @@ bool ParserImpl::sync_to(Token::Type tok, bool consume) {
 
     // Is this synchronization token |tok|?
     if (t.Is(tok)) {
-      if (consume)
+      if (consume) {
         next();
-      synchronized_ = true;
-      return true;
+      }
+      return maybe_set_synchronized();
     }
     break;
   }
@@ -3348,6 +3348,14 @@ bool ParserImpl::is_sync_token(const Token& t) const {
   for (auto r : sync_tokens_) {
     if (t.Is(r))
       return true;
+  }
+  return false;
+}
+
+bool ParserImpl::maybe_set_synchronized() {
+  if (builder_.Diagnostics().error_count() < max_errors_) {
+    synchronized_ = true;
+    return true;
   }
   return false;
 }
