@@ -120,6 +120,24 @@ TEST(ObjectBase, CopyAssignment) {
     ASSERT_EQ(refcount, 2);
 }
 
+// Test the repeated copy assignment of C++ objects
+TEST(ObjectBase, RepeatedCopyAssignment) {
+    int refcount = 1;
+    Object source(&refcount);
+
+    Object destination;
+    for (int i = 0; i < 10; i++) {
+        destination = source;
+    }
+
+    ASSERT_EQ(source.Get(), &refcount);
+    ASSERT_EQ(destination.Get(), &refcount);
+    ASSERT_EQ(3, refcount);
+
+    destination = Object();
+    ASSERT_EQ(refcount, 2);
+}
+
 // Test the copy assignment of C++ objects onto themselves
 TEST(ObjectBase, CopyAssignmentSelf) {
     int refcount = 1;

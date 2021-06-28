@@ -33,17 +33,13 @@
 // RefBase supports
 template <typename T, typename Traits>
 class RefBase {
-  private:
-    static constexpr T kNullValue = Traits::kNullValue;
-
   public:
     // Default constructor and destructor.
-    RefBase() : mValue(kNullValue) {
+    RefBase() : mValue(Traits::kNullValue) {
     }
 
     ~RefBase() {
-        Release();
-        mValue = kNullValue;
+        Release(mValue);
     }
 
     // Constructors from nullptr.
@@ -51,49 +47,39 @@ class RefBase {
     }
 
     RefBase<T, Traits>& operator=(std::nullptr_t) {
-        Release();
-        mValue = kNullValue;
+        Set(Traits::kNullValue);
         return *this;
     }
 
     // Constructors from a value T.
     RefBase(T value) : mValue(value) {
-        Reference();
+        Reference(value);
     }
 
     RefBase<T, Traits>& operator=(const T& value) {
-        mValue = value;
-        Reference();
+        Set(value);
         return *this;
     }
 
     // Constructors from a RefBase<T>
     RefBase(const RefBase<T, Traits>& other) : mValue(other.mValue) {
-        Reference();
+        Reference(other.mValue);
     }
 
     RefBase<T, Traits>& operator=(const RefBase<T, Traits>& other) {
-        if (&other != this) {
-            other.Reference();
-            Release();
-            mValue = other.mValue;
-        }
-
+        Set(other.mValue);
         return *this;
     }
 
     RefBase(RefBase<T, Traits>&& other) {
-        mValue = other.mValue;
-        other.mValue = kNullValue;
+        mValue = other.Detach();
     }
 
     RefBase<T, Traits>& operator=(RefBase<T, Traits>&& other) {
         if (&other != this) {
-            Release();
-            mValue = other.mValue;
-            other.mValue = kNullValue;
+            Release(mValue);
+            mValue = other.Detach();
         }
-
         return *this;
     }
 
@@ -102,14 +88,12 @@ class RefBase {
     // operators defined with `other` == RefBase<T, Traits>.
     template <typename U, typename UTraits, typename = typename std::is_convertible<U, T>::type>
     RefBase(const RefBase<U, UTraits>& other) : mValue(other.mValue) {
-        Reference();
+        Reference(other.mValue);
     }
 
     template <typename U, typename UTraits, typename = typename std::is_convertible<U, T>::type>
     RefBase<T, Traits>& operator=(const RefBase<U, UTraits>& other) {
-        other.Reference();
-        Release();
-        mValue = other.mValue;
+        Set(other.mValue);
         return *this;
     }
 
@@ -120,7 +104,7 @@ class RefBase {
 
     template <typename U, typename UTraits, typename = typename std::is_convertible<U, T>::type>
     RefBase<T, Traits>& operator=(RefBase<U, UTraits>&& other) {
-        Release();
+        Release(mValue);
         mValue = other.Detach();
         return *this;
     }
@@ -150,18 +134,18 @@ class RefBase {
     }
 
     T Detach() DAWN_NO_DISCARD {
-        T value = mValue;
-        mValue = kNullValue;
+        T value{std::move(mValue)};
+        mValue = Traits::kNullValue;
         return value;
     }
 
     void Acquire(T value) {
-        Release();
+        Release(mValue);
         mValue = value;
     }
 
     T* InitializeInto() DAWN_NO_DISCARD {
-        ASSERT(mValue == kNullValue);
+        ASSERT(mValue == Traits::kNullValue);
         return &mValue;
     }
 
@@ -171,14 +155,24 @@ class RefBase {
     template <typename U, typename UTraits>
     friend class RefBase;
 
-    void Reference() const {
-        if (mValue != kNullValue) {
-            Traits::Reference(mValue);
+    static void Reference(T value) {
+        if (value != Traits::kNullValue) {
+            Traits::Reference(value);
         }
     }
-    void Release() const {
-        if (mValue != kNullValue) {
-            Traits::Release(mValue);
+    static void Release(T value) {
+        if (value != Traits::kNullValue) {
+            Traits::Release(value);
+        }
+    }
+
+    void Set(T value) {
+        if (mValue != value) {
+            // Ensure that the new value is referenced before the old is released to prevent any
+            // transitive frees that may affect the new value.
+            Reference(value);
+            Release(mValue);
+            mValue = value;
         }
     }
 
