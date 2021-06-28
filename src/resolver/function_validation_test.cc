@@ -354,7 +354,9 @@ TEST_F(ResolverFunctionValidationTest, FunctionParamsConst) {
        {Assign(Expr(Source{{12, 34}}, "arg"), Expr(1)), Return()});
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:34 error: cannot assign to value of type 'i32'");
+  EXPECT_EQ(r()->error(),
+            "12:34 error: cannot assign to function parameter\nnote: 'arg' is "
+            "declared here:");
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_BadType) {

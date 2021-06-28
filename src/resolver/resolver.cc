@@ -3670,12 +3670,31 @@ bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
   auto const* lhs_type = TypeOf(a->lhs());
   auto const* rhs_type = TypeOf(a->rhs());
 
+  if (auto* ident = a->lhs()->As<ast::IdentifierExpression>()) {
+    VariableInfo* var;
+    if (variable_stack_.get(ident->symbol(), &var)) {
+      if (var->kind == VariableKind::kParameter) {
+        AddError("cannot assign to function parameter", a->lhs()->source());
+        AddNote("'" + builder_->Symbols().NameFor(ident->symbol()) +
+                    "' is declared here:",
+                var->declaration->source());
+        return false;
+      }
+      if (var->declaration->is_const()) {
+        AddError("cannot assign to const", a->lhs()->source());
+        AddNote("'" + builder_->Symbols().NameFor(ident->symbol()) +
+                    "' is declared here:",
+                var->declaration->source());
+        return false;
+      }
+    }
+  }
+
   auto* lhs_ref = lhs_type->As<sem::Reference>();
   if (!lhs_ref) {
     // LHS is not a reference, so it has no storage.
     AddError("cannot assign to value of type '" + TypeNameOf(a->lhs()) + "'",
              a->lhs()->source());
-
     return false;
   }
 

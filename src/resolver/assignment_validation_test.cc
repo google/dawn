@@ -173,7 +173,8 @@ TEST_F(ResolverAssignmentValidationTest, AssignToConstant_Fail) {
   WrapInFunction(var, Assign(Expr(Source{{12, 34}}, "a"), 2));
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:34 error: cannot assign to value of type 'i32'");
+  EXPECT_EQ(r()->error(),
+            "12:34 error: cannot assign to const\nnote: 'a' is declared here:");
 }
 
 TEST_F(ResolverAssignmentValidationTest, AssignNonStorable_Fail) {
