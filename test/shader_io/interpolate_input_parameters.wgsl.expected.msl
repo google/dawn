@@ -1,10 +1,26 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-../../src/writer/msl/generator_impl.cc:1782 internal compiler error: TINT_UNIMPLEMENTED interpolate decoration
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+using namespace metal;
+struct tint_symbol_2 {
+  float none [[user(locn0)]];
+  float flat [[user(locn1)]] [[flat]];
+  float perspective_center [[user(locn2)]] [[center_perspective]];
+  float perspective_centroid [[user(locn3)]] [[centroid_perspective]];
+  float perspective_sample [[user(locn4)]] [[sample_perspective]];
+  float linear_center [[user(locn5)]] [[center_no_perspective]];
+  float linear_centroid [[user(locn6)]] [[centroid_no_perspective]];
+  float linear_sample [[user(locn7)]] [[sample_no_perspective]];
+};
+
+fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  float const none = tint_symbol_1.none;
+  float const flat = tint_symbol_1.flat;
+  float const perspective_center = tint_symbol_1.perspective_center;
+  float const perspective_centroid = tint_symbol_1.perspective_centroid;
+  float const perspective_sample = tint_symbol_1.perspective_sample;
+  float const linear_center = tint_symbol_1.linear_center;
+  float const linear_centroid = tint_symbol_1.linear_centroid;
+  float const linear_sample = tint_symbol_1.linear_sample;
+  return;
+}
 

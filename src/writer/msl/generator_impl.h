@@ -25,6 +25,7 @@
 #include "src/ast/continue_statement.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/interpolate_decoration.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
@@ -252,6 +253,14 @@ class GeneratorImpl : public TextGenerator {
   /// @param builtin the builtin to convert
   /// @returns the string name of the builtin or blank on error
   std::string builtin_to_attribute(ast::Builtin builtin) const;
+
+  /// Converts interpolation attributes to an MSL attribute
+  /// @param type the interpolation type
+  /// @param sampling the interpolation sampling
+  /// @returns the string name of the attribute or blank on error
+  std::string interpolation_to_attribute(
+      ast::InterpolationType type,
+      ast::InterpolationSampling sampling) const;
 
  private:
   /// @returns the resolved type of the ast::Expression `expr`

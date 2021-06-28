@@ -1142,6 +1142,37 @@ std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
   return "";
 }
 
+std::string GeneratorImpl::interpolation_to_attribute(
+    ast::InterpolationType type,
+    ast::InterpolationSampling sampling) const {
+  std::string attr;
+  switch (sampling) {
+    case ast::InterpolationSampling::kCenter:
+      attr = "center_";
+      break;
+    case ast::InterpolationSampling::kCentroid:
+      attr = "centroid_";
+      break;
+    case ast::InterpolationSampling::kSample:
+      attr = "sample_";
+      break;
+    case ast::InterpolationSampling::kNone:
+      break;
+  }
+  switch (type) {
+    case ast::InterpolationType::kPerspective:
+      attr += "perspective";
+      break;
+    case ast::InterpolationType::kLinear:
+      attr += "no_perspective";
+      break;
+    case ast::InterpolationType::kFlat:
+      attr += "flat";
+      break;
+  }
+  return attr;
+}
+
 bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
   auto* func_sem = program_->Sem().Get(func);
 
@@ -1784,8 +1815,15 @@ bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
           TINT_ICE(Writer, diagnostics_)
               << "invalid use of location decoration";
         }
-      } else if (deco->Is<ast::InterpolateDecoration>()) {
-        TINT_UNIMPLEMENTED(Writer, diagnostics_) << "interpolate decoration";
+      } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
+        auto attr = interpolation_to_attribute(interpolate->type(),
+                                               interpolate->sampling());
+        if (attr.empty()) {
+          diagnostics_.add_error(diag::System::Writer,
+                                 "unknown interpolation attribute");
+          return false;
+        }
+        out << " [[" << attr << "]]";
       }
     }
 
