@@ -61,6 +61,7 @@ enum class DecorationKind {
   kBinding,
   kBuiltin,
   kGroup,
+  kInterpolate,
   kLocation,
   kOverride,
   kOffset,
@@ -102,6 +103,10 @@ static ast::DecorationList createDecorations(const Source& source,
       return {builder.Builtin(source, ast::Builtin::kPosition)};
     case DecorationKind::kGroup:
       return {builder.create<ast::GroupDecoration>(source, 1u)};
+    case DecorationKind::kInterpolate:
+      return {builder.Interpolate(source, ast::InterpolationType::kLinear,
+                                  ast::InterpolationSampling::kCenter),
+              builder.Location(0)};
     case DecorationKind::kLocation:
       return {builder.Location(source, 1)};
     case DecorationKind::kOverride:
@@ -150,6 +155,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, false},
                     TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kInterpolate, false},
                     TestParams{DecorationKind::kLocation, false},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
@@ -185,6 +191,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, true},
                     TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kInterpolate, true},
                     TestParams{DecorationKind::kLocation, true},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
@@ -247,6 +254,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, false},
                     TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kInterpolate, false},
                     TestParams{DecorationKind::kLocation, false},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
@@ -282,6 +290,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, true},
                     TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kInterpolate, true},
                     TestParams{DecorationKind::kLocation, true},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
@@ -335,6 +344,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, false},
                     TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kInterpolate, false},
                     TestParams{DecorationKind::kLocation, false},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
@@ -369,6 +379,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, false},
                     TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kInterpolate, false},
                     TestParams{DecorationKind::kLocation, false},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
@@ -408,7 +419,7 @@ TEST_P(StructMemberDecorationTest, IsValid) {
                 createDecorations(Source{{12, 34}}, *this, params.kind))});
   } else {
     members.push_back(
-        {Member("a", ty.i32(),
+        {Member("a", ty.f32(),
                 createDecorations(Source{{12, 34}}, *this, params.kind))});
   }
 
@@ -431,6 +442,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, true},
                     TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kInterpolate, true},
                     TestParams{DecorationKind::kLocation, true},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, true},
@@ -492,6 +504,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, false},
                     TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kInterpolate, false},
                     TestParams{DecorationKind::kLocation, false},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
@@ -542,6 +555,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, false},
                     TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kInterpolate, false},
                     TestParams{DecorationKind::kLocation, false},
                     TestParams{DecorationKind::kOverride, true},
                     TestParams{DecorationKind::kOffset, false},
@@ -590,6 +604,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, false},
                     TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kInterpolate, false},
                     TestParams{DecorationKind::kLocation, false},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
@@ -956,6 +971,102 @@ TEST_F(WorkgroupDecoration, DuplicateDecoration) {
 
 }  // namespace
 }  // namespace WorkgroupDecorationTests
+
+namespace InterpolateTests {
+namespace {
+
+using InterpolateTest = ResolverTest;
+
+struct Params {
+  ast::InterpolationType type;
+  ast::InterpolationSampling sampling;
+  bool should_pass;
+};
+
+struct TestWithParams : ResolverTestWithParam<Params> {};
+
+using InterpolateParameterTest = TestWithParams;
+TEST_P(InterpolateParameterTest, All) {
+  auto& params = GetParam();
+
+  Func("main",
+       ast::VariableList{Param(
+           "a", ty.f32(),
+           {Location(0),
+            Interpolate(Source{{12, 34}}, params.type, params.sampling)})},
+       ty.void_(), {},
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
+
+  if (params.should_pass) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: flat interpolation attribute must not have a "
+              "sampling parameter");
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ResolverDecorationValidationTest,
+    InterpolateParameterTest,
+    testing::Values(Params{ast::InterpolationType::kPerspective,
+                           ast::InterpolationSampling::kNone, true},
+                    Params{ast::InterpolationType::kPerspective,
+                           ast::InterpolationSampling::kCenter, true},
+                    Params{ast::InterpolationType::kPerspective,
+                           ast::InterpolationSampling::kCentroid, true},
+                    Params{ast::InterpolationType::kPerspective,
+                           ast::InterpolationSampling::kSample, true},
+                    Params{ast::InterpolationType::kLinear,
+                           ast::InterpolationSampling::kNone, true},
+                    Params{ast::InterpolationType::kLinear,
+                           ast::InterpolationSampling::kCenter, true},
+                    Params{ast::InterpolationType::kLinear,
+                           ast::InterpolationSampling::kCentroid, true},
+                    Params{ast::InterpolationType::kLinear,
+                           ast::InterpolationSampling::kSample, true},
+                    // flat interpolation must not have a sampling type
+                    Params{ast::InterpolationType::kFlat,
+                           ast::InterpolationSampling::kNone, true},
+                    Params{ast::InterpolationType::kFlat,
+                           ast::InterpolationSampling::kCenter, false},
+                    Params{ast::InterpolationType::kFlat,
+                           ast::InterpolationSampling::kCentroid, false},
+                    Params{ast::InterpolationType::kFlat,
+                           ast::InterpolationSampling::kSample, false}));
+
+TEST_F(InterpolateTest, Parameter_NotFloatingPoint) {
+  Func("main",
+       ast::VariableList{
+           Param("a", ty.i32(),
+                 {Location(0),
+                  Interpolate(Source{{12, 34}}, ast::InterpolationType::kFlat,
+                              ast::InterpolationSampling::kNone)})},
+       ty.void_(), {},
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: store type of interpolate attribute must be floating "
+            "point scalar or vector");
+}
+
+TEST_F(InterpolateTest, ReturnType_NotFloatingPoint) {
+  Func(
+      "main", {}, ty.i32(), {Return(1)},
+      ast::DecorationList{Stage(ast::PipelineStage::kFragment)},
+      {Location(0), Interpolate(Source{{12, 34}}, ast::InterpolationType::kFlat,
+                                ast::InterpolationSampling::kNone)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: store type of interpolate attribute must be floating "
+            "point scalar or vector");
+}
+
+}  // namespace
+}  // namespace InterpolateTests
 
 }  // namespace resolver
 }  // namespace tint

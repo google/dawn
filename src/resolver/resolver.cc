@@ -30,6 +30,7 @@
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/internal_decoration.h"
+#include "src/ast/interpolate_decoration.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/matrix.h"
 #include "src/ast/override_decoration.h"
@@ -719,7 +720,8 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
       }
     } else {
       bool is_shader_io_decoration =
-          deco->IsAnyOf<ast::BuiltinDecoration, ast::LocationDecoration>();
+          deco->IsAnyOf<ast::BuiltinDecoration, ast::InterpolateDecoration,
+                        ast::LocationDecoration>();
       bool has_io_storage_class =
           info->storage_class == ast::StorageClass::kInput ||
           info->storage_class == ast::StorageClass::kOutput;
@@ -947,6 +949,10 @@ bool Resolver::ValidateParameter(const ast::Function* func,
       if (!ValidateBuiltinDecoration(builtin, info->type)) {
         return false;
       }
+    } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
+      if (!ValidateInterpolateDecoration(interpolate, info->type)) {
+        return false;
+      }
     } else if (!deco->IsAnyOf<ast::LocationDecoration,
                               ast::InternalDecoration>() &&
                !(IsValidationDisabled(
@@ -1012,6 +1018,29 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
     default:
       break;
   }
+  return true;
+}
+
+bool Resolver::ValidateInterpolateDecoration(
+    const ast::InterpolateDecoration* deco,
+    const sem::Type* storage_type) {
+  auto* type = storage_type->UnwrapRef();
+
+  if (!type->is_float_scalar_or_vector()) {
+    AddError(
+        "store type of interpolate attribute must be floating point scalar or "
+        "vector",
+        deco->source());
+    return false;
+  }
+
+  if (deco->type() == ast::InterpolationType::kFlat &&
+      deco->sampling() != ast::InterpolationSampling::kNone) {
+    AddError("flat interpolation attribute must not have a sampling parameter",
+             deco->source());
+    return false;
+  }
+
   return true;
 }
 
@@ -1099,6 +1128,10 @@ bool Resolver::ValidateFunction(const ast::Function* func,
 
       if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
         if (!ValidateBuiltinDecoration(builtin, info->return_type)) {
+          return false;
+        }
+      } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
+        if (!ValidateInterpolateDecoration(interpolate, info->return_type)) {
           return false;
         }
       } else if (!deco->Is<ast::LocationDecoration>()) {
@@ -3364,6 +3397,7 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
 
     for (auto* deco : member->Declaration()->decorations()) {
       if (!(deco->Is<ast::BuiltinDecoration>() ||
+            deco->Is<ast::InterpolateDecoration>() ||
             deco->Is<ast::LocationDecoration>() ||
             deco->Is<ast::StructMemberOffsetDecoration>() ||
             deco->Is<ast::StructMemberSizeDecoration>() ||
@@ -3374,6 +3408,10 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
       }
       if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
         if (!ValidateBuiltinDecoration(builtin, member->Type())) {
+          return false;
+        }
+      } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
+        if (!ValidateInterpolateDecoration(interpolate, member->Type())) {
           return false;
         }
       }

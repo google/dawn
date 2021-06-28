@@ -36,6 +36,7 @@
 #include "src/ast/float_literal.h"
 #include "src/ast/i32.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/interpolate_decoration.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/matrix.h"
 #include "src/ast/member_accessor_expression.h"
@@ -1923,6 +1924,26 @@ class ProgramBuilder {
   /// @returns the builtin decoration pointer
   ast::BuiltinDecoration* Builtin(ast::Builtin builtin) {
     return create<ast::BuiltinDecoration>(source_, builtin);
+  }
+
+  /// Creates an ast::InterpolateDecoration
+  /// @param source the source information
+  /// @param type the interpolation type
+  /// @param sampling the interpolation sampling
+  /// @returns the interpolate decoration pointer
+  ast::InterpolateDecoration* Interpolate(const Source& source,
+                                          ast::InterpolationType type,
+                                          ast::InterpolationSampling sampling) {
+    return create<ast::InterpolateDecoration>(source, type, sampling);
+  }
+
+  /// Creates an ast::InterpolateDecoration
+  /// @param type the interpolation type
+  /// @param sampling the interpolation sampling
+  /// @returns the interpolate decoration pointer
+  ast::InterpolateDecoration* Interpolate(ast::InterpolationType type,
+                                          ast::InterpolationSampling sampling) {
+    return create<ast::InterpolateDecoration>(source_, type, sampling);
   }
 
   /// Creates an ast::LocationDecoration

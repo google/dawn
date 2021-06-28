@@ -276,6 +276,8 @@ class Resolver {
   bool ValidateEntryPoint(const ast::Function* func, const FunctionInfo* info);
   bool ValidateFunction(const ast::Function* func, const FunctionInfo* info);
   bool ValidateGlobalVariable(const VariableInfo* var);
+  bool ValidateInterpolateDecoration(const ast::InterpolateDecoration* deco,
+                                     const sem::Type* storage_type);
   bool ValidateMatrix(const sem::Matrix* matirx_type, const Source& source);
   bool ValidateMatrixConstructor(const ast::TypeConstructorExpression* ctor,
                                  const sem::Matrix* matrix_type);
