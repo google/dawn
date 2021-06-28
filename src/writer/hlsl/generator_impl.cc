@@ -2212,6 +2212,35 @@ std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
   return "";
 }
 
+std::string GeneratorImpl::interpolation_to_modifiers(
+    ast::InterpolationType type,
+    ast::InterpolationSampling sampling) const {
+  std::string modifiers;
+  switch (type) {
+    case ast::InterpolationType::kPerspective:
+      modifiers += "linear ";
+      break;
+    case ast::InterpolationType::kLinear:
+      modifiers += "noperspective ";
+      break;
+    case ast::InterpolationType::kFlat:
+      modifiers += "nointerpolation ";
+      break;
+  }
+  switch (sampling) {
+    case ast::InterpolationSampling::kCentroid:
+      modifiers += "centroid ";
+      break;
+    case ast::InterpolationSampling::kSample:
+      modifiers += "sample ";
+      break;
+    case ast::InterpolationSampling::kCenter:
+    case ast::InterpolationSampling::kNone:
+      break;
+  }
+  return modifiers;
+}
+
 bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
   auto* func_sem = builder_.Sem().Get(func);
 
@@ -2737,10 +2766,8 @@ bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
       auto* ty = mem->Type();
 
       auto out = line();
-      if (!EmitTypeAndName(out, ty, ast::StorageClass::kNone,
-                           ast::Access::kReadWrite, name)) {
-        return false;
-      }
+
+      std::string pre, post;
 
       for (auto* deco : mem->Declaration()->decorations()) {
         if (auto* location = deco->As<ast::LocationDecoration>()) {
@@ -2752,16 +2779,16 @@ bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
 
           if (pipeline_stage_uses.count(
                   sem::PipelineStageUsage::kVertexInput)) {
-            out << " : TEXCOORD" + std::to_string(location->value());
+            post += " : TEXCOORD" + std::to_string(location->value());
           } else if (pipeline_stage_uses.count(
                          sem::PipelineStageUsage::kVertexOutput)) {
-            out << " : TEXCOORD" + std::to_string(location->value());
+            post += " : TEXCOORD" + std::to_string(location->value());
           } else if (pipeline_stage_uses.count(
                          sem::PipelineStageUsage::kFragmentInput)) {
-            out << " : TEXCOORD" + std::to_string(location->value());
+            post += " : TEXCOORD" + std::to_string(location->value());
           } else if (pipeline_stage_uses.count(
                          sem::PipelineStageUsage::kFragmentOutput)) {
-            out << " : SV_Target" + std::to_string(location->value());
+            post += " : SV_Target" + std::to_string(location->value());
           } else {
             TINT_ICE(Writer, diagnostics_)
                 << "invalid use of location decoration";
@@ -2772,13 +2799,25 @@ bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
             diagnostics_.add_error(diag::System::Writer, "unsupported builtin");
             return false;
           }
-          out << " : " << attr;
-        } else if (deco->Is<ast::InterpolateDecoration>()) {
-          TINT_UNIMPLEMENTED(Writer, diagnostics_) << "interpolate decoration";
+          post += " : " + attr;
+        } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
+          auto mod = interpolation_to_modifiers(interpolate->type(),
+                                                interpolate->sampling());
+          if (mod.empty()) {
+            diagnostics_.add_error(diag::System::Writer,
+                                   "unsupported interpolation");
+            return false;
+          }
+          pre += mod;
         }
       }
 
-      out << ";";
+      out << pre;
+      if (!EmitTypeAndName(out, ty, ast::StorageClass::kNone,
+                           ast::Access::kReadWrite, name)) {
+        return false;
+      }
+      out << post << ";";
     }
   }
 

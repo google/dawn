@@ -353,6 +353,14 @@ class GeneratorImpl : public TextGenerator {
   /// @returns the string name of the builtin or blank on error
   std::string builtin_to_attribute(ast::Builtin builtin) const;
 
+  /// Converts interpolation attributes to a HLSL modifiers
+  /// @param type the interpolation type
+  /// @param sampling the interpolation sampling
+  /// @returns the string name of the attribute or blank on error
+  std::string interpolation_to_modifiers(
+      ast::InterpolationType type,
+      ast::InterpolationSampling sampling) const;
+
   /// Generate a unique name
   /// @param prefix the name prefix
   /// @returns a unique name
