@@ -2733,12 +2733,41 @@ bool Resolver::UnaryOp(ast::UnaryOpExpression* unary) {
   const sem::Type* type = nullptr;
 
   switch (unary->op()) {
-    case ast::UnaryOp::kComplement:
-    case ast::UnaryOp::kNegation:
     case ast::UnaryOp::kNot:
       // Result type matches the deref'd inner type.
       type_name = TypeNameOf(unary->expr());
       type = expr_type->UnwrapRef();
+      if (!type->Is<sem::Bool>() && !type->is_bool_vector()) {
+        AddError("cannot logical negate expression of type '" +
+                     TypeNameOf(unary->expr()),
+                 unary->expr()->source());
+        return false;
+      }
+      break;
+
+    case ast::UnaryOp::kComplement:
+      // Result type matches the deref'd inner type.
+      type_name = TypeNameOf(unary->expr());
+      type = expr_type->UnwrapRef();
+      if (!type->is_integer_scalar_or_vector()) {
+        AddError("cannot bitwise complement expression of type '" +
+                     TypeNameOf(unary->expr()),
+                 unary->expr()->source());
+        return false;
+      }
+      break;
+
+    case ast::UnaryOp::kNegation:
+      // Result type matches the deref'd inner type.
+      type_name = TypeNameOf(unary->expr());
+      type = expr_type->UnwrapRef();
+      if (!(type->IsAnyOf<sem::F32, sem::I32>() ||
+            type->is_signed_integer_vector() || type->is_float_vector())) {
+        AddError(
+            "cannot negate expression of type '" + TypeNameOf(unary->expr()),
+            unary->expr()->source());
+        return false;
+      }
       break;
 
     case ast::UnaryOp::kAddressOf:

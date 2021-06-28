@@ -35,7 +35,7 @@ TEST_F(HlslUnaryOpTest, AddressOf) {
 }
 
 TEST_F(HlslUnaryOpTest, Complement) {
-  Global("expr", ty.f32(), ast::StorageClass::kPrivate);
+  Global("expr", ty.u32(), ast::StorageClass::kPrivate);
   auto* op =
       create<ast::UnaryOpExpression>(ast::UnaryOp::kComplement, Expr("expr"));
   WrapInFunction(op);
@@ -64,7 +64,7 @@ TEST_F(HlslUnaryOpTest, Indirection) {
 }
 
 TEST_F(HlslUnaryOpTest, Not) {
-  Global("expr", ty.f32(), ast::StorageClass::kPrivate);
+  Global("expr", ty.bool_(), ast::StorageClass::kPrivate);
   auto* op = create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, Expr("expr"));
   WrapInFunction(op);
 
@@ -76,7 +76,7 @@ TEST_F(HlslUnaryOpTest, Not) {
 }
 
 TEST_F(HlslUnaryOpTest, Negation) {
-  Global("expr", ty.f32(), ast::StorageClass::kPrivate);
+  Global("expr", ty.i32(), ast::StorageClass::kPrivate);
   auto* op =
       create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr("expr"));
   WrapInFunction(op);

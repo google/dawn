@@ -1917,7 +1917,13 @@ using UnaryOpExpressionTest = ResolverTestWithParam<ast::UnaryOp>;
 TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
   auto op = GetParam();
 
-  Global("ident", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+  if (op == ast::UnaryOp::kNot) {
+    Global("ident", ty.vec4<bool>(), ast::StorageClass::kPrivate);
+  } else if (op == ast::UnaryOp::kNegation || op == ast::UnaryOp::kComplement) {
+    Global("ident", ty.vec4<i32>(), ast::StorageClass::kPrivate);
+  } else {
+    Global("ident", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+  }
   auto* der = create<ast::UnaryOpExpression>(op, Expr("ident"));
   WrapInFunction(der);
 
@@ -1925,7 +1931,13 @@ TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
 
   ASSERT_NE(TypeOf(der), nullptr);
   ASSERT_TRUE(TypeOf(der)->Is<sem::Vector>());
-  EXPECT_TRUE(TypeOf(der)->As<sem::Vector>()->type()->Is<sem::F32>());
+  if (op == ast::UnaryOp::kNot) {
+    EXPECT_TRUE(TypeOf(der)->As<sem::Vector>()->type()->Is<sem::Bool>());
+  } else if (op == ast::UnaryOp::kNegation || op == ast::UnaryOp::kComplement) {
+    EXPECT_TRUE(TypeOf(der)->As<sem::Vector>()->type()->Is<sem::I32>());
+  } else {
+    EXPECT_TRUE(TypeOf(der)->As<sem::Vector>()->type()->Is<sem::F32>());
+  }
   EXPECT_EQ(TypeOf(der)->As<sem::Vector>()->size(), 4u);
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTest,
@@ -2181,6 +2193,38 @@ TEST_F(ResolverTest, ASTNodeReachedTwice) {
       "encountered twice in the same AST of a Program");
 }
 
+TEST_F(ResolverTest, UnaryOp_Not) {
+  Global("ident", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+  auto* der = create<ast::UnaryOpExpression>(ast::UnaryOp::kNot,
+                                             Expr(Source{{12, 34}}, "ident"));
+  WrapInFunction(der);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: cannot logical negate expression of type 'vec4<f32>");
+}
+
+TEST_F(ResolverTest, UnaryOp_Complement) {
+  Global("ident", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+  auto* der = create<ast::UnaryOpExpression>(ast::UnaryOp::kComplement,
+                                             Expr(Source{{12, 34}}, "ident"));
+  WrapInFunction(der);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: cannot bitwise complement expression of type 'vec4<f32>");
+}
+
+TEST_F(ResolverTest, UnaryOp_Negation) {
+  Global("ident", ty.u32(), ast::StorageClass::kPrivate);
+  auto* der = create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation,
+                                             Expr(Source{{12, 34}}, "ident"));
+  WrapInFunction(der);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: cannot negate expression of type 'u32");
+}
 }  // namespace
 }  // namespace resolver
 }  // namespace tint
