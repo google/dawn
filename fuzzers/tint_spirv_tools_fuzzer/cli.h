@@ -20,9 +20,6 @@
 
 #include "source/fuzz/fuzzer.h"
 
-// TODO(vasniktel): Add doxygen comments.
-//! @cond Doxygen_Suppress
-
 namespace tint {
 namespace fuzzers {
 namespace spvtools_fuzzer {
@@ -68,34 +65,74 @@ inline FuzzingTarget operator&(FuzzingTarget a, FuzzingTarget b) {
 /// These parameters are accepted by various mutators and thus they are accepted
 /// by both the fuzzer and the mutator debugger.
 struct MutatorCliParams {
+  /// SPIR-V target environment for fuzzing.
   spv_target_env target_env = kDefaultTargetEnv;
+
+  /// The number of spirv-fuzz transformations to apply at a time.
   uint32_t transformation_batch_size = 3;
+
+  /// The number of spirv-reduce reductions to apply at a time.
   uint32_t reduction_batch_size = 3;
+
+  /// The number of spirv-opt optimizations to apply at a time.
   uint32_t opt_batch_size = 6;
+
+  /// The vector of donors to use in spirv-fuzz (see the doc for spirv-fuzz to
+  /// learn more).
   std::vector<spvtools::fuzz::fuzzerutil::ModuleSupplier> donors = {};
+
+  /// The strategy to use during fuzzing in spirv-fuzz (see the doc for
+  /// spirv-fuzz to learn more).
   spvtools::fuzz::RepeatedPassStrategy repeated_pass_strategy =
       spvtools::fuzz::RepeatedPassStrategy::kSimple;
+
+  /// Whether to use all fuzzer passes or a randomly selected subset of them.
   bool enable_all_fuzzer_passes = false;
+
+  /// Whether to use all reduction passes or a randomly selected subset of them.
   bool enable_all_reduce_passes = false;
+
+  /// Whether to validate the SPIR-V binary after each optimization pass.
   bool validate_after_each_opt_pass = true;
+
+  /// Whether to validate the SPIR-V binary after each fuzzer pass.
   bool validate_after_each_fuzzer_pass = true;
+
+  /// Whether to validate the SPIR-V binary after each reduction pass.
   bool validate_after_each_reduce_pass = true;
 };
 
-/// Parameters specific to the fuzzer.
+/// Parameters specific to the fuzzer. Type `--help` in the CLI to learn more.
 struct FuzzerCliParams {
+  /// The size of the cache that records ongoing mutation sessions.
   uint32_t mutator_cache_size = 20;
+
+  /// The type of the mutator to run.
   MutatorType mutator_type = MutatorType::kAll;
+
+  /// Tint backend to fuzz.
   FuzzingTarget fuzzing_target = FuzzingTarget::kAll;
+
+  /// The path to the directory, that will be used to output buggy shaders.
   std::string error_dir;
+
+  /// Parameters for various mutators.
   MutatorCliParams mutator_params;
 };
 
-/// Parameters specific to the mutator debugger.
+/// Parameters specific to the mutator debugger. Type `--help` in the CLI to
+/// learn more.
 struct MutatorDebuggerCliParams {
+  /// The type of the mutator to debug.
   MutatorType mutator_type = MutatorType::kNone;
+
+  /// The seed that was used to initialize the mutator.
   uint32_t seed = 0;
+
+  /// The binary that triggered a bug in the mutator.
   std::vector<uint32_t> original_binary;
+
+  /// Parameters for various mutators.
   MutatorCliParams mutator_params;
 };
 
@@ -123,7 +160,5 @@ MutatorDebuggerCliParams ParseMutatorDebuggerCliParams(int argc,
 }  // namespace spvtools_fuzzer
 }  // namespace fuzzers
 }  // namespace tint
-
-//! @endcond
 
 #endif  // FUZZERS_TINT_SPIRV_TOOLS_FUZZER_CLI_H_
