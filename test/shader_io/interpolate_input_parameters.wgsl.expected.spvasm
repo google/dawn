@@ -1,0 +1,24 @@
+SKIP: FAILED
+
+
+[[location(0), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol : f32;
+
+[[location(1), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_1 : f32;
+
+[[location(2), interpolate(perspective, center), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_2 : f32;
+
+[[location(3), interpolate(perspective, centroid), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_3 : f32;
+
+[[location(4), interpolate(perspective, sample), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_4 : f32;
+
+[[location(5), interpolate(linear, center), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_5 : f32;
+
+[[location(6), interpolate(linear, centroid), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_6 : f32;
+
+[[location(7), interpolate(linear, sample), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_7 : f32;
+
+[[stage(fragment)]]
+fn main() {
+}
+
+Failed to generate: unknown decoration

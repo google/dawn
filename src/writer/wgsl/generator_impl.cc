@@ -30,6 +30,7 @@
 #include "src/ast/float_literal.h"
 #include "src/ast/i32.h"
 #include "src/ast/internal_decoration.h"
+#include "src/ast/interpolate_decoration.h"
 #include "src/ast/matrix.h"
 #include "src/ast/module.h"
 #include "src/ast/multisampled_texture.h"
@@ -668,6 +669,12 @@ bool GeneratorImpl::EmitDecorations(const ast::DecorationList& decos) {
       out_ << "location(" << location->value() << ")";
     } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
       out_ << "builtin(" << builtin->value() << ")";
+    } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
+      out_ << "interpolate(" << interpolate->type();
+      if (interpolate->sampling() != ast::InterpolationSampling::kNone) {
+        out_ << ", " << interpolate->sampling();
+      }
+      out_ << ")";
     } else if (auto* override_deco = deco->As<ast::OverrideDecoration>()) {
       out_ << "override";
       if (override_deco->HasValue()) {

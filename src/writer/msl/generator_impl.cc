@@ -25,6 +25,7 @@
 #include "src/ast/disable_validation_decoration.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/float_literal.h"
+#include "src/ast/interpolate_decoration.h"
 #include "src/ast/module.h"
 #include "src/ast/override_decoration.h"
 #include "src/ast/sint_literal.h"
@@ -1783,6 +1784,8 @@ bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
           TINT_ICE(Writer, diagnostics_)
               << "invalid use of location decoration";
         }
+      } else if (deco->Is<ast::InterpolateDecoration>()) {
+        TINT_UNIMPLEMENTED(Writer, diagnostics_) << "interpolate decoration";
       }
     }
 

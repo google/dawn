@@ -1,0 +1,55 @@
+SKIP: FAILED
+
+
+[[builtin(pointsize), internal(disable_validation__ignore_storage_class)]] var<out> tint_pointsize : f32;
+
+struct Out {
+  pos : vec4<f32>;
+  none : f32;
+  flat : f32;
+  perspective_center : f32;
+  perspective_centroid : f32;
+  perspective_sample : f32;
+  linear_center : f32;
+  linear_centroid : f32;
+  linear_sample : f32;
+};
+
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_1 : vec4<f32>;
+
+[[location(0), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_2 : f32;
+
+[[location(1), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_3 : f32;
+
+[[location(2), interpolate(perspective, center), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_4 : f32;
+
+[[location(3), interpolate(perspective, centroid), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_5 : f32;
+
+[[location(4), interpolate(perspective, sample), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_6 : f32;
+
+[[location(5), interpolate(linear, center), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_7 : f32;
+
+[[location(6), interpolate(linear, centroid), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_8 : f32;
+
+[[location(7), interpolate(linear, sample), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_9 : f32;
+
+fn tint_symbol_10(tint_symbol : Out) {
+  tint_symbol_1 = tint_symbol.pos;
+  tint_symbol_2 = tint_symbol.none;
+  tint_symbol_3 = tint_symbol.flat;
+  tint_symbol_4 = tint_symbol.perspective_center;
+  tint_symbol_5 = tint_symbol.perspective_centroid;
+  tint_symbol_6 = tint_symbol.perspective_sample;
+  tint_symbol_7 = tint_symbol.linear_center;
+  tint_symbol_8 = tint_symbol.linear_centroid;
+  tint_symbol_9 = tint_symbol.linear_sample;
+}
+
+[[stage(vertex)]]
+fn main() {
+  tint_pointsize = 1.0;
+  tint_symbol_10(Out());
+  return;
+}
+
+Failed to generate: unknown decoration

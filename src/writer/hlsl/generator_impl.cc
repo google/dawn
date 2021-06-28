@@ -23,6 +23,7 @@
 #include "src/ast/call_statement.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/internal_decoration.h"
+#include "src/ast/interpolate_decoration.h"
 #include "src/ast/override_decoration.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/sem/array.h"
@@ -2772,6 +2773,8 @@ bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
             return false;
           }
           out << " : " << attr;
+        } else if (deco->Is<ast::InterpolateDecoration>()) {
+          TINT_UNIMPLEMENTED(Writer, diagnostics_) << "interpolate decoration";
         }
       }
 

@@ -1,0 +1,10 @@
+SKIP: FAILED
+
+../../src/writer/msl/generator_impl.cc:1782 internal compiler error: TINT_UNIMPLEMENTED interpolate decoration
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
+
