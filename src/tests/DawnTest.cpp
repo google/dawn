@@ -557,6 +557,7 @@ std::vector<AdapterTestParam> DawnTestEnvironment::GetAvailableAdapterTestParams
                 // use_tint_generator in the command line args instead.
                 if (params[i].backendType == wgpu::BackendType::Vulkan ||
                     params[i].backendType == wgpu::BackendType::D3D12 ||
+                    params[i].backendType == wgpu::BackendType::Metal ||
                     params[i].backendType == wgpu::BackendType::OpenGL ||
                     params[i].backendType == wgpu::BackendType::OpenGLES) {
                     BackendTestConfig configWithTint = params[i];
