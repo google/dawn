@@ -62,16 +62,6 @@ namespace dawn_wire {
 
         MemoryTransferService::~MemoryTransferService() = default;
 
-        MemoryTransferService::ReadHandle*
-        MemoryTransferService::CreateReadHandle(WGPUBuffer buffer, uint64_t offset, size_t size) {
-            return CreateReadHandle(size);
-        }
-
-        MemoryTransferService::WriteHandle*
-        MemoryTransferService::CreateWriteHandle(WGPUBuffer buffer, uint64_t offset, size_t size) {
-            return CreateWriteHandle(size);
-        }
-
         MemoryTransferService::ReadHandle::ReadHandle() = default;
 
         MemoryTransferService::ReadHandle::~ReadHandle() = default;

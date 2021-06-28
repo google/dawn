@@ -91,14 +91,34 @@ namespace dawn_wire {
                 ReadHandle();
                 virtual ~ReadHandle();
 
-                // Get the required serialization size for SerializeInitialData
-                virtual size_t SerializeInitialDataSize(const void* data, size_t dataLength) = 0;
+                // Return the size of the command serialized if
+                // SerializeDataUpdate is called with the same offset/size args
+                // TODO(dawn:773): change to pure virtual after update on chromium side.
+                virtual size_t SizeOfSerializeDataUpdate(size_t offset, size_t size) {
+                    return 0;
+                }
 
-                // Initialize the handle data.
-                // Serialize into |serializePointer| so the client can update handle data.
+                // Gets called when a MapReadCallback resolves.
+                // Serialize the data update for the range (offset, offset + size) into
+                // |serializePointer| to the client There could be nothing to be serialized (if
+                // using shared memory)
+                // TODO(dawn:773): change to pure virtual after update on chromium side.
+                virtual void SerializeDataUpdate(const void* data,
+                                                 size_t offset,
+                                                 size_t size,
+                                                 void* serializePointer) {
+                }
+
+                // TODO(dawn:773): remove after update on chromium side.
+                virtual size_t SerializeInitialDataSize(const void* data, size_t dataLength) {
+                    return 0;
+                }
+
+                // TODO(dawn:773): remove after update on chromium side.
                 virtual void SerializeInitialData(const void* data,
                                                   size_t dataLength,
-                                                  void* serializePointer) = 0;
+                                                  void* serializePointer) {
+                }
 
               private:
                 ReadHandle(const ReadHandle&) = delete;
@@ -112,15 +132,27 @@ namespace dawn_wire {
 
                 // Set the target for writes from the client. DeserializeFlush should copy data
                 // into the target.
+                // TODO(dawn:773): only set backing buffer pointer data
                 void SetTarget(void* data, size_t dataLength);
 
-                // This function takes in the serialized result of
-                // client::MemoryTransferService::WriteHandle::SerializeFlush.
+                // TODO(dawn:773): remove after update on chromium side.
                 virtual bool DeserializeFlush(const void* deserializePointer,
-                                              size_t deserializeSize) = 0;
+                                              size_t deserializeSize) {
+                    return false;
+                }
+
+                // This function takes in the serialized result of
+                // client::MemoryTransferService::WriteHandle::SerializeDataUpdate.
+                virtual bool DeserializeDataUpdate(const void* deserializePointer,
+                                                   size_t deserializeSize,
+                                                   size_t offset,
+                                                   size_t size) {
+                    return false;
+                }
 
               protected:
                 void* mTargetData = nullptr;
+                // TODO(dawn:773): only set backing buffer pointer data
                 size_t mDataLength = 0;
 
               private:
