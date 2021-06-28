@@ -174,6 +174,130 @@ TEST_F(ParserImplTest, Decoration_Builtin_MissingInvalid) {
   EXPECT_EQ(p->error(), "1:9: expected identifier for builtin");
 }
 
+TEST_F(ParserImplTest, Decoration_Interpolate_Flat) {
+  auto p = parser("interpolate(flat)");
+  auto deco = p->decoration();
+  EXPECT_TRUE(deco.matched);
+  EXPECT_FALSE(deco.errored);
+  ASSERT_NE(deco.value, nullptr);
+  auto* var_deco = deco.value->As<ast::Decoration>();
+  ASSERT_NE(var_deco, nullptr);
+  ASSERT_FALSE(p->has_error());
+  ASSERT_TRUE(var_deco->Is<ast::InterpolateDecoration>());
+
+  auto* interp = var_deco->As<ast::InterpolateDecoration>();
+  EXPECT_EQ(interp->type(), ast::InterpolationType::kFlat);
+  EXPECT_EQ(interp->sampling(), ast::InterpolationSampling::kNone);
+}
+
+TEST_F(ParserImplTest, Decoration_Interpolate_Perspective_Center) {
+  auto p = parser("interpolate(perspective, center)");
+  auto deco = p->decoration();
+  EXPECT_TRUE(deco.matched);
+  EXPECT_FALSE(deco.errored);
+  ASSERT_NE(deco.value, nullptr);
+  auto* var_deco = deco.value->As<ast::Decoration>();
+  ASSERT_NE(var_deco, nullptr);
+  ASSERT_FALSE(p->has_error());
+  ASSERT_TRUE(var_deco->Is<ast::InterpolateDecoration>());
+
+  auto* interp = var_deco->As<ast::InterpolateDecoration>();
+  EXPECT_EQ(interp->type(), ast::InterpolationType::kPerspective);
+  EXPECT_EQ(interp->sampling(), ast::InterpolationSampling::kCenter);
+}
+
+TEST_F(ParserImplTest, Decoration_Interpolate_Perspective_Centroid) {
+  auto p = parser("interpolate(perspective, centroid)");
+  auto deco = p->decoration();
+  EXPECT_TRUE(deco.matched);
+  EXPECT_FALSE(deco.errored);
+  ASSERT_NE(deco.value, nullptr);
+  auto* var_deco = deco.value->As<ast::Decoration>();
+  ASSERT_NE(var_deco, nullptr);
+  ASSERT_FALSE(p->has_error());
+  ASSERT_TRUE(var_deco->Is<ast::InterpolateDecoration>());
+
+  auto* interp = var_deco->As<ast::InterpolateDecoration>();
+  EXPECT_EQ(interp->type(), ast::InterpolationType::kPerspective);
+  EXPECT_EQ(interp->sampling(), ast::InterpolationSampling::kCentroid);
+}
+
+TEST_F(ParserImplTest, Decoration_Interpolate_Linear_Sample) {
+  auto p = parser("interpolate(linear, sample)");
+  auto deco = p->decoration();
+  EXPECT_TRUE(deco.matched);
+  EXPECT_FALSE(deco.errored);
+  ASSERT_NE(deco.value, nullptr);
+  auto* var_deco = deco.value->As<ast::Decoration>();
+  ASSERT_NE(var_deco, nullptr);
+  ASSERT_FALSE(p->has_error());
+  ASSERT_TRUE(var_deco->Is<ast::InterpolateDecoration>());
+
+  auto* interp = var_deco->As<ast::InterpolateDecoration>();
+  EXPECT_EQ(interp->type(), ast::InterpolationType::kLinear);
+  EXPECT_EQ(interp->sampling(), ast::InterpolationSampling::kSample);
+}
+
+TEST_F(ParserImplTest, Decoration_Interpolate_MissingLeftParen) {
+  auto p = parser("interpolate flat)");
+  auto deco = p->decoration();
+  EXPECT_FALSE(deco.matched);
+  EXPECT_TRUE(deco.errored);
+  EXPECT_EQ(deco.value, nullptr);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:13: expected '(' for interpolate decoration");
+}
+
+TEST_F(ParserImplTest, Decoration_Interpolate_MissingRightParen) {
+  auto p = parser("interpolate(flat");
+  auto deco = p->decoration();
+  EXPECT_FALSE(deco.matched);
+  EXPECT_TRUE(deco.errored);
+  EXPECT_EQ(deco.value, nullptr);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:17: expected ')' for interpolate decoration");
+}
+
+TEST_F(ParserImplTest, Decoration_Interpolate_MissingFirstValue) {
+  auto p = parser("interpolate()");
+  auto deco = p->decoration();
+  EXPECT_FALSE(deco.matched);
+  EXPECT_TRUE(deco.errored);
+  EXPECT_EQ(deco.value, nullptr);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:13: invalid interpolation type");
+}
+
+TEST_F(ParserImplTest, Decoration_Interpolate_InvalidFirstValue) {
+  auto p = parser("interpolate(other_thingy)");
+  auto deco = p->decoration();
+  EXPECT_FALSE(deco.matched);
+  EXPECT_TRUE(deco.errored);
+  EXPECT_EQ(deco.value, nullptr);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:13: invalid interpolation type");
+}
+
+TEST_F(ParserImplTest, Decoration_Interpolate_MissingSecondValue) {
+  auto p = parser("interpolate(perspective,)");
+  auto deco = p->decoration();
+  EXPECT_FALSE(deco.matched);
+  EXPECT_TRUE(deco.errored);
+  EXPECT_EQ(deco.value, nullptr);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:25: invalid interpolation sampling");
+}
+
+TEST_F(ParserImplTest, Decoration_Interpolate_InvalidSecondValue) {
+  auto p = parser("interpolate(perspective, nope)");
+  auto deco = p->decoration();
+  EXPECT_FALSE(deco.matched);
+  EXPECT_TRUE(deco.errored);
+  EXPECT_EQ(deco.value, nullptr);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:26: invalid interpolation sampling");
+}
+
 TEST_F(ParserImplTest, Decoration_Binding) {
   auto p = parser("binding(4)");
   auto deco = p->decoration();

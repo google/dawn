@@ -110,6 +110,7 @@ const char kBindingDecoration[] = "binding";
 const char kBlockDecoration[] = "block";
 const char kBuiltinDecoration[] = "builtin";
 const char kGroupDecoration[] = "group";
+const char kInterpolateDecoration[] = "interpolate";
 const char kLocationDecoration[] = "location";
 const char kOverrideDecoration[] = "override";
 const char kSizeDecoration[] = "size";
@@ -126,9 +127,9 @@ bool is_decoration(Token t) {
   auto s = t.to_str();
   return s == kAlignDecoration || s == kBindingDecoration ||
          s == kBlockDecoration || s == kBuiltinDecoration ||
-         s == kGroupDecoration || s == kLocationDecoration ||
-         s == kOverrideDecoration || s == kSetDecoration ||
-         s == kSizeDecoration || s == kStageDecoration ||
+         s == kGroupDecoration || s == kInterpolateDecoration ||
+         s == kLocationDecoration || s == kOverrideDecoration ||
+         s == kSetDecoration || s == kSizeDecoration || s == kStageDecoration ||
          s == kStrideDecoration || s == kWorkgroupSizeDecoration;
 }
 
@@ -2992,6 +2993,41 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
         return Failure::kErrored;
 
       return create<ast::GroupDecoration>(t.source(), val.value);
+    });
+  }
+
+  if (s == kInterpolateDecoration) {
+    return expect_paren_block("interpolate decoration", [&]() -> Result {
+      ast::InterpolationType type;
+      ast::InterpolationSampling sampling = ast::InterpolationSampling::kNone;
+
+      auto type_tok = next();
+      auto type_str = type_tok.to_str();
+      if (type_str == "perspective") {
+        type = ast::InterpolationType::kPerspective;
+      } else if (type_str == "linear") {
+        type = ast::InterpolationType::kLinear;
+      } else if (type_str == "flat") {
+        type = ast::InterpolationType::kFlat;
+      } else {
+        return add_error(type_tok, "invalid interpolation type");
+      }
+
+      if (match(Token::Type::kComma)) {
+        auto sampling_tok = next();
+        auto sampling_str = sampling_tok.to_str();
+        if (sampling_str == "center") {
+          sampling = ast::InterpolationSampling::kCenter;
+        } else if (sampling_str == "centroid") {
+          sampling = ast::InterpolationSampling::kCentroid;
+        } else if (sampling_str == "sample") {
+          sampling = ast::InterpolationSampling::kSample;
+        } else {
+          return add_error(sampling_tok, "invalid interpolation sampling");
+        }
+      }
+
+      return create<ast::InterpolateDecoration>(t.source(), type, sampling);
     });
   }
 
