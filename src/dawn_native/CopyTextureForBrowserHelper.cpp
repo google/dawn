@@ -36,14 +36,12 @@ namespace dawn_native {
 // TODO(crbug.com/1221110): Remove this header macro by merging vertex and
 // fragment shaders into one shader source. Now it blocks by
 // crbug.com/dawn/947 and crbug.com/tint/915
-#define HEADER \
-    R"(
-            [[block]] struct Uniforms {
-                u_scale: vec2<f32>;
-                u_offset: vec2<f32>;
-                u_alphaOp: u32;
-            };
-    )"
+#define HEADER                              \
+    "        [[block]] struct Uniforms {\n" \
+    "            u_scale: vec2<f32>;\n"     \
+    "            u_offset: vec2<f32>;\n"    \
+    "            u_alphaOp: u32;\n"         \
+    "        };\n"
 
         static const char sCopyTextureForBrowserVertex[] = HEADER R"(
             [[binding(0), group(0)]] var<uniform> uniforms : Uniforms;
