@@ -54,6 +54,7 @@ namespace dawn_native {
         EmitHLSLDebugSymbols,
         DisallowSpirv,
         DumpTranslatedShaders,
+        ForceWGSLStep,
 
         EnumCount,
         InvalidEnum = EnumCount,

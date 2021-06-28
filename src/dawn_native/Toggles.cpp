@@ -194,7 +194,13 @@ namespace dawn_native {
               "Dump generated shaders for debug propose, dumped shaders will be log via "
               "EmitLog, thus printed in Chrome console or consumed by user-defined callback "
               "function.",
-              "https://crbug.com/dawn/792"}}
+              "https://crbug.com/dawn/792"}},
+            {Toggle::ForceWGSLStep,
+             {"force_wgsl_step",
+              "When ingesting SPIR-V shaders, force a first conversion to WGSL. This allows "
+              "testing Tint's SPIRV->WGSL translation on real content to be sure that it will "
+              "work when the same translation runs in a WASM module in the page.",
+              "https://crbug.com/dawn/960"}},
             // Dummy comment to separate the }} so it is clearer what to copy-paste to add a toggle.
         }};
     }  // anonymous namespace

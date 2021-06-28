@@ -1086,6 +1086,30 @@ namespace dawn_native {
         const ShaderModuleWGSLDescriptor* wgslDesc = nullptr;
         FindInChain(chainedDescriptor, &wgslDesc);
 
+        // We have a temporary toggle to force the SPIRV ingestion to go through a WGSL
+        // intermediate step. It is done by switching the spirvDesc for a wgslDesc below.
+        ShaderModuleWGSLDescriptor newWgslDesc;
+        std::string newWgslCode;
+        if (spirvDesc && device->IsToggleEnabled(Toggle::ForceWGSLStep)) {
+            std::vector<uint32_t> spirv(spirvDesc->code, spirvDesc->code + spirvDesc->codeSize);
+            tint::Program program;
+            DAWN_TRY_ASSIGN(program, ParseSPIRV(spirv, outMessages));
+
+            tint::writer::wgsl::Generator generator(&program);
+            if (!generator.Generate()) {
+                std::ostringstream errorStream;
+                errorStream << "Tint WGSL failure:" << std::endl;
+                errorStream << "Generator: " << generator.error() << std::endl;
+                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
+            }
+
+            newWgslCode = generator.result();
+            newWgslDesc.source = newWgslCode.c_str();
+
+            spirvDesc = nullptr;
+            wgslDesc = &newWgslDesc;
+        }
+
         if (spirvDesc) {
             if (device->IsToggleEnabled(Toggle::DisallowSpirv)) {
                 return DAWN_VALIDATION_ERROR("SPIR-V is disallowed.");
