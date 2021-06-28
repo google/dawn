@@ -932,8 +932,12 @@ bool Resolver::ValidateParameter(const ast::Function* func,
   if (!ValidateVariable(info)) {
     return false;
   }
+
   for (auto* deco : info->declaration->decorations()) {
-    if (!func->IsEntryPoint()) {
+    if (!func->IsEntryPoint() &&
+        !IsValidationDisabled(
+            info->declaration->decorations(),
+            ast::DisabledValidation::kIgnoreAtomicFunctionParameter)) {
       AddError("decoration is not valid for function parameters",
                deco->source());
       return false;
@@ -945,9 +949,12 @@ bool Resolver::ValidateParameter(const ast::Function* func,
       }
     } else if (!deco->IsAnyOf<ast::LocationDecoration,
                               ast::InternalDecoration>() &&
-               !IsValidationDisabled(
-                   info->declaration->decorations(),
-                   ast::DisabledValidation::kEntryPointParameter)) {
+               !(IsValidationDisabled(
+                     info->declaration->decorations(),
+                     ast::DisabledValidation::kEntryPointParameter) ||
+                 IsValidationDisabled(info->declaration->decorations(),
+                                      ast::DisabledValidation::
+                                          kIgnoreAtomicFunctionParameter))) {
       AddError("decoration is not valid for function parameters",
                deco->source());
       return false;

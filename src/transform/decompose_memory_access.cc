@@ -475,6 +475,10 @@ struct DecomposeMemoryAccess::State {
     return utils::GetOrCreate(
         load_funcs, LoadStoreKey{storage_class, buf_ty, el_ty}, [&] {
           auto* buf_ast_ty = CreateASTTypeFor(&ctx, buf_ty);
+          auto* disable_validation =
+              ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
+                  ctx.dst->ID(),
+                  ast::DisabledValidation::kIgnoreAtomicFunctionParameter);
 
           ast::VariableList params = {
               // Note: The buffer parameter requires the StorageClass in
@@ -483,7 +487,7 @@ struct DecomposeMemoryAccess::State {
               ctx.dst->create<ast::Variable>(
                   ctx.dst->Sym("buffer"), storage_class,
                   var_user->Variable()->Access(), buf_ast_ty, true, nullptr,
-                  ast::DecorationList{}),
+                  ast::DecorationList{disable_validation}),
               ctx.dst->Param("offset", ctx.dst->ty.u32()),
           };
 
@@ -560,13 +564,18 @@ struct DecomposeMemoryAccess::State {
         store_funcs, LoadStoreKey{storage_class, buf_ty, el_ty}, [&] {
           auto* buf_ast_ty = CreateASTTypeFor(&ctx, buf_ty);
           auto* el_ast_ty = CreateASTTypeFor(&ctx, el_ty);
+          auto* disable_validation =
+              ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
+                  ctx.dst->ID(),
+                  ast::DisabledValidation::kIgnoreAtomicFunctionParameter);
           ast::VariableList params{
               // Note: The buffer parameter requires the StorageClass in
               // order for HLSL to emit this as a ByteAddressBuffer.
+
               ctx.dst->create<ast::Variable>(
                   ctx.dst->Sym("buffer"), storage_class,
                   var_user->Variable()->Access(), buf_ast_ty, true, nullptr,
-                  ast::DecorationList{}),
+                  ast::DecorationList{disable_validation}),
               ctx.dst->Param("offset", ctx.dst->ty.u32()),
               ctx.dst->Param("value", el_ast_ty),
           };
@@ -650,7 +659,10 @@ struct DecomposeMemoryAccess::State {
     auto op = intrinsic->Type();
     return utils::GetOrCreate(atomic_funcs, AtomicKey{buf_ty, el_ty, op}, [&] {
       auto* buf_ast_ty = CreateASTTypeFor(&ctx, buf_ty);
-
+      auto* disable_validation =
+          ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
+              ctx.dst->ID(),
+              ast::DisabledValidation::kIgnoreAtomicFunctionParameter);
       // The first parameter to all WGSL atomics is the expression to the
       // atomic. This is replaced with two parameters: the buffer and offset.
 
@@ -660,7 +672,7 @@ struct DecomposeMemoryAccess::State {
           ctx.dst->create<ast::Variable>(
               ctx.dst->Sym("buffer"), ast::StorageClass::kStorage,
               var_user->Variable()->Access(), buf_ast_ty, true, nullptr,
-              ast::DecorationList{}),
+              ast::DecorationList{disable_validation}),
           ctx.dst->Param("offset", ctx.dst->ty.u32()),
       };
 
