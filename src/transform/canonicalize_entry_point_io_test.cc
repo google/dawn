@@ -608,21 +608,103 @@ fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(CanonicalizeEntryPointIOTest, InterpolateAttributes) {
+  auto* src = R"(
+struct VertexOut {
+  [[builtin(position)]] pos : vec4<f32>;
+  [[location(1), interpolate(flat)]] loc1: f32;
+  [[location(2), interpolate(linear, sample)]] loc2 : f32;
+  [[location(3), interpolate(perspective, centroid)]] loc3 : f32;
+};
+
+struct FragmentIn {
+  [[location(1), interpolate(flat)]] loc1: f32;
+  [[location(2), interpolate(linear, sample)]] loc2 : f32;
+};
+
+[[stage(vertex)]]
+fn vert_main() -> VertexOut {
+  return VertexOut();
+}
+
+[[stage(fragment)]]
+fn frag_main(inputs : FragmentIn,
+             [[location(3), interpolate(perspective, centroid)]] loc3 : f32) {
+  let x = inputs.loc1 + inputs.loc2 + loc3;
+}
+)";
+
+  auto* expect = R"(
+struct VertexOut {
+  pos : vec4<f32>;
+  loc1 : f32;
+  loc2 : f32;
+  loc3 : f32;
+};
+
+struct FragmentIn {
+  loc1 : f32;
+  loc2 : f32;
+};
+
+struct tint_symbol {
+  [[location(1), interpolate(flat)]]
+  loc1 : f32;
+  [[location(2), interpolate(linear, sample)]]
+  loc2 : f32;
+  [[location(3), interpolate(perspective, centroid)]]
+  loc3 : f32;
+  [[builtin(position)]]
+  pos : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn vert_main() -> tint_symbol {
+  let tint_symbol_1 : VertexOut = VertexOut();
+  return tint_symbol(tint_symbol_1.loc1, tint_symbol_1.loc2, tint_symbol_1.loc3, tint_symbol_1.pos);
+}
+
+struct tint_symbol_3 {
+  [[location(1), interpolate(flat)]]
+  loc1 : f32;
+  [[location(2), interpolate(linear, sample)]]
+  loc2 : f32;
+  [[location(3), interpolate(perspective, centroid)]]
+  loc3 : f32;
+};
+
+[[stage(fragment)]]
+fn frag_main(tint_symbol_2 : tint_symbol_3) {
+  let inputs : FragmentIn = FragmentIn(tint_symbol_2.loc1, tint_symbol_2.loc2);
+  let loc3 : f32 = tint_symbol_2.loc3;
+  let x = ((inputs.loc1 + inputs.loc2) + loc3);
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kStructMember);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(CanonicalizeEntryPointIOTest, Struct_LayoutDecorations) {
   auto* src = R"(
 [[block]]
 struct FragmentInput {
   [[size(16), location(1)]] value : f32;
   [[builtin(position)]] [[align(32)]] coord : vec4<f32>;
+  [[location(0), interpolate(linear, sample)]] [[align(128)]] loc0 : f32;
 };
 
 struct FragmentOutput {
-  [[size(16), location(1)]] value : f32;
+  [[size(16), location(1), interpolate(flat)]] value : f32;
 };
 
 [[stage(fragment)]]
 fn frag_main(inputs : FragmentInput) -> FragmentOutput {
-  return FragmentOutput(inputs.coord.x * inputs.value);
+  return FragmentOutput(inputs.coord.x * inputs.value + inputs.loc0);
 }
 )";
 
@@ -633,6 +715,8 @@ struct FragmentInput {
   value : f32;
   [[align(32)]]
   coord : vec4<f32>;
+  [[align(128)]]
+  loc0 : f32;
 };
 
 struct FragmentOutput {
@@ -641,6 +725,8 @@ struct FragmentOutput {
 };
 
 struct tint_symbol_1 {
+  [[location(0), interpolate(linear, sample)]]
+  loc0 : f32;
   [[location(1)]]
   value : f32;
   [[builtin(position)]]
@@ -648,14 +734,14 @@ struct tint_symbol_1 {
 };
 
 struct tint_symbol_2 {
-  [[location(1)]]
+  [[location(1), interpolate(flat)]]
   value : f32;
 };
 
 [[stage(fragment)]]
 fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
-  let inputs : FragmentInput = FragmentInput(tint_symbol.value, tint_symbol.coord);
-  let tint_symbol_3 : FragmentOutput = FragmentOutput((inputs.coord.x * inputs.value));
+  let inputs : FragmentInput = FragmentInput(tint_symbol.value, tint_symbol.coord, tint_symbol.loc0);
+  let tint_symbol_3 : FragmentOutput = FragmentOutput(((inputs.coord.x * inputs.value) + inputs.loc0));
   return tint_symbol_2(tint_symbol_3.value);
 }
 )";

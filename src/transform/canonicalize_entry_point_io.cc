@@ -84,7 +84,8 @@ void CanonicalizeEntryPointIO::Run(CloneContext& ctx,
         ast::DecorationList new_decorations = RemoveDecorations(
             &ctx, member->decorations(), [](const ast::Decoration* deco) {
               return deco
-                  ->IsAnyOf<ast::BuiltinDecoration, ast::LocationDecoration>();
+                  ->IsAnyOf<ast::BuiltinDecoration, ast::InterpolateDecoration,
+                            ast::LocationDecoration>();
             });
         new_struct_members.push_back(
             ctx.dst->Member(ctx.Clone(member->symbol()),
@@ -155,6 +156,7 @@ void CanonicalizeEntryPointIO::Run(CloneContext& ctx,
                 &ctx, member->Declaration()->decorations(),
                 [](const ast::Decoration* deco) {
                   return !deco->IsAnyOf<ast::BuiltinDecoration,
+                                        ast::InterpolateDecoration,
                                         ast::LocationDecoration>();
                 });
 
@@ -182,14 +184,9 @@ void CanonicalizeEntryPointIO::Run(CloneContext& ctx,
           func_const_initializer =
               ctx.dst->Construct(ctx.Clone(param_declared_ty), init_values);
         } else {
-          ast::DecorationList new_decorations = RemoveDecorations(
-              &ctx, param->Declaration()->decorations(),
-              [](const ast::Decoration* deco) {
-                return !deco->IsAnyOf<ast::BuiltinDecoration,
-                                      ast::LocationDecoration>();
-              });
-          new_struct_members.push_back(ctx.dst->Member(
-              param_name, ctx.Clone(param_declared_ty), new_decorations));
+          new_struct_members.push_back(
+              ctx.dst->Member(param_name, ctx.Clone(param_declared_ty),
+                              ctx.Clone(param->Declaration()->decorations())));
           func_const_initializer =
               ctx.dst->MemberAccessor(new_struct_param_symbol, param_name);
         }
@@ -249,6 +246,7 @@ void CanonicalizeEntryPointIO::Run(CloneContext& ctx,
               &ctx, member->Declaration()->decorations(),
               [](const ast::Decoration* deco) {
                 return !deco->IsAnyOf<ast::BuiltinDecoration,
+                                      ast::InterpolateDecoration,
                                       ast::LocationDecoration>();
               });
           auto symbol = ctx.Clone(member->Declaration()->symbol());

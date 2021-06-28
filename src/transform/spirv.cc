@@ -144,7 +144,8 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
         ast::DecorationList new_decorations = RemoveDecorations(
             &ctx, member->decorations(), [](const ast::Decoration* deco) {
               return deco
-                  ->IsAnyOf<ast::BuiltinDecoration, ast::LocationDecoration>();
+                  ->IsAnyOf<ast::BuiltinDecoration, ast::InterpolateDecoration,
+                            ast::LocationDecoration>();
             });
         new_struct_members.push_back(
             ctx.dst->Member(ctx.Clone(member->symbol()),
@@ -313,6 +314,7 @@ Symbol Spirv::HoistToInputVariables(
     ast::DecorationList new_decorations =
         RemoveDecorations(&ctx, decorations, [](const ast::Decoration* deco) {
           return !deco->IsAnyOf<ast::BuiltinDecoration,
+                                ast::InterpolateDecoration,
                                 ast::LocationDecoration>();
         });
     new_decorations.push_back(
@@ -370,6 +372,7 @@ void Spirv::HoistToOutputVariables(CloneContext& ctx,
     ast::DecorationList new_decorations =
         RemoveDecorations(&ctx, decorations, [](const ast::Decoration* deco) {
           return !deco->IsAnyOf<ast::BuiltinDecoration,
+                                ast::InterpolateDecoration,
                                 ast::LocationDecoration>();
         });
     new_decorations.push_back(

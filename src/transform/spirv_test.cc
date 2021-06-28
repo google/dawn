@@ -394,21 +394,100 @@ fn frag_main() {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(SpirvTest, HandleEntryPointIOTypes_InterpolateAttributes) {
+  auto* src = R"(
+struct VertexOut {
+  [[builtin(position)]] pos : vec4<f32>;
+  [[location(1), interpolate(flat)]] loc1: f32;
+  [[location(2), interpolate(linear, sample)]] loc2 : f32;
+  [[location(3), interpolate(perspective, centroid)]] loc3 : f32;
+};
+
+struct FragmentIn {
+  [[location(1), interpolate(flat)]] loc1: f32;
+  [[location(2), interpolate(linear, sample)]] loc2 : f32;
+};
+
+[[stage(vertex)]]
+fn vert_main() -> VertexOut {
+  return VertexOut();
+}
+
+[[stage(fragment)]]
+fn frag_main(inputs : FragmentIn,
+             [[location(3), interpolate(perspective, centroid)]] loc3 : f32) {
+  let x = inputs.loc1 + inputs.loc2 + loc3;
+}
+)";
+
+  auto* expect = R"(
+struct VertexOut {
+  pos : vec4<f32>;
+  loc1 : f32;
+  loc2 : f32;
+  loc3 : f32;
+};
+
+struct FragmentIn {
+  loc1 : f32;
+  loc2 : f32;
+};
+
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_1 : vec4<f32>;
+
+[[location(1), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_2 : f32;
+
+[[location(2), interpolate(linear, sample), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_3 : f32;
+
+[[location(3), interpolate(perspective, centroid), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_4 : f32;
+
+fn tint_symbol_5(tint_symbol : VertexOut) {
+  tint_symbol_1 = tint_symbol.pos;
+  tint_symbol_2 = tint_symbol.loc1;
+  tint_symbol_3 = tint_symbol.loc2;
+  tint_symbol_4 = tint_symbol.loc3;
+}
+
+[[stage(vertex)]]
+fn vert_main() {
+  tint_symbol_5(VertexOut());
+  return;
+}
+
+[[location(1), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_6 : f32;
+
+[[location(2), interpolate(linear, sample), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_7 : f32;
+
+[[location(3), interpolate(perspective, centroid), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_9 : f32;
+
+[[stage(fragment)]]
+fn frag_main() {
+  let tint_symbol_8 : FragmentIn = FragmentIn(tint_symbol_6, tint_symbol_7);
+  let x = ((tint_symbol_8.loc1 + tint_symbol_8.loc2) + tint_symbol_9);
+}
+)";
+
+  auto got = Run<Spirv>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(SpirvTest, HandleEntryPointIOTypes_StructLayoutDecorations) {
   auto* src = R"(
 [[block]]
 struct FragmentInput {
   [[size(16), location(1)]] value : f32;
   [[builtin(position)]] [[align(32)]] coord : vec4<f32>;
+  [[location(0), interpolate(linear, sample)]] [[align(128)]] loc0 : f32;
 };
 
 struct FragmentOutput {
-  [[size(16), location(1)]] value : f32;
+  [[size(16), location(1), interpolate(flat)]] value : f32;
 };
 
 [[stage(fragment)]]
 fn frag_main(inputs : FragmentInput) -> FragmentOutput {
-  return FragmentOutput(inputs.coord.x * inputs.value);
+  return FragmentOutput(inputs.coord.x * inputs.value + inputs.loc0);
 }
 )";
 
@@ -419,6 +498,8 @@ struct FragmentInput {
   value : f32;
   [[align(32)]]
   coord : vec4<f32>;
+  [[align(128)]]
+  loc0 : f32;
 };
 
 struct FragmentOutput {
@@ -430,16 +511,18 @@ struct FragmentOutput {
 
 [[builtin(position), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_1 : vec4<f32>;
 
-[[location(1), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_4 : f32;
+[[location(0), interpolate(linear, sample), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_2 : f32;
 
-fn tint_symbol_5(tint_symbol_3 : FragmentOutput) {
-  tint_symbol_4 = tint_symbol_3.value;
+[[location(1), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_5 : f32;
+
+fn tint_symbol_6(tint_symbol_4 : FragmentOutput) {
+  tint_symbol_5 = tint_symbol_4.value;
 }
 
 [[stage(fragment)]]
 fn frag_main() {
-  let tint_symbol_2 : FragmentInput = FragmentInput(tint_symbol, tint_symbol_1);
-  tint_symbol_5(FragmentOutput((tint_symbol_2.coord.x * tint_symbol_2.value)));
+  let tint_symbol_3 : FragmentInput = FragmentInput(tint_symbol, tint_symbol_1, tint_symbol_2);
+  tint_symbol_6(FragmentOutput(((tint_symbol_3.coord.x * tint_symbol_3.value) + tint_symbol_3.loc0)));
   return;
 }
 )";
