@@ -6288,7 +6288,404 @@ TEST_F(SpvModuleScopeVarParserTest,
   EXPECT_EQ(got, expected) << got;
 }
 
-// TODO(dneto): pipeline IO: flatten structures, and distribute locations
+TEST_F(SpvModuleScopeVarParserTest, Input_FlattenArray_OneLevel) {
+  const std::string assembly = R"(
+    OpCapability Shader
+    OpMemoryModel Logical Simple
+    OpEntryPoint Vertex %main "main" %1 %2
+    OpDecorate %1 Location 4
+    OpDecorate %2 BuiltIn Position
+
+    %void = OpTypeVoid
+    %voidfn = OpTypeFunction %void
+    %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+    %uint = OpTypeInt 32 0
+    %uint_0 = OpConstant %uint 0
+    %uint_1 = OpConstant %uint 1
+    %uint_3 = OpConstant %uint 3
+    %arr = OpTypeArray %float %uint_3
+    %11 = OpTypePointer Input %arr
+
+    %1 = OpVariable %11 Input
+
+    %12 = OpTypePointer Output %v4float
+    %2 = OpVariable %12 Output
+
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    OpReturn
+    OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+
+  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+
+  const auto got = p->program().to_str();
+  const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] x_2: __vec_4__f32}
+  }
+  Variable{
+    x_1
+    private
+    undefined
+    __array__f32_3
+  }
+  Variable{
+    x_2
+    private
+    undefined
+    __vec_4__f32
+  }
+  Function main_1 -> __void
+  ()
+  {
+    Return{}
+  }
+  Function main -> __type_name_main_out
+  StageDecoration{vertex}
+  (
+    VariableConst{
+      Decorations{
+        LocationDecoration{4}
+      }
+      x_1_param
+      none
+      undefined
+      __f32
+    }
+    VariableConst{
+      Decorations{
+        LocationDecoration{5}
+      }
+      x_1_param_1
+      none
+      undefined
+      __f32
+    }
+    VariableConst{
+      Decorations{
+        LocationDecoration{6}
+      }
+      x_1_param_2
+      none
+      undefined
+      __f32
+    }
+  )
+  {
+    Assignment{
+      ArrayAccessor[not set]{
+        Identifier[not set]{x_1}
+        ScalarConstructor[not set]{0}
+      }
+      Identifier[not set]{x_1_param}
+    }
+    Assignment{
+      ArrayAccessor[not set]{
+        Identifier[not set]{x_1}
+        ScalarConstructor[not set]{1}
+      }
+      Identifier[not set]{x_1_param_1}
+    }
+    Assignment{
+      ArrayAccessor[not set]{
+        Identifier[not set]{x_1}
+        ScalarConstructor[not set]{2}
+      }
+      Identifier[not set]{x_1_param_2}
+    }
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{x_2}
+        }
+      }
+    }
+  }
+}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, Input_FlattenMatrix) {
+  const std::string assembly = R"(
+    OpCapability Shader
+    OpMemoryModel Logical Simple
+    OpEntryPoint Vertex %main "main" %1 %2
+    OpDecorate %1 Location 9
+    OpDecorate %2 BuiltIn Position
+
+    %void = OpTypeVoid
+    %voidfn = OpTypeFunction %void
+    %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+    %m2v4float = OpTypeMatrix %v4float 2
+    %uint = OpTypeInt 32 0
+
+    %11 = OpTypePointer Input %m2v4float
+
+    %1 = OpVariable %11 Input
+
+    %12 = OpTypePointer Output %v4float
+    %2 = OpVariable %12 Output
+
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    OpReturn
+    OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+
+  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+
+  const auto got = p->program().to_str();
+  const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] x_2: __vec_4__f32}
+  }
+  Variable{
+    x_1
+    private
+    undefined
+    __mat_4_2__f32
+  }
+  Variable{
+    x_2
+    private
+    undefined
+    __vec_4__f32
+  }
+  Function main_1 -> __void
+  ()
+  {
+    Return{}
+  }
+  Function main -> __type_name_main_out
+  StageDecoration{vertex}
+  (
+    VariableConst{
+      Decorations{
+        LocationDecoration{9}
+      }
+      x_1_param
+      none
+      undefined
+      __vec_4__f32
+    }
+    VariableConst{
+      Decorations{
+        LocationDecoration{10}
+      }
+      x_1_param_1
+      none
+      undefined
+      __vec_4__f32
+    }
+  )
+  {
+    Assignment{
+      ArrayAccessor[not set]{
+        Identifier[not set]{x_1}
+        ScalarConstructor[not set]{0}
+      }
+      Identifier[not set]{x_1_param}
+    }
+    Assignment{
+      ArrayAccessor[not set]{
+        Identifier[not set]{x_1}
+        ScalarConstructor[not set]{1}
+      }
+      Identifier[not set]{x_1_param_1}
+    }
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{x_2}
+        }
+      }
+    }
+  }
+}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, Input_FlattenNested) {
+  const std::string assembly = R"(
+    OpCapability Shader
+    OpMemoryModel Logical Simple
+    OpEntryPoint Vertex %main "main" %1 %2
+    OpDecorate %1 Location 7
+    OpDecorate %2 BuiltIn Position
+
+    %void = OpTypeVoid
+    %voidfn = OpTypeFunction %void
+    %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+    %m2v4float = OpTypeMatrix %v4float 2
+    %uint = OpTypeInt 32 0
+    %uint_2 = OpConstant %uint 2
+
+    %arr = OpTypeArray %m2v4float %uint_2
+
+    %11 = OpTypePointer Input %arr
+    %1 = OpVariable %11 Input
+
+    %12 = OpTypePointer Output %v4float
+    %2 = OpVariable %12 Output
+
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    OpReturn
+    OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+
+  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+
+  const auto got = p->program().to_str();
+  const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] x_2: __vec_4__f32}
+  }
+  Variable{
+    x_1
+    private
+    undefined
+    __array__mat_4_2__f32_2
+  }
+  Variable{
+    x_2
+    private
+    undefined
+    __vec_4__f32
+  }
+  Function main_1 -> __void
+  ()
+  {
+    Return{}
+  }
+  Function main -> __type_name_main_out
+  StageDecoration{vertex}
+  (
+    VariableConst{
+      Decorations{
+        LocationDecoration{7}
+      }
+      x_1_param
+      none
+      undefined
+      __vec_4__f32
+    }
+    VariableConst{
+      Decorations{
+        LocationDecoration{8}
+      }
+      x_1_param_1
+      none
+      undefined
+      __vec_4__f32
+    }
+    VariableConst{
+      Decorations{
+        LocationDecoration{9}
+      }
+      x_1_param_2
+      none
+      undefined
+      __vec_4__f32
+    }
+    VariableConst{
+      Decorations{
+        LocationDecoration{10}
+      }
+      x_1_param_3
+      none
+      undefined
+      __vec_4__f32
+    }
+  )
+  {
+    Assignment{
+      ArrayAccessor[not set]{
+        ArrayAccessor[not set]{
+          Identifier[not set]{x_1}
+          ScalarConstructor[not set]{0}
+        }
+        ScalarConstructor[not set]{0}
+      }
+      Identifier[not set]{x_1_param}
+    }
+    Assignment{
+      ArrayAccessor[not set]{
+        ArrayAccessor[not set]{
+          Identifier[not set]{x_1}
+          ScalarConstructor[not set]{0}
+        }
+        ScalarConstructor[not set]{1}
+      }
+      Identifier[not set]{x_1_param_1}
+    }
+    Assignment{
+      ArrayAccessor[not set]{
+        ArrayAccessor[not set]{
+          Identifier[not set]{x_1}
+          ScalarConstructor[not set]{1}
+        }
+        ScalarConstructor[not set]{0}
+      }
+      Identifier[not set]{x_1_param_2}
+    }
+    Assignment{
+      ArrayAccessor[not set]{
+        ArrayAccessor[not set]{
+          Identifier[not set]{x_1}
+          ScalarConstructor[not set]{1}
+        }
+        ScalarConstructor[not set]{1}
+      }
+      Identifier[not set]{x_1_param_3}
+    }
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{x_2}
+        }
+      }
+    }
+  }
+}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
+
+// TODO(dneto):  flatting structures
 
 }  // namespace
 }  // namespace spirv

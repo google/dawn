@@ -935,6 +935,101 @@ ast::BlockStatement* FunctionEmitter::MakeFunctionBody() {
   return body;
 }
 
+bool FunctionEmitter::EmitInputParameter(std::string var_name,
+                                         const Type* var_type,
+                                         ast::DecorationList* decos,
+                                         std::vector<int> index_prefix,
+                                         const Type* tip_type,
+                                         const Type* forced_param_type,
+                                         ast::VariableList* params,
+                                         ast::StatementList* statements) {
+  tip_type = tip_type->UnwrapAlias();
+  if (auto* ref_type = tip_type->As<Reference>()) {
+    tip_type = ref_type->type;
+  }
+
+  if (auto* matrix_type = tip_type->As<Matrix>()) {
+    index_prefix.push_back(0);
+    const auto num_columns = static_cast<int>(matrix_type->columns);
+    const Type* vec_ty = ty_.Vector(matrix_type->type, matrix_type->rows);
+    for (int col = 0; col < num_columns; col++) {
+      index_prefix.back() = col;
+      if (!EmitInputParameter(var_name, var_type, decos, index_prefix, vec_ty,
+                              forced_param_type, params, statements)) {
+        return false;
+      }
+    }
+    return success();
+  } else if (auto* array_type = tip_type->As<Array>()) {
+    if (array_type->size == 0) {
+      return Fail() << "runtime-size array not allowed on pipeline IO";
+    }
+    index_prefix.push_back(0);
+    const Type* elem_ty = array_type->type;
+    for (int i = 0; i < static_cast<int>(array_type->size); i++) {
+      index_prefix.back() = i;
+      if (!EmitInputParameter(var_name, var_type, decos, index_prefix, elem_ty,
+                              forced_param_type, params, statements)) {
+        return false;
+      }
+    }
+    return success();
+  }
+
+  const bool is_builtin = ast::HasDecoration<ast::BuiltinDecoration>(*decos);
+
+  const Type* param_type = is_builtin ? forced_param_type : tip_type;
+
+  const auto param_name = namer_.MakeDerivedName(var_name + "_param");
+  // Create the parameter.
+  // TODO(dneto): Note: If the parameter has non-location decorations,
+  // then those decoration AST nodes  will be reused between multiple elements
+  // of a matrix, array, or structure.  Normally that's disallowed but currently
+  // the SPIR-V reader will make duplicates when the entire AST is cloned
+  // at the top level of the SPIR-V reader flow.  Consider rewriting this
+  // to avoid this node-sharing.
+  params->push_back(
+      builder_.Param(param_name, param_type->Build(builder_), *decos));
+
+  // Add a body statement to copy the parameter to the corresponding private
+  // variable.
+  ast::Expression* param_value = builder_.Expr(param_name);
+  ast::Expression* store_dest = builder_.Expr(var_name);
+
+  // Index into the LHS as needed.
+  auto* current_type = var_type->UnwrapAlias()->UnwrapRef()->UnwrapAlias();
+  for (auto index : index_prefix) {
+    if (auto* matrix_type = current_type->As<Matrix>()) {
+      store_dest = builder_.IndexAccessor(store_dest, builder_.Expr(index));
+      current_type = ty_.Vector(matrix_type->type, matrix_type->rows);
+    } else if (auto* array_type = current_type->As<Array>()) {
+      store_dest = builder_.IndexAccessor(store_dest, builder_.Expr(index));
+      current_type = array_type->type->UnwrapAlias();
+    }
+  }
+
+  if (is_builtin && (tip_type != forced_param_type)) {
+    // The parameter will have the WGSL type, but we need bitcast to
+    // the variable store type.
+    param_value =
+        create<ast::BitcastExpression>(tip_type->Build(builder_), param_value);
+  }
+
+  statements->push_back(builder_.Assign(store_dest, param_value));
+
+  // Increment the location attribute, in case more parameters will follow.
+  for (auto*& deco : *decos) {
+    if (auto* loc_deco = deco->As<ast::LocationDecoration>()) {
+      // Replace this location decoration with a new one with one higher index.
+      // The old one doesn't leak because it's kept in the builder's AST node
+      // list.
+      deco = builder_.Location(loc_deco->source(), loc_deco->value() + 1);
+    }
+  }
+
+  return success();
+}
+
 bool FunctionEmitter::EmitEntryPointAsWrapper() {
   Source source;
 
@@ -954,9 +1049,9 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
     TINT_ASSERT(Reader, var != nullptr);
     TINT_ASSERT(Reader, var->opcode() == SpvOpVariable);
     auto* store_type = GetVariableStoreType(*var);
-    auto* forced_store_type = store_type;
+    auto* forced_param_type = store_type;
     ast::DecorationList param_decos;
-    if (!parser_impl_.ConvertDecorationsForVariable(var_id, &forced_store_type,
+    if (!parser_impl_.ConvertDecorationsForVariable(var_id, &forced_param_type,
                                                     &param_decos, true)) {
       // This occurs, and is not an error, for the PointSize builtin.
       if (!success()) {
@@ -966,49 +1061,31 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
       continue;
     }
 
-    // In Vulkan SPIR-V, Input variables must not have an initializer.
+    // We don't have to handle initializers because in Vulkan SPIR-V, Input
+    // variables must not have them.
 
     const auto var_name = namer_.GetName(var_id);
     const auto var_sym = builder_.Symbols().Register(var_name);
-    const auto param_name = namer_.MakeDerivedName(var_name + "_param");
-    const auto param_sym = builder_.Symbols().Register(param_name);
-    auto* param = create<ast::Variable>(
-        source, param_sym, ast::StorageClass::kNone, ast::Access::kUndefined,
-        forced_store_type->Build(builder_), true /* is const */,
-        nullptr /* no constructor */, param_decos);
-    decl.params.push_back(param);
 
-    // Add a body statement to copy the parameter to the corresponding private
-    // variable.
-    ast::Expression* param_value =
-        create<ast::IdentifierExpression>(source, param_sym);
-    ast::Expression* store_dest =
-        create<ast::IdentifierExpression>(source, var_sym);
+    bool ok = true;
     if (HasBuiltinSampleMask(param_decos)) {
       // In Vulkan SPIR-V, the sample mask is an array. In WGSL it's a scalar.
       // Use the first element only.
-      store_dest = create<ast::ArrayAccessorExpression>(
-          source, store_dest, parser_impl_.MakeNullValue(ty_.I32()));
-      if (const auto* arr_ty = store_type->UnwrapAlias()->As<Array>()) {
-        if (arr_ty->type->IsSignedScalarOrVector()) {
-          // sample_mask is unsigned in WGSL. Bitcast it.
-          param_value = create<ast::BitcastExpression>(
-              source, ty_.I32()->Build(builder_), param_value);
-        }
-      } else {
-        // Vulkan SPIR-V requires this. Validation should have failed already.
-        return Fail()
-               << "expected SampleMask to be an array of integer scalars";
-      }
-    } else if (forced_store_type != store_type) {
-      // The parameter will have the WGSL type, but we need to add
-      // a bitcast to the variable store type.
-      param_value = create<ast::BitcastExpression>(
-          source, store_type->Build(builder_), param_value);
+      auto* sample_mask_array_type =
+          store_type->UnwrapRef()->UnwrapAlias()->As<Array>();
+      TINT_ASSERT(Reader, sample_mask_array_type);
+      ok = EmitInputParameter(var_name, store_type, &param_decos, {0},
+                              sample_mask_array_type->type, forced_param_type,
+                              &(decl.params), &stmts);
+    } else {
+      // The normal path.
+      ok =
+          EmitInputParameter(var_name, store_type, &param_decos, {}, store_type,
+                             forced_param_type, &(decl.params), &stmts);
     }
-
-    stmts.push_back(
-        create<ast::AssignmentStatement>(source, store_dest, param_value));
+    if (!ok) {
+      return false;
+    }
   }
 
   // Call the inner function.  It has no parameters.

@@ -410,6 +410,33 @@ class FunctionEmitter {
   /// @returns false if emission failed.
   bool EmitEntryPointAsWrapper();
 
+  /// Creates one or more entry point input parameters corresponding to a
+  /// part of an input variable.  The part of the input variable is specfied
+  /// by the `index_prefix`, which successively indexes into the variable.
+  /// Also generates the assignment statements that copy the input parameter
+  /// to the corresponding part of the variable.  Assumes the variable
+  /// has already been created in the Private storage class.
+  /// @param var_name The name of the variable
+  /// @param var_type The store type of the variable
+  /// @param decos The variable's decorations
+  /// @param index_prefix Indices stepping into the variable, indicating
+  /// what part of the variable to populate.
+  /// @param tip_type The type of the component inside variable, after indexing
+  /// with the indices in `index_prefix`.
+  /// @param forced_param_type The type forced by WGSL, if the variable is a
+  /// builtin, otherwise the same as var_type.
+  /// @param params The parameter list where the new parameter is appended.
+  /// @param statements The statement list where the assignment is appended.
+  /// @returns false if emission failed
+  bool EmitInputParameter(std::string var_name,
+                          const Type* var_type,
+                          ast::DecorationList* decos,
+                          std::vector<int> index_prefix,
+                          const Type* tip_type,
+                          const Type* forced_param_type,
+                          ast::VariableList* params,
+                          ast::StatementList* statements);
+
   /// Create an ast::BlockStatement representing the body of the function.
   /// This creates the statement stack, which is non-empty for the lifetime
   /// of the function.
