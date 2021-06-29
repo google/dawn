@@ -326,10 +326,11 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         auto* textureStore = is2DArray
                                  ? "textureStore(storageImage0, vec2<i32>(x, y), layer, expected)"
                                  : "textureStore(storageImage0, vec2<i32>(x, y), expected)";
+        auto workgroupSize = !strcmp(stage, "compute") ? ", workgroup_size(1)" : "";
 
         std::ostringstream ostream;
         ostream << GetImageDeclaration(format, "write", is2DArray, 0) << "\n";
-        ostream << "[[stage(" << stage << ")]]\n";
+        ostream << "[[stage(" << stage << ")" << workgroupSize << "]]\n";
         ostream << "fn main() {\n";
         ostream << "  let size : vec2<i32> = textureDimensions(storageImage0);\n";
         ostream << "  let layerCount : i32 = " << layerCount << ";\n";
