@@ -160,7 +160,7 @@ namespace dawn_native { namespace null {
 
         std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;
 
-        static constexpr uint64_t kMaxMemoryUsage = 256 * 1024 * 1024;
+        static constexpr uint64_t kMaxMemoryUsage = 512 * 1024 * 1024;
         size_t mMemoryUsage = 0;
     };
 

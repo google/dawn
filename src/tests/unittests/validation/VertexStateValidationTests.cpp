@@ -199,12 +199,12 @@ TEST_F(VertexStateTest, SetInputStrideOutOfBounds) {
     // Control case, setting max input arrayStride
     utils::ComboVertexStateDescriptor state;
     state.vertexBufferCount = 1;
-    state.cVertexBuffers[0].arrayStride = kMaxVertexBufferStride;
+    state.cVertexBuffers[0].arrayStride = kMaxVertexBufferArrayStride;
     state.cVertexBuffers[0].attributeCount = 1;
     CreatePipeline(true, state, kDummyVertexShader);
 
     // Test input arrayStride OOB
-    state.cVertexBuffers[0].arrayStride = kMaxVertexBufferStride + 1;
+    state.cVertexBuffers[0].arrayStride = kMaxVertexBufferArrayStride + 1;
     CreatePipeline(false, state, kDummyVertexShader);
 }
 
@@ -283,11 +283,11 @@ TEST_F(VertexStateTest, SetAttributeOffsetOutOfBounds) {
     utils::ComboVertexStateDescriptor state;
     state.vertexBufferCount = 1;
     state.cVertexBuffers[0].attributeCount = 1;
-    state.cAttributes[0].offset = kMaxVertexBufferStride - sizeof(wgpu::VertexFormat::Float32);
+    state.cAttributes[0].offset = kMaxVertexBufferArrayStride - sizeof(wgpu::VertexFormat::Float32);
     CreatePipeline(true, state, kDummyVertexShader);
 
     // Test attribute offset out of bounds
-    state.cAttributes[0].offset = kMaxVertexBufferStride - 1;
+    state.cAttributes[0].offset = kMaxVertexBufferArrayStride - 1;
     CreatePipeline(false, state, kDummyVertexShader);
 }
 

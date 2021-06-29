@@ -123,7 +123,22 @@ namespace dawn_native {
             ASSERT(bindingInfo.bindingType == BindingInfoType::Buffer);
             ASSERT(bindingInfo.buffer.hasDynamicOffset);
 
-            if (dynamicOffsets[i] % kMinDynamicBufferOffsetAlignment != 0) {
+            uint64_t requiredAlignment;
+            switch (bindingInfo.buffer.type) {
+                case wgpu::BufferBindingType::Uniform:
+                    requiredAlignment = kMinUniformBufferOffsetAlignment;
+                    break;
+                case wgpu::BufferBindingType::Storage:
+                case wgpu::BufferBindingType::ReadOnlyStorage:
+                case kInternalStorageBufferBinding:
+                    requiredAlignment = kMinStorageBufferOffsetAlignment;
+                    requiredAlignment = kMinStorageBufferOffsetAlignment;
+                    break;
+                case wgpu::BufferBindingType::Undefined:
+                    UNREACHABLE();
+            }
+
+            if (!IsAligned(dynamicOffsets[i], requiredAlignment)) {
                 return DAWN_VALIDATION_ERROR("Dynamic Buffer Offset need to be aligned");
             }
 

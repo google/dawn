@@ -39,16 +39,16 @@ namespace dawn_native {
             }
 
             // No underflow is possible because the max vertex format size is smaller than
-            // kMaxVertexBufferStride.
-            ASSERT(kMaxVertexBufferStride >= dawn::VertexFormatSize(attribute->format));
+            // kMaxVertexBufferArrayStride.
+            ASSERT(kMaxVertexBufferArrayStride >= dawn::VertexFormatSize(attribute->format));
             if (attribute->offset >
-                kMaxVertexBufferStride - dawn::VertexFormatSize(attribute->format)) {
+                kMaxVertexBufferArrayStride - dawn::VertexFormatSize(attribute->format)) {
                 return DAWN_VALIDATION_ERROR("Setting attribute offset out of bounds");
             }
 
             // No overflow is possible because the offset is already validated to be less
-            // than kMaxVertexBufferStride.
-            ASSERT(attribute->offset < kMaxVertexBufferStride);
+            // than kMaxVertexBufferArrayStride.
+            ASSERT(attribute->offset < kMaxVertexBufferArrayStride);
             if (vertexBufferStride > 0 &&
                 attribute->offset + dawn::VertexFormatSize(attribute->format) >
                     vertexBufferStride) {
@@ -73,7 +73,7 @@ namespace dawn_native {
             const VertexBufferLayout* buffer,
             std::bitset<kMaxVertexAttributes>* attributesSetMask) {
             DAWN_TRY(ValidateInputStepMode(buffer->stepMode));
-            if (buffer->arrayStride > kMaxVertexBufferStride) {
+            if (buffer->arrayStride > kMaxVertexBufferArrayStride) {
                 return DAWN_VALIDATION_ERROR("Setting arrayStride out of bounds");
             }
 

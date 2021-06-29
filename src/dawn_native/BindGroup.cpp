@@ -44,19 +44,23 @@ namespace dawn_native {
 
             wgpu::BufferUsage requiredUsage;
             uint64_t maxBindingSize;
+            uint64_t requiredBindingAlignment;
             switch (bindingInfo.buffer.type) {
                 case wgpu::BufferBindingType::Uniform:
                     requiredUsage = wgpu::BufferUsage::Uniform;
                     maxBindingSize = kMaxUniformBufferBindingSize;
+                    requiredBindingAlignment = kMinUniformBufferOffsetAlignment;
                     break;
                 case wgpu::BufferBindingType::Storage:
                 case wgpu::BufferBindingType::ReadOnlyStorage:
                     requiredUsage = wgpu::BufferUsage::Storage;
-                    maxBindingSize = std::numeric_limits<uint64_t>::max();
+                    maxBindingSize = kMaxStorageBufferBindingSize;
+                    requiredBindingAlignment = kMinStorageBufferOffsetAlignment;
                     break;
                 case kInternalStorageBufferBinding:
                     requiredUsage = kInternalStorageBuffer;
-                    maxBindingSize = std::numeric_limits<uint64_t>::max();
+                    maxBindingSize = kMaxStorageBufferBindingSize;
+                    requiredBindingAlignment = kMinStorageBufferOffsetAlignment;
                     break;
                 case wgpu::BufferBindingType::Undefined:
                     UNREACHABLE();
@@ -85,9 +89,9 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("Buffer binding doesn't fit in the buffer");
             }
 
-            if (!IsAligned(entry.offset, 256)) {
+            if (!IsAligned(entry.offset, requiredBindingAlignment)) {
                 return DAWN_VALIDATION_ERROR(
-                    "Buffer offset for bind group needs to be 256-byte aligned");
+                    "Buffer offset for bind group needs to satisfy the minimum alignment");
             }
 
             if (!(entry.buffer->GetUsage() & requiredUsage)) {

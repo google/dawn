@@ -101,45 +101,30 @@ namespace {
 
     // Test OOB color attachment indices are handled
     TEST_F(RenderPassDescriptorValidationTest, ColorAttachmentOutOfBounds) {
-        wgpu::TextureView color0 =
-            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
-        wgpu::TextureView color1 =
-            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
-        wgpu::TextureView color2 =
-            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
-        wgpu::TextureView color3 =
-            Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
-        // For setting the color attachment, control case
+        std::array<wgpu::RenderPassColorAttachmentDescriptor, kMaxColorAttachments + 1>
+            colorAttachments;
+        for (uint32_t i = 0; i < colorAttachments.size(); i++) {
+            colorAttachments[i].view =
+                Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+            colorAttachments[i].resolveTarget = nullptr;
+            colorAttachments[i].clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
+            colorAttachments[i].loadOp = wgpu::LoadOp::Clear;
+            colorAttachments[i].storeOp = wgpu::StoreOp::Store;
+        }
+
+        // Control case: kMaxColorAttachments is valid.
         {
-            utils::ComboRenderPassDescriptor renderPass({color0, color1, color2, color3});
+            wgpu::RenderPassDescriptor renderPass;
+            renderPass.colorAttachmentCount = kMaxColorAttachments;
+            renderPass.colorAttachments = colorAttachments.data();
+            renderPass.depthStencilAttachment = nullptr;
             AssertBeginRenderPassSuccess(&renderPass);
         }
-        // For setting the color attachment, OOB
+
+        // Error case: kMaxColorAttachments + 1 is an error.
         {
-            // We cannot use utils::ComboRenderPassDescriptor here because it only supports at most
-            // kMaxColorAttachments(4) color attachments.
-            std::array<wgpu::RenderPassColorAttachmentDescriptor, 5> colorAttachments;
-            colorAttachments[0].view = color0;
-            colorAttachments[0].resolveTarget = nullptr;
-            colorAttachments[0].clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
-            colorAttachments[0].loadOp = wgpu::LoadOp::Clear;
-            colorAttachments[0].storeOp = wgpu::StoreOp::Store;
-
-            colorAttachments[1] = colorAttachments[0];
-            colorAttachments[1].view = color1;
-
-            colorAttachments[2] = colorAttachments[0];
-            colorAttachments[2].view = color2;
-
-            colorAttachments[3] = colorAttachments[0];
-            colorAttachments[3].view = color3;
-
-            colorAttachments[4] = colorAttachments[0];
-            colorAttachments[4].view =
-                Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
-
             wgpu::RenderPassDescriptor renderPass;
-            renderPass.colorAttachmentCount = 5;
+            renderPass.colorAttachmentCount = kMaxColorAttachments + 1;
             renderPass.colorAttachments = colorAttachments.data();
             renderPass.depthStencilAttachment = nullptr;
             AssertBeginRenderPassError(&renderPass);

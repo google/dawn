@@ -37,7 +37,7 @@ float RandomFloat(float min, float max) {
 
 constexpr size_t kNumTriangles = 10000;
 
-struct alignas(kMinDynamicBufferOffsetAlignment) ShaderData {
+struct alignas(kMinUniformBufferOffsetAlignment) ShaderData {
     float scale;
     float time;
     float offsetX;
