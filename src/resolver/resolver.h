@@ -281,7 +281,8 @@ class Resolver {
   bool ValidateMatrix(const sem::Matrix* matirx_type, const Source& source);
   bool ValidateMatrixConstructor(const ast::TypeConstructorExpression* ctor,
                                  const sem::Matrix* matrix_type);
-  bool ValidateParameter(const ast::Function* func, const VariableInfo* info);
+  bool ValidateFunctionParameter(const ast::Function* func,
+                                 const VariableInfo* info);
   bool ValidateReturn(const ast::ReturnStatement* ret);
   bool ValidateStatements(const ast::StatementList& stmts);
   bool ValidateStorageTexture(const ast::StorageTexture* t);

@@ -521,5 +521,65 @@ TEST_F(ResolverFunctionValidationTest, ReturnIsAtomicFreePlain_StructOfAtomic) {
       "12:34 error: function return type must be an atomic-free plain type");
 }
 
+TEST_F(ResolverFunctionValidationTest, ParameterSotreType_NonAtomicFree) {
+  Structure("S", {Member("m", ty.atomic(ty.i32()))});
+  auto* ret_type = ty.type_name(Source{{12, 34}}, "S");
+  auto* bar = Param(Source{{12, 34}}, "bar", ret_type);
+  Func("f", ast::VariableList{bar}, ty.void_(), {});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: store type of function parameter must be an "
+            "atomic-free type");
+}
+
+TEST_F(ResolverFunctionValidationTest, ParameterSotreType_AtomicFree) {
+  Structure("S", {Member("m", ty.i32())});
+  auto* ret_type = ty.type_name(Source{{12, 34}}, "S");
+  auto* bar = Param(Source{{12, 34}}, "bar", ret_type);
+  Func("f", ast::VariableList{bar}, ty.void_(), {});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+struct TestParams {
+  ast::StorageClass storage_class;
+  bool should_pass;
+};
+
+struct TestWithParams : resolver::ResolverTestWithParam<TestParams> {};
+
+using ResolverFunctionParameterValidationTest = TestWithParams;
+TEST_P(ResolverFunctionParameterValidationTest, SotrageClass) {
+  auto& param = GetParam();
+  auto* ptr_type = ty.pointer(Source{{12, 34}}, ty.i32(), param.storage_class);
+  auto* arg = Param(Source{{12, 34}}, "p", ptr_type);
+  Func("f", ast::VariableList{arg}, ty.void_(), {});
+
+  if (param.should_pass) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    std::stringstream ss;
+    ss << param.storage_class;
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: function parameter of pointer type cannot be in '" +
+                  ss.str() + "' storage class");
+  }
+}
+INSTANTIATE_TEST_SUITE_P(
+    ResolverTest,
+    ResolverFunctionParameterValidationTest,
+    testing::Values(TestParams{ast::StorageClass::kNone, false},
+                    TestParams{ast::StorageClass::kInput, false},
+                    TestParams{ast::StorageClass::kOutput, false},
+                    TestParams{ast::StorageClass::kUniform, false},
+                    TestParams{ast::StorageClass::kWorkgroup, true},
+                    TestParams{ast::StorageClass::kUniformConstant, false},
+                    TestParams{ast::StorageClass::kStorage, false},
+                    TestParams{ast::StorageClass::kImage, false},
+                    TestParams{ast::StorageClass::kPrivate, true},
+                    TestParams{ast::StorageClass::kFunction, true}));
+
 }  // namespace
 }  // namespace tint

@@ -916,8 +916,8 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
   return true;
 }
 
-bool Resolver::ValidateParameter(const ast::Function* func,
-                                 const VariableInfo* info) {
+bool Resolver::ValidateFunctionParameter(const ast::Function* func,
+                                         const VariableInfo* info) {
   if (!ValidateVariable(info)) {
     return false;
   }
@@ -953,6 +953,36 @@ bool Resolver::ValidateParameter(const ast::Function* func,
       return false;
     }
   }
+
+  if (auto* ref = info->type->As<sem::Pointer>()) {
+    auto sc = ref->StorageClass();
+    if (!(sc == ast::StorageClass::kFunction ||
+          sc == ast::StorageClass::kPrivate ||
+          sc == ast::StorageClass::kWorkgroup)) {
+      std::stringstream ss;
+      ss << "function parameter of pointer type cannot be in '" << sc
+         << "' storage class";
+      AddError(ss.str(), info->declaration->source());
+      return false;
+    }
+  }
+
+  if (IsPlain(info->type)) {
+    if (!IsAtomicFreePlain(info->type) &&
+        !IsValidationDisabled(
+            info->declaration->decorations(),
+            ast::DisabledValidation::kIgnoreAtomicFunctionParameter)) {
+      AddError("store type of function parameter must be an atomic-free type",
+               info->declaration->source());
+      return false;
+    }
+  } else if (!info->type->IsAnyOf<sem::Texture, sem::Sampler, sem::Pointer>()) {
+    AddError("store type of function parameter cannot be " +
+                 info->type->FriendlyName(builder_->Symbols()),
+             info->declaration->source());
+    return false;
+  }
+
   return true;
 }
 
@@ -1077,7 +1107,7 @@ bool Resolver::ValidateFunction(const ast::Function* func,
   }
 
   for (auto* param : func->params()) {
-    if (!ValidateParameter(func, variable_to_info_.at(param))) {
+    if (!ValidateFunctionParameter(func, variable_to_info_.at(param))) {
       return false;
     }
   }
