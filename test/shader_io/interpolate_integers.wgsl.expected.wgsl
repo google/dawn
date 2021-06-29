@@ -17,5 +17,6 @@ fn vert_main() -> Interface {
 }
 
 [[stage(fragment)]]
-fn frag_main(inputs : Interface) {
+fn frag_main(inputs : Interface) -> [[location(0)]] i32 {
+  return inputs.i;
 }

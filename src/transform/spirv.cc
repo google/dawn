@@ -320,6 +320,14 @@ Symbol Spirv::HoistToInputVariables(
     new_decorations.push_back(
         ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
             ctx.dst->ID(), ast::DisabledValidation::kIgnoreStorageClass));
+    if (ty->is_integer_scalar_or_vector() &&
+        ast::HasDecoration<ast::LocationDecoration>(new_decorations) &&
+        func->pipeline_stage() == ast::PipelineStage::kFragment) {
+      // Vulkan requires that integer user-defined fragment inputs are
+      // always decorated with `Flat`.
+      new_decorations.push_back(ctx.dst->Interpolate(
+          ast::InterpolationType::kFlat, ast::InterpolationSampling::kNone));
+    }
     auto global_var_symbol = ctx.dst->Sym();
     auto* global_var =
         ctx.dst->Var(global_var_symbol, ctx.Clone(declared_ty),
@@ -378,6 +386,14 @@ void Spirv::HoistToOutputVariables(CloneContext& ctx,
     new_decorations.push_back(
         ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
             ctx.dst->ID(), ast::DisabledValidation::kIgnoreStorageClass));
+    if (ty->is_integer_scalar_or_vector() &&
+        ast::HasDecoration<ast::LocationDecoration>(new_decorations) &&
+        func->pipeline_stage() == ast::PipelineStage::kVertex) {
+      // Vulkan requires that integer user-defined vertex outputs are
+      // always decorated with `Flat`.
+      new_decorations.push_back(ctx.dst->Interpolate(
+          ast::InterpolationType::kFlat, ast::InterpolationSampling::kNone));
+    }
     auto global_var_symbol = ctx.dst->Sym();
     auto* global_var =
         ctx.dst->Var(global_var_symbol, ctx.Clone(declared_ty),

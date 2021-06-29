@@ -30,9 +30,7 @@
                OpName %tint_symbol_9 "tint_symbol_9"
                OpName %main3 "main3"
                OpDecorate %tint_symbol_1 Location 0
-               OpDecorate %tint_symbol_1 Flat
                OpDecorate %tint_symbol_4 Location 1
-               OpDecorate %tint_symbol_4 Flat
                OpDecorate %tint_symbol_7 Location 2
                OpDecorate %tint_symbol_10 Location 3
         %int = OpTypeInt 32 1

@@ -848,11 +848,6 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
       push_annot(spv::Op::OpDecorate,
                  {Operand::Int(var_id), Operand::Int(SpvDecorationLocation),
                   Operand::Int(location->value())});
-      if (type->is_integer_scalar_or_vector()) {
-        // Vulkan requires that integers are always decorated with `Flat`.
-        AddInterpolationDecorations(var_id, ast::InterpolationType::kFlat,
-                                    ast::InterpolationSampling::kNone);
-      }
     } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
       AddInterpolationDecorations(var_id, interpolate->type(),
                                   interpolate->sampling());

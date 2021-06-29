@@ -125,7 +125,7 @@ fn frag_main([[location(0)]] loc_in : u32) -> [[location(0)]] f32 {
 )";
 
   auto* expect = R"(
-[[location(0), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol : u32;
+[[location(0), internal(disable_validation__ignore_storage_class), interpolate(flat)]] var<in> tint_symbol : u32;
 
 [[location(0), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_2 : f32;
 
@@ -165,7 +165,7 @@ fn frag_main([[location(0)]] loc_in : u32) -> [[location(0)]] myf32 {
   auto* expect = R"(
 type myf32 = f32;
 
-[[location(0), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol : u32;
+[[location(0), internal(disable_validation__ignore_storage_class), interpolate(flat)]] var<in> tint_symbol : u32;
 
 [[location(0), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_2 : myf32;
 
@@ -464,6 +464,135 @@ fn vert_main() {
 fn frag_main() {
   let tint_symbol_8 : FragmentIn = FragmentIn(tint_symbol_6, tint_symbol_7);
   let x = ((tint_symbol_8.loc1 + tint_symbol_8.loc2) + tint_symbol_9);
+}
+)";
+
+  auto got = Run<Spirv>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvTest, HandleEntryPointIOTypes_InterpolateAttributes_Integers) {
+  // Test that we add a Flat attribute to integers that are vertex outputs and
+  // fragment inputs, but not vertex inputs or fragment outputs.
+  auto* src = R"(
+struct VertexIn {
+  [[location(0)]] i : i32;
+  [[location(1)]] u : u32;
+  [[location(2)]] vi : vec4<i32>;
+  [[location(3)]] vu : vec4<u32>;
+};
+
+struct VertexOut {
+  [[location(0)]] i : i32;
+  [[location(1)]] u : u32;
+  [[location(2)]] vi : vec4<i32>;
+  [[location(3)]] vu : vec4<u32>;
+  [[builtin(position)]] pos : vec4<f32>;
+};
+
+struct FragmentInterface {
+  [[location(0)]] i : i32;
+  [[location(1)]] u : u32;
+  [[location(2)]] vi : vec4<i32>;
+  [[location(3)]] vu : vec4<u32>;
+};
+
+[[stage(vertex)]]
+fn vert_main(in : VertexIn) -> VertexOut {
+  return VertexOut(in.i, in.u, in.vi, in.vu);
+}
+
+[[stage(fragment)]]
+fn frag_main(inputs : FragmentInterface) -> FragmentInterface {
+  return inputs;
+}
+)";
+
+  auto* expect = R"(
+struct VertexIn {
+  i : i32;
+  u : u32;
+  vi : vec4<i32>;
+  vu : vec4<u32>;
+};
+
+struct VertexOut {
+  i : i32;
+  u : u32;
+  vi : vec4<i32>;
+  vu : vec4<u32>;
+  pos : vec4<f32>;
+};
+
+struct FragmentInterface {
+  i : i32;
+  u : u32;
+  vi : vec4<i32>;
+  vu : vec4<u32>;
+};
+
+[[location(0), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol : i32;
+
+[[location(1), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_1 : u32;
+
+[[location(2), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_2 : vec4<i32>;
+
+[[location(3), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_3 : vec4<u32>;
+
+[[location(0), internal(disable_validation__ignore_storage_class), interpolate(flat)]] var<out> tint_symbol_6 : i32;
+
+[[location(1), internal(disable_validation__ignore_storage_class), interpolate(flat)]] var<out> tint_symbol_7 : u32;
+
+[[location(2), internal(disable_validation__ignore_storage_class), interpolate(flat)]] var<out> tint_symbol_8 : vec4<i32>;
+
+[[location(3), internal(disable_validation__ignore_storage_class), interpolate(flat)]] var<out> tint_symbol_9 : vec4<u32>;
+
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_10 : vec4<f32>;
+
+fn tint_symbol_11(tint_symbol_5 : VertexOut) {
+  tint_symbol_6 = tint_symbol_5.i;
+  tint_symbol_7 = tint_symbol_5.u;
+  tint_symbol_8 = tint_symbol_5.vi;
+  tint_symbol_9 = tint_symbol_5.vu;
+  tint_symbol_10 = tint_symbol_5.pos;
+}
+
+[[stage(vertex)]]
+fn vert_main() {
+  let tint_symbol_4 : VertexIn = VertexIn(tint_symbol, tint_symbol_1, tint_symbol_2, tint_symbol_3);
+  tint_symbol_11(VertexOut(tint_symbol_4.i, tint_symbol_4.u, tint_symbol_4.vi, tint_symbol_4.vu));
+  return;
+}
+
+[[location(0), internal(disable_validation__ignore_storage_class), interpolate(flat)]] var<in> tint_symbol_12 : i32;
+
+[[location(1), internal(disable_validation__ignore_storage_class), interpolate(flat)]] var<in> tint_symbol_13 : u32;
+
+[[location(2), internal(disable_validation__ignore_storage_class), interpolate(flat)]] var<in> tint_symbol_14 : vec4<i32>;
+
+[[location(3), internal(disable_validation__ignore_storage_class), interpolate(flat)]] var<in> tint_symbol_15 : vec4<u32>;
+
+[[location(0), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_18 : i32;
+
+[[location(1), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_19 : u32;
+
+[[location(2), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_20 : vec4<i32>;
+
+[[location(3), internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_21 : vec4<u32>;
+
+fn tint_symbol_22(tint_symbol_17 : FragmentInterface) {
+  tint_symbol_18 = tint_symbol_17.i;
+  tint_symbol_19 = tint_symbol_17.u;
+  tint_symbol_20 = tint_symbol_17.vi;
+  tint_symbol_21 = tint_symbol_17.vu;
+}
+
+[[stage(fragment)]]
+fn frag_main() {
+  let tint_symbol_16 : FragmentInterface = FragmentInterface(tint_symbol_12, tint_symbol_13, tint_symbol_14, tint_symbol_15);
+  tint_symbol_22(tint_symbol_16);
+  return;
 }
 )";
 
