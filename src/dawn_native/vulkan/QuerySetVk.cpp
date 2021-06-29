@@ -77,7 +77,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.pNext = NULL;
         createInfo.flags = 0;
         createInfo.queryType = VulkanQueryType(GetQueryType());
-        createInfo.queryCount = GetQueryCount();
+        createInfo.queryCount = std::max(GetQueryCount(), uint32_t(1u));
         if (GetQueryType() == wgpu::QueryType::PipelineStatistics) {
             createInfo.pipelineStatistics =
                 VulkanQueryPipelineStatisticFlags(GetPipelineStatistics());

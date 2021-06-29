@@ -215,6 +215,9 @@ class OcclusionQueryTests : public QueryTests {
 
 // Test creating query set with the type of Occlusion
 TEST_P(OcclusionQueryTests, QuerySetCreation) {
+    // Zero-sized query set is allowed.
+    CreateOcclusionQuerySet(0);
+
     CreateOcclusionQuerySet(1);
 }
 
@@ -461,19 +464,30 @@ class PipelineStatisticsQueryTests : public QueryTests {
 
         return requiredExtensions;
     }
+
+    wgpu::QuerySet CreateQuerySetForPipelineStatistics(
+        uint32_t queryCount,
+        std::vector<wgpu::PipelineStatisticName> pipelineStatistics = {}) {
+        wgpu::QuerySetDescriptor descriptor;
+        descriptor.count = queryCount;
+        descriptor.type = wgpu::QueryType::PipelineStatistics;
+
+        if (pipelineStatistics.size() > 0) {
+            descriptor.pipelineStatistics = pipelineStatistics.data();
+            descriptor.pipelineStatisticsCount = pipelineStatistics.size();
+        }
+        return device.CreateQuerySet(&descriptor);
+    }
 };
 
 // Test creating query set with the type of PipelineStatistics
 TEST_P(PipelineStatisticsQueryTests, QuerySetCreation) {
-    wgpu::QuerySetDescriptor descriptor;
-    descriptor.count = 1;
-    descriptor.type = wgpu::QueryType::PipelineStatistics;
-    wgpu::PipelineStatisticName pipelineStatistics[2] = {
-        wgpu::PipelineStatisticName::ClipperInvocations,
-        wgpu::PipelineStatisticName::VertexShaderInvocations};
-    descriptor.pipelineStatistics = pipelineStatistics;
-    descriptor.pipelineStatisticsCount = 2;
-    device.CreateQuerySet(&descriptor);
+    // Zero-sized query set is allowed.
+    CreateQuerySetForPipelineStatistics(0, {wgpu::PipelineStatisticName::ClipperInvocations,
+                                            wgpu::PipelineStatisticName::VertexShaderInvocations});
+
+    CreateQuerySetForPipelineStatistics(1, {wgpu::PipelineStatisticName::ClipperInvocations,
+                                            wgpu::PipelineStatisticName::VertexShaderInvocations});
 }
 
 DAWN_INSTANTIATE_TEST(PipelineStatisticsQueryTests,
@@ -529,6 +543,9 @@ class TimestampQueryTests : public QueryTests {
 
 // Test creating query set with the type of Timestamp
 TEST_P(TimestampQueryTests, QuerySetCreation) {
+    // Zero-sized query set is allowed.
+    CreateQuerySetForTimestamp(0);
+
     CreateQuerySetForTimestamp(1);
 }
 

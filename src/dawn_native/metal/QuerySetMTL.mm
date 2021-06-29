@@ -42,7 +42,7 @@ namespace dawn_native { namespace metal {
             }
             ASSERT(descriptor.counterSet != nullptr);
 
-            descriptor.sampleCount = count;
+            descriptor.sampleCount = static_cast<NSUInteger>(std::max(count, uint32_t(1u)));
             descriptor.storageMode = MTLStorageModePrivate;
             if (device->IsToggleEnabled(Toggle::MetalUseSharedModeForCounterSampleBuffer)) {
                 descriptor.storageMode = MTLStorageModeShared;
@@ -75,7 +75,8 @@ namespace dawn_native { namespace metal {
         switch (GetQueryType()) {
             case wgpu::QueryType::Occlusion: {
                 // Create buffer for writing 64-bit results.
-                NSUInteger bufferSize = static_cast<NSUInteger>(GetQueryCount() * sizeof(uint64_t));
+                NSUInteger bufferSize = static_cast<NSUInteger>(
+                    std::max(GetQueryCount() * sizeof(uint64_t), size_t(4u)));
                 mVisibilityBuffer = AcquireNSPRef([device->GetMTLDevice()
                     newBufferWithLength:bufferSize
                                 options:MTLResourceStorageModePrivate]);
