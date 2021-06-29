@@ -19,6 +19,8 @@ target_sources(dawn_utils PRIVATE
     "ComboRenderPipelineDescriptor.cpp"
     "ComboRenderPipelineDescriptor.h"
     "PlatformDebugLogger.h"
+    "ScopedAutoreleasePool.cpp"
+    "ScopedAutoreleasePool.h"
     "SystemUtils.cpp"
     "SystemUtils.h"
     "TerribleCommandBuffer.cpp"
