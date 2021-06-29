@@ -1,0 +1,120 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 54
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %vert_main "vert_main" %tint_pointsize %tint_symbol_1 %tint_symbol_2 %tint_symbol_3 %tint_symbol_4 %tint_symbol_5
+               OpEntryPoint Fragment %frag_main "frag_main"
+               OpExecutionMode %frag_main OriginUpperLeft
+               OpName %tint_pointsize "tint_pointsize"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %tint_symbol_2 "tint_symbol_2"
+               OpName %tint_symbol_3 "tint_symbol_3"
+               OpName %tint_symbol_4 "tint_symbol_4"
+               OpName %tint_symbol_5 "tint_symbol_5"
+               OpName %tint_symbol_7 "tint_symbol_7"
+               OpName %tint_symbol_8 "tint_symbol_8"
+               OpName %tint_symbol_9 "tint_symbol_9"
+               OpName %tint_symbol_10 "tint_symbol_10"
+               OpName %tint_symbol_11 "tint_symbol_11"
+               OpName %Interface "Interface"
+               OpMemberName %Interface 0 "i"
+               OpMemberName %Interface 1 "u"
+               OpMemberName %Interface 2 "vi"
+               OpMemberName %Interface 3 "vu"
+               OpMemberName %Interface 4 "pos"
+               OpName %tint_symbol_6 "tint_symbol_6"
+               OpName %tint_symbol "tint_symbol"
+               OpName %vert_main "vert_main"
+               OpName %frag_main "frag_main"
+               OpDecorate %tint_pointsize BuiltIn PointSize
+               OpDecorate %tint_symbol_1 Location 0
+               OpDecorate %tint_symbol_1 Flat
+               OpDecorate %tint_symbol_2 Location 1
+               OpDecorate %tint_symbol_2 Flat
+               OpDecorate %tint_symbol_3 Location 2
+               OpDecorate %tint_symbol_3 Flat
+               OpDecorate %tint_symbol_4 Location 3
+               OpDecorate %tint_symbol_4 Flat
+               OpDecorate %tint_symbol_5 BuiltIn Position
+               OpDecorate %tint_symbol_7 Location 0
+               OpDecorate %tint_symbol_7 Flat
+               OpDecorate %tint_symbol_8 Location 1
+               OpDecorate %tint_symbol_8 Flat
+               OpDecorate %tint_symbol_9 Location 2
+               OpDecorate %tint_symbol_9 Flat
+               OpDecorate %tint_symbol_10 Location 3
+               OpDecorate %tint_symbol_10 Flat
+               OpDecorate %tint_symbol_11 BuiltIn FragCoord
+               OpMemberDecorate %Interface 0 Offset 0
+               OpMemberDecorate %Interface 1 Offset 4
+               OpMemberDecorate %Interface 2 Offset 16
+               OpMemberDecorate %Interface 3 Offset 32
+               OpMemberDecorate %Interface 4 Offset 48
+      %float = OpTypeFloat 32
+%_ptr_Output_float = OpTypePointer Output %float
+          %4 = OpConstantNull %float
+%tint_pointsize = OpVariable %_ptr_Output_float Output %4
+        %int = OpTypeInt 32 1
+%_ptr_Output_int = OpTypePointer Output %int
+          %8 = OpConstantNull %int
+%tint_symbol_1 = OpVariable %_ptr_Output_int Output %8
+       %uint = OpTypeInt 32 0
+%_ptr_Output_uint = OpTypePointer Output %uint
+         %12 = OpConstantNull %uint
+%tint_symbol_2 = OpVariable %_ptr_Output_uint Output %12
+      %v4int = OpTypeVector %int 4
+%_ptr_Output_v4int = OpTypePointer Output %v4int
+         %16 = OpConstantNull %v4int
+%tint_symbol_3 = OpVariable %_ptr_Output_v4int Output %16
+     %v4uint = OpTypeVector %uint 4
+%_ptr_Output_v4uint = OpTypePointer Output %v4uint
+         %20 = OpConstantNull %v4uint
+%tint_symbol_4 = OpVariable %_ptr_Output_v4uint Output %20
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+         %24 = OpConstantNull %v4float
+%tint_symbol_5 = OpVariable %_ptr_Output_v4float Output %24
+%_ptr_Input_int = OpTypePointer Input %int
+%tint_symbol_7 = OpVariable %_ptr_Input_int Input
+%_ptr_Input_uint = OpTypePointer Input %uint
+%tint_symbol_8 = OpVariable %_ptr_Input_uint Input
+%_ptr_Input_v4int = OpTypePointer Input %v4int
+%tint_symbol_9 = OpVariable %_ptr_Input_v4int Input
+%_ptr_Input_v4uint = OpTypePointer Input %v4uint
+%tint_symbol_10 = OpVariable %_ptr_Input_v4uint Input
+%_ptr_Input_v4float = OpTypePointer Input %v4float
+%tint_symbol_11 = OpVariable %_ptr_Input_v4float Input
+       %void = OpTypeVoid
+  %Interface = OpTypeStruct %int %uint %v4int %v4uint %v4float
+         %35 = OpTypeFunction %void %Interface
+         %46 = OpTypeFunction %void
+    %float_1 = OpConstant %float 1
+         %51 = OpConstantNull %Interface
+%tint_symbol_6 = OpFunction %void None %35
+%tint_symbol = OpFunctionParameter %Interface
+         %40 = OpLabel
+         %41 = OpCompositeExtract %int %tint_symbol 0
+               OpStore %tint_symbol_1 %41
+         %42 = OpCompositeExtract %uint %tint_symbol 1
+               OpStore %tint_symbol_2 %42
+         %43 = OpCompositeExtract %v4int %tint_symbol 2
+               OpStore %tint_symbol_3 %43
+         %44 = OpCompositeExtract %v4uint %tint_symbol 3
+               OpStore %tint_symbol_4 %44
+         %45 = OpCompositeExtract %v4float %tint_symbol 4
+               OpStore %tint_symbol_5 %45
+               OpReturn
+               OpFunctionEnd
+  %vert_main = OpFunction %void None %46
+         %48 = OpLabel
+               OpStore %tint_pointsize %float_1
+         %50 = OpFunctionCall %void %tint_symbol_6 %51
+               OpReturn
+               OpFunctionEnd
+  %frag_main = OpFunction %void None %46
+         %53 = OpLabel
+               OpReturn
+               OpFunctionEnd

@@ -26,8 +26,10 @@
                OpDecorate %tint_pointsize BuiltIn PointSize
                OpDecorate %tint_symbol_1 BuiltIn Position
                OpDecorate %tint_symbol_2 Location 0
+               OpDecorate %tint_symbol_2 Flat
                OpDecorate %tint_symbol_5 BuiltIn Position
                OpDecorate %tint_symbol_6 Location 0
+               OpDecorate %tint_symbol_6 Flat
                OpMemberDecorate %VertexOutput 0 Offset 0
                OpMemberDecorate %VertexOutput 1 Offset 16
       %float = OpTypeFloat 32

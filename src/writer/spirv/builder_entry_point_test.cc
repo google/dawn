@@ -133,6 +133,7 @@ OpName %10 "tint_symbol_3"
 OpName %11 "tint_symbol_1"
 OpName %14 "frag_main"
 OpDecorate %1 Location 0
+OpDecorate %1 Flat
 OpDecorate %4 Location 0
 %3 = OpTypeInt 32 0
 %2 = OpTypePointer Input %3

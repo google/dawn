@@ -25,8 +25,10 @@
                OpName %tint_symbol "tint_symbol"
                OpName %main "main"
                OpDecorate %tint_symbol_1 Location 0
+               OpDecorate %tint_symbol_1 Flat
                OpDecorate %tint_symbol_2 BuiltIn FragDepth
                OpDecorate %tint_symbol_3 Location 1
+               OpDecorate %tint_symbol_3 Flat
                OpDecorate %tint_symbol_4 Location 2
                OpDecorate %_arr_uint_uint_1 ArrayStride 4
                OpDecorate %tint_symbol_5 BuiltIn SampleMask

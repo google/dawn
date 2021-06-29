@@ -23,7 +23,9 @@
                OpName %main "main"
                OpDecorate %tint_pointsize BuiltIn PointSize
                OpDecorate %tint_symbol_1 Location 0
+               OpDecorate %tint_symbol_1 Flat
                OpDecorate %tint_symbol_2 Location 1
+               OpDecorate %tint_symbol_2 Flat
                OpDecorate %tint_symbol_3 Location 2
                OpDecorate %tint_symbol_4 Location 3
                OpDecorate %tint_symbol_5 BuiltIn Position

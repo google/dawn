@@ -848,8 +848,14 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
       push_annot(spv::Op::OpDecorate,
                  {Operand::Int(var_id), Operand::Int(SpvDecorationLocation),
                   Operand::Int(location->value())});
+      if (type->is_integer_scalar_or_vector()) {
+        // Vulkan requires that integers are always decorated with `Flat`.
+        AddInterpolationDecorations(var_id, ast::InterpolationType::kFlat,
+                                    ast::InterpolationSampling::kNone);
+      }
     } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
-      AddInterpolationDecorations(var_id, interpolate);
+      AddInterpolationDecorations(var_id, interpolate->type(),
+                                  interpolate->sampling());
     } else if (auto* binding = deco->As<ast::BindingDecoration>()) {
       push_annot(spv::Op::OpDecorate,
                  {Operand::Int(var_id), Operand::Int(SpvDecorationBinding),
@@ -4011,10 +4017,10 @@ SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin,
   return SpvBuiltInMax;
 }
 
-void Builder::AddInterpolationDecorations(
-    uint32_t id,
-    ast::InterpolateDecoration* interpolate) {
-  switch (interpolate->type()) {
+void Builder::AddInterpolationDecorations(uint32_t id,
+                                          ast::InterpolationType type,
+                                          ast::InterpolationSampling sampling) {
+  switch (type) {
     case ast::InterpolationType::kLinear:
       push_annot(spv::Op::OpDecorate,
                  {Operand::Int(id), Operand::Int(SpvDecorationNoPerspective)});
@@ -4026,7 +4032,7 @@ void Builder::AddInterpolationDecorations(
     case ast::InterpolationType::kPerspective:
       break;
   }
-  switch (interpolate->sampling()) {
+  switch (sampling) {
     case ast::InterpolationSampling::kCentroid:
       push_annot(spv::Op::OpDecorate,
                  {Operand::Int(id), Operand::Int(SpvDecorationCentroid)});

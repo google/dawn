@@ -25,6 +25,7 @@
                OpDecorate %output Binding 0
                OpDecorate %tint_symbol Location 0
                OpDecorate %tint_symbol_1 Location 1
+               OpDecorate %tint_symbol_1 Flat
                OpDecorate %tint_symbol_2 BuiltIn FragCoord
       %float = OpTypeFloat 32
        %uint = OpTypeInt 32 0

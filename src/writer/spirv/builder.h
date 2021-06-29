@@ -212,9 +212,11 @@ class Builder {
   /// Converts an interpolate attribute to SPIR-V decorations and pushes a
   /// capability if needed.
   /// @param id the id to decorate
-  /// @param interpolate the interpolation attribute to convert
+  /// @param type the interpolation type
+  /// @param sampling the interpolation sampling
   void AddInterpolationDecorations(uint32_t id,
-                                   ast::InterpolateDecoration* interpolate);
+                                   ast::InterpolationType type,
+                                   ast::InterpolationSampling sampling);
 
   /// Generates a label for the given id. Emits an error and returns false if
   /// we're currently outside a function.
