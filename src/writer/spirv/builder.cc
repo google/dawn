@@ -89,11 +89,17 @@ bool LastIsTerminator(const ast::BlockStatement* stmts) {
   }
 
   auto* last = stmts->last();
-  return last->Is<ast::BreakStatement>() ||
-         last->Is<ast::ContinueStatement>() ||
-         last->Is<ast::DiscardStatement>() ||
-         last->Is<ast::ReturnStatement>() ||
-         last->Is<ast::FallthroughStatement>();
+  if (last->Is<ast::BreakStatement>() || last->Is<ast::ContinueStatement>() ||
+      last->Is<ast::DiscardStatement>() || last->Is<ast::ReturnStatement>() ||
+      last->Is<ast::FallthroughStatement>()) {
+    return true;
+  }
+
+  if (auto* block = last->As<ast::BlockStatement>()) {
+    return LastIsTerminator(block);
+  }
+
+  return false;
 }
 
 /// Returns the matrix type that is `type` or that is wrapped by

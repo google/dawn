@@ -1,0 +1,299 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Mat4x4_ {
+  /* 0x0000 */ packed_float4 mx;
+  /* 0x0010 */ packed_float4 my;
+  /* 0x0020 */ packed_float4 mz;
+  /* 0x0030 */ packed_float4 mw;
+};
+struct Mat4x3_ {
+  /* 0x0000 */ packed_float4 mx;
+  /* 0x0010 */ packed_float4 my;
+  /* 0x0020 */ packed_float4 mz;
+};
+struct Mat4x2_ {
+  /* 0x0000 */ packed_float4 mx;
+  /* 0x0010 */ packed_float4 my;
+};
+struct ub_SceneParams {
+  /* 0x0000 */ Mat4x4_ u_Projection;
+};
+struct tint_array_wrapper {
+  /* 0x0000 */ Mat4x2_ arr[1];
+};
+struct ub_MaterialParams {
+  /* 0x0000 */ tint_array_wrapper u_TexMtx;
+  /* 0x0020 */ packed_float4 u_Misc0_;
+};
+struct tint_array_wrapper_1 {
+  /* 0x0000 */ Mat4x3_ arr[32];
+};
+struct ub_PacketParams {
+  /* 0x0000 */ tint_array_wrapper_1 u_PosMtx;
+};
+struct VertexOutput {
+  float4 v_Color;
+  float2 v_TexCoord;
+  float4 member;
+};
+struct tint_symbol_2 {
+  float3 a_Position [[attribute(0)]];
+  float2 a_UV [[attribute(1)]];
+  float4 a_Color [[attribute(2)]];
+  float3 a_Normal [[attribute(3)]];
+  float a_PosMtxIdx [[attribute(4)]];
+};
+struct tint_symbol_3 {
+  float4 v_Color [[user(locn0)]];
+  float2 v_TexCoord [[user(locn1)]];
+  float4 member [[position]];
+};
+
+float3 Mat4x3GetCol0_(Mat4x3_ m) {
+  Mat4x3_ m1 = {};
+  m1 = m;
+  Mat4x3_ const _e2 = m1;
+  Mat4x3_ const _e5 = m1;
+  Mat4x3_ const _e8 = m1;
+  return float3(_e2.mx.x, _e5.my.x, _e8.mz.x);
+}
+
+float3 Mat4x3GetCol1_(Mat4x3_ m2) {
+  Mat4x3_ m3 = {};
+  m3 = m2;
+  Mat4x3_ const _e2 = m3;
+  Mat4x3_ const _e5 = m3;
+  Mat4x3_ const _e8 = m3;
+  return float3(_e2.mx.y, _e5.my.y, _e8.mz.y);
+}
+
+float3 Mat4x3GetCol2_(Mat4x3_ m4) {
+  Mat4x3_ m5 = {};
+  m5 = m4;
+  Mat4x3_ const _e2 = m5;
+  Mat4x3_ const _e5 = m5;
+  Mat4x3_ const _e8 = m5;
+  return float3(_e2.mx.z, _e5.my.z, _e8.mz.z);
+}
+
+float3 Mat4x3GetCol3_(Mat4x3_ m6) {
+  Mat4x3_ m7 = {};
+  m7 = m6;
+  Mat4x3_ const _e2 = m7;
+  Mat4x3_ const _e5 = m7;
+  Mat4x3_ const _e8 = m7;
+  return float3(_e2.mx.w, _e5.my.w, _e8.mz.w);
+}
+
+float4 Mul(Mat4x4_ m8, float4 v) {
+  Mat4x4_ m9 = {};
+  float4 v1 = 0.0f;
+  m9 = m8;
+  v1 = v;
+  Mat4x4_ const _e4 = m9;
+  float4 const _e6 = v1;
+  Mat4x4_ const _e8 = m9;
+  float4 const _e10 = v1;
+  Mat4x4_ const _e12 = m9;
+  float4 const _e14 = v1;
+  Mat4x4_ const _e16 = m9;
+  float4 const _e18 = v1;
+  return float4(dot(_e4.mx, _e6), dot(_e8.my, _e10), dot(_e12.mz, _e14), dot(_e16.mw, _e18));
+}
+
+float3 Mul1(Mat4x3_ m10, float4 v2) {
+  Mat4x3_ m11 = {};
+  float4 v3 = 0.0f;
+  m11 = m10;
+  v3 = v2;
+  Mat4x3_ const _e4 = m11;
+  float4 const _e6 = v3;
+  Mat4x3_ const _e8 = m11;
+  float4 const _e10 = v3;
+  Mat4x3_ const _e12 = m11;
+  float4 const _e14 = v3;
+  return float3(dot(_e4.mx, _e6), dot(_e8.my, _e10), dot(_e12.mz, _e14));
+}
+
+float2 Mul2(Mat4x2_ m12, float4 v4) {
+  Mat4x2_ m13 = {};
+  float4 v5 = 0.0f;
+  m13 = m12;
+  v5 = v4;
+  Mat4x2_ const _e4 = m13;
+  float4 const _e6 = v5;
+  Mat4x2_ const _e8 = m13;
+  float4 const _e10 = v5;
+  return float2(dot(_e4.mx, _e6), dot(_e8.my, _e10));
+}
+
+float4 Mul3(float3 v6, Mat4x3_ m14) {
+  float3 v7 = 0.0f;
+  Mat4x3_ m15 = {};
+  v7 = v6;
+  m15 = m14;
+  Mat4x3_ const _e5 = m15;
+  float3 const _e6 = Mat4x3GetCol0_(_e5);
+  float3 const _e7 = v7;
+  Mat4x3_ const _e10 = m15;
+  float3 const _e11 = Mat4x3GetCol1_(_e10);
+  float3 const _e12 = v7;
+  Mat4x3_ const _e15 = m15;
+  float3 const _e16 = Mat4x3GetCol2_(_e15);
+  float3 const _e17 = v7;
+  Mat4x3_ const _e20 = m15;
+  float3 const _e21 = Mat4x3GetCol3_(_e20);
+  float3 const _e22 = v7;
+  return float4(dot(_e6, _e7), dot(_e11, _e12), dot(_e16, _e17), dot(_e21, _e22));
+}
+
+Mat4x4_ _Mat4x4_(float n) {
+  float n1 = 0.0f;
+  Mat4x4_ o = {};
+  n1 = n;
+  float const _e4 = n1;
+  o.mx = float4(_e4, 0.0f, 0.0f, 0.0f);
+  float const _e11 = n1;
+  o.my = float4(0.0f, _e11, 0.0f, 0.0f);
+  float const _e18 = n1;
+  o.mz = float4(0.0f, 0.0f, _e18, 0.0f);
+  float const _e25 = n1;
+  o.mw = float4(0.0f, 0.0f, 0.0f, _e25);
+  Mat4x4_ const _e27 = o;
+  return _e27;
+}
+
+Mat4x4_ _Mat4x4_1(Mat4x3_ m16) {
+  Mat4x3_ m17 = {};
+  Mat4x4_ o1 = {};
+  m17 = m16;
+  Mat4x4_ const _e4 = _Mat4x4_(1.0f);
+  o1 = _e4;
+  Mat4x3_ const _e7 = m17;
+  o1.mx = _e7.mx;
+  Mat4x3_ const _e10 = m17;
+  o1.my = _e10.my;
+  Mat4x3_ const _e13 = m17;
+  o1.mz = _e13.mz;
+  Mat4x4_ const _e15 = o1;
+  return _e15;
+}
+
+Mat4x4_ _Mat4x4_2(Mat4x2_ m18) {
+  Mat4x2_ m19 = {};
+  Mat4x4_ o2 = {};
+  m19 = m18;
+  Mat4x4_ const _e4 = _Mat4x4_(1.0f);
+  o2 = _e4;
+  Mat4x2_ const _e7 = m19;
+  o2.mx = _e7.mx;
+  Mat4x2_ const _e10 = m19;
+  o2.my = _e10.my;
+  Mat4x4_ const _e12 = o2;
+  return _e12;
+}
+
+Mat4x3_ _Mat4x3_(float n2) {
+  float n3 = 0.0f;
+  Mat4x3_ o3 = {};
+  n3 = n2;
+  float const _e4 = n3;
+  o3.mx = float4(_e4, 0.0f, 0.0f, 0.0f);
+  float const _e11 = n3;
+  o3.my = float4(0.0f, _e11, 0.0f, 0.0f);
+  float const _e18 = n3;
+  o3.mz = float4(0.0f, 0.0f, _e18, 0.0f);
+  Mat4x3_ const _e21 = o3;
+  return _e21;
+}
+
+Mat4x3_ _Mat4x3_1(Mat4x4_ m20) {
+  Mat4x4_ m21 = {};
+  Mat4x3_ o4 = {};
+  m21 = m20;
+  Mat4x4_ const _e4 = m21;
+  o4.mx = _e4.mx;
+  Mat4x4_ const _e7 = m21;
+  o4.my = _e7.my;
+  Mat4x4_ const _e10 = m21;
+  o4.mz = _e10.mz;
+  Mat4x3_ const _e12 = o4;
+  return _e12;
+}
+
+void main1(constant ub_PacketParams& global2, constant ub_SceneParams& global, constant ub_MaterialParams& global1, thread float* const tint_symbol_6, thread float3* const tint_symbol_7, thread float4* const tint_symbol_8, thread float4* const tint_symbol_9, thread float4* const tint_symbol_10, thread float3* const tint_symbol_11, thread float2* const tint_symbol_12, thread float2* const tint_symbol_13) {
+  Mat4x3_ t_PosMtx = {};
+  float2 t_TexSpaceCoord = 0.0f;
+  float const _e15 = *(tint_symbol_6);
+  Mat4x3_ const _e18 = global2.u_PosMtx.arr[int(_e15)];
+  t_PosMtx = _e18;
+  Mat4x3_ const _e23 = t_PosMtx;
+  Mat4x4_ const _e24 = _Mat4x4_1(_e23);
+  float3 const _e25 = *(tint_symbol_7);
+  Mat4x3_ const _e29 = t_PosMtx;
+  Mat4x4_ const _e30 = _Mat4x4_1(_e29);
+  float3 const _e31 = *(tint_symbol_7);
+  float4 const _e34 = Mul(_e30, float4(_e31, 1.0f));
+  Mat4x4_ const _e35 = global.u_Projection;
+  Mat4x3_ const _e37 = t_PosMtx;
+  Mat4x4_ const _e38 = _Mat4x4_1(_e37);
+  float3 const _e39 = *(tint_symbol_7);
+  Mat4x3_ const _e43 = t_PosMtx;
+  Mat4x4_ const _e44 = _Mat4x4_1(_e43);
+  float3 const _e45 = *(tint_symbol_7);
+  float4 const _e48 = Mul(_e44, float4(_e45, 1.0f));
+  float4 const _e49 = Mul(_e35, _e48);
+  *(tint_symbol_8) = _e49;
+  float4 const _e50 = *(tint_symbol_9);
+  *(tint_symbol_10) = _e50;
+  float4 const _e52 = global1.u_Misc0_;
+  if ((_e52.x == 2.0f)) {
+    {
+      float3 const _e59 = *(tint_symbol_11);
+      Mat4x2_ const _e64 = global1.u_TexMtx.arr[0];
+      float3 const _e65 = *(tint_symbol_11);
+      float2 const _e68 = Mul2(_e64, float4(_e65, 1.0f));
+      *(tint_symbol_12) = _e68.xy;
+      return;
+    }
+  } else {
+    {
+      float2 const _e73 = *(tint_symbol_13);
+      Mat4x2_ const _e79 = global1.u_TexMtx.arr[0];
+      float2 const _e80 = *(tint_symbol_13);
+      float2 const _e84 = Mul2(_e79, float4(_e80, 1.0f, 1.0f));
+      *(tint_symbol_12) = _e84.xy;
+      return;
+    }
+  }
+}
+
+vertex tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]], constant ub_PacketParams& global2 [[buffer(2)]], constant ub_SceneParams& global [[buffer(0)]], constant ub_MaterialParams& global1 [[buffer(1)]]) {
+  thread float3 tint_symbol_14 = 0.0f;
+  thread float2 tint_symbol_15 = 0.0f;
+  thread float4 tint_symbol_16 = 0.0f;
+  thread float3 tint_symbol_17 = 0.0f;
+  thread float tint_symbol_18 = 0.0f;
+  thread float4 tint_symbol_19 = 0.0f;
+  thread float4 tint_symbol_20 = 0.0f;
+  thread float2 tint_symbol_21 = 0.0f;
+  float3 const a_Position = tint_symbol_1.a_Position;
+  float2 const a_UV = tint_symbol_1.a_UV;
+  float4 const a_Color = tint_symbol_1.a_Color;
+  float3 const a_Normal = tint_symbol_1.a_Normal;
+  float const a_PosMtxIdx = tint_symbol_1.a_PosMtxIdx;
+  tint_symbol_14 = a_Position;
+  tint_symbol_15 = a_UV;
+  tint_symbol_16 = a_Color;
+  tint_symbol_17 = a_Normal;
+  tint_symbol_18 = a_PosMtxIdx;
+  main1(global2, global, global1, &(tint_symbol_18), &(tint_symbol_14), &(tint_symbol_19), &(tint_symbol_16), &(tint_symbol_20), &(tint_symbol_17), &(tint_symbol_21), &(tint_symbol_15));
+  float4 const _e11 = tint_symbol_20;
+  float2 const _e13 = tint_symbol_21;
+  float4 const _e15 = tint_symbol_19;
+  VertexOutput const tint_symbol_4 = {.v_Color=_e11, .v_TexCoord=_e13, .member=_e15};
+  tint_symbol_3 const tint_symbol_5 = {.v_Color=tint_symbol_4.v_Color, .v_TexCoord=tint_symbol_4.v_TexCoord, .member=tint_symbol_4.member};
+  return tint_symbol_5;
+}
+

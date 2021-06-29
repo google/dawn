@@ -501,6 +501,38 @@ OpReturnValue %5
 )");
 }
 
+TEST_F(BuilderTest, If_WithNestedBlockReturnValue) {
+  // if (true) {
+  //  {
+  //    {
+  //      {
+  //        return false;
+  //      }
+  //    }
+  //  }
+  // }
+  // return true;
+  auto* if_body = Block(Block(Block(Block(Return(false)))));
+  auto* expr = If(Expr(true), if_body);
+  Func("test", {}, ty.bool_(), {expr, Return(true)}, {});
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+
+  EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
+%2 = OpConstantTrue %1
+%5 = OpConstantFalse %1
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpSelectionMerge %3 None
+OpBranchConditional %2 %4 %3
+%4 = OpLabel
+OpReturnValue %5
+%3 = OpLabel
+)");
+}
+
 TEST_F(BuilderTest, If_WithLoad_Bug327) {
   // var a : bool;
   // if (a) {
