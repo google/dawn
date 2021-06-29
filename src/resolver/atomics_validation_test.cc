@@ -61,7 +61,7 @@ TEST_F(ResolverAtomicValidationTest, Local) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: cannot declare an atomic var in a function scope");
+            "12:34 error: atomic var requires workgroup storage");
 }
 
 TEST_F(ResolverAtomicValidationTest, NoAtomicExpr) {

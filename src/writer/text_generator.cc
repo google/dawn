@@ -14,10 +14,13 @@
 
 #include "src/writer/text_generator.h"
 
+#include <limits>
+
 namespace tint {
 namespace writer {
 
-TextGenerator::TextGenerator() = default;
+TextGenerator::TextGenerator(const Program* program)
+    : program_(program), builder_(ProgramBuilder::Wrap(program)) {}
 
 TextGenerator::~TextGenerator() = default;
 
@@ -29,6 +32,10 @@ void TextGenerator::make_indent(std::ostream& out) const {
   for (size_t i = 0; i < indent_; i++) {
     out << " ";
   }
+}
+
+std::string TextGenerator::UniqueIdentifier(const std::string& prefix) {
+  return builder_.Symbols().NameFor(builder_.Symbols().New(prefix));
 }
 
 TextGenerator::LineWriter::LineWriter(TextGenerator* generator)

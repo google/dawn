@@ -1,25 +1,21 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-
-[[block]]
+using namespace metal;
 struct SB_RW {
-  arg_0 : atomic<i32>;
+  /* 0x0000 */ atomic_int arg_0;
 };
 
-[[group(0), binding(0)]] var<storage, read_write> sb_rw : SB_RW;
-
-fn atomicExchange_f2e22f() {
-  var res : i32 = atomicExchange(&(sb_rw.arg_0), 1);
+void atomicExchange_f2e22f(device SB_RW& sb_rw) {
+  int res = atomic_exchange_explicit(&(sb_rw.arg_0), 1, memory_order_relaxed);
 }
 
-[[stage(fragment)]]
-fn fragment_main() {
-  atomicExchange_f2e22f();
+fragment void fragment_main(device SB_RW& sb_rw [[buffer(0)]]) {
+  atomicExchange_f2e22f(sb_rw);
+  return;
 }
 
-[[stage(compute)]]
-fn compute_main() {
-  atomicExchange_f2e22f();
+kernel void compute_main(device SB_RW& sb_rw [[buffer(0)]]) {
+  atomicExchange_f2e22f(sb_rw);
+  return;
 }
 
-Failed to generate: error: unknown type in EmitType: __atomic__i32

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/writer/msl/generator.h"
+#include "src/writer/msl/generator_impl.h"
 
 namespace tint {
 namespace writer {

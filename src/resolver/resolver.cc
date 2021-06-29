@@ -909,21 +909,13 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
   // https://gpuweb.github.io/gpuweb/wgsl/#atomic-types
   // Atomic types may only be instantiated by variables in the workgroup storage
   // class or by storage buffer variables with a read_write access mode.
-  if (info->type->UnwrapRef()->Is<sem::Atomic>()) {
-    if (info->kind != VariableKind::kGlobal) {
-      // Neither storage nor workgroup storage classes can be used in function
-      // scopes.
-      AddError("cannot declare an atomic var in a function scope",
-               info->declaration->type()->source());
-      return false;
-    }
-    if (info->storage_class != ast::StorageClass::kWorkgroup) {
-      // Storage buffers require a structure, so just check for workgroup
-      // storage here.
-      AddError("atomic var requires workgroup storage",
-               info->declaration->type()->source());
-      return false;
-    }
+  if (info->type->UnwrapRef()->Is<sem::Atomic>() &&
+      info->storage_class != ast::StorageClass::kWorkgroup) {
+    // Storage buffers require a structure, so just check for workgroup
+    // storage here.
+    AddError("atomic var requires workgroup storage",
+             info->declaration->type()->source());
+    return false;
   }
 
   return true;

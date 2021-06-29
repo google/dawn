@@ -18,12 +18,13 @@
 #include <memory>
 #include <string>
 
-#include "src/writer/msl/generator_impl.h"
 #include "src/writer/text.h"
 
 namespace tint {
 namespace writer {
 namespace msl {
+
+class GeneratorImpl;
 
 /// Class to generate MSL source
 class Generator : public Text {
@@ -46,6 +47,9 @@ class Generator : public Text {
   std::string error() const;
 
  private:
+  Generator(const Generator&) = delete;
+  Generator& operator=(const Generator&) = delete;
+
   std::unique_ptr<GeneratorImpl> impl_;
 };
 

@@ -15,7 +15,6 @@
 #include "src/writer/wgsl/generator_impl.h"
 
 #include <algorithm>
-#include <limits>
 
 #include "src/ast/access.h"
 #include "src/ast/alias.h"
@@ -60,8 +59,7 @@ namespace tint {
 namespace writer {
 namespace wgsl {
 
-GeneratorImpl::GeneratorImpl(const Program* program)
-    : TextGenerator(), program_(program) {}
+GeneratorImpl::GeneratorImpl(const Program* program) : TextGenerator(program) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 
@@ -1057,24 +1055,6 @@ bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
   out_ << "}" << std::endl;
 
   return true;
-}
-
-std::string GeneratorImpl::UniqueIdentifier(const std::string& suffix) {
-  auto const limit =
-      std::numeric_limits<decltype(next_unique_identifier_suffix)>::max();
-  while (next_unique_identifier_suffix < limit) {
-    auto ident = "tint_" + std::to_string(next_unique_identifier_suffix);
-    if (!suffix.empty()) {
-      ident += "_" + suffix;
-    }
-    next_unique_identifier_suffix++;
-    if (!program_->Symbols().Get(ident).IsValid()) {
-      return ident;
-    }
-  }
-  diagnostics_.add_error(diag::System::Writer,
-                         "Unable to generate a unique WGSL identifier");
-  return "<invalid-ident>";
 }
 
 }  // namespace wgsl

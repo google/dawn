@@ -361,11 +361,6 @@ class GeneratorImpl : public TextGenerator {
       ast::InterpolationType type,
       ast::InterpolationSampling sampling) const;
 
-  /// Generate a unique name
-  /// @param prefix the name prefix
-  /// @returns a unique name
-  std::string generate_name(const std::string& prefix);
-
  private:
   enum class VarType { kIn, kOut };
 
@@ -376,25 +371,6 @@ class GeneratorImpl : public TextGenerator {
 
   std::string get_buffer_name(ast::Expression* expr);
 
-  /// @returns the resolved type of the ast::Expression `expr`
-  /// @param expr the expression
-  sem::Type* TypeOf(ast::Expression* expr) const {
-    return builder_.TypeOf(expr);
-  }
-
-  /// @returns the resolved type of the ast::Type `type`
-  /// @param type the type
-  const sem::Type* TypeOf(const ast::Type* type) const {
-    return builder_.TypeOf(type);
-  }
-
-  /// @returns the resolved type of the ast::TypeDecl `type_decl`
-  /// @param type_decl the type
-  const sem::Type* TypeOf(const ast::TypeDecl* type_decl) const {
-    return builder_.TypeOf(type_decl);
-  }
-
-  ProgramBuilder builder_;
   std::function<bool()> emit_continuing_;
   std::unordered_map<const sem::Struct*, std::string> structure_builders_;
 };

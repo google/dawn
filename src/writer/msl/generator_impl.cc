@@ -33,6 +33,7 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/void.h"
 #include "src/sem/array.h"
+#include "src/sem/atomic_type.h"
 #include "src/sem/bool_type.h"
 #include "src/sem/call.h"
 #include "src/sem/depth_texture_type.h"
@@ -71,8 +72,7 @@ bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
 
 }  // namespace
 
-GeneratorImpl::GeneratorImpl(const Program* program)
-    : TextGenerator(), program_(program) {}
+GeneratorImpl::GeneratorImpl(const Program* program) : TextGenerator(program) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 
@@ -359,6 +359,9 @@ bool GeneratorImpl::EmitCall(std::ostream& out, ast::CallExpression* expr) {
 bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
                                       ast::CallExpression* expr,
                                       const sem::Intrinsic* intrinsic) {
+  if (intrinsic->IsAtomic()) {
+    return EmitAtomicCall(out, expr, intrinsic);
+  }
   if (intrinsic->IsTexture()) {
     return EmitTextureCall(out, expr, intrinsic);
   }
@@ -420,6 +423,111 @@ bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
 
   out << ")";
   return true;
+}
+
+bool GeneratorImpl::EmitAtomicCall(std::ostream& out,
+                                   ast::CallExpression* expr,
+                                   const sem::Intrinsic* intrinsic) {
+  auto call = [&](const char* name) {
+    out << name;
+    {
+      ScopedParen sp(out);
+      for (size_t i = 0; i < expr->params().size(); i++) {
+        auto* arg = expr->params()[i];
+        if (i > 0) {
+          out << ", ";
+        }
+        if (!EmitExpression(out, arg)) {
+          return false;
+        }
+      }
+      out << ", memory_order_relaxed";
+    }
+    return true;
+  };
+
+  switch (intrinsic->Type()) {
+    case sem::IntrinsicType::kAtomicLoad:
+      return call("atomic_load_explicit");
+
+    case sem::IntrinsicType::kAtomicStore:
+      return call("atomic_store_explicit");
+
+    case sem::IntrinsicType::kAtomicAdd:
+      return call("atomic_fetch_add_explicit");
+
+    case sem::IntrinsicType::kAtomicMax:
+      return call("atomic_fetch_max_explicit");
+
+    case sem::IntrinsicType::kAtomicMin:
+      return call("atomic_fetch_min_explicit");
+
+    case sem::IntrinsicType::kAtomicAnd:
+      return call("atomic_fetch_and_explicit");
+
+    case sem::IntrinsicType::kAtomicOr:
+      return call("atomic_fetch_or_explicit");
+
+    case sem::IntrinsicType::kAtomicXor:
+      return call("atomic_fetch_xor_explicit");
+
+    case sem::IntrinsicType::kAtomicExchange:
+      return call("atomic_exchange_explicit");
+
+    case sem::IntrinsicType::kAtomicCompareExchangeWeak: {
+      auto* target = expr->params()[0];
+      auto* compare_value = expr->params()[1];
+      auto* value = expr->params()[2];
+
+      auto prev_value = UniqueIdentifier("prev_value");
+      auto matched = UniqueIdentifier("matched");
+
+      {  // prev_value = <compare_value>;
+        auto pre = line();
+        if (!EmitType(pre, TypeOf(value), "")) {
+          return false;
+        }
+        pre << " " << prev_value << " = ";
+        if (!EmitExpression(pre, compare_value)) {
+          return false;
+        }
+        pre << ";";
+      }
+
+      {  // bool matched = atomic_compare_exchange_weak_explicit(
+         //   target, &got, <value>, memory_order_relaxed, memory_order_relaxed)
+        auto pre = line();
+        pre << "bool " << matched << " = atomic_compare_exchange_weak_explicit";
+        {
+          ScopedParen sp(pre);
+          if (!EmitExpression(pre, target)) {
+            return false;
+          }
+          pre << ", &" << prev_value << ", ";
+          if (!EmitExpression(pre, value)) {
+            return false;
+          }
+          pre << ", memory_order_relaxed, memory_order_relaxed";
+        }
+        pre << ";";
+      }
+
+      {  // [u]int2(got, matched)
+        if (!EmitType(out, TypeOf(expr), "")) {
+          return false;
+        }
+        out << "(" << prev_value << ", " << matched << ")";
+      }
+      return true;
+    }
+
+    default:
+      break;
+  }
+
+  TINT_UNREACHABLE(Writer, diagnostics_)
+      << "unsupported atomic intrinsic: " << intrinsic->Type();
+  return false;
 }
 
 bool GeneratorImpl::EmitTextureCall(std::ostream& out,
@@ -1550,6 +1658,20 @@ bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
 bool GeneratorImpl::EmitType(std::ostream& out,
                              const sem::Type* type,
                              const std::string& name) {
+  if (auto* atomic = type->As<sem::Atomic>()) {
+    if (atomic->Type()->Is<sem::I32>()) {
+      out << "atomic_int";
+      return true;
+    }
+    if (atomic->Type()->Is<sem::U32>()) {
+      out << "atomic_uint";
+      return true;
+    }
+    TINT_ICE(Writer, diagnostics_)
+        << "unhandled atomic type " << atomic->Type()->type_name();
+    return false;
+  }
+
   if (auto* ary = type->As<sem::Array>()) {
     const sem::Type* base_type = ary;
     std::vector<uint32_t> sizes;
@@ -1570,18 +1692,33 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     for (uint32_t size : sizes) {
       out << "[" << size << "]";
     }
-  } else if (type->Is<sem::Bool>()) {
+    return true;
+  }
+
+  if (type->Is<sem::Bool>()) {
     out << "bool";
-  } else if (type->Is<sem::F32>()) {
+    return true;
+  }
+
+  if (type->Is<sem::F32>()) {
     out << "float";
-  } else if (type->Is<sem::I32>()) {
+    return true;
+  }
+
+  if (type->Is<sem::I32>()) {
     out << "int";
-  } else if (auto* mat = type->As<sem::Matrix>()) {
+    return true;
+  }
+
+  if (auto* mat = type->As<sem::Matrix>()) {
     if (!EmitType(out, mat->type(), "")) {
       return false;
     }
     out << mat->columns() << "x" << mat->rows();
-  } else if (auto* ptr = type->As<sem::Pointer>()) {
+    return true;
+  }
+
+  if (auto* ptr = type->As<sem::Pointer>()) {
     switch (ptr->StorageClass()) {
       case ast::StorageClass::kFunction:
       case ast::StorageClass::kPrivate:
@@ -1611,13 +1748,22 @@ bool GeneratorImpl::EmitType(std::ostream& out,
       }
       out << "* " << name;
     }
-  } else if (type->Is<sem::Sampler>()) {
+    return true;
+  }
+
+  if (type->Is<sem::Sampler>()) {
     out << "sampler";
-  } else if (auto* str = type->As<sem::Struct>()) {
+    return true;
+  }
+
+  if (auto* str = type->As<sem::Struct>()) {
     // The struct type emits as just the name. The declaration would be emitted
     // as part of emitting the declared types.
     out << program_->Symbols().NameFor(str->Declaration()->name());
-  } else if (auto* tex = type->As<sem::Texture>()) {
+    return true;
+  }
+
+  if (auto* tex = type->As<sem::Texture>()) {
     if (tex->Is<sem::DepthTexture>()) {
       out << "depth";
     } else {
@@ -1684,23 +1830,30 @@ bool GeneratorImpl::EmitType(std::ostream& out,
       return false;
     }
     out << ">";
+    return true;
+  }
 
-  } else if (type->Is<sem::U32>()) {
+  if (type->Is<sem::U32>()) {
     out << "uint";
-  } else if (auto* vec = type->As<sem::Vector>()) {
+    return true;
+  }
+
+  if (auto* vec = type->As<sem::Vector>()) {
     if (!EmitType(out, vec->type(), "")) {
       return false;
     }
     out << vec->size();
-  } else if (type->Is<sem::Void>()) {
-    out << "void";
-  } else {
-    diagnostics_.add_error(diag::System::Writer,
-                           "unknown type in EmitType: " + type->type_name());
-    return false;
+    return true;
   }
 
-  return true;
+  if (type->Is<sem::Void>()) {
+    out << "void";
+    return true;
+  }
+
+  diagnostics_.add_error(diag::System::Writer,
+                         "unknown type in EmitType: " + type->type_name());
+  return false;
 }
 
 bool GeneratorImpl::EmitPackedType(std::ostream& out,
@@ -2037,6 +2190,10 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
     // TODO(crbug.com/tint/650): There's an assumption here that MSL's default
     // structure size and alignment matches WGSL's. We need to confirm this.
     return SizeAndAlign{str->Size(), str->Align()};
+  }
+
+  if (auto* atomic = ty->As<sem::Atomic>()) {
+    return MslPackedTypeSizeAndAlign(atomic->Type());
   }
 
   TINT_UNREACHABLE(Writer, diagnostics_)

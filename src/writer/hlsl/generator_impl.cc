@@ -104,8 +104,7 @@ std::ostream& operator<<(std::ostream& s, const RegisterAndSpace& rs) {
 
 }  // namespace
 
-GeneratorImpl::GeneratorImpl(const Program* program)
-    : builder_(ProgramBuilder::Wrap(program)) {}
+GeneratorImpl::GeneratorImpl(const Program* program) : TextGenerator(program) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 
@@ -165,10 +164,6 @@ bool GeneratorImpl::Generate() {
   return true;
 }
 
-std::string GeneratorImpl::generate_name(const std::string& prefix) {
-  return builder_.Symbols().NameFor(builder_.Symbols().New(prefix));
-}
-
 bool GeneratorImpl::EmitArrayAccessor(std::ostream& out,
                                       ast::ArrayAccessorExpression* expr) {
   if (!EmitExpression(out, expr->array())) {
@@ -222,7 +217,7 @@ bool GeneratorImpl::EmitAssign(ast::AssignmentStatement* stmt) {
 bool GeneratorImpl::EmitBinary(std::ostream& out, ast::BinaryExpression* expr) {
   if (expr->op() == ast::BinaryOp::kLogicalAnd ||
       expr->op() == ast::BinaryOp::kLogicalOr) {
-    auto name = generate_name(kTempNamePrefix);
+    auto name = UniqueIdentifier(kTempNamePrefix);
 
     {
       auto pre = line();
@@ -505,7 +500,7 @@ bool GeneratorImpl::EmitUniformBufferAccess(
     const transform::DecomposeMemoryAccess::Intrinsic* intrinsic) {
   const auto& params = expr->params();
 
-  std::string scalar_offset = generate_name("scalar_offset");
+  std::string scalar_offset = UniqueIdentifier("scalar_offset");
   {
     auto pre = line();
     pre << "const int " << scalar_offset << " = (";
@@ -534,7 +529,7 @@ bool GeneratorImpl::EmitUniformBufferAccess(
       };
       // Has a minimum alignment of 8 bytes, so is either .xy or .zw
       auto load_vec2 = [&] {
-        std::string ubo_load = generate_name("ubo_load");
+        std::string ubo_load = UniqueIdentifier("ubo_load");
 
         {
           auto pre = line();
@@ -744,7 +739,7 @@ bool GeneratorImpl::EmitStorageAtomicCall(
     transform::DecomposeMemoryAccess::Intrinsic::Op op) {
   using Op = transform::DecomposeMemoryAccess::Intrinsic::Op;
 
-  std::string result = generate_name("atomic_result");
+  std::string result = UniqueIdentifier("atomic_result");
 
   auto* result_ty = TypeOf(expr);
   if (!result_ty->Is<sem::Void>()) {
@@ -849,7 +844,7 @@ bool GeneratorImpl::EmitStorageAtomicCall(
       auto* compare_value = expr->params()[2];
       auto* value = expr->params()[3];
 
-      std::string compare = generate_name("atomic_compare_value");
+      std::string compare = UniqueIdentifier("atomic_compare_value");
       {  // T atomic_compare_value = compare_value;
         auto pre = line();
         if (!EmitTypeAndName(pre, TypeOf(compare_value),
@@ -924,7 +919,7 @@ bool GeneratorImpl::EmitStorageAtomicCall(
 bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
                                             ast::CallExpression* expr,
                                             const sem::Intrinsic* intrinsic) {
-  std::string result = generate_name("atomic_result");
+  std::string result = UniqueIdentifier("atomic_result");
 
   if (!intrinsic->ReturnType()->Is<sem::Void>()) {
     auto pre = line();
@@ -1018,7 +1013,7 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
       auto* compare_value = expr->params()[1];
       auto* value = expr->params()[2];
 
-      std::string compare = generate_name("atomic_compare_value");
+      std::string compare = UniqueIdentifier("atomic_compare_value");
 
       {  // T compare_value = <compare_value>;
         auto pre = line();
@@ -1130,8 +1125,8 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
 
   // Exponent is an integer, which HLSL does not have an overload for.
   // We need to cast from a float.
-  auto float_exp = generate_name(kTempNamePrefix);
-  auto significand = generate_name(kTempNamePrefix);
+  auto float_exp = UniqueIdentifier(kTempNamePrefix);
+  auto significand = UniqueIdentifier(kTempNamePrefix);
   line() << "float" << width << " " << float_exp << ";";
   {
     auto pre = line();
@@ -1173,8 +1168,8 @@ bool GeneratorImpl::EmitIsNormalCall(std::ostream& out,
   constexpr auto* kMinNormalExponent = "0x0080000";
   constexpr auto* kMaxNormalExponent = "0x7f00000";
 
-  auto exponent = generate_name("tint_isnormal_exponent");
-  auto clamped = generate_name("tint_isnormal_clamped");
+  auto exponent = UniqueIdentifier("tint_isnormal_exponent");
+  auto clamped = UniqueIdentifier("tint_isnormal_clamped");
 
   {
     auto pre = line();
@@ -1196,7 +1191,7 @@ bool GeneratorImpl::EmitDataPackingCall(std::ostream& out,
                                         ast::CallExpression* expr,
                                         const sem::Intrinsic* intrinsic) {
   auto* param = expr->params()[0];
-  auto tmp_name = generate_name(kTempNamePrefix);
+  auto tmp_name = UniqueIdentifier(kTempNamePrefix);
   std::ostringstream expr_out;
   if (!EmitExpression(expr_out, param)) {
     return false;
@@ -1261,7 +1256,7 @@ bool GeneratorImpl::EmitDataUnpackingCall(std::ostream& out,
                                           ast::CallExpression* expr,
                                           const sem::Intrinsic* intrinsic) {
   auto* param = expr->params()[0];
-  auto tmp_name = generate_name(kTempNamePrefix);
+  auto tmp_name = UniqueIdentifier(kTempNamePrefix);
   std::ostringstream expr_out;
   if (!EmitExpression(expr_out, param)) {
     return false;
@@ -1282,7 +1277,7 @@ bool GeneratorImpl::EmitDataUnpackingCall(std::ostream& out,
   switch (intrinsic->Type()) {
     case sem::IntrinsicType::kUnpack4x8snorm:
     case sem::IntrinsicType::kUnpack2x16snorm: {
-      auto tmp_name2 = generate_name(kTempNamePrefix);
+      auto tmp_name2 = UniqueIdentifier(kTempNamePrefix);
       line() << "int " << tmp_name2 << " = int(" << expr_out.str() << ");";
       {  // Perform sign extension on the converted values.
         auto pre = line();
@@ -1302,7 +1297,7 @@ bool GeneratorImpl::EmitDataUnpackingCall(std::ostream& out,
     }
     case sem::IntrinsicType::kUnpack4x8unorm:
     case sem::IntrinsicType::kUnpack2x16unorm: {
-      auto tmp_name2 = generate_name(kTempNamePrefix);
+      auto tmp_name2 = UniqueIdentifier(kTempNamePrefix);
       line() << "uint " << tmp_name2 << " = " << expr_out.str() << ";";
       {
         auto pre = line();
@@ -1492,7 +1487,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
       }
 
       // Declare a variable to hold the queried texture info
-      auto dims = generate_name(kTempNamePrefix);
+      auto dims = UniqueIdentifier(kTempNamePrefix);
       if (num_dimensions == 1) {
         line() << "int " << dims << ";";
       } else {

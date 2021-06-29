@@ -43,24 +43,6 @@ TEST_F(HlslGeneratorImplTest, Generate) {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest, InputStructName) {
-  GeneratorImpl& gen = Build();
-
-  ASSERT_EQ(gen.generate_name("func_main_in"), "func_main_in");
-}
-
-TEST_F(HlslGeneratorImplTest, InputStructName_ConflictWithExisting) {
-  Symbols().Register("func_main_out_1");
-  Symbols().Register("func_main_out_2");
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_EQ(gen.generate_name("func_main_out"), "func_main_out");
-  ASSERT_EQ(gen.generate_name("func_main_out"), "func_main_out_3");
-  ASSERT_EQ(gen.generate_name("func_main_out"), "func_main_out_4");
-  ASSERT_EQ(gen.generate_name("func_main_out"), "func_main_out_5");
-}
-
 struct HlslBuiltinData {
   ast::Builtin builtin;
   const char* attribute_name;

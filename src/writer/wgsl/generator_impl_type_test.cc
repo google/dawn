@@ -141,10 +141,10 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructOffsetDecl) {
   ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
   [[size(8)]]
-  tint_0_padding : u32;
+  padding : u32;
   a : i32;
   [[size(4)]]
-  tint_1_padding : u32;
+  padding_1 : u32;
   b : f32;
 };
 )");
@@ -162,10 +162,10 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructOffsetDecl_WithSymbolCollisions) {
   ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
   [[size(8)]]
-  tint_1_padding : u32;
+  padding : u32;
   tint_0_padding : i32;
   [[size(4)]]
-  tint_3_padding : u32;
+  padding_1 : u32;
   tint_2_padding : f32;
 };
 )");

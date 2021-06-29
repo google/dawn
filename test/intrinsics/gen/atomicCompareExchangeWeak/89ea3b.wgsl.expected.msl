@@ -1,14 +1,19 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-
-fn atomicCompareExchangeWeak_89ea3b(tint_symbol : ptr<workgroup, atomic<i32>>) {
-  var res : vec2<i32> = atomicCompareExchangeWeak(&(*(tint_symbol)), 1, 1);
+using namespace metal;
+void atomicCompareExchangeWeak_89ea3b(threadgroup atomic_int* const tint_symbol_1) {
+  int prev_value = 1;
+  bool matched = atomic_compare_exchange_weak_explicit(&(*(tint_symbol_1)), &prev_value, 1, memory_order_relaxed, memory_order_relaxed);
+  int2 res = int2(prev_value, matched);
 }
 
-[[stage(compute)]]
-fn compute_main() {
-  [[internal(disable_validation__function_var_storage_class)]] var<workgroup> tint_symbol_1 : atomic<i32>;
-  atomicCompareExchangeWeak_89ea3b(&(tint_symbol_1));
+kernel void compute_main(uint local_invocation_index [[thread_index_in_threadgroup]]) {
+  threadgroup atomic_int tint_symbol_2;
+  if ((local_invocation_index == 0u)) {
+    atomic_store_explicit(&(tint_symbol_2), int(), memory_order_relaxed);
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  atomicCompareExchangeWeak_89ea3b(&(tint_symbol_2));
+  return;
 }
 
-error: cannot declare an atomic var in a function scope

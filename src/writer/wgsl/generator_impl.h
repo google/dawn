@@ -194,13 +194,6 @@ class GeneratorImpl : public TextGenerator {
   /// @param decos the decoration list
   /// @returns true if the decorations were emitted
   bool EmitDecorations(const ast::DecorationList& decos);
-
- private:
-  /// @return a new, unique, valid WGSL identifier with the given suffix.
-  std::string UniqueIdentifier(const std::string& suffix = "");
-
-  Program const* const program_;
-  uint32_t next_unique_identifier_suffix = 0;
 };
 
 }  // namespace wgsl

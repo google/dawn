@@ -669,6 +669,7 @@ if(${TINT_BUILD_TESTS})
     utils/unique_vector_test.cc
     writer/append_vector_test.cc
     writer/float_to_string_test.cc
+    writer/text_generator_test.cc
   )
 
   if(${TINT_BUILD_SPV_READER})

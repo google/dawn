@@ -1,14 +1,17 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-
-fn atomicXor_c8e6be(tint_symbol : ptr<workgroup, atomic<u32>>) {
-  var res : u32 = atomicXor(&(*(tint_symbol)), 1u);
+using namespace metal;
+void atomicXor_c8e6be(threadgroup atomic_uint* const tint_symbol_1) {
+  uint res = atomic_fetch_xor_explicit(&(*(tint_symbol_1)), 1u, memory_order_relaxed);
 }
 
-[[stage(compute)]]
-fn compute_main() {
-  [[internal(disable_validation__function_var_storage_class)]] var<workgroup> tint_symbol_1 : atomic<u32>;
-  atomicXor_c8e6be(&(tint_symbol_1));
+kernel void compute_main(uint local_invocation_index [[thread_index_in_threadgroup]]) {
+  threadgroup atomic_uint tint_symbol_2;
+  if ((local_invocation_index == 0u)) {
+    atomic_store_explicit(&(tint_symbol_2), uint(), memory_order_relaxed);
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  atomicXor_c8e6be(&(tint_symbol_2));
+  return;
 }
 
-error: cannot declare an atomic var in a function scope

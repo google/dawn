@@ -1,25 +1,23 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-
-[[block]]
+using namespace metal;
 struct SB_RW {
-  arg_0 : atomic<i32>;
+  /* 0x0000 */ atomic_int arg_0;
 };
 
-[[group(0), binding(0)]] var<storage, read_write> sb_rw : SB_RW;
-
-fn atomicCompareExchangeWeak_12871c() {
-  var res : vec2<i32> = atomicCompareExchangeWeak(&(sb_rw.arg_0), 1, 1);
+void atomicCompareExchangeWeak_12871c(device SB_RW& sb_rw) {
+  int prev_value = 1;
+  bool matched = atomic_compare_exchange_weak_explicit(&(sb_rw.arg_0), &prev_value, 1, memory_order_relaxed, memory_order_relaxed);
+  int2 res = int2(prev_value, matched);
 }
 
-[[stage(fragment)]]
-fn fragment_main() {
-  atomicCompareExchangeWeak_12871c();
+fragment void fragment_main(device SB_RW& sb_rw [[buffer(0)]]) {
+  atomicCompareExchangeWeak_12871c(sb_rw);
+  return;
 }
 
-[[stage(compute)]]
-fn compute_main() {
-  atomicCompareExchangeWeak_12871c();
+kernel void compute_main(device SB_RW& sb_rw [[buffer(0)]]) {
+  atomicCompareExchangeWeak_12871c(sb_rw);
+  return;
 }
 
-Failed to generate: error: unknown type in EmitType: __atomic__i32

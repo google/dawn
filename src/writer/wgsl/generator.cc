@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/writer/wgsl/generator.h"
+#include "src/writer/wgsl/generator_impl.h"
 
 namespace tint {
 namespace writer {

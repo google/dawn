@@ -19,11 +19,12 @@
 #include <string>
 
 #include "src/writer/text.h"
-#include "src/writer/wgsl/generator_impl.h"
 
 namespace tint {
 namespace writer {
 namespace wgsl {
+
+class GeneratorImpl;
 
 /// Class to generate WGSL source
 class Generator : public Text {
@@ -46,6 +47,9 @@ class Generator : public Text {
   std::string error() const;
 
  private:
+  Generator(const Generator&) = delete;
+  Generator& operator=(const Generator&) = delete;
+
   std::unique_ptr<GeneratorImpl> impl_;
 };
 

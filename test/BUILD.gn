@@ -305,6 +305,7 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/utils/unique_vector_test.cc",
     "../src/writer/append_vector_test.cc",
     "../src/writer/float_to_string_test.cc",
+    "../src/writer/text_generator_test.cc",
   ]
 
   deps = [

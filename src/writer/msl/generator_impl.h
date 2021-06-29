@@ -104,6 +104,15 @@ class GeneratorImpl : public TextGenerator {
   bool EmitIntrinsicCall(std::ostream& out,
                          ast::CallExpression* expr,
                          const sem::Intrinsic* intrinsic);
+  /// Handles generating a call to an atomic function (`atomicAdd`,
+  /// `atomicMax`, etc)
+  /// @param out the output of the expression stream
+  /// @param expr the call expression
+  /// @param intrinsic the semantic information for the atomic intrinsic
+  /// @returns true if the call expression is emitted
+  bool EmitAtomicCall(std::ostream& out,
+                      ast::CallExpression* expr,
+                      const sem::Intrinsic* intrinsic);
   /// Handles generating a call to a texture function (`textureSample`,
   /// `textureSampleGrad`, etc)
   /// @param out the output of the expression stream
@@ -263,24 +272,6 @@ class GeneratorImpl : public TextGenerator {
       ast::InterpolationSampling sampling) const;
 
  private:
-  /// @returns the resolved type of the ast::Expression `expr`
-  /// @param expr the expression
-  sem::Type* TypeOf(ast::Expression* expr) const {
-    return program_->TypeOf(expr);
-  }
-
-  /// @returns the resolved type of the ast::Type `type`
-  /// @param type the type
-  const sem::Type* TypeOf(const ast::Type* type) const {
-    return program_->TypeOf(type);
-  }
-
-  /// @returns the resolved type of the ast::TypeDecl `type_decl`
-  /// @param type_decl the type declaration
-  const sem::Type* TypeOf(const ast::TypeDecl* type_decl) const {
-    return program_->TypeOf(type_decl);
-  }
-
   // A pair of byte size and alignment `uint32_t`s.
   struct SizeAndAlign {
     uint32_t size;
@@ -291,7 +282,6 @@ class GeneratorImpl : public TextGenerator {
   /// type.
   SizeAndAlign MslPackedTypeSizeAndAlign(const sem::Type* ty);
 
-  const Program* program_ = nullptr;
   std::function<bool()> emit_continuing_;
 };
 
