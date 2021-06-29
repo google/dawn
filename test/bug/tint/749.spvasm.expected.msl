@@ -11,10 +11,10 @@ struct buf0 {
   /* 0x0000 */ packed_float2 resolution;
 };
 struct main_out {
-  float4 x_GLF_color;
+  float4 x_GLF_color_1;
 };
 struct tint_symbol_2 {
-  float4 x_GLF_color [[color(0)]];
+  float4 x_GLF_color_1 [[color(0)]];
 };
 
 void swap_i1_i1_(thread int* const i, thread int* const j, thread QuicksortObject* const tint_symbol_83) {
@@ -1553,8 +1553,8 @@ fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]], const
   thread float4 tint_symbol_91 = 0.0f;
   tint_symbol_89 = gl_FragCoord_param;
   main_1(x_188, &(tint_symbol_90), &(tint_symbol_89), &(tint_symbol_91));
-  main_out const tint_symbol_3 = {.x_GLF_color=tint_symbol_91};
-  tint_symbol_2 const tint_symbol_82 = {.x_GLF_color=tint_symbol_3.x_GLF_color};
+  main_out const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_91};
+  tint_symbol_2 const tint_symbol_82 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
   return tint_symbol_82;
 }
 

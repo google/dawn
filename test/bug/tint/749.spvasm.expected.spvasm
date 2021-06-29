@@ -47,7 +47,7 @@
                OpName %i_2 "i_2"
                OpName %uv "uv"
                OpName %main_out "main_out"
-               OpMemberName %main_out 0 "x_GLF_color"
+               OpMemberName %main_out 0 "x_GLF_color_1"
                OpName %tint_symbol_3 "tint_symbol_3"
                OpName %tint_symbol_1 "tint_symbol_1"
                OpName %main "main"

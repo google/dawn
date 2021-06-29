@@ -428,14 +428,43 @@ class FunctionEmitter {
   /// @param params The parameter list where the new parameter is appended.
   /// @param statements The statement list where the assignment is appended.
   /// @returns false if emission failed
-  bool EmitInputParameter(std::string var_name,
+  bool EmitPipelineInput(std::string var_name,
+                         const Type* var_type,
+                         ast::DecorationList* decos,
+                         std::vector<int> index_prefix,
+                         const Type* tip_type,
+                         const Type* forced_param_type,
+                         ast::VariableList* params,
+                         ast::StatementList* statements);
+
+  /// Creates one or more struct members from an output variable, and the
+  /// expressions that compute the value they contribute to the entry point
+  /// return value.  The part of the output variable is specfied
+  /// by the `index_prefix`, which successively indexes into the variable.
+  /// Assumes the variable has already been created in the Private storage
+  /// class.
+  /// @param var_name The name of the variable
+  /// @param var_type The store type of the variable
+  /// @param decos The variable's decorations
+  /// @param index_prefix Indices stepping into the variable, indicating
+  /// what part of the variable to populate.
+  /// @param tip_type The type of the component inside variable, after indexing
+  /// with the indices in `index_prefix`.
+  /// @param forced_member_type The type forced by WGSL, if the variable is a
+  /// builtin, otherwise the same as var_type.
+  /// @param return_members The struct member list where the new member is
+  /// added.
+  /// @param return_exprs The expression list where the return expression is
+  /// added.
+  /// @returns false if emission failed
+  bool EmitPipelineOutput(std::string var_name,
                           const Type* var_type,
                           ast::DecorationList* decos,
                           std::vector<int> index_prefix,
                           const Type* tip_type,
-                          const Type* forced_param_type,
-                          ast::VariableList* params,
-                          ast::StatementList* statements);
+                          const Type* forced_member_type,
+                          ast::StructMemberList* return_members,
+                          ast::ExpressionList* return_exprs);
 
   /// Create an ast::BlockStatement representing the body of the function.
   /// This creates the statement stack, which is non-empty for the lifetime
