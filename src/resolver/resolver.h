@@ -283,6 +283,10 @@ class Resolver {
                                  const sem::Matrix* matrix_type);
   bool ValidateFunctionParameter(const ast::Function* func,
                                  const VariableInfo* info);
+  bool ValidateNoDuplicateDefinition(Symbol sym,
+                                     const Source& source,
+                                     bool check_global_scope_only = false);
+  bool ValidateParameter(const ast::Function* func, const VariableInfo* info);
   bool ValidateReturn(const ast::ReturnStatement* ret);
   bool ValidateStatements(const ast::StatementList& stmts);
   bool ValidateStorageTexture(const ast::StorageTexture* t);

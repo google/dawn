@@ -124,7 +124,9 @@ TEST_F(ResolverVarLetValidationTest, LocalVarRedeclared) {
   WrapInFunction(v1, v2);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:34 error: redeclared identifier 'v'");
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: redefinition of 'v'\nnote: previous definition is here");
 }
 
 TEST_F(ResolverVarLetValidationTest, LocalLetRedeclared) {
@@ -135,7 +137,9 @@ TEST_F(ResolverVarLetValidationTest, LocalLetRedeclared) {
   WrapInFunction(l1, l2);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:34 error: redeclared identifier 'l'");
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: redefinition of 'l'\nnote: previous definition is here");
 }
 
 TEST_F(ResolverVarLetValidationTest, GlobalVarRedeclared) {
@@ -145,8 +149,9 @@ TEST_F(ResolverVarLetValidationTest, GlobalVarRedeclared) {
   Global(Source{{12, 34}}, "v", ty.i32(), ast::StorageClass::kPrivate);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: redeclared global identifier 'v'");
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: redefinition of 'v'\nnote: previous definition is here");
 }
 
 TEST_F(ResolverVarLetValidationTest, GlobalLetRedeclared) {
@@ -156,8 +161,9 @@ TEST_F(ResolverVarLetValidationTest, GlobalLetRedeclared) {
   GlobalConst(Source{{12, 34}}, "l", ty.i32(), Expr(0));
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: redeclared global identifier 'l'");
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: redefinition of 'l'\nnote: previous definition is here");
 }
 
 TEST_F(ResolverVarLetValidationTest, GlobalVarRedeclaredAsLocal) {
@@ -173,7 +179,9 @@ TEST_F(ResolverVarLetValidationTest, GlobalVarRedeclaredAsLocal) {
                      Expr(2.0f)));
 
   EXPECT_FALSE(r()->Resolve()) << r()->error();
-  EXPECT_EQ(r()->error(), "12:34 error: redeclared identifier 'v'");
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: redefinition of 'v'\nnote: previous definition is here");
 }
 
 TEST_F(ResolverVarLetValidationTest, VarRedeclaredInInnerBlock) {
@@ -190,7 +198,9 @@ TEST_F(ResolverVarLetValidationTest, VarRedeclaredInInnerBlock) {
   WrapInFunction(outer_body);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:34 error: redeclared identifier 'v'");
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: redefinition of 'v'\nnote: previous definition is here");
 }
 
 TEST_F(ResolverVarLetValidationTest, VarRedeclaredInIfBlock) {
@@ -213,7 +223,9 @@ TEST_F(ResolverVarLetValidationTest, VarRedeclaredInIfBlock) {
   WrapInFunction(outer_body);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:34 error: redeclared identifier 'v'");
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: redefinition of 'v'\nnote: previous definition is here");
 }
 
 TEST_F(ResolverVarLetValidationTest, InferredPtrStorageAccessMismatch) {

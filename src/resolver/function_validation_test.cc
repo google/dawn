@@ -42,8 +42,8 @@ TEST_F(ResolverFunctionValidationTest, FunctionNamesMustBeUnique_fail) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            R"(12:34 error: duplicate function named 'func'
-note: first function declared here)");
+            "12:34 error: redefinition of 'func'\nnote: previous definition "
+            "is here");
 }
 
 TEST_F(ResolverFunctionValidationTest,
@@ -74,8 +74,8 @@ TEST_F(ResolverFunctionValidationTest,
 
   EXPECT_FALSE(r()->Resolve()) << r()->error();
   EXPECT_EQ(r()->error(),
-            "12:34 error: duplicate declaration 'foo'\n56:78 note: 'foo' first "
-            "declared here:");
+            "12:34 error: redefinition of 'foo'\n56:78 note: previous "
+            "definition is here");
 }
 
 TEST_F(ResolverFunctionValidationTest,
@@ -85,14 +85,14 @@ TEST_F(ResolverFunctionValidationTest,
 
   Func(Source{Source::Location{12, 34}}, "foo", ast::VariableList{}, ty.void_(),
        ast::StatementList{}, ast::DecorationList{});
-  auto* global_var =
-      Var("foo", ty.f32(), ast::StorageClass::kPrivate, Expr(3.14f));
+  auto* global_var = Var(Source{Source::Location{56, 78}}, "foo", ty.f32(),
+                         ast::StorageClass::kPrivate, Expr(3.14f));
   AST().AddGlobalVariable(global_var);
 
   EXPECT_FALSE(r()->Resolve()) << r()->error();
   EXPECT_EQ(r()->error(),
-            "error: duplicate declaration 'foo'\n12:34 note: 'foo' first "
-            "declared here:");
+            "56:78 error: redefinition of 'foo'\n12:34 note: previous "
+            "definition is here");
 }
 
 TEST_F(ResolverFunctionValidationTest, FunctionUsingSameVariableName_Pass) {

@@ -615,10 +615,8 @@ bool Resolver::ValidateVariableConstructor(const ast::Variable* var,
 }
 
 bool Resolver::GlobalVariable(ast::Variable* var) {
-  if (variable_stack_.has(var->symbol())) {
-    AddError("redeclared global identifier '" +
-                 builder_->Symbols().NameFor(var->symbol()) + "'",
-             var->source());
+  if (!ValidateNoDuplicateDefinition(var->symbol(), var->source(),
+                                     /* check_global_scope_only */ true)) {
     return false;
   }
 
@@ -673,17 +671,6 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
 }
 
 bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
-  auto duplicate_func = symbol_to_function_.find(info->declaration->symbol());
-  if (duplicate_func != symbol_to_function_.end()) {
-    AddError("duplicate declaration '" +
-                 builder_->Symbols().NameFor(info->declaration->symbol()) + "'",
-             info->declaration->source());
-    AddNote("'" + builder_->Symbols().NameFor(info->declaration->symbol()) +
-                "' first declared here:",
-            duplicate_func->second->declaration->source());
-    return false;
-  }
-
   if (!ValidateNoDuplicateDecorations(info->declaration->decorations())) {
     return false;
   }
@@ -1063,28 +1050,9 @@ bool Resolver::ValidateInterpolateDecoration(
 
 bool Resolver::ValidateFunction(const ast::Function* func,
                                 const FunctionInfo* info) {
-  auto func_it = symbol_to_function_.find(func->symbol());
-  if (func_it != symbol_to_function_.end()) {
-    AddError("duplicate function named '" +
-                 builder_->Symbols().NameFor(func->symbol()) + "'",
-             func->source());
-    AddNote("first function declared here",
-            func_it->second->declaration->source());
+  if (!ValidateNoDuplicateDefinition(func->symbol(), func->source(),
+                                     /* check_global_scope_only */ true)) {
     return false;
-  }
-
-  bool is_global = false;
-  VariableInfo* var;
-  if (variable_stack_.get(func->symbol(), &var, &is_global)) {
-    if (is_global) {
-      AddError("duplicate declaration '" +
-                   builder_->Symbols().NameFor(func->symbol()) + "'",
-               func->source());
-      AddNote("'" + builder_->Symbols().NameFor(func->symbol()) +
-                  "' first declared here:",
-              var->declaration->source());
-      return false;
-    }
   }
 
   auto stage_deco_count = 0;
@@ -2857,11 +2825,7 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
   ast::Variable* var = stmt->variable();
   Mark(var);
 
-  bool is_global = false;
-  if (variable_stack_.get(var->symbol(), nullptr, &is_global)) {
-    AddError("redeclared identifier '" +
-                 builder_->Symbols().NameFor(var->symbol()) + "'",
-             var->source());
+  if (!ValidateNoDuplicateDefinition(var->symbol(), var->source())) {
     return false;
   }
 
@@ -3768,6 +3732,39 @@ bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
         "cannot store into a read-only type '" + TypeNameOf(a->lhs()) + "'",
         a->source());
     return false;
+  }
+  return true;
+}
+
+bool Resolver::ValidateNoDuplicateDefinition(Symbol sym,
+                                             const Source& source,
+                                             bool check_global_scope_only) {
+  if (check_global_scope_only) {
+    bool is_global = false;
+    VariableInfo* var;
+    if (variable_stack_.get(sym, &var, &is_global)) {
+      if (is_global) {
+        AddError("redefinition of '" + builder_->Symbols().NameFor(sym) + "'",
+                 source);
+        AddNote("previous definition is here", var->declaration->source());
+        return false;
+      }
+    }
+    auto it = symbol_to_function_.find(sym);
+    if (it != symbol_to_function_.end()) {
+      AddError("redefinition of '" + builder_->Symbols().NameFor(sym) + "'",
+               source);
+      AddNote("previous definition is here", it->second->declaration->source());
+      return false;
+    }
+  } else {
+    VariableInfo* var;
+    if (variable_stack_.get(sym, &var)) {
+      AddError("redefinition of '" + builder_->Symbols().NameFor(sym) + "'",
+               source);
+      AddNote("previous definition is here", var->declaration->source());
+      return false;
+    }
   }
   return true;
 }
