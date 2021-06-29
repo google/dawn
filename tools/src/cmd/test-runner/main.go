@@ -323,7 +323,7 @@ func run() error {
 		}
 
 		if verbose || !rowAllPassed {
-			fmt.Println(row)
+			fmt.Fprintln(color.Output, row)
 		}
 	}
 
@@ -350,7 +350,7 @@ func run() error {
 		}
 		col.Printf(alignRight(name, filenameColumnWidth))
 		fmt.Printf(" ┃ ")
-		fmt.Println(row)
+		fmt.Fprintln(color.Output, row)
 
 		col.Printf(strings.Repeat(" ", filenameColumnWidth))
 		fmt.Printf(" ┃ ")
