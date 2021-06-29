@@ -14,6 +14,7 @@
 
 #include "src/transform/vertex_pulling.h"
 
+#include <algorithm>
 #include <utility>
 
 #include "src/ast/assignment_statement.h"
@@ -23,6 +24,7 @@
 #include "src/program_builder.h"
 #include "src/sem/variable.h"
 #include "src/utils/get_or_create.h"
+#include "src/utils/math.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::VertexPulling);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::VertexPulling::Config);
@@ -31,6 +33,173 @@ namespace tint {
 namespace transform {
 
 namespace {
+
+/// The base type of a component.
+/// The format type is either this type or a vector of this type.
+enum class BaseType {
+  kInvalid,
+  kU32,
+  kI32,
+  kF32,
+};
+
+/// Writes the BaseType to the std::ostream.
+/// @param out the std::ostream to write to
+/// @param format the BaseType to write
+/// @returns out so calls can be chained
+std::ostream& operator<<(std::ostream& out, BaseType format) {
+  switch (format) {
+    case BaseType::kInvalid:
+      return out << "invalid";
+    case BaseType::kU32:
+      return out << "u32";
+    case BaseType::kI32:
+      return out << "i32";
+    case BaseType::kF32:
+      return out << "f32";
+  }
+  return out << "<unknown>";
+}
+
+/// Writes the VertexFormat to the std::ostream.
+/// @param out the std::ostream to write to
+/// @param format the VertexFormat to write
+/// @returns out so calls can be chained
+std::ostream& operator<<(std::ostream& out, VertexFormat format) {
+  switch (format) {
+    case VertexFormat::kUint8x2:
+      return out << "uint8x2";
+    case VertexFormat::kUint8x4:
+      return out << "uint8x4";
+    case VertexFormat::kSint8x2:
+      return out << "sint8x2";
+    case VertexFormat::kSint8x4:
+      return out << "sint8x4";
+    case VertexFormat::kUnorm8x2:
+      return out << "unorm8x2";
+    case VertexFormat::kUnorm8x4:
+      return out << "unorm8x4";
+    case VertexFormat::kSnorm8x2:
+      return out << "snorm8x2";
+    case VertexFormat::kSnorm8x4:
+      return out << "snorm8x4";
+    case VertexFormat::kUint16x2:
+      return out << "uint16x2";
+    case VertexFormat::kUint16x4:
+      return out << "uint16x4";
+    case VertexFormat::kSint16x2:
+      return out << "sint16x2";
+    case VertexFormat::kSint16x4:
+      return out << "sint16x4";
+    case VertexFormat::kUnorm16x2:
+      return out << "unorm16x2";
+    case VertexFormat::kUnorm16x4:
+      return out << "unorm16x4";
+    case VertexFormat::kSnorm16x2:
+      return out << "snorm16x2";
+    case VertexFormat::kSnorm16x4:
+      return out << "snorm16x4";
+    case VertexFormat::kFloat16x2:
+      return out << "float16x2";
+    case VertexFormat::kFloat16x4:
+      return out << "float16x4";
+    case VertexFormat::kFloat32:
+      return out << "float32";
+    case VertexFormat::kFloat32x2:
+      return out << "float32x2";
+    case VertexFormat::kFloat32x3:
+      return out << "float32x3";
+    case VertexFormat::kFloat32x4:
+      return out << "float32x4";
+    case VertexFormat::kUint32:
+      return out << "uint32";
+    case VertexFormat::kUint32x2:
+      return out << "uint32x2";
+    case VertexFormat::kUint32x3:
+      return out << "uint32x3";
+    case VertexFormat::kUint32x4:
+      return out << "uint32x4";
+    case VertexFormat::kSint32:
+      return out << "sint32";
+    case VertexFormat::kSint32x2:
+      return out << "sint32x2";
+    case VertexFormat::kSint32x3:
+      return out << "sint32x3";
+    case VertexFormat::kSint32x4:
+      return out << "sint32x4";
+  }
+  return out << "<unknown>";
+}
+
+/// A vertex attribute data format.
+struct DataType {
+  BaseType base_type;
+  uint32_t width;  // 1 for scalar, 2+ for a vector
+};
+
+DataType DataTypeOf(sem::Type* ty) {
+  if (ty->Is<sem::I32>()) {
+    return {BaseType::kI32, 1};
+  }
+  if (ty->Is<sem::U32>()) {
+    return {BaseType::kU32, 1};
+  }
+  if (ty->Is<sem::F32>()) {
+    return {BaseType::kF32, 1};
+  }
+  if (auto* vec = ty->As<sem::Vector>()) {
+    return {DataTypeOf(vec->type()).base_type, vec->size()};
+  }
+  return {BaseType::kInvalid, 0};
+}
+
+DataType DataTypeOf(VertexFormat format) {
+  switch (format) {
+    case VertexFormat::kUint32:
+      return {BaseType::kU32, 1};
+    case VertexFormat::kUint8x2:
+    case VertexFormat::kUint16x2:
+    case VertexFormat::kUint32x2:
+      return {BaseType::kU32, 2};
+    case VertexFormat::kUint32x3:
+      return {BaseType::kU32, 3};
+    case VertexFormat::kUint8x4:
+    case VertexFormat::kUint16x4:
+    case VertexFormat::kUint32x4:
+      return {BaseType::kU32, 4};
+    case VertexFormat::kSint32:
+      return {BaseType::kI32, 1};
+    case VertexFormat::kSint8x2:
+    case VertexFormat::kSint16x2:
+    case VertexFormat::kSint32x2:
+      return {BaseType::kI32, 2};
+    case VertexFormat::kSint32x3:
+      return {BaseType::kI32, 3};
+    case VertexFormat::kSint8x4:
+    case VertexFormat::kSint16x4:
+    case VertexFormat::kSint32x4:
+      return {BaseType::kI32, 4};
+    case VertexFormat::kFloat32:
+      return {BaseType::kF32, 1};
+    case VertexFormat::kUnorm8x2:
+    case VertexFormat::kSnorm8x2:
+    case VertexFormat::kUnorm16x2:
+    case VertexFormat::kSnorm16x2:
+    case VertexFormat::kFloat16x2:
+    case VertexFormat::kFloat32x2:
+      return {BaseType::kF32, 2};
+    case VertexFormat::kFloat32x3:
+      return {BaseType::kF32, 3};
+    case VertexFormat::kUnorm8x4:
+    case VertexFormat::kSnorm8x4:
+    case VertexFormat::kUnorm16x4:
+    case VertexFormat::kSnorm16x4:
+    case VertexFormat::kFloat16x4:
+    case VertexFormat::kFloat32x4:
+      return {BaseType::kF32, 4};
+  }
+  return {BaseType::kInvalid, 0};
+}
 
 struct State {
   State(CloneContext& context, const VertexPulling::Config& c)
@@ -47,10 +216,14 @@ struct State {
     ast::Variable* to;
   };
 
+  struct LocationInfo {
+    std::function<ast::Expression*()> expr;
+    sem::Type* type;
+  };
+
   CloneContext& ctx;
   VertexPulling::Config const cfg;
-  std::unordered_map<uint32_t, std::function<ast::Expression*()>>
-      location_to_expr;
+  std::unordered_map<uint32_t, LocationInfo> location_info;
   std::function<ast::Expression*()> vertex_index_expr = nullptr;
   std::function<ast::Expression*()> instance_index_expr = nullptr;
   Symbol pulling_position_name;
@@ -69,15 +242,6 @@ struct State {
     });
   }
 
-  /// Lazily generates the pulling position symbol
-  Symbol GetPullingPositionName() {
-    if (!pulling_position_name.IsValid()) {
-      static const char kPullingPosVarName[] = "tint_pulling_pos";
-      pulling_position_name = ctx.dst->Symbols().New(kPullingPosVarName);
-    }
-    return pulling_position_name;
-  }
-
   /// Lazily generates the structure buffer symbol
   Symbol GetStructBufferName() {
     if (!struct_buffer_name.IsValid()) {
@@ -89,9 +253,6 @@ struct State {
 
   /// Adds storage buffer decorated variables for the vertex buffers
   void AddVertexStorageBuffers() {
-    // TODO(idanr): Make this readonly
-    // https://github.com/gpuweb/gpuweb/issues/935
-
     // Creating the struct type
     static const char kStructName[] = "TintVertexData";
     auto* struct_type = ctx.dst->Structure(
@@ -122,151 +283,434 @@ struct State {
 
     ast::StatementList stmts;
 
-    // Declare the pulling position variable in the shader
-    stmts.emplace_back(ctx.dst->Decl(
-        ctx.dst->Var(GetPullingPositionName(), ctx.dst->ty.u32())));
+    for (uint32_t buffer_idx = 0; buffer_idx < cfg.vertex_state.size();
+         ++buffer_idx) {
+      const VertexBufferLayoutDescriptor& buffer_layout =
+          cfg.vertex_state[buffer_idx];
 
-    for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
-      const VertexBufferLayoutDescriptor& buffer_layout = cfg.vertex_state[i];
+      if ((buffer_layout.array_stride & 3) != 0) {
+        ctx.dst->Diagnostics().add_error(
+            diag::System::Transform,
+            "WebGPU requires that vertex stride must be a multiple of 4 bytes, "
+            "but VertexPulling array stride for buffer " +
+                std::to_string(buffer_idx) + " was " +
+                std::to_string(buffer_layout.array_stride) + " bytes");
+        return nullptr;
+      }
+
+      auto* index_expr = buffer_layout.step_mode == InputStepMode::kVertex
+                             ? vertex_index_expr()
+                             : instance_index_expr();
+
+      // buffer_array_base is the base array offset for all the vertex
+      // attributes. These are units of uint (4 bytes).
+      auto buffer_array_base = ctx.dst->Symbols().New(
+          "buffer_array_base_" + std::to_string(buffer_idx));
+
+      auto* attribute_offset = index_expr;
+      if (buffer_layout.array_stride != 4) {
+        attribute_offset =
+            ctx.dst->Mul(index_expr, buffer_layout.array_stride / 4u);
+      }
+
+      // let pulling_offset_n = <attribute_offset>
+      stmts.emplace_back(ctx.dst->Decl(
+          ctx.dst->Const(buffer_array_base, nullptr, attribute_offset)));
 
       for (const VertexAttributeDescriptor& attribute_desc :
            buffer_layout.attributes) {
-        auto it = location_to_expr.find(attribute_desc.shader_location);
-        if (it == location_to_expr.end()) {
+        auto it = location_info.find(attribute_desc.shader_location);
+        if (it == location_info.end()) {
           continue;
         }
-        auto* ident = it->second();
+        auto& var = it->second;
 
-        auto* index_expr = buffer_layout.step_mode == InputStepMode::kVertex
-                               ? vertex_index_expr()
-                               : instance_index_expr();
+        // Data type of the target WGSL variable
+        auto var_dt = DataTypeOf(var.type);
+        // Data type of the vertex stream attribute
+        auto fmt_dt = DataTypeOf(attribute_desc.format);
 
-        // An expression for the start of the read in the buffer in bytes
-        auto* pos_value = ctx.dst->Add(
-            ctx.dst->Mul(index_expr,
-                         static_cast<uint32_t>(buffer_layout.array_stride)),
-            static_cast<uint32_t>(attribute_desc.offset));
+        // Base types must match between the vertex stream and the WGSL variable
+        if (var_dt.base_type != fmt_dt.base_type) {
+          std::stringstream err;
+          err << "VertexAttributeDescriptor for location "
+              << std::to_string(attribute_desc.shader_location)
+              << " has format " << attribute_desc.format
+              << " but shader expects "
+              << var.type->FriendlyName(ctx.src->Symbols());
+          ctx.dst->Diagnostics().add_error(diag::System::Transform, err.str());
+          return nullptr;
+        }
 
-        // Update position of the read
-        auto* set_pos_expr =
-            ctx.dst->Assign(ctx.dst->Expr(GetPullingPositionName()), pos_value);
-        stmts.emplace_back(set_pos_expr);
+        // Load the attribute value
+        auto* fetch = Fetch(buffer_array_base, attribute_desc.offset,
+                            buffer_idx, attribute_desc.format);
 
-        stmts.emplace_back(
-            ctx.dst->Assign(ident, AccessByFormat(i, attribute_desc.format)));
+        // The attribute value may not be of the desired vector width. If it is
+        // not, we'll need to either reduce the width with a swizzle, or append
+        // 0's and / or a 1.
+        auto* value = fetch;
+        if (var_dt.width < fmt_dt.width) {
+          // WGSL variable vector width is smaller than the loaded vector width
+          switch (var_dt.width) {
+            case 1:
+              value = ctx.dst->MemberAccessor(fetch, "x");
+              break;
+            case 2:
+              value = ctx.dst->MemberAccessor(fetch, "xy");
+              break;
+            case 3:
+              value = ctx.dst->MemberAccessor(fetch, "xyz");
+              break;
+            default:
+              TINT_UNREACHABLE(Transform, ctx.dst->Diagnostics())
+                  << var_dt.width;
+              return nullptr;
+          }
+        } else if (var_dt.width > fmt_dt.width) {
+          // WGSL variable vector width is wider than the loaded vector width
+          ast::Type* ty = nullptr;
+          ast::ExpressionList values{fetch};
+          switch (var_dt.base_type) {
+            case BaseType::kI32:
+              ty = ctx.dst->ty.i32();
+              for (uint32_t i = fmt_dt.width; i < var_dt.width; i++) {
+                values.emplace_back(ctx.dst->Expr((i == 3) ? 1 : 0));
+              }
+              break;
+            case BaseType::kU32:
+              ty = ctx.dst->ty.u32();
+              for (uint32_t i = fmt_dt.width; i < var_dt.width; i++) {
+                values.emplace_back(ctx.dst->Expr((i == 3) ? 1u : 0u));
+              }
+              break;
+            case BaseType::kF32:
+              ty = ctx.dst->ty.f32();
+              for (uint32_t i = fmt_dt.width; i < var_dt.width; i++) {
+                values.emplace_back(ctx.dst->Expr((i == 3) ? 1.f : 0.f));
+              }
+              break;
+            default:
+              TINT_UNREACHABLE(Transform, ctx.dst->Diagnostics())
+                  << var_dt.base_type;
+              return nullptr;
+          }
+          value = ctx.dst->Construct(ctx.dst->ty.vec(ty, var_dt.width), values);
+        }
+
+        // Assign the value to the WGSL variable
+        stmts.emplace_back(ctx.dst->Assign(var.expr(), value));
       }
+    }
+
+    if (stmts.empty()) {
+      return nullptr;
     }
 
     return ctx.dst->create<ast::BlockStatement>(stmts);
   }
 
   /// Generates an expression reading from a buffer a specific format.
-  /// This reads the value wherever `kPullingPosVarName` points to at the time
-  /// of the read.
+  /// @param array_base the symbol of the variable holding the base array offset
+  /// of the vertex array (each index is 4-bytes).
+  /// @param offset the byte offset of the data from `buffer_base`
   /// @param buffer the index of the vertex buffer
   /// @param format the format to read
-  ast::Expression* AccessByFormat(uint32_t buffer, VertexFormat format) {
-    // TODO(idanr): this doesn't account for the format of the attribute in the
-    // shader. ex: vec<u32> in shader, and attribute claims VertexFormat::Float4
-    // right now, we would try to assign a vec4<f32> to this attribute, but we
-    // really need to assign a vec4<u32> by casting.
-    // We could split this function to first do memory accesses and unpacking
-    // into int/uint/float1-4/etc, then convert that variable to a var<in> with
-    // the conversion defined in the WebGPU spec.
+  ast::Expression* Fetch(Symbol array_base,
+                         uint32_t offset,
+                         uint32_t buffer,
+                         VertexFormat format) {
+    using u32 = ProgramBuilder::u32;
+    using i32 = ProgramBuilder::i32;
+    using f32 = ProgramBuilder::f32;
+
+    // Returns a u32 loaded from buffer_base + offset.
+    auto load_u32 = [&] {
+      return LoadPrimitive(array_base, offset, buffer, VertexFormat::kU32);
+    };
+
+    // Returns a i32 loaded from buffer_base + offset.
+    auto load_i32 = [&] { return ctx.dst->Bitcast<i32>(load_u32()); };
+
+    // Returns a u32 loaded from buffer_base + offset + 4.
+    auto load_next_u32 = [&] {
+      return LoadPrimitive(array_base, offset + 4, buffer, VertexFormat::kU32);
+    };
+
+    // Returns a i32 loaded from buffer_base + offset + 4.
+    auto load_next_i32 = [&] { return ctx.dst->Bitcast<i32>(load_next_u32()); };
+
+    // Returns a u16 loaded from offset, packed in the high 16 bits of a u32.
+    // The low 16 bits are 0.
+    // `min_alignment` must be a power of two.
+    // `offset` must be `min_alignment` bytes aligned.
+    auto load_u16_h = [&] {
+      auto low_u32_offset = offset & ~3u;
+      auto* low_u32 =
+          LoadPrimitive(array_base, low_u32_offset, buffer, VertexFormat::kU32);
+      switch (offset & 3) {
+        case 0:
+          return ctx.dst->Shl(low_u32, 16u);
+        case 1:
+          return ctx.dst->And(ctx.dst->Shl(low_u32, 8u), 0xffff0000u);
+        case 2:
+          return ctx.dst->And(low_u32, 0xffff0000u);
+        default: {  // 3:
+          auto* high_u32 = LoadPrimitive(array_base, low_u32_offset + 4, buffer,
+                                         VertexFormat::kU32);
+          auto* shr = ctx.dst->Shr(low_u32, 8u);
+          auto* shl = ctx.dst->Shl(high_u32, 24u);
+          return ctx.dst->And(ctx.dst->Or(shl, shr), 0xffff0000u);
+        }
+      }
+    };
+
+    // Returns a u16 loaded from offset, packed in the low 16 bits of a u32.
+    // The high 16 bits are 0.
+    auto load_u16_l = [&] {
+      auto low_u32_offset = offset & ~3u;
+      auto* low_u32 =
+          LoadPrimitive(array_base, low_u32_offset, buffer, VertexFormat::kU32);
+      switch (offset & 3) {
+        case 0:
+          return ctx.dst->And(low_u32, 0xffffu);
+        case 1:
+          return ctx.dst->And(ctx.dst->Shr(low_u32, 8u), 0xffffu);
+        case 2:
+          return ctx.dst->Shr(low_u32, 16u);
+        default: {  // 3:
+          auto* high_u32 = LoadPrimitive(array_base, low_u32_offset + 4, buffer,
+                                         VertexFormat::kU32);
+          auto* shr = ctx.dst->Shr(low_u32, 24u);
+          auto* shl = ctx.dst->Shl(high_u32, 8u);
+          return ctx.dst->And(ctx.dst->Or(shl, shr), 0xffffu);
+        }
+      }
+    };
+
+    // Returns a i16 loaded from offset, packed in the high 16 bits of a u32.
+    // The low 16 bits are 0.
+    auto load_i16_h = [&] { return ctx.dst->Bitcast<i32>(load_u16_h()); };
+
+    // Assumptions are made that alignment must be at least as large as the size
+    // of a single component.
+    switch (format) {
+      // Basic primitives
+      case VertexFormat::kUint32:
+      case VertexFormat::kSint32:
+      case VertexFormat::kFloat32:
+        return LoadPrimitive(array_base, offset, buffer, format);
+
+        // Vectors of basic primitives
+      case VertexFormat::kUint32x2:
+        return LoadVec(array_base, offset, buffer, 4, ctx.dst->ty.u32(),
+                       VertexFormat::kU32, 2);
+      case VertexFormat::kUint32x3:
+        return LoadVec(array_base, offset, buffer, 4, ctx.dst->ty.u32(),
+                       VertexFormat::kU32, 3);
+      case VertexFormat::kUint32x4:
+        return LoadVec(array_base, offset, buffer, 4, ctx.dst->ty.u32(),
+                       VertexFormat::kU32, 4);
+      case VertexFormat::kSint32x2:
+        return LoadVec(array_base, offset, buffer, 4, ctx.dst->ty.i32(),
+                       VertexFormat::kI32, 2);
+      case VertexFormat::kSint32x3:
+        return LoadVec(array_base, offset, buffer, 4, ctx.dst->ty.i32(),
+                       VertexFormat::kI32, 3);
+      case VertexFormat::kSint32x4:
+        return LoadVec(array_base, offset, buffer, 4, ctx.dst->ty.i32(),
+                       VertexFormat::kI32, 4);
+      case VertexFormat::kFloat32x2:
+        return LoadVec(array_base, offset, buffer, 4, ctx.dst->ty.f32(),
+                       VertexFormat::kF32, 2);
+      case VertexFormat::kFloat32x3:
+        return LoadVec(array_base, offset, buffer, 4, ctx.dst->ty.f32(),
+                       VertexFormat::kF32, 3);
+      case VertexFormat::kFloat32x4:
+        return LoadVec(array_base, offset, buffer, 4, ctx.dst->ty.f32(),
+                       VertexFormat::kF32, 4);
+
+      case VertexFormat::kUint8x2: {
+        // yyxx0000, yyxx0000
+        auto* u16s = ctx.dst->vec2<u32>(load_u16_h());
+        // xx000000, yyxx0000
+        auto* shl = ctx.dst->Shl(u16s, ctx.dst->vec2<u32>(8u, 0u));
+        // 000000xx, 000000yy
+        return ctx.dst->Shr(shl, ctx.dst->vec2<u32>(24u));
+      }
+      case VertexFormat::kUint8x4: {
+        // wwzzyyxx, wwzzyyxx, wwzzyyxx, wwzzyyxx
+        auto* u32s = ctx.dst->vec4<u32>(load_u32());
+        // xx000000, yyxx0000, zzyyxx00, wwzzyyxx
+        auto* shl = ctx.dst->Shl(u32s, ctx.dst->vec4<u32>(24u, 16u, 8u, 0u));
+        // 000000xx, 000000yy, 000000zz, 000000ww
+        return ctx.dst->Shr(shl, ctx.dst->vec4<u32>(24u));
+      }
+      case VertexFormat::kUint16x2: {
+        // yyyyxxxx, yyyyxxxx
+        auto* u32s = ctx.dst->vec2<u32>(load_u32());
+        // xxxx0000, yyyyxxxx
+        auto* shl = ctx.dst->Shl(u32s, ctx.dst->vec2<u32>(16u, 0u));
+        // 0000xxxx, 0000yyyy
+        return ctx.dst->Shr(shl, ctx.dst->vec2<u32>(16u));
+      }
+      case VertexFormat::kUint16x4: {
+        // yyyyxxxx, wwwwzzzz
+        auto* u32s = ctx.dst->vec2<u32>(load_u32(), load_next_u32());
+        // yyyyxxxx, yyyyxxxx, wwwwzzzz, wwwwzzzz
+        auto* xxyy = ctx.dst->MemberAccessor(u32s, "xxyy");
+        // xxxx0000, yyyyxxxx, zzzz0000, wwwwzzzz
+        auto* shl = ctx.dst->Shl(xxyy, ctx.dst->vec4<u32>(16u, 0u, 16u, 0u));
+        // 0000xxxx, 0000yyyy, 0000zzzz, 0000wwww
+        return ctx.dst->Shr(shl, ctx.dst->vec4<u32>(16u));
+      }
+      case VertexFormat::kSint8x2: {
+        // yyxx0000, yyxx0000
+        auto* i16s = ctx.dst->vec2<i32>(load_i16_h());
+        // xx000000, yyxx0000
+        auto* shl = ctx.dst->Shl(i16s, ctx.dst->vec2<u32>(8u, 0u));
+        // ssssssxx, ssssssyy
+        return ctx.dst->Shr(shl, ctx.dst->vec2<u32>(24u));
+      }
+      case VertexFormat::kSint8x4: {
+        // wwzzyyxx, wwzzyyxx, wwzzyyxx, wwzzyyxx
+        auto* i32s = ctx.dst->vec4<i32>(load_i32());
+        // xx000000, yyxx0000, zzyyxx00, wwzzyyxx
+        auto* shl = ctx.dst->Shl(i32s, ctx.dst->vec4<u32>(24u, 16u, 8u, 0u));
+        // ssssssxx, ssssssyy, sssssszz, ssssssww
+        return ctx.dst->Shr(shl, ctx.dst->vec4<u32>(24u));
+      }
+      case VertexFormat::kSint16x2: {
+        // yyyyxxxx, yyyyxxxx
+        auto* i32s = ctx.dst->vec2<i32>(load_i32());
+        // xxxx0000, yyyyxxxx
+        auto* shl = ctx.dst->Shl(i32s, ctx.dst->vec2<u32>(16u, 0u));
+        // ssssxxxx, ssssyyyy
+        return ctx.dst->Shr(shl, ctx.dst->vec2<u32>(16u));
+      }
+      case VertexFormat::kSint16x4: {
+        // yyyyxxxx, wwwwzzzz
+        auto* i32s = ctx.dst->vec2<i32>(load_i32(), load_next_i32());
+        // yyyyxxxx, yyyyxxxx, wwwwzzzz, wwwwzzzz
+        auto* xxyy = ctx.dst->MemberAccessor(i32s, "xxyy");
+        // xxxx0000, yyyyxxxx, zzzz0000, wwwwzzzz
+        auto* shl = ctx.dst->Shl(xxyy, ctx.dst->vec4<u32>(16u, 0u, 16u, 0u));
+        // ssssxxxx, ssssyyyy, sssszzzz, sssswwww
+        return ctx.dst->Shr(shl, ctx.dst->vec4<u32>(16u));
+      }
+      case VertexFormat::kUnorm8x2:
+        return ctx.dst->MemberAccessor(
+            ctx.dst->Call("unpack4x8unorm", load_u16_l()), "xy");
+      case VertexFormat::kSnorm8x2:
+        return ctx.dst->MemberAccessor(
+            ctx.dst->Call("unpack4x8snorm", load_u16_l()), "xy");
+      case VertexFormat::kUnorm8x4:
+        return ctx.dst->Call("unpack4x8unorm", load_u32());
+      case VertexFormat::kSnorm8x4:
+        return ctx.dst->Call("unpack4x8snorm", load_u32());
+      case VertexFormat::kUnorm16x2:
+        return ctx.dst->Call("unpack2x16unorm", load_u32());
+      case VertexFormat::kSnorm16x2:
+        return ctx.dst->Call("unpack2x16snorm", load_u32());
+      case VertexFormat::kFloat16x2:
+        return ctx.dst->Call("unpack2x16float", load_u32());
+      case VertexFormat::kUnorm16x4:
+        return ctx.dst->vec4<f32>(
+            ctx.dst->Call("unpack2x16unorm", load_u32()),
+            ctx.dst->Call("unpack2x16unorm", load_next_u32()));
+      case VertexFormat::kSnorm16x4:
+        return ctx.dst->vec4<f32>(
+            ctx.dst->Call("unpack2x16snorm", load_u32()),
+            ctx.dst->Call("unpack2x16snorm", load_next_u32()));
+      case VertexFormat::kFloat16x4:
+        return ctx.dst->vec4<f32>(
+            ctx.dst->Call("unpack2x16float", load_u32()),
+            ctx.dst->Call("unpack2x16float", load_next_u32()));
+    }
+
+    TINT_UNREACHABLE(Transform, ctx.dst->Diagnostics())
+        << "format " << static_cast<int>(format);
+    return nullptr;
+  }
+
+  /// Generates an expression reading an aligned basic type (u32, i32, f32) from
+  /// a vertex buffer.
+  /// @param array_base the symbol of the variable holding the base array offset
+  /// of the vertex array (each index is 4-bytes).
+  /// @param offset the byte offset of the data from `buffer_base`
+  /// @param buffer the index of the vertex buffer
+  /// @param format VertexFormat::kU32, VertexFormat::kI32 or VertexFormat::kF32
+  ast::Expression* LoadPrimitive(Symbol array_base,
+                                 uint32_t offset,
+                                 uint32_t buffer,
+                                 VertexFormat format) {
+    ast::Expression* u32 = nullptr;
+    if ((offset & 3) == 0) {
+      // Aligned load.
+
+      ast ::Expression* index = nullptr;
+      if (offset > 0) {
+        index = ctx.dst->Add(array_base, offset / 4);
+      } else {
+        index = ctx.dst->Expr(array_base);
+      }
+      u32 = ctx.dst->IndexAccessor(
+          ctx.dst->MemberAccessor(GetVertexBufferName(buffer),
+                                  GetStructBufferName()),
+          index);
+
+    } else {
+      // Unaligned load
+      uint32_t offset_aligned = offset & ~3u;
+      auto* low =
+          LoadPrimitive(array_base, offset_aligned, buffer, VertexFormat::kU32);
+      auto* high = LoadPrimitive(array_base, offset_aligned + 4u, buffer,
+                                 VertexFormat::kU32);
+
+      uint32_t shift = 8u * (offset & 3u);
+
+      auto* low_shr = ctx.dst->Shr(low, shift);
+      auto* high_shl = ctx.dst->Shl(high, 32u - shift);
+      u32 = ctx.dst->Or(low_shr, high_shl);
+    }
+
     switch (format) {
       case VertexFormat::kU32:
-        return AccessU32(buffer, ctx.dst->Expr(GetPullingPositionName()));
+        return u32;
       case VertexFormat::kI32:
-        return AccessI32(buffer, ctx.dst->Expr(GetPullingPositionName()));
+        return ctx.dst->Bitcast(ctx.dst->ty.i32(), u32);
       case VertexFormat::kF32:
-        return AccessF32(buffer, ctx.dst->Expr(GetPullingPositionName()));
-      case VertexFormat::kVec2F32:
-        return AccessVec(buffer, 4, ctx.dst->ty.f32(), VertexFormat::kF32, 2);
-      case VertexFormat::kVec3F32:
-        return AccessVec(buffer, 4, ctx.dst->ty.f32(), VertexFormat::kF32, 3);
-      case VertexFormat::kVec4F32:
-        return AccessVec(buffer, 4, ctx.dst->ty.f32(), VertexFormat::kF32, 4);
+        return ctx.dst->Bitcast(ctx.dst->ty.f32(), u32);
       default:
-        return nullptr;
+        break;
     }
-  }
-
-  /// Generates an expression reading a uint32 from a vertex buffer
-  /// @param buffer the index of the vertex buffer
-  /// @param pos an expression for the position of the access, in bytes
-  ast::Expression* AccessU32(uint32_t buffer, ast::Expression* pos) {
-    // Here we divide by 4, since the buffer is uint32 not uint8. The input
-    // buffer has byte offsets for each attribute, and we will convert it to u32
-    // indexes by dividing. Then, that element is going to be read, and if
-    // needed, unpacked into an appropriate variable. All reads should end up
-    // here as a base case.
-    return ctx.dst->create<ast::ArrayAccessorExpression>(
-        ctx.dst->MemberAccessor(GetVertexBufferName(buffer),
-                                GetStructBufferName()),
-        ctx.dst->Div(pos, 4u));
-  }
-
-  /// Generates an expression reading an int32 from a vertex buffer
-  /// @param buffer the index of the vertex buffer
-  /// @param pos an expression for the position of the access, in bytes
-  ast::Expression* AccessI32(uint32_t buffer, ast::Expression* pos) {
-    // as<T> reinterprets bits
-    return ctx.dst->create<ast::BitcastExpression>(ctx.dst->ty.i32(),
-                                                   AccessU32(buffer, pos));
-  }
-
-  /// Generates an expression reading a float from a vertex buffer
-  /// @param buffer the index of the vertex buffer
-  /// @param pos an expression for the position of the access, in bytes
-  ast::Expression* AccessF32(uint32_t buffer, ast::Expression* pos) {
-    // as<T> reinterprets bits
-    return ctx.dst->create<ast::BitcastExpression>(ctx.dst->ty.f32(),
-                                                   AccessU32(buffer, pos));
-  }
-
-  /// Generates an expression reading a basic type (u32, i32, f32) from a
-  /// vertex buffer
-  /// @param buffer the index of the vertex buffer
-  /// @param pos an expression for the position of the access, in bytes
-  /// @param format the underlying vertex format
-  ast::Expression* AccessPrimitive(uint32_t buffer,
-                                   ast::Expression* pos,
-                                   VertexFormat format) {
-    // This function uses a position expression to read, rather than using the
-    // position variable. This allows us to read from offset positions relative
-    // to |kPullingPosVarName|. We can't call AccessByFormat because it reads
-    // only from the position variable.
-    switch (format) {
-      case VertexFormat::kU32:
-        return AccessU32(buffer, pos);
-      case VertexFormat::kI32:
-        return AccessI32(buffer, pos);
-      case VertexFormat::kF32:
-        return AccessF32(buffer, pos);
-      default:
-        return nullptr;
-    }
+    TINT_UNREACHABLE(Transform, ctx.dst->Diagnostics())
+        << "invalid format for LoadPrimitive" << static_cast<int>(format);
+    return nullptr;
   }
 
   /// Generates an expression reading a vec2/3/4 from a vertex buffer.
-  /// This reads the value wherever `kPullingPosVarName` points to at the time
-  /// of the read.
+  /// @param array_base the symbol of the variable holding the base array offset
+  /// of the vertex array (each index is 4-bytes).
+  /// @param offset the byte offset of the data from `buffer_base`
   /// @param buffer the index of the vertex buffer
   /// @param element_stride stride between elements, in bytes
   /// @param base_type underlying AST type
   /// @param base_format underlying vertex format
   /// @param count how many elements the vector has
-  ast::Expression* AccessVec(uint32_t buffer,
-                             uint32_t element_stride,
-                             ast::Type* base_type,
-                             VertexFormat base_format,
-                             uint32_t count) {
+  ast::Expression* LoadVec(Symbol array_base,
+                           uint32_t offset,
+                           uint32_t buffer,
+                           uint32_t element_stride,
+                           ast::Type* base_type,
+                           VertexFormat base_format,
+                           uint32_t count) {
     ast::ExpressionList expr_list;
     for (uint32_t i = 0; i < count; ++i) {
       // Offset read position by element_stride for each component
-      auto* cur_pos =
-          ctx.dst->Add(GetPullingPositionName(), element_stride * i);
-      expr_list.push_back(AccessPrimitive(buffer, cur_pos, base_format));
+      uint32_t primitive_offset = offset + element_stride * i;
+      expr_list.push_back(
+          LoadPrimitive(array_base, primitive_offset, buffer, base_format));
     }
 
     return ctx.dst->create<ast::TypeConstructorExpression>(
@@ -285,12 +729,12 @@ struct State {
       auto func_var_sym = ctx.Clone(param->symbol());
       auto* func_var_type = ctx.Clone(param->type());
       auto* func_var = ctx.dst->Var(func_var_sym, func_var_type);
-      ctx.InsertBefore(func->body()->statements(), *func->body()->begin(),
-                       ctx.dst->Decl(func_var));
+      ctx.InsertFront(func->body()->statements(), ctx.dst->Decl(func_var));
       // Capture mapping from location to the new variable.
-      location_to_expr[location->value()] = [this, func_var]() {
-        return ctx.dst->Expr(func_var);
-      };
+      LocationInfo info;
+      info.expr = [this, func_var]() { return ctx.dst->Expr(func_var); };
+      info.type = ctx.src->Sem().Get(param)->Type();
+      location_info[location->value()] = info;
     } else if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(
                    param->decorations())) {
       // Check for existing vertex_index and instance_index builtins.
@@ -336,7 +780,10 @@ struct State {
       if (auto* location = ast::GetDecoration<ast::LocationDecoration>(
               member->decorations())) {
         // Capture mapping from location to struct member.
-        location_to_expr[location->value()] = member_expr;
+        LocationInfo info;
+        info.expr = member_expr;
+        info.type = ctx.src->Sem().Get(member)->Type();
+        location_info[location->value()] = info;
         has_locations = true;
       } else if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(
                      member->decorations())) {
@@ -361,8 +808,7 @@ struct State {
 
     // Create a function-scope variable to replace the parameter.
     auto* func_var = ctx.dst->Var(param_sym, ctx.Clone(param->type()));
-    ctx.InsertBefore(func->body()->statements(), *func->body()->begin(),
-                     ctx.dst->Decl(func_var));
+    ctx.InsertFront(func->body()->statements(), ctx.dst->Decl(func_var));
 
     if (!members_to_clone.empty()) {
       // Create a new struct without the location attributes.
@@ -384,8 +830,8 @@ struct State {
       // Copy values from the new parameter to the function-scope variable.
       for (auto* member : members_to_clone) {
         auto member_name = ctx.Clone(member->symbol());
-        ctx.InsertBefore(
-            func->body()->statements(), *func->body()->begin(),
+        ctx.InsertFront(
+            func->body()->statements(),
             ctx.dst->Assign(ctx.dst->MemberAccessor(func_var, member_name),
                             ctx.dst->MemberAccessor(new_param, member_name)));
       }
@@ -436,8 +882,9 @@ struct State {
     }
 
     // Generate vertex pulling preamble.
-    ctx.InsertBefore(func->body()->statements(), *func->body()->begin(),
-                     CreateVertexPullingPreamble());
+    if (auto* block = CreateVertexPullingPreamble()) {
+      ctx.InsertFront(func->body()->statements(), block);
+    }
 
     // Rewrite the function header with the new parameters.
     auto func_sym = ctx.Clone(func->symbol());
@@ -495,7 +942,7 @@ VertexPulling::Config& VertexPulling::Config::operator=(const Config&) =
 VertexBufferLayoutDescriptor::VertexBufferLayoutDescriptor() = default;
 
 VertexBufferLayoutDescriptor::VertexBufferLayoutDescriptor(
-    uint64_t in_array_stride,
+    uint32_t in_array_stride,
     InputStepMode in_step_mode,
     std::vector<VertexAttributeDescriptor> in_attributes)
     : array_stride(in_array_stride),

@@ -17,6 +17,7 @@
 
 #include <sstream>
 #include <string>
+#include <type_traits>
 
 namespace tint {
 namespace utils {
@@ -36,6 +37,18 @@ inline T RoundUp(T alignment, T value) {
 template <typename T>
 inline bool IsPowerOfTwo(T value) {
   return (value & (value - 1)) == 0;
+}
+
+/// @param value the input value
+/// @returns the largest power of two that `value` is a multiple of
+template <typename T>
+inline std::enable_if_t<std::is_unsigned<T>::value, T> MaxAlignOf(T value) {
+  T pot = 1;
+  while (value && ((value & 1u) == 0)) {
+    pot <<= 1;
+    value >>= 1;
+  }
+  return pot;
 }
 
 }  // namespace utils

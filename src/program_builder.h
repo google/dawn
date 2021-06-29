@@ -25,6 +25,7 @@
 #include "src/ast/assignment_statement.h"
 #include "src/ast/atomic.h"
 #include "src/ast/binary_expression.h"
+#include "src/ast/bitcast_expression.h"
 #include "src/ast/bool.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/call_expression.h"
@@ -1101,6 +1102,36 @@ class ProgramBuilder {
         source, type, ExprList(std::forward<ARGS>(args)...));
   }
 
+  /// @param expr the expression for the bitcast
+  /// @return an `ast::BitcastExpression` of type `ty`, with the values of
+  /// `expr` converted to `ast::Expression`s using `Expr()`
+  template <typename T, typename EXPR>
+  ast::BitcastExpression* Bitcast(EXPR&& expr) {
+    return Bitcast(ty.Of<T>(), std::forward<EXPR>(expr));
+  }
+
+  /// @param type the type to cast to
+  /// @param expr the expression for the bitcast
+  /// @return an `ast::BitcastExpression` of `type` constructed with the values
+  /// `expr`.
+  template <typename EXPR>
+  ast::BitcastExpression* Bitcast(ast::Type* type, EXPR&& expr) {
+    return create<ast::BitcastExpression>(type, Expr(std::forward<EXPR>(expr)));
+  }
+
+  /// @param source the source information
+  /// @param type the type to cast to
+  /// @param expr the expression for the bitcast
+  /// @return an `ast::BitcastExpression` of `type` constructed with the values
+  /// `expr`.
+  template <typename EXPR>
+  ast::BitcastExpression* Bitcast(const Source& source,
+                                  ast::Type* type,
+                                  EXPR&& expr) {
+    return create<ast::BitcastExpression>(source, type,
+                                          Expr(std::forward<EXPR>(expr)));
+  }
+
   /// @param args the arguments for the vector constructor
   /// @param type the vector type
   /// @param size the vector size
@@ -1503,6 +1534,16 @@ class ProgramBuilder {
                                          Expr(std::forward<RHS>(rhs)));
   }
 
+  /// @param lhs the left hand argument to the or operation
+  /// @param rhs the right hand argument to the or operation
+  /// @returns a `ast::BinaryExpression` bitwise or-ing `lhs` and `rhs`
+  template <typename LHS, typename RHS>
+  ast::BinaryExpression* Or(LHS&& lhs, RHS&& rhs) {
+    return create<ast::BinaryExpression>(ast::BinaryOp::kOr,
+                                         Expr(std::forward<LHS>(lhs)),
+                                         Expr(std::forward<RHS>(rhs)));
+  }
+
   /// @param lhs the left hand argument to the subtraction operation
   /// @param rhs the right hand argument to the subtraction operation
   /// @returns a `ast::BinaryExpression` subtracting `rhs` from `lhs`
@@ -1540,6 +1581,26 @@ class ProgramBuilder {
   template <typename LHS, typename RHS>
   ast::Expression* Div(LHS&& lhs, RHS&& rhs) {
     return create<ast::BinaryExpression>(ast::BinaryOp::kDivide,
+                                         Expr(std::forward<LHS>(lhs)),
+                                         Expr(std::forward<RHS>(rhs)));
+  }
+
+  /// @param lhs the left hand argument to the bit shift right operation
+  /// @param rhs the right hand argument to the bit shift right operation
+  /// @returns a `ast::BinaryExpression` bit shifting right `lhs` by `rhs`
+  template <typename LHS, typename RHS>
+  ast::BinaryExpression* Shr(LHS&& lhs, RHS&& rhs) {
+    return create<ast::BinaryExpression>(ast::BinaryOp::kShiftRight,
+                                         Expr(std::forward<LHS>(lhs)),
+                                         Expr(std::forward<RHS>(rhs)));
+  }
+
+  /// @param lhs the left hand argument to the bit shift left operation
+  /// @param rhs the right hand argument to the bit shift left operation
+  /// @returns a `ast::BinaryExpression` bit shifting left `lhs` by `rhs`
+  template <typename LHS, typename RHS>
+  ast::BinaryExpression* Shl(LHS&& lhs, RHS&& rhs) {
+    return create<ast::BinaryExpression>(ast::BinaryOp::kShiftLeft,
                                          Expr(std::forward<LHS>(lhs)),
                                          Expr(std::forward<RHS>(rhs)));
   }

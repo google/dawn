@@ -51,7 +51,7 @@ transform::VertexAttributeDescriptor ExtractVertexAttributeDescriptor(
   transform::VertexAttributeDescriptor desc;
   desc.format = r->enum_class<transform::VertexFormat>(
       static_cast<uint8_t>(transform::VertexFormat::kLastEntry) + 1);
-  desc.offset = r->read<uint64_t>();
+  desc.offset = r->read<uint32_t>();
   desc.shader_location = r->read<uint32_t>();
   return desc;
 }
@@ -59,7 +59,7 @@ transform::VertexAttributeDescriptor ExtractVertexAttributeDescriptor(
 transform::VertexBufferLayoutDescriptor ExtractVertexBufferLayoutDescriptor(
     Reader* r) {
   transform::VertexBufferLayoutDescriptor desc;
-  desc.array_stride = r->read<uint64_t>();
+  desc.array_stride = r->read<uint32_t>();
   desc.step_mode = r->enum_class<transform::InputStepMode>(
       static_cast<uint8_t>(transform::InputStepMode::kLastEntry) + 1);
   desc.attributes = r->vector(ExtractVertexAttributeDescriptor);

@@ -58,6 +58,26 @@ TEST(MathTests, IsPowerOfTwo) {
   EXPECT_EQ(IsPowerOfTwo(9), false);
 }
 
+TEST(MathTests, MaxAlignOf) {
+  EXPECT_EQ(MaxAlignOf(0u), 1u);
+  EXPECT_EQ(MaxAlignOf(1u), 1u);
+  EXPECT_EQ(MaxAlignOf(2u), 2u);
+  EXPECT_EQ(MaxAlignOf(3u), 1u);
+  EXPECT_EQ(MaxAlignOf(4u), 4u);
+  EXPECT_EQ(MaxAlignOf(5u), 1u);
+  EXPECT_EQ(MaxAlignOf(6u), 2u);
+  EXPECT_EQ(MaxAlignOf(7u), 1u);
+  EXPECT_EQ(MaxAlignOf(8u), 8u);
+  EXPECT_EQ(MaxAlignOf(9u), 1u);
+  EXPECT_EQ(MaxAlignOf(10u), 2u);
+  EXPECT_EQ(MaxAlignOf(11u), 1u);
+  EXPECT_EQ(MaxAlignOf(12u), 4u);
+  EXPECT_EQ(MaxAlignOf(13u), 1u);
+  EXPECT_EQ(MaxAlignOf(14u), 2u);
+  EXPECT_EQ(MaxAlignOf(15u), 1u);
+  EXPECT_EQ(MaxAlignOf(16u), 16u);
+}
+
 }  // namespace
 }  // namespace utils
 }  // namespace tint
