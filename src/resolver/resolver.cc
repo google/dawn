@@ -616,8 +616,7 @@ bool Resolver::ValidateVariableConstructor(const ast::Variable* var,
 
 bool Resolver::GlobalVariable(ast::Variable* var) {
   if (variable_stack_.has(var->symbol())) {
-    AddError("v-0011",
-             "redeclared global identifier '" +
+    AddError("redeclared global identifier '" +
                  builder_->Symbols().NameFor(var->symbol()) + "'",
              var->source());
     return false;
@@ -630,13 +629,11 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
   variable_stack_.set_global(var->symbol(), info);
 
   if (!var->is_const() && info->storage_class == ast::StorageClass::kNone) {
-    AddError("v-0022", "global variables must have a storage class",
-             var->source());
+    AddError("global variables must have a storage class", var->source());
     return false;
   }
   if (var->is_const() && !(info->storage_class == ast::StorageClass::kNone)) {
-    AddError("v-global01", "global constants shouldn't have a storage class",
-             var->source());
+    AddError("global constants shouldn't have a storage class", var->source());
     return false;
   }
 
@@ -678,8 +675,7 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
 bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
   auto duplicate_func = symbol_to_function_.find(info->declaration->symbol());
   if (duplicate_func != symbol_to_function_.end()) {
-    AddError("v-2000",
-             "duplicate declaration '" +
+    AddError("duplicate declaration '" +
                  builder_->Symbols().NameFor(info->declaration->symbol()) + "'",
              info->declaration->source());
     AddNote("'" + builder_->Symbols().NameFor(info->declaration->symbol()) +
@@ -866,8 +862,7 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
 
   if (auto* r = storage_type->As<sem::Array>()) {
     if (r->IsRuntimeSized()) {
-      AddError("v-0015",
-               "runtime arrays may only appear as the last member of a struct",
+      AddError("runtime arrays may only appear as the last member of a struct",
                var->source());
       return false;
     }
@@ -1040,8 +1035,7 @@ bool Resolver::ValidateFunction(const ast::Function* func,
                                 const FunctionInfo* info) {
   auto func_it = symbol_to_function_.find(func->symbol());
   if (func_it != symbol_to_function_.end()) {
-    AddError("v-0016",
-             "duplicate function named '" +
+    AddError("duplicate function named '" +
                  builder_->Symbols().NameFor(func->symbol()) + "'",
              func->source());
     AddNote("first function declared here",
@@ -1053,8 +1047,7 @@ bool Resolver::ValidateFunction(const ast::Function* func,
   VariableInfo* var;
   if (variable_stack_.get(func->symbol(), &var, &is_global)) {
     if (is_global) {
-      AddError("v-2000",
-               "duplicate declaration '" +
+      AddError("duplicate declaration '" +
                    builder_->Symbols().NameFor(func->symbol()) + "'",
                func->source());
       AddNote("'" + builder_->Symbols().NameFor(func->symbol()) +
@@ -1099,7 +1092,7 @@ bool Resolver::ValidateFunction(const ast::Function* func,
     if (func->body()) {
       if (!func->get_last_statement() ||
           !func->get_last_statement()->Is<ast::ReturnStatement>()) {
-        AddError("v-0002", "non-void function must end with a return statement",
+        AddError("non-void function must end with a return statement",
                  func->source());
         return false;
       }
@@ -2038,13 +2031,11 @@ bool Resolver::FunctionCall(const ast::CallExpression* call) {
   if (callee_func_it == symbol_to_function_.end()) {
     if (current_function_ &&
         current_function_->declaration->symbol() == ident->symbol()) {
-      AddError("v-0004",
-               "recursion is not permitted. '" + name +
+      AddError("recursion is not permitted. '" + name +
                    "' attempted to call itself.",
                call->source());
     } else {
-      AddError("v-0006: unable to find called function: " + name,
-               call->source());
+      AddError("unable to find called function: " + name, call->source());
     }
     return false;
   }
@@ -2400,8 +2391,7 @@ bool Resolver::Identifier(ast::IdentifierExpression* expr) {
     return false;
   }
 
-  AddError("v-0006: identifier must be declared before use: " + name,
-           expr->source());
+  AddError("identifier must be declared before use: " + name, expr->source());
   return false;
 }
 
@@ -2829,9 +2819,7 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
 
   bool is_global = false;
   if (variable_stack_.get(var->symbol(), nullptr, &is_global)) {
-    const char* error_code = is_global ? "v-0013" : "v-0014";
-    AddError(error_code,
-             "redeclared identifier '" +
+    AddError("redeclared identifier '" +
                  builder_->Symbols().NameFor(var->symbol()) + "'",
              var->source());
     return false;
@@ -3370,18 +3358,16 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
       if (r->IsRuntimeSized()) {
         if (member != str->Members().back()) {
           AddError(
-              "v-0015",
               "runtime arrays may only appear as the last member of a struct",
               member->Declaration()->source());
           return false;
         }
         if (!str->IsBlockDecorated()) {
-          AddError("v-0015",
-                   "a struct containing a runtime-sized array "
-                   "requires the [[block]] attribute: '" +
-                       builder_->Symbols().NameFor(str->Declaration()->name()) +
-                       "'",
-                   member->Declaration()->source());
+          AddError(
+              "a struct containing a runtime-sized array "
+              "requires the [[block]] attribute: '" +
+                  builder_->Symbols().NameFor(str->Declaration()->name()) + "'",
+              member->Declaration()->source());
           return false;
         }
       }
@@ -3568,12 +3554,12 @@ bool Resolver::ValidateReturn(const ast::ReturnStatement* ret) {
                                     : builder_->create<sem::Void>();
 
   if (func_type->UnwrapRef() != ret_type) {
-    AddError("v-000y",
-             "return statement type must match its function "
-             "return type, returned '" +
-                 ret_type->FriendlyName(builder_->Symbols()) + "', expected '" +
-                 current_function_->return_type_name + "'",
-             ret->source());
+    AddError(
+        "return statement type must match its function "
+        "return type, returned '" +
+            ret_type->FriendlyName(builder_->Symbols()) + "', expected '" +
+            current_function_->return_type_name + "'",
+        ret->source());
     return false;
   }
 
@@ -3598,10 +3584,10 @@ bool Resolver::Return(ast::ReturnStatement* ret) {
 bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
   auto* cond_type = TypeOf(s->condition())->UnwrapRef();
   if (!cond_type->is_integer_scalar()) {
-    AddError("v-0025",
-             "switch statement selector expression must be of a "
-             "scalar integer type",
-             s->condition()->source());
+    AddError(
+        "switch statement selector expression must be of a "
+        "scalar integer type",
+        s->condition()->source());
     return false;
   }
 
@@ -3612,8 +3598,7 @@ bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
     if (case_stmt->IsDefault()) {
       if (has_default) {
         // More than one default clause
-        AddError("v-0008",
-                 "switch statement must have exactly one default clause",
+        AddError("switch statement must have exactly one default clause",
                  case_stmt->source());
         return false;
       }
@@ -3622,20 +3607,20 @@ bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
 
     for (auto* selector : case_stmt->selectors()) {
       if (cond_type != TypeOf(selector)) {
-        AddError("v-0026",
-                 "the case selector values must have the same "
-                 "type as the selector expression.",
-                 case_stmt->source());
+        AddError(
+            "the case selector values must have the same "
+            "type as the selector expression.",
+            case_stmt->source());
         return false;
       }
 
       auto v = selector->value_as_u32();
       if (selector_set.find(v) != selector_set.end()) {
-        AddError("v-0027",
-                 "a literal value must not appear more than once in "
-                 "the case selectors for a switch statement: '" +
-                     builder_->str(selector) + "'",
-                 case_stmt->source());
+        AddError(
+            "a literal value must not appear more than once in "
+            "the case selectors for a switch statement: '" +
+                builder_->str(selector) + "'",
+            case_stmt->source());
         return false;
       }
       selector_set.emplace(v);
@@ -3652,10 +3637,10 @@ bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
     auto* last_clause = s->body().back()->As<ast::CaseStatement>();
     auto* last_stmt = last_clause->body()->last();
     if (last_stmt && last_stmt->Is<ast::FallthroughStatement>()) {
-      AddError("v-0028",
-               "a fallthrough statement must not appear as "
-               "the last statement in last clause of a switch",
-               last_stmt->source());
+      AddError(
+          "a fallthrough statement must not appear as "
+          "the last statement in last clause of a switch",
+          last_stmt->source());
       return false;
     }
   }
@@ -3873,12 +3858,6 @@ void Resolver::Mark(const ast::Node* node) {
       << "At: " << node->source() << "\n"
       << "Content: " << builder_->str(node) << "\n"
       << "Pointer: " << node;
-}
-
-void Resolver::AddError(const char* code,
-                        const std::string& msg,
-                        const Source& source) const {
-  diagnostics_.add_error(diag::System::Resolver, code, msg, source);
 }
 
 void Resolver::AddError(const std::string& msg, const Source& source) const {

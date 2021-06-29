@@ -412,12 +412,6 @@ class Resolver {
   void Mark(const ast::Node* node);
 
   /// Adds the given error message to the diagnostics
-  /// [DEPRECATED] Remove all codes
-  void AddError(const char* code,
-                const std::string& msg,
-                const Source& source) const;
-
-  /// Adds the given error message to the diagnostics
   void AddError(const std::string& msg, const Source& source) const;
 
   /// Adds the given warning message to the diagnostics

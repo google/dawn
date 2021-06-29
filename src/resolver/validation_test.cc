@@ -213,7 +213,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariable_Fail) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: v-0006: identifier must be declared before use: b");
+            "12:34 error: identifier must be declared before use: b");
 }
 
 TEST_F(ResolverValidationTest, UsingUndefinedVariableInBlockStatement_Fail) {
@@ -229,7 +229,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableInBlockStatement_Fail) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: v-0006: identifier must be declared before use: b");
+            "12:34 error: identifier must be declared before use: b");
 }
 
 TEST_F(ResolverValidationTest, UsingUndefinedVariableGlobalVariableAfter_Fail) {
@@ -251,8 +251,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableGlobalVariableAfter_Fail) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: v-0006: identifier must be declared before use: "
-            "global_var");
+            "12:34 error: identifier must be declared before use: global_var");
 }
 
 TEST_F(ResolverValidationTest, UsingUndefinedVariableGlobalVariable_Pass) {
@@ -295,7 +294,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableInnerScope_Fail) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: v-0006: identifier must be declared before use: a");
+            "12:34 error: identifier must be declared before use: a");
 }
 
 TEST_F(ResolverValidationTest, UsingUndefinedVariableOuterScope_Pass) {
@@ -338,7 +337,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableDifferentScope_Fail) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: v-0006: identifier must be declared before use: a");
+            "12:34 error: identifier must be declared before use: a");
 }
 
 TEST_F(ResolverValidationTest, StorageClass_FunctionVariableWorkgroupClass) {

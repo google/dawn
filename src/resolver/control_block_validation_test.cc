@@ -45,8 +45,8 @@ TEST_F(ResolverControlBlockValidationTest,
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error v-0025: switch statement selector expression must be "
-            "of a scalar integer type");
+            "12:34 error: switch statement selector expression must be of a "
+            "scalar integer type");
 }
 
 TEST_F(ResolverControlBlockValidationTest, SwitchWithoutDefault_Fail) {
@@ -106,8 +106,7 @@ TEST_F(ResolverControlBlockValidationTest, SwitchWithTwoDefault_Fail) {
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
-      "12:34 error v-0008: switch statement must have exactly one default "
-      "clause");
+      "12:34 error: switch statement must have exactly one default clause");
 }
 
 TEST_F(ResolverControlBlockValidationTest, UnreachableCode_continue) {
@@ -164,8 +163,8 @@ TEST_F(ResolverControlBlockValidationTest,
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error v-0026: the case selector values must have the same "
-            "type as the selector expression.");
+            "12:34 error: the case selector values must have the same type as "
+            "the selector expression.");
 }
 
 TEST_F(ResolverControlBlockValidationTest,
@@ -193,8 +192,8 @@ TEST_F(ResolverControlBlockValidationTest,
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error v-0026: the case selector values must have the same "
-            "type as the selector expression.");
+            "12:34 error: the case selector values must have the same type as "
+            "the selector expression.");
 }
 
 TEST_F(ResolverControlBlockValidationTest,
@@ -228,8 +227,8 @@ TEST_F(ResolverControlBlockValidationTest,
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error v-0027: a literal value must not appear more than "
-            "once in the case selectors for a switch statement: '2u'");
+            "12:34 error: a literal value must not appear more than once in "
+            "the case selectors for a switch statement: '2u'");
 }
 
 TEST_F(ResolverControlBlockValidationTest,
@@ -264,10 +263,9 @@ TEST_F(ResolverControlBlockValidationTest,
   WrapInFunction(block);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error v-0027: a literal value must not appear more than once in "
-      "the case selectors for a switch statement: '10'");
+  EXPECT_EQ(r()->error(),
+            "12:34 error: a literal value must not appear more than once in "
+            "the case selectors for a switch statement: '10'");
 }
 
 TEST_F(ResolverControlBlockValidationTest,
@@ -288,10 +286,9 @@ TEST_F(ResolverControlBlockValidationTest,
   WrapInFunction(block);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error v-0028: a fallthrough statement must not appear as the "
-      "last statement in last clause of a switch");
+  EXPECT_EQ(r()->error(),
+            "12:34 error: a fallthrough statement must not appear as the last "
+            "statement in last clause of a switch");
 }
 
 TEST_F(ResolverControlBlockValidationTest, SwitchCase_Pass) {

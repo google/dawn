@@ -42,7 +42,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionNamesMustBeUnique_fail) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            R"(12:34 error v-0016: duplicate function named 'func'
+            R"(12:34 error: duplicate function named 'func'
 note: first function declared here)");
 }
 
@@ -74,8 +74,8 @@ TEST_F(ResolverFunctionValidationTest,
 
   EXPECT_FALSE(r()->Resolve()) << r()->error();
   EXPECT_EQ(r()->error(),
-            "12:34 error v-2000: duplicate declaration 'foo'\n56:78 note: "
-            "'foo' first declared here:");
+            "12:34 error: duplicate declaration 'foo'\n56:78 note: 'foo' first "
+            "declared here:");
 }
 
 TEST_F(ResolverFunctionValidationTest,
@@ -91,8 +91,8 @@ TEST_F(ResolverFunctionValidationTest,
 
   EXPECT_FALSE(r()->Resolve()) << r()->error();
   EXPECT_EQ(r()->error(),
-            "error v-2000: duplicate declaration 'foo'\n12:34 note: 'foo' "
-            "first declared here:");
+            "error: duplicate declaration 'foo'\n12:34 note: 'foo' first "
+            "declared here:");
 }
 
 TEST_F(ResolverFunctionValidationTest, FunctionUsingSameVariableName_Pass) {
@@ -163,9 +163,8 @@ TEST_F(ResolverFunctionValidationTest, FunctionEndWithoutReturnStatement_Fail) {
        ast::DecorationList{});
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error v-0002: non-void function must end with a return statement");
+  EXPECT_EQ(r()->error(),
+            "12:34 error: non-void function must end with a return statement");
 }
 
 TEST_F(ResolverFunctionValidationTest,
@@ -186,9 +185,8 @@ TEST_F(ResolverFunctionValidationTest,
        ast::StatementList{}, ast::DecorationList{});
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error v-0002: non-void function must end with a return statement");
+  EXPECT_EQ(r()->error(),
+            "12:34 error: non-void function must end with a return statement");
 }
 
 TEST_F(ResolverFunctionValidationTest,
@@ -214,8 +212,8 @@ TEST_F(ResolverFunctionValidationTest,
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error v-000y: return statement type must match its function "
-            "return type, returned 'i32', expected 'void'");
+            "12:34 error: return statement type must match its function return "
+            "type, returned 'i32', expected 'void'");
 }
 
 TEST_F(ResolverFunctionValidationTest,
@@ -229,8 +227,8 @@ TEST_F(ResolverFunctionValidationTest,
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error v-000y: return statement type must match its function "
-            "return type, returned 'void', expected 'f32'");
+            "12:34 error: return statement type must match its function return "
+            "type, returned 'void', expected 'f32'");
 }
 
 TEST_F(ResolverFunctionValidationTest,
@@ -256,8 +254,8 @@ TEST_F(ResolverFunctionValidationTest,
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error v-000y: return statement type must match its function "
-            "return type, returned 'i32', expected 'f32'");
+            "12:34 error: return statement type must match its function return "
+            "type, returned 'i32', expected 'f32'");
 }
 
 TEST_F(ResolverFunctionValidationTest,
@@ -287,8 +285,8 @@ TEST_F(ResolverFunctionValidationTest,
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error v-000y: return statement type must match its function "
-            "return type, returned 'u32', expected 'myf32'");
+            "12:34 error: return statement type must match its function return "
+            "type, returned 'u32', expected 'myf32'");
 }
 
 TEST_F(ResolverFunctionValidationTest, PipelineStage_MustBeUnique_Fail) {

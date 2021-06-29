@@ -31,7 +31,7 @@ TEST_F(ResolverStorageClassValidationTest, GlobalVariableNoStorageClass_Fail) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error v-0022: global variables must have a storage class");
+            "12:34 error: global variables must have a storage class");
 }
 
 TEST_F(ResolverStorageClassValidationTest, StorageBufferBool) {

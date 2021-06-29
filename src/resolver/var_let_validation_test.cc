@@ -124,7 +124,7 @@ TEST_F(ResolverVarLetValidationTest, LocalVarRedeclared) {
   WrapInFunction(v1, v2);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:34 error v-0014: redeclared identifier 'v'");
+  EXPECT_EQ(r()->error(), "12:34 error: redeclared identifier 'v'");
 }
 
 TEST_F(ResolverVarLetValidationTest, LocalLetRedeclared) {
@@ -135,7 +135,7 @@ TEST_F(ResolverVarLetValidationTest, LocalLetRedeclared) {
   WrapInFunction(l1, l2);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:34 error v-0014: redeclared identifier 'l'");
+  EXPECT_EQ(r()->error(), "12:34 error: redeclared identifier 'l'");
 }
 
 TEST_F(ResolverVarLetValidationTest, GlobalVarRedeclared) {
@@ -146,7 +146,7 @@ TEST_F(ResolverVarLetValidationTest, GlobalVarRedeclared) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error v-0011: redeclared global identifier 'v'");
+            "12:34 error: redeclared global identifier 'v'");
 }
 
 TEST_F(ResolverVarLetValidationTest, GlobalLetRedeclared) {
@@ -157,7 +157,7 @@ TEST_F(ResolverVarLetValidationTest, GlobalLetRedeclared) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error v-0011: redeclared global identifier 'l'");
+            "12:34 error: redeclared global identifier 'l'");
 }
 
 TEST_F(ResolverVarLetValidationTest, GlobalVarRedeclaredAsLocal) {
@@ -173,7 +173,7 @@ TEST_F(ResolverVarLetValidationTest, GlobalVarRedeclaredAsLocal) {
                      Expr(2.0f)));
 
   EXPECT_FALSE(r()->Resolve()) << r()->error();
-  EXPECT_EQ(r()->error(), "12:34 error v-0013: redeclared identifier 'v'");
+  EXPECT_EQ(r()->error(), "12:34 error: redeclared identifier 'v'");
 }
 
 TEST_F(ResolverVarLetValidationTest, VarRedeclaredInInnerBlock) {
@@ -190,7 +190,7 @@ TEST_F(ResolverVarLetValidationTest, VarRedeclaredInInnerBlock) {
   WrapInFunction(outer_body);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:34 error v-0014: redeclared identifier 'v'");
+  EXPECT_EQ(r()->error(), "12:34 error: redeclared identifier 'v'");
 }
 
 TEST_F(ResolverVarLetValidationTest, VarRedeclaredInIfBlock) {
@@ -213,7 +213,7 @@ TEST_F(ResolverVarLetValidationTest, VarRedeclaredInIfBlock) {
   WrapInFunction(outer_body);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:34 error v-0014: redeclared identifier 'v'");
+  EXPECT_EQ(r()->error(), "12:34 error: redeclared identifier 'v'");
 }
 
 TEST_F(ResolverVarLetValidationTest, InferredPtrStorageAccessMismatch) {

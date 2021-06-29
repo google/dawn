@@ -100,8 +100,7 @@ TEST_F(ResolverTypeValidationTest, GlobalConstantWithStorageClass_Fail) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error v-global01: global constants shouldn't have a storage "
-            "class");
+            "12:34 error: global constants shouldn't have a storage class");
 }
 
 TEST_F(ResolverTypeValidationTest, GlobalConstNoStorageClass_Pass) {
@@ -216,10 +215,9 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInFunction_Fail) {
        });
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error v-0015: runtime arrays may only appear as the last member "
-      "of a struct");
+  EXPECT_EQ(r()->error(),
+            "12:34 error: runtime arrays may only appear as the last member of "
+            "a struct");
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayIsLast_Pass) {
@@ -256,8 +254,8 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayIsLastNoBlock_Fail) {
 
   EXPECT_FALSE(r()->Resolve()) << r()->error();
   EXPECT_EQ(r()->error(),
-            "12:34 error v-0015: a struct containing a runtime-sized array "
-            "requires the [[block]] attribute: 'Foo'");
+            "12:34 error: a struct containing a runtime-sized array requires "
+            "the [[block]] attribute: 'Foo'");
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayIsNotLast_Fail) {
@@ -279,7 +277,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayIsNotLast_Fail) {
   EXPECT_FALSE(r()->Resolve()) << r()->error();
   EXPECT_EQ(
       r()->error(),
-      R"(12:34 error v-0015: runtime arrays may only appear as the last member of a struct)");
+      R"(12:34 error: runtime arrays may only appear as the last member of a struct)");
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayAsGlobalVariable) {
@@ -289,7 +287,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayAsGlobalVariable) {
 
   EXPECT_EQ(
       r()->error(),
-      R"(56:78 error v-0015: runtime arrays may only appear as the last member of a struct)");
+      R"(56:78 error: runtime arrays may only appear as the last member of a struct)");
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayAsLocalVariable) {
@@ -300,7 +298,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayAsLocalVariable) {
 
   EXPECT_EQ(
       r()->error(),
-      R"(56:78 error v-0015: runtime arrays may only appear as the last member of a struct)");
+      R"(56:78 error: runtime arrays may only appear as the last member of a struct)");
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayAsParameter_Fail) {
@@ -324,10 +322,9 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayAsParameter_Fail) {
        });
 
   EXPECT_FALSE(r()->Resolve()) << r()->error();
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error v-0015: runtime arrays may only appear as the last member "
-      "of a struct");
+  EXPECT_EQ(r()->error(),
+            "12:34 error: runtime arrays may only appear as the last member of "
+            "a struct");
 }
 
 TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsNotLast_Fail) {
@@ -349,10 +346,9 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsNotLast_Fail) {
   WrapInFunction();
 
   EXPECT_FALSE(r()->Resolve()) << r()->error();
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error v-0015: runtime arrays may only appear as the last member "
-      "of a struct");
+  EXPECT_EQ(r()->error(),
+            "12:34 error: runtime arrays may only appear as the last member of "
+            "a struct");
 }
 
 TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsLast_Pass) {

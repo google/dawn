@@ -42,8 +42,7 @@ TEST_F(ResolverCallValidationTest, Recursive_Invalid) {
   EXPECT_FALSE(r()->Resolve());
 
   EXPECT_EQ(r()->error(),
-            "12:34 error v-0004: recursion is not permitted. 'main' attempted "
-            "to call "
+            "12:34 error: recursion is not permitted. 'main' attempted to call "
             "itself.");
 }
 
@@ -70,8 +69,7 @@ TEST_F(ResolverCallValidationTest, Undeclared_Invalid) {
 
   EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(r()->error(),
-            "12:34 error: v-0006: unable to find called function: func");
+  EXPECT_EQ(r()->error(), "12:34 error: unable to find called function: func");
 }
 
 TEST_F(ResolverCallValidationTest, TooFewArgs) {

@@ -42,7 +42,7 @@ import (
 
 const (
 	toolName        = "check-spec-examples"
-	defaultSpecPath = "https://gpuweb.github.io/gpuweb/wgsl.html"
+	defaultSpecPath = "https://gpuweb.github.io/gpuweb/wgsl/"
 )
 
 var (
@@ -152,6 +152,10 @@ func run() error {
 		return err
 	}
 
+	if len(examples) == 0 {
+		return fmt.Errorf("no examples found")
+	}
+
 	// Create a temporary directory to hold the examples as separate files
 	tmpDir, err := ioutil.TempDir("", "wgsl-spec-examples")
 	if err != nil {
@@ -193,9 +197,8 @@ type example struct {
 // tryCompile attempts to compile the example e in the directory wd, using the
 // compiler at the given path. If the example is annotated with 'function-scope'
 // then the code is wrapped with a basic vertex-stage-entry function.
-// If the first compile fails with an error message containing 'error v-0003',
-// then a dummy vertex-state-entry function is appended to the source, and
-// another attempt to compile the shader is made.
+// If the first compile fails then a dummy vertex-state-entry function is
+// appended to the source, and another attempt to compile the shader is made.
 func tryCompile(compiler, wd string, e example) error {
 	code := e.code
 	if e.functionScope {
@@ -209,9 +212,7 @@ func tryCompile(compiler, wd string, e example) error {
 			return nil
 		}
 
-		if !addedStubFunction && strings.Contains(err.Error(), "error v-0003") {
-			// error v-0003: At least one of vertex, fragment or compute shader
-			// must be present. Add a stub entry point to satisfy the compiler.
+		if !addedStubFunction {
 			code += "\n[[stage(vertex)]] fn main() {}\n"
 			addedStubFunction = true
 			continue
