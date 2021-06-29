@@ -24,7 +24,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"sort"
-	"strconv"
 	"strings"
 	"unicode/utf8"
 
@@ -69,11 +68,12 @@ optional flags:`)
 func run() error {
 	var formatList, filter, dxcPath, xcrunPath string
 	numCPU := runtime.NumCPU()
-	generateExpected, generateSkip := false, false
+	verbose, generateExpected, generateSkip := false, false, false
 	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, hlsl")
 	flag.StringVar(&filter, "filter", "**.wgsl, **.spvasm, **.spv", "comma separated list of glob patterns for test files")
 	flag.StringVar(&dxcPath, "dxc", "", "path to DXC executable for validating HLSL output")
 	flag.StringVar(&xcrunPath, "xcrun", "", "path to xcrun executable for validating MSL output")
+	flag.BoolVar(&verbose, "verbose", false, "print all run tests, including rows that all pass")
 	flag.BoolVar(&generateExpected, "generate-expected", false, "create or update all expected outputs")
 	flag.BoolVar(&generateSkip, "generate-skip", false, "create or update all expected outputs that fail with SKIP")
 	flag.IntVar(&numCPU, "j", numCPU, "maximum number of concurrent threads to run tests")
@@ -158,9 +158,9 @@ func run() error {
 		}
 	}
 
-	default_msl_exe := "xcrun"
+	defaultMSLExe := "xcrun"
 	if runtime.GOOS == "windows" {
-		default_msl_exe = "metal.exe"
+		defaultMSLExe = "metal.exe"
 	}
 
 	// If explicit verification compilers have been specified, check they exist.
@@ -171,7 +171,7 @@ func run() error {
 		path *string
 	}{
 		{"dxc", "hlsl", &dxcPath},
-		{default_msl_exe, "msl", &xcrunPath},
+		{defaultMSLExe, "msl", &xcrunPath},
 	} {
 		if *tool.path == "" {
 			p, err := exec.LookPath(tool.name)
@@ -241,40 +241,63 @@ func run() error {
 		err    error
 	}
 
-	// Print the table of file x format
+	type stats struct {
+		numTests, numPass, numSkip, numFail int
+	}
+
+	// Statistics per output format
+	statsByFmt := map[outputFormat]*stats{}
+	for _, format := range formats {
+		statsByFmt[format] = &stats{}
+
+	}
+
+	// Print the table of file x format and gather per-format stats
 	failures := []failure{}
-	numTests, numPass, numSkip, numFail := 0, 0, 0, 0
-	filenameFmt := columnFormat(maxStringLen(files), false)
+	filenameColumnWidth := maxStringLen(files)
+
+	red := color.New(color.FgRed)
+	green := color.New(color.FgGreen)
+	yellow := color.New(color.FgYellow)
+	cyan := color.New(color.FgCyan)
+
+	printFormatsHeader := func() {
+		fmt.Printf(strings.Repeat(" ", filenameColumnWidth))
+		fmt.Printf(" ┃ ")
+		for _, format := range formats {
+			cyan.Printf(alignCenter(format, formatWidth(format)))
+			fmt.Printf(" │ ")
+		}
+		fmt.Println()
+	}
+	printHorizontalLine := func() {
+		fmt.Printf(strings.Repeat("━", maxStringLen(files)))
+		fmt.Printf("━╋━")
+		for _, format := range formats {
+			fmt.Printf(strings.Repeat("━", formatWidth(format)))
+			fmt.Printf("━┿━")
+		}
+		fmt.Println()
+	}
 
 	fmt.Println()
-	fmt.Printf(filenameFmt, "")
-	fmt.Printf(" ┃ ")
-	for _, format := range formats {
-		color.Set(color.FgCyan)
-		fmt.Printf(columnFormat(formatWidth(format), false), format)
-		color.Unset()
-		fmt.Printf(" │ ")
-	}
-	fmt.Println()
-	fmt.Printf(strings.Repeat("━", maxStringLen(files)))
-	fmt.Printf("━╋━")
-	for _, format := range formats {
-		fmt.Printf(strings.Repeat("━", formatWidth(format)))
-		fmt.Printf("━│━")
-	}
-	fmt.Println()
+
+	printFormatsHeader()
+	printHorizontalLine()
 
 	for i, file := range files {
 		results := results[i]
 
-		color.Set(color.FgBlue)
-		fmt.Printf(filenameFmt, file)
-		color.Unset()
-		fmt.Printf(" ┃ ")
+		row := &strings.Builder{}
+		rowAllPassed := true
+
+		fmt.Fprintf(row, alignRight(file, filenameColumnWidth))
+		fmt.Fprintf(row, " ┃ ")
 		for _, format := range formats {
-			formatFmt := columnFormat(formatWidth(format), true)
+			columnWidth := formatWidth(format)
 			result := <-results[format]
-			numTests++
+			stats := statsByFmt[format]
+			stats.numTests++
 			if err := result.err; err != nil {
 				failures = append(failures, failure{
 					file: file, format: format, err: err,
@@ -282,25 +305,72 @@ func run() error {
 			}
 			switch result.code {
 			case pass:
-				color.Set(color.FgGreen)
-				fmt.Printf(formatFmt, "PASS")
-				numPass++
+				green.Fprintf(row, alignCenter("PASS", columnWidth))
+				stats.numPass++
 			case fail:
-				color.Set(color.FgRed)
-				fmt.Printf(formatFmt, "FAIL")
-				numFail++
+				red.Fprintf(row, alignCenter("FAIL", columnWidth))
+				rowAllPassed = false
+				stats.numFail++
 			case skip:
-				color.Set(color.FgYellow)
-				fmt.Printf(formatFmt, "SKIP")
-				numSkip++
+				yellow.Fprintf(row, alignCenter("SKIP", columnWidth))
+				rowAllPassed = false
+				stats.numSkip++
 			default:
-				fmt.Printf(formatFmt, result.code)
+				fmt.Fprintf(row, alignCenter(result.code, columnWidth))
+				rowAllPassed = false
 			}
-			color.Unset()
+			fmt.Fprintf(row, " │ ")
+		}
+
+		if verbose || !rowAllPassed {
+			fmt.Println(row)
+		}
+	}
+
+	printHorizontalLine()
+	printFormatsHeader()
+	printHorizontalLine()
+	printStat := func(col *color.Color, name string, num func(*stats) int) {
+		row := &strings.Builder{}
+		anyNonZero := false
+		for _, format := range formats {
+			columnWidth := formatWidth(format)
+			count := num(statsByFmt[format])
+			if count > 0 {
+				col.Fprintf(row, alignLeft(count, columnWidth))
+				anyNonZero = true
+			} else {
+				fmt.Fprintf(row, alignLeft(count, columnWidth))
+			}
+			fmt.Fprintf(row, " │ ")
+		}
+
+		if !anyNonZero {
+			return
+		}
+		col.Printf(alignRight(name, filenameColumnWidth))
+		fmt.Printf(" ┃ ")
+		fmt.Println(row)
+
+		col.Printf(strings.Repeat(" ", filenameColumnWidth))
+		fmt.Printf(" ┃ ")
+		for _, format := range formats {
+			columnWidth := formatWidth(format)
+			stats := statsByFmt[format]
+			count := num(stats)
+			percent := percentage(count, stats.numTests)
+			if count > 0 {
+				col.Print(alignRight(percent, columnWidth))
+			} else {
+				fmt.Print(alignRight(percent, columnWidth))
+			}
 			fmt.Printf(" │ ")
 		}
 		fmt.Println()
 	}
+	printStat(green, "PASS", func(s *stats) int { return s.numPass })
+	printStat(yellow, "SKIP", func(s *stats) int { return s.numSkip })
+	printStat(red, "FAIL", func(s *stats) int { return s.numFail })
 	fmt.Println()
 
 	for _, f := range failures {
@@ -317,35 +387,44 @@ func run() error {
 		fmt.Println()
 	}
 
-	fmt.Printf("%d tests run", numTests)
-	if numPass > 0 {
+	allStats := stats{}
+	for _, format := range formats {
+		stats := statsByFmt[format]
+		allStats.numTests += stats.numTests
+		allStats.numPass += stats.numPass
+		allStats.numSkip += stats.numSkip
+		allStats.numFail += stats.numFail
+	}
+
+	fmt.Printf("%d tests run", allStats.numTests)
+	if allStats.numPass > 0 {
 		fmt.Printf(", ")
 		color.Set(color.FgGreen)
-		fmt.Printf("%d tests pass", numPass)
+		fmt.Printf("%d tests pass", allStats.numPass)
 		color.Unset()
 	} else {
-		fmt.Printf(", %d tests pass", numPass)
+		fmt.Printf(", %d tests pass", allStats.numPass)
 	}
-	if numSkip > 0 {
+	if allStats.numSkip > 0 {
 		fmt.Printf(", ")
 		color.Set(color.FgYellow)
-		fmt.Printf("%d tests skipped", numSkip)
+		fmt.Printf("%d tests skipped", allStats.numSkip)
 		color.Unset()
 	} else {
-		fmt.Printf(", %d tests skipped", numSkip)
+		fmt.Printf(", %d tests skipped", allStats.numSkip)
 	}
-	if numFail > 0 {
+	if allStats.numFail > 0 {
 		fmt.Printf(", ")
 		color.Set(color.FgRed)
-		fmt.Printf("%d tests failed", numFail)
+		fmt.Printf("%d tests failed", allStats.numFail)
 		color.Unset()
 	} else {
-		fmt.Printf(", %d tests failed", numFail)
+		fmt.Printf(", %d tests failed", allStats.numFail)
 	}
 	fmt.Println()
 	fmt.Println()
 
-	if numFail > 0 {
+	if allStats.numFail > 0 {
 		os.Exit(1)
 	}
 
@@ -508,13 +587,28 @@ func indent(s string, n int) string {
 	return tab + strings.ReplaceAll(s, "\n", "\n"+tab)
 }
 
-// columnFormat returns the printf format string to sprint a string with the
-// width of 'i' runes.
-func columnFormat(i int, alignLeft bool) string {
-	if alignLeft {
-		return "%-" + strconv.Itoa(i) + "s"
-	}
-	return "%" + strconv.Itoa(i) + "s"
+// alignLeft returns the string of 'val' padded so that it is aligned left in
+// a column of the given width
+func alignLeft(val interface{}, width int) string {
+	s := fmt.Sprint(val)
+	padding := width - utf8.RuneCountInString(s)
+	return s + strings.Repeat(" ", padding)
+}
+
+// alignCenter returns the string of 'val' padded so that it is centered in a
+// column of the given width.
+func alignCenter(val interface{}, width int) string {
+	s := fmt.Sprint(val)
+	padding := width - utf8.RuneCountInString(s)
+	return strings.Repeat(" ", padding/2) + s + strings.Repeat(" ", (padding+1)/2)
+}
+
+// alignRight returns the string of 'val' padded so that it is aligned right in
+// a column of the given width
+func alignRight(val interface{}, width int) string {
+	s := fmt.Sprint(val)
+	padding := width - utf8.RuneCountInString(s)
+	return strings.Repeat(" ", padding) + s
 }
 
 // maxStringLen returns the maximum number of runes found in all the strings in
@@ -531,11 +625,21 @@ func maxStringLen(l []string) int {
 
 // formatWidth returns the width in runes for the outputFormat column 'b'
 func formatWidth(b outputFormat) int {
+	const min = 6
 	c := utf8.RuneCountInString(string(b))
-	if c > 4 {
-		return c
+	if c < min {
+		return min
 	}
-	return 4
+	return c
+}
+
+// percentage returns the percentage of n out of total as a string
+func percentage(n, total int) string {
+	if total == 0 {
+		return "-"
+	}
+	f := float64(n) / float64(total)
+	return fmt.Sprintf("%.1f%c", f*100.0, '%')
 }
 
 // invoke runs the executable 'exe' with the provided arguments.

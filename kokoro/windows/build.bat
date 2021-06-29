@@ -127,7 +127,7 @@ call :status "Testing test/test-all.sh"
 cd /d %SRC_DIR% || goto :error
 set PATH=C:\Program Files\Metal Developer Tools\macos\bin;%PATH%
 where metal.exe
-git bash -- ./test/test-all.sh ../tint-build/%BUILD_TYPE%/tint.exe
+git bash -- ./test/test-all.sh ../tint-build/%BUILD_TYPE%/tint.exe --verbose
 @echo off
 
 call :status "Done"
