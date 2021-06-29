@@ -359,6 +359,7 @@ fn reverseBits<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
 fn round(f32) -> f32
 fn round<N: num>(vec<N, f32>) -> vec<N, f32>
 fn select<T: scalar>(T, T, bool) -> T
+fn select<T: scalar, N: num>(vec<N, T>, vec<N, T>, bool) -> vec<N, T>
 fn select<N: num, T: scalar>(vec<N, T>, vec<N, T>, vec<N, bool>) -> vec<N, T>
 fn sign(f32) -> f32
 fn sign<N: num>(vec<N, f32>) -> vec<N, f32>

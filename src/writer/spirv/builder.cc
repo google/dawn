@@ -2441,6 +2441,23 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
       if (!cond_id || !true_id || !false_id) {
         return 0;
       }
+
+      // If the condition is scalar but the objects are vectors, we need to
+      // splat the condition into a vector of the same size.
+      // TODO(jrprice): If we're targeting SPIR-V 1.4, we don't need to do this.
+      auto* result_vector_type = intrinsic->ReturnType()->As<sem::Vector>();
+      if (result_vector_type && intrinsic->Parameters()[2].type->is_scalar()) {
+        sem::Bool bool_type;
+        sem::Vector bool_vec_type(&bool_type, result_vector_type->size());
+        if (!GenerateTypeIfNeeded(&bool_vec_type)) {
+          return 0;
+        }
+        cond_id = GenerateSplat(cond_id, &bool_vec_type);
+        if (cond_id == 0) {
+          return 0;
+        }
+      }
+
       if (!push_function_inst(
               spv::Op::OpSelect,
               {Operand::Int(result_type_id), result, Operand::Int(cond_id),

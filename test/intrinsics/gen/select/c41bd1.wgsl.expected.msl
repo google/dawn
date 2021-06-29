@@ -1,0 +1,27 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+void select_c41bd1() {
+  bool4 res = select(bool4(), bool4(), bool());
+}
+
+vertex tint_symbol vertex_main() {
+  select_c41bd1();
+  tint_symbol const tint_symbol_1 = {.value=float4()};
+  return tint_symbol_1;
+}
+
+fragment void fragment_main() {
+  select_c41bd1();
+  return;
+}
+
+kernel void compute_main() {
+  select_c41bd1();
+  return;
+}
+
