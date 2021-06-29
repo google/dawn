@@ -9,7 +9,7 @@ let width : u32 = 128u;
 
 [[group(0), binding(1)]] var<storage, read_write> result : Result;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main([[builtin(global_invocation_id)]] GlobalInvocationId : vec3<u32>) {
   result.values[((GlobalInvocationId.y * width) + GlobalInvocationId.x)] = textureLoad(tex, vec2<i32>(i32(GlobalInvocationId.x), i32(GlobalInvocationId.y)), 0);
 }

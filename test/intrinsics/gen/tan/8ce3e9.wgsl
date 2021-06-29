@@ -39,7 +39,7 @@ fn fragment_main() {
   tan_8ce3e9();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   tan_8ce3e9();
 }

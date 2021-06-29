@@ -273,7 +273,7 @@ TEST_F(ResolverBuiltinsValidationTest, VertexBuiltin_Pass) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_Pass) {
-  // [[stage(compute)]]
+  // [[stage(compute), workgroup_size(1)]]
   // fn main(
   //   [[builtin(local_invocationId)]] li_id: vec3<u32>,
   //   [[builtin(local_invocationIndex)]] li_index: u32,

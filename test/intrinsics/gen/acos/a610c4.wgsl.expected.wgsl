@@ -13,7 +13,7 @@ fn fragment_main() {
   acos_a610c4();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   acos_a610c4();
 }

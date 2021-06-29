@@ -13,7 +13,7 @@ fn fragment_main() {
   reverseBits_7c4269();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   reverseBits_7c4269();
 }

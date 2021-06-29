@@ -296,7 +296,7 @@ OpFunctionEnd
 TEST_F(BuilderTest, SampleIndex_SampleRateShadingCapability) {
   Func("main",
        {Param("sample_index", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)})},
-       ty.void_(), {}, {Stage(ast::PipelineStage::kCompute)});
+       ty.void_(), {}, {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
   spirv::Builder& b = SanitizeAndBuild();
 

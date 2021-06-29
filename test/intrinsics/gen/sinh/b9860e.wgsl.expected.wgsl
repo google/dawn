@@ -13,7 +13,7 @@ fn fragment_main() {
   sinh_b9860e();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   sinh_b9860e();
 }

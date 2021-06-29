@@ -39,7 +39,7 @@ fn fragment_main() {
   acos_489247();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   acos_489247();
 }

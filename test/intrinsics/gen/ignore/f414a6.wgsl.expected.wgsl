@@ -13,7 +13,7 @@ fn fragment_main() {
   ignore_f414a6();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   ignore_f414a6();
 }

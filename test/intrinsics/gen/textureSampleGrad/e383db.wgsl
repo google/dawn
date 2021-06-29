@@ -41,7 +41,7 @@ fn fragment_main() {
   textureSampleGrad_e383db();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   textureSampleGrad_e383db();
 }

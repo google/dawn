@@ -39,7 +39,7 @@ fn fragment_main() {
   log_b2ce28();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   log_b2ce28();
 }

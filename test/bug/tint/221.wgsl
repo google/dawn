@@ -8,7 +8,7 @@ struct Buf{
 
 [[group(0), binding (0)]] var<storage, read_write> b : Buf;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var i : u32 = 0u;
   loop {

@@ -13,7 +13,7 @@ fn fragment_main() {
   smoothStep_658be3();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   smoothStep_658be3();
 }

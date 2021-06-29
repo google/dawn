@@ -38,7 +38,7 @@ fn fragment_main() {
   atomicCompareExchangeWeak_12871c();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   atomicCompareExchangeWeak_12871c();
 }

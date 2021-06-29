@@ -13,7 +13,7 @@ fn fragment_main() {
   tanh_c15fdb();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   tanh_c15fdb();
 }

@@ -13,7 +13,7 @@ fn fragment_main() {
   cos_c5c28e();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   cos_c5c28e();
 }

@@ -13,7 +13,7 @@ fn fragment_main() {
   dot_ba4246();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   dot_ba4246();
 }

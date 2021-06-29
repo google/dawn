@@ -39,7 +39,7 @@ fn fragment_main() {
   step_e2b337();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   step_e2b337();
 }

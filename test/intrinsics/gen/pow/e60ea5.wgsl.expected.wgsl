@@ -13,7 +13,7 @@ fn fragment_main() {
   pow_e60ea5();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   pow_e60ea5();
 }

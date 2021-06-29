@@ -13,7 +13,7 @@ fn fragment_main() {
   reverseBits_e31adf();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   reverseBits_e31adf();
 }

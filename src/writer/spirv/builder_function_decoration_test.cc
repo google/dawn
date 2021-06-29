@@ -62,11 +62,12 @@ TEST_P(Decoration_StageTest, Emit) {
     ret_type = ty.void_();
   }
 
-  auto* func = Func("main", {}, ret_type, body,
-                    ast::DecorationList{
-                        Stage(params.stage),
-                    },
-                    ret_type_decos);
+  auto deco_list = ast::DecorationList{Stage(params.stage)};
+  if (params.stage == ast::PipelineStage::kCompute) {
+    deco_list.push_back(WorkgroupSize(1));
+  }
+
+  auto* func = Func("main", {}, ret_type, body, deco_list, ret_type_decos);
 
   spirv::Builder& b = Build();
 
@@ -109,9 +110,8 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_Fragment_OriginUpperLeft) {
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Default) {
   auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
-                    ast::DecorationList{
-                        Stage(ast::PipelineStage::kCompute),
-                    });
+                    ast::DecorationList{Stage(ast::PipelineStage::kCompute),
+                                        WorkgroupSize(1)});
 
   spirv::Builder& b = Build();
 

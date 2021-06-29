@@ -39,7 +39,7 @@ fn fragment_main() {
   exp2_dea523();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   exp2_dea523();
 }

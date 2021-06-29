@@ -41,7 +41,7 @@ fn fragment_main() {
   textureSampleLevel_9bd37b();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   textureSampleLevel_9bd37b();
 }

@@ -271,7 +271,7 @@ TEST_P(EntryPointReturnTypeDecorationTest, IsValid) {
 
   Func("main", ast::VariableList{}, ty.vec4<f32>(),
        {Return(Construct(ty.vec4<f32>(), 1.f))},
-       {Stage(ast::PipelineStage::kCompute)},
+       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)},
        createDecorations({}, *this, params.kind));
 
   if (params.should_pass) {
@@ -933,6 +933,24 @@ namespace WorkgroupDecorationTests {
 namespace {
 
 using WorkgroupDecoration = ResolverTest;
+TEST_F(WorkgroupDecoration, ComputeShaderPass) {
+  Func("main", {}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute),
+        create<ast::WorkgroupDecoration>(Source{{12, 34}}, Expr(1))});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(WorkgroupDecoration, Missing) {
+  Func(Source{{12, 34}}, "main", {}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: a compute shader must include 'workgroup_size' in its "
+      "attributes");
+}
 
 TEST_F(WorkgroupDecoration, NotAnEntryPoint) {
   Func("main", {}, ty.void_(), {},

@@ -38,7 +38,7 @@ fn fragment_main() {
   atomicAdd_d32fe4();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   atomicAdd_d32fe4();
 }

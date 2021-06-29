@@ -14,7 +14,7 @@ fn fragment_main() {
   atomicMin_c67a74();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   atomicMin_c67a74();
 }

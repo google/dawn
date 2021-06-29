@@ -38,7 +38,7 @@ fn fragment_main() {
   atomicExchange_f2e22f();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   atomicExchange_f2e22f();
 }

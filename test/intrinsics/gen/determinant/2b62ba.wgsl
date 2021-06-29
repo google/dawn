@@ -39,7 +39,7 @@ fn fragment_main() {
   determinant_2b62ba();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   determinant_2b62ba();
 }

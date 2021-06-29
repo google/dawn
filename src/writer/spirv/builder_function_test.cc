@@ -191,12 +191,12 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   // };
   // [[binding(0), group(0)]] var<storage> data : Data;
   //
-  // [[stage(compute)]]
+  // [[stage(compute), workgroup_size(1)]]
   // fn a() {
   //   return;
   // }
   //
-  // [[stage(compute)]]
+  // [[stage(compute), workgroup_size(1)]]
   // fn b() {
   //   return;
   // }
@@ -219,9 +219,8 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
              Decl(var),
              Return(),
          },
-         ast::DecorationList{
-             Stage(ast::PipelineStage::kCompute),
-         });
+         ast::DecorationList{Stage(ast::PipelineStage::kCompute),
+                             WorkgroupSize(1)});
   }
 
   {
@@ -233,9 +232,8 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
              Decl(var),
              Return(),
          },
-         ast::DecorationList{
-             Stage(ast::PipelineStage::kCompute),
-         });
+         ast::DecorationList{Stage(ast::PipelineStage::kCompute),
+                             WorkgroupSize(1)});
   }
 
   spirv::Builder& b = Build();

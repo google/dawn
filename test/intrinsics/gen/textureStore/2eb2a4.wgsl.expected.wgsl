@@ -15,7 +15,7 @@ fn fragment_main() {
   textureStore_2eb2a4();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   textureStore_2eb2a4();
 }

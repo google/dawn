@@ -30,7 +30,7 @@ fn frag_main([[builtin(position)]] coord : vec4<f32>,
   var col : f32 = (coord.x * loc1);
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(8, 1, 1)]]
 fn compute_main([[builtin(local_invocation_id)]] local_id : vec3<u32>,
                 [[builtin(local_invocation_index)]] local_index : u32) {
   var id_x : u32 = local_id.x;
@@ -51,7 +51,7 @@ fn frag_main() {
 
 [[builtin(local_invocation_index), internal(disable_validation__ignore_storage_class)]] var<in> tint_symbol_3 : u32;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(8, 1, 1)]]
 fn compute_main() {
   var id_x : u32 = tint_symbol_2.x;
 }
@@ -891,7 +891,7 @@ fn main3() {
 
 TEST_F(SpirvTest, EmitVertexPointSize_NoVertexShaders) {
   auto* src = R"(
-[[stage(compute)]]
+[[stage(compute), workgroup_size(8, 1, 1)]]
 fn main() {
 }
 )";
@@ -907,7 +907,7 @@ TEST_F(SpirvTest, AddEmptyEntryPoint) {
   auto* src = R"()";
 
   auto* expect = R"(
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn unused_entry_point() {
 }
 )";

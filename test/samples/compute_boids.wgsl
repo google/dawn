@@ -58,7 +58,7 @@ struct Particle {
 [[binding(2), group(0)]] var<storage, read_write> particlesB : Particles;
 
 // https://github.com/austinEng/Project6-Vulkan-Flocking/blob/master/data/shaders/computeparticles/particle.comp
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn comp_main(
   [[builtin(global_invocation_id)]] gl_GlobalInvocationID : vec3<u32>) {
   var index : u32 = gl_GlobalInvocationID.x;

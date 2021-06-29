@@ -39,7 +39,7 @@ fn fragment_main() {
   trunc_f370d3();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   trunc_f370d3();
 }

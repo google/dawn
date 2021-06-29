@@ -4,7 +4,7 @@
 
 [[group(0), binding(2)]] var t_u : texture_2d_array<u32>;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   ignore(t_f);
   ignore(t_i);

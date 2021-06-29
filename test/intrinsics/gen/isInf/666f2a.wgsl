@@ -39,7 +39,7 @@ fn fragment_main() {
   isInf_666f2a();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   isInf_666f2a();
 }

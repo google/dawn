@@ -39,7 +39,7 @@ fn fragment_main() {
   unpack4x8snorm_523fb3();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   unpack4x8snorm_523fb3();
 }

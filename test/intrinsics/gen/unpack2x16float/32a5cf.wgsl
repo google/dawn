@@ -39,7 +39,7 @@ fn fragment_main() {
   unpack2x16float_32a5cf();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   unpack2x16float_32a5cf();
 }

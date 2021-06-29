@@ -13,7 +13,7 @@ fn fragment_main() {
   reflect_05357e();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   reflect_05357e();
 }

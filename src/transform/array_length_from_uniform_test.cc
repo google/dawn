@@ -70,7 +70,7 @@ struct SB {
 
 [[group(0), binding(0)]] var<storage, read> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var len : u32 = arrayLength(&sb.arr);
 }
@@ -92,7 +92,7 @@ struct SB {
 
 [[group(0), binding(0)]] var<storage, read> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var len : u32 = ((tint_symbol_1.buffer_size[0u] - 4u) / 4u);
 }
@@ -123,7 +123,7 @@ struct SB {
 
 [[group(0), binding(0)]] var<storage, read> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var len : u32 = arrayLength(&sb.arr);
 }
@@ -146,7 +146,7 @@ struct SB {
 
 [[group(0), binding(0)]] var<storage, read> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var len : u32 = ((tint_symbol_1.buffer_size[0u] - 8u) / 64u);
 }
@@ -184,7 +184,7 @@ struct SB2 {
 
 [[group(1), binding(2)]] var<storage, read> sb2 : SB2;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var len1 : u32 = arrayLength(&(sb1.arr1));
   var len2 : u32 = arrayLength(&(sb2.arr2));
@@ -216,7 +216,7 @@ struct SB2 {
 
 [[group(1), binding(2)]] var<storage, read> sb2 : SB2;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var len1 : u32 = ((tint_symbol_1.buffer_size[0u] - 4u) / 4u);
   var len2 : u32 = ((tint_symbol_1.buffer_size[1u] - 16u) / 16u);
@@ -249,7 +249,7 @@ struct SB {
 
 [[group(0), binding(0)]] var<storage, read> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   ignore(&(sb.arr));
 }
@@ -287,7 +287,7 @@ struct SB2 {
 
 [[group(1), binding(2)]] var<storage, read> sb2 : SB2;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var len1 : u32 = arrayLength(&(sb1.arr1));
   var len2 : u32 = arrayLength(&(sb2.arr2));

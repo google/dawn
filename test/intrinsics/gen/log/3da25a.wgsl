@@ -39,7 +39,7 @@ fn fragment_main() {
   log_3da25a();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   log_3da25a();
 }

@@ -40,7 +40,7 @@ fn fragment_main() {
   textureNumLevels_b4f5ea();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   textureNumLevels_b4f5ea();
 }

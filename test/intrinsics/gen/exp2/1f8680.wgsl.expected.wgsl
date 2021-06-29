@@ -13,7 +13,7 @@ fn fragment_main() {
   exp2_1f8680();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   exp2_1f8680();
 }

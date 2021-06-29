@@ -39,7 +39,7 @@ fn fragment_main() {
   ignore_6698df();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   ignore_6698df();
 }

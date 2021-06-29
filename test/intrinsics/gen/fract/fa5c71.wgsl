@@ -39,7 +39,7 @@ fn fragment_main() {
   fract_fa5c71();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   fract_fa5c71();
 }

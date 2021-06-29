@@ -13,7 +13,7 @@ fn fragment_main() {
   cosh_c13756();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   cosh_c13756();
 }

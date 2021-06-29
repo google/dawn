@@ -13,7 +13,7 @@ fn fragment_main() {
   fract_8bc1e9();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   fract_8bc1e9();
 }

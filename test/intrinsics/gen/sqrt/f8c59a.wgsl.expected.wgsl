@@ -13,7 +13,7 @@ fn fragment_main() {
   sqrt_f8c59a();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   sqrt_f8c59a();
 }

@@ -13,7 +13,7 @@ fn fragment_main() {
   select_00b848();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   select_00b848();
 }

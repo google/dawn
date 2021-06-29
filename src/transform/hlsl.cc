@@ -83,7 +83,8 @@ void Hlsl::AddEmptyEntryPoint(CloneContext& ctx) const {
   }
   ctx.dst->Func(ctx.dst->Symbols().New("unused_entry_point"), {},
                 ctx.dst->ty.void_(), {},
-                {ctx.dst->Stage(ast::PipelineStage::kCompute)});
+                {ctx.dst->Stage(ast::PipelineStage::kCompute),
+                 ctx.dst->WorkgroupSize(1)});
 }
 
 }  // namespace transform

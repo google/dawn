@@ -39,7 +39,7 @@ fn fragment_main() {
   ldexp_4d6f6d();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   ldexp_4d6f6d();
 }

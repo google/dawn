@@ -13,7 +13,7 @@ fn fragment_main() {
   unpack2x16snorm_b4aea6();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   unpack2x16snorm_b4aea6();
 }

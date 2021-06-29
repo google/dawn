@@ -14,7 +14,7 @@ struct S {
   member_struct : S_inner;
 };
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   let s : S = S();
 }

@@ -13,7 +13,7 @@ fn fragment_main() {
   select_a2860e();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   select_a2860e();
 }

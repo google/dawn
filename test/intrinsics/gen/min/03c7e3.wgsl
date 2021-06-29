@@ -39,7 +39,7 @@ fn fragment_main() {
   min_03c7e3();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   min_03c7e3();
 }

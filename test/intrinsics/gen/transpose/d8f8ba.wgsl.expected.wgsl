@@ -13,7 +13,7 @@ fn fragment_main() {
   transpose_d8f8ba();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   transpose_d8f8ba();
 }

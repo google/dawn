@@ -40,7 +40,7 @@ fn fragment_main() {
   textureNumLayers_ab0c9b();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   textureNumLayers_ab0c9b();
 }

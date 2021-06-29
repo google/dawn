@@ -612,12 +612,12 @@ TEST_F(MslGeneratorImplTest,
   // };
   // [[binding(0), group(0)]] var<storage> data : Data;
   //
-  // [[stage(compute)]]
+  // [[stage(compute), workgroup_size(1)]]
   // fn a() {
   //   return;
   // }
   //
-  // [[stage(compute)]]
+  // [[stage(compute), workgroup_size(1)]]
   // fn b() {
   //   return;
   // }
@@ -642,6 +642,7 @@ TEST_F(MslGeneratorImplTest,
          },
          {
              Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1),
          });
   }
 
@@ -651,7 +652,10 @@ TEST_F(MslGeneratorImplTest,
 
     Func("b", ast::VariableList{}, ty.void_(),
          ast::StatementList{Decl(var), Return()},
-         {Stage(ast::PipelineStage::kCompute)});
+         {
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1),
+         });
   }
 
   GeneratorImpl& gen = Build();

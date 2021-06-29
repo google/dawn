@@ -31,7 +31,7 @@
 [[group(0), binding(64)]] var t_rgba32sint_w : texture_storage_2d<rgba32sint, write>;
 [[group(0), binding(65)]] var t_rgba32float_w : texture_storage_2d<rgba32float, write>;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   ignore(t_rgba8unorm_r);
   ignore(t_rgba8snorm_r);

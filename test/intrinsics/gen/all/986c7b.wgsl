@@ -39,7 +39,7 @@ fn fragment_main() {
   all_986c7b();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   all_986c7b();
 }

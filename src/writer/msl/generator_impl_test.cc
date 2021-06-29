@@ -36,6 +36,7 @@ TEST_F(MslGeneratorImplTest, Generate) {
   Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
        ast::DecorationList{
            Stage(ast::PipelineStage::kCompute),
+           WorkgroupSize(1),
        });
 
   GeneratorImpl& gen = Build();

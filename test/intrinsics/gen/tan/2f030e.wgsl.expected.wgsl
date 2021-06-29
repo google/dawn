@@ -13,7 +13,7 @@ fn fragment_main() {
   tan_2f030e();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   tan_2f030e();
 }

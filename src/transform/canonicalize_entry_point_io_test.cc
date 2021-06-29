@@ -1095,7 +1095,7 @@ fn vert_main1() -> [[builtin(position)]] vec4<f32> {
   return vec4<f32>();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn comp_main1() {
 }
 )";
@@ -1133,7 +1133,7 @@ fn vert_main1() -> tint_symbol_3 {
   return tint_symbol_3(vec4<f32>());
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn comp_main1() {
 }
 )";

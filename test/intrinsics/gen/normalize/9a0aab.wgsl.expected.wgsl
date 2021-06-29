@@ -13,7 +13,7 @@ fn fragment_main() {
   normalize_9a0aab();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   normalize_9a0aab();
 }

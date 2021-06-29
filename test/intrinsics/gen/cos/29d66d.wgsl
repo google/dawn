@@ -39,7 +39,7 @@ fn fragment_main() {
   cos_29d66d();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   cos_29d66d();
 }

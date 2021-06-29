@@ -40,7 +40,7 @@ fn fragment_main() {
   ignore_b469af();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   ignore_b469af();
 }

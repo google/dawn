@@ -29,7 +29,7 @@ fn frexp_40fc9b() {
   var res: vec3<f32> = frexp(vec3<f32>(), &arg_1);
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   frexp_40fc9b();
 }

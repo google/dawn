@@ -39,7 +39,7 @@ fn fragment_main() {
   reverseBits_c21bc1();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   reverseBits_c21bc1();
 }

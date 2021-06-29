@@ -20,7 +20,7 @@ fn fragment_main() {
   arrayLength_cfca0a();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   arrayLength_cfca0a();
 }

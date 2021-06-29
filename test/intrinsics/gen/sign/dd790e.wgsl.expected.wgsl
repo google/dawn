@@ -13,7 +13,7 @@ fn fragment_main() {
   sign_dd790e();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   sign_dd790e();
 }

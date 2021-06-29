@@ -39,7 +39,7 @@ fn fragment_main() {
   mix_0c8c33();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   mix_0c8c33();
 }

@@ -13,7 +13,7 @@ fn fragment_main() {
   isFinite_426f9f();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   isFinite_426f9f();
 }

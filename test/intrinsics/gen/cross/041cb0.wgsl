@@ -39,7 +39,7 @@ fn fragment_main() {
   cross_041cb0();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   cross_041cb0();
 }

@@ -39,7 +39,7 @@ fn fragment_main() {
   atan2_a70d0d();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   atan2_a70d0d();
 }

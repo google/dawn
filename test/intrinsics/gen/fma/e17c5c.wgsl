@@ -39,7 +39,7 @@ fn fragment_main() {
   fma_e17c5c();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   fma_e17c5c();
 }

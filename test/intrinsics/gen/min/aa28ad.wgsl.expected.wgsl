@@ -13,7 +13,7 @@ fn fragment_main() {
   min_aa28ad();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   min_aa28ad();
 }

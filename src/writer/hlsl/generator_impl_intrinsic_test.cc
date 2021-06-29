@@ -535,7 +535,10 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack2x16Float) {
 TEST_F(HlslGeneratorImplTest_Intrinsic, StorageBarrier) {
   Func("main", {}, ty.void_(),
        {create<ast::CallStatement>(Call("storageBarrier"))},
-       {Stage(ast::PipelineStage::kCompute)});
+       {
+           Stage(ast::PipelineStage::kCompute),
+           WorkgroupSize(1),
+       });
 
   GeneratorImpl& gen = Build();
 
@@ -551,7 +554,10 @@ void main() {
 TEST_F(HlslGeneratorImplTest_Intrinsic, WorkgroupBarrier) {
   Func("main", {}, ty.void_(),
        {create<ast::CallStatement>(Call("workgroupBarrier"))},
-       {Stage(ast::PipelineStage::kCompute)});
+       {
+           Stage(ast::PipelineStage::kCompute),
+           WorkgroupSize(1),
+       });
 
   GeneratorImpl& gen = Build();
 
@@ -570,7 +576,10 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Ignore) {
 
   Func("main", {}, ty.void_(),
        {create<ast::CallStatement>(Call("ignore", Call("f", 1, 2, 3)))},
-       {Stage(ast::PipelineStage::kCompute)});
+       {
+           Stage(ast::PipelineStage::kCompute),
+           WorkgroupSize(1),
+       });
 
   GeneratorImpl& gen = Build();
 

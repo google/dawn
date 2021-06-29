@@ -660,9 +660,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Decoration_EntryPoint_Compute) {
        {
            Return(),
        },
-       {
-           Stage(ast::PipelineStage::kCompute),
-       });
+       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
   GeneratorImpl& gen = Build();
 
@@ -800,13 +798,13 @@ TEST_F(HlslGeneratorImplTest_Function,
   // };
   // [[binding(0), group(0)]] var<storage> data : Data;
   //
-  // [[stage(compute)]]
+  // [[stage(compute), workgroup_size(1)]]
   // fn a() {
   //   var v = data.d;
   //   return;
   // }
   //
-  // [[stage(compute)]]
+  // [[stage(compute), workgroup_size(1)]]
   // fn b() {
   //   var v = data.d;
   //   return;
@@ -830,9 +828,7 @@ TEST_F(HlslGeneratorImplTest_Function,
              Decl(var),
              Return(),
          },
-         {
-             Stage(ast::PipelineStage::kCompute),
-         });
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
   }
 
   {
@@ -844,9 +840,7 @@ TEST_F(HlslGeneratorImplTest_Function,
              Decl(var),
              Return(),
          },
-         {
-             Stage(ast::PipelineStage::kCompute),
-         });
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
   }
 
   GeneratorImpl& gen = SanitizeAndBuild();

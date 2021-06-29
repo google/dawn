@@ -39,7 +39,7 @@ fn fragment_main() {
   select_8fa62c();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   select_8fa62c();
 }

@@ -40,7 +40,7 @@ fn fragment_main() {
   textureDimensions_1a58e7();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   textureDimensions_1a58e7();
 }

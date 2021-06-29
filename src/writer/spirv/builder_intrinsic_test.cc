@@ -2366,6 +2366,7 @@ TEST_F(IntrinsicBuilderTest, Call_WorkgroupBarrier) {
        },
        ast::DecorationList{
            Stage(ast::PipelineStage::kCompute),
+           WorkgroupSize(1),
        });
 
   spirv::Builder& b = Build();
@@ -2398,6 +2399,7 @@ TEST_F(IntrinsicBuilderTest, Call_StorageBarrier) {
        },
        ast::DecorationList{
            Stage(ast::PipelineStage::kCompute),
+           WorkgroupSize(1),
        });
 
   spirv::Builder& b = Build();
@@ -2434,6 +2436,7 @@ TEST_F(IntrinsicBuilderTest, Call_Ignore) {
        },
        {
            Stage(ast::PipelineStage::kCompute),
+           WorkgroupSize(1),
        });
 
   spirv::Builder& b = Build();

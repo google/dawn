@@ -300,7 +300,8 @@ void Spirv::AddEmptyEntryPoint(CloneContext& ctx) const {
     }
   }
   ctx.dst->Func(ctx.dst->Sym("unused_entry_point"), {}, ctx.dst->ty.void_(), {},
-                {ctx.dst->Stage(ast::PipelineStage::kCompute)});
+                {ctx.dst->Stage(ast::PipelineStage::kCompute),
+                 ctx.dst->WorkgroupSize(1)});
 }
 
 Symbol Spirv::HoistToInputVariables(

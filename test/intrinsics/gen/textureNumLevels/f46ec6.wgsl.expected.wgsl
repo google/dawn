@@ -15,7 +15,7 @@ fn fragment_main() {
   textureNumLevels_f46ec6();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   textureNumLevels_f46ec6();
 }

@@ -13,7 +13,7 @@ fn fragment_main() {
   log2_4036ed();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   log2_4036ed();
 }

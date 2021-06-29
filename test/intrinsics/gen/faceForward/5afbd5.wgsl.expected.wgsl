@@ -13,7 +13,7 @@ fn fragment_main() {
   faceForward_5afbd5();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   faceForward_5afbd5();
 }

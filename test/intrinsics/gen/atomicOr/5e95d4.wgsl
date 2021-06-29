@@ -38,7 +38,7 @@ fn fragment_main() {
   atomicOr_5e95d4();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   atomicOr_5e95d4();
 }

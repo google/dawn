@@ -35,7 +35,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalDeclAfterFunction) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  [[stage(compute)]]
+  EXPECT_EQ(gen.result(), R"(  [[stage(compute), workgroup_size(1, 1, 1)]]
   fn test_function() {
     var a : f32;
   }
@@ -67,6 +67,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
        },
        ast::DecorationList{
            Stage(ast::PipelineStage::kCompute),
+           WorkgroupSize(1),
        });
 
   GeneratorImpl& gen = Build();
@@ -90,7 +91,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
     a : i32;
   };
 
-  [[stage(compute)]]
+  [[stage(compute), workgroup_size(1)]]
   fn main() {
     var s0 : S0;
     var s1 : S1;

@@ -39,7 +39,7 @@ fn fragment_main() {
   isInf_7bd98f();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   isInf_7bd98f();
 }

@@ -39,7 +39,7 @@ fn fragment_main() {
   length_602a17();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   length_602a17();
 }

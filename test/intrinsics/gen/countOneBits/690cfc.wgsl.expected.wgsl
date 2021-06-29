@@ -13,7 +13,7 @@ fn fragment_main() {
   countOneBits_690cfc();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   countOneBits_690cfc();
 }

@@ -13,7 +13,7 @@ fn fragment_main() {
   isInf_a46d6f();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   isInf_a46d6f();
 }

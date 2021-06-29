@@ -52,7 +52,7 @@ struct SB {
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var a : i32 = sb.a;
   var b : u32 = sb.b;
@@ -184,7 +184,7 @@ fn tint_symbol_21([[internal(disable_validation__ignore_atomic_function_paramete
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var a : i32 = tint_symbol(sb, 0u);
   var b : u32 = tint_symbol_1(sb, 4u);
@@ -246,7 +246,7 @@ struct UB {
 
 [[group(0), binding(0)]] var<uniform> ub : UB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var a : i32 = ub.a;
   var b : u32 = ub.b;
@@ -378,7 +378,7 @@ fn tint_symbol_21([[internal(disable_validation__ignore_atomic_function_paramete
 
 [[group(0), binding(0)]] var<uniform> ub : UB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var a : i32 = tint_symbol(ub, 0u);
   var b : u32 = tint_symbol_1(ub, 4u);
@@ -440,7 +440,7 @@ struct SB {
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   sb.a = i32();
   sb.b = u32();
@@ -591,7 +591,7 @@ fn tint_symbol_21([[internal(disable_validation__ignore_atomic_function_paramete
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   tint_symbol(sb, 0u, i32());
   tint_symbol_1(sb, 4u, u32());
@@ -653,7 +653,7 @@ struct SB {
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var x : SB = sb;
 }
@@ -768,7 +768,7 @@ fn tint_symbol_22([[internal(disable_validation__ignore_atomic_function_paramete
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var x : SB = tint_symbol_22(sb, 0u);
 }
@@ -809,7 +809,7 @@ struct SB {
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   sb = SB();
 }
@@ -964,7 +964,7 @@ fn tint_symbol_22([[internal(disable_validation__ignore_atomic_function_paramete
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   tint_symbol_22(sb, 0u, SB());
 }
@@ -998,7 +998,7 @@ struct SB {
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var x : f32 = sb.b[4].b[1].b.z;
 }
@@ -1036,7 +1036,7 @@ fn tint_symbol([[internal(disable_validation__ignore_atomic_function_parameter)]
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var x : f32 = tint_symbol(sb, 1224u);
 }
@@ -1070,7 +1070,7 @@ struct SB {
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var i : i32 = 4;
   var j : u32 = 1u;
@@ -1104,7 +1104,7 @@ fn tint_symbol([[internal(disable_validation__ignore_atomic_function_parameter)]
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var i : i32 = 4;
   var j : u32 = 1u;
@@ -1149,7 +1149,7 @@ struct SB {
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var i : i32 = 4;
   var j : u32 = 1u;
@@ -1191,7 +1191,7 @@ fn tint_symbol([[internal(disable_validation__ignore_atomic_function_parameter)]
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var i : i32 = 4;
   var j : u32 = 1u;
@@ -1216,7 +1216,7 @@ struct SB {
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   atomicStore(&sb.a, 123);
   ignore(atomicLoad(&sb.a));
@@ -1312,7 +1312,7 @@ fn tint_symbol_19([[internal(disable_validation__ignore_atomic_function_paramete
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   tint_symbol(sb, 16u, 123);
   ignore(tint_symbol_1(sb, 16u));
@@ -1352,7 +1352,7 @@ struct S {
 
 var<workgroup> w : S;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   atomicStore(&(w.a), 123);
   ignore(atomicLoad(&(w.a)));

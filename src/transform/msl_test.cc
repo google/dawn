@@ -27,14 +27,14 @@ TEST_F(MslTest, HandleModuleScopeVariables_Basic) {
 var<private> p : f32;
 var<workgroup> w : f32;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   w = p;
 }
 )";
 
   auto* expect = R"(
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main([[builtin(local_invocation_index)]] local_invocation_index : u32) {
   [[internal(disable_validation__ignore_storage_class)]] var<workgroup> tint_symbol_1 : f32;
   [[internal(disable_validation__ignore_storage_class)]] var<private> tint_symbol_2 : f32;
@@ -70,7 +70,7 @@ fn foo(a : f32) {
   no_uses();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   foo(1.0);
 }
@@ -91,7 +91,7 @@ fn foo(a : f32, tint_symbol_3 : ptr<private, f32>, tint_symbol_4 : ptr<workgroup
   no_uses();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main([[builtin(local_invocation_index)]] local_invocation_index : u32) {
   [[internal(disable_validation__ignore_storage_class)]] var<workgroup> tint_symbol_5 : f32;
   [[internal(disable_validation__ignore_storage_class)]] var<private> tint_symbol_6 : f32;
@@ -113,14 +113,14 @@ TEST_F(MslTest, HandleModuleScopeVariables_Constructors) {
 var<private> a : f32 = 1.0;
 var<private> b : f32 = f32();
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   let x : f32 = a + b;
 }
 )";
 
   auto* expect = R"(
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   [[internal(disable_validation__ignore_storage_class)]] var<private> tint_symbol : f32 = 1.0;
   [[internal(disable_validation__ignore_storage_class)]] var<private> tint_symbol_1 : f32 = f32();
@@ -138,7 +138,7 @@ TEST_F(MslTest, HandleModuleScopeVariables_Pointers) {
 var<private> p : f32;
 var<workgroup> w : f32;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   let p_ptr : ptr<private, f32> = &p;
   let w_ptr : ptr<workgroup, f32> = &w;
@@ -148,7 +148,7 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main([[builtin(local_invocation_index)]] local_invocation_index : u32) {
   [[internal(disable_validation__ignore_storage_class)]] var<workgroup> tint_symbol_1 : f32;
   [[internal(disable_validation__ignore_storage_class)]] var<private> tint_symbol_2 : f32;
@@ -171,13 +171,13 @@ TEST_F(MslTest, HandleModuleScopeVariables_UnusedVariables) {
 var<private> p : f32;
 var<workgroup> w : f32;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
 }
 )";
 
   auto* expect = R"(
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
 }
 )";
@@ -196,7 +196,7 @@ struct S {
 [[group(0), binding(0)]]
 var<uniform> u : S;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
 }
 )";
@@ -208,7 +208,7 @@ struct S {
 
 [[group(0), binding(0)]] var<uniform> u : S;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
 }
 )";
@@ -223,7 +223,7 @@ TEST_F(MslTest, HandleModuleScopeVariables_HandleTypes_Basic) {
 [[group(0), binding(0)]] var t : texture_2d<f32>;
 [[group(0), binding(1)]] var s : sampler;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   ignore(t);
   ignore(s);
@@ -231,7 +231,7 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main([[group(0), binding(0), internal(disable_validation__entry_point_parameter)]] tint_symbol : texture_2d<f32>, [[group(0), binding(1), internal(disable_validation__entry_point_parameter)]] tint_symbol_1 : sampler) {
   ignore(tint_symbol);
   ignore(tint_symbol_1);
@@ -263,7 +263,7 @@ fn foo(a : f32) {
   no_uses();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   foo(1.0);
 }
@@ -285,7 +285,7 @@ fn foo(a : f32, tint_symbol_2 : texture_2d<f32>, tint_symbol_3 : sampler) {
   no_uses();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main([[group(0), binding(0), internal(disable_validation__entry_point_parameter)]] tint_symbol_4 : texture_2d<f32>, [[group(0), binding(1), internal(disable_validation__entry_point_parameter)]] tint_symbol_5 : sampler) {
   foo(1.0, tint_symbol_4, tint_symbol_5);
 }

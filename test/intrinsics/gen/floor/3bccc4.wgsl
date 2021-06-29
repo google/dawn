@@ -39,7 +39,7 @@ fn fragment_main() {
   floor_3bccc4();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   floor_3bccc4();
 }

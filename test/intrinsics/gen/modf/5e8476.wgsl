@@ -40,7 +40,7 @@ fn fragment_main() {
   modf_5e8476();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   modf_5e8476();
 }

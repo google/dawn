@@ -40,7 +40,7 @@ fn fragment_main() {
   textureLoad_1a8452();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   textureLoad_1a8452();
 }

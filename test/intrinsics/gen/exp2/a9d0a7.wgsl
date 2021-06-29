@@ -39,7 +39,7 @@ fn fragment_main() {
   exp2_a9d0a7();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   exp2_a9d0a7();
 }

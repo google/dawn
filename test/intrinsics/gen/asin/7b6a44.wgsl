@@ -39,7 +39,7 @@ fn fragment_main() {
   asin_7b6a44();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   asin_7b6a44();
 }

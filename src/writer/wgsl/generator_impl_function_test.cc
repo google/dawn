@@ -162,12 +162,12 @@ TEST_F(WgslGeneratorImplTest,
   // };
   // [[binding(0), group(0)]] var<storage> data : Data;
   //
-  // [[stage(compute)]]
+  // [[stage(compute), workgroup_size(1)]]
   // fn a() {
   //   return;
   // }
   //
-  // [[stage(compute)]]
+  // [[stage(compute), workgroup_size(1)]]
   // fn b() {
   //   return;
   // }
@@ -192,6 +192,7 @@ TEST_F(WgslGeneratorImplTest,
          },
          ast::DecorationList{
              Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1),
          });
   }
 
@@ -206,6 +207,7 @@ TEST_F(WgslGeneratorImplTest,
          },
          ast::DecorationList{
              Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1),
          });
   }
 
@@ -219,13 +221,13 @@ struct Data {
 
 [[binding(0), group(0)]] var<storage, read_write> data : Data;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn a() {
   var v : f32 = data.d;
   return;
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn b() {
   var v : f32 = data.d;
   return;

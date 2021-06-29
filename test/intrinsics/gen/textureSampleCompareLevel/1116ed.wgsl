@@ -41,7 +41,7 @@ fn fragment_main() {
   textureSampleCompareLevel_1116ed();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   textureSampleCompareLevel_1116ed();
 }

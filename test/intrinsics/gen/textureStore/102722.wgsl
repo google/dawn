@@ -40,7 +40,7 @@ fn fragment_main() {
   textureStore_102722();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   textureStore_102722();
 }

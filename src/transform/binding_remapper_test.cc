@@ -34,7 +34,7 @@ struct S {
 
 [[group(3), binding(2)]] var<storage, read> b : S;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn f() {
 }
 )";
@@ -59,7 +59,7 @@ struct S {
 
 [[group(3), binding(2)]] var<storage, read> b : S;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn f() {
 }
 )";
@@ -73,7 +73,7 @@ struct S {
 
 [[group(3), binding(2)]] var<storage, read> b : S;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn f() {
 }
 )";
@@ -103,7 +103,7 @@ struct S {
 
 [[group(4), binding(3)]] var<storage, read> c : S;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn f() {
 }
 )";
@@ -119,7 +119,7 @@ struct S {
 
 [[group(4), binding(3)]] var<storage, read> c : S;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn f() {
 }
 )";
@@ -157,7 +157,7 @@ type A = S;
 
 [[group(4), binding(3)]] var<storage> c : A;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn f() {
 }
 )";
@@ -179,7 +179,7 @@ type A = S;
 
 [[group(4), binding(3)]] var<storage, write> c : S;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn f() {
 }
 )";
@@ -207,7 +207,7 @@ struct S {
 
 [[group(3), binding(2)]] var<storage, read> b : S;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn f() {
 }
 )";
@@ -221,7 +221,7 @@ struct S {
 
 [[group(6), binding(7)]] var<storage, write> b : S;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn f() {
 }
 )";
@@ -256,7 +256,7 @@ struct S {
 
 [[group(5), binding(4)]] var<storage, read> d : S;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn f() {
   let x : i32 = (((a.i + b.i) + c.i) + d.i);
 }
@@ -276,7 +276,7 @@ struct S {
 
 [[internal(disable_validation__binding_point_collision), group(5), binding(4)]] var<storage, read> d : S;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn f() {
   let x : i32 = (((a.i + b.i) + c.i) + d.i);
 }
@@ -310,12 +310,12 @@ struct S {
 
 [[group(5), binding(4)]] var<storage, read> d : S;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn f1() {
   let x : i32 = (a.i + c.i);
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn f2() {
   let x : i32 = (b.i + d.i);
 }
@@ -335,12 +335,12 @@ struct S {
 
 [[group(5), binding(4)]] var<storage, read> d : S;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn f1() {
   let x : i32 = (a.i + c.i);
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn f2() {
   let x : i32 = (b.i + d.i);
 }
@@ -368,7 +368,7 @@ struct S {
 [[group(2), binding(1)]] var<storage, read> a : S;
 [[group(3), binding(2)]] var<storage, read> b : S;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn f() {}
 )";
 

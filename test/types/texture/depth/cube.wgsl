@@ -1,6 +1,6 @@
 [[group(0), binding(0)]] var t_f : texture_depth_cube;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   ignore(t_f);
 }

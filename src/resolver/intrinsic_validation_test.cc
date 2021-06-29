@@ -49,12 +49,12 @@ using IntrinsicType = sem::IntrinsicType;
 using ResolverIntrinsicValidationTest = ResolverTest;
 
 TEST_F(ResolverIntrinsicValidationTest, InvalidPipelineStageDirect) {
-  // [[stage(compute)]] fn func { return dpdx(1.0); }
+  // [[stage(compute), workgroup_size(1)]] fn func { return dpdx(1.0); }
 
   auto* dpdx = create<ast::CallExpression>(Source{{3, 4}}, Expr("dpdx"),
                                            ast::ExpressionList{Expr(1.0f)});
   Func(Source{{1, 2}}, "func", ast::VariableList{}, ty.void_(), {Ignore(dpdx)},
-       {Stage(ast::PipelineStage::kCompute)});
+       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
@@ -65,7 +65,7 @@ TEST_F(ResolverIntrinsicValidationTest, InvalidPipelineStageIndirect) {
   // fn f0 { return dpdx(1.0); }
   // fn f1 { f0(); }
   // fn f2 { f1(); }
-  // [[stage(compute)]] fn main { return f2(); }
+  // [[stage(compute), workgroup_size(1)]] fn main { return f2(); }
 
   auto* dpdx = create<ast::CallExpression>(Source{{3, 4}}, Expr("dpdx"),
                                            ast::ExpressionList{Expr(1.0f)});
@@ -78,7 +78,8 @@ TEST_F(ResolverIntrinsicValidationTest, InvalidPipelineStageIndirect) {
        {Ignore(Call("f1"))});
 
   Func(Source{{7, 8}}, "main", ast::VariableList{}, ty.void_(),
-       {Ignore(Call("f2"))}, {Stage(ast::PipelineStage::kCompute)});
+       {Ignore(Call("f2"))},
+       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),

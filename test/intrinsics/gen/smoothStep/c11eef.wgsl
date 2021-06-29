@@ -39,7 +39,7 @@ fn fragment_main() {
   smoothStep_c11eef();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   smoothStep_c11eef();
 }

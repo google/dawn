@@ -41,6 +41,6 @@ fn ret_struct() -> S {
   return S();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
 }

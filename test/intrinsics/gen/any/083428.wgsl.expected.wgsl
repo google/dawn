@@ -13,7 +13,7 @@ fn fragment_main() {
   any_083428();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   any_083428();
 }

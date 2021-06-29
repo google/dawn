@@ -13,7 +13,7 @@ fn fragment_main() {
   sign_d065d8();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   sign_d065d8();
 }

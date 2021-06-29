@@ -787,9 +787,9 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPoints) {
                                    Stage(ast::PipelineStage::kFragment),
                                });
 
-  MakeEmptyBodyFunction("bar", ast::DecorationList{
-                                   Stage(ast::PipelineStage::kCompute),
-                               });
+  MakeEmptyBodyFunction("bar",
+                        ast::DecorationList{Stage(ast::PipelineStage::kCompute),
+                                            WorkgroupSize(1)});
 
   // TODO(dsinclair): Update to run the namer transform when available.
 
@@ -810,10 +810,10 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPoints) {
 TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
   MakeEmptyBodyFunction("func", {});
 
-  MakeCallerBodyFunction("foo", {"func"},
-                         ast::DecorationList{
-                             Stage(ast::PipelineStage::kCompute),
-                         });
+  MakeCallerBodyFunction(
+      "foo", {"func"},
+      ast::DecorationList{Stage(ast::PipelineStage::kCompute),
+                          WorkgroupSize(1)});
 
   MakeCallerBodyFunction("bar", {"func"},
                          ast::DecorationList{
@@ -837,9 +837,9 @@ TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
 }
 
 TEST_F(InspectorGetEntryPointTest, DefaultWorkgroupSize) {
-  MakeEmptyBodyFunction("foo", ast::DecorationList{
-                                   Stage(ast::PipelineStage::kCompute),
-                               });
+  MakeEmptyBodyFunction("foo",
+                        ast::DecorationList{Stage(ast::PipelineStage::kCompute),
+                                            WorkgroupSize(8, 2, 1)});
 
   Inspector& inspector = Build();
 
@@ -849,8 +849,8 @@ TEST_F(InspectorGetEntryPointTest, DefaultWorkgroupSize) {
   ASSERT_EQ(1u, result.size());
   uint32_t x, y, z;
   std::tie(x, y, z) = result[0].workgroup_size();
-  EXPECT_EQ(1u, x);
-  EXPECT_EQ(1u, y);
+  EXPECT_EQ(8u, x);
+  EXPECT_EQ(2u, y);
   EXPECT_EQ(1u, z);
 }
 
@@ -1329,10 +1329,10 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables_Legacy) {
                                     Stage(ast::PipelineStage::kFragment),
                                 });
 
-  MakeInOutVariableBodyFunction("bar", {{"in2_var", "out_var"}},
-                                ast::DecorationList{
-                                    Stage(ast::PipelineStage::kCompute),
-                                });
+  MakeInOutVariableBodyFunction(
+      "bar", {{"in2_var", "out_var"}},
+      ast::DecorationList{Stage(ast::PipelineStage::kCompute),
+                          WorkgroupSize(1)});
 
   // TODO(dsinclair): Update to run the namer transform when
   // available.
@@ -1387,10 +1387,10 @@ TEST_F(InspectorGetEntryPointTest,
                                           Stage(ast::PipelineStage::kFragment),
                                       });
 
-  MakeCallerBodyFunction("bar", {"func"},
-                         ast::DecorationList{
-                             Stage(ast::PipelineStage::kCompute),
-                         });
+  MakeCallerBodyFunction(
+      "bar", {"func"},
+      ast::DecorationList{Stage(ast::PipelineStage::kCompute),
+                          WorkgroupSize(1)});
 
   // TODO(dsinclair): Update to run the namer transform when
   // available.
@@ -1482,7 +1482,8 @@ TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables_Legacy) {
 
 TEST_F(InspectorGetEntryPointTest, OverridableConstantUnreferenced) {
   AddOverridableConstantWithoutID<float>("foo", ty.f32(), nullptr);
-  MakeEmptyBodyFunction("ep_func", {Stage(ast::PipelineStage::kCompute)});
+  MakeEmptyBodyFunction(
+      "ep_func", {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
   Inspector& inspector = Build();
 
@@ -1494,8 +1495,9 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantUnreferenced) {
 
 TEST_F(InspectorGetEntryPointTest, OverridableConstantReferencedByEntryPoint) {
   AddOverridableConstantWithoutID<float>("foo", ty.f32(), nullptr);
-  MakeConstReferenceBodyFunction("ep_func", "foo", ty.f32(),
-                                 {Stage(ast::PipelineStage::kCompute)});
+  MakeConstReferenceBodyFunction(
+      "ep_func", "foo", ty.f32(),
+      {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
   Inspector& inspector = Build();
 
@@ -1512,8 +1514,9 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantReferencedByEntryPoint) {
 TEST_F(InspectorGetEntryPointTest, OverridableConstantReferencedByCallee) {
   AddOverridableConstantWithoutID<float>("foo", ty.f32(), nullptr);
   MakeConstReferenceBodyFunction("callee_func", "foo", ty.f32(), {});
-  MakeCallerBodyFunction("ep_func", {"callee_func"},
-                         {Stage(ast::PipelineStage::kCompute)});
+  MakeCallerBodyFunction(
+      "ep_func", {"callee_func"},
+      {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
   Inspector& inspector = Build();
 
@@ -1528,8 +1531,9 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantSomeReferenced) {
   AddOverridableConstantWithID<float>("foo", 1, ty.f32(), nullptr);
   AddOverridableConstantWithID<float>("bar", 2, ty.f32(), nullptr);
   MakeConstReferenceBodyFunction("callee_func", "foo", ty.f32(), {});
-  MakeCallerBodyFunction("ep_func", {"callee_func"},
-                         {Stage(ast::PipelineStage::kCompute)});
+  MakeCallerBodyFunction(
+      "ep_func", {"callee_func"},
+      {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
   Inspector& inspector = Build();
 
@@ -1606,9 +1610,9 @@ TEST_F(InspectorGetRemappedNameForEntryPointTest,
   // TODO(dsinclair): Update to run the namer transform when
   // available.
 
-  MakeEmptyBodyFunction("bar", ast::DecorationList{
-                                   Stage(ast::PipelineStage::kCompute),
-                               });
+  MakeEmptyBodyFunction("bar",
+                        ast::DecorationList{Stage(ast::PipelineStage::kCompute),
+                                            WorkgroupSize(1)});
 
   Inspector& inspector = Build();
 

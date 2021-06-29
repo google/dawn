@@ -20,7 +20,7 @@ fn fragment_main() {
   arrayLength_eb510f();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   arrayLength_eb510f();
 }

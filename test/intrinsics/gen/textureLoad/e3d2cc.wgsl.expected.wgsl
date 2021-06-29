@@ -15,7 +15,7 @@ fn fragment_main() {
   textureLoad_e3d2cc();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   textureLoad_e3d2cc();
 }

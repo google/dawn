@@ -14,7 +14,7 @@ fn fragment_main() {
   atomicStore_cdc29e();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   atomicStore_cdc29e();
 }

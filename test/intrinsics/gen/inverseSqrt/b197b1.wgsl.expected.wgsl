@@ -13,7 +13,7 @@ fn fragment_main() {
   inverseSqrt_b197b1();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   inverseSqrt_b197b1();
 }

@@ -13,7 +13,7 @@ fn fragment_main() {
   ldexp_2cb32a();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   ldexp_2cb32a();
 }

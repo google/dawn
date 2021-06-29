@@ -13,7 +13,7 @@ fn fragment_main() {
   pack2x16float_0e97b3();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   pack2x16float_0e97b3();
 }

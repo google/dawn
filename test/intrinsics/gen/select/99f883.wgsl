@@ -39,7 +39,7 @@ fn fragment_main() {
   select_99f883();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   select_99f883();
 }

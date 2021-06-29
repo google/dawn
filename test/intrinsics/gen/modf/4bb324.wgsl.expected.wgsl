@@ -14,7 +14,7 @@ fn fragment_main() {
   modf_4bb324();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   modf_4bb324();
 }

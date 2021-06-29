@@ -13,7 +13,7 @@ fn fragment_main() {
   ceil_34064b();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   ceil_34064b();
 }

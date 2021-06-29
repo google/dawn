@@ -39,7 +39,7 @@ fn fragment_main() {
   normalize_fc2ef1();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   normalize_fc2ef1();
 }

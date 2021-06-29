@@ -1365,6 +1365,16 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
     }
   }
 
+  if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
+    if (!ast::HasDecoration<ast::WorkgroupDecoration>(func->decorations())) {
+      AddError(
+          "a compute shader must include 'workgroup_size' in its "
+          "attributes",
+          func->source());
+      return false;
+    }
+  }
+
   // Validate there are no resource variable binding collisions
   std::unordered_map<sem::BindingPoint, const ast::Variable*> binding_points;
   for (auto* var_info : info->referenced_module_vars) {

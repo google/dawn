@@ -86,7 +86,7 @@ fn main() {}
 
 TEST_F(SingleEntryPointTest, SingleEntryPoint) {
   auto* src = R"(
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
 }
 )";
@@ -111,17 +111,17 @@ fn vert_main() -> [[builtin(position)]] vec4<f32> {
 fn frag_main() {
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn comp_main1() {
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn comp_main2() {
 }
 )";
 
   auto* expect = R"(
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn comp_main1() {
 }
 )";
@@ -156,12 +156,12 @@ fn frag_main() {
   b = 0.0;
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn comp_main1() {
   c = 0.0;
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn comp_main2() {
   d = 0.0;
 }
@@ -170,7 +170,7 @@ fn comp_main2() {
   auto* expect = R"(
 var<private> c : f32;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn comp_main1() {
   c = 0.0;
 }
@@ -206,12 +206,12 @@ fn frag_main() {
   let local_b : f32 = b;
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn comp_main1() {
   let local_c : f32 = c;
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn comp_main2() {
   let local_d : f32 = d;
 }
@@ -226,7 +226,7 @@ let c : f32 = 1.0;
 
 let d : f32 = 1.0;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn comp_main1() {
   let local_c : f32 = c;
 }
@@ -262,12 +262,12 @@ fn outer2() {
   inner_shared();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn comp_main1() {
   outer1();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn comp_main2() {
   outer2();
 }
@@ -285,7 +285,7 @@ fn outer1() {
   inner_shared();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn comp_main1() {
   outer1();
 }
@@ -336,12 +336,12 @@ fn outer2() {
   outer2_var = 0.0;
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn comp_main1() {
   outer1();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn comp_main2() {
   outer2();
 }
@@ -368,7 +368,7 @@ fn outer1() {
   outer1_var = 0.0;
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn comp_main1() {
   outer1();
 }

@@ -13,7 +13,7 @@ fn fragment_main() {
   sin_4e3979();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   sin_4e3979();
 }

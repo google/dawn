@@ -15,7 +15,7 @@ fn fragment_main() {
   ignore_c8a0ee();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   ignore_c8a0ee();
 }

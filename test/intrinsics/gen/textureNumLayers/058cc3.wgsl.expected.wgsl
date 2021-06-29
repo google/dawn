@@ -15,7 +15,7 @@ fn fragment_main() {
   textureNumLayers_058cc3();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   textureNumLayers_058cc3();
 }

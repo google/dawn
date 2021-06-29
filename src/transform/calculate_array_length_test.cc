@@ -32,7 +32,7 @@ struct SB {
 
 [[group(0), binding(0)]] var<storage, read> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var len : u32 = arrayLength(&sb.arr);
 }
@@ -50,7 +50,7 @@ fn tint_symbol(buffer : SB, result : ptr<function, u32>)
 
 [[group(0), binding(0)]] var<storage, read> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var tint_symbol_1 : u32 = 0u;
   tint_symbol(sb, &(tint_symbol_1));
@@ -74,7 +74,7 @@ struct SB {
 
 [[group(0), binding(0)]] var<storage, read> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var a : u32 = arrayLength(&sb.arr);
   var b : u32 = arrayLength(&sb.arr);
@@ -94,7 +94,7 @@ fn tint_symbol(buffer : SB, result : ptr<function, u32>)
 
 [[group(0), binding(0)]] var<storage, read> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var tint_symbol_1 : u32 = 0u;
   tint_symbol(sb, &(tint_symbol_1));
@@ -121,7 +121,7 @@ struct SB {
 
 [[group(0), binding(0)]] var<storage, read> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var len : u32 = arrayLength(&sb.arr);
 }
@@ -140,7 +140,7 @@ fn tint_symbol(buffer : SB, result : ptr<function, u32>)
 
 [[group(0), binding(0)]] var<storage, read> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var tint_symbol_1 : u32 = 0u;
   tint_symbol(sb, &(tint_symbol_1));
@@ -164,7 +164,7 @@ struct SB {
 
 [[group(0), binding(0)]] var<storage, read> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   if (true) {
     var len : u32 = arrayLength(&sb.arr);
@@ -188,7 +188,7 @@ fn tint_symbol(buffer : SB, result : ptr<function, u32>)
 
 [[group(0), binding(0)]] var<storage, read> sb : SB;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   if (true) {
     var tint_symbol_1 : u32 = 0u;
@@ -229,7 +229,7 @@ struct SB2 {
 
 [[group(0), binding(1)]] var<storage, read> sb2 : SB2;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var len1 : u32 = arrayLength(&(sb1.arr1));
   var len2 : u32 = arrayLength(&(sb2.arr2));
@@ -260,7 +260,7 @@ fn tint_symbol_3(buffer : SB2, result : ptr<function, u32>)
 
 [[group(0), binding(1)]] var<storage, read> sb2 : SB2;
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var tint_symbol_1 : u32 = 0u;
   tint_symbol(sb1, &(tint_symbol_1));

@@ -14,7 +14,7 @@ fn fragment_main() {
   atomicAnd_85a8d9();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   atomicAnd_85a8d9();
 }

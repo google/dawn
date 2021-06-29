@@ -39,7 +39,7 @@ fn fragment_main() {
   sin_b78c91();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   sin_b78c91();
 }

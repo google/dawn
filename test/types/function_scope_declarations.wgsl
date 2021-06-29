@@ -1,7 +1,7 @@
 struct S {
 };
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn main() {
   var bool_var : bool = bool();
   let bool_let : bool = bool();

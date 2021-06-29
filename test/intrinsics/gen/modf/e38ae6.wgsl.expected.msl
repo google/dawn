@@ -24,7 +24,7 @@ fn fragment_main() {
   modf_e38ae6(&(tint_symbol_4));
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   [[internal(disable_validation__function_var_storage_class)]] var<workgroup> tint_symbol_5 : f32;
   modf_e38ae6(&(tint_symbol_5));

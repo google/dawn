@@ -24,7 +24,7 @@ fn fragment_main() {
   frexp_e8b4d1(&(tint_symbol_4));
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   [[internal(disable_validation__function_var_storage_class)]] var<workgroup> tint_symbol_5 : vec2<u32>;
   frexp_e8b4d1(&(tint_symbol_5));

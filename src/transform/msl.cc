@@ -128,7 +128,7 @@ void Msl::HandleModuleScopeVariables(CloneContext& ctx) const {
   //   v = v + 1.0;
   // }
   //
-  // [[stage(compute)]]
+  // [[stage(compute), workgroup_size(1)]]
   // fn main() {
   //   foo();
   // }
@@ -140,7 +140,7 @@ void Msl::HandleModuleScopeVariables(CloneContext& ctx) const {
   //   *v = *v + 1.0;
   // }
   //
-  // [[stage(compute)]]
+  // [[stage(compute), workgroup_size(1)]]
   // fn main() {
   //   var<private> v : f32 = 2.0;
   //   foo(&v);

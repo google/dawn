@@ -13,7 +13,7 @@ fn fragment_main() {
   isNormal_863dcd();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   isNormal_863dcd();
 }

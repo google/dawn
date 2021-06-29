@@ -14,7 +14,7 @@ fn fragment_main() {
   atomicXor_54510e();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   atomicXor_54510e();
 }

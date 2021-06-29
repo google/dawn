@@ -13,7 +13,7 @@ fn fragment_main() {
   ldexp_f54ff2();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   ldexp_f54ff2();
 }

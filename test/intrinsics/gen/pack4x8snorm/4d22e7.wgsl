@@ -39,7 +39,7 @@ fn fragment_main() {
   pack4x8snorm_4d22e7();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   pack4x8snorm_4d22e7();
 }

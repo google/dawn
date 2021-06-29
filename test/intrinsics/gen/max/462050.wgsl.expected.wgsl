@@ -13,7 +13,7 @@ fn fragment_main() {
   max_462050();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   max_462050();
 }

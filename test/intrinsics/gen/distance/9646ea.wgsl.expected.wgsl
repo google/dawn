@@ -13,7 +13,7 @@ fn fragment_main() {
   distance_9646ea();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   distance_9646ea();
 }

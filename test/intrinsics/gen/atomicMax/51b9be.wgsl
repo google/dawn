@@ -38,7 +38,7 @@ fn fragment_main() {
   atomicMax_51b9be();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   atomicMax_51b9be();
 }

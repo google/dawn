@@ -39,7 +39,7 @@ fn fragment_main() {
   round_52c84d();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   round_52c84d();
 }

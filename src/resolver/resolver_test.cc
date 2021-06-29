@@ -1107,7 +1107,7 @@ TEST_F(ResolverTest, Function_ReturnStatements) {
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_NotSet) {
-  // [[stage(compute)]]
+  // [[stage(compute), workgroup_size(1)]]
   // fn main() {}
   auto* func = Func("main", ast::VariableList{}, ty.void_(), {}, {});
 
@@ -2067,17 +2067,15 @@ TEST_F(ResolverTest, Function_EntryPoints_StageDecoration) {
                         Assign("call_a", Call("a")),
                         Assign("call_b", Call("b")),
                     },
-                    ast::DecorationList{
-                        Stage(ast::PipelineStage::kCompute),
-                    });
+                    ast::DecorationList{Stage(ast::PipelineStage::kCompute),
+                                        WorkgroupSize(1)});
 
   auto* ep_2 = Func("ep_2", params, ty.void_(),
                     {
                         Assign("call_c", Call("c")),
                     },
-                    ast::DecorationList{
-                        Stage(ast::PipelineStage::kCompute),
-                    });
+                    ast::DecorationList{Stage(ast::PipelineStage::kCompute),
+                                        WorkgroupSize(1)});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -2154,9 +2152,7 @@ TEST_F(ResolverTest, Function_EntryPoints_LinearTime) {
            create<ast::CallStatement>(Call(fn_a(0))),
            create<ast::CallStatement>(Call(fn_b(0))),
        },
-       {
-           Stage(ast::PipelineStage::kCompute),
-       });
+       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 }

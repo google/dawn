@@ -40,7 +40,7 @@ fn fragment_main() {
   frexp_19ab15();
 }
 
-[[stage(compute)]]
+[[stage(compute), workgroup_size(1)]]
 fn compute_main() {
   frexp_19ab15();
 }

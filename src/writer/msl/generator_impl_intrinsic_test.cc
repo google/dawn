@@ -347,7 +347,10 @@ TEST_F(MslGeneratorImplTest, Ignore) {
        ty.i32(), {Return(Mul(Add("a", "b"), "c"))});
 
   Func("func", {}, ty.void_(), {Ignore(Call("f", 1, 2, 3))},
-       {Stage(ast::PipelineStage::kCompute)});
+       {
+           Stage(ast::PipelineStage::kCompute),
+           WorkgroupSize(1),
+       });
 
   GeneratorImpl& gen = Build();
 
