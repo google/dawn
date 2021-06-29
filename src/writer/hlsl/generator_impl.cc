@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <iosfwd>
+#include <set>
 #include <utility>
 #include <vector>
 
@@ -26,19 +27,23 @@
 #include "src/ast/interpolate_decoration.h"
 #include "src/ast/override_decoration.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/debug.h"
 #include "src/sem/array.h"
 #include "src/sem/atomic_type.h"
+#include "src/sem/block_statement.h"
 #include "src/sem/call.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/function.h"
 #include "src/sem/member_accessor_expression.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/sampled_texture_type.h"
+#include "src/sem/statement.h"
 #include "src/sem/storage_texture_type.h"
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
 #include "src/transform/calculate_array_length.h"
 #include "src/transform/hlsl.h"
+#include "src/utils/get_or_create.h"
 #include "src/utils/scoped_assignment.h"
 #include "src/writer/append_vector.h"
 #include "src/writer/float_to_string.h"
@@ -120,6 +125,10 @@ bool GeneratorImpl::Generate() {
   const TypeInfo* last_kind = nullptr;
   std::streampos last_padding_pos;
 
+  if (!FindAndEmitVectorAssignmentInLoopFunctions()) {
+    return false;
+  }
+
   for (auto* decl : builder_.AST().GlobalDeclarations()) {
     if (decl->Is<ast::Alias>()) {
       continue;  // Ignore aliases.
@@ -164,6 +173,112 @@ bool GeneratorImpl::Generate() {
   return true;
 }
 
+bool GeneratorImpl::FindAndEmitVectorAssignmentInLoopFunctions() {
+  auto is_in_loop = [](const sem::Expression* expr) {
+    auto* block = expr->Stmt()->Block();
+    if (!block) {
+      return false;
+    }
+    return block->FindFirstParent<sem::LoopBlockStatement>() != nullptr;
+  };
+
+  auto emit_function_once = [&](const sem::Vector* vec) {
+    utils::GetOrCreate(vector_assignment_in_loop_funcs_, vec, [&] {
+      std::ostringstream ss;
+      EmitType(ss, vec, tint::ast::StorageClass::kInvalid,
+               ast::Access::kUndefined, "");
+      auto func_name = UniqueIdentifier("Set_" + ss.str());
+      {
+        auto out = line();
+        out << "void " << func_name << "(inout ";
+        EmitType(out, vec, ast::StorageClass::kInvalid, ast::Access::kUndefined,
+                 "");
+        out << " vec, int idx, ";
+        EmitType(out, vec->type(), ast::StorageClass::kInvalid,
+                 ast::Access::kUndefined, "");
+        out << " val) {";
+      }
+      {
+        ScopedIndent si(this);
+        line() << "switch(idx) {";
+        {
+          ScopedIndent si2(this);
+          for (size_t i = 0; i < vec->size(); ++i) {
+            auto sidx = std::to_string(i);
+            line() << "case " + sidx + ": vec[" + sidx + "] = val; break;";
+          }
+        }
+        line() << "}";
+      }
+      line() << "}";
+      return func_name;
+    });
+  };
+
+  // Find vector assignments via an accessor expression (index) within loops so
+  // that we can replace them later with calls to setter functions. Also emit
+  // the setter functions per vector type as we find them. We do this to avoid
+  // having FCX fail to unroll loops with "error X3511: forced to unroll loop,
+  // but unrolling failed." See crbug.com/tint/534.
+
+  for (auto* ast_node : program_->ASTNodes().Objects()) {
+    auto* ast_assign = ast_node->As<ast::AssignmentStatement>();
+    if (!ast_assign) {
+      continue;
+    }
+
+    auto* ast_access_expr =
+        ast_assign->lhs()->As<ast::ArrayAccessorExpression>();
+    if (!ast_access_expr) {
+      continue;
+    }
+
+    auto* array_expr = builder_.Sem().Get(ast_access_expr->array());
+    auto* vec = array_expr->Type()->UnwrapRef()->As<sem::Vector>();
+
+    // Skip non-vectors
+    if (!vec) {
+      continue;
+    }
+
+    // Skip if not part of a loop
+    if (!is_in_loop(array_expr)) {
+      continue;
+    }
+
+    // Save this assignment along with the vector type
+    vector_assignments_in_loops_.emplace(ast_assign, vec);
+
+    // Emit the function if it hasn't already
+    emit_function_once(vec);
+  }
+
+  return true;
+}
+
+bool GeneratorImpl::EmitVectorAssignmentInLoopCall(
+    const ast::AssignmentStatement* stmt,
+    const sem::Vector* vec) {
+  auto* ast_access_expr = stmt->lhs()->As<ast::ArrayAccessorExpression>();
+
+  auto out = line();
+  out << vector_assignment_in_loop_funcs_.at(vec) << "(";
+  if (!EmitExpression(out, ast_access_expr->array())) {
+    return false;
+  }
+  out << ", ";
+  if (!EmitExpression(out, ast_access_expr->idx_expr())) {
+    return false;
+  }
+  out << ", ";
+  if (!EmitExpression(out, stmt->rhs())) {
+    return false;
+  }
+  out << ");";
+
+  return true;
+}
+
 bool GeneratorImpl::EmitArrayAccessor(std::ostream& out,
                                       ast::ArrayAccessorExpression* expr) {
   if (!EmitExpression(out, expr->array())) {
@@ -202,6 +317,11 @@ bool GeneratorImpl::EmitBitcast(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitAssign(ast::AssignmentStatement* stmt) {
+  auto iter = vector_assignments_in_loops_.find(stmt);
+  if (iter != vector_assignments_in_loops_.end()) {
+    return EmitVectorAssignmentInLoopCall(iter->first, iter->second);
+  }
+
   auto out = line();
   if (!EmitExpression(out, stmt->lhs())) {
     return false;

@@ -1,0 +1,129 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 92
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+               OpName %v2f "v2f"
+               OpName %v3f "v3f"
+               OpName %v4f "v4f"
+               OpName %v2i "v2i"
+               OpName %v3i "v3i"
+               OpName %v4i "v4i"
+               OpName %v2u "v2u"
+               OpName %v3u "v3u"
+               OpName %v4u "v4u"
+               OpName %v2b "v2b"
+               OpName %v3b "v3b"
+               OpName %v4b "v4b"
+               OpName %i "i"
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+%_ptr_Function_v2float = OpTypePointer Function %v2float
+          %9 = OpConstantNull %v2float
+    %v3float = OpTypeVector %float 3
+%_ptr_Function_v3float = OpTypePointer Function %v3float
+         %13 = OpConstantNull %v3float
+    %v4float = OpTypeVector %float 4
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+         %17 = OpConstantNull %v4float
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+%_ptr_Function_v2int = OpTypePointer Function %v2int
+         %22 = OpConstantNull %v2int
+      %v3int = OpTypeVector %int 3
+%_ptr_Function_v3int = OpTypePointer Function %v3int
+         %26 = OpConstantNull %v3int
+      %v4int = OpTypeVector %int 4
+%_ptr_Function_v4int = OpTypePointer Function %v4int
+         %30 = OpConstantNull %v4int
+       %uint = OpTypeInt 32 0
+     %v2uint = OpTypeVector %uint 2
+%_ptr_Function_v2uint = OpTypePointer Function %v2uint
+         %35 = OpConstantNull %v2uint
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Function_v3uint = OpTypePointer Function %v3uint
+         %39 = OpConstantNull %v3uint
+     %v4uint = OpTypeVector %uint 4
+%_ptr_Function_v4uint = OpTypePointer Function %v4uint
+         %43 = OpConstantNull %v4uint
+       %bool = OpTypeBool
+     %v2bool = OpTypeVector %bool 2
+%_ptr_Function_v2bool = OpTypePointer Function %v2bool
+         %48 = OpConstantNull %v2bool
+     %v3bool = OpTypeVector %bool 3
+%_ptr_Function_v3bool = OpTypePointer Function %v3bool
+         %52 = OpConstantNull %v3bool
+     %v4bool = OpTypeVector %bool 4
+%_ptr_Function_v4bool = OpTypePointer Function %v4bool
+         %56 = OpConstantNull %v4bool
+      %int_0 = OpConstant %int 0
+%_ptr_Function_int = OpTypePointer Function %int
+         %60 = OpConstantNull %int
+%_ptr_Function_float = OpTypePointer Function %float
+    %float_1 = OpConstant %float 1
+      %int_1 = OpConstant %int 1
+%_ptr_Function_uint = OpTypePointer Function %uint
+     %uint_1 = OpConstant %uint 1
+%_ptr_Function_bool = OpTypePointer Function %bool
+       %true = OpConstantTrue %bool
+       %main = OpFunction %void None %1
+          %4 = OpLabel
+        %v2f = OpVariable %_ptr_Function_v2float Function %9
+        %v3f = OpVariable %_ptr_Function_v3float Function %13
+        %v4f = OpVariable %_ptr_Function_v4float Function %17
+        %v2i = OpVariable %_ptr_Function_v2int Function %22
+        %v3i = OpVariable %_ptr_Function_v3int Function %26
+        %v4i = OpVariable %_ptr_Function_v4int Function %30
+        %v2u = OpVariable %_ptr_Function_v2uint Function %35
+        %v3u = OpVariable %_ptr_Function_v3uint Function %39
+        %v4u = OpVariable %_ptr_Function_v4uint Function %43
+        %v2b = OpVariable %_ptr_Function_v2bool Function %48
+        %v3b = OpVariable %_ptr_Function_v3bool Function %52
+        %v4b = OpVariable %_ptr_Function_v4bool Function %56
+          %i = OpVariable %_ptr_Function_int Function %60
+               OpStore %i %int_0
+         %61 = OpLoad %int %i
+         %63 = OpAccessChain %_ptr_Function_float %v2f %61
+               OpStore %63 %float_1
+         %65 = OpLoad %int %i
+         %66 = OpAccessChain %_ptr_Function_float %v3f %65
+               OpStore %66 %float_1
+         %67 = OpLoad %int %i
+         %68 = OpAccessChain %_ptr_Function_float %v4f %67
+               OpStore %68 %float_1
+         %69 = OpLoad %int %i
+         %70 = OpAccessChain %_ptr_Function_int %v2i %69
+               OpStore %70 %int_1
+         %72 = OpLoad %int %i
+         %73 = OpAccessChain %_ptr_Function_int %v3i %72
+               OpStore %73 %int_1
+         %74 = OpLoad %int %i
+         %75 = OpAccessChain %_ptr_Function_int %v4i %74
+               OpStore %75 %int_1
+         %76 = OpLoad %int %i
+         %78 = OpAccessChain %_ptr_Function_uint %v2u %76
+               OpStore %78 %uint_1
+         %80 = OpLoad %int %i
+         %81 = OpAccessChain %_ptr_Function_uint %v3u %80
+               OpStore %81 %uint_1
+         %82 = OpLoad %int %i
+         %83 = OpAccessChain %_ptr_Function_uint %v4u %82
+               OpStore %83 %uint_1
+         %84 = OpLoad %int %i
+         %86 = OpAccessChain %_ptr_Function_bool %v2b %84
+               OpStore %86 %true
+         %88 = OpLoad %int %i
+         %89 = OpAccessChain %_ptr_Function_bool %v3b %88
+               OpStore %89 %true
+         %90 = OpLoad %int %i
+         %91 = OpAccessChain %_ptr_Function_bool %v4b %90
+               OpStore %91 %true
+               OpReturn
+               OpFunctionEnd

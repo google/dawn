@@ -20,9 +20,9 @@
 #include "src/utils/io/tmpfile.h"
 
 #ifdef _WIN32
+#include <Windows.h>
 #include <d3dcommon.h>
 #include <d3dcompiler.h>
-#include <windows.h>
 
 #include <wrl.h>
 using Microsoft::WRL::ComPtr;
