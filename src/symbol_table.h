@@ -66,7 +66,7 @@ class SymbolTable {
   /// @returns a new, unnamed symbol with the given name. If the name is already
   /// taken then this will be suffixed with an underscore and a unique numerical
   /// value
-  Symbol New(std::string name = "tint_symbol");
+  Symbol New(std::string name = "");
 
   /// Foreach calls the callback function `F` for each symbol in the table.
   /// @param callback must be a function or function-like object with the

@@ -32,8 +32,7 @@ SymbolTable& SymbolTable::operator=(const SymbolTable& other) = default;
 SymbolTable& SymbolTable::operator=(SymbolTable&&) = default;
 
 Symbol SymbolTable::Register(const std::string& name) {
-  if (name == "")
-    return Symbol();
+  TINT_ASSERT(Symbol, !name.empty());
 
   auto it = name_to_symbol_.find(name);
   if (it != name_to_symbol_.end())
@@ -63,7 +62,10 @@ std::string SymbolTable::NameFor(const Symbol symbol) const {
   return it->second;
 }
 
-Symbol SymbolTable::New(std::string prefix /* = "tint_symbol" */) {
+Symbol SymbolTable::New(std::string prefix /* = "" */) {
+  if (prefix.empty()) {
+    prefix = "tint_symbol";
+  }
   auto it = name_to_symbol_.find(prefix);
   if (it == name_to_symbol_.end()) {
     return Register(prefix);

@@ -54,7 +54,7 @@ TEST_F(IdentifierExpressionTest, Assert_DifferentProgramID_Symbol) {
       {
         ProgramBuilder b1;
         ProgramBuilder b2;
-        b1.Expr(b2.Sym(""));
+        b1.Expr(b2.Sym("b2"));
       },
       "internal compiler error");
 }

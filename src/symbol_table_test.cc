@@ -14,7 +14,7 @@
 
 #include "src/symbol_table.h"
 
-#include "gtest/gtest.h"
+#include "gtest/gtest-spi.h"
 
 namespace tint {
 namespace {
@@ -49,10 +49,14 @@ TEST_F(SymbolTableTest, ReturnsBlankForMissingSymbol) {
   EXPECT_EQ("$2", s.NameFor(Symbol(2, program_id)));
 }
 
-TEST_F(SymbolTableTest, ReturnsInvalidForBlankString) {
-  auto program_id = ProgramID::New();
-  SymbolTable s{program_id};
-  EXPECT_FALSE(s.Register("").IsValid());
+TEST_F(SymbolTableTest, AssertsForBlankString) {
+  EXPECT_FATAL_FAILURE(
+      {
+        auto program_id = ProgramID::New();
+        SymbolTable s{program_id};
+        s.Register("");
+      },
+      "internal compiler error");
 }
 
 }  // namespace
