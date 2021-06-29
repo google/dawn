@@ -974,6 +974,18 @@ bool FunctionEmitter::EmitInputParameter(std::string var_name,
       }
     }
     return success();
+  } else if (auto* struct_type = tip_type->As<Struct>()) {
+    const auto& members = struct_type->members;
+    index_prefix.push_back(0);
+    for (int i = 0; i < static_cast<int>(members.size()); ++i) {
+      index_prefix.back() = i;
+      if (!EmitInputParameter(var_name, var_type, decos, index_prefix,
+                              members[i], forced_param_type, params,
+                              statements)) {
+        return false;
+      }
+    }
+    return success();
   }
 
   const bool is_builtin = ast::HasDecoration<ast::BuiltinDecoration>(*decos);
@@ -1005,6 +1017,11 @@ bool FunctionEmitter::EmitInputParameter(std::string var_name,
     } else if (auto* array_type = current_type->As<Array>()) {
       store_dest = builder_.IndexAccessor(store_dest, builder_.Expr(index));
       current_type = array_type->type->UnwrapAlias();
+    } else if (auto* struct_type = current_type->As<Struct>()) {
+      store_dest = builder_.MemberAccessor(
+          store_dest,
+          builder_.Expr(parser_impl_.GetMemberName(*struct_type, index)));
+      current_type = struct_type->members[index];
     }
   }
 

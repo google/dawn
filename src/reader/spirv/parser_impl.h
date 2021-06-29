@@ -373,6 +373,12 @@ class ParserImpl : Reader {
   /// @returns the integer constant for its array size, or nullptr.
   const spvtools::opt::analysis::IntConstant* GetArraySize(uint32_t var_id);
 
+  /// Returns the member name for the struct member.
+  /// @param struct_type the parser's structure type.
+  /// @param member_index the member index
+  /// @returns the field name
+  std::string GetMemberName(const Struct& struct_type, int member_index);
+
   /// Creates an AST Variable node for a SPIR-V ID, including any attached
   /// decorations, unless it's an ignorable builtin variable.
   /// @param id the SPIR-V result ID
@@ -808,6 +814,9 @@ class ParserImpl : Reader {
   // Set of symbols of declared type that have been added, used to avoid
   // adding duplicates.
   std::unordered_set<Symbol> declared_types_;
+
+  // Maps a struct type name to the SPIR-V ID for the structure type.
+  std::unordered_map<Symbol, uint32_t> struct_id_for_symbol_;
 
   /// Maps the SPIR-V ID of a module-scope builtin variable that should be
   /// ignored or type-converted, to its builtin kind.

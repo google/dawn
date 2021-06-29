@@ -6528,6 +6528,126 @@ TEST_F(SpvModuleScopeVarParserTest, Input_FlattenMatrix) {
   EXPECT_EQ(got, expected) << got;
 }
 
+TEST_F(SpvModuleScopeVarParserTest, Input_FlattenStruct) {
+  const std::string assembly = R"(
+    OpCapability Shader
+    OpMemoryModel Logical Simple
+    OpEntryPoint Vertex %main "main" %1 %2
+
+    OpName %strct "Communicators"
+    OpMemberName %strct 0 "alice"
+    OpMemberName %strct 1 "bob"
+
+    OpDecorate %1 Location 9
+    OpDecorate %2 BuiltIn Position
+
+
+    %void = OpTypeVoid
+    %voidfn = OpTypeFunction %void
+    %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+    %strct = OpTypeStruct %float %v4float
+
+    %11 = OpTypePointer Input %strct
+
+    %1 = OpVariable %11 Input
+
+    %12 = OpTypePointer Output %v4float
+    %2 = OpVariable %12 Output
+
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    OpReturn
+    OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+
+  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+
+  const auto got = p->program().to_str();
+  const std::string expected = R"(Module{
+  Struct Communicators {
+    StructMember{alice: __f32}
+    StructMember{bob: __vec_4__f32}
+  }
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] x_2: __vec_4__f32}
+  }
+  Variable{
+    x_1
+    private
+    undefined
+    __type_name_Communicators
+  }
+  Variable{
+    x_2
+    private
+    undefined
+    __vec_4__f32
+  }
+  Function main_1 -> __void
+  ()
+  {
+    Return{}
+  }
+  Function main -> __type_name_main_out
+  StageDecoration{vertex}
+  (
+    VariableConst{
+      Decorations{
+        LocationDecoration{9}
+      }
+      x_1_param
+      none
+      undefined
+      __f32
+    }
+    VariableConst{
+      Decorations{
+        LocationDecoration{10}
+      }
+      x_1_param_1
+      none
+      undefined
+      __vec_4__f32
+    }
+  )
+  {
+    Assignment{
+      MemberAccessor[not set]{
+        Identifier[not set]{x_1}
+        Identifier[not set]{alice}
+      }
+      Identifier[not set]{x_1_param}
+    }
+    Assignment{
+      MemberAccessor[not set]{
+        Identifier[not set]{x_1}
+        Identifier[not set]{bob}
+      }
+      Identifier[not set]{x_1_param_1}
+    }
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{x_2}
+        }
+      }
+    }
+  }
+}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
+
 TEST_F(SpvModuleScopeVarParserTest, Input_FlattenNested) {
   const std::string assembly = R"(
     OpCapability Shader

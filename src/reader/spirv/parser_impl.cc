@@ -1144,7 +1144,9 @@ const Type* ParserImpl::ConvertType(
     read_only_struct_types_.insert(ast_struct->name());
   }
   AddTypeDecl(sym, ast_struct);
-  return ty_.Struct(sym, std::move(ast_member_types));
+  const auto* result = ty_.Struct(sym, std::move(ast_member_types));
+  struct_id_for_symbol_[sym] = type_id;
+  return result;
 }
 
 void ParserImpl::AddTypeDecl(Symbol name, ast::TypeDecl* decl) {
@@ -2616,6 +2618,16 @@ Usage ParserImpl::GetHandleUsage(uint32_t id) const {
 const spvtools::opt::Instruction* ParserImpl::GetInstructionForTest(
     uint32_t id) const {
   return def_use_mgr_ ? def_use_mgr_->GetDef(id) : nullptr;
+}
+
+std::string ParserImpl::GetMemberName(const Struct& struct_type,
+                                      int member_index) {
+  auto where = struct_id_for_symbol_.find(struct_type.name);
+  if (where == struct_id_for_symbol_.end()) {
+    Fail() << "no structure type registered for symbol";
+    return "";
+  }
+  return namer_.GetMemberName(where->second, member_index);
 }
 
 WorkgroupSizeInfo::WorkgroupSizeInfo() = default;
