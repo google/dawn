@@ -19,7 +19,7 @@ namespace fuzzers {
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   tint::transform::Manager transform_manager;
-  transform_manager.Add<tint::transform::BoundArrayAccessors>();
+  transform_manager.Add<tint::transform::Robustness>();
 
   tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
   fuzzer.SetTransformManager(&transform_manager, {});

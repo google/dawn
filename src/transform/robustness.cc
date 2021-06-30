@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/transform/bound_array_accessors.h"
+#include "src/transform/robustness.h"
 
 #include <algorithm>
 #include <utility>
@@ -20,15 +20,15 @@
 #include "src/program_builder.h"
 #include "src/sem/expression.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::BoundArrayAccessors);
+TINT_INSTANTIATE_TYPEINFO(tint::transform::Robustness);
 
 namespace tint {
 namespace transform {
 
-BoundArrayAccessors::BoundArrayAccessors() = default;
-BoundArrayAccessors::~BoundArrayAccessors() = default;
+Robustness::Robustness() = default;
+Robustness::~Robustness() = default;
 
-void BoundArrayAccessors::Run(CloneContext& ctx, const DataMap&, DataMap&) {
+void Robustness::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   ctx.ReplaceAll([&](ast::ArrayAccessorExpression* expr) {
     return Transform(expr, &ctx);
   });
@@ -36,7 +36,7 @@ void BoundArrayAccessors::Run(CloneContext& ctx, const DataMap&, DataMap&) {
   ctx.Clone();
 }
 
-ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(
+ast::ArrayAccessorExpression* Robustness::Transform(
     ast::ArrayAccessorExpression* expr,
     CloneContext* ctx) {
   auto& diags = ctx->dst->Diagnostics();

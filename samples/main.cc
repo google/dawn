@@ -87,9 +87,9 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
   -o <name>                 -- Output file name.  Use "-" for standard output
   --transform <name list>   -- Runs transforms, name list is comma separated
                                Available transforms:
-                                bound_array_accessors
                                 first_index_offset
                                 renamer
+                                robustness
   --parse-only              -- Stop after parsing the input
   --dump-ast                -- Dump the generated AST to stdout
   --demangle                -- Preserve original source names. Demangle them.
@@ -704,14 +704,14 @@ int main(int argc, const char** argv) {
     // be run that needs user input. Should we find a way to support that here
     // maybe through a provided file?
 
-    if (name == "bound_array_accessors") {
-      transform_manager.Add<tint::transform::BoundArrayAccessors>();
-    } else if (name == "first_index_offset") {
+    if (name == "first_index_offset") {
       transform_inputs.Add<tint::transform::FirstIndexOffset::BindingPoint>(0,
                                                                             0);
       transform_manager.Add<tint::transform::FirstIndexOffset>();
     } else if (name == "renamer") {
       transform_manager.Add<tint::transform::Renamer>();
+    } else if (name == "robustness") {
+      transform_manager.Add<tint::transform::Robustness>();
     } else {
       std::cerr << "Unknown transform name: " << name << std::endl;
       return 1;

@@ -30,7 +30,7 @@ bool AddPlatformIndependentPasses(Config* config) {
   ExtractSingleEntryPointInputs(&config->reader, &config->inputs);
   ExtractVertexPullingInputs(&config->reader, &config->inputs);
 
-  config->manager.Add<transform::BoundArrayAccessors>();
+  config->manager.Add<transform::Robustness>();
   config->manager.Add<transform::FirstIndexOffset>();
   config->manager.Add<transform::BindingRemapper>();
   config->manager.Add<transform::Renamer>();

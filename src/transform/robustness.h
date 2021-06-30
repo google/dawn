@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TRANSFORM_BOUND_ARRAY_ACCESSORS_H_
-#define SRC_TRANSFORM_BOUND_ARRAY_ACCESSORS_H_
+#ifndef SRC_TRANSFORM_ROBUSTNESS_H_
+#define SRC_TRANSFORM_ROBUSTNESS_H_
 
 #include "src/ast/array_accessor_expression.h"
 #include "src/transform/transform.h"
@@ -25,12 +25,12 @@ namespace transform {
 /// the bounds of the array. Any access before the start of the array will clamp
 /// to zero and any access past the end of the array will clamp to
 /// (array length - 1).
-class BoundArrayAccessors : public Castable<BoundArrayAccessors, Transform> {
+class Robustness : public Castable<Robustness, Transform> {
  public:
   /// Constructor
-  BoundArrayAccessors();
+  Robustness();
   /// Destructor
-  ~BoundArrayAccessors() override;
+  ~Robustness() override;
 
  protected:
   /// Runs the transform using the CloneContext built for transforming a
@@ -46,7 +46,9 @@ class BoundArrayAccessors : public Castable<BoundArrayAccessors, Transform> {
                                           CloneContext* ctx);
 };
 
+using BoundArrayAccessors = Robustness;
+
 }  // namespace transform
 }  // namespace tint
 
-#endif  // SRC_TRANSFORM_BOUND_ARRAY_ACCESSORS_H_
+#endif  // SRC_TRANSFORM_ROBUSTNESS_H_

@@ -279,8 +279,6 @@ set(TINT_LIB_SRCS
   transform/array_length_from_uniform.h
   transform/binding_remapper.cc
   transform/binding_remapper.h
-  transform/bound_array_accessors.cc
-  transform/bound_array_accessors.h
   transform/calculate_array_length.cc
   transform/calculate_array_length.h
   transform/canonicalize_entry_point_io.cc
@@ -303,6 +301,8 @@ set(TINT_LIB_SRCS
   transform/promote_initializers_to_const_var.h
   transform/renamer.cc
   transform/renamer.h
+  transform/robustness.cc
+  transform/robustness.h
   transform/simplify.cc
   transform/simplify.h
   transform/single_entry_point.cc
@@ -866,7 +866,6 @@ if(${TINT_BUILD_TESTS})
     list(APPEND TINT_TEST_SRCS
       transform/array_length_from_uniform_test.cc
       transform/binding_remapper_test.cc
-      transform/bound_array_accessors_test.cc
       transform/calculate_array_length_test.cc
       transform/canonicalize_entry_point_io_test.cc
       transform/decompose_memory_access_test.cc
@@ -877,6 +876,7 @@ if(${TINT_BUILD_TESTS})
       transform/pad_array_elements_test.cc
       transform/promote_initializers_to_const_var_test.cc
       transform/renamer_test.cc
+      transform/robustness_test.cc
       transform/simplify_test.cc
       transform/single_entry_point_test.cc
       transform/test_helper.h

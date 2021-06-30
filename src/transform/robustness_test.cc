@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/transform/bound_array_accessors.h"
+#include "src/transform/robustness.h"
 
 #include "src/transform/test_helper.h"
 
@@ -20,9 +20,9 @@ namespace tint {
 namespace transform {
 namespace {
 
-using BoundArrayAccessorsTest = TransformTest;
+using RobustnessTest = TransformTest;
 
-TEST_F(BoundArrayAccessorsTest, Ptrs_Clamp) {
+TEST_F(RobustnessTest, Ptrs_Clamp) {
   auto* src = R"(
 var<private> a : array<f32, 3>;
 
@@ -43,12 +43,12 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
+TEST_F(RobustnessTest, Array_Idx_Nested_Scalar) {
   auto* src = R"(
 var<private> a : array<f32, 3>;
 
@@ -73,12 +73,12 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(BoundArrayAccessorsTest, Array_Idx_Scalar) {
+TEST_F(RobustnessTest, Array_Idx_Scalar) {
   auto* src = R"(
 var<private> a : array<f32, 3>;
 
@@ -95,12 +95,12 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
+TEST_F(RobustnessTest, Array_Idx_Expr) {
   auto* src = R"(
 var<private> a : array<f32, 3>;
 
@@ -121,12 +121,12 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(BoundArrayAccessorsTest, Array_Idx_Negative) {
+TEST_F(RobustnessTest, Array_Idx_Negative) {
   auto* src = R"(
 var<private> a : array<f32, 3>;
 
@@ -143,12 +143,12 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(BoundArrayAccessorsTest, Array_Idx_OutOfBounds) {
+TEST_F(RobustnessTest, Array_Idx_OutOfBounds) {
   auto* src = R"(
 var<private> a : array<f32, 3>;
 
@@ -165,12 +165,12 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(BoundArrayAccessorsTest, Vector_Idx_Scalar) {
+TEST_F(RobustnessTest, Vector_Idx_Scalar) {
   auto* src = R"(
 var<private> a : vec3<f32>;
 
@@ -187,12 +187,12 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
+TEST_F(RobustnessTest, Vector_Idx_Expr) {
   auto* src = R"(
 var<private> a : vec3<f32>;
 
@@ -213,12 +213,12 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(BoundArrayAccessorsTest, Vector_Swizzle_Idx_Scalar) {
+TEST_F(RobustnessTest, Vector_Swizzle_Idx_Scalar) {
   auto* src = R"(
 var<private> a : vec3<f32>;
 
@@ -235,12 +235,12 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(BoundArrayAccessorsTest, Vector_Swizzle_Idx_Var) {
+TEST_F(RobustnessTest, Vector_Swizzle_Idx_Var) {
   auto* src = R"(
 var<private> a : vec3<f32>;
 
@@ -261,11 +261,11 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
-TEST_F(BoundArrayAccessorsTest, Vector_Swizzle_Idx_Expr) {
+TEST_F(RobustnessTest, Vector_Swizzle_Idx_Expr) {
   auto* src = R"(
 var<private> a : vec3<f32>;
 
@@ -286,12 +286,12 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(BoundArrayAccessorsTest, Vector_Idx_Negative) {
+TEST_F(RobustnessTest, Vector_Idx_Negative) {
   auto* src = R"(
 var<private> a : vec3<f32>;
 
@@ -308,12 +308,12 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(BoundArrayAccessorsTest, Vector_Idx_OutOfBounds) {
+TEST_F(RobustnessTest, Vector_Idx_OutOfBounds) {
   auto* src = R"(
 var<private> a : vec3<f32>;
 
@@ -330,12 +330,12 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Scalar) {
+TEST_F(RobustnessTest, Matrix_Idx_Scalar) {
   auto* src = R"(
 var<private> a : mat3x2<f32>;
 
@@ -352,12 +352,12 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
+TEST_F(RobustnessTest, Matrix_Idx_Expr_Column) {
   auto* src = R"(
 var<private> a : mat3x2<f32>;
 
@@ -378,12 +378,12 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
+TEST_F(RobustnessTest, Matrix_Idx_Expr_Row) {
   auto* src = R"(
 var<private> a : mat3x2<f32>;
 
@@ -404,12 +404,12 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Column) {
+TEST_F(RobustnessTest, Matrix_Idx_Negative_Column) {
   auto* src = R"(
 var<private> a : mat3x2<f32>;
 
@@ -426,12 +426,12 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Row) {
+TEST_F(RobustnessTest, Matrix_Idx_Negative_Row) {
   auto* src = R"(
 var<private> a : mat3x2<f32>;
 
@@ -448,12 +448,12 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Column) {
+TEST_F(RobustnessTest, Matrix_Idx_OutOfBounds_Column) {
   auto* src = R"(
 var<private> a : mat3x2<f32>;
 
@@ -470,12 +470,12 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Row) {
+TEST_F(RobustnessTest, Matrix_Idx_OutOfBounds_Row) {
   auto* src = R"(
 var<private> a : mat3x2<f32>;
 
@@ -492,13 +492,13 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
 // TODO(dsinclair): Implement when constant_id exists
-TEST_F(BoundArrayAccessorsTest, DISABLED_Vector_Constant_Id_Clamps) {
+TEST_F(RobustnessTest, DISABLED_Vector_Constant_Id_Clamps) {
   // [[override(1300)]] let idx : i32;
   // var a : vec3<f32>
   // var b : f32 = a[idx]
@@ -507,7 +507,7 @@ TEST_F(BoundArrayAccessorsTest, DISABLED_Vector_Constant_Id_Clamps) {
 }
 
 // TODO(dsinclair): Implement when constant_id exists
-TEST_F(BoundArrayAccessorsTest, DISABLED_Array_Constant_Id_Clamps) {
+TEST_F(RobustnessTest, DISABLED_Array_Constant_Id_Clamps) {
   // [[override(1300)]] let idx : i32;
   // var a : array<f32, 4>
   // var b : f32 = a[idx]
@@ -516,7 +516,7 @@ TEST_F(BoundArrayAccessorsTest, DISABLED_Array_Constant_Id_Clamps) {
 }
 
 // TODO(dsinclair): Implement when constant_id exists
-TEST_F(BoundArrayAccessorsTest, DISABLED_Matrix_Column_Constant_Id_Clamps) {
+TEST_F(RobustnessTest, DISABLED_Matrix_Column_Constant_Id_Clamps) {
   // [[override(1300)]] let idx : i32;
   // var a : mat3x2<f32>
   // var b : f32 = a[idx][1]
@@ -525,7 +525,7 @@ TEST_F(BoundArrayAccessorsTest, DISABLED_Matrix_Column_Constant_Id_Clamps) {
 }
 
 // TODO(dsinclair): Implement when constant_id exists
-TEST_F(BoundArrayAccessorsTest, DISABLED_Matrix_Row_Constant_Id_Clamps) {
+TEST_F(RobustnessTest, DISABLED_Matrix_Row_Constant_Id_Clamps) {
   // [[override(1300)]] let idx : i32;
   // var a : mat3x2<f32>
   // var b : f32 = a[1][idx]
@@ -533,7 +533,7 @@ TEST_F(BoundArrayAccessorsTest, DISABLED_Matrix_Row_Constant_Id_Clamps) {
   // -> var b : f32 = a[1][min(u32(idx), 0, 1)]
 }
 
-TEST_F(BoundArrayAccessorsTest, RuntimeArray_Clamps) {
+TEST_F(RobustnessTest, RuntimeArray_Clamps) {
   auto* src = R"(
 [[block]]
 struct S {
@@ -561,24 +561,24 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
 
 // TODO(dsinclair): Clamp atomics when available.
-TEST_F(BoundArrayAccessorsTest, DISABLED_Atomics_Clamp) {
+TEST_F(RobustnessTest, DISABLED_Atomics_Clamp) {
   FAIL();
 }
 
 // TODO(dsinclair): Clamp texture coord values. Depends on:
 // https://github.com/gpuweb/gpuweb/issues/1107
-TEST_F(BoundArrayAccessorsTest, DISABLED_TextureCoord_Clamp) {
+TEST_F(RobustnessTest, DISABLED_TextureCoord_Clamp) {
   FAIL();
 }
 
 // TODO(dsinclair): Test for scoped variables when Lexical Scopes implemented
-TEST_F(BoundArrayAccessorsTest, DISABLED_Scoped_Variable) {
+TEST_F(RobustnessTest, DISABLED_Scoped_Variable) {
   // var a : array<f32, 3>;
   // var i : u32;
   // {
@@ -593,7 +593,7 @@ TEST_F(BoundArrayAccessorsTest, DISABLED_Scoped_Variable) {
 }
 
 // Check that existing use of min() and arrayLength() do not get renamed.
-TEST_F(BoundArrayAccessorsTest, DontRenameSymbols) {
+TEST_F(RobustnessTest, DontRenameSymbols) {
   auto* src = R"(
 [[block]]
 struct S {
@@ -630,7 +630,7 @@ fn f() {
 }
 )";
 
-  auto got = Run<BoundArrayAccessors>(src);
+  auto got = Run<Robustness>(src);
 
   EXPECT_EQ(expect, str(got));
 }
