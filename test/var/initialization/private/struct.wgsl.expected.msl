@@ -1,0 +1,14 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  int a;
+  float b;
+};
+
+kernel void tint_symbol() {
+  thread S tint_symbol_1 = {};
+  (void) tint_symbol_1;
+  return;
+}
+

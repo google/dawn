@@ -1,0 +1,47 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 25
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main" %tint_symbol
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %S "S"
+               OpMemberName %S 0 "a"
+               OpMemberName %S 1 "b"
+               OpName %v "v"
+               OpName %tint_symbol "tint_symbol"
+               OpName %main "main"
+               OpMemberDecorate %S 0 Offset 0
+               OpMemberDecorate %S 1 Offset 4
+               OpDecorate %tint_symbol BuiltIn LocalInvocationIndex
+        %int = OpTypeInt 32 1
+      %float = OpTypeFloat 32
+          %S = OpTypeStruct %int %float
+%_ptr_Workgroup_S = OpTypePointer Workgroup %S
+          %v = OpVariable %_ptr_Workgroup_S Workgroup
+       %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+%tint_symbol = OpVariable %_ptr_Input_uint Input
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
+     %uint_0 = OpConstant %uint 0
+       %bool = OpTypeBool
+         %19 = OpConstantNull %S
+     %uint_2 = OpConstant %uint 2
+   %uint_264 = OpConstant %uint 264
+       %main = OpFunction %void None %9
+         %12 = OpLabel
+         %13 = OpLoad %uint %tint_symbol
+         %15 = OpIEqual %bool %13 %uint_0
+               OpSelectionMerge %17 None
+               OpBranchConditional %15 %18 %17
+         %18 = OpLabel
+               OpStore %v %19
+               OpBranch %17
+         %17 = OpLabel
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+         %24 = OpLoad %S %v
+               OpReturn
+               OpFunctionEnd

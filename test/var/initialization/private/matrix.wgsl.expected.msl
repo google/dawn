@@ -1,0 +1,9 @@
+#include <metal_stdlib>
+
+using namespace metal;
+kernel void tint_symbol() {
+  thread float2x3 tint_symbol_1 = float2x3(0.0f);
+  (void) tint_symbol_1;
+  return;
+}
+

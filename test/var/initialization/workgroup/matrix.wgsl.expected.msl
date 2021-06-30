@@ -1,0 +1,192 @@
+SKIP: crbug.com/tint/938
+
+
+
+Validation Failure:
+
+Compilation failed:
+
+program_source:5:24: error: no matching constructor for initialization of 'threadgroup metal::float2x3' (aka 'threadgroup matrix<float, 2, 3>')
+  threadgroup float2x3 tint_symbol_2;
+                       ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:269:23: note: candidate template ignored: requirement 'sizeof...(U) == 2' was not satisfied [with U = <>]
+  METAL_FUNC explicit matrix(initializer_list<U>... cols) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:281:23: note: candidate template ignored: requirement '(sizeof...(U) == 2) || (sizeof...(U) == 2 * 3)' was not satisfied [with U = <>]
+  METAL_FUNC explicit matrix(U... vals) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:299:23: note: candidate template ignored: requirement 'sizeof...(U) == 2' was not satisfied [with U = <>]
+  METAL_FUNC explicit matrix(initializer_list<U>... cols) constant
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:311:23: note: candidate template ignored: requirement '(sizeof...(U) == 2) || (sizeof...(U) == 2 * 3)' was not satisfied [with U = <>]
+  METAL_FUNC explicit matrix(U... vals) constant
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:330:23: note: candidate template ignored: requirement 'sizeof...(U) == 2' was not satisfied [with U = <>]
+  METAL_FUNC explicit matrix(initializer_list<U>... cols) ray_data
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:342:23: note: candidate template ignored: requirement '(sizeof...(U) == 2) || (sizeof...(U) == 2 * 3)' was not satisfied [with U = <>]
+  METAL_FUNC explicit matrix(U... vals) ray_data
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:56:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(T val, _integer_sequence<int, C...>) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:62:23: note: candidate constructor template not viable: requires 3 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(cols_init_tag, initializer_list<vec<T, Rows>> cols, _integer_sequence<int, C...>) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:68:23: note: candidate constructor template not viable: requires at least 1 argument, but 0 were provided
+  METAL_FUNC explicit matrix(cols_all_tag, U... cols) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:75:23: note: candidate constructor template not viable: requires at least 1 argument, but 0 were provided
+  METAL_FUNC explicit matrix(elems_all_tag, U... elems) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:80:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(initializer_list<T> elems, _integer_sequence<int, C...>) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:86:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(T val, _integer_sequence<int, C...>) constant
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:92:23: note: candidate constructor template not viable: requires 3 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(cols_init_tag, initializer_list<vec<T, Rows>> cols, _integer_sequence<int, C...>) constant
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:98:23: note: candidate constructor template not viable: requires at least 1 argument, but 0 were provided
+  METAL_FUNC explicit matrix(cols_all_tag, U... cols) constant
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:105:23: note: candidate constructor template not viable: requires at least 1 argument, but 0 were provided
+  METAL_FUNC explicit matrix(elems_all_tag, U... elems) constant
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:110:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(initializer_list<T> elems, _integer_sequence<int, C...>) constant
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:117:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(T val, _integer_sequence<int, C...>) ray_data
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:123:23: note: candidate constructor template not viable: requires 3 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(cols_init_tag, initializer_list<vec<T, Rows>> cols, _integer_sequence<int, C...>) ray_data
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:129:23: note: candidate constructor template not viable: requires at least 1 argument, but 0 were provided
+  METAL_FUNC explicit matrix(cols_all_tag, U... cols) ray_data
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:136:23: note: candidate constructor template not viable: requires at least 1 argument, but 0 were provided
+  METAL_FUNC explicit matrix(elems_all_tag, U... elems) ray_data
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:141:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(initializer_list<T> elems, _integer_sequence<int, C...>) ray_data
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:149:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(const thread matrix<U, Cols, Rows> &that, _integer_sequence<int, C...>) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:154:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(const device matrix<U, Cols, Rows> &that, _integer_sequence<int, C...>) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:159:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(const constant matrix<U, Cols, Rows> &that, _integer_sequence<int, C...>) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:164:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(const threadgroup matrix<U, Cols, Rows> &that, _integer_sequence<int, C...>) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:170:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(const threadgroup_imageblock matrix<U, Cols, Rows> &that, _integer_sequence<int, C...>) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:177:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(const ray_data matrix<U, Cols, Rows> &that, _integer_sequence<int, C...>) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:183:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(const thread matrix<U, Cols, Rows> &that, _integer_sequence<int, C...>) constant
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:188:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(const device matrix<U, Cols, Rows> &that, _integer_sequence<int, C...>) constant
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:193:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(const constant matrix<U, Cols, Rows> &that, _integer_sequence<int, C...>) constant
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:198:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(const threadgroup matrix<U, Cols, Rows> &that, _integer_sequence<int, C...>) constant
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:204:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(const threadgroup_imageblock matrix<U, Cols, Rows> &that, _integer_sequence<int, C...>) constant
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:211:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(const ray_data matrix<U, Cols, Rows> &that, _integer_sequence<int, C...>) constant
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:218:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(const thread matrix<U, Cols, Rows> &that, _integer_sequence<int, C...>) ray_data
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:225:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(const device matrix<U, Cols, Rows> &that, _integer_sequence<int, C...>) ray_data
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:232:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(const constant matrix<U, Cols, Rows> &that, _integer_sequence<int, C...>) ray_data
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:239:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(const threadgroup matrix<U, Cols, Rows> &that, _integer_sequence<int, C...>) ray_data
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:247:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(const threadgroup_imageblock matrix<U, Cols, Rows> &that, _integer_sequence<int, C...>) ray_data
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:255:23: note: candidate constructor template not viable: requires 2 arguments, but 0 were provided
+  METAL_FUNC explicit matrix(const ray_data matrix<U, Cols, Rows> &that, _integer_sequence<int, C...>) ray_data
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:358:23: note: candidate constructor template not viable: requires single argument 'that', but no arguments were provided
+  METAL_FUNC explicit matrix(const thread matrix<U, Cols, Rows> &that) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:365:23: note: candidate constructor template not viable: requires single argument 'that', but no arguments were provided
+  METAL_FUNC explicit matrix(const device matrix<U, Cols, Rows> &that) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:372:23: note: candidate constructor template not viable: requires single argument 'that', but no arguments were provided
+  METAL_FUNC explicit matrix(const constant matrix<U, Cols, Rows> &that) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:379:23: note: candidate constructor template not viable: requires single argument 'that', but no arguments were provided
+  METAL_FUNC explicit matrix(const threadgroup matrix<U, Cols, Rows> &that) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:387:23: note: candidate constructor template not viable: requires single argument 'that', but no arguments were provided
+  METAL_FUNC explicit matrix(const threadgroup_imageblock matrix<U, Cols, Rows> &that) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:396:23: note: candidate constructor template not viable: requires single argument 'that', but no arguments were provided
+  METAL_FUNC explicit matrix(const ray_data matrix<U, Cols, Rows> &that) thread
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:404:23: note: candidate constructor template not viable: requires single argument 'that', but no arguments were provided
+  METAL_FUNC explicit matrix(const thread matrix<U, Cols, Rows> &that) constant
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:411:23: note: candidate constructor template not viable: requires single argument 'that', but no arguments were provided
+  METAL_FUNC explicit matrix(const device matrix<U, Cols, Rows> &that) constant
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:418:23: note: candidate constructor template not viable: requires single argument 'that', but no arguments were provided
+  METAL_FUNC explicit matrix(const constant matrix<U, Cols, Rows> &that) constant
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:425:23: note: candidate constructor template not viable: requires single argument 'that', but no arguments were provided
+  METAL_FUNC explicit matrix(const threadgroup matrix<U, Cols, Rows> &that) constant
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:433:23: note: candidate constructor template not viable: requires single argument 'that', but no arguments were provided
+  METAL_FUNC explicit matrix(const threadgroup_imageblock matrix<U, Cols, Rows> &that) constant
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:442:23: note: candidate constructor template not viable: requires single argument 'that', but no arguments were provided
+  METAL_FUNC explicit matrix(const ray_data matrix<U, Cols, Rows> &that) constant
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:451:23: note: candidate constructor template not viable: requires single argument 'that', but no arguments were provided
+  METAL_FUNC explicit matrix(const thread matrix<U, Cols, Rows> &that) ray_data
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:460:23: note: candidate constructor template not viable: requires single argument 'that', but no arguments were provided
+  METAL_FUNC explicit matrix(const device matrix<U, Cols, Rows> &that) ray_data
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:469:23: note: candidate constructor template not viable: requires single argument 'that', but no arguments were provided
+  METAL_FUNC explicit matrix(const constant matrix<U, Cols, Rows> &that) ray_data
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:478:23: note: candidate constructor template not viable: requires single argument 'that', but no arguments were provided
+  METAL_FUNC explicit matrix(const threadgroup matrix<U, Cols, Rows> &that) ray_data
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:488:23: note: candidate constructor template not viable: requires single argument 'that', but no arguments were provided
+  METAL_FUNC explicit matrix(const threadgroup_imageblock matrix<U, Cols, Rows> &that) ray_data
+                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_matrix:498:23: note: candidate constructor template not viable: requires single argument 'that', but no arguments were provided
+  METAL_FUNC explicit matrix(const ray_data matrix<U, Cols, Rows> &that) ray_data
+                      ^
+program_source:6:31: warning: equality comparison with extraneous parentheses
+  if ((local_invocation_index == 0u)) {
+       ~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+program_source:6:31: note: remove extraneous parentheses around the comparison to silence this warning
+  if ((local_invocation_index == 0u)) {
+      ~                       ^    ~
+program_source:6:31: note: use '=' to turn this equality comparison into an assignment
+  if ((local_invocation_index == 0u)) {
+                              ^~
+                              =
