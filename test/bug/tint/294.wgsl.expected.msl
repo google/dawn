@@ -3,7 +3,7 @@
 using namespace metal;
 struct Light {
   /* 0x0000 */ packed_float3 position;
-  /* 0x000c */ int8_t tint_pad_0[4];
+  /* 0x000c */ int8_t tint_pad[4];
   /* 0x0010 */ packed_float3 colour;
   /* 0x001c */ int8_t tint_pad_1[4];
 };

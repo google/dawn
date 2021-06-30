@@ -1885,11 +1885,10 @@ bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
     out.flags(saved_flag_state);
   };
 
-  uint32_t pad_count = 0;
   auto add_padding = [&](uint32_t size, uint32_t msl_offset) {
     std::string name;
     do {
-      name = "tint_pad_" + std::to_string(pad_count++);
+      name = UniqueIdentifier("tint_pad");
     } while (str->FindMember(program_->Symbols().Get(name)));
 
     auto out = line();

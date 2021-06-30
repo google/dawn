@@ -133,7 +133,7 @@ TEST_F(MslGeneratorImplTest, EmitType_ArrayWithStride) {
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_THAT(gen.result(), HasSubstr(R"(struct tint_padded_array_element {
   /* 0x0000 */ float el;
-  /* 0x0004 */ int8_t tint_pad_0[60];
+  /* 0x0004 */ int8_t tint_pad[60];
 };)"));
   EXPECT_THAT(gen.result(), HasSubstr(R"(struct tint_array_wrapper {
   /* 0x0000 */ tint_padded_array_element arr[4];
@@ -275,7 +275,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
   // for each field of the structure s.
 #define ALL_FIELDS()                             \
   FIELD(0x0000, int, a, /*NO SUFFIX*/)           \
-  FIELD(0x0004, int8_t, tint_pad_0, [124])       \
+  FIELD(0x0004, int8_t, tint_pad, [124])         \
   FIELD(0x0080, float, b, /*NO SUFFIX*/)         \
   FIELD(0x0084, int8_t, tint_pad_1, [124])       \
   FIELD(0x0100, packed_float2, c, /*NO SUFFIX*/) \
@@ -384,7 +384,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_Structures) {
   // for each field of the structure s.
 #define ALL_FIELDS()                       \
   FIELD(0x0000, int, a, /*NO SUFFIX*/)     \
-  FIELD(0x0004, int8_t, tint_pad_0, [508]) \
+  FIELD(0x0004, int8_t, tint_pad, [508])   \
   FIELD(0x0200, inner_x, b, /*NO SUFFIX*/) \
   FIELD(0x0600, float, c, /*NO SUFFIX*/)   \
   FIELD(0x0604, inner_y, d, /*NO SUFFIX*/) \
@@ -476,14 +476,14 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
 
   // ALL_FIELDS() calls the macro FIELD(ADDR, TYPE, NAME, SUFFIX)
   // for each field of the structure s.
-#define ALL_FIELDS()                       \
-  FIELD(0x0000, int, a, /*NO SUFFIX*/)     \
-  FIELD(0x0004, float, b, [7])             \
-  FIELD(0x0020, float, c, /*NO SUFFIX*/)   \
-  FIELD(0x0024, int8_t, tint_pad_0, [476]) \
-  FIELD(0x0200, inner, d, [4])             \
-  FIELD(0x1200, float, e, /*NO SUFFIX*/)   \
-  FIELD(0x1204, float, f, [1])             \
+#define ALL_FIELDS()                     \
+  FIELD(0x0000, int, a, /*NO SUFFIX*/)   \
+  FIELD(0x0004, float, b, [7])           \
+  FIELD(0x0020, float, c, /*NO SUFFIX*/) \
+  FIELD(0x0024, int8_t, tint_pad, [476]) \
+  FIELD(0x0200, inner, d, [4])           \
+  FIELD(0x1200, float, e, /*NO SUFFIX*/) \
+  FIELD(0x1204, float, f, [1])           \
   FIELD(0x1208, int8_t, tint_pad_1, [504])
 
   // Check that the generated string is as expected.
@@ -561,11 +561,11 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
 
   // ALL_FIELDS() calls the macro FIELD(ADDR, TYPE, NAME, SUFFIX)
   // for each field of the structure s.
-#define ALL_FIELDS()                      \
-  FIELD(0x0000, int, a, /*NO SUFFIX*/)    \
-  FIELD(0x0004, int8_t, tint_pad_0, [12]) \
-  FIELD(0x0010, float3, b, [4])           \
-  FIELD(0x0050, int, c, /*NO SUFFIX*/)    \
+#define ALL_FIELDS()                    \
+  FIELD(0x0000, int, a, /*NO SUFFIX*/)  \
+  FIELD(0x0004, int8_t, tint_pad, [12]) \
+  FIELD(0x0010, float3, b, [4])         \
+  FIELD(0x0050, int, c, /*NO SUFFIX*/)  \
   FIELD(0x0054, int8_t, tint_pad_1, [12])
 
   // Check that the generated string is as expected.
@@ -592,7 +592,7 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
           Member("tint_pad_27", ty.mat2x2<f32>()),
           Member("tint_pad_24", ty.u32()),
           Member("tint_pad_23", ty.mat2x3<f32>()),
-          Member("tint_pad_0", ty.u32()),
+          Member("tint_pad", ty.u32()),
           Member("tint_pad_8", ty.mat2x4<f32>()),
           Member("tint_pad_26", ty.u32()),
           Member("tint_pad_29", ty.mat3x2<f32>()),
@@ -637,7 +637,7 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
   /* 0x0148 */ uint tint_pad_24;
   /* 0x014c */ int8_t tint_pad_14[4];
   /* 0x0150 */ float2x3 tint_pad_23;
-  /* 0x0170 */ uint tint_pad_0;
+  /* 0x0170 */ uint tint_pad;
   /* 0x0174 */ int8_t tint_pad_15[12];
   /* 0x0180 */ float2x4 tint_pad_8;
   /* 0x01a0 */ uint tint_pad_26;
