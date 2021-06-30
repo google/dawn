@@ -368,12 +368,10 @@ namespace dawn_native {
                 if (HasOneBit(format.aspects)) {
                     Aspect single = format.aspects;
                     return single;
-                } else {
-                    return DAWN_VALIDATION_ERROR(
-                        "A single aspect must be selected for multi-planar formats in "
-                        "texture <-> linear data copies");
                 }
-                break;
+                return DAWN_VALIDATION_ERROR(
+                    "A single aspect must be selected for multi-planar formats in "
+                    "texture <-> linear data copies");
             case wgpu::TextureAspect::DepthOnly:
                 ASSERT(format.aspects & Aspect::Depth);
                 return Aspect::Depth;

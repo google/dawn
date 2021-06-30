@@ -119,6 +119,7 @@ config("dawn_internal") {
       "-Wshadow-field",
       "-Wstrict-prototypes",
       "-Wtautological-unsigned-zero-compare",
+      "-Wunreachable-code-aggressive",
     ]
 
     if (is_win) {

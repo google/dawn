@@ -50,12 +50,12 @@ namespace dawn_native {
 #if defined(DAWN_ENABLE_BACKEND_METAL)
         const SurfaceDescriptorFromMetalLayer* metalDesc = nullptr;
         FindInChain(descriptor->nextInChain, &metalDesc);
-        if (!metalDesc) {
-            return DAWN_VALIDATION_ERROR("Unsupported sType");
-        }
-        // Check that the layer is a CAMetalLayer (or a derived class).
-        if (!InheritsFromCAMetalLayer(metalDesc->layer)) {
-            return DAWN_VALIDATION_ERROR("layer must be a CAMetalLayer");
+        if (metalDesc) {
+            // Check that the layer is a CAMetalLayer (or a derived class).
+            if (!InheritsFromCAMetalLayer(metalDesc->layer)) {
+                return DAWN_VALIDATION_ERROR("layer must be a CAMetalLayer");
+            }
+            return {};
         }
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 
@@ -94,32 +94,31 @@ namespace dawn_native {
             }
             return {};
         }
-        return DAWN_VALIDATION_ERROR("Unsupported sType");
 #endif  // defined(DAWN_PLATFORM_WINDOWS)
 
 #if defined(DAWN_USE_X11)
         const SurfaceDescriptorFromXlib* xDesc = nullptr;
         FindInChain(descriptor->nextInChain, &xDesc);
-        if (!xDesc) {
-            return DAWN_VALIDATION_ERROR("Unsupported sType");
-        }
-        // Check the validity of the window by calling a getter function on the window that
-        // returns a status code. If the window is bad the call return a status of zero. We
-        // need to set a temporary X11 error handler while doing this because the default
-        // X11 error handler exits the program on any error.
-        XErrorHandler oldErrorHandler =
-            XSetErrorHandler([](Display*, XErrorEvent*) { return 0; });
-        XWindowAttributes attributes;
-        int status = XGetWindowAttributes(reinterpret_cast<Display*>(xDesc->display),
-                                          xDesc->window, &attributes);
-        XSetErrorHandler(oldErrorHandler);
+        if (xDesc) {
+            // Check the validity of the window by calling a getter function on the window that
+            // returns a status code. If the window is bad the call return a status of zero. We
+            // need to set a temporary X11 error handler while doing this because the default
+            // X11 error handler exits the program on any error.
+            XErrorHandler oldErrorHandler =
+                XSetErrorHandler([](Display*, XErrorEvent*) { return 0; });
+            XWindowAttributes attributes;
+            int status = XGetWindowAttributes(reinterpret_cast<Display*>(xDesc->display),
+                                              xDesc->window, &attributes);
+            XSetErrorHandler(oldErrorHandler);
 
-        if (status == 0) {
-            return DAWN_VALIDATION_ERROR("Invalid X Window");
+            if (status == 0) {
+                return DAWN_VALIDATION_ERROR("Invalid X Window");
+            }
+            return {};
         }
 #endif  // defined(DAWN_USE_X11)
 
-        return {};
+        return DAWN_VALIDATION_ERROR("Unsupported sType");
     }
 
     Surface::Surface(InstanceBase* instance, const SurfaceDescriptor* descriptor)

@@ -118,8 +118,6 @@ namespace dawn_wire { namespace server {
             default:
                 return false;
         }
-
-        return true;
     }
 
 }}  // namespace dawn_wire::server

@@ -105,7 +105,6 @@ namespace dawn_native {
                         return DAWN_VALIDATION_ERROR(
                             "The depth aspect of depth24plus texture cannot be selected in a "
                             "texture to buffer copy");
-                        break;
                     case wgpu::TextureFormat::Depth32Float:
                         break;
 

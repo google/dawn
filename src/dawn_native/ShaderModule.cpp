@@ -784,7 +784,6 @@ namespace dawn_native {
                         }
                         case BindingInfoType::ExternalTexture: {
                             return DAWN_VALIDATION_ERROR("External textures are not supported.");
-                            break;
                         }
                     }
                 }
