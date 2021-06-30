@@ -571,14 +571,90 @@ TEST_F(RobustnessTest, DISABLED_Atomics_Clamp) {
   FAIL();
 }
 
-// TODO(dsinclair): Clamp texture coord values. Depends on:
-// https://github.com/gpuweb/gpuweb/issues/1107
-TEST_F(RobustnessTest, DISABLED_TextureCoord_Clamp) {
-  FAIL();
+// Clamp textureLoad() coord values
+TEST_F(RobustnessTest, TextureLoad_TextureCoord_Clamp) {
+  auto* src = R"(
+[[group(0), binding(0)]] var tex1d : texture_1d<f32>;
+
+[[group(0), binding(1)]] var tex2d : texture_2d<f32>;
+
+[[group(0), binding(2)]] var tex3d : texture_3d<f32>;
+
+[[group(0), binding(3)]] var tex2d_arr : texture_storage_2d_array<rgba8sint, read>;
+
+fn f() {
+  ignore(textureLoad(tex1d, 10, 100));
+  ignore(textureLoad(tex2d, vec2<i32>(10, 20), 100));
+  ignore(textureLoad(tex3d, vec3<i32>(10, 20, 30), 100));
+  ignore(textureLoad(tex2d_arr, vec2<i32>(10, 20), 100));
+}
+)";
+
+  auto* expect = R"(
+[[group(0), binding(0)]] var tex1d : texture_1d<f32>;
+
+[[group(0), binding(1)]] var tex2d : texture_2d<f32>;
+
+[[group(0), binding(2)]] var tex3d : texture_3d<f32>;
+
+[[group(0), binding(3)]] var tex2d_arr : texture_storage_2d_array<rgba8sint, read>;
+
+fn f() {
+  ignore(textureLoad(tex1d, clamp(10, i32(), textureDimensions(tex1d)), 100));
+  ignore(textureLoad(tex2d, clamp(vec2<i32>(10, 20), vec2<i32>(), textureDimensions(tex2d)), 100));
+  ignore(textureLoad(tex3d, clamp(vec3<i32>(10, 20, 30), vec3<i32>(), textureDimensions(tex3d)), 100));
+  ignore(textureLoad(tex2d_arr, clamp(vec2<i32>(10, 20), vec2<i32>(), textureDimensions(tex2d_arr)), 100));
+}
+)";
+
+  auto got = Run<Robustness>(src);
+
+  EXPECT_EQ(expect, str(got));
 }
 
-// TODO(dsinclair): Test for scoped variables when Lexical Scopes implemented
-TEST_F(RobustnessTest, DISABLED_Scoped_Variable) {
+// Clamp textureStore() coord values
+TEST_F(RobustnessTest, TextureStore_TextureCoord_Clamp) {
+  auto* src = R"(
+[[group(0), binding(0)]] var tex1d : texture_storage_1d<rgba8sint, write>;
+
+[[group(0), binding(1)]] var tex2d : texture_storage_2d<rgba8sint, write>;
+
+[[group(0), binding(2)]] var tex3d : texture_storage_3d<rgba8sint, write>;
+
+[[group(0), binding(3)]] var tex2d_arr : texture_storage_2d_array<rgba8sint, write>;
+
+fn f() {
+  textureStore(tex1d, 10, vec4<i32>());
+  textureStore(tex2d, vec2<i32>(10, 20), vec4<i32>());
+  textureStore(tex3d, vec3<i32>(10, 20, 30), vec4<i32>());
+  textureStore(tex2d_arr, vec2<i32>(10, 20), 50, vec4<i32>());
+}
+)";
+
+  auto* expect = R"(
+[[group(0), binding(0)]] var tex1d : texture_storage_1d<rgba8sint, write>;
+
+[[group(0), binding(1)]] var tex2d : texture_storage_2d<rgba8sint, write>;
+
+[[group(0), binding(2)]] var tex3d : texture_storage_3d<rgba8sint, write>;
+
+[[group(0), binding(3)]] var tex2d_arr : texture_storage_2d_array<rgba8sint, write>;
+
+fn f() {
+  textureStore(tex1d, clamp(10, i32(), textureDimensions(tex1d)), vec4<i32>());
+  textureStore(tex2d, clamp(vec2<i32>(10, 20), vec2<i32>(), textureDimensions(tex2d)), vec4<i32>());
+  textureStore(tex3d, clamp(vec3<i32>(10, 20, 30), vec3<i32>(), textureDimensions(tex3d)), vec4<i32>());
+  textureStore(tex2d_arr, clamp(vec2<i32>(10, 20), vec2<i32>(), textureDimensions(tex2d_arr)), 50, vec4<i32>());
+}
+)";
+
+  auto got = Run<Robustness>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+// TODO(dsinclair): Test for scoped variables when shadowing is implemented
+TEST_F(RobustnessTest, DISABLED_Shadowed_Variable) {
   // var a : array<f32, 3>;
   // var i : u32;
   // {

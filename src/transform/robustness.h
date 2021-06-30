@@ -15,8 +15,15 @@
 #ifndef SRC_TRANSFORM_ROBUSTNESS_H_
 #define SRC_TRANSFORM_ROBUSTNESS_H_
 
-#include "src/ast/array_accessor_expression.h"
 #include "src/transform/transform.h"
+
+// Forward declarations
+namespace tint {
+namespace ast {
+class ArrayAccessorExpression;
+class CallExpression;
+}  // namespace ast
+}  // namespace tint
 
 namespace tint {
 namespace transform {
@@ -44,6 +51,7 @@ class Robustness : public Castable<Robustness, Transform> {
  private:
   ast::ArrayAccessorExpression* Transform(ast::ArrayAccessorExpression* expr,
                                           CloneContext* ctx);
+  ast::CallExpression* Transform(ast::CallExpression* expr, CloneContext* ctx);
 };
 
 using BoundArrayAccessors = Robustness;
