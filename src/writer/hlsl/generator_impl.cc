@@ -1663,7 +1663,12 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
   if (!EmitExpression(out, texture))
     return false;
 
+  // If pack_level_in_coords is true, then the mip level will be appended as the
+  // last value of the coordinates argument. If the WGSL intrinsic overload does
+  // not have a level parameter and pack_level_in_coords is true, then a zero
+  // mip level will be inserted.
   bool pack_level_in_coords = false;
+
   uint32_t hlsl_ret_width = 4u;
 
   switch (intrinsic->Type()) {
@@ -1689,6 +1694,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
       break;
     case sem::IntrinsicType::kTextureLoad:
       out << ".Load(";
+      // Multisampled textures do not support mip-levels.
       if (!texture_type->Is<sem::MultisampledTexture>()) {
         pack_level_in_coords = true;
       }
