@@ -125,6 +125,10 @@ TEST_P(DrawIndexedIndirectTest, BaseVertex) {
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
+    // TODO(crbug.com/dawn/966): Fails on Metal Intel, likely because [[builtin(vertex_index)]]
+    // doesn't take into account BaseVertex, which breaks programmable vertex pulling.
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
+
     RGBA8 filled(0, 255, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);
 
@@ -149,6 +153,10 @@ TEST_P(DrawIndexedIndirectTest, BaseVertex) {
 TEST_P(DrawIndexedIndirectTest, IndirectOffset) {
     // TODO(crbug.com/dawn/789): Test is failing after a roll on SwANGLE on Windows only.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
+
+    // TODO(crbug.com/dawn/966): Fails on Metal Intel, likely because [[builtin(vertex_index)]]
+    // doesn't take into account BaseVertex, which breaks programmable vertex pulling.
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
     RGBA8 filled(0, 255, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);

@@ -127,10 +127,6 @@ namespace dawn_native { namespace metal {
     MaybeError Device::Initialize() {
         InitTogglesFromDriver();
 
-        if (!IsRobustnessEnabled()) {
-            ForceSetToggle(Toggle::MetalEnableVertexPulling, false);
-        }
-
         mCommandQueue.Acquire([*mMtlDevice newCommandQueue]);
 
         if (GetAdapter()->GetSupportedExtensions().IsEnabled(Extension::TimestampQuery)) {
@@ -187,6 +183,12 @@ namespace dawn_native { namespace metal {
             // TODO(crbug.com/dawn/343): Investigate emulation.
             SetToggle(Toggle::DisableBaseVertex, !haveBaseVertexBaseInstance);
             SetToggle(Toggle::DisableBaseInstance, !haveBaseVertexBaseInstance);
+        }
+
+        // Vertex buffer robustness is implemented by using programmable vertex pulling. Enable
+        // that code path if it isn't explicitly disabled.
+        if (IsToggleEnabled(Toggle::UseTintGenerator) && IsRobustnessEnabled()) {
+            SetToggle(Toggle::MetalEnableVertexPulling, true);
         }
 
         // TODO(crbug.com/dawn/846): tighten this workaround when the driver bug is fixed.
