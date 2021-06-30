@@ -639,6 +639,43 @@ class InspectorHelper : public ProgramBuilder {
     return Func(func_name, ast::VariableList(), ty.void_(), stmts, decorations);
   }
 
+  std::function<ast::Type*()> GetTypeFunction(ComponentType component,
+                                              CompositionType composition) {
+    std::function<ast::Type*()> func;
+    switch (component) {
+      case ComponentType::kFloat:
+        func = [this]() -> ast::Type* { return ty.f32(); };
+        break;
+      case ComponentType::kSInt:
+        func = [this]() -> ast::Type* { return ty.i32(); };
+        break;
+      case ComponentType::kUInt:
+        func = [this]() -> ast::Type* { return ty.u32(); };
+        break;
+      case ComponentType::kUnknown:
+        return []() -> ast::Type* { return nullptr; };
+    }
+
+    uint32_t n;
+    switch (composition) {
+      case CompositionType::kScalar:
+        return func;
+      case CompositionType::kVec2:
+        n = 2;
+        break;
+      case CompositionType::kVec3:
+        n = 3;
+        break;
+      case CompositionType::kVec4:
+        n = 4;
+        break;
+      default:
+        return []() -> ast::Type* { return nullptr; };
+    }
+
+    return [this, func, n]() -> ast::Type* { return ty.vec(func(), n); };
+  }
+
   Inspector& Build() {
     if (inspector_) {
       return *inspector_;
@@ -666,9 +703,23 @@ class InspectorHelper : public ProgramBuilder {
 
 class InspectorGetEntryPointTest : public InspectorHelper,
                                    public testing::Test {};
-class InspectorGetEntryPointTestWithComponentTypeParam
+
+typedef std::tuple<inspector::ComponentType, inspector::CompositionType>
+    InspectorGetEntryPointComponentAndCompositionTestParams;
+class InspectorGetEntryPointComponentAndCompositionTest
     : public InspectorHelper,
-      public testing::TestWithParam<ComponentType> {};
+      public testing::TestWithParam<
+          InspectorGetEntryPointComponentAndCompositionTestParams> {};
+struct InspectorGetEntryPointInterpolateTestParams {
+  ast::InterpolationType in_type;
+  ast::InterpolationSampling in_sampling;
+  inspector::InterpolationType out_type;
+  inspector::InterpolationSampling out_sampling;
+};
+class InspectorGetEntryPointInterpolateTest
+    : public InspectorHelper,
+      public testing::TestWithParam<
+          InspectorGetEntryPointInterpolateTestParams> {};
 class InspectorGetRemappedNameForEntryPointTest : public InspectorHelper,
                                                   public testing::Test {};
 class InspectorGetConstantIDsTest : public InspectorHelper,
@@ -889,22 +940,12 @@ TEST_F(InspectorGetEntryPointTest, NoInOutVariables) {
   EXPECT_EQ(0u, result[0].output_variables.size());
 }
 
-TEST_P(InspectorGetEntryPointTestWithComponentTypeParam, InOutVariables) {
-  ComponentType inspector_type = GetParam();
-  std::function<ast::Type*()> tint_type;
-  switch (inspector_type) {
-    case ComponentType::kFloat:
-      tint_type = [this]() -> ast::Type* { return ty.f32(); };
-      break;
-    case ComponentType::kSInt:
-      tint_type = [this]() -> ast::Type* { return ty.i32(); };
-      break;
-    case ComponentType::kUInt:
-      tint_type = [this]() -> ast::Type* { return ty.u32(); };
-      break;
-    case ComponentType::kUnknown:
-      return;
-  }
+TEST_P(InspectorGetEntryPointComponentAndCompositionTest, Test) {
+  ComponentType component;
+  CompositionType composition;
+  std::tie(component, composition) = GetParam();
+  std::function<ast::Type*()> tint_type =
+      GetTypeFunction(component, composition);
 
   auto* in_var = Param("in_var", tint_type(), {Location(0u)});
   Func("foo", {in_var}, tint_type(), {Return("in_var")},
@@ -920,19 +961,24 @@ TEST_P(InspectorGetEntryPointTestWithComponentTypeParam, InOutVariables) {
   EXPECT_EQ("in_var", result[0].input_variables[0].name);
   EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
   EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
-  EXPECT_EQ(inspector_type, result[0].input_variables[0].component_type);
+  EXPECT_EQ(component, result[0].input_variables[0].component_type);
 
   ASSERT_EQ(1u, result[0].output_variables.size());
   EXPECT_EQ("<retval>", result[0].output_variables[0].name);
   EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
   EXPECT_EQ(0u, result[0].output_variables[0].location_decoration);
-  EXPECT_EQ(inspector_type, result[0].output_variables[0].component_type);
+  EXPECT_EQ(component, result[0].output_variables[0].component_type);
 }
-INSTANTIATE_TEST_SUITE_P(InspectorGetEntryPointTest,
-                         InspectorGetEntryPointTestWithComponentTypeParam,
-                         testing::Values(ComponentType::kFloat,
-                                         ComponentType::kSInt,
-                                         ComponentType::kUInt));
+INSTANTIATE_TEST_SUITE_P(
+    InspectorGetEntryPointTest,
+    InspectorGetEntryPointComponentAndCompositionTest,
+    testing::Combine(testing::Values(ComponentType::kFloat,
+                                     ComponentType::kSInt,
+                                     ComponentType::kUInt),
+                     testing::Values(CompositionType::kScalar,
+                                     CompositionType::kVec2,
+                                     CompositionType::kVec3,
+                                     CompositionType::kVec4)));
 
 TEST_F(InspectorGetEntryPointTest, MultipleInOutVariables) {
   auto* in_var0 = Param("in_var0", ty.u32(), {Location(0u)});
@@ -1602,6 +1648,89 @@ TEST_F(InspectorGetEntryPointTest, SampleMaskStructReferenced) {
   ASSERT_EQ(1u, result.size());
   EXPECT_TRUE(result[0].sample_mask_used);
 }
+
+TEST_F(InspectorGetEntryPointTest, ImplicitInterpolate) {
+  ast::StructMemberList members;
+  members.push_back(Member("struct_inner", ty.f32(), {Location(0)}));
+  Structure("in_struct", members, {});
+  auto* in_var = Param("in_var", ty.type_name("in_struct"), {});
+
+  Func("ep_func", {in_var}, ty.void_(), {Return()},
+       {Stage(ast::PipelineStage::kFragment)}, {});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  ASSERT_EQ(1u, result[0].input_variables.size());
+  EXPECT_EQ(InterpolationType::kPerspective,
+            result[0].input_variables[0].interpolation_type);
+  EXPECT_EQ(InterpolationSampling::kCenter,
+            result[0].input_variables[0].interpolation_sampling);
+}
+
+TEST_P(InspectorGetEntryPointInterpolateTest, Test) {
+  auto& params = GetParam();
+  ast::StructMemberList members;
+  members.push_back(
+      Member("struct_inner", ty.f32(),
+             {Interpolate(params.in_type, params.in_sampling), Location(0)}));
+  Structure("in_struct", members, {});
+  auto* in_var = Param("in_var", ty.type_name("in_struct"), {});
+
+  Func("ep_func", {in_var}, ty.void_(), {Return()},
+       {Stage(ast::PipelineStage::kFragment)}, {});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  ASSERT_EQ(1u, result[0].input_variables.size());
+  EXPECT_EQ(params.out_type, result[0].input_variables[0].interpolation_type);
+  EXPECT_EQ(params.out_sampling,
+            result[0].input_variables[0].interpolation_sampling);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    InspectorGetEntryPointTest,
+    InspectorGetEntryPointInterpolateTest,
+    testing::Values(
+        InspectorGetEntryPointInterpolateTestParams{
+            ast::InterpolationType::kPerspective,
+            ast::InterpolationSampling::kCenter,
+            InterpolationType::kPerspective, InterpolationSampling::kCenter},
+        InspectorGetEntryPointInterpolateTestParams{
+            ast::InterpolationType::kPerspective,
+            ast::InterpolationSampling::kCentroid,
+            InterpolationType::kPerspective, InterpolationSampling::kCentroid},
+        InspectorGetEntryPointInterpolateTestParams{
+            ast::InterpolationType::kPerspective,
+            ast::InterpolationSampling::kSample,
+            InterpolationType::kPerspective, InterpolationSampling::kSample},
+        InspectorGetEntryPointInterpolateTestParams{
+            ast::InterpolationType::kPerspective,
+            ast::InterpolationSampling::kNone, InterpolationType::kPerspective,
+            InterpolationSampling::kCenter},
+        InspectorGetEntryPointInterpolateTestParams{
+            ast::InterpolationType::kLinear,
+            ast::InterpolationSampling::kCenter, InterpolationType::kLinear,
+            InterpolationSampling::kCenter},
+        InspectorGetEntryPointInterpolateTestParams{
+            ast::InterpolationType::kLinear,
+            ast::InterpolationSampling::kCentroid, InterpolationType::kLinear,
+            InterpolationSampling::kCentroid},
+        InspectorGetEntryPointInterpolateTestParams{
+            ast::InterpolationType::kLinear,
+            ast::InterpolationSampling::kSample, InterpolationType::kLinear,
+            InterpolationSampling::kSample},
+        InspectorGetEntryPointInterpolateTestParams{
+            ast::InterpolationType::kLinear, ast::InterpolationSampling::kNone,
+            InterpolationType::kLinear, InterpolationSampling::kCenter},
+        InspectorGetEntryPointInterpolateTestParams{
+            ast::InterpolationType::kFlat, ast::InterpolationSampling::kNone,
+            InterpolationType::kFlat, InterpolationSampling::kNone}));
 
 // TODO(rharrison): Reenable once GetRemappedNameForEntryPoint isn't a pass
 // through

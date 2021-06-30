@@ -19,6 +19,8 @@
 #include "src/ast/bool_literal.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/float_literal.h"
+#include "src/ast/interpolate_decoration.h"
+#include "src/ast/location_decoration.h"
 #include "src/ast/module.h"
 #include "src/ast/override_decoration.h"
 #include "src/ast/scalar_constructor_expression.h"
@@ -54,6 +56,68 @@ void AppendResourceBindings(std::vector<ResourceBinding>* dest,
 
   dest->reserve(dest->size() + orig.size());
   dest->insert(dest->end(), orig.begin(), orig.end());
+}
+
+std::tuple<ComponentType, CompositionType> CalculateComponentAndComposition(
+    const sem::Type* type) {
+  if (type->is_float_scalar()) {
+    return {ComponentType::kFloat, CompositionType::kScalar};
+  } else if (type->is_float_vector()) {
+    auto* vec = type->As<sem::Vector>();
+    if (vec->size() == 2) {
+      return {ComponentType::kFloat, CompositionType::kVec2};
+    } else if (vec->size() == 3) {
+      return {ComponentType::kFloat, CompositionType::kVec3};
+    } else if (vec->size() == 4) {
+      return {ComponentType::kFloat, CompositionType::kVec4};
+    }
+  } else if (type->is_unsigned_integer_scalar()) {
+    return {ComponentType::kUInt, CompositionType::kScalar};
+  } else if (type->is_unsigned_integer_vector()) {
+    auto* vec = type->As<sem::Vector>();
+    if (vec->size() == 2) {
+      return {ComponentType::kUInt, CompositionType::kVec2};
+    } else if (vec->size() == 3) {
+      return {ComponentType::kUInt, CompositionType::kVec3};
+    } else if (vec->size() == 4) {
+      return {ComponentType::kUInt, CompositionType::kVec4};
+    }
+  } else if (type->is_signed_integer_scalar()) {
+    return {ComponentType::kSInt, CompositionType::kScalar};
+  } else if (type->is_signed_integer_vector()) {
+    auto* vec = type->As<sem::Vector>();
+    if (vec->size() == 2) {
+      return {ComponentType::kSInt, CompositionType::kVec2};
+    } else if (vec->size() == 3) {
+      return {ComponentType::kSInt, CompositionType::kVec3};
+    } else if (vec->size() == 4) {
+      return {ComponentType::kSInt, CompositionType::kVec4};
+    }
+  }
+  return {ComponentType::kUnknown, CompositionType::kUnknown};
+}
+
+std::tuple<InterpolationType, InterpolationSampling> CalculateInterpolationData(
+    const sem::Type* type,
+    const ast::DecorationList& decorations) {
+  auto* interpolation_decoration =
+      ast::GetDecoration<ast::InterpolateDecoration>(decorations);
+  if (type->is_integer_scalar_or_vector()) {
+    return {InterpolationType::kFlat, InterpolationSampling::kNone};
+  }
+
+  if (!interpolation_decoration) {
+    return {InterpolationType::kPerspective, InterpolationSampling::kCenter};
+  }
+
+  auto interpolation_type = interpolation_decoration->type();
+  auto sampling = interpolation_decoration->sampling();
+  if (interpolation_type != ast::InterpolationType::kFlat &&
+      sampling == ast::InterpolationSampling::kNone) {
+    sampling = ast::InterpolationSampling::kCenter;
+  }
+  return {ASTToInspectorInterpolationType(interpolation_type),
+          ASTToInspectorInterpolationSampling(sampling)};
 }
 
 }  // namespace
@@ -116,15 +180,10 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
         StageVariable stage_variable;
         stage_variable.name = name;
 
-        stage_variable.component_type = ComponentType::kUnknown;
         auto* type = var->Type()->UnwrapRef();
-        if (type->is_float_scalar_or_vector() || type->is_float_matrix()) {
-          stage_variable.component_type = ComponentType::kFloat;
-        } else if (type->is_unsigned_scalar_or_vector()) {
-          stage_variable.component_type = ComponentType::kUInt;
-        } else if (type->is_signed_scalar_or_vector()) {
-          stage_variable.component_type = ComponentType::kSInt;
-        }
+        std::tie(stage_variable.component_type,
+                 stage_variable.composition_type) =
+            CalculateComponentAndComposition(type);
 
         auto* location_decoration =
             ast::GetDecoration<ast::LocationDecoration>(decl->decorations());
@@ -134,6 +193,10 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
         } else {
           stage_variable.has_location_decoration = false;
         }
+
+        std::tie(stage_variable.interpolation_type,
+                 stage_variable.interpolation_sampling) =
+            CalculateInterpolationData(type, decl->decorations());
 
         if (var->StorageClass() == ast::StorageClass::kInput) {
           entry_point.input_variables.push_back(stage_variable);
@@ -520,20 +583,17 @@ void Inspector::AddEntryPointInOutVariables(
 
   StageVariable stage_variable;
   stage_variable.name = name;
-  stage_variable.component_type = ComponentType::kUnknown;
-  if (unwrapped_type->is_float_scalar_or_vector() ||
-      unwrapped_type->is_float_matrix()) {
-    stage_variable.component_type = ComponentType::kFloat;
-  } else if (unwrapped_type->is_unsigned_scalar_or_vector()) {
-    stage_variable.component_type = ComponentType::kUInt;
-  } else if (unwrapped_type->is_signed_scalar_or_vector()) {
-    stage_variable.component_type = ComponentType::kSInt;
-  }
+  std::tie(stage_variable.component_type, stage_variable.composition_type) =
+      CalculateComponentAndComposition(type);
 
   auto* location = ast::GetDecoration<ast::LocationDecoration>(decorations);
   TINT_ASSERT(Inspector, location != nullptr);
   stage_variable.has_location_decoration = true;
   stage_variable.location_decoration = location->value();
+
+  std::tie(stage_variable.interpolation_type,
+           stage_variable.interpolation_sampling) =
+      CalculateInterpolationData(type, decorations);
 
   variables.push_back(stage_variable);
 }

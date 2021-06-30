@@ -69,6 +69,10 @@ class Type : public Castable<Type, Node> {
   bool is_float_scalar_or_vector_or_matrix() const;
   /// @returns true if this type is an integer scalar
   bool is_integer_scalar() const;
+  /// @returns true if this type is a signed integer scalar
+  bool is_signed_integer_scalar() const;
+  /// @returns true if this type is an unsigned integer scalar
+  bool is_unsigned_integer_scalar() const;
   /// @returns true if this type is a signed integer vector
   bool is_signed_integer_vector() const;
   /// @returns true if this type is an unsigned vector
