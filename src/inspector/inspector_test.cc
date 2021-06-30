@@ -1559,6 +1559,50 @@ TEST_F(InspectorGetEntryPointTest, NonOverridableConstantSkipped) {
   EXPECT_EQ(0u, result[0].overridable_constants.size());
 }
 
+TEST_F(InspectorGetEntryPointTest, SampleMaskNotReferenced) {
+  MakeEmptyBodyFunction("ep_func", {Stage(ast::PipelineStage::kFragment)});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_FALSE(result[0].sample_mask_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, SampleMaskSimpleReferenced) {
+  auto* in_var =
+      Param("in_var", ty.u32(), {Builtin(ast::Builtin::kSampleMask)});
+  Func("ep_func", {in_var}, ty.u32(), {Return("in_var")},
+       {Stage(ast::PipelineStage::kFragment)},
+       {Builtin(ast::Builtin::kSampleMask)});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_TRUE(result[0].sample_mask_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, SampleMaskStructReferenced) {
+  ast::StructMemberList members;
+  members.push_back(Member("inner_sample_mask", ty.u32(),
+                           {Builtin(ast::Builtin::kSampleMask)}));
+  Structure("out_struct", members, {});
+
+  Func("ep_func", {}, ty.type_name("out_struct"),
+       {Decl(Var("out_var", ty.type_name("out_struct"))), Return("out_var")},
+       {Stage(ast::PipelineStage::kFragment)}, {});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_TRUE(result[0].sample_mask_used);
+}
+
 // TODO(rharrison): Reenable once GetRemappedNameForEntryPoint isn't a pass
 // through
 TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_NoFunctions) {

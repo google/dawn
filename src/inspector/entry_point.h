@@ -69,17 +69,19 @@ struct EntryPoint {
   /// The entry point stage
   ast::PipelineStage stage = ast::PipelineStage::kNone;
   /// The workgroup x size
-  uint32_t workgroup_size_x;
+  uint32_t workgroup_size_x = 0;
   /// The workgroup y size
-  uint32_t workgroup_size_y;
+  uint32_t workgroup_size_y = 0;
   /// The workgroup z size
-  uint32_t workgroup_size_z;
+  uint32_t workgroup_size_z = 0;
   /// List of the input variable accessed via this entry point.
   std::vector<StageVariable> input_variables;
   /// List of the output variable accessed via this entry point.
   std::vector<StageVariable> output_variables;
   /// List of the pipeline overridable constants accessed via this entry point.
   std::vector<OverridableConstant> overridable_constants;
+  /// Does the entry point use the sample_mask builtin
+  bool sample_mask_used = false;
 
   /// @returns the size of the workgroup in {x,y,z} format
   std::tuple<uint32_t, uint32_t, uint32_t> workgroup_size() {

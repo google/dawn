@@ -151,6 +151,12 @@ class Inspector {
                                    const ast::DecorationList& decorations,
                                    std::vector<StageVariable>& variables) const;
 
+  /// Recursively determine if the type contains [[builtin(sample_mask)]]
+  /// If `type` is a struct, recurse into members to check for the decoration.
+  /// Otherwise, check `decorations` for the decoration.
+  bool ContainsSampleMaskBuiltin(sem::Type* type,
+                                 const ast::DecorationList& decorations) const;
+
   /// @param entry_point name of the entry point to get information about.
   /// @param read_only if true get only read-only bindings, if false get
   ///                  write-only bindings.

@@ -100,6 +100,9 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
                                   entry_point.output_variables);
     }
 
+    entry_point.sample_mask_used = ContainsSampleMaskBuiltin(
+        sem->ReturnType(), func->return_type_decorations());
+
     for (auto* var : sem->ReferencedModuleVariables()) {
       auto* decl = var->Declaration();
 
@@ -533,6 +536,31 @@ void Inspector::AddEntryPointInOutVariables(
   stage_variable.location_decoration = location->value();
 
   variables.push_back(stage_variable);
+}
+
+bool Inspector::ContainsSampleMaskBuiltin(
+    sem::Type* type,
+    const ast::DecorationList& decorations) const {
+  auto* unwrapped_type = type->UnwrapRef();
+
+  if (auto* struct_ty = unwrapped_type->As<sem::Struct>()) {
+    // Recurse into members.
+    for (auto* member : struct_ty->Members()) {
+      if (ContainsSampleMaskBuiltin(member->Type(),
+                                    member->Declaration()->decorations())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Base case: check for [[builtin(sample_mask)]]
+  auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(decorations);
+  if (!builtin || builtin->value() != ast::Builtin::kSampleMask) {
+    return false;
+  }
+
+  return true;
 }
 
 std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
