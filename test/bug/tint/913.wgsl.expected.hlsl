@@ -46,7 +46,7 @@ void main(tint_symbol_2 tint_symbol_1) {
   if ((tint_tmp_2)) {
     bool tint_tmp_5 = success;
     if (tint_tmp_5) {
-      tint_tmp_5 = all((tint_symbol.Load(int3(dstTexCoord, 0), 0) == nonCoveredColor));
+      tint_tmp_5 = all((tint_symbol.Load(int3(dstTexCoord, 0)) == nonCoveredColor));
     }
     success = (tint_tmp_5);
   } else {
@@ -59,8 +59,8 @@ void main(tint_symbol_2 tint_symbol_1) {
     if ((uniforms[scalar_offset_8 / 4][scalar_offset_8 % 4] == 1u)) {
       srcTexCoord.y = ((uint(srcSize.y) - srcTexCoord.y) - 1u);
     }
-    const float4 srcColor = src.Load(int3(srcTexCoord, 0), 0);
-    const float4 dstColor = tint_symbol.Load(int3(dstTexCoord, 0), 0);
+    const float4 srcColor = src.Load(int3(srcTexCoord, 0));
+    const float4 dstColor = tint_symbol.Load(int3(dstTexCoord, 0));
     const int scalar_offset_9 = (4u) / 4;
     if ((uniforms[scalar_offset_9 / 4][scalar_offset_9 % 4] == 2u)) {
       bool tint_tmp_7 = success;

@@ -292,39 +292,39 @@ ExpectedResult expected_texture_overload(
     case ValidTextureOverload::kSampleCompareLevelDepthCubeArrayF32:
       return R"(tint_symbol.SampleCmpLevelZero(tint_symbol_1, float4(1.0f, 2.0f, 3.0f, float(4)), 5.0f);)";
     case ValidTextureOverload::kLoad1dLevelF32:
-      return R"(tint_symbol.Load(int2(1, 0), 3);)";
+      return R"(tint_symbol.Load(int2(1, 3));)";
     case ValidTextureOverload::kLoad1dLevelU32:
-      return R"(tint_symbol.Load(int2(1, 0), 3);)";
+      return R"(tint_symbol.Load(int2(1, 3));)";
     case ValidTextureOverload::kLoad1dLevelI32:
-      return R"(tint_symbol.Load(int2(1, 0), 3);)";
+      return R"(tint_symbol.Load(int2(1, 3));)";
     case ValidTextureOverload::kLoad2dLevelF32:
-      return R"(tint_symbol.Load(int3(1, 2, 0), 3);)";
+      return R"(tint_symbol.Load(int3(1, 2, 3));)";
     case ValidTextureOverload::kLoad2dLevelU32:
-      return R"(tint_symbol.Load(int3(1, 2, 0), 3);)";
+      return R"(tint_symbol.Load(int3(1, 2, 3));)";
     case ValidTextureOverload::kLoad2dLevelI32:
-      return R"(tint_symbol.Load(int3(1, 2, 0), 3);)";
+      return R"(tint_symbol.Load(int3(1, 2, 3));)";
     case ValidTextureOverload::kLoad2dArrayLevelF32:
-      return R"(tint_symbol.Load(int4(1, 2, 3, 0), 4);)";
+      return R"(tint_symbol.Load(int4(1, 2, 3, 4));)";
     case ValidTextureOverload::kLoad2dArrayLevelU32:
-      return R"(tint_symbol.Load(int4(1, 2, 3, 0), 4);)";
+      return R"(tint_symbol.Load(int4(1, 2, 3, 4));)";
     case ValidTextureOverload::kLoad2dArrayLevelI32:
-      return R"(tint_symbol.Load(int4(1, 2, 3, 0), 4);)";
+      return R"(tint_symbol.Load(int4(1, 2, 3, 4));)";
     case ValidTextureOverload::kLoad3dLevelF32:
-      return R"(tint_symbol.Load(int4(1, 2, 3, 0), 4);)";
+      return R"(tint_symbol.Load(int4(1, 2, 3, 4));)";
     case ValidTextureOverload::kLoad3dLevelU32:
-      return R"(tint_symbol.Load(int4(1, 2, 3, 0), 4);)";
+      return R"(tint_symbol.Load(int4(1, 2, 3, 4));)";
     case ValidTextureOverload::kLoad3dLevelI32:
-      return R"(tint_symbol.Load(int4(1, 2, 3, 0), 4);)";
+      return R"(tint_symbol.Load(int4(1, 2, 3, 4));)";
     case ValidTextureOverload::kLoadMultisampled2dF32:
-      return R"(tint_symbol.Load(int3(1, 2, 0), 3);)";
+      return R"(tint_symbol.Load(int2(1, 2), 3);)";
     case ValidTextureOverload::kLoadMultisampled2dU32:
-      return R"(tint_symbol.Load(int3(1, 2, 0), 3);)";
+      return R"(tint_symbol.Load(int2(1, 2), 3);)";
     case ValidTextureOverload::kLoadMultisampled2dI32:
-      return R"(tint_symbol.Load(int3(1, 2, 0), 3);)";
+      return R"(tint_symbol.Load(int2(1, 2), 3);)";
     case ValidTextureOverload::kLoadDepth2dLevelF32:
-      return R"(tint_symbol.Load(int3(1, 2, 0), 3).x;)";
+      return R"(tint_symbol.Load(int3(1, 2, 3)).x;)";
     case ValidTextureOverload::kLoadDepth2dArrayLevelF32:
-      return R"(tint_symbol.Load(int4(1, 2, 3, 0), 4).x;)";
+      return R"(tint_symbol.Load(int4(1, 2, 3, 4)).x;)";
     case ValidTextureOverload::kLoadStorageRO1dRgba32float:
       return R"(tint_symbol.Load(int2(1, 0));)";
     case ValidTextureOverload::kLoadStorageRO2dRgba8unorm:

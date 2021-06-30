@@ -1663,7 +1663,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
   if (!EmitExpression(out, texture))
     return false;
 
-  bool pack_mip_in_coords = false;
+  bool pack_level_in_coords = false;
   uint32_t hlsl_ret_width = 4u;
 
   switch (intrinsic->Type()) {
@@ -1689,7 +1689,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
       break;
     case sem::IntrinsicType::kTextureLoad:
       out << ".Load(";
-      pack_mip_in_coords = true;
+      if (!texture_type->Is<sem::MultisampledTexture>()) {
+        pack_level_in_coords = true;
+      }
       break;
     case sem::IntrinsicType::kTextureStore:
       out << "[";
@@ -1723,11 +1725,20 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     return EmitExpression(out, packed);
   };
 
+  auto emit_vector_appended_with_level = [&](tint::ast::Expression* vector) {
+    if (auto* level = arg(Usage::kLevel)) {
+      auto* packed = AppendVector(&builder_, vector, level);
+      return EmitExpression(out, packed);
+    }
+    return emit_vector_appended_with_i32_zero(vector);
+  };
+
   if (auto* array_index = arg(Usage::kArrayIndex)) {
     // Array index needs to be appended to the coordinates.
     auto* packed = AppendVector(&builder_, param_coords, array_index);
-    if (pack_mip_in_coords) {
-      if (!emit_vector_appended_with_i32_zero(packed)) {
+    if (pack_level_in_coords) {
+      // Then mip level needs to be appended to the coordinates.
+      if (!emit_vector_appended_with_level(packed)) {
         return false;
       }
     } else {
@@ -1735,9 +1746,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
         return false;
       }
     }
-  } else if (pack_mip_in_coords) {
-    // Mip level needs to be appended to the coordinates, but is always zero.
-    if (!emit_vector_appended_with_i32_zero(param_coords)) {
+  } else if (pack_level_in_coords) {
+    // Mip level needs to be appended to the coordinates.
+    if (!emit_vector_appended_with_level(param_coords)) {
       return false;
     }
   } else {
@@ -1748,6 +1759,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
 
   for (auto usage : {Usage::kDepthRef, Usage::kBias, Usage::kLevel, Usage::kDdx,
                      Usage::kDdy, Usage::kSampleIndex, Usage::kOffset}) {
+    if (usage == Usage::kLevel && pack_level_in_coords) {
+      continue;  // mip level already packed in coordinates.
+    }
     if (auto* e = arg(usage)) {
       out << ", ";
       if (!EmitExpression(out, e)) {

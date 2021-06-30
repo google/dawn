@@ -1,7 +1,7 @@
 Texture2DMS<uint4> arg_0 : register(t0, space1);
 
 void textureLoad_c378ee() {
-  uint4 res = arg_0.Load(int3(0, 0, 0), 1);
+  uint4 res = arg_0.Load(int2(0, 0), 1);
 }
 
 struct tint_symbol {
