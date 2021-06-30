@@ -65,14 +65,14 @@ void init() {
             scalar : f32;
             scalarOffset : f32;
         };
-        [[set(0), binding(0)]] var<uniform> c : Constants;
+        [[group(0), binding(0)]] var<uniform> c : Constants;
 
         struct VertexOut {
             [[location(0)]] v_color : vec4<f32>;
             [[builtin(position)]] Position : vec4<f32>;
         };
 
-        [[stage(vertex)]] fn main([[builtin(vertex_idx)]] VertexIndex : u32) -> VertexOut {
+        [[stage(vertex)]] fn main([[builtin(vertex_index)]] VertexIndex : u32) -> VertexOut {
             var positions : array<vec4<f32>, 3> = array<vec4<f32>, 3>(
                 vec4<f32>( 0.0,  0.1, 0.0, 1.0),
                 vec4<f32>(-0.1, -0.1, 0.0, 1.0),

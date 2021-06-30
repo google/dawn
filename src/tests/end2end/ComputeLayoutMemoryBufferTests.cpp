@@ -190,9 +190,9 @@ struct Data {
     code : u32;
 };
 
-[[set(0), binding(0)]] var<{input_qualifiers}> input : Input;
-[[set(0), binding(1)]] var<storage, read_write> output : Output;
-[[set(0), binding(2)]] var<storage, read_write> status : Status;
+[[group(0), binding(0)]] var<{input_qualifiers}> input : Input;
+[[group(0), binding(1)]] var<storage, read_write> output : Output;
+[[group(0), binding(2)]] var<storage, read_write> status : Status;
 
 [[stage(compute), workgroup_size(1,1,1)]]
 fn main() {

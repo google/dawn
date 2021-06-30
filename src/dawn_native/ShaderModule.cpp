@@ -53,65 +53,65 @@ namespace dawn_native {
         tint::transform::VertexFormat ToTintVertexFormat(wgpu::VertexFormat format) {
             switch (format) {
                 case wgpu::VertexFormat::Uint8x2:
-                    return tint::transform::VertexFormat::kVec2U8;
+                    return tint::transform::VertexFormat::kUint8x2;
                 case wgpu::VertexFormat::Uint8x4:
-                    return tint::transform::VertexFormat::kVec4U8;
+                    return tint::transform::VertexFormat::kUint8x4;
                 case wgpu::VertexFormat::Sint8x2:
-                    return tint::transform::VertexFormat::kVec2I8;
+                    return tint::transform::VertexFormat::kSint8x2;
                 case wgpu::VertexFormat::Sint8x4:
-                    return tint::transform::VertexFormat::kVec4I8;
+                    return tint::transform::VertexFormat::kSint8x4;
                 case wgpu::VertexFormat::Unorm8x2:
-                    return tint::transform::VertexFormat::kVec2U8Norm;
+                    return tint::transform::VertexFormat::kUnorm8x2;
                 case wgpu::VertexFormat::Unorm8x4:
-                    return tint::transform::VertexFormat::kVec4U8Norm;
+                    return tint::transform::VertexFormat::kUnorm8x4;
                 case wgpu::VertexFormat::Snorm8x2:
-                    return tint::transform::VertexFormat::kVec2I8Norm;
+                    return tint::transform::VertexFormat::kSnorm8x2;
                 case wgpu::VertexFormat::Snorm8x4:
-                    return tint::transform::VertexFormat::kVec4I8Norm;
+                    return tint::transform::VertexFormat::kSnorm8x4;
                 case wgpu::VertexFormat::Uint16x2:
-                    return tint::transform::VertexFormat::kVec2U16;
+                    return tint::transform::VertexFormat::kUint16x2;
                 case wgpu::VertexFormat::Uint16x4:
-                    return tint::transform::VertexFormat::kVec4U16;
+                    return tint::transform::VertexFormat::kUint16x4;
                 case wgpu::VertexFormat::Sint16x2:
-                    return tint::transform::VertexFormat::kVec2I16;
+                    return tint::transform::VertexFormat::kSint16x2;
                 case wgpu::VertexFormat::Sint16x4:
-                    return tint::transform::VertexFormat::kVec4I16;
+                    return tint::transform::VertexFormat::kSint16x4;
                 case wgpu::VertexFormat::Unorm16x2:
-                    return tint::transform::VertexFormat::kVec2U16Norm;
+                    return tint::transform::VertexFormat::kUnorm16x2;
                 case wgpu::VertexFormat::Unorm16x4:
-                    return tint::transform::VertexFormat::kVec4U16Norm;
+                    return tint::transform::VertexFormat::kUnorm16x4;
                 case wgpu::VertexFormat::Snorm16x2:
-                    return tint::transform::VertexFormat::kVec2I16Norm;
+                    return tint::transform::VertexFormat::kSnorm16x2;
                 case wgpu::VertexFormat::Snorm16x4:
-                    return tint::transform::VertexFormat::kVec4I16Norm;
+                    return tint::transform::VertexFormat::kSnorm16x4;
                 case wgpu::VertexFormat::Float16x2:
-                    return tint::transform::VertexFormat::kVec2F16;
+                    return tint::transform::VertexFormat::kFloat16x2;
                 case wgpu::VertexFormat::Float16x4:
-                    return tint::transform::VertexFormat::kVec4F16;
+                    return tint::transform::VertexFormat::kFloat16x4;
                 case wgpu::VertexFormat::Float32:
-                    return tint::transform::VertexFormat::kF32;
+                    return tint::transform::VertexFormat::kFloat32;
                 case wgpu::VertexFormat::Float32x2:
-                    return tint::transform::VertexFormat::kVec2F32;
+                    return tint::transform::VertexFormat::kFloat32x2;
                 case wgpu::VertexFormat::Float32x3:
-                    return tint::transform::VertexFormat::kVec3F32;
+                    return tint::transform::VertexFormat::kFloat32x3;
                 case wgpu::VertexFormat::Float32x4:
-                    return tint::transform::VertexFormat::kVec4F32;
+                    return tint::transform::VertexFormat::kFloat32x4;
                 case wgpu::VertexFormat::Uint32:
-                    return tint::transform::VertexFormat::kU32;
+                    return tint::transform::VertexFormat::kUint32;
                 case wgpu::VertexFormat::Uint32x2:
-                    return tint::transform::VertexFormat::kVec2U32;
+                    return tint::transform::VertexFormat::kUint32x2;
                 case wgpu::VertexFormat::Uint32x3:
-                    return tint::transform::VertexFormat::kVec3U32;
+                    return tint::transform::VertexFormat::kUint32x3;
                 case wgpu::VertexFormat::Uint32x4:
-                    return tint::transform::VertexFormat::kVec4U32;
+                    return tint::transform::VertexFormat::kUint32x4;
                 case wgpu::VertexFormat::Sint32:
-                    return tint::transform::VertexFormat::kI32;
+                    return tint::transform::VertexFormat::kSint32;
                 case wgpu::VertexFormat::Sint32x2:
-                    return tint::transform::VertexFormat::kVec2I32;
+                    return tint::transform::VertexFormat::kSint32x2;
                 case wgpu::VertexFormat::Sint32x3:
-                    return tint::transform::VertexFormat::kVec3I32;
+                    return tint::transform::VertexFormat::kSint32x3;
                 case wgpu::VertexFormat::Sint32x4:
-                    return tint::transform::VertexFormat::kVec4I32;
+                    return tint::transform::VertexFormat::kSint32x4;
 
                 case wgpu::VertexFormat::Undefined:
                     break;

@@ -297,8 +297,8 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYtoR) {
     renderPipelineDescriptor.vertex.module = GetTestVertexShaderModule();
 
     renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-            [[set(0), binding(0)]] var sampler0 : sampler;
-            [[set(0), binding(1)]] var texture : texture_2d<f32>;
+            [[group(0), binding(0)]] var sampler0 : sampler;
+            [[group(0), binding(1)]] var texture : texture_2d<f32>;
 
             [[stage(fragment)]]
             fn main([[location(0)]] texCoord : vec2<f32>) -> [[location(0)]] vec4<f32> {
@@ -348,8 +348,8 @@ TEST_P(D3D12VideoViewsTests, NV12SampleUVtoRG) {
     renderPipelineDescriptor.vertex.module = GetTestVertexShaderModule();
 
     renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-            [[set(0), binding(0)]] var sampler0 : sampler;
-            [[set(0), binding(1)]] var texture : texture_2d<f32>;
+            [[group(0), binding(0)]] var sampler0 : sampler;
+            [[group(0), binding(1)]] var texture : texture_2d<f32>;
 
             [[stage(fragment)]]
             fn main([[location(0)]] texCoord : vec2<f32>) -> [[location(0)]] vec4<f32> {
@@ -408,9 +408,9 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYUVtoRGB) {
     renderPipelineDescriptor.vertex.module = GetTestVertexShaderModule();
 
     renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-            [[set(0), binding(0)]] var sampler0 : sampler;
-            [[set(0), binding(1)]] var lumaTexture : texture_2d<f32>;
-            [[set(0), binding(2)]] var chromaTexture : texture_2d<f32>;
+            [[group(0), binding(0)]] var sampler0 : sampler;
+            [[group(0), binding(1)]] var lumaTexture : texture_2d<f32>;
+            [[group(0), binding(2)]] var chromaTexture : texture_2d<f32>;
 
             [[stage(fragment)]]
             fn main([[location(0)]] texCoord : vec2<f32>) -> [[location(0)]] vec4<f32> {
