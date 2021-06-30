@@ -122,6 +122,14 @@ bool IsValidationDisabled(const ast::DecorationList& decorations,
   return false;
 }
 
+/// @returns true if the decoration list does not contains a
+/// ast::DisableValidationDecoration with the validation mode equal to
+/// `validation`
+bool IsValidationEnabled(const ast::DecorationList& decorations,
+                         ast::DisabledValidation validation) {
+  return !IsValidationDisabled(decorations, validation);
+}
+
 // Helper to stringify a pipeline IO decoration.
 std::string deco_to_str(const ast::Decoration* deco) {
   std::stringstream str;
@@ -880,8 +888,8 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
     return false;
   }
 
-  if (!IsValidationDisabled(var->decorations(),
-                            ast::DisabledValidation::kIgnoreStorageClass) &&
+  if (IsValidationEnabled(var->decorations(),
+                          ast::DisabledValidation::kIgnoreStorageClass) &&
       (var->declared_storage_class() == ast::StorageClass::kInput ||
        var->declared_storage_class() == ast::StorageClass::kOutput)) {
     AddError("invalid use of input/output storage class", var->source());
@@ -910,10 +918,7 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
   }
 
   for (auto* deco : info->declaration->decorations()) {
-    if (!func->IsEntryPoint() &&
-        !IsValidationDisabled(
-            info->declaration->decorations(),
-            ast::DisabledValidation::kIgnoreAtomicFunctionParameter)) {
+    if (!func->IsEntryPoint() && !deco->Is<ast::InternalDecoration>()) {
       AddError("decoration is not valid for function parameters",
                deco->source());
       return false;
@@ -929,12 +934,12 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
       }
     } else if (!deco->IsAnyOf<ast::LocationDecoration,
                               ast::InternalDecoration>() &&
-               !(IsValidationDisabled(
-                     info->declaration->decorations(),
-                     ast::DisabledValidation::kEntryPointParameter) ||
-                 IsValidationDisabled(info->declaration->decorations(),
-                                      ast::DisabledValidation::
-                                          kIgnoreAtomicFunctionParameter))) {
+               (IsValidationEnabled(
+                    info->declaration->decorations(),
+                    ast::DisabledValidation::kEntryPointParameter) &&
+                IsValidationEnabled(
+                    info->declaration->decorations(),
+                    ast::DisabledValidation::kIgnoreAtomicFunctionParameter))) {
       AddError("decoration is not valid for function parameters",
                deco->source());
       return false;
@@ -956,7 +961,7 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
 
   if (IsPlain(info->type)) {
     if (!IsAtomicFreePlain(info->type) &&
-        !IsValidationDisabled(
+        IsValidationEnabled(
             info->declaration->decorations(),
             ast::DisabledValidation::kIgnoreAtomicFunctionParameter)) {
       AddError("store type of function parameter must be an atomic-free type",
@@ -1094,7 +1099,7 @@ bool Resolver::ValidateFunction(const ast::Function* func,
                  func->source());
         return false;
       }
-    } else if (!IsValidationDisabled(
+    } else if (IsValidationEnabled(
                    func->decorations(),
                    ast::DisabledValidation::kFunctionHasNoBody)) {
       TINT_ICE(Resolver, diagnostics_)
@@ -1211,7 +1216,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
                 pipeline_io_attribute->source());
             return false;
           }
-        } else if (!IsValidationDisabled(
+        } else if (IsValidationEnabled(
                        decos, ast::DisabledValidation::kEntryPointParameter)) {
           if (!pipeline_io_attribute) {
             std::string err = "missing entry point IO attribute";
@@ -1352,12 +1357,10 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
     auto bp = var_info->binding_point;
     auto res = binding_points.emplace(bp, var_info->declaration);
     if (!res.second &&
-        !IsValidationDisabled(
-            var_info->declaration->decorations(),
-            ast::DisabledValidation::kBindingPointCollision) &&
-        !IsValidationDisabled(
-            res.first->second->decorations(),
-            ast::DisabledValidation::kBindingPointCollision)) {
+        IsValidationEnabled(var_info->declaration->decorations(),
+                            ast::DisabledValidation::kBindingPointCollision) &&
+        IsValidationEnabled(res.first->second->decorations(),
+                            ast::DisabledValidation::kBindingPointCollision)) {
       // https://gpuweb.github.io/gpuweb/wgsl/#resource-interface
       // Bindings must not alias within a shader stage: two different
       // variables in the resource interface of a given shader must not have
@@ -2848,8 +2851,8 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
 
   if (!var->is_const()) {
     if (info->storage_class != ast::StorageClass::kFunction &&
-        !IsValidationDisabled(var->decorations(),
-                              ast::DisabledValidation::kIgnoreStorageClass)) {
+        IsValidationEnabled(var->decorations(),
+                            ast::DisabledValidation::kIgnoreStorageClass)) {
       if (info->storage_class != ast::StorageClass::kNone) {
         AddError("function variable has a non-function storage class",
                  stmt->source());
