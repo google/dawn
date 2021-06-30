@@ -1098,6 +1098,8 @@ const Type* ParserImpl::ConvertType(
         // apply the ReadOnly access control to the containing struct if all
         // the members are non-writable.
         is_non_writable = true;
+      } else if (decoration[0] == SpvDecorationLocation) {
+        // Location decorations are handled when emitting the entry point.
       } else {
         auto* ast_member_decoration =
             ConvertMemberDecoration(type_id, member_index, decoration);
@@ -1134,7 +1136,7 @@ const Type* ParserImpl::ConvertType(
   // Now make the struct.
   auto sym = builder_.Symbols().Register(name);
   ast::DecorationList ast_struct_decorations;
-  if (is_block_decorated) {
+  if (is_block_decorated && struct_types_for_buffers_.count(type_id)) {
     ast_struct_decorations.emplace_back(
         create<ast::StructBlockDecoration>(Source{}));
   }
@@ -1208,6 +1210,37 @@ bool ParserImpl::RegisterTypes() {
   if (!success_) {
     return false;
   }
+
+  // First record the structure types that should have a `block` decoration
+  // in WGSL. In particular, exclude user-defined pipeline IO in a
+  // block-decorated struct.
+  for (const auto& type_or_value : module_->types_values()) {
+    if (type_or_value.opcode() != SpvOpVariable) {
+      continue;
+    }
+    const auto& var = type_or_value;
+    const auto spirv_storage_class =
+        SpvStorageClass(var.GetSingleWordInOperand(0));
+    if ((spirv_storage_class != SpvStorageClassStorageBuffer) &&
+        (spirv_storage_class != SpvStorageClassUniform)) {
+      continue;
+    }
+    const auto* ptr_type = def_use_mgr_->GetDef(var.type_id());
+    if (ptr_type->opcode() != SpvOpTypePointer) {
+      return Fail() << "OpVariable type expected to be a pointer: "
+                    << var.PrettyPrint();
+    }
+    const auto* store_type =
+        def_use_mgr_->GetDef(ptr_type->GetSingleWordInOperand(1));
+    if (store_type->opcode() == SpvOpTypeStruct) {
+      struct_types_for_buffers_.insert(store_type->result_id());
+    } else {
+      Fail() << "WGSL does not support arrays of buffers: "
+             << var.PrettyPrint();
+    }
+  }
+
+  // Now convert each type.
   for (auto& type_or_const : module_->types_values()) {
     const auto* type = type_mgr_->GetType(type_or_const.result_id());
     if (type == nullptr) {
@@ -2628,6 +2661,22 @@ std::string ParserImpl::GetMemberName(const Struct& struct_type,
     return "";
   }
   return namer_.GetMemberName(where->second, member_index);
+}
+
+ast::Decoration* ParserImpl::GetMemberLocation(const Struct& struct_type,
+                                               int member_index) {
+  auto where = struct_id_for_symbol_.find(struct_type.name);
+  if (where == struct_id_for_symbol_.end()) {
+    Fail() << "no structure type registered for symbol";
+    return nullptr;
+  }
+  const auto type_id = where->second;
+  for (auto& deco : GetDecorationsForMember(type_id, member_index)) {
+    if ((deco.size() == 2) && (deco[0] == SpvDecorationLocation)) {
+      return create<ast::LocationDecoration>(Source{}, deco[1]);
+    }
+  }
+  return nullptr;
 }
 
 WorkgroupSizeInfo::WorkgroupSizeInfo() = default;

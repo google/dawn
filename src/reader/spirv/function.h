@@ -466,6 +466,23 @@ class FunctionEmitter {
                           ast::StructMemberList* return_members,
                           ast::ExpressionList* return_exprs);
 
+  /// Updates the decoration list, replacing an existing Location decoration
+  /// with another having one higher location value. Does nothing if no
+  /// location decoration exists.
+  /// Assumes the list contains at most one Location decoration.
+  /// @param decos the decoration list to modify
+  void IncrementLocation(ast::DecorationList* decos);
+
+  /// Updates the decoration list, placing a non-null location decoration into
+  /// the list, replacing an existing one if it exists. Does nothing if the
+  /// replacement is nullptr.
+  /// Assumes the list contains at most one Location decoration.
+  /// @param decos the decoration list to modify
+  /// @param replacement the location decoration to place into the list
+  /// @returns the location decoration that was replaced, if one was replaced.
+  ast::Decoration* SetLocation(ast::DecorationList* decos,
+                               ast::Decoration* replacement);
+
   /// Create an ast::BlockStatement representing the body of the function.
   /// This creates the statement stack, which is non-empty for the lifetime
   /// of the function.

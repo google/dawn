@@ -6528,7 +6528,7 @@ TEST_F(SpvModuleScopeVarParserTest, Input_FlattenMatrix) {
   EXPECT_EQ(got, expected) << got;
 }
 
-TEST_F(SpvModuleScopeVarParserTest, Input_FlattenStruct) {
+TEST_F(SpvModuleScopeVarParserTest, Input_FlattenStruct_LocOnVariable) {
   const std::string assembly = R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
@@ -6993,7 +6993,7 @@ TEST_F(SpvModuleScopeVarParserTest, Output_FlattenMatrix) {
   EXPECT_EQ(got, expected) << got;
 }
 
-TEST_F(SpvModuleScopeVarParserTest, Output_FlattenStruct) {
+TEST_F(SpvModuleScopeVarParserTest, Output_FlattenStruct_LocOnVariable) {
   const std::string assembly = R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
@@ -7090,6 +7090,192 @@ TEST_F(SpvModuleScopeVarParserTest, Output_FlattenStruct) {
 }
 )";
   EXPECT_EQ(got, expected) << got;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, FlattenStruct_LocOnMembers) {
+  // Block-decorated struct may have its members decorated with Location.
+  const std::string assembly = R"(
+    OpCapability Shader
+    OpMemoryModel Logical Simple
+    OpEntryPoint Vertex %main "main" %1 %2 %3
+
+    OpName %strct "Communicators"
+    OpMemberName %strct 0 "alice"
+    OpMemberName %strct 1 "bob"
+
+    OpMemberDecorate %strct 0 Location 9
+    OpMemberDecorate %strct 1 Location 11
+    OpDecorate %strct Block
+    OpDecorate %2 BuiltIn Position
+
+    %void = OpTypeVoid
+    %voidfn = OpTypeFunction %void
+    %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+    %strct = OpTypeStruct %float %v4float
+
+    %11 = OpTypePointer Input %strct
+    %13 = OpTypePointer Output %strct
+
+    %1 = OpVariable %11 Input
+    %3 = OpVariable %13 Output
+
+    %12 = OpTypePointer Output %v4float
+    %2 = OpVariable %12 Output
+
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    OpReturn
+    OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+
+  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+
+  const auto got = p->program().to_str();
+  const std::string expected = R"(Module{
+  Struct Communicators {
+    StructMember{alice: __f32}
+    StructMember{bob: __vec_4__f32}
+  }
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] x_2_1: __vec_4__f32}
+    StructMember{[[ LocationDecoration{9}
+ ]] x_3_1: __f32}
+    StructMember{[[ LocationDecoration{11}
+ ]] x_3_2: __vec_4__f32}
+  }
+  Variable{
+    x_1
+    private
+    undefined
+    __type_name_Communicators
+  }
+  Variable{
+    x_3
+    private
+    undefined
+    __type_name_Communicators
+  }
+  Variable{
+    x_2
+    private
+    undefined
+    __vec_4__f32
+  }
+  Function main_1 -> __void
+  ()
+  {
+    Return{}
+  }
+  Function main -> __type_name_main_out
+  StageDecoration{vertex}
+  (
+    VariableConst{
+      Decorations{
+        LocationDecoration{9}
+      }
+      x_1_param
+      none
+      undefined
+      __f32
+    }
+    VariableConst{
+      Decorations{
+        LocationDecoration{11}
+      }
+      x_1_param_1
+      none
+      undefined
+      __vec_4__f32
+    }
+  )
+  {
+    Assignment{
+      MemberAccessor[not set]{
+        Identifier[not set]{x_1}
+        Identifier[not set]{alice}
+      }
+      Identifier[not set]{x_1_param}
+    }
+    Assignment{
+      MemberAccessor[not set]{
+        Identifier[not set]{x_1}
+        Identifier[not set]{bob}
+      }
+      Identifier[not set]{x_1_param_1}
+    }
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{x_2}
+          MemberAccessor[not set]{
+            Identifier[not set]{x_3}
+            Identifier[not set]{alice}
+          }
+          MemberAccessor[not set]{
+            Identifier[not set]{x_3}
+            Identifier[not set]{bob}
+          }
+        }
+      }
+    }
+  }
+}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, FlattenStruct_LocOnStruct) {
+  const std::string assembly = R"(
+    OpCapability Shader
+    OpMemoryModel Logical Simple
+    OpEntryPoint Vertex %main "main" %1 %2 %3
+
+    OpName %strct "Communicators"
+    OpMemberName %strct 0 "alice"
+    OpMemberName %strct 1 "bob"
+
+    OpDecorate %strct Location 9
+    OpDecorate %strct Block
+    OpDecorate %2 BuiltIn Position
+
+    %void = OpTypeVoid
+    %voidfn = OpTypeFunction %void
+    %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+    %strct = OpTypeStruct %float %v4float
+
+    %11 = OpTypePointer Input %strct
+    %13 = OpTypePointer Output %strct
+
+    %1 = OpVariable %11 Input
+    %3 = OpVariable %13 Output
+
+    %12 = OpTypePointer Output %v4float
+    %2 = OpVariable %12 Output
+
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    OpReturn
+    OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+
+  // The validator rejects this because Location decorations
+  // can only go on OpVariable or members of a structure type.
+  ASSERT_FALSE(p->Parse()) << p->error() << assembly;
+  EXPECT_THAT(p->error(),
+              HasSubstr("Location decoration can only be applied to a variable "
+                        "or member of a structure type"));
 }
 
 }  // namespace

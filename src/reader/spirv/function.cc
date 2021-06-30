@@ -980,11 +980,14 @@ bool FunctionEmitter::EmitPipelineInput(std::string var_name,
     index_prefix.push_back(0);
     for (int i = 0; i < static_cast<int>(members.size()); ++i) {
       index_prefix.back() = i;
+      auto* location = parser_impl_.GetMemberLocation(*struct_type, i);
+      auto* saved_location = SetLocation(decos, location);
       if (!EmitPipelineInput(var_name, var_type, decos, index_prefix,
                              members[i], forced_param_type, params,
                              statements)) {
         return false;
       }
+      SetLocation(decos, saved_location);
     }
     return success();
   }
@@ -1036,6 +1039,12 @@ bool FunctionEmitter::EmitPipelineInput(std::string var_name,
   statements->push_back(builder_.Assign(store_dest, param_value));
 
   // Increment the location attribute, in case more parameters will follow.
+  IncrementLocation(decos);
+
+  return success();
+}
+
+void FunctionEmitter::IncrementLocation(ast::DecorationList* decos) {
   for (auto*& deco : *decos) {
     if (auto* loc_deco = deco->As<ast::LocationDecoration>()) {
       // Replace this location decoration with a new one with one higher index.
@@ -1044,8 +1053,27 @@ bool FunctionEmitter::EmitPipelineInput(std::string var_name,
       deco = builder_.Location(loc_deco->source(), loc_deco->value() + 1);
     }
   }
+}
 
-  return success();
+ast::Decoration* FunctionEmitter::SetLocation(
+    ast::DecorationList* decos,
+    ast::Decoration* replacement) {
+  if (!replacement) {
+    return nullptr;
+  }
+  for (auto*& deco : *decos) {
+    if (deco->Is<ast::LocationDecoration>()) {
+      // Replace this location decoration with a new one with one higher index.
+      // The old one doesn't leak because it's kept in the builder's AST node
+      // list.
+      ast::Decoration* result = deco;
+      deco = replacement;
+      return result;
+    }
+  }
+  // The list didn't have a location. Add it.
+  decos->push_back(replacement);
+  return nullptr;
 }
 
 bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
@@ -1095,11 +1123,14 @@ bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
     index_prefix.push_back(0);
     for (int i = 0; i < static_cast<int>(members.size()); ++i) {
       index_prefix.back() = i;
+      auto* location = parser_impl_.GetMemberLocation(*struct_type, i);
+      auto* saved_location = SetLocation(decos, location);
       if (!EmitPipelineOutput(var_name, var_type, decos, index_prefix,
                               members[i], forced_member_type, return_members,
                               return_exprs)) {
         return false;
       }
+      SetLocation(decos, saved_location);
     }
     return success();
   }
@@ -1150,14 +1181,7 @@ bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
   return_exprs->push_back(load_source);
 
   // Increment the location attribute, in case more parameters will follow.
-  for (auto*& deco : *decos) {
-    if (auto* loc_deco = deco->As<ast::LocationDecoration>()) {
-      // Replace this location decoration with a new one with one higher index.
-      // The old one doesn't leak because it's kept in the builder's AST node
-      // list.
-      deco = builder_.Location(loc_deco->source(), loc_deco->value() + 1);
-    }
-  }
+  IncrementLocation(decos);
 
   return success();
 }

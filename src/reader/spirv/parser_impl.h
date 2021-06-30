@@ -379,6 +379,13 @@ class ParserImpl : Reader {
   /// @returns the field name
   std::string GetMemberName(const Struct& struct_type, int member_index);
 
+  /// Returns the location decoration, if any on a struct member.
+  /// @param struct_type the parser's structure type.
+  /// @param member_index the member index
+  /// @returns a newly created location node, or nullptr
+  ast::Decoration* GetMemberLocation(const Struct& struct_type,
+                                     int member_index);
+
   /// Creates an AST Variable node for a SPIR-V ID, including any attached
   /// decorations, unless it's an ignorable builtin variable.
   /// @param id the SPIR-V result ID
@@ -764,6 +771,10 @@ class ParserImpl : Reader {
   // The set of IDs of imports that are ignored. For example, any
   // "NonSemanticInfo." import is ignored.
   std::unordered_set<uint32_t> ignored_imports_;
+
+  // The SPIR-V IDs of structure types that are the store type for buffer
+  // variables, either UBO or SSBO.
+  std::unordered_set<uint32_t> struct_types_for_buffers_;
 
   // Bookkeeping for the gl_Position builtin.
   // In Vulkan SPIR-V, it's the 0 member of the gl_PerVertex structure.

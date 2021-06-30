@@ -2784,7 +2784,6 @@ TEST_F(SpvParserFunctionVarTest, DISABLED_EmitStatement_Hoist_UsedAsPtrArg) {
     OpReturn
     OpFunctionEnd
 )";
-  std::cout << assembly << std::endl;
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   auto fe = p->function_emitter(100);
