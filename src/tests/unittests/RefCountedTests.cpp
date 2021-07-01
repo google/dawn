@@ -126,7 +126,7 @@ TEST(Ref, DefaultsToNull) {
     Ref<RCTest> test;
 
     EXPECT_EQ(test.Get(), nullptr);
-    EXPECT_EQ(test->GetThis(), nullptr);
+    // Can't check GetThis() returns nullptr, as it would be undefined behavior.
 }
 
 // Test Ref's copy constructor
