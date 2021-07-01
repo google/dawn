@@ -1,4 +1,5 @@
 struct S_inner {
+  float a;
 };
 struct tint_array_wrapper {
   float arr[4];
@@ -18,6 +19,6 @@ struct S {
 
 [numthreads(1, 1, 1)]
 void main() {
-  const S s = {false, 0, 0u, 0.0f, int2(0, 0), uint3(0u, 0u, 0u), float4(0.0f, 0.0f, 0.0f, 0.0f), float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), {{0.0f, 0.0f, 0.0f, 0.0f}}, {}};
+  const S s = {false, 0, 0u, 0.0f, int2(0, 0), uint3(0u, 0u, 0u), float4(0.0f, 0.0f, 0.0f, 0.0f), float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), {{0.0f, 0.0f, 0.0f, 0.0f}}, {0.0f}};
   return;
 }

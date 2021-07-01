@@ -1,4 +1,5 @@
 struct S {
+  float a;
 };
 
 bool ret_bool() {
@@ -43,7 +44,7 @@ tint_array_wrapper ret_arr() {
 }
 
 S ret_struct() {
-  const S tint_symbol_1 = {};
+  const S tint_symbol_1 = {0.0f};
   return tint_symbol_1;
 }
 

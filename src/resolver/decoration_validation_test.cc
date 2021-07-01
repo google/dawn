@@ -359,7 +359,7 @@ using StructDecorationTest = TestWithParams;
 TEST_P(StructDecorationTest, IsValid) {
   auto& params = GetParam();
 
-  Structure("mystruct", {},
+  Structure("mystruct", {Member("a", ty.f32())},
             createDecorations(Source{{12, 34}}, *this, params.kind));
 
   WrapInFunction();

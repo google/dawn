@@ -8,6 +8,7 @@
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
                OpName %S "S"
+               OpMemberName %S 0 "a"
                OpName %foo "foo"
                OpName %param_bool "param_bool"
                OpName %param_i32 "param_i32"
@@ -24,6 +25,7 @@
                OpName %param_ptr_arr "param_ptr_arr"
                OpName %main "main"
                OpDecorate %_arr_float_uint_4 ArrayStride 4
+               OpMemberDecorate %S 0 Offset 0
        %void = OpTypeVoid
        %bool = OpTypeBool
         %int = OpTypeInt 32 1
@@ -36,7 +38,7 @@
 %mat2v3float = OpTypeMatrix %v3float 2
      %uint_4 = OpConstant %uint 4
 %_arr_float_uint_4 = OpTypeArray %float %uint_4
-          %S = OpTypeStruct
+          %S = OpTypeStruct %float
 %_ptr_Function_float = OpTypePointer Function %float
 %_ptr_Function_v4float = OpTypePointer Function %v4float
 %_ptr_Function__arr_float_uint_4 = OpTypePointer Function %_arr_float_uint_4

@@ -266,22 +266,6 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedPtr) {
   EXPECT_EQ(b.GenerateTypeIfNeeded(ptr), 1u);
 }
 
-TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
-  auto* s = Structure("S", {});
-
-  spirv::Builder& b = Build();
-
-  auto id = b.GenerateTypeIfNeeded(program->TypeOf(s));
-  ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(id, 1u);
-
-  EXPECT_EQ(b.types().size(), 1u);
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "S"
-)");
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeStruct
-)");
-}
-
 TEST_F(BuilderTest_Type, GenerateStruct) {
   auto* s = Structure("my_struct", {Member("a", ty.f32())});
 

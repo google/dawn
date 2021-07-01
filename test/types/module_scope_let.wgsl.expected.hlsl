@@ -1,4 +1,5 @@
 struct S {
+  float a;
 };
 
 static const bool bool_let = false;
@@ -15,7 +16,7 @@ struct tint_array_wrapper {
 };
 
 static const tint_array_wrapper arr_let = {{0.0f, 0.0f, 0.0f, 0.0f}};
-static const S struct_let = {};
+static const S struct_let = {0.0f};
 
 [numthreads(1, 1, 1)]
 void main() {

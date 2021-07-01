@@ -1,4 +1,5 @@
 struct S {
+  float a;
 };
 
 static bool bool_var = false;
@@ -15,7 +16,7 @@ struct tint_array_wrapper {
 };
 
 static tint_array_wrapper arr_var = {{0.0f, 0.0f, 0.0f, 0.0f}};
-static S struct_var = {};
+static S struct_var = {0.0f};
 
 [numthreads(1, 1, 1)]
 void main() {
@@ -29,7 +30,7 @@ void main() {
   m2x3_var = float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   const tint_array_wrapper tint_symbol = {{0.0f, 0.0f, 0.0f, 0.0f}};
   arr_var = tint_symbol;
-  const S tint_symbol_1 = {};
+  const S tint_symbol_1 = {0.0f};
   struct_var = tint_symbol_1;
   return;
 }

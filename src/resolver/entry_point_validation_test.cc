@@ -102,12 +102,13 @@ TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Multiple) {
 
 TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Struct) {
   // struct Output {
+  //   a : f32;
   // };
   // [[stage(vertex)]]
   // fn main() -> [[location(0)]] Output {
   //   return Output();
   // }
-  auto* output = Structure("Output", {});
+  auto* output = Structure("Output", {Member("a", ty.f32())});
   Func(Source{{12, 34}}, "main", {}, ty.Of(output),
        {Return(Construct(ty.Of(output)))}, {Stage(ast::PipelineStage::kVertex)},
        {Location(Source{{13, 43}}, 0)});
@@ -328,10 +329,11 @@ TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Multiple) {
 
 TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Struct) {
   // struct Input {
+  //   a : f32;
   // };
   // [[stage(fragment)]]
   // fn main([[location(0)]] param : Input) {}
-  auto* input = Structure("Input", {});
+  auto* input = Structure("Input", {Member("a", ty.f32())});
   auto* param = Param("param", ty.Of(input), {Location(Source{{13, 43}}, 0)});
   Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});

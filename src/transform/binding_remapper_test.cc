@@ -28,6 +28,7 @@ TEST_F(BindingRemapperTest, NoRemappings) {
   auto* src = R"(
 [[block]]
 struct S {
+  a : f32;
 };
 
 [[group(2), binding(1)]] var<storage, read> a : S;
@@ -53,6 +54,7 @@ TEST_F(BindingRemapperTest, RemapBindingPoints) {
   auto* src = R"(
 [[block]]
 struct S {
+  a : f32;
 };
 
 [[group(2), binding(1)]] var<storage, read> a : S;
@@ -67,6 +69,7 @@ fn f() {
   auto* expect = R"(
 [[block]]
 struct S {
+  a : f32;
 };
 
 [[group(1), binding(2)]] var<storage, read> a : S;
@@ -95,6 +98,7 @@ TEST_F(BindingRemapperTest, RemapAccessControls) {
   auto* src = R"(
 [[block]]
 struct S {
+  a : f32;
 };
 
 [[group(2), binding(1)]] var<storage, read> a : S;
@@ -111,6 +115,7 @@ fn f() {
   auto* expect = R"(
 [[block]]
 struct S {
+  a : f32;
 };
 
 [[group(2), binding(1)]] var<storage, write> a : S;
@@ -143,6 +148,7 @@ TEST_F(BindingRemapperTest, DISABLED_RemapAccessControlsWithAliases) {
   auto* src = R"(
 [[block]]
 struct S {
+  a : f32;
 };
 
 type, read ReadOnlyS = S;
@@ -165,6 +171,7 @@ fn f() {
   auto* expect = R"(
 [[block]]
 struct S {
+  a : f32;
 };
 
 type, read ReadOnlyS = S;
@@ -201,6 +208,7 @@ TEST_F(BindingRemapperTest, RemapAll) {
   auto* src = R"(
 [[block]]
 struct S {
+  a : f32;
 };
 
 [[group(2), binding(1)]] var<storage, read> a : S;
@@ -215,6 +223,7 @@ fn f() {
   auto* expect = R"(
 [[block]]
 struct S {
+  a : f32;
 };
 
 [[group(4), binding(5)]] var<storage, write> a : S;
@@ -363,6 +372,7 @@ TEST_F(BindingRemapperTest, NoData) {
   auto* src = R"(
 [[block]]
 struct S {
+  a : f32;
 };
 
 [[group(2), binding(1)]] var<storage, read> a : S;

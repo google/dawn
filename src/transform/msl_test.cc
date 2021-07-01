@@ -191,6 +191,7 @@ TEST_F(MslTest, HandleModuleScopeVariables_OtherVariables) {
   auto* src = R"(
 [[block]]
 struct S {
+  a : f32;
 };
 
 [[group(0), binding(0)]]
@@ -204,6 +205,7 @@ fn main() {
   auto* expect = R"(
 [[block]]
 struct S {
+  a : f32;
 };
 
 [[group(0), binding(0)]] var<uniform> u : S;

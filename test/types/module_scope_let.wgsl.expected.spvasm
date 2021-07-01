@@ -17,9 +17,11 @@
                OpName %m3x4_let "m3x4_let"
                OpName %arr_let "arr_let"
                OpName %S "S"
+               OpMemberName %S 0 "a"
                OpName %struct_let "struct_let"
                OpName %main "main"
                OpDecorate %_arr_float_uint_4 ArrayStride 4
+               OpMemberDecorate %S 0 Offset 0
        %bool = OpTypeBool
    %bool_let = OpConstantNull %bool
         %int = OpTypeInt 32 1
@@ -39,7 +41,7 @@
      %uint_4 = OpConstant %uint 4
 %_arr_float_uint_4 = OpTypeArray %float %uint_4
     %arr_let = OpConstantNull %_arr_float_uint_4
-          %S = OpTypeStruct
+          %S = OpTypeStruct %float
  %struct_let = OpConstantNull %S
        %void = OpTypeVoid
          %22 = OpTypeFunction %void

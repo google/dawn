@@ -169,7 +169,11 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Struct) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Struct_Empty) {
-  auto* str = Structure("S", {});
+  auto* str = Structure("S", {
+                                 Member("a", ty.i32()),
+                                 Member("b", ty.f32()),
+                                 Member("c", ty.vec3<i32>()),
+                             });
 
   WrapInFunction(Construct(ty.Of(str)));
 

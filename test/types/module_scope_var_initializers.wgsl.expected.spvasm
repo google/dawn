@@ -17,9 +17,11 @@
                OpName %m2x3_var "m2x3_var"
                OpName %arr_var "arr_var"
                OpName %S "S"
+               OpMemberName %S 0 "a"
                OpName %struct_var "struct_var"
                OpName %main "main"
                OpDecorate %_arr_float_uint_4 ArrayStride 4
+               OpMemberDecorate %S 0 Offset 0
        %bool = OpTypeBool
           %2 = OpConstantNull %bool
 %_ptr_Private_bool = OpTypePointer Private %bool
@@ -58,7 +60,7 @@
          %36 = OpConstantNull %_arr_float_uint_4
 %_ptr_Private__arr_float_uint_4 = OpTypePointer Private %_arr_float_uint_4
     %arr_var = OpVariable %_ptr_Private__arr_float_uint_4 Private %36
-          %S = OpTypeStruct
+          %S = OpTypeStruct %float
          %40 = OpConstantNull %S
 %_ptr_Private_S = OpTypePointer Private %S
  %struct_var = OpVariable %_ptr_Private_S Private %40

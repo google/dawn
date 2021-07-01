@@ -1,4 +1,5 @@
 struct S {
+  float a;
 };
 struct tint_array_wrapper {
   float arr[4];
@@ -24,7 +25,7 @@ void main() {
   const float3x4 m3x4_let = float3x4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   tint_array_wrapper arr_var = {{0.0f, 0.0f, 0.0f, 0.0f}};
   const tint_array_wrapper arr_let = {{0.0f, 0.0f, 0.0f, 0.0f}};
-  S struct_var = {};
-  const S struct_let = {};
+  S struct_var = {0.0f};
+  const S struct_let = {0.0f};
   return;
 }

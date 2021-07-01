@@ -1,4 +1,5 @@
 struct S_inner {
+  a : f32;
 };
 
 struct S {

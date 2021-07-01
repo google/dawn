@@ -3360,6 +3360,12 @@ bool Resolver::ValidateArrayStrideDecoration(const ast::StrideDecoration* deco,
 }
 
 bool Resolver::ValidateStructure(const sem::Struct* str) {
+  if (str->Members().empty()) {
+    AddError("structures must have at least one member",
+             str->Declaration()->source());
+    return false;
+  }
+
   for (auto* member : str->Members()) {
     if (auto* r = member->Type()->As<sem::Array>()) {
       if (r->IsRuntimeSized()) {
