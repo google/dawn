@@ -38,17 +38,11 @@ void main() {
   bool4 v4b = bool4(false, false, false, false);
   {
     int i = 0;
-    while (true) {
-      if (!((i < 2))) {
-        break;
-      }
+    for(; !(!((i < 2))); i = (i + 1)) {
       Set_float2(v2f, i, 1.0f);
       Set_int2(v2i, i, 1);
       Set_uint2(v2u, i, 1u);
       Set_bool2(v2b, i, true);
-      {
-        i = (i + 1);
-      }
     }
   }
   int i = 0;

@@ -15,14 +15,8 @@ void foo() {
 void main() {
   {
     int i = 0;
-    while (true) {
-      if (!((i < 2))) {
-        break;
-      }
+    for(; !(!((i < 2))); i = (i + 1)) {
       foo();
-      {
-        i = (i + 1);
-      }
     }
   }
   return;

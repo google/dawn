@@ -20,16 +20,10 @@ void main(tint_symbol_1 tint_symbol) {
   uint result = 0u;
   {
     uint i = 0u;
-    while (true) {
-      if (!((i < dimInner))) {
-        break;
-      }
+    for(; !(!((i < dimInner))); i = (i + 1u)) {
       const uint a = (i + (resultCell.x * dimInner));
       const uint b = (resultCell.y + (i * dimOutter));
       result = (result + (firstMatrix.Load((4u * a)) * secondMatrix.Load((4u * b))));
-      {
-        i = (i + 1u);
-      }
     }
   }
   const uint index = (resultCell.y + (resultCell.x * dimOutter));

@@ -37,10 +37,7 @@ void main() {
   bool2 v2b_2 = bool2(false, false);
   {
     int i = 0;
-    while (true) {
-      if (!((i < 2))) {
-        break;
-      }
+    for(; !(!((i < 2))); i = (i + 1)) {
       Set_float2(v2f, i, 1.0f);
       Set_int3(v3i, i, 1);
       Set_uint4(v4u, i, 1u);
@@ -49,9 +46,6 @@ void main() {
       Set_int3(v3i_2, i, 1);
       Set_uint4(v4u_2, i, 1u);
       Set_bool2(v2b_2, i, true);
-      {
-        i = (i + 1);
-      }
     }
   }
   return;

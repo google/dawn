@@ -98,10 +98,7 @@ void main() {
   bool4 v4b = bool4(false, false, false, false);
   {
     int i = 0;
-    while (true) {
-      if (!((i < 2))) {
-        break;
-      }
+    for(; !(!((i < 2))); i = (i + 1)) {
       Set_float2(v2f, i, 1.0f);
       Set_float3(v3f, i, 1.0f);
       Set_float4(v4f, i, 1.0f);
@@ -114,9 +111,6 @@ void main() {
       Set_bool2(v2b, i, true);
       Set_bool3(v3b, i, true);
       Set_bool4(v4b, i, true);
-      {
-        i = (i + 1);
-      }
     }
   }
   return;

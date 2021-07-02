@@ -25,6 +25,7 @@
 #include "src/ast/break_statement.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/discard_statement.h"
+#include "src/ast/for_loop_statement.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/return_statement.h"
@@ -271,6 +272,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
   bool EmitLoop(ast::LoopStatement* stmt);
+  /// Handles a for loop statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted
+  bool EmitForLoop(ast::ForLoopStatement* stmt);
   /// Handles generating an identifier expression
   /// @param out the output of the expression stream
   /// @param expr the identifier expression

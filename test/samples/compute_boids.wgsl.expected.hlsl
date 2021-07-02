@@ -54,14 +54,8 @@ void comp_main(tint_symbol_5 tint_symbol_4) {
   float2 vel = float2(0.0f, 0.0f);
   {
     uint i = 0u;
-    while (true) {
-      if (!((i < 5u))) {
-        break;
-      }
+    for(; !(!((i < 5u))); i = (i + 1u)) {
       if ((i == index)) {
-        {
-          i = (i + 1u);
-        }
         continue;
       }
       pos = asfloat(particlesA.Load2((16u * i))).xy;
@@ -79,9 +73,6 @@ void comp_main(tint_symbol_5 tint_symbol_4) {
       if ((distance(pos, vPos) < asfloat(params[scalar_offset_2 / 4][scalar_offset_2 % 4]))) {
         cVel = (cVel + vel);
         cVelCount = (cVelCount + 1);
-      }
-      {
-        i = (i + 1u);
       }
     }
   }

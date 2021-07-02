@@ -2549,6 +2549,111 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
   return true;
 }
 
+bool GeneratorImpl::EmitForLoop(ast::ForLoopStatement* stmt) {
+  TextBuffer init_buf;
+  if (auto* init = stmt->initializer()) {
+    TINT_SCOPED_ASSIGNMENT(current_buffer_, &init_buf);
+    if (!EmitStatement(init)) {
+      return false;
+    }
+  }
+  bool multi_stmt_init = init_buf.lines.size() > 1;
+  // For-loop has multi-statement initializer.
+  // This cannot be emitted with a regular for loop, so instead nest the loop in
+  // a new block scope prefixed with these initializer statements.
+  if (multi_stmt_init) {
+    line() << "{";
+    increment_indent();
+    current_buffer_->Append(init_buf);
+    init_buf.lines.clear();  // Don't emit the initializer again in the 'for'
+  }
+
+  TextBuffer cond_pre;
+  std::stringstream cond_buf;
+  if (auto* cond = stmt->condition()) {
+    TINT_SCOPED_ASSIGNMENT(current_buffer_, &cond_pre);
+    if (!EmitExpression(cond_buf, cond)) {
+      return false;
+    }
+  }
+
+  TextBuffer cont_buf;
+  if (auto* cont = stmt->continuing()) {
+    TINT_SCOPED_ASSIGNMENT(current_buffer_, &cont_buf);
+    if (!EmitStatement(cont)) {
+      return false;
+    }
+  }
+
+  if (cond_pre.lines.size() > 0 || cont_buf.lines.size() > 1) {
+    // For-loop has multi-statement conditional and / or continuing.
+    // This cannot be emitted with a regular for loop, so instead generate a
+    // `while(true)` loop.
+    auto emit_continuing = [&]() {
+      current_buffer_->Append(cont_buf);
+      return true;
+    };
+
+    TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
+    line() << "while (true) {";
+    {
+      ScopedIndent si(this);
+
+      if (stmt->condition()) {
+        current_buffer_->Append(cond_pre);
+        line() << "if (!(" << cond_buf.str() << ")) { break; }";
+      }
+
+      if (!EmitStatements(stmt->body()->statements())) {
+        return false;
+      }
+
+      if (!emit_continuing()) {
+        return false;
+      }
+    }
+    line() << "}";
+  } else {
+    // For-loop can be generated.
+    {
+      auto out = line();
+      out << "for";
+      {
+        ScopedParen sp(out);
+
+        if (!init_buf.lines.empty()) {
+          out << init_buf.lines[0].content << " ";
+        } else {
+          out << "; ";
+        }
+
+        out << cond_buf.str() << "; ";
+
+        if (!cont_buf.lines.empty()) {
+          out << TrimSuffix(cont_buf.lines[0].content, ";");
+        }
+      }
+      out << " {";
+    }
+    {
+      auto emit_continuing = [] { return true; };
+      TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
+      if (!EmitStatementsWithIndent(stmt->body()->statements())) {
+        return false;
+      }
+    }
+
+    line() << "}";
+  }
+
+  if (multi_stmt_init) {
+    decrement_indent();
+    line() << "}";
+  }
+
+  return true;
+}
+
 bool GeneratorImpl::EmitMemberAccessor(std::ostream& out,
                                        ast::MemberAccessorExpression* expr) {
   if (!EmitExpression(out, expr->structure())) {
@@ -2616,6 +2721,9 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   }
   if (auto* l = stmt->As<ast::LoopStatement>()) {
     return EmitLoop(l);
+  }
+  if (auto* l = stmt->As<ast::ForLoopStatement>()) {
+    return EmitForLoop(l);
   }
   if (auto* r = stmt->As<ast::ReturnStatement>()) {
     return EmitReturn(r);

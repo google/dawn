@@ -21,7 +21,9 @@
 #include "src/transform/canonicalize_entry_point_io.h"
 #include "src/transform/decompose_memory_access.h"
 #include "src/transform/external_texture_transform.h"
+#include "src/transform/fold_trivial_single_use_lets.h"
 #include "src/transform/inline_pointer_lets.h"
+#include "src/transform/loop_to_for_loop.h"
 #include "src/transform/manager.h"
 #include "src/transform/pad_array_elements.h"
 #include "src/transform/promote_initializers_to_const_var.h"
@@ -40,6 +42,12 @@ Hlsl::~Hlsl() = default;
 Output Hlsl::Run(const Program* in, const DataMap&) {
   Manager manager;
   DataMap data;
+
+  // Attempt to convert `loop`s into for-loops. This is to try and massage the
+  // output into something that will not cause FXC to choke or misbehave.
+  manager.Add<FoldTrivialSingleUseLets>();
+  manager.Add<LoopToForLoop>();
+
   // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as
   // ZeroInitWorkgroupMemory may inject new builtin parameters.
   manager.Add<ZeroInitWorkgroupMemory>();

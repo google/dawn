@@ -255,8 +255,7 @@ int performPartition_i1_i1_(inout int l, inout int h) {
       const int x_983 = i_1;
       i_1 = 0;
       i_1 = x_983;
-      const int x_72 = j_1;
-      param_1 = x_72;
+      param_1 = j_1;
       const int x_984 = param_3;
       param_3 = 0;
       param_3 = x_984;
@@ -556,8 +555,7 @@ void quicksort_() {
     const int x_1049 = top;
     top = 0;
     top = x_1049;
-    const int x_118 = l_1;
-    param_4 = x_118;
+    param_4 = l_1;
     const int x_1050 = stack.arr[x_110_save];
     stack.arr[x_110_save] = 0;
     stack.arr[x_110_save] = x_1050;
