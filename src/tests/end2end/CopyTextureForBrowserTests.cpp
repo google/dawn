@@ -235,8 +235,8 @@ class CopyTextureForBrowserTests : public DawnTest {
                         }
                         default: {
                             break;
-                        }   
-                    } 
+                        }
+                    }
 
                     // Not use loop and variable index format to workaround
                     // crbug.com/tint/638.

@@ -193,17 +193,9 @@ class DepthStencilSamplingTest : public DawnTest {
                 return textureSampleCompare(tex, samp, vec2<f32>(0.5, 0.5), uniforms.compareRef);
             })");
 
-        // TODO(crbug.com/dawn/367): Cannot use GetBindGroupLayout for comparison samplers without
-        // shader reflection data.
-        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-            device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Comparison},
-                     {1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Depth},
-                     {2, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform}});
-
         utils::ComboRenderPipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.vertex.module = vsModule;
         pipelineDescriptor.cFragment.module = fsModule;
-        pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
         pipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
         pipelineDescriptor.cTargets[0].format = wgpu::TextureFormat::R32Float;
 
@@ -228,15 +220,7 @@ class DepthStencilSamplingTest : public DawnTest {
                 samplerResult.value = textureSampleCompare(tex, samp, vec2<f32>(0.5, 0.5), uniforms.compareRef);
             })");
 
-        // TODO(crbug.com/dawn/367): Cannot use GetBindGroupLayout without shader reflection data.
-        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-            device, {{0, wgpu::ShaderStage::Compute, wgpu::SamplerBindingType::Comparison},
-                     {1, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Depth},
-                     {2, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform},
-                     {3, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage}});
-
         wgpu::ComputePipelineDescriptor pipelineDescriptor;
-        pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
         pipelineDescriptor.compute.module = csModule;
         pipelineDescriptor.compute.entryPoint = "main";
 
@@ -709,6 +693,9 @@ TEST_P(DepthStencilSamplingTest, CompareFunctionsRender) {
     // Initialization via renderPass loadOp doesn't work on Mac Intel.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
+    // Depends on Tint's shader reflection
+    DAWN_TEST_UNSUPPORTED_IF(!HasToggleEnabled("use_tint_generator"));
+
     wgpu::RenderPipeline pipeline = CreateComparisonRenderPipeline();
 
     for (wgpu::TextureFormat format : kDepthFormats) {
@@ -727,6 +714,9 @@ TEST_P(DepthStencilSamplingTest, CompareFunctionsRender) {
 TEST_P(DepthStencilSamplingTest, DISABLED_CompareFunctionsCompute) {
     // Initialization via renderPass loadOp doesn't work on Mac Intel.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
+
+    // Depends on Tint's shader reflection
+    DAWN_TEST_UNSUPPORTED_IF(!HasToggleEnabled("use_tint_generator"));
 
     wgpu::ComputePipeline pipeline = CreateComparisonComputePipeline();
 

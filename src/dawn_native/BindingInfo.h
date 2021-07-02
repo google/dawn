@@ -63,6 +63,11 @@ namespace dawn_native {
         StorageTextureBindingLayout storageTexture;
     };
 
+    struct BindingSlot {
+        BindGroupIndex group;
+        BindingNumber binding;
+    };
+
     struct PerStageBindingCounts {
         uint32_t sampledTextureCount;
         uint32_t samplerCount;

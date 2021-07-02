@@ -33,7 +33,8 @@ namespace dawn_native {
 
         static SamplerBase* MakeError(DeviceBase* device);
 
-        bool HasCompareFunction() const;
+        bool IsComparison() const;
+        bool IsFiltering() const;
 
         // Functions necessary for the unordered_set<SamplerBase*>-based cache.
         size_t ComputeContentHash() override;

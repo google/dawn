@@ -100,8 +100,13 @@ namespace dawn_native {
         return new SamplerBase(device, ObjectBase::kError);
     }
 
-    bool SamplerBase::HasCompareFunction() const {
+    bool SamplerBase::IsComparison() const {
         return mCompareFunction != wgpu::CompareFunction::Undefined;
+    }
+
+    bool SamplerBase::IsFiltering() const {
+        return mMinFilter == wgpu::FilterMode::Linear || mMagFilter == wgpu::FilterMode::Linear ||
+               mMipmapFilter == wgpu::FilterMode::Linear;
     }
 
     size_t SamplerBase::ComputeContentHash() {

@@ -266,17 +266,17 @@ namespace dawn_native {
             }
         }
 
-        wgpu::TextureSampleType TintSampledKindToTextureSampleType(
+        SampleTypeBit TintSampledKindToSampleTypeBit(
             tint::inspector::ResourceBinding::SampledKind s) {
             switch (s) {
                 case tint::inspector::ResourceBinding::SampledKind::kSInt:
-                    return wgpu::TextureSampleType::Sint;
+                    return SampleTypeBit::Sint;
                 case tint::inspector::ResourceBinding::SampledKind::kUInt:
-                    return wgpu::TextureSampleType::Uint;
+                    return SampleTypeBit::Uint;
                 case tint::inspector::ResourceBinding::SampledKind::kFloat:
-                    return wgpu::TextureSampleType::Float;
+                    return SampleTypeBit::Float | SampleTypeBit::UnfilterableFloat;
                 case tint::inspector::ResourceBinding::SampledKind::kUnknown:
-                    return wgpu::TextureSampleType::Undefined;
+                    return SampleTypeBit::None;
             }
         }
 
@@ -535,10 +535,11 @@ namespace dawn_native {
                                 GetShaderDeclarationString(group, bindingNumber));
                         }
 
-                        if (layoutInfo.texture.sampleType != shaderInfo.texture.sampleType) {
+                        if ((SampleTypeToSampleTypeBit(layoutInfo.texture.sampleType) &
+                             shaderInfo.texture.compatibleSampleTypes) == 0) {
                             return DAWN_VALIDATION_ERROR(
                                 "The texture sampleType of the bind group layout entry is "
-                                "different from " +
+                                "not compatible with " +
                                 GetShaderDeclarationString(group, bindingNumber));
                         }
 
@@ -621,10 +622,13 @@ namespace dawn_native {
                     }
 
                     case BindingInfoType::Sampler:
-                        // TODO(crbug.com/dawn/367): Temporarily allow using either a sampler or a
-                        // comparison sampler until we can perform the proper shader analysis of
-                        // what type is used in the shader module.
-                        break;
+                        if ((layoutInfo.sampler.type == wgpu::SamplerBindingType::Comparison) !=
+                            shaderInfo.sampler.isComparison) {
+                            return DAWN_VALIDATION_ERROR(
+                                "The sampler type of the bind group layout entry is "
+                                "not compatible with " +
+                                GetShaderDeclarationString(group, bindingNumber));
+                        }
                 }
             }
 
@@ -695,21 +699,23 @@ namespace dawn_native {
 
                             info->texture.viewDimension =
                                 SpirvDimToTextureViewDimension(imageType.dim, imageType.arrayed);
-                            info->texture.sampleType =
-                                SpirvBaseTypeToTextureSampleType(textureComponentType);
                             info->texture.multisampled = imageType.ms;
+                            info->texture.compatibleSampleTypes =
+                                SpirvBaseTypeToSampleTypeBit(textureComponentType);
 
                             if (imageType.depth) {
                                 if (imageType.ms) {
                                     return DAWN_VALIDATION_ERROR(
                                         "Multisampled depth textures aren't supported");
                                 }
-                                if (info->texture.sampleType != wgpu::TextureSampleType::Float) {
+                                if ((info->texture.compatibleSampleTypes & SampleTypeBit::Float) ==
+                                    0) {
                                     return DAWN_VALIDATION_ERROR(
                                         "Depth textures must have a float type");
                                 }
-                                info->texture.sampleType = wgpu::TextureSampleType::Depth;
+                                info->texture.compatibleSampleTypes = SampleTypeBit::Depth;
                             }
+
                             if (imageType.ms && imageType.arrayed) {
                                 return DAWN_VALIDATION_ERROR(
                                     "Multisampled array textures aren't supported");
@@ -779,7 +785,7 @@ namespace dawn_native {
                             break;
                         }
                         case BindingInfoType::Sampler: {
-                            info->sampler.type = wgpu::SamplerBindingType::Filtering;
+                            info->sampler.isComparison = false;
                             break;
                         }
                         case BindingInfoType::ExternalTexture: {
@@ -897,26 +903,6 @@ namespace dawn_native {
                 auto metadata = std::make_unique<EntryPointMetadata>();
 
                 DAWN_TRY_ASSIGN(metadata->stage, TintPipelineStageToShaderStage(entryPoint.stage));
-                if (metadata->stage == SingleShaderStage::Vertex) {
-                    for (auto& stage_input : entryPoint.input_variables) {
-                        if (!stage_input.has_location_decoration) {
-                            return DAWN_VALIDATION_ERROR(
-                                "Need Location decoration on Vertex input");
-                        }
-                        uint32_t location = stage_input.location_decoration;
-                        if (location >= kMaxVertexAttributes) {
-                            return DAWN_VALIDATION_ERROR("Attribute location over limits");
-                        }
-                        metadata->usedVertexAttributes.set(location);
-                    }
-
-                    for (auto& stage_output : entryPoint.output_variables) {
-                        if (!stage_output.has_location_decoration) {
-                            return DAWN_VALIDATION_ERROR(
-                                "Need Location decoration on Vertex output");
-                        }
-                    }
-                }
 
                 if (metadata->stage == SingleShaderStage::Compute) {
                     metadata->localWorkgroupSize.x = entryPoint.workgroup_size_x;
@@ -926,11 +912,11 @@ namespace dawn_native {
 
                 if (metadata->stage == SingleShaderStage::Vertex) {
                     for (const auto& input_var : entryPoint.input_variables) {
-                        uint32_t location = 0;
-                        if (input_var.has_location_decoration) {
-                            location = input_var.location_decoration;
+                        if (!input_var.has_location_decoration) {
+                            return DAWN_VALIDATION_ERROR(
+                                "Need Location decoration on Vertex input");
                         }
-
+                        uint32_t location = input_var.location_decoration;
                         if (DAWN_UNLIKELY(location >= kMaxVertexAttributes)) {
                             std::stringstream ss;
                             ss << "Attribute location (" << location << ") over limits";
@@ -978,7 +964,8 @@ namespace dawn_native {
                     }
                 }
 
-                for (auto& resource : inspector.GetResourceBindings(entryPoint.name)) {
+                for (const tint::inspector::ResourceBinding& resource :
+                     inspector.GetResourceBindings(entryPoint.name)) {
                     BindingNumber bindingNumber(resource.binding);
                     BindGroupIndex bindGroupIndex(resource.bind_group);
                     if (bindGroupIndex >= kMaxBindGroupsTyped) {
@@ -1001,17 +988,27 @@ namespace dawn_native {
                                                                    resource.resource_type));
                             break;
                         case BindingInfoType::Sampler:
-                            info->sampler.type = wgpu::SamplerBindingType::Filtering;
+                            switch (resource.resource_type) {
+                                case tint::inspector::ResourceBinding::ResourceType::kSampler:
+                                    info->sampler.isComparison = false;
+                                    break;
+                                case tint::inspector::ResourceBinding::ResourceType::
+                                    kComparisonSampler:
+                                    info->sampler.isComparison = true;
+                                    break;
+                                default:
+                                    UNREACHABLE();
+                            }
                             break;
                         case BindingInfoType::Texture:
                             info->texture.viewDimension =
                                 TintTextureDimensionToTextureViewDimension(resource.dim);
                             if (resource.resource_type ==
                                 tint::inspector::ResourceBinding::ResourceType::kDepthTexture) {
-                                info->texture.sampleType = wgpu::TextureSampleType::Depth;
+                                info->texture.compatibleSampleTypes = SampleTypeBit::Depth;
                             } else {
-                                info->texture.sampleType =
-                                    TintSampledKindToTextureSampleType(resource.sampled_kind);
+                                info->texture.compatibleSampleTypes =
+                                    TintSampledKindToSampleTypeBit(resource.sampled_kind);
                             }
                             info->texture.multisampled = resource.resource_type ==
                                                          tint::inspector::ResourceBinding::
@@ -1034,6 +1031,21 @@ namespace dawn_native {
                             return DAWN_VALIDATION_ERROR("Unknown binding type in Shader");
                     }
                 }
+
+                std::vector<tint::inspector::SamplerTexturePair> samplerTextureUses =
+                    inspector.GetSamplerTextureUses(entryPoint.name);
+                metadata->samplerTexturePairs.reserve(samplerTextureUses.size());
+                std::transform(
+                    samplerTextureUses.begin(), samplerTextureUses.end(),
+                    std::back_inserter(metadata->samplerTexturePairs),
+                    [](const tint::inspector::SamplerTexturePair& pair) {
+                        EntryPointMetadata::SamplerTexturePair result;
+                        result.sampler = {BindGroupIndex(pair.sampler_binding_point.group),
+                                          BindingNumber(pair.sampler_binding_point.binding)};
+                        result.texture = {BindGroupIndex(pair.texture_binding_point.group),
+                                          BindingNumber(pair.texture_binding_point.binding)};
+                        return result;
+                    });
 
                 result[entryPoint.name] = std::move(metadata);
             }
@@ -1230,6 +1242,43 @@ namespace dawn_native {
                 ostream << "No bind group layout entry matches the declaration set "
                         << static_cast<uint32_t>(group) << " in the shader module";
                 return DAWN_VALIDATION_ERROR(ostream.str());
+            }
+        }
+
+        // Validate that filtering samplers are not used with unfilterable textures.
+        for (const auto& pair : entryPoint.samplerTexturePairs) {
+            const BindGroupLayoutBase* samplerBGL = layout->GetBindGroupLayout(pair.sampler.group);
+            const BindingInfo& samplerInfo =
+                samplerBGL->GetBindingInfo(samplerBGL->GetBindingIndex(pair.sampler.binding));
+            if (samplerInfo.sampler.type != wgpu::SamplerBindingType::Filtering) {
+                continue;
+            }
+            const BindGroupLayoutBase* textureBGL = layout->GetBindGroupLayout(pair.texture.group);
+            const BindingInfo& textureInfo =
+                textureBGL->GetBindingInfo(textureBGL->GetBindingIndex(pair.texture.binding));
+
+            ASSERT(textureInfo.bindingType != BindingInfoType::Buffer &&
+                   textureInfo.bindingType != BindingInfoType::Sampler &&
+                   textureInfo.bindingType != BindingInfoType::StorageTexture);
+
+            if (textureInfo.bindingType != BindingInfoType::Texture) {
+                continue;
+            }
+
+            // Uint/sint can't be statically used with a sampler, so they any
+            // texture bindings reflected must be float or depth textures. If
+            // the shader uses a float/depth texture but the bind group layout
+            // specifies a uint/sint texture binding,
+            // |ValidateCompatibilityWithBindGroupLayout| will fail since the
+            // sampleType does not match.
+            ASSERT(textureInfo.texture.sampleType != wgpu::TextureSampleType::Undefined &&
+                   textureInfo.texture.sampleType != wgpu::TextureSampleType::Uint &&
+                   textureInfo.texture.sampleType != wgpu::TextureSampleType::Sint);
+
+            if (textureInfo.texture.sampleType == wgpu::TextureSampleType::UnfilterableFloat) {
+                return DAWN_VALIDATION_ERROR(
+                    "unfilterable-float texture bindings cannot be sampled with a "
+                    "filtering sampler");
             }
         }
 

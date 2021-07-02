@@ -26,55 +26,61 @@ namespace dawn_native {
     // Format
 
     // TODO(dawn:527): Remove when unused.
-    ComponentTypeBit ToComponentTypeBit(wgpu::TextureComponentType type) {
+    SampleTypeBit ToSampleTypeBit(wgpu::TextureComponentType type) {
         switch (type) {
             case wgpu::TextureComponentType::Float:
+                return SampleTypeBit::Float;
             case wgpu::TextureComponentType::Sint:
+                return SampleTypeBit::Sint;
             case wgpu::TextureComponentType::Uint:
+                return SampleTypeBit::Uint;
             case wgpu::TextureComponentType::DepthComparison:
+                return SampleTypeBit::Depth;
+        }
+    }
+
+    SampleTypeBit SampleTypeToSampleTypeBit(wgpu::TextureSampleType sampleType) {
+        switch (sampleType) {
+            case wgpu::TextureSampleType::Float:
+            case wgpu::TextureSampleType::UnfilterableFloat:
+            case wgpu::TextureSampleType::Sint:
+            case wgpu::TextureSampleType::Uint:
+            case wgpu::TextureSampleType::Depth:
+            case wgpu::TextureSampleType::Undefined:
                 // When the compiler complains that you need to add a case statement here, please
                 // also add a corresponding static assert below!
                 break;
         }
 
-        // Check that ComponentTypeBit bits are in the same position / order as the respective
-        // wgpu::TextureComponentType value.
-        static_assert(ComponentTypeBit::Float ==
-                          static_cast<ComponentTypeBit>(
-                              1 << static_cast<uint32_t>(wgpu::TextureComponentType::Float)),
-                      "");
-        static_assert(ComponentTypeBit::Uint ==
-                          static_cast<ComponentTypeBit>(
-                              1 << static_cast<uint32_t>(wgpu::TextureComponentType::Uint)),
-                      "");
-        static_assert(ComponentTypeBit::Sint ==
-                          static_cast<ComponentTypeBit>(
-                              1 << static_cast<uint32_t>(wgpu::TextureComponentType::Sint)),
-                      "");
-        static_assert(
-            ComponentTypeBit::DepthComparison ==
-                static_cast<ComponentTypeBit>(
-                    1 << static_cast<uint32_t>(wgpu::TextureComponentType::DepthComparison)),
-            "");
-        return static_cast<ComponentTypeBit>(1 << static_cast<uint32_t>(type));
-    }
-
-    ComponentTypeBit SampleTypeToComponentTypeBit(wgpu::TextureSampleType sampleType) {
-        switch (sampleType) {
-            case wgpu::TextureSampleType::Float:
-            case wgpu::TextureSampleType::UnfilterableFloat:
-                return ComponentTypeBit::Float;
-            case wgpu::TextureSampleType::Sint:
-                return ComponentTypeBit::Sint;
-            case wgpu::TextureSampleType::Uint:
-                return ComponentTypeBit::Uint;
-            case wgpu::TextureSampleType::Depth:
-                return ComponentTypeBit::DepthComparison;
-            case wgpu::TextureSampleType::Undefined:
-                UNREACHABLE();
+        static_assert(static_cast<uint32_t>(wgpu::TextureSampleType::Undefined) == 0, "");
+        if (sampleType == wgpu::TextureSampleType::Undefined) {
+            return SampleTypeBit::None;
         }
 
-        // TODO(dawn:527): Ideally we can get this path to use that static_cast method as well.
+        // Check that SampleTypeBit bits are in the same position / order as the respective
+        // wgpu::TextureSampleType value.
+        static_assert(SampleTypeBit::Float ==
+                          static_cast<SampleTypeBit>(
+                              1 << (static_cast<uint32_t>(wgpu::TextureSampleType::Float) - 1)),
+                      "");
+        static_assert(
+            SampleTypeBit::UnfilterableFloat ==
+                static_cast<SampleTypeBit>(
+                    1 << (static_cast<uint32_t>(wgpu::TextureSampleType::UnfilterableFloat) - 1)),
+            "");
+        static_assert(SampleTypeBit::Uint ==
+                          static_cast<SampleTypeBit>(
+                              1 << (static_cast<uint32_t>(wgpu::TextureSampleType::Uint) - 1)),
+                      "");
+        static_assert(SampleTypeBit::Sint ==
+                          static_cast<SampleTypeBit>(
+                              1 << (static_cast<uint32_t>(wgpu::TextureSampleType::Sint) - 1)),
+                      "");
+        static_assert(SampleTypeBit::Depth ==
+                          static_cast<SampleTypeBit>(
+                              1 << (static_cast<uint32_t>(wgpu::TextureSampleType::Depth) - 1)),
+                      "");
+        return static_cast<SampleTypeBit>(1 << (static_cast<uint32_t>(sampleType) - 1));
     }
 
     bool Format::IsColor() const {
@@ -129,7 +135,8 @@ namespace dawn_native {
         FormatTable table;
         std::bitset<kKnownFormatCount> formatsSet;
 
-        using Type = wgpu::TextureComponentType;
+        static constexpr SampleTypeBit kAnyFloat =
+            SampleTypeBit::Float | SampleTypeBit::UnfilterableFloat;
 
         auto AddFormat = [&table, &formatsSet](Format format) {
             size_t index = ComputeFormatIndex(format.format);
@@ -151,7 +158,7 @@ namespace dawn_native {
 
         auto AddColorFormat = [&AddFormat](wgpu::TextureFormat format, bool renderable,
                                            bool supportsStorageUsage, uint32_t byteSize,
-                                           Type type) {
+                                           SampleTypeBit sampleTypes) {
             Format internalFormat;
             internalFormat.format = format;
             internalFormat.isRenderable = renderable;
@@ -163,8 +170,26 @@ namespace dawn_native {
             firstAspect->block.byteSize = byteSize;
             firstAspect->block.width = 1;
             firstAspect->block.height = 1;
-            firstAspect->baseType = type;
-            firstAspect->supportedComponentTypes = ToComponentTypeBit(type);
+            if (HasOneBit(sampleTypes)) {
+                switch (sampleTypes) {
+                    case SampleTypeBit::Float:
+                    case SampleTypeBit::UnfilterableFloat:
+                        firstAspect->baseType = wgpu::TextureComponentType::Float;
+                        break;
+                    case SampleTypeBit::Sint:
+                        firstAspect->baseType = wgpu::TextureComponentType::Sint;
+                        break;
+                    case SampleTypeBit::Uint:
+                        firstAspect->baseType = wgpu::TextureComponentType::Uint;
+                        break;
+                    default:
+                        UNREACHABLE();
+                }
+            } else {
+                ASSERT((sampleTypes & SampleTypeBit::Float) != 0);
+                firstAspect->baseType = wgpu::TextureComponentType::Float;
+            }
+            firstAspect->supportedSampleTypes = sampleTypes;
             firstAspect->format = format;
             AddFormat(internalFormat);
         };
@@ -182,8 +207,7 @@ namespace dawn_native {
             firstAspect->block.width = 1;
             firstAspect->block.height = 1;
             firstAspect->baseType = wgpu::TextureComponentType::Float;
-            firstAspect->supportedComponentTypes =
-                ComponentTypeBit::Float | ComponentTypeBit::DepthComparison;
+            firstAspect->supportedSampleTypes = kAnyFloat | SampleTypeBit::Depth;
             firstAspect->format = format;
             AddFormat(internalFormat);
         };
@@ -201,7 +225,7 @@ namespace dawn_native {
             firstAspect->block.width = 1;
             firstAspect->block.height = 1;
             firstAspect->baseType = wgpu::TextureComponentType::Uint;
-            firstAspect->supportedComponentTypes = ComponentTypeBit::Uint;
+            firstAspect->supportedSampleTypes = SampleTypeBit::Uint;
             firstAspect->format = format;
             AddFormat(internalFormat);
         };
@@ -220,7 +244,7 @@ namespace dawn_native {
             firstAspect->block.width = width;
             firstAspect->block.height = height;
             firstAspect->baseType = wgpu::TextureComponentType::Float;
-            firstAspect->supportedComponentTypes = ComponentTypeBit::Float;
+            firstAspect->supportedSampleTypes = kAnyFloat;
             firstAspect->format = format;
             AddFormat(internalFormat);
         };
@@ -247,53 +271,52 @@ namespace dawn_native {
         };
 
         // clang-format off
-
         // 1 byte color formats
-        AddColorFormat(wgpu::TextureFormat::R8Unorm, true, false, 1, Type::Float);
-        AddColorFormat(wgpu::TextureFormat::R8Snorm, false, false, 1, Type::Float);
-        AddColorFormat(wgpu::TextureFormat::R8Uint, true, false, 1, Type::Uint);
-        AddColorFormat(wgpu::TextureFormat::R8Sint, true, false, 1, Type::Sint);
+        AddColorFormat(wgpu::TextureFormat::R8Unorm, true, false, 1, kAnyFloat);
+        AddColorFormat(wgpu::TextureFormat::R8Snorm, false, false, 1, kAnyFloat);
+        AddColorFormat(wgpu::TextureFormat::R8Uint, true, false, 1, SampleTypeBit::Uint);
+        AddColorFormat(wgpu::TextureFormat::R8Sint, true, false, 1, SampleTypeBit::Sint);
 
         // 2 bytes color formats
-        AddColorFormat(wgpu::TextureFormat::R16Uint, true, false, 2, Type::Uint);
-        AddColorFormat(wgpu::TextureFormat::R16Sint, true, false, 2, Type::Sint);
-        AddColorFormat(wgpu::TextureFormat::R16Float, true, false, 2, Type::Float);
-        AddColorFormat(wgpu::TextureFormat::RG8Unorm, true, false, 2, Type::Float);
-        AddColorFormat(wgpu::TextureFormat::RG8Snorm, false, false, 2, Type::Float);
-        AddColorFormat(wgpu::TextureFormat::RG8Uint, true, false, 2, Type::Uint);
-        AddColorFormat(wgpu::TextureFormat::RG8Sint, true, false, 2, Type::Sint);
+        AddColorFormat(wgpu::TextureFormat::R16Uint, true, false, 2, SampleTypeBit::Uint);
+        AddColorFormat(wgpu::TextureFormat::R16Sint, true, false, 2, SampleTypeBit::Sint);
+        AddColorFormat(wgpu::TextureFormat::R16Float, true, false, 2, kAnyFloat);
+        AddColorFormat(wgpu::TextureFormat::RG8Unorm, true, false, 2, kAnyFloat);
+        AddColorFormat(wgpu::TextureFormat::RG8Snorm, false, false, 2, kAnyFloat);
+        AddColorFormat(wgpu::TextureFormat::RG8Uint, true, false, 2, SampleTypeBit::Uint);
+        AddColorFormat(wgpu::TextureFormat::RG8Sint, true, false, 2, SampleTypeBit::Sint);
 
         // 4 bytes color formats
-        AddColorFormat(wgpu::TextureFormat::R32Uint, true, true, 4, Type::Uint);
-        AddColorFormat(wgpu::TextureFormat::R32Sint, true, true, 4, Type::Sint);
-        AddColorFormat(wgpu::TextureFormat::R32Float, true, true, 4, Type::Float);
-        AddColorFormat(wgpu::TextureFormat::RG16Uint, true, false, 4, Type::Uint);
-        AddColorFormat(wgpu::TextureFormat::RG16Sint, true, false, 4, Type::Sint);
-        AddColorFormat(wgpu::TextureFormat::RG16Float, true, false, 4, Type::Float);
-        AddColorFormat(wgpu::TextureFormat::RGBA8Unorm, true, true, 4, Type::Float);
-        AddColorFormat(wgpu::TextureFormat::RGBA8UnormSrgb, true, false, 4, Type::Float);
-        AddColorFormat(wgpu::TextureFormat::RGBA8Snorm, false, true, 4, Type::Float);
-        AddColorFormat(wgpu::TextureFormat::RGBA8Uint, true, true, 4, Type::Uint);
-        AddColorFormat(wgpu::TextureFormat::RGBA8Sint, true, true, 4, Type::Sint);
-        AddColorFormat(wgpu::TextureFormat::BGRA8Unorm, true, false, 4, Type::Float);
-        AddColorFormat(wgpu::TextureFormat::BGRA8UnormSrgb, true, false, 4, Type::Float);
-        AddColorFormat(wgpu::TextureFormat::RGB10A2Unorm, true, false, 4, Type::Float);
+        AddColorFormat(wgpu::TextureFormat::R32Uint, true, true, 4, SampleTypeBit::Uint);
+        AddColorFormat(wgpu::TextureFormat::R32Sint, true, true, 4, SampleTypeBit::Sint);
+        AddColorFormat(wgpu::TextureFormat::R32Float, true, true, 4, SampleTypeBit::UnfilterableFloat);
+        AddColorFormat(wgpu::TextureFormat::RG16Uint, true, false, 4, SampleTypeBit::Uint);
+        AddColorFormat(wgpu::TextureFormat::RG16Sint, true, false, 4, SampleTypeBit::Sint);
+        AddColorFormat(wgpu::TextureFormat::RG16Float, true, false, 4, kAnyFloat);
+        AddColorFormat(wgpu::TextureFormat::RGBA8Unorm, true, true, 4, kAnyFloat);
+        AddColorFormat(wgpu::TextureFormat::RGBA8UnormSrgb, true, false, 4, kAnyFloat);
+        AddColorFormat(wgpu::TextureFormat::RGBA8Snorm, false, true, 4, kAnyFloat);
+        AddColorFormat(wgpu::TextureFormat::RGBA8Uint, true, true, 4, SampleTypeBit::Uint);
+        AddColorFormat(wgpu::TextureFormat::RGBA8Sint, true, true, 4, SampleTypeBit::Sint);
+        AddColorFormat(wgpu::TextureFormat::BGRA8Unorm, true, false, 4, kAnyFloat);
+        AddColorFormat(wgpu::TextureFormat::BGRA8UnormSrgb, true, false, 4, kAnyFloat);
+        AddColorFormat(wgpu::TextureFormat::RGB10A2Unorm, true, false, 4, kAnyFloat);
 
-        AddColorFormat(wgpu::TextureFormat::RG11B10Ufloat, false, false, 4, Type::Float);
-        AddColorFormat(wgpu::TextureFormat::RGB9E5Ufloat, false, false, 4, Type::Float);
+        AddColorFormat(wgpu::TextureFormat::RG11B10Ufloat, false, false, 4, kAnyFloat);
+        AddColorFormat(wgpu::TextureFormat::RGB9E5Ufloat, false, false, 4, kAnyFloat);
 
         // 8 bytes color formats
-        AddColorFormat(wgpu::TextureFormat::RG32Uint, true, true, 8, Type::Uint);
-        AddColorFormat(wgpu::TextureFormat::RG32Sint, true, true, 8, Type::Sint);
-        AddColorFormat(wgpu::TextureFormat::RG32Float, true, true, 8, Type::Float);
-        AddColorFormat(wgpu::TextureFormat::RGBA16Uint, true, true, 8, Type::Uint);
-        AddColorFormat(wgpu::TextureFormat::RGBA16Sint, true, true, 8, Type::Sint);
-        AddColorFormat(wgpu::TextureFormat::RGBA16Float, true, true, 8, Type::Float);
+        AddColorFormat(wgpu::TextureFormat::RG32Uint, true, true, 8, SampleTypeBit::Uint);
+        AddColorFormat(wgpu::TextureFormat::RG32Sint, true, true, 8, SampleTypeBit::Sint);
+        AddColorFormat(wgpu::TextureFormat::RG32Float, true, true, 8, SampleTypeBit::UnfilterableFloat);
+        AddColorFormat(wgpu::TextureFormat::RGBA16Uint, true, true, 8, SampleTypeBit::Uint);
+        AddColorFormat(wgpu::TextureFormat::RGBA16Sint, true, true, 8, SampleTypeBit::Sint);
+        AddColorFormat(wgpu::TextureFormat::RGBA16Float, true, true, 8, kAnyFloat);
 
         // 16 bytes color formats
-        AddColorFormat(wgpu::TextureFormat::RGBA32Uint, true, true, 16, Type::Uint);
-        AddColorFormat(wgpu::TextureFormat::RGBA32Sint, true, true, 16, Type::Sint);
-        AddColorFormat(wgpu::TextureFormat::RGBA32Float, true, true, 16, Type::Float);
+        AddColorFormat(wgpu::TextureFormat::RGBA32Uint, true, true, 16, SampleTypeBit::Uint);
+        AddColorFormat(wgpu::TextureFormat::RGBA32Sint, true, true, 16, SampleTypeBit::Sint);
+        AddColorFormat(wgpu::TextureFormat::RGBA32Float, true, true, 16, SampleTypeBit::UnfilterableFloat);
 
         // Depth-stencil formats
         AddDepthFormat(wgpu::TextureFormat::Depth32Float, 4);

@@ -45,19 +45,20 @@ namespace dawn_native {
     enum class Aspect : uint8_t;
     class DeviceBase;
 
-    // This mirrors wgpu::TextureComponentType as a bitmask instead.
-    enum class ComponentTypeBit : uint8_t {
+    // This mirrors wgpu::TextureSampleType as a bitmask instead.
+    enum class SampleTypeBit : uint8_t {
         None = 0x0,
         Float = 0x1,
-        Sint = 0x2,
-        Uint = 0x4,
-        DepthComparison = 0x8,
+        UnfilterableFloat = 0x2,
+        Depth = 0x4,
+        Sint = 0x8,
+        Uint = 0x10,
     };
 
     // Converts an wgpu::TextureComponentType to its bitmask representation.
-    ComponentTypeBit ToComponentTypeBit(wgpu::TextureComponentType type);
+    SampleTypeBit ToSampleTypeBit(wgpu::TextureComponentType type);
     // Converts an wgpu::TextureSampleType to its bitmask representation.
-    ComponentTypeBit SampleTypeToComponentTypeBit(wgpu::TextureSampleType sampleType);
+    SampleTypeBit SampleTypeToSampleTypeBit(wgpu::TextureSampleType sampleType);
 
     struct TexelBlockInfo {
         uint32_t byteSize;
@@ -67,8 +68,10 @@ namespace dawn_native {
 
     struct AspectInfo {
         TexelBlockInfo block;
+        // TODO(crbug.com/dawn/367): Replace TextureComponentType with TextureSampleType, or make it
+        // an internal Dawn enum.
         wgpu::TextureComponentType baseType;
-        ComponentTypeBit supportedComponentTypes;
+        SampleTypeBit supportedSampleTypes;
         wgpu::TextureFormat format;
     };
 
@@ -127,7 +130,7 @@ namespace dawn_native {
 namespace wgpu {
 
     template <>
-    struct IsDawnBitmask<dawn_native::ComponentTypeBit> {
+    struct IsDawnBitmask<dawn_native::SampleTypeBit> {
         static constexpr bool enable = true;
     };
 

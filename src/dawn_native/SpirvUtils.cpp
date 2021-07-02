@@ -148,15 +148,14 @@ namespace dawn_native {
         }
     }
 
-    wgpu::TextureSampleType SpirvBaseTypeToTextureSampleType(
-        spirv_cross::SPIRType::BaseType spirvBaseType) {
+    SampleTypeBit SpirvBaseTypeToSampleTypeBit(spirv_cross::SPIRType::BaseType spirvBaseType) {
         switch (spirvBaseType) {
             case spirv_cross::SPIRType::Float:
-                return wgpu::TextureSampleType::Float;
+                return SampleTypeBit::Float | SampleTypeBit::UnfilterableFloat;
             case spirv_cross::SPIRType::Int:
-                return wgpu::TextureSampleType::Sint;
+                return SampleTypeBit::Sint;
             case spirv_cross::SPIRType::UInt:
-                return wgpu::TextureSampleType::Uint;
+                return SampleTypeBit::Uint;
             default:
                 UNREACHABLE();
         }

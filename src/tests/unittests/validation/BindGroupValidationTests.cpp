@@ -435,20 +435,61 @@ TEST_F(BindGroupValidationTest, StorageTextureUsage) {
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, view}}));
 }
 
-// Check that a texture must have the correct component type
-TEST_F(BindGroupValidationTest, TextureComponentType) {
-    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float}});
+// Check that a texture must have the correct sample type
+TEST_F(BindGroupValidationTest, TextureSampleType) {
+    auto DoTest = [this](bool success, wgpu::TextureFormat format,
+                         wgpu::TextureSampleType sampleType) {
+        wgpu::BindGroupLayout layout =
+            utils::MakeBindGroupLayout(device, {{0, wgpu::ShaderStage::Fragment, sampleType}});
 
-    // Control case: setting a Float typed texture view works.
-    utils::MakeBindGroup(device, layout, {{0, mSampledTextureView}});
+        wgpu::TextureDescriptor descriptor;
+        descriptor.size = {4, 4, 1};
+        descriptor.usage = wgpu::TextureUsage::Sampled;
+        descriptor.format = format;
 
-    // Make a Uint component typed texture and try to set it to a Float component binding.
-    wgpu::Texture uintTexture =
-        CreateTexture(wgpu::TextureUsage::Sampled, wgpu::TextureFormat::RGBA8Uint, 1);
-    wgpu::TextureView uintTextureView = uintTexture.CreateView();
+        wgpu::TextureView view = device.CreateTexture(&descriptor).CreateView();
 
-    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, uintTextureView}}));
+        if (success) {
+            utils::MakeBindGroup(device, layout, {{0, view}});
+        } else {
+            ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, view}}));
+        }
+    };
+
+    // Test that RGBA8Unorm is only compatible with float/unfilterable-float
+    DoTest(true, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureSampleType::Float);
+    DoTest(true, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureSampleType::UnfilterableFloat);
+    DoTest(false, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureSampleType::Depth);
+    DoTest(false, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureSampleType::Uint);
+    DoTest(false, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureSampleType::Sint);
+
+    // Test that R32Float is only compatible with unfilterable-float
+    DoTest(false, wgpu::TextureFormat::R32Float, wgpu::TextureSampleType::Float);
+    DoTest(true, wgpu::TextureFormat::R32Float, wgpu::TextureSampleType::UnfilterableFloat);
+    DoTest(false, wgpu::TextureFormat::R32Float, wgpu::TextureSampleType::Depth);
+    DoTest(false, wgpu::TextureFormat::R32Float, wgpu::TextureSampleType::Uint);
+    DoTest(false, wgpu::TextureFormat::R32Float, wgpu::TextureSampleType::Sint);
+
+    // Test that Depth32Float is only compatible with float/unfilterable-float/depth
+    DoTest(true, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::Float);
+    DoTest(true, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::UnfilterableFloat);
+    DoTest(true, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::Depth);
+    DoTest(false, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::Uint);
+    DoTest(false, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::Sint);
+
+    // Test that RG8Uint is only compatible with uint
+    DoTest(false, wgpu::TextureFormat::RG8Uint, wgpu::TextureSampleType::Float);
+    DoTest(false, wgpu::TextureFormat::RG8Uint, wgpu::TextureSampleType::UnfilterableFloat);
+    DoTest(false, wgpu::TextureFormat::RG8Uint, wgpu::TextureSampleType::Depth);
+    DoTest(true, wgpu::TextureFormat::RG8Uint, wgpu::TextureSampleType::Uint);
+    DoTest(false, wgpu::TextureFormat::RG8Uint, wgpu::TextureSampleType::Sint);
+
+    // Test that R16Sint is only compatible with sint
+    DoTest(false, wgpu::TextureFormat::R16Sint, wgpu::TextureSampleType::Float);
+    DoTest(false, wgpu::TextureFormat::R16Sint, wgpu::TextureSampleType::UnfilterableFloat);
+    DoTest(false, wgpu::TextureFormat::R16Sint, wgpu::TextureSampleType::Depth);
+    DoTest(false, wgpu::TextureFormat::R16Sint, wgpu::TextureSampleType::Uint);
+    DoTest(true, wgpu::TextureFormat::R16Sint, wgpu::TextureSampleType::Sint);
 }
 
 // Test which depth-stencil formats are allowed to be sampled (all).
@@ -491,36 +532,6 @@ TEST_F(BindGroupValidationTest, SamplingDepthStencilTexture) {
         viewDesc.aspect = wgpu::TextureAspect::StencilOnly;
         utils::MakeBindGroup(device, layout, {{0, texture.CreateView(&viewDesc)}});
     }
-}
-
-// Check that a texture must have a correct format for DepthComparison
-TEST_F(BindGroupValidationTest, TextureComponentTypeDepthComparison) {
-    wgpu::BindGroupLayout depthLayout = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Depth}});
-
-    // Control case: setting a depth texture works.
-    wgpu::Texture depthTexture =
-        CreateTexture(wgpu::TextureUsage::Sampled, wgpu::TextureFormat::Depth32Float, 1);
-    utils::MakeBindGroup(device, depthLayout, {{0, depthTexture.CreateView()}});
-
-    // Error case: setting a Float typed texture view fails.
-    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, depthLayout, {{0, mSampledTextureView}}));
-}
-
-// Check that a depth texture is allowed to be used for both TextureComponentType::Float and
-// ::DepthComparison
-TEST_F(BindGroupValidationTest, TextureComponentTypeForDepthTexture) {
-    wgpu::BindGroupLayout depthLayout = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Depth}});
-
-    wgpu::BindGroupLayout floatLayout = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float}});
-
-    wgpu::Texture depthTexture =
-        CreateTexture(wgpu::TextureUsage::Sampled, wgpu::TextureFormat::Depth32Float, 1);
-
-    utils::MakeBindGroup(device, depthLayout, {{0, depthTexture.CreateView()}});
-    utils::MakeBindGroup(device, floatLayout, {{0, depthTexture.CreateView()}});
 }
 
 // Check that a texture must have the correct dimension
@@ -2324,7 +2335,7 @@ TEST_F(BindingsValidationTest, BindGroupsWithLessBindingsThanPipelineLayout) {
     TestComputePassBindings(bg.data(), kBindingNum, computePipeline, false);
 }
 
-class ComparisonSamplerBindingTest : public ValidationTest {
+class SamplerTypeBindingTest : public ValidationTest {
   protected:
     wgpu::RenderPipeline CreateFragmentPipeline(wgpu::BindGroupLayout* bindGroupLayout,
                                                 const char* fragmentSource) {
@@ -2345,10 +2356,13 @@ class ComparisonSamplerBindingTest : public ValidationTest {
     }
 };
 
-// TODO(crbug.com/dawn/367): Disabled until we can perform shader analysis
-// of which samplers are comparison samplers.
-TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
-    // Test that sampler binding works with normal sampler in the shader.
+// Test that the use of sampler and comparison_sampler in the shader must match the bind group
+// layout.
+TEST_F(SamplerTypeBindingTest, ShaderAndBGLMatches) {
+    // Tint needed for proper shader reflection.
+    DAWN_SKIP_TEST_IF(!HasToggleEnabled("use_tint_generator"));
+
+    // Test that a filtering sampler binding works with normal sampler in the shader.
     {
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering}});
@@ -2356,11 +2370,23 @@ TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
         CreateFragmentPipeline(&bindGroupLayout, R"(
             [[group(0), binding(0)]] var mySampler: sampler;
             [[stage(fragment)]] fn main() {
-                let s : sampler = mySampler;
+                ignore(mySampler);
             })");
     }
 
-    // Test that comparison sampler binding works with shadow sampler in the shader.
+    // Test that a non-filtering sampler binding works with normal sampler in the shader.
+    {
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::NonFiltering}});
+
+        CreateFragmentPipeline(&bindGroupLayout, R"(
+            [[group(0), binding(0)]] var mySampler: sampler;
+            [[stage(fragment)]] fn main() {
+                ignore(mySampler);
+            })");
+    }
+
+    // Test that comparison sampler binding works with comparison sampler in the shader.
     {
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Comparison}});
@@ -2368,11 +2394,11 @@ TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
         CreateFragmentPipeline(&bindGroupLayout, R"(
             [[group(0), binding(0)]] var mySampler: sampler_comparison;
             [[stage(fragment)]] fn main() {
-                let s : sampler_comparison = mySampler;
+                ignore(mySampler);
             })");
     }
 
-    // Test that sampler binding does not work with comparison sampler in the shader.
+    // Test that filtering sampler binding does not work with comparison sampler in the shader.
     {
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering}});
@@ -2380,7 +2406,19 @@ TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
         ASSERT_DEVICE_ERROR(CreateFragmentPipeline(&bindGroupLayout, R"(
             [[group(0), binding(0)]] var mySampler: sampler_comparison;
             [[stage(fragment)]] fn main() {
-                let s : sampler_comparison = mySampler;
+                ignore(mySampler);
+            })"));
+    }
+
+    // Test that non-filtering sampler binding does not work with comparison sampler in the shader.
+    {
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::NonFiltering}});
+
+        ASSERT_DEVICE_ERROR(CreateFragmentPipeline(&bindGroupLayout, R"(
+            [[group(0), binding(0)]] var mySampler: sampler_comparison;
+            [[stage(fragment)]] fn main() {
+                ignore(mySampler);
             })"));
     }
 
@@ -2392,12 +2430,110 @@ TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
         ASSERT_DEVICE_ERROR(CreateFragmentPipeline(&bindGroupLayout, R"(
             [[group(0), binding(0)]] var mySampler: sampler;
             [[stage(fragment)]] fn main() {
-                let s : sampler = mySampler;
+                ignore(mySampler);
             })"));
+    }
+
+    // Test that a filtering sampler can be used to sample a float texture.
+    {
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering},
+                     {1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float}});
+
+        CreateFragmentPipeline(&bindGroupLayout, R"(
+            [[group(0), binding(0)]] var mySampler: sampler;
+            [[group(0), binding(1)]] var myTexture: texture_2d<f32>;
+            [[stage(fragment)]] fn main() {
+                ignore(textureSample(myTexture, mySampler, vec2<f32>(0.0, 0.0)));
+            })");
+    }
+
+    // Test that a non-filtering sampler can be used to sample a float texture.
+    {
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::NonFiltering},
+                     {1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float}});
+
+        CreateFragmentPipeline(&bindGroupLayout, R"(
+            [[group(0), binding(0)]] var mySampler: sampler;
+            [[group(0), binding(1)]] var myTexture: texture_2d<f32>;
+            [[stage(fragment)]] fn main() {
+                ignore(textureSample(myTexture, mySampler, vec2<f32>(0.0, 0.0)));
+            })");
+    }
+
+    // Test that a filtering sampler can be used to sample a depth texture.
+    {
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering},
+                     {1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Depth}});
+
+        CreateFragmentPipeline(&bindGroupLayout, R"(
+            [[group(0), binding(0)]] var mySampler: sampler;
+            [[group(0), binding(1)]] var myTexture: texture_depth_2d;
+            [[stage(fragment)]] fn main() {
+                ignore(textureSample(myTexture, mySampler, vec2<f32>(0.0, 0.0)));
+            })");
+    }
+
+    // Test that a non-filtering sampler can be used to sample a depth texture.
+    {
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::NonFiltering},
+                     {1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Depth}});
+
+        CreateFragmentPipeline(&bindGroupLayout, R"(
+            [[group(0), binding(0)]] var mySampler: sampler;
+            [[group(0), binding(1)]] var myTexture: texture_depth_2d;
+            [[stage(fragment)]] fn main() {
+                ignore(textureSample(myTexture, mySampler, vec2<f32>(0.0, 0.0)));
+            })");
+    }
+
+    // Test that a comparison sampler can be used to sample a depth texture.
+    {
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Comparison},
+                     {1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Depth}});
+
+        CreateFragmentPipeline(&bindGroupLayout, R"(
+            [[group(0), binding(0)]] var mySampler: sampler_comparison;
+            [[group(0), binding(1)]] var myTexture: texture_depth_2d;
+            [[stage(fragment)]] fn main() {
+                ignore(textureSampleCompare(myTexture, mySampler, vec2<f32>(0.0, 0.0), 0.0));
+            })");
+    }
+
+    // Test that a filtering sampler cannot be used to sample an unfilterable-float texture.
+    {
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering},
+                     {1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::UnfilterableFloat}});
+
+        ASSERT_DEVICE_ERROR(CreateFragmentPipeline(&bindGroupLayout, R"(
+            [[group(0), binding(0)]] var mySampler: sampler;
+            [[group(0), binding(1)]] var myTexture: texture_2d<f32>;
+            [[stage(fragment)]] fn main() {
+                ignore(textureSample(myTexture, mySampler, vec2<f32>(0.0, 0.0)));
+            })"));
+    }
+
+    // Test that a non-filtering sampler can be used to sample an unfilterable-float texture.
+    {
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::NonFiltering},
+                     {1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::UnfilterableFloat}});
+
+        CreateFragmentPipeline(&bindGroupLayout, R"(
+            [[group(0), binding(0)]] var mySampler: sampler;
+            [[group(0), binding(1)]] var myTexture: texture_2d<f32>;
+            [[stage(fragment)]] fn main() {
+                ignore(textureSample(myTexture, mySampler, vec2<f32>(0.0, 0.0)));
+            })");
     }
 }
 
-TEST_F(ComparisonSamplerBindingTest, SamplerAndBindGroupMatches) {
+TEST_F(SamplerTypeBindingTest, SamplerAndBindGroupMatches) {
     // Test that sampler binding works with normal sampler.
     {
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
@@ -2435,5 +2571,60 @@ TEST_F(ComparisonSamplerBindingTest, SamplerAndBindGroupMatches) {
         wgpu::SamplerDescriptor desc = {};
         ASSERT_DEVICE_ERROR(
             utils::MakeBindGroup(device, bindGroupLayout, {{0, device.CreateSampler(&desc)}}));
+    }
+
+    // Test that filtering sampler binding works with a filtering or non-filtering sampler.
+    {
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering}});
+
+        // Test each filter member
+        {
+            wgpu::SamplerDescriptor desc;
+            desc.minFilter = wgpu::FilterMode::Linear;
+            utils::MakeBindGroup(device, bindGroupLayout, {{0, device.CreateSampler(&desc)}});
+        }
+        {
+            wgpu::SamplerDescriptor desc;
+            desc.magFilter = wgpu::FilterMode::Linear;
+            utils::MakeBindGroup(device, bindGroupLayout, {{0, device.CreateSampler(&desc)}});
+        }
+        {
+            wgpu::SamplerDescriptor desc;
+            desc.mipmapFilter = wgpu::FilterMode::Linear;
+            utils::MakeBindGroup(device, bindGroupLayout, {{0, device.CreateSampler(&desc)}});
+        }
+
+        // Test non-filtering sampler
+        utils::MakeBindGroup(device, bindGroupLayout, {{0, device.CreateSampler()}});
+    }
+
+    // Test that non-filtering sampler binding does not work with a filtering sampler.
+    {
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::NonFiltering}});
+
+        // Test each filter member
+        {
+            wgpu::SamplerDescriptor desc;
+            desc.minFilter = wgpu::FilterMode::Linear;
+            ASSERT_DEVICE_ERROR(
+                utils::MakeBindGroup(device, bindGroupLayout, {{0, device.CreateSampler(&desc)}}));
+        }
+        {
+            wgpu::SamplerDescriptor desc;
+            desc.magFilter = wgpu::FilterMode::Linear;
+            ASSERT_DEVICE_ERROR(
+                utils::MakeBindGroup(device, bindGroupLayout, {{0, device.CreateSampler(&desc)}}));
+        }
+        {
+            wgpu::SamplerDescriptor desc;
+            desc.mipmapFilter = wgpu::FilterMode::Linear;
+            ASSERT_DEVICE_ERROR(
+                utils::MakeBindGroup(device, bindGroupLayout, {{0, device.CreateSampler(&desc)}}));
+        }
+
+        // Test non-filtering sampler
+        utils::MakeBindGroup(device, bindGroupLayout, {{0, device.CreateSampler()}});
     }
 }

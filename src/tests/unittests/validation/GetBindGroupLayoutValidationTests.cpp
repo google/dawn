@@ -139,6 +139,122 @@ TEST_F(GetBindGroupLayoutTests, DefaultShaderStageAndDynamicOffsets) {
     EXPECT_NE(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
 }
 
+TEST_F(GetBindGroupLayoutTests, DefaultTextureSampleType) {
+    // This test works assuming Dawn Native's object deduplication.
+    // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
+    // Native.
+    DAWN_SKIP_TEST_IF(UsesWire());
+    // Relies on Tint shader reflection.
+    DAWN_SKIP_TEST_IF(!HasToggleEnabled("use_tint_generator"));
+
+    wgpu::BindGroupLayout filteringBGL = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment,
+                  wgpu::TextureSampleType::Float},
+                 {1, wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment,
+                  wgpu::SamplerBindingType::Filtering}});
+
+    wgpu::BindGroupLayout nonFilteringBGL = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment,
+                  wgpu::TextureSampleType::UnfilterableFloat},
+                 {1, wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment,
+                  wgpu::SamplerBindingType::Filtering}});
+
+    wgpu::ShaderModule emptyVertexModule = utils::CreateShaderModule(device, R"(
+        [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
+        [[group(0), binding(1)]] var mySampler : sampler;
+        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+            ignore(myTexture);
+            ignore(mySampler);
+            return vec4<f32>();
+        })");
+
+    wgpu::ShaderModule textureLoadVertexModule = utils::CreateShaderModule(device, R"(
+        [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
+        [[group(0), binding(1)]] var mySampler : sampler;
+        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+            ignore(textureLoad(myTexture, vec2<i32>(), 0));
+            ignore(mySampler);
+            return vec4<f32>();
+        })");
+
+    wgpu::ShaderModule textureSampleVertexModule = utils::CreateShaderModule(device, R"(
+        [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
+        [[group(0), binding(1)]] var mySampler : sampler;
+        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+            ignore(textureSampleLevel(myTexture, mySampler, vec2<f32>(), 0.0));
+            return vec4<f32>();
+        })");
+
+    wgpu::ShaderModule unusedTextureFragmentModule = utils::CreateShaderModule(device, R"(
+        [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
+        [[group(0), binding(1)]] var mySampler : sampler;
+        [[stage(fragment)]] fn main() {
+            ignore(myTexture);
+            ignore(mySampler);
+        })");
+
+    wgpu::ShaderModule textureLoadFragmentModule = utils::CreateShaderModule(device, R"(
+        [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
+        [[group(0), binding(1)]] var mySampler : sampler;
+        [[stage(fragment)]] fn main() {
+            ignore(textureLoad(myTexture, vec2<i32>(), 0));
+            ignore(mySampler);
+        })");
+
+    wgpu::ShaderModule textureSampleFragmentModule = utils::CreateShaderModule(device, R"(
+        [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
+        [[group(0), binding(1)]] var mySampler : sampler;
+        [[stage(fragment)]] fn main() {
+            ignore(textureSample(myTexture, mySampler, vec2<f32>()));
+        })");
+
+    auto BGLFromModules = [this](wgpu::ShaderModule vertexModule,
+                                 wgpu::ShaderModule fragmentModule) {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vertexModule;
+        descriptor.cFragment.module = fragmentModule;
+        return device.CreateRenderPipeline(&descriptor).GetBindGroupLayout(0);
+    };
+
+    // Textures not used default to non-filtering
+    EXPECT_EQ(BGLFromModules(emptyVertexModule, unusedTextureFragmentModule).Get(),
+              nonFilteringBGL.Get());
+    EXPECT_NE(BGLFromModules(emptyVertexModule, unusedTextureFragmentModule).Get(),
+              filteringBGL.Get());
+
+    // Textures used with textureLoad default to non-filtering
+    EXPECT_EQ(BGLFromModules(emptyVertexModule, textureLoadFragmentModule).Get(),
+              nonFilteringBGL.Get());
+    EXPECT_NE(BGLFromModules(emptyVertexModule, textureLoadFragmentModule).Get(),
+              filteringBGL.Get());
+
+    // Textures used with textureLoad on both stages default to non-filtering
+    EXPECT_EQ(BGLFromModules(textureLoadVertexModule, textureLoadFragmentModule).Get(),
+              nonFilteringBGL.Get());
+    EXPECT_NE(BGLFromModules(textureLoadVertexModule, textureLoadFragmentModule).Get(),
+              filteringBGL.Get());
+
+    // Textures used with textureSample default to filtering
+    EXPECT_NE(BGLFromModules(emptyVertexModule, textureSampleFragmentModule).Get(),
+              nonFilteringBGL.Get());
+    EXPECT_EQ(BGLFromModules(emptyVertexModule, textureSampleFragmentModule).Get(),
+              filteringBGL.Get());
+    EXPECT_NE(BGLFromModules(textureSampleVertexModule, unusedTextureFragmentModule).Get(),
+              nonFilteringBGL.Get());
+    EXPECT_EQ(BGLFromModules(textureSampleVertexModule, unusedTextureFragmentModule).Get(),
+              filteringBGL.Get());
+
+    // Textures used with both textureLoad and textureSample default to filtering
+    EXPECT_NE(BGLFromModules(textureLoadVertexModule, textureSampleFragmentModule).Get(),
+              nonFilteringBGL.Get());
+    EXPECT_EQ(BGLFromModules(textureLoadVertexModule, textureSampleFragmentModule).Get(),
+              filteringBGL.Get());
+    EXPECT_NE(BGLFromModules(textureSampleVertexModule, textureLoadFragmentModule).Get(),
+              nonFilteringBGL.Get());
+    EXPECT_EQ(BGLFromModules(textureSampleVertexModule, textureLoadFragmentModule).Get(),
+              filteringBGL.Get());
+}
+
 // Test GetBindGroupLayout works with a compute pipeline
 TEST_F(GetBindGroupLayoutTests, ComputePipeline) {
     // This test works assuming Dawn Native's object deduplication.
@@ -240,7 +356,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
     binding.buffer.type = wgpu::BufferBindingType::Undefined;
     binding.buffer.minBindingSize = 0;
     {
-        binding.texture.sampleType = wgpu::TextureSampleType::Float;
+        binding.texture.sampleType = wgpu::TextureSampleType::UnfilterableFloat;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
@@ -311,7 +427,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
     wgpu::BindGroupLayoutEntry binding = {};
     binding.binding = 0;
     binding.visibility = wgpu::ShaderStage::Fragment;
-    binding.texture.sampleType = wgpu::TextureSampleType::Float;
+    binding.texture.sampleType = wgpu::TextureSampleType::UnfilterableFloat;
 
     wgpu::BindGroupLayoutDescriptor desc = {};
     desc.entryCount = 1;
@@ -400,7 +516,7 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
     desc.entries = &binding;
 
     {
-        binding.texture.sampleType = wgpu::TextureSampleType::Float;
+        binding.texture.sampleType = wgpu::TextureSampleType::UnfilterableFloat;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 

@@ -39,8 +39,7 @@ namespace dawn_native {
     // Returns the format "component type" corresponding to the SPIRV base type.
     wgpu::TextureComponentType SpirvBaseTypeToTextureComponentType(
         spirv_cross::SPIRType::BaseType spirvBaseType);
-    wgpu::TextureSampleType SpirvBaseTypeToTextureSampleType(
-        spirv_cross::SPIRType::BaseType spirvBaseType);
+    SampleTypeBit SpirvBaseTypeToSampleTypeBit(spirv_cross::SPIRType::BaseType spirvBaseType);
 
 }  // namespace dawn_native
 

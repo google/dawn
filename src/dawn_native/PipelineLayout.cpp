@@ -88,7 +88,9 @@ namespace dawn_native {
                 modifiedEntry->binding == mergedEntry.binding &&
                 modifiedEntry->buffer.type == mergedEntry.buffer.type &&
                 modifiedEntry->sampler.type == mergedEntry.sampler.type &&
-                modifiedEntry->texture.sampleType == mergedEntry.texture.sampleType &&
+                // Compatibility between these sample types is checked below.
+                (modifiedEntry->texture.sampleType != wgpu::TextureSampleType::Undefined) ==
+                    (mergedEntry.texture.sampleType != wgpu::TextureSampleType::Undefined) &&
                 modifiedEntry->storageTexture.access == mergedEntry.storageTexture.access;
 
             // Minimum buffer binding size excluded because we take the maximum seen across stages.
@@ -98,8 +100,18 @@ namespace dawn_native {
             }
 
             if (modifiedEntry->texture.sampleType != wgpu::TextureSampleType::Undefined) {
+                // Sample types are compatible if they are exactly equal,
+                // or if the |modifiedEntry| is Float and the |mergedEntry| is UnfilterableFloat.
+                // Note that the |mergedEntry| never has type Float. Texture bindings all start
+                // as UnfilterableFloat and are promoted to Float if they are statically used with
+                // a sampler.
+                ASSERT(mergedEntry.texture.sampleType != wgpu::TextureSampleType::Float);
+                bool compatibleSampleTypes =
+                    modifiedEntry->texture.sampleType == mergedEntry.texture.sampleType ||
+                    (modifiedEntry->texture.sampleType == wgpu::TextureSampleType::Float &&
+                     mergedEntry.texture.sampleType == wgpu::TextureSampleType::UnfilterableFloat);
                 compatible =
-                    compatible &&
+                    compatible && compatibleSampleTypes &&
                     modifiedEntry->texture.viewDimension == mergedEntry.texture.viewDimension &&
                     modifiedEntry->texture.multisampled == mergedEntry.texture.multisampled;
             }
@@ -136,16 +148,51 @@ namespace dawn_native {
             BindGroupLayoutEntry entry = {};
             switch (shaderBinding.bindingType) {
                 case BindingInfoType::Buffer:
-                    entry.buffer = shaderBinding.buffer;
+                    entry.buffer.type = shaderBinding.buffer.type;
+                    entry.buffer.hasDynamicOffset = shaderBinding.buffer.hasDynamicOffset;
+                    entry.buffer.minBindingSize = shaderBinding.buffer.minBindingSize;
                     break;
                 case BindingInfoType::Sampler:
-                    entry.sampler = shaderBinding.sampler;
+                    if (shaderBinding.sampler.isComparison) {
+                        entry.sampler.type = wgpu::SamplerBindingType::Comparison;
+                    } else {
+                        entry.sampler.type = wgpu::SamplerBindingType::Filtering;
+                    }
                     break;
                 case BindingInfoType::Texture:
-                    entry.texture = shaderBinding.texture;
+                    switch (shaderBinding.texture.compatibleSampleTypes) {
+                        case SampleTypeBit::Depth:
+                            entry.texture.sampleType = wgpu::TextureSampleType::Depth;
+                            break;
+                        case SampleTypeBit::Sint:
+                            entry.texture.sampleType = wgpu::TextureSampleType::Sint;
+                            break;
+                        case SampleTypeBit::Uint:
+                            entry.texture.sampleType = wgpu::TextureSampleType::Uint;
+                            break;
+                        case SampleTypeBit::Float:
+                        case SampleTypeBit::UnfilterableFloat:
+                        case SampleTypeBit::None:
+                            UNREACHABLE();
+                            break;
+                        default:
+                            if (shaderBinding.texture.compatibleSampleTypes ==
+                                (SampleTypeBit::Float | SampleTypeBit::UnfilterableFloat)) {
+                                // Default to UnfilterableFloat. It will be promoted to Float if it
+                                // is used with a sampler.
+                                entry.texture.sampleType =
+                                    wgpu::TextureSampleType::UnfilterableFloat;
+                            } else {
+                                UNREACHABLE();
+                            }
+                    }
+                    entry.texture.viewDimension = shaderBinding.texture.viewDimension;
+                    entry.texture.multisampled = shaderBinding.texture.multisampled;
                     break;
                 case BindingInfoType::StorageTexture:
-                    entry.storageTexture = shaderBinding.storageTexture;
+                    entry.storageTexture.access = shaderBinding.storageTexture.access;
+                    entry.storageTexture.format = shaderBinding.storageTexture.format;
+                    entry.storageTexture.viewDimension = shaderBinding.storageTexture.viewDimension;
                     break;
                 case BindingInfoType::ExternalTexture:
                     // TODO(dawn:728) On backend configurations that use SPIRV-Cross to reflect
@@ -185,11 +232,10 @@ namespace dawn_native {
 
         // Loops over all the reflected BindGroupLayoutEntries from shaders.
         for (const StageAndDescriptor& stage : stages) {
-            const EntryPointMetadata::BindingInfoArray& info =
-                stage.module->GetEntryPoint(stage.entryPoint).bindings;
+            const EntryPointMetadata& metadata = stage.module->GetEntryPoint(stage.entryPoint);
 
-            for (BindGroupIndex group(0); group < info.size(); ++group) {
-                for (const auto& bindingIt : info[group]) {
+            for (BindGroupIndex group(0); group < metadata.bindings.size(); ++group) {
+                for (const auto& bindingIt : metadata.bindings[group]) {
                     BindingNumber bindingNumber = bindingIt.first;
                     const EntryPointMetadata::ShaderBindingInfo& shaderBinding = bindingIt.second;
 
@@ -204,6 +250,15 @@ namespace dawn_native {
                     if (!insertion.second) {
                         DAWN_TRY(MergeEntries(&insertion.first->second, entry));
                     }
+                }
+            }
+
+            // Promote any Unfilterable textures used with a sampler to Filtering.
+            for (const EntryPointMetadata::SamplerTexturePair& pair :
+                 metadata.samplerTexturePairs) {
+                BindGroupLayoutEntry* entry = &entryData[pair.texture.group][pair.texture.binding];
+                if (entry->texture.sampleType == wgpu::TextureSampleType::UnfilterableFloat) {
+                    entry->texture.sampleType = wgpu::TextureSampleType::Float;
                 }
             }
         }

@@ -136,10 +136,10 @@ namespace dawn_native {
             TextureBase* texture = view->GetTexture();
             switch (bindingInfo.bindingType) {
                 case BindingInfoType::Texture: {
-                    ComponentTypeBit supportedTypes =
-                        texture->GetFormat().GetAspectInfo(aspect).supportedComponentTypes;
-                    ComponentTypeBit requiredType =
-                        SampleTypeToComponentTypeBit(bindingInfo.texture.sampleType);
+                    SampleTypeBit supportedTypes =
+                        texture->GetFormat().GetAspectInfo(aspect).supportedSampleTypes;
+                    SampleTypeBit requiredType =
+                        SampleTypeToSampleTypeBit(bindingInfo.texture.sampleType);
 
                     if (!(texture->GetUsage() & wgpu::TextureUsage::Sampled)) {
                         return DAWN_VALIDATION_ERROR("Texture binding usage mismatch");
@@ -193,15 +193,25 @@ namespace dawn_native {
             ASSERT(bindingInfo.bindingType == BindingInfoType::Sampler);
 
             switch (bindingInfo.sampler.type) {
-                case wgpu::SamplerBindingType::Filtering:
                 case wgpu::SamplerBindingType::NonFiltering:
-                    if (entry.sampler->HasCompareFunction()) {
-                        return DAWN_VALIDATION_ERROR("Did not expect comparison sampler");
+                    if (entry.sampler->IsFiltering()) {
+                        return DAWN_VALIDATION_ERROR(
+                            "Filtering sampler is incompatible with non-filtering sampler "
+                            "binding.");
+                    }
+                    DAWN_FALLTHROUGH;
+                case wgpu::SamplerBindingType::Filtering:
+                    if (entry.sampler->IsComparison()) {
+                        return DAWN_VALIDATION_ERROR(
+                            "Comparison sampler is incompatible with non-comparison sampler "
+                            "binding.");
                     }
                     break;
                 case wgpu::SamplerBindingType::Comparison:
-                    if (!entry.sampler->HasCompareFunction()) {
-                        return DAWN_VALIDATION_ERROR("Expected comparison sampler");
+                    if (!entry.sampler->IsComparison()) {
+                        return DAWN_VALIDATION_ERROR(
+                            "Non-comparison sampler is imcompatible with comparison sampler "
+                            "binding.");
                     }
                     break;
                 default:
