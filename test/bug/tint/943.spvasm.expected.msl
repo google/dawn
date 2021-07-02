@@ -1,0 +1,32 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+
+Compilation failed: 
+
+program_source:5:22: error: expected parameter declarator
+  /* 0x0000 */ float NAN;
+                     ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_types:214:28: note: expanded from macro 'NAN'
+#define NAN __builtin_nanf("")
+                           ^
+program_source:5:22: error: expected ')'
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_types:214:28: note: expanded from macro 'NAN'
+#define NAN __builtin_nanf("")
+                           ^
+program_source:5:22: note: to match this '('
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_types:214:27: note: expanded from macro 'NAN'
+#define NAN __builtin_nanf("")
+                          ^
+program_source:494:31: warning: equality comparison with extraneous parentheses
+  if ((local_invocation_index == 0u)) {
+       ~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+program_source:494:31: note: remove extraneous parentheses around the comparison to silence this warning
+  if ((local_invocation_index == 0u)) {
+      ~                       ^    ~
+program_source:494:31: note: use '=' to turn this equality comparison into an assignment
+  if ((local_invocation_index == 0u)) {
+                              ^~
+                              =

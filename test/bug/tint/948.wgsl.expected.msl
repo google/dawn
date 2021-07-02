@@ -1,0 +1,11 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+
+Compilation failed: 
+
+program_source:113:44: error: invalid operands to binary expression ('float' and 'float')
+      *(tint_symbol_14) = ((x_181 * x_184) % 1.0f);
+                           ~~~~~~~~~~~~~~~ ^ ~~~~
