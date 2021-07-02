@@ -215,7 +215,7 @@ uint32_t ScalarSize(const sem::Type*) {
   return 4;
 }
 
-/// @returns the numer of bytes between columns of the given matrix
+/// @returns the number of bytes between columns of the given matrix
 uint32_t MatrixColumnStride(const sem::Matrix* mat) {
   return ScalarSize(mat->type()) * ((mat->rows() == 2) ? 2 : 4);
 }

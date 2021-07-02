@@ -297,6 +297,8 @@ set(TINT_LIB_SRCS
   transform/fold_trivial_single_use_lets.h
   transform/inline_pointer_lets.cc
   transform/inline_pointer_lets.h
+  transform/loop_to_for_loop.cc
+  transform/loop_to_for_loop.h
   transform/manager.cc
   transform/manager.h
   transform/pad_array_elements.cc
@@ -879,6 +881,7 @@ if(${TINT_BUILD_TESTS})
       transform/fold_constants_test.cc
       transform/fold_trivial_single_use_lets_test.cc
       transform/inline_pointer_lets_test.cc
+      transform/loop_to_for_loop_test.cc
       transform/pad_array_elements_test.cc
       transform/promote_initializers_to_const_var_test.cc
       transform/renamer_test.cc
