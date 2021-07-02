@@ -16,18 +16,25 @@
 
 #include "dawn_native/dawn_platform.h"
 
-class InternalResourceUsageTests : public DawnTest {};
+class InternalResourceUsageTests : public DawnTest {
+  protected:
+    wgpu::Buffer CreateBuffer(wgpu::BufferUsage usage) {
+        wgpu::BufferDescriptor descriptor;
+        descriptor.size = 4;
+        descriptor.usage = usage;
+
+        return device.CreateBuffer(&descriptor);
+    }
+};
 
 // Verify it is an error to create a buffer with a buffer usage that should only be used
 // internally.
 TEST_P(InternalResourceUsageTests, InternalBufferUsage) {
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
-    wgpu::BufferDescriptor descriptor;
-    descriptor.size = 4;
-    descriptor.usage = dawn_native::kReadOnlyStorageBuffer;
+    ASSERT_DEVICE_ERROR(CreateBuffer(dawn_native::kReadOnlyStorageBuffer));
 
-    ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
+    ASSERT_DEVICE_ERROR(CreateBuffer(dawn_native::kInternalStorageBuffer));
 }
 
 // Verify it is an error to create a texture with a texture usage that should only be used
@@ -43,3 +50,23 @@ TEST_P(InternalResourceUsageTests, InternalTextureUsage) {
 }
 
 DAWN_INSTANTIATE_TEST(InternalResourceUsageTests, NullBackend());
+
+class InternalBindingTypeTests : public DawnTest {};
+
+// Verify it is an error to create a bind group layout with a buffer binding type that should only
+// be used internally.
+TEST_P(InternalBindingTypeTests, InternalStorageBufferBindingType) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+
+    wgpu::BindGroupLayoutEntry bglEntry;
+    bglEntry.binding = 0;
+    bglEntry.buffer.type = dawn_native::kInternalStorageBufferBinding;
+    bglEntry.visibility = wgpu::ShaderStage::Compute;
+
+    wgpu::BindGroupLayoutDescriptor bglDesc;
+    bglDesc.entryCount = 1;
+    bglDesc.entries = &bglEntry;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&bglDesc));
+}
+
+DAWN_INSTANTIATE_TEST(InternalBindingTypeTests, NullBackend());

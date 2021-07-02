@@ -45,17 +45,15 @@ namespace dawn_native { namespace vulkan {
             if (usage & wgpu::BufferUsage::Uniform) {
                 flags |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
             }
-            if (usage & (wgpu::BufferUsage::Storage | kReadOnlyStorageBuffer)) {
+            if (usage &
+                (wgpu::BufferUsage::Storage | kInternalStorageBuffer | kReadOnlyStorageBuffer)) {
                 flags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
             }
             if (usage & wgpu::BufferUsage::Indirect) {
                 flags |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
             }
             if (usage & wgpu::BufferUsage::QueryResolve) {
-                // VK_BUFFER_USAGE_TRANSFER_DST_BIT is required by vkCmdCopyQueryPoolResults
-                // but we also add VK_BUFFER_USAGE_STORAGE_BUFFER_BIT because the queries will
-                // be post-processed by a compute shader and written to this buffer.
-                flags |= (VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+                flags |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
             }
 
             return flags;

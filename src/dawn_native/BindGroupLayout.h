@@ -33,7 +33,8 @@
 namespace dawn_native {
 
     MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
-                                                 const BindGroupLayoutDescriptor* descriptor);
+                                                 const BindGroupLayoutDescriptor* descriptor,
+                                                 bool allowInternalBinding = false);
 
     // Bindings are specified as a |BindingNumber| in the BindGroupLayoutDescriptor.
     // These numbers may be arbitrary and sparse. Internally, Dawn packs these numbers

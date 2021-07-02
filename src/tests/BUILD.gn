@@ -435,6 +435,7 @@ source_set("dawn_white_box_tests_sources") {
 
   sources += [
     "white_box/InternalResourceUsageTests.cpp",
+    "white_box/InternalStorageBufferBindingTests.cpp",
     "white_box/QueryInternalShaderTests.cpp",
   ]
 

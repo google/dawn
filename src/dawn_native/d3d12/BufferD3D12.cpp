@@ -53,7 +53,7 @@ namespace dawn_native { namespace d3d12 {
             if (usage & wgpu::BufferUsage::Index) {
                 resourceState |= D3D12_RESOURCE_STATE_INDEX_BUFFER;
             }
-            if (usage & wgpu::BufferUsage::Storage) {
+            if (usage & (wgpu::BufferUsage::Storage | kInternalStorageBuffer)) {
                 resourceState |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
             }
             if (usage & kReadOnlyStorageBuffer) {
@@ -64,11 +64,7 @@ namespace dawn_native { namespace d3d12 {
                 resourceState |= D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;
             }
             if (usage & wgpu::BufferUsage::QueryResolve) {
-                // D3D12_RESOURCE_STATE_COPY_DEST is required by ResolveQueryData but we also add
-                // D3D12_RESOURCE_STATE_UNORDERED_ACCESS because the queries will be post-processed
-                // by a compute shader and written to this buffer via a UAV.
-                resourceState |=
-                    (D3D12_RESOURCE_STATE_UNORDERED_ACCESS | D3D12_RESOURCE_STATE_COPY_DEST);
+                resourceState |= D3D12_RESOURCE_STATE_COPY_DEST;
             }
 
             return resourceState;

@@ -138,9 +138,12 @@ namespace dawn_native {
             mUsage |= kReadOnlyStorageBuffer;
         }
 
-        // The buffer made with QueryResolve usage implicitly get InternalStorage usage which is
-        // only compatible with InternalStorageBuffer binding type in BGL, not StorageBuffer binding
-        // type.
+        // The query resolve buffer need to be used as a storage buffer in the internal compute
+        // pipeline which does timestamp uint conversion for timestamp query, it requires the buffer
+        // has Storage usage in the binding group. Implicitly add an InternalStorage usage which is
+        // only compatible with InternalStorageBuffer binding type in BGL. It shouldn't be
+        // compatible with StorageBuffer binding type and the query resolve buffer cannot be bound
+        // as storage buffer if it's created without Storage usage.
         if (mUsage & wgpu::BufferUsage::QueryResolve) {
             mUsage |= kInternalStorageBuffer;
         }

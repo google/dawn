@@ -1034,10 +1034,11 @@ namespace dawn_native {
     }
 
     ResultOrError<Ref<BindGroupLayoutBase>> DeviceBase::CreateBindGroupLayout(
-        const BindGroupLayoutDescriptor* descriptor) {
+        const BindGroupLayoutDescriptor* descriptor,
+        bool allowInternalBinding) {
         DAWN_TRY(ValidateIsAlive());
         if (IsValidationEnabled()) {
-            DAWN_TRY(ValidateBindGroupLayoutDescriptor(this, descriptor));
+            DAWN_TRY(ValidateBindGroupLayoutDescriptor(this, descriptor, allowInternalBinding));
         }
         return GetOrCreateBindGroupLayout(descriptor);
     }

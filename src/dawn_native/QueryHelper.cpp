@@ -135,7 +135,7 @@ namespace dawn_native {
                 bglDesc.entryCount = static_cast<uint32_t>(entries.size());
                 bglDesc.entries = entries.data();
                 Ref<BindGroupLayoutBase> bgl;
-                DAWN_TRY_ASSIGN(bgl, device->CreateBindGroupLayout(&bglDesc));
+                DAWN_TRY_ASSIGN(bgl, device->CreateBindGroupLayout(&bglDesc, true));
 
                 // Create pipeline layout
                 PipelineLayoutDescriptor plDesc;

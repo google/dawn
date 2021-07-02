@@ -62,7 +62,8 @@ namespace dawn_native {
     }  // anonymous namespace
 
     MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
-                                                 const BindGroupLayoutDescriptor* descriptor) {
+                                                 const BindGroupLayoutDescriptor* descriptor,
+                                                 bool allowInternalBinding) {
         if (descriptor->nextInChain != nullptr) {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
         }
@@ -88,7 +89,11 @@ namespace dawn_native {
 
                 // The kInternalStorageBufferBinding is used internally and not a value
                 // in wgpu::BufferBindingType.
-                if (buffer.type != kInternalStorageBufferBinding) {
+                if (buffer.type == kInternalStorageBufferBinding) {
+                    if (!allowInternalBinding) {
+                        return DAWN_VALIDATION_ERROR("Internal binding types are disallowed");
+                    }
+                } else {
                     DAWN_TRY(ValidateBufferBindingType(buffer.type));
                 }
 
