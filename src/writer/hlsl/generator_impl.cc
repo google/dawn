@@ -16,7 +16,6 @@
 
 #include <algorithm>
 #include <iomanip>
-#include <iosfwd>
 #include <set>
 #include <utility>
 #include <vector>
@@ -123,7 +122,7 @@ bool GeneratorImpl::Generate() {
   }
 
   const TypeInfo* last_kind = nullptr;
-  std::streampos last_padding_pos;
+  size_t last_padding_line = 0;
 
   if (!FindAndEmitVectorAssignmentInLoopFunctions()) {
     return false;
@@ -137,10 +136,10 @@ bool GeneratorImpl::Generate() {
     // Emit a new line between declarations if the type of declaration has
     // changed, or we're about to emit a function
     auto* kind = &decl->TypeInfo();
-    if (out_.tellp() != last_padding_pos) {
+    if (current_buffer_->lines.size() != last_padding_line) {
       if (last_kind && (last_kind != kind || decl->Is<ast::Function>())) {
-        out_ << std::endl;
-        last_padding_pos = out_.tellp();
+        line();
+        last_padding_line = current_buffer_->lines.size();
       }
     }
     last_kind = kind;

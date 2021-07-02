@@ -27,8 +27,9 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Scalar) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(cast)) << gen.error();
-  EXPECT_EQ(gen.result(), "f32(1)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
+  EXPECT_EQ(out.str(), "f32(1)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Vector) {
@@ -37,8 +38,9 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Vector) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(cast)) << gen.error();
-  EXPECT_EQ(gen.result(), "vec3<f32>(vec3<i32>(1, 2, 3))");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
+  EXPECT_EQ(out.str(), "vec3<f32>(vec3<i32>(1, 2, 3))");
 }
 
 }  // namespace

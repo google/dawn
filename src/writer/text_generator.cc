@@ -14,6 +14,7 @@
 
 #include "src/writer/text_generator.h"
 
+#include <algorithm>
 #include <limits>
 
 namespace tint {
@@ -24,18 +25,18 @@ TextGenerator::TextGenerator(const Program* program)
 
 TextGenerator::~TextGenerator() = default;
 
-void TextGenerator::make_indent() {
-  make_indent(out_);
-}
-
-void TextGenerator::make_indent(std::ostream& out) const {
-  for (size_t i = 0; i < indent_; i++) {
-    out << " ";
-  }
-}
-
 std::string TextGenerator::UniqueIdentifier(const std::string& prefix) {
   return builder_.Symbols().NameFor(builder_.Symbols().New(prefix));
+}
+
+std::string TextGenerator::TrimSuffix(std::string str,
+                                      const std::string& suffix) {
+  if (str.size() >= suffix.size()) {
+    if (str.substr(str.size() - suffix.size(), suffix.size()) == suffix) {
+      return str.substr(0, str.size() - suffix.size());
+    }
+  }
+  return str;
 }
 
 TextGenerator::LineWriter::LineWriter(TextGenerator* generator)
@@ -48,13 +49,43 @@ TextGenerator::LineWriter::LineWriter(LineWriter&& other) {
 
 TextGenerator::LineWriter::~LineWriter() {
   if (gen) {
-    auto str = os.str();
-    if (!str.empty()) {
-      gen->make_indent();
-      gen->out_ << str;
-    }
-    gen->out_ << std::endl;
+    gen->current_buffer_->Append(os.str());
   }
+}
+
+TextGenerator::TextBuffer::TextBuffer() = default;
+TextGenerator::TextBuffer::~TextBuffer() = default;
+
+void TextGenerator::TextBuffer::IncrementIndent() {
+  current_indent += 2;
+}
+
+void TextGenerator::TextBuffer::DecrementIndent() {
+  current_indent = std::max(2u, current_indent) - 2u;
+}
+
+void TextGenerator::TextBuffer::Append(const std::string& line) {
+  lines.emplace_back(Line{current_indent, line});
+}
+
+void TextGenerator::TextBuffer::Append(const TextBuffer& tb) {
+  for (auto& line : tb.lines) {
+    lines.emplace_back(Line{current_indent + line.indent, line.content});
+  }
+}
+
+std::string TextGenerator::TextBuffer::String() const {
+  std::stringstream ss;
+  for (auto& line : lines) {
+    if (!line.content.empty()) {
+      for (uint32_t i = 0; i < line.indent; i++) {
+        ss << " ";
+      }
+      ss << line.content;
+    }
+    ss << std::endl;
+  }
+  return ss.str();
 }
 
 TextGenerator::ScopedParen::ScopedParen(std::ostream& stream) : s(stream) {

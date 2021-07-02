@@ -28,8 +28,9 @@ TEST_F(WgslGeneratorImplTest, ArrayAccessor) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "ary[5]");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), "ary[5]");
 }
 
 TEST_F(WgslGeneratorImplTest, ArrayAccessor_OfDref) {
@@ -41,8 +42,9 @@ TEST_F(WgslGeneratorImplTest, ArrayAccessor_OfDref) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "(*(p))[5]");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), "(*(p))[5]");
 }
 
 }  // namespace

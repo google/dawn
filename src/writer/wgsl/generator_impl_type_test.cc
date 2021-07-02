@@ -32,8 +32,9 @@ TEST_F(WgslGeneratorImplTest, EmitType_Alias) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(alias_ty)) << gen.error();
-  EXPECT_EQ(gen.result(), "alias");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, alias_ty)) << gen.error();
+  EXPECT_EQ(out.str(), "alias");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array) {
@@ -42,8 +43,9 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(arr)) << gen.error();
-  EXPECT_EQ(gen.result(), "array<bool, 4>");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, arr)) << gen.error();
+  EXPECT_EQ(out.str(), "array<bool, 4>");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {
@@ -52,8 +54,9 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(a)) << gen.error();
-  EXPECT_EQ(gen.result(), "[[stride(16)]] array<bool, 4>");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, a)) << gen.error();
+  EXPECT_EQ(out.str(), "[[stride(16)]] array<bool, 4>");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_RuntimeArray) {
@@ -62,8 +65,9 @@ TEST_F(WgslGeneratorImplTest, EmitType_RuntimeArray) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(a)) << gen.error();
-  EXPECT_EQ(gen.result(), "array<bool>");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, a)) << gen.error();
+  EXPECT_EQ(out.str(), "array<bool>");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Bool) {
@@ -72,8 +76,9 @@ TEST_F(WgslGeneratorImplTest, EmitType_Bool) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(bool_)) << gen.error();
-  EXPECT_EQ(gen.result(), "bool");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, bool_)) << gen.error();
+  EXPECT_EQ(out.str(), "bool");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_F32) {
@@ -82,8 +87,9 @@ TEST_F(WgslGeneratorImplTest, EmitType_F32) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(f32)) << gen.error();
-  EXPECT_EQ(gen.result(), "f32");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, f32)) << gen.error();
+  EXPECT_EQ(out.str(), "f32");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_I32) {
@@ -92,8 +98,9 @@ TEST_F(WgslGeneratorImplTest, EmitType_I32) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(i32)) << gen.error();
-  EXPECT_EQ(gen.result(), "i32");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, i32)) << gen.error();
+  EXPECT_EQ(out.str(), "i32");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Matrix) {
@@ -102,8 +109,9 @@ TEST_F(WgslGeneratorImplTest, EmitType_Matrix) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(mat2x3)) << gen.error();
-  EXPECT_EQ(gen.result(), "mat2x3<f32>");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, mat2x3)) << gen.error();
+  EXPECT_EQ(out.str(), "mat2x3<f32>");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Pointer) {
@@ -112,8 +120,9 @@ TEST_F(WgslGeneratorImplTest, EmitType_Pointer) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(p)) << gen.error();
-  EXPECT_EQ(gen.result(), "ptr<workgroup, f32>");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, p)) << gen.error();
+  EXPECT_EQ(out.str(), "ptr<workgroup, f32>");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
@@ -126,8 +135,9 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(s_ty)) << gen.error();
-  EXPECT_EQ(gen.result(), "S");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, s_ty)) << gen.error();
+  EXPECT_EQ(out.str(), "S");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_StructOffsetDecl) {
@@ -257,8 +267,9 @@ TEST_F(WgslGeneratorImplTest, EmitType_U32) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(u32)) << gen.error();
-  EXPECT_EQ(gen.result(), "u32");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, u32)) << gen.error();
+  EXPECT_EQ(out.str(), "u32");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Vector) {
@@ -267,8 +278,9 @@ TEST_F(WgslGeneratorImplTest, EmitType_Vector) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(vec3)) << gen.error();
-  EXPECT_EQ(gen.result(), "vec3<f32>");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, vec3)) << gen.error();
+  EXPECT_EQ(out.str(), "vec3<f32>");
 }
 
 struct TextureData {
@@ -289,8 +301,9 @@ TEST_P(WgslGenerator_DepthTextureTest, EmitType_DepthTexture) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(d)) << gen.error();
-  EXPECT_EQ(gen.result(), param.name);
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, d)) << gen.error();
+  EXPECT_EQ(out.str(), param.name);
 }
 INSTANTIATE_TEST_SUITE_P(
     WgslGeneratorImplTest,
@@ -311,8 +324,9 @@ TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_F32) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(t)) << gen.error();
-  EXPECT_EQ(gen.result(), std::string(param.name) + "<f32>");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, t)) << gen.error();
+  EXPECT_EQ(out.str(), std::string(param.name) + "<f32>");
 }
 
 TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_I32) {
@@ -323,8 +337,9 @@ TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_I32) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(t)) << gen.error();
-  EXPECT_EQ(gen.result(), std::string(param.name) + "<i32>");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, t)) << gen.error();
+  EXPECT_EQ(out.str(), std::string(param.name) + "<i32>");
 }
 
 TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_U32) {
@@ -335,8 +350,9 @@ TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_U32) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(t)) << gen.error();
-  EXPECT_EQ(gen.result(), std::string(param.name) + "<u32>");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, t)) << gen.error();
+  EXPECT_EQ(out.str(), std::string(param.name) + "<u32>");
 }
 INSTANTIATE_TEST_SUITE_P(
     WgslGeneratorImplTest,
@@ -358,8 +374,9 @@ TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_F32) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(t)) << gen.error();
-  EXPECT_EQ(gen.result(), std::string(param.name) + "<f32>");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, t)) << gen.error();
+  EXPECT_EQ(out.str(), std::string(param.name) + "<f32>");
 }
 
 TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_I32) {
@@ -370,8 +387,9 @@ TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_I32) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(t)) << gen.error();
-  EXPECT_EQ(gen.result(), std::string(param.name) + "<i32>");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, t)) << gen.error();
+  EXPECT_EQ(out.str(), std::string(param.name) + "<i32>");
 }
 
 TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_U32) {
@@ -382,8 +400,9 @@ TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_U32) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(t)) << gen.error();
-  EXPECT_EQ(gen.result(), std::string(param.name) + "<u32>");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, t)) << gen.error();
+  EXPECT_EQ(out.str(), std::string(param.name) + "<u32>");
 }
 INSTANTIATE_TEST_SUITE_P(WgslGeneratorImplTest,
                          WgslGenerator_MultiampledTextureTest,
@@ -414,8 +433,9 @@ TEST_P(WgslGenerator_StorageTextureTest, EmitType_StorageTexture) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(t)) << gen.error();
-  EXPECT_EQ(gen.result(), param.name);
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, t)) << gen.error();
+  EXPECT_EQ(out.str(), param.name);
 }
 INSTANTIATE_TEST_SUITE_P(
     WgslGeneratorImplTest,
@@ -460,8 +480,9 @@ TEST_P(WgslGenerator_ImageFormatTest, EmitType_StorageTexture_ImageFormat) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitImageFormat(param.fmt)) << gen.error();
-  EXPECT_EQ(gen.result(), param.name);
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitImageFormat(out, param.fmt)) << gen.error();
+  EXPECT_EQ(out.str(), param.name);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -510,8 +531,9 @@ TEST_F(WgslGeneratorImplTest, EmitType_Sampler) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(sampler)) << gen.error();
-  EXPECT_EQ(gen.result(), "sampler");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, sampler)) << gen.error();
+  EXPECT_EQ(out.str(), "sampler");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_SamplerComparison) {
@@ -520,8 +542,9 @@ TEST_F(WgslGeneratorImplTest, EmitType_SamplerComparison) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(sampler)) << gen.error();
-  EXPECT_EQ(gen.result(), "sampler_comparison");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, sampler)) << gen.error();
+  EXPECT_EQ(out.str(), "sampler_comparison");
 }
 
 }  // namespace

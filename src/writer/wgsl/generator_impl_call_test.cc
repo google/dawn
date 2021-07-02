@@ -31,8 +31,9 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
-  EXPECT_EQ(gen.result(), "my_func()");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+  EXPECT_EQ(out.str(), "my_func()");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithParams) {
@@ -50,8 +51,9 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithParams) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
-  EXPECT_EQ(gen.result(), "my_func(param1, param2)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+  EXPECT_EQ(out.str(), "my_func(param1, param2)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitStatement_Call) {

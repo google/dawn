@@ -30,8 +30,9 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_MemberAccessor) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "str.mem");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), "str.mem");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_MemberAccessor_OfDref) {
@@ -44,8 +45,9 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_MemberAccessor_OfDref) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "(*(p)).mem");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), "(*(p)).mem");
 }
 
 }  // namespace

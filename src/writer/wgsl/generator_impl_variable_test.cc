@@ -28,8 +28,9 @@ TEST_F(WgslGeneratorImplTest, EmitVariable) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(var<private> a : f32)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.error();
+  EXPECT_EQ(out.str(), R"(var<private> a : f32;)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_StorageClass) {
@@ -37,8 +38,9 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_StorageClass) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(var<private> a : f32)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.error();
+  EXPECT_EQ(out.str(), R"(var<private> a : f32;)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Read) {
@@ -53,9 +55,9 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Read) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
-  EXPECT_EQ(gen.result(),
-            R"([[binding(0), group(0)]] var<storage, read> a : S)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.error();
+  EXPECT_EQ(out.str(), R"([[binding(0), group(0)]] var<storage, read> a : S;)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Write) {
@@ -70,9 +72,10 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Write) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
-  EXPECT_EQ(gen.result(),
-            R"([[binding(0), group(0)]] var<storage, write> a : S)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.error();
+  EXPECT_EQ(out.str(),
+            R"([[binding(0), group(0)]] var<storage, write> a : S;)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Access_ReadWrite) {
@@ -87,9 +90,10 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_ReadWrite) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
-  EXPECT_EQ(gen.result(),
-            R"([[binding(0), group(0)]] var<storage, read_write> a : S)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.error();
+  EXPECT_EQ(out.str(),
+            R"([[binding(0), group(0)]] var<storage, read_write> a : S;)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
@@ -102,8 +106,9 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
-  EXPECT_EQ(gen.result(), R"([[group(1), binding(2)]] var a : sampler)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.error();
+  EXPECT_EQ(out.str(), R"([[group(1), binding(2)]] var a : sampler;)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
@@ -111,8 +116,9 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(var<private> a : f32 = 1.0)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.error();
+  EXPECT_EQ(out.str(), R"(var<private> a : f32 = 1.0;)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Const) {
@@ -121,8 +127,9 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Const) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(let a : f32 = 1.0)");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.error();
+  EXPECT_EQ(out.str(), R"(let a : f32 = 1.0;)");
 }
 
 }  // namespace

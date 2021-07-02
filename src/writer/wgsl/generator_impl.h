@@ -60,57 +60,56 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true if the declared type was emitted
   bool EmitTypeDecl(const ast::TypeDecl* ty);
   /// Handles an array accessor expression
+  /// @param out the output of the expression stream
   /// @param expr the expression to emit
   /// @returns true if the array accessor was emitted
-  bool EmitArrayAccessor(ast::ArrayAccessorExpression* expr);
+  bool EmitArrayAccessor(std::ostream& out, ast::ArrayAccessorExpression* expr);
   /// Handles an assignment statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
   bool EmitAssign(ast::AssignmentStatement* stmt);
   /// Handles generating a binary expression
+  /// @param out the output of the expression stream
   /// @param expr the binary expression
   /// @returns true if the expression was emitted, false otherwise
-  bool EmitBinary(ast::BinaryExpression* expr);
+  bool EmitBinary(std::ostream& out, ast::BinaryExpression* expr);
   /// Handles generating a bitcast expression
+  /// @param out the output of the expression stream
   /// @param expr the bitcast expression
   /// @returns true if the bitcast was emitted
-  bool EmitBitcast(ast::BitcastExpression* expr);
+  bool EmitBitcast(std::ostream& out, ast::BitcastExpression* expr);
   /// Handles a block statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
   bool EmitBlock(const ast::BlockStatement* stmt);
-  /// Handles a block statement with a newline at the end
-  /// @param stmt the statement to emit
-  /// @returns true if the statement was emitted successfully
-  bool EmitBlockAndNewline(const ast::BlockStatement* stmt);
   /// Handles a break statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
   bool EmitBreak(ast::BreakStatement* stmt);
   /// Handles generating a call expression
+  /// @param out the output of the expression stream
   /// @param expr the call expression
   /// @returns true if the call expression is emitted
-  bool EmitCall(ast::CallExpression* expr);
+  bool EmitCall(std::ostream& out, ast::CallExpression* expr);
   /// Handles a case statement
   /// @param stmt the statement
   /// @returns true if the statment was emitted successfully
   bool EmitCase(ast::CaseStatement* stmt);
   /// Handles generating a scalar constructor
+  /// @param out the output of the expression stream
   /// @param expr the scalar constructor expression
   /// @returns true if the scalar constructor is emitted
-  bool EmitScalarConstructor(ast::ScalarConstructorExpression* expr);
+  bool EmitScalarConstructor(std::ostream& out,
+                             ast::ScalarConstructorExpression* expr);
   /// Handles a continue statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
   bool EmitContinue(ast::ContinueStatement* stmt);
-  /// Handles generating an else statement
-  /// @param stmt the statement to emit
-  /// @returns true if the statement was emitted
-  bool EmitElse(ast::ElseStatement* stmt);
   /// Handles generate an Expression
+  /// @param out the output of the expression stream
   /// @param expr the expression
   /// @returns true if the expression was emitted
-  bool EmitExpression(ast::Expression* expr);
+  bool EmitExpression(std::ostream& out, ast::Expression* expr);
   /// Handles generating a fallthrough statement
   /// @param stmt the fallthrough statement
   /// @returns true if the statement was successfully emitted
@@ -120,25 +119,28 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true if the function was emitted
   bool EmitFunction(ast::Function* func);
   /// Handles generating an identifier expression
+  /// @param out the output of the expression stream
   /// @param expr the identifier expression
   /// @returns true if the identifeir was emitted
-  bool EmitIdentifier(ast::IdentifierExpression* expr);
+  bool EmitIdentifier(std::ostream& out, ast::IdentifierExpression* expr);
   /// Handles an if statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
   bool EmitIf(ast::IfStatement* stmt);
   /// Handles generating constructor expressions
+  /// @param out the output of the expression stream
   /// @param expr the constructor expression
   /// @returns true if the expression was emitted
-  bool EmitConstructor(ast::ConstructorExpression* expr);
+  bool EmitConstructor(std::ostream& out, ast::ConstructorExpression* expr);
   /// Handles generating a discard statement
   /// @param stmt the discard statement
   /// @returns true if the statement was successfully emitted
   bool EmitDiscard(ast::DiscardStatement* stmt);
   /// Handles a literal
+  /// @param out the output of the expression stream
   /// @param lit the literal to emit
   /// @returns true if the literal was successfully emitted
-  bool EmitLiteral(ast::Literal* lit);
+  bool EmitLiteral(std::ostream& out, ast::Literal* lit);
   /// Handles a loop statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emtited
@@ -148,9 +150,11 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true if the statement was emtited
   bool EmitForLoop(ast::ForLoopStatement* stmt);
   /// Handles a member accessor expression
+  /// @param out the output of the expression stream
   /// @param expr the member accessor expression
   /// @returns true if the member accessor was emitted
-  bool EmitMemberAccessor(ast::MemberAccessorExpression* expr);
+  bool EmitMemberAccessor(std::ostream& out,
+                          ast::MemberAccessorExpression* expr);
   /// Handles return statements
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
@@ -159,47 +163,58 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
   bool EmitStatement(ast::Statement* stmt);
-  /// Emits a statement without an indentation or trailing semi-colon and
-  /// newline
-  /// @param stmt the statement to emit
-  /// @returns true if the statement was emitted
-  bool EmitRawStatement(ast::Statement* stmt);
+  /// Handles a statement list
+  /// @param stmts the statements to emit
+  /// @returns true if the statements were emitted
+  bool EmitStatements(const ast::StatementList& stmts);
+  /// Handles a statement list with an increased indentation
+  /// @param stmts the statements to emit
+  /// @returns true if the statements were emitted
+  bool EmitStatementsWithIndent(const ast::StatementList& stmts);
   /// Handles generating a switch statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
   bool EmitSwitch(ast::SwitchStatement* stmt);
   /// Handles generating type
+  /// @param out the output of the expression stream
   /// @param type the type to generate
   /// @returns true if the type is emitted
-  bool EmitType(const ast::Type* type);
+  bool EmitType(std::ostream& out, const ast::Type* type);
   /// Handles generating a struct declaration
   /// @param str the struct
   /// @returns true if the struct is emitted
   bool EmitStructType(const ast::Struct* str);
   /// Handles emitting an image format
+  /// @param out the output of the expression stream
   /// @param fmt the format to generate
   /// @returns true if the format is emitted
-  bool EmitImageFormat(const ast::ImageFormat fmt);
+  bool EmitImageFormat(std::ostream& out, const ast::ImageFormat fmt);
   /// Handles emitting an access control
+  /// @param out the output of the expression stream
   /// @param access the access to generate
   /// @returns true if the access is emitted
-  bool EmitAccess(const ast::Access access);
+  bool EmitAccess(std::ostream& out, const ast::Access access);
   /// Handles emitting a type constructor
+  /// @param out the output of the expression stream
   /// @param expr the type constructor expression
   /// @returns true if the constructor is emitted
-  bool EmitTypeConstructor(ast::TypeConstructorExpression* expr);
+  bool EmitTypeConstructor(std::ostream& out,
+                           ast::TypeConstructorExpression* expr);
   /// Handles a unary op expression
+  /// @param out the output of the expression stream
   /// @param expr the expression to emit
   /// @returns true if the expression was emitted
-  bool EmitUnaryOp(ast::UnaryOpExpression* expr);
+  bool EmitUnaryOp(std::ostream& out, ast::UnaryOpExpression* expr);
   /// Handles generating a variable
+  /// @param out the output of the expression stream
   /// @param var the variable to generate
   /// @returns true if the variable was emitted
-  bool EmitVariable(ast::Variable* var);
+  bool EmitVariable(std::ostream& out, ast::Variable* var);
   /// Handles generating a decoration list
+  /// @param out the output of the expression stream
   /// @param decos the decoration list
   /// @returns true if the decorations were emitted
-  bool EmitDecorations(const ast::DecorationList& decos);
+  bool EmitDecorations(std::ostream& out, const ast::DecorationList& decos);
 };
 
 }  // namespace wgsl

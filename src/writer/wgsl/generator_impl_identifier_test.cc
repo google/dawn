@@ -28,8 +28,9 @@ TEST_F(WgslGeneratorImplTest, EmitIdentifierExpression_Single) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitExpression(i)) << gen.error();
-  EXPECT_EQ(gen.result(), "glsl");
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, i)) << gen.error();
+  EXPECT_EQ(out.str(), "glsl");
 }
 
 }  // namespace

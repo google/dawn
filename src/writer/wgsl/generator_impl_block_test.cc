@@ -36,20 +36,6 @@ TEST_F(WgslGeneratorImplTest, Emit_Block) {
 )");
 }
 
-TEST_F(WgslGeneratorImplTest, Emit_Block_WithoutNewline) {
-  auto* b = Block(create<ast::DiscardStatement>());
-  WrapInFunction(b);
-
-  GeneratorImpl& gen = Build();
-
-  gen.increment_indent();
-
-  ASSERT_TRUE(gen.EmitBlock(b)) << gen.error();
-  EXPECT_EQ(gen.result(), R"({
-    discard;
-  })");
-}
-
 }  // namespace
 }  // namespace wgsl
 }  // namespace writer
