@@ -30,7 +30,7 @@ void main(tint_symbol_2 tint_symbol_1) {
   int2 size = tint_tmp;
   int2 dstTexCoord = int2(GlobalInvocationID.xy);
   int2 srcTexCoord = dstTexCoord;
-  const int scalar_offset = (0u) / 4;
+  const uint scalar_offset = (0u) / 4;
   if ((uniforms[scalar_offset / 4][scalar_offset % 4] == 1u)) {
     srcTexCoord.y = ((size.y - dstTexCoord.y) - 1);
   }
@@ -42,7 +42,7 @@ void main(tint_symbol_2 tint_symbol_1) {
   {
     uint i = 0u;
     while (true) {
-      const int scalar_offset_1 = (12u) / 4;
+      const uint scalar_offset_1 = (12u) / 4;
       if (!((i < uniforms[scalar_offset_1 / 4][scalar_offset_1 % 4]))) {
         break;
       }

@@ -866,7 +866,7 @@ void main_1() {
   const float2 x_762 = uv;
   uv = float2(0.0f, 0.0f);
   uv = x_762;
-  const int scalar_offset = (0u) / 4;
+  const uint scalar_offset = (0u) / 4;
   uint4 ubo_load = x_188[scalar_offset / 4];
   const float2 x_191 = asfloat(((scalar_offset & 2) ? ubo_load.zw : ubo_load.xy));
   const QuicksortObject x_763 = obj;

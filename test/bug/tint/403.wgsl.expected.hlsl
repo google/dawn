@@ -1,15 +1,15 @@
 float2x2 tint_symbol_4(uint4 buffer[1], uint offset) {
-  const int scalar_offset = ((offset + 0u)) / 4;
+  const uint scalar_offset = ((offset + 0u)) / 4;
   uint4 ubo_load = buffer[scalar_offset / 4];
-  const int scalar_offset_1 = ((offset + 8u)) / 4;
+  const uint scalar_offset_1 = ((offset + 8u)) / 4;
   uint4 ubo_load_1 = buffer[scalar_offset_1 / 4];
   return float2x2(asfloat(((scalar_offset & 2) ? ubo_load.zw : ubo_load.xy)), asfloat(((scalar_offset_1 & 2) ? ubo_load_1.zw : ubo_load_1.xy)));
 }
 
 float2x2 tint_symbol_6(uint4 buffer[1], uint offset) {
-  const int scalar_offset_2 = ((offset + 0u)) / 4;
+  const uint scalar_offset_2 = ((offset + 0u)) / 4;
   uint4 ubo_load_2 = buffer[scalar_offset_2 / 4];
-  const int scalar_offset_3 = ((offset + 8u)) / 4;
+  const uint scalar_offset_3 = ((offset + 8u)) / 4;
   uint4 ubo_load_3 = buffer[scalar_offset_3 / 4];
   return float2x2(asfloat(((scalar_offset_2 & 2) ? ubo_load_2.zw : ubo_load_2.xy)), asfloat(((scalar_offset_3 & 2) ? ubo_load_3.zw : ubo_load_3.xy)));
 }

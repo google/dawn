@@ -25,22 +25,22 @@ void main(tint_symbol_2 tint_symbol_1) {
   const uint2 dstTexCoord = uint2(GlobalInvocationID.xy);
   const float4 nonCoveredColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
   bool success = true;
-  const int scalar_offset = (16u) / 4;
+  const uint scalar_offset = (16u) / 4;
   bool tint_tmp_4 = (dstTexCoord.x < uniforms[scalar_offset / 4][scalar_offset % 4]);
   if (!tint_tmp_4) {
-    const int scalar_offset_1 = (20u) / 4;
+    const uint scalar_offset_1 = (20u) / 4;
     tint_tmp_4 = (dstTexCoord.y < uniforms[scalar_offset_1 / 4][scalar_offset_1 % 4]);
   }
   bool tint_tmp_3 = (tint_tmp_4);
   if (!tint_tmp_3) {
-    const int scalar_offset_2 = (16u) / 4;
-    const int scalar_offset_3 = (24u) / 4;
+    const uint scalar_offset_2 = (16u) / 4;
+    const uint scalar_offset_3 = (24u) / 4;
     tint_tmp_3 = (dstTexCoord.x >= (uniforms[scalar_offset_2 / 4][scalar_offset_2 % 4] + uniforms[scalar_offset_3 / 4][scalar_offset_3 % 4]));
   }
   bool tint_tmp_2 = (tint_tmp_3);
   if (!tint_tmp_2) {
-    const int scalar_offset_4 = (20u) / 4;
-    const int scalar_offset_5 = (28u) / 4;
+    const uint scalar_offset_4 = (20u) / 4;
+    const uint scalar_offset_5 = (28u) / 4;
     tint_tmp_2 = (dstTexCoord.y >= (uniforms[scalar_offset_4 / 4][scalar_offset_4 % 4] + uniforms[scalar_offset_5 / 4][scalar_offset_5 % 4]));
   }
   if ((tint_tmp_2)) {
@@ -50,18 +50,18 @@ void main(tint_symbol_2 tint_symbol_1) {
     }
     success = (tint_tmp_5);
   } else {
-    const int scalar_offset_6 = (16u) / 4;
+    const uint scalar_offset_6 = (16u) / 4;
     uint4 ubo_load = uniforms[scalar_offset_6 / 4];
-    const int scalar_offset_7 = (8u) / 4;
+    const uint scalar_offset_7 = (8u) / 4;
     uint4 ubo_load_1 = uniforms[scalar_offset_7 / 4];
     uint2 srcTexCoord = ((dstTexCoord - ((scalar_offset_6 & 2) ? ubo_load.zw : ubo_load.xy)) + ((scalar_offset_7 & 2) ? ubo_load_1.zw : ubo_load_1.xy));
-    const int scalar_offset_8 = (0u) / 4;
+    const uint scalar_offset_8 = (0u) / 4;
     if ((uniforms[scalar_offset_8 / 4][scalar_offset_8 % 4] == 1u)) {
       srcTexCoord.y = ((uint(srcSize.y) - srcTexCoord.y) - 1u);
     }
     const float4 srcColor = src.Load(int3(srcTexCoord, 0));
     const float4 dstColor = tint_symbol.Load(int3(dstTexCoord, 0));
-    const int scalar_offset_9 = (4u) / 4;
+    const uint scalar_offset_9 = (4u) / 4;
     if ((uniforms[scalar_offset_9 / 4][scalar_offset_9 % 4] == 2u)) {
       bool tint_tmp_7 = success;
       if (tint_tmp_7) {

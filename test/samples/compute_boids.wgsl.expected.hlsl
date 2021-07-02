@@ -66,16 +66,16 @@ void comp_main(tint_symbol_5 tint_symbol_4) {
       }
       pos = asfloat(particlesA.Load2((16u * i))).xy;
       vel = asfloat(particlesA.Load2(((16u * i) + 8u))).xy;
-      const int scalar_offset = (4u) / 4;
+      const uint scalar_offset = (4u) / 4;
       if ((distance(pos, vPos) < asfloat(params[scalar_offset / 4][scalar_offset % 4]))) {
         cMass = (cMass + pos);
         cMassCount = (cMassCount + 1);
       }
-      const int scalar_offset_1 = (8u) / 4;
+      const uint scalar_offset_1 = (8u) / 4;
       if ((distance(pos, vPos) < asfloat(params[scalar_offset_1 / 4][scalar_offset_1 % 4]))) {
         colVel = (colVel - (pos - vPos));
       }
-      const int scalar_offset_2 = (12u) / 4;
+      const uint scalar_offset_2 = (12u) / 4;
       if ((distance(pos, vPos) < asfloat(params[scalar_offset_2 / 4][scalar_offset_2 % 4]))) {
         cVel = (cVel + vel);
         cVelCount = (cVelCount + 1);
@@ -91,12 +91,12 @@ void comp_main(tint_symbol_5 tint_symbol_4) {
   if ((cVelCount > 0)) {
     cVel = (cVel / float2(float(cVelCount), float(cVelCount)));
   }
-  const int scalar_offset_3 = (16u) / 4;
-  const int scalar_offset_4 = (20u) / 4;
-  const int scalar_offset_5 = (24u) / 4;
+  const uint scalar_offset_3 = (16u) / 4;
+  const uint scalar_offset_4 = (20u) / 4;
+  const uint scalar_offset_5 = (24u) / 4;
   vVel = (((vVel + (cMass * asfloat(params[scalar_offset_3 / 4][scalar_offset_3 % 4]))) + (colVel * asfloat(params[scalar_offset_4 / 4][scalar_offset_4 % 4]))) + (cVel * asfloat(params[scalar_offset_5 / 4][scalar_offset_5 % 4])));
   vVel = (normalize(vVel) * clamp(length(vVel), 0.0f, 0.100000001f));
-  const int scalar_offset_6 = (0u) / 4;
+  const uint scalar_offset_6 = (0u) / 4;
   vPos = (vPos + (vVel * asfloat(params[scalar_offset_6 / 4][scalar_offset_6 % 4])));
   if ((vPos.x < -1.0f)) {
     vPos.x = 1.0f;

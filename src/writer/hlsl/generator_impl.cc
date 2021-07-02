@@ -623,7 +623,7 @@ bool GeneratorImpl::EmitUniformBufferAccess(
   std::string scalar_offset = UniqueIdentifier("scalar_offset");
   {
     auto pre = line();
-    pre << "const int " << scalar_offset << " = (";
+    pre << "const uint " << scalar_offset << " = (";
     if (!EmitExpression(pre, params[1])) {  // offset
       return false;
     }

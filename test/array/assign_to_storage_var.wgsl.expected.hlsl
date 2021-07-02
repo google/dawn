@@ -14,10 +14,10 @@ struct S {
 };
 
 tint_array_wrapper tint_symbol_2(uint4 buffer[4], uint offset) {
-  const int scalar_offset = ((offset + 0u)) / 4;
-  const int scalar_offset_1 = ((offset + 16u)) / 4;
-  const int scalar_offset_2 = ((offset + 32u)) / 4;
-  const int scalar_offset_3 = ((offset + 48u)) / 4;
+  const uint scalar_offset = ((offset + 0u)) / 4;
+  const uint scalar_offset_1 = ((offset + 16u)) / 4;
+  const uint scalar_offset_2 = ((offset + 32u)) / 4;
+  const uint scalar_offset_3 = ((offset + 48u)) / 4;
   const tint_array_wrapper tint_symbol_11 = {{{asint(buffer[scalar_offset / 4][scalar_offset % 4])}, {asint(buffer[scalar_offset_1 / 4][scalar_offset_1 % 4])}, {asint(buffer[scalar_offset_2 / 4][scalar_offset_2 % 4])}, {asint(buffer[scalar_offset_3 / 4][scalar_offset_3 % 4])}}};
   return tint_symbol_11;
 }
