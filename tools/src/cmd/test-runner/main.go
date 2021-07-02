@@ -16,6 +16,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -25,6 +26,7 @@ import (
 	"runtime"
 	"sort"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"dawn.googlesource.com/tint/tools/src/fileutils"
@@ -36,6 +38,8 @@ import (
 type outputFormat string
 
 const (
+	testTimeout = 30 * time.Second
+
 	wgsl   = outputFormat("wgsl")
 	spvasm = outputFormat("spvasm")
 	msl    = outputFormat("msl")
@@ -68,11 +72,12 @@ optional flags:`)
 func run() error {
 	var formatList, filter, dxcPath, xcrunPath string
 	numCPU := runtime.NumCPU()
-	verbose, generateExpected, generateSkip := false, false, false
+	fxc, verbose, generateExpected, generateSkip := false, false, false, false
 	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, hlsl")
 	flag.StringVar(&filter, "filter", "**.wgsl, **.spvasm, **.spv", "comma separated list of glob patterns for test files")
 	flag.StringVar(&dxcPath, "dxc", "", "path to DXC executable for validating HLSL output")
 	flag.StringVar(&xcrunPath, "xcrun", "", "path to xcrun executable for validating MSL output")
+	flag.BoolVar(&fxc, "fxc", false, "validate with FXC instead of DXC")
 	flag.BoolVar(&verbose, "verbose", false, "print all run tests, including rows that all pass")
 	flag.BoolVar(&generateExpected, "generate-expected", false, "create or update all expected outputs")
 	flag.BoolVar(&generateSkip, "generate-skip", false, "create or update all expected outputs that fail with SKIP")
@@ -186,12 +191,12 @@ func run() error {
 		fmt.Printf("%-4s", tool.lang)
 		color.Unset()
 		fmt.Printf(" validation ")
-		if *tool.path == "" {
-			color.Set(color.FgRed)
-			fmt.Printf("DISABLED")
-		} else {
+		if *tool.path != "" || (fxc && tool.lang == "hlsl") {
 			color.Set(color.FgGreen)
 			fmt.Printf("ENABLED")
+		} else {
+			color.Set(color.FgRed)
+			fmt.Printf("DISABLED")
 		}
 		color.Unset()
 		fmt.Println()
@@ -215,7 +220,7 @@ func run() error {
 	for cpu := 0; cpu < numCPU; cpu++ {
 		go func() {
 			for job := range pendingJobs {
-				job.run(dir, exe, dxcPath, xcrunPath, generateExpected, generateSkip)
+				job.run(dir, exe, fxc, dxcPath, xcrunPath, generateExpected, generateSkip)
 			}
 		}()
 	}
@@ -451,7 +456,7 @@ type job struct {
 	result chan status
 }
 
-func (j job) run(wd, exe, dxcPath, xcrunPath string, generateExpected, generateSkip bool) {
+func (j job) run(wd, exe string, fxc bool, dxcPath, xcrunPath string, generateExpected, generateSkip bool) {
 	j.result <- func() status {
 		// Is there an expected output?
 		expected := loadExpectedFile(j.file, j.format)
@@ -485,7 +490,10 @@ func (j job) run(wd, exe, dxcPath, xcrunPath string, generateExpected, generateS
 			args = append(args, "--validate") // spirv-val is statically linked, always available
 			validate = true
 		case hlsl:
-			if dxcPath != "" {
+			if fxc {
+				args = append(args, "--fxc")
+				validate = true
+			} else if dxcPath != "" {
 				args = append(args, "--dxc", dxcPath)
 				validate = true
 			}
@@ -644,11 +652,17 @@ func percentage(n, total int) string {
 
 // invoke runs the executable 'exe' with the provided arguments.
 func invoke(wd, exe string, args ...string) (ok bool, output string) {
-	cmd := exec.Command(exe, args...)
+	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, exe, args...)
 	cmd.Dir = wd
 	out, err := cmd.CombinedOutput()
 	str := string(out)
 	if err != nil {
+		if ctx.Err() == context.DeadlineExceeded {
+			return false, fmt.Sprintf("test timed out after %v", testTimeout)
+		}
 		if str != "" {
 			return false, str
 		}
