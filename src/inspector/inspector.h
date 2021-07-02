@@ -62,6 +62,11 @@ class Inspector {
   std::map<std::string, uint32_t> GetConstantNameToIdMap();
 
   /// @param entry_point name of the entry point to get information about.
+  /// @returns the total size of shared storage required by an entry point,
+  //           including all uniforms storage buffers.
+  uint32_t GetStorageSize(const std::string& entry_point);
+
+  /// @param entry_point name of the entry point to get information about.
   /// @returns vector of all of the resource bindings.
   std::vector<ResourceBinding> GetResourceBindings(
       const std::string& entry_point);

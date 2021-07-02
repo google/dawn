@@ -14,6 +14,7 @@
 
 #include "src/inspector/inspector.h"
 
+#include <limits>
 #include <utility>
 
 #include "src/ast/bool_literal.h"
@@ -314,6 +315,33 @@ std::map<std::string, uint32_t> Inspector::GetConstantNameToIdMap() {
     }
   }
   return result;
+}
+
+uint32_t Inspector::GetStorageSize(const std::string& entry_point) {
+  auto* func = FindEntryPointByName(entry_point);
+  if (!func) {
+    return 0;
+  }
+
+  size_t size = 0;
+  auto* func_sem = program_->Sem().Get(func);
+  for (auto& ruv : func_sem->ReferencedUniformVariables()) {
+    const sem::Struct* s = ruv.first->Type()->UnwrapRef()->As<sem::Struct>();
+    if (s && s->IsBlockDecorated()) {
+      size += s->Size();
+    }
+  }
+  for (auto& rsv : func_sem->ReferencedStorageBufferVariables()) {
+    const sem::Struct* s = rsv.first->Type()->UnwrapRef()->As<sem::Struct>();
+    if (s) {
+      size += s->Size();
+    }
+  }
+
+  if (size > std::numeric_limits<uint32_t>::max()) {
+    return std::numeric_limits<uint32_t>::max();
+  }
+  return static_cast<uint32_t>(size);
 }
 
 std::vector<ResourceBinding> Inspector::GetResourceBindings(

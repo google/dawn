@@ -726,6 +726,8 @@ class InspectorGetConstantIDsTest : public InspectorHelper,
                                     public testing::Test {};
 class InspectorGetConstantNameToIdMapTest : public InspectorHelper,
                                             public testing::Test {};
+class InspectorGetStorageSizeTest : public InspectorHelper,
+                                    public testing::Test {};
 class InspectorGetResourceBindingsTest : public InspectorHelper,
                                          public testing::Test {};
 class InspectorGetUniformBufferResourceBindingsTest : public InspectorHelper,
@@ -1930,6 +1932,40 @@ TEST_F(InspectorGetConstantNameToIdMapTest, WithAndWithoutIds) {
   ASSERT_TRUE(result.count("c"));
   ASSERT_TRUE(program_->Sem().Get(c));
   EXPECT_EQ(result["c"], program_->Sem().Get(c)->ConstantId());
+}
+
+TEST_F(InspectorGetStorageSizeTest, Empty) {
+  MakeEmptyBodyFunction("ep_func",
+                        ast::DecorationList{Stage(ast::PipelineStage::kCompute),
+                                            WorkgroupSize(1)});
+  Inspector& inspector = Build();
+  EXPECT_EQ(0u, inspector.GetStorageSize("ep_func"));
+}
+
+TEST_F(InspectorGetStorageSizeTest, Simple) {
+  ast::Struct* ub_struct_type =
+      MakeUniformBufferType("ub_type", {ty.i32(), ty.i32()});
+  AddUniformBuffer("ub_var", ty.Of(ub_struct_type), 0, 0);
+  MakeStructVariableReferenceBodyFunction("ub_func", "ub_var", {{0, ty.i32()}});
+
+  auto sb = MakeStorageBufferTypes("sb_type", {ty.i32()});
+  AddStorageBuffer("sb_var", sb(), ast::Access::kReadWrite, 1, 0);
+  MakeStructVariableReferenceBodyFunction("sb_func", "sb_var", {{0, ty.i32()}});
+
+  auto ro_sb = MakeStorageBufferTypes("rosb_type", {ty.i32()});
+  AddStorageBuffer("rosb_var", ro_sb(), ast::Access::kRead, 1, 1);
+  MakeStructVariableReferenceBodyFunction("rosb_func", "rosb_var",
+                                          {{0, ty.i32()}});
+
+  MakeCallerBodyFunction("ep_func", {"ub_func", "sb_func", "rosb_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kCompute),
+                             WorkgroupSize(1),
+                         });
+
+  Inspector& inspector = Build();
+
+  EXPECT_EQ(16u, inspector.GetStorageSize("ep_func"));
 }
 
 TEST_F(InspectorGetResourceBindingsTest, Empty) {
