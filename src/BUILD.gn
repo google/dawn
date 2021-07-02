@@ -354,6 +354,8 @@ libtint_source_set("libtint_core_all_src") {
     "ast/fallthrough_statement.h",
     "ast/float_literal.cc",
     "ast/float_literal.h",
+    "ast/for_loop_statement.cc",
+    "ast/for_loop_statement.h",
     "ast/function.cc",
     "ast/function.h",
     "ast/group_decoration.cc",

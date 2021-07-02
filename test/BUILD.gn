@@ -169,6 +169,7 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/ast/f32_test.cc",
     "../src/ast/fallthrough_statement_test.cc",
     "../src/ast/float_literal_test.cc",
+    "../src/ast/for_loop_statement_test.cc",
     "../src/ast/function_test.cc",
     "../src/ast/group_decoration_test.cc",
     "../src/ast/i32_test.cc",

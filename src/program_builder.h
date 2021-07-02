@@ -35,6 +35,7 @@
 #include "src/ast/external_texture.h"
 #include "src/ast/f32.h"
 #include "src/ast/float_literal.h"
+#include "src/ast/for_loop_statement.h"
 #include "src/ast/i32.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/interpolate_decoration.h"
@@ -1918,6 +1919,40 @@ class ProgramBuilder {
   ast::LoopStatement* Loop(ast::BlockStatement* body,
                            ast::BlockStatement* continuing = nullptr) {
     return create<ast::LoopStatement>(body, continuing);
+  }
+
+  /// Creates a ast::ForLoopStatement with input body and optional initializer,
+  /// condition and continuing.
+  /// @param source the source information
+  /// @param init the optional loop initializer
+  /// @param cond the optional loop condition
+  /// @param cont the optional loop continuing
+  /// @param body the loop body
+  /// @returns the for loop statement pointer
+  template <typename COND>
+  ast::ForLoopStatement* For(const Source& source,
+                             ast::Statement* init,
+                             COND&& cond,
+                             ast::Statement* cont,
+                             ast::BlockStatement* body) {
+    return create<ast::ForLoopStatement>(
+        source, init, Expr(std::forward<COND>(cond)), cont, body);
+  }
+
+  /// Creates a ast::ForLoopStatement with input body and optional initializer,
+  /// condition and continuing.
+  /// @param init the optional loop initializer
+  /// @param cond the optional loop condition
+  /// @param cont the optional loop continuing
+  /// @param body the loop body
+  /// @returns the for loop statement pointer
+  template <typename COND>
+  ast::ForLoopStatement* For(ast::Statement* init,
+                             COND&& cond,
+                             ast::Statement* cont,
+                             ast::BlockStatement* body) {
+    return create<ast::ForLoopStatement>(init, Expr(std::forward<COND>(cond)),
+                                         cont, body);
   }
 
   /// Creates a ast::VariableDeclStatement for the input variable
