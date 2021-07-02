@@ -88,6 +88,7 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
   --transform <name list>   -- Runs transforms, name list is comma separated
                                Available transforms:
                                 first_index_offset
+                                fold_trivial_single_use_lets
                                 renamer
                                 robustness
   --parse-only              -- Stop after parsing the input
@@ -708,6 +709,8 @@ int main(int argc, const char** argv) {
       transform_inputs.Add<tint::transform::FirstIndexOffset::BindingPoint>(0,
                                                                             0);
       transform_manager.Add<tint::transform::FirstIndexOffset>();
+    } else if (name == "fold_trivial_single_use_lets") {
+      transform_manager.Add<tint::transform::FoldTrivialSingleUseLets>();
     } else if (name == "renamer") {
       transform_manager.Add<tint::transform::Renamer>();
     } else if (name == "robustness") {

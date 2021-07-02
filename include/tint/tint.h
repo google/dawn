@@ -26,6 +26,7 @@
 #include "src/sem/type_manager.h"
 #include "src/transform/binding_remapper.h"
 #include "src/transform/first_index_offset.h"
+#include "src/transform/fold_trivial_single_use_lets.h"
 #include "src/transform/manager.h"
 #include "src/transform/renamer.h"
 #include "src/transform/robustness.h"

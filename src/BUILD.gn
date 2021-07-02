@@ -568,6 +568,8 @@ libtint_source_set("libtint_core_all_src") {
     "transform/first_index_offset.h",
     "transform/fold_constants.cc",
     "transform/fold_constants.h",
+    "transform/fold_trivial_single_use_lets.cc",
+    "transform/fold_trivial_single_use_lets.h",
     "transform/inline_pointer_lets.cc",
     "transform/inline_pointer_lets.h",
     "transform/manager.cc",
