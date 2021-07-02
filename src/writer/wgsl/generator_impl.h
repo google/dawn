@@ -25,6 +25,7 @@
 #include "src/ast/continue_statement.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/fallthrough_statement.h"
+#include "src/ast/for_loop_statement.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
@@ -78,10 +79,6 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
   bool EmitBlock(const ast::BlockStatement* stmt);
-  /// Handles a block statement with a newline at the end
-  /// @param stmt the statement to emit
-  /// @returns true if the statement was emitted successfully
-  bool EmitIndentedBlockAndNewline(const ast::BlockStatement* stmt);
   /// Handles a block statement with a newline at the end
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
@@ -146,6 +143,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emtited
   bool EmitLoop(ast::LoopStatement* stmt);
+  /// Handles a for-loop statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emtited
+  bool EmitForLoop(ast::ForLoopStatement* stmt);
   /// Handles a member accessor expression
   /// @param expr the member accessor expression
   /// @returns true if the member accessor was emitted
@@ -158,6 +159,11 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
   bool EmitStatement(ast::Statement* stmt);
+  /// Emits a statement without an indentation or trailing semi-colon and
+  /// newline
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted
+  bool EmitRawStatement(ast::Statement* stmt);
   /// Handles generating a switch statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted

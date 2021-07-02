@@ -75,9 +75,11 @@ bool GeneratorImpl::Generate() {
         return false;
       }
     } else if (auto* var = decl->As<ast::Variable>()) {
+      make_indent();
       if (!EmitVariable(var)) {
         return false;
       }
+      out_ << ";" << std::endl;
     } else {
       TINT_UNREACHABLE(Writer, diagnostics_);
       return false;
@@ -575,8 +577,6 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
 }
 
 bool GeneratorImpl::EmitVariable(ast::Variable* var) {
-  make_indent();
-
   if (!var->decorations().empty()) {
     if (!EmitDecorations(var->decorations())) {
       return false;
@@ -617,7 +617,6 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
       return false;
     }
   }
-  out_ << ";" << std::endl;
 
   return true;
 }
@@ -819,16 +818,6 @@ bool GeneratorImpl::EmitBlock(const ast::BlockStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitIndentedBlockAndNewline(
-    const ast::BlockStatement* stmt) {
-  make_indent();
-  const bool result = EmitBlock(stmt);
-  if (result) {
-    out_ << std::endl;
-  }
-  return result;
-}
-
 bool GeneratorImpl::EmitBlockAndNewline(const ast::BlockStatement* stmt) {
   const bool result = EmitBlock(stmt);
   if (result) {
@@ -838,22 +827,32 @@ bool GeneratorImpl::EmitBlockAndNewline(const ast::BlockStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
+  make_indent();
+
+  if (!EmitRawStatement(stmt)) {
+    return false;
+  }
+
+  if (!stmt->IsAnyOf<ast::BlockStatement, ast::IfStatement,
+                     ast::SwitchStatement, ast::LoopStatement,
+                     ast::ForLoopStatement>()) {
+    out_ << ";" << std::endl;
+  }
+  return true;
+}
+
+bool GeneratorImpl::EmitRawStatement(ast::Statement* stmt) {
   if (auto* a = stmt->As<ast::AssignmentStatement>()) {
     return EmitAssign(a);
   }
   if (auto* b = stmt->As<ast::BlockStatement>()) {
-    return EmitIndentedBlockAndNewline(b);
+    return EmitBlockAndNewline(b);
   }
   if (auto* b = stmt->As<ast::BreakStatement>()) {
     return EmitBreak(b);
   }
   if (auto* c = stmt->As<ast::CallStatement>()) {
-    make_indent();
-    if (!EmitCall(c->expr())) {
-      return false;
-    }
-    out_ << ";" << std::endl;
-    return true;
+    return EmitCall(c->expr());
   }
   if (auto* c = stmt->As<ast::ContinueStatement>()) {
     return EmitContinue(c);
@@ -869,6 +868,9 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   }
   if (auto* l = stmt->As<ast::LoopStatement>()) {
     return EmitLoop(l);
+  }
+  if (auto* l = stmt->As<ast::ForLoopStatement>()) {
+    return EmitForLoop(l);
   }
   if (auto* r = stmt->As<ast::ReturnStatement>()) {
     return EmitReturn(r);
@@ -886,8 +888,6 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
 }
 
 bool GeneratorImpl::EmitAssign(ast::AssignmentStatement* stmt) {
-  make_indent();
-
   if (!EmitExpression(stmt->lhs())) {
     return false;
   }
@@ -898,14 +898,11 @@ bool GeneratorImpl::EmitAssign(ast::AssignmentStatement* stmt) {
     return false;
   }
 
-  out_ << ";" << std::endl;
-
   return true;
 }
 
 bool GeneratorImpl::EmitBreak(ast::BreakStatement*) {
-  make_indent();
-  out_ << "break;" << std::endl;
+  out_ << "break";
   return true;
 }
 
@@ -935,8 +932,7 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
-  make_indent();
-  out_ << "continue;" << std::endl;
+  out_ << "continue";
   return true;
 }
 
@@ -955,14 +951,11 @@ bool GeneratorImpl::EmitElse(ast::ElseStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitFallthrough(ast::FallthroughStatement*) {
-  make_indent();
-  out_ << "fallthrough;" << std::endl;
+  out_ << "fallthrough";
   return true;
 }
 
 bool GeneratorImpl::EmitIf(ast::IfStatement* stmt) {
-  make_indent();
-
   out_ << "if (";
   if (!EmitExpression(stmt->condition())) {
     return false;
@@ -984,14 +977,11 @@ bool GeneratorImpl::EmitIf(ast::IfStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitDiscard(ast::DiscardStatement*) {
-  make_indent();
-  out_ << "discard;" << std::endl;
+  out_ << "discard";
   return true;
 }
 
 bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
-  make_indent();
-
   out_ << "loop {" << std::endl;
   increment_indent();
 
@@ -1019,9 +1009,50 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
-  make_indent();
+bool GeneratorImpl::EmitForLoop(ast::ForLoopStatement* stmt) {
+  out_ << "for";
+  {
+    ScopedParen sp(out_);
+    if (auto* init = stmt->initializer()) {
+      if (!EmitRawStatement(init)) {
+        return false;
+      }
+    }
 
+    out_ << "; ";
+
+    if (auto* cond = stmt->condition()) {
+      if (!EmitExpression(cond)) {
+        return false;
+      }
+    }
+
+    out_ << "; ";
+
+    if (auto* cont = stmt->continuing()) {
+      if (!EmitRawStatement(cont)) {
+        return false;
+      }
+    }
+  }
+  out_ << " {" << std::endl;
+
+  {
+    ScopedIndent si(this);
+    for (auto* s : stmt->body()->statements()) {
+      if (!EmitStatement(s)) {
+        return false;
+      }
+    }
+  }
+
+  make_indent();
+  out_ << "}" << std::endl;
+
+  return true;
+}
+
+bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
   out_ << "return";
   if (stmt->has_value()) {
     out_ << " ";
@@ -1029,13 +1060,10 @@ bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
       return false;
     }
   }
-  out_ << ";" << std::endl;
   return true;
 }
 
 bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
-  make_indent();
-
   out_ << "switch(";
   if (!EmitExpression(stmt->condition())) {
     return false;
