@@ -964,6 +964,13 @@ class FunctionEmitter {
   TypedExpression MakeOperand(const spvtools::opt::Instruction& inst,
                               uint32_t operand_index);
 
+  /// Copies a typed expression to the result, but when the type is a pointer
+  /// or reference type, ensures the storage class is not defaulted.  That is,
+  /// it changes a storage class of "none" to "function".
+  /// @param expr a typed expression
+  /// @results a copy of the expression, with possibly updated type
+  TypedExpression InferFunctionStorageClass(TypedExpression expr);
+
   /// Returns an expression for a SPIR-V OpAccessChain or OpInBoundsAccessChain
   /// instruction.
   /// @param inst the SPIR-V instruction

@@ -3786,6 +3786,21 @@ TypedExpression FunctionEmitter::MakeOperand(
   return parser_impl_.RectifyOperandSignedness(inst, std::move(expr));
 }
 
+TypedExpression FunctionEmitter::InferFunctionStorageClass(
+    TypedExpression expr) {
+  TypedExpression result(expr);
+  if (const auto* ref = expr.type->UnwrapAlias()->As<Reference>()) {
+    if (ref->storage_class == ast::StorageClass::kNone) {
+      expr.type = ty_.Reference(ref->type, ast::StorageClass::kFunction);
+    }
+  } else if (const auto* ptr = expr.type->UnwrapAlias()->As<Pointer>()) {
+    if (ptr->storage_class == ast::StorageClass::kNone) {
+      expr.type = ty_.Pointer(ptr->type, ast::StorageClass::kFunction);
+    }
+  }
+  return expr;
+}
+
 TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     const spvtools::opt::Instruction& inst) {
   if (inst.result_id() == 0) {
@@ -4118,7 +4133,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(
   // ever-deeper nested indexing expressions. Start off with an expression
   // for the base, and then bury that inside nested indexing expressions.
   if (!current_expr) {
-    current_expr = MakeOperand(inst, 0);
+    current_expr = InferFunctionStorageClass(MakeOperand(inst, 0));
     if (current_expr.type->Is<Pointer>()) {
       current_expr = Dereference(current_expr);
     }

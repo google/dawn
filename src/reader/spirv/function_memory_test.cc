@@ -903,6 +903,76 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_DereferenceBase) {
   EXPECT_EQ(got, expected) << got;
 }
 
+TEST_F(SpvParserMemoryTest,
+       EmitStatement_AccessChain_InferFunctionStorageClass) {
+  // An access chain can have no indices. When the base is a Function variable,
+  // the reference type has no explicit storage class in the AST representation.
+  // But the pointer type for the let declaration must have an explicit
+  // 'function' storage class. From crbug.com/tint/807
+  const std::string assembly = R"(
+OpCapability Shader
+OpMemoryModel Logical Simple
+OpEntryPoint Fragment %main "main"
+OpExecutionMode %main OriginUpperLeft
+
+%uint = OpTypeInt 32 0
+%ptr_ty = OpTypePointer Function %uint
+
+  %void = OpTypeVoid
+%voidfn = OpTypeFunction %void
+  %main = OpFunction %void None %voidfn
+ %entry = OpLabel
+     %1 = OpVariable %ptr_ty Function
+     %2 = OpAccessChain %ptr_ty %1
+          OpReturn
+          OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly;
+  const auto got = p->program().to_str();
+  const std::string expected = R"(Module{
+  Function main_1 -> __void
+  ()
+  {
+    VariableDeclStatement{
+      Variable{
+        x_1
+        none
+        undefined
+        __u32
+      }
+    }
+    VariableDeclStatement{
+      VariableConst{
+        x_2
+        none
+        undefined
+        __ptr_function__u32
+        {
+          UnaryOp[not set]{
+            address-of
+            Identifier[not set]{x_1}
+          }
+        }
+      }
+    }
+    Return{}
+  }
+  Function main -> __void
+  StageDecoration{fragment}
+  ()
+  {
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+  }
+}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
+
 std::string OldStorageBufferPreamble() {
   return Preamble() + R"(
      OpName %myvar "myvar"
