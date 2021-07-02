@@ -652,6 +652,17 @@ TEST_F(ResolverTest, Stmt_Loop_ContinueInLoopBodyAfterDecl_UsageInContinuing) {
   EXPECT_TRUE(r()->Resolve());
 }
 
+TEST_F(ResolverTest, Stmt_ForLoop_CondIsNotBool) {
+  // for (; 1.0f; ) {
+  // }
+
+  WrapInFunction(For(nullptr, Expr(Source{{12, 34}}, 1.0f), nullptr, Block()));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: for-loop condition must be bool, got f32");
+}
+
 TEST_F(ResolverValidationTest, Stmt_ContinueInLoop) {
   WrapInFunction(Loop(Block(create<ast::ContinueStatement>(Source{{12, 34}}))));
   EXPECT_TRUE(r()->Resolve()) << r()->error();

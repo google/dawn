@@ -109,7 +109,7 @@ TEST_F(ResolverControlBlockValidationTest, SwitchWithTwoDefault_Fail) {
       "12:34 error: switch statement must have exactly one default clause");
 }
 
-TEST_F(ResolverControlBlockValidationTest, UnreachableCode_continue) {
+TEST_F(ResolverControlBlockValidationTest, UnreachableCode_Loop_continue) {
   // loop {
   //   continue;
   //   var z : i32;
@@ -122,6 +122,20 @@ TEST_F(ResolverControlBlockValidationTest, UnreachableCode_continue) {
   EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
 }
 
+TEST_F(ResolverControlBlockValidationTest, UnreachableCode_ForLoop_continue) {
+  // for (;;;) {
+  //   continue;
+  //   var z : i32;
+  // }
+  WrapInFunction(
+      For(nullptr, nullptr, nullptr,
+          Block(create<ast::ContinueStatement>(),
+                Decl(Source{{12, 34}},
+                     Var("z", ty.i32(), ast::StorageClass::kNone)))));
+
+  EXPECT_FALSE(r()->Resolve()) << r()->error();
+  EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
+}
 TEST_F(ResolverControlBlockValidationTest, UnreachableCode_break) {
   // switch (a) {
   //   case 1: { break; var a : u32 = 2;}

@@ -59,7 +59,6 @@ TEST_F(ResolverBlockTest, Block) {
   auto* s = Sem().Get(stmt);
   ASSERT_NE(s, nullptr);
   ASSERT_NE(s->Block(), nullptr);
-  ASSERT_NE(s->Block()->Parent(), nullptr);
   EXPECT_EQ(s->Block(), s->Block()->FindFirstParent<sem::BlockStatement>());
   EXPECT_EQ(s->Block()->Parent(),
             s->Block()->FindFirstParent<sem::FunctionBlockStatement>());
@@ -69,8 +68,98 @@ TEST_F(ResolverBlockTest, Block) {
   EXPECT_EQ(s->Block()->Parent()->Parent(), nullptr);
 }
 
-// TODO(bclayton): Add tests for other block types (LoopBlockStatement,
-//                 LoopContinuingBlockStatement, SwitchCaseBlockStatement)
+TEST_F(ResolverBlockTest, LoopBlock) {
+  // fn F() {
+  //   loop {
+  //     var x : 32;
+  //   }
+  // }
+  auto* stmt = Decl(Var("x", ty.i32()));
+  auto* loop = Loop(Block(stmt));
+  auto* f = Func("F", {}, ty.void_(), {loop});
+
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+  auto* s = Sem().Get(stmt);
+  ASSERT_NE(s, nullptr);
+  ASSERT_NE(s->Block(), nullptr);
+  EXPECT_EQ(s->Block(), s->Block()->FindFirstParent<sem::LoopBlockStatement>());
+  ASSERT_TRUE(Is<sem::FunctionBlockStatement>(s->Block()->Parent()->Parent()));
+  EXPECT_EQ(s->Block()->Parent()->Parent(),
+            s->Block()->FindFirstParent<sem::FunctionBlockStatement>());
+  EXPECT_EQ(s->Block()
+                ->Parent()
+                ->Parent()
+                ->As<sem::FunctionBlockStatement>()
+                ->Function(),
+            f);
+  EXPECT_EQ(s->Block()->Parent()->Parent()->Parent(), nullptr);
+}
+
+TEST_F(ResolverBlockTest, ForLoopBlock) {
+  // fn F() {
+  //   for (var i : u32; true; i = i + 1u) {
+  //     return;
+  //   }
+  // }
+  auto* init = Decl(Var("i", ty.u32()));
+  auto* cond = Expr(true);
+  auto* cont = Assign("i", Add("i", 1u));
+  auto* stmt = Return();
+  auto* body = Block(stmt);
+  auto* for_ = For(init, cond, cont, body);
+  auto* f = Func("F", {}, ty.void_(), {for_});
+
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+  {
+    auto* s = Sem().Get(init);
+    ASSERT_NE(s, nullptr);
+    ASSERT_NE(s->Block(), nullptr);
+    EXPECT_EQ(s->Block(),
+              s->Block()->FindFirstParent<sem::LoopBlockStatement>());
+    ASSERT_TRUE(
+        Is<sem::FunctionBlockStatement>(s->Block()->Parent()->Parent()));
+  }
+  {  // Condition expression's statement is the for-loop itself
+    auto* s = Sem().Get(cond);
+    ASSERT_NE(s, nullptr);
+    ASSERT_NE(s->Stmt()->Block(), nullptr);
+    EXPECT_EQ(
+        s->Stmt()->Block(),
+        s->Stmt()->Block()->FindFirstParent<sem::FunctionBlockStatement>());
+    ASSERT_TRUE(Is<sem::FunctionBlockStatement>(s->Stmt()->Block()));
+  }
+  {
+    auto* s = Sem().Get(cont);
+    ASSERT_NE(s, nullptr);
+    ASSERT_NE(s->Block(), nullptr);
+    EXPECT_EQ(s->Block(),
+              s->Block()->FindFirstParent<sem::LoopBlockStatement>());
+    ASSERT_TRUE(
+        Is<sem::FunctionBlockStatement>(s->Block()->Parent()->Parent()));
+  }
+  {
+    auto* s = Sem().Get(stmt);
+    ASSERT_NE(s, nullptr);
+    ASSERT_NE(s->Block(), nullptr);
+    EXPECT_EQ(s->Block(),
+              s->Block()->FindFirstParent<sem::LoopBlockStatement>());
+    ASSERT_TRUE(
+        Is<sem::FunctionBlockStatement>(s->Block()->Parent()->Parent()));
+    EXPECT_EQ(s->Block()->Parent()->Parent(),
+              s->Block()->FindFirstParent<sem::FunctionBlockStatement>());
+    EXPECT_EQ(s->Block()
+                  ->Parent()
+                  ->Parent()
+                  ->As<sem::FunctionBlockStatement>()
+                  ->Function(),
+              f);
+    EXPECT_EQ(s->Block()->Parent()->Parent()->Parent(), nullptr);
+  }
+}
+// TODO(bclayton): Add tests for other block types
+//                 (LoopContinuingBlockStatement, SwitchCaseBlockStatement)
 
 }  // namespace
 }  // namespace resolver

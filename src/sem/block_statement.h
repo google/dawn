@@ -105,7 +105,7 @@ class FunctionBlockStatement
   ast::Function const* const function_;
 };
 
-/// Holds semantic information about a loop block
+/// Holds semantic information about a loop block or a for-loop block
 class LoopBlockStatement : public Castable<LoopBlockStatement, BlockStatement> {
  public:
   /// Constructor

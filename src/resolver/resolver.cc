@@ -28,6 +28,7 @@
 #include "src/ast/disable_validation_decoration.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/fallthrough_statement.h"
+#include "src/ast/for_loop_statement.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/internal_decoration.h"
 #include "src/ast/interpolate_decoration.h"
@@ -1701,6 +1702,9 @@ bool Resolver::Statement(ast::Statement* stmt) {
   if (auto* l = stmt->As<ast::LoopStatement>()) {
     return LoopStatement(l);
   }
+  if (auto* l = stmt->As<ast::ForLoopStatement>()) {
+    return ForLoopStatement(l);
+  }
   if (auto* r = stmt->As<ast::ReturnStatement>()) {
     return Return(r);
   }
@@ -1822,6 +1826,45 @@ bool Resolver::LoopStatement(ast::LoopStatement* stmt) {
     }
     return true;
   });
+}
+
+bool Resolver::ForLoopStatement(ast::ForLoopStatement* stmt) {
+  Mark(stmt->body());
+
+  auto* sem_block_body = builder_->create<sem::LoopBlockStatement>(
+      stmt->body(), current_statement_);
+  builder_->Sem().Add(stmt->body(), sem_block_body);
+  TINT_SCOPED_ASSIGNMENT(current_statement_, sem_block_body);
+
+  if (auto* initializer = stmt->initializer()) {
+    Mark(initializer);
+    if (!Statement(initializer)) {
+      return false;
+    }
+  }
+
+  if (auto* condition = stmt->condition()) {
+    Mark(condition);
+    if (!Expression(condition)) {
+      return false;
+    }
+
+    if (!TypeOf(condition)->Is<sem::Bool>()) {
+      AddError("for-loop condition must be bool, got " + TypeNameOf(condition),
+               condition->source());
+      return false;
+    }
+  }
+
+  if (auto* continuing = stmt->continuing()) {
+    Mark(continuing);
+    if (!Statement(continuing)) {
+      return false;
+    }
+  }
+
+  return BlockScope(stmt->body(),
+                    [&] { return Statements(stmt->body()->list()); });
 }
 
 bool Resolver::Expressions(const ast::ExpressionList& list) {
