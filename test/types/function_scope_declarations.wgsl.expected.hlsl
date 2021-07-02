@@ -23,9 +23,9 @@ void main() {
   const float4 v4f32_let = float4(0.0f, 0.0f, 0.0f, 0.0f);
   float2x3 m2x3_var = float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   const float3x4 m3x4_let = float3x4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-  tint_array_wrapper arr_var = {{0.0f, 0.0f, 0.0f, 0.0f}};
-  const tint_array_wrapper arr_let = {{0.0f, 0.0f, 0.0f, 0.0f}};
-  S struct_var = {0.0f};
-  const S struct_let = {0.0f};
+  tint_array_wrapper arr_var = {(float[4])0};
+  const tint_array_wrapper arr_let = {(float[4])0};
+  S struct_var = (S)0;
+  const S struct_let = (S)0;
   return;
 }

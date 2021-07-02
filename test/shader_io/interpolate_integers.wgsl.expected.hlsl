@@ -14,7 +14,7 @@ struct tint_symbol {
 };
 
 tint_symbol vert_main() {
-  const Interface tint_symbol_1 = {0, 0u, int4(0, 0, 0, 0), uint4(0u, 0u, 0u, 0u), float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  const Interface tint_symbol_1 = (Interface)0;
   const tint_symbol tint_symbol_5 = {tint_symbol_1.i, tint_symbol_1.u, tint_symbol_1.vi, tint_symbol_1.vu, tint_symbol_1.pos};
   return tint_symbol_5;
 }

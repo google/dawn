@@ -10,7 +10,7 @@ tint_array_wrapper tint_symbol_1(ByteAddressBuffer buffer, uint offset) {
 ByteAddressBuffer sspp962805860buildInformation : register(t2, space0);
 
 void main_1() {
-  tint_array_wrapper orientation = {{0, 0, 0, 0, 0, 0}};
+  tint_array_wrapper orientation = (tint_array_wrapper)0;
   const tint_array_wrapper x_23 = tint_symbol_1(sspp962805860buildInformation, 36u);
   orientation.arr[0] = x_23.arr[0u];
   orientation.arr[1] = x_23.arr[1u];

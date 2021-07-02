@@ -3,7 +3,7 @@ struct S {
 };
 
 void main_1() {
-  S V = {0};
+  S V = (S)0;
   V.i = 5;
   return;
 }

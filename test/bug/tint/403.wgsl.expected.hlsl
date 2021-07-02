@@ -33,7 +33,7 @@ struct tint_array_wrapper {
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   const uint gl_VertexIndex = tint_symbol.gl_VertexIndex;
-  tint_array_wrapper indexable = {{float2(0.0f, 0.0f), float2(0.0f, 0.0f), float2(0.0f, 0.0f)}};
+  tint_array_wrapper indexable = (tint_array_wrapper)0;
   const float2x2 x_23 = tint_symbol_4(x_20, 0u);
   const float2x2 x_28 = tint_symbol_6(x_26, 0u);
   const uint x_46 = gl_VertexIndex;

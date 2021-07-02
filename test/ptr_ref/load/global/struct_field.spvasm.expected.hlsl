@@ -2,7 +2,7 @@ struct S {
   int i;
 };
 
-static S V = {0};
+static S V = (S)0;
 
 void main_1() {
   int i = 0;

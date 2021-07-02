@@ -18,12 +18,12 @@ float ret_f32() {
 }
 
 MyStruct ret_MyStruct() {
-  const MyStruct tint_symbol_1 = {0.0f};
+  const MyStruct tint_symbol_1 = (MyStruct)0;
   return tint_symbol_1;
 }
 
 tint_array_wrapper ret_MyArray() {
-  const tint_array_wrapper tint_symbol_2 = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+  const tint_array_wrapper tint_symbol_2 = {(float[10])0};
   return tint_symbol_2;
 }
 
@@ -36,7 +36,7 @@ void let_decls() {
   const float3 v6 = float3(1.0f, 1.0f, 1.0f);
   const float3x3 v7 = float3x3(v6, v6, v6);
   const MyStruct v8 = {1.0f};
-  const tint_array_wrapper v9 = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+  const tint_array_wrapper v9 = {(float[10])0};
   const int v10 = ret_i32();
   const uint v11 = ret_u32();
   const float v12 = ret_f32();

@@ -5,7 +5,7 @@ struct S {
 
 [numthreads(1, 1, 1)]
 void main() {
-  S v = {0, 0.0f};
+  S v = (S)0;
   v;
   return;
 }

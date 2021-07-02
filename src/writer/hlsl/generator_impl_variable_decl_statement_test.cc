@@ -61,8 +61,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(),
-              HasSubstr("  float a[5] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f};\n"));
+  EXPECT_THAT(gen.result(), HasSubstr("  float a[5] = (float[5])0;\n"));
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {

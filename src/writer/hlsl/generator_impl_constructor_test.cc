@@ -233,7 +233,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Struct_Empty) {
   GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("{0, 0.0f, int3(0, 0, 0)}"));
+  EXPECT_THAT(gen.result(), HasSubstr("(S)0"));
 }
 
 }  // namespace

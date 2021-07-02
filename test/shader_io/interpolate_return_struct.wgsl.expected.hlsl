@@ -22,7 +22,7 @@ struct tint_symbol {
 };
 
 tint_symbol main() {
-  const Out tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f), 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+  const Out tint_symbol_1 = (Out)0;
   const tint_symbol tint_symbol_2 = {tint_symbol_1.none, tint_symbol_1.flat, tint_symbol_1.perspective_center, tint_symbol_1.perspective_centroid, tint_symbol_1.perspective_sample, tint_symbol_1.linear_center, tint_symbol_1.linear_centroid, tint_symbol_1.linear_sample, tint_symbol_1.pos};
   return tint_symbol_2;
 }

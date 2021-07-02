@@ -62,7 +62,7 @@ void tint_symbol_10(RWByteAddressBuffer buffer, uint offset, tint_array_wrapper_
   tint_symbol_9(buffer, (offset + 72u), value.arr[3u]);
 }
 
-static tint_array_wrapper src_private = {{{0}, {0}, {0}, {0}}};
+static tint_array_wrapper src_private = (tint_array_wrapper)0;
 groupshared tint_array_wrapper src_workgroup;
 cbuffer cbuffer_src_uniform : register(b0, space0) {
   uint4 src_uniform[4];
@@ -72,22 +72,22 @@ RWByteAddressBuffer tint_symbol : register(u2, space0);
 RWByteAddressBuffer dst_nested : register(u3, space0);
 
 tint_array_wrapper ret_arr() {
-  const tint_array_wrapper tint_symbol_13 = {{{0}, {0}, {0}, {0}}};
+  const tint_array_wrapper tint_symbol_13 = {(tint_padded_array_element[4])0};
   return tint_symbol_13;
 }
 
 S ret_struct_arr() {
-  const S tint_symbol_14 = {{{{0}, {0}, {0}, {0}}}};
+  const S tint_symbol_14 = (S)0;
   return tint_symbol_14;
 }
 
 void foo(tint_array_wrapper src_param) {
-  tint_array_wrapper src_function = {{{0}, {0}, {0}, {0}}};
+  tint_array_wrapper src_function = (tint_array_wrapper)0;
   const tint_array_wrapper tint_symbol_15 = {{{1}, {2}, {3}, {3}}};
   tint_symbol_6(tint_symbol, 0u, tint_symbol_15);
   tint_symbol_6(tint_symbol, 0u, src_param);
   tint_symbol_6(tint_symbol, 0u, ret_arr());
-  const tint_array_wrapper src_let = {{{0}, {0}, {0}, {0}}};
+  const tint_array_wrapper src_let = {(tint_padded_array_element[4])0};
   tint_symbol_6(tint_symbol, 0u, src_let);
   tint_symbol_6(tint_symbol, 0u, src_function);
   tint_symbol_6(tint_symbol, 0u, src_private);
@@ -95,6 +95,6 @@ void foo(tint_array_wrapper src_param) {
   tint_symbol_6(tint_symbol, 0u, ret_struct_arr().arr);
   tint_symbol_6(tint_symbol, 0u, tint_symbol_2(src_uniform, 0u));
   tint_symbol_6(tint_symbol, 0u, tint_symbol_4(src_storage, 0u));
-  tint_array_wrapper_1 src_nested = {{{{{{0, 0}}, {{0, 0}}, {{0, 0}}}}, {{{{0, 0}}, {{0, 0}}, {{0, 0}}}}, {{{{0, 0}}, {{0, 0}}, {{0, 0}}}}, {{{{0, 0}}, {{0, 0}}, {{0, 0}}}}}};
+  tint_array_wrapper_1 src_nested = (tint_array_wrapper_1)0;
   tint_symbol_10(dst_nested, 0u, src_nested);
 }

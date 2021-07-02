@@ -784,7 +784,7 @@ struct tint_array_wrapper {
 };
 
 tint_array_wrapper my_func() {
-  const tint_array_wrapper tint_symbol = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+  const tint_array_wrapper tint_symbol = {(float[5])0};
   return tint_symbol;
 }
 )"));

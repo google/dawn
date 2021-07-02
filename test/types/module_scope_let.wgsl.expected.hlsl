@@ -15,8 +15,8 @@ struct tint_array_wrapper {
   float arr[4];
 };
 
-static const tint_array_wrapper arr_let = {{0.0f, 0.0f, 0.0f, 0.0f}};
-static const S struct_let = {0.0f};
+static const tint_array_wrapper arr_let = {(float[4])0};
+static const S struct_let = (S)0;
 
 [numthreads(1, 1, 1)]
 void main() {

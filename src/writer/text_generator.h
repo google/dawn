@@ -81,7 +81,7 @@ class TextGenerator {
     ~LineWriter();
 
     /// @returns the ostringstream
-    operator std::ostream &() { return os; }
+    operator std::ostream&() { return os; }
 
     /// @param rhs the value to write to the line
     /// @returns the ostream so calls can be chained

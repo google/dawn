@@ -29,7 +29,7 @@ struct tint_symbol_2 {
 
 tint_symbol_2 vtx_main(tint_symbol_1 tint_symbol) {
   const VertexInput input = {tint_symbol.cur_position, tint_symbol.color};
-  VertexOutput output = {float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  VertexOutput output = (VertexOutput)0;
   output.Position = mul(input.cur_position, tint_symbol_7(uniforms, 0u));
   output.vtxFragColor = input.color;
   const tint_symbol_2 tint_symbol_8 = {output.vtxFragColor, output.Position};

@@ -2508,38 +2508,13 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
         return false;
       }
     }
-  } else if (auto* str = type->As<sem::Struct>()) {
-    auto it = structure_builders_.find(str);
-    if (it != structure_builders_.end()) {
-      out << it->second << "(";
-    } else {
-      out << "{";
+  } else if (type->IsAnyOf<sem::Struct, sem::Array>()) {
+    out << "(";
+    if (!EmitType(out, type, ast::StorageClass::kNone, ast::Access::kUndefined,
+                  "")) {
+      return false;
     }
-
-    bool first = true;
-    for (auto* member : str->Members()) {
-      if (!first) {
-        out << ", ";
-      }
-      first = false;
-      if (!EmitZeroValue(out, member->Type())) {
-        return false;
-      }
-    }
-
-    out << (it != structure_builders_.end() ? ")" : "}");
-  } else if (auto* arr = type->As<sem::Array>()) {
-    out << "{";
-    auto* elem = arr->ElemType();
-    for (size_t i = 0; i < arr->Count(); i++) {
-      if (i > 0) {
-        out << ", ";
-      }
-      if (!EmitZeroValue(out, elem)) {
-        return false;
-      }
-    }
-    out << "}";
+    out << ")0";
   } else {
     diagnostics_.add_error(
         diag::System::Writer,

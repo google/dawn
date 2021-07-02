@@ -63,7 +63,7 @@ static float2 v_TexCoord = float2(0.0f, 0.0f);
 static float4 gl_Position = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 float3 Mat4x3GetCol0_(Mat4x3_ m) {
-  Mat4x3_ m1 = {float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  Mat4x3_ m1 = (Mat4x3_)0;
   m1 = m;
   const Mat4x3_ _e2 = m1;
   const Mat4x3_ _e5 = m1;
@@ -72,7 +72,7 @@ float3 Mat4x3GetCol0_(Mat4x3_ m) {
 }
 
 float3 Mat4x3GetCol1_(Mat4x3_ m2) {
-  Mat4x3_ m3 = {float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  Mat4x3_ m3 = (Mat4x3_)0;
   m3 = m2;
   const Mat4x3_ _e2 = m3;
   const Mat4x3_ _e5 = m3;
@@ -81,7 +81,7 @@ float3 Mat4x3GetCol1_(Mat4x3_ m2) {
 }
 
 float3 Mat4x3GetCol2_(Mat4x3_ m4) {
-  Mat4x3_ m5 = {float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  Mat4x3_ m5 = (Mat4x3_)0;
   m5 = m4;
   const Mat4x3_ _e2 = m5;
   const Mat4x3_ _e5 = m5;
@@ -90,7 +90,7 @@ float3 Mat4x3GetCol2_(Mat4x3_ m4) {
 }
 
 float3 Mat4x3GetCol3_(Mat4x3_ m6) {
-  Mat4x3_ m7 = {float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  Mat4x3_ m7 = (Mat4x3_)0;
   m7 = m6;
   const Mat4x3_ _e2 = m7;
   const Mat4x3_ _e5 = m7;
@@ -99,7 +99,7 @@ float3 Mat4x3GetCol3_(Mat4x3_ m6) {
 }
 
 float4 Mul(Mat4x4_ m8, float4 v) {
-  Mat4x4_ m9 = {float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  Mat4x4_ m9 = (Mat4x4_)0;
   float4 v1 = float4(0.0f, 0.0f, 0.0f, 0.0f);
   m9 = m8;
   v1 = v;
@@ -115,7 +115,7 @@ float4 Mul(Mat4x4_ m8, float4 v) {
 }
 
 float3 Mul1(Mat4x3_ m10, float4 v2) {
-  Mat4x3_ m11 = {float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  Mat4x3_ m11 = (Mat4x3_)0;
   float4 v3 = float4(0.0f, 0.0f, 0.0f, 0.0f);
   m11 = m10;
   v3 = v2;
@@ -129,7 +129,7 @@ float3 Mul1(Mat4x3_ m10, float4 v2) {
 }
 
 float2 Mul2(Mat4x2_ m12, float4 v4) {
-  Mat4x2_ m13 = {float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  Mat4x2_ m13 = (Mat4x2_)0;
   float4 v5 = float4(0.0f, 0.0f, 0.0f, 0.0f);
   m13 = m12;
   v5 = v4;
@@ -142,7 +142,7 @@ float2 Mul2(Mat4x2_ m12, float4 v4) {
 
 float4 Mul3(float3 v6, Mat4x3_ m14) {
   float3 v7 = float3(0.0f, 0.0f, 0.0f);
-  Mat4x3_ m15 = {float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  Mat4x3_ m15 = (Mat4x3_)0;
   v7 = v6;
   m15 = m14;
   const Mat4x3_ _e5 = m15;
@@ -162,7 +162,7 @@ float4 Mul3(float3 v6, Mat4x3_ m14) {
 
 Mat4x4_ _Mat4x4_(float n) {
   float n1 = 0.0f;
-  Mat4x4_ o = {float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  Mat4x4_ o = (Mat4x4_)0;
   n1 = n;
   const float _e4 = n1;
   o.mx = float4(_e4, 0.0f, 0.0f, 0.0f);
@@ -177,8 +177,8 @@ Mat4x4_ _Mat4x4_(float n) {
 }
 
 Mat4x4_ _Mat4x4_1(Mat4x3_ m16) {
-  Mat4x3_ m17 = {float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f)};
-  Mat4x4_ o1 = {float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  Mat4x3_ m17 = (Mat4x3_)0;
+  Mat4x4_ o1 = (Mat4x4_)0;
   m17 = m16;
   const Mat4x4_ _e4 = _Mat4x4_(1.0f);
   o1 = _e4;
@@ -193,8 +193,8 @@ Mat4x4_ _Mat4x4_1(Mat4x3_ m16) {
 }
 
 Mat4x4_ _Mat4x4_2(Mat4x2_ m18) {
-  Mat4x2_ m19 = {float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f)};
-  Mat4x4_ o2 = {float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  Mat4x2_ m19 = (Mat4x2_)0;
+  Mat4x4_ o2 = (Mat4x4_)0;
   m19 = m18;
   const Mat4x4_ _e4 = _Mat4x4_(1.0f);
   o2 = _e4;
@@ -208,7 +208,7 @@ Mat4x4_ _Mat4x4_2(Mat4x2_ m18) {
 
 Mat4x3_ _Mat4x3_(float n2) {
   float n3 = 0.0f;
-  Mat4x3_ o3 = {float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  Mat4x3_ o3 = (Mat4x3_)0;
   n3 = n2;
   const float _e4 = n3;
   o3.mx = float4(_e4, 0.0f, 0.0f, 0.0f);
@@ -221,8 +221,8 @@ Mat4x3_ _Mat4x3_(float n2) {
 }
 
 Mat4x3_ _Mat4x3_1(Mat4x4_ m20) {
-  Mat4x4_ m21 = {float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f)};
-  Mat4x3_ o4 = {float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  Mat4x4_ m21 = (Mat4x4_)0;
+  Mat4x3_ o4 = (Mat4x3_)0;
   m21 = m20;
   const Mat4x4_ _e4 = m21;
   o4.mx = _e4.mx;
@@ -235,7 +235,7 @@ Mat4x3_ _Mat4x3_1(Mat4x4_ m20) {
 }
 
 void main1() {
-  Mat4x3_ t_PosMtx = {float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  Mat4x3_ t_PosMtx = (Mat4x3_)0;
   float2 t_TexSpaceCoord = float2(0.0f, 0.0f);
   const float _e15 = a_PosMtxIdx1;
   const Mat4x3_ _e18 = tint_symbol_5(global2, (48u * uint(int(_e15))));

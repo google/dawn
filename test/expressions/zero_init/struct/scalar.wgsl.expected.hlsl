@@ -11,5 +11,5 @@ struct S {
 };
 
 void f() {
-  S v = {0, 0u, 0.0f, false};
+  S v = (S)0;
 }

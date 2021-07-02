@@ -3,7 +3,7 @@ struct S {
   float b;
 };
 
-static S v = {0, 0.0f};
+static S v = (S)0;
 
 [numthreads(1, 1, 1)]
 void main() {

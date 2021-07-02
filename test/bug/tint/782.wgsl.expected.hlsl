@@ -8,7 +8,7 @@ struct tint_array_wrapper {
 };
 
 void foo() {
-  tint_array_wrapper tint_symbol = {{0, 0}};
-  tint_array_wrapper implict = {{0, 0}};
+  tint_array_wrapper tint_symbol = (tint_array_wrapper)0;
+  tint_array_wrapper implict = (tint_array_wrapper)0;
   implict = tint_symbol;
 }

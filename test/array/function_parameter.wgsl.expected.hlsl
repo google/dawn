@@ -24,9 +24,9 @@ float f3(tint_array_wrapper_2 a) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  const tint_array_wrapper a1 = {{0.0f, 0.0f, 0.0f, 0.0f}};
-  const tint_array_wrapper_1 a2 = {{{{0.0f, 0.0f, 0.0f, 0.0f}}, {{0.0f, 0.0f, 0.0f, 0.0f}}, {{0.0f, 0.0f, 0.0f, 0.0f}}}};
-  const tint_array_wrapper_2 a3 = {{{{{{0.0f, 0.0f, 0.0f, 0.0f}}, {{0.0f, 0.0f, 0.0f, 0.0f}}, {{0.0f, 0.0f, 0.0f, 0.0f}}}}, {{{{0.0f, 0.0f, 0.0f, 0.0f}}, {{0.0f, 0.0f, 0.0f, 0.0f}}, {{0.0f, 0.0f, 0.0f, 0.0f}}}}}};
+  const tint_array_wrapper a1 = {(float[4])0};
+  const tint_array_wrapper_1 a2 = {(tint_array_wrapper[3])0};
+  const tint_array_wrapper_2 a3 = {(tint_array_wrapper_1[2])0};
   const float v1 = f1(a1);
   const float v2 = f2(a2);
   const float v3 = f3(a3);

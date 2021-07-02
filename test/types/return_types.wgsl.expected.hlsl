@@ -39,12 +39,12 @@ struct tint_array_wrapper {
 };
 
 tint_array_wrapper ret_arr() {
-  const tint_array_wrapper tint_symbol = {{0.0f, 0.0f, 0.0f, 0.0f}};
+  const tint_array_wrapper tint_symbol = {(float[4])0};
   return tint_symbol;
 }
 
 S ret_struct() {
-  const S tint_symbol_1 = {0.0f};
+  const S tint_symbol_1 = (S)0;
   return tint_symbol_1;
 }
 

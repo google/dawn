@@ -14,10 +14,10 @@ struct tint_array_wrapper_1 {
 };
 
 void foo() {
-  const tint_array_wrapper src = {{0, 0, 0, 0}};
-  tint_array_wrapper tint_symbol = {{0, 0, 0, 0}};
-  S dst_struct = {{{0, 0, 0, 0}}};
-  tint_array_wrapper_1 dst_array = {{{{0, 0, 0, 0}}, {{0, 0, 0, 0}}}};
+  const tint_array_wrapper src = {(int[4])0};
+  tint_array_wrapper tint_symbol = (tint_array_wrapper)0;
+  S dst_struct = (S)0;
+  tint_array_wrapper_1 dst_array = (tint_array_wrapper_1)0;
   dst_struct.arr = src;
   dst_array.arr[1] = src;
   tint_symbol = src;

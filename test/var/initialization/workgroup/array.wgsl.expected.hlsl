@@ -12,7 +12,7 @@ struct tint_symbol_1 {
 void main(tint_symbol_1 tint_symbol) {
   const uint local_invocation_index = tint_symbol.local_invocation_index;
   if ((local_invocation_index == 0u)) {
-    const tint_array_wrapper tint_symbol_2 = {{0, 0, 0}};
+    const tint_array_wrapper tint_symbol_2 = {(int[3])0};
     v = tint_symbol_2;
   }
   GroupMemoryBarrierWithGroupSync();

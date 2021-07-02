@@ -8,5 +8,5 @@ struct tint_array_wrapper {
 };
 
 void f() {
-  tint_array_wrapper v = {{0, 0, 0, 0}};
+  tint_array_wrapper v = {(int[4])0};
 }

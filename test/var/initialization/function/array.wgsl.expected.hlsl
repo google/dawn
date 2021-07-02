@@ -4,7 +4,7 @@ struct tint_array_wrapper {
 
 [numthreads(1, 1, 1)]
 void main() {
-  tint_array_wrapper v = {{0, 0, 0}};
+  tint_array_wrapper v = (tint_array_wrapper)0;
   v;
   return;
 }

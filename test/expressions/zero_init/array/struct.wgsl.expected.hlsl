@@ -14,5 +14,5 @@ struct tint_array_wrapper {
 };
 
 void f() {
-  tint_array_wrapper v = {{{0, 0u, 0.0f, false}, {0, 0u, 0.0f, false}, {0, 0u, 0.0f, false}, {0, 0u, 0.0f, false}}};
+  tint_array_wrapper v = {(S[4])0};
 }

@@ -20,7 +20,7 @@ struct tint_array_wrapper {
 tint_symbol_2 vs_main(tint_symbol_1 tint_symbol) {
   const uint VertexIndex = tint_symbol.VertexIndex;
   tint_array_wrapper texcoord = {{float2(-0.5f, 0.0f), float2(1.5f, 0.0f), float2(0.5f, 2.0f)}};
-  VertexOutputs output = {float2(0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  VertexOutputs output = (VertexOutputs)0;
   output.position = float4(((texcoord.arr[VertexIndex] * 2.0f) - float2(1.0f, 1.0f)), 0.0f, 1.0f);
   const int scalar_offset = (4u) / 4;
   bool flipY = (asfloat(uniforms[scalar_offset / 4][scalar_offset % 4]) < 0.0f);

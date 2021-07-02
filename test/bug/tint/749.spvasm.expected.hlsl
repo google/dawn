@@ -5,7 +5,7 @@ struct QuicksortObject {
   tint_array_wrapper numbers;
 };
 
-static QuicksortObject obj = {{{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}};
+static QuicksortObject obj = (QuicksortObject)0;
 static float4 gl_FragCoord = float4(0.0f, 0.0f, 0.0f, 0.0f);
 cbuffer cbuffer_x_188 : register(b0, space0) {
   uint4 x_188[1];
@@ -363,7 +363,7 @@ void quicksort_() {
   int p = 0;
   int l_1 = 0;
   int top = 0;
-  tint_array_wrapper stack = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+  tint_array_wrapper stack = (tint_array_wrapper)0;
   int param_5 = 0;
   l_1 = 0;
   const int x_1007 = param_5;
