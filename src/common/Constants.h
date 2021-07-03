@@ -25,9 +25,14 @@ static constexpr uint32_t kNumStages = 3;
 static constexpr uint8_t kMaxColorAttachments = 8u;
 static constexpr uint32_t kTextureBytesPerRowAlignment = 256u;
 static constexpr uint32_t kMaxInterStageShaderComponents = 60u;
+
+// Compute constants
 static constexpr uint32_t kMaxComputeWorkgroupStorageSize = 16352u;
 static constexpr uint32_t kMaxComputeWorkgroupInvocations = 256u;
 static constexpr uint32_t kMaxComputePerDimensionDispatchSize = 65535u;
+static constexpr uint32_t kMaxComputeWorkgroupSizeX = 256;
+static constexpr uint32_t kMaxComputeWorkgroupSizeY = 256;
+static constexpr uint32_t kMaxComputeWorkgroupSizeZ = 64;
 
 // Per stage limits
 static constexpr uint32_t kMaxSampledTexturesPerShaderStage = 16;
