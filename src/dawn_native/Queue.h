@@ -71,7 +71,7 @@ namespace dawn_native {
         MaybeError WriteTextureInternal(const ImageCopyTexture* destination,
                                         const void* data,
                                         size_t dataSize,
-                                        const TextureDataLayout* dataLayout,
+                                        const TextureDataLayout& dataLayout,
                                         const Extent3D* writeSize);
         MaybeError CopyTextureForBrowserInternal(const ImageCopyTexture* source,
                                                  const ImageCopyTexture* destination,
@@ -97,7 +97,7 @@ namespace dawn_native {
                                        size_t size) const;
         MaybeError ValidateWriteTexture(const ImageCopyTexture* destination,
                                         size_t dataSize,
-                                        const TextureDataLayout* dataLayout,
+                                        const TextureDataLayout& dataLayout,
                                         const Extent3D* writeSize) const;
 
         void SubmitInternal(uint32_t commandCount, CommandBufferBase* const* commands);

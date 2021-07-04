@@ -254,8 +254,7 @@ namespace {
                                                  0, {0, 0, 0}, {0, 1, 2}));
 
             // copyHeight = 1 and copyDepth = 1
-            // TODO(crbug.com/dawn/520): Change to ASSERT_DEVICE_ERROR.
-            EXPECT_DEPRECATION_WARNING(
+            ASSERT_DEVICE_ERROR(
                 TestWriteTexture(128, 0, 0, 1, destination, 0, {0, 0, 0}, {3, 1, 1}));
             TestWriteTexture(128, 0, wgpu::kCopyStrideUndefined, 1, destination, 0, {0, 0, 0},
                              {3, 1, 1});
@@ -278,9 +277,7 @@ namespace {
                 TestWriteTexture(128, 0, 11, 1, destination, 0, {0, 0, 0}, {3, 1, 0}));
 
             // copyHeight = 1 and copyDepth = 1
-            // TODO(crbug.com/dawn/520): Change to ASSERT_DEVICE_ERROR. bytesPerRow used to be only
-            // validated if height > 1 || depth > 1.
-            EXPECT_DEPRECATION_WARNING(
+            ASSERT_DEVICE_ERROR(
                 TestWriteTexture(128, 0, 11, 1, destination, 0, {0, 0, 0}, {3, 1, 1}));
         }
 
@@ -312,7 +309,7 @@ namespace {
         // rowsPerImage is less than copy height (Invalid)
         ASSERT_DEVICE_ERROR(
             TestWriteTexture(dataSize, 0, 256, 3, destination, 0, {0, 0, 0}, {4, 4, 1}));
-        EXPECT_DEPRECATION_WARNING(
+        ASSERT_DEVICE_ERROR(
             TestWriteTexture(dataSize, 0, 256, 0, destination, 0, {0, 0, 0}, {4, 4, 1}));
     }
 

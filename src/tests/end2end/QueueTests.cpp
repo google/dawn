@@ -541,23 +541,9 @@ TEST_P(QueueWriteTextureTests, BytesPerRowWithOneRowCopy) {
         constexpr wgpu::Extent3D copyExtent = {5, 1, 1};
         DataSpec dataSpec = MinimumDataSpec(copyExtent);
 
-        // bytesPerRow = 0
-        // TODO(crbug.com/dawn/520): This behavior is deprecated; remove this case.
-        dataSpec.bytesPerRow = 0;
-        EXPECT_DEPRECATION_WARNING(DoTest(textureSpec, dataSpec, copyExtent));
-
         // bytesPerRow undefined
         dataSpec.bytesPerRow = wgpu::kCopyStrideUndefined;
         DoTest(textureSpec, dataSpec, copyExtent);
-    }
-
-    // bytesPerRow < bytesInACompleteRow
-    // TODO(crbug.com/dawn/520): This behavior is deprecated; remove this case.
-    {
-        constexpr wgpu::Extent3D copyExtent = {259, 1, 1};
-        DataSpec dataSpec = MinimumDataSpec(copyExtent);
-        dataSpec.bytesPerRow = 256;
-        EXPECT_DEPRECATION_WARNING(DoTest(textureSpec, dataSpec, copyExtent));
     }
 }
 

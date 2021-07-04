@@ -824,22 +824,9 @@ TEST_P(CopyTests_T2B, BytesPerRowWithOneRowCopy) {
     {
         BufferSpec bufferSpec = MinimumBufferSpec(5, 1);
 
-        // bytesPerRow = 0
-        // TODO(crbug.com/dawn/520): This behavior is deprecated; remove this case.
-        bufferSpec.bytesPerRow = 0;
-        EXPECT_DEPRECATION_WARNING(DoTest(textureSpec, bufferSpec, {5, 1, 1}));
-
         // bytesPerRow undefined
         bufferSpec.bytesPerRow = wgpu::kCopyStrideUndefined;
         DoTest(textureSpec, bufferSpec, {5, 1, 1});
-    }
-
-    // bytesPerRow < bytesInACompleteRow
-    // TODO(crbug.com/dawn/520): This behavior is deprecated; remove this case.
-    {
-        BufferSpec bufferSpec = MinimumBufferSpec(259, 1);
-        bufferSpec.bytesPerRow = 256;
-        EXPECT_DEPRECATION_WARNING(DoTest(textureSpec, bufferSpec, {259, 1, 1}));
     }
 }
 
@@ -1540,22 +1527,9 @@ TEST_P(CopyTests_B2T, BytesPerRowWithOneRowCopy) {
     {
         BufferSpec bufferSpec = MinimumBufferSpec(5, 1);
 
-        // bytesPerRow = 0
-        // TODO(crbug.com/dawn/520): This behavior is deprecated; remove this case.
-        bufferSpec.bytesPerRow = 0;
-        EXPECT_DEPRECATION_WARNING(DoTest(textureSpec, bufferSpec, {5, 1, 1}));
-
         // bytesPerRow undefined
         bufferSpec.bytesPerRow = wgpu::kCopyStrideUndefined;
         DoTest(textureSpec, bufferSpec, {5, 1, 1});
-    }
-
-    // bytesPerRow < bytesInACompleteRow
-    // TODO(crbug.com/dawn/520): This behavior is deprecated; remove this case.
-    {
-        BufferSpec bufferSpec = MinimumBufferSpec(259, 1);
-        bufferSpec.bytesPerRow = 256;
-        EXPECT_DEPRECATION_WARNING(DoTest(textureSpec, bufferSpec, {259, 1, 1}));
     }
 }
 

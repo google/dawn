@@ -36,11 +36,6 @@ namespace dawn_native {
                                                        uint32_t bytesPerRow,
                                                        uint32_t rowsPerImage);
 
-    TextureDataLayout FixUpDeprecatedTextureDataLayoutOptions(
-        DeviceBase* device,
-        const TextureDataLayout& originalLayout,
-        const TexelBlockInfo& blockInfo,
-        const Extent3D& copyExtent);
     void ApplyDefaultTextureDataLayoutOptions(TextureDataLayout* layout,
                                               const TexelBlockInfo& blockInfo,
                                               const Extent3D& copyExtent);

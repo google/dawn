@@ -278,13 +278,13 @@ namespace dawn_native {
                                     const TextureDataLayout* dataLayout,
                                     const Extent3D* writeSize) {
         GetDevice()->ConsumedError(
-            WriteTextureInternal(destination, data, dataSize, dataLayout, writeSize));
+            WriteTextureInternal(destination, data, dataSize, *dataLayout, writeSize));
     }
 
     MaybeError QueueBase::WriteTextureInternal(const ImageCopyTexture* destination,
                                                const void* data,
                                                size_t dataSize,
-                                               const TextureDataLayout* dataLayout,
+                                               const TextureDataLayout& dataLayout,
                                                const Extent3D* writeSize) {
         DAWN_TRY(ValidateWriteTexture(destination, dataSize, dataLayout, writeSize));
 
@@ -294,7 +294,7 @@ namespace dawn_native {
 
         const TexelBlockInfo& blockInfo =
             destination->texture->GetFormat().GetAspectInfo(destination->aspect).block;
-        TextureDataLayout layout = *dataLayout;
+        TextureDataLayout layout = dataLayout;
         ApplyDefaultTextureDataLayoutOptions(&layout, blockInfo, *writeSize);
         return WriteTextureImpl(*destination, data, layout, *writeSize);
     }
@@ -460,7 +460,7 @@ namespace dawn_native {
 
     MaybeError QueueBase::ValidateWriteTexture(const ImageCopyTexture* destination,
                                                size_t dataSize,
-                                               const TextureDataLayout* dataLayout,
+                                               const TextureDataLayout& dataLayout,
                                                const Extent3D* writeSize) const {
         DAWN_TRY(GetDevice()->ValidateIsAlive());
         DAWN_TRY(GetDevice()->ValidateObject(this));
@@ -468,7 +468,7 @@ namespace dawn_native {
 
         DAWN_TRY(ValidateImageCopyTexture(GetDevice(), *destination, *writeSize));
 
-        if (dataLayout->offset > dataSize) {
+        if (dataLayout.offset > dataSize) {
             return DAWN_VALIDATION_ERROR("Queue::WriteTexture out of range");
         }
 
@@ -490,9 +490,7 @@ namespace dawn_native {
         const TexelBlockInfo& blockInfo =
             destination->texture->GetFormat().GetAspectInfo(destination->aspect).block;
 
-        TextureDataLayout layout = FixUpDeprecatedTextureDataLayoutOptions(GetDevice(), *dataLayout,
-                                                                           blockInfo, *writeSize);
-        DAWN_TRY(ValidateLinearTextureData(layout, dataSize, blockInfo, *writeSize));
+        DAWN_TRY(ValidateLinearTextureData(dataLayout, dataSize, blockInfo, *writeSize));
 
         DAWN_TRY(destination->texture->ValidateCanUseInSubmitNow());
 

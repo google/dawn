@@ -580,9 +580,8 @@ TEST_F(CopyCommandTest_B2T, BytesPerRowConstraints) {
                     {0, 1, 4});
 
         // copyHeight = 1 and copyDepth = 1
-        // TODO(crbug.com/dawn/520): Change to ::Failure.
-        EXPECT_DEPRECATION_WARNING(TestB2TCopy(utils::Expectation::Success, source, 0, 0, 1,
-                                               destination, 0, {0, 0, 0}, {64, 1, 1}));
+        TestB2TCopy(utils::Expectation::Failure, source, 0, 0, 1, destination, 0, {0, 0, 0},
+                    {64, 1, 1});
     }
 
     // bytes per row is not 256-byte aligned
@@ -613,9 +612,8 @@ TEST_F(CopyCommandTest_B2T, BytesPerRowConstraints) {
                     {65, 1, 0});
 
         // copyHeight = 1 and copyDepth = 1
-        // TODO(crbug.com/dawn/520): Change to ::Failure.
-        EXPECT_DEPRECATION_WARNING(TestB2TCopy(utils::Expectation::Success, source, 0, 256, 1,
-                                               destination, 0, {0, 0, 0}, {65, 1, 1}));
+        TestB2TCopy(utils::Expectation::Failure, source, 0, 256, 1, destination, 0, {0, 0, 0},
+                    {65, 1, 1});
     }
 }
 
@@ -626,11 +624,10 @@ TEST_F(CopyCommandTest_B2T, RowsPerImageConstraints) {
         Create2DTexture(16, 16, 1, 5, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::CopyDst);
 
     // rowsPerImage is zero
-    // TODO(crbug.com/dawn/520): Change to ::Failure.
-    EXPECT_DEPRECATION_WARNING(TestB2TCopy(utils::Expectation::Success, source, 0, 256, 0,
-                                           destination, 0, {0, 0, 0}, {1, 1, 1}));
-    EXPECT_DEPRECATION_WARNING(TestB2TCopy(utils::Expectation::Success, source, 0, 256, 0,
-                                           destination, 0, {0, 0, 0}, {4, 4, 1}));
+    TestB2TCopy(utils::Expectation::Failure, source, 0, 256, 0, destination, 0, {0, 0, 0},
+                {1, 1, 1});
+    TestB2TCopy(utils::Expectation::Failure, source, 0, 256, 0, destination, 0, {0, 0, 0},
+                {4, 4, 1});
 
     // rowsPerImage is undefined
     TestB2TCopy(utils::Expectation::Success, source, 0, 256, wgpu::kCopyStrideUndefined,
@@ -1198,9 +1195,8 @@ TEST_F(CopyCommandTest_T2B, BytesPerRowConstraints) {
                     {0, 1, 4});
 
         // copyHeight = 1 and copyDepth = 1
-        // TODO(crbug.com/dawn/520): Change to ::Failure.
-        EXPECT_DEPRECATION_WARNING(TestT2BCopy(utils::Expectation::Success, source, 0, {0, 0, 0},
-                                               destination, 0, 0, 1, {64, 1, 1}));
+        TestT2BCopy(utils::Expectation::Failure, source, 0, {0, 0, 0}, destination, 0, 0, 1,
+                    {64, 1, 1});
     }
 
     // bytes per row is not 256-byte aligned
@@ -1231,9 +1227,8 @@ TEST_F(CopyCommandTest_T2B, BytesPerRowConstraints) {
                     {65, 1, 0});
 
         // copyHeight = 1 and copyDepth = 1
-        // TODO(crbug.com/dawn/520): Change to ::Failure.
-        EXPECT_DEPRECATION_WARNING(TestT2BCopy(utils::Expectation::Success, source, 0, {0, 0, 0},
-                                               destination, 0, 256, 1, {65, 1, 1}));
+        TestT2BCopy(utils::Expectation::Failure, source, 0, {0, 0, 0}, destination, 0, 256, 1,
+                    {65, 1, 1});
     }
 }
 
@@ -1244,11 +1239,10 @@ TEST_F(CopyCommandTest_T2B, RowsPerImageConstraints) {
     wgpu::Buffer destination = CreateBuffer(bufferSize, wgpu::BufferUsage::CopyDst);
 
     // rowsPerImage is zero (Valid)
-    // TODO(crbug.com/dawn/520): Change to ::Failure.
-    EXPECT_DEPRECATION_WARNING(TestT2BCopy(utils::Expectation::Success, source, 0, {0, 0, 0},
-                                           destination, 0, 256, 0, {1, 1, 1}));
-    EXPECT_DEPRECATION_WARNING(TestT2BCopy(utils::Expectation::Success, source, 0, {0, 0, 0},
-                                           destination, 0, 256, 0, {4, 4, 1}));
+    TestT2BCopy(utils::Expectation::Failure, source, 0, {0, 0, 0}, destination, 0, 256, 0,
+                {1, 1, 1});
+    TestT2BCopy(utils::Expectation::Failure, source, 0, {0, 0, 0}, destination, 0, 256, 0,
+                {4, 4, 1});
 
     // rowsPerImage is undefined
     TestT2BCopy(utils::Expectation::Success, source, 0, {0, 0, 0}, destination, 0, 256,

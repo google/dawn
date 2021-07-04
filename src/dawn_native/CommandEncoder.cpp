@@ -693,18 +693,18 @@ namespace dawn_native {
             }
             const TexelBlockInfo& blockInfo =
                 destination->texture->GetFormat().GetAspectInfo(destination->aspect).block;
-            TextureDataLayout srcLayout = FixUpDeprecatedTextureDataLayoutOptions(
-                GetDevice(), source->layout, blockInfo, *copySize);
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(ValidateLinearTextureCopyOffset(
-                    srcLayout, blockInfo, destination->texture->GetFormat().HasDepthOrStencil()));
-                DAWN_TRY(ValidateLinearTextureData(srcLayout, source->buffer->GetSize(), blockInfo,
-                                                   *copySize));
+                    source->layout, blockInfo,
+                    destination->texture->GetFormat().HasDepthOrStencil()));
+                DAWN_TRY(ValidateLinearTextureData(source->layout, source->buffer->GetSize(),
+                                                   blockInfo, *copySize));
 
                 mTopLevelBuffers.insert(source->buffer);
                 mTopLevelTextures.insert(destination->texture);
             }
 
+            TextureDataLayout srcLayout = source->layout;
             ApplyDefaultTextureDataLayoutOptions(&srcLayout, blockInfo, *copySize);
 
             CopyBufferToTextureCmd* copy =
@@ -745,18 +745,18 @@ namespace dawn_native {
             }
             const TexelBlockInfo& blockInfo =
                 source->texture->GetFormat().GetAspectInfo(source->aspect).block;
-            TextureDataLayout dstLayout = FixUpDeprecatedTextureDataLayoutOptions(
-                GetDevice(), destination->layout, blockInfo, *copySize);
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(ValidateLinearTextureCopyOffset(
-                    dstLayout, blockInfo, source->texture->GetFormat().HasDepthOrStencil()));
-                DAWN_TRY(ValidateLinearTextureData(dstLayout, destination->buffer->GetSize(),
-                                                   blockInfo, *copySize));
+                    destination->layout, blockInfo,
+                    source->texture->GetFormat().HasDepthOrStencil()));
+                DAWN_TRY(ValidateLinearTextureData(
+                    destination->layout, destination->buffer->GetSize(), blockInfo, *copySize));
 
                 mTopLevelTextures.insert(source->texture);
                 mTopLevelBuffers.insert(destination->buffer);
             }
 
+            TextureDataLayout dstLayout = destination->layout;
             ApplyDefaultTextureDataLayoutOptions(&dstLayout, blockInfo, *copySize);
 
             CopyTextureToBufferCmd* copy =
