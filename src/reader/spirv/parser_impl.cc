@@ -21,6 +21,7 @@
 
 #include "source/opt/build_module.h"
 #include "src/ast/bitcast_expression.h"
+#include "src/ast/interpolate_decoration.h"
 #include "src/ast/override_decoration.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/type_name.h"
@@ -1093,21 +1094,28 @@ const Type* ParserImpl::ConvertType(
     bool is_non_writable = false;
     ast::DecorationList ast_member_decorations;
     for (auto& decoration : GetDecorationsForMember(type_id, member_index)) {
-      if (decoration[0] == SpvDecorationNonWritable) {
-        // WGSL doesn't represent individual members as non-writable. Instead,
-        // apply the ReadOnly access control to the containing struct if all
-        // the members are non-writable.
-        is_non_writable = true;
-      } else if (decoration[0] == SpvDecorationLocation) {
-        // Location decorations are handled when emitting the entry point.
-      } else {
-        auto* ast_member_decoration =
-            ConvertMemberDecoration(type_id, member_index, decoration);
-        if (!success_) {
-          return nullptr;
-        }
-        if (ast_member_decoration) {
-          ast_member_decorations.push_back(ast_member_decoration);
+      switch (decoration[0]) {
+        case SpvDecorationNonWritable:
+
+          // WGSL doesn't represent individual members as non-writable. Instead,
+          // apply the ReadOnly access control to the containing struct if all
+          // the members are non-writable.
+          is_non_writable = true;
+          break;
+        case SpvDecorationLocation:
+        case SpvDecorationFlat:
+          // IO decorations are handled when emitting the entry point.
+          break;
+        default: {
+          auto* ast_member_decoration =
+              ConvertMemberDecoration(type_id, member_index, decoration);
+          if (!success_) {
+            return nullptr;
+          }
+          if (ast_member_decoration) {
+            ast_member_decorations.push_back(ast_member_decoration);
+          }
+          break;
         }
       }
     }
@@ -1633,6 +1641,17 @@ bool ParserImpl::ConvertDecorationsForVariable(uint32_t id,
       if (transfer_pipeline_io) {
         decorations->emplace_back(
             create<ast::LocationDecoration>(Source{}, deco[1]));
+      }
+    }
+    if (deco[0] == SpvDecorationFlat) {
+      if (transfer_pipeline_io) {
+        // In WGSL, integral types are always flat, and so the decoration
+        // is never specified.
+        if (!(*store_type)->IsIntegerScalarOrVector()) {
+          decorations->emplace_back(create<ast::InterpolateDecoration>(
+              Source{}, ast::InterpolationType::kFlat,
+              ast::InterpolationSampling::kNone));
+        }
       }
     }
     if (deco[0] == SpvDecorationDescriptorSet) {
