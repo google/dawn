@@ -123,7 +123,7 @@ fn arr() {
   *p = 4;
 }
 
-fn vec() {
+fn vector() {
   var v : vec3<f32>;
   var i : i32 = 0;
   var j : i32 = 0;
@@ -132,7 +132,7 @@ fn vec() {
   *p = 4.0;
 }
 
-fn mat() {
+fn matrix() {
   var m : mat3x3<f32>;
   var i : i32 = 0;
   var j : i32 = 0;
@@ -156,7 +156,7 @@ fn arr() {
   *(&(a[p_save].i)) = 4;
 }
 
-fn vec() {
+fn vector() {
   var v : vec3<f32>;
   var i : i32 = 0;
   var j : i32 = 0;
@@ -165,7 +165,7 @@ fn vec() {
   *(&(v[p_save_1])) = 4.0;
 }
 
-fn mat() {
+fn matrix() {
   var m : mat3x3<f32>;
   var i : i32 = 0;
   var j : i32 = 0;

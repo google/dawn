@@ -523,38 +523,6 @@ INSTANTIATE_TEST_SUITE_P(
         TokenData{"vec4", Token::Type::kVec4},
         TokenData{"workgroup", Token::Type::kWorkgroup}));
 
-using KeywordTest_Reserved = testing::TestWithParam<const char*>;
-TEST_P(KeywordTest_Reserved, Parses) {
-  auto* keyword = GetParam();
-  Source::FileContent content(keyword);
-  Lexer l("test.wgsl", &content);
-
-  auto t = l.next();
-  EXPECT_TRUE(t.IsReservedKeyword());
-  EXPECT_EQ(t.to_str(), keyword);
-}
-INSTANTIATE_TEST_SUITE_P(LexerTest,
-                         KeywordTest_Reserved,
-                         testing::Values("asm",
-                                         "bf16",
-                                         "const",
-                                         "do",
-                                         "enum",
-                                         "f16",
-                                         "f64",
-                                         "handle",
-                                         "i8",
-                                         "i16",
-                                         "i64",
-                                         "premerge",
-                                         "typedef",
-                                         "u8",
-                                         "u16",
-                                         "u64",
-                                         "unless",
-                                         "regardless",
-                                         "void"));
-
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader

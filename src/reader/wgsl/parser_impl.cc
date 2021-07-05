@@ -121,8 +121,9 @@ const char kStrideDecoration[] = "stride";
 const char kWorkgroupSizeDecoration[] = "workgroup_size";
 
 bool is_decoration(Token t) {
-  if (!t.IsIdentifier())
+  if (!t.IsIdentifier()) {
     return false;
+  }
 
   auto s = t.to_str();
   return s == kAlignDecoration || s == kBindingDecoration ||
@@ -131,6 +132,17 @@ bool is_decoration(Token t) {
          s == kLocationDecoration || s == kOverrideDecoration ||
          s == kSetDecoration || s == kSizeDecoration || s == kStageDecoration ||
          s == kStrideDecoration || s == kWorkgroupSizeDecoration;
+}
+
+// https://gpuweb.github.io/gpuweb/wgsl.html#reserved-keywords
+bool is_reserved(Token t) {
+  auto s = t.to_str();
+  return s == "asm" || s == "bf16" || s == "const" || s == "do" ||
+         s == "enum" || s == "f16" || s == "f64" || s == "handle" ||
+         s == "i8" || s == "i16" || s == "i64" || s == "mat" ||
+         s == "premerge" || s == "regardless" || s == "typedef" || s == "u8" ||
+         s == "u16" || s == "u64" || s == "unless" || s == "using" ||
+         s == "vec" || s == "void" || s == "while";
 }
 
 /// Enter-exit counters for block token types.
@@ -3261,6 +3273,12 @@ Expect<std::string> ParserImpl::expect_ident(const std::string& use) {
       return Failure::kErrored;
     }
     next();
+
+    if (is_reserved(t)) {
+      return add_error(t.source(),
+                       "'" + t.to_str() + "' is a reserved keyword");
+    }
+
     return {t.to_str(), t.source()};
   }
   synchronized_ = false;

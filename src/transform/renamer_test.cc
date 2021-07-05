@@ -838,14 +838,14 @@ INSTANTIATE_TEST_SUITE_P(RenamerTestHlsl,
                                          "unorm",
                                          "unroll",
                                          "unsigned",
-                                         "using",
+                                         // "using",  // WGSL reserved keyword
                                          "vector",
                                          "vertexfragment",
                                          "vertexshader",
                                          "virtual",
                                          // "void",  // WGSL keyword
-                                         "volatile",
-                                         "while"));
+                                         "volatile"));
+//                                          "while"  // WGSL reserved keyword
 
 INSTANTIATE_TEST_SUITE_P(RenamerTestMsl,
                          RenamerTestMsl,
@@ -928,12 +928,12 @@ INSTANTIATE_TEST_SUITE_P(RenamerTestMsl,
                              "typename",
                              "union",
                              "unsigned",
-                             "using",
+                             // "using",  // WGSL reserved keyword
                              "virtual",
                              // "void",  // Also used in WGSL
                              "volatile",
                              "wchar_t",
-                             "while",
+                             // "while",  // WGSL reserved keyword
                              "xor",
                              "xor_eq",
 
@@ -1087,7 +1087,7 @@ INSTANTIATE_TEST_SUITE_P(RenamerTestMsl,
                              "ushort2",
                              "ushort3",
                              "ushort4",
-                             "vec",
+                             // "vec",  // WGSL reserved keyword
                              "vertex"));
 
 }  // namespace

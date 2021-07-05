@@ -23,8 +23,6 @@ std::string Token::TypeToName(Type type) {
   switch (type) {
     case Token::Type::kError:
       return "kError";
-    case Token::Type::kReservedKeyword:
-      return "kReservedKeyword";
     case Token::Type::kEOF:
       return "kEOF";
     case Token::Type::kIdentifier:

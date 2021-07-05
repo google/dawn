@@ -30,8 +30,6 @@ class Token {
   enum class Type {
     /// Error result
     kError = -2,
-    /// Reserved keyword
-    kReservedKeyword = -1,
     /// Uninitialized token
     kUninitialized = 0,
     /// End of input string reached
@@ -367,7 +365,6 @@ class Token {
   /// @returns true if the token is uninitialized
   bool IsUninitialized() const { return type_ == Type::kUninitialized; }
   /// @returns true if the token is reserved
-  bool IsReservedKeyword() const { return type_ == Type::kReservedKeyword; }
   /// @returns true if the token is an error
   bool IsError() const { return type_ == Type::kError; }
   /// @returns true if the token is EOF

@@ -762,6 +762,7 @@ if(${TINT_BUILD_TESTS})
       reader/wgsl/parser_impl_pipeline_stage_test.cc
       reader/wgsl/parser_impl_primary_expression_test.cc
       reader/wgsl/parser_impl_relational_expression_test.cc
+      reader/wgsl/parser_impl_reserved_keyword_test.cc
       reader/wgsl/parser_impl_sampled_texture_type_test.cc
       reader/wgsl/parser_impl_sampler_type_test.cc
       reader/wgsl/parser_impl_shift_expression_test.cc

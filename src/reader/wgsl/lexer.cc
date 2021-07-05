@@ -309,14 +309,9 @@ Token Lexer::try_ident() {
   }
 
   auto str = content_->data.substr(s, pos_ - s);
-  auto t = check_reserved(source, str);
-  if (!t.IsUninitialized()) {
-    return t;
-  }
-
   end_source(source);
 
-  t = check_keyword(source, str);
+  auto t = check_keyword(source, str);
   if (!t.IsUninitialized()) {
     return t;
   }
@@ -688,48 +683,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kVec4, source, "vec4"};
   if (str == "workgroup")
     return {Token::Type::kWorkgroup, source, "workgroup"};
-  return {};
-}
-
-Token Lexer::check_reserved(const Source& source, const std::string& str) {
-  if (str == "asm")
-    return {Token::Type::kReservedKeyword, source, "asm"};
-  if (str == "bf16")
-    return {Token::Type::kReservedKeyword, source, "bf16"};
-  if (str == "const")
-    return {Token::Type::kReservedKeyword, source, "const"};
-  if (str == "do")
-    return {Token::Type::kReservedKeyword, source, "do"};
-  if (str == "enum")
-    return {Token::Type::kReservedKeyword, source, "enum"};
-  if (str == "f16")
-    return {Token::Type::kReservedKeyword, source, "f16"};
-  if (str == "f64")
-    return {Token::Type::kReservedKeyword, source, "f64"};
-  if (str == "handle")
-    return {Token::Type::kReservedKeyword, source, "handle"};
-  if (str == "i8")
-    return {Token::Type::kReservedKeyword, source, "i8"};
-  if (str == "i16")
-    return {Token::Type::kReservedKeyword, source, "i16"};
-  if (str == "i64")
-    return {Token::Type::kReservedKeyword, source, "i64"};
-  if (str == "premerge")
-    return {Token::Type::kReservedKeyword, source, "premerge"};
-  if (str == "regardless")
-    return {Token::Type::kReservedKeyword, source, "regardless"};
-  if (str == "typedef")
-    return {Token::Type::kReservedKeyword, source, "typedef"};
-  if (str == "u8")
-    return {Token::Type::kReservedKeyword, source, "u8"};
-  if (str == "u16")
-    return {Token::Type::kReservedKeyword, source, "u16"};
-  if (str == "u64")
-    return {Token::Type::kReservedKeyword, source, "u64"};
-  if (str == "unless")
-    return {Token::Type::kReservedKeyword, source, "unless"};
-  if (str == "void")
-    return {Token::Type::kReservedKeyword, source, "void"};
   return {};
 }
 

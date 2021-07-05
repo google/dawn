@@ -450,6 +450,7 @@ tint_unittests_source_set("tint_unittests_wgsl_reader_src") {
     "../src/reader/wgsl/parser_impl_pipeline_stage_test.cc",
     "../src/reader/wgsl/parser_impl_primary_expression_test.cc",
     "../src/reader/wgsl/parser_impl_relational_expression_test.cc",
+    "../src/reader/wgsl/parser_impl_reserved_keyword_test.cc",
     "../src/reader/wgsl/parser_impl_sampled_texture_type_test.cc",
     "../src/reader/wgsl/parser_impl_sampler_type_test.cc",
     "../src/reader/wgsl/parser_impl_shift_expression_test.cc",

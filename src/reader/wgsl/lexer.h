@@ -45,7 +45,6 @@ class Lexer {
                                          size_t end,
                                          int32_t base);
   Token check_keyword(const Source&, const std::string&);
-  Token check_reserved(const Source&, const std::string&);
   Token try_float();
   Token try_hex_integer();
   Token try_ident();
