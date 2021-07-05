@@ -106,7 +106,7 @@ func run() error {
 		writeFile := func(relpath, body string) error {
 			// Write the common file header
 			sb := strings.Builder{}
-			sb.WriteString(fmt.Sprintf(header, relTmplPath, defProjectRelPath))
+			sb.WriteString(fmt.Sprintf(header, filepath.ToSlash(relTmplPath), filepath.ToSlash(defProjectRelPath)))
 			sb.WriteString(body)
 			content := sb.String()
 			abspath := filepath.Join(filepath.Dir(tmplPath), relpath)

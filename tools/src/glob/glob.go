@@ -192,6 +192,7 @@ func (c Config) shouldExamine(root, absPath string) bool {
 	if err != nil {
 		return false
 	}
+	relPath = filepath.ToSlash(relPath) // Canonicalize
 
 	res := false
 	for _, rule := range c.Paths {
