@@ -1392,9 +1392,19 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
     }
     return_decorations = decos.value;
 
+    // Apply stride decorations to the type node instead of the function.
+    ast::DecorationList type_decorations;
+    auto itr = std::find_if(
+        return_decorations.begin(), return_decorations.end(),
+        [](auto* deco) { return Is<ast::StrideDecoration>(deco); });
+    if (itr != return_decorations.end()) {
+      type_decorations.emplace_back(*itr);
+      return_decorations.erase(itr);
+    }
+
     auto tok = peek();
 
-    auto type = type_decl();
+    auto type = type_decl(type_decorations);
     if (type.errored) {
       errored = true;
     } else if (!type.matched) {
@@ -3145,23 +3155,6 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
   }
 
   return Failure::kNoMatch;
-}
-
-template <typename T>
-std::vector<T*> ParserImpl::take_decorations(ast::DecorationList& in) {
-  ast::DecorationList remaining;
-  std::vector<T*> out;
-  out.reserve(in.size());
-  for (auto* deco : in) {
-    if (auto* t = deco->As<T>()) {
-      out.emplace_back(t);
-    } else {
-      remaining.emplace_back(deco);
-    }
-  }
-
-  in = std::move(remaining);
-  return out;
 }
 
 bool ParserImpl::expect_decorations_consumed(const ast::DecorationList& in) {

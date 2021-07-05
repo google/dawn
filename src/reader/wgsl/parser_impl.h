@@ -839,11 +839,6 @@ class ParserImpl {
   template <typename F, typename T = ReturnType<F>>
   T without_error(F&& func);
 
-  /// Returns all the decorations taken from `list` that matches the type `T`.
-  /// Those that do not match are kept in `list`.
-  template <typename T>
-  std::vector<T*> take_decorations(ast::DecorationList& list);
-
   /// Reports an error if the decoration list `list` is not empty.
   /// Used to ensure that all decorations are consumed.
   bool expect_decorations_consumed(const ast::DecorationList& list);
