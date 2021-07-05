@@ -156,6 +156,9 @@ using mat3x3 = mat<3, 3, T>;
 template <typename T>
 using mat4x4 = mat<4, 4, T>;
 
+template <int N, typename T>
+struct array {};
+
 template <typename TO, int ID = 0>
 struct alias {};
 
@@ -381,6 +384,43 @@ struct DataType<alias<T, ID>> {
       int elem_value) {
     // Construct
     return b.Construct(AST(b), DataType<T>::ExprArgs(b, elem_value));
+  }
+};
+
+/// Helper for building array types and expressions
+template <int N, typename T>
+struct DataType<array<N, T>> {
+  /// true as arrays are a composite type
+  static constexpr bool is_composite = true;
+
+  /// @param b the ProgramBuilder
+  /// @return a new AST array type
+  static inline ast::Type* AST(ProgramBuilder& b) {
+    return b.ty.array(DataType<T>::AST(b), N);
+  }
+  /// @param b the ProgramBuilder
+  /// @return the semantic array type
+  static inline sem::Type* Sem(ProgramBuilder& b) {
+    return b.create<sem::Array>(DataType<T>::Sem(b), N);
+  }
+  /// @param b the ProgramBuilder
+  /// @param elem_value the value each element in the array will be initialized
+  /// with
+  /// @return a new AST array value expression
+  static inline ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+    return b.Construct(AST(b), ExprArgs(b, elem_value));
+  }
+
+  /// @param b the ProgramBuilder
+  /// @param elem_value the value each element will be initialized with
+  /// @return the list of expressions that are used to construct the array
+  static inline ast::ExpressionList ExprArgs(ProgramBuilder& b,
+                                             int elem_value) {
+    ast::ExpressionList args;
+    for (int i = 0; i < N; i++) {
+      args.emplace_back(DataType<T>::Expr(b, elem_value));
+    }
+    return args;
   }
 };
 

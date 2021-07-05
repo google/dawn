@@ -1356,29 +1356,19 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
   //   vec4<f32> foo
   // }
   // struct A {
-  //   vec3<struct b> mem
+  //   array<b, 3> mem
   // }
   // var c : A
   // c.mem[0].foo.yx
   //   -> vec2<f32>
   //
-  // MemberAccessor{
-  //   MemberAccessor{
-  //     ArrayAccessor{
-  //       MemberAccessor{
-  //         Identifier{c}
-  //         Identifier{mem}
-  //       }
-  //       ScalarConstructor{0}
-  //     }
-  //     Identifier{foo}
-  //   }
-  //   Identifier{yx}
+  // fn f() {
+  //   c.mem[0].foo
   // }
   //
 
   auto* stB = Structure("B", {Member("foo", ty.vec4<f32>())});
-  auto* stA = Structure("A", {Member("mem", ty.vec(ty.Of(stB), 3))});
+  auto* stA = Structure("A", {Member("mem", ty.array(ty.Of(stB), 3))});
   Global("c", ty.Of(stA), ast::StorageClass::kPrivate);
 
   auto* mem = MemberAccessor(

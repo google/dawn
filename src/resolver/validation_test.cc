@@ -2007,17 +2007,6 @@ std::string VecStr(uint32_t dimensions, std::string subtype = "f32") {
 
 using MatrixConstructorTest = ResolverTestWithParam<MatrixDimensions>;
 
-TEST_F(MatrixConstructorTest, Expr_Constructor_Matrix_NotF32) {
-  // m2x2<i32>()
-  SetSource(Source::Location({12, 34}));
-  auto* tc = mat2x2<i32>(
-      create<ast::TypeConstructorExpression>(ty.mat2x2<i32>(), ExprList()));
-  WrapInFunction(tc);
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:34 error: matrix element type must be 'f32'");
-}
-
 TEST_P(MatrixConstructorTest, Expr_Constructor_Error_TooFewArguments) {
   // matNxM<f32>(vecM<f32>(), ...); with N - 1 arguments
 

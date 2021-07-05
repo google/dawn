@@ -324,8 +324,12 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
     }
     if (auto* t = ty->As<ast::Vector>()) {
       if (auto* el = Type(t->type())) {
-        return builder_->create<sem::Vector>(const_cast<sem::Type*>(el),
-                                             t->size());
+        if (auto* vector = builder_->create<sem::Vector>(
+                const_cast<sem::Type*>(el), t->size())) {
+          if (ValidateVector(vector, t->source())) {
+            return vector;
+          }
+        }
       }
       return nullptr;
     }
@@ -333,10 +337,10 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
       if (auto* el = Type(t->type())) {
         if (auto* column_type = builder_->create<sem::Vector>(
                 const_cast<sem::Type*>(el), t->rows())) {
-          if (auto* matrix_type =
+          if (auto* matrix =
                   builder_->create<sem::Matrix>(column_type, t->columns())) {
-            if (ValidateMatrix(matrix_type, t->source())) {
-              return matrix_type;
+            if (ValidateMatrix(matrix, t->source())) {
+              return matrix;
             }
           }
         }
@@ -2300,14 +2304,22 @@ bool Resolver::ValidateVectorConstructor(
   return true;
 }
 
-bool Resolver::ValidateMatrix(const sem::Matrix* matrix_type,
-                              const Source& source) {
-  if (!matrix_type->is_float_matrix()) {
+bool Resolver::ValidateVector(const sem::Vector* ty, const Source& source) {
+  if (!ty->type()->is_scalar()) {
+    AddError("vector element type must be 'bool', 'f32', 'i32' or 'u32'",
+             source);
+    return false;
+  }
+  return true;
+}
+
+bool Resolver::ValidateMatrix(const sem::Matrix* ty, const Source& source) {
+  if (!ty->is_float_matrix()) {
     AddError("matrix element type must be 'f32'", source);
     return false;
   }
   return true;
-}  // namespace resolver
+}
 
 bool Resolver::ValidateMatrixConstructor(
     const ast::TypeConstructorExpression* ctor,

@@ -280,7 +280,7 @@ class Resolver {
   bool ValidateGlobalVariable(const VariableInfo* var);
   bool ValidateInterpolateDecoration(const ast::InterpolateDecoration* deco,
                                      const sem::Type* storage_type);
-  bool ValidateMatrix(const sem::Matrix* matirx_type, const Source& source);
+  bool ValidateMatrix(const sem::Matrix* ty, const Source& source);
   bool ValidateMatrixConstructor(const ast::TypeConstructorExpression* ctor,
                                  const sem::Matrix* matrix_type);
   bool ValidateFunctionParameter(const ast::Function* func,
@@ -300,6 +300,7 @@ class Resolver {
                                    const std::string& type_name,
                                    const sem::Type* rhs_type,
                                    const std::string& rhs_type_name);
+  bool ValidateVector(const sem::Vector* ty, const Source& source);
   bool ValidateVectorConstructor(const ast::TypeConstructorExpression* ctor,
                                  const sem::Vector* vec_type);
   bool ValidateScalarConstructor(const ast::TypeConstructorExpression* ctor,
