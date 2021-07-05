@@ -484,7 +484,7 @@ namespace dawn_native {
             return std::move(result);
         }
 
-        MaybeError ValidateCompatibilityWithBindGroupLayout(DeviceBase*,
+        MaybeError ValidateCompatibilityWithBindGroupLayout(DeviceBase* device,
                                                             BindGroupIndex group,
                                                             const EntryPointMetadata& entryPoint,
                                                             const BindGroupLayoutBase* layout) {
@@ -622,6 +622,13 @@ namespace dawn_native {
                     }
 
                     case BindingInfoType::Sampler:
+                        // Allow mismatched samplers when using SPIRV-Cross since we can't reflect
+                        // data that's precise enough.
+                        // TODO(dawn:571): Remove once we use Tint unconditionnally for reflection.
+                        if (!device->IsToggleEnabled(Toggle::UseTintGenerator)) {
+                            break;
+                        }
+
                         if ((layoutInfo.sampler.type == wgpu::SamplerBindingType::Comparison) !=
                             shaderInfo.sampler.isComparison) {
                             return DAWN_VALIDATION_ERROR(
