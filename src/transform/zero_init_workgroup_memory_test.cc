@@ -558,6 +558,56 @@ fn f([[builtin(local_invocation_index)]] local_invocation_index : u32) {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(ZeroInitWorkgroupMemoryTest, WorkgroupArray_InitWithLoop) {
+  auto* src = R"(
+struct S {
+  a : array<i32, 3>; // size: 12, less than the loop threshold
+  b : array<i32, 4>; // size: 16, equal to the loop threshold
+  c : array<i32, 5>; // size: 20, greater than the loop threshold
+};
+
+var<workgroup> w : S;
+
+[[stage(compute), workgroup_size(1)]]
+fn f() {
+  ignore(w); // Initialization should be inserted above this statement
+}
+)";
+  auto* expect = R"(
+struct S {
+  a : array<i32, 3>;
+  b : array<i32, 4>;
+  c : array<i32, 5>;
+};
+
+var<workgroup> w : S;
+
+[[stage(compute), workgroup_size(1)]]
+fn f([[builtin(local_invocation_index)]] local_invocation_index : u32) {
+  if ((local_invocation_index == 0u)) {
+    w.a = array<i32, 3>();
+    for(var i : i32; (i < 4); i = (i + 1)) {
+      w.b[i] = i32();
+    }
+    for(var i_1 : i32; (i_1 < 5); i_1 = (i_1 + 1)) {
+      w.c[i_1] = i32();
+    }
+  }
+  workgroupBarrier();
+  ignore(w);
+}
+)";
+
+  ZeroInitWorkgroupMemory::Config cfg;
+  cfg.init_arrays_with_loop_size_threshold = 16;
+
+  DataMap data;
+  data.Add<ZeroInitWorkgroupMemory::Config>(cfg);
+  auto got = Run<ZeroInitWorkgroupMemory>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace transform
 }  // namespace tint

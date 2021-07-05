@@ -24,6 +24,7 @@
 #include "src/utils/get_or_create.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::ZeroInitWorkgroupMemory);
+TINT_INSTANTIATE_TYPEINFO(tint::transform::ZeroInitWorkgroupMemory::Config);
 
 namespace tint {
 namespace transform {
@@ -32,14 +33,16 @@ namespace transform {
 struct ZeroInitWorkgroupMemory::State {
   /// The clone context
   CloneContext& ctx;
-  /// The built statements
-  ast::StatementList& stmts;
+  /// The config
+  Config cfg;
 
   /// Zero() generates the statements required to zero initialize the workgroup
   /// storage expression of type `ty`.
   /// @param ty the expression type
+  /// @param stmts the built statements
   /// @param get_expr a function that builds the AST nodes for the expression
   void Zero(const sem::Type* ty,
+            ast::StatementList& stmts,
             const std::function<ast::Expression*()>& get_expr) {
     if (CanZero(ty)) {
       auto* var = get_expr();
@@ -61,21 +64,32 @@ struct ZeroInitWorkgroupMemory::State {
     if (auto* str = ty->As<sem::Struct>()) {
       for (auto* member : str->Members()) {
         auto name = ctx.Clone(member->Declaration()->symbol());
-        Zero(member->Type(),
+        Zero(member->Type(), stmts,
              [&] { return ctx.dst->MemberAccessor(get_expr(), name); });
       }
       return;
     }
 
     if (auto* arr = ty->As<sem::Array>()) {
-      // TODO(bclayton): If array sizes become pipeline-overridable then this
-      // will need to emit code for a loop.
-      // See https://github.com/gpuweb/gpuweb/pull/1792
-      for (size_t i = 0; i < arr->Count(); i++) {
-        Zero(arr->ElemType(), [&] {
-          return ctx.dst->IndexAccessor(get_expr(),
-                                        static_cast<ProgramBuilder::u32>(i));
-        });
+      if (ShouldEmitForLoop(arr)) {
+        auto i = ctx.dst->Symbols().New("i");
+        auto* i_decl = ctx.dst->Decl(ctx.dst->Var(i, ctx.dst->ty.i32()));
+        auto* cond = ctx.dst->create<ast::BinaryExpression>(
+            ast::BinaryOp::kLessThan, ctx.dst->Expr(i),
+            ctx.dst->Expr(static_cast<int>(arr->Count())));
+        auto* inc = ctx.dst->Assign(i, ctx.dst->Add(i, 1));
+        ast::StatementList for_stmts;
+        Zero(arr->ElemType(), for_stmts,
+             [&] { return ctx.dst->IndexAccessor(get_expr(), i); });
+        auto* body = ctx.dst->Block(for_stmts);
+        stmts.emplace_back(ctx.dst->For(i_decl, cond, inc, body));
+      } else {
+        for (size_t i = 0; i < arr->Count(); i++) {
+          Zero(arr->ElemType(), stmts, [&] {
+            return ctx.dst->IndexAccessor(get_expr(),
+                                          static_cast<ProgramBuilder::u32>(i));
+          });
+        }
       }
       return;
     }
@@ -89,7 +103,7 @@ struct ZeroInitWorkgroupMemory::State {
   /// CanZero() returns false, then the type needs to be initialized by
   /// decomposing the initialization into multiple sub-initializations.
   /// @param ty the type to inspect
-  static bool CanZero(const sem::Type* ty) {
+  bool CanZero(const sem::Type* ty) {
     if (ty->Is<sem::Atomic>()) {
       return false;
     }
@@ -101,11 +115,22 @@ struct ZeroInitWorkgroupMemory::State {
       }
     }
     if (auto* arr = ty->As<sem::Array>()) {
-      if (!CanZero(arr->ElemType())) {
+      if (ShouldEmitForLoop(arr) || !CanZero(arr->ElemType())) {
         return false;
       }
     }
     return true;
+  }
+
+  /// @returns true if the array should be emitted as a for-loop instead of
+  /// using zero-initializer statements.
+  /// @param array the array
+  bool ShouldEmitForLoop(const sem::Array* array) {
+    // TODO(bclayton): If array sizes become pipeline-overridable then this
+    // we need to return true for these arrays.
+    // See https://github.com/gpuweb/gpuweb/pull/1792
+    return (cfg.init_arrays_with_loop_size_threshold != 0) &&
+           (array->SizeInBytes() >= cfg.init_arrays_with_loop_size_threshold);
   }
 };
 
@@ -113,8 +138,15 @@ ZeroInitWorkgroupMemory::ZeroInitWorkgroupMemory() = default;
 
 ZeroInitWorkgroupMemory::~ZeroInitWorkgroupMemory() = default;
 
-void ZeroInitWorkgroupMemory::Run(CloneContext& ctx, const DataMap&, DataMap&) {
+void ZeroInitWorkgroupMemory::Run(CloneContext& ctx,
+                                  const DataMap& inputs,
+                                  DataMap&) {
   auto& sem = ctx.src->Sem();
+
+  Config cfg;
+  if (auto* c = inputs.Get<Config>()) {
+    cfg = *c;
+  }
 
   for (auto* ast_func : ctx.src->AST().Functions()) {
     if (!ast_func->IsEntryPoint()) {
@@ -129,7 +161,7 @@ void ZeroInitWorkgroupMemory::Run(CloneContext& ctx, const DataMap&, DataMap&) {
       if (var->StorageClass() != ast::StorageClass::kWorkgroup) {
         continue;
       }
-      State{ctx, stmts}.Zero(var->Type()->UnwrapRef(), [&] {
+      State{ctx, cfg}.Zero(var->Type()->UnwrapRef(), stmts, [&] {
         auto var_name = ctx.Clone(var->Declaration()->symbol());
         return ctx.dst->Expr(var_name);
       });
@@ -192,6 +224,12 @@ void ZeroInitWorkgroupMemory::Run(CloneContext& ctx, const DataMap&, DataMap&) {
 
   ctx.Clone();
 }
+
+ZeroInitWorkgroupMemory::Config::Config() = default;
+ZeroInitWorkgroupMemory::Config::Config(const Config&) = default;
+ZeroInitWorkgroupMemory::Config::~Config() = default;
+ZeroInitWorkgroupMemory::Config& ZeroInitWorkgroupMemory::Config::operator=(
+    const Config&) = default;
 
 }  // namespace transform
 }  // namespace tint

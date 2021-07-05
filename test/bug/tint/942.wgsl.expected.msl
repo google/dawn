@@ -1,0 +1,102 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Params {
+  /* 0x0000 */ uint filterDim;
+  /* 0x0004 */ uint blockDim;
+};
+struct Flip {
+  /* 0x0000 */ uint value;
+};
+struct tint_array_wrapper_1 {
+  float3 arr[256];
+};
+struct tint_array_wrapper {
+  tint_array_wrapper_1 arr[4];
+};
+
+kernel void tint_symbol(texture2d<float, access::sample> tint_symbol_4 [[texture(1)]], sampler tint_symbol_5 [[sampler(0)]], texture2d<float, access::write> tint_symbol_6 [[texture(2)]], uint3 WorkGroupID [[threadgroup_position_in_grid]], uint3 LocalInvocationID [[thread_position_in_threadgroup]], uint local_invocation_index [[thread_index_in_threadgroup]], constant Params& params [[buffer(1)]], constant Flip& flip [[buffer(3)]]) {
+  threadgroup tint_array_wrapper tint_symbol_3;
+  if ((local_invocation_index == 0u)) {
+    tint_array_wrapper const tint_symbol_2 = {.arr={}};
+    tint_symbol_3 = tint_symbol_2;
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  uint const filterOffset = ((params.filterDim - 1u) / 2u);
+  int2 const dims = int2(tint_symbol_4.get_width(0), tint_symbol_4.get_height(0));
+  int2 const baseIndex = (int2(((WorkGroupID.xy * uint2(params.blockDim, 4u)) + (LocalInvocationID.xy * uint2(4u, 1u)))) - int2(int(filterOffset), 0));
+  {
+    uint r = 0u;
+    while (true) {
+      if (!((r < 4u))) {
+        break;
+      }
+      {
+        uint c = 0u;
+        while (true) {
+          if (!((c < 4u))) {
+            break;
+          }
+          int2 loadIndex = (baseIndex + int2(int(c), int(r)));
+          if ((flip.value != 0u)) {
+            loadIndex = loadIndex.yx;
+          }
+          tint_symbol_3.arr[r].arr[((4u * LocalInvocationID.x) + c)] = tint_symbol_4.sample(tint_symbol_5, ((float2(loadIndex) + float2(0.25f, 0.25f)) / float2(dims)), level(0.0f)).rgb;
+          {
+            c = (c + 1u);
+          }
+        }
+      }
+      {
+        r = (r + 1u);
+      }
+    }
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  {
+    uint r = 0u;
+    while (true) {
+      if (!((r < 4u))) {
+        break;
+      }
+      {
+        uint c = 0u;
+        while (true) {
+          if (!((c < 4u))) {
+            break;
+          }
+          int2 writeIndex = (baseIndex + int2(int(c), int(r)));
+          if ((flip.value != 0u)) {
+            writeIndex = writeIndex.yx;
+          }
+          uint const center = ((4u * LocalInvocationID.x) + c);
+          if ((((center >= filterOffset) && (center < (256u - filterOffset))) && all((writeIndex < dims)))) {
+            float3 acc = float3(0.0f, 0.0f, 0.0f);
+            {
+              uint f = 0u;
+              while (true) {
+                if (!((f < params.filterDim))) {
+                  break;
+                }
+                uint i = ((center + f) - filterOffset);
+                acc = (acc + ((1.0f / float(params.filterDim)) * tint_symbol_3.arr[r].arr[i]));
+                {
+                  f = (f + 1u);
+                }
+              }
+            }
+            tint_symbol_6.write(float4(acc, 1.0f), uint2(writeIndex));
+          }
+          {
+            c = (c + 1u);
+          }
+        }
+      }
+      {
+        r = (r + 1u);
+      }
+    }
+  }
+  return;
+}
+

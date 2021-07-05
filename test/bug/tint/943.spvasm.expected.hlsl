@@ -336,10 +336,15 @@ void main(tint_symbol_1 tint_symbol) {
   const uint3 gl_GlobalInvocationID_param = tint_symbol.gl_GlobalInvocationID_param;
   const uint local_invocation_index = tint_symbol.local_invocation_index;
   if ((local_invocation_index == 0u)) {
-    const float tint_symbol_6[64][64] = (float[64][64])0;
-    mm_Asub = tint_symbol_6;
-    const float tint_symbol_7[64][1] = (float[64][1])0;
-    mm_Bsub = tint_symbol_7;
+    for(int i = 0; (i < 64); i = (i + 1)) {
+      for(int i_1 = 0; (i_1 < 64); i_1 = (i_1 + 1)) {
+        mm_Asub[i][i_1] = 0.0f;
+      }
+    }
+    for(int i_2 = 0; (i_2 < 64); i_2 = (i_2 + 1)) {
+      const float tint_symbol_6[1] = (float[1])0;
+      mm_Bsub[i_2] = tint_symbol_6;
+    }
   }
   GroupMemoryBarrierWithGroupSync();
   gl_LocalInvocationID = gl_LocalInvocationID_param;
