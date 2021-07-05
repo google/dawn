@@ -1840,6 +1840,7 @@ std::string GeneratorImpl::generate_builtin_name(
     case sem::IntrinsicType::kNormalize:
     case sem::IntrinsicType::kPow:
     case sem::IntrinsicType::kReflect:
+    case sem::IntrinsicType::kRefract:
     case sem::IntrinsicType::kRound:
     case sem::IntrinsicType::kSign:
     case sem::IntrinsicType::kSin:

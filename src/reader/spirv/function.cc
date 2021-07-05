@@ -365,6 +365,8 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
       return "sign";
     case GLSLstd450Reflect:
       return "reflect";
+    case GLSLstd450Refract:
+      return "refract";
     case GLSLstd450Round:
     case GLSLstd450RoundEven:
       return "round";
@@ -418,8 +420,6 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
 
     case GLSLstd450PackDouble2x32:
     case GLSLstd450UnpackDouble2x32:
-
-    case GLSLstd450Refract:
 
     case GLSLstd450FindILsb:
     case GLSLstd450FindSMsb:
@@ -1055,9 +1055,8 @@ void FunctionEmitter::IncrementLocation(ast::DecorationList* decos) {
   }
 }
 
-ast::Decoration* FunctionEmitter::SetLocation(
-    ast::DecorationList* decos,
-    ast::Decoration* replacement) {
+ast::Decoration* FunctionEmitter::SetLocation(ast::DecorationList* decos,
+                                              ast::Decoration* replacement) {
   if (!replacement) {
     return nullptr;
   }

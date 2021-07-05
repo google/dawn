@@ -1,0 +1,27 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+void refract_cd905f() {
+  float2 res = refract(float2(), float2(), 1.0f);
+}
+
+vertex tint_symbol vertex_main() {
+  refract_cd905f();
+  tint_symbol const tint_symbol_1 = {.value=float4()};
+  return tint_symbol_1;
+}
+
+fragment void fragment_main() {
+  refract_cd905f();
+  return;
+}
+
+kernel void compute_main() {
+  refract_cd905f();
+  return;
+}
+

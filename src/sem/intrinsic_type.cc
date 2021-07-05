@@ -193,6 +193,9 @@ IntrinsicType ParseIntrinsicType(const std::string& name) {
   if (name == "reflect") {
     return IntrinsicType::kReflect;
   }
+  if (name == "refract") {
+    return IntrinsicType::kRefract;
+  }
   if (name == "reverseBits") {
     return IntrinsicType::kReverseBits;
   }
@@ -436,6 +439,8 @@ const char* str(IntrinsicType i) {
       return "pow";
     case IntrinsicType::kReflect:
       return "reflect";
+    case IntrinsicType::kRefract:
+      return "refract";
     case IntrinsicType::kReverseBits:
       return "reverseBits";
     case IntrinsicType::kRound:

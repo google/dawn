@@ -88,6 +88,7 @@ enum class IntrinsicType {
   kPack4x8unorm,
   kPow,
   kReflect,
+  kRefract,
   kReverseBits,
   kRound,
   kSelect,

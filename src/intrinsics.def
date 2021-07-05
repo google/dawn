@@ -354,6 +354,7 @@ fn pow(f32, f32) -> f32
 fn pow<N: num>(vec<N, f32>, vec<N, f32>) -> vec<N, f32>
 fn reflect(f32, f32) -> f32
 fn reflect<N: num>(vec<N, f32>, vec<N, f32>) -> vec<N, f32>
+fn refract<N: num>(vec<N, f32>, vec<N, f32>, f32) -> vec<N, f32>
 fn reverseBits<T: iu32>(T) -> T
 fn reverseBits<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
 fn round(f32) -> f32
