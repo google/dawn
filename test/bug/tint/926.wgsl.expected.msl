@@ -1,17 +1,13 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-
-[[block]]
+using namespace metal;
 struct DrawIndirectArgs {
-  vertexCount : atomic<u32>;
+  /* 0x0000 */ atomic_uint vertexCount;
 };
 
-[[group(0), binding(5)]] var<storage, read_write> drawOut : DrawIndirectArgs;
-
-[[stage(compute), workgroup_size(1)]]
-fn computeMain([[builtin(global_invocation_id)]] global_id : vec3<u32>) {
-  [[internal(disable_validation__function_var_storage_class)]] var<private> tint_symbol_1 : u32 = 0u;
-  let firstVertex : u32 = atomicAdd(&(drawOut.vertexCount), tint_symbol_1);
+kernel void computeMain(uint3 global_id [[thread_position_in_grid]], device DrawIndirectArgs& drawOut [[buffer(5)]]) {
+  thread uint tint_symbol_1 = 0u;
+  uint const firstVertex = atomic_fetch_add_explicit(&(drawOut.vertexCount), tint_symbol_1, memory_order_relaxed);
+  return;
 }
 
-Failed to generate: error: unknown type in EmitType: __atomic__u32
