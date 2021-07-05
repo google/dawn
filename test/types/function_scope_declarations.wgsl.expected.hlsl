@@ -1,9 +1,6 @@
 struct S {
   float a;
 };
-struct tint_array_wrapper {
-  float arr[4];
-};
 
 [numthreads(1, 1, 1)]
 void main() {
@@ -23,8 +20,8 @@ void main() {
   const float4 v4f32_let = float4(0.0f, 0.0f, 0.0f, 0.0f);
   float2x3 m2x3_var = float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   const float3x4 m3x4_let = float3x4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-  tint_array_wrapper arr_var = {(float[4])0};
-  const tint_array_wrapper arr_let = {(float[4])0};
+  float arr_var[4] = (float[4])0;
+  const float arr_let[4] = (float[4])0;
   S struct_var = (S)0;
   const S struct_let = (S)0;
   return;

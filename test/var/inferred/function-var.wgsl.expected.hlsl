@@ -1,9 +1,6 @@
 struct MyStruct {
   float f1;
 };
-struct tint_array_wrapper {
-  float arr[10];
-};
 
 int ret_i32() {
   return 1;
@@ -22,8 +19,9 @@ MyStruct ret_MyStruct() {
   return tint_symbol_1;
 }
 
-tint_array_wrapper ret_MyArray() {
-  const tint_array_wrapper tint_symbol_2 = {(float[10])0};
+typedef float ret_MyArray_ret[10];
+ret_MyArray_ret ret_MyArray() {
+  const float tint_symbol_2[10] = (float[10])0;
   return tint_symbol_2;
 }
 
@@ -36,13 +34,13 @@ void var_decls() {
   float3 v6 = float3(1.0f, 1.0f, 1.0f);
   float3x3 v7 = float3x3(v6, v6, v6);
   MyStruct v8 = {1.0f};
-  tint_array_wrapper v9 = {(float[10])0};
+  float v9[10] = (float[10])0;
   int v10 = ret_i32();
   uint v11 = ret_u32();
   float v12 = ret_f32();
   MyStruct v13 = ret_MyStruct();
   MyStruct v14 = ret_MyStruct();
-  tint_array_wrapper v15 = ret_MyArray();
+  float v15[10] = ret_MyArray();
 }
 
 struct tint_symbol {

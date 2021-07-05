@@ -7,24 +7,8 @@ static int dimBOuter_1 = 0;
 RWByteAddressBuffer x_54 : register(u0, space0);
 static uint3 gl_LocalInvocationID = uint3(0u, 0u, 0u);
 static uint3 gl_GlobalInvocationID = uint3(0u, 0u, 0u);
-
-struct tint_array_wrapper_1 {
-  float arr[64];
-};
-struct tint_array_wrapper {
-  tint_array_wrapper_1 arr[64];
-};
-
-groupshared tint_array_wrapper mm_Asub;
-
-struct tint_array_wrapper_3 {
-  float arr[1];
-};
-struct tint_array_wrapper_2 {
-  tint_array_wrapper_3 arr[64];
-};
-
-groupshared tint_array_wrapper_2 mm_Bsub;
+groupshared float mm_Asub[64][64];
+groupshared float mm_Bsub[64][1];
 ByteAddressBuffer x_165 : register(t1, space0);
 static int batch = 0;
 ByteAddressBuffer x_185 : register(t2, space0);
@@ -161,10 +145,6 @@ void mm_write_i1_i1_f1_(inout int row_2, inout int col_2, inout float value_2) {
   return;
 }
 
-struct tint_array_wrapper_4 {
-  tint_array_wrapper_3 arr[1];
-};
-
 void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimBOuter) {
   int tileRow = 0;
   int tileCol = 0;
@@ -173,7 +153,7 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
   int numTiles = 0;
   int innerRow = 0;
   int innerCol = 0;
-  tint_array_wrapper_4 acc = (tint_array_wrapper_4)0;
+  float acc[1][1] = (float[1][1])0;
   int tileColA = 0;
   int tileRowB = 0;
   int t = 0;
@@ -191,7 +171,7 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
   int param_6 = 0;
   int k = 0;
   int inner = 0;
-  tint_array_wrapper_3 BCached = (tint_array_wrapper_3)0;
+  float BCached[1] = (float[1])0;
   int innerRow_3 = 0;
   float ACached = 0.0f;
   int innerCol_3 = 0;
@@ -214,7 +194,7 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
   for(; (innerRow < 1); innerRow = (innerRow + 1)) {
     innerCol = 0;
     for(; (innerCol < 1); innerCol = (innerCol + 1)) {
-      acc.arr[innerRow].arr[innerCol] = 0.0f;
+      acc[innerRow][innerCol] = 0.0f;
     }
   }
   const uint x_187 = gl_LocalInvocationID.x;
@@ -236,7 +216,7 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
         param_3 = (globalRow + innerRow_1);
         param_4 = ((x_238 * 64) + x_240);
         const float x_244 = mm_readA_i1_i1_(param_3, param_4);
-        mm_Asub.arr[x_233].arr[x_234] = x_244;
+        mm_Asub[x_233][x_234] = x_244;
       }
     }
     innerRow_2 = 0;
@@ -252,7 +232,7 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
         param_5 = ((t * 64) + inputRow_1);
         param_6 = (x_284 + x_285);
         const float x_289 = mm_readB_i1_i1_(param_5, param_6);
-        mm_Bsub.arr[x_278].arr[x_279] = x_289;
+        mm_Bsub[x_278][x_279] = x_289;
       }
     }
     GroupMemoryBarrierWithGroupSync();
@@ -261,21 +241,21 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
       inner = 0;
       for(; (inner < 1); inner = (inner + 1)) {
         const int x_314 = inner;
-        const float x_320 = mm_Bsub.arr[k].arr[(tileCol + inner)];
-        BCached.arr[x_314] = x_320;
+        const float x_320 = mm_Bsub[k][(tileCol + inner)];
+        BCached[x_314] = x_320;
       }
       innerRow_3 = 0;
       for(; (innerRow_3 < 1); innerRow_3 = (innerRow_3 + 1)) {
-        const float x_338 = mm_Asub.arr[(tileRow + innerRow_3)].arr[k];
+        const float x_338 = mm_Asub[(tileRow + innerRow_3)][k];
         ACached = x_338;
         innerCol_3 = 0;
         for(; (innerCol_3 < 1); innerCol_3 = (innerCol_3 + 1)) {
           const int x_347 = innerRow_3;
           const int x_348 = innerCol_3;
           const float x_349 = ACached;
-          const float x_352 = BCached.arr[innerCol_3];
-          const float x_355 = acc.arr[x_347].arr[x_348];
-          acc.arr[x_347].arr[x_348] = (x_355 + (x_349 * x_352));
+          const float x_352 = BCached[innerCol_3];
+          const float x_355 = acc[x_347][x_348];
+          acc[x_347][x_348] = (x_355 + (x_349 * x_352));
         }
       }
     }
@@ -310,7 +290,7 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
         const int x_404 = innerCol_4;
         param_7 = (globalRow + innerRow_4);
         param_8 = (x_400 + x_401);
-        const float x_409 = acc.arr[x_403].arr[x_404];
+        const float x_409 = acc[x_403][x_404];
         param_9 = x_409;
         mm_write_i1_i1_f1_(param_7, param_8, param_9);
       }
@@ -356,9 +336,9 @@ void main(tint_symbol_1 tint_symbol) {
   const uint3 gl_GlobalInvocationID_param = tint_symbol.gl_GlobalInvocationID_param;
   const uint local_invocation_index = tint_symbol.local_invocation_index;
   if ((local_invocation_index == 0u)) {
-    const tint_array_wrapper tint_symbol_6 = {(tint_array_wrapper_1[64])0};
+    const float tint_symbol_6[64][64] = (float[64][64])0;
     mm_Asub = tint_symbol_6;
-    const tint_array_wrapper_2 tint_symbol_7 = {(tint_array_wrapper_3[64])0};
+    const float tint_symbol_7[64][1] = (float[64][1])0;
     mm_Bsub = tint_symbol_7;
   }
   GroupMemoryBarrierWithGroupSync();

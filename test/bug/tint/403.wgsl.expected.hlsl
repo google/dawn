@@ -27,19 +27,16 @@ struct tint_symbol_1 {
 struct tint_symbol_2 {
   float4 value : SV_Position;
 };
-struct tint_array_wrapper {
-  float2 arr[3];
-};
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   const uint gl_VertexIndex = tint_symbol.gl_VertexIndex;
-  tint_array_wrapper indexable = (tint_array_wrapper)0;
+  float2 indexable[3] = (float2[3])0;
   const float2x2 x_23 = tint_symbol_4(x_20, 0u);
   const float2x2 x_28 = tint_symbol_6(x_26, 0u);
   const uint x_46 = gl_VertexIndex;
-  const tint_array_wrapper tint_symbol_7 = {{float2(-1.0f, 1.0f), float2(1.0f, 1.0f), float2(-1.0f, -1.0f)}};
+  const float2 tint_symbol_7[3] = {float2(-1.0f, 1.0f), float2(1.0f, 1.0f), float2(-1.0f, -1.0f)};
   indexable = tint_symbol_7;
-  const float2 x_51 = indexable.arr[x_46];
+  const float2 x_51 = indexable[x_46];
   const float2 x_52 = mul(x_51, float2x2((x_23[0u] + x_28[0u]), (x_23[1u] + x_28[1u])));
   const tint_symbol_2 tint_symbol_8 = {float4(x_52.x, x_52.y, 0.0f, 1.0f)};
   return tint_symbol_8;

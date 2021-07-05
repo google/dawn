@@ -3,11 +3,8 @@ void unused_entry_point() {
   return;
 }
 
-struct tint_array_wrapper {
-  float arr[4];
-};
 struct S {
-  tint_array_wrapper a;
+  float a[4];
 };
 
 void f() {

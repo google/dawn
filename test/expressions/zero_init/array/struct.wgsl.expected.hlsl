@@ -9,10 +9,7 @@ struct S {
   float f;
   bool b;
 };
-struct tint_array_wrapper {
-  S arr[4];
-};
 
 void f() {
-  tint_array_wrapper v = {(S[4])0};
+  S v[4] = (S[4])0;
 }

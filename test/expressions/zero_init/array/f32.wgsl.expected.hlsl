@@ -3,10 +3,6 @@ void unused_entry_point() {
   return;
 }
 
-struct tint_array_wrapper {
-  float arr[4];
-};
-
 void f() {
-  tint_array_wrapper v = {(float[4])0};
+  float v[4] = (float[4])0;
 }

@@ -13,14 +13,8 @@ struct S3 {
   S1 h;
   S2 i;
 };
-struct tint_array_wrapper {
-  int arr[2];
-};
 struct T {
-  tint_array_wrapper a;
-};
-struct tint_array_wrapper_1 {
-  T arr[2];
+  int a[2];
 };
 
 [numthreads(1, 1, 1)]
@@ -51,14 +45,14 @@ void main() {
   const S1 tint_symbol_11 = {2, x, (x + 1), nested_nonempty.i.f.d};
   const S2 tint_symbol_12 = {1, tint_symbol_11};
   const S1 subexpr_nested_nonempty_with_expr = tint_symbol_12.f;
-  const tint_array_wrapper_1 aosoa_empty = {(T[2])0};
-  const tint_array_wrapper tint_symbol_13 = {{1, 2}};
+  const T aosoa_empty[2] = (T[2])0;
+  const int tint_symbol_13[2] = {1, 2};
   const T tint_symbol_14 = {tint_symbol_13};
-  const tint_array_wrapper tint_symbol_15 = {{3, 4}};
+  const int tint_symbol_15[2] = {3, 4};
   const T tint_symbol_16 = {tint_symbol_15};
-  const tint_array_wrapper_1 aosoa_nonempty = {{tint_symbol_14, tint_symbol_16}};
-  const tint_array_wrapper tint_symbol_17 = {{1, (aosoa_nonempty.arr[0].a.arr[0] + 1)}};
+  const T aosoa_nonempty[2] = {tint_symbol_14, tint_symbol_16};
+  const int tint_symbol_17[2] = {1, (aosoa_nonempty[0].a[0] + 1)};
   const T tint_symbol_18 = {tint_symbol_17};
-  const tint_array_wrapper_1 aosoa_nonempty_with_expr = {{tint_symbol_18, aosoa_nonempty.arr[1]}};
+  const T aosoa_nonempty_with_expr[2] = {tint_symbol_18, aosoa_nonempty[1]};
   return;
 }

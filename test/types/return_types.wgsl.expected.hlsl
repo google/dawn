@@ -34,12 +34,9 @@ float2x3 ret_m2x3() {
   return float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 }
 
-struct tint_array_wrapper {
-  float arr[4];
-};
-
-tint_array_wrapper ret_arr() {
-  const tint_array_wrapper tint_symbol = {(float[4])0};
+typedef float ret_arr_ret[4];
+ret_arr_ret ret_arr() {
+  const float tint_symbol[4] = (float[4])0;
   return tint_symbol;
 }
 

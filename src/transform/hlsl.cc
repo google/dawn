@@ -28,7 +28,6 @@
 #include "src/transform/pad_array_elements.h"
 #include "src/transform/promote_initializers_to_const_var.h"
 #include "src/transform/simplify.h"
-#include "src/transform/wrap_arrays_in_structs.h"
 #include "src/transform/zero_init_workgroup_memory.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Hlsl);
@@ -66,7 +65,6 @@ Output Hlsl::Run(const Program* in, const DataMap&) {
   manager.Add<CalculateArrayLength>();
   manager.Add<ExternalTextureTransform>();
   manager.Add<PromoteInitializersToConstVar>();
-  manager.Add<WrapArraysInStructs>();
   manager.Add<PadArrayElements>();
   data.Add<CanonicalizeEntryPointIO::Config>(
       CanonicalizeEntryPointIO::BuiltinStyle::kStructMember);

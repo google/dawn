@@ -755,18 +755,13 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
            Return(),
        });
 
-  GeneratorImpl& gen = SanitizeAndBuild();
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr(R"(
-struct tint_array_wrapper {
-  float arr[5];
-};
-
-void my_func(tint_array_wrapper a) {
+  EXPECT_EQ(gen.result(), R"(void my_func(float a[5]) {
   return;
 }
-)"));
+)");
 }
 
 TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayReturn) {
@@ -775,19 +770,14 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayReturn) {
            Return(Construct(ty.array<f32, 5>())),
        });
 
-  GeneratorImpl& gen = SanitizeAndBuild();
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr(R"(
-struct tint_array_wrapper {
-  float arr[5];
-};
-
-tint_array_wrapper my_func() {
-  const tint_array_wrapper tint_symbol = {(float[5])0};
-  return tint_symbol;
+  EXPECT_EQ(gen.result(), R"(typedef float my_func_ret[5];
+my_func_ret my_func() {
+  return (float[5])0;
 }
-)"));
+)");
 }
 
 // https://crbug.com/tint/297

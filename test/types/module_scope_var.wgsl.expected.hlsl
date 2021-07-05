@@ -10,12 +10,7 @@ static int2 v2i32_var = int2(0, 0);
 static uint3 v3u32_var = uint3(0u, 0u, 0u);
 static float4 v4f32_var = float4(0.0f, 0.0f, 0.0f, 0.0f);
 static float2x3 m2x3_var = float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-
-struct tint_array_wrapper {
-  float arr[4];
-};
-
-static tint_array_wrapper arr_var = (tint_array_wrapper)0;
+static float arr_var[4] = (float[4])0;
 static S struct_var = (S)0;
 
 [numthreads(1, 1, 1)]
@@ -28,7 +23,7 @@ void main() {
   v3u32_var = uint3(0u, 0u, 0u);
   v4f32_var = float4(0.0f, 0.0f, 0.0f, 0.0f);
   m2x3_var = float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-  const tint_array_wrapper tint_symbol = {(float[4])0};
+  const float tint_symbol[4] = (float[4])0;
   arr_var = tint_symbol;
   const S tint_symbol_1 = (S)0;
   struct_var = tint_symbol_1;
