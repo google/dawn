@@ -15,6 +15,7 @@
 #include "src/writer/hlsl/generator_impl.h"
 
 #include <algorithm>
+#include <cmath>
 #include <iomanip>
 #include <set>
 #include <utility>
@@ -2474,7 +2475,14 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, ast::Literal* lit) {
   if (auto* l = lit->As<ast::BoolLiteral>()) {
     out << (l->IsTrue() ? "true" : "false");
   } else if (auto* fl = lit->As<ast::FloatLiteral>()) {
-    out << FloatToString(fl->value()) << "f";
+    if (std::isinf(fl->value())) {
+      out << (fl->value() >= 0 ? "asfloat(0x7f800000u)"
+                               : "asfloat(0xff800000u)");
+    } else if (std::isnan(fl->value())) {
+      out << "asfloat(0x7fc00000u)";
+    } else {
+      out << FloatToString(fl->value()) << "f";
+    }
   } else if (auto* sl = lit->As<ast::SintLiteral>()) {
     out << sl->value();
   } else if (auto* ul = lit->As<ast::UintLiteral>()) {

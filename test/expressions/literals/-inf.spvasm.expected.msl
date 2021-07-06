@@ -1,0 +1,23 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct main_out {
+  float4 out_var_SV_TARGET_1;
+};
+struct tint_symbol_1 {
+  float4 out_var_SV_TARGET_1 [[color(0)]];
+};
+
+void main_1(thread float4* const tint_symbol_4) {
+  *(tint_symbol_4) = float4(-INFINITY, -INFINITY, -INFINITY, -INFINITY);
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol() {
+  thread float4 tint_symbol_5 = 0.0f;
+  main_1(&(tint_symbol_5));
+  main_out const tint_symbol_2 = {.out_var_SV_TARGET_1=tint_symbol_5};
+  tint_symbol_1 const tint_symbol_3 = {.out_var_SV_TARGET_1=tint_symbol_2.out_var_SV_TARGET_1};
+  return tint_symbol_3;
+}
+
