@@ -363,8 +363,7 @@ class Resolver {
 
   /// @param storage_class the storage class
   /// @returns the default access control for the given storage class
-  ast::AccessControl DefaultAccessForStorageClass(
-      ast::StorageClass storage_class);
+  ast::Access DefaultAccessForStorageClass(ast::StorageClass storage_class);
 
   /// @returns the resolved type of the ast::Expression `expr`
   /// @param expr the expression

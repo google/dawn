@@ -15,6 +15,7 @@
 #include "src/transform/canonicalize_entry_point_io.h"
 
 #include <algorithm>
+#include <string>
 #include <utility>
 
 #include "src/program_builder.h"
@@ -70,7 +71,7 @@ void CanonicalizeEntryPointIO::Run(CloneContext& ctx,
   if (cfg == nullptr) {
     ctx.dst->Diagnostics().add_error(
         diag::System::Transform,
-        "missing transform data for CanonicalizeEntryPointIO");
+        "missing transform data for " + std::string(TypeInfo().name));
     return;
   }
 

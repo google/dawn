@@ -15,6 +15,7 @@
 #include "src/transform/array_length_from_uniform.h"
 
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "src/ast/struct_block_decoration.h"
@@ -45,7 +46,7 @@ void ArrayLengthFromUniform::Run(CloneContext& ctx,
   if (cfg == nullptr) {
     ctx.dst->Diagnostics().add_error(
         diag::System::Transform,
-        "missing transform data for ArrayLengthFromUniform");
+        "missing transform data for " + std::string(TypeInfo().name));
     return;
   }
 

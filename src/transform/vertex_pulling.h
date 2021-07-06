@@ -58,38 +58,7 @@ enum class VertexFormat {
   kSint32x3,   // sint32x3
   kSint32x4,   // sint32x4
 
-  // Deprecated names
-  kVec2U8 = kUint8x2,
-  kVec4U8 = kUint8x4,
-  kVec2I8 = kSint8x2,
-  kVec4I8 = kSint8x4,
-  kVec2U8Norm = kUnorm8x2,
-  kVec4U8Norm = kUnorm8x4,
-  kVec2I8Norm = kSnorm8x2,
-  kVec4I8Norm = kSnorm8x4,
-  kVec2U16 = kUint16x2,
-  kVec4U16 = kUint16x4,
-  kVec2I16 = kSint16x2,
-  kVec4I16 = kSint16x4,
-  kVec2U16Norm = kUnorm16x2,
-  kVec4U16Norm = kUnorm16x4,
-  kVec2I16Norm = kSnorm16x2,
-  kVec4I16Norm = kSnorm16x4,
-  kVec2F16 = kFloat16x2,
-  kVec4F16 = kFloat16x4,
-  kF32 = kFloat32,
-  kVec2F32 = kFloat32x2,
-  kVec3F32 = kFloat32x3,
-  kVec4F32 = kFloat32x4,
-  kU32 = kUint32,
-  kVec2U32 = kUint32x2,
-  kVec3U32 = kUint32x3,
-  kVec4U32 = kUint32x4,
-  kI32 = kSint32,
-  kVec2I32 = kSint32x2,
-  kVec3I32 = kSint32x3,
-  kVec4I32 = kSint32x4,
-  kLastEntry = kVec4I32
+  kLastEntry = kSint32x4,
 };
 
 /// Describes if a vertex attributes increments with vertex index or instance

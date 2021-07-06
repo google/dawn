@@ -56,7 +56,8 @@ class Renamer : public Castable<Renamer, Transform> {
     kMslKeywords,
   };
 
-  /// Configuration options for the transform
+  /// Optional configuration options for the transform.
+  /// If omitted, then the renamer will use Target::kAll.
   struct Config : public Castable<Config, transform::Data> {
     /// Constructor
     /// @param tgt the targets to rename
@@ -75,11 +76,6 @@ class Renamer : public Castable<Renamer, Transform> {
   /// Constructor using a the configuration provided in the input Data
   Renamer();
 
-  /// Constructor
-  /// @param config the configuration for the transform
-  /// [DEPRECATED] Pass Config as input Data
-  explicit Renamer(const Config& config);
-
   /// Destructor
   ~Renamer() override;
 
@@ -88,9 +84,6 @@ class Renamer : public Castable<Renamer, Transform> {
   /// @param data optional extra transform-specific input data
   /// @returns the transformation result
   Output Run(const Program* program, const DataMap& data = {}) override;
-
- private:
-  Config const deprecated_cfg_;
 };
 
 }  // namespace transform

@@ -35,7 +35,9 @@ void SingleEntryPoint::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
   auto* cfg = inputs.Get<Config>();
   if (cfg == nullptr) {
     ctx.dst->Diagnostics().add_error(
-        diag::System::Transform, "missing transform data for SingleEntryPoint");
+        diag::System::Transform,
+        "missing transform data for " + std::string(TypeInfo().name));
+
     return;
   }
 

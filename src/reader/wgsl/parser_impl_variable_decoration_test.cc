@@ -108,9 +108,7 @@ INSTANTIATE_TEST_SUITE_P(
     BuiltinTest,
     testing::Values(
         BuiltinData{"position", ast::Builtin::kPosition},
-        BuiltinData{"vertex_idx", ast::Builtin::kVertexIndex},
         BuiltinData{"vertex_index", ast::Builtin::kVertexIndex},
-        BuiltinData{"instance_idx", ast::Builtin::kInstanceIndex},
         BuiltinData{"instance_index", ast::Builtin::kInstanceIndex},
         BuiltinData{"front_facing", ast::Builtin::kFrontFacing},
         BuiltinData{"frag_depth", ast::Builtin::kFragDepth},
@@ -353,22 +351,6 @@ TEST_F(ParserImplTest, Decoration_Binding_MissingInvalid) {
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),
             "1:9: expected signed integer literal for binding decoration");
-}
-
-// DEPRECATED
-TEST_F(ParserImplTest, Decoration_set) {
-  auto p = parser("set(4)");
-  auto deco = p->decoration();
-  EXPECT_TRUE(deco.matched);
-  EXPECT_FALSE(deco.errored);
-  ASSERT_NE(deco.value, nullptr);
-  auto* var_deco = deco.value->As<ast::Decoration>();
-  ASSERT_FALSE(p->has_error());
-  ASSERT_NE(var_deco, nullptr);
-  ASSERT_TRUE(var_deco->Is<ast::GroupDecoration>());
-
-  auto* group = var_deco->As<ast::GroupDecoration>();
-  EXPECT_EQ(group->value(), 4u);
 }
 
 TEST_F(ParserImplTest, Decoration_group) {

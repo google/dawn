@@ -81,12 +81,12 @@ class TestHelperBase : public BODY, public ProgramBuilder {
     }();
 
     transform::Manager transform_manager;
-    transform::Renamer::Config renamer_config{
-        transform::Renamer::Target::kHlslKeywords};
-    transform_manager.append(
-        std::make_unique<tint::transform::Renamer>(renamer_config));
-    transform_manager.append(std::make_unique<tint::transform::Hlsl>());
-    auto result = transform_manager.Run(program.get());
+    transform::DataMap transform_data;
+    transform_data.Add<transform::Renamer::Config>(
+        transform::Renamer::Target::kHlslKeywords);
+    transform_manager.Add<tint::transform::Renamer>();
+    transform_manager.Add<tint::transform::Hlsl>();
+    auto result = transform_manager.Run(program.get(), transform_data);
     [&]() {
       ASSERT_TRUE(result.program.IsValid())
           << formatter.format(result.program.Diagnostics());

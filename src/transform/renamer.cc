@@ -881,8 +881,7 @@ Renamer::Config::Config(Target t) : target(t) {}
 Renamer::Config::Config(const Config&) = default;
 Renamer::Config::~Config() = default;
 
-Renamer::Renamer() : deprecated_cfg_(Target::kAll) {}
-Renamer::Renamer(const Config& config) : deprecated_cfg_(config) {}
+Renamer::Renamer() = default;
 Renamer::~Renamer() = default;
 
 Output Renamer::Run(const Program* in, const DataMap& inputs) {
@@ -918,14 +917,15 @@ Output Renamer::Run(const Program* in, const DataMap& inputs) {
 
   Data::Remappings remappings;
 
-  auto* cfg = inputs.Get<Config>();
-  if (!cfg) {
-    cfg = &deprecated_cfg_;
+  Target target = Target::kAll;
+
+  if (auto* cfg = inputs.Get<Config>()) {
+    target = cfg->target;
   }
 
   ctx.ReplaceAll([&](Symbol sym_in) {
     auto name_in = ctx.src->Symbols().NameFor(sym_in);
-    switch (cfg->target) {
+    switch (target) {
       case Target::kAll:
         // Always rename.
         break;

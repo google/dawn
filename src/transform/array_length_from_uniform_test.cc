@@ -29,7 +29,9 @@ using ArrayLengthFromUniformTest = TransformTest;
 TEST_F(ArrayLengthFromUniformTest, Error_MissingTransformData) {
   auto* src = "";
 
-  auto* expect = "error: missing transform data for ArrayLengthFromUniform";
+  auto* expect =
+      "error: missing transform data for "
+      "tint::transform::ArrayLengthFromUniform";
 
   auto got = Run<InlinePointerLets, Simplify, ArrayLengthFromUniform>(src);
 

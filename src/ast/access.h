@@ -38,9 +38,6 @@ enum Access {
 /// @return the std::ostream so calls can be chained
 std::ostream& operator<<(std::ostream& out, Access access);
 
-/// [DEPRECATED]: Old name in use by Dawn.
-using AccessControl = Access;
-
 }  // namespace ast
 }  // namespace tint
 

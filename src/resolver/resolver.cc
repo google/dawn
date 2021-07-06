@@ -595,7 +595,7 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
   return info;
 }
 
-ast::AccessControl Resolver::DefaultAccessForStorageClass(
+ast::Access Resolver::DefaultAccessForStorageClass(
     ast::StorageClass storage_class) {
   // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
   switch (storage_class) {

@@ -426,7 +426,7 @@ struct State {
 
     // Returns a u32 loaded from buffer_base + offset.
     auto load_u32 = [&] {
-      return LoadPrimitive(array_base, offset, buffer, VertexFormat::kU32);
+      return LoadPrimitive(array_base, offset, buffer, VertexFormat::kUint32);
     };
 
     // Returns a i32 loaded from buffer_base + offset.
@@ -434,7 +434,8 @@ struct State {
 
     // Returns a u32 loaded from buffer_base + offset + 4.
     auto load_next_u32 = [&] {
-      return LoadPrimitive(array_base, offset + 4, buffer, VertexFormat::kU32);
+      return LoadPrimitive(array_base, offset + 4, buffer,
+                           VertexFormat::kUint32);
     };
 
     // Returns a i32 loaded from buffer_base + offset + 4.
@@ -446,8 +447,8 @@ struct State {
     // `offset` must be `min_alignment` bytes aligned.
     auto load_u16_h = [&] {
       auto low_u32_offset = offset & ~3u;
-      auto* low_u32 =
-          LoadPrimitive(array_base, low_u32_offset, buffer, VertexFormat::kU32);
+      auto* low_u32 = LoadPrimitive(array_base, low_u32_offset, buffer,
+                                    VertexFormat::kUint32);
       switch (offset & 3) {
         case 0:
           return ctx.dst->Shl(low_u32, 16u);
@@ -457,7 +458,7 @@ struct State {
           return ctx.dst->And(low_u32, 0xffff0000u);
         default: {  // 3:
           auto* high_u32 = LoadPrimitive(array_base, low_u32_offset + 4, buffer,
-                                         VertexFormat::kU32);
+                                         VertexFormat::kUint32);
           auto* shr = ctx.dst->Shr(low_u32, 8u);
           auto* shl = ctx.dst->Shl(high_u32, 24u);
           return ctx.dst->And(ctx.dst->Or(shl, shr), 0xffff0000u);
@@ -469,8 +470,8 @@ struct State {
     // The high 16 bits are 0.
     auto load_u16_l = [&] {
       auto low_u32_offset = offset & ~3u;
-      auto* low_u32 =
-          LoadPrimitive(array_base, low_u32_offset, buffer, VertexFormat::kU32);
+      auto* low_u32 = LoadPrimitive(array_base, low_u32_offset, buffer,
+                                    VertexFormat::kUint32);
       switch (offset & 3) {
         case 0:
           return ctx.dst->And(low_u32, 0xffffu);
@@ -480,7 +481,7 @@ struct State {
           return ctx.dst->Shr(low_u32, 16u);
         default: {  // 3:
           auto* high_u32 = LoadPrimitive(array_base, low_u32_offset + 4, buffer,
-                                         VertexFormat::kU32);
+                                         VertexFormat::kUint32);
           auto* shr = ctx.dst->Shr(low_u32, 24u);
           auto* shl = ctx.dst->Shl(high_u32, 8u);
           return ctx.dst->And(ctx.dst->Or(shl, shr), 0xffffu);
@@ -504,31 +505,31 @@ struct State {
         // Vectors of basic primitives
       case VertexFormat::kUint32x2:
         return LoadVec(array_base, offset, buffer, 4, ctx.dst->ty.u32(),
-                       VertexFormat::kU32, 2);
+                       VertexFormat::kUint32, 2);
       case VertexFormat::kUint32x3:
         return LoadVec(array_base, offset, buffer, 4, ctx.dst->ty.u32(),
-                       VertexFormat::kU32, 3);
+                       VertexFormat::kUint32, 3);
       case VertexFormat::kUint32x4:
         return LoadVec(array_base, offset, buffer, 4, ctx.dst->ty.u32(),
-                       VertexFormat::kU32, 4);
+                       VertexFormat::kUint32, 4);
       case VertexFormat::kSint32x2:
         return LoadVec(array_base, offset, buffer, 4, ctx.dst->ty.i32(),
-                       VertexFormat::kI32, 2);
+                       VertexFormat::kSint32, 2);
       case VertexFormat::kSint32x3:
         return LoadVec(array_base, offset, buffer, 4, ctx.dst->ty.i32(),
-                       VertexFormat::kI32, 3);
+                       VertexFormat::kSint32, 3);
       case VertexFormat::kSint32x4:
         return LoadVec(array_base, offset, buffer, 4, ctx.dst->ty.i32(),
-                       VertexFormat::kI32, 4);
+                       VertexFormat::kSint32, 4);
       case VertexFormat::kFloat32x2:
         return LoadVec(array_base, offset, buffer, 4, ctx.dst->ty.f32(),
-                       VertexFormat::kF32, 2);
+                       VertexFormat::kFloat32, 2);
       case VertexFormat::kFloat32x3:
         return LoadVec(array_base, offset, buffer, 4, ctx.dst->ty.f32(),
-                       VertexFormat::kF32, 3);
+                       VertexFormat::kFloat32, 3);
       case VertexFormat::kFloat32x4:
         return LoadVec(array_base, offset, buffer, 4, ctx.dst->ty.f32(),
-                       VertexFormat::kF32, 4);
+                       VertexFormat::kFloat32, 4);
 
       case VertexFormat::kUint8x2: {
         // yyxx0000, yyxx0000
@@ -639,7 +640,8 @@ struct State {
   /// of the vertex array (each index is 4-bytes).
   /// @param offset the byte offset of the data from `buffer_base`
   /// @param buffer the index of the vertex buffer
-  /// @param format VertexFormat::kU32, VertexFormat::kI32 or VertexFormat::kF32
+  /// @param format VertexFormat::kUint32, VertexFormat::kSint32 or
+  /// VertexFormat::kFloat32
   ast::Expression* LoadPrimitive(Symbol array_base,
                                  uint32_t offset,
                                  uint32_t buffer,
@@ -662,10 +664,10 @@ struct State {
     } else {
       // Unaligned load
       uint32_t offset_aligned = offset & ~3u;
-      auto* low =
-          LoadPrimitive(array_base, offset_aligned, buffer, VertexFormat::kU32);
+      auto* low = LoadPrimitive(array_base, offset_aligned, buffer,
+                                VertexFormat::kUint32);
       auto* high = LoadPrimitive(array_base, offset_aligned + 4u, buffer,
-                                 VertexFormat::kU32);
+                                 VertexFormat::kUint32);
 
       uint32_t shift = 8u * (offset & 3u);
 
@@ -675,11 +677,11 @@ struct State {
     }
 
     switch (format) {
-      case VertexFormat::kU32:
+      case VertexFormat::kUint32:
         return u32;
-      case VertexFormat::kI32:
+      case VertexFormat::kSint32:
         return ctx.dst->Bitcast(ctx.dst->ty.i32(), u32);
-      case VertexFormat::kF32:
+      case VertexFormat::kFloat32:
         return ctx.dst->Bitcast(ctx.dst->ty.f32(), u32);
       default:
         break;

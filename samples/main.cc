@@ -738,20 +738,18 @@ int main(int argc, const char** argv) {
 #endif  // TINT_BUILD_SPV_WRITER
 #if TINT_BUILD_MSL_WRITER
     case Format::kMsl: {
-      tint::transform::Renamer::Config renamer_config{
-          tint::transform::Renamer::Target::kMslKeywords};
-      transform_manager.append(
-          std::make_unique<tint::transform::Renamer>(renamer_config));
+      transform_inputs.Add<tint::transform::Renamer::Config>(
+          tint::transform::Renamer::Target::kMslKeywords);
+      transform_manager.Add<tint::transform::Renamer>();
       transform_manager.Add<tint::transform::Msl>();
       break;
     }
 #endif  // TINT_BUILD_MSL_WRITER
 #if TINT_BUILD_HLSL_WRITER
     case Format::kHlsl: {
-      tint::transform::Renamer::Config renamer_config{
-          tint::transform::Renamer::Target::kHlslKeywords};
-      transform_manager.append(
-          std::make_unique<tint::transform::Renamer>(renamer_config));
+      transform_inputs.Add<tint::transform::Renamer::Config>(
+          tint::transform::Renamer::Target::kHlslKeywords);
+      transform_manager.Add<tint::transform::Renamer>();
       transform_manager.Add<tint::transform::Hlsl>();
       break;
     }

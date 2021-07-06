@@ -25,7 +25,9 @@ using CanonicalizeEntryPointIOTest = TransformTest;
 TEST_F(CanonicalizeEntryPointIOTest, Error_MissingTransformData) {
   auto* src = "";
 
-  auto* expect = "error: missing transform data for CanonicalizeEntryPointIO";
+  auto* expect =
+      "error: missing transform data for "
+      "tint::transform::CanonicalizeEntryPointIO";
 
   auto got = Run<CanonicalizeEntryPointIO>(src);
 

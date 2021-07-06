@@ -153,7 +153,7 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferNoError_Aliases) {
 
 TEST_F(ResolverStorageClassValidationTest, UniformBuffer_Struct_Runtime) {
   // [[block]] struct S { m:  array<f32>; };
-  // [[set(0), binding(0)]] var<uniform, > svar : S;
+  // [[group(0), binding(0)]] var<uniform, > svar : S;
 
   auto* s = Structure(Source{{12, 34}}, "S", {Member("m", ty.array<i32>())},
                       {create<ast::StructBlockDecoration>()});

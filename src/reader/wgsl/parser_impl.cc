@@ -73,10 +73,10 @@ ast::Builtin ident_to_builtin(const std::string& str) {
   if (str == "position") {
     return ast::Builtin::kPosition;
   }
-  if (str == "vertex_idx" || str == "vertex_index") {
+  if (str == "vertex_index") {
     return ast::Builtin::kVertexIndex;
   }
-  if (str == "instance_idx" || str == "instance_index") {
+  if (str == "instance_index") {
     return ast::Builtin::kInstanceIndex;
   }
   if (str == "front_facing") {
@@ -115,7 +115,6 @@ const char kLocationDecoration[] = "location";
 const char kOverrideDecoration[] = "override";
 const char kSizeDecoration[] = "size";
 const char kAlignDecoration[] = "align";
-const char kSetDecoration[] = "set";
 const char kStageDecoration[] = "stage";
 const char kStrideDecoration[] = "stride";
 const char kWorkgroupSizeDecoration[] = "workgroup_size";
@@ -130,7 +129,7 @@ bool is_decoration(Token t) {
          s == kBlockDecoration || s == kBuiltinDecoration ||
          s == kGroupDecoration || s == kInterpolateDecoration ||
          s == kLocationDecoration || s == kOverrideDecoration ||
-         s == kSetDecoration || s == kSizeDecoration || s == kStageDecoration ||
+         s == kSizeDecoration || s == kStageDecoration ||
          s == kStrideDecoration || s == kWorkgroupSizeDecoration;
 }
 
@@ -3007,7 +3006,7 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
     });
   }
 
-  if (s == kSetDecoration || s == kGroupDecoration) {
+  if (s == kGroupDecoration) {
     const char* use = "group decoration";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_positive_sint(use);

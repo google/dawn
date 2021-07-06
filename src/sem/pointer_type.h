@@ -59,7 +59,7 @@ class Pointer : public Castable<Pointer, Type> {
  private:
   Type const* const subtype_;
   ast::StorageClass const storage_class_;
-  ast::AccessControl const access_;
+  ast::Access const access_;
 };
 
 }  // namespace sem

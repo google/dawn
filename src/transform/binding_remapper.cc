@@ -14,6 +14,7 @@
 
 #include "src/transform/binding_remapper.h"
 
+#include <string>
 #include <unordered_set>
 #include <utility>
 
@@ -46,7 +47,7 @@ void BindingRemapper::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
   if (!remappings) {
     ctx.dst->Diagnostics().add_error(
         diag::System::Transform,
-        "BindingRemapper did not find the remapping data");
+        "missing transform data for " + std::string(TypeInfo().name));
     return;
   }
 

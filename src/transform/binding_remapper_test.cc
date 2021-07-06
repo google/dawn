@@ -382,7 +382,8 @@ struct S {
 fn f() {}
 )";
 
-  auto* expect = "error: BindingRemapper did not find the remapping data";
+  auto* expect =
+      "error: missing transform data for tint::transform::BindingRemapper";
 
   auto got = Run<BindingRemapper>(src);
 

@@ -27,7 +27,8 @@ using SingleEntryPointTest = TransformTest;
 TEST_F(SingleEntryPointTest, Error_MissingTransformData) {
   auto* src = "";
 
-  auto* expect = "error: missing transform data for SingleEntryPoint";
+  auto* expect =
+      "error: missing transform data for tint::transform::SingleEntryPoint";
 
   auto got = Run<SingleEntryPoint>(src);
 
