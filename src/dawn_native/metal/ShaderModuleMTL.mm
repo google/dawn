@@ -122,8 +122,11 @@ namespace dawn_native { namespace metal {
             transformManager.Add<tint::transform::BoundArrayAccessors>();
         }
         transformManager.Add<tint::transform::BindingRemapper>();
-        transformManager.Add<tint::transform::Renamer>();
         transformManager.Add<tint::transform::Msl>();
+
+        if (!GetDevice()->IsToggleEnabled(Toggle::DumpTranslatedShaders)) {
+            transformManager.Add<tint::transform::Renamer>();
+        }
 
         transformInputs.Add<BindingRemapper::Remappings>(std::move(bindingPoints),
                                                          std::move(accessControls),
@@ -143,7 +146,11 @@ namespace dawn_native { namespace metal {
             }
             *remappedEntryPointName = it->second;
         } else {
-            return DAWN_VALIDATION_ERROR("Transform output missing renamer data.");
+            if (GetDevice()->IsToggleEnabled(Toggle::DumpTranslatedShaders)) {
+                *remappedEntryPointName = entryPointName;
+            } else {
+                return DAWN_VALIDATION_ERROR("Transform output missing renamer data.");
+            }
         }
 
         if (auto* data = transformOutputs.Get<tint::transform::Msl::Result>()) {
@@ -311,6 +318,12 @@ namespace dawn_native { namespace metal {
 #pragma clang diagnostic ignored "-Wall"
 #endif
 )" + msl;
+
+        if (GetDevice()->IsToggleEnabled(Toggle::DumpTranslatedShaders)) {
+            std::ostringstream dumpedMsg;
+            dumpedMsg << "/* Dumped generated MSL */" << std::endl << msl;
+            GetDevice()->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());
+        }
 
         NSRef<NSString> mslSource = AcquireNSRef([[NSString alloc] initWithUTF8String:msl.c_str()]);
 
