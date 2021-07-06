@@ -1124,6 +1124,12 @@ namespace dawn_native {
             newWgslCode = generator.result();
             newWgslDesc.source = newWgslCode.c_str();
 
+            if (device->IsToggleEnabled(Toggle::DumpTranslatedShaders)) {
+                std::ostringstream dumpedMsg;
+                dumpedMsg << "// Dumped generated WGSL" << std::endl << newWgslCode;
+                device->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());
+            }
+
             spirvDesc = nullptr;
             wgslDesc = &newWgslDesc;
         }
