@@ -71,6 +71,7 @@ optional flags:`)
 
 func run() error {
 	var formatList, filter, dxcPath, xcrunPath string
+	var maxFilenameColumnWidth int
 	numCPU := runtime.NumCPU()
 	fxc, verbose, generateExpected, generateSkip := false, false, false, false
 	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, hlsl")
@@ -82,6 +83,7 @@ func run() error {
 	flag.BoolVar(&generateExpected, "generate-expected", false, "create or update all expected outputs")
 	flag.BoolVar(&generateSkip, "generate-skip", false, "create or update all expected outputs that fail with SKIP")
 	flag.IntVar(&numCPU, "j", numCPU, "maximum number of concurrent threads to run tests")
+	flag.IntVar(&maxFilenameColumnWidth, "filename-column-width", 0, "maximum width of the filename column")
 	flag.Usage = showUsage
 	flag.Parse()
 
@@ -260,6 +262,9 @@ func run() error {
 	// Print the table of file x format and gather per-format stats
 	failures := []failure{}
 	filenameColumnWidth := maxStringLen(files)
+	if maxFilenameColumnWidth > 0 {
+		filenameColumnWidth = maxFilenameColumnWidth
+	}
 
 	red := color.New(color.FgRed)
 	green := color.New(color.FgGreen)
@@ -276,7 +281,7 @@ func run() error {
 		fmt.Println()
 	}
 	printHorizontalLine := func() {
-		fmt.Printf(strings.Repeat("━", maxStringLen(files)))
+		fmt.Printf(strings.Repeat("━", filenameColumnWidth))
 		fmt.Printf("━╋━")
 		for _, format := range formats {
 			fmt.Printf(strings.Repeat("━", formatWidth(format)))
@@ -296,7 +301,13 @@ func run() error {
 		row := &strings.Builder{}
 		rowAllPassed := true
 
-		fmt.Fprintf(row, alignRight(file, filenameColumnWidth))
+		filenameLength := utf8.RuneCountInString(file)
+		shortFile := file
+		if filenameLength > filenameColumnWidth {
+			shortFile = "..." + file[filenameLength-filenameColumnWidth+3:]
+		}
+
+		fmt.Fprintf(row, alignRight(shortFile, filenameColumnWidth))
 		fmt.Fprintf(row, " ┃ ")
 		for _, format := range formats {
 			columnWidth := formatWidth(format)
