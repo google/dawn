@@ -52,9 +52,6 @@ class VertexFormatTest : public DawnTest {
         // TODO(crbug.com/dawn/259): Failing because of a SPIRV-Cross issue.
         DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
-        // TODO(crbug.com/tint/904): FXC emits bad output for this test
-        DAWN_SUPPRESS_TEST_IF(IsD3D12() && !IsDXC() && HasToggleEnabled("use_tint_generator"));
-
         renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
     }
 
