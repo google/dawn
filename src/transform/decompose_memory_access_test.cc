@@ -107,78 +107,78 @@ struct SB {
 };
 
 [[internal(intrinsic_load_storage_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> i32
+fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> i32
 
 [[internal(intrinsic_load_storage_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_1([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> u32
+fn tint_symbol_1([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> u32
 
 [[internal(intrinsic_load_storage_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_2([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> f32
+fn tint_symbol_2([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> f32
 
 [[internal(intrinsic_load_storage_vec2_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_3([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> vec2<i32>
+fn tint_symbol_3([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> vec2<i32>
 
 [[internal(intrinsic_load_storage_vec2_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_4([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> vec2<u32>
+fn tint_symbol_4([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> vec2<u32>
 
 [[internal(intrinsic_load_storage_vec2_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_5([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> vec2<f32>
+fn tint_symbol_5([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> vec2<f32>
 
 [[internal(intrinsic_load_storage_vec3_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_6([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> vec3<i32>
+fn tint_symbol_6([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> vec3<i32>
 
 [[internal(intrinsic_load_storage_vec3_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_7([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> vec3<u32>
+fn tint_symbol_7([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> vec3<u32>
 
 [[internal(intrinsic_load_storage_vec3_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_8([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> vec3<f32>
+fn tint_symbol_8([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> vec3<f32>
 
 [[internal(intrinsic_load_storage_vec4_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_9([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> vec4<i32>
+fn tint_symbol_9([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> vec4<i32>
 
 [[internal(intrinsic_load_storage_vec4_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_10([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> vec4<u32>
+fn tint_symbol_10([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> vec4<u32>
 
 [[internal(intrinsic_load_storage_vec4_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_11([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> vec4<f32>
+fn tint_symbol_11([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> vec4<f32>
 
-fn tint_symbol_12([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> mat2x2<f32> {
+fn tint_symbol_12([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> mat2x2<f32> {
   return mat2x2<f32>(tint_symbol_5(buffer, (offset + 0u)), tint_symbol_5(buffer, (offset + 8u)));
 }
 
-fn tint_symbol_13([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> mat2x3<f32> {
+fn tint_symbol_13([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> mat2x3<f32> {
   return mat2x3<f32>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_14([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> mat2x4<f32> {
+fn tint_symbol_14([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> mat2x4<f32> {
   return mat2x4<f32>(tint_symbol_11(buffer, (offset + 0u)), tint_symbol_11(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_15([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> mat3x2<f32> {
+fn tint_symbol_15([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> mat3x2<f32> {
   return mat3x2<f32>(tint_symbol_5(buffer, (offset + 0u)), tint_symbol_5(buffer, (offset + 8u)), tint_symbol_5(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_16([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> mat3x3<f32> {
+fn tint_symbol_16([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> mat3x3<f32> {
   return mat3x3<f32>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)), tint_symbol_8(buffer, (offset + 32u)));
 }
 
-fn tint_symbol_17([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> mat3x4<f32> {
+fn tint_symbol_17([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> mat3x4<f32> {
   return mat3x4<f32>(tint_symbol_11(buffer, (offset + 0u)), tint_symbol_11(buffer, (offset + 16u)), tint_symbol_11(buffer, (offset + 32u)));
 }
 
-fn tint_symbol_18([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> mat4x2<f32> {
+fn tint_symbol_18([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> mat4x2<f32> {
   return mat4x2<f32>(tint_symbol_5(buffer, (offset + 0u)), tint_symbol_5(buffer, (offset + 8u)), tint_symbol_5(buffer, (offset + 16u)), tint_symbol_5(buffer, (offset + 24u)));
 }
 
-fn tint_symbol_19([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> mat4x3<f32> {
+fn tint_symbol_19([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> mat4x3<f32> {
   return mat4x3<f32>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)), tint_symbol_8(buffer, (offset + 32u)), tint_symbol_8(buffer, (offset + 48u)));
 }
 
-fn tint_symbol_20([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> mat4x4<f32> {
+fn tint_symbol_20([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> mat4x4<f32> {
   return mat4x4<f32>(tint_symbol_11(buffer, (offset + 0u)), tint_symbol_11(buffer, (offset + 16u)), tint_symbol_11(buffer, (offset + 32u)), tint_symbol_11(buffer, (offset + 48u)));
 }
 
-fn tint_symbol_21([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> array<vec3<f32>, 2> {
+fn tint_symbol_21([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> array<vec3<f32>, 2> {
   return array<vec3<f32>, 2>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)));
 }
 
@@ -301,78 +301,78 @@ struct UB {
 };
 
 [[internal(intrinsic_load_uniform_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> i32
+fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> i32
 
 [[internal(intrinsic_load_uniform_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_1([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> u32
+fn tint_symbol_1([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> u32
 
 [[internal(intrinsic_load_uniform_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_2([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> f32
+fn tint_symbol_2([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> f32
 
 [[internal(intrinsic_load_uniform_vec2_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_3([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> vec2<i32>
+fn tint_symbol_3([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> vec2<i32>
 
 [[internal(intrinsic_load_uniform_vec2_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_4([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> vec2<u32>
+fn tint_symbol_4([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> vec2<u32>
 
 [[internal(intrinsic_load_uniform_vec2_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_5([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> vec2<f32>
+fn tint_symbol_5([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> vec2<f32>
 
 [[internal(intrinsic_load_uniform_vec3_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_6([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> vec3<i32>
+fn tint_symbol_6([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> vec3<i32>
 
 [[internal(intrinsic_load_uniform_vec3_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_7([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> vec3<u32>
+fn tint_symbol_7([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> vec3<u32>
 
 [[internal(intrinsic_load_uniform_vec3_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_8([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> vec3<f32>
+fn tint_symbol_8([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> vec3<f32>
 
 [[internal(intrinsic_load_uniform_vec4_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_9([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> vec4<i32>
+fn tint_symbol_9([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> vec4<i32>
 
 [[internal(intrinsic_load_uniform_vec4_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_10([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> vec4<u32>
+fn tint_symbol_10([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> vec4<u32>
 
 [[internal(intrinsic_load_uniform_vec4_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_11([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> vec4<f32>
+fn tint_symbol_11([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> vec4<f32>
 
-fn tint_symbol_12([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> mat2x2<f32> {
+fn tint_symbol_12([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> mat2x2<f32> {
   return mat2x2<f32>(tint_symbol_5(buffer, (offset + 0u)), tint_symbol_5(buffer, (offset + 8u)));
 }
 
-fn tint_symbol_13([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> mat2x3<f32> {
+fn tint_symbol_13([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> mat2x3<f32> {
   return mat2x3<f32>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_14([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> mat2x4<f32> {
+fn tint_symbol_14([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> mat2x4<f32> {
   return mat2x4<f32>(tint_symbol_11(buffer, (offset + 0u)), tint_symbol_11(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_15([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> mat3x2<f32> {
+fn tint_symbol_15([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> mat3x2<f32> {
   return mat3x2<f32>(tint_symbol_5(buffer, (offset + 0u)), tint_symbol_5(buffer, (offset + 8u)), tint_symbol_5(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_16([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> mat3x3<f32> {
+fn tint_symbol_16([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> mat3x3<f32> {
   return mat3x3<f32>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)), tint_symbol_8(buffer, (offset + 32u)));
 }
 
-fn tint_symbol_17([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> mat3x4<f32> {
+fn tint_symbol_17([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> mat3x4<f32> {
   return mat3x4<f32>(tint_symbol_11(buffer, (offset + 0u)), tint_symbol_11(buffer, (offset + 16u)), tint_symbol_11(buffer, (offset + 32u)));
 }
 
-fn tint_symbol_18([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> mat4x2<f32> {
+fn tint_symbol_18([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> mat4x2<f32> {
   return mat4x2<f32>(tint_symbol_5(buffer, (offset + 0u)), tint_symbol_5(buffer, (offset + 8u)), tint_symbol_5(buffer, (offset + 16u)), tint_symbol_5(buffer, (offset + 24u)));
 }
 
-fn tint_symbol_19([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> mat4x3<f32> {
+fn tint_symbol_19([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> mat4x3<f32> {
   return mat4x3<f32>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)), tint_symbol_8(buffer, (offset + 32u)), tint_symbol_8(buffer, (offset + 48u)));
 }
 
-fn tint_symbol_20([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> mat4x4<f32> {
+fn tint_symbol_20([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> mat4x4<f32> {
   return mat4x4<f32>(tint_symbol_11(buffer, (offset + 0u)), tint_symbol_11(buffer, (offset + 16u)), tint_symbol_11(buffer, (offset + 32u)), tint_symbol_11(buffer, (offset + 48u)));
 }
 
-fn tint_symbol_21([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : UB, offset : u32) -> array<vec3<f32>, 2> {
+fn tint_symbol_21([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> array<vec3<f32>, 2> {
   return array<vec3<f32>, 2>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)));
 }
 
@@ -495,96 +495,96 @@ struct SB {
 };
 
 [[internal(intrinsic_store_storage_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : i32)
+fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : i32)
 
 [[internal(intrinsic_store_storage_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_1([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : u32)
+fn tint_symbol_1([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : u32)
 
 [[internal(intrinsic_store_storage_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_2([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : f32)
+fn tint_symbol_2([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : f32)
 
 [[internal(intrinsic_store_storage_vec2_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_3([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : vec2<i32>)
+fn tint_symbol_3([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : vec2<i32>)
 
 [[internal(intrinsic_store_storage_vec2_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_4([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : vec2<u32>)
+fn tint_symbol_4([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : vec2<u32>)
 
 [[internal(intrinsic_store_storage_vec2_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_5([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : vec2<f32>)
+fn tint_symbol_5([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : vec2<f32>)
 
 [[internal(intrinsic_store_storage_vec3_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_6([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : vec3<i32>)
+fn tint_symbol_6([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : vec3<i32>)
 
 [[internal(intrinsic_store_storage_vec3_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_7([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : vec3<u32>)
+fn tint_symbol_7([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : vec3<u32>)
 
 [[internal(intrinsic_store_storage_vec3_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_8([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : vec3<f32>)
+fn tint_symbol_8([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : vec3<f32>)
 
 [[internal(intrinsic_store_storage_vec4_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_9([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : vec4<i32>)
+fn tint_symbol_9([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : vec4<i32>)
 
 [[internal(intrinsic_store_storage_vec4_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_10([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : vec4<u32>)
+fn tint_symbol_10([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : vec4<u32>)
 
 [[internal(intrinsic_store_storage_vec4_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_11([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : vec4<f32>)
+fn tint_symbol_11([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : vec4<f32>)
 
-fn tint_symbol_12([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : mat2x2<f32>) {
+fn tint_symbol_12([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : mat2x2<f32>) {
   tint_symbol_5(buffer, (offset + 0u), value[0u]);
   tint_symbol_5(buffer, (offset + 8u), value[1u]);
 }
 
-fn tint_symbol_13([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : mat2x3<f32>) {
+fn tint_symbol_13([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : mat2x3<f32>) {
   tint_symbol_8(buffer, (offset + 0u), value[0u]);
   tint_symbol_8(buffer, (offset + 16u), value[1u]);
 }
 
-fn tint_symbol_14([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : mat2x4<f32>) {
+fn tint_symbol_14([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : mat2x4<f32>) {
   tint_symbol_11(buffer, (offset + 0u), value[0u]);
   tint_symbol_11(buffer, (offset + 16u), value[1u]);
 }
 
-fn tint_symbol_15([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : mat3x2<f32>) {
+fn tint_symbol_15([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : mat3x2<f32>) {
   tint_symbol_5(buffer, (offset + 0u), value[0u]);
   tint_symbol_5(buffer, (offset + 8u), value[1u]);
   tint_symbol_5(buffer, (offset + 16u), value[2u]);
 }
 
-fn tint_symbol_16([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : mat3x3<f32>) {
+fn tint_symbol_16([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : mat3x3<f32>) {
   tint_symbol_8(buffer, (offset + 0u), value[0u]);
   tint_symbol_8(buffer, (offset + 16u), value[1u]);
   tint_symbol_8(buffer, (offset + 32u), value[2u]);
 }
 
-fn tint_symbol_17([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : mat3x4<f32>) {
+fn tint_symbol_17([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : mat3x4<f32>) {
   tint_symbol_11(buffer, (offset + 0u), value[0u]);
   tint_symbol_11(buffer, (offset + 16u), value[1u]);
   tint_symbol_11(buffer, (offset + 32u), value[2u]);
 }
 
-fn tint_symbol_18([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : mat4x2<f32>) {
+fn tint_symbol_18([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : mat4x2<f32>) {
   tint_symbol_5(buffer, (offset + 0u), value[0u]);
   tint_symbol_5(buffer, (offset + 8u), value[1u]);
   tint_symbol_5(buffer, (offset + 16u), value[2u]);
   tint_symbol_5(buffer, (offset + 24u), value[3u]);
 }
 
-fn tint_symbol_19([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : mat4x3<f32>) {
+fn tint_symbol_19([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : mat4x3<f32>) {
   tint_symbol_8(buffer, (offset + 0u), value[0u]);
   tint_symbol_8(buffer, (offset + 16u), value[1u]);
   tint_symbol_8(buffer, (offset + 32u), value[2u]);
   tint_symbol_8(buffer, (offset + 48u), value[3u]);
 }
 
-fn tint_symbol_20([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : mat4x4<f32>) {
+fn tint_symbol_20([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : mat4x4<f32>) {
   tint_symbol_11(buffer, (offset + 0u), value[0u]);
   tint_symbol_11(buffer, (offset + 16u), value[1u]);
   tint_symbol_11(buffer, (offset + 32u), value[2u]);
   tint_symbol_11(buffer, (offset + 48u), value[3u]);
 }
 
-fn tint_symbol_21([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : array<vec3<f32>, 2>) {
+fn tint_symbol_21([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : array<vec3<f32>, 2>) {
   tint_symbol_8(buffer, (offset + 0u), value[0u]);
   tint_symbol_8(buffer, (offset + 16u), value[1u]);
 }
@@ -687,82 +687,82 @@ struct SB {
 };
 
 [[internal(intrinsic_load_storage_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> i32
+fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> i32
 
 [[internal(intrinsic_load_storage_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_1([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> u32
+fn tint_symbol_1([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> u32
 
 [[internal(intrinsic_load_storage_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_2([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> f32
+fn tint_symbol_2([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> f32
 
 [[internal(intrinsic_load_storage_vec2_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_3([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> vec2<i32>
+fn tint_symbol_3([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> vec2<i32>
 
 [[internal(intrinsic_load_storage_vec2_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_4([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> vec2<u32>
+fn tint_symbol_4([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> vec2<u32>
 
 [[internal(intrinsic_load_storage_vec2_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_5([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> vec2<f32>
+fn tint_symbol_5([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> vec2<f32>
 
 [[internal(intrinsic_load_storage_vec3_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_6([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> vec3<i32>
+fn tint_symbol_6([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> vec3<i32>
 
 [[internal(intrinsic_load_storage_vec3_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_7([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> vec3<u32>
+fn tint_symbol_7([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> vec3<u32>
 
 [[internal(intrinsic_load_storage_vec3_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_8([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> vec3<f32>
+fn tint_symbol_8([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> vec3<f32>
 
 [[internal(intrinsic_load_storage_vec4_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_9([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> vec4<i32>
+fn tint_symbol_9([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> vec4<i32>
 
 [[internal(intrinsic_load_storage_vec4_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_10([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> vec4<u32>
+fn tint_symbol_10([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> vec4<u32>
 
 [[internal(intrinsic_load_storage_vec4_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_11([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> vec4<f32>
+fn tint_symbol_11([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> vec4<f32>
 
-fn tint_symbol_12([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> mat2x2<f32> {
+fn tint_symbol_12([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> mat2x2<f32> {
   return mat2x2<f32>(tint_symbol_5(buffer, (offset + 0u)), tint_symbol_5(buffer, (offset + 8u)));
 }
 
-fn tint_symbol_13([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> mat2x3<f32> {
+fn tint_symbol_13([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> mat2x3<f32> {
   return mat2x3<f32>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_14([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> mat2x4<f32> {
+fn tint_symbol_14([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> mat2x4<f32> {
   return mat2x4<f32>(tint_symbol_11(buffer, (offset + 0u)), tint_symbol_11(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_15([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> mat3x2<f32> {
+fn tint_symbol_15([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> mat3x2<f32> {
   return mat3x2<f32>(tint_symbol_5(buffer, (offset + 0u)), tint_symbol_5(buffer, (offset + 8u)), tint_symbol_5(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_16([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> mat3x3<f32> {
+fn tint_symbol_16([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> mat3x3<f32> {
   return mat3x3<f32>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)), tint_symbol_8(buffer, (offset + 32u)));
 }
 
-fn tint_symbol_17([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> mat3x4<f32> {
+fn tint_symbol_17([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> mat3x4<f32> {
   return mat3x4<f32>(tint_symbol_11(buffer, (offset + 0u)), tint_symbol_11(buffer, (offset + 16u)), tint_symbol_11(buffer, (offset + 32u)));
 }
 
-fn tint_symbol_18([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> mat4x2<f32> {
+fn tint_symbol_18([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> mat4x2<f32> {
   return mat4x2<f32>(tint_symbol_5(buffer, (offset + 0u)), tint_symbol_5(buffer, (offset + 8u)), tint_symbol_5(buffer, (offset + 16u)), tint_symbol_5(buffer, (offset + 24u)));
 }
 
-fn tint_symbol_19([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> mat4x3<f32> {
+fn tint_symbol_19([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> mat4x3<f32> {
   return mat4x3<f32>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)), tint_symbol_8(buffer, (offset + 32u)), tint_symbol_8(buffer, (offset + 48u)));
 }
 
-fn tint_symbol_20([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> mat4x4<f32> {
+fn tint_symbol_20([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> mat4x4<f32> {
   return mat4x4<f32>(tint_symbol_11(buffer, (offset + 0u)), tint_symbol_11(buffer, (offset + 16u)), tint_symbol_11(buffer, (offset + 32u)), tint_symbol_11(buffer, (offset + 48u)));
 }
 
-fn tint_symbol_21([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> array<vec3<f32>, 2> {
+fn tint_symbol_21([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> array<vec3<f32>, 2> {
   return array<vec3<f32>, 2>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_22([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> SB {
+fn tint_symbol_22([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> SB {
   return SB(tint_symbol(buffer, (offset + 0u)), tint_symbol_1(buffer, (offset + 4u)), tint_symbol_2(buffer, (offset + 8u)), tint_symbol_3(buffer, (offset + 16u)), tint_symbol_4(buffer, (offset + 24u)), tint_symbol_5(buffer, (offset + 32u)), tint_symbol_6(buffer, (offset + 48u)), tint_symbol_7(buffer, (offset + 64u)), tint_symbol_8(buffer, (offset + 80u)), tint_symbol_9(buffer, (offset + 96u)), tint_symbol_10(buffer, (offset + 112u)), tint_symbol_11(buffer, (offset + 128u)), tint_symbol_12(buffer, (offset + 144u)), tint_symbol_13(buffer, (offset + 160u)), tint_symbol_14(buffer, (offset + 192u)), tint_symbol_15(buffer, (offset + 224u)), tint_symbol_16(buffer, (offset + 256u)), tint_symbol_17(buffer, (offset + 304u)), tint_symbol_18(buffer, (offset + 352u)), tint_symbol_19(buffer, (offset + 384u)), tint_symbol_20(buffer, (offset + 448u)), tint_symbol_21(buffer, (offset + 512u)));
 }
 
@@ -843,101 +843,101 @@ struct SB {
 };
 
 [[internal(intrinsic_store_storage_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : i32)
+fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : i32)
 
 [[internal(intrinsic_store_storage_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_1([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : u32)
+fn tint_symbol_1([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : u32)
 
 [[internal(intrinsic_store_storage_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_2([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : f32)
+fn tint_symbol_2([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : f32)
 
 [[internal(intrinsic_store_storage_vec2_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_3([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : vec2<i32>)
+fn tint_symbol_3([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : vec2<i32>)
 
 [[internal(intrinsic_store_storage_vec2_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_4([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : vec2<u32>)
+fn tint_symbol_4([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : vec2<u32>)
 
 [[internal(intrinsic_store_storage_vec2_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_5([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : vec2<f32>)
+fn tint_symbol_5([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : vec2<f32>)
 
 [[internal(intrinsic_store_storage_vec3_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_6([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : vec3<i32>)
+fn tint_symbol_6([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : vec3<i32>)
 
 [[internal(intrinsic_store_storage_vec3_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_7([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : vec3<u32>)
+fn tint_symbol_7([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : vec3<u32>)
 
 [[internal(intrinsic_store_storage_vec3_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_8([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : vec3<f32>)
+fn tint_symbol_8([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : vec3<f32>)
 
 [[internal(intrinsic_store_storage_vec4_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_9([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : vec4<i32>)
+fn tint_symbol_9([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : vec4<i32>)
 
 [[internal(intrinsic_store_storage_vec4_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_10([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : vec4<u32>)
+fn tint_symbol_10([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : vec4<u32>)
 
 [[internal(intrinsic_store_storage_vec4_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_11([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : vec4<f32>)
+fn tint_symbol_11([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : vec4<f32>)
 
-fn tint_symbol_12([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : mat2x2<f32>) {
+fn tint_symbol_12([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : mat2x2<f32>) {
   tint_symbol_5(buffer, (offset + 0u), value[0u]);
   tint_symbol_5(buffer, (offset + 8u), value[1u]);
 }
 
-fn tint_symbol_13([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : mat2x3<f32>) {
+fn tint_symbol_13([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : mat2x3<f32>) {
   tint_symbol_8(buffer, (offset + 0u), value[0u]);
   tint_symbol_8(buffer, (offset + 16u), value[1u]);
 }
 
-fn tint_symbol_14([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : mat2x4<f32>) {
+fn tint_symbol_14([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : mat2x4<f32>) {
   tint_symbol_11(buffer, (offset + 0u), value[0u]);
   tint_symbol_11(buffer, (offset + 16u), value[1u]);
 }
 
-fn tint_symbol_15([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : mat3x2<f32>) {
+fn tint_symbol_15([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : mat3x2<f32>) {
   tint_symbol_5(buffer, (offset + 0u), value[0u]);
   tint_symbol_5(buffer, (offset + 8u), value[1u]);
   tint_symbol_5(buffer, (offset + 16u), value[2u]);
 }
 
-fn tint_symbol_16([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : mat3x3<f32>) {
+fn tint_symbol_16([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : mat3x3<f32>) {
   tint_symbol_8(buffer, (offset + 0u), value[0u]);
   tint_symbol_8(buffer, (offset + 16u), value[1u]);
   tint_symbol_8(buffer, (offset + 32u), value[2u]);
 }
 
-fn tint_symbol_17([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : mat3x4<f32>) {
+fn tint_symbol_17([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : mat3x4<f32>) {
   tint_symbol_11(buffer, (offset + 0u), value[0u]);
   tint_symbol_11(buffer, (offset + 16u), value[1u]);
   tint_symbol_11(buffer, (offset + 32u), value[2u]);
 }
 
-fn tint_symbol_18([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : mat4x2<f32>) {
+fn tint_symbol_18([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : mat4x2<f32>) {
   tint_symbol_5(buffer, (offset + 0u), value[0u]);
   tint_symbol_5(buffer, (offset + 8u), value[1u]);
   tint_symbol_5(buffer, (offset + 16u), value[2u]);
   tint_symbol_5(buffer, (offset + 24u), value[3u]);
 }
 
-fn tint_symbol_19([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : mat4x3<f32>) {
+fn tint_symbol_19([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : mat4x3<f32>) {
   tint_symbol_8(buffer, (offset + 0u), value[0u]);
   tint_symbol_8(buffer, (offset + 16u), value[1u]);
   tint_symbol_8(buffer, (offset + 32u), value[2u]);
   tint_symbol_8(buffer, (offset + 48u), value[3u]);
 }
 
-fn tint_symbol_20([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : mat4x4<f32>) {
+fn tint_symbol_20([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : mat4x4<f32>) {
   tint_symbol_11(buffer, (offset + 0u), value[0u]);
   tint_symbol_11(buffer, (offset + 16u), value[1u]);
   tint_symbol_11(buffer, (offset + 32u), value[2u]);
   tint_symbol_11(buffer, (offset + 48u), value[3u]);
 }
 
-fn tint_symbol_21([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : array<vec3<f32>, 2>) {
+fn tint_symbol_21([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : array<vec3<f32>, 2>) {
   tint_symbol_8(buffer, (offset + 0u), value[0u]);
   tint_symbol_8(buffer, (offset + 16u), value[1u]);
 }
 
-fn tint_symbol_22([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, value : SB) {
+fn tint_symbol_22([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : SB) {
   tint_symbol(buffer, (offset + 0u), value.a);
   tint_symbol_1(buffer, (offset + 4u), value.b);
   tint_symbol_2(buffer, (offset + 8u), value.c);
@@ -1032,7 +1032,7 @@ struct SB {
 };
 
 [[internal(intrinsic_load_storage_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> f32
+fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> f32
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
@@ -1100,7 +1100,7 @@ struct SB {
 };
 
 [[internal(intrinsic_load_storage_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> f32
+fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> f32
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
@@ -1187,7 +1187,7 @@ struct SB {
 };
 
 [[internal(intrinsic_load_storage_f32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> f32
+fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> f32
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
@@ -1251,64 +1251,64 @@ struct SB {
 };
 
 [[internal(intrinsic_atomic_store_storage_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, param_1 : i32)
+fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : i32)
 
 [[internal(intrinsic_atomic_load_storage_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_1([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> i32
+fn tint_symbol_1([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> i32
 
 [[internal(intrinsic_atomic_add_storage_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_2([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_symbol_2([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
 
 [[internal(intrinsic_atomic_max_storage_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_3([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_symbol_3([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
 
 [[internal(intrinsic_atomic_min_storage_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_4([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_symbol_4([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
 
 [[internal(intrinsic_atomic_and_storage_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_5([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_symbol_5([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
 
 [[internal(intrinsic_atomic_or_storage_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_6([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_symbol_6([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
 
 [[internal(intrinsic_atomic_xor_storage_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_7([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_symbol_7([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
 
 [[internal(intrinsic_atomic_exchange_storage_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_8([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_symbol_8([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
 
 [[internal(intrinsic_atomic_compare_exchange_weak_storage_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_9([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, param_1 : i32, param_2 : i32) -> vec2<i32>
+fn tint_symbol_9([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : i32, param_2 : i32) -> vec2<i32>
 
 [[internal(intrinsic_atomic_store_storage_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_10([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, param_1 : u32)
+fn tint_symbol_10([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32)
 
 [[internal(intrinsic_atomic_load_storage_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_11([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32) -> u32
+fn tint_symbol_11([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> u32
 
 [[internal(intrinsic_atomic_add_storage_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_12([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_symbol_12([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
 
 [[internal(intrinsic_atomic_max_storage_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_13([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_symbol_13([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
 
 [[internal(intrinsic_atomic_min_storage_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_14([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_symbol_14([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
 
 [[internal(intrinsic_atomic_and_storage_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_15([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_symbol_15([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
 
 [[internal(intrinsic_atomic_or_storage_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_16([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_symbol_16([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
 
 [[internal(intrinsic_atomic_xor_storage_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_17([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_symbol_17([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
 
 [[internal(intrinsic_atomic_exchange_storage_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_18([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_symbol_18([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
 
 [[internal(intrinsic_atomic_compare_exchange_weak_storage_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_19([[internal(disable_validation__ignore_atomic_function_parameter)]] buffer : SB, offset : u32, param_1 : u32, param_2 : u32) -> vec2<u32>
+fn tint_symbol_19([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32, param_2 : u32) -> vec2<u32>
 
 [[group(0), binding(0)]] var<storage, read_write> sb : SB;
 

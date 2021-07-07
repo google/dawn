@@ -479,49 +479,54 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_NonConst) {
             "i32 module-scope constant");
 }
 
-TEST_F(ResolverFunctionValidationTest, ReturnIsAtomicFreePlain_NonPlain) {
+TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_NonPlain) {
   auto* ret_type =
       ty.pointer(Source{{12, 34}}, ty.i32(), ast::StorageClass::kFunction);
   Func("f", {}, ret_type, {});
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error: function return type must be an atomic-free plain type");
+  EXPECT_EQ(r()->error(),
+            "12:34 error: function return type must be a constructible type");
 }
 
-TEST_F(ResolverFunctionValidationTest, ReturnIsAtomicFreePlain_AtomicInt) {
+TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_AtomicInt) {
   auto* ret_type = ty.atomic(Source{{12, 34}}, ty.i32());
   Func("f", {}, ret_type, {});
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error: function return type must be an atomic-free plain type");
+  EXPECT_EQ(r()->error(),
+            "12:34 error: function return type must be a constructible type");
 }
 
-TEST_F(ResolverFunctionValidationTest, ReturnIsAtomicFreePlain_ArrayOfAtomic) {
-  auto* ret_type = ty.array(Source{{12, 34}}, ty.atomic(ty.i32()));
+TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_ArrayOfAtomic) {
+  auto* ret_type = ty.array(Source{{12, 34}}, ty.atomic(ty.i32()), 10);
   Func("f", {}, ret_type, {});
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error: function return type must be an atomic-free plain type");
+  EXPECT_EQ(r()->error(),
+            "12:34 error: function return type must be a constructible type");
 }
 
-TEST_F(ResolverFunctionValidationTest, ReturnIsAtomicFreePlain_StructOfAtomic) {
+TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_StructOfAtomic) {
   Structure("S", {Member("m", ty.atomic(ty.i32()))});
   auto* ret_type = ty.type_name(Source{{12, 34}}, "S");
   Func("f", {}, ret_type, {});
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error: function return type must be an atomic-free plain type");
+  EXPECT_EQ(r()->error(),
+            "12:34 error: function return type must be a constructible type");
 }
 
-TEST_F(ResolverFunctionValidationTest, ParameterSotreType_NonAtomicFree) {
+TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_RuntimeArray) {
+  auto* ret_type = ty.array(Source{{12, 34}}, ty.i32(), 0);
+  Func("f", {}, ret_type, {});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: function return type must be a constructible type");
+}
+
+TEST_F(ResolverFunctionValidationTest, ParameterStoreType_NonAtomicFree) {
   Structure("S", {Member("m", ty.atomic(ty.i32()))});
   auto* ret_type = ty.type_name(Source{{12, 34}}, "S");
   auto* bar = Param(Source{{12, 34}}, "bar", ret_type);
@@ -529,8 +534,8 @@ TEST_F(ResolverFunctionValidationTest, ParameterSotreType_NonAtomicFree) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: store type of function parameter must be an "
-            "atomic-free type");
+            "12:34 error: store type of function parameter must be a "
+            "constructible type");
 }
 
 TEST_F(ResolverFunctionValidationTest, ParameterSotreType_AtomicFree) {

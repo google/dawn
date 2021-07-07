@@ -38,8 +38,8 @@ std::string DisableValidationDecoration::InternalName() const {
       return "disable_validation__ignore_storage_class";
     case DisabledValidation::kEntryPointParameter:
       return "disable_validation__entry_point_parameter";
-    case DisabledValidation::kIgnoreAtomicFunctionParameter:
-      return "disable_validation__ignore_atomic_function_parameter";
+    case DisabledValidation::kIgnoreConstructibleFunctionParameter:
+      return "disable_validation__ignore_constructible_function_parameter";
   }
   return "<invalid>";
 }

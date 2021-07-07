@@ -230,10 +230,8 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_RuntimeArray) {
        {Stage(ast::PipelineStage::kFragment)});
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      R"(13:43 error: entry point IO types cannot contain runtime sized arrays
-12:34 note: while analysing entry point main)");
+  EXPECT_EQ(r()->error(),
+            R"(error: function return type must be a constructible type)");
 }
 
 TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_DuplicateBuiltins) {
@@ -446,8 +444,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_RuntimeArray) {
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
-      R"(13:43 error: entry point IO types cannot contain runtime sized arrays
-12:34 note: while analysing entry point main)");
+      R"(error: store type of function parameter must be a constructible type)");
 }
 
 TEST_F(ResolverEntryPointValidationTest, Parameter_DuplicateBuiltins) {

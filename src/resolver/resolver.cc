@@ -193,8 +193,8 @@ bool Resolver::IsPlain(const sem::Type* type) const {
          type->Is<sem::Array>() || type->Is<sem::Struct>();
 }
 
-// https://gpuweb.github.io/gpuweb/wgsl/#atomic-free
-bool Resolver::IsAtomicFreePlain(const sem::Type* type) const {
+// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
+bool Resolver::IsConstructible(const sem::Type* type) const {
   if (type->Is<sem::Atomic>()) {
     return false;
   }
@@ -204,12 +204,16 @@ bool Resolver::IsAtomicFreePlain(const sem::Type* type) const {
   }
 
   if (auto* arr = type->As<sem::Array>()) {
-    return IsAtomicFreePlain(arr->ElemType());
+    if (arr->IsRuntimeSized()) {
+      return false;
+    }
+
+    return IsConstructible(arr->ElemType());
   }
 
   if (auto* str = type->As<sem::Struct>()) {
     for (auto* m : str->Members()) {
-      if (!IsAtomicFreePlain(m->Type())) {
+      if (!IsConstructible(m->Type())) {
         return false;
       }
     }
@@ -944,7 +948,8 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
                     ast::DisabledValidation::kEntryPointParameter) &&
                 IsValidationEnabled(
                     info->declaration->decorations(),
-                    ast::DisabledValidation::kIgnoreAtomicFunctionParameter))) {
+                    ast::DisabledValidation::
+                        kIgnoreConstructibleFunctionParameter))) {
       AddError("decoration is not valid for function parameters",
                deco->source());
       return false;
@@ -965,11 +970,11 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
   }
 
   if (IsPlain(info->type)) {
-    if (!IsAtomicFreePlain(info->type) &&
+    if (!IsConstructible(info->type) &&
         IsValidationEnabled(
             info->declaration->decorations(),
-            ast::DisabledValidation::kIgnoreAtomicFunctionParameter)) {
-      AddError("store type of function parameter must be an atomic-free type",
+            ast::DisabledValidation::kIgnoreConstructibleFunctionParameter)) {
+      AddError("store type of function parameter must be a constructible type",
                info->declaration->source());
       return false;
     }
@@ -1091,8 +1096,8 @@ bool Resolver::ValidateFunction(const ast::Function* func,
   }
 
   if (!info->return_type->Is<sem::Void>()) {
-    if (!IsAtomicFreePlain(info->return_type)) {
-      AddError("function return type must be an atomic-free plain type",
+    if (!IsConstructible(info->return_type)) {
+      AddError("function return type must be a constructible type",
                func->return_type()->source());
       return false;
     }

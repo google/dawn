@@ -18,6 +18,7 @@
 #include <utility>
 
 #include "src/ast/call_statement.h"
+#include "src/ast/disable_validation_decoration.h"
 #include "src/program_builder.h"
 #include "src/sem/block_statement.h"
 #include "src/sem/call.h"
@@ -82,6 +83,10 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) {
       auto name = ctx.dst->Sym();
       auto* buffer_typename =
           ctx.dst->ty.type_name(ctx.Clone(buffer_type->Declaration()->name()));
+      auto* disable_validation =
+          ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
+              ctx.dst->ID(),
+              ast::DisabledValidation::kIgnoreConstructibleFunctionParameter);
       auto* func = ctx.dst->create<ast::Function>(
           name,
           ast::VariableList{
@@ -90,7 +95,7 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) {
               ctx.dst->create<ast::Variable>(
                   ctx.dst->Sym("buffer"), ast::StorageClass::kStorage,
                   ast::Access::kUndefined, buffer_typename, true, nullptr,
-                  ast::DecorationList{}),
+                  ast::DecorationList{disable_validation}),
               ctx.dst->Param("result",
                              ctx.dst->ty.pointer(ctx.dst->ty.u32(),
                                                  ast::StorageClass::kFunction)),

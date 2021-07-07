@@ -30,7 +30,7 @@ namespace transform {
 ///
 /// Note: InlinePointerLets does not operate on module-scope `let`s, as these
 /// cannot be pointers: https://gpuweb.github.io/gpuweb/wgsl/#module-constants
-/// `A module-scope let-declared constant must be of atomic-free plain type.`
+/// `A module-scope let-declared constant must be of constructible type.`
 class InlinePointerLets : public Castable<InlinePointerLets, Transform> {
  public:
   /// Constructor

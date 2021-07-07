@@ -38,8 +38,8 @@ enum class DisabledValidation {
   /// check for entry IO decorations.
   kEntryPointParameter,
   /// When applied to a function parameter, the validator will not
-  /// check if parameter type is atomic-free
-  kIgnoreAtomicFunctionParameter,
+  /// check if parameter type is constructible
+  kIgnoreConstructibleFunctionParameter,
 };
 
 /// An internal decoration used to tell the validator to ignore specific
