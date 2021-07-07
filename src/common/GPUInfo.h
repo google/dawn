@@ -48,8 +48,8 @@ namespace gpu_info {
 
     // Do comparison between two driver versions. Currently we only support the comparison between
     // Intel D3D driver versions.
-    // - Return a negative value if version1 is older
-    // - Return a positive value if version1 is newer
+    // - Return -1 if build number of version1 is smaller
+    // - Return 1 if build number of version1 is bigger
     // - Return 0 if version1 and version2 represent same driver version
     int CompareD3DDriverVersion(PCIVendorID vendorId,
                                 const D3DDriverVersion& version1,

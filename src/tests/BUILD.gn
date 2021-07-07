@@ -163,6 +163,7 @@ test("dawn_unittests") {
     "unittests/EnumMaskIteratorTests.cpp",
     "unittests/ErrorTests.cpp",
     "unittests/ExtensionTests.cpp",
+    "unittests/GPUInfoTests.cpp",
     "unittests/GetProcAddressTests.cpp",
     "unittests/ITypArrayTests.cpp",
     "unittests/ITypBitsetTests.cpp",

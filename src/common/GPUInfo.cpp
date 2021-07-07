@@ -41,10 +41,20 @@ namespace gpu_info {
             {0x9B21, 0x9BA0, 0x9BA2, 0x9BA4, 0x9BA5, 0x9BA8, 0x9BAA, 0x9BAB, 0x9BAC, 0x9B41, 0x9BC0,
              0x9BC2, 0x9BC4, 0x9BC5, 0x9BC6, 0x9BC8, 0x9BCA, 0x9BCB, 0x9BCC, 0x9BE6, 0x9BF6}};
 
-        bool IsOldIntelD3DVersionScheme(const D3DDriverVersion& driverVersion) {
-            // See https://www.intel.com/content/www/us/en/support/articles/000005654/graphics.html
-            // for more details
+        // The Intel graphics driver version schema has had a change since the Windows 10 April
+        // 2018 Update release. The last two parts are build number in new driver, while only the
+        // last part is build number in legacy driver.
+        // See https://www.intel.com/content/www/us/en/support/articles/000005654/graphics.html
+        // for more details.
+        bool IsOldIntelD3DDriver(const D3DDriverVersion& driverVersion) {
             return driverVersion[2] < 100u;
+        }
+        uint32_t GetIntelD3DDriverBuildNumber(const D3DDriverVersion& driverVersion) {
+            uint32_t buildNumber = driverVersion[3];
+            if (!IsOldIntelD3DDriver(driverVersion)) {
+                buildNumber += driverVersion[2] * 10000;
+            }
+            return buildNumber;
         }
 
     }  // anonymous namespace
@@ -78,21 +88,9 @@ namespace gpu_info {
                                 const D3DDriverVersion& version1,
                                 const D3DDriverVersion& version2) {
         if (IsIntel(vendorId)) {
-            // The Intel graphics driver version schema has had a change since the Windows 10 April
-            // 2018 Update release. In the new schema the 3rd number of the driver version is always
-            // 100, while on the older drivers it is always less than 100. For the drivers using the
-            // same driver version schema, the newer driver always has the bigger 4th number.
-            // See https://www.intel.com/content/www/us/en/support/articles/000005654/graphics.html
-            // for more details.
-            bool isOldIntelDriver1 = IsOldIntelD3DVersionScheme(version1);
-            bool isOldIntelDriver2 = IsOldIntelD3DVersionScheme(version2);
-            if (isOldIntelDriver1 && !isOldIntelDriver2) {
-                return -1;
-            } else if (!isOldIntelDriver1 && isOldIntelDriver2) {
-                return 1;
-            } else {
-                return static_cast<int32_t>(version1[3]) - static_cast<int32_t>(version2[3]);
-            }
+            uint32_t buildNumber1 = GetIntelD3DDriverBuildNumber(version1);
+            uint32_t buildNumber2 = GetIntelD3DDriverBuildNumber(version2);
+            return buildNumber1 < buildNumber2 ? -1 : (buildNumber1 == buildNumber2 ? 0 : 1);
         }
 
         // TODO(crbug.com/dawn/823): support other GPU vendors
