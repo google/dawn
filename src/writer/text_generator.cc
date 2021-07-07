@@ -39,17 +39,16 @@ std::string TextGenerator::TrimSuffix(std::string str,
   return str;
 }
 
-TextGenerator::LineWriter::LineWriter(TextGenerator* generator)
-    : gen(generator) {}
+TextGenerator::LineWriter::LineWriter(TextBuffer* buf) : buffer(buf) {}
 
 TextGenerator::LineWriter::LineWriter(LineWriter&& other) {
-  gen = other.gen;
-  other.gen = nullptr;
+  buffer = other.buffer;
+  other.buffer = nullptr;
 }
 
 TextGenerator::LineWriter::~LineWriter() {
-  if (gen) {
-    gen->current_buffer_->Append(os.str());
+  if (buffer) {
+    buffer->Append(os.str());
   }
 }
 
@@ -68,9 +67,44 @@ void TextGenerator::TextBuffer::Append(const std::string& line) {
   lines.emplace_back(Line{current_indent, line});
 }
 
+void TextGenerator::TextBuffer::Insert(const std::string& line,
+                                       size_t before,
+                                       uint32_t indent) {
+  if (before >= lines.size()) {
+    diag::List d;
+    TINT_ICE(Writer, d)
+        << "TextBuffer::Insert() called with before >= lines.size()\n"
+        << "  before:" << before << "\n"
+        << "  lines.size(): " << lines.size();
+    return;
+  }
+  lines.insert(lines.begin() + before, Line{indent, line});
+}
+
 void TextGenerator::TextBuffer::Append(const TextBuffer& tb) {
   for (auto& line : tb.lines) {
+    // TODO(bclayton): inefficent, consider optimizing
     lines.emplace_back(Line{current_indent + line.indent, line.content});
+  }
+}
+
+void TextGenerator::TextBuffer::Insert(const TextBuffer& tb,
+                                       size_t before,
+                                       uint32_t indent) {
+  if (before >= lines.size()) {
+    diag::List d;
+    TINT_ICE(Writer, d)
+        << "TextBuffer::Insert() called with before >= lines.size()\n"
+        << "  before:" << before << "\n"
+        << "  lines.size(): " << lines.size();
+    return;
+  }
+  size_t idx = 0;
+  for (auto& line : tb.lines) {
+    // TODO(bclayton): inefficent, consider optimizing
+    lines.insert(lines.begin() + before + idx,
+                 Line{indent + line.indent, line.content});
+    idx++;
   }
 }
 
@@ -96,11 +130,14 @@ TextGenerator::ScopedParen::~ScopedParen() {
 }
 
 TextGenerator::ScopedIndent::ScopedIndent(TextGenerator* generator)
-    : gen(generator) {
-  gen->increment_indent();
+    : ScopedIndent(generator->current_buffer_) {}
+
+TextGenerator::ScopedIndent::ScopedIndent(TextBuffer* buffer)
+    : buffer_(buffer) {
+  buffer_->IncrementIndent();
 }
 TextGenerator::ScopedIndent::~ScopedIndent() {
-  gen->decrement_indent();
+  buffer_->DecrementIndent();
 }
 
 }  // namespace writer

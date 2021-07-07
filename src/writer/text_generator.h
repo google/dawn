@@ -60,38 +60,6 @@ class TextGenerator {
   std::string TrimSuffix(std::string str, const std::string& suffix);
 
  protected:
-  /// LineWriter is a helper that acts as a string buffer, who's content is
-  /// emitted to the TextGenerator as a single line on destruction.
-  struct LineWriter {
-   public:
-    /// Constructor
-    /// @param generator the TextGenerator that the LineWriter will append its
-    /// content to on destruction
-    explicit LineWriter(TextGenerator* generator);
-    /// Move constructor
-    /// @param rhs the LineWriter to move
-    LineWriter(LineWriter&& rhs);
-    /// Destructor
-    ~LineWriter();
-
-    /// @returns the ostringstream
-    operator std::ostream &() { return os; }
-
-    /// @param rhs the value to write to the line
-    /// @returns the ostream so calls can be chained
-    template <typename T>
-    std::ostream& operator<<(T&& rhs) {
-      return os << std::forward<T>(rhs);
-    }
-
-   private:
-    LineWriter(const LineWriter&) = delete;
-    LineWriter& operator=(const LineWriter&) = delete;
-
-    std::ostringstream os;
-    TextGenerator* gen;
-  };
-
   /// Line holds a single line of text
   struct Line {
     /// The indentation of the line in whitespaces
@@ -120,9 +88,22 @@ class TextGenerator {
     /// @param line the line to append to the TextBuffer
     void Append(const std::string& line);
 
+    /// Inserts the line to the TextBuffer before the line with index `before`
+    /// @param line the line to append to the TextBuffer
+    /// @param before the zero-based index of the line to insert the text before
+    /// @param indent the indentation to apply to the inserted lines
+    void Insert(const std::string& line, size_t before, uint32_t indent);
+
     /// Appends the lines of `tb` to the end of this TextBuffer
     /// @param tb the TextBuffer to append to the end of this TextBuffer
     void Append(const TextBuffer& tb);
+
+    /// Inserts the lines of `tb` to the TextBuffer before the line with index
+    /// `before`
+    /// @param tb the TextBuffer to insert into this TextBuffer
+    /// @param before the zero-based index of the line to insert the text before
+    /// @param indent the indentation to apply to the inserted lines
+    void Insert(const TextBuffer& tb, size_t before, uint32_t indent);
 
     /// @returns the buffer's content as a single string
     std::string String() const;
@@ -133,6 +114,39 @@ class TextGenerator {
 
     /// The lines
     std::vector<Line> lines;
+  };
+
+  /// LineWriter is a helper that acts as a string buffer, who's content is
+  /// emitted to the TextBuffer as a single line on destruction.
+  struct LineWriter {
+   public:
+    /// Constructor
+    /// @param buffer the TextBuffer that the LineWriter will append its
+    /// content to on destruction, at the end of the buffer.
+    explicit LineWriter(TextBuffer* buffer);
+
+    /// Move constructor
+    /// @param rhs the LineWriter to move
+    LineWriter(LineWriter&& rhs);
+    /// Destructor
+    ~LineWriter();
+
+    /// @returns the ostringstream
+    operator std::ostream &() { return os; }
+
+    /// @param rhs the value to write to the line
+    /// @returns the ostream so calls can be chained
+    template <typename T>
+    std::ostream& operator<<(T&& rhs) {
+      return os << std::forward<T>(rhs);
+    }
+
+   private:
+    LineWriter(const LineWriter&) = delete;
+    LineWriter& operator=(const LineWriter&) = delete;
+
+    std::ostringstream os;
+    TextBuffer* buffer;
   };
 
   /// Helper for writing a '(' on construction and a ')' destruction.
@@ -154,7 +168,11 @@ class TextGenerator {
   /// indentation on destruction.
   struct ScopedIndent {
     /// Constructor
-    /// @param generator the TextGenerator that the ScopedIndent will indent
+    /// @param buffer the TextBuffer that the ScopedIndent will indent
+    explicit ScopedIndent(TextBuffer* buffer);
+    /// Constructor
+    /// @param generator ScopedIndent will indent the generator's
+    /// `current_buffer_`
     explicit ScopedIndent(TextGenerator* generator);
     /// Destructor
     ~ScopedIndent();
@@ -163,7 +181,7 @@ class TextGenerator {
     ScopedIndent(ScopedIndent&& rhs) = delete;
     ScopedIndent(const ScopedIndent&) = delete;
     ScopedIndent& operator=(const ScopedIndent&) = delete;
-    TextGenerator* gen;
+    TextBuffer* buffer_;
   };
 
   /// @returns the resolved type of the ast::Expression `expr`
@@ -184,8 +202,14 @@ class TextGenerator {
     return builder_.TypeOf(type_decl);
   }
 
-  /// @returns a new LineWriter, used for buffering and writing a line to out_
-  LineWriter line() { return LineWriter(this); }
+  /// @returns a new LineWriter, used for buffering and writing a line to
+  /// the end of #current_buffer_.
+  LineWriter line() { return LineWriter(current_buffer_); }
+
+  /// @param buffer the TextBuffer to write the line to
+  /// @returns a new LineWriter, used for buffering and writing a line to
+  /// the end of `buffer`.
+  LineWriter line(TextBuffer* buffer) { return LineWriter(buffer); }
 
   /// The program
   Program const* const program_;
