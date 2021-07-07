@@ -336,6 +336,7 @@ source_set("dawn_end2end_tests_sources") {
     "end2end/QueryTests.cpp",
     "end2end/QueueTests.cpp",
     "end2end/QueueTimelineTests.cpp",
+    "end2end/RenderAttachmentTests.cpp",
     "end2end/RenderBundleTests.cpp",
     "end2end/RenderPassLoadOpTests.cpp",
     "end2end/RenderPassTests.cpp",
