@@ -53,8 +53,7 @@ void comp_main(tint_symbol_5 tint_symbol_4) {
   float2 pos = float2(0.0f, 0.0f);
   float2 vel = float2(0.0f, 0.0f);
   {
-    uint i = 0u;
-    for(; !(!((i < 5u))); i = (i + 1u)) {
+    for(uint i = 0u; (i < 5u); i = (i + 1u)) {
       if ((i == index)) {
         continue;
       }

@@ -15,7 +15,7 @@ void f() {
       if (tint_tmp) {
         tint_tmp = (j < 10);
       }
-      if (!(!(!((tint_tmp))))) { break; }
+      if (!((tint_tmp))) { break; }
       some_loop_body();
       j = (i * 30);
       i = (i + 1);

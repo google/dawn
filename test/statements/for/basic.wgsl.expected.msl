@@ -5,17 +5,8 @@ void some_loop_body() {
 }
 
 void f() {
-  {
-    int i = 0;
-    while (true) {
-      if (!((i < 5))) {
-        break;
-      }
-      some_loop_body();
-      {
-        i = (i + 1);
-      }
-    }
+  for(int i = 0; (i < 5); i = (i + 1)) {
+    some_loop_body();
   }
 }
 

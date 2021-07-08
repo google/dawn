@@ -69,14 +69,22 @@ void main(tint_symbol_1 tint_symbol) {
   const uint3 global_id = tint_symbol.global_id;
   const uint local_invocation_index = tint_symbol.local_invocation_index;
   if ((local_invocation_index == 0u)) {
-    for(int i = 0; (i < 64); i = (i + 1)) {
-      for(int i_1 = 0; (i_1 < 64); i_1 = (i_1 + 1)) {
-        mm_Asub[i][i_1] = 0.0f;
+    {
+      for(int i = 0; (i < 64); i = (i + 1)) {
+        {
+          for(int i_1 = 0; (i_1 < 64); i_1 = (i_1 + 1)) {
+            mm_Asub[i][i_1] = 0.0f;
+          }
+        }
       }
     }
-    for(int i_2 = 0; (i_2 < 64); i_2 = (i_2 + 1)) {
-      for(int i_3 = 0; (i_3 < 64); i_3 = (i_3 + 1)) {
-        mm_Bsub[i_2][i_3] = 0.0f;
+    {
+      for(int i_2 = 0; (i_2 < 64); i_2 = (i_2 + 1)) {
+        {
+          for(int i_3 = 0; (i_3 < 64); i_3 = (i_3 + 1)) {
+            mm_Bsub[i_2][i_3] = 0.0f;
+          }
+        }
       }
     }
   }
@@ -91,8 +99,7 @@ void main(tint_symbol_1 tint_symbol) {
   float ACached = 0.0f;
   float BCached[4] = (float[4])0;
   {
-    uint index = 0u;
-    for(; !(!((index < (RowPerThread * ColPerThread)))); index = (index + 1u)) {
+    for(uint index = 0u; (index < (RowPerThread * ColPerThread)); index = (index + 1u)) {
       acc[index] = 0.0f;
     }
   }
@@ -101,14 +108,11 @@ void main(tint_symbol_1 tint_symbol) {
   const uint RowPerThreadB = (TileInner / 16u);
   const uint tileRowB = (local_id.y * RowPerThreadB);
   {
-    uint t = 0u;
-    for(; !(!((t < numTiles))); t = (t + 1u)) {
+    for(uint t = 0u; (t < numTiles); t = (t + 1u)) {
       {
-        uint innerRow = 0u;
-        for(; !(!((innerRow < RowPerThread))); innerRow = (innerRow + 1u)) {
+        for(uint innerRow = 0u; (innerRow < RowPerThread); innerRow = (innerRow + 1u)) {
           {
-            uint innerCol = 0u;
-            for(; !(!((innerCol < ColPerThreadA))); innerCol = (innerCol + 1u)) {
+            for(uint innerCol = 0u; (innerCol < ColPerThreadA); innerCol = (innerCol + 1u)) {
               const uint inputRow = (tileRow + innerRow);
               const uint inputCol = (tileColA + innerCol);
               mm_Asub[inputRow][inputCol] = mm_readA((globalRow + innerRow), ((t * TileInner) + inputCol));
@@ -117,11 +121,9 @@ void main(tint_symbol_1 tint_symbol) {
         }
       }
       {
-        uint innerRow = 0u;
-        for(; !(!((innerRow < RowPerThreadB))); innerRow = (innerRow + 1u)) {
+        for(uint innerRow = 0u; (innerRow < RowPerThreadB); innerRow = (innerRow + 1u)) {
           {
-            uint innerCol = 0u;
-            for(; !(!((innerCol < ColPerThread))); innerCol = (innerCol + 1u)) {
+            for(uint innerCol = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
               const uint inputRow = (tileRowB + innerRow);
               const uint inputCol = (tileCol + innerCol);
               mm_Bsub[innerCol][inputCol] = mm_readB(((t * TileInner) + inputRow), (globalCol + innerCol));
@@ -131,21 +133,17 @@ void main(tint_symbol_1 tint_symbol) {
       }
       GroupMemoryBarrierWithGroupSync();
       {
-        uint k = 0u;
-        for(; !(!((k < TileInner))); k = (k + 1u)) {
+        for(uint k = 0u; (k < TileInner); k = (k + 1u)) {
           {
-            uint inner = 0u;
-            for(; !(!((inner < ColPerThread))); inner = (inner + 1u)) {
+            for(uint inner = 0u; (inner < ColPerThread); inner = (inner + 1u)) {
               BCached[inner] = mm_Bsub[k][(tileCol + inner)];
             }
           }
           {
-            uint innerRow = 0u;
-            for(; !(!((innerRow < RowPerThread))); innerRow = (innerRow + 1u)) {
+            for(uint innerRow = 0u; (innerRow < RowPerThread); innerRow = (innerRow + 1u)) {
               ACached = mm_Asub[(tileRow + innerRow)][k];
               {
-                uint innerCol = 0u;
-                for(; !(!((innerCol < ColPerThread))); innerCol = (innerCol + 1u)) {
+                for(uint innerCol = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
                   const uint index = ((innerRow * ColPerThread) + innerCol);
                   acc[index] = (acc[index] + (ACached * BCached[innerCol]));
                 }
@@ -158,11 +156,9 @@ void main(tint_symbol_1 tint_symbol) {
     }
   }
   {
-    uint innerRow = 0u;
-    for(; !(!((innerRow < RowPerThread))); innerRow = (innerRow + 1u)) {
+    for(uint innerRow = 0u; (innerRow < RowPerThread); innerRow = (innerRow + 1u)) {
       {
-        uint innerCol = 0u;
-        for(; !(!((innerCol < ColPerThread))); innerCol = (innerCol + 1u)) {
+        for(uint innerCol = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
           const uint index = ((innerRow * ColPerThread) + innerCol);
           mm_write((globalRow + innerRow), (globalCol + innerCol), acc[index]);
         }

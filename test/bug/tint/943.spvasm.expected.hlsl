@@ -191,10 +191,14 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
   const int x_152 = dimInner;
   numTiles = (((x_152 - 1) / 64) + 1);
   innerRow = 0;
-  for(; (innerRow < 1); innerRow = (innerRow + 1)) {
-    innerCol = 0;
-    for(; (innerCol < 1); innerCol = (innerCol + 1)) {
-      acc[innerRow][innerCol] = 0.0f;
+  {
+    for(; (innerRow < 1); innerRow = (innerRow + 1)) {
+      innerCol = 0;
+      {
+        for(; (innerCol < 1); innerCol = (innerCol + 1)) {
+          acc[innerRow][innerCol] = 0.0f;
+        }
+      }
     }
   }
   const uint x_187 = gl_LocalInvocationID.x;
@@ -202,100 +206,120 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
   const uint x_192 = gl_LocalInvocationID.y;
   tileRowB = (asint(x_192) * 1);
   t = 0;
-  for(; (t < numTiles); t = (t + 1)) {
-    innerRow_1 = 0;
-    for(; (innerRow_1 < 1); innerRow_1 = (innerRow_1 + 1)) {
-      innerCol_1 = 0;
-      for(; (innerCol_1 < 64); innerCol_1 = (innerCol_1 + 1)) {
-        inputRow = (tileRow + innerRow_1);
-        inputCol = (tileColA + innerCol_1);
-        const int x_233 = inputRow;
-        const int x_234 = inputCol;
-        const int x_238 = t;
-        const int x_240 = inputCol;
-        param_3 = (globalRow + innerRow_1);
-        param_4 = ((x_238 * 64) + x_240);
-        const float x_244 = mm_readA_i1_i1_(param_3, param_4);
-        mm_Asub[x_233][x_234] = x_244;
-      }
-    }
-    innerRow_2 = 0;
-    for(; (innerRow_2 < 1); innerRow_2 = (innerRow_2 + 1)) {
-      innerCol_2 = 0;
-      for(; (innerCol_2 < 1); innerCol_2 = (innerCol_2 + 1)) {
-        inputRow_1 = (tileRowB + innerRow_2);
-        inputCol_1 = (tileCol + innerCol_2);
-        const int x_278 = inputRow_1;
-        const int x_279 = inputCol_1;
-        const int x_284 = globalCol;
-        const int x_285 = innerCol_2;
-        param_5 = ((t * 64) + inputRow_1);
-        param_6 = (x_284 + x_285);
-        const float x_289 = mm_readB_i1_i1_(param_5, param_6);
-        mm_Bsub[x_278][x_279] = x_289;
-      }
-    }
-    GroupMemoryBarrierWithGroupSync();
-    k = 0;
-    for(; (k < 64); k = (k + 1)) {
-      inner = 0;
-      for(; (inner < 1); inner = (inner + 1)) {
-        const int x_314 = inner;
-        const float x_320 = mm_Bsub[k][(tileCol + inner)];
-        BCached[x_314] = x_320;
-      }
-      innerRow_3 = 0;
-      for(; (innerRow_3 < 1); innerRow_3 = (innerRow_3 + 1)) {
-        const float x_338 = mm_Asub[(tileRow + innerRow_3)][k];
-        ACached = x_338;
-        innerCol_3 = 0;
-        for(; (innerCol_3 < 1); innerCol_3 = (innerCol_3 + 1)) {
-          const int x_347 = innerRow_3;
-          const int x_348 = innerCol_3;
-          const float x_349 = ACached;
-          const float x_352 = BCached[innerCol_3];
-          const float x_355 = acc[x_347][x_348];
-          acc[x_347][x_348] = (x_355 + (x_349 * x_352));
+  {
+    for(; (t < numTiles); t = (t + 1)) {
+      innerRow_1 = 0;
+      {
+        for(; (innerRow_1 < 1); innerRow_1 = (innerRow_1 + 1)) {
+          innerCol_1 = 0;
+          {
+            for(; (innerCol_1 < 64); innerCol_1 = (innerCol_1 + 1)) {
+              inputRow = (tileRow + innerRow_1);
+              inputCol = (tileColA + innerCol_1);
+              const int x_233 = inputRow;
+              const int x_234 = inputCol;
+              const int x_238 = t;
+              const int x_240 = inputCol;
+              param_3 = (globalRow + innerRow_1);
+              param_4 = ((x_238 * 64) + x_240);
+              const float x_244 = mm_readA_i1_i1_(param_3, param_4);
+              mm_Asub[x_233][x_234] = x_244;
+            }
+          }
         }
       }
+      innerRow_2 = 0;
+      {
+        for(; (innerRow_2 < 1); innerRow_2 = (innerRow_2 + 1)) {
+          innerCol_2 = 0;
+          {
+            for(; (innerCol_2 < 1); innerCol_2 = (innerCol_2 + 1)) {
+              inputRow_1 = (tileRowB + innerRow_2);
+              inputCol_1 = (tileCol + innerCol_2);
+              const int x_278 = inputRow_1;
+              const int x_279 = inputCol_1;
+              const int x_284 = globalCol;
+              const int x_285 = innerCol_2;
+              param_5 = ((t * 64) + inputRow_1);
+              param_6 = (x_284 + x_285);
+              const float x_289 = mm_readB_i1_i1_(param_5, param_6);
+              mm_Bsub[x_278][x_279] = x_289;
+            }
+          }
+        }
+      }
+      GroupMemoryBarrierWithGroupSync();
+      k = 0;
+      {
+        for(; (k < 64); k = (k + 1)) {
+          inner = 0;
+          {
+            for(; (inner < 1); inner = (inner + 1)) {
+              const int x_314 = inner;
+              const float x_320 = mm_Bsub[k][(tileCol + inner)];
+              BCached[x_314] = x_320;
+            }
+          }
+          innerRow_3 = 0;
+          {
+            for(; (innerRow_3 < 1); innerRow_3 = (innerRow_3 + 1)) {
+              const float x_338 = mm_Asub[(tileRow + innerRow_3)][k];
+              ACached = x_338;
+              innerCol_3 = 0;
+              {
+                for(; (innerCol_3 < 1); innerCol_3 = (innerCol_3 + 1)) {
+                  const int x_347 = innerRow_3;
+                  const int x_348 = innerCol_3;
+                  const float x_349 = ACached;
+                  const float x_352 = BCached[innerCol_3];
+                  const float x_355 = acc[x_347][x_348];
+                  acc[x_347][x_348] = (x_355 + (x_349 * x_352));
+                }
+              }
+            }
+          }
+        }
+      }
+      GroupMemoryBarrierWithGroupSync();
     }
-    GroupMemoryBarrierWithGroupSync();
   }
   innerRow_4 = 0;
-  for(; (innerRow_4 < 1); innerRow_4 = (innerRow_4 + 1)) {
-    innerCol_4 = 0;
-    while (true) {
-      bool x_393 = false;
-      bool x_394_phi = false;
-      if ((innerCol_4 < 1)) {
-      } else {
-        break;
-      }
-      const int x_382 = globalCol;
-      const int x_383 = innerCol_4;
-      const int x_385 = dimBOuter;
-      const bool x_386 = ((x_382 + x_383) < x_385);
-      x_394_phi = x_386;
-      if (x_386) {
-        const int x_389 = globalRow;
-        const int x_390 = innerRow_4;
-        const int x_392 = dimAOuter;
-        x_393 = ((x_389 + x_390) < x_392);
-        x_394_phi = x_393;
-      }
-      if (x_394_phi) {
-        const int x_400 = globalCol;
-        const int x_401 = innerCol_4;
-        const int x_403 = innerRow_4;
-        const int x_404 = innerCol_4;
-        param_7 = (globalRow + innerRow_4);
-        param_8 = (x_400 + x_401);
-        const float x_409 = acc[x_403][x_404];
-        param_9 = x_409;
-        mm_write_i1_i1_f1_(param_7, param_8, param_9);
-      }
-      {
-        innerCol_4 = (innerCol_4 + 1);
+  {
+    for(; (innerRow_4 < 1); innerRow_4 = (innerRow_4 + 1)) {
+      innerCol_4 = 0;
+      while (true) {
+        bool x_393 = false;
+        bool x_394_phi = false;
+        if ((innerCol_4 < 1)) {
+        } else {
+          break;
+        }
+        const int x_382 = globalCol;
+        const int x_383 = innerCol_4;
+        const int x_385 = dimBOuter;
+        const bool x_386 = ((x_382 + x_383) < x_385);
+        x_394_phi = x_386;
+        if (x_386) {
+          const int x_389 = globalRow;
+          const int x_390 = innerRow_4;
+          const int x_392 = dimAOuter;
+          x_393 = ((x_389 + x_390) < x_392);
+          x_394_phi = x_393;
+        }
+        if (x_394_phi) {
+          const int x_400 = globalCol;
+          const int x_401 = innerCol_4;
+          const int x_403 = innerRow_4;
+          const int x_404 = innerCol_4;
+          param_7 = (globalRow + innerRow_4);
+          param_8 = (x_400 + x_401);
+          const float x_409 = acc[x_403][x_404];
+          param_9 = x_409;
+          mm_write_i1_i1_f1_(param_7, param_8, param_9);
+        }
+        {
+          innerCol_4 = (innerCol_4 + 1);
+        }
       }
     }
   }
@@ -336,14 +360,20 @@ void main(tint_symbol_1 tint_symbol) {
   const uint3 gl_GlobalInvocationID_param = tint_symbol.gl_GlobalInvocationID_param;
   const uint local_invocation_index = tint_symbol.local_invocation_index;
   if ((local_invocation_index == 0u)) {
-    for(int i = 0; (i < 64); i = (i + 1)) {
-      for(int i_1 = 0; (i_1 < 64); i_1 = (i_1 + 1)) {
-        mm_Asub[i][i_1] = 0.0f;
+    {
+      for(int i = 0; (i < 64); i = (i + 1)) {
+        {
+          for(int i_1 = 0; (i_1 < 64); i_1 = (i_1 + 1)) {
+            mm_Asub[i][i_1] = 0.0f;
+          }
+        }
       }
     }
-    for(int i_2 = 0; (i_2 < 64); i_2 = (i_2 + 1)) {
-      const float tint_symbol_6[1] = (float[1])0;
-      mm_Bsub[i_2] = tint_symbol_6;
+    {
+      for(int i_2 = 0; (i_2 < 64); i_2 = (i_2 + 1)) {
+        const float tint_symbol_6[1] = (float[1])0;
+        mm_Bsub[i_2] = tint_symbol_6;
+      }
     }
   }
   GroupMemoryBarrierWithGroupSync();

@@ -22,9 +22,13 @@ void main(tint_symbol_1 tint_symbol) {
   const uint3 LocalInvocationID = tint_symbol.LocalInvocationID;
   const uint local_invocation_index = tint_symbol.local_invocation_index;
   if ((local_invocation_index == 0u)) {
-    for(int i_1 = 0; (i_1 < 4); i_1 = (i_1 + 1)) {
-      for(int i_2 = 0; (i_2 < 256); i_2 = (i_2 + 1)) {
-        tile[i_1][i_2] = float3(0.0f, 0.0f, 0.0f);
+    {
+      for(int i_1 = 0; (i_1 < 4); i_1 = (i_1 + 1)) {
+        {
+          for(int i_2 = 0; (i_2 < 256); i_2 = (i_2 + 1)) {
+            tile[i_1][i_2] = float3(0.0f, 0.0f, 0.0f);
+          }
+        }
       }
     }
   }
@@ -37,11 +41,9 @@ void main(tint_symbol_1 tint_symbol) {
   const uint scalar_offset_1 = (4u) / 4;
   const int2 baseIndex = (int2(((WorkGroupID.xy * uint2(params[scalar_offset_1 / 4][scalar_offset_1 % 4], 4u)) + (LocalInvocationID.xy * uint2(4u, 1u)))) - int2(int(filterOffset), 0));
   {
-    uint r = 0u;
-    for(; !(!((r < 4u))); r = (r + 1u)) {
+    for(uint r = 0u; (r < 4u); r = (r + 1u)) {
       {
-        uint c = 0u;
-        for(; !(!((c < 4u))); c = (c + 1u)) {
+        for(uint c = 0u; (c < 4u); c = (c + 1u)) {
           int2 loadIndex = (baseIndex + int2(int(c), int(r)));
           const uint scalar_offset_2 = (0u) / 4;
           if ((flip[scalar_offset_2 / 4][scalar_offset_2 % 4] != 0u)) {
@@ -54,11 +56,9 @@ void main(tint_symbol_1 tint_symbol) {
   }
   GroupMemoryBarrierWithGroupSync();
   {
-    uint r = 0u;
-    for(; !(!((r < 4u))); r = (r + 1u)) {
+    for(uint r = 0u; (r < 4u); r = (r + 1u)) {
       {
-        uint c = 0u;
-        for(; !(!((c < 4u))); c = (c + 1u)) {
+        for(uint c = 0u; (c < 4u); c = (c + 1u)) {
           int2 writeIndex = (baseIndex + int2(int(c), int(r)));
           const uint scalar_offset_3 = (0u) / 4;
           if ((flip[scalar_offset_3 / 4][scalar_offset_3 % 4] != 0u)) {
@@ -79,7 +79,7 @@ void main(tint_symbol_1 tint_symbol) {
               uint f = 0u;
               while (true) {
                 const uint scalar_offset_4 = (0u) / 4;
-                if (!(!(!((f < params[scalar_offset_4 / 4][scalar_offset_4 % 4]))))) { break; }
+                if (!((f < params[scalar_offset_4 / 4][scalar_offset_4 % 4]))) { break; }
                 uint i = ((center + f) - filterOffset);
                 const uint scalar_offset_5 = (0u) / 4;
                 acc = (acc + ((1.0f / float(params[scalar_offset_5 / 4][scalar_offset_5 % 4])) * tile[r][i]));

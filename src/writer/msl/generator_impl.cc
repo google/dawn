@@ -54,6 +54,7 @@
 #include "src/sem/vector_type.h"
 #include "src/sem/void_type.h"
 #include "src/transform/msl.h"
+#include "src/utils/defer.h"
 #include "src/utils/scoped_assignment.h"
 #include "src/writer/float_to_string.h"
 
@@ -1493,6 +1494,116 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
   return true;
 }
 
+bool GeneratorImpl::EmitForLoop(ast::ForLoopStatement* stmt) {
+  TextBuffer init_buf;
+  if (auto* init = stmt->initializer()) {
+    TINT_SCOPED_ASSIGNMENT(current_buffer_, &init_buf);
+    if (!EmitStatement(init)) {
+      return false;
+    }
+  }
+
+  TextBuffer cond_pre;
+  std::stringstream cond_buf;
+  if (auto* cond = stmt->condition()) {
+    TINT_SCOPED_ASSIGNMENT(current_buffer_, &cond_pre);
+    if (!EmitExpression(cond_buf, cond)) {
+      return false;
+    }
+  }
+
+  TextBuffer cont_buf;
+  if (auto* cont = stmt->continuing()) {
+    TINT_SCOPED_ASSIGNMENT(current_buffer_, &cont_buf);
+    if (!EmitStatement(cont)) {
+      return false;
+    }
+  }
+
+  // If the for-loop has a multi-statement conditional and / or continuing, then
+  // we cannot emit this as a regular for-loop in MSL. Instead we need to
+  // generate a `while(true)` loop.
+  bool emit_as_loop = cond_pre.lines.size() > 0 || cont_buf.lines.size() > 1;
+
+  // If the for-loop has multi-statement initializer, or is going to be emitted
+  // as a `while(true)` loop, then declare the initializer statement(s) before
+  // the loop in a new block.
+  bool nest_in_block =
+      init_buf.lines.size() > 1 || (stmt->initializer() && emit_as_loop);
+  if (nest_in_block) {
+    line() << "{";
+    increment_indent();
+    current_buffer_->Append(init_buf);
+    init_buf.lines.clear();  // Don't emit the initializer again in the 'for'
+  }
+  TINT_DEFER({
+    if (nest_in_block) {
+      decrement_indent();
+      line() << "}";
+    }
+  });
+
+  if (emit_as_loop) {
+    auto emit_continuing = [&]() {
+      current_buffer_->Append(cont_buf);
+      return true;
+    };
+
+    TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
+    line() << "while (true) {";
+    increment_indent();
+    TINT_DEFER({
+      decrement_indent();
+      line() << "}";
+    });
+
+    if (stmt->condition()) {
+      current_buffer_->Append(cond_pre);
+      line() << "if (!(" << cond_buf.str() << ")) { break; }";
+    }
+
+    if (!EmitStatements(stmt->body()->statements())) {
+      return false;
+    }
+
+    if (!emit_continuing()) {
+      return false;
+    }
+  } else {
+    // For-loop can be generated.
+    {
+      auto out = line();
+      out << "for";
+      {
+        ScopedParen sp(out);
+
+        if (!init_buf.lines.empty()) {
+          out << init_buf.lines[0].content << " ";
+        } else {
+          out << "; ";
+        }
+
+        out << cond_buf.str() << "; ";
+
+        if (!cont_buf.lines.empty()) {
+          out << TrimSuffix(cont_buf.lines[0].content, ";");
+        }
+      }
+      out << " {";
+    }
+    {
+      auto emit_continuing = [] { return true; };
+      TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
+      if (!EmitStatementsWithIndent(stmt->body()->statements())) {
+        return false;
+      }
+    }
+    line() << "}";
+  }
+
+  return true;
+}
+
 bool GeneratorImpl::EmitDiscard(ast::DiscardStatement*) {
   // TODO(dsinclair): Verify this is correct when the discard semantics are
   // defined for WGSL (https://github.com/gpuweb/gpuweb/issues/361)
@@ -1634,6 +1745,9 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   }
   if (auto* l = stmt->As<ast::LoopStatement>()) {
     return EmitLoop(l);
+  }
+  if (auto* l = stmt->As<ast::ForLoopStatement>()) {
+    return EmitForLoop(l);
   }
   if (auto* r = stmt->As<ast::ReturnStatement>()) {
     return EmitReturn(r);

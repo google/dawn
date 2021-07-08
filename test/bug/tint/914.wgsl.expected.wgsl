@@ -65,167 +65,47 @@ fn main([[builtin(local_invocation_id)]] local_id : vec3<u32>, [[builtin(global_
   var acc : array<f32, 16>;
   var ACached : f32;
   var BCached : array<f32, 4>;
-  {
-    var index : u32 = 0u;
-    loop {
-      if (!((index < (RowPerThread * ColPerThread)))) {
-        break;
-      }
-      acc[index] = 0.0;
-
-      continuing {
-        index = (index + 1u);
-      }
-    }
+  for(var index : u32 = 0u; (index < (RowPerThread * ColPerThread)); index = (index + 1u)) {
+    acc[index] = 0.0;
   }
   let ColPerThreadA : u32 = (TileInner / 16u);
   let tileColA : u32 = (local_id.x * ColPerThreadA);
   let RowPerThreadB : u32 = (TileInner / 16u);
   let tileRowB : u32 = (local_id.y * RowPerThreadB);
-  {
-    var t : u32 = 0u;
-    loop {
-      if (!((t < numTiles))) {
-        break;
-      }
-      {
-        var innerRow : u32 = 0u;
-        loop {
-          if (!((innerRow < RowPerThread))) {
-            break;
-          }
-          {
-            var innerCol : u32 = 0u;
-            loop {
-              if (!((innerCol < ColPerThreadA))) {
-                break;
-              }
-              let inputRow : u32 = (tileRow + innerRow);
-              let inputCol : u32 = (tileColA + innerCol);
-              mm_Asub[inputRow][inputCol] = mm_readA((globalRow + innerRow), ((t * TileInner) + inputCol));
-
-              continuing {
-                innerCol = (innerCol + 1u);
-              }
-            }
-          }
-
-          continuing {
-            innerRow = (innerRow + 1u);
-          }
-        }
-      }
-      {
-        var innerRow : u32 = 0u;
-        loop {
-          if (!((innerRow < RowPerThreadB))) {
-            break;
-          }
-          {
-            var innerCol : u32 = 0u;
-            loop {
-              if (!((innerCol < ColPerThread))) {
-                break;
-              }
-              let inputRow : u32 = (tileRowB + innerRow);
-              let inputCol : u32 = (tileCol + innerCol);
-              mm_Bsub[innerCol][inputCol] = mm_readB(((t * TileInner) + inputRow), (globalCol + innerCol));
-
-              continuing {
-                innerCol = (innerCol + 1u);
-              }
-            }
-          }
-
-          continuing {
-            innerRow = (innerRow + 1u);
-          }
-        }
-      }
-      workgroupBarrier();
-      {
-        var k : u32 = 0u;
-        loop {
-          if (!((k < TileInner))) {
-            break;
-          }
-          {
-            var inner : u32 = 0u;
-            loop {
-              if (!((inner < ColPerThread))) {
-                break;
-              }
-              BCached[inner] = mm_Bsub[k][(tileCol + inner)];
-
-              continuing {
-                inner = (inner + 1u);
-              }
-            }
-          }
-          {
-            var innerRow : u32 = 0u;
-            loop {
-              if (!((innerRow < RowPerThread))) {
-                break;
-              }
-              ACached = mm_Asub[(tileRow + innerRow)][k];
-              {
-                var innerCol : u32 = 0u;
-                loop {
-                  if (!((innerCol < ColPerThread))) {
-                    break;
-                  }
-                  let index : u32 = ((innerRow * ColPerThread) + innerCol);
-                  acc[index] = (acc[index] + (ACached * BCached[innerCol]));
-
-                  continuing {
-                    innerCol = (innerCol + 1u);
-                  }
-                }
-              }
-
-              continuing {
-                innerRow = (innerRow + 1u);
-              }
-            }
-          }
-
-          continuing {
-            k = (k + 1u);
-          }
-        }
-      }
-      workgroupBarrier();
-
-      continuing {
-        t = (t + 1u);
+  for(var t : u32 = 0u; (t < numTiles); t = (t + 1u)) {
+    for(var innerRow : u32 = 0u; (innerRow < RowPerThread); innerRow = (innerRow + 1u)) {
+      for(var innerCol : u32 = 0u; (innerCol < ColPerThreadA); innerCol = (innerCol + 1u)) {
+        let inputRow : u32 = (tileRow + innerRow);
+        let inputCol : u32 = (tileColA + innerCol);
+        mm_Asub[inputRow][inputCol] = mm_readA((globalRow + innerRow), ((t * TileInner) + inputCol));
       }
     }
-  }
-  {
-    var innerRow : u32 = 0u;
-    loop {
-      if (!((innerRow < RowPerThread))) {
-        break;
+    for(var innerRow : u32 = 0u; (innerRow < RowPerThreadB); innerRow = (innerRow + 1u)) {
+      for(var innerCol : u32 = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
+        let inputRow : u32 = (tileRowB + innerRow);
+        let inputCol : u32 = (tileCol + innerCol);
+        mm_Bsub[innerCol][inputCol] = mm_readB(((t * TileInner) + inputRow), (globalCol + innerCol));
       }
-      {
-        var innerCol : u32 = 0u;
-        loop {
-          if (!((innerCol < ColPerThread))) {
-            break;
-          }
+    }
+    workgroupBarrier();
+    for(var k : u32 = 0u; (k < TileInner); k = (k + 1u)) {
+      for(var inner : u32 = 0u; (inner < ColPerThread); inner = (inner + 1u)) {
+        BCached[inner] = mm_Bsub[k][(tileCol + inner)];
+      }
+      for(var innerRow : u32 = 0u; (innerRow < RowPerThread); innerRow = (innerRow + 1u)) {
+        ACached = mm_Asub[(tileRow + innerRow)][k];
+        for(var innerCol : u32 = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
           let index : u32 = ((innerRow * ColPerThread) + innerCol);
-          mm_write((globalRow + innerRow), (globalCol + innerCol), acc[index]);
-
-          continuing {
-            innerCol = (innerCol + 1u);
-          }
+          acc[index] = (acc[index] + (ACached * BCached[innerCol]));
         }
       }
-
-      continuing {
-        innerRow = (innerRow + 1u);
-      }
+    }
+    workgroupBarrier();
+  }
+  for(var innerRow : u32 = 0u; (innerRow < RowPerThread); innerRow = (innerRow + 1u)) {
+    for(var innerCol : u32 = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
+      let index : u32 = ((innerRow * ColPerThread) + innerCol);
+      mm_write((globalRow + innerRow), (globalCol + innerCol), acc[index]);
     }
   }
 }

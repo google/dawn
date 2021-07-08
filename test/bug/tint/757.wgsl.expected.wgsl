@@ -19,17 +19,7 @@ fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
   var flatIndex : u32 = ((((2u * 2u) * GlobalInvocationID.z) + (2u * GlobalInvocationID.y)) + GlobalInvocationID.x);
   flatIndex = (flatIndex * 1u);
   var texel : vec4<f32> = textureLoad(myTexture, vec2<i32>(GlobalInvocationID.xy), 0, 0);
-  {
-    var i : u32 = 0u;
-    loop {
-      if (!((i < 1u))) {
-        break;
-      }
-      result.values[(flatIndex + i)] = texel.r;
-
-      continuing {
-        i = (i + 1u);
-      }
-    }
+  for(var i : u32 = 0u; (i < 1u); i = (i + 1u)) {
+    result.values[(flatIndex + i)] = texel.r;
   }
 }

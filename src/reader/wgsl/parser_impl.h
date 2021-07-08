@@ -554,7 +554,7 @@ class ParserImpl {
   Expect<std::unique_ptr<ForHeader>> expect_for_header();
   /// Parses a `for_stmt` grammar element
   /// @returns the parsed for loop or nullptr
-  Maybe<ast::Statement*> for_stmt();
+  Maybe<ast::ForLoopStatement*> for_stmt();
   /// Parses a `continuing_stmt` grammar element
   /// @returns the parsed statements
   Maybe<ast::BlockStatement*> continuing_stmt();

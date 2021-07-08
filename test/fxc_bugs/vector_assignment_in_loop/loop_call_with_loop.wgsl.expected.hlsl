@@ -32,8 +32,7 @@ static bool2 v2b = bool2(false, false);
 
 void foo() {
   {
-    int i = 0;
-    for(; !(!((i < 2))); i = (i + 1)) {
+    for(int i = 0; (i < 2); i = (i + 1)) {
       Set_float2(v2f, i, 1.0f);
       Set_int3(v3i, i, 1);
       Set_uint4(v4u, i, 1u);
@@ -45,8 +44,7 @@ void foo() {
 [numthreads(1, 1, 1)]
 void main() {
   {
-    int i = 0;
-    for(; !(!((i < 2))); i = (i + 1)) {
+    for(int i = 0; (i < 2); i = (i + 1)) {
       foo();
     }
   }

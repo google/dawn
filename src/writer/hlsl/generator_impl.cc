@@ -43,6 +43,7 @@
 #include "src/sem/variable.h"
 #include "src/transform/calculate_array_length.h"
 #include "src/transform/hlsl.h"
+#include "src/utils/defer.h"
 #include "src/utils/get_or_create.h"
 #include "src/utils/scoped_assignment.h"
 #include "src/writer/append_vector.h"
@@ -2574,22 +2575,21 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitForLoop(ast::ForLoopStatement* stmt) {
+  // Nest a for loop with a new block. In HLSL the initializer scope is not
+  // nested by the for-loop, so we may get variable redefinitions.
+  line() << "{";
+  increment_indent();
+  TINT_DEFER({
+    decrement_indent();
+    line() << "}";
+  });
+
   TextBuffer init_buf;
   if (auto* init = stmt->initializer()) {
     TINT_SCOPED_ASSIGNMENT(current_buffer_, &init_buf);
     if (!EmitStatement(init)) {
       return false;
     }
-  }
-  bool multi_stmt_init = init_buf.lines.size() > 1;
-  // For-loop has multi-statement initializer.
-  // This cannot be emitted with a regular for loop, so instead nest the loop in
-  // a new block scope prefixed with these initializer statements.
-  if (multi_stmt_init) {
-    line() << "{";
-    increment_indent();
-    current_buffer_->Append(init_buf);
-    init_buf.lines.clear();  // Don't emit the initializer again in the 'for'
   }
 
   TextBuffer cond_pre;
@@ -2609,10 +2609,20 @@ bool GeneratorImpl::EmitForLoop(ast::ForLoopStatement* stmt) {
     }
   }
 
-  if (cond_pre.lines.size() > 0 || cont_buf.lines.size() > 1) {
-    // For-loop has multi-statement conditional and / or continuing.
-    // This cannot be emitted with a regular for loop, so instead generate a
-    // `while(true)` loop.
+  // If the for-loop has a multi-statement conditional and / or continuing, then
+  // we cannot emit this as a regular for-loop in HLSL. Instead we need to
+  // generate a `while(true)` loop.
+  bool emit_as_loop = cond_pre.lines.size() > 0 || cont_buf.lines.size() > 1;
+
+  // If the for-loop has multi-statement initializer, or is going to be emitted
+  // as a `while(true)` loop, then declare the initializer statement(s) before
+  // the loop.
+  if (init_buf.lines.size() > 1 || (stmt->initializer() && emit_as_loop)) {
+    current_buffer_->Append(init_buf);
+    init_buf.lines.clear();  // Don't emit the initializer again in the 'for'
+  }
+
+  if (emit_as_loop) {
     auto emit_continuing = [&]() {
       current_buffer_->Append(cont_buf);
       return true;
@@ -2620,23 +2630,24 @@ bool GeneratorImpl::EmitForLoop(ast::ForLoopStatement* stmt) {
 
     TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
     line() << "while (true) {";
-    {
-      ScopedIndent si(this);
+    increment_indent();
+    TINT_DEFER({
+      decrement_indent();
+      line() << "}";
+    });
 
-      if (stmt->condition()) {
-        current_buffer_->Append(cond_pre);
-        line() << "if (!(" << cond_buf.str() << ")) { break; }";
-      }
-
-      if (!EmitStatements(stmt->body()->statements())) {
-        return false;
-      }
-
-      if (!emit_continuing()) {
-        return false;
-      }
+    if (stmt->condition()) {
+      current_buffer_->Append(cond_pre);
+      line() << "if (!(" << cond_buf.str() << ")) { break; }";
     }
-    line() << "}";
+
+    if (!EmitStatements(stmt->body()->statements())) {
+      return false;
+    }
+
+    if (!emit_continuing()) {
+      return false;
+    }
   } else {
     // For-loop can be generated.
     {
@@ -2666,12 +2677,6 @@ bool GeneratorImpl::EmitForLoop(ast::ForLoopStatement* stmt) {
         return false;
       }
     }
-
-    line() << "}";
-  }
-
-  if (multi_stmt_init) {
-    decrement_indent();
     line() << "}";
   }
 

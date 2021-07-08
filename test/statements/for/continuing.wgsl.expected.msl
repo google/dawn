@@ -3,10 +3,7 @@
 using namespace metal;
 void f() {
   int i = 0;
-  while (true) {
-    {
-      i = (i + 1);
-    }
+  for(; ; i = (i + 1)) {
   }
 }
 

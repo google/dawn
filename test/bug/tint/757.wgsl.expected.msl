@@ -12,17 +12,8 @@ kernel void tint_symbol(texture2d_array<float, access::sample> tint_symbol_2 [[t
   uint flatIndex = ((((2u * 2u) * GlobalInvocationID.z) + (2u * GlobalInvocationID.y)) + GlobalInvocationID.x);
   flatIndex = (flatIndex * 1u);
   float4 texel = tint_symbol_2.read(uint2(int2(GlobalInvocationID.xy)), 0, 0);
-  {
-    uint i = 0u;
-    while (true) {
-      if (!((i < 1u))) {
-        break;
-      }
-      result.values[(flatIndex + i)] = texel.r;
-      {
-        i = (i + 1u);
-      }
-    }
+  for(uint i = 0u; (i < 1u); i = (i + 1u)) {
+    result.values[(flatIndex + i)] = texel.r;
   }
   return;
 }

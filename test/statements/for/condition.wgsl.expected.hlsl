@@ -5,6 +5,8 @@ void unused_entry_point() {
 
 void f() {
   int i = 0;
-  for(; !(!((i < 4))); ) {
+  {
+    for(; (i < 4); ) {
+    }
   }
 }

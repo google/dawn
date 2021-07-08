@@ -12,21 +12,11 @@ fn main() {
   var v2b : vec2<bool>;
   var v3b : vec3<bool>;
   var v4b : vec4<bool>;
-  {
-    var i : i32 = 0;
-    loop {
-      if (!((i < 2))) {
-        break;
-      }
-      v2f[i] = 1.0;
-      v2i[i] = 1;
-      v2u[i] = 1u;
-      v2b[i] = true;
-
-      continuing {
-        i = (i + 1);
-      }
-    }
+  for(var i : i32 = 0; (i < 2); i = (i + 1)) {
+    v2f[i] = 1.0;
+    v2i[i] = 1;
+    v2u[i] = 1u;
+    v2b[i] = true;
   }
   var i : i32 = 0;
   v3f[i] = 1.0;

@@ -2,17 +2,7 @@ fn some_loop_body() {
 }
 
 fn f() {
-  {
-    var i : i32 = 0;
-    loop {
-      if (!((i < 5))) {
-        break;
-      }
-      some_loop_body();
-
-      continuing {
-        i = (i + 1);
-      }
-    }
+  for(var i : i32 = 0; (i < 5); i = (i + 1)) {
+    some_loop_body();
   }
 }

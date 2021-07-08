@@ -16,17 +16,7 @@ fn foo() {
 
 [[stage(compute), workgroup_size(1, 1, 1)]]
 fn main() {
-  {
-    var i : i32 = 0;
-    loop {
-      if (!((i < 2))) {
-        break;
-      }
-      foo();
-
-      continuing {
-        i = (i + 1);
-      }
-    }
+  for(var i : i32 = 0; (i < 2); i = (i + 1)) {
+    foo();
   }
 }

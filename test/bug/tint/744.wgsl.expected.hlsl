@@ -19,8 +19,7 @@ void main(tint_symbol_1 tint_symbol) {
   const uint dimOutter = uniforms[scalar_offset_1 / 4][scalar_offset_1 % 4];
   uint result = 0u;
   {
-    uint i = 0u;
-    for(; !(!((i < dimInner))); i = (i + 1u)) {
+    for(uint i = 0u; (i < dimInner); i = (i + 1u)) {
       const uint a = (i + (resultCell.x * dimInner));
       const uint b = (resultCell.y + (i * dimOutter));
       result = (result + (firstMatrix.Load((4u * a)) * secondMatrix.Load((4u * b))));

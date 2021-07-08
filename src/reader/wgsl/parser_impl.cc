@@ -2071,7 +2071,7 @@ Expect<std::unique_ptr<ForHeader>> ParserImpl::expect_for_header() {
 
 // for_statement
 //   : FOR PAREN_LEFT for_header PAREN_RIGHT BRACE_LEFT statements BRACE_RIGHT
-Maybe<ast::Statement*> ParserImpl::for_stmt() {
+Maybe<ast::ForLoopStatement*> ParserImpl::for_stmt() {
   Source source;
   if (!match(Token::Type::kFor, &source))
     return Failure::kNoMatch;
@@ -2086,45 +2086,9 @@ Maybe<ast::Statement*> ParserImpl::for_stmt() {
   if (stmts.errored)
     return Failure::kErrored;
 
-  // The for statement is a syntactic sugar on top of the loop statement.
-  // We create corresponding nodes in ast with the exact same behaviour
-  // as we would expect from the loop statement.
-  if (header->condition != nullptr) {
-    // !condition
-    auto* not_condition = create<ast::UnaryOpExpression>(
-        header->condition->source(), ast::UnaryOp::kNot, header->condition);
-    // { break; }
-    auto* break_stmt = create<ast::BreakStatement>(not_condition->source());
-    auto* break_body =
-        create<ast::BlockStatement>(not_condition->source(), ast::StatementList{
-                                                                 break_stmt,
-                                                             });
-    // if (!condition) { break; }
-    auto* break_if_not_condition =
-        create<ast::IfStatement>(not_condition->source(), not_condition,
-                                 break_body, ast::ElseStatementList{});
-    stmts.value.insert(stmts.value.begin(), break_if_not_condition);
-  }
-
-  ast::BlockStatement* continuing_body = nullptr;
-  if (header->continuing != nullptr) {
-    continuing_body = create<ast::BlockStatement>(header->continuing->source(),
-                                                  ast::StatementList{
-                                                      header->continuing,
-                                                  });
-  }
-
-  auto* body = create<ast::BlockStatement>(source, stmts.value);
-  auto* loop = create<ast::LoopStatement>(source, body, continuing_body);
-
-  if (header->initializer != nullptr) {
-    return create<ast::BlockStatement>(source, ast::StatementList{
-                                                   header->initializer,
-                                                   loop,
-                                               });
-  }
-
-  return loop;
+  return create<ast::ForLoopStatement>(
+      source, header->initializer, header->condition, header->continuing,
+      create<ast::BlockStatement>(stmts.value));
 }
 
 // func_call_stmt

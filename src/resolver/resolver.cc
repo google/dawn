@@ -62,6 +62,7 @@
 #include "src/sem/storage_texture_type.h"
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
+#include "src/utils/defer.h"
 #include "src/utils/get_or_create.h"
 #include "src/utils/math.h"
 #include "src/utils/scoped_assignment.h"
@@ -1915,6 +1916,10 @@ bool Resolver::ForLoopStatement(ast::ForLoopStatement* stmt) {
       stmt->body(), current_statement_);
   builder_->Sem().Add(stmt->body(), sem_block_body);
   TINT_SCOPED_ASSIGNMENT(current_statement_, sem_block_body);
+  TINT_SCOPED_ASSIGNMENT(current_block_, sem_block_body);
+
+  variable_stack_.push_scope();
+  TINT_DEFER(variable_stack_.pop_scope());
 
   if (auto* initializer = stmt->initializer()) {
     Mark(initializer);
@@ -4011,9 +4016,8 @@ bool Resolver::BlockScope(const ast::BlockStatement* block, F&& callback) {
   TINT_SCOPED_ASSIGNMENT(current_block_,
                          const_cast<sem::BlockStatement*>(sem_block));
   variable_stack_.push_scope();
-  bool result = callback();
-  variable_stack_.pop_scope();
-  return result;
+  TINT_DEFER(variable_stack_.pop_scope());
+  return callback();
 }
 
 std::string Resolver::VectorPretty(uint32_t size,

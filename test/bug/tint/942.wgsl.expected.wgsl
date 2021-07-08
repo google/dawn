@@ -26,80 +26,30 @@ fn main([[builtin(workgroup_id)]] WorkGroupID : vec3<u32>, [[builtin(local_invoc
   let filterOffset : u32 = ((params.filterDim - 1u) / 2u);
   let dims : vec2<i32> = textureDimensions(inputTex, 0);
   let baseIndex = (vec2<i32>(((WorkGroupID.xy * vec2<u32>(params.blockDim, 4u)) + (LocalInvocationID.xy * vec2<u32>(4u, 1u)))) - vec2<i32>(i32(filterOffset), 0));
-  {
-    var r : u32 = 0u;
-    loop {
-      if (!((r < 4u))) {
-        break;
+  for(var r : u32 = 0u; (r < 4u); r = (r + 1u)) {
+    for(var c : u32 = 0u; (c < 4u); c = (c + 1u)) {
+      var loadIndex = (baseIndex + vec2<i32>(i32(c), i32(r)));
+      if ((flip.value != 0u)) {
+        loadIndex = loadIndex.yx;
       }
-      {
-        var c : u32 = 0u;
-        loop {
-          if (!((c < 4u))) {
-            break;
-          }
-          var loadIndex = (baseIndex + vec2<i32>(i32(c), i32(r)));
-          if ((flip.value != 0u)) {
-            loadIndex = loadIndex.yx;
-          }
-          tile[r][((4u * LocalInvocationID.x) + c)] = textureSampleLevel(inputTex, samp, ((vec2<f32>(loadIndex) + vec2<f32>(0.25, 0.25)) / vec2<f32>(dims)), 0.0).rgb;
-
-          continuing {
-            c = (c + 1u);
-          }
-        }
-      }
-
-      continuing {
-        r = (r + 1u);
-      }
+      tile[r][((4u * LocalInvocationID.x) + c)] = textureSampleLevel(inputTex, samp, ((vec2<f32>(loadIndex) + vec2<f32>(0.25, 0.25)) / vec2<f32>(dims)), 0.0).rgb;
     }
   }
   workgroupBarrier();
-  {
-    var r : u32 = 0u;
-    loop {
-      if (!((r < 4u))) {
-        break;
+  for(var r : u32 = 0u; (r < 4u); r = (r + 1u)) {
+    for(var c : u32 = 0u; (c < 4u); c = (c + 1u)) {
+      var writeIndex = (baseIndex + vec2<i32>(i32(c), i32(r)));
+      if ((flip.value != 0u)) {
+        writeIndex = writeIndex.yx;
       }
-      {
-        var c : u32 = 0u;
-        loop {
-          if (!((c < 4u))) {
-            break;
-          }
-          var writeIndex = (baseIndex + vec2<i32>(i32(c), i32(r)));
-          if ((flip.value != 0u)) {
-            writeIndex = writeIndex.yx;
-          }
-          let center : u32 = ((4u * LocalInvocationID.x) + c);
-          if ((((center >= filterOffset) && (center < (256u - filterOffset))) && all((writeIndex < dims)))) {
-            var acc : vec3<f32> = vec3<f32>(0.0, 0.0, 0.0);
-            {
-              var f : u32 = 0u;
-              loop {
-                if (!((f < params.filterDim))) {
-                  break;
-                }
-                var i : u32 = ((center + f) - filterOffset);
-                acc = (acc + ((1.0 / f32(params.filterDim)) * tile[r][i]));
-
-                continuing {
-                  f = (f + 1u);
-                }
-              }
-            }
-            textureStore(outputTex, writeIndex, vec4<f32>(acc, 1.0));
-          }
-
-          continuing {
-            c = (c + 1u);
-          }
+      let center : u32 = ((4u * LocalInvocationID.x) + c);
+      if ((((center >= filterOffset) && (center < (256u - filterOffset))) && all((writeIndex < dims)))) {
+        var acc : vec3<f32> = vec3<f32>(0.0, 0.0, 0.0);
+        for(var f : u32 = 0u; (f < params.filterDim); f = (f + 1u)) {
+          var i : u32 = ((center + f) - filterOffset);
+          acc = (acc + ((1.0 / f32(params.filterDim)) * tile[r][i]));
         }
-      }
-
-      continuing {
-        r = (r + 1u);
+        textureStore(outputTex, writeIndex, vec4<f32>(acc, 1.0));
       }
     }
   }

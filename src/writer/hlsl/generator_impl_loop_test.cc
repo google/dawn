@@ -161,8 +161,10 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoop) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  for(; ; ) {
-    return;
+  EXPECT_EQ(gen.result(), R"(  {
+    for(; ; ) {
+      return;
+    }
   }
 )");
 }
@@ -180,8 +182,10 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoopWithSimpleInit) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  for(int i = 0; ; ) {
-    return;
+  EXPECT_EQ(gen.result(), R"(  {
+    for(int i = 0; ; ) {
+      return;
+    }
   }
 )");
 }
@@ -227,8 +231,10 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoopWithSimpleCond) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  for(; true; ) {
-    return;
+  EXPECT_EQ(gen.result(), R"(  {
+    for(; true; ) {
+      return;
+    }
   }
 )");
 }
@@ -248,13 +254,15 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtCond) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  while (true) {
-    bool tint_tmp = true;
-    if (tint_tmp) {
-      tint_tmp = false;
+  EXPECT_EQ(gen.result(), R"(  {
+    while (true) {
+      bool tint_tmp = true;
+      if (tint_tmp) {
+        tint_tmp = false;
+      }
+      if (!((tint_tmp))) { break; }
+      return;
     }
-    if (!((tint_tmp))) { break; }
-    return;
   }
 )");
 }
@@ -273,8 +281,10 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoopWithSimpleCont) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  for(; ; i = (i + 1)) {
-    return;
+  EXPECT_EQ(gen.result(), R"(  {
+    for(; ; i = (i + 1)) {
+      return;
+    }
   }
 )");
 }
@@ -295,13 +305,15 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtCont) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  while (true) {
-    return;
-    bool tint_tmp = true;
-    if (tint_tmp) {
-      tint_tmp = false;
+  EXPECT_EQ(gen.result(), R"(  {
+    while (true) {
+      return;
+      bool tint_tmp = true;
+      if (tint_tmp) {
+        tint_tmp = false;
+      }
+      i = (tint_tmp);
     }
-    i = (tint_tmp);
   }
 )");
 }
@@ -320,8 +332,10 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoopWithSimpleInitCondCont) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  for(int i = 0; true; i = (i + 1)) {
-    return;
+  EXPECT_EQ(gen.result(), R"(  {
+    for(int i = 0; true; i = (i + 1)) {
+      return;
+    }
   }
 )");
 }

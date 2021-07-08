@@ -68,155 +68,47 @@ kernel void tint_symbol(uint3 local_id [[thread_position_in_threadgroup]], uint3
   tint_array_wrapper_2 acc = {};
   float ACached = 0.0f;
   tint_array_wrapper_3 BCached = {};
-  {
-    uint index = 0u;
-    while (true) {
-      if (!((index < (RowPerThread * ColPerThread)))) {
-        break;
-      }
-      acc.arr[index] = 0.0f;
-      {
-        index = (index + 1u);
-      }
-    }
+  for(uint index = 0u; (index < (RowPerThread * ColPerThread)); index = (index + 1u)) {
+    acc.arr[index] = 0.0f;
   }
   uint const ColPerThreadA = (TileInner / 16u);
   uint const tileColA = (local_id.x * ColPerThreadA);
   uint const RowPerThreadB = (TileInner / 16u);
   uint const tileRowB = (local_id.y * RowPerThreadB);
-  {
-    uint t = 0u;
-    while (true) {
-      if (!((t < numTiles))) {
-        break;
-      }
-      {
-        uint innerRow = 0u;
-        while (true) {
-          if (!((innerRow < RowPerThread))) {
-            break;
-          }
-          {
-            uint innerCol = 0u;
-            while (true) {
-              if (!((innerCol < ColPerThreadA))) {
-                break;
-              }
-              uint const inputRow = (tileRow + innerRow);
-              uint const inputCol = (tileColA + innerCol);
-              tint_symbol_4.arr[inputRow].arr[inputCol] = mm_readA(uniforms, firstMatrix, (globalRow + innerRow), ((t * TileInner) + inputCol));
-              {
-                innerCol = (innerCol + 1u);
-              }
-            }
-          }
-          {
-            innerRow = (innerRow + 1u);
-          }
-        }
-      }
-      {
-        uint innerRow = 0u;
-        while (true) {
-          if (!((innerRow < RowPerThreadB))) {
-            break;
-          }
-          {
-            uint innerCol = 0u;
-            while (true) {
-              if (!((innerCol < ColPerThread))) {
-                break;
-              }
-              uint const inputRow = (tileRowB + innerRow);
-              uint const inputCol = (tileCol + innerCol);
-              tint_symbol_5.arr[innerCol].arr[inputCol] = mm_readB(uniforms, secondMatrix, ((t * TileInner) + inputRow), (globalCol + innerCol));
-              {
-                innerCol = (innerCol + 1u);
-              }
-            }
-          }
-          {
-            innerRow = (innerRow + 1u);
-          }
-        }
-      }
-      threadgroup_barrier(mem_flags::mem_threadgroup);
-      {
-        uint k = 0u;
-        while (true) {
-          if (!((k < TileInner))) {
-            break;
-          }
-          {
-            uint inner = 0u;
-            while (true) {
-              if (!((inner < ColPerThread))) {
-                break;
-              }
-              BCached.arr[inner] = tint_symbol_5.arr[k].arr[(tileCol + inner)];
-              {
-                inner = (inner + 1u);
-              }
-            }
-          }
-          {
-            uint innerRow = 0u;
-            while (true) {
-              if (!((innerRow < RowPerThread))) {
-                break;
-              }
-              ACached = tint_symbol_4.arr[(tileRow + innerRow)].arr[k];
-              {
-                uint innerCol = 0u;
-                while (true) {
-                  if (!((innerCol < ColPerThread))) {
-                    break;
-                  }
-                  uint const index = ((innerRow * ColPerThread) + innerCol);
-                  acc.arr[index] = (acc.arr[index] + (ACached * BCached.arr[innerCol]));
-                  {
-                    innerCol = (innerCol + 1u);
-                  }
-                }
-              }
-              {
-                innerRow = (innerRow + 1u);
-              }
-            }
-          }
-          {
-            k = (k + 1u);
-          }
-        }
-      }
-      threadgroup_barrier(mem_flags::mem_threadgroup);
-      {
-        t = (t + 1u);
+  for(uint t = 0u; (t < numTiles); t = (t + 1u)) {
+    for(uint innerRow = 0u; (innerRow < RowPerThread); innerRow = (innerRow + 1u)) {
+      for(uint innerCol = 0u; (innerCol < ColPerThreadA); innerCol = (innerCol + 1u)) {
+        uint const inputRow = (tileRow + innerRow);
+        uint const inputCol = (tileColA + innerCol);
+        tint_symbol_4.arr[inputRow].arr[inputCol] = mm_readA(uniforms, firstMatrix, (globalRow + innerRow), ((t * TileInner) + inputCol));
       }
     }
-  }
-  {
-    uint innerRow = 0u;
-    while (true) {
-      if (!((innerRow < RowPerThread))) {
-        break;
+    for(uint innerRow = 0u; (innerRow < RowPerThreadB); innerRow = (innerRow + 1u)) {
+      for(uint innerCol = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
+        uint const inputRow = (tileRowB + innerRow);
+        uint const inputCol = (tileCol + innerCol);
+        tint_symbol_5.arr[innerCol].arr[inputCol] = mm_readB(uniforms, secondMatrix, ((t * TileInner) + inputRow), (globalCol + innerCol));
       }
-      {
-        uint innerCol = 0u;
-        while (true) {
-          if (!((innerCol < ColPerThread))) {
-            break;
-          }
+    }
+    threadgroup_barrier(mem_flags::mem_threadgroup);
+    for(uint k = 0u; (k < TileInner); k = (k + 1u)) {
+      for(uint inner = 0u; (inner < ColPerThread); inner = (inner + 1u)) {
+        BCached.arr[inner] = tint_symbol_5.arr[k].arr[(tileCol + inner)];
+      }
+      for(uint innerRow = 0u; (innerRow < RowPerThread); innerRow = (innerRow + 1u)) {
+        ACached = tint_symbol_4.arr[(tileRow + innerRow)].arr[k];
+        for(uint innerCol = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
           uint const index = ((innerRow * ColPerThread) + innerCol);
-          mm_write(uniforms, resultMatrix, (globalRow + innerRow), (globalCol + innerCol), acc.arr[index]);
-          {
-            innerCol = (innerCol + 1u);
-          }
+          acc.arr[index] = (acc.arr[index] + (ACached * BCached.arr[innerCol]));
         }
       }
-      {
-        innerRow = (innerRow + 1u);
-      }
+    }
+    threadgroup_barrier(mem_flags::mem_threadgroup);
+  }
+  for(uint innerRow = 0u; (innerRow < RowPerThread); innerRow = (innerRow + 1u)) {
+    for(uint innerCol = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
+      uint const index = ((innerRow * ColPerThread) + innerCol);
+      mm_write(uniforms, resultMatrix, (globalRow + innerRow), (globalCol + innerCol), acc.arr[index]);
     }
   }
   return;

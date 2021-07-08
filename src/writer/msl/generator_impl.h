@@ -170,6 +170,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
   bool EmitLoop(ast::LoopStatement* stmt);
+  /// Handles a for loop statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted
+  bool EmitForLoop(ast::ForLoopStatement* stmt);
   /// Handles a member accessor expression
   /// @param out the output of the expression stream
   /// @param expr the member accessor expression

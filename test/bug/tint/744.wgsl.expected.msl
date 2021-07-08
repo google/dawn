@@ -15,19 +15,10 @@ kernel void tint_symbol(uint3 global_id [[thread_position_in_grid]], constant Un
   uint const dimInner = uniforms.aShape.y;
   uint const dimOutter = uniforms.outShape.y;
   uint result = 0u;
-  {
-    uint i = 0u;
-    while (true) {
-      if (!((i < dimInner))) {
-        break;
-      }
-      uint const a = (i + (resultCell.x * dimInner));
-      uint const b = (resultCell.y + (i * dimOutter));
-      result = (result + (firstMatrix.numbers[a] * secondMatrix.numbers[b]));
-      {
-        i = (i + 1u);
-      }
-    }
+  for(uint i = 0u; (i < dimInner); i = (i + 1u)) {
+    uint const a = (i + (resultCell.x * dimInner));
+    uint const b = (resultCell.y + (i * dimOutter));
+    result = (result + (firstMatrix.numbers[a] * secondMatrix.numbers[b]));
   }
   uint const index = (resultCell.y + (resultCell.x * dimOutter));
   resultMatrix.numbers[index] = result;

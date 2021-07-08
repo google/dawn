@@ -14,17 +14,8 @@ kernel void tint_symbol() {
   thread int3 tint_symbol_6 = 0;
   thread uint4 tint_symbol_7 = 0u;
   thread bool2 tint_symbol_8 = false;
-  {
-    int i = 0;
-    while (true) {
-      if (!((i < 2))) {
-        break;
-      }
-      foo(&(tint_symbol_5), &(tint_symbol_6), &(tint_symbol_7), &(tint_symbol_8));
-      {
-        i = (i + 1);
-      }
-    }
+  for(int i = 0; (i < 2); i = (i + 1)) {
+    foo(&(tint_symbol_5), &(tint_symbol_6), &(tint_symbol_7), &(tint_symbol_8));
   }
   return;
 }

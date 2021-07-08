@@ -36,19 +36,9 @@ fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
   var success : bool = true;
   var srcColorBits : vec4<u32>;
   var dstColorBits : vec4<u32> = vec4<u32>(dstColor);
-  {
-    var i : u32 = 0u;
-    loop {
-      if (!((i < uniforms.channelCount))) {
-        break;
-      }
-      srcColorBits[i] = ConvertToFp16FloatValue(srcColor[i]);
-      success = (success && (srcColorBits[i] == dstColorBits[i]));
-
-      continuing {
-        i = (i + 1u);
-      }
-    }
+  for(var i : u32 = 0u; (i < uniforms.channelCount); i = (i + 1u)) {
+    srcColorBits[i] = ConvertToFp16FloatValue(srcColor[i]);
+    success = (success && (srcColorBits[i] == dstColorBits[i]));
   }
   var outputIndex : u32 = ((GlobalInvocationID.y * u32(size.x)) + GlobalInvocationID.x);
   if (success) {

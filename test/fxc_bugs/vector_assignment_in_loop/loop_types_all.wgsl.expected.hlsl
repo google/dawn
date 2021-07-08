@@ -97,8 +97,7 @@ void main() {
   bool3 v3b = bool3(false, false, false);
   bool4 v4b = bool4(false, false, false, false);
   {
-    int i = 0;
-    for(; !(!((i < 2))); i = (i + 1)) {
+    for(int i = 0; (i < 2); i = (i + 1)) {
       Set_float2(v2f, i, 1.0f);
       Set_float3(v3f, i, 1.0f);
       Set_float4(v4f, i, 1.0f);

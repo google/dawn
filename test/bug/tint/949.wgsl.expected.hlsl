@@ -249,20 +249,22 @@ void main_1() {
   lastSampledHeight = 1.0f;
   currSampledHeight = 1.0f;
   i = 0;
-  for(; (i < 15); i = (i + 1)) {
-    const float4 x_397 = TextureSamplerTexture.Sample(TextureSamplerSampler, (v_uv + vCurrOffset));
-    currSampledHeight = x_397.w;
-    if ((currSampledHeight > currRayHeight)) {
-      delta1 = (currSampledHeight - currRayHeight);
-      delta2 = ((currRayHeight + stepSize) - lastSampledHeight);
-      ratio = (delta1 / (delta1 + delta2));
-      vCurrOffset = ((vLastOffset * ratio) + (vCurrOffset * (1.0f - ratio)));
-      break;
-    } else {
-      currRayHeight = (currRayHeight - stepSize);
-      vLastOffset = vCurrOffset;
-      vCurrOffset = (vCurrOffset + (vMaxOffset * stepSize));
-      lastSampledHeight = currSampledHeight;
+  {
+    for(; (i < 15); i = (i + 1)) {
+      const float4 x_397 = TextureSamplerTexture.Sample(TextureSamplerSampler, (v_uv + vCurrOffset));
+      currSampledHeight = x_397.w;
+      if ((currSampledHeight > currRayHeight)) {
+        delta1 = (currSampledHeight - currRayHeight);
+        delta2 = ((currRayHeight + stepSize) - lastSampledHeight);
+        ratio = (delta1 / (delta1 + delta2));
+        vCurrOffset = ((vLastOffset * ratio) + (vCurrOffset * (1.0f - ratio)));
+        break;
+      } else {
+        currRayHeight = (currRayHeight - stepSize);
+        vLastOffset = vCurrOffset;
+        vCurrOffset = (vCurrOffset + (vMaxOffset * stepSize));
+        lastSampledHeight = currSampledHeight;
+      }
     }
   }
   parallaxOcclusion_0 = vCurrOffset;

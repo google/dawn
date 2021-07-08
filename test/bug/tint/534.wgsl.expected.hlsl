@@ -43,7 +43,7 @@ void main(tint_symbol_2 tint_symbol_1) {
     uint i = 0u;
     while (true) {
       const uint scalar_offset_1 = (12u) / 4;
-      if (!(!(!((i < uniforms[scalar_offset_1 / 4][scalar_offset_1 % 4]))))) { break; }
+      if (!((i < uniforms[scalar_offset_1 / 4][scalar_offset_1 % 4]))) { break; }
       Set_uint4(srcColorBits, i, ConvertToFp16FloatValue(srcColor[i]));
       bool tint_tmp_1 = success;
       if (tint_tmp_1) {

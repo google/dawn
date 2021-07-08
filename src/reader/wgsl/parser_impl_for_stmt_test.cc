@@ -14,141 +14,154 @@
 
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
+#include "src/ast/discard_statement.h"
+
 namespace tint {
 namespace reader {
 namespace wgsl {
 namespace {
 
-class ForStmtTest : public ParserImplTest {
- public:
-  void TestForLoop(std::string loop_str, std::string for_str) {
-    auto p_loop = parser(loop_str);
-    auto e_loop = p_loop->expect_statements();
-    EXPECT_FALSE(e_loop.errored);
-    EXPECT_FALSE(p_loop->has_error()) << p_loop->error();
-
-    auto p_for = parser(for_str);
-    auto e_for = p_for->expect_statements();
-    EXPECT_FALSE(e_for.errored);
-    EXPECT_FALSE(p_for->has_error()) << p_for->error();
-
-    std::string loop = ast::BlockStatement({}, {}, e_loop.value).str(Sem());
-    std::string for_ = ast::BlockStatement({}, {}, e_for.value).str(Sem());
-    EXPECT_EQ(loop, for_);
-  }
-};
+using ForStmtTest = ParserImplTest;
 
 // Test an empty for loop.
 TEST_F(ForStmtTest, Empty) {
-  std::string for_str = "for (;;) { }";
-  std::string loop_str = "loop { }";
-
-  TestForLoop(loop_str, for_str);
+  auto p = parser("for (;;) { }");
+  auto fl = p->for_stmt();
+  EXPECT_FALSE(p->has_error()) << p->error();
+  EXPECT_FALSE(fl.errored);
+  ASSERT_TRUE(fl.matched);
+  EXPECT_EQ(fl->initializer(), nullptr);
+  EXPECT_EQ(fl->condition(), nullptr);
+  EXPECT_EQ(fl->continuing(), nullptr);
+  EXPECT_TRUE(fl->body()->empty());
 }
 
 // Test a for loop with non-empty body.
 TEST_F(ForStmtTest, Body) {
-  std::string for_str = "for (;;) { discard; }";
-  std::string loop_str = "loop { discard; }";
-
-  TestForLoop(loop_str, for_str);
+  auto p = parser("for (;;) { discard; }");
+  auto fl = p->for_stmt();
+  EXPECT_FALSE(p->has_error()) << p->error();
+  EXPECT_FALSE(fl.errored);
+  ASSERT_TRUE(fl.matched);
+  EXPECT_EQ(fl->initializer(), nullptr);
+  EXPECT_EQ(fl->condition(), nullptr);
+  EXPECT_EQ(fl->continuing(), nullptr);
+  ASSERT_EQ(fl->body()->size(), 1u);
+  EXPECT_TRUE(fl->body()->statements()[0]->Is<ast::DiscardStatement>());
 }
 
 // Test a for loop declaring a variable in the initializer statement.
 TEST_F(ForStmtTest, InitializerStatementDecl) {
-  std::string for_str = "for (var i: i32 ;;) { }";
-  std::string loop_str = "{ var i: i32; loop { } }";
-
-  TestForLoop(loop_str, for_str);
+  auto p = parser("for (var i: i32 ;;) { }");
+  auto fl = p->for_stmt();
+  EXPECT_FALSE(p->has_error()) << p->error();
+  EXPECT_FALSE(fl.errored);
+  ASSERT_TRUE(fl.matched);
+  ASSERT_TRUE(Is<ast::VariableDeclStatement>(fl->initializer()));
+  auto* var = fl->initializer()->As<ast::VariableDeclStatement>()->variable();
+  EXPECT_FALSE(var->is_const());
+  EXPECT_EQ(var->constructor(), nullptr);
+  EXPECT_EQ(fl->condition(), nullptr);
+  EXPECT_EQ(fl->continuing(), nullptr);
+  EXPECT_TRUE(fl->body()->empty());
 }
 
 // Test a for loop declaring and initializing a variable in the initializer
 // statement.
 TEST_F(ForStmtTest, InitializerStatementDeclEqual) {
-  std::string for_str = "for (var i: i32 = 0 ;;) { }";
-  std::string loop_str = "{ var i: i32 = 0; loop { } }";
-
-  TestForLoop(loop_str, for_str);
+  auto p = parser("for (var i: i32 = 0 ;;) { }");
+  auto fl = p->for_stmt();
+  EXPECT_FALSE(p->has_error()) << p->error();
+  EXPECT_FALSE(fl.errored);
+  ASSERT_TRUE(fl.matched);
+  ASSERT_TRUE(Is<ast::VariableDeclStatement>(fl->initializer()));
+  auto* var = fl->initializer()->As<ast::VariableDeclStatement>()->variable();
+  EXPECT_FALSE(var->is_const());
+  EXPECT_NE(var->constructor(), nullptr);
+  EXPECT_EQ(fl->condition(), nullptr);
+  EXPECT_EQ(fl->continuing(), nullptr);
+  EXPECT_TRUE(fl->body()->empty());
 }
 
 // Test a for loop declaring a const variable in the initializer statement.
 TEST_F(ForStmtTest, InitializerStatementConstDecl) {
-  std::string for_str = "for (let i: i32 = 0 ;;) { }";
-  std::string loop_str = "{ let i: i32 = 0; loop { } }";
-
-  TestForLoop(loop_str, for_str);
+  auto p = parser("for (let i: i32 = 0 ;;) { }");
+  auto fl = p->for_stmt();
+  EXPECT_FALSE(p->has_error()) << p->error();
+  EXPECT_FALSE(fl.errored);
+  ASSERT_TRUE(fl.matched);
+  ASSERT_TRUE(Is<ast::VariableDeclStatement>(fl->initializer()));
+  auto* var = fl->initializer()->As<ast::VariableDeclStatement>()->variable();
+  EXPECT_TRUE(var->is_const());
+  EXPECT_NE(var->constructor(), nullptr);
+  EXPECT_EQ(fl->condition(), nullptr);
+  EXPECT_EQ(fl->continuing(), nullptr);
+  EXPECT_TRUE(fl->body()->empty());
 }
 
 // Test a for loop assigning a variable in the initializer statement.
 TEST_F(ForStmtTest, InitializerStatementAssignment) {
-  std::string for_str = "var i: i32; for (i = 0 ;;) { }";
-  std::string loop_str = "var i: i32; { i = 0; loop { } }";
-
-  TestForLoop(loop_str, for_str);
+  auto p = parser("for (i = 0 ;;) { }");
+  auto fl = p->for_stmt();
+  EXPECT_FALSE(p->has_error()) << p->error();
+  EXPECT_FALSE(fl.errored);
+  ASSERT_TRUE(fl.matched);
+  EXPECT_TRUE(Is<ast::AssignmentStatement>(fl->initializer()));
+  EXPECT_EQ(fl->condition(), nullptr);
+  EXPECT_EQ(fl->continuing(), nullptr);
+  EXPECT_TRUE(fl->body()->empty());
 }
 
 // Test a for loop calling a function in the initializer statement.
 TEST_F(ForStmtTest, InitializerStatementFuncCall) {
-  std::string for_str = "for (a(b,c) ;;) { }";
-  std::string loop_str = "{ a(b,c); loop { } }";
-
-  TestForLoop(loop_str, for_str);
+  auto p = parser("for (a(b,c) ;;) { }");
+  auto fl = p->for_stmt();
+  EXPECT_FALSE(p->has_error()) << p->error();
+  EXPECT_FALSE(fl.errored);
+  ASSERT_TRUE(fl.matched);
+  EXPECT_TRUE(Is<ast::CallStatement>(fl->initializer()));
+  EXPECT_EQ(fl->condition(), nullptr);
+  EXPECT_EQ(fl->continuing(), nullptr);
+  EXPECT_TRUE(fl->body()->empty());
 }
 
 // Test a for loop with a break condition
 TEST_F(ForStmtTest, BreakCondition) {
-  std::string for_str = "for (; 0 == 1;) { }";
-  std::string loop_str = "loop { if (!(0 == 1)) { break; } }";
-
-  TestForLoop(loop_str, for_str);
+  auto p = parser("for (; 0 == 1;) { }");
+  auto fl = p->for_stmt();
+  EXPECT_FALSE(p->has_error()) << p->error();
+  EXPECT_FALSE(fl.errored);
+  ASSERT_TRUE(fl.matched);
+  EXPECT_EQ(fl->initializer(), nullptr);
+  EXPECT_TRUE(Is<ast::BinaryExpression>(fl->condition()));
+  EXPECT_EQ(fl->continuing(), nullptr);
+  EXPECT_TRUE(fl->body()->empty());
 }
 
 // Test a for loop assigning a variable in the continuing statement.
 TEST_F(ForStmtTest, ContinuingAssignment) {
-  std::string for_str = "var x: i32; for (;; x = 2) { }";
-  std::string loop_str = "var x: i32; loop { continuing { x = 2; }}";
-
-  TestForLoop(loop_str, for_str);
+  auto p = parser("for (;; x = 2) { }");
+  auto fl = p->for_stmt();
+  EXPECT_FALSE(p->has_error()) << p->error();
+  EXPECT_FALSE(fl.errored);
+  ASSERT_TRUE(fl.matched);
+  EXPECT_EQ(fl->initializer(), nullptr);
+  EXPECT_EQ(fl->condition(), nullptr);
+  EXPECT_TRUE(Is<ast::AssignmentStatement>(fl->continuing()));
+  EXPECT_TRUE(fl->body()->empty());
 }
 
 // Test a for loop calling a function in the continuing statement.
 TEST_F(ForStmtTest, ContinuingFuncCall) {
-  std::string for_str = "for (;; a(b,c)) { }";
-  std::string loop_str = "loop { continuing { a(b,c); }}";
-
-  TestForLoop(loop_str, for_str);
-}
-
-// Test a for loop with all statements non-empty.
-TEST_F(ForStmtTest, All) {
-  std::string for_str =
-      R"(for(var i : i32 = 0; i < 4; i = i + 1) {
-       if (a == 0) {
-        continue;
-       }
-       a = a + 2;
-     })";
-
-  std::string loop_str =
-      R"({ // Introduce new scope for loop variable i
-      var i : i32 = 0;
-      loop {
-        if (!(i < 4)) {
-          break;
-        }
-
-        if (a == 0) {
-          continue;
-        }
-        a = a + 2;
-
-        continuing {
-          i = i + 1;
-        }
-      }
-    };)";
-
-  TestForLoop(loop_str, for_str);
+  auto p = parser("for (;; a(b,c)) { }");
+  auto fl = p->for_stmt();
+  EXPECT_FALSE(p->has_error()) << p->error();
+  EXPECT_FALSE(fl.errored);
+  ASSERT_TRUE(fl.matched);
+  EXPECT_EQ(fl->initializer(), nullptr);
+  EXPECT_EQ(fl->condition(), nullptr);
+  EXPECT_TRUE(Is<ast::CallStatement>(fl->continuing()));
+  EXPECT_TRUE(fl->body()->empty());
 }
 
 class ForStmtErrorTest : public ParserImplTest {
