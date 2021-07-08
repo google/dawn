@@ -84,24 +84,15 @@ namespace dawn_native { namespace opengl {
         // Tint currently does not support emitting GLSL, so when provided a Tint program need to
         // generate SPIRV and SPIRV-Cross reflection data to be used in this backend.
         if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
-            tint::transform::Manager transformManager;
-            transformManager.append(std::make_unique<tint::transform::Spirv>());
-
-            tint::transform::DataMap transformInputs;
-
-            tint::Program program;
-            DAWN_TRY_ASSIGN(program,
-                            RunTransforms(&transformManager, GetTintProgram(), transformInputs,
-                                          nullptr, GetCompilationMessages()));
-
-            tint::writer::spirv::Generator generator(&program);
-            if (!generator.Generate()) {
+            tint::writer::spirv::Options options;
+            auto result = tint::writer::spirv::Generate(GetTintProgram(), options);
+            if (!result.success) {
                 std::ostringstream errorStream;
-                errorStream << "Generator: " << generator.error() << std::endl;
+                errorStream << "Generator: " << result.error << std::endl;
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
-            mGLSpirv = generator.result();
+            mGLSpirv = std::move(result.spirv);
             DAWN_TRY_ASSIGN(mGLEntryPoints, ReflectShaderUsingSPIRVCross(GetDevice(), mGLSpirv));
         }
 

@@ -122,7 +122,6 @@ namespace dawn_native { namespace metal {
             transformManager.Add<tint::transform::BoundArrayAccessors>();
         }
         transformManager.Add<tint::transform::BindingRemapper>();
-        transformManager.Add<tint::transform::Msl>();
 
         if (!GetDevice()->IsToggleEnabled(Toggle::DumpTranslatedShaders)) {
             transformManager.Add<tint::transform::Renamer>();
@@ -131,8 +130,6 @@ namespace dawn_native { namespace metal {
         transformInputs.Add<BindingRemapper::Remappings>(std::move(bindingPoints),
                                                          std::move(accessControls),
                                                          /* mayCollide */ true);
-
-        transformInputs.Add<tint::transform::Msl::Config>(kBufferLengthBufferSlot, sampleMask);
 
         tint::Program program;
         tint::transform::DataMap transformOutputs;
@@ -153,20 +150,18 @@ namespace dawn_native { namespace metal {
             }
         }
 
-        if (auto* data = transformOutputs.Get<tint::transform::Msl::Result>()) {
-            *needsStorageBufferLength = data->needs_storage_buffer_sizes;
-        } else {
-            return DAWN_VALIDATION_ERROR("Transform output missing MSL data.");
-        }
-
-        tint::writer::msl::Generator generator(&program);
-        if (!generator.Generate()) {
-            errorStream << "Generator: " << generator.error() << std::endl;
+        tint::writer::msl::Options options;
+        options.buffer_size_ubo_index = kBufferLengthBufferSlot;
+        options.fixed_sample_mask = sampleMask;
+        auto result = tint::writer::msl::Generate(&program, options);
+        if (!result.success) {
+            errorStream << "Generator: " << result.error << std::endl;
             return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
         }
 
-        std::string msl = generator.result();
-        return std::move(msl);
+        *needsStorageBufferLength = result.needs_storage_buffer_sizes;
+
+        return std::move(result.msl);
     }
 
     ResultOrError<std::string> ShaderModule::TranslateToMSLWithSPIRVCross(

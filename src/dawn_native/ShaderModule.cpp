@@ -406,14 +406,15 @@ namespace dawn_native {
             std::ostringstream errorStream;
             errorStream << "Tint SPIR-V writer failure:" << std::endl;
 
-            tint::writer::spirv::Generator generator(program);
-            if (!generator.Generate()) {
-                errorStream << "Generator: " << generator.error() << std::endl;
+            tint::writer::spirv::Options options;
+            options.emit_vertex_point_size = true;
+            auto result = tint::writer::spirv::Generate(program, options);
+            if (!result.success) {
+                errorStream << "Generator: " << result.error << std::endl;
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
-            std::vector<uint32_t> spirv = generator.result();
-            return std::move(spirv);
+            return std::move(result.spirv);
         }
 
         std::vector<uint64_t> GetBindGroupMinBufferSizes(
@@ -1113,15 +1114,16 @@ namespace dawn_native {
             tint::Program program;
             DAWN_TRY_ASSIGN(program, ParseSPIRV(spirv, outMessages));
 
-            tint::writer::wgsl::Generator generator(&program);
-            if (!generator.Generate()) {
+            tint::writer::wgsl::Options options;
+            auto result = tint::writer::wgsl::Generate(&program, options);
+            if (!result.success) {
                 std::ostringstream errorStream;
                 errorStream << "Tint WGSL failure:" << std::endl;
-                errorStream << "Generator: " << generator.error() << std::endl;
+                errorStream << "Generator: " << result.error << std::endl;
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
-            newWgslCode = generator.result();
+            newWgslCode = std::move(result.wgsl);
             newWgslDesc.source = newWgslCode.c_str();
 
             if (device->IsToggleEnabled(Toggle::DumpTranslatedShaders)) {
@@ -1160,18 +1162,6 @@ namespace dawn_native {
                 parseResult->tintProgram = std::make_unique<tint::Program>(std::move(program));
                 parseResult->tintSource = std::move(tintSource);
             } else {
-                tint::transform::Manager transformManager;
-                transformManager.Add<tint::transform::Spirv>();
-
-                tint::transform::DataMap transformInputs;
-
-                tint::transform::Spirv::Config spirv_cfg;
-                spirv_cfg.emit_vertex_point_size = true;
-                transformInputs.Add<tint::transform::Spirv::Config>(spirv_cfg);
-
-                DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, &program, transformInputs,
-                                                       nullptr, outMessages));
-
                 std::vector<uint32_t> spirv;
                 DAWN_TRY_ASSIGN(spirv, ModuleToSPIRV(&program));
                 DAWN_TRY(ValidateSpirv(spirv.data(), spirv.size()));
@@ -1433,16 +1423,11 @@ namespace dawn_native {
 
         tint::transform::Manager transformManager;
         transformManager.Add<tint::transform::VertexPulling>();
-        transformManager.Add<tint::transform::Spirv>();
         if (GetDevice()->IsRobustnessEnabled()) {
             transformManager.Add<tint::transform::BoundArrayAccessors>();
         }
 
         tint::transform::DataMap transformInputs;
-
-        tint::transform::Spirv::Config spirv_cfg;
-        spirv_cfg.emit_vertex_point_size = true;
-        transformInputs.Add<tint::transform::Spirv::Config>(spirv_cfg);
 
         AddVertexPullingTransformConfig(vertexState, entryPoint, pullingBufferBindingSet,
                                         &transformInputs);
@@ -1454,13 +1439,15 @@ namespace dawn_native {
         DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, programIn, transformInputs,
                                                nullptr, nullptr));
 
-        tint::writer::spirv::Generator generator(&program);
-        if (!generator.Generate()) {
-            errorStream << "Generator: " << generator.error() << std::endl;
+        tint::writer::spirv::Options options;
+        options.emit_vertex_point_size = true;
+        auto result = tint::writer::spirv::Generate(&program, options);
+        if (!result.success) {
+            errorStream << "Generator: " << result.error << std::endl;
             return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
         }
 
-        std::vector<uint32_t> spirv = generator.result();
+        std::vector<uint32_t> spirv = std::move(result.spirv);
         DAWN_TRY(ValidateSpirv(spirv.data(), spirv.size()));
         return std::move(spirv);
     }

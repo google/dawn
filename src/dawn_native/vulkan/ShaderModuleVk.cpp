@@ -97,13 +97,8 @@ namespace dawn_native { namespace vulkan {
             if (GetDevice()->IsRobustnessEnabled()) {
                 transformManager.Add<tint::transform::BoundArrayAccessors>();
             }
-            transformManager.Add<tint::transform::Spirv>();
 
             tint::transform::DataMap transformInputs;
-
-            tint::transform::Spirv::Config spirv_cfg;
-            spirv_cfg.emit_vertex_point_size = true;
-            transformInputs.Add<tint::transform::Spirv::Config>(spirv_cfg);
 
             tint::Program program;
             DAWN_TRY_ASSIGN(program,
@@ -111,13 +106,15 @@ namespace dawn_native { namespace vulkan {
                                           transformInputs, nullptr, nullptr));
             // We will miss the messages generated in this RunTransforms.
 
-            tint::writer::spirv::Generator generator(&program);
-            if (!generator.Generate()) {
-                errorStream << "Generator: " << generator.error() << std::endl;
+            tint::writer::spirv::Options options;
+            options.emit_vertex_point_size = true;
+            auto result = tint::writer::spirv::Generate(&program, options);
+            if (!result.success) {
+                errorStream << "Generator: " << result.error << std::endl;
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
-            spirv = generator.result();
+            spirv = std::move(result.spirv);
             spirvPtr = &spirv;
 
             // Rather than use a new ParseResult object, we just reuse the original parseResult
@@ -214,13 +211,15 @@ namespace dawn_native { namespace vulkan {
         DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, GetTintProgram(), transformInputs,
                                                nullptr, nullptr));
 
-        tint::writer::spirv::Generator generator(&program);
-        if (!generator.Generate()) {
-            errorStream << "Generator: " << generator.error() << std::endl;
+        tint::writer::spirv::Options options;
+        options.emit_vertex_point_size = true;
+        auto result = tint::writer::spirv::Generate(&program, options);
+        if (!result.success) {
+            errorStream << "Generator: " << result.error << std::endl;
             return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
         }
 
-        std::vector<uint32_t> spirv = generator.result();
+        std::vector<uint32_t> spirv = result.spirv;
 
         // Don't save the transformedParseResult but just create a VkShaderModule
         VkShaderModuleCreateInfo createInfo;

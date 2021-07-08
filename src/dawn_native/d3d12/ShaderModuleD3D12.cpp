@@ -258,7 +258,6 @@ namespace dawn_native { namespace d3d12 {
                 layout->GetFirstIndexOffsetRegisterSpace());
         }
         transformManager.Add<tint::transform::BindingRemapper>();
-        transformManager.Add<tint::transform::Hlsl>();
 
         if (!GetDevice()->IsToggleEnabled(Toggle::DumpTranslatedShaders)) {
             transformManager.Add<tint::transform::Renamer>();
@@ -300,14 +299,14 @@ namespace dawn_native { namespace d3d12 {
             }
         }
 
-        tint::writer::hlsl::Generator generator(&program);
-        // TODO: Switch to GenerateEntryPoint once HLSL writer supports it.
-        if (!generator.Generate()) {
-            errorStream << "Generator: " << generator.error() << std::endl;
+        tint::writer::hlsl::Options options;
+        auto result = tint::writer::hlsl::Generate(&program, options);
+        if (!result.success) {
+            errorStream << "Generator: " << result.error << std::endl;
             return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
         }
 
-        return generator.result();
+        return std::move(result.hlsl);
     }
 
     ResultOrError<std::string> ShaderModule::TranslateToHLSLWithSPIRVCross(
