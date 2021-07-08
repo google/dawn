@@ -863,8 +863,8 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_FirstParamInt) {
       R"(error: no matching call to frexp(i32, ptr<workgroup, i32, read_write>)
 
 2 candidate functions:
-  frexp(f32, ptr<S, T, A>) -> f32  where: T is i32 or u32, S is function, private or workgroup
-  frexp(vecN<f32>, ptr<S, vecN<T>, A>) -> vecN<f32>  where: T is i32 or u32, S is function, private or workgroup
+  frexp(f32, ptr<S, i32, A>) -> f32  where: S is function, private or workgroup
+  frexp(vecN<f32>, ptr<S, vecN<i32>, A>) -> vecN<f32>  where: S is function, private or workgroup
 )");
 }
 
@@ -880,8 +880,8 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_SecondParamFloatPtr) {
       R"(error: no matching call to frexp(f32, ptr<workgroup, f32, read_write>)
 
 2 candidate functions:
-  frexp(f32, ptr<S, T, A>) -> f32  where: T is i32 or u32, S is function, private or workgroup
-  frexp(vecN<f32>, ptr<S, vecN<T>, A>) -> vecN<f32>  where: T is i32 or u32, S is function, private or workgroup
+  frexp(f32, ptr<S, i32, A>) -> f32  where: S is function, private or workgroup
+  frexp(vecN<f32>, ptr<S, vecN<i32>, A>) -> vecN<f32>  where: S is function, private or workgroup
 )");
 }
 
@@ -894,8 +894,8 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_SecondParamNotAPointer) {
   EXPECT_EQ(r()->error(), R"(error: no matching call to frexp(f32, i32)
 
 2 candidate functions:
-  frexp(f32, ptr<S, T, A>) -> f32  where: T is i32 or u32, S is function, private or workgroup
-  frexp(vecN<f32>, ptr<S, vecN<T>, A>) -> vecN<f32>  where: T is i32 or u32, S is function, private or workgroup
+  frexp(f32, ptr<S, i32, A>) -> f32  where: S is function, private or workgroup
+  frexp(vecN<f32>, ptr<S, vecN<i32>, A>) -> vecN<f32>  where: S is function, private or workgroup
 )");
 }
 
@@ -911,8 +911,8 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_VectorSizesDontMatch) {
       R"(error: no matching call to frexp(vec2<f32>, ptr<workgroup, vec4<i32>, read_write>)
 
 2 candidate functions:
-  frexp(f32, ptr<S, T, A>) -> f32  where: T is i32 or u32, S is function, private or workgroup
-  frexp(vecN<f32>, ptr<S, vecN<T>, A>) -> vecN<f32>  where: T is i32 or u32, S is function, private or workgroup
+  frexp(vecN<f32>, ptr<S, vecN<i32>, A>) -> vecN<f32>  where: S is function, private or workgroup
+  frexp(f32, ptr<S, i32, A>) -> f32  where: S is function, private or workgroup
 )");
 }
 

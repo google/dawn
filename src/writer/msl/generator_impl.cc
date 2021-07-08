@@ -367,6 +367,8 @@ bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
     return EmitTextureCall(out, expr, intrinsic);
   }
 
+  auto name = generate_builtin_name(intrinsic);
+
   switch (intrinsic->Type()) {
     case sem::IntrinsicType::kPack2x16float:
     case sem::IntrinsicType::kUnpack2x16float: {
@@ -398,11 +400,33 @@ bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
       }
       return true;
     }
+
+    case sem::IntrinsicType::kFrexp:
+    case sem::IntrinsicType::kModf: {
+      // TODO(bclayton): These intrinsics are likely to change signature.
+      // See: crbug.com/tint/54 and https://github.com/gpuweb/gpuweb/issues/1480
+      out << name;
+      ScopedParen sp(out);
+      if (!EmitExpression(out, expr->params()[0])) {
+        return false;
+      }
+      out << ", ";
+      {
+        // MSL has a reference for the second parameter, but WGSL has a pointer.
+        // Dereference the argument.
+        out << "*";
+        ScopedParen sp2(out);
+        if (!EmitExpression(out, expr->params()[1])) {
+          return false;
+        }
+      }
+      return true;
+    }
+
     default:
       break;
   }
 
-  auto name = generate_builtin_name(intrinsic);
   if (name.empty()) {
     return false;
   }
@@ -825,11 +849,13 @@ std::string GeneratorImpl::generate_builtin_name(
     case sem::IntrinsicType::kFloor:
     case sem::IntrinsicType::kFma:
     case sem::IntrinsicType::kFract:
+    case sem::IntrinsicType::kFrexp:
     case sem::IntrinsicType::kLength:
     case sem::IntrinsicType::kLdexp:
     case sem::IntrinsicType::kLog:
     case sem::IntrinsicType::kLog2:
     case sem::IntrinsicType::kMix:
+    case sem::IntrinsicType::kModf:
     case sem::IntrinsicType::kNormalize:
     case sem::IntrinsicType::kPow:
     case sem::IntrinsicType::kReflect:

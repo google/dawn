@@ -1,31 +1,28 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-
-fn frexp_5a141e() {
-  var arg_1 : vec3<i32>;
-  var res : vec3<f32> = frexp(vec3<f32>(), &(arg_1));
-}
-
+using namespace metal;
 struct tint_symbol {
-  [[builtin(position)]]
-  value : vec4<f32>;
+  float4 value [[position]];
 };
 
-[[stage(vertex)]]
-fn vertex_main() -> tint_symbol {
+void frexp_5a141e() {
+  int3 arg_1 = 0;
+  float3 res = frexp(float3(), *(&(arg_1)));
+}
+
+vertex tint_symbol vertex_main() {
   frexp_5a141e();
-  let tint_symbol_1 : tint_symbol = tint_symbol(vec4<f32>());
+  tint_symbol const tint_symbol_1 = {.value=float4()};
   return tint_symbol_1;
 }
 
-[[stage(fragment)]]
-fn fragment_main() {
+fragment void fragment_main() {
   frexp_5a141e();
+  return;
 }
 
-[[stage(compute), workgroup_size(1)]]
-fn compute_main() {
+kernel void compute_main() {
   frexp_5a141e();
+  return;
 }
 
-Failed to generate: error: Unknown import method: frexp

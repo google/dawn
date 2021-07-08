@@ -308,8 +308,8 @@ fn fma(f32, f32, f32) -> f32
 fn fma<N: num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32>
 fn fract(f32) -> f32
 fn fract<N: num>(vec<N, f32>) -> vec<N, f32>
-fn frexp<T: iu32, S: function_private_workgroup, A: access>(f32, ptr<S, T, A>) -> f32
-fn frexp<N: num, T: iu32, S: function_private_workgroup, A: access>(vec<N, f32>, ptr<S, vec<N, T>, A>) -> vec<N, f32>
+fn frexp<S: function_private_workgroup, A: access>(f32, ptr<S, i32, A>) -> f32
+fn frexp<N: num, S: function_private_workgroup, A: access>(vec<N, f32>, ptr<S, vec<N, i32>, A>) -> vec<N, f32>
 [[stage("fragment")]] fn fwidth(f32) -> f32
 [[stage("fragment")]] fn fwidth<N: num>(vec<N, f32>) -> vec<N, f32>
 [[stage("fragment")]] fn fwidthCoarse(f32) -> f32

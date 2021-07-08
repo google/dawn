@@ -1,33 +1,60 @@
 SKIP: FAILED
 
+#include <metal_stdlib>
 
-fn frexp_b87f4e(tint_symbol_2 : ptr<workgroup, vec4<i32>>) {
-  var res : vec4<f32> = frexp(vec4<f32>(), &(*(tint_symbol_2)));
+using namespace metal;
+void frexp_b87f4e(threadgroup int4* const tint_symbol_1) {
+  float4 res = frexp(float4(), *(&(*(tint_symbol_1))));
 }
 
-struct tint_symbol {
-  [[builtin(position)]]
-  value : vec4<f32>;
-};
-
-[[stage(vertex)]]
-fn vertex_main() -> tint_symbol {
-  [[internal(disable_validation__function_var_storage_class)]] var<workgroup> tint_symbol_3 : vec4<i32>;
-  frexp_b87f4e(&(tint_symbol_3));
-  let tint_symbol_1 : tint_symbol = tint_symbol(vec4<f32>());
-  return tint_symbol_1;
+kernel void compute_main(uint local_invocation_index [[thread_index_in_threadgroup]]) {
+  threadgroup int4 tint_symbol_2;
+  if ((local_invocation_index == 0u)) {
+    tint_symbol_2 = int4();
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  frexp_b87f4e(&(tint_symbol_2));
+  return;
 }
 
-[[stage(fragment)]]
-fn fragment_main() {
-  [[internal(disable_validation__function_var_storage_class)]] var<workgroup> tint_symbol_4 : vec4<i32>;
-  frexp_b87f4e(&(tint_symbol_4));
-}
+Compilation failed: 
 
-[[stage(compute), workgroup_size(1)]]
-fn compute_main() {
-  [[internal(disable_validation__function_var_storage_class)]] var<workgroup> tint_symbol_5 : vec4<i32>;
-  frexp_b87f4e(&(tint_symbol_5));
-}
+program_source:5:16: error: no matching function for call to 'frexp'
+  float4 res = frexp(float4(), *(&(*(tint_symbol_1))));
+               ^~~~~
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:5292:19: note: candidate function not viable: address space mismatch in 2nd argument ('threadgroup int4' (vector of 4 'int' values)), parameter type must be 'metal::int4 &' (aka 'int4 &')
+METAL_FUNC float4 frexp(float4 x, thread int4 &exp)
+                  ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:3092:17: note: candidate function not viable: no known conversion from 'float4' (vector of 4 'float' values) to 'half' for 1st argument
+METAL_FUNC half frexp(half x, thread int &exp)
+                ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:3336:18: note: candidate function not viable: no known conversion from 'float4' (vector of 4 'float' values) to 'metal::half2' (aka 'half2') for 1st argument
+METAL_FUNC half2 frexp(half2 x, thread int2 &exp)
+                 ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:3580:18: note: candidate function not viable: no known conversion from 'float4' (vector of 4 'float' values) to 'metal::half3' (aka 'half3') for 1st argument
+METAL_FUNC half3 frexp(half3 x, thread int3 &exp)
+                 ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:3824:18: note: candidate function not viable: no known conversion from 'float4' (vector of 4 'float' values) to 'metal::half4' (aka 'half4') for 1st argument
+METAL_FUNC half4 frexp(half4 x, thread int4 &exp)
+                 ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:4560:18: note: candidate function not viable: no known conversion from 'float4' (vector of 4 'float' values) to 'float' for 1st argument
+METAL_FUNC float frexp(float x, thread int &exp)
+                 ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:4804:19: note: candidate function not viable: no known conversion from 'float4' (vector of 4 'float' values) to 'metal::float2' (aka 'float2') for 1st argument
+METAL_FUNC float2 frexp(float2 x, thread int2 &exp)
+                  ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:5048:19: note: candidate function not viable: no known conversion from 'float4' (vector of 4 'float' values) to 'metal::float3' (aka 'float3') for 1st argument
+METAL_FUNC float3 frexp(float3 x, thread int3 &exp)
+                  ^
+program_source:10:31: warning: equality comparison with extraneous parentheses
+  if ((local_invocation_index == 0u)) {
+       ~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+program_source:10:31: note: remove extraneous parentheses around the comparison to silence this warning
+  if ((local_invocation_index == 0u)) {
+      ~                       ^    ~
+program_source:10:31: note: use '=' to turn this equality comparison into an assignment
+  if ((local_invocation_index == 0u)) {
+                              ^~
+                              =
 
-Failed to generate: error: Unknown import method: frexp
+

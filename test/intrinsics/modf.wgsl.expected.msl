@@ -1,1 +1,9 @@
-SKIP: Failed to generate: error: Unknown import method: frexp
+#include <metal_stdlib>
+
+using namespace metal;
+kernel void tint_symbol() {
+  float whole = 0.0f;
+  float const frac = modf(1.230000019f, *(&(whole)));
+  return;
+}
+
