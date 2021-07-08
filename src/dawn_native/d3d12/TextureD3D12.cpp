@@ -1182,11 +1182,30 @@ namespace dawn_native { namespace d3d12 {
         uavDesc.Format = GetD3D12Format();
 
         ASSERT(!GetTexture()->IsMultisampledTexture());
-        uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
-        uavDesc.Texture2DArray.FirstArraySlice = GetBaseArrayLayer();
-        uavDesc.Texture2DArray.ArraySize = GetLayerCount();
-        uavDesc.Texture2DArray.MipSlice = GetBaseMipLevel();
-        uavDesc.Texture2DArray.PlaneSlice = 0;
+        switch (GetDimension()) {
+            case wgpu::TextureViewDimension::e2D:
+            case wgpu::TextureViewDimension::e2DArray:
+                uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
+                uavDesc.Texture2DArray.FirstArraySlice = GetBaseArrayLayer();
+                uavDesc.Texture2DArray.ArraySize = GetLayerCount();
+                uavDesc.Texture2DArray.MipSlice = GetBaseMipLevel();
+                uavDesc.Texture2DArray.PlaneSlice = 0;
+                break;
+            case wgpu::TextureViewDimension::e3D:
+                uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE3D;
+                uavDesc.Texture3D.FirstWSlice = 0;
+                uavDesc.Texture3D.WSize = GetTexture()->GetDepth() >> GetBaseMipLevel();
+                uavDesc.Texture3D.MipSlice = GetBaseMipLevel();
+                break;
+            // TODO(crbug.com/dawn/814): support 1D textures.
+            case wgpu::TextureViewDimension::e1D:
+            // Cube and Cubemap can't be used as storage texture. So there is no need to create UAV
+            // descriptor for them.
+            case wgpu::TextureViewDimension::Cube:
+            case wgpu::TextureViewDimension::CubeArray:
+            case wgpu::TextureViewDimension::Undefined:
+                UNREACHABLE();
+        }
         return uavDesc;
     }
 
