@@ -128,12 +128,6 @@ namespace {
             DAWN_TEST_UNSUPPORTED_IF(GetParam().mFormat == wgpu::TextureFormat::BC1RGBAUnorm &&
                                      (IsOpenGL() || IsOpenGLES()));
 
-            // TODO(crbug.com/tint/827): HLSL writer produces invalid code.
-            DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("use_tint_generator") &&
-                                  GetParam().mFormat == wgpu::TextureFormat::Depth24PlusStencil8 &&
-                                  GetParam().mAspect == wgpu::TextureAspect::DepthOnly &&
-                                  IsD3D12());
-
             wgpu::TextureDescriptor descriptor;
             descriptor.dimension = GetParam().mDimension;
             descriptor.size.width = kSize;

@@ -61,10 +61,6 @@ namespace {
         void SetUp() override {
             DawnTestWithParams<DepthStencilLoadOpTestParams>::SetUp();
 
-            // TODO(crbug.com/tint/827): HLSL writer produces invalid code.
-            DAWN_SUPPRESS_TEST_IF(IsD3D12() && HasToggleEnabled("use_tint_generator") &&
-                                  GetParam().mCheck == Check::SampleDepth);
-
             // Readback of Depth/Stencil textures not fully supported on GL right now.
             // Also depends on glTextureView which is not supported on ES.
             DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());

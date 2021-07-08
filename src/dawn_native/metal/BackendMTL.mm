@@ -234,8 +234,6 @@ namespace dawn_native { namespace metal {
             if (@available(macOS 10.11, iOS 11.0, *)) {
                 mSupportedExtensions.EnableExtension(Extension::DepthClamping);
             }
-
-            mSupportedExtensions.EnableExtension(Extension::ShaderFloat16);
         }
 
         NSPRef<id<MTLDevice>> mDevice;
