@@ -849,8 +849,36 @@ INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                                          IntrinsicData{"max", "NMax"},
                                          IntrinsicData{"min", "NMin"},
                                          IntrinsicData{"pow", "Pow"},
-                                         IntrinsicData{"reflect", "Reflect"},
                                          IntrinsicData{"step", "Step"}));
+
+TEST_F(IntrinsicBuilderTest, Call_Reflect_Vector) {
+  auto* expr = Call("reflect", vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f));
+
+  WrapInFunction(expr);
+
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
+                    ast::StatementList{}, ast::DecorationList{});
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeFloat 32
+%6 = OpTypeVector %7 2
+%9 = OpConstant %7 1
+%10 = OpConstantComposite %6 %9 %9
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %8 Reflect %10 %10
+OpReturn
+OpFunctionEnd
+)");
+}
 
 TEST_F(IntrinsicBuilderTest, Call_Distance_Scalar) {
   auto* expr = Call("distance", 1.0f, 1.0f);
@@ -1001,15 +1029,44 @@ OpReturn
 OpFunctionEnd
 )");
 }
-INSTANTIATE_TEST_SUITE_P(
-    IntrinsicBuilderTest,
-    Intrinsic_Builtin_ThreeParam_Float_Test,
-    testing::Values(IntrinsicData{"clamp", "NClamp"},
-                    IntrinsicData{"faceForward", "FaceForward"},
-                    IntrinsicData{"fma", "Fma"},
-                    IntrinsicData{"mix", "FMix"},
+INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
+                         Intrinsic_Builtin_ThreeParam_Float_Test,
+                         testing::Values(IntrinsicData{"clamp", "NClamp"},
+                                         IntrinsicData{"fma", "Fma"},
+                                         IntrinsicData{"mix", "FMix"},
 
-                    IntrinsicData{"smoothStep", "SmoothStep"}));
+                                         IntrinsicData{"smoothStep",
+                                                       "SmoothStep"}));
+
+TEST_F(IntrinsicBuilderTest, Call_FaceForward_Vector) {
+  auto* expr = Call("faceForward", vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f),
+                    vec2<f32>(1.0f, 1.0f));
+
+  WrapInFunction(expr);
+
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
+                    ast::StatementList{}, ast::DecorationList{});
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeFloat 32
+%6 = OpTypeVector %7 2
+%9 = OpConstant %7 1
+%10 = OpConstantComposite %6 %9 %9
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpExtInst %6 %8 FaceForward %10 %10 %10
+OpReturn
+OpFunctionEnd
+)");
+}
 
 using Intrinsic_Builtin_SingleParam_Sint_Test =
     IntrinsicBuilderTestWithParam<IntrinsicData>;

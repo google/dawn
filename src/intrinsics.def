@@ -301,7 +301,6 @@ fn exp(f32) -> f32
 fn exp<N: num>(vec<N, f32>) -> vec<N, f32>
 fn exp2(f32) -> f32
 fn exp2<N: num>(vec<N, f32>) -> vec<N, f32>
-fn faceForward(f32, f32, f32) -> f32
 fn faceForward<N: num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32>
 fn floor(f32) -> f32
 fn floor<N: num>(vec<N, f32>) -> vec<N, f32>
@@ -352,7 +351,6 @@ fn pack4x8snorm(vec4<f32>) -> u32
 fn pack4x8unorm(vec4<f32>) -> u32
 fn pow(f32, f32) -> f32
 fn pow<N: num>(vec<N, f32>, vec<N, f32>) -> vec<N, f32>
-fn reflect(f32, f32) -> f32
 fn reflect<N: num>(vec<N, f32>, vec<N, f32>) -> vec<N, f32>
 fn refract<N: num>(vec<N, f32>, vec<N, f32>, f32) -> vec<N, f32>
 fn reverseBits<T: iu32>(T) -> T

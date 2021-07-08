@@ -1190,8 +1190,7 @@ INSTANTIATE_TEST_SUITE_P(
     ResolverIntrinsicTest_TwoParam,
     testing::Values(IntrinsicData{"atan2", IntrinsicType::kAtan2},
                     IntrinsicData{"pow", IntrinsicType::kPow},
-                    IntrinsicData{"step", IntrinsicType::kStep},
-                    IntrinsicData{"reflect", IntrinsicType::kReflect}));
+                    IntrinsicData{"step", IntrinsicType::kStep}));
 
 TEST_F(ResolverIntrinsicTest, Distance_Scalar) {
   auto* call = Call("distance", 1.f, 1.f);
@@ -1369,8 +1368,7 @@ INSTANTIATE_TEST_SUITE_P(
     ResolverIntrinsicTest_ThreeParam,
     testing::Values(IntrinsicData{"mix", IntrinsicType::kMix},
                     IntrinsicData{"smoothStep", IntrinsicType::kSmoothStep},
-                    IntrinsicData{"fma", IntrinsicType::kFma},
-                    IntrinsicData{"faceForward", IntrinsicType::kFaceForward}));
+                    IntrinsicData{"fma", IntrinsicType::kFma}));
 
 using ResolverIntrinsicTest_ThreeParam_FloatOrInt =
     ResolverTestWithParam<IntrinsicData>;
