@@ -12,23 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TRANSFORM_LOOP_TO_FOR_LOOP_H_
-#define SRC_TRANSFORM_LOOP_TO_FOR_LOOP_H_
+#ifndef SRC_TRANSFORM_FOR_LOOP_TO_LOOP_H_
+#define SRC_TRANSFORM_FOR_LOOP_TO_LOOP_H_
 
 #include "src/transform/transform.h"
 
 namespace tint {
 namespace transform {
 
-/// LoopToForLoop is a Transform that attempts to convert WGSL `loop {}`
-/// statements into a for-loop statement.
-class LoopToForLoop : public Castable<LoopToForLoop, Transform> {
+/// ForLoopToLoop is a Transform that converts a for-loop statement into a loop
+/// statement. This is required by the SPIR-V writer.
+class ForLoopToLoop : public Castable<ForLoopToLoop, Transform> {
  public:
   /// Constructor
-  LoopToForLoop();
+  ForLoopToLoop();
 
   /// Destructor
-  ~LoopToForLoop() override;
+  ~ForLoopToLoop() override;
 
  protected:
   /// Runs the transform using the CloneContext built for transforming a
@@ -43,4 +43,4 @@ class LoopToForLoop : public Castable<LoopToForLoop, Transform> {
 }  // namespace transform
 }  // namespace tint
 
-#endif  // SRC_TRANSFORM_LOOP_TO_FOR_LOOP_H_
+#endif  // SRC_TRANSFORM_FOR_LOOP_TO_LOOP_H_

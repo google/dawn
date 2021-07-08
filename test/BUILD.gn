@@ -286,6 +286,7 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/transform/first_index_offset_test.cc",
     "../src/transform/fold_constants_test.cc",
     "../src/transform/fold_trivial_single_use_lets_test.cc",
+    "../src/transform/for_loop_to_loop_test.cc",
     "../src/transform/inline_pointer_lets_test.cc",
     "../src/transform/loop_to_for_loop_test.cc",
     "../src/transform/pad_array_elements_test.cc",

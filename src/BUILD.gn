@@ -570,6 +570,8 @@ libtint_source_set("libtint_core_all_src") {
     "transform/fold_constants.h",
     "transform/fold_trivial_single_use_lets.cc",
     "transform/fold_trivial_single_use_lets.h",
+    "transform/for_loop_to_loop.cc",
+    "transform/for_loop_to_loop.h",
     "transform/inline_pointer_lets.cc",
     "transform/inline_pointer_lets.h",
     "transform/loop_to_for_loop.cc",
