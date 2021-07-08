@@ -2475,20 +2475,13 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, ast::Literal* lit) {
   if (auto* l = lit->As<ast::BoolLiteral>()) {
     out << (l->IsTrue() ? "true" : "false");
   } else if (auto* fl = lit->As<ast::FloatLiteral>()) {
-    bool positive = std::signbit(fl->value()) == 0;
-    switch (std::fpclassify(fl->value())) {
-      case FP_INFINITE:
-        out << (positive ? "asfloat(0x7f800000u)" : "asfloat(0xff800000u)");
-        break;
-      case FP_NAN:
-        out << "asfloat(0x7fc00000u)";
-        break;
-      case FP_ZERO:
-        out << (positive ? "0.0f" : "asfloat(0xff800000u)");
-        break;
-      default:
-        out << FloatToString(fl->value()) << "f";
-        break;
+    if (std::isinf(fl->value())) {
+      out << (fl->value() >= 0 ? "asfloat(0x7f800000u)"
+                               : "asfloat(0xff800000u)");
+    } else if (std::isnan(fl->value())) {
+      out << "asfloat(0x7fc00000u)";
+    } else {
+      out << FloatToString(fl->value()) << "f";
     }
   } else if (auto* sl = lit->As<ast::SintLiteral>()) {
     out << sl->value();
