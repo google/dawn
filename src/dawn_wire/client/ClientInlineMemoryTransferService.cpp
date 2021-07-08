@@ -24,7 +24,8 @@ namespace dawn_wire { namespace client {
     class InlineMemoryTransferService : public MemoryTransferService {
         class ReadHandleImpl : public ReadHandle {
           public:
-            explicit ReadHandleImpl(size_t size) : mSize(size) {
+            explicit ReadHandleImpl(std::unique_ptr<uint8_t[]> stagingData, size_t size)
+                : mStagingData(std::move(stagingData)), mSize(size) {
             }
 
             ~ReadHandleImpl() override = default;
@@ -36,36 +37,36 @@ namespace dawn_wire { namespace client {
             void SerializeCreate(void*) override {
             }
 
-            bool DeserializeInitialData(const void* deserializePointer,
-                                        size_t deserializeSize,
-                                        const void** data,
-                                        size_t* dataLength) override {
-                if (deserializeSize != mSize || deserializePointer == nullptr) {
+            const void* GetData() override {
+                return mStagingData.get();
+            }
+
+            bool DeserializeDataUpdate(const void* deserializePointer,
+                                       size_t deserializeSize,
+                                       size_t offset,
+                                       size_t size) override {
+                if (deserializeSize != size || deserializePointer == nullptr) {
                     return false;
                 }
 
-                mStagingData = std::unique_ptr<uint8_t[]>(AllocNoThrow<uint8_t>(mSize));
-                if (!mStagingData) {
+                if (offset > mSize || size > mSize - offset) {
                     return false;
                 }
-                memcpy(mStagingData.get(), deserializePointer, mSize);
 
-                ASSERT(data != nullptr);
-                ASSERT(dataLength != nullptr);
-                *data = mStagingData.get();
-                *dataLength = mSize;
-
+                void* start = static_cast<uint8_t*>(mStagingData.get()) + offset;
+                memcpy(start, deserializePointer, size);
                 return true;
             }
 
           private:
-            size_t mSize;
             std::unique_ptr<uint8_t[]> mStagingData;
+            size_t mSize;
         };
 
         class WriteHandleImpl : public WriteHandle {
           public:
-            explicit WriteHandleImpl(size_t size) : mSize(size) {
+            explicit WriteHandleImpl(std::unique_ptr<uint8_t[]> stagingData, size_t size)
+                : mStagingData(std::move(stagingData)), mSize(size) {
             }
 
             ~WriteHandleImpl() override = default;
@@ -77,28 +78,27 @@ namespace dawn_wire { namespace client {
             void SerializeCreate(void*) override {
             }
 
-            std::pair<void*, size_t> Open() override {
-                mStagingData = std::unique_ptr<uint8_t[]>(AllocNoThrow<uint8_t>(mSize));
-                if (!mStagingData) {
-                    return std::make_pair(nullptr, 0);
-                }
-                memset(mStagingData.get(), 0, mSize);
-                return std::make_pair(mStagingData.get(), mSize);
+            void* GetData() override {
+                return mStagingData.get();
             }
 
-            size_t SerializeFlushSize() override {
-                return mSize;
+            size_t SizeOfSerializeDataUpdate(size_t offset, size_t size) override {
+                ASSERT(offset <= mSize);
+                ASSERT(size <= mSize - offset);
+                return size;
             }
 
-            void SerializeFlush(void* serializePointer) override {
+            void SerializeDataUpdate(void* serializePointer, size_t offset, size_t size) override {
                 ASSERT(mStagingData != nullptr);
                 ASSERT(serializePointer != nullptr);
-                memcpy(serializePointer, mStagingData.get(), mSize);
+                ASSERT(offset <= mSize);
+                ASSERT(size <= mSize - offset);
+                memcpy(serializePointer, static_cast<uint8_t*>(mStagingData.get()) + offset, size);
             }
 
           private:
-            size_t mSize;
             std::unique_ptr<uint8_t[]> mStagingData;
+            size_t mSize;
         };
 
       public:
@@ -107,11 +107,20 @@ namespace dawn_wire { namespace client {
         ~InlineMemoryTransferService() override = default;
 
         ReadHandle* CreateReadHandle(size_t size) override {
-            return new ReadHandleImpl(size);
+            auto stagingData = std::unique_ptr<uint8_t[]>(AllocNoThrow<uint8_t>(size));
+            if (stagingData) {
+                return new ReadHandleImpl(std::move(stagingData), size);
+            }
+            return nullptr;
         }
 
         WriteHandle* CreateWriteHandle(size_t size) override {
-            return new WriteHandleImpl(size);
+            auto stagingData = std::unique_ptr<uint8_t[]>(AllocNoThrow<uint8_t>(size));
+            if (stagingData) {
+                memset(stagingData.get(), 0, size);
+                return new WriteHandleImpl(std::move(stagingData), size);
+            }
+            return nullptr;
         }
     };
 

@@ -121,6 +121,7 @@ namespace dawn_wire {
                 // deserialize the data update and apply
                 // it to the range (offset, offset + size) of allocation
                 // There could be nothing to be deserialized (if using shared memory)
+                // Needs to check potential offset/size OOB and overflow
                 // TODO(dawn:773): change to pure virtual after update on chromium side.
                 virtual bool DeserializeDataUpdate(const void* deserializePointer,
                                                    size_t deserializeSize,

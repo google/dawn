@@ -113,6 +113,21 @@ TEST_P(BufferMappingTests, MapRead_Twice) {
     buffer.Unmap();
 }
 
+// Map read and test multiple get mapped range data
+TEST_P(BufferMappingTests, MapRead_MultipleMappedRange) {
+    wgpu::Buffer buffer = CreateMapReadBuffer(12);
+
+    uint32_t myData[] = {0x00010203, 0x04050607, 0x08090a0b};
+    queue.WriteBuffer(buffer, 0, &myData, 12);
+
+    MapAsyncAndWait(buffer, wgpu::MapMode::Read, 0, 12);
+    ASSERT_EQ(myData[0], *static_cast<const uint32_t*>(buffer.GetConstMappedRange(0)));
+    ASSERT_EQ(myData[1], *(static_cast<const uint32_t*>(buffer.GetConstMappedRange(0)) + 1));
+    ASSERT_EQ(myData[2], *(static_cast<const uint32_t*>(buffer.GetConstMappedRange(0)) + 2));
+    ASSERT_EQ(myData[2], *static_cast<const uint32_t*>(buffer.GetConstMappedRange(8)));
+    buffer.Unmap();
+}
+
 // Test map-reading a large buffer.
 TEST_P(BufferMappingTests, MapRead_Large) {
     constexpr uint32_t kDataSize = 1000 * 1000;
@@ -257,6 +272,70 @@ TEST_P(BufferMappingTests, MapWrite_Twice) {
     EXPECT_BUFFER_U32_EQ(myData, buffer, 0);
 }
 
+// Map write and unmap twice with different ranges and make sure the first write is preserved
+TEST_P(BufferMappingTests, MapWrite_TwicePreserve) {
+    wgpu::Buffer buffer = CreateMapWriteBuffer(12);
+
+    uint32_t data1 = 0x08090a0b;
+    size_t offset1 = 8;
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, offset1, sizeof(data1));
+    memcpy(buffer.GetMappedRange(offset1), &data1, sizeof(data1));
+    buffer.Unmap();
+
+    uint32_t data2 = 0x00010203;
+    size_t offset2 = 0;
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, offset2, sizeof(data2));
+    memcpy(buffer.GetMappedRange(offset2), &data2, sizeof(data2));
+    buffer.Unmap();
+
+    EXPECT_BUFFER_U32_EQ(data1, buffer, offset1);
+    EXPECT_BUFFER_U32_EQ(data2, buffer, offset2);
+}
+
+// Map write and unmap twice with overlapping ranges and make sure data is updated correctly
+TEST_P(BufferMappingTests, MapWrite_TwiceRangeOverlap) {
+    wgpu::Buffer buffer = CreateMapWriteBuffer(16);
+
+    uint32_t data1[] = {0x01234567, 0x89abcdef};
+    size_t offset1 = 8;
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, offset1, 8);
+    memcpy(buffer.GetMappedRange(offset1), data1, 8);
+    buffer.Unmap();
+
+    EXPECT_BUFFER_U32_EQ(0x00000000, buffer, 0);
+    EXPECT_BUFFER_U32_EQ(0x00000000, buffer, 4);
+    EXPECT_BUFFER_U32_EQ(0x01234567, buffer, 8);
+    EXPECT_BUFFER_U32_EQ(0x89abcdef, buffer, 12);
+
+    uint32_t data2[] = {0x01234567, 0x89abcdef, 0x55555555};
+    size_t offset2 = 0;
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, offset2, 12);
+    memcpy(buffer.GetMappedRange(offset2), data2, 12);
+    buffer.Unmap();
+
+    EXPECT_BUFFER_U32_EQ(0x01234567, buffer, 0);
+    EXPECT_BUFFER_U32_EQ(0x89abcdef, buffer, 4);
+    EXPECT_BUFFER_U32_EQ(0x55555555, buffer, 8);
+    EXPECT_BUFFER_U32_EQ(0x89abcdef, buffer, 12);
+}
+
+// Map write and test multiple mapped range data get updated correctly
+TEST_P(BufferMappingTests, MapWrite_MultipleMappedRange) {
+    wgpu::Buffer buffer = CreateMapWriteBuffer(12);
+
+    uint32_t data1 = 0x08090a0b;
+    size_t offset1 = 8;
+    uint32_t data2 = 0x00010203;
+    size_t offset2 = 0;
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, 12);
+    memcpy(buffer.GetMappedRange(offset1), &data1, sizeof(data1));
+    memcpy(buffer.GetMappedRange(offset2), &data2, sizeof(data2));
+    buffer.Unmap();
+
+    EXPECT_BUFFER_U32_EQ(data1, buffer, offset1);
+    EXPECT_BUFFER_U32_EQ(data2, buffer, offset2);
+}
+
 // Test mapping a large buffer.
 TEST_P(BufferMappingTests, MapWrite_Large) {
     constexpr uint32_t kDataSize = 1000 * 1000;
@@ -330,20 +409,26 @@ TEST_P(BufferMappingTests, OffsetNotUpdatedOnError) {
     queue.WriteBuffer(buffer, 0, data, sizeof(data));
 
     // Map the buffer but do not wait on the result yet.
-    bool done = false;
+    bool done1 = false;
+    bool done2 = false;
     buffer.MapAsync(
         wgpu::MapMode::Read, 8, 4,
         [](WGPUBufferMapAsyncStatus status, void* userdata) {
             ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
             *static_cast<bool*>(userdata) = true;
         },
-        &done);
+        &done1);
 
     // Call MapAsync another time, it is an error because the buffer is already being mapped so
     // mMapOffset is not updated.
-    ASSERT_DEVICE_ERROR(buffer.MapAsync(wgpu::MapMode::Read, 0, 4, nullptr, nullptr));
+    ASSERT_DEVICE_ERROR(buffer.MapAsync(
+        wgpu::MapMode::Read, 0, 4,
+        [](WGPUBufferMapAsyncStatus status, void* userdata) {
+            *static_cast<bool*>(userdata) = true;
+        },
+        &done2));
 
-    while (!done) {
+    while (!done1 || !done2) {
         WaitABit();
     }
 

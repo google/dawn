@@ -20,24 +20,26 @@
     "commands": {
         "buffer map async": [
             { "name": "buffer id", "type": "ObjectId" },
-            { "name": "request serial", "type": "uint32_t" },
+            { "name": "request serial", "type": "uint64_t" },
             { "name": "mode", "type": "map mode" },
             { "name": "offset", "type": "uint64_t"},
-            { "name": "size", "type": "uint64_t"},
-            { "name": "handle create info length", "type": "uint64_t" },
-            { "name": "handle create info", "type": "uint8_t", "annotation": "const*", "length": "handle create info length", "skip_serialize": true}
+            { "name": "size", "type": "uint64_t"}
         ],
         "buffer update mapped data": [
             { "name": "buffer id", "type": "ObjectId" },
-            { "name": "write flush info length", "type": "uint64_t" },
-            { "name": "write flush info", "type": "uint8_t", "annotation": "const*", "length": "write flush info length", "skip_serialize": true}
+            { "name": "write data update info length", "type": "uint64_t" },
+            { "name": "write data update info", "type": "uint8_t", "annotation": "const*", "length": "write data update info length", "skip_serialize": true},
+            { "name": "offset", "type": "uint64_t"},
+            { "name": "size", "type": "uint64_t"}
         ],
         "device create buffer": [
             { "name": "device id", "type": "ObjectId" },
             { "name": "descriptor", "type": "buffer descriptor", "annotation": "const*" },
             { "name": "result", "type": "ObjectHandle", "handle_type": "buffer" },
-            { "name": "handle create info length", "type": "uint64_t" },
-            { "name": "handle create info", "type": "uint8_t", "annotation": "const*", "length": "handle create info length", "skip_serialize": true}
+            { "name": "read handle create info length", "type": "uint64_t" },
+            { "name": "read handle create info", "type": "uint8_t", "annotation": "const*", "length": "read handle create info length", "skip_serialize": true},
+            { "name": "write handle create info length", "type": "uint64_t" },
+            { "name": "write handle create info", "type": "uint8_t", "annotation": "const*", "length": "write handle create info length", "skip_serialize": true}
         ],
         "device create compute pipeline async": [
             { "name": "device id", "type": "ObjectId" },
@@ -87,10 +89,10 @@
     "return commands": {
         "buffer map async callback": [
             { "name": "buffer", "type": "ObjectHandle", "handle_type": "buffer" },
-            { "name": "request serial", "type": "uint32_t" },
+            { "name": "request serial", "type": "uint64_t" },
             { "name": "status", "type": "uint32_t" },
-            { "name": "read initial data info length", "type": "uint64_t" },
-            { "name": "read initial data info", "type": "uint8_t", "annotation": "const*", "length": "read initial data info length", "skip_serialize": true }
+            { "name": "read data update info length", "type": "uint64_t" },
+            { "name": "read data update info", "type": "uint8_t", "annotation": "const*", "length": "read data update info length", "skip_serialize": true }
         ],
         "device create compute pipeline async callback": [
             { "name": "device", "type": "ObjectHandle", "handle_type": "device" },

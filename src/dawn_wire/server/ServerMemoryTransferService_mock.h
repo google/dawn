@@ -29,10 +29,11 @@ namespace dawn_wire { namespace server {
             MockReadHandle(MockMemoryTransferService* service);
             ~MockReadHandle() override;
 
-            size_t SerializeInitialDataSize(const void* data, size_t dataLength) override;
-            void SerializeInitialData(const void* data,
-                                      size_t dataLength,
-                                      void* serializePointer) override;
+            size_t SizeOfSerializeDataUpdate(size_t offset, size_t size) override;
+            void SerializeDataUpdate(const void* data,
+                                     size_t offset,
+                                     size_t size,
+                                     void* serializePointer) override;
 
           private:
             MockMemoryTransferService* mService;
@@ -43,7 +44,10 @@ namespace dawn_wire { namespace server {
             MockWriteHandle(MockMemoryTransferService* service);
             ~MockWriteHandle() override;
 
-            bool DeserializeFlush(const void* deserializePointer, size_t deserializeSize) override;
+            bool DeserializeDataUpdate(const void* deserializePointer,
+                                       size_t deserializeSize,
+                                       size_t offset,
+                                       size_t size) override;
 
             const uint32_t* GetData() const;
 
@@ -78,21 +82,24 @@ namespace dawn_wire { namespace server {
                      WriteHandle** writeHandle));
 
         MOCK_METHOD(size_t,
-                    OnReadHandleSerializeInitialDataSize,
-                    (const ReadHandle* readHandle, const void* data, size_t dataLength));
+                    OnReadHandleSizeOfSerializeDataUpdate,
+                    (const ReadHandle* readHandle, size_t offset, size_t size));
         MOCK_METHOD(void,
-                    OnReadHandleSerializeInitialData,
+                    OnReadHandleSerializeDataUpdate,
                     (const ReadHandle* readHandle,
                      const void* data,
-                     size_t dataLength,
+                     size_t offset,
+                     size_t size,
                      void* serializePointer));
         MOCK_METHOD(void, OnReadHandleDestroy, (const ReadHandle* readHandle));
 
         MOCK_METHOD(bool,
-                    OnWriteHandleDeserializeFlush,
+                    OnWriteHandleDeserializeDataUpdate,
                     (const WriteHandle* writeHandle,
                      const uint32_t* deserializePointer,
-                     size_t deserializeSize));
+                     size_t deserializeSize,
+                     size_t offset,
+                     size_t size));
         MOCK_METHOD(void, OnWriteHandleDestroy, (const WriteHandle* writeHandle));
     };
 

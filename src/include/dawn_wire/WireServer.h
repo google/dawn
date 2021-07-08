@@ -132,8 +132,9 @@ namespace dawn_wire {
 
                 // Set the target for writes from the client. DeserializeFlush should copy data
                 // into the target.
-                // TODO(dawn:773): only set backing buffer pointer data
-                void SetTarget(void* data, size_t dataLength);
+                void SetTarget(void* data);
+                // Set Staging data length for OOB check
+                void SetDataLength(size_t dataLength);
 
                 // TODO(dawn:773): remove after update on chromium side.
                 virtual bool DeserializeFlush(const void* deserializePointer,
@@ -143,6 +144,7 @@ namespace dawn_wire {
 
                 // This function takes in the serialized result of
                 // client::MemoryTransferService::WriteHandle::SerializeDataUpdate.
+                // Needs to check potential offset/size OOB and overflow
                 virtual bool DeserializeDataUpdate(const void* deserializePointer,
                                                    size_t deserializeSize,
                                                    size_t offset,
@@ -152,7 +154,6 @@ namespace dawn_wire {
 
               protected:
                 void* mTargetData = nullptr;
-                // TODO(dawn:773): only set backing buffer pointer data
                 size_t mDataLength = 0;
 
               private:

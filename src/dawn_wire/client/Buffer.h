@@ -35,10 +35,10 @@ namespace dawn_wire { namespace client {
 
         ~Buffer();
 
-        bool OnMapAsyncCallback(uint32_t requestSerial,
+        bool OnMapAsyncCallback(uint64_t requestSerial,
                                 uint32_t status,
-                                uint64_t readInitialDataInfoLength,
-                                const uint8_t* readInitialDataInfo);
+                                uint64_t readDataUpdateInfoLength,
+                                const uint8_t* readDataUpdateInfo);
         void MapAsync(WGPUMapModeFlags mode,
                       size_t offset,
                       size_t size,
@@ -57,9 +57,18 @@ namespace dawn_wire { namespace client {
         bool IsMappedForWriting() const;
         bool CheckGetMappedRangeOffsetSize(size_t offset, size_t size) const;
 
-        void FreeMappedData(bool destruction);
+        void FreeMappedData();
 
         Device* mDevice;
+
+        enum class MapRequestType { None, Read, Write };
+
+        enum class MapState {
+            Unmapped,
+            MappedForRead,
+            MappedForWrite,
+            MappedAtCreation,
+        };
 
         // We want to defer all the validation to the server, which means we could have multiple
         // map request in flight at a single time and need to track them separately.
@@ -75,12 +84,10 @@ namespace dawn_wire { namespace client {
             // from the server take precedence over the client-side status.
             WGPUBufferMapAsyncStatus clientStatus = WGPUBufferMapAsyncStatus_Success;
 
-            // TODO(enga): Use a tagged pointer to save space.
-            std::unique_ptr<MemoryTransferService::ReadHandle> readHandle = nullptr;
-            std::unique_ptr<MemoryTransferService::WriteHandle> writeHandle = nullptr;
+            MapRequestType type = MapRequestType::None;
         };
-        std::map<uint32_t, MapRequestData> mRequests;
-        uint32_t mRequestSerial = 0;
+        std::map<uint64_t, MapRequestData> mRequests;
+        uint64_t mRequestSerial = 0;
         uint64_t mSize = 0;
 
         // Only one mapped pointer can be active at a time because Unmap clears all the in-flight
@@ -88,6 +95,9 @@ namespace dawn_wire { namespace client {
         // TODO(enga): Use a tagged pointer to save space.
         std::unique_ptr<MemoryTransferService::ReadHandle> mReadHandle = nullptr;
         std::unique_ptr<MemoryTransferService::WriteHandle> mWriteHandle = nullptr;
+        MapState mMapState = MapState::Unmapped;
+        bool mDestructWriteHandleOnUnmap = false;
+
         void* mMappedData = nullptr;
         size_t mMapOffset = 0;
         size_t mMapSize = 0;

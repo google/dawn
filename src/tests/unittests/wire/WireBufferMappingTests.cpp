@@ -47,17 +47,7 @@ class WireBufferMappingTests : public WireTest {
         WireTest::SetUp();
 
         mockBufferMapCallback = std::make_unique<StrictMock<MockBufferMapCallback>>();
-
-        WGPUBufferDescriptor descriptor = {};
-        descriptor.size = kBufferSize;
-
         apiBuffer = api.GetNewBuffer();
-        buffer = wgpuDeviceCreateBuffer(device, &descriptor);
-
-        EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _))
-            .WillOnce(Return(apiBuffer))
-            .RetiresOnSaturation();
-        FlushClient();
     }
 
     void TearDown() override {
@@ -77,6 +67,19 @@ class WireBufferMappingTests : public WireTest {
         Mock::VerifyAndClearExpectations(&mockBufferMapCallback);
     }
 
+    void SetupBuffer(WGPUBufferUsageFlags usage) {
+        WGPUBufferDescriptor descriptor = {};
+        descriptor.size = kBufferSize;
+        descriptor.usage = usage;
+
+        buffer = wgpuDeviceCreateBuffer(device, &descriptor);
+
+        EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _))
+            .WillOnce(Return(apiBuffer))
+            .RetiresOnSaturation();
+        FlushClient();
+    }
+
   protected:
     static constexpr uint64_t kBufferSize = sizeof(uint32_t);
     // A successfully created buffer
@@ -85,9 +88,21 @@ class WireBufferMappingTests : public WireTest {
 };
 
 // Tests specific to mapping for reading
+class WireBufferMappingReadTests : public WireBufferMappingTests {
+  public:
+    WireBufferMappingReadTests() {
+    }
+    ~WireBufferMappingReadTests() override = default;
+
+    void SetUp() override {
+        WireBufferMappingTests::SetUp();
+
+        SetupBuffer(WGPUBufferUsage_MapRead);
+    }
+};
 
 // Check mapping for reading a succesfully created buffer
-TEST_F(WireBufferMappingTests, MappingForReadSuccessBuffer) {
+TEST_F(WireBufferMappingReadTests, MappingForReadSuccessBuffer) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     uint32_t bufferContent = 31337;
@@ -115,7 +130,7 @@ TEST_F(WireBufferMappingTests, MappingForReadSuccessBuffer) {
 
 // Check that things work correctly when a validation error happens when mapping the buffer for
 // reading
-TEST_F(WireBufferMappingTests, ErrorWhileMappingForRead) {
+TEST_F(WireBufferMappingReadTests, ErrorWhileMappingForRead) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
@@ -133,7 +148,7 @@ TEST_F(WireBufferMappingTests, ErrorWhileMappingForRead) {
 
 // Check that the map read callback is called with UNKNOWN when the buffer is destroyed before the
 // request is finished
-TEST_F(WireBufferMappingTests, DestroyBeforeReadRequestEnd) {
+TEST_F(WireBufferMappingReadTests, DestroyBeforeReadRequestEnd) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     // Return success
@@ -158,7 +173,7 @@ TEST_F(WireBufferMappingTests, DestroyBeforeReadRequestEnd) {
 
 // Check the map read callback is called with "UnmappedBeforeCallback" when the map request would
 // have worked, but Unmap was called
-TEST_F(WireBufferMappingTests, UnmapCalledTooEarlyForRead) {
+TEST_F(WireBufferMappingReadTests, UnmapCalledTooEarlyForRead) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     uint32_t bufferContent = 31337;
@@ -186,7 +201,7 @@ TEST_F(WireBufferMappingTests, UnmapCalledTooEarlyForRead) {
 
 // Check that even if Unmap() was called early client-side, we correctly surface server-side
 // validation errors.
-TEST_F(WireBufferMappingTests, UnmapCalledTooEarlyForReadButServerSideError) {
+TEST_F(WireBufferMappingReadTests, UnmapCalledTooEarlyForReadButServerSideError) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
@@ -209,7 +224,7 @@ TEST_F(WireBufferMappingTests, UnmapCalledTooEarlyForReadButServerSideError) {
 
 // Check the map read callback is called with "DestroyedBeforeCallback" when the map request would
 // have worked, but Destroy was called
-TEST_F(WireBufferMappingTests, DestroyCalledTooEarlyForRead) {
+TEST_F(WireBufferMappingReadTests, DestroyCalledTooEarlyForRead) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     uint32_t bufferContent = 31337;
@@ -237,7 +252,7 @@ TEST_F(WireBufferMappingTests, DestroyCalledTooEarlyForRead) {
 
 // Check that even if Destroy() was called early client-side, we correctly surface server-side
 // validation errors.
-TEST_F(WireBufferMappingTests, DestroyCalledTooEarlyForReadButServerSideError) {
+TEST_F(WireBufferMappingReadTests, DestroyCalledTooEarlyForReadButServerSideError) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Read, 0, kBufferSize, _, _))
@@ -258,8 +273,9 @@ TEST_F(WireBufferMappingTests, DestroyCalledTooEarlyForReadButServerSideError) {
     FlushServer();
 }
 
-// Check that an error map read callback gets nullptr while a buffer is already mapped
-TEST_F(WireBufferMappingTests, MappingForReadingErrorWhileAlreadyMappedGetsNullptr) {
+// Check that an error map read while a buffer is already mapped won't changed the result of get
+// mapped range
+TEST_F(WireBufferMappingReadTests, MappingForReadingErrorWhileAlreadyMappedUnchangeMapData) {
     // Successful map
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
@@ -289,11 +305,12 @@ TEST_F(WireBufferMappingTests, MappingForReadingErrorWhileAlreadyMappedGetsNullp
 
     FlushServer();
 
-    EXPECT_EQ(nullptr, wgpuBufferGetConstMappedRange(buffer, 0, kBufferSize));
+    EXPECT_EQ(bufferContent,
+              *static_cast<const uint32_t*>(wgpuBufferGetConstMappedRange(buffer, 0, kBufferSize)));
 }
 
 // Test that the MapReadCallback isn't fired twice when unmap() is called inside the callback
-TEST_F(WireBufferMappingTests, UnmapInsideMapReadCallback) {
+TEST_F(WireBufferMappingReadTests, UnmapInsideMapReadCallback) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     uint32_t bufferContent = 31337;
@@ -318,7 +335,7 @@ TEST_F(WireBufferMappingTests, UnmapInsideMapReadCallback) {
 
 // Test that the MapReadCallback isn't fired twice the buffer external refcount reaches 0 in the
 // callback
-TEST_F(WireBufferMappingTests, DestroyInsideMapReadCallback) {
+TEST_F(WireBufferMappingReadTests, DestroyInsideMapReadCallback) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     uint32_t bufferContent = 31337;
@@ -342,9 +359,21 @@ TEST_F(WireBufferMappingTests, DestroyInsideMapReadCallback) {
 }
 
 // Tests specific to mapping for writing
+class WireBufferMappingWriteTests : public WireBufferMappingTests {
+  public:
+    WireBufferMappingWriteTests() {
+    }
+    ~WireBufferMappingWriteTests() override = default;
+
+    void SetUp() override {
+        WireBufferMappingTests::SetUp();
+
+        SetupBuffer(WGPUBufferUsage_MapWrite);
+    }
+};
 
 // Check mapping for writing a succesfully created buffer
-TEST_F(WireBufferMappingTests, MappingForWriteSuccessBuffer) {
+TEST_F(WireBufferMappingWriteTests, MappingForWriteSuccessBuffer) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     uint32_t serverBufferContent = 31337;
@@ -382,7 +411,7 @@ TEST_F(WireBufferMappingTests, MappingForWriteSuccessBuffer) {
 
 // Check that things work correctly when a validation error happens when mapping the buffer for
 // writing
-TEST_F(WireBufferMappingTests, ErrorWhileMappingForWrite) {
+TEST_F(WireBufferMappingWriteTests, ErrorWhileMappingForWrite) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
@@ -400,7 +429,7 @@ TEST_F(WireBufferMappingTests, ErrorWhileMappingForWrite) {
 
 // Check that the map write callback is called with "DestroyedBeforeCallback" when the buffer is
 // destroyed before the request is finished
-TEST_F(WireBufferMappingTests, DestroyBeforeWriteRequestEnd) {
+TEST_F(WireBufferMappingWriteTests, DestroyBeforeWriteRequestEnd) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     // Return success
@@ -423,9 +452,9 @@ TEST_F(WireBufferMappingTests, DestroyBeforeWriteRequestEnd) {
     FlushServer();
 }
 
-// Check the map read callback is called with "UnmappedBeforeCallback" when the map request would
+// Check the map write callback is called with "UnmappedBeforeCallback" when the map request would
 // have worked, but Unmap was called
-TEST_F(WireBufferMappingTests, UnmapCalledTooEarlyForWrite) {
+TEST_F(WireBufferMappingWriteTests, UnmapCalledTooEarlyForWrite) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     uint32_t bufferContent = 31337;
@@ -447,8 +476,8 @@ TEST_F(WireBufferMappingTests, UnmapCalledTooEarlyForWrite) {
     FlushServer();
 }
 
-// Check that an error map read callback gets nullptr while a buffer is already mapped
-TEST_F(WireBufferMappingTests, MappingForWritingErrorWhileAlreadyMappedGetsNullptr) {
+// Check that an error map write while a buffer is already mapped
+TEST_F(WireBufferMappingWriteTests, MappingForWritingErrorWhileAlreadyMapped) {
     // Successful map
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
@@ -478,11 +507,12 @@ TEST_F(WireBufferMappingTests, MappingForWritingErrorWhileAlreadyMappedGetsNullp
 
     FlushServer();
 
-    EXPECT_EQ(nullptr, wgpuBufferGetMappedRange(buffer, 0, kBufferSize));
+    EXPECT_NE(nullptr,
+              static_cast<const uint32_t*>(wgpuBufferGetConstMappedRange(buffer, 0, kBufferSize)));
 }
 
 // Test that the MapWriteCallback isn't fired twice when unmap() is called inside the callback
-TEST_F(WireBufferMappingTests, UnmapInsideMapWriteCallback) {
+TEST_F(WireBufferMappingWriteTests, UnmapInsideMapWriteCallback) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     uint32_t bufferContent = 31337;
@@ -507,7 +537,7 @@ TEST_F(WireBufferMappingTests, UnmapInsideMapWriteCallback) {
 
 // Test that the MapWriteCallback isn't fired twice the buffer external refcount reaches 0 in the
 // callback
-TEST_F(WireBufferMappingTests, DestroyInsideMapWriteCallback) {
+TEST_F(WireBufferMappingWriteTests, DestroyInsideMapWriteCallback) {
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, nullptr);
 
     uint32_t bufferContent = 31337;
@@ -578,6 +608,7 @@ TEST_F(WireBufferMappingTests, MappedAtCreationReleaseBeforeUnmap) {
 TEST_F(WireBufferMappingTests, MappedAtCreationThenMapSuccess) {
     WGPUBufferDescriptor descriptor = {};
     descriptor.size = 4;
+    descriptor.usage = WGPUMapMode_Write;
     descriptor.mappedAtCreation = true;
 
     WGPUBuffer apiBuffer = api.GetNewBuffer();
@@ -639,7 +670,8 @@ TEST_F(WireBufferMappingTests, MappedAtCreationThenMapFailure) {
 
     FlushServer();
 
-    EXPECT_EQ(nullptr, wgpuBufferGetConstMappedRange(buffer, 0, kBufferSize));
+    EXPECT_NE(nullptr,
+              static_cast<const uint32_t*>(wgpuBufferGetConstMappedRange(buffer, 0, kBufferSize)));
 
     wgpuBufferUnmap(buffer);
     EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
@@ -694,6 +726,7 @@ TEST_F(WireBufferMappingTests, MaxSizeMappableBufferOOMDirectly) {
 // Test that registering a callback then wire disconnect calls the callback with
 // DeviceLost.
 TEST_F(WireBufferMappingTests, MapThenDisconnect) {
+    SetupBuffer(WGPUMapMode_Write);
     wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize, ToMockBufferMapCallback, this);
 
     EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
@@ -711,6 +744,8 @@ TEST_F(WireBufferMappingTests, MapThenDisconnect) {
 // Test that registering a callback after wire disconnect calls the callback with
 // DeviceLost.
 TEST_F(WireBufferMappingTests, MapAfterDisconnect) {
+    SetupBuffer(WGPUMapMode_Read);
+
     GetWireClient()->Disconnect();
 
     EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_DeviceLost, this)).Times(1);
