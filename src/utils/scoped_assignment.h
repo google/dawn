@@ -1,3 +1,4 @@
+
 // Copyright 2021 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +17,8 @@
 #define SRC_UTILS_SCOPED_ASSIGNMENT_H_
 
 #include <type_traits>
+
+#include "src/utils/concat.h"
 
 namespace tint {
 namespace utils {
@@ -49,9 +52,6 @@ class ScopedAssignment {
 
 }  // namespace utils
 }  // namespace tint
-
-#define TINT_CONCAT_2(a, b) a##b
-#define TINT_CONCAT(a, b) TINT_CONCAT_2(a, b)
 
 /// TINT_SCOPED_ASSIGNMENT(var, val) assigns `val` to `var`, and automatically
 /// restores the original value of `var` when exiting the current lexical scope.

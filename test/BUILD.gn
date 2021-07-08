@@ -299,6 +299,7 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/transform/vertex_pulling_test.cc",
     "../src/transform/wrap_arrays_in_structs_test.cc",
     "../src/transform/zero_init_workgroup_memory_test.cc",
+    "../src/utils/defer_test.cc",
     "../src/utils/enum_set_test.cc",
     "../src/utils/get_or_create_test.cc",
     "../src/utils/hash_test.cc",

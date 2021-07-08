@@ -666,6 +666,7 @@ if(${TINT_BUILD_TESTS})
     sem/type_manager_test.cc
     sem/u32_type_test.cc
     sem/vector_type_test.cc
+    utils/defer_test.cc
     utils/enum_set_test.cc
     utils/get_or_create_test.cc
     utils/hash_test.cc
