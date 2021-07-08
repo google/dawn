@@ -25,6 +25,7 @@ fi
 
 FILTER="-runtime/references"
 FILES="`find src -type f` `find samples -type f`"
+FILES+="`find tools/src -type f` `find samples -type f`"
 
 if command -v go &> /dev/null; then
     # Go is installed. Run cpplint in parallel for speed wins

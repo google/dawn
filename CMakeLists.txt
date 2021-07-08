@@ -53,6 +53,7 @@ option(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
 option(TINT_BUILD_SPIRV_TOOLS_FUZZER "Build SPIRV-Tools fuzzer" OFF)
 option(TINT_BUILD_TESTS "Build tests" ${TINT_BUILD_TESTS_DEFAULT})
 option(TINT_BUILD_AS_OTHER_OS "Override OS detection to force building of *_other.cc files" OFF)
+option(TINT_BUILD_REMOTE_COMPILE "Build the remote-compile tool for validating shaders on a remote machine" OFF)
 
 option(TINT_ENABLE_MSAN "Enable memory sanitizer" OFF)
 option(TINT_ENABLE_ASAN "Enable address sanitizer" OFF)
@@ -77,6 +78,7 @@ message(STATUS "Tint build with ASAN: ${TINT_ENABLE_ASAN}")
 message(STATUS "Tint build with MSAN: ${TINT_ENABLE_MSAN}")
 message(STATUS "Tint build with UBSAN: ${TINT_ENABLE_UBSAN}")
 message(STATUS "Tint build checking [chromium-style]: ${TINT_CHECK_CHROMIUM_STYLE}")
+message(STATUS "Tint build remote-compile tool: ${TINT_BUILD_REMOTE_COMPILE}")
 
 message(STATUS "Using python3")
 find_package(PythonInterp 3 REQUIRED)
@@ -99,6 +101,8 @@ if (${TINT_BUILD_SPIRV_TOOLS_FUZZER})
   set(TINT_BUILD_SPV_WRITER ON)
 endif()
 
+set(TINT_ROOT_SOURCE_DIR ${PROJECT_SOURCE_DIR})
+
 # CMake < 3.15 sets /W3 in CMAKE_CXX_FLAGS. Remove it if it's there.
 # See https://gitlab.kitware.com/cmake/cmake/-/issues/18317
 if (MSVC)
@@ -112,7 +116,7 @@ if (${TINT_CHECK_CHROMIUM_STYLE})
 endif()
 
 if (${TINT_BUILD_SPV_READER})
-  include_directories("${PROJECT_SOURCE_DIR}/third_party/spirv-tools/include")
+  include_directories("${TINT_ROOT_SOURCE_DIR}/third_party/spirv-tools/include")
 endif()
 
 if((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") AND (CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC"))
@@ -171,12 +175,12 @@ if(${TINT_BUILD_DOCS})
 endif()
 
 function(tint_default_compile_options TARGET)
-  target_include_directories(${TARGET} PUBLIC "${PROJECT_SOURCE_DIR}")
-  target_include_directories(${TARGET} PUBLIC "${PROJECT_SOURCE_DIR}/include")
+  target_include_directories(${TARGET} PUBLIC "${TINT_ROOT_SOURCE_DIR}")
+  target_include_directories(${TARGET} PUBLIC "${TINT_ROOT_SOURCE_DIR}/include")
 
   if (${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
     target_include_directories(${TARGET} PUBLIC
-        "${PROJECT_SOURCE_DIR}/third_party/spirv-headers/include")
+        "${TINT_ROOT_SOURCE_DIR}/third_party/spirv-headers/include")
   endif()
 
   target_compile_definitions(${TARGET} PUBLIC
@@ -186,7 +190,7 @@ function(tint_default_compile_options TARGET)
   target_compile_definitions(${TARGET} PUBLIC
       -DTINT_BUILD_HLSL_WRITER=$<BOOL:${TINT_BUILD_HLSL_WRITER}>)
   target_compile_definitions(${TARGET} PUBLIC
-    -DTINT_BUILD_MSL_WRITER=$<BOOL:${TINT_BUILD_MSL_WRITER}>)
+      -DTINT_BUILD_MSL_WRITER=$<BOOL:${TINT_BUILD_MSL_WRITER}>)
   target_compile_definitions(${TARGET} PUBLIC
       -DTINT_BUILD_SPV_WRITER=$<BOOL:${TINT_BUILD_SPV_WRITER}>)
   target_compile_definitions(${TARGET} PUBLIC
@@ -304,13 +308,13 @@ endif()
 
 add_custom_target(tint-lint
   COMMAND ./tools/lint
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  WORKING_DIRECTORY ${TINT_ROOT_SOURCE_DIR}
   COMMENT "Running linter"
   VERBATIM)
 
 add_custom_target(tint-format
   COMMAND ./tools/format
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  WORKING_DIRECTORY ${TINT_ROOT_SOURCE_DIR}
   COMMENT "Running formatter"
   VERBATIM)
 
@@ -324,7 +328,11 @@ if (${TINT_EMIT_COVERAGE} AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_custom_target(tint-generate-coverage
     COMMAND ${CMAKE_COMMAND} -E env PATH=${PATH_WITH_CLANG} ./tools/tint-generate-coverage $<TARGET_FILE:tint_unittests>
     DEPENDS tint_unittests
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    WORKING_DIRECTORY ${TINT_ROOT_SOURCE_DIR}
     COMMENT "Generating tint coverage data"
     VERBATIM)
+endif()
+
+if (${TINT_BUILD_REMOTE_COMPILE})
+  add_subdirectory("${TINT_ROOT_SOURCE_DIR}/tools/src/cmd/remote-compile")
 endif()
