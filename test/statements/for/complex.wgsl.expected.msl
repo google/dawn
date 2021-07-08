@@ -1,0 +1,23 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void some_loop_body() {
+}
+
+void f() {
+  int j = 0;
+  {
+    int i = 0;
+    while (true) {
+      if (!(((i < 5) && (j < 10)))) {
+        break;
+      }
+      some_loop_body();
+      j = (i * 30);
+      {
+        i = (i + 1);
+      }
+    }
+  }
+}
+

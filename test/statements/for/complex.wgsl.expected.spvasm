@@ -1,0 +1,72 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 39
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %unused_entry_point "unused_entry_point"
+               OpName %some_loop_body "some_loop_body"
+               OpName %f "f"
+               OpName %j "j"
+               OpName %i "i"
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+%_ptr_Function_int = OpTypePointer Function %int
+         %12 = OpConstantNull %int
+      %int_0 = OpConstant %int 0
+      %int_5 = OpConstant %int 5
+       %bool = OpTypeBool
+     %int_10 = OpConstant %int 10
+     %int_30 = OpConstant %int 30
+      %int_1 = OpConstant %int 1
+%unused_entry_point = OpFunction %void None %1
+          %4 = OpLabel
+               OpReturn
+               OpFunctionEnd
+%some_loop_body = OpFunction %void None %1
+          %6 = OpLabel
+               OpReturn
+               OpFunctionEnd
+          %f = OpFunction %void None %1
+          %8 = OpLabel
+          %j = OpVariable %_ptr_Function_int Function %12
+          %i = OpVariable %_ptr_Function_int Function %12
+               OpStore %i %int_0
+               OpBranch %15
+         %15 = OpLabel
+               OpLoopMerge %16 %17 None
+               OpBranch %18
+         %18 = OpLabel
+         %20 = OpLoad %int %i
+         %22 = OpSLessThan %bool %20 %int_5
+               OpSelectionMerge %24 None
+               OpBranchConditional %22 %25 %24
+         %25 = OpLabel
+         %26 = OpLoad %int %j
+         %28 = OpSLessThan %bool %26 %int_10
+               OpBranch %24
+         %24 = OpLabel
+         %29 = OpPhi %bool %22 %18 %28 %25
+         %19 = OpLogicalNot %bool %29
+               OpSelectionMerge %30 None
+               OpBranchConditional %19 %31 %30
+         %31 = OpLabel
+               OpBranch %16
+         %30 = OpLabel
+         %32 = OpFunctionCall %void %some_loop_body
+         %33 = OpLoad %int %i
+         %35 = OpIMul %int %33 %int_30
+               OpStore %j %35
+               OpBranch %17
+         %17 = OpLabel
+         %36 = OpLoad %int %i
+         %38 = OpIAdd %int %36 %int_1
+               OpStore %i %38
+               OpBranch %15
+         %16 = OpLabel
+               OpReturn
+               OpFunctionEnd

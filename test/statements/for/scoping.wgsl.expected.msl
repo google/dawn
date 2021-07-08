@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void f() {
+  {
+    int must_not_collide = 0;
+    while (true) {
+    }
+  }
+  int must_not_collide = 0;
+}
+
