@@ -655,39 +655,6 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
     const char* kComputeExpectedValue = "1 + x + size.x * (y + size.y * layer)";
 };
 
-// Test that using read-only storage texture and write-only storage texture in BindGroupLayout is
-// valid on all backends. This test is a regression test for chromium:1061156 and passes by not
-// asserting or crashing.
-TEST_P(StorageTextureTests, BindGroupLayoutWithStorageTextureBindingType) {
-    // ReadOnly is a valid storage texture binding type to create a bind group
-    // layout.
-    {
-        wgpu::BindGroupLayoutEntry entry;
-        entry.binding = 0;
-        entry.visibility = wgpu::ShaderStage::Compute;
-        entry.storageTexture.access = wgpu::StorageTextureAccess::ReadOnly;
-        entry.storageTexture.format = wgpu::TextureFormat::R32Float;
-        wgpu::BindGroupLayoutDescriptor descriptor;
-        descriptor.entryCount = 1;
-        descriptor.entries = &entry;
-        device.CreateBindGroupLayout(&descriptor);
-    }
-
-    // WriteOnly is a valid storage texture binding type to create a bind group
-    // layout.
-    {
-        wgpu::BindGroupLayoutEntry entry;
-        entry.binding = 0;
-        entry.visibility = wgpu::ShaderStage::Compute;
-        entry.storageTexture.access = wgpu::StorageTextureAccess::WriteOnly;
-        entry.storageTexture.format = wgpu::TextureFormat::R32Float;
-        wgpu::BindGroupLayoutDescriptor descriptor;
-        descriptor.entryCount = 1;
-        descriptor.entries = &entry;
-        device.CreateBindGroupLayout(&descriptor);
-    }
-}
-
 // Test that read-only storage textures are supported in compute shader.
 TEST_P(StorageTextureTests, ReadonlyStorageTextureInComputeShader) {
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {

@@ -95,9 +95,10 @@ class StorageTextureValidationTests : public ValidationTest {
     wgpu::Texture CreateTexture(wgpu::TextureUsage usage,
                                 wgpu::TextureFormat format,
                                 uint32_t sampleCount = 1,
-                                uint32_t arrayLayerCount = 1) {
+                                uint32_t arrayLayerCount = 1,
+                                wgpu::TextureDimension dimension = wgpu::TextureDimension::e2D) {
         wgpu::TextureDescriptor descriptor;
-        descriptor.dimension = wgpu::TextureDimension::e2D;
+        descriptor.dimension = dimension;
         descriptor.size = {16, 16, arrayLayerCount};
         descriptor.sampleCount = sampleCount;
         descriptor.format = format;
@@ -686,16 +687,13 @@ TEST_F(StorageTextureValidationTests, StorageTextureFormatInBindGroup) {
 // bind group must match the corresponding bind group binding.
 TEST_F(StorageTextureValidationTests, StorageTextureViewDimensionInBindGroup) {
     constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Float;
-    constexpr uint32_t kArrayLayerCount = 6u;
+    constexpr uint32_t kDepthOrArrayLayers = 6u;
 
-    // Currently we only support creating 2D-compatible texture view dimensions.
-    // TODO(jiawei.shao@intel.com): test the use of 1D and 3D texture view dimensions when they are
+    // TODO(crbug.com/dawn/814): test the use of 1D texture view dimensions when they are
     // supported in Dawn.
-    constexpr std::array<wgpu::TextureViewDimension, 2> kSupportedDimensions = {
-        wgpu::TextureViewDimension::e2D, wgpu::TextureViewDimension::e2DArray};
-
-    wgpu::Texture texture =
-        CreateTexture(wgpu::TextureUsage::Storage, kStorageTextureFormat, 1, kArrayLayerCount);
+    constexpr std::array<wgpu::TextureViewDimension, 3> kSupportedDimensions = {
+        wgpu::TextureViewDimension::e2D, wgpu::TextureViewDimension::e2DArray,
+        wgpu::TextureViewDimension::e3D};
 
     wgpu::TextureViewDescriptor kDefaultTextureViewDescriptor;
     kDefaultTextureViewDescriptor.format = kStorageTextureFormat;
@@ -720,6 +718,14 @@ TEST_F(StorageTextureValidationTests, StorageTextureViewDimensionInBindGroup) {
 
             for (wgpu::TextureViewDimension dimensionOfTextureView : kSupportedDimensions) {
                 // Create a texture view with given texture view dimension.
+                wgpu::TextureDimension dimension = wgpu::TextureDimension::e2D;
+                if (dimensionOfTextureView == wgpu::TextureViewDimension::e3D) {
+                    dimension = wgpu::TextureDimension::e3D;
+                }
+                wgpu::Texture texture =
+                    CreateTexture(wgpu::TextureUsage::Storage, kStorageTextureFormat, 1,
+                                  kDepthOrArrayLayers, dimension);
+
                 wgpu::TextureViewDescriptor textureViewDescriptor = kDefaultTextureViewDescriptor;
                 textureViewDescriptor.dimension = dimensionOfTextureView;
                 wgpu::TextureView storageTextureView = texture.CreateView(&textureViewDescriptor);
