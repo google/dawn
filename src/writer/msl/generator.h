@@ -21,11 +21,59 @@
 #include "src/writer/text.h"
 
 namespace tint {
+
+// Forward declarations
+class Program;
+
 namespace writer {
 namespace msl {
 
 class GeneratorImpl;
 
+/// Configuration options used for generating MSL.
+struct Options {
+  /// The index to use when generating a UBO to receive storage buffer sizes.
+  /// Defaults to 30, which is the last valid buffer slot.
+  uint32_t buffer_size_ubo_index = 30;
+
+  /// The fixed sample mask to combine with fragment shader outputs.
+  /// Defaults to 0xFFFFFFFF.
+  uint32_t fixed_sample_mask = 0xFFFFFFFF;
+};
+
+/// The result produced when generating MSL.
+struct Result {
+  /// Constructor
+  Result();
+
+  /// Destructor
+  ~Result();
+
+  /// Copy constructor
+  Result(const Result&);
+
+  /// True if generation was successful.
+  bool success = false;
+
+  /// The errors generated during code generation, if any.
+  std::string error;
+
+  /// The generated MSL.
+  std::string msl = "";
+
+  /// True if the shader needs a UBO of buffer sizes.
+  bool needs_storage_buffer_sizes = false;
+};
+
+/// Generate MSL for a program, according to a set of configuration options. The
+/// result will contain the MSL, as well as success status and diagnostic
+/// information.
+/// @param program the program to translate to MSL
+/// @param options the configuration options to use when generating MSL
+/// @returns the resulting MSL and supplementary information
+Result Generate(const Program* program, const Options& options);
+
+// TODO(jrprice): Remove this once Dawn is using the new interface.
 /// Class to generate MSL source
 class Generator : public Text {
  public:

@@ -1549,9 +1549,6 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantReferencedByEntryPoint) {
 
   Inspector& inspector = Build();
 
-  tint::writer::wgsl::Generator writer(program_.get());
-  writer.Generate();
-
   auto result = inspector.GetEntryPoints();
 
   ASSERT_EQ(1u, result.size());

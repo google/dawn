@@ -13,11 +13,44 @@
 // limitations under the License.
 
 #include "src/writer/msl/generator.h"
+
+#include "src/transform/msl.h"
 #include "src/writer/msl/generator_impl.h"
 
 namespace tint {
 namespace writer {
 namespace msl {
+
+Result::Result() = default;
+Result::~Result() = default;
+Result::Result(const Result&) = default;
+
+Result Generate(const Program* program, const Options& options) {
+  Result result;
+
+  // Run the MSL sanitizer.
+  transform::Msl sanitizer;
+  transform::DataMap transform_input;
+  transform_input.Add<transform::Msl::Config>(options.buffer_size_ubo_index,
+                                              options.fixed_sample_mask);
+  auto output = sanitizer.Run(program, transform_input);
+  if (!output.program.IsValid()) {
+    result.success = false;
+    result.error = output.program.Diagnostics().str();
+    return result;
+  }
+  auto* transform_output = output.data.Get<transform::Msl::Result>();
+  result.needs_storage_buffer_sizes =
+      transform_output->needs_storage_buffer_sizes;
+
+  // Generate the MSL code.
+  auto impl = std::make_unique<GeneratorImpl>(&output.program);
+  result.success = impl->Generate();
+  result.error = impl->error();
+  result.msl = impl->result();
+
+  return result;
+}
 
 Generator::Generator(const Program* program)
     : impl_(std::make_unique<GeneratorImpl>(program)) {}

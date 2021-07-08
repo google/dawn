@@ -17,8 +17,6 @@
 
 #include <string>
 
-#include "src/program.h"
-
 namespace tint {
 namespace writer {
 

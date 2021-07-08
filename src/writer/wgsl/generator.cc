@@ -19,6 +19,22 @@ namespace tint {
 namespace writer {
 namespace wgsl {
 
+Result::Result() = default;
+Result::~Result() = default;
+Result::Result(const Result&) = default;
+
+Result Generate(const Program* program, const Options&) {
+  Result result;
+
+  // Generate the WGSL code.
+  auto impl = std::make_unique<GeneratorImpl>(program);
+  result.success = impl->Generate();
+  result.error = impl->error();
+  result.wgsl = impl->result();
+
+  return result;
+}
+
 Generator::Generator(const Program* program)
     : impl_(std::make_unique<GeneratorImpl>(program)) {}
 

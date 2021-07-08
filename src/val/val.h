@@ -16,6 +16,10 @@
 #define SRC_VAL_VAL_H_
 
 #include <string>
+#include <utility>
+#include <vector>
+
+#include "src/ast/pipeline_stage.h"
 
 // Forward declarations
 namespace tint {
@@ -24,6 +28,8 @@ class Program;
 
 namespace tint {
 namespace val {
+
+using EntryPointList = std::vector<std::pair<std::string, ast::PipelineStage>>;
 
 /// The return structure of Validate()
 struct Result {
@@ -39,19 +45,20 @@ struct Result {
 /// compiles successfully.
 /// @param dxc_path path to DXC
 /// @param source the generated HLSL source
-/// @param program the HLSL program
+/// @param entry_points the list of entry points to validate
 /// @return the result of the compile
 Result HlslUsingDXC(const std::string& dxc_path,
                     const std::string& source,
-                    Program* program);
+                    const EntryPointList& entry_points);
 
 #ifdef _WIN32
 /// Hlsl attempts to compile the shader with FXC, verifying that the shader
 /// compiles successfully.
 /// @param source the generated HLSL source
-/// @param program the HLSL program
+/// @param entry_points the list of entry points to validate
 /// @return the result of the compile
-Result HlslUsingFXC(const std::string& source, Program* program);
+Result HlslUsingFXC(const std::string& source,
+                    const EntryPointList& entry_points);
 #endif  // _WIN32
 
 /// Msl attempts to compile the shader with the Metal Shader Compiler,

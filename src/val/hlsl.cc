@@ -14,8 +14,6 @@
 
 #include "src/val/val.h"
 
-#include "src/ast/module.h"
-#include "src/program.h"
 #include "src/utils/io/command.h"
 #include "src/utils/io/tmpfile.h"
 
@@ -33,7 +31,7 @@ namespace val {
 
 Result HlslUsingDXC(const std::string& dxc_path,
                     const std::string& source,
-                    Program* program) {
+                    const EntryPointList& entry_points) {
   Result result;
 
   auto dxc = utils::Command(dxc_path);
@@ -48,48 +46,42 @@ Result HlslUsingDXC(const std::string& dxc_path,
   utils::TmpFile file;
   file << source;
 
-  bool found_an_entrypoint = false;
-  for (auto* func : program->AST().Functions()) {
-    if (func->IsEntryPoint()) {
-      found_an_entrypoint = true;
+  for (auto ep : entry_points) {
+    const char* profile = "";
 
-      const char* profile = "";
-
-      switch (func->pipeline_stage()) {
-        case ast::PipelineStage::kNone:
-          result.output = "Invalid PipelineStage";
-          result.failed = true;
-          return result;
-        case ast::PipelineStage::kVertex:
-          profile = "-T vs_6_0";
-          break;
-        case ast::PipelineStage::kFragment:
-          profile = "-T ps_6_0";
-          break;
-        case ast::PipelineStage::kCompute:
-          profile = "-T cs_6_0";
-          break;
-      }
-
-      auto name = program->Symbols().NameFor(func->symbol());
-      auto res = dxc(profile, "-E " + name, file.Path());
-      if (!res.out.empty()) {
-        if (!result.output.empty()) {
-          result.output += "\n";
-        }
-        result.output += res.out;
-      }
-      if (!res.err.empty()) {
-        if (!result.output.empty()) {
-          result.output += "\n";
-        }
-        result.output += res.err;
-      }
-      result.failed = (res.error_code != 0);
+    switch (ep.second) {
+      case ast::PipelineStage::kNone:
+        result.output = "Invalid PipelineStage";
+        result.failed = true;
+        return result;
+      case ast::PipelineStage::kVertex:
+        profile = "-T vs_6_0";
+        break;
+      case ast::PipelineStage::kFragment:
+        profile = "-T ps_6_0";
+        break;
+      case ast::PipelineStage::kCompute:
+        profile = "-T cs_6_0";
+        break;
     }
+
+    auto res = dxc(profile, "-E " + ep.first, file.Path());
+    if (!res.out.empty()) {
+      if (!result.output.empty()) {
+        result.output += "\n";
+      }
+      result.output += res.out;
+    }
+    if (!res.err.empty()) {
+      if (!result.output.empty()) {
+        result.output += "\n";
+      }
+      result.output += res.err;
+    }
+    result.failed = (res.error_code != 0);
   }
 
-  if (!found_an_entrypoint) {
+  if (entry_points.empty()) {
     result.output = "No entrypoint found";
     result.failed = true;
     return result;
@@ -99,7 +91,8 @@ Result HlslUsingDXC(const std::string& dxc_path,
 }
 
 #ifdef _WIN32
-Result HlslUsingFXC(const std::string& source, Program* program) {
+Result HlslUsingFXC(const std::string& source,
+                    const EntryPointList& entry_points) {
   Result result;
 
   // This library leaks if an error happens in this function, but it is ok
@@ -122,45 +115,38 @@ Result HlslUsingFXC(const std::string& source, Program* program) {
 
   result.source = source;
 
-  bool found_an_entrypoint = false;
-  for (auto* func : program->AST().Functions()) {
-    if (func->IsEntryPoint()) {
-      found_an_entrypoint = true;
-
-      const char* profile = "";
-      switch (func->pipeline_stage()) {
-        case ast::PipelineStage::kNone:
-          result.output = "Invalid PipelineStage";
-          result.failed = true;
-          return result;
-        case ast::PipelineStage::kVertex:
-          profile = "vs_5_1";
-          break;
-        case ast::PipelineStage::kFragment:
-          profile = "ps_5_1";
-          break;
-        case ast::PipelineStage::kCompute:
-          profile = "cs_5_1";
-          break;
-      }
-
-      auto name = program->Symbols().NameFor(func->symbol());
-
-      ComPtr<ID3DBlob> compiledShader;
-      ComPtr<ID3DBlob> errors;
-      if (FAILED(d3dCompile(source.c_str(), source.length(), nullptr, nullptr,
-                            nullptr, name.c_str(), profile, 0, 0,
-                            &compiledShader, &errors))) {
-        result.output = static_cast<char*>(errors->GetBufferPointer());
+  for (auto ep : entry_points) {
+    const char* profile = "";
+    switch (ep.second) {
+      case ast::PipelineStage::kNone:
+        result.output = "Invalid PipelineStage";
         result.failed = true;
         return result;
-      }
+      case ast::PipelineStage::kVertex:
+        profile = "vs_5_1";
+        break;
+      case ast::PipelineStage::kFragment:
+        profile = "ps_5_1";
+        break;
+      case ast::PipelineStage::kCompute:
+        profile = "cs_5_1";
+        break;
+    }
+
+    ComPtr<ID3DBlob> compiledShader;
+    ComPtr<ID3DBlob> errors;
+    if (FAILED(d3dCompile(source.c_str(), source.length(), nullptr, nullptr,
+                          nullptr, ep.first.c_str(), profile, 0, 0,
+                          &compiledShader, &errors))) {
+      result.output = static_cast<char*>(errors->GetBufferPointer());
+      result.failed = true;
+      return result;
     }
   }
 
   FreeLibrary(fxcLib);
 
-  if (!found_an_entrypoint) {
+  if (entry_points.empty()) {
     result.output = "No entrypoint found";
     result.failed = true;
     return result;

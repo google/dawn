@@ -14,11 +14,45 @@
 
 #include "src/writer/hlsl/generator.h"
 
+#include "src/transform/hlsl.h"
 #include "src/writer/hlsl/generator_impl.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
+
+Result::Result() = default;
+Result::~Result() = default;
+Result::Result(const Result&) = default;
+
+Result Generate(const Program* program, const Options&) {
+  Result result;
+
+  // Run the HLSL sanitizer.
+  transform::Hlsl sanitizer;
+  auto output = sanitizer.Run(program);
+  if (!output.program.IsValid()) {
+    result.success = false;
+    result.error = output.program.Diagnostics().str();
+    return result;
+  }
+
+  // Generate the HLSL code.
+  auto impl = std::make_unique<GeneratorImpl>(&output.program);
+  result.success = impl->Generate();
+  result.error = impl->error();
+  result.hlsl = impl->result();
+
+  // Collect the list of entry points in the sanitized program.
+  for (auto* func : output.program.AST().Functions()) {
+    if (func->IsEntryPoint()) {
+      auto name = output.program.Symbols().NameFor(func->symbol());
+      result.entry_points.push_back({name, func->pipeline_stage()});
+    }
+  }
+
+  return result;
+}
 
 Generator::Generator(const Program* program)
     : impl_(std::make_unique<GeneratorImpl>(program)) {}

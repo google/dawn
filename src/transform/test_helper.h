@@ -82,12 +82,13 @@ class TransformTestBase : public BASE {
       return diag::Formatter(style).format(output.program.Diagnostics());
     }
 
-    writer::wgsl::Generator generator(&output.program);
-    if (!generator.Generate()) {
-      return "WGSL writer failed:\n" + generator.error();
+    writer::wgsl::Options options;
+    auto result = writer::wgsl::Generate(&output.program, options);
+    if (!result.success) {
+      return "WGSL writer failed:\n" + result.error;
     }
 
-    auto res = generator.result();
+    auto res = result.wgsl;
     if (res.empty()) {
       return res;
     }

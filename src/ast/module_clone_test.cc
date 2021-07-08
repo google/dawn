@@ -144,11 +144,12 @@ let declaration_order_check_3 : i32 = 1;
   // Regenerate the wgsl for the src program. We use this instead of the
   // original source so that reformatting doesn't impact the final wgsl
   // comparison.
+  writer::wgsl::Options options;
   std::string src_wgsl;
   {
-    writer::wgsl::Generator src_gen(&src);
-    ASSERT_TRUE(src_gen.Generate()) << src_gen.error();
-    src_wgsl = src_gen.result();
+    auto result = writer::wgsl::Generate(&src, options);
+    ASSERT_TRUE(result.success) << result.error;
+    src_wgsl = result.wgsl;
 
     // Move the src program to a temporary that'll be dropped, so that the src
     // program is released before we attempt to print the dst program. This
@@ -159,9 +160,9 @@ let declaration_order_check_3 : i32 = 1;
   }
 
   // Print the dst module, check it matches the original source
-  writer::wgsl::Generator dst_gen(&dst);
-  ASSERT_TRUE(dst_gen.Generate());
-  auto dst_wgsl = dst_gen.result();
+  auto result = writer::wgsl::Generate(&dst, options);
+  ASSERT_TRUE(result.success);
+  auto dst_wgsl = result.wgsl;
   ASSERT_EQ(src_wgsl, dst_wgsl);
 
 #else  // #if TINT_BUILD_WGSL_READER && TINT_BUILD_WGSL_WRITER

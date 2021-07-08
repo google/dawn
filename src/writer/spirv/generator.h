@@ -22,6 +22,10 @@
 #include "src/writer/writer.h"
 
 namespace tint {
+
+// Forward declarations
+class Program;
+
 namespace writer {
 namespace spirv {
 
@@ -29,6 +33,43 @@ namespace spirv {
 class Builder;
 class BinaryWriter;
 
+/// Configuration options used for generating SPIR-V.
+struct Options {
+  /// Set to `true` to generate a PointSize builtin and have it set to 1.0
+  /// from all vertex shaders in the module.
+  bool emit_vertex_point_size = true;
+};
+
+/// The result produced when generating SPIR-V.
+struct Result {
+  /// Constructor
+  Result();
+
+  /// Destructor
+  ~Result();
+
+  /// Copy constructor
+  Result(const Result&);
+
+  /// True if generation was successful.
+  bool success = false;
+
+  /// The errors generated during code generation, if any.
+  std::string error;
+
+  /// The generated SPIR-V.
+  std::vector<uint32_t> spirv;
+};
+
+/// Generate SPIR-V for a program, according to a set of configuration options.
+/// The result will contain the SPIR-V, as well as success status and diagnostic
+/// information.
+/// @param program the program to translate to SPIR-V
+/// @param options the configuration options to use when generating SPIR-V
+/// @returns the resulting SPIR-V and supplementary information
+Result Generate(const Program* program, const Options& options);
+
+// TODO(jrprice): Remove this once Dawn is using the new interface.
 /// Class to generate SPIR-V from a Tint program
 class Generator : public writer::Writer {
  public:
