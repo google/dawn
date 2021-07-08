@@ -1197,9 +1197,10 @@ bool Resolver::ValidateFunction(const ast::Function* func,
                  (IsValidationEnabled(
                       info->declaration->decorations(),
                       ast::DisabledValidation::kEntryPointParameter) &&
-                  IsValidationEnabled(info->declaration->decorations(),
-                                      ast::DisabledValidation::
-                                          kIgnoreAtomicFunctionParameter))) {
+                  IsValidationEnabled(
+                      info->declaration->decorations(),
+                      ast::DisabledValidation::
+                          kIgnoreConstructibleFunctionParameter))) {
         AddError("decoration is not valid for entry point return types",
                  deco->source());
         return false;
@@ -1231,103 +1232,101 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
   };
 
   // Inner lambda that is applied to a type and all of its members.
-  auto validate_entry_point_decorations_inner =
-      [&](const ast::DecorationList& decos, sem::Type* ty, Source source,
-          ParamOrRetType param_or_ret, bool is_struct_member) {
-        // Scan decorations for pipeline IO attributes.
-        // Check for overlap with attributes that have been seen previously.
-        ast::Decoration* pipeline_io_attribute = nullptr;
-        for (auto* deco : decos) {
-          if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
-            if (pipeline_io_attribute) {
-              AddError("multiple entry point IO attributes", deco->source());
-              AddNote(
-                  "previously consumed " + deco_to_str(pipeline_io_attribute),
+  auto validate_entry_point_decorations_inner = [&](const ast::DecorationList&
+                                                        decos,
+                                                    sem::Type* ty,
+                                                    Source source,
+                                                    ParamOrRetType param_or_ret,
+                                                    bool is_struct_member) {
+    // Scan decorations for pipeline IO attributes.
+    // Check for overlap with attributes that have been seen previously.
+    ast::Decoration* pipeline_io_attribute = nullptr;
+    for (auto* deco : decos) {
+      if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+        if (pipeline_io_attribute) {
+          AddError("multiple entry point IO attributes", deco->source());
+          AddNote("previously consumed " + deco_to_str(pipeline_io_attribute),
                   pipeline_io_attribute->source());
-              return false;
-            }
-            pipeline_io_attribute = deco;
+          return false;
+        }
+        pipeline_io_attribute = deco;
 
-            if (builtins.count(builtin->value())) {
-              AddError(
-                  deco_to_str(builtin) +
-                      " attribute appears multiple times as pipeline " +
-                      (param_or_ret == ParamOrRetType::kParameter ? "input"
-                                                                  : "output"),
-                  func->source());
-              return false;
-            }
-            builtins.emplace(builtin->value());
+        if (builtins.count(builtin->value())) {
+          AddError(deco_to_str(builtin) +
+                       " attribute appears multiple times as pipeline " +
+                       (param_or_ret == ParamOrRetType::kParameter ? "input"
+                                                                   : "output"),
+                   func->source());
+          return false;
+        }
+        builtins.emplace(builtin->value());
 
-            if (!ValidateBuiltinDecoration(builtin, ty,
-                                           /* is_input */ param_or_ret ==
-                                               ParamOrRetType::kParameter)) {
-              return false;
-            }
-
-          } else if (auto* location = deco->As<ast::LocationDecoration>()) {
-            if (pipeline_io_attribute) {
-              AddError("multiple entry point IO attributes", deco->source());
-              AddNote(
-                  "previously consumed " + deco_to_str(pipeline_io_attribute),
-                  pipeline_io_attribute->source());
-              return false;
-            }
-            pipeline_io_attribute = deco;
-
-            if (locations.count(location->value())) {
-              AddError(
-                  deco_to_str(location) +
-                      " attribute appears multiple times as pipeline " +
-                      (param_or_ret == ParamOrRetType::kParameter ? "input"
-                                                                  : "output"),
-                  func->source());
-              return false;
-            }
-            locations.emplace(location->value());
-          }
+        if (!ValidateBuiltinDecoration(
+                builtin, ty,
+                /* is_input */ param_or_ret == ParamOrRetType::kParameter)) {
+          return false;
         }
 
-        // Check that we saw a pipeline IO attribute iff we need one.
-        if (ty->Is<sem::Struct>()) {
-          if (pipeline_io_attribute) {
-            AddError(
-                "entry point IO attributes must not be used on structure " +
-                    std::string(param_or_ret == ParamOrRetType::kParameter
-                                    ? "parameters"
-                                    : "return types"),
-                pipeline_io_attribute->source());
-            return false;
-          }
-        } else if (IsValidationEnabled(
-                       decos, ast::DisabledValidation::kEntryPointParameter)) {
-          if (!pipeline_io_attribute) {
-            std::string err = "missing entry point IO attribute";
-            if (!is_struct_member) {
-              err += (param_or_ret == ParamOrRetType::kParameter
-                          ? " on parameter"
-                          : " on return type");
-            }
-            AddError(err, source);
-            return false;
-          }
-
-          // Check that all user defined attributes are numeric scalars, vectors
-          // of numeric scalars.
-          // Testing for being a struct is handled by the if portion above.
-          if (!pipeline_io_attribute->Is<ast::BuiltinDecoration>()) {
-            if (!ty->is_numeric_scalar_or_vector()) {
-              AddError(
-                  "User defined entry point IO types must be a numeric scalar, "
-                  "a numeric vector, or a structure",
-                  source);
-              return false;
-            }
-          }
+      } else if (auto* location = deco->As<ast::LocationDecoration>()) {
+        if (pipeline_io_attribute) {
+          AddError("multiple entry point IO attributes", deco->source());
+          AddNote("previously consumed " + deco_to_str(pipeline_io_attribute),
+                  pipeline_io_attribute->source());
+          return false;
         }
+        pipeline_io_attribute = deco;
 
-        return true;
-      };
+        if (locations.count(location->value())) {
+          AddError(deco_to_str(location) +
+                       " attribute appears multiple times as pipeline " +
+                       (param_or_ret == ParamOrRetType::kParameter ? "input"
+                                                                   : "output"),
+                   func->source());
+          return false;
+        }
+        locations.emplace(location->value());
+      }
+    }
+
+    // Check that we saw a pipeline IO attribute iff we need one.
+    if (ty->Is<sem::Struct>()) {
+      if (pipeline_io_attribute) {
+        AddError("entry point IO attributes must not be used on structure " +
+                     std::string(param_or_ret == ParamOrRetType::kParameter
+                                     ? "parameters"
+                                     : "return types"),
+                 pipeline_io_attribute->source());
+        return false;
+      }
+    } else if (IsValidationEnabled(
+                   decos, ast::DisabledValidation::kEntryPointParameter)) {
+      if (!pipeline_io_attribute) {
+        std::string err = "missing entry point IO attribute";
+        if (!is_struct_member) {
+          err +=
+              (param_or_ret == ParamOrRetType::kParameter ? " on parameter"
+                                                          : " on return type");
+        }
+        AddError(err, source);
+        return false;
+      }
+
+      // Check that all user defined attributes are numeric scalars, vectors
+      // of numeric scalars.
+      // Testing for being a struct is handled by the if portion above.
+      if (!pipeline_io_attribute->Is<ast::BuiltinDecoration>()) {
+        if (!ty->is_numeric_scalar_or_vector()) {
+          AddError(
+              "User defined entry point IO types must be a numeric scalar, "
+              "a numeric vector, or a structure",
+              source);
+          return false;
+        }
+      }
+    }
+
+    return true;
+  };
 
   // Outer lambda for validating the entry point decorations for a type.
   auto validate_entry_point_decorations = [&](const ast::DecorationList& decos,
