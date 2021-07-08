@@ -1,8 +1,3 @@
-SKIP: FAILED
-
-
-
-Validation Failure:
 #include <metal_stdlib>
 
 using namespace metal;
@@ -10,60 +5,23 @@ struct tint_symbol {
   float4 value [[position]];
 };
 
-void textureLoad_5a2f9d(thread texture1d<int, access::sample>* const tint_symbol_2) {
-  int4 res = (*(tint_symbol_2)).read(uint(1), 1);
+void textureLoad_5a2f9d(texture1d<int, access::sample> tint_symbol_2) {
+  int4 res = tint_symbol_2.read(uint(1), 0);
 }
 
-vertex tint_symbol vertex_main(texture1d<int, access::sample> tint_symbol_4 [[texture(0)]]) {
-  texture1d<int, access::sample> tint_symbol_5 = tint_symbol_4;
-  thread texture1d<int, access::sample>* const tint_symbol_3 = &(tint_symbol_5);
+vertex tint_symbol vertex_main(texture1d<int, access::sample> tint_symbol_3 [[texture(0)]]) {
   textureLoad_5a2f9d(tint_symbol_3);
   tint_symbol const tint_symbol_1 = {.value=float4()};
   return tint_symbol_1;
 }
 
-fragment void fragment_main(texture1d<int, access::sample> tint_symbol_7 [[texture(0)]]) {
-  texture1d<int, access::sample> tint_symbol_8 = tint_symbol_7;
-  thread texture1d<int, access::sample>* const tint_symbol_6 = &(tint_symbol_8);
-  textureLoad_5a2f9d(tint_symbol_6);
+fragment void fragment_main(texture1d<int, access::sample> tint_symbol_4 [[texture(0)]]) {
+  textureLoad_5a2f9d(tint_symbol_4);
   return;
 }
 
-kernel void compute_main(texture1d<int, access::sample> tint_symbol_10 [[texture(0)]]) {
-  texture1d<int, access::sample> tint_symbol_11 = tint_symbol_10;
-  thread texture1d<int, access::sample>* const tint_symbol_9 = &(tint_symbol_11);
-  textureLoad_5a2f9d(tint_symbol_9);
+kernel void compute_main(texture1d<int, access::sample> tint_symbol_5 [[texture(0)]]) {
+  textureLoad_5a2f9d(tint_symbol_5);
   return;
 }
-
-
-Compilation failed: 
-
-program_source:9:33: error: no matching member function for call to 'read'
-  int4 res = (*(tint_symbol_2)).read(uint(1), 1);
-             ~~~~~~~~~~~~~~~~~~~^~~~
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_texture:1132:24: note: candidate function not viable: address space mismatch in 'this' argument ('texture1d<int, access::sample>'), parameter type must be 'const device metal::texture1d<int, metal::access::sample, void>'
-  METAL_FUNC vec<T, 4> read(uint coord, uint lod = 0) const device METAL_CONST_ARG(lod) METAL_ZERO_ARG(lod)
-                       ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_texture:1164:24: note: candidate function not viable: address space mismatch in 'this' argument ('texture1d<int, access::sample>'), parameter type must be 'const constant metal::texture1d<int, metal::access::sample, void>'
-  METAL_FUNC vec<T, 4> read(uint coord, uint lod = 0) const constant METAL_CONST_ARG(lod) METAL_ZERO_ARG(lod)
-                       ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_texture:1196:24: note: candidate function not viable: address space mismatch in 'this' argument ('texture1d<int, access::sample>'), parameter type must be 'const ray_data metal::texture1d<int, metal::access::sample, void>'
-  METAL_FUNC vec<T, 4> read(uint coord, uint lod = 0) const ray_data METAL_CONST_ARG(lod) METAL_ZERO_ARG(lod)
-                       ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_texture:1117:24: note: candidate function not viable: address space mismatch in 'this' argument ('texture1d<int, access::sample>'), parameter type must be 'const device metal::texture1d<int, metal::access::sample, void>'
-  METAL_FUNC vec<T, 4> read(ushort coord, ushort lod = 0) const device METAL_CONST_ARG(lod) METAL_ZERO_ARG(lod)
-                       ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_texture:1149:24: note: candidate function not viable: address space mismatch in 'this' argument ('texture1d<int, access::sample>'), parameter type must be 'const constant metal::texture1d<int, metal::access::sample, void>'
-  METAL_FUNC vec<T, 4> read(ushort coord, ushort lod = 0) const constant METAL_CONST_ARG(lod) METAL_ZERO_ARG(lod)
-                       ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_texture:1181:24: note: candidate function not viable: address space mismatch in 'this' argument ('texture1d<int, access::sample>'), parameter type must be 'const ray_data metal::texture1d<int, metal::access::sample, void>'
-  METAL_FUNC vec<T, 4> read(ushort coord, ushort lod = 0) const ray_data METAL_CONST_ARG(lod) METAL_ZERO_ARG(lod)
-                       ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_texture:1086:24: note: candidate disabled: 'lod' argument value must be 0
-  METAL_FUNC vec<T, 4> read(ushort coord, ushort lod = 0) const thread METAL_CONST_ARG(lod) METAL_ZERO_ARG(lod)
-                       ^                                                                    ~~~~~~~~~~~~~~~~~~~
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_texture:1101:24: note: candidate disabled: 'lod' argument value must be 0
-  METAL_FUNC vec<T, 4> read(uint coord, uint lod = 0) const thread METAL_CONST_ARG(lod) METAL_ZERO_ARG(lod)
-                       ^                                                                ~~~~~~~~~~~~~~~~~~~
 

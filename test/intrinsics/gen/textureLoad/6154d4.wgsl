@@ -26,7 +26,7 @@
 
 // fn textureLoad(texture: texture_2d<u32>, coords: vec2<i32>, level: i32) -> vec4<u32>
 fn textureLoad_6154d4() {
-  var res: vec4<u32> = textureLoad(arg_0, vec2<i32>(), 1);
+  var res: vec4<u32> = textureLoad(arg_0, vec2<i32>(), 0);
 }
 
 [[stage(vertex)]]

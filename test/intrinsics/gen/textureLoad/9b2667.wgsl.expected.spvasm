@@ -49,7 +49,7 @@
          %15 = OpLabel
         %res = OpVariable %_ptr_Function_float Function %4
          %18 = OpLoad %7 %arg_0
-         %17 = OpImageFetch %v4float %18 %23 Lod %int_1
+         %17 = OpImageFetch %v4float %18 %23 Lod %int_0
          %16 = OpCompositeExtract %float %17 0
                OpStore %res %16
                OpReturn

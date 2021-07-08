@@ -52,7 +52,7 @@
          %16 = OpLabel
         %res = OpVariable %_ptr_Function_v4uint Function %27
          %19 = OpLoad %7 %arg_0
-         %17 = OpImageFetch %v4uint %19 %24 Lod %int_1
+         %17 = OpImageFetch %v4uint %19 %24 Lod %int_0
                OpStore %res %17
                OpReturn
                OpFunctionEnd

@@ -26,7 +26,7 @@
 
 // fn textureDimensions(texture: texture_depth_cube_array, level: i32) -> vec2<i32>
 fn textureDimensions_a01845() {
-  var res: vec2<i32> = textureDimensions(arg_0, 1);
+  var res: vec2<i32> = textureDimensions(arg_0, 0);
 }
 
 [[stage(vertex)]]
