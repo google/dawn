@@ -1059,11 +1059,11 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
 
 TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
   auto* in_var0 =
-      Param("in_var0", ty.u32(), {Builtin(ast::Builtin::kInstanceIndex)});
-  auto* in_var1 = Param("in_var1", ty.u32(), {Location(0u)});
-  Func("foo", {in_var0, in_var1}, ty.u32(), {Return("in_var1")},
+      Param("in_var0", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)});
+  auto* in_var1 = Param("in_var1", ty.f32(), {Location(0u)});
+  Func("foo", {in_var0, in_var1}, ty.f32(), {Return("in_var1")},
        {Stage(ast::PipelineStage::kFragment)},
-       {Builtin(ast::Builtin::kSampleMask)});
+       {Builtin(ast::Builtin::kFragDepth)});
   Inspector& inspector = Build();
 
   auto result = inspector.GetEntryPoints();
@@ -1075,7 +1075,7 @@ TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
   EXPECT_EQ("in_var1", result[0].input_variables[0].name);
   EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
   EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
-  EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[0].component_type);
+  EXPECT_EQ(ComponentType::kFloat, result[0].input_variables[0].component_type);
 
   ASSERT_EQ(0u, result[0].output_variables.size());
 }

@@ -289,16 +289,6 @@ TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Location) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Builtin) {
-  // [[stage(fragment)]]
-  // fn main([[builtin(frag_depth)]] param : f32) {}
-  auto* param = Param("param", ty.f32(), {Builtin(ast::Builtin::kFragDepth)});
-  Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
-       {Stage(ast::PipelineStage::kFragment)});
-
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
-}
-
 TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Missing) {
   // [[stage(fragment)]]
   // fn main(param : f32) {}
@@ -313,10 +303,10 @@ TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Missing) {
 
 TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Multiple) {
   // [[stage(fragment)]]
-  // fn main([[location(0)]] [[builtin(vertex_index)]] param : u32) {}
+  // fn main([[location(0)]] [[builtin(sample_index)]] param : u32) {}
   auto* param = Param("param", ty.u32(),
                       {Location(Source{{13, 43}}, 0),
-                       Builtin(Source{{14, 52}}, ast::Builtin::kVertexIndex)});
+                       Builtin(Source{{14, 52}}, ast::Builtin::kSampleIndex)});
   Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
 

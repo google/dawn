@@ -145,7 +145,8 @@ TEST_P(FunctionParameterDecorationTest, IsValid) {
   } else {
     EXPECT_FALSE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(),
-              "error: decoration is not valid for function parameters");
+              "error: decoration is not valid for non-entry point function "
+              "parameters");
   }
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -244,7 +245,8 @@ TEST_P(FunctionReturnTypeDecorationTest, IsValid) {
   } else {
     EXPECT_FALSE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(),
-              "error: decoration is not valid for function return types");
+              "error: decoration is not valid for non-entry point function "
+              "return types");
   }
 }
 INSTANTIATE_TEST_SUITE_P(

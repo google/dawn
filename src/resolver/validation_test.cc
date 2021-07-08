@@ -85,9 +85,8 @@ TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInFragmentStage) {
   // fn f2(){ dst = wg; }
   // fn f1() { f2(); }
   // [[stage(fragment)]]
-  // fn f0() -> [[builtin(position)]] vec4<f32> {
+  // fn f0() {
   //  f1();
-  //  return dst;
   //}
 
   Global(Source{{1, 2}}, "wg", ty.vec4<f32>(), ast::StorageClass::kWorkgroup);
@@ -97,10 +96,9 @@ TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInFragmentStage) {
   Func(Source{{5, 6}}, "f2", ast::VariableList{}, ty.void_(), {stmt});
   Func(Source{{7, 8}}, "f1", ast::VariableList{}, ty.void_(),
        {Ignore(Call("f2"))});
-  Func(Source{{9, 10}}, "f0", ast::VariableList{}, ty.vec4<f32>(),
-       {Ignore(Call("f1")), Return(Expr("dst"))},
-       ast::DecorationList{Stage(ast::PipelineStage::kFragment)},
-       ast::DecorationList{Builtin(ast::Builtin::kPosition)});
+  Func(Source{{9, 10}}, "f0", ast::VariableList{}, ty.void_(),
+       {Ignore(Call("f1"))},
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(

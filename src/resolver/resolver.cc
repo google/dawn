@@ -928,20 +928,15 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
 
   for (auto* deco : info->declaration->decorations()) {
     if (!func->IsEntryPoint() && !deco->Is<ast::InternalDecoration>()) {
-      AddError("decoration is not valid for function parameters",
-               deco->source());
+      AddError(
+          "decoration is not valid for non-entry point function parameters",
+          deco->source());
       return false;
-    }
-
-    if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
-      if (!ValidateBuiltinDecoration(builtin, info->type)) {
-        return false;
-      }
     } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
       if (!ValidateInterpolateDecoration(interpolate, info->type)) {
         return false;
       }
-    } else if (!deco->IsAnyOf<ast::LocationDecoration,
+    } else if (!deco->IsAnyOf<ast::LocationDecoration, ast::BuiltinDecoration,
                               ast::InternalDecoration>() &&
                (IsValidationEnabled(
                     info->declaration->decorations(),
@@ -989,10 +984,25 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
 }
 
 bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
-                                         const sem::Type* storage_type) {
+                                         const sem::Type* storage_type,
+                                         const bool is_input) {
   auto* type = storage_type->UnwrapRef();
+  const auto stage = current_function_
+                         ? current_function_->declaration->pipeline_stage()
+                         : ast::PipelineStage::kNone;
+  std::stringstream stage_name;
+  stage_name << stage;
+  bool is_stage_mismatch = false;
   switch (deco->value()) {
     case ast::Builtin::kPosition:
+      if (stage != ast::PipelineStage::kNone &&
+          !(stage == ast::PipelineStage::kFragment && is_input) &&
+          !(stage == ast::PipelineStage::kVertex && !is_input)) {
+        AddError(deco_to_str(deco) + " cannot be used in " +
+                     (is_input ? "input of " : "output of ") +
+                     stage_name.str() + " pipeline stage",
+                 deco->source());
+      }
       if (!(type->is_float_vector() && type->As<sem::Vector>()->size() == 4)) {
         AddError("store type of " + deco_to_str(deco) + " must be 'vec4<f32>'",
                  deco->source());
@@ -1002,6 +1012,10 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
     case ast::Builtin::kGlobalInvocationId:
     case ast::Builtin::kLocalInvocationId:
     case ast::Builtin::kWorkgroupId:
+      if (stage != ast::PipelineStage::kNone &&
+          !(stage == ast::PipelineStage::kCompute && is_input)) {
+        is_stage_mismatch = true;
+      }
       if (!(type->is_unsigned_integer_vector() &&
             type->As<sem::Vector>()->size() == 3)) {
         AddError("store type of " + deco_to_str(deco) + " must be 'vec3<u32>'",
@@ -1010,6 +1024,10 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
       }
       break;
     case ast::Builtin::kFragDepth:
+      if (stage != ast::PipelineStage::kNone &&
+          !(stage == ast::PipelineStage::kFragment && !is_input)) {
+        is_stage_mismatch = true;
+      }
       if (!type->Is<sem::F32>()) {
         AddError("store type of " + deco_to_str(deco) + " must be 'f32'",
                  deco->source());
@@ -1017,6 +1035,10 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
       }
       break;
     case ast::Builtin::kFrontFacing:
+      if (stage != ast::PipelineStage::kNone &&
+          !(stage == ast::PipelineStage::kFragment && is_input)) {
+        is_stage_mismatch = true;
+      }
       if (!type->Is<sem::Bool>()) {
         AddError("store type of " + deco_to_str(deco) + " must be 'bool'",
                  deco->source());
@@ -1024,10 +1046,44 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
       }
       break;
     case ast::Builtin::kLocalInvocationIndex:
+      if (stage != ast::PipelineStage::kNone &&
+          !(stage == ast::PipelineStage::kCompute && is_input)) {
+        is_stage_mismatch = true;
+      }
+      if (!type->Is<sem::U32>()) {
+        AddError("store type of " + deco_to_str(deco) + " must be 'u32'",
+                 deco->source());
+        return false;
+      }
+      break;
     case ast::Builtin::kVertexIndex:
     case ast::Builtin::kInstanceIndex:
+      if (stage != ast::PipelineStage::kNone &&
+          !(stage == ast::PipelineStage::kVertex && is_input)) {
+        is_stage_mismatch = true;
+      }
+      if (!type->Is<sem::U32>()) {
+        AddError("store type of " + deco_to_str(deco) + " must be 'u32'",
+                 deco->source());
+        return false;
+      }
+      break;
     case ast::Builtin::kSampleMask:
+      if (stage != ast::PipelineStage::kNone &&
+          !(stage == ast::PipelineStage::kFragment)) {
+        is_stage_mismatch = true;
+      }
+      if (!type->Is<sem::U32>()) {
+        AddError("store type of " + deco_to_str(deco) + " must be 'u32'",
+                 deco->source());
+        return false;
+      }
+      break;
     case ast::Builtin::kSampleIndex:
+      if (stage != ast::PipelineStage::kNone &&
+          !(stage == ast::PipelineStage::kFragment && is_input)) {
+        is_stage_mismatch = true;
+      }
       if (!type->Is<sem::U32>()) {
         AddError("store type of " + deco_to_str(deco) + " must be 'u32'",
                  deco->source());
@@ -1037,6 +1093,15 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
     default:
       break;
   }
+
+  if (is_stage_mismatch) {
+    AddError(deco_to_str(deco) + " cannot be used in " +
+                 (is_input ? "input of " : "output of ") + stage_name.str() +
+                 " pipeline stage",
+             deco->source());
+    return false;
+  }
+
   return true;
 }
 
@@ -1070,12 +1135,9 @@ bool Resolver::ValidateFunction(const ast::Function* func,
     return false;
   }
 
-  auto stage_deco_count = 0;
   auto workgroup_deco_count = 0;
   for (auto* deco : func->decorations()) {
-    if (deco->Is<ast::StageDecoration>()) {
-      stage_deco_count++;
-    } else if (deco->Is<ast::WorkgroupDecoration>()) {
+    if (deco->Is<ast::WorkgroupDecoration>()) {
       workgroup_deco_count++;
       if (func->pipeline_stage() != ast::PipelineStage::kCompute) {
         AddError(
@@ -1083,7 +1145,8 @@ bool Resolver::ValidateFunction(const ast::Function* func,
             deco->source());
         return false;
       }
-    } else if (!deco->Is<ast::InternalDecoration>()) {
+    } else if (!deco->IsAnyOf<ast::StageDecoration,
+                              ast::InternalDecoration>()) {
       AddError("decoration is not valid for functions", deco->source());
       return false;
     }
@@ -1119,20 +1182,24 @@ bool Resolver::ValidateFunction(const ast::Function* func,
 
     for (auto* deco : func->return_type_decorations()) {
       if (!func->IsEntryPoint()) {
-        AddError("decoration is not valid for function return types",
-                 deco->source());
+        AddError(
+            "decoration is not valid for non-entry point function return types",
+            deco->source());
         return false;
       }
 
-      if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
-        if (!ValidateBuiltinDecoration(builtin, info->return_type)) {
-          return false;
-        }
-      } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
+      if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
         if (!ValidateInterpolateDecoration(interpolate, info->return_type)) {
           return false;
         }
-      } else if (!deco->Is<ast::LocationDecoration>()) {
+      } else if (!deco->IsAnyOf<ast::LocationDecoration, ast::BuiltinDecoration,
+                                ast::InternalDecoration>() &&
+                 (IsValidationEnabled(
+                      info->declaration->decorations(),
+                      ast::DisabledValidation::kEntryPointParameter) &&
+                  IsValidationEnabled(info->declaration->decorations(),
+                                      ast::DisabledValidation::
+                                          kIgnoreAtomicFunctionParameter))) {
         AddError("decoration is not valid for entry point return types",
                  deco->source());
         return false;
@@ -1191,6 +1258,12 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
               return false;
             }
             builtins.emplace(builtin->value());
+
+            if (!ValidateBuiltinDecoration(builtin, ty,
+                                           /* is_input */ param_or_ret ==
+                                               ParamOrRetType::kParameter)) {
+              return false;
+            }
 
           } else if (auto* location = deco->As<ast::LocationDecoration>()) {
             if (pipeline_io_attribute) {
@@ -1409,7 +1482,6 @@ bool Resolver::Function(ast::Function* func) {
       return false;
     }
 
-    // TODO(amaiorano): Validate parameter decorations
     for (auto* deco : param->decorations()) {
       Mark(deco);
     }
