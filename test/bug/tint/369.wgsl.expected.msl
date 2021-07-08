@@ -1,0 +1,7 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  /* 0x0000 */ float2x2 m;
+};
+
