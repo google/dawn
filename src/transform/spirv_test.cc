@@ -500,7 +500,7 @@ struct FragmentInterface {
 
 [[stage(vertex)]]
 fn vert_main(in : VertexIn) -> VertexOut {
-  return VertexOut(in.i, in.u, in.vi, in.vu);
+  return VertexOut(in.i, in.u, in.vi, in.vu, vec4<f32>());
 }
 
 [[stage(fragment)]]
@@ -561,7 +561,7 @@ fn tint_symbol_11(tint_symbol_5 : VertexOut) {
 [[stage(vertex)]]
 fn vert_main() {
   let tint_symbol_4 : VertexIn = VertexIn(tint_symbol, tint_symbol_1, tint_symbol_2, tint_symbol_3);
-  tint_symbol_11(VertexOut(tint_symbol_4.i, tint_symbol_4.u, tint_symbol_4.vi, tint_symbol_4.vu));
+  tint_symbol_11(VertexOut(tint_symbol_4.i, tint_symbol_4.u, tint_symbol_4.vi, tint_symbol_4.vu, vec4<f32>()));
   return;
 }
 

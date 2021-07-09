@@ -2335,6 +2335,176 @@ INSTANTIATE_TEST_SUITE_P(ResolverValidationTest,
                                          MatrixDimensions{3, 4},
                                          MatrixDimensions{4, 4}));
 
+namespace StructConstructor {
+using builder::CreatePtrs;
+using builder::CreatePtrsFor;
+using builder::f32;
+using builder::i32;
+using builder::mat2x2;
+using builder::mat3x3;
+using builder::mat4x4;
+using builder::u32;
+using builder::vec2;
+using builder::vec3;
+using builder::vec4;
+
+constexpr CreatePtrs all_types[] = {
+    CreatePtrsFor<bool>(),         //
+    CreatePtrsFor<u32>(),          //
+    CreatePtrsFor<i32>(),          //
+    CreatePtrsFor<f32>(),          //
+    CreatePtrsFor<vec4<bool>>(),   //
+    CreatePtrsFor<vec2<i32>>(),    //
+    CreatePtrsFor<vec3<u32>>(),    //
+    CreatePtrsFor<vec4<f32>>(),    //
+    CreatePtrsFor<mat2x2<f32>>(),  //
+    CreatePtrsFor<mat3x3<f32>>(),  //
+    CreatePtrsFor<mat4x4<f32>>()   //
+};
+
+auto number_of_members = testing::Values(2u, 32u, 64u);
+
+using StructConstructorInputsTest =
+    ResolverTestWithParam<std::tuple<CreatePtrs,  // struct member type
+                                     uint32_t>>;  // number of struct members
+TEST_P(StructConstructorInputsTest, TooFew) {
+  auto& param = GetParam();
+  auto& str_params = std::get<0>(param);
+  uint32_t N = std::get<1>(param);
+
+  ast::StructMemberList members;
+  ast::ExpressionList values;
+  for (uint32_t i = 0; i < N; i++) {
+    auto* struct_type = str_params.ast(*this);
+    members.push_back(Member("member_" + std::to_string(i), struct_type));
+    if (i < N - 1) {
+      auto* ctor_value_expr = str_params.expr(*this, 0);
+      values.push_back(ctor_value_expr);
+    }
+  }
+  auto* s = Structure("s", members);
+  auto* tc = create<ast::TypeConstructorExpression>(Source{{12, 34}}, ty.Of(s),
+                                                    values);
+  WrapInFunction(tc);
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: struct constructor has too few inputs: expected " +
+                std::to_string(N) + ", found " + std::to_string(N - 1));
+}
+
+TEST_P(StructConstructorInputsTest, TooMany) {
+  auto& param = GetParam();
+  auto& str_params = std::get<0>(param);
+  uint32_t N = std::get<1>(param);
+
+  ast::StructMemberList members;
+  ast::ExpressionList values;
+  for (uint32_t i = 0; i < N + 1; i++) {
+    if (i < N) {
+      auto* struct_type = str_params.ast(*this);
+      members.push_back(Member("member_" + std::to_string(i), struct_type));
+    }
+    auto* ctor_value_expr = str_params.expr(*this, 0);
+    values.push_back(ctor_value_expr);
+  }
+  auto* s = Structure("s", members);
+  auto* tc = create<ast::TypeConstructorExpression>(Source{{12, 34}}, ty.Of(s),
+                                                    values);
+  WrapInFunction(tc);
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: struct constructor has too many inputs: expected " +
+                std::to_string(N) + ", found " + std::to_string(N + 1));
+}
+
+INSTANTIATE_TEST_SUITE_P(ResolverValidationTest,
+                         StructConstructorInputsTest,
+                         testing::Combine(testing::ValuesIn(all_types),
+                                          number_of_members));
+using StructConstructorTypeTest =
+    ResolverTestWithParam<std::tuple<CreatePtrs,  // struct member type
+                                     CreatePtrs,  // constructor value type
+                                     uint32_t>>;  // number of struct members
+TEST_P(StructConstructorTypeTest, AllTypes) {
+  auto& param = GetParam();
+  auto& str_params = std::get<0>(param);
+  auto& ctor_params = std::get<1>(param);
+  uint32_t N = std::get<2>(param);
+
+  if (str_params.ast == ctor_params.ast) {
+    return;
+  }
+
+  ast::StructMemberList members;
+  ast::ExpressionList values;
+  // make the last value of the constructor to have a different type
+  uint32_t constructor_value_with_different_type = N - 1;
+  for (uint32_t i = 0; i < N; i++) {
+    auto* struct_type = str_params.ast(*this);
+    members.push_back(Member("member_" + std::to_string(i), struct_type));
+    auto* ctor_value_expr = (i == constructor_value_with_different_type)
+                                ? ctor_params.expr(*this, 0)
+                                : str_params.expr(*this, 0);
+    values.push_back(ctor_value_expr);
+  }
+  auto* s = Structure("s", members);
+  auto* tc = create<ast::TypeConstructorExpression>(ty.Of(s), values);
+  WrapInFunction(tc);
+
+  std::string found = FriendlyName(ctor_params.ast(*this));
+  std::string expected = FriendlyName(str_params.ast(*this));
+  std::stringstream err;
+  err << "error: type in struct constructor does not match struct member ";
+  err << "type: expected '" << expected << "', found '" << found << "'";
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), err.str());
+}
+
+INSTANTIATE_TEST_SUITE_P(ResolverValidationTest,
+                         StructConstructorTypeTest,
+                         testing::Combine(testing::ValuesIn(all_types),
+                                          testing::ValuesIn(all_types),
+                                          number_of_members));
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Struct_Nested) {
+  auto* inner_m = Member("m", ty.i32());
+  auto* inner_s = Structure("inner_s", {inner_m});
+
+  auto* m0 = Member("m", ty.i32());
+  auto* m1 = Member("m", ty.Of(inner_s));
+  auto* m2 = Member("m", ty.i32());
+  auto* s = Structure("s", {m0, m1, m2});
+
+  auto* tc = create<ast::TypeConstructorExpression>(Source{{12, 34}}, ty.Of(s),
+                                                    ExprList(1, 1, 1));
+  WrapInFunction(tc);
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "error: type in struct constructor does not match struct member "
+            "type: expected 'inner_s', found 'i32'");
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Struct) {
+  auto* m = Member("m", ty.i32());
+  auto* s = Structure("MyInputs", {m});
+  auto* tc = create<ast::TypeConstructorExpression>(Source{{12, 34}}, ty.Of(s),
+                                                    ExprList());
+  WrapInFunction(tc);
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Struct_Empty) {
+  auto* str = Structure("S", {
+                                 Member("a", ty.i32()),
+                                 Member("b", ty.f32()),
+                                 Member("c", ty.vec3<i32>()),
+                             });
+
+  WrapInFunction(Construct(ty.Of(str)));
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+}  // namespace StructConstructor
+
 }  // namespace
 }  // namespace resolver
 }  // namespace tint

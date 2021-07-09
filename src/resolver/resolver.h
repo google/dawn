@@ -294,6 +294,8 @@ class Resolver {
   bool ValidateStatements(const ast::StatementList& stmts);
   bool ValidateStorageTexture(const ast::StorageTexture* t);
   bool ValidateStructure(const sem::Struct* str);
+  bool ValidateStructureConstructor(const ast::TypeConstructorExpression* ctor,
+                                    const sem::Struct* struct_type);
   bool ValidateSwitch(const ast::SwitchStatement* s);
   bool ValidateVariable(const VariableInfo* info);
   bool ValidateVariableConstructor(const ast::Variable* var,

@@ -1793,9 +1793,9 @@ TEST_F(SpvBuilderConstructorTest,
                                    });
 
   Global("a", ty.f32(), ast::StorageClass::kPrivate);
-  Global("b", ty.f32(), ast::StorageClass::kPrivate);
+  Global("b", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
-  auto* t = Construct(ty.Of(s), 2.f, "a", 2.f);
+  auto* t = Construct(ty.Of(s), "a", "b");
   WrapInFunction(t);
 
   spirv::Builder& b = Build();

@@ -2266,6 +2266,9 @@ bool Resolver::Constructor(ast::ConstructorExpression* expr) {
     if (auto* arr_type = type->As<sem::Array>()) {
       return ValidateArrayConstructor(type_ctor, arr_type);
     }
+    if (auto* struct_type = type->As<sem::Struct>()) {
+      return ValidateStructureConstructor(type_ctor, struct_type);
+    }
   } else if (auto* scalar_ctor = expr->As<ast::ScalarConstructorExpression>()) {
     Mark(scalar_ctor->literal());
     auto* type = TypeOf(scalar_ctor->literal());
@@ -2276,6 +2279,36 @@ bool Resolver::Constructor(ast::ConstructorExpression* expr) {
   } else {
     TINT_ICE(Resolver, diagnostics_)
         << "unexpected constructor expression type";
+  }
+  return true;
+}
+
+bool Resolver::ValidateStructureConstructor(
+    const ast::TypeConstructorExpression* ctor,
+    const sem::Struct* struct_type) {
+  if (ctor->values().size() > 0) {
+    if (ctor->values().size() != struct_type->Members().size()) {
+      std::string fm = ctor->values().size() < struct_type->Members().size()
+                           ? "few"
+                           : "many";
+      AddError("struct constructor has too " + fm + " inputs: expected " +
+                   std::to_string(struct_type->Members().size()) + ", found " +
+                   std::to_string(ctor->values().size()),
+               ctor->source());
+      return false;
+    }
+    for (auto* member : struct_type->Members()) {
+      auto* value = ctor->values()[member->Index()];
+      if (member->Type() != TypeOf(value)->UnwrapRef()) {
+        AddError(
+            "type in struct constructor does not match struct member type: "
+            "expected '" +
+                member->Type()->FriendlyName(builder_->Symbols()) +
+                "', found '" + TypeNameOf(value) + "'",
+            value->source());
+        return false;
+      }
+    }
   }
   return true;
 }

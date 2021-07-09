@@ -264,13 +264,10 @@ TEST_F(HlslGeneratorImplTest_Function,
        {});
 
   Func("vert_main1", {}, ty.Of(vertex_output_struct),
-       {Return(Construct(ty.Of(vertex_output_struct),
-                         Expr(Call("foo", Expr(0.5f)))))},
-       {Stage(ast::PipelineStage::kVertex)});
+       {Return(Call("foo", Expr(0.5f)))}, {Stage(ast::PipelineStage::kVertex)});
 
   Func("vert_main2", {}, ty.Of(vertex_output_struct),
-       {Return(Construct(ty.Of(vertex_output_struct),
-                         Expr(Call("foo", Expr(0.25f)))))},
+       {Return(Call("foo", Expr(0.25f)))},
        {Stage(ast::PipelineStage::kVertex)});
 
   GeneratorImpl& gen = SanitizeAndBuild();
@@ -290,7 +287,7 @@ struct tint_symbol {
 };
 
 tint_symbol vert_main1() {
-  const VertexOutput tint_symbol_1 = {foo(0.5f)};
+  const VertexOutput tint_symbol_1 = foo(0.5f);
   const tint_symbol tint_symbol_5 = {tint_symbol_1.pos};
   return tint_symbol_5;
 }
@@ -300,7 +297,7 @@ struct tint_symbol_2 {
 };
 
 tint_symbol_2 vert_main2() {
-  const VertexOutput tint_symbol_3 = {foo(0.25f)};
+  const VertexOutput tint_symbol_3 = foo(0.25f);
   const tint_symbol_2 tint_symbol_6 = {tint_symbol_3.pos};
   return tint_symbol_6;
 }

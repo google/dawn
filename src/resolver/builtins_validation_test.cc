@@ -27,14 +27,13 @@ template <typename T>
 using vec3 = builder::vec3<T>;
 template <typename T>
 using vec4 = builder::vec4<T>;
-template <typename T>
 using f32 = builder::f32;
 using i32 = builder::i32;
 using u32 = builder::u32;
 
 class ResolverBuiltinsValidationTest : public resolver::TestHelper,
                                        public testing::Test {};
-namespace TypeTemp {
+namespace StageTest {
 struct Params {
   builder::ast_type_func_ptr type;
   ast::Builtin builtin;
@@ -218,7 +217,7 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInputStruct_Fail) {
       "12:34 error: builtin(frag_depth) cannot be used in input of fragment "
       "pipeline stage\nnote: while analysing entry point fragShader");
 }
-}  // namespace TypeTemp
+}  // namespace StageTest
 
 TEST_F(ResolverBuiltinsValidationTest, PositionNotF32_Struct_Fail) {
   // struct MyInputs {
