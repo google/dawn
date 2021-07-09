@@ -448,6 +448,9 @@ TEST_P(CompressedTextureBCFormatTest, Basic) {
 
 // Test copying into a sub-region of a texture with BC formats works correctly.
 TEST_P(CompressedTextureBCFormatTest, CopyIntoSubRegion) {
+    // TODO(crbug.com/dawn/976): Failing on Linux Intel OpenGL drivers.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
+
     DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
 
     CopyConfig config;
@@ -1164,6 +1167,9 @@ class CompressedTextureWriteTextureTest : public CompressedTextureBCFormatTest {
 // Test WriteTexture to a 2D texture with all parameters non-default
 // with BC formats.
 TEST_P(CompressedTextureWriteTextureTest, Basic) {
+    // TODO(crbug.com/dawn/976): Failing on Linux Intel OpenGL drivers.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
+
     CopyConfig config;
     config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
     config.textureDescriptor.size = {20, 24, 1};
@@ -1181,6 +1187,9 @@ TEST_P(CompressedTextureWriteTextureTest, Basic) {
 
 // Test writing to multiple 2D texture array layers with BC formats.
 TEST_P(CompressedTextureWriteTextureTest, WriteMultiple2DArrayLayers) {
+    // TODO(crbug.com/dawn/976): Failing on Linux Intel OpenGL drivers.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
+
     // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
@@ -1203,6 +1212,9 @@ TEST_P(CompressedTextureWriteTextureTest, WriteMultiple2DArrayLayers) {
 // subresource is different from its virtual size.
 TEST_P(CompressedTextureWriteTextureTest,
        WriteIntoSubresourceWithPhysicalSizeNotEqualToVirtualSize) {
+    // TODO(crbug.com/dawn/976): Failing on Linux Intel OpenGL drivers.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
+
     // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
