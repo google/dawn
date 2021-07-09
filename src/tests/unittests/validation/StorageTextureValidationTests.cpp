@@ -15,7 +15,7 @@
 #include "common/Assert.h"
 #include "tests/unittests/validation/ValidationTest.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/TextureFormatUtils.h"
+#include "utils/TextureUtils.h"
 #include "utils/WGPUHelpers.h"
 
 class StorageTextureValidationTests : public ValidationTest {
@@ -718,13 +718,9 @@ TEST_F(StorageTextureValidationTests, StorageTextureViewDimensionInBindGroup) {
 
             for (wgpu::TextureViewDimension dimensionOfTextureView : kSupportedDimensions) {
                 // Create a texture view with given texture view dimension.
-                wgpu::TextureDimension dimension = wgpu::TextureDimension::e2D;
-                if (dimensionOfTextureView == wgpu::TextureViewDimension::e3D) {
-                    dimension = wgpu::TextureDimension::e3D;
-                }
-                wgpu::Texture texture =
-                    CreateTexture(wgpu::TextureUsage::Storage, kStorageTextureFormat, 1,
-                                  kDepthOrArrayLayers, dimension);
+                wgpu::Texture texture = CreateTexture(
+                    wgpu::TextureUsage::Storage, kStorageTextureFormat, 1, kDepthOrArrayLayers,
+                    utils::ViewDimensionToTextureDimension(dimensionOfTextureView));
 
                 wgpu::TextureViewDescriptor textureViewDescriptor = kDefaultTextureViewDescriptor;
                 textureViewDescriptor.dimension = dimensionOfTextureView;

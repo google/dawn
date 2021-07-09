@@ -22,7 +22,7 @@
 #include <vector>
 
 #include "common/Constants.h"
-#include "utils/TextureFormatUtils.h"
+#include "utils/TextureUtils.h"
 
 namespace utils {
 

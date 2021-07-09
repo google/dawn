@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "TextureFormatUtils.h"
+#include "TextureUtils.h"
 
 namespace utils {
     bool TextureFormatSupportsStorageTexture(wgpu::TextureFormat format) {
@@ -376,6 +376,24 @@ namespace utils {
 
             default:
                 UNREACHABLE();
+        }
+    }
+
+    wgpu::TextureDimension ViewDimensionToTextureDimension(
+        const wgpu::TextureViewDimension dimension) {
+        switch (dimension) {
+            case wgpu::TextureViewDimension::e2D:
+            case wgpu::TextureViewDimension::e2DArray:
+            case wgpu::TextureViewDimension::Cube:
+            case wgpu::TextureViewDimension::CubeArray:
+                return wgpu::TextureDimension::e2D;
+            case wgpu::TextureViewDimension::e3D:
+                return wgpu::TextureDimension::e3D;
+            // TODO(crbug.com/dawn/814): Implement for 1D texture.
+            case wgpu::TextureViewDimension::e1D:
+            default:
+                UNREACHABLE();
+                break;
         }
     }
 

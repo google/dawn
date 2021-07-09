@@ -18,7 +18,7 @@
 #include "common/Constants.h"
 #include "common/Math.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/TextureFormatUtils.h"
+#include "utils/TextureUtils.h"
 #include "utils/WGPUHelpers.h"
 
 namespace {
@@ -481,20 +481,6 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         return device.CreateBuffer(&descriptor);
     }
 
-    wgpu::TextureDimension ViewDimensionToTextureDimension(
-        const wgpu::TextureViewDimension dimension) {
-        switch (dimension) {
-            case wgpu::TextureViewDimension::e2D:
-            case wgpu::TextureViewDimension::e2DArray:
-                return wgpu::TextureDimension::e2D;
-            case wgpu::TextureViewDimension::e3D:
-                return wgpu::TextureDimension::e3D;
-            default:
-                UNREACHABLE();
-                break;
-        }
-    }
-
     wgpu::Texture CreateTextureWithTestData(
         const std::vector<uint8_t>& initialTextureData,
         wgpu::TextureFormat format,
@@ -527,7 +513,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
 
         wgpu::Texture outputTexture =
             CreateTexture(format, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopyDst, kWidth,
-                          kHeight, sliceCount, ViewDimensionToTextureDimension(dimension));
+                          kHeight, sliceCount, utils::ViewDimensionToTextureDimension(dimension));
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
@@ -1025,9 +1011,9 @@ TEST_P(StorageTextureTests, Writeonly2DArrayOr3DStorageTexture) {
 
     // Prepare the write-only storage texture.
     for (wgpu::TextureViewDimension dimension : dimensions) {
-        wgpu::Texture writeonlyStorageTexture =
-            CreateTexture(kTextureFormat, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc,
-                          kWidth, kHeight, kSliceCount, ViewDimensionToTextureDimension(dimension));
+        wgpu::Texture writeonlyStorageTexture = CreateTexture(
+            kTextureFormat, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc, kWidth,
+            kHeight, kSliceCount, utils::ViewDimensionToTextureDimension(dimension));
 
         // Write the expected pixel values into the write-only storage texture.
         const std::string computeShader =
@@ -1060,9 +1046,9 @@ TEST_P(StorageTextureTests, ReadWrite2DArrayOr3DStorageTexture) {
         wgpu::Texture readonlyStorageTexture =
             CreateTextureWithTestData(initialTextureData, kTextureFormat, dimension);
         // Prepare the write-only storage texture.
-        wgpu::Texture writeonlyStorageTexture =
-            CreateTexture(kTextureFormat, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc,
-                          kWidth, kHeight, kSliceCount, ViewDimensionToTextureDimension(dimension));
+        wgpu::Texture writeonlyStorageTexture = CreateTexture(
+            kTextureFormat, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc, kWidth,
+            kHeight, kSliceCount, utils::ViewDimensionToTextureDimension(dimension));
 
         // Read values from read-only storage texture and write into the write-only storage texture.
         const std::string computeShader = CommonReadWriteTestCode(kTextureFormat, dimension);

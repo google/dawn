@@ -19,7 +19,7 @@
 #include "common/Math.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/TestUtils.h"
-#include "utils/TextureFormatUtils.h"
+#include "utils/TextureUtils.h"
 #include "utils/WGPUHelpers.h"
 
 // The helper struct to configure the copies between buffers and textures.

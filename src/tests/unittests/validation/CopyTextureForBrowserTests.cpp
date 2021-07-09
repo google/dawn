@@ -17,7 +17,7 @@
 #include "common/Math.h"
 #include "tests/unittests/validation/ValidationTest.h"
 #include "utils/TestUtils.h"
-#include "utils/TextureFormatUtils.h"
+#include "utils/TextureUtils.h"
 #include "utils/WGPUHelpers.h"
 
 class CopyTextureForBrowserTest : public ValidationTest {

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef UTILS_TEXTURE_FORMAT_UTILS_H_
-#define UTILS_TEXTURE_FORMAT_UTILS_H_
+#ifndef UTILS_TEXTURE_UTILS_H_
+#define UTILS_TEXTURE_UTILS_H_
 
 #include <array>
 
@@ -95,6 +95,9 @@ namespace utils {
 
     const char* GetWGSLColorTextureComponentType(wgpu::TextureFormat textureFormat);
     const char* GetWGSLImageFormatQualifier(wgpu::TextureFormat textureFormat);
+
+    wgpu::TextureDimension ViewDimensionToTextureDimension(
+        const wgpu::TextureViewDimension dimension);
 }  // namespace utils
 
 #endif
