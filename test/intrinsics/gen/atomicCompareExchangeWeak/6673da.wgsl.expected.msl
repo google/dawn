@@ -1,14 +1,20 @@
 #include <metal_stdlib>
 
 using namespace metal;
+
+template <typename A, typename T>
+vec<T, 2> atomicCompareExchangeWeak_1(device A* atomic, T compare, T value) {
+  T prev_value = compare;
+  bool matched = atomic_compare_exchange_weak_explicit(atomic, &prev_value, value, memory_order_relaxed, memory_order_relaxed);
+  return {prev_value, matched};
+}
+
 struct SB_RW {
   /* 0x0000 */ atomic_uint arg_0;
 };
 
 void atomicCompareExchangeWeak_6673da(device SB_RW& sb_rw) {
-  uint prev_value = 1u;
-  bool matched = atomic_compare_exchange_weak_explicit(&(sb_rw.arg_0), &prev_value, 1u, memory_order_relaxed, memory_order_relaxed);
-  uint2 res = uint2(prev_value, matched);
+  uint2 res = atomicCompareExchangeWeak_1(&(sb_rw.arg_0), 1u, 1u);
 }
 
 fragment void fragment_main(device SB_RW& sb_rw [[buffer(0)]]) {

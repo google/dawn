@@ -16,6 +16,7 @@
 #define SRC_WRITER_MSL_GENERATOR_IMPL_H_
 
 #include <string>
+#include <unordered_map>
 
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
@@ -218,6 +219,11 @@ class GeneratorImpl : public TextGenerator {
   bool EmitType(std::ostream& out,
                 const sem::Type* type,
                 const std::string& name);
+  /// Handles generating a storage class
+  /// @param out the output of the type stream
+  /// @param sc the storage class to generate
+  /// @returns true if the storage class is emitted
+  bool EmitStorageClass(std::ostream& out, ast::StorageClass sc);
   /// Handles generating an MSL-packed storage type.
   /// If the type does not have a packed form, the standard non-packed form is
   /// emitted.
@@ -282,11 +288,20 @@ class GeneratorImpl : public TextGenerator {
     uint32_t align;
   };
 
+  TextBuffer helpers_;  // Helper functions emitted at the top of the output
+
   /// @returns the MSL packed type size and alignment in bytes for the given
   /// type.
   SizeAndAlign MslPackedTypeSizeAndAlign(const sem::Type* ty);
 
+  using StorageClassToString =
+      std::unordered_map<ast::StorageClass, std::string>;
+
   std::function<bool()> emit_continuing_;
+
+  /// Name of atomicCompareExchangeWeak() helper for the given pointer storage
+  /// class.
+  StorageClassToString atomicCompareExchangeWeak_;
 };
 
 }  // namespace msl

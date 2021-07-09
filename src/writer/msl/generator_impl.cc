@@ -55,6 +55,7 @@
 #include "src/sem/void_type.h"
 #include "src/transform/msl.h"
 #include "src/utils/defer.h"
+#include "src/utils/get_or_create.h"
 #include "src/utils/scoped_assignment.h"
 #include "src/writer/float_to_string.h"
 
@@ -90,6 +91,8 @@ bool GeneratorImpl::Generate() {
   line() << "#include <metal_stdlib>";
   line();
   line() << "using namespace metal;";
+
+  auto helpers_insertion_point = current_buffer_->lines.size();
 
   for (auto* const type_decl : program_->AST().TypeDecls()) {
     if (!type_decl->Is<ast::Alias>()) {
@@ -135,6 +138,11 @@ bool GeneratorImpl::Generate() {
       }
     }
     line();
+  }
+
+  if (!helpers_.lines.empty()) {
+    current_buffer_->Insert("", helpers_insertion_point++, 0);
+    current_buffer_->Insert(helpers_, helpers_insertion_point++, 0);
   }
 
   return true;
@@ -454,7 +462,7 @@ bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
 bool GeneratorImpl::EmitAtomicCall(std::ostream& out,
                                    ast::CallExpression* expr,
                                    const sem::Intrinsic* intrinsic) {
-  auto call = [&](const char* name) {
+  auto call = [&](const std::string& name, bool append_memory_order_relaxed) {
     out << name;
     {
       ScopedParen sp(out);
@@ -467,84 +475,77 @@ bool GeneratorImpl::EmitAtomicCall(std::ostream& out,
           return false;
         }
       }
-      out << ", memory_order_relaxed";
+      if (append_memory_order_relaxed) {
+        out << ", memory_order_relaxed";
+      }
     }
     return true;
   };
 
   switch (intrinsic->Type()) {
     case sem::IntrinsicType::kAtomicLoad:
-      return call("atomic_load_explicit");
+      return call("atomic_load_explicit", true);
 
     case sem::IntrinsicType::kAtomicStore:
-      return call("atomic_store_explicit");
+      return call("atomic_store_explicit", true);
 
     case sem::IntrinsicType::kAtomicAdd:
-      return call("atomic_fetch_add_explicit");
+      return call("atomic_fetch_add_explicit", true);
 
     case sem::IntrinsicType::kAtomicMax:
-      return call("atomic_fetch_max_explicit");
+      return call("atomic_fetch_max_explicit", true);
 
     case sem::IntrinsicType::kAtomicMin:
-      return call("atomic_fetch_min_explicit");
+      return call("atomic_fetch_min_explicit", true);
 
     case sem::IntrinsicType::kAtomicAnd:
-      return call("atomic_fetch_and_explicit");
+      return call("atomic_fetch_and_explicit", true);
 
     case sem::IntrinsicType::kAtomicOr:
-      return call("atomic_fetch_or_explicit");
+      return call("atomic_fetch_or_explicit", true);
 
     case sem::IntrinsicType::kAtomicXor:
-      return call("atomic_fetch_xor_explicit");
+      return call("atomic_fetch_xor_explicit", true);
 
     case sem::IntrinsicType::kAtomicExchange:
-      return call("atomic_exchange_explicit");
+      return call("atomic_exchange_explicit", true);
 
     case sem::IntrinsicType::kAtomicCompareExchangeWeak: {
-      auto* target = expr->params()[0];
-      auto* compare_value = expr->params()[1];
-      auto* value = expr->params()[2];
+      auto* ptr_ty = TypeOf(expr->params()[0])->UnwrapRef()->As<sem::Pointer>();
+      auto sc = ptr_ty->StorageClass();
 
-      auto prev_value = UniqueIdentifier("prev_value");
-      auto matched = UniqueIdentifier("matched");
+      auto func = utils::GetOrCreate(
+          atomicCompareExchangeWeak_, sc, [&]() -> std::string {
+            auto name = UniqueIdentifier("atomicCompareExchangeWeak");
+            auto& buf = helpers_;
 
-      {  // prev_value = <compare_value>;
-        auto pre = line();
-        if (!EmitType(pre, TypeOf(value), "")) {
-          return false;
-        }
-        pre << " " << prev_value << " = ";
-        if (!EmitExpression(pre, compare_value)) {
-          return false;
-        }
-        pre << ";";
-      }
+            line(&buf) << "template <typename A, typename T>";
+            {
+              auto f = line(&buf);
+              f << "vec<T, 2> " << name << "(";
+              if (!EmitStorageClass(f, sc)) {
+                return "";
+              }
+              f << " A* atomic, T compare, T value) {";
+            }
 
-      {  // bool matched = atomic_compare_exchange_weak_explicit(
-         //   target, &got, <value>, memory_order_relaxed, memory_order_relaxed)
-        auto pre = line();
-        pre << "bool " << matched << " = atomic_compare_exchange_weak_explicit";
-        {
-          ScopedParen sp(pre);
-          if (!EmitExpression(pre, target)) {
-            return false;
-          }
-          pre << ", &" << prev_value << ", ";
-          if (!EmitExpression(pre, value)) {
-            return false;
-          }
-          pre << ", memory_order_relaxed, memory_order_relaxed";
-        }
-        pre << ";";
-      }
+            buf.IncrementIndent();
+            TINT_DEFER({
+              buf.DecrementIndent();
+              line(&buf) << "}";
+              line(&buf);
+            });
 
-      {  // [u]int2(got, matched)
-        if (!EmitType(out, TypeOf(expr), "")) {
-          return false;
-        }
-        out << "(" << prev_value << ", " << matched << ")";
-      }
-      return true;
+            line(&buf) << "T prev_value = compare;";
+            line(&buf) << "bool matched = "
+                          "atomic_compare_exchange_weak_explicit(atomic, "
+                          "&prev_value, value, memory_order_relaxed, "
+                          "memory_order_relaxed);";
+            line(&buf) << "return {prev_value, matched};";
+            return name;
+          });
+
+      return call(func, false);
     }
 
     default:
@@ -1867,24 +1868,10 @@ bool GeneratorImpl::EmitType(std::ostream& out,
   }
 
   if (auto* ptr = type->As<sem::Pointer>()) {
-    switch (ptr->StorageClass()) {
-      case ast::StorageClass::kFunction:
-      case ast::StorageClass::kPrivate:
-      case ast::StorageClass::kUniformConstant:
-        out << "thread ";
-        break;
-      case ast::StorageClass::kWorkgroup:
-        out << "threadgroup ";
-        break;
-      case ast::StorageClass::kStorage:
-        out << "device ";
-        break;
-      case ast::StorageClass::kUniform:
-        out << "constant ";
-        break;
-      default:
-        TINT_ICE(Writer, diagnostics_) << "unhandled storage class for pointer";
+    if (!EmitStorageClass(out, ptr->StorageClass())) {
+      return false;
     }
+    out << " ";
     if (ptr->StoreType()->Is<sem::Array>()) {
       std::string inner = "(*" + name + ")";
       if (!EmitType(out, ptr->StoreType(), inner)) {
@@ -2001,6 +1988,29 @@ bool GeneratorImpl::EmitType(std::ostream& out,
 
   diagnostics_.add_error(diag::System::Writer,
                          "unknown type in EmitType: " + type->type_name());
+  return false;
+}
+
+bool GeneratorImpl::EmitStorageClass(std::ostream& out, ast::StorageClass sc) {
+  switch (sc) {
+    case ast::StorageClass::kFunction:
+    case ast::StorageClass::kPrivate:
+    case ast::StorageClass::kUniformConstant:
+      out << "thread";
+      return true;
+    case ast::StorageClass::kWorkgroup:
+      out << "threadgroup";
+      return true;
+    case ast::StorageClass::kStorage:
+      out << "device";
+      return true;
+    case ast::StorageClass::kUniform:
+      out << "constant";
+      return true;
+    default:
+      break;
+  }
+  TINT_ICE(Writer, diagnostics_) << "unhandled storage class: " << sc;
   return false;
 }
 
