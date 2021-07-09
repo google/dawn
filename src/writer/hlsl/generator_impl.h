@@ -34,6 +34,7 @@
 #include "src/program_builder.h"
 #include "src/scope_stack.h"
 #include "src/transform/decompose_memory_access.h"
+#include "src/utils/hash.h"
 #include "src/writer/text_generator.h"
 
 namespace tint {
@@ -126,12 +127,12 @@ class GeneratorImpl : public TextGenerator {
   /// Handles generating an atomic intrinsic call for a storage buffer variable
   /// @param out the output of the expression stream
   /// @param expr the call expression
-  /// @param op the atomic op
+  /// @param intrinsic the atomic intrinsic
   /// @returns true if the call expression is emitted
   bool EmitStorageAtomicCall(
       std::ostream& out,
       ast::CallExpression* expr,
-      transform::DecomposeMemoryAccess::Intrinsic::Op op);
+      const transform::DecomposeMemoryAccess::Intrinsic* intrinsic);
   /// Handles generating an atomic intrinsic call for a workgroup variable
   /// @param out the output of the expression stream
   /// @param expr the call expression
@@ -389,9 +390,28 @@ class GeneratorImpl : public TextGenerator {
     std::string var_name;
   };
 
+  struct DMAIntrinsic {
+    transform::DecomposeMemoryAccess::Intrinsic::Op op;
+    transform::DecomposeMemoryAccess::Intrinsic::DataType type;
+    bool operator==(const DMAIntrinsic& rhs) const {
+      return op == rhs.op && type == rhs.type;
+    }
+    /// Hasher is a std::hash function for DMAIntrinsic
+    struct Hasher {
+      /// @param i the DMAIntrinsic to hash
+      /// @returns the hash of `i`
+      inline std::size_t operator()(const DMAIntrinsic& i) const {
+        return utils::Hash(i.op, i.type);
+      }
+    };
+  };
+
   std::string get_buffer_name(ast::Expression* expr);
 
+  TextBuffer helpers_;  // Helper functions emitted at the top of the output
   std::function<bool()> emit_continuing_;
+  std::unordered_map<DMAIntrinsic, std::string, DMAIntrinsic::Hasher>
+      dma_intrinsics_;
   std::unordered_map<const sem::Struct*, std::string> structure_builders_;
   std::unordered_map<const ast::AssignmentStatement*, const sem::Vector*>
       vector_assignments_in_loops_;

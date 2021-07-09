@@ -1,9 +1,13 @@
+int atomicXor_1(RWByteAddressBuffer buffer, uint offset, int value) {
+  int original_value = 0;
+  buffer.InterlockedXor(offset, value, original_value);
+  return original_value;
+}
+
 RWByteAddressBuffer sb_rw : register(u0, space0);
 
 void atomicXor_c1b78c() {
-  int atomic_result = 0;
-  sb_rw.InterlockedXor(0u, 1, atomic_result);
-  int res = atomic_result;
+  int res = atomicXor_1(sb_rw, 0u, 1);
 }
 
 void fragment_main() {

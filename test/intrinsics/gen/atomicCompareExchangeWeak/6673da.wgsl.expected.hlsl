@@ -1,11 +1,14 @@
+uint2 atomicCompareExchangeWeak_1(RWByteAddressBuffer buffer, uint offset, uint compare, uint value) {
+  uint2 result = {0, 0};
+  buffer.InterlockedCompareExchange(offset, compare, value, result.x);
+  result.y = result.x == compare;
+  return result;
+}
+
 RWByteAddressBuffer sb_rw : register(u0, space0);
 
 void atomicCompareExchangeWeak_6673da() {
-  uint2 atomic_result = uint2(0u, 0u);
-  uint atomic_compare_value = 1u;
-  sb_rw.InterlockedCompareExchange(0u, atomic_compare_value, 1u, atomic_result.x);
-  atomic_result.y = atomic_result.x == atomic_compare_value;
-  uint2 res = atomic_result;
+  uint2 res = atomicCompareExchangeWeak_1(sb_rw, 0u, 1u, 1u);
 }
 
 void fragment_main() {

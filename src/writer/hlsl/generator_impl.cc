@@ -171,6 +171,10 @@ bool GeneratorImpl::Generate() {
     }
   }
 
+  if (!helpers_.lines.empty()) {
+    current_buffer_->Insert(helpers_, 0, 0);
+  }
+
   return true;
 }
 
@@ -845,7 +849,7 @@ bool GeneratorImpl::EmitStorageBufferAccess(
     case Op::kAtomicXor:
     case Op::kAtomicExchange:
     case Op::kAtomicCompareExchangeWeak:
-      return EmitStorageAtomicCall(out, expr, intrinsic->op);
+      return EmitStorageAtomicCall(out, expr, intrinsic);
   }
 
   TINT_UNREACHABLE(Writer, diagnostics_)
@@ -857,188 +861,217 @@ bool GeneratorImpl::EmitStorageBufferAccess(
 bool GeneratorImpl::EmitStorageAtomicCall(
     std::ostream& out,
     ast::CallExpression* expr,
-    transform::DecomposeMemoryAccess::Intrinsic::Op op) {
+    const transform::DecomposeMemoryAccess::Intrinsic* intrinsic) {
   using Op = transform::DecomposeMemoryAccess::Intrinsic::Op;
 
-  std::string result = UniqueIdentifier("atomic_result");
-
   auto* result_ty = TypeOf(expr);
-  if (!result_ty->Is<sem::Void>()) {
-    auto pre = line();
-    if (!EmitTypeAndName(pre, TypeOf(expr), ast::StorageClass::kNone,
-                         ast::Access::kUndefined, result)) {
-      return false;
-    }
-    pre << " = ";
-    if (!EmitZeroValue(pre, result_ty)) {
-      return false;
-    }
-    pre << ";";
-  }
 
-  auto* buffer = expr->params()[0];
-  auto* offset = expr->params()[1];
+  auto& buf = helpers_;
 
-  auto call_buffer_method = [&](const char* name) {
-    // First two arguments to the DecomposeMemoryAccess::Intrinsic are the
-    // buffer and offset. The buffer is the moved to the LHS of the '.', and the
-    // offset becomes the first argument. The rest of the method's arguments are
-    // the same.
-    auto pre = line();
-    if (!EmitExpression(pre, buffer)) {
-      return false;
-    }
-    pre << "." << name;
-    {
-      ScopedParen sp(pre);
-      if (!EmitExpression(pre, offset)) {
-        return false;
-      }
-
-      for (size_t i = 2; i < expr->params().size(); i++) {
-        auto* arg = expr->params()[i];
-        pre << ", ";
-        if (!EmitExpression(pre, arg)) {
-          return false;
+  // generate_helper() generates a helper function that translates the
+  // DecomposeMemoryAccess::Intrinsic call into the corresponding HLSL
+  // atomic intrinsic function.
+  auto generate_helper = [&]() -> std::string {
+    auto rmw = [&](const char* wgsl, const char* hlsl) -> std::string {
+      auto name = UniqueIdentifier(wgsl);
+      {
+        auto fn = line(&buf);
+        if (!EmitTypeAndName(fn, result_ty, ast::StorageClass::kNone,
+                             ast::Access::kUndefined, name)) {
+          return "";
         }
+        fn << "(RWByteAddressBuffer buffer, uint offset, ";
+        if (!EmitTypeAndName(fn, result_ty, ast::StorageClass::kNone,
+                             ast::Access::kUndefined, "value")) {
+          return "";
+        }
+        fn << ") {";
       }
 
-      pre << ", " << result;
-    }
-    pre << ";";
+      buf.IncrementIndent();
+      TINT_DEFER({
+        buf.DecrementIndent();
+        line(&buf) << "}";
+        line(&buf);
+      });
 
-    out << result;
-    return true;
+      {
+        auto l = line(&buf);
+        if (!EmitTypeAndName(l, result_ty, ast::StorageClass::kNone,
+                             ast::Access::kUndefined, "original_value")) {
+          return "";
+        }
+        l << " = 0;";
+      }
+      line(&buf) << "buffer." << hlsl << "(offset, value, original_value);";
+      line(&buf) << "return original_value;";
+      return name;
+    };
+
+    switch (intrinsic->op) {
+      case Op::kAtomicAdd:
+        return rmw("atomicAdd", "InterlockedAdd");
+
+      case Op::kAtomicMax:
+        return rmw("atomicMax", "InterlockedMax");
+
+      case Op::kAtomicMin:
+        return rmw("atomicMin", "InterlockedMin");
+
+      case Op::kAtomicAnd:
+        return rmw("atomicAnd", "InterlockedAnd");
+
+      case Op::kAtomicOr:
+        return rmw("atomicOr", "InterlockedOr");
+
+      case Op::kAtomicXor:
+        return rmw("atomicXor", "InterlockedXor");
+
+      case Op::kAtomicExchange:
+        return rmw("atomicExchange", "InterlockedExchange");
+
+      case Op::kAtomicLoad: {
+        // HLSL does not have an InterlockedLoad, so we emulate it with
+        // InterlockedOr using 0 as the OR value
+        auto name = UniqueIdentifier("atomicLoad");
+        {
+          auto fn = line(&buf);
+          if (!EmitTypeAndName(fn, result_ty, ast::StorageClass::kNone,
+                               ast::Access::kUndefined, name)) {
+            return "";
+          }
+          fn << "(RWByteAddressBuffer buffer, uint offset) {";
+        }
+
+        buf.IncrementIndent();
+        TINT_DEFER({
+          buf.DecrementIndent();
+          line(&buf) << "}";
+          line(&buf);
+        });
+
+        {
+          auto l = line(&buf);
+          if (!EmitTypeAndName(l, result_ty, ast::StorageClass::kNone,
+                               ast::Access::kUndefined, "value")) {
+            return "";
+          }
+          l << " = 0;";
+        }
+
+        line(&buf) << "buffer.InterlockedOr(offset, 0, value);";
+        line(&buf) << "return value;";
+        return name;
+      }
+      case Op::kAtomicStore: {
+        // HLSL does not have an InterlockedStore, so we emulate it with
+        // InterlockedExchange and discard the returned value
+        auto* value_ty = TypeOf(expr->params()[2]);
+        auto name = UniqueIdentifier("atomicStore");
+        {
+          auto fn = line(&buf);
+          fn << "void " << name << "(RWByteAddressBuffer buffer, uint offset, ";
+          if (!EmitTypeAndName(fn, value_ty, ast::StorageClass::kNone,
+                               ast::Access::kUndefined, "value")) {
+            return "";
+          }
+          fn << ") {";
+        }
+
+        buf.IncrementIndent();
+        TINT_DEFER({
+          buf.DecrementIndent();
+          line(&buf) << "}";
+          line(&buf);
+        });
+
+        {
+          auto l = line(&buf);
+          if (!EmitTypeAndName(l, value_ty, ast::StorageClass::kNone,
+                               ast::Access::kUndefined, "ignored")) {
+            return "";
+          }
+          l << ";";
+        }
+        line(&buf) << "buffer.InterlockedExchange(offset, value, ignored);";
+        return name;
+      }
+      case Op::kAtomicCompareExchangeWeak: {
+        auto* value_ty = TypeOf(expr->params()[2]);
+
+        auto name = UniqueIdentifier("atomicCompareExchangeWeak");
+        {
+          auto fn = line(&buf);
+          if (!EmitTypeAndName(fn, result_ty, ast::StorageClass::kNone,
+                               ast::Access::kUndefined, name)) {
+            return "";
+          }
+          fn << "(RWByteAddressBuffer buffer, uint offset, ";
+          if (!EmitTypeAndName(fn, value_ty, ast::StorageClass::kNone,
+                               ast::Access::kUndefined, "compare")) {
+            return "";
+          }
+          fn << ", ";
+          if (!EmitTypeAndName(fn, value_ty, ast::StorageClass::kNone,
+                               ast::Access::kUndefined, "value")) {
+            return "";
+          }
+          fn << ") {";
+        }
+
+        buf.IncrementIndent();
+        TINT_DEFER({
+          buf.DecrementIndent();
+          line(&buf) << "}";
+          line(&buf);
+        });
+
+        {  // T result = {0, 0};
+          auto l = line(&buf);
+          if (!EmitTypeAndName(l, result_ty, ast::StorageClass::kNone,
+                               ast::Access::kUndefined, "result")) {
+            return "";
+          }
+          l << " = {0, 0};";
+        }
+        line(&buf) << "buffer.InterlockedCompareExchange(offset, compare, "
+                      "value, result.x);";
+        line(&buf) << "result.y = result.x == compare;";
+        line(&buf) << "return result;";
+        return name;
+      }
+      default:
+        break;
+    }
+    TINT_UNREACHABLE(Writer, diagnostics_)
+        << "unsupported atomic DecomposeMemoryAccess::Intrinsic::Op: "
+        << static_cast<int>(intrinsic->op);
+    return "";
   };
 
-  switch (op) {
-    case Op::kAtomicLoad: {
-      // HLSL does not have an InterlockedLoad, so we emulate it with
-      // InterlockedOr using 0 as the OR value
-      auto pre = line();
-      if (!EmitExpression(pre, buffer)) {
-        return false;
-      }
-      pre << ".InterlockedOr";
-      {
-        ScopedParen sp(pre);
-        if (!EmitExpression(pre, offset)) {
-          return false;
-        }
-        pre << ", 0, " << result;
-      }
-
-      pre << ";";
-      out << result;
-      return true;
-    }
-    case Op::kAtomicStore: {
-      // HLSL does not have an InterlockedStore, so we emulate it with
-      // InterlockedExchange and discard the returned value
-      auto pre = line();
-      auto* value = expr->params()[2];
-      auto* value_ty = TypeOf(value);
-      if (!EmitTypeAndName(pre, value_ty, ast::StorageClass::kNone,
-                           ast::Access::kUndefined, result)) {
-        return false;
-      }
-      pre << " = ";
-      if (!EmitZeroValue(pre, value_ty)) {
-        return false;
-      }
-      pre << ";";
-
-      if (!EmitExpression(out, buffer)) {
-        return false;
-      }
-      out << ".InterlockedExchange";
-      {
-        ScopedParen sp(out);
-        if (!EmitExpression(out, offset)) {
-          return false;
-        }
-        out << ", ";
-        if (!EmitExpression(out, value)) {
-          return false;
-        }
-        out << ", " << result;
-      }
-      return true;
-    }
-    case Op::kAtomicCompareExchangeWeak: {
-      auto* compare_value = expr->params()[2];
-      auto* value = expr->params()[3];
-
-      std::string compare = UniqueIdentifier("atomic_compare_value");
-      {  // T atomic_compare_value = compare_value;
-        auto pre = line();
-        if (!EmitTypeAndName(pre, TypeOf(compare_value),
-                             ast::StorageClass::kNone, ast::Access::kUndefined,
-                             compare)) {
-          return false;
-        }
-        pre << " = ";
-        if (!EmitExpression(pre, compare_value)) {
-          return false;
-        }
-        pre << ";";
-      }
-      {  // buffer.InterlockedCompareExchange(offset, compare, value, result.x);
-        auto pre = line();
-        if (!EmitExpression(pre, buffer)) {
-          return false;
-        }
-        pre << ".InterlockedCompareExchange";
-        {
-          ScopedParen sp(pre);
-          if (!EmitExpression(pre, offset)) {
-            return false;
-          }
-          pre << ", " << compare << ", ";
-          if (!EmitExpression(pre, value)) {
-            return false;
-          }
-          pre << ", " << result << ".x";
-        }
-        pre << ";";
-      }
-      {  // result.y = result.x == compare;
-        line() << result << ".y = " << result << ".x == " << compare << ";";
-      }
-
-      out << result;
-      return true;
-    }
-
-    case Op::kAtomicAdd:
-      return call_buffer_method("InterlockedAdd");
-
-    case Op::kAtomicMax:
-      return call_buffer_method("InterlockedMax");
-
-    case Op::kAtomicMin:
-      return call_buffer_method("InterlockedMin");
-
-    case Op::kAtomicAnd:
-      return call_buffer_method("InterlockedAnd");
-
-    case Op::kAtomicOr:
-      return call_buffer_method("InterlockedOr");
-
-    case Op::kAtomicXor:
-      return call_buffer_method("InterlockedXor");
-
-    case Op::kAtomicExchange:
-      return call_buffer_method("InterlockedExchange");
-
-    default:
-      break;
+  auto func = utils::GetOrCreate(dma_intrinsics_,
+                                 DMAIntrinsic{intrinsic->op, intrinsic->type},
+                                 generate_helper);
+  if (func.empty()) {
+    return false;
   }
 
-  TINT_UNREACHABLE(Writer, diagnostics_)
-      << "unsupported atomic DecomposeMemoryAccess::Intrinsic::Op: "
-      << static_cast<int>(op);
-  return false;
+  out << func;
+  {
+    ScopedParen sp(out);
+    bool first = true;
+    for (auto* arg : expr->params()) {
+      if (!first) {
+        out << ", ";
+      }
+      first = false;
+      if (!EmitExpression(out, arg)) {
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,

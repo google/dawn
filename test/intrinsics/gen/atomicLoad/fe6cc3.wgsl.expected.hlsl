@@ -1,9 +1,13 @@
+uint atomicLoad_1(RWByteAddressBuffer buffer, uint offset) {
+  uint value = 0;
+  buffer.InterlockedOr(offset, 0, value);
+  return value;
+}
+
 RWByteAddressBuffer sb_rw : register(u0, space0);
 
 void atomicLoad_fe6cc3() {
-  uint atomic_result = 0u;
-  sb_rw.InterlockedOr(0u, 0, atomic_result);
-  uint res = atomic_result;
+  uint res = atomicLoad_1(sb_rw, 0u);
 }
 
 void fragment_main() {

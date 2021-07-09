@@ -1,8 +1,12 @@
+void atomicStore_1(RWByteAddressBuffer buffer, uint offset, uint value) {
+  uint ignored;
+  buffer.InterlockedExchange(offset, value, ignored);
+}
+
 RWByteAddressBuffer sb_rw : register(u0, space0);
 
 void atomicStore_cdc29e() {
-  uint atomic_result = 0u;
-  sb_rw.InterlockedExchange(0u, 1u, atomic_result);
+  atomicStore_1(sb_rw, 0u, 1u);
 }
 
 void fragment_main() {
