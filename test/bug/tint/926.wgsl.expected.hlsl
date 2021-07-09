@@ -9,7 +9,7 @@ struct tint_symbol_1 {
 void computeMain(tint_symbol_1 tint_symbol) {
   const uint3 global_id = tint_symbol.global_id;
   uint atomic_result = 0u;
-  drawOut.InterlockedAdd(0u, 0u, atomic_result);
+  drawOut.InterlockedAdd(0u, cubeVerts, atomic_result);
   const uint firstVertex = atomic_result;
   return;
 }

@@ -880,6 +880,10 @@ bool GeneratorImpl::EmitStorageAtomicCall(
   auto* offset = expr->params()[1];
 
   auto call_buffer_method = [&](const char* name) {
+    // First two arguments to the DecomposeMemoryAccess::Intrinsic are the
+    // buffer and offset. The buffer is the moved to the LHS of the '.', and the
+    // offset becomes the first argument. The rest of the method's arguments are
+    // the same.
     auto pre = line();
     if (!EmitExpression(pre, buffer)) {
       return false;
@@ -891,7 +895,7 @@ bool GeneratorImpl::EmitStorageAtomicCall(
         return false;
       }
 
-      for (size_t i = 1; i < expr->params().size() - 1; i++) {
+      for (size_t i = 2; i < expr->params().size(); i++) {
         auto* arg = expr->params()[i];
         pre << ", ";
         if (!EmitExpression(pre, arg)) {
