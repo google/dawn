@@ -39,6 +39,7 @@
 #include "src/ast/i32.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/interpolate_decoration.h"
+#include "src/ast/invariant_decoration.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/matrix.h"
 #include "src/ast/member_accessor_expression.h"
@@ -2040,6 +2041,19 @@ class ProgramBuilder {
   ast::InterpolateDecoration* Interpolate(ast::InterpolationType type,
                                           ast::InterpolationSampling sampling) {
     return create<ast::InterpolateDecoration>(source_, type, sampling);
+  }
+
+  /// Creates an ast::InvariantDecoration
+  /// @param source the source information
+  /// @returns the invariant decoration pointer
+  ast::InvariantDecoration* Invariant(const Source& source) {
+    return create<ast::InvariantDecoration>(source);
+  }
+
+  /// Creates an ast::InvariantDecoration
+  /// @returns the invariant decoration pointer
+  ast::InvariantDecoration* Invariant() {
+    return create<ast::InvariantDecoration>(source_);
   }
 
   /// Creates an ast::LocationDecoration

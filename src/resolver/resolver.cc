@@ -722,7 +722,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
     } else {
       bool is_shader_io_decoration =
           deco->IsAnyOf<ast::BuiltinDecoration, ast::InterpolateDecoration,
-                        ast::LocationDecoration>();
+                        ast::InvariantDecoration, ast::LocationDecoration>();
       bool has_io_storage_class =
           info->storage_class == ast::StorageClass::kInput ||
           info->storage_class == ast::StorageClass::kOutput;
@@ -1194,6 +1194,7 @@ bool Resolver::ValidateFunction(const ast::Function* func,
           return false;
         }
       } else if (!deco->IsAnyOf<ast::LocationDecoration, ast::BuiltinDecoration,
+                                ast::InvariantDecoration,
                                 ast::InternalDecoration>() &&
                  (IsValidationEnabled(
                       info->declaration->decorations(),
@@ -1242,6 +1243,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
     // Scan decorations for pipeline IO attributes.
     // Check for overlap with attributes that have been seen previously.
     ast::Decoration* pipeline_io_attribute = nullptr;
+    ast::InvariantDecoration* invariant_attribute = nullptr;
     for (auto* deco : decos) {
       if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
         if (pipeline_io_attribute) {
@@ -1286,6 +1288,8 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
           return false;
         }
         locations.emplace(location->value());
+      } else if (auto* invariant = deco->As<ast::InvariantDecoration>()) {
+        invariant_attribute = invariant;
       }
     }
 
@@ -1312,10 +1316,19 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
         return false;
       }
 
+      auto* builtin = pipeline_io_attribute->As<ast::BuiltinDecoration>();
+      if (invariant_attribute &&
+          !(builtin && builtin->value() == ast::Builtin::kPosition)) {
+        AddError(
+            "invariant attribute must only be applied to a position builtin",
+            invariant_attribute->source());
+        return false;
+      }
+
       // Check that all user defined attributes are numeric scalars, vectors
       // of numeric scalars.
       // Testing for being a struct is handled by the if portion above.
-      if (!pipeline_io_attribute->Is<ast::BuiltinDecoration>()) {
+      if (!builtin) {
         if (!ty->is_numeric_scalar_or_vector()) {
           AddError(
               "User defined entry point IO types must be a numeric scalar, "
@@ -3558,6 +3571,7 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
     for (auto* deco : member->Declaration()->decorations()) {
       if (!(deco->Is<ast::BuiltinDecoration>() ||
             deco->Is<ast::InterpolateDecoration>() ||
+            deco->Is<ast::InvariantDecoration>() ||
             deco->Is<ast::LocationDecoration>() ||
             deco->Is<ast::StructMemberOffsetDecoration>() ||
             deco->Is<ast::StructMemberSizeDecoration>() ||

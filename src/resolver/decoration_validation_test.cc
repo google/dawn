@@ -62,6 +62,7 @@ enum class DecorationKind {
   kBuiltin,
   kGroup,
   kInterpolate,
+  kInvariant,
   kLocation,
   kOverride,
   kOffset,
@@ -107,6 +108,8 @@ static ast::DecorationList createDecorations(const Source& source,
       return {builder.Interpolate(source, ast::InterpolationType::kLinear,
                                   ast::InterpolationSampling::kCenter),
               builder.Location(0)};
+    case DecorationKind::kInvariant:
+      return {builder.Invariant(source)};
     case DecorationKind::kLocation:
       return {builder.Location(source, 1)};
     case DecorationKind::kOverride:
@@ -157,6 +160,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBuiltin, false},
                     TestParams{DecorationKind::kGroup, false},
                     TestParams{DecorationKind::kInterpolate, false},
+                    TestParams{DecorationKind::kInvariant, false},
                     TestParams{DecorationKind::kLocation, false},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
@@ -193,6 +197,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBuiltin, true},
                     TestParams{DecorationKind::kGroup, false},
                     TestParams{DecorationKind::kInterpolate, true},
+                    TestParams{DecorationKind::kInvariant, false},
                     TestParams{DecorationKind::kLocation, true},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
@@ -257,6 +262,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBuiltin, false},
                     TestParams{DecorationKind::kGroup, false},
                     TestParams{DecorationKind::kInterpolate, false},
+                    TestParams{DecorationKind::kInvariant, false},
                     TestParams{DecorationKind::kLocation, false},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
@@ -293,6 +299,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBuiltin, true},
                     TestParams{DecorationKind::kGroup, false},
                     TestParams{DecorationKind::kInterpolate, true},
+                    // kInvariant tested separately (requires position builtin)
                     TestParams{DecorationKind::kLocation, true},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
@@ -315,6 +322,32 @@ TEST_F(EntryPointReturnTypeDecorationTest, DuplicateDecoration) {
   EXPECT_EQ(r()->error(),
             R"(56:78 error: duplicate location decoration
 12:34 note: first decoration declared here)");
+}
+
+TEST_F(EntryPointReturnTypeDecorationTest, InvariantWithPosition) {
+  Func("main", ast::VariableList{}, ty.vec4<f32>(),
+       ast::StatementList{Return(Construct(ty.vec4<f32>()))},
+       ast::DecorationList{Stage(ast::PipelineStage::kVertex)},
+       ast::DecorationList{
+           Invariant(Source{{12, 34}}),
+           Builtin(Source{{56, 78}}, ast::Builtin::kPosition),
+       });
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(EntryPointReturnTypeDecorationTest, InvariantWithoutPosition) {
+  Func("main", ast::VariableList{}, ty.vec4<f32>(),
+       ast::StatementList{Return(Construct(ty.vec4<f32>()))},
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)},
+       ast::DecorationList{
+           Invariant(Source{{12, 34}}),
+           Location(Source{{56, 78}}, 0),
+       });
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: invariant attribute must only be applied to a "
+            "position builtin");
 }
 
 using ArrayDecorationTest = TestWithParams;
@@ -347,6 +380,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBuiltin, false},
                     TestParams{DecorationKind::kGroup, false},
                     TestParams{DecorationKind::kInterpolate, false},
+                    TestParams{DecorationKind::kInvariant, false},
                     TestParams{DecorationKind::kLocation, false},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
@@ -382,6 +416,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBuiltin, false},
                     TestParams{DecorationKind::kGroup, false},
                     TestParams{DecorationKind::kInterpolate, false},
+                    TestParams{DecorationKind::kInvariant, false},
                     TestParams{DecorationKind::kLocation, false},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
@@ -445,6 +480,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBuiltin, true},
                     TestParams{DecorationKind::kGroup, false},
                     TestParams{DecorationKind::kInterpolate, true},
+                    TestParams{DecorationKind::kInvariant, true},
                     TestParams{DecorationKind::kLocation, true},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, true},
@@ -507,6 +543,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBuiltin, false},
                     TestParams{DecorationKind::kGroup, false},
                     TestParams{DecorationKind::kInterpolate, false},
+                    TestParams{DecorationKind::kInvariant, false},
                     TestParams{DecorationKind::kLocation, false},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
@@ -558,6 +595,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBuiltin, false},
                     TestParams{DecorationKind::kGroup, false},
                     TestParams{DecorationKind::kInterpolate, false},
+                    TestParams{DecorationKind::kInvariant, false},
                     TestParams{DecorationKind::kLocation, false},
                     TestParams{DecorationKind::kOverride, true},
                     TestParams{DecorationKind::kOffset, false},
@@ -607,6 +645,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBuiltin, false},
                     TestParams{DecorationKind::kGroup, false},
                     TestParams{DecorationKind::kInterpolate, false},
+                    TestParams{DecorationKind::kInvariant, false},
                     TestParams{DecorationKind::kLocation, false},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
