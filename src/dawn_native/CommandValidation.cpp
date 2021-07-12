@@ -268,13 +268,6 @@ namespace dawn_native {
 
         ASSERT(texture->GetDimension() != wgpu::TextureDimension::e1D);
 
-        // Disallow copy to/from a 3D texture as unsafe until it is fully implemented.
-        if (texture->GetDimension() == wgpu::TextureDimension::e3D &&
-            device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
-            return DAWN_VALIDATION_ERROR(
-                "Copy to/from a 3D texture is disallowed because it is not fully implemented");
-        }
-
         // Validation for the copy being in-bounds:
         Extent3D mipSize = texture->GetMipLevelPhysicalSize(textureCopy.mipLevel);
         // For 1D/2D textures, include the array layer as depth so it can be checked with other

@@ -270,13 +270,6 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Cannot create an empty texture");
         }
 
-        // Disallow 1D and 3D textures as unsafe until they are fully implemented.
-        if (descriptor->dimension != wgpu::TextureDimension::e2D &&
-            device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
-            return DAWN_VALIDATION_ERROR(
-                "1D and 3D textures are disallowed because they are not fully implemented");
-        }
-
         if (descriptor->dimension != wgpu::TextureDimension::e2D && format->isCompressed) {
             return DAWN_VALIDATION_ERROR("Compressed texture must be 2D");
         }
@@ -321,13 +314,6 @@ namespace dawn_native {
         DAWN_TRY(ValidateTextureViewDimension(descriptor->dimension));
         if (descriptor->dimension == wgpu::TextureViewDimension::e1D) {
             return DAWN_VALIDATION_ERROR("1D texture views aren't supported (yet).");
-        }
-
-        // Disallow 3D views as unsafe until they are fully implemented.
-        if (descriptor->dimension == wgpu::TextureViewDimension::e3D &&
-            device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
-            return DAWN_VALIDATION_ERROR(
-                "3D views are disallowed because they are not fully implemented");
         }
 
         DAWN_TRY(ValidateTextureFormat(descriptor->format));
