@@ -25,7 +25,6 @@
 #include "src/ast/assignment_statement.h"
 #include "src/ast/atomic.h"
 #include "src/ast/binary_expression.h"
-#include "src/ast/binding_decoration.h"
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/bool.h"
 #include "src/ast/bool_literal.h"
@@ -55,7 +54,6 @@
 #include "src/ast/stage_decoration.h"
 #include "src/ast/storage_texture.h"
 #include "src/ast/stride_decoration.h"
-#include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_member_align_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/struct_member_size_decoration.h"
@@ -1381,9 +1379,7 @@ class ProgramBuilder {
   /// value.
   /// @returns a new `ast::Variable`, which is automatically registered as a
   /// global variable with the ast::Module.
-  template <typename NAME,
-            typename... OPTIONAL,
-            traits::EnableIfIsNotType<traits::Decay<NAME>, Source>* = nullptr>
+  template <typename NAME, typename... OPTIONAL>
   ast::Variable* Global(NAME&& name,
                         const ast::Type* type,
                         OPTIONAL&&... optional) {
@@ -1678,35 +1674,6 @@ class ProgramBuilder {
   /// @returns the align decoration pointer
   ast::StructMemberAlignDecoration* MemberAlign(uint32_t val) {
     return create<ast::StructMemberAlignDecoration>(source_, val);
-  }
-
-  /// Creates a ast::StructBlockDecoration
-  /// @returns the struct block decoration pointer
-  ast::StructBlockDecoration* StructBlock() {
-    return create<ast::StructBlockDecoration>();
-  }
-
-  /// Creates the ast::GroupDecoration
-  /// @param value group decoration index
-  /// @returns the group decoration pointer
-  ast::GroupDecoration* Group(uint32_t value) {
-    return create<ast::GroupDecoration>(value);
-  }
-
-  /// Creates the ast::BindingDecoration
-  /// @param value the binding index
-  /// @returns the binding deocration pointer
-  ast::BindingDecoration* Binding(uint32_t value) {
-    return create<ast::BindingDecoration>(value);
-  }
-
-  /// Convenience function to create both a ast::GroupDecoration and
-  /// ast::BindingDecoration
-  /// @param group the group index
-  /// @param binding the binding index
-  /// @returns a decoration list with both the group and binding decorations
-  ast::DecorationList GroupAndBinding(uint32_t group, uint32_t binding) {
-    return {Group(group), Binding(binding)};
   }
 
   /// Creates an ast::Function and registers it with the ast::Module.

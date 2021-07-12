@@ -2239,14 +2239,11 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
-  // Manually create uniform buffer to make sure it had a valid layout (array
-  // with elem stride of 16, and that is 16-byte aligned within the struct)
-  ast::Struct* foo_struct_type = Structure(
-      "foo_type",
-      {Member("0__i32", ty.i32()),
-       Member("b", ty.array(ty.u32(), 4, /*stride*/ 16), {MemberAlign(16)})},
-      {create<ast::StructBlockDecoration>()});
-
+  // TODO(bclayton) - This is not a legal structure layout for uniform buffer
+  // usage. Once crbug.com/tint/628 is implemented, this will fail validation
+  // and will need to be fixed.
+  ast::Struct* foo_struct_type =
+      MakeUniformBufferType("foo_type", {ty.i32(), ty.array<u32, 4>()});
   AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
 
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
@@ -2266,8 +2263,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
             result[0].resource_type);
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
-  EXPECT_EQ(80u, result[0].size);
-  EXPECT_EQ(80u, result[0].size_no_padding);
+  EXPECT_EQ(20u, result[0].size);
+  EXPECT_EQ(20u, result[0].size_no_padding);
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
