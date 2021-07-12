@@ -309,8 +309,8 @@ Token ParserImpl::peek(size_t idx) {
   return token_queue_[idx];
 }
 
-Token ParserImpl::peek() {
-  return peek(0);
+bool ParserImpl::peek_is(Token::Type tok, size_t idx) {
+  return peek(idx).Is(tok);
 }
 
 Token ParserImpl::last_token() const {
@@ -892,7 +892,7 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
   if (ident.errored)
     return Failure::kErrored;
 
-  if (allow_inferred && !peek().Is(Token::Type::kColon)) {
+  if (allow_inferred && !peek_is(Token::Type::kColon)) {
     return TypedIdentifier{nullptr, ident.value, ident.source};
   }
 
@@ -934,7 +934,7 @@ Expect<ast::Access> ParserImpl::expect_access(const std::string& use) {
 // variable_qualifier
 //   : LESS_THAN storage_class (COMMA access_mode)? GREATER_THAN
 Maybe<ParserImpl::VariableQualifier> ParserImpl::variable_qualifier() {
-  if (!peek().IsLessThan()) {
+  if (!peek_is(Token::Type::kLessThan)) {
     return Failure::kNoMatch;
   }
 
@@ -966,12 +966,10 @@ Maybe<ParserImpl::VariableQualifier> ParserImpl::variable_qualifier() {
 // type_alias
 //   : TYPE IDENT EQUAL type_decl
 Maybe<ast::Alias*> ParserImpl::type_alias() {
-  auto t = peek();
-  if (!t.IsType())
+  if (!peek_is(Token::Type::kType))
     return Failure::kNoMatch;
 
-  next();  // Consume the peek
-
+  auto t = next();
   const char* use = "type alias";
 
   auto name = expect_ident(use);
@@ -1059,7 +1057,7 @@ Maybe<ast::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
   if (match(Token::Type::kU32, &source))
     return builder_.ty.u32(source);
 
-  if (t.IsVec2() || t.IsVec3() || t.IsVec4()) {
+  if (t.IsVector()) {
     next();  // Consume the peek
     return expect_type_decl_vector(t);
   }
@@ -1076,9 +1074,7 @@ Maybe<ast::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
     return expect_type_decl_array(t, std::move(decos));
   }
 
-  if (t.IsMat2x2() || t.IsMat2x3() || t.IsMat2x4() || t.IsMat3x2() ||
-      t.IsMat3x3() || t.IsMat3x4() || t.IsMat4x2() || t.IsMat4x3() ||
-      t.IsMat4x4()) {
+  if (t.IsMatrix()) {
     next();  // Consume the peek
     return expect_type_decl_matrix(t);
   }
@@ -1155,9 +1151,9 @@ Expect<ast::Type*> ParserImpl::expect_type_decl_atomic(Token t) {
 
 Expect<ast::Type*> ParserImpl::expect_type_decl_vector(Token t) {
   uint32_t count = 2;
-  if (t.IsVec3())
+  if (t.Is(Token::Type::kVec3))
     count = 3;
-  else if (t.IsVec4())
+  else if (t.Is(Token::Type::kVec4))
     count = 4;
 
   const char* use = "vector";
@@ -1203,14 +1199,14 @@ Expect<ast::Type*> ParserImpl::expect_type_decl_array(
 Expect<ast::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
   uint32_t rows = 2;
   uint32_t columns = 2;
-  if (t.IsMat3x2() || t.IsMat3x3() || t.IsMat3x4()) {
+  if (t.IsMat3xN()) {
     columns = 3;
-  } else if (t.IsMat4x2() || t.IsMat4x3() || t.IsMat4x4()) {
+  } else if (t.IsMat4xN()) {
     columns = 4;
   }
-  if (t.IsMat2x3() || t.IsMat3x3() || t.IsMat4x3()) {
+  if (t.IsMatNx3()) {
     rows = 3;
-  } else if (t.IsMat2x4() || t.IsMat3x4() || t.IsMat4x4()) {
+  } else if (t.IsMatNx4()) {
     rows = 4;
   }
 
@@ -1289,7 +1285,8 @@ Expect<ast::StructMemberList> ParserImpl::expect_struct_body_decl() {
 
         ast::StructMemberList members;
 
-        while (synchronized_ && !peek().IsBraceRight() && !peek().IsEof()) {
+        while (synchronized_ && !peek_is(Token::Type::kBraceRight) &&
+               !peek_is(Token::Type::kEOF)) {
           auto member = sync(Token::Type::kSemicolon,
                              [&]() -> Expect<ast::StructMember*> {
                                auto decos = decoration_list();
@@ -1443,7 +1440,7 @@ Expect<ast::VariableList> ParserImpl::expect_param_list() {
   while (synchronized_) {
     // Check for the end of the list.
     auto t = peek();
-    if (!t.IsIdentifier() && !t.IsAttrLeft()) {
+    if (!t.IsIdentifier() && !t.Is(Token::Type::kAttrLeft)) {
       break;
     }
 
@@ -1625,7 +1622,7 @@ Maybe<ast::Statement*> ParserImpl::statement() {
   if (stmt_for.matched)
     return stmt_for.value;
 
-  if (peek().IsBraceLeft()) {
+  if (peek_is(Token::Type::kBraceLeft)) {
     auto body = expect_body_stmt();
     if (body.errored)
       return Failure::kErrored;
@@ -1701,7 +1698,7 @@ Maybe<ast::ReturnStatement*> ParserImpl::return_stmt() {
   if (!match(Token::Type::kReturn, &source))
     return Failure::kNoMatch;
 
-  if (peek().IsSemicolon())
+  if (peek_is(Token::Type::kSemicolon))
     return create<ast::ReturnStatement>(source, nullptr);
 
   auto expr = logical_or_expression();
@@ -1885,15 +1882,14 @@ Maybe<ast::SwitchStatement*> ParserImpl::switch_stmt() {
 //   : CASE case_selectors COLON BRACKET_LEFT case_body BRACKET_RIGHT
 //   | DEFAULT COLON BRACKET_LEFT case_body BRACKET_RIGHT
 Maybe<ast::CaseStatement*> ParserImpl::switch_body() {
-  auto t = peek();
-  if (!t.IsCase() && !t.IsDefault())
+  if (!peek_is(Token::Type::kCase) && !peek_is(Token::Type::kDefault))
     return Failure::kNoMatch;
 
+  auto t = next();
   auto source = t.source();
-  next();  // Consume the peek
 
   ast::CaseSelectorList selector_list;
-  if (t.IsCase()) {
+  if (t.Is(Token::Type::kCase)) {
     auto selectors = expect_case_selectors();
     if (selectors.errored)
       return Failure::kErrored;
@@ -2096,7 +2092,7 @@ Maybe<ast::ForLoopStatement*> ParserImpl::for_stmt() {
 Maybe<ast::CallStatement*> ParserImpl::func_call_stmt() {
   auto t = peek();
   auto t2 = peek(1);
-  if (!t.IsIdentifier() || !t2.IsParenLeft())
+  if (!t.IsIdentifier() || !t2.Is(Token::Type::kParenLeft))
     return Failure::kNoMatch;
 
   next();  // Consume the first peek
@@ -2161,7 +2157,7 @@ Maybe<ast::Expression*> ParserImpl::primary_expression() {
   if (lit.matched)
     return create<ast::ScalarConstructorExpression>(source, lit.value);
 
-  if (t.IsParenLeft()) {
+  if (t.Is(Token::Type::kParenLeft)) {
     auto paren = expect_paren_rhs_stmt();
     if (paren.errored)
       return Failure::kErrored;
@@ -2189,7 +2185,7 @@ Maybe<ast::Expression*> ParserImpl::primary_expression() {
     auto* ident = create<ast::IdentifierExpression>(
         t.source(), builder_.Symbols().Register(t.to_str()));
 
-    if (peek().IsParenLeft()) {
+    if (peek_is(Token::Type::kParenLeft)) {
       auto params = expect_argument_expression_list("function call");
       if (params.errored)
         return Failure::kErrored;
@@ -2345,21 +2341,19 @@ Maybe<ast::Expression*> ParserImpl::unary_expression() {
 Expect<ast::Expression*> ParserImpl::expect_multiplicative_expr(
     ast::Expression* lhs) {
   while (synchronized_) {
-    auto t = peek();
-
     ast::BinaryOp op = ast::BinaryOp::kNone;
-    if (t.IsStar())
+    if (peek_is(Token::Type::kStar))
       op = ast::BinaryOp::kMultiply;
-    else if (t.IsForwardSlash())
+    else if (peek_is(Token::Type::kForwardSlash))
       op = ast::BinaryOp::kDivide;
-    else if (t.IsMod())
+    else if (peek_is(Token::Type::kMod))
       op = ast::BinaryOp::kModulo;
     else
       return lhs;
 
+    auto t = next();
     auto source = t.source();
     auto name = t.to_name();
-    next();  // Consume the peek
 
     auto rhs = unary_expression();
     if (rhs.errored)
@@ -2393,18 +2387,16 @@ Maybe<ast::Expression*> ParserImpl::multiplicative_expression() {
 Expect<ast::Expression*> ParserImpl::expect_additive_expr(
     ast::Expression* lhs) {
   while (synchronized_) {
-    auto t = peek();
-
     ast::BinaryOp op = ast::BinaryOp::kNone;
-    if (t.IsPlus())
+    if (peek_is(Token::Type::kPlus))
       op = ast::BinaryOp::kAdd;
-    else if (t.IsMinus())
+    else if (peek_is(Token::Type::kMinus))
       op = ast::BinaryOp::kSubtract;
     else
       return lhs;
 
+    auto t = next();
     auto source = t.source();
-    next();  // Consume the peek
 
     auto rhs = multiplicative_expression();
     if (rhs.errored)
@@ -2435,23 +2427,20 @@ Maybe<ast::Expression*> ParserImpl::additive_expression() {
 //   | SHIFT_RIGHT additive_expression shift_expr
 Expect<ast::Expression*> ParserImpl::expect_shift_expr(ast::Expression* lhs) {
   while (synchronized_) {
-    auto t = peek();
-    auto source = t.source();
-
     auto* name = "";
     ast::BinaryOp op = ast::BinaryOp::kNone;
-    if (t.IsShiftLeft()) {
-      next();  // Consume the peek
+    if (peek_is(Token::Type::kShiftLeft)) {
       op = ast::BinaryOp::kShiftLeft;
       name = "<<";
-    } else if (t.IsShiftRight()) {
-      next();  // Consume the peek
+    } else if (peek_is(Token::Type::kShiftRight)) {
       op = ast::BinaryOp::kShiftRight;
       name = ">>";
     } else {
       return lhs;
     }
 
+    auto t = next();
+    auto source = t.source();
     auto rhs = additive_expression();
     if (rhs.errored)
       return Failure::kErrored;
@@ -2486,22 +2475,21 @@ Maybe<ast::Expression*> ParserImpl::shift_expression() {
 Expect<ast::Expression*> ParserImpl::expect_relational_expr(
     ast::Expression* lhs) {
   while (synchronized_) {
-    auto t = peek();
     ast::BinaryOp op = ast::BinaryOp::kNone;
-    if (t.IsLessThan())
+    if (peek_is(Token::Type::kLessThan))
       op = ast::BinaryOp::kLessThan;
-    else if (t.IsGreaterThan())
+    else if (peek_is(Token::Type::kGreaterThan))
       op = ast::BinaryOp::kGreaterThan;
-    else if (t.IsLessThanEqual())
+    else if (peek_is(Token::Type::kLessThanEqual))
       op = ast::BinaryOp::kLessThanEqual;
-    else if (t.IsGreaterThanEqual())
+    else if (peek_is(Token::Type::kGreaterThanEqual))
       op = ast::BinaryOp::kGreaterThanEqual;
     else
       return lhs;
 
+    auto t = next();
     auto source = t.source();
     auto name = t.to_name();
-    next();  // Consume the peek
 
     auto rhs = shift_expression();
     if (rhs.errored)
@@ -2535,18 +2523,17 @@ Maybe<ast::Expression*> ParserImpl::relational_expression() {
 Expect<ast::Expression*> ParserImpl::expect_equality_expr(
     ast::Expression* lhs) {
   while (synchronized_) {
-    auto t = peek();
     ast::BinaryOp op = ast::BinaryOp::kNone;
-    if (t.IsEqualEqual())
+    if (peek_is(Token::Type::kEqualEqual))
       op = ast::BinaryOp::kEqual;
-    else if (t.IsNotEqual())
+    else if (peek_is(Token::Type::kNotEqual))
       op = ast::BinaryOp::kNotEqual;
     else
       return lhs;
 
+    auto t = next();
     auto source = t.source();
     auto name = t.to_name();
-    next();  // Consume the peek
 
     auto rhs = relational_expression();
     if (rhs.errored)
@@ -2578,12 +2565,11 @@ Maybe<ast::Expression*> ParserImpl::equality_expression() {
 //   | AND equality_expression and_expr
 Expect<ast::Expression*> ParserImpl::expect_and_expr(ast::Expression* lhs) {
   while (synchronized_) {
-    auto t = peek();
-    if (!t.IsAnd())
+    if (!peek_is(Token::Type::kAnd))
       return lhs;
 
+    auto t = next();
     auto source = t.source();
-    next();  // Consume the peek
 
     auto rhs = equality_expression();
     if (rhs.errored)
@@ -2683,12 +2669,11 @@ Maybe<ast::Expression*> ParserImpl::inclusive_or_expression() {
 Expect<ast::Expression*> ParserImpl::expect_logical_and_expr(
     ast::Expression* lhs) {
   while (synchronized_) {
-    auto t = peek();
-    if (!t.IsAndAnd())
+    if (!peek_is(Token::Type::kAndAnd))
       return lhs;
 
+    auto t = next();
     auto source = t.source();
-    next();  // Consume the peek
 
     auto rhs = inclusive_or_expression();
     if (rhs.errored)
@@ -2757,7 +2742,7 @@ Maybe<ast::AssignmentStatement*> ParserImpl::assignment_stmt() {
   // tint:295 - Test for `ident COLON` - this is invalid grammar, and without
   // special casing will error as "missing = for assignment", which is less
   // helpful than this error message:
-  if (peek(0).IsIdentifier() && peek(1).IsColon()) {
+  if (peek_is(Token::Type::kIdentifier) && peek_is(Token::Type::kColon, 1)) {
     return add_error(peek(0).source(),
                      "expected 'var' for variable declaration");
   }
@@ -2827,7 +2812,8 @@ Expect<ast::ConstructorExpression*> ParserImpl::expect_const_expr() {
                                      [&]() -> Expect<ast::ExpressionList> {
                                        ast::ExpressionList list;
                                        while (synchronized_) {
-                                         if (peek().IsParenRight()) {
+                                         if (peek_is(
+                                                 Token::Type::kParenRight)) {
                                            break;
                                          }
 
@@ -3114,7 +3100,7 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
   if (s == kOverrideDecoration) {
     const char* use = "override decoration";
 
-    if (peek().IsParenLeft()) {
+    if (peek_is(Token::Type::kParenLeft)) {
       // [[override(x)]]
       return expect_paren_block(use, [&]() -> Result {
         auto val = expect_positive_sint(use);
@@ -3162,15 +3148,16 @@ bool ParserImpl::expect(const std::string& use, Token::Type tok) {
 
   // Special case to split `>>` and `>=` tokens if we are looking for a `>`.
   if (tok == Token::Type::kGreaterThan &&
-      (t.IsShiftRight() || t.IsGreaterThanEqual())) {
+      (t.Is(Token::Type::kShiftRight) ||
+       t.Is(Token::Type::kGreaterThanEqual))) {
     next();
 
     // Push the second character to the token queue.
     auto source = t.source();
     source.range.begin.column++;
-    if (t.IsShiftRight()) {
+    if (t.Is(Token::Type::kShiftRight)) {
       token_queue_.push_front(Token(Token::Type::kGreaterThan, source));
-    } else if (t.IsGreaterThanEqual()) {
+    } else if (t.Is(Token::Type::kGreaterThanEqual)) {
       token_queue_.push_front(Token(Token::Type::kEqual, source));
     }
 
@@ -3179,7 +3166,7 @@ bool ParserImpl::expect(const std::string& use, Token::Type tok) {
 
   // Handle the case when `]` is expected but the actual token is `]]`.
   // For example, in `arr1[arr2[0]]`.
-  if (tok == Token::Type::kBracketRight && t.IsAttrRight()) {
+  if (tok == Token::Type::kBracketRight && t.Is(Token::Type::kAttrRight)) {
     next();
     auto source = t.source();
     source.range.begin.column++;
@@ -3199,7 +3186,7 @@ bool ParserImpl::expect(const std::string& use, Token::Type tok) {
 
 Expect<int32_t> ParserImpl::expect_sint(const std::string& use) {
   auto t = peek();
-  if (!t.IsSintLiteral())
+  if (!t.Is(Token::Type::kSintLiteral))
     return add_error(t.source(), "expected signed integer literal", use);
 
   next();

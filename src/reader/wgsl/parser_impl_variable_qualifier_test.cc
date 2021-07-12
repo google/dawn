@@ -97,7 +97,7 @@ TEST_F(ParserImplTest, VariableQualifier_MissingLessThan) {
   EXPECT_FALSE(sc.matched);
 
   auto t = p->next();
-  ASSERT_TRUE(t.IsPrivate());
+  ASSERT_TRUE(t.Is(Token::Type::kPrivate));
 }
 
 TEST_F(ParserImplTest, VariableQualifier_MissingLessThan_AfterSC) {
@@ -108,7 +108,7 @@ TEST_F(ParserImplTest, VariableQualifier_MissingLessThan_AfterSC) {
   EXPECT_FALSE(sc.matched);
 
   auto t = p->next();
-  ASSERT_TRUE(t.IsPrivate());
+  ASSERT_TRUE(t.Is(Token::Type::kPrivate));
 }
 
 TEST_F(ParserImplTest, VariableQualifier_MissingGreaterThan) {

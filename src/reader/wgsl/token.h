@@ -364,309 +364,44 @@ class Token {
 
   /// @returns true if the token is uninitialized
   bool IsUninitialized() const { return type_ == Type::kUninitialized; }
-  /// @returns true if the token is reserved
-  /// @returns true if the token is an error
-  bool IsError() const { return type_ == Type::kError; }
   /// @returns true if the token is EOF
   bool IsEof() const { return type_ == Type::kEOF; }
   /// @returns true if the token is an identifier
   bool IsIdentifier() const { return type_ == Type::kIdentifier; }
-  /// @returns true if the token is a float
-  bool IsFloatLiteral() const { return type_ == Type::kFloatLiteral; }
-  /// @returns true if the token is an signed int
-  bool IsSintLiteral() const { return type_ == Type::kSintLiteral; }
-  /// @returns true if the token is a unsigned int
-  bool IsUintLiteral() const { return type_ == Type::kUintLiteral; }
 
-  /// @returns true if token is a '&'
-  bool IsAnd() const { return type_ == Type::kAnd; }
-  /// @returns true if token is a '&&'
-  bool IsAndAnd() const { return type_ == Type::kAndAnd; }
-  /// @returns true if token is a '->'
-  bool IsArrow() const { return type_ == Type::kArrow; }
-  /// @returns true if token is a '[['
-  bool IsAttrLeft() const { return type_ == Type::kAttrLeft; }
-  /// @returns true if token is a ']]'
-  bool IsAttrRight() const { return type_ == Type::kAttrRight; }
-  /// @returns true if token is a '/'
-  bool IsForwardSlash() const { return type_ == Type::kForwardSlash; }
-  /// @returns true if token is a '!'
-  bool IsBang() const { return type_ == Type::kBang; }
-  /// @returns true if token is a '['
-  bool IsBracketLeft() const { return type_ == Type::kBracketLeft; }
-  /// @returns true if token is a ']'
-  bool IsBracketRight() const { return type_ == Type::kBracketRight; }
-  /// @returns true if token is a '{'
-  bool IsBraceLeft() const { return type_ == Type::kBraceLeft; }
-  /// @returns true if token is a '}'
-  bool IsBraceRight() const { return type_ == Type::kBraceRight; }
-  /// @returns true if token is a ':'
-  bool IsColon() const { return type_ == Type::kColon; }
-  /// @returns true if token is a ','
-  bool IsComma() const { return type_ == Type::kComma; }
-  /// @returns true if token is a '='
-  bool IsEqual() const { return type_ == Type::kEqual; }
-  /// @returns true if token is a '=='
-  bool IsEqualEqual() const { return type_ == Type::kEqualEqual; }
-  /// @returns true if token is a '>'
-  bool IsGreaterThan() const { return type_ == Type::kGreaterThan; }
-  /// @returns true if token is a '>='
-  bool IsGreaterThanEqual() const { return type_ == Type::kGreaterThanEqual; }
-  /// @returns true if token is a '>>'
-  bool IsShiftRight() const { return type_ == Type::kShiftRight; }
-  /// @returns true if token is a '<'
-  bool IsLessThan() const { return type_ == Type::kLessThan; }
-  /// @returns true if token is a '<='
-  bool IsLessThanEqual() const { return type_ == Type::kLessThanEqual; }
-  /// @returns true if token is a '<<'
-  bool IsShiftLeft() const { return type_ == Type::kShiftLeft; }
-  /// @returns true if token is a '%'
-  bool IsMod() const { return type_ == Type::kMod; }
-  /// @returns true if token is a '-'
-  bool IsMinus() const { return type_ == Type::kMinus; }
-  /// @returns true if token is a '!='
-  bool IsNotEqual() const { return type_ == Type::kNotEqual; }
-  /// @returns true if token is a '.'
-  bool IsPeriod() const { return type_ == Type::kPeriod; }
-  /// @returns true if token is a '+'
-  bool IsPlus() const { return type_ == Type::kPlus; }
-  /// @returns true if token is a '|'
-  bool IsOr() const { return type_ == Type::kOr; }
-  /// @returns true if token is a '||'
-  bool IsOrOr() const { return type_ == Type::kOrOr; }
-  /// @returns true if token is a '('
-  bool IsParenLeft() const { return type_ == Type::kParenLeft; }
-  /// @returns true if token is a ')'
-  bool IsParenRight() const { return type_ == Type::kParenRight; }
-  /// @returns true if token is a ';'
-  bool IsSemicolon() const { return type_ == Type::kSemicolon; }
-  /// @returns true if token is a '*'
-  bool IsStar() const { return type_ == Type::kStar; }
-  /// @returns true if token is a '~'
-  bool IsTilde() const { return type_ == Type::kTilde; }
-  /// @returns true if token is a '^'
-  bool IsXor() const { return type_ == Type::kXor; }
+  /// @returns true if token is a 'matNxM'
+  bool IsMatrix() const {
+    return type_ == Type::kMat2x2 || type_ == Type::kMat2x3 ||
+           type_ == Type::kMat2x4 || type_ == Type::kMat3x2 ||
+           type_ == Type::kMat3x3 || type_ == Type::kMat3x4 ||
+           type_ == Type::kMat4x2 || type_ == Type::kMat4x3 ||
+           type_ == Type::kMat4x4;
+  }
+  /// @returns true if token is a 'mat3xM'
+  bool IsMat3xN() const {
+    return type_ == Type::kMat3x2 || type_ == Type::kMat3x3 ||
+           type_ == Type::kMat3x4;
+  }
+  /// @returns true if token is a 'mat4xM'
+  bool IsMat4xN() const {
+    return type_ == Type::kMat4x2 || type_ == Type::kMat4x3 ||
+           type_ == Type::kMat4x4;
+  }
+  /// @returns true if token is a 'matNx3'
+  bool IsMatNx3() const {
+    return type_ == Type::kMat2x3 || type_ == Type::kMat3x3 ||
+           type_ == Type::kMat4x3;
+  }
+  /// @returns true if token is a 'matNx4'
+  bool IsMatNx4() const {
+    return type_ == Type::kMat2x4 || type_ == Type::kMat3x4 ||
+           type_ == Type::kMat4x4;
+  }
 
-  /// @returns true if token is a 'array'
-  bool IsArray() const { return type_ == Type::kArray; }
-  /// @returns true if token is a 'bitcast'
-  bool IsBitcast() const { return type_ == Type::kBitcast; }
-  /// @returns true if token is a 'bool'
-  bool IsBool() const { return type_ == Type::kBool; }
-  /// @returns true if token is a 'break'
-  bool IsBreak() const { return type_ == Type::kBreak; }
-  /// @returns true if token is a 'case'
-  bool IsCase() const { return type_ == Type::kCase; }
-  /// @returns true if token is a 'sampler_comparison'
-  bool IsComparisonSampler() const { return type_ == Type::kComparisonSampler; }
-  /// @returns true if token is a 'continue'
-  bool IsContinue() const { return type_ == Type::kContinue; }
-  /// @returns true if token is a 'continuing'
-  bool IsContinuing() const { return type_ == Type::kContinuing; }
-  /// @returns true if token is a 'discard'
-  bool IsDiscard() const { return type_ == Type::kDiscard; }
-  /// @returns true if token is a 'default'
-  bool IsDefault() const { return type_ == Type::kDefault; }
-  /// @returns true if token is a 'else'
-  bool IsElse() const { return type_ == Type::kElse; }
-  /// @returns true if token is a 'elseif'
-  bool IsElseIf() const { return type_ == Type::kElseIf; }
-  /// @returns true if token is a 'f32'
-  bool IsF32() const { return type_ == Type::kF32; }
-  /// @returns true if token is a 'fallthrough'
-  bool IsFallthrough() const { return type_ == Type::kFallthrough; }
-  /// @returns true if token is a 'false'
-  bool IsFalse() const { return type_ == Type::kFalse; }
-  /// @returns true if token is a 'fn'
-  bool IsFn() const { return type_ == Type::kFn; }
-  /// @returns true if token is a 'for'
-  bool IsFor() const { return type_ == Type::kFor; }
-  /// @returns true if token is a 'Bgra8Unorm' format
-  bool IsFormatBgra8Unorm() const { return type_ == Type::kFormatBgra8Unorm; }
-  /// @returns true if token is a 'Bgra8UnormSrgb' format
-  bool IsFormatBgra8UnormSrgb() const {
-    return type_ == Type::kFormatBgra8UnormSrgb;
+  /// @returns true if token is a 'vecN'
+  bool IsVector() const {
+    return type_ == Type::kVec2 || type_ == Type::kVec3 || type_ == Type::kVec4;
   }
-  /// @returns true if token is a 'R16Float' format
-  bool IsFormatR16Float() const { return type_ == Type::kFormatR16Float; }
-  /// @returns true if token is a 'R16Sint' format
-  bool IsFormatR16Sint() const { return type_ == Type::kFormatR16Sint; }
-  /// @returns true if token is a 'R16Uint' format
-  bool IsFormatR16Uint() const { return type_ == Type::kFormatR16Uint; }
-  /// @returns true if token is a 'R32Float' format
-  bool IsFormatR32Float() const { return type_ == Type::kFormatR32Float; }
-  /// @returns true if token is a 'R32Sint' format
-  bool IsFormatR32Sint() const { return type_ == Type::kFormatR32Sint; }
-  /// @returns true if token is a 'R32Uint' format
-  bool IsFormatR32Uint() const { return type_ == Type::kFormatR32Uint; }
-  /// @returns true if token is a 'R8Sint' format
-  bool IsFormatR8Sint() const { return type_ == Type::kFormatR8Sint; }
-  /// @returns true if token is a 'R8Snorm' format
-  bool IsFormatR8Snorm() const { return type_ == Type::kFormatR8Snorm; }
-  /// @returns true if token is a 'R8Uint' format
-  bool IsFormatR8Uint() const { return type_ == Type::kFormatR8Uint; }
-  /// @returns true if token is a 'R8Unorm' format
-  bool IsFormatR8Unorm() const { return type_ == Type::kFormatR8Unorm; }
-  /// @returns true if token is a 'Rg11B10Float' format
-  bool IsFormatRg11B10Float() const {
-    return type_ == Type::kFormatRg11B10Float;
-  }
-  /// @returns true if token is a 'Rg16Float' format
-  bool IsFormatRg16Float() const { return type_ == Type::kFormatRg16Float; }
-  /// @returns true if token is a 'Rg16Sint' format
-  bool IsFormatRg16Sint() const { return type_ == Type::kFormatRg16Sint; }
-  /// @returns true if token is a 'Rg16Uint' format
-  bool IsFormatRg16Uint() const { return type_ == Type::kFormatRg16Uint; }
-  /// @returns true if token is a 'Rg32Float' format
-  bool IsFormatRg32Float() const { return type_ == Type::kFormatRg32Float; }
-  /// @returns true if token is a 'Rg32Sint' format
-  bool IsFormatRg32Sint() const { return type_ == Type::kFormatRg32Sint; }
-  /// @returns true if token is a 'Rg32Uint' format
-  bool IsFormatRg32Uint() const { return type_ == Type::kFormatRg32Uint; }
-  /// @returns true if token is a 'Rg8Sint' format
-  bool IsFormatRg8Sint() const { return type_ == Type::kFormatRg8Sint; }
-  /// @returns true if token is a 'Rg8Snorm' format
-  bool IsFormatRg8Snorm() const { return type_ == Type::kFormatRg8Snorm; }
-  /// @returns true if token is a 'Rg8Uint' format
-  bool IsFormatRg8Uint() const { return type_ == Type::kFormatRg8Uint; }
-  /// @returns true if token is a 'Rg8Unorm' format
-  bool IsFormatRg8Unorm() const { return type_ == Type::kFormatRg8Unorm; }
-  /// @returns true if token is a 'Rgb10A2Unorm' format
-  bool IsFormatRgb10A2Unorm() const {
-    return type_ == Type::kFormatRgb10A2Unorm;
-  }
-  /// @returns true if token is a 'Rgba16Float' format
-  bool IsFormatRgba16Float() const { return type_ == Type::kFormatRgba16Float; }
-  /// @returns true if token is a 'Rgba16Sint' format
-  bool IsFormatRgba16Sint() const { return type_ == Type::kFormatRgba16Sint; }
-  /// @returns true if token is a 'Rgba16Uint' format
-  bool IsFormatRgba16Uint() const { return type_ == Type::kFormatRgba16Uint; }
-  /// @returns true if token is a 'Rgba32Float' format
-  bool IsFormatRgba32Float() const { return type_ == Type::kFormatRgba32Float; }
-  /// @returns true if token is a 'Rgba32Sint' format
-  bool IsFormatRgba32Sint() const { return type_ == Type::kFormatRgba32Sint; }
-  /// @returns true if token is a 'Rgba32Uint' format
-  bool IsFormatRgba32Uint() const { return type_ == Type::kFormatRgba32Uint; }
-  /// @returns true if token is a 'Rgba8Sint' format
-  bool IsFormatRgba8Sint() const { return type_ == Type::kFormatRgba8Sint; }
-  /// @returns true if token is a 'Rgba8Snorm' format
-  bool IsFormatRgba8Snorm() const { return type_ == Type::kFormatRgba8Snorm; }
-  /// @returns true if token is a 'Rgba8Uint' format
-  bool IsFormatRgba8Uint() const { return type_ == Type::kFormatRgba8Uint; }
-  /// @returns true if token is a 'Rgba8Unorm' format
-  bool IsFormatRgba8Unorm() const { return type_ == Type::kFormatRgba8Unorm; }
-  /// @returns true if token is a 'Rgba8UnormSrgb' format
-  bool IsFormatRgba8UnormSrgb() const {
-    return type_ == Type::kFormatRgba8UnormSrgb;
-  }
-  /// @returns true if token is a 'function'
-  bool IsFunction() const { return type_ == Type::kFunction; }
-  /// @returns true if token is a 'i32'
-  bool IsI32() const { return type_ == Type::kI32; }
-  /// @returns true if token is a 'if'
-  bool IsIf() const { return type_ == Type::kIf; }
-  /// @returns true if token is a 'image'
-  bool IsImage() const { return type_ == Type::kImage; }
-  /// @returns true if token is a 'import'
-  bool IsImport() const { return type_ == Type::kImport; }
-  /// @returns true if token is a 'let'
-  bool IsLet() const { return type_ == Type::kLet; }
-  /// @returns true if token is a 'loop'
-  bool IsLoop() const { return type_ == Type::kLoop; }
-  /// @returns true if token is a 'mat2x2'
-  bool IsMat2x2() const { return type_ == Type::kMat2x2; }
-  /// @returns true if token is a 'mat2x3'
-  bool IsMat2x3() const { return type_ == Type::kMat2x3; }
-  /// @returns true if token is a 'mat2x4'
-  bool IsMat2x4() const { return type_ == Type::kMat2x4; }
-  /// @returns true if token is a 'mat3x2'
-  bool IsMat3x2() const { return type_ == Type::kMat3x2; }
-  /// @returns true if token is a 'mat3x3'
-  bool IsMat3x3() const { return type_ == Type::kMat3x3; }
-  /// @returns true if token is a 'mat3x4'
-  bool IsMat3x4() const { return type_ == Type::kMat3x4; }
-  /// @returns true if token is a 'mat4x2'
-  bool IsMat4x2() const { return type_ == Type::kMat4x2; }
-  /// @returns true if token is a 'mat4x3'
-  bool IsMat4x3() const { return type_ == Type::kMat4x3; }
-  /// @returns true if token is a 'mat4x4'
-  bool IsMat4x4() const { return type_ == Type::kMat4x4; }
-  /// @returns true if token is a 'private'
-  bool IsPrivate() const { return type_ == Type::kPrivate; }
-  /// @returns true if token is a 'ptr'
-  bool IsPtr() const { return type_ == Type::kPtr; }
-  /// @returns true if token is a 'return'
-  bool IsReturn() const { return type_ == Type::kReturn; }
-  /// @returns true if token is a 'sampler'
-  bool IsSampler() const { return type_ == Type::kSampler; }
-  /// @returns true if token is a 'storage'
-  bool IsStorage() const { return type_ == Type::kStorage; }
-  /// @returns true if token is a 'struct'
-  bool IsStruct() const { return type_ == Type::kStruct; }
-  /// @returns true if token is a 'switch'
-  bool IsSwitch() const { return type_ == Type::kSwitch; }
-  /// @returns true if token is a 'texture_depth_2d'
-  bool IsTextureDepth2d() const { return type_ == Type::kTextureDepth2d; }
-  /// @returns true if token is a 'texture_depth_2d_array'
-  bool IsTextureDepth2dArray() const {
-    return type_ == Type::kTextureDepth2dArray;
-  }
-  /// @returns true if token is a 'texture_depth_cube'
-  bool IsTextureDepthCube() const { return type_ == Type::kTextureDepthCube; }
-  /// @returns true if token is a 'texture_depth_cube_array'
-  bool IsTextureDepthCubeArray() const {
-    return type_ == Type::kTextureDepthCubeArray;
-  }
-  /// @returns true if the token is a 'texture_multisample_2d'
-  bool IsTextureMultisampled2d() const {
-    return type_ == Type::kTextureMultisampled2d;
-  }
-  /// @returns true if token is a 'texture_storage_1d'
-  bool IsTextureStorage1d() const { return type_ == Type::kTextureStorage1d; }
-  /// @returns true if token is a 'texture_storage_2d'
-  bool IsTextureStorage2d() const { return type_ == Type::kTextureStorage2d; }
-  /// @returns true if token is a 'texture_storage_2d_array'
-  bool IsTextureStorage2dArray() const {
-    return type_ == Type::kTextureStorage2dArray;
-  }
-  /// @returns true if token is a 'texture_storage_3d'
-  bool IsTextureStorage3d() const { return type_ == Type::kTextureStorage3d; }
-  /// @returns true if token is a 'texture_1d'
-  bool IsTextureSampled1d() const { return type_ == Type::kTextureSampled1d; }
-  /// @returns true if token is a 'texture_2d'
-  bool IsTextureSampled2d() const { return type_ == Type::kTextureSampled2d; }
-  /// @returns true if token is a 'texture_2d_array'
-  bool IsTextureSampled2dArray() const {
-    return type_ == Type::kTextureSampled2dArray;
-  }
-  /// @returns true if token is a 'texture_3d'
-  bool IsTextureSampled3d() const { return type_ == Type::kTextureSampled3d; }
-  /// @returns true if token is a 'texture_cube'
-  bool IsTextureSampledCube() const {
-    return type_ == Type::kTextureSampledCube;
-  }
-  /// @returns true if token is a 'texture_cube_array'
-  bool IsTextureSampledCubeArray() const {
-    return type_ == Type::kTextureSampledCubeArray;
-  }
-  /// @returns true if token is a 'true'
-  bool IsTrue() const { return type_ == Type::kTrue; }
-  /// @returns true if token is a 'type'
-  bool IsType() const { return type_ == Type::kType; }
-  /// @returns true if token is a 'u32'
-  bool IsU32() const { return type_ == Type::kU32; }
-  /// @returns true if token is a 'uniform'
-  bool IsUniform() const { return type_ == Type::kUniform; }
-  /// @returns true if token is a 'var'
-  bool IsVar() const { return type_ == Type::kVar; }
-  /// @returns true if token is a 'vec2'
-  bool IsVec2() const { return type_ == Type::kVec2; }
-  /// @returns true if token is a 'vec3'
-  bool IsVec3() const { return type_ == Type::kVec3; }
-  /// @returns true if token is a 'vec4'
-  bool IsVec4() const { return type_ == Type::kVec4; }
-  /// @returns true if token is a 'workgroup'
-  bool IsWorkgroup() const { return type_ == Type::kWorkgroup; }
 
   /// @returns the source information for this token
   Source source() const { return source_; }

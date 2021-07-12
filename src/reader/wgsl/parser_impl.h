@@ -336,12 +336,16 @@ class ParserImpl {
 
   /// @returns the next token
   Token next();
-  /// @returns the next token without advancing
-  Token peek();
-  /// Peeks ahead and returns the token at `idx` head of the current position
+  /// Peeks ahead and returns the token at `idx` ahead of the current position
   /// @param idx the index of the token to return
   /// @returns the token `idx` positions ahead without advancing
-  Token peek(size_t idx);
+  Token peek(size_t idx = 0);
+  /// Peeks ahead and returns true if the token at `idx` ahead of the current
+  /// position is |tok|
+  /// @param idx the index of the token to return
+  /// @param tok the token to look for
+  /// @returns true if the token `idx` positions ahead is |tok|
+  bool peek_is(Token::Type tok, size_t idx = 0);
   /// @returns the last token that was returned by `next()`
   Token last_token() const;
   /// Appends an error at `t` with the message `msg`

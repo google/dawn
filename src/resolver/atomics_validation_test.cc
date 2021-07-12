@@ -60,8 +60,7 @@ TEST_F(ResolverAtomicValidationTest, Local) {
   WrapInFunction(Var("a", ty.atomic(Source{{12, 34}}, ty.i32())));
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: atomic var requires workgroup storage");
+  EXPECT_EQ(r()->error(), "12:34 error: atomic var requires workgroup storage");
 }
 
 TEST_F(ResolverAtomicValidationTest, NoAtomicExpr) {

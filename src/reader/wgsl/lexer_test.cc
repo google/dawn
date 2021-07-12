@@ -90,7 +90,7 @@ TEST_P(FloatTest, Parse) {
   Lexer l("test.wgsl", &content);
 
   auto t = l.next();
-  EXPECT_TRUE(t.IsFloatLiteral());
+  EXPECT_TRUE(t.Is(Token::Type::kFloatLiteral));
   EXPECT_EQ(t.to_f32(), params.result);
   EXPECT_EQ(t.source().range.begin.line, 1u);
   EXPECT_EQ(t.source().range.begin.column, 1u);
@@ -126,7 +126,7 @@ TEST_P(FloatTest_Invalid, Handles) {
   Lexer l("test.wgsl", &content);
 
   auto t = l.next();
-  EXPECT_FALSE(t.IsFloatLiteral());
+  EXPECT_FALSE(t.Is(Token::Type::kFloatLiteral));
 }
 INSTANTIATE_TEST_SUITE_P(LexerTest,
                          FloatTest_Invalid,
@@ -180,7 +180,7 @@ TEST_P(IntegerTest_HexSigned, Matches) {
   Lexer l("test.wgsl", &content);
 
   auto t = l.next();
-  EXPECT_TRUE(t.IsSintLiteral());
+  EXPECT_TRUE(t.Is(Token::Type::kSintLiteral));
   EXPECT_EQ(t.source().range.begin.line, 1u);
   EXPECT_EQ(t.source().range.begin.column, 1u);
   EXPECT_EQ(t.source().range.end.line, 1u);
@@ -203,7 +203,7 @@ TEST_F(LexerTest, IntegerTest_HexSignedTooLarge) {
   Lexer l("test.wgsl", &content);
 
   auto t = l.next();
-  ASSERT_TRUE(t.IsError());
+  ASSERT_TRUE(t.Is(Token::Type::kError));
   EXPECT_EQ(t.to_str(), "i32 (0x80000000) too large");
 }
 
@@ -212,7 +212,7 @@ TEST_F(LexerTest, IntegerTest_HexSignedTooSmall) {
   Lexer l("test.wgsl", &content);
 
   auto t = l.next();
-  ASSERT_TRUE(t.IsError());
+  ASSERT_TRUE(t.Is(Token::Type::kError));
   EXPECT_EQ(t.to_str(), "i32 (-0x8000000F) too small");
 }
 
@@ -231,7 +231,7 @@ TEST_P(IntegerTest_HexUnsigned, Matches) {
   Lexer l("test.wgsl", &content);
 
   auto t = l.next();
-  EXPECT_TRUE(t.IsUintLiteral());
+  EXPECT_TRUE(t.Is(Token::Type::kUintLiteral));
   EXPECT_EQ(t.source().range.begin.line, 1u);
   EXPECT_EQ(t.source().range.begin.column, 1u);
   EXPECT_EQ(t.source().range.end.line, 1u);
@@ -257,7 +257,7 @@ TEST_F(LexerTest, IntegerTest_HexUnsignedTooLarge) {
   Lexer l("test.wgsl", &content);
 
   auto t = l.next();
-  ASSERT_TRUE(t.IsError());
+  ASSERT_TRUE(t.Is(Token::Type::kError));
   EXPECT_EQ(t.to_str(), "u32 (0xffffffffff) too large");
 }
 
@@ -276,7 +276,7 @@ TEST_P(IntegerTest_Unsigned, Matches) {
   Lexer l("test.wgsl", &content);
 
   auto t = l.next();
-  EXPECT_TRUE(t.IsUintLiteral());
+  EXPECT_TRUE(t.Is(Token::Type::kUintLiteral));
   EXPECT_EQ(t.to_u32(), params.result);
   EXPECT_EQ(t.source().range.begin.line, 1u);
   EXPECT_EQ(t.source().range.begin.column, 1u);
@@ -305,7 +305,7 @@ TEST_P(IntegerTest_Signed, Matches) {
   Lexer l("test.wgsl", &content);
 
   auto t = l.next();
-  EXPECT_TRUE(t.IsSintLiteral());
+  EXPECT_TRUE(t.Is(Token::Type::kSintLiteral));
   EXPECT_EQ(t.to_i32(), params.result);
   EXPECT_EQ(t.source().range.begin.line, 1u);
   EXPECT_EQ(t.source().range.begin.column, 1u);
@@ -328,8 +328,8 @@ TEST_P(IntegerTest_Invalid, Parses) {
   Lexer l("test.wgsl", &content);
 
   auto t = l.next();
-  EXPECT_FALSE(t.IsSintLiteral());
-  EXPECT_FALSE(t.IsUintLiteral());
+  EXPECT_FALSE(t.Is(Token::Type::kSintLiteral));
+  EXPECT_FALSE(t.Is(Token::Type::kUintLiteral));
 }
 INSTANTIATE_TEST_SUITE_P(LexerTest,
                          IntegerTest_Invalid,
