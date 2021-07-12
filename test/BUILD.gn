@@ -179,6 +179,7 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/ast/interpolate_decoration_test.cc",
     "../src/ast/intrinsic_texture_helper_test.cc",
     "../src/ast/intrinsic_texture_helper_test.h",
+    "../src/ast/invariant_decoration_test.cc",
     "../src/ast/location_decoration_test.cc",
     "../src/ast/loop_statement_test.cc",
     "../src/ast/matrix_test.cc",

@@ -116,6 +116,8 @@ set(TINT_LIB_SRCS
   ast/internal_decoration.h
   ast/interpolate_decoration.cc
   ast/interpolate_decoration.h
+  ast/invariant_decoration.cc
+  ast/invariant_decoration.h
   ast/literal.cc
   ast/literal.h
   ast/location_decoration.cc
@@ -568,6 +570,7 @@ if(${TINT_BUILD_TESTS})
     ast/interpolate_decoration_test.cc
     ast/intrinsic_texture_helper_test.cc
     ast/intrinsic_texture_helper_test.h
+    ast/invariant_decoration_test.cc
     ast/location_decoration_test.cc
     ast/loop_statement_test.cc
     ast/matrix_test.cc
