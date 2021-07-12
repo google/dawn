@@ -601,6 +601,58 @@ fn frag_main() {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(SpirvTest, HandleEntryPointIOTypes_InvariantAttributes) {
+  auto* src = R"(
+struct VertexOut {
+  [[builtin(position), invariant]] pos : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main1() -> VertexOut {
+  return VertexOut();
+}
+
+[[stage(vertex)]]
+fn main2() -> [[builtin(position), invariant]] vec4<f32> {
+  return vec4<f32>();
+}
+)";
+
+  auto* expect = R"(
+struct VertexOut {
+  pos : vec4<f32>;
+};
+
+[[builtin(position), invariant, internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_1 : vec4<f32>;
+
+fn tint_symbol_2(tint_symbol : VertexOut) {
+  tint_symbol_1 = tint_symbol.pos;
+}
+
+[[stage(vertex)]]
+fn main1() {
+  tint_symbol_2(VertexOut());
+  return;
+}
+
+[[builtin(position), invariant, internal(disable_validation__ignore_storage_class)]] var<out> tint_symbol_4 : vec4<f32>;
+
+fn tint_symbol_5(tint_symbol_3 : vec4<f32>) {
+  tint_symbol_4 = tint_symbol_3;
+}
+
+[[stage(vertex)]]
+fn main2() {
+  tint_symbol_5(vec4<f32>());
+  return;
+}
+)";
+
+  auto got = Run<Spirv>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(SpirvTest, HandleEntryPointIOTypes_StructLayoutDecorations) {
   auto* src = R"(
 [[block]]

@@ -853,6 +853,9 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
       AddInterpolationDecorations(var_id, interpolate->type(),
                                   interpolate->sampling());
+    } else if (deco->Is<ast::InvariantDecoration>()) {
+      push_annot(spv::Op::OpDecorate,
+                 {Operand::Int(var_id), Operand::Int(SpvDecorationInvariant)});
     } else if (auto* binding = deco->As<ast::BindingDecoration>()) {
       push_annot(spv::Op::OpDecorate,
                  {Operand::Int(var_id), Operand::Int(SpvDecorationBinding),

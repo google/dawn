@@ -145,9 +145,9 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
       for (auto* member : struct_ty->members()) {
         ast::DecorationList new_decorations = RemoveDecorations(
             &ctx, member->decorations(), [](const ast::Decoration* deco) {
-              return deco
-                  ->IsAnyOf<ast::BuiltinDecoration, ast::InterpolateDecoration,
-                            ast::LocationDecoration>();
+              return deco->IsAnyOf<
+                  ast::BuiltinDecoration, ast::InterpolateDecoration,
+                  ast::InvariantDecoration, ast::LocationDecoration>();
             });
         new_struct_members.push_back(
             ctx.dst->Member(ctx.Clone(member->symbol()),
@@ -316,9 +316,9 @@ Symbol Spirv::HoistToInputVariables(
     // Base case: create a global variable and return.
     ast::DecorationList new_decorations =
         RemoveDecorations(&ctx, decorations, [](const ast::Decoration* deco) {
-          return !deco->IsAnyOf<ast::BuiltinDecoration,
-                                ast::InterpolateDecoration,
-                                ast::LocationDecoration>();
+          return !deco->IsAnyOf<
+              ast::BuiltinDecoration, ast::InterpolateDecoration,
+              ast::InvariantDecoration, ast::LocationDecoration>();
         });
     new_decorations.push_back(
         ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
@@ -382,9 +382,9 @@ void Spirv::HoistToOutputVariables(CloneContext& ctx,
     // Create a global variable.
     ast::DecorationList new_decorations =
         RemoveDecorations(&ctx, decorations, [](const ast::Decoration* deco) {
-          return !deco->IsAnyOf<ast::BuiltinDecoration,
-                                ast::InterpolateDecoration,
-                                ast::LocationDecoration>();
+          return !deco->IsAnyOf<
+              ast::BuiltinDecoration, ast::InterpolateDecoration,
+              ast::InvariantDecoration, ast::LocationDecoration>();
         });
     new_decorations.push_back(
         ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
