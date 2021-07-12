@@ -48,6 +48,7 @@ Result Generate(const Program* program, const Options& options) {
   result.success = impl->Generate();
   result.error = impl->error();
   result.msl = impl->result();
+  result.has_invariant_attribute = impl->HasInvariant();
 
   return result;
 }

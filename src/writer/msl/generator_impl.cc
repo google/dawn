@@ -2134,6 +2134,9 @@ bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
           return false;
         }
         out << " [[" << attr << "]]";
+      } else if (deco->Is<ast::InvariantDecoration>()) {
+        out << " [[invariant]]";
+        has_invariant_ = true;
       } else if (!deco->IsAnyOf<ast::StructMemberOffsetDecoration,
                                 ast::StructMemberAlignDecoration,
                                 ast::StructMemberSizeDecoration>()) {

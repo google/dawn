@@ -691,6 +691,58 @@ fn frag_main(tint_symbol_2 : tint_symbol_3) {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(CanonicalizeEntryPointIOTest, InvariantAttributes) {
+  auto* src = R"(
+struct VertexOut {
+  [[builtin(position), invariant]] pos : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main1() -> VertexOut {
+  return VertexOut();
+}
+
+[[stage(vertex)]]
+fn main2() -> [[builtin(position), invariant]] vec4<f32> {
+  return vec4<f32>();
+}
+)";
+
+  auto* expect = R"(
+struct VertexOut {
+  pos : vec4<f32>;
+};
+
+struct tint_symbol {
+  [[builtin(position), invariant]]
+  pos : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main1() -> tint_symbol {
+  let tint_symbol_1 : VertexOut = VertexOut();
+  return tint_symbol(tint_symbol_1.pos);
+}
+
+struct tint_symbol_2 {
+  [[builtin(position), invariant]]
+  value : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main2() -> tint_symbol_2 {
+  return tint_symbol_2(vec4<f32>());
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kStructMember);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(CanonicalizeEntryPointIOTest, Struct_LayoutDecorations) {
   auto* src = R"(
 [[block]]

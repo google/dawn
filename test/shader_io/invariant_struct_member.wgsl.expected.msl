@@ -1,10 +1,16 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-../../src/writer/msl/generator_impl.cc:1990 internal compiler error: unhandled struct member attribute: invariant
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+using namespace metal;
+struct Out {
+  float4 pos;
+};
+struct tint_symbol_1 {
+  float4 pos [[position]] [[invariant]];
+};
+
+vertex tint_symbol_1 tint_symbol() {
+  Out const tint_symbol_2 = {};
+  tint_symbol_1 const tint_symbol_3 = {.pos=tint_symbol_2.pos};
+  return tint_symbol_3;
+}
 

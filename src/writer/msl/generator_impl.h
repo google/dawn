@@ -61,6 +61,9 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true on successful generation; false otherwise
   bool Generate();
 
+  /// @returns true if an invariant attribute was generated
+  bool HasInvariant() { return has_invariant_; }
+
   /// Handles generating a declared type
   /// @param ty the declared type to generate
   /// @returns true if the declared type was emitted
@@ -302,6 +305,9 @@ class GeneratorImpl : public TextGenerator {
   /// Name of atomicCompareExchangeWeak() helper for the given pointer storage
   /// class.
   StorageClassToString atomicCompareExchangeWeak_;
+
+  /// True if an invariant attribute has been generated.
+  bool has_invariant_ = false;
 };
 
 }  // namespace msl

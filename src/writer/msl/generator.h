@@ -63,6 +63,9 @@ struct Result {
 
   /// True if the shader needs a UBO of buffer sizes.
   bool needs_storage_buffer_sizes = false;
+
+  /// True if the generated shader uses the invariant attribute.
+  bool has_invariant_attribute = false;
 };
 
 /// Generate MSL for a program, according to a set of configuration options. The
