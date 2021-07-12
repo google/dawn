@@ -30,6 +30,7 @@
 #include "src/ast/i32.h"
 #include "src/ast/internal_decoration.h"
 #include "src/ast/interpolate_decoration.h"
+#include "src/ast/invariant_decoration.h"
 #include "src/ast/matrix.h"
 #include "src/ast/module.h"
 #include "src/ast/multisampled_texture.h"
@@ -676,6 +677,8 @@ bool GeneratorImpl::EmitDecorations(std::ostream& out,
         out << ", " << interpolate->sampling();
       }
       out << ")";
+    } else if (deco->Is<ast::InvariantDecoration>()) {
+      out << "invariant";
     } else if (auto* override_deco = deco->As<ast::OverrideDecoration>()) {
       out << "override";
       if (override_deco->HasValue()) {

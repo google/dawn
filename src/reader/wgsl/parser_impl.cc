@@ -24,6 +24,7 @@
 #include "src/ast/external_texture.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/invariant_decoration.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/override_decoration.h"
 #include "src/ast/return_statement.h"
@@ -111,6 +112,7 @@ const char kBlockDecoration[] = "block";
 const char kBuiltinDecoration[] = "builtin";
 const char kGroupDecoration[] = "group";
 const char kInterpolateDecoration[] = "interpolate";
+const char kInvariantDecoration[] = "invariant";
 const char kLocationDecoration[] = "location";
 const char kOverrideDecoration[] = "override";
 const char kSizeDecoration[] = "size";
@@ -3000,6 +3002,10 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
 
       return create<ast::InterpolateDecoration>(t.source(), type, sampling);
     });
+  }
+
+  if (s == kInvariantDecoration) {
+    return create<ast::InvariantDecoration>(t.source());
   }
 
   if (s == kBuiltinDecoration) {

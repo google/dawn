@@ -3092,6 +3092,11 @@ bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
             return false;
           }
           pre += mod;
+
+        } else if (!deco->IsAnyOf<ast::StructMemberAlignDecoration,
+                                  ast::StructMemberSizeDecoration>()) {
+          TINT_ICE(Writer, diagnostics_)
+              << "unhandled struct member attribute: " << deco->name();
         }
       }
 

@@ -61,6 +61,20 @@ TEST_F(ParserImplTest, FunctionHeader_DecoratedReturnType) {
   EXPECT_EQ(loc->value(), 1u);
 }
 
+TEST_F(ParserImplTest, FunctionHeader_InvariantReturnType) {
+  auto p = parser("fn main() -> [[invariant]] f32");
+  auto f = p->function_header();
+  ASSERT_FALSE(p->has_error()) << p->error();
+  EXPECT_TRUE(f.matched);
+  EXPECT_FALSE(f.errored);
+
+  EXPECT_EQ(f->name, "main");
+  EXPECT_EQ(f->params.size(), 0u);
+  EXPECT_TRUE(f->return_type->Is<ast::F32>());
+  ASSERT_EQ(f->return_type_decorations.size(), 1u);
+  EXPECT_TRUE(f->return_type_decorations[0]->Is<ast::InvariantDecoration>());
+}
+
 TEST_F(ParserImplTest, FunctionHeader_DecoratedReturnType_WithArrayStride) {
   auto p = parser("fn main() -> [[location(1), stride(16)]] array<f32, 4>");
   auto f = p->function_header();

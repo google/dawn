@@ -2134,6 +2134,11 @@ bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
           return false;
         }
         out << " [[" << attr << "]]";
+      } else if (!deco->IsAnyOf<ast::StructMemberOffsetDecoration,
+                                ast::StructMemberAlignDecoration,
+                                ast::StructMemberSizeDecoration>()) {
+        TINT_ICE(Writer, diagnostics_)
+            << "unhandled struct member attribute: " << deco->name();
       }
     }
 
