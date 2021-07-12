@@ -92,10 +92,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   // original source so that reformatting doesn't impact the final wgsl
   // comparison.
   std::string src_wgsl;
+  tint::writer::wgsl::Options wgsl_options;
   {
-    tint::writer::wgsl::Generator src_gen(&src);
-    ASSERT_TRUE(src_gen.Generate());
-    src_wgsl = src_gen.result();
+    auto result = tint::writer::wgsl::Generate(&src, wgsl_options);
+    ASSERT_TRUE(result.success);
+    src_wgsl = result.wgsl;
 
     // Move the src program to a temporary that'll be dropped, so that the src
     // program is released before we attempt to print the dst program. This
@@ -106,9 +107,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   }
 
   // Print the dst program, check it matches the original source
-  tint::writer::wgsl::Generator dst_gen(&dst);
-  ASSERT_TRUE(dst_gen.Generate());
-  auto dst_wgsl = dst_gen.result();
+  auto result = tint::writer::wgsl::Generate(&dst, wgsl_options);
+  ASSERT_TRUE(result.success);
+  auto dst_wgsl = result.wgsl;
   ASSERT_EQ(src_wgsl, dst_wgsl);
 
   return 0;

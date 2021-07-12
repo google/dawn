@@ -62,8 +62,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
       return 0;
     }
 
-    config.manager.Add<transform::Hlsl>();
-
     fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kHLSL);
     fuzzer.SetTransformManager(&config.manager, std::move(config.inputs));
 
@@ -79,8 +77,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
       return 0;
     }
 
-    config.manager.Add<transform::Msl>();
-
     fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kMSL);
     fuzzer.SetTransformManager(&config.manager, std::move(config.inputs));
 
@@ -94,8 +90,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     if (!AddPlatformIndependentPasses(&config)) {
       return 0;
     }
-
-    config.manager.Add<transform::Spirv>();
 
     fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
     fuzzer.SetTransformManager(&config.manager, std::move(config.inputs));

@@ -321,45 +321,57 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
   }
 
   switch (output_) {
-    case OutputFormat::kWGSL:
+    case OutputFormat::kWGSL: {
 #if TINT_BUILD_WGSL_WRITER
-      writer_ = std::make_unique<writer::wgsl::Generator>(&program);
+      writer::wgsl::Options options;
+      auto result = writer::wgsl::Generate(&program, options);
+      if (!result.success) {
+        errors_ = writer_->error();
+        return 0;
+      }
 #endif  // TINT_BUILD_WGSL_WRITER
       break;
-    case OutputFormat::kSpv:
+    }
+    case OutputFormat::kSpv: {
 #if TINT_BUILD_SPV_WRITER
-      writer_ = std::make_unique<writer::spirv::Generator>(&program);
+      writer::spirv::Options options;
+      auto result = writer::spirv::Generate(&program, options);
+      if (!result.success) {
+        errors_ = writer_->error();
+        return 0;
+      }
+      if (!SPIRVToolsValidationCheck(program, result.spirv)) {
+        FatalError(program.Diagnostics(),
+                   "Fuzzing detected invalid spirv being emitted by Tint");
+      }
+
 #endif  // TINT_BUILD_SPV_WRITER
       break;
-    case OutputFormat::kHLSL:
+    }
+    case OutputFormat::kHLSL: {
 #if TINT_BUILD_HLSL_WRITER
-      writer_ = std::make_unique<writer::hlsl::Generator>(&program);
+      writer::hlsl::Options options;
+      auto result = writer::hlsl::Generate(&program, options);
+      if (!result.success) {
+        errors_ = writer_->error();
+        return 0;
+      }
 #endif  // TINT_BUILD_HLSL_WRITER
       break;
-    case OutputFormat::kMSL:
+    }
+    case OutputFormat::kMSL: {
 #if TINT_BUILD_MSL_WRITER
-      writer_ = std::make_unique<writer::msl::Generator>(&program);
+      writer::msl::Options options;
+      auto result = writer::msl::Generate(&program, options);
+      if (!result.success) {
+        errors_ = writer_->error();
+        return 0;
+      }
 #endif  // TINT_BUILD_MSL_WRITER
       break;
+    }
     case OutputFormat::kNone:
       break;
-  }
-
-  if (writer_) {
-    if (!writer_->Generate()) {
-      errors_ = writer_->error();
-      return 0;
-    }
-
-#if TINT_BUILD_SPV_WRITER
-    if (output_ == OutputFormat::kSpv &&
-        !SPIRVToolsValidationCheck(
-            program,
-            static_cast<writer::spirv::Generator*>(writer_.get())->result())) {
-      FatalError(program.Diagnostics(),
-                 "Fuzzing detected invalid spirv being emitted by Tint");
-    }
-#endif  // TINT_BUILD_SPV_WRITER
   }
 
   return 0;
