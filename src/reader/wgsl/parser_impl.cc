@@ -339,7 +339,7 @@ bool ParserImpl::Parse() {
 // translation_unit
 //  : global_decl* EOF
 void ParserImpl::translation_unit() {
-  while (synchronized_) {
+  while (continue_parsing()) {
     auto p = peek();
     if (p.IsEof()) {
       break;
@@ -369,7 +369,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
   auto decos = decoration_list();
   if (decos.errored)
     errored = true;
-  if (!synchronized_)
+  if (!continue_parsing())
     return Failure::kErrored;
 
   auto decl = sync(Token::Type::kSemicolon, [&]() -> Maybe<bool> {
@@ -1287,15 +1287,17 @@ Expect<ast::StructMemberList> ParserImpl::expect_struct_body_decl() {
 
         ast::StructMemberList members;
 
-        while (synchronized_ && !peek_is(Token::Type::kBraceRight) &&
+        while (continue_parsing() && !peek_is(Token::Type::kBraceRight) &&
                !peek_is(Token::Type::kEOF)) {
           auto member = sync(Token::Type::kSemicolon,
                              [&]() -> Expect<ast::StructMember*> {
                                auto decos = decoration_list();
-                               if (decos.errored)
+                               if (decos.errored) {
                                  errored = true;
-                               if (!synchronized_)
+                               }
+                               if (!synchronized_) {
                                  return Failure::kErrored;
+                               }
                                return expect_struct_member(decos.value);
                              });
 
@@ -1439,7 +1441,7 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
 //   | (param COMMA)* param COMMA?
 Expect<ast::VariableList> ParserImpl::expect_param_list() {
   ast::VariableList ret;
-  while (synchronized_) {
+  while (continue_parsing()) {
     // Check for the end of the list.
     auto t = peek();
     if (!t.IsIdentifier() && !t.Is(Token::Type::kAttrLeft)) {
@@ -1554,7 +1556,7 @@ Expect<ast::StatementList> ParserImpl::expect_statements() {
   bool errored = false;
   ast::StatementList stmts;
 
-  while (synchronized_) {
+  while (continue_parsing()) {
     auto stmt = statement();
     if (stmt.errored) {
       errored = true;
@@ -1811,7 +1813,7 @@ Maybe<ast::ElseStatementList> ParserImpl::elseif_stmt() {
     return Failure::kNoMatch;
 
   ast::ElseStatementList ret;
-  for (;;) {
+  while (continue_parsing()) {
     auto condition = expect_paren_rhs_stmt();
     if (condition.errored)
       return Failure::kErrored;
@@ -1859,7 +1861,7 @@ Maybe<ast::SwitchStatement*> ParserImpl::switch_stmt() {
                                  [&]() -> Expect<ast::CaseStatementList> {
                                    bool errored = false;
                                    ast::CaseStatementList list;
-                                   while (synchronized_) {
+                                   while (continue_parsing()) {
                                      auto stmt = switch_body();
                                      if (stmt.errored) {
                                        errored = true;
@@ -1919,7 +1921,7 @@ Maybe<ast::CaseStatement*> ParserImpl::switch_body() {
 Expect<ast::CaseSelectorList> ParserImpl::expect_case_selectors() {
   ast::CaseSelectorList selectors;
 
-  while (synchronized_) {
+  while (continue_parsing()) {
     auto cond = const_literal();
     if (cond.errored) {
       return Failure::kErrored;
@@ -1949,7 +1951,7 @@ Expect<ast::CaseSelectorList> ParserImpl::expect_case_selectors() {
 //   | FALLTHROUGH SEMICOLON
 Maybe<ast::BlockStatement*> ParserImpl::case_body() {
   ast::StatementList stmts;
-  for (;;) {
+  while (continue_parsing()) {
     Source source;
     if (match(Token::Type::kFallthrough, &source)) {
       if (!expect("fallthrough statement", Token::Type::kSemicolon))
@@ -2270,7 +2272,7 @@ Expect<ast::ExpressionList> ParserImpl::expect_argument_expression_list(
     const std::string& use) {
   return expect_paren_block(use, [&]() -> Expect<ast::ExpressionList> {
     ast::ExpressionList ret;
-    while (synchronized_) {
+    while (continue_parsing()) {
       auto arg = logical_or_expression();
       if (arg.errored) {
         return Failure::kErrored;
@@ -2342,7 +2344,7 @@ Maybe<ast::Expression*> ParserImpl::unary_expression() {
 //   | MODULO unary_expression multiplicative_expr
 Expect<ast::Expression*> ParserImpl::expect_multiplicative_expr(
     ast::Expression* lhs) {
-  while (synchronized_) {
+  while (continue_parsing()) {
     ast::BinaryOp op = ast::BinaryOp::kNone;
     if (peek_is(Token::Type::kStar))
       op = ast::BinaryOp::kMultiply;
@@ -2388,7 +2390,7 @@ Maybe<ast::Expression*> ParserImpl::multiplicative_expression() {
 //   | MINUS multiplicative_expression additive_expr
 Expect<ast::Expression*> ParserImpl::expect_additive_expr(
     ast::Expression* lhs) {
-  while (synchronized_) {
+  while (continue_parsing()) {
     ast::BinaryOp op = ast::BinaryOp::kNone;
     if (peek_is(Token::Type::kPlus))
       op = ast::BinaryOp::kAdd;
@@ -2428,7 +2430,7 @@ Maybe<ast::Expression*> ParserImpl::additive_expression() {
 //   | SHIFT_LEFT additive_expression shift_expr
 //   | SHIFT_RIGHT additive_expression shift_expr
 Expect<ast::Expression*> ParserImpl::expect_shift_expr(ast::Expression* lhs) {
-  while (synchronized_) {
+  while (continue_parsing()) {
     auto* name = "";
     ast::BinaryOp op = ast::BinaryOp::kNone;
     if (peek_is(Token::Type::kShiftLeft)) {
@@ -2476,7 +2478,7 @@ Maybe<ast::Expression*> ParserImpl::shift_expression() {
 //   | GREATER_THAN_EQUAL shift_expression relational_expr
 Expect<ast::Expression*> ParserImpl::expect_relational_expr(
     ast::Expression* lhs) {
-  while (synchronized_) {
+  while (continue_parsing()) {
     ast::BinaryOp op = ast::BinaryOp::kNone;
     if (peek_is(Token::Type::kLessThan))
       op = ast::BinaryOp::kLessThan;
@@ -2524,7 +2526,7 @@ Maybe<ast::Expression*> ParserImpl::relational_expression() {
 //   | NOT_EQUAL relational_expression equality_expr
 Expect<ast::Expression*> ParserImpl::expect_equality_expr(
     ast::Expression* lhs) {
-  while (synchronized_) {
+  while (continue_parsing()) {
     ast::BinaryOp op = ast::BinaryOp::kNone;
     if (peek_is(Token::Type::kEqualEqual))
       op = ast::BinaryOp::kEqual;
@@ -2566,9 +2568,10 @@ Maybe<ast::Expression*> ParserImpl::equality_expression() {
 //   :
 //   | AND equality_expression and_expr
 Expect<ast::Expression*> ParserImpl::expect_and_expr(ast::Expression* lhs) {
-  while (synchronized_) {
-    if (!peek_is(Token::Type::kAnd))
+  while (continue_parsing()) {
+    if (!peek_is(Token::Type::kAnd)) {
       return lhs;
+    }
 
     auto t = next();
     auto source = t.source();
@@ -2602,7 +2605,7 @@ Maybe<ast::Expression*> ParserImpl::and_expression() {
 //   | XOR and_expression exclusive_or_expr
 Expect<ast::Expression*> ParserImpl::expect_exclusive_or_expr(
     ast::Expression* lhs) {
-  while (synchronized_) {
+  while (continue_parsing()) {
     Source source;
     if (!match(Token::Type::kXor, &source))
       return lhs;
@@ -2636,7 +2639,7 @@ Maybe<ast::Expression*> ParserImpl::exclusive_or_expression() {
 //   | OR exclusive_or_expression inclusive_or_expr
 Expect<ast::Expression*> ParserImpl::expect_inclusive_or_expr(
     ast::Expression* lhs) {
-  while (synchronized_) {
+  while (continue_parsing()) {
     Source source;
     if (!match(Token::Type::kOr))
       return lhs;
@@ -2670,9 +2673,10 @@ Maybe<ast::Expression*> ParserImpl::inclusive_or_expression() {
 //   | AND_AND inclusive_or_expression logical_and_expr
 Expect<ast::Expression*> ParserImpl::expect_logical_and_expr(
     ast::Expression* lhs) {
-  while (synchronized_) {
-    if (!peek_is(Token::Type::kAndAnd))
+  while (continue_parsing()) {
+    if (!peek_is(Token::Type::kAndAnd)) {
       return lhs;
+    }
 
     auto t = next();
     auto source = t.source();
@@ -2706,7 +2710,7 @@ Maybe<ast::Expression*> ParserImpl::logical_and_expression() {
 //   | OR_OR logical_and_expression logical_or_expr
 Expect<ast::Expression*> ParserImpl::expect_logical_or_expr(
     ast::Expression* lhs) {
-  while (synchronized_) {
+  while (continue_parsing()) {
     Source source;
     if (!match(Token::Type::kOrOr))
       return lhs;
@@ -2810,27 +2814,26 @@ Expect<ast::ConstructorExpression*> ParserImpl::expect_const_expr() {
   if (type.errored)
     return Failure::kErrored;
   if (type.matched) {
-    auto params = expect_paren_block("type constructor",
-                                     [&]() -> Expect<ast::ExpressionList> {
-                                       ast::ExpressionList list;
-                                       while (synchronized_) {
-                                         if (peek_is(
-                                                 Token::Type::kParenRight)) {
-                                           break;
-                                         }
+    auto params = expect_paren_block(
+        "type constructor", [&]() -> Expect<ast::ExpressionList> {
+          ast::ExpressionList list;
+          while (continue_parsing()) {
+            if (peek_is(Token::Type::kParenRight)) {
+              break;
+            }
 
-                                         auto arg = expect_const_expr();
-                                         if (arg.errored) {
-                                           return Failure::kErrored;
-                                         }
-                                         list.emplace_back(arg.value);
+            auto arg = expect_const_expr();
+            if (arg.errored) {
+              return Failure::kErrored;
+            }
+            list.emplace_back(arg.value);
 
-                                         if (!match(Token::Type::kComma)) {
-                                           break;
-                                         }
-                                       }
-                                       return list;
-                                     });
+            if (!match(Token::Type::kComma)) {
+              break;
+            }
+          }
+          return list;
+        });
 
     if (params.errored)
       return Failure::kErrored;
@@ -2853,7 +2856,7 @@ Maybe<ast::DecorationList> ParserImpl::decoration_list() {
   bool matched = false;
   ast::DecorationList decos;
 
-  while (synchronized_) {
+  while (continue_parsing()) {
     auto list = decoration_bracketed_list(decos);
     if (list.errored)
       errored = true;
@@ -2886,14 +2889,16 @@ Maybe<bool> ParserImpl::decoration_bracketed_list(ast::DecorationList& decos) {
   return sync(Token::Type::kAttrRight, [&]() -> Expect<bool> {
     bool errored = false;
 
-    while (synchronized_) {
+    while (continue_parsing()) {
       auto deco = expect_decoration();
-      if (deco.errored)
+      if (deco.errored) {
         errored = true;
+      }
       decos.emplace_back(deco.value);
 
-      if (match(Token::Type::kComma))
+      if (match(Token::Type::kComma)) {
         continue;
+      }
 
       if (is_decoration(peek())) {
         // We have two decorations in a bracket without a separating comma.
@@ -2906,11 +2911,13 @@ Maybe<bool> ParserImpl::decoration_bracketed_list(ast::DecorationList& decos) {
       break;
     }
 
-    if (errored)
+    if (errored) {
       return Failure::kErrored;
+    }
 
-    if (!expect(use, Token::Type::kAttrRight))
+    if (!expect(use, Token::Type::kAttrRight)) {
       return Failure::kErrored;
+    }
 
     return true;
   });
@@ -3149,7 +3156,8 @@ bool ParserImpl::expect(const std::string& use, Token::Type tok) {
   auto t = peek();
   if (t.Is(tok)) {
     next();
-    return maybe_set_synchronized();
+    synchronized_ = true;
+    return true;
   }
 
   // Special case to split `>>` and `>=` tokens if we are looking for a `>`.
@@ -3167,7 +3175,8 @@ bool ParserImpl::expect(const std::string& use, Token::Type tok) {
       token_queue_.push_front(Token(Token::Type::kEqual, source));
     }
 
-    return maybe_set_synchronized();
+    synchronized_ = true;
+    return true;
   }
 
   // Handle the case when `]` is expected but the actual token is `]]`.
@@ -3177,7 +3186,8 @@ bool ParserImpl::expect(const std::string& use, Token::Type tok) {
     auto source = t.source();
     source.range.begin.column++;
     token_queue_.push_front({Token::Type::kBracketRight, source});
-    return maybe_set_synchronized();
+    synchronized_ = true;
+    return true;
   }
 
   std::stringstream err;
@@ -3225,9 +3235,7 @@ Expect<uint32_t> ParserImpl::expect_nonzero_positive_sint(
 Expect<std::string> ParserImpl::expect_ident(const std::string& use) {
   auto t = peek();
   if (t.IsIdentifier()) {
-    if (!maybe_set_synchronized()) {
-      return Failure::kErrored;
-    }
+    synchronized_ = true;
     next();
 
     if (is_reserved(t)) {
@@ -3321,10 +3329,12 @@ bool ParserImpl::sync_to(Token::Type tok, bool consume) {
 
   for (size_t i = 0; i < kMaxResynchronizeLookahead; i++) {
     auto t = peek(i);
-    if (counters.consume(t) > 0)
+    if (counters.consume(t) > 0) {
       continue;  // Nested block
-    if (!t.Is(tok) && !is_sync_token(t))
+    }
+    if (!t.Is(tok) && !is_sync_token(t)) {
       continue;  // Not a synchronization point
+    }
 
     // Synchronization point found.
 
@@ -3339,7 +3349,8 @@ bool ParserImpl::sync_to(Token::Type tok, bool consume) {
       if (consume) {
         next();
       }
-      return maybe_set_synchronized();
+      synchronized_ = true;
+      return true;
     }
     break;
   }
@@ -3349,16 +3360,9 @@ bool ParserImpl::sync_to(Token::Type tok, bool consume) {
 
 bool ParserImpl::is_sync_token(const Token& t) const {
   for (auto r : sync_tokens_) {
-    if (t.Is(r))
+    if (t.Is(r)) {
       return true;
-  }
-  return false;
-}
-
-bool ParserImpl::maybe_set_synchronized() {
-  if (builder_.Diagnostics().error_count() < max_errors_) {
-    synchronized_ = true;
-    return true;
+    }
   }
   return false;
 }
