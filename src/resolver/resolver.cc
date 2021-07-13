@@ -2067,7 +2067,7 @@ bool Resolver::ArrayAccessor(ast::ArrayAccessorExpression* expr) {
     ret = builder_->create<sem::Reference>(ret, ref->StorageClass(),
                                            ref->Access());
   }
-  SetType(expr, ret);
+  SetExprInfo(expr, ret);
 
   return true;
 }
@@ -2085,7 +2085,7 @@ bool Resolver::Bitcast(ast::BitcastExpression* expr) {
     AddError("cannot cast to a pointer", expr->source());
     return false;
   }
-  SetType(expr, ty, expr->type()->FriendlyName(builder_->Symbols()));
+  SetExprInfo(expr, ty, expr->type()->FriendlyName(builder_->Symbols()));
   return true;
 }
 
@@ -2167,7 +2167,7 @@ bool Resolver::IntrinsicCall(ast::CallExpression* call,
 
   builder_->Sem().Add(
       call, builder_->create<sem::Call>(call, result, current_statement_));
-  SetType(call, result->ReturnType());
+  SetExprInfo(call, result->ReturnType());
 
   current_function_->intrinsic_calls.emplace_back(
       IntrinsicCallInfo{call, result});
@@ -2239,7 +2239,7 @@ bool Resolver::FunctionCall(const ast::CallExpression* call) {
 
   function_calls_.emplace(call,
                           FunctionCallInfo{callee_func, current_statement_});
-  SetType(call, callee_func->return_type, callee_func->return_type_name);
+  SetExprInfo(call, callee_func->return_type, callee_func->return_type_name);
 
   return true;
 }
@@ -2258,7 +2258,7 @@ bool Resolver::Constructor(ast::ConstructorExpression* expr) {
       return false;
     }
 
-    SetType(expr, type, type_ctor->type()->FriendlyName(builder_->Symbols()));
+    auto type_name = type_ctor->type()->FriendlyName(builder_->Symbols());
 
     // Now that the argument types have been determined, make sure that they
     // obey the constructor type rules laid out in
@@ -2267,33 +2267,38 @@ bool Resolver::Constructor(ast::ConstructorExpression* expr) {
       AddError("cannot cast to a pointer", expr->source());
       return false;
     }
+
+    bool ok = true;
     if (auto* vec_type = type->As<sem::Vector>()) {
-      return ValidateVectorConstructor(type_ctor, vec_type);
+      ok = ValidateVectorConstructor(type_ctor, vec_type, type_name);
+    } else if (auto* mat_type = type->As<sem::Matrix>()) {
+      ok = ValidateMatrixConstructor(type_ctor, mat_type, type_name);
+    } else if (type->is_scalar()) {
+      ok = ValidateScalarConstructor(type_ctor, type, type_name);
+    } else if (auto* arr_type = type->As<sem::Array>()) {
+      ok = ValidateArrayConstructor(type_ctor, arr_type);
+    } else if (auto* struct_type = type->As<sem::Struct>()) {
+      ok = ValidateStructureConstructor(type_ctor, struct_type);
     }
-    if (auto* mat_type = type->As<sem::Matrix>()) {
-      return ValidateMatrixConstructor(type_ctor, mat_type);
+    if (!ok) {
+      return false;
     }
-    if (type->is_scalar()) {
-      return ValidateScalarConstructor(type_ctor, type);
-    }
-    if (auto* arr_type = type->As<sem::Array>()) {
-      return ValidateArrayConstructor(type_ctor, arr_type);
-    }
-    if (auto* struct_type = type->As<sem::Struct>()) {
-      return ValidateStructureConstructor(type_ctor, struct_type);
-    }
-  } else if (auto* scalar_ctor = expr->As<ast::ScalarConstructorExpression>()) {
+    SetExprInfo(expr, type, type_name);
+    return true;
+  }
+
+  if (auto* scalar_ctor = expr->As<ast::ScalarConstructorExpression>()) {
     Mark(scalar_ctor->literal());
     auto* type = TypeOf(scalar_ctor->literal());
     if (!type) {
       return false;
     }
-    SetType(expr, type);
-  } else {
-    TINT_ICE(Resolver, diagnostics_)
-        << "unexpected constructor expression type";
+    SetExprInfo(expr, type);
+    return true;
   }
-  return true;
+
+  TINT_ICE(Resolver, diagnostics_) << "unexpected constructor expression type";
+  return false;
 }
 
 bool Resolver::ValidateStructureConstructor(
@@ -2366,7 +2371,8 @@ bool Resolver::ValidateArrayConstructor(
 
 bool Resolver::ValidateVectorConstructor(
     const ast::TypeConstructorExpression* ctor,
-    const sem::Vector* vec_type) {
+    const sem::Vector* vec_type,
+    const std::string& type_name) {
   auto& values = ctor->values();
   auto* elem_type = vec_type->type();
   size_t value_cardinality_sum = 0;
@@ -2423,7 +2429,7 @@ bool Resolver::ValidateVectorConstructor(
     }
     const Source& values_start = values[0]->source();
     const Source& values_end = values[values.size() - 1]->source();
-    AddError("attempted to construct '" + TypeNameOf(ctor) + "' with " +
+    AddError("attempted to construct '" + type_name + "' with " +
                  std::to_string(value_cardinality_sum) + " component(s)",
              Source::Combine(values_start, values_end));
     return false;
@@ -2450,7 +2456,8 @@ bool Resolver::ValidateMatrix(const sem::Matrix* ty, const Source& source) {
 
 bool Resolver::ValidateMatrixConstructor(
     const ast::TypeConstructorExpression* ctor,
-    const sem::Matrix* matrix_type) {
+    const sem::Matrix* matrix_type,
+    const std::string& type_name) {
   auto& values = ctor->values();
   // Zero Value expression
   if (values.empty()) {
@@ -2467,8 +2474,8 @@ bool Resolver::ValidateMatrixConstructor(
     const Source& values_end = values[values.size() - 1]->source();
     AddError("expected " + std::to_string(matrix_type->columns()) + " '" +
                  VectorPretty(matrix_type->rows(), elem_type) +
-                 "' arguments in '" + TypeNameOf(ctor) +
-                 "' constructor, found " + std::to_string(values.size()),
+                 "' arguments in '" + type_name + "' constructor, found " +
+                 std::to_string(values.size()),
              Source::Combine(values_start, values_end));
     return false;
   }
@@ -2481,8 +2488,8 @@ bool Resolver::ValidateMatrixConstructor(
         elem_type != value_vec->type()) {
       AddError("expected argument type '" +
                    VectorPretty(matrix_type->rows(), elem_type) + "' in '" +
-                   TypeNameOf(ctor) + "' constructor, found '" +
-                   TypeNameOf(value) + "'",
+                   type_name + "' constructor, found '" + TypeNameOf(value) +
+                   "'",
                value->source());
       return false;
     }
@@ -2493,7 +2500,8 @@ bool Resolver::ValidateMatrixConstructor(
 
 bool Resolver::ValidateScalarConstructor(
     const ast::TypeConstructorExpression* ctor,
-    const sem::Type* type) {
+    const sem::Type* type,
+    const std::string& type_name) {
   if (ctor->values().size() == 0) {
     return true;
   }
@@ -2519,8 +2527,8 @@ bool Resolver::ValidateScalarConstructor(
       (type->Is<U32>() && value_type->IsAnyOf<I32, U32, F32>()) ||
       (type->Is<F32>() && value_type->IsAnyOf<I32, U32, F32>());
   if (!is_valid) {
-    AddError("cannot construct '" + TypeNameOf(ctor) +
-                 "' with a value of type '" + TypeNameOf(value) + "'",
+    AddError("cannot construct '" + type_name + "' with a value of type '" +
+                 TypeNameOf(value) + "'",
              ctor->source());
 
     return false;
@@ -2533,7 +2541,7 @@ bool Resolver::Identifier(ast::IdentifierExpression* expr) {
   auto symbol = expr->symbol();
   VariableInfo* var;
   if (variable_stack_.get(symbol, &var)) {
-    SetType(expr, var->type, var->type_name);
+    SetExprInfo(expr, var->type, var->type_name);
 
     var->users.push_back(expr);
     set_referenced_from_function_if_needed(var, true);
@@ -2707,7 +2715,7 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
     return false;
   }
 
-  SetType(expr, ret);
+  SetExprInfo(expr, ret);
 
   return true;
 }
@@ -2745,17 +2753,17 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
   // Binary logical expressions
   if (expr->IsLogicalAnd() || expr->IsLogicalOr()) {
     if (matching_types && lhs_type->Is<Bool>()) {
-      SetType(expr, lhs_type);
+      SetExprInfo(expr, lhs_type);
       return true;
     }
   }
   if (expr->IsOr() || expr->IsAnd()) {
     if (matching_types && lhs_type->Is<Bool>()) {
-      SetType(expr, lhs_type);
+      SetExprInfo(expr, lhs_type);
       return true;
     }
     if (matching_types && lhs_vec_elem_type && lhs_vec_elem_type->Is<Bool>()) {
-      SetType(expr, lhs_type);
+      SetExprInfo(expr, lhs_type);
       return true;
     }
   }
@@ -2764,14 +2772,14 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
   if (expr->IsArithmetic()) {
     // Binary arithmetic expressions over scalars
     if (matching_types && lhs_type->is_numeric_scalar()) {
-      SetType(expr, lhs_type);
+      SetExprInfo(expr, lhs_type);
       return true;
     }
 
     // Binary arithmetic expressions over vectors
     if (matching_types && lhs_vec_elem_type &&
         lhs_vec_elem_type->is_numeric_scalar()) {
-      SetType(expr, lhs_type);
+      SetExprInfo(expr, lhs_type);
       return true;
     }
 
@@ -2779,22 +2787,22 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
     if (lhs_vec_elem_type && (lhs_vec_elem_type == rhs_type)) {
       if (expr->IsModulo()) {
         if (rhs_type->is_integer_scalar()) {
-          SetType(expr, lhs_type);
+          SetExprInfo(expr, lhs_type);
           return true;
         }
       } else if (rhs_type->is_numeric_scalar()) {
-        SetType(expr, lhs_type);
+        SetExprInfo(expr, lhs_type);
         return true;
       }
     }
     if (rhs_vec_elem_type && (rhs_vec_elem_type == lhs_type)) {
       if (expr->IsModulo()) {
         if (lhs_type->is_integer_scalar()) {
-          SetType(expr, rhs_type);
+          SetExprInfo(expr, rhs_type);
           return true;
         }
       } else if (lhs_type->is_numeric_scalar()) {
-        SetType(expr, rhs_type);
+        SetExprInfo(expr, rhs_type);
         return true;
       }
     }
@@ -2811,19 +2819,19 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
       rhs_mat_elem_type->Is<F32>() &&
       (lhs_mat->columns() == rhs_mat->columns()) &&
       (lhs_mat->rows() == rhs_mat->rows())) {
-    SetType(expr, rhs_type);
+    SetExprInfo(expr, rhs_type);
     return true;
   }
   if (expr->IsMultiply()) {
     // Multiplication of a matrix and a scalar
     if (lhs_type->Is<F32>() && rhs_mat_elem_type &&
         rhs_mat_elem_type->Is<F32>()) {
-      SetType(expr, rhs_type);
+      SetExprInfo(expr, rhs_type);
       return true;
     }
     if (lhs_mat_elem_type && lhs_mat_elem_type->Is<F32>() &&
         rhs_type->Is<F32>()) {
-      SetType(expr, lhs_type);
+      SetExprInfo(expr, lhs_type);
       return true;
     }
 
@@ -2831,8 +2839,8 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
     if (lhs_vec_elem_type && lhs_vec_elem_type->Is<F32>() &&
         rhs_mat_elem_type && rhs_mat_elem_type->Is<F32>() &&
         (lhs_vec->size() == rhs_mat->rows())) {
-      SetType(expr, builder_->create<sem::Vector>(lhs_vec->type(),
-                                                  rhs_mat->columns()));
+      SetExprInfo(expr, builder_->create<sem::Vector>(lhs_vec->type(),
+                                                      rhs_mat->columns()));
       return true;
     }
 
@@ -2840,8 +2848,8 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
     if (lhs_mat_elem_type && lhs_mat_elem_type->Is<F32>() &&
         rhs_vec_elem_type && rhs_vec_elem_type->Is<F32>() &&
         (lhs_mat->columns() == rhs_vec->size())) {
-      SetType(expr,
-              builder_->create<sem::Vector>(rhs_vec->type(), lhs_mat->rows()));
+      SetExprInfo(expr, builder_->create<sem::Vector>(rhs_vec->type(),
+                                                      lhs_mat->rows()));
       return true;
     }
 
@@ -2849,10 +2857,10 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
     if (lhs_mat_elem_type && lhs_mat_elem_type->Is<F32>() &&
         rhs_mat_elem_type && rhs_mat_elem_type->Is<F32>() &&
         (lhs_mat->columns() == rhs_mat->rows())) {
-      SetType(expr, builder_->create<sem::Matrix>(
-                        builder_->create<sem::Vector>(lhs_mat_elem_type,
-                                                      lhs_mat->rows()),
-                        rhs_mat->columns()));
+      SetExprInfo(expr, builder_->create<sem::Matrix>(
+                            builder_->create<sem::Vector>(lhs_mat_elem_type,
+                                                          lhs_mat->rows()),
+                            rhs_mat->columns()));
       return true;
     }
   }
@@ -2862,13 +2870,13 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
     if (matching_types) {
       // Special case for bools: only == and !=
       if (lhs_type->Is<Bool>() && (expr->IsEqual() || expr->IsNotEqual())) {
-        SetType(expr, builder_->create<sem::Bool>());
+        SetExprInfo(expr, builder_->create<sem::Bool>());
         return true;
       }
 
       // For the rest, we can compare i32, u32, and f32
       if (lhs_type->IsAnyOf<I32, U32, F32>()) {
-        SetType(expr, builder_->create<sem::Bool>());
+        SetExprInfo(expr, builder_->create<sem::Bool>());
         return true;
       }
     }
@@ -2877,14 +2885,14 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
     if (matching_vec_elem_types) {
       if (lhs_vec_elem_type->Is<Bool>() &&
           (expr->IsEqual() || expr->IsNotEqual())) {
-        SetType(expr, builder_->create<sem::Vector>(
-                          builder_->create<sem::Bool>(), lhs_vec->size()));
+        SetExprInfo(expr, builder_->create<sem::Vector>(
+                              builder_->create<sem::Bool>(), lhs_vec->size()));
         return true;
       }
 
       if (lhs_vec_elem_type->is_numeric_scalar()) {
-        SetType(expr, builder_->create<sem::Vector>(
-                          builder_->create<sem::Bool>(), lhs_vec->size()));
+        SetExprInfo(expr, builder_->create<sem::Vector>(
+                              builder_->create<sem::Bool>(), lhs_vec->size()));
         return true;
       }
     }
@@ -2893,7 +2901,7 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
   // Binary bitwise operations
   if (expr->IsBitwise()) {
     if (matching_types && lhs_type->is_integer_scalar_or_vector()) {
-      SetType(expr, lhs_type);
+      SetExprInfo(expr, lhs_type);
       return true;
     }
   }
@@ -2905,13 +2913,13 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
     // logical depending on lhs type).
 
     if (lhs_type->IsAnyOf<I32, U32>() && rhs_type->Is<U32>()) {
-      SetType(expr, lhs_type);
+      SetExprInfo(expr, lhs_type);
       return true;
     }
 
     if (lhs_vec_elem_type && lhs_vec_elem_type->IsAnyOf<I32, U32>() &&
         rhs_vec_elem_type && rhs_vec_elem_type->Is<U32>()) {
-      SetType(expr, lhs_type);
+      SetExprInfo(expr, lhs_type);
       return true;
     }
   }
@@ -3002,7 +3010,7 @@ bool Resolver::UnaryOp(ast::UnaryOpExpression* unary) {
       break;
   }
 
-  SetType(unary, type);
+  SetExprInfo(unary, type);
   return true;
 }
 
@@ -3131,18 +3139,20 @@ sem::Type* Resolver::TypeOf(const ast::Literal* lit) {
   return nullptr;
 }
 
-void Resolver::SetType(const ast::Expression* expr, const sem::Type* type) {
-  SetType(expr, type, type->FriendlyName(builder_->Symbols()));
-}
-
-void Resolver::SetType(const ast::Expression* expr,
-                       const sem::Type* type,
-                       const std::string& type_name) {
+void Resolver::SetExprInfo(const ast::Expression* expr,
+                           const sem::Type* type,
+                           std::string type_name) {
   if (expr_info_.count(expr)) {
     TINT_ICE(Resolver, diagnostics_)
-        << "SetType() called twice for the same expression";
+        << "SetExprInfo() called twice for the same expression";
   }
-  expr_info_.emplace(expr, ExpressionInfo{type, type_name, current_statement_});
+  if (type_name.empty()) {
+    type_name = type->FriendlyName(builder_->Symbols());
+  }
+  auto constant_value = EvaluateConstantValue(expr, type);
+  expr_info_.emplace(
+      expr, ExpressionInfo{type, std::move(type_name), current_statement_,
+                           std::move(constant_value)});
 }
 
 bool Resolver::ValidatePipelineStages() {
@@ -3313,10 +3323,11 @@ void Resolver::CreateSemanticNodes() const {
       // Create semantic node for the identifier expression if necessary
       auto* sem_expr = sem.Get(user);
       if (sem_expr == nullptr) {
-        auto* type = expr_info_.at(user).type;
-        auto* stmt = expr_info_.at(user).statement;
-        auto* sem_user =
-            builder_->create<sem::VariableUser>(user, type, stmt, sem_var);
+        auto& expr_info = expr_info_.at(user);
+        auto* type = expr_info.type;
+        auto* stmt = expr_info.statement;
+        auto* sem_user = builder_->create<sem::VariableUser>(
+            user, type, stmt, sem_var, expr_info.constant_value);
         sem_var->AddUser(sem_user);
         sem.Add(user, sem_user);
       } else {
@@ -3372,9 +3383,9 @@ void Resolver::CreateSemanticNodes() const {
       // Expression has already been assigned a semantic node
       continue;
     }
-    sem.Add(expr,
-            builder_->create<sem::Expression>(
-                const_cast<ast::Expression*>(expr), info.type, info.statement));
+    sem.Add(expr, builder_->create<sem::Expression>(
+                      const_cast<ast::Expression*>(expr), info.type,
+                      info.statement, info.constant_value));
   }
 }
 

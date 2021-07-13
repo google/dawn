@@ -14,6 +14,8 @@
 
 #include "src/sem/variable.h"
 
+#include <utility>
+
 #include "src/ast/identifier_expression.h"
 #include "src/ast/variable.h"
 
@@ -50,8 +52,10 @@ Variable::~Variable() = default;
 VariableUser::VariableUser(ast::IdentifierExpression* declaration,
                            const sem::Type* type,
                            Statement* statement,
-                           sem::Variable* variable)
-    : Base(declaration, type, statement), variable_(variable) {}
+                           sem::Variable* variable,
+                           Constant constant_value)
+    : Base(declaration, type, statement, std::move(constant_value)),
+      variable_(variable) {}
 
 }  // namespace sem
 }  // namespace tint

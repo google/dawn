@@ -1764,7 +1764,8 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     auto* i32 = builder_.create<sem::I32>();
     auto* zero = builder_.Expr(0);
     auto* stmt = builder_.Sem().Get(vector)->Stmt();
-    builder_.Sem().Add(zero, builder_.create<sem::Expression>(zero, i32, stmt));
+    builder_.Sem().Add(zero, builder_.create<sem::Expression>(zero, i32, stmt,
+                                                              sem::Constant{}));
     auto* packed = AppendVector(&builder_, vector, zero);
     return EmitExpression(out, packed);
   };

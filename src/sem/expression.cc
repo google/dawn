@@ -14,6 +14,8 @@
 
 #include "src/sem/expression.h"
 
+#include <utility>
+
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Expression);
 
 namespace tint {
@@ -21,10 +23,16 @@ namespace sem {
 
 Expression::Expression(const ast::Expression* declaration,
                        const sem::Type* type,
-                       Statement* statement)
-    : declaration_(declaration), type_(type), statement_(statement) {
+                       Statement* statement,
+                       Constant constant)
+    : declaration_(declaration),
+      type_(type),
+      statement_(statement),
+      constant_(std::move(constant)) {
   TINT_ASSERT(Semantic, type_);
 }
+
+Expression::~Expression() = default;
 
 }  // namespace sem
 }  // namespace tint

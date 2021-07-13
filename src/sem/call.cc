@@ -22,7 +22,8 @@ namespace sem {
 Call::Call(const ast::Expression* declaration,
            const CallTarget* target,
            Statement* statement)
-    : Base(declaration, target->ReturnType(), statement), target_(target) {}
+    : Base(declaration, target->ReturnType(), statement, Constant{}),
+      target_(target) {}
 
 Call::~Call() = default;
 

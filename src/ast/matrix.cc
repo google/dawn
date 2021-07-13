@@ -30,6 +30,7 @@ Matrix::Matrix(ProgramID program_id,
       subtype_(subtype),
       rows_(rows),
       columns_(columns) {
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, subtype, program_id);
   TINT_ASSERT(AST, rows > 1);
   TINT_ASSERT(AST, rows < 5);
   TINT_ASSERT(AST, columns > 1);

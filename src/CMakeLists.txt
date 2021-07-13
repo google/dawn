@@ -240,6 +240,7 @@ set(TINT_LIB_SRCS
   reader/reader.cc
   reader/reader.h
   resolver/resolver.cc
+  resolver/resolver_constants.cc
   resolver/resolver.h
   scope_stack.h
   sem/array.cc
@@ -253,6 +254,8 @@ set(TINT_LIB_SRCS
   sem/call_target.h
   sem/call.cc
   sem/call.h
+  sem/constant.cc
+  sem/constant.h
   sem/expression.cc
   sem/expression.h
   sem/function.cc
@@ -633,6 +636,7 @@ if(${TINT_BUILD_TESTS})
     resolver/is_storeable_test.cc
     resolver/ptr_ref_test.cc
     resolver/ptr_ref_validation_test.cc
+    resolver/resolver_constants_test.cc
     resolver/pipeline_overridable_constant_test.cc
     resolver/resolver_test_helper.cc
     resolver/resolver_test_helper.h

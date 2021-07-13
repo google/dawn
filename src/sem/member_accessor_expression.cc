@@ -28,7 +28,7 @@ MemberAccessorExpression::MemberAccessorExpression(
     ast::MemberAccessorExpression* declaration,
     const sem::Type* type,
     Statement* statement)
-    : Base(declaration, type, statement) {}
+    : Base(declaration, type, statement, Constant{}) {}
 
 MemberAccessorExpression::~MemberAccessorExpression() = default;
 

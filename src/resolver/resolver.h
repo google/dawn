@@ -26,6 +26,7 @@
 #include "src/scope_stack.h"
 #include "src/sem/binding_point.h"
 #include "src/sem/block_statement.h"
+#include "src/sem/constant.h"
 #include "src/sem/function.h"
 #include "src/sem/struct.h"
 #include "src/utils/unique_vector.h"
@@ -152,6 +153,7 @@ class Resolver {
     sem::Type const* type;
     std::string const type_name;  // Declared type name
     sem::Statement* statement;
+    sem::Constant constant_value;
   };
 
   /// Structure holding semantic information about a call expression to an
@@ -282,8 +284,6 @@ class Resolver {
   bool ValidateInterpolateDecoration(const ast::InterpolateDecoration* deco,
                                      const sem::Type* storage_type);
   bool ValidateMatrix(const sem::Matrix* ty, const Source& source);
-  bool ValidateMatrixConstructor(const ast::TypeConstructorExpression* ctor,
-                                 const sem::Matrix* matrix_type);
   bool ValidateFunctionParameter(const ast::Function* func,
                                  const VariableInfo* info);
   bool ValidateNoDuplicateDefinition(Symbol sym,
@@ -305,9 +305,14 @@ class Resolver {
                                    const std::string& rhs_type_name);
   bool ValidateVector(const sem::Vector* ty, const Source& source);
   bool ValidateVectorConstructor(const ast::TypeConstructorExpression* ctor,
-                                 const sem::Vector* vec_type);
+                                 const sem::Vector* vec_type,
+                                 const std::string& type_name);
+  bool ValidateMatrixConstructor(const ast::TypeConstructorExpression* ctor,
+                                 const sem::Matrix* matrix_type,
+                                 const std::string& type_name);
   bool ValidateScalarConstructor(const ast::TypeConstructorExpression* ctor,
-                                 const sem::Type* type);
+                                 const sem::Type* type,
+                                 const std::string& type_name);
   bool ValidateArrayConstructor(const ast::TypeConstructorExpression* ctor,
                                 const sem::Array* arr_type);
   bool ValidateTypeDecl(const ast::TypeDecl* named_type) const;
@@ -380,21 +385,14 @@ class Resolver {
   /// @param lit the literal
   sem::Type* TypeOf(const ast::Literal* lit);
 
-  /// Creates a sem::Expression node with the resolved type `type`, and
-  /// assigns this semantic node to the expression `expr`.
-  /// @param expr the expression
-  /// @param type the resolved type
-  void SetType(const ast::Expression* expr, const sem::Type* type);
-
-  /// Creates a sem::Expression node with the resolved type `type`, the declared
-  /// type name `type_name` and assigns this semantic node to the expression
-  /// `expr`.
+  /// Records the semantic information for the expression node with the resolved
+  /// type `type` and optional declared type name `type_name`.
   /// @param expr the expression
   /// @param type the resolved type
   /// @param type_name the declared type name
-  void SetType(const ast::Expression* expr,
-               const sem::Type* type,
-               const std::string& type_name);
+  void SetExprInfo(const ast::Expression* expr,
+                   const sem::Type* type,
+                   std::string type_name = "");
 
   /// Resolve the value of a scalar const_expr.
   /// @param expr the expression
@@ -434,6 +432,26 @@ class Resolver {
   void TraverseCallChain(FunctionInfo* from,
                          FunctionInfo* to,
                          CALLBACK&& callback) const;
+
+  //////////////////////////////////////////////////////////////////////////////
+  /// Constant value evaluation methods
+  //////////////////////////////////////////////////////////////////////////////
+  /// @return the Constant value of the given Expression
+  sem::Constant ConstantValueOf(const ast::Expression* expr);
+
+  /// Cast `Value` to `target_type`
+  /// @return the casted value
+  sem::Constant ConstantCast(const sem::Constant& value,
+                             const sem::Type* target_elem_type);
+
+  sem::Constant EvaluateConstantValue(const ast::Expression* expr,
+                                      const sem::Type* type);
+  sem::Constant EvaluateConstantValue(
+      const ast::ScalarConstructorExpression* scalar_ctor,
+      const sem::Type* type);
+  sem::Constant EvaluateConstantValue(
+      const ast::TypeConstructorExpression* type_ctor,
+      const sem::Type* type);
 
   ProgramBuilder* const builder_;
   diag::List& diagnostics_;

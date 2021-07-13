@@ -54,6 +54,10 @@ Output Spirv::Run(const Program* in, const DataMap& data) {
   manager.Add<ForLoopToLoop>();  // Must come after ZeroInitWorkgroupMemory
   auto transformedInput = manager.Run(in, data);
 
+  if (transformedInput.program.Diagnostics().contains_errors()) {
+    return transformedInput;
+  }
+
   auto* cfg = data.Get<Config>();
 
   ProgramBuilder out;

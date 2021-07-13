@@ -16,6 +16,7 @@
 #define SRC_SEM_EXPRESSION_H_
 
 #include "src/ast/expression.h"
+#include "src/sem/constant.h"
 #include "src/sem/node.h"
 
 namespace tint {
@@ -31,15 +32,23 @@ class Expression : public Castable<Expression, Node> {
   /// @param declaration the AST node
   /// @param type the resolved type of the expression
   /// @param statement the statement that owns this expression
+  /// @param constant the constant value of the expression. May be invalid
   Expression(const ast::Expression* declaration,
              const sem::Type* type,
-             Statement* statement);
+             Statement* statement,
+             Constant constant);
+
+  /// Destructor
+  ~Expression() override;
 
   /// @return the resolved type of the expression
   sem::Type* Type() const { return const_cast<sem::Type*>(type_); }
 
   /// @return the statement that owns this expression
   Statement* Stmt() const { return statement_; }
+
+  /// @return the constant value of this expression
+  const Constant& ConstantValue() const { return constant_; }
 
   /// @returns the AST node
   ast::Expression* Declaration() const {
@@ -50,6 +59,7 @@ class Expression : public Castable<Expression, Node> {
   const ast::Expression* declaration_;
   const sem::Type* const type_;
   Statement* const statement_;
+  Constant const constant_;
 };
 
 }  // namespace sem

@@ -96,8 +96,9 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
 
       for (uint32_t i = 0; i < packed_size - 1; i++) {
         auto* zero = buildZero();
-        b->Sem().Add(zero, b->create<sem::Expression>(zero, packed_el_sem_ty,
-                                                      statement));
+        b->Sem().Add(
+            zero, b->create<sem::Expression>(zero, packed_el_sem_ty, statement,
+                                             sem::Constant{}));
         packed.emplace_back(zero);
       }
     }
@@ -107,16 +108,18 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
   if (packed_el_sem_ty != b->TypeOf(scalar)->UnwrapRef()) {
     // Cast scalar to the vector element type
     auto* scalar_cast = b->Construct(packed_el_ty, scalar);
-    b->Sem().Add(scalar_cast, b->create<sem::Expression>(
-                                  scalar_cast, packed_el_sem_ty, statement));
+    b->Sem().Add(scalar_cast,
+                 b->create<sem::Expression>(scalar_cast, packed_el_sem_ty,
+                                            statement, sem::Constant{}));
     packed.emplace_back(scalar_cast);
   } else {
     packed.emplace_back(scalar);
   }
 
   auto* constructor = b->Construct(packed_ty, std::move(packed));
-  b->Sem().Add(constructor, b->create<sem::Expression>(
-                                constructor, packed_sem_ty, statement));
+  b->Sem().Add(constructor,
+               b->create<sem::Expression>(constructor, packed_sem_ty, statement,
+                                          sem::Constant{}));
 
   return constructor;
 }

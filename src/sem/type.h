@@ -52,7 +52,6 @@ class Type : public Castable<Type, Node> {
   /// @returns the inner type if this is a reference, `this` otherwise
   const Type* UnwrapRef() const;
 
-
   /// @returns true if this type is a scalar
   bool is_scalar() const;
   /// @returns true if this type is a numeric scalar

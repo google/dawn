@@ -109,10 +109,12 @@ class VariableUser : public Castable<VariableUser, Expression> {
   /// @param type the resolved type of the expression
   /// @param statement the statement that owns this expression
   /// @param variable the semantic variable
+  /// @param constant_value the constant value for the variable. May be invalid
   VariableUser(ast::IdentifierExpression* declaration,
                const sem::Type* type,
                Statement* statement,
-               sem::Variable* variable);
+               sem::Variable* variable,
+               Constant constant_value);
 
   /// @returns the variable that this expression refers to
   const sem::Variable* Variable() const { return variable_; }
