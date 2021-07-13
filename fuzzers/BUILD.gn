@@ -29,6 +29,19 @@ if (build_with_chromium) {
     outputs = [ fuzzer_corpus_wgsl_dir ]
   }
 
+  fuzzer_corpus_spirv_dir = "${target_gen_dir}/fuzzer_corpus_spirv"
+  action("tint_generate_spirv_corpus") {
+
+    spirv_as_target = "${tint_spirv_tools_dir}/:spirv-as(${host_toolchain})"
+    spirv_as_out_dir = get_label_info(spirv_as_target, "root_out_dir")
+    deps = [ spirv_as_target ]
+
+    script = "generate_spirv_corpus.py"
+    sources = [ "generate_spirv_corpus.py" ]
+    args = [ rebase_path("${tint_root_dir}/test", root_build_dir), rebase_path(fuzzer_corpus_spirv_dir, root_build_dir), rebase_path("${spirv_as_out_dir}/spirv-as", root_build_dir) ]
+    outputs = [ fuzzer_corpus_spirv_dir ]
+  }
+
   # fuzzer_test doesn't have configs members, so need to define them in an empty
   # source_set.
 
@@ -167,6 +180,8 @@ if (build_with_chromium) {
     fuzzer_test("tint_spv_reader_fuzzer") {
       sources = [ "tint_spv_reader_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
+      seed_corpus = fuzzer_corpus_spirv_dir
+      seed_corpus_deps = [ ":tint_generate_spirv_corpus" ]
     }
   }
 
@@ -174,6 +189,8 @@ if (build_with_chromium) {
     fuzzer_test("tint_spv_reader_wgsl_writer_fuzzer") {
       sources = [ "tint_spv_reader_wgsl_writer_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
+      seed_corpus = fuzzer_corpus_spirv_dir
+      seed_corpus_deps = [ ":tint_generate_spirv_corpus" ]
     }
   }
 
@@ -181,6 +198,8 @@ if (build_with_chromium) {
     fuzzer_test("tint_spv_reader_spv_writer_fuzzer") {
       sources = [ "tint_spv_reader_spv_writer_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
+      seed_corpus = fuzzer_corpus_spirv_dir
+      seed_corpus_deps = [ ":tint_generate_spirv_corpus" ]
     }
   }
 
@@ -188,6 +207,8 @@ if (build_with_chromium) {
     fuzzer_test("tint_spv_reader_hlsl_writer_fuzzer") {
       sources = [ "tint_spv_reader_hlsl_writer_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
+      seed_corpus = fuzzer_corpus_spirv_dir
+      seed_corpus_deps = [ ":tint_generate_spirv_corpus" ]
     }
   }
 
@@ -195,6 +216,8 @@ if (build_with_chromium) {
     fuzzer_test("tint_spv_reader_msl_writer_fuzzer") {
       sources = [ "tint_spv_reader_msl_writer_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
+      seed_corpus = fuzzer_corpus_spirv_dir
+      seed_corpus_deps = [ ":tint_generate_spirv_corpus" ]
     }
   }
 
