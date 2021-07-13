@@ -58,7 +58,8 @@ namespace dawn_native { namespace metal {
                                                           const RenderPipeline* renderPipeline,
                                                           const VertexState* vertexState,
                                                           std::string* remappedEntryPointName,
-                                                          bool* needsStorageBufferLength);
+                                                          bool* needsStorageBufferLength,
+                                                          bool* hasInvariantAttribute);
         ResultOrError<std::string> TranslateToMSLWithSPIRVCross(
             const char* entryPointName,
             SingleShaderStage stage,

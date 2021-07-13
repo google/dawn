@@ -59,7 +59,8 @@ namespace dawn_native { namespace metal {
         const RenderPipeline* renderPipeline,
         const VertexState* vertexState,
         std::string* remappedEntryPointName,
-        bool* needsStorageBufferLength) {
+        bool* needsStorageBufferLength,
+        bool* hasInvariantAttribute) {
         ScopedTintICEHandler scopedICEHandler(GetDevice());
 
         std::ostringstream errorStream;
@@ -160,6 +161,7 @@ namespace dawn_native { namespace metal {
         }
 
         *needsStorageBufferLength = result.needs_storage_buffer_sizes;
+        *hasInvariantAttribute = result.has_invariant_attribute;
 
         return std::move(result.msl);
     }
@@ -292,11 +294,12 @@ namespace dawn_native { namespace metal {
 
         std::string remappedEntryPointName;
         std::string msl;
+        bool hasInvariantAttribute = false;
         if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
-            DAWN_TRY_ASSIGN(
-                msl, TranslateToMSLWithTint(entryPointName, stage, layout, sampleMask,
-                                            renderPipeline, vertexState, &remappedEntryPointName,
-                                            &out->needsStorageBufferLength));
+            DAWN_TRY_ASSIGN(msl, TranslateToMSLWithTint(
+                                     entryPointName, stage, layout, sampleMask, renderPipeline,
+                                     vertexState, &remappedEntryPointName,
+                                     &out->needsStorageBufferLength, &hasInvariantAttribute));
         } else {
             DAWN_TRY_ASSIGN(msl, TranslateToMSLWithSPIRVCross(entryPointName, stage, layout,
                                                               sampleMask, renderPipeline,
@@ -322,11 +325,17 @@ namespace dawn_native { namespace metal {
 
         NSRef<NSString> mslSource = AcquireNSRef([[NSString alloc] initWithUTF8String:msl.c_str()]);
 
+        NSRef<MTLCompileOptions> compileOptions = AcquireNSRef([[MTLCompileOptions alloc] init]);
+        if (hasInvariantAttribute) {
+            if (@available(macOS 11.0, iOS 13.0, *)) {
+                (*compileOptions).preserveInvariance = true;
+            }
+        }
         auto mtlDevice = ToBackend(GetDevice())->GetMTLDevice();
         NSError* error = nullptr;
         NSPRef<id<MTLLibrary>> library =
             AcquireNSPRef([mtlDevice newLibraryWithSource:mslSource.Get()
-                                                  options:nullptr
+                                                  options:compileOptions.Get()
                                                     error:&error]);
         if (error != nullptr) {
             if (error.code != MTLLibraryErrorCompileWarning) {
