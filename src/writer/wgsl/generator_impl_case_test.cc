@@ -22,17 +22,15 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Case) {
-  auto* body = Block(create<ast::BreakStatement>());
-  ast::CaseSelectorList lit;
-  lit.push_back(Literal(5));
-  auto* c = create<ast::CaseStatement>(lit, body);
-  WrapInFunction(c);
+  auto* s = Switch(1, Case(Literal(5), Block(create<ast::BreakStatement>())),
+                   DefaultCase());
+  WrapInFunction(s);
 
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitCase(c)) << gen.error();
+  ASSERT_TRUE(gen.EmitCase(s->body()[0])) << gen.error();
   EXPECT_EQ(gen.result(), R"(  case 5: {
     break;
   }
@@ -40,18 +38,16 @@ TEST_F(WgslGeneratorImplTest, Emit_Case) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Case_MultipleSelectors) {
-  auto* body = Block(create<ast::BreakStatement>());
-  ast::CaseSelectorList lit;
-  lit.push_back(Literal(5));
-  lit.push_back(Literal(6));
-  auto* c = create<ast::CaseStatement>(lit, body);
-  WrapInFunction(c);
+  auto* s = Switch(
+      1, Case({Literal(5), Literal(6)}, Block(create<ast::BreakStatement>())),
+      DefaultCase());
+  WrapInFunction(s);
 
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitCase(c)) << gen.error();
+  ASSERT_TRUE(gen.EmitCase(s->body()[0])) << gen.error();
   EXPECT_EQ(gen.result(), R"(  case 5, 6: {
     break;
   }
@@ -59,15 +55,14 @@ TEST_F(WgslGeneratorImplTest, Emit_Case_MultipleSelectors) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Case_Default) {
-  auto* body = Block(create<ast::BreakStatement>());
-  auto* c = create<ast::CaseStatement>(ast::CaseSelectorList{}, body);
-  WrapInFunction(c);
+  auto* s = Switch(1, DefaultCase(Block(create<ast::BreakStatement>())));
+  WrapInFunction(s);
 
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitCase(c)) << gen.error();
+  ASSERT_TRUE(gen.EmitCase(s->body()[0])) << gen.error();
   EXPECT_EQ(gen.result(), R"(  default: {
     break;
   }
