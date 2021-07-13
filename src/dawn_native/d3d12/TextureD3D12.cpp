@@ -810,15 +810,15 @@ namespace dawn_native { namespace d3d12 {
     }
 
     D3D12_RENDER_TARGET_VIEW_DESC Texture::GetRTVDescriptor(uint32_t mipLevel,
-                                                            uint32_t baseArrayLayer,
-                                                            uint32_t layerCount) const {
+                                                            uint32_t baseSlice,
+                                                            uint32_t sliceCount) const {
         D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
         rtvDesc.Format = GetD3D12Format();
         if (IsMultisampledTexture()) {
             ASSERT(GetDimension() == wgpu::TextureDimension::e2D);
             ASSERT(GetNumMipLevels() == 1);
-            ASSERT(layerCount == 1);
-            ASSERT(baseArrayLayer == 0);
+            ASSERT(sliceCount == 1);
+            ASSERT(baseSlice == 0);
             ASSERT(mipLevel == 0);
             rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMS;
             return rtvDesc;
@@ -832,16 +832,16 @@ namespace dawn_native { namespace d3d12 {
                 // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_array
                 // _rtv
                 rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
-                rtvDesc.Texture2DArray.FirstArraySlice = baseArrayLayer;
-                rtvDesc.Texture2DArray.ArraySize = layerCount;
+                rtvDesc.Texture2DArray.FirstArraySlice = baseSlice;
+                rtvDesc.Texture2DArray.ArraySize = sliceCount;
                 rtvDesc.Texture2DArray.MipSlice = mipLevel;
                 rtvDesc.Texture2DArray.PlaneSlice = 0;
                 break;
             case wgpu::TextureDimension::e3D:
                 rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE3D;
                 rtvDesc.Texture3D.MipSlice = mipLevel;
-                rtvDesc.Texture3D.FirstWSlice = baseArrayLayer;
-                rtvDesc.Texture3D.WSize = layerCount;
+                rtvDesc.Texture3D.FirstWSlice = baseSlice;
+                rtvDesc.Texture3D.WSize = sliceCount;
                 break;
             case wgpu::TextureDimension::e1D:
                 UNREACHABLE();
@@ -953,7 +953,14 @@ namespace dawn_native { namespace d3d12 {
                         device->GetRenderTargetViewAllocator()->AllocateTransientCPUDescriptors());
                     const D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap.GetBaseDescriptor();
 
-                    D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = GetRTVDescriptor(level, layer, 1);
+                    uint32_t baseSlice = layer;
+                    uint32_t sliceCount = 1;
+                    if (GetDimension() == wgpu::TextureDimension::e3D) {
+                        baseSlice = 0;
+                        sliceCount = std::max(GetDepth() >> level, 1u);
+                    }
+                    D3D12_RENDER_TARGET_VIEW_DESC rtvDesc =
+                        GetRTVDescriptor(level, baseSlice, sliceCount);
                     device->GetD3D12Device()->CreateRenderTargetView(GetD3D12Resource(), &rtvDesc,
                                                                      rtvHandle);
                     commandList->ClearRenderTargetView(rtvHandle, clearColorRGBA, 0, nullptr);

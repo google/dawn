@@ -92,10 +92,9 @@ namespace {
             DAWN_TEST_UNSUPPORTED_IF(GetParam().mFormat == wgpu::TextureFormat::RGBA8Snorm &&
                                      HasToggleEnabled("disable_snorm_read"));
 
-            // TODO(crbug.com/dawn/547): 3D texture copies not fully implemented on D3D12.
             // TODO(crbug.com/angleproject/5967): This texture readback hits an assert in ANGLE.
             DAWN_SUPPRESS_TEST_IF(GetParam().mDimension == wgpu::TextureDimension::e3D &&
-                                  (IsANGLE() || IsD3D12()));
+                                  IsANGLE());
 
             // TODO(crbug.com/dawn/791): Determine Intel specific platforms this occurs on, and
             // implement a workaround on all backends (happens on Windows too, but not on our test

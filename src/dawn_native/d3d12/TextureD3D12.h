@@ -55,8 +55,8 @@ namespace dawn_native { namespace d3d12 {
         DXGI_FORMAT GetD3D12CopyableSubresourceFormat(Aspect aspect) const;
 
         D3D12_RENDER_TARGET_VIEW_DESC GetRTVDescriptor(uint32_t mipLevel,
-                                                       uint32_t baseArrayLayer,
-                                                       uint32_t layerCount) const;
+                                                       uint32_t baseSlice,
+                                                       uint32_t sliceCount) const;
         D3D12_DEPTH_STENCIL_VIEW_DESC GetDSVDescriptor(uint32_t mipLevel,
                                                        uint32_t baseArrayLayer,
                                                        uint32_t layerCount) const;
