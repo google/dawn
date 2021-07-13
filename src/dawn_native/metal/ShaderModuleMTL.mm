@@ -123,10 +123,7 @@ namespace dawn_native { namespace metal {
             transformManager.Add<tint::transform::BoundArrayAccessors>();
         }
         transformManager.Add<tint::transform::BindingRemapper>();
-
-        if (!GetDevice()->IsToggleEnabled(Toggle::DumpTranslatedShaders)) {
-            transformManager.Add<tint::transform::Renamer>();
-        }
+        transformManager.Add<tint::transform::Renamer>();
 
         transformInputs.Add<BindingRemapper::Remappings>(std::move(bindingPoints),
                                                          std::move(accessControls),
@@ -144,11 +141,7 @@ namespace dawn_native { namespace metal {
             }
             *remappedEntryPointName = it->second;
         } else {
-            if (GetDevice()->IsToggleEnabled(Toggle::DumpTranslatedShaders)) {
-                *remappedEntryPointName = entryPointName;
-            } else {
-                return DAWN_VALIDATION_ERROR("Transform output missing renamer data.");
-            }
+            return DAWN_VALIDATION_ERROR("Transform output missing renamer data.");
         }
 
         tint::writer::msl::Options options;

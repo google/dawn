@@ -258,10 +258,7 @@ namespace dawn_native { namespace d3d12 {
                 layout->GetFirstIndexOffsetRegisterSpace());
         }
         transformManager.Add<tint::transform::BindingRemapper>();
-
-        if (!GetDevice()->IsToggleEnabled(Toggle::DumpTranslatedShaders)) {
-            transformManager.Add<tint::transform::Renamer>();
-        }
+        transformManager.Add<tint::transform::Renamer>();
 
         // D3D12 registers like `t3` and `c3` have the same bindingOffset number in the
         // remapping but should not be considered a collision because they have different types.
@@ -292,11 +289,7 @@ namespace dawn_native { namespace d3d12 {
             }
             *remappedEntryPointName = it->second;
         } else {
-            if (GetDevice()->IsToggleEnabled(Toggle::DumpTranslatedShaders)) {
-                *remappedEntryPointName = entryPointName;
-            } else {
-                return DAWN_VALIDATION_ERROR("Transform output missing renamer data.");
-            }
+            return DAWN_VALIDATION_ERROR("Transform output missing renamer data.");
         }
 
         tint::writer::hlsl::Options options;
