@@ -615,6 +615,8 @@ if(${TINT_BUILD_TESTS})
     diagnostic/formatter_test.cc
     diagnostic/printer_test.cc
     inspector/inspector_test.cc
+    inspector/test_inspector_builder.cc
+    inspector/test_inspector_builder.h
     intrinsic_table_test.cc
     program_test.cc
     resolver/assignment_validation_test.cc

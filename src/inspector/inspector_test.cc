@@ -19,6 +19,7 @@
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/workgroup_decoration.h"
+#include "src/inspector/test_inspector_builder.h"
 #include "src/program_builder.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/external_texture_type.h"
@@ -31,683 +32,17 @@ namespace tint {
 namespace inspector {
 namespace {
 
-class InspectorHelper : public ProgramBuilder {
- public:
-  InspectorHelper() {}
-
-  /// Generates an empty function
-  /// @param name name of the function created
-  /// @param decorations the function decorations
-  void MakeEmptyBodyFunction(std::string name,
-                             ast::DecorationList decorations) {
-    Func(name, ast::VariableList(), ty.void_(), ast::StatementList{Return()},
-         decorations);
-  }
-
-  /// Generates a function that calls other functions
-  /// @param caller name of the function created
-  /// @param callees names of the functions to be called
-  /// @param decorations the function decorations
-  void MakeCallerBodyFunction(std::string caller,
-                              std::vector<std::string> callees,
-                              ast::DecorationList decorations) {
-    ast::StatementList body;
-    body.reserve(callees.size() + 1);
-    for (auto callee : callees) {
-      body.push_back(create<ast::CallStatement>(Call(callee)));
-    }
-    body.push_back(Return());
-
-    Func(caller, ast::VariableList(), ty.void_(), body, decorations);
-  }
-
-  /// Generates a struct that contains user-defined IO members
-  /// @param name the name of the generated struct
-  /// @param inout_vars tuples of {name, loc} that will be the struct members
-  ast::Struct* MakeInOutStruct(
-      std::string name,
-      std::vector<std::tuple<std::string, uint32_t>> inout_vars) {
-    ast::StructMemberList members;
-    for (auto var : inout_vars) {
-      std::string member_name;
-      uint32_t location;
-      std::tie(member_name, location) = var;
-      members.push_back(Member(member_name, ty.u32(), {Location(location)}));
-    }
-    return Structure(name, members);
-  }
-
-  // TODO(crbug.com/tint/697): Remove this.
-  /// Add In/Out variables to the global variables
-  /// @param inout_vars tuples of {in, out} that will be added as entries to the
-  ///                   global variables
-  void AddInOutVariables(
-      std::vector<std::tuple<std::string, std::string>> inout_vars) {
-    uint32_t location = 0;
-    for (auto inout : inout_vars) {
-      std::string in, out;
-      std::tie(in, out) = inout;
-
-      Global(in, ty.u32(), ast::StorageClass::kInput, nullptr,
-             ast::DecorationList{
-                 Location(location++),
-                 ASTNodes().Create<ast::DisableValidationDecoration>(
-                     ID(), ast::DisabledValidation::kIgnoreStorageClass)});
-      Global(out, ty.u32(), ast::StorageClass::kOutput, nullptr,
-             ast::DecorationList{
-                 Location(location++),
-                 ASTNodes().Create<ast::DisableValidationDecoration>(
-                     ID(), ast::DisabledValidation::kIgnoreStorageClass)});
-    }
-  }
-
-  // TODO(crbug.com/tint/697): Remove this.
-  /// Generates a function that references in/out variables
-  /// @param name name of the function created
-  /// @param inout_vars tuples of {in, out} that will be converted into out = in
-  ///                   calls in the function body
-  /// @param decorations the function decorations
-  void MakeInOutVariableBodyFunction(
-      std::string name,
-      std::vector<std::tuple<std::string, std::string>> inout_vars,
-      ast::DecorationList decorations) {
-    ast::StatementList stmts;
-    for (auto inout : inout_vars) {
-      std::string in, out;
-      std::tie(in, out) = inout;
-      stmts.emplace_back(Assign(out, in));
-    }
-    stmts.emplace_back(Return());
-    Func(name, ast::VariableList(), ty.void_(), stmts, decorations);
-  }
-
-  // TODO(crbug.com/tint/697): Remove this.
-  /// Generates a function that references in/out variables and calls another
-  /// function.
-  /// @param caller name of the function created
-  /// @param callee name of the function to be called
-  /// @param inout_vars tuples of {in, out} that will be converted into out = in
-  ///                   calls in the function body
-  /// @param decorations the function decorations
-  /// @returns a function object
-  ast::Function* MakeInOutVariableCallerBodyFunction(
-      std::string caller,
-      std::string callee,
-      std::vector<std::tuple<std::string, std::string>> inout_vars,
-      ast::DecorationList decorations) {
-    ast::StatementList stmts;
-    for (auto inout : inout_vars) {
-      std::string in, out;
-      std::tie(in, out) = inout;
-      stmts.emplace_back(Assign(out, in));
-    }
-    stmts.emplace_back(create<ast::CallStatement>(Call(callee)));
-    stmts.emplace_back(Return());
-
-    return Func(caller, ast::VariableList(), ty.void_(), stmts, decorations);
-  }
-
-  /// Add a pipeline constant to the global variables, with a specific ID.
-  /// @param name name of the variable to add
-  /// @param id id number for the constant id
-  /// @param type type of the variable
-  /// @param val value to initialize the variable with, if NULL no initializer
-  ///            will be added.
-  /// @returns the constant that was created
-  template <class T>
-  ast::Variable* AddOverridableConstantWithID(std::string name,
-                                              uint32_t id,
-                                              ast::Type* type,
-                                              T* val) {
-    ast::Expression* constructor = nullptr;
-    if (val) {
-      constructor = Expr(*val);
-    }
-    return GlobalConst(name, type, constructor,
-                       ast::DecorationList{
-                           Override(id),
-                       });
-  }
-
-  /// Add a pipeline constant to the global variables, without a specific ID.
-  /// @param name name of the variable to add
-  /// @param type type of the variable
-  /// @param val value to initialize the variable with, if NULL no initializer
-  ///            will be added.
-  /// @returns the constant that was created
-  template <class T>
-  ast::Variable* AddOverridableConstantWithoutID(std::string name,
-                                                 ast::Type* type,
-                                                 T* val) {
-    ast::Expression* constructor = nullptr;
-    if (val) {
-      constructor = Expr(*val);
-    }
-    return GlobalConst(name, type, constructor,
-                       ast::DecorationList{
-                           Override(),
-                       });
-  }
-
-  /// Generates a function that references module constant
-  /// @param func name of the function created
-  /// @param var name of the constant to be reference
-  /// @param type type of the const being referenced
-  /// @param decorations the function decorations
-  /// @returns a function object
-  ast::Function* MakeConstReferenceBodyFunction(
-      std::string func,
-      std::string var,
-      ast::Type* type,
-      ast::DecorationList decorations) {
-    ast::StatementList stmts;
-    stmts.emplace_back(Decl(Var("local_" + var, type)));
-    stmts.emplace_back(Assign("local_" + var, var));
-    stmts.emplace_back(Return());
-
-    return Func(func, ast::VariableList(), ty.void_(), stmts, decorations);
-  }
-
-  /// @param vec Vector of StageVariable to be searched
-  /// @param name Name to be searching for
-  /// @returns true if name is in vec, otherwise false
-  bool ContainsName(const std::vector<StageVariable>& vec,
-                    const std::string& name) {
-    for (auto& s : vec) {
-      if (s.name == name) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /// Builds a string for accessing a member in a generated struct
-  /// @param idx index of member
-  /// @param type type of member
-  /// @returns a string for the member
-  std::string StructMemberName(size_t idx, ast::Type* type) {
-    return std::to_string(idx) + type->type_name();
-  }
-
-  /// Generates a struct type
-  /// @param name name for the type
-  /// @param member_types a vector of member types
-  /// @param is_block whether or not to decorate as a Block
-  /// @returns a struct type
-  ast::Struct* MakeStructType(const std::string& name,
-                              std::vector<ast::Type*> member_types,
-                              bool is_block) {
-    ast::StructMemberList members;
-    for (auto* type : member_types) {
-      members.push_back(Member(StructMemberName(members.size(), type), type));
-    }
-
-    ast::DecorationList decos;
-    if (is_block) {
-      decos.push_back(create<ast::StructBlockDecoration>());
-    }
-
-    return Structure(name, members, decos);
-  }
-
-  /// Generates types appropriate for using in an uniform buffer
-  /// @param name name for the type
-  /// @param member_types a vector of member types
-  /// @returns a struct type that has the layout for an uniform buffer.
-  ast::Struct* MakeUniformBufferType(const std::string& name,
-                                     std::vector<ast::Type*> member_types) {
-    return MakeStructType(name, member_types, true);
-  }
-
-  /// Generates types appropriate for using in a storage buffer
-  /// @param name name for the type
-  /// @param member_types a vector of member types
-  /// @returns a function that returns the created structure.
-  std::function<ast::TypeName*()> MakeStorageBufferTypes(
-      const std::string& name,
-      std::vector<ast::Type*> member_types) {
-    MakeStructType(name, member_types, true);
-    return [this, name] { return ty.type_name(name); };
-  }
-
-  /// Adds an uniform buffer variable to the program
-  /// @param name the name of the variable
-  /// @param type the type to use
-  /// @param group the binding/group/ to use for the uniform buffer
-  /// @param binding the binding number to use for the uniform buffer
-  void AddUniformBuffer(const std::string& name,
-                        ast::Type* type,
-                        uint32_t group,
-                        uint32_t binding) {
-    Global(name, type, ast::StorageClass::kUniform,
-           ast::DecorationList{
-               create<ast::BindingDecoration>(binding),
-               create<ast::GroupDecoration>(group),
-           });
-  }
-
-  /// Adds a storage buffer variable to the program
-  /// @param name the name of the variable
-  /// @param type the type to use
-  /// @param access the storage buffer access control
-  /// @param group the binding/group to use for the storage buffer
-  /// @param binding the binding number to use for the storage buffer
-  void AddStorageBuffer(const std::string& name,
-                        ast::Type* type,
-                        ast::Access access,
-                        uint32_t group,
-                        uint32_t binding) {
-    Global(name, type, ast::StorageClass::kStorage, access,
-           ast::DecorationList{
-               create<ast::BindingDecoration>(binding),
-               create<ast::GroupDecoration>(group),
-           });
-  }
-
-  /// Generates a function that references a specific struct variable
-  /// @param func_name name of the function created
-  /// @param struct_name name of the struct variabler to be accessed
-  /// @param members list of members to access, by index and type
-  void MakeStructVariableReferenceBodyFunction(
-      std::string func_name,
-      std::string struct_name,
-      std::vector<std::tuple<size_t, ast::Type*>> members) {
-    ast::StatementList stmts;
-    for (auto member : members) {
-      size_t member_idx;
-      ast::Type* member_type;
-      std::tie(member_idx, member_type) = member;
-      std::string member_name = StructMemberName(member_idx, member_type);
-
-      stmts.emplace_back(Decl(Var("local" + member_name, member_type)));
-    }
-
-    for (auto member : members) {
-      size_t member_idx;
-      ast::Type* member_type;
-      std::tie(member_idx, member_type) = member;
-      std::string member_name = StructMemberName(member_idx, member_type);
-
-      stmts.emplace_back(Assign("local" + member_name,
-                                MemberAccessor(struct_name, member_name)));
-    }
-
-    stmts.emplace_back(Return());
-
-    Func(func_name, ast::VariableList(), ty.void_(), stmts,
-         ast::DecorationList{});
-  }
-
-  /// Adds a regular sampler variable to the program
-  /// @param name the name of the variable
-  /// @param group the binding/group to use for the storage buffer
-  /// @param binding the binding number to use for the storage buffer
-  void AddSampler(const std::string& name, uint32_t group, uint32_t binding) {
-    Global(name, sampler_type(),
-           ast::DecorationList{
-               create<ast::BindingDecoration>(binding),
-               create<ast::GroupDecoration>(group),
-           });
-  }
-
-  /// Adds a comparison sampler variable to the program
-  /// @param name the name of the variable
-  /// @param group the binding/group to use for the storage buffer
-  /// @param binding the binding number to use for the storage buffer
-  void AddComparisonSampler(const std::string& name,
-                            uint32_t group,
-                            uint32_t binding) {
-    Global(name, comparison_sampler_type(),
-           ast::DecorationList{
-               create<ast::BindingDecoration>(binding),
-               create<ast::GroupDecoration>(group),
-           });
-  }
-
-  /// Generates a SampledTexture appropriate for the params
-  /// @param dim the dimensions of the texture
-  /// @param type the data type of the sampled texture
-  /// @returns the generated SampleTextureType
-  ast::SampledTexture* MakeSampledTextureType(ast::TextureDimension dim,
-                                              ast::Type* type) {
-    return ty.sampled_texture(dim, type);
-  }
-
-  /// Generates a DepthTexture appropriate for the params
-  /// @param dim the dimensions of the texture
-  /// @returns the generated DepthTexture
-  ast::DepthTexture* MakeDepthTextureType(ast::TextureDimension dim) {
-    return ty.depth_texture(dim);
-  }
-
-  /// Generates a MultisampledTexture appropriate for the params
-  /// @param dim the dimensions of the texture
-  /// @param type the data type of the sampled texture
-  /// @returns the generated SampleTextureType
-  ast::MultisampledTexture* MakeMultisampledTextureType(
-      ast::TextureDimension dim,
-      ast::Type* type) {
-    return ty.multisampled_texture(dim, type);
-  }
-
-  /// Generates an ExternalTexture appropriate for the params
-  /// @returns the generated ExternalTexture
-  ast::ExternalTexture* MakeExternalTextureType() {
-    return ty.external_texture();
-  }
-
-  /// Adds a sampled texture variable to the program
-  /// @param name the name of the variable
-  /// @param type the type to use
-  /// @param group the binding/group to use for the sampled texture
-  /// @param binding the binding number to use for the sampled texture
-  void AddSampledTexture(const std::string& name,
-                         ast::Type* type,
-                         uint32_t group,
-                         uint32_t binding) {
-    Global(name, type,
-           ast::DecorationList{
-               create<ast::BindingDecoration>(binding),
-               create<ast::GroupDecoration>(group),
-           });
-  }
-
-  /// Adds a multi-sampled texture variable to the program
-  /// @param name the name of the variable
-  /// @param type the type to use
-  /// @param group the binding/group to use for the multi-sampled texture
-  /// @param binding the binding number to use for the multi-sampled texture
-  void AddMultisampledTexture(const std::string& name,
-                              ast::Type* type,
-                              uint32_t group,
-                              uint32_t binding) {
-    Global(name, type,
-           ast::DecorationList{
-               create<ast::BindingDecoration>(binding),
-               create<ast::GroupDecoration>(group),
-           });
-  }
-
-  void AddGlobalVariable(const std::string& name, ast::Type* type) {
-    Global(name, type, ast::StorageClass::kPrivate);
-  }
-
-  /// Adds a depth texture variable to the program
-  /// @param name the name of the variable
-  /// @param type the type to use
-  /// @param group the binding/group to use for the depth texture
-  /// @param binding the binding number to use for the depth texture
-  void AddDepthTexture(const std::string& name,
-                       ast::Type* type,
-                       uint32_t group,
-                       uint32_t binding) {
-    Global(name, type,
-           ast::DecorationList{
-               create<ast::BindingDecoration>(binding),
-               create<ast::GroupDecoration>(group),
-           });
-  }
-
-  /// Adds an external texture variable to the program
-  /// @param name the name of the variable
-  /// @param type the type to use
-  /// @param group the binding/group to use for the external texture
-  /// @param binding the binding number to use for the external texture
-  void AddExternalTexture(const std::string& name,
-                          ast::Type* type,
-                          uint32_t group,
-                          uint32_t binding) {
-    Global(name, type,
-           ast::DecorationList{
-               create<ast::BindingDecoration>(binding),
-               create<ast::GroupDecoration>(group),
-           });
-  }
-
-  /// Generates a function that references a specific sampler variable
-  /// @param func_name name of the function created
-  /// @param texture_name name of the texture to be sampled
-  /// @param sampler_name name of the sampler to use
-  /// @param coords_name name of the coords variable to use
-  /// @param base_type sampler base type
-  /// @param decorations the function decorations
-  /// @returns a function that references all of the values specified
-  ast::Function* MakeSamplerReferenceBodyFunction(
-      const std::string& func_name,
-      const std::string& texture_name,
-      const std::string& sampler_name,
-      const std::string& coords_name,
-      ast::Type* base_type,
-      ast::DecorationList decorations) {
-    std::string result_name = "sampler_result";
-
-    ast::StatementList stmts;
-    stmts.emplace_back(Decl(Var(result_name, ty.vec(base_type, 4))));
-
-    stmts.emplace_back(Assign(result_name, Call("textureSample", texture_name,
-                                                sampler_name, coords_name)));
-    stmts.emplace_back(Return());
-
-    return Func(func_name, ast::VariableList(), ty.void_(), stmts, decorations);
-  }
-
-  /// Generates a function that references a specific sampler variable
-  /// @param func_name name of the function created
-  /// @param texture_name name of the texture to be sampled
-  /// @param sampler_name name of the sampler to use
-  /// @param coords_name name of the coords variable to use
-  /// @param array_index name of the array index variable to use
-  /// @param base_type sampler base type
-  /// @param decorations the function decorations
-  /// @returns a function that references all of the values specified
-  ast::Function* MakeSamplerReferenceBodyFunction(
-      const std::string& func_name,
-      const std::string& texture_name,
-      const std::string& sampler_name,
-      const std::string& coords_name,
-      const std::string& array_index,
-      ast::Type* base_type,
-      ast::DecorationList decorations) {
-    std::string result_name = "sampler_result";
-
-    ast::StatementList stmts;
-
-    stmts.emplace_back(Decl(Var("sampler_result", ty.vec(base_type, 4))));
-
-    stmts.emplace_back(
-        Assign("sampler_result", Call("textureSample", texture_name,
-                                      sampler_name, coords_name, array_index)));
-    stmts.emplace_back(Return());
-
-    return Func(func_name, ast::VariableList(), ty.void_(), stmts, decorations);
-  }
-
-  /// Generates a function that references a specific comparison sampler
-  /// variable.
-  /// @param func_name name of the function created
-  /// @param texture_name name of the depth texture to  use
-  /// @param sampler_name name of the sampler to use
-  /// @param coords_name name of the coords variable to use
-  /// @param depth_name name of the depth reference to use
-  /// @param base_type sampler base type
-  /// @param decorations the function decorations
-  /// @returns a function that references all of the values specified
-  ast::Function* MakeComparisonSamplerReferenceBodyFunction(
-      const std::string& func_name,
-      const std::string& texture_name,
-      const std::string& sampler_name,
-      const std::string& coords_name,
-      const std::string& depth_name,
-      ast::Type* base_type,
-      ast::DecorationList decorations) {
-    std::string result_name = "sampler_result";
-
-    ast::StatementList stmts;
-
-    stmts.emplace_back(Decl(Var("sampler_result", base_type)));
-    stmts.emplace_back(
-        Assign("sampler_result", Call("textureSampleCompare", texture_name,
-                                      sampler_name, coords_name, depth_name)));
-    stmts.emplace_back(Return());
-
-    return Func(func_name, ast::VariableList(), ty.void_(), stmts, decorations);
-  }
-
-  /// Gets an appropriate type for the data in a given texture type.
-  /// @param sampled_kind type of in the texture
-  /// @returns a pointer to a type appropriate for the coord param
-  ast::Type* GetBaseType(ResourceBinding::SampledKind sampled_kind) {
-    switch (sampled_kind) {
-      case ResourceBinding::SampledKind::kFloat:
-        return ty.f32();
-      case ResourceBinding::SampledKind::kSInt:
-        return ty.i32();
-      case ResourceBinding::SampledKind::kUInt:
-        return ty.u32();
-      default:
-        return nullptr;
-    }
-  }
-
-  /// Gets an appropriate type for the coords parameter depending the the
-  /// dimensionality of the texture being sampled.
-  /// @param dim dimensionality of the texture being sampled
-  /// @param scalar the scalar type
-  /// @returns a pointer to a type appropriate for the coord param
-  ast::Type* GetCoordsType(ast::TextureDimension dim, ast::Type* scalar) {
-    switch (dim) {
-      case ast::TextureDimension::k1d:
-        return scalar;
-      case ast::TextureDimension::k2d:
-      case ast::TextureDimension::k2dArray:
-        return create<ast::Vector>(scalar, 2);
-      case ast::TextureDimension::k3d:
-      case ast::TextureDimension::kCube:
-      case ast::TextureDimension::kCubeArray:
-        return create<ast::Vector>(scalar, 3);
-      default:
-        [=]() { FAIL() << "Unsupported texture dimension: " << dim; }();
-    }
-    return nullptr;
-  }
-
-  /// Generates appropriate types for a Read-Only StorageTexture
-  /// @param dim the texture dimension of the storage texture
-  /// @param format the image format of the storage texture
-  /// @param read_only should the access type be read only, otherwise write only
-  /// @returns the storage texture type
-  ast::Type* MakeStorageTextureTypes(ast::TextureDimension dim,
-                                     ast::ImageFormat format,
-                                     bool read_only) {
-    auto access = read_only ? ast::Access::kRead : ast::Access::kWrite;
-    return ty.storage_texture(dim, format, access);
-  }
-
-  /// Adds a storage texture variable to the program
-  /// @param name the name of the variable
-  /// @param type the type to use
-  /// @param group the binding/group to use for the sampled texture
-  /// @param binding the binding number to use for the sampled texture
-  void AddStorageTexture(const std::string& name,
-                         ast::Type* type,
-                         uint32_t group,
-                         uint32_t binding) {
-    Global(name, type,
-           ast::DecorationList{
-               create<ast::BindingDecoration>(binding),
-               create<ast::GroupDecoration>(group),
-           });
-  }
-
-  /// Generates a function that references a storage texture variable.
-  /// @param func_name name of the function created
-  /// @param st_name name of the storage texture to use
-  /// @param dim_type type expected by textureDimensons to return
-  /// @param decorations the function decorations
-  /// @returns a function that references all of the values specified
-  ast::Function* MakeStorageTextureBodyFunction(
-      const std::string& func_name,
-      const std::string& st_name,
-      ast::Type* dim_type,
-      ast::DecorationList decorations) {
-    ast::StatementList stmts;
-
-    stmts.emplace_back(Decl(Var("dim", dim_type)));
-    stmts.emplace_back(Assign("dim", Call("textureDimensions", st_name)));
-    stmts.emplace_back(Return());
-
-    return Func(func_name, ast::VariableList(), ty.void_(), stmts, decorations);
-  }
-
-  std::function<ast::Type*()> GetTypeFunction(ComponentType component,
-                                              CompositionType composition) {
-    std::function<ast::Type*()> func;
-    switch (component) {
-      case ComponentType::kFloat:
-        func = [this]() -> ast::Type* { return ty.f32(); };
-        break;
-      case ComponentType::kSInt:
-        func = [this]() -> ast::Type* { return ty.i32(); };
-        break;
-      case ComponentType::kUInt:
-        func = [this]() -> ast::Type* { return ty.u32(); };
-        break;
-      case ComponentType::kUnknown:
-        return []() -> ast::Type* { return nullptr; };
-    }
-
-    uint32_t n;
-    switch (composition) {
-      case CompositionType::kScalar:
-        return func;
-      case CompositionType::kVec2:
-        n = 2;
-        break;
-      case CompositionType::kVec3:
-        n = 3;
-        break;
-      case CompositionType::kVec4:
-        n = 4;
-        break;
-      default:
-        return []() -> ast::Type* { return nullptr; };
-    }
-
-    return [this, func, n]() -> ast::Type* { return ty.vec(func(), n); };
-  }
-
-  Inspector& Build() {
-    if (inspector_) {
-      return *inspector_;
-    }
-    program_ = std::make_unique<Program>(std::move(*this));
-    [&]() {
-      ASSERT_TRUE(program_->IsValid())
-          << diag::Formatter().format(program_->Diagnostics());
-    }();
-    inspector_ = std::make_unique<Inspector>(program_.get());
-    return *inspector_;
-  }
-
-  ast::Sampler* sampler_type() {
-    return ty.sampler(ast::SamplerKind::kSampler);
-  }
-  ast::Sampler* comparison_sampler_type() {
-    return ty.sampler(ast::SamplerKind::kComparisonSampler);
-  }
-
- protected:
-  std::unique_ptr<Program> program_;
-  std::unique_ptr<Inspector> inspector_;
-};
-
-class InspectorGetEntryPointTest : public InspectorHelper,
+// All the tests that descend from InspectorBuilder are expected to define their
+// test state via building up the AST through InspectorBuilder and then generate
+// the program with ::Build().
+// The returned Inspector from ::Build() can then be used to test expecations.
+class InspectorGetEntryPointTest : public InspectorBuilder,
                                    public testing::Test {};
 
 typedef std::tuple<inspector::ComponentType, inspector::CompositionType>
     InspectorGetEntryPointComponentAndCompositionTestParams;
 class InspectorGetEntryPointComponentAndCompositionTest
-    : public InspectorHelper,
+    : public InspectorBuilder,
       public testing::TestWithParam<
           InspectorGetEntryPointComponentAndCompositionTestParams> {};
 struct InspectorGetEntryPointInterpolateTestParams {
@@ -717,35 +52,35 @@ struct InspectorGetEntryPointInterpolateTestParams {
   inspector::InterpolationSampling out_sampling;
 };
 class InspectorGetEntryPointInterpolateTest
-    : public InspectorHelper,
+    : public InspectorBuilder,
       public testing::TestWithParam<
           InspectorGetEntryPointInterpolateTestParams> {};
-class InspectorGetRemappedNameForEntryPointTest : public InspectorHelper,
+class InspectorGetRemappedNameForEntryPointTest : public InspectorBuilder,
                                                   public testing::Test {};
-class InspectorGetConstantIDsTest : public InspectorHelper,
+class InspectorGetConstantIDsTest : public InspectorBuilder,
                                     public testing::Test {};
-class InspectorGetConstantNameToIdMapTest : public InspectorHelper,
+class InspectorGetConstantNameToIdMapTest : public InspectorBuilder,
                                             public testing::Test {};
-class InspectorGetStorageSizeTest : public InspectorHelper,
+class InspectorGetStorageSizeTest : public InspectorBuilder,
                                     public testing::Test {};
-class InspectorGetResourceBindingsTest : public InspectorHelper,
+class InspectorGetResourceBindingsTest : public InspectorBuilder,
                                          public testing::Test {};
-class InspectorGetUniformBufferResourceBindingsTest : public InspectorHelper,
+class InspectorGetUniformBufferResourceBindingsTest : public InspectorBuilder,
                                                       public testing::Test {};
-class InspectorGetStorageBufferResourceBindingsTest : public InspectorHelper,
+class InspectorGetStorageBufferResourceBindingsTest : public InspectorBuilder,
                                                       public testing::Test {};
 class InspectorGetReadOnlyStorageBufferResourceBindingsTest
-    : public InspectorHelper,
+    : public InspectorBuilder,
       public testing::Test {};
-class InspectorGetSamplerResourceBindingsTest : public InspectorHelper,
+class InspectorGetSamplerResourceBindingsTest : public InspectorBuilder,
                                                 public testing::Test {};
 class InspectorGetComparisonSamplerResourceBindingsTest
-    : public InspectorHelper,
+    : public InspectorBuilder,
       public testing::Test {};
-class InspectorGetSampledTextureResourceBindingsTest : public InspectorHelper,
+class InspectorGetSampledTextureResourceBindingsTest : public InspectorBuilder,
                                                        public testing::Test {};
 class InspectorGetSampledArrayTextureResourceBindingsTest
-    : public InspectorHelper,
+    : public InspectorBuilder,
       public testing::Test {};
 struct GetSampledTextureTestParams {
   ast::TextureDimension type_dim;
@@ -753,32 +88,32 @@ struct GetSampledTextureTestParams {
   inspector::ResourceBinding::SampledKind sampled_kind;
 };
 class InspectorGetSampledTextureResourceBindingsTestWithParam
-    : public InspectorHelper,
+    : public InspectorBuilder,
       public testing::TestWithParam<GetSampledTextureTestParams> {};
 class InspectorGetSampledArrayTextureResourceBindingsTestWithParam
-    : public InspectorHelper,
+    : public InspectorBuilder,
       public testing::TestWithParam<GetSampledTextureTestParams> {};
 class InspectorGetMultisampledTextureResourceBindingsTest
-    : public InspectorHelper,
+    : public InspectorBuilder,
       public testing::Test {};
 class InspectorGetMultisampledArrayTextureResourceBindingsTest
-    : public InspectorHelper,
+    : public InspectorBuilder,
       public testing::Test {};
 typedef GetSampledTextureTestParams GetMultisampledTextureTestParams;
 class InspectorGetMultisampledArrayTextureResourceBindingsTestWithParam
-    : public InspectorHelper,
+    : public InspectorBuilder,
       public testing::TestWithParam<GetMultisampledTextureTestParams> {};
 class InspectorGetMultisampledTextureResourceBindingsTestWithParam
-    : public InspectorHelper,
+    : public InspectorBuilder,
       public testing::TestWithParam<GetMultisampledTextureTestParams> {};
-class InspectorGetStorageTextureResourceBindingsTest : public InspectorHelper,
+class InspectorGetStorageTextureResourceBindingsTest : public InspectorBuilder,
                                                        public testing::Test {};
 struct GetDepthTextureTestParams {
   ast::TextureDimension type_dim;
   inspector::ResourceBinding::TextureDimension inspector_dim;
 };
 class InspectorGetDepthTextureResourceBindingsTestWithParam
-    : public InspectorHelper,
+    : public InspectorBuilder,
       public testing::TestWithParam<GetDepthTextureTestParams> {};
 
 typedef std::tuple<ast::TextureDimension, ResourceBinding::TextureDimension>
@@ -790,13 +125,13 @@ typedef std::tuple<ast::ImageFormat,
 typedef std::tuple<bool, DimensionParams, ImageFormatParams>
     GetStorageTextureTestParams;
 class InspectorGetStorageTextureResourceBindingsTestWithParam
-    : public InspectorHelper,
+    : public InspectorBuilder,
       public testing::TestWithParam<GetStorageTextureTestParams> {};
 
-class InspectorGetExternalTextureResourceBindingsTest : public InspectorHelper,
+class InspectorGetExternalTextureResourceBindingsTest : public InspectorBuilder,
                                                         public testing::Test {};
 
-class InspectorGetSamplerTextureUsesTest : public InspectorHelper,
+class InspectorGetSamplerTextureUsesTest : public InspectorBuilder,
                                            public testing::Test {};
 
 TEST_F(InspectorGetEntryPointTest, NoFunctions) {
