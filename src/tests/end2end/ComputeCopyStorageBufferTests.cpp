@@ -88,16 +88,12 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
 // Test that a trivial compute-shader memcpy implementation works.
 TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfBasic) {
     BasicTest(R"(
-        [[block]] struct Buf1 {
-            s : array<vec4<u32>, 4>;
-        };
-        [[block]] struct Buf2 {
+        [[block]] struct Buf {
             s : array<vec4<u32>, 4>;
         };
 
-        // TODO(crbug.com/tint/386): Use the same struct type
-        [[group(0), binding(0)]] var<storage, read_write> src : Buf1;
-        [[group(0), binding(1)]] var<storage, read_write> dst : Buf2;
+        [[group(0), binding(0)]] var<storage, read_write> src : Buf;
+        [[group(0), binding(1)]] var<storage, read_write> dst : Buf;
 
         [[stage(compute), workgroup_size(1)]]
         fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
@@ -115,16 +111,12 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfStruct) {
             b : vec2<u32>;
         };
 
-        [[block]] struct Buf1 {
-            s : array<S, 4>;
-        };
-        [[block]] struct Buf2 {
+        [[block]] struct Buf {
             s : array<S, 4>;
         };
 
-        // TODO(crbug.com/tint/386): Use the same struct type
-        [[group(0), binding(0)]] var<storage, read_write> src : Buf1;
-        [[group(0), binding(1)]] var<storage, read_write> dst : Buf2;
+        [[group(0), binding(0)]] var<storage, read_write> src : Buf;
+        [[group(0), binding(1)]] var<storage, read_write> dst : Buf;
 
         [[stage(compute), workgroup_size(1)]]
         fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
@@ -137,16 +129,12 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfStruct) {
 // Test that a trivial compute-shader memcpy implementation works.
 TEST_P(ComputeCopyStorageBufferTests, UnsizedArrayOfBasic) {
     BasicTest(R"(
-        [[block]] struct Buf1 {
-            s : array<vec4<u32>>;
-        };
-        [[block]] struct Buf2 {
+        [[block]] struct Buf {
             s : array<vec4<u32>>;
         };
 
-        // TODO(crbug.com/tint/386): Use the same struct type
-        [[group(0), binding(0)]] var<storage, read_write> src : Buf1;
-        [[group(0), binding(1)]] var<storage, read_write> dst : Buf2;
+        [[group(0), binding(0)]] var<storage, read_write> src : Buf;
+        [[group(0), binding(1)]] var<storage, read_write> dst : Buf;
 
         [[stage(compute), workgroup_size(1)]]
         fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {

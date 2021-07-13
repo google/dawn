@@ -82,17 +82,12 @@ TEST_P(ComputeStorageBufferBarrierTests, AddPingPong) {
         device, data.data(), bufferSize, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        // TODO(crbug.com/tint/386):  Use the same struct.
-        [[block]] struct Src {
+        [[block]] struct Buf {
             data : array<u32, 100>;
         };
 
-        [[block]] struct Dst {
-            data : array<u32, 100>;
-        };
-
-        [[group(0), binding(0)]] var<storage, read_write> src : Src;
-        [[group(0), binding(1)]] var<storage, read_write> dst : Dst;
+        [[group(0), binding(0)]] var<storage, read_write> src : Buf;
+        [[group(0), binding(1)]] var<storage, read_write> dst : Buf;
 
         [[stage(compute), workgroup_size(1)]]
         fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
@@ -153,17 +148,12 @@ TEST_P(ComputeStorageBufferBarrierTests, StorageAndReadonlyStoragePingPongInOneP
         device, data.data(), bufferSize, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        // TODO(crbug.com/tint/386):  Use the same struct.
-        [[block]] struct Src {
+        [[block]] struct Buf {
             data : array<u32, 100>;
         };
 
-        [[block]] struct Dst {
-            data : array<u32, 100>;
-        };
-
-        [[group(0), binding(0)]] var<storage, read> src : Src;
-        [[group(0), binding(1)]] var<storage, read_write> dst : Dst;
+        [[group(0), binding(0)]] var<storage, read> src : Buf;
+        [[group(0), binding(1)]] var<storage, read_write> dst : Buf;
 
         [[stage(compute), workgroup_size(1)]]
         fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {

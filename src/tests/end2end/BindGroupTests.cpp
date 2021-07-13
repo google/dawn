@@ -338,18 +338,12 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         // TODO(crbug.com/tint/369): Use a mat2x2 when Tint translates it correctly.
-        // TODO(crbug.com/tint/386): Use the same struct.
-        [[block]] struct VertexUniformBuffer1 {
+        [[block]] struct VertexUniformBuffer {
             transform : vec4<f32>;
         };
 
-        [[block]] struct VertexUniformBuffer2 {
-            transform : vec4<f32>;
-        };
-
-        // TODO(crbug.com/tint/386): Use the same struct definition.
-        [[group(0), binding(0)]] var <uniform> vertexUbo1 : VertexUniformBuffer1;
-        [[group(1), binding(0)]] var <uniform> vertexUbo2 : VertexUniformBuffer2;
+        [[group(0), binding(0)]] var <uniform> vertexUbo1 : VertexUniformBuffer;
+        [[group(1), binding(0)]] var <uniform> vertexUbo2 : VertexUniformBuffer;
 
         [[stage(vertex)]]
         fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
@@ -365,18 +359,12 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        // TODO(crbug.com/tint/386): Use the same struct
-        [[block]] struct FragmentUniformBuffer1 {
+        [[block]] struct FragmentUniformBuffer {
             color : vec4<f32>;
         };
 
-        [[block]] struct FragmentUniformBuffer2 {
-            color : vec4<f32>;
-        };
-
-        // TODO(crbug.com/tint/386): Use the same struct definition.
-        [[group(0), binding(1)]] var <uniform> fragmentUbo1 : FragmentUniformBuffer1;
-        [[group(1), binding(1)]] var <uniform> fragmentUbo2 : FragmentUniformBuffer2;
+        [[group(0), binding(1)]] var <uniform> fragmentUbo1 : FragmentUniformBuffer;
+        [[group(1), binding(1)]] var <uniform> fragmentUbo2 : FragmentUniformBuffer;
 
         [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
             return fragmentUbo1.color + fragmentUbo2.color;
@@ -770,6 +758,9 @@ TEST_P(BindGroupTests, DrawThenChangePipelineAndBindGroup) {
 // Regression test for crbug.com/dawn/408 where dynamic offsets were applied in the wrong order.
 // Dynamic offsets should be applied in increasing order of binding number.
 TEST_P(BindGroupTests, DynamicOffsetOrder) {
+    // Does not work with SPIRV-Cross. crbug.com/dawn/975
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && !HasToggleEnabled("use_tint_generator"));
+
     // We will put the following values and the respective offsets into a buffer.
     // The test will ensure that the correct dynamic offset is applied to each buffer by reading the
     // value from an offset binding.
@@ -819,16 +810,7 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
 
     wgpu::ComputePipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.compute.module = utils::CreateShaderModule(device, R"(
-        // TODO(crbug.com/tint/386): Use the same struct
-        [[block]] struct Buffer0 {
-            value : u32;
-        };
-
-        [[block]] struct Buffer2 {
-            value : u32;
-        };
-
-        [[block]] struct Buffer3 {
+        [[block]] struct Buffer {
             value : u32;
         };
 
@@ -836,9 +818,9 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
             value : vec3<u32>;
         };
 
-        [[group(0), binding(2)]] var<uniform> buffer2 : Buffer2;
-        [[group(0), binding(3)]] var<storage, read> buffer3 : Buffer3;
-        [[group(0), binding(0)]] var<storage, read> buffer0 : Buffer0;
+        [[group(0), binding(2)]] var<uniform> buffer2 : Buffer;
+        [[group(0), binding(3)]] var<storage, read> buffer3 : Buffer;
+        [[group(0), binding(0)]] var<storage, read> buffer0 : Buffer;
         [[group(0), binding(4)]] var<storage, read_write> outputBuffer : OutputBuffer;
 
         [[stage(compute), workgroup_size(1)]] fn main() {
@@ -948,23 +930,13 @@ TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        // TODO(crbug.com/tint/386): Use the same struct
-        [[block]] struct Ubo1 {
+        [[block]] struct Ubo {
             color : vec4<f32>;
         };
 
-        [[block]] struct Ubo2 {
-            color : vec4<f32>;
-        };
-
-        [[block]] struct Ubo3 {
-            color : vec4<f32>;
-        };
-
-        // TODO(crbug.com/tint/386): Use the same struct definition.
-        [[group(0), binding(953)]] var <uniform> ubo1 : Ubo1;
-        [[group(0), binding(47)]] var <uniform> ubo2 : Ubo2;
-        [[group(0), binding(111)]] var <uniform> ubo3 : Ubo3;
+        [[group(0), binding(953)]] var <uniform> ubo1 : Ubo;
+        [[group(0), binding(47)]] var <uniform> ubo2 : Ubo;
+        [[group(0), binding(111)]] var <uniform> ubo3 : Ubo;
 
         [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
             return ubo1.color + 2.0 * ubo2.color + 4.0 * ubo3.color;

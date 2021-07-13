@@ -519,15 +519,11 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
         };
         [[group(0), binding(1)]] var<storage, read_write> ibContents : IBContents;
 
-        // TODO(crbug.com/tint/386): Use the same struct.
-        [[block]] struct ColorContents1 {
+        [[block]] struct ColorContents {
             color : f32;
         };
-        [[block]] struct ColorContents2 {
-            color : f32;
-        };
-        [[group(0), binding(2)]] var<storage, read_write> uniformContents : ColorContents1;
-        [[group(0), binding(3)]] var<storage, read_write> storageContents : ColorContents2;
+        [[group(0), binding(2)]] var<storage, read_write> uniformContents : ColorContents;
+        [[group(0), binding(3)]] var<storage, read_write> storageContents : ColorContents;
 
         [[stage(compute), workgroup_size(1)]] fn main() {
             vbContents.pos[0] = vec4<f32>(-1.0, 1.0, 0.0, 1.0);
