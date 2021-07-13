@@ -423,6 +423,10 @@ Token Lexer::try_punctuation() {
     type = Token::Type::kArrow;
     pos_ += 2;
     location_.column += 2;
+  } else if (matches(pos_, "--")) {
+    type = Token::Type::kMinusMinus;
+    pos_ += 2;
+    location_.column += 2;
   } else if (matches(pos_, "-")) {
     type = Token::Type::kMinus;
     pos_ += 1;
@@ -431,6 +435,10 @@ Token Lexer::try_punctuation() {
     type = Token::Type::kPeriod;
     pos_ += 1;
     location_.column += 1;
+  } else if (matches(pos_, "++")) {
+    type = Token::Type::kPlusPlus;
+    pos_ += 2;
+    location_.column += 2;
   } else if (matches(pos_, "+")) {
     type = Token::Type::kPlus;
     pos_ += 1;

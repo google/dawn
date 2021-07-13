@@ -84,10 +84,14 @@ std::string Token::TypeToName(Type type) {
       return "!=";
     case Token::Type::kMinus:
       return "-";
+    case Token::Type::kMinusMinus:
+      return "--";
     case Token::Type::kPeriod:
       return ".";
     case Token::Type::kPlus:
       return "+";
+    case Token::Type::kPlusPlus:
+      return "++";
     case Token::Type::kOr:
       return "|";
     case Token::Type::kOrOr:

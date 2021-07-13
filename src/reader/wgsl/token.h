@@ -90,12 +90,16 @@ class Token {
     kMod,
     /// A '-'
     kMinus,
+    /// A '--'
+    kMinusMinus,
     /// A '!='
     kNotEqual,
     /// A '.'
     kPeriod,
     /// A '+'
     kPlus,
+    /// A '++'
+    kPlusPlus,
     /// A '|'
     kOr,
     /// A '||'

@@ -177,6 +177,30 @@ TEST_F(ParserImplTest, UnaryExpression_Tilde) {
   EXPECT_EQ(init->literal()->As<ast::SintLiteral>()->value(), 1);
 }
 
+TEST_F(ParserImplTest, UnaryExpression_PrefixPlusPlus) {
+  auto p = parser("++a");
+  auto e = p->unary_expression();
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(),
+            "1:1: prefix increment and decrement operators are reserved for a "
+            "future WGSL version");
+}
+
+TEST_F(ParserImplTest, UnaryExpression_PrefixMinusMinus) {
+  auto p = parser("--a");
+  auto e = p->unary_expression();
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(),
+            "1:1: prefix increment and decrement operators are reserved for a "
+            "future WGSL version");
+}
+
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader

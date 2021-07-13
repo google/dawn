@@ -236,6 +236,30 @@ TEST_F(ParserImplTest, SingularExpression_Array_NestedArrayAccessor) {
   EXPECT_EQ(index_expr->symbol(), p->builder().Symbols().Get("c"));
 }
 
+TEST_F(ParserImplTest, SingularExpression_PostfixPlusPlus) {
+  auto p = parser("a++");
+  auto e = p->singular_expression();
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(),
+            "1:2: postfix increment and decrement operators are reserved for a "
+            "future WGSL version");
+}
+
+TEST_F(ParserImplTest, SingularExpression_PostfixMinusMinus) {
+  auto p = parser("a--");
+  auto e = p->singular_expression();
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(),
+            "1:2: postfix increment and decrement operators are reserved for a "
+            "future WGSL version");
+}
+
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader

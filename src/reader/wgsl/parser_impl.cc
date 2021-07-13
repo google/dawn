@@ -2223,6 +2223,15 @@ Maybe<ast::Expression*> ParserImpl::primary_expression() {
 Maybe<ast::Expression*> ParserImpl::postfix_expression(
     ast::Expression* prefix) {
   Source source;
+
+  if (match(Token::Type::kPlusPlus, &source) ||
+      match(Token::Type::kMinusMinus, &source)) {
+    add_error(source,
+              "postfix increment and decrement operators are reserved for a "
+              "future WGSL version");
+    return Failure::kErrored;
+  }
+
   if (match(Token::Type::kBracketLeft, &source)) {
     return sync(Token::Type::kBracketRight, [&]() -> Maybe<ast::Expression*> {
       auto param = logical_or_expression();
@@ -2298,6 +2307,13 @@ Expect<ast::ExpressionList> ParserImpl::expect_argument_expression_list(
 //   | AND unary_expression
 Maybe<ast::Expression*> ParserImpl::unary_expression() {
   auto t = peek();
+
+  if (match(Token::Type::kPlusPlus) || match(Token::Type::kMinusMinus)) {
+    add_error(t.source(),
+              "prefix increment and decrement operators are reserved for a "
+              "future WGSL version");
+    return Failure::kErrored;
+  }
 
   ast::UnaryOp op;
   if (match(Token::Type::kMinus)) {
