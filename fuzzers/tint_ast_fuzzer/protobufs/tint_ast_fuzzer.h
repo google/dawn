@@ -25,6 +25,7 @@
 #pragma clang diagnostic ignored "-Wextra-semi-stmt"
 #pragma clang diagnostic ignored "-Winconsistent-missing-destructor-override"
 #pragma clang diagnostic ignored "-Wweak-vtables"
+#pragma clang diagnostic ignored "-Wsuggest-destructor-override"
 
 #include "fuzzers/tint_ast_fuzzer/protobufs/tint_ast_fuzzer.pb.h"
 
