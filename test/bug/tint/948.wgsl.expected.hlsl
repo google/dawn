@@ -22,8 +22,7 @@ static float2 vUV = float2(0.0f, 0.0f);
 float4x4 getFrameData_f1_(inout float frameID) {
   float fX = 0.0f;
   const float x_15 = frameID;
-  const uint scalar_offset = (108u) / 4;
-  const float x_25 = asfloat(x_20[scalar_offset / 4][scalar_offset % 4]);
+  const float x_25 = asfloat(x_20[6].w);
   fX = (x_15 / x_25);
   const float4 x_40 = frameMapTexture.SampleBias(frameMapSampler, float2(fX, 0.0f), 0.0f);
   const float4 x_47 = frameMapTexture.SampleBias(frameMapSampler, float2(fX, 0.25f), 0.0f);
@@ -55,16 +54,11 @@ void main_1() {
   const float x_91 = tileUV.y;
   tileUV.y = (1.0f - x_91);
   tileID = floor(tUV);
-  const uint scalar_offset_1 = (96u) / 4;
-  uint4 ubo_load = x_20[scalar_offset_1 / 4];
-  const float2 x_101 = asfloat(((scalar_offset_1 & 2) ? ubo_load.zw : ubo_load.xy));
+  const float2 x_101 = asfloat(x_20[6].xy);
   sheetUnits = (float2(1.0f, 1.0f) / x_101);
-  const uint scalar_offset_2 = (108u) / 4;
-  const float x_106 = asfloat(x_20[scalar_offset_2 / 4][scalar_offset_2 % 4]);
+  const float x_106 = asfloat(x_20[6].w);
   spriteUnits = (1.0f / x_106);
-  const uint scalar_offset_3 = (88u) / 4;
-  uint4 ubo_load_1 = x_20[scalar_offset_3 / 4];
-  const float2 x_111 = asfloat(((scalar_offset_3 & 2) ? ubo_load_1.zw : ubo_load_1.xy));
+  const float2 x_111 = asfloat(x_20[5].zw);
   stageUnits = (float2(1.0f, 1.0f) / x_111);
   i = 0;
   {
@@ -72,18 +66,14 @@ void main_1() {
       switch(i) {
         case 1: {
           const float2 x_150 = tileID;
-          const uint scalar_offset_4 = (88u) / 4;
-          uint4 ubo_load_2 = x_20[scalar_offset_4 / 4];
-          const float2 x_154 = asfloat(((scalar_offset_4 & 2) ? ubo_load_2.zw : ubo_load_2.xy));
+          const float2 x_154 = asfloat(x_20[5].zw);
           const float4 x_156 = tileMapsTexture1.SampleBias(tileMapsSampler, ((x_150 + float2(0.5f, 0.5f)) / x_154), 0.0f);
           frameID_1 = x_156.x;
           break;
         }
         case 0: {
           const float2 x_136 = tileID;
-          const uint scalar_offset_5 = (88u) / 4;
-          uint4 ubo_load_3 = x_20[scalar_offset_5 / 4];
-          const float2 x_140 = asfloat(((scalar_offset_5 & 2) ? ubo_load_3.zw : ubo_load_3.xy));
+          const float2 x_140 = asfloat(x_20[5].zw);
           const float4 x_142 = tileMapsTexture0.SampleBias(tileMapsSampler, ((x_136 + float2(0.5f, 0.5f)) / x_140), 0.0f);
           frameID_1 = x_142.x;
           break;
@@ -93,14 +83,12 @@ void main_1() {
         }
       }
       const float x_166 = frameID_1;
-      const uint scalar_offset_6 = (108u) / 4;
-      const float x_169 = asfloat(x_20[scalar_offset_6 / 4][scalar_offset_6 % 4]);
+      const float x_169 = asfloat(x_20[6].w);
       const float4 x_172 = animationMapTexture.SampleBias(animationMapSampler, float2(((x_166 + 0.5f) / x_169), 0.0f), 0.0f);
       animationData = x_172;
       const float x_174 = animationData.y;
       if ((x_174 > 0.0f)) {
-        const uint scalar_offset_7 = (0u) / 4;
-        const float x_181 = asfloat(x_20[scalar_offset_7 / 4][scalar_offset_7 % 4]);
+        const float x_181 = asfloat(x_20[0].x);
         const float x_184 = animationData.z;
         mt = ((x_181 * x_184) % 1.0f);
         f = 0.0f;
@@ -113,8 +101,7 @@ void main_1() {
               break;
             }
             const float x_208 = frameID_1;
-            const uint scalar_offset_8 = (108u) / 4;
-            const float x_211 = asfloat(x_20[scalar_offset_8 / 4][scalar_offset_8 % 4]);
+            const float x_211 = asfloat(x_20[6].w);
             const float4 x_217 = animationMapTexture.SampleBias(animationMapSampler, float2(((x_208 + 0.5f) / x_211), (0.125f * f)), 0.0f);
             animationData = x_217;
           }
@@ -124,9 +111,7 @@ void main_1() {
       const float4x4 x_225 = getFrameData_f1_(param);
       frameData = x_225;
       const float4 x_228 = frameData[0];
-      const uint scalar_offset_9 = (96u) / 4;
-      uint4 ubo_load_4 = x_20[scalar_offset_9 / 4];
-      const float2 x_231 = asfloat(((scalar_offset_9 & 2) ? ubo_load_4.zw : ubo_load_4.xy));
+      const float2 x_231 = asfloat(x_20[6].xy);
       frameSize = (float2(x_228.w, x_228.z) / x_231);
       const float4 x_235 = frameData[0];
       offset_1 = (float2(x_235.x, x_235.y) * sheetUnits);
@@ -156,8 +141,7 @@ void main_1() {
       }
     }
   }
-  const uint scalar_offset_10 = (112u) / 4;
-  const float3 x_310 = asfloat(x_20[scalar_offset_10 / 4].xyz);
+  const float3 x_310 = asfloat(x_20[7].xyz);
   const float4 x_311 = color;
   const float3 x_313 = (float3(x_311.x, x_311.y, x_311.z) * x_310);
   color = float4(x_313.x, x_313.y, x_313.z, color.w);

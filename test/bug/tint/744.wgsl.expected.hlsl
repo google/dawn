@@ -13,10 +13,8 @@ struct tint_symbol_1 {
 void main(tint_symbol_1 tint_symbol) {
   const uint3 global_id = tint_symbol.global_id;
   const uint2 resultCell = uint2(global_id.y, global_id.x);
-  const uint scalar_offset = (4u) / 4;
-  const uint dimInner = uniforms[scalar_offset / 4][scalar_offset % 4];
-  const uint scalar_offset_1 = (20u) / 4;
-  const uint dimOutter = uniforms[scalar_offset_1 / 4][scalar_offset_1 % 4];
+  const uint dimInner = uniforms[0].y;
+  const uint dimOutter = uniforms[1].y;
   uint result = 0u;
   {
     for(uint i = 0u; (i < dimInner); i = (i + 1u)) {

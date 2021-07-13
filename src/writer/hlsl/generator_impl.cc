@@ -624,11 +624,27 @@ bool GeneratorImpl::EmitUniformBufferAccess(
     ast::CallExpression* expr,
     const transform::DecomposeMemoryAccess::Intrinsic* intrinsic) {
   const auto& params = expr->params();
+  auto* offset_arg = builder_.Sem().Get(params[1]);
 
-  std::string scalar_offset = UniqueIdentifier("scalar_offset");
-  {
+  uint32_t scalar_offset_value = 0;
+  std::string scalar_offset_expr;
+
+  // If true, use scalar_offset_value, otherwise use scalar_offset_expr
+  bool scalar_offset_constant = false;
+
+  if (auto val = offset_arg->ConstantValue()) {
+    TINT_ASSERT(Writer, val.Type()->Is<sem::U32>());
+    scalar_offset_value = val.Elements()[0].u32;
+    scalar_offset_value /= 4;  // bytes -> scalar index
+    scalar_offset_constant = true;
+  }
+
+  if (!scalar_offset_constant) {
+    // UBO offset not compile-time known.
+    // Calculate the scalar offset into a temporary.
+    scalar_offset_expr = UniqueIdentifier("scalar_offset");
     auto pre = line();
-    pre << "const uint " << scalar_offset << " = (";
+    pre << "const uint " << scalar_offset_expr << " = (";
     if (!EmitExpression(pre, params[1])) {  // offset
       return false;
     }
@@ -649,32 +665,37 @@ bool GeneratorImpl::EmitUniformBufferAccess(
         if (!EmitExpression(out, params[0])) {  // buffer
           return false;
         }
-        out << "[" << scalar_offset << " / 4][" << scalar_offset << " % 4]";
+        if (scalar_offset_constant) {
+          char swizzle[] = {'x', 'y', 'z', 'w'};
+          out << "[" << (scalar_offset_value / 4) << "]."
+              << swizzle[scalar_offset_value & 3];
+        } else {
+          out << "[" << scalar_offset_expr << " / 4][" << scalar_offset_expr
+              << " % 4]";
+        }
         return true;
       };
       // Has a minimum alignment of 8 bytes, so is either .xy or .zw
       auto load_vec2 = [&] {
-        std::string ubo_load = UniqueIdentifier("ubo_load");
-
-        {
-          auto pre = line();
-          pre << "uint4 " << ubo_load << " = ";
-          if (!EmitExpression(pre, params[0])) {  // buffer
+        if (scalar_offset_constant) {
+          if (!EmitExpression(out, params[0])) {  // buffer
             return false;
           }
-          pre << "[" << scalar_offset << " / 4];";
+          out << "[" << (scalar_offset_value / 4) << "]";
+          out << ((scalar_offset_value & 2) == 0 ? ".xy" : ".zw");
+        } else {
+          std::string ubo_load = UniqueIdentifier("ubo_load");
+          {
+            auto pre = line();
+            pre << "uint4 " << ubo_load << " = ";
+            if (!EmitExpression(pre, params[0])) {  // buffer
+              return false;
+            }
+            pre << "[" << scalar_offset_expr << " / 4];";
+          }
+          out << "((" << scalar_offset_expr << " & 2) ? " << ubo_load
+              << ".zw : " << ubo_load << ".xy)";
         }
-
-        out << "((" << scalar_offset << " & 2) ? " << ubo_load
-            << ".zw : " << ubo_load << ".xy)";
-        return true;
-      };
-      // vec3 has a minimum alignment of 16 bytes, so is just a .xyz swizzle
-      auto load_vec3 = [&] {
-        if (!EmitExpression(out, params[0])) {  // buffer
-          return false;
-        }
-        out << "[" << scalar_offset << " / 4].xyz";
         return true;
       };
       // vec4 has a minimum alignment of 16 bytes, easiest case
@@ -682,7 +703,19 @@ bool GeneratorImpl::EmitUniformBufferAccess(
         if (!EmitExpression(out, params[0])) {  // buffer
           return false;
         }
-        out << "[" << scalar_offset << " / 4]";
+        if (scalar_offset_constant) {
+          out << "[" << (scalar_offset_value / 4) << "]";
+        } else {
+          out << "[" << scalar_offset_expr << " / 4]";
+        }
+        return true;
+      };
+      // vec3 has a minimum alignment of 16 bytes, so is just a .xyz swizzle
+      auto load_vec3 = [&] {
+        if (!load_vec4()) {
+          return false;
+        }
+        out << ".xyz";
         return true;
       };
       switch (intrinsic->type) {

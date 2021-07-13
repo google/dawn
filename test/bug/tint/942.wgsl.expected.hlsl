@@ -33,20 +33,17 @@ void main(tint_symbol_1 tint_symbol) {
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  const uint scalar_offset = (0u) / 4;
-  const uint filterOffset = ((params[scalar_offset / 4][scalar_offset % 4] - 1u) / 2u);
+  const uint filterOffset = ((params[0].x - 1u) / 2u);
   int3 tint_tmp;
   inputTex.GetDimensions(0, tint_tmp.x, tint_tmp.y, tint_tmp.z);
   const int2 dims = tint_tmp.xy;
-  const uint scalar_offset_1 = (4u) / 4;
-  const int2 baseIndex = (int2(((WorkGroupID.xy * uint2(params[scalar_offset_1 / 4][scalar_offset_1 % 4], 4u)) + (LocalInvocationID.xy * uint2(4u, 1u)))) - int2(int(filterOffset), 0));
+  const int2 baseIndex = (int2(((WorkGroupID.xy * uint2(params[0].y, 4u)) + (LocalInvocationID.xy * uint2(4u, 1u)))) - int2(int(filterOffset), 0));
   {
     for(uint r = 0u; (r < 4u); r = (r + 1u)) {
       {
         for(uint c = 0u; (c < 4u); c = (c + 1u)) {
           int2 loadIndex = (baseIndex + int2(int(c), int(r)));
-          const uint scalar_offset_2 = (0u) / 4;
-          if ((flip[scalar_offset_2 / 4][scalar_offset_2 % 4] != 0u)) {
+          if ((flip[0].x != 0u)) {
             loadIndex = loadIndex.yx;
           }
           tile[r][((4u * LocalInvocationID.x) + c)] = inputTex.SampleLevel(samp, ((float2(loadIndex) + float2(0.25f, 0.25f)) / float2(dims)), 0.0f).rgb;
@@ -60,8 +57,7 @@ void main(tint_symbol_1 tint_symbol) {
       {
         for(uint c = 0u; (c < 4u); c = (c + 1u)) {
           int2 writeIndex = (baseIndex + int2(int(c), int(r)));
-          const uint scalar_offset_3 = (0u) / 4;
-          if ((flip[scalar_offset_3 / 4][scalar_offset_3 % 4] != 0u)) {
+          if ((flip[0].x != 0u)) {
             writeIndex = writeIndex.yx;
           }
           const uint center = ((4u * LocalInvocationID.x) + c);
@@ -76,14 +72,9 @@ void main(tint_symbol_1 tint_symbol) {
           if ((tint_tmp_1)) {
             float3 acc = float3(0.0f, 0.0f, 0.0f);
             {
-              uint f = 0u;
-              while (true) {
-                const uint scalar_offset_4 = (0u) / 4;
-                if (!((f < params[scalar_offset_4 / 4][scalar_offset_4 % 4]))) { break; }
+              for(uint f = 0u; (f < params[0].x); f = (f + 1u)) {
                 uint i = ((center + f) - filterOffset);
-                const uint scalar_offset_5 = (0u) / 4;
-                acc = (acc + ((1.0f / float(params[scalar_offset_5 / 4][scalar_offset_5 % 4])) * tile[r][i]));
-                f = (f + 1u);
+                acc = (acc + ((1.0f / float(params[0].x)) * tile[r][i]));
               }
             }
             outputTex[writeIndex] = float4(acc, 1.0f);

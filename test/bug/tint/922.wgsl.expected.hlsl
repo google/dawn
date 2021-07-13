@@ -196,8 +196,7 @@ void main1() {
   const float4 _e49 = Mul(_e35, _e48);
   gl_Position = _e49;
   v_Color = a_Color1;
-  const uint scalar_offset_9 = (32u) / 4;
-  const float4 _e52 = asfloat(global1[scalar_offset_9 / 4]);
+  const float4 _e52 = asfloat(global1[2]);
   if ((_e52.x == 2.0f)) {
     {
       const float3 _e59 = a_Normal1;

@@ -36,8 +36,7 @@ void main_1() {
   const uint x_61 = gl_GlobalInvocationID.x;
   index = asint(x_61);
   const int x_63 = index;
-  const uint scalar_offset = (16u) / 4;
-  const int x_70 = asint(x_24[scalar_offset / 4][scalar_offset % 4]);
+  const int x_70 = asint(x_24[1].x);
   if ((x_63 < x_70)) {
     const float x_75 = getAAtOutCoords_();
     a_1 = x_75;

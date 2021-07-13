@@ -30,8 +30,7 @@ void main(tint_symbol_2 tint_symbol_1) {
   int2 size = tint_tmp;
   int2 dstTexCoord = int2(GlobalInvocationID.xy);
   int2 srcTexCoord = dstTexCoord;
-  const uint scalar_offset = (0u) / 4;
-  if ((uniforms[scalar_offset / 4][scalar_offset % 4] == 1u)) {
+  if ((uniforms[0].x == 1u)) {
     srcTexCoord.y = ((size.y - dstTexCoord.y) - 1);
   }
   float4 srcColor = src.Load(int3(srcTexCoord, 0));
@@ -40,17 +39,13 @@ void main(tint_symbol_2 tint_symbol_1) {
   uint4 srcColorBits = uint4(0u, 0u, 0u, 0u);
   uint4 dstColorBits = uint4(dstColor);
   {
-    uint i = 0u;
-    while (true) {
-      const uint scalar_offset_1 = (12u) / 4;
-      if (!((i < uniforms[scalar_offset_1 / 4][scalar_offset_1 % 4]))) { break; }
+    for(uint i = 0u; (i < uniforms[0].w); i = (i + 1u)) {
       Set_uint4(srcColorBits, i, ConvertToFp16FloatValue(srcColor[i]));
       bool tint_tmp_1 = success;
       if (tint_tmp_1) {
         tint_tmp_1 = (srcColorBits[i] == dstColorBits[i]);
       }
       success = (tint_tmp_1);
-      i = (i + 1u);
     }
   }
   uint outputIndex = ((GlobalInvocationID.y * uint(size.x)) + GlobalInvocationID.x);

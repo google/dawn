@@ -33,10 +33,8 @@ float mm_readA_i1_i1_(inout int row, inout int col) {
   int2 param_10 = int2(0, 0);
   int2 param_11 = int2(0, 0);
   float x_430 = 0.0f;
-  const uint scalar_offset = (20u) / 4;
-  const int x_417 = asint(x_48[scalar_offset / 4][scalar_offset % 4]);
-  const uint scalar_offset_1 = (24u) / 4;
-  const int x_419 = asint(x_48[scalar_offset_1 / 4][scalar_offset_1 % 4]);
+  const int x_417 = asint(x_48[1].y);
+  const int x_419 = asint(x_48[1].z);
   batchASize = (x_417 * x_419);
   const int x_421 = row;
   const int x_422 = col;
@@ -64,10 +62,8 @@ float mm_readB_i1_i1_(inout int row_1, inout int col_1) {
   int2 param_12 = int2(0, 0);
   int2 param_13 = int2(0, 0);
   float x_468 = 0.0f;
-  const uint scalar_offset_2 = (36u) / 4;
-  const int x_455 = asint(x_48[scalar_offset_2 / 4][scalar_offset_2 % 4]);
-  const uint scalar_offset_3 = (40u) / 4;
-  const int x_457 = asint(x_48[scalar_offset_3 / 4][scalar_offset_3 % 4]);
+  const int x_455 = asint(x_48[2].y);
+  const int x_457 = asint(x_48[2].z);
   batchBSize = (x_455 * x_457);
   const int x_459 = row_1;
   const int x_460 = col_1;
@@ -92,10 +88,8 @@ float mm_readB_i1_i1_(inout int row_1, inout int col_1) {
 
 int getOutputFlatIndex_vi3_(inout int3 coords) {
   const int3 x_99 = coords;
-  const uint scalar_offset_4 = (64u) / 4;
-  const int x_105 = asint(x_48[scalar_offset_4 / 4][scalar_offset_4 % 4]);
-  const uint scalar_offset_5 = (68u) / 4;
-  const int x_107 = asint(x_48[scalar_offset_5 / 4][scalar_offset_5 % 4]);
+  const int x_105 = asint(x_48[4].x);
+  const int x_107 = asint(x_48[4].y);
   return int(dot(float3(x_99), float3(int3(x_105, x_107, 1))));
 }
 
@@ -330,14 +324,11 @@ void main_1() {
   int param_18 = 0;
   int param_19 = 0;
   int param_20 = 0;
-  const uint scalar_offset_6 = (20u) / 4;
-  const int x_67 = asint(x_48[scalar_offset_6 / 4][scalar_offset_6 % 4]);
+  const int x_67 = asint(x_48[1].y);
   dimAOuter_1 = x_67;
-  const uint scalar_offset_7 = (24u) / 4;
-  const int x_71 = asint(x_48[scalar_offset_7 / 4][scalar_offset_7 % 4]);
+  const int x_71 = asint(x_48[1].z);
   dimInner_1 = x_71;
-  const uint scalar_offset_8 = (40u) / 4;
-  const int x_75 = asint(x_48[scalar_offset_8 / 4][scalar_offset_8 % 4]);
+  const int x_75 = asint(x_48[2].z);
   dimBOuter_1 = x_75;
   const uint x_505 = gl_GlobalInvocationID.z;
   batch = asint(x_505);

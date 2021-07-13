@@ -335,7 +335,7 @@ TEST_F(HlslGeneratorImplTest_Function,
            Stage(ast::PipelineStage::kFragment),
        });
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(cbuffer cbuffer_ubo : register(b0, space1) {
@@ -343,7 +343,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 };
 
 float sub_func(float param) {
-  return ubo.coord.x;
+  return asfloat(ubo[0].x);
 }
 
 void frag_main() {

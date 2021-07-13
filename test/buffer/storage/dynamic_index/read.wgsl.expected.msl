@@ -1,0 +1,35 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  /* 0x0000 */ int4 arr[4];
+};
+struct Inner {
+  /* 0x0000 */ packed_int3 a;
+  /* 0x000c */ int b;
+  /* 0x0010 */ packed_uint3 c;
+  /* 0x001c */ uint d;
+  /* 0x0020 */ packed_float3 e;
+  /* 0x002c */ float f;
+  /* 0x0030 */ float2x3 g;
+  /* 0x0050 */ float3x2 h;
+  /* 0x0068 */ int8_t tint_pad[8];
+  /* 0x0070 */ tint_array_wrapper i;
+};
+struct S {
+  /* 0x0000 */ Inner arr[1];
+};
+
+kernel void tint_symbol(uint idx [[thread_index_in_threadgroup]], const device S& s [[buffer(0)]]) {
+  int3 const a = s.arr[idx].a;
+  int const b = s.arr[idx].b;
+  uint3 const c = s.arr[idx].c;
+  uint const d = s.arr[idx].d;
+  float3 const e = s.arr[idx].e;
+  float const f = s.arr[idx].f;
+  float2x3 const g = s.arr[idx].g;
+  float3x2 const h = s.arr[idx].h;
+  tint_array_wrapper const i = s.arr[idx].i;
+  return;
+}
+

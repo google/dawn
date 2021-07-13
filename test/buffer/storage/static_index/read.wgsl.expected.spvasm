@@ -1,0 +1,104 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 59
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %S "S"
+               OpMemberName %S 0 "a"
+               OpMemberName %S 1 "b"
+               OpMemberName %S 2 "c"
+               OpMemberName %S 3 "d"
+               OpMemberName %S 4 "e"
+               OpMemberName %S 5 "f"
+               OpMemberName %S 6 "g"
+               OpMemberName %S 7 "h"
+               OpMemberName %S 8 "i"
+               OpName %Inner "Inner"
+               OpMemberName %Inner 0 "x"
+               OpMemberName %S 9 "j"
+               OpName %s "s"
+               OpName %main "main"
+               OpDecorate %S Block
+               OpMemberDecorate %S 0 Offset 0
+               OpMemberDecorate %S 1 Offset 12
+               OpMemberDecorate %S 2 Offset 16
+               OpMemberDecorate %S 3 Offset 28
+               OpMemberDecorate %S 4 Offset 32
+               OpMemberDecorate %S 5 Offset 44
+               OpMemberDecorate %S 6 Offset 48
+               OpMemberDecorate %S 6 ColMajor
+               OpMemberDecorate %S 6 MatrixStride 16
+               OpMemberDecorate %S 7 Offset 80
+               OpMemberDecorate %S 7 ColMajor
+               OpMemberDecorate %S 7 MatrixStride 8
+               OpMemberDecorate %S 8 Offset 104
+               OpMemberDecorate %Inner 0 Offset 0
+               OpMemberDecorate %S 9 Offset 108
+               OpDecorate %_arr_Inner_uint_4 ArrayStride 16
+               OpDecorate %s NonWritable
+               OpDecorate %s Binding 0
+               OpDecorate %s DescriptorSet 0
+        %int = OpTypeInt 32 1
+      %v3int = OpTypeVector %int 3
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+      %float = OpTypeFloat 32
+    %v3float = OpTypeVector %float 3
+%mat2v3float = OpTypeMatrix %v3float 2
+    %v2float = OpTypeVector %float 2
+%mat3v2float = OpTypeMatrix %v2float 3
+      %Inner = OpTypeStruct %int
+     %uint_4 = OpConstant %uint 4
+%_arr_Inner_uint_4 = OpTypeArray %Inner %uint_4
+          %S = OpTypeStruct %v3int %int %v3uint %uint %v3float %float %mat2v3float %mat3v2float %Inner %_arr_Inner_uint_4
+%_ptr_StorageBuffer_S = OpTypePointer StorageBuffer %S
+          %s = OpVariable %_ptr_StorageBuffer_S StorageBuffer
+       %void = OpTypeVoid
+         %16 = OpTypeFunction %void
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_v3int = OpTypePointer StorageBuffer %v3int
+     %uint_1 = OpConstant %uint 1
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+     %uint_2 = OpConstant %uint 2
+%_ptr_StorageBuffer_v3uint = OpTypePointer StorageBuffer %v3uint
+     %uint_3 = OpConstant %uint 3
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+%_ptr_StorageBuffer_v3float = OpTypePointer StorageBuffer %v3float
+     %uint_5 = OpConstant %uint 5
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+     %uint_6 = OpConstant %uint 6
+%_ptr_StorageBuffer_mat2v3float = OpTypePointer StorageBuffer %mat2v3float
+     %uint_7 = OpConstant %uint 7
+%_ptr_StorageBuffer_mat3v2float = OpTypePointer StorageBuffer %mat3v2float
+     %uint_8 = OpConstant %uint 8
+%_ptr_StorageBuffer_Inner = OpTypePointer StorageBuffer %Inner
+     %uint_9 = OpConstant %uint 9
+%_ptr_StorageBuffer__arr_Inner_uint_4 = OpTypePointer StorageBuffer %_arr_Inner_uint_4
+       %main = OpFunction %void None %16
+         %19 = OpLabel
+         %22 = OpAccessChain %_ptr_StorageBuffer_v3int %s %uint_0
+         %23 = OpLoad %v3int %22
+         %26 = OpAccessChain %_ptr_StorageBuffer_int %s %uint_1
+         %27 = OpLoad %int %26
+         %30 = OpAccessChain %_ptr_StorageBuffer_v3uint %s %uint_2
+         %31 = OpLoad %v3uint %30
+         %34 = OpAccessChain %_ptr_StorageBuffer_uint %s %uint_3
+         %35 = OpLoad %uint %34
+         %37 = OpAccessChain %_ptr_StorageBuffer_v3float %s %uint_4
+         %38 = OpLoad %v3float %37
+         %41 = OpAccessChain %_ptr_StorageBuffer_float %s %uint_5
+         %42 = OpLoad %float %41
+         %45 = OpAccessChain %_ptr_StorageBuffer_mat2v3float %s %uint_6
+         %46 = OpLoad %mat2v3float %45
+         %49 = OpAccessChain %_ptr_StorageBuffer_mat3v2float %s %uint_7
+         %50 = OpLoad %mat3v2float %49
+         %53 = OpAccessChain %_ptr_StorageBuffer_Inner %s %uint_8
+         %54 = OpLoad %Inner %53
+         %57 = OpAccessChain %_ptr_StorageBuffer__arr_Inner_uint_4 %s %uint_9
+         %58 = OpLoad %_arr_Inner_uint_4 %57
+               OpReturn
+               OpFunctionEnd

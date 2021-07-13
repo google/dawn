@@ -19,20 +19,11 @@ tint_symbol_2 vs_main(tint_symbol_1 tint_symbol) {
   float2 texcoord[3] = {float2(-0.5f, 0.0f), float2(1.5f, 0.0f), float2(0.5f, 2.0f)};
   VertexOutputs output = (VertexOutputs)0;
   output.position = float4(((texcoord[VertexIndex] * 2.0f) - float2(1.0f, 1.0f)), 0.0f, 1.0f);
-  const uint scalar_offset = (4u) / 4;
-  bool flipY = (asfloat(uniforms[scalar_offset / 4][scalar_offset % 4]) < 0.0f);
+  bool flipY = (asfloat(uniforms[0].y) < 0.0f);
   if (flipY) {
-    const uint scalar_offset_1 = (0u) / 4;
-    uint4 ubo_load = uniforms[scalar_offset_1 / 4];
-    const uint scalar_offset_2 = (8u) / 4;
-    uint4 ubo_load_1 = uniforms[scalar_offset_2 / 4];
-    output.texcoords = ((((texcoord[VertexIndex] * asfloat(((scalar_offset_1 & 2) ? ubo_load.zw : ubo_load.xy))) + asfloat(((scalar_offset_2 & 2) ? ubo_load_1.zw : ubo_load_1.xy))) * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f));
+    output.texcoords = ((((texcoord[VertexIndex] * asfloat(uniforms[0].xy)) + asfloat(uniforms[0].zw)) * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f));
   } else {
-    const uint scalar_offset_3 = (0u) / 4;
-    uint4 ubo_load_2 = uniforms[scalar_offset_3 / 4];
-    const uint scalar_offset_4 = (8u) / 4;
-    uint4 ubo_load_3 = uniforms[scalar_offset_4 / 4];
-    output.texcoords = ((((texcoord[VertexIndex] * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f)) * asfloat(((scalar_offset_3 & 2) ? ubo_load_2.zw : ubo_load_2.xy))) + asfloat(((scalar_offset_4 & 2) ? ubo_load_3.zw : ubo_load_3.xy)));
+    output.texcoords = ((((texcoord[VertexIndex] * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f)) * asfloat(uniforms[0].xy)) + asfloat(uniforms[0].zw));
   }
   const tint_symbol_2 tint_symbol_8 = {output.texcoords, output.position};
   return tint_symbol_8;

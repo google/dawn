@@ -1,0 +1,46 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Inner {
+  /* 0x0000 */ int x;
+};
+struct tint_padded_array_element {
+  /* 0x0000 */ Inner el;
+  /* 0x0004 */ int8_t tint_pad[12];
+};
+struct tint_array_wrapper {
+  /* 0x0000 */ tint_padded_array_element arr[4];
+};
+struct S {
+  /* 0x0000 */ packed_int3 a;
+  /* 0x000c */ int b;
+  /* 0x0010 */ packed_uint3 c;
+  /* 0x001c */ uint d;
+  /* 0x0020 */ packed_float3 e;
+  /* 0x002c */ float f;
+  /* 0x0030 */ packed_int2 g;
+  /* 0x0038 */ packed_int2 h;
+  /* 0x0040 */ float2x3 i;
+  /* 0x0060 */ float3x2 j;
+  /* 0x0078 */ int8_t tint_pad_1[8];
+  /* 0x0080 */ Inner k;
+  /* 0x0084 */ int8_t tint_pad_2[12];
+  /* 0x0090 */ tint_array_wrapper l;
+};
+
+kernel void tint_symbol(constant S& s [[buffer(0)]]) {
+  int3 const a = s.a;
+  int const b = s.b;
+  uint3 const c = s.c;
+  uint const d = s.d;
+  float3 const e = s.e;
+  float const f = s.f;
+  int2 const g = s.g;
+  int2 const h = s.h;
+  float2x3 const i = s.i;
+  float3x2 const j = s.j;
+  Inner const k = s.k;
+  tint_array_wrapper const l = s.l;
+  return;
+}
+
