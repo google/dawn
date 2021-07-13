@@ -3127,6 +3127,11 @@ bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
           }
           pre += mod;
 
+        } else if (deco->Is<ast::InvariantDecoration>()) {
+          // Note: `precise` is not exactly the same as `invariant`, but is
+          // stricter and therefore provides the necessary guarantees.
+          // See discussion here: https://github.com/gpuweb/gpuweb/issues/893
+          pre += "precise ";
         } else if (!deco->IsAnyOf<ast::StructMemberAlignDecoration,
                                   ast::StructMemberSizeDecoration>()) {
           TINT_ICE(Writer, diagnostics_)
