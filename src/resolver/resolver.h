@@ -394,13 +394,6 @@ class Resolver {
                    const sem::Type* type,
                    std::string type_name = "");
 
-  /// Resolve the value of a scalar const_expr.
-  /// @param expr the expression
-  /// @param result pointer to the where the result will be stored
-  /// @returns true on success, false on error
-  template <typename T>
-  bool GetScalarConstExprValue(ast::Expression* expr, T* result);
-
   /// Constructs a new semantic BlockStatement with the given type and with
   /// #current_block_ as its parent, assigns this to #current_block_, and then
   /// calls `callback`. The original #current_block_ is restored on exit.

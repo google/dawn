@@ -1643,9 +1643,13 @@ bool Resolver::Function(ast::Function* func) {
         auto* constructor = var->declaration->constructor();
         if (constructor) {
           // Resolve the constructor expression to use as the default value.
-          if (!GetScalarConstExprValue(constructor, &value)) {
+          auto val = ConstantValueOf(constructor);
+          if (!val.IsValid() || !val.Type()->Is<sem::I32>()) {
+            TINT_ICE(Resolver, diagnostics_)
+                << "failed to resolve workgroup_size constant value";
             return false;
           }
+          value = val.Elements()[0].i32;
         } else {
           // No constructor means this value must be overriden by the user.
           info->workgroup_size[i].value = 0;
@@ -1656,7 +1660,8 @@ bool Resolver::Function(ast::Function* func) {
         // We have a literal.
         Mark(scalar->literal());
 
-        if (!scalar->literal()->Is<ast::IntLiteral>()) {
+        auto* i32_literal = scalar->literal()->As<ast::IntLiteral>();
+        if (!i32_literal) {
           AddError(
               "workgroup_size parameter must be a literal i32 or an i32 "
               "module-scope constant",
@@ -1664,9 +1669,7 @@ bool Resolver::Function(ast::Function* func) {
           return false;
         }
 
-        if (!GetScalarConstExprValue(scalar, &value)) {
-          return false;
-        }
+        value = i32_literal->value_as_i32();
       }
 
       // Validate and set the default value for this dimension.
@@ -4026,40 +4029,6 @@ bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
   }
 
   return true;
-}
-
-template <typename T>
-bool Resolver::GetScalarConstExprValue(ast::Expression* expr, T* result) {
-  if (auto* type_constructor = expr->As<ast::TypeConstructorExpression>()) {
-    if (type_constructor->values().size() == 0) {
-      // Zero-valued constructor.
-      *result = static_cast<T>(0);
-      return true;
-    } else if (type_constructor->values().size() == 1) {
-      // Recurse into the constructor argument expression.
-      return GetScalarConstExprValue(type_constructor->values()[0], result);
-    } else {
-      TINT_ICE(Resolver, diagnostics_) << "malformed scalar type constructor";
-    }
-  } else if (auto* scalar = expr->As<ast::ScalarConstructorExpression>()) {
-    // Cast literal to result type.
-    if (auto* int_lit = scalar->literal()->As<ast::IntLiteral>()) {
-      *result = static_cast<T>(int_lit->value_as_u32());
-      return true;
-    } else if (auto* float_lit = scalar->literal()->As<ast::FloatLiteral>()) {
-      *result = static_cast<T>(float_lit->value());
-      return true;
-    } else if (auto* bool_lit = scalar->literal()->As<ast::BoolLiteral>()) {
-      *result = static_cast<T>(bool_lit->IsTrue());
-      return true;
-    } else {
-      TINT_ICE(Resolver, diagnostics_) << "unhandled scalar constructor";
-    }
-  } else {
-    TINT_ICE(Resolver, diagnostics_) << "unhandled constant expression";
-  }
-
-  return false;
 }
 
 template <typename F>
