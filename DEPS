@@ -45,7 +45,7 @@ deps = {
       '/google/googletest.git@' + Var('googletest_revision'),
 
   'third_party/protobuf': Var('chromium_git') + Var('github') +
-        '/protocolbuffers/protobuf.git@' + Var('protobuf_revision'),
+      '/protocolbuffers/protobuf.git@' + Var('protobuf_revision'),
 }
 
 hooks = [

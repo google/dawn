@@ -51,6 +51,7 @@ option(TINT_BUILD_SPV_WRITER "Build the SPIR-V output writer" ON)
 option(TINT_BUILD_WGSL_WRITER "Build the WGSL output writer" ON)
 option(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
 option(TINT_BUILD_SPIRV_TOOLS_FUZZER "Build SPIRV-Tools fuzzer" OFF)
+option(TINT_BUILD_AST_FUZZER "Build AST fuzzer" OFF)
 option(TINT_BUILD_TESTS "Build tests" ${TINT_BUILD_TESTS_DEFAULT})
 option(TINT_BUILD_AS_OTHER_OS "Override OS detection to force building of *_other.cc files" OFF)
 option(TINT_BUILD_REMOTE_COMPILE "Build the remote-compile tool for validating shaders on a remote machine" OFF)
@@ -73,6 +74,7 @@ message(STATUS "Tint build SPIR-V writer: ${TINT_BUILD_SPV_WRITER}")
 message(STATUS "Tint build WGSL writer: ${TINT_BUILD_WGSL_WRITER}")
 message(STATUS "Tint build fuzzers: ${TINT_BUILD_FUZZERS}")
 message(STATUS "Tint build SPIRV-Tools fuzzer: ${TINT_BUILD_SPIRV_TOOLS_FUZZER}")
+message(STATUS "Tint build AST fuzzer: ${TINT_BUILD_AST_FUZZER}")
 message(STATUS "Tint build tests: ${TINT_BUILD_TESTS}")
 message(STATUS "Tint build with ASAN: ${TINT_ENABLE_ASAN}")
 message(STATUS "Tint build with MSAN: ${TINT_ENABLE_MSAN}")
@@ -85,13 +87,13 @@ find_package(PythonInterp 3 REQUIRED)
 
 if (${TINT_BUILD_SPIRV_TOOLS_FUZZER})
   message(STATUS "TINT_BUILD_SPIRV_TOOLS_FUZZER is ON - setting
-          TINT_BUILD_FUZZERS,
-          TINT_BUILD_SPV_READER,
-          TINT_BUILD_WGSL_READER,
-          TINT_BUILD_WGSL_WRITER,
-          TINT_BUILD_HLSL_WRITER,
-          TINT_BUILD_MSL_WRITER,
-          TINT_BUILD_SPV_WRITER to ON")
+      TINT_BUILD_FUZZERS
+      TINT_BUILD_SPV_READER
+      TINT_BUILD_WGSL_READER
+      TINT_BUILD_WGSL_WRITER
+      TINT_BUILD_HLSL_WRITER
+      TINT_BUILD_MSL_WRITER
+      TINT_BUILD_SPV_WRITER to ON")
   set(TINT_BUILD_FUZZERS ON)
   set(TINT_BUILD_SPV_READER ON)
   set(TINT_BUILD_WGSL_READER ON)
@@ -99,6 +101,22 @@ if (${TINT_BUILD_SPIRV_TOOLS_FUZZER})
   set(TINT_BUILD_HLSL_WRITER ON)
   set(TINT_BUILD_MSL_WRITER ON)
   set(TINT_BUILD_SPV_WRITER ON)
+endif()
+
+if (${TINT_BUILD_AST_FUZZER})
+  message(STATUS "TINT_BUILD_AST_FUZZER is ON - setting
+      TINT_BUILD_FUZZERS
+      TINT_BUILD_WGSL_READER
+      TINT_BUILD_WGSL_WRITER
+      TINT_BUILD_SPV_WRITER
+      TINT_BUILD_MSL_WRITER
+      TINT_BUILD_HLSL_WRITER to ON")
+  set(TINT_BUILD_FUZZERS ON)
+  set(TINT_BUILD_WGSL_READER ON)
+  set(TINT_BUILD_WGSL_WRITER ON)
+  set(TINT_BUILD_SPV_WRITER ON)
+  set(TINT_BUILD_MSL_WRITER ON)
+  set(TINT_BUILD_HLSL_WRITER ON)
 endif()
 
 set(TINT_ROOT_SOURCE_DIR ${PROJECT_SOURCE_DIR})

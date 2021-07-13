@@ -77,3 +77,7 @@ endif()
 if (${TINT_BUILD_SPIRV_TOOLS_FUZZER})
   add_subdirectory(tint_spirv_tools_fuzzer)
 endif()
+
+if (${TINT_BUILD_AST_FUZZER})
+  add_subdirectory(tint_ast_fuzzer)
+endif()

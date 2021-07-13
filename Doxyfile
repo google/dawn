@@ -789,6 +789,8 @@ INPUT                  = CODE_OF_CONDUCT.md \
                          fuzzers/tint_spirv_tools_fuzzer \
                          src \
                          tools/src \
+                         fuzzers/tint_spirv_tools_fuzzer \
+                         fuzzers/tint_ast_fuzzer
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
