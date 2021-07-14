@@ -57,27 +57,6 @@ Result Generate(const Program* program, const Options& options) {
   return result;
 }
 
-Generator::Generator(const Program* program)
-    : builder_(std::make_unique<Builder>(program)),
-      writer_(std::make_unique<BinaryWriter>()) {}
-
-Generator::~Generator() = default;
-
-bool Generator::Generate() {
-  if (!builder_->Build()) {
-    set_error(builder_->error());
-    return false;
-  }
-
-  writer_->WriteHeader(builder_->id_bound());
-  writer_->WriteBuilder(builder_.get());
-  return true;
-}
-
-const std::vector<uint32_t>& Generator::result() const {
-  return writer_->result();
-}
-
 }  // namespace spirv
 }  // namespace writer
 }  // namespace tint

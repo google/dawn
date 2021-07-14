@@ -69,31 +69,6 @@ struct Result {
 /// @returns the resulting HLSL and supplementary information
 Result Generate(const Program* program, const Options& options);
 
-// TODO(jrprice): Remove this once Dawn is using the new interface.
-/// Class to generate HLSL source
-class Generator : public Text {
- public:
-  /// Constructor
-  /// @param program the program to convert
-  explicit Generator(const Program* program);
-
-  /// Destructor
-  ~Generator() override;
-
-  /// Generates the result data
-  /// @returns true on successful generation; false otherwise
-  bool Generate() override;
-
-  /// @returns the result data
-  std::string result() const override;
-
-  /// @returns the error
-  std::string error() const;
-
- private:
-  std::unique_ptr<GeneratorImpl> impl_;
-};
-
 }  // namespace hlsl
 }  // namespace writer
 }  // namespace tint

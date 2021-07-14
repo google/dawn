@@ -54,27 +54,6 @@ Result Generate(const Program* program, const Options&) {
   return result;
 }
 
-Generator::Generator(const Program* program)
-    : impl_(std::make_unique<GeneratorImpl>(program)) {}
-
-Generator::~Generator() = default;
-
-bool Generator::Generate() {
-  auto ret = impl_->Generate();
-  if (!ret) {
-    error_ = impl_->error();
-  }
-  return ret;
-}
-
-std::string Generator::result() const {
-  return impl_->result();
-}
-
-std::string Generator::error() const {
-  return impl_->error();
-}
-
 }  // namespace hlsl
 }  // namespace writer
 }  // namespace tint

@@ -69,29 +69,6 @@ struct Result {
 /// @returns the resulting SPIR-V and supplementary information
 Result Generate(const Program* program, const Options& options);
 
-// TODO(jrprice): Remove this once Dawn is using the new interface.
-/// Class to generate SPIR-V from a Tint program
-class Generator : public writer::Writer {
- public:
-  /// Constructor
-  /// @param program the program to convert
-  explicit Generator(const Program* program);
-
-  /// Destructor
-  ~Generator() override;
-
-  /// Generates the result data
-  /// @returns true on successful generation; false otherwise
-  bool Generate() override;
-
-  /// @returns the result data
-  const std::vector<uint32_t>& result() const;
-
- private:
-  std::unique_ptr<Builder> builder_;
-  std::unique_ptr<BinaryWriter> writer_;
-};
-
 }  // namespace spirv
 }  // namespace writer
 }  // namespace tint
