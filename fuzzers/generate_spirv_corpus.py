@@ -49,7 +49,6 @@ def main():
     input_dir: str = os.path.abspath(sys.argv[1].rstrip(os.sep))
     corpus_dir: str = os.path.abspath(sys.argv[2])
     spirv_as_path: str = os.path.abspath(sys.argv[3])
-    print(' '.join([input_dir, corpus_dir, spirv_as_path]))
     if os.path.exists(corpus_dir):
         shutil.rmtree(corpus_dir)
     os.makedirs(corpus_dir)

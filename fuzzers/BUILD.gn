@@ -31,11 +31,13 @@ if (build_with_chromium) {
 
   fuzzer_corpus_spirv_dir = "${target_gen_dir}/fuzzer_corpus_spirv"
   action("tint_generate_spirv_corpus") {
-
+    # The spirv-as tool is used to turn SPIR-V assembly files into binary form.
+    # When cross compiling, it is important that spirv-as is built for the
+    # *host* tool chain, and that the host version of spirv-as is used to
+    # prepare the corpus.
     spirv_as_target = "${tint_spirv_tools_dir}/:spirv-as(${host_toolchain})"
     spirv_as_out_dir = get_label_info(spirv_as_target, "root_out_dir")
     deps = [ spirv_as_target ]
-
     script = "generate_spirv_corpus.py"
     sources = [ "generate_spirv_corpus.py" ]
     args = [ rebase_path("${tint_root_dir}/test", root_build_dir), rebase_path(fuzzer_corpus_spirv_dir, root_build_dir), rebase_path("${spirv_as_out_dir}/spirv-as", root_build_dir) ]
