@@ -239,6 +239,7 @@ test("dawn_unittests") {
     "unittests/wire/WireMemoryTransferServiceTests.cpp",
     "unittests/wire/WireOptionalTests.cpp",
     "unittests/wire/WireQueueTests.cpp",
+    "unittests/wire/WireShaderModuleTests.cpp",
     "unittests/wire/WireTest.cpp",
     "unittests/wire/WireTest.h",
     "unittests/wire/WireWGPUDevicePropertiesTests.cpp",

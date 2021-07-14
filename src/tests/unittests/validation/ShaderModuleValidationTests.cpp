@@ -174,12 +174,14 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
     messages->AddMessageForTesting("Info Message");
     messages->AddMessageForTesting("Warning Message", wgpu::CompilationMessageType::Warning);
     messages->AddMessageForTesting("Error Message", wgpu::CompilationMessageType::Error, 3, 4);
+    messages->AddMessageForTesting("Complete Message", wgpu::CompilationMessageType::Info, 3, 4, 5,
+                                   6);
 
     auto callback = [](WGPUCompilationInfoRequestStatus status, const WGPUCompilationInfo* info,
                        void* userdata) {
         ASSERT_EQ(WGPUCompilationInfoRequestStatus_Success, status);
         ASSERT_NE(nullptr, info);
-        ASSERT_EQ(3u, info->messageCount);
+        ASSERT_EQ(4u, info->messageCount);
 
         const WGPUCompilationMessage* message = &info->messages[0];
         ASSERT_STREQ("Info Message", message->message);
@@ -198,6 +200,14 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
         ASSERT_EQ(WGPUCompilationMessageType_Error, message->type);
         ASSERT_EQ(3u, message->lineNum);
         ASSERT_EQ(4u, message->linePos);
+
+        message = &info->messages[3];
+        ASSERT_STREQ("Complete Message", message->message);
+        ASSERT_EQ(WGPUCompilationMessageType_Info, message->type);
+        ASSERT_EQ(3u, message->lineNum);
+        ASSERT_EQ(4u, message->linePos);
+        ASSERT_EQ(5u, message->offset);
+        ASSERT_EQ(6u, message->length);
     };
 
     shaderModule.GetCompilationInfo(callback, nullptr);
