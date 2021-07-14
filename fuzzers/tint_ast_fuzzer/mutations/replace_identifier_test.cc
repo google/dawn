@@ -540,8 +540,9 @@ fn f() {
       &program, &node_id_map, nullptr));
   ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
-  writer::wgsl::Generator generator(&program);
-  ASSERT_TRUE(generator.Generate()) << generator.error();
+  writer::wgsl::Options options;
+  auto result = writer::wgsl::Generate(&program, options);
+  ASSERT_TRUE(result.success) << result.error;
 
   std::string expected_shader = R"(fn f() {
   var b : vec2<u32>;
@@ -549,7 +550,7 @@ fn f() {
   (*(&(b)))[1] = 3u;
 }
 )";
-  ASSERT_EQ(expected_shader, generator.result());
+  ASSERT_EQ(expected_shader, result.wgsl);
 }
 
 TEST(ReplaceIdentifierTest, Applicable2) {
@@ -588,8 +589,9 @@ fn f(b: ptr<function, vec2<u32>>) {
       &program, &node_id_map, nullptr));
   ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
-  writer::wgsl::Generator generator(&program);
-  ASSERT_TRUE(generator.Generate()) << generator.error();
+  writer::wgsl::Options options;
+  auto result = writer::wgsl::Generate(&program, options);
+  ASSERT_TRUE(result.success) << result.error;
 
   std::string expected_shader = R"(fn f(b : ptr<function, vec2<u32>>) {
   var a = vec2<u32>(34u, 45u);
@@ -597,7 +599,7 @@ fn f(b: ptr<function, vec2<u32>>) {
   (*(b))[1] = 3u;
 }
 )";
-  ASSERT_EQ(expected_shader, generator.result());
+  ASSERT_EQ(expected_shader, result.wgsl);
 }
 
 TEST(ReplaceIdentifierTest, NotApplicable12) {

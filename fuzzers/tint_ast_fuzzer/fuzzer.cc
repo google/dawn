@@ -82,14 +82,15 @@ extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
   if (!cli_params.record_mutations) {
     // If mutations are not being recorded, then the mutated `program` must be
     // stored into the `mutator_state`.
-    writer::wgsl::Generator generator(&program);
-    if (!generator.Generate()) {
+    writer::wgsl::Options options;
+    auto result = writer::wgsl::Generate(&program, options);
+    if (!result.success) {
       std::cout << "Can't generate WGSL for valid tint::Program:" << std::endl
                 << "  seed: " << seed << std::endl
-                << generator.error() << std::endl;
+                << result.error << std::endl;
       return 0;
     }
-    *mutator_state.mutable_program() = generator.result();
+    *mutator_state.mutable_program() = result.wgsl;
   }
 
   if (mutator_state.ByteSizeLong() > max_size) {
@@ -120,10 +121,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
         Replay(reader::wgsl::Parse(&file), mutator_state.mutation_sequence());
     assert(program.IsValid() && "Replayed program is invalid");
 
-    writer::wgsl::Generator generator(&program);
-    success = generator.Generate();
-    assert(success && "Can't generate a shader for the valid tint::Program");
-    program_text = generator.result();
+    writer::wgsl::Options options;
+    auto result = writer::wgsl::Generate(&program, options);
+    assert(result.success &&
+           "Can't generate a shader for the valid tint::Program");
+    program_text = result.wgsl;
   } else {
     program_text.assign(data, data + size);
   }
