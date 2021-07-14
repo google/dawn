@@ -37,8 +37,6 @@ struct Result {
   bool failed = false;
   /// Output of DXC.
   std::string output;
-  /// The generated source that was compiled
-  std::string source;
 };
 
 /// Hlsl attempts to compile the shader with DXC, verifying that the shader

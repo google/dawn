@@ -32,10 +32,8 @@ Result Msl(const std::string& xcrun_path, const std::string& source) {
     return result;
   }
 
-  result.source = source;
-
   utils::TmpFile file(".metal");
-  file << result.source;
+  file << source;
 
 #ifdef _WIN32
   // On Windows, we should actually be running metal.exe from the Metal

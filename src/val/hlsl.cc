@@ -41,8 +41,6 @@ Result HlslUsingDXC(const std::string& dxc_path,
     return result;
   }
 
-  result.source = source;
-
   utils::TmpFile file;
   file << source;
 
@@ -112,8 +110,6 @@ Result HlslUsingFXC(const std::string& source,
     result.failed = true;
     return result;
   }
-
-  result.source = source;
 
   for (auto ep : entry_points) {
     const char* profile = "";
