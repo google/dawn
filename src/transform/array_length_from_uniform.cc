@@ -67,11 +67,16 @@ void ArrayLengthFromUniform::Run(CloneContext& ctx,
   ast::Variable* buffer_size_ubo = nullptr;
   auto get_ubo = [&]() {
     if (!buffer_size_ubo) {
+      // Emit an array<vec4<u32>, N>, where N is 1/4 number of elements.
+      // We do this because UBOs require an element stride that is 16-byte
+      // aligned.
       auto* buffer_size_struct = ctx.dst->Structure(
           ctx.dst->Sym(),
           {ctx.dst->Member(
               kBufferSizeMemberName,
-              ctx.dst->ty.array(ctx.dst->ty.u32(), max_buffer_size_index + 1))},
+              ctx.dst->ty.array(ctx.dst->ty.vec4(ctx.dst->ty.u32()),
+                                (max_buffer_size_index / 4) + 1))},
+
           ast::DecorationList{ctx.dst->create<ast::StructBlockDecoration>()});
       buffer_size_ubo = ctx.dst->Global(
           ctx.dst->Sym(), ctx.dst->ty.Of(buffer_size_struct),
@@ -99,18 +104,20 @@ void ArrayLengthFromUniform::Run(CloneContext& ctx,
 
     // Get the storage buffer that contains the runtime array.
     // We assume that the argument to `arrayLength` has the form
-    // `&resource.array`, which requires that `InlinePointerLets` and `Simplify`
-    // have been run before this transform.
+    // `&resource.array`, which requires that `InlinePointerLets` and
+    // `Simplify` have been run before this transform.
     auto* param = call_expr->params()[0]->As<ast::UnaryOpExpression>();
     if (!param || param->op() != ast::UnaryOp::kAddressOf) {
       TINT_ICE(Transform, ctx.dst->Diagnostics())
-          << "expected form of arrayLength argument to be &resource.array";
+          << "expected form of arrayLength argument to be "
+             "&resource.array";
       break;
     }
     auto* accessor = param->expr()->As<ast::MemberAccessorExpression>();
     if (!accessor) {
       TINT_ICE(Transform, ctx.dst->Diagnostics())
-          << "expected form of arrayLength argument to be &resource.array";
+          << "expected form of arrayLength argument to be "
+             "&resource.array";
       break;
     }
     auto* storage_buffer_expr = accessor->structure();
@@ -118,7 +125,8 @@ void ArrayLengthFromUniform::Run(CloneContext& ctx,
         sem.Get(storage_buffer_expr)->As<sem::VariableUser>();
     if (!storage_buffer_sem) {
       TINT_ICE(Transform, ctx.dst->Diagnostics())
-          << "expected form of arrayLength argument to be &resource.array";
+          << "expected form of arrayLength argument to be "
+             "&resource.array";
       break;
     }
 
@@ -135,9 +143,13 @@ void ArrayLengthFromUniform::Run(CloneContext& ctx,
     }
 
     // Load the total storage buffer size from the UBO.
-    auto* total_storage_buffer_size = ctx.dst->IndexAccessor(
+    uint32_t array_index = idx_itr->second / 4;
+    auto* vec_expr = ctx.dst->IndexAccessor(
         ctx.dst->MemberAccessor(get_ubo()->symbol(), kBufferSizeMemberName),
-        idx_itr->second);
+        array_index);
+    uint32_t vec_index = idx_itr->second % 4;
+    auto* total_storage_buffer_size =
+        ctx.dst->IndexAccessor(vec_expr, vec_index);
 
     // Calculate actual array length
     //                total_storage_buffer_size - array_offset

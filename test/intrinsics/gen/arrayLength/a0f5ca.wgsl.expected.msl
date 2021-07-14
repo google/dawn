@@ -2,7 +2,7 @@
 
 using namespace metal;
 struct tint_symbol_2 {
-  /* 0x0000 */ uint buffer_size[2];
+  /* 0x0000 */ uint4 buffer_size[1];
 };
 struct SB_RO {
   /* 0x0000 */ float arg_0[1];
@@ -12,7 +12,7 @@ struct tint_symbol {
 };
 
 void arrayLength_a0f5ca(constant tint_symbol_2& tint_symbol_3) {
-  uint res = ((tint_symbol_3.buffer_size[1u] - 0u) / 4u);
+  uint res = ((tint_symbol_3.buffer_size[0u][1u] - 0u) / 4u);
 }
 
 vertex tint_symbol vertex_main(constant tint_symbol_2& tint_symbol_3 [[buffer(30)]]) {
