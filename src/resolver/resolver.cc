@@ -51,7 +51,10 @@
 #include "src/sem/atomic_type.h"
 #include "src/sem/call.h"
 #include "src/sem/depth_texture_type.h"
+#include "src/sem/for_loop_statement.h"
 #include "src/sem/function.h"
+#include "src/sem/if_statement.h"
+#include "src/sem/loop_statement.h"
 #include "src/sem/member_accessor_expression.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/pointer_type.h"
@@ -61,6 +64,7 @@
 #include "src/sem/statement.h"
 #include "src/sem/storage_texture_type.h"
 #include "src/sem/struct.h"
+#include "src/sem/switch_statement.h"
 #include "src/sem/variable.h"
 #include "src/utils/defer.h"
 #include "src/utils/get_or_create.h"
@@ -1568,16 +1572,14 @@ bool Resolver::Function(ast::Function* func) {
 
   if (func->body()) {
     Mark(func->body());
-    if (current_statement_) {
+    if (current_compound_statement_) {
       TINT_ICE(Resolver, diagnostics_)
-          << "Resolver::Function() called with a current statement";
+          << "Resolver::Function() called with a current compound statement";
       return false;
     }
     auto* sem_block = builder_->create<sem::FunctionBlockStatement>(func);
     builder_->Sem().Add(func->body(), sem_block);
-    TINT_SCOPED_ASSIGNMENT(current_statement_, sem_block);
-    if (!BlockScope(func->body(),
-                    [&] { return Statements(func->body()->list()); })) {
+    if (!Scope(sem_block, [&] { return Statements(func->body()->list()); })) {
       return false;
     }
   }
@@ -1725,17 +1727,11 @@ bool Resolver::ValidateStatements(const ast::StatementList& stmts) {
 }
 
 bool Resolver::Statement(ast::Statement* stmt) {
-  sem::Statement* sem_statement;
-  if (stmt->As<ast::BlockStatement>()) {
-    sem_statement = builder_->create<sem::BlockStatement>(
-        stmt->As<ast::BlockStatement>(), current_statement_);
-  } else {
-    sem_statement = builder_->create<sem::Statement>(stmt, current_statement_);
+  if (stmt->Is<ast::CaseStatement>()) {
+    AddError("case statement can only be used inside a switch statement",
+             stmt->source());
+    return false;
   }
-  builder_->Sem().Add(stmt, sem_statement);
-
-  TINT_SCOPED_ASSIGNMENT(current_statement_, sem_statement);
-
   if (stmt->Is<ast::ElseStatement>()) {
     TINT_ICE(Resolver, diagnostics_)
         << "Resolver::Statement() encountered an Else statement. Else "
@@ -1744,15 +1740,35 @@ bool Resolver::Statement(ast::Statement* stmt) {
     return false;
   }
 
+  // Compound statements. These create their own sem::CompoundStatement
+  // bindings.
+  if (auto* b = stmt->As<ast::BlockStatement>()) {
+    return BlockStatement(b);
+  }
+  if (auto* l = stmt->As<ast::ForLoopStatement>()) {
+    return ForLoopStatement(l);
+  }
+  if (auto* l = stmt->As<ast::LoopStatement>()) {
+    return LoopStatement(l);
+  }
+  if (auto* i = stmt->As<ast::IfStatement>()) {
+    return IfStatement(i);
+  }
+  if (auto* s = stmt->As<ast::SwitchStatement>()) {
+    return SwitchStatement(s);
+  }
+
+  // Non-Compound statements
+  sem::Statement* sem_statement =
+      builder_->create<sem::Statement>(stmt, current_compound_statement_);
+  builder_->Sem().Add(stmt, sem_statement);
+  TINT_SCOPED_ASSIGNMENT(current_statement_, sem_statement);
   if (auto* a = stmt->As<ast::AssignmentStatement>()) {
     return Assignment(a);
   }
-  if (auto* b = stmt->As<ast::BlockStatement>()) {
-    return BlockScope(b, [&] { return Statements(b->list()); });
-  }
   if (stmt->Is<ast::BreakStatement>()) {
-    if (!current_block_->FindFirstParent<sem::LoopBlockStatement>() &&
-        !current_block_->FindFirstParent<sem::SwitchCaseBlockStatement>()) {
+    if (!sem_statement->FindFirstParent<sem::LoopBlockStatement>() &&
+        !sem_statement->FindFirstParent<sem::SwitchCaseBlockStatement>()) {
       AddError("break statement must be in a loop or switch case",
                stmt->source());
       return false;
@@ -1768,9 +1784,6 @@ bool Resolver::Statement(ast::Statement* stmt) {
       return false;
     }
     return true;
-  }
-  if (auto* c = stmt->As<ast::CaseStatement>()) {
-    return CaseStatement(c);
   }
   if (stmt->Is<ast::ContinueStatement>()) {
     // Set if we've hit the first continue statement in our parent loop
@@ -1793,20 +1806,8 @@ bool Resolver::Statement(ast::Statement* stmt) {
   if (stmt->Is<ast::FallthroughStatement>()) {
     return true;
   }
-  if (auto* i = stmt->As<ast::IfStatement>()) {
-    return IfStatement(i);
-  }
-  if (auto* l = stmt->As<ast::LoopStatement>()) {
-    return LoopStatement(l);
-  }
-  if (auto* l = stmt->As<ast::ForLoopStatement>()) {
-    return ForLoopStatement(l);
-  }
   if (auto* r = stmt->As<ast::ReturnStatement>()) {
     return Return(r);
-  }
-  if (auto* s = stmt->As<ast::SwitchStatement>()) {
-    return Switch(s);
   }
   if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
     return VariableDeclStatement(v);
@@ -1819,51 +1820,59 @@ bool Resolver::Statement(ast::Statement* stmt) {
 }
 
 bool Resolver::CaseStatement(ast::CaseStatement* stmt) {
+  auto* sem = builder_->create<sem::SwitchCaseBlockStatement>(
+      stmt->body(), current_compound_statement_);
+  builder_->Sem().Add(stmt, sem);
+  builder_->Sem().Add(stmt->body(), sem);
   Mark(stmt->body());
   for (auto* sel : stmt->selectors()) {
     Mark(sel);
   }
-  auto* sem_block = builder_->create<sem::SwitchCaseBlockStatement>(
-      stmt->body(), current_statement_);
-  builder_->Sem().Add(stmt->body(), sem_block);
-  TINT_SCOPED_ASSIGNMENT(current_statement_, sem_block);
-  return BlockScope(stmt->body(),
-                    [&] { return Statements(stmt->body()->list()); });
+  return Scope(sem, [&] { return Statements(stmt->body()->list()); });
 }
 
 bool Resolver::IfStatement(ast::IfStatement* stmt) {
-  Mark(stmt->condition());
-  if (!Expression(stmt->condition())) {
-    return false;
-  }
-
-  auto* cond_type = TypeOf(stmt->condition())->UnwrapRef();
-  if (!cond_type->Is<sem::Bool>()) {
-    AddError("if statement condition must be bool, got " +
-                 cond_type->FriendlyName(builder_->Symbols()),
-             stmt->condition()->source());
-    return false;
-  }
-
-  Mark(stmt->body());
-  {
-    auto* sem_block =
-        builder_->create<sem::BlockStatement>(stmt->body(), current_statement_);
-    builder_->Sem().Add(stmt->body(), sem_block);
-    TINT_SCOPED_ASSIGNMENT(current_statement_, sem_block);
-    if (!BlockScope(stmt->body(),
-                    [&] { return Statements(stmt->body()->list()); })) {
+  auto* sem =
+      builder_->create<sem::IfStatement>(stmt, current_compound_statement_);
+  builder_->Sem().Add(stmt, sem);
+  return Scope(sem, [&] {
+    Mark(stmt->condition());
+    if (!Expression(stmt->condition())) {
       return false;
     }
-  }
 
-  for (auto* else_stmt : stmt->else_statements()) {
-    Mark(else_stmt);
-    auto* sem_else_stmt =
-        builder_->create<sem::Statement>(else_stmt, current_statement_);
-    builder_->Sem().Add(else_stmt, sem_else_stmt);
-    TINT_SCOPED_ASSIGNMENT(current_statement_, sem_else_stmt);
-    if (auto* cond = else_stmt->condition()) {
+    auto* cond_type = TypeOf(stmt->condition())->UnwrapRef();
+    if (!cond_type->Is<sem::Bool>()) {
+      AddError("if statement condition must be bool, got " +
+                   cond_type->FriendlyName(builder_->Symbols()),
+               stmt->condition()->source());
+      return false;
+    }
+
+    Mark(stmt->body());
+    auto* body = builder_->create<sem::BlockStatement>(
+        stmt->body(), current_compound_statement_);
+    builder_->Sem().Add(stmt->body(), body);
+    if (!Scope(body, [&] { return Statements(stmt->body()->list()); })) {
+      return false;
+    }
+
+    for (auto* else_stmt : stmt->else_statements()) {
+      Mark(else_stmt);
+      if (!ElseStatement(else_stmt)) {
+        return false;
+      }
+    }
+    return true;
+  });
+}
+
+bool Resolver::ElseStatement(ast::ElseStatement* stmt) {
+  auto* sem =
+      builder_->create<sem::ElseStatement>(stmt, current_compound_statement_);
+  builder_->Sem().Add(stmt, sem);
+  return Scope(sem, [&] {
+    if (auto* cond = stmt->condition()) {
       Mark(cond);
       if (!Expression(cond)) {
         return false;
@@ -1877,95 +1886,93 @@ bool Resolver::IfStatement(ast::IfStatement* stmt) {
         return false;
       }
     }
-    Mark(else_stmt->body());
-    {
-      auto* sem_block = builder_->create<sem::BlockStatement>(
-          else_stmt->body(), current_statement_);
-      builder_->Sem().Add(else_stmt->body(), sem_block);
-      TINT_SCOPED_ASSIGNMENT(current_statement_, sem_block);
-      if (!BlockScope(else_stmt->body(),
-                      [&] { return Statements(else_stmt->body()->list()); })) {
-        return false;
-      }
-    }
-  }
-  return true;
+
+    Mark(stmt->body());
+    auto* body = builder_->create<sem::BlockStatement>(
+        stmt->body(), current_compound_statement_);
+    builder_->Sem().Add(stmt->body(), body);
+    return Scope(body, [&] { return Statements(stmt->body()->list()); });
+  });
+}
+
+bool Resolver::BlockStatement(ast::BlockStatement* stmt) {
+  auto* sem = builder_->create<sem::BlockStatement>(
+      stmt->As<ast::BlockStatement>(), current_compound_statement_);
+  builder_->Sem().Add(stmt, sem);
+  return Scope(sem, [&] { return Statements(stmt->list()); });
 }
 
 bool Resolver::LoopStatement(ast::LoopStatement* stmt) {
-  // We don't call DetermineBlockStatement on the body and continuing block as
-  // these would make their BlockInfo siblings as in the AST, but we want the
-  // body BlockInfo to parent the continuing BlockInfo for semantics and
-  // validation. Also, we need to set their types differently.
-  Mark(stmt->body());
+  auto* sem =
+      builder_->create<sem::LoopStatement>(stmt, current_compound_statement_);
+  builder_->Sem().Add(stmt, sem);
+  return Scope(sem, [&] {
+    Mark(stmt->body());
 
-  auto* sem_block_body = builder_->create<sem::LoopBlockStatement>(
-      stmt->body(), current_statement_);
-  builder_->Sem().Add(stmt->body(), sem_block_body);
-  TINT_SCOPED_ASSIGNMENT(current_statement_, sem_block_body);
-  return BlockScope(stmt->body(), [&] {
-    if (!Statements(stmt->body()->list())) {
-      return false;
-    }
-    if (stmt->continuing()) {  // has_continuing() also checks for empty()
-      Mark(stmt->continuing());
-    }
-    if (stmt->has_continuing()) {
-      auto* sem_block_continuing =
-          builder_->create<sem::LoopContinuingBlockStatement>(
-              stmt->continuing(), current_statement_);
-      builder_->Sem().Add(stmt->continuing(), sem_block_continuing);
-      TINT_SCOPED_ASSIGNMENT(current_statement_, sem_block_continuing);
-      if (!BlockScope(stmt->continuing(),
-                      [&] { return Statements(stmt->continuing()->list()); })) {
+    auto* body = builder_->create<sem::LoopBlockStatement>(
+        stmt->body(), current_compound_statement_);
+    builder_->Sem().Add(stmt->body(), body);
+    return Scope(body, [&] {
+      if (!Statements(stmt->body()->list())) {
         return false;
       }
-    }
-    return true;
+      if (stmt->continuing()) {  // has_continuing() also checks for empty()
+        Mark(stmt->continuing());
+      }
+      if (stmt->has_continuing()) {
+        auto* continuing = builder_->create<sem::LoopContinuingBlockStatement>(
+            stmt->continuing(), current_compound_statement_);
+        builder_->Sem().Add(stmt->continuing(), continuing);
+        if (!Scope(continuing,
+                   [&] { return Statements(stmt->continuing()->list()); })) {
+          return false;
+        }
+      }
+      return true;
+    });
   });
 }
 
 bool Resolver::ForLoopStatement(ast::ForLoopStatement* stmt) {
-  Mark(stmt->body());
-
-  auto* sem_block_body = builder_->create<sem::LoopBlockStatement>(
-      stmt->body(), current_statement_);
-  builder_->Sem().Add(stmt->body(), sem_block_body);
-  TINT_SCOPED_ASSIGNMENT(current_statement_, sem_block_body);
-  TINT_SCOPED_ASSIGNMENT(current_block_, sem_block_body);
-
-  variable_stack_.push_scope();
-  TINT_DEFER(variable_stack_.pop_scope());
-
-  if (auto* initializer = stmt->initializer()) {
-    Mark(initializer);
-    if (!Statement(initializer)) {
-      return false;
-    }
-  }
-
-  if (auto* condition = stmt->condition()) {
-    Mark(condition);
-    if (!Expression(condition)) {
-      return false;
+  auto* sem = builder_->create<sem::ForLoopStatement>(
+      stmt, current_compound_statement_);
+  builder_->Sem().Add(stmt, sem);
+  return Scope(sem, [&] {
+    if (auto* initializer = stmt->initializer()) {
+      Mark(initializer);
+      if (!Statement(initializer)) {
+        return false;
+      }
     }
 
-    if (!TypeOf(condition)->Is<sem::Bool>()) {
-      AddError("for-loop condition must be bool, got " + TypeNameOf(condition),
-               condition->source());
-      return false;
-    }
-  }
+    if (auto* condition = stmt->condition()) {
+      Mark(condition);
+      if (!Expression(condition)) {
+        return false;
+      }
 
-  if (auto* continuing = stmt->continuing()) {
-    Mark(continuing);
-    if (!Statement(continuing)) {
-      return false;
+      if (!TypeOf(condition)->Is<sem::Bool>()) {
+        AddError(
+            "for-loop condition must be bool, got " + TypeNameOf(condition),
+            condition->source());
+        return false;
+      }
     }
-  }
 
-  return BlockScope(stmt->body(),
-                    [&] { return Statements(stmt->body()->list()); });
+    if (auto* continuing = stmt->continuing()) {
+      Mark(continuing);
+      if (!Statement(continuing)) {
+        return false;
+      }
+    }
+
+    Mark(stmt->body());
+
+    auto* body = builder_->create<sem::LoopBlockStatement>(
+        stmt->body(), current_compound_statement_);
+    builder_->Sem().Add(stmt->body(), body);
+    return Scope(body, [&] { return Statements(stmt->body()->statements()); });
+  });
 }
 
 bool Resolver::Expressions(const ast::ExpressionList& list) {
@@ -3036,7 +3043,9 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
   }
 
   variable_stack_.set(var->symbol(), info);
-  current_block_->AddDecl(var);
+  if (current_block_) {  // Not all statements are inside a block
+    current_block_->AddDecl(var);
+  }
 
   if (!ValidateVariable(info)) {
     return false;
@@ -3858,26 +3867,26 @@ bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
   return true;
 }
 
-bool Resolver::Switch(ast::SwitchStatement* s) {
-  Mark(s->condition());
-  if (!Expression(s->condition())) {
-    return false;
-  }
-  for (auto* case_stmt : s->body()) {
-    Mark(case_stmt);
-
-    sem::Statement* sem_statement =
-        builder_->create<sem::Statement>(case_stmt, current_statement_);
-    builder_->Sem().Add(case_stmt, sem_statement);
-    TINT_SCOPED_ASSIGNMENT(current_statement_, sem_statement);
-    if (!CaseStatement(case_stmt)) {
+bool Resolver::SwitchStatement(ast::SwitchStatement* stmt) {
+  auto* sem =
+      builder_->create<sem::SwitchStatement>(stmt, current_compound_statement_);
+  builder_->Sem().Add(stmt, sem);
+  return Scope(sem, [&] {
+    Mark(stmt->condition());
+    if (!Expression(stmt->condition())) {
       return false;
     }
-  }
-  if (!ValidateSwitch(s)) {
-    return false;
-  }
-  return true;
+    for (auto* case_stmt : stmt->body()) {
+      Mark(case_stmt);
+      if (!CaseStatement(case_stmt)) {
+        return false;
+      }
+    }
+    if (!ValidateSwitch(stmt)) {
+      return false;
+    }
+    return true;
+  });
 }
 
 bool Resolver::Assignment(ast::AssignmentStatement* a) {
@@ -4032,18 +4041,22 @@ bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
 }
 
 template <typename F>
-bool Resolver::BlockScope(const ast::BlockStatement* block, F&& callback) {
-  auto* sem_block = builder_->Sem().Get<sem::BlockStatement>(block);
-  if (!sem_block) {
-    TINT_ICE(Resolver, diagnostics_)
-        << "Resolver::BlockScope() called on a block for "
-           "which semantic information is not available";
-    return false;
-  }
-  TINT_SCOPED_ASSIGNMENT(current_block_,
-                         const_cast<sem::BlockStatement*>(sem_block));
+bool Resolver::Scope(sem::CompoundStatement* stmt, F&& callback) {
+  auto* prev_current_statement = current_statement_;
+  auto* prev_current_compound_statement = current_compound_statement_;
+  auto* prev_current_block = current_block_;
+  current_statement_ = stmt;
+  current_compound_statement_ = stmt;
+  current_block_ = stmt->As<sem::BlockStatement>();
   variable_stack_.push_scope();
-  TINT_DEFER(variable_stack_.pop_scope());
+
+  TINT_DEFER({
+    TINT_DEFER(variable_stack_.pop_scope());
+    current_block_ = prev_current_block;
+    current_compound_statement_ = prev_current_compound_statement;
+    current_statement_ = prev_current_statement;
+  });
+
   return callback();
 }
 

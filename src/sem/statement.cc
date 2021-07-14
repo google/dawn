@@ -21,32 +21,31 @@
 #include "src/sem/statement.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Statement);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::CompoundStatement);
 
 namespace tint {
 namespace sem {
 
-Statement::Statement(const ast::Statement* declaration, const Statement* parent)
+Statement::Statement(const ast::Statement* declaration,
+                     const CompoundStatement* parent)
     : declaration_(declaration), parent_(parent) {}
 
 const BlockStatement* Statement::Block() const {
-  auto* stmt = parent_;
-  while (stmt != nullptr) {
-    if (auto* block_stmt = stmt->As<BlockStatement>()) {
-      return block_stmt;
-    }
-    stmt = stmt->parent_;
+  return FindFirstParent<BlockStatement>();
+}
+
+const ast::Function* Statement::Function() const {
+  if (auto* fbs = FindFirstParent<FunctionBlockStatement>()) {
+    return fbs->Function();
   }
   return nullptr;
 }
 
-const ast::Function* Statement::Function() const {
-  if (auto* block = Block()) {
-    if (auto* fbs = block->FindFirstParent<FunctionBlockStatement>()) {
-      return fbs->Function();
-    }
-  }
-  return nullptr;
-}
+CompoundStatement::CompoundStatement(const ast::Statement* declaration,
+                                     const CompoundStatement* parent)
+    : Base(declaration, parent) {}
+
+CompoundStatement::~CompoundStatement() = default;
 
 }  // namespace sem
 }  // namespace tint

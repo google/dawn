@@ -336,8 +336,14 @@ set(TINT_LIB_SRCS
   sem/external_texture_type.h
   sem/f32_type.cc
   sem/f32_type.h
+  sem/for_loop_statement.cc
+  sem/for_loop_statement.h
   sem/i32_type.cc
   sem/i32_type.h
+  sem/if_statement.cc
+  sem/if_statement.h
+  sem/loop_statement.cc
+  sem/loop_statement.h
   sem/matrix_type.cc
   sem/matrix_type.h
   sem/multisampled_texture_type.cc
@@ -352,6 +358,8 @@ set(TINT_LIB_SRCS
   sem/sampler_type.h
   sem/storage_texture_type.cc
   sem/storage_texture_type.h
+  sem/switch_statement.cc
+  sem/switch_statement.h
   sem/texture_type.cc
   sem/texture_type.h
   sem/type.cc
@@ -622,10 +630,10 @@ if(${TINT_BUILD_TESTS})
     resolver/assignment_validation_test.cc
     resolver/atomics_test.cc
     resolver/atomics_validation_test.cc
-    resolver/block_test.cc
     resolver/builtins_validation_test.cc
     resolver/call_test.cc
     resolver/call_validation_test.cc
+    resolver/compound_statement_test.cc
     resolver/control_block_validation_test.cc
     resolver/decoration_validation_test.cc
     resolver/entry_point_validation_test.cc

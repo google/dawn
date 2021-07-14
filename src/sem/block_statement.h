@@ -34,13 +34,13 @@ namespace sem {
 
 /// Holds semantic information about a block, such as parent block and variables
 /// declared in the block.
-class BlockStatement : public Castable<BlockStatement, Statement> {
+class BlockStatement : public Castable<BlockStatement, CompoundStatement> {
  public:
   /// Constructor
   /// @param declaration the AST node for this block statement
   /// @param parent the owning statement
   BlockStatement(const ast::BlockStatement* declaration,
-                 const Statement* parent);
+                 const CompoundStatement* parent);
 
   /// Destructor
   ~BlockStatement() override;
@@ -48,33 +48,6 @@ class BlockStatement : public Castable<BlockStatement, Statement> {
   /// @returns the AST block statement associated with this semantic block
   /// statement
   const ast::BlockStatement* Declaration() const;
-
-  /// @returns the closest enclosing block that satisfies the given predicate,
-  /// which may be the block itself, or nullptr if no match is found
-  /// @param pred a predicate that the resulting block must satisfy
-  template <typename Pred>
-  const BlockStatement* FindFirstParent(Pred&& pred) const {
-    const BlockStatement* curr = this;
-    while (curr && !pred(curr)) {
-      curr = curr->Block();
-    }
-    return curr;
-  }
-
-  /// @returns the statement itself if it matches the template type `T`,
-  /// otherwise the nearest enclosing block that matches `T`, or nullptr if
-  /// there is none.
-  template <typename T>
-  const T* FindFirstParent() const {
-    const BlockStatement* curr = this;
-    while (curr) {
-      if (auto* block = curr->As<T>()) {
-        return block;
-      }
-      curr = curr->Block();
-    }
-    return nullptr;
-  }
 
   /// @returns the declarations associated with this block
   const std::vector<const ast::Variable*>& Decls() const { return decls_; }
@@ -105,14 +78,14 @@ class FunctionBlockStatement
   ast::Function const* const function_;
 };
 
-/// Holds semantic information about a loop block or a for-loop block
+/// Holds semantic information about a loop body block or for-loop body block
 class LoopBlockStatement : public Castable<LoopBlockStatement, BlockStatement> {
  public:
   /// Constructor
   /// @param declaration the AST node for this block statement
   /// @param parent the owning statement
   LoopBlockStatement(const ast::BlockStatement* declaration,
-                     const Statement* parent);
+                     const CompoundStatement* parent);
 
   /// Destructor
   ~LoopBlockStatement() override;
@@ -132,34 +105,6 @@ class LoopBlockStatement : public Castable<LoopBlockStatement, BlockStatement> {
   // declared after the first continue statement in a loop block, if any.
   constexpr static size_t kNoContinue = size_t(~0);
   size_t first_continue_ = kNoContinue;
-};
-
-/// Holds semantic information about a loop continuing block
-class LoopContinuingBlockStatement
-    : public Castable<LoopContinuingBlockStatement, BlockStatement> {
- public:
-  /// Constructor
-  /// @param declaration the AST node for this block statement
-  /// @param parent the owning statement
-  LoopContinuingBlockStatement(const ast::BlockStatement* declaration,
-                               const Statement* parent);
-
-  /// Destructor
-  ~LoopContinuingBlockStatement() override;
-};
-
-/// Holds semantic information about a switch case block
-class SwitchCaseBlockStatement
-    : public Castable<SwitchCaseBlockStatement, BlockStatement> {
- public:
-  /// Constructor
-  /// @param declaration the AST node for this block statement
-  /// @param parent the owning statement
-  SwitchCaseBlockStatement(const ast::BlockStatement* declaration,
-                           const Statement* parent);
-
-  /// Destructor
-  ~SwitchCaseBlockStatement() override;
 };
 
 }  // namespace sem

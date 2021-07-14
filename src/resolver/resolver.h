@@ -242,9 +242,11 @@ class Resolver {
   bool Assignment(ast::AssignmentStatement* a);
   bool Binary(ast::BinaryExpression*);
   bool Bitcast(ast::BitcastExpression*);
+  bool BlockStatement(ast::BlockStatement*);
   bool Call(ast::CallExpression*);
   bool CaseStatement(ast::CaseStatement*);
   bool Constructor(ast::ConstructorExpression*);
+  bool ElseStatement(ast::ElseStatement*);
   bool Expression(ast::Expression*);
   bool Expressions(const ast::ExpressionList&);
   bool ForLoopStatement(ast::ForLoopStatement*);
@@ -260,7 +262,7 @@ class Resolver {
   bool Return(ast::ReturnStatement* ret);
   bool Statement(ast::Statement*);
   bool Statements(const ast::StatementList&);
-  bool Switch(ast::SwitchStatement* s);
+  bool SwitchStatement(ast::SwitchStatement* s);
   bool UnaryOp(ast::UnaryOpExpression*);
   bool VariableDeclStatement(const ast::VariableDeclStatement*);
 
@@ -394,11 +396,14 @@ class Resolver {
                    const sem::Type* type,
                    std::string type_name = "");
 
-  /// Constructs a new semantic BlockStatement with the given type and with
-  /// #current_block_ as its parent, assigns this to #current_block_, and then
-  /// calls `callback`. The original #current_block_ is restored on exit.
+  /// Assigns `stmt` to #current_statement_, #current_compound_statement_, and
+  /// possibly #current_block_, pushes the variable scope, then calls
+  /// `callback`. Before returning #current_statement_,
+  /// #current_compound_statement_, and #current_block_ are restored to their
+  /// original values, and the variable scope is popped.
+  /// @returns the value returned by callback
   template <typename F>
-  bool BlockScope(const ast::BlockStatement* block, F&& callback);
+  bool Scope(sem::CompoundStatement* stmt, F&& callback);
 
   /// Returns a human-readable string representation of the vector type name
   /// with the given parameters.
@@ -449,7 +454,6 @@ class Resolver {
   ProgramBuilder* const builder_;
   diag::List& diagnostics_;
   std::unique_ptr<IntrinsicTable> const intrinsic_table_;
-  sem::BlockStatement* current_block_ = nullptr;
   ScopeStack<VariableInfo*> variable_stack_;
   std::unordered_map<Symbol, FunctionInfo*> symbol_to_function_;
   std::vector<FunctionInfo*> entry_points_;
@@ -466,6 +470,8 @@ class Resolver {
 
   FunctionInfo* current_function_ = nullptr;
   sem::Statement* current_statement_ = nullptr;
+  sem::CompoundStatement* current_compound_statement_ = nullptr;
+  sem::BlockStatement* current_block_ = nullptr;
   BlockAllocator<VariableInfo> variable_infos_;
   BlockAllocator<FunctionInfo> function_infos_;
 };
