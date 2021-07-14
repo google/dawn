@@ -111,12 +111,13 @@ class InternalCompilerError {
 /// may silently fail in builds where SetInternalCompilerErrorReporter() is not
 /// called. Only use in places where there's no sensible place to put proper
 /// error handling.
-#define TINT_ASSERT(system, condition)                                      \
-  do {                                                                      \
-    if (!(condition)) {                                                     \
-      tint::diag::List diagnostics;                                         \
-      TINT_ICE(system, diagnostics) << "TINT_ASSERT(" << #condition << ")"; \
-    }                                                                       \
+#define TINT_ASSERT(system, condition)                   \
+  do {                                                   \
+    if (!(condition)) {                                  \
+      tint::diag::List diagnostics;                      \
+      TINT_ICE(system, diagnostics)                      \
+          << "TINT_ASSERT(" #system ", " #condition ")"; \
+    }                                                    \
   } while (false)
 
 #endif  // SRC_DEBUG_H_
