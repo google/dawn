@@ -518,6 +518,17 @@ TEST_P(BufferMappingTests, MapWrite_InCallbackRange) {
     EXPECT_BUFFER_U32_EQ(myData, buffer, 0);
 }
 
+// Regression test for crbug.com/dawn/969 where this test
+// produced invalid barriers.
+TEST_P(BufferMappingTests, MapWrite_ZeroSizedTwice) {
+    wgpu::Buffer buffer = CreateMapWriteBuffer(0);
+
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, 0);
+    buffer.Unmap();
+
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, 0);
+}
+
 DAWN_INSTANTIATE_TEST(BufferMappingTests,
                       D3D12Backend(),
                       MetalBackend(),

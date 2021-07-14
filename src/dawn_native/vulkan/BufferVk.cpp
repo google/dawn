@@ -243,7 +243,10 @@ namespace dawn_native { namespace vulkan {
         barrier->dstQueueFamilyIndex = 0;
         barrier->buffer = mHandle;
         barrier->offset = 0;
-        barrier->size = GetSize();
+        // Size must be non-zero or VK_WHOLE_SIZE. Use WHOLE_SIZE
+        // instead of GetSize() because the buffer allocation may
+        // be padded.
+        barrier->size = VK_WHOLE_SIZE;
 
         mLastUsage = usage;
 

@@ -52,6 +52,7 @@ namespace dawn_native { namespace vulkan {
       private:
         ~Buffer() override;
         using BufferBase::BufferBase;
+
         MaybeError Initialize(bool mappedAtCreation);
         void InitializeToZero(CommandRecordingContext* recordingContext);
         void ClearBuffer(CommandRecordingContext* recordingContext, uint32_t clearValue);
