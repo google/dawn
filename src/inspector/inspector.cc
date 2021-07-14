@@ -172,46 +172,11 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
       auto* decl = var->Declaration();
 
       auto name = program_->Symbols().NameFor(decl->symbol());
-      if (ast::HasDecoration<ast::BuiltinDecoration>(decl->decorations())) {
-        continue;
-      }
 
-      // TODO(crbug.com/tint/697): Remove this.
-      {
-        StageVariable stage_variable;
-        stage_variable.name = name;
-
-        auto* type = var->Type()->UnwrapRef();
-        std::tie(stage_variable.component_type,
-                 stage_variable.composition_type) =
-            CalculateComponentAndComposition(type);
-
-        auto* location_decoration =
-            ast::GetDecoration<ast::LocationDecoration>(decl->decorations());
-        if (location_decoration) {
-          stage_variable.has_location_decoration = true;
-          stage_variable.location_decoration = location_decoration->value();
-        } else {
-          stage_variable.has_location_decoration = false;
-        }
-
-        std::tie(stage_variable.interpolation_type,
-                 stage_variable.interpolation_sampling) =
-            CalculateInterpolationData(type, decl->decorations());
-
-        if (var->StorageClass() == ast::StorageClass::kInput) {
-          entry_point.input_variables.push_back(stage_variable);
-        } else if (var->StorageClass() == ast::StorageClass::kOutput) {
-          entry_point.output_variables.push_back(stage_variable);
-        }
-      }
-
-      {
-        if (var->IsPipelineConstant()) {
-          OverridableConstant overridable_constant;
-          overridable_constant.name = name;
-          entry_point.overridable_constants.push_back(overridable_constant);
-        }
+      if (var->IsPipelineConstant()) {
+        OverridableConstant overridable_constant;
+        overridable_constant.name = name;
+        entry_point.overridable_constants.push_back(overridable_constant);
       }
     }
 

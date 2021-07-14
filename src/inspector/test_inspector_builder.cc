@@ -60,60 +60,6 @@ ast::Struct* InspectorBuilder::MakeInOutStruct(
   return Structure(name, members);
 }
 
-// TODO(crbug.com/tint/697): Remove this.
-void InspectorBuilder::AddInOutVariables(
-    std::vector<std::tuple<std::string, std::string>> inout_vars) {
-  uint32_t location = 0;
-  for (auto inout : inout_vars) {
-    std::string in, out;
-    std::tie(in, out) = inout;
-
-    Global(in, ty.u32(), ast::StorageClass::kInput, nullptr,
-           ast::DecorationList{
-               Location(location++),
-               ASTNodes().Create<ast::DisableValidationDecoration>(
-                   ID(), ast::DisabledValidation::kIgnoreStorageClass)});
-    Global(out, ty.u32(), ast::StorageClass::kOutput, nullptr,
-           ast::DecorationList{
-               Location(location++),
-               ASTNodes().Create<ast::DisableValidationDecoration>(
-                   ID(), ast::DisabledValidation::kIgnoreStorageClass)});
-  }
-}
-
-// TODO(crbug.com/tint/697): Remove this.
-void InspectorBuilder::MakeInOutVariableBodyFunction(
-    std::string name,
-    std::vector<std::tuple<std::string, std::string>> inout_vars,
-    ast::DecorationList decorations) {
-  ast::StatementList stmts;
-  for (auto inout : inout_vars) {
-    std::string in, out;
-    std::tie(in, out) = inout;
-    stmts.emplace_back(Assign(out, in));
-  }
-  stmts.emplace_back(Return());
-  Func(name, ast::VariableList(), ty.void_(), stmts, decorations);
-}
-
-// TODO(crbug.com/tint/697): Remove this.
-ast::Function* InspectorBuilder::MakeInOutVariableCallerBodyFunction(
-    std::string caller,
-    std::string callee,
-    std::vector<std::tuple<std::string, std::string>> inout_vars,
-    ast::DecorationList decorations) {
-  ast::StatementList stmts;
-  for (auto inout : inout_vars) {
-    std::string in, out;
-    std::tie(in, out) = inout;
-    stmts.emplace_back(Assign(out, in));
-  }
-  stmts.emplace_back(create<ast::CallStatement>(Call(callee)));
-  stmts.emplace_back(Return());
-
-  return Func(caller, ast::VariableList(), ty.void_(), stmts, decorations);
-}
-
 ast::Function* InspectorBuilder::MakeConstReferenceBodyFunction(
     std::string func,
     std::string var,
