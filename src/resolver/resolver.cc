@@ -1608,6 +1608,8 @@ bool Resolver::Function(ast::Function* func) {
   if (auto* workgroup =
           ast::GetDecoration<ast::WorkgroupDecoration>(func->decorations())) {
     auto values = workgroup->values();
+    auto is_i32 = false;
+    auto is_less_than_one = true;
     for (int i = 0; i < 3; i++) {
       // Each argument to this decoration can either be a literal, an
       // identifier for a module-scope constants, or nullptr if not specified.
@@ -1619,7 +1621,7 @@ bool Resolver::Function(ast::Function* func) {
 
       Mark(values[i]);
 
-      int32_t value = 0;
+      uint32_t value = 0;
       if (auto* ident = values[i]->As<ast::IdentifierExpression>()) {
         // We have an identifier of a module-scope constant.
         if (!Identifier(ident)) {
@@ -1628,10 +1630,10 @@ bool Resolver::Function(ast::Function* func) {
 
         VariableInfo* var;
         if (!variable_stack_.get(ident->symbol(), &var) ||
-            !(var->declaration->is_const() && var->type->Is<sem::I32>())) {
+            !(var->declaration->is_const() && var->type->is_integer_scalar())) {
           AddError(
-              "workgroup_size parameter must be a literal i32 or an i32 "
-              "module-scope constant",
+              "workgroup_size parameter must be either literal or module-scope "
+              "constant of type i32 or u32",
               values[i]->source());
           return false;
         }
@@ -1646,12 +1648,28 @@ bool Resolver::Function(ast::Function* func) {
         if (constructor) {
           // Resolve the constructor expression to use as the default value.
           auto val = ConstantValueOf(constructor);
-          if (!val.IsValid() || !val.Type()->Is<sem::I32>()) {
+          if (!val.IsValid() || !val.Type()->is_integer_scalar()) {
             TINT_ICE(Resolver, diagnostics_)
                 << "failed to resolve workgroup_size constant value";
             return false;
           }
-          value = val.Elements()[0].i32;
+
+          if (i == 0) {
+            is_i32 = val.Type()->Is<sem::I32>();
+          } else {
+            if (is_i32 != val.Type()->Is<sem::I32>()) {
+              AddError(
+                  "workgroup_size parameters must be of the same type, "
+                  "either i32 or u32",
+                  values[i]->source());
+              return false;
+            }
+          }
+          is_less_than_one =
+              is_i32 ? val.Elements()[0].i32 < 1 : val.Elements()[0].u32 < 1;
+
+          value = is_i32 ? static_cast<uint32_t>(val.Elements()[0].i32)
+                         : val.Elements()[0].u32;
         } else {
           // No constructor means this value must be overriden by the user.
           info->workgroup_size[i].value = 0;
@@ -1661,22 +1679,36 @@ bool Resolver::Function(ast::Function* func) {
                      values[i]->As<ast::ScalarConstructorExpression>()) {
         // We have a literal.
         Mark(scalar->literal());
-
-        auto* i32_literal = scalar->literal()->As<ast::IntLiteral>();
-        if (!i32_literal) {
+        auto* literal = scalar->literal()->As<ast::IntLiteral>();
+        if (!literal) {
           AddError(
-              "workgroup_size parameter must be a literal i32 or an i32 "
-              "module-scope constant",
+              "workgroup_size parameter must be either literal or module-scope "
+              "constant of type i32 or u32",
               values[i]->source());
           return false;
         }
 
-        value = i32_literal->value_as_i32();
+        if (i == 0) {
+          is_i32 = literal->Is<ast::SintLiteral>();
+        } else {
+          if (literal->Is<ast::SintLiteral>() != is_i32) {
+            AddError(
+                "workgroup_size parameters must be of the same type, "
+                "either i32 or u32",
+                values[i]->source());
+            return false;
+          }
+        }
+
+        is_less_than_one =
+            is_i32 ? literal->value_as_i32() < 1 : literal->value_as_u32() < 1;
+        value = is_i32 ? static_cast<uint32_t>(literal->value_as_i32())
+                       : literal->value_as_u32();
       }
 
       // Validate and set the default value for this dimension.
-      if (value < 1) {
-        AddError("workgroup_size parameter must be a positive i32 value",
+      if (is_less_than_one) {
+        AddError("workgroup_size parameter must be at least 1",
                  values[i]->source());
         return false;
       }

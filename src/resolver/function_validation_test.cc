@@ -357,6 +357,108 @@ TEST_F(ResolverFunctionValidationTest, FunctionParamsConst) {
             "declared here:");
 }
 
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_ConstU32) {
+  // let x = 4u;
+  // let x = 8u;
+  // [[stage(compute), workgroup_size(x, y, 16u]
+  // fn main() {}
+  GlobalConst("x", ty.u32(), Expr(4u));
+  GlobalConst("y", ty.u32(), Expr(8u));
+  Func("main", {}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute),
+        WorkgroupSize(Expr("x"), Expr("y"), Expr(16u))});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_U32) {
+  // [[stage(compute), workgroup_size(1u, 2u, 3u)]
+  // fn main() {}
+
+  Func("main", {}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute),
+        WorkgroupSize(Source{{12, 34}}, Expr(1u), Expr(2u), Expr(3u))});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_MismatchTypeU32) {
+  // [[stage(compute), workgroup_size(1u, 2u, 3)]
+  // fn main() {}
+
+  Func("main", {}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute),
+        WorkgroupSize(Expr(1u), Expr(2u), Expr(Source{{12, 34}}, 3))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: workgroup_size parameters must be of the same "
+            "type, either i32 or u32");
+}
+
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_MismatchTypeI32) {
+  // [[stage(compute), workgroup_size(1, 2u, 3)]
+  // fn main() {}
+
+  Func("main", {}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute),
+        WorkgroupSize(Expr(1), Expr(Source{{12, 34}}, 2u), Expr(3))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: workgroup_size parameters must be of the same "
+            "type, either i32 or u32");
+}
+
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_TypeMismatch) {
+  // let x = 64u;
+  // [[stage(compute), workgroup_size(1, x)]
+  // fn main() {}
+  GlobalConst("x", ty.u32(), Expr(64u));
+  Func("main", {}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute),
+        WorkgroupSize(Expr(1), Expr(Source{Source::Location{12, 34}}, "x"))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: workgroup_size parameters must be of the same "
+            "type, either i32 or u32");
+}
+
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_TypeMismatch2) {
+  // let x = 64u;
+  // let y = 32;
+  // [[stage(compute), workgroup_size(x, y)]
+  // fn main() {}
+  GlobalConst("x", ty.u32(), Expr(64u));
+  GlobalConst("y", ty.i32(), Expr(32));
+  Func("main", {}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute),
+        WorkgroupSize(Expr("x"), Expr(Source{Source::Location{12, 34}}, "y"))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: workgroup_size parameters must be of the same "
+            "type, either i32 or u32");
+}
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Mismatch_ConstU32) {
+  // let x = 4u;
+  // let x = 8u;
+  // [[stage(compute), workgroup_size(x, y, 16]
+  // fn main() {}
+  GlobalConst("x", ty.u32(), Expr(4u));
+  GlobalConst("y", ty.u32(), Expr(8u));
+  Func("main", {}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute),
+        WorkgroupSize(Expr("x"), Expr("y"),
+                      Expr(Source{Source::Location{12, 34}}, 16))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: workgroup_size parameters must be of the same "
+            "type, either i32 or u32");
+}
+
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_BadType) {
   // [[stage(compute), workgroup_size(64.0)]
   // fn main() {}
@@ -368,8 +470,8 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_BadType) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: workgroup_size parameter must be a literal i32 or an "
-            "i32 module-scope constant");
+            "12:34 error: workgroup_size parameter must be either literal or "
+            "module-scope constant of type i32 or u32");
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_Negative) {
@@ -382,9 +484,8 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_Negative) {
             Source{Source::Location{12, 34}}, Literal(-2)))});
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error: workgroup_size parameter must be a positive i32 value");
+  EXPECT_EQ(r()->error(),
+            "12:34 error: workgroup_size parameter must be at least 1");
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_Zero) {
@@ -397,9 +498,8 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_Zero) {
             Source{Source::Location{12, 34}}, Literal(0)))});
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error: workgroup_size parameter must be a positive i32 value");
+  EXPECT_EQ(r()->error(),
+            "12:34 error: workgroup_size parameter must be at least 1");
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_BadType) {
@@ -413,8 +513,8 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_BadType) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: workgroup_size parameter must be a literal i32 or an "
-            "i32 module-scope constant");
+            "12:34 error: workgroup_size parameter must be either literal or "
+            "module-scope constant of type i32 or u32");
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_Negative) {
@@ -427,9 +527,8 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_Negative) {
         WorkgroupSize(Expr(Source{Source::Location{12, 34}}, "x"))});
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error: workgroup_size parameter must be a positive i32 value");
+  EXPECT_EQ(r()->error(),
+            "12:34 error: workgroup_size parameter must be at least 1");
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_Zero) {
@@ -442,9 +541,8 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_Zero) {
         WorkgroupSize(Expr(Source{Source::Location{12, 34}}, "x"))});
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error: workgroup_size parameter must be a positive i32 value");
+  EXPECT_EQ(r()->error(),
+            "12:34 error: workgroup_size parameter must be at least 1");
 }
 
 TEST_F(ResolverFunctionValidationTest,
@@ -459,9 +557,8 @@ TEST_F(ResolverFunctionValidationTest,
         WorkgroupSize(Expr(Source{Source::Location{12, 34}}, "x"))});
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error: workgroup_size parameter must be a positive i32 value");
+  EXPECT_EQ(r()->error(),
+            "12:34 error: workgroup_size parameter must be at least 1");
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_NonConst) {
@@ -475,8 +572,8 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_NonConst) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: workgroup_size parameter must be a literal i32 or an "
-            "i32 module-scope constant");
+            "12:34 error: workgroup_size parameter must be either literal or "
+            "module-scope constant of type i32 or u32");
 }
 
 TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_NonPlain) {
