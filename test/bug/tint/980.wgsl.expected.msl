@@ -1,0 +1,19 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  /* 0x0000 */ packed_float3 v;
+  /* 0x000c */ uint i;
+};
+
+float3 Bad(uint index, float3 rd) {
+  float3 normal = float3(0.0f);
+  normal[index] = -(sign(rd[index]));
+  return normalize(normal);
+}
+
+kernel void tint_symbol(uint idx [[thread_index_in_threadgroup]], device S& io [[buffer(0)]]) {
+  io.v = Bad(io.i, io.v);
+  return;
+}
+

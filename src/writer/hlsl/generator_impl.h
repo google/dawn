@@ -349,21 +349,15 @@ class GeneratorImpl : public TextGenerator {
   /// @param var the variable to emit
   /// @returns true if the variable was emitted
   bool EmitProgramConstVariable(const ast::Variable* var);
-
-  /// Finds vector assignments via an accessor expression within loops, storing
-  /// the assignment/vector node pair in `vector_assignments_in_loops`, and
-  /// emits function definitions per vector type found. Required to work around
-  /// an FXC bug, see crbug.com/tint/534.
-  /// @returns true on success
-  bool FindAndEmitVectorAssignmentInLoopFunctions();
-  /// Emits call to vector assignment function for the input assignment
-  /// statement and vector type.
-  /// @param stmt assignment statement that corresponds to a vector assingment
+  /// Emits call to a helper vector assignment function for the input assignment
+  /// statement and vector type. This is used to work around FXC issues where
+  /// assignments to vectors with dynamic indices cause compilation failures.
+  /// @param stmt assignment statement that corresponds to a vector assignment
   /// via an accessor expression
   /// @param vec the vector type being assigned to
   /// @returns true on success
-  bool EmitVectorAssignmentInLoopCall(const ast::AssignmentStatement* stmt,
-                                      const sem::Vector* vec);
+  bool EmitDynamicVectorAssignment(const ast::AssignmentStatement* stmt,
+                                   const sem::Vector* vec);
 
   /// Handles generating a builtin method name
   /// @param intrinsic the semantic info for the intrinsic
@@ -413,10 +407,7 @@ class GeneratorImpl : public TextGenerator {
   std::unordered_map<DMAIntrinsic, std::string, DMAIntrinsic::Hasher>
       dma_intrinsics_;
   std::unordered_map<const sem::Struct*, std::string> structure_builders_;
-  std::unordered_map<const ast::AssignmentStatement*, const sem::Vector*>
-      vector_assignments_in_loops_;
-  std::unordered_map<const sem::Vector*, std::string>
-      vector_assignment_in_loop_funcs_;
+  std::unordered_map<const sem::Vector*, std::string> dynamic_vector_write_;
 };
 
 }  // namespace hlsl

@@ -126,10 +126,6 @@ bool GeneratorImpl::Generate() {
   const TypeInfo* last_kind = nullptr;
   size_t last_padding_line = 0;
 
-  if (!FindAndEmitVectorAssignmentInLoopFunctions()) {
-    return false;
-  }
-
   for (auto* decl : builder_.AST().GlobalDeclarations()) {
     if (decl->Is<ast::Alias>()) {
       continue;  // Ignore aliases.
@@ -178,96 +174,66 @@ bool GeneratorImpl::Generate() {
   return true;
 }
 
-bool GeneratorImpl::FindAndEmitVectorAssignmentInLoopFunctions() {
-  auto is_in_loop = [](const sem::Expression* expr) {
-    auto* block = expr->Stmt()->Block();
-    if (!block) {
-      return false;
-    }
-    return block->FindFirstParent<sem::LoopBlockStatement>() != nullptr;
-  };
-
-  auto emit_function_once = [&](const sem::Vector* vec) {
-    utils::GetOrCreate(vector_assignment_in_loop_funcs_, vec, [&] {
-      std::ostringstream ss;
-      EmitType(ss, vec, tint::ast::StorageClass::kInvalid,
-               ast::Access::kUndefined, "");
-      auto func_name = UniqueIdentifier("Set_" + ss.str());
-      {
-        auto out = line();
-        out << "void " << func_name << "(inout ";
-        EmitType(out, vec, ast::StorageClass::kInvalid, ast::Access::kUndefined,
-                 "");
-        out << " vec, int idx, ";
-        EmitType(out, vec->type(), ast::StorageClass::kInvalid,
-                 ast::Access::kUndefined, "");
-        out << " val) {";
-      }
-      {
-        ScopedIndent si(this);
-        line() << "switch(idx) {";
-        {
-          ScopedIndent si2(this);
-          for (size_t i = 0; i < vec->size(); ++i) {
-            auto sidx = std::to_string(i);
-            line() << "case " + sidx + ": vec[" + sidx + "] = val; break;";
-          }
-        }
-        line() << "}";
-      }
-      line() << "}";
-      return func_name;
-    });
-  };
-
-  // Find vector assignments via an accessor expression (index) within loops so
-  // that we can replace them later with calls to setter functions. Also emit
-  // the setter functions per vector type as we find them. We do this to avoid
-  // having FCX fail to unroll loops with "error X3511: forced to unroll loop,
-  // but unrolling failed." See crbug.com/tint/534.
-
-  for (auto* ast_node : program_->ASTNodes().Objects()) {
-    auto* ast_assign = ast_node->As<ast::AssignmentStatement>();
-    if (!ast_assign) {
-      continue;
-    }
-
-    auto* ast_access_expr =
-        ast_assign->lhs()->As<ast::ArrayAccessorExpression>();
-    if (!ast_access_expr) {
-      continue;
-    }
-
-    auto* array_expr = builder_.Sem().Get(ast_access_expr->array());
-    auto* vec = array_expr->Type()->UnwrapRef()->As<sem::Vector>();
-
-    // Skip non-vectors
-    if (!vec) {
-      continue;
-    }
-
-    // Skip if not part of a loop
-    if (!is_in_loop(array_expr)) {
-      continue;
-    }
-
-    // Save this assignment along with the vector type
-    vector_assignments_in_loops_.emplace(ast_assign, vec);
-
-    // Emit the function if it hasn't already
-    emit_function_once(vec);
-  }
-
-  return true;
-}
-
-bool GeneratorImpl::EmitVectorAssignmentInLoopCall(
+bool GeneratorImpl::EmitDynamicVectorAssignment(
     const ast::AssignmentStatement* stmt,
     const sem::Vector* vec) {
+  auto name =
+      utils::GetOrCreate(dynamic_vector_write_, vec, [&]() -> std::string {
+        std::string fn;
+        {
+          std::ostringstream ss;
+          if (!EmitType(ss, vec, tint::ast::StorageClass::kInvalid,
+                        ast::Access::kUndefined, "")) {
+            return "";
+          }
+          fn = UniqueIdentifier("set_" + ss.str());
+        }
+        {
+          auto out = line(&helpers_);
+          out << "void " << fn << "(inout ";
+          if (!EmitTypeAndName(out, vec, ast::StorageClass::kInvalid,
+                               ast::Access::kUndefined, "vec")) {
+            return "";
+          }
+          out << ", int idx, ";
+          if (!EmitTypeAndName(out, vec->type(), ast::StorageClass::kInvalid,
+                               ast::Access::kUndefined, "val")) {
+            return "";
+          }
+          out << ") {";
+        }
+        {
+          ScopedIndent si(&helpers_);
+          auto out = line(&helpers_);
+          switch (vec->size()) {
+            case 2:
+              out << "vec = (idx.xx == int2(0, 1)) ? val.xx : vec;";
+              break;
+            case 3:
+              out << "vec = (idx.xxx == int3(0, 1, 2)) ? val.xxx : vec;";
+              break;
+            case 4:
+              out << "vec = (idx.xxxx == int4(0, 1, 2, 3)) ? val.xxxx : vec;";
+              break;
+            default:
+              TINT_UNREACHABLE(Writer, builder_.Diagnostics())
+                  << "invalid vector size " << vec->size();
+              break;
+          }
+        }
+        line(&helpers_) << "}";
+        line(&helpers_);
+        return fn;
+      });
+
+  if (name.empty()) {
+    return false;
+  }
+
   auto* ast_access_expr = stmt->lhs()->As<ast::ArrayAccessorExpression>();
 
   auto out = line();
-  out << vector_assignment_in_loop_funcs_.at(vec) << "(";
+  out << name << "(";
   if (!EmitExpression(out, ast_access_expr->array())) {
     return false;
   }
@@ -322,9 +288,13 @@ bool GeneratorImpl::EmitBitcast(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitAssign(ast::AssignmentStatement* stmt) {
-  auto iter = vector_assignments_in_loops_.find(stmt);
-  if (iter != vector_assignments_in_loops_.end()) {
-    return EmitVectorAssignmentInLoopCall(iter->first, iter->second);
+  if (auto* idx = stmt->lhs()->As<ast::ArrayAccessorExpression>()) {
+    if (auto* vec = TypeOf(idx->array())->UnwrapRef()->As<sem::Vector>()) {
+      auto* rhs_sem = builder_.Sem().Get(idx->idx_expr());
+      if (!rhs_sem->ConstantValue().IsValid()) {
+        return EmitDynamicVectorAssignment(stmt, vec);
+      }
+    }
   }
 
   auto out = line();
