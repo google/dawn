@@ -395,7 +395,7 @@ namespace dawn_native { namespace d3d12 {
             entryPointName = "main";
         }
 
-        if (device->IsToggleEnabled(Toggle::DumpTranslatedShaders)) {
+        if (device->IsToggleEnabled(Toggle::DumpShaders)) {
             std::ostringstream dumpedMsg;
             dumpedMsg << "/* Dumped generated HLSL */" << std::endl << hlslSource;
             GetDevice()->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());

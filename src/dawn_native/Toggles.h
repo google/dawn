@@ -53,7 +53,8 @@ namespace dawn_native {
         UseTempBufferInSmallFormatTextureToTextureCopyFromGreaterToLessMipLevel,
         EmitHLSLDebugSymbols,
         DisallowSpirv,
-        DumpTranslatedShaders,
+        DumpShaders,
+        DEPRECATED_DumpTranslatedShaders,  // Use DumpShaders
         ForceWGSLStep,
 
         EnumCount,

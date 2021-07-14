@@ -310,7 +310,7 @@ namespace dawn_native { namespace metal {
 #endif
 )" + msl;
 
-        if (GetDevice()->IsToggleEnabled(Toggle::DumpTranslatedShaders)) {
+        if (GetDevice()->IsToggleEnabled(Toggle::DumpShaders)) {
             std::ostringstream dumpedMsg;
             dumpedMsg << "/* Dumped generated MSL */" << std::endl << msl;
             GetDevice()->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());

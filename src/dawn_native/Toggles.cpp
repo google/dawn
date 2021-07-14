@@ -189,11 +189,14 @@ namespace dawn_native {
               "This is useful to prevent a Chromium renderer process from successfully sending"
               "SPIR-V code to be compiled in the GPU process.",
               "https://crbug.com/1214923"}},
-            {Toggle::DumpTranslatedShaders,
-             {"dump_translated_shaders",
-              "Dump generated shaders for debug propose, dumped shaders will be log via "
+            {Toggle::DumpShaders,
+             {"dump_shaders",
+              "Dump shaders for debugging purposes. Dumped shaders will be log via "
               "EmitLog, thus printed in Chrome console or consumed by user-defined callback "
               "function.",
+              "https://crbug.com/dawn/792"}},
+            {Toggle::DEPRECATED_DumpTranslatedShaders,
+             {"dump_translated_shaders", "Deprecated. Use dump_shaders",
               "https://crbug.com/dawn/792"}},
             {Toggle::ForceWGSLStep,
              {"force_wgsl_step",
@@ -206,12 +209,19 @@ namespace dawn_native {
     }  // anonymous namespace
 
     void TogglesSet::Set(Toggle toggle, bool enabled) {
+        if (toggle == Toggle::DEPRECATED_DumpTranslatedShaders) {
+            Set(Toggle::DumpShaders, enabled);
+            return;
+        }
         ASSERT(toggle != Toggle::InvalidEnum);
         const size_t toggleIndex = static_cast<size_t>(toggle);
         toggleBitset.set(toggleIndex, enabled);
     }
 
     bool TogglesSet::Has(Toggle toggle) const {
+        if (toggle == Toggle::DEPRECATED_DumpTranslatedShaders) {
+            return Has(Toggle::DumpShaders);
+        }
         ASSERT(toggle != Toggle::InvalidEnum);
         const size_t toggleIndex = static_cast<size_t>(toggle);
         return toggleBitset.test(toggleIndex);
