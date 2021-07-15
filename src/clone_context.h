@@ -513,12 +513,15 @@ class CloneContext {
   /// Reports an internal compiler error if the cast failed.
   template <typename TO, typename FROM>
   TO* CheckedCast(FROM* obj) {
-    if (TO* cast = As<TO>(obj)) {
+    if (obj == nullptr) {
+      return nullptr;
+    }
+    if (TO* cast = obj->template As<TO>()) {
       return cast;
     }
     TINT_ICE(Clone, Diagnostics())
         << "Cloned object was not of the expected type\n"
-        << "got:      " << (obj ? obj->TypeInfo().name : "<null>") << "\n"
+        << "got:      " << obj->TypeInfo().name << "\n"
         << "expected: " << TypeInfo::Of<TO>().name;
     return nullptr;
   }

@@ -195,6 +195,13 @@ class Transform : public Castable<Transform> {
       const ast::DecorationList& in,
       std::function<bool(const ast::Decoration*)> should_remove);
 
+  /// Removes the statement `stmt` from the transformed program.
+  /// RemoveStatement handles edge cases, like statements in the initializer and
+  /// continuing of for-loops.
+  /// @param ctx the clone context
+  /// @param stmt the statement to remove when the program is cloned
+  static void RemoveStatement(CloneContext& ctx, ast::Statement* stmt);
+
   /// CreateASTTypeFor constructs new ast::Type nodes that reconstructs the
   /// semantic type `ty`.
   /// @param ctx the clone context

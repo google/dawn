@@ -177,7 +177,7 @@ void InlinePointerLets::Run(CloneContext& ctx, const DataMap&, DataMap&) {
       ptr_lets.emplace(let->variable(), std::move(ptr_let));
       // As the original `let` declaration will be fully inlined, there's no
       // need for the original declaration to exist. Remove it.
-      ctx.Remove(block->statements(), let);
+      RemoveStatement(ctx, let);
     }
   }
 

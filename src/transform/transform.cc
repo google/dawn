@@ -19,6 +19,8 @@
 
 #include "src/program_builder.h"
 #include "src/sem/atomic_type.h"
+#include "src/sem/block_statement.h"
+#include "src/sem/for_loop_statement.h"
 #include "src/sem/reference_type.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Transform);
@@ -82,6 +84,21 @@ ast::DecorationList Transform::RemoveDecorations(
     }
   }
   return new_decorations;
+}
+
+void Transform::RemoveStatement(CloneContext& ctx, ast::Statement* stmt) {
+  auto* sem = ctx.src->Sem().Get(stmt);
+  if (auto* block = tint::As<sem::BlockStatement>(sem->Parent())) {
+    ctx.Remove(block->Declaration()->statements(), stmt);
+    return;
+  }
+  if (tint::Is<sem::ForLoopStatement>(sem->Parent())) {
+    ctx.Replace(stmt, static_cast<ast::Expression*>(nullptr));
+    return;
+  }
+  TINT_ICE(Transform, ctx.dst->Diagnostics())
+      << "unable to remove statement from parent of type "
+      << sem->TypeInfo().name;
 }
 
 ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const sem::Type* ty) {
