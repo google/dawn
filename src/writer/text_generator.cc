@@ -108,11 +108,11 @@ void TextGenerator::TextBuffer::Insert(const TextBuffer& tb,
   }
 }
 
-std::string TextGenerator::TextBuffer::String() const {
+std::string TextGenerator::TextBuffer::String(uint32_t indent /* = 0 */) const {
   std::stringstream ss;
   for (auto& line : lines) {
     if (!line.content.empty()) {
-      for (uint32_t i = 0; i < line.indent; i++) {
+      for (uint32_t i = 0; i < indent + line.indent; i++) {
         ss << " ";
       }
       ss << line.content;

@@ -106,7 +106,8 @@ class TextGenerator {
     void Insert(const TextBuffer& tb, size_t before, uint32_t indent);
 
     /// @returns the buffer's content as a single string
-    std::string String() const;
+    /// @param indent additional indentation to apply to each line
+    std::string String(uint32_t indent = 0) const;
 
     /// The current indentation of the TextBuffer. Lines appended to the
     /// TextBuffer will use this indentation.

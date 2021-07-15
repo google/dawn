@@ -181,7 +181,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithSimpleInit) {
 
 TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtInit) {
   // var<workgroup> a : atomic<i32>;
-  // for(var b = atomicCompareExchangeWeak(&a, 1, 2); ; ) {
+  // for({ignore(1); ignore(2);}; ; ) {
   //   return;
   // }
   Global("a", ty.atomic<i32>(), ast::StorageClass::kWorkgroup);
