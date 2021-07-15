@@ -1589,6 +1589,10 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
               TINT_ICE(Writer, diagnostics_)
                   << "texture dimension does not support mips";
               return false;
+            case ast::TextureDimension::k1d:
+              num_dimensions = 2;
+              swizzle = ".y";
+              break;
             case ast::TextureDimension::k2d:
             case ast::TextureDimension::kCube:
               num_dimensions = 3;

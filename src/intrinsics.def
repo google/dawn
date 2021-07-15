@@ -388,6 +388,7 @@ fn unpack4x8unorm(u32) -> vec4<f32>
 [[stage("compute")]] fn workgroupBarrier()
 
 fn textureDimensions<T: fiu32>(texture: texture_1d<T>) -> i32
+fn textureDimensions<T: fiu32>(texture: texture_1d<T>, level: i32) -> i32
 fn textureDimensions<T: fiu32>(texture: texture_2d<T>) -> vec2<i32>
 fn textureDimensions<T: fiu32>(texture: texture_2d<T>, level: i32) -> vec2<i32>
 fn textureDimensions<T: fiu32>(texture: texture_2d_array<T>) -> vec2<i32>
@@ -417,6 +418,7 @@ fn textureNumLayers<T: fiu32>(texture: texture_cube_array<T>) -> i32
 fn textureNumLayers(texture: texture_depth_2d_array) -> i32
 fn textureNumLayers(texture: texture_depth_cube_array) -> i32
 fn textureNumLayers<F: texel_format, A: read_or_write>(texture: texture_storage_2d_array<F, A>) -> i32
+fn textureNumLevels<T: fiu32>(texture: texture_1d<T>) -> i32
 fn textureNumLevels<T: fiu32>(texture: texture_2d<T>) -> i32
 fn textureNumLevels<T: fiu32>(texture: texture_2d_array<T>) -> i32
 fn textureNumLevels<T: fiu32>(texture: texture_3d<T>) -> i32
