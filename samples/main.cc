@@ -773,6 +773,16 @@ int main(int argc, const char** argv) {
 
   tint::SetInternalCompilerErrorReporter(&TintInternalCompilerErrorReporter);
 
+#if TINT_BUILD_WGSL_WRITER
+  tint::Program::printer = [](const tint::Program* program) {
+    auto result = tint::writer::wgsl::Generate(program, {});
+    if (!result.error.empty()) {
+      return "error: " + result.error;
+    }
+    return result.wgsl;
+  };
+#endif  //  TINT_BUILD_WGSL_WRITER
+
   if (!ParseArgs(args, &options)) {
     std::cerr << "Failed to parse arguments." << std::endl;
     return 1;

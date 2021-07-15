@@ -186,6 +186,12 @@ class Program {
   /// @returns a string representation of the node
   std::string str(const ast::Node* node) const;
 
+  /// A function that can be used to print a program
+  using Printer = std::string (*)(const Program*);
+
+  /// The Program printer used for testing and debugging.
+  static Printer printer;
+
  private:
   Program(const Program&) = delete;
 

@@ -21,6 +21,15 @@
 #include "src/sem/expression.h"
 
 namespace tint {
+namespace {
+
+std::string DefaultPrinter(const Program*) {
+  return "<no program printer assigned>";
+}
+
+}  // namespace
+
+Program::Printer Program::printer = DefaultPrinter;
 
 Program::Program() = default;
 

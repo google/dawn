@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
+#include "src/program.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
-#include "src/writer/hlsl/test_helper.h"
-#include "src/writer/msl/test_helper.h"
+#include "src/writer/wgsl/generator.h"
 
 namespace {
 
@@ -47,6 +47,16 @@ struct Flags {
 // Entry point for tint unit tests
 int main(int argc, char** argv) {
   testing::InitGoogleMock(&argc, argv);
+
+#if TINT_BUILD_WGSL_WRITER
+  tint::Program::printer = [](const tint::Program* program) {
+    auto result = tint::writer::wgsl::Generate(program, {});
+    if (!result.error.empty()) {
+      return "error: " + result.error;
+    }
+    return result.wgsl;
+  };
+#endif  //  TINT_BUILD_WGSL_WRITER
 
   Flags flags;
   if (!flags.parse(argc, argv)) {
