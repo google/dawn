@@ -49,9 +49,7 @@ class Robustness : public Castable<Robustness, Transform> {
   void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) override;
 
  private:
-  ast::ArrayAccessorExpression* Transform(ast::ArrayAccessorExpression* expr,
-                                          CloneContext* ctx);
-  ast::CallExpression* Transform(ast::CallExpression* expr, CloneContext* ctx);
+  struct State;
 };
 
 using BoundArrayAccessors = Robustness;
