@@ -291,7 +291,7 @@ TEST_F(CloneContextNodeTest, CloneWithoutTransform) {
   EXPECT_EQ(cloned_node->name, cloned.Symbols().Get("root"));
 }
 
-TEST_F(CloneContextNodeTest, CloneWithReplace) {
+TEST_F(CloneContextNodeTest, CloneWithReplacePointer) {
   Allocator a;
 
   ProgramBuilder builder;
@@ -312,6 +312,39 @@ TEST_F(CloneContextNodeTest, CloneWithReplace) {
   auto* cloned_root = CloneContext(&cloned, &original)
                           .Replace(original_root->b, replacement)
                           .Clone(original_root);
+
+  EXPECT_NE(cloned_root->a, replacement);
+  EXPECT_EQ(cloned_root->b, replacement);
+  EXPECT_NE(cloned_root->c, replacement);
+
+  EXPECT_EQ(cloned_root->name, cloned.Symbols().Get("root"));
+  EXPECT_EQ(cloned_root->a->name, cloned.Symbols().Get("a"));
+  EXPECT_EQ(cloned_root->b->name, cloned.Symbols().Get("replacement"));
+  EXPECT_EQ(cloned_root->c->name, cloned.Symbols().Get("c"));
+}
+
+TEST_F(CloneContextNodeTest, CloneWithReplaceFunction) {
+  Allocator a;
+
+  ProgramBuilder builder;
+  auto* original_root = a.Create<Node>(builder.Symbols().New("root"));
+  original_root->a = a.Create<Node>(builder.Symbols().New("a"));
+  original_root->b = a.Create<Node>(builder.Symbols().New("b"));
+  original_root->c = a.Create<Node>(builder.Symbols().New("c"));
+  Program original(std::move(builder));
+
+  //                          root
+  //        ╭──────────────────┼──────────────────╮
+  //       (a)                (b)                (c)
+  //                        Replaced
+
+  ProgramBuilder cloned;
+  auto* replacement = a.Create<Node>(cloned.Symbols().New("replacement"));
+
+  auto* cloned_root =
+      CloneContext(&cloned, &original)
+          .Replace(original_root->b, [=] { return replacement; })
+          .Clone(original_root);
 
   EXPECT_NE(cloned_root->a, replacement);
   EXPECT_EQ(cloned_root->b, replacement);
@@ -638,7 +671,7 @@ TEST_F(CloneContextNodeTest, CloneWithReplaceAll_DerivedThenBase) {
           replaceable_name);
 }
 
-TEST_F(CloneContextNodeTest, CloneWithReplace_WithNotANode) {
+TEST_F(CloneContextNodeTest, CloneWithReplacePointer_WithNotANode) {
   EXPECT_FATAL_FAILURE(
       {
         Allocator allocator;
@@ -660,6 +693,34 @@ TEST_F(CloneContextNodeTest, CloneWithReplace_WithNotANode) {
 
         CloneContext ctx(&cloned, &original);
         ctx.Replace(original_root->b, replacement);
+
+        ctx.Clone(original_root);
+      },
+      "internal compiler error");
+}
+
+TEST_F(CloneContextNodeTest, CloneWithReplaceFunction_WithNotANode) {
+  EXPECT_FATAL_FAILURE(
+      {
+        Allocator allocator;
+        ProgramBuilder builder;
+        auto* original_root =
+            allocator.Create<Node>(builder.Symbols().New("root"));
+        original_root->a = allocator.Create<Node>(builder.Symbols().New("a"));
+        original_root->b = allocator.Create<Node>(builder.Symbols().New("b"));
+        original_root->c = allocator.Create<Node>(builder.Symbols().New("c"));
+        Program original(std::move(builder));
+
+        //                          root
+        //        ╭──────────────────┼──────────────────╮
+        //       (a)                (b)                (c)
+        //                        Replaced
+
+        ProgramBuilder cloned;
+        auto* replacement = allocator.Create<NotANode>();
+
+        CloneContext ctx(&cloned, &original);
+        ctx.Replace(original_root->b, [=] { return replacement; });
 
         ctx.Clone(original_root);
       },

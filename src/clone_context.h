@@ -109,7 +109,9 @@ class CloneContext {
     // Was Replace() called for this object?
     auto it = replacements_.find(a);
     if (it != replacements_.end()) {
-      return CheckedCast<T>(it->second);
+      auto* replacement = it->second();
+      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, replacement);
+      return CheckedCast<T>(replacement);
     }
 
     Cloneable* cloned = nullptr;
@@ -342,8 +344,10 @@ class CloneContext {
     return *this;
   }
 
-  /// Replace replaces all occurrences of `what` in #src with `with` in #dst
-  /// when calling Clone().
+  /// Replace replaces all occurrences of `what` in #src with the pointer `with`
+  /// in #dst when calling Clone().
+  /// [DEPRECATED]: This function cannot handle nested replacements. Use the
+  /// overload of Replace() that take a function for the `WITH` argument.
   /// @param what a pointer to the object in #src that will be replaced with
   /// `with`
   /// @param with a pointer to the replacement object owned by #dst that will be
@@ -352,10 +356,32 @@ class CloneContext {
   /// references of the original object. A type mismatch will result in an
   /// assertion in debug builds, and undefined behavior in release builds.
   /// @returns this CloneContext so calls can be chained
-  template <typename WHAT, typename WITH>
+  template <typename WHAT,
+            typename WITH,
+            typename = traits::EnableIfIsType<WITH, Cloneable>>
   CloneContext& Replace(WHAT* what, WITH* with) {
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, what);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, with);
+    replacements_[what] = [with]() -> Cloneable* { return with; };
+    return *this;
+  }
+
+  /// Replace replaces all occurrences of `what` in #src with the result of the
+  /// function `with` in #dst when calling Clone(). `with` will be called each
+  /// time `what` is cloned by this context. If `what` is not cloned, then
+  /// `with` may never be called.
+  /// @param what a pointer to the object in #src that will be replaced with
+  /// `with`
+  /// @param with a function that takes no arguments and returns a pointer to
+  /// the replacement object owned by #dst. The returned pointer will be used as
+  /// a replacement for `what`.
+  /// @warning The replacement object must be of the correct type for all
+  /// references of the original object. A type mismatch will result in an
+  /// assertion in debug builds, and undefined behavior in release builds.
+  /// @returns this CloneContext so calls can be chained
+  template <typename WHAT, typename WITH, typename = std::result_of_t<WITH()>>
+  CloneContext& Replace(WHAT* what, WITH&& with) {
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, what);
     replacements_[what] = with;
     return *this;
   }
@@ -532,8 +558,10 @@ class CloneContext {
     std::unordered_map<const Cloneable*, CloneableList> insert_after_;
   };
 
-  /// A map of object in #src to their replacement in #dst
-  std::unordered_map<const Cloneable*, Cloneable*> replacements_;
+  /// A map of object in #src to functions that create their replacement in
+  /// #dst
+  std::unordered_map<const Cloneable*, std::function<Cloneable*()>>
+      replacements_;
 
   /// A map of symbol in #src to their cloned equivalent in #dst
   std::unordered_map<Symbol, Symbol> cloned_symbols_;
