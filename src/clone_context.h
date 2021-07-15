@@ -85,9 +85,7 @@ class CloneContext {
   ~CloneContext();
 
   /// Clones the Node or sem::Type `a` into the ProgramBuilder #dst if `a` is
-  /// not null. If `a` is null, then Clone() returns null. If `a` has been
-  /// cloned already by this CloneContext then the same cloned pointer is
-  /// returned.
+  /// not null. If `a` is null, then Clone() returns null.
   ///
   /// Clone() may use a function registered with ReplaceAll() to create a
   /// transformed version of the object. See ReplaceAll() for more information.
@@ -140,9 +138,7 @@ class CloneContext {
   }
 
   /// Clones the Node or sem::Type `a` into the ProgramBuilder #dst if `a` is
-  /// not null. If `a` is null, then Clone() returns null. If `a` has been
-  /// cloned already by this CloneContext then the same cloned pointer is
-  /// returned.
+  /// not null. If `a` is null, then Clone() returns null.
   ///
   /// Unlike Clone(), this method does not invoke or use any transformations
   /// registered by ReplaceAll().
@@ -158,22 +154,10 @@ class CloneContext {
     if (a == nullptr) {
       return nullptr;
     }
-
     if (src) {
       TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, a);
     }
-
-    // Have we seen this object before? If so, return the previously cloned
-    // version instead of making yet another copy.
-    auto it = replacements_.find(a);
-    if (it != replacements_.end()) {
-      return CheckedCast<T>(it->second);
-    }
-
-    // First time clone and no replacer transforms matched.
-    // Clone with T::Clone().
     auto* c = a->Clone(this);
-    replacements_.emplace(a, c);
     return CheckedCast<T>(c);
   }
 
