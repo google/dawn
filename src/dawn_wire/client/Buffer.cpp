@@ -303,9 +303,6 @@ namespace dawn_wire { namespace client {
         //   - Unmap locally on the client
         //   - Server -> Client: Result of MapRequest2
 
-        // TODO(dawn:608): mDevice->InjectError(WGPUErrorType_Validation) for map oom failure
-        // and separate from buffer destroyed before unmap case
-
         // mWriteHandle can still be nullptr if buffer has been destroyed before unmap
         if ((mMapState == MapState::MappedForWrite || mMapState == MapState::MappedAtCreation) &&
             mWriteHandle != nullptr) {
@@ -364,8 +361,6 @@ namespace dawn_wire { namespace client {
         BufferUnmapCmd cmd;
         cmd.self = ToAPI(this);
         client->SerializeCommand(cmd);
-        // TODO(dawn:608): add tracking mapped status and change to return bool for returning unmap
-        // success/failure
     }
 
     void Buffer::Destroy() {

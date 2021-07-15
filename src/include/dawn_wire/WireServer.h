@@ -93,32 +93,16 @@ namespace dawn_wire {
 
                 // Return the size of the command serialized if
                 // SerializeDataUpdate is called with the same offset/size args
-                // TODO(dawn:773): change to pure virtual after update on chromium side.
-                virtual size_t SizeOfSerializeDataUpdate(size_t offset, size_t size) {
-                    return 0;
-                }
+                virtual size_t SizeOfSerializeDataUpdate(size_t offset, size_t size) = 0;
 
                 // Gets called when a MapReadCallback resolves.
                 // Serialize the data update for the range (offset, offset + size) into
                 // |serializePointer| to the client There could be nothing to be serialized (if
                 // using shared memory)
-                // TODO(dawn:773): change to pure virtual after update on chromium side.
                 virtual void SerializeDataUpdate(const void* data,
                                                  size_t offset,
                                                  size_t size,
-                                                 void* serializePointer) {
-                }
-
-                // TODO(dawn:773): remove after update on chromium side.
-                virtual size_t SerializeInitialDataSize(const void* data, size_t dataLength) {
-                    return 0;
-                }
-
-                // TODO(dawn:773): remove after update on chromium side.
-                virtual void SerializeInitialData(const void* data,
-                                                  size_t dataLength,
-                                                  void* serializePointer) {
-                }
+                                                 void* serializePointer) = 0;
 
               private:
                 ReadHandle(const ReadHandle&) = delete;

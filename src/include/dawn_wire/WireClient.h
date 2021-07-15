@@ -112,31 +112,17 @@ namespace dawn_wire {
                 // Simply return the base address of the allocation (without applying any offset)
                 // Returns nullptr if the allocation failed.
                 // The data must live at least until the ReadHandle is destructued
-                // TODO(dawn:773): change to pure virtual after update on chromium side.
-                virtual const void* GetData() {
-                    return nullptr;
-                }
+                virtual const void* GetData() = 0;
 
                 // Gets called when a MapReadCallback resolves.
                 // deserialize the data update and apply
                 // it to the range (offset, offset + size) of allocation
                 // There could be nothing to be deserialized (if using shared memory)
                 // Needs to check potential offset/size OOB and overflow
-                // TODO(dawn:773): change to pure virtual after update on chromium side.
                 virtual bool DeserializeDataUpdate(const void* deserializePointer,
                                                    size_t deserializeSize,
                                                    size_t offset,
-                                                   size_t size) {
-                    return false;
-                }
-
-                // TODO(dawn:773): remove after update on chromium side.
-                virtual bool DeserializeInitialData(const void* deserializePointer,
-                                                    size_t deserializeSize,
-                                                    const void** data,
-                                                    size_t* dataLength) {
-                    return false;
-                }
+                                                   size_t size) = 0;
 
               private:
                 ReadHandle(const ReadHandle&) = delete;
@@ -158,40 +144,18 @@ namespace dawn_wire {
                 // The data returned should be zero-initialized.
                 // The data returned must live at least until the WriteHandle is destructed.
                 // On failure, the pointer returned should be null.
-                // TODO(dawn:773): change to pure virtual after update on chromium side.
-                virtual void* GetData() {
-                    return nullptr;
-                }
+                virtual void* GetData() = 0;
 
                 // Get the required serialization size for SerializeDataUpdate
-                // TODO(dawn:773): change to pure virtual after update on chromium side.
-                virtual size_t SizeOfSerializeDataUpdate(size_t offset, size_t size) {
-                    return 0;
-                }
+                virtual size_t SizeOfSerializeDataUpdate(size_t offset, size_t size) = 0;
 
                 // Serialize a command to send the modified contents of
                 // the subrange (offset, offset + size) of the allocation at buffer unmap
                 // This subrange is always the whole mapped region for now
                 // There could be nothing to be serialized (if using shared memory)
-                // TODO(dawn:773): change to pure virtual after update on chromium side.
                 virtual void SerializeDataUpdate(void* serializePointer,
                                                  size_t offset,
-                                                 size_t size) {
-                }
-
-                // TODO(dawn:773): remove after update on chromium side.
-                virtual std::pair<void*, size_t> Open() {
-                    return std::make_pair(nullptr, 0);
-                }
-
-                // TODO(dawn:773): remove after update on chromium side.
-                virtual size_t SerializeFlushSize() {
-                    return 0;
-                }
-
-                // TODO(dawn:773): remove after update on chromium side.
-                virtual void SerializeFlush(void* serializePointer) {
-                }
+                                                 size_t size) = 0;
 
               private:
                 WriteHandle(const WriteHandle&) = delete;
