@@ -361,7 +361,9 @@ TEST_P(TextureViewSamplingTest, Default2DArrayTexture) {
     constexpr uint32_t kMipLevels = 1;
     initTexture(kLayers, kMipLevels);
 
-    wgpu::TextureView textureView = mTexture.CreateView();
+    wgpu::TextureViewDescriptor descriptor;
+    descriptor.dimension = wgpu::TextureViewDimension::e2DArray;
+    wgpu::TextureView textureView = mTexture.CreateView(&descriptor);
 
     const char* fragmentShader = R"(
             [[group(0), binding(0)]] var sampler0 : sampler;

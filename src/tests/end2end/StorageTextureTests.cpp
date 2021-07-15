@@ -583,8 +583,10 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
             << fragmentShader;
     }
 
-    void CheckResultInStorageBuffer(wgpu::Texture readonlyStorageTexture,
-                                    const std::string& computeShader) {
+    void CheckResultInStorageBuffer(
+        wgpu::Texture readonlyStorageTexture,
+        const std::string& computeShader,
+        wgpu::TextureViewDimension dimension = wgpu::TextureViewDimension::e2D) {
         wgpu::ComputePipeline pipeline = CreateComputePipeline(computeShader.c_str());
 
         // Clear the content of the result buffer into 0.
@@ -592,9 +594,11 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         wgpu::Buffer resultBuffer =
             utils::CreateBufferFromData(device, &kInitialValue, sizeof(kInitialValue),
                                         wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
-        wgpu::BindGroup bindGroup =
-            utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
-                                 {{0, readonlyStorageTexture.CreateView()}, {1, resultBuffer}});
+        wgpu::TextureViewDescriptor descriptor;
+        descriptor.dimension = dimension;
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(
+            device, pipeline.GetBindGroupLayout(0),
+            {{0, readonlyStorageTexture.CreateView(&descriptor)}, {1, resultBuffer}});
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder computeEncoder = encoder.BeginComputePass();
@@ -635,12 +639,17 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         queue.Submit(1, &commandBuffer);
     }
 
-    void WriteIntoStorageTextureInComputePass(wgpu::Texture writeonlyStorageTexture,
-                                              const char* computeShader) {
+    void WriteIntoStorageTextureInComputePass(
+        wgpu::Texture writeonlyStorageTexture,
+        const char* computeShader,
+        wgpu::TextureViewDimension dimension = wgpu::TextureViewDimension::e2D) {
         // Create a compute pipeline that writes the expected pixel values into the storage texture.
+        wgpu::TextureViewDescriptor descriptor;
+        descriptor.dimension = dimension;
         wgpu::ComputePipeline pipeline = CreateComputePipeline(computeShader);
-        wgpu::BindGroup bindGroup = utils::MakeBindGroup(
-            device, pipeline.GetBindGroupLayout(0), {{0, writeonlyStorageTexture.CreateView()}});
+        wgpu::BindGroup bindGroup =
+            utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                 {{0, writeonlyStorageTexture.CreateView(&descriptor)}});
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder computePassEncoder = encoder.BeginComputePass();
@@ -652,14 +661,19 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         queue.Submit(1, &commandBuffer);
     }
 
-    void ReadWriteIntoStorageTextureInComputePass(wgpu::Texture readonlyStorageTexture,
-                                                  wgpu::Texture writeonlyStorageTexture,
-                                                  const char* computeShader) {
+    void ReadWriteIntoStorageTextureInComputePass(
+        wgpu::Texture readonlyStorageTexture,
+        wgpu::Texture writeonlyStorageTexture,
+        const char* computeShader,
+        wgpu::TextureViewDimension dimension = wgpu::TextureViewDimension::e2D) {
         // Create a compute pipeline that writes the expected pixel values into the storage texture.
+        wgpu::TextureViewDescriptor descriptor;
+        descriptor.dimension = dimension;
         wgpu::ComputePipeline pipeline = CreateComputePipeline(computeShader);
-        wgpu::BindGroup bindGroup = utils::MakeBindGroup(
-            device, pipeline.GetBindGroupLayout(0),
-            {{0, writeonlyStorageTexture.CreateView()}, {1, readonlyStorageTexture.CreateView()}});
+        wgpu::BindGroup bindGroup =
+            utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                 {{0, writeonlyStorageTexture.CreateView(&descriptor)},
+                                  {1, readonlyStorageTexture.CreateView(&descriptor)}});
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder computePassEncoder = encoder.BeginComputePass();
@@ -991,7 +1005,7 @@ TEST_P(StorageTextureTests, Readonly2DArrayOr3DStorageTexture) {
   }
 })";
 
-        CheckResultInStorageBuffer(readonlyStorageTexture, csStream.str());
+        CheckResultInStorageBuffer(readonlyStorageTexture, csStream.str(), dimension);
     }
 }
 
@@ -1018,7 +1032,8 @@ TEST_P(StorageTextureTests, Writeonly2DArrayOr3DStorageTexture) {
         // Write the expected pixel values into the write-only storage texture.
         const std::string computeShader =
             CommonWriteOnlyTestCode("compute", kTextureFormat, dimension);
-        WriteIntoStorageTextureInComputePass(writeonlyStorageTexture, computeShader.c_str());
+        WriteIntoStorageTextureInComputePass(writeonlyStorageTexture, computeShader.c_str(),
+                                             dimension);
 
         // Verify the pixel data in the write-only storage texture is expected.
         CheckOutputStorageTexture(writeonlyStorageTexture, kTextureFormat, kSliceCount);
@@ -1053,7 +1068,7 @@ TEST_P(StorageTextureTests, ReadWrite2DArrayOr3DStorageTexture) {
         // Read values from read-only storage texture and write into the write-only storage texture.
         const std::string computeShader = CommonReadWriteTestCode(kTextureFormat, dimension);
         ReadWriteIntoStorageTextureInComputePass(readonlyStorageTexture, writeonlyStorageTexture,
-                                                 computeShader.c_str());
+                                                 computeShader.c_str(), dimension);
 
         // Verify the data in the write-only storage texture is expected.
         CheckOutputStorageTexture(writeonlyStorageTexture, kTextureFormat, kSliceCount);

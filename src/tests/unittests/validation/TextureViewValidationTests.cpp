@@ -288,7 +288,7 @@ namespace {
     // specifying the values they're supposed to default to.
     // Variant for a 2D texture with more than 1 array layer.
     TEST_F(TextureViewValidationTest, TextureViewDescriptorDefaults2DArray) {
-        constexpr uint32_t kDefaultArrayLayers = 6;
+        constexpr uint32_t kDefaultArrayLayers = 8;
         wgpu::Texture texture = Create2DArrayTexture(device, kDefaultArrayLayers);
 
         { texture.CreateView(); }
@@ -307,7 +307,25 @@ namespace {
             texture.CreateView(&descriptor);
             descriptor.dimension = wgpu::TextureViewDimension::e2DArray;
             texture.CreateView(&descriptor);
+            // Setting view dimension to 2D, its arrayLayer will default to 1. And view creation
+            // will success.
             descriptor.dimension = wgpu::TextureViewDimension::e2D;
+            texture.CreateView(&descriptor);
+            // Setting view dimension to Cube, its arrayLayer will default to 6.
+            descriptor.dimension = wgpu::TextureViewDimension::Cube;
+            texture.CreateView(&descriptor);
+            descriptor.baseArrayLayer = 2;
+            texture.CreateView(&descriptor);
+            descriptor.baseArrayLayer = 3;
+            ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
+            // Setting view dimension to CubeArray, its arrayLayer will default to
+            // size.depthOrArrayLayers (kDefaultArrayLayers) - baseArrayLayer.
+            descriptor.dimension = wgpu::TextureViewDimension::CubeArray;
+            descriptor.baseArrayLayer = 0;
+            ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
+            descriptor.baseArrayLayer = 2;
+            texture.CreateView(&descriptor);
+            descriptor.baseArrayLayer = 3;
             ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
         }
         {

@@ -559,7 +559,9 @@ namespace {
         wgpu::Texture resolveTexture =
             CreateTexture(device, wgpu::TextureDimension::e2D, kColorFormat, kSize, kSize,
                           kArrayLayers2, kLevelCount);
-        wgpu::TextureView resolveTextureView = resolveTexture.CreateView();
+        wgpu::TextureViewDescriptor viewDesc;
+        viewDesc.dimension = wgpu::TextureViewDimension::e2DArray;
+        wgpu::TextureView resolveTextureView = resolveTexture.CreateView(&viewDesc);
 
         utils::ComboRenderPassDescriptor renderPass = CreateMultisampledRenderPass();
         renderPass.cColorAttachments[0].resolveTarget = resolveTextureView;
