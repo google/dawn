@@ -46,7 +46,7 @@ struct ZeroInitWorkgroupMemory::State {
             const std::function<ast::Expression*()>& get_expr) {
     if (CanZero(ty)) {
       auto* var = get_expr();
-      auto* zero_init = ctx.dst->Construct(CreateASTTypeFor(&ctx, ty));
+      auto* zero_init = ctx.dst->Construct(CreateASTTypeFor(ctx, ty));
       stmts.emplace_back(
           ctx.dst->create<ast::AssignmentStatement>(var, zero_init));
       return;
@@ -54,7 +54,7 @@ struct ZeroInitWorkgroupMemory::State {
 
     if (auto* atomic = ty->As<sem::Atomic>()) {
       auto* zero_init =
-          ctx.dst->Construct(CreateASTTypeFor(&ctx, atomic->Type()));
+          ctx.dst->Construct(CreateASTTypeFor(ctx, atomic->Type()));
       auto* store = ctx.dst->Call("atomicStore", ctx.dst->AddressOf(get_expr()),
                                   zero_init);
       stmts.emplace_back(ctx.dst->create<ast::CallStatement>(store));

@@ -71,101 +71,80 @@ bool Transform::Requires(CloneContext& ctx,
   return true;
 }
 
-ast::Function* Transform::CloneWithStatementsAtStart(
-    CloneContext* ctx,
-    ast::Function* in,
-    ast::StatementList statements) {
-  for (auto* s : *in->body()) {
-    statements.emplace_back(ctx->Clone(s));
-  }
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto source = ctx->Clone(in->source());
-  auto symbol = ctx->Clone(in->symbol());
-  auto params = ctx->Clone(in->params());
-  auto* return_type = ctx->Clone(in->return_type());
-  auto* body = ctx->dst->create<ast::BlockStatement>(
-      ctx->Clone(in->body()->source()), statements);
-  auto decos = ctx->Clone(in->decorations());
-  auto ret_decos = ctx->Clone(in->return_type_decorations());
-  return ctx->dst->create<ast::Function>(source, symbol, params, return_type,
-                                         body, decos, ret_decos);
-}
-
 ast::DecorationList Transform::RemoveDecorations(
-    CloneContext* ctx,
+    CloneContext& ctx,
     const ast::DecorationList& in,
     std::function<bool(const ast::Decoration*)> should_remove) {
   ast::DecorationList new_decorations;
   for (auto* deco : in) {
     if (!should_remove(deco)) {
-      new_decorations.push_back(ctx->Clone(deco));
+      new_decorations.push_back(ctx.Clone(deco));
     }
   }
   return new_decorations;
 }
 
-ast::Type* Transform::CreateASTTypeFor(CloneContext* ctx, const sem::Type* ty) {
+ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const sem::Type* ty) {
   if (ty->Is<sem::Void>()) {
-    return ctx->dst->create<ast::Void>();
+    return ctx.dst->create<ast::Void>();
   }
   if (ty->Is<sem::I32>()) {
-    return ctx->dst->create<ast::I32>();
+    return ctx.dst->create<ast::I32>();
   }
   if (ty->Is<sem::U32>()) {
-    return ctx->dst->create<ast::U32>();
+    return ctx.dst->create<ast::U32>();
   }
   if (ty->Is<sem::F32>()) {
-    return ctx->dst->create<ast::F32>();
+    return ctx.dst->create<ast::F32>();
   }
   if (ty->Is<sem::Bool>()) {
-    return ctx->dst->create<ast::Bool>();
+    return ctx.dst->create<ast::Bool>();
   }
   if (auto* m = ty->As<sem::Matrix>()) {
     auto* el = CreateASTTypeFor(ctx, m->type());
-    return ctx->dst->create<ast::Matrix>(el, m->rows(), m->columns());
+    return ctx.dst->create<ast::Matrix>(el, m->rows(), m->columns());
   }
   if (auto* v = ty->As<sem::Vector>()) {
     auto* el = CreateASTTypeFor(ctx, v->type());
-    return ctx->dst->create<ast::Vector>(el, v->size());
+    return ctx.dst->create<ast::Vector>(el, v->size());
   }
   if (auto* a = ty->As<sem::Array>()) {
     auto* el = CreateASTTypeFor(ctx, a->ElemType());
     ast::DecorationList decos;
     if (!a->IsStrideImplicit()) {
-      decos.emplace_back(ctx->dst->create<ast::StrideDecoration>(a->Stride()));
+      decos.emplace_back(ctx.dst->create<ast::StrideDecoration>(a->Stride()));
     }
-    return ctx->dst->create<ast::Array>(el, a->Count(), std::move(decos));
+    return ctx.dst->create<ast::Array>(el, a->Count(), std::move(decos));
   }
   if (auto* s = ty->As<sem::Struct>()) {
-    return ctx->dst->create<ast::TypeName>(
-        ctx->Clone(s->Declaration()->name()));
+    return ctx.dst->create<ast::TypeName>(ctx.Clone(s->Declaration()->name()));
   }
   if (auto* s = ty->As<sem::Reference>()) {
     return CreateASTTypeFor(ctx, s->StoreType());
   }
   if (auto* a = ty->As<sem::Atomic>()) {
-    return ctx->dst->create<ast::Atomic>(CreateASTTypeFor(ctx, a->Type()));
+    return ctx.dst->create<ast::Atomic>(CreateASTTypeFor(ctx, a->Type()));
   }
   if (auto* t = ty->As<sem::DepthTexture>()) {
-    return ctx->dst->create<ast::DepthTexture>(t->dim());
+    return ctx.dst->create<ast::DepthTexture>(t->dim());
   }
   if (auto* t = ty->As<sem::MultisampledTexture>()) {
-    return ctx->dst->create<ast::MultisampledTexture>(
+    return ctx.dst->create<ast::MultisampledTexture>(
         t->dim(), CreateASTTypeFor(ctx, t->type()));
   }
   if (auto* t = ty->As<sem::SampledTexture>()) {
-    return ctx->dst->create<ast::SampledTexture>(
+    return ctx.dst->create<ast::SampledTexture>(
         t->dim(), CreateASTTypeFor(ctx, t->type()));
   }
   if (auto* t = ty->As<sem::StorageTexture>()) {
-    return ctx->dst->create<ast::StorageTexture>(
+    return ctx.dst->create<ast::StorageTexture>(
         t->dim(), t->image_format(), CreateASTTypeFor(ctx, t->type()),
         t->access());
   }
   if (auto* s = ty->As<sem::Sampler>()) {
-    return ctx->dst->create<ast::Sampler>(s->kind());
+    return ctx.dst->create<ast::Sampler>(s->kind());
   }
-  TINT_UNREACHABLE(Transform, ctx->dst->Diagnostics())
+  TINT_UNREACHABLE(Transform, ctx.dst->Diagnostics())
       << "Unhandled type: " << ty->TypeInfo().name;
   return nullptr;
 }

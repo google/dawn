@@ -121,7 +121,7 @@ WrapArraysInStructs::WrappedArrayInfo WrapArraysInStructs::WrapArray(
     // If the element wasn't an array, just create the typical AST type for it
     if (!el_type) {
       el_type = [=](CloneContext& c) {
-        return CreateASTTypeFor(&c, array->ElemType());
+        return CreateASTTypeFor(c, array->ElemType());
       };
     }
 

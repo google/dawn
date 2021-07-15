@@ -148,7 +148,7 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
       ast::StructMemberList new_struct_members;
       for (auto* member : struct_ty->members()) {
         ast::DecorationList new_decorations = RemoveDecorations(
-            &ctx, member->decorations(), [](const ast::Decoration* deco) {
+            ctx, member->decorations(), [](const ast::Decoration* deco) {
               return deco->IsAnyOf<
                   ast::BuiltinDecoration, ast::InterpolateDecoration,
                   ast::InvariantDecoration, ast::LocationDecoration>();
@@ -289,13 +289,11 @@ void Spirv::EmitVertexPointSize(CloneContext& ctx) const {
 
   // Assign 1.0 to the global at the start of all vertex shader entry points.
   ctx.ReplaceAll([&ctx, pointsize](ast::Function* func) -> ast::Function* {
-    if (func->pipeline_stage() != ast::PipelineStage::kVertex) {
-      return nullptr;
+    if (func->pipeline_stage() == ast::PipelineStage::kVertex) {
+      ctx.InsertFront(func->body()->statements(),
+                      ctx.dst->Assign(pointsize, 1.0f));
     }
-    return CloneWithStatementsAtStart(&ctx, func,
-                                      {
-                                          ctx.dst->Assign(pointsize, 1.0f),
-                                      });
+    return nullptr;
   });
 }
 
@@ -319,7 +317,7 @@ Symbol Spirv::HoistToInputVariables(
   if (!ty->Is<sem::Struct>()) {
     // Base case: create a global variable and return.
     ast::DecorationList new_decorations =
-        RemoveDecorations(&ctx, decorations, [](const ast::Decoration* deco) {
+        RemoveDecorations(ctx, decorations, [](const ast::Decoration* deco) {
           return !deco->IsAnyOf<
               ast::BuiltinDecoration, ast::InterpolateDecoration,
               ast::InvariantDecoration, ast::LocationDecoration>();
@@ -385,7 +383,7 @@ void Spirv::HoistToOutputVariables(CloneContext& ctx,
   if (!ty->Is<sem::Struct>()) {
     // Create a global variable.
     ast::DecorationList new_decorations =
-        RemoveDecorations(&ctx, decorations, [](const ast::Decoration* deco) {
+        RemoveDecorations(ctx, decorations, [](const ast::Decoration* deco) {
           return !deco->IsAnyOf<
               ast::BuiltinDecoration, ast::InterpolateDecoration,
               ast::InvariantDecoration, ast::LocationDecoration>();

@@ -185,24 +185,13 @@ class Transform : public Castable<Transform> {
   bool Requires(CloneContext& ctx,
                 std::initializer_list<const ::tint::TypeInfo*> deps);
 
-  /// Clones the function `in` adding `statements` to the beginning of the
-  /// cloned function body.
-  /// @param ctx the clone context
-  /// @param in the function to clone
-  /// @param statements the statements to prepend to `in`'s body
-  /// @return the cloned function
-  static ast::Function* CloneWithStatementsAtStart(
-      CloneContext* ctx,
-      ast::Function* in,
-      ast::StatementList statements);
-
   /// Clones the decoration list `in`, removing decorations based on a filter.
   /// @param ctx the clone context
   /// @param in the decorations to clone
   /// @param should_remove the function to select which decorations to remove
   /// @return the cloned decorations
   static ast::DecorationList RemoveDecorations(
-      CloneContext* ctx,
+      CloneContext& ctx,
       const ast::DecorationList& in,
       std::function<bool(const ast::Decoration*)> should_remove);
 
@@ -212,7 +201,7 @@ class Transform : public Castable<Transform> {
   /// @param ty the semantic type to reconstruct
   /// @returns a ast::Type that when resolved, will produce the semantic type
   /// `ty`.
-  static ast::Type* CreateASTTypeFor(CloneContext* ctx, const sem::Type* ty);
+  static ast::Type* CreateASTTypeFor(CloneContext& ctx, const sem::Type* ty);
 };
 
 }  // namespace transform

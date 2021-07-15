@@ -196,7 +196,7 @@ void Msl::HandleModuleScopeVariables(CloneContext& ctx) const {
       // This is the symbol for the variable that replaces the module-scope var.
       auto new_var_symbol = ctx.dst->Sym();
 
-      auto* store_type = CreateASTTypeFor(&ctx, var->Type()->UnwrapRef());
+      auto* store_type = CreateASTTypeFor(ctx, var->Type()->UnwrapRef());
 
       if (is_entry_point) {
         if (store_type->is_handle()) {

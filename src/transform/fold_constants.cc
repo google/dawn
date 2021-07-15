@@ -76,7 +76,7 @@ void FoldConstants::Run(CloneContext& ctx, const DataMap&, DataMap&) {
             i, [&](auto&& s) { ctors.emplace_back(ctx.dst->Expr(s)); });
       }
 
-      auto* el_ty = CreateASTTypeFor(&ctx, vec->type());
+      auto* el_ty = CreateASTTypeFor(ctx, vec->type());
       return ctx.dst->vec(el_ty, vec_size, ctors);
     }
 

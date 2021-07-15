@@ -114,7 +114,7 @@ void BindingRemapper::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) {
       if (ac_it != remappings->access_controls.end()) {
         ast::Access ac = ac_it->second;
         auto* ty = ctx.src->Sem().Get(var)->Type()->UnwrapRef();
-        ast::Type* inner_ty = CreateASTTypeFor(&ctx, ty);
+        ast::Type* inner_ty = CreateASTTypeFor(ctx, ty);
         auto* new_var = ctx.dst->create<ast::Variable>(
             ctx.Clone(var->source()), ctx.Clone(var->symbol()),
             var->declared_storage_class(), ac, inner_ty, var->is_const(),

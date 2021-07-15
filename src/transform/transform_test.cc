@@ -32,7 +32,7 @@ struct CreateASTTypeForTest : public testing::Test, public Transform {
     auto* sem_type = create_sem_type(sem_type_builder);
     Program program(std::move(sem_type_builder));
     CloneContext ctx(&ast_type_builder, &program, false);
-    return CreateASTTypeFor(&ctx, sem_type);
+    return CreateASTTypeFor(ctx, sem_type);
   }
 
   ProgramBuilder ast_type_builder;

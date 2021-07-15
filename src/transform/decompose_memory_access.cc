@@ -452,7 +452,7 @@ struct DecomposeMemoryAccess::State {
     auto storage_class = var_user->Variable()->StorageClass();
     return utils::GetOrCreate(
         load_funcs, LoadStoreKey{storage_class, buf_ty, el_ty}, [&] {
-          auto* buf_ast_ty = CreateASTTypeFor(&ctx, buf_ty);
+          auto* buf_ast_ty = CreateASTTypeFor(ctx, buf_ty);
           auto* disable_validation =
               ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
                   ctx.dst->ID(), ast::DisabledValidation::
@@ -472,7 +472,7 @@ struct DecomposeMemoryAccess::State {
           ast::Function* func = nullptr;
           if (auto* intrinsic =
                   IntrinsicLoadFor(ctx.dst, storage_class, el_ty)) {
-            auto* el_ast_ty = CreateASTTypeFor(&ctx, el_ty);
+            auto* el_ast_ty = CreateASTTypeFor(ctx, el_ty);
             func = ctx.dst->create<ast::Function>(
                 ctx.dst->Sym(), params, el_ast_ty, nullptr,
                 ast::DecorationList{
@@ -508,12 +508,12 @@ struct DecomposeMemoryAccess::State {
                 values.emplace_back(ctx.dst->Call(load, "buffer", offset));
               }
             }
-            auto* el_ast_ty = CreateASTTypeFor(&ctx, el_ty);
+            auto* el_ast_ty = CreateASTTypeFor(ctx, el_ty);
             func = ctx.dst->create<ast::Function>(
                 ctx.dst->Sym(), params, el_ast_ty,
                 ctx.dst->Block(ctx.dst->Return(
                     ctx.dst->create<ast::TypeConstructorExpression>(
-                        CreateASTTypeFor(&ctx, el_ty), values))),
+                        CreateASTTypeFor(ctx, el_ty), values))),
                 ast::DecorationList{}, ast::DecorationList{});
           }
           ctx.dst->AST().AddFunction(func);
@@ -537,8 +537,8 @@ struct DecomposeMemoryAccess::State {
     auto storage_class = var_user->Variable()->StorageClass();
     return utils::GetOrCreate(
         store_funcs, LoadStoreKey{storage_class, buf_ty, el_ty}, [&] {
-          auto* buf_ast_ty = CreateASTTypeFor(&ctx, buf_ty);
-          auto* el_ast_ty = CreateASTTypeFor(&ctx, el_ty);
+          auto* buf_ast_ty = CreateASTTypeFor(ctx, buf_ty);
+          auto* el_ast_ty = CreateASTTypeFor(ctx, el_ty);
           auto* disable_validation =
               ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
                   ctx.dst->ID(), ast::DisabledValidation::
@@ -629,7 +629,7 @@ struct DecomposeMemoryAccess::State {
                     const sem::VariableUser* var_user) {
     auto op = intrinsic->Type();
     return utils::GetOrCreate(atomic_funcs, AtomicKey{buf_ty, el_ty, op}, [&] {
-      auto* buf_ast_ty = CreateASTTypeFor(&ctx, buf_ty);
+      auto* buf_ast_ty = CreateASTTypeFor(ctx, buf_ty);
       auto* disable_validation =
           ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
               ctx.dst->ID(),
@@ -650,7 +650,7 @@ struct DecomposeMemoryAccess::State {
       // Other parameters are copied as-is:
       for (size_t i = 1; i < intrinsic->Parameters().size(); i++) {
         auto& param = intrinsic->Parameters()[i];
-        auto* ty = CreateASTTypeFor(&ctx, param.type);
+        auto* ty = CreateASTTypeFor(ctx, param.type);
         params.emplace_back(ctx.dst->Param("param_" + std::to_string(i), ty));
       }
 
@@ -661,7 +661,7 @@ struct DecomposeMemoryAccess::State {
             << " and type " << el_ty->type_name();
       }
 
-      auto* ret_ty = CreateASTTypeFor(&ctx, intrinsic->ReturnType());
+      auto* ret_ty = CreateASTTypeFor(ctx, intrinsic->ReturnType());
       auto* func = ctx.dst->create<ast::Function>(
           ctx.dst->Sym(), params, ret_ty, nullptr,
           ast::DecorationList{

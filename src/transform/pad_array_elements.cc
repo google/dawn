@@ -67,7 +67,7 @@ ArrayBuilder PadArray(
     // If the element wasn't a padded array, just create the typical AST type
     // for it
     if (el_ty == nullptr) {
-      el_ty = create_ast_type_for(&ctx, array->ElemType());
+      el_ty = create_ast_type_for(ctx, array->ElemType());
     }
 
     // Structure() will create and append the ast::Struct to the

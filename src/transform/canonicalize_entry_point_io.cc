@@ -83,7 +83,7 @@ void CanonicalizeEntryPointIO::Run(CloneContext& ctx,
       ast::StructMemberList new_struct_members;
       for (auto* member : struct_ty->members()) {
         ast::DecorationList new_decorations = RemoveDecorations(
-            &ctx, member->decorations(), [](const ast::Decoration* deco) {
+            ctx, member->decorations(), [](const ast::Decoration* deco) {
               return deco->IsAnyOf<
                   ast::BuiltinDecoration, ast::InterpolateDecoration,
                   ast::InvariantDecoration, ast::LocationDecoration>();
@@ -154,7 +154,7 @@ void CanonicalizeEntryPointIO::Run(CloneContext& ctx,
             }
 
             ast::DecorationList new_decorations = RemoveDecorations(
-                &ctx, member->Declaration()->decorations(),
+                ctx, member->Declaration()->decorations(),
                 [](const ast::Decoration* deco) {
                   return !deco->IsAnyOf<
                       ast::BuiltinDecoration, ast::InterpolateDecoration,
@@ -166,7 +166,7 @@ void CanonicalizeEntryPointIO::Run(CloneContext& ctx,
                     member->Declaration()->decorations())) {
               // If this struct member is a builtin and we are emitting those as
               // parameters, then move it to the parameter list.
-              auto* member_ty = CreateASTTypeFor(&ctx, member->Type());
+              auto* member_ty = CreateASTTypeFor(ctx, member->Type());
               auto new_param_name = ctx.dst->Sym();
               new_parameters.push_back(
                   ctx.dst->Param(new_param_name, member_ty, new_decorations));
@@ -244,7 +244,7 @@ void CanonicalizeEntryPointIO::Run(CloneContext& ctx,
           }
 
           ast::DecorationList new_decorations = RemoveDecorations(
-              &ctx, member->Declaration()->decorations(),
+              ctx, member->Declaration()->decorations(),
               [](const ast::Decoration* deco) {
                 return !deco->IsAnyOf<
                     ast::BuiltinDecoration, ast::InterpolateDecoration,
@@ -306,7 +306,7 @@ void CanonicalizeEntryPointIO::Run(CloneContext& ctx,
             // Create a const to hold the return value expression to avoid
             // re-evaluating it multiple times.
             auto temp = ctx.dst->Sym();
-            auto* ty = CreateASTTypeFor(&ctx, ret_type);
+            auto* ty = CreateASTTypeFor(ctx, ret_type);
             auto* temp_var =
                 ctx.dst->Decl(ctx.dst->Const(temp, ty, new_ret_value()));
             ctx.InsertBefore(ret_sem->Block()->Declaration()->statements(), ret,

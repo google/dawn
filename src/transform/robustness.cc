@@ -167,9 +167,9 @@ struct Robustness::State {
           level_arg
               ? b.Call("textureDimensions", ctx.Clone(texture_arg), level_arg())
               : b.Call("textureDimensions", ctx.Clone(texture_arg));
-      auto* zero = b.Construct(CreateASTTypeFor(&ctx, coords_ty));
+      auto* zero = b.Construct(CreateASTTypeFor(ctx, coords_ty));
       auto* max = ctx.dst->Sub(
-          texture_dims, b.Construct(CreateASTTypeFor(&ctx, coords_ty), 1));
+          texture_dims, b.Construct(CreateASTTypeFor(ctx, coords_ty), 1));
       auto* clamped_coords = b.Call("clamp", ctx.Clone(coords_arg), zero, max);
       ctx.Replace(coords_arg, clamped_coords);
     }
