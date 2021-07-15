@@ -45,7 +45,7 @@ class IntrinsicTable {
   virtual const sem::Intrinsic* Lookup(
       sem::IntrinsicType type,
       const std::vector<const sem::Type*>& args,
-      const Source& source) const = 0;
+      const Source& source) = 0;
 };
 
 }  // namespace tint

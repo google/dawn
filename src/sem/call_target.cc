@@ -26,6 +26,8 @@ CallTarget::CallTarget(sem::Type* return_type, const ParameterList& parameters)
   TINT_ASSERT(Semantic, return_type);
 }
 
+CallTarget::CallTarget(const CallTarget&) = default;
+
 CallTarget::~CallTarget() = default;
 
 int IndexOf(const ParameterList& parameters, ParameterUsage usage) {

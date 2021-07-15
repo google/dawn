@@ -548,5 +548,26 @@ TEST_F(IntrinsicTableTest, OverloadOrderByMatchingParameter) {
 )");
 }
 
+TEST_F(IntrinsicTableTest, SameOverloadReturnsSameIntrinsicPointer) {
+  auto* f32 = create<sem::F32>();
+  auto* vec2_f32 = create<sem::Vector>(create<sem::F32>(), 2);
+  auto* bool_ = create<sem::Bool>();
+  auto* a = table->Lookup(IntrinsicType::kSelect, {f32, f32, bool_}, Source{});
+  ASSERT_NE(a, nullptr) << Diagnostics().str();
+
+  auto* b = table->Lookup(IntrinsicType::kSelect, {f32, f32, bool_}, Source{});
+  ASSERT_NE(b, nullptr) << Diagnostics().str();
+  ASSERT_EQ(Diagnostics().str(), "");
+
+  auto* c = table->Lookup(IntrinsicType::kSelect, {vec2_f32, vec2_f32, bool_},
+                          Source{});
+  ASSERT_NE(c, nullptr) << Diagnostics().str();
+  ASSERT_EQ(Diagnostics().str(), "");
+
+  EXPECT_EQ(a, b);
+  EXPECT_NE(a, c);
+  EXPECT_NE(b, c);
+}
+
 }  // namespace
 }  // namespace tint

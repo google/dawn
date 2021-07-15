@@ -27,8 +27,10 @@ namespace utils {
 /// @param key the map key of the item to query or add
 /// @param create a callable function-like object with the signature `V()`
 /// @return the value of the item with the given key, or the newly created item
-template <typename K, typename V, typename CREATE, typename H>
-V GetOrCreate(std::unordered_map<K, V, H>& map, K key, CREATE&& create) {
+template <typename K, typename V, typename H, typename C, typename CREATE>
+V GetOrCreate(std::unordered_map<K, V, H, C>& map,
+              const K& key,
+              CREATE&& create) {
   auto it = map.find(key);
   if (it != map.end()) {
     return it->second;

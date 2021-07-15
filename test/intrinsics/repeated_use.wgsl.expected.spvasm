@@ -1,0 +1,120 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 121
+; Schema: 0
+               OpCapability Shader
+         %12 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+       %bool = OpTypeBool
+     %v4bool = OpTypeVector %bool 4
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+         %11 = OpConstantNull %v4float
+       %uint = OpTypeInt 32 0
+%uint_133693440 = OpConstant %uint 133693440
+%uint_524288 = OpConstant %uint 524288
+%uint_133169152 = OpConstant %uint 133169152
+     %v4uint = OpTypeVector %uint 4
+    %float_1 = OpConstant %float 1
+         %27 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
+    %float_2 = OpConstant %float 2
+    %float_3 = OpConstant %float 3
+    %float_4 = OpConstant %float 4
+         %39 = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
+     %v3bool = OpTypeVector %bool 3
+    %v3float = OpTypeVector %float 3
+         %50 = OpConstantNull %v3float
+     %v3uint = OpTypeVector %uint 3
+         %60 = OpConstantComposite %v3float %float_1 %float_1 %float_1
+         %69 = OpConstantComposite %v3float %float_1 %float_2 %float_3
+     %v2bool = OpTypeVector %bool 2
+    %v2float = OpTypeVector %float 2
+         %80 = OpConstantNull %v2float
+     %v2uint = OpTypeVector %uint 2
+         %90 = OpConstantComposite %v2float %float_1 %float_1
+         %99 = OpConstantComposite %v2float %float_1 %float_2
+       %main = OpFunction %void None %1
+          %4 = OpLabel
+         %18 = OpCompositeConstruct %v4uint %uint_133693440 %uint_133693440 %uint_133693440 %uint_133693440
+         %19 = OpCompositeConstruct %v4uint %uint_524288 %uint_524288 %uint_524288 %uint_524288
+         %20 = OpCompositeConstruct %v4uint %uint_133169152 %uint_133169152 %uint_133169152 %uint_133169152
+         %21 = OpBitcast %v4uint %11
+         %22 = OpBitwiseAnd %v4uint %21 %18
+         %23 = OpExtInst %v4uint %12 UClamp %22 %19 %20
+          %6 = OpIEqual %v4bool %22 %23
+         %28 = OpCompositeConstruct %v4uint %uint_133693440 %uint_133693440 %uint_133693440 %uint_133693440
+         %29 = OpCompositeConstruct %v4uint %uint_524288 %uint_524288 %uint_524288 %uint_524288
+         %30 = OpCompositeConstruct %v4uint %uint_133169152 %uint_133169152 %uint_133169152 %uint_133169152
+         %31 = OpBitcast %v4uint %27
+         %32 = OpBitwiseAnd %v4uint %31 %28
+         %33 = OpExtInst %v4uint %12 UClamp %32 %29 %30
+         %25 = OpIEqual %v4bool %32 %33
+         %40 = OpCompositeConstruct %v4uint %uint_133693440 %uint_133693440 %uint_133693440 %uint_133693440
+         %41 = OpCompositeConstruct %v4uint %uint_524288 %uint_524288 %uint_524288 %uint_524288
+         %42 = OpCompositeConstruct %v4uint %uint_133169152 %uint_133169152 %uint_133169152 %uint_133169152
+         %43 = OpBitcast %v4uint %39
+         %44 = OpBitwiseAnd %v4uint %43 %40
+         %45 = OpExtInst %v4uint %12 UClamp %44 %41 %42
+         %35 = OpIEqual %v4bool %44 %45
+         %52 = OpCompositeConstruct %v3uint %uint_133693440 %uint_133693440 %uint_133693440
+         %53 = OpCompositeConstruct %v3uint %uint_524288 %uint_524288 %uint_524288
+         %54 = OpCompositeConstruct %v3uint %uint_133169152 %uint_133169152 %uint_133169152
+         %55 = OpBitcast %v3uint %50
+         %56 = OpBitwiseAnd %v3uint %55 %52
+         %57 = OpExtInst %v3uint %12 UClamp %56 %53 %54
+         %47 = OpIEqual %v3bool %56 %57
+         %61 = OpCompositeConstruct %v3uint %uint_133693440 %uint_133693440 %uint_133693440
+         %62 = OpCompositeConstruct %v3uint %uint_524288 %uint_524288 %uint_524288
+         %63 = OpCompositeConstruct %v3uint %uint_133169152 %uint_133169152 %uint_133169152
+         %64 = OpBitcast %v3uint %60
+         %65 = OpBitwiseAnd %v3uint %64 %61
+         %66 = OpExtInst %v3uint %12 UClamp %65 %62 %63
+         %59 = OpIEqual %v3bool %65 %66
+         %70 = OpCompositeConstruct %v3uint %uint_133693440 %uint_133693440 %uint_133693440
+         %71 = OpCompositeConstruct %v3uint %uint_524288 %uint_524288 %uint_524288
+         %72 = OpCompositeConstruct %v3uint %uint_133169152 %uint_133169152 %uint_133169152
+         %73 = OpBitcast %v3uint %69
+         %74 = OpBitwiseAnd %v3uint %73 %70
+         %75 = OpExtInst %v3uint %12 UClamp %74 %71 %72
+         %68 = OpIEqual %v3bool %74 %75
+         %82 = OpCompositeConstruct %v2uint %uint_133693440 %uint_133693440
+         %83 = OpCompositeConstruct %v2uint %uint_524288 %uint_524288
+         %84 = OpCompositeConstruct %v2uint %uint_133169152 %uint_133169152
+         %85 = OpBitcast %v2uint %80
+         %86 = OpBitwiseAnd %v2uint %85 %82
+         %87 = OpExtInst %v2uint %12 UClamp %86 %83 %84
+         %77 = OpIEqual %v2bool %86 %87
+         %91 = OpCompositeConstruct %v2uint %uint_133693440 %uint_133693440
+         %92 = OpCompositeConstruct %v2uint %uint_524288 %uint_524288
+         %93 = OpCompositeConstruct %v2uint %uint_133169152 %uint_133169152
+         %94 = OpBitcast %v2uint %90
+         %95 = OpBitwiseAnd %v2uint %94 %91
+         %96 = OpExtInst %v2uint %12 UClamp %95 %92 %93
+         %89 = OpIEqual %v2bool %95 %96
+        %100 = OpCompositeConstruct %v2uint %uint_133693440 %uint_133693440
+        %101 = OpCompositeConstruct %v2uint %uint_524288 %uint_524288
+        %102 = OpCompositeConstruct %v2uint %uint_133169152 %uint_133169152
+        %103 = OpBitcast %v2uint %99
+        %104 = OpBitwiseAnd %v2uint %103 %100
+        %105 = OpExtInst %v2uint %12 UClamp %104 %101 %102
+         %98 = OpIEqual %v2bool %104 %105
+        %108 = OpBitcast %uint %float_1
+        %109 = OpBitwiseAnd %uint %108 %uint_133693440
+        %110 = OpExtInst %uint %12 UClamp %109 %uint_524288 %uint_133169152
+        %107 = OpIEqual %bool %109 %110
+        %113 = OpBitcast %uint %float_2
+        %114 = OpBitwiseAnd %uint %113 %uint_133693440
+        %115 = OpExtInst %uint %12 UClamp %114 %uint_524288 %uint_133169152
+        %112 = OpIEqual %bool %114 %115
+        %118 = OpBitcast %uint %float_3
+        %119 = OpBitwiseAnd %uint %118 %uint_133693440
+        %120 = OpExtInst %uint %12 UClamp %119 %uint_524288 %uint_133169152
+        %117 = OpIEqual %bool %119 %120
+               OpReturn
+               OpFunctionEnd

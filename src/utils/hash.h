@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <cstdio>
 #include <functional>
+#include <vector>
 
 namespace tint {
 namespace utils {
@@ -49,6 +50,15 @@ template <typename T>
 void HashCombine(size_t* hash, const T& value) {
   constexpr size_t offset = HashCombineOffset<sizeof(size_t)>::value();
   *hash ^= std::hash<T>()(value) + offset + (*hash << 6) + (*hash >> 2);
+}
+
+// Helper for hashing vectors
+template <typename T>
+void HashCombine(size_t* hash, const std::vector<T>& vector) {
+  HashCombine(hash, vector.size());
+  for (auto& el : vector) {
+    HashCombine(hash, el);
+  }
 }
 
 template <typename T, typename... ARGS>

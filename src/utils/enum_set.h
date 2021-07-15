@@ -16,6 +16,7 @@
 #define SRC_UTILS_ENUM_SET_H_
 
 #include <cstdint>
+#include <functional>
 #include <type_traits>
 
 namespace tint {
@@ -58,6 +59,19 @@ struct EnumSet {
   /// @return true if the set contains `e`
   inline bool Contains(Enum e) { return (set & Bit(e)) != 0; }
 
+  /// Equality operator
+  /// @param rhs the other EnumSet to compare this to
+  /// @return true if this EnumSet is equal to rhs
+  inline bool operator==(const EnumSet& rhs) const { return set == rhs.set; }
+
+  /// Inequality operator
+  /// @param rhs the other EnumSet to compare this to
+  /// @return true if this EnumSet is not equal to rhs
+  inline bool operator!=(const EnumSet& rhs) const { return set != rhs.set; }
+
+  /// @return the underlying value for the EnumSet
+  inline uint64_t Value() const { return set; }
+
  private:
   static constexpr uint64_t Bit(Enum value) {
     return static_cast<uint64_t>(1) << static_cast<uint64_t>(value);
@@ -75,5 +89,20 @@ struct EnumSet {
 
 }  // namespace utils
 }  // namespace tint
+
+namespace std {
+
+/// Custom std::hash specialization for tint::utils::EnumSet<T>
+template <typename T>
+class hash<tint::utils::EnumSet<T>> {
+ public:
+  /// @param e the EnumSet to create a hash for
+  /// @return the hash value
+  inline std::size_t operator()(const tint::utils::EnumSet<T>& e) const {
+    return std::hash<uint64_t>()(e.Value());
+  }
+};
+
+}  // namespace std
 
 #endif  // SRC_UTILS_ENUM_SET_H_

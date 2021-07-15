@@ -27,6 +27,8 @@
 #include "src/sem/pipeline_stage_set.h"
 #include "src/sem/sampled_texture_type.h"
 #include "src/sem/storage_texture_type.h"
+#include "src/utils/get_or_create.h"
+#include "src/utils/hash.h"
 #include "src/utils/scoped_assignment.h"
 
 namespace tint {
@@ -706,13 +708,13 @@ class Impl : public IntrinsicTable {
 
   const sem::Intrinsic* Lookup(sem::IntrinsicType intrinsic_type,
                                const std::vector<const sem::Type*>& args,
-                               const Source& source) const override;
+                               const Source& source) override;
 
  private:
   const sem::Intrinsic* Match(sem::IntrinsicType intrinsic_type,
                               const OverloadInfo& overload,
                               const std::vector<const sem::Type*>& args,
-                              int& match_score) const;
+                              int& match_score);
 
   MatchState Match(ClosedState& closed,
                    const OverloadInfo& overload,
@@ -724,6 +726,7 @@ class Impl : public IntrinsicTable {
 
   ProgramBuilder& builder;
   Matchers matchers;
+  std::unordered_map<sem::Intrinsic, sem::Intrinsic*> intrinsics;
 };
 
 /// @return a string representing a call to an intrinsic with the given argument
@@ -760,7 +763,7 @@ Impl::Impl(ProgramBuilder& b) : builder(b) {}
 
 const sem::Intrinsic* Impl::Lookup(sem::IntrinsicType intrinsic_type,
                                    const std::vector<const sem::Type*>& args,
-                                   const Source& source) const {
+                                   const Source& source) {
   // Candidate holds information about a mismatched overload that could be what
   // the user intended to call.
   struct Candidate {
@@ -809,7 +812,7 @@ const sem::Intrinsic* Impl::Lookup(sem::IntrinsicType intrinsic_type,
 const sem::Intrinsic* Impl::Match(sem::IntrinsicType intrinsic_type,
                                   const OverloadInfo& overload,
                                   const std::vector<const sem::Type*>& args,
-                                  int& match_score) const {
+                                  int& match_score) {
   // Score wait for argument <-> parameter count matches / mismatches
   constexpr int kScorePerParamArgMismatch = -1;
   constexpr int kScorePerMatchedParam = 2;
@@ -896,9 +899,14 @@ const sem::Intrinsic* Impl::Match(sem::IntrinsicType intrinsic_type,
     return_type = builder.create<sem::Void>();
   }
 
-  return builder.create<sem::Intrinsic>(
-      intrinsic_type, const_cast<sem::Type*>(return_type),
-      std::move(parameters), overload.supported_stages, overload.is_deprecated);
+  sem::Intrinsic intrinsic(intrinsic_type, const_cast<sem::Type*>(return_type),
+                           std::move(parameters), overload.supported_stages,
+                           overload.is_deprecated);
+
+  // De-duplicate intrinsics that are identical.
+  return utils::GetOrCreate(intrinsics, intrinsic, [&] {
+    return builder.create<sem::Intrinsic>(intrinsic);
+  });
 }
 
 MatchState Impl::Match(ClosedState& closed,

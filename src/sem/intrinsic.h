@@ -20,6 +20,7 @@
 #include "src/sem/call_target.h"
 #include "src/sem/intrinsic_type.h"
 #include "src/sem/pipeline_stage_set.h"
+#include "src/utils/hash.h"
 
 namespace tint {
 namespace sem {
@@ -91,6 +92,9 @@ class Intrinsic : public Castable<Intrinsic, CallTarget> {
             PipelineStageSet supported_stages,
             bool is_deprecated);
 
+  /// Copy constructor
+  Intrinsic(const Intrinsic&);
+
   /// Destructor
   ~Intrinsic() override;
 
@@ -147,7 +151,31 @@ class Intrinsic : public Castable<Intrinsic, CallTarget> {
 /// matches the name in the WGSL spec.
 std::ostream& operator<<(std::ostream& out, IntrinsicType i);
 
+/// Equality operator for Intrinsics
+bool operator==(const Intrinsic& a, const Intrinsic& b);
+
+/// Inequality operator for Intrinsics
+static inline bool operator!=(const Intrinsic& a, const Intrinsic& b) {
+  return !(a == b);
+}
+
 }  // namespace sem
 }  // namespace tint
+
+namespace std {
+
+/// Custom std::hash specialization for tint::sem::Intrinsic
+template <>
+class hash<tint::sem::Intrinsic> {
+ public:
+  /// @param i the Intrinsic to create a hash for
+  /// @return the hash value
+  inline std::size_t operator()(const tint::sem::Intrinsic& i) const {
+    return tint::utils::Hash(i.Type(), i.SupportedStages(), i.ReturnType(),
+                             i.Parameters(), i.IsDeprecated());
+  }
+};
+
+}  // namespace std
 
 #endif  // SRC_SEM_INTRINSIC_H_

@@ -51,8 +51,8 @@ struct SamplerTexturePair {
 
 namespace std {
 
-/// Custom std::hash specialization for ttint::inspector::SamplerTexturePair so
-/// SamplerTexturePairss be used as keys for std::unordered_map and
+/// Custom std::hash specialization for tint::inspector::SamplerTexturePair so
+/// SamplerTexturePairs be used as keys for std::unordered_map and
 /// std::unordered_set.
 template <>
 class hash<tint::inspector::SamplerTexturePair> {

@@ -59,6 +59,30 @@ TEST(EnumSetTest, Remove) {
   EXPECT_FALSE(set.Contains(E::C));
 }
 
+TEST(EnumSetTest, Equality) {
+  EXPECT_TRUE(EnumSet<E>(E::A, E::B) == EnumSet<E>(E::A, E::B));
+  EXPECT_FALSE(EnumSet<E>(E::A, E::B) == EnumSet<E>(E::A, E::C));
+}
+
+TEST(EnumSetTest, Inequality) {
+  EXPECT_FALSE(EnumSet<E>(E::A, E::B) != EnumSet<E>(E::A, E::B));
+  EXPECT_TRUE(EnumSet<E>(E::A, E::B) != EnumSet<E>(E::A, E::C));
+}
+
+TEST(EnumSetTest, Hash) {
+  auto hash = [&](EnumSet<E> s) { return std::hash<EnumSet<E>>()(s); };
+  EXPECT_EQ(hash(EnumSet<E>(E::A, E::B)), hash(EnumSet<E>(E::A, E::B)));
+  EXPECT_NE(hash(EnumSet<E>(E::A, E::B)), hash(EnumSet<E>(E::A, E::C)));
+}
+
+TEST(EnumSetTest, Value) {
+  EXPECT_EQ(EnumSet<E>().Value(), 0u);
+  EXPECT_EQ(EnumSet<E>(E::A).Value(), 1u);
+  EXPECT_EQ(EnumSet<E>(E::B).Value(), 2u);
+  EXPECT_EQ(EnumSet<E>(E::C).Value(), 4u);
+  EXPECT_EQ(EnumSet<E>(E::A, E::C).Value(), 5u);
+}
+
 }  // namespace
 }  // namespace utils
 }  // namespace tint

@@ -20,6 +20,7 @@
 #include "src/sem/node.h"
 #include "src/sem/parameter_usage.h"
 #include "src/sem/sampler_type.h"
+#include "src/utils/hash.h"
 
 namespace tint {
 
@@ -37,9 +38,14 @@ struct Parameter {
 
 std::ostream& operator<<(std::ostream& out, Parameter parameter);
 
-/// Comparison operator for Parameters
+/// Equality operator for Parameters
 static inline bool operator==(const Parameter& a, const Parameter& b) {
   return a.type == b.type && a.usage == b.usage;
+}
+
+/// Inequality operator for Parameters
+static inline bool operator!=(const Parameter& a, const Parameter& b) {
+  return !(a == b);
 }
 
 /// ParameterList is a list of Parameter
@@ -59,6 +65,9 @@ class CallTarget : public Castable<CallTarget, Node> {
   /// @param parameters the parameters for the call target
   CallTarget(sem::Type* return_type, const ParameterList& parameters);
 
+  /// Copy constructor
+  CallTarget(const CallTarget&);
+
   /// @return the return type of the call target
   sem::Type* ReturnType() const { return return_type_; }
 
@@ -75,5 +84,20 @@ class CallTarget : public Castable<CallTarget, Node> {
 
 }  // namespace sem
 }  // namespace tint
+
+namespace std {
+
+/// Custom std::hash specialization for tint::sem::Parameter
+template <>
+class hash<tint::sem::Parameter> {
+ public:
+  /// @param p the tint::sem::Parameter to create a hash for
+  /// @return the hash value
+  inline std::size_t operator()(const tint::sem::Parameter& p) const {
+    return tint::utils::Hash(p.type, p.usage);
+  }
+};
+
+}  // namespace std
 
 #endif  // SRC_SEM_CALL_TARGET_H_
