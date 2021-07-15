@@ -263,7 +263,7 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferNoError_Basic) {
              create<ast::GroupDecoration>(0),
          });
 
-  ASSERT_TRUE(r()->Resolve());
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverStorageClassValidationTest, UniformBufferNoError_Aliases) {
@@ -279,7 +279,7 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferNoError_Aliases) {
              create<ast::GroupDecoration>(0),
          });
 
-  ASSERT_TRUE(r()->Resolve());
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 }  // namespace

@@ -16,9 +16,11 @@
 #define SRC_RESOLVER_RESOLVER_H_
 
 #include <memory>
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "src/intrinsic_table.h"
@@ -122,6 +124,9 @@ class Resolver {
     const ast::CallExpression* call;
     const sem::Intrinsic* intrinsic;
   };
+
+  std::set<std::pair<const sem::Struct*, ast::StorageClass>>
+      valid_struct_storage_layouts_;
 
   /// Structure holding semantic information about a function.
   /// Used to build the sem::Function nodes at the end of resolving.
@@ -319,6 +324,10 @@ class Resolver {
                                 const sem::Array* arr_type);
   bool ValidateTypeDecl(const ast::TypeDecl* named_type) const;
   bool ValidateNoDuplicateDecorations(const ast::DecorationList& decorations);
+  // sem::Struct is assumed to have at least one member
+  bool ValidateStorageClassLayout(const sem::Struct* type,
+                                  ast::StorageClass sc);
+  bool ValidateStorageClassLayout(const VariableInfo* info);
 
   /// @returns the sem::Type for the ast::Type `ty`, building it if it
   /// hasn't been constructed already. If an error is raised, nullptr is
