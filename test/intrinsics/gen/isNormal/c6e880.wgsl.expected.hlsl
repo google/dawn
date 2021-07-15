@@ -1,7 +1,11 @@
+bool tint_isNormal(float param_0) {
+  uint exponent = asuint(param_0) & 0x7f80000;
+  uint clamped = clamp(exponent, 0x0080000, 0x7f00000);
+  return clamped == exponent;
+}
+
 void isNormal_c6e880() {
-  uint tint_isnormal_exponent = asuint(1.0f) & 0x7f80000;
-  uint tint_isnormal_clamped = clamp(tint_isnormal_exponent, 0x0080000, 0x7f00000);
-  bool res = (tint_isnormal_clamped == tint_isnormal_exponent);
+  bool res = tint_isNormal(1.0f);
 }
 
 struct tint_symbol {

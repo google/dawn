@@ -1,6 +1,10 @@
+uint tint_pack2x16snorm(float2 param_0) {
+  int2 i = int2(round(clamp(param_0, -1.0, 1.0) * 32767.0)) & 0xffff;
+  return asuint(i.x | i.y << 16);
+}
+
 void pack2x16snorm_6c169b() {
-  int2 tint_tmp = int2(round(clamp(float2(0.0f, 0.0f), -1.0, 1.0) * 32767.0)) & 0xffff;
-  uint res = asuint(tint_tmp.x | tint_tmp.y << 16);
+  uint res = tint_pack2x16snorm(float2(0.0f, 0.0f));
 }
 
 struct tint_symbol {

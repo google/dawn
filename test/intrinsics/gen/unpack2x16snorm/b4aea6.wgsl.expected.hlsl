@@ -1,7 +1,11 @@
+float2 tint_unpack2x16snorm(uint param_0) {
+  int j = int(param_0);
+  int2 i = int2(j << 16, j) >> 16;
+  return clamp(float2(i) / 32767.0, -1.0, 1.0);
+}
+
 void unpack2x16snorm_b4aea6() {
-  int tint_tmp_1 = int(1u);
-  int2 tint_tmp = int2(tint_tmp_1 << 16, tint_tmp_1) >> 16;
-  float2 res = clamp(float2(tint_tmp) / 32767.0, -1.0, 1.0);
+  float2 res = tint_unpack2x16snorm(1u);
 }
 
 struct tint_symbol {

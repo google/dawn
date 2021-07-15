@@ -1275,219 +1275,200 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
                                   const sem::Intrinsic* intrinsic) {
   // Exponent is an integer in WGSL, but HLSL wants a float.
   // We need to make the call with a temporary float, and then cast.
+  return CallIntrinsicHelper(
+      out, expr, intrinsic,
+      [&](TextBuffer* b, const std::vector<std::string>& params) {
+        auto* significand_ty = intrinsic->Parameters()[0].type;
+        auto significand = params[0];
+        auto* exponent_ty = intrinsic->Parameters()[1].type;
+        auto exponent = params[1];
 
-  auto signficand = intrinsic->Parameters()[0];
-  auto exponent = intrinsic->Parameters()[1];
+        std::string width;
+        if (auto* vec = significand_ty->As<sem::Vector>()) {
+          width = std::to_string(vec->size());
+        }
 
-  std::string width;
-  if (auto* vec = signficand.type->As<sem::Vector>()) {
-    width = std::to_string(vec->size());
-  }
-
-  // Exponent is an integer, which HLSL does not have an overload for.
-  // We need to cast from a float.
-  auto float_exp = UniqueIdentifier(kTempNamePrefix);
-  auto significand = UniqueIdentifier(kTempNamePrefix);
-  line() << "float" << width << " " << float_exp << ";";
-  {
-    auto pre = line();
-    pre << "float" << width << " " << significand << " = frexp(";
-    if (!EmitExpression(pre, expr->params()[0])) {
-      return false;
-    }
-    pre << ", " << float_exp << ");";
-  }
-  {
-    auto pre = line();
-    if (!EmitExpression(pre, expr->params()[1])) {
-      return false;
-    }
-    pre << " = ";
-    if (!EmitType(pre, exponent.type->UnwrapPtr(), ast::StorageClass::kNone,
-                  ast::Access::kUndefined, "")) {
-      return false;
-    }
-    pre << "(" << float_exp << ");";
-  }
-
-  out << significand;
-  return true;
+        // Exponent is an integer, which HLSL does not have an overload for.
+        // We need to cast from a float.
+        line(b) << "float" << width << " float_exp;";
+        line(b) << "float" << width << " significand = frexp(" << significand
+                << ", float_exp);";
+        {
+          auto l = line(b);
+          l << exponent << " = ";
+          if (!EmitType(l, exponent_ty->UnwrapPtr(), ast::StorageClass::kNone,
+                        ast::Access::kUndefined, "")) {
+            return false;
+          }
+          l << "(float_exp);";
+        }
+        line(b) << "return significand;";
+        return true;
+      });
 }
 
 bool GeneratorImpl::EmitIsNormalCall(std::ostream& out,
                                      ast::CallExpression* expr,
                                      const sem::Intrinsic* intrinsic) {
   // HLSL doesn't have a isNormal intrinsic, we need to emulate
-  auto input = intrinsic->Parameters()[0];
+  return CallIntrinsicHelper(
+      out, expr, intrinsic,
+      [&](TextBuffer* b, const std::vector<std::string>& params) {
+        auto* input_ty = intrinsic->Parameters()[0].type;
 
-  std::string width;
-  if (auto* vec = input.type->As<sem::Vector>()) {
-    width = std::to_string(vec->size());
-  }
+        std::string width;
+        if (auto* vec = input_ty->As<sem::Vector>()) {
+          width = std::to_string(vec->size());
+        }
 
-  constexpr auto* kExponentMask = "0x7f80000";
-  constexpr auto* kMinNormalExponent = "0x0080000";
-  constexpr auto* kMaxNormalExponent = "0x7f00000";
+        constexpr auto* kExponentMask = "0x7f80000";
+        constexpr auto* kMinNormalExponent = "0x0080000";
+        constexpr auto* kMaxNormalExponent = "0x7f00000";
 
-  auto exponent = UniqueIdentifier("tint_isnormal_exponent");
-  auto clamped = UniqueIdentifier("tint_isnormal_clamped");
-
-  {
-    auto pre = line();
-    pre << "uint" << width << " " << exponent << " = asuint(";
-    if (!EmitExpression(pre, expr->params()[0])) {
-      return false;
-    }
-    pre << ") & " << kExponentMask << ";";
-  }
-  line() << "uint" << width << " " << clamped << " = "
-         << "clamp(" << exponent << ", " << kMinNormalExponent << ", "
-         << kMaxNormalExponent << ");";
-
-  out << "(" << clamped << " == " << exponent << ")";
-  return true;
+        line(b) << "uint" << width << " exponent = asuint(" << params[0]
+                << ") & " << kExponentMask << ";";
+        line(b) << "uint" << width << " clamped = "
+                << "clamp(exponent, " << kMinNormalExponent << ", "
+                << kMaxNormalExponent << ");";
+        line(b) << "return clamped == exponent;";
+        return true;
+      });
 }
 
 bool GeneratorImpl::EmitDataPackingCall(std::ostream& out,
                                         ast::CallExpression* expr,
                                         const sem::Intrinsic* intrinsic) {
-  auto* param = expr->params()[0];
-  auto tmp_name = UniqueIdentifier(kTempNamePrefix);
-  std::ostringstream expr_out;
-  if (!EmitExpression(expr_out, param)) {
-    return false;
-  }
-  uint32_t dims = 2;
-  bool is_signed = false;
-  uint32_t scale = 65535;
-  if (intrinsic->Type() == sem::IntrinsicType::kPack4x8snorm ||
-      intrinsic->Type() == sem::IntrinsicType::kPack4x8unorm) {
-    dims = 4;
-    scale = 255;
-  }
-  if (intrinsic->Type() == sem::IntrinsicType::kPack4x8snorm ||
-      intrinsic->Type() == sem::IntrinsicType::kPack2x16snorm) {
-    is_signed = true;
-    scale = (scale - 1) / 2;
-  }
-  switch (intrinsic->Type()) {
-    case sem::IntrinsicType::kPack4x8snorm:
-    case sem::IntrinsicType::kPack4x8unorm:
-    case sem::IntrinsicType::kPack2x16snorm:
-    case sem::IntrinsicType::kPack2x16unorm: {
-      {
-        auto pre = line();
-        pre << (is_signed ? "" : "u") << "int" << dims << " " << tmp_name
-            << " = " << (is_signed ? "" : "u") << "int" << dims
-            << "(round(clamp(" << expr_out.str() << ", "
-            << (is_signed ? "-1.0" : "0.0") << ", 1.0) * " << scale << ".0))";
-        if (is_signed) {
-          pre << " & " << (dims == 4 ? "0xff" : "0xffff");
+  return CallIntrinsicHelper(
+      out, expr, intrinsic,
+      [&](TextBuffer* b, const std::vector<std::string>& params) {
+        uint32_t dims = 2;
+        bool is_signed = false;
+        uint32_t scale = 65535;
+        if (intrinsic->Type() == sem::IntrinsicType::kPack4x8snorm ||
+            intrinsic->Type() == sem::IntrinsicType::kPack4x8unorm) {
+          dims = 4;
+          scale = 255;
         }
-        pre << ";";
-      }
-      if (is_signed) {
-        out << "asuint";
-      }
-      out << "(";
-      out << tmp_name << ".x | " << tmp_name << ".y << " << (32 / dims);
-      if (dims == 4) {
-        out << " | " << tmp_name << ".z << 16 | " << tmp_name << ".w << 24";
-      }
-      out << ")";
-      break;
-    }
-    case sem::IntrinsicType::kPack2x16float: {
-      line() << "uint2 " << tmp_name << " = f32tof16(" << expr_out.str()
-             << ");";
-      out << "(" << tmp_name << ".x | " << tmp_name << ".y << 16)";
-      break;
-    }
-    default:
-      diagnostics_.add_error(
-          diag::System::Writer,
-          "Internal error: unhandled data packing intrinsic");
-      return false;
-  }
+        if (intrinsic->Type() == sem::IntrinsicType::kPack4x8snorm ||
+            intrinsic->Type() == sem::IntrinsicType::kPack2x16snorm) {
+          is_signed = true;
+          scale = (scale - 1) / 2;
+        }
+        switch (intrinsic->Type()) {
+          case sem::IntrinsicType::kPack4x8snorm:
+          case sem::IntrinsicType::kPack4x8unorm:
+          case sem::IntrinsicType::kPack2x16snorm:
+          case sem::IntrinsicType::kPack2x16unorm: {
+            {
+              auto l = line(b);
+              l << (is_signed ? "" : "u") << "int" << dims
+                << " i = " << (is_signed ? "" : "u") << "int" << dims
+                << "(round(clamp(" << params[0] << ", "
+                << (is_signed ? "-1.0" : "0.0") << ", 1.0) * " << scale
+                << ".0))";
+              if (is_signed) {
+                l << " & " << (dims == 4 ? "0xff" : "0xffff");
+              }
+              l << ";";
+            }
+            {
+              auto l = line(b);
+              l << "return ";
+              if (is_signed) {
+                l << "asuint";
+              }
+              l << "(i.x | i.y << " << (32 / dims);
+              if (dims == 4) {
+                l << " | i.z << 16 | i.w << 24";
+              }
+              l << ");";
+            }
+            break;
+          }
+          case sem::IntrinsicType::kPack2x16float: {
+            line(b) << "uint2 i = f32tof16(" << params[0] << ");";
+            line(b) << "return i.x | (i.y << 16);";
+            break;
+          }
+          default:
+            diagnostics_.add_error(
+                diag::System::Writer,
+                "Internal error: unhandled data packing intrinsic");
+            return false;
+        }
 
-  return true;
+        return true;
+      });
 }
 
 bool GeneratorImpl::EmitDataUnpackingCall(std::ostream& out,
                                           ast::CallExpression* expr,
                                           const sem::Intrinsic* intrinsic) {
-  auto* param = expr->params()[0];
-  auto tmp_name = UniqueIdentifier(kTempNamePrefix);
-  std::ostringstream expr_out;
-  if (!EmitExpression(expr_out, param)) {
-    return false;
-  }
-  uint32_t dims = 2;
-  bool is_signed = false;
-  uint32_t scale = 65535;
-  if (intrinsic->Type() == sem::IntrinsicType::kUnpack4x8snorm ||
-      intrinsic->Type() == sem::IntrinsicType::kUnpack4x8unorm) {
-    dims = 4;
-    scale = 255;
-  }
-  if (intrinsic->Type() == sem::IntrinsicType::kUnpack4x8snorm ||
-      intrinsic->Type() == sem::IntrinsicType::kUnpack2x16snorm) {
-    is_signed = true;
-    scale = (scale - 1) / 2;
-  }
-  switch (intrinsic->Type()) {
-    case sem::IntrinsicType::kUnpack4x8snorm:
-    case sem::IntrinsicType::kUnpack2x16snorm: {
-      auto tmp_name2 = UniqueIdentifier(kTempNamePrefix);
-      line() << "int " << tmp_name2 << " = int(" << expr_out.str() << ");";
-      {  // Perform sign extension on the converted values.
-        auto pre = line();
-        pre << "int" << dims << " " << tmp_name << " = int" << dims << "(";
-        if (dims == 2) {
-          pre << tmp_name2 << " << 16, " << tmp_name2 << ") >> 16";
-        } else {
-          pre << tmp_name2 << " << 24, " << tmp_name2 << " << 16, " << tmp_name2
-              << " << 8, " << tmp_name2 << ") >> 24";
+  return CallIntrinsicHelper(
+      out, expr, intrinsic,
+      [&](TextBuffer* b, const std::vector<std::string>& params) {
+        uint32_t dims = 2;
+        bool is_signed = false;
+        uint32_t scale = 65535;
+        if (intrinsic->Type() == sem::IntrinsicType::kUnpack4x8snorm ||
+            intrinsic->Type() == sem::IntrinsicType::kUnpack4x8unorm) {
+          dims = 4;
+          scale = 255;
         }
-        pre << ";";
-      }
-
-      out << "clamp(float" << dims << "(" << tmp_name << ") / " << scale
-          << ".0, " << (is_signed ? "-1.0" : "0.0") << ", 1.0)";
-      break;
-    }
-    case sem::IntrinsicType::kUnpack4x8unorm:
-    case sem::IntrinsicType::kUnpack2x16unorm: {
-      auto tmp_name2 = UniqueIdentifier(kTempNamePrefix);
-      line() << "uint " << tmp_name2 << " = " << expr_out.str() << ";";
-      {
-        auto pre = line();
-        pre << "uint" << dims << " " << tmp_name << " = uint" << dims << "(";
-        pre << tmp_name2 << " & " << (dims == 2 ? "0xffff" : "0xff") << ", ";
-        if (dims == 4) {
-          pre << "(" << tmp_name2 << " >> " << (32 / dims) << ") & 0xff, ("
-              << tmp_name2 << " >> 16) & 0xff, " << tmp_name2 << " >> 24";
-        } else {
-          pre << tmp_name2 << " >> " << (32 / dims);
+        if (intrinsic->Type() == sem::IntrinsicType::kUnpack4x8snorm ||
+            intrinsic->Type() == sem::IntrinsicType::kUnpack2x16snorm) {
+          is_signed = true;
+          scale = (scale - 1) / 2;
         }
-        pre << ");";
-      }
-      out << "float" << dims << "(" << tmp_name << ") / " << scale << ".0";
-      break;
-    }
-    case sem::IntrinsicType::kUnpack2x16float:
-      line() << "uint " << tmp_name << " = " << expr_out.str() << ";";
-      out << "f16tof32(uint2(" << tmp_name << " & 0xffff, " << tmp_name
-          << " >> 16))";
-      break;
-    default:
-      diagnostics_.add_error(
-          diag::System::Writer,
-          "Internal error: unhandled data packing intrinsic");
-      return false;
-  }
+        switch (intrinsic->Type()) {
+          case sem::IntrinsicType::kUnpack4x8snorm:
+          case sem::IntrinsicType::kUnpack2x16snorm: {
+            line(b) << "int j = int(" << params[0] << ");";
+            {  // Perform sign extension on the converted values.
+              auto l = line(b);
+              l << "int" << dims << " i = int" << dims << "(";
+              if (dims == 2) {
+                l << "j << 16, j) >> 16";
+              } else {
+                l << "j << 24, j << 16, j << 8, j) >> 24";
+              }
+              l << ";";
+            }
+            line(b) << "return clamp(float" << dims << "(i) / " << scale
+                    << ".0, " << (is_signed ? "-1.0" : "0.0") << ", 1.0);";
+            break;
+          }
+          case sem::IntrinsicType::kUnpack4x8unorm:
+          case sem::IntrinsicType::kUnpack2x16unorm: {
+            line(b) << "uint j = " << params[0] << ";";
+            {
+              auto l = line(b);
+              l << "uint" << dims << " i = uint" << dims << "(";
+              l << "j & " << (dims == 2 ? "0xffff" : "0xff") << ", ";
+              if (dims == 4) {
+                l << "(j >> " << (32 / dims)
+                  << ") & 0xff, (j >> 16) & 0xff, j >> 24";
+              } else {
+                l << "j >> " << (32 / dims);
+              }
+              l << ");";
+            }
+            line(b) << "return float" << dims << "(i) / " << scale << ".0;";
+            break;
+          }
+          case sem::IntrinsicType::kUnpack2x16float:
+            line(b) << "uint i = " << params[0] << ";";
+            line(b) << "return f16tof32(uint2(i & 0xffff, i >> 16));";
+            break;
+          default:
+            diagnostics_.add_error(
+                diag::System::Writer,
+                "Internal error: unhandled data packing intrinsic");
+            return false;
+        }
 
-  return true;
+        return true;
+      });
 }
 
 bool GeneratorImpl::EmitBarrierCall(std::ostream& out,
@@ -3247,19 +3228,75 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
   return true;
 }
 
-std::string GeneratorImpl::get_buffer_name(ast::Expression* expr) {
-  for (;;) {
-    if (auto* ident = expr->As<ast::IdentifierExpression>()) {
-      return builder_.Symbols().NameFor(ident->symbol());
-    } else if (auto* member = expr->As<ast::MemberAccessorExpression>()) {
-      expr = member->structure();
-    } else if (auto* array = expr->As<ast::ArrayAccessorExpression>()) {
-      expr = array->array();
-    } else {
-      break;
+template <typename F>
+bool GeneratorImpl::CallIntrinsicHelper(std::ostream& out,
+                                        ast::CallExpression* call,
+                                        const sem::Intrinsic* intrinsic,
+                                        F&& build) {
+  // Generate the helper function if it hasn't been created already
+  auto fn = utils::GetOrCreate(intrinsics_, intrinsic, [&]() -> std::string {
+    auto fn_name =
+        UniqueIdentifier(std::string("tint_") + sem::str(intrinsic->Type()));
+    std::vector<std::string> parameter_names;
+    {
+      auto decl = line(&helpers_);
+      if (!EmitTypeAndName(decl, intrinsic->ReturnType(),
+                           ast::StorageClass::kNone, ast::Access::kUndefined,
+                           fn_name)) {
+        return "";
+      }
+      {
+        ScopedParen sp(decl);
+        for (auto param : intrinsic->Parameters()) {
+          if (!parameter_names.empty()) {
+            decl << ", ";
+          }
+          auto param_name = "param_" + std::to_string(parameter_names.size());
+          const auto* ty = param.type;
+          if (auto* ptr = ty->As<sem::Pointer>()) {
+            decl << "inout ";
+            ty = ptr->StoreType();
+          }
+          if (!EmitTypeAndName(decl, ty, ast::StorageClass::kNone,
+                               ast::Access::kUndefined, param_name)) {
+            return "";
+          }
+          parameter_names.emplace_back(std::move(param_name));
+        }
+      }
+      decl << " {";
+    }
+    {
+      ScopedIndent si(&helpers_);
+      if (!build(&helpers_, parameter_names)) {
+        return "";
+      }
+    }
+    line(&helpers_) << "}";
+    line(&helpers_);
+    return fn_name;
+  });
+
+  if (fn.empty()) {
+    return false;
+  }
+
+  // Call the helper
+  out << fn;
+  {
+    ScopedParen sp(out);
+    bool first = true;
+    for (auto* arg : call->params()) {
+      if (!first) {
+        out << ", ";
+      }
+      first = false;
+      if (!EmitExpression(out, arg)) {
+        return false;
+      }
     }
   }
-  return "";
+  return true;
 }
 
 }  // namespace hlsl

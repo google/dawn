@@ -209,7 +209,7 @@ class TextGenerator {
   /// @param buffer the TextBuffer to write the line to
   /// @returns a new LineWriter, used for buffering and writing a line to
   /// the end of `buffer`.
-  LineWriter line(TextBuffer* buffer) { return LineWriter(buffer); }
+  static LineWriter line(TextBuffer* buffer) { return LineWriter(buffer); }
 
   /// The program
   Program const* const program_;

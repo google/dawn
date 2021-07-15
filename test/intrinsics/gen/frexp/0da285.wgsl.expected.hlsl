@@ -1,10 +1,14 @@
+float tint_frexp(float param_0, inout int param_1) {
+  float float_exp;
+  float significand = frexp(param_0, float_exp);
+  param_1 = int(float_exp);
+  return significand;
+}
+
 groupshared int arg_1;
 
 void frexp_0da285() {
-  float tint_tmp;
-  float tint_tmp_1 = frexp(1.0f, tint_tmp);
-  arg_1 = int(tint_tmp);
-  float res = tint_tmp_1;
+  float res = tint_frexp(1.0f, arg_1);
 }
 
 struct tint_symbol_1 {

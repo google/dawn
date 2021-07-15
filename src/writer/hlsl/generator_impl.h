@@ -400,12 +400,31 @@ class GeneratorImpl : public TextGenerator {
     };
   };
 
-  std::string get_buffer_name(ast::Expression* expr);
+  /// CallIntrinsicHelper will call the intrinsic helper function, creating it
+  /// if it hasn't been built already. If the intrinsic needs to be built then
+  /// CallIntrinsicHelper will generate the function signature and will call
+  /// `build` to emit the body of the function.
+  /// @param out the output of the expression stream
+  /// @param call the call expression
+  /// @param intrinsic the semantic information for the intrinsic
+  /// @param build a function with the signature:
+  ///        `bool(TextBuffer* buffer, const std::vector<std::string>& params)`
+  ///        Where:
+  ///          `buffer` is the body of the generated function
+  ///          `params` is the name of all the generated function parameters
+  /// @returns true if the call expression is emitted
+
+  template <typename F>
+  bool CallIntrinsicHelper(std::ostream& out,
+                           ast::CallExpression* call,
+                           const sem::Intrinsic* intrinsic,
+                           F&& build);
 
   TextBuffer helpers_;  // Helper functions emitted at the top of the output
   std::function<bool()> emit_continuing_;
   std::unordered_map<DMAIntrinsic, std::string, DMAIntrinsic::Hasher>
       dma_intrinsics_;
+  std::unordered_map<const sem::Intrinsic*, std::string> intrinsics_;
   std::unordered_map<const sem::Struct*, std::string> structure_builders_;
   std::unordered_map<const sem::Vector*, std::string> dynamic_vector_write_;
 };
