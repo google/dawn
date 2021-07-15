@@ -1,3 +1,17 @@
+cbuffer cbuffer_x_20 : register(b0, space0) {
+  uint4 x_20[1];
+};
+cbuffer cbuffer_x_26 : register(b0, space1) {
+  uint4 x_26[1];
+};
+
+struct tint_symbol_1 {
+  uint gl_VertexIndex : SV_VertexID;
+};
+struct tint_symbol_2 {
+  float4 value : SV_Position;
+};
+
 float2x2 tint_symbol_4(uint4 buffer[1], uint offset) {
   const uint scalar_offset = ((offset + 0u)) / 4;
   uint4 ubo_load = buffer[scalar_offset / 4];
@@ -13,20 +27,6 @@ float2x2 tint_symbol_6(uint4 buffer[1], uint offset) {
   uint4 ubo_load_3 = buffer[scalar_offset_3 / 4];
   return float2x2(asfloat(((scalar_offset_2 & 2) ? ubo_load_2.zw : ubo_load_2.xy)), asfloat(((scalar_offset_3 & 2) ? ubo_load_3.zw : ubo_load_3.xy)));
 }
-
-cbuffer cbuffer_x_20 : register(b0, space0) {
-  uint4 x_20[1];
-};
-cbuffer cbuffer_x_26 : register(b0, space1) {
-  uint4 x_26[1];
-};
-
-struct tint_symbol_1 {
-  uint gl_VertexIndex : SV_VertexID;
-};
-struct tint_symbol_2 {
-  float4 value : SV_Position;
-};
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   const uint gl_VertexIndex = tint_symbol.gl_VertexIndex;

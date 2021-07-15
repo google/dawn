@@ -5,6 +5,10 @@ struct tint_padded_array_element {
   Inner el;
 };
 
+cbuffer cbuffer_s : register(b0, space0) {
+  uint4 s[13];
+};
+
 float2x3 tint_symbol_7(uint4 buffer[13], uint offset) {
   const uint scalar_offset = ((offset + 0u)) / 4;
   const uint scalar_offset_1 = ((offset + 16u)) / 4;
@@ -32,10 +36,6 @@ tint_symbol_11_ret tint_symbol_11(uint4 buffer[13], uint offset) {
   const tint_padded_array_element tint_symbol_13[4] = {{tint_symbol_10(buffer, (offset + 0u))}, {tint_symbol_10(buffer, (offset + 16u))}, {tint_symbol_10(buffer, (offset + 32u))}, {tint_symbol_10(buffer, (offset + 48u))}};
   return tint_symbol_13;
 }
-
-cbuffer cbuffer_s : register(b0, space0) {
-  uint4 s[13];
-};
 
 [numthreads(1, 1, 1)]
 void main() {

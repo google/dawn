@@ -1,3 +1,9 @@
+ByteAddressBuffer s : register(t0, space0);
+
+struct tint_symbol_1 {
+  uint idx : SV_GroupIndex;
+};
+
 float2x3 tint_symbol_8(ByteAddressBuffer buffer, uint offset) {
   return float2x3(asfloat(buffer.Load3((offset + 0u))), asfloat(buffer.Load3((offset + 16u))));
 }
@@ -11,12 +17,6 @@ tint_symbol_12_ret tint_symbol_12(ByteAddressBuffer buffer, uint offset) {
   const int4 tint_symbol_13[4] = {asint(buffer.Load4((offset + 0u))), asint(buffer.Load4((offset + 16u))), asint(buffer.Load4((offset + 32u))), asint(buffer.Load4((offset + 48u)))};
   return tint_symbol_13;
 }
-
-ByteAddressBuffer s : register(t0, space0);
-
-struct tint_symbol_1 {
-  uint idx : SV_GroupIndex;
-};
 
 [numthreads(1, 1, 1)]
 void main(tint_symbol_1 tint_symbol) {

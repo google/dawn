@@ -1,9 +1,3 @@
-float2x3 tint_symbol_9(uint4 buffer[96], uint offset) {
-  const uint scalar_offset = ((offset + 0u)) / 4;
-  const uint scalar_offset_1 = ((offset + 16u)) / 4;
-  return float2x3(asfloat(buffer[scalar_offset / 4].xyz), asfloat(buffer[scalar_offset_1 / 4].xyz));
-}
-
 cbuffer cbuffer_s : register(b0, space0) {
   uint4 s[96];
 };
@@ -11,6 +5,12 @@ cbuffer cbuffer_s : register(b0, space0) {
 struct tint_symbol_1 {
   uint idx : SV_GroupIndex;
 };
+
+float2x3 tint_symbol_9(uint4 buffer[96], uint offset) {
+  const uint scalar_offset = ((offset + 0u)) / 4;
+  const uint scalar_offset_1 = ((offset + 16u)) / 4;
+  return float2x3(asfloat(buffer[scalar_offset / 4].xyz), asfloat(buffer[scalar_offset_1 / 4].xyz));
+}
 
 [numthreads(1, 1, 1)]
 void main(tint_symbol_1 tint_symbol) {

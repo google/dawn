@@ -1,0 +1,34 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+
+using namespace metal;
+struct Constants {
+  /* 0x0000 */ uint zero;
+};
+struct Result {
+  /* 0x0000 */ uint value;
+};
+struct tint_array_wrapper {
+  /* 0x0000 */ atomic_int arr[3];
+};
+struct TestData {
+  /* 0x0000 */ tint_array_wrapper data;
+};
+
+int runTest(constant Constants& constants, device TestData& s) {
+  return atomic_load_explicit(&(s.data.arr[(0u + uint(constants.zero))]), memory_order_relaxed);
+}
+
+kernel void tint_symbol(constant Constants& constants [[buffer(0)]], device Result& result [[buffer(1)]], device TestData& s [[buffer(0)]]) {
+  result.value = uint(runTest(constants, s));
+  return;
+}
+
+Compilation failed: 
+
+program_source:21:124: error: cannot reserve 'buffer' resource location at index 0
+kernel void tint_symbol(constant Constants& constants [[buffer(0)]], device Result& result [[buffer(1)]], device TestData& s [[buffer(0)]]) {
+                                                                                                                           ^
+
+

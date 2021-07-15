@@ -5,6 +5,8 @@ struct tint_padded_array_element {
   Inner el;
 };
 
+ByteAddressBuffer s : register(t0, space0);
+
 float2x3 tint_symbol_6(ByteAddressBuffer buffer, uint offset) {
   return float2x3(asfloat(buffer.Load3((offset + 0u))), asfloat(buffer.Load3((offset + 16u))));
 }
@@ -23,8 +25,6 @@ tint_symbol_10_ret tint_symbol_10(ByteAddressBuffer buffer, uint offset) {
   const tint_padded_array_element tint_symbol_12[4] = {{tint_symbol_9(buffer, (offset + 0u))}, {tint_symbol_9(buffer, (offset + 16u))}, {tint_symbol_9(buffer, (offset + 32u))}, {tint_symbol_9(buffer, (offset + 48u))}};
   return tint_symbol_12;
 }
-
-ByteAddressBuffer s : register(t0, space0);
 
 [numthreads(1, 1, 1)]
 void main() {

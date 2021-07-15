@@ -106,6 +106,8 @@ struct SB {
   v : array<vec3<f32>, 2>;
 };
 
+[[group(0), binding(0)]] var<storage, read_write> sb : SB;
+
 [[internal(intrinsic_load_storage_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> i32
 
@@ -181,8 +183,6 @@ fn tint_symbol_20([[internal(disable_validation__ignore_constructible_function_p
 fn tint_symbol_21([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> array<vec3<f32>, 2> {
   return array<vec3<f32>, 2>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)));
 }
-
-[[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {
@@ -300,6 +300,8 @@ struct UB {
   v : array<vec3<f32>, 2>;
 };
 
+[[group(0), binding(0)]] var<uniform> ub : UB;
+
 [[internal(intrinsic_load_uniform_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> i32
 
@@ -375,8 +377,6 @@ fn tint_symbol_20([[internal(disable_validation__ignore_constructible_function_p
 fn tint_symbol_21([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> array<vec3<f32>, 2> {
   return array<vec3<f32>, 2>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)));
 }
-
-[[group(0), binding(0)]] var<uniform> ub : UB;
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {
@@ -494,6 +494,8 @@ struct SB {
   v : array<vec3<f32>, 2>;
 };
 
+[[group(0), binding(0)]] var<storage, read_write> sb : SB;
+
 [[internal(intrinsic_store_storage_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : i32)
 
@@ -588,8 +590,6 @@ fn tint_symbol_21([[internal(disable_validation__ignore_constructible_function_p
   tint_symbol_8(buffer, (offset + 0u), value[0u]);
   tint_symbol_8(buffer, (offset + 16u), value[1u]);
 }
-
-[[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {
@@ -686,6 +686,8 @@ struct SB {
   v : array<vec3<f32>, 2>;
 };
 
+[[group(0), binding(0)]] var<storage, read_write> sb : SB;
+
 [[internal(intrinsic_load_storage_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> i32
 
@@ -766,8 +768,6 @@ fn tint_symbol_22([[internal(disable_validation__ignore_constructible_function_p
   return SB(tint_symbol(buffer, (offset + 0u)), tint_symbol_1(buffer, (offset + 4u)), tint_symbol_2(buffer, (offset + 8u)), tint_symbol_3(buffer, (offset + 16u)), tint_symbol_4(buffer, (offset + 24u)), tint_symbol_5(buffer, (offset + 32u)), tint_symbol_6(buffer, (offset + 48u)), tint_symbol_7(buffer, (offset + 64u)), tint_symbol_8(buffer, (offset + 80u)), tint_symbol_9(buffer, (offset + 96u)), tint_symbol_10(buffer, (offset + 112u)), tint_symbol_11(buffer, (offset + 128u)), tint_symbol_12(buffer, (offset + 144u)), tint_symbol_13(buffer, (offset + 160u)), tint_symbol_14(buffer, (offset + 192u)), tint_symbol_15(buffer, (offset + 224u)), tint_symbol_16(buffer, (offset + 256u)), tint_symbol_17(buffer, (offset + 304u)), tint_symbol_18(buffer, (offset + 352u)), tint_symbol_19(buffer, (offset + 384u)), tint_symbol_20(buffer, (offset + 448u)), tint_symbol_21(buffer, (offset + 512u)));
 }
 
-[[group(0), binding(0)]] var<storage, read_write> sb : SB;
-
 [[stage(compute), workgroup_size(1)]]
 fn main() {
   var x : SB = tint_symbol_22(sb, 0u);
@@ -841,6 +841,8 @@ struct SB {
   u : mat4x4<f32>;
   v : array<vec3<f32>, 2>;
 };
+
+[[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
 [[internal(intrinsic_store_storage_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : i32)
@@ -962,8 +964,6 @@ fn tint_symbol_22([[internal(disable_validation__ignore_constructible_function_p
   tint_symbol_21(buffer, (offset + 512u), value.v);
 }
 
-[[group(0), binding(0)]] var<storage, read_write> sb : SB;
-
 [[stage(compute), workgroup_size(1)]]
 fn main() {
   tint_symbol_22(sb, 0u, SB());
@@ -1031,10 +1031,10 @@ struct SB {
   b : [[stride(256)]] array<S2>;
 };
 
+[[group(0), binding(0)]] var<storage, read_write> sb : SB;
+
 [[internal(intrinsic_load_storage_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> f32
-
-[[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {
@@ -1099,10 +1099,10 @@ struct SB {
   b : [[stride(256)]] array<S2>;
 };
 
+[[group(0), binding(0)]] var<storage, read_write> sb : SB;
+
 [[internal(intrinsic_load_storage_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> f32
-
-[[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {
@@ -1186,10 +1186,10 @@ struct SB {
   b : A2_Array;
 };
 
+[[group(0), binding(0)]] var<storage, read_write> sb : SB;
+
 [[internal(intrinsic_load_storage_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> f32
-
-[[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {
@@ -1250,6 +1250,8 @@ struct SB {
   b : atomic<u32>;
 };
 
+[[group(0), binding(0)]] var<storage, read_write> sb : SB;
+
 [[internal(intrinsic_atomic_store_storage_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : i32)
 
@@ -1309,8 +1311,6 @@ fn tint_symbol_18([[internal(disable_validation__ignore_constructible_function_p
 
 [[internal(intrinsic_atomic_compare_exchange_weak_storage_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_19([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32, param_2 : u32) -> vec2<u32>
-
-[[group(0), binding(0)]] var<storage, read_write> sb : SB;
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {

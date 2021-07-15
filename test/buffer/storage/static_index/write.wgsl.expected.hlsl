@@ -5,6 +5,8 @@ struct tint_padded_array_element {
   Inner el;
 };
 
+RWByteAddressBuffer s : register(u0, space0);
+
 void tint_symbol_6(RWByteAddressBuffer buffer, uint offset, float2x3 value) {
   buffer.Store3((offset + 0u), asuint(value[0u]));
   buffer.Store3((offset + 16u), asuint(value[1u]));
@@ -26,8 +28,6 @@ void tint_symbol_10(RWByteAddressBuffer buffer, uint offset, tint_padded_array_e
   tint_symbol_9(buffer, (offset + 32u), value[2u].el);
   tint_symbol_9(buffer, (offset + 48u), value[3u].el);
 }
-
-RWByteAddressBuffer s : register(u0, space0);
 
 [numthreads(1, 1, 1)]
 void main() {

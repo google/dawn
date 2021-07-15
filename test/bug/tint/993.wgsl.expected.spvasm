@@ -1,0 +1,73 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 36
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %Constants "Constants"
+               OpMemberName %Constants 0 "zero"
+               OpName %constants "constants"
+               OpName %Result "Result"
+               OpMemberName %Result 0 "value"
+               OpName %result "result"
+               OpName %TestData "TestData"
+               OpMemberName %TestData 0 "data"
+               OpName %s "s"
+               OpName %runTest "runTest"
+               OpName %main "main"
+               OpDecorate %Constants Block
+               OpMemberDecorate %Constants 0 Offset 0
+               OpDecorate %constants NonWritable
+               OpDecorate %constants DescriptorSet 1
+               OpDecorate %constants Binding 0
+               OpDecorate %Result Block
+               OpMemberDecorate %Result 0 Offset 0
+               OpDecorate %result NonReadable
+               OpDecorate %result DescriptorSet 1
+               OpDecorate %result Binding 1
+               OpDecorate %TestData Block
+               OpMemberDecorate %TestData 0 Offset 0
+               OpDecorate %_arr_int_uint_3 ArrayStride 4
+               OpDecorate %s DescriptorSet 0
+               OpDecorate %s Binding 0
+       %uint = OpTypeInt 32 0
+  %Constants = OpTypeStruct %uint
+%_ptr_Uniform_Constants = OpTypePointer Uniform %Constants
+  %constants = OpVariable %_ptr_Uniform_Constants Uniform
+     %Result = OpTypeStruct %uint
+%_ptr_StorageBuffer_Result = OpTypePointer StorageBuffer %Result
+     %result = OpVariable %_ptr_StorageBuffer_Result StorageBuffer
+        %int = OpTypeInt 32 1
+     %uint_3 = OpConstant %uint 3
+%_arr_int_uint_3 = OpTypeArray %int %uint_3
+   %TestData = OpTypeStruct %_arr_int_uint_3
+%_ptr_StorageBuffer_TestData = OpTypePointer StorageBuffer %TestData
+          %s = OpVariable %_ptr_StorageBuffer_TestData StorageBuffer
+         %14 = OpTypeFunction %int
+     %uint_1 = OpConstant %uint 1
+     %uint_0 = OpConstant %uint 0
+%_ptr_Uniform_uint = OpTypePointer Uniform %uint
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+       %void = OpTypeVoid
+         %28 = OpTypeFunction %void
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+    %runTest = OpFunction %int None %14
+         %16 = OpLabel
+         %23 = OpAccessChain %_ptr_Uniform_uint %constants %uint_0
+         %24 = OpLoad %uint %23
+         %25 = OpIAdd %uint %uint_0 %24
+         %27 = OpAccessChain %_ptr_StorageBuffer_int %s %uint_0 %25
+         %17 = OpAtomicLoad %int %27 %uint_1 %uint_0
+               OpReturnValue %17
+               OpFunctionEnd
+       %main = OpFunction %void None %28
+         %31 = OpLabel
+         %33 = OpAccessChain %_ptr_StorageBuffer_uint %result %uint_0
+         %35 = OpFunctionCall %int %runTest
+         %34 = OpBitcast %uint %35
+               OpStore %33 %34
+               OpReturn
+               OpFunctionEnd
