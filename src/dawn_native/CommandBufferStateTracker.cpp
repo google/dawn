@@ -76,6 +76,66 @@ namespace dawn_native {
         return ValidateOperation(kDrawIndexedAspects);
     }
 
+    MaybeError CommandBufferStateTracker::ValidateBufferInRangeForVertexBuffer(
+        uint32_t vertexCount,
+        uint32_t firstVertex) {
+        const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>&
+            vertexBufferSlotsUsedAsVertexBuffer =
+                mLastRenderPipeline->GetVertexBufferSlotsUsedAsVertexBuffer();
+
+        for (auto usedSlotVertex : IterateBitSet(vertexBufferSlotsUsedAsVertexBuffer)) {
+            const VertexBufferInfo& vertexBuffer =
+                mLastRenderPipeline->GetVertexBuffer(usedSlotVertex);
+            uint64_t arrayStride = vertexBuffer.arrayStride;
+            uint64_t bufferSize = mVertexBufferSizes[usedSlotVertex];
+            // firstVertex and vertexCount are in uint32_t, and arrayStride must not
+            // be larger than kMaxVertexBufferArrayStride, which is currently 2048. So by
+            // doing checks in uint64_t we avoid overflows.
+            if ((static_cast<uint64_t>(firstVertex) + vertexCount) * arrayStride > bufferSize) {
+                return DAWN_VALIDATION_ERROR("Vertex buffer out of bound");
+            }
+        }
+
+        return {};
+    }
+
+    MaybeError CommandBufferStateTracker::ValidateBufferInRangeForInstanceBuffer(
+        uint32_t instanceCount,
+        uint32_t firstInstance) {
+        const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>&
+            vertexBufferSlotsUsedAsInstanceBuffer =
+                mLastRenderPipeline->GetVertexBufferSlotsUsedAsInstanceBuffer();
+
+        for (auto usedSlotInstance : IterateBitSet(vertexBufferSlotsUsedAsInstanceBuffer)) {
+            const VertexBufferInfo& vertexBuffer =
+                mLastRenderPipeline->GetVertexBuffer(usedSlotInstance);
+            uint64_t arrayStride = vertexBuffer.arrayStride;
+            uint64_t bufferSize = mVertexBufferSizes[usedSlotInstance];
+            // firstInstance and instanceCount are in uint32_t, and arrayStride must
+            // not be larger than kMaxVertexBufferArrayStride, which is currently 2048.
+            // So by doing checks in uint64_t we avoid overflows.
+            if ((static_cast<uint64_t>(firstInstance) + instanceCount) * arrayStride > bufferSize) {
+                return DAWN_VALIDATION_ERROR("Vertex buffer out of bound");
+            }
+        }
+
+        return {};
+    }
+
+    MaybeError CommandBufferStateTracker::ValidateIndexBufferInRange(uint32_t indexCount,
+                                                                     uint32_t firstIndex) {
+        // Validate the range of index buffer
+        // firstIndex and indexCount are in uint32_t, while IndexFormatSize is 2 (for
+        // wgpu::IndexFormat::Uint16) or 4 (for wgpu::IndexFormat::Uint32), so by doing checks in
+        // uint64_t we avoid overflows.
+        if ((static_cast<uint64_t>(firstIndex) + indexCount) * IndexFormatSize(mIndexFormat) >
+            mIndexBufferSize) {
+            // Index range is out of bounds
+            return DAWN_VALIDATION_ERROR("Index buffer out of bound");
+        }
+        return {};
+    }
+
     MaybeError CommandBufferStateTracker::ValidateOperation(ValidationAspects requiredAspects) {
         // Fast return-true path if everything is good
         ValidationAspects missingAspects = requiredAspects & ~mAspects;
@@ -213,8 +273,9 @@ namespace dawn_native {
         mIndexBufferSize = size;
     }
 
-    void CommandBufferStateTracker::SetVertexBuffer(VertexBufferSlot slot) {
+    void CommandBufferStateTracker::SetVertexBuffer(VertexBufferSlot slot, uint64_t size) {
         mVertexBufferSlotsUsed.set(slot);
+        mVertexBufferSizes[slot] = size;
     }
 
     void CommandBufferStateTracker::SetPipelineCommon(PipelineBase* pipeline) {
@@ -234,5 +295,4 @@ namespace dawn_native {
     PipelineLayoutBase* CommandBufferStateTracker::GetPipelineLayout() const {
         return mLastPipelineLayout;
     }
-
 }  // namespace dawn_native

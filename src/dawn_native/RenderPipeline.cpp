@@ -395,6 +395,16 @@ namespace dawn_native {
             mVertexBufferSlotsUsed.set(typedSlot);
             mVertexBufferInfos[typedSlot].arrayStride = buffers[slot].arrayStride;
             mVertexBufferInfos[typedSlot].stepMode = buffers[slot].stepMode;
+            switch (buffers[slot].stepMode) {
+                case wgpu::InputStepMode::Vertex:
+                    mVertexBufferSlotsUsedAsVertexBuffer.set(typedSlot);
+                    break;
+                case wgpu::InputStepMode::Instance:
+                    mVertexBufferSlotsUsedAsInstanceBuffer.set(typedSlot);
+                    break;
+                default:
+                    DAWN_UNREACHABLE();
+            }
 
             for (uint32_t i = 0; i < buffers[slot].attributeCount; ++i) {
                 VertexAttributeLocation location = VertexAttributeLocation(
@@ -492,6 +502,18 @@ namespace dawn_native {
     RenderPipelineBase::GetVertexBufferSlotsUsed() const {
         ASSERT(!IsError());
         return mVertexBufferSlotsUsed;
+    }
+
+    const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>&
+    RenderPipelineBase::GetVertexBufferSlotsUsedAsVertexBuffer() const {
+        ASSERT(!IsError());
+        return mVertexBufferSlotsUsedAsVertexBuffer;
+    }
+
+    const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>&
+    RenderPipelineBase::GetVertexBufferSlotsUsedAsInstanceBuffer() const {
+        ASSERT(!IsError());
+        return mVertexBufferSlotsUsedAsInstanceBuffer;
     }
 
     const VertexBufferInfo& RenderPipelineBase::GetVertexBuffer(VertexBufferSlot slot) const {

@@ -67,6 +67,11 @@ namespace dawn_native {
                 if (mDisableBaseInstance && firstInstance != 0) {
                     return DAWN_VALIDATION_ERROR("Non-zero first instance not supported");
                 }
+
+                DAWN_TRY(mCommandBufferState.ValidateBufferInRangeForVertexBuffer(vertexCount,
+                                                                                  firstVertex));
+                DAWN_TRY(mCommandBufferState.ValidateBufferInRangeForInstanceBuffer(instanceCount,
+                                                                                    firstInstance));
             }
 
             DrawCmd* draw = allocator->Allocate<DrawCmd>(Command::Draw);
@@ -94,16 +99,13 @@ namespace dawn_native {
                 if (mDisableBaseVertex && baseVertex != 0) {
                     return DAWN_VALIDATION_ERROR("Non-zero base vertex not supported");
                 }
+
+                DAWN_TRY(mCommandBufferState.ValidateIndexBufferInRange(indexCount, firstIndex));
+
+                DAWN_TRY(mCommandBufferState.ValidateBufferInRangeForInstanceBuffer(instanceCount,
+                                                                                    firstInstance));
             }
 
-            if (static_cast<uint64_t>(firstIndex) + indexCount >
-                mCommandBufferState.GetIndexBufferSize() /
-                    IndexFormatSize(mCommandBufferState.GetIndexFormat())) {
-                // Index range is out of bounds
-                // Treat as no-op and skip issuing draw call
-                dawn::WarningLog() << "Index range is out of bounds";
-                return {};
-            }
             DrawIndexedCmd* draw = allocator->Allocate<DrawIndexedCmd>(Command::DrawIndexed);
             draw->indexCount = indexCount;
             draw->instanceCount = instanceCount;
@@ -292,7 +294,7 @@ namespace dawn_native {
                 }
             }
 
-            mCommandBufferState.SetVertexBuffer(VertexBufferSlot(uint8_t(slot)));
+            mCommandBufferState.SetVertexBuffer(VertexBufferSlot(uint8_t(slot)), size);
 
             SetVertexBufferCmd* cmd =
                 allocator->Allocate<SetVertexBufferCmd>(Command::SetVertexBuffer);

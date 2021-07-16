@@ -63,6 +63,10 @@ namespace dawn_native {
         GetAttributeLocationsUsed() const;
         const VertexAttributeInfo& GetAttribute(VertexAttributeLocation location) const;
         const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>& GetVertexBufferSlotsUsed() const;
+        const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>&
+        GetVertexBufferSlotsUsedAsVertexBuffer() const;
+        const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>&
+        GetVertexBufferSlotsUsedAsInstanceBuffer() const;
         const VertexBufferInfo& GetVertexBuffer(VertexBufferSlot slot) const;
         uint32_t GetVertexBufferCount() const;
 
@@ -104,6 +108,8 @@ namespace dawn_native {
         ityp::array<VertexAttributeLocation, VertexAttributeInfo, kMaxVertexAttributes>
             mAttributeInfos;
         ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mVertexBufferSlotsUsed;
+        ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mVertexBufferSlotsUsedAsVertexBuffer;
+        ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mVertexBufferSlotsUsedAsInstanceBuffer;
         ityp::array<VertexBufferSlot, VertexBufferInfo, kMaxVertexBuffers> mVertexBufferInfos;
 
         // Attachments
