@@ -390,7 +390,9 @@ namespace dawn_native {
                     desc.arrayLayerCount = texture->GetArrayLayers() - desc.baseArrayLayer;
                     break;
                 default:
-                    UNREACHABLE();
+                    // We don't put UNREACHABLE() here because we validate enums only after this
+                    // function sets default values. Otherwise, the UNREACHABLE() will be hit.
+                    break;
             }
         }
         if (desc.mipLevelCount == 0) {
