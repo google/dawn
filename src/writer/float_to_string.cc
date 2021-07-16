@@ -19,6 +19,7 @@
 #include <iomanip>
 #include <limits>
 #include <sstream>
+#include <functional>
 
 #include "src/debug.h"
 
@@ -26,16 +27,31 @@ namespace tint {
 namespace writer {
 
 std::string FloatToString(float f) {
-  std::stringstream ss;
-  ss.flags(ss.flags() | std::ios_base::showpoint | std::ios_base::fixed);
-  ss.precision(std::numeric_limits<float>::max_digits10);
-  ss << f;
-  auto str = ss.str();
-  while (str.length() >= 2 && str[str.size() - 1] == '0' &&
-         str[str.size() - 2] != '.') {
-    str.pop_back();
+  // Try printing the float in fixed point, with a smallish limit on the
+  // precision
+  std::stringstream fixed;
+  fixed.flags(fixed.flags() | std::ios_base::showpoint | std::ios_base::fixed);
+  fixed.precision(9);
+  fixed << f;
+
+  // If this string can be parsed without loss of information, use it
+  auto float_equal_no_warning = std::equal_to<float>();
+  if (float_equal_no_warning(std::stof(fixed.str()), f)) {
+    auto str = fixed.str();
+    while (str.length() >= 2 && str[str.size() - 1] == '0' &&
+           str[str.size() - 2] != '.') {
+      str.pop_back();
+    }
+
+    return str;
   }
-  return str;
+
+  // Resort to scientific, with the minimum precision needed to preserve the
+  // whole float
+  std::stringstream sci;
+  sci.precision(std::numeric_limits<float>::max_digits10);
+  sci << f;
+  return sci.str();
 }
 
 std::string FloatToBitPreservingString(float f) {

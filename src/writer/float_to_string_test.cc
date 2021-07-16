@@ -88,6 +88,13 @@ TEST(FloatToStringTest, Lowest) {
             "-340282346638528859811704183484516925440.0");
 }
 
+TEST(FloatToStringTest, Precision) {
+  EXPECT_EQ(FloatToString(1e-8f), "0.00000001");
+  EXPECT_EQ(FloatToString(1e-9f), "0.000000001");
+  EXPECT_EQ(FloatToString(1e-10f), "1.00000001e-10");
+  EXPECT_EQ(FloatToString(1e-20f), "9.99999968e-21");
+}
+
 // FloatToBitPreservingString
 //
 // First replicate the tests for FloatToString
