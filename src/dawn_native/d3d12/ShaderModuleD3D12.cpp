@@ -128,7 +128,7 @@ namespace dawn_native { namespace d3d12 {
 
             std::string message = std::string("DXC compile failed with ") +
                                   static_cast<char*>(errors->GetBufferPointer());
-            return DAWN_INTERNAL_ERROR(message);
+            return DAWN_VALIDATION_ERROR(message);
         }
 
         ComPtr<IDxcBlob> compiledShader;
@@ -163,7 +163,7 @@ namespace dawn_native { namespace d3d12 {
                                          &compiledShader, &errors))) {
             std::string message = std::string("D3D compile failed with ") +
                                   static_cast<char*>(errors->GetBufferPointer());
-            return DAWN_INTERNAL_ERROR(message);
+            return DAWN_VALIDATION_ERROR(message);
         }
 
         return std::move(compiledShader);
