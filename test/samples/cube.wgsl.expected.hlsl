@@ -19,7 +19,7 @@ struct tint_symbol_2 {
   float4 Position : SV_Position;
 };
 
-float4x4 tint_symbol_7(uint4 buffer[4], uint offset) {
+float4x4 tint_symbol_6(uint4 buffer[4], uint offset) {
   const uint scalar_offset = ((offset + 0u)) / 4;
   const uint scalar_offset_1 = ((offset + 16u)) / 4;
   const uint scalar_offset_2 = ((offset + 32u)) / 4;
@@ -30,7 +30,7 @@ float4x4 tint_symbol_7(uint4 buffer[4], uint offset) {
 tint_symbol_2 vtx_main(tint_symbol_1 tint_symbol) {
   const VertexInput input = {tint_symbol.cur_position, tint_symbol.color};
   VertexOutput output = (VertexOutput)0;
-  output.Position = mul(input.cur_position, tint_symbol_7(uniforms, 0u));
+  output.Position = mul(input.cur_position, tint_symbol_6(uniforms, 0u));
   output.vtxFragColor = input.color;
   const tint_symbol_2 tint_symbol_8 = {output.vtxFragColor, output.Position};
   return tint_symbol_8;

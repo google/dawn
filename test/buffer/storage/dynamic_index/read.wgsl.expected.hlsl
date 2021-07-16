@@ -8,14 +8,19 @@ float2x3 tint_symbol_8(ByteAddressBuffer buffer, uint offset) {
   return float2x3(asfloat(buffer.Load3((offset + 0u))), asfloat(buffer.Load3((offset + 16u))));
 }
 
-float3x2 tint_symbol_10(ByteAddressBuffer buffer, uint offset) {
+float3x2 tint_symbol_9(ByteAddressBuffer buffer, uint offset) {
   return float3x2(asfloat(buffer.Load2((offset + 0u))), asfloat(buffer.Load2((offset + 8u))), asfloat(buffer.Load2((offset + 16u))));
 }
 
-typedef int4 tint_symbol_12_ret[4];
-tint_symbol_12_ret tint_symbol_12(ByteAddressBuffer buffer, uint offset) {
-  const int4 tint_symbol_13[4] = {asint(buffer.Load4((offset + 0u))), asint(buffer.Load4((offset + 16u))), asint(buffer.Load4((offset + 32u))), asint(buffer.Load4((offset + 48u)))};
-  return tint_symbol_13;
+typedef int4 tint_symbol_11_ret[4];
+tint_symbol_11_ret tint_symbol_11(ByteAddressBuffer buffer, uint offset) {
+  int4 arr_1[4] = (int4[4])0;
+  {
+    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
+      arr_1[i_1] = asint(buffer.Load4((offset + (i_1 * 16u))));
+    }
+  }
+  return arr_1;
 }
 
 [numthreads(1, 1, 1)]
@@ -28,7 +33,7 @@ void main(tint_symbol_1 tint_symbol) {
   const float3 e = asfloat(s.Load3(((176u * idx) + 32u)));
   const float f = asfloat(s.Load(((176u * idx) + 44u)));
   const float2x3 g = tint_symbol_8(s, ((176u * idx) + 48u));
-  const float3x2 h = tint_symbol_10(s, ((176u * idx) + 80u));
-  const int4 i[4] = tint_symbol_12(s, ((176u * idx) + 112u));
+  const float3x2 h = tint_symbol_9(s, ((176u * idx) + 80u));
+  const int4 i[4] = tint_symbol_11(s, ((176u * idx) + 112u));
   return;
 }

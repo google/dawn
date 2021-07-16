@@ -154,7 +154,7 @@ Mat4x3_ _Mat4x3_1(Mat4x4_ m20) {
   return o4;
 }
 
-Mat4x3_ tint_symbol_5(uint4 buffer[96], uint offset) {
+Mat4x3_ tint_symbol_4(uint4 buffer[96], uint offset) {
   const uint scalar_offset = ((offset + 0u)) / 4;
   const uint scalar_offset_1 = ((offset + 16u)) / 4;
   const uint scalar_offset_2 = ((offset + 32u)) / 4;
@@ -162,7 +162,7 @@ Mat4x3_ tint_symbol_5(uint4 buffer[96], uint offset) {
   return tint_symbol_10;
 }
 
-Mat4x4_ tint_symbol_7(uint4 buffer[4], uint offset) {
+Mat4x4_ tint_symbol_6(uint4 buffer[4], uint offset) {
   const uint scalar_offset_3 = ((offset + 0u)) / 4;
   const uint scalar_offset_4 = ((offset + 16u)) / 4;
   const uint scalar_offset_5 = ((offset + 32u)) / 4;
@@ -181,13 +181,13 @@ Mat4x2_ tint_symbol_9(uint4 buffer[3], uint offset) {
 void main1() {
   Mat4x3_ t_PosMtx = (Mat4x3_)0;
   float2 t_TexSpaceCoord = float2(0.0f, 0.0f);
-  const Mat4x3_ _e18 = tint_symbol_5(global2, (48u * uint(int(a_PosMtxIdx1))));
+  const Mat4x3_ _e18 = tint_symbol_4(global2, (48u * uint(int(a_PosMtxIdx1))));
   t_PosMtx = _e18;
   const Mat4x4_ _e24 = _Mat4x4_1(t_PosMtx);
   const float3 _e25 = a_Position1;
   const Mat4x4_ _e30 = _Mat4x4_1(t_PosMtx);
   const float4 _e34 = Mul(_e30, float4(a_Position1, 1.0f));
-  const Mat4x4_ _e35 = tint_symbol_7(global, 0u);
+  const Mat4x4_ _e35 = tint_symbol_6(global, 0u);
   const Mat4x4_ _e38 = _Mat4x4_1(t_PosMtx);
   const float3 _e39 = a_Position1;
   const Mat4x4_ _e44 = _Mat4x4_1(t_PosMtx);

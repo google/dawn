@@ -15,7 +15,7 @@ float2x3 tint_symbol_7(uint4 buffer[13], uint offset) {
   return float2x3(asfloat(buffer[scalar_offset / 4].xyz), asfloat(buffer[scalar_offset_1 / 4].xyz));
 }
 
-float3x2 tint_symbol_9(uint4 buffer[13], uint offset) {
+float3x2 tint_symbol_8(uint4 buffer[13], uint offset) {
   const uint scalar_offset_2 = ((offset + 0u)) / 4;
   uint4 ubo_load = buffer[scalar_offset_2 / 4];
   const uint scalar_offset_3 = ((offset + 8u)) / 4;
@@ -33,8 +33,13 @@ Inner tint_symbol_10(uint4 buffer[13], uint offset) {
 
 typedef tint_padded_array_element tint_symbol_11_ret[4];
 tint_symbol_11_ret tint_symbol_11(uint4 buffer[13], uint offset) {
-  const tint_padded_array_element tint_symbol_13[4] = {{tint_symbol_10(buffer, (offset + 0u))}, {tint_symbol_10(buffer, (offset + 16u))}, {tint_symbol_10(buffer, (offset + 32u))}, {tint_symbol_10(buffer, (offset + 48u))}};
-  return tint_symbol_13;
+  tint_padded_array_element arr[4] = (tint_padded_array_element[4])0;
+  {
+    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
+      arr[i_1].el = tint_symbol_10(buffer, (offset + (i_1 * 16u)));
+    }
+  }
+  return arr;
 }
 
 [numthreads(1, 1, 1)]
@@ -48,7 +53,7 @@ void main() {
   const int2 g = asint(s[3].xy);
   const int2 h = asint(s[3].zw);
   const float2x3 i = tint_symbol_7(s, 64u);
-  const float3x2 j = tint_symbol_9(s, 96u);
+  const float3x2 j = tint_symbol_8(s, 96u);
   const Inner k = tint_symbol_10(s, 128u);
   const tint_padded_array_element l[4] = tint_symbol_11(s, 144u);
   return;

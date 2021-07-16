@@ -343,13 +343,13 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_Matrix_Empty) {
   auto* expected =
       R"(RWByteAddressBuffer data : register(u0, space1);
 
-void tint_symbol_1(RWByteAddressBuffer buffer, uint offset, float2x3 value) {
+void tint_symbol(RWByteAddressBuffer buffer, uint offset, float2x3 value) {
   buffer.Store3((offset + 0u), asuint(value[0u]));
   buffer.Store3((offset + 16u), asuint(value[1u]));
 }
 
 void main() {
-  tint_symbol_1(data, 16u, float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+  tint_symbol(data, 16u, float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
   return;
 }
 )";

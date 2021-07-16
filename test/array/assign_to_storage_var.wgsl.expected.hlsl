@@ -30,61 +30,79 @@ S ret_struct_arr() {
   return tint_symbol_12;
 }
 
-void tint_symbol_2(RWByteAddressBuffer buffer, uint offset, tint_padded_array_element value[4]) {
-  buffer.Store((offset + 0u), asuint(value[0u].el));
-  buffer.Store((offset + 16u), asuint(value[1u].el));
-  buffer.Store((offset + 32u), asuint(value[2u].el));
-  buffer.Store((offset + 48u), asuint(value[3u].el));
+void tint_symbol_1(RWByteAddressBuffer buffer, uint offset, tint_padded_array_element value[4]) {
+  tint_padded_array_element array[4] = value;
+  {
+    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+      buffer.Store((offset + (i * 16u)), asuint(array[i].el));
+    }
+  }
 }
 
-typedef tint_padded_array_element tint_symbol_4_ret[4];
-tint_symbol_4_ret tint_symbol_4(uint4 buffer[4], uint offset) {
-  const uint scalar_offset = ((offset + 0u)) / 4;
-  const uint scalar_offset_1 = ((offset + 16u)) / 4;
-  const uint scalar_offset_2 = ((offset + 32u)) / 4;
-  const uint scalar_offset_3 = ((offset + 48u)) / 4;
-  const tint_padded_array_element tint_symbol_13[4] = {{asint(buffer[scalar_offset / 4][scalar_offset % 4])}, {asint(buffer[scalar_offset_1 / 4][scalar_offset_1 % 4])}, {asint(buffer[scalar_offset_2 / 4][scalar_offset_2 % 4])}, {asint(buffer[scalar_offset_3 / 4][scalar_offset_3 % 4])}};
-  return tint_symbol_13;
+typedef tint_padded_array_element tint_symbol_3_ret[4];
+tint_symbol_3_ret tint_symbol_3(uint4 buffer[4], uint offset) {
+  tint_padded_array_element arr_1[4] = (tint_padded_array_element[4])0;
+  {
+    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
+      const uint scalar_offset = ((offset + (i_1 * 16u))) / 4;
+      arr_1[i_1].el = asint(buffer[scalar_offset / 4][scalar_offset % 4]);
+    }
+  }
+  return arr_1;
 }
 
-typedef tint_padded_array_element tint_symbol_6_ret[4];
-tint_symbol_6_ret tint_symbol_6(RWByteAddressBuffer buffer, uint offset) {
-  const tint_padded_array_element tint_symbol_14[4] = {{asint(buffer.Load((offset + 0u)))}, {asint(buffer.Load((offset + 16u)))}, {asint(buffer.Load((offset + 32u)))}, {asint(buffer.Load((offset + 48u)))}};
-  return tint_symbol_14;
+typedef tint_padded_array_element tint_symbol_5_ret[4];
+tint_symbol_5_ret tint_symbol_5(RWByteAddressBuffer buffer, uint offset) {
+  tint_padded_array_element arr_2[4] = (tint_padded_array_element[4])0;
+  {
+    for(uint i_2 = 0u; (i_2 < 4u); i_2 = (i_2 + 1u)) {
+      arr_2[i_2].el = asint(buffer.Load((offset + (i_2 * 16u))));
+    }
+  }
+  return arr_2;
 }
 
-void tint_symbol_8(RWByteAddressBuffer buffer, uint offset, int value[2]) {
-  buffer.Store((offset + 0u), asuint(value[0u]));
-  buffer.Store((offset + 4u), asuint(value[1u]));
+void tint_symbol_9(RWByteAddressBuffer buffer, uint offset, int value[2]) {
+  int array_3[2] = value;
+  {
+    for(uint i_3 = 0u; (i_3 < 2u); i_3 = (i_3 + 1u)) {
+      buffer.Store((offset + (i_3 * 4u)), asuint(array_3[i_3]));
+    }
+  }
 }
 
-void tint_symbol_9(RWByteAddressBuffer buffer, uint offset, int value[3][2]) {
-  tint_symbol_8(buffer, (offset + 0u), value[0u]);
-  tint_symbol_8(buffer, (offset + 8u), value[1u]);
-  tint_symbol_8(buffer, (offset + 16u), value[2u]);
+void tint_symbol_8(RWByteAddressBuffer buffer, uint offset, int value[3][2]) {
+  int array_2[3][2] = value;
+  {
+    for(uint i_4 = 0u; (i_4 < 3u); i_4 = (i_4 + 1u)) {
+      tint_symbol_9(buffer, (offset + (i_4 * 8u)), array_2[i_4]);
+    }
+  }
 }
 
-void tint_symbol_10(RWByteAddressBuffer buffer, uint offset, int value[4][3][2]) {
-  tint_symbol_9(buffer, (offset + 0u), value[0u]);
-  tint_symbol_9(buffer, (offset + 24u), value[1u]);
-  tint_symbol_9(buffer, (offset + 48u), value[2u]);
-  tint_symbol_9(buffer, (offset + 72u), value[3u]);
+void tint_symbol_7(RWByteAddressBuffer buffer, uint offset, int value[4][3][2]) {
+  int array_1[4][3][2] = value;
+  {
+    for(uint i_5 = 0u; (i_5 < 4u); i_5 = (i_5 + 1u)) {
+      tint_symbol_8(buffer, (offset + (i_5 * 24u)), array_1[i_5]);
+    }
+  }
 }
 
 void foo(tint_padded_array_element src_param[4]) {
   tint_padded_array_element src_function[4] = (tint_padded_array_element[4])0;
-  const tint_padded_array_element tint_symbol_15[4] = {{1}, {2}, {3}, {3}};
-  tint_symbol_2(tint_symbol, 0u, tint_symbol_15);
-  tint_symbol_2(tint_symbol, 0u, src_param);
-  tint_symbol_2(tint_symbol, 0u, ret_arr());
+  const tint_padded_array_element tint_symbol_13[4] = {{1}, {2}, {3}, {3}};
+  tint_symbol_1(tint_symbol, 0u, tint_symbol_13);
+  tint_symbol_1(tint_symbol, 0u, src_param);
+  tint_symbol_1(tint_symbol, 0u, ret_arr());
   const tint_padded_array_element src_let[4] = (tint_padded_array_element[4])0;
-  tint_symbol_2(tint_symbol, 0u, src_let);
-  tint_symbol_2(tint_symbol, 0u, src_function);
-  tint_symbol_2(tint_symbol, 0u, src_private);
-  tint_symbol_2(tint_symbol, 0u, src_workgroup);
-  tint_symbol_2(tint_symbol, 0u, ret_struct_arr().arr);
-  tint_symbol_2(tint_symbol, 0u, tint_symbol_4(src_uniform, 0u));
-  tint_symbol_2(tint_symbol, 0u, tint_symbol_6(src_storage, 0u));
+  tint_symbol_1(tint_symbol, 0u, src_let);
+  tint_symbol_1(tint_symbol, 0u, src_function);
+  tint_symbol_1(tint_symbol, 0u, src_private);
+  tint_symbol_1(tint_symbol, 0u, src_workgroup);
+  tint_symbol_1(tint_symbol, 0u, ret_struct_arr().arr);
+  tint_symbol_1(tint_symbol, 0u, tint_symbol_3(src_uniform, 0u));
+  tint_symbol_1(tint_symbol, 0u, tint_symbol_5(src_storage, 0u));
   int src_nested[4][3][2] = (int[4][3][2])0;
-  tint_symbol_10(dst_nested, 0u, src_nested);
+  tint_symbol_7(dst_nested, 0u, src_nested);
 }

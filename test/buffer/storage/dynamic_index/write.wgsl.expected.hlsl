@@ -9,17 +9,19 @@ void tint_symbol_8(RWByteAddressBuffer buffer, uint offset, float2x3 value) {
   buffer.Store3((offset + 16u), asuint(value[1u]));
 }
 
-void tint_symbol_10(RWByteAddressBuffer buffer, uint offset, float3x2 value) {
+void tint_symbol_9(RWByteAddressBuffer buffer, uint offset, float3x2 value) {
   buffer.Store2((offset + 0u), asuint(value[0u]));
   buffer.Store2((offset + 8u), asuint(value[1u]));
   buffer.Store2((offset + 16u), asuint(value[2u]));
 }
 
-void tint_symbol_12(RWByteAddressBuffer buffer, uint offset, int4 value[4]) {
-  buffer.Store4((offset + 0u), asuint(value[0u]));
-  buffer.Store4((offset + 16u), asuint(value[1u]));
-  buffer.Store4((offset + 32u), asuint(value[2u]));
-  buffer.Store4((offset + 48u), asuint(value[3u]));
+void tint_symbol_11(RWByteAddressBuffer buffer, uint offset, int4 value[4]) {
+  int4 array[4] = value;
+  {
+    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
+      buffer.Store4((offset + (i_1 * 16u)), asuint(array[i_1]));
+    }
+  }
 }
 
 [numthreads(1, 1, 1)]
@@ -32,8 +34,8 @@ void main(tint_symbol_1 tint_symbol) {
   s.Store3(((176u * idx) + 32u), asuint(float3(0.0f, 0.0f, 0.0f)));
   s.Store(((176u * idx) + 44u), asuint(0.0f));
   tint_symbol_8(s, ((176u * idx) + 48u), float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
-  tint_symbol_10(s, ((176u * idx) + 80u), float3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+  tint_symbol_9(s, ((176u * idx) + 80u), float3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
   const int4 tint_symbol_13[4] = (int4[4])0;
-  tint_symbol_12(s, ((176u * idx) + 112u), tint_symbol_13);
+  tint_symbol_11(s, ((176u * idx) + 112u), tint_symbol_13);
   return;
 }
