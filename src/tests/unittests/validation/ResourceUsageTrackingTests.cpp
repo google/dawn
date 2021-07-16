@@ -990,6 +990,70 @@ namespace {
         }
     }
 
+    // Test that a single subresource of a texture cannot be used as a render attachment more than
+    // once in the same pass.
+    TEST_F(ResourceUsageTrackingTest, TextureWithMultipleRenderAttachmentUsage) {
+        // Create a texture with two array layers
+        wgpu::TextureDescriptor descriptor;
+        descriptor.dimension = wgpu::TextureDimension::e2D;
+        descriptor.size = {1, 1, 2};
+        descriptor.usage = wgpu::TextureUsage::RenderAttachment;
+        descriptor.format = kFormat;
+
+        wgpu::Texture texture = device.CreateTexture(&descriptor);
+
+        wgpu::TextureViewDescriptor viewDesc = {};
+        viewDesc.arrayLayerCount = 1;
+
+        wgpu::TextureView viewLayer0 = texture.CreateView(&viewDesc);
+
+        viewDesc.baseArrayLayer = 1;
+        wgpu::TextureView viewLayer1 = texture.CreateView(&viewDesc);
+
+        // Control: It is valid to use layer0 as a render target for one attachment, and
+        // layer1 as the second attachment in the same pass
+        {
+            utils::ComboRenderPassDescriptor renderPass({viewLayer0, viewLayer1});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+            pass.EndPass();
+            encoder.Finish();
+        }
+
+        // Control: It is valid to use layer0 as a render target in separate passes.
+        {
+            utils::ComboRenderPassDescriptor renderPass({viewLayer0});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder pass0 = encoder.BeginRenderPass(&renderPass);
+            pass0.EndPass();
+            wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&renderPass);
+            pass1.EndPass();
+            encoder.Finish();
+        }
+
+        // It is invalid to use layer0 as a render target for both attachments in the same pass
+        {
+            utils::ComboRenderPassDescriptor renderPass({viewLayer0, viewLayer0});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+            pass.EndPass();
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+
+        // It is invalid to use layer1 as a render target for both attachments in the same pass
+        {
+            utils::ComboRenderPassDescriptor renderPass({viewLayer1, viewLayer1});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+            pass.EndPass();
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+    }
+
     // Test that using the same texture as both readable and writable in different passes is
     // allowed
     TEST_F(ResourceUsageTrackingTest, TextureWithReadAndWriteUsageInDifferentPasses) {

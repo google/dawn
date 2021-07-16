@@ -42,10 +42,6 @@ namespace dawn_native {
     static constexpr wgpu::TextureUsage kReadOnlyTextureUsages =
         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::Sampled | kReadOnlyStorageTexture;
 
-    static constexpr wgpu::TextureUsage kWritableTextureUsages =
-        wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Storage |
-        wgpu::TextureUsage::RenderAttachment;
-
     class TextureBase : public ObjectBase {
       public:
         enum class TextureState { OwnedInternal, OwnedExternal, Destroyed };

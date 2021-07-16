@@ -36,7 +36,8 @@ namespace dawn_native {
       public:
         void BufferUsedAs(BufferBase* buffer, wgpu::BufferUsage usage);
         void TextureViewUsedAs(TextureViewBase* texture, wgpu::TextureUsage usage);
-        void AddTextureUsage(TextureBase* texture, const TextureSubresourceUsage& textureUsage);
+        void AddRenderBundleTextureUsage(TextureBase* texture,
+                                         const TextureSubresourceUsage& textureUsage);
 
         // Walks the bind groups and tracks all its resources.
         void AddBindGroup(BindGroupBase* group);

@@ -30,6 +30,11 @@ namespace dawn_native {
     static constexpr wgpu::TextureUsage kReadOnlyStorageTexture =
         static_cast<wgpu::TextureUsage>(0x80000000);
 
+    // Internal usage to help tracking when a subresource is used as render attachment usage
+    // more than once in a render pass.
+    static constexpr wgpu::TextureUsage kAgainAsRenderAttachment =
+        static_cast<wgpu::TextureUsage>(0x80000001);
+
     // Add an extra texture usage for textures that will be presented, for use in backends
     // that needs to transition to present usage.
     // This currently aliases wgpu::TextureUsage::Present, we would assign it

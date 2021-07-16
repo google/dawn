@@ -227,7 +227,8 @@ namespace dawn_native {
                 }
 
                 for (uint32_t i = 0; i < usages.textures.size(); ++i) {
-                    mUsageTracker.AddTextureUsage(usages.textures[i], usages.textureUsages[i]);
+                    mUsageTracker.AddRenderBundleTextureUsage(usages.textures[i],
+                                                              usages.textureUsages[i]);
                 }
             }
 
