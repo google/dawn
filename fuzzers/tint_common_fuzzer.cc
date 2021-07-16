@@ -202,7 +202,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 #endif  // TINT_BUILD_WGSL_READER
 #if TINT_BUILD_SPV_READER
     case InputFormat::kSpv: {
-      if (spirv_input.empty()) {
+      if (!spirv_input.empty()) {
         program = reader::spirv::Parse(spirv_input);
       }
       break;
