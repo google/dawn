@@ -52,12 +52,6 @@ run it with -help=1 to check out libfuzzer parameters.
                        The number of mutations to apply in a single libfuzzer
                        mutation session. This must be a numeric value that fits
                        in type `uint32_t`. By default it's 5.
-
-  -tint_record_mutations=
-                       Whether to record applied mutations in the protobuf
-                       message. This is useful to debug the fuzzer and during
-                       metamorphic fuzzing. The value must be one of `true` or
-                       `false` (without `). By default it's `false`.
 )";
 
 bool HasPrefix(const char* str, const char* prefix) {
@@ -115,12 +109,7 @@ CliParams ParseCliParams(int* argc, char** argv) {
     auto param = argv[i];
     auto recognized_parameter = true;
 
-    if (HasPrefix(param, "-tint_record_mutations=")) {
-      if (!ParseBool(param + sizeof("-tint_record_mutations=") - 1,
-                     &cli_params.record_mutations)) {
-        InvalidParam(param);
-      }
-    } else if (HasPrefix(param, "-tint_enable_all_mutations=")) {
+    if (HasPrefix(param, "-tint_enable_all_mutations=")) {
       if (!ParseBool(param + sizeof("-tint_enable_all_mutations=") - 1,
                      &cli_params.enable_all_mutations)) {
         InvalidParam(param);

@@ -42,9 +42,6 @@ inline FuzzingTarget operator&(FuzzingTarget a, FuzzingTarget b) {
 /// CLI parameters accepted by the fuzzer. Type -tint_help in the CLI to see the
 /// help message
 struct CliParams {
-  /// Whether to record applied mutations.
-  bool record_mutations = false;
-
   /// Whether to use all mutation finders or only a randomly selected subset of
   /// them.
   bool enable_all_mutations = false;

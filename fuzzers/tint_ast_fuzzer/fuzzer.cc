@@ -18,7 +18,6 @@
 #include "fuzzers/tint_ast_fuzzer/cli.h"
 #include "fuzzers/tint_ast_fuzzer/mt_rng.h"
 #include "fuzzers/tint_ast_fuzzer/mutator.h"
-#include "fuzzers/tint_ast_fuzzer/protobufs/tint_ast_fuzzer.h"
 #include "fuzzers/tint_common_fuzzer.h"
 
 #include "src/reader/wgsl/parser.h"
@@ -42,27 +41,12 @@ extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
                                           size_t size,
                                           size_t max_size,
                                           unsigned seed) {
-  protobufs::MutatorState mutator_state;
-  auto success = mutator_state.ParseFromArray(data, static_cast<int>(size));
-  (void)success;  // This variable will be unused in release mode.
-  assert(success && "Can't parse protobuf message");
-
-  tint::Source::File file("test.wgsl", mutator_state.program());
+  Source::File file("test.wgsl", {reinterpret_cast<char*>(data), size});
   auto program = reader::wgsl::Parse(&file);
-  protobufs::MutationSequence* mutation_sequence = nullptr;
-
-  if (cli_params.record_mutations) {
-    // If mutations are being recorded, then `mutator_state.program` is the
-    // original (unmodified) program and it is necessary to replay all
-    // mutations.
-    mutation_sequence = mutator_state.mutable_mutation_sequence();
-    program = Replay(std::move(program), *mutation_sequence);
-    if (!program.IsValid()) {
-      std::cout << "Replayer produced invalid WGSL:" << std::endl
-                << "  seed: " << seed << std::endl
-                << program.Diagnostics().str() << std::endl;
-      return 0;
-    }
+  if (!program.IsValid()) {
+    std::cout << "Trying to mutate an invalid program:" << std::endl
+              << program.Diagnostics().str() << std::endl;
+    return 0;
   }
 
   // Run the mutator.
@@ -70,7 +54,7 @@ extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
   ProbabilityContext probability_context(&mt_rng);
   program = Mutate(std::move(program), &probability_context,
                    cli_params.enable_all_mutations,
-                   cli_params.mutation_batch_size, mutation_sequence);
+                   cli_params.mutation_batch_size, nullptr);
 
   if (!program.IsValid()) {
     std::cout << "Mutator produced invalid WGSL:" << std::endl
@@ -79,27 +63,21 @@ extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
     return 0;
   }
 
-  if (!cli_params.record_mutations) {
-    // If mutations are not being recorded, then the mutated `program` must be
-    // stored into the `mutator_state`.
-    writer::wgsl::Options options;
-    auto result = writer::wgsl::Generate(&program, options);
-    if (!result.success) {
-      std::cout << "Can't generate WGSL for valid tint::Program:" << std::endl
-                << "  seed: " << seed << std::endl
-                << result.error << std::endl;
-      return 0;
-    }
-    *mutator_state.mutable_program() = std::move(result.wgsl);
-  }
-
-  if (mutator_state.ByteSizeLong() > max_size) {
+  auto result = writer::wgsl::Generate(&program, writer::wgsl::Options());
+  if (!result.success) {
+    std::cout << "Can't generate WGSL for a valid tint::Program:" << std::endl
+              << result.error << std::endl;
     return 0;
   }
 
-  success = mutator_state.SerializeToArray(data, static_cast<int>(max_size));
-  assert(success && "Can't serialize a protobuf message");
-  return mutator_state.ByteSizeLong();
+  // +1 to account for \0 at the end of a string.
+  auto mutated_size = result.wgsl.size() + 1;
+  if (mutated_size > max_size) {
+    return 0;
+  }
+
+  std::memcpy(data, result.wgsl.data(), mutated_size);
+  return mutated_size;
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
@@ -107,44 +85,31 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     return 0;
   }
 
-  protobufs::MutatorState mutator_state;
-  auto success = mutator_state.ParseFromArray(data, static_cast<int>(size));
-  (void)success;  // This variable will be unused in release mode.
-  assert(success && "Can't parse a protobuf message");
+  struct Target {
+    FuzzingTarget fuzzing_target;
+    OutputFormat output_format;
+    const char* name;
+  };
 
-  std::string program_text;
-  if (cli_params.record_mutations) {
-    // If mutations are being recorded, then it's necessary to replay them
-    // before invoking the system under test.
-    Source::File file("test.wgsl", mutator_state.program());
-    auto program =
-        Replay(reader::wgsl::Parse(&file), mutator_state.mutation_sequence());
-    assert(program.IsValid() && "Replayed program is invalid");
-
-    writer::wgsl::Options options;
-    auto result = writer::wgsl::Generate(&program, options);
-    assert(result.success &&
-           "Can't generate a shader for the valid tint::Program");
-    program_text = std::move(result.wgsl);
-  } else {
-    program_text.assign(data, data + size);
-  }
-
-  std::pair<FuzzingTarget, OutputFormat> targets[] = {
-      {FuzzingTarget::kWgsl, OutputFormat::kWGSL},
-      {FuzzingTarget::kHlsl, OutputFormat::kHLSL},
-      {FuzzingTarget::kMsl, OutputFormat::kMSL},
-      {FuzzingTarget::kSpv, OutputFormat::kSpv}};
+  Target targets[] = {{FuzzingTarget::kWgsl, OutputFormat::kWGSL, "WGSL"},
+                      {FuzzingTarget::kHlsl, OutputFormat::kHLSL, "HLSL"},
+                      {FuzzingTarget::kMsl, OutputFormat::kMSL, "MSL"},
+                      {FuzzingTarget::kSpv, OutputFormat::kSpv, "SPV"}};
 
   for (auto target : targets) {
-    if ((target.first & cli_params.fuzzing_target) != target.first) {
+    if ((target.fuzzing_target & cli_params.fuzzing_target) !=
+        target.fuzzing_target) {
       continue;
     }
 
-    CommonFuzzer fuzzer(InputFormat::kWGSL, target.second);
+    CommonFuzzer fuzzer(InputFormat::kWGSL, target.output_format);
     fuzzer.EnableInspector();
-    fuzzer.Run(reinterpret_cast<const uint8_t*>(program_text.data()),
-               program_text.size());
+    fuzzer.Run(data, size);
+    if (fuzzer.HasErrors()) {
+      std::cout << "Fuzzing " << target.name
+                << " produced an error:" << std::endl
+                << fuzzer.GetErrors() << std::endl;
+    }
   }
 
   return 0;
