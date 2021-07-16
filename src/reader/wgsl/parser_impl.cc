@@ -2224,42 +2224,57 @@ Maybe<ast::Expression*> ParserImpl::postfix_expression(
     ast::Expression* prefix) {
   Source source;
 
-  if (match(Token::Type::kPlusPlus, &source) ||
-      match(Token::Type::kMinusMinus, &source)) {
-    add_error(source,
-              "postfix increment and decrement operators are reserved for a "
-              "future WGSL version");
-    return Failure::kErrored;
-  }
-
-  if (match(Token::Type::kBracketLeft, &source)) {
-    return sync(Token::Type::kBracketRight, [&]() -> Maybe<ast::Expression*> {
-      auto param = logical_or_expression();
-      if (param.errored)
-        return Failure::kErrored;
-      if (!param.matched)
-        return add_error(peek(), "unable to parse expression inside []");
-
-      if (!expect("array accessor", Token::Type::kBracketRight))
-        return Failure::kErrored;
-
-      return postfix_expression(
-          create<ast::ArrayAccessorExpression>(source, prefix, param.value));
-    });
-  }
-
-  if (match(Token::Type::kPeriod)) {
-    auto ident = expect_ident("member accessor");
-    if (ident.errored)
+  while (continue_parsing()) {
+    if (match(Token::Type::kPlusPlus, &source) ||
+        match(Token::Type::kMinusMinus, &source)) {
+      add_error(source,
+                "postfix increment and decrement operators are reserved for a "
+                "future WGSL version");
       return Failure::kErrored;
+    }
 
-    return postfix_expression(create<ast::MemberAccessorExpression>(
-        ident.source, prefix,
-        create<ast::IdentifierExpression>(
-            ident.source, builder_.Symbols().Register(ident.value))));
+    if (match(Token::Type::kBracketLeft, &source)) {
+      auto res =
+          sync(Token::Type::kBracketRight, [&]() -> Maybe<ast::Expression*> {
+            auto param = logical_or_expression();
+            if (param.errored)
+              return Failure::kErrored;
+            if (!param.matched) {
+              return add_error(peek(), "unable to parse expression inside []");
+            }
+
+            if (!expect("array accessor", Token::Type::kBracketRight)) {
+              return Failure::kErrored;
+            }
+
+            return create<ast::ArrayAccessorExpression>(source, prefix,
+                                                        param.value);
+          });
+
+      if (res.errored) {
+        return res;
+      }
+      prefix = res.value;
+      continue;
+    }
+
+    if (match(Token::Type::kPeriod)) {
+      auto ident = expect_ident("member accessor");
+      if (ident.errored) {
+        return Failure::kErrored;
+      }
+
+      prefix = create<ast::MemberAccessorExpression>(
+          ident.source, prefix,
+          create<ast::IdentifierExpression>(
+              ident.source, builder_.Symbols().Register(ident.value)));
+      continue;
+    }
+
+    return prefix;
   }
 
-  return prefix;
+  return Failure::kErrored;
 }
 
 // singular_expression
