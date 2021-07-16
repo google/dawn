@@ -2431,13 +2431,67 @@ bool Resolver::IntrinsicCall(ast::CallExpression* call,
     AddWarning("use of deprecated intrinsic", call->source());
   }
 
-  builder_->Sem().Add(
-      call, builder_->create<sem::Call>(call, result, current_statement_));
+  auto* out = builder_->create<sem::Call>(call, result, current_statement_);
+  builder_->Sem().Add(call, out);
   SetExprInfo(call, result->ReturnType());
 
   current_function_->intrinsic_calls.emplace_back(
       IntrinsicCallInfo{call, result});
 
+  if (IsTextureIntrinsic(intrinsic_type) &&
+      !ValidateTextureIntrinsicFunction(call, out)) {
+    return false;
+  }
+
+  return true;
+}
+
+bool Resolver::ValidateTextureIntrinsicFunction(
+    const ast::CallExpression* ast_call,
+    const sem::Call* sem_call) {
+  auto* intrinsic = sem_call->Target()->As<sem::Intrinsic>();
+  if (!intrinsic) {
+    return false;
+  }
+  std::string func_name = intrinsic->str();
+  auto index =
+      sem::IndexOf(intrinsic->Parameters(), sem::ParameterUsage::kOffset);
+  if (index > -1) {
+    auto* param = ast_call->params()[index];
+    if (param->Is<ast::TypeConstructorExpression>()) {
+      auto values = ConstantValueOf(param);
+      if (!values.IsValid()) {
+        AddError("'" + func_name +
+                     "' offset parameter must be provided as a literal or "
+                     "const_expr expression",
+                 param->source());
+        return false;
+      }
+      if (!values.Type()->Is<sem::Vector>() ||
+          !values.ElementType()->Is<sem::I32>()) {
+        TINT_ICE(Resolver, diagnostics_)
+            << "failed to resolve '" + func_name + "' offset parameter type";
+        return false;
+      }
+      for (auto offset : values.Elements()) {
+        auto offset_value = offset.i32;
+        if (offset_value < -8 || offset_value > 7) {
+          AddError("each offset component of '" + func_name +
+                       "' must be at least -8 and at most 7. "
+                       "found: '" +
+                       std::to_string(offset_value) + "'",
+                   param->source());
+          return false;
+        }
+      }
+    } else {
+      AddError("'" + func_name +
+                   "' offset parameter must be provided as a literal or "
+                   "const_expr expression",
+               param->source());
+      return false;
+    }
+  }
   return true;
 }
 

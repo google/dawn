@@ -323,6 +323,8 @@ class Resolver {
   bool ValidateArrayConstructor(const ast::TypeConstructorExpression* ctor,
                                 const sem::Array* arr_type);
   bool ValidateTypeDecl(const ast::TypeDecl* named_type) const;
+  bool ValidateTextureIntrinsicFunction(const ast::CallExpression* ast_call,
+                                        const sem::Call* sem_call);
   bool ValidateNoDuplicateDecorations(const ast::DecorationList& decorations);
   // sem::Struct is assumed to have at least one member
   bool ValidateStorageClassLayout(const sem::Struct* type,

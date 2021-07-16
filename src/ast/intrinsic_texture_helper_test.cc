@@ -1367,7 +1367,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                                b->vec2<f32>(1.f, 2.f),  // coords
                                b->vec2<f32>(3.f, 4.f),  // ddx
                                b->vec2<f32>(5.f, 6.f),  // ddy
-                               b->vec2<i32>(7, 8));     // offset
+                               b->vec2<i32>(7, 7));     // offset
           },
       },
       {
@@ -1413,7 +1413,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                                3,                       // array_index
                                b->vec2<f32>(4.f, 5.f),  // ddx
                                b->vec2<f32>(6.f, 7.f),  // ddy
-                               b->vec2<i32>(8, 9));     // offset
+                               b->vec2<i32>(6, 7));     // offset
           },
       },
       {
@@ -1455,7 +1455,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                                b->vec3<f32>(1.f, 2.f, 3.f),  // coords
                                b->vec3<f32>(4.f, 5.f, 6.f),  // ddx
                                b->vec3<f32>(7.f, 8.f, 9.f),  // ddy
-                               b->vec3<i32>(10, 11, 12));    // offset
+                               b->vec3<i32>(0, 1, 2));       // offset
           },
       },
       {

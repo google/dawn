@@ -2070,14 +2070,13 @@ OpCapability SampledCubeArray
 %25 = OpTypeInt 32 1
 %24 = OpTypeVector %25 2
 %26 = OpConstant %25 7
-%27 = OpConstant %25 8
-%28 = OpConstantComposite %24 %26 %27
+%27 = OpConstantComposite %24 %26 %26
 )",
           R"(
 %10 = OpLoad %7 %5
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
-%8 = OpImageSampleExplicitLod %9 %13 %17 Grad|ConstOffset %20 %23 %28
+%8 = OpImageSampleExplicitLod %9 %13 %17 Grad|ConstOffset %20 %23 %27
 )",
           R"(
 )"};
@@ -2141,8 +2140,8 @@ OpCapability SampledCubeArray
 %26 = OpConstant %4 7
 %27 = OpConstantComposite %21 %25 %26
 %28 = OpTypeVector %18 2
-%29 = OpConstant %18 8
-%30 = OpConstant %18 9
+%29 = OpConstant %18 6
+%30 = OpConstant %18 7
 %31 = OpConstantComposite %28 %29 %30
 )",
           R"(
@@ -2216,9 +2215,9 @@ OpCapability SampledCubeArray
 %26 = OpConstantComposite %14 %23 %24 %25
 %28 = OpTypeInt 32 1
 %27 = OpTypeVector %28 3
-%29 = OpConstant %28 10
-%30 = OpConstant %28 11
-%31 = OpConstant %28 12
+%29 = OpConstant %28 0
+%30 = OpConstant %28 1
+%31 = OpConstant %28 2
 %32 = OpConstantComposite %27 %29 %30 %31
 )",
           R"(

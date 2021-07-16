@@ -12,39 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/resolver/resolver.h"
-
-#include "gmock/gmock.h"
-#include "src/ast/assignment_statement.h"
-#include "src/ast/bitcast_expression.h"
-#include "src/ast/break_statement.h"
-#include "src/ast/call_statement.h"
-#include "src/ast/continue_statement.h"
-#include "src/ast/if_statement.h"
 #include "src/ast/intrinsic_texture_helper_test.h"
-#include "src/ast/loop_statement.h"
-#include "src/ast/return_statement.h"
-#include "src/ast/stage_decoration.h"
-#include "src/ast/struct_block_decoration.h"
-#include "src/ast/switch_statement.h"
-#include "src/ast/unary_op_expression.h"
-#include "src/ast/variable_decl_statement.h"
 #include "src/resolver/resolver_test_helper.h"
-#include "src/sem/call.h"
-#include "src/sem/function.h"
-#include "src/sem/member_accessor_expression.h"
-#include "src/sem/sampled_texture_type.h"
-#include "src/sem/statement.h"
-#include "src/sem/variable.h"
-
-using ::testing::ElementsAre;
-using ::testing::HasSubstr;
 
 namespace tint {
 namespace resolver {
 namespace {
-
-using IntrinsicType = sem::IntrinsicType;
 
 using ResolverIntrinsicValidationTest = ResolverTest;
 
@@ -89,6 +62,207 @@ TEST_F(ResolverIntrinsicValidationTest, InvalidPipelineStageIndirect) {
 5:6 note: called by function 'f2'
 7:8 note: called by entry point 'main')");
 }
+
+namespace TextureSamplerOffset {
+
+using TextureOverloadCase = ast::intrinsic::test::TextureOverloadCase;
+using ValidTextureOverload = ast::intrinsic::test::ValidTextureOverload;
+using TextureKind = ast::intrinsic::test::TextureKind;
+using TextureDataType = ast::intrinsic::test::TextureDataType;
+using u32 = ProgramBuilder::u32;
+using i32 = ProgramBuilder::i32;
+using f32 = ProgramBuilder::f32;
+
+static std::vector<TextureOverloadCase> ValidCases() {
+  std::vector<TextureOverloadCase> cases;
+  for (auto c : TextureOverloadCase::ValidCases()) {
+    if (std::string(c.function).find("textureSample") == 0) {
+      if (std::string(c.description).find("offset ") != std::string::npos) {
+        cases.push_back(c);
+      }
+    }
+  }
+  return cases;
+}
+
+struct OffsetCase {
+  bool is_valid;
+  int32_t x;
+  int32_t y;
+  int32_t z;
+  int32_t illegal_value = 0;
+};
+
+static std::vector<OffsetCase> OffsetCases() {
+  return {
+      {true, 0, 1, 2},          //
+      {true, 7, -8, 7},         //
+      {false, 10, 10, 20, 10},  //
+      {false, -9, 0, 0, -9},    //
+      {false, 0, 8, 0, 8},      //
+  };
+}
+
+using IntrinsicTextureSamplerValidationTest =
+    ResolverTestWithParam<std::tuple<TextureOverloadCase,  // texture info
+                                     OffsetCase            // offset info
+                                     >>;
+TEST_P(IntrinsicTextureSamplerValidationTest, ConstExpr) {
+  auto& p = GetParam();
+  auto param = std::get<0>(p);
+  auto offset = std::get<1>(p);
+  param.buildTextureVariable(this);
+  param.buildSamplerVariable(this);
+
+  auto args = param.args(this);
+  // Make Resolver visit the Node about to be removed
+  WrapInFunction(args.back());
+  args.pop_back();
+  if (NumCoordinateAxes(param.texture_dimension) == 2) {
+    args.push_back(
+        Construct(Source{{12, 34}}, ty.vec2<i32>(), offset.x, offset.y));
+  } else if (NumCoordinateAxes(param.texture_dimension) == 3) {
+    args.push_back(Construct(Source{{12, 34}}, ty.vec3<i32>(), offset.x,
+                             offset.y, offset.z));
+  }
+
+  auto* call = Call(param.function, args);
+  Func("func", {}, ty.void_(), {Ignore(call)},
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+
+  if (offset.is_valid) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve());
+    std::stringstream err;
+    err << "12:34 error: each offset component of '" << param.function
+        << "' must be at least -8 and at most 7. found: '"
+        << std::to_string(offset.illegal_value) << "'";
+    EXPECT_EQ(r()->error(), err.str());
+  }
+}
+
+TEST_P(IntrinsicTextureSamplerValidationTest, ConstExprOfConstExpr) {
+  auto& p = GetParam();
+  auto param = std::get<0>(p);
+  auto offset = std::get<1>(p);
+  param.buildTextureVariable(this);
+  param.buildSamplerVariable(this);
+
+  auto args = param.args(this);
+  // Make Resolver visit the Node about to be removed
+  WrapInFunction(args.back());
+  args.pop_back();
+  if (NumCoordinateAxes(param.texture_dimension) == 2) {
+    args.push_back(Construct(Source{{12, 34}}, ty.vec2<i32>(),
+                             Construct(ty.i32(), offset.x), offset.y));
+  } else if (NumCoordinateAxes(param.texture_dimension) == 3) {
+    args.push_back(Construct(Source{{12, 34}}, ty.vec3<i32>(), offset.x,
+                             Construct(ty.vec2<i32>(), offset.y, offset.z)));
+  }
+  auto* call = Call(param.function, args);
+  Func("func", {}, ty.void_(), {Ignore(call)},
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+  if (offset.is_valid) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve());
+    std::stringstream err;
+    err << "12:34 error: each offset component of '" << param.function
+        << "' must be at least -8 and at most 7. found: '"
+        << std::to_string(offset.illegal_value) << "'";
+    EXPECT_EQ(r()->error(), err.str());
+  }
+}
+
+TEST_P(IntrinsicTextureSamplerValidationTest, EmptyVectorConstructor) {
+  auto& p = GetParam();
+  auto param = std::get<0>(p);
+  param.buildTextureVariable(this);
+  param.buildSamplerVariable(this);
+
+  auto args = param.args(this);
+  // Make Resolver visit the Node about to be removed
+  WrapInFunction(args.back());
+  args.pop_back();
+  if (NumCoordinateAxes(param.texture_dimension) == 2) {
+    args.push_back(Construct(Source{{12, 34}}, ty.vec2<i32>()));
+  } else if (NumCoordinateAxes(param.texture_dimension) == 3) {
+    args.push_back(Construct(Source{{12, 34}}, ty.vec3<i32>()));
+  }
+
+  auto* call = Call(param.function, args);
+  Func("func", {}, ty.void_(), {Ignore(call)},
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_P(IntrinsicTextureSamplerValidationTest, GlobalConst) {
+  auto& p = GetParam();
+  auto param = std::get<0>(p);
+  auto offset = std::get<1>(p);
+  param.buildTextureVariable(this);
+  param.buildSamplerVariable(this);
+
+  auto args = param.args(this);
+  // Make Resolver visit the Node about to be removed
+  WrapInFunction(args.back());
+  args.pop_back();
+  GlobalConst("offset_2d", ty.vec2<i32>(), vec2<i32>(offset.x, offset.y));
+  GlobalConst("offset_3d", ty.vec3<i32>(),
+              vec3<i32>(offset.x, offset.y, offset.z));
+  if (NumCoordinateAxes(param.texture_dimension) == 2) {
+    args.push_back(Expr(Source{{12, 34}}, "offset_2d"));
+  } else if (NumCoordinateAxes(param.texture_dimension) == 3) {
+    args.push_back(Expr(Source{{12, 34}}, "offset_3d"));
+  }
+
+  auto* call = Call(param.function, args);
+  Func("func", {}, ty.void_(), {Ignore(call)},
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+  EXPECT_FALSE(r()->Resolve());
+  std::stringstream err;
+  err << "12:34 error: '" << param.function
+      << "' offset parameter must be provided as"
+      << " a literal or const_expr expression";
+  EXPECT_EQ(r()->error(), err.str());
+}
+
+TEST_P(IntrinsicTextureSamplerValidationTest, ScalarConst) {
+  auto& p = GetParam();
+  auto param = std::get<0>(p);
+  auto offset = std::get<1>(p);
+  param.buildTextureVariable(this);
+  param.buildSamplerVariable(this);
+  auto* x = Const("x", ty.i32(), Construct(ty.i32(), offset.x));
+
+  auto args = param.args(this);
+  // Make Resolver visit the Node about to be removed
+  WrapInFunction(args.back());
+  args.pop_back();
+  if (NumCoordinateAxes(param.texture_dimension) == 2) {
+    args.push_back(Construct(Source{{12, 34}}, ty.vec2<i32>(), x, offset.y));
+  } else if (NumCoordinateAxes(param.texture_dimension) == 3) {
+    args.push_back(
+        Construct(Source{{12, 34}}, ty.vec3<i32>(), x, offset.y, offset.z));
+  }
+
+  auto* call = Call(param.function, args);
+  Func("func", {}, ty.void_(), {Decl(x), Ignore(call)},
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+  EXPECT_FALSE(r()->Resolve());
+  std::stringstream err;
+  err << "12:34 error: '" << param.function
+      << "' offset parameter must be provided as"
+      << " a literal or const_expr expression";
+  EXPECT_EQ(r()->error(), err.str());
+}
+
+INSTANTIATE_TEST_SUITE_P(IntrinsicTextureSamplerValidationTest,
+                         IntrinsicTextureSamplerValidationTest,
+                         testing::Combine(testing::ValuesIn(ValidCases()),
+                                          testing::ValuesIn(OffsetCases())));
+}  // namespace TextureSamplerOffset
 
 }  // namespace
 }  // namespace resolver
