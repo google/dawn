@@ -39,7 +39,7 @@ inline FuzzingTarget operator&(FuzzingTarget a, FuzzingTarget b) {
   return static_cast<FuzzingTarget>(static_cast<int>(a) & static_cast<int>(b));
 }
 
-/// CLI parameters accepted by the fuzzer. Type --help in the CLI to see the
+/// CLI parameters accepted by the fuzzer. Type -tint_help in the CLI to see the
 /// help message
 struct CliParams {
   /// Whether to record applied mutations.
@@ -60,12 +60,13 @@ struct CliParams {
 /// @brief Parses CLI parameters.
 ///
 /// This function will exit the process with non-zero return code if some
-/// parameters are invalid.
+/// parameters are invalid. This function will remove recognized parameters from
+/// `argv` and adjust `argc` accordingly.
 ///
 /// @param argc - the total number of parameters.
 /// @param argv - array of all CLI parameters.
 /// @return parsed parameters.
-CliParams ParseCliParams(int argc, const char* const* argv);
+CliParams ParseCliParams(int* argc, char** argv);
 
 }  // namespace ast_fuzzer
 }  // namespace fuzzers

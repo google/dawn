@@ -32,59 +32,59 @@ namespace {
 const char* const kMutatorParameters = R"(
 Mutators' parameters:
 
-  --donors=
+  -tint_donors=
                        A path to the text file with a list of paths to the
                        SPIR-V donor files. Check out the doc for the spirv-fuzz
                        to learn more about donor binaries. Donors are not used
                        by default.
 
-  --enable_all_fuzzer_passes=
+  -tint_enable_all_fuzzer_passes=
                        Whether to use all fuzzer passes or a randomly selected subset
                        of them. This must be one of `true` or `false` (without `).
                        By default it's `false`.
 
-  --enable_all_reduce_passes=
+  -tint_enable_all_reduce_passes=
                        Whether to use all reduction passes or a randomly selected subset
                        of them. This must be one of `true` or `false` (without `).
                        By default it's `false`.
 
-  --opt_batch_size=
+  -tint_opt_batch_size=
                        The maximum number of spirv-opt optimizations that
                        will be applied in a single mutation session (i.e.
                        a call to LLVMFuzzerCustomMutator). This must fit in
                        uint32_t. By default it's 6.
 
-  --reduction_batch_size=
+  -tint_reduction_batch_size=
                        The maximum number of spirv-reduce reductions that
                        will be applied in a single mutation session (i.e.
                        a call to LLVMFuzzerCustomMutator). This must fit in
                        uint32_t. By default it's 3.
 
-  --repeated_pass_strategy=
+  -tint_repeated_pass_strategy=
                        The strategy that will be used to recommend the next fuzzer
                        pass. This must be one of `simple`, `looped` or `random`
                        (without `). By default it's `simple`. Check out the doc for
                        spirv-fuzz to learn more.
 
-  --transformation_batch_size=
+  -tint_transformation_batch_size=
                        The maximum number of spirv-fuzz transformations
                        that will be applied during a single mutation
                        session (i.e. a call to LLVMFuzzerCustomMutator).
                        This must fit in uint32_t. By default it's 3.
 
-  --validate_after_each_fuzzer_pass=
+  -tint_validate_after_each_fuzzer_pass=
                        Whether to validate SPIR-V binary after each fuzzer pass.
                        This must be one of `true` or `false` (without `).
                        By default it's `true`. Switch this to `false` if you experience
                        bad performance.
 
-  --validate_after_each_opt_pass=
+  -tint_validate_after_each_opt_pass=
                        Whether to validate SPIR-V binary after each optimization pass.
                        This must be one of `true` or `false` (without `).
                        By default it's `true`. Switch this to `false` if you experience
                        bad performance.
 
-  --validate_after_each_reduce_pass=
+  -tint_validate_after_each_reduce_pass=
                        Whether to validate SPIR-V binary after each reduction pass.
                        This must be one of `true` or `false` (without `).
                        By default it's `true`. Switch this to `false` if you experience
@@ -105,7 +105,7 @@ run it with -help=1 to check out libfuzzer parameters.
 
 Fuzzer parameters:
 
-  --error_dir
+  -tint_error_dir
                        The directory that will be used to output invalid SPIR-V
                        binaries to. This is especially useful during debugging
                        mutators. The directory must have the following subdirectories:
@@ -117,22 +117,22 @@ Fuzzer parameters:
                          the mutators.
                        By default invalid files are not printed out.
 
-  --fuzzing_target
+  -tint_fuzzing_target
                        The type of backend to target during fuzzing. This must
                        be one or a combination of `wgsl`, `spv`, `msl` or `hlsl`
                        (without `) separated by commas. By default it's
                        `wgsl,spv,msl,hlsl`.
 
-  --help
+  -tint_help
                        Show this message. Note that there is also a -help=1
                        parameter that will display libfuzzer's help message.
 
-  --mutator_cache_size=
+  -tint_mutator_cache_size=
                        The maximum size of the cache that stores
                        mutation sessions. This must fit in uint32_t.
                        By default it's 20.
 
-  --mutator_type=
+  -tint_mutator_type=
                        Determines types of the mutators to run. This must be one or
                        a combination of `fuzz`, `opt`, `reduce` (without `) separated by
                        comma. If a combination is specified, each element in the
@@ -287,80 +287,83 @@ bool HasPrefix(const char* str, const char* prefix) {
   return strncmp(str, prefix, strlen(prefix)) == 0;
 }
 
-void ParseMutatorCliParam(const char* param,
+bool ParseMutatorCliParam(const char* param,
                           const char* help_message,
                           MutatorCliParams* out) {
-  if (HasPrefix(param, "--transformation_batch_size=")) {
-    if (!ParseUint32(param + sizeof("--transformation_batch_size=") - 1,
+  if (HasPrefix(param, "-tint_transformation_batch_size=")) {
+    if (!ParseUint32(param + sizeof("-tint_transformation_batch_size=") - 1,
                      &out->transformation_batch_size)) {
       InvalidParameter(help_message, param);
     }
-  } else if (HasPrefix(param, "--reduction_batch_size=")) {
-    if (!ParseUint32(param + sizeof("--reduction_batch_size=") - 1,
+  } else if (HasPrefix(param, "-tint_reduction_batch_size=")) {
+    if (!ParseUint32(param + sizeof("-tint_reduction_batch_size=") - 1,
                      &out->reduction_batch_size)) {
       InvalidParameter(help_message, param);
     }
-  } else if (HasPrefix(param, "--opt_batch_size=")) {
-    if (!ParseUint32(param + sizeof("--opt_batch_size=") - 1,
+  } else if (HasPrefix(param, "-tint_opt_batch_size=")) {
+    if (!ParseUint32(param + sizeof("-tint_opt_batch_size=") - 1,
                      &out->opt_batch_size)) {
       InvalidParameter(help_message, param);
     }
-  } else if (HasPrefix(param, "--donors=")) {
-    out->donors = ParseDonors(param + sizeof("--donors=") - 1);
-  } else if (HasPrefix(param, "--repeated_pass_strategy=")) {
+  } else if (HasPrefix(param, "-tint_donors=")) {
+    out->donors = ParseDonors(param + sizeof("-tint_donors=") - 1);
+  } else if (HasPrefix(param, "-tint_repeated_pass_strategy=")) {
     if (!ParseRepeatedPassStrategy(
-            param + sizeof("--repeated_pass_strategy=") - 1,
+            param + sizeof("-tint_repeated_pass_strategy=") - 1,
             &out->repeated_pass_strategy)) {
       InvalidParameter(help_message, param);
     }
-  } else if (HasPrefix(param, "--enable_all_fuzzer_passes=")) {
-    if (!ParseBool(param + sizeof("--enable_all_fuzzer_passes=") - 1,
+  } else if (HasPrefix(param, "-tint_enable_all_fuzzer_passes=")) {
+    if (!ParseBool(param + sizeof("-tint_enable_all_fuzzer_passes=") - 1,
                    &out->enable_all_fuzzer_passes)) {
       InvalidParameter(help_message, param);
     }
-  } else if (HasPrefix(param, "--enable_all_reduce_passes=")) {
-    if (!ParseBool(param + sizeof("--enable_all_reduce_passes=") - 1,
+  } else if (HasPrefix(param, "-tint_enable_all_reduce_passes=")) {
+    if (!ParseBool(param + sizeof("-tint_enable_all_reduce_passes=") - 1,
                    &out->enable_all_reduce_passes)) {
       InvalidParameter(help_message, param);
     }
-  } else if (HasPrefix(param, "--validate_after_each_opt_pass=")) {
-    if (!ParseBool(param + sizeof("--validate_after_each_opt_pass=") - 1,
+  } else if (HasPrefix(param, "-tint_validate_after_each_opt_pass=")) {
+    if (!ParseBool(param + sizeof("-tint_validate_after_each_opt_pass=") - 1,
                    &out->validate_after_each_opt_pass)) {
       InvalidParameter(help_message, param);
     }
-  } else if (HasPrefix(param, "--validate_after_each_fuzzer_pass=")) {
-    if (!ParseBool(param + sizeof("--validate_after_each_fuzzer_pass=") - 1,
+  } else if (HasPrefix(param, "-tint_validate_after_each_fuzzer_pass=")) {
+    if (!ParseBool(param + sizeof("-tint_validate_after_each_fuzzer_pass=") - 1,
                    &out->validate_after_each_fuzzer_pass)) {
       InvalidParameter(help_message, param);
     }
-  } else if (HasPrefix(param, "--validate_after_each_reduce_pass=")) {
-    if (!ParseBool(param + sizeof("--validate_after_each_reduce_pass=") - 1,
+  } else if (HasPrefix(param, "-tint_validate_after_each_reduce_pass=")) {
+    if (!ParseBool(param + sizeof("-tint_validate_after_each_reduce_pass=") - 1,
                    &out->validate_after_each_reduce_pass)) {
       InvalidParameter(help_message, param);
     }
+  } else {
+    return false;
   }
+  return true;
 }
 
 }  // namespace
 
-FuzzerCliParams ParseFuzzerCliParams(int argc, const char* const* argv) {
+FuzzerCliParams ParseFuzzerCliParams(int* argc, char** argv) {
   FuzzerCliParams cli_params;
   const auto* help_message = kFuzzerHelpMessage;
   auto help = false;
 
-  for (int i = 0; i < argc; ++i) {
+  for (int i = *argc - 1; i > 0; --i) {
     auto param = argv[i];
-    ParseMutatorCliParam(param, help_message, &cli_params.mutator_params);
+    auto recognized_param = true;
 
-    if (HasPrefix(param, "--mutator_cache_size=")) {
-      if (!ParseUint32(param + sizeof("--mutator_cache_size=") - 1,
+    if (HasPrefix(param, "-tint_mutator_cache_size=")) {
+      if (!ParseUint32(param + sizeof("-tint_mutator_cache_size=") - 1,
                        &cli_params.mutator_cache_size)) {
         InvalidParameter(help_message, param);
       }
-    } else if (HasPrefix(param, "--mutator_type=")) {
+    } else if (HasPrefix(param, "-tint_mutator_type=")) {
       auto result = MutatorType::kNone;
 
-      std::stringstream ss(param + sizeof("--mutator_type=") - 1);
+      std::stringstream ss(param + sizeof("-tint_mutator_type=") - 1);
       for (std::string value; std::getline(ss, value, ',');) {
         auto out = MutatorType::kNone;
         if (!ParseMutatorType(value.c_str(), &out)) {
@@ -374,10 +377,10 @@ FuzzerCliParams ParseFuzzerCliParams(int argc, const char* const* argv) {
       }
 
       cli_params.mutator_type = result;
-    } else if (HasPrefix(param, "--fuzzing_target=")) {
+    } else if (HasPrefix(param, "-tint_fuzzing_target=")) {
       auto result = FuzzingTarget::kNone;
 
-      std::stringstream ss(param + sizeof("--fuzzing_target=") - 1);
+      std::stringstream ss(param + sizeof("-tint_fuzzing_target=") - 1);
       for (std::string value; std::getline(ss, value, ',');) {
         auto tmp = FuzzingTarget::kNone;
         if (!ParseFuzzingTarget(value.c_str(), &tmp)) {
@@ -391,10 +394,24 @@ FuzzerCliParams ParseFuzzerCliParams(int argc, const char* const* argv) {
       }
 
       cli_params.fuzzing_target = result;
-    } else if (HasPrefix(param, "--error_dir=")) {
-      cli_params.error_dir = param + sizeof("--error_dir=") - 1;
-    } else if (!strcmp(param, "--help")) {
+    } else if (HasPrefix(param, "-tint_error_dir=")) {
+      cli_params.error_dir = param + sizeof("-tint_error_dir=") - 1;
+    } else if (!strcmp(param, "-tint_help")) {
       help = true;
+    } else {
+      recognized_param = ParseMutatorCliParam(param, help_message,
+                                              &cli_params.mutator_params);
+    }
+
+    if (recognized_param) {
+      // Remove the recognized parameter from the list of all parameters by
+      // swapping it with the last one. This will suppress warnings in the
+      // libFuzzer about unrecognized parameters. By default, libFuzzer thinks
+      // that all user-defined parameters start with two dashes. However, we are
+      // forced to use a single one to make the fuzzer compatible with the
+      // ClusterFuzz.
+      std::swap(argv[i], argv[*argc - 1]);
+      *argc -= 1;
     }
   }
 

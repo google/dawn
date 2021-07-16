@@ -38,7 +38,7 @@ struct Context {
 Context* context = nullptr;
 
 extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
-  auto params = ParseFuzzerCliParams(*argc, *argv);
+  auto params = ParseFuzzerCliParams(argc, *argv);
   auto mutator_cache =
       params.mutator_cache_size
           ? std::make_unique<MutatorCache>(params.mutator_cache_size)

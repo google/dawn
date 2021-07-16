@@ -19,6 +19,7 @@
 #include <limits>
 #include <sstream>
 #include <string>
+#include <utility>
 
 namespace tint {
 namespace fuzzers {
@@ -31,28 +32,28 @@ This is a fuzzer for the Tint compiler that works by mutating the AST.
 Below is a list of all supported parameters for this fuzzer. You may want to
 run it with -help=1 to check out libfuzzer parameters.
 
-  --enable_all_mutations=
+  -tint_enable_all_mutations=
                        If `false`, the fuzzer will only apply mutations from a
                        randomly selected subset of mutation types. Otherwise,
                        all mutation types will be considered. This must be one
                        of `true` or `false` (without `). By default it's `false`.
 
-  --fuzzing_target=
+  -tint_fuzzing_target=
                        Specifies the shading language to target during fuzzing.
                        This must be one or a combination of `wgsl`, `spv`, `hlsl`,
                        `msl` (without `) separated by commas. By default it's
                        `wgsl,msl,hlsl,spv`.
 
-  --help
+  -tint_help
                        Show this message. Note that there is also a -help=1
                        parameter that will display libfuzzer's help message.
 
-  --mutation_batch_size=
+  -tint_mutation_batch_size=
                        The number of mutations to apply in a single libfuzzer
                        mutation session. This must be a numeric value that fits
                        in type `uint32_t`. By default it's 5.
 
-  --record_mutations=
+  -tint_record_mutations=
                        Whether to record applied mutations in the protobuf
                        message. This is useful to debug the fuzzer and during
                        metamorphic fuzzing. The value must be one of `true` or
@@ -106,31 +107,33 @@ bool ParseFuzzingTarget(const char* value, FuzzingTarget* out) {
 
 }  // namespace
 
-CliParams ParseCliParams(int argc, const char* const* argv) {
+CliParams ParseCliParams(int* argc, char** argv) {
   CliParams cli_params;
   auto help = false;
 
-  for (int i = 1; i < argc; ++i) {
+  for (int i = *argc - 1; i > 0; --i) {
     auto param = argv[i];
-    if (HasPrefix(param, "--record_mutations=")) {
-      if (!ParseBool(param + sizeof("--record_mutations=") - 1,
+    auto recognized_parameter = true;
+
+    if (HasPrefix(param, "-tint_record_mutations=")) {
+      if (!ParseBool(param + sizeof("-tint_record_mutations=") - 1,
                      &cli_params.record_mutations)) {
         InvalidParam(param);
       }
-    } else if (HasPrefix(param, "--enable_all_mutations=")) {
-      if (!ParseBool(param + sizeof("--enable_all_mutations=") - 1,
+    } else if (HasPrefix(param, "-tint_enable_all_mutations=")) {
+      if (!ParseBool(param + sizeof("-tint_enable_all_mutations=") - 1,
                      &cli_params.enable_all_mutations)) {
         InvalidParam(param);
       }
-    } else if (HasPrefix(param, "--mutation_batch_size=")) {
-      if (!ParseUint32(param + sizeof("--mutation_batch_size=") - 1,
+    } else if (HasPrefix(param, "-tint_mutation_batch_size=")) {
+      if (!ParseUint32(param + sizeof("-tint_mutation_batch_size=") - 1,
                        &cli_params.mutation_batch_size)) {
         InvalidParam(param);
       }
-    } else if (HasPrefix(param, "--fuzzing_target=")) {
+    } else if (HasPrefix(param, "-tint_fuzzing_target=")) {
       auto result = FuzzingTarget::kNone;
 
-      std::stringstream ss(param + sizeof("--fuzzing_target=") - 1);
+      std::stringstream ss(param + sizeof("-tint_fuzzing_target=") - 1);
       for (std::string value; std::getline(ss, value, ',');) {
         auto tmp = FuzzingTarget::kNone;
         if (!ParseFuzzingTarget(value.c_str(), &tmp)) {
@@ -144,8 +147,21 @@ CliParams ParseCliParams(int argc, const char* const* argv) {
       }
 
       cli_params.fuzzing_target = result;
-    } else if (!strcmp(param, "--help")) {
+    } else if (!strcmp(param, "-tint_help")) {
       help = true;
+    } else {
+      recognized_parameter = false;
+    }
+
+    if (recognized_parameter) {
+      // Remove the recognized parameter from the list of all parameters by
+      // swapping it with the last one. This will suppress warnings in the
+      // libFuzzer about unrecognized parameters. By default, libFuzzer thinks
+      // that all user-defined parameters start with two dashes. However, we are
+      // forced to use a single one to make the fuzzer compatible with the
+      // ClusterFuzz.
+      std::swap(argv[i], argv[*argc - 1]);
+      *argc -= 1;
     }
   }
 

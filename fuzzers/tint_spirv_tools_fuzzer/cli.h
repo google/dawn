@@ -102,7 +102,8 @@ struct MutatorCliParams {
   bool validate_after_each_reduce_pass = true;
 };
 
-/// Parameters specific to the fuzzer. Type `--help` in the CLI to learn more.
+/// Parameters specific to the fuzzer. Type `-tint_help` in the CLI to learn
+/// more.
 struct FuzzerCliParams {
   /// The size of the cache that records ongoing mutation sessions.
   uint32_t mutator_cache_size = 20;
@@ -138,13 +139,15 @@ struct MutatorDebuggerCliParams {
 
 /// Parses CLI parameters for the fuzzer. This function exits with an error code
 /// and a message is printed to the console if some parameter has invalid
-/// format. You can pass `--help` to check out all available parameters.
+/// format. You can pass `-tint_help` to check out all available parameters.
+/// This function will remove recognized parameters from the `argv` and adjust
+/// the `argc` accordingly.
 ///
 /// @param argc - the number of parameters (identical to the `argc` in `main`
 ///     function).
 /// @param argv - array of C strings of parameters.
 /// @return the parsed parameters.
-FuzzerCliParams ParseFuzzerCliParams(int argc, const char* const* argv);
+FuzzerCliParams ParseFuzzerCliParams(int* argc, char** argv);
 
 /// Parses CLI parameters for the mutator debugger. This function exits with an
 /// error code and a message is printed to the console if some parameter has

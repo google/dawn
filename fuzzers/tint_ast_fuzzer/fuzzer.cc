@@ -34,7 +34,7 @@ CliParams cli_params{};
 extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
   // Parse CLI parameters. `ParseCliParams` will call `exit` if some parameter
   // is invalid.
-  cli_params = ParseCliParams(*argc, *argv);
+  cli_params = ParseCliParams(argc, *argv);
   return 0;
 }
 
