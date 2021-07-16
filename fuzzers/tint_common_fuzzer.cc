@@ -187,7 +187,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 
 #if TINT_BUILD_SPV_READER
   std::vector<uint32_t> spirv_input(size / sizeof(uint32_t));
-  std::memcpy(spirv_input.data(), data, size);
+  std::memcpy(spirv_input.data(), data, spirv_input.size() * sizeof(uint32_t));
 
 #endif  // TINT_BUILD_SPV_READER
 
