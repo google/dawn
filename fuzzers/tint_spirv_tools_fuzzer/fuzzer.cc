@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <iostream>
 #include <memory>
 #include <random>
 #include <string>
@@ -179,13 +178,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     return 0;
   }
 
-  const auto* writer =
-      static_cast<const writer::wgsl::Generator*>(spv_to_wgsl.GetWriter());
-
-  assert(writer && writer->error().empty() &&
-         "Errors should have already been handled");
-
-  auto wgsl = writer->result();
+  const auto& wgsl = spv_to_wgsl.GetGeneratedWgsl();
 
   std::pair<FuzzingTarget, OutputFormat> targets[] = {
       {FuzzingTarget::kHlsl, OutputFormat::kHLSL},

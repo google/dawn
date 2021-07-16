@@ -16,7 +16,6 @@
 #define FUZZERS_TINT_COMMON_FUZZER_H_
 
 #include <cstring>
-#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -30,9 +29,9 @@ class Reader {
  public:
   Reader(const uint8_t* data, size_t size);
 
-  bool failed() { return failed_; }
+  bool failed() const { return failed_; }
   const uint8_t* data() { return data_; }
-  size_t size() { return size_; }
+  size_t size() const { return size_; }
 
   template <typename T>
   T read() {
@@ -109,20 +108,32 @@ class CommonFuzzer {
 
   int Run(const uint8_t* data, size_t size);
 
-  const writer::Writer* GetWriter() const;
-
   const std::string& GetErrors() const { return errors_; }
+
+  const std::vector<uint32_t>& GetGeneratedSpirv() const {
+    return generated_spirv_;
+  }
+
+  const std::string& GetGeneratedWgsl() const { return generated_wgsl_; }
+
+  const std::string& GetGeneratedHlsl() const { return generated_hlsl_; }
+
+  const std::string& GetGeneratedMsl() const { return generated_msl_; }
 
   bool HasErrors() const { return !errors_.empty(); }
 
  private:
   InputFormat input_;
   OutputFormat output_;
-  std::unique_ptr<writer::Writer> writer_;
   transform::Manager* transform_manager_;
   transform::DataMap transform_inputs_;
   bool inspector_enabled_;
   std::string errors_;
+
+  std::vector<uint32_t> generated_spirv_;
+  std::string generated_wgsl_;
+  std::string generated_hlsl_;
+  std::string generated_msl_;
 };
 
 }  // namespace fuzzers

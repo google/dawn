@@ -90,7 +90,7 @@ extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
                 << result.error << std::endl;
       return 0;
     }
-    *mutator_state.mutable_program() = result.wgsl;
+    *mutator_state.mutable_program() = std::move(result.wgsl);
   }
 
   if (mutator_state.ByteSizeLong() > max_size) {
@@ -125,7 +125,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     auto result = writer::wgsl::Generate(&program, options);
     assert(result.success &&
            "Can't generate a shader for the valid tint::Program");
-    program_text = result.wgsl;
+    program_text = std::move(result.wgsl);
   } else {
     program_text.assign(data, data + size);
   }

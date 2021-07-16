@@ -35,10 +35,10 @@ namespace fuzzers {
 namespace {
 
 [[noreturn]] void FatalError(const tint::diag::List& diags,
-                             std::string msg = "") {
+                             const std::string& msg = "") {
   auto printer = tint::diag::Printer::create(stderr, true);
-  if (msg.size()) {
-    printer->write((msg + "\n").c_str(), {diag::Color::kRed, true});
+  if (!msg.empty()) {
+    printer->write(msg + "\n", {diag::Color::kRed, true});
   }
   tint::diag::Formatter().format(diags, printer.get());
   __builtin_trap();
@@ -51,7 +51,7 @@ namespace {
 
 transform::VertexAttributeDescriptor ExtractVertexAttributeDescriptor(
     Reader* r) {
-  transform::VertexAttributeDescriptor desc;
+  transform::VertexAttributeDescriptor desc{};
   desc.format = r->enum_class<transform::VertexFormat>(
       static_cast<uint8_t>(transform::VertexFormat::kLastEntry) + 1);
   desc.offset = r->read<uint32_t>();
@@ -70,7 +70,7 @@ transform::VertexBufferLayoutDescriptor ExtractVertexBufferLayoutDescriptor(
 }
 
 bool SPIRVToolsValidationCheck(const tint::Program& program,
-                               std::vector<uint32_t> spirv) {
+                               const std::vector<uint32_t>& spirv) {
   spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_1);
   const tint::diag::List& diags = program.Diagnostics();
   tools.SetMessageConsumer([diags](spv_message_level_t, const char*,
@@ -186,9 +186,8 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 #endif  // TINT_BUILD_WGSL_READER
 
 #if TINT_BUILD_SPV_READER
-  size_t u32_size = size / sizeof(uint32_t);
-  const uint32_t* u32_data = reinterpret_cast<const uint32_t*>(data);
-  std::vector<uint32_t> spirv_input(u32_data, u32_data + u32_size);
+  std::vector<uint32_t> spirv_input(size / sizeof(uint32_t));
+  std::memcpy(spirv_input.data(), data, size);
 
 #endif  // TINT_BUILD_SPV_READER
 
@@ -203,7 +202,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 #endif  // TINT_BUILD_WGSL_READER
 #if TINT_BUILD_SPV_READER
     case InputFormat::kSpv: {
-      if (spirv_input.size() != 0) {
+      if (spirv_input.empty()) {
         program = reader::spirv::Parse(spirv_input);
       }
       break;
@@ -307,7 +306,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
     if (!out.program.IsValid()) {
       // Transforms can produce error messages for bad input.
       // Catch ICEs and errors from non transform systems.
-      for (auto diag : out.program.Diagnostics()) {
+      for (const auto& diag : out.program.Diagnostics()) {
         if (diag.severity > diag::Severity::Error ||
             diag.system != diag::System::Transform) {
           FatalError(out.program.Diagnostics(),
@@ -325,8 +324,9 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 #if TINT_BUILD_WGSL_WRITER
       writer::wgsl::Options options;
       auto result = writer::wgsl::Generate(&program, options);
+      generated_wgsl_ = std::move(result.wgsl);
       if (!result.success) {
-        errors_ = writer_->error();
+        errors_ = result.error;
         return 0;
       }
 #endif  // TINT_BUILD_WGSL_WRITER
@@ -336,11 +336,12 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 #if TINT_BUILD_SPV_WRITER
       writer::spirv::Options options;
       auto result = writer::spirv::Generate(&program, options);
+      generated_spirv_ = std::move(result.spirv);
       if (!result.success) {
-        errors_ = writer_->error();
+        errors_ = result.error;
         return 0;
       }
-      if (!SPIRVToolsValidationCheck(program, result.spirv)) {
+      if (!SPIRVToolsValidationCheck(program, generated_spirv_)) {
         FatalError(program.Diagnostics(),
                    "Fuzzing detected invalid spirv being emitted by Tint");
       }
@@ -352,8 +353,9 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 #if TINT_BUILD_HLSL_WRITER
       writer::hlsl::Options options;
       auto result = writer::hlsl::Generate(&program, options);
+      generated_hlsl_ = std::move(result.hlsl);
       if (!result.success) {
-        errors_ = writer_->error();
+        errors_ = result.error;
         return 0;
       }
 #endif  // TINT_BUILD_HLSL_WRITER
@@ -363,8 +365,9 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 #if TINT_BUILD_MSL_WRITER
       writer::msl::Options options;
       auto result = writer::msl::Generate(&program, options);
+      generated_msl_ = std::move(result.msl);
       if (!result.success) {
-        errors_ = writer_->error();
+        errors_ = result.error;
         return 0;
       }
 #endif  // TINT_BUILD_MSL_WRITER
@@ -375,10 +378,6 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
   }
 
   return 0;
-}
-
-const writer::Writer* CommonFuzzer::GetWriter() const {
-  return writer_.get();
 }
 
 }  // namespace fuzzers
