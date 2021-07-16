@@ -252,6 +252,15 @@ class ParserImpl : Reader {
                                      ast::DecorationList* ast_decos,
                                      bool transfer_pipeline_io);
 
+  /// Converts SPIR-V interpolation decorations into AST decorations.
+  /// @param store_type the store type for the variable or member
+  /// @param decorations the SPIR-V interpolation decorations
+  /// @param ast_decos the decoration list to populate.
+  /// @returns false if conversion fails
+  bool ConvertInterpolationDecorations(const Type* store_type,
+                                       const DecorationList& decorations,
+                                       ast::DecorationList* ast_decos);
+
   /// Converts a SPIR-V struct member decoration. If the decoration is
   /// recognized but deliberately dropped, then returns nullptr without a
   /// diagnostic. On failure, emits a diagnostic and returns nullptr.
@@ -385,6 +394,13 @@ class ParserImpl : Reader {
   /// @returns a newly created location node, or nullptr
   ast::Decoration* GetMemberLocation(const Struct& struct_type,
                                      int member_index);
+
+  /// Returns the SPIR-V interpolation decorations, if any, on a struct member.
+  /// @param struct_type the parser's structure type.
+  /// @param member_index the member index
+  /// @returns a list of SPIR-V decorations.
+  DecorationList GetMemberInterpolationDecorations(const Struct& struct_type,
+                                                   int member_index);
 
   /// Creates an AST Variable node for a SPIR-V ID, including any attached
   /// decorations, unless it's an ignorable builtin variable.

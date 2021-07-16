@@ -479,9 +479,15 @@ class FunctionEmitter {
   /// Assumes the list contains at most one Location decoration.
   /// @param decos the decoration list to modify
   /// @param replacement the location decoration to place into the list
-  /// @returns the location decoration that was replaced, if one was replaced.
+  /// @returns the location decoration that was replaced, if one was replaced,
+  /// or null otherwise.
   ast::Decoration* SetLocation(ast::DecorationList* decos,
                                ast::Decoration* replacement);
+
+  /// Returns the Location dcoration, if it exists.
+  /// @param decos the list of decorations to search
+  /// @returns the Location decoration, or nullptr if it doesn't exist
+  ast::Decoration* GetLocation(const ast::DecorationList& decos);
 
   /// Create an ast::BlockStatement representing the body of the function.
   /// This creates the statement stack, which is non-empty for the lifetime

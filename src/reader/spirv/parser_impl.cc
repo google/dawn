@@ -233,6 +233,24 @@ bool AssumesResultSignednessMatchesFirstOperand(GLSLstd450 extended_opcode) {
   return false;
 }
 
+// @param a SPIR-V decoration
+// @return true when the given decoration is an interpolation decoration.
+bool IsInterpolationDecoration(const Decoration& deco) {
+  if (deco.size() < 1) {
+    return false;
+  }
+  switch (deco[0]) {
+    case SpvDecorationFlat:
+    case SpvDecorationNoPerspective:
+    case SpvDecorationCentroid:
+    case SpvDecorationSample:
+      return true;
+    default:
+      break;
+  }
+  return false;
+}
+
 }  // namespace
 
 TypedExpression::TypedExpression() = default;
@@ -1104,6 +1122,9 @@ const Type* ParserImpl::ConvertType(
           break;
         case SpvDecorationLocation:
         case SpvDecorationFlat:
+        case SpvDecorationNoPerspective:
+        case SpvDecorationCentroid:
+        case SpvDecorationSample:
           // IO decorations are handled when emitting the entry point.
           break;
         default: {
@@ -1571,6 +1592,7 @@ bool ParserImpl::ConvertDecorationsForVariable(uint32_t id,
                                                const Type** store_type,
                                                ast::DecorationList* decorations,
                                                bool transfer_pipeline_io) {
+  DecorationList interpolation_decorations;
   for (auto& deco : GetDecorationsFor(id)) {
     if (deco.empty()) {
       return Fail() << "malformed decoration on ID " << id << ": it is empty";
@@ -1643,16 +1665,8 @@ bool ParserImpl::ConvertDecorationsForVariable(uint32_t id,
             create<ast::LocationDecoration>(Source{}, deco[1]));
       }
     }
-    if (deco[0] == SpvDecorationFlat) {
-      if (transfer_pipeline_io) {
-        // In WGSL, integral types are always flat, and so the decoration
-        // is never specified.
-        if (!(*store_type)->IsIntegerScalarOrVector()) {
-          decorations->emplace_back(create<ast::InterpolateDecoration>(
-              Source{}, ast::InterpolationType::kFlat,
-              ast::InterpolationSampling::kNone));
-        }
-      }
+    if (transfer_pipeline_io && IsInterpolationDecoration(deco)) {
+      interpolation_decorations.push_back(deco);
     }
     if (deco[0] == SpvDecorationDescriptorSet) {
       if (deco.size() == 1) {
@@ -1671,6 +1685,98 @@ bool ParserImpl::ConvertDecorationsForVariable(uint32_t id,
           create<ast::BindingDecoration>(Source{}, deco[1]));
     }
   }
+
+  if (transfer_pipeline_io) {
+    if (!ConvertInterpolationDecorations(*store_type, interpolation_decorations,
+                                         decorations)) {
+      return false;
+    }
+  }
+
+  return success();
+}
+
+DecorationList ParserImpl::GetMemberInterpolationDecorations(
+    const Struct& struct_type,
+    int member_index) {
+  // Yes, I could have used std::copy_if or std::copy_if.
+  DecorationList result;
+  for (const auto& deco : GetDecorationsForMember(
+           struct_id_for_symbol_[struct_type.name], member_index)) {
+    if (IsInterpolationDecoration(deco)) {
+      result.emplace_back(deco);
+    }
+  }
+  return result;
+}
+
+bool ParserImpl::ConvertInterpolationDecorations(
+    const Type* store_type,
+    const DecorationList& decorations,
+    ast::DecorationList* ast_decos) {
+  bool has_interpolate_no_perspective = false;
+  bool has_interpolate_sampling_centroid = false;
+  bool has_interpolate_sampling_sample = false;
+
+  for (const auto& deco : decorations) {
+    if (deco[0] == SpvDecorationFlat) {
+      // In WGSL, integral types are always flat, and so the decoration
+      // is never specified.
+      if (!store_type->IsIntegerScalarOrVector()) {
+        ast_decos->emplace_back(create<ast::InterpolateDecoration>(
+            Source{}, ast::InterpolationType::kFlat,
+            ast::InterpolationSampling::kNone));
+        // Only one interpolate attribute is allowed.
+        return true;
+      }
+    }
+    if (deco[0] == SpvDecorationNoPerspective) {
+      if (store_type->IsIntegerScalarOrVector()) {
+        // This doesn't capture the array or struct case.
+        return Fail() << "NoPerspective is invalid on integral IO";
+      }
+      has_interpolate_no_perspective = true;
+    }
+    if (deco[0] == SpvDecorationCentroid) {
+      if (store_type->IsIntegerScalarOrVector()) {
+        // This doesn't capture the array or struct case.
+        return Fail()
+               << "Centroid interpolation sampling is invalid on integral IO";
+      }
+      has_interpolate_sampling_centroid = true;
+    }
+    if (deco[0] == SpvDecorationSample) {
+      if (store_type->IsIntegerScalarOrVector()) {
+        // This doesn't capture the array or struct case.
+        return Fail()
+               << "Sample interpolation sampling is invalid on integral IO";
+      }
+      has_interpolate_sampling_sample = true;
+    }
+  }
+
+  // Apply non-integral interpolation.
+  if (has_interpolate_no_perspective || has_interpolate_sampling_centroid ||
+      has_interpolate_sampling_sample) {
+    const ast::InterpolationType type =
+        has_interpolate_no_perspective ? ast::InterpolationType::kLinear
+                                       : ast::InterpolationType::kPerspective;
+    const ast::InterpolationSampling sampling =
+        has_interpolate_sampling_centroid
+            ? ast::InterpolationSampling::kCentroid
+            : (has_interpolate_sampling_sample
+                   ? ast::InterpolationSampling::kSample
+                   : ast::InterpolationSampling::
+                         kNone /* Center is the default */);
+    if (type == ast::InterpolationType::kPerspective &&
+        sampling == ast::InterpolationSampling::kNone) {
+      // This is the default. Don't add a decoration.
+    } else {
+      ast_decos->emplace_back(
+          create<ast::InterpolateDecoration>(type, sampling));
+    }
+  }
+
   return success();
 }
 

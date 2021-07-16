@@ -949,6 +949,7 @@ bool FunctionEmitter::EmitPipelineInput(std::string var_name,
     tip_type = ref_type->type;
   }
 
+  // Recursively flatten matrices, arrays, and structures.
   if (auto* matrix_type = tip_type->As<Matrix>()) {
     index_prefix.push_back(0);
     const auto num_columns = static_cast<int>(matrix_type->columns);
@@ -981,13 +982,21 @@ bool FunctionEmitter::EmitPipelineInput(std::string var_name,
     for (int i = 0; i < static_cast<int>(members.size()); ++i) {
       index_prefix.back() = i;
       auto* location = parser_impl_.GetMemberLocation(*struct_type, i);
-      auto* saved_location = SetLocation(decos, location);
-      if (!EmitPipelineInput(var_name, var_type, decos, index_prefix,
+      SetLocation(decos, location);
+      ast::DecorationList member_decos(*decos);
+      if (!parser_impl_.ConvertInterpolationDecorations(
+              struct_type,
+              parser_impl_.GetMemberInterpolationDecorations(*struct_type, i),
+              &member_decos)) {
+        return false;
+      }
+      if (!EmitPipelineInput(var_name, var_type, &member_decos, index_prefix,
                              members[i], forced_param_type, params,
                              statements)) {
         return false;
       }
-      SetLocation(decos, saved_location);
+      // Copy the location as updated by nested expansion of the member.
+      SetLocation(decos, GetLocation(member_decos));
     }
     return success();
   }
@@ -999,7 +1008,7 @@ bool FunctionEmitter::EmitPipelineInput(std::string var_name,
   const auto param_name = namer_.MakeDerivedName(var_name + "_param");
   // Create the parameter.
   // TODO(dneto): Note: If the parameter has non-location decorations,
-  // then those decoration AST nodes  will be reused between multiple elements
+  // then those decoration AST nodes will be reused between multiple elements
   // of a matrix, array, or structure.  Normally that's disallowed but currently
   // the SPIR-V reader will make duplicates when the entire AST is cloned
   // at the top level of the SPIR-V reader flow.  Consider rewriting this
@@ -1062,7 +1071,7 @@ ast::Decoration* FunctionEmitter::SetLocation(ast::DecorationList* decos,
   }
   for (auto*& deco : *decos) {
     if (deco->Is<ast::LocationDecoration>()) {
-      // Replace this location decoration with a new one with one higher index.
+      // Replace this location decoration with the replacement.
       // The old one doesn't leak because it's kept in the builder's AST node
       // list.
       ast::Decoration* result = deco;
@@ -1075,6 +1084,16 @@ ast::Decoration* FunctionEmitter::SetLocation(ast::DecorationList* decos,
   return nullptr;
 }
 
+ast::Decoration* FunctionEmitter::GetLocation(
+    const ast::DecorationList& decos) {
+  for (auto* const& deco : decos) {
+    if (deco->Is<ast::LocationDecoration>()) {
+      return deco;
+    }
+  }
+  return nullptr;
+}
+
 bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
                                          const Type* var_type,
                                          ast::DecorationList* decos,
@@ -1083,12 +1102,12 @@ bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
                                          const Type* forced_member_type,
                                          ast::StructMemberList* return_members,
                                          ast::ExpressionList* return_exprs) {
-  // TODO(dneto): Handle structs where the locations are annotated on members.
   tip_type = tip_type->UnwrapAlias();
   if (auto* ref_type = tip_type->As<Reference>()) {
     tip_type = ref_type->type;
   }
 
+  // Recursively flatten matrices, arrays, and structures.
   if (auto* matrix_type = tip_type->As<Matrix>()) {
     index_prefix.push_back(0);
     const auto num_columns = static_cast<int>(matrix_type->columns);
@@ -1123,13 +1142,21 @@ bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
     for (int i = 0; i < static_cast<int>(members.size()); ++i) {
       index_prefix.back() = i;
       auto* location = parser_impl_.GetMemberLocation(*struct_type, i);
-      auto* saved_location = SetLocation(decos, location);
-      if (!EmitPipelineOutput(var_name, var_type, decos, index_prefix,
+      SetLocation(decos, location);
+      ast::DecorationList member_decos(*decos);
+      if (!parser_impl_.ConvertInterpolationDecorations(
+              struct_type,
+              parser_impl_.GetMemberInterpolationDecorations(*struct_type, i),
+              &member_decos)) {
+        return false;
+      }
+      if (!EmitPipelineOutput(var_name, var_type, &member_decos, index_prefix,
                               members[i], forced_member_type, return_members,
                               return_exprs)) {
         return false;
       }
-      SetLocation(decos, saved_location);
+      // Copy the location as updated by nested expansion of the member.
+      SetLocation(decos, GetLocation(member_decos));
     }
     return success();
   }

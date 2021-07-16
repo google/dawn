@@ -55,6 +55,7 @@ std::string MainBody() {
 std::string CommonCapabilities() {
   return R"(
     OpCapability Shader
+    OpCapability SampleRateShading
     OpMemoryModel Logical Simple
 )";
 }
@@ -7753,6 +7754,633 @@ TEST_F(SpvModuleScopeVarParserTest,
       Identifier[not set]{main_1}
       (
       )
+    }
+  }
+}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
+
+TEST_F(SpvModuleScopeVarParserTest,
+       EntryPointWrapping_Interpolation_Floating_Fragment_In) {
+  // Flat decorations are dropped for integral
+  const auto assembly = CommonCapabilities() + R"(
+     OpEntryPoint Fragment %main "main" %1 %2 %3 %4 %5 %6
+     OpExecutionMode %main OriginUpperLeft
+     OpDecorate %1 Location 1
+     OpDecorate %2 Location 2
+     OpDecorate %3 Location 3
+     OpDecorate %4 Location 4
+     OpDecorate %5 Location 5
+     OpDecorate %6 Location 6
+
+     ; %1 perspective center
+
+     OpDecorate %2 Centroid ; perspective centroid
+
+     OpDecorate %3 Sample ; perspective sample
+
+     OpDecorate %4 NoPerspective; linear center
+
+     OpDecorate %5 NoPerspective ; linear centroid
+     OpDecorate %5 Centroid
+
+     OpDecorate %6 NoPerspective ; linear sample
+     OpDecorate %6 Sample
+
+)" + CommonTypes() +
+                        R"(
+     %ptr_in_float = OpTypePointer Input %float
+     %1 = OpVariable %ptr_in_float Input
+     %2 = OpVariable %ptr_in_float Input
+     %3 = OpVariable %ptr_in_float Input
+     %4 = OpVariable %ptr_in_float Input
+     %5 = OpVariable %ptr_in_float Input
+     %6 = OpVariable %ptr_in_float Input
+
+     %main = OpFunction %void None %voidfn
+     %entry = OpLabel
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+
+  ASSERT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_TRUE(p->error().empty());
+  const auto got = p->program().to_str();
+  const std::string expected =
+      R"(Module{
+  Variable{
+    x_1
+    private
+    undefined
+    __f32
+  }
+  Variable{
+    x_2
+    private
+    undefined
+    __f32
+  }
+  Variable{
+    x_3
+    private
+    undefined
+    __f32
+  }
+  Variable{
+    x_4
+    private
+    undefined
+    __f32
+  }
+  Variable{
+    x_5
+    private
+    undefined
+    __f32
+  }
+  Variable{
+    x_6
+    private
+    undefined
+    __f32
+  }
+  Function main_1 -> __void
+  ()
+  {
+    Return{}
+  }
+  Function main -> __void
+  StageDecoration{fragment}
+  (
+    VariableConst{
+      Decorations{
+        LocationDecoration{1}
+      }
+      x_1_param
+      none
+      undefined
+      __f32
+    }
+    VariableConst{
+      Decorations{
+        LocationDecoration{2}
+        InterpolateDecoration{perspective centroid}
+      }
+      x_2_param
+      none
+      undefined
+      __f32
+    }
+    VariableConst{
+      Decorations{
+        LocationDecoration{3}
+        InterpolateDecoration{perspective sample}
+      }
+      x_3_param
+      none
+      undefined
+      __f32
+    }
+    VariableConst{
+      Decorations{
+        LocationDecoration{4}
+        InterpolateDecoration{linear none}
+      }
+      x_4_param
+      none
+      undefined
+      __f32
+    }
+    VariableConst{
+      Decorations{
+        LocationDecoration{5}
+        InterpolateDecoration{linear centroid}
+      }
+      x_5_param
+      none
+      undefined
+      __f32
+    }
+    VariableConst{
+      Decorations{
+        LocationDecoration{6}
+        InterpolateDecoration{linear sample}
+      }
+      x_6_param
+      none
+      undefined
+      __f32
+    }
+  )
+  {
+    Assignment{
+      Identifier[not set]{x_1}
+      Identifier[not set]{x_1_param}
+    }
+    Assignment{
+      Identifier[not set]{x_2}
+      Identifier[not set]{x_2_param}
+    }
+    Assignment{
+      Identifier[not set]{x_3}
+      Identifier[not set]{x_3_param}
+    }
+    Assignment{
+      Identifier[not set]{x_4}
+      Identifier[not set]{x_4_param}
+    }
+    Assignment{
+      Identifier[not set]{x_5}
+      Identifier[not set]{x_5_param}
+    }
+    Assignment{
+      Identifier[not set]{x_6}
+      Identifier[not set]{x_6_param}
+    }
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+  }
+}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
+
+TEST_F(SpvModuleScopeVarParserTest,
+       EntryPointWrapping_Flatten_Interpolation_Floating_Fragment_In) {
+  const auto assembly = CommonCapabilities() + R"(
+     OpEntryPoint Fragment %main "main" %1
+     OpExecutionMode %main OriginUpperLeft
+     OpDecorate %1 Location 1
+
+     ; member 0 perspective center
+
+     OpMemberDecorate %10 1 Centroid ; perspective centroid
+
+     OpMemberDecorate %10 2 Sample ; perspective sample
+
+     OpMemberDecorate %10 3 NoPerspective; linear center
+
+     OpMemberDecorate %10 4 NoPerspective ; linear centroid
+     OpMemberDecorate %10 4 Centroid
+
+     OpMemberDecorate %10 5 NoPerspective ; linear sample
+     OpMemberDecorate %10 5 Sample
+
+)" + CommonTypes() +
+                        R"(
+
+     %10 = OpTypeStruct %float %float %float %float %float %float
+     %ptr_in_strct = OpTypePointer Input %10
+     %1 = OpVariable %ptr_in_strct Input
+
+     %main = OpFunction %void None %voidfn
+     %entry = OpLabel
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+  EXPECT_TRUE(p->error().empty());
+  const auto got = p->program().to_str();
+  const std::string expected =
+      R"(Module{
+  Struct S {
+    StructMember{field0: __f32}
+    StructMember{field1: __f32}
+    StructMember{field2: __f32}
+    StructMember{field3: __f32}
+    StructMember{field4: __f32}
+    StructMember{field5: __f32}
+  }
+  Variable{
+    x_1
+    private
+    undefined
+    __type_name_S
+  }
+  Function main_1 -> __void
+  ()
+  {
+    Return{}
+  }
+  Function main -> __void
+  StageDecoration{fragment}
+  (
+    VariableConst{
+      Decorations{
+        LocationDecoration{1}
+      }
+      x_1_param
+      none
+      undefined
+      __f32
+    }
+    VariableConst{
+      Decorations{
+        LocationDecoration{2}
+        InterpolateDecoration{perspective centroid}
+      }
+      x_1_param_1
+      none
+      undefined
+      __f32
+    }
+    VariableConst{
+      Decorations{
+        LocationDecoration{3}
+        InterpolateDecoration{perspective sample}
+      }
+      x_1_param_2
+      none
+      undefined
+      __f32
+    }
+    VariableConst{
+      Decorations{
+        LocationDecoration{4}
+        InterpolateDecoration{linear none}
+      }
+      x_1_param_3
+      none
+      undefined
+      __f32
+    }
+    VariableConst{
+      Decorations{
+        LocationDecoration{5}
+        InterpolateDecoration{linear centroid}
+      }
+      x_1_param_4
+      none
+      undefined
+      __f32
+    }
+    VariableConst{
+      Decorations{
+        LocationDecoration{6}
+        InterpolateDecoration{linear sample}
+      }
+      x_1_param_5
+      none
+      undefined
+      __f32
+    }
+  )
+  {
+    Assignment{
+      MemberAccessor[not set]{
+        Identifier[not set]{x_1}
+        Identifier[not set]{field0}
+      }
+      Identifier[not set]{x_1_param}
+    }
+    Assignment{
+      MemberAccessor[not set]{
+        Identifier[not set]{x_1}
+        Identifier[not set]{field1}
+      }
+      Identifier[not set]{x_1_param_1}
+    }
+    Assignment{
+      MemberAccessor[not set]{
+        Identifier[not set]{x_1}
+        Identifier[not set]{field2}
+      }
+      Identifier[not set]{x_1_param_2}
+    }
+    Assignment{
+      MemberAccessor[not set]{
+        Identifier[not set]{x_1}
+        Identifier[not set]{field3}
+      }
+      Identifier[not set]{x_1_param_3}
+    }
+    Assignment{
+      MemberAccessor[not set]{
+        Identifier[not set]{x_1}
+        Identifier[not set]{field4}
+      }
+      Identifier[not set]{x_1_param_4}
+    }
+    Assignment{
+      MemberAccessor[not set]{
+        Identifier[not set]{x_1}
+        Identifier[not set]{field5}
+      }
+      Identifier[not set]{x_1_param_5}
+    }
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+  }
+}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
+
+TEST_F(SpvModuleScopeVarParserTest,
+       EntryPointWrapping_Interpolation_Floating_Fragment_Out) {
+  // Flat decorations are dropped for integral
+  const auto assembly = CommonCapabilities() + R"(
+     OpEntryPoint Fragment %main "main" %1 %2 %3 %4 %5 %6
+     OpExecutionMode %main OriginUpperLeft
+     OpDecorate %1 Location 1
+     OpDecorate %2 Location 2
+     OpDecorate %3 Location 3
+     OpDecorate %4 Location 4
+     OpDecorate %5 Location 5
+     OpDecorate %6 Location 6
+
+     ; %1 perspective center
+
+     OpDecorate %2 Centroid ; perspective centroid
+
+     OpDecorate %3 Sample ; perspective sample
+
+     OpDecorate %4 NoPerspective; linear center
+
+     OpDecorate %5 NoPerspective ; linear centroid
+     OpDecorate %5 Centroid
+
+     OpDecorate %6 NoPerspective ; linear sample
+     OpDecorate %6 Sample
+
+)" + CommonTypes() +
+                        R"(
+     %ptr_out_float = OpTypePointer Output %float
+     %1 = OpVariable %ptr_out_float Output
+     %2 = OpVariable %ptr_out_float Output
+     %3 = OpVariable %ptr_out_float Output
+     %4 = OpVariable %ptr_out_float Output
+     %5 = OpVariable %ptr_out_float Output
+     %6 = OpVariable %ptr_out_float Output
+
+     %main = OpFunction %void None %voidfn
+     %entry = OpLabel
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+
+  ASSERT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_TRUE(p->error().empty());
+  const auto got = p->program().to_str();
+  const std::string expected =
+      R"(Module{
+  Struct main_out {
+    StructMember{[[ LocationDecoration{1}
+ ]] x_1_1: __f32}
+    StructMember{[[ LocationDecoration{2}
+ InterpolateDecoration{perspective centroid}
+ ]] x_2_1: __f32}
+    StructMember{[[ LocationDecoration{3}
+ InterpolateDecoration{perspective sample}
+ ]] x_3_1: __f32}
+    StructMember{[[ LocationDecoration{4}
+ InterpolateDecoration{linear none}
+ ]] x_4_1: __f32}
+    StructMember{[[ LocationDecoration{5}
+ InterpolateDecoration{linear centroid}
+ ]] x_5_1: __f32}
+    StructMember{[[ LocationDecoration{6}
+ InterpolateDecoration{linear sample}
+ ]] x_6_1: __f32}
+  }
+  Variable{
+    x_1
+    private
+    undefined
+    __f32
+  }
+  Variable{
+    x_2
+    private
+    undefined
+    __f32
+  }
+  Variable{
+    x_3
+    private
+    undefined
+    __f32
+  }
+  Variable{
+    x_4
+    private
+    undefined
+    __f32
+  }
+  Variable{
+    x_5
+    private
+    undefined
+    __f32
+  }
+  Variable{
+    x_6
+    private
+    undefined
+    __f32
+  }
+  Function main_1 -> __void
+  ()
+  {
+    Return{}
+  }
+  Function main -> __type_name_main_out
+  StageDecoration{fragment}
+  ()
+  {
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{x_1}
+          Identifier[not set]{x_2}
+          Identifier[not set]{x_3}
+          Identifier[not set]{x_4}
+          Identifier[not set]{x_5}
+          Identifier[not set]{x_6}
+        }
+      }
+    }
+  }
+}
+)";
+  EXPECT_EQ(got, expected) << got;
+}
+
+TEST_F(SpvModuleScopeVarParserTest,
+       EntryPointWrapping_Flatten_Interpolation_Floating_Fragment_Out) {
+  const auto assembly = CommonCapabilities() + R"(
+     OpEntryPoint Fragment %main "main" %1
+     OpExecutionMode %main OriginUpperLeft
+
+     OpDecorate %1 Location 1
+
+     ; member 0 perspective center
+
+     OpMemberDecorate %10 1 Centroid ; perspective centroid
+
+     OpMemberDecorate %10 2 Sample ; perspective sample
+
+     OpMemberDecorate %10 3 NoPerspective; linear center
+
+     OpMemberDecorate %10 4 NoPerspective ; linear centroid
+     OpMemberDecorate %10 4 Centroid
+
+     OpMemberDecorate %10 5 NoPerspective ; linear sample
+     OpMemberDecorate %10 5 Sample
+
+)" + CommonTypes() +
+                        R"(
+
+     %10 = OpTypeStruct %float %float %float %float %float %float
+     %ptr_in_strct = OpTypePointer Output %10
+     %1 = OpVariable %ptr_in_strct Output
+
+     %main = OpFunction %void None %voidfn
+     %entry = OpLabel
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+
+  ASSERT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_TRUE(p->error().empty());
+  const auto got = p->program().to_str();
+  const std::string expected =
+      R"(Module{
+  Struct S {
+    StructMember{field0: __f32}
+    StructMember{field1: __f32}
+    StructMember{field2: __f32}
+    StructMember{field3: __f32}
+    StructMember{field4: __f32}
+    StructMember{field5: __f32}
+  }
+  Struct main_out {
+    StructMember{[[ LocationDecoration{1}
+ ]] x_1_1: __f32}
+    StructMember{[[ LocationDecoration{2}
+ InterpolateDecoration{perspective centroid}
+ ]] x_1_2: __f32}
+    StructMember{[[ LocationDecoration{3}
+ InterpolateDecoration{perspective sample}
+ ]] x_1_3: __f32}
+    StructMember{[[ LocationDecoration{4}
+ InterpolateDecoration{linear none}
+ ]] x_1_4: __f32}
+    StructMember{[[ LocationDecoration{5}
+ InterpolateDecoration{linear centroid}
+ ]] x_1_5: __f32}
+    StructMember{[[ LocationDecoration{6}
+ InterpolateDecoration{linear sample}
+ ]] x_1_6: __f32}
+  }
+  Variable{
+    x_1
+    private
+    undefined
+    __type_name_S
+  }
+  Function main_1 -> __void
+  ()
+  {
+    Return{}
+  }
+  Function main -> __type_name_main_out
+  StageDecoration{fragment}
+  ()
+  {
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          MemberAccessor[not set]{
+            Identifier[not set]{x_1}
+            Identifier[not set]{field0}
+          }
+          MemberAccessor[not set]{
+            Identifier[not set]{x_1}
+            Identifier[not set]{field1}
+          }
+          MemberAccessor[not set]{
+            Identifier[not set]{x_1}
+            Identifier[not set]{field2}
+          }
+          MemberAccessor[not set]{
+            Identifier[not set]{x_1}
+            Identifier[not set]{field3}
+          }
+          MemberAccessor[not set]{
+            Identifier[not set]{x_1}
+            Identifier[not set]{field4}
+          }
+          MemberAccessor[not set]{
+            Identifier[not set]{x_1}
+            Identifier[not set]{field5}
+          }
+        }
+      }
     }
   }
 }
