@@ -1247,8 +1247,8 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
 
 bool GeneratorImpl::EmitSelectCall(std::ostream& out,
                                    ast::CallExpression* expr) {
-  auto* expr_true = expr->params()[0];
-  auto* expr_false = expr->params()[1];
+  auto* expr_false = expr->params()[0];
+  auto* expr_true = expr->params()[1];
   auto* expr_cond = expr->params()[2];
   ScopedParen paren(out);
   if (!EmitExpression(out, expr_cond)) {

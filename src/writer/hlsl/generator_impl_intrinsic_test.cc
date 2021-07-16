@@ -281,7 +281,7 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Select_Scalar) {
   gen.increment_indent();
   std::stringstream out;
   ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
-  EXPECT_EQ(out.str(), "(true ? 1.0f : 2.0f)");
+  EXPECT_EQ(out.str(), "(true ? 2.0f : 1.0f)");
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Select_Vector) {
@@ -293,7 +293,7 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Select_Vector) {
   gen.increment_indent();
   std::stringstream out;
   ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
-  EXPECT_EQ(out.str(), "(bool2(true, false) ? int2(1, 2) : int2(3, 4))");
+  EXPECT_EQ(out.str(), "(bool2(true, false) ? int2(3, 4) : int2(1, 2))");
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Modf_Scalar) {

@@ -1160,8 +1160,8 @@ TEST_F(SpvLogicalTest, Select_BoolCond_BoolParams) {
       Call[not set]{
         Identifier[not set]{select}
         (
-          ScalarConstructor[not set]{true}
           ScalarConstructor[not set]{false}
+          ScalarConstructor[not set]{true}
           ScalarConstructor[not set]{true}
         )
       }
@@ -1193,8 +1193,8 @@ TEST_F(SpvLogicalTest, Select_BoolCond_IntScalarParams) {
       Call[not set]{
         Identifier[not set]{select}
         (
-          ScalarConstructor[not set]{10u}
           ScalarConstructor[not set]{20u}
+          ScalarConstructor[not set]{10u}
           ScalarConstructor[not set]{true}
         )
       }
@@ -1226,8 +1226,8 @@ TEST_F(SpvLogicalTest, Select_BoolCond_FloatScalarParams) {
       Call[not set]{
         Identifier[not set]{select}
         (
-          ScalarConstructor[not set]{50.000000}
           ScalarConstructor[not set]{60.000000}
+          ScalarConstructor[not set]{50.000000}
           ScalarConstructor[not set]{true}
         )
       }
@@ -1264,13 +1264,13 @@ TEST_F(SpvLogicalTest, Select_BoolCond_VectorParams) {
         (
           TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor[not set]{10u}
             ScalarConstructor[not set]{20u}
+            ScalarConstructor[not set]{10u}
           }
           TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor[not set]{20u}
             ScalarConstructor[not set]{10u}
+            ScalarConstructor[not set]{20u}
           }
           ScalarConstructor[not set]{true}
         )
@@ -1311,13 +1311,13 @@ TEST_F(SpvLogicalTest, Select_VecBoolCond_VectorParams) {
         (
           TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor[not set]{10u}
             ScalarConstructor[not set]{20u}
+            ScalarConstructor[not set]{10u}
           }
           TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor[not set]{20u}
             ScalarConstructor[not set]{10u}
+            ScalarConstructor[not set]{20u}
           }
           TypeConstructor[not set]{
             __vec_2__bool

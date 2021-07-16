@@ -4960,28 +4960,27 @@ TypedExpression FunctionEmitter::MakeIntrinsicCall(
 TypedExpression FunctionEmitter::MakeSimpleSelect(
     const spvtools::opt::Instruction& inst) {
   auto condition = MakeOperand(inst, 0);
-  auto operand1 = MakeOperand(inst, 1);
-  auto operand2 = MakeOperand(inst, 2);
+  auto true_value = MakeOperand(inst, 1);
+  auto false_value = MakeOperand(inst, 2);
 
   // SPIR-V validation requires:
   // - the condition to be bool or bool vector, so we don't check it here.
-  // - operand1, operand2, and result type to match.
+  // - true_value false_value, and result type to match.
   // - you can't select over pointers or pointer vectors, unless you also have
   //   a VariablePointers* capability, which is not allowed in by WebGPU.
-  auto* op_ty = operand1.type;
+  auto* op_ty = true_value.type;
   if (op_ty->Is<Vector>() || op_ty->IsFloatScalar() ||
       op_ty->IsIntegerScalar() || op_ty->Is<Bool>()) {
     ast::ExpressionList params;
-    params.push_back(operand1.expr);
-    params.push_back(operand2.expr);
+    params.push_back(false_value.expr);
+    params.push_back(true_value.expr);
     // The condition goes last.
     params.push_back(condition.expr);
-    return {operand1.type,
-            create<ast::CallExpression>(
-                Source{},
-                create<ast::IdentifierExpression>(
-                    Source{}, builder_.Symbols().Register("select")),
-                std::move(params))};
+    return {op_ty, create<ast::CallExpression>(
+                       Source{},
+                       create<ast::IdentifierExpression>(
+                           Source{}, builder_.Symbols().Register("select")),
+                       std::move(params))};
   }
   return {};
 }

@@ -2448,8 +2448,8 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
     case IntrinsicType::kSelect: {
       // Note: Argument order is different in WGSL and SPIR-V
       auto cond_id = get_param_as_value_id(2);
-      auto true_id = get_param_as_value_id(0);
-      auto false_id = get_param_as_value_id(1);
+      auto true_id = get_param_as_value_id(1);
+      auto false_id = get_param_as_value_id(0);
       if (!cond_id || !true_id || !false_id) {
         return 0;
       }
