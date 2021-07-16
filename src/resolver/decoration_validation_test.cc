@@ -146,7 +146,7 @@ TEST_P(FunctionParameterDecorationTest, IsValid) {
   if (params.should_pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
   } else {
-    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "error: decoration is not valid for non-entry point function "
               "parameters");
@@ -184,7 +184,7 @@ TEST_P(EntryPointParameterDecorationTest, IsValid) {
   if (params.should_pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
   } else {
-    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "error: decoration is not valid for function parameters");
   }
@@ -197,7 +197,8 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBuiltin, true},
                     TestParams{DecorationKind::kGroup, false},
                     TestParams{DecorationKind::kInterpolate, true},
-                    TestParams{DecorationKind::kInvariant, false},
+                    // TODO(crbug.com/tint/1008)
+                    // kInvariant tested separately (requires position builtin)
                     TestParams{DecorationKind::kLocation, true},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
@@ -238,6 +239,19 @@ TEST_F(EntryPointParameterDecorationTest, DuplicateInternalDecoration) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(EntryPointParameterDecorationTest, ComputeShaderLocation) {
+  auto* input = Param("input", ty.vec4<f32>(),
+                      ast::DecorationList{Location(Source{{12, 34}}, 1)});
+  Func("main", {input}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute),
+        create<ast::WorkgroupDecoration>(Source{{12, 34}}, Expr(1))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: decoration is not valid for compute shader function "
+            "parameters");
+}
+
 using FunctionReturnTypeDecorationTest = TestWithParams;
 TEST_P(FunctionReturnTypeDecorationTest, IsValid) {
   auto& params = GetParam();
@@ -248,7 +262,7 @@ TEST_P(FunctionReturnTypeDecorationTest, IsValid) {
   if (params.should_pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
   } else {
-    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "error: decoration is not valid for non-entry point function "
               "return types");
@@ -285,9 +299,16 @@ TEST_P(EntryPointReturnTypeDecorationTest, IsValid) {
   if (params.should_pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
   } else {
-    EXPECT_FALSE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(r()->error(),
-              "error: decoration is not valid for entry point return types");
+    EXPECT_FALSE(r()->Resolve());
+    if (params.kind == DecorationKind::kLocation ||
+        params.kind == DecorationKind::kInterpolate) {
+      EXPECT_EQ(r()->error(),
+                "error: decoration is not valid for compute shader entry point "
+                "return types");
+    } else {
+      EXPECT_EQ(r()->error(),
+                "error: decoration is not valid for entry point return types");
+    }
   }
 }
 
@@ -298,9 +319,9 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, true},
                     TestParams{DecorationKind::kGroup, false},
-                    TestParams{DecorationKind::kInterpolate, true},
+                    TestParams{DecorationKind::kInterpolate, false},
                     // kInvariant tested separately (requires position builtin)
-                    TestParams{DecorationKind::kLocation, true},
+                    TestParams{DecorationKind::kLocation, false},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
                     TestParams{DecorationKind::kSize, false},
@@ -367,7 +388,7 @@ TEST_P(ArrayDecorationTest, IsValid) {
   if (params.should_pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
   } else {
-    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: decoration is not valid for array types");
   }
@@ -403,7 +424,7 @@ TEST_P(StructDecorationTest, IsValid) {
   if (params.should_pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
   } else {
-    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: decoration is not valid for struct declarations");
   }
@@ -467,7 +488,7 @@ TEST_P(StructMemberDecorationTest, IsValid) {
   if (params.should_pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
   } else {
-    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: decoration is not valid for structure members");
   }
@@ -528,7 +549,7 @@ TEST_P(VariableDecorationTest, IsValid) {
   if (params.should_pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
   } else {
-    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_FALSE(r()->Resolve());
     if (!IsBindingDecoration(params.kind)) {
       EXPECT_EQ(r()->error(),
                 "12:34 error: decoration is not valid for variables");
@@ -582,7 +603,7 @@ TEST_P(ConstantDecorationTest, IsValid) {
   if (params.should_pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
   } else {
-    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: decoration is not valid for constants");
   }
@@ -632,7 +653,7 @@ TEST_P(FunctionDecorationTest, IsValid) {
   if (params.should_pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
   } else {
-    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: decoration is not valid for functions");
   }

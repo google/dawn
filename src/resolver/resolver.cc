@@ -1165,7 +1165,14 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
       if (!ValidateInterpolateDecoration(interpolate, info->type)) {
         return false;
       }
-    } else if (!deco->IsAnyOf<ast::LocationDecoration, ast::BuiltinDecoration,
+    } else if (deco->Is<ast::LocationDecoration>()) {
+      if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
+        AddError(
+            "decoration is not valid for compute shader function parameters",
+            deco->source());
+        return false;
+      }
+    } else if (!deco->IsAnyOf<ast::BuiltinDecoration,
                               ast::InternalDecoration>() &&
                (IsValidationEnabled(
                     info->declaration->decorations(),
@@ -1421,9 +1428,16 @@ bool Resolver::ValidateFunction(const ast::Function* func,
         if (!ValidateInterpolateDecoration(interpolate, info->return_type)) {
           return false;
         }
-      } else if (!deco->IsAnyOf<ast::LocationDecoration, ast::BuiltinDecoration,
-                                ast::InvariantDecoration,
-                                ast::InternalDecoration>() &&
+      } else if (deco->Is<ast::LocationDecoration>()) {
+        if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
+          AddError(
+              "decoration is not valid for compute shader entry point return "
+              "types",
+              deco->source());
+          return false;
+        }
+      } else if (!deco->IsAnyOf<ast::BuiltinDecoration, ast::InternalDecoration,
+                                ast::InvariantDecoration>() &&
                  (IsValidationEnabled(
                       info->declaration->decorations(),
                       ast::DisabledValidation::kEntryPointParameter) &&
