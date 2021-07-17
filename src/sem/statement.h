@@ -34,6 +34,30 @@ namespace sem {
 /// Forward declaration
 class CompoundStatement;
 
+namespace detail {
+/// FindFirstParentReturn is a traits helper for determining the return type for
+/// the template member function Statement::FindFirstParent().
+/// For zero or multiple template arguments, FindFirstParentReturn::type
+/// resolves to CompoundStatement.
+template <typename... TYPES>
+struct FindFirstParentReturn {
+  /// The pointer type returned by Statement::FindFirstParent()
+  using type = CompoundStatement;
+};
+
+/// A specialization of FindFirstParentReturn for a single template argument.
+/// FindFirstParentReturn::type resolves to the single template argument.
+template <typename T>
+struct FindFirstParentReturn<T> {
+  /// The pointer type returned by Statement::FindFirstParent()
+  using type = T;
+};
+
+template <typename... TYPES>
+using FindFirstParentReturnType =
+    typename FindFirstParentReturn<TYPES...>::type;
+}  // namespace detail
+
 /// Statement holds the semantic information for a statement.
 class Statement : public Castable<Statement, Node> {
  public:
@@ -49,16 +73,18 @@ class Statement : public Castable<Statement, Node> {
   const CompoundStatement* Parent() const { return parent_; }
 
   /// @returns the closest enclosing parent that satisfies the given predicate,
-  /// which may be the statement itself, or nullptr if no match is found
+  /// which may be the statement itself, or nullptr if no match is found.
   /// @param pred a predicate that the resulting block must satisfy
   template <typename Pred>
   const CompoundStatement* FindFirstParent(Pred&& pred) const;
 
-  /// @returns the statement itself if it matches the template type `T`,
-  /// otherwise the nearest enclosing statement that matches `T`, or nullptr if
-  /// there is none.
-  template <typename T>
-  const T* FindFirstParent() const;
+  /// @returns the closest enclosing parent that is of one of the types in
+  /// `TYPES`, which may be the statement itself, or nullptr if no match is
+  /// found. If `TYPES` is a single template argument, the return type is a
+  /// pointer to that template argument type, otherwise a CompoundStatement
+  /// pointer is returned.
+  template <typename... TYPES>
+  const detail::FindFirstParentReturnType<TYPES...>* FindFirstParent() const;
 
   /// @return the closest enclosing block for this statement
   const BlockStatement* Block() const;
@@ -99,17 +125,32 @@ const CompoundStatement* Statement::FindFirstParent(Pred&& pred) const {
   return curr;
 }
 
-template <typename T>
-const T* Statement::FindFirstParent() const {
-  if (auto* p = As<T>()) {
-    return p;
-  }
-  const auto* curr = parent_;
-  while (curr) {
-    if (auto* p = curr->As<T>()) {
+template <typename... TYPES>
+const detail::FindFirstParentReturnType<TYPES...>* Statement::FindFirstParent()
+    const {
+  using ReturnType = detail::FindFirstParentReturnType<TYPES...>;
+  if (sizeof...(TYPES) == 1) {
+    if (auto* p = As<ReturnType>()) {
       return p;
     }
-    curr = curr->Parent();
+    const auto* curr = parent_;
+    while (curr) {
+      if (auto* p = curr->As<ReturnType>()) {
+        return p;
+      }
+      curr = curr->Parent();
+    }
+  } else {
+    if (IsAnyOf<TYPES...>()) {
+      return As<ReturnType>();
+    }
+    const auto* curr = parent_;
+    while (curr) {
+      if (curr->IsAnyOf<TYPES...>()) {
+        return curr->As<ReturnType>();
+      }
+      curr = curr->Parent();
+    }
   }
   return nullptr;
 }

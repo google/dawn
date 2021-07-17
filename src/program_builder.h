@@ -105,6 +105,14 @@ class CloneContext;
 /// To construct a Program, populate the builder and then `std::move` it to a
 /// Program.
 class ProgramBuilder {
+  /// A helper used to disable overloads if the first type in `TYPES` is a
+  /// Source. Used to avoid ambiguities in overloads that take a Source as the
+  /// first parameter and those that perfectly-forward the first argument.
+  template <typename... TYPES>
+  using DisableIfSource = traits::EnableIfIsNotType<
+      traits::Decay<traits::NthTypeOf<0, TYPES..., void>>,
+      Source>;
+
   /// VarOptionals is a helper for accepting a number of optional, extra
   /// arguments for Var() and Global().
   struct VarOptionals {
@@ -1383,7 +1391,7 @@ class ProgramBuilder {
   /// global variable with the ast::Module.
   template <typename NAME,
             typename... OPTIONAL,
-            traits::EnableIfIsNotType<traits::Decay<NAME>, Source>* = nullptr>
+            typename = DisableIfSource<NAME>>
   ast::Variable* Global(NAME&& name,
                         const ast::Type* type,
                         OPTIONAL&&... optional) {
@@ -1504,9 +1512,7 @@ class ProgramBuilder {
   /// @param args the function call arguments
   /// @returns a `ast::CallExpression` to the function `func`, with the
   /// arguments of `args` converted to `ast::Expression`s using `Expr()`.
-  template <typename NAME,
-            typename... ARGS,
-            traits::EnableIfIsNotType<traits::Decay<NAME>, Source>* = nullptr>
+  template <typename NAME, typename... ARGS, typename = DisableIfSource<NAME>>
   ast::CallExpression* Call(NAME&& func, ARGS&&... args) {
     return create<ast::CallExpression>(Expr(func),
                                        ExprList(std::forward<ARGS>(args)...));
@@ -1781,7 +1787,7 @@ class ProgramBuilder {
   /// Creates an ast::ReturnStatement with the given return value
   /// @param val the return value
   /// @returns the return statement pointer
-  template <typename EXPR>
+  template <typename EXPR, typename = DisableIfSource<EXPR>>
   ast::ReturnStatement* Return(EXPR&& val) {
     return create<ast::ReturnStatement>(Expr(std::forward<EXPR>(val)));
   }
@@ -1886,12 +1892,22 @@ class ProgramBuilder {
   }
 
   /// Creates a ast::BlockStatement with input statements
+  /// @param source the source information for the block
   /// @param statements statements of block
   /// @returns the block statement pointer
   template <typename... Statements>
-  ast::BlockStatement* Block(Statements&&... statements) {
+  ast::BlockStatement* Block(const Source& source, Statements&&... statements) {
     return create<ast::BlockStatement>(
-        ast::StatementList{std::forward<Statements>(statements)...});
+        source, ast::StatementList{std::forward<Statements>(statements)...});
+  }
+
+  /// Creates a ast::BlockStatement with input statements
+  /// @param statements statements of block
+  /// @returns the block statement pointer
+  template <typename... STATEMENTS, typename = DisableIfSource<STATEMENTS...>>
+  ast::BlockStatement* Block(STATEMENTS&&... statements) {
+    return create<ast::BlockStatement>(
+        ast::StatementList{std::forward<STATEMENTS>(statements)...});
   }
 
   /// Creates a ast::ElseStatement with input condition and body

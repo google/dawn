@@ -2062,11 +2062,18 @@ bool Resolver::Statement(ast::Statement* stmt) {
   }
   if (stmt->Is<ast::ContinueStatement>()) {
     // Set if we've hit the first continue statement in our parent loop
-    if (auto* loop_block =
-            current_block_->FindFirstParent<sem::LoopBlockStatement>()) {
-      if (loop_block->FirstContinue() == size_t(~0)) {
-        const_cast<sem::LoopBlockStatement*>(loop_block)
-            ->SetFirstContinue(loop_block->Decls().size());
+    if (auto* block =
+            current_block_->FindFirstParent<
+                sem::LoopBlockStatement, sem::LoopContinuingBlockStatement>()) {
+      if (auto* loop_block = block->As<sem::LoopBlockStatement>()) {
+        if (loop_block->FirstContinue() == size_t(~0)) {
+          const_cast<sem::LoopBlockStatement*>(loop_block)
+              ->SetFirstContinue(loop_block->Decls().size());
+        }
+      } else {
+        AddError("continuing blocks must not contain a continue statement",
+                 stmt->source());
+        return false;
       }
     } else {
       AddError("continue statement must be in a loop", stmt->source());
@@ -2076,6 +2083,17 @@ bool Resolver::Statement(ast::Statement* stmt) {
     return true;
   }
   if (stmt->Is<ast::DiscardStatement>()) {
+    if (auto* continuing =
+            sem_statement
+                ->FindFirstParent<sem::LoopContinuingBlockStatement>()) {
+      AddError("continuing blocks must not contain a discard statement",
+               stmt->source());
+      if (continuing != sem_statement->Parent()) {
+        AddNote("see continuing block here",
+                continuing->Declaration()->source());
+      }
+      return false;
+    }
     return true;
   }
   if (stmt->Is<ast::FallthroughStatement>()) {
@@ -4107,6 +4125,17 @@ bool Resolver::ValidateReturn(const ast::ReturnStatement* ret) {
             ret_type->FriendlyName(builder_->Symbols()) + "', expected '" +
             current_function_->return_type_name + "'",
         ret->source());
+    return false;
+  }
+
+  auto* sem = builder_->Sem().Get(ret);
+  if (auto* continuing =
+          sem->FindFirstParent<sem::LoopContinuingBlockStatement>()) {
+    AddError("continuing blocks must not contain a return statement",
+             ret->source());
+    if (continuing != sem->Parent()) {
+      AddNote("see continuing block here", continuing->Declaration()->source());
+    }
     return false;
   }
 

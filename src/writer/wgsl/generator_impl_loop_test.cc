@@ -40,8 +40,10 @@ TEST_F(WgslGeneratorImplTest, Emit_Loop) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing) {
+  Func("a_statement", {}, ty.void_(), {});
+
   auto* body = Block(create<ast::DiscardStatement>());
-  auto* continuing = Block(Return());
+  auto* continuing = Block(create<ast::CallStatement>(Call("a_statement")));
   auto* l = Loop(body, continuing);
 
   WrapInFunction(l);
@@ -55,7 +57,7 @@ TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing) {
     discard;
 
     continuing {
-      return;
+      a_statement();
     }
   }
 )");

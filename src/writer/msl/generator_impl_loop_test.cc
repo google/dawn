@@ -40,8 +40,10 @@ TEST_F(MslGeneratorImplTest, Emit_Loop) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
+  Func("a_statement", {}, ty.void_(), {});
+
   auto* body = Block(create<ast::DiscardStatement>());
-  auto* continuing = Block(Return());
+  auto* continuing = Block(create<ast::CallStatement>(Call("a_statement")));
   auto* l = Loop(body, continuing);
   WrapInFunction(l);
 
@@ -53,18 +55,20 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
   EXPECT_EQ(gen.result(), R"(  while (true) {
     discard_fragment();
     {
-      return;
+      a_statement();
     }
   }
 )");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
+  Func("a_statement", {}, ty.void_(), {});
+
   Global("lhs", ty.f32(), ast::StorageClass::kPrivate);
   Global("rhs", ty.f32(), ast::StorageClass::kPrivate);
 
   auto* body = Block(create<ast::DiscardStatement>());
-  auto* continuing = Block(Return());
+  auto* continuing = Block(create<ast::CallStatement>(Call("a_statement")));
   auto* inner = Loop(body, continuing);
 
   body = Block(inner);
@@ -83,7 +87,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
     while (true) {
       discard_fragment();
       {
-        return;
+        a_statement();
       }
     }
     {
@@ -146,7 +150,10 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoop) {
   //   return;
   // }
 
-  auto* f = For(nullptr, nullptr, nullptr, Block(Return()));
+  Func("a_statement", {}, ty.void_(), {});
+
+  auto* f = For(nullptr, nullptr, nullptr,
+                Block(create<ast::CallStatement>(Call("a_statement"))));
   WrapInFunction(f);
 
   GeneratorImpl& gen = Build();
@@ -155,7 +162,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoop) {
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  for(; ; ) {
-    return;
+    a_statement();
   }
 )");
 }
@@ -165,7 +172,10 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithSimpleInit) {
   //   return;
   // }
 
-  auto* f = For(Decl(Var("i", ty.i32())), nullptr, nullptr, Block(Return()));
+  Func("a_statement", {}, ty.void_(), {});
+
+  auto* f = For(Decl(Var("i", ty.i32())), nullptr, nullptr,
+                Block(create<ast::CallStatement>(Call("a_statement"))));
   WrapInFunction(f);
 
   GeneratorImpl& gen = Build();
@@ -174,7 +184,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithSimpleInit) {
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  for(int i = 0; ; ) {
-    return;
+    a_statement();
   }
 )");
 }
@@ -184,9 +194,13 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtInit) {
   // for({ignore(1); ignore(2);}; ; ) {
   //   return;
   // }
+
+  Func("a_statement", {}, ty.void_(), {});
+
   Global("a", ty.atomic<i32>(), ast::StorageClass::kWorkgroup);
   auto* multi_stmt = Block(Ignore(1), Ignore(2));
-  auto* f = For(multi_stmt, nullptr, nullptr, Block(Return()));
+  auto* f = For(multi_stmt, nullptr, nullptr,
+                Block(create<ast::CallStatement>(Call("a_statement"))));
   WrapInFunction(f);
 
   GeneratorImpl& gen = Build();
@@ -200,7 +214,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtInit) {
       (void) 2;
     }
     for(; ; ) {
-      return;
+      a_statement();
     }
   }
 )");
@@ -211,7 +225,10 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithSimpleCond) {
   //   return;
   // }
 
-  auto* f = For(nullptr, true, nullptr, Block(Return()));
+  Func("a_statement", {}, ty.void_(), {});
+
+  auto* f = For(nullptr, true, nullptr,
+                Block(create<ast::CallStatement>(Call("a_statement"))));
   WrapInFunction(f);
 
   GeneratorImpl& gen = Build();
@@ -220,7 +237,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithSimpleCond) {
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  for(; true; ) {
-    return;
+    a_statement();
   }
 )");
 }
@@ -230,8 +247,11 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithSimpleCont) {
   //   return;
   // }
 
+  Func("a_statement", {}, ty.void_(), {});
+
   auto* v = Decl(Var("i", ty.i32()));
-  auto* f = For(nullptr, nullptr, Assign("i", Add("i", 1)), Block(Return()));
+  auto* f = For(nullptr, nullptr, Assign("i", Add("i", 1)),
+                Block(create<ast::CallStatement>(Call("a_statement"))));
   WrapInFunction(v, f);
 
   GeneratorImpl& gen = Build();
@@ -240,7 +260,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithSimpleCont) {
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  for(; ; i = (i + 1)) {
-    return;
+    a_statement();
   }
 )");
 }
@@ -251,9 +271,12 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtCont) {
   //   return;
   // }
 
+  Func("a_statement", {}, ty.void_(), {});
+
   Global("a", ty.atomic<i32>(), ast::StorageClass::kWorkgroup);
   auto* multi_stmt = Block(Ignore(1), Ignore(2));
-  auto* f = For(nullptr, nullptr, multi_stmt, Block(Return()));
+  auto* f = For(nullptr, nullptr, multi_stmt,
+                Block(create<ast::CallStatement>(Call("a_statement"))));
   WrapInFunction(f);
 
   GeneratorImpl& gen = Build();
@@ -262,7 +285,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtCont) {
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  while (true) {
-    return;
+    a_statement();
     {
       (void) 1;
       (void) 2;
@@ -276,8 +299,10 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithSimpleInitCondCont) {
   //   return;
   // }
 
+  Func("a_statement", {}, ty.void_(), {});
+
   auto* f = For(Decl(Var("i", ty.i32())), true, Assign("i", Add("i", 1)),
-                Block(Return()));
+                Block(create<ast::CallStatement>(Call("a_statement"))));
   WrapInFunction(f);
 
   GeneratorImpl& gen = Build();
@@ -286,7 +311,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithSimpleInitCondCont) {
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  for(int i = 0; true; i = (i + 1)) {
-    return;
+    a_statement();
   }
 )");
 }
@@ -296,10 +321,14 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtInitCondCont) {
   // for({ ignore(1); ignore(2); }; true; { ignore(3); ignore(4); }) {
   //   return;
   // }
+
+  Func("a_statement", {}, ty.void_(), {});
+
   Global("a", ty.atomic<i32>(), ast::StorageClass::kWorkgroup);
   auto* multi_stmt_a = Block(Ignore(1), Ignore(2));
   auto* multi_stmt_b = Block(Ignore(3), Ignore(4));
-  auto* f = For(multi_stmt_a, Expr(true), multi_stmt_b, Block(Return()));
+  auto* f = For(multi_stmt_a, Expr(true), multi_stmt_b,
+                Block(create<ast::CallStatement>(Call("a_statement"))));
   WrapInFunction(f);
 
   GeneratorImpl& gen = Build();
@@ -314,7 +343,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtInitCondCont) {
     }
     while (true) {
       if (!(true)) { break; }
-      return;
+      a_statement();
       {
         (void) 3;
         (void) 4;

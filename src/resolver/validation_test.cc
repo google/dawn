@@ -20,6 +20,7 @@
 #include "src/ast/break_statement.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/continue_statement.h"
+#include "src/ast/discard_statement.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/intrinsic_texture_helper_test.h"
 #include "src/ast/loop_statement.h"
@@ -648,6 +649,123 @@ TEST_F(ResolverTest, Stmt_Loop_ContinueInLoopBodyAfterDecl_UsageInContinuing) {
   WrapInFunction(loop_stmt);
 
   EXPECT_TRUE(r()->Resolve());
+}
+
+TEST_F(ResolverTest, Stmt_Loop_ReturnInContinuing_Direct) {
+  // loop  {
+  //   continuing {
+  //     return;
+  //   }
+  // }
+
+  WrapInFunction(Loop(  // loop
+      Block(),          //   loop block
+      Block(            //   loop continuing block
+          Return(Source{{12, 34}}))));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: continuing blocks must not contain a return statement)");
+}
+
+TEST_F(ResolverTest, Stmt_Loop_ReturnInContinuing_Indirect) {
+  // loop {
+  //   continuing {
+  //     loop {
+  //       return;
+  //     }
+  //   }
+  // }
+
+  WrapInFunction(Loop(         // outer loop
+      Block(),                 //   outer loop block
+      Block(Source{{56, 78}},  //   outer loop continuing block
+            Loop(              //     inner loop
+                Block(         //       inner loop block
+                    Return(Source{{12, 34}}))))));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: continuing blocks must not contain a return statement
+56:78 note: see continuing block here)");
+}
+
+TEST_F(ResolverTest, Stmt_Loop_DiscardInContinuing_Direct) {
+  // loop  {
+  //   continuing {
+  //     discard;
+  //   }
+  // }
+
+  WrapInFunction(Loop(  // loop
+      Block(),          //   loop block
+      Block(            //   loop continuing block
+          create<ast::DiscardStatement>(Source{{12, 34}}))));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: continuing blocks must not contain a discard statement)");
+}
+
+TEST_F(ResolverTest, Stmt_Loop_DiscardInContinuing_Indirect) {
+  // loop {
+  //   continuing {
+  //     loop { discard; }
+  //   }
+  // }
+
+  WrapInFunction(Loop(         // outer loop
+      Block(),                 //   outer loop block
+      Block(Source{{56, 78}},  //   outer loop continuing block
+            Loop(              //     inner loop
+                Block(         //       inner loop block
+                    create<ast::DiscardStatement>(Source{{12, 34}}))))));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: continuing blocks must not contain a discard statement
+56:78 note: see continuing block here)");
+}
+
+TEST_F(ResolverTest, Stmt_Loop_ContinueInContinuing_Direct) {
+  // loop  {
+  //     continuing {
+  //         continue;
+  //     }
+  // }
+
+  WrapInFunction(Loop(         // loop
+      Block(),                 //   loop block
+      Block(Source{{56, 78}},  //   loop continuing block
+            create<ast::ContinueStatement>(Source{{12, 34}}))));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: continuing blocks must not contain a continue statement");
+}
+
+TEST_F(ResolverTest, Stmt_Loop_ContinueInContinuing_Indirect) {
+  // loop {
+  //   continuing {
+  //     loop {
+  //       continue;
+  //     }
+  //   }
+  // }
+
+  WrapInFunction(Loop(  // outer loop
+      Block(),          //   outer loop block
+      Block(            //   outer loop continuing block
+          Loop(         //     inner loop
+              Block(    //       inner loop block
+                  create<ast::ContinueStatement>(Source{{12, 34}}))))));
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTest, Stmt_ForLoop_CondIsNotBool) {
