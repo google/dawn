@@ -644,6 +644,28 @@ TEST_F(ResolverFunctionValidationTest, ParameterSotreType_AtomicFree) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverFunctionValidationTest, ParametersAtLimit) {
+  ast::VariableList params;
+  for (int i = 0; i < 255; i++) {
+    params.emplace_back(Param("param_" + std::to_string(i), ty.i32()));
+  }
+  Func(Source{{12, 34}}, "f", params, ty.void_(), {});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverFunctionValidationTest, ParametersOverLimit) {
+  ast::VariableList params;
+  for (int i = 0; i < 256; i++) {
+    params.emplace_back(Param("param_" + std::to_string(i), ty.i32()));
+  }
+  Func(Source{{12, 34}}, "f", params, ty.void_(), {});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: functions may declare at most 255 parameters");
+}
+
 struct TestParams {
   ast::StorageClass storage_class;
   bool should_pass;

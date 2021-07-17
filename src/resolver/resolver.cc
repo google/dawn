@@ -1388,6 +1388,11 @@ bool Resolver::ValidateFunction(const ast::Function* func,
     }
   }
 
+  if (func->params().size() > 255) {
+    AddError("functions may declare at most 255 parameters", func->source());
+    return false;
+  }
+
   for (auto* param : func->params()) {
     if (!ValidateFunctionParameter(func, variable_to_info_.at(param))) {
       return false;
