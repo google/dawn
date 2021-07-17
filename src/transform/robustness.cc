@@ -15,6 +15,7 @@
 #include "src/transform/robustness.h"
 
 #include <algorithm>
+#include <limits>
 #include <utility>
 
 #include "src/program_builder.h"
@@ -46,64 +47,140 @@ struct Robustness::State {
   /// cloned without changes.
   ast::ArrayAccessorExpression* Transform(ast::ArrayAccessorExpression* expr) {
     auto* ret_type = ctx.src->Sem().Get(expr->array())->Type()->UnwrapRef();
-    if (!ret_type->IsAnyOf<sem::Array, sem::Matrix, sem::Vector>()) {
-      return nullptr;
-    }
 
     ProgramBuilder& b = *ctx.dst;
     using u32 = ProgramBuilder::u32;
 
-    uint32_t size = 0;
-    bool is_vec = ret_type->Is<sem::Vector>();
-    bool is_arr = ret_type->Is<sem::Array>();
-    if (is_vec || is_arr) {
-      size = is_vec ? ret_type->As<sem::Vector>()->size()
-                    : ret_type->As<sem::Array>()->Count();
-    } else {
+    struct Value {
+      ast::Expression* expr = nullptr;  // If null, then is a constant
+      union {
+        uint32_t u32 = 0;  // use if is_signed == false
+        int32_t i32;       // use if is_signed == true
+      };
+      bool is_signed = false;
+    };
+
+    Value size;              // size of the array, vector or matrix
+    size.is_signed = false;  // size is always unsigned
+    if (auto* vec = ret_type->As<sem::Vector>()) {
+      size.u32 = vec->size();
+
+    } else if (auto* arr = ret_type->As<sem::Array>()) {
+      size.u32 = arr->Count();
+    } else if (auto* mat = ret_type->As<sem::Matrix>()) {
       // The row accessor would have been an embedded array accessor and already
       // handled, so we just need to do columns here.
-      size = ret_type->As<sem::Matrix>()->columns();
+      size.u32 = mat->columns();
+    } else {
+      return nullptr;
     }
 
-    auto* const old_idx = expr->idx_expr();
-    b.SetSource(ctx.Clone(old_idx->source()));
-
-    ast::Expression* new_idx = nullptr;
-
-    if (size == 0) {
-      if (!is_arr) {
+    if (size.u32 == 0) {
+      if (!ret_type->Is<sem::Array>()) {
         b.Diagnostics().add_error(diag::System::Transform,
                                   "invalid 0 sized non-array", expr->source());
         return nullptr;
       }
       // Runtime sized array
       auto* arr = ctx.Clone(expr->array());
-      auto* arr_len = b.Call("arrayLength", b.AddressOf(arr));
-      auto* limit = b.Sub(arr_len, b.Expr(1u));
-      new_idx = b.Call("min", b.Construct<u32>(ctx.Clone(old_idx)), limit);
-    } else if (auto* c = old_idx->As<ast::ScalarConstructorExpression>()) {
-      // Scalar constructor we can re-write the value to be within bounds.
-      auto* lit = c->literal();
-      if (auto* sint = lit->As<ast::SintLiteral>()) {
-        int32_t max = static_cast<int32_t>(size) - 1;
-        new_idx = b.Expr(std::max(std::min(sint->value(), max), 0));
-      } else if (auto* uint = lit->As<ast::UintLiteral>()) {
-        new_idx = b.Expr(std::min(uint->value(), size - 1));
+      size.expr = b.Call("arrayLength", b.AddressOf(arr));
+    }
+
+    // Calculate the maximum possible index value (size-1u)
+    // Size must be positive (non-zero), so we can safely subtract 1 here
+    // without underflow.
+    Value limit;
+    limit.is_signed = false;  // Like size, limit is always unsigned.
+    if (size.expr) {
+      // Dynamic size
+      limit.expr = b.Sub(size.expr, 1u);
+    } else {
+      // Constant size
+      limit.u32 = size.u32 - 1u;
+    }
+
+    Value idx;  // index value
+
+    auto* idx_sem = ctx.src->Sem().Get(expr->idx_expr());
+    auto* idx_ty = idx_sem->Type()->UnwrapRef();
+    if (!idx_ty->IsAnyOf<sem::I32, sem::U32>()) {
+      TINT_ICE(Transform, b.Diagnostics())
+          << "index must be u32 or i32, got " << idx_sem->Type()->type_name();
+      return nullptr;
+    }
+
+    if (auto idx_constant = idx_sem->ConstantValue()) {
+      // Constant value index
+      if (idx_constant.Type()->Is<sem::I32>()) {
+        idx.i32 = idx_constant.Elements()[0].i32;
+        idx.is_signed = true;
+      } else if (idx_constant.Type()->Is<sem::U32>()) {
+        idx.u32 = idx_constant.Elements()[0].u32;
+        idx.is_signed = false;
       } else {
-        b.Diagnostics().add_error(
-            diag::System::Transform,
-            "unknown scalar constructor type for accessor", expr->source());
+        b.Diagnostics().add_error(diag::System::Transform,
+                                  "unsupported constant value for accessor: " +
+                                      idx_constant.Type()->type_name(),
+                                  expr->source());
         return nullptr;
       }
     } else {
-      auto* cloned_idx = ctx.Clone(old_idx);
-      new_idx = b.Call("min", b.Construct<u32>(cloned_idx), b.Expr(size - 1));
+      // Dynamic value index
+      idx.expr = ctx.Clone(expr->idx_expr());
+      idx.is_signed = idx_ty->Is<sem::I32>();
+    }
+
+    // Clamp the index so that it cannot exceed limit.
+    if (idx.expr || limit.expr) {
+      // One of, or both of idx and limit are non-constant.
+
+      // If the index is signed, cast it to a u32 (with clamping if constant).
+      if (idx.is_signed) {
+        if (idx.expr) {
+          // We don't use a max(idx, 0) here, as that incurs a runtime
+          // performance cost, and if the unsigned value will be clamped by
+          // limit, resulting in a value between [0..limit)
+          idx.expr = b.Construct<u32>(idx.expr);
+          idx.is_signed = false;
+        } else {
+          idx.u32 = static_cast<uint32_t>(std::max(idx.i32, 0));
+          idx.is_signed = false;
+        }
+      }
+
+      // Convert idx and limit to expressions, so we can emit `min(idx, limit)`.
+      if (!idx.expr) {
+        idx.expr = b.Expr(idx.u32);
+      }
+      if (!limit.expr) {
+        limit.expr = b.Expr(limit.u32);
+      }
+
+      // Perform the clamp with `min(idx, limit)`
+      idx.expr = b.Call("min", idx.expr, limit.expr);
+    } else {
+      // Both idx and max are constant.
+      if (idx.is_signed) {
+        // The index is signed. Calculate limit as signed.
+        int32_t signed_limit = static_cast<int32_t>(
+            std::min<uint32_t>(limit.u32, std::numeric_limits<int32_t>::max()));
+        idx.i32 = std::max(idx.i32, 0);
+        idx.i32 = std::min(idx.i32, signed_limit);
+      } else {
+        // The index is unsigned.
+        idx.u32 = std::min(idx.u32, limit.u32);
+      }
+    }
+
+    // Convert idx to an expression, so we can emit the new accessor.
+    if (!idx.expr) {
+      idx.expr = idx.is_signed ? b.Expr(idx.i32) : b.Expr(idx.u32);
     }
 
     // Clone arguments outside of create() call to have deterministic ordering
     auto src = ctx.Clone(expr->source());
     auto* arr = ctx.Clone(expr->array());
-    return b.IndexAccessor(src, arr, new_idx);
+    return b.IndexAccessor(src, arr, idx.expr);
   }
 
   /// @param type intrinsic type

@@ -22,7 +22,7 @@ namespace {
 
 using RobustnessTest = TransformTest;
 
-TEST_F(RobustnessTest, Ptrs_Clamp) {
+TEST_F(RobustnessTest, Array_Idx_Clamp) {
   auto* src = R"(
 var<private> a : array<f32, 3>;
 
@@ -39,7 +39,7 @@ var<private> a : array<f32, 3>;
 let c : u32 = 1u;
 
 fn f() {
-  let b : f32 = a[min(u32(c), 2u)];
+  let b : f32 = a[min(c, 2u)];
 }
 )";
 
@@ -69,7 +69,7 @@ var<private> b : array<i32, 5>;
 var<private> i : u32;
 
 fn f() {
-  var c : f32 = a[min(u32(b[min(u32(i), 4u)]), 2u)];
+  var c : f32 = a[min(u32(b[min(i, 4u)]), 2u)];
 }
 )";
 
@@ -162,6 +162,86 @@ var<private> a : array<f32, 3>;
 
 fn f() {
   var b : f32 = a[2];
+}
+)";
+
+  auto got = Run<Robustness>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(RobustnessTest, LargeArrays_Idx) {
+  auto* src = R"(
+[[block]]
+struct S {
+  a : array<f32, 0x7fffffff>;
+  b : array<f32>;
+};
+[[group(0), binding(0)]] var<storage, read> s : S;
+
+fn f() {
+  // Signed
+  var i32_a1 : f32 = s.a[ 0x7ffffffe];
+  var i32_a2 : f32 = s.a[ 1];
+  var i32_a3 : f32 = s.a[ 0];
+  var i32_a4 : f32 = s.a[-1];
+  var i32_a5 : f32 = s.a[-0x7fffffff];
+
+  var i32_b1 : f32 = s.b[ 0x7ffffffe];
+  var i32_b2 : f32 = s.b[ 1];
+  var i32_b3 : f32 = s.b[ 0];
+  var i32_b4 : f32 = s.b[-1];
+  var i32_b5 : f32 = s.b[-0x7fffffff];
+
+  // Unsigned
+  var u32_a1 : f32 = s.a[0u];
+  var u32_a2 : f32 = s.a[1u];
+  var u32_a3 : f32 = s.a[0x7ffffffeu];
+  var u32_a4 : f32 = s.a[0x7fffffffu];
+  var u32_a5 : f32 = s.a[0x80000000u];
+  var u32_a6 : f32 = s.a[0xffffffffu];
+
+  var u32_b1 : f32 = s.b[0u];
+  var u32_b2 : f32 = s.b[1u];
+  var u32_b3 : f32 = s.b[0x7ffffffeu];
+  var u32_b4 : f32 = s.b[0x7fffffffu];
+  var u32_b5 : f32 = s.b[0x80000000u];
+  var u32_b6 : f32 = s.b[0xffffffffu];
+}
+)";
+
+  auto* expect = R"(
+[[block]]
+struct S {
+  a : array<f32, 2147483647>;
+  b : array<f32>;
+};
+
+[[group(0), binding(0)]] var<storage, read> s : S;
+
+fn f() {
+  var i32_a1 : f32 = s.a[2147483646];
+  var i32_a2 : f32 = s.a[1];
+  var i32_a3 : f32 = s.a[0];
+  var i32_a4 : f32 = s.a[0];
+  var i32_a5 : f32 = s.a[0];
+  var i32_b1 : f32 = s.b[min(2147483646u, (arrayLength(&(s.b)) - 1u))];
+  var i32_b2 : f32 = s.b[min(1u, (arrayLength(&(s.b)) - 1u))];
+  var i32_b3 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];
+  var i32_b4 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];
+  var i32_b5 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];
+  var u32_a1 : f32 = s.a[0u];
+  var u32_a2 : f32 = s.a[1u];
+  var u32_a3 : f32 = s.a[2147483646u];
+  var u32_a4 : f32 = s.a[2147483646u];
+  var u32_a5 : f32 = s.a[2147483646u];
+  var u32_a6 : f32 = s.a[2147483646u];
+  var u32_b1 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];
+  var u32_b2 : f32 = s.b[min(1u, (arrayLength(&(s.b)) - 1u))];
+  var u32_b3 : f32 = s.b[min(2147483646u, (arrayLength(&(s.b)) - 1u))];
+  var u32_b4 : f32 = s.b[min(2147483647u, (arrayLength(&(s.b)) - 1u))];
+  var u32_b5 : f32 = s.b[min(2147483648u, (arrayLength(&(s.b)) - 1u))];
+  var u32_b6 : f32 = s.b[min(4294967295u, (arrayLength(&(s.b)) - 1u))];
 }
 )";
 
@@ -557,7 +637,7 @@ struct S {
 [[group(0), binding(0)]] var<storage, read> s : S;
 
 fn f() {
-  var d : f32 = s.b[min(u32(25), (arrayLength(&(s.b)) - 1u))];
+  var d : f32 = s.b[min(25u, (arrayLength(&(s.b)) - 1u))];
 }
 )";
 
@@ -744,7 +824,7 @@ struct S {
 let c : u32 = 1u;
 
 fn f() {
-  let b : f32 = s.b[min(u32(c), (arrayLength(&(s.b)) - 1u))];
+  let b : f32 = s.b[min(c, (arrayLength(&(s.b)) - 1u))];
   let x : i32 = min(1, 2);
   let y : u32 = arrayLength(&(s.b));
 }
