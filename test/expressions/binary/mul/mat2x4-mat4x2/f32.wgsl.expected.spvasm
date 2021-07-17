@@ -1,0 +1,47 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 36
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %f "f"
+               OpExecutionMode %f LocalSize 1 1 1
+               OpName %f "f"
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%mat2v4float = OpTypeMatrix %v4float 2
+    %float_1 = OpConstant %float 1
+    %float_2 = OpConstant %float 2
+    %float_3 = OpConstant %float 3
+    %float_4 = OpConstant %float 4
+         %12 = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
+    %float_5 = OpConstant %float 5
+    %float_6 = OpConstant %float 6
+    %float_7 = OpConstant %float 7
+    %float_8 = OpConstant %float 8
+         %17 = OpConstantComposite %v4float %float_5 %float_6 %float_7 %float_8
+         %18 = OpConstantComposite %mat2v4float %12 %17
+    %v2float = OpTypeVector %float 2
+%mat4v2float = OpTypeMatrix %v2float 4
+   %float_n1 = OpConstant %float -1
+   %float_n2 = OpConstant %float -2
+         %23 = OpConstantComposite %v2float %float_n1 %float_n2
+   %float_n3 = OpConstant %float -3
+   %float_n4 = OpConstant %float -4
+         %26 = OpConstantComposite %v2float %float_n3 %float_n4
+   %float_n5 = OpConstant %float -5
+   %float_n6 = OpConstant %float -6
+         %29 = OpConstantComposite %v2float %float_n5 %float_n6
+   %float_n7 = OpConstant %float -7
+   %float_n8 = OpConstant %float -8
+         %32 = OpConstantComposite %v2float %float_n7 %float_n8
+         %33 = OpConstantComposite %mat4v2float %23 %26 %29 %32
+%mat4v4float = OpTypeMatrix %v4float 4
+          %f = OpFunction %void None %1
+          %4 = OpLabel
+         %34 = OpMatrixTimesMatrix %mat4v4float %18 %33
+               OpReturn
+               OpFunctionEnd
