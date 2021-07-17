@@ -4560,6 +4560,8 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
           }
           switch (inst.opcode()) {
             case SpvOpUndef:
+              return Fail()
+                     << "undef pointer is not valid: " << inst.PrettyPrint();
             case SpvOpVariable:
               // Keep the default decision based on the result type.
               break;

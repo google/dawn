@@ -344,7 +344,7 @@ TEST_F(SpvModuleScopeVarParserTest,
   const std::string assembly = PerVertexPreamble() + R"(
   %main = OpFunction %void None %voidfn
   %entry = OpLabel
-  %1000 = OpUndef %11
+  %1000 = OpCopyObject %11 %1
   OpReturn
   OpFunctionEnd
   )";
@@ -352,7 +352,7 @@ TEST_F(SpvModuleScopeVarParserTest,
   EXPECT_FALSE(p->BuildAndParseInternalModule());
   EXPECT_THAT(p->error(),
               Eq("operations producing a pointer to a per-vertex structure are "
-                 "not supported: %1000 = OpUndef %11"))
+                 "not supported: %1000 = OpCopyObject %11 %1"))
       << p->error();
 }
 

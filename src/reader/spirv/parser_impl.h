@@ -349,6 +349,11 @@ class ParserImpl : Reader {
   /// @returns true if parser is still successful.
   bool RegisterTypes();
 
+  /// Fail if there are any module-scope pointer values other than those
+  /// declared by OpVariable.
+  /// @returns true if parser is still successful.
+  bool RejectInvalidPointerRoots();
+
   /// Register sampler and texture usage for memory object declarations.
   /// This must be called after we've registered line numbers for all
   /// instructions. This is a no-op if the parser has already failed.

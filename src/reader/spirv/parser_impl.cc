@@ -610,6 +610,9 @@ bool ParserImpl::ParseInternalModuleExceptFunctions() {
   if (!RegisterTypes()) {
     return false;
   }
+  if (!RejectInvalidPointerRoots()) {
+    return false;
+  }
   if (!EmitScalarSpecConstants()) {
     return false;
   }
@@ -1286,6 +1289,33 @@ bool ParserImpl::RegisterTypes() {
     ConvertType(builtin_position_.position_member_pointer_type_id);
   }
   return success_;
+}
+
+bool ParserImpl::RejectInvalidPointerRoots() {
+  if (!success_) {
+    return false;
+  }
+  for (auto& inst : module_->types_values()) {
+    if (const auto* result_type = type_mgr_->GetType(inst.type_id())) {
+      if (result_type->AsPointer()) {
+        switch (inst.opcode()) {
+          case SpvOpVariable:
+            // This is the only valid case.
+            break;
+          case SpvOpUndef:
+            return Fail() << "undef pointer is not valid: "
+                          << inst.PrettyPrint();
+          case SpvOpConstantNull:
+            return Fail() << "null pointer is not valid: "
+                          << inst.PrettyPrint();
+          default:
+            return Fail() << "module-scope pointer is not valid: "
+                          << inst.PrettyPrint();
+        }
+      }
+    }
+  }
+  return success();
 }
 
 bool ParserImpl::EmitScalarSpecConstants() {

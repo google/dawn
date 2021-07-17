@@ -1280,12 +1280,11 @@ Return{}
 }
 
 TEST_F(SpvParserMemoryTest, DISABLED_RemapStorageBuffer_ThroughFunctionCall) {
-  // TODO(dneto): Blocked on OpFunctionCall support.
-  // We might need this for passing pointers into atomic builtins.
+  // WGSL does not support pointer-to-storage-buffer as function parameter
 }
 TEST_F(SpvParserMemoryTest,
        DISABLED_RemapStorageBuffer_ThroughFunctionParameter) {
-  // TODO(dneto): Blocked on OpFunctionCall support.
+  // WGSL does not support pointer-to-storage-buffer as function parameter
 }
 
 std::string RuntimeArrayPreamble() {
@@ -1357,6 +1356,79 @@ TEST_F(SpvParserMemoryTest, ArrayLength) {
   }
 }
 )")) << body_str;
+}
+
+std::string InvalidPointerPreamble() {
+  return R"(
+OpCapability Shader
+OpMemoryModel Logical Simple
+OpEntryPoint Fragment %main "main"
+OpExecutionMode %main OriginUpperLeft
+
+%uint = OpTypeInt 32 0
+%ptr_ty = OpTypePointer Function %uint
+
+  %void = OpTypeVoid
+%voidfn = OpTypeFunction %void
+)";
+}
+
+TEST_F(SpvParserMemoryTest, InvalidPointer_Undef_ModuleScope_IsError) {
+  const std::string assembly = InvalidPointerPreamble() + R"(
+ %ptr = OpUndef %ptr_ty
+
+  %main = OpFunction %void None %voidfn
+ %entry = OpLabel
+     %1 = OpCopyObject %ptr_ty %ptr
+     %2 = OpAccessChain %ptr_ty %ptr
+     %3 = OpInBoundsAccessChain %ptr_ty %ptr
+; now show the invalid pointer propagates
+     %10 = OpCopyObject %ptr_ty %1
+     %20 = OpAccessChain %ptr_ty %2
+     %30 = OpInBoundsAccessChain %ptr_ty %3
+          OpReturn
+          OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  EXPECT_FALSE(p->BuildAndParseInternalModule()) << assembly;
+  EXPECT_EQ(p->error(), "undef pointer is not valid: %9 = OpUndef %6");
+}
+
+TEST_F(SpvParserMemoryTest, InvalidPointer_Undef_FunctionScope_IsError) {
+  const std::string assembly = InvalidPointerPreamble() + R"(
+
+  %main = OpFunction %void None %voidfn
+ %entry = OpLabel
+   %ptr = OpUndef %ptr_ty
+          OpReturn
+          OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  EXPECT_FALSE(p->BuildAndParseInternalModule()) << assembly;
+  EXPECT_EQ(p->error(), "undef pointer is not valid: %7 = OpUndef %3");
+}
+
+TEST_F(SpvParserMemoryTest, InvalidPointer_ConstantNull_IsError) {
+  // OpConstantNull on logical pointer requires variable-pointers, which
+  // is not (yet) supported by WGSL features.
+  const std::string assembly = InvalidPointerPreamble() + R"(
+ %ptr = OpConstantNull %ptr_ty
+
+  %main = OpFunction %void None %voidfn
+ %entry = OpLabel
+     %1 = OpCopyObject %ptr_ty %ptr
+     %2 = OpAccessChain %ptr_ty %ptr
+     %3 = OpInBoundsAccessChain %ptr_ty %ptr
+; now show the invalid pointer propagates
+     %10 = OpCopyObject %ptr_ty %1
+     %20 = OpAccessChain %ptr_ty %2
+     %30 = OpInBoundsAccessChain %ptr_ty %3
+          OpReturn
+          OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  EXPECT_FALSE(p->BuildAndParseInternalModule());
+  EXPECT_EQ(p->error(), "null pointer is not valid: %9 = OpConstantNull %6");
 }
 
 }  // namespace
