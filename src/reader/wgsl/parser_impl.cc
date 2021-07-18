@@ -2109,11 +2109,11 @@ Maybe<ast::CallStatement*> ParserImpl::func_call_stmt() {
     return Failure::kErrored;
 
   return create<ast::CallStatement>(
-      Source{}, create<ast::CallExpression>(
-                    source,
-                    create<ast::IdentifierExpression>(
-                        source, builder_.Symbols().Register(name)),
-                    std::move(params.value)));
+      source, create<ast::CallExpression>(
+                  source,
+                  create<ast::IdentifierExpression>(
+                      source, builder_.Symbols().Register(name)),
+                  std::move(params.value)));
 }
 
 // break_stmt

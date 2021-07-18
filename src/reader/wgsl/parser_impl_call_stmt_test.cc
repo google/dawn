@@ -28,6 +28,11 @@ TEST_F(ParserImplTest, Statement_Call) {
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
 
+  EXPECT_EQ(e->source().range.begin.line, 1u);
+  EXPECT_EQ(e->source().range.begin.column, 1u);
+  EXPECT_EQ(e->source().range.end.line, 1u);
+  EXPECT_EQ(e->source().range.end.column, 2u);
+
   ASSERT_TRUE(e->Is<ast::CallStatement>());
   auto* c = e->As<ast::CallStatement>()->expr();
 
