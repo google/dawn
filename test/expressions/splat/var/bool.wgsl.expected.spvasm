@@ -1,0 +1,59 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 34
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %unused_entry_point "unused_entry_point"
+               OpName %f "f"
+               OpName %v "v"
+               OpName %v2 "v2"
+               OpName %v3 "v3"
+               OpName %v4 "v4"
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+      %false = OpConstantFalse %bool
+%_ptr_Function_bool = OpTypePointer Function %bool
+         %15 = OpConstantNull %bool
+     %v2bool = OpTypeVector %bool 2
+%_ptr_Function_v2bool = OpTypePointer Function %v2bool
+         %21 = OpConstantNull %v2bool
+     %v3bool = OpTypeVector %bool 3
+%_ptr_Function_v3bool = OpTypePointer Function %v3bool
+         %27 = OpConstantNull %v3bool
+     %v4bool = OpTypeVector %bool 4
+%_ptr_Function_v4bool = OpTypePointer Function %v4bool
+         %33 = OpConstantNull %v4bool
+%unused_entry_point = OpFunction %void None %1
+          %4 = OpLabel
+               OpReturn
+               OpFunctionEnd
+          %f = OpFunction %void None %1
+          %6 = OpLabel
+          %v = OpVariable %_ptr_Function_bool Function %15
+         %v2 = OpVariable %_ptr_Function_v2bool Function %21
+         %v3 = OpVariable %_ptr_Function_v3bool Function %27
+         %v4 = OpVariable %_ptr_Function_v4bool Function %33
+               OpSelectionMerge %9 None
+               OpBranchConditional %true %9 %10
+         %10 = OpLabel
+               OpBranch %9
+          %9 = OpLabel
+         %12 = OpPhi %bool %true %6 %false %10
+               OpStore %v %12
+         %17 = OpLoad %bool %v
+         %18 = OpCompositeConstruct %v2bool %17 %17
+               OpStore %v2 %18
+         %23 = OpLoad %bool %v
+         %24 = OpCompositeConstruct %v3bool %23 %23 %23
+               OpStore %v3 %24
+         %29 = OpLoad %bool %v
+         %30 = OpCompositeConstruct %v4bool %29 %29 %29 %29
+               OpStore %v4 %30
+               OpReturn
+               OpFunctionEnd

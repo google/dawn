@@ -116,7 +116,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_Empty) {
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor,
-       EmitConstructor_Type_Vec_SingleScalar_Float) {
+       EmitConstructor_Type_Vec_SingleScalar_Float_Literal) {
   WrapInFunction(vec3<f32>(2.0f));
 
   GeneratorImpl& gen = Build();
@@ -126,13 +126,39 @@ TEST_F(HlslGeneratorImplTest_Constructor,
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor,
-       EmitConstructor_Type_Vec_SingleScalar_Bool) {
+       EmitConstructor_Type_Vec_SingleScalar_Float_Var) {
+  auto* var = Var("v", nullptr, Expr(2.0f));
+  auto* cast = vec3<f32>(var);
+  WrapInFunction(var, cast);
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr(R"(float v = 2.0f;
+  const float3 tint_symbol = float3((v).xxx);)"));
+}
+
+TEST_F(HlslGeneratorImplTest_Constructor,
+       EmitConstructor_Type_Vec_SingleScalar_Bool_Literal) {
   WrapInFunction(vec3<bool>(true));
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_THAT(gen.result(), HasSubstr("bool3((true).xxx)"));
+}
+
+TEST_F(HlslGeneratorImplTest_Constructor,
+       EmitConstructor_Type_Vec_SingleScalar_Bool_Var) {
+  auto* var = Var("v", nullptr, Expr(true));
+  auto* cast = vec3<bool>(var);
+  WrapInFunction(var, cast);
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr(R"(bool v = true;
+  const bool3 tint_symbol = bool3((v).xxx);)"));
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor,

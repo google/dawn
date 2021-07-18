@@ -1989,7 +1989,7 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& out,
   // vector dimension using .x
   const bool is_single_value_vector_init =
       type->is_scalar_vector() && expr->values().size() == 1 &&
-      TypeOf(expr->values()[0])->is_scalar();
+      TypeOf(expr->values()[0])->UnwrapRef()->is_scalar();
 
   auto it = structure_builders_.find(As<sem::Struct>(type));
   if (it != structure_builders_.end()) {

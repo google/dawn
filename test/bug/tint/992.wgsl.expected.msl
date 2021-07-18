@@ -1,0 +1,14 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol {
+  float4 value [[color(0)]];
+};
+
+fragment tint_symbol frag_main() {
+  float b = 0.0f;
+  float3 v = float3(b);
+  tint_symbol const tint_symbol_1 = {.value=float4(v, 1.0f)};
+  return tint_symbol_1;
+}
+

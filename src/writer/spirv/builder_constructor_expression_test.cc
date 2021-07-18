@@ -241,7 +241,7 @@ TEST_F(SpvBuilderConstructorTest, Type_F32_With_F32) {
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_Bool) {
+TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_Bool_Literal) {
   auto* cast = vec2<bool>(true);
   WrapInFunction(cast);
 
@@ -255,9 +255,34 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_Bool) {
 %3 = OpConstantTrue %2
 %4 = OpConstantComposite %1 %3 %3
 )");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32) {
+TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_Bool_Var) {
+  auto* var = Var("v", nullptr, Expr(true));
+  auto* cast = vec2<bool>(var);
+  WrapInFunction(var, cast);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
+  ASSERT_EQ(b.GenerateExpression(cast), 8u) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
+%2 = OpConstantTrue %1
+%4 = OpTypePointer Function %1
+%5 = OpConstantNull %1
+%6 = OpTypeVector %1 2
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpStore %3 %2
+%7 = OpLoad %1 %3
+%8 = OpCompositeConstruct %6 %7 %7
+)");
+}
+
+TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32_Literal) {
   auto* cast = vec2<f32>(2.0f);
   WrapInFunction(cast);
 
@@ -270,6 +295,30 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32) {
 %1 = OpTypeVector %2 2
 %3 = OpConstant %2 2
 %4 = OpConstantComposite %1 %3 %3
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
+}
+
+TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32_Var) {
+  auto* var = Var("v", nullptr, Expr(2.0f));
+  auto* cast = vec2<f32>(var);
+  WrapInFunction(var, cast);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
+  ASSERT_EQ(b.GenerateExpression(cast), 8u) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
+%2 = OpConstant %1 2
+%4 = OpTypePointer Function %1
+%5 = OpConstantNull %1
+%6 = OpTypeVector %1 2
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpStore %3 %2
+%7 = OpLoad %1 %3
+%8 = OpCompositeConstruct %6 %7 %7
 )");
 }
 
