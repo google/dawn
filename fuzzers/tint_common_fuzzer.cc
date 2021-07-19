@@ -115,7 +115,7 @@ void Reader::read(void* out, size_t n) {
     mark_failed();
     return;
   }
-  memcpy(&out, data_, n);
+  memcpy(out, data_, n);
   data_ += n;
   size_ -= n;
 }
