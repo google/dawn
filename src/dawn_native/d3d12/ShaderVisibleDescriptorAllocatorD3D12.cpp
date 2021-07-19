@@ -22,7 +22,10 @@ namespace dawn_native { namespace d3d12 {
 
     // Limits the min/max heap size to always be some known value for testing.
     // Thresholds should be adjusted (lower == faster) to avoid tests taking too long to complete.
-    static constexpr const uint32_t kShaderVisibleSmallHeapSizes[] = {1024, 512};
+    // We change the value from {1024, 512} to {32, 16} because we use blending
+    // for D3D12DescriptorHeapTests.EncodeManyUBO and R16Float has limited range
+    // and low precision at big integer.
+    static constexpr const uint32_t kShaderVisibleSmallHeapSizes[] = {32, 16};
 
     uint32_t GetD3D12ShaderVisibleHeapMinSize(D3D12_DESCRIPTOR_HEAP_TYPE heapType,
                                               bool useSmallSize) {

@@ -1514,21 +1514,21 @@ namespace detail {
 
     // Helper classes to set expectations
 
-    template <typename T>
-    ExpectEq<T>::ExpectEq(T singleValue, T tolerance) : mTolerance(tolerance) {
+    template <typename T, typename U>
+    ExpectEq<T, U>::ExpectEq(T singleValue, T tolerance) : mTolerance(tolerance) {
         mExpected.push_back(singleValue);
     }
 
-    template <typename T>
-    ExpectEq<T>::ExpectEq(const T* values, const unsigned int count, T tolerance)
+    template <typename T, typename U>
+    ExpectEq<T, U>::ExpectEq(const T* values, const unsigned int count, T tolerance)
         : mTolerance(tolerance) {
         mExpected.assign(values, values + count);
     }
 
     namespace {
 
-        template <typename T>
-        testing::AssertionResult CheckImpl(const T& expected, const T& actual, const T& tolerance) {
+        template <typename T, typename U = T>
+        testing::AssertionResult CheckImpl(const T& expected, const U& actual, const T& tolerance) {
             ASSERT(tolerance == T{});
             if (expected != actual) {
                 return testing::AssertionFailure() << expected << ", actual " << actual;
@@ -1549,12 +1549,28 @@ namespace detail {
             return testing::AssertionSuccess();
         }
 
+        // Interpret uint16_t as float16
+        // This is mostly for reading float16 output from textures
+        template <>
+        testing::AssertionResult CheckImpl<float, uint16_t>(const float& expected,
+                                                            const uint16_t& actual,
+                                                            const float& tolerance) {
+            float actualF32 = Float16ToFloat32(actual);
+            if (abs(expected - actualF32) > tolerance) {
+                return tolerance == 0.0
+                           ? testing::AssertionFailure() << expected << ", actual " << actualF32
+                           : testing::AssertionFailure() << "within " << tolerance << " of "
+                                                         << expected << ", actual " << actualF32;
+            }
+            return testing::AssertionSuccess();
+        }
+
     }  // namespace
 
-    template <typename T>
-    testing::AssertionResult ExpectEq<T>::Check(const void* data, size_t size) {
-        DAWN_ASSERT(size == sizeof(T) * mExpected.size());
-        const T* actual = static_cast<const T*>(data);
+    template <typename T, typename U>
+    testing::AssertionResult ExpectEq<T, U>::Check(const void* data, size_t size) {
+        DAWN_ASSERT(size == sizeof(U) * mExpected.size());
+        const U* actual = static_cast<const U*>(data);
 
         for (size_t i = 0; i < mExpected.size(); ++i) {
             testing::AssertionResult check = CheckImpl(mExpected[i], actual[i], mTolerance);
@@ -1583,6 +1599,7 @@ namespace detail {
     template class ExpectEq<uint64_t>;
     template class ExpectEq<RGBA8>;
     template class ExpectEq<float>;
+    template class ExpectEq<float, uint16_t>;
 
     template <typename T>
     ExpectBetweenColors<T>::ExpectBetweenColors(T value0, T value1) {

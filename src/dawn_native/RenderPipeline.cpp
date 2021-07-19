@@ -261,6 +261,11 @@ namespace dawn_native {
             if (!format->IsColor() || !format->isRenderable) {
                 return DAWN_VALIDATION_ERROR("Color format must be color renderable");
             }
+            if (descriptor->blend && !(format->GetAspectInfo(Aspect::Color).supportedSampleTypes &
+                                       SampleTypeBit::Float)) {
+                return DAWN_VALIDATION_ERROR(
+                    "Color format must be blendable when blending is enabled");
+            }
             if (fragmentWritten &&
                 fragmentOutputBaseType != format->GetAspectInfo(Aspect::Color).baseType) {
                 return DAWN_VALIDATION_ERROR(

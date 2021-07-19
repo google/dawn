@@ -126,6 +126,12 @@ uint16_t Float32ToFloat16(float fp32) {
     }
 }
 
+float Float16ToFloat32(uint16_t fp16) {
+    uint32_t tmp = (fp16 & 0x7fff) << 13 | (fp16 & 0x8000) << 16;
+    float tmp2 = *reinterpret_cast<float*>(&tmp);
+    return pow(2, 127 - 15) * tmp2;
+}
+
 bool IsFloat16NaN(uint16_t fp16) {
     return (fp16 & 0x7FFF) > 0x7C00;
 }

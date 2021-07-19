@@ -82,6 +82,9 @@
 #define EXPECT_PIXEL_FLOAT_EQ(expected, texture, x, y) \
     AddTextureExpectation(__FILE__, __LINE__, expected, texture, {x, y})
 
+#define EXPECT_PIXEL_FLOAT16_EQ(expected, texture, x, y) \
+    AddTextureExpectation<float, uint16_t>(__FILE__, __LINE__, expected, texture, {x, y})
+
 #define EXPECT_PIXEL_RGBA8_BETWEEN(color0, color1, texture, x, y) \
     AddTextureBetweenColorsExpectation(__FILE__, __LINE__, color0, color1, texture, x, y)
 
@@ -183,7 +186,7 @@ namespace detail {
     class Expectation;
     class CustomTextureExpectation;
 
-    template <typename T>
+    template <typename T, typename U = T>
     class ExpectEq;
     template <typename T>
     class ExpectBetweenColors;
@@ -341,7 +344,9 @@ class DawnTestBase {
                                              uint64_t size,
                                              detail::Expectation* expectation);
 
-    template <typename T>
+    // T - expected value Type
+    // U - actual value Type (defaults = T)
+    template <typename T, typename U = T>
     std::ostringstream& AddTextureExpectation(const char* file,
                                               int line,
                                               const T* expectedData,
@@ -353,12 +358,12 @@ class DawnTestBase {
                                               uint32_t bytesPerRow = 0) {
         return AddTextureExpectationImpl(
             file, line,
-            new detail::ExpectEq<T>(expectedData,
-                                    extent.width * extent.height * extent.depthOrArrayLayers),
-            texture, origin, extent, level, aspect, sizeof(T), bytesPerRow);
+            new detail::ExpectEq<T, U>(expectedData,
+                                       extent.width * extent.height * extent.depthOrArrayLayers),
+            texture, origin, extent, level, aspect, sizeof(U), bytesPerRow);
     }
 
-    template <typename T>
+    template <typename T, typename U = T>
     std::ostringstream& AddTextureExpectation(const char* file,
                                               int line,
                                               const T& expectedData,
@@ -367,8 +372,9 @@ class DawnTestBase {
                                               uint32_t level = 0,
                                               wgpu::TextureAspect aspect = wgpu::TextureAspect::All,
                                               uint32_t bytesPerRow = 0) {
-        return AddTextureExpectationImpl(file, line, new detail::ExpectEq<T>(expectedData), texture,
-                                         origin, {1, 1}, level, aspect, sizeof(T), bytesPerRow);
+        return AddTextureExpectationImpl(file, line, new detail::ExpectEq<T, U>(expectedData),
+                                         texture, origin, {1, 1}, level, aspect, sizeof(U),
+                                         bytesPerRow);
     }
 
     template <typename E,
@@ -692,7 +698,10 @@ namespace detail {
     };
 
     // Expectation that checks the data is equal to some expected values.
-    template <typename T>
+    // T - expected value Type
+    // U - actual value Type (defaults = T)
+    // This is expanded for float16 mostly where T=float, U=uint16_t
+    template <typename T, typename U>
     class ExpectEq : public Expectation {
       public:
         ExpectEq(T singleValue, T tolerance = {});
@@ -710,6 +719,7 @@ namespace detail {
     extern template class ExpectEq<uint64_t>;
     extern template class ExpectEq<RGBA8>;
     extern template class ExpectEq<float>;
+    extern template class ExpectEq<float, uint16_t>;
 
     template <typename T>
     class ExpectBetweenColors : public Expectation {

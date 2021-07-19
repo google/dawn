@@ -438,7 +438,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBO) {
         dawn_native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
 
     utils::BasicRenderPass renderPass =
-        MakeRenderPass(kRTSize, kRTSize, wgpu::TextureFormat::R32Float);
+        MakeRenderPass(kRTSize, kRTSize, wgpu::TextureFormat::R16Float);
 
     utils::ComboRenderPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.vertex.module = mSimpleVSModule;
@@ -461,7 +461,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBO) {
     blend.alpha.srcFactor = wgpu::BlendFactor::One;
     blend.alpha.dstFactor = wgpu::BlendFactor::One;
 
-    pipelineDescriptor.cTargets[0].format = wgpu::TextureFormat::R32Float;
+    pipelineDescriptor.cTargets[0].format = wgpu::TextureFormat::R16Float;
     pipelineDescriptor.cTargets[0].blend = &blend;
 
     wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&pipelineDescriptor);
@@ -500,7 +500,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBO) {
     queue.Submit(1, &commands);
 
     float colorSum = numOfEncodedBindGroups * (numOfEncodedBindGroups + 1) / 2;
-    EXPECT_PIXEL_FLOAT_EQ(colorSum, renderPass.color, 0, 0);
+    EXPECT_PIXEL_FLOAT16_EQ(colorSum, renderPass.color, 0, 0);
 }
 
 // Verify encoding one bindgroup then a heaps worth in different submits.
