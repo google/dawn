@@ -390,10 +390,9 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
     }
 }
 
-// Test that an external texture binding type matches a shader using texture_external.
-// TODO(dawn:728) Enable this test once Dawn no longer relies on SPIRV-Cross to extract shader info.
-// Consider combining with the similar test above.
-TEST_F(GetBindGroupLayoutTests, DISABLED_ExternalTextureBindingType) {
+// Tests that the external texture binding type matches with a texture_external declared in the
+// shader.
+TEST_F(GetBindGroupLayoutTests, ExternalTextureBindingType) {
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.
@@ -412,7 +411,7 @@ TEST_F(GetBindGroupLayoutTests, DISABLED_ExternalTextureBindingType) {
             [[group(0), binding(0)]] var myExternalTexture: texture_external;
 
             [[stage(fragment)]] fn main() {
-               textureDimensions(myExternalTexture);
+               ignore(myExternalTexture);
             })");
     EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
 }

@@ -506,19 +506,9 @@ namespace dawn_native {
                 const BindingInfo& layoutInfo = layout->GetBindingInfo(bindingIndex);
 
                 if (layoutInfo.bindingType != shaderInfo.bindingType) {
-                    // TODO(dawn:728) On backend configurations that use SPIRV-Cross to reflect
-                    // shader info - the shader must have been already transformed prior to
-                    // reflecting the shader. During transformation, all instances of
-                    // texture_external are changed to texture_2d<f32>. This means that when
-                    // extracting shader info, external textures will be seen as sampled 2d
-                    // textures. In the future when Dawn no longer uses SPIRV-Cross, the
-                    // if-statement below should be removed.
-                    if (layoutInfo.bindingType != BindingInfoType::ExternalTexture ||
-                        shaderInfo.bindingType != BindingInfoType::Texture) {
-                        return DAWN_VALIDATION_ERROR(
-                            "The binding type of the bind group layout entry conflicts " +
-                            GetShaderDeclarationString(group, bindingNumber));
-                    }
+                    return DAWN_VALIDATION_ERROR(
+                        "The binding type of the bind group layout entry conflicts " +
+                        GetShaderDeclarationString(group, bindingNumber));
                 }
 
                 if ((layoutInfo.visibility & StageBit(entryPoint.stage)) == 0) {
@@ -582,13 +572,11 @@ namespace dawn_native {
                     }
 
                     case BindingInfoType::ExternalTexture: {
-                        // TODO(dawn:728) On backend configurations that use SPIRV-Cross to reflect
-                        // shader info - the shader must have been already transformed prior to
-                        // reflecting the shader. During transformation, all instances of
-                        // texture_external are changed to texture_2d<f32>. This means that when
-                        // extracting shader info, external textures will be seen as sampled 2d
-                        // textures. In the future when Dawn no longer uses SPIRV-Cross, we should
-                        // handle external textures here.
+                        if (shaderInfo.bindingType != BindingInfoType::ExternalTexture) {
+                            return DAWN_VALIDATION_ERROR(
+                                "The external texture bind group layout entry conflicts with " +
+                                GetShaderDeclarationString(group, bindingNumber));
+                        }
                         break;
                     }
 

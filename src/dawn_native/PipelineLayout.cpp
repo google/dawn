@@ -144,7 +144,9 @@ namespace dawn_native {
 
         // Does the trivial conversions from a ShaderBindingInfo to a BindGroupLayoutEntry
         auto ConvertMetadataToEntry =
-            [](const EntryPointMetadata::ShaderBindingInfo& shaderBinding) -> BindGroupLayoutEntry {
+            [](const EntryPointMetadata::ShaderBindingInfo& shaderBinding,
+               const ExternalTextureBindingLayout* externalTextureBindingEntry)
+            -> BindGroupLayoutEntry {
             BindGroupLayoutEntry entry = {};
             switch (shaderBinding.bindingType) {
                 case BindingInfoType::Buffer:
@@ -195,13 +197,7 @@ namespace dawn_native {
                     entry.storageTexture.viewDimension = shaderBinding.storageTexture.viewDimension;
                     break;
                 case BindingInfoType::ExternalTexture:
-                    // TODO(dawn:728) On backend configurations that use SPIRV-Cross to reflect
-                    // shader info - the shader must have been already transformed prior to
-                    // reflecting the shader. During transformation, all instances of
-                    // texture_external are changed to texture_2d<f32>. This means that when
-                    // extracting shader info, external textures will be seen as sampled 2d
-                    // textures. In the future when Dawn no longer uses SPIRV-Cross, we should
-                    // handle external textures here.
+                    entry.nextInChain = externalTextureBindingEntry;
                     break;
             }
             return entry;
@@ -230,6 +226,13 @@ namespace dawn_native {
         ityp::array<BindGroupIndex, std::map<BindingNumber, BindGroupLayoutEntry>, kMaxBindGroups>
             entryData = {};
 
+        // External texture binding layouts are chained structs that are set as a pointer within
+        // the bind group layout entry. We declare an entry here so that it can be used when needed
+        // in each BindGroupLayoutEntry and so it can stay alive until the call to
+        // GetOrCreateBindGroupLayout. Because ExternalTextureBindingLayout is an empty struct,
+        // there's no issue with using the same struct multiple times.
+        ExternalTextureBindingLayout externalTextureBindingLayout;
+
         // Loops over all the reflected BindGroupLayoutEntries from shaders.
         for (const StageAndDescriptor& stage : stages) {
             const EntryPointMetadata& metadata = stage.module->GetEntryPoint(stage.entryPoint);
@@ -240,7 +243,8 @@ namespace dawn_native {
                     const EntryPointMetadata::ShaderBindingInfo& shaderBinding = bindingIt.second;
 
                     // Create the BindGroupLayoutEntry
-                    BindGroupLayoutEntry entry = ConvertMetadataToEntry(shaderBinding);
+                    BindGroupLayoutEntry entry =
+                        ConvertMetadataToEntry(shaderBinding, &externalTextureBindingLayout);
                     entry.binding = static_cast<uint32_t>(bindingNumber);
                     entry.visibility = StageBit(stage.shaderStage);
 

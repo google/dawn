@@ -62,6 +62,10 @@ TEST_P(ExternalTextureTests, CreateExternalTextureSuccess) {
 }
 
 TEST_P(ExternalTextureTests, SampleExternalTexture) {
+    // SPIRV-Cross is unable to reflect texture_external correctly, which causes errors during
+    // validation.
+    DAWN_SUPPRESS_TEST_IF(!HasToggleEnabled("use_tint_generator"));
+
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[stage(vertex)]] fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
             var positions : array<vec4<f32>, 3> = array<vec4<f32>, 3>(
