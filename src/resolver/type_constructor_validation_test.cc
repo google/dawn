@@ -2113,9 +2113,9 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Struct_Nested) {
   auto* inner_m = Member("m", ty.i32());
   auto* inner_s = Structure("inner_s", {inner_m});
 
-  auto* m0 = Member("m", ty.i32());
-  auto* m1 = Member("m", ty.Of(inner_s));
-  auto* m2 = Member("m", ty.i32());
+  auto* m0 = Member("m0", ty.i32());
+  auto* m1 = Member("m1", ty.Of(inner_s));
+  auto* m2 = Member("m2", ty.i32());
   auto* s = Structure("s", {m0, m1, m2});
 
   auto* tc = create<ast::TypeConstructorExpression>(Source{{12, 34}}, ty.Of(s),

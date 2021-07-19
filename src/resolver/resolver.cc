@@ -4003,9 +4003,18 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
   // validation.
   uint32_t struct_size = 0;
   uint32_t struct_align = 1;
+  std::unordered_map<Symbol, ast::StructMember*> member_map;
 
   for (auto* member : str->members()) {
     Mark(member);
+    auto result = member_map.emplace(member->symbol(), member);
+    if (!result.second) {
+      AddError("redefinition of '" +
+                   builder_->Symbols().NameFor(member->symbol()) + "'",
+               member->source());
+      AddNote("previous definition is here", result.first->second->source());
+      return nullptr;
+    }
 
     // Resolve member type
     auto* type = Type(member->type());
