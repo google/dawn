@@ -50,9 +50,11 @@ class Reader {
       return {};
     }
     std::vector<T> out(count);
-    memcpy(out.data(), data_, count * sizeof(T));
-    data_ += count * sizeof(T);
-    size_ -= count * sizeof(T);
+    if (!out.empty()) {
+      memcpy(out.data(), data_, count * sizeof(T));
+      data_ += count * sizeof(T);
+      size_ -= count * sizeof(T);
+    }
     return out;
   }
 
