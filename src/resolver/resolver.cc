@@ -556,7 +556,14 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
     }
   } else if (var->is_const() && kind != VariableKind::kParameter &&
              !ast::HasDecoration<ast::OverrideDecoration>(var->decorations())) {
-    AddError("let declarations must have initializers", var->source());
+    AddError("let declaration must have an initializer", var->source());
+    return nullptr;
+  } else if (!var->type()) {
+    AddError(
+        (kind == VariableKind::kGlobal)
+            ? "module scope var declaration requires a type and initializer"
+            : "function scope var declaration requires a type or initializer",
+        var->source());
     return nullptr;
   }
 
