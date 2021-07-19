@@ -536,7 +536,7 @@ class Builder {
     return builder_.TypeOf(expr);
   }
 
-  /// Generates a constant if needed
+  /// Generates a scalar constant if needed
   /// @param constant the constant to generate.
   /// @returns the ID on success or 0 on failure
   uint32_t GenerateConstantIfNeeded(const ScalarConstant& constant);
@@ -545,6 +545,13 @@ class Builder {
   /// @param type the type of the constant null to generate.
   /// @returns the ID on success or 0 on failure
   uint32_t GenerateConstantNullIfNeeded(const sem::Type* type);
+
+  /// Generates a vector constant splat if needed
+  /// @param type the type of the vector to generate
+  /// @param value_id the ID of the scalar value to splat
+  /// @returns the ID on success or 0 on failure
+  uint32_t GenerateConstantVectorSplatIfNeeded(const sem::Vector* type,
+                                               uint32_t value_id);
 
   ProgramBuilder builder_;
   std::string error_;
@@ -567,6 +574,7 @@ class Builder {
   std::unordered_map<ScalarConstant, uint32_t> const_to_id_;
   std::unordered_map<std::string, uint32_t> type_constructor_to_id_;
   std::unordered_map<std::string, uint32_t> const_null_to_id_;
+  std::unordered_map<uint64_t, uint32_t> const_splat_to_id_;
   std::unordered_map<std::string, uint32_t>
       texture_type_name_to_sampled_image_type_id_;
   ScopeStack<uint32_t> scope_stack_;

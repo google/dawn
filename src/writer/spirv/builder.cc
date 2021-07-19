@@ -1568,7 +1568,51 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
     }
 
     return result_id;
+  } else if (from_type->is_bool_scalar_or_vector() &&
+             to_type->is_numeric_scalar_or_vector()) {
+    // Convert bool scalar/vector to numeric scalar/vector.
+    // Use the bool to select between 1 (if true) and 0 (if false).
 
+    const auto* to_elem_type = elem_type_of(to_type);
+    uint32_t one_id;
+    uint32_t zero_id;
+    if (to_elem_type->Is<sem::F32>()) {
+      ast::FloatLiteral one(ProgramID(), Source{}, 1.0f);
+      ast::FloatLiteral zero(ProgramID(), Source{}, 0.0f);
+      one_id = GenerateLiteralIfNeeded(nullptr, &one);
+      zero_id = GenerateLiteralIfNeeded(nullptr, &zero);
+    } else if (to_elem_type->Is<sem::U32>()) {
+      ast::UintLiteral one(ProgramID(), Source{}, 1);
+      ast::UintLiteral zero(ProgramID(), Source{}, 0);
+      one_id = GenerateLiteralIfNeeded(nullptr, &one);
+      zero_id = GenerateLiteralIfNeeded(nullptr, &zero);
+    } else if (to_elem_type->Is<sem::I32>()) {
+      ast::SintLiteral one(ProgramID(), Source{}, 1);
+      ast::SintLiteral zero(ProgramID(), Source{}, 0);
+      one_id = GenerateLiteralIfNeeded(nullptr, &one);
+      zero_id = GenerateLiteralIfNeeded(nullptr, &zero);
+    } else {
+      error_ = "invalid destination type for bool conversion";
+      return false;
+    }
+    if (auto* to_vec = to_type->As<sem::Vector>()) {
+      // Splat the scalars into vectors.
+      one_id = GenerateConstantVectorSplatIfNeeded(to_vec, one_id);
+      zero_id = GenerateConstantVectorSplatIfNeeded(to_vec, zero_id);
+    }
+    if (!one_id || !zero_id) {
+      return false;
+    }
+
+    op = spv::Op::OpSelect;
+    if (!push_function_inst(
+            op, {Operand::Int(result_type_id), Operand::Int(result_id),
+                 Operand::Int(val_id), Operand::Int(one_id),
+                 Operand::Int(zero_id)})) {
+      return 0;
+    }
+
+    return result_id;
   } else {
     TINT_ICE(Writer, builder_.Diagnostics()) << "Invalid from_type";
   }
@@ -1718,6 +1762,31 @@ uint32_t Builder::GenerateConstantNullIfNeeded(const sem::Type* type) {
 
   const_null_to_id_[name] = result_id;
   return result_id;
+}
+
+uint32_t Builder::GenerateConstantVectorSplatIfNeeded(const sem::Vector* type,
+                                                      uint32_t value_id) {
+  auto type_id = GenerateTypeIfNeeded(type);
+  if (type_id == 0 || value_id == 0) {
+    return 0;
+  }
+
+  uint64_t key = (static_cast<uint64_t>(type->size()) << 32) + value_id;
+  return utils::GetOrCreate(const_splat_to_id_, key, [&] {
+    auto result = result_op();
+    auto result_id = result.to_i();
+
+    OperandList ops;
+    ops.push_back(Operand::Int(type_id));
+    ops.push_back(result);
+    for (uint32_t i = 0; i < type->size(); i++) {
+      ops.push_back(Operand::Int(value_id));
+    }
+    push_type(spv::Op::OpConstantComposite, ops);
+
+    const_splat_to_id_[key] = result_id;
+    return result_id;
+  });
 }
 
 uint32_t Builder::GenerateShortCircuitBinaryExpression(

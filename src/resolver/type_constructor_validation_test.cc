@@ -255,27 +255,33 @@ static constexpr Params valid_cases[] = {
     ParamsFor<bool, i32>(),  //
     ParamsFor<bool, f32>(),  //
 
-    ParamsFor<i32, u32>(),  //
-    ParamsFor<i32, f32>(),  //
+    ParamsFor<i32, bool>(),  //
+    ParamsFor<i32, u32>(),   //
+    ParamsFor<i32, f32>(),   //
 
-    ParamsFor<u32, i32>(),  //
-    ParamsFor<u32, f32>(),  //
+    ParamsFor<u32, bool>(),  //
+    ParamsFor<u32, i32>(),   //
+    ParamsFor<u32, f32>(),   //
 
-    ParamsFor<f32, u32>(),  //
-    ParamsFor<f32, i32>(),  //
+    ParamsFor<f32, bool>(),  //
+    ParamsFor<f32, u32>(),   //
+    ParamsFor<f32, i32>(),   //
 
     ParamsFor<vec3<bool>, vec3<u32>>(),  //
     ParamsFor<vec3<bool>, vec3<i32>>(),  //
     ParamsFor<vec3<bool>, vec3<f32>>(),  //
 
-    ParamsFor<vec3<i32>, vec3<u32>>(),  //
-    ParamsFor<vec3<i32>, vec3<f32>>(),  //
+    ParamsFor<vec3<i32>, vec3<bool>>(),  //
+    ParamsFor<vec3<i32>, vec3<u32>>(),   //
+    ParamsFor<vec3<i32>, vec3<f32>>(),   //
 
-    ParamsFor<vec3<u32>, vec3<i32>>(),  //
-    ParamsFor<vec3<u32>, vec3<f32>>(),  //
+    ParamsFor<vec3<u32>, vec3<bool>>(),  //
+    ParamsFor<vec3<u32>, vec3<i32>>(),   //
+    ParamsFor<vec3<u32>, vec3<f32>>(),   //
 
-    ParamsFor<vec3<f32>, vec3<u32>>(),  //
-    ParamsFor<vec3<f32>, vec3<i32>>(),  //
+    ParamsFor<vec3<f32>, vec3<bool>>(),  //
+    ParamsFor<vec3<f32>, vec3<u32>>(),   //
+    ParamsFor<vec3<f32>, vec3<i32>>(),   //
 };
 
 using ConversionConstructorValidTest = ResolverTestWithParam<Params>;
@@ -388,13 +394,15 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest,
        ConversionConstructorInvalid_InvalidInitializer) {
-  auto* a = Var("a", ty.f32(), ast::StorageClass::kNone,
-                Construct(Source{{12, 34}}, ty.f32(), Expr(true)));
+  auto* a =
+      Var("a", ty.f32(), ast::StorageClass::kNone,
+          Construct(Source{{12, 34}}, ty.f32(), Construct(ty.array<f32, 4>())));
   WrapInFunction(a);
 
   ASSERT_FALSE(r()->Resolve());
   ASSERT_EQ(r()->error(),
-            "12:34 error: cannot construct 'f32' with a value of type 'bool'");
+            "12:34 error: cannot construct 'f32' with a value of type "
+            "'array<f32, 4>'");
 }
 
 }  // namespace ConversionConstructorTest
@@ -717,20 +725,6 @@ TEST_F(ResolverTypeConstructorValidationTest,
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
-       Expr_Constructor_Vec2_Error_InvalidConversionFromVec2Bool) {
-  SetSource(Source::Location({12, 34}));
-
-  auto* tc = vec2<f32>(create<ast::TypeConstructorExpression>(
-      Source{{12, 34}}, ty.vec2<bool>(), ExprList()));
-  WrapInFunction(tc);
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: type in vector constructor does not match vector "
-            "type: expected 'f32', found 'bool'");
-}
-
-TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec2_Error_InvalidArgumentType) {
   auto* tc = vec2<f32>(create<ast::TypeConstructorExpression>(
       Source{{12, 34}}, ty.mat2x2<f32>(), ExprList()));
@@ -984,18 +978,6 @@ TEST_F(ResolverTypeConstructorValidationTest,
   EXPECT_EQ(
       r()->error(),
       "12:34 error: attempted to construct 'vec3<f32>' with 4 component(s)");
-}
-
-TEST_F(ResolverTypeConstructorValidationTest,
-       Expr_Constructor_Vec3_Error_InvalidConversionFromVec3Bool) {
-  auto* tc = vec3<f32>(create<ast::TypeConstructorExpression>(
-      Source{{12, 34}}, ty.vec3<bool>(), ExprList()));
-  WrapInFunction(tc);
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: type in vector constructor does not match vector "
-            "type: expected 'f32', found 'bool'");
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1346,18 +1328,6 @@ TEST_F(ResolverTypeConstructorValidationTest,
   EXPECT_EQ(
       r()->error(),
       "12:34 error: attempted to construct 'vec4<f32>' with 6 component(s)");
-}
-
-TEST_F(ResolverTypeConstructorValidationTest,
-       Expr_Constructor_Vec4_Error_InvalidConversionFromVec4Bool) {
-  auto* tc = vec4<f32>(create<ast::TypeConstructorExpression>(
-      Source{{12, 34}}, ty.vec4<bool>(), ExprList()));
-  WrapInFunction(tc);
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: type in vector constructor does not match vector "
-            "type: expected 'f32', found 'bool'");
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,

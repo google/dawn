@@ -2752,11 +2752,7 @@ bool Resolver::ValidateVectorConstructor(
       // A mismatch of vector type parameter T is only an error if multiple
       // arguments are present. A single argument constructor constitutes a
       // type conversion expression.
-      // NOTE: A conversion expression from a vec<bool> to any other vecN<T>
-      // is disallowed (see
-      // https://gpuweb.github.io/gpuweb/wgsl.html#conversion-expr).
-      if (elem_type != value_elem_type &&
-          (values.size() > 1u || value_vec->is_bool_vector())) {
+      if (elem_type != value_elem_type && values.size() > 1u) {
         AddError(
             "type in vector constructor does not match vector type: "
             "expected '" +
@@ -2878,11 +2874,10 @@ bool Resolver::ValidateScalarConstructor(
   using U32 = sem::U32;
   using F32 = sem::F32;
 
-  const bool is_valid =
-      (type->Is<Bool>() && value_type->IsAnyOf<Bool, I32, U32, F32>()) ||
-      (type->Is<I32>() && value_type->IsAnyOf<I32, U32, F32>()) ||
-      (type->Is<U32>() && value_type->IsAnyOf<I32, U32, F32>()) ||
-      (type->Is<F32>() && value_type->IsAnyOf<I32, U32, F32>());
+  const bool is_valid = (type->Is<Bool>() && value_type->is_scalar()) ||
+                        (type->Is<I32>() && value_type->is_scalar()) ||
+                        (type->Is<U32>() && value_type->is_scalar()) ||
+                        (type->Is<F32>() && value_type->is_scalar());
   if (!is_valid) {
     AddError("cannot construct '" + type_name + "' with a value of type '" +
                  TypeNameOf(value) + "'",
