@@ -3989,6 +3989,37 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(
             create<ast::ScalarConstructorExpression>(
                 Source{}, create<ast::FloatLiteral>(Source{}, 1.0f))};
   }
+  if ((ext_opcode == GLSLstd450Refract) && result_type->IsScalar()) {
+    // WGSL does not have scalar form of the refract builtin.
+    // It's a complicated expression.  Implement it by /computing it in two
+    // dimensions, but with a 0-valued y component in both the incident and
+    // normal vectors, then take the x component of that result.
+    auto incident = MakeOperand(inst, 2);
+    auto normal = MakeOperand(inst, 3);
+    auto eta = MakeOperand(inst, 4);
+    TINT_ASSERT(Reader, incident.type->Is<F32>());
+    TINT_ASSERT(Reader, normal.type->Is<F32>());
+    TINT_ASSERT(Reader, eta.type->Is<F32>());
+    if (!success()) {
+      return {};
+    }
+    const Type* f32 = eta.type;
+    const Type* vec2 = ty_.Vector(f32, 2);
+    return {
+        f32,
+        builder_.MemberAccessor(
+            builder_.Call(
+                Source{}, "refract",
+                ast::ExpressionList{
+                    builder_.Construct(vec2->Build(builder_),
+                                       ast::ExpressionList{
+                                           incident.expr, builder_.Expr(0.0f)}),
+                    builder_.Construct(
+                        vec2->Build(builder_),
+                        ast::ExpressionList{normal.expr, builder_.Expr(0.0f)}),
+                    eta.expr}),
+            "x")};
+  }
 
   const auto name = GetGlslStd450FuncName(ext_opcode);
   if (name.empty()) {

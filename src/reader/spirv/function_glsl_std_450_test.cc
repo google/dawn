@@ -53,6 +53,7 @@ std::string Preamble() {
   OpName %v3f1 "v3f1"
   OpName %v3f2 "v3f2"
   OpName %v4f1 "v4f1"
+  OpName %v4f2 "v4f2"
 
   %void = OpTypeVoid
   %voidfn = OpTypeFunction %void
@@ -123,6 +124,7 @@ std::string Preamble() {
   %v3f2 = OpCopyObject %v3float %v3float_60_70_50
 
   %v4f1 = OpCopyObject %v4float %v4float_50_50_50_50
+  %v4f2 = OpCopyObject %v4float %v4f1
 )";
 }
 
@@ -1745,6 +1747,78 @@ INSTANTIATE_TEST_SUITE_P(Samples,
                              {"UnpackSnorm2x16", "unpack2x16snorm", 2},
                              {"UnpackUnorm2x16", "unpack2x16unorm", 2},
                              {"UnpackHalf2x16", "unpack2x16float", 2}}));
+
+TEST_F(SpvParserTest, GlslStd450_Refract_Scalar) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %float %glsl Refract %f1 %f2 %f3
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(p->builder(), fe.ast_body());
+  const auto* expected = R"(VariableConst{
+    x_1
+    none
+    undefined
+    __f32
+    {
+      MemberAccessor[not set]{
+        Call[not set]{
+          Identifier[not set]{refract}
+          (
+            TypeConstructor[not set]{
+              __vec_2__f32
+              Identifier[not set]{f1}
+              ScalarConstructor[not set]{0.000000}
+            }
+            TypeConstructor[not set]{
+              __vec_2__f32
+              Identifier[not set]{f2}
+              ScalarConstructor[not set]{0.000000}
+            }
+            Identifier[not set]{f3}
+          )
+        }
+        Identifier[not set]{x}
+      }
+    }
+  })";
+
+  EXPECT_THAT(body, HasSubstr(expected)) << body;
+}
+
+TEST_F(SpvParserTest, GlslStd450_Refract_Vector) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %v2float %glsl Refract %v2f1 %v2f2 %f3
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(p->builder(), fe.ast_body());
+  const auto* expected = R"(VariableConst{
+    x_1
+    none
+    undefined
+    __vec_2__f32
+    {
+      Call[not set]{
+        Identifier[not set]{refract}
+        (
+          Identifier[not set]{v2f1}
+          Identifier[not set]{v2f2}
+          Identifier[not set]{f3}
+        )
+      }
+    })";
+
+  EXPECT_THAT(body, HasSubstr(expected));
+}
 
 }  // namespace
 }  // namespace spirv
