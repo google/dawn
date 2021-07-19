@@ -32,7 +32,9 @@ std::unique_ptr<Mutation> Mutation::FromMessage(
           message.replace_identifier());
     case protobufs::Mutation::MUTATION_NOT_SET:
       assert(false && "Mutation is not set");
+      break;
   }
+  return nullptr;
 }
 
 }  // namespace ast_fuzzer
