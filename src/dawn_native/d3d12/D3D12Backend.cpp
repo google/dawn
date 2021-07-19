@@ -84,16 +84,10 @@ namespace dawn_native { namespace d3d12 {
         textureDescriptor.mipLevelCount = mMipLevelCount;
         textureDescriptor.sampleCount = mSampleCount;
 
-        // Set the release key to acquire key + 1 if not set. This allows supporting the old keyed
-        // mutex protocol during the transition to making this a required parameter.
-        ExternalMutexSerial releaseMutexKey =
-            (descriptor->releaseMutexKey != UINT64_MAX)
-                ? ExternalMutexSerial(descriptor->releaseMutexKey)
-                : ExternalMutexSerial(descriptor->acquireMutexKey + 1);
-
         Ref<TextureBase> texture = backendDevice->CreateExternalTexture(
             &textureDescriptor, mD3D12Resource, ExternalMutexSerial(descriptor->acquireMutexKey),
-            releaseMutexKey, descriptor->isSwapChainTexture, descriptor->isInitialized);
+            ExternalMutexSerial(descriptor->releaseMutexKey), descriptor->isSwapChainTexture,
+            descriptor->isInitialized);
         return reinterpret_cast<WGPUTexture>(texture.Detach());
     }
 

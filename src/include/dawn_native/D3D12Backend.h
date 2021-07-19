@@ -56,8 +56,7 @@ namespace dawn_native { namespace d3d12 {
         : ExternalImageAccessDescriptor {
       public:
         uint64_t acquireMutexKey;
-        // Release key will be set to acquireMutexKey + 1 if set to sentinel value UINT64_MAX.
-        uint64_t releaseMutexKey = UINT64_MAX;
+        uint64_t releaseMutexKey;
         bool isSwapChainTexture = false;
     };
 
