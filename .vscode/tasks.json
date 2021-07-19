@@ -40,13 +40,15 @@
             "windows": {
                 // Invokes ninja in the 'out/active' directory, which is created
                 // with the 'generate' task (see below).
-                "command": "cmd",
+                "command": "/C",
                 "args": [
-                    "/C",
                     "ninja && echo Done"
                 ],
                 "options": {
                     "cwd": "${workspaceRoot}/out/active",
+                    "shell": {
+                        "executable": "cmd"
+                    }
                 },
             },
             "presentation": {
@@ -100,11 +102,15 @@
                 // is_debug argument set to to true iff the build-type is Debug.
                 // A symbolic link to this build directory is created at 'out/active'
                 // which is used to track the active build directory.
-                "command": "cmd",
+                "command": "/C",
                 "args": [
-                    "/C",
                     "(IF \"${input:buildType}\" == \"Debug\" ( gn gen 'out\\${input:buildType}' --args=is_debug=true ) ELSE ( gn gen 'out\\${input:buildType}' --args=is_debug=false )) && (IF EXIST 'out\\active' rmdir 'out\\active' /q /s) && (mklink /j 'out\\active' 'out\\${input:buildType}')",
                 ],
+                "options": {
+                    "shell": {
+                        "executable": "cmd"
+                    }
+                },
             },
             "problemMatcher": [],
         },
