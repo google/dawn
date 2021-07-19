@@ -34,11 +34,15 @@
                 ],
             },
             "windows": {
-                "command": "cmd",
+                "command": "/C",
                 "args": [
-                    "/C",
-                    "ninja && echo Done"
+                    "ninja && echo Done",
                 ],
+                "options": {
+                    "shell": {
+                        "executable": "cmd"
+                    },
+                }
             },
             "options": {
                 "cwd": "${workspaceRoot}/out/active",
@@ -86,11 +90,15 @@
                 ],
             },
             "windows": {
-                "command": "cmd",
+                "command": "/C",
                 "args": [
-                    "/C",
                     "(IF \"${input:buildType}\" == \"Debug\" ( gn gen 'out\\${input:buildType}' --args=is_debug=true ) ELSE ( gn gen 'out\\${input:buildType}' --args=is_debug=false )) && (IF EXIST 'out\\active' rmdir 'out\\active' /q /s) && (mklink /j 'out\\active' 'out\\${input:buildType}')",
                 ],
+                "options": {
+                    "shell": {
+                        "executable": "cmd"
+                    },
+                }
             },
             "options": {
                 "cwd": "${workspaceRoot}"
@@ -117,11 +125,15 @@
                 ],
             },
             "windows": {
-                "command": "cmd",
+                "command": "/C",
                 "args": [
-                    "/C",
-                    "git fetch origin && git rebase origin/main && gclient sync && echo Done"
+                    "git fetch origin && git rebase origin/main && gclient sync && echo Done",
                 ],
+                "options": {
+                    "shell": {
+                        "executable": "cmd"
+                    },
+                }
             },
             "options": {
                 "cwd": "${workspaceRoot}"
