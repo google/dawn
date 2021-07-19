@@ -52,6 +52,10 @@ class Type : public Castable<Type, Node> {
   /// @returns the inner type if this is a reference, `this` otherwise
   const Type* UnwrapRef() const;
 
+  /// @param align the output default alignment in bytes for this type.
+  /// @param size the output default size in bytes for this type.
+  void GetDefaultAlignAndSize(uint32_t& align, uint32_t& size) const;
+
   /// @returns true if this type is a scalar
   bool is_scalar() const;
   /// @returns true if this type is a numeric scalar

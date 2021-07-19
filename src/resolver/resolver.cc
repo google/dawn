@@ -723,7 +723,7 @@ bool Resolver::ValidateStorageClassLayout(const sem::Struct* str,
   auto required_alignment_of = [&](const sem::Type* ty) {
     uint32_t actual_align = 0;
     uint32_t actual_size = 0;
-    DefaultAlignAndSize(ty, actual_align, actual_size);
+    ty->GetDefaultAlignAndSize(actual_align, actual_size);
     uint32_t required_align = actual_align;
     if (is_uniform_struct_or_array(ty)) {
       required_align = utils::RoundUp(16u, actual_align);
@@ -3750,69 +3750,6 @@ void Resolver::CreateSemanticNodes() const {
   }
 }
 
-bool Resolver::DefaultAlignAndSize(const sem::Type* ty,
-                                   uint32_t& align,
-                                   uint32_t& size) {
-  static constexpr uint32_t vector_size[] = {
-      /* padding */ 0,
-      /* padding */ 0,
-      /*vec2*/ 8,
-      /*vec3*/ 12,
-      /*vec4*/ 16,
-  };
-  static constexpr uint32_t vector_align[] = {
-      /* padding */ 0,
-      /* padding */ 0,
-      /*vec2*/ 8,
-      /*vec3*/ 16,
-      /*vec4*/ 16,
-  };
-
-  if (ty->is_scalar()) {
-    // Note: Also captures booleans, but these are not host-shareable.
-    align = 4;
-    size = 4;
-    return true;
-  }
-  if (auto* vec = ty->As<sem::Vector>()) {
-    if (vec->size() < 2 || vec->size() > 4) {
-      TINT_UNREACHABLE(Resolver, diagnostics_)
-          << "Invalid vector size: vec" << vec->size();
-      return false;
-    }
-    align = vector_align[vec->size()];
-    size = vector_size[vec->size()];
-    return true;
-  }
-  if (auto* mat = ty->As<sem::Matrix>()) {
-    if (mat->columns() < 2 || mat->columns() > 4 || mat->rows() < 2 ||
-        mat->rows() > 4) {
-      TINT_UNREACHABLE(Resolver, diagnostics_)
-          << "Invalid matrix size: mat" << mat->columns() << "x" << mat->rows();
-      return false;
-    }
-    align = vector_align[mat->rows()];
-    size = vector_align[mat->rows()] * mat->columns();
-    return true;
-  }
-  if (auto* s = ty->As<sem::Struct>()) {
-    align = s->Align();
-    size = s->Size();
-    return true;
-  }
-  if (auto* a = ty->As<sem::Array>()) {
-    align = a->Align();
-    size = a->SizeInBytes();
-    return true;
-  }
-  if (auto* a = ty->As<sem::Atomic>()) {
-    return DefaultAlignAndSize(a->Type(), align, size);
-  }
-  TINT_UNREACHABLE(Resolver, diagnostics_)
-      << "invalid type " << ty->TypeInfo().name;
-  return false;
-}
-
 sem::Array* Resolver::Array(const ast::Array* arr) {
   auto source = arr->source();
 
@@ -3821,7 +3758,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
     return nullptr;
   }
 
-  if (!IsPlain(el_ty)) {  // Check must come before DefaultAlignAndSize()
+  if (!IsPlain(el_ty)) {  // Check must come before GetDefaultAlignAndSize()
     AddError(el_ty->FriendlyName(builder_->Symbols()) +
                  " cannot be used as an element type of an array",
              source);
@@ -3830,9 +3767,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
 
   uint32_t el_align = 0;
   uint32_t el_size = 0;
-  if (!DefaultAlignAndSize(el_ty, el_align, el_size)) {
-    return nullptr;
-  }
+  el_ty->GetDefaultAlignAndSize(el_align, el_size);
 
   if (!ValidateNoDuplicateDecorations(arr->decorations())) {
     return nullptr;
@@ -4040,9 +3975,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     uint32_t offset = struct_size;
     uint32_t align = 0;
     uint32_t size = 0;
-    if (!DefaultAlignAndSize(type, align, size)) {
-      return nullptr;
-    }
+    type->GetDefaultAlignAndSize(align, size);
 
     if (!ValidateNoDuplicateDecorations(member->decorations())) {
       return nullptr;

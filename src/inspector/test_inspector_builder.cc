@@ -60,7 +60,7 @@ ast::Struct* InspectorBuilder::MakeInOutStruct(
   return Structure(name, members);
 }
 
-ast::Function* InspectorBuilder::MakeConstReferenceBodyFunction(
+ast::Function* InspectorBuilder::MakePlainGlobalReferenceBodyFunction(
     std::string func,
     std::string var,
     ast::Type* type,
@@ -93,15 +93,27 @@ ast::Struct* InspectorBuilder::MakeStructType(
     bool is_block) {
   ast::StructMemberList members;
   for (auto* type : member_types) {
-    members.push_back(Member(StructMemberName(members.size(), type), type));
+    members.push_back(MakeStructMember(members.size(), type, {}));
   }
+  return MakeStructTypeFromMembers(name, std::move(members), is_block);
+}
 
+ast::Struct* InspectorBuilder::MakeStructTypeFromMembers(
+    const std::string& name,
+    ast::StructMemberList members,
+    bool is_block) {
   ast::DecorationList decos;
   if (is_block) {
     decos.push_back(create<ast::StructBlockDecoration>());
   }
+  return Structure(name, std::move(members), decos);
+}
 
-  return Structure(name, members, decos);
+ast::StructMember* InspectorBuilder::MakeStructMember(
+    size_t index,
+    ast::Type* type,
+    ast::DecorationList decorations) {
+  return Member(StructMemberName(index, type), type, std::move(decorations));
 }
 
 ast::Struct* InspectorBuilder::MakeUniformBufferType(
@@ -126,6 +138,11 @@ void InspectorBuilder::AddUniformBuffer(const std::string& name,
              create<ast::BindingDecoration>(binding),
              create<ast::GroupDecoration>(group),
          });
+}
+
+void InspectorBuilder::AddWorkgroupStorage(const std::string& name,
+                                           ast::Type* type) {
+  Global(name, type, ast::StorageClass::kWorkgroup);
 }
 
 void InspectorBuilder::AddStorageBuffer(const std::string& name,

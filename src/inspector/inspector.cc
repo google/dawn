@@ -42,6 +42,7 @@
 #include "src/sem/variable.h"
 #include "src/sem/vector_type.h"
 #include "src/sem/void_type.h"
+#include "src/utils/math.h"
 
 namespace tint {
 namespace inspector {
@@ -532,6 +533,31 @@ std::vector<SamplerTexturePair> Inspector::GetSamplerTextureUses(
     return {};
   }
   return it->second;
+}
+
+uint32_t Inspector::GetWorkgroupStorageSize(const std::string& entry_point) {
+  auto* func = FindEntryPointByName(entry_point);
+  if (!func) {
+    return 0;
+  }
+
+  uint32_t total_size = 0;
+  auto* func_sem = program_->Sem().Get(func);
+  for (const sem::Variable* var : func_sem->ReferencedModuleVariables()) {
+    if (var->StorageClass() == ast::StorageClass::kWorkgroup) {
+      uint32_t align = 0;
+      uint32_t size = 0;
+      var->Type()->UnwrapRef()->GetDefaultAlignAndSize(align, size);
+
+      // This essentially matches std430 layout rules from GLSL, which are in
+      // turn specified as an upper bound for Vulkan layout sizing. Since D3D
+      // and Metal are even less specific, we assume Vulkan behavior as a
+      // good-enough approximation everywhere.
+      total_size += utils::RoundUp(align, size);
+    }
+  }
+
+  return total_size;
 }
 
 ast::Function* Inspector::FindEntryPointByName(const std::string& name) {

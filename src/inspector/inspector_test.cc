@@ -134,6 +134,9 @@ class InspectorGetExternalTextureResourceBindingsTest : public InspectorBuilder,
 class InspectorGetSamplerTextureUsesTest : public InspectorBuilder,
                                            public testing::Test {};
 
+class InspectorGetWorkgroupStorageSizeTest : public InspectorBuilder,
+                                             public testing::Test {};
+
 TEST_F(InspectorGetEntryPointTest, NoFunctions) {
   Inspector& inspector = Build();
 
@@ -549,7 +552,7 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantUnreferenced) {
 
 TEST_F(InspectorGetEntryPointTest, OverridableConstantReferencedByEntryPoint) {
   AddOverridableConstantWithoutID<float>("foo", ty.f32(), nullptr);
-  MakeConstReferenceBodyFunction(
+  MakePlainGlobalReferenceBodyFunction(
       "ep_func", "foo", ty.f32(),
       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
@@ -564,7 +567,7 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantReferencedByEntryPoint) {
 
 TEST_F(InspectorGetEntryPointTest, OverridableConstantReferencedByCallee) {
   AddOverridableConstantWithoutID<float>("foo", ty.f32(), nullptr);
-  MakeConstReferenceBodyFunction("callee_func", "foo", ty.f32(), {});
+  MakePlainGlobalReferenceBodyFunction("callee_func", "foo", ty.f32(), {});
   MakeCallerBodyFunction(
       "ep_func", {"callee_func"},
       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
@@ -581,7 +584,7 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantReferencedByCallee) {
 TEST_F(InspectorGetEntryPointTest, OverridableConstantSomeReferenced) {
   AddOverridableConstantWithID<float>("foo", 1, ty.f32(), nullptr);
   AddOverridableConstantWithID<float>("bar", 2, ty.f32(), nullptr);
-  MakeConstReferenceBodyFunction("callee_func", "foo", ty.f32(), {});
+  MakePlainGlobalReferenceBodyFunction("callee_func", "foo", ty.f32(), {});
   MakeCallerBodyFunction(
       "ep_func", {"callee_func"},
       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
@@ -2395,6 +2398,93 @@ TEST_F(InspectorGetSamplerTextureUsesTest, InFunction) {
   EXPECT_EQ(1u, result[0].sampler_binding_point.binding);
   EXPECT_EQ(0u, result[0].texture_binding_point.group);
   EXPECT_EQ(0u, result[0].texture_binding_point.binding);
+}
+
+TEST_F(InspectorGetWorkgroupStorageSizeTest, Empty) {
+  MakeEmptyBodyFunction("ep_func",
+                        ast::DecorationList{Stage(ast::PipelineStage::kCompute),
+                                            WorkgroupSize(1)});
+  Inspector& inspector = Build();
+  EXPECT_EQ(0u, inspector.GetWorkgroupStorageSize("ep_func"));
+}
+
+TEST_F(InspectorGetWorkgroupStorageSizeTest, Simple) {
+  AddWorkgroupStorage("wg_f32", ty.f32());
+  MakePlainGlobalReferenceBodyFunction("f32_func", "wg_f32", ty.f32(), {});
+
+  MakeCallerBodyFunction("ep_func", {"f32_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kCompute),
+                             WorkgroupSize(1),
+                         });
+
+  Inspector& inspector = Build();
+  EXPECT_EQ(4u, inspector.GetWorkgroupStorageSize("ep_func"));
+}
+
+TEST_F(InspectorGetWorkgroupStorageSizeTest, CompoundTypes) {
+  // This struct should occupy 68 bytes. 4 from the i32 field, and another 64
+  // from the 4-element array with 16-byte stride.
+  ast::Struct* wg_struct_type = MakeStructType(
+      "WgStruct", {ty.i32(), ty.array(ty.i32(), 4, /*stride=*/16)},
+      /*is_block=*/false);
+  AddWorkgroupStorage("wg_struct_var", ty.Of(wg_struct_type));
+  MakeStructVariableReferenceBodyFunction("wg_struct_func", "wg_struct_var",
+                                          {{0, ty.i32()}});
+
+  // Plus another 4 bytes from this other workgroup-class f32.
+  AddWorkgroupStorage("wg_f32", ty.f32());
+  MakePlainGlobalReferenceBodyFunction("f32_func", "wg_f32", ty.f32(), {});
+
+  MakeCallerBodyFunction("ep_func", {"wg_struct_func", "f32_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kCompute),
+                             WorkgroupSize(1),
+                         });
+
+  Inspector& inspector = Build();
+  EXPECT_EQ(72u, inspector.GetWorkgroupStorageSize("ep_func"));
+}
+
+TEST_F(InspectorGetWorkgroupStorageSizeTest, AlignmentPadding) {
+  // vec3<f32> has an alignment of 16 but a size of 12. We leverage this to test
+  // that our padded size calculation for workgroup storage is accurate.
+  AddWorkgroupStorage("wg_vec3", ty.vec3<f32>());
+  MakePlainGlobalReferenceBodyFunction("wg_func", "wg_vec3", ty.vec3<f32>(),
+                                       {});
+
+  MakeCallerBodyFunction("ep_func", {"wg_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kCompute),
+                             WorkgroupSize(1),
+                         });
+
+  Inspector& inspector = Build();
+  EXPECT_EQ(16u, inspector.GetWorkgroupStorageSize("ep_func"));
+}
+
+TEST_F(InspectorGetWorkgroupStorageSizeTest, StructAlignment) {
+  // Per WGSL spec, a struct's size is the offset its last member plus the size
+  // of its last member, rounded up to the alignment of its largest member. So
+  // here the struct is expected to occupy 1024 bytes of workgroup storage.
+  ast::Struct* wg_struct_type = MakeStructTypeFromMembers(
+      "WgStruct",
+      {MakeStructMember(0, ty.f32(),
+                        {create<ast::StructMemberAlignDecoration>(1024)})},
+      /*is_block=*/false);
+
+  AddWorkgroupStorage("wg_struct_var", ty.Of(wg_struct_type));
+  MakeStructVariableReferenceBodyFunction("wg_struct_func", "wg_struct_var",
+                                          {{0, ty.f32()}});
+
+  MakeCallerBodyFunction("ep_func", {"wg_struct_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kCompute),
+                             WorkgroupSize(1),
+                         });
+
+  Inspector& inspector = Build();
+  EXPECT_EQ(1024u, inspector.GetWorkgroupStorageSize("ep_func"));
 }
 
 }  // namespace

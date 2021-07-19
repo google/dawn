@@ -139,13 +139,14 @@ class InspectorBuilder : public ProgramBuilder {
                        });
   }
 
-  /// Generates a function that references module constant
+  /// Generates a function that references module-scoped, plain-typed constant
+  /// or variable.
   /// @param func name of the function created
   /// @param var name of the constant to be reference
   /// @param type type of the const being referenced
   /// @param decorations the function decorations
   /// @returns a function object
-  ast::Function* MakeConstReferenceBodyFunction(
+  ast::Function* MakePlainGlobalReferenceBodyFunction(
       std::string func,
       std::string var,
       ast::Type* type,
@@ -172,6 +173,24 @@ class InspectorBuilder : public ProgramBuilder {
                               std::vector<ast::Type*> member_types,
                               bool is_block);
 
+  /// Generates a struct type from a list of member nodes.
+  /// @param name name for the struct type
+  /// @param members a vector of members
+  /// @param is_block whether or not to decorate as a Block
+  /// @returns a struct type
+  ast::Struct* MakeStructTypeFromMembers(const std::string& name,
+                                         ast::StructMemberList members,
+                                         bool is_block);
+
+  /// Generates a struct member with a specified index and type.
+  /// @param index index of the field within the struct
+  /// @param type the type of the member field
+  /// @param decorations a list of decorations to apply to the member field
+  /// @returns a struct member
+  ast::StructMember* MakeStructMember(size_t index,
+                                      ast::Type* type,
+                                      ast::DecorationList decorations);
+
   /// Generates types appropriate for using in an uniform buffer
   /// @param name name for the type
   /// @param member_types a vector of member types
@@ -196,6 +215,11 @@ class InspectorBuilder : public ProgramBuilder {
                         ast::Type* type,
                         uint32_t group,
                         uint32_t binding);
+
+  /// Adds a workgroup storage variable to the program
+  /// @param name the name of the variable
+  /// @param type the type of the variable
+  void AddWorkgroupStorage(const std::string& name, ast::Type* type);
 
   /// Adds a storage buffer variable to the program
   /// @param name the name of the variable

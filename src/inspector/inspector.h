@@ -132,6 +132,11 @@ class Inspector {
   std::vector<SamplerTexturePair> GetSamplerTextureUses(
       const std::string& entry_point);
 
+  /// @param entry_point name of the entry point to get information about.
+  /// @returns the total size in bytes of all Workgroup storage-class storage
+  /// referenced transitively by the entry point.
+  uint32_t GetWorkgroupStorageSize(const std::string& entry_point);
+
  private:
   const Program* program_;
   std::string error_;

@@ -375,13 +375,6 @@ class Resolver {
                                     sem::Type* ty,
                                     const Source& usage);
 
-  /// @param align the output default alignment in bytes for the type `ty`
-  /// @param size the output default size in bytes for the type `ty`
-  /// @returns true on success, false on error
-  bool DefaultAlignAndSize(const sem::Type* ty,
-                           uint32_t& align,
-                           uint32_t& size);
-
   /// @param storage_class the storage class
   /// @returns the default access control for the given storage class
   ast::Access DefaultAccessForStorageClass(ast::StorageClass storage_class);
