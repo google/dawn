@@ -59,7 +59,4 @@
 #include "src/writer/hlsl/generator.h"
 #endif  // TINT_BUILD_HLSL_WRITER
 
-// TODO(crbug/984): Remove once Dawn builds with this flag
-#define TINT_EXPECTS_UBOS_TO_BE_MULTIPLE_OF_16
-
 #endif  // INCLUDE_TINT_TINT_H_
