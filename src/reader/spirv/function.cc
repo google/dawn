@@ -981,12 +981,10 @@ bool FunctionEmitter::EmitPipelineInput(std::string var_name,
     index_prefix.push_back(0);
     for (int i = 0; i < static_cast<int>(members.size()); ++i) {
       index_prefix.back() = i;
-      auto* location = parser_impl_.GetMemberLocation(*struct_type, i);
-      SetLocation(decos, location);
       ast::DecorationList member_decos(*decos);
-      if (!parser_impl_.ConvertInterpolationDecorations(
+      if (!parser_impl_.ConvertPipelineDecorations(
               struct_type,
-              parser_impl_.GetMemberInterpolationDecorations(*struct_type, i),
+              parser_impl_.GetMemberPipelineDecorations(*struct_type, i),
               &member_decos)) {
         return false;
       }
@@ -996,7 +994,7 @@ bool FunctionEmitter::EmitPipelineInput(std::string var_name,
         return false;
       }
       // Copy the location as updated by nested expansion of the member.
-      SetLocation(decos, GetLocation(member_decos));
+      parser_impl_.SetLocation(decos, GetLocation(member_decos));
     }
     return success();
   }
@@ -1064,26 +1062,6 @@ void FunctionEmitter::IncrementLocation(ast::DecorationList* decos) {
   }
 }
 
-ast::Decoration* FunctionEmitter::SetLocation(ast::DecorationList* decos,
-                                              ast::Decoration* replacement) {
-  if (!replacement) {
-    return nullptr;
-  }
-  for (auto*& deco : *decos) {
-    if (deco->Is<ast::LocationDecoration>()) {
-      // Replace this location decoration with the replacement.
-      // The old one doesn't leak because it's kept in the builder's AST node
-      // list.
-      ast::Decoration* result = deco;
-      deco = replacement;
-      return result;
-    }
-  }
-  // The list didn't have a location. Add it.
-  decos->push_back(replacement);
-  return nullptr;
-}
-
 ast::Decoration* FunctionEmitter::GetLocation(
     const ast::DecorationList& decos) {
   for (auto* const& deco : decos) {
@@ -1141,12 +1119,10 @@ bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
     index_prefix.push_back(0);
     for (int i = 0; i < static_cast<int>(members.size()); ++i) {
       index_prefix.back() = i;
-      auto* location = parser_impl_.GetMemberLocation(*struct_type, i);
-      SetLocation(decos, location);
       ast::DecorationList member_decos(*decos);
-      if (!parser_impl_.ConvertInterpolationDecorations(
+      if (!parser_impl_.ConvertPipelineDecorations(
               struct_type,
-              parser_impl_.GetMemberInterpolationDecorations(*struct_type, i),
+              parser_impl_.GetMemberPipelineDecorations(*struct_type, i),
               &member_decos)) {
         return false;
       }
@@ -1156,7 +1132,7 @@ bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
         return false;
       }
       // Copy the location as updated by nested expansion of the member.
-      SetLocation(decos, GetLocation(member_decos));
+      parser_impl_.SetLocation(decos, GetLocation(member_decos));
     }
     return success();
   }

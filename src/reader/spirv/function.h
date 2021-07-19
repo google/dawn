@@ -473,17 +473,6 @@ class FunctionEmitter {
   /// @param decos the decoration list to modify
   void IncrementLocation(ast::DecorationList* decos);
 
-  /// Updates the decoration list, placing a non-null location decoration into
-  /// the list, replacing an existing one if it exists. Does nothing if the
-  /// replacement is nullptr.
-  /// Assumes the list contains at most one Location decoration.
-  /// @param decos the decoration list to modify
-  /// @param replacement the location decoration to place into the list
-  /// @returns the location decoration that was replaced, if one was replaced,
-  /// or null otherwise.
-  ast::Decoration* SetLocation(ast::DecorationList* decos,
-                               ast::Decoration* replacement);
-
   /// Returns the Location dcoration, if it exists.
   /// @param decos the list of decorations to search
   /// @returns the Location decoration, or nullptr if it doesn't exist

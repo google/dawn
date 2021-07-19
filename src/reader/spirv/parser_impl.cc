@@ -234,12 +234,14 @@ bool AssumesResultSignednessMatchesFirstOperand(GLSLstd450 extended_opcode) {
 }
 
 // @param a SPIR-V decoration
-// @return true when the given decoration is an interpolation decoration.
-bool IsInterpolationDecoration(const Decoration& deco) {
+// @return true when the given decoration is a pipeline decoration other than a
+// bulitin variable.
+bool IsPipelineDecoration(const Decoration& deco) {
   if (deco.size() < 1) {
     return false;
   }
   switch (deco[0]) {
+    case SpvDecorationLocation:
     case SpvDecorationFlat:
     case SpvDecorationNoPerspective:
     case SpvDecorationCentroid:
@@ -1115,31 +1117,22 @@ const Type* ParserImpl::ConvertType(
     bool is_non_writable = false;
     ast::DecorationList ast_member_decorations;
     for (auto& decoration : GetDecorationsForMember(type_id, member_index)) {
-      switch (decoration[0]) {
-        case SpvDecorationNonWritable:
-
-          // WGSL doesn't represent individual members as non-writable. Instead,
-          // apply the ReadOnly access control to the containing struct if all
-          // the members are non-writable.
-          is_non_writable = true;
-          break;
-        case SpvDecorationLocation:
-        case SpvDecorationFlat:
-        case SpvDecorationNoPerspective:
-        case SpvDecorationCentroid:
-        case SpvDecorationSample:
-          // IO decorations are handled when emitting the entry point.
-          break;
-        default: {
-          auto* ast_member_decoration =
-              ConvertMemberDecoration(type_id, member_index, decoration);
-          if (!success_) {
-            return nullptr;
-          }
-          if (ast_member_decoration) {
-            ast_member_decorations.push_back(ast_member_decoration);
-          }
-          break;
+      if (IsPipelineDecoration(decoration)) {
+        // IO decorations are handled when emitting the entry point.
+        continue;
+      } else if (decoration[0] == SpvDecorationNonWritable) {
+        // WGSL doesn't represent individual members as non-writable. Instead,
+        // apply the ReadOnly access control to the containing struct if all
+        // the members are non-writable.
+        is_non_writable = true;
+      } else {
+        auto* ast_member_decoration =
+            ConvertMemberDecoration(type_id, member_index, decoration);
+        if (!success_) {
+          return nullptr;
+        }
+        if (ast_member_decoration) {
+          ast_member_decorations.push_back(ast_member_decoration);
         }
       }
     }
@@ -1622,7 +1615,7 @@ bool ParserImpl::ConvertDecorationsForVariable(uint32_t id,
                                                const Type** store_type,
                                                ast::DecorationList* decorations,
                                                bool transfer_pipeline_io) {
-  DecorationList interpolation_decorations;
+  DecorationList non_builtin_pipeline_decorations;
   for (auto& deco : GetDecorationsFor(id)) {
     if (deco.empty()) {
       return Fail() << "malformed decoration on ID " << id << ": it is empty";
@@ -1685,18 +1678,8 @@ bool ParserImpl::ConvertDecorationsForVariable(uint32_t id,
             create<ast::BuiltinDecoration>(Source{}, ast_builtin));
       }
     }
-    if (deco[0] == SpvDecorationLocation) {
-      if (deco.size() != 2) {
-        return Fail() << "malformed Location decoration on ID " << id
-                      << ": requires one literal operand";
-      }
-      if (transfer_pipeline_io) {
-        decorations->emplace_back(
-            create<ast::LocationDecoration>(Source{}, deco[1]));
-      }
-    }
-    if (transfer_pipeline_io && IsInterpolationDecoration(deco)) {
-      interpolation_decorations.push_back(deco);
+    if (transfer_pipeline_io && IsPipelineDecoration(deco)) {
+      non_builtin_pipeline_decorations.push_back(deco);
     }
     if (deco[0] == SpvDecorationDescriptorSet) {
       if (deco.size() == 1) {
@@ -1717,8 +1700,8 @@ bool ParserImpl::ConvertDecorationsForVariable(uint32_t id,
   }
 
   if (transfer_pipeline_io) {
-    if (!ConvertInterpolationDecorations(*store_type, interpolation_decorations,
-                                         decorations)) {
+    if (!ConvertPipelineDecorations(
+            *store_type, non_builtin_pipeline_decorations, decorations)) {
       return false;
     }
   }
@@ -1726,62 +1709,95 @@ bool ParserImpl::ConvertDecorationsForVariable(uint32_t id,
   return success();
 }
 
-DecorationList ParserImpl::GetMemberInterpolationDecorations(
+DecorationList ParserImpl::GetMemberPipelineDecorations(
     const Struct& struct_type,
     int member_index) {
   // Yes, I could have used std::copy_if or std::copy_if.
   DecorationList result;
   for (const auto& deco : GetDecorationsForMember(
            struct_id_for_symbol_[struct_type.name], member_index)) {
-    if (IsInterpolationDecoration(deco)) {
+    if (IsPipelineDecoration(deco)) {
       result.emplace_back(deco);
     }
   }
   return result;
 }
 
-bool ParserImpl::ConvertInterpolationDecorations(
-    const Type* store_type,
-    const DecorationList& decorations,
-    ast::DecorationList* ast_decos) {
+ast::Decoration* ParserImpl::SetLocation(ast::DecorationList* decos,
+                                         ast::Decoration* replacement) {
+  if (!replacement) {
+    return nullptr;
+  }
+  for (auto*& deco : *decos) {
+    if (deco->Is<ast::LocationDecoration>()) {
+      // Replace this location decoration with the replacement.
+      // The old one doesn't leak because it's kept in the builder's AST node
+      // list.
+      ast::Decoration* result = nullptr;
+      result = deco;
+      deco = replacement;
+      return result;  // Assume there is only one such decoration.
+    }
+  }
+  // The list didn't have a location. Add it.
+  decos->push_back(replacement);
+  return nullptr;
+}
+
+bool ParserImpl::ConvertPipelineDecorations(const Type* store_type,
+                                            const DecorationList& decorations,
+                                            ast::DecorationList* ast_decos) {
   bool has_interpolate_no_perspective = false;
   bool has_interpolate_sampling_centroid = false;
   bool has_interpolate_sampling_sample = false;
 
   for (const auto& deco : decorations) {
-    if (deco[0] == SpvDecorationFlat) {
-      // In WGSL, integral types are always flat, and so the decoration
-      // is never specified.
-      if (!store_type->IsIntegerScalarOrVector()) {
-        ast_decos->emplace_back(create<ast::InterpolateDecoration>(
-            Source{}, ast::InterpolationType::kFlat,
-            ast::InterpolationSampling::kNone));
-        // Only one interpolate attribute is allowed.
-        return true;
-      }
-    }
-    if (deco[0] == SpvDecorationNoPerspective) {
-      if (store_type->IsIntegerScalarOrVector()) {
-        // This doesn't capture the array or struct case.
-        return Fail() << "NoPerspective is invalid on integral IO";
-      }
-      has_interpolate_no_perspective = true;
-    }
-    if (deco[0] == SpvDecorationCentroid) {
-      if (store_type->IsIntegerScalarOrVector()) {
-        // This doesn't capture the array or struct case.
-        return Fail()
-               << "Centroid interpolation sampling is invalid on integral IO";
-      }
-      has_interpolate_sampling_centroid = true;
-    }
-    if (deco[0] == SpvDecorationSample) {
-      if (store_type->IsIntegerScalarOrVector()) {
-        // This doesn't capture the array or struct case.
-        return Fail()
-               << "Sample interpolation sampling is invalid on integral IO";
-      }
-      has_interpolate_sampling_sample = true;
+    TINT_ASSERT(Reader, deco.size() > 0);
+    switch (deco[0]) {
+      case SpvDecorationLocation:
+        if (deco.size() != 2) {
+          return Fail() << "malformed Location decoration on ID requires one "
+                           "literal operand";
+        }
+        SetLocation(ast_decos,
+                    create<ast::LocationDecoration>(Source{}, deco[1]));
+        break;
+      case SpvDecorationFlat:
+        // In WGSL, integral types are always flat, and so the decoration
+        // is never specified.
+        if (!store_type->IsIntegerScalarOrVector()) {
+          ast_decos->emplace_back(create<ast::InterpolateDecoration>(
+              Source{}, ast::InterpolationType::kFlat,
+              ast::InterpolationSampling::kNone));
+          // Only one interpolate attribute is allowed.
+          return true;
+        }
+        break;
+      case SpvDecorationNoPerspective:
+        if (store_type->IsIntegerScalarOrVector()) {
+          // This doesn't capture the array or struct case.
+          return Fail() << "NoPerspective is invalid on integral IO";
+        }
+        has_interpolate_no_perspective = true;
+        break;
+      case SpvDecorationCentroid:
+        if (store_type->IsIntegerScalarOrVector()) {
+          // This doesn't capture the array or struct case.
+          return Fail()
+                 << "Centroid interpolation sampling is invalid on integral IO";
+        }
+        has_interpolate_sampling_centroid = true;
+        break;
+      case SpvDecorationSample:
+        if (store_type->IsIntegerScalarOrVector()) {
+          // This doesn't capture the array or struct case.
+          return Fail()
+                 << "Sample interpolation sampling is invalid on integral IO";
+        }
+        has_interpolate_sampling_sample = true;
+        break;
+      default:
+        break;
     }
   }
 
@@ -2816,22 +2832,6 @@ std::string ParserImpl::GetMemberName(const Struct& struct_type,
     return "";
   }
   return namer_.GetMemberName(where->second, member_index);
-}
-
-ast::Decoration* ParserImpl::GetMemberLocation(const Struct& struct_type,
-                                               int member_index) {
-  auto where = struct_id_for_symbol_.find(struct_type.name);
-  if (where == struct_id_for_symbol_.end()) {
-    Fail() << "no structure type registered for symbol";
-    return nullptr;
-  }
-  const auto type_id = where->second;
-  for (auto& deco : GetDecorationsForMember(type_id, member_index)) {
-    if ((deco.size() == 2) && (deco[0] == SpvDecorationLocation)) {
-      return create<ast::LocationDecoration>(Source{}, deco[1]);
-    }
-  }
-  return nullptr;
 }
 
 WorkgroupSizeInfo::WorkgroupSizeInfo() = default;

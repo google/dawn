@@ -252,14 +252,25 @@ class ParserImpl : Reader {
                                      ast::DecorationList* ast_decos,
                                      bool transfer_pipeline_io);
 
-  /// Converts SPIR-V interpolation decorations into AST decorations.
+  /// Converts SPIR-V decorations for pipeline IO into AST decorations.
   /// @param store_type the store type for the variable or member
   /// @param decorations the SPIR-V interpolation decorations
   /// @param ast_decos the decoration list to populate.
   /// @returns false if conversion fails
-  bool ConvertInterpolationDecorations(const Type* store_type,
-                                       const DecorationList& decorations,
-                                       ast::DecorationList* ast_decos);
+  bool ConvertPipelineDecorations(const Type* store_type,
+                                  const DecorationList& decorations,
+                                  ast::DecorationList* ast_decos);
+
+  /// Updates the decoration list, placing a non-null location decoration into
+  /// the list, replacing an existing one if it exists. Does nothing if the
+  /// replacement is nullptr.
+  /// Assumes the list contains at most one Location decoration.
+  /// @param decos the decoration list to modify
+  /// @param replacement the location decoration to place into the list
+  /// @returns the location decoration that was replaced, if one was replaced,
+  /// or null otherwise.
+  ast::Decoration* SetLocation(ast::DecorationList* decos,
+                               ast::Decoration* replacement);
 
   /// Converts a SPIR-V struct member decoration. If the decoration is
   /// recognized but deliberately dropped, then returns nullptr without a
@@ -393,19 +404,13 @@ class ParserImpl : Reader {
   /// @returns the field name
   std::string GetMemberName(const Struct& struct_type, int member_index);
 
-  /// Returns the location decoration, if any on a struct member.
-  /// @param struct_type the parser's structure type.
-  /// @param member_index the member index
-  /// @returns a newly created location node, or nullptr
-  ast::Decoration* GetMemberLocation(const Struct& struct_type,
-                                     int member_index);
-
-  /// Returns the SPIR-V interpolation decorations, if any, on a struct member.
+  /// Returns the SPIR-V decorations for pipeline IO, if any, on a struct
+  /// member.
   /// @param struct_type the parser's structure type.
   /// @param member_index the member index
   /// @returns a list of SPIR-V decorations.
-  DecorationList GetMemberInterpolationDecorations(const Struct& struct_type,
-                                                   int member_index);
+  DecorationList GetMemberPipelineDecorations(const Struct& struct_type,
+                                              int member_index);
 
   /// Creates an AST Variable node for a SPIR-V ID, including any attached
   /// decorations, unless it's an ignorable builtin variable.
