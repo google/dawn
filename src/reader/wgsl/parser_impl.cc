@@ -98,6 +98,9 @@ ast::Builtin ident_to_builtin(const std::string& str) {
   if (str == "workgroup_id") {
     return ast::Builtin::kWorkgroupId;
   }
+  if (str == "num_workgroups") {
+    return ast::Builtin::kNumWorkgroups;
+  }
   if (str == "sample_index") {
     return ast::Builtin::kSampleIndex;
   }

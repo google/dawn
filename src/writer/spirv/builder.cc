@@ -4075,6 +4075,8 @@ SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin,
       return SpvBuiltInPointSize;
     case ast::Builtin::kWorkgroupId:
       return SpvBuiltInWorkgroupId;
+    case ast::Builtin::kNumWorkgroups:
+      return SpvBuiltInNumWorkgroups;
     case ast::Builtin::kSampleIndex:
       push_capability(SpvCapabilitySampleRateShading);
       return SpvBuiltInSampleId;

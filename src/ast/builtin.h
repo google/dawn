@@ -32,6 +32,7 @@ enum class Builtin {
   kLocalInvocationIndex,
   kGlobalInvocationId,
   kWorkgroupId,
+  kNumWorkgroups,
   kSampleIndex,
   kSampleMask,
 

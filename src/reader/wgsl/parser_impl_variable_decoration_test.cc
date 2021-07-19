@@ -119,6 +119,7 @@ INSTANTIATE_TEST_SUITE_P(
                     ast::Builtin::kLocalInvocationIndex},
         BuiltinData{"global_invocation_id", ast::Builtin::kGlobalInvocationId},
         BuiltinData{"workgroup_id", ast::Builtin::kWorkgroupId},
+        BuiltinData{"num_workgroups", ast::Builtin::kNumWorkgroups},
         BuiltinData{"sample_index", ast::Builtin::kSampleIndex},
         BuiltinData{"sample_mask", ast::Builtin::kSampleMask}));
 

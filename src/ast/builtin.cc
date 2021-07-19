@@ -59,6 +59,10 @@ std::ostream& operator<<(std::ostream& out, Builtin builtin) {
       out << "workgroup_id";
       break;
     }
+    case Builtin::kNumWorkgroups: {
+      out << "num_workgroups";
+      break;
+    }
     case Builtin::kSampleIndex: {
       out << "sample_index";
       break;
