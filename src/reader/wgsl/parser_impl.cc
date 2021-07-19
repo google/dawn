@@ -1023,13 +1023,15 @@ Maybe<ast::Type*> ParserImpl::type_decl() {
     return Failure::kErrored;
 
   auto type = type_decl(decos.value);
-  if (type.errored)
+  if (type.errored) {
     return Failure::kErrored;
-  if (!type.matched)
+  }
+  if (!expect_decorations_consumed(decos.value)) {
+    return Failure::kErrored;
+  }
+  if (!type.matched) {
     return Failure::kNoMatch;
-
-  if (!expect_decorations_consumed(decos.value))
-    return Failure::kErrored;
+  }
 
   return type;
 }

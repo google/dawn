@@ -422,6 +422,13 @@ TEST_F(ParserImplErrorTest, FunctionDeclMissingRBrace) {
          "        ^\n");
 }
 
+TEST_F(ParserImplErrorTest, FunctionScopeUnusedDecl) {
+  EXPECT("fn f(a:i32)->i32{return a;[[size(1)]]}",
+         "test.wgsl:1:29 error: unexpected decorations\n"
+         "fn f(a:i32)->i32{return a;[[size(1)]]}\n"
+         "                            ^^^^\n");
+}
+
 TEST_F(ParserImplErrorTest, FunctionMissingOpenLine) {
   EXPECT(R"(let bar : vec2<f32> = vec2<f32>(1., 2.);
   var a : f32 = bar[0];
