@@ -116,8 +116,7 @@ func run() error {
 	// Split the --filter flag up by ',', trimming any whitespace at the start and end
 	globIncludes := strings.Split(filter, ",")
 	for i, s := range globIncludes {
-		// Escape backslashes for the glob config
-		s = strings.ReplaceAll(s, `\`, `\\`)
+		s = filepath.ToSlash(s) // Replace '\' with '/'
 		globIncludes[i] = `"` + strings.TrimSpace(s) + `"`
 	}
 
