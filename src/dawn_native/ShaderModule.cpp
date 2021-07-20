@@ -1307,8 +1307,8 @@ namespace dawn_native {
     }
 
     // static
-    ShaderModuleBase* ShaderModuleBase::MakeError(DeviceBase* device) {
-        return new ShaderModuleBase(device, ObjectBase::kError);
+    Ref<ShaderModuleBase> ShaderModuleBase::MakeError(DeviceBase* device) {
+        return AcquireRef(new ShaderModuleBase(device, ObjectBase::kError));
     }
 
     bool ShaderModuleBase::HasEntryPoint(const std::string& entryPoint) const {

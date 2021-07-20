@@ -844,6 +844,7 @@ namespace dawn_native {
         std::unique_ptr<OwnedCompilationMessages> compilationMessages(
             std::make_unique<OwnedCompilationMessages>());
         if (ConsumedError(CreateShaderModule(descriptor, compilationMessages.get()), &result)) {
+            DAWN_ASSERT(result == nullptr);
             result = ShaderModuleBase::MakeError(this);
         }
         // Move compilation messages into ShaderModuleBase and emit tint errors and warnings
