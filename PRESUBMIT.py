@@ -18,6 +18,8 @@ for more details about the presubmit API built into depot_tools.
 
 import re
 
+USE_PYTHON3 = True
+
 
 def _LicenseHeader(input_api):
     """Returns the license header regexp."""
@@ -100,23 +102,26 @@ for reg in REGEXES:
     REGEX_LIST.append(re.compile(reg))
 
 def CheckNonInclusiveLanguage(input_api, output_api, source_file_filter=None):
-  """Checks the files for non-inclusive language."""
+    """Checks the files for non-inclusive language."""
 
-  matches = []
-  for f in input_api.AffectedFiles(include_deletes=False,
-                                         file_filter=source_file_filter):
-    for line_num, line in f.ChangedContents():
-        for reg in REGEX_LIST:
-            match = reg.search(line)
-            if match:
-                matches.append("{} ({}): found non-inclusive language: {}".
-                    format(f.LocalPath(), line_num, match.group(0)))
+    matches = []
+    for f in input_api.AffectedFiles(include_deletes=False,
+                                     file_filter=source_file_filter):
+        for line_num, line in f.ChangedContents():
+            for reg in REGEX_LIST:
+                match = reg.search(line)
+                if match:
+                    matches.append(
+                        "{} ({}): found non-inclusive language: {}".format(
+                            f.LocalPath(), line_num, match.group(0)))
 
-  if len(matches):
-    return [output_api.PresubmitPromptWarning(
-      'Non-inclusive language found:', items=matches)]
+    if len(matches):
+        return [
+            output_api.PresubmitPromptWarning('Non-inclusive language found:',
+                                              items=matches)
+        ]
 
-  return []
+    return []
 
 
 def CheckChange(input_api, output_api):
