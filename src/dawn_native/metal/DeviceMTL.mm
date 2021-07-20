@@ -286,7 +286,7 @@ namespace dawn_native { namespace metal {
         }
 
         // Just run timestamp period calculation when timestamp extension is enabled.
-        if (GetAdapter()->GetSupportedExtensions().IsEnabled(Extension::TimestampQuery)) {
+        if (IsExtensionEnabled(Extension::TimestampQuery)) {
             if (@available(macos 10.15, iOS 14.0, *)) {
                 UpdateTimestampPeriod(GetMTLDevice(), mKalmanInfo.get(), &mCpuTimestamp,
                                       &mGpuTimestamp, &mTimestampPeriod);
