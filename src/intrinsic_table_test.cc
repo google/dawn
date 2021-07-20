@@ -215,7 +215,7 @@ TEST_F(IntrinsicTableTest, MismatchPointer) {
 }
 
 TEST_F(IntrinsicTableTest, MatchArray) {
-  auto* arr = create<sem::Array>(create<sem::U32>(), 0, 4, 4, 4, true);
+  auto* arr = create<sem::Array>(create<sem::U32>(), 0, 4, 4, 4, 4);
   auto* arr_ptr = create<sem::Pointer>(arr, ast::StorageClass::kStorage,
                                        ast::Access::kReadWrite);
   auto* result =

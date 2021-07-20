@@ -56,6 +56,10 @@ class Type : public Castable<Type, Node> {
   /// @param size the output default size in bytes for this type.
   void GetDefaultAlignAndSize(uint32_t& align, uint32_t& size) const;
 
+  /// @returns true if constructible as per
+  /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
+  virtual bool IsConstructible() const;
+
   /// @returns true if this type is a scalar
   bool is_scalar() const;
   /// @returns true if this type is a numeric scalar

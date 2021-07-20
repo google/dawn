@@ -84,10 +84,6 @@ class Resolver {
   bool IsPlain(const sem::Type* type) const;
 
   /// @param type the given type
-  /// @returns true if the given type is a constructible type
-  bool IsConstructible(const sem::Type* type) const;
-
-  /// @param type the given type
   /// @returns true if the given type is storable
   bool IsStorable(const sem::Type* type) const;
 

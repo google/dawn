@@ -148,6 +148,10 @@ class Struct : public Castable<Struct, Type> {
   /// declared in WGSL.
   std::string FriendlyName(const SymbolTable& symbols) const override;
 
+  /// @returns true if constructible as per
+  /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
+  bool IsConstructible() const override;
+
  private:
   uint64_t LargestMemberBaseAlignment(MemoryLayout mem_layout) const;
 
@@ -158,6 +162,7 @@ class Struct : public Castable<Struct, Type> {
   uint32_t const size_no_padding_;
   std::unordered_set<ast::StorageClass> storage_class_usage_;
   std::unordered_set<PipelineStageUsage> pipeline_stage_uses_;
+  bool constructible_;
 };
 
 /// StructMember holds the semantic information for structure members.

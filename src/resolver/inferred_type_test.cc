@@ -142,7 +142,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest,
 TEST_F(ResolverInferredTypeTest, InferArray_Pass) {
   auto* type = ty.array(ty.u32(), 10);
   auto* expected_type =
-      create<sem::Array>(create<sem::U32>(), 10, 4, 4 * 10, 4, true);
+      create<sem::Array>(create<sem::U32>(), 10, 4, 4 * 10, 4, 4);
 
   auto* ctor_expr = Construct(type);
   auto* var = Var("a", nullptr, ast::StorageClass::kFunction, ctor_expr);

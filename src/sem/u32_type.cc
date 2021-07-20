@@ -35,5 +35,9 @@ std::string U32::FriendlyName(const SymbolTable&) const {
   return "u32";
 }
 
+bool U32::IsConstructible() const {
+  return true;
+}
+
 }  // namespace sem
 }  // namespace tint

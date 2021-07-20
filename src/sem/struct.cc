@@ -35,7 +35,15 @@ Struct::Struct(const ast::Struct* declaration,
       members_(std::move(members)),
       align_(align),
       size_(size),
-      size_no_padding_(size_no_padding) {}
+      size_no_padding_(size_no_padding) {
+  constructible_ = true;
+  for (auto* member : members_) {
+    if (!member->Type()->IsConstructible()) {
+      constructible_ = false;
+      break;
+    }
+  }
+}
 
 Struct::~Struct() = default;
 
@@ -54,6 +62,10 @@ std::string Struct::type_name() const {
 
 std::string Struct::FriendlyName(const SymbolTable& symbols) const {
   return symbols.NameFor(declaration_->name());
+}
+
+bool Struct::IsConstructible() const {
+  return constructible_;
 }
 
 StructMember::StructMember(ast::StructMember* declaration,

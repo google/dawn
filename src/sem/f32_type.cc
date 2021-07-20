@@ -35,5 +35,9 @@ std::string F32::FriendlyName(const SymbolTable&) const {
   return "f32";
 }
 
+bool F32::IsConstructible() const {
+  return true;
+}
+
 }  // namespace sem
 }  // namespace tint

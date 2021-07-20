@@ -35,5 +35,9 @@ std::string Bool::FriendlyName(const SymbolTable&) const {
   return "bool";
 }
 
+bool Bool::IsConstructible() const {
+  return true;
+}
+
 }  // namespace sem
 }  // namespace tint

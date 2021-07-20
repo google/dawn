@@ -41,5 +41,9 @@ std::string Vector::FriendlyName(const SymbolTable& symbols) const {
   return out.str();
 }
 
+bool Vector::IsConstructible() const {
+  return true;
+}
+
 }  // namespace sem
 }  // namespace tint

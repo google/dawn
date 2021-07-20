@@ -99,12 +99,12 @@ TEST_F(ResolverIsHostShareable, Atomic) {
 }
 
 TEST_F(ResolverIsHostShareable, ArraySizedOfHostShareable) {
-  auto* arr = create<sem::Array>(create<sem::I32>(), 5, 4, 20, 4, true);
+  auto* arr = create<sem::Array>(create<sem::I32>(), 5, 4, 20, 4, 4);
   EXPECT_TRUE(r()->IsHostShareable(arr));
 }
 
 TEST_F(ResolverIsHostShareable, ArrayUnsizedOfHostShareable) {
-  auto* arr = create<sem::Array>(create<sem::I32>(), 0, 4, 4, 4, true);
+  auto* arr = create<sem::Array>(create<sem::I32>(), 0, 4, 4, 4, 4);
   EXPECT_TRUE(r()->IsHostShareable(arr));
 }
 

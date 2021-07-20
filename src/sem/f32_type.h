@@ -38,6 +38,10 @@ class F32 : public Castable<F32, Type> {
   /// @returns the name for this type that closely resembles how it would be
   /// declared in WGSL.
   std::string FriendlyName(const SymbolTable& symbols) const override;
+
+  /// @returns true if constructible as per
+  /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
+  bool IsConstructible() const override;
 };
 
 }  // namespace sem

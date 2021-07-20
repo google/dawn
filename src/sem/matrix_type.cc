@@ -49,5 +49,9 @@ std::string Matrix::FriendlyName(const SymbolTable& symbols) const {
   return out.str();
 }
 
+bool Matrix::IsConstructible() const {
+  return true;
+}
+
 }  // namespace sem
 }  // namespace tint

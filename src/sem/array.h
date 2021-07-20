@@ -85,6 +85,10 @@ class Array : public Castable<Array, Type> {
   /// @returns true if this array is runtime sized
   bool IsRuntimeSized() const { return count_ == 0; }
 
+  /// @returns true if constructible as per
+  /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
+  bool IsConstructible() const override;
+
   /// @returns the name for the type
   std::string type_name() const override;
 
@@ -100,6 +104,7 @@ class Array : public Castable<Array, Type> {
   uint32_t const size_;
   uint32_t const stride_;
   uint32_t const implicit_stride_;
+  bool const constructible_;
 };
 
 }  // namespace sem

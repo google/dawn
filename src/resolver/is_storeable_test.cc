@@ -74,12 +74,12 @@ TEST_F(ResolverIsStorableTest, Atomic) {
 }
 
 TEST_F(ResolverIsStorableTest, ArraySizedOfStorable) {
-  auto* arr = create<sem::Array>(create<sem::I32>(), 5, 4, 20, 4, true);
+  auto* arr = create<sem::Array>(create<sem::I32>(), 5, 4, 20, 4, 4);
   EXPECT_TRUE(r()->IsStorable(arr));
 }
 
 TEST_F(ResolverIsStorableTest, ArrayUnsizedOfStorable) {
-  auto* arr = create<sem::Array>(create<sem::I32>(), 0, 4, 4, 4, true);
+  auto* arr = create<sem::Array>(create<sem::I32>(), 0, 4, 4, 4, 4);
   EXPECT_TRUE(r()->IsStorable(arr));
 }
 

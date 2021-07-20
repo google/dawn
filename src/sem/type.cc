@@ -111,6 +111,10 @@ void Type::GetDefaultAlignAndSize(uint32_t& align, uint32_t& size) const {
   TINT_ASSERT(Semantic, false);
 }
 
+bool Type::IsConstructible() const {
+  return false;
+}
+
 bool Type::is_scalar() const {
   return IsAnyOf<F32, U32, I32, Bool>();
 }

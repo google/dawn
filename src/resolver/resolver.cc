@@ -200,36 +200,6 @@ bool Resolver::IsPlain(const sem::Type* type) const {
          type->Is<sem::Array>() || type->Is<sem::Struct>();
 }
 
-// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
-bool Resolver::IsConstructible(const sem::Type* type) const {
-  if (type->Is<sem::Atomic>()) {
-    return false;
-  }
-
-  if (type->is_scalar() || type->Is<sem::Vector>() || type->Is<sem::Matrix>()) {
-    return true;
-  }
-
-  if (auto* arr = type->As<sem::Array>()) {
-    if (arr->IsRuntimeSized()) {
-      return false;
-    }
-
-    return IsConstructible(arr->ElemType());
-  }
-
-  if (auto* str = type->As<sem::Struct>()) {
-    for (auto* m : str->Members()) {
-      if (!IsConstructible(m->Type())) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  return false;
-}
-
 // https://gpuweb.github.io/gpuweb/wgsl.html#storable-types
 bool Resolver::IsStorable(const sem::Type* type) const {
   return IsPlain(type) || type->Is<sem::Texture>() || type->Is<sem::Sampler>();
@@ -1208,7 +1178,7 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
   }
 
   if (IsPlain(info->type)) {
-    if (!IsConstructible(info->type) &&
+    if (!info->type->IsConstructible() &&
         IsValidationEnabled(
             info->declaration->decorations(),
             ast::DisabledValidation::kIgnoreConstructibleFunctionParameter)) {
@@ -1411,7 +1381,7 @@ bool Resolver::ValidateFunction(const ast::Function* func,
   }
 
   if (!info->return_type->Is<sem::Void>()) {
-    if (!IsConstructible(info->return_type)) {
+    if (!info->return_type->IsConstructible()) {
       AddError("function return type must be a constructible type",
                func->return_type()->source());
       return false;

@@ -34,8 +34,14 @@ Array::Array(const Type* element,
       align_(align),
       size_(size),
       stride_(stride),
-      implicit_stride_(implicit_stride) {
+      implicit_stride_(implicit_stride),
+      constructible_(count > 0  // Runtime-sized arrays are not constructible
+                     && element->IsConstructible()) {
   TINT_ASSERT(Semantic, element_);
+}
+
+bool Array::IsConstructible() const {
+  return constructible_;
 }
 
 std::string Array::type_name() const {
