@@ -343,6 +343,10 @@ namespace dawn_native { namespace d3d12 {
         // SPRIV-cross does matrix multiplication expecting row major matrices
         compileFlags |= D3DCOMPILE_PACK_MATRIX_ROW_MAJOR;
 
+        // FXC can miscompile code that depends on special float values (NaN, INF, etc) when IEEE
+        // strictness is not enabled. See crbug.com/tint/976.
+        compileFlags |= D3DCOMPILE_IEEE_STRICTNESS;
+
         D3D12_GRAPHICS_PIPELINE_STATE_DESC descriptorD3D12 = {};
 
         PerStage<const char*> entryPoints;
