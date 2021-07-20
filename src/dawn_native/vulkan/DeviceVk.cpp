@@ -845,11 +845,12 @@ namespace dawn_native { namespace vulkan {
                     INJECT_ERROR_OR_RUN(fn.WaitForFences(mVkDevice, 1, &*fence, true, UINT64_MAX),
                                         VK_ERROR_DEVICE_LOST));
             } while (result == VK_TIMEOUT);
+            // Ignore errors from vkWaitForFences: it can be either OOM which we can't do anything
+            // about (and we need to keep going with the destruction of all fences), or device
+            // loss, which means the workload on the GPU is no longer accessible and we can
+            // safely destroy the fence.
 
-            // TODO: Handle errors
-            ASSERT(result == VK_SUCCESS);
             fn.DestroyFence(mVkDevice, fence, nullptr);
-
             mFencesInFlight.pop();
         }
         return {};
