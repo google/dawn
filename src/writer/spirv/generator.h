@@ -38,6 +38,9 @@ struct Options {
   /// Set to `true` to generate a PointSize builtin and have it set to 1.0
   /// from all vertex shaders in the module.
   bool emit_vertex_point_size = true;
+
+  /// Set to `true` to disable workgroup memory zero initialization
+  bool disable_workgroup_init = false;
 };
 
 /// The result produced when generating SPIR-V.

@@ -45,8 +45,12 @@ Spirv::Spirv() = default;
 Spirv::~Spirv() = default;
 
 Output Spirv::Run(const Program* in, const DataMap& data) {
+  auto* cfg = data.Get<Config>();
+
   Manager manager;
-  manager.Add<ZeroInitWorkgroupMemory>();
+  if (!cfg || !cfg->disable_workgroup_init) {
+    manager.Add<ZeroInitWorkgroupMemory>();
+  }
   manager.Add<InlinePointerLets>();  // Required for arrayLength()
   manager.Add<Simplify>();           // Required for arrayLength()
   manager.Add<FoldConstants>();
@@ -57,8 +61,6 @@ Output Spirv::Run(const Program* in, const DataMap& data) {
   if (transformedInput.program.Diagnostics().contains_errors()) {
     return transformedInput;
   }
-
-  auto* cfg = data.Get<Config>();
 
   ProgramBuilder out;
   CloneContext ctx(&out, &transformedInput.program);
@@ -427,7 +429,8 @@ void Spirv::HoistToOutputVariables(CloneContext& ctx,
   }
 }
 
-Spirv::Config::Config(bool emit_vps) : emit_vertex_point_size(emit_vps) {}
+Spirv::Config::Config(bool emit_vps, bool disable_wi)
+    : emit_vertex_point_size(emit_vps), disable_workgroup_init(disable_wi) {}
 
 Spirv::Config::Config(const Config&) = default;
 Spirv::Config::~Config() = default;

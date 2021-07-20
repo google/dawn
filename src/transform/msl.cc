@@ -73,9 +73,11 @@ Output Msl::Run(const Program* in, const DataMap& inputs) {
     }
   }
 
-  // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as
-  // ZeroInitWorkgroupMemory may inject new builtin parameters.
-  manager.Add<ZeroInitWorkgroupMemory>();
+  if (!cfg || !cfg->disable_workgroup_init) {
+    // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as
+    // ZeroInitWorkgroupMemory may inject new builtin parameters.
+    manager.Add<ZeroInitWorkgroupMemory>();
+  }
   manager.Add<CanonicalizeEntryPointIO>();
   manager.Add<ExternalTextureTransform>();
   manager.Add<PromoteInitializersToConstVar>();
@@ -280,9 +282,12 @@ void Msl::HandleModuleScopeVariables(CloneContext& ctx) const {
   }
 }
 
-Msl::Config::Config(uint32_t buffer_size_ubo_idx, uint32_t sample_mask)
+Msl::Config::Config(uint32_t buffer_size_ubo_idx,
+                    uint32_t sample_mask,
+                    bool disable_wi)
     : buffer_size_ubo_index(buffer_size_ubo_idx),
-      fixed_sample_mask(sample_mask) {}
+      fixed_sample_mask(sample_mask),
+      disable_workgroup_init(disable_wi) {}
 Msl::Config::Config(const Config&) = default;
 Msl::Config::~Config() = default;
 

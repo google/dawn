@@ -54,6 +54,7 @@ struct Options {
 
   bool parse_only = false;
   bool dump_ast = false;
+  bool disable_workgroup_init = false;
   bool validate = false;
   bool demangle = false;
   bool dump_inspector_bindings = false;
@@ -93,6 +94,7 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
                                 robustness
   --parse-only              -- Stop after parsing the input
   --dump-ast                -- Dump the generated AST to stdout
+  --disable-workgroup-init  -- Disable workgroup memory zero initialization.
   --demangle                -- Preserve original source names. Demangle them.
                                Affects AST dumping, and text-based output languages.
   --dump-inspector-bindings -- Dump reflection data about bindins to stdout.
@@ -401,6 +403,8 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
       opts->parse_only = true;
     } else if (arg == "--dump-ast") {
       opts->dump_ast = true;
+    } else if (arg == "--disable-workgroup-init") {
+      opts->disable_workgroup_init = true;
     } else if (arg == "--demangle") {
       opts->demangle = true;
     } else if (arg == "--dump-inspector-bindings") {
@@ -603,6 +607,7 @@ bool GenerateSpirv(const tint::Program* program, const Options& options) {
 #if TINT_BUILD_SPV_WRITER
   // TODO(jrprice): Provide a way for the user to set non-default options.
   tint::writer::spirv::Options gen_options;
+  gen_options.disable_workgroup_init = options.disable_workgroup_init;
   auto result = tint::writer::spirv::Generate(program, gen_options);
   if (!result.success) {
     PrintWGSL(std::cerr, *program);
@@ -670,6 +675,7 @@ bool GenerateMsl(const tint::Program* program, const Options& options) {
 #if TINT_BUILD_MSL_WRITER
   // TODO(jrprice): Provide a way for the user to set non-default options.
   tint::writer::msl::Options gen_options;
+  gen_options.disable_workgroup_init = options.disable_workgroup_init;
   auto result = tint::writer::msl::Generate(program, gen_options);
   if (!result.success) {
     PrintWGSL(std::cerr, *program);
@@ -721,6 +727,7 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
 #if TINT_BUILD_HLSL_WRITER
   // TODO(jrprice): Provide a way for the user to set non-default options.
   tint::writer::hlsl::Options gen_options;
+  gen_options.disable_workgroup_init = options.disable_workgroup_init;
   auto result = tint::writer::hlsl::Generate(program, gen_options);
   if (!result.success) {
     PrintWGSL(std::cerr, *program);

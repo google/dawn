@@ -99,7 +99,7 @@
             },
             "windows": {
                 // Generates a GN build directory at 'out/<build-type>' with the
-                // is_debug argument set to to true iff the build-type is Debug.
+                // is_debug argument set to true iff the build-type is Debug.
                 // A symbolic link to this build directory is created at 'out/active'
                 // which is used to track the active build directory.
                 "command": "/C",

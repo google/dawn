@@ -31,7 +31,8 @@ Result Generate(const Program* program, const Options& options) {
   // Run the SPIR-V sanitizer.
   transform::Spirv sanitizer;
   transform::DataMap transform_input;
-  transform_input.Add<transform::Spirv::Config>(options.emit_vertex_point_size);
+  transform_input.Add<transform::Spirv::Config>(options.emit_vertex_point_size,
+                                                options.disable_workgroup_init);
   auto output = sanitizer.Run(program, transform_input);
   if (!output.program.IsValid()) {
     result.success = false;

@@ -29,6 +29,23 @@ namespace transform {
 /// behavior.
 class Hlsl : public Castable<Hlsl, Transform> {
  public:
+  /// Configuration options for the Hlsl sanitizer transform.
+  struct Config : public Castable<Data, transform::Data> {
+    /// Constructor
+    /// @param disable_workgroup_init `true` to disable workgroup memory zero
+    ///        initialization
+    explicit Config(bool disable_workgroup_init = false);
+
+    /// Copy constructor
+    Config(const Config&);
+
+    /// Destructor
+    ~Config() override;
+
+    /// Set to `true` to disable workgroup memory zero initialization
+    bool disable_workgroup_init = false;
+  };
+
   /// Constructor
   Hlsl();
   ~Hlsl() override;

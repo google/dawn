@@ -33,8 +33,11 @@ class Msl : public Castable<Msl, Transform> {
     /// Constructor
     /// @param buffer_size_ubo_idx the index to use for the buffer size UBO
     /// @param sample_mask the fixed sample mask to use for fragment shaders
-    explicit Config(uint32_t buffer_size_ubo_idx,
-                    uint32_t sample_mask = 0xFFFFFFFF);
+    /// @param disable_workgroup_init `true` to disable workgroup memory zero
+    ///        initialization
+    Config(uint32_t buffer_size_ubo_idx,
+           uint32_t sample_mask = 0xFFFFFFFF,
+           bool disable_workgroup_init = false);
 
     /// Copy constructor
     Config(const Config&);
@@ -43,10 +46,13 @@ class Msl : public Castable<Msl, Transform> {
     ~Config() override;
 
     /// The index to use when generating a UBO to receive storage buffer sizes.
-    uint32_t buffer_size_ubo_index;
+    uint32_t buffer_size_ubo_index = 0;
 
     /// The fixed sample mask to combine with fragment shader outputs.
-    uint32_t fixed_sample_mask;
+    uint32_t fixed_sample_mask = 0xFFFFFFFF;
+
+    /// Set to `true` to disable workgroup memory zero initialization
+    bool disable_workgroup_init = false;
   };
 
   /// Information produced by the sanitizer that users may need to act on.

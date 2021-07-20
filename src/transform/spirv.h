@@ -35,7 +35,10 @@ class Spirv : public Castable<Spirv, Transform> {
   struct Config : public Castable<Config, Data> {
     /// Constructor
     /// @param emit_vertex_point_size `true` to generate a PointSize builtin
-    explicit Config(bool emit_vertex_point_size = false);
+    /// @param disable_workgroup_init `true` to disable workgroup memory zero
+    ///        initialization
+    Config(bool emit_vertex_point_size = false,
+           bool disable_workgroup_init = false);
 
     /// Copy constructor.
     Config(const Config&);
@@ -49,7 +52,10 @@ class Spirv : public Castable<Spirv, Transform> {
 
     /// Set to `true` to generate a PointSize builtin and have it set to 1.0
     /// from all vertex shaders in the module.
-    bool emit_vertex_point_size;
+    bool emit_vertex_point_size = false;
+
+    /// Set to `true` to disable workgroup memory zero initialization
+    bool disable_workgroup_init = false;
   };
 
   /// Constructor

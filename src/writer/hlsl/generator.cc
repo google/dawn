@@ -25,12 +25,14 @@ Result::Result() = default;
 Result::~Result() = default;
 Result::Result(const Result&) = default;
 
-Result Generate(const Program* program, const Options&) {
+Result Generate(const Program* program, const Options& options) {
   Result result;
 
   // Run the HLSL sanitizer.
   transform::Hlsl sanitizer;
-  auto output = sanitizer.Run(program);
+  transform::DataMap transform_input;
+  transform_input.Add<transform::Hlsl::Config>(options.disable_workgroup_init);
+  auto output = sanitizer.Run(program, transform_input);
   if (!output.program.IsValid()) {
     result.success = false;
     result.error = output.program.Diagnostics().str();

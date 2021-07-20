@@ -35,7 +35,10 @@ namespace hlsl {
 class GeneratorImpl;
 
 /// Configuration options used for generating HLSL.
-struct Options {};
+struct Options {
+  /// Set to `true` to disable workgroup memory zero initialization
+  bool disable_workgroup_init = false;
+};
 
 /// The result produced when generating HLSL.
 struct Result {
