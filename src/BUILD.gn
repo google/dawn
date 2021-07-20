@@ -82,133 +82,6 @@ config("tint_config") {
 }
 
 ###############################################################################
-# Generated - Generated source files
-###############################################################################
-# These are copies of rules from SPIRV-Tools with the names tweaked to be Tint
-# specific. They are needed here because referencing generated files in sibling
-# packages is difficult/impossible in Chromium. Parts of Tint's SPIRV handling
-# code depend on internal parts of SPIRV-Tools. This causes issues because when
-# Tint references the internal headers, since it causes a dependency on these
-# generated files, but they are not visible in the context building Tint. Thus
-# Tint generates its own copy of the generated files. Since they come from the
-# same source of truth, they should not vary.
-
-template("tint_core_tables") {
-  assert(defined(invoker.version), "Need version in $target_name generation.")
-
-  action("tint_core_tables_" + target_name) {
-    script = "${tint_spirv_tools_dir}/utils/generate_grammar_tables.py"
-
-    version = invoker.version
-
-    core_json_file = "${tint_spirv_headers_dir}/include/spirv/$version/spirv.core.grammar.json"
-    core_insts_file = "${target_gen_dir}/core.insts-$version.inc"
-    operand_kinds_file = "${target_gen_dir}/operand.kinds-$version.inc"
-    debuginfo_insts_file = "${tint_spirv_headers_dir}/include/spirv/unified1/extinst.debuginfo.grammar.json"
-    cldebuginfo100_insts_file = "${tint_spirv_headers_dir}/include/spirv/unified1/extinst.opencl.debuginfo.100.grammar.json"
-
-    sources = [
-      cldebuginfo100_insts_file,
-      core_json_file,
-      debuginfo_insts_file,
-    ]
-    outputs = [
-      core_insts_file,
-      operand_kinds_file,
-    ]
-    args = [
-      "--spirv-core-grammar",
-      rebase_path(core_json_file, root_build_dir),
-      "--core-insts-output",
-      rebase_path(core_insts_file, root_build_dir),
-      "--extinst-debuginfo-grammar",
-      rebase_path(debuginfo_insts_file, root_build_dir),
-      "--extinst-cldebuginfo100-grammar",
-      rebase_path(cldebuginfo100_insts_file, root_build_dir),
-      "--operand-kinds-output",
-      rebase_path(operand_kinds_file, root_build_dir),
-    ]
-  }
-}
-
-template("tint_core_enums") {
-  assert(defined(invoker.version), "Need version in $target_name generation.")
-
-  action("tint_core_enums_" + target_name) {
-    script = "${tint_spirv_tools_dir}/utils/generate_grammar_tables.py"
-
-    version = invoker.version
-
-    core_json_file = "${tint_spirv_headers_dir}/include/spirv/$version/spirv.core.grammar.json"
-    debuginfo_insts_file = "${tint_spirv_headers_dir}/include/spirv/unified1/extinst.debuginfo.grammar.json"
-    cldebuginfo100_insts_file = "${tint_spirv_headers_dir}/include/spirv/unified1/extinst.opencl.debuginfo.100.grammar.json"
-
-    extension_enum_file = "${target_gen_dir}/extension_enum.inc"
-    extension_map_file = "${target_gen_dir}/enum_string_mapping.inc"
-
-    args = [
-      "--spirv-core-grammar",
-      rebase_path(core_json_file, root_build_dir),
-      "--extinst-debuginfo-grammar",
-      rebase_path(debuginfo_insts_file, root_build_dir),
-      "--extinst-cldebuginfo100-grammar",
-      rebase_path(cldebuginfo100_insts_file, root_build_dir),
-      "--extension-enum-output",
-      rebase_path(extension_enum_file, root_build_dir),
-      "--enum-string-mapping-output",
-      rebase_path(extension_map_file, root_build_dir),
-    ]
-    inputs = [
-      core_json_file,
-      debuginfo_insts_file,
-      cldebuginfo100_insts_file,
-    ]
-    outputs = [
-      extension_enum_file,
-      extension_map_file,
-    ]
-  }
-}
-
-template("tint_language_header") {
-  assert(defined(invoker.name), "Need name in $target_name generation.")
-
-  action("tint_language_header_" + target_name) {
-    script = "${tint_spirv_tools_dir}/utils/generate_language_headers.py"
-
-    name = invoker.name
-    extinst_output_path = "${target_gen_dir}/${name}.h"
-
-    args = [
-      "--extinst-grammar",
-      rebase_path(invoker.grammar_file, root_build_dir),
-      "--extinst-output-path",
-      rebase_path(extinst_output_path, root_build_dir),
-    ]
-    inputs = [ invoker.grammar_file ]
-    outputs = [ "${extinst_output_path}" ]
-  }
-}
-
-tint_core_tables("unified1") {
-  version = "unified1"
-}
-
-tint_core_enums("unified1") {
-  version = "unified1"
-}
-
-tint_language_header("debuginfo") {
-  name = "DebugInfo"
-  grammar_file = "${tint_spirv_headers_dir}/include/spirv/unified1/extinst.debuginfo.grammar.json"
-}
-
-tint_language_header("cldebuginfo100") {
-  name = "OpenCLDebugInfo100"
-  grammar_file = "${tint_spirv_headers_dir}/include/spirv/unified1/extinst.opencl.debuginfo.100.grammar.json"
-}
-
-###############################################################################
 # Helper library for IO operations
 # Only to be used by tests and sample executable
 ###############################################################################
@@ -267,11 +140,12 @@ template("libtint_source_set") {
       deps = []
     }
     deps += [
-      ":tint_core_enums_unified1",
-      ":tint_core_tables_unified1",
-      ":tint_language_header_cldebuginfo100",
-      ":tint_language_header_debuginfo",
       "${tint_spirv_headers_dir}:spv_headers",
+      "${tint_spirv_tools_dir}:spvtools_core_enums_unified1",
+      "${tint_spirv_tools_dir}:spvtools_core_tables_unified1",
+      "${tint_spirv_tools_dir}:spvtools_language_header_cldebuginfo100",
+      "${tint_spirv_tools_dir}:spvtools_language_header_vkdebuginfo100",
+      "${tint_spirv_tools_dir}:spvtools_language_header_debuginfo",
       "${tint_spirv_tools_dir}:spvtools_headers",
     ]
 
@@ -727,6 +601,10 @@ libtint_source_set("libtint_spv_reader_src") {
   public_deps = [
     ":libtint_core_src",
     "${tint_spirv_tools_dir}/:spvtools_opt",
+  ]
+
+  public_configs = [
+    "${tint_spirv_tools_dir}/:spvtools_internal_config"
   ]
 }
 
