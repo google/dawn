@@ -432,6 +432,33 @@ bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
       return true;
     }
 
+    case sem::IntrinsicType::kLength: {
+      auto* sem = builder_.Sem().Get(expr->params()[0]);
+      if (sem->Type()->UnwrapRef()->is_scalar()) {
+        // Emulate scalar overload using fabs(x).
+        name = "fabs";
+      }
+      break;
+    }
+
+    case sem::IntrinsicType::kDistance: {
+      auto* sem = builder_.Sem().Get(expr->params()[0]);
+      if (sem->Type()->UnwrapRef()->is_scalar()) {
+        // Emulate scalar overload using fabs(x - y);
+        out << "fabs";
+        ScopedParen sp(out);
+        if (!EmitExpression(out, expr->params()[0])) {
+          return false;
+        }
+        out << " - ";
+        if (!EmitExpression(out, expr->params()[1])) {
+          return false;
+        }
+        return true;
+      }
+      break;
+    }
+
     default:
       break;
   }

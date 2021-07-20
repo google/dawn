@@ -86,6 +86,17 @@ TEST_F(MslGeneratorImplTest, MslImportData_SingleParamTest_IntScalar) {
   EXPECT_EQ(out.str(), R"(abs(1))");
 }
 
+TEST_F(MslGeneratorImplTest, MslImportData_SingleParamTest_ScalarLength) {
+  auto* expr = Call("length", 2.f);
+  WrapInFunction(expr);
+
+  GeneratorImpl& gen = Build();
+
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), R"(fabs(2.0f))");
+}
+
 using MslImportData_DualParam_ScalarTest = TestParamHelper<MslImportData>;
 TEST_P(MslImportData_DualParam_ScalarTest, Float) {
   auto param = GetParam();
@@ -102,11 +113,21 @@ TEST_P(MslImportData_DualParam_ScalarTest, Float) {
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                          MslImportData_DualParam_ScalarTest,
                          testing::Values(MslImportData{"atan2", "atan2"},
-                                         MslImportData{"distance", "distance"},
                                          MslImportData{"max", "fmax"},
                                          MslImportData{"min", "fmin"},
                                          MslImportData{"pow", "pow"},
                                          MslImportData{"step", "step"}));
+
+TEST_F(MslGeneratorImplTest, MslImportData_DualParam_ScalarDistance) {
+  auto* expr = Call("distance", 2.f, 3.f);
+  WrapInFunction(expr);
+
+  GeneratorImpl& gen = Build();
+
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), R"(fabs(2.0f - 3.0f))");
+}
 
 using MslImportData_DualParam_VectorTest = TestParamHelper<MslImportData>;
 TEST_P(MslImportData_DualParam_VectorTest, Float) {
