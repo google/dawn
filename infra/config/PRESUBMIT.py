@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+USE_PYTHON3 = True
+
 
 def CheckChangeOnUpload(input_api, output_api):
     return input_api.canned_checks.CheckChangedLUCIConfigs(
