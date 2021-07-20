@@ -120,21 +120,13 @@ namespace dawn_wire {
                 // Set Staging data length for OOB check
                 void SetDataLength(size_t dataLength);
 
-                // TODO(dawn:773): remove after update on chromium side.
-                virtual bool DeserializeFlush(const void* deserializePointer,
-                                              size_t deserializeSize) {
-                    return false;
-                }
-
                 // This function takes in the serialized result of
                 // client::MemoryTransferService::WriteHandle::SerializeDataUpdate.
                 // Needs to check potential offset/size OOB and overflow
                 virtual bool DeserializeDataUpdate(const void* deserializePointer,
                                                    size_t deserializeSize,
                                                    size_t offset,
-                                                   size_t size) {
-                    return false;
-                }
+                                                   size_t size) = 0;
 
               protected:
                 void* mTargetData = nullptr;
