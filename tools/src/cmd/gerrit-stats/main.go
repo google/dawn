@@ -18,20 +18,15 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"regexp"
-	"strings"
 	"time"
 
-	"github.com/andygrunwald/go-gerrit"
+	"dawn.googlesource.com/tint/tools/src/gerrit"
 )
 
-const (
-	yyyymmdd  = "2006-01-02"
-	gerritURL = "https://dawn-review.googlesource.com/"
-)
+const yyyymmdd = "2006-01-02"
 
 var (
 	// See https://dawn-review.googlesource.com/new-password for obtaining
@@ -52,26 +47,6 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-}
-
-func queryChanges(client *gerrit.Client, queryParts ...string) ([]gerrit.ChangeInfo, string, error) {
-	query := strings.Join(queryParts, "+")
-	out := []gerrit.ChangeInfo{}
-	for {
-		changes, _, err := client.Changes.QueryChanges(&gerrit.QueryChangeOptions{
-			QueryOptions: gerrit.QueryOptions{Query: []string{query}},
-			Skip:         len(out),
-		})
-		if err != nil {
-			return nil, "", err
-		}
-
-		out = append(out, *changes...)
-		if len(*changes) == 0 || !(*changes)[len(*changes)-1].MoreChanges {
-			break
-		}
-	}
-	return out, query, nil
 }
 
 func run() error {
@@ -98,43 +73,22 @@ func run() error {
 		after = before.Add(-time.Hour * time.Duration(24**daysFlag))
 	}
 
-	client, err := gerrit.NewClient(gerritURL, nil)
+	g, err := gerrit.New(gerrit.Config{Username: *gerritUser, Password: *gerritPass})
 	if err != nil {
-		return fmt.Errorf("Couldn't create gerrit client: %w", err)
+		return err
 	}
 
-	if *gerritUser == "" {
-		cookiesFile := os.Getenv("HOME") + "/.gitcookies"
-		if cookies, err := ioutil.ReadFile(cookiesFile); err == nil {
-			re := regexp.MustCompile(`dawn-review.googlesource.com\s+(?:FALSE|TRUE)[\s/]+(?:FALSE|TRUE)\s+[0-9]+\s+.\s+(.*)=(.*)`)
-			match := re.FindStringSubmatch(string(cookies))
-			if len(match) == 3 {
-				*gerritUser, *gerritPass = match[1], match[2]
-			}
-		}
-	}
-
-	if *gerritUser != "" {
-		client.Authentication.SetBasicAuth(*gerritUser, *gerritPass)
-	}
-
-	submitted, submittedQuery, err := queryChanges(client,
+	submitted, submittedQuery, err := g.QueryChanges(
 		"status:merged",
 		"owner:"+user,
 		"after:"+date(after),
 		"before:"+date(before),
 		"repo:"+*repoFlag)
 	if err != nil {
-		if *gerritUser == "" {
-			return fmt.Errorf(`Query failed, possibly because of authentication.
-See https://dawn-review.googlesource.com/new-password for obtaining a username
-and password which can be provided with --gerrit-user and --gerrit-pass.
-%w`, err)
-		}
 		return fmt.Errorf("Query failed: %w", err)
 	}
 
-	reviewed, reviewQuery, err := queryChanges(client,
+	reviewed, reviewQuery, err := g.QueryChanges(
 		"commentby:"+user,
 		"-owner:"+user,
 		"after:"+date(after),
@@ -183,8 +137,8 @@ and password which can be provided with --gerrit-user and --gerrit-pass.
 	}
 
 	fmt.Printf("\n")
-	fmt.Printf("Submitted query: %vq/%v\n", gerritURL, url.QueryEscape(submittedQuery))
-	fmt.Printf("Review query: %vq/%v\n", gerritURL, url.QueryEscape(reviewQuery))
+	fmt.Printf("Submitted query: %vq/%v\n", gerrit.URL, url.QueryEscape(submittedQuery))
+	fmt.Printf("Review query: %vq/%v\n", gerrit.URL, url.QueryEscape(reviewQuery))
 
 	return nil
 }
