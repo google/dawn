@@ -1,0 +1,16 @@
+#include <metal_stdlib>
+
+using namespace metal;
+fragment void tint_symbol(texture2d<float, access::sample> tint_symbol_1 [[texture(0)]], sampler tint_symbol_2 [[sampler(1)]]) {
+  texture2d<float, access::sample> const x = tint_symbol_1;
+  sampler const a = tint_symbol_2;
+  (void) 1;
+  texture2d<float, access::sample> const y = x;
+  sampler const b = a;
+  (void) 2;
+  texture2d<float, access::sample> const z = y;
+  sampler const c = b;
+  (void) z.sample(c, float2(1.0f, 2.0f));
+  return;
+}
+
