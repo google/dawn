@@ -58,11 +58,12 @@ namespace dawn_native { namespace metal {
             return DAWN_VALIDATION_ERROR("Sampler compare function not supported.");
         }
 
-        return AcquireRef(new Sampler(device, descriptor));
+        Ref<Sampler> sampler = AcquireRef(new Sampler(device, descriptor));
+        DAWN_TRY(sampler->Initialize(descriptor));
+        return sampler;
     }
 
-    Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
-        : SamplerBase(device, descriptor) {
+    MaybeError Sampler::Initialize(const SamplerDescriptor* descriptor) {
         NSRef<MTLSamplerDescriptor> mtlDescRef = AcquireNSRef([MTLSamplerDescriptor new]);
         MTLSamplerDescriptor* mtlDesc = mtlDescRef.Get();
 
@@ -87,8 +88,13 @@ namespace dawn_native { namespace metal {
             // Metal debug device errors.
         }
 
-        mMtlSamplerState =
-            AcquireNSPRef([device->GetMTLDevice() newSamplerStateWithDescriptor:mtlDesc]);
+        mMtlSamplerState = AcquireNSPRef(
+            [ToBackend(GetDevice())->GetMTLDevice() newSamplerStateWithDescriptor:mtlDesc]);
+
+        if (mMtlSamplerState == nil) {
+            return DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate sampler.");
+        }
+        return {};
     }
 
     id<MTLSamplerState> Sampler::GetMTLSamplerState() {

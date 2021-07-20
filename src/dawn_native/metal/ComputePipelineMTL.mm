@@ -43,9 +43,10 @@ namespace dawn_native { namespace metal {
             newComputePipelineStateWithFunction:computeData.function.Get()
                                           error:&error]);
         if (error != nullptr) {
-            NSLog(@" error => %@", error);
-            return DAWN_INTERNAL_ERROR("Error creating pipeline state");
+            return DAWN_INTERNAL_ERROR("Error creating pipeline state" +
+                                       std::string([error.localizedDescription UTF8String]));
         }
+        ASSERT(mMtlComputePipelineState != nil);
 
         // Copy over the local workgroup size as it is passed to dispatch explicitly in Metal
         Origin3D localSize = GetStage(SingleShaderStage::Compute).metadata->localWorkgroupSize;

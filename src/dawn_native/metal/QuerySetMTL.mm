@@ -53,8 +53,8 @@ namespace dawn_native { namespace metal {
                 [device->GetMTLDevice() newCounterSampleBufferWithDescriptor:descriptor
                                                                        error:&error];
             if (error != nullptr) {
-                const char* errorString = [error.localizedDescription UTF8String];
-                return DAWN_INTERNAL_ERROR(std::string("Error creating query set: ") + errorString);
+                return DAWN_OUT_OF_MEMORY_ERROR(std::string("Error creating query set: ") +
+                                                [error.localizedDescription UTF8String]);
             }
 
             return counterSampleBuffer;
@@ -80,6 +80,10 @@ namespace dawn_native { namespace metal {
                 mVisibilityBuffer = AcquireNSPRef([device->GetMTLDevice()
                     newBufferWithLength:bufferSize
                                 options:MTLResourceStorageModePrivate]);
+
+                if (mVisibilityBuffer == nil) {
+                    return DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate query set.");
+                }
                 break;
             }
             case wgpu::QueryType::PipelineStatistics:

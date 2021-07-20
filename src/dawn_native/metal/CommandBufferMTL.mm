@@ -223,10 +223,11 @@ namespace dawn_native { namespace metal {
         }
 
         // Helper functions for Toggle AlwaysResolveIntoZeroLevelAndLayer
-        NSPRef<id<MTLTexture>> CreateResolveTextureForWorkaround(Device* device,
-                                                                 MTLPixelFormat mtlFormat,
-                                                                 uint32_t width,
-                                                                 uint32_t height) {
+        ResultOrError<NSPRef<id<MTLTexture>>> CreateResolveTextureForWorkaround(
+            Device* device,
+            MTLPixelFormat mtlFormat,
+            uint32_t width,
+            uint32_t height) {
             NSRef<MTLTextureDescriptor> mtlDescRef = AcquireNSRef([MTLTextureDescriptor new]);
             MTLTextureDescriptor* mtlDesc = mtlDescRef.Get();
 
@@ -241,7 +242,12 @@ namespace dawn_native { namespace metal {
             mtlDesc.storageMode = MTLStorageModePrivate;
             mtlDesc.sampleCount = 1;
 
-            return AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:mtlDesc]);
+            id<MTLTexture> texture = [device->GetMTLDevice() newTextureWithDescriptor:mtlDesc];
+            if (texture == nil) {
+                return DAWN_OUT_OF_MEMORY_ERROR("Allocation of temporary texture failed.");
+            }
+
+            return AcquireNSPRef(texture);
         }
 
         void CopyIntoTrueResolveTarget(CommandRecordingContext* commandContext,
@@ -1144,8 +1150,8 @@ namespace dawn_native { namespace metal {
                 trueResolveSlices[i] = mtlRenderPass.colorAttachments[i].resolveSlice;
 
                 const MTLPixelFormat mtlFormat = trueResolveTextures[i].pixelFormat;
-                temporaryResolveTextures[i] =
-                    CreateResolveTextureForWorkaround(device, mtlFormat, width, height);
+                DAWN_TRY_ASSIGN(temporaryResolveTextures[i], CreateResolveTextureForWorkaround(
+                                                                 device, mtlFormat, width, height));
 
                 mtlRenderPass.colorAttachments[i].resolveTexture =
                     temporaryResolveTextures[i].Get();

@@ -332,11 +332,11 @@ namespace dawn_native { namespace metal {
                                                     error:&error]);
         if (error != nullptr) {
             if (error.code != MTLLibraryErrorCompileWarning) {
-                const char* errorString = [error.localizedDescription UTF8String];
                 return DAWN_VALIDATION_ERROR(std::string("Unable to create library object: ") +
-                                             errorString);
+                                             [error.localizedDescription UTF8String]);
             }
         }
+        ASSERT(library != nil);
 
         NSRef<NSString> name =
             AcquireNSRef([[NSString alloc] initWithUTF8String:remappedEntryPointName.c_str()]);
