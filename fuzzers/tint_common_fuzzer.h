@@ -110,8 +110,6 @@ class CommonFuzzer {
 
   int Run(const uint8_t* data, size_t size);
 
-  const std::string& GetErrors() const { return errors_; }
-
   const std::vector<uint32_t>& GetGeneratedSpirv() const {
     return generated_spirv_;
   }
@@ -122,7 +120,9 @@ class CommonFuzzer {
 
   const std::string& GetGeneratedMsl() const { return generated_msl_; }
 
-  bool HasErrors() const { return !errors_.empty(); }
+  const tint::diag::List& Diagnostics() const { return diagnostics_; }
+
+  bool HasErrors() const { return diagnostics_.contains_errors(); }
 
  private:
   InputFormat input_;
@@ -130,7 +130,7 @@ class CommonFuzzer {
   transform::Manager* transform_manager_;
   transform::DataMap transform_inputs_;
   bool inspector_enabled_;
-  std::string errors_;
+  tint::diag::List diagnostics_;
 
   std::vector<uint32_t> generated_spirv_;
   std::string generated_wgsl_;

@@ -15,6 +15,7 @@
 #include "src/diagnostic/formatter.h"
 
 #include <algorithm>
+#include <iterator>
 #include <vector>
 
 #include "src/diagnostic/diagnostic.h"
@@ -96,9 +97,7 @@ struct Formatter::State {
   /// @param c the character to print `n` times
   /// @param n the number of times to print character `c`
   void repeat(char c, size_t n) {
-    while (n-- > 0) {
-      stream << c;
-    }
+    std::fill_n(std::ostream_iterator<char>(stream), n, c);
   }
 
  private:

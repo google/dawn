@@ -217,7 +217,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
   }
 
   if (!program.IsValid()) {
-    errors_ = diag::Formatter().format(program.Diagnostics());
+    diagnostics_ = program.Diagnostics();
     return 0;
   }
 
@@ -234,68 +234,77 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 
     auto entry_points = inspector.GetEntryPoints();
     if (inspector.has_error()) {
-      errors_ = inspector.error();
+      diagnostics_.add_error(tint::diag::System::Inspector, inspector.error());
       return 0;
     }
 
     for (auto& ep : entry_points) {
       auto remapped_name = inspector.GetRemappedNameForEntryPoint(ep.name);
       if (inspector.has_error()) {
-        errors_ = inspector.error();
+        diagnostics_.add_error(tint::diag::System::Inspector,
+                               inspector.error());
         return 0;
       }
 
       auto constant_ids = inspector.GetConstantIDs();
       if (inspector.has_error()) {
-        errors_ = inspector.error();
+        diagnostics_.add_error(tint::diag::System::Inspector,
+                               inspector.error());
         return 0;
       }
 
       auto uniform_bindings =
           inspector.GetUniformBufferResourceBindings(ep.name);
       if (inspector.has_error()) {
-        errors_ = inspector.error();
+        diagnostics_.add_error(tint::diag::System::Inspector,
+                               inspector.error());
         return 0;
       }
 
       auto storage_bindings =
           inspector.GetStorageBufferResourceBindings(ep.name);
       if (inspector.has_error()) {
-        errors_ = inspector.error();
+        diagnostics_.add_error(tint::diag::System::Inspector,
+                               inspector.error());
         return 0;
       }
 
       auto readonly_bindings =
           inspector.GetReadOnlyStorageBufferResourceBindings(ep.name);
       if (inspector.has_error()) {
-        errors_ = inspector.error();
+        diagnostics_.add_error(tint::diag::System::Inspector,
+                               inspector.error());
         return 0;
       }
 
       auto sampler_bindings = inspector.GetSamplerResourceBindings(ep.name);
       if (inspector.has_error()) {
-        errors_ = inspector.error();
+        diagnostics_.add_error(tint::diag::System::Inspector,
+                               inspector.error());
         return 0;
       }
 
       auto comparison_sampler_bindings =
           inspector.GetComparisonSamplerResourceBindings(ep.name);
       if (inspector.has_error()) {
-        errors_ = inspector.error();
+        diagnostics_.add_error(tint::diag::System::Inspector,
+                               inspector.error());
         return 0;
       }
 
       auto sampled_texture_bindings =
           inspector.GetSampledTextureResourceBindings(ep.name);
       if (inspector.has_error()) {
-        errors_ = inspector.error();
+        diagnostics_.add_error(tint::diag::System::Inspector,
+                               inspector.error());
         return 0;
       }
 
       auto multisampled_texture_bindings =
           inspector.GetMultisampledTextureResourceBindings(ep.name);
       if (inspector.has_error()) {
-        errors_ = inspector.error();
+        diagnostics_.add_error(tint::diag::System::Inspector,
+                               inspector.error());
         return 0;
       }
     }
