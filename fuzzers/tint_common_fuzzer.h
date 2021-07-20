@@ -45,15 +45,16 @@ class Reader {
   template <typename T>
   std::vector<T> vector() {
     auto count = read<uint8_t>();
-    if (failed_ || size_ < count) {
+    auto size = static_cast<size_t>(count) * sizeof(T);
+    if (failed_ || size_ < size) {
       mark_failed();
       return {};
     }
     std::vector<T> out(count);
     if (!out.empty()) {
-      memcpy(out.data(), data_, count * sizeof(T));
-      data_ += count * sizeof(T);
-      size_ -= count * sizeof(T);
+      memcpy(out.data(), data_, size);
+      data_ += size;
+      size_ -= size;
     }
     return out;
   }
@@ -61,13 +62,15 @@ class Reader {
   template <typename T>
   std::vector<T> vector(T (*extract)(Reader*)) {
     auto count = read<uint8_t>();
-    if (size_ < count) {
-      mark_failed();
+    if (failed_) {
       return {};
     }
     std::vector<T> out(count);
     for (uint8_t i = 0; i < count; i++) {
       out[i] = extract(this);
+      if (failed_) {
+        return {};
+      }
     }
     return out;
   }
