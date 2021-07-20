@@ -286,54 +286,6 @@ TEST_F(HlslSanitizerTest, InlinePtrLetsComplexChain) {
   EXPECT_EQ(expect, got);
 }
 
-TEST_F(HlslSanitizerTest, InlineParam) {
-  // fn x(p : ptr<function, i32>) -> i32 {
-  //   return *p;
-  // }
-  //
-  // [[stage(fragment)]]
-  // fn main() {
-  //   var v : i32;
-  //   let p : ptr<function, i32> = &v;
-  //   var r : i32 = x(p);
-  // }
-
-  Func("x", {Param("p", ty.pointer<i32>(ast::StorageClass::kFunction))},
-       ty.i32(), {Return(Deref("p"))});
-
-  auto* v = Var("v", ty.i32());
-  auto* p = Const("p", ty.pointer(ty.i32(), ast::StorageClass::kFunction),
-                  AddressOf(v));
-  auto* r = Var("r", ty.i32(), ast::StorageClass::kNone, Call("x", p));
-
-  Func("main", ast::VariableList{}, ty.void_(),
-       {
-           Decl(v),
-           Decl(p),
-           Decl(r),
-       },
-       {
-           Stage(ast::PipelineStage::kFragment),
-       });
-
-  GeneratorImpl& gen = SanitizeAndBuild();
-
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-
-  auto got = gen.result();
-  auto* expect = R"(int x(inout int p) {
-  return p;
-}
-
-void main() {
-  int v = 0;
-  int r = x(v);
-  return;
-}
-)";
-  EXPECT_EQ(expect, got);
-}
-
 }  // namespace
 }  // namespace hlsl
 }  // namespace writer

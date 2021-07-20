@@ -2578,7 +2578,21 @@ bool Resolver::FunctionCall(const ast::CallExpression* call) {
     }
   }
 
-  // Validate number of arguments match number of parameters
+  function_calls_.emplace(call,
+                          FunctionCallInfo{callee_func, current_statement_});
+  SetExprInfo(call, callee_func->return_type, callee_func->return_type_name);
+
+  if (!ValidateFunctionCall(call, callee_func)) {
+    return false;
+  }
+  return true;
+}
+
+bool Resolver::ValidateFunctionCall(const ast::CallExpression* call,
+                                    const FunctionInfo* callee_func) {
+  auto* ident = call->func();
+  auto name = builder_->Symbols().NameFor(ident->symbol());
+
   if (call->params().size() != callee_func->parameters.size()) {
     bool more = call->params().size() > callee_func->parameters.size();
     AddError("too " + (more ? std::string("many") : std::string("few")) +
@@ -2589,7 +2603,6 @@ bool Resolver::FunctionCall(const ast::CallExpression* call) {
     return false;
   }
 
-  // Validate arguments match parameter types
   for (size_t i = 0; i < call->params().size(); ++i) {
     const VariableInfo* param = callee_func->parameters[i];
     const ast::Expression* arg_expr = call->params()[i];
@@ -2603,12 +2616,48 @@ bool Resolver::FunctionCall(const ast::CallExpression* call) {
                arg_expr->source());
       return false;
     }
+
+    if (param->declaration->type()->Is<ast::Pointer>()) {
+      auto is_valid = false;
+      if (auto* ident_expr = arg_expr->As<ast::IdentifierExpression>()) {
+        VariableInfo* var;
+        if (!variable_stack_.get(ident_expr->symbol(), &var)) {
+          TINT_ICE(Resolver, diagnostics_) << "failed to resolve identifier";
+          return false;
+        }
+        if (var->kind == VariableKind::kParameter) {
+          is_valid = true;
+        }
+      } else if (auto* unary = arg_expr->As<ast::UnaryOpExpression>()) {
+        if (unary->op() == ast::UnaryOp::kAddressOf) {
+          if (auto* ident_unary =
+                  unary->expr()->As<ast::IdentifierExpression>()) {
+            VariableInfo* var;
+            if (!variable_stack_.get(ident_unary->symbol(), &var)) {
+              TINT_ICE(Resolver, diagnostics_)
+                  << "failed to resolve identifier";
+              return false;
+            }
+            if (var->declaration->is_const()) {
+              TINT_ICE(Resolver, diagnostics_)
+                  << "Resolver::FunctionCall() encountered an address-of "
+                     "expression of a constant identifier expression";
+              return false;
+            }
+            is_valid = true;
+          }
+        }
+      }
+
+      if (!is_valid) {
+        AddError(
+            "expected an address-of expression of a variable identifier "
+            "expression or a function parameter",
+            arg_expr->source());
+        return false;
+      }
+    }
   }
-
-  function_calls_.emplace(call,
-                          FunctionCallInfo{callee_func, current_statement_});
-  SetExprInfo(call, callee_func->return_type, callee_func->return_type_name);
-
   return true;
 }
 

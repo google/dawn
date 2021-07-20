@@ -811,20 +811,20 @@ TEST_F(ResolverValidationTest, Stmt_BreakNotInLoopOrSwitch) {
 }
 
 TEST_F(ResolverValidationTest, StructMemberDuplicateName) {
-  Structure("S",
-            {Member("a", ty.i32()), Member(Source{{12, 34}}, "a", ty.i32())});
+  Structure("S", {Member(Source{{12, 34}}, "a", ty.i32()),
+                  Member(Source{{56, 78}}, "a", ty.i32())});
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error: redefinition of 'a'\nnote: previous definition is here");
+  EXPECT_EQ(r()->error(),
+            "56:78 error: redefinition of 'a'\n12:34 note: previous definition "
+            "is here");
 }
 TEST_F(ResolverValidationTest, StructMemberDuplicateNameDifferentTypes) {
-  Structure("S", {Member("a", ty.bool_()),
+  Structure("S", {Member(Source{{12, 34}}, "a", ty.bool_()),
                   Member(Source{{12, 34}}, "a", ty.vec3<f32>())});
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error: redefinition of 'a'\nnote: previous definition is here");
+  EXPECT_EQ(r()->error(),
+            "12:34 error: redefinition of 'a'\n12:34 note: previous definition "
+            "is here");
 }
 TEST_F(ResolverValidationTest, StructMemberDuplicateNamePass) {
   Structure("S", {Member("a", ty.i32()), Member("b", ty.f32())});

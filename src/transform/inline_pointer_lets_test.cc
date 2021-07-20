@@ -79,35 +79,6 @@ fn f() {
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(InlinePointerLetsTest, Param) {
-  auto* src = R"(
-fn x(p : ptr<function, i32>) -> i32 {
-  return *p;
-}
-
-fn f() {
-  var v : i32;
-  let p : ptr<function, i32> = &v;
-  var r : i32 = x(p);
-}
-)";
-
-  auto* expect = R"(
-fn x(p : ptr<function, i32>) -> i32 {
-  return *(p);
-}
-
-fn f() {
-  var v : i32;
-  var r : i32 = x(&(v));
-}
-)";
-
-  auto got = Run<InlinePointerLets>(src);
-
-  EXPECT_EQ(expect, str(got));
-}
-
 TEST_F(InlinePointerLetsTest, SavedVars) {
   auto* src = R"(
 struct S {
