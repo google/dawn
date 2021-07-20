@@ -187,7 +187,6 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 
 #if TINT_BUILD_SPV_READER
   std::vector<uint32_t> spirv_input(size / sizeof(uint32_t));
-  std::memcpy(spirv_input.data(), data, spirv_input.size() * sizeof(uint32_t));
 
 #endif  // TINT_BUILD_SPV_READER
 
@@ -202,9 +201,16 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 #endif  // TINT_BUILD_WGSL_READER
 #if TINT_BUILD_SPV_READER
     case InputFormat::kSpv: {
-      if (!spirv_input.empty()) {
-        program = reader::spirv::Parse(spirv_input);
+      // `spirv_input` has been initialized with the capacity to store `size /
+      // sizeof(uint32_t)` uint32_t values. If `size` is not a multiple of
+      // sizeof(uint32_t) then not all of `data` can be copied into
+      // `spirv_input`, and any trailing bytes are discarded.
+      const size_t adjusted_size = (size / sizeof(uint32_t)) * sizeof(uint32_t);
+      std::memcpy(spirv_input.data(), data, adjusted_size);
+      if (spirv_input.empty()) {
+        return 0;
       }
+      program = reader::spirv::Parse(spirv_input);
       break;
     }
 #endif  // TINT_BUILD_SPV_READER
