@@ -182,8 +182,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   spv_to_wgsl.EnableInspector();
   spv_to_wgsl.Run(data, size);
   if (spv_to_wgsl.HasErrors()) {
-    util::LogSpvError(spv_to_wgsl.GetErrors(), data, size,
-                      context->params.error_dir);
+    auto error = spv_to_wgsl.Diagnostics().str();
+    util::LogSpvError(error, data, size, context->params.error_dir);
     return 0;
   }
 
@@ -204,7 +204,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     fuzzer.EnableInspector();
     fuzzer.Run(reinterpret_cast<const uint8_t*>(wgsl.data()), wgsl.size());
     if (fuzzer.HasErrors()) {
-      util::LogWgslError(fuzzer.GetErrors(), data, size, wgsl, target.second,
+      auto error = spv_to_wgsl.Diagnostics().str();
+      util::LogWgslError(error, data, size, wgsl, target.second,
                          context->params.error_dir);
     }
   }
