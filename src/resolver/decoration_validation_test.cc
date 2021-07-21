@@ -197,7 +197,6 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBuiltin, true},
                     TestParams{DecorationKind::kGroup, false},
                     TestParams{DecorationKind::kInterpolate, true},
-                    // TODO(crbug.com/tint/1008)
                     // kInvariant tested separately (requires position builtin)
                     TestParams{DecorationKind::kLocation, true},
                     TestParams{DecorationKind::kOverride, false},
@@ -250,6 +249,34 @@ TEST_F(EntryPointParameterDecorationTest, ComputeShaderLocation) {
   EXPECT_EQ(r()->error(),
             "12:34 error: decoration is not valid for compute shader function "
             "parameters");
+}
+
+TEST_F(EntryPointParameterDecorationTest, InvariantWithPosition) {
+  auto* param = Param("p", ty.vec4<f32>(),
+                      {Invariant(Source{{12, 34}}),
+                       Builtin(Source{{56, 78}}, ast::Builtin::kPosition)});
+  Func("main", ast::VariableList{param}, ty.vec4<f32>(),
+       ast::StatementList{Return(Construct(ty.vec4<f32>()))},
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)},
+       ast::DecorationList{
+           Location(0),
+       });
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(EntryPointParameterDecorationTest, InvariantWithoutPosition) {
+  auto* param =
+      Param("p", ty.vec4<f32>(), {Invariant(Source{{12, 34}}), Location(0)});
+  Func("main", ast::VariableList{param}, ty.vec4<f32>(),
+       ast::StatementList{Return(Construct(ty.vec4<f32>()))},
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)},
+       ast::DecorationList{
+           Location(0),
+       });
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: invariant attribute must only be applied to a "
+            "position builtin");
 }
 
 using FunctionReturnTypeDecorationTest = TestWithParams;
@@ -359,7 +386,7 @@ TEST_F(EntryPointReturnTypeDecorationTest, InvariantWithPosition) {
 TEST_F(EntryPointReturnTypeDecorationTest, InvariantWithoutPosition) {
   Func("main", ast::VariableList{}, ty.vec4<f32>(),
        ast::StatementList{Return(Construct(ty.vec4<f32>()))},
-       ast::DecorationList{Stage(ast::PipelineStage::kFragment)},
+       ast::DecorationList{Stage(ast::PipelineStage::kVertex)},
        ast::DecorationList{
            Invariant(Source{{12, 34}}),
            Location(Source{{56, 78}}, 0),
@@ -501,7 +528,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kBuiltin, true},
                     TestParams{DecorationKind::kGroup, false},
                     TestParams{DecorationKind::kInterpolate, true},
-                    TestParams{DecorationKind::kInvariant, true},
+                    // kInvariant tested separately (requires position builtin)
                     TestParams{DecorationKind::kLocation, true},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, true},
@@ -529,6 +556,34 @@ TEST_F(StructMemberDecorationTest, DuplicateDecoration) {
   EXPECT_EQ(r()->error(),
             R"(56:78 error: duplicate align decoration
 12:34 note: first decoration declared here)");
+}
+
+TEST_F(StructMemberDecorationTest, InvariantDecorationWithPosition) {
+  Structure("mystruct", {
+                            Member("a", ty.vec4<f32>(),
+                                   {
+                                       Invariant(),
+                                       Builtin(ast::Builtin::kPosition),
+                                   }),
+                        });
+
+  WrapInFunction();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(StructMemberDecorationTest, InvariantDecorationWithoutPosition) {
+  Structure("mystruct", {
+                            Member("a", ty.vec4<f32>(),
+                                   {
+                                       Invariant(Source{{12, 34}}),
+                                   }),
+                        });
+
+  WrapInFunction();
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: invariant attribute must only be applied to a "
+            "position builtin");
 }
 
 using VariableDecorationTest = TestWithParams;

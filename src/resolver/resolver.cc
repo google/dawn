@@ -1149,7 +1149,7 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
             deco->source());
         return false;
       }
-    } else if (!deco->IsAnyOf<ast::BuiltinDecoration,
+    } else if (!deco->IsAnyOf<ast::BuiltinDecoration, ast::InvariantDecoration,
                               ast::InternalDecoration>() &&
                (IsValidationEnabled(
                     info->declaration->decorations(),
@@ -3896,6 +3896,8 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
       }
     }
 
+    auto has_position = false;
+    ast::InvariantDecoration* invariant_attribute = nullptr;
     for (auto* deco : member->Declaration()->decorations()) {
       if (!(deco->Is<ast::BuiltinDecoration>() ||
             deco->Is<ast::InterpolateDecoration>() ||
@@ -3908,15 +3910,27 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
                  deco->source());
         return false;
       }
+      if (auto* invariant = deco->As<ast::InvariantDecoration>()) {
+        invariant_attribute = invariant;
+      }
       if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
         if (!ValidateBuiltinDecoration(builtin, member->Type())) {
           return false;
+        }
+        if (builtin->value() == ast::Builtin::kPosition) {
+          has_position = true;
         }
       } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
         if (!ValidateInterpolateDecoration(interpolate, member->Type())) {
           return false;
         }
       }
+    }
+
+    if (invariant_attribute && !has_position) {
+      AddError("invariant attribute must only be applied to a position builtin",
+               invariant_attribute->source());
+      return false;
     }
 
     if (auto* member_struct_type = member->Type()->As<sem::Struct>()) {
