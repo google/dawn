@@ -25,6 +25,18 @@
 
 namespace dawn_native {
 
+    namespace {
+
+        MaybeError ValidatePerDimensionDispatchSizeLimit(uint32_t size) {
+            if (size > kMaxComputePerDimensionDispatchSize) {
+                return DAWN_VALIDATION_ERROR("Dispatch size exceeds defined limits");
+            }
+
+            return {};
+        }
+
+    }  // namespace
+
     ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
                                            CommandEncoder* commandEncoder,
                                            EncodingContext* encodingContext)
@@ -63,6 +75,9 @@ namespace dawn_native {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(mCommandBufferState.ValidateCanDispatch());
+                DAWN_TRY(ValidatePerDimensionDispatchSizeLimit(x));
+                DAWN_TRY(ValidatePerDimensionDispatchSizeLimit(y));
+                DAWN_TRY(ValidatePerDimensionDispatchSizeLimit(z));
             }
 
             // Record the synchronization scope for Dispatch, which is just the current bindgroups.
