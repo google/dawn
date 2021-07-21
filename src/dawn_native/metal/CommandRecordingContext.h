@@ -15,6 +15,8 @@
 #define DAWNNATIVE_METAL_COMMANDRECORDINGCONTEXT_H_
 
 #include "common/NSRef.h"
+#include "common/NonCopyable.h"
+#include "dawn_native/Error.h"
 
 #import <Metal/Metal.h>
 
@@ -22,21 +24,16 @@ namespace dawn_native { namespace metal {
 
     // This class wraps a MTLCommandBuffer and tracks which Metal encoder is open.
     // Only one encoder may be open at a time.
-    class CommandRecordingContext {
+    class CommandRecordingContext : NonMovable {
       public:
         CommandRecordingContext();
-        CommandRecordingContext(NSPRef<id<MTLCommandBuffer>> commands);
-
-        CommandRecordingContext(const CommandRecordingContext& rhs) = delete;
-        CommandRecordingContext& operator=(const CommandRecordingContext& rhs) = delete;
-
-        CommandRecordingContext(CommandRecordingContext&& rhs);
-        CommandRecordingContext& operator=(CommandRecordingContext&& rhs);
-
         ~CommandRecordingContext();
 
         id<MTLCommandBuffer> GetCommands();
+        void MarkUsed();
+        bool WasUsed() const;
 
+        MaybeError PrepareNextCommandBuffer(id<MTLCommandQueue> queue);
         NSPRef<id<MTLCommandBuffer>> AcquireCommands();
 
         id<MTLBlitCommandEncoder> EnsureBlit();
@@ -54,6 +51,7 @@ namespace dawn_native { namespace metal {
         NSPRef<id<MTLComputeCommandEncoder>> mCompute;
         NSPRef<id<MTLRenderCommandEncoder>> mRender;
         bool mInEncoder = false;
+        bool mUsed = false;
     };
 
 }}  // namespace dawn_native::metal

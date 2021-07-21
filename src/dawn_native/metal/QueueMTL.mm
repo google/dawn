@@ -42,8 +42,7 @@ namespace dawn_native { namespace metal {
         }
         TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferMTL::FillCommands");
 
-        device->SubmitPendingCommandBuffer();
-        return {};
+        return device->SubmitPendingCommandBuffer();
     }
 
 }}  // namespace dawn_native::metal
