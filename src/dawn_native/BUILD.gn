@@ -598,12 +598,13 @@ source_set("dawn_native_sources") {
     if (is_chromeos) {
       sources += [
         "vulkan/external_memory/MemoryServiceDmaBuf.cpp",
-        "vulkan/external_semaphore/SemaphoreServiceOpaqueFD.cpp",
+        "vulkan/external_semaphore/SemaphoreServiceFD.cpp",
       ]
+      defines += [ "DAWN_USE_SYNC_FDS" ]
     } else if (is_linux) {
       sources += [
         "vulkan/external_memory/MemoryServiceOpaqueFD.cpp",
-        "vulkan/external_semaphore/SemaphoreServiceOpaqueFD.cpp",
+        "vulkan/external_semaphore/SemaphoreServiceFD.cpp",
       ]
     } else if (is_fuchsia) {
       sources += [

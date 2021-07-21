@@ -18,6 +18,13 @@
 #include "dawn_native/vulkan/VulkanError.h"
 #include "dawn_native/vulkan/external_semaphore/SemaphoreService.h"
 
+static constexpr VkExternalSemaphoreHandleTypeFlagBits kHandleType =
+#if defined(DAWN_USE_SYNC_FDS)
+    VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
+#else
+    VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
+#endif  // defined(DAWN_USE_SYNC_FDS)
+
 namespace dawn_native { namespace vulkan { namespace external_semaphore {
 
     Service::Service(Device* device) : mDevice(device) {
@@ -31,7 +38,7 @@ namespace dawn_native { namespace vulkan { namespace external_semaphore {
         VkPhysicalDeviceExternalSemaphoreInfoKHR semaphoreInfo;
         semaphoreInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_SEMAPHORE_INFO_KHR;
         semaphoreInfo.pNext = nullptr;
-        semaphoreInfo.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
+        semaphoreInfo.handleType = kHandleType;
 
         VkExternalSemaphorePropertiesKHR semaphoreProperties;
         semaphoreProperties.sType = VK_STRUCTURE_TYPE_EXTERNAL_SEMAPHORE_PROPERTIES_KHR;
@@ -73,7 +80,7 @@ namespace dawn_native { namespace vulkan { namespace external_semaphore {
         importSemaphoreFdInfo.pNext = nullptr;
         importSemaphoreFdInfo.semaphore = semaphore;
         importSemaphoreFdInfo.flags = 0;
-        importSemaphoreFdInfo.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
+        importSemaphoreFdInfo.handleType = kHandleType;
         importSemaphoreFdInfo.fd = handle;
 
         MaybeError status = CheckVkSuccess(
@@ -92,7 +99,7 @@ namespace dawn_native { namespace vulkan { namespace external_semaphore {
         VkExportSemaphoreCreateInfoKHR exportSemaphoreInfo;
         exportSemaphoreInfo.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO_KHR;
         exportSemaphoreInfo.pNext = nullptr;
-        exportSemaphoreInfo.handleTypes = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
+        exportSemaphoreInfo.handleTypes = kHandleType;
 
         VkSemaphoreCreateInfo semaphoreCreateInfo;
         semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -112,7 +119,7 @@ namespace dawn_native { namespace vulkan { namespace external_semaphore {
         semaphoreGetFdInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR;
         semaphoreGetFdInfo.pNext = nullptr;
         semaphoreGetFdInfo.semaphore = semaphore;
-        semaphoreGetFdInfo.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
+        semaphoreGetFdInfo.handleType = kHandleType;
 
         int fd = -1;
         DAWN_TRY(CheckVkSuccess(

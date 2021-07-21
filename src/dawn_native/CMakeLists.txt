@@ -489,7 +489,7 @@ if (DAWN_ENABLE_VULKAN)
     if (UNIX AND NOT APPLE)
         target_sources(dawn_native PRIVATE
             "vulkan/external_memory/MemoryServiceOpaqueFD.cpp"
-            "vulkan/external_semaphore/SemaphoreServiceOpaqueFD.cpp"
+            "vulkan/external_semaphore/SemaphoreServiceFD.cpp"
         )
     else()
         target_sources(dawn_native PRIVATE
