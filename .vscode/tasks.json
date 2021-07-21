@@ -104,7 +104,7 @@
                 // which is used to track the active build directory.
                 "command": "/C",
                 "args": [
-                    "(IF \"${input:buildType}\" == \"Debug\" ( gn gen 'out\\${input:buildType}' --args=is_debug=true ) ELSE ( gn gen 'out\\${input:buildType}' --args=is_debug=false )) && (IF EXIST 'out\\active' rmdir 'out\\active' /q /s) && (mklink /j 'out\\active' 'out\\${input:buildType}')",
+                    "(IF \"${input:buildType}\" == \"Debug\" ( gn gen \"out\\${input:buildType}\" --args=is_debug=true ) ELSE ( gn gen \"out\\${input:buildType}\" --args=is_debug=false )) && (IF EXIST \"out\\active\" rmdir \"out\\active\" /q /s) && (mklink /j \"out\\active\" \"out\\${input:buildType}\")",
                 ],
                 "options": {
                     "shell": {
