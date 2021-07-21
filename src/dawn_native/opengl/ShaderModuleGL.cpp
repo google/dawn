@@ -85,6 +85,8 @@ namespace dawn_native { namespace opengl {
         // generate SPIRV and SPIRV-Cross reflection data to be used in this backend.
         if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
             tint::writer::spirv::Options options;
+            options.disable_workgroup_init =
+                GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
             auto result = tint::writer::spirv::Generate(GetTintProgram(), options);
             if (!result.success) {
                 std::ostringstream errorStream;

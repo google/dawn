@@ -56,6 +56,8 @@ namespace dawn_native {
         DumpShaders,
         DEPRECATED_DumpTranslatedShaders,  // Use DumpShaders
         ForceWGSLStep,
+        DisableWorkgroupInit,
+        DisableSymbolRenaming,
 
         EnumCount,
         InvalidEnum = EnumCount,

@@ -125,6 +125,13 @@ namespace dawn_native { namespace metal {
         transformManager.Add<tint::transform::BindingRemapper>();
         transformManager.Add<tint::transform::Renamer>();
 
+        if (GetDevice()->IsToggleEnabled(Toggle::DisableSymbolRenaming)) {
+            // We still need to rename MSL reserved keywords
+            transformInputs.Add<tint::transform::Renamer::Config>(
+                tint::transform::Renamer::Target::kMslKeywords);
+        }
+
+
         transformInputs.Add<BindingRemapper::Remappings>(std::move(bindingPoints),
                                                          std::move(accessControls),
                                                          /* mayCollide */ true);
@@ -136,10 +143,15 @@ namespace dawn_native { namespace metal {
 
         if (auto* data = transformOutputs.Get<tint::transform::Renamer::Data>()) {
             auto it = data->remappings.find(entryPointName);
-            if (it == data->remappings.end()) {
-                return DAWN_VALIDATION_ERROR("Could not find remapped name for entry point.");
+            if (it != data->remappings.end()) {
+                *remappedEntryPointName = it->second;
+            } else {
+                if (GetDevice()->IsToggleEnabled(Toggle::DisableSymbolRenaming)) {
+                    *remappedEntryPointName = entryPointName;
+                } else {
+                    return DAWN_VALIDATION_ERROR("Could not find remapped name for entry point.");
+                }
             }
-            *remappedEntryPointName = it->second;
         } else {
             return DAWN_VALIDATION_ERROR("Transform output missing renamer data.");
         }
@@ -147,6 +159,7 @@ namespace dawn_native { namespace metal {
         tint::writer::msl::Options options;
         options.buffer_size_ubo_index = kBufferLengthBufferSlot;
         options.fixed_sample_mask = sampleMask;
+        options.disable_workgroup_init = GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
         auto result = tint::writer::msl::Generate(&program, options);
         if (!result.success) {
             errorStream << "Generator: " << result.error << std::endl;

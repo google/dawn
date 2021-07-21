@@ -108,6 +108,8 @@ namespace dawn_native { namespace vulkan {
 
             tint::writer::spirv::Options options;
             options.emit_vertex_point_size = true;
+            options.disable_workgroup_init =
+                GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
             auto result = tint::writer::spirv::Generate(&program, options);
             if (!result.success) {
                 errorStream << "Generator: " << result.error << std::endl;
@@ -213,6 +215,7 @@ namespace dawn_native { namespace vulkan {
 
         tint::writer::spirv::Options options;
         options.emit_vertex_point_size = true;
+        options.disable_workgroup_init = GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
         auto result = tint::writer::spirv::Generate(&program, options);
         if (!result.success) {
             errorStream << "Generator: " << result.error << std::endl;

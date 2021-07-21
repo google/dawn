@@ -204,6 +204,14 @@ namespace dawn_native {
               "testing Tint's SPIRV->WGSL translation on real content to be sure that it will "
               "work when the same translation runs in a WASM module in the page.",
               "https://crbug.com/dawn/960"}},
+            {Toggle::DisableWorkgroupInit,
+             {"disable_workgroup_init",
+              "Disables the workgroup memory zero-initialization for compute shaders.",
+              "https://crbug.com/tint/1003"}},
+            {Toggle::DisableSymbolRenaming,
+             {"disable_symbol_renaming",
+              "Disables the WGSL symbol renaming so that names are preserved.",
+              "https://crbug.com/dawn/1016"}},
             // Dummy comment to separate the }} so it is clearer what to copy-paste to add a toggle.
         }};
     }  // anonymous namespace

@@ -260,6 +260,12 @@ namespace dawn_native { namespace d3d12 {
         transformManager.Add<tint::transform::BindingRemapper>();
         transformManager.Add<tint::transform::Renamer>();
 
+        if (GetDevice()->IsToggleEnabled(Toggle::DisableSymbolRenaming)) {
+            // We still need to rename HLSL reserved keywords
+            transformInputs.Add<tint::transform::Renamer::Config>(
+                tint::transform::Renamer::Target::kHlslKeywords);
+        }
+
         // D3D12 registers like `t3` and `c3` have the same bindingOffset number in the
         // remapping but should not be considered a collision because they have different types.
         const bool mayCollide = true;
@@ -284,15 +290,21 @@ namespace dawn_native { namespace d3d12 {
 
         if (auto* data = transformOutputs.Get<tint::transform::Renamer::Data>()) {
             auto it = data->remappings.find(entryPointName);
-            if (it == data->remappings.end()) {
-                return DAWN_VALIDATION_ERROR("Could not find remapped name for entry point.");
+            if (it != data->remappings.end()) {
+                *remappedEntryPointName = it->second;
+            } else {
+                if (GetDevice()->IsToggleEnabled(Toggle::DisableSymbolRenaming)) {
+                    *remappedEntryPointName = entryPointName;
+                } else {
+                    return DAWN_VALIDATION_ERROR("Could not find remapped name for entry point.");
+                }
             }
-            *remappedEntryPointName = it->second;
         } else {
             return DAWN_VALIDATION_ERROR("Transform output missing renamer data.");
         }
 
         tint::writer::hlsl::Options options;
+        options.disable_workgroup_init = GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
         auto result = tint::writer::hlsl::Generate(&program, options);
         if (!result.success) {
             errorStream << "Generator: " << result.error << std::endl;
