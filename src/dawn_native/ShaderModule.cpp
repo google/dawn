@@ -14,6 +14,7 @@
 
 #include "dawn_native/ShaderModule.h"
 
+#include "common/Constants.h"
 #include "common/HashUtils.h"
 #include "common/VertexFormatUtils.h"
 #include "dawn_native/BindGroupLayout.h"
@@ -903,6 +904,50 @@ namespace dawn_native {
                 DAWN_TRY_ASSIGN(metadata->stage, TintPipelineStageToShaderStage(entryPoint.stage));
 
                 if (metadata->stage == SingleShaderStage::Compute) {
+                    if (entryPoint.workgroup_size_x > kMaxComputeWorkgroupSizeX) {
+                        errorStream << "Workgroup X dimension exceeds maximum allowed:"
+                                    << entryPoint.workgroup_size_x << " > "
+                                    << kMaxComputeWorkgroupSizeX;
+                        return DAWN_VALIDATION_ERROR(errorStream.str());
+                    }
+                    if (entryPoint.workgroup_size_y > kMaxComputeWorkgroupSizeY) {
+                        errorStream << "Workgroup Y dimension exceeds maximum allowed: "
+                                    << entryPoint.workgroup_size_y << " > "
+                                    << kMaxComputeWorkgroupSizeY;
+                        return DAWN_VALIDATION_ERROR(errorStream.str());
+                    }
+                    if (entryPoint.workgroup_size_z > kMaxComputeWorkgroupSizeZ) {
+                        errorStream << "Workgroup Z dimension exceeds maximum allowed: "
+                                    << entryPoint.workgroup_size_z << " > "
+                                    << kMaxComputeWorkgroupSizeZ;
+                        return DAWN_VALIDATION_ERROR(errorStream.str());
+                    }
+
+                    // Dimensions have already been validated against their individual limits above.
+                    // This assertion ensures that the product of such limited dimensions cannot
+                    // possibly overflow a uint32_t.
+                    static_assert(static_cast<uint64_t>(kMaxComputeWorkgroupSizeX) *
+                                          kMaxComputeWorkgroupSizeY * kMaxComputeWorkgroupSizeZ <=
+                                      std::numeric_limits<uint32_t>::max(),
+                                  "Per-dimension workgroup size limits are too high");
+                    uint32_t num_invocations = entryPoint.workgroup_size_x *
+                                               entryPoint.workgroup_size_y *
+                                               entryPoint.workgroup_size_z;
+                    if (num_invocations > kMaxComputeWorkgroupInvocations) {
+                        errorStream << "Number of workgroup invocations exceeds maximum allowed: "
+                                    << num_invocations << " > " << kMaxComputeWorkgroupInvocations;
+                        return DAWN_VALIDATION_ERROR(errorStream.str());
+                    }
+
+                    const size_t workgroup_storage_size =
+                        inspector.GetWorkgroupStorageSize(entryPoint.name);
+                    if (workgroup_storage_size > kMaxComputeWorkgroupStorageSize) {
+                        errorStream << "Workgroup shared storage size for " << entryPoint.name
+                                    << " exceeds the maximum allowed: " << workgroup_storage_size
+                                    << " > " << kMaxComputeWorkgroupStorageSize;
+                        return DAWN_VALIDATION_ERROR(errorStream.str());
+                    }
+
                     metadata->localWorkgroupSize.x = entryPoint.workgroup_size_x;
                     metadata->localWorkgroupSize.y = entryPoint.workgroup_size_y;
                     metadata->localWorkgroupSize.z = entryPoint.workgroup_size_z;

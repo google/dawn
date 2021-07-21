@@ -282,3 +282,64 @@ TEST_F(ShaderModuleValidationTest, MaximumShaderIOLocations) {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, fragmentShader.c_str()));
     }
 }
+
+// Tests that we validate workgroup size limits.
+TEST_F(ShaderModuleValidationTest, ComputeWorkgroupSizeLimits) {
+    DAWN_SKIP_TEST_IF(!HasToggleEnabled("use_tint_generator"));
+
+    auto MakeShaderWithWorkgroupSize = [this](uint32_t x, uint32_t y, uint32_t z) {
+        std::ostringstream ss;
+        ss << "[[stage(compute), workgroup_size(" << x << "," << y << "," << z
+           << ")]] fn main() {}";
+        utils::CreateShaderModule(device, ss.str().c_str());
+    };
+
+    MakeShaderWithWorkgroupSize(1, 1, 1);
+    MakeShaderWithWorkgroupSize(kMaxComputeWorkgroupSizeX, 1, 1);
+    MakeShaderWithWorkgroupSize(1, kMaxComputeWorkgroupSizeY, 1);
+    MakeShaderWithWorkgroupSize(1, 1, kMaxComputeWorkgroupSizeZ);
+
+    ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupSize(kMaxComputeWorkgroupSizeX + 1, 1, 1));
+    ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupSize(1, kMaxComputeWorkgroupSizeY + 1, 1));
+    ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupSize(1, 1, kMaxComputeWorkgroupSizeZ + 1));
+
+    // No individual dimension exceeds its limit, but the combined size should definitely exceed the
+    // total invocation limit.
+    ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupSize(
+        kMaxComputeWorkgroupSizeX, kMaxComputeWorkgroupSizeY, kMaxComputeWorkgroupSizeZ));
+}
+
+// Tests that we validate workgroup storage size limits.
+TEST_F(ShaderModuleValidationTest, ComputeWorkgroupStorageSizeLimits) {
+    DAWN_SKIP_TEST_IF(!HasToggleEnabled("use_tint_generator"));
+
+    constexpr uint32_t kVec4Size = 16;
+    constexpr uint32_t kMaxVec4Count = kMaxComputeWorkgroupStorageSize / kVec4Size;
+    constexpr uint32_t kMat4Size = 64;
+    constexpr uint32_t kMaxMat4Count = kMaxComputeWorkgroupStorageSize / kMat4Size;
+
+    auto MakeShaderWithWorkgroupStorage = [this](uint32_t vec4_count, uint32_t mat4_count) {
+        std::ostringstream ss;
+        std::ostringstream body;
+        if (vec4_count > 0) {
+            ss << "var<workgroup> vec4_data: array<vec4<f32>, " << vec4_count << ">;";
+            body << "ignore(vec4_data);";
+        }
+        if (mat4_count > 0) {
+            ss << "var<workgroup> mat4_data: array<mat4x4<f32>, " << mat4_count << ">;";
+            body << "ignore(mat4_data);";
+        }
+        ss << "[[stage(compute), workgroup_size(1)]] fn main() { " << body.str() << " }";
+        utils::CreateShaderModule(device, ss.str().c_str());
+    };
+
+    MakeShaderWithWorkgroupStorage(1, 1);
+    MakeShaderWithWorkgroupStorage(kMaxVec4Count, 0);
+    MakeShaderWithWorkgroupStorage(0, kMaxMat4Count);
+    MakeShaderWithWorkgroupStorage(kMaxVec4Count - 4, 1);
+    MakeShaderWithWorkgroupStorage(4, kMaxMat4Count - 1);
+    ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupStorage(kMaxVec4Count + 1, 0));
+    ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupStorage(kMaxVec4Count - 3, 1));
+    ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupStorage(0, kMaxMat4Count + 1));
+    ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupStorage(4, kMaxMat4Count));
+}

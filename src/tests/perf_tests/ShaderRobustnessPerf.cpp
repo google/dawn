@@ -17,7 +17,7 @@
 #include "utils/WGPUHelpers.h"
 
 namespace {
-    constexpr uint32_t kTileSize = 64u;
+    constexpr uint32_t kTileSize = 32u;
 
     const std::string& kMatMulFloatHeader = R"(
         [[block]] struct Uniforms {
@@ -62,18 +62,18 @@ namespace {
 
         let RowPerThread : u32 = 4u;
         let ColPerThread : u32 = 4u;
-        let TileAOuter : u32 = 64u;
-        let TileBOuter : u32 = 64u;
-        let TileInner : u32 = 64u;)";
+        let TileAOuter : u32 = 32u;
+        let TileBOuter : u32 = 32u;
+        let TileInner : u32 = 32u;)";
 
     const std::string& kMatMulFloatSharedArray1D = R"(
-        var<workgroup> mm_Asub : array<f32, 4096>;
-        var<workgroup> mm_Bsub : array<f32, 4096>;)";
+        var<workgroup> mm_Asub : array<f32, 1024>;
+        var<workgroup> mm_Bsub : array<f32, 1024>;)";
     const std::string& kMatMulFloatSharedArray2D = R"(
-        var<workgroup> mm_Asub : array<array<f32, 64>, 64>;
-        var<workgroup> mm_Bsub : array<array<f32, 64>, 64>;)";
+        var<workgroup> mm_Asub : array<array<f32, 32>, 32>;
+        var<workgroup> mm_Bsub : array<array<f32, 32>, 32>;)";
     const std::string& kMatMulFloatBodyPart1 = R"(
-        [[stage(compute), workgroup_size(16, 16, 1)]]
+        [[stage(compute), workgroup_size(8, 8, 1)]]
         fn main([[builtin(local_invocation_id)]] local_id : vec3<u32>,
                 [[builtin(global_invocation_id)]] global_id  : vec3<u32>) {
             let tileRow : u32 = local_id.y * RowPerThread;
@@ -95,9 +95,9 @@ namespace {
                 acc[index] = 0.;
             }
 
-            let ColPerThreadA : u32 = TileInner / 16u;
+            let ColPerThreadA : u32 = TileInner / 8u;
             let tileColA : u32 = local_id.x * ColPerThreadA;
-            let RowPerThreadB : u32 = TileInner / 16u;
+            let RowPerThreadB : u32 = TileInner / 8u;
             let tileRowB : u32 = local_id.y * RowPerThreadB;
 
             // Loop over shared dimension.
@@ -229,17 +229,16 @@ namespace {
 
         let RowPerThread : u32 = 4u;
         let ColPerThread : u32 = 4u;
-        let TileAOuter : u32 = 64u;
-        let TileBOuter : u32 = 64u;
-        let TileInner : u32 = 64u;)";
+        let TileOuter : u32 = 32u;
+        let TileInner : u32 = 32u;)";
     const std::string& kMatMulVec4SharedArray1D = R"(
-        var<workgroup> mm_Asub : array<vec4<f32>, 1024>;
-        var<workgroup> mm_Bsub : array<vec4<f32>, 1024>;)";
+        var<workgroup> mm_Asub : array<vec4<f32>, 256>;
+        var<workgroup> mm_Bsub : array<vec4<f32>, 256>;)";
     const std::string& kMatMulVec4SharedArray2D = R"(
-        var<workgroup> mm_Asub : array<array<vec4<f32>, 16>, 64>;
-        var<workgroup> mm_Bsub : array<array<vec4<f32>, 16>, 64>;)";
+        var<workgroup> mm_Asub : array<array<vec4<f32>, 8>, 32>;
+        var<workgroup> mm_Bsub : array<array<vec4<f32>, 8>, 32>;)";
     const std::string& kMatMulVec4BodyPart1 = R"(
-        [[stage(compute), workgroup_size(16, 16, 1)]]
+        [[stage(compute), workgroup_size(8, 8, 1)]]
         fn main([[builtin(local_invocation_id)]] local_id : vec3<u32>,
                 [[builtin(global_invocation_id)]] global_id  : vec3<u32>) {
             let tileRow : u32 = local_id.y * RowPerThread;
@@ -262,7 +261,7 @@ namespace {
             }
 
             var globalColA : u32 = tileCol;
-            let RowPerThreadB : u32 = TileInner / 16u;
+            let RowPerThreadB : u32 = TileInner / 8u;
             let tileRowB : u32 = local_id.y * RowPerThreadB;
 
             // Loop over shared dimension.
@@ -281,7 +280,7 @@ namespace {
                 for (var innerRow : u32 = 0u; innerRow < RowPerThreadB; innerRow = innerRow + 1u) {
                     let inputRow : u32 = tileRowB + innerRow;
                     let inputCol : u32 = tileCol;
-                    let index : u32 = inputRow * TileBOuter / ColPerThread + inputCol;
+                    let index : u32 = inputRow * TileOuter / ColPerThread + inputCol;
                     mm_Bsub[index] = mm_readB(t * TileInner + inputRow, globalCol);;
                 }
 
@@ -289,10 +288,10 @@ namespace {
 
                 // Compute acc values for a single thread.
                 for (var k : u32 = 0u; k < TileInner / ColPerThread; k = k + 1u) {
-                    BCached[0] = mm_Bsub[(k * ColPerThread) * (TileBOuter / ColPerThread) + tileCol];
-                    BCached[1] = mm_Bsub[(k * ColPerThread + 1u) * (TileBOuter / ColPerThread) + tileCol];
-                    BCached[2] = mm_Bsub[(k * ColPerThread + 2u) * (TileBOuter / ColPerThread) + tileCol];
-                    BCached[3] = mm_Bsub[(k * ColPerThread + 3u) * (TileBOuter / ColPerThread) + tileCol];
+                    BCached[0] = mm_Bsub[(k * ColPerThread) * (TileOuter / ColPerThread) + tileCol];
+                    BCached[1] = mm_Bsub[(k * ColPerThread + 1u) * (TileOuter / ColPerThread) + tileCol];
+                    BCached[2] = mm_Bsub[(k * ColPerThread + 2u) * (TileOuter / ColPerThread) + tileCol];
+                    BCached[3] = mm_Bsub[(k * ColPerThread + 3u) * (TileOuter / ColPerThread) + tileCol];
 
                     for (var i : u32 = 0u; i < RowPerThread; i = i + 1u) {
                         ACached = mm_Asub[(tileRow + i) * (TileInner / ColPerThread) + k];)";
