@@ -563,12 +563,13 @@ uint32_t Inspector::GetWorkgroupStorageSize(const std::string& entry_point) {
 ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
   auto* func = program_->AST().Functions().Find(program_->Symbols().Get(name));
   if (!func) {
-    error_ += name + " was not found!";
+    diagnostics_.add_error(diag::System::Inspector, name + " was not found!");
     return nullptr;
   }
 
   if (!func->IsEntryPoint()) {
-    error_ += name + " is not an entry point!";
+    diagnostics_.add_error(diag::System::Inspector,
+                           name + " is not an entry point!");
     return nullptr;
   }
 

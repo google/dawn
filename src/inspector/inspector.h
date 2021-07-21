@@ -43,9 +43,9 @@ class Inspector {
   ~Inspector();
 
   /// @returns error messages from the Inspector
-  const std::string& error() { return error_; }
+  std::string error() { return diagnostics_.str(); }
   /// @returns true if an error was encountered
-  bool has_error() const { return !error_.empty(); }
+  bool has_error() const { return diagnostics_.contains_errors(); }
 
   /// @returns vector of entry point information
   std::vector<EntryPoint> GetEntryPoints();
@@ -139,7 +139,7 @@ class Inspector {
 
  private:
   const Program* program_;
-  std::string error_;
+  diag::List diagnostics_;
   std::unique_ptr<
       std::unordered_map<std::string, UniqueVector<SamplerTexturePair>>>
       sampler_targets_;
