@@ -342,6 +342,7 @@ namespace dawn_native {
             const TextureViewDescriptor* descriptor) = 0;
 
         virtual MaybeError TickImpl() = 0;
+        void FlushCallbackTaskQueue();
 
         ResultOrError<Ref<BindGroupLayoutBase>> CreateEmptyBindGroupLayout();
 

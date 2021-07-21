@@ -86,6 +86,7 @@ namespace dawn_native {
     namespace {
         struct LoggingCallbackTask : CallbackTask {
           public:
+            LoggingCallbackTask() = delete;
             LoggingCallbackTask(wgpu::LoggingCallback loggingCallback,
                                 WGPULoggingType loggingType,
                                 const char* message,
@@ -94,14 +95,11 @@ namespace dawn_native {
                   mLoggingType(loggingType),
                   mMessage(message),
                   mUserdata(userdata) {
-                // The parameter of constructor is the same as those of callback.
                 // Since the Finish() will be called in uncertain future in which time the message
                 // may already disposed, we must keep a local copy in the CallbackTask.
             }
 
             void Finish() override {
-                // Original direct call: mLoggingCallback(message, mLoggingUserdata)
-                // Do the same here, but with everything bound locally.
                 mCallback(mLoggingType, mMessage.c_str(), mUserdata);
             }
 
@@ -115,6 +113,9 @@ namespace dawn_native {
             }
 
           private:
+            // As all deferred callback tasks will be triggered before modifying the registered
+            // callback or shutting down, we are ensured that callback function and userdata pointer
+            // stored in tasks is valid when triggered.
             wgpu::LoggingCallback mCallback;
             WGPULoggingType mLoggingType;
             std::string mMessage;
@@ -321,17 +322,35 @@ namespace dawn_native {
         HandleError(error->GetType(), ss.str().c_str());
     }
 
-    void DeviceBase::APISetUncapturedErrorCallback(wgpu::ErrorCallback callback, void* userdata) {
-        mUncapturedErrorCallback = callback;
-        mUncapturedErrorUserdata = userdata;
-    }
-
     void DeviceBase::APISetLoggingCallback(wgpu::LoggingCallback callback, void* userdata) {
+        // The registered callback function and userdata pointer are stored and used by deferred
+        // callback tasks, and after setting a different callback (especially in the case of
+        // resetting) the resources pointed by such pointer may be freed. Flush all deferred
+        // callback tasks to guarantee we are never going to use the previous callback after
+        // this call.
+        FlushCallbackTaskQueue();
         mLoggingCallback = callback;
         mLoggingUserdata = userdata;
     }
 
+    void DeviceBase::APISetUncapturedErrorCallback(wgpu::ErrorCallback callback, void* userdata) {
+        // The registered callback function and userdata pointer are stored and used by deferred
+        // callback tasks, and after setting a different callback (especially in the case of
+        // resetting) the resources pointed by such pointer may be freed. Flush all deferred
+        // callback tasks to guarantee we are never going to use the previous callback after
+        // this call.
+        FlushCallbackTaskQueue();
+        mUncapturedErrorCallback = callback;
+        mUncapturedErrorUserdata = userdata;
+    }
+
     void DeviceBase::APISetDeviceLostCallback(wgpu::DeviceLostCallback callback, void* userdata) {
+        // The registered callback function and userdata pointer are stored and used by deferred
+        // callback tasks, and after setting a different callback (especially in the case of
+        // resetting) the resources pointed by such pointer may be freed. Flush all deferred
+        // callback tasks to guarantee we are never going to use the previous callback after
+        // this call.
+        FlushCallbackTaskQueue();
         mDeviceLostCallback = callback;
         mDeviceLostUserdata = userdata;
     }
@@ -801,8 +820,7 @@ namespace dawn_native {
     void DeviceBase::APICreateRenderPipelineAsync(const RenderPipelineDescriptor* descriptor,
                                                   WGPUCreateRenderPipelineAsyncCallback callback,
                                                   void* userdata) {
-        ResultOrError<Ref<RenderPipelineBase>> maybeResult =
-            CreateRenderPipeline(descriptor);
+        ResultOrError<Ref<RenderPipelineBase>> maybeResult = CreateRenderPipeline(descriptor);
         if (maybeResult.IsError()) {
             std::unique_ptr<ErrorData> error = maybeResult.AcquireError();
             callback(WGPUCreatePipelineAsyncStatus_Error, nullptr, error->GetMessage().c_str(),
@@ -911,18 +929,9 @@ namespace dawn_native {
             mQueue->Tick(mCompletedSerial);
         }
 
-        // We have to check mCallbackTaskManager in every Tick because it is not related to any
-        // global serials.
-        if (!mCallbackTaskManager->IsEmpty()) {
-            // If a user calls Queue::Submit inside the callback, then the device will be ticked,
-            // which in turns ticks the tracker, causing reentrance and dead lock here. To prevent
-            // such reentrant call, we remove all the callback tasks from mCallbackTaskManager,
-            // update mCallbackTaskManager, then call all the callbacks.
-            auto callbackTasks = mCallbackTaskManager->AcquireCallbackTasks();
-            for (std::unique_ptr<CallbackTask>& callbackTask : callbackTasks) {
-                callbackTask->Finish();
-            }
-        }
+        // We have to check callback tasks in every Tick because it is not related to any global
+        // serials.
+        FlushCallbackTaskQueue();
 
         return {};
     }
@@ -1224,8 +1233,7 @@ namespace dawn_native {
         }
     }
 
-    ResultOrError<Ref<SamplerBase>> DeviceBase::CreateSampler(
-        const SamplerDescriptor* descriptor) {
+    ResultOrError<Ref<SamplerBase>> DeviceBase::CreateSampler(const SamplerDescriptor* descriptor) {
         const SamplerDescriptor defaultDescriptor = {};
         DAWN_TRY(ValidateIsAlive());
         descriptor = descriptor != nullptr ? descriptor : &defaultDescriptor;
@@ -1355,6 +1363,19 @@ namespace dawn_native {
             if (toggle != Toggle::InvalidEnum) {
                 mEnabledToggles.Set(toggle, false);
                 mOverridenToggles.Set(toggle, true);
+            }
+        }
+    }
+
+    void DeviceBase::FlushCallbackTaskQueue() {
+        if (!mCallbackTaskManager->IsEmpty()) {
+            // If a user calls Queue::Submit inside the callback, then the device will be ticked,
+            // which in turns ticks the tracker, causing reentrance and dead lock here. To prevent
+            // such reentrant call, we remove all the callback tasks from mCallbackTaskManager,
+            // update mCallbackTaskManager, then call all the callbacks.
+            auto callbackTasks = mCallbackTaskManager->AcquireCallbackTasks();
+            for (std::unique_ptr<CallbackTask>& callbackTask : callbackTasks) {
+                callbackTask->Finish();
             }
         }
     }
