@@ -53,7 +53,7 @@ namespace dawn_native { namespace metal {
         CommandRecordingContext* GetPendingCommandContext();
         void SubmitPendingCommandBuffer();
 
-        TextureBase* CreateTextureWrappingIOSurface(const ExternalImageDescriptor* descriptor,
+        Ref<Texture> CreateTextureWrappingIOSurface(const ExternalImageDescriptor* descriptor,
                                                     IOSurfaceRef ioSurface,
                                                     uint32_t plane);
         void WaitForCommandsToBeScheduled();

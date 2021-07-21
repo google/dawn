@@ -17,8 +17,8 @@
 
 #include "dawn_native/MetalBackend.h"
 
-#include "dawn_native/Texture.h"
 #include "dawn_native/metal/DeviceMTL.h"
+#include "dawn_native/metal/TextureMTL.h"
 
 namespace dawn_native { namespace metal {
 
@@ -34,9 +34,9 @@ namespace dawn_native { namespace metal {
     WGPUTexture WrapIOSurface(WGPUDevice cDevice,
                               const ExternalImageDescriptorIOSurface* cDescriptor) {
         Device* device = reinterpret_cast<Device*>(cDevice);
-        TextureBase* texture = device->CreateTextureWrappingIOSurface(
+        Ref<TextureBase> texture = device->CreateTextureWrappingIOSurface(
             cDescriptor, cDescriptor->ioSurface, cDescriptor->plane);
-        return reinterpret_cast<WGPUTexture>(texture);
+        return reinterpret_cast<WGPUTexture>(texture.Detach());
     }
 
     void WaitForCommandsToBeScheduled(WGPUDevice cDevice) {

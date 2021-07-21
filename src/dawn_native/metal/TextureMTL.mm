@@ -352,49 +352,82 @@ namespace dawn_native { namespace metal {
     // static
     ResultOrError<Ref<Texture>> Texture::Create(Device* device,
                                                 const TextureDescriptor* descriptor) {
-        return AcquireRef(new Texture(device, descriptor));
+        Ref<Texture> texture =
+            AcquireRef(new Texture(device, descriptor, TextureState::OwnedInternal));
+        DAWN_TRY(texture->InitializeAsInternalTexture(descriptor));
+        return texture;
     }
 
-    Texture::Texture(Device* device, const TextureDescriptor* descriptor)
-        : TextureBase(device, descriptor, TextureState::OwnedInternal) {
+    // static
+    ResultOrError<Ref<Texture>> Texture::CreateFromIOSurface(
+        Device* device,
+        const ExternalImageDescriptor* descriptor,
+        IOSurfaceRef ioSurface,
+        uint32_t plane) {
+        const TextureDescriptor* textureDescriptor =
+            reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor);
+
+        Ref<Texture> texture =
+            AcquireRef(new Texture(device, textureDescriptor, TextureState::OwnedInternal));
+        DAWN_TRY(texture->InitializeFromIOSurface(descriptor, textureDescriptor, ioSurface, plane));
+        return texture;
+    }
+
+    // static
+    Ref<Texture> Texture::CreateWrapping(Device* device,
+                                         const TextureDescriptor* descriptor,
+                                         NSPRef<id<MTLTexture>> wrapped) {
+        Ref<Texture> texture =
+            AcquireRef(new Texture(device, descriptor, TextureState::OwnedInternal));
+        texture->InitializeAsWrapping(descriptor, std::move(wrapped));
+        return texture;
+    }
+
+    MaybeError Texture::InitializeAsInternalTexture(const TextureDescriptor* descriptor) {
+        Device* device = ToBackend(GetDevice());
+
         NSRef<MTLTextureDescriptor> mtlDesc = CreateMetalTextureDescriptor(device, descriptor);
+        mMtlUsage = [*mtlDesc usage];
         mMtlTexture =
             AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:mtlDesc.Get()]);
-        mMtlUsage = [*mtlDesc usage];
+
+        if (mMtlTexture == nil) {
+            return DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate texture.");
+        }
 
         if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
-            device->ConsumedError(ClearTexture(device->GetPendingCommandContext(),
-                                               GetAllSubresources(),
-                                               TextureBase::ClearValue::NonZero));
+            DAWN_TRY(ClearTexture(device->GetPendingCommandContext(), GetAllSubresources(),
+                                  TextureBase::ClearValue::NonZero));
         }
+
+        return {};
     }
 
-    Texture::Texture(Device* device,
-                     const TextureDescriptor* descriptor,
-                     NSPRef<id<MTLTexture>> mtlTexture)
-        : TextureBase(device, descriptor, TextureState::OwnedInternal),
-          mMtlTexture(std::move(mtlTexture)) {
-        NSRef<MTLTextureDescriptor> mtlDesc = CreateMetalTextureDescriptor(device, descriptor);
+    void Texture::InitializeAsWrapping(const TextureDescriptor* descriptor,
+                                       NSPRef<id<MTLTexture>> wrapped) {
+        NSRef<MTLTextureDescriptor> mtlDesc = CreateMetalTextureDescriptor(GetDevice(), descriptor);
         mMtlUsage = [*mtlDesc usage];
+        mMtlTexture = std::move(wrapped);
     }
 
-    Texture::Texture(Device* device,
-                     const ExternalImageDescriptor* descriptor,
-                     IOSurfaceRef ioSurface,
-                     uint32_t plane)
-        : TextureBase(device,
-                      reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor),
-                      TextureState::OwnedInternal) {
-        NSRef<MTLTextureDescriptor> mtlDesc = CreateMetalTextureDescriptor(
-            device, reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor));
+    MaybeError Texture::InitializeFromIOSurface(const ExternalImageDescriptor* descriptor,
+                                                const TextureDescriptor* textureDescriptor,
+                                                IOSurfaceRef ioSurface,
+                                                uint32_t plane) {
+        Device* device = ToBackend(GetDevice());
+
+        NSRef<MTLTextureDescriptor> mtlDesc =
+            CreateMetalTextureDescriptor(device, textureDescriptor);
         [*mtlDesc setStorageMode:kIOSurfaceStorageMode];
 
+        mMtlUsage = [*mtlDesc usage];
         mMtlTexture = AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:mtlDesc.Get()
                                                                            iosurface:ioSurface
                                                                                plane:plane]);
-        mMtlUsage = [*mtlDesc usage];
 
         SetIsSubresourceContentInitialized(descriptor->isInitialized, GetAllSubresources());
+
+        return {};
     }
 
     Texture::~Texture() {
@@ -625,12 +658,14 @@ namespace dawn_native { namespace metal {
     // static
     ResultOrError<Ref<TextureView>> TextureView::Create(TextureBase* texture,
                                                         const TextureViewDescriptor* descriptor) {
-        return AcquireRef(new TextureView(texture, descriptor));
+        Ref<TextureView> view = AcquireRef(new TextureView(texture, descriptor));
+        DAWN_TRY(view->Initialize(descriptor));
+        return view;
     }
 
-    TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor)
-        : TextureViewBase(texture, descriptor) {
-        id<MTLTexture> mtlTexture = ToBackend(texture)->GetMTLTexture();
+    MaybeError TextureView::Initialize(const TextureViewDescriptor* descriptor) {
+        Texture* texture = ToBackend(GetTexture());
+        id<MTLTexture> mtlTexture = texture->GetMTLTexture();
 
         if (!UsageNeedsTextureView(texture->GetUsage())) {
             mMtlTextureView = nullptr;
@@ -663,7 +698,12 @@ namespace dawn_native { namespace metal {
                                                             textureType:textureViewType
                                                                  levels:mipLevelRange
                                                                  slices:arrayLayerRange]);
+            if (mMtlTextureView == nil) {
+                return DAWN_INTERNAL_ERROR("Failed to create MTLTexture view.");
+            }
         }
+
+        return {};
     }
 
     id<MTLTexture> TextureView::GetMTLTexture() {

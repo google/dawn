@@ -409,7 +409,7 @@ namespace dawn_native { namespace metal {
         return {};
     }
 
-    TextureBase* Device::CreateTextureWrappingIOSurface(const ExternalImageDescriptor* descriptor,
+    Ref<Texture> Device::CreateTextureWrappingIOSurface(const ExternalImageDescriptor* descriptor,
                                                         IOSurfaceRef ioSurface,
                                                         uint32_t plane) {
         const TextureDescriptor* textureDescriptor =
@@ -423,7 +423,12 @@ namespace dawn_native { namespace metal {
             return nullptr;
         }
 
-        return new Texture(this, descriptor, ioSurface, plane);
+        Ref<Texture> result;
+        if (ConsumedError(Texture::CreateFromIOSurface(this, descriptor, ioSurface, plane),
+                          &result)) {
+            return nullptr;
+        }
+        return result;
     }
 
     void Device::WaitForCommandsToBeScheduled() {

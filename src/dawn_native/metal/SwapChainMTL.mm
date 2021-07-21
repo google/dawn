@@ -53,7 +53,8 @@ namespace dawn_native { namespace metal {
         }
 
         id<MTLTexture> nativeTexture = reinterpret_cast<id<MTLTexture>>(next.texture.ptr);
-        return new Texture(ToBackend(GetDevice()), descriptor, nativeTexture);
+
+        return Texture::CreateWrapping(ToBackend(GetDevice()), descriptor, nativeTexture).Detach();
     }
 
     MaybeError OldSwapChain::OnBeforePresent(TextureViewBase*) {
@@ -131,9 +132,8 @@ namespace dawn_native { namespace metal {
 
         TextureDescriptor textureDesc = GetSwapChainBaseTextureDescriptor(this);
 
-        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-        mTexture = AcquireRef(
-            new Texture(ToBackend(GetDevice()), &textureDesc, [*mCurrentDrawable texture]));
+        mTexture = Texture::CreateWrapping(ToBackend(GetDevice()), &textureDesc,
+                                           [*mCurrentDrawable texture]);
         // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
         return mTexture->APICreateView();
     }

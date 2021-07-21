@@ -38,14 +38,14 @@ namespace dawn_native { namespace metal {
       public:
         static ResultOrError<Ref<Texture>> Create(Device* device,
                                                   const TextureDescriptor* descriptor);
-
-        Texture(Device* device,
-                const TextureDescriptor* descriptor,
-                NSPRef<id<MTLTexture>> mtlTexture);
-        Texture(Device* device,
-                const ExternalImageDescriptor* descriptor,
-                IOSurfaceRef ioSurface,
-                uint32_t plane);
+        static ResultOrError<Ref<Texture>> CreateFromIOSurface(
+            Device* device,
+            const ExternalImageDescriptor* descriptor,
+            IOSurfaceRef ioSurface,
+            uint32_t plane);
+        static Ref<Texture> CreateWrapping(Device* device,
+                                           const TextureDescriptor* descriptor,
+                                           NSPRef<id<MTLTexture>> wrapped);
 
         id<MTLTexture> GetMTLTexture();
 
@@ -53,8 +53,16 @@ namespace dawn_native { namespace metal {
                                                  const SubresourceRange& range);
 
       private:
-        Texture(Device* device, const TextureDescriptor* descriptor);
+        using TextureBase::TextureBase;
         ~Texture() override;
+
+        MaybeError InitializeAsInternalTexture(const TextureDescriptor* descriptor);
+        MaybeError InitializeFromIOSurface(const ExternalImageDescriptor* descriptor,
+                                           const TextureDescriptor* textureDescriptor,
+                                           IOSurfaceRef ioSurface,
+                                           uint32_t plane);
+        void InitializeAsWrapping(const TextureDescriptor* descriptor,
+                                  NSPRef<id<MTLTexture>> wrapped);
 
         void DestroyImpl() override;
 
@@ -74,7 +82,8 @@ namespace dawn_native { namespace metal {
         id<MTLTexture> GetMTLTexture();
 
       private:
-        TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor);
+        using TextureViewBase::TextureViewBase;
+        MaybeError Initialize(const TextureViewDescriptor* descriptor);
 
         NSPRef<id<MTLTexture>> mMtlTextureView;
     };
