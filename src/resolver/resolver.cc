@@ -2479,10 +2479,9 @@ bool Resolver::ValidateTextureIntrinsicFunction(
     if (param->Is<ast::TypeConstructorExpression>()) {
       auto values = ConstantValueOf(param);
       if (!values.IsValid()) {
-        AddError("'" + func_name +
-                     "' offset parameter must be provided as a literal or "
-                     "const_expr expression",
-                 param->source());
+        AddError(
+            "'" + func_name + "' offset parameter must be a const_expression",
+            param->source());
         return false;
       }
       if (!values.Type()->Is<sem::Vector>() ||
@@ -2503,10 +2502,9 @@ bool Resolver::ValidateTextureIntrinsicFunction(
         }
       }
     } else {
-      AddError("'" + func_name +
-                   "' offset parameter must be provided as a literal or "
-                   "const_expr expression",
-               param->source());
+      AddError(
+          "'" + func_name + "' offset parameter must be a const_expression",
+          param->source());
       return false;
     }
   }

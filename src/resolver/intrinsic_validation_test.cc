@@ -223,8 +223,7 @@ TEST_P(IntrinsicTextureSamplerValidationTest, GlobalConst) {
   EXPECT_FALSE(r()->Resolve());
   std::stringstream err;
   err << "12:34 error: '" << param.function
-      << "' offset parameter must be provided as"
-      << " a literal or const_expr expression";
+      << "' offset parameter must be a const_expression";
   EXPECT_EQ(r()->error(), err.str());
 }
 
@@ -253,8 +252,7 @@ TEST_P(IntrinsicTextureSamplerValidationTest, ScalarConst) {
   EXPECT_FALSE(r()->Resolve());
   std::stringstream err;
   err << "12:34 error: '" << param.function
-      << "' offset parameter must be provided as"
-      << " a literal or const_expr expression";
+      << "' offset parameter must be a const_expression";
   EXPECT_EQ(r()->error(), err.str());
 }
 
