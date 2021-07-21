@@ -361,7 +361,7 @@
         %217 = OpAccessChain %_ptr_Function_float %animationData %uint_2
         %218 = OpLoad %float %217
         %219 = OpFMul %float %215 %218
-        %220 = OpFMod %float %219 %float_1
+        %220 = OpFRem %float %219 %float_1
                OpStore %mt %220
                OpStore %f %float_0
                OpBranch %221

@@ -225,7 +225,21 @@ bool GeneratorImpl::EmitAssign(ast::AssignmentStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitBinary(std::ostream& out, ast::BinaryExpression* expr) {
-  out << "(";
+  if (expr->op() == ast::BinaryOp::kModulo &&
+      TypeOf(expr)->UnwrapRef()->is_float_scalar_or_vector()) {
+    out << "fmod";
+    ScopedParen sp(out);
+    if (!EmitExpression(out, expr->lhs())) {
+      return false;
+    }
+    out << ", ";
+    if (!EmitExpression(out, expr->rhs())) {
+      return false;
+    }
+    return true;
+  }
+
+  ScopedParen sp(out);
 
   if (!EmitExpression(out, expr->lhs())) {
     return false;
@@ -303,7 +317,6 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, ast::BinaryExpression* expr) {
     return false;
   }
 
-  out << ")";
   return true;
 }
 

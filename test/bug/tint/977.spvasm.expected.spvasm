@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 95
+; Bound: 98
 ; Schema: 0
                OpCapability Shader
          %43 = OpExtInstImport "GLSL.std.450"
@@ -87,9 +87,9 @@
     %float_1 = OpConstant %float 1
     %float_2 = OpConstant %float 2
        %void = OpTypeVoid
-         %67 = OpTypeFunction %void
+         %70 = OpTypeFunction %void
 %_ptr_Function_int = OpTypePointer Function %int
-         %73 = OpConstantNull %int
+         %76 = OpConstantNull %int
      %uint_0 = OpConstant %uint 0
 %_ptr_Private_uint = OpTypePointer Private %uint
     %int_n10 = OpConstant %int -10
@@ -109,56 +109,59 @@
                OpReturnValue %float_1
          %36 = OpLabel
          %40 = OpLoad %float %b
-         %45 = OpFMod %float %40 %float_2
-         %42 = OpExtInst %float %43 RoundEven %45
-         %46 = OpFOrdEqual %bool %42 %float_1
-         %41 = OpLogicalNot %bool %46
-               OpSelectionMerge %47 None
-               OpBranchConditional %41 %48 %49
-         %48 = OpLabel
-         %51 = OpLoad %float %a
-         %53 = OpLoad %float %b
-         %55 = OpExtInst %float %43 FAbs %51
-         %54 = OpExtInst %float %43 Pow %55 %53
-               OpStore %x_26 %54
-               OpBranch %47
-         %49 = OpLabel
-         %57 = OpLoad %float %a
-         %59 = OpLoad %float %a
-         %61 = OpLoad %float %b
-         %62 = OpExtInst %float %43 FSign %57
-         %64 = OpExtInst %float %43 FAbs %59
-         %63 = OpExtInst %float %43 Pow %64 %61
-         %65 = OpFMul %float %62 %63
-               OpStore %x_26 %65
-               OpBranch %47
-         %47 = OpLabel
-         %66 = OpLoad %float %x_26
-               OpReturnValue %66
+         %46 = OpFDiv %float %40 %float_2
+         %45 = OpExtInst %float %43 Floor %46
+         %47 = OpFMul %float %float_2 %45
+         %48 = OpFSub %float %40 %47
+         %42 = OpExtInst %float %43 RoundEven %48
+         %49 = OpFOrdEqual %bool %42 %float_1
+         %41 = OpLogicalNot %bool %49
+               OpSelectionMerge %50 None
+               OpBranchConditional %41 %51 %52
+         %51 = OpLabel
+         %54 = OpLoad %float %a
+         %56 = OpLoad %float %b
+         %58 = OpExtInst %float %43 FAbs %54
+         %57 = OpExtInst %float %43 Pow %58 %56
+               OpStore %x_26 %57
+               OpBranch %50
+         %52 = OpLabel
+         %60 = OpLoad %float %a
+         %62 = OpLoad %float %a
+         %64 = OpLoad %float %b
+         %65 = OpExtInst %float %43 FSign %60
+         %67 = OpExtInst %float %43 FAbs %62
+         %66 = OpExtInst %float %43 Pow %67 %64
+         %68 = OpFMul %float %65 %66
+               OpStore %x_26 %68
+               OpBranch %50
+         %50 = OpLabel
+         %69 = OpLoad %float %x_26
+               OpReturnValue %69
                OpFunctionEnd
-     %main_1 = OpFunction %void None %67
-         %70 = OpLabel
-      %index = OpVariable %_ptr_Function_int Function %73
-        %a_1 = OpVariable %_ptr_Function_int Function %73
+     %main_1 = OpFunction %void None %70
+         %73 = OpLabel
+      %index = OpVariable %_ptr_Function_int Function %76
+        %a_1 = OpVariable %_ptr_Function_int Function %76
       %param = OpVariable %_ptr_Function_float Function %30
     %param_1 = OpVariable %_ptr_Function_float Function %30
-         %79 = OpAccessChain %_ptr_Private_uint %gl_GlobalInvocationID %uint_0
-         %80 = OpLoad %uint %79
-         %81 = OpBitcast %int %80
-               OpStore %index %81
+         %82 = OpAccessChain %_ptr_Private_uint %gl_GlobalInvocationID %uint_0
+         %83 = OpLoad %uint %82
+         %84 = OpBitcast %int %83
+               OpStore %index %84
                OpStore %a_1 %int_n10
-         %83 = OpLoad %int %index
+         %86 = OpLoad %int %index
                OpStore %param %float_n4
                OpStore %param_1 %float_n3
-         %86 = OpFunctionCall %float %binaryOperation_f1_f1_ %param %param_1
-         %90 = OpAccessChain %_ptr_StorageBuffer_float %resultMatrix %uint_0 %83
-               OpStore %90 %86
+         %89 = OpFunctionCall %float %binaryOperation_f1_f1_ %param %param_1
+         %93 = OpAccessChain %_ptr_StorageBuffer_float %resultMatrix %uint_0 %86
+               OpStore %93 %89
                OpReturn
                OpFunctionEnd
-       %main = OpFunction %void None %67
-         %92 = OpLabel
-         %93 = OpLoad %v3uint %tint_symbol
-               OpStore %gl_GlobalInvocationID %93
-         %94 = OpFunctionCall %void %main_1
+       %main = OpFunction %void None %70
+         %95 = OpLabel
+         %96 = OpLoad %v3uint %tint_symbol
+               OpStore %gl_GlobalInvocationID %96
+         %97 = OpFunctionCall %void %main_1
                OpReturn
                OpFunctionEnd

@@ -966,6 +966,11 @@ class FunctionEmitter {
   /// @results a copy of the expression, with possibly updated type
   TypedExpression InferFunctionStorageClass(TypedExpression expr);
 
+  /// Returns an expression for a SPIR-V OpFMod instruction.
+  /// @param inst the SPIR-V instruction
+  /// @returns an expression
+  TypedExpression MakeFMod(const spvtools::opt::Instruction& inst);
+
   /// Returns an expression for a SPIR-V OpAccessChain or OpInBoundsAccessChain
   /// instruction.
   /// @param inst the SPIR-V instruction

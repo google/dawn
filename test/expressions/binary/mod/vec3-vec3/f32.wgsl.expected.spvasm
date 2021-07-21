@@ -22,6 +22,6 @@
          %14 = OpConstantComposite %v3float %float_4 %float_5 %float_6
           %f = OpFunction %void None %1
           %4 = OpLabel
-         %15 = OpFMod %v3float %10 %14
+         %15 = OpFRem %v3float %10 %14
                OpReturn
                OpFunctionEnd

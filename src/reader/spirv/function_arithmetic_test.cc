@@ -1239,17 +1239,119 @@ TEST_F(SpvBinaryArithTestBasic, SMod_Vector_UnsignedResult) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    SpvParserTest_FMod,
+    SpvParserTest_FRem,
     SpvBinaryArithTest,
     ::testing::Values(
         // Scalar float
-        BinaryData{"float", "float_50", "OpFMod", "float_60", "__f32",
+        BinaryData{"float", "float_50", "OpFRem", "float_60", "__f32",
                    "ScalarConstructor[not set]{50.000000}", "modulo",
                    "ScalarConstructor[not set]{60.000000}"},
         // Vector float
-        BinaryData{"v2float", "v2float_50_60", "OpFMod", "v2float_60_50",
+        BinaryData{"v2float", "v2float_50_60", "OpFRem", "v2float_60_50",
                    "__vec_2__f32", AstFor("v2float_50_60"), "modulo",
                    AstFor("v2float_60_50")}));
+
+TEST_F(SpvBinaryArithTestBasic, FMod_Scalar) {
+  const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpFMod %float %float_50 %float_60
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << "\n"
+      << assembly;
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    undefined
+    __f32
+    {
+      Binary[not set]{
+        ScalarConstructor[not set]{50.000000}
+        subtract
+        Binary[not set]{
+          ScalarConstructor[not set]{60.000000}
+          multiply
+          Call[not set]{
+            Identifier[not set]{floor}
+            (
+              Binary[not set]{
+                ScalarConstructor[not set]{50.000000}
+                divide
+                ScalarConstructor[not set]{60.000000}
+              }
+            )
+          }
+        }
+      }
+    }
+  })"));
+}
+
+TEST_F(SpvBinaryArithTestBasic, FMod_Vector) {
+  const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpFMod %v2float %v2float_50_60 %v2float_60_50
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << "\n"
+      << assembly;
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    undefined
+    __vec_2__f32
+    {
+      Binary[not set]{
+        TypeConstructor[not set]{
+          __vec_2__f32
+          ScalarConstructor[not set]{50.000000}
+          ScalarConstructor[not set]{60.000000}
+        }
+        subtract
+        Binary[not set]{
+          TypeConstructor[not set]{
+            __vec_2__f32
+            ScalarConstructor[not set]{60.000000}
+            ScalarConstructor[not set]{50.000000}
+          }
+          multiply
+          Call[not set]{
+            Identifier[not set]{floor}
+            (
+              Binary[not set]{
+                TypeConstructor[not set]{
+                  __vec_2__f32
+                  ScalarConstructor[not set]{50.000000}
+                  ScalarConstructor[not set]{60.000000}
+                }
+                divide
+                TypeConstructor[not set]{
+                  __vec_2__f32
+                  ScalarConstructor[not set]{60.000000}
+                  ScalarConstructor[not set]{50.000000}
+                }
+              }
+            )
+          }
+        }
+      }
+    }
+  })"));
+}
 
 TEST_F(SpvBinaryArithTestBasic, VectorTimesScalar) {
   const auto assembly = Preamble() + R"(

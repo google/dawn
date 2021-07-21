@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 
 using namespace metal;
@@ -25,7 +23,7 @@ float binaryOperation_f1_f1_(thread float* const a, thread float* const b) {
     return 1.0f;
   }
   float const x_21 = *(b);
-  if (!((rint((x_21 % 2.0f)) == 1.0f))) {
+  if (!((rint((x_21 - (2.0f * floor((x_21 / 2.0f))))) == 1.0f))) {
     float const x_29 = *(a);
     float const x_31 = *(b);
     x_26 = pow(fabs(x_29), x_31);
@@ -61,11 +59,4 @@ kernel void tint_symbol_1(uint3 gl_GlobalInvocationID_param [[thread_position_in
   main_1(resultMatrix, &(tint_symbol_4));
   return;
 }
-
-Compilation failed: 
-
-program_source:26:21: error: invalid operands to binary expression ('const float' and 'float')
-  if (!((rint((x_21 % 2.0f)) == 1.0f))) {
-               ~~~~ ^ ~~~~
-
 

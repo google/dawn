@@ -212,7 +212,7 @@ ast::BinaryOp ConvertBinaryOp(SpvOp opcode) {
       return ast::BinaryOp::kDivide;
     case SpvOpUMod:
     case SpvOpSMod:
-    case SpvOpFMod:
+    case SpvOpFRem:
       return ast::BinaryOp::kModulo;
     case SpvOpLogicalEqual:
     case SpvOpIEqual:
@@ -398,8 +398,9 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
       return "unpack2x16float";
 
     default:
-    // TODO(dneto) - The following are not implemented.
-    // They are grouped semantically, as in GLSL.std.450.h.
+      // TODO(dneto) - The following are not implemented.
+      // They are grouped semantically, as in GLSL.std.450.h.
+
     case GLSLstd450SSign:
 
     case GLSLstd450Radians:
@@ -3854,6 +3855,10 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     return MakeIntrinsicCall(inst);
   }
 
+  if (opcode == SpvOpFMod) {
+    return MakeFMod(inst);
+  }
+
   if (opcode == SpvOpAccessChain || opcode == SpvOpInBoundsAccessChain) {
     return MakeAccessChain(inst);
   }
@@ -4072,6 +4077,21 @@ ast::IdentifierExpression* FunctionEmitter::PrefixSwizzle(uint32_t n) {
   }
   Fail() << "invalid swizzle prefix count: " << n;
   return nullptr;
+}
+
+TypedExpression FunctionEmitter::MakeFMod(
+    const spvtools::opt::Instruction& inst) {
+  auto x = MakeOperand(inst, 0);
+  auto y = MakeOperand(inst, 1);
+  if (!x || !y) {
+    return {};
+  }
+  // Emulated with: x - y * floor(x / y)
+  auto* div = builder_.Div(x.expr, y.expr);
+  auto* floor = builder_.Call("floor", div);
+  auto* y_floor = builder_.Mul(y.expr, floor);
+  auto* res = builder_.Sub(x.expr, y_floor);
+  return {x.type, res};
 }
 
 TypedExpression FunctionEmitter::MakeAccessChain(

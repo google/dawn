@@ -246,7 +246,7 @@ INSTANTIATE_TEST_SUITE_P(
     BinaryArithFloatTest,
     testing::Values(BinaryData{ast::BinaryOp::kAdd, "OpFAdd"},
                     BinaryData{ast::BinaryOp::kDivide, "OpFDiv"},
-                    BinaryData{ast::BinaryOp::kModulo, "OpFMod"},
+                    BinaryData{ast::BinaryOp::kModulo, "OpFRem"},
                     BinaryData{ast::BinaryOp::kMultiply, "OpFMul"},
                     BinaryData{ast::BinaryOp::kSubtract, "OpFSub"}));
 

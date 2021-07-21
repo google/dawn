@@ -15,6 +15,6 @@
     %float_2 = OpConstant %float 2
           %f = OpFunction %void None %1
           %4 = OpLabel
-          %8 = OpFMod %float %float_1 %float_2
+          %8 = OpFRem %float %float_1 %float_2
                OpReturn
                OpFunctionEnd

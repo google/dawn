@@ -42,7 +42,7 @@ TEST_P(MslBinaryTest, Emit) {
   auto* right = Var("right", type());
 
   auto* expr =
-      create<ast::BinaryExpression>(params.op, Expr("left"), Expr("right"));
+      create<ast::BinaryExpression>(params.op, Expr(left), Expr(right));
   WrapInFunction(left, right, expr);
 
   GeneratorImpl& gen = Build();
@@ -73,6 +73,34 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"(left * right)", ast::BinaryOp::kMultiply},
         BinaryData{"(left / right)", ast::BinaryOp::kDivide},
         BinaryData{"(left % right)", ast::BinaryOp::kModulo}));
+
+TEST_F(MslBinaryTest, ModF32) {
+  auto* left = Var("left", ty.f32());
+  auto* right = Var("right", ty.f32());
+  auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kModulo, Expr(left),
+                                             Expr(right));
+  WrapInFunction(left, right, expr);
+
+  GeneratorImpl& gen = Build();
+
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), "fmod(left, right)");
+}
+
+TEST_F(MslBinaryTest, ModVec3F32) {
+  auto* left = Var("left", ty.vec3<f32>());
+  auto* right = Var("right", ty.vec3<f32>());
+  auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kModulo, Expr(left),
+                                             Expr(right));
+  WrapInFunction(left, right, expr);
+
+  GeneratorImpl& gen = Build();
+
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), "fmod(left, right)");
+}
 
 }  // namespace
 }  // namespace msl

@@ -43,7 +43,7 @@ fn binaryOperation_f1_f1_(a : ptr<function, f32>, b : ptr<function, f32>) -> f32
     return 1.0;
   }
   let x_21 : f32 = *(b);
-  if (!((round((x_21 % 2.0)) == 1.0))) {
+  if (!((round((x_21 - (2.0 * floor((x_21 / 2.0))))) == 1.0))) {
     let x_29 : f32 = *(a);
     let x_31 : f32 = *(b);
     x_26 = pow(abs(x_29), x_31);

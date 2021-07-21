@@ -13,7 +13,7 @@ float binaryOperation_f1_f1_(inout float a, inout float b) {
     return 1.0f;
   }
   const float x_21 = b;
-  if (!((round((x_21 % 2.0f)) == 1.0f))) {
+  if (!((round((x_21 - (2.0f * floor((x_21 / 2.0f))))) == 1.0f))) {
     const float x_29 = a;
     const float x_31 = b;
     x_26 = pow(abs(x_29), x_31);
