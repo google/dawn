@@ -888,6 +888,8 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
+            constexpr uint32_t kMaxInterStageShaderLocation =
+                kMaxInterStageShaderComponents / 4 - 1;
             for (auto& entryPoint : entryPoints) {
                 ASSERT(result.count(entryPoint.name) == 0);
 
@@ -928,6 +930,12 @@ namespace dawn_native {
                                << output_var.name;
                             return DAWN_VALIDATION_ERROR(ss.str());
                         }
+                        uint32_t location = output_var.location_decoration;
+                        if (DAWN_UNLIKELY(location > kMaxInterStageShaderLocation)) {
+                            std::stringstream ss;
+                            ss << "Vertex output location (" << location << ") over limits";
+                            return DAWN_VALIDATION_ERROR(ss.str());
+                        }
                     }
                 }
 
@@ -936,6 +944,12 @@ namespace dawn_native {
                         if (!input_var.has_location_decoration) {
                             return DAWN_VALIDATION_ERROR(
                                 "Need location decoration on fragment input");
+                        }
+                        uint32_t location = input_var.location_decoration;
+                        if (DAWN_UNLIKELY(location > kMaxInterStageShaderLocation)) {
+                            std::stringstream ss;
+                            ss << "Fragment input location (" << location << ") over limits";
+                            return DAWN_VALIDATION_ERROR(ss.str());
                         }
                     }
 

@@ -212,3 +212,73 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
 
     shaderModule.GetCompilationInfo(callback, nullptr);
 }
+
+// Validate the maximum location of effective inter-stage variables cannot be greater than 14
+// (kMaxInterStageShaderComponents / 4 - 1).
+TEST_F(ShaderModuleValidationTest, MaximumShaderIOLocations) {
+    auto generateShaderForTest = [](uint32_t maximumOutputLocation, wgpu::ShaderStage shaderStage) {
+        std::ostringstream stream;
+        stream << "struct ShaderIO {" << std::endl;
+        for (uint32_t location = 0; location <= maximumOutputLocation; ++location) {
+            stream << "[[location(" << location << ")]] var" << location << ": f32;" << std::endl;
+        }
+        switch (shaderStage) {
+            case wgpu::ShaderStage::Vertex: {
+                stream << R"(
+                    [[builtin(position)]] pos: vec4<f32>;
+                };
+                [[stage(vertex)]] fn main() -> ShaderIO {
+                    var shaderIO : ShaderIO;
+                    shaderIO.pos = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+                    return shaderIO;
+                 })";
+            } break;
+
+            case wgpu::ShaderStage::Fragment: {
+                stream << R"(
+                };
+                [[stage(fragment)]] fn main(shaderIO: ShaderIO) -> [[location(0)]] vec4<f32> {
+                    return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+                })";
+            } break;
+
+            case wgpu::ShaderStage::Compute:
+            default:
+                UNREACHABLE();
+        }
+
+        return stream.str();
+    };
+
+    constexpr uint32_t kMaxInterShaderIOLocation = kMaxInterStageShaderComponents / 4 - 1;
+
+    // It is allowed to create a shader module with the maximum active vertex output location == 14;
+    {
+        std::string vertexShader =
+            generateShaderForTest(kMaxInterShaderIOLocation, wgpu::ShaderStage::Vertex);
+        utils::CreateShaderModule(device, vertexShader.c_str());
+    }
+
+    // It isn't allowed to create a shader module with the maximum active vertex output location >
+    // 14;
+    {
+        std::string vertexShader =
+            generateShaderForTest(kMaxInterShaderIOLocation + 1, wgpu::ShaderStage::Vertex);
+        ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, vertexShader.c_str()));
+    }
+
+    // It is allowed to create a shader module with the maximum active fragment input location ==
+    // 14;
+    {
+        std::string fragmentShader =
+            generateShaderForTest(kMaxInterShaderIOLocation, wgpu::ShaderStage::Fragment);
+        utils::CreateShaderModule(device, fragmentShader.c_str());
+    }
+
+    // It is allowed to create a shader module with the maximum active vertex output location > 14;
+    {
+        std::string fragmentShader =
+            generateShaderForTest(kMaxInterShaderIOLocation + 1, wgpu::ShaderStage::Fragment);
+        ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, fragmentShader.c_str()));
+    }
+}
