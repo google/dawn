@@ -24,6 +24,11 @@ std::string GetEnvironmentVar(const char* variableName);
 bool SetEnvironmentVar(const char* variableName, const char* value);
 std::string GetExecutableDirectory();
 
+#ifdef DAWN_PLATFORM_APPLE
+void GetMacOSVersion(int32_t* majorVersion, int32_t* minorVersion = nullptr);
+bool IsMacOSVersionAtLeast(uint32_t majorVersion, uint32_t minorVersion = 0);
+#endif
+
 class ScopedEnvironmentVar {
   public:
     ScopedEnvironmentVar() = default;

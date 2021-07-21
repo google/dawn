@@ -18,6 +18,7 @@
 #include "common/GPUInfo.h"
 #include "common/NSRef.h"
 #include "common/Platform.h"
+#include "common/SystemUtils.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/MetalBackend.h"
 #include "dawn_native/metal/DeviceMTL.h"
@@ -152,8 +153,7 @@ namespace dawn_native { namespace metal {
 
         bool IsMetalSupported() {
             // Metal was first introduced in macOS 10.11
-            NSOperatingSystemVersion macOS10_11 = {10, 11, 0};
-            return [NSProcessInfo.processInfo isOperatingSystemAtLeastVersion:macOS10_11];
+            return IsMacOSVersionAtLeast(10, 11);
         }
 #elif defined(DAWN_PLATFORM_IOS)
         MaybeError GetDevicePCIInfo(id<MTLDevice> device, PCIIDs* ids) {
@@ -225,8 +225,7 @@ namespace dawn_native { namespace metal {
                     // Disable timestamp query on macOS 10.15 on AMD GPU because WriteTimestamp
                     // fails to call without any copy commands on MTLBlitCommandEncoder. This issue
                     // has been fixed on macOS 11.0. See crbug.com/dawn/545
-                    if (!gpu_info::IsAMD(GetPCIInfo().vendorId) ||
-                        [NSProcessInfo.processInfo isOperatingSystemAtLeastVersion:{11, 0, 0}]) {
+                    if (!gpu_info::IsAMD(GetPCIInfo().vendorId) || IsMacOSVersionAtLeast(11)) {
                         mSupportedExtensions.EnableExtension(Extension::TimestampQuery);
                     }
                 }

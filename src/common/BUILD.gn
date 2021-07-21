@@ -213,6 +213,10 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android) {
       "xlib_with_undefs.h",
     ]
 
+    if (is_mac) {
+      sources += [ "SystemUtils_mac.mm" ]
+    }
+
     public_configs = [ ":dawn_internal" ]
     deps = [
       "${dawn_root}/src/dawn:dawn_headers",

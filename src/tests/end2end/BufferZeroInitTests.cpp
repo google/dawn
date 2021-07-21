@@ -1205,6 +1205,9 @@ TEST_P(BufferZeroInitTest, ResolveQuerySet) {
     // Skip if timestamp extension is not supported on device
     DAWN_TEST_UNSUPPORTED_IF(!SupportsExtensions({"timestamp_query"}));
 
+    // crbug.com/dawn/940: Does not work on Mac 11.0+. Backend validation changed.
+    DAWN_TEST_UNSUPPORTED_IF(IsMacOS() && !IsMacOS(10));
+
     constexpr uint64_t kBufferSize = 16u;
     constexpr wgpu::BufferUsage kBufferUsage =
         wgpu::BufferUsage::QueryResolve | wgpu::BufferUsage::CopyDst;

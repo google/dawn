@@ -16,6 +16,7 @@
 #define TESTS_DAWNTEST_H_
 
 #include "common/Log.h"
+#include "common/Platform.h"
 #include "common/Preprocessor.h"
 #include "dawn/dawn_proc_table.h"
 #include "dawn/webgpu_cpp.h"
@@ -289,7 +290,7 @@ class DawnTestBase {
 
     bool IsWindows() const;
     bool IsLinux() const;
-    bool IsMacOS() const;
+    bool IsMacOS(int32_t majorVersion = -1, int32_t minorVersion = -1) const;
 
     bool UsesWire() const;
     bool IsBackendValidationEnabled() const;
