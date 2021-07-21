@@ -205,8 +205,8 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       // sizeof(uint32_t)` uint32_t values. If `size` is not a multiple of
       // sizeof(uint32_t) then not all of `data` can be copied into
       // `spirv_input`, and any trailing bytes are discarded.
-      const size_t adjusted_size = (size / sizeof(uint32_t)) * sizeof(uint32_t);
-      std::memcpy(spirv_input.data(), data, adjusted_size);
+      std::memcpy(spirv_input.data(), data,
+                  spirv_input.size() * sizeof(uint32_t));
       if (spirv_input.empty()) {
         return 0;
       }

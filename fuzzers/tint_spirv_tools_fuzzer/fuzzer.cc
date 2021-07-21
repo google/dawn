@@ -102,7 +102,8 @@ extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
                                           unsigned seed) {
   assert((size % 4) == 0 &&
          "A valid SPIR-V binary's size must be a multiple of 4, and the "
-         "SPIR-V Tools fuzzer should only work with valid binaries.");
+         "SPIR-V Tools fuzzer should only work with valid binaries. Check that "
+         "the fuzzer has been correctly configured.");
 
   std::vector<uint32_t> binary(size / sizeof(uint32_t));
   std::memcpy(binary.data(), data, size);
@@ -175,8 +176,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   }
 
   assert((size % 4) == 0 &&
-         "A valid SPIR-V binary's size is a multiple of 4 bytes, and the "
-         "SPIR-V Tools fuzzer should only work with valid binaries.");
+         "By design, the SPIR-V Tools fuzzer should only ever test using valid "
+         "SPIR-V binaries, whose sizes should be multiples of 4 bytes. Check "
+         "that the fuzzer has been configured correctly, with a corpus of "
+         "valid SPIR-V binaries, and with only the custom mutator enabled.");
 
   CommonFuzzer spv_to_wgsl(InputFormat::kSpv, OutputFormat::kWGSL);
   spv_to_wgsl.EnableInspector();
