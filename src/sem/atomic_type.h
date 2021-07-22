@@ -44,6 +44,12 @@ class Atomic : public Castable<Atomic, Type> {
   /// declared in WGSL.
   std::string FriendlyName(const SymbolTable& symbols) const override;
 
+  /// @returns the size in bytes of the type.
+  uint32_t Size() const override;
+
+  /// @returns the alignment in bytes of the type.
+  uint32_t Align() const override;
+
  private:
   sem::Type const* const subtype_;
 };

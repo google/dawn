@@ -86,13 +86,13 @@ class Struct : public Castable<Struct, Type> {
   /// @note this may differ from the alignment of a structure member of this
   /// structure type, if the member is annotated with the `[[align(n)]]`
   /// decoration.
-  uint32_t Align() const { return align_; }
+  uint32_t Align() const override;
 
   /// @returns the byte size of the structure
   /// @note this may differ from the size of a structure member of this
   /// structure type, if the member is annotated with the `[[size(n)]]`
   /// decoration.
-  uint32_t Size() const { return size_; }
+  uint32_t Size() const override;
 
   /// @returns the byte size of the members without the end of structure
   /// alignment padding

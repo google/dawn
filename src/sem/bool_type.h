@@ -48,6 +48,16 @@ class Bool : public Castable<Bool, Type> {
   /// @returns true if constructible as per
   /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
   bool IsConstructible() const override;
+
+  /// @returns the size in bytes of the type.
+  /// @note: booleans are not host-sharable, but still may exist in workgroup
+  /// storage.
+  uint32_t Size() const override;
+
+  /// @returns the alignment in bytes of the type.
+  /// @note: booleans are not host-sharable, but still may exist in workgroup
+  /// storage.
+  uint32_t Align() const override;
 };
 
 }  // namespace sem

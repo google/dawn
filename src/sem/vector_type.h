@@ -39,9 +39,6 @@ class Vector : public Castable<Vector, Type> {
   /// @returns the name for th type
   std::string type_name() const override;
 
-  /// @returns the width of the vector
-  uint32_t Width() const { return width_; }
-
   /// @param symbols the program's symbol table
   /// @returns the name for this type that closely resembles how it would be
   /// declared in WGSL.
@@ -50,6 +47,24 @@ class Vector : public Castable<Vector, Type> {
   /// @returns true if constructible as per
   /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
   bool IsConstructible() const override;
+
+  /// @returns the number of elements in the vector
+  uint32_t Width() const { return width_; }
+
+  /// @returns the size in bytes of the type. This may include tail padding.
+  uint32_t Size() const override;
+
+  /// @returns the alignment in bytes of the type. This may include tail
+  /// padding.
+  uint32_t Align() const override;
+
+  /// @param width the width of the vector
+  /// @returns the size in bytes of a vector of the given width.
+  static uint32_t SizeOf(uint32_t width);
+
+  /// @param width the width of the vector
+  /// @returns the alignment in bytes of a vector of the given width.
+  static uint32_t AlignOf(uint32_t width);
 
  private:
   Type const* const subtype_;

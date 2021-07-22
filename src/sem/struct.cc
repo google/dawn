@@ -60,6 +60,14 @@ std::string Struct::type_name() const {
   return declaration_->type_name();
 }
 
+uint32_t Struct::Align() const {
+  return align_;
+}
+
+uint32_t Struct::Size() const {
+  return size_;
+}
+
 std::string Struct::FriendlyName(const SymbolTable& symbols) const {
   return symbols.NameFor(declaration_->name());
 }

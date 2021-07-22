@@ -38,6 +38,14 @@ std::string Atomic::FriendlyName(const SymbolTable& symbols) const {
   return out.str();
 }
 
+uint32_t Atomic::Size() const {
+  return subtype_->Size();
+}
+
+uint32_t Atomic::Align() const {
+  return subtype_->Align();
+}
+
 Atomic::Atomic(Atomic&&) = default;
 
 Atomic::~Atomic() = default;

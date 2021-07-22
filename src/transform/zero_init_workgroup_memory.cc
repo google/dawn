@@ -130,7 +130,7 @@ struct ZeroInitWorkgroupMemory::State {
     // we need to return true for these arrays.
     // See https://github.com/gpuweb/gpuweb/pull/1792
     return (cfg.init_arrays_with_loop_size_threshold != 0) &&
-           (array->SizeInBytes() >= cfg.init_arrays_with_loop_size_threshold);
+           (array->Size() >= cfg.init_arrays_with_loop_size_threshold);
   }
 };
 

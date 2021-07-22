@@ -693,9 +693,7 @@ bool Resolver::ValidateStorageClassLayout(const sem::Struct* str,
   };
 
   auto required_alignment_of = [&](const sem::Type* ty) {
-    uint32_t actual_align = 0;
-    uint32_t actual_size = 0;
-    ty->GetDefaultAlignAndSize(actual_align, actual_size);
+    uint32_t actual_align = ty->Align();
     uint32_t required_align = actual_align;
     if (is_uniform_struct_or_array(ty)) {
       required_align = utils::RoundUp(16u, actual_align);
@@ -3813,9 +3811,8 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
     return nullptr;
   }
 
-  uint32_t el_align = 0;
-  uint32_t el_size = 0;
-  el_ty->GetDefaultAlignAndSize(el_align, el_size);
+  uint32_t el_align = el_ty->Align();
+  uint32_t el_size = el_ty->Size();
 
   if (!ValidateNoDuplicateDecorations(arr->decorations())) {
     return nullptr;
@@ -4035,9 +4032,8 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     }
 
     uint32_t offset = struct_size;
-    uint32_t align = 0;
-    uint32_t size = 0;
-    type->GetDefaultAlignAndSize(align, size);
+    uint32_t align = type->Align();
+    uint32_t size = type->Size();
 
     if (!ValidateNoDuplicateDecorations(member->decorations())) {
       return nullptr;

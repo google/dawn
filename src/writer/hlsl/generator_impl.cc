@@ -2970,21 +2970,21 @@ bool GeneratorImpl::EmitType(std::ostream& out,
   } else if (type->Is<sem::U32>()) {
     out << "uint";
   } else if (auto* vec = type->As<sem::Vector>()) {
-    auto size = vec->Width();
-    if (vec->type()->Is<sem::F32>() && size >= 1 && size <= 4) {
-      out << "float" << size;
-    } else if (vec->type()->Is<sem::I32>() && size >= 1 && size <= 4) {
-      out << "int" << size;
-    } else if (vec->type()->Is<sem::U32>() && size >= 1 && size <= 4) {
-      out << "uint" << size;
-    } else if (vec->type()->Is<sem::Bool>() && size >= 1 && size <= 4) {
-      out << "bool" << size;
+    auto width = vec->Width();
+    if (vec->type()->Is<sem::F32>() && width >= 1 && width <= 4) {
+      out << "float" << width;
+    } else if (vec->type()->Is<sem::I32>() && width >= 1 && width <= 4) {
+      out << "int" << width;
+    } else if (vec->type()->Is<sem::U32>() && width >= 1 && width <= 4) {
+      out << "uint" << width;
+    } else if (vec->type()->Is<sem::Bool>() && width >= 1 && width <= 4) {
+      out << "bool" << width;
     } else {
       out << "vector<";
       if (!EmitType(out, vec->type(), storage_class, access, "")) {
         return false;
       }
-      out << ", " << size << ">";
+      out << ", " << width << ">";
     }
   } else if (auto* atomic = type->As<sem::Atomic>()) {
     if (!EmitType(out, atomic->Type(), storage_class, access, name)) {

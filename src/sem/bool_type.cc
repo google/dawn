@@ -39,5 +39,13 @@ bool Bool::IsConstructible() const {
   return true;
 }
 
+uint32_t Bool::Size() const {
+  return 4;
+}
+
+uint32_t Bool::Align() const {
+  return 4;
+}
+
 }  // namespace sem
 }  // namespace tint

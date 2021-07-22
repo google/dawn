@@ -27,7 +27,7 @@ TEST_F(ArrayTest, CreateSizedArray) {
   EXPECT_EQ(arr->ElemType(), &u32);
   EXPECT_EQ(arr->Count(), 2u);
   EXPECT_EQ(arr->Align(), 4u);
-  EXPECT_EQ(arr->SizeInBytes(), 8u);
+  EXPECT_EQ(arr->Size(), 8u);
   EXPECT_EQ(arr->Stride(), 32u);
   EXPECT_EQ(arr->ImplicitStride(), 16u);
   EXPECT_FALSE(arr->IsStrideImplicit());
@@ -40,7 +40,7 @@ TEST_F(ArrayTest, CreateRuntimeArray) {
   EXPECT_EQ(arr->ElemType(), &u32);
   EXPECT_EQ(arr->Count(), 0u);
   EXPECT_EQ(arr->Align(), 4u);
-  EXPECT_EQ(arr->SizeInBytes(), 8u);
+  EXPECT_EQ(arr->Size(), 8u);
   EXPECT_EQ(arr->Stride(), 32u);
   EXPECT_EQ(arr->ImplicitStride(), 32u);
   EXPECT_TRUE(arr->IsStrideImplicit());

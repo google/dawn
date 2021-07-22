@@ -546,9 +546,9 @@ uint32_t Inspector::GetWorkgroupStorageSize(const std::string& entry_point) {
   auto* func_sem = program_->Sem().Get(func);
   for (const sem::Variable* var : func_sem->ReferencedModuleVariables()) {
     if (var->StorageClass() == ast::StorageClass::kWorkgroup) {
-      uint32_t align = 0;
-      uint32_t size = 0;
-      var->Type()->UnwrapRef()->GetDefaultAlignAndSize(align, size);
+      auto* ty = var->Type()->UnwrapRef();
+      uint32_t align = ty->Align();
+      uint32_t size = ty->Size();
 
       // This essentially matches std430 layout rules from GLSL, which are in
       // turn specified as an upper bound for Vulkan layout sizing. Since D3D

@@ -39,5 +39,13 @@ bool F32::IsConstructible() const {
   return true;
 }
 
+uint32_t F32::Size() const {
+  return 4;
+}
+
+uint32_t F32::Align() const {
+  return 4;
+}
+
 }  // namespace sem
 }  // namespace tint

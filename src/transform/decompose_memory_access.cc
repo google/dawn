@@ -127,17 +127,6 @@ struct AtomicKey {
   };
 };
 
-/// @returns the size in bytes of a scalar
-uint32_t ScalarSize(const sem::Type*) {
-  // TODO(bclayton): Assumes 32-bit elements
-  return 4;
-}
-
-/// @returns the number of bytes between columns of the given matrix
-uint32_t MatrixColumnStride(const sem::Matrix* mat) {
-  return ScalarSize(mat->type()) * ((mat->rows() == 2) ? 2 : 4);
-}
-
 bool IntrinsicDataTypeFor(const sem::Type* ty,
                           DecomposeMemoryAccess::Intrinsic::DataType& out) {
   if (ty->Is<sem::I32>()) {
@@ -525,7 +514,7 @@ struct DecomposeMemoryAccess::State {
               auto* vec_ty = mat_ty->ColumnType();
               Symbol load = LoadFunc(buf_ty, vec_ty, var_user);
               for (uint32_t i = 0; i < mat_ty->columns(); i++) {
-                auto* offset = b.Add("offset", i * MatrixColumnStride(mat_ty));
+                auto* offset = b.Add("offset", i * mat_ty->ColumnStride());
                 values.emplace_back(b.Call(load, "buffer", offset));
               }
             } else if (auto* str = el_ty->As<sem::Struct>()) {
@@ -624,7 +613,7 @@ struct DecomposeMemoryAccess::State {
               auto* vec_ty = mat_ty->ColumnType();
               Symbol store = StoreFunc(buf_ty, vec_ty, var_user);
               for (uint32_t i = 0; i < mat_ty->columns(); i++) {
-                auto* offset = b.Add("offset", i * MatrixColumnStride(mat_ty));
+                auto* offset = b.Add("offset", i * mat_ty->ColumnStride());
                 auto* access = b.IndexAccessor("value", i);
                 auto* call = b.Call(store, "buffer", offset, access);
                 body.emplace_back(b.create<ast::CallStatement>(call));
@@ -845,7 +834,7 @@ void DecomposeMemoryAccess::Run(CloneContext& ctx, const DataMap&, DataMap&) {
           if (auto access = state.TakeAccess(accessor->structure())) {
             auto* vec_ty = access.type->As<sem::Vector>();
             auto* offset =
-                state.Mul(ScalarSize(vec_ty->type()), swizzle->Indices()[0]);
+                state.Mul(vec_ty->type()->Size(), swizzle->Indices()[0]);
             state.AddAccess(accessor, {
                                           access.var,
                                           state.Add(access.offset, offset),
@@ -882,7 +871,7 @@ void DecomposeMemoryAccess::Run(CloneContext& ctx, const DataMap&, DataMap&) {
         }
         if (auto* vec_ty = access.type->As<sem::Vector>()) {
           auto* offset =
-              state.Mul(ScalarSize(vec_ty->type()), accessor->idx_expr());
+              state.Mul(vec_ty->type()->Size(), accessor->idx_expr());
           state.AddAccess(accessor, {
                                         access.var,
                                         state.Add(access.offset, offset),
@@ -892,7 +881,7 @@ void DecomposeMemoryAccess::Run(CloneContext& ctx, const DataMap&, DataMap&) {
         }
         if (auto* mat_ty = access.type->As<sem::Matrix>()) {
           auto* offset =
-              state.Mul(MatrixColumnStride(mat_ty), accessor->idx_expr());
+              state.Mul(mat_ty->ColumnStride(), accessor->idx_expr());
           state.AddAccess(accessor, {
                                         access.var,
                                         state.Add(access.offset, offset),

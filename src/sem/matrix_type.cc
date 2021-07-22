@@ -53,5 +53,17 @@ bool Matrix::IsConstructible() const {
   return true;
 }
 
+uint32_t Matrix::Size() const {
+  return column_type_->Align() * columns();
+}
+
+uint32_t Matrix::Align() const {
+  return column_type_->Align();
+}
+
+uint32_t Matrix::ColumnStride() const {
+  return column_type_->Align();
+}
+
 }  // namespace sem
 }  // namespace tint

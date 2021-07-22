@@ -42,6 +42,12 @@ class F32 : public Castable<F32, Type> {
   /// @returns true if constructible as per
   /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
   bool IsConstructible() const override;
+
+  /// @returns the size in bytes of the type.
+  uint32_t Size() const override;
+
+  /// @returns the alignment in bytes of the type.
+  uint32_t Align() const override;
 };
 
 }  // namespace sem

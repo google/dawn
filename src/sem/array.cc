@@ -68,5 +68,13 @@ std::string Array::FriendlyName(const SymbolTable& symbols) const {
   return out.str();
 }
 
+uint32_t Array::Align() const {
+  return align_;
+}
+
+uint32_t Array::Size() const {
+  return size_;
+}
+
 }  // namespace sem
 }  // namespace tint

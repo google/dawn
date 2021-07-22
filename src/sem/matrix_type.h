@@ -58,6 +58,16 @@ class Matrix : public Castable<Matrix, Type> {
   /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
   bool IsConstructible() const override;
 
+  /// @returns the size in bytes of the type. This may include tail padding.
+  uint32_t Size() const override;
+
+  /// @returns the alignment in bytes of the type. This may include tail
+  /// padding.
+  uint32_t Align() const override;
+
+  /// @returns the number of bytes between columns of the matrix
+  uint32_t ColumnStride() const;
+
  private:
   Type* const subtype_;
   Vector* const column_type_;

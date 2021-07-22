@@ -45,5 +45,37 @@ bool Vector::IsConstructible() const {
   return true;
 }
 
+uint32_t Vector::Size() const {
+  return SizeOf(width_);
+}
+
+uint32_t Vector::Align() const {
+  return AlignOf(width_);
+}
+
+uint32_t Vector::SizeOf(uint32_t width) {
+  switch (width) {
+    case 2:
+      return 8;
+    case 3:
+      return 12;
+    case 4:
+      return 16;
+  }
+  return 0;  // Unreachable
+}
+
+uint32_t Vector::AlignOf(uint32_t width) {
+  switch (width) {
+    case 2:
+      return 8;
+    case 3:
+      return 16;
+    case 4:
+      return 16;
+  }
+  return 0;  // Unreachable
+}
+
 }  // namespace sem
 }  // namespace tint

@@ -14,9 +14,6 @@
 
 #include "src/sem/type.h"
 
-#include "src/debug.h"
-#include "src/sem/array.h"
-#include "src/sem/atomic_type.h"
 #include "src/sem/bool_type.h"
 #include "src/sem/f32_type.h"
 #include "src/sem/i32_type.h"
@@ -24,7 +21,6 @@
 #include "src/sem/pointer_type.h"
 #include "src/sem/reference_type.h"
 #include "src/sem/sampler_type.h"
-#include "src/sem/struct.h"
 #include "src/sem/texture_type.h"
 #include "src/sem/u32_type.h"
 #include "src/sem/vector_type.h"
@@ -56,59 +52,12 @@ const Type* Type::UnwrapRef() const {
   return type;
 }
 
-void Type::GetDefaultAlignAndSize(uint32_t& align, uint32_t& size) const {
-  TINT_ASSERT(Semantic, !As<Reference>());
-  TINT_ASSERT(Semantic, !As<Pointer>());
+uint32_t Type::Size() const {
+  return 0;
+}
 
-  static constexpr uint32_t vector_size[] = {
-      /* padding */ 0,
-      /* padding */ 0,
-      /*vec2*/ 8,
-      /*vec3*/ 12,
-      /*vec4*/ 16,
-  };
-  static constexpr uint32_t vector_align[] = {
-      /* padding */ 0,
-      /* padding */ 0,
-      /*vec2*/ 8,
-      /*vec3*/ 16,
-      /*vec4*/ 16,
-  };
-
-  if (is_scalar()) {
-    // Note: Also captures booleans, but these are not host-shareable.
-    align = 4;
-    size = 4;
-    return;
-  }
-  if (auto* vec = As<Vector>()) {
-    TINT_ASSERT(Semantic, vec->Width() >= 2 && vec->Width() <= 4);
-    align = vector_align[vec->Width()];
-    size = vector_size[vec->Width()];
-    return;
-  }
-  if (auto* mat = As<Matrix>()) {
-    TINT_ASSERT(Semantic, mat->columns() >= 2 && mat->columns() <= 4);
-    TINT_ASSERT(Semantic, mat->rows() >= 2 && mat->rows() <= 4);
-    align = vector_align[mat->rows()];
-    size = vector_align[mat->rows()] * mat->columns();
-    return;
-  }
-  if (auto* s = As<Struct>()) {
-    align = s->Align();
-    size = s->Size();
-    return;
-  }
-  if (auto* a = As<Array>()) {
-    align = a->Align();
-    size = a->SizeInBytes();
-    return;
-  }
-  if (auto* a = As<Atomic>()) {
-    return a->Type()->GetDefaultAlignAndSize(align, size);
-  }
-
-  TINT_ASSERT(Semantic, false);
+uint32_t Type::Align() const {
+  return 0;
 }
 
 bool Type::IsConstructible() const {
