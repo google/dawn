@@ -28,16 +28,19 @@ namespace dawn_native {
     // Helper functions
     namespace {
 
-        MaybeError ValidateVertexAttribute(DeviceBase* device,
-                                           const VertexAttribute* attribute,
-                                           uint64_t vertexBufferStride,
-                                           std::bitset<kMaxVertexAttributes>* attributesSetMask) {
+        MaybeError ValidateVertexAttribute(
+            DeviceBase* device,
+            const VertexAttribute* attribute,
+            const EntryPointMetadata& metadata,
+            uint64_t vertexBufferStride,
+            ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>* attributesSetMask) {
             DAWN_TRY(ValidateVertexFormat(attribute->format));
             const VertexFormatInfo& formatInfo = GetVertexFormatInfo(attribute->format);
 
             if (attribute->shaderLocation >= kMaxVertexAttributes) {
                 return DAWN_VALIDATION_ERROR("Setting attribute out of bounds");
             }
+            VertexAttributeLocation location(static_cast<uint8_t>(attribute->shaderLocation));
 
             // No underflow is possible because the max vertex format size is smaller than
             // kMaxVertexBufferArrayStride.
@@ -59,18 +62,25 @@ namespace dawn_native {
                     "Attribute offset needs to be a multiple of the size format's components");
             }
 
-            if ((*attributesSetMask)[attribute->shaderLocation]) {
+            if (metadata.usedVertexInputs[location] &&
+                formatInfo.baseType != metadata.vertexInputBaseTypes[location]) {
+                return DAWN_VALIDATION_ERROR(
+                    "Attribute base type must match the base type in the shader.");
+            }
+
+            if ((*attributesSetMask)[location]) {
                 return DAWN_VALIDATION_ERROR("Setting already set attribute");
             }
 
-            attributesSetMask->set(attribute->shaderLocation);
+            attributesSetMask->set(location);
             return {};
         }
 
         MaybeError ValidateVertexBufferLayout(
             DeviceBase* device,
             const VertexBufferLayout* buffer,
-            std::bitset<kMaxVertexAttributes>* attributesSetMask) {
+            const EntryPointMetadata& metadata,
+            ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>* attributesSetMask) {
             DAWN_TRY(ValidateInputStepMode(buffer->stepMode));
             if (buffer->arrayStride > kMaxVertexBufferArrayStride) {
                 return DAWN_VALIDATION_ERROR("Setting arrayStride out of bounds");
@@ -82,7 +92,7 @@ namespace dawn_native {
             }
 
             for (uint32_t i = 0; i < buffer->attributeCount; ++i) {
-                DAWN_TRY(ValidateVertexAttribute(device, &buffer->attributes[i],
+                DAWN_TRY(ValidateVertexAttribute(device, &buffer->attributes[i], metadata,
                                                  buffer->arrayStride, attributesSetMask));
             }
 
@@ -100,10 +110,15 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("Vertex buffer count exceeds maximum");
             }
 
-            std::bitset<kMaxVertexAttributes> attributesSetMask;
+            DAWN_TRY(ValidateProgrammableStage(device, descriptor->module, descriptor->entryPoint,
+                                               layout, SingleShaderStage::Vertex));
+            const EntryPointMetadata& vertexMetadata =
+                descriptor->module->GetEntryPoint(descriptor->entryPoint);
+
+            ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes> attributesSetMask;
             uint32_t totalAttributesNum = 0;
             for (uint32_t i = 0; i < descriptor->bufferCount; ++i) {
-                DAWN_TRY(ValidateVertexBufferLayout(device, &descriptor->buffers[i],
+                DAWN_TRY(ValidateVertexBufferLayout(device, &descriptor->buffers[i], vertexMetadata,
                                                     &attributesSetMask));
                 totalAttributesNum += descriptor->buffers[i].attributeCount;
             }
@@ -114,11 +129,7 @@ namespace dawn_native {
             // attribute number never exceed kMaxVertexAttributes.
             ASSERT(totalAttributesNum <= kMaxVertexAttributes);
 
-            DAWN_TRY(ValidateProgrammableStage(device, descriptor->module, descriptor->entryPoint,
-                                               layout, SingleShaderStage::Vertex));
-            const EntryPointMetadata& vertexMetadata =
-                descriptor->module->GetEntryPoint(descriptor->entryPoint);
-            if (!IsSubset(vertexMetadata.usedVertexAttributes, attributesSetMask)) {
+            if (!IsSubset(vertexMetadata.usedVertexInputs, attributesSetMask)) {
                 return DAWN_VALIDATION_ERROR(
                     "Pipeline vertex stage uses vertex buffers not in the vertex state");
             }

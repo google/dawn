@@ -20,6 +20,7 @@
 
 #include "dawn_native/Format.h"
 #include "dawn_native/PerStage.h"
+#include "dawn_native/VertexFormat.h"
 #include "dawn_native/dawn_platform.h"
 
 #include <spirv_cross.hpp>
@@ -40,6 +41,10 @@ namespace dawn_native {
     wgpu::TextureComponentType SpirvBaseTypeToTextureComponentType(
         spirv_cross::SPIRType::BaseType spirvBaseType);
     SampleTypeBit SpirvBaseTypeToSampleTypeBit(spirv_cross::SPIRType::BaseType spirvBaseType);
+
+    // Returns the VertexFormatBaseType corresponding to the SPIRV base type.
+    VertexFormatBaseType SpirvBaseTypeToVertexFormatBaseType(
+        spirv_cross::SPIRType::BaseType spirvBaseType);
 
 }  // namespace dawn_native
 

@@ -295,6 +295,21 @@ namespace dawn_native {
             }
         }
 
+        ResultOrError<VertexFormatBaseType> TintComponentTypeToVertexFormatBaseType(
+            tint::inspector::ComponentType type) {
+            switch (type) {
+                case tint::inspector::ComponentType::kFloat:
+                    return VertexFormatBaseType::Float;
+                case tint::inspector::ComponentType::kSInt:
+                    return VertexFormatBaseType::Sint;
+                case tint::inspector::ComponentType::kUInt:
+                    return VertexFormatBaseType::Uint;
+                case tint::inspector::ComponentType::kUnknown:
+                    return DAWN_VALIDATION_ERROR(
+                        "Attempted to convert 'Unknown' component type from Tint");
+            }
+        }
+
         ResultOrError<wgpu::BufferBindingType> TintResourceTypeToBufferBindingType(
             tint::inspector::ResourceBinding::ResourceType resource_type) {
             switch (resource_type) {
@@ -811,13 +826,19 @@ namespace dawn_native {
                         return DAWN_VALIDATION_ERROR(
                             "Unable to find Location decoration for Vertex input");
                     }
-                    uint32_t location = compiler.get_decoration(attrib.id, spv::DecorationLocation);
+                    uint32_t unsanitizedLocation =
+                        compiler.get_decoration(attrib.id, spv::DecorationLocation);
 
-                    if (location >= kMaxVertexAttributes) {
+                    if (unsanitizedLocation >= kMaxVertexAttributes) {
                         return DAWN_VALIDATION_ERROR("Attribute location over limits in the SPIRV");
                     }
+                    VertexAttributeLocation location(static_cast<uint8_t>(unsanitizedLocation));
 
-                    metadata->usedVertexAttributes.set(location);
+                    spirv_cross::SPIRType::BaseType inputBaseType =
+                        compiler.get_type(attrib.base_type_id).basetype;
+                    metadata->vertexInputBaseTypes[location] =
+                        SpirvBaseTypeToVertexFormatBaseType(inputBaseType);
+                    metadata->usedVertexInputs.set(location);
                 }
 
                 // Without a location qualifier on vertex outputs, spirv_cross::CompilerMSL gives
@@ -846,6 +867,7 @@ namespace dawn_native {
                     }
                     uint32_t unsanitizedAttachment =
                         compiler.get_decoration(fragmentOutput.id, spv::DecorationLocation);
+
                     if (unsanitizedAttachment >= kMaxColorAttachments) {
                         return DAWN_VALIDATION_ERROR(
                             "Fragment output index must be less than max number of color "
@@ -958,13 +980,17 @@ namespace dawn_native {
                             return DAWN_VALIDATION_ERROR(
                                 "Need Location decoration on Vertex input");
                         }
-                        uint32_t location = input_var.location_decoration;
-                        if (DAWN_UNLIKELY(location >= kMaxVertexAttributes)) {
+                        uint32_t unsanitizedLocation = input_var.location_decoration;
+                        if (DAWN_UNLIKELY(unsanitizedLocation >= kMaxVertexAttributes)) {
                             std::stringstream ss;
-                            ss << "Attribute location (" << location << ") over limits";
+                            ss << "Attribute location (" << unsanitizedLocation << ") over limits";
                             return DAWN_VALIDATION_ERROR(ss.str());
                         }
-                        metadata->usedVertexAttributes.set(location);
+                        VertexAttributeLocation location(static_cast<uint8_t>(unsanitizedLocation));
+                        DAWN_TRY_ASSIGN(
+                            metadata->vertexInputBaseTypes[location],
+                            TintComponentTypeToVertexFormatBaseType(input_var.component_type));
+                        metadata->usedVertexInputs.set(location);
                     }
 
                     for (const auto& output_var : entryPoint.output_variables) {

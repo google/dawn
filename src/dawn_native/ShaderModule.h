@@ -25,6 +25,7 @@
 #include "dawn_native/Forward.h"
 #include "dawn_native/IntegerTypes.h"
 #include "dawn_native/PerStage.h"
+#include "dawn_native/VertexFormat.h"
 #include "dawn_native/dawn_platform.h"
 
 #include <bitset>
@@ -147,7 +148,9 @@ namespace dawn_native {
         std::vector<SamplerTexturePair> samplerTexturePairs;
 
         // The set of vertex attributes this entryPoint uses.
-        std::bitset<kMaxVertexAttributes> usedVertexAttributes;
+        ityp::array<VertexAttributeLocation, VertexFormatBaseType, kMaxVertexAttributes>
+            vertexInputBaseTypes;
+        ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes> usedVertexInputs;
 
         // An array to record the basic types (float, int and uint) of the fragment shader outputs.
         ityp::array<ColorAttachmentIndex, wgpu::TextureComponentType, kMaxColorAttachments>

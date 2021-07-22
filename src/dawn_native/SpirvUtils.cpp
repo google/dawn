@@ -161,4 +161,18 @@ namespace dawn_native {
         }
     }
 
+    VertexFormatBaseType SpirvBaseTypeToVertexFormatBaseType(
+        spirv_cross::SPIRType::BaseType spirvBaseType) {
+        switch (spirvBaseType) {
+            case spirv_cross::SPIRType::Float:
+                return VertexFormatBaseType::Float;
+            case spirv_cross::SPIRType::Int:
+                return VertexFormatBaseType::Sint;
+            case spirv_cross::SPIRType::UInt:
+                return VertexFormatBaseType::Uint;
+            default:
+                UNREACHABLE();
+        }
+    }
+
 }  // namespace dawn_native
