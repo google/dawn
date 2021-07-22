@@ -88,12 +88,9 @@ class Intrinsic : public Castable<Intrinsic, CallTarget> {
   /// deprecated
   Intrinsic(IntrinsicType type,
             sem::Type* return_type,
-            const ParameterList& parameters,
+            ParameterList parameters,
             PipelineStageSet supported_stages,
             bool is_deprecated);
-
-  /// Copy constructor
-  Intrinsic(const Intrinsic&);
 
   /// Destructor
   ~Intrinsic() override;
@@ -146,18 +143,6 @@ class Intrinsic : public Castable<Intrinsic, CallTarget> {
   PipelineStageSet const supported_stages_;
   bool const is_deprecated_;
 };
-
-/// Emits the name of the intrinsic function type. The spelling, including case,
-/// matches the name in the WGSL spec.
-std::ostream& operator<<(std::ostream& out, IntrinsicType i);
-
-/// Equality operator for Intrinsics
-bool operator==(const Intrinsic& a, const Intrinsic& b);
-
-/// Inequality operator for Intrinsics
-static inline bool operator!=(const Intrinsic& a, const Intrinsic& b) {
-  return !(a == b);
-}
 
 }  // namespace sem
 }  // namespace tint

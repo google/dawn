@@ -22,6 +22,7 @@
 #include "src/sem/block_statement.h"
 #include "src/sem/for_loop_statement.h"
 #include "src/sem/reference_type.h"
+#include "src/sem/sampler_type.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Transform);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Data);

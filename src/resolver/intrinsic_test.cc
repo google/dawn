@@ -1706,11 +1706,11 @@ std::string to_str(const std::string& function,
   std::stringstream out;
   out << function << "(";
   bool first = true;
-  for (auto& param : params) {
+  for (auto* param : params) {
     if (!first) {
       out << ", ";
     }
-    out << sem::str(param.usage);
+    out << sem::str(param->Usage());
     first = false;
   }
   out << ")";

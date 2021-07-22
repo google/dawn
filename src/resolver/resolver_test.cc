@@ -2018,8 +2018,10 @@ TEST_F(ResolverTest, BindingPoint_SetForResources) {
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-  EXPECT_EQ(Sem().Get(s1)->BindingPoint(), (sem::BindingPoint{1u, 2u}));
-  EXPECT_EQ(Sem().Get(s2)->BindingPoint(), (sem::BindingPoint{3u, 4u}));
+  EXPECT_EQ(Sem().Get<sem::GlobalVariable>(s1)->BindingPoint(),
+            (sem::BindingPoint{1u, 2u}));
+  EXPECT_EQ(Sem().Get<sem::GlobalVariable>(s2)->BindingPoint(),
+            (sem::BindingPoint{3u, 4u}));
 }
 
 TEST_F(ResolverTest, Function_EntryPoints_StageDecoration) {

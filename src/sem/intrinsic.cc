@@ -19,11 +19,6 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Intrinsic);
 namespace tint {
 namespace sem {
 
-std::ostream& operator<<(std::ostream& out, IntrinsicType i) {
-  out << str(i);
-  return out;
-}
-
 const char* Intrinsic::str() const {
   return sem::str(type_);
 }
@@ -103,15 +98,13 @@ bool IsAtomicIntrinsic(IntrinsicType i) {
 
 Intrinsic::Intrinsic(IntrinsicType type,
                      sem::Type* return_type,
-                     const ParameterList& parameters,
+                     ParameterList parameters,
                      PipelineStageSet supported_stages,
                      bool is_deprecated)
     : Base(return_type, parameters),
       type_(type),
       supported_stages_(supported_stages),
       is_deprecated_(is_deprecated) {}
-
-Intrinsic::Intrinsic(const Intrinsic&) = default;
 
 Intrinsic::~Intrinsic() = default;
 
@@ -153,26 +146,6 @@ bool Intrinsic::IsBarrier() const {
 
 bool Intrinsic::IsAtomic() const {
   return IsAtomicIntrinsic(type_);
-}
-
-bool operator==(const Intrinsic& a, const Intrinsic& b) {
-  static_assert(sizeof(Intrinsic(IntrinsicType::kNone, nullptr, ParameterList{},
-                                 PipelineStageSet{}, false)) > 0,
-                "don't forget to update the comparison below if you change the "
-                "constructor of Intrinsic!");
-
-  if (a.Type() != b.Type() || a.SupportedStages() != b.SupportedStages() ||
-      a.ReturnType() != b.ReturnType() ||
-      a.IsDeprecated() != b.IsDeprecated() ||
-      a.Parameters().size() != b.Parameters().size()) {
-    return false;
-  }
-  for (size_t i = 0; i < a.Parameters().size(); i++) {
-    if (a.Parameters()[i] != b.Parameters()[i]) {
-      return false;
-    }
-  }
-  return true;
 }
 
 }  // namespace sem

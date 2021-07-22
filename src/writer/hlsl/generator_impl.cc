@@ -1143,7 +1143,7 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
       // InterlockedExchange and discard the returned value
       {  // T result = 0;
         auto pre = line();
-        auto* value_ty = intrinsic->Parameters()[1].type;
+        auto* value_ty = intrinsic->Parameters()[1]->Type();
         if (!EmitTypeAndName(pre, value_ty, ast::StorageClass::kNone,
                              ast::Access::kUndefined, result)) {
           return false;
@@ -1278,9 +1278,9 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
   return CallIntrinsicHelper(
       out, expr, intrinsic,
       [&](TextBuffer* b, const std::vector<std::string>& params) {
-        auto* significand_ty = intrinsic->Parameters()[0].type;
+        auto* significand_ty = intrinsic->Parameters()[0]->Type();
         auto significand = params[0];
-        auto* exponent_ty = intrinsic->Parameters()[1].type;
+        auto* exponent_ty = intrinsic->Parameters()[1]->Type();
         auto exponent = params[1];
 
         std::string width;
@@ -1314,7 +1314,7 @@ bool GeneratorImpl::EmitIsNormalCall(std::ostream& out,
   return CallIntrinsicHelper(
       out, expr, intrinsic,
       [&](TextBuffer* b, const std::vector<std::string>& params) {
-        auto* input_ty = intrinsic->Parameters()[0].type;
+        auto* input_ty = intrinsic->Parameters()[0]->Type();
 
         std::string width;
         if (auto* vec = input_ty->As<sem::Vector>()) {
@@ -2434,12 +2434,13 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
         }
 
         if (wgsize[i].overridable_const) {
-          auto* sem_const = builder_.Sem().Get(wgsize[i].overridable_const);
-          if (!sem_const->IsPipelineConstant()) {
+          auto* global = builder_.Sem().Get<sem::GlobalVariable>(
+              wgsize[i].overridable_const);
+          if (!global->IsPipelineConstant()) {
             TINT_ICE(Writer, builder_.Diagnostics())
                 << "expected a pipeline-overridable constant";
           }
-          out << kSpecConstantPrefix << sem_const->ConstantId();
+          out << kSpecConstantPrefix << global->ConstantId();
         } else {
           out << std::to_string(wgsize[i].value);
         }
@@ -3187,8 +3188,9 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
   auto* sem = builder_.Sem().Get(var);
   auto* type = sem->Type();
 
-  if (sem->IsPipelineConstant()) {
-    auto const_id = sem->ConstantId();
+  auto* global = sem->As<sem::GlobalVariable>();
+  if (global && global->IsPipelineConstant()) {
+    auto const_id = global->ConstantId();
 
     line() << "#ifndef " << kSpecConstantPrefix << const_id;
 
@@ -3247,12 +3249,12 @@ bool GeneratorImpl::CallIntrinsicHelper(std::ostream& out,
       }
       {
         ScopedParen sp(decl);
-        for (auto param : intrinsic->Parameters()) {
+        for (auto* param : intrinsic->Parameters()) {
           if (!parameter_names.empty()) {
             decl << ", ";
           }
           auto param_name = "param_" + std::to_string(parameter_names.size());
-          const auto* ty = param.type;
+          const auto* ty = param->Type();
           if (auto* ptr = ty->As<sem::Pointer>()) {
             decl << "inout ";
             ty = ptr->StoreType();

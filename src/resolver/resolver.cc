@@ -3693,11 +3693,24 @@ void Resolver::CreateSemanticNodes() const {
         next_constant_id = constant_id + 1;
       }
 
-      sem_var = builder_->create<sem::Variable>(var, info->type, constant_id);
-    } else {
       sem_var =
-          builder_->create<sem::Variable>(var, info->type, info->storage_class,
-                                          info->access, info->binding_point);
+          builder_->create<sem::GlobalVariable>(var, info->type, constant_id);
+    } else {
+      switch (info->kind) {
+        case VariableKind::kGlobal:
+          sem_var = builder_->create<sem::GlobalVariable>(
+              var, info->type, info->storage_class, info->access,
+              info->binding_point);
+          break;
+        case VariableKind::kLocal:
+          sem_var = builder_->create<sem::LocalVariable>(
+              var, info->type, info->storage_class, info->access);
+          break;
+        case VariableKind::kParameter:
+          sem_var = builder_->create<sem::Parameter>(
+              var, info->type, info->storage_class, info->access);
+          break;
+      }
     }
 
     std::vector<const sem::VariableUser*> users;
@@ -3739,9 +3752,15 @@ void Resolver::CreateSemanticNodes() const {
     auto* func = it.first;
     auto* info = it.second;
 
+    sem::ParameterList parameters;
+    parameters.reserve(info->parameters.size());
+    for (auto* p : info->parameters) {
+      parameters.emplace_back(sem.Get<sem::Parameter>(p->declaration));
+    }
+
     auto* sem_func = builder_->create<sem::Function>(
         info->declaration, const_cast<sem::Type*>(info->return_type),
-        remap_vars(info->parameters), remap_vars(info->referenced_module_vars),
+        parameters, remap_vars(info->referenced_module_vars),
         remap_vars(info->local_referenced_module_vars), info->return_statements,
         info->callsites, ancestor_entry_points[func->symbol()],
         info->workgroup_size);

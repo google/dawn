@@ -131,7 +131,13 @@ void ArrayLengthFromUniform::Run(CloneContext& ctx,
     }
 
     // Get the index to use for the buffer size array.
-    auto binding = storage_buffer_sem->Variable()->BindingPoint();
+    auto* var = tint::As<sem::GlobalVariable>(storage_buffer_sem->Variable());
+    if (!var) {
+      TINT_ICE(Transform, ctx.dst->Diagnostics())
+          << "storage buffer is not a global variable";
+      break;
+    }
+    auto binding = var->BindingPoint();
     auto idx_itr = cfg->bindpoint_to_size_index.find(binding);
     if (idx_itr == cfg->bindpoint_to_size_index.end()) {
       ctx.dst->Diagnostics().add_error(

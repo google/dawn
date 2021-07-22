@@ -20,6 +20,9 @@
 #include "src/ast/variable.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Variable);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::GlobalVariable);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::LocalVariable);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::Parameter);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::VariableUser);
 
 namespace tint {
@@ -28,26 +31,51 @@ namespace sem {
 Variable::Variable(const ast::Variable* declaration,
                    const sem::Type* type,
                    ast::StorageClass storage_class,
-                   ast::Access access,
-                   sem::BindingPoint binding_point)
+                   ast::Access access)
     : declaration_(declaration),
       type_(type),
       storage_class_(storage_class),
-      access_(access),
+      access_(access) {}
+
+Variable::~Variable() = default;
+
+LocalVariable::LocalVariable(const ast::Variable* declaration,
+                             const sem::Type* type,
+                             ast::StorageClass storage_class,
+                             ast::Access access)
+    : Base(declaration, type, storage_class, access) {}
+
+LocalVariable::~LocalVariable() = default;
+
+GlobalVariable::GlobalVariable(const ast::Variable* declaration,
+                               const sem::Type* type,
+                               ast::StorageClass storage_class,
+                               ast::Access access,
+                               sem::BindingPoint binding_point)
+    : Base(declaration, type, storage_class, access),
       binding_point_(binding_point),
       is_pipeline_constant_(false) {}
 
-Variable::Variable(const ast::Variable* declaration,
-                   const sem::Type* type,
-                   uint16_t constant_id)
-    : declaration_(declaration),
-      type_(type),
-      storage_class_(ast::StorageClass::kNone),
-      access_(ast::Access::kReadWrite),
+GlobalVariable::GlobalVariable(const ast::Variable* declaration,
+                               const sem::Type* type,
+                               uint16_t constant_id)
+    : Base(declaration,
+           type,
+           ast::StorageClass::kNone,
+           ast::Access::kReadWrite),
       is_pipeline_constant_(true),
       constant_id_(constant_id) {}
 
-Variable::~Variable() = default;
+GlobalVariable::~GlobalVariable() = default;
+
+Parameter::Parameter(const ast::Variable* declaration,
+                     const sem::Type* type,
+                     ast::StorageClass storage_class,
+                     ast::Access access,
+                     const ParameterUsage usage /* = ParameterUsage::kNone */)
+    : Base(declaration, type, storage_class, access), usage_(usage) {}
+
+Parameter::~Parameter() = default;
 
 VariableUser::VariableUser(ast::IdentifierExpression* declaration,
                            const sem::Type* type,

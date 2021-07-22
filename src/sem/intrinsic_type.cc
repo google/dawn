@@ -24,6 +24,8 @@
 
 #include "src/sem/intrinsic_type.h"
 
+#include <sstream>
+
 namespace tint {
 namespace sem {
 
@@ -527,6 +529,11 @@ const char* str(IntrinsicType i) {
       return "atomicCompareExchangeWeak";
   }
   return "<unknown>";
+}
+
+std::ostream& operator<<(std::ostream& out, IntrinsicType i) {
+  out << str(i);
+  return out;
 }
 
 }  // namespace sem

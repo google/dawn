@@ -701,6 +701,55 @@ struct IntrinsicInfo {
 
 #include "intrinsic_table.inl"
 
+/// IntrinsicPrototype describes a fully matched intrinsic function, which is
+/// used as a lookup for building unique sem::Intrinsic instances.
+struct IntrinsicPrototype {
+  /// Parameter describes a single parameter
+  struct Parameter {
+    /// Parameter type
+    sem::Type* const type;
+    /// Parameter usage
+    ParameterUsage const usage = ParameterUsage::kNone;
+  };
+
+  /// Hasher provides a hash function for the IntrinsicPrototype
+  struct Hasher {
+    /// @param i the IntrinsicPrototype to create a hash for
+    /// @return the hash value
+    inline std::size_t operator()(const IntrinsicPrototype& i) const {
+      size_t hash = utils::Hash(i.parameters.size());
+      for (auto& p : i.parameters) {
+        utils::HashCombine(&hash, p.type, p.usage);
+      }
+      return utils::Hash(hash, i.type, i.return_type, i.supported_stages,
+                         i.is_deprecated);
+    }
+  };
+
+  sem::IntrinsicType type = sem::IntrinsicType::kNone;
+  std::vector<Parameter> parameters;
+  sem::Type const* return_type = nullptr;
+  PipelineStageSet supported_stages;
+  bool is_deprecated = false;
+};
+
+/// Equality operator for IntrinsicPrototype
+bool operator==(const IntrinsicPrototype& a, const IntrinsicPrototype& b) {
+  if (a.type != b.type || a.supported_stages != b.supported_stages ||
+      a.return_type != b.return_type || a.is_deprecated != b.is_deprecated ||
+      a.parameters.size() != b.parameters.size()) {
+    return false;
+  }
+  for (size_t i = 0; i < a.parameters.size(); i++) {
+    auto& pa = a.parameters[i];
+    auto& pb = b.parameters[i];
+    if (pa.type != pb.type || pa.usage != pb.usage) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /// Impl is the private implementation of the IntrinsicTable interface.
 class Impl : public IntrinsicTable {
  public:
@@ -726,7 +775,10 @@ class Impl : public IntrinsicTable {
 
   ProgramBuilder& builder;
   Matchers matchers;
-  std::unordered_map<sem::Intrinsic, sem::Intrinsic*> intrinsics;
+  std::unordered_map<IntrinsicPrototype,
+                     sem::Intrinsic*,
+                     IntrinsicPrototype::Hasher>
+      intrinsics;
 };
 
 /// @return a string representing a call to an intrinsic with the given argument
@@ -833,7 +885,7 @@ const sem::Intrinsic* Impl::Match(sem::IntrinsicType intrinsic_type,
 
   ClosedState closed(builder);
 
-  sem::ParameterList parameters;
+  std::vector<IntrinsicPrototype::Parameter> parameters;
 
   auto num_params = std::min(num_parameters, num_arguments);
   for (uint32_t p = 0; p < num_params; p++) {
@@ -841,8 +893,8 @@ const sem::Intrinsic* Impl::Match(sem::IntrinsicType intrinsic_type,
     auto* indices = parameter.matcher_indices;
     auto* type = Match(closed, overload, indices).Type(args[p]->UnwrapRef());
     if (type) {
-      parameters.emplace_back(
-          sem::Parameter{const_cast<sem::Type*>(type), parameter.usage});
+      parameters.emplace_back(IntrinsicPrototype::Parameter{
+          const_cast<sem::Type*>(type), parameter.usage});
       match_score += kScorePerMatchedParam;
     } else {
       overload_matched = false;
@@ -899,13 +951,25 @@ const sem::Intrinsic* Impl::Match(sem::IntrinsicType intrinsic_type,
     return_type = builder.create<sem::Void>();
   }
 
-  sem::Intrinsic intrinsic(intrinsic_type, const_cast<sem::Type*>(return_type),
-                           std::move(parameters), overload.supported_stages,
-                           overload.is_deprecated);
+  IntrinsicPrototype intrinsic;
+  intrinsic.type = intrinsic_type;
+  intrinsic.return_type = return_type;
+  intrinsic.parameters = std::move(parameters);
+  intrinsic.supported_stages = overload.supported_stages;
+  intrinsic.is_deprecated = overload.is_deprecated;
 
   // De-duplicate intrinsics that are identical.
   return utils::GetOrCreate(intrinsics, intrinsic, [&] {
-    return builder.create<sem::Intrinsic>(intrinsic);
+    sem::ParameterList params;
+    params.reserve(intrinsic.parameters.size());
+    for (auto& p : intrinsic.parameters) {
+      params.emplace_back(builder.create<sem::Parameter>(
+          nullptr, p.type, ast::StorageClass::kNone, ast::Access::kUndefined,
+          p.usage));
+    }
+    return builder.create<sem::Intrinsic>(
+        intrinsic.type, const_cast<sem::Type*>(intrinsic.return_type),
+        std::move(params), intrinsic.supported_stages, intrinsic.is_deprecated);
   });
 }
 

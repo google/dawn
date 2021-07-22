@@ -26,6 +26,7 @@
 #define SRC_SEM_INTRINSIC_TYPE_H_
 
 #include <string>
+#include <sstream>
 
 namespace tint {
 namespace sem {
@@ -142,6 +143,10 @@ IntrinsicType ParseIntrinsicType(const std::string& name);
 /// @returns the name of the intrinsic function type. The spelling, including
 /// case, matches the name in the WGSL spec.
 const char* str(IntrinsicType i);
+
+/// Emits the name of the intrinsic function type. The spelling, including case,
+/// matches the name in the WGSL spec.
+std::ostream& operator<<(std::ostream& out, IntrinsicType i);
 
 }  // namespace sem
 }  // namespace tint

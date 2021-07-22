@@ -27,31 +27,17 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Function);
 namespace tint {
 namespace sem {
 
-namespace {
-
-ParameterList GetParameters(const std::vector<const Variable*>& params) {
-  ParameterList parameters;
-  parameters.reserve(params.size());
-  for (auto* param : params) {
-    parameters.emplace_back(Parameter{param->Type(), ParameterUsage::kNone});
-  }
-  return parameters;
-}
-
-}  // namespace
-
 Function::Function(ast::Function* declaration,
                    Type* return_type,
-                   std::vector<const Variable*> parameters,
+                   ParameterList parameters,
                    std::vector<const Variable*> referenced_module_vars,
                    std::vector<const Variable*> local_referenced_module_vars,
                    std::vector<const ast::ReturnStatement*> return_statements,
                    std::vector<const ast::CallExpression*> callsites,
                    std::vector<Symbol> ancestor_entry_points,
                    std::array<WorkgroupDimension, 3> workgroup_size)
-    : Base(return_type, GetParameters(parameters)),
+    : Base(return_type, std::move(parameters)),
       declaration_(declaration),
-      parameters_(std::move(parameters)),
       referenced_module_vars_(std::move(referenced_module_vars)),
       local_referenced_module_vars_(std::move(local_referenced_module_vars)),
       return_statements_(std::move(return_statements)),

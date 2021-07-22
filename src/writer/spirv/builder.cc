@@ -492,7 +492,8 @@ bool Builder::GenerateExecutionModes(ast::Function* func, uint32_t id) {
         auto constant = ScalarConstant::U32(wgsize[i].value);
         if (wgsize[i].overridable_const) {
           // Make the constant specializable.
-          auto* sem_const = builder_.Sem().Get(wgsize[i].overridable_const);
+          auto* sem_const = builder_.Sem().Get<sem::GlobalVariable>(
+              wgsize[i].overridable_const);
           if (!sem_const->IsPipelineConstant()) {
             TINT_ICE(Writer, builder_.Diagnostics())
                 << "expected a pipeline-overridable constant";
@@ -1635,10 +1636,10 @@ uint32_t Builder::GenerateLiteralIfNeeded(ast::Variable* var,
                                           ast::Literal* lit) {
   ScalarConstant constant;
 
-  auto* sem_var = builder_.Sem().Get(var);
-  if (sem_var && sem_var->IsPipelineConstant()) {
+  auto* global = builder_.Sem().Get<sem::GlobalVariable>(var);
+  if (global && global->IsPipelineConstant()) {
     constant.is_spec_op = true;
-    constant.constant_id = sem_var->ConstantId();
+    constant.constant_id = global->ConstantId();
   }
 
   if (auto* l = lit->As<ast::BoolLiteral>()) {
@@ -2295,13 +2296,13 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
   // and loads it if necessary. Returns 0 on error.
   auto get_param_as_value_id = [&](size_t i) -> uint32_t {
     auto* arg = call->params()[i];
-    auto& param = intrinsic->Parameters()[i];
+    auto* param = intrinsic->Parameters()[i];
     auto val_id = GenerateExpression(arg);
     if (val_id == 0) {
       return 0;
     }
 
-    if (!param.type->Is<sem::Pointer>()) {
+    if (!param->Type()->Is<sem::Pointer>()) {
       val_id = GenerateLoadIfNeeded(TypeOf(arg), val_id);
     }
     return val_id;
@@ -2527,7 +2528,8 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
       // splat the condition into a vector of the same size.
       // TODO(jrprice): If we're targeting SPIR-V 1.4, we don't need to do this.
       auto* result_vector_type = intrinsic->ReturnType()->As<sem::Vector>();
-      if (result_vector_type && intrinsic->Parameters()[2].type->is_scalar()) {
+      if (result_vector_type &&
+          intrinsic->Parameters()[2]->Type()->is_scalar()) {
         sem::Bool bool_type;
         sem::Vector bool_vec_type(&bool_type, result_vector_type->size());
         if (!GenerateTypeIfNeeded(&bool_vec_type)) {
@@ -3036,14 +3038,15 @@ bool Builder::GenerateAtomicIntrinsic(ast::CallExpression* call,
                                       Operand result_type,
                                       Operand result_id) {
   auto is_value_signed = [&] {
-    return intrinsic->Parameters()[1].type->Is<sem::I32>();
+    return intrinsic->Parameters()[1]->Type()->Is<sem::I32>();
   };
 
   auto storage_class =
-      intrinsic->Parameters()[0].type->As<sem::Pointer>()->StorageClass();
+      intrinsic->Parameters()[0]->Type()->As<sem::Pointer>()->StorageClass();
 
   uint32_t memory_id = 0;
-  switch (intrinsic->Parameters()[0].type->As<sem::Pointer>()->StorageClass()) {
+  switch (
+      intrinsic->Parameters()[0]->Type()->As<sem::Pointer>()->StorageClass()) {
     case ast::StorageClass::kWorkgroup:
       memory_id = GenerateConstantIfNeeded(
           ScalarConstant::U32(static_cast<uint32_t>(spv::Scope::Workgroup)));

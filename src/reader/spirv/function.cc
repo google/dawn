@@ -34,6 +34,7 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/sem/depth_texture_type.h"
+#include "src/sem/intrinsic_type.h"
 #include "src/sem/sampled_texture_type.h"
 
 // Terms:
@@ -4959,9 +4960,7 @@ bool FunctionEmitter::EmitControlBarrier(
 TypedExpression FunctionEmitter::MakeIntrinsicCall(
     const spvtools::opt::Instruction& inst) {
   const auto intrinsic = GetIntrinsic(inst.opcode());
-  std::ostringstream ss;
-  ss << intrinsic;
-  auto name = ss.str();
+  auto* name = sem::str(intrinsic);
   auto* ident = create<ast::IdentifierExpression>(
       Source{}, builder_.Symbols().Register(name));
 

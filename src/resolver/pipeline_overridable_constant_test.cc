@@ -30,7 +30,7 @@ TEST_F(ResolverPipelineOverridableConstantTest, NonOverridable) {
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-  auto* sem_a = Sem().Get(a);
+  auto* sem_a = Sem().Get<sem::GlobalVariable>(a);
   ASSERT_NE(sem_a, nullptr);
   EXPECT_EQ(sem_a->Declaration(), a);
   EXPECT_FALSE(sem_a->IsPipelineConstant());
@@ -41,7 +41,7 @@ TEST_F(ResolverPipelineOverridableConstantTest, WithId) {
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-  auto* sem_a = Sem().Get(a);
+  auto* sem_a = Sem().Get<sem::GlobalVariable>(a);
   ASSERT_NE(sem_a, nullptr);
   EXPECT_EQ(sem_a->Declaration(), a);
   EXPECT_TRUE(sem_a->IsPipelineConstant());
@@ -53,7 +53,7 @@ TEST_F(ResolverPipelineOverridableConstantTest, WithoutId) {
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-  auto* sem_a = Sem().Get(a);
+  auto* sem_a = Sem().Get<sem::GlobalVariable>(a);
   ASSERT_NE(sem_a, nullptr);
   EXPECT_EQ(sem_a->Declaration(), a);
   EXPECT_TRUE(sem_a->IsPipelineConstant());
@@ -79,7 +79,7 @@ TEST_F(ResolverPipelineOverridableConstantTest, WithAndWithoutIds) {
 
   std::vector<uint16_t> constant_ids;
   for (auto* var : variables) {
-    auto* sem = Sem().Get(var);
+    auto* sem = Sem().Get<sem::GlobalVariable>(var);
     ASSERT_NE(sem, nullptr);
     constant_ids.push_back(static_cast<uint16_t>(sem->ConstantId()));
   }

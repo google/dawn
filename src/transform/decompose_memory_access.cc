@@ -682,8 +682,8 @@ struct DecomposeMemoryAccess::State {
 
       // Other parameters are copied as-is:
       for (size_t i = 1; i < intrinsic->Parameters().size(); i++) {
-        auto& param = intrinsic->Parameters()[i];
-        auto* ty = CreateASTTypeFor(ctx, param.type);
+        auto* param = intrinsic->Parameters()[i];
+        auto* ty = CreateASTTypeFor(ctx, param->Type());
         params.emplace_back(b.Param("param_" + std::to_string(i), ty));
       }
 

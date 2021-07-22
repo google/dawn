@@ -66,10 +66,10 @@ Output Msl::Run(const Program* in, const DataMap& inputs) {
 
   // Use the SSBO binding numbers as the indices for the buffer size lookups.
   for (auto* var : in->AST().GlobalVariables()) {
-    auto* sem_var = in->Sem().Get(var);
-    if (sem_var->StorageClass() == ast::StorageClass::kStorage) {
+    auto* global = in->Sem().Get<sem::GlobalVariable>(var);
+    if (global && global->StorageClass() == ast::StorageClass::kStorage) {
       array_length_from_uniform_cfg.bindpoint_to_size_index.emplace(
-          sem_var->BindingPoint(), sem_var->BindingPoint().binding);
+          global->BindingPoint(), global->BindingPoint().binding);
     }
   }
 

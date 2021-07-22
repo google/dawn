@@ -19,6 +19,7 @@
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/sampled_texture_type.h"
+#include "src/sem/sampler_type.h"
 #include "src/sem/storage_texture_type.h"
 #include "src/writer/hlsl/test_helper.h"
 

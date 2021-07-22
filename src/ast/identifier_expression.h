@@ -16,7 +16,6 @@
 #define SRC_AST_IDENTIFIER_EXPRESSION_H_
 
 #include "src/ast/expression.h"
-#include "src/sem/intrinsic.h"
 
 namespace tint {
 namespace ast {

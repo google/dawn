@@ -32,17 +32,11 @@ CallTarget::~CallTarget() = default;
 
 int IndexOf(const ParameterList& parameters, ParameterUsage usage) {
   for (size_t i = 0; i < parameters.size(); i++) {
-    if (parameters[i].usage == usage) {
+    if (parameters[i]->Usage() == usage) {
       return static_cast<int>(i);
     }
   }
   return -1;
-}
-
-std::ostream& operator<<(std::ostream& out, Parameter parameter) {
-  out << "[type: " << parameter.type->FriendlyName(SymbolTable{ProgramID{}})
-      << ", usage: " << str(parameter.usage) << "]";
-  return out;
 }
 
 }  // namespace sem

@@ -68,7 +68,7 @@ class Function : public Castable<Function, CallTarget> {
   /// @param workgroup_size the workgroup size
   Function(ast::Function* declaration,
            Type* return_type,
-           std::vector<const Variable*> parameters,
+           ParameterList parameters,
            std::vector<const Variable*> referenced_module_vars,
            std::vector<const Variable*> local_referenced_module_vars,
            std::vector<const ast::ReturnStatement*> return_statements,
@@ -81,9 +81,6 @@ class Function : public Castable<Function, CallTarget> {
 
   /// @returns the ast::Function declaration
   ast::Function* Declaration() const { return declaration_; }
-
-  /// @return the parameters to the function
-  const std::vector<const Variable*> Parameters() const { return parameters_; }
 
   /// Note: If this function calls other functions, the return will also include
   /// all of the referenced variables from the callees.
@@ -178,7 +175,6 @@ class Function : public Castable<Function, CallTarget> {
       bool multisampled) const;
 
   ast::Function* const declaration_;
-  std::vector<const Variable*> const parameters_;
   std::vector<const Variable*> const referenced_module_vars_;
   std::vector<const Variable*> const local_referenced_module_vars_;
   std::vector<const ast::ReturnStatement*> const return_statements_;

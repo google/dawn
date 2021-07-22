@@ -219,7 +219,7 @@ struct Robustness::State {
 
     auto* texture_arg = expr->params()[texture_idx];
     auto* coords_arg = expr->params()[coords_idx];
-    auto* coords_ty = intrinsic->Parameters()[coords_idx].type;
+    auto* coords_ty = intrinsic->Parameters()[coords_idx]->Type();
 
     // If the level is provided, then we need to clamp this. As the level is
     // used by textureDimensions() and the texture[Load|Store]() calls, we need

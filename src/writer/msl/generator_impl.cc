@@ -2323,9 +2323,9 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
     out << " " << program_->Symbols().NameFor(var->symbol());
   }
 
-  auto* sem_var = program_->Sem().Get(var);
-  if (sem_var->IsPipelineConstant()) {
-    out << " [[function_constant(" << sem_var->ConstantId() << ")]]";
+  auto* global = program_->Sem().Get<sem::GlobalVariable>(var);
+  if (global && global->IsPipelineConstant()) {
+    out << " [[function_constant(" << global->ConstantId() << ")]]";
   } else if (var->constructor() != nullptr) {
     out << " = ";
     if (!EmitExpression(out, var->constructor())) {

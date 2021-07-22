@@ -174,7 +174,8 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
 
       auto name = program_->Symbols().NameFor(decl->symbol());
 
-      if (var->IsPipelineConstant()) {
+      auto* global = var->As<sem::GlobalVariable>();
+      if (global && global->IsPipelineConstant()) {
         OverridableConstant overridable_constant;
         overridable_constant.name = name;
         entry_point.overridable_constants.push_back(overridable_constant);
@@ -203,8 +204,8 @@ std::string Inspector::GetRemappedNameForEntryPoint(
 std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
   std::map<uint32_t, Scalar> result;
   for (auto* var : program_->AST().GlobalVariables()) {
-    auto* sem_var = program_->Sem().Get(var);
-    if (!sem_var->IsPipelineConstant()) {
+    auto* global = program_->Sem().Get<sem::GlobalVariable>(var);
+    if (!global || !global->IsPipelineConstant()) {
       continue;
     }
 
@@ -212,7 +213,7 @@ std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
     // WGSL, so the resolver should catch it. Thus here the inspector just
     // assumes all definitions of the constant id are the same, so only needs
     // to find the first reference to constant id.
-    uint32_t constant_id = sem_var->ConstantId();
+    uint32_t constant_id = global->ConstantId();
     if (result.find(constant_id) != result.end()) {
       continue;
     }
@@ -274,10 +275,10 @@ std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
 std::map<std::string, uint32_t> Inspector::GetConstantNameToIdMap() {
   std::map<std::string, uint32_t> result;
   for (auto* var : program_->AST().GlobalVariables()) {
-    auto* sem_var = program_->Sem().Get(var);
-    if (sem_var->IsPipelineConstant()) {
+    auto* global = program_->Sem().Get<sem::GlobalVariable>(var);
+    if (global && global->IsPipelineConstant()) {
       auto name = program_->Symbols().NameFor(var->symbol());
-      result[name] = sem_var->ConstantId();
+      result[name] = global->ConstantId();
     }
   }
   return result;
