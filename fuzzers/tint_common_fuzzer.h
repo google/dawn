@@ -90,11 +90,20 @@ class Reader {
 };
 
 void ExtractBindingRemapperInputs(Reader* r, tint::transform::DataMap* inputs);
+
 void ExtractFirstIndexOffsetInputs(Reader* r, tint::transform::DataMap* inputs);
 
 void ExtractSingleEntryPointInputs(Reader* r, tint::transform::DataMap* inputs);
 
 void ExtractVertexPullingInputs(Reader* r, tint::transform::DataMap* inputs);
+
+void ExtractSpirvOptions(Reader* r, writer::spirv::Options* options);
+
+void ExtractWgslOptions(Reader* r, writer::wgsl::Options* options);
+
+void ExtractHlslOptions(Reader* r, writer::hlsl::Options* options);
+
+void ExtractMslOptions(Reader* r, writer::msl::Options* options);
 
 enum class InputFormat { kWGSL, kSpv, kNone };
 
@@ -113,6 +122,10 @@ class CommonFuzzer {
 
   int Run(const uint8_t* data, size_t size);
 
+  const tint::diag::List& Diagnostics() const { return diagnostics_; }
+
+  bool HasErrors() const { return diagnostics_.contains_errors(); }
+
   const std::vector<uint32_t>& GetGeneratedSpirv() const {
     return generated_spirv_;
   }
@@ -123,9 +136,21 @@ class CommonFuzzer {
 
   const std::string& GetGeneratedMsl() const { return generated_msl_; }
 
-  const tint::diag::List& Diagnostics() const { return diagnostics_; }
+  void SetOptionsSpirv(const writer::spirv::Options& options) {
+    options_spirv_ = options;
+  }
 
-  bool HasErrors() const { return diagnostics_.contains_errors(); }
+  void SetOptionsWgsl(const writer::wgsl::Options& options) {
+    options_wgsl_ = options;
+  }
+
+  void SetOptionsHlsl(const writer::hlsl::Options& options) {
+    options_hlsl_ = options;
+  }
+
+  void SetOptionsMsl(const writer::msl::Options& options) {
+    options_msl_ = options;
+  }
 
  private:
   InputFormat input_;
@@ -139,6 +164,11 @@ class CommonFuzzer {
   std::string generated_wgsl_;
   std::string generated_hlsl_;
   std::string generated_msl_;
+
+  writer::spirv::Options options_spirv_;
+  writer::wgsl::Options options_wgsl_;
+  writer::hlsl::Options options_hlsl_;
+  writer::msl::Options options_msl_;
 };
 
 }  // namespace fuzzers

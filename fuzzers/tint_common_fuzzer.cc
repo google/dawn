@@ -168,6 +168,22 @@ void ExtractVertexPullingInputs(Reader* r, tint::transform::DataMap* inputs) {
   inputs->Add<transform::VertexPulling::Config>(cfg);
 }
 
+void ExtractSpirvOptions(Reader* r, writer::spirv::Options* options) {
+  *options = r->read<writer::spirv::Options>();
+}
+
+void ExtractWgslOptions(Reader* r, writer::wgsl::Options* options) {
+  *options = r->read<writer::wgsl::Options>();
+}
+
+void ExtractHlslOptions(Reader* r, writer::hlsl::Options* options) {
+  *options = r->read<writer::hlsl::Options>();
+}
+
+void ExtractMslOptions(Reader* r, writer::msl::Options* options) {
+  *options = r->read<writer::msl::Options>();
+}
+
 CommonFuzzer::CommonFuzzer(InputFormat input, OutputFormat output)
     : input_(input),
       output_(output),
@@ -337,8 +353,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
   switch (output_) {
     case OutputFormat::kWGSL: {
 #if TINT_BUILD_WGSL_WRITER
-      writer::wgsl::Options options;
-      auto result = writer::wgsl::Generate(&program, options);
+      auto result = writer::wgsl::Generate(&program, options_wgsl_);
       generated_wgsl_ = std::move(result.wgsl);
       if (!result.success) {
         FatalError(program.Diagnostics(),
@@ -349,8 +364,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
     }
     case OutputFormat::kSpv: {
 #if TINT_BUILD_SPV_WRITER
-      writer::spirv::Options options;
-      auto result = writer::spirv::Generate(&program, options);
+      auto result = writer::spirv::Generate(&program, options_spirv_);
       generated_spirv_ = std::move(result.spirv);
       if (!result.success) {
         FatalError(program.Diagnostics(),
@@ -366,8 +380,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
     }
     case OutputFormat::kHLSL: {
 #if TINT_BUILD_HLSL_WRITER
-      writer::hlsl::Options options;
-      auto result = writer::hlsl::Generate(&program, options);
+      auto result = writer::hlsl::Generate(&program, options_hlsl_);
       generated_hlsl_ = std::move(result.hlsl);
       if (!result.success) {
         FatalError(program.Diagnostics(),
@@ -378,8 +391,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
     }
     case OutputFormat::kMSL: {
 #if TINT_BUILD_MSL_WRITER
-      writer::msl::Options options;
-      auto result = writer::msl::Generate(&program, options);
+      auto result = writer::msl::Generate(&program, options_msl_);
       generated_msl_ = std::move(result.msl);
       if (!result.success) {
         FatalError(program.Diagnostics(), "MSL writer failed: " + result.error);

@@ -20,8 +20,12 @@ namespace tint {
 namespace fuzzers {
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
+  Reader reader(data, size);
+  writer::spirv::Options options;
+  ExtractSpirvOptions(&reader, &options);
   tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
-  return fuzzer.Run(data, size);
+  fuzzer.SetOptionsSpirv(options);
+  return fuzzer.Run(reader.data(), reader.size());
 }
 
 }  // namespace fuzzers
