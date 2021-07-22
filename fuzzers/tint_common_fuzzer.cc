@@ -197,10 +197,6 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 
   Program program;
 
-#if TINT_BUILD_WGSL_READER
-  std::unique_ptr<Source::File> file;
-#endif  // TINT_BUILD_WGSL_READER
-
 #if TINT_BUILD_SPV_READER
   std::vector<uint32_t> spirv_input(size / sizeof(uint32_t));
 
@@ -209,9 +205,12 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
   switch (input_) {
 #if TINT_BUILD_WGSL_READER
     case InputFormat::kWGSL: {
+      // Clear any existing diagnostics, as these will hold pointers to file_,
+      // which we are about to release.
+      diagnostics_ = {};
       std::string str(reinterpret_cast<const char*>(data), size);
-      file = std::make_unique<Source::File>("test.wgsl", str);
-      program = reader::wgsl::Parse(file.get());
+      file_ = std::make_unique<Source::File>("test.wgsl", str);
+      program = reader::wgsl::Parse(file_.get());
       break;
     }
 #endif  // TINT_BUILD_WGSL_READER

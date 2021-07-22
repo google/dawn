@@ -16,6 +16,7 @@
 #define FUZZERS_TINT_COMMON_FUZZER_H_
 
 #include <cstring>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -169,6 +170,11 @@ class CommonFuzzer {
   writer::wgsl::Options options_wgsl_;
   writer::hlsl::Options options_hlsl_;
   writer::msl::Options options_msl_;
+
+#if TINT_BUILD_WGSL_READER
+  /// The source file needs to live at least as long as #diagnostics_
+  std::unique_ptr<Source::File> file_;
+#endif  // TINT_BUILD_WGSL_READER
 };
 
 }  // namespace fuzzers
