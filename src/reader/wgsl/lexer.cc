@@ -135,13 +135,43 @@ void Lexer::skip_whitespace() {
 }
 
 void Lexer::skip_comments() {
-  if (!matches(pos_, "//")) {
+  if (matches(pos_, "//")) {
+    // Line comment: ignore everything until the end of line.
+    while (!is_eof() && !matches(pos_, "\n")) {
+      pos_++;
+      location_.column++;
+    }
     return;
   }
 
-  while (!is_eof() && !matches(pos_, "\n")) {
-    pos_++;
-    location_.column++;
+  if (matches(pos_, "/*")) {
+    // Block comment: ignore everything until the closing '*/' token.
+    pos_ += 2;
+    location_.column += 2;
+
+    int depth = 1;
+    while (!is_eof() && depth > 0) {
+      if (matches(pos_, "/*")) {
+        // Start of block comment: increase nesting depth.
+        pos_ += 2;
+        location_.column += 2;
+        depth++;
+      } else if (matches(pos_, "*/")) {
+        // End of block comment: decrease nesting depth.
+        pos_ += 2;
+        location_.column += 2;
+        depth--;
+      } else if (matches(pos_, "\n")) {
+        // Newline: skip and update source location.
+        pos_++;
+        location_.line++;
+        location_.column = 1;
+      } else {
+        // Anything else: skip and update source location.
+        pos_++;
+        location_.column++;
+      }
+    }
   }
 }
 

@@ -48,7 +48,7 @@ TEST_F(LexerTest, Skips_Whitespace) {
   EXPECT_TRUE(t.IsEof());
 }
 
-TEST_F(LexerTest, Skips_Comments) {
+TEST_F(LexerTest, Skips_Comments_Line) {
   Source::FileContent content(R"(//starts with comment
 ident1 //ends with comment
 // blank line
@@ -70,6 +70,41 @@ ident1 //ends with comment
   EXPECT_EQ(t.source().range.end.line, 4u);
   EXPECT_EQ(t.source().range.end.column, 8u);
   EXPECT_EQ(t.to_str(), "ident2");
+
+  t = l.next();
+  EXPECT_TRUE(t.IsEof());
+}
+
+TEST_F(LexerTest, Skips_Comments_Block) {
+  Source::FileContent content(R"(/* comment
+text */ident)");
+  Lexer l("test.wgsl", &content);
+
+  auto t = l.next();
+  EXPECT_TRUE(t.IsIdentifier());
+  EXPECT_EQ(t.source().range.begin.line, 2u);
+  EXPECT_EQ(t.source().range.begin.column, 8u);
+  EXPECT_EQ(t.source().range.end.line, 2u);
+  EXPECT_EQ(t.source().range.end.column, 13u);
+  EXPECT_EQ(t.to_str(), "ident");
+
+  t = l.next();
+  EXPECT_TRUE(t.IsEof());
+}
+
+TEST_F(LexerTest, Skips_Comments_Block_Nested) {
+  Source::FileContent content(R"(/* comment
+text // nested line comments are ignored /* more text
+/////**/ */*/ident)");
+  Lexer l("test.wgsl", &content);
+
+  auto t = l.next();
+  EXPECT_TRUE(t.IsIdentifier());
+  EXPECT_EQ(t.source().range.begin.line, 3u);
+  EXPECT_EQ(t.source().range.begin.column, 14u);
+  EXPECT_EQ(t.source().range.end.line, 3u);
+  EXPECT_EQ(t.source().range.end.column, 19u);
+  EXPECT_EQ(t.to_str(), "ident");
 
   t = l.next();
   EXPECT_TRUE(t.IsEof());

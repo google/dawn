@@ -48,6 +48,26 @@ fn main() ->  {  // missing return type
   EXPECT_EQ(p->error(), "2:15: unable to determine function return type");
 }
 
+TEST_F(ParserImplTest, Comments) {
+  auto p = parser(R"(
+/**
+ * Here is my shader.
+ *
+ * /* I can nest /**/ comments. */
+ * // I can nest line comments too.
+ **/
+[[stage(fragment)]] // This is the stage
+fn main(/*
+no
+parameters
+*/) -> [[location(0)]] vec4<f32> {
+  return/*block_comments_delimit_tokens*/vec4<f32>(.4, .2, .3, 1);
+}/* unterminated block comments are OK at EOF...)");
+
+  ASSERT_TRUE(p->Parse()) << p->error();
+  ASSERT_EQ(1u, p->program().AST().Functions().size());
+}
+
 TEST_F(ParserImplTest, GetRegisteredType) {
   auto p = parser("");
   auto* alias = create<ast::Alias>(Sym("my_alias"), ty.i32());
