@@ -191,6 +191,7 @@ class UnsafeQueryAPIValidationTest : public ValidationTest {
     WGPUDevice CreateTestDevice() override {
         dawn_native::DeviceDescriptor descriptor;
         descriptor.requiredExtensions.push_back("pipeline_statistics_query");
+        descriptor.requiredExtensions.push_back("timestamp_query");
         descriptor.forceEnabledToggles.push_back("disallow_unsafe_apis");
         return adapter.CreateDevice(&descriptor);
     }
@@ -214,6 +215,24 @@ TEST_F(UnsafeQueryAPIValidationTest, PipelineStatisticsDisallowed) {
             wgpu::PipelineStatisticName::VertexShaderInvocations};
         descriptor.pipelineStatistics = pipelineStatistics.data();
         descriptor.pipelineStatisticsCount = pipelineStatistics.size();
+        ASSERT_DEVICE_ERROR(device.CreateQuerySet(&descriptor));
+    }
+}
+
+// Check timestamp queries are disallowed.
+TEST_F(UnsafeQueryAPIValidationTest, TimestampQueryDisallowed) {
+    wgpu::QuerySetDescriptor descriptor;
+    descriptor.count = 1;
+
+    // Control case: occlusion query creation is allowed.
+    {
+        descriptor.type = wgpu::QueryType::Occlusion;
+        device.CreateQuerySet(&descriptor);
+    }
+
+    // Error case: timestamp query creation is disallowed.
+    {
+        descriptor.type = wgpu::QueryType::Timestamp;
         ASSERT_DEVICE_ERROR(device.CreateQuerySet(&descriptor));
     }
 }

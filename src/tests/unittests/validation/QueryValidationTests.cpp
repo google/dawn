@@ -227,6 +227,7 @@ class TimestampQueryValidationTest : public QuerySetValidationTest {
     WGPUDevice CreateTestDevice() override {
         dawn_native::DeviceDescriptor descriptor;
         descriptor.requiredExtensions.push_back("timestamp_query");
+        descriptor.forceDisabledToggles.push_back("disallow_unsafe_apis");
         return adapter.CreateDevice(&descriptor);
     }
 };

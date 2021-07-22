@@ -94,6 +94,12 @@ namespace dawn_native {
                     return DAWN_VALIDATION_ERROR("The timestamp query feature is not supported");
                 }
 
+                if (device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
+                    return DAWN_VALIDATION_ERROR(
+                        "The timestamp query is disallowed because it may expose precise timing "
+                        "information");
+                }
+
                 if (descriptor->pipelineStatisticsCount != 0) {
                     return DAWN_VALIDATION_ERROR(
                         "The pipeline statistics should not be set if query type is Timestamp");
