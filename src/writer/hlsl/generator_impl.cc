@@ -3089,9 +3089,11 @@ bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
           // See discussion here: https://github.com/gpuweb/gpuweb/issues/893
           pre += "precise ";
         } else if (!deco->IsAnyOf<ast::StructMemberAlignDecoration,
+                                  ast::StructMemberOffsetDecoration,
                                   ast::StructMemberSizeDecoration>()) {
           TINT_ICE(Writer, diagnostics_)
               << "unhandled struct member attribute: " << deco->name();
+          return false;
         }
       }
 

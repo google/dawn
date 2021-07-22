@@ -236,6 +236,26 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
 )"));
 }
 
+TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_WithOffsetAttributes) {
+  auto* s = Structure("S",
+                      {
+                          Member("a", ty.i32(), {MemberOffset(0)}),
+                          Member("b", ty.f32(), {MemberOffset(8)}),
+                      },
+                      {create<ast::StructBlockDecoration>()});
+  Global("g", ty.Of(s), ast::StorageClass::kPrivate);
+
+  GeneratorImpl& gen = Build();
+
+  auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+  ASSERT_TRUE(gen.EmitStructType(sem_s)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct S {
+  int a;
+  float b;
+};
+)");
+}
+
 TEST_F(HlslGeneratorImplTest_Type, EmitType_U32) {
   auto* u32 = create<sem::U32>();
 
