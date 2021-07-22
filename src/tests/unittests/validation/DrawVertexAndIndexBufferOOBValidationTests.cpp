@@ -15,8 +15,6 @@
 #include "tests/unittests/validation/ValidationTest.h"
 
 #include "common/Constants.h"
-
-#include "common/VertexFormatUtils.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
@@ -111,8 +109,7 @@ namespace {
                 for (auto attr : buffer.attributes) {
                     // [[location({shaderLocation})]] var_{id} : {typeString},
                     inputStringStream << "[[location(" << attr.shaderLocation << ")]] var_"
-                                      << attributeCount << " : "
-                                      << dawn::GetWGSLVertexFormatType(attr.format) << ", ";
+                                      << attributeCount << " : vec4<f32>,";
                     attributeCount++;
                 }
             }
@@ -171,9 +168,7 @@ namespace {
 
         // Create a render pipeline using only one vertex-step-mode Float32x4 buffer
         wgpu::RenderPipeline CreateBasicRenderPipeline(uint32_t bufferStride = kFloat32x4Stride) {
-            DAWN_ASSERT(bufferStride >=
-                        dawn::VertexFormatNumComponents(wgpu::VertexFormat::Float32x4) *
-                            dawn::VertexFormatComponentSize(wgpu::VertexFormat::Float32x4));
+            DAWN_ASSERT(bufferStride >= kFloat32x4Stride);
 
             std::vector<PipelineVertexBufferDesc> bufferDescList = {
                 {bufferStride, wgpu::InputStepMode::Vertex, {{0, wgpu::VertexFormat::Float32x4}}},

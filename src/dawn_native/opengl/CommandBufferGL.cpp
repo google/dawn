@@ -14,13 +14,13 @@
 
 #include "dawn_native/opengl/CommandBufferGL.h"
 
-#include "common/VertexFormatUtils.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/BindGroupTracker.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/ExternalTexture.h"
 #include "dawn_native/RenderBundle.h"
+#include "dawn_native/VertexFormat.h"
 #include "dawn_native/opengl/BufferGL.h"
 #include "dawn_native/opengl/ComputePipelineGL.h"
 #include "dawn_native/opengl/DeviceGL.h"
@@ -179,7 +179,7 @@ namespace dawn_native { namespace opengl {
                         uint64_t offset = mVertexBufferOffsets[slot];
 
                         const VertexBufferInfo& vertexBuffer = mLastPipeline->GetVertexBuffer(slot);
-                        uint32_t components = dawn::VertexFormatNumComponents(attribute.format);
+                        uint32_t components = GetVertexFormatInfo(attribute.format).componentCount;
                         GLenum formatType = VertexFormatType(attribute.format);
 
                         GLboolean normalized = VertexFormatIsNormalized(attribute.format);

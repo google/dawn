@@ -15,12 +15,12 @@
 #include "dawn_native/RenderPipeline.h"
 
 #include "common/BitSetIterator.h"
-#include "common/VertexFormatUtils.h"
 #include "dawn_native/ChainUtils_autogen.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/ObjectContentHasher.h"
 #include "dawn_native/ValidationUtils_autogen.h"
+#include "dawn_native/VertexFormat.h"
 
 #include <cmath>
 
@@ -33,6 +33,7 @@ namespace dawn_native {
                                            uint64_t vertexBufferStride,
                                            std::bitset<kMaxVertexAttributes>* attributesSetMask) {
             DAWN_TRY(ValidateVertexFormat(attribute->format));
+            const VertexFormatInfo& formatInfo = GetVertexFormatInfo(attribute->format);
 
             if (attribute->shaderLocation >= kMaxVertexAttributes) {
                 return DAWN_VALIDATION_ERROR("Setting attribute out of bounds");
@@ -40,9 +41,8 @@ namespace dawn_native {
 
             // No underflow is possible because the max vertex format size is smaller than
             // kMaxVertexBufferArrayStride.
-            ASSERT(kMaxVertexBufferArrayStride >= dawn::VertexFormatSize(attribute->format));
-            if (attribute->offset >
-                kMaxVertexBufferArrayStride - dawn::VertexFormatSize(attribute->format)) {
+            ASSERT(kMaxVertexBufferArrayStride >= formatInfo.byteSize);
+            if (attribute->offset > kMaxVertexBufferArrayStride - formatInfo.byteSize) {
                 return DAWN_VALIDATION_ERROR("Setting attribute offset out of bounds");
             }
 
@@ -50,12 +50,11 @@ namespace dawn_native {
             // than kMaxVertexBufferArrayStride.
             ASSERT(attribute->offset < kMaxVertexBufferArrayStride);
             if (vertexBufferStride > 0 &&
-                attribute->offset + dawn::VertexFormatSize(attribute->format) >
-                    vertexBufferStride) {
+                attribute->offset + formatInfo.byteSize > vertexBufferStride) {
                 return DAWN_VALIDATION_ERROR("Setting attribute offset out of bounds");
             }
 
-            if (attribute->offset % dawn::VertexFormatComponentSize(attribute->format) != 0) {
+            if (attribute->offset % formatInfo.componentByteSize != 0) {
                 return DAWN_VALIDATION_ERROR(
                     "Attribute offset needs to be a multiple of the size format's components");
             }

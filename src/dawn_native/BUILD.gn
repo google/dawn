@@ -300,6 +300,8 @@ source_set("dawn_native_sources") {
     "ToBackend.h",
     "Toggles.cpp",
     "Toggles.h",
+    "VertexFormat.cpp",
+    "VertexFormat.h",
     "dawn_platform.h",
   ]
 

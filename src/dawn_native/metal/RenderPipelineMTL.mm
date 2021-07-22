@@ -14,7 +14,7 @@
 
 #include "dawn_native/metal/RenderPipelineMTL.h"
 
-#include "common/VertexFormatUtils.h"
+#include "dawn_native/VertexFormat.h"
 #include "dawn_native/metal/DeviceMTL.h"
 #include "dawn_native/metal/PipelineLayoutMTL.h"
 #include "dawn_native/metal/ShaderModuleMTL.h"
@@ -479,8 +479,8 @@ namespace dawn_native { namespace metal {
                         continue;
                     }
                     maxArrayStride =
-                        std::max(maxArrayStride,
-                                 dawn::VertexFormatSize(attrib.format) + size_t(attrib.offset));
+                        std::max(maxArrayStride, GetVertexFormatInfo(attrib.format).byteSize +
+                                                     size_t(attrib.offset));
                 }
                 layoutDesc.stepFunction = MTLVertexStepFunctionConstant;
                 layoutDesc.stepRate = 0;

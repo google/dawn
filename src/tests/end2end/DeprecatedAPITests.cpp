@@ -20,7 +20,6 @@
 #include "tests/DawnTest.h"
 
 #include "common/Constants.h"
-#include "common/VertexFormatUtils.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
