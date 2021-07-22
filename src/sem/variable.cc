@@ -69,11 +69,14 @@ GlobalVariable::GlobalVariable(const ast::Variable* declaration,
 GlobalVariable::~GlobalVariable() = default;
 
 Parameter::Parameter(const ast::Variable* declaration,
+                     uint32_t index,
                      const sem::Type* type,
                      ast::StorageClass storage_class,
                      ast::Access access,
                      const ParameterUsage usage /* = ParameterUsage::kNone */)
-    : Base(declaration, type, storage_class, access), usage_(usage) {}
+    : Base(declaration, type, storage_class, access),
+      index_(index),
+      usage_(usage) {}
 
 Parameter::~Parameter() = default;
 

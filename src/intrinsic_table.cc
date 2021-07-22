@@ -960,12 +960,12 @@ const sem::Intrinsic* Impl::Match(sem::IntrinsicType intrinsic_type,
 
   // De-duplicate intrinsics that are identical.
   return utils::GetOrCreate(intrinsics, intrinsic, [&] {
-    sem::ParameterList params;
+    std::vector<sem::Parameter*> params;
     params.reserve(intrinsic.parameters.size());
     for (auto& p : intrinsic.parameters) {
       params.emplace_back(builder.create<sem::Parameter>(
-          nullptr, p.type, ast::StorageClass::kNone, ast::Access::kUndefined,
-          p.usage));
+          nullptr, static_cast<uint32_t>(params.size()), p.type,
+          ast::StorageClass::kNone, ast::Access::kUndefined, p.usage));
     }
     return builder.create<sem::Intrinsic>(
         intrinsic.type, const_cast<sem::Type*>(intrinsic.return_type),

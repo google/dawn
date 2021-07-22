@@ -68,7 +68,7 @@ class Function : public Castable<Function, CallTarget> {
   /// @param workgroup_size the workgroup size
   Function(ast::Function* declaration,
            Type* return_type,
-           ParameterList parameters,
+           std::vector<Parameter*> parameters,
            std::vector<const Variable*> referenced_module_vars,
            std::vector<const Variable*> local_referenced_module_vars,
            std::vector<const ast::ReturnStatement*> return_statements,

@@ -16,6 +16,7 @@
 #define SRC_SEM_INTRINSIC_H_
 
 #include <string>
+#include <vector>
 
 #include "src/sem/call_target.h"
 #include "src/sem/intrinsic_type.h"
@@ -88,7 +89,7 @@ class Intrinsic : public Castable<Intrinsic, CallTarget> {
   /// deprecated
   Intrinsic(IntrinsicType type,
             sem::Type* return_type,
-            ParameterList parameters,
+            std::vector<Parameter*> parameters,
             PipelineStageSet supported_stages,
             bool is_deprecated);
 

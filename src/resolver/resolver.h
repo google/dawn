@@ -103,7 +103,8 @@ class Resolver {
                  const std::string& type_name,
                  ast::StorageClass storage_class,
                  ast::Access ac,
-                 VariableKind k);
+                 VariableKind k,
+                 uint32_t idx);
     ~VariableInfo();
 
     ast::Variable const* const declaration;
@@ -114,6 +115,7 @@ class Resolver {
     std::vector<ast::IdentifierExpression*> users;
     sem::BindingPoint binding_point;
     VariableKind kind;
+    uint32_t index = 0;  // Parameter index, if kind == kParameter
   };
 
   struct IntrinsicCallInfo {
@@ -359,7 +361,10 @@ class Resolver {
   /// context-dependent (global, local, parameter)
   /// @param var the variable to create or return the `VariableInfo` for
   /// @param kind what kind of variable we are declaring
-  VariableInfo* Variable(ast::Variable* var, VariableKind kind);
+  /// @param index the index of the parameter, if this variable is a parameter
+  VariableInfo* Variable(ast::Variable* var,
+                         VariableKind kind,
+                         uint32_t index = 0);
 
   /// Records the storage class usage for the given type, and any transient
   /// dependencies of the type. Validates that the type can be used for the

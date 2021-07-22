@@ -34,6 +34,7 @@ class Variable;
 namespace sem {
 
 // Forward declarations
+class CallTarget;
 class Type;
 class VariableUser;
 
@@ -143,27 +144,37 @@ class Parameter : public Castable<Parameter, Variable> {
  public:
   /// Constructor for function parameters
   /// @param declaration the AST declaration node
+  /// @param index the index of the parmeter in the function
   /// @param type the variable type
   /// @param storage_class the variable storage class
   /// @param access the variable access control type
   /// @param usage the semantic usage for the parameter
   Parameter(const ast::Variable* declaration,
+            uint32_t index,
             const sem::Type* type,
             ast::StorageClass storage_class,
             ast::Access access,
             const ParameterUsage usage = ParameterUsage::kNone);
 
-  /// Copy constructor
-  Parameter(const Parameter&);
-
   /// Destructor
   ~Parameter() override;
+
+  /// @return the index of the parmeter in the function
+  uint32_t Index() const { return index_; }
 
   /// @returns the semantic usage for the parameter
   ParameterUsage Usage() const { return usage_; }
 
+  /// @returns the CallTarget owner of this parameter
+  CallTarget const* Owner() const { return owner_; }
+
+  /// @param owner the CallTarget owner of this parameter
+  void SetOwner(CallTarget const* owner) { owner_ = owner; }
+
  private:
+  uint32_t const index_;
   ParameterUsage const usage_;
+  CallTarget const* owner_;
 };
 
 /// ParameterList is a list of Parameter

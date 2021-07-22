@@ -477,7 +477,8 @@ bool Resolver::ValidateStorageTexture(const ast::StorageTexture* t) {
 }
 
 Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
-                                           VariableKind kind) {
+                                           VariableKind kind,
+                                           uint32_t index /* = 0 */) {
   if (variable_to_info_.count(var)) {
     TINT_ICE(Resolver, diagnostics_)
         << "Variable " << builder_->Symbols().NameFor(var->symbol())
@@ -576,8 +577,9 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
     return nullptr;
   }
 
-  auto* info = variable_infos_.Create(var, const_cast<sem::Type*>(type),
-                                      type_name, storage_class, access, kind);
+  auto* info =
+      variable_infos_.Create(var, const_cast<sem::Type*>(type), type_name,
+                             storage_class, access, kind, index);
   variable_to_info_.emplace(var, info);
 
   return info;
@@ -1716,9 +1718,11 @@ bool Resolver::Function(ast::Function* func) {
   TINT_SCOPED_ASSIGNMENT(current_function_, info);
 
   variable_stack_.push_scope();
+  uint32_t parameter_index = 0;
   for (auto* param : func->params()) {
     Mark(param);
-    auto* param_info = Variable(param, VariableKind::kParameter);
+    auto* param_info =
+        Variable(param, VariableKind::kParameter, parameter_index++);
     if (!param_info) {
       return false;
     }
@@ -3667,6 +3671,7 @@ void Resolver::CreateSemanticNodes() const {
   uint16_t next_constant_id = 0;
 
   // Create semantic nodes for all ast::Variables
+  std::unordered_map<const tint::ast::Variable*, sem::Parameter*> sem_params;
   for (auto it : variable_to_info_) {
     auto* var = it.first;
     auto* info = it.second;
@@ -3706,10 +3711,13 @@ void Resolver::CreateSemanticNodes() const {
           sem_var = builder_->create<sem::LocalVariable>(
               var, info->type, info->storage_class, info->access);
           break;
-        case VariableKind::kParameter:
-          sem_var = builder_->create<sem::Parameter>(
-              var, info->type, info->storage_class, info->access);
+        case VariableKind::kParameter: {
+          auto* param = builder_->create<sem::Parameter>(
+              var, info->index, info->type, info->storage_class, info->access);
+          sem_var = param;
+          sem_params.emplace(var, param);
           break;
+        }
       }
     }
 
@@ -3752,10 +3760,10 @@ void Resolver::CreateSemanticNodes() const {
     auto* func = it.first;
     auto* info = it.second;
 
-    sem::ParameterList parameters;
+    std::vector<sem::Parameter*> parameters;
     parameters.reserve(info->parameters.size());
     for (auto* p : info->parameters) {
-      parameters.emplace_back(sem.Get<sem::Parameter>(p->declaration));
+      parameters.emplace_back(sem_params.at(p->declaration));
     }
 
     auto* sem_func = builder_->create<sem::Function>(
@@ -4453,13 +4461,15 @@ Resolver::VariableInfo::VariableInfo(const ast::Variable* decl,
                                      const std::string& tn,
                                      ast::StorageClass sc,
                                      ast::Access ac,
-                                     VariableKind k)
+                                     VariableKind k,
+                                     uint32_t idx)
     : declaration(decl),
       type(ty),
       type_name(tn),
       storage_class(sc),
       access(ac),
-      kind(k) {}
+      kind(k),
+      index(idx) {}
 
 Resolver::VariableInfo::~VariableInfo() = default;
 
