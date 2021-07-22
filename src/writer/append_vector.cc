@@ -43,7 +43,7 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
   auto* vector_sem = b->Sem().Get(vector);
   auto* vector_ty = vector_sem->Type()->UnwrapRef();
   if (auto* vec = vector_ty->As<sem::Vector>()) {
-    packed_size = vec->size() + 1;
+    packed_size = vec->Width() + 1;
     packed_el_sem_ty = vec->type();
   } else {
     packed_size = 2;

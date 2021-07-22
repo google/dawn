@@ -153,7 +153,7 @@ bool IntrinsicDataTypeFor(const sem::Type* ty,
     return true;
   }
   if (auto* vec = ty->As<sem::Vector>()) {
-    switch (vec->size()) {
+    switch (vec->Width()) {
       case 2:
         if (vec->type()->Is<sem::I32>()) {
           out = DecomposeMemoryAccess::Intrinsic::DataType::kVec2I32;

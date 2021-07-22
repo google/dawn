@@ -1337,7 +1337,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
       auto* value_type = TypeOf(values[0])->UnwrapRef();
       if (auto* val_vec = value_type->As<sem::Vector>()) {
         if (val_vec->type()->is_scalar()) {
-          can_cast_or_copy = res_vec->size() == val_vec->size();
+          can_cast_or_copy = res_vec->Width() == val_vec->Width();
         }
       }
     }
@@ -1413,7 +1413,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
         return 0;
       }
 
-      for (uint32_t i = 0; i < vec->size(); ++i) {
+      for (uint32_t i = 0; i < vec->Width(); ++i) {
         auto extract = result_op();
         auto extract_id = extract.to_i();
 
@@ -1455,7 +1455,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   auto* const init_result_type = TypeOf(init)->UnwrapRef();
   if (values.size() == 1 && init_result_type->is_scalar_vector() &&
       TypeOf(values[0])->UnwrapRef()->is_scalar()) {
-    size_t vec_size = init_result_type->As<sem::Vector>()->size();
+    size_t vec_size = init_result_type->As<sem::Vector>()->Width();
     for (size_t i = 0; i < (vec_size - 1); ++i) {
       ops.push_back(ops[0]);
     }
@@ -1772,7 +1772,7 @@ uint32_t Builder::GenerateConstantVectorSplatIfNeeded(const sem::Vector* type,
     return 0;
   }
 
-  uint64_t key = (static_cast<uint64_t>(type->size()) << 32) + value_id;
+  uint64_t key = (static_cast<uint64_t>(type->Width()) << 32) + value_id;
   return utils::GetOrCreate(const_splat_to_id_, key, [&] {
     auto result = result_op();
     auto result_id = result.to_i();
@@ -1780,7 +1780,7 @@ uint32_t Builder::GenerateConstantVectorSplatIfNeeded(const sem::Vector* type,
     OperandList ops;
     ops.push_back(Operand::Int(type_id));
     ops.push_back(result);
-    for (uint32_t i = 0; i < type->size(); i++) {
+    for (uint32_t i = 0; i < type->Width(); i++) {
       ops.push_back(Operand::Int(value_id));
     }
     push_type(spv::Op::OpConstantComposite, ops);
@@ -1882,7 +1882,7 @@ uint32_t Builder::GenerateSplat(uint32_t scalar_id, const sem::Type* vec_type) {
   OperandList ops;
   ops.push_back(Operand::Int(GenerateTypeIfNeeded(vec_type)));
   ops.push_back(splat_result);
-  for (size_t i = 0; i < vec_type->As<sem::Vector>()->size(); ++i) {
+  for (size_t i = 0; i < vec_type->As<sem::Vector>()->Width(); ++i) {
     ops.push_back(Operand::Int(scalar_id));
   }
   if (!push_function_inst(spv::Op::OpCompositeConstruct, ops)) {
@@ -2467,12 +2467,12 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
         // same size, and create vector constants by replicating the scalars.
         // I expect backend compilers to fold these into unique constants, so
         // there is no loss of efficiency.
-        sem::Vector uvec_ty(&u32, fvec_ty->size());
+        sem::Vector uvec_ty(&u32, fvec_ty->Width());
         unsigned_id = GenerateTypeIfNeeded(&uvec_ty);
         auto splat = [&](uint32_t scalar_id) -> uint32_t {
           auto splat_result = result_op();
           OperandList splat_params{Operand::Int(unsigned_id), splat_result};
-          for (size_t i = 0; i < fvec_ty->size(); i++) {
+          for (size_t i = 0; i < fvec_ty->Width(); i++) {
             splat_params.emplace_back(Operand::Int(scalar_id));
           }
           if (!push_function_inst(spv::Op::OpCompositeConstruct,
@@ -2531,7 +2531,7 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
       if (result_vector_type &&
           intrinsic->Parameters()[2]->Type()->is_scalar()) {
         sem::Bool bool_type;
-        sem::Vector bool_vec_type(&bool_type, result_vector_type->size());
+        sem::Vector bool_vec_type(&bool_type, result_vector_type->Width());
         if (!GenerateTypeIfNeeded(&bool_vec_type)) {
           return 0;
         }
@@ -4015,7 +4015,7 @@ bool Builder::GenerateVectorType(const sem::Vector* vec,
   }
 
   push_type(spv::Op::OpTypeVector,
-            {result, Operand::Int(type_id), Operand::Int(vec->size())});
+            {result, Operand::Int(type_id), Operand::Int(vec->Width())});
   return true;
 }
 

@@ -205,7 +205,7 @@ bool GeneratorImpl::EmitDynamicVectorAssignment(
         {
           ScopedIndent si(&helpers_);
           auto out = line(&helpers_);
-          switch (vec->size()) {
+          switch (vec->Width()) {
             case 2:
               out << "vec = (idx.xx == int2(0, 1)) ? val.xx : vec;";
               break;
@@ -217,7 +217,7 @@ bool GeneratorImpl::EmitDynamicVectorAssignment(
               break;
             default:
               TINT_UNREACHABLE(Writer, builder_.Diagnostics())
-                  << "invalid vector size " << vec->size();
+                  << "invalid vector size " << vec->Width();
               break;
           }
         }
@@ -1285,7 +1285,7 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
 
         std::string width;
         if (auto* vec = significand_ty->As<sem::Vector>()) {
-          width = std::to_string(vec->size());
+          width = std::to_string(vec->Width());
         }
 
         // Exponent is an integer, which HLSL does not have an overload for.
@@ -1318,7 +1318,7 @@ bool GeneratorImpl::EmitIsNormalCall(std::ostream& out,
 
         std::string width;
         if (auto* vec = input_ty->As<sem::Vector>()) {
-          width = std::to_string(vec->size());
+          width = std::to_string(vec->Width());
         }
 
         constexpr auto* kExponentMask = "0x7f80000";
@@ -1816,7 +1816,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     // number of components.
     uint32_t wgsl_ret_width = 1;
     if (auto* vec = intrinsic->ReturnType()->As<sem::Vector>()) {
-      wgsl_ret_width = vec->size();
+      wgsl_ret_width = vec->Width();
     }
     if (wgsl_ret_width < hlsl_ret_width) {
       out << ".";
@@ -2022,7 +2022,7 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& out,
   }
 
   if (is_single_value_vector_init) {
-    out << ")." << std::string(type->As<sem::Vector>()->size(), 'x');
+    out << ")." << std::string(type->As<sem::Vector>()->Width(), 'x');
   }
 
   out << (brackets ? "}" : ")");
@@ -2537,7 +2537,7 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
       return false;
     }
     ScopedParen sp(out);
-    for (uint32_t i = 0; i < vec->size(); i++) {
+    for (uint32_t i = 0; i < vec->Width(); i++) {
       if (i != 0) {
         out << ", ";
       }
@@ -2970,7 +2970,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
   } else if (type->Is<sem::U32>()) {
     out << "uint";
   } else if (auto* vec = type->As<sem::Vector>()) {
-    auto size = vec->size();
+    auto size = vec->Width();
     if (vec->type()->Is<sem::F32>() && size >= 1 && size <= 4) {
       out << "float" << size;
     } else if (vec->type()->Is<sem::I32>() && size >= 1 && size <= 4) {

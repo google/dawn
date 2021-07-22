@@ -335,7 +335,7 @@ bool match_vec(const sem::Type* ty, Number& N, const sem::Type*& T) {
   }
 
   if (auto* v = ty->As<sem::Vector>()) {
-    N = v->size();
+    N = v->Width();
     T = v->type();
     return true;
   }
@@ -354,7 +354,7 @@ bool match_vec(const sem::Type* ty, const sem::Type*& T) {
   }
 
   if (auto* v = ty->As<sem::Vector>()) {
-    if (v->size() == N) {
+    if (v->Width() == N) {
       T = v->type();
       return true;
     }
@@ -395,7 +395,7 @@ bool match_mat(const sem::Type* ty, Number& M, Number& N, const sem::Type*& T) {
   }
   if (auto* m = ty->As<sem::Matrix>()) {
     M = m->columns();
-    N = m->ColumnType()->size();
+    N = m->ColumnType()->Width();
     T = m->type();
     return true;
   }

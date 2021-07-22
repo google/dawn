@@ -56,7 +56,7 @@ void FoldConstants::Run(CloneContext& ctx, const DataMap&, DataMap&) {
     }
 
     if (auto* vec = ty->As<sem::Vector>()) {
-      uint32_t vec_size = static_cast<uint32_t>(vec->size());
+      uint32_t vec_size = static_cast<uint32_t>(vec->Width());
 
       // We'd like to construct the new vector with the same number of
       // constructor args that the original node had, but after folding

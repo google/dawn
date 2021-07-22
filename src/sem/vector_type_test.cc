@@ -25,7 +25,7 @@ TEST_F(VectorTest, Creation) {
   I32 i32;
   Vector v{&i32, 2};
   EXPECT_EQ(v.type(), &i32);
-  EXPECT_EQ(v.size(), 2u);
+  EXPECT_EQ(v.Width(), 2u);
 }
 
 TEST_F(VectorTest, TypeName) {

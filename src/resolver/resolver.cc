@@ -1218,7 +1218,7 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
                      stage_name.str() + " pipeline stage",
                  deco->source());
       }
-      if (!(type->is_float_vector() && type->As<sem::Vector>()->size() == 4)) {
+      if (!(type->is_float_vector() && type->As<sem::Vector>()->Width() == 4)) {
         AddError("store type of " + deco_to_str(deco) + " must be 'vec4<f32>'",
                  deco->source());
         return false;
@@ -1232,7 +1232,7 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
         is_stage_mismatch = true;
       }
       if (!(type->is_unsigned_integer_vector() &&
-            type->As<sem::Vector>()->size() == 3)) {
+            type->As<sem::Vector>()->Width() == 3)) {
         AddError("store type of " + deco_to_str(deco) + " must be 'vec3<u32>'",
                  deco->source());
         return false;
@@ -2794,7 +2794,7 @@ bool Resolver::ValidateVectorConstructor(
         return false;
       }
 
-      value_cardinality_sum += value_vec->size();
+      value_cardinality_sum += value_vec->Width();
     } else {
       // A vector constructor can only accept vectors and scalars.
       AddError("expected vector or scalar type in vector constructor; found: " +
@@ -2807,7 +2807,7 @@ bool Resolver::ValidateVectorConstructor(
   // A correct vector constructor must either be a zero-value expression,
   // a single-value initializer (splat) expression, or the number of components
   // of all constructor arguments must add up to the vector cardinality.
-  if (value_cardinality_sum > 1 && value_cardinality_sum != vec_type->size()) {
+  if (value_cardinality_sum > 1 && value_cardinality_sum != vec_type->Width()) {
     if (values.empty()) {
       TINT_ICE(Resolver, diagnostics_)
           << "constructor arguments expected to be non-empty!";
@@ -2869,7 +2869,7 @@ bool Resolver::ValidateMatrixConstructor(
     auto* value_type = TypeOf(value)->UnwrapRef();
     auto* value_vec = value_type->As<sem::Vector>();
 
-    if (!value_vec || value_vec->size() != matrix_type->rows() ||
+    if (!value_vec || value_vec->Width() != matrix_type->rows() ||
         elem_type != value_vec->type()) {
       AddError("expected argument type '" +
                    VectorPretty(matrix_type->rows(), elem_type) + "' in '" +
@@ -3050,7 +3050,7 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
           return false;
       }
 
-      if (swizzle.back() >= vec->size()) {
+      if (swizzle.back() >= vec->Width()) {
         AddError("invalid vector swizzle member", expr->member()->source());
         return false;
       }
@@ -3130,7 +3130,7 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
   const bool matching_vec_elem_types =
       lhs_vec_elem_type && rhs_vec_elem_type &&
       (lhs_vec_elem_type == rhs_vec_elem_type) &&
-      (lhs_vec->size() == rhs_vec->size());
+      (lhs_vec->Width() == rhs_vec->Width());
 
   const bool matching_types = matching_vec_elem_types || (lhs_type == rhs_type);
 
@@ -3222,7 +3222,7 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
     // Vector times matrix
     if (lhs_vec_elem_type && lhs_vec_elem_type->Is<F32>() &&
         rhs_mat_elem_type && rhs_mat_elem_type->Is<F32>() &&
-        (lhs_vec->size() == rhs_mat->rows())) {
+        (lhs_vec->Width() == rhs_mat->rows())) {
       SetExprInfo(expr, builder_->create<sem::Vector>(lhs_vec->type(),
                                                       rhs_mat->columns()));
       return true;
@@ -3231,7 +3231,7 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
     // Matrix times vector
     if (lhs_mat_elem_type && lhs_mat_elem_type->Is<F32>() &&
         rhs_vec_elem_type && rhs_vec_elem_type->Is<F32>() &&
-        (lhs_mat->columns() == rhs_vec->size())) {
+        (lhs_mat->columns() == rhs_vec->Width())) {
       SetExprInfo(expr, builder_->create<sem::Vector>(rhs_vec->type(),
                                                       lhs_mat->rows()));
       return true;
@@ -3270,13 +3270,13 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
       if (lhs_vec_elem_type->Is<Bool>() &&
           (expr->IsEqual() || expr->IsNotEqual())) {
         SetExprInfo(expr, builder_->create<sem::Vector>(
-                              builder_->create<sem::Bool>(), lhs_vec->size()));
+                              builder_->create<sem::Bool>(), lhs_vec->Width()));
         return true;
       }
 
       if (lhs_vec_elem_type->is_numeric_scalar()) {
         SetExprInfo(expr, builder_->create<sem::Vector>(
-                              builder_->create<sem::Bool>(), lhs_vec->size()));
+                              builder_->create<sem::Bool>(), lhs_vec->Width()));
         return true;
       }
     }

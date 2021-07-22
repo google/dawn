@@ -77,7 +77,7 @@ TEST_P(ResolverIntrinsicDerivativeTest, Vector) {
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(expr)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(expr)->As<sem::Vector>()->size(), 4u);
+  EXPECT_EQ(TypeOf(expr)->As<sem::Vector>()->Width(), 4u);
 }
 
 TEST_P(ResolverIntrinsicDerivativeTest, MissingParam) {
@@ -139,7 +139,7 @@ TEST_P(ResolverIntrinsicTest_FloatMethod, Vector) {
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(expr)->As<sem::Vector>()->type()->Is<sem::Bool>());
-  EXPECT_EQ(TypeOf(expr)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(expr)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_P(ResolverIntrinsicTest_FloatMethod, Scalar) {
@@ -301,7 +301,7 @@ TEST_P(ResolverIntrinsicTest_StorageTextureOperation, TextureLoadRo) {
   } else {
     EXPECT_TRUE(TypeOf(expr)->As<sem::Vector>()->type()->Is<sem::U32>());
   }
-  EXPECT_EQ(TypeOf(expr)->As<sem::Vector>()->size(), 4u);
+  EXPECT_EQ(TypeOf(expr)->As<sem::Vector>()->Width(), 4u);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -366,7 +366,7 @@ TEST_P(ResolverIntrinsicTest_SampledTextureOperation, TextureLoadSampled) {
   } else {
     EXPECT_TRUE(TypeOf(expr)->As<sem::Vector>()->type()->Is<sem::U32>());
   }
-  EXPECT_EQ(TypeOf(expr)->As<sem::Vector>()->size(), 4u);
+  EXPECT_EQ(TypeOf(expr)->As<sem::Vector>()->Width(), 4u);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -455,7 +455,7 @@ TEST_F(ResolverIntrinsicTest, Select) {
 
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<sem::Vector>());
-  EXPECT_EQ(TypeOf(expr)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(expr)->As<sem::Vector>()->Width(), 3u);
   EXPECT_TRUE(TypeOf(expr)->As<sem::Vector>()->type()->Is<sem::F32>());
 }
 
@@ -668,9 +668,9 @@ TEST_P(ResolverIntrinsicTest_DataUnpacking, InferType) {
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_vector());
   if (pack4) {
-    EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->size(), 4u);
+    EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 4u);
   } else {
-    EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->size(), 2u);
+    EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 2u);
   }
 }
 
@@ -707,7 +707,7 @@ TEST_P(ResolverIntrinsicTest_SingleParam, Vector) {
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_vector());
-  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_P(ResolverIntrinsicTest_SingleParam, Error_NoParams) {
@@ -812,7 +812,7 @@ TEST_F(ResolverIntrinsicDataTest, Normalize_Vector) {
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_vector());
-  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_F(ResolverIntrinsicDataTest, Normalize_Error_NoParams) {
@@ -1028,7 +1028,7 @@ TEST_P(ResolverIntrinsicTest_SingleParam_FloatOrInt, Float_Vector) {
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_vector());
-  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_P(ResolverIntrinsicTest_SingleParam_FloatOrInt, Sint_Scalar) {
@@ -1053,7 +1053,7 @@ TEST_P(ResolverIntrinsicTest_SingleParam_FloatOrInt, Sint_Vector) {
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_signed_integer_vector());
-  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_P(ResolverIntrinsicTest_SingleParam_FloatOrInt, Uint_Scalar) {
@@ -1078,7 +1078,7 @@ TEST_P(ResolverIntrinsicTest_SingleParam_FloatOrInt, Uint_Vector) {
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_unsigned_integer_vector());
-  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_P(ResolverIntrinsicTest_SingleParam_FloatOrInt, Error_NoParams) {
@@ -1148,7 +1148,7 @@ TEST_P(ResolverIntrinsicTest_TwoParam, Vector) {
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_vector());
-  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_P(ResolverIntrinsicTest_TwoParam, Error_NoTooManyParams) {
@@ -1222,7 +1222,7 @@ TEST_F(ResolverIntrinsicTest, Cross) {
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_vector());
-  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_F(ResolverIntrinsicTest, Cross_Error_NoArgs) {
@@ -1304,7 +1304,7 @@ TEST_F(ResolverIntrinsicTest, Normalize) {
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_vector());
-  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_F(ResolverIntrinsicTest, Normalize_NoArgs) {
@@ -1344,7 +1344,7 @@ TEST_P(ResolverIntrinsicTest_ThreeParam, Vector) {
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_vector());
-  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
 }
 TEST_P(ResolverIntrinsicTest_ThreeParam, Error_NoParams) {
   auto param = GetParam();
@@ -1395,7 +1395,7 @@ TEST_P(ResolverIntrinsicTest_ThreeParam_FloatOrInt, Float_Vector) {
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_vector());
-  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_P(ResolverIntrinsicTest_ThreeParam_FloatOrInt, Sint_Scalar) {
@@ -1421,7 +1421,7 @@ TEST_P(ResolverIntrinsicTest_ThreeParam_FloatOrInt, Sint_Vector) {
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_signed_integer_vector());
-  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_P(ResolverIntrinsicTest_ThreeParam_FloatOrInt, Uint_Scalar) {
@@ -1447,7 +1447,7 @@ TEST_P(ResolverIntrinsicTest_ThreeParam_FloatOrInt, Uint_Vector) {
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_unsigned_integer_vector());
-  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_P(ResolverIntrinsicTest_ThreeParam_FloatOrInt, Error_NoParams) {
@@ -1498,7 +1498,7 @@ TEST_P(ResolverIntrinsicTest_Int_SingleParam, Vector) {
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_signed_integer_vector());
-  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_P(ResolverIntrinsicTest_Int_SingleParam, Error_NoParams) {
@@ -1573,7 +1573,7 @@ TEST_P(ResolverIntrinsicTest_FloatOrInt_TwoParam, Vector_Signed) {
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_signed_integer_vector());
-  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_P(ResolverIntrinsicTest_FloatOrInt_TwoParam, Vector_Unsigned) {
@@ -1586,7 +1586,7 @@ TEST_P(ResolverIntrinsicTest_FloatOrInt_TwoParam, Vector_Unsigned) {
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_unsigned_integer_vector());
-  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_P(ResolverIntrinsicTest_FloatOrInt_TwoParam, Vector_Float) {
@@ -1600,7 +1600,7 @@ TEST_P(ResolverIntrinsicTest_FloatOrInt_TwoParam, Vector_Float) {
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_vector());
-  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_P(ResolverIntrinsicTest_FloatOrInt_TwoParam, Error_NoParams) {
@@ -1977,14 +1977,14 @@ TEST_P(ResolverIntrinsicTest_Texture, Call) {
       case ast::TextureDimension::kCubeArray: {
         auto* vec = As<sem::Vector>(TypeOf(call));
         ASSERT_NE(vec, nullptr);
-        EXPECT_EQ(vec->size(), 2u);
+        EXPECT_EQ(vec->Width(), 2u);
         EXPECT_TRUE(vec->type()->Is<sem::I32>());
         break;
       }
       case ast::TextureDimension::k3d: {
         auto* vec = As<sem::Vector>(TypeOf(call));
         ASSERT_NE(vec, nullptr);
-        EXPECT_EQ(vec->size(), 3u);
+        EXPECT_EQ(vec->Width(), 3u);
         EXPECT_TRUE(vec->type()->Is<sem::I32>());
         break;
       }

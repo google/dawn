@@ -35,11 +35,12 @@ class Vector : public Castable<Vector, Type> {
 
   /// @returns the type of the vector elements
   Type* type() const { return const_cast<Type*>(subtype_); }
-  /// @returns the size of the vector
-  uint32_t size() const { return size_; }
 
   /// @returns the name for th type
   std::string type_name() const override;
+
+  /// @returns the width of the vector
+  uint32_t Width() const { return width_; }
 
   /// @param symbols the program's symbol table
   /// @returns the name for this type that closely resembles how it would be
@@ -52,7 +53,7 @@ class Vector : public Castable<Vector, Type> {
 
  private:
   Type const* const subtype_;
-  uint32_t const size_;
+  uint32_t const width_;
 };
 
 }  // namespace sem

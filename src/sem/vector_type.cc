@@ -21,10 +21,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Vector);
 namespace tint {
 namespace sem {
 
-Vector::Vector(Type const* subtype, uint32_t size)
-    : subtype_(subtype), size_(size) {
-  TINT_ASSERT(Semantic, size_ > 1);
-  TINT_ASSERT(Semantic, size_ < 5);
+Vector::Vector(Type const* subtype, uint32_t width)
+    : subtype_(subtype), width_(width) {
+  TINT_ASSERT(Semantic, width_ > 1);
+  TINT_ASSERT(Semantic, width_ < 5);
 }
 
 Vector::Vector(Vector&&) = default;
@@ -32,12 +32,12 @@ Vector::Vector(Vector&&) = default;
 Vector::~Vector() = default;
 
 std::string Vector::type_name() const {
-  return "__vec_" + std::to_string(size_) + subtype_->type_name();
+  return "__vec_" + std::to_string(width_) + subtype_->type_name();
 }
 
 std::string Vector::FriendlyName(const SymbolTable& symbols) const {
   std::ostringstream out;
-  out << "vec" << size_ << "<" << subtype_->FriendlyName(symbols) << ">";
+  out << "vec" << width_ << "<" << subtype_->FriendlyName(symbols) << ">";
   return out.str();
 }
 

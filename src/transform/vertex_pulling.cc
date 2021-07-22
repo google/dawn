@@ -148,7 +148,7 @@ DataType DataTypeOf(sem::Type* ty) {
     return {BaseType::kF32, 1};
   }
   if (auto* vec = ty->As<sem::Vector>()) {
-    return {DataTypeOf(vec->type()).base_type, vec->size()};
+    return {DataTypeOf(vec->type()).base_type, vec->Width()};
   }
   return {BaseType::kInvalid, 0};
 }

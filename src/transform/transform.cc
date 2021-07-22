@@ -124,7 +124,7 @@ ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const sem::Type* ty) {
   }
   if (auto* v = ty->As<sem::Vector>()) {
     auto* el = CreateASTTypeFor(ctx, v->type());
-    return ctx.dst->create<ast::Vector>(el, v->size());
+    return ctx.dst->create<ast::Vector>(el, v->Width());
   }
   if (auto* a = ty->As<sem::Array>()) {
     auto* el = CreateASTTypeFor(ctx, a->ElemType());

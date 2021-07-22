@@ -552,7 +552,7 @@ TEST_F(ResolverTest, Expr_ArrayAccessor_Matrix) {
 
   auto* ref = TypeOf(acc)->As<sem::Reference>();
   ASSERT_TRUE(ref->StoreType()->Is<sem::Vector>());
-  EXPECT_EQ(ref->StoreType()->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(ref->StoreType()->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_F(ResolverTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
@@ -709,7 +709,7 @@ TEST_F(ResolverTest, Expr_Constructor_Type_Vec2) {
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 2u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 2u);
 }
 
 TEST_F(ResolverTest, Expr_Constructor_Type_Vec3) {
@@ -721,7 +721,7 @@ TEST_F(ResolverTest, Expr_Constructor_Type_Vec3) {
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_F(ResolverTest, Expr_Constructor_Type_Vec4) {
@@ -733,7 +733,7 @@ TEST_F(ResolverTest, Expr_Constructor_Type_Vec4) {
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 4u);
 }
 
 TEST_F(ResolverTest, Expr_Identifier_GlobalVariable) {
@@ -1328,7 +1328,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle) {
   ASSERT_NE(TypeOf(mem), nullptr);
   ASSERT_TRUE(TypeOf(mem)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(mem)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(mem)->As<sem::Vector>()->size(), 4u);
+  EXPECT_EQ(TypeOf(mem)->As<sem::Vector>()->Width(), 4u);
   ASSERT_TRUE(Sem().Get(mem)->Is<sem::Swizzle>());
   EXPECT_THAT(Sem().Get(mem)->As<sem::Swizzle>()->Indices(),
               ElementsAre(0, 2, 1, 3));
@@ -1381,7 +1381,7 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
   ASSERT_NE(TypeOf(mem), nullptr);
   ASSERT_TRUE(TypeOf(mem)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(mem)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(mem)->As<sem::Vector>()->size(), 2u);
+  EXPECT_EQ(TypeOf(mem)->As<sem::Vector>()->Width(), 2u);
   ASSERT_TRUE(Sem().Get(mem)->Is<sem::Swizzle>());
 }
 
@@ -1928,7 +1928,7 @@ TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
   } else {
     EXPECT_TRUE(TypeOf(der)->As<sem::Vector>()->type()->Is<sem::F32>());
   }
-  EXPECT_EQ(TypeOf(der)->As<sem::Vector>()->size(), 4u);
+  EXPECT_EQ(TypeOf(der)->As<sem::Vector>()->Width(), 4u);
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          UnaryOpExpressionTest,

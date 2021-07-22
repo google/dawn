@@ -66,33 +66,33 @@ std::tuple<ComponentType, CompositionType> CalculateComponentAndComposition(
     return {ComponentType::kFloat, CompositionType::kScalar};
   } else if (type->is_float_vector()) {
     auto* vec = type->As<sem::Vector>();
-    if (vec->size() == 2) {
+    if (vec->Width() == 2) {
       return {ComponentType::kFloat, CompositionType::kVec2};
-    } else if (vec->size() == 3) {
+    } else if (vec->Width() == 3) {
       return {ComponentType::kFloat, CompositionType::kVec3};
-    } else if (vec->size() == 4) {
+    } else if (vec->Width() == 4) {
       return {ComponentType::kFloat, CompositionType::kVec4};
     }
   } else if (type->is_unsigned_integer_scalar()) {
     return {ComponentType::kUInt, CompositionType::kScalar};
   } else if (type->is_unsigned_integer_vector()) {
     auto* vec = type->As<sem::Vector>();
-    if (vec->size() == 2) {
+    if (vec->Width() == 2) {
       return {ComponentType::kUInt, CompositionType::kVec2};
-    } else if (vec->size() == 3) {
+    } else if (vec->Width() == 3) {
       return {ComponentType::kUInt, CompositionType::kVec3};
-    } else if (vec->size() == 4) {
+    } else if (vec->Width() == 4) {
       return {ComponentType::kUInt, CompositionType::kVec4};
     }
   } else if (type->is_signed_integer_scalar()) {
     return {ComponentType::kSInt, CompositionType::kScalar};
   } else if (type->is_signed_integer_vector()) {
     auto* vec = type->As<sem::Vector>();
-    if (vec->size() == 2) {
+    if (vec->Width() == 2) {
       return {ComponentType::kSInt, CompositionType::kVec2};
-    } else if (vec->size() == 3) {
+    } else if (vec->Width() == 3) {
       return {ComponentType::kSInt, CompositionType::kVec3};
-    } else if (vec->size() == 4) {
+    } else if (vec->Width() == 4) {
       return {ComponentType::kSInt, CompositionType::kVec4};
     }
   }

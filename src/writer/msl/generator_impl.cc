@@ -2017,7 +2017,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     if (!EmitType(out, vec->type(), "")) {
       return false;
     }
-    out << vec->size();
+    out << vec->Width();
     return true;
   }
 
@@ -2062,7 +2062,7 @@ bool GeneratorImpl::EmitPackedType(std::ostream& out,
     if (!EmitType(out, vec->type(), "")) {
       return false;
     }
-    out << vec->size();
+    out << vec->Width();
     return true;
   }
 
@@ -2349,7 +2349,7 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
   if (auto* vec = ty->As<sem::Vector>()) {
     // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
     // 2.2.3 Packed Vector Types
-    auto num_els = vec->size();
+    auto num_els = vec->Width();
     auto* el_ty = vec->type();
     if (el_ty->IsAnyOf<sem::U32, sem::I32, sem::F32>()) {
       return SizeAndAlign{num_els * 4, 4};

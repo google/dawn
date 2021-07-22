@@ -746,7 +746,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 2u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 2u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -759,7 +759,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 2u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 2u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -772,7 +772,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::U32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 2u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 2u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -785,7 +785,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::I32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 2u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 2u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -798,7 +798,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::Bool>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 2u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 2u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -811,7 +811,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 2u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 2u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -824,7 +824,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 2u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 2u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1002,7 +1002,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1015,7 +1015,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1028,7 +1028,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::U32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1041,7 +1041,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::I32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1054,7 +1054,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::Bool>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1067,7 +1067,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1080,7 +1080,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1093,7 +1093,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1106,7 +1106,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 3u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1352,7 +1352,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 4u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1365,7 +1365,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 4u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1378,7 +1378,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::U32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 4u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1391,7 +1391,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::I32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 4u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1404,7 +1404,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::Bool>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 4u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1417,7 +1417,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 4u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1430,7 +1430,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 4u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1443,7 +1443,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 4u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1456,7 +1456,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 4u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1469,7 +1469,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 4u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1482,7 +1482,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 4u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1495,7 +1495,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 4u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1508,7 +1508,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 4u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1535,7 +1535,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 4u);
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,

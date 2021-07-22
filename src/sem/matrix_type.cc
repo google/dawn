@@ -25,7 +25,7 @@ namespace sem {
 Matrix::Matrix(Vector* column_type, uint32_t columns)
     : subtype_(column_type->type()),
       column_type_(column_type),
-      rows_(column_type->size()),
+      rows_(column_type->Width()),
       columns_(columns) {
   TINT_ASSERT(AST, rows_ > 1);
   TINT_ASSERT(AST, rows_ < 5);

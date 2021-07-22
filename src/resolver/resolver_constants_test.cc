@@ -96,7 +96,7 @@ TEST_F(ResolverConstantsTest, Vec3_ZeroInit_i32) {
   EXPECT_NE(sem, nullptr);
   ASSERT_TRUE(sem->Type()->Is<sem::Vector>());
   EXPECT_TRUE(sem->Type()->As<sem::Vector>()->type()->Is<sem::I32>());
-  EXPECT_EQ(sem->Type()->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(sem->Type()->As<sem::Vector>()->Width(), 3u);
   EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
   EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::I32>());
   ASSERT_EQ(sem->ConstantValue().Elements().size(), 3u);
@@ -115,7 +115,7 @@ TEST_F(ResolverConstantsTest, Vec3_ZeroInit_u32) {
   EXPECT_NE(sem, nullptr);
   ASSERT_TRUE(sem->Type()->Is<sem::Vector>());
   EXPECT_TRUE(sem->Type()->As<sem::Vector>()->type()->Is<sem::U32>());
-  EXPECT_EQ(sem->Type()->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(sem->Type()->As<sem::Vector>()->Width(), 3u);
   EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
   EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::U32>());
   ASSERT_EQ(sem->ConstantValue().Elements().size(), 3u);
@@ -134,7 +134,7 @@ TEST_F(ResolverConstantsTest, Vec3_ZeroInit_f32) {
   EXPECT_NE(sem, nullptr);
   ASSERT_TRUE(sem->Type()->Is<sem::Vector>());
   EXPECT_TRUE(sem->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(sem->Type()->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(sem->Type()->As<sem::Vector>()->Width(), 3u);
   EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
   EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::F32>());
   ASSERT_EQ(sem->ConstantValue().Elements().size(), 3u);
@@ -153,7 +153,7 @@ TEST_F(ResolverConstantsTest, Vec3_ZeroInit_bool) {
   EXPECT_NE(sem, nullptr);
   ASSERT_TRUE(sem->Type()->Is<sem::Vector>());
   EXPECT_TRUE(sem->Type()->As<sem::Vector>()->type()->Is<sem::Bool>());
-  EXPECT_EQ(sem->Type()->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(sem->Type()->As<sem::Vector>()->Width(), 3u);
   EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
   EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::Bool>());
   ASSERT_EQ(sem->ConstantValue().Elements().size(), 3u);
@@ -172,7 +172,7 @@ TEST_F(ResolverConstantsTest, Vec3_Splat_i32) {
   EXPECT_NE(sem, nullptr);
   ASSERT_TRUE(sem->Type()->Is<sem::Vector>());
   EXPECT_TRUE(sem->Type()->As<sem::Vector>()->type()->Is<sem::I32>());
-  EXPECT_EQ(sem->Type()->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(sem->Type()->As<sem::Vector>()->Width(), 3u);
   EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
   EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::I32>());
   ASSERT_EQ(sem->ConstantValue().Elements().size(), 3u);
@@ -191,7 +191,7 @@ TEST_F(ResolverConstantsTest, Vec3_Splat_u32) {
   EXPECT_NE(sem, nullptr);
   ASSERT_TRUE(sem->Type()->Is<sem::Vector>());
   EXPECT_TRUE(sem->Type()->As<sem::Vector>()->type()->Is<sem::U32>());
-  EXPECT_EQ(sem->Type()->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(sem->Type()->As<sem::Vector>()->Width(), 3u);
   EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
   EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::U32>());
   ASSERT_EQ(sem->ConstantValue().Elements().size(), 3u);
@@ -210,7 +210,7 @@ TEST_F(ResolverConstantsTest, Vec3_Splat_f32) {
   EXPECT_NE(sem, nullptr);
   ASSERT_TRUE(sem->Type()->Is<sem::Vector>());
   EXPECT_TRUE(sem->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(sem->Type()->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(sem->Type()->As<sem::Vector>()->Width(), 3u);
   EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
   EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::F32>());
   ASSERT_EQ(sem->ConstantValue().Elements().size(), 3u);
@@ -229,7 +229,7 @@ TEST_F(ResolverConstantsTest, Vec3_Splat_bool) {
   EXPECT_NE(sem, nullptr);
   ASSERT_TRUE(sem->Type()->Is<sem::Vector>());
   EXPECT_TRUE(sem->Type()->As<sem::Vector>()->type()->Is<sem::Bool>());
-  EXPECT_EQ(sem->Type()->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(sem->Type()->As<sem::Vector>()->Width(), 3u);
   EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
   EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::Bool>());
   ASSERT_EQ(sem->ConstantValue().Elements().size(), 3u);
@@ -248,7 +248,7 @@ TEST_F(ResolverConstantsTest, Vec3_FullConstruct_i32) {
   EXPECT_NE(sem, nullptr);
   ASSERT_TRUE(sem->Type()->Is<sem::Vector>());
   EXPECT_TRUE(sem->Type()->As<sem::Vector>()->type()->Is<sem::I32>());
-  EXPECT_EQ(sem->Type()->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(sem->Type()->As<sem::Vector>()->Width(), 3u);
   EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
   EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::I32>());
   ASSERT_EQ(sem->ConstantValue().Elements().size(), 3u);
@@ -267,7 +267,7 @@ TEST_F(ResolverConstantsTest, Vec3_FullConstruct_u32) {
   EXPECT_NE(sem, nullptr);
   ASSERT_TRUE(sem->Type()->Is<sem::Vector>());
   EXPECT_TRUE(sem->Type()->As<sem::Vector>()->type()->Is<sem::U32>());
-  EXPECT_EQ(sem->Type()->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(sem->Type()->As<sem::Vector>()->Width(), 3u);
   EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
   EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::U32>());
   ASSERT_EQ(sem->ConstantValue().Elements().size(), 3u);
@@ -286,7 +286,7 @@ TEST_F(ResolverConstantsTest, Vec3_FullConstruct_f32) {
   EXPECT_NE(sem, nullptr);
   ASSERT_TRUE(sem->Type()->Is<sem::Vector>());
   EXPECT_TRUE(sem->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(sem->Type()->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(sem->Type()->As<sem::Vector>()->Width(), 3u);
   EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
   EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::F32>());
   ASSERT_EQ(sem->ConstantValue().Elements().size(), 3u);
@@ -305,7 +305,7 @@ TEST_F(ResolverConstantsTest, Vec3_FullConstruct_bool) {
   EXPECT_NE(sem, nullptr);
   ASSERT_TRUE(sem->Type()->Is<sem::Vector>());
   EXPECT_TRUE(sem->Type()->As<sem::Vector>()->type()->Is<sem::Bool>());
-  EXPECT_EQ(sem->Type()->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(sem->Type()->As<sem::Vector>()->Width(), 3u);
   EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
   EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::Bool>());
   ASSERT_EQ(sem->ConstantValue().Elements().size(), 3u);
@@ -324,7 +324,7 @@ TEST_F(ResolverConstantsTest, Vec3_MixConstruct_i32) {
   EXPECT_NE(sem, nullptr);
   ASSERT_TRUE(sem->Type()->Is<sem::Vector>());
   EXPECT_TRUE(sem->Type()->As<sem::Vector>()->type()->Is<sem::I32>());
-  EXPECT_EQ(sem->Type()->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(sem->Type()->As<sem::Vector>()->Width(), 3u);
   EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
   EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::I32>());
   ASSERT_EQ(sem->ConstantValue().Elements().size(), 3u);
@@ -343,7 +343,7 @@ TEST_F(ResolverConstantsTest, Vec3_MixConstruct_u32) {
   EXPECT_NE(sem, nullptr);
   ASSERT_TRUE(sem->Type()->Is<sem::Vector>());
   EXPECT_TRUE(sem->Type()->As<sem::Vector>()->type()->Is<sem::U32>());
-  EXPECT_EQ(sem->Type()->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(sem->Type()->As<sem::Vector>()->Width(), 3u);
   EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
   EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::U32>());
   ASSERT_EQ(sem->ConstantValue().Elements().size(), 3u);
@@ -362,7 +362,7 @@ TEST_F(ResolverConstantsTest, Vec3_MixConstruct_f32) {
   EXPECT_NE(sem, nullptr);
   ASSERT_TRUE(sem->Type()->Is<sem::Vector>());
   EXPECT_TRUE(sem->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(sem->Type()->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(sem->Type()->As<sem::Vector>()->Width(), 3u);
   EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
   EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::F32>());
   ASSERT_EQ(sem->ConstantValue().Elements().size(), 3u);
@@ -381,7 +381,7 @@ TEST_F(ResolverConstantsTest, Vec3_MixConstruct_bool) {
   EXPECT_NE(sem, nullptr);
   ASSERT_TRUE(sem->Type()->Is<sem::Vector>());
   EXPECT_TRUE(sem->Type()->As<sem::Vector>()->type()->Is<sem::Bool>());
-  EXPECT_EQ(sem->Type()->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(sem->Type()->As<sem::Vector>()->Width(), 3u);
   EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
   EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::Bool>());
   ASSERT_EQ(sem->ConstantValue().Elements().size(), 3u);
@@ -400,7 +400,7 @@ TEST_F(ResolverConstantsTest, Vec3_Cast_f32_to_32) {
   EXPECT_NE(sem, nullptr);
   ASSERT_TRUE(sem->Type()->Is<sem::Vector>());
   EXPECT_TRUE(sem->Type()->As<sem::Vector>()->type()->Is<sem::I32>());
-  EXPECT_EQ(sem->Type()->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(sem->Type()->As<sem::Vector>()->Width(), 3u);
   EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
   EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::I32>());
   ASSERT_EQ(sem->ConstantValue().Elements().size(), 3u);
@@ -419,7 +419,7 @@ TEST_F(ResolverConstantsTest, Vec3_Cast_u32_to_f32) {
   EXPECT_NE(sem, nullptr);
   ASSERT_TRUE(sem->Type()->Is<sem::Vector>());
   EXPECT_TRUE(sem->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
-  EXPECT_EQ(sem->Type()->As<sem::Vector>()->size(), 3u);
+  EXPECT_EQ(sem->Type()->As<sem::Vector>()->Width(), 3u);
   EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
   EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::F32>());
   ASSERT_EQ(sem->ConstantValue().Elements().size(), 3u);

@@ -109,7 +109,7 @@ sem::Constant Resolver::EvaluateConstantValue(
   }
 
   auto* elem_type = vec ? vec->type() : type;
-  int result_size = vec ? static_cast<int>(vec->size()) : 1;
+  int result_size = vec ? static_cast<int>(vec->Width()) : 1;
 
   // For zero value init, return 0s
   if (ctor_values.empty()) {

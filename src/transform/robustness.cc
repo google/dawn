@@ -63,7 +63,7 @@ struct Robustness::State {
     Value size;              // size of the array, vector or matrix
     size.is_signed = false;  // size is always unsigned
     if (auto* vec = ret_type->As<sem::Vector>()) {
-      size.u32 = vec->size();
+      size.u32 = vec->Width();
 
     } else if (auto* arr = ret_type->As<sem::Array>()) {
       size.u32 = arr->Count();

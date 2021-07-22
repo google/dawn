@@ -82,9 +82,9 @@ void Type::GetDefaultAlignAndSize(uint32_t& align, uint32_t& size) const {
     return;
   }
   if (auto* vec = As<Vector>()) {
-    TINT_ASSERT(Semantic, vec->size() >= 2 && vec->size() <= 4);
-    align = vector_align[vec->size()];
-    size = vector_size[vec->size()];
+    TINT_ASSERT(Semantic, vec->Width() >= 2 && vec->Width() <= 4);
+    align = vector_align[vec->Width()];
+    size = vector_size[vec->Width()];
     return;
   }
   if (auto* mat = As<Matrix>()) {

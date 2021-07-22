@@ -36,7 +36,7 @@ const Type* ElemType(const Type* ty, size_t num_elements) {
     return ty;
   }
   if (auto* vec = ty->As<Vector>()) {
-    if (num_elements != vec->size()) {
+    if (num_elements != vec->Width()) {
       TINT_ICE(Semantic, diag)
           << "sem::Constant() type <-> num_element mismatch. type: '"
           << ty->type_name() << "' num_elements: " << num_elements;
