@@ -2912,6 +2912,9 @@ bool GeneratorImpl::EmitType(std::ostream& out,
                              ast::Access access,
                              const std::string& name,
                              bool* name_printed /* = nullptr */) {
+  if (name_printed) {
+    *name_printed = false;
+  }
   switch (storage_class) {
     case ast::StorageClass::kStorage:
       if (access != ast::Access::kRead) {
@@ -3091,11 +3094,11 @@ bool GeneratorImpl::EmitTypeAndName(std::ostream& out,
                                     ast::StorageClass storage_class,
                                     ast::Access access,
                                     const std::string& name) {
-  bool printed_name = false;
-  if (!EmitType(out, type, storage_class, access, name, &printed_name)) {
+  bool name_printed = false;
+  if (!EmitType(out, type, storage_class, access, name, &name_printed)) {
     return false;
   }
-  if (!name.empty() && !printed_name) {
+  if (!name.empty() && !name_printed) {
     out << " " << name;
   }
   return true;

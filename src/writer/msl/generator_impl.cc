@@ -1930,6 +1930,9 @@ bool GeneratorImpl::EmitType(std::ostream& out,
                              const sem::Type* type,
                              const std::string& name,
                              bool* name_printed /* = nullptr */) {
+  if (name_printed) {
+    *name_printed = false;
+  }
   if (auto* atomic = type->As<sem::Atomic>()) {
     if (atomic->Type()->Is<sem::I32>()) {
       out << "atomic_int";
@@ -2000,11 +2003,11 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     out << " ";
     if (ptr->StoreType()->Is<sem::Array>()) {
       std::string inner = "(*" + name + ")";
-      if (name_printed) {
-        *name_printed = true;
-      }
       if (!EmitType(out, ptr->StoreType(), inner)) {
         return false;
+      }
+      if (name_printed) {
+        *name_printed = true;
       }
     } else {
       if (!EmitType(out, ptr->StoreType(), "")) {
