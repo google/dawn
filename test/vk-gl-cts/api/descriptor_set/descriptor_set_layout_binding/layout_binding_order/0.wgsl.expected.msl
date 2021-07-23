@@ -1,0 +1,33 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct result {
+  /* 0x0000 */ int res0;
+  /* 0x0004 */ int res1;
+  /* 0x0008 */ int res2;
+};
+struct block0 {
+  /* 0x0000 */ int data0;
+};
+struct block1 {
+  /* 0x0000 */ int data1;
+};
+struct block2 {
+  /* 0x0000 */ int data2;
+};
+
+void main_1(constant block0& x_6, constant block1& x_8, constant block2& x_10, device result& x_4) {
+  int const x_25 = x_6.data0;
+  x_4.res0 = x_25;
+  int const x_28 = x_8.data1;
+  x_4.res1 = x_28;
+  int const x_31 = x_10.data2;
+  x_4.res2 = x_31;
+  return;
+}
+
+kernel void tint_symbol(constant block0& x_6 [[buffer(0)]], constant block1& x_8 [[buffer(1)]], constant block2& x_10 [[buffer(2)]], device result& x_4 [[buffer(3)]]) {
+  main_1(x_6, x_8, x_10, x_4);
+  return;
+}
+

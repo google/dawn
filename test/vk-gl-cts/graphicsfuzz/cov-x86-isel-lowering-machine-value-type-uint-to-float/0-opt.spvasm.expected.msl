@@ -1,0 +1,74 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_padded_array_element {
+  /* 0x0000 */ uint el;
+  /* 0x0004 */ int8_t tint_pad[12];
+};
+struct tint_array_wrapper {
+  /* 0x0000 */ tint_padded_array_element arr[2];
+};
+struct buf1 {
+  /* 0x0000 */ tint_array_wrapper x_GLF_uniform_uint_values;
+};
+struct tint_padded_array_element_1 {
+  /* 0x0000 */ float el;
+  /* 0x0004 */ int8_t tint_pad_1[12];
+};
+struct tint_array_wrapper_1 {
+  /* 0x0000 */ tint_padded_array_element_1 arr[1];
+};
+struct buf2 {
+  /* 0x0000 */ tint_array_wrapper_1 x_GLF_uniform_float_values;
+};
+struct tint_padded_array_element_2 {
+  /* 0x0000 */ int el;
+  /* 0x0004 */ int8_t tint_pad_2[12];
+};
+struct tint_array_wrapper_2 {
+  /* 0x0000 */ tint_padded_array_element_2 arr[2];
+};
+struct buf0 {
+  /* 0x0000 */ tint_array_wrapper_2 x_GLF_uniform_int_values;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_1 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(constant buf1& x_6, constant buf2& x_8, constant buf0& x_12, thread float4* const tint_symbol_4) {
+  uint a = 0u;
+  float b = 0.0f;
+  uint c = 0u;
+  uint const x_38 = x_6.x_GLF_uniform_uint_values.arr[0].el;
+  float const x_40 = x_8.x_GLF_uniform_float_values.arr[0].el;
+  a = (x_38 >> uint(x_40));
+  uint const x_43 = a;
+  b = as_type<float>(x_43);
+  float const x_45 = b;
+  c = as_type<uint>(x_45);
+  uint const x_47 = c;
+  uint const x_49 = x_6.x_GLF_uniform_uint_values.arr[0].el;
+  if ((x_47 == x_49)) {
+    int const x_55 = x_12.x_GLF_uniform_int_values.arr[0].el;
+    int const x_58 = x_12.x_GLF_uniform_int_values.arr[1].el;
+    int const x_61 = x_12.x_GLF_uniform_int_values.arr[1].el;
+    int const x_64 = x_12.x_GLF_uniform_int_values.arr[0].el;
+    *(tint_symbol_4) = float4(float(x_55), float(x_58), float(x_61), float(x_64));
+  } else {
+    float const x_67 = b;
+    *(tint_symbol_4) = float4(x_67, x_67, x_67, x_67);
+  }
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol(constant buf1& x_6 [[buffer(1)]], constant buf2& x_8 [[buffer(2)]], constant buf0& x_12 [[buffer(0)]]) {
+  thread float4 tint_symbol_5 = 0.0f;
+  main_1(x_6, x_8, x_12, &(tint_symbol_5));
+  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
+  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
+  return tint_symbol_3;
+}
+

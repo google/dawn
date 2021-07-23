@@ -1,0 +1,75 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 41
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %tint_symbol %tint_symbol_2
+               OpExecutionMode %main OriginUpperLeft
+               OpName %color_out "color_out"
+               OpName %texture "texture"
+               OpName %gl_FragCoord "gl_FragCoord"
+               OpName %tint_symbol "tint_symbol"
+               OpName %tint_symbol_2 "tint_symbol_2"
+               OpName %main_1 "main_1"
+               OpName %main_out "main_out"
+               OpMemberName %main_out 0 "color_out_1"
+               OpName %tint_symbol_3 "tint_symbol_3"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %main "main"
+               OpDecorate %texture NonWritable
+               OpDecorate %texture DescriptorSet 0
+               OpDecorate %texture Binding 0
+               OpDecorate %tint_symbol BuiltIn FragCoord
+               OpDecorate %tint_symbol_2 Location 0
+               OpMemberDecorate %main_out 0 Offset 0
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Private_v4float = OpTypePointer Private %v4float
+          %5 = OpConstantNull %v4float
+  %color_out = OpVariable %_ptr_Private_v4float Private %5
+          %8 = OpTypeImage %float 2D 0 0 0 2 Rgba8
+%_ptr_UniformConstant_8 = OpTypePointer UniformConstant %8
+    %texture = OpVariable %_ptr_UniformConstant_8 UniformConstant
+%gl_FragCoord = OpVariable %_ptr_Private_v4float Private %5
+%_ptr_Input_v4float = OpTypePointer Input %v4float
+%tint_symbol = OpVariable %_ptr_Input_v4float Input
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%tint_symbol_2 = OpVariable %_ptr_Output_v4float Output %5
+       %void = OpTypeVoid
+         %14 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+    %v2float = OpTypeVector %float 2
+   %main_out = OpTypeStruct %v4float
+         %28 = OpTypeFunction %void %main_out
+     %main_1 = OpFunction %void None %14
+         %17 = OpLabel
+         %18 = OpLoad %v4float %gl_FragCoord
+         %20 = OpLoad %8 %texture
+         %25 = OpCompositeExtract %float %18 0
+         %26 = OpCompositeExtract %float %18 1
+         %27 = OpCompositeConstruct %v2float %25 %26
+         %21 = OpConvertFToS %v2int %27
+         %19 = OpImageRead %v4float %20 %21
+               OpStore %color_out %19
+               OpReturn
+               OpFunctionEnd
+%tint_symbol_3 = OpFunction %void None %28
+%tint_symbol_1 = OpFunctionParameter %main_out
+         %32 = OpLabel
+         %33 = OpCompositeExtract %v4float %tint_symbol_1 0
+               OpStore %tint_symbol_2 %33
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %14
+         %35 = OpLabel
+         %36 = OpLoad %v4float %tint_symbol
+               OpStore %gl_FragCoord %36
+         %37 = OpFunctionCall %void %main_1
+         %39 = OpLoad %v4float %color_out
+         %40 = OpCompositeConstruct %main_out %39
+         %38 = OpFunctionCall %void %tint_symbol_3 %40
+               OpReturn
+               OpFunctionEnd

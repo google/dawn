@@ -1,0 +1,108 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  /* 0x0000 */ int arr[8];
+};
+struct In2 {
+  /* 0x0000 */ tint_array_wrapper data_in2;
+};
+struct tint_array_wrapper_1 {
+  /* 0x0000 */ int arr[1024];
+};
+struct Out0 {
+  /* 0x0000 */ tint_array_wrapper_1 data_out0;
+};
+struct tint_array_wrapper_2 {
+  /* 0x0000 */ int arr[512];
+};
+struct In1 {
+  /* 0x0000 */ tint_array_wrapper_2 data_in1;
+};
+struct In0 {
+  /* 0x0000 */ tint_array_wrapper_2 data_in0;
+};
+
+void main_1(const device In2& x_13, const device In1& x_17, device Out0& x_15, const device In0& x_19, thread uint3* const tint_symbol_2) {
+  uint base_index_in = 0u;
+  uint base_index_out = 0u;
+  int index_in0 = 0;
+  int index_in1 = 0;
+  int index_out0 = 0;
+  int index_out1 = 0;
+  int condition_index = 0;
+  int i = 0;
+  int temp0 = 0;
+  int temp1 = 0;
+  uint const x_58 = (*(tint_symbol_2)).x;
+  base_index_in = (128u * x_58);
+  uint const x_61 = (*(tint_symbol_2)).x;
+  base_index_out = (256u * x_61);
+  index_in0 = 127;
+  index_in1 = 383;
+  index_out0 = 255;
+  index_out1 = 383;
+  condition_index = 0;
+  i = 0;
+  while (true) {
+    int const x_67 = i;
+    if ((x_67 < 256)) {
+    } else {
+      break;
+    }
+    int const x_70 = condition_index;
+    int const x_72 = x_13.data_in2.arr[x_70];
+    if ((x_72 == 0)) {
+      uint const x_77 = base_index_out;
+      int const x_78 = index_out0;
+      uint const x_81 = base_index_in;
+      int const x_82 = index_in0;
+      int const x_86 = x_17.data_in1.arr[(x_81 + as_type<uint>(x_82))];
+      x_15.data_out0.arr[(x_77 + as_type<uint>(x_78))] = x_86;
+      int const x_88 = index_out0;
+      index_out0 = (x_88 - 1);
+      int const x_90 = index_in1;
+      index_in1 = (x_90 - 1);
+    } else {
+      uint const x_92 = base_index_out;
+      int const x_93 = index_out1;
+      uint const x_96 = base_index_in;
+      int const x_97 = index_in1;
+      int const x_101 = x_19.data_in0.arr[(x_96 + as_type<uint>(x_97))];
+      x_15.data_out0.arr[(x_92 + as_type<uint>(x_93))] = x_101;
+      int const x_103 = index_out1;
+      index_out1 = (x_103 - 1);
+      int const x_105 = index_in1;
+      index_in1 = (x_105 - 1);
+    }
+    int const x_107 = condition_index;
+    int const x_110 = x_13.data_in2.arr[(x_107 + 1)];
+    int const x_111 = condition_index;
+    condition_index = (x_111 + x_110);
+    int const x_113 = index_in0;
+    temp0 = x_113;
+    int const x_114 = index_in1;
+    index_in0 = x_114;
+    int const x_115 = temp0;
+    index_in1 = x_115;
+    int const x_116 = index_out0;
+    temp1 = x_116;
+    int const x_117 = index_out1;
+    index_out0 = x_117;
+    int const x_118 = temp1;
+    index_out1 = x_118;
+    {
+      int const x_119 = i;
+      i = (x_119 + 1);
+    }
+  }
+  return;
+}
+
+kernel void tint_symbol(uint3 gl_WorkGroupID_param [[threadgroup_position_in_grid]], const device In2& x_13 [[buffer(2)]], const device In1& x_17 [[buffer(1)]], device Out0& x_15 [[buffer(3)]], const device In0& x_19 [[buffer(0)]]) {
+  thread uint3 tint_symbol_3 = 0u;
+  tint_symbol_3 = gl_WorkGroupID_param;
+  main_1(x_13, x_17, x_15, x_19, &(tint_symbol_3));
+  return;
+}
+

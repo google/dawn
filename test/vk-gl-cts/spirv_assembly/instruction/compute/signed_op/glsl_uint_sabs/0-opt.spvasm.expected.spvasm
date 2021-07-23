@@ -1,0 +1,64 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 34
+; Schema: 0
+               OpCapability Shader
+         %28 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main" %tint_symbol
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %x_3 "x_3"
+               OpName %S "S"
+               OpMemberName %S 0 "field0"
+               OpName %x_6 "x_6"
+               OpName %x_7 "x_7"
+               OpName %tint_symbol "tint_symbol"
+               OpName %main_1 "main_1"
+               OpName %main "main"
+               OpDecorate %S Block
+               OpMemberDecorate %S 0 Offset 0
+               OpDecorate %_runtimearr_uint ArrayStride 4
+               OpDecorate %x_6 DescriptorSet 0
+               OpDecorate %x_6 Binding 0
+               OpDecorate %x_7 DescriptorSet 0
+               OpDecorate %x_7 Binding 1
+               OpDecorate %tint_symbol BuiltIn GlobalInvocationId
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Private_v3uint = OpTypePointer Private %v3uint
+          %5 = OpConstantNull %v3uint
+        %x_3 = OpVariable %_ptr_Private_v3uint Private %5
+%_runtimearr_uint = OpTypeRuntimeArray %uint
+          %S = OpTypeStruct %_runtimearr_uint
+%_ptr_StorageBuffer_S = OpTypePointer StorageBuffer %S
+        %x_6 = OpVariable %_ptr_StorageBuffer_S StorageBuffer
+        %x_7 = OpVariable %_ptr_StorageBuffer_S StorageBuffer
+%_ptr_Input_v3uint = OpTypePointer Input %v3uint
+%tint_symbol = OpVariable %_ptr_Input_v3uint Input
+       %void = OpTypeVoid
+         %13 = OpTypeFunction %void
+     %uint_0 = OpConstant %uint 0
+%_ptr_Private_uint = OpTypePointer Private %uint
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+        %int = OpTypeInt 32 1
+     %main_1 = OpFunction %void None %13
+         %16 = OpLabel
+         %19 = OpAccessChain %_ptr_Private_uint %x_3 %uint_0
+         %20 = OpLoad %uint %19
+         %22 = OpAccessChain %_ptr_StorageBuffer_uint %x_6 %uint_0 %20
+         %23 = OpLoad %uint %22
+         %24 = OpAccessChain %_ptr_StorageBuffer_uint %x_7 %uint_0 %20
+         %29 = OpBitcast %int %23
+         %26 = OpExtInst %int %28 SAbs %29
+         %25 = OpBitcast %uint %26
+               OpStore %24 %25
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %13
+         %31 = OpLabel
+         %32 = OpLoad %v3uint %tint_symbol
+               OpStore %x_3 %32
+         %33 = OpFunctionCall %void %main_1
+               OpReturn
+               OpFunctionEnd

@@ -1,0 +1,69 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct buf0 {
+  /* 0x0000 */ float4x4 matrix_a_uni;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_1 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(constant buf0& x_8, thread float4* const tint_symbol_4) {
+  int x = 0;
+  float4 matrix_u = 0.0f;
+  int b = 0;
+  float4 matrix_b = 0.0f;
+  float4 x_42 = 0.0f;
+  x = 4;
+  while (true) {
+    int const x_10 = x;
+    if ((x_10 >= 1)) {
+    } else {
+      break;
+    }
+    int const x_11 = x;
+    matrix_u[x_11] = 1.0f;
+    {
+      int const x_12 = x;
+      x = (x_12 - 1);
+    }
+  }
+  b = 4;
+  while (true) {
+    float const x_55 = x_8.matrix_a_uni[0].x;
+    if ((x_55 < -1.0f)) {
+    } else {
+      break;
+    }
+    int const x_14 = b;
+    int const x_15 = b;
+    if ((x_15 > 1)) {
+      float4 const x_62 = matrix_b;
+      float4 const x_63 = matrix_b;
+      x_42 = fmin(x_62, x_63);
+    } else {
+      float4 const x_65 = matrix_u;
+      x_42 = x_65;
+    }
+    float const x_67 = x_42.y;
+    matrix_b[x_14] = x_67;
+    {
+      int const x_16 = b;
+      b = (x_16 - 1);
+    }
+  }
+  *(tint_symbol_4) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol(constant buf0& x_8 [[buffer(0)]]) {
+  thread float4 tint_symbol_5 = 0.0f;
+  main_1(x_8, &(tint_symbol_5));
+  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
+  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
+  return tint_symbol_3;
+}
+

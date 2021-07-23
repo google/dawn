@@ -1,0 +1,49 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_2 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(thread float4* const tint_symbol_5, thread float4* const tint_symbol_6) {
+  int ll = 0;
+  *(tint_symbol_5) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  float const x_30 = (*(tint_symbol_6)).x;
+  if ((int(x_30) < 2000)) {
+  } else {
+    ll = 0;
+    while (true) {
+      float const x_41 = (*(tint_symbol_6)).x;
+      if ((x_41 < 0.0f)) {
+        discard_fragment();
+      }
+      int const x_6 = ll;
+      if ((x_6 >= 5)) {
+        break;
+      }
+      {
+        int const x_7 = ll;
+        ll = (x_7 + 1);
+      }
+    }
+    float const x_49 = (*(tint_symbol_6)).x;
+    if ((int(x_49) >= 2000)) {
+      discard_fragment();
+    }
+  }
+  return;
+}
+
+fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]]) {
+  thread float4 tint_symbol_7 = 0.0f;
+  thread float4 tint_symbol_8 = 0.0f;
+  tint_symbol_7 = gl_FragCoord_param;
+  main_1(&(tint_symbol_8), &(tint_symbol_7));
+  main_out const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_8};
+  tint_symbol_2 const tint_symbol_4 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
+  return tint_symbol_4;
+}
+

@@ -1,0 +1,134 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct buf2 {
+  /* 0x0000 */ float one;
+};
+struct tint_padded_array_element {
+  /* 0x0000 */ float el;
+  /* 0x0004 */ int8_t tint_pad[12];
+};
+struct tint_array_wrapper {
+  /* 0x0000 */ tint_padded_array_element arr[1];
+};
+struct buf0 {
+  /* 0x0000 */ tint_array_wrapper x_GLF_uniform_float_values;
+};
+struct tint_padded_array_element_1 {
+  /* 0x0000 */ int el;
+  /* 0x0004 */ int8_t tint_pad_1[12];
+};
+struct tint_array_wrapper_1 {
+  /* 0x0000 */ tint_padded_array_element_1 arr[4];
+};
+struct buf1 {
+  /* 0x0000 */ tint_array_wrapper_1 x_GLF_uniform_int_values;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_2 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void func0_i1_(constant buf2& x_10, constant buf0& x_12, thread int* const x, thread float4x2* const tint_symbol_5) {
+  int i = 0;
+  bool x_137 = false;
+  bool x_138 = false;
+  bool x_138_phi = false;
+  bool x_139_phi = false;
+  int const x_124 = *(x);
+  bool const x_125 = (x_124 < 1);
+  x_139_phi = x_125;
+  if (!(x_125)) {
+    int const x_129 = *(x);
+    bool const x_130 = (x_129 > 1);
+    x_138_phi = x_130;
+    if (x_130) {
+      float const x_134 = x_10.one;
+      float const x_136 = x_12.x_GLF_uniform_float_values.arr[0].el;
+      x_137 = (x_134 > x_136);
+      x_138_phi = x_137;
+    }
+    x_138 = x_138_phi;
+    x_139_phi = x_138;
+  }
+  bool const x_139 = x_139_phi;
+  if (x_139) {
+    return;
+  }
+  float const x_143 = x_10.one;
+  float const x_145 = x_12.x_GLF_uniform_float_values.arr[0].el;
+  if ((x_143 == x_145)) {
+    i = 0;
+    while (true) {
+      int const x_150 = i;
+      if ((x_150 < 2)) {
+      } else {
+        break;
+      }
+      {
+        int const x_154 = *(x);
+        int const x_155 = clamp(x_154, 0, 3);
+        int const x_156 = i;
+        float const x_158 = x_12.x_GLF_uniform_float_values.arr[0].el;
+        float const x_160 = (*(tint_symbol_5))[x_155][x_156];
+        (*(tint_symbol_5))[x_155][x_156] = (x_160 + x_158);
+        int const x_163 = i;
+        i = (x_163 + 1);
+      }
+    }
+  }
+  return;
+}
+
+void func1_(constant buf2& x_10, constant buf0& x_12, thread float4* const tint_symbol_6, thread float4x2* const tint_symbol_7) {
+  int param = 0;
+  float const x_167 = (*(tint_symbol_6)).y;
+  if ((x_167 < 0.0f)) {
+    return;
+  }
+  param = 1;
+  func0_i1_(x_10, x_12, &(param), tint_symbol_7);
+  return;
+}
+
+void main_1(constant buf2& x_10, constant buf0& x_12, constant buf1& x_16, thread float4x2* const tint_symbol_8, thread float4* const tint_symbol_9, thread float4* const tint_symbol_10) {
+  *(tint_symbol_8) = float4x2(float2(0.0f, 0.0f), float2(0.0f, 0.0f), float2(0.0f, 0.0f), float2(0.0f, 0.0f));
+  func1_(x_10, x_12, tint_symbol_9, tint_symbol_8);
+  func1_(x_10, x_12, tint_symbol_9, tint_symbol_8);
+  float4x2 const x_54 = *(tint_symbol_8);
+  int const x_56 = x_16.x_GLF_uniform_int_values.arr[0].el;
+  int const x_59 = x_16.x_GLF_uniform_int_values.arr[0].el;
+  int const x_62 = x_16.x_GLF_uniform_int_values.arr[1].el;
+  int const x_65 = x_16.x_GLF_uniform_int_values.arr[1].el;
+  int const x_68 = x_16.x_GLF_uniform_int_values.arr[0].el;
+  int const x_71 = x_16.x_GLF_uniform_int_values.arr[0].el;
+  int const x_74 = x_16.x_GLF_uniform_int_values.arr[0].el;
+  int const x_77 = x_16.x_GLF_uniform_int_values.arr[0].el;
+  float4x2 const x_83 = float4x2(float2(float(x_56), float(x_59)), float2(float(x_62), float(x_65)), float2(float(x_68), float(x_71)), float2(float(x_74), float(x_77)));
+  if ((((all((x_54[0u] == x_83[0u])) && all((x_54[1u] == x_83[1u]))) && all((x_54[2u] == x_83[2u]))) && all((x_54[3u] == x_83[3u])))) {
+    int const x_107 = x_16.x_GLF_uniform_int_values.arr[3].el;
+    int const x_110 = x_16.x_GLF_uniform_int_values.arr[0].el;
+    int const x_113 = x_16.x_GLF_uniform_int_values.arr[0].el;
+    int const x_116 = x_16.x_GLF_uniform_int_values.arr[3].el;
+    *(tint_symbol_10) = float4(float(x_107), float(x_110), float(x_113), float(x_116));
+  } else {
+    int const x_120 = x_16.x_GLF_uniform_int_values.arr[0].el;
+    float const x_121 = float(x_120);
+    *(tint_symbol_10) = float4(x_121, x_121, x_121, x_121);
+  }
+  return;
+}
+
+fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf2& x_10 [[buffer(2)]], constant buf0& x_12 [[buffer(0)]], constant buf1& x_16 [[buffer(1)]]) {
+  thread float4 tint_symbol_11 = 0.0f;
+  thread float4x2 tint_symbol_12 = float4x2(0.0f);
+  thread float4 tint_symbol_13 = 0.0f;
+  tint_symbol_11 = gl_FragCoord_param;
+  main_1(x_10, x_12, x_16, &(tint_symbol_12), &(tint_symbol_11), &(tint_symbol_13));
+  main_out const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_13};
+  tint_symbol_2 const tint_symbol_4 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
+  return tint_symbol_4;
+}
+

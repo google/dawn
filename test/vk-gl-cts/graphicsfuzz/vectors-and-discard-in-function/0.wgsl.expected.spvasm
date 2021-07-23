@@ -1,0 +1,121 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 73
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %tint_symbol_1
+               OpExecutionMode %main OriginUpperLeft
+               OpName %x_GLF_color "x_GLF_color"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %func_ "func_"
+               OpName %coord "coord"
+               OpName %tmp3 "tmp3"
+               OpName %tmp2 "tmp2"
+               OpName %tmp "tmp"
+               OpName %x_48 "x_48"
+               OpName %main_1 "main_1"
+               OpName %main_out "main_out"
+               OpMemberName %main_out 0 "x_GLF_color_1"
+               OpName %tint_symbol_2 "tint_symbol_2"
+               OpName %tint_symbol "tint_symbol"
+               OpName %main "main"
+               OpDecorate %tint_symbol_1 Location 0
+               OpDecorate %_arr_float_uint_1 ArrayStride 4
+               OpMemberDecorate %main_out 0 Offset 0
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Private_v4float = OpTypePointer Private %v4float
+          %5 = OpConstantNull %v4float
+%x_GLF_color = OpVariable %_ptr_Private_v4float Private %5
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%tint_symbol_1 = OpVariable %_ptr_Output_v4float Output %5
+        %int = OpTypeInt 32 1
+          %8 = OpTypeFunction %int
+    %v2float = OpTypeVector %float 2
+%_ptr_Function_v2float = OpTypePointer Function %v2float
+         %15 = OpConstantNull %v2float
+%_ptr_Function_float = OpTypePointer Function %float
+         %18 = OpConstantNull %float
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+%_arr_float_uint_1 = OpTypeArray %float %uint_1
+%_ptr_Function__arr_float_uint_1 = OpTypePointer Function %_arr_float_uint_1
+         %24 = OpConstantNull %_arr_float_uint_1
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+    %float_1 = OpConstant %float 1
+         %29 = OpConstantComposite %v2float %float_1 %float_1
+    %int_180 = OpConstant %int 180
+       %bool = OpTypeBool
+      %int_0 = OpConstant %int 0
+      %int_1 = OpConstant %int 1
+       %void = OpTypeVoid
+         %49 = OpTypeFunction %void
+    %float_0 = OpConstant %float 0
+         %59 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
+         %60 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_1
+   %main_out = OpTypeStruct %v4float
+         %61 = OpTypeFunction %void %main_out
+      %func_ = OpFunction %int None %8
+         %11 = OpLabel
+      %coord = OpVariable %_ptr_Function_v2float Function %15
+       %tmp3 = OpVariable %_ptr_Function_float Function %18
+       %tmp2 = OpVariable %_ptr_Function__arr_float_uint_1 Function %24
+        %tmp = OpVariable %_ptr_Function_v4float Function %5
+       %x_48 = OpVariable %_ptr_Function_float Function %18
+               OpStore %coord %29
+         %30 = OpAccessChain %_ptr_Function_float %coord %uint_1
+         %31 = OpLoad %float %30
+         %32 = OpConvertFToS %int %31
+         %34 = OpSLessThan %bool %32 %int_180
+               OpSelectionMerge %36 None
+               OpBranchConditional %34 %37 %38
+         %37 = OpLabel
+         %40 = OpAccessChain %_ptr_Function_float %tmp2 %int_0
+         %41 = OpLoad %float %40
+               OpStore %x_48 %41
+         %42 = OpLoad %float %x_48
+               OpStore %tmp3 %42
+               OpBranch %36
+         %38 = OpLabel
+               OpKill
+         %36 = OpLabel
+         %43 = OpLoad %float %x_48
+         %44 = OpLoad %float %x_48
+         %45 = OpLoad %float %x_48
+         %46 = OpLoad %float %x_48
+         %47 = OpCompositeConstruct %v4float %43 %44 %45 %46
+               OpStore %tmp %47
+               OpReturnValue %int_1
+               OpFunctionEnd
+     %main_1 = OpFunction %void None %49
+         %52 = OpLabel
+         %53 = OpFunctionCall %int %func_
+         %54 = OpIEqual %bool %53 %int_1
+               OpSelectionMerge %55 None
+               OpBranchConditional %54 %56 %57
+         %56 = OpLabel
+               OpStore %x_GLF_color %59
+               OpBranch %55
+         %57 = OpLabel
+               OpStore %x_GLF_color %60
+               OpBranch %55
+         %55 = OpLabel
+               OpReturn
+               OpFunctionEnd
+%tint_symbol_2 = OpFunction %void None %61
+%tint_symbol = OpFunctionParameter %main_out
+         %65 = OpLabel
+         %66 = OpCompositeExtract %v4float %tint_symbol 0
+               OpStore %tint_symbol_1 %66
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %49
+         %68 = OpLabel
+         %69 = OpFunctionCall %void %main_1
+         %71 = OpLoad %v4float %x_GLF_color
+         %72 = OpCompositeConstruct %main_out %71
+         %70 = OpFunctionCall %void %tint_symbol_2 %72
+               OpReturn
+               OpFunctionEnd

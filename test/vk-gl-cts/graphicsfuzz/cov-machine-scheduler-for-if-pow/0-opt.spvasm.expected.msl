@@ -1,0 +1,101 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_padded_array_element {
+  /* 0x0000 */ float el;
+  /* 0x0004 */ int8_t tint_pad[12];
+};
+struct tint_array_wrapper {
+  /* 0x0000 */ tint_padded_array_element arr[4];
+};
+struct buf1 {
+  /* 0x0000 */ tint_array_wrapper x_GLF_uniform_float_values;
+};
+struct tint_padded_array_element_1 {
+  /* 0x0000 */ int el;
+  /* 0x0004 */ int8_t tint_pad_1[12];
+};
+struct tint_array_wrapper_1 {
+  /* 0x0000 */ tint_padded_array_element_1 arr[2];
+};
+struct buf0 {
+  /* 0x0000 */ tint_array_wrapper_1 x_GLF_uniform_int_values;
+};
+struct main_out {
+  float4 x_GLF_v1_1;
+};
+struct tint_symbol_2 {
+  float4 x_GLF_v1_1 [[color(0)]];
+};
+
+void main_1(constant buf1& x_8, constant buf0& x_12, thread float4* const tint_symbol_5, thread float4* const tint_symbol_6) {
+  float2 uv = 0.0f;
+  float4 v1 = 0.0f;
+  float a = 0.0f;
+  int i = 0;
+  float4 const x_49 = *(tint_symbol_5);
+  uv = float2(x_49.x, x_49.y);
+  float const x_52 = x_8.x_GLF_uniform_float_values.arr[0].el;
+  v1 = float4(x_52, x_52, x_52, x_52);
+  float const x_55 = uv.y;
+  float const x_57 = x_8.x_GLF_uniform_float_values.arr[0].el;
+  if ((x_55 >= x_57)) {
+    float const x_62 = x_8.x_GLF_uniform_float_values.arr[2].el;
+    v1.x = x_62;
+    float const x_65 = x_8.x_GLF_uniform_float_values.arr[0].el;
+    v1.y = x_65;
+    float const x_68 = x_8.x_GLF_uniform_float_values.arr[0].el;
+    v1.z = x_68;
+    float const x_71 = x_8.x_GLF_uniform_float_values.arr[2].el;
+    v1.w = x_71;
+  }
+  float const x_74 = x_8.x_GLF_uniform_float_values.arr[2].el;
+  a = x_74;
+  int const x_15 = x_12.x_GLF_uniform_int_values.arr[1].el;
+  i = x_15;
+  while (true) {
+    int const x_16 = i;
+    int const x_17 = x_12.x_GLF_uniform_int_values.arr[0].el;
+    if ((x_16 < x_17)) {
+    } else {
+      break;
+    }
+    float const x_84 = x_8.x_GLF_uniform_float_values.arr[2].el;
+    float const x_86 = x_8.x_GLF_uniform_float_values.arr[0].el;
+    if ((x_84 < x_86)) {
+      discard_fragment();
+    }
+    float const x_91 = v1.x;
+    float const x_93 = v1.y;
+    float const x_96 = v1.z;
+    float const x_99 = v1.w;
+    float const x_102 = x_8.x_GLF_uniform_float_values.arr[3].el;
+    a = pow((((x_91 + x_93) + x_96) + x_99), x_102);
+    {
+      int const x_18 = i;
+      i = (x_18 + 1);
+    }
+  }
+  float const x_104 = a;
+  float const x_106 = x_8.x_GLF_uniform_float_values.arr[1].el;
+  if ((x_104 == x_106)) {
+    float4 const x_111 = v1;
+    *(tint_symbol_6) = x_111;
+  } else {
+    int const x_20 = x_12.x_GLF_uniform_int_values.arr[1].el;
+    float const x_113 = float(x_20);
+    *(tint_symbol_6) = float4(x_113, x_113, x_113, x_113);
+  }
+  return;
+}
+
+fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf1& x_8 [[buffer(1)]], constant buf0& x_12 [[buffer(0)]]) {
+  thread float4 tint_symbol_7 = 0.0f;
+  thread float4 tint_symbol_8 = 0.0f;
+  tint_symbol_7 = gl_FragCoord_param;
+  main_1(x_8, x_12, &(tint_symbol_7), &(tint_symbol_8));
+  main_out const tint_symbol_3 = {.x_GLF_v1_1=tint_symbol_8};
+  tint_symbol_2 const tint_symbol_4 = {.x_GLF_v1_1=tint_symbol_3.x_GLF_v1_1};
+  return tint_symbol_4;
+}
+

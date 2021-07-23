@@ -1,0 +1,78 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct buf0 {
+  /* 0x0000 */ uint one;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_1 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(constant buf0& x_6, thread float4* const tint_symbol_4) {
+  uint a = 0u;
+  uint b = 0u;
+  uint c = 0u;
+  uint d = 0u;
+  uint e = 0u;
+  uint f = 0u;
+  uint const x_41 = x_6.one;
+  a = ((77u + x_41) >> 32u);
+  uint const x_45 = x_6.one;
+  b = ((3243u + x_45) >> 33u);
+  uint const x_49 = x_6.one;
+  c = ((23u + x_49) >> 345u);
+  uint const x_53 = x_6.one;
+  d = ((2395u + x_53) << 32u);
+  uint const x_57 = x_6.one;
+  e = ((290485u + x_57) << 33u);
+  uint const x_61 = x_6.one;
+  f = ((44321u + x_61) << 345u);
+  uint const x_64 = a;
+  if ((x_64 != 1u)) {
+    a = 1u;
+  }
+  uint const x_68 = b;
+  if ((x_68 != 0u)) {
+    b = 0u;
+  }
+  uint const x_72 = c;
+  if ((x_72 != 1u)) {
+    c = 1u;
+  }
+  uint const x_76 = d;
+  if ((x_76 != 0u)) {
+    d = 0u;
+  }
+  uint const x_80 = e;
+  if ((x_80 != 1u)) {
+    e = 1u;
+  }
+  uint const x_84 = f;
+  if ((x_84 != 0u)) {
+    f = 0u;
+  }
+  uint const x_88 = a;
+  uint const x_90 = b;
+  uint const x_93 = c;
+  uint const x_96 = d;
+  uint const x_99 = e;
+  uint const x_102 = f;
+  if (((((((x_88 == 1u) && (x_90 == 0u)) && (x_93 == 1u)) && (x_96 == 0u)) && (x_99 == 1u)) && (x_102 == 0u))) {
+    *(tint_symbol_4) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  } else {
+    *(tint_symbol_4) = float4(0.0f, 0.0f, 0.0f, 0.0f);
+  }
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol(constant buf0& x_6 [[buffer(0)]]) {
+  thread float4 tint_symbol_5 = 0.0f;
+  main_1(x_6, &(tint_symbol_5));
+  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
+  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
+  return tint_symbol_3;
+}
+

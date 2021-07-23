@@ -1,0 +1,122 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+
+using namespace metal;
+struct buf0 {
+  /* 0x0000 */ packed_float2 resolution;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_2 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+float compute_value_f1_f1_(thread float* const limit, thread float* const thirty_two) {
+  float result = 0.0f;
+  int i = 0;
+  result = -0.5f;
+  i = 1;
+  while (true) {
+    int const x_111 = i;
+    if ((x_111 < 800)) {
+    } else {
+      break;
+    }
+    int const x_114 = i;
+    if (((x_114 % 32) == 0)) {
+      float const x_120 = result;
+      result = (x_120 + 0.400000006f);
+    } else {
+      int const x_122 = i;
+      float const x_124 = *(thirty_two);
+      if (((float(x_122) % rint(x_124)) <= 0.01f)) {
+        float const x_130 = result;
+        result = (x_130 + 100.0f);
+      }
+    }
+    int const x_132 = i;
+    float const x_134 = *(limit);
+    if ((float(x_132) >= x_134)) {
+      float const x_138 = result;
+      return x_138;
+    }
+    {
+      int const x_139 = i;
+      i = (x_139 + 1);
+    }
+  }
+  float const x_141 = result;
+  return x_141;
+}
+
+void main_1(constant buf0& x_13, thread float4* const tint_symbol_5, thread float4* const tint_symbol_6) {
+  float3 c = 0.0f;
+  float thirty_two_1 = 0.0f;
+  float param = 0.0f;
+  float param_1 = 0.0f;
+  float param_2 = 0.0f;
+  float param_3 = 0.0f;
+  int i_1 = 0;
+  c = float3(7.0f, 8.0f, 9.0f);
+  float const x_56 = x_13.resolution.x;
+  thirty_two_1 = rint((x_56 / 8.0f));
+  float const x_60 = (*(tint_symbol_5)).x;
+  param = x_60;
+  float const x_61 = thirty_two_1;
+  param_1 = x_61;
+  float const x_62 = compute_value_f1_f1_(&(param), &(param_1));
+  c.x = x_62;
+  float const x_65 = (*(tint_symbol_5)).y;
+  param_2 = x_65;
+  float const x_66 = thirty_two_1;
+  param_3 = x_66;
+  float const x_67 = compute_value_f1_f1_(&(param_2), &(param_3));
+  c.y = x_67;
+  float const x_70 = c.x;
+  float const x_72 = c.y;
+  c.z = (x_70 + x_72);
+  i_1 = 0;
+  while (true) {
+    int const x_79 = i_1;
+    if ((x_79 < 3)) {
+    } else {
+      break;
+    }
+    int const x_82 = i_1;
+    float const x_84 = c[x_82];
+    if ((x_84 >= 1.0f)) {
+      int const x_88 = i_1;
+      int const x_89 = i_1;
+      float const x_91 = c[x_89];
+      int const x_92 = i_1;
+      float const x_94 = c[x_92];
+      c[x_88] = (x_91 * x_94);
+    }
+    {
+      int const x_97 = i_1;
+      i_1 = (x_97 + 1);
+    }
+  }
+  float3 const x_99 = c;
+  float3 const x_101 = normalize(fabs(x_99));
+  *(tint_symbol_6) = float4(x_101.x, x_101.y, x_101.z, 1.0f);
+  return;
+}
+
+fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_13 [[buffer(0)]]) {
+  thread float4 tint_symbol_7 = 0.0f;
+  thread float4 tint_symbol_8 = 0.0f;
+  tint_symbol_7 = gl_FragCoord_param;
+  main_1(x_13, &(tint_symbol_7), &(tint_symbol_8));
+  main_out const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_8};
+  tint_symbol_2 const tint_symbol_4 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
+  return tint_symbol_4;
+}
+
+T:\tmp\u2a4.0.metal:32:26: error: invalid operands to binary expression ('float' and 'float')
+      if (((float(x_122) % rint(x_124)) <= 0.01f)) {
+            ~~~~~~~~~~~~ ^ ~~~~~~~~~~~
+1 error generated.
+

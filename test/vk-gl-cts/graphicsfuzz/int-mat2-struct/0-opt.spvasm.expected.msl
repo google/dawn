@@ -1,0 +1,50 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  int f1;
+  float2x2 f2;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_2 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(thread float4* const tint_symbol_5, thread float4* const tint_symbol_6) {
+  float2x2 x_41 = float2x2(0.0f);
+  int x_6 = 0;
+  float2x2 x_42 = float2x2(0.0f);
+  float2x2 x_49_phi = float2x2(0.0f);
+  float const x_44 = (*(tint_symbol_5)).x;
+  if ((x_44 < 0.0f)) {
+    x_42 = float2x2(float2(1.0f, 2.0f), float2(3.0f, 4.0f));
+    x_49_phi = float2x2(float2(1.0f, 2.0f), float2(3.0f, 4.0f));
+  } else {
+    x_42 = float2x2(float2(0.5f, -0.5f), float2(-0.5f, 0.5f));
+    x_49_phi = float2x2(float2(0.5f, -0.5f), float2(-0.5f, 0.5f));
+  }
+  float2x2 const x_49 = x_49_phi;
+  S const x_51 = {.f1=1, .f2=transpose(x_49)};
+  int const x_52 = x_51.f1;
+  x_6 = x_52;
+  x_41 = x_51.f2;
+  float2x2 const x_56 = x_41;
+  float2x2 const x_59 = x_41;
+  float2x2 const x_63 = x_41;
+  float2x2 const x_66 = x_41;
+  *(tint_symbol_6) = float4(float(x_52), (x_56[0u].x + x_59[1u].x), (x_63[0u].y + x_66[1u].y), float(x_52));
+  return;
+}
+
+fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]]) {
+  thread float4 tint_symbol_7 = 0.0f;
+  thread float4 tint_symbol_8 = 0.0f;
+  tint_symbol_7 = gl_FragCoord_param;
+  main_1(&(tint_symbol_7), &(tint_symbol_8));
+  main_out const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_8};
+  tint_symbol_2 const tint_symbol_4 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
+  return tint_symbol_4;
+}
+

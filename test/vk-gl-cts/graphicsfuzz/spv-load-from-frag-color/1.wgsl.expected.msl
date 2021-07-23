@@ -1,0 +1,764 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct BST {
+  int data;
+  int leftIndex;
+  int rightIndex;
+};
+struct tint_array_wrapper {
+  BST arr[10];
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_1 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(thread float4* const tint_symbol_23) {
+  tint_array_wrapper tree = {};
+  int x_360 = 0;
+  int x_62_phi = 0;
+  bool x_90_phi = false;
+  int x_357_phi = 0;
+  int x_360_phi = 0;
+  int x_362_phi = 0;
+  BST const tint_symbol_3 = {.data=9, .leftIndex=-1, .rightIndex=-1};
+  tree.arr[0] = tint_symbol_3;
+  switch(0u) {
+    default: {
+      x_62_phi = 0;
+      while (true) {
+        int x_88 = 0;
+        int x_80 = 0;
+        int x_63 = 0;
+        int x_63_phi = 0;
+        int const x_62 = x_62_phi;
+        x_90_phi = false;
+        if ((x_62 <= 1)) {
+        } else {
+          break;
+        }
+        int const x_69 = tree.arr[x_62].data;
+        if ((5 <= x_69)) {
+          int const x_82_save = x_62;
+          int const x_83 = tree.arr[x_82_save].leftIndex;
+          if ((x_83 == -1)) {
+            tree.arr[x_82_save].leftIndex = 1;
+            BST const tint_symbol_4 = {.data=5, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[1] = tint_symbol_4;
+            x_90_phi = true;
+            break;
+          } else {
+            x_88 = tree.arr[x_82_save].leftIndex;
+            x_63_phi = x_88;
+            {
+              x_63 = x_63_phi;
+              x_62_phi = x_63;
+            }
+            continue;
+          }
+          return;
+        } else {
+          int const x_74_save = x_62;
+          int const x_75 = tree.arr[x_74_save].rightIndex;
+          if ((x_75 == -1)) {
+            tree.arr[x_74_save].rightIndex = 1;
+            BST const tint_symbol_5 = {.data=5, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[1] = tint_symbol_5;
+            x_90_phi = true;
+            break;
+          } else {
+            x_80 = tree.arr[x_74_save].rightIndex;
+            x_63_phi = x_80;
+            {
+              x_63 = x_63_phi;
+              x_62_phi = x_63;
+            }
+            continue;
+          }
+          return;
+        }
+        return;
+        {
+          x_63 = x_63_phi;
+          x_62_phi = x_63;
+        }
+      }
+      bool const x_90 = x_90_phi;
+      if (x_90) {
+        break;
+      }
+      break;
+    }
+  }
+  int x_95_phi = 0;
+  bool x_123_phi = false;
+  switch(0u) {
+    default: {
+      x_95_phi = 0;
+      while (true) {
+        int x_121 = 0;
+        int x_113 = 0;
+        int x_96 = 0;
+        int x_96_phi = 0;
+        int const x_95 = x_95_phi;
+        x_123_phi = false;
+        if ((x_95 <= 2)) {
+        } else {
+          break;
+        }
+        int const x_102 = tree.arr[x_95].data;
+        if ((12 <= x_102)) {
+          int const x_115_save = x_95;
+          int const x_116 = tree.arr[x_115_save].leftIndex;
+          if ((x_116 == -1)) {
+            tree.arr[x_115_save].leftIndex = 2;
+            BST const tint_symbol_6 = {.data=12, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[2] = tint_symbol_6;
+            x_123_phi = true;
+            break;
+          } else {
+            x_121 = tree.arr[x_115_save].leftIndex;
+            x_96_phi = x_121;
+            {
+              x_96 = x_96_phi;
+              x_95_phi = x_96;
+            }
+            continue;
+          }
+          return;
+        } else {
+          int const x_107_save = x_95;
+          int const x_108 = tree.arr[x_107_save].rightIndex;
+          if ((x_108 == -1)) {
+            tree.arr[x_107_save].rightIndex = 2;
+            BST const tint_symbol_7 = {.data=12, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[2] = tint_symbol_7;
+            x_123_phi = true;
+            break;
+          } else {
+            x_113 = tree.arr[x_107_save].rightIndex;
+            x_96_phi = x_113;
+            {
+              x_96 = x_96_phi;
+              x_95_phi = x_96;
+            }
+            continue;
+          }
+          return;
+        }
+        return;
+        {
+          x_96 = x_96_phi;
+          x_95_phi = x_96;
+        }
+      }
+      bool const x_123 = x_123_phi;
+      if (x_123) {
+        break;
+      }
+      break;
+    }
+  }
+  int x_128_phi = 0;
+  bool x_156_phi = false;
+  switch(0u) {
+    default: {
+      x_128_phi = 0;
+      while (true) {
+        int x_154 = 0;
+        int x_146 = 0;
+        int x_129 = 0;
+        int x_129_phi = 0;
+        int const x_128 = x_128_phi;
+        x_156_phi = false;
+        if ((x_128 <= 3)) {
+        } else {
+          break;
+        }
+        int const x_135 = tree.arr[x_128].data;
+        if ((15 <= x_135)) {
+          int const x_148_save = x_128;
+          int const x_149 = tree.arr[x_148_save].leftIndex;
+          if ((x_149 == -1)) {
+            tree.arr[x_148_save].leftIndex = 3;
+            BST const tint_symbol_8 = {.data=15, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[3] = tint_symbol_8;
+            x_156_phi = true;
+            break;
+          } else {
+            x_154 = tree.arr[x_148_save].leftIndex;
+            x_129_phi = x_154;
+            {
+              x_129 = x_129_phi;
+              x_128_phi = x_129;
+            }
+            continue;
+          }
+          return;
+        } else {
+          int const x_140_save = x_128;
+          int const x_141 = tree.arr[x_140_save].rightIndex;
+          if ((x_141 == -1)) {
+            tree.arr[x_140_save].rightIndex = 3;
+            BST const tint_symbol_9 = {.data=15, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[3] = tint_symbol_9;
+            x_156_phi = true;
+            break;
+          } else {
+            x_146 = tree.arr[x_140_save].rightIndex;
+            x_129_phi = x_146;
+            {
+              x_129 = x_129_phi;
+              x_128_phi = x_129;
+            }
+            continue;
+          }
+          return;
+        }
+        return;
+        {
+          x_129 = x_129_phi;
+          x_128_phi = x_129;
+        }
+      }
+      bool const x_156 = x_156_phi;
+      if (x_156) {
+        break;
+      }
+      break;
+    }
+  }
+  int x_161_phi = 0;
+  bool x_189_phi = false;
+  switch(0u) {
+    default: {
+      x_161_phi = 0;
+      while (true) {
+        int x_187 = 0;
+        int x_179 = 0;
+        int x_162 = 0;
+        int x_162_phi = 0;
+        int const x_161 = x_161_phi;
+        x_189_phi = false;
+        if ((x_161 <= 4)) {
+        } else {
+          break;
+        }
+        int const x_168 = tree.arr[x_161].data;
+        if ((7 <= x_168)) {
+          int const x_181_save = x_161;
+          int const x_182 = tree.arr[x_181_save].leftIndex;
+          if ((x_182 == -1)) {
+            tree.arr[x_181_save].leftIndex = 4;
+            BST const tint_symbol_10 = {.data=7, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[4] = tint_symbol_10;
+            x_189_phi = true;
+            break;
+          } else {
+            x_187 = tree.arr[x_181_save].leftIndex;
+            x_162_phi = x_187;
+            {
+              x_162 = x_162_phi;
+              x_161_phi = x_162;
+            }
+            continue;
+          }
+          return;
+        } else {
+          int const x_173_save = x_161;
+          int const x_174 = tree.arr[x_173_save].rightIndex;
+          if ((x_174 == -1)) {
+            tree.arr[x_173_save].rightIndex = 4;
+            BST const tint_symbol_11 = {.data=7, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[4] = tint_symbol_11;
+            x_189_phi = true;
+            break;
+          } else {
+            x_179 = tree.arr[x_173_save].rightIndex;
+            x_162_phi = x_179;
+            {
+              x_162 = x_162_phi;
+              x_161_phi = x_162;
+            }
+            continue;
+          }
+          return;
+        }
+        return;
+        {
+          x_162 = x_162_phi;
+          x_161_phi = x_162;
+        }
+      }
+      bool const x_189 = x_189_phi;
+      if (x_189) {
+        break;
+      }
+      break;
+    }
+  }
+  int x_194_phi = 0;
+  bool x_222_phi = false;
+  switch(0u) {
+    default: {
+      x_194_phi = 0;
+      while (true) {
+        int x_220 = 0;
+        int x_212 = 0;
+        int x_195 = 0;
+        int x_195_phi = 0;
+        int const x_194 = x_194_phi;
+        x_222_phi = false;
+        if ((x_194 <= 5)) {
+        } else {
+          break;
+        }
+        int const x_201 = tree.arr[x_194].data;
+        if ((8 <= x_201)) {
+          int const x_214_save = x_194;
+          int const x_215 = tree.arr[x_214_save].leftIndex;
+          if ((x_215 == -1)) {
+            tree.arr[x_214_save].leftIndex = 5;
+            BST const tint_symbol_12 = {.data=8, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[5] = tint_symbol_12;
+            x_222_phi = true;
+            break;
+          } else {
+            x_220 = tree.arr[x_214_save].leftIndex;
+            x_195_phi = x_220;
+            {
+              x_195 = x_195_phi;
+              x_194_phi = x_195;
+            }
+            continue;
+          }
+          return;
+        } else {
+          int const x_206_save = x_194;
+          int const x_207 = tree.arr[x_206_save].rightIndex;
+          if ((x_207 == -1)) {
+            tree.arr[x_206_save].rightIndex = 5;
+            BST const tint_symbol_13 = {.data=8, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[5] = tint_symbol_13;
+            x_222_phi = true;
+            break;
+          } else {
+            x_212 = tree.arr[x_206_save].rightIndex;
+            x_195_phi = x_212;
+            {
+              x_195 = x_195_phi;
+              x_194_phi = x_195;
+            }
+            continue;
+          }
+          return;
+        }
+        return;
+        {
+          x_195 = x_195_phi;
+          x_194_phi = x_195;
+        }
+      }
+      bool const x_222 = x_222_phi;
+      if (x_222) {
+        break;
+      }
+      break;
+    }
+  }
+  int x_227_phi = 0;
+  bool x_255_phi = false;
+  switch(0u) {
+    default: {
+      x_227_phi = 0;
+      while (true) {
+        int x_253 = 0;
+        int x_245 = 0;
+        int x_228 = 0;
+        int x_228_phi = 0;
+        int const x_227 = x_227_phi;
+        x_255_phi = false;
+        if ((x_227 <= 6)) {
+        } else {
+          break;
+        }
+        int const x_234 = tree.arr[x_227].data;
+        if ((2 <= x_234)) {
+          int const x_247_save = x_227;
+          int const x_248 = tree.arr[x_247_save].leftIndex;
+          if ((x_248 == -1)) {
+            tree.arr[x_247_save].leftIndex = 6;
+            BST const tint_symbol_14 = {.data=2, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[6] = tint_symbol_14;
+            x_255_phi = true;
+            break;
+          } else {
+            x_253 = tree.arr[x_247_save].leftIndex;
+            x_228_phi = x_253;
+            {
+              x_228 = x_228_phi;
+              x_227_phi = x_228;
+            }
+            continue;
+          }
+          return;
+        } else {
+          int const x_239_save = x_227;
+          int const x_240 = tree.arr[x_239_save].rightIndex;
+          if ((x_240 == -1)) {
+            tree.arr[x_239_save].rightIndex = 6;
+            BST const tint_symbol_15 = {.data=2, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[6] = tint_symbol_15;
+            x_255_phi = true;
+            break;
+          } else {
+            x_245 = tree.arr[x_239_save].rightIndex;
+            x_228_phi = x_245;
+            {
+              x_228 = x_228_phi;
+              x_227_phi = x_228;
+            }
+            continue;
+          }
+          return;
+        }
+        return;
+        {
+          x_228 = x_228_phi;
+          x_227_phi = x_228;
+        }
+      }
+      bool const x_255 = x_255_phi;
+      if (x_255) {
+        break;
+      }
+      break;
+    }
+  }
+  int x_260_phi = 0;
+  bool x_288_phi = false;
+  switch(0u) {
+    default: {
+      x_260_phi = 0;
+      while (true) {
+        int x_286 = 0;
+        int x_278 = 0;
+        int x_261 = 0;
+        int x_261_phi = 0;
+        int const x_260 = x_260_phi;
+        x_288_phi = false;
+        if ((x_260 <= 7)) {
+        } else {
+          break;
+        }
+        int const x_267 = tree.arr[x_260].data;
+        if ((6 <= x_267)) {
+          int const x_280_save = x_260;
+          int const x_281 = tree.arr[x_280_save].leftIndex;
+          if ((x_281 == -1)) {
+            tree.arr[x_280_save].leftIndex = 7;
+            BST const tint_symbol_16 = {.data=6, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[7] = tint_symbol_16;
+            x_288_phi = true;
+            break;
+          } else {
+            x_286 = tree.arr[x_280_save].leftIndex;
+            x_261_phi = x_286;
+            {
+              x_261 = x_261_phi;
+              x_260_phi = x_261;
+            }
+            continue;
+          }
+          return;
+        } else {
+          int const x_272_save = x_260;
+          int const x_273 = tree.arr[x_272_save].rightIndex;
+          if ((x_273 == -1)) {
+            tree.arr[x_272_save].rightIndex = 7;
+            BST const tint_symbol_17 = {.data=6, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[7] = tint_symbol_17;
+            x_288_phi = true;
+            break;
+          } else {
+            x_278 = tree.arr[x_272_save].rightIndex;
+            x_261_phi = x_278;
+            {
+              x_261 = x_261_phi;
+              x_260_phi = x_261;
+            }
+            continue;
+          }
+          return;
+        }
+        return;
+        {
+          x_261 = x_261_phi;
+          x_260_phi = x_261;
+        }
+      }
+      bool const x_288 = x_288_phi;
+      if (x_288) {
+        break;
+      }
+      break;
+    }
+  }
+  int x_293_phi = 0;
+  bool x_321_phi = false;
+  switch(0u) {
+    default: {
+      x_293_phi = 0;
+      while (true) {
+        int x_319 = 0;
+        int x_311 = 0;
+        int x_294 = 0;
+        int x_294_phi = 0;
+        int const x_293 = x_293_phi;
+        x_321_phi = false;
+        if ((x_293 <= 8)) {
+        } else {
+          break;
+        }
+        int const x_300 = tree.arr[x_293].data;
+        if ((17 <= x_300)) {
+          int const x_313_save = x_293;
+          int const x_314 = tree.arr[x_313_save].leftIndex;
+          if ((x_314 == -1)) {
+            tree.arr[x_313_save].leftIndex = 8;
+            BST const tint_symbol_18 = {.data=17, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[8] = tint_symbol_18;
+            x_321_phi = true;
+            break;
+          } else {
+            x_319 = tree.arr[x_313_save].leftIndex;
+            x_294_phi = x_319;
+            {
+              x_294 = x_294_phi;
+              x_293_phi = x_294;
+            }
+            continue;
+          }
+          return;
+        } else {
+          int const x_305_save = x_293;
+          int const x_306 = tree.arr[x_305_save].rightIndex;
+          if ((x_306 == -1)) {
+            tree.arr[x_305_save].rightIndex = 8;
+            BST const tint_symbol_19 = {.data=17, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[8] = tint_symbol_19;
+            x_321_phi = true;
+            break;
+          } else {
+            x_311 = tree.arr[x_305_save].rightIndex;
+            x_294_phi = x_311;
+            {
+              x_294 = x_294_phi;
+              x_293_phi = x_294;
+            }
+            continue;
+          }
+          return;
+        }
+        return;
+        {
+          x_294 = x_294_phi;
+          x_293_phi = x_294;
+        }
+      }
+      bool const x_321 = x_321_phi;
+      if (x_321) {
+        break;
+      }
+      break;
+    }
+  }
+  int x_326_phi = 0;
+  bool x_354_phi = false;
+  switch(0u) {
+    default: {
+      x_326_phi = 0;
+      while (true) {
+        int x_352 = 0;
+        int x_344 = 0;
+        int x_327 = 0;
+        int x_327_phi = 0;
+        int const x_326 = x_326_phi;
+        x_354_phi = false;
+        if ((x_326 <= 9)) {
+        } else {
+          break;
+        }
+        int const x_333 = tree.arr[x_326].data;
+        if ((13 <= x_333)) {
+          int const x_346_save = x_326;
+          int const x_347 = tree.arr[x_346_save].leftIndex;
+          if ((x_347 == -1)) {
+            tree.arr[x_346_save].leftIndex = 9;
+            BST const tint_symbol_20 = {.data=13, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[9] = tint_symbol_20;
+            x_354_phi = true;
+            break;
+          } else {
+            x_352 = tree.arr[x_346_save].leftIndex;
+            x_327_phi = x_352;
+            {
+              x_327 = x_327_phi;
+              x_326_phi = x_327;
+            }
+            continue;
+          }
+          return;
+        } else {
+          int const x_338_save = x_326;
+          int const x_339 = tree.arr[x_338_save].rightIndex;
+          if ((x_339 == -1)) {
+            tree.arr[x_338_save].rightIndex = 9;
+            BST const tint_symbol_21 = {.data=13, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[9] = tint_symbol_21;
+            x_354_phi = true;
+            break;
+          } else {
+            x_344 = tree.arr[x_338_save].rightIndex;
+            x_327_phi = x_344;
+            {
+              x_327 = x_327_phi;
+              x_326_phi = x_327;
+            }
+            continue;
+          }
+          return;
+        }
+        return;
+        {
+          x_327 = x_327_phi;
+          x_326_phi = x_327;
+        }
+      }
+      bool const x_354 = x_354_phi;
+      if (x_354) {
+        break;
+      }
+      break;
+    }
+  }
+  x_357_phi = 0;
+  x_360_phi = 0;
+  x_362_phi = 0;
+  while (true) {
+    int x_392 = 0;
+    int x_402 = 0;
+    int x_407 = 0;
+    int x_363 = 0;
+    int x_358_phi = 0;
+    int x_361_phi = 0;
+    int const x_357 = x_357_phi;
+    x_360 = x_360_phi;
+    int const x_362 = x_362_phi;
+    int const x_365 = (6 - 15);
+    if ((x_362 < 20)) {
+    } else {
+      break;
+    }
+    int x_374_phi = 0;
+    int x_392_phi = 0;
+    bool x_393_phi = false;
+    switch(0u) {
+      default: {
+        x_374_phi = 0;
+        while (true) {
+          int const x_374 = x_374_phi;
+          x_392_phi = x_357;
+          x_393_phi = false;
+          if ((x_374 != -1)) {
+          } else {
+            break;
+          }
+          BST const x_381 = tree.arr[x_374];
+          int const x_382 = x_381.data;
+          int const x_383 = x_381.leftIndex;
+          int const x_385 = x_381.rightIndex;
+          if ((x_382 == x_362)) {
+            x_392_phi = x_362;
+            x_393_phi = true;
+            break;
+          }
+          float const x_389 = (*(tint_symbol_23))[select(3u, 3u, (3u <= 3u))];
+          {
+            x_374_phi = select(x_383, x_385, !((x_362 <= x_382)));
+          }
+        }
+        x_392 = x_392_phi;
+        bool const x_393 = x_393_phi;
+        x_358_phi = x_392;
+        if (x_393) {
+          break;
+        }
+        x_358_phi = -1;
+        break;
+      }
+    }
+    int x_358 = 0;
+    int x_401 = 0;
+    int x_406 = 0;
+    int x_402_phi = 0;
+    int x_407_phi = 0;
+    x_358 = x_358_phi;
+    switch(x_362) {
+      case 2:
+      case 5:
+      case 6:
+      case 7:
+      case 8:
+      case 9:
+      case 12:
+      case 13:
+      case 15:
+      case 17: {
+        x_402_phi = x_360;
+        if ((x_358 == as_type<int>(x_362))) {
+          x_401 = as_type<int>((x_360 + as_type<int>(1)));
+          x_402_phi = x_401;
+        }
+        x_402 = x_402_phi;
+        x_361_phi = x_402;
+        break;
+      }
+      default: {
+        x_407_phi = x_360;
+        if ((x_358 == as_type<int>(-1))) {
+          x_406 = as_type<int>((x_360 + as_type<int>(1)));
+          x_407_phi = x_406;
+        }
+        x_407 = x_407_phi;
+        x_361_phi = x_407;
+        break;
+      }
+    }
+    int const x_361 = x_361_phi;
+    {
+      x_363 = (x_362 + 1);
+      x_357_phi = x_358;
+      x_360_phi = x_361;
+      x_362_phi = x_363;
+    }
+  }
+  if ((x_360 == as_type<int>(20))) {
+    *(tint_symbol_23) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  } else {
+    *(tint_symbol_23) = float4(0.0f, 0.0f, 1.0f, 1.0f);
+  }
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol() {
+  thread float4 tint_symbol_24 = 0.0f;
+  main_1(&(tint_symbol_24));
+  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_24};
+  tint_symbol_1 const tint_symbol_22 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
+  return tint_symbol_22;
+}
+

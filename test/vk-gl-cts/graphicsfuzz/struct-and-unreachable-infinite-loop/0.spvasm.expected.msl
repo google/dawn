@@ -1,0 +1,54 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct BST {
+  int data;
+  int leftIndex;
+  int rightIndex;
+};
+struct tint_array_wrapper {
+  BST arr[10];
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_1 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void makeTreeNode_struct_BST_i1_i1_i11_(thread BST* const tree) {
+  (*(tree)).rightIndex = 1;
+  return;
+}
+
+void main_1(thread float4* const tint_symbol_4) {
+  tint_array_wrapper tree_1 = {};
+  BST param = {};
+  tint_array_wrapper const x_37 = tree_1;
+  param = x_37.arr[0u];
+  makeTreeNode_struct_BST_i1_i1_i11_(&(param));
+  BST const x_40 = param;
+  tint_array_wrapper const x_41 = tree_1;
+  tint_array_wrapper x_42_1 = x_41;
+  x_42_1.arr[0u] = x_40;
+  tint_array_wrapper const x_42 = x_42_1;
+  tree_1 = x_42;
+  tint_array_wrapper const x_11 = tree_1;
+  if ((x_11.arr[0u].rightIndex == 0)) {
+    while (true) {
+    }
+    return;
+  }
+  tint_array_wrapper const x_12 = tree_1;
+  *(tint_symbol_4) = float4(float(x_12.arr[0u].rightIndex), 0.0f, 0.0f, 1.0f);
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol() {
+  thread float4 tint_symbol_5 = 0.0f;
+  main_1(&(tint_symbol_5));
+  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
+  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
+  return tint_symbol_3;
+}
+

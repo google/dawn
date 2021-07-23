@@ -1,0 +1,48 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_padded_array_element {
+  /* 0x0000 */ int el;
+  /* 0x0004 */ int8_t tint_pad[12];
+};
+struct tint_array_wrapper {
+  /* 0x0000 */ tint_padded_array_element arr[2];
+};
+struct buf0 {
+  /* 0x0000 */ tint_array_wrapper x_GLF_uniform_int_values;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_1 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(constant buf0& x_6, thread float4* const tint_symbol_4) {
+  int a = 0;
+  a = -1;
+  int const x_25 = x_6.x_GLF_uniform_int_values.arr[1].el;
+  int const x_26 = a;
+  int const x_29 = x_6.x_GLF_uniform_int_values.arr[1].el;
+  if (((x_25 / x_26) < x_29)) {
+    int const x_35 = x_6.x_GLF_uniform_int_values.arr[1].el;
+    int const x_38 = x_6.x_GLF_uniform_int_values.arr[0].el;
+    int const x_41 = x_6.x_GLF_uniform_int_values.arr[0].el;
+    int const x_44 = x_6.x_GLF_uniform_int_values.arr[1].el;
+    *(tint_symbol_4) = float4(float(x_35), float(x_38), float(x_41), float(x_44));
+  } else {
+    int const x_48 = x_6.x_GLF_uniform_int_values.arr[0].el;
+    float const x_49 = float(x_48);
+    *(tint_symbol_4) = float4(x_49, x_49, x_49, x_49);
+  }
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol(constant buf0& x_6 [[buffer(0)]]) {
+  thread float4 tint_symbol_5 = 0.0f;
+  main_1(x_6, &(tint_symbol_5));
+  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
+  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
+  return tint_symbol_3;
+}
+

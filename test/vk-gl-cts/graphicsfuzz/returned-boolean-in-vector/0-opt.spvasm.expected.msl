@@ -1,0 +1,112 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct buf0 {
+  /* 0x0000 */ packed_float2 injectionSwitch;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_1 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(constant buf0& x_5, thread float4* const tint_symbol_4) {
+  bool x_36 = false;
+  bool x_37 = false;
+  int x_7 = 0;
+  bool x_38 = false;
+  float3 color = 0.0f;
+  bool x_40 = false;
+  float3 x_43 = 0.0f;
+  bool x_40_phi = false;
+  float3 x_42_phi = 0.0f;
+  bool x_56_phi = false;
+  bool x_58_phi = false;
+  x_40_phi = false;
+  x_42_phi = float3(0.0f, 0.0f, 0.0f);
+  while (true) {
+    float3 x_43_phi = 0.0f;
+    x_40 = x_40_phi;
+    float3 const x_42 = x_42_phi;
+    float const x_47 = x_5.injectionSwitch.y;
+    x_43_phi = x_42;
+    if ((x_47 < 0.0f)) {
+      color = float3(1.0f, 1.0f, 1.0f);
+      x_43_phi = float3(1.0f, 1.0f, 1.0f);
+    }
+    x_43 = x_43_phi;
+    {
+      x_40_phi = x_40;
+      x_42_phi = x_43;
+      if (false) {
+      } else {
+        break;
+      }
+    }
+  }
+  x_36 = false;
+  x_56_phi = x_40;
+  x_58_phi = false;
+  while (true) {
+    bool x_62 = false;
+    bool x_62_phi = false;
+    bool x_64_phi = false;
+    int x_65_phi = 0;
+    bool x_70_phi = false;
+    bool x_71_phi = false;
+    bool const x_56 = x_56_phi;
+    bool const x_58 = x_58_phi;
+    x_7 = 0;
+    x_62_phi = x_56;
+    x_64_phi = false;
+    x_65_phi = 0;
+    while (true) {
+      x_62 = x_62_phi;
+      bool const x_64 = x_64_phi;
+      int const x_65 = x_65_phi;
+      bool const x_68 = (0 < 1);
+      x_70_phi = x_62;
+      x_71_phi = false;
+      if (true) {
+      } else {
+        break;
+      }
+      x_36 = true;
+      x_37 = true;
+      x_70_phi = true;
+      x_71_phi = true;
+      break;
+      {
+        x_62_phi = false;
+        x_64_phi = false;
+        x_65_phi = 0;
+      }
+    }
+    bool const x_70 = x_70_phi;
+    bool const x_71 = x_71_phi;
+    if (true) {
+      break;
+    }
+    x_36 = true;
+    break;
+    {
+      x_56_phi = false;
+      x_58_phi = false;
+    }
+  }
+  x_38 = true;
+  float const x_73 = select(0.0f, 1.0f, true);
+  *(tint_symbol_4) = (float4(x_43.x, x_43.y, x_43.z, 1.0f) + float4(x_73, x_73, x_73, x_73));
+  *(tint_symbol_4) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol(constant buf0& x_5 [[buffer(0)]]) {
+  thread float4 tint_symbol_5 = 0.0f;
+  main_1(x_5, &(tint_symbol_5));
+  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
+  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
+  return tint_symbol_3;
+}
+

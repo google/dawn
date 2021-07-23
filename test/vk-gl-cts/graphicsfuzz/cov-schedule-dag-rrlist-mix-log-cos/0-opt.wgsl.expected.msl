@@ -1,0 +1,63 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_padded_array_element {
+  /* 0x0000 */ float el;
+  /* 0x0004 */ int8_t tint_pad[12];
+};
+struct tint_array_wrapper {
+  /* 0x0000 */ tint_padded_array_element arr[5];
+};
+struct buf0 {
+  /* 0x0000 */ tint_array_wrapper x_GLF_uniform_float_values;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_1 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(constant buf0& x_6, thread float4* const tint_symbol_4) {
+  float a = 0.0f;
+  float b = 0.0f;
+  bool x_51 = false;
+  bool x_52_phi = false;
+  float const x_28 = x_6.x_GLF_uniform_float_values.arr[2].el;
+  float const x_30 = x_6.x_GLF_uniform_float_values.arr[3].el;
+  float const x_32 = x_6.x_GLF_uniform_float_values.arr[3].el;
+  float const x_34 = x_6.x_GLF_uniform_float_values.arr[2].el;
+  a = select(x_28, x_30, (x_32 > x_34));
+  float const x_37 = a;
+  b = cos(log(x_37));
+  float const x_40 = b;
+  *(tint_symbol_4) = float4(x_40, x_40, x_40, x_40);
+  float const x_42 = b;
+  float const x_44 = x_6.x_GLF_uniform_float_values.arr[0].el;
+  bool const x_45 = (x_42 > x_44);
+  x_52_phi = x_45;
+  if (x_45) {
+    float const x_48 = b;
+    float const x_50 = x_6.x_GLF_uniform_float_values.arr[1].el;
+    x_51 = (x_48 < x_50);
+    x_52_phi = x_51;
+  }
+  bool const x_52 = x_52_phi;
+  if (x_52) {
+    float const x_56 = x_6.x_GLF_uniform_float_values.arr[3].el;
+    float const x_58 = x_6.x_GLF_uniform_float_values.arr[4].el;
+    float const x_60 = x_6.x_GLF_uniform_float_values.arr[4].el;
+    float const x_62 = x_6.x_GLF_uniform_float_values.arr[3].el;
+    *(tint_symbol_4) = float4(x_56, x_58, x_60, x_62);
+  }
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol(constant buf0& x_6 [[buffer(0)]]) {
+  thread float4 tint_symbol_5 = 0.0f;
+  main_1(x_6, &(tint_symbol_5));
+  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
+  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
+  return tint_symbol_3;
+}
+

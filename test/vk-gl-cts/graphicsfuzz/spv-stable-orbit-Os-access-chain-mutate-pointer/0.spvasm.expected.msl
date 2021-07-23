@@ -1,0 +1,108 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct buf0 {
+  /* 0x0000 */ packed_float2 resolution;
+};
+struct tint_array_wrapper {
+  float4 arr[16];
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_2 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(constant buf0& x_6, thread float4* const tint_symbol_6, thread float4* const tint_symbol_7) {
+  tint_array_wrapper indexable = {};
+  int2 x_76 = 0;
+  int2 x_109 = 0;
+  int x_115 = 0;
+  int2 x_76_phi = 0;
+  int x_79_phi = 0;
+  int2 x_110_phi = 0;
+  int2 x_112_phi = 0;
+  float4 const x_55 = *(tint_symbol_6);
+  float2 const x_58 = x_6.resolution;
+  float2 const x_59 = (float2(x_55.x, x_55.y) / x_58);
+  int const x_62 = int((x_59.x * 8.0f));
+  int const x_65 = int((x_59.y * 8.0f));
+  int2 const x_74 = int2(((((x_62 & 5) | (x_65 & 10)) * 8) + ((x_65 & 5) | (x_62 & 10))), 0);
+  x_76_phi = x_74;
+  x_79_phi = 0;
+  while (true) {
+    int2 x_90 = 0;
+    int2 x_98 = 0;
+    int x_80 = 0;
+    int2 x_91_phi = 0;
+    int2 x_99_phi = 0;
+    x_76 = x_76_phi;
+    int const x_79 = x_79_phi;
+    if ((x_79 < 100)) {
+    } else {
+      break;
+    }
+    x_91_phi = x_76;
+    if ((x_76.x > 0)) {
+      x_90 = x_76;
+      x_90.y = (x_76.y - 1);
+      x_91_phi = x_90;
+    }
+    int2 const x_91 = x_91_phi;
+    x_99_phi = x_91;
+    if ((x_91.x < 0)) {
+      x_98 = x_91;
+      x_98.y = (x_91.y + 1);
+      x_99_phi = x_98;
+    }
+    int2 const x_99 = x_99_phi;
+    int2 x_77_1 = x_99;
+    x_77_1.x = (x_99.x + (x_99.y / 2));
+    int2 const x_77 = x_77_1;
+    {
+      x_80 = (x_79 + 1);
+      x_76_phi = x_77;
+      x_79_phi = x_80;
+    }
+  }
+  int const x_104 = x_76.x;
+  x_110_phi = x_76;
+  if ((x_104 < 0)) {
+    x_109 = x_76;
+    x_109.x = -(x_104);
+    x_110_phi = x_109;
+  }
+  int2 const x_110 = x_110_phi;
+  x_112_phi = x_110;
+  while (true) {
+    int2 x_113 = 0;
+    int2 const x_112 = x_112_phi;
+    x_115 = x_112.x;
+    if ((x_115 > 15)) {
+    } else {
+      break;
+    }
+    {
+      x_113 = x_112;
+      x_113.x = as_type<int>((x_115 - as_type<int>(16)));
+      x_112_phi = x_113;
+    }
+  }
+  tint_array_wrapper const tint_symbol_4 = {.arr={float4(0.0f, 0.0f, 0.0f, 1.0f), float4(0.5f, 0.0f, 0.0f, 1.0f), float4(0.0f, 0.5f, 0.0f, 1.0f), float4(0.5f, 0.5f, 0.0f, 1.0f), float4(0.0f, 0.0f, 0.5f, 1.0f), float4(0.5f, 0.0f, 0.5f, 1.0f), float4(0.0f, 0.5f, 0.5f, 1.0f), float4(0.5f, 0.5f, 0.5f, 1.0f), float4(0.0f, 0.0f, 0.0f, 1.0f), float4(1.0f, 0.0f, 0.0f, 1.0f), float4(0.0f, 1.0f, 0.0f, 1.0f), float4(1.0f, 1.0f, 0.0f, 1.0f), float4(0.0f, 0.0f, 1.0f, 1.0f), float4(1.0f, 0.0f, 1.0f, 1.0f), float4(0.0f, 1.0f, 1.0f, 1.0f), float4(1.0f, 1.0f, 1.0f, 1.0f)}};
+  indexable = tint_symbol_4;
+  float4 const x_120 = indexable.arr[x_115];
+  *(tint_symbol_7) = x_120;
+  return;
+}
+
+fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_6 [[buffer(0)]]) {
+  thread float4 tint_symbol_8 = 0.0f;
+  thread float4 tint_symbol_9 = 0.0f;
+  tint_symbol_8 = gl_FragCoord_param;
+  main_1(x_6, &(tint_symbol_8), &(tint_symbol_9));
+  main_out const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_9};
+  tint_symbol_2 const tint_symbol_5 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
+  return tint_symbol_5;
+}
+

@@ -1,0 +1,183 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct buf0 {
+  /* 0x0000 */ int one;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_1 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(constant buf0& x_7, thread float4* const tint_symbol_4) {
+  int a = 0;
+  int i0 = 0;
+  int i1 = 0;
+  int i2 = 0;
+  int i3 = 0;
+  int i4 = 0;
+  int i5 = 0;
+  int i6 = 0;
+  int i7 = 0;
+  int i8_1 = 0;
+  int i9 = 0;
+  a = 0;
+  i0 = 0;
+  while (true) {
+    int const x_40 = i0;
+    int const x_42 = x_7.one;
+    if ((x_40 < x_42)) {
+    } else {
+      break;
+    }
+    i1 = 0;
+    while (true) {
+      int const x_49 = i1;
+      int const x_51 = x_7.one;
+      if ((x_49 < x_51)) {
+      } else {
+        break;
+      }
+      i2 = 0;
+      while (true) {
+        int const x_58 = i2;
+        int const x_60 = x_7.one;
+        if ((x_58 < x_60)) {
+        } else {
+          break;
+        }
+        i3 = 0;
+        while (true) {
+          int const x_67 = i3;
+          int const x_69 = x_7.one;
+          if ((x_67 < (x_69 + 2))) {
+          } else {
+            break;
+          }
+          i4 = 0;
+          while (true) {
+            int const x_77 = i4;
+            int const x_79 = x_7.one;
+            if ((x_77 < x_79)) {
+            } else {
+              break;
+            }
+            i5 = 0;
+            while (true) {
+              int const x_86 = i5;
+              int const x_88 = x_7.one;
+              if ((x_86 < x_88)) {
+              } else {
+                break;
+              }
+              while (true) {
+                int const x_96 = x_7.one;
+                if ((x_96 > 0)) {
+                } else {
+                  break;
+                }
+                i6 = 0;
+                while (true) {
+                  int const x_103 = i6;
+                  int const x_105 = x_7.one;
+                  if ((x_103 < x_105)) {
+                  } else {
+                    break;
+                  }
+                  i7 = 0;
+                  while (true) {
+                    int const x_112 = i7;
+                    int const x_114 = x_7.one;
+                    if ((x_112 < x_114)) {
+                    } else {
+                      break;
+                    }
+                    i8_1 = 0;
+                    while (true) {
+                      int const x_121 = i8_1;
+                      int const x_123 = x_7.one;
+                      if ((x_121 < x_123)) {
+                      } else {
+                        break;
+                      }
+                      i9 = 0;
+                      while (true) {
+                        int const x_130 = i9;
+                        int const x_132 = x_7.one;
+                        if ((x_130 < x_132)) {
+                        } else {
+                          break;
+                        }
+                        int const x_135 = a;
+                        a = (x_135 + 1);
+                        {
+                          int const x_137 = i9;
+                          i9 = (x_137 + 1);
+                        }
+                      }
+                      {
+                        int const x_139 = i8_1;
+                        i8_1 = (x_139 + 1);
+                      }
+                    }
+                    {
+                      int const x_141 = i7;
+                      i7 = (x_141 + 1);
+                    }
+                  }
+                  {
+                    int const x_143 = i6;
+                    i6 = (x_143 + 1);
+                  }
+                }
+                break;
+              }
+              {
+                int const x_145 = i5;
+                i5 = (x_145 + 1);
+              }
+            }
+            {
+              int const x_147 = i4;
+              i4 = (x_147 + 1);
+            }
+          }
+          {
+            int const x_149 = i3;
+            i3 = (x_149 + 1);
+          }
+        }
+        {
+          int const x_151 = i2;
+          i2 = (x_151 + 1);
+        }
+      }
+      {
+        int const x_153 = i1;
+        i1 = (x_153 + 1);
+      }
+    }
+    {
+      int const x_155 = i0;
+      i0 = (x_155 + 1);
+    }
+  }
+  int const x_157 = a;
+  if ((x_157 == 3)) {
+    *(tint_symbol_4) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  } else {
+    *(tint_symbol_4) = float4(0.0f, 0.0f, 0.0f, 0.0f);
+  }
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol(constant buf0& x_7 [[buffer(0)]]) {
+  thread float4 tint_symbol_5 = 0.0f;
+  main_1(x_7, &(tint_symbol_5));
+  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
+  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
+  return tint_symbol_3;
+}
+

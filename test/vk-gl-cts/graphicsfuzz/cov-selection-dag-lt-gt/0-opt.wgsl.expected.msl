@@ -1,0 +1,56 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct buf1 {
+  /* 0x0000 */ packed_float2 v1;
+};
+struct tint_padded_array_element {
+  /* 0x0000 */ int el;
+  /* 0x0004 */ int8_t tint_pad[12];
+};
+struct tint_array_wrapper {
+  /* 0x0000 */ tint_padded_array_element arr[2];
+};
+struct buf0 {
+  /* 0x0000 */ tint_array_wrapper x_GLF_uniform_int_values;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_1 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(constant buf1& x_5, constant buf0& x_7, thread float4* const tint_symbol_4) {
+  float const x_29 = x_5.v1.x;
+  float const x_31 = x_5.v1.y;
+  if ((x_29 < x_31)) {
+    int const x_37 = x_7.x_GLF_uniform_int_values.arr[0].el;
+    int const x_40 = x_7.x_GLF_uniform_int_values.arr[1].el;
+    int const x_43 = x_7.x_GLF_uniform_int_values.arr[1].el;
+    int const x_46 = x_7.x_GLF_uniform_int_values.arr[0].el;
+    *(tint_symbol_4) = float4(float(x_37), float(x_40), float(x_43), float(x_46));
+    float const x_50 = x_5.v1.x;
+    float const x_52 = x_5.v1.y;
+    if ((x_50 > x_52)) {
+      int const x_57 = x_7.x_GLF_uniform_int_values.arr[0].el;
+      float const x_58 = float(x_57);
+      *(tint_symbol_4) = float4(x_58, x_58, x_58, x_58);
+    }
+    return;
+  } else {
+    int const x_61 = x_7.x_GLF_uniform_int_values.arr[1].el;
+    float const x_62 = float(x_61);
+    *(tint_symbol_4) = float4(x_62, x_62, x_62, x_62);
+  }
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol(constant buf1& x_5 [[buffer(1)]], constant buf0& x_7 [[buffer(0)]]) {
+  thread float4 tint_symbol_5 = 0.0f;
+  main_1(x_5, x_7, &(tint_symbol_5));
+  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
+  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
+  return tint_symbol_3;
+}
+

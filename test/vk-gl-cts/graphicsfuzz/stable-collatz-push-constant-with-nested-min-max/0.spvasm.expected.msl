@@ -1,0 +1,73 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct buf0 {
+  /* 0x0000 */ packed_float2 resolution;
+};
+struct tint_array_wrapper {
+  float4 arr[16];
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_2 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+int collatz_i1_(thread int* const v) {
+  int count = 0;
+  count = 0;
+  while (true) {
+    int const x_89 = *(v);
+    if ((x_89 > 1)) {
+    } else {
+      break;
+    }
+    int const x_92 = *(v);
+    if (((x_92 & 1) == 1)) {
+      int const x_98 = *(v);
+      *(v) = ((3 * x_98) + 1);
+    } else {
+      int const x_101 = *(v);
+      *(v) = (x_101 / 2);
+    }
+    int const x_103 = count;
+    count = (x_103 + 1);
+  }
+  int const x_105 = count;
+  return x_105;
+}
+
+void main_1(constant buf0& x_10, thread float4* const tint_symbol_6, thread float4* const tint_symbol_7) {
+  float2 lin = 0.0f;
+  int v_1 = 0;
+  int param = 0;
+  tint_array_wrapper indexable = {};
+  float4 const x_63 = *(tint_symbol_6);
+  float2 const x_66 = x_10.resolution;
+  lin = (float2(x_63.x, x_63.y) / x_66);
+  float2 const x_68 = lin;
+  lin = floor((x_68 * 8.0f));
+  float const x_72 = lin.x;
+  float const x_76 = lin.y;
+  v_1 = ((int(x_72) * 8) + int(x_76));
+  int const x_79 = v_1;
+  param = x_79;
+  int const x_80 = collatz_i1_(&(param));
+  tint_array_wrapper const tint_symbol_4 = {.arr={float4(0.0f, 0.0f, 0.0f, 1.0f), float4(0.5f, 0.0f, 0.0f, 1.0f), float4(0.0f, 0.5f, 0.0f, 1.0f), float4(0.5f, 0.5f, 0.0f, 1.0f), float4(0.0f, 0.0f, 0.5f, 1.0f), float4(0.5f, 0.0f, 0.5f, 1.0f), float4(0.0f, 0.5f, 0.5f, 1.0f), float4(0.5f, 0.5f, 0.5f, 1.0f), float4(0.0f, 0.0f, 0.0f, 1.0f), float4(1.0f, 0.0f, 0.0f, 1.0f), float4(0.0f, 1.0f, 0.0f, 1.0f), float4(1.0f, 1.0f, 0.0f, 1.0f), float4(0.0f, 0.0f, 1.0f, 1.0f), float4(1.0f, 0.0f, 1.0f, 1.0f), float4(0.0f, 1.0f, 1.0f, 1.0f), float4(1.0f, 1.0f, 1.0f, 1.0f)}};
+  indexable = tint_symbol_4;
+  float4 const x_83 = indexable.arr[(x_80 % 16)];
+  *(tint_symbol_7) = x_83;
+  return;
+}
+
+fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_10 [[buffer(0)]]) {
+  thread float4 tint_symbol_8 = 0.0f;
+  thread float4 tint_symbol_9 = 0.0f;
+  tint_symbol_8 = gl_FragCoord_param;
+  main_1(x_10, &(tint_symbol_8), &(tint_symbol_9));
+  main_out const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_9};
+  tint_symbol_2 const tint_symbol_5 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
+  return tint_symbol_5;
+}
+

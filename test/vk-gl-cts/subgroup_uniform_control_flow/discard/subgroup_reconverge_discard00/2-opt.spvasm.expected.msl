@@ -1,0 +1,39 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct main_out {
+  int expect_1;
+};
+struct tint_symbol_2 {
+  int expect_1 [[color(0)]];
+};
+
+void main_1(thread float4* const tint_symbol_5, thread int* const tint_symbol_6) {
+  bool inbounds = false;
+  bool x_31 = false;
+  bool x_32_phi = false;
+  float const x_24 = (*(tint_symbol_5)).x;
+  bool const x_25 = (x_24 < 128.0f);
+  x_32_phi = x_25;
+  if (!(x_25)) {
+    float const x_30 = (*(tint_symbol_5)).y;
+    x_31 = (x_30 < 128.0f);
+    x_32_phi = x_31;
+  }
+  bool const x_32 = x_32_phi;
+  inbounds = x_32;
+  bool const x_33 = inbounds;
+  *(tint_symbol_6) = select(-1, 1, x_33);
+  return;
+}
+
+fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]]) {
+  thread float4 tint_symbol_7 = 0.0f;
+  thread int tint_symbol_8 = 0;
+  tint_symbol_7 = gl_FragCoord_param;
+  main_1(&(tint_symbol_7), &(tint_symbol_8));
+  main_out const tint_symbol_3 = {.expect_1=tint_symbol_8};
+  tint_symbol_2 const tint_symbol_4 = {.expect_1=tint_symbol_3.expect_1};
+  return tint_symbol_4;
+}
+

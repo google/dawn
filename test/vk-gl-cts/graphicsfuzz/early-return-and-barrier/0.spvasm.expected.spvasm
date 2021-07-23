@@ -1,0 +1,121 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 72
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %theSSBO "theSSBO"
+               OpMemberName %theSSBO 0 "out_data"
+               OpName %x_4 "x_4"
+               OpName %main_1 "main_1"
+               OpName %x_30 "x_30"
+               OpName %x_30_phi "x_30_phi"
+               OpName %x_32_phi "x_32_phi"
+               OpName %x_33 "x_33"
+               OpName %main "main"
+               OpDecorate %theSSBO Block
+               OpMemberDecorate %theSSBO 0 Offset 0
+               OpDecorate %x_4 DescriptorSet 0
+               OpDecorate %x_4 Binding 0
+        %int = OpTypeInt 32 1
+    %theSSBO = OpTypeStruct %int
+%_ptr_StorageBuffer_theSSBO = OpTypePointer StorageBuffer %theSSBO
+        %x_4 = OpVariable %_ptr_StorageBuffer_theSSBO StorageBuffer
+       %void = OpTypeVoid
+          %5 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+%mat2v2float = OpTypeMatrix %v2float 2
+%_ptr_Function_mat2v2float = OpTypePointer Function %mat2v2float
+         %14 = OpConstantNull %mat2v2float
+%_ptr_Function_int = OpTypePointer Function %int
+         %18 = OpConstantNull %int
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+     %int_42 = OpConstant %int 42
+    %float_0 = OpConstant %float 0
+         %25 = OpConstantComposite %v2float %float_0 %float_0
+         %26 = OpConstantComposite %mat2v2float %25 %25
+      %int_1 = OpConstant %int 1
+      %int_0 = OpConstant %int 0
+       %bool = OpTypeBool
+    %float_1 = OpConstant %float 1
+         %43 = OpConstantComposite %v2float %float_1 %float_0
+         %44 = OpConstantComposite %v2float %float_0 %float_1
+         %45 = OpConstantComposite %mat2v2float %43 %44
+         %47 = OpConstantComposite %v2float %float_1 %float_1
+%_ptr_Function_v2float = OpTypePointer Function %v2float
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
+   %uint_264 = OpConstant %uint 264
+     %main_1 = OpFunction %void None %5
+          %8 = OpLabel
+       %x_30 = OpVariable %_ptr_Function_mat2v2float Function %14
+   %x_30_phi = OpVariable %_ptr_Function_mat2v2float Function %14
+   %x_32_phi = OpVariable %_ptr_Function_int Function %18
+       %x_33 = OpVariable %_ptr_Function_int Function %18
+         %22 = OpAccessChain %_ptr_StorageBuffer_int %x_4 %uint_0
+               OpStore %22 %int_42
+               OpStore %x_30_phi %26
+               OpStore %x_32_phi %int_1
+               OpBranch %28
+         %28 = OpLabel
+               OpLoopMerge %29 %30 None
+               OpBranch %31
+         %31 = OpLabel
+         %33 = OpLoad %mat2v2float %x_30_phi
+               OpStore %x_30 %33
+         %34 = OpLoad %int %x_32_phi
+         %36 = OpSGreaterThan %bool %34 %int_0
+               OpSelectionMerge %38 None
+               OpBranchConditional %36 %39 %40
+         %39 = OpLabel
+               OpBranch %38
+         %40 = OpLabel
+               OpBranch %29
+         %38 = OpLabel
+               OpBranch %30
+         %30 = OpLabel
+         %41 = OpISub %int %34 %int_1
+               OpStore %x_33 %41
+               OpStore %x_30_phi %45
+         %46 = OpLoad %int %x_33
+               OpStore %x_32_phi %46
+               OpBranch %28
+         %29 = OpLabel
+         %49 = OpAccessChain %_ptr_Function_v2float %x_30 %uint_0
+         %50 = OpLoad %v2float %49
+         %51 = OpFSub %v2float %50 %43
+         %53 = OpAccessChain %_ptr_Function_v2float %x_30 %uint_1
+         %54 = OpLoad %v2float %53
+         %55 = OpFSub %v2float %54 %44
+         %56 = OpCompositeConstruct %mat2v2float %51 %55
+         %57 = OpVectorTimesMatrix %v2float %47 %56
+               OpBranch %58
+         %58 = OpLabel
+               OpLoopMerge %59 %60 None
+               OpBranch %61
+         %61 = OpLabel
+         %62 = OpCompositeExtract %float %57 0
+         %63 = OpFOrdLessThan %bool %float_1 %62
+               OpSelectionMerge %64 None
+               OpBranchConditional %63 %65 %64
+         %65 = OpLabel
+               OpBranch %59
+         %64 = OpLabel
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+               OpBranch %59
+         %60 = OpLabel
+               OpBranch %58
+         %59 = OpLabel
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %5
+         %70 = OpLabel
+         %71 = OpFunctionCall %void %main_1
+               OpReturn
+               OpFunctionEnd

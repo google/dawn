@@ -1,0 +1,205 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 115
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %tint_symbol_1
+               OpExecutionMode %main OriginUpperLeft
+               OpName %buf0 "buf0"
+               OpMemberName %buf0 0 "injectionSwitch"
+               OpName %x_6 "x_6"
+               OpName %x_GLF_color "x_GLF_color"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %main_1 "main_1"
+               OpName %k "k"
+               OpName %GLF_dead0j "GLF_dead0j"
+               OpName %donor_replacementGLF_dead0stack "donor_replacementGLF_dead0stack"
+               OpName %donor_replacementGLF_dead0top "donor_replacementGLF_dead0top"
+               OpName %x_54 "x_54"
+               OpName %matrix_b "matrix_b"
+               OpName %b "b"
+               OpName %main_out "main_out"
+               OpMemberName %main_out 0 "x_GLF_color_1"
+               OpName %tint_symbol_2 "tint_symbol_2"
+               OpName %tint_symbol "tint_symbol"
+               OpName %main "main"
+               OpDecorate %buf0 Block
+               OpMemberDecorate %buf0 0 Offset 0
+               OpDecorate %x_6 NonWritable
+               OpDecorate %x_6 DescriptorSet 0
+               OpDecorate %x_6 Binding 0
+               OpDecorate %tint_symbol_1 Location 0
+               OpDecorate %_arr_int_uint_10 ArrayStride 4
+               OpMemberDecorate %main_out 0 Offset 0
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+       %buf0 = OpTypeStruct %v2float
+%_ptr_Uniform_buf0 = OpTypePointer Uniform %buf0
+        %x_6 = OpVariable %_ptr_Uniform_buf0 Uniform
+    %v4float = OpTypeVector %float 4
+%_ptr_Private_v4float = OpTypePointer Private %v4float
+          %9 = OpConstantNull %v4float
+%x_GLF_color = OpVariable %_ptr_Private_v4float Private %9
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%tint_symbol_1 = OpVariable %_ptr_Output_v4float Output %9
+       %void = OpTypeVoid
+         %12 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+%_ptr_Function_int = OpTypePointer Function %int
+         %19 = OpConstantNull %int
+       %uint = OpTypeInt 32 0
+    %uint_10 = OpConstant %uint 10
+%_arr_int_uint_10 = OpTypeArray %int %uint_10
+%_ptr_Function__arr_int_uint_10 = OpTypePointer Function %_arr_int_uint_10
+         %26 = OpConstantNull %_arr_int_uint_10
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+      %int_0 = OpConstant %int 0
+      %int_4 = OpConstant %int 4
+       %bool = OpTypeBool
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+%_ptr_Uniform_float = OpTypePointer Uniform %float
+    %float_0 = OpConstant %float 0
+      %int_1 = OpConstant %int 1
+      %int_9 = OpConstant %int 9
+         %79 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_0
+      %int_3 = OpConstant %int 3
+%_ptr_Function_float = OpTypePointer Function %float
+    %float_1 = OpConstant %float 1
+        %102 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
+   %main_out = OpTypeStruct %v4float
+        %103 = OpTypeFunction %void %main_out
+     %main_1 = OpFunction %void None %12
+         %15 = OpLabel
+          %k = OpVariable %_ptr_Function_int Function %19
+ %GLF_dead0j = OpVariable %_ptr_Function_int Function %19
+%donor_replacementGLF_dead0stack = OpVariable %_ptr_Function__arr_int_uint_10 Function %26
+%donor_replacementGLF_dead0top = OpVariable %_ptr_Function_int Function %19
+       %x_54 = OpVariable %_ptr_Function_int Function %19
+   %matrix_b = OpVariable %_ptr_Function_v4float Function %9
+          %b = OpVariable %_ptr_Function_int Function %19
+               OpStore %k %int_0
+               OpBranch %33
+         %33 = OpLabel
+               OpLoopMerge %34 %35 None
+               OpBranch %36
+         %36 = OpLabel
+         %37 = OpLoad %int %k
+         %39 = OpSLessThan %bool %37 %int_4
+               OpSelectionMerge %41 None
+               OpBranchConditional %39 %42 %43
+         %42 = OpLabel
+               OpBranch %41
+         %43 = OpLabel
+               OpBranch %34
+         %41 = OpLabel
+         %47 = OpAccessChain %_ptr_Uniform_float %x_6 %uint_0 %uint_1
+         %48 = OpLoad %float %47
+         %50 = OpFOrdGreaterThan %bool %float_0 %48
+               OpSelectionMerge %51 None
+               OpBranchConditional %50 %52 %51
+         %52 = OpLabel
+               OpStore %GLF_dead0j %int_1
+               OpBranch %54
+         %54 = OpLabel
+               OpLoopMerge %55 %56 None
+               OpBranch %57
+         %57 = OpLabel
+         %58 = OpAccessChain %_ptr_Function_int %donor_replacementGLF_dead0stack %int_0
+         %59 = OpLoad %int %58
+         %60 = OpSLessThanEqual %bool %int_1 %59
+               OpSelectionMerge %61 None
+               OpBranchConditional %60 %62 %63
+         %62 = OpLabel
+               OpBranch %61
+         %63 = OpLabel
+               OpBranch %55
+         %61 = OpLabel
+               OpBranch %56
+         %56 = OpLabel
+               OpBranch %54
+         %55 = OpLabel
+         %64 = OpLoad %int %donor_replacementGLF_dead0top
+         %65 = OpLoad %int %donor_replacementGLF_dead0top
+         %66 = OpSGreaterThanEqual %bool %64 %int_0
+               OpSelectionMerge %67 None
+               OpBranchConditional %66 %68 %67
+         %68 = OpLabel
+         %70 = OpSLessThan %bool %65 %int_9
+               OpBranch %67
+         %67 = OpLabel
+         %71 = OpPhi %bool %66 %55 %70 %68
+               OpSelectionMerge %72 None
+               OpBranchConditional %71 %73 %74
+         %73 = OpLabel
+         %75 = OpLoad %int %donor_replacementGLF_dead0top
+         %76 = OpIAdd %int %75 %int_1
+               OpStore %donor_replacementGLF_dead0top %76
+               OpStore %x_54 %76
+               OpBranch %72
+         %74 = OpLabel
+               OpStore %x_54 %int_0
+               OpBranch %72
+         %72 = OpLabel
+         %77 = OpLoad %int %x_54
+         %78 = OpAccessChain %_ptr_Function_int %donor_replacementGLF_dead0stack %77
+               OpStore %78 %int_1
+               OpBranch %51
+         %51 = OpLabel
+               OpStore %matrix_b %79
+               OpStore %b %int_3
+               OpBranch %81
+         %81 = OpLabel
+               OpLoopMerge %82 %83 None
+               OpBranch %84
+         %84 = OpLabel
+         %85 = OpLoad %int %b
+         %86 = OpSGreaterThanEqual %bool %85 %int_0
+               OpSelectionMerge %87 None
+               OpBranchConditional %86 %88 %89
+         %88 = OpLabel
+               OpBranch %87
+         %89 = OpLabel
+               OpBranch %82
+         %87 = OpLabel
+         %90 = OpLoad %int %b
+         %91 = OpLoad %int %b
+         %93 = OpAccessChain %_ptr_Function_float %matrix_b %91
+         %94 = OpLoad %float %93
+         %95 = OpAccessChain %_ptr_Function_float %matrix_b %90
+         %97 = OpFSub %float %94 %float_1
+               OpStore %95 %97
+               OpBranch %83
+         %83 = OpLabel
+         %98 = OpLoad %int %b
+         %99 = OpISub %int %98 %int_1
+               OpStore %b %99
+               OpBranch %81
+         %82 = OpLabel
+               OpBranch %35
+         %35 = OpLabel
+        %100 = OpLoad %int %k
+        %101 = OpIAdd %int %100 %int_1
+               OpStore %k %101
+               OpBranch %33
+         %34 = OpLabel
+               OpStore %x_GLF_color %102
+               OpReturn
+               OpFunctionEnd
+%tint_symbol_2 = OpFunction %void None %103
+%tint_symbol = OpFunctionParameter %main_out
+        %107 = OpLabel
+        %108 = OpCompositeExtract %v4float %tint_symbol 0
+               OpStore %tint_symbol_1 %108
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %12
+        %110 = OpLabel
+        %111 = OpFunctionCall %void %main_1
+        %113 = OpLoad %v4float %x_GLF_color
+        %114 = OpCompositeConstruct %main_out %113
+        %112 = OpFunctionCall %void %tint_symbol_2 %114
+               OpReturn
+               OpFunctionEnd

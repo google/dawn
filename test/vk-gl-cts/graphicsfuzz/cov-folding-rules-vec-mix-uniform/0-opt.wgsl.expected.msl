@@ -1,0 +1,39 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct buf0 {
+  /* 0x0000 */ packed_float2 zeroOne;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_1 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(constant buf0& x_6, thread float4* const tint_symbol_4) {
+  float2 v = 0.0f;
+  float d = 0.0f;
+  float2 const x_37 = x_6.zeroOne;
+  v = mix(float2(2.0f, 3.0f), float2(4.0f, 5.0f), x_37);
+  float2 const x_39 = v;
+  d = distance(x_39, float2(2.0f, 5.0f));
+  float const x_41 = d;
+  if ((x_41 < 0.100000001f)) {
+    float const x_47 = v.x;
+    float const x_50 = v.y;
+    *(tint_symbol_4) = float4((x_47 - 1.0f), (x_50 - 5.0f), 0.0f, 1.0f);
+  } else {
+    *(tint_symbol_4) = float4(0.0f, 0.0f, 0.0f, 0.0f);
+  }
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol(constant buf0& x_6 [[buffer(0)]]) {
+  thread float4 tint_symbol_5 = 0.0f;
+  main_1(x_6, &(tint_symbol_5));
+  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
+  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
+  return tint_symbol_3;
+}
+

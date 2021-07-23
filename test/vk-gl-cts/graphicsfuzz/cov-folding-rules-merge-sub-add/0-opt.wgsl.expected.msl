@@ -1,0 +1,50 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_1 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(thread float4* const tint_symbol_4) {
+  bool b = false;
+  int i = 0;
+  float a = 0.0f;
+  b = false;
+  i = 1;
+  while (true) {
+    int const x_7 = i;
+    if ((x_7 > 0)) {
+    } else {
+      break;
+    }
+    int const x_8 = i;
+    a = (1.0f + float(x_8));
+    float const x_39 = a;
+    if (((2.0f - x_39) == 0.0f)) {
+      b = true;
+    }
+    {
+      int const x_9 = i;
+      i = (x_9 - 1);
+    }
+  }
+  bool const x_44 = b;
+  if (x_44) {
+    *(tint_symbol_4) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  } else {
+    *(tint_symbol_4) = float4(0.0f, 0.0f, 0.0f, 0.0f);
+  }
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol() {
+  thread float4 tint_symbol_5 = 0.0f;
+  main_1(&(tint_symbol_5));
+  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
+  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
+  return tint_symbol_3;
+}
+

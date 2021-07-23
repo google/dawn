@@ -1,0 +1,79 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct buf0 {
+  /* 0x0000 */ packed_float2 injectionSwitch;
+};
+struct StructType {
+  float3 col;
+  bool4 bbbb;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_1 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(constant buf0& x_5, thread float4* const tint_symbol_5) {
+  StructType x_33 = {};
+  int x_38 = 0;
+  StructType x_42 = {};
+  StructType x_33_phi = {};
+  int x_9_phi = 0;
+  StructType x_42_phi = {};
+  int x_10_phi = 0;
+  StructType const tint_symbol_3 = {.col=float3(0.0f, 0.0f, 0.0f), .bbbb=bool4(false, false, false, false)};
+  x_33_phi = tint_symbol_3;
+  x_9_phi = 0;
+  while (true) {
+    StructType x_34 = {};
+    int x_7 = 0;
+    x_33 = x_33_phi;
+    int const x_9 = x_9_phi;
+    float const x_37 = x_5.injectionSwitch.y;
+    x_38 = int(x_37);
+    if ((x_9 < x_38)) {
+    } else {
+      break;
+    }
+    {
+      x_34 = x_33;
+      x_34.col = float3(1.0f, 0.0f, 0.0f);
+      x_7 = (x_9 + 1);
+      x_33_phi = x_34;
+      x_9_phi = x_7;
+    }
+  }
+  x_42_phi = x_33;
+  x_10_phi = 0;
+  while (true) {
+    StructType x_43 = {};
+    int x_8 = 0;
+    x_42 = x_42_phi;
+    int const x_10 = x_10_phi;
+    if ((x_10 < x_38)) {
+    } else {
+      break;
+    }
+    {
+      x_43 = x_42;
+      x_43.col = float3(1.0f, 0.0f, 0.0f);
+      x_8 = (x_10 + 1);
+      x_42_phi = x_43;
+      x_10_phi = x_8;
+    }
+  }
+  float3 const x_47 = x_42.col;
+  *(tint_symbol_5) = float4(x_47.x, x_47.y, x_47.z, 1.0f);
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol(constant buf0& x_5 [[buffer(0)]]) {
+  thread float4 tint_symbol_6 = 0.0f;
+  main_1(x_5, &(tint_symbol_6));
+  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_6};
+  tint_symbol_1 const tint_symbol_4 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
+  return tint_symbol_4;
+}
+

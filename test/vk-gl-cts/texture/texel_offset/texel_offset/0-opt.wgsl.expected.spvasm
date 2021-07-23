@@ -1,0 +1,74 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 44
+; Schema: 0
+               OpCapability Shader
+         %24 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %tint_symbol %tint_symbol_2
+               OpExecutionMode %main OriginUpperLeft
+               OpName %result "result"
+               OpName %gl_FragCoord "gl_FragCoord"
+               OpName %tint_symbol "tint_symbol"
+               OpName %tint_symbol_2 "tint_symbol_2"
+               OpName %main_1 "main_1"
+               OpName %main_out "main_out"
+               OpMemberName %main_out 0 "result_1"
+               OpName %tint_symbol_3 "tint_symbol_3"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %main "main"
+               OpDecorate %tint_symbol BuiltIn FragCoord
+               OpDecorate %tint_symbol_2 Location 0
+               OpMemberDecorate %main_out 0 Offset 0
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Private_v4float = OpTypePointer Private %v4float
+          %5 = OpConstantNull %v4float
+     %result = OpVariable %_ptr_Private_v4float Private %5
+%gl_FragCoord = OpVariable %_ptr_Private_v4float Private %5
+%_ptr_Input_v4float = OpTypePointer Input %v4float
+%tint_symbol = OpVariable %_ptr_Input_v4float Input
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%tint_symbol_2 = OpVariable %_ptr_Output_v4float Output %5
+       %void = OpTypeVoid
+         %11 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_Private_float = OpTypePointer Private %float
+     %uint_1 = OpConstant %uint 1
+  %float_255 = OpConstant %float 255
+    %float_0 = OpConstant %float 0
+   %main_out = OpTypeStruct %v4float
+         %31 = OpTypeFunction %void %main_out
+     %main_1 = OpFunction %void None %11
+         %14 = OpLabel
+         %18 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_0
+         %19 = OpLoad %float %18
+         %21 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_1
+         %22 = OpLoad %float %21
+         %23 = OpExtInst %float %24 Floor %19
+         %26 = OpFDiv %float %23 %float_255
+         %27 = OpExtInst %float %24 Floor %22
+         %28 = OpFDiv %float %27 %float_255
+         %30 = OpCompositeConstruct %v4float %26 %28 %float_0 %float_0
+               OpStore %result %30
+               OpReturn
+               OpFunctionEnd
+%tint_symbol_3 = OpFunction %void None %31
+%tint_symbol_1 = OpFunctionParameter %main_out
+         %35 = OpLabel
+         %36 = OpCompositeExtract %v4float %tint_symbol_1 0
+               OpStore %tint_symbol_2 %36
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %11
+         %38 = OpLabel
+         %39 = OpLoad %v4float %tint_symbol
+               OpStore %gl_FragCoord %39
+         %40 = OpFunctionCall %void %main_1
+         %42 = OpLoad %v4float %result
+         %43 = OpCompositeConstruct %main_out %42
+         %41 = OpFunctionCall %void %tint_symbol_3 %43
+               OpReturn
+               OpFunctionEnd

@@ -1,0 +1,21 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  /* 0x0000 */ uint field0[1];
+};
+
+void main_1(device S& x_5, device S& x_6, thread uint3* const tint_symbol_2) {
+  uint const x_20 = (*(tint_symbol_2)).x;
+  uint const x_22 = x_5.field0[x_20];
+  x_6.field0[x_20] = as_type<uint>(-(as_type<int>(x_22)));
+  return;
+}
+
+kernel void tint_symbol(uint3 x_2_param [[thread_position_in_grid]], device S& x_5 [[buffer(0)]], device S& x_6 [[buffer(1)]]) {
+  thread uint3 tint_symbol_3 = 0u;
+  tint_symbol_3 = x_2_param;
+  main_1(x_5, x_6, &(tint_symbol_3));
+  return;
+}
+

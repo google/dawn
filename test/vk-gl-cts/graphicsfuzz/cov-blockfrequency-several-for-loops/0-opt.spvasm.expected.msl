@@ -1,0 +1,156 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_2 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(thread float4* const tint_symbol_5, thread float4* const tint_symbol_6) {
+  float4 c = 0.0f;
+  int a = 0;
+  int i1 = 0;
+  int i2 = 0;
+  int i3 = 0;
+  int i4 = 0;
+  int i5 = 0;
+  int i6 = 0;
+  int i7 = 0;
+  int i8_1 = 0;
+  c = float4(0.0f, 0.0f, 0.0f, 1.0f);
+  a = 0;
+  while (true) {
+    while (true) {
+      int const x_46 = a;
+      c[x_46] = 1.0f;
+      i1 = 0;
+      while (true) {
+        int const x_52 = i1;
+        if ((x_52 < 1)) {
+        } else {
+          break;
+        }
+        i2 = 0;
+        while (true) {
+          int const x_59 = i2;
+          if ((x_59 < 1)) {
+          } else {
+            break;
+          }
+          i3 = 0;
+          while (true) {
+            int const x_66 = i3;
+            if ((x_66 < 1)) {
+            } else {
+              break;
+            }
+            i4 = 0;
+            while (true) {
+              int const x_73 = i4;
+              if ((x_73 < 1)) {
+              } else {
+                break;
+              }
+              i5 = 0;
+              while (true) {
+                int const x_80 = i5;
+                if ((x_80 < 1)) {
+                } else {
+                  break;
+                }
+                i6 = 0;
+                while (true) {
+                  int const x_87 = i6;
+                  if ((x_87 < 1)) {
+                  } else {
+                    break;
+                  }
+                  i7 = 0;
+                  while (true) {
+                    int const x_94 = i7;
+                    if ((x_94 < 1)) {
+                    } else {
+                      break;
+                    }
+                    i8_1 = 0;
+                    while (true) {
+                      int const x_101 = i8_1;
+                      if ((x_101 < 17)) {
+                      } else {
+                        break;
+                      }
+                      int const x_104 = a;
+                      a = (x_104 + 1);
+                      {
+                        int const x_106 = i8_1;
+                        i8_1 = (x_106 + 1);
+                      }
+                    }
+                    {
+                      int const x_108 = i7;
+                      i7 = (x_108 + 1);
+                    }
+                  }
+                  {
+                    int const x_110 = i6;
+                    i6 = (x_110 + 1);
+                  }
+                }
+                {
+                  int const x_112 = i5;
+                  i5 = (x_112 + 1);
+                }
+              }
+              {
+                int const x_114 = i4;
+                i4 = (x_114 + 1);
+              }
+            }
+            {
+              int const x_116 = i3;
+              i3 = (x_116 + 1);
+            }
+          }
+          {
+            int const x_118 = i2;
+            i2 = (x_118 + 1);
+          }
+        }
+        {
+          int const x_120 = i1;
+          i1 = (x_120 + 1);
+        }
+      }
+      {
+        float const x_123 = (*(tint_symbol_5)).x;
+        if ((x_123 < -1.0f)) {
+        } else {
+          break;
+        }
+      }
+    }
+    {
+      float const x_126 = (*(tint_symbol_5)).y;
+      if ((x_126 < -1.0f)) {
+      } else {
+        break;
+      }
+    }
+  }
+  float4 const x_128 = c;
+  *(tint_symbol_6) = x_128;
+  return;
+}
+
+fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]]) {
+  thread float4 tint_symbol_7 = 0.0f;
+  thread float4 tint_symbol_8 = 0.0f;
+  tint_symbol_7 = gl_FragCoord_param;
+  main_1(&(tint_symbol_7), &(tint_symbol_8));
+  main_out const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_8};
+  tint_symbol_2 const tint_symbol_4 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
+  return tint_symbol_4;
+}
+

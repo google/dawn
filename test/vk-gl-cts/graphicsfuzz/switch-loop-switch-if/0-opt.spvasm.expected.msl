@@ -1,0 +1,86 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct buf0 {
+  /* 0x0000 */ packed_float2 injectionSwitch;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_1 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(constant buf0& x_6, thread float4* const tint_symbol_4) {
+  int i = 0;
+  float const x_51 = x_6.injectionSwitch.x;
+  i = int(x_51);
+  int const x_8 = i;
+  switch(x_8) {
+    case 0: {
+      while (true) {
+        int const x_9 = i;
+        i = (x_9 + 1);
+        int const x_11 = i;
+        switch(x_11) {
+          case 2: {
+            int const x_12 = i;
+            i = (x_12 + 5);
+            break;
+          }
+          case 1: {
+            {
+              int const x_16 = i;
+              if ((x_16 > 200)) {
+              } else {
+                break;
+              }
+            }
+            continue;
+            break;
+          }
+          default: {
+            int const x_14 = i;
+            i = (x_14 + 7);
+            break;
+          }
+        }
+        {
+          int const x_16 = i;
+          if ((x_16 > 200)) {
+          } else {
+            break;
+          }
+        }
+      }
+      int const x_17 = i;
+      if ((x_17 > 100)) {
+        int const x_18 = i;
+        i = (x_18 - 2);
+        break;
+      }
+      /* fallthrough */
+    }
+    default: {
+      int const x_20 = i;
+      i = (x_20 - 3);
+      break;
+    }
+  }
+  int const x_22 = i;
+  if ((x_22 == -2)) {
+    *(tint_symbol_4) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  } else {
+    *(tint_symbol_4) = float4(0.0f, 0.0f, 0.0f, 1.0f);
+  }
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol(constant buf0& x_6 [[buffer(0)]]) {
+  thread float4 tint_symbol_5 = 0.0f;
+  main_1(x_6, &(tint_symbol_5));
+  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
+  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
+  return tint_symbol_3;
+}
+

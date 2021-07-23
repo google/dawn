@@ -1,0 +1,312 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct buf0 {
+  /* 0x0000 */ packed_float2 injectionSwitch;
+};
+struct tint_array_wrapper {
+  float arr[9];
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_2 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+float3 drawShape_vf2_(constant buf0& x_25, thread float2* const pos) {
+  bool c2 = false;
+  bool c3 = false;
+  bool c4 = false;
+  bool c5 = false;
+  bool c6 = false;
+  int GLF_live4i = 0;
+  int GLF_live4_looplimiter5 = 0;
+  float4x2 GLF_live7m42 = float4x2(0.0f);
+  float3x3 GLF_live7m33 = float3x3(0.0f);
+  int GLF_live7cols = 0;
+  int GLF_live7_looplimiter3 = 0;
+  int GLF_live7rows = 0;
+  int GLF_live7_looplimiter2 = 0;
+  int GLF_live7_looplimiter1 = 0;
+  int GLF_live7c = 0;
+  int GLF_live7r = 0;
+  int GLF_live7_looplimiter0 = 0;
+  int GLF_live7sum_index = 0;
+  int GLF_live7_looplimiter7 = 0;
+  int GLF_live7cols_1 = 0;
+  int GLF_live7rows_1 = 0;
+  tint_array_wrapper GLF_live7sums = {};
+  int GLF_live7c_1 = 0;
+  int GLF_live7r_1 = 0;
+  int x_180 = 0;
+  float3x3 indexable = float3x3(0.0f);
+  float const x_182 = (*(pos)).x;
+  c2 = (x_182 > 1.0f);
+  bool const x_184 = c2;
+  if (x_184) {
+    return float3(1.0f, 1.0f, 1.0f);
+  }
+  float const x_188 = (*(pos)).y;
+  c3 = (x_188 < 1.0f);
+  bool const x_190 = c3;
+  if (x_190) {
+    return float3(1.0f, 1.0f, 1.0f);
+  }
+  float const x_194 = (*(pos)).y;
+  c4 = (x_194 > 1.0f);
+  bool const x_196 = c4;
+  if (x_196) {
+    return float3(1.0f, 1.0f, 1.0f);
+  }
+  float const x_200 = (*(pos)).x;
+  c5 = (x_200 < 1.0f);
+  bool const x_202 = c5;
+  if (x_202) {
+    return float3(1.0f, 1.0f, 1.0f);
+  }
+  float const x_206 = (*(pos)).x;
+  c6 = ((x_206 + 1.0f) > 1.0f);
+  bool const x_209 = c6;
+  if (x_209) {
+    return float3(1.0f, 1.0f, 1.0f);
+  }
+  GLF_live4i = 0;
+  while (true) {
+    int const x_39 = GLF_live4i;
+    if ((x_39 < 4)) {
+    } else {
+      break;
+    }
+    int const x_40 = GLF_live4_looplimiter5;
+    if ((x_40 >= 7)) {
+      break;
+    }
+    int const x_41 = GLF_live4_looplimiter5;
+    GLF_live4_looplimiter5 = (x_41 + 1);
+    GLF_live7m42 = float4x2(float2(1.0f, 0.0f), float2(0.0f, 1.0f), float2(0.0f, 0.0f), float2(1.0f, 0.0f));
+    GLF_live7m33 = float3x3(float3(1.0f, 0.0f, 0.0f), float3(0.0f, 1.0f, 0.0f), float3(0.0f, 0.0f, 1.0f));
+    GLF_live7cols = 2;
+    while (true) {
+      int const x_43 = GLF_live7cols;
+      if ((x_43 < 4)) {
+      } else {
+        break;
+      }
+      int const x_44 = GLF_live7_looplimiter3;
+      if ((x_44 >= 7)) {
+        break;
+      }
+      int const x_45 = GLF_live7_looplimiter3;
+      GLF_live7_looplimiter3 = (x_45 + 1);
+      GLF_live7rows = 2;
+      while (true) {
+        int const x_47 = GLF_live7rows;
+        if ((x_47 < 4)) {
+        } else {
+          break;
+        }
+        int const x_48 = GLF_live7_looplimiter2;
+        if ((x_48 >= 7)) {
+          break;
+        }
+        int const x_49 = GLF_live7_looplimiter2;
+        GLF_live7_looplimiter2 = (x_49 + 1);
+        GLF_live7_looplimiter1 = 0;
+        GLF_live7c = 0;
+        while (true) {
+          int const x_51 = GLF_live7c;
+          if ((x_51 < 3)) {
+          } else {
+            break;
+          }
+          int const x_52 = GLF_live7_looplimiter1;
+          if ((x_52 >= 7)) {
+            break;
+          }
+          int const x_53 = GLF_live7_looplimiter1;
+          GLF_live7_looplimiter1 = (x_53 + 1);
+          GLF_live7r = 0;
+          while (true) {
+            int const x_55 = GLF_live7r;
+            if ((x_55 < 2)) {
+            } else {
+              break;
+            }
+            int const x_56 = GLF_live7_looplimiter0;
+            if ((x_56 >= 7)) {
+              break;
+            }
+            int const x_57 = GLF_live7_looplimiter0;
+            GLF_live7_looplimiter0 = (x_57 + 1);
+            int const x_59 = GLF_live7c;
+            int const x_60 = GLF_live7c;
+            int const x_61 = GLF_live7c;
+            int const x_62 = GLF_live7r;
+            int const x_63 = GLF_live7r;
+            int const x_64 = GLF_live7r;
+            GLF_live7m33[select(0, x_61, ((x_59 >= 0) && (x_60 < 3)))][select(0, x_64, ((x_62 >= 0) && (x_63 < 3)))] = 1.0f;
+            float const x_267 = x_25.injectionSwitch.y;
+            if ((0.0f > x_267)) {
+            } else {
+              int const x_65 = GLF_live7c;
+              int const x_66 = GLF_live7c;
+              int const x_67 = GLF_live7c;
+              int const x_68 = GLF_live7r;
+              int const x_69 = GLF_live7r;
+              int const x_70 = GLF_live7r;
+              GLF_live7m42[select(0, x_67, ((x_65 >= 0) && (x_66 < 4)))][select(0, x_70, ((x_68 >= 0) && (x_69 < 2)))] = 1.0f;
+            }
+            {
+              int const x_71 = GLF_live7r;
+              GLF_live7r = (x_71 + 1);
+            }
+          }
+          {
+            int const x_73 = GLF_live7c;
+            GLF_live7c = (x_73 + 1);
+          }
+        }
+        {
+          int const x_75 = GLF_live7rows;
+          GLF_live7rows = (x_75 + 1);
+        }
+      }
+      {
+        int const x_77 = GLF_live7cols;
+        GLF_live7cols = (x_77 + 1);
+      }
+    }
+    GLF_live7sum_index = 0;
+    GLF_live7_looplimiter7 = 0;
+    GLF_live7cols_1 = 2;
+    while (true) {
+      int const x_79 = GLF_live7cols_1;
+      if ((x_79 < 4)) {
+      } else {
+        break;
+      }
+      int const x_80 = GLF_live7_looplimiter7;
+      if ((x_80 >= 7)) {
+        break;
+      }
+      int const x_81 = GLF_live7_looplimiter7;
+      GLF_live7_looplimiter7 = (x_81 + 1);
+      GLF_live7rows_1 = 2;
+      int const x_83 = GLF_live7sum_index;
+      int const x_84 = GLF_live7sum_index;
+      int const x_85 = GLF_live7sum_index;
+      GLF_live7sums.arr[select(0, x_85, ((x_83 >= 0) && (x_84 < 9)))] = 0.0f;
+      GLF_live7c_1 = 0;
+      while (true) {
+        int const x_86 = GLF_live7c_1;
+        if ((x_86 < 1)) {
+        } else {
+          break;
+        }
+        GLF_live7r_1 = 0;
+        while (true) {
+          int const x_87 = GLF_live7r_1;
+          int const x_88 = GLF_live7rows_1;
+          if ((x_87 < x_88)) {
+          } else {
+            break;
+          }
+          int const x_89 = GLF_live7sum_index;
+          int const x_90 = GLF_live7sum_index;
+          int const x_91 = GLF_live7sum_index;
+          int const x_310 = select(0, x_91, ((x_89 >= 0) && (x_90 < 9)));
+          float3x3 const x_311 = GLF_live7m33;
+          float3x3 const x_312 = transpose(x_311);
+          int const x_92 = GLF_live7c_1;
+          if ((x_92 < 3)) {
+            x_180 = 1;
+          } else {
+            float const x_318 = x_25.injectionSwitch.x;
+            x_180 = int(x_318);
+          }
+          int const x_320 = x_180;
+          int const x_93 = GLF_live7r_1;
+          indexable = x_312;
+          float const x_324 = indexable[x_320][select(0, 1, (x_93 < 3))];
+          float const x_326 = GLF_live7sums.arr[x_310];
+          GLF_live7sums.arr[x_310] = (x_326 + x_324);
+          int const x_94 = GLF_live7sum_index;
+          int const x_95 = GLF_live7sum_index;
+          int const x_96 = GLF_live7sum_index;
+          int const x_332 = select(0, x_96, ((x_94 >= 0) && (x_95 < 9)));
+          int const x_97 = GLF_live7r_1;
+          float const x_334 = GLF_live7m42[1][x_97];
+          float const x_336 = GLF_live7sums.arr[x_332];
+          GLF_live7sums.arr[x_332] = (x_336 + x_334);
+          {
+            int const x_98 = GLF_live7r_1;
+            GLF_live7r_1 = (x_98 + 1);
+          }
+        }
+        {
+          int const x_100 = GLF_live7c_1;
+          GLF_live7c_1 = (x_100 + 1);
+        }
+      }
+      int const x_102 = GLF_live7sum_index;
+      GLF_live7sum_index = (x_102 + 1);
+      {
+        int const x_104 = GLF_live7cols_1;
+        GLF_live7cols_1 = (x_104 + 1);
+      }
+    }
+    {
+      int const x_106 = GLF_live4i;
+      GLF_live4i = (x_106 + 1);
+    }
+  }
+  return float3(1.0f, 1.0f, 1.0f);
+}
+
+void main_1(constant buf0& x_25, thread float4* const tint_symbol_5, thread float4* const tint_symbol_6) {
+  float2 position = 0.0f;
+  float2 param = 0.0f;
+  float2 param_1 = 0.0f;
+  int i = 0;
+  float2 param_2 = 0.0f;
+  float const x_161 = x_25.injectionSwitch.x;
+  if ((x_161 >= 2.0f)) {
+    float4 const x_165 = *(tint_symbol_5);
+    position = float2(x_165.x, x_165.y);
+    float2 const x_167 = position;
+    param = x_167;
+    float3 const x_168 = drawShape_vf2_(x_25, &(param));
+    float2 const x_169 = position;
+    param_1 = x_169;
+    float3 const x_170 = drawShape_vf2_(x_25, &(param_1));
+    i = 25;
+    while (true) {
+      int const x_108 = i;
+      if ((x_108 > 0)) {
+      } else {
+        break;
+      }
+      float2 const x_177 = position;
+      param_2 = x_177;
+      float3 const x_178 = drawShape_vf2_(x_25, &(param_2));
+      {
+        int const x_109 = i;
+        i = (x_109 - 1);
+      }
+    }
+  }
+  *(tint_symbol_6) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  return;
+}
+
+fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_25 [[buffer(0)]]) {
+  thread float4 tint_symbol_7 = 0.0f;
+  thread float4 tint_symbol_8 = 0.0f;
+  tint_symbol_7 = gl_FragCoord_param;
+  main_1(x_25, &(tint_symbol_7), &(tint_symbol_8));
+  main_out const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_8};
+  tint_symbol_2 const tint_symbol_4 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
+  return tint_symbol_4;
+}
+

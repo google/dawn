@@ -1,0 +1,88 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 36
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %result "result"
+               OpMemberName %result 0 "res0"
+               OpMemberName %result 1 "res1"
+               OpMemberName %result 2 "res2"
+               OpName %x_4 "x_4"
+               OpName %block0 "block0"
+               OpMemberName %block0 0 "data0"
+               OpName %x_6 "x_6"
+               OpName %block1 "block1"
+               OpMemberName %block1 0 "data1"
+               OpName %x_8 "x_8"
+               OpName %block2 "block2"
+               OpMemberName %block2 0 "data2"
+               OpName %x_10 "x_10"
+               OpName %main_1 "main_1"
+               OpName %main "main"
+               OpDecorate %result Block
+               OpMemberDecorate %result 0 Offset 0
+               OpMemberDecorate %result 1 Offset 4
+               OpMemberDecorate %result 2 Offset 8
+               OpDecorate %x_4 DescriptorSet 0
+               OpDecorate %x_4 Binding 3
+               OpDecorate %block0 Block
+               OpMemberDecorate %block0 0 Offset 0
+               OpDecorate %x_6 NonWritable
+               OpDecorate %x_6 DescriptorSet 0
+               OpDecorate %x_6 Binding 0
+               OpDecorate %block1 Block
+               OpMemberDecorate %block1 0 Offset 0
+               OpDecorate %x_8 NonWritable
+               OpDecorate %x_8 DescriptorSet 0
+               OpDecorate %x_8 Binding 1
+               OpDecorate %block2 Block
+               OpMemberDecorate %block2 0 Offset 0
+               OpDecorate %x_10 NonWritable
+               OpDecorate %x_10 DescriptorSet 0
+               OpDecorate %x_10 Binding 2
+        %int = OpTypeInt 32 1
+     %result = OpTypeStruct %int %int %int
+%_ptr_StorageBuffer_result = OpTypePointer StorageBuffer %result
+        %x_4 = OpVariable %_ptr_StorageBuffer_result StorageBuffer
+     %block0 = OpTypeStruct %int
+%_ptr_Uniform_block0 = OpTypePointer Uniform %block0
+        %x_6 = OpVariable %_ptr_Uniform_block0 Uniform
+     %block1 = OpTypeStruct %int
+%_ptr_Uniform_block1 = OpTypePointer Uniform %block1
+        %x_8 = OpVariable %_ptr_Uniform_block1 Uniform
+     %block2 = OpTypeStruct %int
+%_ptr_Uniform_block2 = OpTypePointer Uniform %block2
+       %x_10 = OpVariable %_ptr_Uniform_block2 Uniform
+       %void = OpTypeVoid
+         %14 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_Uniform_int = OpTypePointer Uniform %int
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
+     %main_1 = OpFunction %void None %14
+         %17 = OpLabel
+         %21 = OpAccessChain %_ptr_Uniform_int %x_6 %uint_0
+         %22 = OpLoad %int %21
+         %24 = OpAccessChain %_ptr_StorageBuffer_int %x_4 %uint_0
+               OpStore %24 %22
+         %25 = OpAccessChain %_ptr_Uniform_int %x_8 %uint_0
+         %26 = OpLoad %int %25
+         %28 = OpAccessChain %_ptr_StorageBuffer_int %x_4 %uint_1
+               OpStore %28 %26
+         %29 = OpAccessChain %_ptr_Uniform_int %x_10 %uint_0
+         %30 = OpLoad %int %29
+         %32 = OpAccessChain %_ptr_StorageBuffer_int %x_4 %uint_2
+               OpStore %32 %30
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %14
+         %34 = OpLabel
+         %35 = OpFunctionCall %void %main_1
+               OpReturn
+               OpFunctionEnd

@@ -1,0 +1,70 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct buf0 {
+  /* 0x0000 */ packed_float2 injectionSwitch;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_2 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void f_(constant buf0& x_7, thread float4* const tint_symbol_5) {
+  while (true) {
+    float const x_35 = x_7.injectionSwitch.y;
+    if ((1.0f > x_35)) {
+      float const x_40 = (*(tint_symbol_5)).y;
+      if ((x_40 < 0.0f)) {
+        {
+          if (false) {
+          } else {
+            break;
+          }
+        }
+        continue;
+      } else {
+        {
+          if (false) {
+          } else {
+            break;
+          }
+        }
+        continue;
+      }
+      {
+        if (false) {
+        } else {
+          break;
+        }
+      }
+      continue;
+    }
+    discard_fragment();
+    {
+      if (false) {
+      } else {
+        break;
+      }
+    }
+  }
+  return;
+}
+
+void main_1(constant buf0& x_7, thread float4* const tint_symbol_6, thread float4* const tint_symbol_7) {
+  f_(x_7, tint_symbol_6);
+  *(tint_symbol_7) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  return;
+}
+
+fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_7 [[buffer(0)]]) {
+  thread float4 tint_symbol_8 = 0.0f;
+  thread float4 tint_symbol_9 = 0.0f;
+  tint_symbol_8 = gl_FragCoord_param;
+  main_1(x_7, &(tint_symbol_8), &(tint_symbol_9));
+  main_out const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_9};
+  tint_symbol_2 const tint_symbol_4 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
+  return tint_symbol_4;
+}
+

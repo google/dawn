@@ -1,0 +1,90 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 47
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %tint_symbol_1
+               OpExecutionMode %main OriginUpperLeft
+               OpName %x_GLF_color "x_GLF_color"
+               OpName %buf0 "buf0"
+               OpMemberName %buf0 0 "one"
+               OpName %x_6 "x_6"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %main_1 "main_1"
+               OpName %x_24 "x_24"
+               OpName %main_out "main_out"
+               OpMemberName %main_out 0 "x_GLF_color_1"
+               OpName %tint_symbol_2 "tint_symbol_2"
+               OpName %tint_symbol "tint_symbol"
+               OpName %main "main"
+               OpName %func_ "func_"
+               OpDecorate %buf0 Block
+               OpMemberDecorate %buf0 0 Offset 0
+               OpDecorate %x_6 NonWritable
+               OpDecorate %x_6 DescriptorSet 0
+               OpDecorate %x_6 Binding 0
+               OpDecorate %tint_symbol_1 Location 0
+               OpMemberDecorate %main_out 0 Offset 0
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Private_v4float = OpTypePointer Private %v4float
+          %5 = OpConstantNull %v4float
+%x_GLF_color = OpVariable %_ptr_Private_v4float Private %5
+        %int = OpTypeInt 32 1
+       %buf0 = OpTypeStruct %int
+%_ptr_Uniform_buf0 = OpTypePointer Uniform %buf0
+        %x_6 = OpVariable %_ptr_Uniform_buf0 Uniform
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%tint_symbol_1 = OpVariable %_ptr_Output_v4float Output %5
+       %void = OpTypeVoid
+         %12 = OpTypeFunction %void
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+    %float_0 = OpConstant %float 0
+         %19 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_0
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_Uniform_int = OpTypePointer Uniform %int
+      %int_0 = OpConstant %int 0
+       %bool = OpTypeBool
+    %float_1 = OpConstant %float 1
+         %31 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
+   %main_out = OpTypeStruct %v4float
+         %32 = OpTypeFunction %void %main_out
+         %44 = OpTypeFunction %v4float
+     %main_1 = OpFunction %void None %12
+         %15 = OpLabel
+       %x_24 = OpVariable %_ptr_Function_v4float Function %5
+               OpStore %x_GLF_color %19
+         %23 = OpAccessChain %_ptr_Uniform_int %x_6 %uint_0
+         %24 = OpLoad %int %23
+         %26 = OpIEqual %bool %24 %int_0
+               OpSelectionMerge %28 None
+               OpBranchConditional %26 %29 %28
+         %29 = OpLabel
+               OpReturn
+         %28 = OpLabel
+               OpStore %x_24 %31
+               OpStore %x_GLF_color %31
+               OpReturn
+               OpFunctionEnd
+%tint_symbol_2 = OpFunction %void None %32
+%tint_symbol = OpFunctionParameter %main_out
+         %36 = OpLabel
+         %37 = OpCompositeExtract %v4float %tint_symbol 0
+               OpStore %tint_symbol_1 %37
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %12
+         %39 = OpLabel
+         %40 = OpFunctionCall %void %main_1
+         %42 = OpLoad %v4float %x_GLF_color
+         %43 = OpCompositeConstruct %main_out %42
+         %41 = OpFunctionCall %void %tint_symbol_2 %43
+               OpReturn
+               OpFunctionEnd
+      %func_ = OpFunction %v4float None %44
+         %46 = OpLabel
+               OpReturnValue %31
+               OpFunctionEnd

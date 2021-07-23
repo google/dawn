@@ -1,0 +1,91 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  int arr[2];
+};
+struct S {
+  tint_array_wrapper arr;
+};
+struct buf0 {
+  /* 0x0000 */ int one;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_1 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+int func_struct_S_i1_2_1_i1_(constant buf0& x_9, thread S* const s, thread int* const x) {
+  int const x_16 = *(x);
+  (*(s)).arr.arr[1] = (x_16 + 1);
+  int const x_18 = x_9.one;
+  int const x_19 = (*(s)).arr.arr[x_18];
+  int const x_20 = *(x);
+  if ((x_19 == x_20)) {
+    return -1;
+  }
+  int const x_21 = *(x);
+  return x_21;
+}
+
+void main_1(constant buf0& x_9, thread float4* const tint_symbol_4) {
+  int a = 0;
+  int i = 0;
+  int j = 0;
+  S s_1 = {};
+  S param = {};
+  int param_1 = 0;
+  a = 0;
+  i = 0;
+  while (true) {
+    int const x_22 = i;
+    int const x_23 = x_9.one;
+    if ((x_22 < (2 + x_23))) {
+    } else {
+      break;
+    }
+    j = 0;
+    while (true) {
+      int const x_25 = j;
+      int const x_26 = x_9.one;
+      if ((x_25 < (3 + x_26))) {
+      } else {
+        break;
+      }
+      int const x_28 = i;
+      int const x_29 = j;
+      S const x_79 = s_1;
+      param = x_79;
+      param_1 = (x_28 + x_29);
+      int const x_31 = func_struct_S_i1_2_1_i1_(x_9, &(param), &(param_1));
+      int const x_32 = a;
+      a = (x_32 + x_31);
+      {
+        int const x_34 = j;
+        j = (x_34 + 1);
+      }
+    }
+    {
+      int const x_36 = i;
+      i = (x_36 + 1);
+    }
+  }
+  int const x_38 = a;
+  if ((x_38 == 30)) {
+    *(tint_symbol_4) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  } else {
+    *(tint_symbol_4) = float4(0.0f, 0.0f, 0.0f, 0.0f);
+  }
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol(constant buf0& x_9 [[buffer(0)]]) {
+  thread float4 tint_symbol_5 = 0.0f;
+  main_1(x_9, &(tint_symbol_5));
+  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
+  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
+  return tint_symbol_3;
+}
+

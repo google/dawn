@@ -1,0 +1,31 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct main_out {
+  float4 gl_Position;
+};
+struct tint_symbol_2 {
+  float4 position_param [[attribute(0)]];
+};
+struct tint_symbol_3 {
+  float4 gl_Position [[position]];
+};
+
+void main_1(thread float4* const tint_symbol_6, thread float4* const tint_symbol_7) {
+  float4 const x_22 = *(tint_symbol_6);
+  float2 const x_23 = float2(x_22.x, x_22.y);
+  *(tint_symbol_7) = float4(x_23.x, x_23.y, 0.400000006f, 1.0f);
+  return;
+}
+
+vertex tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  thread float4 tint_symbol_8 = 0.0f;
+  thread float4 tint_symbol_9 = 0.0f;
+  float4 const position_param = tint_symbol_1.position_param;
+  tint_symbol_8 = position_param;
+  main_1(&(tint_symbol_8), &(tint_symbol_9));
+  main_out const tint_symbol_4 = {.gl_Position=tint_symbol_9};
+  tint_symbol_3 const tint_symbol_5 = {.gl_Position=tint_symbol_4.gl_Position};
+  return tint_symbol_5;
+}
+

@@ -1,0 +1,96 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 50
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %Buf1 "Buf1"
+               OpMemberName %Buf1 0 "result"
+               OpName %x_4 "x_4"
+               OpName %Buf0 "Buf0"
+               OpMemberName %Buf0 0 "values"
+               OpName %x_7 "x_7"
+               OpName %main_1 "main_1"
+               OpName %i "i"
+               OpName %main "main"
+               OpDecorate %Buf1 Block
+               OpMemberDecorate %Buf1 0 Offset 0
+               OpDecorate %x_4 DescriptorSet 0
+               OpDecorate %x_4 Binding 1
+               OpDecorate %Buf0 Block
+               OpMemberDecorate %Buf0 0 Offset 0
+               OpDecorate %_runtimearr_uint ArrayStride 4
+               OpDecorate %x_7 DescriptorSet 0
+               OpDecorate %x_7 Binding 0
+        %int = OpTypeInt 32 1
+       %Buf1 = OpTypeStruct %int
+%_ptr_StorageBuffer_Buf1 = OpTypePointer StorageBuffer %Buf1
+        %x_4 = OpVariable %_ptr_StorageBuffer_Buf1 StorageBuffer
+       %uint = OpTypeInt 32 0
+%_runtimearr_uint = OpTypeRuntimeArray %uint
+       %Buf0 = OpTypeStruct %_runtimearr_uint
+%_ptr_StorageBuffer_Buf0 = OpTypePointer StorageBuffer %Buf0
+        %x_7 = OpVariable %_ptr_StorageBuffer_Buf0 StorageBuffer
+       %void = OpTypeVoid
+         %10 = OpTypeFunction %void
+%_ptr_Function_uint = OpTypePointer Function %uint
+         %16 = OpConstantNull %uint
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+      %int_1 = OpConstant %int 1
+   %uint_512 = OpConstant %uint 512
+       %bool = OpTypeBool
+     %uint_2 = OpConstant %uint 2
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+      %int_0 = OpConstant %int 0
+     %main_1 = OpFunction %void None %10
+         %13 = OpLabel
+          %i = OpVariable %_ptr_Function_uint Function %16
+         %19 = OpAccessChain %_ptr_StorageBuffer_int %x_4 %uint_0
+               OpStore %19 %int_1
+               OpStore %i %uint_0
+               OpBranch %21
+         %21 = OpLabel
+               OpLoopMerge %22 %23 None
+               OpBranch %24
+         %24 = OpLabel
+         %25 = OpLoad %uint %i
+         %27 = OpULessThan %bool %25 %uint_512
+               OpSelectionMerge %29 None
+               OpBranchConditional %27 %30 %31
+         %30 = OpLabel
+               OpBranch %29
+         %31 = OpLabel
+               OpBranch %22
+         %29 = OpLabel
+         %32 = OpLoad %uint %i
+         %34 = OpIMul %uint %32 %uint_2
+         %36 = OpAccessChain %_ptr_StorageBuffer_uint %x_7 %uint_0 %34
+         %37 = OpLoad %uint %36
+         %38 = OpLoad %uint %i
+         %39 = OpINotEqual %bool %37 %38
+               OpSelectionMerge %40 None
+               OpBranchConditional %39 %41 %40
+         %41 = OpLabel
+         %42 = OpAccessChain %_ptr_StorageBuffer_int %x_4 %uint_0
+               OpStore %42 %int_0
+               OpBranch %40
+         %40 = OpLabel
+               OpBranch %23
+         %23 = OpLabel
+         %44 = OpLoad %uint %i
+         %45 = OpBitcast %uint %int_1
+         %46 = OpIAdd %uint %44 %45
+               OpStore %i %46
+               OpBranch %21
+         %22 = OpLabel
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %10
+         %48 = OpLabel
+         %49 = OpFunctionCall %void %main_1
+               OpReturn
+               OpFunctionEnd

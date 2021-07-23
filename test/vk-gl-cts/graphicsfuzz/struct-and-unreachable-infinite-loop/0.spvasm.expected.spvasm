@@ -1,0 +1,125 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 73
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %tint_symbol_1
+               OpExecutionMode %main OriginUpperLeft
+               OpName %x_GLF_color "x_GLF_color"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %BST "BST"
+               OpMemberName %BST 0 "data"
+               OpMemberName %BST 1 "leftIndex"
+               OpMemberName %BST 2 "rightIndex"
+               OpName %makeTreeNode_struct_BST_i1_i1_i11_ "makeTreeNode_struct_BST_i1_i1_i11_"
+               OpName %tree "tree"
+               OpName %main_1 "main_1"
+               OpName %tree_1 "tree_1"
+               OpName %param "param"
+               OpName %x_42_1 "x_42_1"
+               OpName %main_out "main_out"
+               OpMemberName %main_out 0 "x_GLF_color_1"
+               OpName %tint_symbol_2 "tint_symbol_2"
+               OpName %tint_symbol "tint_symbol"
+               OpName %main "main"
+               OpDecorate %tint_symbol_1 Location 0
+               OpMemberDecorate %BST 0 Offset 0
+               OpMemberDecorate %BST 1 Offset 4
+               OpMemberDecorate %BST 2 Offset 8
+               OpDecorate %_arr_BST_uint_10 ArrayStride 12
+               OpMemberDecorate %main_out 0 Offset 0
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Private_v4float = OpTypePointer Private %v4float
+          %5 = OpConstantNull %v4float
+%x_GLF_color = OpVariable %_ptr_Private_v4float Private %5
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%tint_symbol_1 = OpVariable %_ptr_Output_v4float Output %5
+       %void = OpTypeVoid
+        %int = OpTypeInt 32 1
+        %BST = OpTypeStruct %int %int %int
+%_ptr_Function_BST = OpTypePointer Function %BST
+          %8 = OpTypeFunction %void %_ptr_Function_BST
+       %uint = OpTypeInt 32 0
+     %uint_2 = OpConstant %uint 2
+%_ptr_Function_int = OpTypePointer Function %int
+      %int_1 = OpConstant %int 1
+         %22 = OpTypeFunction %void
+    %uint_10 = OpConstant %uint 10
+%_arr_BST_uint_10 = OpTypeArray %BST %uint_10
+%_ptr_Function__arr_BST_uint_10 = OpTypePointer Function %_arr_BST_uint_10
+         %29 = OpConstantNull %_arr_BST_uint_10
+         %31 = OpConstantNull %BST
+     %uint_0 = OpConstant %uint 0
+      %int_0 = OpConstant %int 0
+       %bool = OpTypeBool
+    %float_0 = OpConstant %float 0
+    %float_1 = OpConstant %float 1
+   %main_out = OpTypeStruct %v4float
+         %61 = OpTypeFunction %void %main_out
+%makeTreeNode_struct_BST_i1_i1_i11_ = OpFunction %void None %8
+       %tree = OpFunctionParameter %_ptr_Function_BST
+         %15 = OpLabel
+         %20 = OpAccessChain %_ptr_Function_int %tree %uint_2
+               OpStore %20 %int_1
+               OpReturn
+               OpFunctionEnd
+     %main_1 = OpFunction %void None %22
+         %24 = OpLabel
+     %tree_1 = OpVariable %_ptr_Function__arr_BST_uint_10 Function %29
+      %param = OpVariable %_ptr_Function_BST Function %31
+     %x_42_1 = OpVariable %_ptr_Function__arr_BST_uint_10 Function %29
+         %32 = OpLoad %_arr_BST_uint_10 %tree_1
+         %34 = OpCompositeExtract %BST %32 0
+               OpStore %param %34
+         %35 = OpFunctionCall %void %makeTreeNode_struct_BST_i1_i1_i11_ %param
+         %37 = OpLoad %BST %param
+         %38 = OpLoad %_arr_BST_uint_10 %tree_1
+               OpStore %x_42_1 %38
+         %40 = OpAccessChain %_ptr_Function_BST %x_42_1 %uint_0
+               OpStore %40 %37
+         %41 = OpLoad %_arr_BST_uint_10 %x_42_1
+               OpStore %tree_1 %41
+         %42 = OpLoad %_arr_BST_uint_10 %tree_1
+         %43 = OpCompositeExtract %BST %42 0
+         %44 = OpCompositeExtract %int %43 2
+         %46 = OpIEqual %bool %44 %int_0
+               OpSelectionMerge %48 None
+               OpBranchConditional %46 %49 %48
+         %49 = OpLabel
+               OpBranch %50
+         %50 = OpLabel
+               OpLoopMerge %51 %52 None
+               OpBranch %53
+         %53 = OpLabel
+               OpBranch %52
+         %52 = OpLabel
+               OpBranch %50
+         %51 = OpLabel
+               OpReturn
+         %48 = OpLabel
+         %54 = OpLoad %_arr_BST_uint_10 %tree_1
+         %56 = OpCompositeExtract %BST %54 0
+         %57 = OpCompositeExtract %int %56 2
+         %55 = OpConvertSToF %float %57
+         %60 = OpCompositeConstruct %v4float %55 %float_0 %float_0 %float_1
+               OpStore %x_GLF_color %60
+               OpReturn
+               OpFunctionEnd
+%tint_symbol_2 = OpFunction %void None %61
+%tint_symbol = OpFunctionParameter %main_out
+         %65 = OpLabel
+         %66 = OpCompositeExtract %v4float %tint_symbol 0
+               OpStore %tint_symbol_1 %66
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %22
+         %68 = OpLabel
+         %69 = OpFunctionCall %void %main_1
+         %71 = OpLoad %v4float %x_GLF_color
+         %72 = OpCompositeConstruct %main_out %71
+         %70 = OpFunctionCall %void %tint_symbol_2 %72
+               OpReturn
+               OpFunctionEnd

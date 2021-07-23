@@ -1,0 +1,38 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct main_out {
+  int x_4_1;
+  float4 gl_Position;
+};
+struct tint_symbol_2 {
+  float3 x_2_param [[attribute(0)]];
+  int x_3_param [[attribute(1)]];
+};
+struct tint_symbol_3 {
+  int x_4_1 [[user(locn0)]];
+  float4 gl_Position [[position]];
+};
+
+void main_1(thread float3* const tint_symbol_6, thread float4* const tint_symbol_7, thread int* const tint_symbol_8, thread int* const tint_symbol_9) {
+  float3 const x_22 = *(tint_symbol_6);
+  *(tint_symbol_7) = float4(x_22, 1.0f);
+  *(tint_symbol_8) = *(tint_symbol_9);
+  return;
+}
+
+vertex tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  thread float3 tint_symbol_10 = 0.0f;
+  thread int tint_symbol_11 = 0;
+  thread float4 tint_symbol_12 = 0.0f;
+  thread int tint_symbol_13 = 0;
+  float3 const x_2_param = tint_symbol_1.x_2_param;
+  int const x_3_param = tint_symbol_1.x_3_param;
+  tint_symbol_10 = x_2_param;
+  tint_symbol_11 = x_3_param;
+  main_1(&(tint_symbol_10), &(tint_symbol_12), &(tint_symbol_13), &(tint_symbol_11));
+  main_out const tint_symbol_4 = {.x_4_1=tint_symbol_13, .gl_Position=tint_symbol_12};
+  tint_symbol_3 const tint_symbol_5 = {.x_4_1=tint_symbol_4.x_4_1, .gl_Position=tint_symbol_4.gl_Position};
+  return tint_symbol_5;
+}
+

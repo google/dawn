@@ -1,0 +1,355 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct buf0 {
+  /* 0x0000 */ packed_float2 resolution;
+};
+struct tint_array_wrapper {
+  int arr[256];
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_2 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(constant buf0& x_7, thread float4* const tint_symbol_7, thread tint_array_wrapper* const tint_symbol_8, thread float4* const tint_symbol_9) {
+  float2 pos = 0.0f;
+  int2 ipos = 0;
+  int i = 0;
+  int2 p = 0;
+  bool canwalk = false;
+  int v = 0;
+  int directions = 0;
+  int j = 0;
+  int d = 0;
+  float4 const x_59 = *(tint_symbol_7);
+  float2 const x_62 = x_7.resolution;
+  pos = (float2(x_59.x, x_59.y) / x_62);
+  float const x_65 = pos.x;
+  float const x_69 = pos.y;
+  ipos = int2(int((x_65 * 16.0f)), int((x_69 * 16.0f)));
+  i = 0;
+  while (true) {
+    int const x_77 = i;
+    if ((x_77 < 256)) {
+    } else {
+      break;
+    }
+    int const x_80 = i;
+    (*(tint_symbol_8)).arr[x_80] = 0;
+    {
+      int const x_82 = i;
+      i = (x_82 + 1);
+    }
+  }
+  p = int2(0, 0);
+  canwalk = true;
+  v = 0;
+  while (true) {
+    bool x_104 = false;
+    bool x_124 = false;
+    bool x_144 = false;
+    bool x_164 = false;
+    bool x_105_phi = false;
+    bool x_125_phi = false;
+    bool x_145_phi = false;
+    bool x_165_phi = false;
+    int const x_88 = v;
+    v = (x_88 + 1);
+    directions = 0;
+    int const x_91 = p.x;
+    bool const x_92 = (x_91 > 0);
+    x_105_phi = x_92;
+    if (x_92) {
+      int const x_96 = p.x;
+      int const x_99 = p.y;
+      int const x_103 = (*(tint_symbol_8)).arr[((x_96 - 2) + (x_99 * 16))];
+      x_104 = (x_103 == 0);
+      x_105_phi = x_104;
+    }
+    bool const x_105 = x_105_phi;
+    if (x_105) {
+      int const x_108 = directions;
+      directions = (x_108 + 1);
+    }
+    int const x_111 = p.y;
+    bool const x_112 = (x_111 > 0);
+    x_125_phi = x_112;
+    if (x_112) {
+      int const x_116 = p.x;
+      int const x_118 = p.y;
+      int const x_123 = (*(tint_symbol_8)).arr[(x_116 + ((x_118 - 2) * 16))];
+      x_124 = (x_123 == 0);
+      x_125_phi = x_124;
+    }
+    bool const x_125 = x_125_phi;
+    if (x_125) {
+      int const x_128 = directions;
+      directions = (x_128 + 1);
+    }
+    int const x_131 = p.x;
+    bool const x_132 = (x_131 < 14);
+    x_145_phi = x_132;
+    if (x_132) {
+      int const x_136 = p.x;
+      int const x_139 = p.y;
+      int const x_143 = (*(tint_symbol_8)).arr[((x_136 + 2) + (x_139 * 16))];
+      x_144 = (x_143 == 0);
+      x_145_phi = x_144;
+    }
+    bool const x_145 = x_145_phi;
+    if (x_145) {
+      int const x_148 = directions;
+      directions = (x_148 + 1);
+    }
+    int const x_151 = p.y;
+    bool const x_152 = (x_151 < 14);
+    x_165_phi = x_152;
+    if (x_152) {
+      int const x_156 = p.x;
+      int const x_158 = p.y;
+      int const x_163 = (*(tint_symbol_8)).arr[(x_156 + ((x_158 + 2) * 16))];
+      x_164 = (x_163 == 0);
+      x_165_phi = x_164;
+    }
+    bool const x_165 = x_165_phi;
+    if (x_165) {
+      int const x_168 = directions;
+      directions = (x_168 + 1);
+    }
+    bool x_229 = false;
+    bool x_242 = false;
+    bool x_281 = false;
+    bool x_295 = false;
+    bool x_335 = false;
+    bool x_348 = false;
+    bool x_387 = false;
+    bool x_400 = false;
+    bool x_230_phi = false;
+    bool x_243_phi = false;
+    bool x_282_phi = false;
+    bool x_296_phi = false;
+    bool x_336_phi = false;
+    bool x_349_phi = false;
+    bool x_388_phi = false;
+    bool x_401_phi = false;
+    int const x_170 = directions;
+    if ((x_170 == 0)) {
+      canwalk = false;
+      i = 0;
+      while (true) {
+        int const x_179 = i;
+        if ((x_179 < 8)) {
+        } else {
+          break;
+        }
+        j = 0;
+        while (true) {
+          int const x_186 = j;
+          if ((x_186 < 8)) {
+          } else {
+            break;
+          }
+          int const x_189 = j;
+          int const x_191 = i;
+          int const x_196 = (*(tint_symbol_8)).arr[((x_189 * 2) + ((x_191 * 2) * 16))];
+          if ((x_196 == 0)) {
+            int const x_200 = j;
+            p.x = (x_200 * 2);
+            int const x_203 = i;
+            p.y = (x_203 * 2);
+            canwalk = true;
+          }
+          {
+            int const x_206 = j;
+            j = (x_206 + 1);
+          }
+        }
+        {
+          int const x_208 = i;
+          i = (x_208 + 1);
+        }
+      }
+      int const x_211 = p.x;
+      int const x_213 = p.y;
+      (*(tint_symbol_8)).arr[(x_211 + (x_213 * 16))] = 1;
+    } else {
+      int const x_217 = v;
+      int const x_218 = directions;
+      d = (x_217 % x_218);
+      int const x_220 = directions;
+      int const x_221 = v;
+      v = (x_221 + x_220);
+      int const x_223 = d;
+      bool const x_224 = (x_223 >= 0);
+      x_230_phi = x_224;
+      if (x_224) {
+        int const x_228 = p.x;
+        x_229 = (x_228 > 0);
+        x_230_phi = x_229;
+      }
+      bool const x_230 = x_230_phi;
+      x_243_phi = x_230;
+      if (x_230) {
+        int const x_234 = p.x;
+        int const x_237 = p.y;
+        int const x_241 = (*(tint_symbol_8)).arr[((x_234 - 2) + (x_237 * 16))];
+        x_242 = (x_241 == 0);
+        x_243_phi = x_242;
+      }
+      bool const x_243 = x_243_phi;
+      if (x_243) {
+        int const x_246 = d;
+        d = (x_246 - 1);
+        int const x_249 = p.x;
+        int const x_251 = p.y;
+        (*(tint_symbol_8)).arr[(x_249 + (x_251 * 16))] = 1;
+        int const x_256 = p.x;
+        int const x_259 = p.y;
+        (*(tint_symbol_8)).arr[((x_256 - 1) + (x_259 * 16))] = 1;
+        int const x_264 = p.x;
+        int const x_267 = p.y;
+        (*(tint_symbol_8)).arr[((x_264 - 2) + (x_267 * 16))] = 1;
+        int const x_272 = p.x;
+        p.x = (x_272 - 2);
+      }
+      int const x_275 = d;
+      bool const x_276 = (x_275 >= 0);
+      x_282_phi = x_276;
+      if (x_276) {
+        int const x_280 = p.y;
+        x_281 = (x_280 > 0);
+        x_282_phi = x_281;
+      }
+      bool const x_282 = x_282_phi;
+      x_296_phi = x_282;
+      if (x_282) {
+        int const x_286 = p.x;
+        int const x_288 = p.y;
+        tint_array_wrapper const x_291 = *(tint_symbol_8);
+        tint_array_wrapper const tint_symbol_4 = {.arr={0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+        *(tint_symbol_8) = tint_symbol_4;
+        *(tint_symbol_8) = x_291;
+        int const x_294 = (*(tint_symbol_8)).arr[(x_286 + ((x_288 - 2) * 16))];
+        x_295 = (x_294 == 0);
+        x_296_phi = x_295;
+      }
+      bool const x_296 = x_296_phi;
+      if (x_296) {
+        int const x_299 = d;
+        d = (x_299 - 1);
+        int const x_302 = p.x;
+        int const x_304 = p.y;
+        (*(tint_symbol_8)).arr[(x_302 + (x_304 * 16))] = 1;
+        int const x_309 = p.x;
+        int const x_311 = p.y;
+        (*(tint_symbol_8)).arr[(x_309 + ((x_311 - 1) * 16))] = 1;
+        int const x_317 = p.x;
+        int const x_319 = p.y;
+        tint_array_wrapper const x_321 = *(tint_symbol_8);
+        tint_array_wrapper const tint_symbol_5 = {.arr={0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+        *(tint_symbol_8) = tint_symbol_5;
+        *(tint_symbol_8) = x_321;
+        (*(tint_symbol_8)).arr[(x_317 + ((x_319 - 2) * 16))] = 1;
+        int const x_326 = p.y;
+        p.y = (x_326 - 2);
+      }
+      int const x_329 = d;
+      bool const x_330 = (x_329 >= 0);
+      x_336_phi = x_330;
+      if (x_330) {
+        int const x_334 = p.x;
+        x_335 = (x_334 < 14);
+        x_336_phi = x_335;
+      }
+      bool const x_336 = x_336_phi;
+      x_349_phi = x_336;
+      if (x_336) {
+        int const x_340 = p.x;
+        int const x_343 = p.y;
+        int const x_347 = (*(tint_symbol_8)).arr[((x_340 + 2) + (x_343 * 16))];
+        x_348 = (x_347 == 0);
+        x_349_phi = x_348;
+      }
+      bool const x_349 = x_349_phi;
+      if (x_349) {
+        int const x_352 = d;
+        d = (x_352 - 1);
+        int const x_355 = p.x;
+        int const x_357 = p.y;
+        (*(tint_symbol_8)).arr[(x_355 + (x_357 * 16))] = 1;
+        int const x_362 = p.x;
+        int const x_365 = p.y;
+        (*(tint_symbol_8)).arr[((x_362 + 1) + (x_365 * 16))] = 1;
+        int const x_370 = p.x;
+        int const x_373 = p.y;
+        (*(tint_symbol_8)).arr[((x_370 + 2) + (x_373 * 16))] = 1;
+        int const x_378 = p.x;
+        p.x = (x_378 + 2);
+      }
+      int const x_381 = d;
+      bool const x_382 = (x_381 >= 0);
+      x_388_phi = x_382;
+      if (x_382) {
+        int const x_386 = p.y;
+        x_387 = (x_386 < 14);
+        x_388_phi = x_387;
+      }
+      bool const x_388 = x_388_phi;
+      x_401_phi = x_388;
+      if (x_388) {
+        int const x_392 = p.x;
+        int const x_394 = p.y;
+        int const x_399 = (*(tint_symbol_8)).arr[(x_392 + ((x_394 + 2) * 16))];
+        x_400 = (x_399 == 0);
+        x_401_phi = x_400;
+      }
+      bool const x_401 = x_401_phi;
+      if (x_401) {
+        int const x_404 = d;
+        d = (x_404 - 1);
+        int const x_407 = p.x;
+        int const x_409 = p.y;
+        (*(tint_symbol_8)).arr[(x_407 + (x_409 * 16))] = 1;
+        int const x_414 = p.x;
+        int const x_416 = p.y;
+        (*(tint_symbol_8)).arr[(x_414 + ((x_416 + 1) * 16))] = 1;
+        int const x_422 = p.x;
+        int const x_424 = p.y;
+        (*(tint_symbol_8)).arr[(x_422 + ((x_424 + 2) * 16))] = 1;
+        int const x_430 = p.y;
+        p.y = (x_430 + 2);
+      }
+    }
+    int const x_434 = ipos.y;
+    int const x_437 = ipos.x;
+    int const x_440 = (*(tint_symbol_8)).arr[((x_434 * 16) + x_437)];
+    if ((x_440 == 1)) {
+      *(tint_symbol_9) = float4(1.0f, 1.0f, 1.0f, 1.0f);
+      return;
+    }
+    {
+      bool const x_444 = canwalk;
+      if (x_444) {
+      } else {
+        break;
+      }
+    }
+  }
+  *(tint_symbol_9) = float4(0.0f, 0.0f, 0.0f, 1.0f);
+  return;
+}
+
+fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_7 [[buffer(0)]]) {
+  thread float4 tint_symbol_10 = 0.0f;
+  thread tint_array_wrapper tint_symbol_11 = {};
+  thread float4 tint_symbol_12 = 0.0f;
+  tint_symbol_10 = gl_FragCoord_param;
+  main_1(x_7, &(tint_symbol_10), &(tint_symbol_11), &(tint_symbol_12));
+  main_out const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_12};
+  tint_symbol_2 const tint_symbol_6 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
+  return tint_symbol_6;
+}
+

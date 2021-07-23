@@ -1,0 +1,83 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct buf0 {
+  /* 0x0000 */ int zero;
+};
+struct tint_array_wrapper {
+  int arr[2];
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_1 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(constant buf0& x_8, thread float4* const tint_symbol_4) {
+  int highSigned = 0;
+  uint highUnsigned = 0u;
+  int i = 0;
+  tint_array_wrapper data = {};
+  uint i_1 = 0u;
+  bool x_78 = false;
+  bool x_79_phi = false;
+  highSigned = 1;
+  highUnsigned = 2u;
+  i = 0;
+  while (true) {
+    int const x_42 = i;
+    int const x_43 = highSigned;
+    int const x_46 = x_8.zero;
+    if ((x_42 < (min(10, x_43) + x_46))) {
+    } else {
+      break;
+    }
+    int const x_50 = i;
+    data.arr[x_50] = 5;
+    {
+      int const x_52 = i;
+      i = (x_52 + 1);
+    }
+  }
+  i_1 = 1u;
+  while (true) {
+    uint const x_58 = i_1;
+    uint const x_59 = highUnsigned;
+    int const x_62 = x_8.zero;
+    if ((x_58 < (min(10u, x_59) + as_type<uint>(x_62)))) {
+    } else {
+      break;
+    }
+    uint const x_67 = i_1;
+    data.arr[x_67] = 6;
+    {
+      uint const x_69 = i_1;
+      i_1 = (x_69 + as_type<uint>(1));
+    }
+  }
+  int const x_72 = data.arr[0];
+  bool const x_73 = (x_72 == 5);
+  x_79_phi = x_73;
+  if (x_73) {
+    int const x_77 = data.arr[1];
+    x_78 = (x_77 == 6);
+    x_79_phi = x_78;
+  }
+  bool const x_79 = x_79_phi;
+  if (x_79) {
+    *(tint_symbol_4) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  } else {
+    *(tint_symbol_4) = float4(0.0f, 0.0f, 0.0f, 0.0f);
+  }
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol(constant buf0& x_8 [[buffer(0)]]) {
+  thread float4 tint_symbol_5 = 0.0f;
+  main_1(x_8, &(tint_symbol_5));
+  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
+  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
+  return tint_symbol_3;
+}
+

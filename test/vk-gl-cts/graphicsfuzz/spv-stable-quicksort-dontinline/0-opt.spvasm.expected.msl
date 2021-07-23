@@ -1,0 +1,256 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  int arr[10];
+};
+struct QuicksortObject {
+  tint_array_wrapper numbers;
+};
+struct buf0 {
+  /* 0x0000 */ packed_float2 resolution;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_2 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void swap_i1_i1_(thread int* const i, thread int* const j, thread QuicksortObject* const tint_symbol_5) {
+  int temp = 0;
+  int const x_225 = *(i);
+  int const x_227 = (*(tint_symbol_5)).numbers.arr[x_225];
+  temp = x_227;
+  int const x_228 = *(i);
+  int const x_229 = *(j);
+  int const x_231 = (*(tint_symbol_5)).numbers.arr[x_229];
+  (*(tint_symbol_5)).numbers.arr[x_228] = x_231;
+  int const x_233 = *(j);
+  int const x_234 = temp;
+  (*(tint_symbol_5)).numbers.arr[x_233] = x_234;
+  return;
+}
+
+int performPartition_i1_i1_(thread int* const l, thread int* const h, thread QuicksortObject* const tint_symbol_6) {
+  int pivot = 0;
+  int i_1 = 0;
+  int j_1 = 0;
+  int param = 0;
+  int param_1 = 0;
+  int param_2 = 0;
+  int param_3 = 0;
+  int const x_237 = *(h);
+  int const x_239 = (*(tint_symbol_6)).numbers.arr[x_237];
+  pivot = x_239;
+  int const x_240 = *(l);
+  i_1 = (x_240 - 1);
+  int const x_242 = *(l);
+  j_1 = x_242;
+  while (true) {
+    int const x_247 = j_1;
+    int const x_248 = *(h);
+    if ((x_247 <= (x_248 - 1))) {
+    } else {
+      break;
+    }
+    int const x_252 = j_1;
+    int const x_254 = (*(tint_symbol_6)).numbers.arr[x_252];
+    int const x_255 = pivot;
+    if ((x_254 <= x_255)) {
+      int const x_259 = i_1;
+      i_1 = (x_259 + 1);
+      int const x_261 = i_1;
+      param = x_261;
+      int const x_262 = j_1;
+      param_1 = x_262;
+      swap_i1_i1_(&(param), &(param_1), tint_symbol_6);
+    }
+    {
+      int const x_264 = j_1;
+      j_1 = (x_264 + 1);
+    }
+  }
+  int const x_266 = i_1;
+  i_1 = (x_266 + 1);
+  int const x_268 = i_1;
+  param_2 = x_268;
+  int const x_269 = *(h);
+  param_3 = x_269;
+  swap_i1_i1_(&(param_2), &(param_3), tint_symbol_6);
+  int const x_271 = i_1;
+  return x_271;
+}
+
+void quicksort_(thread QuicksortObject* const tint_symbol_7) {
+  int l_1 = 0;
+  int h_1 = 0;
+  int top = 0;
+  tint_array_wrapper stack = {};
+  int p = 0;
+  int param_4 = 0;
+  int param_5 = 0;
+  l_1 = 0;
+  h_1 = 9;
+  top = -1;
+  int const x_273 = top;
+  int const x_274 = (x_273 + 1);
+  top = x_274;
+  int const x_275 = l_1;
+  stack.arr[x_274] = x_275;
+  int const x_277 = top;
+  int const x_278 = (x_277 + 1);
+  top = x_278;
+  int const x_279 = h_1;
+  stack.arr[x_278] = x_279;
+  while (true) {
+    int const x_285 = top;
+    if ((x_285 >= 0)) {
+    } else {
+      break;
+    }
+    int const x_288 = top;
+    top = (x_288 - 1);
+    int const x_291 = stack.arr[x_288];
+    h_1 = x_291;
+    int const x_292 = top;
+    top = (x_292 - 1);
+    int const x_295 = stack.arr[x_292];
+    l_1 = x_295;
+    int const x_296 = l_1;
+    param_4 = x_296;
+    int const x_297 = h_1;
+    param_5 = x_297;
+    int const x_298 = performPartition_i1_i1_(&(param_4), &(param_5), tint_symbol_7);
+    p = x_298;
+    int const x_299 = p;
+    int const x_301 = l_1;
+    if (((x_299 - 1) > x_301)) {
+      int const x_305 = top;
+      int const x_306 = (x_305 + 1);
+      top = x_306;
+      int const x_307 = l_1;
+      stack.arr[x_306] = x_307;
+      int const x_309 = top;
+      int const x_310 = (x_309 + 1);
+      top = x_310;
+      int const x_311 = p;
+      stack.arr[x_310] = (x_311 - 1);
+    }
+    int const x_314 = p;
+    int const x_316 = h_1;
+    if (((x_314 + 1) < x_316)) {
+      int const x_320 = top;
+      int const x_321 = (x_320 + 1);
+      top = x_321;
+      int const x_322 = p;
+      stack.arr[x_321] = (x_322 + 1);
+      int const x_325 = top;
+      int const x_326 = (x_325 + 1);
+      top = x_326;
+      int const x_327 = h_1;
+      stack.arr[x_326] = x_327;
+    }
+  }
+  return;
+}
+
+void main_1(constant buf0& x_32, thread QuicksortObject* const tint_symbol_8, thread float4* const tint_symbol_9, thread float4* const tint_symbol_10) {
+  int i_2 = 0;
+  float2 uv = 0.0f;
+  float3 color = 0.0f;
+  i_2 = 0;
+  while (true) {
+    int const x_85 = i_2;
+    if ((x_85 < 10)) {
+    } else {
+      break;
+    }
+    int const x_88 = i_2;
+    int const x_89 = i_2;
+    (*(tint_symbol_8)).numbers.arr[x_88] = (10 - x_89);
+    int const x_92 = i_2;
+    int const x_93 = i_2;
+    int const x_95 = (*(tint_symbol_8)).numbers.arr[x_93];
+    int const x_96 = i_2;
+    int const x_98 = (*(tint_symbol_8)).numbers.arr[x_96];
+    (*(tint_symbol_8)).numbers.arr[x_92] = (x_95 * x_98);
+    {
+      int const x_101 = i_2;
+      i_2 = (x_101 + 1);
+    }
+  }
+  quicksort_(tint_symbol_8);
+  float4 const x_104 = *(tint_symbol_9);
+  float2 const x_107 = x_32.resolution;
+  uv = (float2(x_104.x, x_104.y) / x_107);
+  color = float3(1.0f, 2.0f, 3.0f);
+  int const x_110 = (*(tint_symbol_8)).numbers.arr[0];
+  float const x_113 = color.x;
+  color.x = (x_113 + float(x_110));
+  float const x_117 = uv.x;
+  if ((x_117 > 0.25f)) {
+    int const x_122 = (*(tint_symbol_8)).numbers.arr[1];
+    float const x_125 = color.x;
+    color.x = (x_125 + float(x_122));
+  }
+  float const x_129 = uv.x;
+  if ((x_129 > 0.5f)) {
+    int const x_134 = (*(tint_symbol_8)).numbers.arr[2];
+    float const x_137 = color.y;
+    color.y = (x_137 + float(x_134));
+  }
+  float const x_141 = uv.x;
+  if ((x_141 > 0.75f)) {
+    int const x_146 = (*(tint_symbol_8)).numbers.arr[3];
+    float const x_149 = color.z;
+    color.z = (x_149 + float(x_146));
+  }
+  int const x_153 = (*(tint_symbol_8)).numbers.arr[4];
+  float const x_156 = color.y;
+  color.y = (x_156 + float(x_153));
+  float const x_160 = uv.y;
+  if ((x_160 > 0.25f)) {
+    int const x_165 = (*(tint_symbol_8)).numbers.arr[5];
+    float const x_168 = color.x;
+    color.x = (x_168 + float(x_165));
+  }
+  float const x_172 = uv.y;
+  if ((x_172 > 0.5f)) {
+    int const x_177 = (*(tint_symbol_8)).numbers.arr[6];
+    float const x_180 = color.y;
+    color.y = (x_180 + float(x_177));
+  }
+  float const x_184 = uv.y;
+  if ((x_184 > 0.75f)) {
+    int const x_189 = (*(tint_symbol_8)).numbers.arr[7];
+    float const x_192 = color.z;
+    color.z = (x_192 + float(x_189));
+  }
+  int const x_196 = (*(tint_symbol_8)).numbers.arr[8];
+  float const x_199 = color.z;
+  color.z = (x_199 + float(x_196));
+  float const x_203 = uv.x;
+  float const x_205 = uv.y;
+  if ((fabs((x_203 - x_205)) < 0.25f)) {
+    int const x_212 = (*(tint_symbol_8)).numbers.arr[9];
+    float const x_215 = color.x;
+    color.x = (x_215 + float(x_212));
+  }
+  float3 const x_218 = color;
+  float3 const x_219 = normalize(x_218);
+  *(tint_symbol_10) = float4(x_219.x, x_219.y, x_219.z, 1.0f);
+  return;
+}
+
+fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_32 [[buffer(0)]]) {
+  thread float4 tint_symbol_11 = 0.0f;
+  thread QuicksortObject tint_symbol_12 = {};
+  thread float4 tint_symbol_13 = 0.0f;
+  tint_symbol_11 = gl_FragCoord_param;
+  main_1(x_32, &(tint_symbol_12), &(tint_symbol_11), &(tint_symbol_13));
+  main_out const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_13};
+  tint_symbol_2 const tint_symbol_4 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
+  return tint_symbol_4;
+}
+

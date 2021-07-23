@@ -1,0 +1,17 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct block0 {
+  /* 0x0000 */ packed_float4 data;
+};
+
+void main_1(device block0& x_4) {
+  x_4.data = float4(1.0f, 2.0f, 3.0f, 4.0f);
+  return;
+}
+
+kernel void tint_symbol(device block0& x_4 [[buffer(1)]]) {
+  main_1(x_4);
+  return;
+}
+

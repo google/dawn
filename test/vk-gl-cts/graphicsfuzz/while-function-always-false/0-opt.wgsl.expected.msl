@@ -1,0 +1,48 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct buf0 {
+  /* 0x0000 */ packed_float2 injectionSwitch;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_1 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(constant buf0& x_6, thread float4* const tint_symbol_4) {
+  int j = 0;
+  float x_41 = 0.0f;
+  *(tint_symbol_4) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  while (true) {
+    float const x_32 = x_6.injectionSwitch.x;
+    j = int(x_32);
+    while (true) {
+      int const x_8 = j;
+      if ((x_8 < 2)) {
+      } else {
+        break;
+      }
+      return;
+    }
+    {
+      x_41 = x_6.injectionSwitch.y;
+      if ((0.0f > x_41)) {
+      } else {
+        break;
+      }
+    }
+  }
+  int const x_43 = int(x_41);
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol(constant buf0& x_6 [[buffer(0)]]) {
+  thread float4 tint_symbol_5 = 0.0f;
+  main_1(x_6, &(tint_symbol_5));
+  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
+  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
+  return tint_symbol_3;
+}
+

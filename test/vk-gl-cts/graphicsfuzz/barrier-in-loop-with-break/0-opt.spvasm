@@ -1,0 +1,125 @@
+               OpCapability Shader
+          %1 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main" %gl_LocalInvocationID
+               OpExecutionMode %main LocalSize 16 1 1
+               OpSource ESSL 310
+               OpName %main "main"
+               OpName %lid "lid"
+               OpName %gl_LocalInvocationID "gl_LocalInvocationID"
+               OpName %val "val"
+               OpName %doesNotMatter "doesNotMatter"
+               OpMemberName %doesNotMatter 0 "global_seed"
+               OpMemberName %doesNotMatter 1 "data"
+               OpName %_ ""
+               OpName %i "i"
+               OpName %buf1 "buf1"
+               OpMemberName %buf1 0 "injectionSwitch"
+               OpName %__0 ""
+               OpDecorate %gl_LocalInvocationID BuiltIn LocalInvocationId
+               OpDecorate %_runtimearr_int ArrayStride 4
+               OpMemberDecorate %doesNotMatter 0 Offset 0
+               OpMemberDecorate %doesNotMatter 1 Offset 4
+               OpDecorate %doesNotMatter BufferBlock
+               OpDecorate %_ DescriptorSet 0
+               OpDecorate %_ Binding 0
+               OpMemberDecorate %buf1 0 Offset 0
+               OpDecorate %buf1 Block
+               OpDecorate %__0 DescriptorSet 0
+               OpDecorate %__0 Binding 1
+               OpDecorate %gl_WorkGroupSize BuiltIn WorkgroupSize
+       %void = OpTypeVoid
+         %14 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+%_ptr_Function_int = OpTypePointer Function %int
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Input_v3uint = OpTypePointer Input %v3uint
+%gl_LocalInvocationID = OpVariable %_ptr_Input_v3uint Input
+     %uint_0 = OpConstant %uint 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+%_runtimearr_int = OpTypeRuntimeArray %int
+%doesNotMatter = OpTypeStruct %int %_runtimearr_int
+%_ptr_Uniform_doesNotMatter = OpTypePointer Uniform %doesNotMatter
+          %_ = OpVariable %_ptr_Uniform_doesNotMatter Uniform
+      %int_0 = OpConstant %int 0
+%_ptr_Uniform_int = OpTypePointer Uniform %int
+      %int_2 = OpConstant %int 2
+       %bool = OpTypeBool
+      %int_1 = OpConstant %int 1
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+       %buf1 = OpTypeStruct %v2float
+%_ptr_Uniform_buf1 = OpTypePointer Uniform %buf1
+        %__0 = OpVariable %_ptr_Uniform_buf1 Uniform
+%_ptr_Uniform_float = OpTypePointer Uniform %float
+  %float_100 = OpConstant %float 100
+     %uint_2 = OpConstant %uint 2
+   %uint_264 = OpConstant %uint 264
+     %int_42 = OpConstant %int 42
+    %uint_16 = OpConstant %uint 16
+     %uint_1 = OpConstant %uint 1
+%gl_WorkGroupSize = OpConstantComposite %v3uint %uint_16 %uint_1 %uint_1
+       %main = OpFunction %void None %14
+         %38 = OpLabel
+        %lid = OpVariable %_ptr_Function_int Function
+        %val = OpVariable %_ptr_Function_int Function
+          %i = OpVariable %_ptr_Function_int Function
+         %39 = OpAccessChain %_ptr_Input_uint %gl_LocalInvocationID %uint_0
+         %40 = OpLoad %uint %39
+         %41 = OpBitcast %int %40
+               OpStore %lid %41
+         %42 = OpAccessChain %_ptr_Uniform_int %_ %int_0
+         %43 = OpLoad %int %42
+               OpStore %val %43
+               OpStore %i %int_0
+               OpBranch %44
+         %44 = OpLabel
+               OpLoopMerge %45 %46 None
+               OpBranch %47
+         %47 = OpLabel
+         %48 = OpLoad %int %i
+         %49 = OpSLessThan %bool %48 %int_2
+               OpBranchConditional %49 %50 %45
+         %50 = OpLabel
+         %51 = OpLoad %int %lid
+         %52 = OpSGreaterThan %bool %51 %int_0
+               OpSelectionMerge %53 None
+               OpBranchConditional %52 %54 %53
+         %54 = OpLabel
+         %55 = OpLoad %int %lid
+         %56 = OpISub %int %55 %int_1
+         %57 = OpAccessChain %_ptr_Uniform_int %_ %int_1 %56
+         %58 = OpLoad %int %57
+         %59 = OpLoad %int %val
+         %60 = OpIAdd %int %59 %58
+               OpStore %val %60
+         %61 = OpAccessChain %_ptr_Uniform_float %__0 %int_0 %uint_0
+         %62 = OpLoad %float %61
+         %63 = OpFOrdGreaterThan %bool %62 %float_100
+               OpSelectionMerge %64 None
+               OpBranchConditional %63 %65 %64
+         %65 = OpLabel
+               OpBranch %45
+         %64 = OpLabel
+               OpBranch %53
+         %53 = OpLabel
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+               OpBranch %46
+         %46 = OpLabel
+         %66 = OpLoad %int %i
+         %67 = OpIAdd %int %66 %int_1
+               OpStore %i %67
+               OpBranch %44
+         %45 = OpLabel
+         %68 = OpLoad %int %lid
+         %69 = OpIEqual %bool %68 %int_0
+               OpSelectionMerge %70 None
+               OpBranchConditional %69 %71 %70
+         %71 = OpLabel
+         %72 = OpAccessChain %_ptr_Uniform_int %_ %int_1 %int_0
+               OpStore %72 %int_42
+               OpBranch %70
+         %70 = OpLabel
+               OpReturn
+               OpFunctionEnd

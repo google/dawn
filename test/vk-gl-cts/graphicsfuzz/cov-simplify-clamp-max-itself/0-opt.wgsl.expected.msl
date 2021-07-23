@@ -1,0 +1,65 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct buf0 {
+  /* 0x0000 */ packed_int4 sequence;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_1 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(constant buf0& x_7, thread float4* const tint_symbol_4) {
+  int4 a = 0;
+  int i = 0;
+  int sum = 0;
+  a = int4(0, 0, 0, 0);
+  i = 0;
+  while (true) {
+    int const x_40 = i;
+    int const x_42 = x_7.sequence.w;
+    if ((x_40 < (x_42 + 1))) {
+    } else {
+      break;
+    }
+    int const x_46 = i;
+    int const x_48 = x_7.sequence.x;
+    int const x_49 = i;
+    int const x_52 = x_7.sequence[clamp(x_46, x_48, x_49)];
+    if ((x_52 == 1)) {
+      int const x_57 = i;
+      a[x_57] = 5;
+    } else {
+      int const x_59 = i;
+      int const x_60 = i;
+      a[x_59] = x_60;
+    }
+    {
+      int const x_62 = i;
+      i = (x_62 + 1);
+    }
+  }
+  int const x_65 = a.x;
+  int const x_67 = a.y;
+  int const x_70 = a.z;
+  int const x_73 = a.w;
+  sum = (((x_65 + x_67) + x_70) + x_73);
+  int const x_75 = sum;
+  if ((x_75 == 10)) {
+    *(tint_symbol_4) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  } else {
+    *(tint_symbol_4) = float4(0.0f, 0.0f, 0.0f, 0.0f);
+  }
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol(constant buf0& x_7 [[buffer(0)]]) {
+  thread float4 tint_symbol_5 = 0.0f;
+  main_1(x_7, &(tint_symbol_5));
+  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
+  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
+  return tint_symbol_3;
+}
+

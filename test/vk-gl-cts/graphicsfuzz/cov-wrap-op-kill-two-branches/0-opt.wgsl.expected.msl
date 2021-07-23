@@ -1,0 +1,71 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct buf0 {
+  /* 0x0000 */ int five;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_2 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+float func_f1_(thread float* const x, thread float4* const tint_symbol_5) {
+  float const x_56 = *(x);
+  if ((x_56 > 5.0f)) {
+    float const x_61 = (*(tint_symbol_5)).x;
+    if ((x_61 < 0.5f)) {
+      discard_fragment();
+    } else {
+      float const x_67 = (*(tint_symbol_5)).y;
+      if ((x_67 < 0.5f)) {
+        discard_fragment();
+      }
+    }
+  }
+  float const x_71 = *(x);
+  return (x_71 + 1.0f);
+}
+
+void main_1(constant buf0& x_10, thread float4* const tint_symbol_6, thread float4* const tint_symbol_7) {
+  float f = 0.0f;
+  int i = 0;
+  float param = 0.0f;
+  f = 0.0f;
+  i = 0;
+  while (true) {
+    int const x_39 = i;
+    int const x_41 = x_10.five;
+    if ((x_39 < x_41)) {
+    } else {
+      break;
+    }
+    {
+      int const x_45 = i;
+      param = float(x_45);
+      float const x_47 = func_f1_(&(param), tint_symbol_6);
+      f = x_47;
+      int const x_48 = i;
+      i = (x_48 + 1);
+    }
+  }
+  float const x_50 = f;
+  if ((x_50 == 5.0f)) {
+    *(tint_symbol_7) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  } else {
+    *(tint_symbol_7) = float4(0.0f, 0.0f, 0.0f, 0.0f);
+  }
+  return;
+}
+
+fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_10 [[buffer(0)]]) {
+  thread float4 tint_symbol_8 = 0.0f;
+  thread float4 tint_symbol_9 = 0.0f;
+  tint_symbol_8 = gl_FragCoord_param;
+  main_1(x_10, &(tint_symbol_8), &(tint_symbol_9));
+  main_out const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_9};
+  tint_symbol_2 const tint_symbol_4 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
+  return tint_symbol_4;
+}
+

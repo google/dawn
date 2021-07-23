@@ -1,0 +1,164 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct buf0 {
+  /* 0x0000 */ packed_float2 resolution;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_2 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+float cross2d_vf2_vf2_(thread float2* const a, thread float2* const b) {
+  float const x_85 = (*(a)).x;
+  float const x_87 = (*(b)).y;
+  float const x_90 = (*(b)).x;
+  float const x_92 = (*(a)).y;
+  return ((x_85 * x_87) - (x_90 * x_92));
+}
+
+int pointInTriangle_vf2_vf2_vf2_vf2_(constant buf0& x_15, thread float2* const p, thread float2* const a_1, thread float2* const b_1, thread float2* const c) {
+  float var_y = 0.0f;
+  float x_96 = 0.0f;
+  float x_97 = 0.0f;
+  float clamp_y = 0.0f;
+  float pab = 0.0f;
+  float2 param = 0.0f;
+  float2 param_1 = 0.0f;
+  float pbc = 0.0f;
+  float2 param_2 = 0.0f;
+  float2 param_3 = 0.0f;
+  float pca = 0.0f;
+  float2 param_4 = 0.0f;
+  float2 param_5 = 0.0f;
+  bool x_173 = false;
+  bool x_205 = false;
+  bool x_174_phi = false;
+  bool x_206_phi = false;
+  float const x_99 = x_15.resolution.x;
+  float const x_101 = x_15.resolution.y;
+  if ((x_99 == x_101)) {
+    float const x_107 = (*(c)).y;
+    float2 const x_108 = float2(0.0f, x_107);
+    if (true) {
+      float const x_112 = (*(c)).y;
+      x_97 = x_112;
+    } else {
+      x_97 = 1.0f;
+    }
+    float const x_113 = x_97;
+    float const x_114 = (*(c)).y;
+    float2 const x_116 = float2(1.0f, fmax(x_113, x_114));
+    float2 const x_117 = float2(x_108.x, x_108.y);
+    x_96 = x_107;
+  } else {
+    x_96 = -1.0f;
+  }
+  float const x_118 = x_96;
+  var_y = x_118;
+  float const x_120 = (*(c)).y;
+  float const x_121 = (*(c)).y;
+  float const x_122 = var_y;
+  clamp_y = clamp(x_120, x_121, x_122);
+  float const x_125 = (*(p)).x;
+  float const x_127 = (*(a_1)).x;
+  float const x_130 = (*(p)).y;
+  float const x_132 = (*(a_1)).y;
+  float const x_136 = (*(b_1)).x;
+  float const x_137 = (*(a_1)).x;
+  float const x_140 = (*(b_1)).y;
+  float const x_141 = (*(a_1)).y;
+  param = float2((x_125 - x_127), (x_130 - x_132));
+  param_1 = float2((x_136 - x_137), (x_140 - x_141));
+  float const x_144 = cross2d_vf2_vf2_(&(param), &(param_1));
+  pab = x_144;
+  float const x_145 = (*(p)).x;
+  float const x_146 = (*(b_1)).x;
+  float const x_148 = (*(p)).y;
+  float const x_149 = (*(b_1)).y;
+  float const x_153 = (*(c)).x;
+  float const x_154 = (*(b_1)).x;
+  float const x_156 = clamp_y;
+  float const x_157 = (*(b_1)).y;
+  param_2 = float2((x_145 - x_146), (x_148 - x_149));
+  param_3 = float2((x_153 - x_154), (x_156 - x_157));
+  float const x_160 = cross2d_vf2_vf2_(&(param_2), &(param_3));
+  pbc = x_160;
+  float const x_161 = pab;
+  float const x_163 = pbc;
+  bool const x_165 = ((x_161 < 0.0f) && (x_163 < 0.0f));
+  x_174_phi = x_165;
+  if (!(x_165)) {
+    float const x_169 = pab;
+    float const x_171 = pbc;
+    x_173 = ((x_169 >= 0.0f) && (x_171 >= 0.0f));
+    x_174_phi = x_173;
+  }
+  bool const x_174 = x_174_phi;
+  if (!(x_174)) {
+    return 0;
+  }
+  float const x_178 = (*(p)).x;
+  float const x_179 = (*(c)).x;
+  float const x_181 = (*(p)).y;
+  float const x_182 = (*(c)).y;
+  float const x_185 = (*(a_1)).x;
+  float const x_186 = (*(c)).x;
+  float const x_188 = (*(a_1)).y;
+  float const x_189 = (*(c)).y;
+  param_4 = float2((x_178 - x_179), (x_181 - x_182));
+  param_5 = float2((x_185 - x_186), (x_188 - x_189));
+  float const x_192 = cross2d_vf2_vf2_(&(param_4), &(param_5));
+  pca = x_192;
+  float const x_193 = pab;
+  float const x_195 = pca;
+  bool const x_197 = ((x_193 < 0.0f) && (x_195 < 0.0f));
+  x_206_phi = x_197;
+  if (!(x_197)) {
+    float const x_201 = pab;
+    float const x_203 = pca;
+    x_205 = ((x_201 >= 0.0f) && (x_203 >= 0.0f));
+    x_206_phi = x_205;
+  }
+  bool const x_206 = x_206_phi;
+  if (!(x_206)) {
+    return 0;
+  }
+  return 1;
+}
+
+void main_1(constant buf0& x_15, thread float4* const tint_symbol_5, thread float4* const tint_symbol_6) {
+  float2 pos = 0.0f;
+  float2 param_6 = 0.0f;
+  float2 param_7 = 0.0f;
+  float2 param_8 = 0.0f;
+  float2 param_9 = 0.0f;
+  float4 const x_72 = *(tint_symbol_5);
+  float2 const x_75 = x_15.resolution;
+  pos = (float2(x_72.x, x_72.y) / x_75);
+  float2 const x_77 = pos;
+  param_6 = x_77;
+  param_7 = float2(0.699999988f, 0.300000012f);
+  param_8 = float2(0.5f, 0.899999976f);
+  param_9 = float2(0.100000001f, 0.400000006f);
+  int const x_78 = pointInTriangle_vf2_vf2_vf2_vf2_(x_15, &(param_6), &(param_7), &(param_8), &(param_9));
+  if ((x_78 == 1)) {
+    *(tint_symbol_6) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  } else {
+    *(tint_symbol_6) = float4(0.0f, 0.0f, 0.0f, 1.0f);
+  }
+  return;
+}
+
+fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_15 [[buffer(0)]]) {
+  thread float4 tint_symbol_7 = 0.0f;
+  thread float4 tint_symbol_8 = 0.0f;
+  tint_symbol_7 = gl_FragCoord_param;
+  main_1(x_15, &(tint_symbol_7), &(tint_symbol_8));
+  main_out const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_8};
+  tint_symbol_2 const tint_symbol_4 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
+  return tint_symbol_4;
+}
+

@@ -1,0 +1,102 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct theSSBO {
+  /* 0x0000 */ int out_data;
+};
+struct buf1 {
+  /* 0x0000 */ packed_float2 injectionSwitch;
+};
+
+void main_1(constant buf1& x_6, device theSSBO& x_4) {
+  int i = 0;
+  float GLF_live3s = 0.0f;
+  int i_1 = 0;
+  int z = 0;
+  x_4.out_data = 42;
+  float const x_37 = x_6.injectionSwitch.x;
+  float const x_39 = x_6.injectionSwitch.y;
+  if ((x_37 > x_39)) {
+    threadgroup_barrier(mem_flags::mem_threadgroup);
+  }
+  float const x_44 = x_6.injectionSwitch.x;
+  float const x_46 = x_6.injectionSwitch.y;
+  if ((x_44 > x_46)) {
+    threadgroup_barrier(mem_flags::mem_threadgroup);
+  }
+  float const x_51 = x_6.injectionSwitch.y;
+  i = int(x_51);
+  while (true) {
+    int const x_57 = i;
+    if ((x_57 > 0)) {
+    } else {
+      break;
+    }
+    threadgroup_barrier(mem_flags::mem_threadgroup);
+    {
+      int const x_60 = i;
+      i = (x_60 - 1);
+    }
+  }
+  GLF_live3s = 0.0f;
+  while (true) {
+    i_1 = 1;
+    while (true) {
+      int const x_70 = i_1;
+      if ((x_70 < 2)) {
+      } else {
+        break;
+      }
+      float const x_74 = x_6.injectionSwitch.x;
+      if ((x_74 > 1.0f)) {
+        threadgroup_barrier(mem_flags::mem_threadgroup);
+      }
+      float const x_79 = x_6.injectionSwitch.x;
+      float const x_81 = x_6.injectionSwitch.y;
+      if ((x_79 > x_81)) {
+        threadgroup_barrier(mem_flags::mem_threadgroup);
+      }
+      float const x_86 = x_6.injectionSwitch.y;
+      z = int(x_86);
+      while (true) {
+        int const x_92 = z;
+        if ((x_92 > 0)) {
+        } else {
+          break;
+        }
+        float const x_95 = GLF_live3s;
+        GLF_live3s = (x_95 + 1.0f);
+        {
+          int const x_97 = z;
+          z = (x_97 - 1);
+        }
+      }
+      int const x_99 = i_1;
+      if ((x_99 >= 1)) {
+        float const x_104 = x_6.injectionSwitch.x;
+        if ((x_104 > 1.0f)) {
+          threadgroup_barrier(mem_flags::mem_threadgroup);
+        }
+      }
+      {
+        int const x_108 = i_1;
+        i_1 = (x_108 + 1);
+      }
+    }
+    {
+      float const x_111 = x_6.injectionSwitch.x;
+      float const x_113 = x_6.injectionSwitch.y;
+      if ((x_111 > x_113)) {
+      } else {
+        break;
+      }
+    }
+  }
+  return;
+}
+
+kernel void tint_symbol(constant buf1& x_6 [[buffer(1)]], device theSSBO& x_4 [[buffer(0)]]) {
+  main_1(x_6, x_4);
+  return;
+}
+
