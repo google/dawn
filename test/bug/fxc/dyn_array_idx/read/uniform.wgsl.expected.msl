@@ -1,0 +1,23 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_padded_array_element {
+  /* 0x0000 */ int el;
+  /* 0x0004 */ int8_t tint_pad[12];
+};
+struct tint_array_wrapper {
+  /* 0x0000 */ tint_padded_array_element arr[4];
+};
+struct UBO {
+  /* 0x0000 */ tint_array_wrapper data;
+  /* 0x0040 */ int dynamic_idx;
+};
+struct Result {
+  /* 0x0000 */ int out;
+};
+
+kernel void f(constant UBO& ubo [[buffer(0)]], device Result& result [[buffer(2)]]) {
+  result.out = ubo.data.arr[ubo.dynamic_idx].el;
+  return;
+}
+

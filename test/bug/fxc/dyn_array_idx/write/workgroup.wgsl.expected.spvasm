@@ -1,0 +1,80 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 41
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %f "f" %tint_symbol
+               OpExecutionMode %f LocalSize 1 1 1
+               OpName %UBO "UBO"
+               OpMemberName %UBO 0 "dynamic_idx"
+               OpName %ubo "ubo"
+               OpName %Result "Result"
+               OpMemberName %Result 0 "out"
+               OpName %result "result"
+               OpName %S "S"
+               OpMemberName %S 0 "data"
+               OpName %s "s"
+               OpName %tint_symbol "tint_symbol"
+               OpName %f "f"
+               OpDecorate %UBO Block
+               OpMemberDecorate %UBO 0 Offset 0
+               OpDecorate %ubo NonWritable
+               OpDecorate %ubo DescriptorSet 0
+               OpDecorate %ubo Binding 0
+               OpDecorate %Result Block
+               OpMemberDecorate %Result 0 Offset 0
+               OpDecorate %result DescriptorSet 0
+               OpDecorate %result Binding 1
+               OpMemberDecorate %S 0 Offset 0
+               OpDecorate %_arr_int_uint_64 ArrayStride 4
+               OpDecorate %tint_symbol BuiltIn LocalInvocationIndex
+        %int = OpTypeInt 32 1
+        %UBO = OpTypeStruct %int
+%_ptr_Uniform_UBO = OpTypePointer Uniform %UBO
+        %ubo = OpVariable %_ptr_Uniform_UBO Uniform
+     %Result = OpTypeStruct %int
+%_ptr_StorageBuffer_Result = OpTypePointer StorageBuffer %Result
+     %result = OpVariable %_ptr_StorageBuffer_Result StorageBuffer
+       %uint = OpTypeInt 32 0
+    %uint_64 = OpConstant %uint 64
+%_arr_int_uint_64 = OpTypeArray %int %uint_64
+          %S = OpTypeStruct %_arr_int_uint_64
+%_ptr_Workgroup_S = OpTypePointer Workgroup %S
+          %s = OpVariable %_ptr_Workgroup_S Workgroup
+%_ptr_Input_uint = OpTypePointer Input %uint
+%tint_symbol = OpVariable %_ptr_Input_uint Input
+       %void = OpTypeVoid
+         %16 = OpTypeFunction %void
+     %uint_0 = OpConstant %uint 0
+       %bool = OpTypeBool
+         %26 = OpConstantNull %S
+     %uint_2 = OpConstant %uint 2
+   %uint_264 = OpConstant %uint 264
+%_ptr_Uniform_int = OpTypePointer Uniform %int
+%_ptr_Workgroup_int = OpTypePointer Workgroup %int
+      %int_1 = OpConstant %int 1
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+      %int_3 = OpConstant %int 3
+          %f = OpFunction %void None %16
+         %19 = OpLabel
+         %20 = OpLoad %uint %tint_symbol
+         %22 = OpIEqual %bool %20 %uint_0
+               OpSelectionMerge %24 None
+               OpBranchConditional %22 %25 %24
+         %25 = OpLabel
+               OpStore %s %26
+               OpBranch %24
+         %24 = OpLabel
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+         %31 = OpAccessChain %_ptr_Uniform_int %ubo %uint_0
+         %32 = OpLoad %int %31
+         %34 = OpAccessChain %_ptr_Workgroup_int %s %uint_0 %32
+               OpStore %34 %int_1
+         %37 = OpAccessChain %_ptr_StorageBuffer_int %result %uint_0
+         %39 = OpAccessChain %_ptr_Workgroup_int %s %uint_0 %int_3
+         %40 = OpLoad %int %39
+               OpStore %37 %40
+               OpReturn
+               OpFunctionEnd

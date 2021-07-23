@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 cbuffer cbuffer_constants : register(b0, space1) {
   uint4 constants[1];
 };
@@ -15,3 +17,5 @@ void main() {
   s.data[constants[0].x] = 0u;
   return;
 }
+C:\src\tint\test\Shader@0x000002B2827B9810(15,3-24): error X3500: array reference cannot be used as an l-value; not natively addressable
+

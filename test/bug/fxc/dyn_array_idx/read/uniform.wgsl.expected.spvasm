@@ -1,0 +1,54 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 24
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %f "f"
+               OpExecutionMode %f LocalSize 1 1 1
+               OpName %UBO "UBO"
+               OpMemberName %UBO 0 "data"
+               OpMemberName %UBO 1 "dynamic_idx"
+               OpName %ubo "ubo"
+               OpName %Result "Result"
+               OpMemberName %Result 0 "out"
+               OpName %result "result"
+               OpName %f "f"
+               OpDecorate %UBO Block
+               OpMemberDecorate %UBO 0 Offset 0
+               OpDecorate %_arr_int_uint_4 ArrayStride 16
+               OpMemberDecorate %UBO 1 Offset 64
+               OpDecorate %ubo NonWritable
+               OpDecorate %ubo DescriptorSet 0
+               OpDecorate %ubo Binding 0
+               OpDecorate %Result Block
+               OpMemberDecorate %Result 0 Offset 0
+               OpDecorate %result DescriptorSet 0
+               OpDecorate %result Binding 2
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+     %uint_4 = OpConstant %uint 4
+%_arr_int_uint_4 = OpTypeArray %int %uint_4
+        %UBO = OpTypeStruct %_arr_int_uint_4 %int
+%_ptr_Uniform_UBO = OpTypePointer Uniform %UBO
+        %ubo = OpVariable %_ptr_Uniform_UBO Uniform
+     %Result = OpTypeStruct %int
+%_ptr_StorageBuffer_Result = OpTypePointer StorageBuffer %Result
+     %result = OpVariable %_ptr_StorageBuffer_Result StorageBuffer
+       %void = OpTypeVoid
+         %11 = OpTypeFunction %void
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+     %uint_1 = OpConstant %uint 1
+%_ptr_Uniform_int = OpTypePointer Uniform %int
+          %f = OpFunction %void None %11
+         %14 = OpLabel
+         %17 = OpAccessChain %_ptr_StorageBuffer_int %result %uint_0
+         %20 = OpAccessChain %_ptr_Uniform_int %ubo %uint_1
+         %21 = OpLoad %int %20
+         %22 = OpAccessChain %_ptr_Uniform_int %ubo %uint_0 %21
+         %23 = OpLoad %int %22
+               OpStore %17 %23
+               OpReturn
+               OpFunctionEnd

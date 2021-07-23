@@ -1,0 +1,23 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct UBO {
+  /* 0x0000 */ int dynamic_idx;
+};
+struct tint_array_wrapper {
+  int arr[64];
+};
+struct S {
+  tint_array_wrapper data;
+};
+struct Result {
+  /* 0x0000 */ int out;
+};
+
+kernel void f(constant UBO& ubo [[buffer(0)]], device Result& result [[buffer(1)]]) {
+  S s = {};
+  s.data.arr[ubo.dynamic_idx] = 1;
+  result.out = s.data.arr[3];
+  return;
+}
+

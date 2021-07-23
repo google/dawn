@@ -1,0 +1,21 @@
+[[block]]
+struct UBO {
+  dynamic_idx: i32;
+};
+[[group(0), binding(0)]] var<uniform> ubo: UBO;
+[[block]]
+struct Result {
+  out: i32;
+};
+[[group(0), binding(2)]] var<storage, read_write> result: Result;
+
+[[block]]
+struct SSBO {
+  data: array<i32, 4>;
+};
+[[group(0), binding(1)]] var<storage, read_write> ssbo: SSBO;
+
+[[stage(compute), workgroup_size(1)]]
+fn f() {
+  result.out = ssbo.data[ubo.dynamic_idx];
+}
