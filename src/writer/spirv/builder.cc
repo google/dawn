@@ -2514,6 +2514,35 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
       }
       return 0;
     }
+    case IntrinsicType::kMix: {
+      auto std450 = Operand::Int(GetGLSLstd450Import());
+
+      auto a_id = get_param_as_value_id(0);
+      auto b_id = get_param_as_value_id(1);
+      auto f_id = get_param_as_value_id(2);
+      if (!a_id || !b_id || !f_id) {
+        return 0;
+      }
+
+      // If the interpolant is scalar but the objects are vectors, we need to
+      // splat the interpolant into a vector of the same size.
+      auto* result_vector_type = intrinsic->ReturnType()->As<sem::Vector>();
+      if (result_vector_type &&
+          intrinsic->Parameters()[2]->Type()->is_scalar()) {
+        f_id = GenerateSplat(f_id, intrinsic->Parameters()[0]->Type());
+        if (f_id == 0) {
+          return 0;
+        }
+      }
+
+      if (!push_function_inst(spv::Op::OpExtInst,
+                              {Operand::Int(result_type_id), result, std450,
+                               Operand::Int(GLSLstd450FMix), Operand::Int(a_id),
+                               Operand::Int(b_id), Operand::Int(f_id)})) {
+        return 0;
+      }
+      return result_id;
+    }
     case IntrinsicType::kReverseBits:
       op = spv::Op::OpBitReverse;
       break;

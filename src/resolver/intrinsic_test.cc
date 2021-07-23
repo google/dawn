@@ -1494,13 +1494,8 @@ TEST_P(ResolverIntrinsicTest_ThreeParam, Error_NoParams) {
 
   EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(r()->error(),
-            "error: no matching call to " + std::string(param.name) +
-                "()\n\n"
-                "2 candidate functions:\n  " +
-                std::string(param.name) + "(f32, f32, f32) -> f32\n  " +
-                std::string(param.name) +
-                "(vecN<f32>, vecN<f32>, vecN<f32>) -> vecN<f32>\n");
+  EXPECT_THAT(r()->error(), HasSubstr("error: no matching call to " +
+                                      std::string(param.name) + "()"));
 }
 
 INSTANTIATE_TEST_SUITE_P(

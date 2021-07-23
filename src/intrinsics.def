@@ -348,6 +348,7 @@ fn min<T: fiu32>(T, T) -> T
 fn min<N: num, T: fiu32>(vec<N, T>, vec<N, T>) -> vec<N, T>
 fn mix(f32, f32, f32) -> f32
 fn mix<N: num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32>
+fn mix<N: num>(vec<N, f32>, vec<N, f32>, f32) -> vec<N, f32>
 [[deprecated]] fn modf<S: function_private_workgroup, A: access>(f32, ptr<S, f32, A>) -> f32
 [[deprecated]] fn modf<N: num, S: function_private_workgroup, A: access>(vec<N, f32>, ptr<S, vec<N, f32>, A>) -> vec<N, f32>
 fn modf(f32) -> _modf_result

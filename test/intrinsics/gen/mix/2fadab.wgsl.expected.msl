@@ -1,0 +1,27 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+void mix_2fadab() {
+  float2 res = mix(float2(), float2(), 1.0f);
+}
+
+vertex tint_symbol vertex_main() {
+  mix_2fadab();
+  tint_symbol const tint_symbol_1 = {.value=float4()};
+  return tint_symbol_1;
+}
+
+fragment void fragment_main() {
+  mix_2fadab();
+  return;
+}
+
+kernel void compute_main() {
+  mix_2fadab();
+  return;
+}
+
