@@ -41,20 +41,12 @@ namespace gpu_info {
             {0x9B21, 0x9BA0, 0x9BA2, 0x9BA4, 0x9BA5, 0x9BA8, 0x9BAA, 0x9BAB, 0x9BAC, 0x9B41, 0x9BC0,
              0x9BC2, 0x9BC4, 0x9BC5, 0x9BC6, 0x9BC8, 0x9BCA, 0x9BCB, 0x9BCC, 0x9BE6, 0x9BF6}};
 
-        // The Intel graphics driver version schema has had a change since the Windows 10 April
-        // 2018 Update release. The last two parts are build number in new driver, while only the
-        // last part is build number in legacy driver.
-        // See https://www.intel.com/content/www/us/en/support/articles/000005654/graphics.html
-        // for more details.
-        bool IsOldIntelD3DDriver(const D3DDriverVersion& driverVersion) {
-            return driverVersion[2] < 100u;
-        }
+        // According to Intel graphics driver version schema, build number is generated from the
+        // last two fields.
+        // See https://www.intel.com/content/www/us/en/support/articles/000005654/graphics.html for
+        // more details.
         uint32_t GetIntelD3DDriverBuildNumber(const D3DDriverVersion& driverVersion) {
-            uint32_t buildNumber = driverVersion[3];
-            if (!IsOldIntelD3DDriver(driverVersion)) {
-                buildNumber += driverVersion[2] * 10000;
-            }
-            return buildNumber;
+            return driverVersion[2] * 10000 + driverVersion[3];
         }
 
     }  // anonymous namespace
