@@ -160,7 +160,7 @@ TEST_F(ResolverEntryPointValidationTest,
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(), R"(14:52 error: multiple entry point IO attributes
 13:43 note: previously consumed location(0)
-12:34 note: while analysing entry point main)");
+12:34 note: while analysing entry point 'main')");
 }
 
 TEST_F(ResolverEntryPointValidationTest,
@@ -183,7 +183,7 @@ TEST_F(ResolverEntryPointValidationTest,
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
             R"(14:52 error: missing entry point IO attribute
-12:34 note: while analysing entry point main)");
+12:34 note: while analysing entry point 'main')");
 }
 
 TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_NestedStruct) {
@@ -209,7 +209,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_NestedStruct) {
   EXPECT_EQ(
       r()->error(),
       R"(14:52 error: entry point IO types cannot contain nested structures
-12:34 note: while analysing entry point main)");
+12:34 note: while analysing entry point 'main')");
 }
 
 TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_RuntimeArray) {
@@ -254,7 +254,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_DuplicateBuiltins) {
   EXPECT_EQ(
       r()->error(),
       R"(12:34 error: builtin(frag_depth) attribute appears multiple times as pipeline output
-12:34 note: while analysing entry point main)");
+12:34 note: while analysing entry point 'main')");
 }
 
 TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_DuplicateLocation) {
@@ -276,7 +276,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_DuplicateLocation) {
   EXPECT_EQ(
       r()->error(),
       R"(12:34 error: location(1) attribute appears multiple times as pipeline output
-12:34 note: while analysing entry point main)");
+12:34 note: while analysing entry point 'main')");
 }
 
 TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Location) {
@@ -369,7 +369,7 @@ TEST_F(ResolverEntryPointValidationTest,
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(), R"(14:52 error: multiple entry point IO attributes
 13:43 note: previously consumed location(0)
-12:34 note: while analysing entry point main)");
+12:34 note: while analysing entry point 'main')");
 }
 
 TEST_F(ResolverEntryPointValidationTest,
@@ -389,7 +389,7 @@ TEST_F(ResolverEntryPointValidationTest,
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(), R"(14:52 error: missing entry point IO attribute
-12:34 note: while analysing entry point main)");
+12:34 note: while analysing entry point 'main')");
 }
 
 TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_NestedStruct) {
@@ -413,7 +413,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_NestedStruct) {
   EXPECT_EQ(
       r()->error(),
       R"(14:52 error: entry point IO types cannot contain nested structures
-12:34 note: while analysing entry point main)");
+12:34 note: while analysing entry point 'main')");
 }
 
 TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_RuntimeArray) {
@@ -477,7 +477,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_DuplicateBuiltins) {
   EXPECT_EQ(
       r()->error(),
       R"(12:34 error: builtin(sample_index) attribute appears multiple times as pipeline input
-12:34 note: while analysing entry point main)");
+12:34 note: while analysing entry point 'main')");
 }
 
 TEST_F(ResolverEntryPointValidationTest, Parameter_DuplicateLocation) {
@@ -515,7 +515,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_DuplicateLocation) {
   EXPECT_EQ(
       r()->error(),
       R"(12:34 error: location(1) attribute appears multiple times as pipeline input
-12:34 note: while analysing entry point main)");
+12:34 note: while analysing entry point 'main')");
 }
 
 TEST_F(ResolverEntryPointValidationTest, VertexShaderMustReturnPosition) {

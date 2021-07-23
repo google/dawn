@@ -48,6 +48,16 @@ constexpr Params ParamsFor(ast::Builtin builtin,
   return Params{DataType<T>::AST, builtin, stage, is_valid};
 }
 static constexpr Params cases[] = {
+    ParamsFor<vec4<f32>>(ast::Builtin::kPosition,
+                         ast::PipelineStage::kVertex,
+                         false),
+    ParamsFor<vec4<f32>>(ast::Builtin::kPosition,
+                         ast::PipelineStage::kFragment,
+                         true),
+    ParamsFor<vec4<f32>>(ast::Builtin::kPosition,
+                         ast::PipelineStage::kCompute,
+                         false),
+
     ParamsFor<u32>(ast::Builtin::kVertexIndex,
                    ast::PipelineStage::kVertex,
                    true),
@@ -183,7 +193,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverBuiltinsValidationTest,
 TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInput_Fail) {
   // [[stage(fragment)]]
   // fn fs_main(
-  //   [[builtin(kFragDepth)]] fd: f32,
+  //   [[builtin(frag_depth)]] fd: f32,
   // ) -> [[location(0)]] f32 { return 1.0; }
   auto* fd = Param(
       "fd", ty.f32(),
@@ -197,9 +207,9 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInput_Fail) {
             "fragment pipeline stage");
 }
 
-TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInputStruct_Fail) {
-  // Struct MyInputs {
-  //   [[builtin(front_facing)]] ff: bool;
+TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInputStruct_Ignored) {
+  // struct MyInputs {
+  //   [[builtin(frag_depth)]] ff: f32;
   // };
   // [[stage(fragment)]]
   // fn fragShader(arg: MyInputs) -> [[location(0)]] f32 { return 1.0; }
@@ -211,11 +221,7 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInputStruct_Fail) {
 
   Func("fragShader", {Param("arg", ty.Of(s))}, ty.f32(), {Return(1.0f)},
        {Stage(ast::PipelineStage::kFragment)}, {Location(0)});
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error: builtin(frag_depth) cannot be used in input of fragment "
-      "pipeline stage\nnote: while analysing entry point fragShader");
+  EXPECT_TRUE(r()->Resolve());
 }
 }  // namespace StageTest
 

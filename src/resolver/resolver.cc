@@ -1138,18 +1138,9 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
           "decoration is not valid for non-entry point function parameters",
           deco->source());
       return false;
-    } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
-      if (!ValidateInterpolateDecoration(interpolate, info->type)) {
-        return false;
-      }
-    } else if (deco->Is<ast::LocationDecoration>()) {
-      if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
-        AddError(
-            "decoration is not valid for compute shader function parameters",
-            deco->source());
-        return false;
-      }
     } else if (!deco->IsAnyOf<ast::BuiltinDecoration, ast::InvariantDecoration,
+                              ast::LocationDecoration,
+                              ast::InterpolateDecoration,
                               ast::InternalDecoration>() &&
                (IsValidationEnabled(
                     info->declaration->decorations(),
@@ -1198,7 +1189,8 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
 
 bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
                                          const sem::Type* storage_type,
-                                         const bool is_input) {
+                                         const bool is_input,
+                                         const bool is_struct_member) {
   auto* type = storage_type->UnwrapRef();
   const auto stage = current_function_
                          ? current_function_->declaration->pipeline_stage()
@@ -1206,15 +1198,13 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
   std::stringstream stage_name;
   stage_name << stage;
   bool is_stage_mismatch = false;
+  bool is_output = !is_input;
   switch (deco->value()) {
     case ast::Builtin::kPosition:
       if (stage != ast::PipelineStage::kNone &&
-          !(stage == ast::PipelineStage::kFragment && is_input) &&
-          !(stage == ast::PipelineStage::kVertex && !is_input)) {
-        AddError(deco_to_str(deco) + " cannot be used in " +
-                     (is_input ? "input of " : "output of ") +
-                     stage_name.str() + " pipeline stage",
-                 deco->source());
+          !((is_input && stage == ast::PipelineStage::kFragment) ||
+            (is_output && stage == ast::PipelineStage::kVertex))) {
+        is_stage_mismatch = true;
       }
       if (!(type->is_float_vector() && type->As<sem::Vector>()->Width() == 4)) {
         AddError("store type of " + deco_to_str(deco) + " must be 'vec4<f32>'",
@@ -1311,12 +1301,16 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
       break;
   }
 
-  if (is_stage_mismatch) {
-    AddError(deco_to_str(deco) + " cannot be used in " +
-                 (is_input ? "input of " : "output of ") + stage_name.str() +
-                 " pipeline stage",
-             deco->source());
-    return false;
+  // ignore builtin attribute on struct members to facillate data movement
+  // between stages
+  if (!is_struct_member) {
+    if (is_stage_mismatch) {
+      AddError(deco_to_str(deco) + " cannot be used in " +
+                   (is_input ? "input of " : "output of ") + stage_name.str() +
+                   " pipeline stage",
+               deco->source());
+      return false;
+    }
   }
 
   return true;
@@ -1409,28 +1403,14 @@ bool Resolver::ValidateFunction(const ast::Function* func,
             deco->source());
         return false;
       }
-
-      if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
-        if (!ValidateInterpolateDecoration(interpolate, info->return_type)) {
-          return false;
-        }
-      } else if (deco->Is<ast::LocationDecoration>()) {
-        if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
-          AddError(
-              "decoration is not valid for compute shader entry point return "
-              "types",
-              deco->source());
-          return false;
-        }
-      } else if (!deco->IsAnyOf<ast::BuiltinDecoration, ast::InternalDecoration,
-                                ast::InvariantDecoration>() &&
-                 (IsValidationEnabled(
-                      info->declaration->decorations(),
-                      ast::DisabledValidation::kEntryPointParameter) &&
-                  IsValidationEnabled(
-                      info->declaration->decorations(),
-                      ast::DisabledValidation::
-                          kIgnoreConstructibleFunctionParameter))) {
+      if (!deco->IsAnyOf<ast::BuiltinDecoration, ast::InternalDecoration,
+                         ast::LocationDecoration, ast::InterpolateDecoration,
+                         ast::InvariantDecoration>() &&
+          (IsValidationEnabled(info->declaration->decorations(),
+                               ast::DisabledValidation::kEntryPointParameter) &&
+           IsValidationEnabled(info->declaration->decorations(),
+                               ast::DisabledValidation::
+                                   kIgnoreConstructibleFunctionParameter))) {
         AddError("decoration is not valid for entry point return types",
                  deco->source());
         return false;
@@ -1473,6 +1453,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
     ast::Decoration* pipeline_io_attribute = nullptr;
     ast::InvariantDecoration* invariant_attribute = nullptr;
     for (auto* deco : decos) {
+      auto is_invalid_compute_shader_decoration = false;
       if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
         if (pipeline_io_attribute) {
           AddError("multiple entry point IO attributes", deco->source());
@@ -1490,14 +1471,14 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
                    func->source());
           return false;
         }
-        builtins.emplace(builtin->value());
 
         if (!ValidateBuiltinDecoration(
                 builtin, ty,
-                /* is_input */ param_or_ret == ParamOrRetType::kParameter)) {
+                /* is_input */ param_or_ret == ParamOrRetType::kParameter,
+                /* is_struct_member */ is_struct_member)) {
           return false;
         }
-
+        builtins.emplace(builtin->value());
       } else if (auto* location = deco->As<ast::LocationDecoration>()) {
         if (pipeline_io_attribute) {
           AddError("multiple entry point IO attributes", deco->source());
@@ -1515,9 +1496,30 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
                    func->source());
           return false;
         }
+
+        if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
+          is_invalid_compute_shader_decoration = true;
+        }
         locations.emplace(location->value());
+      } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
+        if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
+          is_invalid_compute_shader_decoration = true;
+        } else if (!ValidateInterpolateDecoration(interpolate, ty)) {
+          return false;
+        }
       } else if (auto* invariant = deco->As<ast::InvariantDecoration>()) {
+        if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
+          is_invalid_compute_shader_decoration = true;
+        }
         invariant_attribute = invariant;
+      }
+      if (is_invalid_compute_shader_decoration) {
+        std::string input_or_output =
+            param_or_ret == ParamOrRetType::kParameter ? "inputs" : "output";
+        AddError(
+            "decoration is not valid for compute shader " + input_or_output,
+            deco->source());
+        return false;
       }
     }
 
@@ -1587,8 +1589,8 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
         if (member->Type()->Is<sem::Struct>()) {
           AddError("entry point IO types cannot contain nested structures",
                    member->Declaration()->source());
-          AddNote("while analysing entry point " +
-                      builder_->Symbols().NameFor(func->symbol()),
+          AddNote("while analysing entry point '" +
+                      builder_->Symbols().NameFor(func->symbol()) + "'",
                   func->source());
           return false;
         }
@@ -1597,8 +1599,8 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
           if (arr->IsRuntimeSized()) {
             AddError("entry point IO types cannot contain runtime sized arrays",
                      member->Declaration()->source());
-            AddNote("while analysing entry point " +
-                        builder_->Symbols().NameFor(func->symbol()),
+            AddNote("while analysing entry point '" +
+                        builder_->Symbols().NameFor(func->symbol()) + "'",
                     func->source());
             return false;
           }
@@ -1607,8 +1609,8 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
         if (!validate_entry_point_decorations_inner(
                 member->Declaration()->decorations(), member->Type(),
                 member->Declaration()->source(), param_or_ret, true)) {
-          AddNote("while analysing entry point " +
-                      builder_->Symbols().NameFor(func->symbol()),
+          AddNote("while analysing entry point '" +
+                      builder_->Symbols().NameFor(func->symbol()) + "'",
                   func->source());
           return false;
         }
@@ -3938,7 +3940,9 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
         invariant_attribute = invariant;
       }
       if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
-        if (!ValidateBuiltinDecoration(builtin, member->Type())) {
+        if (!ValidateBuiltinDecoration(builtin, member->Type(),
+                                       /* is_input */ false,
+                                       /* is_struct_member */ true)) {
           return false;
         }
         if (builtin->value() == ast::Builtin::kPosition) {

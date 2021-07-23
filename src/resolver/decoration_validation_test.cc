@@ -13,11 +13,6 @@
 // limitations under the License.
 
 #include "src/ast/disable_validation_decoration.h"
-#include "src/ast/override_decoration.h"
-#include "src/ast/return_statement.h"
-#include "src/ast/stage_decoration.h"
-#include "src/ast/struct_block_decoration.h"
-#include "src/ast/workgroup_decoration.h"
 #include "src/resolver/resolver.h"
 #include "src/resolver/resolver_test_helper.h"
 
@@ -55,7 +50,6 @@ using u32 = builder::u32;
 
 namespace DecorationTests {
 namespace {
-
 enum class DecorationKind {
   kAlign,
   kBinding,
@@ -75,7 +69,7 @@ enum class DecorationKind {
   kBindingAndGroup,
 };
 
-bool IsBindingDecoration(DecorationKind kind) {
+static bool IsBindingDecoration(DecorationKind kind) {
   switch (kind) {
     case DecorationKind::kBinding:
     case DecorationKind::kGroup:
@@ -106,8 +100,7 @@ static ast::DecorationList createDecorations(const Source& source,
       return {builder.create<ast::GroupDecoration>(source, 1u)};
     case DecorationKind::kInterpolate:
       return {builder.Interpolate(source, ast::InterpolationType::kLinear,
-                                  ast::InterpolationSampling::kCenter),
-              builder.Location(0)};
+                                  ast::InterpolationSampling::kCenter)};
     case DecorationKind::kInvariant:
       return {builder.Invariant(source)};
     case DecorationKind::kLocation:
@@ -117,7 +110,7 @@ static ast::DecorationList createDecorations(const Source& source,
     case DecorationKind::kOffset:
       return {builder.create<ast::StructMemberOffsetDecoration>(source, 4u)};
     case DecorationKind::kSize:
-      return {builder.create<ast::StructMemberSizeDecoration>(source, 4u)};
+      return {builder.create<ast::StructMemberSizeDecoration>(source, 16u)};
     case DecorationKind::kStage:
       return {builder.Stage(source, ast::PipelineStage::kCompute)};
     case DecorationKind::kStride:
@@ -134,6 +127,7 @@ static ast::DecorationList createDecorations(const Source& source,
   return {};
 }
 
+namespace FunctionInputAndOutputTests {
 using FunctionParameterDecorationTest = TestWithParams;
 TEST_P(FunctionParameterDecorationTest, IsValid) {
   auto& params = GetParam();
@@ -171,114 +165,6 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kWorkgroup, false},
                     TestParams{DecorationKind::kBindingAndGroup, false}));
 
-using EntryPointParameterDecorationTest = TestWithParams;
-TEST_P(EntryPointParameterDecorationTest, IsValid) {
-  auto& params = GetParam();
-
-  Func("main",
-       ast::VariableList{Param("a", ty.vec4<f32>(),
-                               createDecorations({}, *this, params.kind))},
-       ty.void_(), {},
-       ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
-
-  if (params.should_pass) {
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-  } else {
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "error: decoration is not valid for function parameters");
-  }
-}
-INSTANTIATE_TEST_SUITE_P(
-    ResolverDecorationValidationTest,
-    EntryPointParameterDecorationTest,
-    testing::Values(TestParams{DecorationKind::kAlign, false},
-                    TestParams{DecorationKind::kBinding, false},
-                    TestParams{DecorationKind::kBuiltin, true},
-                    TestParams{DecorationKind::kGroup, false},
-                    TestParams{DecorationKind::kInterpolate, true},
-                    // kInvariant tested separately (requires position builtin)
-                    TestParams{DecorationKind::kLocation, true},
-                    TestParams{DecorationKind::kOverride, false},
-                    TestParams{DecorationKind::kOffset, false},
-                    TestParams{DecorationKind::kSize, false},
-                    TestParams{DecorationKind::kStage, false},
-                    TestParams{DecorationKind::kStride, false},
-                    TestParams{DecorationKind::kStructBlock, false},
-                    TestParams{DecorationKind::kWorkgroup, false},
-                    TestParams{DecorationKind::kBindingAndGroup, false}));
-
-TEST_F(EntryPointParameterDecorationTest, DuplicateDecoration) {
-  Func("main", ast::VariableList{}, ty.f32(), ast::StatementList{Return(1.f)},
-       {Stage(ast::PipelineStage::kFragment)},
-       {
-           Location(Source{{12, 34}}, 2),
-           Location(Source{{56, 78}}, 3),
-       });
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            R"(56:78 error: duplicate location decoration
-12:34 note: first decoration declared here)");
-}
-
-TEST_F(EntryPointParameterDecorationTest, DuplicateInternalDecoration) {
-  auto* s =
-      Param("s", ty.sampler(ast::SamplerKind::kSampler),
-            ast::DecorationList{
-                create<ast::BindingDecoration>(0),
-                create<ast::GroupDecoration>(0),
-                ASTNodes().Create<ast::DisableValidationDecoration>(
-                    ID(), ast::DisabledValidation::kBindingPointCollision),
-                ASTNodes().Create<ast::DisableValidationDecoration>(
-                    ID(), ast::DisabledValidation::kEntryPointParameter),
-            });
-  Func("f", {s}, ty.void_(), {}, {Stage(ast::PipelineStage::kFragment)});
-
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
-}
-
-TEST_F(EntryPointParameterDecorationTest, ComputeShaderLocation) {
-  auto* input = Param("input", ty.vec4<f32>(),
-                      ast::DecorationList{Location(Source{{12, 34}}, 1)});
-  Func("main", {input}, ty.void_(), {},
-       {Stage(ast::PipelineStage::kCompute),
-        create<ast::WorkgroupDecoration>(Source{{12, 34}}, Expr(1))});
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: decoration is not valid for compute shader function "
-            "parameters");
-}
-
-TEST_F(EntryPointParameterDecorationTest, InvariantWithPosition) {
-  auto* param = Param("p", ty.vec4<f32>(),
-                      {Invariant(Source{{12, 34}}),
-                       Builtin(Source{{56, 78}}, ast::Builtin::kPosition)});
-  Func("main", ast::VariableList{param}, ty.vec4<f32>(),
-       ast::StatementList{Return(Construct(ty.vec4<f32>()))},
-       ast::DecorationList{Stage(ast::PipelineStage::kFragment)},
-       ast::DecorationList{
-           Location(0),
-       });
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
-}
-
-TEST_F(EntryPointParameterDecorationTest, InvariantWithoutPosition) {
-  auto* param =
-      Param("p", ty.vec4<f32>(), {Invariant(Source{{12, 34}}), Location(0)});
-  Func("main", ast::VariableList{param}, ty.vec4<f32>(),
-       ast::StatementList{Return(Construct(ty.vec4<f32>()))},
-       ast::DecorationList{Stage(ast::PipelineStage::kFragment)},
-       ast::DecorationList{
-           Location(0),
-       });
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: invariant attribute must only be applied to a "
-            "position builtin");
-}
-
 using FunctionReturnTypeDecorationTest = TestWithParams;
 TEST_P(FunctionReturnTypeDecorationTest, IsValid) {
   auto& params = GetParam();
@@ -313,41 +199,46 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kStructBlock, false},
                     TestParams{DecorationKind::kWorkgroup, false},
                     TestParams{DecorationKind::kBindingAndGroup, false}));
+}  // namespace FunctionInputAndOutputTests
 
-using EntryPointReturnTypeDecorationTest = TestWithParams;
-TEST_P(EntryPointReturnTypeDecorationTest, IsValid) {
+namespace EntryPointInputAndOutputTests {
+using ComputeShaderParameterDecorationTest = TestWithParams;
+TEST_P(ComputeShaderParameterDecorationTest, IsValid) {
   auto& params = GetParam();
-
-  Func("main", ast::VariableList{}, ty.vec4<f32>(),
-       {Return(Construct(ty.vec4<f32>(), 1.f))},
-       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)},
-       createDecorations({}, *this, params.kind));
+  auto* p = Param("a", ty.vec4<f32>(),
+                  createDecorations(Source{{12, 34}}, *this, params.kind));
+  Func("main", ast::VariableList{p}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
   if (params.should_pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
   } else {
     EXPECT_FALSE(r()->Resolve());
-    if (params.kind == DecorationKind::kLocation ||
-        params.kind == DecorationKind::kInterpolate) {
+    if (params.kind == DecorationKind::kBuiltin) {
       EXPECT_EQ(r()->error(),
-                "error: decoration is not valid for compute shader entry point "
-                "return types");
+                "12:34 error: builtin(position) cannot be used in input of "
+                "compute pipeline stage");
+    } else if (params.kind == DecorationKind::kInterpolate ||
+               params.kind == DecorationKind::kLocation ||
+               params.kind == DecorationKind::kInvariant) {
+      EXPECT_EQ(
+          r()->error(),
+          "12:34 error: decoration is not valid for compute shader inputs");
     } else {
       EXPECT_EQ(r()->error(),
-                "error: decoration is not valid for entry point return types");
+                "12:34 error: decoration is not valid for function parameters");
     }
   }
 }
-
 INSTANTIATE_TEST_SUITE_P(
     ResolverDecorationValidationTest,
-    EntryPointReturnTypeDecorationTest,
+    ComputeShaderParameterDecorationTest,
     testing::Values(TestParams{DecorationKind::kAlign, false},
                     TestParams{DecorationKind::kBinding, false},
-                    TestParams{DecorationKind::kBuiltin, true},
+                    TestParams{DecorationKind::kBuiltin, false},
                     TestParams{DecorationKind::kGroup, false},
                     TestParams{DecorationKind::kInterpolate, false},
-                    // kInvariant tested separately (requires position builtin)
+                    TestParams{DecorationKind::kInvariant, false},
                     TestParams{DecorationKind::kLocation, false},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
@@ -358,6 +249,271 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kWorkgroup, false},
                     TestParams{DecorationKind::kBindingAndGroup, false}));
 
+using FragmentShaderParameterDecorationTest = TestWithParams;
+TEST_P(FragmentShaderParameterDecorationTest, IsValid) {
+  auto& params = GetParam();
+  auto decos = createDecorations(Source{{12, 34}}, *this, params.kind);
+  if (params.kind != DecorationKind::kBuiltin &&
+      params.kind != DecorationKind::kLocation) {
+    decos.push_back(Builtin(Source{{34, 56}}, ast::Builtin::kPosition));
+  }
+  auto* p = Param("a", ty.vec4<f32>(), decos);
+  Func("frag_main", {p}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kFragment)});
+
+  if (params.should_pass) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: decoration is not valid for function parameters");
+  }
+}
+INSTANTIATE_TEST_SUITE_P(
+    ResolverDecorationValidationTest,
+    FragmentShaderParameterDecorationTest,
+    testing::Values(TestParams{DecorationKind::kAlign, false},
+                    TestParams{DecorationKind::kBinding, false},
+                    TestParams{DecorationKind::kBuiltin, true},
+                    TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kInterpolate, true},
+                    TestParams{DecorationKind::kInvariant, true},
+                    TestParams{DecorationKind::kLocation, true},
+                    TestParams{DecorationKind::kOverride, false},
+                    TestParams{DecorationKind::kOffset, false},
+                    TestParams{DecorationKind::kSize, false},
+                    TestParams{DecorationKind::kStage, false},
+                    TestParams{DecorationKind::kStride, false},
+                    TestParams{DecorationKind::kStructBlock, false},
+                    TestParams{DecorationKind::kWorkgroup, false},
+                    TestParams{DecorationKind::kBindingAndGroup, false}));
+
+using VertexShaderParameterDecorationTest = TestWithParams;
+TEST_P(VertexShaderParameterDecorationTest, IsValid) {
+  auto& params = GetParam();
+  auto decos = createDecorations(Source{{12, 34}}, *this, params.kind);
+  if (params.kind != DecorationKind::kLocation) {
+    decos.push_back(Location(Source{{34, 56}}, 2));
+  }
+  auto* p = Param("a", ty.vec4<f32>(), decos);
+  Func("vertex_main", ast::VariableList{p}, ty.vec4<f32>(),
+       {Return(Construct(ty.vec4<f32>()))},
+       {Stage(ast::PipelineStage::kVertex)},
+       {Builtin(ast::Builtin::kPosition)});
+
+  if (params.should_pass) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve());
+    if (params.kind == DecorationKind::kBuiltin) {
+      EXPECT_EQ(r()->error(),
+                "12:34 error: builtin(position) cannot be used in input of "
+                "vertex pipeline stage");
+    } else if (params.kind == DecorationKind::kInvariant) {
+      EXPECT_EQ(r()->error(),
+                "12:34 error: invariant attribute must only be applied to a "
+                "position builtin");
+    } else {
+      EXPECT_EQ(r()->error(),
+                "12:34 error: decoration is not valid for function parameters");
+    }
+  }
+}
+INSTANTIATE_TEST_SUITE_P(
+    ResolverDecorationValidationTest,
+    VertexShaderParameterDecorationTest,
+    testing::Values(TestParams{DecorationKind::kAlign, false},
+                    TestParams{DecorationKind::kBinding, false},
+                    TestParams{DecorationKind::kBuiltin, false},
+                    TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kInterpolate, true},
+                    TestParams{DecorationKind::kInvariant, false},
+                    TestParams{DecorationKind::kLocation, true},
+                    TestParams{DecorationKind::kOverride, false},
+                    TestParams{DecorationKind::kOffset, false},
+                    TestParams{DecorationKind::kSize, false},
+                    TestParams{DecorationKind::kStage, false},
+                    TestParams{DecorationKind::kStride, false},
+                    TestParams{DecorationKind::kStructBlock, false},
+                    TestParams{DecorationKind::kWorkgroup, false},
+                    TestParams{DecorationKind::kBindingAndGroup, false}));
+
+using ComputeShaderReturnTypeDecorationTest = TestWithParams;
+TEST_P(ComputeShaderReturnTypeDecorationTest, IsValid) {
+  auto& params = GetParam();
+  Func("main", ast::VariableList{}, ty.vec4<f32>(),
+       {Return(Construct(ty.vec4<f32>(), 1.f))},
+       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)},
+       createDecorations(Source{{12, 34}}, *this, params.kind));
+
+  if (params.should_pass) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve());
+    if (params.kind == DecorationKind::kBuiltin) {
+      EXPECT_EQ(r()->error(),
+                "12:34 error: builtin(position) cannot be used in output of "
+                "compute pipeline stage");
+    } else if (params.kind == DecorationKind::kInterpolate ||
+               params.kind == DecorationKind::kLocation ||
+               params.kind == DecorationKind::kInvariant) {
+      EXPECT_EQ(
+          r()->error(),
+          "12:34 error: decoration is not valid for compute shader output");
+    } else {
+      EXPECT_EQ(r()->error(),
+                "12:34 error: decoration is not valid for entry point return "
+                "types");
+    }
+  }
+}
+INSTANTIATE_TEST_SUITE_P(
+    ResolverDecorationValidationTest,
+    ComputeShaderReturnTypeDecorationTest,
+    testing::Values(TestParams{DecorationKind::kAlign, false},
+                    TestParams{DecorationKind::kBinding, false},
+                    TestParams{DecorationKind::kBuiltin, false},
+                    TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kInterpolate, false},
+                    TestParams{DecorationKind::kInvariant, false},
+                    TestParams{DecorationKind::kLocation, false},
+                    TestParams{DecorationKind::kOverride, false},
+                    TestParams{DecorationKind::kOffset, false},
+                    TestParams{DecorationKind::kSize, false},
+                    TestParams{DecorationKind::kStage, false},
+                    TestParams{DecorationKind::kStride, false},
+                    TestParams{DecorationKind::kStructBlock, false},
+                    TestParams{DecorationKind::kWorkgroup, false},
+                    TestParams{DecorationKind::kBindingAndGroup, false}));
+
+using FragmentShaderReturnTypeDecorationTest = TestWithParams;
+TEST_P(FragmentShaderReturnTypeDecorationTest, IsValid) {
+  auto& params = GetParam();
+  auto decos = createDecorations(Source{{12, 34}}, *this, params.kind);
+  decos.push_back(Location(Source{{34, 56}}, 2));
+  Func("frag_main", {}, ty.vec4<f32>(), {Return(Construct(ty.vec4<f32>()))},
+       {Stage(ast::PipelineStage::kFragment)}, decos);
+
+  if (params.should_pass) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve());
+    if (params.kind == DecorationKind::kBuiltin) {
+      EXPECT_EQ(r()->error(),
+                "12:34 error: builtin(position) cannot be used in output of "
+                "fragment pipeline stage");
+    } else if (params.kind == DecorationKind::kInvariant) {
+      EXPECT_EQ(r()->error(),
+                "12:34 error: invariant attribute must only be applied to a "
+                "position builtin");
+    } else if (params.kind == DecorationKind::kLocation) {
+      EXPECT_EQ(r()->error(),
+                "34:56 error: duplicate location decoration\n"
+                "12:34 note: first decoration declared here");
+    } else {
+      EXPECT_EQ(r()->error(),
+                "12:34 error: decoration is not valid for entry point return "
+                "types");
+    }
+  }
+}
+INSTANTIATE_TEST_SUITE_P(
+    ResolverDecorationValidationTest,
+    FragmentShaderReturnTypeDecorationTest,
+    testing::Values(TestParams{DecorationKind::kAlign, false},
+                    TestParams{DecorationKind::kBinding, false},
+                    TestParams{DecorationKind::kBuiltin, false},
+                    TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kInterpolate, true},
+                    TestParams{DecorationKind::kInvariant, false},
+                    TestParams{DecorationKind::kLocation, false},
+                    TestParams{DecorationKind::kOverride, false},
+                    TestParams{DecorationKind::kOffset, false},
+                    TestParams{DecorationKind::kSize, false},
+                    TestParams{DecorationKind::kStage, false},
+                    TestParams{DecorationKind::kStride, false},
+                    TestParams{DecorationKind::kStructBlock, false},
+                    TestParams{DecorationKind::kWorkgroup, false},
+                    TestParams{DecorationKind::kBindingAndGroup, false}));
+
+using VertexShaderReturnTypeDecorationTest = TestWithParams;
+TEST_P(VertexShaderReturnTypeDecorationTest, IsValid) {
+  auto& params = GetParam();
+  auto decos = createDecorations(Source{{12, 34}}, *this, params.kind);
+  // a vertex shader must include the 'position' builtin in its return type
+  if (params.kind != DecorationKind::kBuiltin) {
+    decos.push_back(Builtin(Source{{34, 56}}, ast::Builtin::kPosition));
+  }
+  Func("vertex_main", ast::VariableList{}, ty.vec4<f32>(),
+       {Return(Construct(ty.vec4<f32>()))},
+       {Stage(ast::PipelineStage::kVertex)}, decos);
+
+  if (params.should_pass) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve());
+    if (params.kind == DecorationKind::kLocation) {
+      EXPECT_EQ(r()->error(),
+                "34:56 error: multiple entry point IO attributes\n"
+                "12:34 note: previously consumed location(1)");
+    } else {
+      EXPECT_EQ(r()->error(),
+                "12:34 error: decoration is not valid for entry point return "
+                "types");
+    }
+  }
+}
+INSTANTIATE_TEST_SUITE_P(
+    ResolverDecorationValidationTest,
+    VertexShaderReturnTypeDecorationTest,
+    testing::Values(TestParams{DecorationKind::kAlign, false},
+                    TestParams{DecorationKind::kBinding, false},
+                    TestParams{DecorationKind::kBuiltin, true},
+                    TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kInterpolate, true},
+                    TestParams{DecorationKind::kInvariant, true},
+                    TestParams{DecorationKind::kLocation, false},
+                    TestParams{DecorationKind::kOverride, false},
+                    TestParams{DecorationKind::kOffset, false},
+                    TestParams{DecorationKind::kSize, false},
+                    TestParams{DecorationKind::kStage, false},
+                    TestParams{DecorationKind::kStride, false},
+                    TestParams{DecorationKind::kStructBlock, false},
+                    TestParams{DecorationKind::kWorkgroup, false},
+                    TestParams{DecorationKind::kBindingAndGroup, false}));
+
+using EntryPointParameterDecorationTest = TestWithParams;
+TEST_F(EntryPointParameterDecorationTest, DuplicateDecoration) {
+  Func("main", ast::VariableList{}, ty.f32(), ast::StatementList{Return(1.f)},
+       {Stage(ast::PipelineStage::kFragment)},
+       {
+           Location(Source{{12, 34}}, 2),
+           Location(Source{{56, 78}}, 3),
+       });
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            R"(56:78 error: duplicate location decoration
+12:34 note: first decoration declared here)");
+}
+
+TEST_F(EntryPointParameterDecorationTest, DuplicateInternalDecoration) {
+  auto* s =
+      Param("s", ty.sampler(ast::SamplerKind::kSampler),
+            ast::DecorationList{
+                create<ast::BindingDecoration>(0),
+                create<ast::GroupDecoration>(0),
+                ASTNodes().Create<ast::DisableValidationDecoration>(
+                    ID(), ast::DisabledValidation::kBindingPointCollision),
+                ASTNodes().Create<ast::DisableValidationDecoration>(
+                    ID(), ast::DisabledValidation::kEntryPointParameter),
+            });
+  Func("f", {s}, ty.void_(), {}, {Stage(ast::PipelineStage::kFragment)});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+using EntryPointReturnTypeDecorationTest = ResolverTest;
 TEST_F(EntryPointReturnTypeDecorationTest, DuplicateDecoration) {
   Func("main", ast::VariableList{}, ty.f32(), ast::StatementList{Return(1.f)},
        ast::DecorationList{Stage(ast::PipelineStage::kFragment)},
@@ -372,73 +528,20 @@ TEST_F(EntryPointReturnTypeDecorationTest, DuplicateDecoration) {
 12:34 note: first decoration declared here)");
 }
 
-TEST_F(EntryPointReturnTypeDecorationTest, InvariantWithPosition) {
-  Func("main", ast::VariableList{}, ty.vec4<f32>(),
-       ast::StatementList{Return(Construct(ty.vec4<f32>()))},
-       ast::DecorationList{Stage(ast::PipelineStage::kVertex)},
+TEST_F(EntryPointReturnTypeDecorationTest, DuplicateInternalDecoration) {
+  Func("f", {}, ty.i32(), {Return(1)}, {Stage(ast::PipelineStage::kFragment)},
        ast::DecorationList{
-           Invariant(Source{{12, 34}}),
-           Builtin(Source{{56, 78}}, ast::Builtin::kPosition),
+           ASTNodes().Create<ast::DisableValidationDecoration>(
+               ID(), ast::DisabledValidation::kBindingPointCollision),
+           ASTNodes().Create<ast::DisableValidationDecoration>(
+               ID(), ast::DisabledValidation::kEntryPointParameter),
        });
+
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
+}  // namespace EntryPointInputAndOutputTests
 
-TEST_F(EntryPointReturnTypeDecorationTest, InvariantWithoutPosition) {
-  Func("main", ast::VariableList{}, ty.vec4<f32>(),
-       ast::StatementList{Return(Construct(ty.vec4<f32>()))},
-       ast::DecorationList{Stage(ast::PipelineStage::kVertex)},
-       ast::DecorationList{
-           Invariant(Source{{12, 34}}),
-           Location(Source{{56, 78}}, 0),
-       });
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: invariant attribute must only be applied to a "
-            "position builtin");
-}
-
-using ArrayDecorationTest = TestWithParams;
-TEST_P(ArrayDecorationTest, IsValid) {
-  auto& params = GetParam();
-
-  auto* arr = ty.array(ty.f32(), 0,
-                       createDecorations(Source{{12, 34}}, *this, params.kind));
-  Structure("mystruct",
-            {
-                Member("a", arr),
-            },
-            {create<ast::StructBlockDecoration>()});
-
-  WrapInFunction();
-
-  if (params.should_pass) {
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-  } else {
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: decoration is not valid for array types");
-  }
-}
-INSTANTIATE_TEST_SUITE_P(
-    ResolverDecorationValidationTest,
-    ArrayDecorationTest,
-    testing::Values(TestParams{DecorationKind::kAlign, false},
-                    TestParams{DecorationKind::kBinding, false},
-                    TestParams{DecorationKind::kBuiltin, false},
-                    TestParams{DecorationKind::kGroup, false},
-                    TestParams{DecorationKind::kInterpolate, false},
-                    TestParams{DecorationKind::kInvariant, false},
-                    TestParams{DecorationKind::kLocation, false},
-                    TestParams{DecorationKind::kOverride, false},
-                    TestParams{DecorationKind::kOffset, false},
-                    TestParams{DecorationKind::kSize, false},
-                    TestParams{DecorationKind::kStage, false},
-                    TestParams{DecorationKind::kStride, true},
-                    TestParams{DecorationKind::kStructBlock, false},
-                    TestParams{DecorationKind::kWorkgroup, false},
-                    TestParams{DecorationKind::kBindingAndGroup, false}));
-
+namespace StructAndStructMemberTests {
 using StructDecorationTest = TestWithParams;
 TEST_P(StructDecorationTest, IsValid) {
   auto& params = GetParam();
@@ -484,19 +587,15 @@ TEST_F(StructDecorationTest, DuplicateDecoration) {
                 create<ast::StructBlockDecoration>(Source{{12, 34}}),
                 create<ast::StructBlockDecoration>(Source{{56, 78}}),
             });
-
   WrapInFunction();
-
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
             R"(56:78 error: duplicate block decoration
 12:34 note: first decoration declared here)");
 }
-
 using StructMemberDecorationTest = TestWithParams;
 TEST_P(StructMemberDecorationTest, IsValid) {
   auto& params = GetParam();
-
   ast::StructMemberList members;
   if (params.kind == DecorationKind::kBuiltin) {
     members.push_back(
@@ -507,11 +606,8 @@ TEST_P(StructMemberDecorationTest, IsValid) {
         {Member("a", ty.f32(),
                 createDecorations(Source{{12, 34}}, *this, params.kind))});
   }
-
   Structure("mystruct", members);
-
   WrapInFunction();
-
   if (params.should_pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
   } else {
@@ -538,7 +634,6 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kStructBlock, false},
                     TestParams{DecorationKind::kWorkgroup, false},
                     TestParams{DecorationKind::kBindingAndGroup, false}));
-
 TEST_F(StructMemberDecorationTest, DuplicateDecoration) {
   Structure("mystruct", {
                             Member("a", ty.i32(),
@@ -549,15 +644,12 @@ TEST_F(StructMemberDecorationTest, DuplicateDecoration) {
                                            Source{{56, 78}}, 8u),
                                    }),
                         });
-
   WrapInFunction();
-
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
             R"(56:78 error: duplicate align decoration
 12:34 note: first decoration declared here)");
 }
-
 TEST_F(StructMemberDecorationTest, InvariantDecorationWithPosition) {
   Structure("mystruct", {
                             Member("a", ty.vec4<f32>(),
@@ -566,11 +658,9 @@ TEST_F(StructMemberDecorationTest, InvariantDecorationWithPosition) {
                                        Builtin(ast::Builtin::kPosition),
                                    }),
                         });
-
   WrapInFunction();
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
-
 TEST_F(StructMemberDecorationTest, InvariantDecorationWithoutPosition) {
   Structure("mystruct", {
                             Member("a", ty.vec4<f32>(),
@@ -578,13 +668,55 @@ TEST_F(StructMemberDecorationTest, InvariantDecorationWithoutPosition) {
                                        Invariant(Source{{12, 34}}),
                                    }),
                         });
-
   WrapInFunction();
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
             "12:34 error: invariant attribute must only be applied to a "
             "position builtin");
 }
+
+}  // namespace StructAndStructMemberTests
+
+using ArrayDecorationTest = TestWithParams;
+TEST_P(ArrayDecorationTest, IsValid) {
+  auto& params = GetParam();
+
+  auto* arr = ty.array(ty.f32(), 0,
+                       createDecorations(Source{{12, 34}}, *this, params.kind));
+  Structure("mystruct",
+            {
+                Member("a", arr),
+            },
+            {create<ast::StructBlockDecoration>()});
+
+  WrapInFunction();
+
+  if (params.should_pass) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: decoration is not valid for array types");
+  }
+}
+INSTANTIATE_TEST_SUITE_P(
+    ResolverDecorationValidationTest,
+    ArrayDecorationTest,
+    testing::Values(TestParams{DecorationKind::kAlign, false},
+                    TestParams{DecorationKind::kBinding, false},
+                    TestParams{DecorationKind::kBuiltin, false},
+                    TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kInterpolate, false},
+                    TestParams{DecorationKind::kInvariant, false},
+                    TestParams{DecorationKind::kLocation, false},
+                    TestParams{DecorationKind::kOverride, false},
+                    TestParams{DecorationKind::kOffset, false},
+                    TestParams{DecorationKind::kSize, false},
+                    TestParams{DecorationKind::kStage, false},
+                    TestParams{DecorationKind::kStride, true},
+                    TestParams{DecorationKind::kStructBlock, false},
+                    TestParams{DecorationKind::kWorkgroup, false},
+                    TestParams{DecorationKind::kBindingAndGroup, false}));
 
 using VariableDecorationTest = TestWithParams;
 TEST_P(VariableDecorationTest, IsValid) {
@@ -696,41 +828,6 @@ TEST_F(ConstantDecorationTest, DuplicateDecoration) {
             R"(56:78 error: duplicate override decoration
 12:34 note: first decoration declared here)");
 }
-
-using FunctionDecorationTest = TestWithParams;
-TEST_P(FunctionDecorationTest, IsValid) {
-  auto& params = GetParam();
-
-  ast::DecorationList decos =
-      createDecorations(Source{{12, 34}}, *this, params.kind);
-  Func("foo", ast::VariableList{}, ty.void_(), ast::StatementList{}, decos);
-
-  if (params.should_pass) {
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-  } else {
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: decoration is not valid for functions");
-  }
-}
-INSTANTIATE_TEST_SUITE_P(
-    ResolverDecorationValidationTest,
-    FunctionDecorationTest,
-    testing::Values(TestParams{DecorationKind::kAlign, false},
-                    TestParams{DecorationKind::kBinding, false},
-                    TestParams{DecorationKind::kBuiltin, false},
-                    TestParams{DecorationKind::kGroup, false},
-                    TestParams{DecorationKind::kInterpolate, false},
-                    TestParams{DecorationKind::kInvariant, false},
-                    TestParams{DecorationKind::kLocation, false},
-                    TestParams{DecorationKind::kOverride, false},
-                    TestParams{DecorationKind::kOffset, false},
-                    TestParams{DecorationKind::kSize, false},
-                    // Skip kStage as we do not apply it in this test
-                    TestParams{DecorationKind::kStride, false},
-                    TestParams{DecorationKind::kStructBlock, false},
-                    // Skip kWorkgroup as this is a different error
-                    TestParams{DecorationKind::kBindingAndGroup, false}));
 
 }  // namespace
 }  // namespace DecorationTests
@@ -1045,6 +1142,108 @@ TEST_F(ResourceDecorationTest, BindingPointOnNonResource) {
 
 }  // namespace
 }  // namespace ResourceTests
+
+namespace LocationDecorationTests {
+namespace {
+using LocationDecorationTests = ResolverTest;
+TEST_F(LocationDecorationTests, ComputeShaderLocation_Input) {
+  Func("main", {}, ty.i32(), {Return(Expr(1))},
+       {Stage(ast::PipelineStage::kCompute),
+        create<ast::WorkgroupDecoration>(Source{{12, 34}}, Expr(1))},
+       ast::DecorationList{Location(Source{{12, 34}}, 1)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: decoration is not valid for compute shader output");
+}
+
+TEST_F(LocationDecorationTests, ComputeShaderLocation_Output) {
+  auto* input = Param("input", ty.i32(),
+                      ast::DecorationList{Location(Source{{12, 34}}, 0u)});
+  Func("main", {input}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute),
+        create<ast::WorkgroupDecoration>(Source{{12, 34}}, Expr(1))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: decoration is not valid for compute shader inputs");
+}
+
+TEST_F(LocationDecorationTests, ComputeShaderLocationStructMember_Output) {
+  auto* m = Member("m", ty.i32(),
+                   ast::DecorationList{Location(Source{{12, 34}}, 0u)});
+  auto* s = Structure("S", {m});
+  Func(Source{{56, 78}}, "main", {}, ty.Of(s),
+       ast::StatementList{Return(Expr(Construct(ty.Of(s))))},
+       {Stage(ast::PipelineStage::kCompute),
+        create<ast::WorkgroupDecoration>(Source{{12, 34}}, Expr(1))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: decoration is not valid for compute shader output\n"
+            "56:78 note: while analysing entry point 'main'");
+}
+
+TEST_F(LocationDecorationTests, ComputeShaderLocationStructMember_Input) {
+  auto* m = Member("m", ty.i32(),
+                   ast::DecorationList{Location(Source{{12, 34}}, 0u)});
+  auto* s = Structure("S", {m});
+  auto* input = Param("input", ty.Of(s));
+  Func(Source{{56, 78}}, "main", {input}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute),
+        create<ast::WorkgroupDecoration>(Source{{12, 34}}, Expr(1))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: decoration is not valid for compute shader inputs\n"
+            "56:78 note: while analysing entry point 'main'");
+}
+
+TEST_F(LocationDecorationTests, BadType) {
+  auto* p = Param(Source{{12, 34}}, "a", ty.mat2x2<f32>(), {Location(0)});
+  Func("frag_main", {p}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kFragment)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: User defined entry point IO types must be a numeric "
+            "scalar, a numeric vector, or a structure");
+}
+}  // namespace
+}  // namespace LocationDecorationTests
+
+namespace InvariantDecorationTests {
+namespace {
+using InvariantDecorationTests = ResolverTest;
+TEST_F(InvariantDecorationTests, InvariantWithPosition) {
+  auto* param = Param("p", ty.vec4<f32>(),
+                      {Invariant(Source{{12, 34}}),
+                       Builtin(Source{{56, 78}}, ast::Builtin::kPosition)});
+  Func("main", ast::VariableList{param}, ty.vec4<f32>(),
+       ast::StatementList{Return(Construct(ty.vec4<f32>()))},
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)},
+       ast::DecorationList{
+           Location(0),
+       });
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(InvariantDecorationTests, InvariantWithoutPosition) {
+  auto* param =
+      Param("p", ty.vec4<f32>(), {Invariant(Source{{12, 34}}), Location(0)});
+  Func("main", ast::VariableList{param}, ty.vec4<f32>(),
+       ast::StatementList{Return(Construct(ty.vec4<f32>()))},
+       ast::DecorationList{Stage(ast::PipelineStage::kFragment)},
+       ast::DecorationList{
+           Location(0),
+       });
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: invariant attribute must only be applied to a "
+            "position builtin");
+}
+}  // namespace
+}  // namespace InvariantDecorationTests
 
 namespace WorkgroupDecorationTests {
 namespace {
