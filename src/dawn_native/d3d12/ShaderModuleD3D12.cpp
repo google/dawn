@@ -251,13 +251,19 @@ namespace dawn_native { namespace d3d12 {
         if (GetDevice()->IsRobustnessEnabled()) {
             transformManager.Add<tint::transform::BoundArrayAccessors>();
         }
+        transformManager.Add<tint::transform::BindingRemapper>();
+
+        // The FirstIndexOffset transform must be done after the BindingRemapper because it assumes
+        // that the register space has already flattened (and uses the next register). Otherwise
+        // intermediate ASTs can be produced where the extra registers conflict with one of the
+        // user-declared bind points.
         if (stage == SingleShaderStage::Vertex) {
             transformManager.Add<tint::transform::FirstIndexOffset>();
             transformInputs.Add<tint::transform::FirstIndexOffset::BindingPoint>(
                 layout->GetFirstIndexOffsetShaderRegister(),
                 layout->GetFirstIndexOffsetRegisterSpace());
         }
-        transformManager.Add<tint::transform::BindingRemapper>();
+
         transformManager.Add<tint::transform::Renamer>();
 
         if (GetDevice()->IsToggleEnabled(Toggle::DisableSymbolRenaming)) {

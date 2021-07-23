@@ -322,6 +322,50 @@ fn ep_func() {
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, shader.c_str()));
 }
 
+// This is a regression test for an issue caused by the FirstIndexOffset transfrom being done before
+// the BindingRemapper, causing an intermediate AST to be invalid (and fail the overall
+// compilation).
+TEST_P(ShaderTests, FirstIndexOffsetRegisterConflictInHLSLTransforms) {
+    // TODO(crbug.com/dawn/658): Crashes on bots because there are two entrypoints in the shader.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    const char* shader = R"(
+// Dumped WGSL:
+
+struct Inputs {
+  [[location(1)]] attrib1 : u32;
+  // The extra register added to handle base_vertex for vertex_index conflicts with [1]
+  [[builtin(vertex_index)]] vertexIndex: u32;
+};
+
+// [1] a binding point that conflicts with the regitster
+[[block]] struct S1 { data : array<vec4<u32>, 20>; };
+[[group(0), binding(1)]] var<uniform> providedData1 : S1;
+
+[[stage(vertex)]] fn vsMain(input : Inputs) -> [[builtin(position)]] vec4<f32> {
+  ignore(providedData1.data[input.vertexIndex][0]);
+  return vec4<f32>();
+}
+
+[[stage(fragment)]] fn fsMain() -> [[location(0)]] vec4<f32> {
+  return vec4<f32>();
+}
+    )";
+    auto module = utils::CreateShaderModule(device, shader);
+
+    utils::ComboRenderPipelineDescriptor rpDesc;
+    rpDesc.vertex.module = module;
+    rpDesc.vertex.entryPoint = "vsMain";
+    rpDesc.cFragment.module = module;
+    rpDesc.cFragment.entryPoint = "fsMain";
+    rpDesc.vertex.bufferCount = 1;
+    rpDesc.cBuffers[0].attributeCount = 1;
+    rpDesc.cBuffers[0].arrayStride = 16;
+    rpDesc.cAttributes[0].shaderLocation = 1;
+    rpDesc.cAttributes[0].format = wgpu::VertexFormat::Uint8x2;
+    device.CreateRenderPipeline(&rpDesc);
+}
+
 DAWN_INSTANTIATE_TEST(ShaderTests,
                       D3D12Backend(),
                       MetalBackend(),
