@@ -98,7 +98,7 @@ TEST_F(ParserImplTest, GlobalConstantDecl_InvalidExpression) {
   EXPECT_TRUE(e.errored);
   EXPECT_FALSE(e.matched);
   EXPECT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:15: unable to parse constant literal");
+  EXPECT_EQ(p->error(), "1:15: invalid type for const_expr");
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_MissingExpression) {
@@ -111,7 +111,7 @@ TEST_F(ParserImplTest, GlobalConstantDecl_MissingExpression) {
   EXPECT_TRUE(e.errored);
   EXPECT_FALSE(e.matched);
   EXPECT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:14: unable to parse constant literal");
+  EXPECT_EQ(p->error(), "1:14: unable to parse const_expr");
 }
 
 TEST_F(ParserImplTest, GlobalConstantDec_Override_WithId) {

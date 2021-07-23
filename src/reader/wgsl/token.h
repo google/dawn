@@ -372,7 +372,12 @@ class Token {
   bool IsEof() const { return type_ == Type::kEOF; }
   /// @returns true if the token is an identifier
   bool IsIdentifier() const { return type_ == Type::kIdentifier; }
-
+  /// @returns true if the token is a literal
+  bool IsLiteral() const {
+    return type_ == Type::kSintLiteral || type_ == Type::kFalse ||
+           type_ == Type::kUintLiteral || type_ == Type::kTrue ||
+           type_ == Type::kFloatLiteral;
+  }
   /// @returns true if token is a 'matNxM'
   bool IsMatrix() const {
     return type_ == Type::kMat2x2 || type_ == Type::kMat2x3 ||

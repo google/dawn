@@ -2843,48 +2843,51 @@ Maybe<ast::Literal*> ParserImpl::const_literal() {
 //   | const_literal
 Expect<ast::ConstructorExpression*> ParserImpl::expect_const_expr() {
   auto t = peek();
-
   auto source = t.source();
-
-  auto type = type_decl();
-  if (type.errored)
-    return Failure::kErrored;
-  if (type.matched) {
-    auto params = expect_paren_block(
-        "type constructor", [&]() -> Expect<ast::ExpressionList> {
-          ast::ExpressionList list;
-          while (continue_parsing()) {
-            if (peek_is(Token::Type::kParenRight)) {
-              break;
-            }
-
-            auto arg = expect_const_expr();
-            if (arg.errored) {
-              return Failure::kErrored;
-            }
-            list.emplace_back(arg.value);
-
-            if (!match(Token::Type::kComma)) {
-              break;
-            }
-          }
-          return list;
-        });
-
-    if (params.errored)
+  if (t.IsLiteral()) {
+    auto lit = const_literal();
+    if (lit.errored)
       return Failure::kErrored;
+    if (!lit.matched)
+      return add_error(peek(), "unable to parse constant literal");
 
-    return create<ast::TypeConstructorExpression>(source, type.value,
-                                                  params.value);
+    return create<ast::ScalarConstructorExpression>(source, lit.value);
+  } else if (!t.IsIdentifier() || get_type(t.to_str())) {
+    if (peek_is(Token::Type::kParenLeft, 1) ||
+        peek_is(Token::Type::kLessThan, 1)) {
+      auto type = expect_type("const_expr");
+      if (type.errored)
+        return Failure::kErrored;
+
+      auto params = expect_paren_block(
+          "type constructor", [&]() -> Expect<ast::ExpressionList> {
+            ast::ExpressionList list;
+            while (continue_parsing()) {
+              if (peek_is(Token::Type::kParenRight)) {
+                break;
+              }
+
+              auto arg = expect_const_expr();
+              if (arg.errored) {
+                return Failure::kErrored;
+              }
+              list.emplace_back(arg.value);
+
+              if (!match(Token::Type::kComma)) {
+                break;
+              }
+            }
+            return list;
+          });
+
+      if (params.errored)
+        return Failure::kErrored;
+
+      return create<ast::TypeConstructorExpression>(source, type.value,
+                                                    params.value);
+    }
   }
-
-  auto lit = const_literal();
-  if (lit.errored)
-    return Failure::kErrored;
-  if (!lit.matched)
-    return add_error(peek(), "unable to parse constant literal");
-
-  return create<ast::ScalarConstructorExpression>(source, lit.value);
+  return add_error(peek(), "unable to parse const_expr");
 }
 
 Maybe<ast::DecorationList> ParserImpl::decoration_list() {

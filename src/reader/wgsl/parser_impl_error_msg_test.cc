@@ -434,7 +434,7 @@ TEST_F(ParserImplErrorTest, FunctionMissingOpenLine) {
   var a : f32 = bar[0];
   return;
 })",
-         "test.wgsl:2:17 error: unknown type 'bar'\n"
+         "test.wgsl:2:17 error: unable to parse const_expr\n"
          "  var a : f32 = bar[0];\n"
          "                ^^^\n"
          "\n"
@@ -473,9 +473,41 @@ TEST_F(ParserImplErrorTest, GlobalDeclConstMissingRParen) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstBadConstLiteral) {
   EXPECT("let i : vec2<i32> = vec2<i32>(!);",
-         "test.wgsl:1:31 error: unable to parse constant literal\n"
+         "test.wgsl:1:31 error: unable to parse const_expr\n"
          "let i : vec2<i32> = vec2<i32>(!);\n"
          "                              ^\n");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclConstBadConstLiteralSpaceLessThan) {
+  EXPECT("let i = 1 < 2;",
+         "test.wgsl:1:11 error: expected \';\' for let declaration\n"
+         "let i = 1 < 2;\n"
+         "          ^\n");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclConstNotConstExpr) {
+  EXPECT(
+      "let a = 1;\n"
+      "let b = a;",
+      "test.wgsl:2:9 error: unable to parse const_expr\n"
+      "let b = a;\n"
+      "        ^\n");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclConstNotConstExprWithParn) {
+  EXPECT(
+      "let a = 1;\n"
+      "let b = a();",
+      "test.wgsl:2:9 error: unable to parse const_expr\n"
+      "let b = a();\n"
+      "        ^\n");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclConstConstExprRegisteredType) {
+  EXPECT("let a = S0(0);",
+         "test.wgsl:1:9 error: unable to parse const_expr\n"
+         "let a = S0(0);\n"
+         "        ^^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstExprMaxDepth) {
