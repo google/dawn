@@ -291,33 +291,44 @@ TEST_F(VertexStateTest, SetAttributeOffsetOutOfBounds) {
     CreatePipeline(false, state, kDummyVertexShader);
 }
 
-// Check the "component byte size" alignment constraint for the offset.
+// Check the min(4, formatSize) alignment constraint for the offset.
 TEST_F(VertexStateTest, SetOffsetNotAligned) {
     // Control case, setting the offset at the correct alignments.
     utils::ComboVertexStateDescriptor state;
     state.vertexBufferCount = 1;
     state.cVertexBuffers[0].attributeCount = 1;
 
+    // Test that for small formats, the offset must be aligned to the format size.
     state.cAttributes[0].format = wgpu::VertexFormat::Float32;
     state.cAttributes[0].offset = 4;
     CreatePipeline(true, state, kDummyVertexShader);
+    state.cAttributes[0].offset = 2;
+    CreatePipeline(false, state, kDummyVertexShader);
 
     state.cAttributes[0].format = wgpu::VertexFormat::Snorm16x2;
-    state.cAttributes[0].offset = 2;
+    state.cAttributes[0].offset = 4;
     CreatePipeline(true, state, kDummyVertexShader);
+    state.cAttributes[0].offset = 2;
+    CreatePipeline(false, state, kDummyVertexShader);
 
     state.cAttributes[0].format = wgpu::VertexFormat::Unorm8x2;
+    state.cAttributes[0].offset = 2;
+    CreatePipeline(true, state, kDummyVertexShader);
     state.cAttributes[0].offset = 1;
+    CreatePipeline(false, state, kDummyVertexShader);
+
+    // Test that for large formts the offset only needs to be aligned to 4.
+    state.cAttributes[0].format = wgpu::VertexFormat::Snorm16x4;
+    state.cAttributes[0].offset = 4;
     CreatePipeline(true, state, kDummyVertexShader);
 
-    // Test offset not multiple of the component byte size.
-    state.cAttributes[0].format = wgpu::VertexFormat::Float32;
-    state.cAttributes[0].offset = 2;
-    CreatePipeline(false, state, kDummyVertexShader);
+    state.cAttributes[0].format = wgpu::VertexFormat::Uint32x3;
+    state.cAttributes[0].offset = 4;
+    CreatePipeline(true, state, kDummyVertexShader);
 
-    state.cAttributes[0].format = wgpu::VertexFormat::Snorm16x2;
-    state.cAttributes[0].offset = 1;
-    CreatePipeline(false, state, kDummyVertexShader);
+    state.cAttributes[0].format = wgpu::VertexFormat::Sint32x4;
+    state.cAttributes[0].offset = 4;
+    CreatePipeline(true, state, kDummyVertexShader);
 }
 
 // Check attribute offset overflow
