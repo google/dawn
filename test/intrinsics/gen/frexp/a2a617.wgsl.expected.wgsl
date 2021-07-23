@@ -1,3 +1,7 @@
+intrinsics/gen/frexp/a2a617.wgsl:29:18 warning: use of deprecated intrinsic
+  var res: f32 = frexp(1.0, &arg_1);
+                 ^^^^^
+
 var<private> arg_1 : i32;
 
 fn frexp_a2a617() {

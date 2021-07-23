@@ -1,3 +1,7 @@
+intrinsics/gen/modf/5e8476.wgsl:29:18 warning: use of deprecated intrinsic
+  var res: f32 = modf(1.0, &arg_1);
+                 ^^^^
+
 var<private> arg_1 : f32;
 
 fn modf_5e8476() {

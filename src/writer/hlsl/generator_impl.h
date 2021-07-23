@@ -155,6 +155,14 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the call expression
   /// @returns true if the call expression is emitted
   bool EmitSelectCall(std::ostream& out, ast::CallExpression* expr);
+  /// Handles generating a call to the `modf()` intrinsic
+  /// @param out the output of the expression stream
+  /// @param expr the call expression
+  /// @param intrinsic the semantic information for the intrinsic
+  /// @returns true if the call expression is emitted
+  bool EmitModfCall(std::ostream& out,
+                    ast::CallExpression* expr,
+                    const sem::Intrinsic* intrinsic);
   /// Handles generating a call to the `frexp()` intrinsic
   /// @param out the output of the expression stream
   /// @param expr the call expression
@@ -320,7 +328,7 @@ class GeneratorImpl : public TextGenerator {
   /// @param type the type to generate
   /// @param storage_class the storage class of the variable
   /// @param access the access control type of the variable
-  /// @param name the name of the variable, used for array emission.
+  /// @param name the name to emit
   /// @returns true if the type is emitted
   bool EmitTypeAndName(std::ostream& out,
                        const sem::Type* type,
@@ -328,9 +336,10 @@ class GeneratorImpl : public TextGenerator {
                        ast::Access access,
                        const std::string& name);
   /// Handles generating a structure declaration
+  /// @param buffer the text buffer that the type declaration will be written to
   /// @param ty the struct to generate
   /// @returns true if the struct is emitted
-  bool EmitStructType(const sem::Struct* ty);
+  bool EmitStructType(TextBuffer* buffer, const sem::Struct* ty);
   /// Handles a unary op expression
   /// @param out the output of the expression stream
   /// @param expr the expression to emit
@@ -413,7 +422,6 @@ class GeneratorImpl : public TextGenerator {
   ///          `buffer` is the body of the generated function
   ///          `params` is the name of all the generated function parameters
   /// @returns true if the call expression is emitted
-
   template <typename F>
   bool CallIntrinsicHelper(std::ostream& out,
                            ast::CallExpression* call,

@@ -58,12 +58,14 @@ class Struct : public Castable<Struct, Type> {
  public:
   /// Constructor
   /// @param declaration the AST structure declaration
+  /// @param name the name of the structure
   /// @param members the structure members
   /// @param align the byte alignment of the structure
   /// @param size the byte size of the structure
   /// @param size_no_padding size of the members without the end of structure
   /// alignment padding
   Struct(const ast::Struct* declaration,
+         Symbol name,
          StructMemberList members,
          uint32_t align,
          uint32_t size,
@@ -74,6 +76,9 @@ class Struct : public Castable<Struct, Type> {
 
   /// @returns the struct
   const ast::Struct* Declaration() const { return declaration_; }
+
+  /// @returns the name of the structure
+  Symbol Name() const { return name_; }
 
   /// @returns the members of the structure
   const StructMemberList& Members() const { return members_; }
@@ -156,6 +161,7 @@ class Struct : public Castable<Struct, Type> {
   uint64_t LargestMemberBaseAlignment(MemoryLayout mem_layout) const;
 
   ast::Struct const* const declaration_;
+  Symbol const name_;
   StructMemberList const members_;
   uint32_t const align_;
   uint32_t const size_;
@@ -170,12 +176,14 @@ class StructMember : public Castable<StructMember, Node> {
  public:
   /// Constructor
   /// @param declaration the AST declaration node
+  /// @param name the name of the structure
   /// @param type the type of the member
   /// @param index the index of the member in the structure
   /// @param offset the byte offset from the base of the structure
   /// @param align the byte alignment of the member
   /// @param size the byte size of the member
   StructMember(ast::StructMember* declaration,
+               Symbol name,
                sem::Type* type,
                uint32_t index,
                uint32_t offset,
@@ -187,6 +195,9 @@ class StructMember : public Castable<StructMember, Node> {
 
   /// @returns the AST declaration node
   ast::StructMember* Declaration() const { return declaration_; }
+
+  /// @returns the name of the structure
+  Symbol Name() const { return name_; }
 
   /// @returns the type of the member
   sem::Type* Type() const { return type_; }
@@ -205,6 +216,7 @@ class StructMember : public Castable<StructMember, Node> {
 
  private:
   ast::StructMember* const declaration_;
+  Symbol const name_;
   sem::Type* const type_;
   uint32_t const index_;
   uint32_t const offset_;

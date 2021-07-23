@@ -1,3 +1,7 @@
+intrinsics/gen/modf/a128ab.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec2<f32> = modf(vec2<f32>(), &arg_1);
+                       ^^^^
+
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0

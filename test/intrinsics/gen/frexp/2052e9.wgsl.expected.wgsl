@@ -1,3 +1,7 @@
+intrinsics/gen/frexp/2052e9.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec4<f32> = frexp(vec4<f32>(), &arg_1);
+                       ^^^^^
+
 fn frexp_2052e9() {
   var arg_1 : vec4<i32>;
   var res : vec4<f32> = frexp(vec4<f32>(), &(arg_1));

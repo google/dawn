@@ -1,3 +1,7 @@
+intrinsics/gen/frexp/481e59.wgsl:29:18 warning: use of deprecated intrinsic
+  var res: f32 = frexp(1.0, &arg_1);
+                 ^^^^^
+
 fn frexp_481e59() {
   var arg_1 : i32;
   var res : f32 = frexp(1.0, &(arg_1));

@@ -1,13 +1,25 @@
+intrinsics/gen/modf/4bb324.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec4<f32> = modf(vec4<f32>(), &arg_1);
+                       ^^^^
+
 #include <metal_stdlib>
 
 using namespace metal;
+
+float4 tint_modf(float4 param_0, thread float4* param_1) {
+  float4 whole;
+  float4 fract = modf(param_0, whole);
+  *param_1 = whole;
+  return fract;
+}
+
 struct tint_symbol {
   float4 value [[position]];
 };
 
 void modf_4bb324() {
   float4 arg_1 = 0.0f;
-  float4 res = modf(float4(), *(&(arg_1)));
+  float4 res = tint_modf(float4(), &(arg_1));
 }
 
 vertex tint_symbol vertex_main() {

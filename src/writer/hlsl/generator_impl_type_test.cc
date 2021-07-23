@@ -173,9 +173,10 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
 
   GeneratorImpl& gen = Build();
 
+  TextGenerator::TextBuffer buf;
   auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
-  ASSERT_TRUE(gen.EmitStructType(sem_s)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(struct S {
+  ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.error();
+  EXPECT_EQ(buf.String(), R"(struct S {
   int a;
   float b;
 };
@@ -197,9 +198,10 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
 
   GeneratorImpl& gen = Build();
 
+  TextGenerator::TextBuffer buf;
   auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
-  ASSERT_TRUE(gen.EmitStructType(sem_s)) << gen.error();
-  EXPECT_EQ(gen.result(), "");
+  ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.error();
+  EXPECT_EQ(buf.String(), "");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
@@ -247,9 +249,10 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_WithOffsetAttributes) {
 
   GeneratorImpl& gen = Build();
 
+  TextGenerator::TextBuffer buf;
   auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
-  ASSERT_TRUE(gen.EmitStructType(sem_s)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(struct S {
+  ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.error();
+  EXPECT_EQ(buf.String(), R"(struct S {
   int a;
   float b;
 };

@@ -40,6 +40,9 @@ func TestLexTokens(t *testing.T) {
 		{"ident_123", tok.Token{Kind: tok.Identifier, Runes: []rune("ident_123"), Source: tok.Source{
 			S: loc(1, 1, 0), E: loc(1, 10, 9),
 		}}},
+		{"_ident_", tok.Token{Kind: tok.Identifier, Runes: []rune("_ident_"), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 8, 7),
+		}}},
 		{"123456789", tok.Token{Kind: tok.Integer, Runes: []rune("123456789"), Source: tok.Source{
 			S: loc(1, 1, 0), E: loc(1, 10, 9),
 		}}},

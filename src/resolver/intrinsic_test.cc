@@ -828,7 +828,7 @@ TEST_F(ResolverIntrinsicDataTest, Normalize_Error_NoParams) {
 )");
 }
 
-TEST_F(ResolverIntrinsicDataTest, FrexpScalar) {
+TEST_F(ResolverIntrinsicDataTest, DEPRECATED_FrexpScalar) {
   Global("exp", ty.i32(), ast::StorageClass::kWorkgroup);
   auto* call = Call("frexp", 1.0f, AddressOf("exp"));
   WrapInFunction(call);
@@ -839,7 +839,7 @@ TEST_F(ResolverIntrinsicDataTest, FrexpScalar) {
   EXPECT_TRUE(TypeOf(call)->Is<sem::F32>());
 }
 
-TEST_F(ResolverIntrinsicDataTest, FrexpVector) {
+TEST_F(ResolverIntrinsicDataTest, DEPRECATED_FrexpVector) {
   Global("exp", ty.vec3<i32>(), ast::StorageClass::kWorkgroup);
   auto* call = Call("frexp", vec3<f32>(1.0f, 2.0f, 3.0f), AddressOf("exp"));
   WrapInFunction(call);
@@ -849,6 +849,68 @@ TEST_F(ResolverIntrinsicDataTest, FrexpVector) {
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(call)->As<sem::Vector>()->type()->Is<sem::F32>());
+}
+
+TEST_F(ResolverIntrinsicDataTest, FrexpScalar) {
+  auto* call = Call("frexp", 1.0f);
+  WrapInFunction(call);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(call), nullptr);
+  auto* ty = TypeOf(call)->As<sem::Struct>();
+  ASSERT_NE(ty, nullptr);
+  ASSERT_EQ(ty->Members().size(), 2u);
+
+  auto* sig = ty->Members()[0];
+  EXPECT_TRUE(sig->Type()->Is<sem::F32>());
+  EXPECT_EQ(sig->Offset(), 0u);
+  EXPECT_EQ(sig->Size(), 4u);
+  EXPECT_EQ(sig->Align(), 4u);
+  EXPECT_EQ(sig->Name(), Sym("sig"));
+
+  auto* exp = ty->Members()[1];
+  EXPECT_TRUE(exp->Type()->Is<sem::I32>());
+  EXPECT_EQ(exp->Offset(), 4u);
+  EXPECT_EQ(exp->Size(), 4u);
+  EXPECT_EQ(exp->Align(), 4u);
+  EXPECT_EQ(exp->Name(), Sym("exp"));
+
+  EXPECT_EQ(ty->Size(), 8u);
+  EXPECT_EQ(ty->SizeNoPadding(), 8u);
+}
+
+TEST_F(ResolverIntrinsicDataTest, FrexpVector) {
+  auto* call = Call("frexp", vec3<f32>());
+  WrapInFunction(call);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(call), nullptr);
+  auto* ty = TypeOf(call)->As<sem::Struct>();
+  ASSERT_NE(ty, nullptr);
+  ASSERT_EQ(ty->Members().size(), 2u);
+
+  auto* sig = ty->Members()[0];
+  ASSERT_TRUE(sig->Type()->Is<sem::Vector>());
+  EXPECT_EQ(sig->Type()->As<sem::Vector>()->Width(), 3u);
+  EXPECT_TRUE(sig->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(sig->Offset(), 0u);
+  EXPECT_EQ(sig->Size(), 12u);
+  EXPECT_EQ(sig->Align(), 16u);
+  EXPECT_EQ(sig->Name(), Sym("sig"));
+
+  auto* exp = ty->Members()[1];
+  ASSERT_TRUE(exp->Type()->Is<sem::Vector>());
+  EXPECT_EQ(exp->Type()->As<sem::Vector>()->Width(), 3u);
+  EXPECT_TRUE(exp->Type()->As<sem::Vector>()->type()->Is<sem::I32>());
+  EXPECT_EQ(exp->Offset(), 16u);
+  EXPECT_EQ(exp->Size(), 12u);
+  EXPECT_EQ(exp->Align(), 16u);
+  EXPECT_EQ(exp->Name(), Sym("exp"));
+
+  EXPECT_EQ(ty->Size(), 32u);
+  EXPECT_EQ(ty->SizeNoPadding(), 28u);
 }
 
 TEST_F(ResolverIntrinsicDataTest, Frexp_Error_FirstParamInt) {
@@ -862,9 +924,11 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_FirstParamInt) {
       r()->error(),
       R"(error: no matching call to frexp(i32, ptr<workgroup, i32, read_write>)
 
-2 candidate functions:
+4 candidate functions:
   frexp(f32, ptr<S, i32, A>) -> f32  where: S is function, private or workgroup
   frexp(vecN<f32>, ptr<S, vecN<i32>, A>) -> vecN<f32>  where: S is function, private or workgroup
+  frexp(f32) -> _frexp_result
+  frexp(vecN<f32>) -> _frexp_result_vecN
 )");
 }
 
@@ -879,9 +943,11 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_SecondParamFloatPtr) {
       r()->error(),
       R"(error: no matching call to frexp(f32, ptr<workgroup, f32, read_write>)
 
-2 candidate functions:
+4 candidate functions:
   frexp(f32, ptr<S, i32, A>) -> f32  where: S is function, private or workgroup
+  frexp(f32) -> _frexp_result
   frexp(vecN<f32>, ptr<S, vecN<i32>, A>) -> vecN<f32>  where: S is function, private or workgroup
+  frexp(vecN<f32>) -> _frexp_result_vecN
 )");
 }
 
@@ -893,9 +959,11 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_SecondParamNotAPointer) {
 
   EXPECT_EQ(r()->error(), R"(error: no matching call to frexp(f32, i32)
 
-2 candidate functions:
+4 candidate functions:
   frexp(f32, ptr<S, i32, A>) -> f32  where: S is function, private or workgroup
+  frexp(f32) -> _frexp_result
   frexp(vecN<f32>, ptr<S, vecN<i32>, A>) -> vecN<f32>  where: S is function, private or workgroup
+  frexp(vecN<f32>) -> _frexp_result_vecN
 )");
 }
 
@@ -910,13 +978,15 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_VectorSizesDontMatch) {
       r()->error(),
       R"(error: no matching call to frexp(vec2<f32>, ptr<workgroup, vec4<i32>, read_write>)
 
-2 candidate functions:
+4 candidate functions:
   frexp(vecN<f32>, ptr<S, vecN<i32>, A>) -> vecN<f32>  where: S is function, private or workgroup
+  frexp(vecN<f32>) -> _frexp_result_vecN
   frexp(f32, ptr<S, i32, A>) -> f32  where: S is function, private or workgroup
+  frexp(f32) -> _frexp_result
 )");
 }
 
-TEST_F(ResolverIntrinsicDataTest, ModfScalar) {
+TEST_F(ResolverIntrinsicDataTest, DEPRECATED_ModfScalar) {
   Global("whole", ty.f32(), ast::StorageClass::kWorkgroup);
   auto* call = Call("modf", 1.0f, AddressOf("whole"));
   WrapInFunction(call);
@@ -927,7 +997,7 @@ TEST_F(ResolverIntrinsicDataTest, ModfScalar) {
   EXPECT_TRUE(TypeOf(call)->Is<sem::F32>());
 }
 
-TEST_F(ResolverIntrinsicDataTest, ModfVector) {
+TEST_F(ResolverIntrinsicDataTest, DEPRECATED_ModfVector) {
   Global("whole", ty.vec3<f32>(), ast::StorageClass::kWorkgroup);
   auto* call = Call("modf", vec3<f32>(1.0f, 2.0f, 3.0f), AddressOf("whole"));
   WrapInFunction(call);
@@ -937,6 +1007,68 @@ TEST_F(ResolverIntrinsicDataTest, ModfVector) {
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<sem::Vector>());
   EXPECT_TRUE(TypeOf(call)->As<sem::Vector>()->type()->Is<sem::F32>());
+}
+
+TEST_F(ResolverIntrinsicDataTest, ModfScalar) {
+  auto* call = Call("modf", 1.0f);
+  WrapInFunction(call);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(call), nullptr);
+  auto* ty = TypeOf(call)->As<sem::Struct>();
+  ASSERT_NE(ty, nullptr);
+  ASSERT_EQ(ty->Members().size(), 2u);
+
+  auto* fract = ty->Members()[0];
+  EXPECT_TRUE(fract->Type()->Is<sem::F32>());
+  EXPECT_EQ(fract->Offset(), 0u);
+  EXPECT_EQ(fract->Size(), 4u);
+  EXPECT_EQ(fract->Align(), 4u);
+  EXPECT_EQ(fract->Name(), Sym("fract"));
+
+  auto* whole = ty->Members()[1];
+  EXPECT_TRUE(whole->Type()->Is<sem::F32>());
+  EXPECT_EQ(whole->Offset(), 4u);
+  EXPECT_EQ(whole->Size(), 4u);
+  EXPECT_EQ(whole->Align(), 4u);
+  EXPECT_EQ(whole->Name(), Sym("whole"));
+
+  EXPECT_EQ(ty->Size(), 8u);
+  EXPECT_EQ(ty->SizeNoPadding(), 8u);
+}
+
+TEST_F(ResolverIntrinsicDataTest, ModfVector) {
+  auto* call = Call("modf", vec3<f32>());
+  WrapInFunction(call);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(call), nullptr);
+  auto* ty = TypeOf(call)->As<sem::Struct>();
+  ASSERT_NE(ty, nullptr);
+  ASSERT_EQ(ty->Members().size(), 2u);
+
+  auto* fract = ty->Members()[0];
+  ASSERT_TRUE(fract->Type()->Is<sem::Vector>());
+  EXPECT_EQ(fract->Type()->As<sem::Vector>()->Width(), 3u);
+  EXPECT_TRUE(fract->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(fract->Offset(), 0u);
+  EXPECT_EQ(fract->Size(), 12u);
+  EXPECT_EQ(fract->Align(), 16u);
+  EXPECT_EQ(fract->Name(), Sym("fract"));
+
+  auto* whole = ty->Members()[1];
+  ASSERT_TRUE(whole->Type()->Is<sem::Vector>());
+  EXPECT_EQ(whole->Type()->As<sem::Vector>()->Width(), 3u);
+  EXPECT_TRUE(whole->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(whole->Offset(), 16u);
+  EXPECT_EQ(whole->Size(), 12u);
+  EXPECT_EQ(whole->Align(), 16u);
+  EXPECT_EQ(whole->Name(), Sym("whole"));
+
+  EXPECT_EQ(ty->Size(), 32u);
+  EXPECT_EQ(ty->SizeNoPadding(), 28u);
 }
 
 TEST_F(ResolverIntrinsicDataTest, Modf_Error_FirstParamInt) {
@@ -950,9 +1082,11 @@ TEST_F(ResolverIntrinsicDataTest, Modf_Error_FirstParamInt) {
       r()->error(),
       R"(error: no matching call to modf(i32, ptr<workgroup, f32, read_write>)
 
-2 candidate functions:
+4 candidate functions:
   modf(f32, ptr<S, f32, A>) -> f32  where: S is function, private or workgroup
   modf(vecN<f32>, ptr<S, vecN<f32>, A>) -> vecN<f32>  where: S is function, private or workgroup
+  modf(f32) -> _modf_result
+  modf(vecN<f32>) -> _modf_result_vecN
 )");
 }
 
@@ -967,9 +1101,11 @@ TEST_F(ResolverIntrinsicDataTest, Modf_Error_SecondParamIntPtr) {
       r()->error(),
       R"(error: no matching call to modf(f32, ptr<workgroup, i32, read_write>)
 
-2 candidate functions:
+4 candidate functions:
   modf(f32, ptr<S, f32, A>) -> f32  where: S is function, private or workgroup
+  modf(f32) -> _modf_result
   modf(vecN<f32>, ptr<S, vecN<f32>, A>) -> vecN<f32>  where: S is function, private or workgroup
+  modf(vecN<f32>) -> _modf_result_vecN
 )");
 }
 
@@ -981,9 +1117,11 @@ TEST_F(ResolverIntrinsicDataTest, Modf_Error_SecondParamNotAPointer) {
 
   EXPECT_EQ(r()->error(), R"(error: no matching call to modf(f32, f32)
 
-2 candidate functions:
+4 candidate functions:
   modf(f32, ptr<S, f32, A>) -> f32  where: S is function, private or workgroup
+  modf(f32) -> _modf_result
   modf(vecN<f32>, ptr<S, vecN<f32>, A>) -> vecN<f32>  where: S is function, private or workgroup
+  modf(vecN<f32>) -> _modf_result_vecN
 )");
 }
 
@@ -998,9 +1136,11 @@ TEST_F(ResolverIntrinsicDataTest, Modf_Error_VectorSizesDontMatch) {
       r()->error(),
       R"(error: no matching call to modf(vec2<f32>, ptr<workgroup, vec4<f32>, read_write>)
 
-2 candidate functions:
+4 candidate functions:
   modf(vecN<f32>, ptr<S, vecN<f32>, A>) -> vecN<f32>  where: S is function, private or workgroup
+  modf(vecN<f32>) -> _modf_result_vecN
   modf(f32, ptr<S, f32, A>) -> f32  where: S is function, private or workgroup
+  modf(f32) -> _modf_result
 )");
 }
 

@@ -1,3 +1,7 @@
+intrinsics/gen/modf/4fe3d9.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec3<f32> = modf(vec3<f32>(), &arg_1);
+                       ^^^^
+
 fn modf_4fe3d9() {
   var arg_1 : vec3<f32>;
   var res : vec3<f32> = modf(vec3<f32>(), &(arg_1));

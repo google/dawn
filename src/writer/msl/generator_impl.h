@@ -126,6 +126,22 @@ class GeneratorImpl : public TextGenerator {
   bool EmitTextureCall(std::ostream& out,
                        ast::CallExpression* expr,
                        const sem::Intrinsic* intrinsic);
+  /// Handles generating a call to the `modf()` intrinsic
+  /// @param out the output of the expression stream
+  /// @param expr the call expression
+  /// @param intrinsic the semantic information for the intrinsic
+  /// @returns true if the call expression is emitted
+  bool EmitModfCall(std::ostream& out,
+                    ast::CallExpression* expr,
+                    const sem::Intrinsic* intrinsic);
+  /// Handles generating a call to the `frexp()` intrinsic
+  /// @param out the output of the expression stream
+  /// @param expr the call expression
+  /// @param intrinsic the semantic information for the intrinsic
+  /// @returns true if the call expression is emitted
+  bool EmitFrexpCall(std::ostream& out,
+                     ast::CallExpression* expr,
+                     const sem::Intrinsic* intrinsic);
   /// Handles a case statement
   /// @param stmt the statement
   /// @returns true if the statement was emitted successfully
@@ -218,10 +234,20 @@ class GeneratorImpl : public TextGenerator {
   /// @param out the output of the type stream
   /// @param type the type to generate
   /// @param name the name of the variable, only used for array emission
+  /// @param name_printed (optional) if not nullptr and an array was printed
   /// @returns true if the type is emitted
   bool EmitType(std::ostream& out,
                 const sem::Type* type,
-                const std::string& name);
+                const std::string& name,
+                bool* name_printed = nullptr);
+  /// Handles generating type and name
+  /// @param out the output stream
+  /// @param type the type to generate
+  /// @param name the name to emit
+  /// @returns true if the type is emitted
+  bool EmitTypeAndName(std::ostream& out,
+                       const sem::Type* type,
+                       const std::string& name);
   /// Handles generating a storage class
   /// @param out the output of the type stream
   /// @param sc the storage class to generate
@@ -238,9 +264,10 @@ class GeneratorImpl : public TextGenerator {
                       const sem::Type* type,
                       const std::string& name);
   /// Handles generating a struct declaration
+  /// @param buffer the text buffer that the type declaration will be written to
   /// @param str the struct to generate
   /// @returns true if the struct is emitted
-  bool EmitStructType(const sem::Struct* str);
+  bool EmitStructType(TextBuffer* buffer, const sem::Struct* str);
   /// Handles emitting a type constructor
   /// @param out the output of the expression stream
   /// @param expr the type constructor expression
@@ -291,6 +318,25 @@ class GeneratorImpl : public TextGenerator {
     uint32_t align;
   };
 
+  /// CallIntrinsicHelper will call the intrinsic helper function, creating it
+  /// if it hasn't been built already. If the intrinsic needs to be built then
+  /// CallIntrinsicHelper will generate the function signature and will call
+  /// `build` to emit the body of the function.
+  /// @param out the output of the expression stream
+  /// @param call the call expression
+  /// @param intrinsic the semantic information for the intrinsic
+  /// @param build a function with the signature:
+  ///        `bool(TextBuffer* buffer, const std::vector<std::string>& params)`
+  ///        Where:
+  ///          `buffer` is the body of the generated function
+  ///          `params` is the name of all the generated function parameters
+  /// @returns true if the call expression is emitted
+  template <typename F>
+  bool CallIntrinsicHelper(std::ostream& out,
+                           ast::CallExpression* call,
+                           const sem::Intrinsic* intrinsic,
+                           F&& build);
+
   TextBuffer helpers_;  // Helper functions emitted at the top of the output
 
   /// @returns the MSL packed type size and alignment in bytes for the given
@@ -308,6 +354,8 @@ class GeneratorImpl : public TextGenerator {
 
   /// True if an invariant attribute has been generated.
   bool has_invariant_ = false;
+
+  std::unordered_map<const sem::Intrinsic*, std::string> intrinsics_;
 };
 
 }  // namespace msl

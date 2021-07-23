@@ -17,6 +17,7 @@
 
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -29,37 +30,6 @@ namespace writer {
 /// Helper methods for generators which are creating text output
 class TextGenerator {
  public:
-  /// Constructor
-  /// @param program the program used by the generator
-  explicit TextGenerator(const Program* program);
-  ~TextGenerator();
-
-  /// Increment the emitter indent level
-  void increment_indent() { current_buffer_->IncrementIndent(); }
-  /// Decrement the emitter indent level
-  void decrement_indent() { current_buffer_->DecrementIndent(); }
-
-  /// @returns the result data
-  std::string result() const { return main_buffer_.String(); }
-
-  /// @returns the list of diagnostics raised by the generator.
-  const diag::List& Diagnostics() const { return diagnostics_; }
-
-  /// @returns the error
-  std::string error() const { return diagnostics_.str(); }
-
-  /// @return a new, unique identifier with the given prefix.
-  /// @param prefix optional prefix to apply to the generated identifier. If
-  /// empty "tint_symbol" will be used.
-  std::string UniqueIdentifier(const std::string& prefix = "");
-
-  /// @param str the string
-  /// @param suffix the suffix to remove
-  /// @return returns str without the provided trailing suffix string. If str
-  /// doesn't end with suffix, str is returned unchanged.
-  std::string TrimSuffix(std::string str, const std::string& suffix);
-
- protected:
   /// Line holds a single line of text
   struct Line {
     /// The indentation of the line in whitespaces
@@ -117,6 +87,44 @@ class TextGenerator {
     std::vector<Line> lines;
   };
 
+  /// Constructor
+  /// @param program the program used by the generator
+  explicit TextGenerator(const Program* program);
+  ~TextGenerator();
+
+  /// Increment the emitter indent level
+  void increment_indent() { current_buffer_->IncrementIndent(); }
+  /// Decrement the emitter indent level
+  void decrement_indent() { current_buffer_->DecrementIndent(); }
+
+  /// @returns the result data
+  std::string result() const { return main_buffer_.String(); }
+
+  /// @returns the list of diagnostics raised by the generator.
+  const diag::List& Diagnostics() const { return diagnostics_; }
+
+  /// @returns the error
+  std::string error() const { return diagnostics_.str(); }
+
+  /// @return a new, unique identifier with the given prefix.
+  /// @param prefix optional prefix to apply to the generated identifier. If
+  /// empty "tint_symbol" will be used.
+  std::string UniqueIdentifier(const std::string& prefix = "");
+
+  /// @param s the semantic structure
+  /// @returns the name of the structure, taking special care of builtin
+  /// structures that start with a leading underscore. If the structure is a
+  /// builtin, then the returned name will be a unique name without the leading
+  /// underscore.
+  std::string StructName(const sem::Struct* s);
+
+  /// @param str the string
+  /// @param suffix the suffix to remove
+  /// @return returns str without the provided trailing suffix string. If str
+  /// doesn't end with suffix, str is returned unchanged.
+  std::string TrimSuffix(std::string str, const std::string& suffix);
+
+ protected:
   /// LineWriter is a helper that acts as a string buffer, who's content is
   /// emitted to the TextBuffer as a single line on destruction.
   struct LineWriter {
@@ -224,6 +232,8 @@ class TextGenerator {
  private:
   /// The primary text buffer that the generator will emit
   TextBuffer main_buffer_;
+  /// Map of builtin structure to unique generated name
+  std::unordered_map<const sem::Struct*, std::string> builtin_struct_names_;
 };
 
 }  // namespace writer

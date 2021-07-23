@@ -1,3 +1,7 @@
+intrinsics/gen/frexp/6d0058.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec3<f32> = frexp(vec3<f32>(), &arg_1);
+                       ^^^^^
+
 fn frexp_6d0058() {
   var arg_1 : vec3<i32>;
   var res : vec3<f32> = frexp(vec3<f32>(), &(arg_1));

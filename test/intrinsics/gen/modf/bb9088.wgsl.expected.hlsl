@@ -1,3 +1,7 @@
+intrinsics/gen/modf/bb9088.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec3<f32> = modf(vec3<f32>(), &arg_1);
+                       ^^^^
+
 groupshared float3 arg_1;
 
 void modf_bb9088() {

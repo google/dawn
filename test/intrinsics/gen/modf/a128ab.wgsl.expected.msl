@@ -1,10 +1,20 @@
-SKIP: FAILED
+intrinsics/gen/modf/a128ab.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec2<f32> = modf(vec2<f32>(), &arg_1);
+                       ^^^^
 
 #include <metal_stdlib>
 
 using namespace metal;
+
+float2 tint_modf(float2 param_0, threadgroup float2* param_1) {
+  float2 whole;
+  float2 fract = modf(param_0, whole);
+  *param_1 = whole;
+  return fract;
+}
+
 void modf_a128ab(threadgroup float2* const tint_symbol_1) {
-  float2 res = modf(float2(), *(&(*(tint_symbol_1))));
+  float2 res = tint_modf(float2(), &(*(tint_symbol_1)));
 }
 
 kernel void compute_main(uint local_invocation_index [[thread_index_in_threadgroup]]) {
@@ -16,45 +26,4 @@ kernel void compute_main(uint local_invocation_index [[thread_index_in_threadgro
   modf_a128ab(&(tint_symbol_2));
   return;
 }
-
-Compilation failed: 
-
-program_source:5:16: error: no matching function for call to 'modf'
-  float2 res = modf(float2(), *(&(*(tint_symbol_1))));
-               ^~~~
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:4854:19: note: candidate function not viable: address space mismatch in 2nd argument ('threadgroup float2' (vector of 2 'float' values)), parameter type must be 'metal::float2 &' (aka 'float2 &')
-METAL_FUNC float2 modf(float2 x, thread float2 &intval)
-                  ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:3142:17: note: candidate function not viable: no known conversion from 'float2' (vector of 2 'float' values) to 'half' for 1st argument
-METAL_FUNC half modf(half x, thread half &intval)
-                ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:3386:18: note: candidate function not viable: no known conversion from 'float2' (vector of 2 'float' values) to 'metal::half2' (aka 'half2') for 1st argument
-METAL_FUNC half2 modf(half2 x, thread half2 &intval)
-                 ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:3630:18: note: candidate function not viable: no known conversion from 'float2' (vector of 2 'float' values) to 'metal::half3' (aka 'half3') for 1st argument
-METAL_FUNC half3 modf(half3 x, thread half3 &intval)
-                 ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:3874:18: note: candidate function not viable: no known conversion from 'float2' (vector of 2 'float' values) to 'metal::half4' (aka 'half4') for 1st argument
-METAL_FUNC half4 modf(half4 x, thread half4 &intval)
-                 ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:4610:18: note: candidate function not viable: no known conversion from 'float2' (vector of 2 'float' values) to 'float' for 1st argument
-METAL_FUNC float modf(float x, thread float &intval)
-                 ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:5098:19: note: candidate function not viable: no known conversion from 'float2' (vector of 2 'float' values) to 'metal::float3' (aka 'float3') for 1st argument
-METAL_FUNC float3 modf(float3 x, thread float3 &intval)
-                  ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:5342:19: note: candidate function not viable: no known conversion from 'float2' (vector of 2 'float' values) to 'metal::float4' (aka 'float4') for 1st argument
-METAL_FUNC float4 modf(float4 x, thread float4 &intval)
-                  ^
-program_source:10:31: warning: equality comparison with extraneous parentheses
-  if ((local_invocation_index == 0u)) {
-       ~~~~~~~~~~~~~~~~~~~~~~~^~~~~
-program_source:10:31: note: remove extraneous parentheses around the comparison to silence this warning
-  if ((local_invocation_index == 0u)) {
-      ~                       ^    ~
-program_source:10:31: note: use '=' to turn this equality comparison into an assignment
-  if ((local_invocation_index == 0u)) {
-                              ^~
-                              =
-
 

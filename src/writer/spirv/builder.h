@@ -486,7 +486,7 @@ class Builder {
   /// @returns the id of the struct member or 0 on error.
   uint32_t GenerateStructMember(uint32_t struct_id,
                                 uint32_t idx,
-                                ast::StructMember* member);
+                                const sem::StructMember* member);
   /// Generates a variable declaration statement
   /// @param stmt the statement to generate
   /// @returns true on successfull generation

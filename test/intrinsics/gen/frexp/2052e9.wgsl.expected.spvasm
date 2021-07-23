@@ -1,3 +1,7 @@
+intrinsics/gen/frexp/2052e9.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec4<f32> = frexp(vec4<f32>(), &arg_1);
+                       ^^^^^
+
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0

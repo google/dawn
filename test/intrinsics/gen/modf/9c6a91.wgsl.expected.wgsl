@@ -1,3 +1,7 @@
+intrinsics/gen/modf/9c6a91.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec2<f32> = modf(vec2<f32>(), &arg_1);
+                       ^^^^
+
 var<private> arg_1 : vec2<f32>;
 
 fn modf_9c6a91() {

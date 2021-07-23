@@ -1,5 +1,6 @@
 [[stage(compute), workgroup_size(1)]]
 fn main() {
-  var exponent : i32;
-  let significand : f32 = frexp(1.230000019, &(exponent));
+  let res = frexp(1.230000019);
+  let exp : i32 = res.exp;
+  let sig : f32 = res.sig;
 }

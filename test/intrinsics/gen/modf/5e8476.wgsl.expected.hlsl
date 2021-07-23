@@ -1,3 +1,7 @@
+intrinsics/gen/modf/5e8476.wgsl:29:18 warning: use of deprecated intrinsic
+  var res: f32 = modf(1.0, &arg_1);
+                 ^^^^
+
 static float arg_1 = 0.0f;
 
 void modf_5e8476() {

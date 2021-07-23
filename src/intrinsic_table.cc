@@ -29,6 +29,7 @@
 #include "src/sem/storage_texture_type.h"
 #include "src/utils/get_or_create.h"
 #include "src/utils/hash.h"
+#include "src/utils/math.h"
 #include "src/utils/scoped_assignment.h"
 
 namespace tint {
@@ -635,6 +636,91 @@ bool match_texture_external(const sem::Type* ty) {
 
 const sem::ExternalTexture* build_texture_external(MatchState& state) {
   return state.builder.create<sem::ExternalTexture>();
+}
+
+// Builtin types starting with a _ prefix cannot be declared in WGSL, so they
+// can only be used as return types. Because of this, they must only match Any,
+// which is used as the return type matcher.
+bool match_modf_result(const sem::Type* ty) {
+  return ty->Is<Any>();
+}
+bool match_modf_result_vec(const sem::Type* ty, Number& N) {
+  if (!ty->Is<Any>()) {
+    return false;
+  }
+  N = Number::any;
+  return true;
+}
+bool match_frexp_result(const sem::Type* ty) {
+  return ty->Is<Any>();
+}
+bool match_frexp_result_vec(const sem::Type* ty, Number& N) {
+  if (!ty->Is<Any>()) {
+    return false;
+  }
+  N = Number::any;
+  return true;
+}
+
+struct NameAndType {
+  std::string name;
+  sem::Type* type;
+};
+const sem::Struct* build_struct(
+    MatchState& state,
+    std::string name,
+    std::initializer_list<NameAndType> member_names_and_types) {
+  uint32_t offset = 0;
+  uint32_t max_align = 0;
+  sem::StructMemberList members;
+  for (auto& m : member_names_and_types) {
+    uint32_t align = m.type->Align();
+    uint32_t size = m.type->Size();
+    offset = utils::RoundUp(align, offset);
+    max_align = std::max(max_align, align);
+    members.emplace_back(state.builder.create<sem::StructMember>(
+        /* declaration */ nullptr,
+        /* name */ state.builder.Sym(m.name),
+        /* type */ m.type,
+        /* index */ static_cast<uint32_t>(members.size()),
+        /* offset */ offset,
+        /* align */ align,
+        /* size */ size));
+    offset += size;
+  }
+  uint32_t size_without_padding = offset;
+  uint32_t size_with_padding = utils::RoundUp(max_align, offset);
+  return state.builder.create<sem::Struct>(
+      /* declaration */ nullptr,
+      /* name */ state.builder.Sym(name),
+      /* members */ members,
+      /* align */ max_align,
+      /* size */ size_with_padding,
+      /* size_no_padding */ size_without_padding);
+}
+
+const sem::Struct* build_modf_result(MatchState& state) {
+  auto* f32 = state.builder.create<sem::F32>();
+  return build_struct(state, "_modf_result", {{"fract", f32}, {"whole", f32}});
+}
+const sem::Struct* build_modf_result_vec(MatchState& state, Number& n) {
+  auto* vec_f32 = state.builder.create<sem::Vector>(
+      state.builder.create<sem::F32>(), n.Value());
+  return build_struct(state, "_modf_result_vec" + std::to_string(n.Value()),
+                      {{"fract", vec_f32}, {"whole", vec_f32}});
+}
+const sem::Struct* build_frexp_result(MatchState& state) {
+  auto* f32 = state.builder.create<sem::F32>();
+  auto* i32 = state.builder.create<sem::I32>();
+  return build_struct(state, "_frexp_result", {{"sig", f32}, {"exp", i32}});
+}
+const sem::Struct* build_frexp_result_vec(MatchState& state, Number& n) {
+  auto* vec_f32 = state.builder.create<sem::Vector>(
+      state.builder.create<sem::F32>(), n.Value());
+  auto* vec_i32 = state.builder.create<sem::Vector>(
+      state.builder.create<sem::I32>(), n.Value());
+  return build_struct(state, "_frexp_result_vec" + std::to_string(n.Value()),
+                      {{"sig", vec_f32}, {"exp", vec_i32}});
 }
 
 /// ParameterInfo describes a parameter

@@ -1,12 +1,24 @@
+intrinsics/gen/frexp/a2a617.wgsl:29:18 warning: use of deprecated intrinsic
+  var res: f32 = frexp(1.0, &arg_1);
+                 ^^^^^
+
 #include <metal_stdlib>
 
 using namespace metal;
+
+float tint_frexp(float param_0, thread int* param_1) {
+  int exp;
+  float sig = frexp(param_0, exp);
+  *param_1 = exp;
+  return sig;
+}
+
 struct tint_symbol {
   float4 value [[position]];
 };
 
 void frexp_a2a617(thread int* const tint_symbol_2) {
-  float res = frexp(1.0f, *(&(*(tint_symbol_2))));
+  float res = tint_frexp(1.0f, &(*(tint_symbol_2)));
 }
 
 vertex tint_symbol vertex_main() {

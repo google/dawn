@@ -1,3 +1,7 @@
+intrinsics/gen/modf/546e09.wgsl:29:18 warning: use of deprecated intrinsic
+  var res: f32 = modf(1.0, &arg_1);
+                 ^^^^
+
 fn modf_546e09() {
   var arg_1 : f32;
   var res : f32 = modf(1.0, &(arg_1));

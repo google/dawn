@@ -1,3 +1,7 @@
+intrinsics/gen/frexp/a3f940.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec2<f32> = frexp(vec2<f32>(), &arg_1);
+                       ^^^^^
+
 float2 tint_frexp(float2 param_0, inout int2 param_1) {
   float2 float_exp;
   float2 significand = frexp(param_0, float_exp);

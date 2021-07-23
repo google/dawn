@@ -123,7 +123,7 @@ fn {{$permutation}}() {
 {{- /* Make the call to the intrinsic */ -}}
 {{- /*indent*/}}  {{/*indent*/ -}}
 {{-   if .ReturnType -}}
-  var res: {{template "Type" .ReturnType}} = {{/* preserve space after = */ -}}
+  var res{{if IsDeclarable .ReturnType}}: {{template "Type" .ReturnType}}{{end}} = {{/* preserve space after = */ -}}
 {{-   end -}}
   {{$function}}(
 {{-   range $i, $p := .Parameters -}}

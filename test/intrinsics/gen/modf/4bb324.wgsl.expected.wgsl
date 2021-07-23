@@ -1,3 +1,7 @@
+intrinsics/gen/modf/4bb324.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec4<f32> = modf(vec4<f32>(), &arg_1);
+                       ^^^^
+
 fn modf_4bb324() {
   var arg_1 : vec4<f32>;
   var res : vec4<f32> = modf(vec4<f32>(), &(arg_1));

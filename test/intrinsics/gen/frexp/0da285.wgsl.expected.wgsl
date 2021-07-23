@@ -1,3 +1,7 @@
+intrinsics/gen/frexp/0da285.wgsl:29:18 warning: use of deprecated intrinsic
+  var res: f32 = frexp(1.0, &arg_1);
+                 ^^^^^
+
 var<workgroup> arg_1 : i32;
 
 fn frexp_0da285() {

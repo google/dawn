@@ -147,7 +147,7 @@ bool GeneratorImpl::Generate() {
         return false;
       }
     } else if (auto* str = decl->As<ast::Struct>()) {
-      if (!EmitStructType(builder_.Sem().Get(str))) {
+      if (!EmitStructType(current_buffer_, builder_.Sem().Get(str))) {
         return false;
       }
     } else if (auto* func = decl->As<ast::Function>()) {
@@ -521,6 +521,8 @@ bool GeneratorImpl::EmitCall(std::ostream& out, ast::CallExpression* expr) {
       return EmitTextureCall(out, expr, intrinsic);
     } else if (intrinsic->Type() == sem::IntrinsicType::kSelect) {
       return EmitSelectCall(out, expr);
+    } else if (intrinsic->Type() == sem::IntrinsicType::kModf) {
+      return EmitModfCall(out, expr, intrinsic);
     } else if (intrinsic->Type() == sem::IntrinsicType::kFrexp) {
       return EmitFrexpCall(out, expr, intrinsic);
     } else if (intrinsic->Type() == sem::IntrinsicType::kIsNormal) {
@@ -1270,9 +1272,93 @@ bool GeneratorImpl::EmitSelectCall(std::ostream& out,
   return true;
 }
 
+bool GeneratorImpl::EmitModfCall(std::ostream& out,
+                                 ast::CallExpression* expr,
+                                 const sem::Intrinsic* intrinsic) {
+  if (expr->params().size() == 1) {
+    return CallIntrinsicHelper(
+        out, expr, intrinsic,
+        [&](TextBuffer* b, const std::vector<std::string>& params) {
+          auto* ty = intrinsic->Parameters()[0]->Type();
+          auto in = params[0];
+
+          std::string width;
+          if (auto* vec = ty->As<sem::Vector>()) {
+            width = std::to_string(vec->Width());
+          }
+
+          // Emit the builtin return type unique to this overload. This does not
+          // exist in the AST, so it will not be generated in Generate().
+          if (!EmitStructType(&helpers_,
+                              intrinsic->ReturnType()->As<sem::Struct>())) {
+            return false;
+          }
+
+          line(b) << "float" << width << " whole;";
+          line(b) << "float" << width << " fract = modf(" << in << ", whole);";
+          {
+            auto l = line(b);
+            if (!EmitType(l, intrinsic->ReturnType(), ast::StorageClass::kNone,
+                          ast::Access::kUndefined, "")) {
+              return false;
+            }
+            l << " result = {fract, whole};";
+          }
+          line(b) << "return result;";
+          return true;
+        });
+  }
+
+  // DEPRECATED
+  out << "modf";
+  ScopedParen sp(out);
+  if (!EmitExpression(out, expr->params()[0])) {
+    return false;
+  }
+  out << ", ";
+  if (!EmitExpression(out, expr->params()[1])) {
+    return false;
+  }
+  return true;
+}
+
 bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
                                   ast::CallExpression* expr,
                                   const sem::Intrinsic* intrinsic) {
+  if (expr->params().size() == 1) {
+    return CallIntrinsicHelper(
+        out, expr, intrinsic,
+        [&](TextBuffer* b, const std::vector<std::string>& params) {
+          auto* ty = intrinsic->Parameters()[0]->Type();
+          auto in = params[0];
+
+          std::string width;
+          if (auto* vec = ty->As<sem::Vector>()) {
+            width = std::to_string(vec->Width());
+          }
+
+          // Emit the builtin return type unique to this overload. This does not
+          // exist in the AST, so it will not be generated in Generate().
+          if (!EmitStructType(&helpers_,
+                              intrinsic->ReturnType()->As<sem::Struct>())) {
+            return false;
+          }
+
+          line(b) << "float" << width << " exp;";
+          line(b) << "float" << width << " sig = frexp(" << in << ", exp);";
+          {
+            auto l = line(b);
+            if (!EmitType(l, intrinsic->ReturnType(), ast::StorageClass::kNone,
+                          ast::Access::kUndefined, "")) {
+              return false;
+            }
+            l << " result = {sig, int" << width << "(exp)};";
+          }
+          line(b) << "return result;";
+          return true;
+        });
+  }
+  // DEPRECATED
   // Exponent is an integer in WGSL, but HLSL wants a float.
   // We need to make the call with a temporary float, and then cast.
   return CallIntrinsicHelper(
@@ -2906,7 +2992,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     }
     out << "State";
   } else if (auto* str = type->As<sem::Struct>()) {
-    out << builder_.Symbols().NameFor(str->Declaration()->name());
+    out << StructName(str);
   } else if (auto* tex = type->As<sem::Texture>()) {
     auto* storage = tex->As<sem::StorageTexture>();
     auto* multism = tex->As<sem::MultisampledTexture>();
@@ -3015,7 +3101,7 @@ bool GeneratorImpl::EmitTypeAndName(std::ostream& out,
   return true;
 }
 
-bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
+bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
   auto storage_class_uses = str->StorageClassUsage();
   if (storage_class_uses.size() ==
       (storage_class_uses.count(ast::StorageClass::kStorage) +
@@ -3029,71 +3115,74 @@ bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
     return true;
   }
 
-  auto struct_name = builder_.Symbols().NameFor(str->Declaration()->name());
-  line() << "struct " << struct_name << " {";
+  line(b) << "struct " << StructName(str) << " {";
   {
-    ScopedIndent si(this);
+    ScopedIndent si(b);
     for (auto* mem : str->Members()) {
-      auto name = builder_.Symbols().NameFor(mem->Declaration()->symbol());
+      auto name = builder_.Symbols().NameFor(mem->Name());
 
       auto* ty = mem->Type();
 
-      auto out = line();
+      auto out = line(b);
 
       std::string pre, post;
 
-      for (auto* deco : mem->Declaration()->decorations()) {
-        if (auto* location = deco->As<ast::LocationDecoration>()) {
-          auto& pipeline_stage_uses = str->PipelineStageUses();
-          if (pipeline_stage_uses.size() != 1) {
-            TINT_ICE(Writer, diagnostics_)
-                << "invalid entry point IO struct uses";
-          }
+      if (auto* decl = mem->Declaration()) {
+        for (auto* deco : decl->decorations()) {
+          if (auto* location = deco->As<ast::LocationDecoration>()) {
+            auto& pipeline_stage_uses = str->PipelineStageUses();
+            if (pipeline_stage_uses.size() != 1) {
+              TINT_ICE(Writer, diagnostics_)
+                  << "invalid entry point IO struct uses";
+            }
 
-          if (pipeline_stage_uses.count(
-                  sem::PipelineStageUsage::kVertexInput)) {
-            post += " : TEXCOORD" + std::to_string(location->value());
-          } else if (pipeline_stage_uses.count(
-                         sem::PipelineStageUsage::kVertexOutput)) {
-            post += " : TEXCOORD" + std::to_string(location->value());
-          } else if (pipeline_stage_uses.count(
-                         sem::PipelineStageUsage::kFragmentInput)) {
-            post += " : TEXCOORD" + std::to_string(location->value());
-          } else if (pipeline_stage_uses.count(
-                         sem::PipelineStageUsage::kFragmentOutput)) {
-            post += " : SV_Target" + std::to_string(location->value());
-          } else {
+            if (pipeline_stage_uses.count(
+                    sem::PipelineStageUsage::kVertexInput)) {
+              post += " : TEXCOORD" + std::to_string(location->value());
+            } else if (pipeline_stage_uses.count(
+                           sem::PipelineStageUsage::kVertexOutput)) {
+              post += " : TEXCOORD" + std::to_string(location->value());
+            } else if (pipeline_stage_uses.count(
+                           sem::PipelineStageUsage::kFragmentInput)) {
+              post += " : TEXCOORD" + std::to_string(location->value());
+            } else if (pipeline_stage_uses.count(
+                           sem::PipelineStageUsage::kFragmentOutput)) {
+              post += " : SV_Target" + std::to_string(location->value());
+            } else {
+              TINT_ICE(Writer, diagnostics_)
+                  << "invalid use of location decoration";
+            }
+          } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+            auto attr = builtin_to_attribute(builtin->value());
+            if (attr.empty()) {
+              diagnostics_.add_error(diag::System::Writer,
+                                     "unsupported builtin");
+              return false;
+            }
+            post += " : " + attr;
+          } else if (auto* interpolate =
+                         deco->As<ast::InterpolateDecoration>()) {
+            auto mod = interpolation_to_modifiers(interpolate->type(),
+                                                  interpolate->sampling());
+            if (mod.empty()) {
+              diagnostics_.add_error(diag::System::Writer,
+                                     "unsupported interpolation");
+              return false;
+            }
+            pre += mod;
+
+          } else if (deco->Is<ast::InvariantDecoration>()) {
+            // Note: `precise` is not exactly the same as `invariant`, but is
+            // stricter and therefore provides the necessary guarantees.
+            // See discussion here: https://github.com/gpuweb/gpuweb/issues/893
+            pre += "precise ";
+          } else if (!deco->IsAnyOf<ast::StructMemberAlignDecoration,
+                                    ast::StructMemberOffsetDecoration,
+                                    ast::StructMemberSizeDecoration>()) {
             TINT_ICE(Writer, diagnostics_)
-                << "invalid use of location decoration";
-          }
-        } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
-          auto attr = builtin_to_attribute(builtin->value());
-          if (attr.empty()) {
-            diagnostics_.add_error(diag::System::Writer, "unsupported builtin");
+                << "unhandled struct member attribute: " << deco->name();
             return false;
           }
-          post += " : " + attr;
-        } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
-          auto mod = interpolation_to_modifiers(interpolate->type(),
-                                                interpolate->sampling());
-          if (mod.empty()) {
-            diagnostics_.add_error(diag::System::Writer,
-                                   "unsupported interpolation");
-            return false;
-          }
-          pre += mod;
-
-        } else if (deco->Is<ast::InvariantDecoration>()) {
-          // Note: `precise` is not exactly the same as `invariant`, but is
-          // stricter and therefore provides the necessary guarantees.
-          // See discussion here: https://github.com/gpuweb/gpuweb/issues/893
-          pre += "precise ";
-        } else if (!deco->IsAnyOf<ast::StructMemberAlignDecoration,
-                                  ast::StructMemberOffsetDecoration,
-                                  ast::StructMemberSizeDecoration>()) {
-          TINT_ICE(Writer, diagnostics_)
-              << "unhandled struct member attribute: " << deco->name();
-          return false;
         }
       }
 
@@ -3106,7 +3195,7 @@ bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
     }
   }
 
-  line() << "};";
+  line(b) << "};";
 
   return true;
 }
@@ -3239,11 +3328,14 @@ bool GeneratorImpl::CallIntrinsicHelper(std::ostream& out,
                                         F&& build) {
   // Generate the helper function if it hasn't been created already
   auto fn = utils::GetOrCreate(intrinsics_, intrinsic, [&]() -> std::string {
+    TextBuffer b;
+    TINT_DEFER(helpers_.Append(b));
+
     auto fn_name =
         UniqueIdentifier(std::string("tint_") + sem::str(intrinsic->Type()));
     std::vector<std::string> parameter_names;
     {
-      auto decl = line(&helpers_);
+      auto decl = line(&b);
       if (!EmitTypeAndName(decl, intrinsic->ReturnType(),
                            ast::StorageClass::kNone, ast::Access::kUndefined,
                            fn_name)) {
@@ -3271,13 +3363,13 @@ bool GeneratorImpl::CallIntrinsicHelper(std::ostream& out,
       decl << " {";
     }
     {
-      ScopedIndent si(&helpers_);
-      if (!build(&helpers_, parameter_names)) {
+      ScopedIndent si(&b);
+      if (!build(&b, parameter_names)) {
         return "";
       }
     }
-    line(&helpers_) << "}";
-    line(&helpers_);
+    line(&b) << "}";
+    line(&b);
     return fn_name;
   });
 

@@ -1,12 +1,24 @@
+intrinsics/gen/modf/9c6a91.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec2<f32> = modf(vec2<f32>(), &arg_1);
+                       ^^^^
+
 #include <metal_stdlib>
 
 using namespace metal;
+
+float2 tint_modf(float2 param_0, thread float2* param_1) {
+  float2 whole;
+  float2 fract = modf(param_0, whole);
+  *param_1 = whole;
+  return fract;
+}
+
 struct tint_symbol {
   float4 value [[position]];
 };
 
 void modf_9c6a91(thread float2* const tint_symbol_2) {
-  float2 res = modf(float2(), *(&(*(tint_symbol_2))));
+  float2 res = tint_modf(float2(), &(*(tint_symbol_2)));
 }
 
 vertex tint_symbol vertex_main() {

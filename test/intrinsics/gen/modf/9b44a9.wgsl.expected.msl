@@ -1,0 +1,38 @@
+#include <metal_stdlib>
+
+using namespace metal;
+
+struct modf_result_vec4 {
+  float4 fract;
+  float4 whole;
+};
+modf_result_vec4 tint_modf(float4 param_0) {
+  float4 whole;
+  float4 fract = modf(param_0, whole);
+  return {fract, whole};
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+void modf_9b44a9() {
+  modf_result_vec4 res = tint_modf(float4());
+}
+
+vertex tint_symbol vertex_main() {
+  modf_9b44a9();
+  tint_symbol const tint_symbol_1 = {.value=float4()};
+  return tint_symbol_1;
+}
+
+fragment void fragment_main() {
+  modf_9b44a9();
+  return;
+}
+
+kernel void compute_main() {
+  modf_9b44a9();
+  return;
+}
+

@@ -58,6 +58,8 @@ func (g *generator) generate(tmpl string, w io.Writer, writeFile WriteFile) erro
 		"SplitDisplayName":      splitDisplayName,
 		"HasPrefix":             strings.HasPrefix,
 		"HasSuffix":             strings.HasSuffix,
+		"TrimPrefix":            strings.TrimPrefix,
+		"TrimSuffix":            strings.TrimSuffix,
 		"IsEnumEntry":           is(sem.EnumEntry{}),
 		"IsEnumMatcher":         is(sem.EnumMatcher{}),
 		"IsFQN":                 is(sem.FullyQualifiedName{}),
@@ -66,6 +68,7 @@ func (g *generator) generate(tmpl string, w io.Writer, writeFile WriteFile) erro
 		"IsTemplateNumberParam": is(sem.TemplateNumberParam{}),
 		"IsTemplateTypeParam":   is(sem.TemplateTypeParam{}),
 		"IsType":                is(sem.Type{}),
+		"IsDeclarable":          isDeclarable,
 		"IsFirstIn":             isFirstIn,
 		"IsLastIn":              isLastIn,
 		"IntrinsicTable":        g.intrinsicTable,
@@ -198,6 +201,13 @@ func iterate(n int) []int {
 		out[i] = i
 	}
 	return out
+}
+
+// isDeclarable returns false if the FullyQualifiedName starts with a
+// leading underscore. These are undeclarable as WGSL does not allow identifers
+// to have a leading underscore.
+func isDeclarable(fqn sem.FullyQualifiedName) bool {
+	return !strings.HasPrefix(fqn.Target.GetName(), "_")
 }
 
 // pascalCase returns the snake-case string s transformed into 'PascalCase',

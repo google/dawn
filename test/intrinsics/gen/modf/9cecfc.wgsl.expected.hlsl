@@ -1,3 +1,7 @@
+intrinsics/gen/modf/9cecfc.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec3<f32> = modf(vec3<f32>(), &arg_1);
+                       ^^^^
+
 static float3 arg_1 = float3(0.0f, 0.0f, 0.0f);
 
 void modf_9cecfc() {

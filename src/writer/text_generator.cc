@@ -17,6 +17,8 @@
 #include <algorithm>
 #include <limits>
 
+#include "src/utils/get_or_create.h"
+
 namespace tint {
 namespace writer {
 
@@ -27,6 +29,15 @@ TextGenerator::~TextGenerator() = default;
 
 std::string TextGenerator::UniqueIdentifier(const std::string& prefix) {
   return builder_.Symbols().NameFor(builder_.Symbols().New(prefix));
+}
+
+std::string TextGenerator::StructName(const sem::Struct* s) {
+  auto name = builder_.Symbols().NameFor(s->Name());
+  if (name.size() > 0 && name[0] == '_') {
+    name = utils::GetOrCreate(builtin_struct_names_, s,
+                              [&] { return UniqueIdentifier(name.substr(1)); });
+  }
+  return name;
 }
 
 std::string TextGenerator::TrimSuffix(std::string str,

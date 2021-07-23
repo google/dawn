@@ -1,3 +1,7 @@
+intrinsics/gen/frexp/e061dd.wgsl:29:18 warning: use of deprecated intrinsic
+  var res: f32 = frexp(1.0, &arg_1);
+                 ^^^^^
+
 fn frexp_e061dd() {
   var arg_1 : i32;
   var res : f32 = frexp(1.0, &(arg_1));

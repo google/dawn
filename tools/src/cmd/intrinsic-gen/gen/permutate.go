@@ -364,6 +364,10 @@ func validate(fqn sem.FullyQualifiedName, uses *sem.StageUses) bool {
 		}
 	}
 
+	if !isDeclarable(fqn) {
+		return false
+	}
+
 	for _, arg := range fqn.TemplateArguments {
 		if argFQN, ok := arg.(sem.FullyQualifiedName); ok {
 			if !validate(argFQN, uses) {

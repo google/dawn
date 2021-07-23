@@ -2998,7 +2998,7 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
 
     const sem::StructMember* member = nullptr;
     for (auto* m : str->Members()) {
-      if (m->Declaration()->symbol() == symbol) {
+      if (m->Name() == symbol) {
         ret = m->Type();
         member = m;
         break;
@@ -4088,7 +4088,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     offset = utils::RoundUp(align, offset);
 
     auto* sem_member = builder_->create<sem::StructMember>(
-        member, const_cast<sem::Type*>(type),
+        member, member->symbol(), const_cast<sem::Type*>(type),
         static_cast<uint32_t>(sem_members.size()), offset, align, size);
     builder_->Sem().Add(member, sem_member);
     sem_members.emplace_back(sem_member);
@@ -4100,8 +4100,9 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
   auto size_no_padding = struct_size;
   struct_size = utils::RoundUp(struct_align, struct_size);
 
-  auto* out = builder_->create<sem::Struct>(str, sem_members, struct_align,
-                                            struct_size, size_no_padding);
+  auto* out =
+      builder_->create<sem::Struct>(str, str->name(), sem_members, struct_align,
+                                    struct_size, size_no_padding);
 
   // Keep track of atomic members for validation after all usages have been
   // determined.

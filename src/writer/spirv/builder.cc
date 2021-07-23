@@ -162,7 +162,8 @@ uint32_t intrinsic_to_glsl_method(const sem::Intrinsic* intrinsic) {
     case IntrinsicType::kFract:
       return GLSLstd450Fract;
     case IntrinsicType::kFrexp:
-      return GLSLstd450Frexp;
+      return (intrinsic->Parameters().size() == 1) ? GLSLstd450FrexpStruct
+                                                   : GLSLstd450Frexp;
     case IntrinsicType::kInverseSqrt:
       return GLSLstd450InverseSqrt;
     case IntrinsicType::kLdexp:
@@ -192,7 +193,8 @@ uint32_t intrinsic_to_glsl_method(const sem::Intrinsic* intrinsic) {
     case IntrinsicType::kMix:
       return GLSLstd450FMix;
     case IntrinsicType::kModf:
-      return GLSLstd450Modf;
+      return (intrinsic->Parameters().size() == 1) ? GLSLstd450ModfStruct
+                                                   : GLSLstd450Modf;
     case IntrinsicType::kNormalize:
       return GLSLstd450Normalize;
     case IntrinsicType::kPack4x8snorm:
@@ -3932,25 +3934,25 @@ bool Builder::GenerateReferenceType(const sem::Reference* ref,
 bool Builder::GenerateStructType(const sem::Struct* struct_type,
                                  const Operand& result) {
   auto struct_id = result.to_i();
-  auto* impl = struct_type->Declaration();
 
-  if (impl->name().IsValid()) {
-    push_debug(spv::Op::OpName,
-               {Operand::Int(struct_id),
-                Operand::String(builder_.Symbols().NameFor(impl->name()))});
+  if (struct_type->Name().IsValid()) {
+    push_debug(
+        spv::Op::OpName,
+        {Operand::Int(struct_id),
+         Operand::String(builder_.Symbols().NameFor(struct_type->Name()))});
   }
 
   OperandList ops;
   ops.push_back(result);
 
-  if (impl->IsBlockDecorated()) {
+  auto* decl = struct_type->Declaration();
+  if (decl && decl->IsBlockDecorated()) {
     push_annot(spv::Op::OpDecorate,
                {Operand::Int(struct_id), Operand::Int(SpvDecorationBlock)});
   }
 
-  auto& members = impl->members();
-  for (uint32_t i = 0; i < members.size(); ++i) {
-    auto mem_id = GenerateStructMember(struct_id, i, members[i]);
+  for (uint32_t i = 0; i < struct_type->Members().size(); ++i) {
+    auto mem_id = GenerateStructMember(struct_id, i, struct_type->Members()[i]);
     if (mem_id == 0) {
       return false;
     }
@@ -3964,10 +3966,10 @@ bool Builder::GenerateStructType(const sem::Struct* struct_type,
 
 uint32_t Builder::GenerateStructMember(uint32_t struct_id,
                                        uint32_t idx,
-                                       ast::StructMember* member) {
+                                       const sem::StructMember* member) {
   push_debug(spv::Op::OpMemberName,
              {Operand::Int(struct_id), Operand::Int(idx),
-              Operand::String(builder_.Symbols().NameFor(member->symbol()))});
+              Operand::String(builder_.Symbols().NameFor(member->Name()))});
 
   // Note: This will generate layout annotations for *all* structs, whether or
   // not they are used in host-shareable variables. This is officially ok in
@@ -3975,19 +3977,13 @@ uint32_t Builder::GenerateStructMember(uint32_t struct_id,
   // to only generate the layout info for structs used for certain storage
   // classes.
 
-  auto* sem_member = builder_.Sem().Get(member);
-  if (!sem_member) {
-    error_ = "Struct member has no semantic information";
-    return 0;
-  }
-
   push_annot(
       spv::Op::OpMemberDecorate,
       {Operand::Int(struct_id), Operand::Int(idx),
-       Operand::Int(SpvDecorationOffset), Operand::Int(sem_member->Offset())});
+       Operand::Int(SpvDecorationOffset), Operand::Int(member->Offset())});
 
   // Infer and emit matrix layout.
-  auto* matrix_type = GetNestedMatrixType(sem_member->Type());
+  auto* matrix_type = GetNestedMatrixType(member->Type());
   if (matrix_type) {
     push_annot(spv::Op::OpMemberDecorate,
                {Operand::Int(struct_id), Operand::Int(idx),
@@ -4004,7 +4000,7 @@ uint32_t Builder::GenerateStructMember(uint32_t struct_id,
                 Operand::Int(effective_row_count * scalar_elem_size)});
   }
 
-  return GenerateTypeIfNeeded(sem_member->Type());
+  return GenerateTypeIfNeeded(member->Type());
 }
 
 bool Builder::GenerateVectorType(const sem::Vector* vec,

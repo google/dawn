@@ -1,3 +1,7 @@
+intrinsics/gen/modf/4bb324.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec4<f32> = modf(vec4<f32>(), &arg_1);
+                       ^^^^
+
 void modf_4bb324() {
   float4 arg_1 = float4(0.0f, 0.0f, 0.0f, 0.0f);
   float4 res = modf(float4(0.0f, 0.0f, 0.0f, 0.0f), arg_1);

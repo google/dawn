@@ -1,3 +1,7 @@
+intrinsics/gen/modf/1d59e5.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec4<f32> = modf(vec4<f32>(), &arg_1);
+                       ^^^^
+
 groupshared float4 arg_1;
 
 void modf_1d59e5() {

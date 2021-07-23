@@ -1,3 +1,7 @@
+intrinsics/gen/frexp/481e59.wgsl:29:18 warning: use of deprecated intrinsic
+  var res: f32 = frexp(1.0, &arg_1);
+                 ^^^^^
+
 float tint_frexp(float param_0, inout int param_1) {
   float float_exp;
   float significand = frexp(param_0, float_exp);

@@ -1,10 +1,20 @@
-SKIP: FAILED
+intrinsics/gen/frexp/b87f4e.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec4<f32> = frexp(vec4<f32>(), &arg_1);
+                       ^^^^^
 
 #include <metal_stdlib>
 
 using namespace metal;
+
+float4 tint_frexp(float4 param_0, threadgroup int4* param_1) {
+  int4 exp;
+  float4 sig = frexp(param_0, exp);
+  *param_1 = exp;
+  return sig;
+}
+
 void frexp_b87f4e(threadgroup int4* const tint_symbol_1) {
-  float4 res = frexp(float4(), *(&(*(tint_symbol_1))));
+  float4 res = tint_frexp(float4(), &(*(tint_symbol_1)));
 }
 
 kernel void compute_main(uint local_invocation_index [[thread_index_in_threadgroup]]) {
@@ -16,45 +26,4 @@ kernel void compute_main(uint local_invocation_index [[thread_index_in_threadgro
   frexp_b87f4e(&(tint_symbol_2));
   return;
 }
-
-Compilation failed: 
-
-program_source:5:16: error: no matching function for call to 'frexp'
-  float4 res = frexp(float4(), *(&(*(tint_symbol_1))));
-               ^~~~~
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:5292:19: note: candidate function not viable: address space mismatch in 2nd argument ('threadgroup int4' (vector of 4 'int' values)), parameter type must be 'metal::int4 &' (aka 'int4 &')
-METAL_FUNC float4 frexp(float4 x, thread int4 &exp)
-                  ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:3092:17: note: candidate function not viable: no known conversion from 'float4' (vector of 4 'float' values) to 'half' for 1st argument
-METAL_FUNC half frexp(half x, thread int &exp)
-                ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:3336:18: note: candidate function not viable: no known conversion from 'float4' (vector of 4 'float' values) to 'metal::half2' (aka 'half2') for 1st argument
-METAL_FUNC half2 frexp(half2 x, thread int2 &exp)
-                 ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:3580:18: note: candidate function not viable: no known conversion from 'float4' (vector of 4 'float' values) to 'metal::half3' (aka 'half3') for 1st argument
-METAL_FUNC half3 frexp(half3 x, thread int3 &exp)
-                 ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:3824:18: note: candidate function not viable: no known conversion from 'float4' (vector of 4 'float' values) to 'metal::half4' (aka 'half4') for 1st argument
-METAL_FUNC half4 frexp(half4 x, thread int4 &exp)
-                 ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:4560:18: note: candidate function not viable: no known conversion from 'float4' (vector of 4 'float' values) to 'float' for 1st argument
-METAL_FUNC float frexp(float x, thread int &exp)
-                 ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:4804:19: note: candidate function not viable: no known conversion from 'float4' (vector of 4 'float' values) to 'metal::float2' (aka 'float2') for 1st argument
-METAL_FUNC float2 frexp(float2 x, thread int2 &exp)
-                  ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/31001/Libraries/lib/clang/31001.189/include/metal/metal_math:5048:19: note: candidate function not viable: no known conversion from 'float4' (vector of 4 'float' values) to 'metal::float3' (aka 'float3') for 1st argument
-METAL_FUNC float3 frexp(float3 x, thread int3 &exp)
-                  ^
-program_source:10:31: warning: equality comparison with extraneous parentheses
-  if ((local_invocation_index == 0u)) {
-       ~~~~~~~~~~~~~~~~~~~~~~~^~~~~
-program_source:10:31: note: remove extraneous parentheses around the comparison to silence this warning
-  if ((local_invocation_index == 0u)) {
-      ~                       ^    ~
-program_source:10:31: note: use '=' to turn this equality comparison into an assignment
-  if ((local_invocation_index == 0u)) {
-                              ^~
-                              =
-
 

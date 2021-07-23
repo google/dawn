@@ -27,11 +27,13 @@ namespace tint {
 namespace sem {
 
 Struct::Struct(const ast::Struct* declaration,
+               Symbol name,
                StructMemberList members,
                uint32_t align,
                uint32_t size,
                uint32_t size_no_padding)
     : declaration_(declaration),
+      name_(name),
       members_(std::move(members)),
       align_(align),
       size_(size),
@@ -57,7 +59,7 @@ const StructMember* Struct::FindMember(Symbol name) const {
 }
 
 std::string Struct::type_name() const {
-  return declaration_->type_name();
+  return "__struct_" + name_.to_str();
 }
 
 uint32_t Struct::Align() const {
@@ -69,7 +71,7 @@ uint32_t Struct::Size() const {
 }
 
 std::string Struct::FriendlyName(const SymbolTable& symbols) const {
-  return symbols.NameFor(declaration_->name());
+  return symbols.NameFor(name_);
 }
 
 bool Struct::IsConstructible() const {
@@ -77,12 +79,14 @@ bool Struct::IsConstructible() const {
 }
 
 StructMember::StructMember(ast::StructMember* declaration,
+                           Symbol name,
                            sem::Type* type,
                            uint32_t index,
                            uint32_t offset,
                            uint32_t align,
                            uint32_t size)
     : declaration_(declaration),
+      name_(name),
       type_(type),
       index_(index),
       offset_(offset),

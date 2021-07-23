@@ -1,3 +1,7 @@
+intrinsics/gen/modf/9cecfc.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec3<f32> = modf(vec3<f32>(), &arg_1);
+                       ^^^^
+
 var<private> arg_1 : vec3<f32>;
 
 fn modf_9cecfc() {
