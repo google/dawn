@@ -5,7 +5,7 @@ cbuffer cbuffer_x_6 : register(b0, space0) {
 
 void main_1() {
   float a = 0.0f;
-  a = (asfloat(1u) % 1.0f);
+  a = (asfloat(1u) - (1.0f * floor((asfloat(1u) / 1.0f))));
   const float x_29 = asfloat(x_6[1].x);
   x_GLF_color = float4(x_29, x_29, x_29, x_29);
   const float x_31 = a;

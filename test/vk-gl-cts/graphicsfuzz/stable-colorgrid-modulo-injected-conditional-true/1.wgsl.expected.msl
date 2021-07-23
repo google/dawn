@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 
 using namespace metal;
@@ -34,7 +32,7 @@ float compute_value_f1_f1_(thread float* const limit, thread float* const thirty
     } else {
       int const x_136 = i;
       float const x_138 = *(thirty_two);
-      if (((float(x_136) % rint(x_138)) <= 0.01f)) {
+      if ((fmod(float(x_136), rint(x_138)) <= 0.01f)) {
         float const x_144 = result;
         result = (x_144 + 100.0f);
       }
@@ -127,9 +125,4 @@ fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]], const
   tint_symbol_2 const tint_symbol_4 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
   return tint_symbol_4;
 }
-
-T:\tmp\uf2s.0.metal:35:26: error: invalid operands to binary expression ('float' and 'float')
-      if (((float(x_136) % rint(x_138)) <= 0.01f)) {
-            ~~~~~~~~~~~~ ^ ~~~~~~~~~~~
-1 error generated.
 

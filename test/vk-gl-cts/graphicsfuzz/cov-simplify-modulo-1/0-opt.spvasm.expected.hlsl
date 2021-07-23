@@ -10,7 +10,7 @@ void main_1() {
   float a = 0.0f;
   const uint scalar_offset = ((16u * uint(0))) / 4;
   const float x_30 = asfloat(x_6[scalar_offset / 4][scalar_offset % 4]);
-  a = (x_30 % 1.0f);
+  a = (x_30 - (1.0f * floor((x_30 / 1.0f))));
   const float x_32 = a;
   const uint scalar_offset_1 = ((16u * uint(0))) / 4;
   const float x_34 = asfloat(x_6[scalar_offset_1 / 4][scalar_offset_1 % 4]);

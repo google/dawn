@@ -10,7 +10,7 @@ void main_1() {
   float undefined = 0.0f;
   bool x_51 = false;
   bool x_52_phi = false;
-  undefined = (5.0f % 0.0f);
+  undefined = (5.0f - (0.0f * floor((5.0f / 0.0f))));
   const uint scalar_offset = ((16u * uint(0))) / 4;
   const int x_10 = asint(x_6[scalar_offset / 4][scalar_offset % 4]);
   const uint scalar_offset_1 = ((16u * uint(0))) / 4;

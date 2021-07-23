@@ -72,7 +72,7 @@
           %a = OpVariable %_ptr_Function_float Function %26
          %30 = OpAccessChain %_ptr_Uniform_float %x_6 %uint_0 %int_0
          %31 = OpLoad %float %30
-         %33 = OpFMod %float %31 %float_1
+         %33 = OpFRem %float %31 %float_1
                OpStore %a %33
          %34 = OpLoad %float %a
          %35 = OpAccessChain %_ptr_Uniform_float %x_6 %uint_0 %int_0

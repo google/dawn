@@ -27,7 +27,7 @@ fn compute_value_f1_f1_(limit : ptr<function, f32>, thirty_two : ptr<function, f
     } else {
       let x_122 : i32 = i;
       let x_124 : f32 = *(thirty_two);
-      if (((f32(x_122) % round(x_124)) <= 0.01)) {
+      if (((f32(x_122) - (round(x_124) * floor((f32(x_122) / round(x_124))))) <= 0.01)) {
         let x_130 : f32 = result;
         result = (x_130 + 100.0);
       }

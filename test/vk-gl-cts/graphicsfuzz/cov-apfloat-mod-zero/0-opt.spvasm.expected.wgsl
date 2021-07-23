@@ -22,7 +22,7 @@ fn main_1() {
   var undefined : f32;
   var x_51 : bool;
   var x_52_phi : bool;
-  undefined = (5.0 % 0.0);
+  undefined = (5.0 - (0.0 * floor((5.0 / 0.0))));
   let x_10 : i32 = x_6.x_GLF_uniform_int_values[0];
   let x_11 : i32 = x_6.x_GLF_uniform_int_values[0];
   let x_12 : i32 = x_6.x_GLF_uniform_int_values[1];

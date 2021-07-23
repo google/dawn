@@ -126,7 +126,7 @@
          %53 = OpLoad %float %thirty_two
          %54 = OpConvertSToF %float %51
          %55 = OpExtInst %float %56 RoundEven %53
-         %57 = OpFMod %float %54 %55
+         %57 = OpFRem %float %54 %55
          %59 = OpFOrdLessThanEqual %bool %57 %float_0_00999999978
                OpSelectionMerge %60 None
                OpBranchConditional %59 %61 %60

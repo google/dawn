@@ -56,7 +56,7 @@ void main_1() {
           x_58_phi = x_70;
         } else {
           x_78_phi = x_57;
-          if (((float(x_60) % round(x_50)) <= 0.01f)) {
+          if (((float(x_60) - (round(x_50) * floor((float(x_60) / round(x_50))))) <= 0.01f)) {
             x_77 = (x_57 + 100.0f);
             x_78_phi = x_77;
           }
@@ -126,7 +126,7 @@ void main_1() {
           x_99_phi = x_111;
         } else {
           x_119_phi = x_98;
-          if (((float(x_101) % round(x_50)) <= 0.01f)) {
+          if (((float(x_101) - (round(x_50) * floor((float(x_101) / round(x_50))))) <= 0.01f)) {
             x_118 = (x_98 + 100.0f);
             x_119_phi = x_118;
           }

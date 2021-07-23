@@ -78,7 +78,7 @@
   %undefined = OpVariable %_ptr_Function_float Function %26
        %x_51 = OpVariable %_ptr_Function_bool Function %30
    %x_52_phi = OpVariable %_ptr_Function_bool Function %30
-         %34 = OpFMod %float %float_5 %float_0
+         %34 = OpFRem %float %float_5 %float_0
                OpStore %undefined %34
          %38 = OpAccessChain %_ptr_Uniform_int %x_6 %uint_0 %int_0
          %39 = OpLoad %int %38

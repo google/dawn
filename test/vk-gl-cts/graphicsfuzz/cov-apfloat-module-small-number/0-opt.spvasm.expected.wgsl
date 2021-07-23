@@ -24,7 +24,7 @@ fn main_1() {
   var f1 : f32;
   var x_72 : bool;
   var x_73_phi : bool;
-  f0 = (10.0 % 0.000001);
+  f0 = (10.0 - (0.000001 * floor((10.0 / 0.000001))));
   s1 = 0x1.b38fb8p-127;
   let x_38 : f32 = s1;
   if ((x_38 == 0.0)) {
@@ -35,7 +35,7 @@ fn main_1() {
   var x_63_phi : bool;
   var x_72_phi : bool;
   let x_42 : f32 = s1;
-  f1 = (10.0 % x_42);
+  f1 = (10.0 - (x_42 * floor((10.0 / x_42))));
   let x_44 : f32 = f1;
   let x_46 : f32 = s1;
   let x_48 : bool = (isInf(x_44) || (x_46 == 1.0));

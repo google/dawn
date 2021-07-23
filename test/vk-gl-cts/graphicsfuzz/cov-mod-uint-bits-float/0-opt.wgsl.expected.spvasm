@@ -59,7 +59,7 @@
          %17 = OpLabel
           %a = OpVariable %_ptr_Function_float Function %20
          %21 = OpBitcast %float %uint_1
-         %24 = OpFMod %float %21 %float_1
+         %24 = OpFRem %float %21 %float_1
                OpStore %a %24
          %29 = OpAccessChain %_ptr_Uniform_float %x_6 %uint_0 %int_1
          %30 = OpLoad %float %29

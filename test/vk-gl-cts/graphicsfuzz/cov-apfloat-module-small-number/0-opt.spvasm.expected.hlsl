@@ -12,7 +12,7 @@ void main_1() {
   float f1 = 0.0f;
   bool x_72 = false;
   bool x_73_phi = false;
-  f0 = (10.0f % 0.000001f);
+  f0 = (10.0f - (0.000001f * floor((10.0f / 0.000001f))));
   s1 = 9.99999935e-39f;
   if ((s1 == 0.0f)) {
     s1 = 1.0f;
@@ -21,7 +21,8 @@ void main_1() {
   bool x_71 = false;
   bool x_63_phi = false;
   bool x_72_phi = false;
-  f1 = (10.0f % s1);
+  const float x_42 = s1;
+  f1 = (10.0f - (x_42 * floor((10.0f / x_42))));
   bool tint_tmp = isinf(f1);
   if (!tint_tmp) {
     tint_tmp = (s1 == 1.0f);

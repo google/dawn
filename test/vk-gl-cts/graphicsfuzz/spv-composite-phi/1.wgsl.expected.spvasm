@@ -209,7 +209,7 @@
                OpStore %x_78_phi %100
         %101 = OpConvertSToF %float %79
         %102 = OpExtInst %float %58 RoundEven %57
-        %103 = OpFMod %float %101 %102
+        %103 = OpFRem %float %101 %102
         %105 = OpFOrdLessThanEqual %bool %103 %float_0_00999999978
                OpSelectionMerge %106 None
                OpBranchConditional %105 %107 %106
@@ -326,7 +326,7 @@
                OpStore %x_119_phi %184
         %185 = OpConvertSToF %float %168
         %186 = OpExtInst %float %58 RoundEven %57
-        %187 = OpFMod %float %185 %186
+        %187 = OpFRem %float %185 %186
         %188 = OpFOrdLessThanEqual %bool %187 %float_0_00999999978
                OpSelectionMerge %189 None
                OpBranchConditional %188 %190 %189

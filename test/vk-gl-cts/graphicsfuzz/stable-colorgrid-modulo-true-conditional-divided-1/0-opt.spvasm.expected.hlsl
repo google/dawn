@@ -33,7 +33,7 @@ float compute_value_f1_f1_(inout float limit, inout float thirty_two) {
     } else {
       const float x_106 = thirty_two;
       x_113_phi = x_91;
-      if (((float(x_94) % round(x_106)) <= 0.01f)) {
+      if (((float(x_94) - (round(x_106) * floor((float(x_94) / round(x_106))))) <= 0.01f)) {
         x_112 = (x_91 + 100.0f);
         x_113_phi = x_112;
       }

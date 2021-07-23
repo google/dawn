@@ -11,7 +11,7 @@ var<private> x_GLF_color : vec4<f32>;
 
 fn main_1() {
   var a : f32;
-  a = (bitcast<f32>(1u) % 1.0);
+  a = (bitcast<f32>(1u) - (1.0 * floor((bitcast<f32>(1u) / 1.0))));
   let x_29 : f32 = x_6.x_GLF_uniform_float_values[1];
   x_GLF_color = vec4<f32>(x_29, x_29, x_29, x_29);
   let x_31 : f32 = a;

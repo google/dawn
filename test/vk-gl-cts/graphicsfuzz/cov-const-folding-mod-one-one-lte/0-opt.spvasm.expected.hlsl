@@ -4,7 +4,7 @@ cbuffer cbuffer_x_5 : register(b0, space0) {
 };
 
 void main_1() {
-  if (((1.0f % 1.0f) <= 0.01f)) {
+  if (((1.0f - (1.0f * floor((1.0f / 1.0f)))) <= 0.01f)) {
     const uint scalar_offset = ((16u * uint(0))) / 4;
     const int x_29 = asint(x_5[scalar_offset / 4][scalar_offset % 4]);
     const uint scalar_offset_1 = ((16u * uint(0))) / 4;

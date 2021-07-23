@@ -53,7 +53,7 @@
          %45 = OpTypeFunction %void %main_out
      %main_1 = OpFunction %void None %15
          %18 = OpLabel
-         %20 = OpFMod %float %float_1 %float_1
+         %20 = OpFRem %float %float_1 %float_1
          %22 = OpFOrdLessThanEqual %bool %20 %float_0_00999999978
                OpSelectionMerge %24 None
                OpBranchConditional %22 %25 %26

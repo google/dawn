@@ -16,7 +16,7 @@ void main_1() {
   const int x_13 = asint(x_5[scalar_offset_1 / 4][scalar_offset_1 % 4]);
   x_GLF_color = float4(float(x_10), float(x_11), float(x_12), float(x_13));
   const float x_45 = asfloat(x_8[1].x);
-  a = (x_45 % asfloat(0x7fc00000u));
+  a = (x_45 - (asfloat(0x7fc00000u) * floor((x_45 / asfloat(0x7fc00000u)))));
   const float x_47 = a;
   const uint scalar_offset_2 = ((16u * uint(0))) / 4;
   const float x_49 = asfloat(x_8[scalar_offset_2 / 4][scalar_offset_2 % 4]);

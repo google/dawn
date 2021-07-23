@@ -10,7 +10,7 @@ var<private> x_GLF_color : vec4<f32>;
 [[group(0), binding(0)]] var<uniform> x_5 : buf0;
 
 fn main_1() {
-  if (((1.0 % 1.0) <= 0.01)) {
+  if (((1.0 - (1.0 * floor((1.0 / 1.0)))) <= 0.01)) {
     let x_29 : i32 = x_5.x_GLF_uniform_int_values[0];
     let x_32 : i32 = x_5.x_GLF_uniform_int_values[0];
     let x_35 : i32 = x_5.x_GLF_uniform_int_values[1];

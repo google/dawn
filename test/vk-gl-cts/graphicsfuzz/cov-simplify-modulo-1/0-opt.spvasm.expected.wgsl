@@ -21,7 +21,7 @@ var<private> x_GLF_color : vec4<f32>;
 fn main_1() {
   var a : f32;
   let x_30 : f32 = x_6.x_GLF_uniform_float_values[0];
-  a = (x_30 % 1.0);
+  a = (x_30 - (1.0 * floor((x_30 / 1.0))));
   let x_32 : f32 = a;
   let x_34 : f32 = x_6.x_GLF_uniform_float_values[0];
   if ((x_32 == x_34)) {
