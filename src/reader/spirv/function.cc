@@ -3996,6 +3996,7 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(
         // WGSL does not have scalar form of the normalize builtin.
         // The answer would be 1 anyway, so return that directly.
         return {ty_.F32(), builder_.Expr(1.0f)};
+
       case GLSLstd450FaceForward: {
         // If dot(Nref, Incident) < 0, the result is Normal, otherwise -Normal.
         // Also: select(-normal,normal, Incident*Nref < 0)
@@ -4019,6 +4020,21 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(
                             Source{}, ast::BinaryOp::kLessThan,
                             builder_.Mul({}, incident.expr, nref.expr),
                             builder_.Expr(0.0f))})};
+      }
+
+      case GLSLstd450Reflect: {
+        // Compute  Incident - 2 * Normal * Normal * Incident
+        auto incident = MakeOperand(inst, 2);
+        auto normal = MakeOperand(inst, 3);
+        TINT_ASSERT(Reader, incident.type->Is<F32>());
+        TINT_ASSERT(Reader, normal.type->Is<F32>());
+        return {
+            ty_.F32(),
+            builder_.Sub(
+                incident.expr,
+                builder_.Mul(2.0f, builder_.Mul(normal.expr,
+                                                builder_.Mul(normal.expr,
+                                                             incident.expr))))};
       }
 
       case GLSLstd450Refract: {
@@ -4700,6 +4716,10 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
         case GLSLstd450FaceForward:
           // The "normal" operand expression is used twice in code generation.
           require_named_const_def(inst, 2);
+          break;
+        case GLSLstd450Reflect:
+          require_named_const_def(inst, 2);  // Incident
+          require_named_const_def(inst, 3);  // Normal
           break;
         default:
           break;

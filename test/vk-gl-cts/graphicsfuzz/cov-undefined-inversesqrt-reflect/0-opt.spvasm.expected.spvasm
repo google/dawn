@@ -4,7 +4,7 @@
 ; Bound: 98
 ; Schema: 0
                OpCapability Shader
-         %58 = OpExtInstImport "GLSL.std.450"
+         %59 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %main "main" %tint_symbol_1
                OpExecutionMode %main OriginUpperLeft
@@ -104,9 +104,9 @@
                OpStore %v2 %54
          %55 = OpLoad %v2float %v2
          %56 = OpLoad %float %a
-         %59 = OpCompositeConstruct %v2float %56 %float_1
-         %57 = OpExtInst %v2float %58 Reflect %55 %59
-               OpStore %v3 %57
+         %57 = OpCompositeConstruct %v2float %56 %float_1
+         %58 = OpExtInst %v2float %59 Reflect %55 %57
+               OpStore %v3 %58
          %60 = OpAccessChain %_ptr_Uniform_float %x_6 %uint_0 %int_0
          %61 = OpLoad %float %60
          %62 = OpLoad %v2float %v3

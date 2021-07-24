@@ -21,7 +21,9 @@ void main_1() {
   m24 = float2x2(float2(x_40, x_42), float2((x_44 * 1.0f), x_47));
   a = m24[0u].x;
   v2 = float2(asfloat(0x7fc00000u), 1.0f);
-  v3 = reflect(v2, float2(a, 1.0f));
+  const float2 x_53 = v2;
+  const float2 x_55 = float2(a, 1.0f);
+  v3 = reflect(x_53, x_55);
   const uint scalar_offset_3 = ((16u * uint(0))) / 4;
   const float x_58 = asfloat(x_6[scalar_offset_3 / 4][scalar_offset_3 % 4]);
   const float2 x_59 = v3;

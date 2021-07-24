@@ -31,7 +31,8 @@ fn main_1() {
   v2 = vec2<f32>(-0x1.8p+128, 1.0);
   let x_53 : vec2<f32> = v2;
   let x_54 : f32 = a;
-  v3 = reflect(x_53, vec2<f32>(x_54, 1.0));
+  let x_55 : vec2<f32> = vec2<f32>(x_54, 1.0);
+  v3 = reflect(x_53, x_55);
   let x_58 : f32 = x_6.x_GLF_uniform_float_values[0];
   let x_59 : vec2<f32> = v3;
   let x_61 : f32 = x_6.x_GLF_uniform_float_values[0];
