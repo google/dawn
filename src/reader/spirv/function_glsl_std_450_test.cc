@@ -739,7 +739,6 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn(std::vector<GlslStd450Case>{
         {"NClamp", "clamp"},
         {"FClamp", "clamp"},  // WGSL FClamp promises more for NaN
-        {"FaceForward", "faceForward"},
         {"Fma", "fma"},
         {"FMix", "mix"},
         {"SmoothStep", "smoothStep"}}));
@@ -1813,6 +1812,100 @@ TEST_F(SpvParserTest, GlslStd450_Refract_Vector) {
           Identifier[not set]{v2f1}
           Identifier[not set]{v2f2}
           Identifier[not set]{f3}
+        )
+      }
+    })";
+
+  EXPECT_THAT(body, HasSubstr(expected));
+}
+
+TEST_F(SpvParserTest, GlslStd450_FaceForward_Scalar) {
+  const auto assembly = Preamble() + R"(
+     %99 = OpFAdd %float %f1 %f1 ; normal operand has only one use
+     %1 = OpExtInst %float %glsl FaceForward %99 %f2 %f3
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(p->builder(), fe.ast_body());
+  // The %99 sum only has one use.  Ensure it is evaluated only once by
+  // making a let-declaration for it, since it is the normal operand to
+  // the builtin function, and code generation uses it twice.
+  const auto* expected = R"(VariableDeclStatement{
+  VariableConst{
+    x_99
+    none
+    undefined
+    __f32
+    {
+      Binary[not set]{
+        Identifier[not set]{f1}
+        add
+        Identifier[not set]{f1}
+      }
+    }
+  }
+}
+VariableDeclStatement{
+  VariableConst{
+    x_1
+    none
+    undefined
+    __f32
+    {
+      Call[not set]{
+        Identifier[not set]{select}
+        (
+          UnaryOp[not set]{
+            negation
+            Identifier[not set]{x_99}
+          }
+          Identifier[not set]{x_99}
+          Binary[not set]{
+            Binary[not set]{
+              Identifier[not set]{f2}
+              multiply
+              Identifier[not set]{f3}
+            }
+            less_than
+            ScalarConstructor[not set]{0.000000}
+          }
+        )
+      }
+    }
+  }
+})";
+
+  EXPECT_THAT(body, HasSubstr(expected)) << body;
+}
+
+TEST_F(SpvParserTest, GlslStd450_FaceForward_Vector) {
+  const auto assembly = Preamble() + R"(
+     %99 = OpFAdd %v2float %v2f1 %v2f1
+     %1 = OpExtInst %v2float %glsl FaceForward %v2f1 %v2f2 %v2f3
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(p->builder(), fe.ast_body());
+  const auto* expected = R"(VariableConst{
+    x_1
+    none
+    undefined
+    __vec_2__f32
+    {
+      Call[not set]{
+        Identifier[not set]{faceForward}
+        (
+          Identifier[not set]{v2f1}
+          Identifier[not set]{v2f2}
+          Identifier[not set]{v2f3}
         )
       }
     })";
