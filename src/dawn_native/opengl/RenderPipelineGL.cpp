@@ -267,9 +267,9 @@ namespace dawn_native { namespace opengl {
                 gl.VertexAttribDivisor(glAttrib, 0xffffffff);
             } else {
                 switch (vertexBuffer.stepMode) {
-                    case wgpu::InputStepMode::Vertex:
+                    case wgpu::VertexStepMode::Vertex:
                         break;
-                    case wgpu::InputStepMode::Instance:
+                    case wgpu::VertexStepMode::Instance:
                         gl.VertexAttribDivisor(glAttrib, 1);
                         break;
                 }

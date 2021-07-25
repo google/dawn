@@ -74,7 +74,7 @@
 #include <stdbool.h>
 
 #define WGPU_WHOLE_SIZE (0xffffffffffffffffULL)
-// TODO(crbug.com/520): Remove WGPU_STRIDE_UNDEFINED in favor of WGPU_COPY_STRIDE_UNDEFINED.
+// TODO(crbug.com/dawn/520): Remove WGPU_STRIDE_UNDEFINED in favor of WGPU_COPY_STRIDE_UNDEFINED.
 #define WGPU_STRIDE_UNDEFINED (0xffffffffUL)
 #define WGPU_COPY_STRIDE_UNDEFINED (0xffffffffUL)
 
@@ -123,6 +123,11 @@ typedef struct WGPUChainedStruct {
     typedef {{as_cType(typeDef.type.name)}} {{as_cType(typeDef.name)}};
 
 {% endfor %}
+
+// TODO(crbug.com/dawn/1023): Remove after the deprecation period.
+#define WGPUInputStepMode_Vertex WGPUVertexStepMode_Vertex
+#define WGPUInputStepMode_Instance WGPUVertexStepMode_Instance
+#define WGPUInputStepMode_Force32 WGPUVertexStepMode_Force32
 
 #ifdef __cplusplus
 extern "C" {

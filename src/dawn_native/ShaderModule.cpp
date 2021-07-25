@@ -119,11 +119,11 @@ namespace dawn_native {
             UNREACHABLE();
         }
 
-        tint::transform::InputStepMode ToTintInputStepMode(wgpu::InputStepMode mode) {
+        tint::transform::InputStepMode ToTintVertexStepMode(wgpu::VertexStepMode mode) {
             switch (mode) {
-                case wgpu::InputStepMode::Vertex:
+                case wgpu::VertexStepMode::Vertex:
                     return tint::transform::InputStepMode::kVertex;
-                case wgpu::InputStepMode::Instance:
+                case wgpu::VertexStepMode::Instance:
                     return tint::transform::InputStepMode::kInstance;
             }
         }
@@ -1286,7 +1286,7 @@ namespace dawn_native {
             const auto& vertexBuffer = vertexState.buffers[i];
             tint::transform::VertexBufferLayoutDescriptor layout;
             layout.array_stride = vertexBuffer.arrayStride;
-            layout.step_mode = ToTintInputStepMode(vertexBuffer.stepMode);
+            layout.step_mode = ToTintVertexStepMode(vertexBuffer.stepMode);
 
             for (uint32_t j = 0; j < vertexBuffer.attributeCount; ++j) {
                 const auto& attribute = vertexBuffer.attributes[j];

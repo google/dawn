@@ -72,7 +72,7 @@ namespace {
         };
         struct PipelineVertexBufferDesc {
             uint64_t arrayStride;
-            wgpu::InputStepMode stepMode;
+            wgpu::VertexStepMode stepMode;
             std::vector<PipelineVertexBufferAttributeDesc> attributes = {};
         };
 
@@ -171,7 +171,7 @@ namespace {
             DAWN_ASSERT(bufferStride >= kFloat32x4Stride);
 
             std::vector<PipelineVertexBufferDesc> bufferDescList = {
-                {bufferStride, wgpu::InputStepMode::Vertex, {{0, wgpu::VertexFormat::Float32x4}}},
+                {bufferStride, wgpu::VertexStepMode::Vertex, {{0, wgpu::VertexFormat::Float32x4}}},
             };
 
             return CreateRenderPipelineWithBufferDesc(bufferDescList);
@@ -186,9 +186,9 @@ namespace {
             DAWN_ASSERT(bufferStride2 >= kFloat32x2Stride);
 
             std::vector<PipelineVertexBufferDesc> bufferDescList = {
-                {bufferStride1, wgpu::InputStepMode::Vertex, {{0, wgpu::VertexFormat::Float32x4}}},
+                {bufferStride1, wgpu::VertexStepMode::Vertex, {{0, wgpu::VertexFormat::Float32x4}}},
                 {bufferStride2,
-                 wgpu::InputStepMode::Instance,
+                 wgpu::VertexStepMode::Instance,
                  {{3, wgpu::VertexFormat::Float32x2}}},
             };
 

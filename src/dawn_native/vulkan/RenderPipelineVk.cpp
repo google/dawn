@@ -27,11 +27,11 @@ namespace dawn_native { namespace vulkan {
 
     namespace {
 
-        VkVertexInputRate VulkanInputRate(wgpu::InputStepMode stepMode) {
+        VkVertexInputRate VulkanInputRate(wgpu::VertexStepMode stepMode) {
             switch (stepMode) {
-                case wgpu::InputStepMode::Vertex:
+                case wgpu::VertexStepMode::Vertex:
                     return VK_VERTEX_INPUT_RATE_VERTEX;
-                case wgpu::InputStepMode::Instance:
+                case wgpu::VertexStepMode::Instance:
                     return VK_VERTEX_INPUT_RATE_INSTANCE;
             }
         }

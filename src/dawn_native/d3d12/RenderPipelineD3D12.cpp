@@ -96,11 +96,11 @@ namespace dawn_native { namespace d3d12 {
             }
         }
 
-        D3D12_INPUT_CLASSIFICATION InputStepModeFunction(wgpu::InputStepMode mode) {
+        D3D12_INPUT_CLASSIFICATION VertexStepModeFunction(wgpu::VertexStepMode mode) {
             switch (mode) {
-                case wgpu::InputStepMode::Vertex:
+                case wgpu::VertexStepMode::Vertex:
                     return D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-                case wgpu::InputStepMode::Instance:
+                case wgpu::VertexStepMode::Instance:
                     return D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA;
             }
         }
@@ -463,7 +463,7 @@ namespace dawn_native { namespace d3d12 {
             const VertexBufferInfo& input = GetVertexBuffer(attribute.vertexBufferSlot);
 
             inputElementDescriptor.AlignedByteOffset = attribute.offset;
-            inputElementDescriptor.InputSlotClass = InputStepModeFunction(input.stepMode);
+            inputElementDescriptor.InputSlotClass = VertexStepModeFunction(input.stepMode);
             if (inputElementDescriptor.InputSlotClass ==
                 D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA) {
                 inputElementDescriptor.InstanceDataStepRate = 0;

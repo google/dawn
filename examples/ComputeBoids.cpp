@@ -127,7 +127,7 @@ void initRender() {
     descriptor.vertex.module = vsModule;
     descriptor.vertex.bufferCount = 2;
     descriptor.cBuffers[0].arrayStride = sizeof(Particle);
-    descriptor.cBuffers[0].stepMode = wgpu::InputStepMode::Instance;
+    descriptor.cBuffers[0].stepMode = wgpu::VertexStepMode::Instance;
     descriptor.cBuffers[0].attributeCount = 2;
     descriptor.cAttributes[0].offset = offsetof(Particle, pos);
     descriptor.cAttributes[0].format = wgpu::VertexFormat::Float32x2;

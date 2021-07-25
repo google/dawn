@@ -91,11 +91,11 @@ namespace dawn_native { namespace metal {
             }
         }
 
-        MTLVertexStepFunction InputStepModeFunction(wgpu::InputStepMode mode) {
+        MTLVertexStepFunction VertexStepModeFunction(wgpu::VertexStepMode mode) {
             switch (mode) {
-                case wgpu::InputStepMode::Vertex:
+                case wgpu::VertexStepMode::Vertex:
                     return MTLVertexStepFunctionPerVertex;
-                case wgpu::InputStepMode::Instance:
+                case wgpu::VertexStepMode::Instance:
                     return MTLVertexStepFunctionPerInstance;
             }
         }
@@ -488,7 +488,7 @@ namespace dawn_native { namespace metal {
                 // multiple of 4 if it's not.
                 layoutDesc.stride = Align(maxArrayStride, 4);
             } else {
-                layoutDesc.stepFunction = InputStepModeFunction(info.stepMode);
+                layoutDesc.stepFunction = VertexStepModeFunction(info.stepMode);
                 layoutDesc.stepRate = 1;
                 layoutDesc.stride = info.arrayStride;
             }

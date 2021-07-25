@@ -64,7 +64,7 @@ namespace dawn_native {
 
     {% endfor %}
 
-    {% for typeDef in by_category["typedef"] %}
+    {% for typeDef in by_category["typedef"] if typeDef.type.category == "structure" %}
         using {{as_cppType(typeDef.name)}} = {{as_cppType(typeDef.type.name)}};
     {% endfor %}
 

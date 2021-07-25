@@ -81,7 +81,7 @@ namespace dawn_native {
             const VertexBufferLayout* buffer,
             const EntryPointMetadata& metadata,
             ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>* attributesSetMask) {
-            DAWN_TRY(ValidateInputStepMode(buffer->stepMode));
+            DAWN_TRY(ValidateVertexStepMode(buffer->stepMode));
             if (buffer->arrayStride > kMaxVertexBufferArrayStride) {
                 return DAWN_VALIDATION_ERROR("Setting arrayStride out of bounds");
             }
@@ -411,10 +411,10 @@ namespace dawn_native {
             mVertexBufferInfos[typedSlot].arrayStride = buffers[slot].arrayStride;
             mVertexBufferInfos[typedSlot].stepMode = buffers[slot].stepMode;
             switch (buffers[slot].stepMode) {
-                case wgpu::InputStepMode::Vertex:
+                case wgpu::VertexStepMode::Vertex:
                     mVertexBufferSlotsUsedAsVertexBuffer.set(typedSlot);
                     break;
-                case wgpu::InputStepMode::Instance:
+                case wgpu::VertexStepMode::Instance:
                     mVertexBufferSlotsUsedAsInstanceBuffer.set(typedSlot);
                     break;
                 default:

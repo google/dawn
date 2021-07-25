@@ -49,7 +49,7 @@ namespace dawn_native {
 
     struct VertexBufferInfo {
         uint64_t arrayStride;
-        wgpu::InputStepMode stepMode;
+        wgpu::VertexStepMode stepMode;
     };
 
     class RenderPipelineBase : public PipelineBase {

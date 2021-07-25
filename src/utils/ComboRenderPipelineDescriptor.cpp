@@ -33,7 +33,7 @@ namespace utils {
         }
         for (uint32_t i = 0; i < kMaxVertexBuffers; ++i) {
             cVertexBuffers[i].arrayStride = 0;
-            cVertexBuffers[i].stepMode = wgpu::InputStepMode::Vertex;
+            cVertexBuffers[i].stepMode = wgpu::VertexStepMode::Vertex;
             cVertexBuffers[i].attributeCount = 0;
             cVertexBuffers[i].attributes = nullptr;
         }
@@ -63,7 +63,7 @@ namespace utils {
             }
             for (uint32_t i = 0; i < kMaxVertexBuffers; ++i) {
                 cBuffers[i].arrayStride = 0;
-                cBuffers[i].stepMode = wgpu::InputStepMode::Vertex;
+                cBuffers[i].stepMode = wgpu::VertexStepMode::Vertex;
                 cBuffers[i].attributeCount = 0;
                 cBuffers[i].attributes = nullptr;
             }
