@@ -355,6 +355,7 @@ const char* kReservedKeywordsHLSL[] = {
     "isinf",
     "isnan",
     "lerp",
+    "line",
     "lineadj",
     "linear",
     "lit",

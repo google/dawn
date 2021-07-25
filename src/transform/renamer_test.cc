@@ -587,6 +587,7 @@ INSTANTIATE_TEST_SUITE_P(RenamerTestHlsl,
                                          // "ldexp",  // WGSL intrinsic
                                          // "length",  // WGSL intrinsic
                                          "lerp",
+                                         "line",
                                          "lineadj",
                                          "linear",
                                          "lit",
