@@ -63,7 +63,10 @@ enum class VertexFormat {
 
 /// Describes if a vertex attributes increments with vertex index or instance
 /// index
-enum class InputStepMode { kVertex, kInstance, kLastEntry = kInstance };
+enum class VertexStepMode { kVertex, kInstance, kLastEntry = kInstance };
+
+/// Deprecated
+using InputStepMode = VertexStepMode;
 
 /// Describes a vertex attribute within a buffer
 struct VertexAttributeDescriptor {
