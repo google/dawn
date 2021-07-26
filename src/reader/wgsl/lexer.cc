@@ -14,7 +14,11 @@
 
 #include "src/reader/wgsl/lexer.h"
 
+#include <cmath>
+#include <cstring>
 #include <limits>
+
+#include "src/debug.h"
 
 namespace tint {
 namespace reader {
@@ -23,6 +27,26 @@ namespace {
 
 bool is_whitespace(char c) {
   return std::isspace(c);
+}
+
+uint32_t dec_value(char c) {
+  if (c >= '0' && c <= '9') {
+    return static_cast<uint32_t>(c - '0');
+  }
+  return 0;
+}
+
+uint32_t hex_value(char c) {
+  if (c >= '0' && c <= '9') {
+    return static_cast<uint32_t>(c - '0');
+  }
+  if (c >= 'a' && c <= 'f') {
+    return 0xA + static_cast<uint32_t>(c - 'a');
+  }
+  if (c >= 'A' && c <= 'F') {
+    return 0xA + static_cast<uint32_t>(c - 'A');
+  }
+  return 0;
 }
 
 }  // namespace
@@ -43,7 +67,12 @@ Token Lexer::next() {
     return {Token::Type::kEOF, begin_source()};
   }
 
-  auto t = try_hex_integer();
+  auto t = try_hex_float();
+  if (!t.IsUninitialized()) {
+    return t;
+  }
+
+  t = try_hex_integer();
   if (!t.IsUninitialized()) {
     return t;
   }
@@ -237,6 +266,225 @@ Token Lexer::try_float() {
   }
 
   return {source, static_cast<float>(res)};
+}
+
+Token Lexer::try_hex_float() {
+  constexpr uint32_t kTotalBits = 32;
+  constexpr uint32_t kTotalMsb = kTotalBits - 1;
+  constexpr uint32_t kMantissaBits = 23;
+  constexpr uint32_t kMantissaMsb = kMantissaBits - 1;
+  constexpr uint32_t kMantissaShiftRight = kTotalBits - kMantissaBits;
+  constexpr int32_t kExponentBias = 127;
+  constexpr int32_t kExponentMax = 255;
+  constexpr uint32_t kExponentBits = 8;
+  constexpr uint32_t kExponentMask = (1 << kExponentBits) - 1;
+  constexpr uint32_t kExponentLeftShift = kMantissaBits;
+  constexpr uint32_t kSignBit = 31;
+
+  auto start = pos_;
+  auto end = pos_;
+
+  auto source = begin_source();
+
+  // clang-format off
+  // -?0x([0-9a-fA-F]*.?[0-9a-fA-F]+ | [0-9a-fA-F]+.[0-9a-fA-F]*)(p|P)(+|-)?[0-9]+  // NOLINT
+  // clang-format on
+
+  // -?
+  int32_t sign_bit = 0;
+  if (matches(end, "-")) {
+    sign_bit = 1;
+    end++;
+  }
+  // 0x
+  if (matches(end, "0x")) {
+    end += 2;
+  } else {
+    return {};
+  }
+
+  uint32_t mantissa = 0;
+  int32_t exponent = 0;
+
+  // `set_next_mantissa_bit_to` sets next `mantissa` bit starting from msb to
+  // lsb to value 1 if `set` is true, 0 otherwise
+  uint32_t mantissa_next_bit = kTotalMsb;
+  auto set_next_mantissa_bit_to = [&](bool set) -> bool {
+    if (mantissa_next_bit > kTotalMsb) {
+      return false;  // Overflowed mantissa
+    }
+    if (set) {
+      mantissa |= (1 << mantissa_next_bit);
+    }
+    --mantissa_next_bit;
+    return true;
+  };
+
+  // Parse integer part
+  // [0-9a-fA-F]*
+  bool has_integer = false;
+  bool has_zero_integer = true;
+  bool leading_bit_seen = false;
+  while (end < len_ && is_hex(content_->data[end])) {
+    has_integer = true;
+
+    const auto nibble = hex_value(content_->data[end]);
+    if (nibble != 0) {
+      has_zero_integer = false;
+    }
+
+    for (int32_t i = 3; i >= 0; --i) {
+      auto v = 1 & (nibble >> i);
+
+      // Skip leading 0s and the first 1
+      if (leading_bit_seen) {
+        if (!set_next_mantissa_bit_to(v != 0)) {
+          return {};
+        }
+        ++exponent;
+      } else {
+        if (v == 1) {
+          leading_bit_seen = true;
+        }
+      }
+    }
+
+    end++;
+  }
+
+  // .?
+  if (matches(end, ".")) {
+    end++;
+  }
+
+  // Parse fractional part
+  // [0-9a-fA-F]*
+  bool has_fractional = false;
+  leading_bit_seen = false;
+  while (end < len_ && is_hex(content_->data[end])) {
+    has_fractional = true;
+    auto nibble = hex_value(content_->data[end]);
+    for (int32_t i = 3; i >= 0; --i) {
+      auto v = 1 & (nibble >> i);
+
+      if (v == 1) {
+        leading_bit_seen = true;
+      }
+
+      // If integer part is 0 (denorm), we only start writing bits to the
+      // mantissa once we have a non-zero fractional bit. While the fractional
+      // values are 0, we adjust the exponent to avoid overflowing `mantissa`.
+      if (has_zero_integer && !leading_bit_seen) {
+        --exponent;
+      } else {
+        if (!set_next_mantissa_bit_to(v != 0)) {
+          return {};
+        }
+      }
+    }
+
+    end++;
+  }
+
+  if (!(has_integer || has_fractional)) {
+    return {};
+  }
+
+  // (p|P)
+  if (matches(end, "p") || matches(end, "P")) {
+    end++;
+  } else {
+    return {};
+  }
+
+  // (+|-)?
+  int32_t exponent_sign = 1;
+  if (matches(end, "+")) {
+    end++;
+  } else if (matches(end, "-")) {
+    exponent_sign = -1;
+    end++;
+  }
+
+  // Parse exponent from input
+  // [0-9]+
+  bool has_exponent = false;
+  int32_t input_exponent = 0;
+  while (end < len_ && isdigit(content_->data[end])) {
+    has_exponent = true;
+    input_exponent = (input_exponent * 10) + dec_value(content_->data[end]);
+    end++;
+  }
+  if (!has_exponent) {
+    return {};
+  }
+
+  pos_ = end;
+  location_.column += (end - start);
+  end_source(source);
+
+  // Compute exponent so far
+  exponent = exponent + (input_exponent * exponent_sign);
+
+  // Determine if value is zero
+  // Note: it's not enough to check mantissa == 0 as we drop initial bit from
+  // integer part.
+  bool is_zero = has_zero_integer && mantissa == 0;
+  TINT_ASSERT(Reader, !is_zero || (exponent == 0 && mantissa == 0));
+
+  if (!is_zero) {
+    // Bias exponent if non-zero
+    // After this, if exponent is <= 0, our value is a denormal
+    exponent += kExponentBias;
+
+    // Denormal uses biased exponent of -126, not -127
+    if (has_zero_integer) {
+      mantissa <<= 1;
+      --exponent;
+    }
+  }
+
+  // Shift mantissa to occupy the low 23 bits
+  mantissa >>= kMantissaShiftRight;
+
+  // If denormal, shift mantissa until our exponent is zero
+  if (!is_zero) {
+    // Denorm has exponent 0 and non-zero mantissa. We set the top bit here,
+    // then shift the mantissa to make exponent zero.
+    if (exponent <= 0) {
+      mantissa >>= 1;
+      mantissa |= (1 << kMantissaMsb);
+    }
+
+    while (exponent < 0) {
+      mantissa >>= 1;
+      ++exponent;
+
+      // If underflow, clamp to zero
+      if (mantissa == 0) {
+        exponent = 0;
+      }
+    }
+  }
+
+  if (exponent > kExponentMax) {
+    // Overflow: set to infinity
+    exponent = kExponentMax;
+    mantissa = 0;
+  } else if (exponent == kExponentMax && mantissa != 0) {
+    // NaN: set to infinity
+    mantissa = 0;
+  }
+
+  // Combine sign, mantissa, and exponent
+  uint32_t result_u32 = sign_bit << kSignBit;
+  result_u32 |= mantissa;
+  result_u32 |= (exponent & kExponentMask) << kExponentLeftShift;
+
+  // Reinterpret as float and return
+  float result;
+  std::memcpy(&result, &result_u32, sizeof(result));
+  return {source, static_cast<float>(result)};
 }
 
 Token Lexer::build_token_from_int_if_possible(Source source,
