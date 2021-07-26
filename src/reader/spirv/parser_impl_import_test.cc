@@ -114,6 +114,9 @@ TEST_F(SpvParserImportTest, Import_NonSemantic_IgnoredExtInsts) {
 )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
+
+  p->SkipDumpingPending(
+      "crbug.com/tint/1041 track access mode in spirv-reader parser type");
 }
 
 // TODO(dneto): We don't currently support other kinds of extended instruction

@@ -1199,6 +1199,9 @@ Assignment{
   }
   ScalarConstructor[not set]{0u}
 })")) << p->error();
+
+  p->SkipDumpingPending(
+      "crbug.com/tint/1041 track access mode in spirv-reader parser type");
 }
 
 TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughCopyObject_WithHoisting) {
