@@ -2544,7 +2544,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_CopyObject) {
         x_11
         none
         undefined
-        __ptr_none__i32
+        __ptr_private__i32
         {
           UnaryOp[not set]{
             address-of
@@ -2779,7 +2779,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_CopyObject) {
         x_11
         none
         undefined
-        __ptr_none__u32
+        __ptr_private__u32
         {
           UnaryOp[not set]{
             address-of
@@ -4120,7 +4120,7 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_CopyObject) {
         x_14
         none
         undefined
-        __ptr_none__i32
+        __ptr_private__i32
         {
           UnaryOp[not set]{
             address-of
@@ -4389,7 +4389,7 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_CopyObject) {
         x_14
         none
         undefined
-        __ptr_none__u32
+        __ptr_private__u32
         {
           UnaryOp[not set]{
             address-of
@@ -4705,7 +4705,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_CopyObject) {
         x_14
         none
         undefined
-        __ptr_none__i32
+        __ptr_private__i32
         {
           UnaryOp[not set]{
             address-of
@@ -4998,7 +4998,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_CopyObject) {
         x_14
         none
         undefined
-        __ptr_none__u32
+        __ptr_private__u32
         {
           UnaryOp[not set]{
             address-of
@@ -5371,7 +5371,7 @@ TEST_P(SpvModuleScopeVarParserTest_ComputeBuiltin, Load_CopyObject) {
         x_13
         none
         undefined
-        __ptr_none)" + wgsl_type +
+        __ptr_private)" + wgsl_type +
                                R"(
         {
           UnaryOp[not set]{

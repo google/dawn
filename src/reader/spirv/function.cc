@@ -4699,7 +4699,10 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
 ast::StorageClass FunctionEmitter::GetStorageClassForPointerValue(uint32_t id) {
   auto where = def_info_.find(id);
   if (where != def_info_.end()) {
-    return where->second.get()->storage_class;
+    auto candidate = where->second.get()->storage_class;
+    if (candidate != ast::StorageClass::kInvalid) {
+      return candidate;
+    }
   }
   const auto type_id = def_use_mgr_->GetDef(id)->type_id();
   if (type_id) {
@@ -4868,7 +4871,7 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
       // Avoid moving combinatorial values across constructs.  This is a
       // simple heuristic to avoid changing the cost of an operation
       // by moving it into or out of a loop, for example.
-      if ((def_info->storage_class == ast::StorageClass::kNone) &&
+      if ((def_info->storage_class == ast::StorageClass::kInvalid) &&
           def_info->used_in_another_construct) {
         should_hoist = true;
       }

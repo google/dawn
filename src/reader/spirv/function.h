@@ -293,8 +293,8 @@ struct DefInfo {
   /// This is required to carry a storage class override from a storage
   /// buffer expressed in the old style (with Uniform storage class)
   /// that needs to be remapped to StorageBuffer storage class.
-  /// This is kNone for non-pointers.
-  ast::StorageClass storage_class = ast::StorageClass::kNone;
+  /// This is kInvalid for non-pointers.
+  ast::StorageClass storage_class = ast::StorageClass::kInvalid;
 
   /// The reason, if any, that this value should be ignored.
   /// Normally no values are ignored.  This field can be updated while

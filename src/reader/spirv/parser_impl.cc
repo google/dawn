@@ -1216,7 +1216,7 @@ const Type* ParserImpl::ConvertType(uint32_t type_id,
     remap_buffer_block_type_.insert(type_id);
   }
 
-  // Pipeline intput and output variables map to private variables.
+  // Pipeline input and output variables map to private variables.
   if (ast_storage_class == ast::StorageClass::kInput ||
       ast_storage_class == ast::StorageClass::kOutput) {
     ast_storage_class = ast::StorageClass::kPrivate;
