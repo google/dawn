@@ -1,3 +1,7 @@
+intrinsics/gen/textureLoad/c7cbed.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec4<f32> = textureLoad(arg_0, 1);
+                       ^^^^^^^^^^^
+
 Texture1D<float4> arg_0 : register(t0, space1);
 
 void textureLoad_c7cbed() {

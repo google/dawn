@@ -1,3 +1,7 @@
+intrinsics/gen/textureLoad/3d9c90.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec4<f32> = textureLoad(arg_0, vec3<i32>());
+                       ^^^^^^^^^^^
+
 Texture3D<float4> arg_0 : register(t0, space1);
 
 void textureLoad_3d9c90() {

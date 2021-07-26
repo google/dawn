@@ -1,3 +1,7 @@
+intrinsics/gen/textureLoad/c02b74.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec4<f32> = textureLoad(arg_0, 1);
+                       ^^^^^^^^^^^
+
 #include <metal_stdlib>
 
 using namespace metal;

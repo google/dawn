@@ -1,3 +1,7 @@
+intrinsics/gen/textureLoad/2ae485.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec4<i32> = textureLoad(arg_0, vec2<i32>());
+                       ^^^^^^^^^^^
+
 [[group(1), binding(0)]] var arg_0 : texture_storage_2d<rgba16sint, read>;
 
 fn textureLoad_2ae485() {

@@ -1,3 +1,7 @@
+vk-gl-cts/rasterization/line_continuity/line-strip/1.wgsl:9:26 warning: use of deprecated intrinsic
+  let x_22 : vec4<f32> = textureLoad(texture, vec2<i32>(vec2<f32>(x_19.x, x_19.y)));
+                         ^^^^^^^^^^^
+
 #include <metal_stdlib>
 
 using namespace metal;

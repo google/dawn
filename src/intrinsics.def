@@ -516,18 +516,18 @@ fn textureLoad<T: fiu32>(texture: texture_3d<T>, coords: vec3<i32>, level: i32) 
 fn textureLoad<T: fiu32>(texture: texture_multisampled_2d<T>, coords: vec2<i32>, sample_index: i32) -> vec4<T>
 fn textureLoad(texture: texture_depth_2d, coords: vec2<i32>, level: i32) -> f32
 fn textureLoad(texture: texture_depth_2d_array, coords: vec2<i32>, array_index: i32, level: i32) -> f32
-fn textureLoad(texture: texture_storage_1d<f32_texel_format, read>, coords: i32) -> vec4<f32>
-fn textureLoad(texture: texture_storage_2d<f32_texel_format, read>, coords: vec2<i32>) -> vec4<f32>
-fn textureLoad(texture: texture_storage_2d_array<f32_texel_format, read>, coords: vec2<i32>, array_index: i32) -> vec4<f32>
-fn textureLoad(texture: texture_storage_3d<f32_texel_format, read>, coords: vec3<i32>) -> vec4<f32>
-fn textureLoad(texture: texture_storage_1d<i32_texel_format, read>, coords: i32) -> vec4<i32>
-fn textureLoad(texture: texture_storage_2d<i32_texel_format, read>, coords: vec2<i32>) -> vec4<i32>
-fn textureLoad(texture: texture_storage_2d_array<i32_texel_format, read>, coords: vec2<i32>, array_index: i32) -> vec4<i32>
-fn textureLoad(texture: texture_storage_3d<i32_texel_format, read>, coords: vec3<i32>) -> vec4<i32>
-fn textureLoad(texture: texture_storage_1d<u32_texel_format, read>, coords: i32) -> vec4<u32>
-fn textureLoad(texture: texture_storage_2d<u32_texel_format, read>, coords: vec2<i32>) -> vec4<u32>
-fn textureLoad(texture: texture_storage_2d_array<u32_texel_format, read>, coords: vec2<i32>, array_index: i32) -> vec4<u32>
-fn textureLoad(texture: texture_storage_3d<u32_texel_format, read>, coords: vec3<i32>) -> vec4<u32>
+[[deprecated]] fn textureLoad(texture: texture_storage_1d<f32_texel_format, read>, coords: i32) -> vec4<f32>
+[[deprecated]] fn textureLoad(texture: texture_storage_2d<f32_texel_format, read>, coords: vec2<i32>) -> vec4<f32>
+[[deprecated]] fn textureLoad(texture: texture_storage_2d_array<f32_texel_format, read>, coords: vec2<i32>, array_index: i32) -> vec4<f32>
+[[deprecated]] fn textureLoad(texture: texture_storage_3d<f32_texel_format, read>, coords: vec3<i32>) -> vec4<f32>
+[[deprecated]] fn textureLoad(texture: texture_storage_1d<i32_texel_format, read>, coords: i32) -> vec4<i32>
+[[deprecated]] fn textureLoad(texture: texture_storage_2d<i32_texel_format, read>, coords: vec2<i32>) -> vec4<i32>
+[[deprecated]] fn textureLoad(texture: texture_storage_2d_array<i32_texel_format, read>, coords: vec2<i32>, array_index: i32) -> vec4<i32>
+[[deprecated]] fn textureLoad(texture: texture_storage_3d<i32_texel_format, read>, coords: vec3<i32>) -> vec4<i32>
+[[deprecated]] fn textureLoad(texture: texture_storage_1d<u32_texel_format, read>, coords: i32) -> vec4<u32>
+[[deprecated]] fn textureLoad(texture: texture_storage_2d<u32_texel_format, read>, coords: vec2<i32>) -> vec4<u32>
+[[deprecated]] fn textureLoad(texture: texture_storage_2d_array<u32_texel_format, read>, coords: vec2<i32>, array_index: i32) -> vec4<u32>
+[[deprecated]] fn textureLoad(texture: texture_storage_3d<u32_texel_format, read>, coords: vec3<i32>) -> vec4<u32>
 fn textureLoad(texture: texture_external, coords: vec2<i32>) -> vec4<f32>
 
 [[stage("fragment", "compute")]] fn atomicLoad<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>) -> T

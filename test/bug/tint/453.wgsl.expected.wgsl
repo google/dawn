@@ -1,3 +1,7 @@
+bug/tint/453.wgsl:7:26 warning: use of deprecated intrinsic
+  let x_22 : vec4<u32> = textureLoad(Src, vec2<i32>(0, 0));
+                         ^^^^^^^^^^^
+
 [[group(0), binding(0)]] var Src : texture_storage_2d<r32uint, read>;
 
 [[group(0), binding(1)]] var Dst : texture_storage_2d<r32uint, write>;

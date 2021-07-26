@@ -1,3 +1,7 @@
+intrinsics/gen/textureLoad/f74bd8.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec4<f32> = textureLoad(arg_0, vec3<i32>());
+                       ^^^^^^^^^^^
+
 [[group(1), binding(0)]] var arg_0 : texture_storage_3d<rg32float, read>;
 
 fn textureLoad_f74bd8() {

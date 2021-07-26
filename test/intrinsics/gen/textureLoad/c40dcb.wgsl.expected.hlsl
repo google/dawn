@@ -1,3 +1,7 @@
+intrinsics/gen/textureLoad/c40dcb.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec4<u32> = textureLoad(arg_0, vec2<i32>(), 1);
+                       ^^^^^^^^^^^
+
 Texture2DArray<uint4> arg_0 : register(t0, space1);
 
 void textureLoad_c40dcb() {

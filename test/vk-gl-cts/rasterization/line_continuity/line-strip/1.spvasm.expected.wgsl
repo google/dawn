@@ -1,3 +1,4 @@
+warning: use of deprecated intrinsic
 var<private> color_out : vec4<f32>;
 
 [[group(0), binding(0)]] var texture : texture_storage_2d<rgba8unorm, read>;

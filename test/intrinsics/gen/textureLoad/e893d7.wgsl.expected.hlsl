@@ -1,3 +1,7 @@
+intrinsics/gen/textureLoad/e893d7.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec4<f32> = textureLoad(arg_0, vec2<i32>());
+                       ^^^^^^^^^^^
+
 Texture2D<float4> arg_0 : register(t0, space1);
 
 void textureLoad_e893d7() {

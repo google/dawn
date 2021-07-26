@@ -1,3 +1,4 @@
+warning: use of deprecated intrinsic
 static float4 color_out = float4(0.0f, 0.0f, 0.0f, 0.0f);
 Texture2D<float4> tint_symbol : register(t0, space0);
 static float4 gl_FragCoord = float4(0.0f, 0.0f, 0.0f, 0.0f);

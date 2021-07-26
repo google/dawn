@@ -1,3 +1,7 @@
+bug/tint/453.wgsl:7:26 warning: use of deprecated intrinsic
+  let x_22 : vec4<u32> = textureLoad(Src, vec2<i32>(0, 0));
+                         ^^^^^^^^^^^
+
 Texture2D<uint4> Src : register(t0, space0);
 RWTexture2D<uint4> Dst : register(u1, space0);
 

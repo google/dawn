@@ -1,3 +1,4 @@
+warning: use of deprecated intrinsic
 #include <metal_stdlib>
 
 using namespace metal;

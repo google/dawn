@@ -1,3 +1,7 @@
+vk-gl-cts/rasterization/line_continuity/line-strip/1.wgsl:9:26 warning: use of deprecated intrinsic
+  let x_22 : vec4<f32> = textureLoad(texture, vec2<i32>(vec2<f32>(x_19.x, x_19.y)));
+                         ^^^^^^^^^^^
+
 static float4 color_out = float4(0.0f, 0.0f, 0.0f, 0.0f);
 Texture2D<float4> tint_symbol : register(t0, space0);
 static float4 gl_FragCoord = float4(0.0f, 0.0f, 0.0f, 0.0f);

@@ -1,3 +1,4 @@
+warning: use of deprecated intrinsic
 [[group(0), binding(0)]] var Src : texture_storage_2d<r32uint, read>;
 
 [[group(0), binding(1)]] var Dst : texture_storage_2d<r32uint, write>;

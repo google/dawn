@@ -1,3 +1,7 @@
+intrinsics/gen/textureLoad/f56e6f.wgsl:29:24 warning: use of deprecated intrinsic
+  var res: vec4<u32> = textureLoad(arg_0, vec3<i32>());
+                       ^^^^^^^^^^^
+
 [[group(1), binding(0)]] var arg_0 : texture_storage_3d<rgba16uint, read>;
 
 fn textureLoad_f56e6f() {
