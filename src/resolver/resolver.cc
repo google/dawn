@@ -1070,6 +1070,14 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
     return false;
   }
 
+  if (var->is_const() && info->kind != VariableKind::kParameter &&
+      !(storage_type->IsConstructible() || storage_type->Is<sem::Pointer>())) {
+    AddError(storage_type->FriendlyName(builder_->Symbols()) +
+                 " cannot be used as the type of a let",
+             var->source());
+    return false;
+  }
+
   if (auto* r = storage_type->As<sem::Array>()) {
     if (r->IsRuntimeSized()) {
       AddError("runtime arrays may only appear as the last member of a struct",

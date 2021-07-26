@@ -78,6 +78,20 @@ TEST_F(ResolverVarLetValidationTest, VarTypeNotStorable) {
             "type of a var");
 }
 
+TEST_F(ResolverVarLetValidationTest, LetTypeNotConstructible) {
+  // [[group(0), binding(0)]] var t1 : texture_2d<f32>;
+  // let t2 : t1;
+  auto* t1 =
+      Global("t1", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+             GroupAndBinding(0, 0));
+  auto* t2 = Const(Source{{56, 78}}, "t2", nullptr, Expr(t1));
+  WrapInFunction(t2);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "56:78 error: texture_2d<f32> cannot be used as the type of a let");
+}
+
 TEST_F(ResolverVarLetValidationTest, LetConstructorWrongType) {
   // var v : i32 = 2u
   WrapInFunction(Const(Source{{3, 3}}, "v", ty.i32(), Expr(2u)));
