@@ -118,6 +118,7 @@ TEST_F(SpvParserGetDecorationsTest, GetDecorationsForMember_RelaxedPrecision) {
   EXPECT_THAT(decorations,
               UnorderedElementsAre(Decoration{SpvDecorationRelaxedPrecision}));
   EXPECT_TRUE(p->error().empty());
+  p->SkipDumpingPending(kSkipReason);
 }
 
 // TODO(dneto): Enable when ArrayStride is handled

@@ -5549,15 +5549,22 @@ TEST_F(SpvModuleScopeVarParserTest, RegisterInputOutputVars) {
       R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
-    OpEntryPoint GLCompute %1000 "w1000"
-    OpEntryPoint GLCompute %1100 "w1100" %1
-    OpEntryPoint GLCompute %1200 "w1200" %2 %15
+    OpEntryPoint Fragment %1000 "w1000"
+    OpEntryPoint Fragment %1100 "w1100" %1
+    OpEntryPoint Fragment %1200 "w1200" %2 %15
     ; duplication is tolerated prior to SPIR-V 1.4
-    OpEntryPoint GLCompute %1300 "w1300" %1 %15 %2 %1
-    OpExecutionMode %1000 LocalSize 1 1 1
-    OpExecutionMode %1100 LocalSize 1 1 1
-    OpExecutionMode %1200 LocalSize 1 1 1
-    OpExecutionMode %1300 LocalSize 1 1 1
+    OpEntryPoint Fragment %1300 "w1300" %1 %15 %2 %1
+    OpExecutionMode %1000 OriginUpperLeft
+    OpExecutionMode %1100 OriginUpperLeft
+    OpExecutionMode %1200 OriginUpperLeft
+    OpExecutionMode %1300 OriginUpperLeft
+
+    OpDecorate %1 Location 1
+    OpDecorate %2 Location 2
+    OpDecorate %5 Location 5
+    OpDecorate %11 Location 1
+    OpDecorate %12 Location 2
+    OpDecorate %15 Location 5
 
 )" + CommonTypes() +
       R"(
@@ -5644,6 +5651,11 @@ TEST_F(SpvModuleScopeVarParserTest, RegisterInputOutputVars) {
   EXPECT_EQ(1u, info_1300.size());
   EXPECT_THAT(info_1300[0].inputs, ElementsAre(1, 2));
   EXPECT_THAT(info_1300[0].outputs, ElementsAre(15));
+
+  // Validation incorrectly reports an overlap for the duplicated variable %1 on
+  // shader %1300
+  p->SkipDumpingPending(
+      "https://github.com/KhronosGroup/SPIRV-Tools/issues/4403");
 }
 
 TEST_F(SpvModuleScopeVarParserTest, InputVarsConvertedToPrivate) {
