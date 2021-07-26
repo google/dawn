@@ -5752,23 +5752,21 @@ TypedExpression FunctionEmitter::MakeArrayLength(
     return {};
   }
 
-  auto* member_ident = create<ast::IdentifierExpression>(
-      Source{}, builder_.Symbols().Register(field_name));
   auto member_expr = MakeExpression(struct_ptr_id);
   if (!member_expr) {
     return {};
   }
+  if (member_expr.type->Is<Pointer>()) {
+    member_expr = Dereference(member_expr);
+  }
+  auto* member_ident = create<ast::IdentifierExpression>(
+      Source{}, builder_.Symbols().Register(field_name));
   auto* member_access = create<ast::MemberAccessorExpression>(
       Source{}, member_expr.expr, member_ident);
 
   // Generate the intrinsic function call.
-  std::string call_ident_str = "arrayLength";
-  auto* call_ident = create<ast::IdentifierExpression>(
-      Source{}, builder_.Symbols().Register(call_ident_str));
-
-  ast::ExpressionList params{member_access};
   auto* call_expr =
-      create<ast::CallExpression>(Source{}, call_ident, std::move(params));
+      builder_.Call(Source{}, "arrayLength", builder_.AddressOf(member_access));
 
   return {parser_impl_.ConvertType(inst.type_id()), call_expr};
 }

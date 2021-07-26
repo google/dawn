@@ -1326,7 +1326,7 @@ std::string RuntimeArrayPreamble() {
   )";
 }
 
-TEST_F(SpvParserMemoryTest, ArrayLength) {
+TEST_F(SpvParserMemoryTest, ArrayLength_FromVar) {
   const auto assembly = RuntimeArrayPreamble() + R"(
 
   %100 = OpFunction %void None %voidfn
@@ -1351,9 +1351,114 @@ TEST_F(SpvParserMemoryTest, ArrayLength) {
       Call[not set]{
         Identifier[not set]{arrayLength}
         (
-          MemberAccessor[not set]{
-            Identifier[not set]{myvar}
-            Identifier[not set]{rtarr}
+          UnaryOp[not set]{
+            address-of
+            MemberAccessor[not set]{
+              Identifier[not set]{myvar}
+              Identifier[not set]{rtarr}
+            }
+          }
+        )
+      }
+    }
+  }
+}
+)")) << body_str;
+}
+
+TEST_F(SpvParserMemoryTest, ArrayLength_FromCopyObject) {
+  const auto assembly = RuntimeArrayPreamble() + R"(
+
+  %100 = OpFunction %void None %voidfn
+
+  %entry = OpLabel
+  %2 = OpCopyObject %ptr_struct %myvar
+  %1 = OpArrayLength %uint %2 1
+  OpReturn
+  OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body_str = ToString(p->builder(), fe.ast_body());
+  EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
+  VariableConst{
+    x_2
+    none
+    undefined
+    __ptr_storage__type_name_S
+    {
+      UnaryOp[not set]{
+        address-of
+        Identifier[not set]{myvar}
+      }
+    }
+  }
+}
+VariableDeclStatement{
+  VariableConst{
+    x_1
+    none
+    undefined
+    __u32
+    {
+      Call[not set]{
+        Identifier[not set]{arrayLength}
+        (
+          UnaryOp[not set]{
+            address-of
+            MemberAccessor[not set]{
+              UnaryOp[not set]{
+                indirection
+                Identifier[not set]{x_2}
+              }
+              Identifier[not set]{rtarr}
+            }
+          }
+        )
+      }
+    }
+  }
+}
+)")) << body_str;
+
+  p->SkipDumpingPending(
+      "crbug.com/tint/1041 track access mode in spirv-reader parser type");
+}
+
+TEST_F(SpvParserMemoryTest, ArrayLength_FromAccessChain) {
+  const auto assembly = RuntimeArrayPreamble() + R"(
+
+  %100 = OpFunction %void None %voidfn
+
+  %entry = OpLabel
+  %2 = OpAccessChain %ptr_struct %myvar ; no indices
+  %1 = OpArrayLength %uint %2 1
+  OpReturn
+  OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body_str = ToString(p->builder(), fe.ast_body());
+  EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
+  VariableConst{
+    x_1
+    none
+    undefined
+    __u32
+    {
+      Call[not set]{
+        Identifier[not set]{arrayLength}
+        (
+          UnaryOp[not set]{
+            address-of
+            MemberAccessor[not set]{
+              Identifier[not set]{myvar}
+              Identifier[not set]{rtarr}
+            }
           }
         )
       }
