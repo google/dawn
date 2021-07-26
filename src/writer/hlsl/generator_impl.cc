@@ -268,6 +268,10 @@ bool GeneratorImpl::EmitArrayAccessor(std::ostream& out,
 bool GeneratorImpl::EmitBitcast(std::ostream& out,
                                 ast::BitcastExpression* expr) {
   auto* type = TypeOf(expr);
+  if (auto* vec = type->UnwrapRef()->As<sem::Vector>()) {
+    type = vec->type();
+  }
+
   if (!type->is_integer_scalar() && !type->is_float_scalar()) {
     diagnostics_.add_error(diag::System::Writer,
                            "Unable to do bitcast to type " + type->type_name());
