@@ -13,11 +13,7 @@ void main_1() {
     i = (i + 1);
     j = (j + 1);
   }
-  bool tint_tmp = (i == 9);
-  if (tint_tmp) {
-    tint_tmp = (j == 10);
-  }
-  if ((tint_tmp)) {
+  if (((i == 9) & (j == 10))) {
     x_GLF_color = float4(1.0f, 0.0f, 0.0f, 1.0f);
   } else {
     x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);

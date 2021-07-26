@@ -58,10 +58,10 @@ int pointInTriangle_vf2_vf2_vf2_vf2_(thread float2* const p, thread float2* cons
   float const x_126 = ((x_117 * x_119) - (x_122 * x_124));
   x_67 = x_126;
   bool const x_127 = (x_99 < 0.0f);
-  bool const x_129 = (x_127 && (x_126 < 0.0f));
+  bool const x_129 = (x_127 & (x_126 < 0.0f));
   x_136_phi = x_129;
   if (!(x_129)) {
-    x_135 = ((x_99 >= 0.0f) && (x_126 >= 0.0f));
+    x_135 = ((x_99 >= 0.0f) & (x_126 >= 0.0f));
     x_136_phi = x_135;
   }
   bool const x_136 = x_136_phi;
@@ -84,10 +84,10 @@ int pointInTriangle_vf2_vf2_vf2_vf2_(thread float2* const p, thread float2* cons
   float const x_162 = param_4.y;
   float const x_164 = ((x_155 * x_157) - (x_160 * x_162));
   x_66 = x_164;
-  bool const x_166 = (x_127 && (x_164 < 0.0f));
+  bool const x_166 = (x_127 & (x_164 < 0.0f));
   x_173_phi = x_166;
   if (!(x_166)) {
-    x_172 = ((x_99 >= 0.0f) && (x_164 >= 0.0f));
+    x_172 = ((x_99 >= 0.0f) & (x_164 >= 0.0f));
     x_173_phi = x_172;
   }
   bool const x_173 = x_173_phi;

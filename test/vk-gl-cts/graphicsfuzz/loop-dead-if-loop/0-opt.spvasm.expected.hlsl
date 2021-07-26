@@ -28,11 +28,7 @@ void main_1() {
             break;
           }
         }
-        bool tint_tmp = (donor_replacementGLF_dead0top >= 0);
-        if (tint_tmp) {
-          tint_tmp = (donor_replacementGLF_dead0top < 9);
-        }
-        if ((tint_tmp)) {
+        if (((donor_replacementGLF_dead0top >= 0) & (donor_replacementGLF_dead0top < 9))) {
           const int x_17 = (donor_replacementGLF_dead0top + 1);
           donor_replacementGLF_dead0top = x_17;
           x_54 = x_17;

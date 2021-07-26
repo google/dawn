@@ -11,7 +11,7 @@ fn main_1() {
   y_is_odd = ((i32(x_29) & 1) == 1);
   let x_33 : bool = x_is_odd;
   let x_34 : bool = y_is_odd;
-  out_data = select(0, 1, (x_33 || x_34));
+  out_data = select(0, 1, (x_33 | x_34));
   return;
 }
 

@@ -440,11 +440,10 @@ INSTANTIATE_TEST_SUITE_P(
     SpvBinaryLogicalTest,
     ::testing::Values(BinaryData{"bool", "true", "OpLogicalAnd", "false",
                                  "__bool", "ScalarConstructor[not set]{true}",
-                                 "logical_and",
-                                 "ScalarConstructor[not set]{false}"},
+                                 "and", "ScalarConstructor[not set]{false}"},
                       BinaryData{"v2bool", "v2bool_t_f", "OpLogicalAnd",
                                  "v2bool_f_t", "__vec_2__bool",
-                                 AstFor("v2bool_t_f"), "logical_and",
+                                 AstFor("v2bool_t_f"), "and",
                                  AstFor("v2bool_f_t")}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -452,11 +451,10 @@ INSTANTIATE_TEST_SUITE_P(
     SpvBinaryLogicalTest,
     ::testing::Values(BinaryData{"bool", "true", "OpLogicalOr", "false",
                                  "__bool", "ScalarConstructor[not set]{true}",
-                                 "logical_or",
-                                 "ScalarConstructor[not set]{false}"},
+                                 "or", "ScalarConstructor[not set]{false}"},
                       BinaryData{"v2bool", "v2bool_t_f", "OpLogicalOr",
                                  "v2bool_f_t", "__vec_2__bool",
-                                 AstFor("v2bool_t_f"), "logical_or",
+                                 AstFor("v2bool_t_f"), "or",
                                  AstFor("v2bool_f_t")}));
 
 INSTANTIATE_TEST_SUITE_P(

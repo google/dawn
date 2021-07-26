@@ -34,7 +34,7 @@ fn main_1() {
       }
       let x_14 : i32 = donor_replacementGLF_dead0top;
       let x_15 : i32 = donor_replacementGLF_dead0top;
-      if (((x_14 >= 0) && (x_15 < 9))) {
+      if (((x_14 >= 0) & (x_15 < 9))) {
         let x_16 : i32 = donor_replacementGLF_dead0top;
         let x_17 : i32 = (x_16 + 1);
         donor_replacementGLF_dead0top = x_17;

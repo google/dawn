@@ -58,11 +58,7 @@ void main_1() {
   const int x_88 = asint(x_5[scalar_offset_3 / 4][scalar_offset_3 % 4]);
   const int x_91 = asint(x_5[3].x);
   const float2x2 x_95 = float2x2(float2(float(x_82), float(x_85)), float2(float(x_88), float(x_91)));
-  bool tint_tmp = all((x_80[0u] == x_95[0u]));
-  if (tint_tmp) {
-    tint_tmp = all((x_80[1u] == x_95[1u]));
-  }
-  if ((tint_tmp)) {
+  if ((all((x_80[0u] == x_95[0u])) & all((x_80[1u] == x_95[1u])))) {
     const int x_109 = asint(x_5[2].x);
     const int x_112 = asint(x_5[1].x);
     const int x_115 = asint(x_5[1].x);

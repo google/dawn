@@ -92,7 +92,7 @@ fn insert_i1_i1_(treeIndex : ptr<function, i32>, data_1 : ptr<function, i32>) {
         let x_94 : i32 = GLF_live8i;
         let x_95 : i32 = GLF_live8i;
         let x_96 : i32 = GLF_live8i;
-        let x_369 : i32 = select(0, x_96, ((x_94 >= 0) && (x_95 < 50)));
+        let x_369 : i32 = select(0, x_96, ((x_94 >= 0) & (x_95 < 50)));
         let x_371 : f32 = GLF_live8A[0];
         let x_373 : f32 = GLF_live8A[x_369];
         GLF_live8A[x_369] = (x_373 + x_371);
@@ -318,11 +318,11 @@ fn main_1() {
     let x_145 : i32 = GLF_live4index;
     let x_146 : i32 = GLF_live4index;
     let x_269 : f32 = GLF_live4obj.even_numbers[1];
-    GLF_live4obj.even_numbers[select(0, x_146, ((x_144 >= 0) && (x_145 < 10)))] = x_269;
+    GLF_live4obj.even_numbers[select(0, x_146, ((x_144 >= 0) & (x_145 < 10)))] = x_269;
     let x_147 : i32 = GLF_live4i;
     let x_148 : i32 = GLF_live4i;
     let x_149 : i32 = GLF_live4i;
-    GLF_live4obj.even_numbers[select(0, x_149, ((x_147 >= 0) && (x_148 < 10)))] = 1.0;
+    GLF_live4obj.even_numbers[select(0, x_149, ((x_147 >= 0) & (x_148 < 10)))] = 1.0;
 
     continuing {
       let x_150 : i32 = GLF_live4i;

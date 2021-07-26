@@ -67,7 +67,7 @@ fn main_1() {
         let x_32 : i32 = d;
         let x_33 : i32 = d;
         let x_34 : i32 = d;
-        tempm43[select(0, x_31, ((x_29 >= 0) && (x_30 < 4)))][select(0, x_34, ((x_32 >= 0) && (x_33 < 3)))] = 1.0;
+        tempm43[select(0, x_31, ((x_29 >= 0) & (x_30 < 4)))][select(0, x_34, ((x_32 >= 0) & (x_33 < 3)))] = 1.0;
 
         continuing {
           let x_35 : i32 = c;
@@ -77,7 +77,7 @@ fn main_1() {
       let x_37 : i32 = idx;
       let x_38 : i32 = idx;
       let x_39 : i32 = idx;
-      let x_117 : i32 = select(0, x_39, ((x_37 >= 0) && (x_38 < 9)));
+      let x_117 : i32 = select(0, x_39, ((x_37 >= 0) & (x_38 < 9)));
       let x_40 : i32 = ctr;
       let x_119 : f32 = m43[x_40].y;
       let x_121 : f32 = GLF_live6sums[x_117];

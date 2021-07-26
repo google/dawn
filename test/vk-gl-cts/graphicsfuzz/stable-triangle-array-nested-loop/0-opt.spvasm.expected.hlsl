@@ -55,18 +55,10 @@ int pointInTriangle_vf2_vf2_vf2_vf2_(inout float2 p, inout float2 a_1, inout flo
       param_3 = float2((x_123 - x_124), (x_127 - x_128));
       const float x_131 = cross2d_vf2_vf2_(param_2, param_3);
       pbc = x_131;
-      bool tint_tmp = (x_114 < 0.0f);
-      if (tint_tmp) {
-        tint_tmp = (x_131 < 0.0f);
-      }
-      const bool x_134 = (tint_tmp);
+      const bool x_134 = ((x_114 < 0.0f) & (x_131 < 0.0f));
       x_141_phi = x_134;
       if (!(x_134)) {
-        bool tint_tmp_1 = (x_114 >= 0.0f);
-        if (tint_tmp_1) {
-          tint_tmp_1 = (x_131 >= 0.0f);
-        }
-        x_140 = (tint_tmp_1);
+        x_140 = ((x_114 >= 0.0f) & (x_131 >= 0.0f));
         x_141_phi = x_140;
       }
       if (!(x_141_phi)) {
@@ -87,18 +79,10 @@ int pointInTriangle_vf2_vf2_vf2_vf2_(inout float2 p, inout float2 a_1, inout flo
       param_5 = float2((x_152 - x_153), (x_155 - x_156));
       const float x_159 = cross2d_vf2_vf2_(param_4, param_5);
       pca = x_159;
-      bool tint_tmp_2 = (x_114 < 0.0f);
-      if (tint_tmp_2) {
-        tint_tmp_2 = (x_159 < 0.0f);
-      }
-      const bool x_162 = (tint_tmp_2);
+      const bool x_162 = ((x_114 < 0.0f) & (x_159 < 0.0f));
       x_169_phi = x_162;
       if (!(x_162)) {
-        bool tint_tmp_3 = (x_114 >= 0.0f);
-        if (tint_tmp_3) {
-          tint_tmp_3 = (x_159 >= 0.0f);
-        }
-        x_168 = (tint_tmp_3);
+        x_168 = ((x_114 >= 0.0f) & (x_159 >= 0.0f));
         x_169_phi = x_168;
       }
       if (!(x_169_phi)) {

@@ -95,12 +95,12 @@ fn pointInTriangle_vf2_vf2_vf2_vf2_(p : ptr<function, vec2<f32>>, a_1 : ptr<func
   pbc = x_160;
   let x_161 : f32 = pab;
   let x_163 : f32 = pbc;
-  let x_165 : bool = ((x_161 < 0.0) && (x_163 < 0.0));
+  let x_165 : bool = ((x_161 < 0.0) & (x_163 < 0.0));
   x_174_phi = x_165;
   if (!(x_165)) {
     let x_169 : f32 = pab;
     let x_171 : f32 = pbc;
-    x_173 = ((x_169 >= 0.0) && (x_171 >= 0.0));
+    x_173 = ((x_169 >= 0.0) & (x_171 >= 0.0));
     x_174_phi = x_173;
   }
   let x_174 : bool = x_174_phi;
@@ -121,12 +121,12 @@ fn pointInTriangle_vf2_vf2_vf2_vf2_(p : ptr<function, vec2<f32>>, a_1 : ptr<func
   pca = x_192;
   let x_193 : f32 = pab;
   let x_195 : f32 = pca;
-  let x_197 : bool = ((x_193 < 0.0) && (x_195 < 0.0));
+  let x_197 : bool = ((x_193 < 0.0) & (x_195 < 0.0));
   x_206_phi = x_197;
   if (!(x_197)) {
     let x_201 : f32 = pab;
     let x_203 : f32 = pca;
-    x_205 = ((x_201 >= 0.0) && (x_203 >= 0.0));
+    x_205 = ((x_201 >= 0.0) & (x_203 >= 0.0));
     x_206_phi = x_205;
   }
   let x_206 : bool = x_206_phi;

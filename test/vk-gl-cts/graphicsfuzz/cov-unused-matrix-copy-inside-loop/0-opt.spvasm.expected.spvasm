@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 198
+; Bound: 192
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -78,7 +78,7 @@
      %uint_2 = OpConstant %uint 2
      %uint_3 = OpConstant %uint 3
    %main_out = OpTypeStruct %v4float
-        %186 = OpTypeFunction %void %main_out
+        %180 = OpTypeFunction %void %main_out
      %main_1 = OpFunction %void None %20
          %23 = OpLabel
          %m0 = OpVariable %_ptr_Function_mat4v4float Function %27
@@ -199,76 +199,61 @@
         %140 = OpCompositeExtract %v4float %137 0
         %141 = OpFOrdEqual %v4bool %139 %140
         %138 = OpAll %bool %141
-               OpSelectionMerge %143 None
-               OpBranchConditional %138 %144 %143
-        %144 = OpLabel
-        %146 = OpCompositeExtract %v4float %84 1
-        %147 = OpCompositeExtract %v4float %137 1
-        %148 = OpFOrdEqual %v4bool %146 %147
-        %145 = OpAll %bool %148
-               OpBranch %143
-        %143 = OpLabel
-        %149 = OpPhi %bool %138 %48 %145 %144
-               OpSelectionMerge %150 None
-               OpBranchConditional %149 %151 %150
-        %151 = OpLabel
-        %154 = OpCompositeExtract %v4float %84 2
-        %155 = OpCompositeExtract %v4float %137 2
-        %156 = OpFOrdEqual %v4bool %154 %155
-        %152 = OpAll %bool %156
-               OpBranch %150
-        %150 = OpLabel
-        %157 = OpPhi %bool %149 %143 %152 %151
-               OpSelectionMerge %158 None
-               OpBranchConditional %157 %159 %158
-        %159 = OpLabel
-        %162 = OpCompositeExtract %v4float %84 3
-        %163 = OpCompositeExtract %v4float %137 3
-        %164 = OpFOrdEqual %v4bool %162 %163
-        %160 = OpAll %bool %164
-               OpBranch %158
-        %158 = OpLabel
-        %165 = OpPhi %bool %157 %150 %160 %159
-               OpSelectionMerge %166 None
-               OpBranchConditional %165 %167 %168
-        %167 = OpLabel
+        %144 = OpCompositeExtract %v4float %84 1
+        %145 = OpCompositeExtract %v4float %137 1
+        %146 = OpFOrdEqual %v4bool %144 %145
+        %143 = OpAll %bool %146
+        %147 = OpLogicalAnd %bool %138 %143
+        %150 = OpCompositeExtract %v4float %84 2
+        %151 = OpCompositeExtract %v4float %137 2
+        %152 = OpFOrdEqual %v4bool %150 %151
+        %148 = OpAll %bool %152
+        %153 = OpLogicalAnd %bool %147 %148
+        %156 = OpCompositeExtract %v4float %84 3
+        %157 = OpCompositeExtract %v4float %137 3
+        %158 = OpFOrdEqual %v4bool %156 %157
+        %154 = OpAll %bool %158
+        %159 = OpLogicalAnd %bool %153 %154
+               OpSelectionMerge %160 None
+               OpBranchConditional %159 %161 %162
+        %161 = OpLabel
+        %163 = OpAccessChain %_ptr_Uniform_int %x_6 %uint_0 %int_2
+        %164 = OpLoad %int %163
+        %165 = OpAccessChain %_ptr_Uniform_int %x_6 %uint_0 %int_1
+        %166 = OpLoad %int %165
+        %167 = OpAccessChain %_ptr_Uniform_int %x_6 %uint_0 %int_1
+        %168 = OpLoad %int %167
         %169 = OpAccessChain %_ptr_Uniform_int %x_6 %uint_0 %int_2
         %170 = OpLoad %int %169
-        %171 = OpAccessChain %_ptr_Uniform_int %x_6 %uint_0 %int_1
-        %172 = OpLoad %int %171
-        %173 = OpAccessChain %_ptr_Uniform_int %x_6 %uint_0 %int_1
-        %174 = OpLoad %int %173
-        %175 = OpAccessChain %_ptr_Uniform_int %x_6 %uint_0 %int_2
-        %176 = OpLoad %int %175
-        %177 = OpConvertSToF %float %170
-        %178 = OpConvertSToF %float %172
-        %179 = OpConvertSToF %float %174
-        %180 = OpConvertSToF %float %176
-        %181 = OpCompositeConstruct %v4float %177 %178 %179 %180
-               OpStore %x_GLF_color %181
-               OpBranch %166
-        %168 = OpLabel
-        %182 = OpAccessChain %_ptr_Uniform_int %x_6 %uint_0 %int_1
-        %183 = OpLoad %int %182
-        %184 = OpConvertSToF %float %183
-        %185 = OpCompositeConstruct %v4float %184 %184 %184 %184
-               OpStore %x_GLF_color %185
-               OpBranch %166
-        %166 = OpLabel
+        %171 = OpConvertSToF %float %164
+        %172 = OpConvertSToF %float %166
+        %173 = OpConvertSToF %float %168
+        %174 = OpConvertSToF %float %170
+        %175 = OpCompositeConstruct %v4float %171 %172 %173 %174
+               OpStore %x_GLF_color %175
+               OpBranch %160
+        %162 = OpLabel
+        %176 = OpAccessChain %_ptr_Uniform_int %x_6 %uint_0 %int_1
+        %177 = OpLoad %int %176
+        %178 = OpConvertSToF %float %177
+        %179 = OpCompositeConstruct %v4float %178 %178 %178 %178
+               OpStore %x_GLF_color %179
+               OpBranch %160
+        %160 = OpLabel
                OpReturn
                OpFunctionEnd
-%tint_symbol_2 = OpFunction %void None %186
+%tint_symbol_2 = OpFunction %void None %180
 %tint_symbol = OpFunctionParameter %main_out
-        %190 = OpLabel
-        %191 = OpCompositeExtract %v4float %tint_symbol 0
-               OpStore %tint_symbol_1 %191
+        %184 = OpLabel
+        %185 = OpCompositeExtract %v4float %tint_symbol 0
+               OpStore %tint_symbol_1 %185
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %20
-        %193 = OpLabel
-        %194 = OpFunctionCall %void %main_1
-        %196 = OpLoad %v4float %x_GLF_color
-        %197 = OpCompositeConstruct %main_out %196
-        %195 = OpFunctionCall %void %tint_symbol_2 %197
+        %187 = OpLabel
+        %188 = OpFunctionCall %void %main_1
+        %190 = OpLoad %v4float %x_GLF_color
+        %191 = OpCompositeConstruct %main_out %190
+        %189 = OpFunctionCall %void %tint_symbol_2 %191
                OpReturn
                OpFunctionEnd

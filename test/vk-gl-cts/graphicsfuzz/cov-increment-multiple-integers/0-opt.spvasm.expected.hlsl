@@ -20,11 +20,7 @@ void main_1() {
   while (true) {
     const int x_38 = b;
     const int x_40 = asint(x_6[4].x);
-    bool tint_tmp = (x_38 < x_40);
-    if (tint_tmp) {
-      tint_tmp = (a < 10);
-    }
-    if ((tint_tmp)) {
+    if (((x_38 < x_40) & (a < 10))) {
     } else {
       break;
     }

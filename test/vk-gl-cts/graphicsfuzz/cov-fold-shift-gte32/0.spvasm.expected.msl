@@ -60,7 +60,7 @@ void main_1(constant buf0& x_6, thread float4* const tint_symbol_4) {
   uint const x_96 = d;
   uint const x_99 = e;
   uint const x_102 = f;
-  if (((((((x_88 == 1u) && (x_90 == 0u)) && (x_93 == 1u)) && (x_96 == 0u)) && (x_99 == 1u)) && (x_102 == 0u))) {
+  if (((((((x_88 == 1u) & (x_90 == 0u)) & (x_93 == 1u)) & (x_96 == 0u)) & (x_99 == 1u)) & (x_102 == 0u))) {
     *(tint_symbol_4) = float4(1.0f, 0.0f, 0.0f, 1.0f);
   } else {
     *(tint_symbol_4) = float4(0.0f, 0.0f, 0.0f, 0.0f);

@@ -24,7 +24,7 @@ fn main_1() {
     break;
   }
   let x_10 : i32 = x_10_phi;
-  if (((x_10 == 1) || (x_10 == 2))) {
+  if (((x_10 == 1) | (x_10 == 2))) {
     x_GLF_color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
   } else {
     x_GLF_color = vec4<f32>(0.0, 0.0, 0.0, 0.0);

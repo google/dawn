@@ -76,11 +76,7 @@ void insert_i1_i1_(inout int treeIndex, inout int data_1) {
         return;
       } else {
         GLF_live8i = 1;
-        bool tint_tmp = (GLF_live8i >= 0);
-        if (tint_tmp) {
-          tint_tmp = (GLF_live8i < 50);
-        }
-        const int x_369 = ((tint_tmp) ? GLF_live8i : 0);
+        const int x_369 = (((GLF_live8i >= 0) & (GLF_live8i < 50)) ? GLF_live8i : 0);
         const float x_371 = GLF_live8A[0];
         const float x_373 = GLF_live8A[x_369];
         GLF_live8A[x_369] = (x_373 + x_371);
@@ -270,16 +266,8 @@ void main_1() {
       const int x_145 = GLF_live4index;
       const int x_146 = GLF_live4index;
       const float x_269 = GLF_live4obj.even_numbers[1];
-      bool tint_tmp_1 = (x_144 >= 0);
-      if (tint_tmp_1) {
-        tint_tmp_1 = (x_145 < 10);
-      }
-      GLF_live4obj.even_numbers[((tint_tmp_1) ? x_146 : 0)] = x_269;
-      bool tint_tmp_2 = (GLF_live4i >= 0);
-      if (tint_tmp_2) {
-        tint_tmp_2 = (GLF_live4i < 10);
-      }
-      GLF_live4obj.even_numbers[((tint_tmp_2) ? GLF_live4i : 0)] = 1.0f;
+      GLF_live4obj.even_numbers[(((x_144 >= 0) & (x_145 < 10)) ? x_146 : 0)] = x_269;
+      GLF_live4obj.even_numbers[(((GLF_live4i >= 0) & (GLF_live4i < 10)) ? GLF_live4i : 0)] = 1.0f;
     }
   }
   param_24 = treeIndex_1;

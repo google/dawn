@@ -59,7 +59,7 @@ fn main_1() {
         let x_27 : i32 = r;
         let x_28 : i32 = r;
         let x_29 : i32 = r;
-        tempm43[select(0, x_26, ((x_24 >= 0) && (x_25 < 4)))][select(0, x_29, ((x_27 >= 0) && (x_28 < 3)))] = 1.0;
+        tempm43[select(0, x_26, ((x_24 >= 0) & (x_25 < 4)))][select(0, x_29, ((x_27 >= 0) & (x_28 < 3)))] = 1.0;
 
         continuing {
           let x_30 : i32 = d;
@@ -69,7 +69,7 @@ fn main_1() {
       let x_32 : i32 = idx;
       let x_33 : i32 = idx;
       let x_34 : i32 = idx;
-      let x_111 : i32 = select(0, x_34, ((x_32 >= 0) && (x_33 < 9)));
+      let x_111 : i32 = select(0, x_34, ((x_32 >= 0) & (x_33 < 9)));
       let x_35 : i32 = c;
       let x_113 : f32 = m43[x_35].y;
       let x_115 : f32 = sums[x_111];

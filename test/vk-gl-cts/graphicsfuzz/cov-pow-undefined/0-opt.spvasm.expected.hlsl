@@ -12,11 +12,7 @@ void main_1() {
   c = pow(a, b);
   const float x_30 = c;
   x_GLF_color = float4(x_30, x_30, x_30, x_30);
-  bool tint_tmp = (a == -1.0f);
-  if (tint_tmp) {
-    tint_tmp = (b == 1.700000048f);
-  }
-  if ((tint_tmp)) {
+  if (((a == -1.0f) & (b == 1.700000048f))) {
     const uint scalar_offset = ((16u * uint(0))) / 4;
     const float x_41 = asfloat(x_8[scalar_offset / 4][scalar_offset % 4]);
     const float x_43 = asfloat(x_8[1].x);

@@ -102,27 +102,11 @@ float3 drawShape_vf2_(inout float2 pos) {
                         break;
                       }
                       GLF_live7_looplimiter0 = (GLF_live7_looplimiter0 + 1);
-                      bool tint_tmp = (GLF_live7c >= 0);
-                      if (tint_tmp) {
-                        tint_tmp = (GLF_live7c < 3);
-                      }
-                      bool tint_tmp_1 = (GLF_live7r >= 0);
-                      if (tint_tmp_1) {
-                        tint_tmp_1 = (GLF_live7r < 3);
-                      }
-                      set_float3(GLF_live7m33[((tint_tmp) ? GLF_live7c : 0)], ((tint_tmp_1) ? GLF_live7r : 0), 1.0f);
+                      set_float3(GLF_live7m33[(((GLF_live7c >= 0) & (GLF_live7c < 3)) ? GLF_live7c : 0)], (((GLF_live7r >= 0) & (GLF_live7r < 3)) ? GLF_live7r : 0), 1.0f);
                       const float x_267 = asfloat(x_25[0].y);
                       if ((0.0f > x_267)) {
                       } else {
-                        bool tint_tmp_2 = (GLF_live7c >= 0);
-                        if (tint_tmp_2) {
-                          tint_tmp_2 = (GLF_live7c < 4);
-                        }
-                        bool tint_tmp_3 = (GLF_live7r >= 0);
-                        if (tint_tmp_3) {
-                          tint_tmp_3 = (GLF_live7r < 2);
-                        }
-                        set_float2(GLF_live7m42[((tint_tmp_2) ? GLF_live7c : 0)], ((tint_tmp_3) ? GLF_live7r : 0), 1.0f);
+                        set_float2(GLF_live7m42[(((GLF_live7c >= 0) & (GLF_live7c < 4)) ? GLF_live7c : 0)], (((GLF_live7r >= 0) & (GLF_live7r < 2)) ? GLF_live7r : 0), 1.0f);
                       }
                     }
                   }
@@ -142,22 +126,14 @@ float3 drawShape_vf2_(inout float2 pos) {
           }
           GLF_live7_looplimiter7 = (GLF_live7_looplimiter7 + 1);
           GLF_live7rows_1 = 2;
-          bool tint_tmp_4 = (GLF_live7sum_index >= 0);
-          if (tint_tmp_4) {
-            tint_tmp_4 = (GLF_live7sum_index < 9);
-          }
-          GLF_live7sums[((tint_tmp_4) ? GLF_live7sum_index : 0)] = 0.0f;
+          GLF_live7sums[(((GLF_live7sum_index >= 0) & (GLF_live7sum_index < 9)) ? GLF_live7sum_index : 0)] = 0.0f;
           GLF_live7c_1 = 0;
           {
             for(; (GLF_live7c_1 < 1); GLF_live7c_1 = (GLF_live7c_1 + 1)) {
               GLF_live7r_1 = 0;
               {
                 for(; (GLF_live7r_1 < GLF_live7rows_1); GLF_live7r_1 = (GLF_live7r_1 + 1)) {
-                  bool tint_tmp_5 = (GLF_live7sum_index >= 0);
-                  if (tint_tmp_5) {
-                    tint_tmp_5 = (GLF_live7sum_index < 9);
-                  }
-                  const int x_310 = ((tint_tmp_5) ? GLF_live7sum_index : 0);
+                  const int x_310 = (((GLF_live7sum_index >= 0) & (GLF_live7sum_index < 9)) ? GLF_live7sum_index : 0);
                   const float3x3 x_312 = transpose(GLF_live7m33);
                   if ((GLF_live7c_1 < 3)) {
                     x_180 = 1;
@@ -171,11 +147,7 @@ float3 drawShape_vf2_(inout float2 pos) {
                   const float x_324 = indexable[x_320][((x_93 < 3) ? 1 : 0)];
                   const float x_326 = GLF_live7sums[x_310];
                   GLF_live7sums[x_310] = (x_326 + x_324);
-                  bool tint_tmp_6 = (GLF_live7sum_index >= 0);
-                  if (tint_tmp_6) {
-                    tint_tmp_6 = (GLF_live7sum_index < 9);
-                  }
-                  const int x_332 = ((tint_tmp_6) ? GLF_live7sum_index : 0);
+                  const int x_332 = (((GLF_live7sum_index >= 0) & (GLF_live7sum_index < 9)) ? GLF_live7sum_index : 0);
                   const float x_334 = GLF_live7m42[1][GLF_live7r_1];
                   const float x_336 = GLF_live7sums[x_332];
                   GLF_live7sums[x_332] = (x_336 + x_334);

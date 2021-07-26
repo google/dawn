@@ -3,11 +3,7 @@ static float4 x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);
 void main_1() {
   bool a = false;
   a = false;
-  bool tint_tmp = true;
-  if (tint_tmp) {
-    tint_tmp = a;
-  }
-  if ((tint_tmp)) {
+  if ((true & a)) {
     x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);
   } else {
     x_GLF_color = float4(1.0f, 0.0f, 0.0f, 1.0f);

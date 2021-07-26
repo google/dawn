@@ -7,11 +7,7 @@ void main_1() {
   float a = 0.0f;
   const float x_27 = asfloat(x_6[0].x);
   a = (2.0f / (1.0f / x_27));
-  bool tint_tmp = (a > 7.900000095f);
-  if (tint_tmp) {
-    tint_tmp = (a < 8.100000381f);
-  }
-  if ((tint_tmp)) {
+  if (((a > 7.900000095f) & (a < 8.100000381f))) {
     x_GLF_color = float4(1.0f, 0.0f, 0.0f, 1.0f);
   } else {
     x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);

@@ -5,11 +5,7 @@ void main_1() {
   m = float2x2(float2(1.0f, 2.0f), float2(3.0f, 4.0f));
   const float2x2 x_30 = mul(transpose(m), transpose(m));
   const float2x2 x_34 = transpose(mul(m, m));
-  bool tint_tmp = all((x_30[0u] == x_34[0u]));
-  if (tint_tmp) {
-    tint_tmp = all((x_30[1u] == x_34[1u]));
-  }
-  if ((tint_tmp)) {
+  if ((all((x_30[0u] == x_34[0u])) & all((x_30[1u] == x_34[1u])))) {
     x_GLF_color = float4(1.0f, 0.0f, 0.0f, 1.0f);
   } else {
     x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);

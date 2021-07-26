@@ -62,19 +62,7 @@ void main_1() {
   const int x_123 = asint(x_6[1].x);
   const int x_126 = asint(x_6[1].x);
   const float4x4 x_132 = float4x4(float4(float(x_81), float(x_84), float(x_87), float(x_90)), float4(float(x_93), float(x_96), float(x_99), float(x_102)), float4(float(x_105), float(x_108), float(x_111), float(x_114)), float4(float(x_117), float(x_120), float(x_123), float(x_126)));
-  bool tint_tmp_2 = all((x_79[0u] == x_132[0u]));
-  if (tint_tmp_2) {
-    tint_tmp_2 = all((x_79[1u] == x_132[1u]));
-  }
-  bool tint_tmp_1 = (tint_tmp_2);
-  if (tint_tmp_1) {
-    tint_tmp_1 = all((x_79[2u] == x_132[2u]));
-  }
-  bool tint_tmp = (tint_tmp_1);
-  if (tint_tmp) {
-    tint_tmp = all((x_79[3u] == x_132[3u]));
-  }
-  if ((tint_tmp)) {
+  if ((((all((x_79[0u] == x_132[0u])) & all((x_79[1u] == x_132[1u]))) & all((x_79[2u] == x_132[2u]))) & all((x_79[3u] == x_132[3u])))) {
     const int x_156 = asint(x_6[2].x);
     const int x_159 = asint(x_6[1].x);
     const int x_162 = asint(x_6[1].x);

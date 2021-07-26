@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 56
+; Bound: 54
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -50,10 +50,10 @@
 %float_2_0999999 = OpConstant %float 2.0999999
     %float_1 = OpConstant %float 1
     %float_0 = OpConstant %float 0
-         %42 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
-         %43 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_0
+         %40 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
+         %41 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_0
    %main_out = OpTypeStruct %v4float
-         %44 = OpTypeFunction %void %main_out
+         %42 = OpTypeFunction %void %main_out
      %main_1 = OpFunction %void None %11
          %14 = OpLabel
           %f = OpVariable %_ptr_Function_float Function %17
@@ -65,36 +65,31 @@
          %27 = OpLoad %float %f
          %28 = OpLoad %float %f
          %30 = OpFOrdGreaterThan %bool %27 %float_1_89999998
-               OpSelectionMerge %32 None
-               OpBranchConditional %30 %33 %32
-         %33 = OpLabel
-         %35 = OpFOrdLessThan %bool %28 %float_2_0999999
-               OpBranch %32
-         %32 = OpLabel
-         %36 = OpPhi %bool %30 %14 %35 %33
-               OpSelectionMerge %37 None
-               OpBranchConditional %36 %38 %39
-         %38 = OpLabel
-               OpStore %x_GLF_color %42
-               OpBranch %37
-         %39 = OpLabel
-               OpStore %x_GLF_color %43
-               OpBranch %37
+         %33 = OpFOrdLessThan %bool %28 %float_2_0999999
+         %34 = OpLogicalAnd %bool %30 %33
+               OpSelectionMerge %35 None
+               OpBranchConditional %34 %36 %37
+         %36 = OpLabel
+               OpStore %x_GLF_color %40
+               OpBranch %35
          %37 = OpLabel
+               OpStore %x_GLF_color %41
+               OpBranch %35
+         %35 = OpLabel
                OpReturn
                OpFunctionEnd
-%tint_symbol_2 = OpFunction %void None %44
+%tint_symbol_2 = OpFunction %void None %42
 %tint_symbol = OpFunctionParameter %main_out
-         %48 = OpLabel
-         %49 = OpCompositeExtract %v4float %tint_symbol 0
-               OpStore %tint_symbol_1 %49
+         %46 = OpLabel
+         %47 = OpCompositeExtract %v4float %tint_symbol 0
+               OpStore %tint_symbol_1 %47
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %11
-         %51 = OpLabel
-         %52 = OpFunctionCall %void %main_1
-         %54 = OpLoad %v4float %x_GLF_color
-         %55 = OpCompositeConstruct %main_out %54
-         %53 = OpFunctionCall %void %tint_symbol_2 %55
+         %49 = OpLabel
+         %50 = OpFunctionCall %void %main_1
+         %52 = OpLoad %v4float %x_GLF_color
+         %53 = OpCompositeConstruct %main_out %52
+         %51 = OpFunctionCall %void %tint_symbol_2 %53
                OpReturn
                OpFunctionEnd

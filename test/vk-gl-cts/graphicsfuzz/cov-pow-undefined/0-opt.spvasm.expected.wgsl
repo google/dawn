@@ -22,7 +22,7 @@ fn main_1() {
   x_GLF_color = vec4<f32>(x_30, x_30, x_30, x_30);
   let x_32 : f32 = a;
   let x_34 : f32 = b;
-  if (((x_32 == -1.0) && (x_34 == 1.700000048))) {
+  if (((x_32 == -1.0) & (x_34 == 1.700000048))) {
     let x_41 : f32 = x_8.x_GLF_uniform_float_values[0];
     let x_43 : f32 = x_8.x_GLF_uniform_float_values[1];
     let x_45 : f32 = x_8.x_GLF_uniform_float_values[1];

@@ -106,7 +106,7 @@ fn main_1() {
   let x_74 : i32 = x_16.x_GLF_uniform_int_values[0];
   let x_77 : i32 = x_16.x_GLF_uniform_int_values[0];
   let x_83 : mat4x2<f32> = mat4x2<f32>(vec2<f32>(f32(x_56), f32(x_59)), vec2<f32>(f32(x_62), f32(x_65)), vec2<f32>(f32(x_68), f32(x_71)), vec2<f32>(f32(x_74), f32(x_77)));
-  if ((((all((x_54[0u] == x_83[0u])) && all((x_54[1u] == x_83[1u]))) && all((x_54[2u] == x_83[2u]))) && all((x_54[3u] == x_83[3u])))) {
+  if ((((all((x_54[0u] == x_83[0u])) & all((x_54[1u] == x_83[1u]))) & all((x_54[2u] == x_83[2u]))) & all((x_54[3u] == x_83[3u])))) {
     let x_107 : i32 = x_16.x_GLF_uniform_int_values[3];
     let x_110 : i32 = x_16.x_GLF_uniform_int_values[0];
     let x_113 : i32 = x_16.x_GLF_uniform_int_values[0];

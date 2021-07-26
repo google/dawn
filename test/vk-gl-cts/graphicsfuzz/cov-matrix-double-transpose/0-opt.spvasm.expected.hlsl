@@ -14,11 +14,7 @@ void main_1() {
   const int x_38 = asint(x_6[scalar_offset_1 / 4][scalar_offset_1 % 4]);
   const float x_39 = float(x_38);
   const float2x2 x_42 = float2x2(float2(x_39, 0.0f), float2(0.0f, x_39));
-  bool tint_tmp = all((x_36[0u] == x_42[0u]));
-  if (tint_tmp) {
-    tint_tmp = all((x_36[1u] == x_42[1u]));
-  }
-  if ((tint_tmp)) {
+  if ((all((x_36[0u] == x_42[0u])) & all((x_36[1u] == x_42[1u])))) {
     const uint scalar_offset_2 = ((16u * uint(0))) / 4;
     const int x_56 = asint(x_6[scalar_offset_2 / 4][scalar_offset_2 % 4]);
     const int x_59 = asint(x_6[1].x);

@@ -23,11 +23,7 @@ void main_1() {
     if (true) {
       const uint scalar_offset = ((16u * uint(0))) / 4;
       const int x_46 = asint(x_6[scalar_offset / 4][scalar_offset % 4]);
-      bool tint_tmp = (x_46 == 1);
-      if (tint_tmp) {
-        tint_tmp = (index <= 1);
-      }
-      x_51 = !((tint_tmp));
+      x_51 = !(((x_46 == 1) & (index <= 1)));
       x_52_phi = x_51;
     }
     if (!(x_52_phi)) {

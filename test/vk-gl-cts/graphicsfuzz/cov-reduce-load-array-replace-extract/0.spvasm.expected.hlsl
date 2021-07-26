@@ -19,11 +19,7 @@ void main_1() {
     break;
   }
   const int x_10 = x_10_phi;
-  bool tint_tmp = (x_10 == 1);
-  if (!tint_tmp) {
-    tint_tmp = (x_10 == 2);
-  }
-  if ((tint_tmp)) {
+  if (((x_10 == 1) | (x_10 == 2))) {
     x_GLF_color = float4(1.0f, 0.0f, 0.0f, 1.0f);
   } else {
     x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);

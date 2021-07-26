@@ -28,11 +28,7 @@ void main_1() {
       return;
     }
     {
-      bool tint_tmp = true;
-      if (tint_tmp) {
-        tint_tmp = (x_GLF_global_loop_count < 100);
-      }
-      if ((tint_tmp)) {
+      if ((true & (x_GLF_global_loop_count < 100))) {
       } else {
         break;
       }

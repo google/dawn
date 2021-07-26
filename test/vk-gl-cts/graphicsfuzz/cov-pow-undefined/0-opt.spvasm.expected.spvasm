@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 71
+; Bound: 69
 ; Schema: 0
                OpCapability Shader
          %28 = OpExtInstImport "GLSL.std.450"
@@ -56,7 +56,7 @@
 %_ptr_Uniform_float = OpTypePointer Uniform %float
       %int_1 = OpConstant %int 1
    %main_out = OpTypeStruct %v4float
-         %59 = OpTypeFunction %void %main_out
+         %57 = OpTypeFunction %void %main_out
      %main_1 = OpFunction %void None %14
          %17 = OpLabel
           %a = OpVariable %_ptr_Function_float Function %20
@@ -74,48 +74,43 @@
          %31 = OpLoad %float %a
          %32 = OpLoad %float %b
          %33 = OpFOrdEqual %bool %31 %float_n1
-               OpSelectionMerge %35 None
-               OpBranchConditional %33 %36 %35
-         %36 = OpLabel
-         %37 = OpFOrdEqual %bool %32 %float_1_70000005
-               OpBranch %35
-         %35 = OpLabel
-         %38 = OpPhi %bool %33 %17 %37 %36
-               OpSelectionMerge %39 None
-               OpBranchConditional %38 %40 %41
-         %40 = OpLabel
-         %46 = OpAccessChain %_ptr_Uniform_float %x_8 %uint_0 %int_0
-         %47 = OpLoad %float %46
+         %35 = OpFOrdEqual %bool %32 %float_1_70000005
+         %36 = OpLogicalAnd %bool %33 %35
+               OpSelectionMerge %37 None
+               OpBranchConditional %36 %38 %39
+         %38 = OpLabel
+         %44 = OpAccessChain %_ptr_Uniform_float %x_8 %uint_0 %int_0
+         %45 = OpLoad %float %44
+         %47 = OpAccessChain %_ptr_Uniform_float %x_8 %uint_0 %int_1
+         %48 = OpLoad %float %47
          %49 = OpAccessChain %_ptr_Uniform_float %x_8 %uint_0 %int_1
          %50 = OpLoad %float %49
-         %51 = OpAccessChain %_ptr_Uniform_float %x_8 %uint_0 %int_1
+         %51 = OpAccessChain %_ptr_Uniform_float %x_8 %uint_0 %int_0
          %52 = OpLoad %float %51
-         %53 = OpAccessChain %_ptr_Uniform_float %x_8 %uint_0 %int_0
-         %54 = OpLoad %float %53
-         %55 = OpCompositeConstruct %v4float %47 %50 %52 %54
-               OpStore %x_GLF_color %55
-               OpBranch %39
-         %41 = OpLabel
-         %56 = OpAccessChain %_ptr_Uniform_float %x_8 %uint_0 %int_0
-         %57 = OpLoad %float %56
-         %58 = OpCompositeConstruct %v4float %57 %57 %57 %57
-               OpStore %x_GLF_color %58
-               OpBranch %39
+         %53 = OpCompositeConstruct %v4float %45 %48 %50 %52
+               OpStore %x_GLF_color %53
+               OpBranch %37
          %39 = OpLabel
+         %54 = OpAccessChain %_ptr_Uniform_float %x_8 %uint_0 %int_0
+         %55 = OpLoad %float %54
+         %56 = OpCompositeConstruct %v4float %55 %55 %55 %55
+               OpStore %x_GLF_color %56
+               OpBranch %37
+         %37 = OpLabel
                OpReturn
                OpFunctionEnd
-%tint_symbol_2 = OpFunction %void None %59
+%tint_symbol_2 = OpFunction %void None %57
 %tint_symbol = OpFunctionParameter %main_out
-         %63 = OpLabel
-         %64 = OpCompositeExtract %v4float %tint_symbol 0
-               OpStore %tint_symbol_1 %64
+         %61 = OpLabel
+         %62 = OpCompositeExtract %v4float %tint_symbol 0
+               OpStore %tint_symbol_1 %62
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %14
-         %66 = OpLabel
-         %67 = OpFunctionCall %void %main_1
-         %69 = OpLoad %v4float %x_GLF_color
-         %70 = OpCompositeConstruct %main_out %69
-         %68 = OpFunctionCall %void %tint_symbol_2 %70
+         %64 = OpLabel
+         %65 = OpFunctionCall %void %main_1
+         %67 = OpLoad %v4float %x_GLF_color
+         %68 = OpCompositeConstruct %main_out %67
+         %66 = OpFunctionCall %void %tint_symbol_2 %68
                OpReturn
                OpFunctionEnd

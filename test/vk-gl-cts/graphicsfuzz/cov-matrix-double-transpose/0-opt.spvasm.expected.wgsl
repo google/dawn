@@ -18,7 +18,7 @@ fn main_1() {
   let x_38 : i32 = x_6.x_GLF_uniform_int_values[0];
   let x_39 : f32 = f32(x_38);
   let x_42 : mat2x2<f32> = mat2x2<f32>(vec2<f32>(x_39, 0.0), vec2<f32>(0.0, x_39));
-  if ((all((x_36[0u] == x_42[0u])) && all((x_36[1u] == x_42[1u])))) {
+  if ((all((x_36[0u] == x_42[0u])) & all((x_36[1u] == x_42[1u])))) {
     let x_56 : i32 = x_6.x_GLF_uniform_int_values[0];
     let x_59 : i32 = x_6.x_GLF_uniform_int_values[1];
     let x_62 : i32 = x_6.x_GLF_uniform_int_values[1];

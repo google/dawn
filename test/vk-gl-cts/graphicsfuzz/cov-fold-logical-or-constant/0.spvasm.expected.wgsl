@@ -4,7 +4,7 @@ var<private> x_GLF_color : vec4<f32>;
 
 fn main_1() {
   let x_22 : f32 = gl_FragCoord.x;
-  if (((x_22 < 0.0) || true)) {
+  if (((x_22 < 0.0) | true)) {
     x_GLF_color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
   } else {
     x_GLF_color = vec4<f32>(0.0, 0.0, 0.0, 0.0);

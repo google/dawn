@@ -97,19 +97,7 @@ void main_1() {
   const uint scalar_offset_8 = ((16u * uint(0))) / 4;
   const int x_77 = asint(x_16[scalar_offset_8 / 4][scalar_offset_8 % 4]);
   const float4x2 x_83 = float4x2(float2(float(x_56), float(x_59)), float2(float(x_62), float(x_65)), float2(float(x_68), float(x_71)), float2(float(x_74), float(x_77)));
-  bool tint_tmp_2 = all((x_54[0u] == x_83[0u]));
-  if (tint_tmp_2) {
-    tint_tmp_2 = all((x_54[1u] == x_83[1u]));
-  }
-  bool tint_tmp_1 = (tint_tmp_2);
-  if (tint_tmp_1) {
-    tint_tmp_1 = all((x_54[2u] == x_83[2u]));
-  }
-  bool tint_tmp = (tint_tmp_1);
-  if (tint_tmp) {
-    tint_tmp = all((x_54[3u] == x_83[3u]));
-  }
-  if ((tint_tmp)) {
+  if ((((all((x_54[0u] == x_83[0u])) & all((x_54[1u] == x_83[1u]))) & all((x_54[2u] == x_83[2u]))) & all((x_54[3u] == x_83[3u])))) {
     const int x_107 = asint(x_16[3].x);
     const uint scalar_offset_9 = ((16u * uint(0))) / 4;
     const int x_110 = asint(x_16[scalar_offset_9 / 4][scalar_offset_9 % 4]);

@@ -11,11 +11,7 @@ void main_1() {
   a = ddx(cos(x_33));
   const float x_37 = asfloat(x_8[0].x);
   b = lerp(2.0f, x_37, a);
-  bool tint_tmp = (b >= 1.899999976f);
-  if (tint_tmp) {
-    tint_tmp = (b <= 2.099999905f);
-  }
-  if ((tint_tmp)) {
+  if (((b >= 1.899999976f) & (b <= 2.099999905f))) {
     x_GLF_color = float4(1.0f, 0.0f, 0.0f, 1.0f);
   } else {
     x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);

@@ -40,27 +40,7 @@ void main_1() {
   if ((f != 0u)) {
     f = 0u;
   }
-  bool tint_tmp_4 = (a == 1u);
-  if (tint_tmp_4) {
-    tint_tmp_4 = (b == 0u);
-  }
-  bool tint_tmp_3 = (tint_tmp_4);
-  if (tint_tmp_3) {
-    tint_tmp_3 = (c == 1u);
-  }
-  bool tint_tmp_2 = (tint_tmp_3);
-  if (tint_tmp_2) {
-    tint_tmp_2 = (d == 0u);
-  }
-  bool tint_tmp_1 = (tint_tmp_2);
-  if (tint_tmp_1) {
-    tint_tmp_1 = (e == 1u);
-  }
-  bool tint_tmp = (tint_tmp_1);
-  if (tint_tmp) {
-    tint_tmp = (f == 0u);
-  }
-  if ((tint_tmp)) {
+  if (((((((a == 1u) & (b == 0u)) & (c == 1u)) & (d == 0u)) & (e == 1u)) & (f == 0u))) {
     x_GLF_color = float4(1.0f, 0.0f, 0.0f, 1.0f);
   } else {
     x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);

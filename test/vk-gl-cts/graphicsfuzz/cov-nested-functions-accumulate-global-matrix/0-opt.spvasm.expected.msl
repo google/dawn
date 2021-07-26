@@ -107,7 +107,7 @@ void main_1(constant buf2& x_10, constant buf0& x_12, constant buf1& x_16, threa
   int const x_74 = x_16.x_GLF_uniform_int_values.arr[0].el;
   int const x_77 = x_16.x_GLF_uniform_int_values.arr[0].el;
   float4x2 const x_83 = float4x2(float2(float(x_56), float(x_59)), float2(float(x_62), float(x_65)), float2(float(x_68), float(x_71)), float2(float(x_74), float(x_77)));
-  if ((((all((x_54[0u] == x_83[0u])) && all((x_54[1u] == x_83[1u]))) && all((x_54[2u] == x_83[2u]))) && all((x_54[3u] == x_83[3u])))) {
+  if ((((all((x_54[0u] == x_83[0u])) & all((x_54[1u] == x_83[1u]))) & all((x_54[2u] == x_83[2u]))) & all((x_54[3u] == x_83[3u])))) {
     int const x_107 = x_16.x_GLF_uniform_int_values.arr[3].el;
     int const x_110 = x_16.x_GLF_uniform_int_values.arr[0].el;
     int const x_113 = x_16.x_GLF_uniform_int_values.arr[0].el;

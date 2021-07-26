@@ -230,9 +230,9 @@ ast::BinaryOp ConvertBinaryOp(SpvOp opcode) {
     case SpvOpBitwiseXor:
       return ast::BinaryOp::kXor;
     case SpvOpLogicalAnd:
-      return ast::BinaryOp::kLogicalAnd;
+      return ast::BinaryOp::kAnd;
     case SpvOpLogicalOr:
-      return ast::BinaryOp::kLogicalOr;
+      return ast::BinaryOp::kOr;
     case SpvOpUGreaterThan:
     case SpvOpSGreaterThan:
     case SpvOpFOrdGreaterThan:

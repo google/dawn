@@ -126,11 +126,7 @@ void main_1() {
         x_121 = x_121_phi;
         const int x_124 = x_124_phi;
         x_126 = x_126_phi;
-        bool tint_tmp = (x_126 <= x_116);
-        if (tint_tmp) {
-          tint_tmp = (x_124 <= x_119);
-        }
-        if ((tint_tmp)) {
+        if (((x_126 <= x_116) & (x_124 <= x_119))) {
         } else {
           break;
         }
@@ -167,11 +163,7 @@ void main_1() {
         int x_152 = 0;
         const int x_148 = x_148_phi;
         const int x_151 = x_151_phi;
-        bool tint_tmp_1 = (x_151 < 10);
-        if (tint_tmp_1) {
-          tint_tmp_1 = (x_151 <= x_116);
-        }
-        if ((tint_tmp_1)) {
+        if (((x_151 < 10) & (x_151 <= x_116))) {
         } else {
           break;
         }

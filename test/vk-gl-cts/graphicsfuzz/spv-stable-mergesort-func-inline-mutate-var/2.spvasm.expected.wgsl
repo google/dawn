@@ -29,7 +29,7 @@ fn merge_i1_i1_i1_(from : ptr<function, i32>, mid : ptr<function, i32>, to : ptr
     let x_311 : i32 = *(mid);
     let x_313 : i32 = j;
     let x_314 : i32 = *(to);
-    if (((x_310 <= x_311) && (x_313 <= x_314))) {
+    if (((x_310 <= x_311) & (x_313 <= x_314))) {
     } else {
       break;
     }
@@ -57,7 +57,7 @@ fn merge_i1_i1_i1_(from : ptr<function, i32>, mid : ptr<function, i32>, to : ptr
     let x_346 : i32 = i;
     let x_348 : i32 = i;
     let x_349 : i32 = *(mid);
-    if (((x_346 < 10) && (x_348 <= x_349))) {
+    if (((x_346 < 10) & (x_348 <= x_349))) {
     } else {
       break;
     }

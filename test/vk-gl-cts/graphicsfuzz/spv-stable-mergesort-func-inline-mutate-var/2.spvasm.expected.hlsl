@@ -22,11 +22,7 @@ void merge_i1_i1_i1_(inout int from, inout int mid, inout int to) {
     const int x_311 = mid;
     const int x_313 = j;
     const int x_314 = to;
-    bool tint_tmp = (x_310 <= x_311);
-    if (tint_tmp) {
-      tint_tmp = (x_313 <= x_314);
-    }
-    if ((tint_tmp)) {
+    if (((x_310 <= x_311) & (x_313 <= x_314))) {
     } else {
       break;
     }
@@ -52,11 +48,7 @@ void merge_i1_i1_i1_(inout int from, inout int mid, inout int to) {
     const int x_346 = i;
     const int x_348 = i;
     const int x_349 = mid;
-    bool tint_tmp_1 = (x_346 < 10);
-    if (tint_tmp_1) {
-      tint_tmp_1 = (x_348 <= x_349);
-    }
-    if ((tint_tmp_1)) {
+    if (((x_346 < 10) & (x_348 <= x_349))) {
     } else {
       break;
     }

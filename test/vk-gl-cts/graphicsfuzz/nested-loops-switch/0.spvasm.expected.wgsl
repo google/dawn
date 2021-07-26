@@ -60,7 +60,7 @@ fn main_1() {
                   let x_90 : i32 = msb10;
                   let x_92 : i32 = msb10;
                   let x_95 : i32 = msb10;
-                  let x_96 : i32 = select(0, x_95, ((x_90 >= 0) && (x_92 < 9)));
+                  let x_96 : i32 = select(0, x_95, ((x_90 >= 0) & (x_92 < 9)));
                   let x_98 : f32 = donor_replacementGLF_dead5sums[x_96];
                   donor_replacementGLF_dead5sums[x_96] = (x_98 + 1.0);
                 }

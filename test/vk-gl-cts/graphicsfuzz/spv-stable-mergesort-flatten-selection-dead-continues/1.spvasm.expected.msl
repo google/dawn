@@ -53,7 +53,7 @@ void merge_i1_i1_i1_(constant buf0& x_28, thread int* const from, thread int* co
     int const x_267 = *(mid);
     int const x_269 = j;
     int const x_270 = *(to);
-    if (((x_266 <= x_267) && (x_269 <= x_270))) {
+    if (((x_266 <= x_267) & (x_269 <= x_270))) {
     } else {
       break;
     }
@@ -166,7 +166,7 @@ void merge_i1_i1_i1_(constant buf0& x_28, thread int* const from, thread int* co
     int const x_376 = i;
     int const x_378 = i;
     int const x_379 = *(mid);
-    if (((x_376 < 10) && (x_378 <= x_379))) {
+    if (((x_376 < 10) & (x_378 <= x_379))) {
     } else {
       break;
     }

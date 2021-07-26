@@ -23,41 +23,25 @@ void main_1() {
   bool x_72_phi = false;
   const float x_42 = s1;
   f1 = (10.0f - (x_42 * floor((10.0f / x_42))));
-  bool tint_tmp = isinf(f1);
-  if (!tint_tmp) {
-    tint_tmp = (s1 == 1.0f);
-  }
-  const bool x_48 = (tint_tmp);
+  const bool x_48 = (isinf(f1) | (s1 == 1.0f));
   x_73_phi = x_48;
   if (!(x_48)) {
     const bool x_54 = (f0 == f1);
     x_63_phi = x_54;
     if (!(x_54)) {
-      bool tint_tmp_1 = (f0 > 0.99000001f);
-      if (tint_tmp_1) {
-        tint_tmp_1 = (f0 < 0.01f);
-      }
-      x_62 = (tint_tmp_1);
+      x_62 = ((f0 > 0.99000001f) & (f0 < 0.01f));
       x_63_phi = x_62;
     }
     const bool x_63 = x_63_phi;
     x_72_phi = x_63;
     if (!(x_63)) {
-      bool tint_tmp_2 = (f1 > 0.99000001f);
-      if (tint_tmp_2) {
-        tint_tmp_2 = (f1 < 0.01f);
-      }
-      x_71 = (tint_tmp_2);
+      x_71 = ((f1 > 0.99000001f) & (f1 < 0.01f));
       x_72_phi = x_71;
     }
     x_72 = x_72_phi;
     x_73_phi = x_72;
   }
-  bool tint_tmp_3 = x_73_phi;
-  if (!tint_tmp_3) {
-    tint_tmp_3 = (f1 == 10.0f);
-  }
-  if ((tint_tmp_3)) {
+  if ((x_73_phi | (f1 == 10.0f))) {
     const int x_81 = asint(x_8[1].x);
     const uint scalar_offset = ((16u * uint(0))) / 4;
     const int x_84 = asint(x_8[scalar_offset / 4][scalar_offset % 4]);

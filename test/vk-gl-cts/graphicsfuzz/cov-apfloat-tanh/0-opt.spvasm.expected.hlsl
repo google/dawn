@@ -7,11 +7,7 @@ void main_1() {
   v = float4(1.0f, 2.0f, 3.0f, 4.0f);
   dist1 = distance(tanh(v), (sinh(v) / cosh(v)));
   dist2 = distance(tanh(v), float4(0.761590004f, 0.964030027f, 0.995050013f, 0.999329984f));
-  bool tint_tmp = (dist1 < 0.100000001f);
-  if (tint_tmp) {
-    tint_tmp = (dist2 < 0.100000001f);
-  }
-  if ((tint_tmp)) {
+  if (((dist1 < 0.100000001f) & (dist2 < 0.100000001f))) {
     x_GLF_color = float4(1.0f, 0.0f, 0.0f, 1.0f);
   } else {
     x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);

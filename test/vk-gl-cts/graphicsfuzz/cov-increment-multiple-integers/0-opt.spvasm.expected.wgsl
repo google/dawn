@@ -26,7 +26,7 @@ fn main_1() {
     let x_38 : i32 = b;
     let x_40 : i32 = x_6.x_GLF_uniform_int_values[4];
     let x_42 : i32 = a;
-    if (((x_38 < x_40) && (x_42 < 10))) {
+    if (((x_38 < x_40) & (x_42 < 10))) {
     } else {
       break;
     }

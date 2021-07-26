@@ -28,7 +28,7 @@ fn main_1() {
     if (true) {
       let x_46 : i32 = x_6.x_GLF_uniform_int_values[0];
       let x_48 : i32 = index;
-      x_51 = !(((x_46 == 1) && (x_48 <= 1)));
+      x_51 = !(((x_46 == 1) & (x_48 <= 1)));
       x_52_phi = x_51;
     }
     let x_52 : bool = x_52_phi;

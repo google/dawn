@@ -2399,7 +2399,7 @@ VariableDeclStatement{
     {
       Binary[not set]{
         ScalarConstructor[not set]{true}
-        logical_and
+        and
         ScalarConstructor[not set]{true}
       }
     }

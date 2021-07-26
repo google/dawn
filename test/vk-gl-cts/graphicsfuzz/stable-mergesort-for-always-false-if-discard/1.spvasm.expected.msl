@@ -136,7 +136,7 @@ void main_1(constant buf0& x_8, thread float4* const tint_symbol_5, thread float
         x_121 = x_121_phi;
         int const x_124 = x_124_phi;
         x_126 = x_126_phi;
-        if (((x_126 <= x_116) && (x_124 <= x_119))) {
+        if (((x_126 <= x_116) & (x_124 <= x_119))) {
         } else {
           break;
         }
@@ -173,7 +173,7 @@ void main_1(constant buf0& x_8, thread float4* const tint_symbol_5, thread float
         int x_152 = 0;
         int const x_148 = x_148_phi;
         int const x_151 = x_151_phi;
-        if (((x_151 < 10) && (x_151 <= x_116))) {
+        if (((x_151 < 10) & (x_151 <= x_116))) {
         } else {
           break;
         }

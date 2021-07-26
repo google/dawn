@@ -3,11 +3,7 @@ static float4 x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 void main_1() {
   const float x_22 = gl_FragCoord.x;
-  bool tint_tmp = (x_22 < 0.0f);
-  if (!tint_tmp) {
-    tint_tmp = true;
-  }
-  if ((tint_tmp)) {
+  if (((x_22 < 0.0f) | true)) {
     x_GLF_color = float4(1.0f, 0.0f, 0.0f, 1.0f);
   } else {
     x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);

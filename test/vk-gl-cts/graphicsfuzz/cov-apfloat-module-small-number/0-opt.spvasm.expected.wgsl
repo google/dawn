@@ -38,7 +38,7 @@ fn main_1() {
   f1 = (10.0 - (x_42 * floor((10.0 / x_42))));
   let x_44 : f32 = f1;
   let x_46 : f32 = s1;
-  let x_48 : bool = (isInf(x_44) || (x_46 == 1.0));
+  let x_48 : bool = (isInf(x_44) | (x_46 == 1.0));
   x_73_phi = x_48;
   if (!(x_48)) {
     let x_52 : f32 = f0;
@@ -48,7 +48,7 @@ fn main_1() {
     if (!(x_54)) {
       let x_58 : f32 = f0;
       let x_60 : f32 = f0;
-      x_62 = ((x_58 > 0.99000001) && (x_60 < 0.01));
+      x_62 = ((x_58 > 0.99000001) & (x_60 < 0.01));
       x_63_phi = x_62;
     }
     let x_63 : bool = x_63_phi;
@@ -56,7 +56,7 @@ fn main_1() {
     if (!(x_63)) {
       let x_67 : f32 = f1;
       let x_69 : f32 = f1;
-      x_71 = ((x_67 > 0.99000001) && (x_69 < 0.01));
+      x_71 = ((x_67 > 0.99000001) & (x_69 < 0.01));
       x_72_phi = x_71;
     }
     x_72 = x_72_phi;
@@ -64,7 +64,7 @@ fn main_1() {
   }
   let x_73 : bool = x_73_phi;
   let x_74 : f32 = f1;
-  if ((x_73 || (x_74 == 10.0))) {
+  if ((x_73 | (x_74 == 10.0))) {
     let x_81 : i32 = x_8.x_GLF_uniform_int_values[1];
     let x_84 : i32 = x_8.x_GLF_uniform_int_values[0];
     let x_87 : i32 = x_8.x_GLF_uniform_int_values[0];

@@ -35,11 +35,7 @@ void main_1() {
                       switch(msb10) {
                         case 1:
                         case 8: {
-                          bool tint_tmp = (msb10 >= 0);
-                          if (tint_tmp) {
-                            tint_tmp = (msb10 < 9);
-                          }
-                          const int x_96 = ((tint_tmp) ? msb10 : 0);
+                          const int x_96 = (((msb10 >= 0) & (msb10 < 9)) ? msb10 : 0);
                           const float x_98 = donor_replacementGLF_dead5sums[x_96];
                           donor_replacementGLF_dead5sums[x_96] = (x_98 + 1.0f);
                           break;

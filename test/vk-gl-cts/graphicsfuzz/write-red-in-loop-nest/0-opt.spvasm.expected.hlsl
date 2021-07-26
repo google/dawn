@@ -44,22 +44,10 @@ void main_1() {
         d = 0;
         {
           for(; (1 < ll4); d = (d + 1)) {
-            bool tint_tmp = (d >= 0);
-            if (tint_tmp) {
-              tint_tmp = (d < 4);
-            }
-            bool tint_tmp_1 = (r >= 0);
-            if (tint_tmp_1) {
-              tint_tmp_1 = (r < 3);
-            }
-            set_float3(tempm43[((tint_tmp) ? d : 0)], ((tint_tmp_1) ? r : 0), 1.0f);
+            set_float3(tempm43[(((d >= 0) & (d < 4)) ? d : 0)], (((r >= 0) & (r < 3)) ? r : 0), 1.0f);
           }
         }
-        bool tint_tmp_2 = (idx >= 0);
-        if (tint_tmp_2) {
-          tint_tmp_2 = (idx < 9);
-        }
-        const int x_111 = ((tint_tmp_2) ? idx : 0);
+        const int x_111 = (((idx >= 0) & (idx < 9)) ? idx : 0);
         const float x_113 = m43[c].y;
         const float x_115 = sums[x_111];
         sums[x_111] = (x_115 + x_113);

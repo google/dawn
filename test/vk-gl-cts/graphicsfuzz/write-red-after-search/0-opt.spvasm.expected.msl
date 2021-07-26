@@ -99,7 +99,7 @@ void insert_i1_i1_(constant buf0& x_27, thread int* const treeIndex, thread int*
         int const x_94 = GLF_live8i;
         int const x_95 = GLF_live8i;
         int const x_96 = GLF_live8i;
-        int const x_369 = select(0, x_96, ((x_94 >= 0) && (x_95 < 50)));
+        int const x_369 = select(0, x_96, ((x_94 >= 0) & (x_95 < 50)));
         float const x_371 = GLF_live8A.arr[0];
         float const x_373 = GLF_live8A.arr[x_369];
         GLF_live8A.arr[x_369] = (x_373 + x_371);
@@ -323,11 +323,11 @@ void main_1(constant buf0& x_27, thread tint_array_wrapper_1* const tint_symbol_
     int const x_145 = GLF_live4index;
     int const x_146 = GLF_live4index;
     float const x_269 = GLF_live4obj.even_numbers.arr[1];
-    GLF_live4obj.even_numbers.arr[select(0, x_146, ((x_144 >= 0) && (x_145 < 10)))] = x_269;
+    GLF_live4obj.even_numbers.arr[select(0, x_146, ((x_144 >= 0) & (x_145 < 10)))] = x_269;
     int const x_147 = GLF_live4i;
     int const x_148 = GLF_live4i;
     int const x_149 = GLF_live4i;
-    GLF_live4obj.even_numbers.arr[select(0, x_149, ((x_147 >= 0) && (x_148 < 10)))] = 1.0f;
+    GLF_live4obj.even_numbers.arr[select(0, x_149, ((x_147 >= 0) & (x_148 < 10)))] = 1.0f;
     {
       int const x_150 = GLF_live4i;
       GLF_live4i = (x_150 + 1);

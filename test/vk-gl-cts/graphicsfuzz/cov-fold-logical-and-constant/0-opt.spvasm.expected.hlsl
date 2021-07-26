@@ -8,11 +8,7 @@ void main_1() {
     i = (i + 1);
     {
       const float x_35 = gl_FragCoord.x;
-      bool tint_tmp = (x_35 >= 0.0f);
-      if (tint_tmp) {
-        tint_tmp = false;
-      }
-      if ((tint_tmp)) {
+      if (((x_35 >= 0.0f) & false)) {
       } else {
         break;
       }

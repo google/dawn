@@ -54,18 +54,10 @@ int pointInTriangle_vf2_vf2_vf2_vf2_(inout float2 p, inout float2 a, inout float
   const float x_138 = ((x_129 * x_131) - (x_134 * x_136));
   x_79 = x_138;
   const bool x_139 = (x_111 < 0.0f);
-  bool tint_tmp = x_139;
-  if (tint_tmp) {
-    tint_tmp = (x_138 < 0.0f);
-  }
-  const bool x_141 = (tint_tmp);
+  const bool x_141 = (x_139 & (x_138 < 0.0f));
   x_148_phi = x_141;
   if (!(x_141)) {
-    bool tint_tmp_1 = (x_111 >= 0.0f);
-    if (tint_tmp_1) {
-      tint_tmp_1 = (x_138 >= 0.0f);
-    }
-    x_147 = (tint_tmp_1);
+    x_147 = ((x_111 >= 0.0f) & (x_138 >= 0.0f));
     x_148_phi = x_147;
   }
   int x_153_phi = 0;
@@ -119,18 +111,10 @@ int pointInTriangle_vf2_vf2_vf2_vf2_(inout float2 p, inout float2 a, inout float
   const float x_193 = param_4.y;
   const float x_195 = ((x_186 * x_188) - (x_191 * x_193));
   x_78 = x_195;
-  bool tint_tmp_2 = x_139;
-  if (tint_tmp_2) {
-    tint_tmp_2 = (x_195 < 0.0f);
-  }
-  const bool x_197 = (tint_tmp_2);
+  const bool x_197 = (x_139 & (x_195 < 0.0f));
   x_204_phi = x_197;
   if (!(x_197)) {
-    bool tint_tmp_3 = (x_111 >= 0.0f);
-    if (tint_tmp_3) {
-      tint_tmp_3 = (x_195 >= 0.0f);
-    }
-    x_203 = (tint_tmp_3);
+    x_203 = ((x_111 >= 0.0f) & (x_195 >= 0.0f));
     x_204_phi = x_203;
   }
   if (!(x_204_phi)) {

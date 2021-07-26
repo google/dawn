@@ -8,11 +8,7 @@ void main_1() {
   x_is_odd = ((int(x_24) & 1) == 1);
   const float x_29 = gl_FragCoord.y;
   y_is_odd = ((int(x_29) & 1) == 1);
-  bool tint_tmp = x_is_odd;
-  if (!tint_tmp) {
-    tint_tmp = y_is_odd;
-  }
-  out_data = ((tint_tmp) ? 1 : 0);
+  out_data = ((x_is_odd | y_is_odd) ? 1 : 0);
   return;
 }
 

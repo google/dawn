@@ -4,11 +4,7 @@ void main_1() {
   float2x2 m = float2x2(0.0f, 0.0f, 0.0f, 0.0f);
   m = (transpose(float2x2(float2(1.0f, 2.0f), float2(3.0f, 4.0f))) * (1.0f / 2.0f));
   const float2x2 x_33 = m;
-  bool tint_tmp = all((x_33[0u] == float2x2(float2(0.5f, 1.5f), float2(1.0f, 2.0f))[0u]));
-  if (tint_tmp) {
-    tint_tmp = all((x_33[1u] == float2x2(float2(0.5f, 1.5f), float2(1.0f, 2.0f))[1u]));
-  }
-  if ((tint_tmp)) {
+  if ((all((x_33[0u] == float2x2(float2(0.5f, 1.5f), float2(1.0f, 2.0f))[0u])) & all((x_33[1u] == float2x2(float2(0.5f, 1.5f), float2(1.0f, 2.0f))[1u])))) {
     x_GLF_color = float4(1.0f, 0.0f, 0.0f, 1.0f);
   } else {
     x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);
