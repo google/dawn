@@ -260,6 +260,8 @@ TEST_F(SpvParserHandleTest,
   EXPECT_EQ(sampler, nullptr);
   EXPECT_EQ(image, nullptr);
   EXPECT_TRUE(p->error().empty());
+
+  p->DeliberatelyInvalidSpirv();  // WGSL does not have null pointers.
 }
 
 TEST_F(SpvParserHandleTest,
@@ -589,6 +591,8 @@ TEST_F(SpvParserHandleTest,
 
   ASSERT_TRUE(image != nullptr);
   EXPECT_EQ(image->result_id(), 20u);
+
+  p->SkipDumpingPending("crbug.com/tint/1039");
 }
 
 TEST_F(SpvParserHandleTest,
@@ -774,6 +778,8 @@ TEST_F(SpvParserHandleTest,
 
   ASSERT_TRUE(image != nullptr);
   EXPECT_EQ(image->result_id(), 20u);
+
+  p->SkipDumpingPending("crbug.com/tint/1039");
 }
 
 TEST_F(SpvParserHandleTest,
@@ -803,6 +809,8 @@ TEST_F(SpvParserHandleTest,
 
   ASSERT_TRUE(image != nullptr);
   EXPECT_EQ(image->result_id(), 20u);
+
+  p->SkipDumpingPending("crbug.com/tint/1039");
 }
 
 TEST_F(SpvParserHandleTest,
@@ -837,6 +845,8 @@ TEST_F(SpvParserHandleTest,
 
   ASSERT_TRUE(image != nullptr);
   EXPECT_EQ(image->result_id(), 20u);
+
+  p->SkipDumpingPending("crbug.com/tint/1039");
 }
 
 TEST_F(SpvParserHandleTest,
@@ -866,6 +876,8 @@ TEST_F(SpvParserHandleTest,
   const auto* image = p->GetMemoryObjectDeclarationForHandle(200, true);
   ASSERT_TRUE(image != nullptr);
   EXPECT_EQ(image->result_id(), 20u);
+
+  p->SkipDumpingPending("crbug.com/tint/1039");
 }
 
 // Test RegisterHandleUsage, sampled image cases
