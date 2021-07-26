@@ -119,12 +119,12 @@ namespace dawn_native {
             UNREACHABLE();
         }
 
-        tint::transform::InputStepMode ToTintVertexStepMode(wgpu::VertexStepMode mode) {
+        tint::transform::VertexStepMode ToTintVertexStepMode(wgpu::VertexStepMode mode) {
             switch (mode) {
                 case wgpu::VertexStepMode::Vertex:
-                    return tint::transform::InputStepMode::kVertex;
+                    return tint::transform::VertexStepMode::kVertex;
                 case wgpu::VertexStepMode::Instance:
-                    return tint::transform::InputStepMode::kInstance;
+                    return tint::transform::VertexStepMode::kInstance;
             }
         }
 
