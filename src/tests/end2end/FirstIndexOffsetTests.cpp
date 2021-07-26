@@ -155,6 +155,7 @@ struct FragInputs {
     pipelineDesc.cBuffers[0].attributeCount = 1;
     pipelineDesc.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
     pipelineDesc.cTargets[0].format = renderPass.colorFormat;
+    pipelineDesc.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
 
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);
 

@@ -55,6 +55,7 @@ TEST_F(UnsafeAPIValidationTest, DrawIndexedIndirectDisallowed) {
             return vec4<f32>();
         })");
     desc.cFragment.module = utils::CreateShaderModule(device, "[[stage(fragment)]] fn main() {}");
+    desc.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
 
     // Control cases: DrawIndirect and DrawIndexed are allowed inside a render pass.

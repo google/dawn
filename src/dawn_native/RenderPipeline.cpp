@@ -277,10 +277,17 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR(
                     "Color format must be blendable when blending is enabled");
             }
-            if (fragmentWritten &&
-                fragmentOutputBaseType != format->GetAspectInfo(Aspect::Color).baseType) {
-                return DAWN_VALIDATION_ERROR(
-                    "Color format must match the fragment stage output type");
+            if (fragmentWritten) {
+                if (fragmentOutputBaseType != format->GetAspectInfo(Aspect::Color).baseType) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Color format must match the fragment stage output type");
+                }
+            } else {
+                if (descriptor->writeMask != wgpu::ColorWriteMask::None) {
+                    return DAWN_VALIDATION_ERROR(
+                        "writeMask must be zero for color targets with no corresponding fragment "
+                        "stage output");
+                }
             }
 
             return {};

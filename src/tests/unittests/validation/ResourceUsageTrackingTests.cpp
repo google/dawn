@@ -57,6 +57,7 @@ namespace {
             utils::ComboRenderPipelineDescriptor pipelineDescriptor;
             pipelineDescriptor.vertex.module = vsModule;
             pipelineDescriptor.cFragment.module = fsModule;
+            pipelineDescriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
             pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, nullptr);
             return device.CreateRenderPipeline(&pipelineDescriptor);
         }
@@ -768,6 +769,7 @@ namespace {
             utils::ComboRenderPipelineDescriptor pipelineDescriptor;
             pipelineDescriptor.vertex.module = vsModule;
             pipelineDescriptor.cFragment.module = fsModule;
+            pipelineDescriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
             pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl0);
             wgpu::RenderPipeline rp = device.CreateRenderPipeline(&pipelineDescriptor);
 
@@ -1578,6 +1580,7 @@ namespace {
             utils::ComboRenderPipelineDescriptor pipelineDescriptor;
             pipelineDescriptor.vertex.module = vsModule;
             pipelineDescriptor.cFragment.module = fsModule;
+            pipelineDescriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
             pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &readBGL);
             wgpu::RenderPipeline rp = device.CreateRenderPipeline(&pipelineDescriptor);
 

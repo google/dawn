@@ -178,6 +178,7 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
         descriptor.layout = nullptr;
         descriptor.vertex.module = mDefaultVSModule;
         descriptor.cFragment.module = fsModule;
+        descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
         device.CreateRenderPipeline(&descriptor);
     }
 }

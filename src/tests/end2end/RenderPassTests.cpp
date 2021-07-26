@@ -145,6 +145,7 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
         descriptor.cFragment.module = fsModule;
         descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
         descriptor.cTargets[0].format = kFormat;
+        descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
 
         wgpu::RenderPipeline pipelineWithNoFragmentOutput =
             device.CreateRenderPipeline(&descriptor);

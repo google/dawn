@@ -193,6 +193,7 @@ class MinBufferSizeTestsBase : public ValidationTest {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.vertex.module = vsModule;
         pipelineDescriptor.cFragment.module = fsModule;
+        pipelineDescriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
         pipelineDescriptor.layout = nullptr;
         if (!layouts.empty()) {
             wgpu::PipelineLayoutDescriptor descriptor;

@@ -226,8 +226,15 @@ TEST_P(SwapChainValidationTests, ReturnedViewCharacteristics) {
             return vec4<f32>(0.0, 0.0, 0.0, 1.0);
         })");
     pipelineDesc.cFragment.module = utils::CreateShaderModule(device, R"(
-        [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
-            return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+        struct FragmentOut {
+            [[location(0)]] target0 : vec4<f32>;
+            [[location(1)]] target1 : f32;
+        };
+        [[stage(fragment)]] fn main() -> FragmentOut {
+            var out : FragmentOut;
+            out.target0 = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+            out.target1 = 0.5;
+            return out;
         })");
     // Validation will check that the sample count of the view matches this format.
     pipelineDesc.multisample.count = 1;

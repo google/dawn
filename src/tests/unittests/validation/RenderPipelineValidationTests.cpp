@@ -456,6 +456,7 @@ TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
                     ignore(textureDimensions(myTexture));
                 })";
             descriptor.cFragment.module = utils::CreateShaderModule(device, stream.str().c_str());
+            descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
 
             wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
                 device, {{0, wgpu::ShaderStage::Fragment, kTextureComponentTypes[j]}});
@@ -504,6 +505,7 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
                     ignore(textureDimensions(myTexture));
                 })";
             descriptor.cFragment.module = utils::CreateShaderModule(device, stream.str().c_str());
+            descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
 
             wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
                 device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float,
@@ -751,6 +753,138 @@ TEST_F(RenderPipelineValidationTest, FragmentOutputCorrectEntryPoint) {
     descriptor.cFragment.entryPoint = "fragmentFloat";
     descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA32Uint;
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+}
+
+// Test that unwritten fragment outputs must have a write mask of 0.
+TEST_F(RenderPipelineValidationTest, UnwrittenFragmentOutputsMask0) {
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+            return vec4<f32>();
+        }
+    )");
+
+    wgpu::ShaderModule fsModuleWriteNone = utils::CreateShaderModule(device, R"(
+        [[stage(fragment)]] fn main() {}
+    )");
+
+    wgpu::ShaderModule fsModuleWrite0 = utils::CreateShaderModule(device, R"(
+        [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+            return vec4<f32>();
+        }
+    )");
+
+    wgpu::ShaderModule fsModuleWrite1 = utils::CreateShaderModule(device, R"(
+        [[stage(fragment)]] fn main() -> [[location(1)]] vec4<f32> {
+            return vec4<f32>();
+        }
+    )");
+
+    wgpu::ShaderModule fsModuleWriteBoth = utils::CreateShaderModule(device, R"(
+        struct FragmentOut {
+            [[location(0)]] target0 : vec4<f32>;
+            [[location(1)]] target1 : vec4<f32>;
+        };
+        [[stage(fragment)]] fn main() -> FragmentOut {
+            var out : FragmentOut;
+            return out;
+        }
+    )");
+
+    // Control case: write to target 0
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+
+        descriptor.cFragment.targetCount = 1;
+        descriptor.cFragment.module = fsModuleWrite0;
+        device.CreateRenderPipeline(&descriptor);
+    }
+
+    // Control case: write to target 0 and target 1
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+
+        descriptor.cFragment.targetCount = 2;
+        descriptor.cFragment.module = fsModuleWriteBoth;
+        device.CreateRenderPipeline(&descriptor);
+    }
+
+    // Write only target 1 (not in pipeline fragment state).
+    // Errors because target 0 does not have a write mask of 0.
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+
+        descriptor.cFragment.targetCount = 1;
+        descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::All;
+        descriptor.cFragment.module = fsModuleWrite1;
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+
+    // Write only target 1 (not in pipeline fragment state).
+    // OK because target 0 has a write mask of 0.
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+
+        descriptor.cFragment.targetCount = 1;
+        descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
+        descriptor.cFragment.module = fsModuleWrite1;
+        device.CreateRenderPipeline(&descriptor);
+    }
+
+    // Write only target 0 with two color targets.
+    // Errors because target 1 does not have a write mask of 0.
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+
+        descriptor.cFragment.targetCount = 2;
+        descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::Red;
+        descriptor.cTargets[1].writeMask = wgpu::ColorWriteMask::Alpha;
+        descriptor.cFragment.module = fsModuleWrite0;
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+
+    // Write only target 0 with two color targets.
+    // OK because target 1 has a write mask of 0.
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+
+        descriptor.cFragment.targetCount = 2;
+        descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::All;
+        descriptor.cTargets[1].writeMask = wgpu::ColorWriteMask::None;
+        descriptor.cFragment.module = fsModuleWrite0;
+        device.CreateRenderPipeline(&descriptor);
+    }
+
+    // Write nothing with two color targets.
+    // Errors because both target 0 and 1 have nonzero write masks.
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+
+        descriptor.cFragment.targetCount = 2;
+        descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::Red;
+        descriptor.cTargets[1].writeMask = wgpu::ColorWriteMask::Green;
+        descriptor.cFragment.module = fsModuleWriteNone;
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+
+    // Write nothing with two color targets.
+    // OK because target 0 and 1 have write masks of 0.
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+
+        descriptor.cFragment.targetCount = 2;
+        descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
+        descriptor.cTargets[1].writeMask = wgpu::ColorWriteMask::None;
+        descriptor.cFragment.module = fsModuleWriteNone;
+        device.CreateRenderPipeline(&descriptor);
+    }
 }
 
 // Test that fragment output validation is for the correct entryPoint

@@ -102,6 +102,7 @@ namespace {
             descriptor->layout = pipelineLayout;
             descriptor->vertex.module = vsModule;
             descriptor->cFragment.module = fsModule;
+            descriptor->cTargets[0].writeMask = wgpu::ColorWriteMask::None;
             descriptor->vertex.bufferCount = 1;
             descriptor->cBuffers[0].arrayStride = 2 * sizeof(float);
             descriptor->cBuffers[0].attributeCount = 1;
@@ -735,6 +736,9 @@ TEST_F(RenderBundleValidationTest, PipelineColorFormatMismatch) {
         desc->cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
         desc->cTargets[1].format = wgpu::TextureFormat::RG16Float;
         desc->cTargets[2].format = wgpu::TextureFormat::R16Sint;
+        desc->cTargets[0].writeMask = wgpu::ColorWriteMask::None;
+        desc->cTargets[1].writeMask = wgpu::ColorWriteMask::None;
+        desc->cTargets[2].writeMask = wgpu::ColorWriteMask::None;
     };
 
     // Test the success case.

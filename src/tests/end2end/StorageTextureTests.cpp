@@ -370,12 +370,17 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
                 UNREACHABLE();
                 break;
         }
-        auto workgroupSize = !strcmp(stage, "compute") ? ", workgroup_size(1)" : "";
+        const char* workgroupSize = !strcmp(stage, "compute") ? ", workgroup_size(1)" : "";
+        const bool isFragment = strcmp(stage, "fragment") == 0;
 
         std::ostringstream ostream;
         ostream << GetImageDeclaration(format, "write", dimension, 0) << "\n";
         ostream << "[[stage(" << stage << ")" << workgroupSize << "]]\n";
-        ostream << "fn main() {\n";
+        ostream << "fn main() ";
+        if (isFragment) {
+            ostream << "-> [[location(0)]] vec4<f32> ";
+        }
+        ostream << "{\n";
         ostream << "  let size : vec2<i32> = textureDimensions(storageImage0).xy;\n";
         ostream << "  let sliceCount : i32 = " << sliceCount << ";\n";
         ostream << "  for (var slice : i32 = 0; slice < sliceCount; slice = slice + 1) {\n";
@@ -388,6 +393,9 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         ostream << "      }\n";
         ostream << "    }\n";
         ostream << "  }\n";
+        if (isFragment) {
+            ostream << "return vec4<f32>();\n";
+        }
         ostream << "}\n";
 
         return ostream.str();
@@ -616,11 +624,11 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
     }
 
     void WriteIntoStorageTextureInRenderPass(wgpu::Texture writeonlyStorageTexture,
-                                             const char* kVertexShader,
-                                             const char* kFragmentShader) {
+                                             const char* vertexShader,
+                                             const char* fragmentShader) {
         // Create a render pipeline that writes the expected pixel values into the storage texture
         // without fragment shader outputs.
-        wgpu::RenderPipeline pipeline = CreateRenderPipeline(kVertexShader, kFragmentShader);
+        wgpu::RenderPipeline pipeline = CreateRenderPipeline(vertexShader, fragmentShader);
         wgpu::BindGroup bindGroup = utils::MakeBindGroup(
             device, pipeline.GetBindGroupLayout(0), {{0, writeonlyStorageTexture.CreateView()}});
 
@@ -1263,8 +1271,9 @@ fn doTest() -> bool {
     const char* kCommonWriteOnlyZeroInitTestCodeFragment = R"(
 [[group(0), binding(0)]] var dstImage : texture_storage_2d<r32uint, write>;
 
-[[stage(fragment)]] fn main() {
+[[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
   textureStore(dstImage, vec2<i32>(0, 0), vec4<u32>(1u, 0u, 0u, 1u));
+  return vec4<f32>();
 })";
     const char* kCommonWriteOnlyZeroInitTestCodeCompute = R"(
 [[group(0), binding(0)]] var dstImage : texture_storage_2d<r32uint, write>;

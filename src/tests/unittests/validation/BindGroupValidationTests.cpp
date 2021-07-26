@@ -1359,6 +1359,7 @@ class SetBindGroupValidationTest : public ValidationTest {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.vertex.module = vsModule;
         pipelineDescriptor.cFragment.module = fsModule;
+        pipelineDescriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
         wgpu::PipelineLayout pipelineLayout =
             utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
         pipelineDescriptor.layout = pipelineLayout;
@@ -1818,6 +1819,7 @@ class SetBindGroupPersistenceValidationTest : public ValidationTest {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.vertex.module = mVsModule;
         pipelineDescriptor.cFragment.module = fsModule;
+        pipelineDescriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
         pipelineDescriptor.layout = pipelineLayout;
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 
@@ -1957,6 +1959,7 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.vertex.module = vsModule;
         pipelineDescriptor.cFragment.module = fsModule;
+        pipelineDescriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
         wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&descriptor);
         pipelineDescriptor.layout = pipelineLayout;
         return device.CreateRenderPipeline(&pipelineDescriptor);
@@ -2350,6 +2353,7 @@ class SamplerTypeBindingTest : public ValidationTest {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.vertex.module = vsModule;
         pipelineDescriptor.cFragment.module = fsModule;
+        pipelineDescriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
         wgpu::PipelineLayout pipelineLayout =
             utils::MakeBasicPipelineLayout(device, bindGroupLayout);
         pipelineDescriptor.layout = pipelineLayout;

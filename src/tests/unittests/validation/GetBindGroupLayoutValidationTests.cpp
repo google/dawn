@@ -31,6 +31,7 @@ class GetBindGroupLayoutTests : public ValidationTest {
         descriptor.layout = nullptr;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
+        descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
 
         return device.CreateRenderPipeline(&descriptor);
     }
@@ -77,6 +78,7 @@ TEST_F(GetBindGroupLayoutTests, SameObject) {
     descriptor.layout = nullptr;
     descriptor.vertex.module = vsModule;
     descriptor.cFragment.module = fsModule;
+    descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
 
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
@@ -213,6 +215,7 @@ TEST_F(GetBindGroupLayoutTests, DefaultTextureSampleType) {
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vertexModule;
         descriptor.cFragment.module = fragmentModule;
+        descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
         return device.CreateRenderPipeline(&descriptor).GetBindGroupLayout(0);
     };
 
@@ -637,6 +640,7 @@ TEST_F(GetBindGroupLayoutTests, DuplicateBinding) {
     descriptor.layout = nullptr;
     descriptor.vertex.module = vsModule;
     descriptor.cFragment.module = fsModule;
+    descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
 
     device.CreateRenderPipeline(&descriptor);
 }
@@ -707,6 +711,7 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
 
     utils::ComboRenderPipelineDescriptor descriptor;
     descriptor.layout = nullptr;
+    descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
 
     // Check with both stages using 4 bytes.
     {
@@ -773,6 +778,7 @@ TEST_F(GetBindGroupLayoutTests, StageAggregation) {
 
     utils::ComboRenderPipelineDescriptor descriptor;
     descriptor.layout = nullptr;
+    descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
 
     // Check with only the vertex shader using the sampler
     {
@@ -999,6 +1005,7 @@ TEST_F(GetBindGroupLayoutTests, Reflection) {
     pipelineDesc.layout = pipelineLayout;
     pipelineDesc.vertex.module = vsModule;
     pipelineDesc.cFragment.module = fsModule;
+    pipelineDesc.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
 
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);
 
