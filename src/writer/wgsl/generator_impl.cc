@@ -420,6 +420,12 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
     if (!EmitType(out, ptr->type())) {
       return false;
     }
+    if (ptr->access() != ast::Access::kUndefined) {
+      out << ", ";
+      if (!EmitAccess(out, ptr->access())) {
+        return false;
+      }
+    }
     out << ">";
   } else if (auto* atomic = ty->As<ast::Atomic>()) {
     out << "atomic<";

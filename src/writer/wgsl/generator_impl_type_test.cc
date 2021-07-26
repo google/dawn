@@ -125,6 +125,18 @@ TEST_F(WgslGeneratorImplTest, EmitType_Pointer) {
   EXPECT_EQ(out.str(), "ptr<workgroup, f32>");
 }
 
+TEST_F(WgslGeneratorImplTest, EmitType_PointerAccessMode) {
+  auto* p =
+      ty.pointer<f32>(ast::StorageClass::kStorage, ast::Access::kReadWrite);
+  Alias("make_type_reachable", p);
+
+  GeneratorImpl& gen = Build();
+
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, p)) << gen.error();
+  EXPECT_EQ(out.str(), "ptr<storage, f32, read_write>");
+}
+
 TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
   auto* s = Structure("S", {
                                Member("a", ty.i32()),

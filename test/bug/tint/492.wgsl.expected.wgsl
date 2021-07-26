@@ -7,6 +7,6 @@ struct S {
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {
-  let p : ptr<storage, i32> = &(buf.a);
+  let p : ptr<storage, i32, read_write> = &(buf.a);
   *(p) = 12;
 }

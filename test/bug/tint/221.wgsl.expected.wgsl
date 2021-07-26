@@ -15,7 +15,7 @@ fn main() {
     if ((i >= b.count)) {
       break;
     }
-    let p : ptr<storage, u32> = &(b.data[i]);
+    let p : ptr<storage, u32, read_write> = &(b.data[i]);
     if (((i % 2u) == 0u)) {
       continue;
     }

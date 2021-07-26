@@ -7,6 +7,6 @@ struct S {
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {
-  let p : ptr<storage, i32> = &(v.a);
+  let p : ptr<storage, i32, read_write> = &(v.a);
   let use : i32 = (*(p) + 1);
 }
