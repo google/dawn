@@ -23,6 +23,7 @@
 #include "dawn_native/VertexFormat.h"
 
 #include <cmath>
+#include <sstream>
 
 namespace dawn_native {
     // Helper functions
@@ -311,6 +312,42 @@ namespace dawn_native {
 
             return {};
         }
+
+        MaybeError ValidateInterStageMatching(DeviceBase* device,
+                                              const VertexState& vertexState,
+                                              const FragmentState& fragmentState) {
+            const EntryPointMetadata& vertexMetadata =
+                vertexState.module->GetEntryPoint(vertexState.entryPoint);
+            const EntryPointMetadata& fragmentMetadata =
+                fragmentState.module->GetEntryPoint(fragmentState.entryPoint);
+
+            if (vertexMetadata.usedInterStageVariables !=
+                fragmentMetadata.usedInterStageVariables) {
+                return DAWN_VALIDATION_ERROR(
+                    "One or more fragment inputs and vertex outputs are not one-to-one matching");
+            }
+
+            auto generateErrorString = [](const char* interStageAttribute, size_t location) {
+                std::ostringstream stream;
+                stream << "The " << interStageAttribute << " of the vertex output at location "
+                       << location
+                       << " is different from the one of the fragment input at the same location";
+                return stream.str();
+            };
+            // TODO(dawn:802): Validate interpolation types and interpolition sampling types
+            for (size_t i : IterateBitSet(vertexMetadata.usedInterStageVariables)) {
+                const auto& vertexOutputInfo = vertexMetadata.interStageVariables[i];
+                const auto& fragmentInputInfo = fragmentMetadata.interStageVariables[i];
+                if (vertexOutputInfo.baseType != fragmentInputInfo.baseType) {
+                    return DAWN_VALIDATION_ERROR(generateErrorString("base type", i));
+                }
+                if (vertexOutputInfo.componentCount != fragmentInputInfo.componentCount) {
+                    return DAWN_VALIDATION_ERROR(generateErrorString("componentCount", i));
+                }
+            }
+
+            return {};
+        }
     }  // anonymous namespace
 
     // Helper functions
@@ -361,6 +398,8 @@ namespace dawn_native {
         if (descriptor->fragment->targetCount == 0 && !descriptor->depthStencil) {
             return DAWN_VALIDATION_ERROR("Should have at least one color target or a depthStencil");
         }
+
+        DAWN_TRY(ValidateInterStageMatching(device, descriptor->vertex, *(descriptor->fragment)));
 
         return {};
     }

@@ -337,6 +337,38 @@ namespace dawn_native {
             }
         }
 
+        ResultOrError<InterStageComponentType> TintComponentTypeToInterStageComponentType(
+            tint::inspector::ComponentType type) {
+            switch (type) {
+                case tint::inspector::ComponentType::kFloat:
+                    return InterStageComponentType::Float;
+                case tint::inspector::ComponentType::kSInt:
+                    return InterStageComponentType::Sint;
+                case tint::inspector::ComponentType::kUInt:
+                    return InterStageComponentType::Uint;
+                case tint::inspector::ComponentType::kUnknown:
+                    return DAWN_VALIDATION_ERROR(
+                        "Attempted to convert 'Unknown' component type from Tint");
+            }
+        }
+
+        ResultOrError<uint32_t> TintCompositionTypeToInterStageComponentCount(
+            tint::inspector::CompositionType type) {
+            switch (type) {
+                case tint::inspector::CompositionType::kScalar:
+                    return 1u;
+                case tint::inspector::CompositionType::kVec2:
+                    return 2u;
+                case tint::inspector::CompositionType::kVec3:
+                    return 3u;
+                case tint::inspector::CompositionType::kVec4:
+                    return 4u;
+                case tint::inspector::CompositionType::kUnknown:
+                    return DAWN_VALIDATION_ERROR(
+                        "Attempt to convert 'Unknown' composition type from Tint");
+            }
+        }
+
         MaybeError ValidateSpirv(const uint32_t* code, uint32_t codeSize) {
             spvtools::SpirvTools spirvTools(SPV_ENV_VULKAN_1_1);
 
@@ -910,8 +942,7 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
-            constexpr uint32_t kMaxInterStageShaderLocation =
-                kMaxInterStageShaderComponents / 4 - 1;
+            constexpr uint32_t kMaxInterStageShaderLocation = kMaxInterStageShaderVariables - 1;
             for (auto& entryPoint : entryPoints) {
                 ASSERT(result.count(entryPoint.name) == 0);
 
@@ -1006,6 +1037,13 @@ namespace dawn_native {
                             ss << "Vertex output location (" << location << ") over limits";
                             return DAWN_VALIDATION_ERROR(ss.str());
                         }
+                        metadata->usedInterStageVariables.set(location);
+                        DAWN_TRY_ASSIGN(
+                            metadata->interStageVariables[location].baseType,
+                            TintComponentTypeToInterStageComponentType(output_var.component_type));
+                        DAWN_TRY_ASSIGN(metadata->interStageVariables[location].componentCount,
+                                        TintCompositionTypeToInterStageComponentCount(
+                                            output_var.composition_type));
                     }
                 }
 
@@ -1021,6 +1059,13 @@ namespace dawn_native {
                             ss << "Fragment input location (" << location << ") over limits";
                             return DAWN_VALIDATION_ERROR(ss.str());
                         }
+                        metadata->usedInterStageVariables.set(location);
+                        DAWN_TRY_ASSIGN(
+                            metadata->interStageVariables[location].baseType,
+                            TintComponentTypeToInterStageComponentType(input_var.component_type));
+                        DAWN_TRY_ASSIGN(metadata->interStageVariables[location].componentCount,
+                                        TintCompositionTypeToInterStageComponentCount(
+                                            input_var.composition_type));
                     }
 
                     for (const auto& output_var : entryPoint.output_variables) {

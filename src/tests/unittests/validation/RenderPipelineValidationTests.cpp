@@ -832,3 +832,124 @@ TEST_F(DepthClampingValidationTest, Success) {
         device.CreateRenderPipeline(&descriptor);
     }
 }
+
+class InterStageVariableMatchingValidationTest : public RenderPipelineValidationTest {
+  protected:
+    void CheckCreatingRenderPipeline(wgpu::ShaderModule vertexModule,
+                                     wgpu::ShaderModule fragmentModule,
+                                     bool shouldSucceed) {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vertexModule;
+        descriptor.cFragment.module = fragmentModule;
+        if (shouldSucceed) {
+            device.CreateRenderPipeline(&descriptor);
+        } else {
+            ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+        }
+    }
+};
+
+// Tests that creating render pipeline should fail when there is a vertex output that doesn't have
+// its corresponding fragment input at the same location, and there is a fragment input that
+// doesn't have its corresponding vertex output at the same location.
+TEST_F(InterStageVariableMatchingValidationTest, MissingDeclarationAtSameLocation) {
+    wgpu::ShaderModule vertexModuleOutputAtLocation0 = utils::CreateShaderModule(device, R"(
+            struct A {
+                [[location(0)]] vout: f32;
+                [[builtin(position)]] pos: vec4<f32>;
+            };
+            [[stage(vertex)]] fn main() -> A {
+                var vertexOut: A;
+                vertexOut.pos = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+                return vertexOut;
+            })");
+    wgpu::ShaderModule fragmentModuleAtLocation0 = utils::CreateShaderModule(device, R"(
+            struct B {
+                [[location(0)]] fin: f32;
+            };
+            [[stage(fragment)]] fn main(fragmentIn: B) -> [[location(0)]] vec4<f32>  {
+                return vec4<f32>(fragmentIn.fin, 0.0, 0.0, 1.0);
+            })");
+    wgpu::ShaderModule fragmentModuleInputAtLocation1 = utils::CreateShaderModule(device, R"(
+            struct A {
+                [[location(1)]] vout: f32;
+            };
+            [[stage(fragment)]] fn main(vertexOut: A) -> [[location(0)]] vec4<f32>  {
+                return vec4<f32>(vertexOut.vout, 0.0, 0.0, 1.0);
+            })");
+    wgpu::ShaderModule vertexModuleOutputAtLocation1 = utils::CreateShaderModule(device, R"(
+            struct B {
+                [[location(1)]] fin: f32;
+                [[builtin(position)]] pos: vec4<f32>;
+            };
+            [[stage(vertex)]] fn main() -> B {
+                var fragmentIn: B;
+                fragmentIn.pos = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+                return fragmentIn;
+            })");
+
+    {
+        CheckCreatingRenderPipeline(vertexModuleOutputAtLocation0, fsModule, false);
+        CheckCreatingRenderPipeline(vsModule, fragmentModuleAtLocation0, false);
+        CheckCreatingRenderPipeline(vertexModuleOutputAtLocation0, fragmentModuleInputAtLocation1,
+                                    false);
+        CheckCreatingRenderPipeline(vertexModuleOutputAtLocation1, fragmentModuleAtLocation0,
+                                    false);
+    }
+
+    {
+        CheckCreatingRenderPipeline(vertexModuleOutputAtLocation0, fragmentModuleAtLocation0, true);
+        CheckCreatingRenderPipeline(vertexModuleOutputAtLocation1, fragmentModuleInputAtLocation1,
+                                    true);
+    }
+}
+
+// Tests that creating render pipeline should fail when the type of a vertex stage output variable
+// doesn't match the type of the fragment stage input variable at the same location.
+TEST_F(InterStageVariableMatchingValidationTest, DifferentTypeAtSameLocation) {
+    constexpr std::array<const char*, 12> kTypes = {{"f32", "vec2<f32>", "vec3<f32>", "vec4<f32>",
+                                                     "i32", "vec2<i32>", "vec3<i32>", "vec4<i32>",
+                                                     "u32", "vec2<u32>", "vec3<u32>", "vec4<u32>"}};
+
+    std::array<wgpu::ShaderModule, 12> vertexModules;
+    std::array<wgpu::ShaderModule, 12> fragmentModules;
+    for (uint32_t i = 0; i < kTypes.size(); ++i) {
+        std::string interfaceDeclaration;
+        {
+            std::ostringstream sstream;
+            sstream << "struct A { [[location(0)]] a: " << kTypes[i] << ";" << std::endl;
+            interfaceDeclaration = sstream.str();
+        }
+        {
+            std::ostringstream vertexStream;
+            vertexStream << interfaceDeclaration << R"(
+                    [[builtin(position)]] pos: vec4<f32>;
+                };
+                [[stage(vertex)]] fn main() -> A {
+                    var vertexOut: A;
+                    vertexOut.pos = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+                    return vertexOut;
+                })";
+            vertexModules[i] = utils::CreateShaderModule(device, vertexStream.str().c_str());
+        }
+        {
+            std::ostringstream fragmentStream;
+            fragmentStream << interfaceDeclaration << R"(
+                };
+                [[stage(fragment)]] fn main(fragmentIn: A) -> [[location(0)]] vec4<f32> {
+                    return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+                })";
+            fragmentModules[i] = utils::CreateShaderModule(device, fragmentStream.str().c_str());
+        }
+    }
+
+    for (uint32_t vertexModuleIndex = 0; vertexModuleIndex < kTypes.size(); ++vertexModuleIndex) {
+        wgpu::ShaderModule vertexModule = vertexModules[vertexModuleIndex];
+        for (uint32_t fragmentModuleIndex = 0; fragmentModuleIndex < kTypes.size();
+             ++fragmentModuleIndex) {
+            wgpu::ShaderModule fragmentModule = fragmentModules[fragmentModuleIndex];
+            bool shouldSuccess = vertexModuleIndex == fragmentModuleIndex;
+            CheckCreatingRenderPipeline(vertexModule, fragmentModule, shouldSuccess);
+        }
+    }
+}

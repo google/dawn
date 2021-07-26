@@ -498,7 +498,8 @@ class TextureViewRenderingTest : public DawnTest {
         renderPassInfo.cColorAttachments[0].clearColor = {1.0f, 0.0f, 0.0f, 1.0f};
 
         const char* oneColorFragmentShader = R"(
-            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+            [[stage(fragment)]] fn main([[location(0)]] texCoord : vec2<f32>) ->
+                [[location(0)]] vec4<f32> {
                 return vec4<f32>(0.0, 1.0, 0.0, 1.0);
             }
         )";
