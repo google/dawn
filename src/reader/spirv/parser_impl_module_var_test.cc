@@ -259,13 +259,19 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinVertexIndex) {
   // See later for tests where the SPIR-V store type is signed
   // integer, as in GLSL.
   auto p = parser(test::Assemble(Preamble() + R"(
-    OpEntryPoint Vertex %main "main" %52
+    OpEntryPoint Vertex %main "main" %52 %position
+    OpName %position "position"
+    OpDecorate %position BuiltIn Position
     OpDecorate %52 BuiltIn VertexIndex
     %uint = OpTypeInt 32 0
     %ptr = OpTypePointer Input %uint
     %52 = OpVariable %ptr Input
     %void = OpTypeVoid
     %voidfn = OpTypeFunction %void
+    %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+    %posty = OpTypePointer Output %v4float
+    %position = OpVariable %posty Output
   )" + MainBody()));
 
   EXPECT_TRUE(p->BuildAndParseInternalModule());
@@ -725,17 +731,22 @@ std::string LoosePointSizePreamble(std::string stage = "Vertex") {
     OpMemoryModel Logical Simple
     OpEntryPoint )" +
          stage + R"( %500 "main" %1
-)" + (stage == "Fragment" ? "OpExecutionMode %500 OriginUpperLeft" : "") +
+)" + (stage == "Vertex" ? " %2 " : "") +
+         +(stage == "Fragment" ? "OpExecutionMode %500 OriginUpperLeft" : "") +
+         +(stage == "Vertex" ? " OpDecorate %2 BuiltIn Position " : "") +
          R"(
     OpDecorate %1 BuiltIn PointSize
     %void = OpTypeVoid
     %voidfn = OpTypeFunction %void
     %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
     %uint = OpTypeInt 32 0
     %uint_0 = OpConstant %uint 0
     %uint_1 = OpConstant %uint 1
     %11 = OpTypePointer Output %float
     %1 = OpVariable %11 Output
+    %12 = OpTypePointer Output %v4float
+    %2 = OpVariable %12 Output
 )";
 }
 
@@ -755,12 +766,22 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Loose_Write1_IsErased) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
   EXPECT_EQ(module_str, R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] x_2_1: __vec_4__f32}
+  }
+  Variable{
+    x_2
+    private
+    undefined
+    __vec_4__f32
+  }
   Function main_1 -> __void
   ()
   {
     Return{}
   }
-  Function main -> __void
+  Function main -> __type_name_main_out
   StageDecoration{vertex}
   ()
   {
@@ -768,6 +789,14 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Loose_Write1_IsErased) {
       Identifier[not set]{main_1}
       (
       )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{x_2}
+        }
+      }
     }
   }
 }
@@ -811,6 +840,16 @@ TEST_F(SpvModuleScopeVarParserTest,
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
   EXPECT_EQ(module_str, R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] x_2_1: __vec_4__f32}
+  }
+  Variable{
+    x_2
+    private
+    undefined
+    __vec_4__f32
+  }
   Variable{
     x_900
     private
@@ -826,7 +865,7 @@ TEST_F(SpvModuleScopeVarParserTest,
     }
     Return{}
   }
-  Function main -> __void
+  Function main -> __type_name_main_out
   StageDecoration{vertex}
   ()
   {
@@ -834,6 +873,14 @@ TEST_F(SpvModuleScopeVarParserTest,
       Identifier[not set]{main_1}
       (
       )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{x_2}
+        }
+      }
     }
   }
 }
@@ -880,12 +927,22 @@ TEST_F(SpvModuleScopeVarParserTest,
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
   EXPECT_EQ(module_str, R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] x_2_1: __vec_4__f32}
+  }
+  Variable{
+    x_2
+    private
+    undefined
+    __vec_4__f32
+  }
   Function main_1 -> __void
   ()
   {
     Return{}
   }
-  Function main -> __void
+  Function main -> __type_name_main_out
   StageDecoration{vertex}
   ()
   {
@@ -893,6 +950,14 @@ TEST_F(SpvModuleScopeVarParserTest,
       Identifier[not set]{main_1}
       (
       )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{x_2}
+        }
+      }
     }
   }
 }
@@ -917,12 +982,22 @@ TEST_F(SpvModuleScopeVarParserTest,
   EXPECT_TRUE(p->error().empty()) << p->error();
   const auto module_str = p->program().to_str();
   EXPECT_EQ(module_str, R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] x_2_1: __vec_4__f32}
+  }
+  Variable{
+    x_2
+    private
+    undefined
+    __vec_4__f32
+  }
   Function main_1 -> __void
   ()
   {
     Return{}
   }
-  Function main -> __void
+  Function main -> __type_name_main_out
   StageDecoration{vertex}
   ()
   {
@@ -930,6 +1005,14 @@ TEST_F(SpvModuleScopeVarParserTest,
       Identifier[not set]{main_1}
       (
       )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{x_2}
+        }
+      }
     }
   }
 }
@@ -2479,7 +2562,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_CopyObject) {
         {
           UnaryOp[not set]{
             indirection
-            Identifier[not set]{x_11}
+            Identifier[not set]{x_14}
           }
         }
       }
@@ -3898,7 +3981,8 @@ std::string VertexIndexPreamble(std::string store_type) {
   return R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
-    OpEntryPoint Vertex %main "main" %1
+    OpEntryPoint Vertex %main "main" %position %1
+    OpDecorate %position BuiltIn Position
     OpDecorate %1 BuiltIn VertexIndex
     %void = OpTypeVoid
     %voidfn = OpTypeFunction %void
@@ -3908,6 +3992,9 @@ std::string VertexIndexPreamble(std::string store_type) {
     %ptr_ty = OpTypePointer Input )" +
          store_type + R"(
     %1 = OpVariable %ptr_ty Input
+    %v4float = OpTypeVector %float 4
+    %posty = OpTypePointer Output %v4float
+    %position = OpVariable %posty Output
 )";
 }
 
@@ -3924,11 +4011,21 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_Direct) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
   const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] x_4_1: __vec_4__f32}
+  }
   Variable{
     x_1
     private
     undefined
     __i32
+  }
+  Variable{
+    x_4
+    private
+    undefined
+    __vec_4__f32
   }
   Function main_1 -> __void
   ()
@@ -3946,7 +4043,7 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_Direct) {
     }
     Return{}
   }
-  Function main -> __void
+  Function main -> __type_name_main_out
   StageDecoration{vertex}
   (
     VariableConst{
@@ -3970,6 +4067,14 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_Direct) {
       Identifier[not set]{main_1}
       (
       )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{x_4}
+        }
+      }
     }
   }
 }
@@ -3991,18 +4096,28 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_CopyObject) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
   const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] x_4_1: __vec_4__f32}
+  }
   Variable{
     x_1
     private
     undefined
     __i32
   }
+  Variable{
+    x_4
+    private
+    undefined
+    __vec_4__f32
+  }
   Function main_1 -> __void
   ()
   {
     VariableDeclStatement{
       VariableConst{
-        x_11
+        x_14
         none
         undefined
         __ptr_none__i32
@@ -4023,14 +4138,14 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_CopyObject) {
         {
           UnaryOp[not set]{
             indirection
-            Identifier[not set]{x_11}
+            Identifier[not set]{x_14}
           }
         }
       }
     }
     Return{}
   }
-  Function main -> __void
+  Function main -> __type_name_main_out
   StageDecoration{vertex}
   (
     VariableConst{
@@ -4054,6 +4169,14 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_CopyObject) {
       Identifier[not set]{main_1}
       (
       )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{x_4}
+        }
+      }
     }
   }
 }
@@ -4075,11 +4198,21 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_AccessChain) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
   const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] x_4_1: __vec_4__f32}
+  }
   Variable{
     x_1
     private
     undefined
     __i32
+  }
+  Variable{
+    x_4
+    private
+    undefined
+    __vec_4__f32
   }
   Function main_1 -> __void
   ()
@@ -4097,7 +4230,7 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_AccessChain) {
     }
     Return{}
   }
-  Function main -> __void
+  Function main -> __type_name_main_out
   StageDecoration{vertex}
   (
     VariableConst{
@@ -4122,6 +4255,14 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_AccessChain) {
       (
       )
     }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{x_4}
+        }
+      }
+    }
   }
 }
 )";
@@ -4141,11 +4282,21 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_Direct) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
   const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] x_4_1: __vec_4__f32}
+  }
   Variable{
     x_1
     private
     undefined
     __u32
+  }
+  Variable{
+    x_4
+    private
+    undefined
+    __vec_4__f32
   }
   Function main_1 -> __void
   ()
@@ -4163,7 +4314,7 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_Direct) {
     }
     Return{}
   }
-  Function main -> __void
+  Function main -> __type_name_main_out
   StageDecoration{vertex}
   (
     VariableConst{
@@ -4185,6 +4336,14 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_Direct) {
       Identifier[not set]{main_1}
       (
       )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{x_4}
+        }
+      }
     }
   }
 }
@@ -4206,18 +4365,28 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_CopyObject) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
   const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] x_4_1: __vec_4__f32}
+  }
   Variable{
     x_1
     private
     undefined
     __u32
   }
+  Variable{
+    x_4
+    private
+    undefined
+    __vec_4__f32
+  }
   Function main_1 -> __void
   ()
   {
     VariableDeclStatement{
       VariableConst{
-        x_11
+        x_14
         none
         undefined
         __ptr_none__u32
@@ -4238,14 +4407,14 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_CopyObject) {
         {
           UnaryOp[not set]{
             indirection
-            Identifier[not set]{x_11}
+            Identifier[not set]{x_14}
           }
         }
       }
     }
     Return{}
   }
-  Function main -> __void
+  Function main -> __type_name_main_out
   StageDecoration{vertex}
   (
     VariableConst{
@@ -4267,6 +4436,14 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_CopyObject) {
       Identifier[not set]{main_1}
       (
       )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{x_4}
+        }
+      }
     }
   }
 }
@@ -4288,11 +4465,21 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_AccessChain) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
   const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] x_4_1: __vec_4__f32}
+  }
   Variable{
     x_1
     private
     undefined
     __u32
+  }
+  Variable{
+    x_4
+    private
+    undefined
+    __vec_4__f32
   }
   Function main_1 -> __void
   ()
@@ -4310,7 +4497,7 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_AccessChain) {
     }
     Return{}
   }
-  Function main -> __void
+  Function main -> __type_name_main_out
   StageDecoration{vertex}
   (
     VariableConst{
@@ -4332,6 +4519,14 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_AccessChain) {
       Identifier[not set]{main_1}
       (
       )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{x_4}
+        }
+      }
     }
   }
 }
@@ -4370,7 +4565,9 @@ std::string InstanceIndexPreamble(std::string store_type) {
   return R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
-    OpEntryPoint Vertex %main "main" %1
+    OpEntryPoint Vertex %main "main" %position %1
+    OpName %position "position"
+    OpDecorate %position BuiltIn Position
     OpDecorate %1 BuiltIn InstanceIndex
     %void = OpTypeVoid
     %voidfn = OpTypeFunction %void
@@ -4380,6 +4577,9 @@ std::string InstanceIndexPreamble(std::string store_type) {
     %ptr_ty = OpTypePointer Input )" +
          store_type + R"(
     %1 = OpVariable %ptr_ty Input
+    %v4float = OpTypeVector %float 4
+    %posty = OpTypePointer Output %v4float
+    %position = OpVariable %posty Output
 )";
 }
 
@@ -4396,11 +4596,21 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_Direct) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
   const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] position_1: __vec_4__f32}
+  }
   Variable{
     x_1
     private
     undefined
     __i32
+  }
+  Variable{
+    position
+    private
+    undefined
+    __vec_4__f32
   }
   Function main_1 -> __void
   ()
@@ -4418,7 +4628,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_Direct) {
     }
     Return{}
   }
-  Function main -> __void
+  Function main -> __type_name_main_out
   StageDecoration{vertex}
   (
     VariableConst{
@@ -4442,6 +4652,14 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_Direct) {
       Identifier[not set]{main_1}
       (
       )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{position}
+        }
+      }
     }
   }
 }
@@ -4463,18 +4681,28 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_CopyObject) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
   const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] position_1: __vec_4__f32}
+  }
   Variable{
     x_1
     private
     undefined
     __i32
   }
+  Variable{
+    position
+    private
+    undefined
+    __vec_4__f32
+  }
   Function main_1 -> __void
   ()
   {
     VariableDeclStatement{
       VariableConst{
-        x_11
+        x_14
         none
         undefined
         __ptr_none__i32
@@ -4495,14 +4723,14 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_CopyObject) {
         {
           UnaryOp[not set]{
             indirection
-            Identifier[not set]{x_11}
+            Identifier[not set]{x_14}
           }
         }
       }
     }
     Return{}
   }
-  Function main -> __void
+  Function main -> __type_name_main_out
   StageDecoration{vertex}
   (
     VariableConst{
@@ -4526,6 +4754,14 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_CopyObject) {
       Identifier[not set]{main_1}
       (
       )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{position}
+        }
+      }
     }
   }
 }
@@ -4547,11 +4783,21 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_AccessChain) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
   const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] position_1: __vec_4__f32}
+  }
   Variable{
     x_1
     private
     undefined
     __i32
+  }
+  Variable{
+    position
+    private
+    undefined
+    __vec_4__f32
   }
   Function main_1 -> __void
   ()
@@ -4569,7 +4815,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_AccessChain) {
     }
     Return{}
   }
-  Function main -> __void
+  Function main -> __type_name_main_out
   StageDecoration{vertex}
   (
     VariableConst{
@@ -4593,6 +4839,14 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_AccessChain) {
       Identifier[not set]{main_1}
       (
       )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{position}
+        }
+      }
     }
   }
 }
@@ -4637,11 +4891,21 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_Direct) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
   const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] position_1: __vec_4__f32}
+  }
   Variable{
     x_1
     private
     undefined
     __u32
+  }
+  Variable{
+    position
+    private
+    undefined
+    __vec_4__f32
   }
   Function main_1 -> __void
   ()
@@ -4659,7 +4923,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_Direct) {
     }
     Return{}
   }
-  Function main -> __void
+  Function main -> __type_name_main_out
   StageDecoration{vertex}
   (
     VariableConst{
@@ -4681,6 +4945,14 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_Direct) {
       Identifier[not set]{main_1}
       (
       )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{position}
+        }
+      }
     }
   }
 }
@@ -4702,18 +4974,28 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_CopyObject) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
   const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] position_1: __vec_4__f32}
+  }
   Variable{
     x_1
     private
     undefined
     __u32
   }
+  Variable{
+    position
+    private
+    undefined
+    __vec_4__f32
+  }
   Function main_1 -> __void
   ()
   {
     VariableDeclStatement{
       VariableConst{
-        x_11
+        x_14
         none
         undefined
         __ptr_none__u32
@@ -4734,14 +5016,14 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_CopyObject) {
         {
           UnaryOp[not set]{
             indirection
-            Identifier[not set]{x_11}
+            Identifier[not set]{x_14}
           }
         }
       }
     }
     Return{}
   }
-  Function main -> __void
+  Function main -> __type_name_main_out
   StageDecoration{vertex}
   (
     VariableConst{
@@ -4763,6 +5045,14 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_CopyObject) {
       Identifier[not set]{main_1}
       (
       )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{position}
+        }
+      }
     }
   }
 }
@@ -4784,11 +5074,21 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_AccessChain) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
   const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] position_1: __vec_4__f32}
+  }
   Variable{
     x_1
     private
     undefined
     __u32
+  }
+  Variable{
+    position
+    private
+    undefined
+    __vec_4__f32
   }
   Function main_1 -> __void
   ()
@@ -4806,7 +5106,7 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_AccessChain) {
     }
     Return{}
   }
-  Function main -> __void
+  Function main -> __type_name_main_out
   StageDecoration{vertex}
   (
     VariableConst{
@@ -4828,6 +5128,14 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_AccessChain) {
       Identifier[not set]{main_1}
       (
       )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{position}
+        }
+      }
     }
   }
 }
@@ -5523,7 +5831,8 @@ TEST_F(SpvModuleScopeVarParserTest, Builtin_Input_OppositeSignednessAsWGSL) {
 
 TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_IOLocations) {
   const auto assembly = CommonCapabilities() + R"(
-     OpEntryPoint Vertex %main "main" %1 %2 %3 %4
+     OpEntryPoint Fragment %main "main" %1 %2 %3 %4
+     OpExecutionMode %main OriginUpperLeft
      OpDecorate %1 Location 0
      OpDecorate %2 Location 0
      OpDecorate %3 Location 30
@@ -5585,7 +5894,7 @@ TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_IOLocations) {
     Return{}
   }
   Function main -> __type_name_main_out
-  StageDecoration{vertex}
+  StageDecoration{fragment}
   (
     VariableConst{
       Decorations{
@@ -5640,12 +5949,15 @@ TEST_F(SpvModuleScopeVarParserTest,
   // instance_index is u32 in WGSL. Use uint in SPIR-V.
   // No bitcasts are used for parameter formation or return value.
   const auto assembly = CommonCapabilities() + R"(
-     OpEntryPoint Vertex %main "main" %1
+     OpEntryPoint Vertex %main "main" %1 %position
+     OpDecorate %position BuiltIn Position
      OpDecorate %1 BuiltIn InstanceIndex
 )" + CommonTypes() +
                         R"(
      %ptr_in_uint = OpTypePointer Input %uint
      %1 = OpVariable %ptr_in_uint Input
+     %posty = OpTypePointer Output %v4float
+     %position = OpVariable %posty Output
 
      %main = OpFunction %void None %voidfn
      %entry = OpLabel
@@ -5660,11 +5972,21 @@ TEST_F(SpvModuleScopeVarParserTest,
   EXPECT_TRUE(p->error().empty());
   const auto got = p->program().to_str();
   const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] x_4_1: __vec_4__f32}
+  }
   Variable{
     x_1
     private
     undefined
     __u32
+  }
+  Variable{
+    x_4
+    private
+    undefined
+    __vec_4__f32
   }
   Function main_1 -> __void
   ()
@@ -5682,7 +6004,7 @@ TEST_F(SpvModuleScopeVarParserTest,
     }
     Return{}
   }
-  Function main -> __void
+  Function main -> __type_name_main_out
   StageDecoration{vertex}
   (
     VariableConst{
@@ -5705,6 +6027,14 @@ TEST_F(SpvModuleScopeVarParserTest,
       (
       )
     }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{x_4}
+        }
+      }
+    }
   }
 }
 )";
@@ -5715,12 +6045,15 @@ TEST_F(SpvModuleScopeVarParserTest,
        EntryPointWrapping_BuiltinVar_Input_OppositeSignedness) {
   // instance_index is u32 in WGSL. Use int in SPIR-V.
   const auto assembly = CommonCapabilities() + R"(
-     OpEntryPoint Vertex %main "main" %1
+     OpEntryPoint Vertex %main "main" %position %1
+     OpDecorate %position BuiltIn Position
      OpDecorate %1 BuiltIn InstanceIndex
 )" + CommonTypes() +
                         R"(
      %ptr_in_int = OpTypePointer Input %int
      %1 = OpVariable %ptr_in_int Input
+     %posty = OpTypePointer Output %v4float
+     %position = OpVariable %posty Output
 
      %main = OpFunction %void None %voidfn
      %entry = OpLabel
@@ -5735,11 +6068,21 @@ TEST_F(SpvModuleScopeVarParserTest,
   EXPECT_TRUE(p->error().empty());
   const auto got = p->program().to_str();
   const std::string expected = R"(Module{
+  Struct main_out {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] x_4_1: __vec_4__f32}
+  }
   Variable{
     x_1
     private
     undefined
     __i32
+  }
+  Variable{
+    x_4
+    private
+    undefined
+    __vec_4__f32
   }
   Function main_1 -> __void
   ()
@@ -5757,7 +6100,7 @@ TEST_F(SpvModuleScopeVarParserTest,
     }
     Return{}
   }
-  Function main -> __void
+  Function main -> __type_name_main_out
   StageDecoration{vertex}
   (
     VariableConst{
@@ -5781,6 +6124,14 @@ TEST_F(SpvModuleScopeVarParserTest,
       Identifier[not set]{main_1}
       (
       )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __type_name_main_out
+          Identifier[not set]{x_4}
+        }
+      }
     }
   }
 }

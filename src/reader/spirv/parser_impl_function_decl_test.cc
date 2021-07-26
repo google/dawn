@@ -32,7 +32,8 @@ std::string Caps() {
 
 std::string Preamble() {
   return Caps() + R"(
-    OpEntryPoint Vertex %main "x_100"
+    OpEntryPoint Fragment %main "x_100"
+    OpExecutionMode %main OriginUpperLeft
   )";
 }
 
@@ -62,8 +63,20 @@ std::string CommonTypes() {
     %float = OpTypeFloat 32
     %uint = OpTypeInt 32 0
     %int = OpTypeInt 32 1
-    %float_0 = OpConstant %float 0.0
   )";
+}
+
+std::string BuiltinPosition() {
+  return R"(OpDecorate %position BuiltIn Position
+    %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+    %ptr = OpTypePointer Output %v4float
+    %position = OpVariable %ptr Output
+    %void = OpTypeVoid
+    %voidfn = OpTypeFunction %void
+    %uint = OpTypeInt 32 0
+    %int = OpTypeInt 32 1
+)";
 }
 
 TEST_F(SpvParserTest, EmitFunctions_NoFunctions) {
@@ -95,8 +108,10 @@ TEST_F(SpvParserTest, EmitFunctions_FunctionWithoutBody) {
 }
 
 TEST_F(SpvParserTest, EmitFunctions_Function_EntryPoint_Vertex) {
-  std::string input = Caps() + R"(OpEntryPoint Vertex %main "main" )" +
-                      Names({"main"}) + CommonTypes() + R"(
+  std::string input = Caps() +
+                      R"(OpEntryPoint Vertex %main "main" %position )" +
+                      Names({"main"}) + BuiltinPosition() + R"(
+
 %main = OpFunction %void None %voidfn
 %entry = OpLabel
 OpReturn
@@ -108,8 +123,14 @@ OpFunctionEnd)";
   Program program = p->program();
   const auto program_ast = program.to_str(false);
   EXPECT_THAT(program_ast, HasSubstr(R"(
+  Struct $3 {
+    StructMember{[[ BuiltinDecoration{position}
+ ]] $4: __vec_4__f32})"))
+      << program_ast;
+
+  EXPECT_THAT(program_ast, HasSubstr(R"(
   Function )" + program.Symbols().Get("main").to_str() +
-                                     R"( -> __void
+                                     R"( -> __type_name_$3
   StageDecoration{vertex}
   ()
   {)"));
@@ -163,8 +184,9 @@ TEST_F(SpvParserTest, EmitFunctions_Function_EntryPoint_GLCompute) {
 TEST_F(SpvParserTest, EmitFunctions_Function_EntryPoint_MultipleEntryPoints) {
   std::string input = Caps() +
                       R"(
-OpEntryPoint Vertex %main "first_shader"
-OpEntryPoint Vertex %main "second_shader"
+OpEntryPoint Fragment %main "first_shader"
+OpEntryPoint Fragment %main "second_shader"
+OpExecutionMode %main OriginUpperLeft
 )" + Names({"main"}) + CommonTypes() +
                       MainBody();
 
@@ -176,23 +198,24 @@ OpEntryPoint Vertex %main "second_shader"
   EXPECT_THAT(program_ast, HasSubstr(R"(
   Function )" + program.Symbols().Get("first_shader").to_str() +
                                      R"( -> __void
-  StageDecoration{vertex}
+  StageDecoration{fragment}
   ()
   {)"));
   EXPECT_THAT(program_ast, HasSubstr(R"(
   Function )" + program.Symbols().Get("second_shader").to_str() +
                                      R"( -> __void
-  StageDecoration{vertex}
+  StageDecoration{fragment}
   ()
   {)"));
 }
 
 TEST_F(SpvParserTest,
        EmitFunctions_Function_EntryPoint_GLCompute_LocalSize_Only) {
-  std::string input = Caps() + Names({"main"}) +
-                      R"(OpEntryPoint GLCompute %main "comp_main"
+  std::string input = Caps() + R"(
+OpEntryPoint GLCompute %main "comp_main"
 OpExecutionMode %main LocalSize 2 4 8
-)" + CommonTypes() + R"(
+)" + Names({"main"}) + CommonTypes() +
+                      R"(
 %main = OpFunction %void None %voidfn
 %entry = OpLabel
 OpReturn
@@ -477,6 +500,7 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
 TEST_F(SpvParserTest, EmitFunctions_NonVoidResultType) {
   auto p = parser(
       test::Assemble(Preamble() + Names({"ret_float"}) + CommonTypes() + R"(
+     %float_0 = OpConstant %float 0.0
      %fn_ret_float = OpTypeFunction %float
 
      %ret_float = OpFunction %float None %fn_ret_float

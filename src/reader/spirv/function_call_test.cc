@@ -29,7 +29,8 @@ std::string Preamble() {
   return R"(
      OpCapability Shader
      OpMemoryModel Logical Simple
-     OpEntryPoint Vertex %100 "x_100"
+     OpEntryPoint Fragment %100 "x_100"
+     OpExecutionMode %100 OriginUpperLeft
 )";
 }
 
@@ -68,7 +69,7 @@ TEST_F(SpvParserTest, EmitStatement_VoidCallNoParams) {
     Return{}
   }
   Function $3 -> __void
-  StageDecoration{vertex}
+  StageDecoration{fragment}
   ()
   {
     Call[not set]{
@@ -286,7 +287,7 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
     Return{}
   }
   Function x_100 -> __void
-  StageDecoration{vertex}
+  StageDecoration{fragment}
   ()
   {
     Call[not set]{

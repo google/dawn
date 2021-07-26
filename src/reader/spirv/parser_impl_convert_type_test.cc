@@ -27,7 +27,8 @@ std::string Preamble() {
   return R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
-    OpEntryPoint Vertex %main "x_100"
+    OpEntryPoint Fragment %main "x_100"
+    OpExecutionMode %main OriginUpperLeft
   )";
 }
 
@@ -75,7 +76,8 @@ TEST_F(SpvParserTest, ConvertType_IdExistsButIsNotAType) {
      OpCapability Shader
      %1 = OpExtInstImport "GLSL.std.450"
      OpMemoryModel Logical Simple
-     OpEntryPoint Vertex %main "x_100"
+     OpEntryPoint Fragment %main "x_100"
+     OpExecutionMode %main OriginUpperLeft
 )" + MainBody();
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildInternalModule());

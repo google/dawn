@@ -60,7 +60,8 @@ std::string SimplePreamble() {
   return R"(
   OpCapability Shader
   OpMemoryModel Logical Simple
-  OpEntryPoint Vertex %100 "main"
+  OpEntryPoint Fragment %100 "main"
+  OpExecutionMode %100 OriginUpperLeft
 )" + CommonTypes();
 }
 

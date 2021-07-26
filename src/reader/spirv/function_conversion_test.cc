@@ -29,7 +29,8 @@ std::string Preamble() {
   return R"(
   OpCapability Shader
   OpMemoryModel Logical Simple
-  OpEntryPoint Vertex %100 "main"
+  OpEntryPoint Fragment %100 "main"
+  OpExecutionMode %100 OriginUpperLeft
 
   %void = OpTypeVoid
   %voidfn = OpTypeFunction %void

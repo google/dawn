@@ -31,7 +31,8 @@ std::string Preamble() {
   return R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
-    OpEntryPoint Vertex %100 "main"
+    OpEntryPoint Fragment %100 "main"
+    OpExecutionMode %100 OriginUpperLeft
 )";
 }
 
@@ -340,7 +341,7 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_NoOperands) {
      OpReturn
   )");
   EXPECT_THAT(err,
-              Eq("15:5: Expected operand, found next instruction instead."));
+              Eq("16:5: Expected operand, found next instruction instead."));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_BaseIsNotPointer) {
@@ -889,7 +890,7 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_DereferenceBase) {
     Return{}
   }
   Function main -> __void
-  StageDecoration{vertex}
+  StageDecoration{fragment}
   ()
   {
     Call[not set]{
@@ -1291,7 +1292,8 @@ std::string RuntimeArrayPreamble() {
   return R"(
      OpCapability Shader
      OpMemoryModel Logical Simple
-     OpEntryPoint Vertex %100 "main"
+     OpEntryPoint Fragment %100 "main"
+     OpExecutionMode %100 OriginUpperLeft
 
      OpName %myvar "myvar"
      OpMemberName %struct 0 "first"

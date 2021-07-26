@@ -28,7 +28,8 @@ std::string Preamble() {
   return R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
-    OpEntryPoint Vertex %100 "x_100"
+    OpEntryPoint Fragment %100 "x_100"
+    OpExecutionMode %100 OriginUpperLeft
   )";
 }
 

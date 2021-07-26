@@ -85,7 +85,8 @@ std::string Caps(std::vector<std::string> ids = {}) {
   return R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
-    OpEntryPoint Vertex %100 "main"
+    OpEntryPoint Fragment %100 "main"
+    OpExecutionMode %100 OriginUpperLeft
 )" + Names(ids);
 }
 
@@ -497,7 +498,8 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer_Alias) {
   auto p = parser(test::Assemble(R"(
      OpCapability Shader
      OpMemoryModel Logical Simple
-     OpEntryPoint Vertex %100 "main"
+     OpEntryPoint Fragment %100 "main"
+     OpExecutionMode %100 OriginUpperLeft
      OpDecorate %arr2uint ArrayStride 16
 )" + CommonTypes() + R"(
      %ptr = OpTypePointer Function %arr2uint
@@ -574,7 +576,8 @@ TEST_F(SpvParserFunctionVarTest,
   auto p = parser(test::Assemble(R"(
      OpCapability Shader
      OpMemoryModel Logical Simple
-     OpEntryPoint Vertex %100 "main"
+     OpEntryPoint Fragment %100 "main"
+     OpExecutionMode %100 OriginUpperLeft
      OpDecorate %arr2uint ArrayStride 16
 )" + CommonTypes() + R"(
      %ptr = OpTypePointer Function %arr2uint
@@ -769,7 +772,8 @@ TEST_F(SpvParserFunctionVarTest,
   auto p = parser(test::Assemble(R"(
       OpCapability Shader
       OpMemoryModel Logical Simple
-      OpEntryPoint Vertex %100 "main"
+      OpEntryPoint Fragment %100 "main"
+      OpExecutionMode %100 OriginUpperLeft
       OpName %_struct_5 "S"
       OpName %_struct_6 "S"
       OpMemberName %_struct_5 0 "algo"

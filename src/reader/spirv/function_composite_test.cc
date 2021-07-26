@@ -469,7 +469,8 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
   const std::string assembly = R"(
      OpCapability Shader
      OpMemoryModel Logical Simple
-     OpEntryPoint Vertex %100 "main"
+     OpEntryPoint Fragment %100 "main"
+     OpExecutionMode %100 OriginUpperLeft
 
      OpMemberName %s0 0 "algo"
      OpMemberName %s1 0 "rithm"
@@ -927,7 +928,8 @@ TEST_F(SpvParserTest_CompositeInsert, Struct_DifferOnlyInMemberName) {
   const std::string assembly = R"(
      OpCapability Shader
      OpMemoryModel Logical Simple
-     OpEntryPoint Vertex %100 "main"
+     OpEntryPoint Fragment %100 "main"
+     OpExecutionMode %100 OriginUpperLeft
 
      OpName %var0 "var0"
      OpName %var1 "var1"
