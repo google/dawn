@@ -2051,6 +2051,142 @@ VariableDeclStatement{
   EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
 
+TEST_F(SpvParserTest, GlslStd450_Degrees_Scalar) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %float %glsl Degrees %float_50
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(p->builder(), fe.ast_body());
+  const auto* expected = R"(VariableDeclStatement{
+  VariableConst{
+    x_1
+    none
+    undefined
+    __f32
+    {
+      Binary[not set]{
+        ScalarConstructor[not set]{50.000000}
+        multiply
+        ScalarConstructor[not set]{57.295780}
+      }
+    }
+  }
+})";
+
+  EXPECT_THAT(body, HasSubstr(expected)) << body;
+}
+
+TEST_F(SpvParserTest, GlslStd450_Degrees_Vector) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %v3float %glsl Degrees %v3float_60_70_50
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(p->builder(), fe.ast_body());
+  const auto* expected = R"(VariableDeclStatement{
+  VariableConst{
+    x_1
+    none
+    undefined
+    __vec_3__f32
+    {
+      Binary[not set]{
+        TypeConstructor[not set]{
+          __vec_3__f32
+          ScalarConstructor[not set]{60.000000}
+          ScalarConstructor[not set]{70.000000}
+          ScalarConstructor[not set]{50.000000}
+        }
+        multiply
+        TypeConstructor[not set]{
+          __vec_3__f32
+          ScalarConstructor[not set]{57.295780}
+        }
+      }
+    }
+  }
+})";
+
+  EXPECT_THAT(body, HasSubstr(expected)) << body;
+}
+
+TEST_F(SpvParserTest, GlslStd450_Radians_Scalar) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %float %glsl Radians %float_50
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(p->builder(), fe.ast_body());
+  const auto* expected = R"(VariableDeclStatement{
+  VariableConst{
+    x_1
+    none
+    undefined
+    __f32
+    {
+      Binary[not set]{
+        ScalarConstructor[not set]{50.000000}
+        multiply
+        ScalarConstructor[not set]{0.017453}
+      }
+    }
+  }
+})";
+
+  EXPECT_THAT(body, HasSubstr(expected)) << body;
+}
+
+TEST_F(SpvParserTest, GlslStd450_Radians_Vector) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %v3float %glsl Radians %v3float_60_70_50
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(p->builder(), fe.ast_body());
+  const auto* expected = R"(VariableDeclStatement{
+  VariableConst{
+    x_1
+    none
+    undefined
+    __vec_3__f32
+    {
+      Binary[not set]{
+        TypeConstructor[not set]{
+          __vec_3__f32
+          ScalarConstructor[not set]{60.000000}
+          ScalarConstructor[not set]{70.000000}
+          ScalarConstructor[not set]{50.000000}
+        }
+        multiply
+        TypeConstructor[not set]{
+          __vec_3__f32
+          ScalarConstructor[not set]{0.017453}
+        }
+      }
+    }
+  }
+})";
+
+  EXPECT_THAT(body, HasSubstr(expected)) << body;
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

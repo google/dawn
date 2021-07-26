@@ -4065,6 +4065,41 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(
     }
   }
 
+  // Some GLSLStd450 builtins don't have a WGSL equivalent. Polyfill them.
+  switch (ext_opcode) {
+    case GLSLstd450Radians: {
+      auto degrees = MakeOperand(inst, 2);
+      TINT_ASSERT(Reader, degrees.type->IsFloatScalarOrVector());
+
+      constexpr auto kPiOver180 = static_cast<float>(3.141592653589793 / 180.0);
+      auto* factor = builder_.Expr(kPiOver180);
+      if (degrees.type->Is<F32>()) {
+        return {degrees.type, builder_.Mul(degrees.expr, factor)};
+      } else {
+        uint32_t size = degrees.type->As<Vector>()->size;
+        return {degrees.type,
+                builder_.Mul(degrees.expr,
+                             builder_.vec(builder_.ty.f32(), size, factor))};
+      }
+    }
+
+    case GLSLstd450Degrees: {
+      auto radians = MakeOperand(inst, 2);
+      TINT_ASSERT(Reader, radians.type->IsFloatScalarOrVector());
+
+      constexpr auto k180OverPi = static_cast<float>(180.0 / 3.141592653589793);
+      auto* factor = builder_.Expr(k180OverPi);
+      if (radians.type->Is<F32>()) {
+        return {radians.type, builder_.Mul(radians.expr, factor)};
+      } else {
+        uint32_t size = radians.type->As<Vector>()->size;
+        return {radians.type,
+                builder_.Mul(radians.expr,
+                             builder_.vec(builder_.ty.f32(), size, factor))};
+      }
+    }
+  }
+
   const auto name = GetGlslStd450FuncName(ext_opcode);
   if (name.empty()) {
     Fail() << "unhandled GLSL.std.450 instruction " << ext_opcode;
