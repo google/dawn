@@ -70,14 +70,17 @@ extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
     return 0;
   }
 
-  // +1 to account for \0 at the end of a string.
-  auto mutated_size = result.wgsl.size() + 1;
-  if (mutated_size > max_size) {
+  if (result.wgsl.size() > max_size) {
     return 0;
   }
 
-  std::memcpy(data, result.wgsl.data(), mutated_size);
-  return mutated_size;
+  // No need to worry about the \0 here. The reason is that if \0 is included by
+  // developer by mistake, it will be considered a part of the string and will
+  // cause all sorts of strange bugs. Thus, unless `data` below is used as a raw
+  // C string, the \0 symbol should be ignored.
+  std::memcpy(  // NOLINT - clang-tidy warns about lack of null termination.
+      data, result.wgsl.data(), result.wgsl.size());
+  return result.wgsl.size();
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
