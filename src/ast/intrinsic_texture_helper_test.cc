@@ -88,6 +88,9 @@ std::ostream& operator<<(std::ostream& out, const TextureKind& kind) {
     case TextureKind::kDepth:
       out << "depth";
       break;
+    case TextureKind::kDepthMultisampled:
+      out << "depth-multisampled";
+      break;
     case TextureKind::kMultisampled:
       out << "multisampled";
       break;
@@ -161,6 +164,11 @@ ast::Variable* TextureOverloadCase::buildTextureVariable(
 
     case ast::intrinsic::test::TextureKind::kDepth:
       return b->Global("texture", b->ty.depth_texture(texture_dimension),
+                       decos);
+
+    case ast::intrinsic::test::TextureKind::kDepthMultisampled:
+      return b->Global("texture",
+                       b->ty.depth_multisampled_texture(texture_dimension),
                        decos);
 
     case ast::intrinsic::test::TextureKind::kMultisampled:
@@ -399,6 +407,16 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           TextureDataType::kF32,
           "textureDimensions",
           [](ProgramBuilder* b) { return b->ExprList("texture", 1); },
+      },
+      {
+          ValidTextureOverload::kDimensionsDepthMultisampled2d,
+          "textureDimensions(t : texture_depth_multisampled_2d) -> vec2<i32>",
+          TextureKind::kDepthMultisampled,
+          ast::SamplerKind::kSampler,
+          ast::TextureDimension::k2d,
+          TextureDataType::kF32,
+          "textureDimensions",
+          [](ProgramBuilder* b) { return b->ExprList("texture"); },
       },
       {
           ValidTextureOverload::kDimensionsStorageRO1d,

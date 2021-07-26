@@ -144,20 +144,20 @@ class Function : public Castable<Function, CallTarget> {
   /// @returns the referenced sampled textures
   VariableBindings ReferencedMultisampledTextureVariables() const;
 
-  /// Retrieves any referenced storage texture variables. Note, the variables
+  /// Retrieves any referenced variables of the given type. Note, the variables
   /// must be decorated with both binding and group decorations.
-  /// @returns the referenced storage textures
-  VariableBindings ReferencedStorageTextureVariables() const;
+  /// @param type_info the type of the variables to find
+  /// @returns the referenced variables
+  VariableBindings ReferencedVariablesOfType(
+      const tint::TypeInfo& type_info) const;
 
-  /// Retrieves any referenced depth texture variables. Note, the variables
+  /// Retrieves any referenced variables of the given type. Note, the variables
   /// must be decorated with both binding and group decorations.
-  /// @returns the referenced depth textures
-  VariableBindings ReferencedDepthTextureVariables() const;
-
-  /// Retrieves any referenced external texture variables. Note, the variables
-  /// must be decorated with both binding and group decorations.
-  /// @returns the referenced external textures
-  VariableBindings ReferencedExternalTextureVariables() const;
+  /// @returns the referenced variables
+  template <typename T>
+  VariableBindings ReferencedVariablesOfType() const {
+    return ReferencedVariablesOfType(TypeInfo::Of<T>());
+  }
 
   /// Checks if the given entry point is an ancestor
   /// @param sym the entry point symbol

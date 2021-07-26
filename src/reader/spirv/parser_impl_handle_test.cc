@@ -3974,6 +3974,52 @@ INSTANTIATE_TEST_SUITE_P(ImageFetch_Depth,
     })"}}));
 
 INSTANTIATE_TEST_SUITE_P(
+    ImageFetch_DepthMultisampled,
+    // In SPIR-V OpImageFetch always yields a vector of 4
+    // elements, even for depth images.  But in WGSL,
+    // textureLoad on a depth image yields f32.
+    // crbug.com/tint/439
+    SpvParserHandleTest_ImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+        // ImageFetch on multisampled depth image.
+        {"%float 2D 1 0 1 1 Unknown",
+         "%99 = OpImageFetch %v4float %im %vi12 Sample %i1",
+         R"(Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    none
+    undefined
+    __depth_multisampled_texture_2d
+  })",
+         R"(VariableDeclStatement{
+      VariableConst{
+        x_99
+        none
+        undefined
+        __vec_4__f32
+        {
+          TypeConstructor[not set]{
+            __vec_4__f32
+            Call[not set]{
+              Identifier[not set]{textureLoad}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{vi12}
+                Identifier[not set]{i1}
+              )
+            }
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
+          }
+        }
+      }
+    })"}}));
+
+INSTANTIATE_TEST_SUITE_P(
     ImageFetch_Multisampled,
     SpvParserHandleTest_ImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{

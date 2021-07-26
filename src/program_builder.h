@@ -32,6 +32,7 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
+#include "src/ast/depth_multisampled_texture.h"
 #include "src/ast/depth_texture.h"
 #include "src/ast/external_texture.h"
 #include "src/ast/f32.h"
@@ -799,6 +800,22 @@ class ProgramBuilder {
     ast::DepthTexture* depth_texture(const Source& source,
                                      ast::TextureDimension dims) const {
       return builder->create<ast::DepthTexture>(source, dims);
+    }
+
+    /// @param dims the dimensionality of the texture
+    /// @returns the multisampled depth texture
+    ast::DepthMultisampledTexture* depth_multisampled_texture(
+        ast::TextureDimension dims) const {
+      return builder->create<ast::DepthMultisampledTexture>(dims);
+    }
+
+    /// @param source the Source of the node
+    /// @param dims the dimensionality of the texture
+    /// @returns the multisampled depth texture
+    ast::DepthMultisampledTexture* depth_multisampled_texture(
+        const Source& source,
+        ast::TextureDimension dims) const {
+      return builder->create<ast::DepthMultisampledTexture>(source, dims);
     }
 
     /// @param dims the dimensionality of the texture

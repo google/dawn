@@ -20,6 +20,7 @@
 #include "src/program_builder.h"
 #include "src/sem/atomic_type.h"
 #include "src/sem/block_statement.h"
+#include "src/sem/depth_multisampled_texture_type.h"
 #include "src/sem/for_loop_statement.h"
 #include "src/sem/reference_type.h"
 #include "src/sem/sampler_type.h"
@@ -145,6 +146,9 @@ ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const sem::Type* ty) {
   }
   if (auto* t = ty->As<sem::DepthTexture>()) {
     return ctx.dst->create<ast::DepthTexture>(t->dim());
+  }
+  if (auto* t = ty->As<sem::DepthMultisampledTexture>()) {
+    return ctx.dst->create<ast::DepthMultisampledTexture>(t->dim());
   }
   if (auto* t = ty->As<sem::MultisampledTexture>()) {
     return ctx.dst->create<ast::MultisampledTexture>(

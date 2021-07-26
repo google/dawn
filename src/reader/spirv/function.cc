@@ -5404,7 +5404,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     //   dref gather         vec4  ImageFetch           vec4 TODO(dneto)
     // Construct a 4-element vector with the result from the builtin in the
     // first component.
-    if (texture_type->Is<DepthTexture>()) {
+    if (texture_type->IsAnyOf<DepthTexture, DepthMultisampledTexture>()) {
       if (is_non_dref_sample || (opcode == SpvOpImageFetch)) {
         value = create<ast::TypeConstructorExpression>(
             Source{},

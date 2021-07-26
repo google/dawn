@@ -38,6 +38,7 @@ std::string expected_texture_overload(
     case ValidTextureOverload::kDimensionsDepth2dArray:
     case ValidTextureOverload::kDimensionsDepthCube:
     case ValidTextureOverload::kDimensionsDepthCubeArray:
+    case ValidTextureOverload::kDimensionsDepthMultisampled2d:
     case ValidTextureOverload::kDimensionsStorageRO2d:
     case ValidTextureOverload::kDimensionsStorageRO2dArray:
     case ValidTextureOverload::kDimensionsStorageWO2d:
@@ -74,6 +75,7 @@ std::string expected_texture_overload(
     case ValidTextureOverload::kNumLevelsDepthCube:
     case ValidTextureOverload::kNumLevelsDepthCubeArray:
       return R"(int(texture.get_num_mip_levels()))";
+    case ValidTextureOverload::kNumSamplesDepthMultisampled2d:
     case ValidTextureOverload::kNumSamplesMultisampled2d:
       return R"(int(texture.get_num_samples()))";
     case ValidTextureOverload::kSample1dF32:
@@ -221,6 +223,7 @@ std::string expected_texture_overload(
     case ValidTextureOverload::kLoadMultisampled2dI32:
       return R"(texture.read(uint2(int2(1, 2)), 3))";
     case ValidTextureOverload::kLoadDepth2dLevelF32:
+    case ValidTextureOverload::kLoadDepthMultisampled2dF32:
       return R"(texture.read(uint2(int2(1, 2)), 3))";
     case ValidTextureOverload::kLoadDepth2dArrayLevelF32:
       return R"(texture.read(uint2(int2(1, 2)), 3, 4))";

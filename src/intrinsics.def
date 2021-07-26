@@ -90,6 +90,7 @@ type texture_depth_2d
 type texture_depth_2d_array
 type texture_depth_cube
 type texture_depth_cube_array
+type texture_depth_multisampled_2d
 type texture_storage_1d<F: texel_format, A: access>
 type texture_storage_2d<F: texel_format, A: access>
 type texture_storage_2d_array<F: texel_format, A: access>
@@ -418,6 +419,7 @@ fn textureDimensions(texture: texture_depth_cube) -> vec2<i32>
 fn textureDimensions(texture: texture_depth_cube, level: i32) -> vec2<i32>
 fn textureDimensions(texture: texture_depth_cube_array) -> vec2<i32>
 fn textureDimensions(texture: texture_depth_cube_array, level: i32) -> vec2<i32>
+fn textureDimensions(texture: texture_depth_multisampled_2d) -> vec2<i32>
 fn textureDimensions<F: texel_format, A: read_or_write>(texture: texture_storage_1d<F, A>) -> i32
 fn textureDimensions<F: texel_format, A: read_or_write>(texture: texture_storage_2d<F, A>) -> vec2<i32>
 fn textureDimensions<F: texel_format, A: read_or_write>(texture: texture_storage_2d_array<F, A>) -> vec2<i32>
@@ -439,6 +441,7 @@ fn textureNumLevels(texture: texture_depth_2d_array) -> i32
 fn textureNumLevels(texture: texture_depth_cube) -> i32
 fn textureNumLevels(texture: texture_depth_cube_array) -> i32
 fn textureNumSamples<T: fiu32>(texture: texture_multisampled_2d<T>) -> i32
+fn textureNumSamples(texture: texture_depth_multisampled_2d) -> i32
 [[stage("fragment")]] fn textureSample(texture: texture_1d<f32>, sampler: sampler, coords: f32) -> vec4<f32>
 [[stage("fragment")]] fn textureSample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
 [[stage("fragment")]] fn textureSample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, offset: vec2<i32>) -> vec4<f32>
@@ -516,6 +519,7 @@ fn textureLoad<T: fiu32>(texture: texture_3d<T>, coords: vec3<i32>, level: i32) 
 fn textureLoad<T: fiu32>(texture: texture_multisampled_2d<T>, coords: vec2<i32>, sample_index: i32) -> vec4<T>
 fn textureLoad(texture: texture_depth_2d, coords: vec2<i32>, level: i32) -> f32
 fn textureLoad(texture: texture_depth_2d_array, coords: vec2<i32>, array_index: i32, level: i32) -> f32
+fn textureLoad(texture: texture_depth_multisampled_2d, coords: vec2<i32>, sample_index: i32) -> f32
 [[deprecated]] fn textureLoad(texture: texture_storage_1d<f32_texel_format, read>, coords: i32) -> vec4<f32>
 [[deprecated]] fn textureLoad(texture: texture_storage_2d<f32_texel_format, read>, coords: vec2<i32>) -> vec4<f32>
 [[deprecated]] fn textureLoad(texture: texture_storage_2d_array<f32_texel_format, read>, coords: vec2<i32>, array_index: i32) -> vec4<f32>

@@ -21,6 +21,7 @@
 
 #include "src/program_builder.h"
 #include "src/sem/atomic_type.h"
+#include "src/sem/depth_multisampled_texture_type.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/external_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
@@ -591,6 +592,20 @@ DECLARE_DEPTH_TEXTURE(2d_array, ast::TextureDimension::k2dArray)
 DECLARE_DEPTH_TEXTURE(cube, ast::TextureDimension::kCube)
 DECLARE_DEPTH_TEXTURE(cube_array, ast::TextureDimension::kCubeArray)
 #undef DECLARE_DEPTH_TEXTURE
+
+bool match_texture_depth_multisampled_2d(const sem::Type* ty) {
+  if (ty->Is<Any>()) {
+    return true;
+  }
+  return ty->Is<sem::DepthMultisampledTexture>(
+      [&](auto t) { return t->dim() == ast::TextureDimension::k2d; });
+}
+
+sem::DepthMultisampledTexture* build_texture_depth_multisampled_2d(
+    MatchState& state) {
+  return state.builder.create<sem::DepthMultisampledTexture>(
+      ast::TextureDimension::k2d);
+}
 
 bool match_texture_storage(const sem::Type* ty,
                            ast::TextureDimension dim,

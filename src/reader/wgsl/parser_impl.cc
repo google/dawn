@@ -724,21 +724,25 @@ Maybe<ast::TextureDimension> ParserImpl::storage_texture_type() {
 //  | TEXTURE_DEPTH_2D_ARRAY
 //  | TEXTURE_DEPTH_CUBE
 //  | TEXTURE_DEPTH_CUBE_ARRAY
+//  | TEXTURE_DEPTH_MULTISAMPLED_2D
 Maybe<ast::Type*> ParserImpl::depth_texture_type() {
   Source source;
-
-  if (match(Token::Type::kTextureDepth2d, &source))
+  if (match(Token::Type::kTextureDepth2d, &source)) {
     return builder_.ty.depth_texture(source, ast::TextureDimension::k2d);
-
-  if (match(Token::Type::kTextureDepth2dArray, &source))
+  }
+  if (match(Token::Type::kTextureDepth2dArray, &source)) {
     return builder_.ty.depth_texture(source, ast::TextureDimension::k2dArray);
-
-  if (match(Token::Type::kTextureDepthCube, &source))
+  }
+  if (match(Token::Type::kTextureDepthCube, &source)) {
     return builder_.ty.depth_texture(source, ast::TextureDimension::kCube);
-
-  if (match(Token::Type::kTextureDepthCubeArray, &source))
+  }
+  if (match(Token::Type::kTextureDepthCubeArray, &source)) {
     return builder_.ty.depth_texture(source, ast::TextureDimension::kCubeArray);
-
+  }
+  if (match(Token::Type::kTextureDepthMultisampled2d, &source)) {
+    return builder_.ty.depth_multisampled_texture(source,
+                                                  ast::TextureDimension::k2d);
+  }
   return Failure::kNoMatch;
 }
 

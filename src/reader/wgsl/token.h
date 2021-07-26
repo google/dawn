@@ -277,6 +277,8 @@ class Token {
     kTextureDepthCube,
     /// A 'texture_depth_cube_array'
     kTextureDepthCubeArray,
+    /// A 'texture_depth_multisampled_2d'
+    kTextureDepthMultisampled2d,
     /// A 'texture_external'
     kTextureExternal,
     /// A 'texture_multisampled_2d'

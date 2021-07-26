@@ -52,6 +52,7 @@
 #include "src/sem/array.h"
 #include "src/sem/atomic_type.h"
 #include "src/sem/call.h"
+#include "src/sem/depth_multisampled_texture_type.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/for_loop_statement.h"
 #include "src/sem/function.h"
@@ -371,6 +372,9 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
     }
     if (auto* t = ty->As<ast::DepthTexture>()) {
       return builder_->create<sem::DepthTexture>(t->dim());
+    }
+    if (auto* t = ty->As<ast::DepthMultisampledTexture>()) {
+      return builder_->create<sem::DepthMultisampledTexture>(t->dim());
     }
     if (auto* t = ty->As<ast::StorageTexture>()) {
       if (auto* el = Type(t->type())) {

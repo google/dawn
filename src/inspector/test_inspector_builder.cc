@@ -207,42 +207,10 @@ void InspectorBuilder::AddComparisonSampler(const std::string& name,
          });
 }
 
-ast::SampledTexture* InspectorBuilder::MakeSampledTextureType(
-    ast::TextureDimension dim,
-    ast::Type* type) {
-  return ty.sampled_texture(dim, type);
-}
-
-ast::DepthTexture* InspectorBuilder::MakeDepthTextureType(
-    ast::TextureDimension dim) {
-  return ty.depth_texture(dim);
-}
-
-ast::MultisampledTexture* InspectorBuilder::MakeMultisampledTextureType(
-    ast::TextureDimension dim,
-    ast::Type* type) {
-  return ty.multisampled_texture(dim, type);
-}
-
-ast::ExternalTexture* InspectorBuilder::MakeExternalTextureType() {
-  return ty.external_texture();
-}
-
-void InspectorBuilder::AddSampledTexture(const std::string& name,
-                                         ast::Type* type,
-                                         uint32_t group,
-                                         uint32_t binding) {
-  Global(name, type,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(binding),
-             create<ast::GroupDecoration>(group),
-         });
-}
-
-void InspectorBuilder::AddMultisampledTexture(const std::string& name,
-                                              ast::Type* type,
-                                              uint32_t group,
-                                              uint32_t binding) {
+void InspectorBuilder::AddResource(const std::string& name,
+                                   ast::Type* type,
+                                   uint32_t group,
+                                   uint32_t binding) {
   Global(name, type,
          ast::DecorationList{
              create<ast::BindingDecoration>(binding),
@@ -253,28 +221,6 @@ void InspectorBuilder::AddMultisampledTexture(const std::string& name,
 void InspectorBuilder::AddGlobalVariable(const std::string& name,
                                          ast::Type* type) {
   Global(name, type, ast::StorageClass::kPrivate);
-}
-
-void InspectorBuilder::AddDepthTexture(const std::string& name,
-                                       ast::Type* type,
-                                       uint32_t group,
-                                       uint32_t binding) {
-  Global(name, type,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(binding),
-             create<ast::GroupDecoration>(group),
-         });
-}
-
-void InspectorBuilder::AddExternalTexture(const std::string& name,
-                                          ast::Type* type,
-                                          uint32_t group,
-                                          uint32_t binding) {
-  Global(name, type,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(binding),
-             create<ast::GroupDecoration>(group),
-         });
 }
 
 ast::Function* InspectorBuilder::MakeSamplerReferenceBodyFunction(

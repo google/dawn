@@ -80,6 +80,8 @@ set(TINT_LIB_SRCS
   ast/continue_statement.h
   ast/decoration.cc
   ast/decoration.h
+  ast/depth_multisampled_texture.cc
+  ast/depth_multisampled_texture.h
   ast/disable_validation_decoration.cc
   ast/disable_validation_decoration.h
   ast/depth_texture.cc
@@ -256,6 +258,8 @@ set(TINT_LIB_SRCS
   sem/call.h
   sem/constant.cc
   sem/constant.h
+  sem/depth_multisampled_texture_type.cc
+  sem/depth_multisampled_texture_type.h
   sem/expression.cc
   sem/expression.h
   sem/function.cc
@@ -564,6 +568,7 @@ if(${TINT_BUILD_TESTS})
     ast/call_statement_test.cc
     ast/case_statement_test.cc
     ast/continue_statement_test.cc
+    ast/depth_multisampled_texture_test.cc
     ast/depth_texture_test.cc
     ast/discard_statement_test.cc
     ast/else_statement_test.cc
@@ -669,6 +674,7 @@ if(${TINT_BUILD_TESTS})
     test_main.cc
     sem/atomic_type_test.cc
     sem/bool_type_test.cc
+    sem/depth_multisampled_texture_type_test.cc
     sem/depth_texture_type_test.cc
     sem/external_texture_type_test.cc
     sem/f32_type_test.cc

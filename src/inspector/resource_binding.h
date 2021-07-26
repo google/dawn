@@ -99,6 +99,7 @@ struct ResourceBinding {
     kReadOnlyStorageTexture,
     kWriteOnlyStorageTexture,
     kDepthTexture,
+    kDepthMultisampledTexture,
     kExternalTexture
   };
 

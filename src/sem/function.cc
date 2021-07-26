@@ -130,53 +130,15 @@ Function::VariableBindings Function::ReferencedMultisampledTextureVariables()
   return ReferencedSampledTextureVariablesImpl(true);
 }
 
-Function::VariableBindings Function::ReferencedStorageTextureVariables() const {
+Function::VariableBindings Function::ReferencedVariablesOfType(
+    const tint::TypeInfo& type_info) const {
   VariableBindings ret;
-
   for (auto* var : ReferencedModuleVariables()) {
     auto* unwrapped_type = var->Type()->UnwrapRef();
-    auto* storage_texture = unwrapped_type->As<sem::StorageTexture>();
-    if (storage_texture == nullptr) {
-      continue;
-    }
-
-    if (auto binding_point = var->Declaration()->binding_point()) {
-      ret.push_back({var, binding_point});
-    }
-  }
-  return ret;
-}
-
-Function::VariableBindings Function::ReferencedDepthTextureVariables() const {
-  VariableBindings ret;
-
-  for (auto* var : ReferencedModuleVariables()) {
-    auto* unwrapped_type = var->Type()->UnwrapRef();
-    auto* storage_texture = unwrapped_type->As<sem::DepthTexture>();
-    if (storage_texture == nullptr) {
-      continue;
-    }
-
-    if (auto binding_point = var->Declaration()->binding_point()) {
-      ret.push_back({var, binding_point});
-    }
-  }
-  return ret;
-}
-
-Function::VariableBindings Function::ReferencedExternalTextureVariables()
-    const {
-  VariableBindings ret;
-
-  for (auto* var : ReferencedModuleVariables()) {
-    auto* unwrapped_type = var->Type()->UnwrapRef();
-    auto* external_texture = unwrapped_type->As<sem::ExternalTexture>();
-    if (external_texture == nullptr) {
-      continue;
-    }
-
-    if (auto binding_point = var->Declaration()->binding_point()) {
-      ret.push_back({var, binding_point});
+    if (unwrapped_type->TypeInfo().Is(type_info)) {
+      if (auto binding_point = var->Declaration()->binding_point()) {
+        ret.push_back({var, binding_point});
+      }
     }
   }
   return ret;

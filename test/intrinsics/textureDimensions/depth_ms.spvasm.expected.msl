@@ -1,0 +1,56 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct vertex_main_out {
+  float4 tint_symbol_1_1;
+};
+struct tint_symbol_3 {
+  float4 tint_symbol_1_1 [[position]];
+};
+
+void textureDimensions_f60bdb(depth2d_ms<float, access::read> tint_symbol_6) {
+  int2 res = int2(0, 0);
+  int2 const x_16 = int2(int2(tint_symbol_6.get_width(), tint_symbol_6.get_height()));
+  res = x_16;
+  return;
+}
+
+void tint_symbol_2(float4 tint_symbol, thread float4* const tint_symbol_7) {
+  *(tint_symbol_7) = tint_symbol;
+  return;
+}
+
+void vertex_main_1(depth2d_ms<float, access::read> tint_symbol_8, thread float4* const tint_symbol_9) {
+  textureDimensions_f60bdb(tint_symbol_8);
+  tint_symbol_2(float4(0.0f, 0.0f, 0.0f, 0.0f), tint_symbol_9);
+  return;
+}
+
+vertex tint_symbol_3 vertex_main(depth2d_ms<float, access::read> tint_symbol_10 [[texture(0)]]) {
+  thread float4 tint_symbol_11 = float4(0.0f, 0.0f, 0.0f, 0.0f);
+  vertex_main_1(tint_symbol_10, &(tint_symbol_11));
+  vertex_main_out const tint_symbol_4 = {.tint_symbol_1_1=tint_symbol_11};
+  tint_symbol_3 const tint_symbol_5 = {.tint_symbol_1_1=tint_symbol_4.tint_symbol_1_1};
+  return tint_symbol_5;
+}
+
+void fragment_main_1(depth2d_ms<float, access::read> tint_symbol_12) {
+  textureDimensions_f60bdb(tint_symbol_12);
+  return;
+}
+
+fragment void fragment_main(depth2d_ms<float, access::read> tint_symbol_13 [[texture(0)]]) {
+  fragment_main_1(tint_symbol_13);
+  return;
+}
+
+void compute_main_1(depth2d_ms<float, access::read> tint_symbol_14) {
+  textureDimensions_f60bdb(tint_symbol_14);
+  return;
+}
+
+kernel void compute_main(depth2d_ms<float, access::read> tint_symbol_15 [[texture(0)]]) {
+  compute_main_1(tint_symbol_15);
+  return;
+}
+

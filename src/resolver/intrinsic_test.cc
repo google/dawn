@@ -1867,6 +1867,7 @@ const char* expected_texture_overload(
     case ValidTextureOverload::kDimensionsDepth2dArray:
     case ValidTextureOverload::kDimensionsDepthCube:
     case ValidTextureOverload::kDimensionsDepthCubeArray:
+    case ValidTextureOverload::kDimensionsDepthMultisampled2d:
     case ValidTextureOverload::kDimensionsStorageRO1d:
     case ValidTextureOverload::kDimensionsStorageRO2d:
     case ValidTextureOverload::kDimensionsStorageRO2dArray:
@@ -1892,6 +1893,7 @@ const char* expected_texture_overload(
     case ValidTextureOverload::kNumLevelsDepthCube:
     case ValidTextureOverload::kNumLevelsDepthCubeArray:
       return R"(textureNumLevels(texture))";
+    case ValidTextureOverload::kNumSamplesDepthMultisampled2d:
     case ValidTextureOverload::kNumSamplesMultisampled2d:
       return R"(textureNumSamples(texture))";
     case ValidTextureOverload::kDimensions2dLevel:
@@ -2019,41 +2021,29 @@ const char* expected_texture_overload(
     case ValidTextureOverload::kSampleCompareLevelDepthCubeArrayF32:
       return R"(textureSampleCompare(texture, sampler, coords, array_index, depth_ref))";
     case ValidTextureOverload::kLoad1dLevelF32:
-      return R"(textureLoad(texture, coords, level))";
     case ValidTextureOverload::kLoad1dLevelU32:
-      return R"(textureLoad(texture, coords, level))";
     case ValidTextureOverload::kLoad1dLevelI32:
-      return R"(textureLoad(texture, coords, level))";
     case ValidTextureOverload::kLoad2dLevelF32:
-      return R"(textureLoad(texture, coords, level))";
     case ValidTextureOverload::kLoad2dLevelU32:
-      return R"(textureLoad(texture, coords, level))";
     case ValidTextureOverload::kLoad2dLevelI32:
       return R"(textureLoad(texture, coords, level))";
     case ValidTextureOverload::kLoad2dArrayLevelF32:
-      return R"(textureLoad(texture, coords, array_index, level))";
     case ValidTextureOverload::kLoad2dArrayLevelU32:
-      return R"(textureLoad(texture, coords, array_index, level))";
     case ValidTextureOverload::kLoad2dArrayLevelI32:
       return R"(textureLoad(texture, coords, array_index, level))";
     case ValidTextureOverload::kLoad3dLevelF32:
-      return R"(textureLoad(texture, coords, level))";
     case ValidTextureOverload::kLoad3dLevelU32:
-      return R"(textureLoad(texture, coords, level))";
     case ValidTextureOverload::kLoad3dLevelI32:
-      return R"(textureLoad(texture, coords, level))";
-    case ValidTextureOverload::kLoadMultisampled2dF32:
-      return R"(textureLoad(texture, coords, sample_index))";
-    case ValidTextureOverload::kLoadMultisampled2dU32:
-      return R"(textureLoad(texture, coords, sample_index))";
-    case ValidTextureOverload::kLoadMultisampled2dI32:
-      return R"(textureLoad(texture, coords, sample_index))";
     case ValidTextureOverload::kLoadDepth2dLevelF32:
       return R"(textureLoad(texture, coords, level))";
+    case ValidTextureOverload::kLoadDepthMultisampled2dF32:
+    case ValidTextureOverload::kLoadMultisampled2dF32:
+    case ValidTextureOverload::kLoadMultisampled2dU32:
+    case ValidTextureOverload::kLoadMultisampled2dI32:
+      return R"(textureLoad(texture, coords, sample_index))";
     case ValidTextureOverload::kLoadDepth2dArrayLevelF32:
       return R"(textureLoad(texture, coords, array_index, level))";
     case ValidTextureOverload::kLoadStorageRO1dRgba32float:
-      return R"(textureLoad(texture, coords))";
     case ValidTextureOverload::kLoadStorageRO2dRgba8unorm:
     case ValidTextureOverload::kLoadStorageRO2dRgba8snorm:
     case ValidTextureOverload::kLoadStorageRO2dRgba8uint:
@@ -2076,13 +2066,11 @@ const char* expected_texture_overload(
     case ValidTextureOverload::kLoadStorageRO3dRgba32float:
       return R"(textureLoad(texture, coords))";
     case ValidTextureOverload::kStoreWO1dRgba32float:
-      return R"(textureStore(texture, coords, value))";
     case ValidTextureOverload::kStoreWO2dRgba32float:
+    case ValidTextureOverload::kStoreWO3dRgba32float:
       return R"(textureStore(texture, coords, value))";
     case ValidTextureOverload::kStoreWO2dArrayRgba32float:
       return R"(textureStore(texture, coords, array_index, value))";
-    case ValidTextureOverload::kStoreWO3dRgba32float:
-      return R"(textureStore(texture, coords, value))";
   }
   return "<unmatched texture overload>";
 }
@@ -2152,7 +2140,8 @@ TEST_P(ResolverIntrinsicTest_Texture, Call) {
         }
         break;
       }
-      case ast::intrinsic::test::TextureKind::kDepth: {
+      case ast::intrinsic::test::TextureKind::kDepth:
+      case ast::intrinsic::test::TextureKind::kDepthMultisampled: {
         EXPECT_TRUE(TypeOf(call)->Is<sem::F32>());
         break;
       }

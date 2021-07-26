@@ -80,6 +80,19 @@ TEST_F(ParserImplTest, DepthTextureType_CubeArray) {
   EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 25u}}));
 }
 
+TEST_F(ParserImplTest, DepthTextureType_Multisampled2d) {
+  auto p = parser("texture_depth_multisampled_2d");
+  auto t = p->depth_texture_type();
+  EXPECT_TRUE(t.matched);
+  EXPECT_FALSE(t.errored);
+  ASSERT_NE(t.value, nullptr);
+  ASSERT_TRUE(t->Is<ast::Texture>());
+  ASSERT_TRUE(t->Is<ast::DepthMultisampledTexture>());
+  EXPECT_EQ(t->As<ast::Texture>()->dim(), ast::TextureDimension::k2d);
+  EXPECT_FALSE(p->has_error());
+  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 30u}}));
+}
+
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader

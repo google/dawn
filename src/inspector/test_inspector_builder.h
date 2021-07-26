@@ -256,74 +256,20 @@ class InspectorBuilder : public ProgramBuilder {
                             uint32_t group,
                             uint32_t binding);
 
-  /// Generates a SampledTexture appropriate for the params
-  /// @param dim the dimensions of the texture
-  /// @param type the data type of the sampled texture
-  /// @returns the generated SampleTextureType
-  ast::SampledTexture* MakeSampledTextureType(ast::TextureDimension dim,
-                                              ast::Type* type);
-
-  /// Generates a DepthTexture appropriate for the params
-  /// @param dim the dimensions of the texture
-  /// @returns the generated DepthTexture
-  ast::DepthTexture* MakeDepthTextureType(ast::TextureDimension dim);
-
-  /// Generates a MultisampledTexture appropriate for the params
-  /// @param dim the dimensions of the texture
-  /// @param type the data type of the sampled texture
-  /// @returns the generated SampleTextureType
-  ast::MultisampledTexture* MakeMultisampledTextureType(
-      ast::TextureDimension dim,
-      ast::Type* type);
-
-  /// Generates an ExternalTexture appropriate for the params
-  /// @returns the generated ExternalTexture
-  ast::ExternalTexture* MakeExternalTextureType();
-
-  /// Adds a sampled texture variable to the program
+  /// Adds a sampler or texture variable to the program
   /// @param name the name of the variable
   /// @param type the type to use
-  /// @param group the binding/group to use for the sampled texture
-  /// @param binding the binding number to use for the sampled texture
-  void AddSampledTexture(const std::string& name,
-                         ast::Type* type,
-                         uint32_t group,
-                         uint32_t binding);
-
-  /// Adds a multi-sampled texture variable to the program
-  /// @param name the name of the variable
-  /// @param type the type to use
-  /// @param group the binding/group to use for the multi-sampled texture
-  /// @param binding the binding number to use for the multi-sampled texture
-  void AddMultisampledTexture(const std::string& name,
-                              ast::Type* type,
-                              uint32_t group,
-                              uint32_t binding);
+  /// @param group the binding/group to use for the resource
+  /// @param binding the binding number to use for the resource
+  void AddResource(const std::string& name,
+                   ast::Type* type,
+                   uint32_t group,
+                   uint32_t binding);
 
   /// Add a module scope private variable to the progames
   /// @param name the name of the variable
   /// @param type the type to use
   void AddGlobalVariable(const std::string& name, ast::Type* type);
-
-  /// Adds a depth texture variable to the program
-  /// @param name the name of the variable
-  /// @param type the type to use
-  /// @param group the binding/group to use for the depth texture
-  /// @param binding the binding number to use for the depth texture
-  void AddDepthTexture(const std::string& name,
-                       ast::Type* type,
-                       uint32_t group,
-                       uint32_t binding);
-
-  /// Adds an external texture variable to the program
-  /// @param name the name of the variable
-  /// @param type the type to use
-  /// @param group the binding/group to use for the external texture
-  /// @param binding the binding number to use for the external texture
-  void AddExternalTexture(const std::string& name,
-                          ast::Type* type,
-                          uint32_t group,
-                          uint32_t binding);
 
   /// Generates a function that references a specific sampler variable
   /// @param func_name name of the function created

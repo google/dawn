@@ -25,6 +25,7 @@
 #include "src/sem/array.h"
 #include "src/sem/atomic_type.h"
 #include "src/sem/call.h"
+#include "src/sem/depth_multisampled_texture_type.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/function.h"
 #include "src/sem/intrinsic.h"
@@ -2697,7 +2698,8 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
   // If the texture is not a depth texture, then this function simply delegates
   // to calling append_result_type_and_id_to_spirv_params().
   auto append_result_type_and_id_to_spirv_params_for_read = [&]() {
-    if (texture_type->Is<sem::DepthTexture>()) {
+    if (texture_type
+            ->IsAnyOf<sem::DepthTexture, sem::DepthMultisampledTexture>()) {
       auto* f32 = builder_.create<sem::F32>();
       auto* spirv_result_type = builder_.create<sem::Vector>(f32, 4);
       auto spirv_result = result_op();
@@ -2821,8 +2823,9 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
       }
 
       spirv_params.emplace_back(gen_arg(Usage::kTexture));
-      if (texture_type->Is<sem::MultisampledTexture>() ||
-          texture_type->Is<sem::StorageTexture>()) {
+      if (texture_type->IsAnyOf<sem::MultisampledTexture,       //
+                                sem::DepthMultisampledTexture,  //
+                                sem::StorageTexture>()) {
         op = spv::Op::OpImageQuerySize;
       } else if (auto* level = arg(Usage::kLevel)) {
         op = spv::Op::OpImageQuerySizeLod;
@@ -3805,7 +3808,6 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
   });
 }
 
-// TODO(tommek): Cover multisampled textures here when they're included in AST
 bool Builder::GenerateTextureType(const sem::Texture* texture,
                                   const Operand& result) {
   uint32_t array_literal = 0u;
@@ -3833,18 +3835,19 @@ bool Builder::GenerateTextureType(const sem::Texture* texture,
   }
 
   uint32_t ms_literal = 0u;
-  if (texture->Is<sem::MultisampledTexture>()) {
+  if (texture->IsAnyOf<sem::MultisampledTexture,
+                       sem::DepthMultisampledTexture>()) {
     ms_literal = 1u;
   }
 
   uint32_t depth_literal = 0u;
-  if (texture->Is<sem::DepthTexture>()) {
+  if (texture->IsAnyOf<sem::DepthTexture, sem::DepthMultisampledTexture>()) {
     depth_literal = 1u;
   }
 
   uint32_t sampled_literal = 2u;
-  if (texture->Is<sem::MultisampledTexture>() ||
-      texture->Is<sem::SampledTexture>() || texture->Is<sem::DepthTexture>()) {
+  if (texture->IsAnyOf<sem::MultisampledTexture, sem::SampledTexture,
+                       sem::DepthTexture, sem::DepthMultisampledTexture>()) {
     sampled_literal = 1u;
   }
 
@@ -3856,7 +3859,7 @@ bool Builder::GenerateTextureType(const sem::Texture* texture,
   }
 
   uint32_t type_id = 0u;
-  if (texture->Is<sem::DepthTexture>()) {
+  if (texture->IsAnyOf<sem::DepthTexture, sem::DepthMultisampledTexture>()) {
     sem::F32 f32;
     type_id = GenerateTypeIfNeeded(&f32);
   } else if (auto* s = texture->As<sem::SampledTexture>()) {

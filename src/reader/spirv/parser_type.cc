@@ -36,6 +36,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::Array);
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::Sampler);
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::Texture);
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::DepthTexture);
+TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::DepthMultisampledTexture);
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::MultisampledTexture);
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::SampledTexture);
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::StorageTexture);
@@ -206,6 +207,15 @@ ast::Type* DepthTexture::Build(ProgramBuilder& b) const {
   return b.ty.depth_texture(dims);
 }
 
+DepthMultisampledTexture::DepthMultisampledTexture(ast::TextureDimension d)
+    : Base(d) {}
+DepthMultisampledTexture::DepthMultisampledTexture(
+    const DepthMultisampledTexture&) = default;
+
+ast::Type* DepthMultisampledTexture::Build(ProgramBuilder& b) const {
+  return b.ty.depth_multisampled_texture(dims);
+}
+
 MultisampledTexture::MultisampledTexture(ast::TextureDimension d, const Type* t)
     : Base(d), type(t) {}
 MultisampledTexture::MultisampledTexture(const MultisampledTexture&) = default;
@@ -288,6 +298,10 @@ struct TypeManager::State {
   /// Map of ast::TextureDimension to returned DepthTexture instance
   std::unordered_map<ast::TextureDimension, const spirv::DepthTexture*>
       depth_textures_;
+  /// Map of ast::TextureDimension to returned DepthMultisampledTexture instance
+  std::unordered_map<ast::TextureDimension,
+                     const spirv::DepthMultisampledTexture*>
+      depth_multisampled_textures_;
   /// Map of MultisampledTexture to the returned MultisampledTexture type
   /// instance
   std::unordered_map<spirv::MultisampledTexture,
@@ -487,6 +501,13 @@ const spirv::DepthTexture* TypeManager::DepthTexture(
   });
 }
 
+const spirv::DepthMultisampledTexture* TypeManager::DepthMultisampledTexture(
+    ast::TextureDimension dims) {
+  return utils::GetOrCreate(state->depth_multisampled_textures_, dims, [&] {
+    return state->allocator_.Create<spirv::DepthMultisampledTexture>(dims);
+  });
+}
+
 const spirv::MultisampledTexture* TypeManager::MultisampledTexture(
     ast::TextureDimension dims,
     const Type* ty) {
@@ -583,6 +604,12 @@ std::string Sampler::String() const {
 std::string DepthTexture::String() const {
   std::stringstream ss;
   ss << "depth_" << dims;
+  return ss.str();
+}
+
+std::string DepthMultisampledTexture::String() const {
+  std::stringstream ss;
+  ss << "depth_multisampled_" << dims;
   return ss.str();
 }
 

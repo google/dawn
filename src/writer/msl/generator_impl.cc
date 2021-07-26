@@ -37,6 +37,7 @@
 #include "src/sem/atomic_type.h"
 #include "src/sem/bool_type.h"
 #include "src/sem/call.h"
+#include "src/sem/depth_multisampled_texture_type.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/f32_type.h"
 #include "src/sem/function.h"
@@ -2034,7 +2035,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
   }
 
   if (auto* tex = type->As<sem::Texture>()) {
-    if (tex->Is<sem::DepthTexture>()) {
+    if (tex->IsAnyOf<sem::DepthTexture, sem::DepthMultisampledTexture>()) {
       out << "depth";
     } else {
       out << "texture";
@@ -2064,12 +2065,15 @@ bool GeneratorImpl::EmitType(std::ostream& out,
                                "Invalid texture dimensions");
         return false;
     }
-    if (tex->Is<sem::MultisampledTexture>()) {
+    if (tex->IsAnyOf<sem::MultisampledTexture,
+                     sem::DepthMultisampledTexture>()) {
       out << "_ms";
     }
     out << "<";
     if (tex->Is<sem::DepthTexture>()) {
       out << "float, access::sample";
+    } else if (tex->Is<sem::DepthMultisampledTexture>()) {
+      out << "float, access::read";
     } else if (auto* storage = tex->As<sem::StorageTexture>()) {
       if (!EmitType(out, storage->type(), "")) {
         return false;

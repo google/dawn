@@ -269,6 +269,8 @@ std::string Token::TypeToName(Type type) {
       return "texture_depth_cube";
     case Token::Type::kTextureDepthCubeArray:
       return "texture_depth_cube_array";
+    case Token::Type::kTextureDepthMultisampled2d:
+      return "texture_depth_multisampled_2d";
     case Token::Type::kTextureExternal:
       return "texture_external";
     case Token::Type::kTextureMultisampled2d:

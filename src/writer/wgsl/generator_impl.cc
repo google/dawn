@@ -445,6 +445,8 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
     out << "texture_";
     if (texture->Is<ast::DepthTexture>()) {
       out << "depth_";
+    } else if (texture->Is<ast::DepthMultisampledTexture>()) {
+      out << "depth_multisampled_";
     } else if (texture->Is<ast::SampledTexture>()) {
       /* nothing to emit */
     } else if (texture->Is<ast::MultisampledTexture>()) {

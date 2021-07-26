@@ -85,6 +85,7 @@
 "texture_depth_2d_array"
 "texture_depth_cube"
 "texture_depth_cube_array"
+"texture_depth_multisampled_2d"
 "texture_multisampled_2d"
 "texture_storage_1d"
 "texture_storage_2d_array"

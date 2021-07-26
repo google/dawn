@@ -122,6 +122,11 @@ class Inspector {
       const std::string& entry_point);
 
   /// @param entry_point name of the entry point to get information about.
+  /// @returns vector of all of the bindings for depth textures.
+  std::vector<ResourceBinding> GetDepthMultisampledTextureResourceBindings(
+      const std::string& entry_point);
+
+  /// @param entry_point name of the entry point to get information about.
   /// @returns vector of all of the bindings for external textures.
   std::vector<ResourceBinding> GetExternalTextureResourceBindings(
       const std::string& entry_point);
@@ -166,6 +171,18 @@ class Inspector {
   /// Otherwise, check `decorations` for the decoration.
   bool ContainsSampleMaskBuiltin(sem::Type* type,
                                  const ast::DecorationList& decorations) const;
+
+  /// Gathers all the texture resource bindings of the given type for the given
+  /// entry point.
+  /// @param entry_point name of the entry point to get information about.
+  /// @param texture_type the type of the textures to gather.
+  /// @param resource_type the ResourceBinding::ResourceType for the given
+  /// texture type.
+  /// @returns vector of all of the bindings for depth textures.
+  std::vector<ResourceBinding> GetTextureResourceBindings(
+      const std::string& entry_point,
+      const tint::TypeInfo& texture_type,
+      ResourceBinding::ResourceType resource_type);
 
   /// @param entry_point name of the entry point to get information about.
   /// @param read_only if true get only read-only bindings, if false get

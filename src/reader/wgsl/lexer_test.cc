@@ -543,6 +543,8 @@ INSTANTIATE_TEST_SUITE_P(
         TokenData{"texture_depth_cube", Token::Type::kTextureDepthCube},
         TokenData{"texture_depth_cube_array",
                   Token::Type::kTextureDepthCubeArray},
+        TokenData{"texture_depth_multisampled_2d",
+                  Token::Type::kTextureDepthMultisampled2d},
         TokenData{"texture_multisampled_2d",
                   Token::Type::kTextureMultisampled2d},
         TokenData{"texture_storage_1d", Token::Type::kTextureStorage1d},

@@ -26,7 +26,13 @@ namespace ast {
 namespace intrinsic {
 namespace test {
 
-enum class TextureKind { kRegular, kDepth, kMultisampled, kStorage };
+enum class TextureKind {
+  kRegular,
+  kDepth,
+  kDepthMultisampled,
+  kMultisampled,
+  kStorage
+};
 enum class TextureDataType { kF32, kU32, kI32 };
 
 std::ostream& operator<<(std::ostream& out, const TextureKind& kind);
@@ -54,6 +60,7 @@ enum class ValidTextureOverload {
   kDimensionsDepthCubeLevel,
   kDimensionsDepthCubeArray,
   kDimensionsDepthCubeArrayLevel,
+  kDimensionsDepthMultisampled2d,
   kDimensionsStorageRO1d,
   kDimensionsStorageRO2d,
   kDimensionsStorageRO2dArray,
@@ -77,6 +84,7 @@ enum class ValidTextureOverload {
   kNumLevelsDepthCube,
   kNumLevelsDepthCubeArray,
   kNumSamplesMultisampled2d,
+  kNumSamplesDepthMultisampled2d,
   kSample1dF32,
   kSample2dF32,
   kSample2dOffsetF32,
@@ -151,6 +159,7 @@ enum class ValidTextureOverload {
   kLoadMultisampled2dI32,
   kLoadDepth2dLevelF32,
   kLoadDepth2dArrayLevelF32,
+  kLoadDepthMultisampled2dF32,
   kLoadStorageRO1dRgba32float,  // Not permutated for all texel formats
   kLoadStorageRO2dRgba8unorm,
   kLoadStorageRO2dRgba8snorm,

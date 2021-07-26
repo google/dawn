@@ -29,6 +29,7 @@
 #include "src/ast/uint_literal.h"
 #include "src/sem/array.h"
 #include "src/sem/call.h"
+#include "src/sem/depth_multisampled_texture_type.h"
 #include "src/sem/f32_type.h"
 #include "src/sem/function.h"
 #include "src/sem/i32_type.h"
@@ -319,27 +320,22 @@ std::vector<ResourceBinding> Inspector::GetResourceBindings(
   }
 
   std::vector<ResourceBinding> result;
-
-  AppendResourceBindings(&result,
-                         GetUniformBufferResourceBindings(entry_point));
-  AppendResourceBindings(&result,
-                         GetStorageBufferResourceBindings(entry_point));
-  AppendResourceBindings(&result,
-                         GetReadOnlyStorageBufferResourceBindings(entry_point));
-  AppendResourceBindings(&result, GetSamplerResourceBindings(entry_point));
-  AppendResourceBindings(&result,
-                         GetComparisonSamplerResourceBindings(entry_point));
-  AppendResourceBindings(&result,
-                         GetSampledTextureResourceBindings(entry_point));
-  AppendResourceBindings(&result,
-                         GetMultisampledTextureResourceBindings(entry_point));
-  AppendResourceBindings(
-      &result, GetReadOnlyStorageTextureResourceBindings(entry_point));
-  AppendResourceBindings(
-      &result, GetWriteOnlyStorageTextureResourceBindings(entry_point));
-  AppendResourceBindings(&result, GetDepthTextureResourceBindings(entry_point));
-  AppendResourceBindings(&result,
-                         GetExternalTextureResourceBindings(entry_point));
+  for (auto fn : {
+           &Inspector::GetUniformBufferResourceBindings,
+           &Inspector::GetStorageBufferResourceBindings,
+           &Inspector::GetReadOnlyStorageBufferResourceBindings,
+           &Inspector::GetSamplerResourceBindings,
+           &Inspector::GetComparisonSamplerResourceBindings,
+           &Inspector::GetSampledTextureResourceBindings,
+           &Inspector::GetMultisampledTextureResourceBindings,
+           &Inspector::GetReadOnlyStorageTextureResourceBindings,
+           &Inspector::GetWriteOnlyStorageTextureResourceBindings,
+           &Inspector::GetDepthTextureResourceBindings,
+           &Inspector::GetDepthMultisampledTextureResourceBindings,
+           &Inspector::GetExternalTextureResourceBindings,
+       }) {
+    AppendResourceBindings(&result, (this->*fn)(entry_point));
+  }
   return result;
 }
 
@@ -465,8 +461,10 @@ Inspector::GetWriteOnlyStorageTextureResourceBindings(
   return GetStorageTextureResourceBindingsImpl(entry_point, false);
 }
 
-std::vector<ResourceBinding> Inspector::GetDepthTextureResourceBindings(
-    const std::string& entry_point) {
+std::vector<ResourceBinding> Inspector::GetTextureResourceBindings(
+    const std::string& entry_point,
+    const tint::TypeInfo& texture_type,
+    ResourceBinding::ResourceType resource_type) {
   auto* func = FindEntryPointByName(entry_point);
   if (!func) {
     return {};
@@ -474,18 +472,18 @@ std::vector<ResourceBinding> Inspector::GetDepthTextureResourceBindings(
 
   std::vector<ResourceBinding> result;
   auto* func_sem = program_->Sem().Get(func);
-  for (auto& ref : func_sem->ReferencedDepthTextureVariables()) {
+  for (auto& ref : func_sem->ReferencedVariablesOfType(texture_type)) {
     auto* var = ref.first;
     auto binding_info = ref.second;
 
     ResourceBinding entry;
-    entry.resource_type = ResourceBinding::ResourceType::kDepthTexture;
+    entry.resource_type = resource_type;
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
-    auto* texture_type = var->Type()->UnwrapRef()->As<sem::Texture>();
-    entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
-        texture_type->dim());
+    auto* tex = var->Type()->UnwrapRef()->As<sem::Texture>();
+    entry.dim =
+        TypeTextureDimensionToResourceBindingTextureDimension(tex->dim());
 
     result.push_back(entry);
   }
@@ -493,31 +491,26 @@ std::vector<ResourceBinding> Inspector::GetDepthTextureResourceBindings(
   return result;
 }
 
+std::vector<ResourceBinding> Inspector::GetDepthTextureResourceBindings(
+    const std::string& entry_point) {
+  return GetTextureResourceBindings(
+      entry_point, TypeInfo::Of<sem::DepthTexture>(),
+      ResourceBinding::ResourceType::kDepthTexture);
+}
+
+std::vector<ResourceBinding>
+Inspector::GetDepthMultisampledTextureResourceBindings(
+    const std::string& entry_point) {
+  return GetTextureResourceBindings(
+      entry_point, TypeInfo::Of<sem::DepthMultisampledTexture>(),
+      ResourceBinding::ResourceType::kDepthMultisampledTexture);
+}
+
 std::vector<ResourceBinding> Inspector::GetExternalTextureResourceBindings(
     const std::string& entry_point) {
-  auto* func = FindEntryPointByName(entry_point);
-  if (!func) {
-    return {};
-  }
-
-  std::vector<ResourceBinding> result;
-  auto* func_sem = program_->Sem().Get(func);
-  for (auto& ref : func_sem->ReferencedExternalTextureVariables()) {
-    auto* var = ref.first;
-    auto binding_info = ref.second;
-
-    ResourceBinding entry;
-    entry.resource_type = ResourceBinding::ResourceType::kExternalTexture;
-    entry.bind_group = binding_info.group->value();
-    entry.binding = binding_info.binding->value();
-
-    auto* texture_type = var->Type()->UnwrapRef()->As<sem::Texture>();
-    entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
-        texture_type->dim());
-
-    result.push_back(entry);
-  }
-  return result;
+  return GetTextureResourceBindings(
+      entry_point, TypeInfo::Of<sem::ExternalTexture>(),
+      ResourceBinding::ResourceType::kExternalTexture);
 }
 
 std::vector<SamplerTexturePair> Inspector::GetSamplerTextureUses(
@@ -734,7 +727,7 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
 
   auto* func_sem = program_->Sem().Get(func);
   std::vector<ResourceBinding> result;
-  for (auto& ref : func_sem->ReferencedStorageTextureVariables()) {
+  for (auto& ref : func_sem->ReferencedVariablesOfType<sem::StorageTexture>()) {
     auto* var = ref.first;
     auto binding_info = ref.second;
 

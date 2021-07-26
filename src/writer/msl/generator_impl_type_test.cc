@@ -17,6 +17,7 @@
 #include "gmock/gmock.h"
 
 #include "src/ast/struct_block_decoration.h"
+#include "src/sem/depth_multisampled_texture_type.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/sampled_texture_type.h"
@@ -779,6 +780,17 @@ INSTANTIATE_TEST_SUITE_P(
                     MslDepthTextureData{
                         ast::TextureDimension::kCubeArray,
                         "depthcube_array<float, access::sample>"}));
+
+using MslDepthMultisampledTexturesTest = TestHelper;
+TEST_F(MslDepthMultisampledTexturesTest, Emit) {
+  sem::DepthMultisampledTexture s(ast::TextureDimension::k2d);
+
+  GeneratorImpl& gen = Build();
+
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitType(out, &s, "")) << gen.error();
+  EXPECT_EQ(out.str(), "depth2d_ms<float, access::read>");
+}
 
 struct MslTextureData {
   ast::TextureDimension dim;

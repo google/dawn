@@ -2516,7 +2516,11 @@ const Pointer* ParserImpl::GetTypeForHandleVar(
       // OpImage variable with an OpImage*Dref* instruction.  In WGSL we must
       // treat that as a depth texture.
       if (image_type->depth() || usage.IsDepthTexture()) {
-        ast_store_type = ty_.DepthTexture(dim);
+        if (image_type->is_multisampled()) {
+          ast_store_type = ty_.DepthMultisampledTexture(dim);
+        } else {
+          ast_store_type = ty_.DepthTexture(dim);
+        }
       } else if (image_type->is_multisampled()) {
         if (dim != ast::TextureDimension::k2d) {
           Fail() << "WGSL multisampled textures must be 2d and non-arrayed: "

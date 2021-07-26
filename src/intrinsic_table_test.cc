@@ -16,6 +16,7 @@
 
 #include "gmock/gmock.h"
 #include "src/program_builder.h"
+#include "src/sem/depth_multisampled_texture_type.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/external_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
@@ -346,6 +347,26 @@ TEST_F(IntrinsicTableTest, MatchDepthTexture) {
   EXPECT_EQ(result->Parameters()[2]->Usage(), ParameterUsage::kLevel);
 }
 
+TEST_F(IntrinsicTableTest, MatchDepthMultisampledTexture) {
+  auto* f32 = create<sem::F32>();
+  auto* i32 = create<sem::I32>();
+  auto* vec2_i32 = create<sem::Vector>(i32, 2);
+  auto* tex = create<sem::DepthMultisampledTexture>(ast::TextureDimension::k2d);
+  auto* result = table->Lookup(IntrinsicType::kTextureLoad,
+                               {tex, vec2_i32, i32}, Source{});
+  ASSERT_NE(result, nullptr) << Diagnostics().str();
+  ASSERT_EQ(Diagnostics().str(), "");
+  EXPECT_THAT(result->Type(), IntrinsicType::kTextureLoad);
+  EXPECT_THAT(result->ReturnType(), f32);
+  ASSERT_EQ(result->Parameters().size(), 3u);
+  EXPECT_EQ(result->Parameters()[0]->Type(), tex);
+  EXPECT_EQ(result->Parameters()[0]->Usage(), ParameterUsage::kTexture);
+  EXPECT_EQ(result->Parameters()[1]->Type(), vec2_i32);
+  EXPECT_EQ(result->Parameters()[1]->Usage(), ParameterUsage::kCoords);
+  EXPECT_EQ(result->Parameters()[2]->Type(), i32);
+  EXPECT_EQ(result->Parameters()[2]->Usage(), ParameterUsage::kSampleIndex);
+}
+
 TEST_F(IntrinsicTableTest, MatchExternalTexture) {
   auto* f32 = create<sem::F32>();
   auto* i32 = create<sem::I32>();
@@ -519,7 +540,7 @@ TEST_F(IntrinsicTableTest, OverloadOrderByNumberOfParameters) {
   ASSERT_EQ(Diagnostics().str(),
             R"(error: no matching call to textureDimensions(bool, bool)
 
-26 candidate functions:
+27 candidate functions:
   textureDimensions(texture: texture_1d<T>, level: i32) -> i32  where: T is f32, i32 or u32
   textureDimensions(texture: texture_2d<T>, level: i32) -> vec2<i32>  where: T is f32, i32 or u32
   textureDimensions(texture: texture_2d_array<T>, level: i32) -> vec2<i32>  where: T is f32, i32 or u32
@@ -541,6 +562,7 @@ TEST_F(IntrinsicTableTest, OverloadOrderByNumberOfParameters) {
   textureDimensions(texture: texture_depth_2d_array) -> vec2<i32>
   textureDimensions(texture: texture_depth_cube) -> vec2<i32>
   textureDimensions(texture: texture_depth_cube_array) -> vec2<i32>
+  textureDimensions(texture: texture_depth_multisampled_2d) -> vec2<i32>
   textureDimensions(texture: texture_storage_1d<F, A>) -> i32  where: A is read or write
   textureDimensions(texture: texture_storage_2d<F, A>) -> vec2<i32>  where: A is read or write
   textureDimensions(texture: texture_storage_2d_array<F, A>) -> vec2<i32>  where: A is read or write
@@ -557,7 +579,7 @@ TEST_F(IntrinsicTableTest, OverloadOrderByMatchingParameter) {
       Diagnostics().str(),
       R"(error: no matching call to textureDimensions(texture_depth_2d, bool)
 
-26 candidate functions:
+27 candidate functions:
   textureDimensions(texture: texture_depth_2d, level: i32) -> vec2<i32>
   textureDimensions(texture: texture_depth_2d) -> vec2<i32>
   textureDimensions(texture: texture_1d<T>, level: i32) -> i32  where: T is f32, i32 or u32
@@ -579,6 +601,7 @@ TEST_F(IntrinsicTableTest, OverloadOrderByMatchingParameter) {
   textureDimensions(texture: texture_depth_2d_array) -> vec2<i32>
   textureDimensions(texture: texture_depth_cube) -> vec2<i32>
   textureDimensions(texture: texture_depth_cube_array) -> vec2<i32>
+  textureDimensions(texture: texture_depth_multisampled_2d) -> vec2<i32>
   textureDimensions(texture: texture_storage_1d<F, A>) -> i32  where: A is read or write
   textureDimensions(texture: texture_storage_2d<F, A>) -> vec2<i32>  where: A is read or write
   textureDimensions(texture: texture_storage_2d_array<F, A>) -> vec2<i32>  where: A is read or write

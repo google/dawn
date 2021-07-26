@@ -32,6 +32,7 @@
 #include "src/sem/atomic_type.h"
 #include "src/sem/block_statement.h"
 #include "src/sem/call.h"
+#include "src/sem/depth_multisampled_texture_type.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/function.h"
 #include "src/sem/member_accessor_expression.h"
@@ -1605,7 +1606,8 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     case sem::IntrinsicType::kTextureNumLevels:
     case sem::IntrinsicType::kTextureNumSamples: {
       // All of these intrinsics use the GetDimensions() method on the texture
-      bool is_ms = texture_type->Is<sem::MultisampledTexture>();
+      bool is_ms = texture_type->IsAnyOf<sem::MultisampledTexture,
+                                         sem::DepthMultisampledTexture>();
       int num_dimensions = 0;
       std::string swizzle;
 
@@ -3002,7 +3004,8 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     out << StructName(str);
   } else if (auto* tex = type->As<sem::Texture>()) {
     auto* storage = tex->As<sem::StorageTexture>();
-    auto* multism = tex->As<sem::MultisampledTexture>();
+    auto* ms = tex->As<sem::MultisampledTexture>();
+    auto* depth_ms = tex->As<sem::DepthMultisampledTexture>();
     auto* sampled = tex->As<sem::SampledTexture>();
 
     if (storage && storage->access() != ast::Access::kRead) {
@@ -3015,10 +3018,10 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         out << "1D";
         break;
       case ast::TextureDimension::k2d:
-        out << (multism ? "2DMS" : "2D");
+        out << ((ms || depth_ms) ? "2DMS" : "2D");
         break;
       case ast::TextureDimension::k2dArray:
-        out << (multism ? "2DMSArray" : "2DArray");
+        out << ((ms || depth_ms) ? "2DMSArray" : "2DArray");
         break;
       case ast::TextureDimension::k3d:
         out << "3D";
@@ -3044,8 +3047,10 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         return false;
       }
       out << "<" << component << ">";
-    } else if (sampled || multism) {
-      auto* subtype = sampled ? sampled->type() : multism->type();
+    } else if (depth_ms) {
+      out << "<float4>";
+    } else if (sampled || ms) {
+      auto* subtype = sampled ? sampled->type() : ms->type();
       out << "<";
       if (subtype->Is<sem::F32>()) {
         out << "float4";

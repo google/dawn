@@ -473,6 +473,26 @@ OpCapability ImageQuery
 OpCapability SampledCubeArray
 OpCapability ImageQuery
 )"};
+    case ValidTextureOverload::kDimensionsDepthMultisampled2d:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 1 0 1 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%10 = OpTypeInt 32 1
+%9 = OpTypeVector %10 2
+)",
+          R"(
+%11 = OpLoad %3 %1
+%8 = OpImageQuerySize %9 %11
+)",
+          R"(
+OpCapability ImageQuery
+)"};
     case ValidTextureOverload::kDimensionsStorageRO1d:
       return {
           R"(
@@ -911,6 +931,24 @@ OpCapability ImageQuery
       return {R"(
 %4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 1 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeInt 32 1
+)",
+              R"(
+%10 = OpLoad %3 %1
+%8 = OpImageQuerySamples %9 %10
+)",
+              R"(
+OpCapability ImageQuery
+)"};
+    case ValidTextureOverload::kNumSamplesDepthMultisampled2d:
+      return {R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 1 0 1 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -3050,6 +3088,32 @@ OpCapability Sampled1D
           R"(
 %11 = OpLoad %3 %1
 %9 = OpImageFetch %10 %11 %17 Lod %18
+%8 = OpCompositeExtract %4 %9 0
+)",
+          R"(
+)"};
+    case ValidTextureOverload::kLoadDepthMultisampled2dF32:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%10 = OpTypeVector %4 4
+%13 = OpTypeInt 32 1
+%12 = OpTypeVector %13 3
+%14 = OpConstant %13 1
+%15 = OpConstant %13 2
+%16 = OpConstant %13 3
+%17 = OpConstantComposite %12 %14 %15 %16
+%18 = OpConstant %13 4
+)",
+          R"(
+%11 = OpLoad %3 %1
+%9 = OpImageFetch %10 %11 %17 Sample %18
 %8 = OpCompositeExtract %4 %9 0
 )",
           R"(

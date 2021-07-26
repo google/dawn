@@ -361,6 +361,26 @@ INSTANTIATE_TEST_SUITE_P(
         HlslDepthTextureData{ast::TextureDimension::kCubeArray,
                              "TextureCubeArray tex : register(t1, space2);"}));
 
+using HlslDepthMultisampledTexturesTest = TestHelper;
+TEST_F(HlslDepthMultisampledTexturesTest, Emit) {
+  auto* t = ty.depth_multisampled_texture(ast::TextureDimension::k2d);
+
+  Global("tex", t,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(2),
+         });
+
+  Func("main", {}, ty.void_(), {Ignore(Call("textureDimensions", "tex"))},
+       {Stage(ast::PipelineStage::kFragment)});
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(),
+              HasSubstr("Texture2DMS<float4> tex : register(t1, space2);"));
+}
+
 enum class TextureDataType { F32, U32, I32 };
 struct HlslSampledTextureData {
   ast::TextureDimension dim;
