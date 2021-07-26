@@ -1,27 +1,25 @@
-SKIP: FAILED
+static float4 x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-
-var<private> x_GLF_color : vec4<f32>;
-
-fn GLF_live6mand_() -> vec3<f32> {
-  return mix(bitcast<vec3<f32>>(vec3<u32>(38730u, 63193u, 63173u)), vec3<f32>(463.0, 4.0, 0.0), vec3<f32>(2.0, 2.0, 2.0));
+float3 GLF_live6mand_() {
+  return lerp(asfloat(uint3(38730u, 63193u, 63173u)), float3(463.0f, 4.0f, 0.0f), float3(2.0f, 2.0f, 2.0f));
 }
 
-fn main_1() {
-  let x_27 : vec3<f32> = GLF_live6mand_();
-  x_GLF_color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+void main_1() {
+  const float3 x_27 = GLF_live6mand_();
+  x_GLF_color = float4(1.0f, 0.0f, 0.0f, 1.0f);
   return;
 }
 
 struct main_out {
-  [[location(0)]]
-  x_GLF_color_1 : vec4<f32>;
+  float4 x_GLF_color_1;
+};
+struct tint_symbol {
+  float4 x_GLF_color_1 : SV_Target0;
 };
 
-[[stage(fragment)]]
-fn main() -> main_out {
+tint_symbol main() {
   main_1();
-  return main_out(x_GLF_color);
+  const main_out tint_symbol_1 = {x_GLF_color};
+  const tint_symbol tint_symbol_2 = {tint_symbol_1.x_GLF_color_1};
+  return tint_symbol_2;
 }
-
-Failed to generate: error: Unable to do bitcast to type __vec_3__f32

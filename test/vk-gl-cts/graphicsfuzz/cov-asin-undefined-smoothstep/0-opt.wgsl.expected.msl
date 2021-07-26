@@ -1,6 +1,103 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-graphicsfuzz/cov-asin-undefined-smoothstep/0-opt.wgsl:30:47 error: expected ')' for type constructor
-  v2 = vec4<f32>(1.570796371, 1.119769573, 0x1.8p+128, 0.927295208);
-                                              ^^
+using namespace metal;
+struct tint_padded_array_element {
+  /* 0x0000 */ float el;
+  /* 0x0004 */ int8_t tint_pad[12];
+};
+struct tint_array_wrapper {
+  /* 0x0000 */ tint_padded_array_element arr[7];
+};
+struct buf0 {
+  /* 0x0000 */ tint_array_wrapper x_GLF_uniform_float_values;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_1 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+void main_1(constant buf0& x_6, thread float4* const tint_symbol_4) {
+  float4 v1 = 0.0f;
+  float4 v2 = 0.0f;
+  float4 v3 = 0.0f;
+  float4 v4 = 0.0f;
+  bool x_69 = false;
+  bool x_77 = false;
+  bool x_85 = false;
+  bool x_93 = false;
+  bool x_70_phi = false;
+  bool x_78_phi = false;
+  bool x_86_phi = false;
+  bool x_94_phi = false;
+  float const x_41 = x_6.x_GLF_uniform_float_values.arr[2].el;
+  float const x_43 = x_6.x_GLF_uniform_float_values.arr[2].el;
+  float const x_45 = x_6.x_GLF_uniform_float_values.arr[0].el;
+  float const x_47 = x_6.x_GLF_uniform_float_values.arr[2].el;
+  v1 = float4(x_41, x_43, x_45, x_47);
+  v2 = float4(1.570796371f, 1.119769573f, INFINITY, 0.927295208f);
+  float const x_50 = x_6.x_GLF_uniform_float_values.arr[0].el;
+  v3 = float4(x_50, x_50, x_50, x_50);
+  float4 const x_52 = v1;
+  float4 const x_53 = v2;
+  float4 const x_54 = v3;
+  v4 = smoothstep(x_52, x_53, x_54);
+  float4 const x_56 = v4;
+  *(tint_symbol_4) = float4(x_56.x, x_56.y, x_56.w, x_56.x);
+  float const x_59 = v4.x;
+  float const x_61 = x_6.x_GLF_uniform_float_values.arr[4].el;
+  bool const x_62 = (x_59 > x_61);
+  x_70_phi = x_62;
+  if (x_62) {
+    float const x_66 = v4.x;
+    float const x_68 = x_6.x_GLF_uniform_float_values.arr[5].el;
+    x_69 = (x_66 < x_68);
+    x_70_phi = x_69;
+  }
+  bool const x_70 = x_70_phi;
+  x_78_phi = x_70;
+  if (x_70) {
+    float const x_74 = v4.y;
+    float const x_76 = x_6.x_GLF_uniform_float_values.arr[3].el;
+    x_77 = (x_74 > x_76);
+    x_78_phi = x_77;
+  }
+  bool const x_78 = x_78_phi;
+  x_86_phi = x_78;
+  if (x_78) {
+    float const x_82 = v4.y;
+    float const x_84 = x_6.x_GLF_uniform_float_values.arr[6].el;
+    x_85 = (x_82 < x_84);
+    x_86_phi = x_85;
+  }
+  bool const x_86 = x_86_phi;
+  x_94_phi = x_86;
+  if (x_86) {
+    float const x_90 = v4.w;
+    float const x_92 = x_6.x_GLF_uniform_float_values.arr[0].el;
+    x_93 = (x_90 == x_92);
+    x_94_phi = x_93;
+  }
+  bool const x_94 = x_94_phi;
+  if (x_94) {
+    float const x_99 = x_6.x_GLF_uniform_float_values.arr[0].el;
+    float const x_101 = x_6.x_GLF_uniform_float_values.arr[1].el;
+    float const x_103 = x_6.x_GLF_uniform_float_values.arr[1].el;
+    float const x_105 = x_6.x_GLF_uniform_float_values.arr[0].el;
+    *(tint_symbol_4) = float4(x_99, x_101, x_103, x_105);
+  } else {
+    float const x_108 = x_6.x_GLF_uniform_float_values.arr[1].el;
+    *(tint_symbol_4) = float4(x_108, x_108, x_108, x_108);
+  }
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol(constant buf0& x_6 [[buffer(0)]]) {
+  thread float4 tint_symbol_5 = 0.0f;
+  main_1(x_6, &(tint_symbol_5));
+  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
+  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
+  return tint_symbol_3;
+}
 

@@ -1,71 +1,56 @@
-SKIP: FAILED
-
-
-type Arr = [[stride(16)]] array<i32, 5>;
-
-[[block]]
-struct buf0 {
-  x_GLF_uniform_int_values : Arr;
+cbuffer cbuffer_x_6 : register(b0, space0) {
+  uint4 x_6[5];
 };
-
-type Arr_1 = [[stride(16)]] array<f32, 3>;
-
-[[block]]
-struct buf1 {
-  x_GLF_uniform_float_values : Arr_1;
+cbuffer cbuffer_x_9 : register(b1, space0) {
+  uint4 x_9[3];
 };
+static float4 x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-[[group(0), binding(0)]] var<uniform> x_6 : buf0;
-
-[[group(0), binding(1)]] var<uniform> x_9 : buf1;
-
-var<private> x_GLF_color : vec4<f32>;
-
-fn main_1() {
-  var I : vec4<f32>;
-  var N : vec4<f32>;
-  var R : vec4<f32>;
-  var ref : vec4<f32>;
-  let x_40 : i32 = x_6.x_GLF_uniform_int_values[2];
-  let x_43 : i32 = x_6.x_GLF_uniform_int_values[3];
-  let x_46 : i32 = x_6.x_GLF_uniform_int_values[4];
-  I = bitcast<vec4<f32>>(vec4<u32>(bitcast<u32>(x_40), bitcast<u32>(x_43), bitcast<u32>(x_46), 92985u));
-  let x_51 : f32 = x_9.x_GLF_uniform_float_values[1];
-  N = vec4<f32>(x_51, x_51, x_51, x_51);
-  let x_53 : vec4<f32> = I;
-  R = reflect(x_53, vec4<f32>(0.5, 0.5, 0.5, 0.5));
-  let x_55 : vec4<f32> = I;
-  let x_57 : f32 = x_9.x_GLF_uniform_float_values[2];
-  let x_58 : vec4<f32> = N;
-  let x_59 : vec4<f32> = I;
-  let x_62 : vec4<f32> = N;
-  ref = (x_55 - (x_62 * (x_57 * dot(x_58, x_59))));
-  let x_65 : vec4<f32> = R;
-  let x_66 : vec4<f32> = ref;
-  let x_69 : f32 = x_9.x_GLF_uniform_float_values[0];
+void main_1() {
+  float4 I = float4(0.0f, 0.0f, 0.0f, 0.0f);
+  float4 N = float4(0.0f, 0.0f, 0.0f, 0.0f);
+  float4 R = float4(0.0f, 0.0f, 0.0f, 0.0f);
+  float4 ref = float4(0.0f, 0.0f, 0.0f, 0.0f);
+  const int x_40 = asint(x_6[2].x);
+  const int x_43 = asint(x_6[3].x);
+  const int x_46 = asint(x_6[4].x);
+  I = asfloat(uint4(asuint(x_40), asuint(x_43), asuint(x_46), 92985u));
+  const float x_51 = asfloat(x_9[1].x);
+  N = float4(x_51, x_51, x_51, x_51);
+  R = reflect(I, float4(0.5f, 0.5f, 0.5f, 0.5f));
+  const float4 x_55 = I;
+  const float x_57 = asfloat(x_9[2].x);
+  ref = (x_55 - (N * (x_57 * dot(N, I))));
+  const float4 x_65 = R;
+  const float4 x_66 = ref;
+  const uint scalar_offset = ((16u * uint(0))) / 4;
+  const float x_69 = asfloat(x_9[scalar_offset / 4][scalar_offset % 4]);
   if ((distance(x_65, x_66) < x_69)) {
-    let x_75 : i32 = x_6.x_GLF_uniform_int_values[0];
-    let x_78 : i32 = x_6.x_GLF_uniform_int_values[1];
-    let x_81 : i32 = x_6.x_GLF_uniform_int_values[1];
-    let x_84 : i32 = x_6.x_GLF_uniform_int_values[0];
-    x_GLF_color = vec4<f32>(f32(x_75), f32(x_78), f32(x_81), f32(x_84));
+    const uint scalar_offset_1 = ((16u * uint(0))) / 4;
+    const int x_75 = asint(x_6[scalar_offset_1 / 4][scalar_offset_1 % 4]);
+    const int x_78 = asint(x_6[1].x);
+    const int x_81 = asint(x_6[1].x);
+    const uint scalar_offset_2 = ((16u * uint(0))) / 4;
+    const int x_84 = asint(x_6[scalar_offset_2 / 4][scalar_offset_2 % 4]);
+    x_GLF_color = float4(float(x_75), float(x_78), float(x_81), float(x_84));
   } else {
-    let x_88 : i32 = x_6.x_GLF_uniform_int_values[1];
-    let x_89 : f32 = f32(x_88);
-    x_GLF_color = vec4<f32>(x_89, x_89, x_89, x_89);
+    const int x_88 = asint(x_6[1].x);
+    const float x_89 = float(x_88);
+    x_GLF_color = float4(x_89, x_89, x_89, x_89);
   }
   return;
 }
 
 struct main_out {
-  [[location(0)]]
-  x_GLF_color_1 : vec4<f32>;
+  float4 x_GLF_color_1;
+};
+struct tint_symbol {
+  float4 x_GLF_color_1 : SV_Target0;
 };
 
-[[stage(fragment)]]
-fn main() -> main_out {
+tint_symbol main() {
   main_1();
-  return main_out(x_GLF_color);
+  const main_out tint_symbol_1 = {x_GLF_color};
+  const tint_symbol tint_symbol_4 = {tint_symbol_1.x_GLF_color_1};
+  return tint_symbol_4;
 }
-
-Failed to generate: error: Unable to do bitcast to type __vec_4__f32
