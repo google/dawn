@@ -710,7 +710,7 @@ fn f() {
 
 [[group(0), binding(0)]] var tex_storage_3d : texture_storage_3d<rgba8sint, read>;
 
-[[group(0), binding(0)]] var tex_external : external_texture;
+[[group(0), binding(0)]] var tex_external : texture_external;
 
 fn f() {
   var array_idx : i32;

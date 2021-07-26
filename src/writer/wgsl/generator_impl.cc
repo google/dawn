@@ -434,7 +434,7 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
       out << "_comparison";
     }
   } else if (ty->Is<ast::ExternalTexture>()) {
-    out << "external_texture";
+    out << "texture_external";
   } else if (auto* texture = ty->As<ast::Texture>()) {
     out << "texture_";
     if (texture->Is<ast::DepthTexture>()) {

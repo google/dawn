@@ -1,4 +1,4 @@
-[[group(1), binding(0)]] var arg_0 : external_texture;
+[[group(1), binding(0)]] var arg_0 : texture_external;
 
 [[group(1), binding(1)]] var arg_1 : sampler;
 
