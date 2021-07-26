@@ -20,8 +20,6 @@ namespace tint {
 namespace diag {
 namespace {
 
-using PrinterTest = testing::Test;
-
 // Actually verifying that the expected colors are printed is exceptionally
 // difficult as:
 // a) The color emission varies by OS.
@@ -32,6 +30,11 @@ using PrinterTest = testing::Test;
 // The least we can do is to exersice the code - which is what we do here.
 // The test will print each of the colors, and can be examined with human
 // eyeballs.
+// This can be enabled or disabled with ENABLE_PRINTER_TESTS
+#define ENABLE_PRINTER_TESTS 0
+#if ENABLE_PRINTER_TESTS
+
+using PrinterTest = testing::Test;
 
 TEST_F(PrinterTest, WithColors) {
   auto printer = Printer::create(stdout, true);
@@ -89,6 +92,7 @@ TEST_F(PrinterTest, BoldWithoutColors) {
   printf("\n");
 }
 
+#endif  // ENABLE_PRINTER_TESTS
 }  // namespace
 }  // namespace diag
 }  // namespace tint
