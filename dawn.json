@@ -880,7 +880,8 @@
             {"name": "timestamp query", "type": "bool", "default": "false"},
             {"name": "multi planar formats", "type": "bool", "default": "false"},
             {"name": "depth clamping", "type": "bool", "default": "false"},
-            {"name": "invalid extension", "type": "bool", "default": "false"}
+            {"name": "invalid extension", "type": "bool", "default": "false"},
+            {"name": "dawn internal usages", "type": "bool", "default": "false"}
         ]
     },
     "double": {
@@ -1852,7 +1853,8 @@
             {"value": 8, "name": "surface descriptor from windows core window"},
             {"value": 9, "name": "external texture binding entry"},
             {"value": 10, "name": "external texture binding layout"},
-            {"value": 11, "name": "surface descriptor from windows swap chain panel"}
+            {"value": 11, "name": "surface descriptor from windows swap chain panel"},
+            {"value": 1000, "name": "dawn texture internal usage descriptor"}
         ]
     },
     "texture": {
@@ -2105,5 +2107,12 @@
     },
     "uint8_t": {
         "category": "native"
+    },
+    "dawn texture internal usage descriptor": {
+        "category": "structure",
+        "chained": true,
+        "members": [
+            {"name": "internal usage", "type": "texture usage", "default": "none"}
+        ]
     }
 }

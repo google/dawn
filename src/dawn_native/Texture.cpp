@@ -20,6 +20,7 @@
 #include "common/Constants.h"
 #include "common/Math.h"
 #include "dawn_native/Adapter.h"
+#include "dawn_native/ChainUtils_autogen.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/EnumMaskIterator.h"
 #include "dawn_native/PassResourceUsage.h"
@@ -104,7 +105,9 @@ namespace dawn_native {
             }
         }
 
-        MaybeError ValidateSampleCount(const TextureDescriptor* descriptor, const Format* format) {
+        MaybeError ValidateSampleCount(const TextureDescriptor* descriptor,
+                                       wgpu::TextureUsage usage,
+                                       const Format* format) {
             if (!IsValidSampleCount(descriptor->sampleCount)) {
                 return DAWN_VALIDATION_ERROR("The sample count of the texture is not supported.");
             }
@@ -132,7 +135,7 @@ namespace dawn_native {
                 // Compressed formats are not renderable. They cannot support multisample.
                 ASSERT(!format->isCompressed);
 
-                if (descriptor->usage & wgpu::TextureUsage::Storage) {
+                if (usage & wgpu::TextureUsage::Storage) {
                     return DAWN_VALIDATION_ERROR(
                         "The sample counts of the storage textures must be 1.");
                 }
@@ -217,30 +220,30 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateTextureUsage(const TextureDescriptor* descriptor, const Format* format) {
-            DAWN_TRY(dawn_native::ValidateTextureUsage(descriptor->usage));
+        MaybeError ValidateTextureUsage(const TextureDescriptor* descriptor,
+                                        wgpu::TextureUsage usage,
+                                        const Format* format) {
+            DAWN_TRY(dawn_native::ValidateTextureUsage(usage));
 
             constexpr wgpu::TextureUsage kValidCompressedUsages = wgpu::TextureUsage::Sampled |
                                                                   wgpu::TextureUsage::CopySrc |
                                                                   wgpu::TextureUsage::CopyDst;
-            if (format->isCompressed && !IsSubset(descriptor->usage, kValidCompressedUsages)) {
+            if (format->isCompressed && !IsSubset(usage, kValidCompressedUsages)) {
                 return DAWN_VALIDATION_ERROR(
                     "Compressed texture format is incompatible with the texture usage");
             }
 
-            if (!format->isRenderable &&
-                (descriptor->usage & wgpu::TextureUsage::RenderAttachment)) {
+            if (!format->isRenderable && (usage & wgpu::TextureUsage::RenderAttachment)) {
                 return DAWN_VALIDATION_ERROR(
                     "Non-renderable format used with RenderAttachment usage");
             }
 
-            if (!format->supportsStorageUsage &&
-                (descriptor->usage & wgpu::TextureUsage::Storage)) {
+            if (!format->supportsStorageUsage && (usage & wgpu::TextureUsage::Storage)) {
                 return DAWN_VALIDATION_ERROR("Format cannot be used in storage textures");
             }
 
             constexpr wgpu::TextureUsage kValidMultiPlanarUsages = wgpu::TextureUsage::Sampled;
-            if (format->IsMultiPlanar() && !IsSubset(descriptor->usage, kValidMultiPlanarUsages)) {
+            if (format->IsMultiPlanar() && !IsSubset(usage, kValidMultiPlanarUsages)) {
                 return DAWN_VALIDATION_ERROR("Multi-planar format doesn't have valid usage.");
             }
 
@@ -251,19 +254,32 @@ namespace dawn_native {
 
     MaybeError ValidateTextureDescriptor(const DeviceBase* device,
                                          const TextureDescriptor* descriptor) {
-        if (descriptor->nextInChain != nullptr) {
-            return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
-        }
+        DAWN_TRY(ValidateSingleSType(descriptor->nextInChain,
+                                     wgpu::SType::DawnTextureInternalUsageDescriptor));
+
+        const DawnTextureInternalUsageDescriptor* internalUsageDesc = nullptr;
+        FindInChain(descriptor->nextInChain, &internalUsageDesc);
+
         if (descriptor->dimension == wgpu::TextureDimension::e1D) {
             return DAWN_VALIDATION_ERROR("1D textures aren't supported (yet).");
+        }
+
+        if (internalUsageDesc != nullptr &&
+            !device->IsExtensionEnabled(Extension::DawnInternalUsages)) {
+            return DAWN_VALIDATION_ERROR("The dawn-internal-usages feature is not enabled");
         }
 
         const Format* format;
         DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->format));
 
-        DAWN_TRY(ValidateTextureUsage(descriptor, format));
+        wgpu::TextureUsage usage = descriptor->usage;
+        if (internalUsageDesc != nullptr) {
+            usage |= internalUsageDesc->internalUsage;
+        }
+
+        DAWN_TRY(ValidateTextureUsage(descriptor, usage, format));
         DAWN_TRY(ValidateTextureDimension(descriptor->dimension));
-        DAWN_TRY(ValidateSampleCount(descriptor, format));
+        DAWN_TRY(ValidateSampleCount(descriptor, usage, format));
 
         if (descriptor->size.width == 0 || descriptor->size.height == 0 ||
             descriptor->size.depthOrArrayLayers == 0 || descriptor->mipLevelCount == 0) {
@@ -426,15 +442,22 @@ namespace dawn_native {
           mMipLevelCount(descriptor->mipLevelCount),
           mSampleCount(descriptor->sampleCount),
           mUsage(descriptor->usage),
+          mInternalUsage(mUsage),
           mState(state) {
         uint32_t subresourceCount =
             mMipLevelCount * GetArrayLayers() * GetAspectCount(mFormat.aspects);
         mIsSubresourceContentInitializedAtIndex = std::vector<bool>(subresourceCount, false);
 
+        const DawnTextureInternalUsageDescriptor* internalUsageDesc = nullptr;
+        FindInChain(descriptor->nextInChain, &internalUsageDesc);
+        if (internalUsageDesc != nullptr) {
+            mInternalUsage |= internalUsageDesc->internalUsage;
+        }
+
         // Add readonly storage usage if the texture has a storage usage. The validation rules in
         // ValidateSyncScopeResourceUsage will make sure we don't use both at the same time.
-        if (mUsage & wgpu::TextureUsage::Storage) {
-            mUsage |= kReadOnlyStorageTexture;
+        if (mInternalUsage & wgpu::TextureUsage::Storage) {
+            mInternalUsage |= kReadOnlyStorageTexture;
         }
     }
 
@@ -504,6 +527,10 @@ namespace dawn_native {
     wgpu::TextureUsage TextureBase::GetUsage() const {
         ASSERT(!IsError());
         return mUsage;
+    }
+    wgpu::TextureUsage TextureBase::GetInternalUsage() const {
+        ASSERT(!IsError());
+        return mInternalUsage;
     }
 
     TextureBase::TextureState TextureBase::GetTextureState() const {

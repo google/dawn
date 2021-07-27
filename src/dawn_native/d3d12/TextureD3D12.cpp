@@ -496,8 +496,8 @@ namespace dawn_native { namespace d3d12 {
 
         // This will need to be much more nuanced when WebGPU has
         // texture view compatibility rules.
-        const bool needsTypelessFormat =
-            GetFormat().HasDepthOrStencil() && (GetUsage() & wgpu::TextureUsage::Sampled) != 0;
+        const bool needsTypelessFormat = GetFormat().HasDepthOrStencil() &&
+                                         (GetInternalUsage() & wgpu::TextureUsage::Sampled) != 0;
 
         DXGI_FORMAT dxgiFormat = needsTypelessFormat
                                      ? D3D12TypelessTextureFormat(GetFormat().format)
@@ -509,7 +509,7 @@ namespace dawn_native { namespace d3d12 {
         resourceDescriptor.SampleDesc.Quality = 0;
         resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
         resourceDescriptor.Flags =
-            D3D12ResourceFlags(GetUsage(), GetFormat(), IsMultisampledTexture());
+            D3D12ResourceFlags(GetInternalUsage(), GetFormat(), IsMultisampledTexture());
         mD3D12ResourceFlags = resourceDescriptor.Flags;
 
         DAWN_TRY_ASSIGN(mResourceAllocation,

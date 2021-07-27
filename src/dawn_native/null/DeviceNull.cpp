@@ -31,7 +31,7 @@ namespace dawn_native { namespace null {
         mAdapterType = wgpu::AdapterType::CPU;
 
         // Enable all extensions by default for the convenience of tests.
-        mSupportedExtensions.extensionsBitSet.flip();
+        mSupportedExtensions.extensionsBitSet.set();
     }
 
     Adapter::~Adapter() = default;

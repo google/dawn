@@ -31,6 +31,9 @@ namespace dawn_native {
         MultiPlanarFormats,
         DepthClamping,
 
+        // Dawn-specific
+        DawnInternalUsages,
+
         EnumCount,
         InvalidEnum = EnumCount,
         ExtensionMin = TextureCompressionBC,

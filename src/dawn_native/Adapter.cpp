@@ -20,6 +20,7 @@ namespace dawn_native {
 
     AdapterBase::AdapterBase(InstanceBase* instance, wgpu::BackendType backend)
         : mInstance(instance), mBackend(backend) {
+        mSupportedExtensions.EnableExtension(Extension::DawnInternalUsages);
     }
 
     wgpu::BackendType AdapterBase::GetBackendType() const {

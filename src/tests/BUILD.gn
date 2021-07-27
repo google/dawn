@@ -202,6 +202,7 @@ test("dawn_unittests") {
     "unittests/validation/ExternalTextureTests.cpp",
     "unittests/validation/GetBindGroupLayoutValidationTests.cpp",
     "unittests/validation/IndexBufferValidationTests.cpp",
+    "unittests/validation/InternalUsageValidationTests.cpp",
     "unittests/validation/MinimumBufferSizeValidationTests.cpp",
     "unittests/validation/MultipleDeviceTests.cpp",
     "unittests/validation/QueryValidationTests.cpp",

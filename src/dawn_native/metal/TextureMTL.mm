@@ -302,42 +302,38 @@ namespace dawn_native { namespace metal {
         return {};
     }
 
-    NSRef<MTLTextureDescriptor> CreateMetalTextureDescriptor(DeviceBase* device,
-                                                             const TextureDescriptor* descriptor) {
+    NSRef<MTLTextureDescriptor> Texture::CreateMetalTextureDescriptor() const {
         NSRef<MTLTextureDescriptor> mtlDescRef = AcquireNSRef([MTLTextureDescriptor new]);
         MTLTextureDescriptor* mtlDesc = mtlDescRef.Get();
 
-        mtlDesc.width = descriptor->size.width;
-        mtlDesc.height = descriptor->size.height;
-        mtlDesc.sampleCount = descriptor->sampleCount;
+        mtlDesc.width = GetWidth();
+        mtlDesc.height = GetHeight();
+        mtlDesc.sampleCount = GetSampleCount();
         // TODO: add MTLTextureUsagePixelFormatView when needed when we support format
         // reinterpretation.
-        mtlDesc.usage = MetalTextureUsage(device->GetValidInternalFormat(descriptor->format),
-                                          descriptor->usage, descriptor->sampleCount);
-        mtlDesc.pixelFormat = MetalPixelFormat(descriptor->format);
-        mtlDesc.mipmapLevelCount = descriptor->mipLevelCount;
+        mtlDesc.usage = MetalTextureUsage(GetFormat(), GetInternalUsage(), GetSampleCount());
+        mtlDesc.pixelFormat = MetalPixelFormat(GetFormat().format);
+        mtlDesc.mipmapLevelCount = GetNumMipLevels();
         mtlDesc.storageMode = MTLStorageModePrivate;
 
         // Choose the correct MTLTextureType and paper over differences in how the array layer count
         // is specified.
-        mtlDesc.depth = descriptor->size.depthOrArrayLayers;
-        mtlDesc.arrayLength = 1;
-        switch (descriptor->dimension) {
+        switch (GetDimension()) {
             case wgpu::TextureDimension::e2D:
-                if (mtlDesc.depth > 1) {
+                mtlDesc.depth = 1;
+                mtlDesc.arrayLength = GetArrayLayers();
+                if (mtlDesc.arrayLength > 1) {
                     ASSERT(mtlDesc.sampleCount == 1);
                     mtlDesc.textureType = MTLTextureType2DArray;
-                    mtlDesc.arrayLength = mtlDesc.depth;
-                    mtlDesc.depth = 1;
+                } else if (mtlDesc.sampleCount > 1) {
+                    mtlDesc.textureType = MTLTextureType2DMultisample;
                 } else {
-                    if (mtlDesc.sampleCount > 1) {
-                        mtlDesc.textureType = MTLTextureType2DMultisample;
-                    } else {
-                        mtlDesc.textureType = MTLTextureType2D;
-                    }
+                    mtlDesc.textureType = MTLTextureType2D;
                 }
                 break;
             case wgpu::TextureDimension::e3D:
+                mtlDesc.depth = GetDepth();
+                mtlDesc.arrayLength = 1;
                 ASSERT(mtlDesc.sampleCount == 1);
                 mtlDesc.textureType = MTLTextureType3D;
                 break;
@@ -386,7 +382,7 @@ namespace dawn_native { namespace metal {
     MaybeError Texture::InitializeAsInternalTexture(const TextureDescriptor* descriptor) {
         Device* device = ToBackend(GetDevice());
 
-        NSRef<MTLTextureDescriptor> mtlDesc = CreateMetalTextureDescriptor(device, descriptor);
+        NSRef<MTLTextureDescriptor> mtlDesc = CreateMetalTextureDescriptor();
         mMtlUsage = [*mtlDesc usage];
         mMtlTexture =
             AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:mtlDesc.Get()]);
@@ -405,7 +401,7 @@ namespace dawn_native { namespace metal {
 
     void Texture::InitializeAsWrapping(const TextureDescriptor* descriptor,
                                        NSPRef<id<MTLTexture>> wrapped) {
-        NSRef<MTLTextureDescriptor> mtlDesc = CreateMetalTextureDescriptor(GetDevice(), descriptor);
+        NSRef<MTLTextureDescriptor> mtlDesc = CreateMetalTextureDescriptor();
         mMtlUsage = [*mtlDesc usage];
         mMtlTexture = std::move(wrapped);
     }
@@ -416,8 +412,7 @@ namespace dawn_native { namespace metal {
                                                 uint32_t plane) {
         Device* device = ToBackend(GetDevice());
 
-        NSRef<MTLTextureDescriptor> mtlDesc =
-            CreateMetalTextureDescriptor(device, textureDescriptor);
+        NSRef<MTLTextureDescriptor> mtlDesc = CreateMetalTextureDescriptor();
         [*mtlDesc setStorageMode:kIOSurfaceStorageMode];
 
         mMtlUsage = [*mtlDesc usage];
@@ -667,7 +662,7 @@ namespace dawn_native { namespace metal {
         Texture* texture = ToBackend(GetTexture());
         id<MTLTexture> mtlTexture = texture->GetMTLTexture();
 
-        if (!UsageNeedsTextureView(texture->GetUsage())) {
+        if (!UsageNeedsTextureView(texture->GetInternalUsage())) {
             mMtlTextureView = nullptr;
         } else if (!RequiresCreatingNewTextureView(texture, descriptor)) {
             mMtlTextureView = mtlTexture;

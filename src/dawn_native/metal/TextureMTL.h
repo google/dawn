@@ -56,6 +56,8 @@ namespace dawn_native { namespace metal {
         using TextureBase::TextureBase;
         ~Texture() override;
 
+        NSRef<MTLTextureDescriptor> CreateMetalTextureDescriptor() const;
+
         MaybeError InitializeAsInternalTexture(const TextureDescriptor* descriptor);
         MaybeError InitializeFromIOSurface(const ExternalImageDescriptor* descriptor,
                                            const TextureDescriptor* textureDescriptor,

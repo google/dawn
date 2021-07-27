@@ -398,7 +398,7 @@ namespace dawn_native { namespace vulkan {
                 // happen so we must prepare for the pessimistic case and always use the GENERAL
                 // layout.
             case wgpu::TextureUsage::Sampled:
-                if (texture->GetUsage() & wgpu::TextureUsage::Storage) {
+                if (texture->GetInternalUsage() & wgpu::TextureUsage::Storage) {
                     return VK_IMAGE_LAYOUT_GENERAL;
                 } else {
                     return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -538,7 +538,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.flags = 0;
         createInfo.format = VulkanImageFormat(device, GetFormat().format);
         createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-        createInfo.usage = VulkanImageUsage(GetUsage(), GetFormat()) | extraUsages;
+        createInfo.usage = VulkanImageUsage(GetInternalUsage(), GetFormat()) | extraUsages;
         createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         createInfo.queueFamilyIndexCount = 0;
         createInfo.pQueueFamilyIndices = nullptr;
@@ -584,7 +584,7 @@ namespace dawn_native { namespace vulkan {
     MaybeError Texture::InitializeFromExternal(const ExternalImageDescriptorVk* descriptor,
                                                external_memory::Service* externalMemoryService) {
         VkFormat format = VulkanImageFormat(ToBackend(GetDevice()), GetFormat().format);
-        VkImageUsageFlags usage = VulkanImageUsage(GetUsage(), GetFormat());
+        VkImageUsageFlags usage = VulkanImageUsage(GetInternalUsage(), GetFormat());
         if (!externalMemoryService->SupportsCreateImage(descriptor, format, usage)) {
             return DAWN_VALIDATION_ERROR("Creating an image from external memory is not supported");
         }
