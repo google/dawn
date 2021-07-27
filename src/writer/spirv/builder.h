@@ -584,6 +584,33 @@ class Builder {
   std::vector<uint32_t> continue_stack_;
   std::unordered_set<uint32_t> capability_set_;
   bool has_overridable_workgroup_size_ = false;
+
+  struct ContinuingInfo {
+    ContinuingInfo(const ast::Statement* last_statement,
+                   uint32_t loop_header_id,
+                   uint32_t break_target_id);
+    // The last statement in the continiung block.
+    const ast::Statement* const last_statement = nullptr;
+    // The ID of the loop header
+    const uint32_t loop_header_id = 0u;
+    // The ID of the merge block for the loop.
+    const uint32_t break_target_id = 0u;
+  };
+  // Stack of nodes, where each is the last statement in a surrounding
+  // continuing block.
+  std::vector<ContinuingInfo> continuing_stack_;
+
+  // The instruction to emit as the backedge of a loop.
+  struct Backedge {
+    Backedge(spv::Op, OperandList);
+    Backedge(const Backedge&);
+    Backedge& operator=(const Backedge&);
+    ~Backedge();
+
+    spv::Op opcode;
+    OperandList operands;
+  };
+  std::vector<Backedge> backedge_stack_;
 };
 
 }  // namespace spirv

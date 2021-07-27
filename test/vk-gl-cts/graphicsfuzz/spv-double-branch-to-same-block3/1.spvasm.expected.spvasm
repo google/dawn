@@ -1,12 +1,10 @@
-SKIP: FAILED
-
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 425
+; Bound: 418
 ; Schema: 0
                OpCapability Shader
-        %187 = OpExtInstImport "GLSL.std.450"
+        %183 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %main "main" %tint_symbol %tint_symbol_2
                OpExecutionMode %main OriginUpperLeft
@@ -99,12 +97,12 @@ SKIP: FAILED
   %float_256 = OpConstant %float 256
     %float_1 = OpConstant %float 1
      %int_10 = OpConstant %int 10
-        %142 = OpTypeFunction %void
+        %138 = OpTypeFunction %void
       %int_0 = OpConstant %int 0
       %int_9 = OpConstant %int 9
       %int_2 = OpConstant %int 2
 %_ptr_Function_float = OpTypePointer Function %float
-        %211 = OpConstantNull %float
+        %207 = OpConstantNull %float
      %uint_0 = OpConstant %uint 0
 %_ptr_Uniform_float = OpTypePointer Uniform %float
      %int_n5 = OpConstant %int -5
@@ -133,7 +131,7 @@ SKIP: FAILED
       %int_8 = OpConstant %int 8
     %v3float = OpTypeVector %float 3
    %main_out = OpTypeStruct %v4float
-        %412 = OpTypeFunction %void %main_out
+        %405 = OpTypeFunction %void %main_out
 %merge_i1_i1_i1_ = OpFunction %void None %26
        %from = OpFunctionParameter %_ptr_Function_int
         %mid = OpFunctionParameter %_ptr_Function_int
@@ -160,138 +158,128 @@ SKIP: FAILED
          %54 = OpLoad %int %j
          %56 = OpLoad %int %to
          %57 = OpSLessThanEqual %bool %51 %53
-               OpSelectionMerge %59 None
-               OpBranchConditional %57 %60 %59
-         %60 = OpLabel
-         %61 = OpSLessThanEqual %bool %54 %56
-               OpBranch %59
-         %59 = OpLabel
-         %62 = OpPhi %bool %57 %50 %61 %60
-               OpSelectionMerge %63 None
-               OpBranchConditional %62 %64 %65
-         %64 = OpLabel
-               OpBranch %63
-         %65 = OpLabel
-               OpBranch %48
+         %59 = OpSLessThanEqual %bool %54 %56
+         %60 = OpLogicalAnd %bool %57 %59
+               OpSelectionMerge %61 None
+               OpBranchConditional %60 %62 %63
+         %62 = OpLabel
+               OpBranch %61
          %63 = OpLabel
-         %66 = OpLoad %int %i
-         %68 = OpAccessChain %_ptr_Private_int %data %66
-         %69 = OpLoad %int %68
-         %70 = OpLoad %int %j
-         %71 = OpAccessChain %_ptr_Private_int %data %70
-         %72 = OpLoad %int %71
-         %73 = OpSLessThan %bool %69 %72
-               OpSelectionMerge %74 None
-               OpBranchConditional %73 %75 %76
-         %75 = OpLabel
-         %77 = OpLoad %int %k
+               OpBranch %48
+         %61 = OpLabel
+         %64 = OpLoad %int %i
+         %66 = OpAccessChain %_ptr_Private_int %data %64
+         %67 = OpLoad %int %66
+         %68 = OpLoad %int %j
+         %69 = OpAccessChain %_ptr_Private_int %data %68
+         %70 = OpLoad %int %69
+         %71 = OpSLessThan %bool %67 %70
+               OpSelectionMerge %72 None
+               OpBranchConditional %71 %73 %74
+         %73 = OpLabel
+         %75 = OpLoad %int %k
+         %76 = OpIAdd %int %75 %int_1
+               OpStore %k %76
+         %77 = OpLoad %int %i
          %78 = OpIAdd %int %77 %int_1
-               OpStore %k %78
-         %79 = OpLoad %int %i
-         %80 = OpIAdd %int %79 %int_1
-               OpStore %i %80
-         %81 = OpAccessChain %_ptr_Private_int %data %79
-         %82 = OpLoad %int %81
-         %83 = OpAccessChain %_ptr_Private_int %temp %77
-               OpStore %83 %82
-               OpBranch %74
-         %76 = OpLabel
-         %84 = OpLoad %int %k
-         %85 = OpIAdd %int %84 %int_1
-               OpStore %k %85
-         %86 = OpLoad %int %j
-         %87 = OpIAdd %int %86 %int_1
-               OpStore %j %87
-         %88 = OpAccessChain %_ptr_Private_int %data %86
-         %89 = OpLoad %int %88
-         %90 = OpAccessChain %_ptr_Private_int %temp %84
-               OpStore %90 %89
-               OpBranch %74
+               OpStore %i %78
+         %79 = OpAccessChain %_ptr_Private_int %data %77
+         %80 = OpLoad %int %79
+         %81 = OpAccessChain %_ptr_Private_int %temp %75
+               OpStore %81 %80
+               OpBranch %72
          %74 = OpLabel
+         %82 = OpLoad %int %k
+         %83 = OpIAdd %int %82 %int_1
+               OpStore %k %83
+         %84 = OpLoad %int %j
+         %85 = OpIAdd %int %84 %int_1
+               OpStore %j %85
+         %86 = OpAccessChain %_ptr_Private_int %data %84
+         %87 = OpLoad %int %86
+         %88 = OpAccessChain %_ptr_Private_int %temp %82
+               OpStore %88 %87
+               OpBranch %72
+         %72 = OpLabel
                OpBranch %49
          %49 = OpLabel
                OpBranch %47
          %48 = OpLabel
+               OpBranch %89
+         %89 = OpLabel
+               OpLoopMerge %90 %91 None
+               OpBranch %92
+         %92 = OpLabel
+         %96 = OpFOrdLessThan %bool %float_256 %float_1
+         %93 = OpLogicalNot %bool %96
+               OpSelectionMerge %97 None
+               OpBranchConditional %93 %98 %99
+         %98 = OpLabel
+               OpBranch %97
+         %99 = OpLabel
+               OpBranch %91
+         %97 = OpLabel
+        %100 = OpLoad %int %i
+        %101 = OpLoad %int %i
+        %103 = OpLoad %int %mid
+        %105 = OpSLessThan %bool %100 %int_10
+        %106 = OpSLessThanEqual %bool %101 %103
+        %107 = OpLogicalAnd %bool %105 %106
+               OpSelectionMerge %108 None
+               OpBranchConditional %107 %109 %110
+        %109 = OpLabel
+               OpBranch %108
+        %110 = OpLabel
+               OpBranch %90
+        %108 = OpLabel
+        %111 = OpLoad %int %k
+        %112 = OpIAdd %int %111 %int_1
+               OpStore %k %112
+        %113 = OpLoad %int %i
+        %114 = OpIAdd %int %113 %int_1
+               OpStore %i %114
+        %115 = OpAccessChain %_ptr_Private_int %data %113
+        %116 = OpLoad %int %115
+        %117 = OpAccessChain %_ptr_Private_int %temp %111
+               OpStore %117 %116
                OpBranch %91
          %91 = OpLabel
-               OpLoopMerge %92 %93 None
-               OpBranch %94
-         %94 = OpLabel
-         %98 = OpFOrdLessThan %bool %float_256 %float_1
-         %95 = OpLogicalNot %bool %98
-               OpSelectionMerge %99 None
-               OpBranchConditional %95 %100 %101
-        %100 = OpLabel
-               OpBranch %99
-        %101 = OpLabel
-               OpBranch %93
-         %99 = OpLabel
-        %102 = OpLoad %int %i
-        %103 = OpLoad %int %i
-        %105 = OpLoad %int %mid
-        %107 = OpSLessThan %bool %102 %int_10
-               OpSelectionMerge %108 None
-               OpBranchConditional %107 %109 %108
-        %109 = OpLabel
-        %110 = OpSLessThanEqual %bool %103 %105
-               OpBranch %108
-        %108 = OpLabel
-        %111 = OpPhi %bool %107 %99 %110 %109
-               OpSelectionMerge %112 None
-               OpBranchConditional %111 %113 %114
-        %113 = OpLabel
-               OpBranch %112
-        %114 = OpLabel
-               OpBranch %92
-        %112 = OpLabel
-        %115 = OpLoad %int %k
-        %116 = OpIAdd %int %115 %int_1
-               OpStore %k %116
-        %117 = OpLoad %int %i
-        %118 = OpIAdd %int %117 %int_1
-               OpStore %i %118
-        %119 = OpAccessChain %_ptr_Private_int %data %117
-        %120 = OpLoad %int %119
-        %121 = OpAccessChain %_ptr_Private_int %temp %115
-               OpStore %121 %120
-               OpBranch %93
-         %93 = OpLabel
-               OpBranch %91
-         %92 = OpLabel
-        %123 = OpLoad %int %from
-               OpStore %i_1 %123
-               OpBranch %124
-        %124 = OpLabel
-               OpLoopMerge %125 %126 None
-               OpBranch %127
-        %127 = OpLabel
-        %128 = OpLoad %int %i_1
-        %130 = OpLoad %int %to
-        %131 = OpSLessThanEqual %bool %128 %130
-               OpSelectionMerge %132 None
-               OpBranchConditional %131 %133 %134
-        %133 = OpLabel
-               OpBranch %132
-        %134 = OpLabel
-               OpBranch %125
-        %132 = OpLabel
-        %135 = OpLoad %int %i_1
+               OpBranch %89
+         %90 = OpLabel
+        %119 = OpLoad %int %from
+               OpStore %i_1 %119
+               OpBranch %120
+        %120 = OpLabel
+               OpLoopMerge %121 %122 None
+               OpBranch %123
+        %123 = OpLabel
+        %124 = OpLoad %int %i_1
+        %126 = OpLoad %int %to
+        %127 = OpSLessThanEqual %bool %124 %126
+               OpSelectionMerge %128 None
+               OpBranchConditional %127 %129 %130
+        %129 = OpLabel
+               OpBranch %128
+        %130 = OpLabel
+               OpBranch %121
+        %128 = OpLabel
+        %131 = OpLoad %int %i_1
+        %132 = OpLoad %int %i_1
+        %133 = OpAccessChain %_ptr_Private_int %temp %132
+        %134 = OpLoad %int %133
+        %135 = OpAccessChain %_ptr_Private_int %data %131
+               OpStore %135 %134
+               OpBranch %122
+        %122 = OpLabel
         %136 = OpLoad %int %i_1
-        %137 = OpAccessChain %_ptr_Private_int %temp %136
-        %138 = OpLoad %int %137
-        %139 = OpAccessChain %_ptr_Private_int %data %135
-               OpStore %139 %138
-               OpBranch %126
-        %126 = OpLabel
-        %140 = OpLoad %int %i_1
-        %141 = OpIAdd %int %140 %int_1
-               OpStore %i_1 %141
-               OpBranch %124
-        %125 = OpLabel
+        %137 = OpIAdd %int %136 %int_1
+               OpStore %i_1 %137
+               OpBranch %120
+        %121 = OpLabel
                OpReturn
                OpFunctionEnd
- %mergeSort_ = OpFunction %void None %142
-        %144 = OpLabel
+ %mergeSort_ = OpFunction %void None %138
+        %140 = OpLabel
         %low = OpVariable %_ptr_Function_int Function %35
        %high = OpVariable %_ptr_Function_int Function %35
           %m = OpVariable %_ptr_Function_int Function %35
@@ -305,366 +293,356 @@ SKIP: FAILED
                OpStore %low %int_0
                OpStore %high %int_9
                OpStore %m %int_1
-               OpBranch %157
-        %157 = OpLabel
-               OpLoopMerge %158 %159 None
+               OpBranch %153
+        %153 = OpLabel
+               OpLoopMerge %154 %155 None
+               OpBranch %156
+        %156 = OpLabel
+        %157 = OpLoad %int %m
+        %158 = OpLoad %int %high
+        %159 = OpSLessThanEqual %bool %157 %158
+               OpSelectionMerge %160 None
+               OpBranchConditional %159 %161 %162
+        %161 = OpLabel
                OpBranch %160
+        %162 = OpLabel
+               OpBranch %154
         %160 = OpLabel
-        %161 = OpLoad %int %m
-        %162 = OpLoad %int %high
-        %163 = OpSLessThanEqual %bool %161 %162
-               OpSelectionMerge %164 None
-               OpBranchConditional %163 %165 %166
-        %165 = OpLabel
+        %163 = OpLoad %int %low
+               OpStore %i_2 %163
                OpBranch %164
-        %166 = OpLabel
-               OpBranch %158
         %164 = OpLabel
-        %167 = OpLoad %int %low
-               OpStore %i_2 %167
-               OpBranch %168
-        %168 = OpLabel
-               OpLoopMerge %169 %170 None
+               OpLoopMerge %165 %166 None
+               OpBranch %167
+        %167 = OpLabel
+        %168 = OpLoad %int %i_2
+        %169 = OpLoad %int %high
+        %170 = OpSLessThan %bool %168 %169
+               OpSelectionMerge %171 None
+               OpBranchConditional %170 %172 %173
+        %172 = OpLabel
                OpBranch %171
+        %173 = OpLabel
+               OpBranch %165
         %171 = OpLabel
-        %172 = OpLoad %int %i_2
-        %173 = OpLoad %int %high
-        %174 = OpSLessThan %bool %172 %173
-               OpSelectionMerge %175 None
-               OpBranchConditional %174 %176 %177
-        %176 = OpLabel
-               OpBranch %175
-        %177 = OpLabel
-               OpBranch %169
-        %175 = OpLabel
-        %178 = OpLoad %int %i_2
-               OpStore %from_1 %178
+        %174 = OpLoad %int %i_2
+               OpStore %from_1 %174
+        %175 = OpLoad %int %i_2
+        %176 = OpLoad %int %m
+        %177 = OpIAdd %int %175 %176
+        %178 = OpISub %int %177 %int_1
+               OpStore %mid_1 %178
         %179 = OpLoad %int %i_2
         %180 = OpLoad %int %m
-        %181 = OpIAdd %int %179 %180
-        %182 = OpISub %int %181 %int_1
-               OpStore %mid_1 %182
-        %183 = OpLoad %int %i_2
-        %184 = OpLoad %int %m
-        %185 = OpLoad %int %high
-        %189 = OpIMul %int %int_2 %184
-        %190 = OpIAdd %int %183 %189
-        %191 = OpISub %int %190 %int_1
-        %186 = OpExtInst %int %187 SMin %191 %185
-               OpStore %to_1 %186
-        %192 = OpLoad %int %from_1
-               OpStore %param %192
-        %193 = OpLoad %int %mid_1
-               OpStore %param_1 %193
-        %194 = OpLoad %int %to_1
-               OpStore %param_2 %194
-        %195 = OpFunctionCall %void %merge_i1_i1_i1_ %param %param_1 %param_2
-               OpBranch %170
-        %170 = OpLabel
+        %181 = OpLoad %int %high
+        %185 = OpIMul %int %int_2 %180
+        %186 = OpIAdd %int %179 %185
+        %187 = OpISub %int %186 %int_1
+        %182 = OpExtInst %int %183 SMin %187 %181
+               OpStore %to_1 %182
+        %188 = OpLoad %int %from_1
+               OpStore %param %188
+        %189 = OpLoad %int %mid_1
+               OpStore %param_1 %189
+        %190 = OpLoad %int %to_1
+               OpStore %param_2 %190
+        %191 = OpFunctionCall %void %merge_i1_i1_i1_ %param %param_1 %param_2
+               OpBranch %166
+        %166 = OpLabel
+        %195 = OpLoad %int %m
+        %196 = OpLoad %int %i_2
+        %197 = OpIMul %int %int_2 %195
+        %198 = OpIAdd %int %196 %197
+               OpStore %i_2 %198
+               OpBranch %164
+        %165 = OpLabel
+               OpBranch %155
+        %155 = OpLabel
         %199 = OpLoad %int %m
-        %200 = OpLoad %int %i_2
-        %201 = OpIMul %int %int_2 %199
-        %202 = OpIAdd %int %200 %201
-               OpStore %i_2 %202
-               OpBranch %168
-        %169 = OpLabel
-               OpBranch %159
-        %159 = OpLabel
-        %203 = OpLoad %int %m
-        %204 = OpIMul %int %int_2 %203
-               OpStore %m %204
-               OpBranch %157
-        %158 = OpLabel
+        %200 = OpIMul %int %int_2 %199
+               OpStore %m %200
+               OpBranch %153
+        %154 = OpLabel
                OpReturn
                OpFunctionEnd
-     %main_1 = OpFunction %void None %142
-        %206 = OpLabel
+     %main_1 = OpFunction %void None %138
+        %202 = OpLabel
         %i_3 = OpVariable %_ptr_Function_int Function %35
         %j_1 = OpVariable %_ptr_Function_int Function %35
-       %grey = OpVariable %_ptr_Function_float Function %211
-        %214 = OpAccessChain %_ptr_Uniform_float %x_28 %uint_0 %uint_0
-        %215 = OpLoad %float %214
-        %216 = OpConvertFToS %int %215
-               OpStore %i_3 %216
-               OpBranch %217
-        %217 = OpLabel
-               OpLoopMerge %218 %219 None
-               OpBranch %220
+       %grey = OpVariable %_ptr_Function_float Function %207
+        %210 = OpAccessChain %_ptr_Uniform_float %x_28 %uint_0 %uint_0
+        %211 = OpLoad %float %210
+        %212 = OpConvertFToS %int %211
+               OpStore %i_3 %212
+               OpBranch %213
+        %213 = OpLabel
+               OpLoopMerge %214 %215 None
+               OpBranch %216
+        %216 = OpLabel
+        %217 = OpLoad %int %i_3
+               OpSelectionMerge %218 None
+               OpSwitch %217 %219 9 %220 8 %221 7 %222 6 %223 5 %224 4 %225 3 %226 2 %227 1 %228 0 %229
         %220 = OpLabel
-        %221 = OpLoad %int %i_3
-               OpSelectionMerge %222 None
-               OpSwitch %221 %223 9 %224 8 %225 7 %226 6 %227 5 %228 4 %229 3 %230 2 %231 1 %232 0 %233
+        %230 = OpLoad %int %i_3
+        %231 = OpAccessChain %_ptr_Private_int %data %230
+               OpStore %231 %int_n5
+               OpBranch %218
+        %221 = OpLabel
+        %233 = OpLoad %int %i_3
+        %234 = OpAccessChain %_ptr_Private_int %data %233
+               OpStore %234 %int_n4
+               OpBranch %218
+        %222 = OpLabel
+        %236 = OpLoad %int %i_3
+        %237 = OpAccessChain %_ptr_Private_int %data %236
+               OpStore %237 %int_n3
+               OpBranch %218
+        %223 = OpLabel
+        %239 = OpLoad %int %i_3
+        %240 = OpAccessChain %_ptr_Private_int %data %239
+               OpStore %240 %int_n2
+               OpBranch %218
         %224 = OpLabel
-        %234 = OpLoad %int %i_3
-        %235 = OpAccessChain %_ptr_Private_int %data %234
-               OpStore %235 %int_n5
-               OpBranch %222
+        %242 = OpLoad %int %i_3
+        %243 = OpAccessChain %_ptr_Private_int %data %242
+               OpStore %243 %int_n1
+               OpBranch %218
         %225 = OpLabel
-        %237 = OpLoad %int %i_3
-        %238 = OpAccessChain %_ptr_Private_int %data %237
-               OpStore %238 %int_n4
-               OpBranch %222
+        %245 = OpLoad %int %i_3
+        %246 = OpAccessChain %_ptr_Private_int %data %245
+               OpStore %246 %int_0
+               OpBranch %218
         %226 = OpLabel
-        %240 = OpLoad %int %i_3
-        %241 = OpAccessChain %_ptr_Private_int %data %240
-               OpStore %241 %int_n3
-               OpBranch %222
+        %247 = OpLoad %int %i_3
+        %248 = OpAccessChain %_ptr_Private_int %data %247
+               OpStore %248 %int_1
+               OpBranch %218
         %227 = OpLabel
-        %243 = OpLoad %int %i_3
-        %244 = OpAccessChain %_ptr_Private_int %data %243
-               OpStore %244 %int_n2
-               OpBranch %222
-        %228 = OpLabel
-        %246 = OpLoad %int %i_3
-        %247 = OpAccessChain %_ptr_Private_int %data %246
-               OpStore %247 %int_n1
-               OpBranch %222
-        %229 = OpLabel
         %249 = OpLoad %int %i_3
         %250 = OpAccessChain %_ptr_Private_int %data %249
-               OpStore %250 %int_0
-               OpBranch %222
-        %230 = OpLabel
+               OpStore %250 %int_2
+               OpBranch %218
+        %228 = OpLabel
         %251 = OpLoad %int %i_3
         %252 = OpAccessChain %_ptr_Private_int %data %251
-               OpStore %252 %int_1
-               OpBranch %222
-        %231 = OpLabel
-        %253 = OpLoad %int %i_3
-        %254 = OpAccessChain %_ptr_Private_int %data %253
-               OpStore %254 %int_2
-               OpBranch %222
-        %232 = OpLabel
-        %255 = OpLoad %int %i_3
-        %256 = OpAccessChain %_ptr_Private_int %data %255
-               OpStore %256 %int_3
-               OpBranch %222
-        %233 = OpLabel
-        %258 = OpLoad %int %i_3
-        %259 = OpAccessChain %_ptr_Private_int %data %258
-               OpStore %259 %int_4
-               OpBranch %222
-        %223 = OpLabel
-               OpBranch %222
-        %222 = OpLabel
-        %261 = OpLoad %int %i_3
-        %262 = OpIAdd %int %261 %int_1
-               OpStore %i_3 %262
-               OpBranch %219
-        %219 = OpLabel
-        %263 = OpLoad %int %i_3
-        %264 = OpSLessThan %bool %263 %int_10
-               OpSelectionMerge %265 None
-               OpBranchConditional %264 %266 %267
-        %266 = OpLabel
-               OpBranch %265
-        %267 = OpLabel
+               OpStore %252 %int_3
                OpBranch %218
-        %265 = OpLabel
-               OpBranch %217
+        %229 = OpLabel
+        %254 = OpLoad %int %i_3
+        %255 = OpAccessChain %_ptr_Private_int %data %254
+               OpStore %255 %int_4
+               OpBranch %218
+        %219 = OpLabel
+               OpBranch %218
         %218 = OpLabel
+        %257 = OpLoad %int %i_3
+        %258 = OpIAdd %int %257 %int_1
+               OpStore %i_3 %258
+               OpBranch %215
+        %215 = OpLabel
+        %259 = OpLoad %int %i_3
+        %260 = OpSLessThan %bool %259 %int_10
+               OpBranchConditional %260 %213 %214
+        %214 = OpLabel
                OpStore %j_1 %int_0
-               OpBranch %268
+               OpBranch %261
+        %261 = OpLabel
+               OpLoopMerge %262 %263 None
+               OpBranch %264
+        %264 = OpLabel
+        %265 = OpLoad %int %j_1
+        %266 = OpSLessThan %bool %265 %int_10
+               OpSelectionMerge %267 None
+               OpBranchConditional %266 %268 %269
         %268 = OpLabel
-               OpLoopMerge %269 %270 None
-               OpBranch %271
-        %271 = OpLabel
-        %272 = OpLoad %int %j_1
-        %273 = OpSLessThan %bool %272 %int_10
-               OpSelectionMerge %274 None
-               OpBranchConditional %273 %275 %276
-        %275 = OpLabel
-               OpBranch %274
-        %276 = OpLabel
-               OpBranch %269
-        %274 = OpLabel
-        %277 = OpLoad %int %j_1
-        %278 = OpLoad %int %j_1
-        %279 = OpAccessChain %_ptr_Private_int %data %278
-        %280 = OpLoad %int %279
-        %281 = OpAccessChain %_ptr_Private_int %temp %277
-               OpStore %281 %280
-               OpBranch %270
-        %270 = OpLabel
-        %282 = OpLoad %int %j_1
-        %283 = OpIAdd %int %282 %int_1
-               OpStore %j_1 %283
-               OpBranch %268
+               OpBranch %267
         %269 = OpLabel
-        %284 = OpFunctionCall %void %mergeSort_
-        %287 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_1
-        %288 = OpLoad %float %287
-        %289 = OpConvertFToS %int %288
-        %291 = OpSLessThan %bool %289 %int_30
-               OpSelectionMerge %292 None
-               OpBranchConditional %291 %293 %294
-        %293 = OpLabel
-        %295 = OpAccessChain %_ptr_Private_int %data %int_0
-        %296 = OpLoad %int %295
-        %298 = OpConvertSToF %float %296
-        %300 = OpFDiv %float %298 %float_10
-        %301 = OpFAdd %float %float_0_5 %300
-               OpStore %grey %301
-               OpBranch %292
-        %294 = OpLabel
-        %302 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_1
-        %303 = OpLoad %float %302
-        %304 = OpConvertFToS %int %303
-        %306 = OpSLessThan %bool %304 %int_60
-               OpSelectionMerge %307 None
-               OpBranchConditional %306 %308 %309
-        %308 = OpLabel
-        %310 = OpAccessChain %_ptr_Private_int %data %int_1
-        %311 = OpLoad %int %310
-        %312 = OpConvertSToF %float %311
-        %313 = OpFDiv %float %312 %float_10
-        %314 = OpFAdd %float %float_0_5 %313
-               OpStore %grey %314
-               OpBranch %307
-        %309 = OpLabel
-        %315 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_1
-        %316 = OpLoad %float %315
-        %317 = OpConvertFToS %int %316
-        %319 = OpSLessThan %bool %317 %int_90
-               OpSelectionMerge %320 None
-               OpBranchConditional %319 %321 %322
-        %321 = OpLabel
-        %323 = OpAccessChain %_ptr_Private_int %data %int_2
-        %324 = OpLoad %int %323
-        %325 = OpConvertSToF %float %324
-        %326 = OpFDiv %float %325 %float_10
-        %327 = OpFAdd %float %float_0_5 %326
-               OpStore %grey %327
-               OpBranch %320
-        %322 = OpLabel
-        %328 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_1
-        %329 = OpLoad %float %328
-        %330 = OpConvertFToS %int %329
-        %332 = OpSLessThan %bool %330 %int_120
-               OpSelectionMerge %333 None
-               OpBranchConditional %332 %334 %335
-        %334 = OpLabel
-        %336 = OpAccessChain %_ptr_Private_int %data %int_3
-        %337 = OpLoad %int %336
-        %338 = OpConvertSToF %float %337
-        %339 = OpFDiv %float %338 %float_10
-        %340 = OpFAdd %float %float_0_5 %339
-               OpStore %grey %340
-               OpBranch %333
-        %335 = OpLabel
-        %341 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_1
-        %342 = OpLoad %float %341
-        %343 = OpConvertFToS %int %342
-        %345 = OpSLessThan %bool %343 %int_150
-               OpSelectionMerge %346 None
-               OpBranchConditional %345 %347 %348
-        %347 = OpLabel
+               OpBranch %262
+        %267 = OpLabel
+        %270 = OpLoad %int %j_1
+        %271 = OpLoad %int %j_1
+        %272 = OpAccessChain %_ptr_Private_int %data %271
+        %273 = OpLoad %int %272
+        %274 = OpAccessChain %_ptr_Private_int %temp %270
+               OpStore %274 %273
+               OpBranch %263
+        %263 = OpLabel
+        %275 = OpLoad %int %j_1
+        %276 = OpIAdd %int %275 %int_1
+               OpStore %j_1 %276
+               OpBranch %261
+        %262 = OpLabel
+        %277 = OpFunctionCall %void %mergeSort_
+        %280 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_1
+        %281 = OpLoad %float %280
+        %282 = OpConvertFToS %int %281
+        %284 = OpSLessThan %bool %282 %int_30
+               OpSelectionMerge %285 None
+               OpBranchConditional %284 %286 %287
+        %286 = OpLabel
+        %288 = OpAccessChain %_ptr_Private_int %data %int_0
+        %289 = OpLoad %int %288
+        %291 = OpConvertSToF %float %289
+        %293 = OpFDiv %float %291 %float_10
+        %294 = OpFAdd %float %float_0_5 %293
+               OpStore %grey %294
+               OpBranch %285
+        %287 = OpLabel
+        %295 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_1
+        %296 = OpLoad %float %295
+        %297 = OpConvertFToS %int %296
+        %299 = OpSLessThan %bool %297 %int_60
+               OpSelectionMerge %300 None
+               OpBranchConditional %299 %301 %302
+        %301 = OpLabel
+        %303 = OpAccessChain %_ptr_Private_int %data %int_1
+        %304 = OpLoad %int %303
+        %305 = OpConvertSToF %float %304
+        %306 = OpFDiv %float %305 %float_10
+        %307 = OpFAdd %float %float_0_5 %306
+               OpStore %grey %307
+               OpBranch %300
+        %302 = OpLabel
+        %308 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_1
+        %309 = OpLoad %float %308
+        %310 = OpConvertFToS %int %309
+        %312 = OpSLessThan %bool %310 %int_90
+               OpSelectionMerge %313 None
+               OpBranchConditional %312 %314 %315
+        %314 = OpLabel
+        %316 = OpAccessChain %_ptr_Private_int %data %int_2
+        %317 = OpLoad %int %316
+        %318 = OpConvertSToF %float %317
+        %319 = OpFDiv %float %318 %float_10
+        %320 = OpFAdd %float %float_0_5 %319
+               OpStore %grey %320
+               OpBranch %313
+        %315 = OpLabel
+        %321 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_1
+        %322 = OpLoad %float %321
+        %323 = OpConvertFToS %int %322
+        %325 = OpSLessThan %bool %323 %int_120
+               OpSelectionMerge %326 None
+               OpBranchConditional %325 %327 %328
+        %327 = OpLabel
+        %329 = OpAccessChain %_ptr_Private_int %data %int_3
+        %330 = OpLoad %int %329
+        %331 = OpConvertSToF %float %330
+        %332 = OpFDiv %float %331 %float_10
+        %333 = OpFAdd %float %float_0_5 %332
+               OpStore %grey %333
+               OpBranch %326
+        %328 = OpLabel
+        %334 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_1
+        %335 = OpLoad %float %334
+        %336 = OpConvertFToS %int %335
+        %338 = OpSLessThan %bool %336 %int_150
+               OpSelectionMerge %339 None
+               OpBranchConditional %338 %340 %341
+        %340 = OpLabel
                OpKill
+        %341 = OpLabel
+        %342 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_1
+        %343 = OpLoad %float %342
+        %344 = OpConvertFToS %int %343
+        %346 = OpSLessThan %bool %344 %int_180
+               OpSelectionMerge %347 None
+               OpBranchConditional %346 %348 %349
         %348 = OpLabel
-        %349 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_1
-        %350 = OpLoad %float %349
-        %351 = OpConvertFToS %int %350
-        %353 = OpSLessThan %bool %351 %int_180
-               OpSelectionMerge %354 None
-               OpBranchConditional %353 %355 %356
-        %355 = OpLabel
-        %358 = OpAccessChain %_ptr_Private_int %data %int_5
-        %359 = OpLoad %int %358
-        %360 = OpConvertSToF %float %359
-        %361 = OpFDiv %float %360 %float_10
-        %362 = OpFAdd %float %float_0_5 %361
-               OpStore %grey %362
-               OpBranch %354
-        %356 = OpLabel
-        %363 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_1
-        %364 = OpLoad %float %363
-        %365 = OpConvertFToS %int %364
-        %367 = OpSLessThan %bool %365 %int_210
-               OpSelectionMerge %368 None
-               OpBranchConditional %367 %369 %370
-        %369 = OpLabel
-        %372 = OpAccessChain %_ptr_Private_int %data %int_6
-        %373 = OpLoad %int %372
-        %374 = OpConvertSToF %float %373
-        %375 = OpFDiv %float %374 %float_10
-        %376 = OpFAdd %float %float_0_5 %375
-               OpStore %grey %376
-               OpBranch %368
-        %370 = OpLabel
-        %377 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_1
-        %378 = OpLoad %float %377
-        %379 = OpConvertFToS %int %378
-        %381 = OpSLessThan %bool %379 %int_240
-               OpSelectionMerge %382 None
-               OpBranchConditional %381 %383 %384
-        %383 = OpLabel
-        %386 = OpAccessChain %_ptr_Private_int %data %int_7
-        %387 = OpLoad %int %386
-        %388 = OpConvertSToF %float %387
-        %389 = OpFDiv %float %388 %float_10
-        %390 = OpFAdd %float %float_0_5 %389
-               OpStore %grey %390
-               OpBranch %382
-        %384 = OpLabel
-        %391 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_1
-        %392 = OpLoad %float %391
-        %393 = OpConvertFToS %int %392
-        %395 = OpSLessThan %bool %393 %int_270
-               OpSelectionMerge %396 None
-               OpBranchConditional %395 %397 %398
-        %397 = OpLabel
-        %400 = OpAccessChain %_ptr_Private_int %data %int_8
-        %401 = OpLoad %int %400
-        %402 = OpConvertSToF %float %401
-        %403 = OpFDiv %float %402 %float_10
-        %404 = OpFAdd %float %float_0_5 %403
-               OpStore %grey %404
-               OpBranch %396
-        %398 = OpLabel
+        %351 = OpAccessChain %_ptr_Private_int %data %int_5
+        %352 = OpLoad %int %351
+        %353 = OpConvertSToF %float %352
+        %354 = OpFDiv %float %353 %float_10
+        %355 = OpFAdd %float %float_0_5 %354
+               OpStore %grey %355
+               OpBranch %347
+        %349 = OpLabel
+        %356 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_1
+        %357 = OpLoad %float %356
+        %358 = OpConvertFToS %int %357
+        %360 = OpSLessThan %bool %358 %int_210
+               OpSelectionMerge %361 None
+               OpBranchConditional %360 %362 %363
+        %362 = OpLabel
+        %365 = OpAccessChain %_ptr_Private_int %data %int_6
+        %366 = OpLoad %int %365
+        %367 = OpConvertSToF %float %366
+        %368 = OpFDiv %float %367 %float_10
+        %369 = OpFAdd %float %float_0_5 %368
+               OpStore %grey %369
+               OpBranch %361
+        %363 = OpLabel
+        %370 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_1
+        %371 = OpLoad %float %370
+        %372 = OpConvertFToS %int %371
+        %374 = OpSLessThan %bool %372 %int_240
+               OpSelectionMerge %375 None
+               OpBranchConditional %374 %376 %377
+        %376 = OpLabel
+        %379 = OpAccessChain %_ptr_Private_int %data %int_7
+        %380 = OpLoad %int %379
+        %381 = OpConvertSToF %float %380
+        %382 = OpFDiv %float %381 %float_10
+        %383 = OpFAdd %float %float_0_5 %382
+               OpStore %grey %383
+               OpBranch %375
+        %377 = OpLabel
+        %384 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_1
+        %385 = OpLoad %float %384
+        %386 = OpConvertFToS %int %385
+        %388 = OpSLessThan %bool %386 %int_270
+               OpSelectionMerge %389 None
+               OpBranchConditional %388 %390 %391
+        %390 = OpLabel
+        %393 = OpAccessChain %_ptr_Private_int %data %int_8
+        %394 = OpLoad %int %393
+        %395 = OpConvertSToF %float %394
+        %396 = OpFDiv %float %395 %float_10
+        %397 = OpFAdd %float %float_0_5 %396
+               OpStore %grey %397
+               OpBranch %389
+        %391 = OpLabel
                OpKill
-        %396 = OpLabel
-               OpBranch %382
-        %382 = OpLabel
-               OpBranch %368
-        %368 = OpLabel
-               OpBranch %354
-        %354 = OpLabel
-               OpBranch %346
-        %346 = OpLabel
-               OpBranch %333
-        %333 = OpLabel
-               OpBranch %320
-        %320 = OpLabel
-               OpBranch %307
-        %307 = OpLabel
-               OpBranch %292
-        %292 = OpLabel
-        %405 = OpLoad %float %grey
-        %407 = OpCompositeConstruct %v3float %405 %405 %405
-        %408 = OpCompositeExtract %float %407 0
-        %409 = OpCompositeExtract %float %407 1
-        %410 = OpCompositeExtract %float %407 2
-        %411 = OpCompositeConstruct %v4float %408 %409 %410 %float_1
-               OpStore %x_GLF_color %411
+        %389 = OpLabel
+               OpBranch %375
+        %375 = OpLabel
+               OpBranch %361
+        %361 = OpLabel
+               OpBranch %347
+        %347 = OpLabel
+               OpBranch %339
+        %339 = OpLabel
+               OpBranch %326
+        %326 = OpLabel
+               OpBranch %313
+        %313 = OpLabel
+               OpBranch %300
+        %300 = OpLabel
+               OpBranch %285
+        %285 = OpLabel
+        %398 = OpLoad %float %grey
+        %400 = OpCompositeConstruct %v3float %398 %398 %398
+        %401 = OpCompositeExtract %float %400 0
+        %402 = OpCompositeExtract %float %400 1
+        %403 = OpCompositeExtract %float %400 2
+        %404 = OpCompositeConstruct %v4float %401 %402 %403 %float_1
+               OpStore %x_GLF_color %404
                OpReturn
                OpFunctionEnd
-%tint_symbol_3 = OpFunction %void None %412
+%tint_symbol_3 = OpFunction %void None %405
 %tint_symbol_1 = OpFunctionParameter %main_out
-        %416 = OpLabel
-        %417 = OpCompositeExtract %v4float %tint_symbol_1 0
-               OpStore %tint_symbol_2 %417
+        %409 = OpLabel
+        %410 = OpCompositeExtract %v4float %tint_symbol_1 0
+               OpStore %tint_symbol_2 %410
                OpReturn
                OpFunctionEnd
-       %main = OpFunction %void None %142
-        %419 = OpLabel
-        %420 = OpLoad %v4float %tint_symbol
-               OpStore %gl_FragCoord %420
-        %421 = OpFunctionCall %void %main_1
-        %423 = OpLoad %v4float %x_GLF_color
-        %424 = OpCompositeConstruct %main_out %423
-        %422 = OpFunctionCall %void %tint_symbol_3 %424
+       %main = OpFunction %void None %138
+        %412 = OpLabel
+        %413 = OpLoad %v4float %tint_symbol
+               OpStore %gl_FragCoord %413
+        %414 = OpFunctionCall %void %main_1
+        %416 = OpLoad %v4float %x_GLF_color
+        %417 = OpCompositeConstruct %main_out %416
+        %415 = OpFunctionCall %void %tint_symbol_3 %417
                OpReturn
                OpFunctionEnd
-1:1: The continue construct with the continue target 219[%219] is not post dominated by the back-edge block 265[%265]
-  %265 = OpLabel
-

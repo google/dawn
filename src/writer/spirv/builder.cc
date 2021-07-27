@@ -3447,6 +3447,49 @@ bool Builder::GenerateConditionalBlock(
 }
 
 bool Builder::GenerateIfStatement(ast::IfStatement* stmt) {
+  if (!continuing_stack_.empty() &&
+      stmt == continuing_stack_.back().last_statement->As<ast::IfStatement>()) {
+    const ContinuingInfo& ci = continuing_stack_.back();
+    // Match one of two patterns: the break-if and break-unless patterns.
+    //
+    // The break-if pattern:
+    //  continuing { ...
+    //    if (cond) { break; }
+    //  }
+    //
+    // The break-unless pattern:
+    //  continuing { ...
+    //    if (cond) {} else {break;}
+    //  }
+    auto is_just_a_break = [](ast::BlockStatement* block) {
+      return block && (block->size() == 1) &&
+             block->last()->Is<ast::BreakStatement>();
+    };
+    if (is_just_a_break(stmt->body()) && !stmt->has_else_statements()) {
+      // It's a break-if.
+      TINT_ASSERT(Writer, !backedge_stack_.empty());
+      const auto cond_id = GenerateExpression(stmt->condition());
+      backedge_stack_.back() =
+          Backedge(spv::Op::OpBranchConditional,
+                   {Operand::Int(cond_id), Operand::Int(ci.break_target_id),
+                    Operand::Int(ci.loop_header_id)});
+      return true;
+    } else if (stmt->body()->empty()) {
+      const auto& es = stmt->else_statements();
+      if (es.size() == 1 && !es.back()->HasCondition() &&
+          is_just_a_break(es.back()->body())) {
+        // It's a break-unless.
+        TINT_ASSERT(Writer, !backedge_stack_.empty());
+        const auto cond_id = GenerateExpression(stmt->condition());
+        backedge_stack_.back() =
+            Backedge(spv::Op::OpBranchConditional,
+                     {Operand::Int(cond_id), Operand::Int(ci.loop_header_id),
+                      Operand::Int(ci.break_target_id)});
+        return true;
+      }
+    }
+  }
+
   if (!GenerateConditionalBlock(stmt->condition(), stmt->body(), 0,
                                 stmt->else_statements())) {
     return false;
@@ -3603,6 +3646,11 @@ bool Builder::GenerateLoopStatement(ast::LoopStatement* stmt) {
   continue_stack_.push_back(continue_block_id);
   merge_stack_.push_back(merge_block_id);
 
+  // Usually, the backedge is a simple branch.  This will be modified if the
+  // backedge block in the continuing construct has an exiting edge.
+  backedge_stack_.emplace_back(spv::Op::OpBranch,
+                               OperandList{Operand::Int(loop_header_id)});
+
   if (!push_function_inst(spv::Op::OpBranch, {Operand::Int(body_block_id)})) {
     return false;
   }
@@ -3630,16 +3678,23 @@ bool Builder::GenerateLoopStatement(ast::LoopStatement* stmt) {
     return false;
   }
   if (stmt->has_continuing()) {
+    continuing_stack_.emplace_back(stmt->continuing()->last(), loop_header_id,
+                                   merge_block_id);
     if (!GenerateBlockStatementWithoutScoping(stmt->continuing())) {
       return false;
     }
+    continuing_stack_.pop_back();
   }
 
   scope_stack_.pop_scope();
 
-  if (!push_function_inst(spv::Op::OpBranch, {Operand::Int(loop_header_id)})) {
+  // Generate the backedge.
+  TINT_ASSERT(Writer, !backedge_stack_.empty());
+  const Backedge& backedge = backedge_stack_.back();
+  if (!push_function_inst(backedge.opcode, backedge.operands)) {
     return false;
   }
+  backedge_stack_.pop_back();
 
   merge_stack_.pop_back();
   continue_stack_.pop_back();
@@ -4259,6 +4314,26 @@ bool Builder::push_function_inst(spv::Op op, const OperandList& operands) {
   functions_.back().push_inst(op, operands);
   return true;
 }
+
+Builder::ContinuingInfo::ContinuingInfo(
+    const ast::Statement* the_last_statement,
+    uint32_t loop_id,
+    uint32_t break_id)
+    : last_statement(the_last_statement),
+      loop_header_id(loop_id),
+      break_target_id(break_id) {
+  TINT_ASSERT(Writer, last_statement != nullptr);
+  TINT_ASSERT(Writer, loop_header_id != 0u);
+  TINT_ASSERT(Writer, break_target_id != 0u);
+}
+
+Builder::Backedge::Backedge(spv::Op the_opcode, OperandList the_operands)
+    : opcode(the_opcode), operands(the_operands) {}
+
+Builder::Backedge::Backedge(const Builder::Backedge& other) = default;
+Builder::Backedge& Builder::Backedge::operator=(
+    const Builder::Backedge& other) = default;
+Builder::Backedge::~Backedge() = default;
 
 }  // namespace spirv
 }  // namespace writer

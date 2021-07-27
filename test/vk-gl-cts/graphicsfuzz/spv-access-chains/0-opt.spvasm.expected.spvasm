@@ -1,9 +1,7 @@
-SKIP: FAILED
-
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 509
+; Bound: 506
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -117,9 +115,9 @@ SKIP: FAILED
     %float_1 = OpConstant %float 1
         %489 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
     %float_0 = OpConstant %float 0
-        %495 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_1
+        %492 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_1
    %main_out = OpTypeStruct %v4float
-        %496 = OpTypeFunction %void %main_out
+        %493 = OpTypeFunction %void %main_out
      %main_1 = OpFunction %void None %22
          %25 = OpLabel
         %pos = OpVariable %_ptr_Function_v2float Function %28
@@ -741,35 +739,25 @@ SKIP: FAILED
                OpBranch %87
          %87 = OpLabel
         %490 = OpLoad %bool %canwalk
-               OpSelectionMerge %491 None
-               OpBranchConditional %490 %492 %493
-        %492 = OpLabel
-               OpBranch %491
-        %493 = OpLabel
-               OpBranch %86
-        %491 = OpLabel
-               OpBranch %85
+               OpBranchConditional %490 %85 %86
          %86 = OpLabel
-               OpStore %x_GLF_color %495
+               OpStore %x_GLF_color %492
                OpReturn
                OpFunctionEnd
-%tint_symbol_3 = OpFunction %void None %496
+%tint_symbol_3 = OpFunction %void None %493
 %tint_symbol_1 = OpFunctionParameter %main_out
-        %500 = OpLabel
-        %501 = OpCompositeExtract %v4float %tint_symbol_1 0
-               OpStore %tint_symbol_2 %501
+        %497 = OpLabel
+        %498 = OpCompositeExtract %v4float %tint_symbol_1 0
+               OpStore %tint_symbol_2 %498
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %22
-        %503 = OpLabel
-        %504 = OpLoad %v4float %tint_symbol
-               OpStore %gl_FragCoord %504
-        %505 = OpFunctionCall %void %main_1
-        %507 = OpLoad %v4float %x_GLF_color
-        %508 = OpCompositeConstruct %main_out %507
-        %506 = OpFunctionCall %void %tint_symbol_3 %508
+        %500 = OpLabel
+        %501 = OpLoad %v4float %tint_symbol
+               OpStore %gl_FragCoord %501
+        %502 = OpFunctionCall %void %main_1
+        %504 = OpLoad %v4float %x_GLF_color
+        %505 = OpCompositeConstruct %main_out %504
+        %503 = OpFunctionCall %void %tint_symbol_3 %505
                OpReturn
                OpFunctionEnd
-1:1: The continue construct with the continue target 87[%87] is not post dominated by the back-edge block 491[%491]
-  %491 = OpLabel
-

@@ -29,6 +29,7 @@
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/bool.h"
 #include "src/ast/bool_literal.h"
+#include "src/ast/break_statement.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
@@ -1781,6 +1782,17 @@ class ProgramBuilder {
     AST().AddFunction(func);
     return func;
   }
+
+  /// Creates an ast::BreakStatement
+  /// @param source the source information
+  /// @returns the break statement pointer
+  ast::BreakStatement* Break(const Source& source) {
+    return create<ast::BreakStatement>(source);
+  }
+
+  /// Creates an ast::BreakStatement
+  /// @returns the break statement pointer
+  ast::BreakStatement* Break() { return create<ast::BreakStatement>(); }
 
   /// Creates an ast::ReturnStatement with no return value
   /// @param source the source information

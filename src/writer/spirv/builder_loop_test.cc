@@ -219,6 +219,186 @@ OpBranch %1
 )");
 }
 
+TEST_F(BuilderTest, Loop_WithContinuing_BreakIf) {
+  // loop {
+  //   continuing {
+  //     if (true) { break; }
+  //   }
+  // }
+
+  auto* if_stmt = create<ast::IfStatement>(Expr(true), Block(Break()),
+                                           ast::ElseStatementList{});
+  auto* continuing = Block(if_stmt);
+  auto* loop = Loop(Block(), continuing);
+  WrapInFunction(loop);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+
+  EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
+%6 = OpConstantTrue %5
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpBranch %1
+%1 = OpLabel
+OpLoopMerge %2 %3 None
+OpBranch %4
+%4 = OpLabel
+OpBranch %3
+%3 = OpLabel
+OpBranchConditional %6 %2 %1
+%2 = OpLabel
+)");
+}
+
+TEST_F(BuilderTest, Loop_WithContinuing_BreakUnless) {
+  // loop {
+  //   continuing {
+  //     if (true) {} else { break; }
+  //   }
+  // }
+  auto* if_stmt = create<ast::IfStatement>(
+      Expr(true), Block(),
+      ast::ElseStatementList{Else(nullptr, Block(Break()))});
+  auto* continuing = Block(if_stmt);
+  auto* loop = Loop(Block(), continuing);
+  WrapInFunction(loop);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+
+  EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
+%6 = OpConstantTrue %5
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpBranch %1
+%1 = OpLabel
+OpLoopMerge %2 %3 None
+OpBranch %4
+%4 = OpLabel
+OpBranch %3
+%3 = OpLabel
+OpBranchConditional %6 %1 %2
+%2 = OpLabel
+)");
+}
+
+TEST_F(BuilderTest, Loop_WithContinuing_BreakIf_Nested) {
+  // Make sure the right backedge and break target are used.
+  // loop {
+  //   continuing {
+  //     loop {
+  //       continuing {
+  //         if (true) { break; }
+  //       }
+  //     }
+  //     if (true) { break; }
+  //   }
+  // }
+
+  auto* inner_if_stmt = create<ast::IfStatement>(Expr(true), Block(Break()),
+                                                 ast::ElseStatementList{});
+  auto* inner_continuing = Block(inner_if_stmt);
+  auto* inner_loop = Loop(Block(), inner_continuing);
+
+  auto* outer_if_stmt = create<ast::IfStatement>(Expr(true), Block(Break()),
+                                                 ast::ElseStatementList{});
+  auto* outer_continuing = Block(inner_loop, outer_if_stmt);
+  auto* outer_loop = Loop(Block(), outer_continuing);
+
+  WrapInFunction(outer_loop);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+
+  EXPECT_TRUE(b.GenerateLoopStatement(outer_loop)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%9 = OpTypeBool
+%10 = OpConstantTrue %9
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpBranch %1
+%1 = OpLabel
+OpLoopMerge %2 %3 None
+OpBranch %4
+%4 = OpLabel
+OpBranch %3
+%3 = OpLabel
+OpBranch %5
+%5 = OpLabel
+OpLoopMerge %6 %7 None
+OpBranch %8
+%8 = OpLabel
+OpBranch %7
+%7 = OpLabel
+OpBranchConditional %10 %6 %5
+%6 = OpLabel
+OpBranchConditional %10 %2 %1
+%2 = OpLabel
+)");
+}
+
+TEST_F(BuilderTest, Loop_WithContinuing_BreakUnless_Nested) {
+  // Make sure the right backedge and break target are used.
+  // loop {
+  //   continuing {
+  //     loop {
+  //       continuing {
+  //         if (true) {} else { break; }
+  //       }
+  //     }
+  //     if (true) {} else { break; }
+  //   }
+  // }
+
+  auto* inner_if_stmt = create<ast::IfStatement>(
+      Expr(true), Block(),
+      ast::ElseStatementList{Else(nullptr, Block(Break()))});
+  auto* inner_continuing = Block(inner_if_stmt);
+  auto* inner_loop = Loop(Block(), inner_continuing);
+
+  auto* outer_if_stmt = create<ast::IfStatement>(
+      Expr(true), Block(),
+      ast::ElseStatementList{Else(nullptr, Block(Break()))});
+  auto* outer_continuing = Block(inner_loop, outer_if_stmt);
+  auto* outer_loop = Loop(Block(), outer_continuing);
+
+  WrapInFunction(outer_loop);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+
+  EXPECT_TRUE(b.GenerateLoopStatement(outer_loop)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%9 = OpTypeBool
+%10 = OpConstantTrue %9
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpBranch %1
+%1 = OpLabel
+OpLoopMerge %2 %3 None
+OpBranch %4
+%4 = OpLabel
+OpBranch %3
+%3 = OpLabel
+OpBranch %5
+%5 = OpLabel
+OpLoopMerge %6 %7 None
+OpBranch %8
+%8 = OpLabel
+OpBranch %7
+%7 = OpLabel
+OpBranchConditional %10 %5 %6
+%6 = OpLabel
+OpBranchConditional %10 %1 %2
+%2 = OpLabel
+)");
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace writer

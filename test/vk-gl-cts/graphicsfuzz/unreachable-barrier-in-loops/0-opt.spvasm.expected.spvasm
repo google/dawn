@@ -1,9 +1,7 @@
-SKIP: FAILED
-
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 187
+; Bound: 184
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -279,44 +277,34 @@ SKIP: FAILED
          %78 = OpLabel
                OpBranch %70
          %70 = OpLabel
-               OpSelectionMerge %160 None
-               OpBranchConditional %false %161 %162
-        %161 = OpLabel
-               OpBranch %160
-        %162 = OpLabel
-               OpBranch %69
-        %160 = OpLabel
-               OpBranch %68
+               OpBranchConditional %false %68 %69
          %69 = OpLabel
-        %163 = OpAccessChain %_ptr_Function_float %value %uint_0
-        %164 = OpLoad %float %163
-        %166 = OpAccessChain %_ptr_StorageBuffer_int %x_15 %uint_0 %int_0
-        %167 = OpConvertFToS %int %164
-               OpStore %166 %167
-        %168 = OpAccessChain %_ptr_Function_float %value %uint_1
-        %169 = OpLoad %float %168
-        %170 = OpAccessChain %_ptr_StorageBuffer_int %x_15 %uint_0 %int_1
-        %171 = OpConvertFToS %int %169
-               OpStore %170 %171
-        %172 = OpAccessChain %_ptr_Function_float %value %uint_2
-        %173 = OpLoad %float %172
-        %175 = OpAccessChain %_ptr_StorageBuffer_int %x_15 %uint_0 %int_2
-        %176 = OpConvertFToS %int %173
-               OpStore %175 %176
-        %178 = OpAccessChain %_ptr_Function_float %value %uint_3
-        %179 = OpLoad %float %178
-        %181 = OpAccessChain %_ptr_StorageBuffer_int %x_15 %uint_0 %int_3
-        %182 = OpConvertFToS %int %179
-               OpStore %181 %182
+        %160 = OpAccessChain %_ptr_Function_float %value %uint_0
+        %161 = OpLoad %float %160
+        %163 = OpAccessChain %_ptr_StorageBuffer_int %x_15 %uint_0 %int_0
+        %164 = OpConvertFToS %int %161
+               OpStore %163 %164
+        %165 = OpAccessChain %_ptr_Function_float %value %uint_1
+        %166 = OpLoad %float %165
+        %167 = OpAccessChain %_ptr_StorageBuffer_int %x_15 %uint_0 %int_1
+        %168 = OpConvertFToS %int %166
+               OpStore %167 %168
+        %169 = OpAccessChain %_ptr_Function_float %value %uint_2
+        %170 = OpLoad %float %169
+        %172 = OpAccessChain %_ptr_StorageBuffer_int %x_15 %uint_0 %int_2
+        %173 = OpConvertFToS %int %170
+               OpStore %172 %173
+        %175 = OpAccessChain %_ptr_Function_float %value %uint_3
+        %176 = OpLoad %float %175
+        %178 = OpAccessChain %_ptr_StorageBuffer_int %x_15 %uint_0 %int_3
+        %179 = OpConvertFToS %int %176
+               OpStore %178 %179
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %21
-        %184 = OpLabel
-        %185 = OpLoad %v3uint %tint_symbol
-               OpStore %gl_GlobalInvocationID %185
-        %186 = OpFunctionCall %void %main_1
+        %181 = OpLabel
+        %182 = OpLoad %v3uint %tint_symbol
+               OpStore %gl_GlobalInvocationID %182
+        %183 = OpFunctionCall %void %main_1
                OpReturn
                OpFunctionEnd
-1:1: The continue construct with the continue target 70[%70] is not post dominated by the back-edge block 160[%160]
-  %160 = OpLabel
-

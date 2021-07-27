@@ -1,9 +1,7 @@
-SKIP: FAILED
-
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 79
+; Bound: 76
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -55,7 +53,7 @@ SKIP: FAILED
        %true = OpConstantTrue %bool
     %float_1 = OpConstant %float 1
    %main_out = OpTypeStruct %v4float
-         %67 = OpTypeFunction %void %main_out
+         %64 = OpTypeFunction %void %main_out
      %main_1 = OpFunction %void None %15
          %18 = OpLabel
           %a = OpVariable %_ptr_Function_int Function %21
@@ -86,57 +84,47 @@ SKIP: FAILED
          %25 = OpLabel
          %42 = OpLoad %int %a
          %43 = OpINotEqual %bool %42 %int_1
-               OpSelectionMerge %44 None
-               OpBranchConditional %43 %45 %46
-         %45 = OpLabel
-               OpBranch %44
-         %46 = OpLabel
-               OpBranch %24
-         %44 = OpLabel
-               OpBranch %23
+               OpBranchConditional %43 %23 %24
          %24 = OpLabel
-         %47 = OpLoad %int %a
-         %48 = OpIEqual %bool %47 %int_1
-               OpSelectionMerge %49 None
-               OpBranchConditional %48 %50 %51
-         %50 = OpLabel
-         %52 = OpAccessChain %_ptr_Uniform_int %x_6 %uint_0 %int_0
-         %53 = OpLoad %int %52
-         %54 = OpAccessChain %_ptr_Uniform_int %x_6 %uint_0 %int_0
-         %55 = OpLoad %int %54
-         %56 = OpAccessChain %_ptr_Uniform_int %x_6 %uint_0 %int_1
-         %57 = OpLoad %int %56
-         %59 = OpConvertSToF %float %53
-         %60 = OpConvertSToF %float %55
-         %61 = OpConvertSToF %float %57
-         %62 = OpCompositeConstruct %v4float %float_1 %59 %60 %61
-               OpStore %x_GLF_color %62
-               OpBranch %49
-         %51 = OpLabel
-         %63 = OpAccessChain %_ptr_Uniform_int %x_6 %uint_0 %int_0
-         %64 = OpLoad %int %63
-         %65 = OpConvertSToF %float %64
-         %66 = OpCompositeConstruct %v4float %65 %65 %65 %65
-               OpStore %x_GLF_color %66
-               OpBranch %49
-         %49 = OpLabel
+         %44 = OpLoad %int %a
+         %45 = OpIEqual %bool %44 %int_1
+               OpSelectionMerge %46 None
+               OpBranchConditional %45 %47 %48
+         %47 = OpLabel
+         %49 = OpAccessChain %_ptr_Uniform_int %x_6 %uint_0 %int_0
+         %50 = OpLoad %int %49
+         %51 = OpAccessChain %_ptr_Uniform_int %x_6 %uint_0 %int_0
+         %52 = OpLoad %int %51
+         %53 = OpAccessChain %_ptr_Uniform_int %x_6 %uint_0 %int_1
+         %54 = OpLoad %int %53
+         %56 = OpConvertSToF %float %50
+         %57 = OpConvertSToF %float %52
+         %58 = OpConvertSToF %float %54
+         %59 = OpCompositeConstruct %v4float %float_1 %56 %57 %58
+               OpStore %x_GLF_color %59
+               OpBranch %46
+         %48 = OpLabel
+         %60 = OpAccessChain %_ptr_Uniform_int %x_6 %uint_0 %int_0
+         %61 = OpLoad %int %60
+         %62 = OpConvertSToF %float %61
+         %63 = OpCompositeConstruct %v4float %62 %62 %62 %62
+               OpStore %x_GLF_color %63
+               OpBranch %46
+         %46 = OpLabel
                OpReturn
                OpFunctionEnd
-%tint_symbol_2 = OpFunction %void None %67
+%tint_symbol_2 = OpFunction %void None %64
 %tint_symbol = OpFunctionParameter %main_out
-         %71 = OpLabel
-         %72 = OpCompositeExtract %v4float %tint_symbol 0
-               OpStore %tint_symbol_1 %72
+         %68 = OpLabel
+         %69 = OpCompositeExtract %v4float %tint_symbol 0
+               OpStore %tint_symbol_1 %69
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %15
-         %74 = OpLabel
-         %75 = OpFunctionCall %void %main_1
-         %77 = OpLoad %v4float %x_GLF_color
-         %78 = OpCompositeConstruct %main_out %77
-         %76 = OpFunctionCall %void %tint_symbol_2 %78
+         %71 = OpLabel
+         %72 = OpFunctionCall %void %main_1
+         %74 = OpLoad %v4float %x_GLF_color
+         %75 = OpCompositeConstruct %main_out %74
+         %73 = OpFunctionCall %void %tint_symbol_2 %75
                OpReturn
                OpFunctionEnd
-1:1: The continue construct with the continue target 25[%25] is not post dominated by the back-edge block 44[%44]
-  %44 = OpLabel
-

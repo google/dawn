@@ -1,9 +1,7 @@
-SKIP: FAILED
-
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 134
+; Bound: 131
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -79,10 +77,10 @@ SKIP: FAILED
          %79 = OpConstantComposite %v4float %float_1 %float_1 %float_0 %float_1
          %90 = OpConstantComposite %v4float %float_0 %float_1 %float_0 %float_1
 %_ptr_Private_float = OpTypePointer Private %float
-        %119 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
-        %120 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_0
+        %116 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
+        %117 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_0
    %main_out = OpTypeStruct %v4float
-        %121 = OpTypeFunction %void %main_out
+        %118 = OpTypeFunction %void %main_out
      %main_1 = OpFunction %void None %15
          %18 = OpLabel
           %v = OpVariable %_ptr_Function_v2float Function %21
@@ -173,67 +171,57 @@ SKIP: FAILED
          %50 = OpLabel
          %93 = OpLoad %int %one
          %94 = OpSLessThan %bool %93 %int_0
-               OpSelectionMerge %95 None
-               OpBranchConditional %94 %96 %97
-         %96 = OpLabel
-               OpBranch %95
-         %97 = OpLabel
-               OpBranch %49
-         %95 = OpLabel
-               OpBranch %48
+               OpBranchConditional %94 %48 %49
          %49 = OpLabel
-        %101 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_1
-        %102 = OpLoad %float %101
-        %103 = OpFOrdGreaterThanEqual %bool %102 %float_0
-               OpSelectionMerge %104 None
-               OpBranchConditional %103 %105 %106
-        %105 = OpLabel
-        %107 = OpAccessChain %_ptr_Function_float %v %uint_1
-        %108 = OpLoad %float %107
-        %109 = OpFOrdEqual %bool %108 %float_1
-               OpStore %x_103_phi %109
-               OpSelectionMerge %110 None
-               OpBranchConditional %109 %111 %110
-        %111 = OpLabel
-        %112 = OpAccessChain %_ptr_Function_float %floats %int_1
-        %113 = OpLoad %float %112
-        %114 = OpFOrdEqual %bool %113 %float_1
-               OpStore %x_102 %114
-        %115 = OpLoad %bool %x_102
-               OpStore %x_103_phi %115
-               OpBranch %110
-        %110 = OpLabel
-        %116 = OpLoad %bool %x_103_phi
-               OpSelectionMerge %117 None
-               OpBranchConditional %116 %118 %117
-        %118 = OpLabel
-               OpStore %x_GLF_color %119
-               OpBranch %117
-        %117 = OpLabel
-               OpBranch %104
-        %106 = OpLabel
-               OpStore %x_GLF_color %120
-               OpBranch %104
-        %104 = OpLabel
+         %98 = OpAccessChain %_ptr_Private_float %gl_FragCoord %uint_1
+         %99 = OpLoad %float %98
+        %100 = OpFOrdGreaterThanEqual %bool %99 %float_0
+               OpSelectionMerge %101 None
+               OpBranchConditional %100 %102 %103
+        %102 = OpLabel
+        %104 = OpAccessChain %_ptr_Function_float %v %uint_1
+        %105 = OpLoad %float %104
+        %106 = OpFOrdEqual %bool %105 %float_1
+               OpStore %x_103_phi %106
+               OpSelectionMerge %107 None
+               OpBranchConditional %106 %108 %107
+        %108 = OpLabel
+        %109 = OpAccessChain %_ptr_Function_float %floats %int_1
+        %110 = OpLoad %float %109
+        %111 = OpFOrdEqual %bool %110 %float_1
+               OpStore %x_102 %111
+        %112 = OpLoad %bool %x_102
+               OpStore %x_103_phi %112
+               OpBranch %107
+        %107 = OpLabel
+        %113 = OpLoad %bool %x_103_phi
+               OpSelectionMerge %114 None
+               OpBranchConditional %113 %115 %114
+        %115 = OpLabel
+               OpStore %x_GLF_color %116
+               OpBranch %114
+        %114 = OpLabel
+               OpBranch %101
+        %103 = OpLabel
+               OpStore %x_GLF_color %117
+               OpBranch %101
+        %101 = OpLabel
                OpReturn
                OpFunctionEnd
-%tint_symbol_3 = OpFunction %void None %121
+%tint_symbol_3 = OpFunction %void None %118
 %tint_symbol_1 = OpFunctionParameter %main_out
-        %125 = OpLabel
-        %126 = OpCompositeExtract %v4float %tint_symbol_1 0
-               OpStore %tint_symbol_2 %126
+        %122 = OpLabel
+        %123 = OpCompositeExtract %v4float %tint_symbol_1 0
+               OpStore %tint_symbol_2 %123
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %15
-        %128 = OpLabel
-        %129 = OpLoad %v4float %tint_symbol
-               OpStore %gl_FragCoord %129
-        %130 = OpFunctionCall %void %main_1
-        %132 = OpLoad %v4float %x_GLF_color
-        %133 = OpCompositeConstruct %main_out %132
-        %131 = OpFunctionCall %void %tint_symbol_3 %133
+        %125 = OpLabel
+        %126 = OpLoad %v4float %tint_symbol
+               OpStore %gl_FragCoord %126
+        %127 = OpFunctionCall %void %main_1
+        %129 = OpLoad %v4float %x_GLF_color
+        %130 = OpCompositeConstruct %main_out %129
+        %128 = OpFunctionCall %void %tint_symbol_3 %130
                OpReturn
                OpFunctionEnd
-1:1: The continue construct with the continue target 50[%50] is not post dominated by the back-edge block 95[%95]
-  %95 = OpLabel
-

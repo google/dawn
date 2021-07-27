@@ -1,9 +1,7 @@
-SKIP: FAILED
-
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 88
+; Bound: 85
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -58,10 +56,10 @@ SKIP: FAILED
      %int_n2 = OpConstant %int -2
     %float_1 = OpConstant %float 1
     %float_0 = OpConstant %float 0
-         %74 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
-         %75 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_1
+         %71 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
+         %72 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_1
    %main_out = OpTypeStruct %v4float
-         %76 = OpTypeFunction %void %main_out
+         %73 = OpTypeFunction %void %main_out
      %main_1 = OpFunction %void None %12
          %15 = OpLabel
           %i = OpVariable %_ptr_Function_int Function %19
@@ -101,60 +99,50 @@ SKIP: FAILED
          %32 = OpLabel
          %48 = OpLoad %int %i
          %50 = OpSGreaterThan %bool %48 %int_200
-               OpSelectionMerge %52 None
-               OpBranchConditional %50 %53 %54
-         %53 = OpLabel
-               OpBranch %52
-         %54 = OpLabel
-               OpBranch %31
-         %52 = OpLabel
-               OpBranch %30
+               OpBranchConditional %50 %30 %31
          %31 = OpLabel
-         %55 = OpLoad %int %i
-         %57 = OpSGreaterThan %bool %55 %int_100
-               OpSelectionMerge %58 None
-               OpBranchConditional %57 %59 %58
-         %59 = OpLabel
-         %60 = OpLoad %int %i
-         %62 = OpISub %int %60 %int_2
-               OpStore %i %62
+         %52 = OpLoad %int %i
+         %54 = OpSGreaterThan %bool %52 %int_100
+               OpSelectionMerge %55 None
+               OpBranchConditional %54 %56 %55
+         %56 = OpLabel
+         %57 = OpLoad %int %i
+         %59 = OpISub %int %57 %int_2
+               OpStore %i %59
                OpBranch %27
-         %58 = OpLabel
+         %55 = OpLabel
                OpBranch %28
          %28 = OpLabel
-         %63 = OpLoad %int %i
-         %65 = OpISub %int %63 %int_3
-               OpStore %i %65
+         %60 = OpLoad %int %i
+         %62 = OpISub %int %60 %int_3
+               OpStore %i %62
                OpBranch %27
          %27 = OpLabel
-         %66 = OpLoad %int %i
-         %68 = OpIEqual %bool %66 %int_n2
-               OpSelectionMerge %69 None
-               OpBranchConditional %68 %70 %71
-         %70 = OpLabel
-               OpStore %x_GLF_color %74
-               OpBranch %69
-         %71 = OpLabel
-               OpStore %x_GLF_color %75
-               OpBranch %69
-         %69 = OpLabel
+         %63 = OpLoad %int %i
+         %65 = OpIEqual %bool %63 %int_n2
+               OpSelectionMerge %66 None
+               OpBranchConditional %65 %67 %68
+         %67 = OpLabel
+               OpStore %x_GLF_color %71
+               OpBranch %66
+         %68 = OpLabel
+               OpStore %x_GLF_color %72
+               OpBranch %66
+         %66 = OpLabel
                OpReturn
                OpFunctionEnd
-%tint_symbol_2 = OpFunction %void None %76
+%tint_symbol_2 = OpFunction %void None %73
 %tint_symbol = OpFunctionParameter %main_out
-         %80 = OpLabel
-         %81 = OpCompositeExtract %v4float %tint_symbol 0
-               OpStore %tint_symbol_1 %81
+         %77 = OpLabel
+         %78 = OpCompositeExtract %v4float %tint_symbol 0
+               OpStore %tint_symbol_1 %78
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %12
-         %83 = OpLabel
-         %84 = OpFunctionCall %void %main_1
-         %86 = OpLoad %v4float %x_GLF_color
-         %87 = OpCompositeConstruct %main_out %86
-         %85 = OpFunctionCall %void %tint_symbol_2 %87
+         %80 = OpLabel
+         %81 = OpFunctionCall %void %main_1
+         %83 = OpLoad %v4float %x_GLF_color
+         %84 = OpCompositeConstruct %main_out %83
+         %82 = OpFunctionCall %void %tint_symbol_2 %84
                OpReturn
                OpFunctionEnd
-1:1: The continue construct with the continue target 32[%32] is not post dominated by the back-edge block 52[%52]
-  %52 = OpLabel
-
