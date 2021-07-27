@@ -426,6 +426,8 @@ libtint_source_set("libtint_core_all_src") {
     "transform/canonicalize_entry_point_io.h",
     "transform/decompose_memory_access.cc",
     "transform/decompose_memory_access.h",
+    "transform/decompose_strided_matrix.cc",
+    "transform/decompose_strided_matrix.h",
     "transform/external_texture_transform.cc",
     "transform/external_texture_transform.h",
     "transform/first_index_offset.cc",

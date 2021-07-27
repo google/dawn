@@ -3937,13 +3937,20 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
     auto has_position = false;
     ast::InvariantDecoration* invariant_attribute = nullptr;
     for (auto* deco : member->Declaration()->decorations()) {
-      if (!(deco->Is<ast::BuiltinDecoration>() ||
-            deco->Is<ast::InterpolateDecoration>() ||
-            deco->Is<ast::InvariantDecoration>() ||
-            deco->Is<ast::LocationDecoration>() ||
-            deco->Is<ast::StructMemberOffsetDecoration>() ||
-            deco->Is<ast::StructMemberSizeDecoration>() ||
-            deco->Is<ast::StructMemberAlignDecoration>())) {
+      if (!deco->IsAnyOf<ast::BuiltinDecoration,             //
+                         ast::InternalDecoration,            //
+                         ast::InterpolateDecoration,         //
+                         ast::InvariantDecoration,           //
+                         ast::LocationDecoration,            //
+                         ast::StructMemberOffsetDecoration,  //
+                         ast::StructMemberSizeDecoration,    //
+                         ast::StructMemberAlignDecoration>()) {
+        if (deco->Is<ast::StrideDecoration>() &&
+            IsValidationDisabled(
+                member->Declaration()->decorations(),
+                ast::DisabledValidation::kIgnoreStrideDecoration)) {
+          continue;
+        }
         AddError("decoration is not valid for structure members",
                  deco->source());
         return false;

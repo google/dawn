@@ -32,7 +32,7 @@ void InternalDecoration::to_str(const sem::Info&,
                                 std::ostream& out,
                                 size_t indent) const {
   make_indent(out, indent);
-  out << "tint_internal(" << InternalName() << ")" << std::endl;
+  out << "tint_internal(" << InternalName() << ")";
 }
 
 }  // namespace ast

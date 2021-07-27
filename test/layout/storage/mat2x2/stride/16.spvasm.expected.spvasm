@@ -1,0 +1,70 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 39
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %f "f"
+               OpExecutionMode %f LocalSize 1 1 1
+               OpName %SSBO "SSBO"
+               OpMemberName %SSBO 0 "m"
+               OpName %ssbo "ssbo"
+               OpName %arr_to_mat2x2_stride_16 "arr_to_mat2x2_stride_16"
+               OpName %arr "arr"
+               OpName %mat2x2_stride_16_to_arr "mat2x2_stride_16_to_arr"
+               OpName %mat "mat"
+               OpName %f_1 "f_1"
+               OpName %f "f"
+               OpDecorate %SSBO Block
+               OpMemberDecorate %SSBO 0 Offset 0
+               OpDecorate %_arr_v2float_uint_2 ArrayStride 16
+               OpDecorate %ssbo DescriptorSet 0
+               OpDecorate %ssbo Binding 0
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+       %uint = OpTypeInt 32 0
+     %uint_2 = OpConstant %uint 2
+%_arr_v2float_uint_2 = OpTypeArray %v2float %uint_2
+       %SSBO = OpTypeStruct %_arr_v2float_uint_2
+%_ptr_StorageBuffer_SSBO = OpTypePointer StorageBuffer %SSBO
+       %ssbo = OpVariable %_ptr_StorageBuffer_SSBO StorageBuffer
+%mat2v2float = OpTypeMatrix %v2float 2
+          %9 = OpTypeFunction %mat2v2float %_arr_v2float_uint_2
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+         %19 = OpTypeFunction %_arr_v2float_uint_2 %mat2v2float
+       %void = OpTypeVoid
+         %26 = OpTypeFunction %void
+%_ptr_StorageBuffer__arr_v2float_uint_2 = OpTypePointer StorageBuffer %_arr_v2float_uint_2
+%arr_to_mat2x2_stride_16 = OpFunction %mat2v2float None %9
+        %arr = OpFunctionParameter %_arr_v2float_uint_2
+         %13 = OpLabel
+         %15 = OpCompositeExtract %v2float %arr 0
+         %17 = OpCompositeExtract %v2float %arr 1
+         %18 = OpCompositeConstruct %mat2v2float %15 %17
+               OpReturnValue %18
+               OpFunctionEnd
+%mat2x2_stride_16_to_arr = OpFunction %_arr_v2float_uint_2 None %19
+        %mat = OpFunctionParameter %mat2v2float
+         %22 = OpLabel
+         %23 = OpCompositeExtract %v2float %mat 0
+         %24 = OpCompositeExtract %v2float %mat 1
+         %25 = OpCompositeConstruct %_arr_v2float_uint_2 %23 %24
+               OpReturnValue %25
+               OpFunctionEnd
+        %f_1 = OpFunction %void None %26
+         %29 = OpLabel
+         %32 = OpAccessChain %_ptr_StorageBuffer__arr_v2float_uint_2 %ssbo %uint_0
+         %33 = OpLoad %_arr_v2float_uint_2 %32
+         %30 = OpFunctionCall %mat2v2float %arr_to_mat2x2_stride_16 %33
+         %34 = OpAccessChain %_ptr_StorageBuffer__arr_v2float_uint_2 %ssbo %uint_0
+         %35 = OpFunctionCall %_arr_v2float_uint_2 %mat2x2_stride_16_to_arr %30
+               OpStore %34 %35
+               OpReturn
+               OpFunctionEnd
+          %f = OpFunction %void None %26
+         %37 = OpLabel
+         %38 = OpFunctionCall %void %f_1
+               OpReturn
+               OpFunctionEnd

@@ -40,6 +40,9 @@ enum class DisabledValidation {
   /// When applied to a function parameter, the validator will not
   /// check if parameter type is constructible
   kIgnoreConstructibleFunctionParameter,
+  /// When applied to a member decoration, a stride decoration may be applied to
+  /// non-array types.
+  kIgnoreStrideDecoration,
 };
 
 /// An internal decoration used to tell the validator to ignore specific

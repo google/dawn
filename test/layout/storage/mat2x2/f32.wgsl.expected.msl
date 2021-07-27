@@ -1,0 +1,13 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct SSBO {
+  /* 0x0000 */ float2x2 m;
+};
+
+kernel void f(device SSBO& ssbo [[buffer(0)]]) {
+  float2x2 const v = ssbo.m;
+  ssbo.m = v;
+  return;
+}
+

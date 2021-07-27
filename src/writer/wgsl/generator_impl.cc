@@ -696,6 +696,8 @@ bool GeneratorImpl::EmitDecorations(std::ostream& out,
       out << "size(" << size->size() << ")";
     } else if (auto* align = deco->As<ast::StructMemberAlignDecoration>()) {
       out << "align(" << align->align() << ")";
+    } else if (auto* stride = deco->As<ast::StrideDecoration>()) {
+      out << "stride(" << stride->stride() << ")";
     } else if (auto* internal = deco->As<ast::InternalDecoration>()) {
       out << "internal(" << internal->InternalName() << ")";
     } else {

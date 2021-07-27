@@ -184,18 +184,21 @@ class ParserImplWrapperForTest {
     return impl_.GetDecorationsForMember(id, member_index);
   }
 
-  /// Converts a SPIR-V struct member decoration. If the decoration is
-  /// recognized but deliberately dropped, then returns nullptr without a
-  /// diagnostic. On failure, emits a diagnostic and returns nullptr.
+  /// Converts a SPIR-V struct member decoration into a number of AST
+  /// decorations. If the decoration is recognized but deliberately dropped,
+  /// then returns an empty list without a diagnostic. On failure, emits a
+  /// diagnostic and returns an empty list.
   /// @param struct_type_id the ID of the struct type
   /// @param member_index the index of the member
+  /// @param member_ty the type of the member
   /// @param decoration an encoded SPIR-V Decoration
-  /// @returns the corresponding ast::StructuMemberDecoration
-  ast::Decoration* ConvertMemberDecoration(uint32_t struct_type_id,
-                                           uint32_t member_index,
-                                           const Decoration& decoration) {
+  /// @returns the AST decorations
+  ast::DecorationList ConvertMemberDecoration(uint32_t struct_type_id,
+                                              uint32_t member_index,
+                                              const Type* member_ty,
+                                              const Decoration& decoration) {
     return impl_.ConvertMemberDecoration(struct_type_id, member_index,
-                                         decoration);
+                                         member_ty, decoration);
   }
 
   /// For a SPIR-V ID that might define a sampler, image, or sampled image

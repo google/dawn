@@ -59,6 +59,16 @@ class TransformTestBase : public BASE {
     // Keep this pointer alive after Transform() returns
     files_.emplace_back(std::move(file));
 
+    return Run<TRANSFORMS...>(std::move(program), data);
+  }
+
+  /// Transforms and returns program `program`, transformed using a transform of
+  /// type `TRANSFORM`.
+  /// @param program the input Program
+  /// @param data the optional DataMap to pass to Transform::Run()
+  /// @return the transformed output
+  template <typename... TRANSFORMS>
+  Output Run(Program&& program, const DataMap& data = {}) {
     if (!program.IsValid()) {
       return Output(std::move(program));
     }

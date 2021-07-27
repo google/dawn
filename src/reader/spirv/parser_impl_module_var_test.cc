@@ -2015,7 +2015,7 @@ TEST_F(SpvModuleScopeVarParserTest, ColMajorDecoration_Dropped) {
 })")) << module_str;
 }
 
-TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Dropped) {
+TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Natural_Dropped) {
   auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpName %myvar "myvar"
      OpDecorate %myvar DescriptorSet 0
@@ -2040,6 +2040,45 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Dropped) {
   Struct S {
     [[block]]
     StructMember{[[ offset 0 ]] field0: __mat_2_3__f32}
+  }
+  Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
+    myvar
+    storage
+    read_write
+    __type_name_S
+  }
+})")) << module_str;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration) {
+  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+     OpName %myvar "myvar"
+     OpDecorate %myvar DescriptorSet 0
+     OpDecorate %myvar Binding 0
+     OpDecorate %s Block
+     OpMemberDecorate %s 0 MatrixStride 64
+     OpMemberDecorate %s 0 Offset 0
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+     %float = OpTypeFloat 32
+     %v2float = OpTypeVector %float 2
+     %m3v2float = OpTypeMatrix %v2float 3
+
+     %s = OpTypeStruct %m3v2float
+     %ptr_sb_s = OpTypePointer StorageBuffer %s
+     %myvar = OpVariable %ptr_sb_s StorageBuffer
+  )" + MainBody()));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->program().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  Struct S {
+    [[block]]
+    StructMember{[[ stride 64 tint_internal(disable_validation__ignore_stride) offset 0 ]] field0: __mat_2_3__f32}
   }
   Variable{
     Decorations{
@@ -2620,7 +2659,8 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_AccessChain) {
     private
     undefined
     __i32
-  })")) <<module_str;
+  })"))
+      << module_str;
 
   // Correct creation of value
   EXPECT_THAT(module_str, HasSubstr(R"(
@@ -3006,7 +3046,8 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_Direct) {
     private
     undefined
     __array__u32_1
-  })")) <<module_str;
+  })"))
+      << module_str;
 
   // Correct creation of value
   EXPECT_THAT(module_str, HasSubstr(R"(
@@ -3149,7 +3190,8 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_AccessChain) {
     private
     undefined
     __array__u32_1
-  })")) <<module_str;
+  })"))
+      << module_str;
 
   // Correct creation of value
   EXPECT_THAT(module_str, HasSubstr(R"(
@@ -5542,7 +5584,6 @@ INSTANTIATE_TEST_SUITE_P(
 // When the AST supports NumWorkgroups, add these cases:
 //        {"NumWorkgroups", "%uint", "num_workgroups"}
 //        {"NumWorkgroups", "%int", "num_workgroups"}
-
 
 TEST_F(SpvModuleScopeVarParserTest, RegisterInputOutputVars) {
   const std::string assembly =

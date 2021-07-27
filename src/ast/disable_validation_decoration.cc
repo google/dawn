@@ -40,6 +40,8 @@ std::string DisableValidationDecoration::InternalName() const {
       return "disable_validation__entry_point_parameter";
     case DisabledValidation::kIgnoreConstructibleFunctionParameter:
       return "disable_validation__ignore_constructible_function_parameter";
+    case DisabledValidation::kIgnoreStrideDecoration:
+      return "disable_validation__ignore_stride";
   }
   return "<invalid>";
 }

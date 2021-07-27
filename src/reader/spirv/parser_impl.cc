@@ -21,6 +21,7 @@
 
 #include "source/opt/build_module.h"
 #include "src/ast/bitcast_expression.h"
+#include "src/ast/disable_validation_decoration.h"
 #include "src/ast/interpolate_decoration.h"
 #include "src/ast/override_decoration.h"
 #include "src/ast/struct_block_decoration.h"
@@ -439,13 +440,14 @@ std::string ParserImpl::ShowType(uint32_t type_id) {
   return "SPIR-V type " + std::to_string(type_id);
 }
 
-ast::Decoration* ParserImpl::ConvertMemberDecoration(
+ast::DecorationList ParserImpl::ConvertMemberDecoration(
     uint32_t struct_type_id,
     uint32_t member_index,
+    const Type* member_ty,
     const Decoration& decoration) {
   if (decoration.empty()) {
     Fail() << "malformed SPIR-V decoration: it's empty";
-    return nullptr;
+    return {};
   }
   switch (decoration[0]) {
     case SpvDecorationOffset:
@@ -454,38 +456,49 @@ ast::Decoration* ParserImpl::ConvertMemberDecoration(
             << "malformed Offset decoration: expected 1 literal operand, has "
             << decoration.size() - 1 << ": member " << member_index << " of "
             << ShowType(struct_type_id);
-        return nullptr;
+        return {};
       }
-      return create<ast::StructMemberOffsetDecoration>(Source{}, decoration[1]);
+      return {
+          create<ast::StructMemberOffsetDecoration>(Source{}, decoration[1]),
+      };
     case SpvDecorationNonReadable:
       // WGSL doesn't have a member decoration for this.  Silently drop it.
-      return nullptr;
+      return {};
     case SpvDecorationNonWritable:
       // WGSL doesn't have a member decoration for this.
-      return nullptr;
+      return {};
     case SpvDecorationColMajor:
       // WGSL only supports column major matrices.
-      return nullptr;
+      return {};
     case SpvDecorationRelaxedPrecision:
       // WGSL doesn't support relaxed precision.
-      return nullptr;
+      return {};
     case SpvDecorationRowMajor:
       Fail() << "WGSL does not support row-major matrices: can't "
                 "translate member "
              << member_index << " of " << ShowType(struct_type_id);
-      return nullptr;
+      return {};
     case SpvDecorationMatrixStride: {
       if (decoration.size() != 2) {
         Fail() << "malformed MatrixStride decoration: expected 1 literal "
                   "operand, has "
                << decoration.size() - 1 << ": member " << member_index << " of "
                << ShowType(struct_type_id);
-        return nullptr;
+        return {};
       }
-      // TODO(dneto): Fail if the matrix stride is not allocation size of the
-      // column vector of the underlying matrix.  This would need to unpack
-      // any levels of array-ness.
-      return nullptr;
+      uint32_t stride = decoration[1];
+      uint32_t natural_stride = 0;
+      if (auto* mat = member_ty->As<Matrix>()) {
+        natural_stride = (mat->rows == 2) ? 8 : 16;
+      }
+      if (stride == natural_stride) {
+        return {};
+      }
+      return {
+          create<ast::StrideDecoration>(Source{}, decoration[1]),
+          builder_.ASTNodes().Create<ast::DisableValidationDecoration>(
+              builder_.ID(), ast::DisabledValidation::kIgnoreStrideDecoration),
+      };
     }
     default:
       // TODO(dneto): Support the remaining member decorations.
@@ -493,7 +506,7 @@ ast::Decoration* ParserImpl::ConvertMemberDecoration(
   }
   Fail() << "unhandled member decoration: " << decoration[0] << " on member "
          << member_index << " of " << ShowType(struct_type_id);
-  return nullptr;
+  return {};
 }
 
 bool ParserImpl::BuildInternalModule() {
@@ -1126,13 +1139,13 @@ const Type* ParserImpl::ConvertType(
         // the members are non-writable.
         is_non_writable = true;
       } else {
-        auto* ast_member_decoration =
-            ConvertMemberDecoration(type_id, member_index, decoration);
+        auto decos = ConvertMemberDecoration(type_id, member_index,
+                                             ast_member_ty, decoration);
+        for (auto* deco : decos) {
+          ast_member_decorations.emplace_back(deco);
+        }
         if (!success_) {
           return nullptr;
-        }
-        if (ast_member_decoration) {
-          ast_member_decorations.push_back(ast_member_decoration);
         }
       }
     }
