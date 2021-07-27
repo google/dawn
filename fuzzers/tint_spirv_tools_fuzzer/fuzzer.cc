@@ -25,6 +25,7 @@
 #include "fuzzers/tint_spirv_tools_fuzzer/spirv_opt_mutator.h"
 #include "fuzzers/tint_spirv_tools_fuzzer/spirv_reduce_mutator.h"
 #include "fuzzers/tint_spirv_tools_fuzzer/util.h"
+#include "spirv-tools/libspirv.hpp"
 
 namespace tint {
 namespace fuzzers {
@@ -96,15 +97,45 @@ std::unique_ptr<Mutator> CreateMutator(const std::vector<uint32_t>& binary,
   }
 }
 
+void CLIMessageConsumer(spv_message_level_t level,
+                        const char*,
+                        const spv_position_t& position,
+                        const char* message) {
+  switch (level) {
+    case SPV_MSG_FATAL:
+    case SPV_MSG_INTERNAL_ERROR:
+    case SPV_MSG_ERROR:
+      std::cerr << "error: line " << position.index << ": " << message
+                << std::endl;
+      break;
+    case SPV_MSG_WARNING:
+      std::cout << "warning: line " << position.index << ": " << message
+                << std::endl;
+      break;
+    case SPV_MSG_INFO:
+      std::cout << "info: line " << position.index << ": " << message
+                << std::endl;
+      break;
+    default:
+      break;
+  }
+}
+
+bool IsValid(const std::vector<uint32_t>& binary) {
+  spvtools::SpirvTools tools(context->params.mutator_params.target_env);
+  tools.SetMessageConsumer(CLIMessageConsumer);
+  return tools.IsValid() && tools.Validate(binary.data(), binary.size(),
+                                           spvtools::ValidatorOptions());
+}
+
 extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
                                           size_t size,
                                           size_t max_size,
                                           unsigned seed) {
-  if ((size % 4) != 0) {
-    // A valid SPIR-V binary's size must be a multiple of 4, and the SPIR-V
-    // Tools fuzzer should only work with valid binaries.
-    // TODO(afdx): Change this to an assertion once sure that this fuzzer is
-    //  configured correctly in ClusterFuzz.
+  if ((size % sizeof(uint32_t)) != 0) {
+    // A valid SPIR-V binary's size must be a multiple of the size of a 32-bit
+    // word, and the SPIR-V Tools fuzzer is only designed to work with valid
+    // binaries.
     return 0;
   }
 
@@ -114,13 +145,18 @@ extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
   MutatorCache dummy_cache(1);
   auto* mutator_cache = context->mutator_cache.get();
   if (!mutator_cache) {
-    // Use a dummy cache if the user has decided not to use a real cache.
-    // The dummy cache will be destroyed when we return from this function but
-    // it will save us from writing all the `if (mutator_cache)` below.
+    // Use a placeholder cache if the user has decided not to use a real cache.
+    // The placeholder cache will be destroyed when we return from this function
+    // but it will save us from writing all the `if (mutator_cache)` below.
     mutator_cache = &dummy_cache;
   }
 
   if (!mutator_cache->Get(binary)) {
+    // This is an unknown binary, so its validity must be checked before
+    // proceeding.
+    if (!IsValid(binary)) {
+      return 0;
+    }
     // Assign a mutator to the binary if it doesn't have one yet.
     mutator_cache->Put(binary, CreateMutator(binary, seed));
   }
@@ -178,11 +214,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     return 0;
   }
 
-  if ((size % 4) != 0) {
-    // By design, the SPIR-V Tools fuzzer should only ever test using valid
-    // SPIR-V binaries, whose sizes should be multiples of 4 bytes.
-    // TODO(afdx): Change this to an assertion once sure that this fuzzer is
-    //  configured correctly in ClusterFuzz.
+  if ((size % sizeof(uint32_t)) != 0) {
+    // The SPIR-V Tools fuzzer has been designed to work with valid
+    // SPIR-V binaries, whose sizes should be multiples of the size of a 32-bit
+    // word.
     return 0;
   }
 
