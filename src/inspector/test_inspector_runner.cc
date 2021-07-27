@@ -1,0 +1,39 @@
+// Copyright 2021 The Tint Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include "src/inspector/test_inspector_runner.h"
+
+namespace tint {
+namespace inspector {
+
+InspectorRunner::InspectorRunner() = default;
+InspectorRunner::~InspectorRunner() = default;
+
+Inspector& InspectorRunner::Initialize(std::string shader) {
+  if (inspector_) {
+    return *inspector_;
+  }
+
+  file_ = std::make_unique<Source::File>("test", shader);
+  program_ = std::make_unique<Program>(reader::wgsl::Parse(file_.get()));
+  [&]() {
+    ASSERT_TRUE(program_->IsValid())
+        << diag::Formatter().format(program_->Diagnostics());
+  }();
+  inspector_ = std::make_unique<Inspector>(program_.get());
+  return *inspector_;
+}
+
+}  // namespace inspector
+}  // namespace tint

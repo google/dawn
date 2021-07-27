@@ -210,6 +210,21 @@ class Inspector {
 
   /// Constructes |sampler_targets_| if it hasn't already been instantiated.
   void GenerateSamplerTargets();
+
+  /// For a N-uple of expressions, resolve to the appropriate global resources
+  /// and call 'cb'.
+  /// 'cb' may be called multiple times.
+  /// Assumes that not being able to resolve the resources is an error, so will
+  /// invoke TINT_ICE when that occurs.
+  /// @tparam N number of expressions in the n-uple
+  /// @tparam F type of the callback provided.
+  /// @param exprs N-uple of expressions to resolve.
+  /// @param cb is a callback function with the signature:
+  /// `void(std::array<const sem::GlobalVariable*, N>)`, which is invoked
+  /// whenever a set of expressions are resolved to globals.
+  template <size_t N, typename F>
+  void GetOriginatingResources(std::array<const ast::Expression*, N> exprs,
+                               F&& cb);
 };
 
 }  // namespace inspector

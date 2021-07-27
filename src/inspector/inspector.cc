@@ -44,6 +44,7 @@
 #include "src/sem/vector_type.h"
 #include "src/sem/void_type.h"
 #include "src/utils/math.h"
+#include "src/utils/unique_vector.h"
 
 namespace tint {
 namespace inspector {
@@ -394,8 +395,6 @@ std::vector<ResourceBinding> Inspector::GetSamplerResourceBindings(
     return {};
   }
 
-  GenerateSamplerTargets();
-
   std::vector<ResourceBinding> result;
 
   auto* func_sem = program_->Sem().Get(func);
@@ -419,8 +418,6 @@ std::vector<ResourceBinding> Inspector::GetComparisonSamplerResourceBindings(
   if (!func) {
     return {};
   }
-
-  GenerateSamplerTargets();
 
   std::vector<ResourceBinding> result;
 
@@ -809,23 +806,132 @@ void Inspector::GenerateSamplerTargets() {
       continue;
     }
 
-    auto* s = c->params()[sampler_index];
-    auto* sampler = sem.Get<sem::VariableUser>(s)->Variable();
-    sem::BindingPoint sampler_binding_point = {
-        sampler->Declaration()->binding_point().group->value(),
-        sampler->Declaration()->binding_point().binding->value()};
-
     auto* t = c->params()[texture_index];
-    auto* texture = sem.Get<sem::VariableUser>(t)->Variable();
-    sem::BindingPoint texture_binding_point = {
-        texture->Declaration()->binding_point().group->value(),
-        texture->Declaration()->binding_point().binding->value()};
+    auto* s = c->params()[sampler_index];
 
-    for (auto entry_point : entry_points) {
-      const auto& ep_name = program_->Symbols().NameFor(entry_point);
-      (*sampler_targets_)[ep_name].add(
-          {sampler_binding_point, texture_binding_point});
+    GetOriginatingResources(
+        std::array<const ast::Expression*, 2>{t, s},
+        [&](std::array<const sem::GlobalVariable*, 2> globals) {
+          auto* texture = globals[0];
+          sem::BindingPoint texture_binding_point = {
+              texture->Declaration()->binding_point().group->value(),
+              texture->Declaration()->binding_point().binding->value()};
+
+          auto* sampler = globals[1];
+          sem::BindingPoint sampler_binding_point = {
+              sampler->Declaration()->binding_point().group->value(),
+              sampler->Declaration()->binding_point().binding->value()};
+
+          for (auto entry_point : entry_points) {
+            const auto& ep_name = program_->Symbols().NameFor(entry_point);
+            (*sampler_targets_)[ep_name].add(
+                {sampler_binding_point, texture_binding_point});
+          }
+        });
+  }
+}
+
+template <size_t N, typename F>
+void Inspector::GetOriginatingResources(
+    std::array<const ast::Expression*, N> exprs,
+    F&& callback) {
+  if (!program_->IsValid()) {
+    TINT_ICE(Inspector, diagnostics_)
+        << "attempting to get originating resources in invalid program";
+    return;
+  }
+
+  auto& sem = program_->Sem();
+
+  std::array<const sem::GlobalVariable*, N> globals{};
+  std::array<const sem::Parameter*, N> parameters{};
+  UniqueVector<const ast::CallExpression*> callsites;
+
+  for (size_t i = 0; i < N; i++) {
+    auto*& expr = exprs[i];
+    // Resolve each of the expressions
+    while (true) {
+      if (auto* user = sem.Get<sem::VariableUser>(expr)) {
+        auto* var = user->Variable();
+
+        if (auto* global = tint::As<sem::GlobalVariable>(var)) {
+          // Found the global resource declaration.
+          globals[i] = global;
+          break;  // Done with this expression.
+        }
+
+        if (auto* local = tint::As<sem::LocalVariable>(var)) {
+          // Chase the variable
+          expr = local->Declaration()->constructor();
+          if (!expr) {
+            TINT_ICE(Inspector, diagnostics_)
+                << "resource variable had no initializer";
+            return;
+          }
+          continue;  // Continue chasing the expression in this function
+        }
+
+        if (auto* param = tint::As<sem::Parameter>(var)) {
+          // Gather each of the callers of this function
+          auto* func = tint::As<sem::Function>(param->Owner());
+          if (func->CallSites().empty()) {
+            // One or more of the expressions is a parameter, but this function
+            // is not called. Ignore.
+            return;
+          }
+          for (auto* call_expr : func->CallSites()) {
+            callsites.add(call_expr);
+          }
+          // Need to evaluate each function call with the group of
+          // expressions, so move on to the next expression.
+          parameters[i] = param;
+          break;
+        }
+
+        TINT_ICE(Inspector, diagnostics_)
+            << "unexpected variable type " << var->TypeInfo().name;
+      }
+
+      if (auto* unary = tint::As<ast::UnaryOpExpression>(expr)) {
+        switch (unary->op()) {
+          case ast::UnaryOp::kAddressOf:
+          case ast::UnaryOp::kIndirection:
+            // `*` and `&` are the only valid unary ops for a resource type,
+            // and must be balanced in order for the program to have passed
+            // validation. Just skip past these.
+            expr = unary->expr();
+            continue;
+          default: {
+            TINT_ICE(Inspector, diagnostics_)
+                << "unexpected unary op on resource: " << unary->op();
+            return;
+          }
+        }
+      }
+
+      TINT_ICE(Inspector, diagnostics_)
+          << "cannot resolve originating resource with expression type "
+          << expr->TypeInfo().name;
+      return;
     }
+  }
+
+  if (callsites.size()) {
+    for (auto* call_expr : callsites) {
+      // Make a copy of the expressions for this callsite
+      std::array<const ast::Expression*, N> call_exprs = exprs;
+      // Patch all the parameter expressions with their argument
+      for (size_t i = 0; i < N; i++) {
+        if (auto* param = parameters[i]) {
+          call_exprs[i] = call_expr->params()[param->Index()];
+        }
+      }
+      // Now call GetOriginatingResources() with from the callsite
+      GetOriginatingResources(call_exprs, callback);
+    }
+  } else {
+    // All the expressions resolved to globals
+    callback(globals);
   }
 }
 

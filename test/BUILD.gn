@@ -224,6 +224,8 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/inspector/inspector_test.cc",
     "../src/inspector/test_inspector_builder.cc",
     "../src/inspector/test_inspector_builder.h",
+    "../src/inspector/test_inspector_runner.cc",
+    "../src/inspector/test_inspector_runner.h",
     "../src/intrinsic_table_test.cc",
     "../src/program_builder_test.cc",
     "../src/program_test.cc",

@@ -632,6 +632,8 @@ if(${TINT_BUILD_TESTS})
     inspector/inspector_test.cc
     inspector/test_inspector_builder.cc
     inspector/test_inspector_builder.h
+    inspector/test_inspector_runner.cc
+    inspector/test_inspector_runner.h
     intrinsic_table_test.cc
     program_test.cc
     resolver/assignment_validation_test.cc

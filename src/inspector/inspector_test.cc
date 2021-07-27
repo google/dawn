@@ -20,6 +20,7 @@
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/workgroup_decoration.h"
 #include "src/inspector/test_inspector_builder.h"
+#include "src/inspector/test_inspector_runner.h"
 #include "src/program_builder.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/external_texture_type.h"
@@ -34,8 +35,15 @@ namespace {
 
 // All the tests that descend from InspectorBuilder are expected to define their
 // test state via building up the AST through InspectorBuilder and then generate
-// the program with ::Build().
-// The returned Inspector from ::Build() can then be used to test expecations.
+// the program with ::Build.
+// The returned Inspector from ::Build can then be used to test expecations.
+//
+// All the tests that descend from InspectorRunner are expected to define their
+// test state via a WGSL shader, which will be parsed to generate a Program and
+// Inspector in ::Initialize.
+// The returned Inspector from ::Initialize can then be used to test
+// expecations.
+
 class InspectorGetEntryPointTest : public InspectorBuilder,
                                    public testing::Test {};
 
@@ -135,11 +143,15 @@ class InspectorGetStorageTextureResourceBindingsTestWithParam
 class InspectorGetExternalTextureResourceBindingsTest : public InspectorBuilder,
                                                         public testing::Test {};
 
-class InspectorGetSamplerTextureUsesTest : public InspectorBuilder,
+class InspectorGetSamplerTextureUsesTest : public InspectorRunner,
                                            public testing::Test {};
 
 class InspectorGetWorkgroupStorageSizeTest : public InspectorBuilder,
                                              public testing::Test {};
+
+// This is a catch all for shaders that have demonstrated regressions/crashes in
+// the wild.
+class InspectorRegressionTest : public InspectorRunner, public testing::Test {};
 
 TEST_F(InspectorGetEntryPointTest, NoFunctions) {
   Inspector& inspector = Build();
@@ -2353,34 +2365,31 @@ TEST_F(InspectorGetExternalTextureResourceBindingsTest, Simple) {
 }
 
 TEST_F(InspectorGetSamplerTextureUsesTest, None) {
-  MakeEmptyBodyFunction("ep_func", ast::DecorationList{
-                                       Stage(ast::PipelineStage::kFragment),
-                                   });
+  std::string shader = R"(
+[[stage(fragment)]]
+fn main() {
+})";
 
-  Inspector& inspector = Build();
-
-  auto result = inspector.GetSamplerTextureUses("ep_func");
+  Inspector& inspector = Initialize(shader);
+  auto result = inspector.GetSamplerTextureUses("main");
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(0u, result.size());
 }
 
 TEST_F(InspectorGetSamplerTextureUsesTest, Simple) {
-  auto* sampled_texture_type =
-      ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
-  AddResource("foo_texture", sampled_texture_type, 0, 10);
-  AddSampler("foo_sampler", 0, 1);
-  AddGlobalVariable("foo_coords", ty.f32());
+  std::string shader = R"(
+[[group(0), binding(1)]] var mySampler: sampler;
+[[group(0), binding(2)]] var myTexture: texture_2d<f32>;
 
-  MakeSamplerReferenceBodyFunction("ep_func", "foo_texture", "foo_sampler",
-                                   "foo_coords", ty.f32(),
-                                   ast::DecorationList{
-                                       Stage(ast::PipelineStage::kFragment),
-                                   });
+[[stage(fragment)]]
+fn main([[location(0)]] fragUV: vec2<f32>,
+        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+  return textureSample(myTexture, mySampler, fragUV) * fragPosition;
+})";
 
-  Inspector& inspector = Build();
-
-  auto result = inspector.GetSamplerTextureUses("ep_func");
+  Inspector& inspector = Initialize(shader);
+  auto result = inspector.GetSamplerTextureUses("main");
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(1u, result.size());
@@ -2388,58 +2397,233 @@ TEST_F(InspectorGetSamplerTextureUsesTest, Simple) {
   EXPECT_EQ(0u, result[0].sampler_binding_point.group);
   EXPECT_EQ(1u, result[0].sampler_binding_point.binding);
   EXPECT_EQ(0u, result[0].texture_binding_point.group);
-  EXPECT_EQ(10u, result[0].texture_binding_point.binding);
+  EXPECT_EQ(2u, result[0].texture_binding_point.binding);
+}
+
+TEST_F(InspectorGetSamplerTextureUsesTest, UnknownEntryPoint) {
+  std::string shader = R"(
+[[group(0), binding(1)]] var mySampler: sampler;
+[[group(0), binding(2)]] var myTexture: texture_2d<f32>;
+
+[[stage(fragment)]]
+fn main([[location(0)]] fragUV: vec2<f32>,
+        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+  return textureSample(myTexture, mySampler, fragUV) * fragPosition;
+})";
+
+  Inspector& inspector = Initialize(shader);
+  auto result = inspector.GetSamplerTextureUses("foo");
+  ASSERT_TRUE(inspector.has_error()) << inspector.error();
 }
 
 TEST_F(InspectorGetSamplerTextureUsesTest, MultipleCalls) {
-  auto* sampled_texture_type =
-      ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
-  AddResource("foo_texture", sampled_texture_type, 0, 10);
-  AddSampler("foo_sampler", 0, 1);
-  AddGlobalVariable("foo_coords", ty.f32());
+  std::string shader = R"(
+[[group(0), binding(1)]] var mySampler: sampler;
+[[group(0), binding(2)]] var myTexture: texture_2d<f32>;
 
-  MakeSamplerReferenceBodyFunction("ep_func", "foo_texture", "foo_sampler",
-                                   "foo_coords", ty.f32(),
-                                   ast::DecorationList{
-                                       Stage(ast::PipelineStage::kFragment),
-                                   });
+[[stage(fragment)]]
+fn main([[location(0)]] fragUV: vec2<f32>,
+        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+  return textureSample(myTexture, mySampler, fragUV) * fragPosition;
+})";
 
-  Inspector& inspector = Build();
-
-  auto result_0 = inspector.GetSamplerTextureUses("ep_func");
+  Inspector& inspector = Initialize(shader);
+  auto result_0 = inspector.GetSamplerTextureUses("main");
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-  auto result_1 = inspector.GetSamplerTextureUses("ep_func");
+  auto result_1 = inspector.GetSamplerTextureUses("main");
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   EXPECT_EQ(result_0, result_1);
 }
 
-TEST_F(InspectorGetSamplerTextureUsesTest, InFunction) {
-  auto* sampled_texture_type =
-      ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
-  AddResource("foo_texture", sampled_texture_type, 0, 0);
-  AddSampler("foo_sampler", 0, 1);
-  AddGlobalVariable("foo_coords", ty.f32());
+TEST_F(InspectorGetSamplerTextureUsesTest, BothIndirect) {
+  std::string shader = R"(
+[[group(0), binding(1)]] var mySampler: sampler;
+[[group(0), binding(2)]] var myTexture: texture_2d<f32>;
 
-  MakeSamplerReferenceBodyFunction("foo_func", "foo_texture", "foo_sampler",
-                                   "foo_coords", ty.f32(), {});
+fn doSample(t: texture_2d<f32>, s: sampler, uv: vec2<f32>) -> vec4<f32> {
+  return textureSample(t, s, uv);
+}
 
-  MakeCallerBodyFunction("ep_func", {"foo_func"},
-                         ast::DecorationList{
-                             Stage(ast::PipelineStage::kFragment),
-                         });
+[[stage(fragment)]]
+fn main([[location(0)]] fragUV: vec2<f32>,
+        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+  return doSample(myTexture, mySampler, fragUV) * fragPosition;
+})";
 
-  Inspector& inspector = Build();
-
-  auto result = inspector.GetSamplerTextureUses("ep_func");
+  Inspector& inspector = Initialize(shader);
+  auto result = inspector.GetSamplerTextureUses("main");
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
   ASSERT_EQ(1u, result.size());
+
   EXPECT_EQ(0u, result[0].sampler_binding_point.group);
   EXPECT_EQ(1u, result[0].sampler_binding_point.binding);
   EXPECT_EQ(0u, result[0].texture_binding_point.group);
-  EXPECT_EQ(0u, result[0].texture_binding_point.binding);
+  EXPECT_EQ(2u, result[0].texture_binding_point.binding);
+}
+
+TEST_F(InspectorGetSamplerTextureUsesTest, SamplerIndirect) {
+  std::string shader = R"(
+[[group(0), binding(1)]] var mySampler: sampler;
+[[group(0), binding(2)]] var myTexture: texture_2d<f32>;
+
+fn doSample(s: sampler, uv: vec2<f32>) -> vec4<f32> {
+  return textureSample(myTexture, s, uv);
+}
+
+[[stage(fragment)]]
+fn main([[location(0)]] fragUV: vec2<f32>,
+        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+  return doSample(mySampler, fragUV) * fragPosition;
+})";
+
+  Inspector& inspector = Initialize(shader);
+  auto result = inspector.GetSamplerTextureUses("main");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  ASSERT_EQ(1u, result.size());
+
+  EXPECT_EQ(0u, result[0].sampler_binding_point.group);
+  EXPECT_EQ(1u, result[0].sampler_binding_point.binding);
+  EXPECT_EQ(0u, result[0].texture_binding_point.group);
+  EXPECT_EQ(2u, result[0].texture_binding_point.binding);
+}
+
+TEST_F(InspectorGetSamplerTextureUsesTest, TextureIndirect) {
+  std::string shader = R"(
+[[group(0), binding(1)]] var mySampler: sampler;
+[[group(0), binding(2)]] var myTexture: texture_2d<f32>;
+
+fn doSample(t: texture_2d<f32>, uv: vec2<f32>) -> vec4<f32> {
+  return textureSample(t, mySampler, uv);
+}
+
+[[stage(fragment)]]
+fn main([[location(0)]] fragUV: vec2<f32>,
+        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+  return doSample(myTexture, fragUV) * fragPosition;
+})";
+
+  Inspector& inspector = Initialize(shader);
+  auto result = inspector.GetSamplerTextureUses("main");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  ASSERT_EQ(1u, result.size());
+
+  EXPECT_EQ(0u, result[0].sampler_binding_point.group);
+  EXPECT_EQ(1u, result[0].sampler_binding_point.binding);
+  EXPECT_EQ(0u, result[0].texture_binding_point.group);
+  EXPECT_EQ(2u, result[0].texture_binding_point.binding);
+}
+
+TEST_F(InspectorGetSamplerTextureUsesTest, NeitherIndirect) {
+  std::string shader = R"(
+[[group(0), binding(1)]] var mySampler: sampler;
+[[group(0), binding(2)]] var myTexture: texture_2d<f32>;
+
+fn doSample(uv: vec2<f32>) -> vec4<f32> {
+  return textureSample(myTexture, mySampler, uv);
+}
+
+[[stage(fragment)]]
+fn main([[location(0)]] fragUV: vec2<f32>,
+        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+  return doSample(fragUV) * fragPosition;
+})";
+
+  Inspector& inspector = Initialize(shader);
+  auto result = inspector.GetSamplerTextureUses("main");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  ASSERT_EQ(1u, result.size());
+
+  EXPECT_EQ(0u, result[0].sampler_binding_point.group);
+  EXPECT_EQ(1u, result[0].sampler_binding_point.binding);
+  EXPECT_EQ(0u, result[0].texture_binding_point.group);
+  EXPECT_EQ(2u, result[0].texture_binding_point.binding);
+}
+
+TEST_F(InspectorGetSamplerTextureUsesTest, Complex) {
+  std::string shader = R"(
+[[group(0), binding(1)]] var mySampler: sampler;
+[[group(0), binding(2)]] var myTexture: texture_2d<f32>;
+
+
+fn doSample(t: texture_2d<f32>, s: sampler, uv: vec2<f32>) -> vec4<f32> {
+  return textureSample(t, s, uv);
+}
+
+fn X(t: texture_2d<f32>, s: sampler, uv: vec2<f32>) -> vec4<f32> {
+  return doSample(t, s, uv);
+}
+
+fn Y(t: texture_2d<f32>, s: sampler, uv: vec2<f32>) -> vec4<f32> {
+  return doSample(t, s, uv);
+}
+
+fn Z(t: texture_2d<f32>, s: sampler, uv: vec2<f32>) -> vec4<f32> {
+  return X(t, s, uv) + Y(t, s, uv);
+}
+
+[[stage(fragment)]]
+fn via_call([[location(0)]] fragUV: vec2<f32>,
+        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+  return Z(myTexture, mySampler, fragUV) * fragPosition;
+}
+
+[[stage(fragment)]]
+fn via_ptr([[location(0)]] fragUV: vec2<f32>,
+        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+  let t = &myTexture;
+  let s = &mySampler;
+  return textureSample(*t, *s, fragUV) + fragPosition;
+}
+
+[[stage(fragment)]]
+fn direct([[location(0)]] fragUV: vec2<f32>,
+        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+  return textureSample(myTexture, mySampler, fragUV) + fragPosition;
+})";
+
+  Inspector& inspector = Initialize(shader);
+
+  {
+    auto result = inspector.GetSamplerTextureUses("via_call");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+
+    EXPECT_EQ(0u, result[0].sampler_binding_point.group);
+    EXPECT_EQ(1u, result[0].sampler_binding_point.binding);
+    EXPECT_EQ(0u, result[0].texture_binding_point.group);
+    EXPECT_EQ(2u, result[0].texture_binding_point.binding);
+  }
+
+  {
+    auto result = inspector.GetSamplerTextureUses("via_ptr");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+
+    EXPECT_EQ(0u, result[0].sampler_binding_point.group);
+    EXPECT_EQ(1u, result[0].sampler_binding_point.binding);
+    EXPECT_EQ(0u, result[0].texture_binding_point.group);
+    EXPECT_EQ(2u, result[0].texture_binding_point.binding);
+  }
+
+  {
+    auto result = inspector.GetSamplerTextureUses("direct");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+
+    EXPECT_EQ(0u, result[0].sampler_binding_point.group);
+    EXPECT_EQ(1u, result[0].sampler_binding_point.binding);
+    EXPECT_EQ(0u, result[0].texture_binding_point.group);
+    EXPECT_EQ(2u, result[0].texture_binding_point.binding);
+  }
 }
 
 TEST_F(InspectorGetWorkgroupStorageSizeTest, Empty) {
@@ -2527,6 +2711,27 @@ TEST_F(InspectorGetWorkgroupStorageSizeTest, StructAlignment) {
 
   Inspector& inspector = Build();
   EXPECT_EQ(1024u, inspector.GetWorkgroupStorageSize("ep_func"));
+}
+
+// Crash was occuring in ::GenerateSamplerTargets, when
+// ::GetSamplerTextureUses was called.
+TEST_F(InspectorRegressionTest, tint967) {
+  std::string shader = R"(
+[[group(0), binding(1)]] var mySampler: sampler;
+[[group(0), binding(2)]] var myTexture: texture_2d<f32>;
+
+fn doSample(t: texture_2d<f32>, s: sampler, uv: vec2<f32>) -> vec4<f32> {
+  return textureSample(t, s, uv);
+}
+
+[[stage(fragment)]]
+fn main([[location(0)]] fragUV: vec2<f32>,
+        [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
+  return doSample(myTexture, mySampler, fragUV) * fragPosition;
+})";
+
+  Inspector& inspector = Initialize(shader);
+  auto result = inspector.GetSamplerTextureUses("main");
 }
 
 }  // namespace
