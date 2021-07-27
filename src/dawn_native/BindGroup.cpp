@@ -117,7 +117,7 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateTextureBinding(const DeviceBase* device,
+        MaybeError ValidateTextureBinding(DeviceBase* device,
                                           const BindGroupEntry& entry,
                                           const BindingInfo& bindingInfo) {
             if (entry.textureView == nullptr || entry.sampler != nullptr ||
@@ -150,7 +150,15 @@ namespace dawn_native {
                     }
 
                     if ((supportedTypes & requiredType) == 0) {
-                        return DAWN_VALIDATION_ERROR("Texture component type usage mismatch");
+                        if (IsSubset(SampleTypeBit::Depth, supportedTypes) != 0 &&
+                            IsSubset(requiredType,
+                                     SampleTypeBit::Float | SampleTypeBit::UnfilterableFloat)) {
+                            device->EmitDeprecationWarning(
+                                "Using depth textures with 'float' or 'unfilterable-float' texture "
+                                "bindings is deprecated. Use 'depth' instead.");
+                        } else {
+                            return DAWN_VALIDATION_ERROR("Texture component type usage mismatch");
+                        }
                     }
 
                     if (entry.textureView->GetDimension() != bindingInfo.texture.viewDimension) {

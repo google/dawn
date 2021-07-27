@@ -160,7 +160,8 @@ namespace utils {
 
     BasicRenderPass CreateBasicRenderPass(const wgpu::Device& device,
                                           uint32_t width,
-                                          uint32_t height) {
+                                          uint32_t height,
+                                          wgpu::TextureFormat format) {
         DAWN_ASSERT(width > 0 && height > 0);
 
         wgpu::TextureDescriptor descriptor;
@@ -169,7 +170,7 @@ namespace utils {
         descriptor.size.height = height;
         descriptor.size.depthOrArrayLayers = 1;
         descriptor.sampleCount = 1;
-        descriptor.format = BasicRenderPass::kDefaultColorFormat;
+        descriptor.format = format;
         descriptor.mipLevelCount = 1;
         descriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
         wgpu::Texture color = device.CreateTexture(&descriptor);

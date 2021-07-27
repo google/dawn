@@ -207,7 +207,7 @@ namespace dawn_native {
             firstAspect->block.width = 1;
             firstAspect->block.height = 1;
             firstAspect->baseType = wgpu::TextureComponentType::Float;
-            firstAspect->supportedSampleTypes = kAnyFloat | SampleTypeBit::Depth;
+            firstAspect->supportedSampleTypes = SampleTypeBit::Depth;
             firstAspect->format = format;
             AddFormat(internalFormat);
         };

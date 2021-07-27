@@ -470,9 +470,12 @@ TEST_F(BindGroupValidationTest, TextureSampleType) {
     DoTest(false, wgpu::TextureFormat::R32Float, wgpu::TextureSampleType::Uint);
     DoTest(false, wgpu::TextureFormat::R32Float, wgpu::TextureSampleType::Sint);
 
-    // Test that Depth32Float is only compatible with float/unfilterable-float/depth
-    DoTest(true, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::Float);
-    DoTest(true, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::UnfilterableFloat);
+    // Test that Depth32Float is only compatible with depth. float/unfilterable-float is deprecated.
+    // TODO(crbug.com/dawn/1021): Disallow using float/unfilterable-float with depth textures.
+    EXPECT_DEPRECATION_WARNING(
+        DoTest(true, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::Float));
+    EXPECT_DEPRECATION_WARNING(DoTest(true, wgpu::TextureFormat::Depth32Float,
+                                      wgpu::TextureSampleType::UnfilterableFloat));
     DoTest(true, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::Depth);
     DoTest(false, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::Uint);
     DoTest(false, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::Sint);
@@ -495,7 +498,7 @@ TEST_F(BindGroupValidationTest, TextureSampleType) {
 // Test which depth-stencil formats are allowed to be sampled (all).
 TEST_F(BindGroupValidationTest, SamplingDepthStencilTexture) {
     wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float}});
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Depth}});
 
     wgpu::TextureDescriptor desc;
     desc.size = {1, 1, 1};

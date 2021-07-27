@@ -63,8 +63,59 @@ class DepthStencilSamplingTest : public DawnTest {
         mUniformBuffer = device.CreateBuffer(&uniformBufferDesc);
     }
 
+    void GenerateSamplingShader(const std::vector<TestAspect>& aspects,
+                                const std::vector<uint32_t> components,
+                                std::ostringstream& shaderSource,
+                                std::ostringstream& shaderBody) {
+        shaderSource << "type StencilValues = array<u32, " << components.size() << ">;\n";
+        shaderSource << R"(
+            [[block]] struct DepthResult {
+                value : f32;
+            };
+            [[block]] struct StencilResult {
+                values : StencilValues;
+            };)";
+        shaderSource << "\n";
+
+        uint32_t index = 0;
+        for (TestAspect aspect : aspects) {
+            switch (aspect) {
+                case TestAspect::Depth:
+                    shaderSource << "[[group(0), binding(" << 2 * index << ")]] var tex" << index
+                                 << " : texture_depth_2d;\n";
+
+                    shaderSource << "[[group(0), binding(" << 2 * index + 1
+                                 << ")]] var<storage, read_write> result" << index
+                                 << " : DepthResult;\n";
+
+                    ASSERT(components.size() == 1 && components[0] == 0);
+                    shaderBody << "\nresult" << index << ".value = textureLoad(tex" << index
+                               << ", vec2<i32>(0, 0), 0);";
+                    break;
+                case TestAspect::Stencil:
+                    shaderSource << "[[group(0), binding(" << 2 * index << ")]] var tex" << index
+                                 << " : texture_2d<u32>;\n";
+
+                    shaderSource << "[[group(0), binding(" << 2 * index + 1
+                                 << ")]] var<storage, read_write> result" << index
+                                 << " : StencilResult;\n";
+
+                    shaderBody << "var texel = textureLoad(tex" << index
+                               << ", vec2<i32>(0, 0), 0);";
+
+                    for (uint32_t i = 0; i < components.size(); ++i) {
+                        shaderBody << "\nresult" << index << ".values[" << i << "] = texel["
+                                   << components[i] << "];";
+                    }
+                    break;
+            }
+
+            index++;
+        }
+    }
+
     wgpu::RenderPipeline CreateSamplingRenderPipeline(std::vector<TestAspect> aspects,
-                                                      uint32_t componentIndex) {
+                                                      std::vector<uint32_t> components) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
                 return vec4<f32>(0.0, 0.0, 0.0, 1.0);
@@ -76,92 +127,25 @@ class DepthStencilSamplingTest : public DawnTest {
         std::ostringstream shaderOutputStruct;
         std::ostringstream shaderBody;
 
-        uint32_t index = 0;
-        for (TestAspect aspect : aspects) {
-            switch (aspect) {
-                case TestAspect::Depth:
-                    shaderSource << "[[group(0), binding(" << index << ")]] var tex" << index
-                                 << " : texture_2d<f32>;\n";
+        GenerateSamplingShader(aspects, components, shaderSource, shaderBody);
 
-                    shaderOutputStruct << "  [[location(" << index << ")]] result" << index
-                                       << " : f32;\n";
-
-                    shaderBody << "\n  output.result" << index << " = textureLoad(tex" << index
-                               << ", vec2<i32>(0, 0), 0)[" << componentIndex << "];\n";
-                    pipelineDescriptor.cTargets[index].format = wgpu::TextureFormat::R32Float;
-                    break;
-                case TestAspect::Stencil:
-                    shaderSource << "[[group(0), binding(" << index << ")]] var tex" << index
-                                 << " : texture_2d<u32>;\n";
-
-                    shaderOutputStruct << "  [[location(" << index << ")]] result" << index
-                                       << " : u32;\n";
-
-                    shaderBody << "\n  output.result" << index << " = textureLoad(tex" << index
-                               << ", vec2<i32>(0, 0), 0)[" << componentIndex << "];\n";
-                    pipelineDescriptor.cTargets[index].format = wgpu::TextureFormat::R8Uint;
-                    break;
-            }
-
-            index++;
-        }
-
-        shaderSource << "struct FragOutputs {\n" << shaderOutputStruct.str() << "};\n";
-        shaderSource << "[[stage(fragment)]] fn main() -> FragOutputs {\n";
-        shaderSource << "  var output : FragOutputs;\n"
-                     << shaderBody.str() << "  return output;\n}";
+        shaderSource << "[[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {\n";
+        shaderSource << shaderBody.str() << "return vec4<f32>();\n }";
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, shaderSource.str().c_str());
         pipelineDescriptor.vertex.module = vsModule;
         pipelineDescriptor.cFragment.module = fsModule;
         pipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
-        pipelineDescriptor.cFragment.targetCount = static_cast<uint32_t>(aspects.size());
+        pipelineDescriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
 
         return device.CreateRenderPipeline(&pipelineDescriptor);
     }
 
     wgpu::ComputePipeline CreateSamplingComputePipeline(std::vector<TestAspect> aspects,
-                                                        uint32_t componentIndex) {
+                                                        std::vector<uint32_t> components) {
         std::ostringstream shaderSource;
         std::ostringstream shaderBody;
-        shaderSource << R"(
-            [[block]] struct DepthResult {
-                value : f32;
-            };
-            [[block]] struct StencilResult {
-                value : u32;
-            };)";
-        shaderSource << "\n";
-
-        uint32_t index = 0;
-        for (TestAspect aspect : aspects) {
-            switch (aspect) {
-                case TestAspect::Depth:
-                    shaderSource << "[[group(0), binding(" << 2 * index << ")]] var tex" << index
-                                 << " : texture_2d<f32>;\n";
-
-                    shaderSource << "[[group(0), binding(" << 2 * index + 1
-                                 << ")]] var<storage, read_write> result" << index
-                                 << " : DepthResult;\n";
-
-                    shaderBody << "\nresult" << index << ".value = textureLoad(tex" << index
-                               << ", vec2<i32>(0, 0), 0)[" << componentIndex << "];";
-                    break;
-                case TestAspect::Stencil:
-                    shaderSource << "[[group(0), binding(" << 2 * index << ")]] var tex" << index
-                                 << " : texture_2d<u32>;\n";
-
-                    shaderSource << "[[group(0), binding(" << 2 * index + 1
-                                 << ")]] var<storage, read_write> result" << index
-                                 << " : StencilResult;\n";
-
-                    shaderBody << "\nresult" << index << ".value = textureLoad(tex" << index
-                               << ", vec2<i32>(0, 0), 0)[" << componentIndex << "];";
-                    break;
-            }
-
-            index++;
-        }
+        GenerateSamplingShader(aspects, components, shaderSource, shaderBody);
 
         shaderSource << "[[stage(compute), workgroup_size(1)]] fn main() { " << shaderBody.str()
                      << "\n}";
@@ -173,6 +157,18 @@ class DepthStencilSamplingTest : public DawnTest {
         pipelineDescriptor.compute.entryPoint = "main";
 
         return device.CreateComputePipeline(&pipelineDescriptor);
+    }
+
+    wgpu::RenderPipeline CreateSamplingRenderPipeline(std::vector<TestAspect> aspects,
+                                                      uint32_t componentIndex) {
+        return CreateSamplingRenderPipeline(std::move(aspects),
+                                            std::vector<uint32_t>{componentIndex});
+    }
+
+    wgpu::ComputePipeline CreateSamplingComputePipeline(std::vector<TestAspect> aspects,
+                                                        uint32_t componentIndex) {
+        return CreateSamplingComputePipeline(std::move(aspects),
+                                             std::vector<uint32_t>{componentIndex});
     }
 
     wgpu::RenderPipeline CreateComparisonRenderPipeline() {
@@ -244,10 +240,10 @@ class DepthStencilSamplingTest : public DawnTest {
         return device.CreateTexture(&outputTextureDesc);
     }
 
-    wgpu::Buffer CreateOutputBuffer() {
+    wgpu::Buffer CreateOutputBuffer(uint32_t componentCount = 1) {
         wgpu::BufferDescriptor outputBufferDesc;
         outputBufferDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
-        outputBufferDesc.size = sizeof(float);  // Large enough for both float and uint8_t
+        outputBufferDesc.size = sizeof(uint32_t) * componentCount;
         return device.CreateBuffer(&outputBufferDesc);
     }
 
@@ -271,30 +267,29 @@ class DepthStencilSamplingTest : public DawnTest {
         pass.EndPass();
     }
 
-    template <typename T>
-    void DoSamplingTest(TestAspect aspect,
-                        wgpu::RenderPipeline pipeline,
-                        wgpu::TextureFormat format,
-                        std::vector<T> textureValues,
-                        std::vector<T> expectedValues) {
-        ASSERT(textureValues.size() == expectedValues.size());
-
-        wgpu::Texture outputTexture;
+    template <typename T, typename CheckBufferFn>
+    void DoSamplingTestImpl(TestAspect aspect,
+                            wgpu::RenderPipeline pipeline,
+                            wgpu::TextureFormat format,
+                            std::vector<T> textureValues,
+                            uint32_t componentCount,
+                            CheckBufferFn CheckBuffer) {
         wgpu::Texture inputTexture = CreateInputTexture(format);
         wgpu::TextureViewDescriptor inputViewDesc = {};
         switch (aspect) {
             case TestAspect::Depth:
                 inputViewDesc.aspect = wgpu::TextureAspect::DepthOnly;
-                outputTexture = CreateOutputTexture(wgpu::TextureFormat::R32Float);
                 break;
             case TestAspect::Stencil:
                 inputViewDesc.aspect = wgpu::TextureAspect::StencilOnly;
-                outputTexture = CreateOutputTexture(wgpu::TextureFormat::R8Uint);
                 break;
         }
 
-        wgpu::BindGroup bindGroup = utils::MakeBindGroup(
-            device, pipeline.GetBindGroupLayout(0), {{0, inputTexture.CreateView(&inputViewDesc)}});
+        wgpu::Buffer outputBuffer = CreateOutputBuffer(componentCount);
+
+        wgpu::BindGroup bindGroup =
+            utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                 {{0, inputTexture.CreateView(&inputViewDesc)}, {1, outputBuffer}});
 
         for (size_t i = 0; i < textureValues.size(); ++i) {
             // Set the input depth texture to the provided texture value
@@ -310,8 +305,10 @@ class DepthStencilSamplingTest : public DawnTest {
 
             // Render into the output texture
             {
-                utils::ComboRenderPassDescriptor passDescriptor({outputTexture.CreateView()});
-                wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
+                utils::BasicRenderPass renderPass =
+                    utils::CreateBasicRenderPass(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+                wgpu::RenderPassEncoder pass =
+                    commandEncoder.BeginRenderPass(&renderPass.renderPassInfo);
                 pass.SetPipeline(pipeline);
                 pass.SetBindGroup(0, bindGroup);
                 pass.Draw(1);
@@ -321,18 +318,19 @@ class DepthStencilSamplingTest : public DawnTest {
             wgpu::CommandBuffer commands = commandEncoder.Finish();
             queue.Submit(1, &commands);
 
-            EXPECT_TEXTURE_EQ(expectedValues[i], outputTexture, {0, 0});
+            uint32_t expectedValueU32 = 0;
+            memcpy(&expectedValueU32, &textureValues[i], std::min(sizeof(T), sizeof(uint32_t)));
+            CheckBuffer(expectedValueU32, outputBuffer);
         }
     }
 
-    template <typename T>
-    void DoSamplingTest(TestAspect aspect,
-                        wgpu::ComputePipeline pipeline,
-                        wgpu::TextureFormat format,
-                        std::vector<T> textureValues,
-                        std::vector<T> expectedValues) {
-        ASSERT(textureValues.size() == expectedValues.size());
-
+    template <typename T, typename CheckBufferFn>
+    void DoSamplingTestImpl(TestAspect aspect,
+                            wgpu::ComputePipeline pipeline,
+                            wgpu::TextureFormat format,
+                            std::vector<T> textureValues,
+                            uint32_t componentCount,
+                            CheckBufferFn CheckBuffer) {
         wgpu::Texture inputTexture = CreateInputTexture(format);
         wgpu::TextureViewDescriptor inputViewDesc = {};
         switch (aspect) {
@@ -344,7 +342,7 @@ class DepthStencilSamplingTest : public DawnTest {
                 break;
         }
 
-        wgpu::Buffer outputBuffer = CreateOutputBuffer();
+        wgpu::Buffer outputBuffer = CreateOutputBuffer(componentCount);
 
         wgpu::BindGroup bindGroup =
             utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
@@ -375,8 +373,8 @@ class DepthStencilSamplingTest : public DawnTest {
             queue.Submit(1, &commands);
 
             uint32_t expectedValueU32 = 0;
-            memcpy(&expectedValueU32, &expectedValues[i], std::min(sizeof(T), sizeof(uint32_t)));
-            EXPECT_BUFFER_U32_EQ(expectedValueU32, outputBuffer, 0);
+            memcpy(&expectedValueU32, &textureValues[i], std::min(sizeof(T), sizeof(uint32_t)));
+            CheckBuffer(expectedValueU32, outputBuffer);
         }
     }
 
@@ -385,7 +383,10 @@ class DepthStencilSamplingTest : public DawnTest {
                         wgpu::RenderPipeline pipeline,
                         wgpu::TextureFormat format,
                         std::vector<T> textureValues) {
-        DoSamplingTest(aspect, pipeline, format, textureValues, textureValues);
+        DoSamplingTestImpl(aspect, pipeline, format, textureValues, 1,
+                           [this](uint32_t expected, wgpu::Buffer buffer) {
+                               EXPECT_BUFFER_U32_EQ(expected, buffer, 0);
+                           });
     }
 
     template <typename T>
@@ -393,7 +394,65 @@ class DepthStencilSamplingTest : public DawnTest {
                         wgpu::ComputePipeline pipeline,
                         wgpu::TextureFormat format,
                         std::vector<T> textureValues) {
-        DoSamplingTest(aspect, pipeline, format, textureValues, textureValues);
+        DoSamplingTestImpl(aspect, pipeline, format, textureValues, 1,
+                           [this](uint32_t expected, wgpu::Buffer buffer) {
+                               EXPECT_BUFFER_U32_EQ(expected, buffer, 0);
+                           });
+    }
+
+    class ExtraStencilComponentsExpectation : public detail::Expectation {
+        using StencilData = std::array<uint32_t, 4>;
+
+      public:
+        ExtraStencilComponentsExpectation(uint32_t expected) : mExpected(expected) {
+        }
+
+        ~ExtraStencilComponentsExpectation() override = default;
+
+        testing::AssertionResult Check(const void* rawData, size_t size) override {
+            ASSERT(size == sizeof(StencilData));
+            const uint32_t* data = static_cast<const uint32_t*>(rawData);
+
+            StencilData ssss = {mExpected, mExpected, mExpected, mExpected};
+            StencilData s001 = {mExpected, 0, 0, 1};
+
+            if (memcmp(data, ssss.data(), size) == 0 || memcmp(data, s001.data(), size) == 0) {
+                return testing::AssertionSuccess();
+            }
+
+            return testing::AssertionFailure() << "Expected stencil data to be "
+                                               << "(" << ssss[0] << ", " << ssss[1] << ", "
+                                               << ssss[2] << ", " << ssss[3] << ") or "
+                                               << "(" << s001[0] << ", " << s001[1] << ", "
+                                               << s001[2] << ", " << s001[3] << "). Got "
+                                               << "(" << data[0] << ", " << data[1] << ", "
+                                               << data[2] << ", " << data[3] << ").";
+        }
+
+      private:
+        uint32_t mExpected;
+    };
+
+    void DoSamplingExtraStencilComponentsRenderTest(TestAspect aspect,
+                                                    wgpu::TextureFormat format,
+                                                    std::vector<uint8_t> textureValues) {
+        DoSamplingTestImpl(aspect,
+                           CreateSamplingRenderPipeline({TestAspect::Stencil}, {0, 1, 2, 3}),
+                           format, textureValues, 4, [&](uint32_t expected, wgpu::Buffer buffer) {
+                               EXPECT_BUFFER(buffer, 0, 4 * sizeof(uint32_t),
+                                             new ExtraStencilComponentsExpectation(expected));
+                           });
+    }
+
+    void DoSamplingExtraStencilComponentsComputeTest(TestAspect aspect,
+                                                     wgpu::TextureFormat format,
+                                                     std::vector<uint8_t> textureValues) {
+        DoSamplingTestImpl(aspect,
+                           CreateSamplingComputePipeline({TestAspect::Stencil}, {0, 1, 2, 3}),
+                           format, textureValues, 4, [&](uint32_t expected, wgpu::Buffer buffer) {
+                               EXPECT_BUFFER(buffer, 0, 4 * sizeof(uint32_t),
+                                             new ExtraStencilComponentsExpectation(expected));
+                           });
     }
 
     static bool CompareFunctionPasses(float compareRef,
@@ -552,32 +611,12 @@ TEST_P(DepthStencilSamplingTest, SampleStencil) {
 TEST_P(DepthStencilSamplingTest, SampleExtraComponents) {
     // TODO(crbug.com/dawn/593): This test requires glTextureView, which is unsupported on GLES.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-    // TODO(enga): In Metal, color textures' unspecified default components values
-    // are (0, 0, 0, 1). Depth/stencil textures are undefined! Figure out what
-    // to do here.
-    // See Section 6.10 of the Metal Shading Language Specification
-    DAWN_SUPPRESS_TEST_IF(IsMetal());
 
-    float expectedDepth[4] = {0, 0, 0, 1};
-    uint8_t expectedStencil[4] = {0, 0, 0, 1};
+    DoSamplingExtraStencilComponentsRenderTest(
+        TestAspect::Stencil, wgpu::TextureFormat::Depth24PlusStencil8, {uint8_t(42), uint8_t(37)});
 
-    for (uint32_t component : {1, 2, 3}) {
-        DoSamplingTest<float>(
-            TestAspect::Depth, CreateSamplingRenderPipeline({TestAspect::Depth}, component),
-            wgpu::TextureFormat::Depth24PlusStencil8, {0.2f}, {expectedDepth[component]});
-
-        DoSamplingTest<float>(
-            TestAspect::Depth, CreateSamplingComputePipeline({TestAspect::Depth}, component),
-            wgpu::TextureFormat::Depth24PlusStencil8, {0.2f}, {expectedDepth[component]});
-
-        DoSamplingTest<uint8_t>(
-            TestAspect::Stencil, CreateSamplingRenderPipeline({TestAspect::Stencil}, component),
-            wgpu::TextureFormat::Depth24PlusStencil8, {uint8_t(37)}, {expectedStencil[component]});
-
-        DoSamplingTest<uint8_t>(
-            TestAspect::Stencil, CreateSamplingComputePipeline({TestAspect::Stencil}, component),
-            wgpu::TextureFormat::Depth24PlusStencil8, {uint8_t(37)}, {expectedStencil[component]});
-    }
+    DoSamplingExtraStencilComponentsComputeTest(
+        TestAspect::Stencil, wgpu::TextureFormat::Depth24PlusStencil8, {uint8_t(42), uint8_t(37)});
 }
 
 // Test sampling both depth and stencil with a render/compute pipeline works.
@@ -600,15 +639,17 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
         wgpu::RenderPipeline pipeline =
             CreateSamplingRenderPipeline({TestAspect::Depth, TestAspect::Stencil}, 0);
 
+        wgpu::Buffer depthOutput = CreateOutputBuffer();
+        wgpu::Buffer stencilOutput = CreateOutputBuffer();
+
         wgpu::BindGroup bindGroup =
             utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
                                  {
                                      {0, inputTexture.CreateView(&depthViewDesc)},
-                                     {1, inputTexture.CreateView(&stencilViewDesc)},
+                                     {1, depthOutput},
+                                     {2, inputTexture.CreateView(&stencilViewDesc)},
+                                     {3, stencilOutput},
                                  });
-
-        wgpu::Texture depthOutput = CreateOutputTexture(wgpu::TextureFormat::R32Float);
-        wgpu::Texture stencilOutput = CreateOutputTexture(wgpu::TextureFormat::R8Uint);
 
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
 
@@ -622,9 +663,10 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
 
         // Render into the output textures
         {
-            utils::ComboRenderPassDescriptor passDescriptor(
-                {depthOutput.CreateView(), stencilOutput.CreateView()});
-            wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
+            utils::BasicRenderPass renderPass =
+                utils::CreateBasicRenderPass(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+            wgpu::RenderPassEncoder pass =
+                commandEncoder.BeginRenderPass(&renderPass.renderPassInfo);
             pass.SetPipeline(pipeline);
             pass.SetBindGroup(0, bindGroup);
             pass.Draw(1);
@@ -634,10 +676,15 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
         wgpu::CommandBuffer commands = commandEncoder.Finish();
         queue.Submit(1, &commands);
 
-        EXPECT_TEXTURE_EQ(passDescriptor.cDepthStencilAttachmentInfo.clearDepth, depthOutput,
-                          {0, 0});
-        EXPECT_TEXTURE_EQ(uint8_t(passDescriptor.cDepthStencilAttachmentInfo.clearStencil),
-                          stencilOutput, {0, 0});
+        uint32_t expectedValueU32 = 0;
+        memcpy(&expectedValueU32, &passDescriptor.cDepthStencilAttachmentInfo.clearDepth,
+               sizeof(float));
+        EXPECT_BUFFER_U32_EQ(expectedValueU32, depthOutput, 0);
+
+        expectedValueU32 = 0;
+        memcpy(&expectedValueU32, &passDescriptor.cDepthStencilAttachmentInfo.clearStencil,
+               sizeof(uint8_t));
+        EXPECT_BUFFER_U32_EQ(expectedValueU32, stencilOutput, 0);
     }
 
     // With compute pipeline

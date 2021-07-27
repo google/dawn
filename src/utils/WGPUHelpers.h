@@ -87,9 +87,11 @@ namespace utils {
         wgpu::TextureFormat colorFormat;
         utils::ComboRenderPassDescriptor renderPassInfo;
     };
-    BasicRenderPass CreateBasicRenderPass(const wgpu::Device& device,
-                                          uint32_t width,
-                                          uint32_t height);
+    BasicRenderPass CreateBasicRenderPass(
+        const wgpu::Device& device,
+        uint32_t width,
+        uint32_t height,
+        wgpu::TextureFormat format = BasicRenderPass::kDefaultColorFormat);
 
     wgpu::PipelineLayout MakeBasicPipelineLayout(const wgpu::Device& device,
                                                  const wgpu::BindGroupLayout* bindGroupLayout);

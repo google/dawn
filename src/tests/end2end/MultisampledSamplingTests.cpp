@@ -206,12 +206,16 @@ TEST_P(MultisampledSamplingTest, SamplePositions) {
 
             wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
             computePassEncoder.SetPipeline(checkSamplePipeline);
-            computePassEncoder.SetBindGroup(
-                0, utils::MakeBindGroup(
-                       device, checkSamplePipeline.GetBindGroupLayout(0),
-                       {{0, colorView},
-                        {1, depthView},
-                        {2, outputBuffer, alignedResultSize * sampleOffset, kResultSize}}));
+            // TODO(crbug.com/dawn/1021): Disallow using float/unfilterable-float with depth
+            // textures.
+            wgpu::BindGroup bindGroup;
+            EXPECT_DEPRECATION_WARNING(
+                bindGroup = utils::MakeBindGroup(
+                    device, checkSamplePipeline.GetBindGroupLayout(0),
+                    {{0, colorView},
+                     {1, depthView},
+                     {2, outputBuffer, alignedResultSize * sampleOffset, kResultSize}}));
+            computePassEncoder.SetBindGroup(0, bindGroup);
             computePassEncoder.Dispatch(1);
             computePassEncoder.EndPass();
         }
