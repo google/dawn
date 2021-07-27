@@ -88,7 +88,7 @@ fn main([[location(0)]] var_a : f32) -> [[builtin(position)]] vec4<f32> {
 
   VertexPulling::Config cfg;
   cfg.vertex_state = {
-      {{15, InputStepMode::kVertex, {{VertexFormat::kFloat32, 0, 0}}}}};
+      {{15, VertexStepMode::kVertex, {{VertexFormat::kFloat32, 0, 0}}}}};
   cfg.entry_point_name = "main";
 
   DataMap data;
@@ -157,7 +157,7 @@ fn main([[builtin(vertex_index)]] tint_pulling_vertex_index : u32) -> [[builtin(
 
   VertexPulling::Config cfg;
   cfg.vertex_state = {
-      {{4, InputStepMode::kVertex, {{VertexFormat::kFloat32, 0, 0}}}}};
+      {{4, VertexStepMode::kVertex, {{VertexFormat::kFloat32, 0, 0}}}}};
   cfg.entry_point_name = "main";
 
   DataMap data;
@@ -196,7 +196,7 @@ fn main([[builtin(instance_index)]] tint_pulling_instance_index : u32) -> [[buil
 
   VertexPulling::Config cfg;
   cfg.vertex_state = {
-      {{4, InputStepMode::kInstance, {{VertexFormat::kFloat32, 0, 0}}}}};
+      {{4, VertexStepMode::kInstance, {{VertexFormat::kFloat32, 0, 0}}}}};
   cfg.entry_point_name = "main";
 
   DataMap data;
@@ -235,7 +235,7 @@ fn main([[builtin(vertex_index)]] tint_pulling_vertex_index : u32) -> [[builtin(
 
   VertexPulling::Config cfg;
   cfg.vertex_state = {
-      {{4, InputStepMode::kVertex, {{VertexFormat::kFloat32, 0, 0}}}}};
+      {{4, VertexStepMode::kVertex, {{VertexFormat::kFloat32, 0, 0}}}}};
   cfg.pulling_group = 5;
   cfg.entry_point_name = "main";
 
@@ -284,7 +284,7 @@ fn main([[builtin(vertex_index)]] tint_pulling_vertex_index : u32) -> [[builtin(
 
   VertexPulling::Config cfg;
   cfg.vertex_state = {
-      {{4, InputStepMode::kVertex, {{VertexFormat::kFloat32, 0, 0}}}}};
+      {{4, VertexStepMode::kVertex, {{VertexFormat::kFloat32, 0, 0}}}}};
   cfg.entry_point_name = "main";
 
   DataMap data;
@@ -335,12 +335,12 @@ fn main([[builtin(vertex_index)]] custom_vertex_index : u32, [[builtin(instance_
   cfg.vertex_state = {{
       {
           4,
-          InputStepMode::kVertex,
+          VertexStepMode::kVertex,
           {{VertexFormat::kFloat32, 0, 0}},
       },
       {
           4,
-          InputStepMode::kInstance,
+          VertexStepMode::kInstance,
           {{VertexFormat::kFloat32, 0, 1}},
       },
   }};
@@ -415,12 +415,12 @@ fn main(tint_symbol_1 : tint_symbol) -> [[builtin(position)]] vec4<f32> {
   cfg.vertex_state = {{
       {
           4,
-          InputStepMode::kVertex,
+          VertexStepMode::kVertex,
           {{VertexFormat::kFloat32, 0, 0}},
       },
       {
           4,
-          InputStepMode::kInstance,
+          VertexStepMode::kInstance,
           {{VertexFormat::kFloat32, 0, 1}},
       },
   }};
@@ -492,12 +492,12 @@ fn main(indices : Indices) -> [[builtin(position)]] vec4<f32> {
   cfg.vertex_state = {{
       {
           4,
-          InputStepMode::kVertex,
+          VertexStepMode::kVertex,
           {{VertexFormat::kFloat32, 0, 0}},
       },
       {
           4,
-          InputStepMode::kInstance,
+          VertexStepMode::kInstance,
           {{VertexFormat::kFloat32, 0, 1}},
       },
   }};
@@ -543,7 +543,7 @@ fn main([[builtin(vertex_index)]] tint_pulling_vertex_index : u32) -> [[builtin(
   VertexPulling::Config cfg;
   cfg.vertex_state = {
       {{16,
-        InputStepMode::kVertex,
+        VertexStepMode::kVertex,
         {{VertexFormat::kFloat32, 0, 0}, {VertexFormat::kFloat32x4, 0, 1}}}}};
   cfg.entry_point_name = "main";
 
@@ -596,9 +596,9 @@ fn main([[builtin(vertex_index)]] tint_pulling_vertex_index : u32) -> [[builtin(
 
   VertexPulling::Config cfg;
   cfg.vertex_state = {{
-      {8, InputStepMode::kVertex, {{VertexFormat::kFloat32x2, 0, 0}}},
-      {12, InputStepMode::kVertex, {{VertexFormat::kFloat32x3, 0, 1}}},
-      {16, InputStepMode::kVertex, {{VertexFormat::kFloat32x4, 0, 2}}},
+      {8, VertexStepMode::kVertex, {{VertexFormat::kFloat32x2, 0, 0}}},
+      {12, VertexStepMode::kVertex, {{VertexFormat::kFloat32x3, 0, 1}}},
+      {16, VertexStepMode::kVertex, {{VertexFormat::kFloat32x4, 0, 2}}},
   }};
   cfg.entry_point_name = "main";
 
@@ -650,7 +650,7 @@ fn main([[builtin(vertex_index)]] tint_pulling_vertex_index_1 : u32) -> [[builti
   VertexPulling::Config cfg;
   cfg.vertex_state = {
       {{16,
-        InputStepMode::kVertex,
+        VertexStepMode::kVertex,
         {{VertexFormat::kFloat32, 0, 0}, {VertexFormat::kFloat32x4, 0, 1}}}}};
   cfg.entry_point_name = "main";
 
@@ -779,7 +779,7 @@ fn main([[builtin(vertex_index)]] tint_pulling_vertex_index : u32) -> [[builtin(
 
   VertexPulling::Config cfg;
   cfg.vertex_state = {{{256,
-                        InputStepMode::kVertex,
+                        VertexStepMode::kVertex,
                         {
                             {VertexFormat::kUint8x2, 64, 0},
                             {VertexFormat::kUint8x4, 64, 1},
@@ -940,7 +940,7 @@ fn main([[builtin(vertex_index)]] tint_pulling_vertex_index : u32) -> [[builtin(
 
   VertexPulling::Config cfg;
   cfg.vertex_state = {{{256,
-                        InputStepMode::kVertex,
+                        VertexStepMode::kVertex,
                         {
                             {VertexFormat::kUint8x2, 63, 0},
                             {VertexFormat::kUint8x4, 63, 1},
@@ -1100,7 +1100,7 @@ fn main([[builtin(vertex_index)]] tint_pulling_vertex_index : u32) -> [[builtin(
 
   VertexPulling::Config cfg;
   cfg.vertex_state = {{{256,
-                        InputStepMode::kVertex,
+                        VertexStepMode::kVertex,
                         {
                             {VertexFormat::kUint8x2, 64, 0},
                             {VertexFormat::kUint8x4, 64, 1},

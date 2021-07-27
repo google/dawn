@@ -63,8 +63,8 @@ transform::VertexBufferLayoutDescriptor ExtractVertexBufferLayoutDescriptor(
     Reader* r) {
   transform::VertexBufferLayoutDescriptor desc;
   desc.array_stride = r->read<uint32_t>();
-  desc.step_mode = r->enum_class<transform::InputStepMode>(
-      static_cast<uint8_t>(transform::InputStepMode::kLastEntry) + 1);
+  desc.step_mode = r->enum_class<transform::VertexStepMode>(
+      static_cast<uint8_t>(transform::VertexStepMode::kLastEntry) + 1);
   desc.attributes = r->vector(ExtractVertexAttributeDescriptor);
   return desc;
 }

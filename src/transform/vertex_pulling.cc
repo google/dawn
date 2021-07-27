@@ -298,7 +298,7 @@ struct State {
         return nullptr;
       }
 
-      auto* index_expr = buffer_layout.step_mode == InputStepMode::kVertex
+      auto* index_expr = buffer_layout.step_mode == VertexStepMode::kVertex
                              ? vertex_index_expr()
                              : instance_index_expr();
 
@@ -860,7 +860,7 @@ struct State {
     // Insert new parameters for vertex_index and instance_index if needed.
     if (!vertex_index_expr) {
       for (const VertexBufferLayoutDescriptor& layout : cfg.vertex_state) {
-        if (layout.step_mode == InputStepMode::kVertex) {
+        if (layout.step_mode == VertexStepMode::kVertex) {
           auto name = ctx.dst->Symbols().New("tint_pulling_vertex_index");
           new_function_parameters.push_back(
               ctx.dst->Param(name, ctx.dst->ty.u32(),
@@ -872,7 +872,7 @@ struct State {
     }
     if (!instance_index_expr) {
       for (const VertexBufferLayoutDescriptor& layout : cfg.vertex_state) {
-        if (layout.step_mode == InputStepMode::kInstance) {
+        if (layout.step_mode == VertexStepMode::kInstance) {
           auto name = ctx.dst->Symbols().New("tint_pulling_instance_index");
           new_function_parameters.push_back(
               ctx.dst->Param(name, ctx.dst->ty.u32(),
@@ -945,7 +945,7 @@ VertexBufferLayoutDescriptor::VertexBufferLayoutDescriptor() = default;
 
 VertexBufferLayoutDescriptor::VertexBufferLayoutDescriptor(
     uint32_t in_array_stride,
-    InputStepMode in_step_mode,
+    VertexStepMode in_step_mode,
     std::vector<VertexAttributeDescriptor> in_attributes)
     : array_stride(in_array_stride),
       step_mode(in_step_mode),
