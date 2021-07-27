@@ -120,6 +120,7 @@ config("dawn_internal") {
       "-Wstrict-prototypes",
       "-Wtautological-unsigned-zero-compare",
       "-Wunreachable-code-aggressive",
+      "-Wunused-but-set-variable",
     ]
 
     if (is_win) {

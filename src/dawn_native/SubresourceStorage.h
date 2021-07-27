@@ -393,13 +393,11 @@ namespace dawn_native {
         ASSERT(mipLevel < mMipLevelCount);
 
         // Fastest path, the aspect is compressed!
-        uint32_t dataIndex = aspectIndex * mArrayLayerCount * mMipLevelCount;
         if (mAspectCompressed[aspectIndex]) {
             return DataInline(aspectIndex);
         }
 
         // Fast path, the array layer is compressed.
-        dataIndex += arrayLayer * mMipLevelCount;
         if (LayerCompressed(aspectIndex, arrayLayer)) {
             return Data(aspectIndex, arrayLayer);
         }

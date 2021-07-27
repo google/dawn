@@ -59,6 +59,7 @@ namespace dawn_native {
 
         const Format* format;
         DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->format));
+        DAWN_UNUSED(format);
 
         switch (descriptor->format) {
             case wgpu::TextureFormat::RGBA8Unorm:

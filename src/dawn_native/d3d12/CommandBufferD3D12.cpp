@@ -987,7 +987,6 @@ namespace dawn_native { namespace d3d12 {
                                                 BindGroupStateTracker* bindingTracker,
                                                 const ComputePassResourceUsage& resourceUsages) {
         uint64_t currentDispatch = 0;
-        PipelineLayout* lastLayout = nullptr;
         ID3D12GraphicsCommandList* commandList = commandContext->GetCommandList();
 
         Command type;
@@ -1035,8 +1034,6 @@ namespace dawn_native { namespace d3d12 {
                     commandList->SetPipelineState(pipeline->GetPipelineState());
 
                     bindingTracker->OnSetPipeline(pipeline);
-
-                    lastLayout = layout;
                     break;
                 }
 
