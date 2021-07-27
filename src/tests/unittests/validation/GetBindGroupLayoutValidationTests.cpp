@@ -387,7 +387,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
             [[group(0), binding(0)]] var mySampler: sampler;
 
             [[stage(fragment)]] fn main() {
-                let s : sampler = mySampler;
+                ignore(mySampler);
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -753,7 +753,7 @@ TEST_F(GetBindGroupLayoutTests, StageAggregation) {
     wgpu::ShaderModule vsModuleSampler = utils::CreateShaderModule(device, R"(
         [[group(0), binding(0)]] var mySampler: sampler;
         [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
-            let s : sampler = mySampler;
+            ignore(mySampler);
             return vec4<f32>();
         })");
 
@@ -764,7 +764,7 @@ TEST_F(GetBindGroupLayoutTests, StageAggregation) {
     wgpu::ShaderModule fsModuleSampler = utils::CreateShaderModule(device, R"(
         [[group(0), binding(0)]] var mySampler: sampler;
         [[stage(fragment)]] fn main() {
-            let s : sampler = mySampler;
+            ignore(mySampler);
         })");
 
     // Create BGLs with minBufferBindingSize 4 and 64.
