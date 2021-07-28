@@ -100,26 +100,6 @@ TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Multiple) {
 13:43 note: previously consumed location(0))");
 }
 
-TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Struct) {
-  // struct Output {
-  //   a : f32;
-  // };
-  // [[stage(vertex)]]
-  // fn main() -> [[location(0)]] Output {
-  //   return Output();
-  // }
-  auto* output = Structure("Output", {Member("a", ty.f32())});
-  Func(Source{{12, 34}}, "main", {}, ty.Of(output),
-       {Return(Construct(ty.Of(output)))}, {Stage(ast::PipelineStage::kVertex)},
-       {Location(Source{{13, 43}}, 0)});
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "13:43 error: entry point IO attributes must not be used on structure "
-      "return types");
-}
-
 TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_Valid) {
   // struct Output {
   //   [[location(0)]] a : f32;
@@ -186,53 +166,6 @@ TEST_F(ResolverEntryPointValidationTest,
 12:34 note: while analysing entry point 'main')");
 }
 
-TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_NestedStruct) {
-  // struct Inner {
-  //   [[location(0)]] b : f32;
-  // };
-  // struct Output {
-  //   [[location(0)]] a : Inner;
-  // };
-  // [[stage(fragment)]]
-  // fn main() -> Output {
-  //   return Output();
-  // }
-  auto* inner = Structure(
-      "Inner", {Member(Source{{13, 43}}, "a", ty.f32(), {Location(0)})});
-  auto* output = Structure(
-      "Output", {Member(Source{{14, 52}}, "a", ty.Of(inner), {Location(0)})});
-  Func(Source{{12, 34}}, "main", {}, ty.Of(output),
-       {Return(Construct(ty.Of(output)))},
-       {Stage(ast::PipelineStage::kFragment)});
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      R"(14:52 error: entry point IO types cannot contain nested structures
-12:34 note: while analysing entry point 'main')");
-}
-
-TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_RuntimeArray) {
-  // [[block]]
-  // struct Output {
-  //   [[location(0)]] a : array<f32>;
-  // };
-  // [[stage(fragment)]]
-  // fn main() -> Output {
-  //   return Output();
-  // }
-  auto* output = Structure(
-      "Output",
-      {Member(Source{{13, 43}}, "a", ty.array<float>(), {Location(0)})},
-      {create<ast::StructBlockDecoration>()});
-  Func(Source{{12, 34}}, "main", {}, ty.Of(output),
-       {Return(Construct(ty.Of(output)))},
-       {Stage(ast::PipelineStage::kFragment)});
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            R"(error: function return type must be a constructible type)");
-}
 
 TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_DuplicateBuiltins) {
   // struct Output {
@@ -254,28 +187,6 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_DuplicateBuiltins) {
   EXPECT_EQ(
       r()->error(),
       R"(12:34 error: builtin(frag_depth) attribute appears multiple times as pipeline output
-12:34 note: while analysing entry point 'main')");
-}
-
-TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_DuplicateLocation) {
-  // struct Output {
-  //   [[location(1)]] a : f32;
-  //   [[location(1)]] b : f32;
-  // };
-  // [[stage(fragment)]]
-  // fn main() -> Output {
-  //   return Output();
-  // }
-  auto* output = Structure("Output", {Member("a", ty.f32(), {Location(1)}),
-                                      Member("b", ty.f32(), {Location(1)})});
-  Func(Source{{12, 34}}, "main", {}, ty.Of(output),
-       {Return(Construct(ty.Of(output)))},
-       {Stage(ast::PipelineStage::kFragment)});
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      R"(12:34 error: location(1) attribute appears multiple times as pipeline output
 12:34 note: while analysing entry point 'main')");
 }
 
@@ -313,24 +224,6 @@ TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Multiple) {
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(), R"(14:52 error: multiple entry point IO attributes
 13:43 note: previously consumed location(0))");
-}
-
-TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Struct) {
-  // struct Input {
-  //   a : f32;
-  // };
-  // [[stage(fragment)]]
-  // fn main([[location(0)]] param : Input) {}
-  auto* input = Structure("Input", {Member("a", ty.f32())});
-  auto* param = Param("param", ty.Of(input), {Location(Source{{13, 43}}, 0)});
-  Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
-       {Stage(ast::PipelineStage::kFragment)});
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "13:43 error: entry point IO attributes must not be used on structure "
-      "parameters");
 }
 
 TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_Valid) {
@@ -392,51 +285,6 @@ TEST_F(ResolverEntryPointValidationTest,
 12:34 note: while analysing entry point 'main')");
 }
 
-TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_NestedStruct) {
-  // struct Inner {
-  //   [[location(0)]] b : f32;
-  // };
-  // struct Input {
-  //   [[location(0)]] a : Inner;
-  // };
-  // [[stage(fragment)]]
-  // fn main(param : Input) {}
-  auto* inner = Structure(
-      "Inner", {Member(Source{{13, 43}}, "a", ty.f32(), {Location(0)})});
-  auto* input = Structure(
-      "Input", {Member(Source{{14, 52}}, "a", ty.Of(inner), {Location(0)})});
-  auto* param = Param("param", ty.Of(input));
-  Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
-       {Stage(ast::PipelineStage::kFragment)});
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      R"(14:52 error: entry point IO types cannot contain nested structures
-12:34 note: while analysing entry point 'main')");
-}
-
-TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_RuntimeArray) {
-  // [[block]]
-  // struct Input {
-  //   [[location(0)]] a : array<f32>;
-  // };
-  // [[stage(fragment)]]
-  // fn main(param : Input) {}
-  auto* input = Structure(
-      "Input",
-      {Member(Source{{13, 43}}, "a", ty.array<float>(), {Location(0)})},
-      {create<ast::StructBlockDecoration>()});
-  auto* param = Param("param", ty.Of(input));
-  Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
-       {Stage(ast::PipelineStage::kFragment)});
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      R"(error: store type of function parameter must be a constructible type)");
-}
-
 TEST_F(ResolverEntryPointValidationTest, Parameter_DuplicateBuiltins) {
   // [[stage(fragment)]]
   // fn main([[builtin(sample_index)]] param_a : u32,
@@ -477,44 +325,6 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_DuplicateBuiltins) {
   EXPECT_EQ(
       r()->error(),
       R"(12:34 error: builtin(sample_index) attribute appears multiple times as pipeline input
-12:34 note: while analysing entry point 'main')");
-}
-
-TEST_F(ResolverEntryPointValidationTest, Parameter_DuplicateLocation) {
-  // [[stage(fragment)]]
-  // fn main([[location(1)]] param_a : f32,
-  //         [[location(1)]] param_b : f32) {}
-  auto* param_a = Param("param_a", ty.u32(), {Location(1)});
-  auto* param_b = Param("param_b", ty.u32(), {Location(1)});
-  Func(Source{{12, 34}}, "main", {param_a, param_b}, ty.void_(), {},
-       {Stage(ast::PipelineStage::kFragment)});
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: location(1) attribute appears multiple times as "
-            "pipeline input");
-}
-
-TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_DuplicateLocation) {
-  // struct InputA {
-  //   [[location(1)]] a : f32;
-  // };
-  // struct InputB {
-  //   [[location(1)]] a : f32;
-  // };
-  // [[stage(fragment)]]
-  // fn main(param_a : InputA, param_b : InputB) {}
-  auto* input_a = Structure("InputA", {Member("a", ty.f32(), {Location(1)})});
-  auto* input_b = Structure("InputB", {Member("a", ty.f32(), {Location(1)})});
-  auto* param_a = Param("param_a", ty.Of(input_a));
-  auto* param_b = Param("param_b", ty.Of(input_b));
-  Func(Source{{12, 34}}, "main", {param_a, param_b}, ty.void_(), {},
-       {Stage(ast::PipelineStage::kFragment)});
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      R"(12:34 error: location(1) attribute appears multiple times as pipeline input
 12:34 note: while analysing entry point 'main')");
 }
 
@@ -638,6 +448,356 @@ INSTANTIATE_TEST_SUITE_P(ResolverEntryPointValidationTest,
                          testing::ValuesIn(cases));
 
 }  // namespace TypeValidationTests
+
+namespace LocationDecorationTests {
+namespace {
+using LocationDecorationTests = ResolverTest;
+
+TEST_F(LocationDecorationTests, Pass) {
+  // [[stage(fragment)]]
+  // fn frag_main([[location(0)]] a: i32) {}
+
+  auto* p = Param(Source{{12, 34}}, "a", ty.i32(), {Location(0)});
+  Func("frag_main", {p}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kFragment)});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(LocationDecorationTests, BadType_Input_bool) {
+  // [[stage(fragment)]]
+  // fn frag_main([[location(0)]] a: bool) {}
+
+  auto* p =
+      Param(Source{{12, 34}}, "a", ty.bool_(), {Location(Source{{34, 56}}, 0)});
+  Func("frag_main", {p}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kFragment)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: cannot apply 'location' attribute to declaration of "
+            "type 'bool'\n"
+            "34:56 note: 'location' attribute must only be applied to "
+            "declarations of numeric scalar or numeric vector type");
+}
+
+TEST_F(LocationDecorationTests, BadType_Output_Array) {
+  // [[stage(fragment)]]
+  // fn frag_main()->[[location(0)]] array<f32, 2> { return array<f32, 2>(); }
+
+  Func(Source{{12, 34}}, "frag_main", {}, ty.array<f32, 2>(),
+       {Return(Construct(ty.array<f32, 2>()))},
+       {Stage(ast::PipelineStage::kFragment)}, {Location(Source{{34, 56}}, 0)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: cannot apply 'location' attribute to declaration of "
+            "type 'array<f32, 2>'\n"
+            "34:56 note: 'location' attribute must only be applied to "
+            "declarations of numeric scalar or numeric vector type");
+}
+
+TEST_F(LocationDecorationTests, BadType_Input_Struct) {
+  // struct Input {
+  //   a : f32;
+  // };
+  // [[stage(fragment)]]
+  // fn main([[location(0)]] param : Input) {}
+  auto* input = Structure("Input", {Member("a", ty.f32())});
+  auto* param = Param(Source{{12, 34}}, "param", ty.Of(input),
+                      {Location(Source{{13, 43}}, 0)});
+  Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kFragment)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: cannot apply 'location' attribute to declaration of "
+            "type 'Input'\n"
+            "13:43 note: 'location' attribute must only be applied to "
+            "declarations of numeric scalar or numeric vector type");
+}
+
+TEST_F(LocationDecorationTests, BadType_Input_Struct_NestedStruct) {
+  // struct Inner {
+  //   [[location(0)]] b : f32;
+  // };
+  // struct Input {
+  //   [[location(0)]] a : Inner;
+  // };
+  // [[stage(fragment)]]
+  // fn main(param : Input) {}
+  auto* inner = Structure(
+      "Inner", {Member(Source{{13, 43}}, "a", ty.f32(), {Location(0)})});
+  auto* input = Structure("Input", {Member(Source{{14, 52}}, "a", ty.Of(inner),
+                                           {Location(Source{{12, 34}}, 0)})});
+  auto* param = Param("param", ty.Of(input));
+  Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kFragment)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "14:52 error: cannot apply 'location' attribute to declaration of "
+            "type 'Inner'\n"
+            "12:34 note: 'location' attribute must only be applied to "
+            "declarations of numeric scalar or numeric vector type");
+}
+
+TEST_F(LocationDecorationTests, BadType_Input_Struct_RuntimeArray) {
+  // [[block]]
+  // struct Input {
+  //   [[location(0)]] a : array<f32>;
+  // };
+  // [[stage(fragment)]]
+  // fn main(param : Input) {}
+  auto* input = Structure(
+      "Input",
+      {Member(Source{{13, 43}}, "a", ty.array<float>(), {Location(0)})},
+      {create<ast::StructBlockDecoration>()});
+  auto* param = Param("param", ty.Of(input));
+  Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kFragment)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "13:43 error: cannot apply 'location' attribute to declaration of "
+            "type 'array<f32>'\n"
+            "note: 'location' attribute must only be applied to declarations "
+            "of numeric scalar or numeric vector type");
+}
+
+TEST_F(LocationDecorationTests, BadMemberType_Input) {
+  // [[block]]
+  // struct S { [[location(0)]] m: array<i32>; };
+  // [[stage(fragment)]]
+  // fn frag_main( a: S) {}
+
+  auto* m = Member(Source{{34, 56}}, "m", ty.array<i32>(),
+                   ast::DecorationList{Location(Source{{12, 34}}, 0u)});
+  auto* s = Structure("S", {m}, ast::DecorationList{StructBlock()});
+  auto* p = Param("a", ty.Of(s));
+
+  Func("frag_main", {p}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kFragment)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "34:56 error: cannot apply 'location' attribute to declaration of "
+            "type 'array<i32>'\n"
+            "12:34 note: 'location' attribute must only be applied to "
+            "declarations of numeric scalar or numeric vector type");
+}
+
+TEST_F(LocationDecorationTests, BadMemberType_Output) {
+  // struct S { [[location(0)]] m: atomic<i32>; };
+  // [[stage(fragment)]]
+  // fn frag_main() -> S {}
+  auto* m = Member(Source{{34, 56}}, "m", ty.atomic<i32>(),
+                   ast::DecorationList{Location(Source{{12, 34}}, 0u)});
+  auto* s = Structure("S", {m});
+
+  Func("frag_main", {}, ty.Of(s), {Return(Construct(ty.Of(s)))},
+       {Stage(ast::PipelineStage::kFragment)}, {});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "34:56 error: cannot apply 'location' attribute to declaration of "
+            "type 'atomic<i32>'\n"
+            "12:34 note: 'location' attribute must only be applied to "
+            "declarations of numeric scalar or numeric vector type");
+}
+
+TEST_F(LocationDecorationTests, BadMemberType_Unused) {
+  // struct S { [[location(0)]] m: mat3x2<f32>; };
+
+  auto* m = Member(Source{{34, 56}}, "m", ty.mat3x2<f32>(),
+                   ast::DecorationList{Location(Source{{12, 34}}, 0u)});
+  Structure("S", {m});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "34:56 error: cannot apply 'location' attribute to declaration of "
+            "type 'mat3x2<f32>'\n"
+            "12:34 note: 'location' attribute must only be applied to "
+            "declarations of numeric scalar or numeric vector type");
+}
+
+TEST_F(LocationDecorationTests, ReturnType_Struct_Valid) {
+  // struct Output {
+  //   [[location(0)]] a : f32;
+  //   [[builtin(frag_depth)]] b : f32;
+  // };
+  // [[stage(fragment)]]
+  // fn main() -> Output {
+  //   return Output();
+  // }
+  auto* output = Structure(
+      "Output", {Member("a", ty.f32(), {Location(0)}),
+                 Member("b", ty.f32(), {Builtin(ast::Builtin::kFragDepth)})});
+  Func(Source{{12, 34}}, "main", {}, ty.Of(output),
+       {Return(Construct(ty.Of(output)))},
+       {Stage(ast::PipelineStage::kFragment)});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(LocationDecorationTests, ReturnType_Struct) {
+  // struct Output {
+  //   a : f32;
+  // };
+  // [[stage(vertex)]]
+  // fn main() -> [[location(0)]] Output {
+  //   return Output();
+  // }
+  auto* output = Structure("Output", {Member("a", ty.f32())});
+  Func(Source{{12, 34}}, "main", {}, ty.Of(output),
+       {Return(Construct(ty.Of(output)))}, {Stage(ast::PipelineStage::kVertex)},
+       {Location(Source{{13, 43}}, 0)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: cannot apply 'location' attribute to declaration of "
+            "type 'Output'\n"
+            "13:43 note: 'location' attribute must only be applied to "
+            "declarations of numeric scalar or numeric vector type");
+}
+
+TEST_F(LocationDecorationTests, ReturnType_Struct_NestedStruct) {
+  // struct Inner {
+  //   [[location(0)]] b : f32;
+  // };
+  // struct Output {
+  //   [[location(0)]] a : Inner;
+  // };
+  auto* inner = Structure(
+      "Inner", {Member(Source{{13, 43}}, "a", ty.f32(), {Location(0)})});
+  Structure("Output", {Member(Source{{14, 52}}, "a", ty.Of(inner),
+                              {Location(Source{{12, 34}}, 0)})});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "14:52 error: cannot apply 'location' attribute to declaration of "
+            "type 'Inner'\n"
+            "12:34 note: 'location' attribute must only be applied to "
+            "declarations of numeric scalar or numeric vector type");
+}
+
+TEST_F(LocationDecorationTests, ReturnType_Struct_RuntimeArray) {
+  // [[block]]
+  // struct Output {
+  //   [[location(0)]] a : array<f32>;
+  // };
+  // [[stage(fragment)]]
+  // fn main() -> Output {
+  //   return Output();
+  // }
+  auto* output = Structure("Output",
+                           {Member(Source{{13, 43}}, "a", ty.array<float>(),
+                                   {Location(Source{{12, 34}}, 0)})},
+                           {create<ast::StructBlockDecoration>()});
+  Func(Source{{12, 34}}, "main", {}, ty.Of(output),
+       {Return(Construct(ty.Of(output)))},
+       {Stage(ast::PipelineStage::kFragment)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "13:43 error: cannot apply 'location' attribute to declaration of "
+            "type 'array<f32>'\n"
+            "12:34 note: 'location' attribute must only be applied to "
+            "declarations of numeric scalar or numeric vector type");
+}
+
+TEST_F(LocationDecorationTests, ComputeShaderLocation_Input) {
+  Func("main", {}, ty.i32(), {Return(Expr(1))},
+       {Stage(ast::PipelineStage::kCompute),
+        create<ast::WorkgroupDecoration>(Source{{12, 34}}, Expr(1))},
+       ast::DecorationList{Location(Source{{12, 34}}, 1)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: decoration is not valid for compute shader output");
+}
+
+TEST_F(LocationDecorationTests, ComputeShaderLocation_Output) {
+  auto* input = Param("input", ty.i32(),
+                      ast::DecorationList{Location(Source{{12, 34}}, 0u)});
+  Func("main", {input}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute),
+        create<ast::WorkgroupDecoration>(Source{{12, 34}}, Expr(1))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: decoration is not valid for compute shader inputs");
+}
+
+TEST_F(LocationDecorationTests, ComputeShaderLocationStructMember_Output) {
+  auto* m = Member("m", ty.i32(),
+                   ast::DecorationList{Location(Source{{12, 34}}, 0u)});
+  auto* s = Structure("S", {m});
+  Func(Source{{56, 78}}, "main", {}, ty.Of(s),
+       ast::StatementList{Return(Expr(Construct(ty.Of(s))))},
+       {Stage(ast::PipelineStage::kCompute),
+        create<ast::WorkgroupDecoration>(Source{{12, 34}}, Expr(1))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: decoration is not valid for compute shader output\n"
+            "56:78 note: while analysing entry point 'main'");
+}
+
+TEST_F(LocationDecorationTests, ComputeShaderLocationStructMember_Input) {
+  auto* m = Member("m", ty.i32(),
+                   ast::DecorationList{Location(Source{{12, 34}}, 0u)});
+  auto* s = Structure("S", {m});
+  auto* input = Param("input", ty.Of(s));
+  Func(Source{{56, 78}}, "main", {input}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute),
+        create<ast::WorkgroupDecoration>(Source{{12, 34}}, Expr(1))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: decoration is not valid for compute shader inputs\n"
+            "56:78 note: while analysing entry point 'main'");
+}
+
+TEST_F(LocationDecorationTests, Duplicate_input) {
+  // [[stage(fragment)]]
+  // fn main([[location(1)]] param_a : f32,
+  //         [[location(1)]] param_b : f32) {}
+  auto* param_a = Param("param_a", ty.u32(), {Location(1)});
+  auto* param_b = Param("param_b", ty.u32(), {Location(Source{{12, 34}}, 1)});
+  Func(Source{{12, 34}}, "main", {param_a, param_b}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kFragment)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: location(1) attribute appears multiple times");
+}
+
+TEST_F(LocationDecorationTests, Duplicate_struct) {
+  // struct InputA {
+  //   [[location(1)]] a : f32;
+  // };
+  // struct InputB {
+  //   [[location(1)]] a : f32;
+  // };
+  // [[stage(fragment)]]
+  // fn main(param_a : InputA, param_b : InputB) {}
+  auto* input_a = Structure("InputA", {Member("a", ty.f32(), {Location(1)})});
+  auto* input_b = Structure(
+      "InputB", {Member("a", ty.f32(), {Location(Source{{34, 56}}, 1)})});
+  auto* param_a = Param("param_a", ty.Of(input_a));
+  auto* param_b = Param("param_b", ty.Of(input_b));
+  Func(Source{{12, 34}}, "main", {param_a, param_b}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kFragment)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "34:56 error: location(1) attribute appears multiple times\n"
+            "12:34 note: while analysing entry point 'main'");
+}
+
+}  // namespace
+}  // namespace LocationDecorationTests
 
 }  // namespace
 }  // namespace resolver

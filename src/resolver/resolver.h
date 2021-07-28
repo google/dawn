@@ -291,6 +291,11 @@ class Resolver {
   bool ValidateGlobalVariable(const VariableInfo* var);
   bool ValidateInterpolateDecoration(const ast::InterpolateDecoration* deco,
                                      const sem::Type* storage_type);
+  bool ValidateLocationDecoration(const ast::LocationDecoration* location,
+                                  const sem::Type* type,
+                                  std::unordered_set<uint32_t>& locations,
+                                  const Source& source,
+                                  const bool is_input = false);
   bool ValidateMatrix(const sem::Matrix* ty, const Source& source);
   bool ValidateFunctionParameter(const ast::Function* func,
                                  const VariableInfo* info);

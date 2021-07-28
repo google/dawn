@@ -1500,19 +1500,11 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
         }
         pipeline_io_attribute = deco;
 
-        if (locations.count(location->value())) {
-          AddError(deco_to_str(location) +
-                       " attribute appears multiple times as pipeline " +
-                       (param_or_ret == ParamOrRetType::kParameter ? "input"
-                                                                   : "output"),
-                   func->source());
+        bool is_input = param_or_ret == ParamOrRetType::kParameter;
+        if (!ValidateLocationDecoration(location, ty, locations, source,
+                                        is_input)) {
           return false;
         }
-
-        if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
-          is_invalid_compute_shader_decoration = true;
-        }
-        locations.emplace(location->value());
       } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
         if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
           is_invalid_compute_shader_decoration = true;
@@ -1535,19 +1527,9 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
       }
     }
 
-    // Check that we saw a pipeline IO attribute iff we need one.
-    if (ty->Is<sem::Struct>()) {
-      if (pipeline_io_attribute) {
-        AddError("entry point IO attributes must not be used on structure " +
-                     std::string(param_or_ret == ParamOrRetType::kParameter
-                                     ? "parameters"
-                                     : "return types"),
-                 pipeline_io_attribute->source());
-        return false;
-      }
-    } else if (IsValidationEnabled(
-                   decos, ast::DisabledValidation::kEntryPointParameter)) {
-      if (!pipeline_io_attribute) {
+    if (IsValidationEnabled(decos,
+                            ast::DisabledValidation::kEntryPointParameter)) {
+      if (!ty->Is<sem::Struct>() && !pipeline_io_attribute) {
         std::string err = "missing entry point IO attribute";
         if (!is_struct_member) {
           err +=
@@ -1558,29 +1540,23 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
         return false;
       }
 
-      auto* builtin = pipeline_io_attribute->As<ast::BuiltinDecoration>();
-      if (invariant_attribute &&
-          !(builtin && builtin->value() == ast::Builtin::kPosition)) {
-        AddError(
-            "invariant attribute must only be applied to a position builtin",
-            invariant_attribute->source());
-        return false;
-      }
-
-      // Check that all user defined attributes are numeric scalars, vectors
-      // of numeric scalars.
-      // Testing for being a struct is handled by the if portion above.
-      if (!builtin) {
-        if (!ty->is_numeric_scalar_or_vector()) {
+      if (invariant_attribute) {
+        bool has_position = false;
+        if (pipeline_io_attribute) {
+          if (auto* builtin =
+                  pipeline_io_attribute->As<ast::BuiltinDecoration>()) {
+            has_position = (builtin->value() == ast::Builtin::kPosition);
+          }
+        }
+        if (!has_position) {
           AddError(
-              "User defined entry point IO types must be a numeric scalar, "
-              "a numeric vector, or a structure",
-              source);
+              "invariant attribute must only be applied to a position "
+              "builtin",
+              invariant_attribute->source());
           return false;
         }
       }
     }
-
     return true;
   };
 
@@ -1588,39 +1564,17 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
   auto validate_entry_point_decorations = [&](const ast::DecorationList& decos,
                                               sem::Type* ty, Source source,
                                               ParamOrRetType param_or_ret) {
-    // Validate the decorations for the type.
     if (!validate_entry_point_decorations_inner(decos, ty, source, param_or_ret,
-                                                false)) {
+                                                /*is_struct_member*/ false)) {
       return false;
     }
 
     if (auto* str = ty->As<sem::Struct>()) {
-      // Validate the decorations for each struct members, and also check for
-      // invalid member types.
       for (auto* member : str->Members()) {
-        if (member->Type()->Is<sem::Struct>()) {
-          AddError("entry point IO types cannot contain nested structures",
-                   member->Declaration()->source());
-          AddNote("while analysing entry point '" +
-                      builder_->Symbols().NameFor(func->symbol()) + "'",
-                  func->source());
-          return false;
-        }
-
-        if (auto* arr = member->Type()->As<sem::Array>()) {
-          if (arr->IsRuntimeSized()) {
-            AddError("entry point IO types cannot contain runtime sized arrays",
-                     member->Declaration()->source());
-            AddNote("while analysing entry point '" +
-                        builder_->Symbols().NameFor(func->symbol()) + "'",
-                    func->source());
-            return false;
-          }
-        }
-
         if (!validate_entry_point_decorations_inner(
                 member->Declaration()->decorations(), member->Type(),
-                member->Declaration()->source(), param_or_ret, true)) {
+                member->Declaration()->source(), param_or_ret,
+                /*is_struct_member*/ true)) {
           AddNote("while analysing entry point '" +
                       builder_->Symbols().NameFor(func->symbol()) + "'",
                   func->source());
@@ -3920,6 +3874,7 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
     return false;
   }
 
+  std::unordered_set<uint32_t> locations;
   for (auto* member : str->Members()) {
     if (auto* r = member->Type()->As<sem::Array>()) {
       if (r->IsRuntimeSized()) {
@@ -3961,10 +3916,15 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
                  deco->source());
         return false;
       }
+
       if (auto* invariant = deco->As<ast::InvariantDecoration>()) {
         invariant_attribute = invariant;
-      }
-      if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+      } else if (auto* location = deco->As<ast::LocationDecoration>()) {
+        if (!ValidateLocationDecoration(location, member->Type(), locations,
+                                        member->Declaration()->source())) {
+          return false;
+        }
+      } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
         if (!ValidateBuiltinDecoration(builtin, member->Type(),
                                        /* is_input */ false,
                                        /* is_struct_member */ true)) {
@@ -4006,6 +3966,42 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
       return false;
     }
   }
+
+  return true;
+}
+
+bool Resolver::ValidateLocationDecoration(
+    const ast::LocationDecoration* location,
+    const sem::Type* type,
+    std::unordered_set<uint32_t>& locations,
+    const Source& source,
+    const bool is_input) {
+  std::string inputs_or_output = is_input ? "inputs" : "output";
+  if (current_function_ && current_function_->declaration->pipeline_stage() ==
+                               ast::PipelineStage::kCompute) {
+    AddError("decoration is not valid for compute shader " + inputs_or_output,
+             location->source());
+    return false;
+  }
+
+  if (!type->is_numeric_scalar_or_vector()) {
+    std::string invalid_type = type->FriendlyName(builder_->Symbols());
+    AddError("cannot apply 'location' attribute to declaration of type '" +
+                 invalid_type + "'",
+             source);
+    AddNote(
+        "'location' attribute must only be applied to declarations of "
+        "numeric scalar or numeric vector type",
+        location->source());
+    return false;
+  }
+
+  if (locations.count(location->value())) {
+    AddError(deco_to_str(location) + " attribute appears multiple times",
+             location->source());
+    return false;
+  }
+  locations.emplace(location->value());
 
   return true;
 }
