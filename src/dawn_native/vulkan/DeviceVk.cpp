@@ -322,6 +322,7 @@ namespace dawn_native { namespace vulkan {
         usedKnobs.features.fullDrawIndexUint32 = VK_TRUE;
         usedKnobs.features.imageCubeArray = VK_TRUE;
         usedKnobs.features.independentBlend = VK_TRUE;
+        usedKnobs.features.sampleRateShading = VK_TRUE;
 
         if (IsRobustnessEnabled()) {
             usedKnobs.features.robustBufferAccess = VK_TRUE;

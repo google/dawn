@@ -109,6 +109,9 @@ namespace dawn_native { namespace vulkan {
         if (!mDeviceInfo.features.independentBlend) {
             return DAWN_INTERNAL_ERROR("Vulkan independentBlend feature required.");
         }
+        if (!mDeviceInfo.features.sampleRateShading) {
+            return DAWN_INTERNAL_ERROR("Vulkan sampleRateShading feature required.");
+        }
 
         // Check base WebGPU limits are supported.
         const VkPhysicalDeviceLimits& limits = mDeviceInfo.properties.limits;

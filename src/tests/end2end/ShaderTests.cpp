@@ -366,6 +366,33 @@ struct Inputs {
     device.CreateRenderPipeline(&rpDesc);
 }
 
+// Test that WGSL built-in variable [[sample_index]] can be used in fragment shaders.
+TEST_P(ShaderTests, SampleIndex) {
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+[[stage(vertex)]]
+fn main([[location(0)]] pos : vec4<f32>) -> [[builtin(position)]] vec4<f32> {
+    return pos;
+})");
+
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+[[stage(fragment)]] fn main([[builtin(sample_index)]] sampleIndex : u32)
+    -> [[location(0)]] vec4<f32> {
+    return vec4<f32>(f32(sampleIndex), 1.0, 0.0, 1.0);
+})");
+
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+    descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+    descriptor.vertex.bufferCount = 1;
+    descriptor.cBuffers[0].arrayStride = 4 * sizeof(float);
+    descriptor.cBuffers[0].attributeCount = 1;
+    descriptor.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
+    descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+
+    device.CreateRenderPipeline(&descriptor);
+}
+
 DAWN_INSTANTIATE_TEST(ShaderTests,
                       D3D12Backend(),
                       MetalBackend(),
