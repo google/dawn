@@ -216,7 +216,9 @@ namespace dawn_native {
             desc.entries = entryVec.data();
             desc.entryCount = entryVec.size();
 
-            DAWN_TRY(ValidateBindGroupLayoutDescriptor(device, &desc));
+            if (device->IsValidationEnabled()) {
+                DAWN_TRY(ValidateBindGroupLayoutDescriptor(device, &desc));
+            }
             return device->GetOrCreateBindGroupLayout(&desc);
         };
 

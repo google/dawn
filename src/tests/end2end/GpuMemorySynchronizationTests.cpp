@@ -264,7 +264,9 @@ TEST_P(GpuMemorySyncTests, SampledAndROStorageTextureInComputePass) {
             output.storageOut = textureLoad(storageTex, vec2<i32>(0, 0)).x;
         }
     )");
-    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+    wgpu::ComputePipeline pipeline;
+    // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is passed.
+    EXPECT_DEPRECATION_WARNING(pipeline = device.CreateComputePipeline(&pipelineDesc));
 
     // Run the compute pipeline and store the result in the buffer.
     wgpu::BufferDescriptor outputDesc;

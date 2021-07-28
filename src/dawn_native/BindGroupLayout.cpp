@@ -159,6 +159,12 @@ namespace dawn_native {
                 if (storageTexture.access == wgpu::StorageTextureAccess::WriteOnly) {
                     allowedStages &= ~wgpu::ShaderStage::Vertex;
                 }
+
+                // TODO(crbug.com/dawn/1025): Remove after the deprecation period.
+                if (storageTexture.access == wgpu::StorageTextureAccess::ReadOnly) {
+                    device->EmitDeprecationWarning(
+                        "Readonly storage textures are deprecated and will be removed.");
+                }
             }
 
             const ExternalTextureBindingLayout* externalTextureBindingLayout = nullptr;

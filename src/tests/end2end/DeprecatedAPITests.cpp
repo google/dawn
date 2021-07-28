@@ -136,6 +136,19 @@ TEST_P(DeprecationTests, StoreOpClear) {
     pass.EndPass();
 }
 
+// Test that readonly storage textures are deprecated
+TEST_P(DeprecationTests, ReadOnlyStorageTextures) {
+    // Control case: WriteOnly storage textures are allowed.
+    utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::WriteOnly,
+                  wgpu::TextureFormat::R32Float}});
+
+    // Error case: ReadOnly storage textures are not allowed.
+    EXPECT_DEPRECATION_WARNING(utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::ReadOnly,
+                  wgpu::TextureFormat::R32Float}}));
+}
+
 DAWN_INSTANTIATE_TEST(DeprecationTests,
                       D3D12Backend(),
                       MetalBackend(),

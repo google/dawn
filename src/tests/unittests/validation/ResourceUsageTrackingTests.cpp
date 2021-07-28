@@ -822,11 +822,15 @@ namespace {
         wgpu::TextureView view = texture.CreateView();
 
         // Create a bind group to use the texture as sampled and readonly storage bindings
-        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-            device, {{0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute,
-                      wgpu::TextureSampleType::Float},
-                     {1, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute,
-                      wgpu::StorageTextureAccess::ReadOnly, kFormat}});
+        wgpu::BindGroupLayout bgl;
+        // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is
+        // passed.
+        EXPECT_DEPRECATION_WARNING(
+            bgl = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute,
+                          wgpu::TextureSampleType::Float},
+                         {1, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute,
+                          wgpu::StorageTextureAccess::ReadOnly, kFormat}}));
         wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, view}, {1, view}});
 
         // Test render pass
@@ -1100,9 +1104,13 @@ namespace {
             wgpu::TextureView view = texture.CreateView();
 
             // Create bind groups to use the texture as readonly and writeonly bindings
-            wgpu::BindGroupLayout readBGL = utils::MakeBindGroupLayout(
-                device,
-                {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadOnly, kFormat}});
+            wgpu::BindGroupLayout readBGL;
+            // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is
+            // passed.
+            EXPECT_DEPRECATION_WARNING(
+                readBGL = utils::MakeBindGroupLayout(
+                    device, {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadOnly,
+                              kFormat}}));
             wgpu::BindGroupLayout writeBGL = utils::MakeBindGroupLayout(
                 device,
                 {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::WriteOnly, kFormat}});
@@ -1133,9 +1141,13 @@ namespace {
             wgpu::BindGroupLayout writeBGL = utils::MakeBindGroupLayout(
                 device,
                 {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::WriteOnly, kFormat}});
-            wgpu::BindGroupLayout readBGL = utils::MakeBindGroupLayout(
-                device,
-                {{0, wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::ReadOnly, kFormat}});
+            wgpu::BindGroupLayout readBGL;
+            // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is
+            // passed.
+            EXPECT_DEPRECATION_WARNING(
+                readBGL = utils::MakeBindGroupLayout(
+                    device, {{0, wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::ReadOnly,
+                              kFormat}}));
             wgpu::BindGroup writeBG = utils::MakeBindGroup(device, writeBGL, {{0, view}});
             wgpu::BindGroup readBG = utils::MakeBindGroup(device, readBGL, {{0, view}});
 
@@ -1199,9 +1211,13 @@ namespace {
         // Test compute pass
         {
             // Create bind groups to use the texture as readonly and writeonly storage bindings
-            wgpu::BindGroupLayout readBGL = utils::MakeBindGroupLayout(
-                device,
-                {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadOnly, kFormat}});
+            wgpu::BindGroupLayout readBGL;
+            // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is
+            // passed.
+            EXPECT_DEPRECATION_WARNING(
+                readBGL = utils::MakeBindGroupLayout(
+                    device, {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadOnly,
+                              kFormat}}));
             wgpu::BindGroupLayout writeBGL = utils::MakeBindGroupLayout(
                 device,
                 {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::WriteOnly, kFormat}});
@@ -1270,9 +1286,13 @@ namespace {
         // Test compute pass
         {
             // Create the bind group to use the texture as readonly and writeonly storage bindings
-            wgpu::BindGroupLayout readBGL = utils::MakeBindGroupLayout(
-                device,
-                {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadOnly, kFormat}});
+            wgpu::BindGroupLayout readBGL;
+            // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is
+            // passed.
+            EXPECT_DEPRECATION_WARNING(
+                readBGL = utils::MakeBindGroupLayout(
+                    device, {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadOnly,
+                              kFormat}}));
             wgpu::BindGroupLayout writeBGL = utils::MakeBindGroupLayout(
                 device,
                 {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::WriteOnly, kFormat}});
@@ -1401,9 +1421,13 @@ namespace {
                 device,
                 {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::WriteOnly, kFormat}});
 
-            wgpu::BindGroupLayout readBGL = utils::MakeBindGroupLayout(
-                device,
-                {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadOnly, kFormat}});
+            wgpu::BindGroupLayout readBGL;
+            // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is
+            // passed.
+            EXPECT_DEPRECATION_WARNING(
+                readBGL = utils::MakeBindGroupLayout(
+                    device, {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadOnly,
+                              kFormat}}));
 
             wgpu::BindGroup writeBG0 = utils::MakeBindGroup(device, writeBGL, {{0, view0}});
             wgpu::BindGroup readBG0 = utils::MakeBindGroup(device, readBGL, {{0, view0}});
@@ -1455,10 +1479,15 @@ namespace {
         // usage doesn't reside in render related stages at all
         {
             // Create a bind group whose bindings are not visible in render pass
-            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-                device,
-                {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadOnly, kFormat},
-                 {1, wgpu::ShaderStage::None, wgpu::StorageTextureAccess::WriteOnly, kFormat}});
+            wgpu::BindGroupLayout bgl;
+            // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is
+            // passed.
+            EXPECT_DEPRECATION_WARNING(
+                bgl = utils::MakeBindGroupLayout(
+                    device,
+                    {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadOnly, kFormat},
+                     {1, wgpu::ShaderStage::None, wgpu::StorageTextureAccess::WriteOnly,
+                      kFormat}}));
             wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, view}, {1, view}});
 
             // These two bindings are invisible in render pass. But we still track these bindings.
@@ -1474,10 +1503,15 @@ namespace {
         // usage doesn't reside in compute related stage at all
         {
             // Create a bind group whose bindings are not visible in compute pass
-            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-                device,
-                {{0, wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::ReadOnly, kFormat},
-                 {1, wgpu::ShaderStage::None, wgpu::StorageTextureAccess::WriteOnly, kFormat}});
+            wgpu::BindGroupLayout bgl;
+            // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is
+            // passed.
+            EXPECT_DEPRECATION_WARNING(
+                bgl = utils::MakeBindGroupLayout(
+                    device, {{0, wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::ReadOnly,
+                              kFormat},
+                             {1, wgpu::ShaderStage::None, wgpu::StorageTextureAccess::WriteOnly,
+                              kFormat}}));
             wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, view}, {1, view}});
 
             // Create a no-op compute pipeline.
@@ -1508,9 +1542,13 @@ namespace {
             utils::ComboRenderPassDescriptor renderPass({view});
 
             // Create a bind group which use the texture as readonly storage in compute stage
-            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-                device,
-                {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadOnly, kFormat}});
+            wgpu::BindGroupLayout bgl;
+            // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is
+            // passed.
+            EXPECT_DEPRECATION_WARNING(
+                bgl = utils::MakeBindGroupLayout(
+                    device, {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadOnly,
+                              kFormat}}));
             wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, view}});
 
             // Texture usage in compute stage in bind group conflicts with render target. And
@@ -1526,10 +1564,15 @@ namespace {
         // Test compute pass
         {
             // Create a bind group which contains both fragment and compute stages
-            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-                device,
-                {{0, wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::ReadOnly, kFormat},
-                 {1, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::WriteOnly, kFormat}});
+            wgpu::BindGroupLayout bgl;
+            // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is
+            // passed.
+            EXPECT_DEPRECATION_WARNING(
+                bgl = utils::MakeBindGroupLayout(
+                    device, {{0, wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::ReadOnly,
+                              kFormat},
+                             {1, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::WriteOnly,
+                              kFormat}}));
             wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, view}, {1, view}});
 
             // Create a no-op compute pipeline.
@@ -1556,9 +1599,13 @@ namespace {
         wgpu::TextureView view = texture.CreateView();
 
         // Create bind groups.
-        wgpu::BindGroupLayout readBGL = utils::MakeBindGroupLayout(
-            device, {{0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute,
-                      wgpu::StorageTextureAccess::ReadOnly, kFormat}});
+        wgpu::BindGroupLayout readBGL;
+        // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is
+        // passed.
+        EXPECT_DEPRECATION_WARNING(
+            readBGL = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute,
+                          wgpu::StorageTextureAccess::ReadOnly, kFormat}}));
         wgpu::BindGroupLayout writeBGL = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute,
                       wgpu::StorageTextureAccess::WriteOnly, kFormat}});

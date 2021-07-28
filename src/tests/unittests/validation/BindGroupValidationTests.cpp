@@ -406,7 +406,7 @@ TEST_F(BindGroupValidationTest, TextureUsage) {
 // Check that a storage texture binding must have the correct usage
 TEST_F(BindGroupValidationTest, StorageTextureUsage) {
     wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadOnly,
+        device, {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::WriteOnly,
                   wgpu::TextureFormat::RGBA8Uint}});
 
     wgpu::TextureDescriptor descriptor;
@@ -932,7 +932,7 @@ TEST_F(BindGroupLayoutValidationTest, PerStageLimits) {
         wgpu::BindGroupLayoutEntry otherEntry;
     };
 
-    std::array<TestInfo, 8> kTestInfos = {
+    std::array<TestInfo, 7> kTestInfos = {
         TestInfo{kMaxSampledTexturesPerShaderStage, BGLEntryType(wgpu::TextureSampleType::Float),
                  BGLEntryType(wgpu::BufferBindingType::Uniform)},
         TestInfo{kMaxSamplersPerShaderStage, BGLEntryType(wgpu::SamplerBindingType::Filtering),
@@ -941,10 +941,6 @@ TEST_F(BindGroupLayoutValidationTest, PerStageLimits) {
                  BGLEntryType(wgpu::BufferBindingType::Uniform)},
         TestInfo{kMaxStorageBuffersPerShaderStage, BGLEntryType(wgpu::BufferBindingType::Storage),
                  BGLEntryType(wgpu::BufferBindingType::Uniform)},
-        TestInfo{
-            kMaxStorageTexturesPerShaderStage,
-            BGLEntryType(wgpu::StorageTextureAccess::ReadOnly, wgpu::TextureFormat::RGBA8Unorm),
-            BGLEntryType(wgpu::BufferBindingType::Uniform)},
         TestInfo{
             kMaxStorageTexturesPerShaderStage,
             BGLEntryType(wgpu::StorageTextureAccess::WriteOnly, wgpu::TextureFormat::RGBA8Unorm),
@@ -1018,6 +1014,78 @@ TEST_F(BindGroupLayoutValidationTest, PerStageLimits) {
         bgl[1] = utils::MakeBindGroupLayout(device, {info.entry});
         TestCreatePipelineLayout(bgl, 2, false);
     }
+}
+
+// This is the same test as PerStageLimits but for the deprecated ReadOnly storage textures.
+// TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is passed.
+TEST_F(BindGroupLayoutValidationTest, PerStageLimits_ReadOnlyStorageTexture) {
+    uint32_t maxCount = kMaxStorageTexturesPerShaderStage;
+    wgpu::BindGroupLayoutEntry entry =
+        BGLEntryType(wgpu::StorageTextureAccess::ReadOnly, wgpu::TextureFormat::RGBA8Unorm);
+    wgpu::BindGroupLayoutEntry otherEntry = BGLEntryType(wgpu::BufferBindingType::Uniform);
+
+    wgpu::BindGroupLayout bgl[2];
+    std::vector<utils::BindingLayoutEntryInitializationHelper> maxBindings;
+
+    for (uint32_t i = 0; i < maxCount; ++i) {
+        entry.binding = i;
+        maxBindings.push_back(entry);
+    }
+
+    // Creating with the maxes works.
+    EXPECT_DEPRECATION_WARNINGS(
+        bgl[0] = MakeBindGroupLayout(maxBindings.data(), maxBindings.size()), maxCount);
+
+    // Adding an extra binding of a different type works.
+    {
+        std::vector<utils::BindingLayoutEntryInitializationHelper> bindings = maxBindings;
+        wgpu::BindGroupLayoutEntry newEntry = otherEntry;
+        newEntry.binding = maxCount;
+        bindings.push_back(newEntry);
+        EXPECT_DEPRECATION_WARNINGS(MakeBindGroupLayout(bindings.data(), bindings.size()),
+                                    maxCount);
+    }
+
+    // Adding an extra binding of the maxed type in a different stage works
+    {
+        std::vector<utils::BindingLayoutEntryInitializationHelper> bindings = maxBindings;
+        wgpu::BindGroupLayoutEntry newEntry = entry;
+        newEntry.binding = maxCount;
+        newEntry.visibility = wgpu::ShaderStage::Fragment;
+        bindings.push_back(newEntry);
+        EXPECT_DEPRECATION_WARNINGS(MakeBindGroupLayout(bindings.data(), bindings.size()),
+                                    maxCount + 1);
+    }
+
+    // Adding an extra binding of the maxed type and stage exceeds the per stage limit.
+    {
+        std::vector<utils::BindingLayoutEntryInitializationHelper> bindings = maxBindings;
+        wgpu::BindGroupLayoutEntry newEntry = entry;
+        newEntry.binding = maxCount;
+        bindings.push_back(newEntry);
+        EXPECT_DEPRECATION_WARNINGS(
+            ASSERT_DEVICE_ERROR(MakeBindGroupLayout(bindings.data(), bindings.size())),
+            maxCount + 1);
+    }
+
+    // Creating a pipeline layout from the valid BGL works.
+    TestCreatePipelineLayout(bgl, 1, true);
+
+    // Adding an extra binding of a different type in a different BGL works
+    bgl[1] = utils::MakeBindGroupLayout(device, {otherEntry});
+    TestCreatePipelineLayout(bgl, 2, true);
+
+    {
+        // Adding an extra binding of the maxed type in a different stage works
+        wgpu::BindGroupLayoutEntry newEntry = entry;
+        newEntry.visibility = wgpu::ShaderStage::Fragment;
+        EXPECT_DEPRECATION_WARNING(bgl[1] = utils::MakeBindGroupLayout(device, {newEntry}));
+        TestCreatePipelineLayout(bgl, 2, true);
+    }
+
+    // Adding an extra binding of the maxed type in a different BGL exceeds the per stage limit.
+    EXPECT_DEPRECATION_WARNING(bgl[1] = utils::MakeBindGroupLayout(device, {entry}));
+    TestCreatePipelineLayout(bgl, 2, false);
 }
 
 // External textures require multiple binding slots (3 sampled texture, 1 uniform buffer, 1

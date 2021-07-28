@@ -1237,7 +1237,9 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
     wgpu::ComputePipelineDescriptor cpDesc;
     cpDesc.compute.module = utils::CreateShaderModule(device, shader.c_str());
     cpDesc.compute.entryPoint = "main";
-    wgpu::ComputePipeline cp = device.CreateComputePipeline(&cpDesc);
+    wgpu::ComputePipeline cp;
+    // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is passed.
+    EXPECT_DEPRECATION_WARNINGS(cp = device.CreateComputePipeline(&cpDesc), 4);
 
     wgpu::BindGroupDescriptor bgDesc = {};
     bgDesc.layout = cp.GetBindGroupLayout(0);
@@ -1298,9 +1300,13 @@ TEST_P(BindGroupTests, CreateWithDestroyedResource) {
 
     // Test a storage texture.
     {
-        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-            device, {{0, wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::ReadOnly,
-                      wgpu::TextureFormat::R32Uint}});
+        wgpu::BindGroupLayout bgl;
+        // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is
+        // passed.
+        EXPECT_DEPRECATION_WARNING(
+            bgl = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::ReadOnly,
+                          wgpu::TextureFormat::R32Uint}}));
 
         wgpu::TextureDescriptor textureDesc;
         textureDesc.usage = wgpu::TextureUsage::Storage;

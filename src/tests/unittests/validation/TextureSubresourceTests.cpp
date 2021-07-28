@@ -72,9 +72,11 @@ namespace {
             {
                 wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {{0, samplerView}});
 
-                wgpu::BindGroupLayout bgl1 = utils::MakeBindGroupLayout(
-                    device, {{0, wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::ReadOnly,
-                              kFormat}});
+                wgpu::BindGroupLayout bgl1;
+                EXPECT_DEPRECATION_WARNING(
+                    bgl1 = utils::MakeBindGroupLayout(
+                        device, {{0, wgpu::ShaderStage::Fragment,
+                                  wgpu::StorageTextureAccess::ReadOnly, kFormat}}));
 
                 wgpu::BindGroup bindGroup1 = utils::MakeBindGroup(device, bgl1, {{0, samplerView}});
 

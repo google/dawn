@@ -780,7 +780,10 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInComputeShader) {
   }
 })";
 
-        CheckResultInStorageBuffer(readonlyStorageTexture, csStream.str());
+        // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is
+        // passed.
+        EXPECT_DEPRECATION_WARNING(
+            CheckResultInStorageBuffer(readonlyStorageTexture, csStream.str()));
     }
 }
 
@@ -824,7 +827,10 @@ struct VertexOut {
 fn main([[location(0)]] color : vec4<f32>) -> [[location(0)]] vec4<f32> {
   return color;
 })";
-        CheckDrawsGreen(vsStream.str().c_str(), kFragmentShader, readonlyStorageTexture);
+        // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is
+        // passed.
+        EXPECT_DEPRECATION_WARNING(
+            CheckDrawsGreen(vsStream.str().c_str(), kFragmentShader, readonlyStorageTexture));
     }
 }
 
@@ -858,7 +864,10 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInFragmentShader) {
   }
   return vec4<f32>(1.0, 0.0, 0.0, 1.0);
 })";
-        CheckDrawsGreen(kSimpleVertexShader, fsStream.str().c_str(), readonlyStorageTexture);
+        // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is
+        // passed.
+        EXPECT_DEPRECATION_WARNING(
+            CheckDrawsGreen(kSimpleVertexShader, fsStream.str().c_str(), readonlyStorageTexture));
     }
 }
 
@@ -927,8 +936,10 @@ TEST_P(StorageTextureTests, ReadWriteDifferentStorageTextureInOneDispatchInCompu
 
         // Write the expected pixel values into the write-only storage texture.
         const std::string computeShader = CommonReadWriteTestCode(format);
-        ReadWriteIntoStorageTextureInComputePass(readonlyStorageTexture, writeonlyStorageTexture,
-                                                 computeShader.c_str());
+        // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is
+        // passed.
+        EXPECT_DEPRECATION_WARNING(ReadWriteIntoStorageTextureInComputePass(
+            readonlyStorageTexture, writeonlyStorageTexture, computeShader.c_str()));
 
         // Verify the pixel data in the write-only storage texture is expected.
         CheckOutputStorageTexture(writeonlyStorageTexture, format);
@@ -1013,7 +1024,10 @@ TEST_P(StorageTextureTests, Readonly2DArrayOr3DStorageTexture) {
   }
 })";
 
-        CheckResultInStorageBuffer(readonlyStorageTexture, csStream.str(), dimension);
+        // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is
+        // passed.
+        EXPECT_DEPRECATION_WARNING(
+            CheckResultInStorageBuffer(readonlyStorageTexture, csStream.str(), dimension));
     }
 }
 
@@ -1075,10 +1089,14 @@ TEST_P(StorageTextureTests, ReadWrite2DArrayOr3DStorageTexture) {
 
         // Read values from read-only storage texture and write into the write-only storage texture.
         const std::string computeShader = CommonReadWriteTestCode(kTextureFormat, dimension);
-        ReadWriteIntoStorageTextureInComputePass(readonlyStorageTexture, writeonlyStorageTexture,
-                                                 computeShader.c_str(), dimension);
+        // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is
+        // passed.
+        EXPECT_DEPRECATION_WARNING(ReadWriteIntoStorageTextureInComputePass(
+            readonlyStorageTexture, writeonlyStorageTexture, computeShader.c_str(), dimension));
 
         // Verify the data in the write-only storage texture is expected.
+        // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is
+        // passed.
         CheckOutputStorageTexture(writeonlyStorageTexture, kTextureFormat, kSliceCount);
     }
 }
@@ -1108,7 +1126,9 @@ TEST_P(StorageTextureTests, ReadonlyAndWriteonlyStorageTexturePingPong) {
     wgpu::ComputePipelineDescriptor pipelineDesc = {};
     pipelineDesc.compute.module = module;
     pipelineDesc.compute.entryPoint = "main";
-    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+    wgpu::ComputePipeline pipeline;
+    // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is passed.
+    EXPECT_DEPRECATION_WARNING(pipeline = device.CreateComputePipeline(&pipelineDesc));
 
     // In bindGroupA storageTexture1 is bound as read-only storage texture and storageTexture2 is
     // bound as write-only storage texture.
@@ -1302,7 +1322,9 @@ TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInRenderPa
   }
   return vec4<f32>(1.0, 0.0, 0.0, 1.0);
 })";
-    CheckDrawsGreen(kVertexShader, kFragmentShader.c_str(), readonlyStorageTexture);
+    // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is passed.
+    EXPECT_DEPRECATION_WARNING(
+        CheckDrawsGreen(kVertexShader, kFragmentShader.c_str(), readonlyStorageTexture));
 }
 
 // Verify that the texture is correctly cleared to 0 before its first usage as a read-only storage
@@ -1329,7 +1351,8 @@ TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInComputeP
   }
 })";
 
-    CheckResultInStorageBuffer(readonlyStorageTexture, kComputeShader);
+    // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is passed.
+    EXPECT_DEPRECATION_WARNING(CheckResultInStorageBuffer(readonlyStorageTexture, kComputeShader));
 }
 
 // Verify that the texture is correctly cleared to 0 before its first usage as a write-only storage

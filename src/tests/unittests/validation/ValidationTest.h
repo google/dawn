@@ -42,7 +42,7 @@
         }                                                       \
     } while (0)
 
-#define EXPECT_DEPRECATION_WARNING(statement)                                                     \
+#define EXPECT_DEPRECATION_WARNINGS(statement, n)                                                 \
     do {                                                                                          \
         FlushWire();                                                                              \
         size_t warningsBefore = dawn_native::GetDeprecationWarningCountForTesting(backendDevice); \
@@ -50,9 +50,10 @@
         statement;                                                                                \
         FlushWire();                                                                              \
         size_t warningsAfter = dawn_native::GetDeprecationWarningCountForTesting(backendDevice);  \
-        EXPECT_EQ(warningsAfter, warningsBefore + 1);                                             \
+        EXPECT_EQ(warningsAfter, warningsBefore + n);                                             \
         mLastWarningCount = warningsAfter;                                                        \
     } while (0)
+#define EXPECT_DEPRECATION_WARNING(statement) EXPECT_DEPRECATION_WARNINGS(statement, 1)
 
 namespace utils {
     class WireHelper;
