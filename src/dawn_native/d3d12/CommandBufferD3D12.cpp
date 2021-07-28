@@ -995,6 +995,12 @@ namespace dawn_native { namespace d3d12 {
                 case Command::Dispatch: {
                     DispatchCmd* dispatch = mCommands.NextCommand<DispatchCmd>();
 
+                    // Skip noop dispatches, it can cause D3D12 warning from validation layers and
+                    // leads to device lost.
+                    if (dispatch->x == 0 || dispatch->y == 0 || dispatch->z == 0) {
+                        break;
+                    }
+
                     TransitionAndClearForSyncScope(commandContext,
                                                    resourceUsages.dispatchUsages[currentDispatch]);
                     DAWN_TRY(bindingTracker->Apply(commandContext));
