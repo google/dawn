@@ -5889,7 +5889,7 @@ TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_IOLocations) {
      OpDecorate %1 Location 0
      OpDecorate %2 Location 0
      OpDecorate %3 Location 30
-     OpDecorate %4 Location 40
+     OpDecorate %4 Location 6
 )" + CommonTypes() +
                         R"(
      %ptr_in_uint = OpTypePointer Input %uint
@@ -5914,7 +5914,7 @@ TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_IOLocations) {
   Struct main_out {
     StructMember{[[ LocationDecoration{0}
  ]] x_2_1: __u32}
-    StructMember{[[ LocationDecoration{40}
+    StructMember{[[ LocationDecoration{6}
  ]] x_4_1: __u32}
   }
   Variable{
