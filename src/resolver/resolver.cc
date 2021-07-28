@@ -979,8 +979,8 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
   if (info->storage_class != ast::StorageClass::kStorage &&
       info->declaration->declared_access() != ast::Access::kUndefined) {
     AddError(
-        "variables declared not declared in the <storage> storage class must "
-        "not declare an access control",
+        "variables not in <storage> storage class must not declare an access "
+        "mode",
         info->declaration->source());
     return false;
   }

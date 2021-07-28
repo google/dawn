@@ -99,6 +99,18 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferBoolAlias) {
       R"(56:78 error: variables declared in the <storage> storage class must be of a structure type)");
 }
 
+TEST_F(ResolverStorageClassValidationTest, NotStorage_AccessMode) {
+  // var<private, read> g : a;
+  Global(Source{{56, 78}}, "g", ty.i32(), ast::StorageClass::kPrivate,
+         ast::Access::kRead);
+
+  ASSERT_FALSE(r()->Resolve());
+
+  EXPECT_EQ(
+      r()->error(),
+      R"(56:78 error: variables not in <storage> storage class must not declare an access mode)");
+}
+
 TEST_F(ResolverStorageClassValidationTest, StorageBufferNoBlockDecoration) {
   // struct S { x : i32 };
   // var<storage, read> g : S;
