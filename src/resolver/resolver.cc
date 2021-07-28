@@ -3384,6 +3384,12 @@ bool Resolver::UnaryOp(ast::UnaryOpExpression* unary) {
 
     case ast::UnaryOp::kAddressOf:
       if (auto* ref = expr_type->As<sem::Reference>()) {
+        if (ref->StoreType()->UnwrapRef()->is_handle()) {
+          AddError(
+              "cannot take the address of expression in handle storage class",
+              unary->expr()->source());
+          return false;
+        }
         type = builder_->create<sem::Pointer>(
             ref->StoreType(), ref->StorageClass(), ref->Access());
       } else {

@@ -2576,9 +2576,7 @@ fn via_call([[location(0)]] fragUV: vec2<f32>,
 [[stage(fragment)]]
 fn via_ptr([[location(0)]] fragUV: vec2<f32>,
         [[location(1)]] fragPosition: vec4<f32>) -> [[location(0)]] vec4<f32> {
-  let t = &myTexture;
-  let s = &mySampler;
-  return textureSample(*t, *s, fragUV) + fragPosition;
+  return textureSample(myTexture, mySampler, fragUV) + fragPosition;
 }
 
 [[stage(fragment)]]

@@ -52,6 +52,34 @@ TEST_F(ResolverPtrRefValidationTest, AddressOfLet) {
   EXPECT_EQ(r()->error(), "12:34 error: cannot take the address of expression");
 }
 
+TEST_F(ResolverPtrRefValidationTest, AddressOfHandle) {
+  // [[group(0), binding(0)]] var t: texture_3d<f32>;
+  // &t
+  Global("t", ty.sampled_texture(ast::TextureDimension::k3d, ty.f32()),
+         GroupAndBinding(0u, 0u));
+  auto* expr = AddressOf(Expr(Source{{12, 34}}, "t"));
+  WrapInFunction(expr);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: cannot take the address of expression in handle "
+            "storage class");
+}
+
+TEST_F(ResolverPtrRefValidationTest, IndirectOfAddressOfHandle) {
+  // [[group(0), binding(0)]] var t: texture_3d<f32>;
+  // *&t
+  Global("t", ty.sampled_texture(ast::TextureDimension::k3d, ty.f32()),
+         GroupAndBinding(0u, 0u));
+  auto* expr = Deref(AddressOf(Expr(Source{{12, 34}}, "t")));
+  WrapInFunction(expr);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: cannot take the address of expression in handle "
+            "storage class");
+}
+
 TEST_F(ResolverPtrRefValidationTest, DerefOfLiteral) {
   // *1
 
