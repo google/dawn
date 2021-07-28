@@ -81,3 +81,7 @@ endif()
 if (${TINT_BUILD_AST_FUZZER})
   add_subdirectory(tint_ast_fuzzer)
 endif()
+
+if (${TINT_BUILD_REGEX_FUZZER})
+  add_subdirectory(tint_regex_fuzzer)
+endif()

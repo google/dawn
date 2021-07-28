@@ -52,6 +52,7 @@ option(TINT_BUILD_WGSL_WRITER "Build the WGSL output writer" ON)
 option(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
 option(TINT_BUILD_SPIRV_TOOLS_FUZZER "Build SPIRV-Tools fuzzer" OFF)
 option(TINT_BUILD_AST_FUZZER "Build AST fuzzer" OFF)
+option(TINT_BUILD_REGEX_FUZZER "Build regex fuzzer" OFF)
 option(TINT_BUILD_TESTS "Build tests" ${TINT_BUILD_TESTS_DEFAULT})
 option(TINT_BUILD_AS_OTHER_OS "Override OS detection to force building of *_other.cc files" OFF)
 option(TINT_BUILD_REMOTE_COMPILE "Build the remote-compile tool for validating shaders on a remote machine" OFF)
@@ -75,6 +76,7 @@ message(STATUS "Tint build WGSL writer: ${TINT_BUILD_WGSL_WRITER}")
 message(STATUS "Tint build fuzzers: ${TINT_BUILD_FUZZERS}")
 message(STATUS "Tint build SPIRV-Tools fuzzer: ${TINT_BUILD_SPIRV_TOOLS_FUZZER}")
 message(STATUS "Tint build AST fuzzer: ${TINT_BUILD_AST_FUZZER}")
+message(STATUS "Tint build regex fuzzer: ${TINT_BUILD_REGEX_FUZZER}")
 message(STATUS "Tint build tests: ${TINT_BUILD_TESTS}")
 message(STATUS "Tint build with ASAN: ${TINT_ENABLE_ASAN}")
 message(STATUS "Tint build with MSAN: ${TINT_ENABLE_MSAN}")
@@ -117,6 +119,22 @@ if (${TINT_BUILD_AST_FUZZER})
   set(TINT_BUILD_SPV_WRITER ON CACHE BOOL "Build SPIR-V writer" FORCE)
   set(TINT_BUILD_MSL_WRITER ON CACHE BOOL "Build MSL writer" FORCE)
   set(TINT_BUILD_HLSL_WRITER ON CACHE BOOL "Build HLSL writer" FORCE)
+endif()
+
+if (${TINT_BUILD_REGEX_FUZZER})
+  message(STATUS "TINT_BUILD_REGEX_FUZZER is ON - setting
+      TINT_BUILD_FUZZERS
+      TINT_BUILD_WGSL_READER
+      TINT_BUILD_WGSL_WRITER
+      TINT_BUILD_SPV_WRITER
+      TINT_BUILD_MSL_WRITER
+      TINT_BUILD_HLSL_WRITER to ON")
+      set(TINT_BUILD_FUZZERS ON CACHE BOOL "Build tint fuzzers" FORCE)
+      set(TINT_BUILD_WGSL_READER ON CACHE BOOL "Build WGSL reader" FORCE)
+      set(TINT_BUILD_WGSL_WRITER ON CACHE BOOL "Build WGSL writer" FORCE)
+      set(TINT_BUILD_SPV_WRITER ON CACHE BOOL "Build SPIR-V writer" FORCE)
+      set(TINT_BUILD_MSL_WRITER ON CACHE BOOL "Build MSL writer" FORCE)
+      set(TINT_BUILD_HLSL_WRITER ON CACHE BOOL "Build HLSL writer" FORCE)
 endif()
 
 set(TINT_ROOT_SOURCE_DIR ${PROJECT_SOURCE_DIR})
