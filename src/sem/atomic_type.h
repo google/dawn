@@ -50,6 +50,10 @@ class Atomic : public Castable<Atomic, Type> {
   /// @returns the alignment in bytes of the type.
   uint32_t Align() const override;
 
+  /// @returns true if constructible as per
+  /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-typesd
+  bool IsConstructible() const override;
+
  private:
   sem::Type const* const subtype_;
 };

@@ -46,6 +46,10 @@ uint32_t Atomic::Align() const {
   return subtype_->Align();
 }
 
+bool Atomic::IsConstructible() const {
+  return false;
+}
+
 Atomic::Atomic(Atomic&&) = default;
 
 Atomic::~Atomic() = default;

@@ -298,6 +298,35 @@ TEST_F(ResolverVarLetValidationTest, InferredPtrStorageAccessMismatch) {
             "'ptr<storage, i32, read>'");
 }
 
+TEST_F(ResolverVarLetValidationTest, NonConstructibleType_Atomic) {
+  auto* v = Var("v", ty.atomic(Source{{12, 34}}, ty.i32()));
+  WrapInFunction(v);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: function variable must have a constructible type");
+}
+
+TEST_F(ResolverVarLetValidationTest, NonConstructibleType_RuntimeArray) {
+  auto* s = Structure("S", {Member("m", ty.array(ty.i32()))}, {StructBlock()});
+  auto* v = Var("v", ty.Of(s));
+  WrapInFunction(v);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "error: function variable must have a constructible type");
+}
+
+TEST_F(ResolverVarLetValidationTest, NonConstructibleType_Struct_WithAtomic) {
+  auto* s = Structure("S", {Member("m", ty.atomic(ty.i32()))});
+  auto* v = Var("v", ty.Of(s));
+  WrapInFunction(v);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "error: function variable must have a constructible type");
+}
+
 }  // namespace
 }  // namespace resolver
 }  // namespace tint

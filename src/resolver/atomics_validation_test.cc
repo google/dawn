@@ -34,7 +34,8 @@ TEST_F(ResolverAtomicValidationTest, GlobalOfInvalidType) {
   EXPECT_EQ(r()->error(), "12:34 error: atomic only supports i32 or u32 types");
 }
 
-TEST_F(ResolverAtomicValidationTest, GlobalOfInvalidStorageClass) {
+// TODO(crbug.com/tint/909): add validation and enable this test
+TEST_F(ResolverAtomicValidationTest, DISABLED_GlobalOfInvalidStorageClass) {
   Global("a", ty.atomic(Source{{12, 34}}, ty.i32()),
          ast::StorageClass::kPrivate);
 
@@ -60,7 +61,8 @@ TEST_F(ResolverAtomicValidationTest, Local) {
   WrapInFunction(Var("a", ty.atomic(Source{{12, 34}}, ty.i32())));
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:34 error: atomic var requires workgroup storage");
+  EXPECT_EQ(r()->error(),
+            "12:34 error: function variable must have a constructible type");
 }
 
 TEST_F(ResolverAtomicValidationTest, NoAtomicExpr) {

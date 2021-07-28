@@ -352,8 +352,8 @@ TEST_F(ResolverValidationTest, StorageClass_FunctionVariableWorkgroupClass) {
             "error: function variable has a non-function storage class");
 }
 
-TEST_F(ResolverValidationTest, StorageClass_FunctionVariableHandleClass) {
-  auto* var = Var("s", ty.sampler(ast::SamplerKind::kSampler));
+TEST_F(ResolverValidationTest, StorageClass_FunctionVariableI32) {
+  auto* var = Var("s", ty.i32(), ast::StorageClass::kPrivate);
 
   auto* stmt = Decl(var);
   Func("func", ast::VariableList{}, ty.void_(), ast::StatementList{stmt},

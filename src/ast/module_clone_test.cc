@@ -27,10 +27,16 @@ TEST(ModuleCloneTest, Clone) {
   // Shader that exercises the bulk of the AST nodes and types.
   // See also fuzzers/tint_ast_clone_fuzzer.cc for further coverage of cloning.
   Source::File file("test.wgsl", R"([[block]]
-struct S {
+struct S0 {
   [[size(4)]]
   m0 : u32;
   m1 : array<u32>;
+};
+
+[[block]] struct S1 {
+  [[size(4)]]
+  m0 : u32;
+  m1 : array<u32, 6>;
 };
 
 let c0 : i32 = 10;
@@ -48,9 +54,9 @@ var<private> g1 : f32 = 123.0;
 [[group(4), binding(0)]] var g6 : texture_storage_2d<rg32float, write>;
 
 var<private> g7 : vec3<f32>;
-[[group(0), binding(1)]] var<storage, write> g8 : S;
-[[group(1), binding(1)]] var<storage, read> g9 : S;
-[[group(2), binding(1)]] var<storage, read_write> g10 : S;
+[[group(0), binding(1)]] var<storage, write> g8 : S0;
+[[group(1), binding(1)]] var<storage, read> g9 : S0;
+[[group(2), binding(1)]] var<storage, read_write> g10 : S0;
 
 fn f0(p0 : bool) -> f32 {
   if (p0) {
@@ -64,7 +70,7 @@ fn f1(p0 : f32, p1 : i32) -> f32 {
   var l1 : f32 = 8.0;
   var l2 : u32 = bitcast<u32>(4);
   var l3 : vec2<u32> = vec2<u32>(u32(l0), u32(l1));
-  var l4 : S;
+  var l4 : S1;
   var l5 : u32 = l4.m1[5];
   let l6 : ptr<private, u32> = &g0;
   loop {

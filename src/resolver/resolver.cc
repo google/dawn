@@ -1122,19 +1122,6 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
     AddError("invalid use of input/output storage class", var->source());
     return false;
   }
-
-  // https://gpuweb.github.io/gpuweb/wgsl/#atomic-types
-  // Atomic types may only be instantiated by variables in the workgroup storage
-  // class or by storage buffer variables with a read_write access mode.
-  if (info->type->UnwrapRef()->Is<sem::Atomic>() &&
-      info->storage_class != ast::StorageClass::kWorkgroup) {
-    // Storage buffers require a structure, so just check for workgroup
-    // storage here.
-    AddError("atomic var requires workgroup storage",
-             info->declaration->type()->source());
-    return false;
-  }
-
   return true;
 }
 
@@ -3370,10 +3357,15 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
     return false;
   }
 
-  if (!var->is_const()) {
-    if (info->storage_class != ast::StorageClass::kFunction &&
-        IsValidationEnabled(var->decorations(),
-                            ast::DisabledValidation::kIgnoreStorageClass)) {
+  if (!var->is_const() &&
+      IsValidationEnabled(var->decorations(),
+                          ast::DisabledValidation::kIgnoreStorageClass)) {
+    if (!info->type->UnwrapRef()->IsConstructible()) {
+      AddError("function variable must have a constructible type",
+               var->type()->source());
+      return false;
+    }
+    if (info->storage_class != ast::StorageClass::kFunction) {
       if (info->storage_class != ast::StorageClass::kNone) {
         AddError("function variable has a non-function storage class",
                  stmt->source());
