@@ -14,7 +14,7 @@ void main(tint_symbol_1 tint_symbol) {
   const uint3 GlobalInvocationID = tint_symbol.GlobalInvocationID;
   uint flatIndex = ((((2u * 2u) * GlobalInvocationID.z) + (2u * GlobalInvocationID.y)) + GlobalInvocationID.x);
   flatIndex = (flatIndex * 1u);
-  float4 texel = myTexture.Load(int4(GlobalInvocationID.xy, 0, 0));
+  float4 texel = myTexture.Load(int4(int3(int2(GlobalInvocationID.xy), 0), 0));
   {
     for(uint i = 0u; (i < 1u); i = (i + 1u)) {
       result.Store((4u * (flatIndex + i)), asuint(texel.r));

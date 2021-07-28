@@ -43,6 +43,58 @@ TEST_F(AppendVectorTest, Vec2i32_i32) {
   EXPECT_EQ(vec_123->values()[2], scalar_3);
 }
 
+TEST_F(AppendVectorTest, Vec2i32_u32) {
+  auto* scalar_1 = Expr(1);
+  auto* scalar_2 = Expr(2);
+  auto* scalar_3 = Expr(3u);
+  auto* vec_12 = vec2<i32>(scalar_1, scalar_2);
+  WrapInFunction(vec_12, scalar_3);
+
+  resolver::Resolver resolver(this);
+  ASSERT_TRUE(resolver.Resolve()) << resolver.error();
+
+  auto* vec_123 = AppendVector(this, vec_12, scalar_3)
+                      ->As<ast::TypeConstructorExpression>();
+  ASSERT_NE(vec_123, nullptr);
+  ASSERT_EQ(vec_123->values().size(), 3u);
+  EXPECT_EQ(vec_123->values()[0], scalar_1);
+  EXPECT_EQ(vec_123->values()[1], scalar_2);
+  auto* u32_to_i32 = vec_123->values()[2]->As<ast::TypeConstructorExpression>();
+  ASSERT_NE(u32_to_i32, nullptr);
+  EXPECT_TRUE(u32_to_i32->type()->Is<ast::I32>());
+  ASSERT_EQ(u32_to_i32->values().size(), 1u);
+  EXPECT_EQ(u32_to_i32->values()[0], scalar_3);
+}
+
+TEST_F(AppendVectorTest, Vec2i32FromVec2u32_u32) {
+  auto* scalar_1 = Expr(1u);
+  auto* scalar_2 = Expr(2u);
+  auto* scalar_3 = Expr(3u);
+  auto* uvec_12 = vec2<u32>(scalar_1, scalar_2);
+  auto* vec_12 = vec2<i32>(uvec_12);
+  WrapInFunction(vec_12, scalar_3);
+
+  resolver::Resolver resolver(this);
+  ASSERT_TRUE(resolver.Resolve()) << resolver.error();
+
+  auto* vec_123 = AppendVector(this, vec_12, scalar_3)
+                      ->As<ast::TypeConstructorExpression>();
+  ASSERT_NE(vec_123, nullptr);
+  ASSERT_EQ(vec_123->values().size(), 2u);
+  auto* v2u32_to_v2i32 =
+      vec_123->values()[0]->As<ast::TypeConstructorExpression>();
+  ASSERT_NE(v2u32_to_v2i32, nullptr);
+  EXPECT_TRUE(v2u32_to_v2i32->type()->is_signed_integer_vector());
+  EXPECT_EQ(v2u32_to_v2i32->values().size(), 1u);
+  EXPECT_EQ(v2u32_to_v2i32->values()[0], uvec_12);
+
+  auto* u32_to_i32 = vec_123->values()[1]->As<ast::TypeConstructorExpression>();
+  ASSERT_NE(u32_to_i32, nullptr);
+  EXPECT_TRUE(u32_to_i32->type()->Is<ast::I32>());
+  ASSERT_EQ(u32_to_i32->values().size(), 1u);
+  EXPECT_EQ(u32_to_i32->values()[0], scalar_3);
+}
+
 TEST_F(AppendVectorTest, Vec2i32_f32) {
   auto* scalar_1 = Expr(1);
   auto* scalar_2 = Expr(2);
@@ -61,6 +113,7 @@ TEST_F(AppendVectorTest, Vec2i32_f32) {
   EXPECT_EQ(vec_123->values()[1], scalar_2);
   auto* f32_to_i32 = vec_123->values()[2]->As<ast::TypeConstructorExpression>();
   ASSERT_NE(f32_to_i32, nullptr);
+  EXPECT_TRUE(f32_to_i32->type()->Is<ast::I32>());
   ASSERT_EQ(f32_to_i32->values().size(), 1u);
   EXPECT_EQ(f32_to_i32->values()[0], scalar_3);
 }
@@ -158,6 +211,7 @@ TEST_F(AppendVectorTest, Vec2i32Var_f32Var) {
   EXPECT_EQ(vec_123->values()[0], vec_12);
   auto* f32_to_i32 = vec_123->values()[1]->As<ast::TypeConstructorExpression>();
   ASSERT_NE(f32_to_i32, nullptr);
+  EXPECT_TRUE(f32_to_i32->type()->Is<ast::I32>());
   ASSERT_EQ(f32_to_i32->values().size(), 1u);
   EXPECT_EQ(f32_to_i32->values()[0], scalar_3);
 }

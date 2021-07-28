@@ -5,7 +5,7 @@ static float4 gl_FragCoord = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 void main_1() {
   const float4 x_19 = gl_FragCoord;
-  const float4 x_22 = tint_symbol.Load(int3(float2(x_19.x, x_19.y), 0));
+  const float4 x_22 = tint_symbol.Load(int3(int2(float2(x_19.x, x_19.y)), 0));
   color_out = x_22;
   return;
 }

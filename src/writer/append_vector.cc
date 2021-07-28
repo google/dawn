@@ -70,12 +70,18 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
   auto* packed_ty = b->create<ast::Vector>(packed_el_ty, packed_size);
   auto* packed_sem_ty = b->create<sem::Vector>(packed_el_sem_ty, packed_size);
 
-  // If the coordinates are already passed in a vector constructor, extract
-  // the elements into the new vector instead of nesting a vector-in-vector.
+  // If the coordinates are already passed in a vector constructor, with only
+  // scalar components supplied, extract the elements into the new vector
+  // instead of nesting a vector-in-vector.
+  // If the coordinates are a zero-constructor of the vector, then expand that
+  // to scalar zeros.
+  // The other cases for a nested vector constructor are when it is used
+  // to convert a vector of a different type, e.g. vec2<i32>(vec2<u32>()).
+  // In that case, preserve the original argument, or you'll get a type error.
   ast::ExpressionList packed;
   if (auto* vc = AsVectorConstructor(b, vector)) {
-    packed = vc->values();
-    if (packed.size() == 0) {
+    const auto num_supplied = vc->values().size();
+    if (num_supplied == 0) {
       // Zero-value vector constructor. Populate with zeros
       auto buildZero = [&]() -> ast::ScalarConstructorExpression* {
         if (packed_el_sem_ty->Is<sem::I32>()) {
@@ -101,8 +107,13 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
                                              sem::Constant{}));
         packed.emplace_back(zero);
       }
+    } else if (num_supplied + 1 == packed_size) {
+      // All vector components were supplied as scalars.  Pass them through.
+      packed = vc->values();
     }
-  } else {
+  }
+  if (packed.empty()) {
+    // The special cases didn't occur. Use the vector argument as-is.
     packed.emplace_back(vector);
   }
   if (packed_el_sem_ty != b->TypeOf(scalar)->UnwrapRef()) {
