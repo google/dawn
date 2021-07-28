@@ -3812,7 +3812,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [388] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[5],
+    /* matcher indices */ &kMatcherIndices[6],
   },
   {
     /* [389] */
@@ -3912,7 +3912,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [408] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[44],
+    /* matcher indices */ &kMatcherIndices[4],
   },
   {
     /* [409] */
@@ -7361,9 +7361,9 @@ constexpr OverloadInfo kOverloads[] = {
   {
     /* [195] */
     /* num parameters */ 2,
-    /* num open types */ 1,
+    /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[2],
+    /* open types */ &kOpenTypes[4],
     /* open numbers */ &kOpenNumbers[7],
     /* parameters */ &kParameters[387],
     /* return matcher indices */ &kMatcherIndices[7],
@@ -7373,9 +7373,9 @@ constexpr OverloadInfo kOverloads[] = {
   {
     /* [196] */
     /* num parameters */ 2,
-    /* num open types */ 1,
+    /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[2],
+    /* open types */ &kOpenTypes[4],
     /* open numbers */ &kOpenNumbers[1],
     /* parameters */ &kParameters[407],
     /* return matcher indices */ &kMatcherIndices[10],
@@ -8638,8 +8638,8 @@ constexpr IntrinsicInfo kIntrinsics[] = {
   },
   {
     /* [39] */
-    /* fn ldexp<T : iu32>(f32, T) -> f32 */
-    /* fn ldexp<N : num, T : iu32>(vec<N, f32>, vec<N, T>) -> vec<N, f32> */
+    /* fn ldexp(f32, i32) -> f32 */
+    /* fn ldexp<N : num>(vec<N, f32>, vec<N, i32>) -> vec<N, f32> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[195],
   },

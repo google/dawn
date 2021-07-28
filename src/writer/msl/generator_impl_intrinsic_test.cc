@@ -98,7 +98,7 @@ ast::CallExpression* GenerateCall(IntrinsicType intrinsic,
     case IntrinsicType::kSign:
       return builder->Call(str.str(), "f2");
     case IntrinsicType::kLdexp:
-      return builder->Call(str.str(), "f2", "u2");
+      return builder->Call(str.str(), "f2", "i2");
     case IntrinsicType::kAtan2:
     case IntrinsicType::kDot:
     case IntrinsicType::kDistance:
@@ -169,14 +169,15 @@ using MslIntrinsicTest = TestParamHelper<IntrinsicData>;
 TEST_P(MslIntrinsicTest, Emit) {
   auto param = GetParam();
 
-  Global("f2", ty.vec2<float>(), ast::StorageClass::kPrivate);
-  Global("f3", ty.vec3<float>(), ast::StorageClass::kPrivate);
-  Global("f4", ty.vec4<float>(), ast::StorageClass::kPrivate);
+  Global("f2", ty.vec2<f32>(), ast::StorageClass::kPrivate);
+  Global("f3", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+  Global("f4", ty.vec4<f32>(), ast::StorageClass::kPrivate);
   Global("u1", ty.u32(), ast::StorageClass::kPrivate);
-  Global("u2", ty.vec2<unsigned int>(), ast::StorageClass::kPrivate);
+  Global("u2", ty.vec2<u32>(), ast::StorageClass::kPrivate);
+  Global("i2", ty.vec2<i32>(), ast::StorageClass::kPrivate);
   Global("b2", ty.vec2<bool>(), ast::StorageClass::kPrivate);
-  Global("m2x2", ty.mat2x2<float>(), ast::StorageClass::kPrivate);
-  Global("m3x2", ty.mat3x2<float>(), ast::StorageClass::kPrivate);
+  Global("m2x2", ty.mat2x2<f32>(), ast::StorageClass::kPrivate);
+  Global("m3x2", ty.mat3x2<f32>(), ast::StorageClass::kPrivate);
 
   auto* call = GenerateCall(param.intrinsic, param.type, this);
   ASSERT_NE(nullptr, call) << "Unhandled intrinsic";
