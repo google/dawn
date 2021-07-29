@@ -223,6 +223,16 @@ namespace dawn_native { namespace vulkan {
         if (limits.maxColorAttachments < kMaxColorAttachments) {
             return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for maxColorAttachments");
         }
+        if (!IsSubset(VkSampleCountFlags(VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT),
+                      limits.framebufferColorSampleCounts)) {
+            return DAWN_INTERNAL_ERROR(
+                "Insufficient Vulkan limits for framebufferColorSampleCounts");
+        }
+        if (!IsSubset(VkSampleCountFlags(VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT),
+                      limits.framebufferDepthSampleCounts)) {
+            return DAWN_INTERNAL_ERROR(
+                "Insufficient Vulkan limits for framebufferDepthSampleCounts");
+        }
 
         // Only check maxFragmentCombinedOutputResources on mobile GPUs. Desktop GPUs drivers seem
         // to put incorrect values for this limit with things like 8 or 16 when they can do bindless

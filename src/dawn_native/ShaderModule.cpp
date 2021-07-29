@@ -155,6 +155,7 @@ namespace dawn_native {
                 case tint::inspector::ResourceBinding::ResourceType::kSampledTexture:
                 case tint::inspector::ResourceBinding::ResourceType::kMultisampledTexture:
                 case tint::inspector::ResourceBinding::ResourceType::kDepthTexture:
+                case tint::inspector::ResourceBinding::ResourceType::kDepthMultisampledTexture:
                     return BindingInfoType::Texture;
                 case tint::inspector::ResourceBinding::ResourceType::kReadOnlyStorageTexture:
                 case tint::inspector::ResourceBinding::ResourceType::kWriteOnlyStorageTexture:
@@ -747,10 +748,6 @@ namespace dawn_native {
                                 SpirvBaseTypeToSampleTypeBit(textureComponentType);
 
                             if (imageType.depth) {
-                                if (imageType.ms) {
-                                    return DAWN_VALIDATION_ERROR(
-                                        "Multisampled depth textures aren't supported");
-                                }
                                 if ((info->texture.compatibleSampleTypes & SampleTypeBit::Float) ==
                                     0) {
                                     return DAWN_VALIDATION_ERROR(
@@ -1129,15 +1126,21 @@ namespace dawn_native {
                             info->texture.viewDimension =
                                 TintTextureDimensionToTextureViewDimension(resource.dim);
                             if (resource.resource_type ==
-                                tint::inspector::ResourceBinding::ResourceType::kDepthTexture) {
+                                    tint::inspector::ResourceBinding::ResourceType::kDepthTexture ||
+                                resource.resource_type ==
+                                    tint::inspector::ResourceBinding::ResourceType::
+                                        kDepthMultisampledTexture) {
                                 info->texture.compatibleSampleTypes = SampleTypeBit::Depth;
                             } else {
                                 info->texture.compatibleSampleTypes =
                                     TintSampledKindToSampleTypeBit(resource.sampled_kind);
                             }
-                            info->texture.multisampled = resource.resource_type ==
-                                                         tint::inspector::ResourceBinding::
-                                                             ResourceType::kMultisampledTexture;
+                            info->texture.multisampled =
+                                resource.resource_type == tint::inspector::ResourceBinding::
+                                                              ResourceType::kMultisampledTexture ||
+                                resource.resource_type ==
+                                    tint::inspector::ResourceBinding::ResourceType::
+                                        kDepthMultisampledTexture;
 
                             break;
                         case BindingInfoType::StorageTexture:

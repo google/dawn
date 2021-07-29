@@ -1348,35 +1348,35 @@ TEST_F(BindGroupLayoutValidationTest, MultisampledTextureViewDimension) {
                 }));
 }
 
-// Test that multisampled textures cannot be DepthComparison
-TEST_F(BindGroupLayoutValidationTest, MultisampledTextureComponentType) {
-    // Multisampled float component type works.
+// Test that multisampled texture bindings are valid
+TEST_F(BindGroupLayoutValidationTest, MultisampledTextureSampleType) {
+    // Multisampled float sample type works.
     utils::MakeBindGroupLayout(device,
                                {
                                    {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float,
                                     wgpu::TextureViewDimension::e2D, true},
                                });
 
-    // Multisampled uint component type works.
+    // Multisampled uint sample type works.
     utils::MakeBindGroupLayout(device,
                                {
                                    {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Uint,
                                     wgpu::TextureViewDimension::e2D, true},
                                });
 
-    // Multisampled sint component type works.
+    // Multisampled sint sample type works.
     utils::MakeBindGroupLayout(device,
                                {
                                    {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Sint,
                                     wgpu::TextureViewDimension::e2D, true},
                                });
 
-    // Multisampled depth comparison component typeworks.
-    ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
-        device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Depth,
-                     wgpu::TextureViewDimension::e2D, true},
-                }));
+    // Multisampled depth sample type works.
+    utils::MakeBindGroupLayout(device,
+                               {
+                                   {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Depth,
+                                    wgpu::TextureViewDimension::e2D, true},
+                               });
 }
 
 constexpr uint64_t kBufferSize = 3 * kMinUniformBufferOffsetAlignment + 8;

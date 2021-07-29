@@ -130,18 +130,8 @@ namespace dawn_native {
                     viewDimension = texture.viewDimension;
                 }
 
-                if (texture.multisampled) {
-                    if (viewDimension != wgpu::TextureViewDimension::e2D) {
-                        return DAWN_VALIDATION_ERROR("Multisampled texture bindings must be 2D.");
-                    }
-                    // TODO: This check should eventually become obsolete. According to the spec,
-                    // depth can be used with both regular and comparison sampling. As such, during
-                    // pipeline creation we have to check that if a comparison sampler is used
-                    // with a texture, that texture must be both depth and not multisampled.
-                    if (texture.sampleType == wgpu::TextureSampleType::Depth) {
-                        return DAWN_VALIDATION_ERROR(
-                            "Multisampled texture bindings must not be Depth.");
-                    }
+                if (texture.multisampled && viewDimension != wgpu::TextureViewDimension::e2D) {
+                    return DAWN_VALIDATION_ERROR("Multisampled texture bindings must be 2D.");
                 }
             }
             if (entry.storageTexture.access != wgpu::StorageTextureAccess::Undefined) {

@@ -50,6 +50,9 @@ class MultisampledSamplingTest : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
 
+        // TODO(crbug.com/dawn/1030): Compute pipeline compilation crashes.
+        DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsIntel());
+
         {
             utils::ComboRenderPipelineDescriptor desc;
 
@@ -94,7 +97,7 @@ class MultisampledSamplingTest : public DawnTest {
             desc.compute.entryPoint = "main";
             desc.compute.module = utils::CreateShaderModule(device, R"(
                 [[group(0), binding(0)]] var texture0 : texture_multisampled_2d<f32>;
-                [[group(0), binding(1)]] var texture1 : texture_multisampled_2d<f32>;
+                [[group(0), binding(1)]] var texture1 : texture_depth_multisampled_2d;
 
                 [[block]] struct Results {
                     colorSamples : array<f32, 4>;
@@ -105,7 +108,7 @@ class MultisampledSamplingTest : public DawnTest {
                 [[stage(compute), workgroup_size(1)]] fn main() {
                     for (var i : i32 = 0; i < 4; i = i + 1) {
                         results.colorSamples[i] = textureLoad(texture0, vec2<i32>(0, 0), i).x;
-                        results.depthSamples[i] = textureLoad(texture1, vec2<i32>(0, 0), i).x;
+                        results.depthSamples[i] = textureLoad(texture1, vec2<i32>(0, 0), i);
                     }
                 })");
 
@@ -123,6 +126,8 @@ class MultisampledSamplingTest : public DawnTest {
 // must cover both the X and Y coordinates of the sample position (no false positives if
 // it covers the X position but not the Y, or vice versa).
 TEST_P(MultisampledSamplingTest, SamplePositions) {
+    DAWN_TEST_UNSUPPORTED_IF(!HasToggleEnabled("use_tint_generator"));
+
     static constexpr wgpu::Extent3D kTextureSize = {1, 1, 1};
 
     wgpu::Texture colorTexture;
@@ -206,16 +211,12 @@ TEST_P(MultisampledSamplingTest, SamplePositions) {
 
             wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
             computePassEncoder.SetPipeline(checkSamplePipeline);
-            // TODO(crbug.com/dawn/1021): Disallow using float/unfilterable-float with depth
-            // textures.
-            wgpu::BindGroup bindGroup;
-            EXPECT_DEPRECATION_WARNING(
-                bindGroup = utils::MakeBindGroup(
-                    device, checkSamplePipeline.GetBindGroupLayout(0),
-                    {{0, colorView},
-                     {1, depthView},
-                     {2, outputBuffer, alignedResultSize * sampleOffset, kResultSize}}));
-            computePassEncoder.SetBindGroup(0, bindGroup);
+            computePassEncoder.SetBindGroup(
+                0, utils::MakeBindGroup(
+                       device, checkSamplePipeline.GetBindGroupLayout(0),
+                       {{0, colorView},
+                        {1, depthView},
+                        {2, outputBuffer, alignedResultSize * sampleOffset, kResultSize}}));
             computePassEncoder.Dispatch(1);
             computePassEncoder.EndPass();
         }
