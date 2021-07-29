@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 void set_float3(inout float3 vec, int idx, float val) {
   vec = (idx.xxx == int3(0, 1, 2)) ? val.xxx : vec;
 }
@@ -68,3 +70,5 @@ tint_symbol main() {
   const tint_symbol tint_symbol_5 = {tint_symbol_1.x_GLF_color_1};
   return tint_symbol_5;
 }
+C:\src\tint\test\Shader@0x000001D041DE1330(29,14-20): error X3500: array reference cannot be used as an l-value; not natively addressable
+

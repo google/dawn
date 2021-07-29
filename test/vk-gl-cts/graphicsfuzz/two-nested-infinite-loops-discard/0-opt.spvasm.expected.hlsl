@@ -46,12 +46,7 @@ tint_symbol main() {
   const tint_symbol tint_symbol_3 = {tint_symbol_1.x_GLF_color_1};
   return tint_symbol_3;
 }
-T:\tmp\udpk.0:26:19: error: expected expression
-      for(; true; const float3 x_46 = mand_()) {
-                  ^
-T:\tmp\udpk.0:26:19: error: expected ')'
-T:\tmp\udpk.0:26:10: note: to match this '('
-      for(; true; const float3 x_46 = mand_()) {
-         ^
-
+C:\src\tint\test\Shader@0x00000294138DDB00(26,19-23): error X3000: syntax error: unexpected token 'const'
+C:\src\tint\test\Shader@0x00000294138DDB00(41,17): error X3000: syntax error: unexpected token '('
+C:\src\tint\test\Shader@0x00000294138DDB00(45,3-23): error X3079: 'main_1': void functions cannot return a value
 

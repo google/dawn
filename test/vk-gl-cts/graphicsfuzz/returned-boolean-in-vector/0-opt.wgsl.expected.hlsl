@@ -109,5 +109,4 @@ tint_symbol main() {
   const tint_symbol tint_symbol_3 = {tint_symbol_1.x_GLF_color_1};
   return tint_symbol_3;
 }
-Internal compiler error: access violation. Attempted to read from address 0x0000000000000048
 

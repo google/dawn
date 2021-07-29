@@ -87,9 +87,5 @@ tint_symbol main() {
   const tint_symbol tint_symbol_5 = {tint_symbol_1.x_GLF_color_1};
   return tint_symbol_5;
 }
-error: validation errors
-T:\tmp\uf58.0:82: error: Loop must have break.
-Validation failed.
-
-
+C:\src\tint\test\Shader@0x0000020495BF5060(21,12-15): error X3696: infinite loop detected - loop never exits
 

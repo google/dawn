@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 static float4 gl_FragCoord = float4(0.0f, 0.0f, 0.0f, 0.0f);
 cbuffer cbuffer_x_6 : register(b0, space0) {
   uint4 x_6[1];
@@ -274,3 +276,10 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   const tint_symbol_2 tint_symbol_5 = {tint_symbol_3.x_GLF_color_1};
   return tint_symbol_5;
 }
+C:\src\tint\test\Shader@0x000002E21608F310(8,3-14): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+C:\src\tint\test\Shader@0x000002E21608F310(71,9-20): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+C:\src\tint\test\Shader@0x000002E21608F310(186,7-18): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+C:\src\tint\test\Shader@0x000002E21608F310(71,9-20): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+C:\src\tint\test\Shader@0x000002E21608F310(186,7-18): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+C:\src\tint\test\Shader@0x000002E21608F310(123,11-22): error X4029: infinite loop detected - loop never exits
+

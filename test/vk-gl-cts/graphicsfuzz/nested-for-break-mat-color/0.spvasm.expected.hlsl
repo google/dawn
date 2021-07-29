@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 void set_float4(inout float4 vec, int idx, float val) {
   vec = (idx.xxxx == int4(0, 1, 2, 3)) ? val.xxxx : vec;
 }
@@ -77,3 +79,5 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   const tint_symbol_2 tint_symbol_5 = {tint_symbol_3.x_GLF_color_1};
   return tint_symbol_5;
 }
+C:\src\tint\test\Shader@0x0000018B52EEB9C0(16,3-14): error X3511: forced to unroll loop, but unrolling failed.
+

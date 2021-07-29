@@ -95,7 +95,7 @@ fn main([[builtin(position)]] gl_FragCoord_param : vec4<f32>) -> main_out {
   return main_out(x_GLF_color);
 }
 
-Failed to generate: graphicsfuzz/two-nested-do-whiles/0-opt.wgsl:74:13 error: break statement must be in a loop or switch case
+Failed to generate: vk-gl-cts/graphicsfuzz/two-nested-do-whiles/0-opt.wgsl:74:13 error: break statement must be in a loop or switch case
             break;
             ^^^^^
 

@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 cbuffer cbuffer_x_9 : register(b0, space0) {
   uint4 x_9[1];
 };
@@ -56,3 +58,5 @@ tint_symbol main() {
   const tint_symbol tint_symbol_3 = {tint_symbol_1.x_GLF_color_1};
   return tint_symbol_3;
 }
+C:\src\tint\test\Shader@0x0000026EBFC3A3B0(6,12-25): error X3507: 'func_i1_': Not all control paths return a value
+

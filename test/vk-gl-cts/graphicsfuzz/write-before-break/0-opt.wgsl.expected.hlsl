@@ -91,9 +91,8 @@ tint_symbol main() {
   const tint_symbol tint_symbol_3 = {tint_symbol_1.x_GLF_color_1};
   return tint_symbol_3;
 }
-error: validation errors
-T:\tmp\udx0.0:86: error: Loop must have break.
-Validation failed.
-
-
+C:\src\tint\test\Shader@0x00000232DC6E3D00(61,24-52): warning X3550: array reference cannot be used as an l-value; not natively addressable, forcing loop to unroll
+C:\src\tint\test\Shader@0x00000232DC6E3D00(51,11-37): error X3511: unable to unroll loop, loop does not appear to terminate in a timely manner (1024 iterations)
+C:\src\tint\test\Shader@0x00000232DC6E3D00(40,7-39): error X3511: forced to unroll loop, but unrolling failed.
+C:\src\tint\test\Shader@0x00000232DC6E3D00(27,3-14): error X3511: forced to unroll loop, but unrolling failed.
 

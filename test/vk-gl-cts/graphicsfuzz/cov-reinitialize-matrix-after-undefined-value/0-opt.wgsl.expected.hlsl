@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 void set_float2(inout float2 vec, int idx, float val) {
   vec = (idx.xx == int2(0, 1)) ? val.xx : vec;
 }
@@ -89,3 +91,7 @@ tint_symbol main() {
   const tint_symbol tint_symbol_3 = {tint_symbol_1.x_GLF_color_1};
   return tint_symbol_3;
 }
+C:\src\tint\test\Shader@0x000001B29A7B25C0(45,18-24): error X3500: array reference cannot be used as an l-value; not natively addressable
+C:\src\tint\test\Shader@0x000001B29A7B25C0(32,5-16): error X3511: forced to unroll loop, but unrolling failed.
+C:\src\tint\test\Shader@0x000001B29A7B25C0(22,3-14): error X3511: forced to unroll loop, but unrolling failed.
+

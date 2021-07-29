@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 cbuffer cbuffer_x_6 : register(b0, space0) {
   uint4 x_6[1];
 };
@@ -70,3 +72,6 @@ tint_symbol main() {
   const tint_symbol tint_symbol_3 = {tint_symbol_1.x_GLF_color_1};
   return tint_symbol_3;
 }
+C:\src\tint\test\Shader@0x00000259291CFD70(11,5): error X3533: non-empty case statements must have break or return
+C:\src\tint\test\Shader@0x00000259291CFD70(26,13-21): error X3708: continue cannot be used in a switch
+

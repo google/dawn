@@ -1,50 +1,38 @@
-SKIP: FAILED
+static float4 color = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-
-var<private> color : vec4<f32>;
-
-fn drawShape_vf2_(pos : ptr<function, vec2<f32>>) -> vec3<f32> {
-  var c3 : bool;
-  var x_35_phi : bool;
-  let x_32 : f32 = (*(pos)).y;
-  let x_33 : bool = (x_32 < 1.0);
+float3 drawShape_vf2_(inout float2 pos) {
+  bool c3 = false;
+  bool x_35_phi = false;
+  const float x_32 = pos.y;
+  const bool x_33 = (x_32 < 1.0f);
   c3 = x_33;
   x_35_phi = x_33;
-  loop {
-    let x_35 : bool = x_35_phi;
-    if (x_35) {
-    } else {
-      break;
-    }
-    return vec3<f32>(1.0, 1.0, 1.0);
-
-    continuing {
-      x_35_phi = false;
+  {
+    for(; x_35_phi; x_35_phi = false) {
+      return float3(1.0f, 1.0f, 1.0f);
     }
   }
-  return vec3<f32>(1.0, 1.0, 1.0);
+  return float3(1.0f, 1.0f, 1.0f);
 }
 
-fn main_1() {
-  var param : vec2<f32>;
-  param = vec2<f32>(1.0, 1.0);
-  let x_29 : vec3<f32> = drawShape_vf2_(&(param));
-  color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+void main_1() {
+  float2 param = float2(0.0f, 0.0f);
+  param = float2(1.0f, 1.0f);
+  const float3 x_29 = drawShape_vf2_(param);
+  color = float4(1.0f, 0.0f, 0.0f, 1.0f);
   return;
 }
 
 struct main_out {
-  [[location(0)]]
-  color_1 : vec4<f32>;
+  float4 color_1;
+};
+struct tint_symbol {
+  float4 color_1 : SV_Target0;
 };
 
-[[stage(fragment)]]
-fn main() -> main_out {
+tint_symbol main() {
   main_1();
-  return main_out(color);
+  const main_out tint_symbol_1 = {color};
+  const tint_symbol tint_symbol_2 = {tint_symbol_1.color_1};
+  return tint_symbol_2;
 }
-
-Failed to generate: graphicsfuzz/for-condition-always-false/0-opt.wgsl:11:23 error: for-loop condition must be bool, got bool
-    let x_35 : bool = x_35_phi;
-                      ^^^^^^^^
-

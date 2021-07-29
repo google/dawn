@@ -65,8 +65,5 @@ tint_symbol main() {
   const tint_symbol tint_symbol_5 = {tint_symbol_1.x_GLF_color_1};
   return tint_symbol_5;
 }
-T:\tmp\u93g.0:23:20: error: matrix row index '3' is out of bounds
-    set_float2(m32[3], x_45, x_40);
-                   ^
-
+C:\src\tint\test\Shader@0x0000029DDF1A00E0(23,16-21): error X3504: array index out of bounds
 

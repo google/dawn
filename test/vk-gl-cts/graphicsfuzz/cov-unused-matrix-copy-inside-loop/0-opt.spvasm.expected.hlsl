@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 void set_float4(inout float4 vec, int idx, float val) {
   vec = (idx.xxxx == int4(0, 1, 2, 3)) ? val.xxxx : vec;
 }
@@ -89,3 +91,7 @@ tint_symbol main() {
   const tint_symbol tint_symbol_4 = {tint_symbol_1.x_GLF_color_1};
   return tint_symbol_4;
 }
+C:\src\tint\test\Shader@0x00000204988F8F80(36,20-30): warning X3556: integer modulus may be much slower, try using uints if possible.
+C:\src\tint\test\Shader@0x00000204988F8F80(36,16-32): error X3500: array reference cannot be used as an l-value; not natively addressable
+C:\src\tint\test\Shader@0x00000204988F8F80(22,3-14): error X3511: forced to unroll loop, but unrolling failed.
+

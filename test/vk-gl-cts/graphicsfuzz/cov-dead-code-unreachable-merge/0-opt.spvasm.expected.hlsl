@@ -72,5 +72,13 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   const tint_symbol_2 tint_symbol_5 = {tint_symbol_3.x_GLF_color_1};
   return tint_symbol_5;
 }
-Internal compiler error: access violation. Attempted to read from address 0xFFFFFFFFFFFFFFE8
+C:\src\tint\test\Shader@0x0000019491823870(15,8-20): warning X3556: integer modulus may be much slower, try using uints if possible.
+C:\src\tint\test\Shader@0x0000019491823870(24,11-22): warning X3557: loop doesn't seem to do anything, forcing loop to unroll
+C:\src\tint\test\Shader@0x0000019491823870(24,11-22): warning X3557: loop doesn't seem to do anything, forcing loop to unroll
+C:\src\tint\test\Shader@0x0000019491823870(24,11-22): warning X3557: loop doesn't seem to do anything, forcing loop to unroll
+C:\src\tint\test\Shader@0x0000019491823870(24,11-22): warning X3557: loop doesn't seem to do anything, forcing loop to unroll
+C:\src\tint\test\Shader@0x0000019491823870(24,11-22): warning X3557: loop doesn't seem to do anything, forcing loop to unroll
+C:\src\tint\test\Shader@0x0000019491823870(24,11-22): warning X3557: loop doesn't seem to do anything, forcing loop to unroll
+C:\src\tint\test\Shader@0x0000019491823870(23,9): error X3533: non-empty case statements must have break or return
+C:\src\tint\test\Shader@0x0000019491823870(24,11-22): warning X3557: loop doesn't seem to do anything, forcing loop to unroll
 

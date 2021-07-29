@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 cbuffer cbuffer_x_6 : register(b1, space0) {
   uint4 x_6[3];
 };
@@ -112,3 +114,5 @@ tint_symbol main() {
   const tint_symbol tint_symbol_4 = {tint_symbol_1.x_GLF_color_1};
   return tint_symbol_4;
 }
+C:\src\tint\test\Shader@0x000001DCAB969A50(52,13-21): error X3708: continue cannot be used in a switch
+

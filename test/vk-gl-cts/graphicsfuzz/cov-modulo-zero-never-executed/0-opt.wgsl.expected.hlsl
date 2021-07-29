@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 cbuffer cbuffer_x_8 : register(b2, space0) {
   uint4 x_8[2];
 };
@@ -61,3 +63,5 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   const tint_symbol_2 tint_symbol_7 = {tint_symbol_3.x_GLF_color_1};
   return tint_symbol_7;
 }
+C:\src\tint\test\Shader@0x0000020234C8C230(25,16-23): error X4010: Unsigned integer divide by zero
+

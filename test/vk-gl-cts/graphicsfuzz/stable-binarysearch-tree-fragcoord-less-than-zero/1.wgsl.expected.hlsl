@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 struct BST {
   int data;
   int leftIndex;
@@ -245,3 +247,9 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   const tint_symbol_2 tint_symbol_4 = {tint_symbol_3.x_GLF_color_1};
   return tint_symbol_4;
 }
+C:\src\tint\test\Shader@0x0000023E291817E0(26,3-14): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+C:\src\tint\test\Shader@0x0000023E291817E0(26,3-14): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+C:\src\tint\test\Shader@0x0000023E291817E0(26,3-14): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\src\tint\test\Shader@0x0000023E291817E0(26,3-14): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+internal error: compilation aborted unexpectedly
+

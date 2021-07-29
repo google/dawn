@@ -1105,46 +1105,48 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   const tint_symbol_2 tint_symbol_24 = {tint_symbol_3.x_GLF_color_1};
   return tint_symbol_24;
 }
-T:\tmp\ulw.0:1053:20: warning: equality comparison with extraneous parentheses [-Wparentheses-equality]
+tint_SR61vW:1053:20: warning: equality comparison with extraneous parentheses [-Wparentheses-equality]
         if ((x_570 == asint(x_574))) {
              ~~~~~~^~~~~~~~~~~~~~~
-T:\tmp\ulw.0:1053:20: note: remove extraneous parentheses around the comparison to silence this warning
+tint_SR61vW:1053:20: note: remove extraneous parentheses around the comparison to silence this warning
         if ((x_570 == asint(x_574))) {
             ~      ^              ~
-T:\tmp\ulw.0:1053:20: note: use '=' to turn this equality comparison into an assignment
+tint_SR61vW:1053:20: note: use '=' to turn this equality comparison into an assignment
         if ((x_570 == asint(x_574))) {
                    ^~
                    =
-T:\tmp\ulw.0:1063:20: warning: equality comparison with extraneous parentheses [-Wparentheses-equality]
+tint_SR61vW:1063:20: warning: equality comparison with extraneous parentheses [-Wparentheses-equality]
         if ((x_570 == asint(-1))) {
              ~~~~~~^~~~~~~~~~~~
-T:\tmp\ulw.0:1063:20: note: remove extraneous parentheses around the comparison to silence this warning
+tint_SR61vW:1063:20: note: remove extraneous parentheses around the comparison to silence this warning
         if ((x_570 == asint(-1))) {
             ~      ^           ~
-T:\tmp\ulw.0:1063:20: note: use '=' to turn this equality comparison into an assignment
+tint_SR61vW:1063:20: note: use '=' to turn this equality comparison into an assignment
         if ((x_570 == asint(-1))) {
                    ^~
                    =
-T:\tmp\ulw.0:1080:14: warning: equality comparison with extraneous parentheses [-Wparentheses-equality]
+tint_SR61vW:1080:14: warning: equality comparison with extraneous parentheses [-Wparentheses-equality]
   if ((x_572 == asint(20))) {
        ~~~~~~^~~~~~~~~~~~
-T:\tmp\ulw.0:1080:14: note: remove extraneous parentheses around the comparison to silence this warning
+tint_SR61vW:1080:14: note: remove extraneous parentheses around the comparison to silence this warning
   if ((x_572 == asint(20))) {
       ~      ^           ~
-T:\tmp\ulw.0:1080:14: note: use '=' to turn this equality comparison into an assignment
+tint_SR61vW:1080:14: note: use '=' to turn this equality comparison into an assignment
   if ((x_572 == asint(20))) {
              ^~
              =
+warning: DXIL.dll not found.  Resulting DXIL will not be signed for use in release environments.
+
 error: validation errors
-T:\tmp\ulw.0:1098: error: Loop must have break.
-T:\tmp\ulw.0:1098: error: Loop must have break.
-T:\tmp\ulw.0:1098: error: Loop must have break.
-T:\tmp\ulw.0:1098: error: Loop must have break.
-T:\tmp\ulw.0:1098: error: Loop must have break.
-T:\tmp\ulw.0:1098: error: Loop must have break.
-T:\tmp\ulw.0:1098: error: Loop must have break.
-T:\tmp\ulw.0:1098: error: Loop must have break.
-T:\tmp\ulw.0:1098: error: Loop must have break.
+tint_SR61vW:1098: error: Loop must have break.
+tint_SR61vW:1098: error: Loop must have break.
+tint_SR61vW:1098: error: Loop must have break.
+tint_SR61vW:1098: error: Loop must have break.
+tint_SR61vW:1098: error: Loop must have break.
+tint_SR61vW:1098: error: Loop must have break.
+tint_SR61vW:1098: error: Loop must have break.
+tint_SR61vW:1098: error: Loop must have break.
+tint_SR61vW:1098: error: Loop must have break.
 Validation failed.
 
 

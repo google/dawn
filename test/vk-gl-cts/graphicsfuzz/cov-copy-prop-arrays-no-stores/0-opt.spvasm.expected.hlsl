@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 struct Array {
   int values[2];
 };
@@ -37,3 +39,5 @@ tint_symbol main() {
   const tint_symbol tint_symbol_3 = {tint_symbol_1.x_GLF_color_1};
   return tint_symbol_3;
 }
+C:\src\tint\test\Shader@0x000001FD1871BC40(15,3-16): error X3500: array reference cannot be used as an l-value; not natively addressable
+

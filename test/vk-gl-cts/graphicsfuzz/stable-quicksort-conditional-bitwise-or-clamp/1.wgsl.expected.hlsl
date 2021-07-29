@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 struct QuicksortObject {
   int numbers[10];
 };
@@ -230,3 +232,9 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   const tint_symbol_2 tint_symbol_5 = {tint_symbol_3.x_GLF_color_1};
   return tint_symbol_5;
 }
+C:\src\tint\test\Shader@0x000002356DF3F300(146,7-22): warning X3550: array reference cannot be used as an l-value; not natively addressable, forcing loop to unroll
+C:\src\tint\test\Shader@0x000002356DF3F300(101,19-29): warning X3556: integer divides may be much slower, try using uints if possible.
+C:\src\tint\test\Shader@0x000002356DF3F300(20,3-20): error X3500: array reference cannot be used as an l-value; not natively addressable
+C:\src\tint\test\Shader@0x000002356DF3F300(41,3-14): error X3511: forced to unroll loop, but unrolling failed.
+C:\src\tint\test\Shader@0x000002356DF3F300(102,3-14): error X3511: forced to unroll loop, but unrolling failed.
+

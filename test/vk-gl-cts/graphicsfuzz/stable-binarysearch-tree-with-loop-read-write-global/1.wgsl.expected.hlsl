@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 struct BST {
   int data;
   int leftIndex;
@@ -269,3 +271,10 @@ tint_symbol main() {
   const tint_symbol tint_symbol_3 = {tint_symbol_1.x_GLF_color_1};
   return tint_symbol_3;
 }
+C:\src\tint\test\Shader@0x000002670FAA27F0(32,3-14): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+C:\src\tint\test\Shader@0x000002670FAA27F0(32,3-14): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+C:\src\tint\test\Shader@0x000002670FAA27F0(32,3-14): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\src\tint\test\Shader@0x000002670FAA27F0(32,3-14): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\src\tint\test\Shader@0x000002670FAA27F0(90,3-20): error X3500: array reference cannot be used as an l-value; not natively addressable
+C:\src\tint\test\Shader@0x000002670FAA27F0(203,5-35): error X3511: forced to unroll loop, but unrolling failed.
+

@@ -52,22 +52,10 @@ void main_1() {
         {
           for(; (1 < z); c = (c + 1)) {
             d = 0;
-            bool tint_tmp = (c >= 0);
-            if (tint_tmp) {
-              tint_tmp = (c < 4);
-            }
-            bool tint_tmp_1 = (d >= 0);
-            if (tint_tmp_1) {
-              tint_tmp_1 = (d < 3);
-            }
-            set_float3(tempm43[((tint_tmp) ? c : 0)], ((tint_tmp_1) ? d : 0), 1.0f);
+            set_float3(tempm43[(((c >= 0) & (c < 4)) ? c : 0)], (((d >= 0) & (d < 3)) ? d : 0), 1.0f);
           }
         }
-        bool tint_tmp_2 = (idx >= 0);
-        if (tint_tmp_2) {
-          tint_tmp_2 = (idx < 9);
-        }
-        const int x_117 = ((tint_tmp_2) ? idx : 0);
+        const int x_117 = (((idx >= 0) & (idx < 9)) ? idx : 0);
         const float x_119 = m43[ctr].y;
         const float x_121 = GLF_live6sums[x_117];
         GLF_live6sums[x_117] = (x_121 + x_119);
@@ -91,9 +79,8 @@ tint_symbol main() {
   const tint_symbol tint_symbol_3 = {tint_symbol_1.x_GLF_color_1};
   return tint_symbol_3;
 }
-error: validation errors
-T:\tmp\ufmo.0:86: error: Loop must have break.
-Validation failed.
-
-
+C:\src\tint\test\Shader@0x000001DB72E101B0(53,24-62): warning X3550: array reference cannot be used as an l-value; not natively addressable, forcing loop to unroll
+C:\src\tint\test\Shader@0x000001DB72E101B0(51,11-37): error X3511: unable to unroll loop, loop does not appear to terminate in a timely manner (1024 iterations)
+C:\src\tint\test\Shader@0x000001DB72E101B0(40,7-39): error X3511: forced to unroll loop, but unrolling failed.
+C:\src\tint\test\Shader@0x000001DB72E101B0(27,3-14): error X3511: forced to unroll loop, but unrolling failed.
 
