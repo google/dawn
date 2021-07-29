@@ -1180,6 +1180,11 @@ namespace dawn_native { namespace vulkan {
             return {};
         }
 
+        // Texture could be destroyed by the time we make a view.
+        if (GetTexture()->GetTextureState() == Texture::TextureState::Destroyed) {
+            return {};
+        }
+
         Device* device = ToBackend(GetTexture()->GetDevice());
 
         VkImageViewCreateInfo createInfo;

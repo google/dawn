@@ -510,13 +510,13 @@ namespace {
         }
     }
 
-    // Test that it's invalid to create a texture view from a destroyed texture
+    // Test that it's valid to create a texture view from a destroyed texture
     TEST_F(TextureViewValidationTest, DestroyCreateTextureView) {
         wgpu::Texture texture = Create2DArrayTexture(device, 1);
         wgpu::TextureViewDescriptor descriptor =
             CreateDefaultViewDescriptor(wgpu::TextureViewDimension::e2D);
         texture.Destroy();
-        ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
+        texture.CreateView(&descriptor);
     }
 
     // Test that the selected TextureAspects must exist in the texture format

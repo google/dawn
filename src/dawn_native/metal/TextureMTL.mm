@@ -660,6 +660,12 @@ namespace dawn_native { namespace metal {
 
     MaybeError TextureView::Initialize(const TextureViewDescriptor* descriptor) {
         Texture* texture = ToBackend(GetTexture());
+
+        // Texture could be destroyed by the time we make a view.
+        if (GetTexture()->GetTextureState() == Texture::TextureState::Destroyed) {
+            return {};
+        }
+
         id<MTLTexture> mtlTexture = texture->GetMTLTexture();
 
         if (!UsageNeedsTextureView(texture->GetInternalUsage())) {

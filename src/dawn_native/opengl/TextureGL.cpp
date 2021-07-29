@@ -533,6 +533,11 @@ namespace dawn_native { namespace opengl {
         mTarget = TargetForTextureViewDimension(descriptor->dimension, descriptor->arrayLayerCount,
                                                 texture->GetSampleCount());
 
+        // Texture could be destroyed by the time we make a view.
+        if (GetTexture()->GetTextureState() == Texture::TextureState::Destroyed) {
+            return;
+        }
+
         if (!UsageNeedsTextureView(texture->GetUsage())) {
             mHandle = 0;
         } else if (!RequiresCreatingNewTextureView(texture, descriptor)) {

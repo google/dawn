@@ -323,9 +323,6 @@ namespace dawn_native {
         // Parent texture should have been already validated.
         ASSERT(texture);
         ASSERT(!texture->IsError());
-        if (texture->GetTextureState() == TextureBase::TextureState::Destroyed) {
-            return DAWN_VALIDATION_ERROR("Destroyed texture used to create texture view");
-        }
 
         DAWN_TRY(ValidateTextureViewDimension(descriptor->dimension));
         if (descriptor->dimension == wgpu::TextureViewDimension::e1D) {

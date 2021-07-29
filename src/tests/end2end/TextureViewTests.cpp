@@ -679,6 +679,23 @@ TEST_P(TextureViewTest, OnlyCopySrcDst) {
     wgpu::TextureView view = texture.CreateView();
 }
 
+// Test that a texture view can be created from a destroyed texture without
+// backend errors.
+TEST_P(TextureViewTest, DestroyedTexture) {
+    wgpu::TextureDescriptor descriptor;
+    descriptor.size = {4, 4, 2};
+    descriptor.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::CopyDst;
+    descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
+    texture.Destroy();
+
+    wgpu::TextureViewDescriptor viewDesc = {};
+    viewDesc.baseArrayLayer = 1;
+    viewDesc.arrayLayerCount = 1;
+    wgpu::TextureView view = texture.CreateView(&viewDesc);
+}
+
 DAWN_INSTANTIATE_TEST(TextureViewTest,
                       D3D12Backend(),
                       MetalBackend(),
