@@ -158,8 +158,6 @@ using SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating =
     SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
 using SpvParserTest_GlslStd450_Floating_FloatingInting =
     SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
-using SpvParserTest_GlslStd450_Floating_FloatingUinting =
-    SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
 using SpvParserTest_GlslStd450_Float3_Float3Float3 =
     SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
 
@@ -503,73 +501,6 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Vector) {
       << body;
 }
 
-TEST_P(SpvParserTest_GlslStd450_Floating_FloatingUinting, Scalar) {
-  const auto assembly = Preamble() + R"(
-     %1 = OpExtInst %float %glsl )" +
-                        GetParam().opcode + R"( %f1 %u1
-     OpReturn
-     OpFunctionEnd
-  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __f32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{f1}
-          Identifier[not set]{u1}
-        )
-      }
-    }
-  })"))
-      << body;
-}
-
-TEST_P(SpvParserTest_GlslStd450_Floating_FloatingUinting, Vector) {
-  const auto assembly = Preamble() + R"(
-     %1 = OpExtInst %v2float %glsl )" +
-                        GetParam().opcode +
-                        R"( %v2f1 %v2u1
-     OpReturn
-     OpFunctionEnd
-  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __vec_2__f32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{v2f1}
-          Identifier[not set]{v2u1}
-        )
-      }
-    }
-  })"))
-      << body;
-}
-
 TEST_P(SpvParserTest_GlslStd450_Floating_FloatingInting, Scalar) {
   const auto assembly = Preamble() + R"(
      %1 = OpExtInst %float %glsl )" +
@@ -721,12 +652,9 @@ INSTANTIATE_TEST_SUITE_P(Samples,
                          }));
 
 INSTANTIATE_TEST_SUITE_P(Samples,
-                         SpvParserTest_GlslStd450_Floating_FloatingUinting,
-                         ::testing::Values(GlslStd450Case{"Ldexp", "ldexp"}));
-
-INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Floating_FloatingInting,
                          ::testing::Values(GlslStd450Case{"Ldexp", "ldexp"}));
+// For ldexp with unsigned second argument, see below.
 
 INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Float3_Float3Float3,
@@ -2179,6 +2107,77 @@ TEST_F(SpvParserTest, GlslStd450_Radians_Vector) {
           __vec_3__f32
           ScalarConstructor[not set]{0.017453}
         }
+      }
+    }
+  }
+})";
+
+  EXPECT_THAT(body, HasSubstr(expected)) << body;
+}
+
+// For ldexp with signed second argument, see above.
+TEST_F(SpvParserTest, GlslStd450_Ldexp_Scalar_Float_Uint) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %float %glsl Ldexp %f1 %u1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(p->builder(), fe.ast_body());
+  const auto* expected = R"(VariableDeclStatement{
+  VariableConst{
+    x_1
+    none
+    undefined
+    __f32
+    {
+      Call[not set]{
+        Identifier[not set]{ldexp}
+        (
+          Identifier[not set]{f1}
+          TypeConstructor[not set]{
+            __i32
+            Identifier[not set]{u1}
+          }
+        )
+      }
+    }
+  }
+})";
+
+  EXPECT_THAT(body, HasSubstr(expected)) << body;
+}
+
+TEST_F(SpvParserTest, GlslStd450_Ldexp_Vector_Floatvec_Uintvec) {
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %v2float %glsl Ldexp %v2f1 %v2u1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(p->builder(), fe.ast_body());
+  const auto* expected = R"(VariableDeclStatement{
+  VariableConst{
+    x_1
+    none
+    undefined
+    __vec_2__f32
+    {
+      Call[not set]{
+        Identifier[not set]{ldexp}
+        (
+          Identifier[not set]{v2f1}
+          TypeConstructor[not set]{
+            __vec_2__i32
+            Identifier[not set]{v2u1}
+          }
+        )
       }
     }
   }

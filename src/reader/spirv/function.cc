@@ -3986,6 +3986,20 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(
     const spvtools::opt::Instruction& inst) {
   const auto ext_opcode = inst.GetSingleWordInOperand(1);
 
+  if (ext_opcode == GLSLstd450Ldexp) {
+    // WGSL requires the second argument to be signed.
+    // Use a type constructor to convert it, which is the same as a bitcast.
+    // If the value would go from very large positive to negative, then the
+    // original result would have been infinity.  And since WGSL
+    // implementations may assume that infinities are not present, then we
+    // don't have to worry about that case.
+    auto e1 = MakeOperand(inst, 2);
+    auto e2 = ToSignedIfUnsigned(MakeOperand(inst, 3));
+
+    return {e1.type, builder_.Call(Source{}, "ldexp",
+                                   ast::ExpressionList{e1.expr, e2.expr})};
+  }
+
   auto* result_type = parser_impl_.ConvertType(inst.type_id());
 
   if (result_type->IsScalar()) {
