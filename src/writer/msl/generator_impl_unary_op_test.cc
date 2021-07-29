@@ -85,7 +85,7 @@ TEST_F(MslUnaryOpTest, Negation) {
 
   std::stringstream out;
   ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.error();
-  EXPECT_EQ(out.str(), "-(expr)");
+  EXPECT_EQ(out.str(), "tint_unary_minus(expr)");
 }
 
 }  // namespace

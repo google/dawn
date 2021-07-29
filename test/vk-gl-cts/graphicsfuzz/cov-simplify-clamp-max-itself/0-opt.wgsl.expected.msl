@@ -20,7 +20,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_4) {
   while (true) {
     int const x_40 = i;
     int const x_42 = x_7.sequence.w;
-    if ((x_40 < (x_42 + 1))) {
+    if ((x_40 < as_type<int>((as_type<uint>(x_42) + as_type<uint>(1))))) {
     } else {
       break;
     }
@@ -38,14 +38,14 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_4) {
     }
     {
       int const x_62 = i;
-      i = (x_62 + 1);
+      i = as_type<int>((as_type<uint>(x_62) + as_type<uint>(1)));
     }
   }
   int const x_65 = a.x;
   int const x_67 = a.y;
   int const x_70 = a.z;
   int const x_73 = a.w;
-  sum = (((x_65 + x_67) + x_70) + x_73);
+  sum = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_65) + as_type<uint>(x_67)))) + as_type<uint>(x_70)))) + as_type<uint>(x_73)));
   int const x_75 = sum;
   if ((x_75 == 10)) {
     *(tint_symbol_4) = float4(1.0f, 0.0f, 0.0f, 1.0f);

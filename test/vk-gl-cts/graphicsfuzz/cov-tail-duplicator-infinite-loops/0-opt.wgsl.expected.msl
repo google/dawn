@@ -71,7 +71,7 @@ void main_1(constant buf1& x_5, constant buf2& x_7, constant buf0& x_10, thread 
           *(tint_symbol_4) = float4(x_73, x_75, x_77, x_79);
           {
             int const x_16 = i;
-            i = (x_16 + 1);
+            i = as_type<int>((as_type<uint>(x_16) + as_type<uint>(1)));
           }
         }
         break;

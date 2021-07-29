@@ -42,12 +42,12 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread float
         int const x_73_save_1 = x_11;
         float const x_74 = m44[x_73_save][x_73_save_1];
         m44[x_73_save][x_73_save_1] = (x_74 + x_72);
-        x_8 = (x_11 + 1);
+        x_8 = as_type<int>((as_type<uint>(x_11) + as_type<uint>(1)));
         x_11_phi = x_8;
       }
     }
     {
-      x_9 = (x_10 + 1);
+      x_9 = as_type<int>((as_type<uint>(x_10) + as_type<uint>(1)));
       x_10_phi = x_9;
     }
   }

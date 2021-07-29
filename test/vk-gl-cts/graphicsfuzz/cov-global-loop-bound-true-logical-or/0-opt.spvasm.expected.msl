@@ -34,7 +34,7 @@ void main_1(constant buf0& x_6, thread int* const tint_symbol_4, thread float4* 
       break;
     }
     int const x_45 = *(tint_symbol_4);
-    *(tint_symbol_4) = (x_45 + 1);
+    *(tint_symbol_4) = as_type<int>((as_type<uint>(x_45) + as_type<uint>(1)));
     x_55_phi = true;
     if (!(true)) {
       int const x_51 = x_6.x_GLF_uniform_int_values.arr[0].el;
@@ -54,7 +54,7 @@ void main_1(constant buf0& x_6, thread int* const tint_symbol_4, thread float4* 
       break;
     }
     int const x_66 = *(tint_symbol_4);
-    *(tint_symbol_4) = (x_66 + 1);
+    *(tint_symbol_4) = as_type<int>((as_type<uint>(x_66) + as_type<uint>(1)));
     int const x_69 = x_6.x_GLF_uniform_int_values.arr[0].el;
     float const x_70 = float(x_69);
     *(tint_symbol_5) = float4(x_70, x_70, x_70, x_70);

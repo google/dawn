@@ -92,12 +92,12 @@ int pointInTriangle_vf2_vf2_vf2_vf2_(constant buf1& x_11, thread float2* const p
         }
         *(tint_symbol_5) = float4(1.0f, 1.0f, 1.0f, 1.0f);
         {
-          x_165 = (x_164 + 1);
+          x_165 = as_type<int>((as_type<uint>(x_164) + as_type<uint>(1)));
           x_164_phi = x_165;
         }
       }
       {
-        x_154 = (x_153 + 1);
+        x_154 = as_type<int>((as_type<uint>(x_153) + as_type<uint>(1)));
         x_153_phi = x_154;
       }
     }

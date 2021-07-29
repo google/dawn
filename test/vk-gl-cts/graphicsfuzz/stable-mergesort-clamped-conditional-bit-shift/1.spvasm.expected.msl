@@ -24,7 +24,7 @@ void merge_i1_i1_i1_(thread int* const from, thread int* const mid, thread int* 
   int const x_261 = *(from);
   i = x_261;
   int const x_262 = *(mid);
-  j = (x_262 + 1);
+  j = as_type<int>((as_type<uint>(x_262) + as_type<uint>(1)));
   while (true) {
     int const x_268 = i;
     int const x_269 = *(mid);
@@ -40,16 +40,16 @@ void merge_i1_i1_i1_(thread int* const from, thread int* const mid, thread int* 
     int const x_281 = (*(tint_symbol_5)).arr[x_279];
     if ((x_278 < x_281)) {
       int const x_286 = k;
-      k = (x_286 + 1);
+      k = as_type<int>((as_type<uint>(x_286) + as_type<uint>(1)));
       int const x_288 = i;
-      i = (x_288 + 1);
+      i = as_type<int>((as_type<uint>(x_288) + as_type<uint>(1)));
       int const x_291 = (*(tint_symbol_5)).arr[x_288];
       (*(tint_symbol_6)).arr[x_286] = x_291;
     } else {
       int const x_293 = k;
-      k = (x_293 + 1);
+      k = as_type<int>((as_type<uint>(x_293) + as_type<uint>(1)));
       int const x_295 = j;
-      j = (x_295 + 1);
+      j = as_type<int>((as_type<uint>(x_295) + as_type<uint>(1)));
       int const x_298 = (*(tint_symbol_5)).arr[x_295];
       (*(tint_symbol_6)).arr[x_293] = x_298;
     }
@@ -63,9 +63,9 @@ void merge_i1_i1_i1_(thread int* const from, thread int* const mid, thread int* 
       break;
     }
     int const x_311 = k;
-    k = (x_311 + 1);
+    k = as_type<int>((as_type<uint>(x_311) + as_type<uint>(1)));
     int const x_313 = i;
-    i = (x_313 + 1);
+    i = as_type<int>((as_type<uint>(x_313) + as_type<uint>(1)));
     int const x_316 = (*(tint_symbol_5)).arr[x_313];
     (*(tint_symbol_6)).arr[x_311] = x_316;
   }
@@ -84,7 +84,7 @@ void merge_i1_i1_i1_(thread int* const from, thread int* const mid, thread int* 
     (*(tint_symbol_5)).arr[x_327] = x_330;
     {
       int const x_332 = i_1;
-      i_1 = (x_332 + 1);
+      i_1 = as_type<int>((as_type<uint>(x_332) + as_type<uint>(1)));
     }
   }
   return;
@@ -98,12 +98,12 @@ int func_i1_i1_(thread int* const m, thread int* const high, thread float4* cons
   if ((x_338 >= 0.0f)) {
     if (false) {
       int const x_346 = *(high);
-      x_336 = (x_346 << as_type<uint>(0));
+      x_336 = as_type<int>((as_type<uint>(x_346) << as_type<uint>(0)));
     } else {
       x_336 = 4;
     }
     int const x_348 = x_336;
-    x_335 = (1 << as_type<uint>(x_348));
+    x_335 = as_type<int>((as_type<uint>(1) << as_type<uint>(x_348)));
   } else {
     x_335 = 1;
   }
@@ -115,7 +115,7 @@ int func_i1_i1_(thread int* const m, thread int* const high, thread float4* cons
   int const x_355 = *(m);
   int const x_357 = *(m);
   int const x_359 = x;
-  return clamp((2 * x_353), (2 * x_355), ((2 * x_357) / x_359));
+  return clamp(as_type<int>((as_type<uint>(2) * as_type<uint>(x_353))), as_type<int>((as_type<uint>(2) * as_type<uint>(x_355))), (as_type<int>((as_type<uint>(2) * as_type<uint>(x_357))) / x_359));
 }
 
 void mergeSort_(thread tint_array_wrapper* const tint_symbol_8, thread tint_array_wrapper* const tint_symbol_9, thread float4* const tint_symbol_10) {
@@ -154,11 +154,11 @@ void mergeSort_(thread tint_array_wrapper* const tint_symbol_8, thread tint_arra
       from_1 = x_380;
       int const x_381 = i_2;
       int const x_382 = m_1;
-      mid_1 = ((x_381 + x_382) - 1);
+      mid_1 = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_381) + as_type<uint>(x_382)))) - as_type<uint>(1)));
       int const x_385 = i_2;
       int const x_386 = m_1;
       int const x_390 = high_1;
-      to_1 = min(((x_385 + (2 * x_386)) - 1), x_390);
+      to_1 = min(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_385) + as_type<uint>(as_type<int>((as_type<uint>(2) * as_type<uint>(x_386))))))) - as_type<uint>(1))), x_390);
       int const x_392 = from_1;
       param = x_392;
       int const x_393 = mid_1;
@@ -173,12 +173,12 @@ void mergeSort_(thread tint_array_wrapper* const tint_symbol_8, thread tint_arra
         param_4 = x_397;
         int const x_398 = func_i1_i1_(&(param_3), &(param_4), tint_symbol_10);
         int const x_399 = i_2;
-        i_2 = (x_399 + x_398);
+        i_2 = as_type<int>((as_type<uint>(x_399) + as_type<uint>(x_398)));
       }
     }
     {
       int const x_401 = m_1;
-      m_1 = (2 * x_401);
+      m_1 = as_type<int>((as_type<uint>(2) * as_type<uint>(x_401)));
     }
   }
   return;
@@ -248,7 +248,7 @@ void main_1(constant buf0& x_34, thread tint_array_wrapper* const tint_symbol_11
       }
     }
     int const x_131 = i_3;
-    i_3 = (x_131 + 1);
+    i_3 = as_type<int>((as_type<uint>(x_131) + as_type<uint>(1)));
     {
       int const x_133 = i_3;
       if ((x_133 < 10)) {
@@ -270,7 +270,7 @@ void main_1(constant buf0& x_34, thread tint_array_wrapper* const tint_symbol_11
     (*(tint_symbol_12)).arr[x_142] = x_145;
     {
       int const x_147 = j_1;
-      j_1 = (x_147 + 1);
+      j_1 = as_type<int>((as_type<uint>(x_147) + as_type<uint>(1)));
     }
   }
   mergeSort_(tint_symbol_11, tint_symbol_12, tint_symbol_13);

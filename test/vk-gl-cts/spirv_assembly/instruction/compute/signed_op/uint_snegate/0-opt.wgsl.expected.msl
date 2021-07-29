@@ -1,6 +1,11 @@
 #include <metal_stdlib>
 
 using namespace metal;
+
+int tint_unary_minus(const int v) {
+  return select(-v, v, v == -2147483648);
+}
+
 struct S {
   /* 0x0000 */ uint field0[1];
 };
@@ -8,7 +13,7 @@ struct S {
 void main_1(device S& x_5, device S& x_6, thread uint3* const tint_symbol_2) {
   uint const x_20 = (*(tint_symbol_2)).x;
   uint const x_22 = x_5.field0[x_20];
-  x_6.field0[x_20] = as_type<uint>(-(as_type<int>(x_22)));
+  x_6.field0[x_20] = as_type<uint>(tint_unary_minus(as_type<int>(x_22)));
   return;
 }
 

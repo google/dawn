@@ -38,7 +38,7 @@ void main_1(thread float4* const tint_symbol_4) {
       break;
     }
     int const x_17 = ll1;
-    ll1 = (x_17 + 1);
+    ll1 = as_type<int>((as_type<uint>(x_17) + as_type<uint>(1)));
     ll4 = 10;
     ll2 = 0;
     c = 0;
@@ -53,7 +53,7 @@ void main_1(thread float4* const tint_symbol_4) {
         break;
       }
       int const x_21 = ll2;
-      ll2 = (x_21 + 1);
+      ll2 = as_type<int>((as_type<uint>(x_21) + as_type<uint>(1)));
       float4x3 const x_92 = m43;
       tempm43 = x_92;
       ll3 = 0;
@@ -73,7 +73,7 @@ void main_1(thread float4* const tint_symbol_4) {
         tempm43[select(0, x_26, ((x_24 >= 0) & (x_25 < 4)))][select(0, x_29, ((x_27 >= 0) & (x_28 < 3)))] = 1.0f;
         {
           int const x_30 = d;
-          d = (x_30 + 1);
+          d = as_type<int>((as_type<uint>(x_30) + as_type<uint>(1)));
         }
       }
       int const x_32 = idx;
@@ -86,11 +86,11 @@ void main_1(thread float4* const tint_symbol_4) {
       sums.arr[x_111] = (x_115 + x_113);
       {
         int const x_36 = c;
-        c = (x_36 + 1);
+        c = as_type<int>((as_type<uint>(x_36) + as_type<uint>(1)));
       }
     }
     int const x_38 = idx;
-    idx = (x_38 + 1);
+    idx = as_type<int>((as_type<uint>(x_38) + as_type<uint>(1)));
   }
   return;
 }

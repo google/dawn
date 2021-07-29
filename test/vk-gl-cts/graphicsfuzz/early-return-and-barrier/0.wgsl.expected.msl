@@ -21,7 +21,7 @@ void main_1(device theSSBO& x_4) {
       break;
     }
     {
-      x_33 = (x_32 - 1);
+      x_33 = as_type<int>((as_type<uint>(x_32) - as_type<uint>(1)));
       x_30_phi = float2x2(float2(1.0f, 0.0f), float2(0.0f, 1.0f));
       x_32_phi = x_33;
     }

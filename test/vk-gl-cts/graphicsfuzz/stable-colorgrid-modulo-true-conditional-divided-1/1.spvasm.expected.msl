@@ -53,7 +53,7 @@ float compute_value_f1_f1_(thread float* const limit, thread float* const thirty
       return x_105;
     }
     {
-      x_108 = (x_107 + 1);
+      x_108 = as_type<int>((as_type<uint>(x_107) + as_type<uint>(1)));
       x_104_phi = x_105;
       x_107_phi = x_108;
     }
@@ -108,7 +108,7 @@ void main_1(constant buf0& x_10, constant buf1& x_16, thread float4* const tint_
       c[x_80_save] = (x_92 * x_93);
     }
     {
-      x_75 = (x_74 + 1);
+      x_75 = as_type<int>((as_type<uint>(x_74) + as_type<uint>(1)));
       x_74_phi = x_75;
     }
   }

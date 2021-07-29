@@ -29,14 +29,14 @@ void main_1(constant buf0& x_8, thread float4* const tint_symbol_4) {
   if ((x_41 > 1)) {
     *(tint_symbol_4) = float4(0.0f, 1.0f, 1.0f, 0.0f);
     int const x_45 = b;
-    b = (x_45 + 1);
+    b = as_type<int>((as_type<uint>(x_45) + as_type<uint>(1)));
   }
   int const x_47 = b;
-  int const x_48 = (x_47 + 1);
+  int const x_48 = as_type<int>((as_type<uint>(x_47) + as_type<uint>(1)));
   b = x_48;
   int const x_50_save = clamp(x_48, 0, 2);
   int const x_51 = a.arr[x_50_save];
-  a.arr[x_50_save] = (x_51 + 1);
+  a.arr[x_50_save] = as_type<int>((as_type<uint>(x_51) + as_type<uint>(1)));
   int const x_54 = a.arr[2];
   if ((x_54 == 4)) {
     *(tint_symbol_4) = float4(1.0f, 0.0f, 0.0f, 1.0f);

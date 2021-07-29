@@ -183,55 +183,55 @@ void main_1(constant buf0& x_50, thread tint_array_wrapper_1* const tint_symbol_
   BST const x_103 = param_4;
   (*(tint_symbol_7)).arr[0] = x_103;
   int const x_105 = treeIndex_1;
-  treeIndex_1 = (x_105 + 1);
+  treeIndex_1 = as_type<int>((as_type<uint>(x_105) + as_type<uint>(1)));
   int const x_107 = treeIndex_1;
   param_6 = x_107;
   param_7 = 5;
   insert_i1_i1_(&(param_6), &(param_7), tint_symbol_7);
   int const x_109 = treeIndex_1;
-  treeIndex_1 = (x_109 + 1);
+  treeIndex_1 = as_type<int>((as_type<uint>(x_109) + as_type<uint>(1)));
   int const x_111 = treeIndex_1;
   param_8 = x_111;
   param_9 = 12;
   insert_i1_i1_(&(param_8), &(param_9), tint_symbol_7);
   int const x_113 = treeIndex_1;
-  treeIndex_1 = (x_113 + 1);
+  treeIndex_1 = as_type<int>((as_type<uint>(x_113) + as_type<uint>(1)));
   int const x_115 = treeIndex_1;
   param_10 = x_115;
   param_11 = 15;
   insert_i1_i1_(&(param_10), &(param_11), tint_symbol_7);
   int const x_117 = treeIndex_1;
-  treeIndex_1 = (x_117 + 1);
+  treeIndex_1 = as_type<int>((as_type<uint>(x_117) + as_type<uint>(1)));
   int const x_119 = treeIndex_1;
   param_12 = x_119;
   param_13 = 7;
   insert_i1_i1_(&(param_12), &(param_13), tint_symbol_7);
   int const x_121 = treeIndex_1;
-  treeIndex_1 = (x_121 + 1);
+  treeIndex_1 = as_type<int>((as_type<uint>(x_121) + as_type<uint>(1)));
   int const x_123 = treeIndex_1;
   param_14 = x_123;
   param_15 = 8;
   insert_i1_i1_(&(param_14), &(param_15), tint_symbol_7);
   int const x_125 = treeIndex_1;
-  treeIndex_1 = (x_125 + 1);
+  treeIndex_1 = as_type<int>((as_type<uint>(x_125) + as_type<uint>(1)));
   int const x_127 = treeIndex_1;
   param_16 = x_127;
   param_17 = 2;
   insert_i1_i1_(&(param_16), &(param_17), tint_symbol_7);
   int const x_129 = treeIndex_1;
-  treeIndex_1 = (x_129 + 1);
+  treeIndex_1 = as_type<int>((as_type<uint>(x_129) + as_type<uint>(1)));
   int const x_131 = treeIndex_1;
   param_18 = x_131;
   param_19 = 6;
   insert_i1_i1_(&(param_18), &(param_19), tint_symbol_7);
   int const x_133 = treeIndex_1;
-  treeIndex_1 = (x_133 + 1);
+  treeIndex_1 = as_type<int>((as_type<uint>(x_133) + as_type<uint>(1)));
   int const x_135 = treeIndex_1;
   param_20 = x_135;
   param_21 = 17;
   insert_i1_i1_(&(param_20), &(param_21), tint_symbol_7);
   int const x_137 = treeIndex_1;
-  treeIndex_1 = (x_137 + 1);
+  treeIndex_1 = as_type<int>((as_type<uint>(x_137) + as_type<uint>(1)));
   int const x_139 = treeIndex_1;
   param_22 = x_139;
   param_23 = 13;
@@ -249,16 +249,16 @@ void main_1(constant buf0& x_50, thread tint_array_wrapper_1* const tint_symbol_
     float const x_150 = x_50.injectionSwitch.y;
     if ((x_148 >= int(x_150))) {
       float const x_156 = x_50.injectionSwitch.y;
-      param_24 = (1 + int(x_156));
+      param_24 = as_type<int>((as_type<uint>(1) + as_type<uint>(int(x_156))));
       int const x_159 = identity_i1_(&(param_24), tint_symbol_8);
       pp = x_159;
       break;
     }
     int const x_160 = looplimiter0;
-    looplimiter0 = (x_160 + 1);
+    looplimiter0 = as_type<int>((as_type<uint>(x_160) + as_type<uint>(1)));
     {
       int const x_162 = i;
-      i = (x_162 + 1);
+      i = as_type<int>((as_type<uint>(x_162) + as_type<uint>(1)));
     }
   }
   int const x_164 = pp;
@@ -293,7 +293,7 @@ void main_1(constant buf0& x_50, thread tint_array_wrapper_1* const tint_symbol_
         int const x_188 = i_1;
         if ((x_187 == x_188)) {
           int const x_192 = count;
-          count = (x_192 + 1);
+          count = as_type<int>((as_type<uint>(x_192) + as_type<uint>(1)));
         }
         break;
       }
@@ -301,14 +301,14 @@ void main_1(constant buf0& x_50, thread tint_array_wrapper_1* const tint_symbol_
         int const x_181 = result;
         if ((x_181 == -1)) {
           int const x_185 = count;
-          count = (x_185 + 1);
+          count = as_type<int>((as_type<uint>(x_185) + as_type<uint>(1)));
         }
         break;
       }
     }
     {
       int const x_194 = i_1;
-      i_1 = (x_194 + 1);
+      i_1 = as_type<int>((as_type<uint>(x_194) + as_type<uint>(1)));
     }
   }
   int const x_196 = count;

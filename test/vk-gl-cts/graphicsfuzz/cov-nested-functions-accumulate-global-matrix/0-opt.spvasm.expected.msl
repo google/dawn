@@ -75,7 +75,7 @@ void func0_i1_(constant buf2& x_10, constant buf0& x_12, thread int* const x, th
         float const x_160 = (*(tint_symbol_5))[x_155][x_156];
         (*(tint_symbol_5))[x_155][x_156] = (x_160 + x_158);
         int const x_163 = i;
-        i = (x_163 + 1);
+        i = as_type<int>((as_type<uint>(x_163) + as_type<uint>(1)));
       }
     }
   }

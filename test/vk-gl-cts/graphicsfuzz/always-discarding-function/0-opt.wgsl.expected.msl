@@ -56,7 +56,7 @@ void main_1(constant buf0& x_11, thread float4* const tint_symbol_6) {
         } else {
           break;
         }
-        int const x_22 = (x_21 - 1);
+        int const x_22 = as_type<int>((as_type<uint>(x_21) - as_type<uint>(1)));
         x_19 = x_22;
         int const x_23 = x_24.arr[x_22];
         if ((x_23 == 1)) {
@@ -139,7 +139,7 @@ int binarySearch_struct_tmp_struct_i1_1_1_(thread tmp_struct* const obj) {
       } else {
         break;
       }
-      int const x_13 = (x_15 - 1);
+      int const x_13 = as_type<int>((as_type<uint>(x_15) - as_type<uint>(1)));
       zero = x_13;
       int const x_14 = (*(obj)).nmb.arr[x_13];
       if ((x_14 == 1)) {

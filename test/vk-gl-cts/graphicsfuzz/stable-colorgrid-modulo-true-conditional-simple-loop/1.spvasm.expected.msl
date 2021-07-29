@@ -45,7 +45,7 @@ float compute_value_f1_f1_(thread float* const limit, thread float* const thirty
     }
     {
       int const x_172 = i;
-      i = (x_172 + 1);
+      i = as_type<int>((as_type<uint>(x_172) + as_type<uint>(1)));
     }
   }
   float const x_174 = result;
@@ -123,7 +123,7 @@ void main_1(constant buf0& x_13, constant buf1& x_19, thread float4* const tint_
     }
     {
       int const x_130 = i_1;
-      i_1 = (x_130 + 1);
+      i_1 = as_type<int>((as_type<uint>(x_130) + as_type<uint>(1)));
     }
   }
   float3 const x_132 = c;
