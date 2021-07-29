@@ -37,6 +37,12 @@ bool Symbol::operator==(const Symbol& other) const {
   return val_ == other.val_;
 }
 
+bool Symbol::operator<(const Symbol& other) const {
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Symbol, program_id_,
+                                         other.program_id_);
+  return val_ < other.val_;
+}
+
 std::string Symbol::to_str() const {
   return "$" + std::to_string(val_);
 }

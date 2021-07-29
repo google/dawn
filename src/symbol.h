@@ -54,6 +54,11 @@ class Symbol {
   /// @returns true if the symbols are the same
   bool operator==(const Symbol& o) const;
 
+  /// Less-than operator
+  /// @param o the other symbol
+  /// @returns true if this symbol is ordered before symbol `o`
+  bool operator<(const Symbol& o) const;
+
   /// @returns true if the symbol is valid
   bool IsValid() const { return val_ != static_cast<uint32_t>(-1); }
 
