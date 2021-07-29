@@ -1447,105 +1447,105 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
                                                     Source source,
                                                     ParamOrRetType param_or_ret,
                                                     bool is_struct_member) {
-    // Scan decorations for pipeline IO attributes.
-    // Check for overlap with attributes that have been seen previously.
-    ast::Decoration* pipeline_io_attribute = nullptr;
-    ast::InvariantDecoration* invariant_attribute = nullptr;
-    for (auto* deco : decos) {
-      auto is_invalid_compute_shader_decoration = false;
-      if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
-        if (pipeline_io_attribute) {
-          AddError("multiple entry point IO attributes", deco->source());
+        // Scan decorations for pipeline IO attributes.
+        // Check for overlap with attributes that have been seen previously.
+        ast::Decoration* pipeline_io_attribute = nullptr;
+        ast::InvariantDecoration* invariant_attribute = nullptr;
+        for (auto* deco : decos) {
+          auto is_invalid_compute_shader_decoration = false;
+          if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+            if (pipeline_io_attribute) {
+              AddError("multiple entry point IO attributes", deco->source());
           AddNote("previously consumed " + deco_to_str(pipeline_io_attribute),
                   pipeline_io_attribute->source());
-          return false;
-        }
-        pipeline_io_attribute = deco;
+              return false;
+            }
+            pipeline_io_attribute = deco;
 
-        if (builtins.count(builtin->value())) {
+            if (builtins.count(builtin->value())) {
           AddError(deco_to_str(builtin) +
-                       " attribute appears multiple times as pipeline " +
-                       (param_or_ret == ParamOrRetType::kParameter ? "input"
-                                                                   : "output"),
-                   func->source());
-          return false;
-        }
+                      " attribute appears multiple times as pipeline " +
+                      (param_or_ret == ParamOrRetType::kParameter ? "input"
+                                                                  : "output"),
+                  func->source());
+              return false;
+            }
 
-        if (!ValidateBuiltinDecoration(
-                builtin, ty,
-                /* is_input */ param_or_ret == ParamOrRetType::kParameter,
-                /* is_struct_member */ is_struct_member)) {
-          return false;
-        }
-        builtins.emplace(builtin->value());
-      } else if (auto* location = deco->As<ast::LocationDecoration>()) {
-        if (pipeline_io_attribute) {
-          AddError("multiple entry point IO attributes", deco->source());
+            if (!ValidateBuiltinDecoration(
+                    builtin, ty,
+                    /* is_input */ param_or_ret == ParamOrRetType::kParameter,
+                    /* is_struct_member */ is_struct_member)) {
+              return false;
+            }
+            builtins.emplace(builtin->value());
+          } else if (auto* location = deco->As<ast::LocationDecoration>()) {
+            if (pipeline_io_attribute) {
+              AddError("multiple entry point IO attributes", deco->source());
           AddNote("previously consumed " + deco_to_str(pipeline_io_attribute),
                   pipeline_io_attribute->source());
-          return false;
-        }
-        pipeline_io_attribute = deco;
+              return false;
+            }
+            pipeline_io_attribute = deco;
 
-        bool is_input = param_or_ret == ParamOrRetType::kParameter;
-        if (!ValidateLocationDecoration(location, ty, locations, source,
-                                        is_input)) {
-          return false;
-        }
+            bool is_input = param_or_ret == ParamOrRetType::kParameter;
+            if (!ValidateLocationDecoration(location, ty, locations, source,
+                                            is_input)) {
+              return false;
+            }
       } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
-        if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
-          is_invalid_compute_shader_decoration = true;
-        } else if (!ValidateInterpolateDecoration(interpolate, ty)) {
-          return false;
-        }
-      } else if (auto* invariant = deco->As<ast::InvariantDecoration>()) {
-        if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
-          is_invalid_compute_shader_decoration = true;
-        }
-        invariant_attribute = invariant;
-      }
-      if (is_invalid_compute_shader_decoration) {
-        std::string input_or_output =
+            if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
+              is_invalid_compute_shader_decoration = true;
+            } else if (!ValidateInterpolateDecoration(interpolate, ty)) {
+              return false;
+            }
+          } else if (auto* invariant = deco->As<ast::InvariantDecoration>()) {
+            if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
+              is_invalid_compute_shader_decoration = true;
+            }
+            invariant_attribute = invariant;
+          }
+          if (is_invalid_compute_shader_decoration) {
+            std::string input_or_output =
             param_or_ret == ParamOrRetType::kParameter ? "inputs" : "output";
-        AddError(
-            "decoration is not valid for compute shader " + input_or_output,
-            deco->source());
-        return false;
-      }
-    }
+            AddError(
+                "decoration is not valid for compute shader " + input_or_output,
+                deco->source());
+            return false;
+          }
+        }
 
     if (IsValidationEnabled(decos,
                             ast::DisabledValidation::kEntryPointParameter)) {
-      if (!ty->Is<sem::Struct>() && !pipeline_io_attribute) {
-        std::string err = "missing entry point IO attribute";
-        if (!is_struct_member) {
+          if (!ty->Is<sem::Struct>() && !pipeline_io_attribute) {
+            std::string err = "missing entry point IO attribute";
+            if (!is_struct_member) {
           err +=
               (param_or_ret == ParamOrRetType::kParameter ? " on parameter"
-                                                          : " on return type");
-        }
-        AddError(err, source);
-        return false;
-      }
+                          : " on return type");
+            }
+            AddError(err, source);
+            return false;
+          }
 
-      if (invariant_attribute) {
-        bool has_position = false;
-        if (pipeline_io_attribute) {
-          if (auto* builtin =
-                  pipeline_io_attribute->As<ast::BuiltinDecoration>()) {
-            has_position = (builtin->value() == ast::Builtin::kPosition);
+          if (invariant_attribute) {
+            bool has_position = false;
+            if (pipeline_io_attribute) {
+              if (auto* builtin =
+                      pipeline_io_attribute->As<ast::BuiltinDecoration>()) {
+                has_position = (builtin->value() == ast::Builtin::kPosition);
+              }
+            }
+            if (!has_position) {
+              AddError(
+                  "invariant attribute must only be applied to a position "
+                  "builtin",
+                  invariant_attribute->source());
+              return false;
+            }
           }
         }
-        if (!has_position) {
-          AddError(
-              "invariant attribute must only be applied to a position "
-              "builtin",
-              invariant_attribute->source());
-          return false;
-        }
-      }
-    }
-    return true;
-  };
+        return true;
+      };
 
   // Outer lambda for validating the entry point decorations for a type.
   auto validate_entry_point_decorations = [&](const ast::DecorationList& decos,
@@ -2155,7 +2155,7 @@ bool Resolver::ForLoopStatement(ast::ForLoopStatement* stmt) {
         return false;
       }
 
-      if (!TypeOf(condition)->Is<sem::Bool>()) {
+      if (!TypeOf(condition)->UnwrapRef()->Is<sem::Bool>()) {
         AddError(
             "for-loop condition must be bool, got " + TypeNameOf(condition),
             condition->source());

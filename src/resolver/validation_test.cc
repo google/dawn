@@ -768,6 +768,16 @@ TEST_F(ResolverTest, Stmt_Loop_ContinueInContinuing_Indirect) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverTest, Stmt_ForLoop_CondIsBoolRef) {
+  // var cond : bool = true;
+  // for (; cond; ) {
+  // }
+
+  auto* cond = Var("cond", ty.bool_(), Expr(true));
+  WrapInFunction(Decl(cond), For(nullptr, "cond", nullptr, Block()));
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
 TEST_F(ResolverTest, Stmt_ForLoop_CondIsNotBool) {
   // for (; 1.0f; ) {
   // }
