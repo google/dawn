@@ -1,0 +1,70 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct PointLight {
+  /* 0x0000 */ packed_float4 position;
+};
+struct PointLights {
+  /* 0x0000 */ PointLight values[1];
+};
+struct Uniforms {
+  /* 0x0000 */ float4x4 worldView;
+  /* 0x0040 */ float4x4 proj;
+  /* 0x0080 */ uint numPointLights;
+  /* 0x0084 */ uint color_source;
+  /* 0x0088 */ int8_t tint_pad[8];
+  /* 0x0090 */ packed_float4 color;
+};
+struct FragmentInput {
+  float4 position;
+  float4 view_position;
+  float4 normal;
+  float2 uv;
+  float4 color;
+};
+struct FragmentOutput {
+  float4 color;
+};
+struct tint_symbol_4 {
+  float4 view_position [[user(locn0)]];
+  float4 normal [[user(locn1)]];
+  float2 uv [[user(locn2)]];
+  float4 color [[user(locn3)]];
+};
+struct tint_symbol_5 {
+  float4 color [[color(0)]];
+};
+
+float4 getColor(constant Uniforms& uniforms, FragmentInput tint_symbol, texture2d<float, access::sample> tint_symbol_7, sampler tint_symbol_8) {
+  float4 color = 0.0f;
+  if ((uniforms.color_source == 0u)) {
+    color = tint_symbol.color;
+  } else {
+    if ((uniforms.color_source == 1u)) {
+      color = tint_symbol.normal;
+      color.a = 1.0f;
+    } else {
+      if ((uniforms.color_source == 2u)) {
+        color = uniforms.color;
+      } else {
+        if ((uniforms.color_source == 3u)) {
+          color = tint_symbol_7.sample(tint_symbol_8, tint_symbol.uv);
+        }
+      }
+    }
+  }
+  return color;
+}
+
+fragment tint_symbol_5 tint_symbol_1(sampler tint_symbol_9 [[sampler(2)]], texture2d<float, access::sample> tint_symbol_10 [[texture(3)]], float4 tint_symbol_3 [[position]], tint_symbol_4 tint_symbol_2 [[stage_in]], constant Uniforms& uniforms [[buffer(0)]], const device PointLights& pointLights [[buffer(1)]]) {
+  FragmentInput const tint_symbol = {.position=tint_symbol_3, .view_position=tint_symbol_2.view_position, .normal=tint_symbol_2.normal, .uv=tint_symbol_2.uv, .color=tint_symbol_2.color};
+  FragmentOutput output = {};
+  output.color = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  (void) uniforms;
+  (void) tint_symbol_9;
+  (void) tint_symbol_10;
+  (void) pointLights;
+  tint_symbol_5 const tint_symbol_6 = {.color=output.color};
+  return tint_symbol_6;
+}
+

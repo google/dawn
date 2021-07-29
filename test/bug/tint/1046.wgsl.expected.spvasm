@@ -1,0 +1,217 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 114
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %tint_symbol %tint_symbol_1 %tint_symbol_2 %tint_symbol_3 %tint_symbol_4 %tint_symbol_7
+               OpExecutionMode %main OriginUpperLeft
+               OpName %Uniforms "Uniforms"
+               OpMemberName %Uniforms 0 "worldView"
+               OpMemberName %Uniforms 1 "proj"
+               OpMemberName %Uniforms 2 "numPointLights"
+               OpMemberName %Uniforms 3 "color_source"
+               OpMemberName %Uniforms 4 "color"
+               OpName %uniforms "uniforms"
+               OpName %PointLights "PointLights"
+               OpMemberName %PointLights 0 "values"
+               OpName %PointLight "PointLight"
+               OpMemberName %PointLight 0 "position"
+               OpName %pointLights "pointLights"
+               OpName %mySampler "mySampler"
+               OpName %myTexture "myTexture"
+               OpName %tint_symbol "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %tint_symbol_2 "tint_symbol_2"
+               OpName %tint_symbol_3 "tint_symbol_3"
+               OpName %tint_symbol_4 "tint_symbol_4"
+               OpName %tint_symbol_7 "tint_symbol_7"
+               OpName %FragmentInput "FragmentInput"
+               OpMemberName %FragmentInput 0 "position"
+               OpMemberName %FragmentInput 1 "view_position"
+               OpMemberName %FragmentInput 2 "normal"
+               OpMemberName %FragmentInput 3 "uv"
+               OpMemberName %FragmentInput 4 "color"
+               OpName %getColor "getColor"
+               OpName %fragment "fragment"
+               OpName %color "color"
+               OpName %FragmentOutput "FragmentOutput"
+               OpMemberName %FragmentOutput 0 "color"
+               OpName %tint_symbol_8 "tint_symbol_8"
+               OpName %tint_symbol_6 "tint_symbol_6"
+               OpName %main "main"
+               OpName %output "output"
+               OpDecorate %Uniforms Block
+               OpMemberDecorate %Uniforms 0 Offset 0
+               OpMemberDecorate %Uniforms 0 ColMajor
+               OpMemberDecorate %Uniforms 0 MatrixStride 16
+               OpMemberDecorate %Uniforms 1 Offset 64
+               OpMemberDecorate %Uniforms 1 ColMajor
+               OpMemberDecorate %Uniforms 1 MatrixStride 16
+               OpMemberDecorate %Uniforms 2 Offset 128
+               OpMemberDecorate %Uniforms 3 Offset 132
+               OpMemberDecorate %Uniforms 4 Offset 144
+               OpDecorate %uniforms NonWritable
+               OpDecorate %uniforms Binding 0
+               OpDecorate %uniforms DescriptorSet 0
+               OpDecorate %PointLights Block
+               OpMemberDecorate %PointLights 0 Offset 0
+               OpMemberDecorate %PointLight 0 Offset 0
+               OpDecorate %_runtimearr_PointLight ArrayStride 16
+               OpDecorate %pointLights NonWritable
+               OpDecorate %pointLights Binding 1
+               OpDecorate %pointLights DescriptorSet 0
+               OpDecorate %mySampler Binding 2
+               OpDecorate %mySampler DescriptorSet 0
+               OpDecorate %myTexture Binding 3
+               OpDecorate %myTexture DescriptorSet 0
+               OpDecorate %tint_symbol BuiltIn FragCoord
+               OpDecorate %tint_symbol_1 Location 0
+               OpDecorate %tint_symbol_2 Location 1
+               OpDecorate %tint_symbol_3 Location 2
+               OpDecorate %tint_symbol_4 Location 3
+               OpDecorate %tint_symbol_7 Location 0
+               OpMemberDecorate %FragmentInput 0 Offset 0
+               OpMemberDecorate %FragmentInput 1 Offset 16
+               OpMemberDecorate %FragmentInput 2 Offset 32
+               OpMemberDecorate %FragmentInput 3 Offset 48
+               OpMemberDecorate %FragmentInput 4 Offset 64
+               OpMemberDecorate %FragmentOutput 0 Offset 0
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%mat4v4float = OpTypeMatrix %v4float 4
+       %uint = OpTypeInt 32 0
+   %Uniforms = OpTypeStruct %mat4v4float %mat4v4float %uint %uint %v4float
+%_ptr_Uniform_Uniforms = OpTypePointer Uniform %Uniforms
+   %uniforms = OpVariable %_ptr_Uniform_Uniforms Uniform
+ %PointLight = OpTypeStruct %v4float
+%_runtimearr_PointLight = OpTypeRuntimeArray %PointLight
+%PointLights = OpTypeStruct %_runtimearr_PointLight
+%_ptr_StorageBuffer_PointLights = OpTypePointer StorageBuffer %PointLights
+%pointLights = OpVariable %_ptr_StorageBuffer_PointLights StorageBuffer
+         %15 = OpTypeSampler
+%_ptr_UniformConstant_15 = OpTypePointer UniformConstant %15
+  %mySampler = OpVariable %_ptr_UniformConstant_15 UniformConstant
+         %18 = OpTypeImage %float 2D 0 0 0 1 Unknown
+%_ptr_UniformConstant_18 = OpTypePointer UniformConstant %18
+  %myTexture = OpVariable %_ptr_UniformConstant_18 UniformConstant
+%_ptr_Input_v4float = OpTypePointer Input %v4float
+%tint_symbol = OpVariable %_ptr_Input_v4float Input
+%tint_symbol_1 = OpVariable %_ptr_Input_v4float Input
+%tint_symbol_2 = OpVariable %_ptr_Input_v4float Input
+    %v2float = OpTypeVector %float 2
+%_ptr_Input_v2float = OpTypePointer Input %v2float
+%tint_symbol_3 = OpVariable %_ptr_Input_v2float Input
+%tint_symbol_4 = OpVariable %_ptr_Input_v4float Input
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+         %29 = OpConstantNull %v4float
+%tint_symbol_7 = OpVariable %_ptr_Output_v4float Output %29
+%FragmentInput = OpTypeStruct %v4float %v4float %v4float %v2float %v4float
+         %30 = OpTypeFunction %v4float %FragmentInput
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+     %uint_3 = OpConstant %uint 3
+%_ptr_Uniform_uint = OpTypePointer Uniform %uint
+     %uint_0 = OpConstant %uint 0
+       %bool = OpTypeBool
+     %uint_1 = OpConstant %uint 1
+%_ptr_Function_float = OpTypePointer Function %float
+    %float_1 = OpConstant %float 1
+     %uint_2 = OpConstant %uint 2
+     %uint_4 = OpConstant %uint 4
+%_ptr_Uniform_v4float = OpTypePointer Uniform %v4float
+         %78 = OpTypeSampledImage %18
+       %void = OpTypeVoid
+%FragmentOutput = OpTypeStruct %v4float
+         %82 = OpTypeFunction %void %FragmentOutput
+         %89 = OpTypeFunction %void
+%_ptr_Function_FragmentOutput = OpTypePointer Function %FragmentOutput
+        %100 = OpConstantNull %FragmentOutput
+    %float_0 = OpConstant %float 0
+        %103 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
+   %getColor = OpFunction %v4float None %30
+   %fragment = OpFunctionParameter %FragmentInput
+         %34 = OpLabel
+      %color = OpVariable %_ptr_Function_v4float Function %29
+         %39 = OpAccessChain %_ptr_Uniform_uint %uniforms %uint_3
+         %40 = OpLoad %uint %39
+         %42 = OpIEqual %bool %40 %uint_0
+               OpSelectionMerge %44 None
+               OpBranchConditional %42 %45 %46
+         %45 = OpLabel
+         %47 = OpCompositeExtract %v4float %fragment 4
+               OpStore %color %47
+               OpBranch %44
+         %46 = OpLabel
+         %48 = OpAccessChain %_ptr_Uniform_uint %uniforms %uint_3
+         %49 = OpLoad %uint %48
+         %51 = OpIEqual %bool %49 %uint_1
+               OpSelectionMerge %52 None
+               OpBranchConditional %51 %53 %54
+         %53 = OpLabel
+         %55 = OpCompositeExtract %v4float %fragment 2
+               OpStore %color %55
+         %57 = OpAccessChain %_ptr_Function_float %color %uint_3
+               OpStore %57 %float_1
+               OpBranch %52
+         %54 = OpLabel
+         %59 = OpAccessChain %_ptr_Uniform_uint %uniforms %uint_3
+         %60 = OpLoad %uint %59
+         %62 = OpIEqual %bool %60 %uint_2
+               OpSelectionMerge %63 None
+               OpBranchConditional %62 %64 %65
+         %64 = OpLabel
+         %68 = OpAccessChain %_ptr_Uniform_v4float %uniforms %uint_4
+         %69 = OpLoad %v4float %68
+               OpStore %color %69
+               OpBranch %63
+         %65 = OpLabel
+         %70 = OpAccessChain %_ptr_Uniform_uint %uniforms %uint_3
+         %71 = OpLoad %uint %70
+         %72 = OpIEqual %bool %71 %uint_3
+               OpSelectionMerge %73 None
+               OpBranchConditional %72 %74 %73
+         %74 = OpLabel
+         %76 = OpLoad %15 %mySampler
+         %77 = OpLoad %18 %myTexture
+         %79 = OpSampledImage %78 %77 %76
+         %80 = OpCompositeExtract %v2float %fragment 3
+         %75 = OpImageSampleImplicitLod %v4float %79 %80
+               OpStore %color %75
+               OpBranch %73
+         %73 = OpLabel
+               OpBranch %63
+         %63 = OpLabel
+               OpBranch %52
+         %52 = OpLabel
+               OpBranch %44
+         %44 = OpLabel
+         %81 = OpLoad %v4float %color
+               OpReturnValue %81
+               OpFunctionEnd
+%tint_symbol_8 = OpFunction %void None %82
+%tint_symbol_6 = OpFunctionParameter %FragmentOutput
+         %87 = OpLabel
+         %88 = OpCompositeExtract %v4float %tint_symbol_6 0
+               OpStore %tint_symbol_7 %88
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %89
+         %91 = OpLabel
+     %output = OpVariable %_ptr_Function_FragmentOutput Function %100
+         %92 = OpLoad %v4float %tint_symbol
+         %93 = OpLoad %v4float %tint_symbol_1
+         %94 = OpLoad %v4float %tint_symbol_2
+         %95 = OpLoad %v2float %tint_symbol_3
+         %96 = OpLoad %v4float %tint_symbol_4
+         %97 = OpCompositeConstruct %FragmentInput %92 %93 %94 %95 %96
+        %101 = OpAccessChain %_ptr_Function_v4float %output %uint_0
+               OpStore %101 %103
+        %105 = OpLoad %Uniforms %uniforms
+        %107 = OpLoad %15 %mySampler
+        %109 = OpLoad %18 %myTexture
+        %111 = OpLoad %PointLights %pointLights
+        %113 = OpLoad %FragmentOutput %output
+        %112 = OpFunctionCall %void %tint_symbol_8 %113
+               OpReturn
+               OpFunctionEnd

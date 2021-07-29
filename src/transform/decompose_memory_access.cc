@@ -915,11 +915,18 @@ void DecomposeMemoryAccess::Run(CloneContext& ctx, const DataMap&, DataMap&) {
     if (auto* call_expr = node->As<ast::CallExpression>()) {
       auto* call = sem.Get(call_expr);
       if (auto* intrinsic = call->Target()->As<sem::Intrinsic>()) {
+        if (intrinsic->Type() == sem::IntrinsicType::kIgnore) {
+          // ignore(X)
+          // Don't convert X into a load, this isn't actually used.
+          state.TakeAccess(call_expr->params()[0]);
+          continue;
+        }
         if (intrinsic->Type() == sem::IntrinsicType::kArrayLength) {
           // arrayLength(X)
           // Don't convert X into a load, this intrinsic actually requires the
           // real pointer.
           state.TakeAccess(call_expr->params()[0]);
+          continue;
         }
         if (intrinsic->IsAtomic()) {
           if (auto access = state.TakeAccess(call_expr->params()[0])) {
