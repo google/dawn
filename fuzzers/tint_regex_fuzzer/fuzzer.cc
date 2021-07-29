@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 
@@ -30,6 +31,13 @@ namespace {
 
 CliParams cli_params{};
 
+enum class MutationKind {
+  kSwapIntervals,
+  kDeleteInterval,
+  kDuplicateInterval,
+  kNumMutationKinds
+};
+
 extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
   // Parse CLI parameters. `ParseCliParams` will call `exit` if some parameter
   // is invalid.
@@ -41,12 +49,47 @@ extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
                                           size_t size,
                                           size_t max_size,
                                           unsigned seed) {
+  std::string wgsl_code(data, data + size);
   const std::vector<std::string> delimiters{";"};
   std::mt19937 generator(seed);
-  std::uniform_int_distribution<size_t> distribution(0, delimiters.size() - 1);
-  size_t ind = distribution(generator);
+  std::string delimiter = delimiters[std::uniform_int_distribution<size_t>(
+      0, delimiters.size() - 1)(generator)];
 
-  return FuzzEnclosedRegions(size, max_size, delimiters[ind], data, &generator);
+  MutationKind mutation_kind =
+      static_cast<MutationKind>(std::uniform_int_distribution<size_t>(
+          0,
+          static_cast<size_t>(MutationKind::kNumMutationKinds) - 1)(generator));
+
+  switch (mutation_kind) {
+    case MutationKind::kSwapIntervals:
+      if (!SwapRandomIntervals(delimiter, wgsl_code, generator)) {
+        return 0;
+      }
+      break;
+
+    case MutationKind::kDeleteInterval:
+      if (!DeleteRandomInterval(delimiter, wgsl_code, generator)) {
+        return 0;
+      }
+      break;
+
+    case MutationKind::kDuplicateInterval:
+      if (!DuplicateRandomInterval(delimiter, wgsl_code, generator)) {
+        return 0;
+      }
+      break;
+
+    default:
+      assert(false && "Unreachable");
+      return 0;
+  }
+
+  if (wgsl_code.size() > max_size) {
+    return 0;
+  }
+
+  memcpy(data, wgsl_code.c_str(), wgsl_code.size());
+  return wgsl_code.size();
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {

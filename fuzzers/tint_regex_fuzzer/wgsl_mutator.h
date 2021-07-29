@@ -44,22 +44,58 @@ void SwapIntervals(size_t idx1,
                    size_t idx2,
                    size_t idx3,
                    size_t idx4,
-                   std::string* wgsl_code);
+                   std::string& wgsl_code);
 
-/// A function that, given an initial string (valid WGSL code) and a delimiter,
-/// generates a new set of strings (valid or invalid WGSL code) by
-/// picking two random regions and swapping them.
-/// @param wgsl_code - the initial string (WGSL code) that will be mutated.
-/// @param size - size of the string that will be mutated.
-/// @param max_size - maximal allowed mutation size.
+/// Given 2 indices, idx1, idx2, it delets the region in the interval [idx1,
+/// idx2].
+/// @param idx1 - starting index of the first region.
+/// @param idx2 - terminating index of the second region.
+/// @param wgsl_code - the string where the swap will occur.
+void DeleteInterval(size_t idx1, size_t idx2, std::string& wgsl_code);
+
+/// Given 3 indices, idx1, idx2, and idx3 it inserts the
+/// region in [idx1, idx2] after idx3.
+/// @param idx1 - starting index of region.
+/// @param idx2 - terminating index of the region.
+/// @param idx3 - the position where the region will be inserted.
+/// @param wgsl_code - the string where the swap will occur.
+void DuplicateInterval(size_t idx1,
+                       size_t idx2,
+                       size_t idx3,
+                       std::string& wgsl_code);
+
+/// A function that, given WGSL-like string and a delimiter,
+/// generates another WGSL-like string by picking two random regions
+/// enclosed by the delimiter and swapping them.
 /// @param delimiter - the delimiter that will be used to find enclosed regions.
+/// @param wgsl_code - the initial string (WGSL code) that will be mutated.
 /// @param generator - the random number generator.
-/// @return size of the mutated string.
-size_t FuzzEnclosedRegions(size_t size,
-                           size_t max_size,
-                           const std::string& delimiter,
-                           uint8_t* wgsl_code,
-                           std::mt19937* generator);
+/// @return true if a swap happened or false otherwise.
+bool SwapRandomIntervals(const std::string& delimiter,
+                         std::string& wgsl_code,
+                         std::mt19937& generator);
+
+/// A function that, given a WGSL-like string and a delimiter,
+/// generates another WGSL-like string by deleting a random
+/// region enclosed by the delimiter.
+/// @param delimiter - the delimiter that will be used to find enclosed regions.
+/// @param wgsl_code - the initial string (WGSL code) that will be mutated.
+/// @param generator - the random number generator.
+/// @return true if a deletion happened or false otherwise.
+bool DeleteRandomInterval(const std::string& delimiter,
+                          std::string& wgsl_code,
+                          std::mt19937& generator);
+
+/// A function that, given a WGSL-like string and a delimiter,
+/// generates another WGSL-like string by duplicating a random
+/// region enclosed by the delimiter.
+/// @param delimiter - the delimiter that will be used to find enclosed regions.
+/// @param wgsl_code - the initial string (WGSL code) that will be mutated.
+/// @param generator - the random number generator.
+/// @return true if a duplication happened or false otherwise.
+bool DuplicateRandomInterval(const std::string& delimiter,
+                             std::string& wgsl_code,
+                             std::mt19937& generator);
 
 }  // namespace regex_fuzzer
 }  // namespace fuzzers

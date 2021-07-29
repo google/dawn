@@ -32,9 +32,9 @@ namespace {
 
 size_t GetRandomIntFromRange(size_t lower_bound,
                              size_t upper_bound,
-                             std::mt19937* generator) {
+                             std::mt19937& generator) {
   std::uniform_int_distribution<size_t> dist(lower_bound, upper_bound);
-  return dist(*generator);
+  return dist(generator);
 }
 
 }  //  namespace
@@ -54,30 +54,38 @@ void SwapIntervals(size_t idx1,
                    size_t idx2,
                    size_t idx3,
                    size_t idx4,
-                   std::string* wgsl_code) {
-  std::string region_1 = wgsl_code->substr(idx1, idx2 - idx1 + 1);
+                   std::string& wgsl_code) {
+  std::string region_1 = wgsl_code.substr(idx1, idx2 - idx1 + 1);
 
-  std::string region_2 = wgsl_code->substr(idx3, idx4 - idx3 + 1);
+  std::string region_2 = wgsl_code.substr(idx3, idx4 - idx3 + 1);
 
   // The second transformation is done first as it doesn't affect ind1 and ind2
-  wgsl_code->replace(idx3, region_2.size(), region_1);
+  wgsl_code.replace(idx3, region_2.size(), region_1);
 
-  wgsl_code->replace(idx1, region_1.size(), region_2);
+  wgsl_code.replace(idx1, region_1.size(), region_2);
 }
 
-size_t FuzzEnclosedRegions(size_t size,
-                           size_t max_size,
-                           const std::string& delimiter,
-                           uint8_t* wgsl_code,
-                           std::mt19937* generator) {
-  std::string init_program(wgsl_code, wgsl_code + size);
+void DeleteInterval(size_t idx1, size_t idx2, std::string& wgsl_code) {
+  wgsl_code.erase(idx1, idx2 - idx1 + 1);
+}
 
+void DuplicateInterval(size_t idx1,
+                       size_t idx2,
+                       size_t idx3,
+                       std::string& wgsl_code) {
+  std::string region = wgsl_code.substr(idx1, idx2 - idx1 + 1);
+  wgsl_code.insert(idx3 + 1, region);
+}
+
+bool SwapRandomIntervals(const std::string& delimiter,
+                         std::string& wgsl_code,
+                         std::mt19937& generator) {
   std::vector<size_t> delimiter_positions =
-      FindDelimiterIndices(delimiter, init_program);
+      FindDelimiterIndices(delimiter, wgsl_code);
 
   // Need to have at least 3 indices
   if (delimiter_positions.size() < 3) {
-    return 0;
+    return false;
   }
 
   // When generating the i-th random number, we should make sure that there are
@@ -93,13 +101,56 @@ size_t FuzzEnclosedRegions(size_t size,
 
   SwapIntervals(delimiter_positions[ind1], delimiter_positions[ind2],
                 delimiter_positions[ind3], delimiter_positions[ind4],
-                &init_program);
+                wgsl_code);
 
-  if (init_program.size() > max_size) {
-    return 0;
+  return true;
+}
+
+bool DeleteRandomInterval(const std::string& delimiter,
+                          std::string& wgsl_code,
+                          std::mt19937& generator) {
+  std::vector<size_t> delimiter_positions =
+      FindDelimiterIndices(delimiter, wgsl_code);
+
+  // Need to have at least 2 indices
+  if (delimiter_positions.size() < 2) {
+    return false;
   }
-  memcpy(wgsl_code, init_program.c_str(), init_program.size());
-  return init_program.size();
+
+  size_t ind1 =
+      GetRandomIntFromRange(0, delimiter_positions.size() - 2U, generator);
+  size_t ind2 = GetRandomIntFromRange(
+      ind1 + 1U, delimiter_positions.size() - 1U, generator);
+
+  DeleteInterval(delimiter_positions[ind1], delimiter_positions[ind2],
+                 wgsl_code);
+
+  return true;
+}
+
+bool DuplicateRandomInterval(const std::string& delimiter,
+                             std::string& wgsl_code,
+                             std::mt19937& generator) {
+  std::vector<size_t> delimiter_positions =
+      FindDelimiterIndices(delimiter, wgsl_code);
+
+  // Need to have at least 2 indices
+  if (delimiter_positions.size() < 2) {
+    return false;
+  }
+
+  size_t ind1 =
+      GetRandomIntFromRange(0, delimiter_positions.size() - 2U, generator);
+  size_t ind2 = GetRandomIntFromRange(
+      ind1 + 1U, delimiter_positions.size() - 1U, generator);
+
+  size_t ind3 =
+      GetRandomIntFromRange(0, delimiter_positions.size() - 1U, generator);
+
+  DuplicateInterval(delimiter_positions[ind1], delimiter_positions[ind2],
+                    delimiter_positions[ind3] + 1, wgsl_code);
+
+  return true;
 }
 
 }  // namespace regex_fuzzer
