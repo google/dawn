@@ -89,7 +89,8 @@ void LoopToForLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) {
       return nullptr;
     }
 
-    // The continuing block must be empty or contain a single statement
+    // The continuing block must be empty or contain a single, assignment or
+    // function call statement.
     ast::Statement* continuing = nullptr;
     if (auto* loop_cont = loop->continuing()) {
       if (loop_cont->statements().size() != 1) {
@@ -97,6 +98,10 @@ void LoopToForLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) {
       }
 
       continuing = loop_cont->statements()[0];
+      if (!continuing
+               ->IsAnyOf<ast::AssignmentStatement, ast::CallStatement>()) {
+        return nullptr;
+      }
 
       // And the continuing statement must not use any of the variables declared
       // in the loop body.

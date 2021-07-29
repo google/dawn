@@ -208,6 +208,32 @@ fn f() {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(LoopToForLoopTest, NoTransform_ContinuingIsCompound) {
+  auto* src = R"(
+fn f() {
+  var i : i32;
+  i = 0;
+  loop {
+    if ((i < 15)) {
+      break;
+    }
+    ignore(123);
+
+    continuing {
+      if (false) {
+      }
+    }
+  }
+}
+)";
+
+  auto* expect = src;
+
+  auto got = Run<LoopToForLoop>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(LoopToForLoopTest, NoTransform_ContinuingMultipleStmts) {
   auto* src = R"(
 fn f() {

@@ -1,77 +1,50 @@
-SKIP: FAILED
-
-
-[[block]]
-struct buf0 {
-  injectionSwitch : vec2<f32>;
+static float4 x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);
+cbuffer cbuffer_x_7 : register(b0, space0) {
+  uint4 x_7[1];
 };
+static float4 gl_FragCoord = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-var<private> x_GLF_color : vec4<f32>;
-
-[[group(0), binding(0)]] var<uniform> x_7 : buf0;
-
-var<private> gl_FragCoord : vec4<f32>;
-
-fn main_1() {
-  var i : i32;
-  var i_1 : i32;
-  var i_2 : i32;
-  x_GLF_color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+void main_1() {
+  int i = 0;
+  int i_1 = 0;
+  int i_2 = 0;
+  x_GLF_color = float4(1.0f, 0.0f, 0.0f, 1.0f);
   i = 0;
-  let x_35 : f32 = x_7.injectionSwitch.y;
-  if ((x_35 < 0.0)) {
+  const float x_35 = asfloat(x_7[0].y);
+  if ((x_35 < 0.0f)) {
   } else {
-    var x_42 : bool;
-    let x_41 : f32 = gl_FragCoord.y;
-    x_42 = (x_41 < -1.0);
+    bool x_42 = false;
+    const float x_41 = gl_FragCoord.y;
+    x_42 = (x_41 < -1.0f);
     if (x_42) {
     } else {
-      loop {
-        let x_50 : i32 = i;
-        if ((x_50 >= 256)) {
+      while (true) {
+        if ((i >= 256)) {
           break;
         }
-        loop {
+        while (true) {
           i_1 = 0;
-          loop {
-            let x_58 : i32 = i_1;
-            if ((x_58 < 1)) {
-            } else {
-              break;
-            }
-            if (x_42) {
-              i_2 = 0;
-              loop {
-                let x_66 : i32 = i_2;
-                if ((x_66 < 1)) {
-                } else {
-                  break;
+          {
+            for(; (i_1 < 1); i_1 = (i_1 + 1)) {
+              if (x_42) {
+                i_2 = 0;
+                {
+                  for(; (i_2 < 1); i_2 = (i_2 + 1)) {
+                  }
                 }
-
-                continuing {
-                  let x_70 : i32 = i_2;
-                  i_2 = (x_70 + 1);
-                }
+                continue;
               }
-              continue;
-            }
-            return;
-
-            continuing {
-              let x_72 : i32 = i_1;
-              i_1 = (x_72 + 1);
+              return;
             }
           }
-
-          continuing {
+          {
             if (false) {
             } else {
               break;
             }
           }
         }
-
-        continuing {
+        {
           if (false) {
           } else {
             break;
@@ -84,18 +57,20 @@ fn main_1() {
 }
 
 struct main_out {
-  [[location(0)]]
-  x_GLF_color_1 : vec4<f32>;
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_1 {
+  float4 gl_FragCoord_param : SV_Position;
+};
+struct tint_symbol_2 {
+  float4 x_GLF_color_1 : SV_Target0;
 };
 
-[[stage(fragment)]]
-fn main([[builtin(position)]] gl_FragCoord_param : vec4<f32>) -> main_out {
+tint_symbol_2 main(tint_symbol_1 tint_symbol) {
+  const float4 gl_FragCoord_param = tint_symbol.gl_FragCoord_param;
   gl_FragCoord = gl_FragCoord_param;
   main_1();
-  return main_out(x_GLF_color);
+  const main_out tint_symbol_3 = {x_GLF_color};
+  const tint_symbol_2 tint_symbol_5 = {tint_symbol_3.x_GLF_color_1};
+  return tint_symbol_5;
 }
-
-Failed to generate: vk-gl-cts/graphicsfuzz/two-nested-do-whiles/0-opt.wgsl:74:13 error: break statement must be in a loop or switch case
-            break;
-            ^^^^^
-
