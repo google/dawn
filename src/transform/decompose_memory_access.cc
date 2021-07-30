@@ -917,8 +917,15 @@ void DecomposeMemoryAccess::Run(CloneContext& ctx, const DataMap&, DataMap&) {
       if (auto* intrinsic = call->Target()->As<sem::Intrinsic>()) {
         if (intrinsic->Type() == sem::IntrinsicType::kIgnore) {
           // ignore(X)
-          // Don't convert X into a load, this isn't actually used.
-          state.TakeAccess(call_expr->params()[0]);
+          // If X is an memory access, don't transform it into a load, as it
+          // may refer to a structure holding a runtime array, which cannot be
+          // loaded. Instead replace X with the underlying storage / uniform
+          // buffer variable.
+          if (auto access = state.TakeAccess(call_expr->params()[0])) {
+            ctx.Replace(call_expr->params()[0], [=, &ctx] {
+              return ctx.CloneWithoutTransform(access.var->Declaration());
+            });
+          }
           continue;
         }
         if (intrinsic->Type() == sem::IntrinsicType::kArrayLength) {
