@@ -5,12 +5,12 @@ int f() {
   int i = 0;
   int j = 0;
   while (true) {
-    i = (i + 1);
+    i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
     if ((i > 4)) {
       return 1;
     }
     while (true) {
-      j = (j + 1);
+      j = as_type<int>((as_type<uint>(j) + as_type<uint>(1)));
       if ((j > 4)) {
         return 2;
       }

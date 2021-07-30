@@ -8,7 +8,7 @@ kernel void tint_symbol(uint local_invocation_index [[thread_index_in_threadgrou
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
   tint_symbol_2 = 123;
-  int const use = (tint_symbol_2 + 1);
+  int const use = as_type<int>((as_type<uint>(tint_symbol_2) + as_type<uint>(1)));
   return;
 }
 

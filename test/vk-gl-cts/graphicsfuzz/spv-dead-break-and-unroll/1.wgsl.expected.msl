@@ -1,6 +1,11 @@
 #include <metal_stdlib>
 
 using namespace metal;
+
+int tint_unary_minus(const int v) {
+  return select(-v, v, v == -2147483648);
+}
+
 struct buf0 {
   /* 0x0000 */ packed_float2 resolution;
 };
@@ -26,7 +31,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
   int d = 0;
   float4 const x_63 = *(tint_symbol_5);
   float2 const x_67 = x_7.resolution;
-  int const x_68 = -((256 - 14));
+  int const x_68 = tint_unary_minus(as_type<int>((as_type<uint>(256) - as_type<uint>(14))));
   pos = (float2(x_63.x, x_63.y) / x_67);
   float const x_71 = pos.x;
   float const x_75 = pos.y;
@@ -42,7 +47,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
     (*(tint_symbol_6)).arr[x_86] = 0;
     {
       int const x_88 = i;
-      i = (x_88 + 1);
+      i = as_type<int>((as_type<uint>(x_88) + as_type<uint>(1)));
     }
   }
   p = int2(0, 0);
@@ -58,7 +63,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
     bool x_151_phi = false;
     bool x_172_phi = false;
     int const x_94 = v;
-    v = (x_94 + 1);
+    v = as_type<int>((as_type<uint>(x_94) + as_type<uint>(1)));
     directions = 0;
     int const x_97 = p.x;
     bool const x_98 = (x_97 > 0);
@@ -66,14 +71,14 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
     if (x_98) {
       int const x_102 = p.x;
       int const x_105 = p.y;
-      int const x_109 = (*(tint_symbol_6)).arr[((x_102 - 2) + (x_105 * 16))];
+      int const x_109 = (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_102) - as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_105) * as_type<uint>(16))))))];
       x_110 = (x_109 == 0);
       x_111_phi = x_110;
     }
     bool const x_111 = x_111_phi;
     if (x_111) {
       int const x_114 = directions;
-      directions = (x_114 + 1);
+      directions = as_type<int>((as_type<uint>(x_114) + as_type<uint>(1)));
     }
     int const x_117 = p.y;
     bool const x_118 = (x_117 > 0);
@@ -81,14 +86,14 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
     if (x_118) {
       int const x_122 = p.x;
       int const x_124 = p.y;
-      int const x_129 = (*(tint_symbol_6)).arr[(x_122 + ((x_124 - 2) * 16))];
+      int const x_129 = (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_122) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_124) - as_type<uint>(2)))) * as_type<uint>(16))))))];
       x_130 = (x_129 == 0);
       x_131_phi = x_130;
     }
     bool const x_131 = x_131_phi;
     if (x_131) {
       int const x_134 = directions;
-      directions = (x_134 + 1);
+      directions = as_type<int>((as_type<uint>(x_134) + as_type<uint>(1)));
     }
     int const x_137 = p.x;
     bool const x_138 = (x_137 < 14);
@@ -96,30 +101,30 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
     if (x_138) {
       int const x_142 = p.x;
       int const x_145 = p.y;
-      int const x_149 = (*(tint_symbol_6)).arr[((x_142 + 2) + (x_145 * 16))];
+      int const x_149 = (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_142) + as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_145) * as_type<uint>(16))))))];
       x_150 = (x_149 == 0);
       x_151_phi = x_150;
     }
     bool const x_151 = x_151_phi;
     if (x_151) {
       int const x_154 = directions;
-      directions = (x_154 + 1);
+      directions = as_type<int>((as_type<uint>(x_154) + as_type<uint>(1)));
     }
-    int const x_156 = (256 - x_68);
+    int const x_156 = as_type<int>((as_type<uint>(256) - as_type<uint>(x_68)));
     int const x_158 = p.y;
     bool const x_159 = (x_158 < 14);
     x_172_phi = x_159;
     if (x_159) {
       int const x_163 = p.x;
       int const x_165 = p.y;
-      int const x_170 = (*(tint_symbol_6)).arr[(x_163 + ((x_165 + 2) * 16))];
+      int const x_170 = (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_163) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_165) + as_type<uint>(2)))) * as_type<uint>(16))))))];
       x_171 = (x_170 == 0);
       x_172_phi = x_171;
     }
     bool const x_172 = x_172_phi;
     if (x_172) {
       int const x_175 = directions;
-      directions = (x_175 + 1);
+      directions = as_type<int>((as_type<uint>(x_175) + as_type<uint>(1)));
     }
     bool x_237 = false;
     bool x_250 = false;
@@ -148,12 +153,12 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
           break;
         }
         j = 0;
-        int const x_189 = (x_156 - x_186);
+        int const x_189 = as_type<int>((as_type<uint>(x_156) - as_type<uint>(x_186)));
         *(tint_symbol_7) = float2x4(float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f));
         if (false) {
           {
             int const x_216 = i;
-            i = (x_216 + 1);
+            i = as_type<int>((as_type<uint>(x_216) + as_type<uint>(1)));
           }
           continue;
         }
@@ -165,34 +170,34 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
           }
           int const x_197 = j;
           int const x_199 = i;
-          int const x_204 = (*(tint_symbol_6)).arr[((x_197 * 2) + ((x_199 * 2) * 16))];
+          int const x_204 = (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_197) * as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_199) * as_type<uint>(2)))) * as_type<uint>(16))))))];
           if ((x_204 == 0)) {
             int const x_208 = j;
-            p.x = (x_208 * 2);
+            p.x = as_type<int>((as_type<uint>(x_208) * as_type<uint>(2)));
             int const x_211 = i;
-            p.y = (x_211 * 2);
+            p.y = as_type<int>((as_type<uint>(x_211) * as_type<uint>(2)));
             canwalk = true;
           }
           {
             int const x_214 = j;
-            j = (x_214 + 1);
+            j = as_type<int>((as_type<uint>(x_214) + as_type<uint>(1)));
           }
         }
         {
           int const x_216 = i;
-          i = (x_216 + 1);
+          i = as_type<int>((as_type<uint>(x_216) + as_type<uint>(1)));
         }
       }
       int const x_219 = p.x;
       int const x_221 = p.y;
-      (*(tint_symbol_6)).arr[(x_219 + (x_221 * 16))] = 1;
+      (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_219) + as_type<uint>(as_type<int>((as_type<uint>(x_221) * as_type<uint>(16))))))] = 1;
     } else {
       int const x_225 = v;
       int const x_226 = directions;
       d = (x_225 % x_226);
       int const x_228 = directions;
       int const x_229 = v;
-      v = (x_229 + x_228);
+      v = as_type<int>((as_type<uint>(x_229) + as_type<uint>(x_228)));
       int const x_231 = d;
       bool const x_232 = (x_231 >= 0);
       x_238_phi = x_232;
@@ -206,25 +211,25 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
       if (x_238) {
         int const x_242 = p.x;
         int const x_245 = p.y;
-        int const x_249 = (*(tint_symbol_6)).arr[((x_242 - 2) + (x_245 * 16))];
+        int const x_249 = (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_242) - as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_245) * as_type<uint>(16))))))];
         x_250 = (x_249 == 0);
         x_251_phi = x_250;
       }
       bool const x_251 = x_251_phi;
       if (x_251) {
         int const x_254 = d;
-        d = (x_254 - 1);
+        d = as_type<int>((as_type<uint>(x_254) - as_type<uint>(1)));
         int const x_257 = p.x;
         int const x_259 = p.y;
-        (*(tint_symbol_6)).arr[(x_257 + (x_259 * 16))] = 1;
+        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_257) + as_type<uint>(as_type<int>((as_type<uint>(x_259) * as_type<uint>(16))))))] = 1;
         int const x_264 = p.x;
         int const x_267 = p.y;
-        (*(tint_symbol_6)).arr[((x_264 - 1) + (x_267 * 16))] = 1;
+        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_264) - as_type<uint>(1)))) + as_type<uint>(as_type<int>((as_type<uint>(x_267) * as_type<uint>(16))))))] = 1;
         int const x_272 = p.x;
         int const x_275 = p.y;
-        (*(tint_symbol_6)).arr[((x_272 - 2) + (x_275 * 16))] = 1;
+        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_272) - as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_275) * as_type<uint>(16))))))] = 1;
         int const x_280 = p.x;
-        p.x = (x_280 - 2);
+        p.x = as_type<int>((as_type<uint>(x_280) - as_type<uint>(2)));
       }
       int const x_283 = d;
       bool const x_284 = (x_283 >= 0);
@@ -239,25 +244,25 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
       if (x_290) {
         int const x_294 = p.x;
         int const x_296 = p.y;
-        int const x_301 = (*(tint_symbol_6)).arr[(x_294 + ((x_296 - 2) * 16))];
+        int const x_301 = (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_294) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_296) - as_type<uint>(2)))) * as_type<uint>(16))))))];
         x_302 = (x_301 == 0);
         x_303_phi = x_302;
       }
       bool const x_303 = x_303_phi;
       if (x_303) {
         int const x_306 = d;
-        d = (x_306 - 1);
+        d = as_type<int>((as_type<uint>(x_306) - as_type<uint>(1)));
         int const x_309 = p.x;
         int const x_311 = p.y;
-        (*(tint_symbol_6)).arr[(x_309 + (x_311 * 16))] = 1;
+        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_309) + as_type<uint>(as_type<int>((as_type<uint>(x_311) * as_type<uint>(16))))))] = 1;
         int const x_316 = p.x;
         int const x_318 = p.y;
-        (*(tint_symbol_6)).arr[(x_316 + ((x_318 - 1) * 16))] = 1;
+        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_316) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_318) - as_type<uint>(1)))) * as_type<uint>(16))))))] = 1;
         int const x_324 = p.x;
         int const x_326 = p.y;
-        (*(tint_symbol_6)).arr[(x_324 + ((x_326 - 2) * 16))] = 1;
+        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_324) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_326) - as_type<uint>(2)))) * as_type<uint>(16))))))] = 1;
         int const x_332 = p.y;
-        p.y = (x_332 - 2);
+        p.y = as_type<int>((as_type<uint>(x_332) - as_type<uint>(2)));
       }
       int const x_335 = d;
       bool const x_336 = (x_335 >= 0);
@@ -272,25 +277,25 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
       if (x_342) {
         int const x_346 = p.x;
         int const x_349 = p.y;
-        int const x_353 = (*(tint_symbol_6)).arr[((x_346 + 2) + (x_349 * 16))];
+        int const x_353 = (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_346) + as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_349) * as_type<uint>(16))))))];
         x_354 = (x_353 == 0);
         x_355_phi = x_354;
       }
       bool const x_355 = x_355_phi;
       if (x_355) {
         int const x_358 = d;
-        d = (x_358 - 1);
+        d = as_type<int>((as_type<uint>(x_358) - as_type<uint>(1)));
         int const x_361 = p.x;
         int const x_363 = p.y;
-        (*(tint_symbol_6)).arr[(x_361 + (x_363 * 16))] = 1;
+        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_361) + as_type<uint>(as_type<int>((as_type<uint>(x_363) * as_type<uint>(16))))))] = 1;
         int const x_368 = p.x;
         int const x_371 = p.y;
-        (*(tint_symbol_6)).arr[((x_368 + 1) + (x_371 * 16))] = 1;
+        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_368) + as_type<uint>(1)))) + as_type<uint>(as_type<int>((as_type<uint>(x_371) * as_type<uint>(16))))))] = 1;
         int const x_376 = p.x;
         int const x_379 = p.y;
-        (*(tint_symbol_6)).arr[((x_376 + 2) + (x_379 * 16))] = 1;
+        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_376) + as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_379) * as_type<uint>(16))))))] = 1;
         int const x_384 = p.x;
-        p.x = (x_384 + 2);
+        p.x = as_type<int>((as_type<uint>(x_384) + as_type<uint>(2)));
       }
       int const x_387 = d;
       bool const x_388 = (x_387 >= 0);
@@ -305,30 +310,30 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
       if (x_394) {
         int const x_398 = p.x;
         int const x_400 = p.y;
-        int const x_405 = (*(tint_symbol_6)).arr[(x_398 + ((x_400 + 2) * 16))];
+        int const x_405 = (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_398) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_400) + as_type<uint>(2)))) * as_type<uint>(16))))))];
         x_406 = (x_405 == 0);
         x_407_phi = x_406;
       }
       bool const x_407 = x_407_phi;
       if (x_407) {
         int const x_410 = d;
-        d = (x_410 - 1);
+        d = as_type<int>((as_type<uint>(x_410) - as_type<uint>(1)));
         int const x_413 = p.x;
         int const x_415 = p.y;
-        (*(tint_symbol_6)).arr[(x_413 + (x_415 * 16))] = 1;
+        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_413) + as_type<uint>(as_type<int>((as_type<uint>(x_415) * as_type<uint>(16))))))] = 1;
         int const x_420 = p.x;
         int const x_422 = p.y;
-        (*(tint_symbol_6)).arr[(x_420 + ((x_422 + 1) * 16))] = 1;
+        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_420) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_422) + as_type<uint>(1)))) * as_type<uint>(16))))))] = 1;
         int const x_428 = p.x;
         int const x_430 = p.y;
-        (*(tint_symbol_6)).arr[(x_428 + ((x_430 + 2) * 16))] = 1;
+        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_428) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_430) + as_type<uint>(2)))) * as_type<uint>(16))))))] = 1;
         int const x_436 = p.y;
-        p.y = (x_436 + 2);
+        p.y = as_type<int>((as_type<uint>(x_436) + as_type<uint>(2)));
       }
     }
     int const x_440 = ipos.y;
     int const x_443 = ipos.x;
-    int const x_446 = (*(tint_symbol_6)).arr[((x_440 * 16) + x_443)];
+    int const x_446 = (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_440) * as_type<uint>(16)))) + as_type<uint>(x_443)))];
     if ((x_446 == 1)) {
       *(tint_symbol_8) = float4(1.0f, 1.0f, 1.0f, 1.0f);
       return;

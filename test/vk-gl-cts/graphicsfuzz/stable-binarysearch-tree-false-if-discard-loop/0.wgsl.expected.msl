@@ -718,7 +718,7 @@ void main_1(thread float4* const tint_symbol_23) {
       case 17: {
         x_391_phi = x_356;
         if ((x_354 == as_type<int>(x_358))) {
-          x_390 = as_type<int>((x_356 + as_type<int>(1)));
+          x_390 = as_type<int>(as_type<int>((as_type<uint>(x_356) + as_type<uint>(as_type<int>(1)))));
           x_391_phi = x_390;
         }
         x_391 = x_391_phi;
@@ -728,7 +728,7 @@ void main_1(thread float4* const tint_symbol_23) {
       default: {
         x_396_phi = x_356;
         if ((x_354 == as_type<int>(-1))) {
-          x_395 = as_type<int>((x_356 + as_type<int>(1)));
+          x_395 = as_type<int>(as_type<int>((as_type<uint>(x_356) + as_type<uint>(as_type<int>(1)))));
           x_396_phi = x_395;
         }
         x_396 = x_396_phi;
@@ -738,7 +738,7 @@ void main_1(thread float4* const tint_symbol_23) {
     }
     int const x_357 = x_357_phi;
     {
-      x_359 = (x_358 + 1);
+      x_359 = as_type<int>((as_type<uint>(x_358) + as_type<uint>(1)));
       x_353_phi = x_354;
       x_356_phi = x_357;
       x_358_phi = x_359;

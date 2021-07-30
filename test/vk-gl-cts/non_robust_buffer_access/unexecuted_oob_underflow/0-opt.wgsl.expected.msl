@@ -60,9 +60,9 @@ void main_1(const device In2& x_13, const device In0& x_17, device Out0& x_15, c
       int const x_84 = x_17.data_in0.arr[(x_79 + as_type<uint>(x_80))];
       x_15.data_out0.arr[(x_75 + as_type<uint>(x_76))] = x_84;
       int const x_86 = index_out0;
-      index_out0 = (x_86 + 1);
+      index_out0 = as_type<int>((as_type<uint>(x_86) + as_type<uint>(1)));
       int const x_88 = index_in1;
-      index_in1 = (x_88 + 1);
+      index_in1 = as_type<int>((as_type<uint>(x_88) + as_type<uint>(1)));
     } else {
       uint const x_90 = base_index_out;
       int const x_91 = index_out1;
@@ -71,14 +71,14 @@ void main_1(const device In2& x_13, const device In0& x_17, device Out0& x_15, c
       int const x_99 = x_19.data_in1.arr[(x_94 + as_type<uint>(x_95))];
       x_15.data_out0.arr[(x_90 + as_type<uint>(x_91))] = x_99;
       int const x_101 = index_out1;
-      index_out1 = (x_101 + 1);
+      index_out1 = as_type<int>((as_type<uint>(x_101) + as_type<uint>(1)));
       int const x_103 = index_in1;
-      index_in1 = (x_103 + 1);
+      index_in1 = as_type<int>((as_type<uint>(x_103) + as_type<uint>(1)));
     }
     int const x_105 = condition_index;
-    int const x_108 = x_13.data_in2.arr[(x_105 + 1)];
+    int const x_108 = x_13.data_in2.arr[as_type<int>((as_type<uint>(x_105) + as_type<uint>(1)))];
     int const x_109 = condition_index;
-    condition_index = (x_109 + x_108);
+    condition_index = as_type<int>((as_type<uint>(x_109) + as_type<uint>(x_108)));
     int const x_111 = index_in0;
     temp0 = x_111;
     int const x_112 = index_in1;
@@ -93,7 +93,7 @@ void main_1(const device In2& x_13, const device In0& x_17, device Out0& x_15, c
     index_out1 = x_116;
     {
       int const x_117 = i;
-      i = (x_117 + 1);
+      i = as_type<int>((as_type<uint>(x_117) + as_type<uint>(1)));
     }
   }
   return;

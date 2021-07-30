@@ -62,7 +62,7 @@ void main_1(constant buf1& x_6, constant buf0& x_8, thread float4* const tint_sy
     float const x_83 = sums.arr[x_77].el;
     sums.arr[x_77].el = (x_83 + x_81);
     {
-      int const x_68 = (x_67 + 1);
+      int const x_68 = as_type<int>((as_type<uint>(x_67) + as_type<uint>(1)));
       i = x_68;
       x_67_phi = x_68;
     }

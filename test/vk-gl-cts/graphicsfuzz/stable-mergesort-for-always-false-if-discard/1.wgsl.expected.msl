@@ -73,7 +73,7 @@ void main_1(constant buf0& x_8, thread float4* const tint_symbol_5, thread float
         break;
       }
     }
-    int const x_66 = (x_65 + 1);
+    int const x_66 = as_type<int>((as_type<uint>(x_65) + as_type<uint>(1)));
     {
       x_65_phi = x_66;
       if ((x_66 < 10)) {
@@ -93,7 +93,7 @@ void main_1(constant buf0& x_8, thread float4* const tint_symbol_5, thread float
     {
       int const x_99 = data.arr[x_93];
       temp.arr[x_93] = x_99;
-      x_94 = (x_93 + 1);
+      x_94 = as_type<int>((as_type<uint>(x_93) + as_type<uint>(1)));
       x_93_phi = x_94;
     }
   }
@@ -121,10 +121,10 @@ void main_1(constant buf0& x_8, thread float4* const tint_symbol_5, thread float
       } else {
         break;
       }
-      int const x_115 = (x_109 + x_102);
-      int const x_116 = (x_115 - 1);
-      int const x_110 = (x_109 + (2 * x_102));
-      int const x_119 = min((x_110 - 1), 9);
+      int const x_115 = as_type<int>((as_type<uint>(x_109) + as_type<uint>(x_102)));
+      int const x_116 = as_type<int>((as_type<uint>(x_115) - as_type<uint>(1)));
+      int const x_110 = as_type<int>((as_type<uint>(x_109) + as_type<uint>(as_type<int>((as_type<uint>(2) * as_type<uint>(x_102))))));
+      int const x_119 = min(as_type<int>((as_type<uint>(x_110) - as_type<uint>(1))), 9);
       x_121_phi = x_109;
       x_124_phi = x_115;
       x_126_phi = x_109;
@@ -144,15 +144,15 @@ void main_1(constant buf0& x_8, thread float4* const tint_symbol_5, thread float
         int const x_134 = data.arr[x_133_save];
         int const x_135_save = x_124;
         int const x_136 = data.arr[x_135_save];
-        int const x_122 = as_type<int>((x_121 + as_type<int>(1)));
+        int const x_122 = as_type<int>(as_type<int>((as_type<uint>(x_121) + as_type<uint>(as_type<int>(1)))));
         if ((x_134 < x_136)) {
-          x_141 = as_type<int>((x_126 + as_type<int>(1)));
+          x_141 = as_type<int>(as_type<int>((as_type<uint>(x_126) + as_type<uint>(as_type<int>(1)))));
           int const x_142 = data.arr[x_133_save];
           temp.arr[x_121] = x_142;
           x_125_phi = x_124;
           x_127_phi = x_141;
         } else {
-          x_144 = (x_124 + 1);
+          x_144 = as_type<int>((as_type<uint>(x_124) + as_type<uint>(1)));
           int const x_145 = data.arr[x_135_save];
           temp.arr[x_121] = x_145;
           x_125_phi = x_144;
@@ -178,8 +178,8 @@ void main_1(constant buf0& x_8, thread float4* const tint_symbol_5, thread float
           break;
         }
         {
-          x_149 = (x_148 + 1);
-          x_152 = (x_151 + 1);
+          x_149 = as_type<int>((as_type<uint>(x_148) + as_type<uint>(1)));
+          x_152 = as_type<int>((as_type<uint>(x_151) + as_type<uint>(1)));
           int const x_158 = data.arr[x_151];
           temp.arr[x_148] = x_158;
           x_148_phi = x_149;
@@ -197,7 +197,7 @@ void main_1(constant buf0& x_8, thread float4* const tint_symbol_5, thread float
         {
           int const x_167 = temp.arr[x_161];
           data.arr[x_161] = x_167;
-          x_162 = (x_161 + 1);
+          x_162 = as_type<int>((as_type<uint>(x_161) + as_type<uint>(1)));
           x_161_phi = x_162;
         }
       }
@@ -206,7 +206,7 @@ void main_1(constant buf0& x_8, thread float4* const tint_symbol_5, thread float
       }
     }
     {
-      x_103 = (2 * x_102);
+      x_103 = as_type<int>((as_type<uint>(2) * as_type<uint>(x_102)));
       x_102_phi = x_103;
     }
   }
@@ -317,7 +317,7 @@ void main_1(constant buf0& x_8, thread float4* const tint_symbol_5, thread float
               x_257_1.x = (x_273.x + x_273.y);
               float2 const x_257 = x_257_1;
               {
-                x_260 = (x_259 + 1);
+                x_260 = as_type<int>((as_type<uint>(x_259) + as_type<uint>(1)));
                 x_256_phi = x_257;
                 x_259_phi = x_260;
               }

@@ -42,7 +42,7 @@ float func_(constant buf0& x_10, thread float4* const tint_symbol_5) {
   while (true) {
     int const x_102 = i;
     float const x_104 = x_10.injectionSwitch.y;
-    if ((x_102 < (int(x_104) + 1))) {
+    if ((x_102 < as_type<int>((as_type<uint>(int(x_104)) + as_type<uint>(1))))) {
     } else {
       break;
     }
@@ -50,7 +50,7 @@ float func_(constant buf0& x_10, thread float4* const tint_symbol_5) {
     value.x = float(x_109);
     {
       int const x_112 = i;
-      i = (x_112 + 1);
+      i = as_type<int>((as_type<uint>(x_112) + as_type<uint>(1)));
     }
   }
   float const x_115 = value.x;
@@ -78,16 +78,16 @@ void main_1(constant buf0& x_10, thread float4* const tint_symbol_6, thread floa
   while (true) {
     int const x_51 = i_1;
     float const x_53 = x_10.injectionSwitch.y;
-    if ((x_51 < (int(x_53) + 1))) {
+    if ((x_51 < as_type<int>((as_type<uint>(int(x_53)) + as_type<uint>(1))))) {
     } else {
       break;
     }
     float const x_58 = func_(x_10, tint_symbol_6);
     int const x_60 = count;
-    count = (x_60 + int(x_58));
+    count = as_type<int>((as_type<uint>(x_60) + as_type<uint>(int(x_58))));
     {
       int const x_62 = i_1;
-      i_1 = (x_62 + 1);
+      i_1 = as_type<int>((as_type<uint>(x_62) + as_type<uint>(1)));
     }
   }
   int const x_64 = count;

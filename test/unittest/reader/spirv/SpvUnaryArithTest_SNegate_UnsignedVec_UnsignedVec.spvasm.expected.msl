@@ -1,8 +1,13 @@
 #include <metal_stdlib>
 
 using namespace metal;
+
+int2 tint_unary_minus(const int2 v) {
+  return select(-v, v, v == -2147483648);
+}
+
 void main_1() {
-  uint2 const x_1 = as_type<uint2>(-(as_type<int2>(uint2(10u, 20u))));
+  uint2 const x_1 = as_type<uint2>(tint_unary_minus(as_type<int2>(uint2(10u, 20u))));
   return;
 }
 

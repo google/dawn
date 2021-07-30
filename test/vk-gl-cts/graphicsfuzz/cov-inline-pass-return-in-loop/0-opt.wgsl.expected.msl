@@ -20,7 +20,7 @@ float func_() {
     int const x_38 = i;
     if ((x_38 > 5)) {
       int const x_42 = i;
-      i = (x_42 + 1);
+      i = as_type<int>((as_type<uint>(x_42) + as_type<uint>(1)));
     }
     int const x_44 = i;
     if ((x_44 > 8)) {
@@ -28,7 +28,7 @@ float func_() {
     }
     {
       int const x_48 = i;
-      i = (x_48 + 1);
+      i = as_type<int>((as_type<uint>(x_48) + as_type<uint>(1)));
     }
   }
   return 1.0f;

@@ -2,11 +2,11 @@
 
 using namespace metal;
 void uses_a(thread int* const tint_symbol) {
-  *(tint_symbol) = (*(tint_symbol) + 1);
+  *(tint_symbol) = as_type<int>((as_type<uint>(*(tint_symbol)) + as_type<uint>(1)));
 }
 
 void uses_b(thread int* const tint_symbol_1) {
-  *(tint_symbol_1) = (*(tint_symbol_1) * 2);
+  *(tint_symbol_1) = as_type<int>((as_type<uint>(*(tint_symbol_1)) * as_type<uint>(2)));
 }
 
 void uses_a_and_b(thread int* const tint_symbol_2, thread int* const tint_symbol_3) {

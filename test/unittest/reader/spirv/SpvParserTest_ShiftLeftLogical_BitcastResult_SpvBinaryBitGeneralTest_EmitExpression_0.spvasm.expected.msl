@@ -2,7 +2,7 @@
 
 using namespace metal;
 void main_1() {
-  uint const x_1 = as_type<uint>((30 << 10u));
+  uint const x_1 = as_type<uint>(as_type<int>((as_type<uint>(30) << 10u)));
   return;
 }
 

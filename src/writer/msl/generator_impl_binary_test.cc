@@ -74,6 +74,85 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"(left / right)", ast::BinaryOp::kDivide},
         BinaryData{"(left % right)", ast::BinaryOp::kModulo}));
 
+using MslBinaryTest_SignedOverflowDefinedBehaviour =
+    TestParamHelper<BinaryData>;
+TEST_P(MslBinaryTest_SignedOverflowDefinedBehaviour, Emit) {
+  auto params = GetParam();
+
+  auto* a_type = ty.i32();
+  auto* b_type = (params.op == ast::BinaryOp::kShiftLeft ||
+                  params.op == ast::BinaryOp::kShiftRight)
+                     ? static_cast<ast::Type*>(ty.u32())
+                     : ty.i32();
+
+  auto* a = Var("a", a_type);
+  auto* b = Var("b", b_type);
+
+  auto* expr = create<ast::BinaryExpression>(params.op, Expr(a), Expr(b));
+  WrapInFunction(a, b, expr);
+
+  GeneratorImpl& gen = Build();
+
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), params.result);
+}
+using Op = ast::BinaryOp;
+constexpr BinaryData signed_overflow_defined_behaviour_cases[] = {
+    {"as_type<int>((as_type<uint>(a) << b))", Op::kShiftLeft},
+    {"(a >> b)", Op::kShiftRight},
+    {"as_type<int>((as_type<uint>(a) + as_type<uint>(b)))", Op::kAdd},
+    {"as_type<int>((as_type<uint>(a) - as_type<uint>(b)))", Op::kSubtract},
+    {"as_type<int>((as_type<uint>(a) * as_type<uint>(b)))", Op::kMultiply}};
+INSTANTIATE_TEST_SUITE_P(
+    MslGeneratorImplTest,
+    MslBinaryTest_SignedOverflowDefinedBehaviour,
+    testing::ValuesIn(signed_overflow_defined_behaviour_cases));
+
+using MslBinaryTest_SignedOverflowDefinedBehaviour_Chained =
+    TestParamHelper<BinaryData>;
+TEST_P(MslBinaryTest_SignedOverflowDefinedBehaviour_Chained, Emit) {
+  auto params = GetParam();
+
+  auto* a_type = ty.i32();
+  auto* b_type = (params.op == ast::BinaryOp::kShiftLeft ||
+                  params.op == ast::BinaryOp::kShiftRight)
+                     ? static_cast<ast::Type*>(ty.u32())
+                     : ty.i32();
+
+  auto* a = Var("a", a_type);
+  auto* b = Var("b", b_type);
+
+  auto* expr1 = create<ast::BinaryExpression>(params.op, Expr(a), Expr(b));
+  auto* expr2 = create<ast::BinaryExpression>(params.op, expr1, Expr(b));
+  WrapInFunction(a, b, expr2);
+
+  GeneratorImpl& gen = Build();
+
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, expr2)) << gen.error();
+  EXPECT_EQ(out.str(), params.result);
+}
+using Op = ast::BinaryOp;
+constexpr BinaryData signed_overflow_defined_behaviour_chained_cases[] = {
+    {"as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(a) << b))) << "
+     "b))",
+     Op::kShiftLeft},
+    {"((a >> b) >> b)", Op::kShiftRight},
+    {"as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(a) + "
+     "as_type<uint>(b)))) + as_type<uint>(b)))",
+     Op::kAdd},
+    {"as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(a) - "
+     "as_type<uint>(b)))) - as_type<uint>(b)))",
+     Op::kSubtract},
+    {"as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(a) * "
+     "as_type<uint>(b)))) * as_type<uint>(b)))",
+     Op::kMultiply}};
+INSTANTIATE_TEST_SUITE_P(
+    MslGeneratorImplTest,
+    MslBinaryTest_SignedOverflowDefinedBehaviour_Chained,
+    testing::ValuesIn(signed_overflow_defined_behaviour_chained_cases));
+
 TEST_F(MslBinaryTest, ModF32) {
   auto* left = Var("left", ty.f32());
   auto* right = Var("right", ty.f32());

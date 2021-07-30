@@ -40,13 +40,13 @@ void main_1(constant buf0& x_6, thread float4* const tint_symbol_4) {
       case 0:
       case 1: {
         int const x_47 = count0;
-        count0 = (x_47 + 1);
+        count0 = as_type<int>((as_type<uint>(x_47) + as_type<uint>(1)));
         /* fallthrough */
       }
       case 2:
       case 3: {
         int const x_49 = count1;
-        count1 = (x_49 + 1);
+        count1 = as_type<int>((as_type<uint>(x_49) + as_type<uint>(1)));
         break;
       }
       default: {
@@ -55,7 +55,7 @@ void main_1(constant buf0& x_6, thread float4* const tint_symbol_4) {
     }
     {
       int const x_51 = i;
-      i = (x_51 + 1);
+      i = as_type<int>((as_type<uint>(x_51) + as_type<uint>(1)));
     }
   }
   int const x_53 = count1;

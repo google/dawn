@@ -69,14 +69,14 @@ kernel void comp_main(uint3 gl_GlobalInvocationID [[thread_position_in_grid]], c
     vel = particlesA.particles.arr[i].vel.xy;
     if ((distance(pos, vPos) < params.rule1Distance)) {
       cMass = (cMass + pos);
-      cMassCount = (cMassCount + 1);
+      cMassCount = as_type<int>((as_type<uint>(cMassCount) + as_type<uint>(1)));
     }
     if ((distance(pos, vPos) < params.rule2Distance)) {
       colVel = (colVel - (pos - vPos));
     }
     if ((distance(pos, vPos) < params.rule3Distance)) {
       cVel = (cVel + vel);
-      cVelCount = (cVelCount + 1);
+      cVelCount = as_type<int>((as_type<uint>(cVelCount) + as_type<uint>(1)));
     }
   }
   if ((cMassCount > 0)) {

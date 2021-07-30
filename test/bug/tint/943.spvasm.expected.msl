@@ -60,7 +60,7 @@ float mm_readA_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, thread 
   float x_430 = 0.0f;
   int const x_417 = x_48.aShape.y;
   int const x_419 = x_48.aShape.z;
-  batchASize = (x_417 * x_419);
+  batchASize = as_type<int>((as_type<uint>(x_417) * as_type<uint>(x_419)));
   int const x_421 = *(row);
   int const x_422 = *(col);
   int const x_424 = *(tint_symbol_3);
@@ -74,7 +74,7 @@ float mm_readA_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, thread 
     int const x_441 = *(row);
     int const x_442 = *(tint_symbol_4);
     int const x_445 = *(col);
-    float const x_448 = x_165.A[(((x_438 * x_439) + (x_441 * x_442)) + x_445)];
+    float const x_448 = x_165.A[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_438) * as_type<uint>(x_439)))) + as_type<uint>(as_type<int>((as_type<uint>(x_441) * as_type<uint>(x_442))))))) + as_type<uint>(x_445)))];
     x_430 = x_448;
   } else {
     x_430 = 0.0f;
@@ -90,7 +90,7 @@ float mm_readB_i1_i1_(constant Uniforms& x_48, const device ssbB& x_185, thread 
   float x_468 = 0.0f;
   int const x_455 = x_48.bShape.y;
   int const x_457 = x_48.bShape.z;
-  batchBSize = (x_455 * x_457);
+  batchBSize = as_type<int>((as_type<uint>(x_455) * as_type<uint>(x_457)));
   int const x_459 = *(row_1);
   int const x_460 = *(col_1);
   int const x_462 = *(tint_symbol_6);
@@ -104,7 +104,7 @@ float mm_readB_i1_i1_(constant Uniforms& x_48, const device ssbB& x_185, thread 
     int const x_478 = *(row_1);
     int const x_479 = *(tint_symbol_7);
     int const x_482 = *(col_1);
-    float const x_485 = x_185.B[(((x_475 * x_476) + (x_478 * x_479)) + x_482)];
+    float const x_485 = x_185.B[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_475) * as_type<uint>(x_476)))) + as_type<uint>(as_type<int>((as_type<uint>(x_478) * as_type<uint>(x_479))))))) + as_type<uint>(x_482)))];
     x_468 = x_485;
   } else {
     x_468 = 0.0f;
@@ -204,15 +204,15 @@ void mm_matMul_i1_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, cons
   int param_8 = 0;
   float param_9 = 0.0f;
   uint const x_132 = (*(tint_symbol_10)).y;
-  tileRow = (as_type<int>(x_132) * 1);
+  tileRow = as_type<int>((as_type<uint>(as_type<int>(x_132)) * as_type<uint>(1)));
   uint const x_137 = (*(tint_symbol_10)).x;
-  tileCol = (as_type<int>(x_137) * 1);
+  tileCol = as_type<int>((as_type<uint>(as_type<int>(x_137)) * as_type<uint>(1)));
   uint const x_143 = (*(tint_symbol_11)).y;
-  globalRow = (as_type<int>(x_143) * 1);
+  globalRow = as_type<int>((as_type<uint>(as_type<int>(x_143)) * as_type<uint>(1)));
   uint const x_148 = (*(tint_symbol_11)).x;
-  globalCol = (as_type<int>(x_148) * 1);
+  globalCol = as_type<int>((as_type<uint>(as_type<int>(x_148)) * as_type<uint>(1)));
   int const x_152 = *(dimInner);
-  numTiles = (((x_152 - 1) / 64) + 1);
+  numTiles = as_type<int>((as_type<uint>((as_type<int>((as_type<uint>(x_152) - as_type<uint>(1))) / 64)) + as_type<uint>(1)));
   innerRow = 0;
   while (true) {
     int const x_163 = innerRow;
@@ -232,18 +232,18 @@ void mm_matMul_i1_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, cons
       acc.arr[x_177].arr[x_178] = 0.0f;
       {
         int const x_181 = innerCol;
-        innerCol = (x_181 + 1);
+        innerCol = as_type<int>((as_type<uint>(x_181) + as_type<uint>(1)));
       }
     }
     {
       int const x_183 = innerRow;
-      innerRow = (x_183 + 1);
+      innerRow = as_type<int>((as_type<uint>(x_183) + as_type<uint>(1)));
     }
   }
   uint const x_187 = (*(tint_symbol_10)).x;
-  tileColA = (as_type<int>(x_187) * 64);
+  tileColA = as_type<int>((as_type<uint>(as_type<int>(x_187)) * as_type<uint>(64)));
   uint const x_192 = (*(tint_symbol_10)).y;
-  tileRowB = (as_type<int>(x_192) * 1);
+  tileRowB = as_type<int>((as_type<uint>(as_type<int>(x_192)) * as_type<uint>(1)));
   t = 0;
   while (true) {
     int const x_201 = t;
@@ -268,28 +268,28 @@ void mm_matMul_i1_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, cons
         }
         int const x_221 = tileRow;
         int const x_222 = innerRow_1;
-        inputRow = (x_221 + x_222);
+        inputRow = as_type<int>((as_type<uint>(x_221) + as_type<uint>(x_222)));
         int const x_225 = tileColA;
         int const x_226 = innerCol_1;
-        inputCol = (x_225 + x_226);
+        inputCol = as_type<int>((as_type<uint>(x_225) + as_type<uint>(x_226)));
         int const x_233 = inputRow;
         int const x_234 = inputCol;
         int const x_235 = globalRow;
         int const x_236 = innerRow_1;
         int const x_238 = t;
         int const x_240 = inputCol;
-        param_3 = (x_235 + x_236);
-        param_4 = ((x_238 * 64) + x_240);
+        param_3 = as_type<int>((as_type<uint>(x_235) + as_type<uint>(x_236)));
+        param_4 = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_238) * as_type<uint>(64)))) + as_type<uint>(x_240)));
         float const x_244 = mm_readA_i1_i1_(x_48, x_165, &(param_3), &(param_4), tint_symbol_12, tint_symbol_13, tint_symbol_14);
         (*(tint_symbol_15)).arr[x_233].arr[x_234] = x_244;
         {
           int const x_247 = innerCol_1;
-          innerCol_1 = (x_247 + 1);
+          innerCol_1 = as_type<int>((as_type<uint>(x_247) + as_type<uint>(1)));
         }
       }
       {
         int const x_249 = innerRow_1;
-        innerRow_1 = (x_249 + 1);
+        innerRow_1 = as_type<int>((as_type<uint>(x_249) + as_type<uint>(1)));
       }
     }
     innerRow_2 = 0;
@@ -308,28 +308,28 @@ void mm_matMul_i1_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, cons
         }
         int const x_268 = tileRowB;
         int const x_269 = innerRow_2;
-        inputRow_1 = (x_268 + x_269);
+        inputRow_1 = as_type<int>((as_type<uint>(x_268) + as_type<uint>(x_269)));
         int const x_272 = tileCol;
         int const x_273 = innerCol_2;
-        inputCol_1 = (x_272 + x_273);
+        inputCol_1 = as_type<int>((as_type<uint>(x_272) + as_type<uint>(x_273)));
         int const x_278 = inputRow_1;
         int const x_279 = inputCol_1;
         int const x_280 = t;
         int const x_282 = inputRow_1;
         int const x_284 = globalCol;
         int const x_285 = innerCol_2;
-        param_5 = ((x_280 * 64) + x_282);
-        param_6 = (x_284 + x_285);
+        param_5 = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_280) * as_type<uint>(64)))) + as_type<uint>(x_282)));
+        param_6 = as_type<int>((as_type<uint>(x_284) + as_type<uint>(x_285)));
         float const x_289 = mm_readB_i1_i1_(x_48, x_185, &(param_5), &(param_6), tint_symbol_13, tint_symbol_16, tint_symbol_14);
         (*(tint_symbol_17)).arr[x_278].arr[x_279] = x_289;
         {
           int const x_291 = innerCol_2;
-          innerCol_2 = (x_291 + 1);
+          innerCol_2 = as_type<int>((as_type<uint>(x_291) + as_type<uint>(1)));
         }
       }
       {
         int const x_293 = innerRow_2;
-        innerRow_2 = (x_293 + 1);
+        innerRow_2 = as_type<int>((as_type<uint>(x_293) + as_type<uint>(1)));
       }
     }
     threadgroup_barrier(mem_flags::mem_threadgroup);
@@ -351,11 +351,11 @@ void mm_matMul_i1_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, cons
         int const x_315 = k;
         int const x_316 = tileCol;
         int const x_317 = inner;
-        float const x_320 = (*(tint_symbol_17)).arr[x_315].arr[(x_316 + x_317)];
+        float const x_320 = (*(tint_symbol_17)).arr[x_315].arr[as_type<int>((as_type<uint>(x_316) + as_type<uint>(x_317)))];
         BCached.arr[x_314] = x_320;
         {
           int const x_322 = inner;
-          inner = (x_322 + 1);
+          inner = as_type<int>((as_type<uint>(x_322) + as_type<uint>(1)));
         }
       }
       innerRow_3 = 0;
@@ -368,7 +368,7 @@ void mm_matMul_i1_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, cons
         int const x_333 = tileRow;
         int const x_334 = innerRow_3;
         int const x_336 = k;
-        float const x_338 = (*(tint_symbol_15)).arr[(x_333 + x_334)].arr[x_336];
+        float const x_338 = (*(tint_symbol_15)).arr[as_type<int>((as_type<uint>(x_333) + as_type<uint>(x_334)))].arr[x_336];
         ACached = x_338;
         innerCol_3 = 0;
         while (true) {
@@ -386,23 +386,23 @@ void mm_matMul_i1_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, cons
           acc.arr[x_347].arr[x_348] = (x_355 + (x_349 * x_352));
           {
             int const x_358 = innerCol_3;
-            innerCol_3 = (x_358 + 1);
+            innerCol_3 = as_type<int>((as_type<uint>(x_358) + as_type<uint>(1)));
           }
         }
         {
           int const x_360 = innerRow_3;
-          innerRow_3 = (x_360 + 1);
+          innerRow_3 = as_type<int>((as_type<uint>(x_360) + as_type<uint>(1)));
         }
       }
       {
         int const x_362 = k;
-        k = (x_362 + 1);
+        k = as_type<int>((as_type<uint>(x_362) + as_type<uint>(1)));
       }
     }
     threadgroup_barrier(mem_flags::mem_threadgroup);
     {
       int const x_364 = t;
-      t = (x_364 + 1);
+      t = as_type<int>((as_type<uint>(x_364) + as_type<uint>(1)));
     }
   }
   innerRow_4 = 0;
@@ -424,13 +424,13 @@ void mm_matMul_i1_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, cons
       int const x_382 = globalCol;
       int const x_383 = innerCol_4;
       int const x_385 = *(dimBOuter);
-      bool const x_386 = ((x_382 + x_383) < x_385);
+      bool const x_386 = (as_type<int>((as_type<uint>(x_382) + as_type<uint>(x_383))) < x_385);
       x_394_phi = x_386;
       if (x_386) {
         int const x_389 = globalRow;
         int const x_390 = innerRow_4;
         int const x_392 = *(dimAOuter);
-        x_393 = ((x_389 + x_390) < x_392);
+        x_393 = (as_type<int>((as_type<uint>(x_389) + as_type<uint>(x_390))) < x_392);
         x_394_phi = x_393;
       }
       bool const x_394 = x_394_phi;
@@ -441,20 +441,20 @@ void mm_matMul_i1_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, cons
         int const x_401 = innerCol_4;
         int const x_403 = innerRow_4;
         int const x_404 = innerCol_4;
-        param_7 = (x_397 + x_398);
-        param_8 = (x_400 + x_401);
+        param_7 = as_type<int>((as_type<uint>(x_397) + as_type<uint>(x_398)));
+        param_8 = as_type<int>((as_type<uint>(x_400) + as_type<uint>(x_401)));
         float const x_409 = acc.arr[x_403].arr[x_404];
         param_9 = x_409;
         mm_write_i1_i1_f1_(x_48, x_54, &(param_7), &(param_8), &(param_9), tint_symbol_14);
       }
       {
         int const x_411 = innerCol_4;
-        innerCol_4 = (x_411 + 1);
+        innerCol_4 = as_type<int>((as_type<uint>(x_411) + as_type<uint>(1)));
       }
     }
     {
       int const x_413 = innerRow_4;
-      innerRow_4 = (x_413 + 1);
+      innerRow_4 = as_type<int>((as_type<uint>(x_413) + as_type<uint>(1)));
     }
   }
   return;

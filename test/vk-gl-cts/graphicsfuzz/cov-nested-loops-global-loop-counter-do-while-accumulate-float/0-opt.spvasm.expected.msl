@@ -187,11 +187,11 @@ void main_1(constant buf0& x_7, constant buf1& x_10, thread int* const tint_symb
                                 }
                                 while (true) {
                                   int const x_223 = *(tint_symbol_4);
-                                  *(tint_symbol_4) = (x_223 + 1);
+                                  *(tint_symbol_4) = as_type<int>((as_type<uint>(x_223) + as_type<uint>(1)));
                                   {
                                     int const x_225 = *(tint_symbol_4);
                                     int const x_227 = x_10.x_GLF_uniform_int_values.arr[3].el;
-                                    if ((x_225 < (100 - x_227))) {
+                                    if ((x_225 < as_type<int>((as_type<uint>(100) - as_type<uint>(x_227))))) {
                                     } else {
                                       break;
                                     }
@@ -202,77 +202,77 @@ void main_1(constant buf0& x_7, constant buf1& x_10, thread int* const tint_symb
                                 f = (x_232 + x_231);
                                 {
                                   int const x_234 = i_14;
-                                  i_14 = (x_234 + 1);
+                                  i_14 = as_type<int>((as_type<uint>(x_234) + as_type<uint>(1)));
                                 }
                               }
                               {
                                 int const x_236 = i_13;
-                                i_13 = (x_236 + 1);
+                                i_13 = as_type<int>((as_type<uint>(x_236) + as_type<uint>(1)));
                               }
                             }
                             {
                               int const x_238 = i_12;
-                              i_12 = (x_238 + 1);
+                              i_12 = as_type<int>((as_type<uint>(x_238) + as_type<uint>(1)));
                             }
                           }
                           {
                             int const x_240 = i_11;
-                            i_11 = (x_240 + 1);
+                            i_11 = as_type<int>((as_type<uint>(x_240) + as_type<uint>(1)));
                           }
                         }
                         {
                           int const x_242 = i_10;
-                          i_10 = (x_242 + 1);
+                          i_10 = as_type<int>((as_type<uint>(x_242) + as_type<uint>(1)));
                         }
                       }
                       {
                         int const x_244 = i_9;
-                        i_9 = (x_244 + 1);
+                        i_9 = as_type<int>((as_type<uint>(x_244) + as_type<uint>(1)));
                       }
                     }
                     {
                       int const x_246 = i_8;
-                      i_8 = (x_246 + 1);
+                      i_8 = as_type<int>((as_type<uint>(x_246) + as_type<uint>(1)));
                     }
                   }
                   {
                     int const x_248 = i_7;
-                    i_7 = (x_248 + 1);
+                    i_7 = as_type<int>((as_type<uint>(x_248) + as_type<uint>(1)));
                   }
                 }
                 {
                   int const x_250 = i_6;
-                  i_6 = (x_250 + 1);
+                  i_6 = as_type<int>((as_type<uint>(x_250) + as_type<uint>(1)));
                 }
               }
               {
                 int const x_252 = i_5;
-                i_5 = (x_252 + 1);
+                i_5 = as_type<int>((as_type<uint>(x_252) + as_type<uint>(1)));
               }
             }
             {
               int const x_254 = i_4;
-              i_4 = (x_254 + 1);
+              i_4 = as_type<int>((as_type<uint>(x_254) + as_type<uint>(1)));
             }
           }
           {
             int const x_256 = i_3;
-            i_3 = (x_256 + 1);
+            i_3 = as_type<int>((as_type<uint>(x_256) + as_type<uint>(1)));
           }
         }
         {
           int const x_258 = i_2;
-          i_2 = (x_258 + 1);
+          i_2 = as_type<int>((as_type<uint>(x_258) + as_type<uint>(1)));
         }
       }
       {
         int const x_260 = i_1;
-        i_1 = (x_260 + 1);
+        i_1 = as_type<int>((as_type<uint>(x_260) + as_type<uint>(1)));
       }
     }
     {
       int const x_262 = i;
-      i = (x_262 + 1);
+      i = as_type<int>((as_type<uint>(x_262) + as_type<uint>(1)));
     }
   }
   float const x_265 = x_7.x_GLF_uniform_float_values.arr[1].el;
@@ -286,13 +286,13 @@ void main_1(constant buf0& x_7, constant buf1& x_10, thread int* const tint_symb
       break;
     }
     int const x_275 = *(tint_symbol_4);
-    *(tint_symbol_4) = (x_275 + 1);
+    *(tint_symbol_4) = as_type<int>((as_type<uint>(x_275) + as_type<uint>(1)));
     float const x_277 = f;
     float const x_278 = sum;
     sum = (x_278 + x_277);
     {
       int const x_280 = r;
-      r = (x_280 + 1);
+      r = as_type<int>((as_type<uint>(x_280) + as_type<uint>(1)));
     }
   }
   float const x_282 = sum;

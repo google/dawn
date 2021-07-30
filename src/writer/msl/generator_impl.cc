@@ -75,6 +75,32 @@ bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
          stmts->last()->Is<ast::FallthroughStatement>();
 }
 
+class ScopedBitCast {
+ public:
+  ScopedBitCast(GeneratorImpl* generator,
+                std::ostream& stream,
+                const sem::Type* curr_type,
+                const sem::Type* target_type)
+      : s(stream) {
+    auto* target_vec_type = target_type->As<sem::Vector>();
+
+    // If we need to promote from scalar to vector, bitcast the scalar to the
+    // vector element type.
+    if (curr_type->is_scalar() && target_vec_type) {
+      target_type = target_vec_type->type();
+    }
+
+    // Bit cast
+    s << "as_type<";
+    generator->EmitType(s, target_type, "");
+    s << ">(";
+  }
+
+  ~ScopedBitCast() { s << ")"; }
+
+ private:
+  std::ostream& s;
+};
 }  // namespace
 
 GeneratorImpl::GeneratorImpl(const Program* program) : TextGenerator(program) {}
@@ -227,8 +253,104 @@ bool GeneratorImpl::EmitAssign(ast::AssignmentStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitBinary(std::ostream& out, ast::BinaryExpression* expr) {
+  auto emit_op = [&] {
+    out << " ";
+
+    switch (expr->op()) {
+      case ast::BinaryOp::kAnd:
+        out << "&";
+        break;
+      case ast::BinaryOp::kOr:
+        out << "|";
+        break;
+      case ast::BinaryOp::kXor:
+        out << "^";
+        break;
+      case ast::BinaryOp::kLogicalAnd:
+        out << "&&";
+        break;
+      case ast::BinaryOp::kLogicalOr:
+        out << "||";
+        break;
+      case ast::BinaryOp::kEqual:
+        out << "==";
+        break;
+      case ast::BinaryOp::kNotEqual:
+        out << "!=";
+        break;
+      case ast::BinaryOp::kLessThan:
+        out << "<";
+        break;
+      case ast::BinaryOp::kGreaterThan:
+        out << ">";
+        break;
+      case ast::BinaryOp::kLessThanEqual:
+        out << "<=";
+        break;
+      case ast::BinaryOp::kGreaterThanEqual:
+        out << ">=";
+        break;
+      case ast::BinaryOp::kShiftLeft:
+        out << "<<";
+        break;
+      case ast::BinaryOp::kShiftRight:
+        // TODO(dsinclair): MSL is based on C++14, and >> in C++14 has
+        // implementation-defined behaviour for negative LHS.  We may have to
+        // generate extra code to implement WGSL-specified behaviour for
+        // negative LHS.
+        out << R"(>>)";
+        break;
+
+      case ast::BinaryOp::kAdd:
+        out << "+";
+        break;
+      case ast::BinaryOp::kSubtract:
+        out << "-";
+        break;
+      case ast::BinaryOp::kMultiply:
+        out << "*";
+        break;
+      case ast::BinaryOp::kDivide:
+        out << "/";
+        break;
+      case ast::BinaryOp::kModulo:
+        out << "%";
+        break;
+      case ast::BinaryOp::kNone:
+        diagnostics_.add_error(diag::System::Writer,
+                               "missing binary operation type");
+        return false;
+    }
+    out << " ";
+    return true;
+  };
+
+  auto signed_type_of = [&](const sem::Type* ty) -> const sem::Type* {
+    if (ty->is_integer_scalar()) {
+      return builder_.create<sem::I32>();
+    } else if (auto* v = ty->As<sem::Vector>()) {
+      return builder_.create<sem::Vector>(builder_.create<sem::I32>(),
+                                          v->Width());
+    }
+    return {};
+  };
+
+  auto unsigned_type_of = [&](const sem::Type* ty) -> const sem::Type* {
+    if (ty->is_integer_scalar()) {
+      return builder_.create<sem::U32>();
+    } else if (auto* v = ty->As<sem::Vector>()) {
+      return builder_.create<sem::Vector>(builder_.create<sem::U32>(),
+                                          v->Width());
+    }
+    return {};
+  };
+
+  auto* lhs_type = TypeOf(expr->lhs())->UnwrapRef();
+  auto* rhs_type = TypeOf(expr->rhs())->UnwrapRef();
+
+  // Handle fmod
   if (expr->op() == ast::BinaryOp::kModulo &&
-      TypeOf(expr)->UnwrapRef()->is_float_scalar_or_vector()) {
+      lhs_type->is_float_scalar_or_vector()) {
     out << "fmod";
     ScopedParen sp(out);
     if (!EmitExpression(out, expr->lhs())) {
@@ -241,80 +363,75 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, ast::BinaryExpression* expr) {
     return true;
   }
 
-  ScopedParen sp(out);
+  // Handle +/-/* of signed values
+  if ((expr->IsAdd() || expr->IsSubtract() || expr->IsMultiply()) &&
+      lhs_type->is_signed_scalar_or_vector() &&
+      rhs_type->is_signed_scalar_or_vector()) {
+    // If lhs or rhs is a vector, use that type (support implicit scalar to
+    // vector promotion)
+    auto* target_type =
+        lhs_type->Is<sem::Vector>()
+            ? lhs_type
+            : (rhs_type->Is<sem::Vector>() ? rhs_type : lhs_type);
 
+    // WGSL defines behaviour for signed overflow, MSL does not. For these
+    // cases, bitcast operands to unsigned, then cast result to signed.
+    ScopedBitCast outer_int_cast(this, out, target_type,
+                                 signed_type_of(target_type));
+    ScopedParen sp(out);
+    {
+      ScopedBitCast lhs_uint_cast(this, out, lhs_type,
+                                  unsigned_type_of(target_type));
+      if (!EmitExpression(out, expr->lhs())) {
+        return false;
+      }
+    }
+    if (!emit_op()) {
+      return false;
+    }
+    {
+      ScopedBitCast rhs_uint_cast(this, out, rhs_type,
+                                  unsigned_type_of(target_type));
+      if (!EmitExpression(out, expr->rhs())) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // Handle left bit shifting a signed value
+  // TODO(crbug.com/tint/1077): This may not be necessary. The MSL spec
+  // seems to imply that left shifting a signed value is treated the same as
+  // left shifting an unsigned value, but we need to make sure.
+  if (expr->IsShiftLeft() && lhs_type->is_signed_scalar_or_vector()) {
+    // Shift left: discards top bits, so convert first operand to unsigned
+    // first, then convert result back to signed
+    ScopedBitCast outer_int_cast(this, out, lhs_type, signed_type_of(lhs_type));
+    ScopedParen sp(out);
+    {
+      ScopedBitCast lhs_uint_cast(this, out, lhs_type,
+                                  unsigned_type_of(lhs_type));
+      if (!EmitExpression(out, expr->lhs())) {
+        return false;
+      }
+    }
+    if (!emit_op()) {
+      return false;
+    }
+    if (!EmitExpression(out, expr->rhs())) {
+      return false;
+    }
+    return true;
+  }
+
+  // Emit as usual
+  ScopedParen sp(out);
   if (!EmitExpression(out, expr->lhs())) {
     return false;
   }
-  out << " ";
-
-  switch (expr->op()) {
-    case ast::BinaryOp::kAnd:
-      out << "&";
-      break;
-    case ast::BinaryOp::kOr:
-      out << "|";
-      break;
-    case ast::BinaryOp::kXor:
-      out << "^";
-      break;
-    case ast::BinaryOp::kLogicalAnd:
-      out << "&&";
-      break;
-    case ast::BinaryOp::kLogicalOr:
-      out << "||";
-      break;
-    case ast::BinaryOp::kEqual:
-      out << "==";
-      break;
-    case ast::BinaryOp::kNotEqual:
-      out << "!=";
-      break;
-    case ast::BinaryOp::kLessThan:
-      out << "<";
-      break;
-    case ast::BinaryOp::kGreaterThan:
-      out << ">";
-      break;
-    case ast::BinaryOp::kLessThanEqual:
-      out << "<=";
-      break;
-    case ast::BinaryOp::kGreaterThanEqual:
-      out << ">=";
-      break;
-    case ast::BinaryOp::kShiftLeft:
-      out << "<<";
-      break;
-    case ast::BinaryOp::kShiftRight:
-      // TODO(dsinclair): MSL is based on C++14, and >> in C++14 has
-      // implementation-defined behaviour for negative LHS.  We may have to
-      // generate extra code to implement WGSL-specified behaviour for negative
-      // LHS.
-      out << R"(>>)";
-      break;
-
-    case ast::BinaryOp::kAdd:
-      out << "+";
-      break;
-    case ast::BinaryOp::kSubtract:
-      out << "-";
-      break;
-    case ast::BinaryOp::kMultiply:
-      out << "*";
-      break;
-    case ast::BinaryOp::kDivide:
-      out << "/";
-      break;
-    case ast::BinaryOp::kModulo:
-      out << "%";
-      break;
-    case ast::BinaryOp::kNone:
-      diagnostics_.add_error(diag::System::Writer,
-                             "missing binary operation type");
-      return false;
+  if (!emit_op()) {
+    return false;
   }
-  out << " ";
-
   if (!EmitExpression(out, expr->rhs())) {
     return false;
   }
@@ -2338,6 +2455,53 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
 
 bool GeneratorImpl::EmitUnaryOp(std::ostream& out,
                                 ast::UnaryOpExpression* expr) {
+  // Handle `-e` when `e` is signed, so that we ensure that if `e` is the
+  // largest negative value, it returns `e`.
+  auto* expr_type = TypeOf(expr->expr())->UnwrapRef();
+  if (expr->op() == ast::UnaryOp::kNegation &&
+      expr_type->is_signed_scalar_or_vector()) {
+    auto fn =
+        utils::GetOrCreate(unary_minus_funcs_, expr_type, [&]() -> std::string {
+          // e.g.:
+          // int tint_unary_minus(const int v) {
+          //     return (v == -2147483648) ? v : -v;
+          // }
+          TextBuffer b;
+          TINT_DEFER(helpers_.Append(b));
+
+          auto fn_name = UniqueIdentifier("tint_unary_minus");
+          {
+            auto decl = line(&b);
+            if (!EmitTypeAndName(decl, expr_type, fn_name)) {
+              return "";
+            }
+            decl << "(const ";
+            if (!EmitType(decl, expr_type, "")) {
+              return "";
+            }
+            decl << " v) {";
+          }
+
+          {
+            ScopedIndent si(&b);
+            const auto largest_negative_value =
+                std::to_string(std::numeric_limits<int32_t>::min());
+            line(&b) << "return select(-v, v, v == " << largest_negative_value
+                     << ");";
+          }
+          line(&b) << "}";
+          line(&b);
+          return fn_name;
+        });
+
+    out << fn << "(";
+    if (!EmitExpression(out, expr->expr())) {
+      return false;
+    }
+    out << ")";
+    return true;
+  }
+
   switch (expr->op()) {
     case ast::UnaryOp::kAddressOf:
       out << "&";

@@ -87,17 +87,17 @@ void main_1(constant buf1& x_6, constant buf0& x_12, thread float4* const tint_s
         }
         {
           int const x_113 = j;
-          j = (x_113 + 1);
+          j = as_type<int>((as_type<uint>(x_113) + as_type<uint>(1)));
         }
       }
       {
         int const x_115 = i;
-        i = (x_115 + 1);
+        i = as_type<int>((as_type<uint>(x_115) + as_type<uint>(1)));
       }
     }
     {
       int const x_117 = a;
-      a = (x_117 + 1);
+      a = as_type<int>((as_type<uint>(x_117) + as_type<uint>(1)));
     }
   }
   while (true) {
@@ -121,7 +121,7 @@ void main_1(constant buf1& x_6, constant buf0& x_12, thread float4* const tint_s
       *(tint_symbol_6) = float4(x_142, x_142, x_142, x_142);
       {
         int const x_144 = i_1;
-        i_1 = (x_144 + 1);
+        i_1 = as_type<int>((as_type<uint>(x_144) + as_type<uint>(1)));
       }
     }
   }

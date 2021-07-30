@@ -20,17 +20,17 @@ float3 f_() {
       break;
     }
     int const x_8 = iteration;
-    iteration = (x_8 + 1);
+    iteration = as_type<int>((as_type<uint>(x_8) + as_type<uint>(1)));
     {
       int const x_10 = k;
-      k = (x_10 + 1);
+      k = as_type<int>((as_type<uint>(x_10) + as_type<uint>(1)));
     }
   }
   int const x_12 = iteration;
   if ((x_12 < 100)) {
     int const x_13 = iteration;
     int const x_15 = iteration;
-    return float3(1.0f, float((x_13 - 1)), float((x_15 - 1)));
+    return float3(1.0f, float(as_type<int>((as_type<uint>(x_13) - as_type<uint>(1)))), float(as_type<int>((as_type<uint>(x_15) - as_type<uint>(1)))));
   } else {
     while (true) {
       while (true) {

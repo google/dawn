@@ -28,7 +28,7 @@ void main_1(constant buf0& x_8, thread float4* const tint_symbol_4) {
     matrix_u[x_11] = 1.0f;
     {
       int const x_12 = x;
-      x = (x_12 - 1);
+      x = as_type<int>((as_type<uint>(x_12) - as_type<uint>(1)));
     }
   }
   b = 4;
@@ -52,7 +52,7 @@ void main_1(constant buf0& x_8, thread float4* const tint_symbol_4) {
     matrix_b[x_14] = x_67;
     {
       int const x_16 = b;
-      b = (x_16 - 1);
+      b = as_type<int>((as_type<uint>(x_16) - as_type<uint>(1)));
     }
   }
   *(tint_symbol_4) = float4(1.0f, 0.0f, 0.0f, 1.0f);

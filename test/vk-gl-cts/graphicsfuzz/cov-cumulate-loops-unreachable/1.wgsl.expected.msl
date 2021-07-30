@@ -31,7 +31,7 @@ void main_1(thread float4* const tint_symbol_5) {
     int const x_41 = i;
     if ((x_41 > 1)) {
       int const x_45 = a;
-      a = (x_45 + 1);
+      a = as_type<int>((as_type<uint>(x_45) + as_type<uint>(1)));
       if (false) {
         i_1 = 0;
         while (true) {
@@ -46,7 +46,7 @@ void main_1(thread float4* const tint_symbol_5) {
     }
     {
       int const x_56 = i;
-      i = (x_56 + 1);
+      i = as_type<int>((as_type<uint>(x_56) + as_type<uint>(1)));
     }
   }
   i_2 = 0;
@@ -61,10 +61,10 @@ void main_1(thread float4* const tint_symbol_5) {
     indexable = tint_symbol_3;
     int const x_67 = indexable.arr[x_65];
     int const x_68 = a;
-    a = (x_68 + x_67);
+    a = as_type<int>((as_type<uint>(x_68) + as_type<uint>(x_67)));
     {
       int const x_70 = i_2;
-      i_2 = (x_70 + 1);
+      i_2 = as_type<int>((as_type<uint>(x_70) + as_type<uint>(1)));
     }
   }
   int const x_72 = a;

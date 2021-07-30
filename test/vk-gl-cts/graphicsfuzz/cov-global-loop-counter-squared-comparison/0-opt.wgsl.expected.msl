@@ -27,10 +27,10 @@ void main_1(constant buf0& x_6, thread int* const tint_symbol_4, thread float4* 
       break;
     }
     int const x_33 = *(tint_symbol_4);
-    *(tint_symbol_4) = (x_33 + 1);
+    *(tint_symbol_4) = as_type<int>((as_type<uint>(x_33) + as_type<uint>(1)));
     int const x_35 = *(tint_symbol_4);
     int const x_36 = *(tint_symbol_4);
-    if (((x_35 * x_36) > 10)) {
+    if ((as_type<int>((as_type<uint>(x_35) * as_type<uint>(x_36))) > 10)) {
       break;
     }
   }

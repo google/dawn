@@ -26,7 +26,7 @@ int func_(constant buf0& x_7, thread int* const tint_symbol_4) {
       break;
     }
     int const x_75 = *(tint_symbol_4);
-    *(tint_symbol_4) = (x_75 + 1);
+    *(tint_symbol_4) = as_type<int>((as_type<uint>(x_75) + as_type<uint>(1)));
     int const x_78 = x_7.x_GLF_uniform_int_values.arr[0].el;
     return x_78;
   }
@@ -39,7 +39,7 @@ void main_1(constant buf0& x_7, thread int* const tint_symbol_5, thread float4* 
   *(tint_symbol_5) = 0;
   while (true) {
     int const x_35 = *(tint_symbol_5);
-    *(tint_symbol_5) = (x_35 + 1);
+    *(tint_symbol_5) = as_type<int>((as_type<uint>(x_35) + as_type<uint>(1)));
     if (false) {
       return;
     }
