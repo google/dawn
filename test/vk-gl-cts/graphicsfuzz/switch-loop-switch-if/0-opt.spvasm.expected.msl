@@ -20,12 +20,12 @@ void main_1(constant buf0& x_6, thread float4* const tint_symbol_4) {
     case 0: {
       while (true) {
         int const x_9 = i;
-        i = as_type<int>((as_type<uint>(x_9) + as_type<uint>(1)));
+        i = (x_9 + 1);
         int const x_11 = i;
         switch(x_11) {
           case 2: {
             int const x_12 = i;
-            i = as_type<int>((as_type<uint>(x_12) + as_type<uint>(5)));
+            i = (x_12 + 5);
             break;
           }
           case 1: {
@@ -41,7 +41,7 @@ void main_1(constant buf0& x_6, thread float4* const tint_symbol_4) {
           }
           default: {
             int const x_14 = i;
-            i = as_type<int>((as_type<uint>(x_14) + as_type<uint>(7)));
+            i = (x_14 + 7);
             break;
           }
         }
@@ -56,14 +56,14 @@ void main_1(constant buf0& x_6, thread float4* const tint_symbol_4) {
       int const x_17 = i;
       if ((x_17 > 100)) {
         int const x_18 = i;
-        i = as_type<int>((as_type<uint>(x_18) - as_type<uint>(2)));
+        i = (x_18 - 2);
         break;
       }
       /* fallthrough */
     }
     default: {
       int const x_20 = i;
-      i = as_type<int>((as_type<uint>(x_20) - as_type<uint>(3)));
+      i = (x_20 - 3);
       break;
     }
   }

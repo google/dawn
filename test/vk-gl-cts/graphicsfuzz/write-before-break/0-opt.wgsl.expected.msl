@@ -39,7 +39,7 @@ void main_1(constant buf0& x_9, thread float4* const tint_symbol_4) {
       break;
     }
     int const x_20 = ll_1;
-    ll_1 = as_type<int>((as_type<uint>(x_20) + as_type<uint>(1)));
+    ll_1 = (x_20 + 1);
     int const x_22 = x_9.injected;
     z = x_22;
     ll_2 = 0;
@@ -56,7 +56,7 @@ void main_1(constant buf0& x_9, thread float4* const tint_symbol_4) {
         break;
       }
       int const x_26 = ll_2;
-      ll_2 = as_type<int>((as_type<uint>(x_26) + as_type<uint>(1)));
+      ll_2 = (x_26 + 1);
       float4x3 const x_98 = m43;
       tempm43 = x_98;
       ll_3 = 0;
@@ -77,7 +77,7 @@ void main_1(constant buf0& x_9, thread float4* const tint_symbol_4) {
         tempm43[select(0, x_31, ((x_29 >= 0) && (x_30 < 4)))][select(0, x_34, ((x_32 >= 0) && (x_33 < 3)))] = 1.0f;
         {
           int const x_35 = c;
-          c = as_type<int>((as_type<uint>(x_35) + as_type<uint>(1)));
+          c = (x_35 + 1);
         }
       }
       int const x_37 = idx;
@@ -90,11 +90,11 @@ void main_1(constant buf0& x_9, thread float4* const tint_symbol_4) {
       GLF_live6sums.arr[x_117] = (x_121 + x_119);
       {
         int const x_41 = ctr;
-        ctr = as_type<int>((as_type<uint>(x_41) + as_type<uint>(1)));
+        ctr = (x_41 + 1);
       }
     }
     int const x_43 = idx;
-    idx = as_type<int>((as_type<uint>(x_43) + as_type<uint>(1)));
+    idx = (x_43 + 1);
   }
   return;
 }

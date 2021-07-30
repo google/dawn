@@ -162,55 +162,55 @@ void main_1(thread tint_array_wrapper* const tint_symbol_6, thread float4* const
   BST const x_86 = param_4;
   (*(tint_symbol_6)).arr[0] = x_86;
   int const x_88 = treeIndex_1;
-  treeIndex_1 = as_type<int>((as_type<uint>(x_88) + as_type<uint>(1)));
+  treeIndex_1 = (x_88 + 1);
   int const x_90 = treeIndex_1;
   param_6 = x_90;
   param_7 = 5;
   insert_i1_i1_(&(param_6), &(param_7), tint_symbol_6);
   int const x_92 = treeIndex_1;
-  treeIndex_1 = as_type<int>((as_type<uint>(x_92) + as_type<uint>(1)));
+  treeIndex_1 = (x_92 + 1);
   int const x_94 = treeIndex_1;
   param_8 = x_94;
   param_9 = 12;
   insert_i1_i1_(&(param_8), &(param_9), tint_symbol_6);
   int const x_96 = treeIndex_1;
-  treeIndex_1 = as_type<int>((as_type<uint>(x_96) + as_type<uint>(1)));
+  treeIndex_1 = (x_96 + 1);
   int const x_98 = treeIndex_1;
   param_10 = x_98;
   param_11 = 15;
   insert_i1_i1_(&(param_10), &(param_11), tint_symbol_6);
   int const x_100 = treeIndex_1;
-  treeIndex_1 = as_type<int>((as_type<uint>(x_100) + as_type<uint>(1)));
+  treeIndex_1 = (x_100 + 1);
   int const x_102 = treeIndex_1;
   param_12 = x_102;
   param_13 = 7;
   insert_i1_i1_(&(param_12), &(param_13), tint_symbol_6);
   int const x_104 = treeIndex_1;
-  treeIndex_1 = as_type<int>((as_type<uint>(x_104) + as_type<uint>(1)));
+  treeIndex_1 = (x_104 + 1);
   int const x_106 = treeIndex_1;
   param_14 = x_106;
   param_15 = 8;
   insert_i1_i1_(&(param_14), &(param_15), tint_symbol_6);
   int const x_108 = treeIndex_1;
-  treeIndex_1 = as_type<int>((as_type<uint>(x_108) + as_type<uint>(1)));
+  treeIndex_1 = (x_108 + 1);
   int const x_110 = treeIndex_1;
   param_16 = x_110;
   param_17 = 2;
   insert_i1_i1_(&(param_16), &(param_17), tint_symbol_6);
   int const x_112 = treeIndex_1;
-  treeIndex_1 = as_type<int>((as_type<uint>(x_112) + as_type<uint>(1)));
+  treeIndex_1 = (x_112 + 1);
   int const x_114 = treeIndex_1;
   param_18 = x_114;
   param_19 = 6;
   insert_i1_i1_(&(param_18), &(param_19), tint_symbol_6);
   int const x_116 = treeIndex_1;
-  treeIndex_1 = as_type<int>((as_type<uint>(x_116) + as_type<uint>(1)));
+  treeIndex_1 = (x_116 + 1);
   int const x_118 = treeIndex_1;
   param_20 = x_118;
   param_21 = 17;
   insert_i1_i1_(&(param_20), &(param_21), tint_symbol_6);
   int const x_120 = treeIndex_1;
-  treeIndex_1 = as_type<int>((as_type<uint>(x_120) + as_type<uint>(1)));
+  treeIndex_1 = (x_120 + 1);
   int const x_122 = treeIndex_1;
   param_22 = x_122;
   param_23 = 13;
@@ -243,7 +243,7 @@ void main_1(thread tint_array_wrapper* const tint_symbol_6, thread float4* const
         int const x_144 = i;
         if ((x_143 == x_144)) {
           int const x_148 = count;
-          count = as_type<int>((as_type<uint>(x_148) + as_type<uint>(1)));
+          count = (x_148 + 1);
         }
         break;
       }
@@ -251,14 +251,14 @@ void main_1(thread tint_array_wrapper* const tint_symbol_6, thread float4* const
         int const x_137 = result;
         if ((x_137 == -1)) {
           int const x_141 = count;
-          count = as_type<int>((as_type<uint>(x_141) + as_type<uint>(1)));
+          count = (x_141 + 1);
         }
         break;
       }
     }
     {
       int const x_150 = i;
-      i = as_type<int>((as_type<uint>(x_150) + as_type<uint>(1)));
+      i = (x_150 + 1);
     }
   }
   int const x_152 = count;

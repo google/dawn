@@ -356,7 +356,6 @@ class GeneratorImpl : public TextGenerator {
   bool has_invariant_ = false;
 
   std::unordered_map<const sem::Intrinsic*, std::string> intrinsics_;
-  std::unordered_map<const sem::Type*, std::string> unary_minus_funcs_;
 };
 
 }  // namespace msl

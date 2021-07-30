@@ -24,7 +24,7 @@ int func_(constant buf0& x_7) {
   i = x_53;
   while (true) {
     int const x_58 = i;
-    i = as_type<int>((as_type<uint>(x_58) + as_type<uint>(1)));
+    i = (x_58 + 1);
     if (true) {
       if (true) {
         int const x_65 = x_7.x_GLF_uniform_int_values.arr[2].el;

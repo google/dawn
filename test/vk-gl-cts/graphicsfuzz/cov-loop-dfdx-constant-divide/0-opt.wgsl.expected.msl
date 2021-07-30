@@ -62,7 +62,7 @@ void main_1(constant buf0& x_6, constant buf1& x_11, thread float4* const tint_s
     a = (x_64 / x_65);
     {
       int const x_67 = i;
-      i = as_type<int>((as_type<uint>(x_67) + as_type<uint>(1)));
+      i = (x_67 + 1);
     }
   }
   float const x_69 = a;

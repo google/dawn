@@ -24,11 +24,11 @@ int func_(constant buf0& x_8) {
       break;
     }
     int const x_44 = ret;
-    ret = as_type<int>((as_type<uint>(x_44) + as_type<uint>(1)));
+    ret = (x_44 + 1);
     {
       int const x_47 = x_8.one;
       int const x_48 = i;
-      i = as_type<int>((as_type<uint>(x_48) - as_type<uint>(x_47)));
+      i = (x_48 - x_47);
     }
   }
   int const x_50 = ret;

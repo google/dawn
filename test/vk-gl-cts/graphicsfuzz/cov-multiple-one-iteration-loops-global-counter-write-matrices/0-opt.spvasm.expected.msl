@@ -334,7 +334,7 @@ void main_1(thread int* const tint_symbol_4, thread float4* const tint_symbol_5)
                                                                               }
                                                                               while (true) {
                                                                                 int const x_371 = *(tint_symbol_4);
-                                                                                *(tint_symbol_4) = as_type<int>((as_type<uint>(x_371) + as_type<uint>(1)));
+                                                                                *(tint_symbol_4) = (x_371 + 1);
                                                                                 {
                                                                                   int const x_373 = *(tint_symbol_4);
                                                                                   if ((x_373 < 98)) {
@@ -369,192 +369,192 @@ void main_1(thread int* const tint_symbol_4, thread float4* const tint_symbol_5)
                                                                               m44[x_396][x_397] = 1.0f;
                                                                               {
                                                                                 int const x_399 = i_37;
-                                                                                i_37 = as_type<int>((as_type<uint>(x_399) + as_type<uint>(1)));
+                                                                                i_37 = (x_399 + 1);
                                                                               }
                                                                             }
                                                                             {
                                                                               int const x_401 = i_36;
-                                                                              i_36 = as_type<int>((as_type<uint>(x_401) + as_type<uint>(1)));
+                                                                              i_36 = (x_401 + 1);
                                                                             }
                                                                           }
                                                                           {
                                                                             int const x_403 = i_35;
-                                                                            i_35 = as_type<int>((as_type<uint>(x_403) + as_type<uint>(1)));
+                                                                            i_35 = (x_403 + 1);
                                                                           }
                                                                         }
                                                                         {
                                                                           int const x_405 = i_34;
-                                                                          i_34 = as_type<int>((as_type<uint>(x_405) + as_type<uint>(1)));
+                                                                          i_34 = (x_405 + 1);
                                                                         }
                                                                       }
                                                                       {
                                                                         int const x_407 = i_33;
-                                                                        i_33 = as_type<int>((as_type<uint>(x_407) + as_type<uint>(1)));
+                                                                        i_33 = (x_407 + 1);
                                                                       }
                                                                     }
                                                                     {
                                                                       int const x_409 = i_32;
-                                                                      i_32 = as_type<int>((as_type<uint>(x_409) + as_type<uint>(1)));
+                                                                      i_32 = (x_409 + 1);
                                                                     }
                                                                   }
                                                                   {
                                                                     int const x_411 = i_31;
-                                                                    i_31 = as_type<int>((as_type<uint>(x_411) + as_type<uint>(1)));
+                                                                    i_31 = (x_411 + 1);
                                                                   }
                                                                 }
                                                                 {
                                                                   int const x_413 = i_30;
-                                                                  i_30 = as_type<int>((as_type<uint>(x_413) + as_type<uint>(1)));
+                                                                  i_30 = (x_413 + 1);
                                                                 }
                                                               }
                                                               {
                                                                 int const x_415 = i_29;
-                                                                i_29 = as_type<int>((as_type<uint>(x_415) + as_type<uint>(1)));
+                                                                i_29 = (x_415 + 1);
                                                               }
                                                             }
                                                             {
                                                               int const x_417 = i_28;
-                                                              i_28 = as_type<int>((as_type<uint>(x_417) + as_type<uint>(1)));
+                                                              i_28 = (x_417 + 1);
                                                             }
                                                           }
                                                           {
                                                             int const x_419 = i_27;
-                                                            i_27 = as_type<int>((as_type<uint>(x_419) + as_type<uint>(1)));
+                                                            i_27 = (x_419 + 1);
                                                           }
                                                         }
                                                         {
                                                           int const x_421 = i_26;
-                                                          i_26 = as_type<int>((as_type<uint>(x_421) + as_type<uint>(1)));
+                                                          i_26 = (x_421 + 1);
                                                         }
                                                       }
                                                       {
                                                         int const x_423 = i_25;
-                                                        i_25 = as_type<int>((as_type<uint>(x_423) + as_type<uint>(1)));
+                                                        i_25 = (x_423 + 1);
                                                       }
                                                     }
                                                     {
                                                       int const x_425 = i_24;
-                                                      i_24 = as_type<int>((as_type<uint>(x_425) + as_type<uint>(1)));
+                                                      i_24 = (x_425 + 1);
                                                     }
                                                   }
                                                   {
                                                     int const x_427 = i_23;
-                                                    i_23 = as_type<int>((as_type<uint>(x_427) + as_type<uint>(1)));
+                                                    i_23 = (x_427 + 1);
                                                   }
                                                 }
                                                 {
                                                   int const x_429 = i_22;
-                                                  i_22 = as_type<int>((as_type<uint>(x_429) + as_type<uint>(1)));
+                                                  i_22 = (x_429 + 1);
                                                 }
                                               }
                                               {
                                                 int const x_431 = i_21;
-                                                i_21 = as_type<int>((as_type<uint>(x_431) + as_type<uint>(1)));
+                                                i_21 = (x_431 + 1);
                                               }
                                             }
                                             {
                                               int const x_433 = i_20;
-                                              i_20 = as_type<int>((as_type<uint>(x_433) + as_type<uint>(1)));
+                                              i_20 = (x_433 + 1);
                                             }
                                           }
                                           {
                                             int const x_435 = i_19;
-                                            i_19 = as_type<int>((as_type<uint>(x_435) + as_type<uint>(1)));
+                                            i_19 = (x_435 + 1);
                                           }
                                         }
                                         {
                                           int const x_437 = i_18;
-                                          i_18 = as_type<int>((as_type<uint>(x_437) + as_type<uint>(1)));
+                                          i_18 = (x_437 + 1);
                                         }
                                       }
                                       {
                                         int const x_439 = i_17;
-                                        i_17 = as_type<int>((as_type<uint>(x_439) + as_type<uint>(1)));
+                                        i_17 = (x_439 + 1);
                                       }
                                     }
                                     {
                                       int const x_441 = i_16;
-                                      i_16 = as_type<int>((as_type<uint>(x_441) + as_type<uint>(1)));
+                                      i_16 = (x_441 + 1);
                                     }
                                   }
                                   {
                                     int const x_443 = i_15;
-                                    i_15 = as_type<int>((as_type<uint>(x_443) + as_type<uint>(1)));
+                                    i_15 = (x_443 + 1);
                                   }
                                 }
                                 {
                                   int const x_445 = i_14;
-                                  i_14 = as_type<int>((as_type<uint>(x_445) + as_type<uint>(1)));
+                                  i_14 = (x_445 + 1);
                                 }
                               }
                               {
                                 int const x_447 = i_13;
-                                i_13 = as_type<int>((as_type<uint>(x_447) + as_type<uint>(1)));
+                                i_13 = (x_447 + 1);
                               }
                             }
                             {
                               int const x_449 = i_12;
-                              i_12 = as_type<int>((as_type<uint>(x_449) + as_type<uint>(1)));
+                              i_12 = (x_449 + 1);
                             }
                           }
                           {
                             int const x_451 = i_11;
-                            i_11 = as_type<int>((as_type<uint>(x_451) + as_type<uint>(1)));
+                            i_11 = (x_451 + 1);
                           }
                         }
                         {
                           int const x_453 = i_10;
-                          i_10 = as_type<int>((as_type<uint>(x_453) + as_type<uint>(1)));
+                          i_10 = (x_453 + 1);
                         }
                       }
                       {
                         int const x_455 = i_9;
-                        i_9 = as_type<int>((as_type<uint>(x_455) + as_type<uint>(1)));
+                        i_9 = (x_455 + 1);
                       }
                     }
                     {
                       int const x_457 = i_8;
-                      i_8 = as_type<int>((as_type<uint>(x_457) + as_type<uint>(1)));
+                      i_8 = (x_457 + 1);
                     }
                   }
                   {
                     int const x_459 = i_7;
-                    i_7 = as_type<int>((as_type<uint>(x_459) + as_type<uint>(1)));
+                    i_7 = (x_459 + 1);
                   }
                 }
                 {
                   int const x_461 = i_6;
-                  i_6 = as_type<int>((as_type<uint>(x_461) + as_type<uint>(1)));
+                  i_6 = (x_461 + 1);
                 }
               }
               {
                 int const x_463 = i_5;
-                i_5 = as_type<int>((as_type<uint>(x_463) + as_type<uint>(1)));
+                i_5 = (x_463 + 1);
               }
             }
             {
               int const x_465 = i_4;
-              i_4 = as_type<int>((as_type<uint>(x_465) + as_type<uint>(1)));
+              i_4 = (x_465 + 1);
             }
           }
           {
             int const x_467 = i_3;
-            i_3 = as_type<int>((as_type<uint>(x_467) + as_type<uint>(1)));
+            i_3 = (x_467 + 1);
           }
         }
         {
           int const x_469 = i_2;
-          i_2 = as_type<int>((as_type<uint>(x_469) + as_type<uint>(1)));
+          i_2 = (x_469 + 1);
         }
       }
       {
         int const x_471 = i_1;
-        i_1 = as_type<int>((as_type<uint>(x_471) + as_type<uint>(1)));
+        i_1 = (x_471 + 1);
       }
     }
     {
       int const x_473 = i;
-      i = as_type<int>((as_type<uint>(x_473) + as_type<uint>(1)));
+      i = (x_473 + 1);
     }
   }
   sum = 0.0f;
@@ -566,7 +566,7 @@ void main_1(thread int* const tint_symbol_4, thread float4* const tint_symbol_5)
       break;
     }
     int const x_482 = *(tint_symbol_4);
-    *(tint_symbol_4) = as_type<int>((as_type<uint>(x_482) + as_type<uint>(1)));
+    *(tint_symbol_4) = (x_482 + 1);
     int const x_484 = r;
     float const x_486 = m23[0][x_484];
     float const x_487 = sum;
@@ -601,7 +601,7 @@ void main_1(thread int* const tint_symbol_4, thread float4* const tint_symbol_5)
     sum = (x_522 + x_521);
     {
       int const x_524 = r;
-      r = as_type<int>((as_type<uint>(x_524) + as_type<uint>(1)));
+      r = (x_524 + 1);
     }
   }
   float const x_526 = sum;

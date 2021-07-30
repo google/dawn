@@ -51,15 +51,15 @@ void main_1(constant buf0& x_5, thread float4* const tint_symbol_4) {
       int const x_68 = i;
       int const x_70 = x_5.x_GLF_uniform_int_values.arr[0].el;
       int const x_72 = j;
-      m[x_66][x_67] = float(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_68) * as_type<uint>(x_70)))) + as_type<uint>(x_72))));
+      m[x_66][x_67] = float(((x_68 * x_70) + x_72));
       {
         int const x_76 = j;
-        j = as_type<int>((as_type<uint>(x_76) + as_type<uint>(1)));
+        j = (x_76 + 1);
       }
     }
     {
       int const x_78 = i;
-      i = as_type<int>((as_type<uint>(x_78) + as_type<uint>(1)));
+      i = (x_78 + 1);
     }
   }
   float2x2 const x_80 = m;

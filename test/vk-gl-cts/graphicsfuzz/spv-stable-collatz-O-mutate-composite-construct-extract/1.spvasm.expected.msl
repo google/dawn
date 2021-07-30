@@ -24,7 +24,7 @@ void main_1(constant buf0& x_6, thread float4* const tint_symbol_8, thread float
   float2 const x_58 = x_6.resolution;
   float2 const x_61 = ((x_55 / x_58) * 8.0f);
   float2 const x_62 = floor(x_61);
-  int const x_69 = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(int(x_62.x)) * as_type<uint>(8)))) + as_type<uint>(int(x_62.y))));
+  int const x_69 = ((int(x_62.x) * 8) + int(x_62.y));
   x_71_phi = 0;
   x_74_phi = x_69;
   while (true) {
@@ -38,7 +38,7 @@ void main_1(constant buf0& x_6, thread float4* const tint_symbol_8, thread float
       break;
     }
     if (((x_74 & 1) == 1)) {
-      x_85 = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(3) * as_type<uint>(x_74)))) + as_type<uint>(1)));
+      x_85 = ((3 * x_74) + 1);
       x_75_phi = x_85;
     } else {
       x_86 = (x_74 / 2);
@@ -46,7 +46,7 @@ void main_1(constant buf0& x_6, thread float4* const tint_symbol_8, thread float
     }
     int const x_75 = x_75_phi;
     {
-      x_71_phi = as_type<int>(as_type<int>((as_type<uint>(x_71) + as_type<uint>(as_type<int>(1)))));
+      x_71_phi = as_type<int>((x_71 + as_type<int>(1)));
       x_74_phi = x_75;
     }
   }

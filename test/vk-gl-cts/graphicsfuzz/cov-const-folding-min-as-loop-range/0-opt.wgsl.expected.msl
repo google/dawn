@@ -29,7 +29,7 @@ void main_1(constant buf0& x_8, thread float4* const tint_symbol_4) {
     int const x_42 = i;
     int const x_43 = highSigned;
     int const x_46 = x_8.zero;
-    if ((x_42 < as_type<int>((as_type<uint>(min(10, x_43)) + as_type<uint>(x_46))))) {
+    if ((x_42 < (min(10, x_43) + x_46))) {
     } else {
       break;
     }
@@ -37,7 +37,7 @@ void main_1(constant buf0& x_8, thread float4* const tint_symbol_4) {
     data.arr[x_50] = 5;
     {
       int const x_52 = i;
-      i = as_type<int>((as_type<uint>(x_52) + as_type<uint>(1)));
+      i = (x_52 + 1);
     }
   }
   i_1 = 1u;

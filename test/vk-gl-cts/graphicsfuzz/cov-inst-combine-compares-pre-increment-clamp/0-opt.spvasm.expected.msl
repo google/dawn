@@ -36,9 +36,9 @@ float f1_f1_(constant buf0& x_9, thread float* const a, thread float4* const tin
   float const x_73 = x_9.x_GLF_uniform_float_values.arr[0].el;
   if ((x_71 >= x_73)) {
     int const x_77 = b;
-    b = as_type<int>((as_type<uint>(x_77) + as_type<uint>(1)));
+    b = (x_77 + 1);
     int const x_79 = b;
-    b = as_type<int>((as_type<uint>(x_79) + as_type<uint>(1)));
+    b = (x_79 + 1);
   }
   float const x_81 = *(a);
   float const x_83 = x_9.x_GLF_uniform_float_values.arr[1].el;

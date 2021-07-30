@@ -113,15 +113,15 @@ void main_1(constant buf1& x_8, constant buf0& x_16, constant buf2& x_12, consta
       }
       int const x_91 = func1_(x_12, x_14, x_8, tint_symbol_9, tint_symbol_10);
       int const x_92 = a_1;
-      a_1 = as_type<int>((as_type<uint>(x_92) + as_type<uint>(x_91)));
+      a_1 = (x_92 + x_91);
       {
         int const x_94 = j;
-        j = as_type<int>((as_type<uint>(x_94) + as_type<uint>(1)));
+        j = (x_94 + 1);
       }
     }
     {
       int const x_96 = i;
-      i = as_type<int>((as_type<uint>(x_96) + as_type<uint>(1)));
+      i = (x_96 + 1);
     }
   }
   int const x_98 = a_1;

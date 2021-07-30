@@ -2,7 +2,7 @@
 
 using namespace metal;
 int func(int value, thread int* const pointer) {
-  return as_type<int>((as_type<uint>(value) + as_type<uint>(*(pointer))));
+  return (value + *(pointer));
 }
 
 kernel void tint_symbol() {

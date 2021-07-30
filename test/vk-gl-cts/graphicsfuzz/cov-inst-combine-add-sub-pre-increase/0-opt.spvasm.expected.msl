@@ -49,7 +49,7 @@ int f1_(constant buf1& x_8, constant buf0& x_12, thread float4* const tint_symbo
     A.arr[x_66] = x_68;
     {
       int const x_70 = i;
-      i = as_type<int>((as_type<uint>(x_70) + as_type<uint>(1)));
+      i = (x_70 + 1);
     }
   }
   a = -1;
@@ -57,7 +57,7 @@ int f1_(constant buf1& x_8, constant buf0& x_12, thread float4* const tint_symbo
   float const x_75 = x_12.x_GLF_uniform_float_values.arr[0].el;
   if ((x_73 >= x_75)) {
     int const x_79 = a;
-    int const x_80 = as_type<int>((as_type<uint>(x_79) + as_type<uint>(1)));
+    int const x_80 = (x_79 + 1);
     a = x_80;
     int const x_82 = x_8.x_GLF_uniform_int_values.arr[1].el;
     A.arr[x_80] = x_82;
@@ -67,7 +67,7 @@ int f1_(constant buf1& x_8, constant buf0& x_12, thread float4* const tint_symbo
   int const x_89 = x_8.x_GLF_uniform_int_values.arr[1].el;
   if ((x_87 == x_89)) {
     int const x_94 = a;
-    int const x_95 = as_type<int>((as_type<uint>(x_94) + as_type<uint>(1)));
+    int const x_95 = (x_94 + 1);
     a = x_95;
     int const x_97 = A.arr[x_95];
     return x_97;

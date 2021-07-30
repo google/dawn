@@ -35,13 +35,13 @@ float func_i1_(thread int* const b, thread float4* const tint_symbol_5, thread f
         }
         {
           int const x_121 = i;
-          i = as_type<int>((as_type<uint>(x_121) + as_type<uint>(1)));
+          i = (x_121 + 1);
         }
       }
     }
     {
       int const x_123 = ndx;
-      ndx = as_type<int>((as_type<uint>(x_123) + as_type<uint>(1)));
+      ndx = (x_123 + 1);
     }
   }
   int const x_125 = *(b);
@@ -80,17 +80,17 @@ void main_1(constant buf0& x_11, thread float4* const tint_symbol_7, thread floa
     while (true) {
       int const x_74 = x_1;
       float const x_76 = x_11.zero;
-      if ((x_74 < as_type<int>((as_type<uint>(int(x_76)) + as_type<uint>(1))))) {
+      if ((x_74 < (int(x_76) + 1))) {
       } else {
         break;
       }
       int const x_81 = x_1;
-      param_1 = as_type<int>((as_type<uint>(x_81) + as_type<uint>(10)));
+      param_1 = (x_81 + 10);
       float const x_83 = func_i1_(&(param_1), tint_symbol_8, tint_symbol_7);
       f = x_83;
       {
         int const x_84 = x_1;
-        x_1 = as_type<int>((as_type<uint>(x_84) + as_type<uint>(1)));
+        x_1 = (x_84 + 1);
       }
     }
     {

@@ -20,9 +20,9 @@ void main_1(device S& x_5, thread int* const tint_symbol_6, thread float4* const
   int const x_27 = int(x_23.x);
   int const x_28 = int(x_23.y);
   int const x_33 = *(tint_symbol_8);
-  if ((as_type<int>((as_type<uint>(as_type<int>((as_type<uint>((x_27 & 1)) + as_type<uint>((x_28 & 1))))) + as_type<uint>(x_33))) == int(x_23.z))) {
+  if (((((x_27 & 1) + (x_28 & 1)) + x_33) == int(x_23.z))) {
   }
-  x_5.field0[as_type<int>((as_type<uint>(x_27) + as_type<uint>(as_type<int>((as_type<uint>(x_28) * as_type<uint>(8))))))] = x_27;
+  x_5.field0[(x_27 + (x_28 * 8))] = x_27;
   return;
 }
 

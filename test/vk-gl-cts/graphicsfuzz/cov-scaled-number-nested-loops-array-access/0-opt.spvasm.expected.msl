@@ -147,52 +147,52 @@ void main_1(constant buf0& x_6, constant buf1& x_8, thread float4* const tint_sy
                       sums.arr[x_53] = (x_199 + x_197);
                       {
                         int const x_54 = j;
-                        j = as_type<int>((as_type<uint>(x_54) - as_type<uint>(1)));
+                        j = (x_54 - 1);
                       }
                     }
                     {
                       int const x_56 = i;
-                      i = as_type<int>((as_type<uint>(x_56) + as_type<uint>(1)));
+                      i = (x_56 + 1);
                     }
                   }
                   {
                     int const x_58 = h;
-                    h = as_type<int>((as_type<uint>(x_58) + as_type<uint>(1)));
+                    h = (x_58 + 1);
                   }
                 }
                 {
                   int const x_60 = g;
-                  g = as_type<int>((as_type<uint>(x_60) + as_type<uint>(1)));
+                  g = (x_60 + 1);
                 }
               }
               {
                 int const x_62 = f;
-                f = as_type<int>((as_type<uint>(x_62) + as_type<uint>(1)));
+                f = (x_62 + 1);
               }
             }
             {
               int const x_64 = e;
-              e = as_type<int>((as_type<uint>(x_64) + as_type<uint>(1)));
+              e = (x_64 + 1);
             }
           }
           {
             int const x_66 = d;
-            d = as_type<int>((as_type<uint>(x_66) + as_type<uint>(1)));
+            d = (x_66 + 1);
           }
         }
         {
           int const x_68 = c;
-          c = as_type<int>((as_type<uint>(x_68) + as_type<uint>(1)));
+          c = (x_68 + 1);
         }
       }
       {
         int const x_70 = b;
-        b = as_type<int>((as_type<uint>(x_70) + as_type<uint>(1)));
+        b = (x_70 + 1);
       }
     }
     {
       int const x_72 = a;
-      a = as_type<int>((as_type<uint>(x_72) + as_type<uint>(1)));
+      a = (x_72 + 1);
     }
   }
   int const x_74 = x_6.x_GLF_uniform_int_values.arr[1].el;

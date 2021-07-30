@@ -47,13 +47,13 @@ void main_1(constant buf1& x_7, constant buf0& x_10, constant buf2& x_12, thread
       break;
     }
     int const x_54 = *(tint_symbol_4);
-    *(tint_symbol_4) = as_type<int>((as_type<uint>(x_54) + as_type<uint>(1)));
+    *(tint_symbol_4) = (x_54 + 1);
     float2 const x_57 = x_12.injectionSwitch;
     float const x_60 = f;
     f = (x_60 + dfdx(x_57).y);
     {
       int const x_62 = r;
-      r = as_type<int>((as_type<uint>(x_62) + as_type<uint>(1)));
+      r = (x_62 + 1);
     }
   }
   while (true) {
@@ -63,7 +63,7 @@ void main_1(constant buf1& x_7, constant buf0& x_10, constant buf2& x_12, thread
       break;
     }
     int const x_71 = *(tint_symbol_4);
-    *(tint_symbol_4) = as_type<int>((as_type<uint>(x_71) + as_type<uint>(1)));
+    *(tint_symbol_4) = (x_71 + 1);
     float const x_74 = x_7.x_GLF_uniform_float_values.arr[0].el;
     float const x_75 = f;
     f = (x_75 + x_74);

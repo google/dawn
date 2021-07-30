@@ -23,13 +23,13 @@ float f_() {
     } else {
       {
         int const x_10 = i;
-        i = as_type<int>((as_type<uint>(x_10) + as_type<uint>(1)));
+        i = (x_10 + 1);
       }
       continue;
     }
     {
       int const x_10 = i;
-      i = as_type<int>((as_type<uint>(x_10) + as_type<uint>(1)));
+      i = (x_10 + 1);
     }
   }
   return 1.0f;
@@ -50,7 +50,7 @@ void main_1(thread float4* const tint_symbol_4) {
       float const x_39 = f_();
       c.x = x_39;
       int const x_13 = i_1;
-      i_1 = as_type<int>((as_type<uint>(x_13) + as_type<uint>(1)));
+      i_1 = (x_13 + 1);
     }
   }
   float4 const x_41 = c;

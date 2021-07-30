@@ -21,7 +21,7 @@ void main_1(constant buf0& x_6, thread float4* const tint_symbol_4) {
   while (true) {
     int const x_31 = x_31_phi;
     float const x_37 = x_6.injectionSwitch.x;
-    if ((x_31 < as_type<int>((as_type<uint>(2) + as_type<uint>(int(x_37)))))) {
+    if ((x_31 < (2 + int(x_37)))) {
     } else {
       break;
     }
@@ -51,14 +51,14 @@ void main_1(constant buf0& x_6, thread float4* const tint_symbol_4) {
       case 2: {
         float const x_46 = x_46_phi;
         if ((x_46 == 1.0f)) {
-          *(tint_symbol_4) = float4(float(as_type<int>((as_type<uint>(x_31) + as_type<uint>(1)))), 0.0f, 0.0f, 1.0f);
+          *(tint_symbol_4) = float4(float((x_31 + 1)), 0.0f, 0.0f, 1.0f);
           return;
         }
         break;
       }
     }
     {
-      int const x_32 = as_type<int>((as_type<uint>(x_31) + as_type<uint>(1)));
+      int const x_32 = (x_31 + 1);
       i = x_32;
       x_31_phi = x_32;
     }

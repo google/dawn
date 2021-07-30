@@ -73,12 +73,12 @@ void main_1(constant buf0& x_6, constant buf1& x_10, thread float4* const tint_s
       }
       {
         int const x_96 = c;
-        c = as_type<int>((as_type<uint>(x_96) + as_type<uint>(1)));
+        c = (x_96 + 1);
       }
     }
     {
       int const x_98 = a;
-      a = as_type<int>((as_type<uint>(x_98) + as_type<uint>(1)));
+      a = (x_98 + 1);
     }
   }
   float const x_101 = v1.x;

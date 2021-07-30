@@ -82,45 +82,45 @@ void main_1(thread float4* const tint_symbol_5, thread float4* const tint_symbol
                         break;
                       }
                       int const x_104 = a;
-                      a = as_type<int>((as_type<uint>(x_104) + as_type<uint>(1)));
+                      a = (x_104 + 1);
                       {
                         int const x_106 = i8_1;
-                        i8_1 = as_type<int>((as_type<uint>(x_106) + as_type<uint>(1)));
+                        i8_1 = (x_106 + 1);
                       }
                     }
                     {
                       int const x_108 = i7;
-                      i7 = as_type<int>((as_type<uint>(x_108) + as_type<uint>(1)));
+                      i7 = (x_108 + 1);
                     }
                   }
                   {
                     int const x_110 = i6;
-                    i6 = as_type<int>((as_type<uint>(x_110) + as_type<uint>(1)));
+                    i6 = (x_110 + 1);
                   }
                 }
                 {
                   int const x_112 = i5;
-                  i5 = as_type<int>((as_type<uint>(x_112) + as_type<uint>(1)));
+                  i5 = (x_112 + 1);
                 }
               }
               {
                 int const x_114 = i4;
-                i4 = as_type<int>((as_type<uint>(x_114) + as_type<uint>(1)));
+                i4 = (x_114 + 1);
               }
             }
             {
               int const x_116 = i3;
-              i3 = as_type<int>((as_type<uint>(x_116) + as_type<uint>(1)));
+              i3 = (x_116 + 1);
             }
           }
           {
             int const x_118 = i2;
-            i2 = as_type<int>((as_type<uint>(x_118) + as_type<uint>(1)));
+            i2 = (x_118 + 1);
           }
         }
         {
           int const x_120 = i1;
-          i1 = as_type<int>((as_type<uint>(x_120) + as_type<uint>(1)));
+          i1 = (x_120 + 1);
         }
       }
       {

@@ -50,7 +50,7 @@ void main_1(constant buf1& x_7, constant buf0& x_9, constant buf2& x_11, thread 
     }
     {
       int const x_58 = i;
-      i = as_type<int>((as_type<uint>(x_58) + as_type<uint>(1)));
+      i = (x_58 + 1);
     }
   }
   float const x_61 = (*(tint_symbol_6)).y;

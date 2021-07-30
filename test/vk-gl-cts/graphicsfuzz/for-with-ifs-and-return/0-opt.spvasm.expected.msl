@@ -26,14 +26,14 @@ void main_1(thread float4* const tint_symbol_5, thread float4* const tint_symbol
       }
       {
         int const x_7 = i;
-        i = as_type<int>((as_type<uint>(x_7) + as_type<uint>(1)));
+        i = (x_7 + 1);
       }
       continue;
     }
     return;
     {
       int const x_7 = i;
-      i = as_type<int>((as_type<uint>(x_7) + as_type<uint>(1)));
+      i = (x_7 + 1);
     }
   }
   return;

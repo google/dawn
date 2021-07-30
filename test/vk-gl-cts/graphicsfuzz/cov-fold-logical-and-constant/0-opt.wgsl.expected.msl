@@ -13,7 +13,7 @@ void main_1(thread float4* const tint_symbol_5, thread float4* const tint_symbol
   i = 2;
   while (true) {
     int const x_6 = i;
-    i = as_type<int>((as_type<uint>(x_6) + as_type<uint>(1)));
+    i = (x_6 + 1);
     {
       float const x_35 = (*(tint_symbol_5)).x;
       if (((x_35 >= 0.0f) && false)) {

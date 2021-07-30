@@ -20,7 +20,7 @@ kernel void tint_symbol(texture2d<float, access::sample> tint_symbol_2 [[texture
   int2 dstTexCoord = int2(GlobalInvocationID.xy);
   int2 srcTexCoord = dstTexCoord;
   if ((uniforms.dstTextureFlipY == 1u)) {
-    srcTexCoord.y = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(size.y) - as_type<uint>(dstTexCoord.y)))) - as_type<uint>(1)));
+    srcTexCoord.y = ((size.y - dstTexCoord.y) - 1);
   }
   float4 srcColor = tint_symbol_2.read(uint2(srcTexCoord), 0);
   float4 dstColor = tint_symbol_3.read(uint2(dstTexCoord), 0);

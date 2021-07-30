@@ -83,7 +83,7 @@ float3 drawShape_vf2_(constant buf0& x_25, thread float2* const pos) {
       break;
     }
     int const x_41 = GLF_live4_looplimiter5;
-    GLF_live4_looplimiter5 = as_type<int>((as_type<uint>(x_41) + as_type<uint>(1)));
+    GLF_live4_looplimiter5 = (x_41 + 1);
     GLF_live7m42 = float4x2(float2(1.0f, 0.0f), float2(0.0f, 1.0f), float2(0.0f, 0.0f), float2(1.0f, 0.0f));
     GLF_live7m33 = float3x3(float3(1.0f, 0.0f, 0.0f), float3(0.0f, 1.0f, 0.0f), float3(0.0f, 0.0f, 1.0f));
     GLF_live7cols = 2;
@@ -98,7 +98,7 @@ float3 drawShape_vf2_(constant buf0& x_25, thread float2* const pos) {
         break;
       }
       int const x_45 = GLF_live7_looplimiter3;
-      GLF_live7_looplimiter3 = as_type<int>((as_type<uint>(x_45) + as_type<uint>(1)));
+      GLF_live7_looplimiter3 = (x_45 + 1);
       GLF_live7rows = 2;
       while (true) {
         int const x_47 = GLF_live7rows;
@@ -111,7 +111,7 @@ float3 drawShape_vf2_(constant buf0& x_25, thread float2* const pos) {
           break;
         }
         int const x_49 = GLF_live7_looplimiter2;
-        GLF_live7_looplimiter2 = as_type<int>((as_type<uint>(x_49) + as_type<uint>(1)));
+        GLF_live7_looplimiter2 = (x_49 + 1);
         GLF_live7_looplimiter1 = 0;
         GLF_live7c = 0;
         while (true) {
@@ -125,7 +125,7 @@ float3 drawShape_vf2_(constant buf0& x_25, thread float2* const pos) {
             break;
           }
           int const x_53 = GLF_live7_looplimiter1;
-          GLF_live7_looplimiter1 = as_type<int>((as_type<uint>(x_53) + as_type<uint>(1)));
+          GLF_live7_looplimiter1 = (x_53 + 1);
           GLF_live7r = 0;
           while (true) {
             int const x_55 = GLF_live7r;
@@ -138,7 +138,7 @@ float3 drawShape_vf2_(constant buf0& x_25, thread float2* const pos) {
               break;
             }
             int const x_57 = GLF_live7_looplimiter0;
-            GLF_live7_looplimiter0 = as_type<int>((as_type<uint>(x_57) + as_type<uint>(1)));
+            GLF_live7_looplimiter0 = (x_57 + 1);
             int const x_59 = GLF_live7c;
             int const x_60 = GLF_live7c;
             int const x_61 = GLF_live7c;
@@ -159,22 +159,22 @@ float3 drawShape_vf2_(constant buf0& x_25, thread float2* const pos) {
             }
             {
               int const x_71 = GLF_live7r;
-              GLF_live7r = as_type<int>((as_type<uint>(x_71) + as_type<uint>(1)));
+              GLF_live7r = (x_71 + 1);
             }
           }
           {
             int const x_73 = GLF_live7c;
-            GLF_live7c = as_type<int>((as_type<uint>(x_73) + as_type<uint>(1)));
+            GLF_live7c = (x_73 + 1);
           }
         }
         {
           int const x_75 = GLF_live7rows;
-          GLF_live7rows = as_type<int>((as_type<uint>(x_75) + as_type<uint>(1)));
+          GLF_live7rows = (x_75 + 1);
         }
       }
       {
         int const x_77 = GLF_live7cols;
-        GLF_live7cols = as_type<int>((as_type<uint>(x_77) + as_type<uint>(1)));
+        GLF_live7cols = (x_77 + 1);
       }
     }
     GLF_live7sum_index = 0;
@@ -191,7 +191,7 @@ float3 drawShape_vf2_(constant buf0& x_25, thread float2* const pos) {
         break;
       }
       int const x_81 = GLF_live7_looplimiter7;
-      GLF_live7_looplimiter7 = as_type<int>((as_type<uint>(x_81) + as_type<uint>(1)));
+      GLF_live7_looplimiter7 = (x_81 + 1);
       GLF_live7rows_1 = 2;
       int const x_83 = GLF_live7sum_index;
       int const x_84 = GLF_live7sum_index;
@@ -241,24 +241,24 @@ float3 drawShape_vf2_(constant buf0& x_25, thread float2* const pos) {
           GLF_live7sums.arr[x_332] = (x_336 + x_334);
           {
             int const x_98 = GLF_live7r_1;
-            GLF_live7r_1 = as_type<int>((as_type<uint>(x_98) + as_type<uint>(1)));
+            GLF_live7r_1 = (x_98 + 1);
           }
         }
         {
           int const x_100 = GLF_live7c_1;
-          GLF_live7c_1 = as_type<int>((as_type<uint>(x_100) + as_type<uint>(1)));
+          GLF_live7c_1 = (x_100 + 1);
         }
       }
       int const x_102 = GLF_live7sum_index;
-      GLF_live7sum_index = as_type<int>((as_type<uint>(x_102) + as_type<uint>(1)));
+      GLF_live7sum_index = (x_102 + 1);
       {
         int const x_104 = GLF_live7cols_1;
-        GLF_live7cols_1 = as_type<int>((as_type<uint>(x_104) + as_type<uint>(1)));
+        GLF_live7cols_1 = (x_104 + 1);
       }
     }
     {
       int const x_106 = GLF_live4i;
-      GLF_live4i = as_type<int>((as_type<uint>(x_106) + as_type<uint>(1)));
+      GLF_live4i = (x_106 + 1);
     }
   }
   return float3(1.0f, 1.0f, 1.0f);
@@ -292,7 +292,7 @@ void main_1(constant buf0& x_25, thread float4* const tint_symbol_5, thread floa
       float3 const x_178 = drawShape_vf2_(x_25, &(param_2));
       {
         int const x_109 = i;
-        i = as_type<int>((as_type<uint>(x_109) - as_type<uint>(1)));
+        i = (x_109 - 1);
       }
     }
   }

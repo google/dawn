@@ -85,12 +85,12 @@ void main_1(constant buf0& x_6, thread float4* const tint_symbol_9, thread float
       float const x_134 = x_84.arr[x_98].y;
       tint_array_wrapper_1 const tint_symbol_7 = {.arr={float4(0.0f, 0.0f, 0.0f, 1.0f), float4(0.5f, 0.0f, 0.0f, 1.0f), float4(0.0f, 0.5f, 0.0f, 1.0f), float4(0.5f, 0.5f, 0.0f, 1.0f), float4(0.0f, 0.0f, 0.5f, 1.0f), float4(0.5f, 0.0f, 0.5f, 1.0f), float4(0.0f, 0.5f, 0.5f, 1.0f), float4(0.5f, 0.5f, 0.5f, 1.0f), float4(0.0f, 0.0f, 0.0f, 1.0f), float4(1.0f, 0.0f, 0.0f, 1.0f), float4(0.0f, 1.0f, 0.0f, 1.0f), float4(1.0f, 1.0f, 0.0f, 1.0f), float4(0.0f, 0.0f, 1.0f, 1.0f), float4(1.0f, 0.0f, 1.0f, 1.0f), float4(0.0f, 1.0f, 1.0f, 1.0f), float4(1.0f, 1.0f, 1.0f, 1.0f)}};
       x_85 = tint_symbol_7;
-      x_142 = x_85.arr[(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(int(x_131)) * as_type<uint>(int(x_134))))) + as_type<uint>(as_type<int>((as_type<uint>(x_98) * as_type<uint>(9))))))) + as_type<uint>(11))) % 16)];
+      x_142 = x_85.arr[((((int(x_131) * int(x_134)) + (x_98 * 9)) + 11) % 16)];
       x_96_phi = x_142;
     }
     float4 const x_96 = x_96_phi;
     {
-      x_99 = as_type<int>((as_type<uint>(x_98) + as_type<uint>(1)));
+      x_99 = (x_98 + 1);
       x_95_phi = x_96;
       x_98_phi = x_99;
     }

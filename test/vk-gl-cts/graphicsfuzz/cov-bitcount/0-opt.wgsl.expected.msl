@@ -36,7 +36,7 @@ int f1_(constant buf0& x_8, constant buf1& x_11, thread float4* const tint_symbo
   float const x_67 = x_8.x_GLF_uniform_float_values.arr[0].el;
   if ((x_65 > x_67)) {
     int const x_71 = a;
-    a = as_type<int>((as_type<uint>(x_71) + as_type<uint>(1)));
+    a = (x_71 + 1);
   }
   int const x_73 = a;
   i = popcount(x_73);

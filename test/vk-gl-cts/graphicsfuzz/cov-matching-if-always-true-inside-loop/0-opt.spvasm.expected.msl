@@ -61,7 +61,7 @@ int func_i1_(constant buf0& x_8, thread int* const x) {
     }
     {
       int const x_112 = i;
-      i = as_type<int>((as_type<uint>(x_112) + as_type<uint>(1)));
+      i = (x_112 + 1);
     }
   }
   int const x_115 = x_8.x_GLF_uniform_int_values.arr[0].el;
@@ -80,7 +80,7 @@ void main_1(constant buf0& x_8, thread float4* const tint_symbol_5) {
   param_1 = x_42;
   int const x_43 = func_i1_(x_8, &(param_1));
   int const x_44 = a_1;
-  a_1 = as_type<int>((as_type<uint>(x_44) + as_type<uint>(x_43)));
+  a_1 = (x_44 + x_43);
   int const x_46 = a_1;
   int const x_48 = x_8.x_GLF_uniform_int_values.arr[2].el;
   if ((x_46 == x_48)) {

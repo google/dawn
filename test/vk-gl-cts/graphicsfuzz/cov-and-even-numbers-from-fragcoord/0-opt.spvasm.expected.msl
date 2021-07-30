@@ -49,7 +49,7 @@ void main_1(constant buf1& x_6, constant buf0& x_8, thread float4* const tint_sy
     int const x_74 = v.x;
     int const x_76 = x_8.x_GLF_uniform_int_values.arr[1].el;
     float const x_80 = x_6.x_GLF_uniform_float_values.arr[1].el;
-    *(tint_symbol_6) = float4(x_63, float((as_type<int>((as_type<uint>(x_65) - as_type<uint>(x_67))) & x_70)), float((x_74 & x_76)), x_80);
+    *(tint_symbol_6) = float4(x_63, float(((x_65 - x_67) & x_70)), float((x_74 & x_76)), x_80);
   }
   return;
 }

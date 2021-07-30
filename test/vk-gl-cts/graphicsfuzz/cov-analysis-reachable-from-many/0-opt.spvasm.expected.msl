@@ -20,7 +20,7 @@ float func_(constant buf0& x_8) {
   while (true) {
     int const x_47 = i;
     int const x_49 = x_8.zero;
-    if ((x_47 < as_type<int>((as_type<uint>(x_49) + as_type<uint>(1))))) {
+    if ((x_47 < (x_49 + 1))) {
     } else {
       break;
     }
@@ -39,12 +39,12 @@ float func_(constant buf0& x_8) {
       }
       {
         int const x_67 = j;
-        j = as_type<int>((as_type<uint>(x_67) + as_type<uint>(1)));
+        j = (x_67 + 1);
       }
     }
     {
       int const x_69 = i;
-      i = as_type<int>((as_type<uint>(x_69) + as_type<uint>(1)));
+      i = (x_69 + 1);
     }
   }
   float const x_71 = s;

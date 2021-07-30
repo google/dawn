@@ -44,7 +44,7 @@ void main_1(constant buf0& x_6, thread int* const tint_symbol_4, thread float4* 
           *(tint_symbol_5) = float4(x_56, x_56, x_56, x_56);
           while (true) {
             int const x_62 = *(tint_symbol_4);
-            *(tint_symbol_4) = as_type<int>((as_type<uint>(x_62) + as_type<uint>(1)));
+            *(tint_symbol_4) = (x_62 + 1);
             if (false) {
               return;
             }

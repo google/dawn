@@ -65,9 +65,9 @@ void main_1(constant buf0& x_5, thread float4* const tint_symbol_4) {
             break;
           }
           {
-            float const x_61 = float(as_type<int>((as_type<uint>(x_38) + as_type<uint>(x_56))));
+            float const x_61 = float((x_38 + x_56));
             x_54 = float4(x_61, x_61, x_61, x_61);
-            x_57 = as_type<int>((as_type<uint>(x_56) + as_type<uint>(1)));
+            x_57 = (x_56 + 1);
             x_53_phi = x_54;
             x_56_phi = x_57;
           }
@@ -81,9 +81,9 @@ void main_1(constant buf0& x_5, thread float4* const tint_symbol_4) {
     float4 const x_34 = x_34_phi;
     int const x_62 = x_62_phi;
     {
-      x_39 = as_type<int>((as_type<uint>(x_38) + as_type<uint>(1)));
+      x_39 = (x_38 + 1);
       x_33_phi = x_34;
-      x_36_phi = as_type<int>(as_type<int>((as_type<uint>(x_36) + as_type<uint>(as_type<int>(x_62)))));
+      x_36_phi = as_type<int>((x_36 + as_type<int>(x_62)));
       x_38_phi = x_39;
     }
   }

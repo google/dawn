@@ -1,11 +1,6 @@
 #include <metal_stdlib>
 
 using namespace metal;
-
-int tint_unary_minus(const int v) {
-  return select(-v, v, v == -2147483648);
-}
-
 struct tint_padded_array_element {
   /* 0x0000 */ int el;
   /* 0x0004 */ int8_t tint_pad[12];
@@ -29,10 +24,10 @@ void main_1(constant buf0& x_6, thread float4* const tint_symbol_4) {
   int const x_27 = x_6.x_GLF_uniform_int_values.arr[1].el;
   a = x_27;
   int const x_29 = x_6.x_GLF_uniform_int_values.arr[3].el;
-  i = tint_unary_minus(x_29);
+  i = -(x_29);
   while (true) {
     int const x_35 = i;
-    int const x_36 = as_type<int>((as_type<uint>(x_35) + as_type<uint>(1)));
+    int const x_36 = (x_35 + 1);
     i = x_36;
     int const x_39 = x_6.x_GLF_uniform_int_values.arr[2].el;
     if ((reverse_bits(x_36) <= x_39)) {
@@ -40,7 +35,7 @@ void main_1(constant buf0& x_6, thread float4* const tint_symbol_4) {
       break;
     }
     int const x_42 = a;
-    a = as_type<int>((as_type<uint>(x_42) + as_type<uint>(1)));
+    a = (x_42 + 1);
   }
   int const x_44 = a;
   int const x_46 = x_6.x_GLF_uniform_int_values.arr[0].el;

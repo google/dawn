@@ -20,12 +20,12 @@ int func_(constant buf0& x_7) {
     int x_39 = 0;
     int x_45_phi = 0;
     int const x_38 = x_38_phi;
-    int const x_43 = as_type<int>((as_type<uint>(x_38) + as_type<uint>(1)));
+    int const x_43 = (x_38 + 1);
     loop_count = x_43;
     x_45_phi = x_43;
     while (true) {
       int const x_45 = x_45_phi;
-      x_39 = as_type<int>((as_type<uint>(x_45) + as_type<uint>(1)));
+      x_39 = (x_45 + 1);
       loop_count = x_39;
       float const x_50 = x_7.injectionSwitch.x;
       float const x_52 = x_7.injectionSwitch.y;

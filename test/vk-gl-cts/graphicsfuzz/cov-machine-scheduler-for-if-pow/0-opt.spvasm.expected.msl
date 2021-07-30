@@ -73,7 +73,7 @@ void main_1(constant buf1& x_8, constant buf0& x_12, thread float4* const tint_s
     a = pow((((x_91 + x_93) + x_96) + x_99), x_102);
     {
       int const x_18 = i;
-      i = as_type<int>((as_type<uint>(x_18) + as_type<uint>(1)));
+      i = (x_18 + 1);
     }
   }
   float const x_104 = a;

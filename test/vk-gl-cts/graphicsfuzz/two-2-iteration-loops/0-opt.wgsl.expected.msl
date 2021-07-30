@@ -41,7 +41,7 @@ void main_1(constant buf0& x_8, thread float4* const tint_symbol_5, thread float
     float const x_70 = (*(tint_symbol_5)).x;
     (*(tint_symbol_5)).x = (x_70 + 0.25f);
     int const x_12 = odd_index;
-    odd_index = as_type<int>((as_type<uint>(x_12) + as_type<uint>(1)));
+    odd_index = (x_12 + 1);
   }
   even_index = 1;
   while (true) {
@@ -72,12 +72,12 @@ void main_1(constant buf0& x_8, thread float4* const tint_symbol_5, thread float
         break;
       }
       int const x_17 = ll;
-      ll = as_type<int>((as_type<uint>(x_17) + as_type<uint>(1)));
+      ll = (x_17 + 1);
       int const x_19 = j;
       if ((as_type<uint>(x_19) < 1u)) {
         {
           int const x_20 = j;
-          j = as_type<int>((as_type<uint>(x_20) + as_type<uint>(1)));
+          j = (x_20 + 1);
         }
         continue;
       }
@@ -88,7 +88,7 @@ void main_1(constant buf0& x_8, thread float4* const tint_symbol_5, thread float
       }
       {
         int const x_20 = j;
-        j = as_type<int>((as_type<uint>(x_20) + as_type<uint>(1)));
+        j = (x_20 + 1);
       }
     }
     float const x_113 = x_8.injectionSwitch.x;
@@ -97,7 +97,7 @@ void main_1(constant buf0& x_8, thread float4* const tint_symbol_5, thread float
       *(tint_symbol_5) = float4(1.0f, 1.0f, 1.0f, 1.0f);
     }
     int const x_22 = even_index;
-    even_index = as_type<int>((as_type<uint>(x_22) - as_type<uint>(1)));
+    even_index = (x_22 - 1);
   }
   return;
 }

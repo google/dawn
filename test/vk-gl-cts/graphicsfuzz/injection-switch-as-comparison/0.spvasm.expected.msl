@@ -77,7 +77,7 @@ float makeFrame_(constant buf0& x_6) {
         break;
       }
       {
-        x_7 = as_type<int>(as_type<int>((as_type<uint>(x_9) + as_type<uint>(as_type<int>(1)))));
+        x_7 = as_type<int>((x_9 + as_type<int>(1)));
         x_41_phi = x_42;
         x_8_phi = x_7;
         x_44_phi = x_45;

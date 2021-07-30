@@ -79,17 +79,17 @@ void main_1(constant buf0& x_6, thread float4* const tint_symbol_6) {
     }
     int const x_134 = i;
     int const x_135 = a;
-    a = as_type<int>((as_type<uint>(x_135) - as_type<uint>(1)));
+    a = (x_135 - 1);
     A.arr[x_134] = x_135;
     int const x_138 = i;
     int const x_140 = x_6.x_GLF_uniform_int_values.arr[2].el;
     int const x_142 = x_6.x_GLF_uniform_int_values.arr[18].el;
     int const x_144 = i;
     int const x_146 = x_6.x_GLF_uniform_int_values.arr[3].el;
-    A.arr[clamp(x_138, x_140, x_142)] = as_type<int>((as_type<uint>(x_144) + as_type<uint>(x_146)));
+    A.arr[clamp(x_138, x_140, x_142)] = (x_144 + x_146);
     {
       int const x_149 = i;
-      i = as_type<int>((as_type<uint>(x_149) + as_type<uint>(1)));
+      i = (x_149 + 1);
     }
   }
   ok = true;
@@ -111,7 +111,7 @@ void main_1(constant buf0& x_6, thread float4* const tint_symbol_6) {
     }
     {
       int const x_171 = i_1;
-      i_1 = as_type<int>((as_type<uint>(x_171) + as_type<uint>(1)));
+      i_1 = (x_171 + 1);
     }
   }
   int const x_174 = x_6.x_GLF_uniform_int_values.arr[2].el;

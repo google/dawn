@@ -97,12 +97,12 @@ float4 match_vf2_(thread float2* const pos_1, thread float4* const tint_symbol_9
       int const x_190 = i;
       tint_array_wrapper_1 const tint_symbol_7 = {.arr={float4(0.0f, 0.0f, 0.0f, 1.0f), float4(0.5f, 0.0f, 0.0f, 1.0f), float4(0.0f, 0.5f, 0.0f, 1.0f), float4(0.5f, 0.5f, 0.0f, 1.0f), float4(0.0f, 0.0f, 0.5f, 1.0f), float4(0.5f, 0.0f, 0.5f, 1.0f), float4(0.0f, 0.5f, 0.5f, 1.0f), float4(0.5f, 0.5f, 0.5f, 1.0f), float4(0.0f, 0.0f, 0.0f, 1.0f), float4(1.0f, 0.0f, 0.0f, 1.0f), float4(0.0f, 1.0f, 0.0f, 1.0f), float4(1.0f, 1.0f, 0.0f, 1.0f), float4(0.0f, 0.0f, 1.0f, 1.0f), float4(1.0f, 0.0f, 1.0f, 1.0f), float4(0.0f, 1.0f, 1.0f, 1.0f), float4(1.0f, 1.0f, 1.0f, 1.0f)}};
       indexable_3 = tint_symbol_7;
-      float4 const x_196 = indexable_3.arr[(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(int(x_183)) * as_type<uint>(int(x_187))))) + as_type<uint>(as_type<int>((as_type<uint>(x_190) * as_type<uint>(9))))))) + as_type<uint>(11))) % 16)];
+      float4 const x_196 = indexable_3.arr[((((int(x_183) * int(x_187)) + (x_190 * 9)) + 11) % 16)];
       res = x_196;
     }
     {
       int const x_197 = i;
-      i = as_type<int>((as_type<uint>(x_197) + as_type<uint>(1)));
+      i = (x_197 + 1);
     }
   }
   float4 const x_199 = res;

@@ -244,13 +244,13 @@ void main_1(constant buf0& x_27, thread tint_array_wrapper_1* const tint_symbol_
   BST const x_239 = param_8;
   (*(tint_symbol_9)).arr[0] = x_239;
   int const x_113 = treeIndex_1;
-  treeIndex_1 = as_type<int>((as_type<uint>(x_113) + as_type<uint>(1)));
+  treeIndex_1 = (x_113 + 1);
   int const x_115 = treeIndex_1;
   param_10 = x_115;
   param_11 = 5;
   insert_i1_i1_(x_27, &(param_10), &(param_11), tint_symbol_9);
   int const x_116 = treeIndex_1;
-  treeIndex_1 = as_type<int>((as_type<uint>(x_116) + as_type<uint>(1)));
+  treeIndex_1 = (x_116 + 1);
   GLF_live1_looplimiter2 = 0;
   GLF_live1i = 0;
   while (true) {
@@ -263,10 +263,10 @@ void main_1(constant buf0& x_27, thread tint_array_wrapper_1* const tint_symbol_
       break;
     }
     int const x_119 = GLF_live1_looplimiter2;
-    GLF_live1_looplimiter2 = as_type<int>((as_type<uint>(x_119) + as_type<uint>(1)));
+    GLF_live1_looplimiter2 = (x_119 + 1);
     {
       int const x_121 = GLF_live1i;
-      GLF_live1i = as_type<int>((as_type<uint>(x_121) + as_type<uint>(1)));
+      GLF_live1i = (x_121 + 1);
     }
   }
   int const x_123 = treeIndex_1;
@@ -274,37 +274,37 @@ void main_1(constant buf0& x_27, thread tint_array_wrapper_1* const tint_symbol_
   param_13 = 12;
   insert_i1_i1_(x_27, &(param_12), &(param_13), tint_symbol_9);
   int const x_124 = treeIndex_1;
-  treeIndex_1 = as_type<int>((as_type<uint>(x_124) + as_type<uint>(1)));
+  treeIndex_1 = (x_124 + 1);
   int const x_126 = treeIndex_1;
   param_14 = x_126;
   param_15 = 15;
   insert_i1_i1_(x_27, &(param_14), &(param_15), tint_symbol_9);
   int const x_127 = treeIndex_1;
-  treeIndex_1 = as_type<int>((as_type<uint>(x_127) + as_type<uint>(1)));
+  treeIndex_1 = (x_127 + 1);
   int const x_129 = treeIndex_1;
   param_16 = x_129;
   param_17 = 7;
   insert_i1_i1_(x_27, &(param_16), &(param_17), tint_symbol_9);
   int const x_130 = treeIndex_1;
-  treeIndex_1 = as_type<int>((as_type<uint>(x_130) + as_type<uint>(1)));
+  treeIndex_1 = (x_130 + 1);
   int const x_132 = treeIndex_1;
   param_18 = x_132;
   param_19 = 8;
   insert_i1_i1_(x_27, &(param_18), &(param_19), tint_symbol_9);
   int const x_133 = treeIndex_1;
-  treeIndex_1 = as_type<int>((as_type<uint>(x_133) + as_type<uint>(1)));
+  treeIndex_1 = (x_133 + 1);
   int const x_135 = treeIndex_1;
   param_20 = x_135;
   param_21 = 2;
   insert_i1_i1_(x_27, &(param_20), &(param_21), tint_symbol_9);
   int const x_136 = treeIndex_1;
-  treeIndex_1 = as_type<int>((as_type<uint>(x_136) + as_type<uint>(1)));
+  treeIndex_1 = (x_136 + 1);
   int const x_138 = treeIndex_1;
   param_22 = x_138;
   param_23 = 6;
   insert_i1_i1_(x_27, &(param_22), &(param_23), tint_symbol_9);
   int const x_139 = treeIndex_1;
-  treeIndex_1 = as_type<int>((as_type<uint>(x_139) + as_type<uint>(1)));
+  treeIndex_1 = (x_139 + 1);
   GLF_live4_looplimiter3 = 0;
   GLF_live4i = 0;
   while (true) {
@@ -317,7 +317,7 @@ void main_1(constant buf0& x_27, thread tint_array_wrapper_1* const tint_symbol_
       break;
     }
     int const x_142 = GLF_live4_looplimiter3;
-    GLF_live4_looplimiter3 = as_type<int>((as_type<uint>(x_142) + as_type<uint>(1)));
+    GLF_live4_looplimiter3 = (x_142 + 1);
     GLF_live4index = 1;
     int const x_144 = GLF_live4index;
     int const x_145 = GLF_live4index;
@@ -330,7 +330,7 @@ void main_1(constant buf0& x_27, thread tint_array_wrapper_1* const tint_symbol_
     GLF_live4obj.even_numbers.arr[select(0, x_149, ((x_147 >= 0) & (x_148 < 10)))] = 1.0f;
     {
       int const x_150 = GLF_live4i;
-      GLF_live4i = as_type<int>((as_type<uint>(x_150) + as_type<uint>(1)));
+      GLF_live4i = (x_150 + 1);
     }
   }
   int const x_152 = treeIndex_1;
@@ -343,7 +343,7 @@ void main_1(constant buf0& x_27, thread tint_array_wrapper_1* const tint_symbol_
     return;
   }
   int const x_153 = treeIndex_1;
-  treeIndex_1 = as_type<int>((as_type<uint>(x_153) + as_type<uint>(1)));
+  treeIndex_1 = (x_153 + 1);
   int const x_155 = treeIndex_1;
   param_26 = x_155;
   param_27 = 13;
@@ -381,7 +381,7 @@ void main_1(constant buf0& x_27, thread tint_array_wrapper_1* const tint_symbol_
         }
         case -1: {
           int const x_161 = sum;
-          sum = as_type<int>((as_type<uint>(x_161) + as_type<uint>(1)));
+          sum = (x_161 + 1);
           break;
         }
         default: {
@@ -391,7 +391,7 @@ void main_1(constant buf0& x_27, thread tint_array_wrapper_1* const tint_symbol_
     }
     {
       int const x_163 = target_1;
-      target_1 = as_type<int>((as_type<uint>(x_163) + as_type<uint>(1)));
+      target_1 = (x_163 + 1);
     }
   }
   float const x_307 = x_1;

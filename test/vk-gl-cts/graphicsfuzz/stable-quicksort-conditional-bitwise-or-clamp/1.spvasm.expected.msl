@@ -44,13 +44,13 @@ int performPartition_i1_i1_(thread int* const l, thread int* const h, thread Qui
   int const x_244 = (*(tint_symbol_6)).numbers.arr[x_242];
   pivot = x_244;
   int const x_245 = *(l);
-  i_1 = as_type<int>((as_type<uint>(x_245) - as_type<uint>(1)));
+  i_1 = (x_245 - 1);
   int const x_247 = *(l);
   j_1 = x_247;
   while (true) {
     int const x_252 = j_1;
     int const x_253 = *(h);
-    if ((x_252 <= as_type<int>((as_type<uint>(x_253) - as_type<uint>(1))))) {
+    if ((x_252 <= (x_253 - 1))) {
     } else {
       break;
     }
@@ -59,7 +59,7 @@ int performPartition_i1_i1_(thread int* const l, thread int* const h, thread Qui
     int const x_260 = pivot;
     if ((x_259 <= x_260)) {
       int const x_264 = i_1;
-      i_1 = as_type<int>((as_type<uint>(x_264) + as_type<uint>(1)));
+      i_1 = (x_264 + 1);
       int const x_266 = i_1;
       param = x_266;
       int const x_267 = j_1;
@@ -68,11 +68,11 @@ int performPartition_i1_i1_(thread int* const l, thread int* const h, thread Qui
     }
     {
       int const x_269 = j_1;
-      j_1 = as_type<int>((as_type<uint>(x_269) + as_type<uint>(1)));
+      j_1 = (x_269 + 1);
     }
   }
   int const x_271 = i_1;
-  i_1 = as_type<int>((as_type<uint>(x_271) + as_type<uint>(1)));
+  i_1 = (x_271 + 1);
   int const x_273 = i_1;
   param_2 = x_273;
   int const x_274 = *(h);
@@ -98,7 +98,7 @@ void quicksort_(thread float4* const tint_symbol_7, thread QuicksortObject* cons
   h_1 = 9;
   top = -1;
   int const x_280 = top;
-  int const x_281 = as_type<int>((as_type<uint>(x_280) + as_type<uint>(1)));
+  int const x_281 = (x_280 + 1);
   top = x_281;
   int const x_282 = l_1;
   stack.arr[x_281] = x_282;
@@ -109,7 +109,7 @@ void quicksort_(thread float4* const tint_symbol_7, thread QuicksortObject* cons
       x_279 = 1;
     } else {
       int const x_294 = h_1;
-      x_279 = as_type<int>((as_type<uint>(x_294) << as_type<uint>(0)));
+      x_279 = (x_294 << as_type<uint>(0));
     }
     int const x_296 = x_279;
     x_278 = (x_290 | x_296);
@@ -123,7 +123,7 @@ void quicksort_(thread float4* const tint_symbol_7, thread QuicksortObject* cons
   int const x_301 = int_a;
   clamp_a = clamp(x_299, x_300, x_301);
   int const x_303 = top;
-  int const x_304 = as_type<int>((as_type<uint>(x_303) + as_type<uint>(1)));
+  int const x_304 = (x_303 + 1);
   top = x_304;
   int const x_305 = clamp_a;
   stack.arr[x_304] = (x_305 / 1);
@@ -134,11 +134,11 @@ void quicksort_(thread float4* const tint_symbol_7, thread QuicksortObject* cons
       break;
     }
     int const x_315 = top;
-    top = as_type<int>((as_type<uint>(x_315) - as_type<uint>(1)));
+    top = (x_315 - 1);
     int const x_318 = stack.arr[x_315];
     h_1 = x_318;
     int const x_319 = top;
-    top = as_type<int>((as_type<uint>(x_319) - as_type<uint>(1)));
+    top = (x_319 - 1);
     int const x_322 = stack.arr[x_319];
     l_1 = x_322;
     int const x_323 = l_1;
@@ -149,28 +149,28 @@ void quicksort_(thread float4* const tint_symbol_7, thread QuicksortObject* cons
     p = x_325;
     int const x_326 = p;
     int const x_328 = l_1;
-    if ((as_type<int>((as_type<uint>(x_326) - as_type<uint>(1))) > x_328)) {
+    if (((x_326 - 1) > x_328)) {
       int const x_332 = top;
-      int const x_333 = as_type<int>((as_type<uint>(x_332) + as_type<uint>(1)));
+      int const x_333 = (x_332 + 1);
       top = x_333;
       int const x_334 = l_1;
       stack.arr[x_333] = x_334;
       int const x_336 = top;
-      int const x_337 = as_type<int>((as_type<uint>(x_336) + as_type<uint>(1)));
+      int const x_337 = (x_336 + 1);
       top = x_337;
       int const x_338 = p;
-      stack.arr[x_337] = as_type<int>((as_type<uint>(x_338) - as_type<uint>(1)));
+      stack.arr[x_337] = (x_338 - 1);
     }
     int const x_341 = p;
     int const x_343 = h_1;
-    if ((as_type<int>((as_type<uint>(x_341) + as_type<uint>(1))) < x_343)) {
+    if (((x_341 + 1) < x_343)) {
       int const x_347 = top;
-      int const x_348 = as_type<int>((as_type<uint>(x_347) + as_type<uint>(1)));
+      int const x_348 = (x_347 + 1);
       top = x_348;
       int const x_349 = p;
-      stack.arr[x_348] = as_type<int>((as_type<uint>(x_349) + as_type<uint>(1)));
+      stack.arr[x_348] = (x_349 + 1);
       int const x_352 = top;
-      int const x_353 = as_type<int>((as_type<uint>(x_352) + as_type<uint>(1)));
+      int const x_353 = (x_352 + 1);
       top = x_353;
       int const x_354 = h_1;
       stack.arr[x_353] = x_354;
@@ -192,16 +192,16 @@ void main_1(constant buf0& x_34, thread QuicksortObject* const tint_symbol_9, th
     }
     int const x_93 = i_2;
     int const x_94 = i_2;
-    (*(tint_symbol_9)).numbers.arr[x_93] = as_type<int>((as_type<uint>(10) - as_type<uint>(x_94)));
+    (*(tint_symbol_9)).numbers.arr[x_93] = (10 - x_94);
     int const x_97 = i_2;
     int const x_98 = i_2;
     int const x_100 = (*(tint_symbol_9)).numbers.arr[x_98];
     int const x_101 = i_2;
     int const x_103 = (*(tint_symbol_9)).numbers.arr[x_101];
-    (*(tint_symbol_9)).numbers.arr[x_97] = as_type<int>((as_type<uint>(x_100) * as_type<uint>(x_103)));
+    (*(tint_symbol_9)).numbers.arr[x_97] = (x_100 * x_103);
     {
       int const x_106 = i_2;
-      i_2 = as_type<int>((as_type<uint>(x_106) + as_type<uint>(1)));
+      i_2 = (x_106 + 1);
     }
   }
   quicksort_(tint_symbol_10, tint_symbol_9);

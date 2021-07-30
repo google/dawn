@@ -259,7 +259,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithSimpleCont) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  for(; ; i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
+  EXPECT_EQ(gen.result(), R"(  for(; ; i = (i + 1)) {
     a_statement();
   }
 )");
@@ -310,7 +310,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithSimpleInitCondCont) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  for(int i = 0; true; i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
+  EXPECT_EQ(gen.result(), R"(  for(int i = 0; true; i = (i + 1)) {
     a_statement();
   }
 )");

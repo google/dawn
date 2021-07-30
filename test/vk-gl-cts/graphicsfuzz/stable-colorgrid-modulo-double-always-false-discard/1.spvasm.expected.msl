@@ -80,7 +80,7 @@ void main_1(constant buf0& x_9, constant buf1& x_6, thread float4* const tint_sy
           break;
         }
         {
-          x_62 = as_type<int>((as_type<uint>(x_61) + as_type<uint>(1)));
+          x_62 = (x_61 + 1);
           x_58_phi = x_59;
           x_61_phi = x_62;
         }
@@ -152,7 +152,7 @@ void main_1(constant buf0& x_9, constant buf1& x_6, thread float4* const tint_sy
           break;
         }
         {
-          x_106 = as_type<int>((as_type<uint>(x_105) + as_type<uint>(1)));
+          x_106 = (x_105 + 1);
           x_102_phi = x_103;
           x_105_phi = x_106;
         }
@@ -194,7 +194,7 @@ void main_1(constant buf0& x_9, constant buf1& x_6, thread float4* const tint_sy
       }
     }
     {
-      x_147 = as_type<int>((as_type<uint>(x_146) + as_type<uint>(1)));
+      x_147 = (x_146 + 1);
       x_146_phi = x_147;
     }
   }
