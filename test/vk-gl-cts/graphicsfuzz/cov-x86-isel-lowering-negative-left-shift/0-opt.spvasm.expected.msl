@@ -69,7 +69,7 @@ void main_1(constant buf1& x_6, constant buf0& x_9, thread float4* const tint_sy
         }
         case 0: {
           int const x_70 = i;
-          if ((-2147483648 < x_70)) {
+          if (((-2147483647 - 1) < x_70)) {
             {
               int const x_82 = j;
               j = (x_82 + 1);

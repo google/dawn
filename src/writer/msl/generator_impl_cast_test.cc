@@ -43,6 +43,17 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Vector) {
   EXPECT_EQ(out.str(), "float3(int3(1, 2, 3))");
 }
 
+TEST_F(MslGeneratorImplTest, EmitExpression_Cast_IntMin) {
+  auto* cast = Construct<u32>(std::numeric_limits<int32_t>::min());
+  WrapInFunction(cast);
+
+  GeneratorImpl& gen = Build();
+
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
+  EXPECT_EQ(out.str(), "uint((-2147483647 - 1))");
+}
+
 }  // namespace
 }  // namespace msl
 }  // namespace writer

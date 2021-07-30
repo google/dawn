@@ -88,6 +88,18 @@ TEST_F(MslUnaryOpTest, Negation) {
   EXPECT_EQ(out.str(), "-(expr)");
 }
 
+TEST_F(MslUnaryOpTest, NegationOfIntMin) {
+  auto* op = create<ast::UnaryOpExpression>(
+      ast::UnaryOp::kNegation, Expr(std::numeric_limits<int32_t>::min()));
+  WrapInFunction(op);
+
+  GeneratorImpl& gen = Build();
+
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.error();
+  EXPECT_EQ(out.str(), "-((-2147483647 - 1))");
+}
+
 }  // namespace
 }  // namespace msl
 }  // namespace writer

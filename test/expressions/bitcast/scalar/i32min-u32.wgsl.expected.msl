@@ -1,0 +1,8 @@
+#include <metal_stdlib>
+
+using namespace metal;
+kernel void f() {
+  uint const b = as_type<uint>((-2147483647 - 1));
+  return;
+}
+

@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
+#include <limits>
 #include <utility>
 #include <vector>
 
@@ -1246,7 +1247,17 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, ast::Literal* lit) {
       out << FloatToString(fl->value()) << "f";
     }
   } else if (auto* sl = lit->As<ast::SintLiteral>()) {
-    out << sl->value();
+    // MSL (and C++) parse `-2147483648` as a `long` because it parses unary
+    // minus and `2147483648` as separate tokens, and the latter doesn't
+    // fit into an (32-bit) `int`. WGSL, OTOH, parses this as an `i32`. To avoid
+    // issues with `long` to `int` casts, emit `(2147483647 - 1)` instead, which
+    // ensures the expression type is `int`.
+    const auto int_min = std::numeric_limits<int32_t>::min();
+    if (sl->value_as_i32() == int_min) {
+      out << "(" << int_min + 1 << " - 1)";
+    } else {
+      out << sl->value();
+    }
   } else if (auto* ul = lit->As<ast::UintLiteral>()) {
     out << ul->value() << "u";
   } else {
