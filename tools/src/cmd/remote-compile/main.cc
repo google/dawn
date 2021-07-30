@@ -20,6 +20,8 @@
 #include <type_traits>
 #include <vector>
 
+#include <thread>  // NOLINT
+
 #include "tools/src/cmd/remote-compile/compile.h"
 #include "tools/src/cmd/remote-compile/socket.h"
 
@@ -350,48 +352,50 @@ bool RunServer(std::string port) {
   }
   printf("Listening on port %s...\n", port.c_str());
   while (auto conn = server_socket->Accept()) {
-    DEBUG("Client connected...");
-    Stream stream{conn.get()};
+    std::thread([=] {
+      DEBUG("Client connected...");
+      Stream stream{conn.get()};
 
-    {
-      ConnectionRequest req;
-      stream >> req;
-      if (!stream.error.empty()) {
-        printf("%s\n", stream.error.c_str());
-        continue;
-      }
-      ConnectionResponse resp;
-      if (req.protocol_version != kProtocolVersion) {
-        DEBUG("Protocol version mismatch");
-        resp.error = "Protocol version mismatch";
-        stream << resp;
-        continue;
-      }
-      stream << resp;
-    }
-    DEBUG("Connection established");
-    {
-      CompileRequest req;
-      stream >> req;
-      if (!stream.error.empty()) {
-        printf("%s\n", stream.error.c_str());
-        continue;
-      }
-#ifdef TINT_ENABLE_MSL_COMPILATION_USING_METAL_API
-      if (req.language == SourceLanguage::MSL) {
-        auto result = CompileMslUsingMetalAPI(req.source);
-        CompileResponse resp;
-        if (!result.success) {
-          resp.error = result.output;
+      {
+        ConnectionRequest req;
+        stream >> req;
+        if (!stream.error.empty()) {
+          printf("%s\n", stream.error.c_str());
+          return;
+        }
+        ConnectionResponse resp;
+        if (req.protocol_version != kProtocolVersion) {
+          DEBUG("Protocol version mismatch");
+          resp.error = "Protocol version mismatch";
+          stream << resp;
+          return;
         }
         stream << resp;
-        continue;
       }
+      DEBUG("Connection established");
+      {
+        CompileRequest req;
+        stream >> req;
+        if (!stream.error.empty()) {
+          printf("%s\n", stream.error.c_str());
+          return;
+        }
+#ifdef TINT_ENABLE_MSL_COMPILATION_USING_METAL_API
+        if (req.language == SourceLanguage::MSL) {
+          auto result = CompileMslUsingMetalAPI(req.source);
+          CompileResponse resp;
+          if (!result.success) {
+            resp.error = result.output;
+          }
+          stream << resp;
+          return;
+        }
 #endif
-      CompileResponse resp;
-      resp.error = "server cannot compile this type of shader";
-      stream << resp;
-    }
+        CompileResponse resp;
+        resp.error = "server cannot compile this type of shader";
+        stream << resp;
+      }
+    }).detach();
   }
   return true;
 }
