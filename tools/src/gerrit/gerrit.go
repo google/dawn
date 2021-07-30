@@ -38,22 +38,27 @@ type Config struct {
 	Password string
 }
 
+func LoadCredentials() (user, pass string) {
+	cookiesFile := os.Getenv("HOME") + "/.gitcookies"
+	if cookies, err := ioutil.ReadFile(cookiesFile); err == nil {
+		re := regexp.MustCompile(`dawn-review.googlesource.com\s+(?:FALSE|TRUE)[\s/]+(?:FALSE|TRUE)\s+[0-9]+\s+.\s+(.*)=(.*)`)
+		match := re.FindStringSubmatch(string(cookies))
+		if len(match) == 3 {
+			return match[1], match[2]
+		}
+	}
+	return "", ""
+}
+
 func New(cfg Config) (*G, error) {
 	client, err := gerrit.NewClient(URL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("Couldn't create gerrit client: %w", err)
+		return nil, fmt.Errorf("couldn't create gerrit client: %w", err)
 	}
 
 	user, pass := cfg.Username, cfg.Password
 	if user == "" {
-		cookiesFile := os.Getenv("HOME") + "/.gitcookies"
-		if cookies, err := ioutil.ReadFile(cookiesFile); err == nil {
-			re := regexp.MustCompile(`dawn-review.googlesource.com\s+(?:FALSE|TRUE)[\s/]+(?:FALSE|TRUE)\s+[0-9]+\s+.\s+(.*)=(.*)`)
-			match := re.FindStringSubmatch(string(cookies))
-			if len(match) == 3 {
-				user, pass = match[1], match[2]
-			}
-		}
+		user, pass = LoadCredentials()
 	}
 
 	if user != "" {
@@ -73,7 +78,7 @@ func (g *G) QueryChanges(queryParts ...string) (changes []gerrit.ChangeInfo, que
 		})
 		if err != nil {
 			if !g.authenticated {
-				err = fmt.Errorf(`Query failed, possibly because of authentication.
+				err = fmt.Errorf(`query failed, possibly because of authentication.
 	See https://dawn-review.googlesource.com/new-password for obtaining a username
 	and password which can be provided with --gerrit-user and --gerrit-pass.
 	%w`, err)
