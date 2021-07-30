@@ -25,6 +25,11 @@ namespace utils {
 namespace {
 
 std::string TmpFilePath(std::string ext) {
+  char const* dir = getenv("TMPDIR");
+  if (dir == nullptr) {
+    dir = "/tmp";
+  }
+
   // mkstemps requires an `int` for the file extension name but STL represents
   // size_t. Pre-C++20 there the behavior for unsigned-to-signed conversion
   // (when the source value exceeds the representable range) is implementation
@@ -32,7 +37,7 @@ std::string TmpFilePath(std::string ext) {
   // enforce this here at runtime.
   TINT_ASSERT(Utils, ext.length() <=
                          static_cast<size_t>(std::numeric_limits<int>::max()));
-  std::string name = "tint_XXXXXX" + ext;
+  std::string name = std::string(dir) + "/tint_XXXXXX" + ext;
   int file = mkstemps(&name[0], static_cast<int>(ext.length()));
   if (file != -1) {
     close(file);
