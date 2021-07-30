@@ -1,0 +1,48 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct main_out {
+  float4 x_8_1;
+};
+struct tint_symbol_2 {
+  uint x_1_param [[attribute(1)]];
+  uint2 x_2_param [[attribute(2)]];
+  int x_3_param [[attribute(3)]];
+  int2 x_4_param [[attribute(4)]];
+  float x_5_param [[attribute(5)]] [[flat]];
+  float2 x_6_param [[attribute(6)]] [[flat]];
+};
+struct tint_symbol_3 {
+  float4 x_8_1 [[position]];
+};
+
+void main_1() {
+  return;
+}
+
+vertex tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  thread uint tint_symbol_6 = 0u;
+  thread uint2 tint_symbol_7 = 0u;
+  thread int tint_symbol_8 = 0;
+  thread int2 tint_symbol_9 = 0;
+  thread float tint_symbol_10 = 0.0f;
+  thread float2 tint_symbol_11 = 0.0f;
+  thread float4 tint_symbol_12 = 0.0f;
+  uint const x_1_param = tint_symbol_1.x_1_param;
+  uint2 const x_2_param = tint_symbol_1.x_2_param;
+  int const x_3_param = tint_symbol_1.x_3_param;
+  int2 const x_4_param = tint_symbol_1.x_4_param;
+  float const x_5_param = tint_symbol_1.x_5_param;
+  float2 const x_6_param = tint_symbol_1.x_6_param;
+  tint_symbol_6 = x_1_param;
+  tint_symbol_7 = x_2_param;
+  tint_symbol_8 = x_3_param;
+  tint_symbol_9 = x_4_param;
+  tint_symbol_10 = x_5_param;
+  tint_symbol_11 = x_6_param;
+  main_1();
+  main_out const tint_symbol_4 = {.x_8_1=tint_symbol_12};
+  tint_symbol_3 const tint_symbol_5 = {.x_8_1=tint_symbol_4.x_8_1};
+  return tint_symbol_5;
+}
+

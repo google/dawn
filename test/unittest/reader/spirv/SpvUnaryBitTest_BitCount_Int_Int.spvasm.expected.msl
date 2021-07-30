@@ -1,0 +1,17 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1() {
+  uint const u1 = 10u;
+  int const i1 = 30;
+  uint2 const v2u1 = uint2(10u, 20u);
+  int2 const v2i1 = int2(30, 40);
+  int const x_1 = popcount(i1);
+  return;
+}
+
+kernel void tint_symbol() {
+  main_1();
+  return;
+}
+

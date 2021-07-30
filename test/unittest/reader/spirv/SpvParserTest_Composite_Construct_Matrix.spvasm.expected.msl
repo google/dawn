@@ -1,0 +1,19 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  float2 field0;
+  uint field1;
+  int field2;
+};
+
+void main_1() {
+  float3x2 const x_1 = float3x2(float2(50.0f, 60.0f), float2(60.0f, 50.0f), float2(70.0f, 70.0f));
+  return;
+}
+
+kernel void tint_symbol() {
+  main_1();
+  return;
+}
+

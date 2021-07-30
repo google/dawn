@@ -1,0 +1,20 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1() {
+  switch(42u) {
+    case 20u: {
+      break;
+    }
+    default: {
+      break;
+    }
+  }
+  return;
+}
+
+fragment void tint_symbol() {
+  main_1();
+  return;
+}
+

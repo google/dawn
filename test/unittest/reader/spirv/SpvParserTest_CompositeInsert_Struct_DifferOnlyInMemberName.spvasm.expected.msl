@@ -1,0 +1,29 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  uint algo;
+};
+struct S_1 {
+  uint rithm;
+};
+
+void main_1() {
+  S var0 = {};
+  S_1 var1 = {};
+  S const x_1 = var0;
+  S x_2_1 = x_1;
+  x_2_1.algo = 10u;
+  S const x_2 = x_2_1;
+  S_1 const x_3 = var1;
+  S_1 x_4_1 = x_3;
+  x_4_1.rithm = 11u;
+  S_1 const x_4 = x_4_1;
+  return;
+}
+
+fragment void tint_symbol() {
+  main_1();
+  return;
+}
+

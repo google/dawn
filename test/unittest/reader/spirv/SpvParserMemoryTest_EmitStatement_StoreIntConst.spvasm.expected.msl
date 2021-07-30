@@ -1,0 +1,15 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1() {
+  int x_1 = 0;
+  x_1 = 42;
+  x_1 = 0;
+  return;
+}
+
+fragment void tint_symbol() {
+  main_1();
+  return;
+}
+

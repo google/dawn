@@ -1,0 +1,19 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  /* 0x0000 */ uint field0;
+  /* 0x0004 */ uint field1[1];
+};
+
+void main_1(device S& myvar) {
+  myvar.field0 = 0u;
+  myvar.field1[1u] = 0u;
+  return;
+}
+
+fragment void tint_symbol(device S& myvar [[buffer(0)]]) {
+  main_1(myvar);
+  return;
+}
+

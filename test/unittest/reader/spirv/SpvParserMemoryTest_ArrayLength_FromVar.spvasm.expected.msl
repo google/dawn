@@ -1,0 +1,21 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol_1 {
+  /* 0x0000 */ uint4 buffer_size[1];
+};
+struct S {
+  /* 0x0000 */ uint first;
+  /* 0x0004 */ uint rtarr[1];
+};
+
+void main_1(constant tint_symbol_1& tint_symbol_2) {
+  uint const x_1 = ((tint_symbol_2.buffer_size[0u][0u] - 4u) / 4u);
+  return;
+}
+
+fragment void tint_symbol(constant tint_symbol_1& tint_symbol_2 [[buffer(30)]]) {
+  main_1(tint_symbol_2);
+  return;
+}
+

@@ -1,0 +1,31 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1(thread uint* const tint_symbol_1) {
+  *(tint_symbol_1) = 1u;
+  bool guard10 = true;
+  if (false) {
+    *(tint_symbol_1) = 2u;
+    if (true) {
+      guard10 = false;
+    }
+    if (guard10) {
+      *(tint_symbol_1) = 3u;
+      guard10 = false;
+    }
+  } else {
+    if (guard10) {
+      *(tint_symbol_1) = 4u;
+      guard10 = false;
+    }
+  }
+  *(tint_symbol_1) = 5u;
+  return;
+}
+
+fragment void tint_symbol() {
+  thread uint tint_symbol_2 = 0u;
+  main_1(&(tint_symbol_2));
+  return;
+}
+

@@ -1,0 +1,44 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  uint arr[2];
+};
+struct S {
+  uint field0;
+  float field1;
+  tint_array_wrapper field2;
+};
+
+void main_1(thread bool* const tint_symbol_1) {
+  bool const x_101 = *(tint_symbol_1);
+  while (true) {
+    uint x_2_phi = 0u;
+    uint x_5_phi = 0u;
+    x_2_phi = 0u;
+    x_5_phi = 1u;
+    while (true) {
+      uint x_7 = 0u;
+      uint const x_2 = x_2_phi;
+      uint const x_5 = x_5_phi;
+      uint const x_4 = (x_2 + 1u);
+      uint const x_6 = (x_4 + 1u);
+      if (x_101) {
+        break;
+      }
+      {
+        x_7 = (x_4 + x_6);
+        x_2_phi = x_4;
+        x_5_phi = x_7;
+      }
+    }
+  }
+  return;
+}
+
+fragment void tint_symbol() {
+  thread bool tint_symbol_2 = false;
+  main_1(&(tint_symbol_2));
+  return;
+}
+

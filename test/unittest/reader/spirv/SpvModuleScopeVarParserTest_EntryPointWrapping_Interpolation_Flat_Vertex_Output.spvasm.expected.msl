@@ -1,0 +1,40 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct main_out {
+  uint x_1_1;
+  uint2 x_2_1;
+  int x_3_1;
+  int2 x_4_1;
+  float x_5_1;
+  float2 x_6_1;
+  float4 x_8_1;
+};
+struct tint_symbol_1 {
+  uint x_1_1 [[user(locn1)]];
+  uint2 x_2_1 [[user(locn2)]];
+  int x_3_1 [[user(locn3)]];
+  int2 x_4_1 [[user(locn4)]];
+  float x_5_1 [[user(locn5)]] [[flat]];
+  float2 x_6_1 [[user(locn6)]] [[flat]];
+  float4 x_8_1 [[position]];
+};
+
+void main_1() {
+  return;
+}
+
+vertex tint_symbol_1 tint_symbol() {
+  thread uint tint_symbol_4 = 0u;
+  thread uint2 tint_symbol_5 = 0u;
+  thread int tint_symbol_6 = 0;
+  thread int2 tint_symbol_7 = 0;
+  thread float tint_symbol_8 = 0.0f;
+  thread float2 tint_symbol_9 = 0.0f;
+  thread float4 tint_symbol_10 = 0.0f;
+  main_1();
+  main_out const tint_symbol_2 = {.x_1_1=tint_symbol_4, .x_2_1=tint_symbol_5, .x_3_1=tint_symbol_6, .x_4_1=tint_symbol_7, .x_5_1=tint_symbol_8, .x_6_1=tint_symbol_9, .x_8_1=tint_symbol_10};
+  tint_symbol_1 const tint_symbol_3 = {.x_1_1=tint_symbol_2.x_1_1, .x_2_1=tint_symbol_2.x_2_1, .x_3_1=tint_symbol_2.x_3_1, .x_4_1=tint_symbol_2.x_4_1, .x_5_1=tint_symbol_2.x_5_1, .x_6_1=tint_symbol_2.x_6_1, .x_8_1=tint_symbol_2.x_8_1};
+  return tint_symbol_3;
+}
+

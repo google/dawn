@@ -1,0 +1,16 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  uint arr[2];
+};
+
+void main_1() {
+  return;
+}
+
+fragment void tint_symbol() {
+  main_1();
+  return;
+}
+

@@ -1,0 +1,17 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  uint field0;
+  float field1;
+};
+
+void x_100_1() {
+  return;
+}
+
+fragment void x_100() {
+  x_100_1();
+  return;
+}
+

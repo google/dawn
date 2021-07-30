@@ -1,0 +1,17 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct strct {
+  float field0;
+};
+
+void main_1() {
+  strct myvar = {};
+  return;
+}
+
+fragment void tint_symbol() {
+  main_1();
+  return;
+}
+

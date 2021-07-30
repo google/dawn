@@ -1,0 +1,54 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 32
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %x_2 "x_2"
+               OpName %x_3 "x_3"
+               OpName %main_1 "main_1"
+               OpName %var_1 "var_1"
+               OpName %main "main"
+               OpDecorate %x_2 DescriptorSet 0
+               OpDecorate %x_2 Binding 0
+               OpDecorate %x_3 DescriptorSet 0
+               OpDecorate %x_3 Binding 1
+      %float = OpTypeFloat 32
+          %3 = OpTypeImage %float 2D 0 0 0 1 Unknown
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+        %x_2 = OpVariable %_ptr_UniformConstant_3 UniformConstant
+          %7 = OpTypeSampler
+%_ptr_UniformConstant_7 = OpTypePointer UniformConstant %7
+        %x_3 = OpVariable %_ptr_UniformConstant_7 UniformConstant
+       %void = OpTypeVoid
+          %8 = OpTypeFunction %void
+    %v4float = OpTypeVector %float 4
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+         %15 = OpConstantNull %v4float
+         %19 = OpTypeSampledImage %3
+    %v2float = OpTypeVector %float 2
+    %float_0 = OpConstant %float 0
+         %23 = OpConstantComposite %v2float %float_0 %float_0
+     %main_1 = OpFunction %void None %8
+         %11 = OpLabel
+      %var_1 = OpVariable %_ptr_Function_v4float Function %15
+         %17 = OpLoad %7 %x_3
+         %18 = OpLoad %3 %x_2
+         %20 = OpSampledImage %19 %18 %17
+         %16 = OpImageSampleImplicitLod %v4float %20 %23
+         %25 = OpLoad %7 %x_3
+         %26 = OpLoad %3 %x_2
+         %27 = OpSampledImage %19 %26 %25
+         %24 = OpImageSampleImplicitLod %v4float %27 %23
+         %28 = OpFAdd %v4float %16 %24
+               OpStore %var_1 %28
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %8
+         %30 = OpLabel
+         %31 = OpFunctionCall %void %main_1
+               OpReturn
+               OpFunctionEnd

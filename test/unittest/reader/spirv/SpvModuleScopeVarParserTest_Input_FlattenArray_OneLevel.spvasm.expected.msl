@@ -1,0 +1,37 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  float arr[3];
+};
+struct main_out {
+  float4 x_2_1;
+};
+struct tint_symbol_2 {
+  float x_1_param [[attribute(4)]];
+  float x_1_param_1 [[attribute(5)]];
+  float x_1_param_2 [[attribute(6)]];
+};
+struct tint_symbol_3 {
+  float4 x_2_1 [[position]];
+};
+
+void main_1() {
+  return;
+}
+
+vertex tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  thread tint_array_wrapper tint_symbol_6 = {};
+  thread float4 tint_symbol_7 = 0.0f;
+  float const x_1_param = tint_symbol_1.x_1_param;
+  float const x_1_param_1 = tint_symbol_1.x_1_param_1;
+  float const x_1_param_2 = tint_symbol_1.x_1_param_2;
+  tint_symbol_6.arr[0] = x_1_param;
+  tint_symbol_6.arr[1] = x_1_param_1;
+  tint_symbol_6.arr[2] = x_1_param_2;
+  main_1();
+  main_out const tint_symbol_4 = {.x_2_1=tint_symbol_7};
+  tint_symbol_3 const tint_symbol_5 = {.x_2_1=tint_symbol_4.x_2_1};
+  return tint_symbol_5;
+}
+

@@ -1,0 +1,31 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Communicators {
+  float alice;
+  float4 bob;
+};
+struct main_out {
+  float x_1_1;
+  float4 x_1_2;
+  float4 x_2_1;
+};
+struct tint_symbol_1 {
+  float x_1_1 [[user(locn9)]];
+  float4 x_1_2 [[user(locn10)]];
+  float4 x_2_1 [[position]];
+};
+
+void main_1() {
+  return;
+}
+
+vertex tint_symbol_1 tint_symbol() {
+  thread Communicators tint_symbol_4 = {};
+  thread float4 tint_symbol_5 = 0.0f;
+  main_1();
+  main_out const tint_symbol_2 = {.x_1_1=tint_symbol_4.alice, .x_1_2=tint_symbol_4.bob, .x_2_1=tint_symbol_5};
+  tint_symbol_1 const tint_symbol_3 = {.x_1_1=tint_symbol_2.x_1_1, .x_1_2=tint_symbol_2.x_1_2, .x_2_1=tint_symbol_2.x_2_1};
+  return tint_symbol_3;
+}
+

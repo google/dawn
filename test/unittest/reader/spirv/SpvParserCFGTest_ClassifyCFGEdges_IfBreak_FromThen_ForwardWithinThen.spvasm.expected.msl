@@ -1,0 +1,21 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1() {
+  bool guard10 = true;
+  if (false) {
+    if (true) {
+      guard10 = false;
+    }
+    if (guard10) {
+      guard10 = false;
+    }
+  }
+  return;
+}
+
+fragment void tint_symbol() {
+  main_1();
+  return;
+}
+

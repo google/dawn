@@ -1,0 +1,25 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  float field0;
+  float age;
+};
+struct S_1 {
+  float field0;
+  float ancientness;
+};
+
+void main_1(thread S* const tint_symbol_1, thread S_1* const tint_symbol_2) {
+  (*(tint_symbol_1)).age = 42.0f;
+  (*(tint_symbol_2)).ancientness = 420.0f;
+  return;
+}
+
+fragment void tint_symbol() {
+  thread S tint_symbol_3 = {};
+  thread S_1 tint_symbol_4 = {};
+  main_1(&(tint_symbol_3), &(tint_symbol_4));
+  return;
+}
+

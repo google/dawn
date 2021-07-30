@@ -1,0 +1,75 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 34
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %tint_symbol %tint_symbol_1 %tint_symbol_3 %tint_symbol_4
+               OpExecutionMode %main OriginUpperLeft
+               OpName %x_1 "x_1"
+               OpName %x_2 "x_2"
+               OpName %x_3 "x_3"
+               OpName %x_4 "x_4"
+               OpName %tint_symbol "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %tint_symbol_3 "tint_symbol_3"
+               OpName %tint_symbol_4 "tint_symbol_4"
+               OpName %main_1 "main_1"
+               OpName %main_out "main_out"
+               OpMemberName %main_out 0 "x_2_1"
+               OpMemberName %main_out 1 "x_4_1"
+               OpName %tint_symbol_5 "tint_symbol_5"
+               OpName %tint_symbol_2 "tint_symbol_2"
+               OpName %main "main"
+               OpDecorate %tint_symbol Location 0
+               OpDecorate %tint_symbol Flat
+               OpDecorate %tint_symbol_1 Location 30
+               OpDecorate %tint_symbol_1 Flat
+               OpDecorate %tint_symbol_3 Location 0
+               OpDecorate %tint_symbol_4 Location 40
+               OpMemberDecorate %main_out 0 Offset 0
+               OpMemberDecorate %main_out 1 Offset 4
+       %uint = OpTypeInt 32 0
+%_ptr_Private_uint = OpTypePointer Private %uint
+          %4 = OpConstantNull %uint
+        %x_1 = OpVariable %_ptr_Private_uint Private %4
+        %x_2 = OpVariable %_ptr_Private_uint Private %4
+        %x_3 = OpVariable %_ptr_Private_uint Private %4
+        %x_4 = OpVariable %_ptr_Private_uint Private %4
+%_ptr_Input_uint = OpTypePointer Input %uint
+%tint_symbol = OpVariable %_ptr_Input_uint Input
+%tint_symbol_1 = OpVariable %_ptr_Input_uint Input
+%_ptr_Output_uint = OpTypePointer Output %uint
+%tint_symbol_3 = OpVariable %_ptr_Output_uint Output %4
+%tint_symbol_4 = OpVariable %_ptr_Output_uint Output %4
+       %void = OpTypeVoid
+         %14 = OpTypeFunction %void
+   %main_out = OpTypeStruct %uint %uint
+         %18 = OpTypeFunction %void %main_out
+     %main_1 = OpFunction %void None %14
+         %17 = OpLabel
+               OpReturn
+               OpFunctionEnd
+%tint_symbol_5 = OpFunction %void None %18
+%tint_symbol_2 = OpFunctionParameter %main_out
+         %22 = OpLabel
+         %23 = OpCompositeExtract %uint %tint_symbol_2 0
+               OpStore %tint_symbol_3 %23
+         %24 = OpCompositeExtract %uint %tint_symbol_2 1
+               OpStore %tint_symbol_4 %24
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %14
+         %26 = OpLabel
+         %27 = OpLoad %uint %tint_symbol
+               OpStore %x_1 %27
+         %28 = OpLoad %uint %tint_symbol_1
+               OpStore %x_3 %28
+         %29 = OpFunctionCall %void %main_1
+         %31 = OpLoad %uint %x_2
+         %32 = OpLoad %uint %x_4
+         %33 = OpCompositeConstruct %main_out %31 %32
+         %30 = OpFunctionCall %void %tint_symbol_5 %33
+               OpReturn
+               OpFunctionEnd

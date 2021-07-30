@@ -1,0 +1,19 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_padded_array_element {
+  uint el;
+};
+struct tint_array_wrapper {
+  tint_padded_array_element arr[5];
+};
+
+void x_100_1() {
+  return;
+}
+
+fragment void x_100() {
+  x_100_1();
+  return;
+}
+

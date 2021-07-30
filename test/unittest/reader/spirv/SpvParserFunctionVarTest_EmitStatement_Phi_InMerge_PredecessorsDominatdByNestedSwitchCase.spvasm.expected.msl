@@ -1,0 +1,40 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  uint arr[2];
+};
+struct S {
+  uint field0;
+  float field1;
+  tint_array_wrapper field2;
+};
+
+void main_1() {
+  uint x_41_phi = 0u;
+  switch(1u) {
+    default: {
+      /* fallthrough */
+    }
+    case 0u: {
+      /* fallthrough */
+    }
+    case 1u: {
+      if (true) {
+      } else {
+        x_41_phi = 0u;
+        break;
+      }
+      x_41_phi = 1u;
+      break;
+    }
+  }
+  uint const x_41 = x_41_phi;
+  return;
+}
+
+fragment void tint_symbol() {
+  main_1();
+  return;
+}
+

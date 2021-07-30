@@ -1,0 +1,17 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1(thread uint4* const tint_symbol_1, thread uint4* const tint_symbol_2) {
+  uint4 const x_11 = *(tint_symbol_1);
+  uint const a_dynamic_index = x_11.z;
+  (*(tint_symbol_2))[a_dynamic_index] = 42u;
+  return;
+}
+
+fragment void tint_symbol() {
+  thread uint4 tint_symbol_3 = 0u;
+  thread uint4 tint_symbol_4 = 0u;
+  main_1(&(tint_symbol_3), &(tint_symbol_4));
+  return;
+}
+

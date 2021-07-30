@@ -1,0 +1,14 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1(thread float3x4* const tint_symbol_1) {
+  (*(tint_symbol_1))[2u].w = 42.0f;
+  return;
+}
+
+fragment void tint_symbol() {
+  thread float3x4 tint_symbol_2 = float3x4(0.0f);
+  main_1(&(tint_symbol_2));
+  return;
+}
+

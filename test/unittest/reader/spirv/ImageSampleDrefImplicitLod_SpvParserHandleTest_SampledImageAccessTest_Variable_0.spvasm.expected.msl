@@ -1,0 +1,30 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1(depth2d<float, access::sample> tint_symbol_1, sampler tint_symbol_2) {
+  float const f1 = 1.0f;
+  float2 const vf12 = float2(1.0f, 2.0f);
+  float2 const vf21 = float2(2.0f, 1.0f);
+  float3 const vf123 = float3(1.0f, 2.0f, 3.0f);
+  float4 const vf1234 = float4(1.0f, 2.0f, 3.0f, 4.0f);
+  int const i1 = 1;
+  int2 const vi12 = int2(1, 2);
+  int3 const vi123 = int3(1, 2, 3);
+  int4 const vi1234 = int4(1, 2, 3, 4);
+  uint const u1 = 1u;
+  uint2 const vu12 = uint2(1u, 2u);
+  uint3 const vu123 = uint3(1u, 2u, 3u);
+  uint4 const vu1234 = uint4(1u, 2u, 3u, 4u);
+  float const coords1 = 1.0f;
+  float2 const coords12 = vf12;
+  float3 const coords123 = vf123;
+  float4 const coords1234 = vf1234;
+  float const x_79 = tint_symbol_1.sample_compare(tint_symbol_2, coords12, 0.200000003f);
+  return;
+}
+
+fragment void tint_symbol(depth2d<float, access::sample> tint_symbol_3 [[texture(1)]], sampler tint_symbol_4 [[sampler(0)]]) {
+  main_1(tint_symbol_3, tint_symbol_4);
+  return;
+}
+

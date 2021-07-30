@@ -1,0 +1,35 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1() {
+  uint const u1 = 10u;
+  uint const u2 = 15u;
+  uint const u3 = 20u;
+  int const i1 = 30;
+  int const i2 = 35;
+  int const i3 = 40;
+  float const f1 = 50.0f;
+  float const f2 = 60.0f;
+  float const f3 = 70.0f;
+  uint2 const v2u1 = uint2(10u, 20u);
+  uint2 const v2u2 = uint2(20u, 10u);
+  uint2 const v2u3 = uint2(15u, 15u);
+  int2 const v2i1 = int2(30, 40);
+  int2 const v2i2 = int2(40, 30);
+  int2 const v2i3 = int2(35, 35);
+  float2 const v2f1 = float2(50.0f, 60.0f);
+  float2 const v2f2 = float2(60.0f, 50.0f);
+  float2 const v2f3 = float2(70.0f, 70.0f);
+  float3 const v3f1 = float3(50.0f, 60.0f, 70.0f);
+  float3 const v3f2 = float3(60.0f, 70.0f, 50.0f);
+  float4 const v4f1 = float4(50.0f, 50.0f, 50.0f, 50.0f);
+  float4 const v4f2 = v4f1;
+  float4 const x_1 = normalize(v4f1);
+  return;
+}
+
+kernel void tint_symbol() {
+  main_1();
+  return;
+}
+

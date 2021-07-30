@@ -1,0 +1,15 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1() {
+  float3 const x_1 = (float3(50.0f, 60.0f, 70.0f) + float3(50.0f, 60.0f, 70.0f));
+  float2 const x_2 = (float2(60.0f, 50.0f) + float2(50.0f, 60.0f));
+  float2x3 const x_3 = float2x3(float3((x_2.x * x_1.x), (x_2.x * x_1.y), (x_2.x * x_1.z)), float3((x_2.y * x_1.x), (x_2.y * x_1.y), (x_2.y * x_1.z)));
+  return;
+}
+
+fragment void tint_symbol() {
+  main_1();
+  return;
+}
+

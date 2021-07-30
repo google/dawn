@@ -1,0 +1,17 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  /* 0x0000 */ uint field0;
+  /* 0x0004 */ uint field1[1];
+};
+
+void main_1() {
+  return;
+}
+
+fragment void tint_symbol() {
+  main_1();
+  return;
+}
+

@@ -1,0 +1,14 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1() {
+  float2x3 const x_1 = float2x3(float3(50.0f, 60.0f, 70.0f), float3(60.0f, 70.0f, 50.0f));
+  float3x2 const x_2 = transpose(x_1);
+  return;
+}
+
+fragment void tint_symbol() {
+  main_1();
+  return;
+}
+

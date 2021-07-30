@@ -1,0 +1,43 @@
+; Test: SpvParserTest_ValueFromBlockNotInBlockOrder.spvasm
+; SPIR-V
+; Version: 1.0
+; Generator: Khronos SPIR-V Tools Assembler; 0
+; Bound: 501
+; Schema: 0
+OpCapability Shader
+OpMemoryModel Logical Simple
+OpEntryPoint Fragment %100 "main"
+OpExecutionMode %100 OriginUpperLeft
+%void = OpTypeVoid
+%2 = OpTypeFunction %void
+%bool = OpTypeBool
+%uint = OpTypeInt 32 0
+%int = OpTypeInt 32 1
+%float = OpTypeFloat 32
+%v2bool = OpTypeVector %bool 2
+%v2uint = OpTypeVector %uint 2
+%v2int = OpTypeVector %int 2
+%v2float = OpTypeVector %float 2
+%float_42 = OpConstant %float 42
+%13 = OpUndef %bool
+%100 = OpFunction %void None %2
+%10 = OpLabel
+OpBranch %30
+%20 = OpLabel
+%499 = OpFAdd %float %float_42 %float_42
+%500 = OpFAdd %float %499 %float_42
+OpBranch %25
+%25 = OpLabel
+OpBranch %80
+%30 = OpLabel
+OpLoopMerge %90 %80 None
+OpBranchConditional %13 %90 %40
+%40 = OpLabel
+OpBranch %90
+%80 = OpLabel
+%81 = OpFMul %float %500 %float_42
+OpBranch %30
+%90 = OpLabel
+OpReturn
+OpFunctionEnd
+

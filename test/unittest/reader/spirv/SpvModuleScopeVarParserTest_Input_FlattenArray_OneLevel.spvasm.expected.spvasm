@@ -1,0 +1,87 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 49
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %tint_pointsize %tint_symbol %tint_symbol_1 %tint_symbol_2 %tint_symbol_4
+               OpName %tint_pointsize "tint_pointsize"
+               OpName %x_1 "x_1"
+               OpName %x_2 "x_2"
+               OpName %tint_symbol "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %tint_symbol_2 "tint_symbol_2"
+               OpName %tint_symbol_4 "tint_symbol_4"
+               OpName %main_1 "main_1"
+               OpName %main_out "main_out"
+               OpMemberName %main_out 0 "x_2_1"
+               OpName %tint_symbol_5 "tint_symbol_5"
+               OpName %tint_symbol_3 "tint_symbol_3"
+               OpName %main "main"
+               OpDecorate %tint_pointsize BuiltIn PointSize
+               OpDecorate %_arr_float_uint_3 ArrayStride 4
+               OpDecorate %tint_symbol Location 4
+               OpDecorate %tint_symbol_1 Location 5
+               OpDecorate %tint_symbol_2 Location 6
+               OpDecorate %tint_symbol_4 BuiltIn Position
+               OpMemberDecorate %main_out 0 Offset 0
+      %float = OpTypeFloat 32
+%_ptr_Output_float = OpTypePointer Output %float
+          %4 = OpConstantNull %float
+%tint_pointsize = OpVariable %_ptr_Output_float Output %4
+       %uint = OpTypeInt 32 0
+     %uint_3 = OpConstant %uint 3
+%_arr_float_uint_3 = OpTypeArray %float %uint_3
+%_ptr_Private__arr_float_uint_3 = OpTypePointer Private %_arr_float_uint_3
+         %10 = OpConstantNull %_arr_float_uint_3
+        %x_1 = OpVariable %_ptr_Private__arr_float_uint_3 Private %10
+    %v4float = OpTypeVector %float 4
+%_ptr_Private_v4float = OpTypePointer Private %v4float
+         %14 = OpConstantNull %v4float
+        %x_2 = OpVariable %_ptr_Private_v4float Private %14
+%_ptr_Input_float = OpTypePointer Input %float
+%tint_symbol = OpVariable %_ptr_Input_float Input
+%tint_symbol_1 = OpVariable %_ptr_Input_float Input
+%tint_symbol_2 = OpVariable %_ptr_Input_float Input
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%tint_symbol_4 = OpVariable %_ptr_Output_v4float Output %14
+       %void = OpTypeVoid
+         %21 = OpTypeFunction %void
+   %main_out = OpTypeStruct %v4float
+         %25 = OpTypeFunction %void %main_out
+    %float_1 = OpConstant %float 1
+        %int = OpTypeInt 32 1
+      %int_0 = OpConstant %int 0
+%_ptr_Private_float = OpTypePointer Private %float
+      %int_1 = OpConstant %int 1
+      %int_2 = OpConstant %int 2
+     %main_1 = OpFunction %void None %21
+         %24 = OpLabel
+               OpReturn
+               OpFunctionEnd
+%tint_symbol_5 = OpFunction %void None %25
+%tint_symbol_3 = OpFunctionParameter %main_out
+         %29 = OpLabel
+         %30 = OpCompositeExtract %v4float %tint_symbol_3 0
+               OpStore %tint_symbol_4 %30
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %21
+         %32 = OpLabel
+               OpStore %tint_pointsize %float_1
+         %37 = OpAccessChain %_ptr_Private_float %x_1 %int_0
+         %38 = OpLoad %float %tint_symbol
+               OpStore %37 %38
+         %40 = OpAccessChain %_ptr_Private_float %x_1 %int_1
+         %41 = OpLoad %float %tint_symbol_1
+               OpStore %40 %41
+         %43 = OpAccessChain %_ptr_Private_float %x_1 %int_2
+         %44 = OpLoad %float %tint_symbol_2
+               OpStore %43 %44
+         %45 = OpFunctionCall %void %main_1
+         %47 = OpLoad %v4float %x_2
+         %48 = OpCompositeConstruct %main_out %47
+         %46 = OpFunctionCall %void %tint_symbol_5 %48
+               OpReturn
+               OpFunctionEnd

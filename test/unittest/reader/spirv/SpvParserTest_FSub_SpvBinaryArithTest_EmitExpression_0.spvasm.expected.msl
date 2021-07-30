@@ -1,0 +1,13 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1() {
+  float const x_1 = (50.0f - 60.0f);
+  return;
+}
+
+fragment void tint_symbol() {
+  main_1();
+  return;
+}
+

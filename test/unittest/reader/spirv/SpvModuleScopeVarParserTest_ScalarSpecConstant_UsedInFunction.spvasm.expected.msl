@@ -1,0 +1,17 @@
+#include <metal_stdlib>
+
+using namespace metal;
+constant float myconst = 2.5f;
+float x_100() {
+  return (myconst + myconst);
+}
+
+void main_1() {
+  return;
+}
+
+fragment void tint_symbol() {
+  main_1();
+  return;
+}
+

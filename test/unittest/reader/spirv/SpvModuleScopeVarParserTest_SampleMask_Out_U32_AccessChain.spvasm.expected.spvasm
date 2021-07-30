@@ -1,0 +1,60 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 33
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %tint_symbol_1
+               OpExecutionMode %main OriginUpperLeft
+               OpName %x_1 "x_1"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %main_1 "main_1"
+               OpName %main_out "main_out"
+               OpMemberName %main_out 0 "x_1_1"
+               OpName %tint_symbol_2 "tint_symbol_2"
+               OpName %tint_symbol "tint_symbol"
+               OpName %main "main"
+               OpDecorate %_arr_uint_uint_1 ArrayStride 4
+               OpDecorate %tint_symbol_1 BuiltIn SampleMask
+               OpMemberDecorate %main_out 0 Offset 0
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+%_arr_uint_uint_1 = OpTypeArray %uint %uint_1
+%_ptr_Private__arr_uint_uint_1 = OpTypePointer Private %_arr_uint_uint_1
+          %6 = OpConstantNull %_arr_uint_uint_1
+        %x_1 = OpVariable %_ptr_Private__arr_uint_uint_1 Private %6
+%_ptr_Output__arr_uint_uint_1 = OpTypePointer Output %_arr_uint_uint_1
+%tint_symbol_1 = OpVariable %_ptr_Output__arr_uint_uint_1 Output %6
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+      %int_0 = OpConstant %int 0
+%_ptr_Private_uint = OpTypePointer Private %uint
+     %uint_0 = OpConstant %uint 0
+   %main_out = OpTypeStruct %uint
+         %18 = OpTypeFunction %void %main_out
+%_ptr_Output_uint = OpTypePointer Output %uint
+     %main_1 = OpFunction %void None %9
+         %12 = OpLabel
+         %16 = OpAccessChain %_ptr_Private_uint %x_1 %int_0
+               OpStore %16 %uint_0
+               OpReturn
+               OpFunctionEnd
+%tint_symbol_2 = OpFunction %void None %18
+%tint_symbol = OpFunctionParameter %main_out
+         %22 = OpLabel
+         %24 = OpAccessChain %_ptr_Output_uint %tint_symbol_1 %int_0
+         %25 = OpCompositeExtract %uint %tint_symbol 0
+               OpStore %24 %25
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %9
+         %27 = OpLabel
+         %28 = OpFunctionCall %void %main_1
+         %30 = OpAccessChain %_ptr_Private_uint %x_1 %int_0
+         %31 = OpLoad %uint %30
+         %32 = OpCompositeConstruct %main_out %31
+         %29 = OpFunctionCall %void %tint_symbol_2 %32
+               OpReturn
+               OpFunctionEnd

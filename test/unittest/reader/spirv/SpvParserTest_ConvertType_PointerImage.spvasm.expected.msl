@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void x_100_1() {
+  return;
+}
+
+fragment void x_100() {
+  x_100_1();
+  return;
+}
+

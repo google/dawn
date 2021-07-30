@@ -1,0 +1,76 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 39
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %x_1 "x_1"
+               OpName %x_17 "x_17"
+               OpName %main_1 "main_1"
+               OpName %x_2_phi "x_2_phi"
+               OpName %x_5_phi "x_5_phi"
+               OpName %x_7 "x_7"
+               OpName %main "main"
+       %uint = OpTypeInt 32 0
+%_ptr_Private_uint = OpTypePointer Private %uint
+          %4 = OpConstantNull %uint
+        %x_1 = OpVariable %_ptr_Private_uint Private %4
+       %bool = OpTypeBool
+%_ptr_Private_bool = OpTypePointer Private %bool
+          %8 = OpConstantNull %bool
+       %x_17 = OpVariable %_ptr_Private_bool Private %8
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
+%_ptr_Function_uint = OpTypePointer Function %uint
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+     %main_1 = OpFunction %void None %9
+         %12 = OpLabel
+    %x_2_phi = OpVariable %_ptr_Function_uint Function %4
+    %x_5_phi = OpVariable %_ptr_Function_uint Function %4
+        %x_7 = OpVariable %_ptr_Function_uint Function %4
+         %13 = OpLoad %bool %x_17
+               OpBranch %14
+         %14 = OpLabel
+               OpLoopMerge %15 %16 None
+               OpBranch %17
+         %17 = OpLabel
+               OpStore %x_2_phi %uint_0
+               OpStore %x_5_phi %uint_1
+               OpBranch %23
+         %23 = OpLabel
+               OpLoopMerge %24 %25 None
+               OpBranch %26
+         %26 = OpLabel
+         %28 = OpLoad %uint %x_2_phi
+         %29 = OpLoad %uint %x_5_phi
+         %30 = OpIAdd %uint %28 %uint_1
+         %31 = OpIAdd %uint %30 %uint_1
+               OpSelectionMerge %32 None
+               OpBranchConditional %13 %33 %32
+         %33 = OpLabel
+               OpBranch %24
+         %32 = OpLabel
+               OpBranch %25
+         %25 = OpLabel
+         %34 = OpIAdd %uint %30 %31
+               OpStore %x_7 %34
+               OpStore %x_2_phi %30
+         %35 = OpLoad %uint %x_7
+               OpStore %x_5_phi %35
+               OpBranch %23
+         %24 = OpLabel
+               OpBranch %16
+         %16 = OpLabel
+               OpBranch %14
+         %15 = OpLabel
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %9
+         %37 = OpLabel
+         %38 = OpFunctionCall %void %main_1
+               OpReturn
+               OpFunctionEnd

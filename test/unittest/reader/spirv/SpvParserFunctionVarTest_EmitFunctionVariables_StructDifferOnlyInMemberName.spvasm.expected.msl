@@ -1,0 +1,21 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  uint algo;
+};
+struct S_1 {
+  uint rithm;
+};
+
+void main_1() {
+  S x_40 = {};
+  S_1 x_41 = {};
+  return;
+}
+
+fragment void tint_symbol() {
+  main_1();
+  return;
+}
+

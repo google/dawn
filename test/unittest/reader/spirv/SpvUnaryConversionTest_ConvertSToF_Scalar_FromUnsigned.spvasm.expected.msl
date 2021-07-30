@@ -1,0 +1,14 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1() {
+  uint const x_30 = 10u;
+  float const x_1 = float(as_type<int>(x_30));
+  return;
+}
+
+fragment void tint_symbol() {
+  main_1();
+  return;
+}
+

@@ -1,0 +1,26 @@
+#include <metal_stdlib>
+
+using namespace metal;
+uint leaf() {
+  return 0u;
+}
+
+uint branch() {
+  uint const leaf_result = leaf();
+  return leaf_result;
+}
+
+void root() {
+  uint const branch_result = branch();
+  return;
+}
+
+void x_100_1() {
+  return;
+}
+
+fragment void x_100() {
+  x_100_1();
+  return;
+}
+

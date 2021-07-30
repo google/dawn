@@ -1,0 +1,13 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1(texture2d<float, access::read> tint_symbol_1) {
+  uint2 const x_125 = uint2(int2(tint_symbol_1.get_width(), tint_symbol_1.get_height()));
+  return;
+}
+
+fragment void tint_symbol(texture2d<float, access::read> tint_symbol_2 [[texture(0)]]) {
+  main_1(tint_symbol_2);
+  return;
+}
+

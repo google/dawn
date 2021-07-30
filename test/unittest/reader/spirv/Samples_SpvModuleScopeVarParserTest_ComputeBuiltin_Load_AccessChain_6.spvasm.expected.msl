@@ -1,0 +1,15 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1(thread uint3* const tint_symbol_2) {
+  uint3 const x_2 = *(tint_symbol_2);
+  return;
+}
+
+kernel void tint_symbol(uint3 x_1_param [[threadgroup_position_in_grid]]) {
+  thread uint3 tint_symbol_3 = 0u;
+  tint_symbol_3 = x_1_param;
+  main_1(&(tint_symbol_3));
+  return;
+}
+

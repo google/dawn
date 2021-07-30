@@ -1,0 +1,13 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1() {
+  uint2 const x_1 = (uint2(10u, 20u) + uint2(20u, 10u));
+  return;
+}
+
+fragment void tint_symbol() {
+  main_1();
+  return;
+}
+

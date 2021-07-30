@@ -1,0 +1,15 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1(thread uint* const tint_symbol_2) {
+  uint const x_2 = *(tint_symbol_2);
+  return;
+}
+
+fragment void tint_symbol(uint x_1_param [[sample_id]]) {
+  thread uint tint_symbol_3 = 0u;
+  tint_symbol_3 = x_1_param;
+  main_1(&(tint_symbol_3));
+  return;
+}
+

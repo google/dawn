@@ -1,0 +1,39 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol_2 {
+  float x_1_param [[user(locn1)]];
+  float x_2_param [[user(locn2)]] [[centroid_perspective]];
+  float x_3_param [[user(locn3)]] [[sample_perspective]];
+  float x_4_param [[user(locn4)]] [[no_perspective]];
+  float x_5_param [[user(locn5)]] [[centroid_no_perspective]];
+  float x_6_param [[user(locn6)]] [[sample_no_perspective]];
+};
+
+void main_1() {
+  return;
+}
+
+fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  thread float tint_symbol_3 = 0.0f;
+  thread float tint_symbol_4 = 0.0f;
+  thread float tint_symbol_5 = 0.0f;
+  thread float tint_symbol_6 = 0.0f;
+  thread float tint_symbol_7 = 0.0f;
+  thread float tint_symbol_8 = 0.0f;
+  float const x_1_param = tint_symbol_1.x_1_param;
+  float const x_2_param = tint_symbol_1.x_2_param;
+  float const x_3_param = tint_symbol_1.x_3_param;
+  float const x_4_param = tint_symbol_1.x_4_param;
+  float const x_5_param = tint_symbol_1.x_5_param;
+  float const x_6_param = tint_symbol_1.x_6_param;
+  tint_symbol_3 = x_1_param;
+  tint_symbol_4 = x_2_param;
+  tint_symbol_5 = x_3_param;
+  tint_symbol_6 = x_4_param;
+  tint_symbol_7 = x_5_param;
+  tint_symbol_8 = x_6_param;
+  main_1();
+  return;
+}
+

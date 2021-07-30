@@ -1,0 +1,37 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct main_out {
+  float x_1_1;
+  float x_2_1;
+  float x_3_1;
+  float x_4_1;
+  float x_5_1;
+  float x_6_1;
+};
+struct tint_symbol_1 {
+  float x_1_1 [[color(1)]];
+  float x_2_1 [[color(2)]] [[centroid_perspective]];
+  float x_3_1 [[color(3)]] [[sample_perspective]];
+  float x_4_1 [[color(4)]] [[no_perspective]];
+  float x_5_1 [[color(5)]] [[centroid_no_perspective]];
+  float x_6_1 [[color(6)]] [[sample_no_perspective]];
+};
+
+void main_1() {
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol() {
+  thread float tint_symbol_4 = 0.0f;
+  thread float tint_symbol_5 = 0.0f;
+  thread float tint_symbol_6 = 0.0f;
+  thread float tint_symbol_7 = 0.0f;
+  thread float tint_symbol_8 = 0.0f;
+  thread float tint_symbol_9 = 0.0f;
+  main_1();
+  main_out const tint_symbol_2 = {.x_1_1=tint_symbol_4, .x_2_1=tint_symbol_5, .x_3_1=tint_symbol_6, .x_4_1=tint_symbol_7, .x_5_1=tint_symbol_8, .x_6_1=tint_symbol_9};
+  tint_symbol_1 const tint_symbol_3 = {.x_1_1=tint_symbol_2.x_1_1, .x_2_1=tint_symbol_2.x_2_1, .x_3_1=tint_symbol_2.x_3_1, .x_4_1=tint_symbol_2.x_4_1, .x_5_1=tint_symbol_2.x_5_1, .x_6_1=tint_symbol_2.x_6_1};
+  return tint_symbol_3;
+}
+

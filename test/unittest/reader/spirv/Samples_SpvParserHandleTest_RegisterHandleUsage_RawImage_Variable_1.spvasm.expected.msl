@@ -1,0 +1,13 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1(texture1d<float, access::write> tint_symbol_1) {
+  tint_symbol_1.write(float4(0.0f, 0.0f, 0.0f, 0.0f), uint(int(1u)));
+  return;
+}
+
+fragment void tint_symbol(texture1d<float, access::write> tint_symbol_2 [[texture(0)]]) {
+  main_1(tint_symbol_2);
+  return;
+}
+

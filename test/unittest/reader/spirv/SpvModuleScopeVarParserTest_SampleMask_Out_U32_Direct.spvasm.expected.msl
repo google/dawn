@@ -1,0 +1,26 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  uint arr[1];
+};
+struct main_out {
+  uint x_1_1;
+};
+struct tint_symbol_1 {
+  uint x_1_1 [[sample_mask]];
+};
+
+void main_1(thread tint_array_wrapper* const tint_symbol_4) {
+  (*(tint_symbol_4)).arr[0] = 0u;
+  return;
+}
+
+fragment tint_symbol_1 tint_symbol() {
+  thread tint_array_wrapper tint_symbol_5 = {};
+  main_1(&(tint_symbol_5));
+  main_out const tint_symbol_2 = {.x_1_1=tint_symbol_5.arr[0]};
+  tint_symbol_1 const tint_symbol_3 = {.x_1_1=tint_symbol_2.x_1_1};
+  return tint_symbol_3;
+}
+

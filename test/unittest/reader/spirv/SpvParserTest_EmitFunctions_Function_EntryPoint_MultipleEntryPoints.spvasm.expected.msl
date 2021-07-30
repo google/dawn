@@ -1,0 +1,17 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void first_shader_1() {
+  return;
+}
+
+fragment void first_shader() {
+  first_shader_1();
+  return;
+}
+
+fragment void second_shader() {
+  first_shader_1();
+  return;
+}
+

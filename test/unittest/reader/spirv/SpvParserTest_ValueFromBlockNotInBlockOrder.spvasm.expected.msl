@@ -1,0 +1,21 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1() {
+  while (true) {
+    if (false) {
+      break;
+    }
+    break;
+    {
+      float const x_81 = (0.0f * 42.0f);
+    }
+  }
+  return;
+}
+
+fragment void tint_symbol() {
+  main_1();
+  return;
+}
+

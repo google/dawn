@@ -1,0 +1,26 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  float2 field0;
+  uint field1;
+  int field2;
+};
+struct tint_array_wrapper {
+  uint arr[5];
+};
+
+void main_1() {
+  tint_array_wrapper x_35 = {};
+  tint_array_wrapper const x_1 = x_35;
+  tint_array_wrapper x_2_1 = x_1;
+  x_2_1.arr[3u] = 20u;
+  tint_array_wrapper const x_2 = x_2_1;
+  return;
+}
+
+kernel void tint_symbol() {
+  main_1();
+  return;
+}
+

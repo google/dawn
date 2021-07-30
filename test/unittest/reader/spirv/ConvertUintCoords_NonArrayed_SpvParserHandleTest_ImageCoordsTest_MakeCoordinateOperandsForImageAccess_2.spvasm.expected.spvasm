@@ -1,0 +1,81 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 55
+; Schema: 0
+               OpCapability Shader
+               OpCapability Image1D
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %x_10 "x_10"
+               OpName %x_20 "x_20"
+               OpName %x_30 "x_30"
+               OpName %main_1 "main_1"
+               OpName %float_var "float_var"
+               OpName %main "main"
+               OpDecorate %x_10 DescriptorSet 0
+               OpDecorate %x_10 Binding 0
+               OpDecorate %x_20 NonReadable
+               OpDecorate %x_20 DescriptorSet 2
+               OpDecorate %x_20 Binding 1
+               OpDecorate %x_30 DescriptorSet 0
+               OpDecorate %x_30 Binding 1
+          %3 = OpTypeSampler
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+       %x_10 = OpVariable %_ptr_UniformConstant_3 UniformConstant
+      %float = OpTypeFloat 32
+          %6 = OpTypeImage %float 1D 0 0 0 2 R32f
+%_ptr_UniformConstant_6 = OpTypePointer UniformConstant %6
+       %x_20 = OpVariable %_ptr_UniformConstant_6 UniformConstant
+       %x_30 = OpVariable %_ptr_UniformConstant_3 UniformConstant
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
+%_ptr_Function_float = OpTypePointer Function %float
+         %15 = OpConstantNull %float
+        %int = OpTypeInt 32 1
+      %int_1 = OpConstant %int 1
+      %v2int = OpTypeVector %int 2
+      %int_2 = OpConstant %int 2
+         %20 = OpConstantComposite %v2int %int_1 %int_2
+      %v3int = OpTypeVector %int 3
+      %int_3 = OpConstant %int 3
+         %23 = OpConstantComposite %v3int %int_1 %int_2 %int_3
+      %v4int = OpTypeVector %int 4
+      %int_4 = OpConstant %int 4
+         %26 = OpConstantComposite %v4int %int_1 %int_2 %int_3 %int_4
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+     %v2uint = OpTypeVector %uint 2
+     %uint_2 = OpConstant %uint 2
+         %31 = OpConstantComposite %v2uint %uint_1 %uint_2
+     %v3uint = OpTypeVector %uint 3
+     %uint_3 = OpConstant %uint 3
+         %34 = OpConstantComposite %v3uint %uint_1 %uint_2 %uint_3
+     %v4uint = OpTypeVector %uint 4
+     %uint_4 = OpConstant %uint 4
+         %37 = OpConstantComposite %v4uint %uint_1 %uint_2 %uint_3 %uint_4
+    %float_1 = OpConstant %float 1
+    %v2float = OpTypeVector %float 2
+    %float_2 = OpConstant %float 2
+         %41 = OpConstantComposite %v2float %float_1 %float_2
+    %v3float = OpTypeVector %float 3
+    %float_3 = OpConstant %float 3
+         %44 = OpConstantComposite %v3float %float_1 %float_2 %float_3
+    %v4float = OpTypeVector %float 4
+    %float_4 = OpConstant %float 4
+         %47 = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
+     %uint_0 = OpConstant %uint 0
+     %main_1 = OpFunction %void None %9
+         %12 = OpLabel
+  %float_var = OpVariable %_ptr_Function_float Function %15
+         %49 = OpLoad %6 %x_20
+         %50 = OpBitcast %int %uint_1
+               OpImageWrite %49 %50 %47
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %9
+         %53 = OpLabel
+         %54 = OpFunctionCall %void %main_1
+               OpReturn
+               OpFunctionEnd

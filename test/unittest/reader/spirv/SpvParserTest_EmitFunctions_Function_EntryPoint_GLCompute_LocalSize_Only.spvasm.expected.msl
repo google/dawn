@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void comp_main_1() {
+  return;
+}
+
+kernel void comp_main() {
+  comp_main_1();
+  return;
+}
+

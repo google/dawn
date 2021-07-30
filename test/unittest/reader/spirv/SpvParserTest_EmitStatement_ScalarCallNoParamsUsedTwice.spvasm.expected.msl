@@ -1,0 +1,20 @@
+#include <metal_stdlib>
+
+using namespace metal;
+uint x_50() {
+  return 42u;
+}
+
+void x_100_1() {
+  uint x_10 = 0u;
+  uint const x_1 = x_50();
+  x_10 = x_1;
+  x_10 = x_1;
+  return;
+}
+
+fragment void x_100() {
+  x_100_1();
+  return;
+}
+

@@ -1,0 +1,25 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct main_out {
+  float4 x_1_1;
+};
+struct tint_symbol_2 {
+  float4 x_1_1 [[position]];
+};
+
+void main_1(thread uint* const tint_symbol_5) {
+  uint const x_2 = *(tint_symbol_5);
+  return;
+}
+
+vertex tint_symbol_2 tint_symbol(uint x_4_param [[vertex_id]]) {
+  thread uint tint_symbol_6 = 0u;
+  thread float4 tint_symbol_7 = 0.0f;
+  tint_symbol_6 = x_4_param;
+  main_1(&(tint_symbol_6));
+  main_out const tint_symbol_3 = {.x_1_1=tint_symbol_7};
+  tint_symbol_2 const tint_symbol_4 = {.x_1_1=tint_symbol_3.x_1_1};
+  return tint_symbol_4;
+}
+
