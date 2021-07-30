@@ -5,12 +5,12 @@ intrinsics/gen/modf/bb9088.wgsl:29:24 warning: use of deprecated intrinsic
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 30
+; Bound: 24
 ; Schema: 0
                OpCapability Shader
          %13 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %compute_main "compute_main" %tint_symbol
+               OpEntryPoint GLCompute %compute_main "compute_main"
                OpExecutionMode %compute_main LocalSize 1 1 1
                OpName %arg_1 "arg_1"
                OpName %tint_symbol "tint_symbol"
@@ -29,8 +29,6 @@ intrinsics/gen/modf/bb9088.wgsl:29:24 warning: use of deprecated intrinsic
           %8 = OpTypeFunction %void
          %14 = OpConstantNull %v3float
 %_ptr_Function_v3float = OpTypePointer Function %v3float
-     %uint_0 = OpConstant %uint 0
-       %bool = OpTypeBool
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
 %modf_bb9088 = OpFunction %void None %8
@@ -42,15 +40,8 @@ intrinsics/gen/modf/bb9088.wgsl:29:24 warning: use of deprecated intrinsic
                OpFunctionEnd
 %compute_main = OpFunction %void None %8
          %19 = OpLabel
-         %20 = OpLoad %uint %tint_symbol
-         %22 = OpIEqual %bool %20 %uint_0
-               OpSelectionMerge %24 None
-               OpBranchConditional %22 %25 %24
-         %25 = OpLabel
                OpStore %arg_1 %14
-               OpBranch %24
-         %24 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %29 = OpFunctionCall %void %modf_bb9088
+         %23 = OpFunctionCall %void %modf_bb9088
                OpReturn
                OpFunctionEnd

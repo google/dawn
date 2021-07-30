@@ -21,15 +21,11 @@ void main(tint_symbol_1 tint_symbol) {
   const uint3 WorkGroupID = tint_symbol.WorkGroupID;
   const uint3 LocalInvocationID = tint_symbol.LocalInvocationID;
   const uint local_invocation_index = tint_symbol.local_invocation_index;
-  if ((local_invocation_index == 0u)) {
-    {
-      for(int i_1 = 0; (i_1 < 4); i_1 = (i_1 + 1)) {
-        {
-          for(int i_2 = 0; (i_2 < 256); i_2 = (i_2 + 1)) {
-            tile[i_1][i_2] = float3(0.0f, 0.0f, 0.0f);
-          }
-        }
-      }
+  {
+    for(uint idx = local_invocation_index; (idx < 1024u); idx = (idx + 64u)) {
+      const uint i_1 = (idx / 256u);
+      const uint i_2 = (idx % 256u);
+      tile[i_1][i_2] = float3(0.0f, 0.0f, 0.0f);
     }
   }
   GroupMemoryBarrierWithGroupSync();

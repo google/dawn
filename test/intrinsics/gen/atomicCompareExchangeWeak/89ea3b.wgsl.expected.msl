@@ -15,7 +15,7 @@ void atomicCompareExchangeWeak_89ea3b(threadgroup atomic_int* const tint_symbol_
 
 kernel void compute_main(uint local_invocation_index [[thread_index_in_threadgroup]]) {
   threadgroup atomic_int tint_symbol_2;
-  if ((local_invocation_index == 0u)) {
+  {
     atomic_store_explicit(&(tint_symbol_2), int(), memory_order_relaxed);
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);

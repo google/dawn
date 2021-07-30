@@ -16,11 +16,10 @@ struct tint_symbol_2 {
 [numthreads(1, 1, 1)]
 void f(tint_symbol_2 tint_symbol_1) {
   const uint local_invocation_index = tint_symbol_1.local_invocation_index;
-  if ((local_invocation_index == 0u)) {
-    {
-      for(int i = 0; (i < 64); i = (i + 1)) {
-        s.data[i] = 0;
-      }
+  {
+    for(uint idx = local_invocation_index; (idx < 64u); idx = (idx + 1u)) {
+      const uint i = idx;
+      s.data[i] = 0;
     }
   }
   GroupMemoryBarrierWithGroupSync();

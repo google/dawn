@@ -15,15 +15,16 @@ struct tint_array_wrapper {
   tint_array_wrapper_1 arr[4];
 };
 
-kernel void tint_symbol(texture2d<float, access::sample> tint_symbol_4 [[texture(1)]], sampler tint_symbol_5 [[sampler(0)]], texture2d<float, access::write> tint_symbol_6 [[texture(2)]], uint3 WorkGroupID [[threadgroup_position_in_grid]], uint3 LocalInvocationID [[thread_position_in_threadgroup]], uint local_invocation_index [[thread_index_in_threadgroup]], constant Params& params [[buffer(1)]], constant Flip& flip [[buffer(3)]]) {
-  threadgroup tint_array_wrapper tint_symbol_3;
-  if ((local_invocation_index == 0u)) {
-    tint_array_wrapper const tint_symbol_2 = {.arr={}};
-    tint_symbol_3 = tint_symbol_2;
+kernel void tint_symbol(texture2d<float, access::sample> tint_symbol_3 [[texture(1)]], sampler tint_symbol_4 [[sampler(0)]], texture2d<float, access::write> tint_symbol_5 [[texture(2)]], uint3 WorkGroupID [[threadgroup_position_in_grid]], uint3 LocalInvocationID [[thread_position_in_threadgroup]], uint local_invocation_index [[thread_index_in_threadgroup]], constant Params& params [[buffer(1)]], constant Flip& flip [[buffer(3)]]) {
+  threadgroup tint_array_wrapper tint_symbol_2;
+  for(uint idx = local_invocation_index; (idx < 1024u); idx = (idx + 64u)) {
+    uint const i_1 = (idx / 256u);
+    uint const i_2 = (idx % 256u);
+    tint_symbol_2.arr[i_1].arr[i_2] = float3();
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
   uint const filterOffset = ((params.filterDim - 1u) / 2u);
-  int2 const dims = int2(tint_symbol_4.get_width(0), tint_symbol_4.get_height(0));
+  int2 const dims = int2(tint_symbol_3.get_width(0), tint_symbol_3.get_height(0));
   int2 const baseIndex = (int2(((WorkGroupID.xy * uint2(params.blockDim, 4u)) + (LocalInvocationID.xy * uint2(4u, 1u)))) - int2(int(filterOffset), 0));
   for(uint r = 0u; (r < 4u); r = (r + 1u)) {
     for(uint c = 0u; (c < 4u); c = (c + 1u)) {
@@ -31,7 +32,7 @@ kernel void tint_symbol(texture2d<float, access::sample> tint_symbol_4 [[texture
       if ((flip.value != 0u)) {
         loadIndex = loadIndex.yx;
       }
-      tint_symbol_3.arr[r].arr[((4u * LocalInvocationID.x) + c)] = tint_symbol_4.sample(tint_symbol_5, ((float2(loadIndex) + float2(0.25f, 0.25f)) / float2(dims)), level(0.0f)).rgb;
+      tint_symbol_2.arr[r].arr[((4u * LocalInvocationID.x) + c)] = tint_symbol_3.sample(tint_symbol_4, ((float2(loadIndex) + float2(0.25f, 0.25f)) / float2(dims)), level(0.0f)).rgb;
     }
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
@@ -46,9 +47,9 @@ kernel void tint_symbol(texture2d<float, access::sample> tint_symbol_4 [[texture
         float3 acc = float3(0.0f, 0.0f, 0.0f);
         for(uint f = 0u; (f < params.filterDim); f = (f + 1u)) {
           uint i = ((center + f) - filterOffset);
-          acc = (acc + ((1.0f / float(params.filterDim)) * tint_symbol_3.arr[r].arr[i]));
+          acc = (acc + ((1.0f / float(params.filterDim)) * tint_symbol_2.arr[r].arr[i]));
         }
-        tint_symbol_6.write(float4(acc, 1.0f), uint2(writeIndex));
+        tint_symbol_5.write(float4(acc, 1.0f), uint2(writeIndex));
       }
     }
   }

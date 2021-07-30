@@ -72,9 +72,6 @@ Output Hlsl::Run(const Program* in, const DataMap& inputs) {
   manager.Add<PromoteInitializersToConstVar>();
   manager.Add<PadArrayElements>();
 
-  ZeroInitWorkgroupMemory::Config zero_init_cfg;
-  zero_init_cfg.init_arrays_with_loop_size_threshold = 32;  // 8 scalars
-  data.Add<ZeroInitWorkgroupMemory::Config>(zero_init_cfg);
   data.Add<CanonicalizeEntryPointIO::Config>(
       CanonicalizeEntryPointIO::BuiltinStyle::kStructMember);
   auto out = manager.Run(in, data);

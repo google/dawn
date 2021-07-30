@@ -26,7 +26,7 @@ void outer(threadgroup int* const tint_symbol_7, threadgroup int* const tint_sym
 
 kernel void main1(uint local_invocation_index [[thread_index_in_threadgroup]]) {
   threadgroup int tint_symbol_9;
-  if ((local_invocation_index == 0u)) {
+  {
     tint_symbol_9 = int();
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
@@ -37,7 +37,7 @@ kernel void main1(uint local_invocation_index [[thread_index_in_threadgroup]]) {
 
 kernel void main2(uint local_invocation_index_1 [[thread_index_in_threadgroup]]) {
   threadgroup int tint_symbol_10;
-  if ((local_invocation_index_1 == 0u)) {
+  {
     tint_symbol_10 = int();
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
@@ -49,7 +49,7 @@ kernel void main2(uint local_invocation_index_1 [[thread_index_in_threadgroup]])
 kernel void main3(uint local_invocation_index_2 [[thread_index_in_threadgroup]]) {
   threadgroup int tint_symbol_11;
   threadgroup int tint_symbol_12;
-  if ((local_invocation_index_2 == 0u)) {
+  {
     tint_symbol_11 = int();
     tint_symbol_12 = int();
   }

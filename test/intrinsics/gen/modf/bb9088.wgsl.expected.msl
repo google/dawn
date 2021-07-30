@@ -19,7 +19,7 @@ void modf_bb9088(threadgroup float3* const tint_symbol_1) {
 
 kernel void compute_main(uint local_invocation_index [[thread_index_in_threadgroup]]) {
   threadgroup float3 tint_symbol_2;
-  if ((local_invocation_index == 0u)) {
+  {
     tint_symbol_2 = float3();
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);

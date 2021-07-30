@@ -32,7 +32,7 @@ struct tint_symbol_1 {
 [numthreads(1, 1, 1)]
 void main1(tint_symbol_1 tint_symbol) {
   const uint local_invocation_index = tint_symbol.local_invocation_index;
-  if ((local_invocation_index == 0u)) {
+  {
     a = 0;
   }
   GroupMemoryBarrierWithGroupSync();
@@ -48,7 +48,7 @@ struct tint_symbol_3 {
 [numthreads(1, 1, 1)]
 void main2(tint_symbol_3 tint_symbol_2) {
   const uint local_invocation_index_1 = tint_symbol_2.local_invocation_index_1;
-  if ((local_invocation_index_1 == 0u)) {
+  {
     b = 0;
   }
   GroupMemoryBarrierWithGroupSync();
@@ -64,7 +64,7 @@ struct tint_symbol_5 {
 [numthreads(1, 1, 1)]
 void main3(tint_symbol_5 tint_symbol_4) {
   const uint local_invocation_index_2 = tint_symbol_4.local_invocation_index_2;
-  if ((local_invocation_index_2 == 0u)) {
+  {
     a = 0;
     b = 0;
   }

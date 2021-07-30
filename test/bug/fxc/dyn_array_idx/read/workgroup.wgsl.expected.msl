@@ -15,13 +15,13 @@ struct Result {
 };
 
 kernel void f(uint local_invocation_index [[thread_index_in_threadgroup]], constant UBO& ubo [[buffer(0)]], device Result& result [[buffer(1)]]) {
-  threadgroup S tint_symbol_2;
-  if ((local_invocation_index == 0u)) {
-    S const tint_symbol_1 = {};
-    tint_symbol_2 = tint_symbol_1;
+  threadgroup S tint_symbol_1;
+  for(uint idx = local_invocation_index; (idx < 64u); idx = (idx + 1u)) {
+    uint const i = idx;
+    tint_symbol_1.data.arr[i] = int();
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  result.out = tint_symbol_2.data.arr[ubo.dynamic_idx];
+  result.out = tint_symbol_1.data.arr[ubo.dynamic_idx];
   return;
 }
 

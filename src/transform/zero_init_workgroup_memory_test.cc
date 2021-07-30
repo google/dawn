@@ -76,7 +76,7 @@ TEST_F(ZeroInitWorkgroupMemoryTest, SingleWorkgroupVar_ExistingLocalIndex) {
 var<workgroup> v : i32;
 
 [[stage(compute), workgroup_size(1)]]
-fn f([[builtin(local_invocation_index)]] idx : u32) {
+fn f([[builtin(local_invocation_index)]] local_idx : u32) {
   ignore(v); // Initialization should be inserted above this statement
 }
 )";
@@ -84,8 +84,8 @@ fn f([[builtin(local_invocation_index)]] idx : u32) {
 var<workgroup> v : i32;
 
 [[stage(compute), workgroup_size(1)]]
-fn f([[builtin(local_invocation_index)]] idx : u32) {
-  if ((idx == 0u)) {
+fn f([[builtin(local_invocation_index)]] local_idx : u32) {
+  {
     v = i32();
   }
   workgroupBarrier();
@@ -104,7 +104,7 @@ TEST_F(ZeroInitWorkgroupMemoryTest,
 var<workgroup> v : i32;
 
 struct Params {
-  [[builtin(local_invocation_index)]] idx : u32;
+  [[builtin(local_invocation_index)]] local_idx : u32;
 };
 
 [[stage(compute), workgroup_size(1)]]
@@ -117,12 +117,12 @@ var<workgroup> v : i32;
 
 struct Params {
   [[builtin(local_invocation_index)]]
-  idx : u32;
+  local_idx : u32;
 };
 
 [[stage(compute), workgroup_size(1)]]
 fn f(params : Params) {
-  if ((params.idx == 0u)) {
+  {
     v = i32();
   }
   workgroupBarrier();
@@ -149,7 +149,7 @@ var<workgroup> v : i32;
 
 [[stage(compute), workgroup_size(1)]]
 fn f([[builtin(local_invocation_index)]] local_invocation_index : u32) {
-  if ((local_invocation_index == 0u)) {
+  {
     v = i32();
   }
   workgroupBarrier();
@@ -162,7 +162,8 @@ fn f([[builtin(local_invocation_index)]] local_invocation_index : u32) {
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(ZeroInitWorkgroupMemoryTest, MultipleWorkgroupVar_ExistingLocalIndex) {
+TEST_F(ZeroInitWorkgroupMemoryTest,
+       MultipleWorkgroupVar_ExistingLocalIndex_Size1) {
   auto* src = R"(
 struct S {
   x : i32;
@@ -176,7 +177,7 @@ var<workgroup> b : S;
 var<workgroup> c : array<S, 32>;
 
 [[stage(compute), workgroup_size(1)]]
-fn f([[builtin(local_invocation_index)]] idx : u32) {
+fn f([[builtin(local_invocation_index)]] local_idx : u32) {
   ignore(a); // Initialization should be inserted above this statement
   ignore(b);
   ignore(c);
@@ -195,11 +196,246 @@ var<workgroup> b : S;
 var<workgroup> c : array<S, 32>;
 
 [[stage(compute), workgroup_size(1)]]
-fn f([[builtin(local_invocation_index)]] idx : u32) {
-  if ((idx == 0u)) {
+fn f([[builtin(local_invocation_index)]] local_idx : u32) {
+  {
     a = i32();
-    b = S();
-    c = array<S, 32>();
+    b.x = i32();
+  }
+  for(var idx : u32 = local_idx; (idx < 8u); idx = (idx + 1u)) {
+    let i : u32 = idx;
+    b.y[i] = i32();
+  }
+  for(var idx_1 : u32 = local_idx; (idx_1 < 32u); idx_1 = (idx_1 + 1u)) {
+    let i_1 : u32 = idx_1;
+    c[i_1].x = i32();
+  }
+  for(var idx_2 : u32 = local_idx; (idx_2 < 256u); idx_2 = (idx_2 + 1u)) {
+    let i_2 : u32 = (idx_2 / 8u);
+    let i : u32 = (idx_2 % 8u);
+    c[i_2].y[i] = i32();
+  }
+  workgroupBarrier();
+  ignore(a);
+  ignore(b);
+  ignore(c);
+}
+)";
+
+  auto got = Run<ZeroInitWorkgroupMemory>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ZeroInitWorkgroupMemoryTest,
+       MultipleWorkgroupVar_ExistingLocalIndex_Size_2_3) {
+  auto* src = R"(
+struct S {
+  x : i32;
+  y : array<i32, 8>;
+};
+
+var<workgroup> a : i32;
+
+var<workgroup> b : S;
+
+var<workgroup> c : array<S, 32>;
+
+[[stage(compute), workgroup_size(2, 3)]]
+fn f([[builtin(local_invocation_index)]] local_idx : u32) {
+  ignore(a); // Initialization should be inserted above this statement
+  ignore(b);
+  ignore(c);
+}
+)";
+  auto* expect = R"(
+struct S {
+  x : i32;
+  y : array<i32, 8>;
+};
+
+var<workgroup> a : i32;
+
+var<workgroup> b : S;
+
+var<workgroup> c : array<S, 32>;
+
+[[stage(compute), workgroup_size(2, 3)]]
+fn f([[builtin(local_invocation_index)]] local_idx : u32) {
+  if ((local_idx < 1u)) {
+    a = i32();
+    b.x = i32();
+  }
+  for(var idx : u32 = local_idx; (idx < 8u); idx = (idx + 6u)) {
+    let i : u32 = idx;
+    b.y[i] = i32();
+  }
+  for(var idx_1 : u32 = local_idx; (idx_1 < 32u); idx_1 = (idx_1 + 6u)) {
+    let i_1 : u32 = idx_1;
+    c[i_1].x = i32();
+  }
+  for(var idx_2 : u32 = local_idx; (idx_2 < 256u); idx_2 = (idx_2 + 6u)) {
+    let i_2 : u32 = (idx_2 / 8u);
+    let i : u32 = (idx_2 % 8u);
+    c[i_2].y[i] = i32();
+  }
+  workgroupBarrier();
+  ignore(a);
+  ignore(b);
+  ignore(c);
+}
+)";
+
+  auto got = Run<ZeroInitWorkgroupMemory>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ZeroInitWorkgroupMemoryTest,
+       MultipleWorkgroupVar_ExistingLocalIndex_Size_2_3_X) {
+  auto* src = R"(
+struct S {
+  x : i32;
+  y : array<i32, 8>;
+};
+
+var<workgroup> a : i32;
+
+var<workgroup> b : S;
+
+var<workgroup> c : array<S, 32>;
+
+[[override(1)]] let X : i32;
+
+[[stage(compute), workgroup_size(2, 3, X)]]
+fn f([[builtin(local_invocation_index)]] local_idx : u32) {
+  ignore(a); // Initialization should be inserted above this statement
+  ignore(b);
+  ignore(c);
+}
+)";
+  auto* expect =
+      R"(
+struct S {
+  x : i32;
+  y : array<i32, 8>;
+};
+
+var<workgroup> a : i32;
+
+var<workgroup> b : S;
+
+var<workgroup> c : array<S, 32>;
+
+[[override(1)]] let X : i32;
+
+[[stage(compute), workgroup_size(2, 3, X)]]
+fn f([[builtin(local_invocation_index)]] local_idx : u32) {
+  for(var idx : u32 = local_idx; (idx < 1u); idx = (idx + (u32(X) * 6u))) {
+    a = i32();
+    b.x = i32();
+  }
+  for(var idx_1 : u32 = local_idx; (idx_1 < 8u); idx_1 = (idx_1 + (u32(X) * 6u))) {
+    let i : u32 = idx_1;
+    b.y[i] = i32();
+  }
+  for(var idx_2 : u32 = local_idx; (idx_2 < 32u); idx_2 = (idx_2 + (u32(X) * 6u))) {
+    let i_1 : u32 = idx_2;
+    c[i_1].x = i32();
+  }
+  for(var idx_3 : u32 = local_idx; (idx_3 < 256u); idx_3 = (idx_3 + (u32(X) * 6u))) {
+    let i_2 : u32 = (idx_3 / 8u);
+    let i : u32 = (idx_3 % 8u);
+    c[i_2].y[i] = i32();
+  }
+  workgroupBarrier();
+  ignore(a);
+  ignore(b);
+  ignore(c);
+}
+)";
+
+  auto got = Run<ZeroInitWorkgroupMemory>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ZeroInitWorkgroupMemoryTest,
+       MultipleWorkgroupVar_ExistingLocalIndex_Size_5u_X_10u) {
+  auto* src = R"(
+struct S {
+  x : array<array<i32, 8>, 10>;
+  y : array<i32, 8>;
+  z : array<array<array<i32, 8>, 10>, 20>;
+};
+
+var<workgroup> a : i32;
+
+var<workgroup> b : S;
+
+var<workgroup> c : array<S, 32>;
+
+[[override(1)]] let X : u32;
+
+[[stage(compute), workgroup_size(5u, X, 10u)]]
+fn f([[builtin(local_invocation_index)]] local_idx : u32) {
+  ignore(a); // Initialization should be inserted above this statement
+  ignore(b);
+  ignore(c);
+}
+)";
+  auto* expect =
+      R"(
+struct S {
+  x : array<array<i32, 8>, 10>;
+  y : array<i32, 8>;
+  z : array<array<array<i32, 8>, 10>, 20>;
+};
+
+var<workgroup> a : i32;
+
+var<workgroup> b : S;
+
+var<workgroup> c : array<S, 32>;
+
+[[override(1)]] let X : u32;
+
+[[stage(compute), workgroup_size(5u, X, 10u)]]
+fn f([[builtin(local_invocation_index)]] local_idx : u32) {
+  for(var idx : u32 = local_idx; (idx < 1u); idx = (idx + (X * 50u))) {
+    a = i32();
+  }
+  for(var idx_1 : u32 = local_idx; (idx_1 < 8u); idx_1 = (idx_1 + (X * 50u))) {
+    let i_1 : u32 = idx_1;
+    b.y[i_1] = i32();
+  }
+  for(var idx_2 : u32 = local_idx; (idx_2 < 80u); idx_2 = (idx_2 + (X * 50u))) {
+    let i : u32 = (idx_2 / 8u);
+    let i_1 : u32 = (idx_2 % 8u);
+    b.x[i][i_1] = i32();
+  }
+  for(var idx_3 : u32 = local_idx; (idx_3 < 256u); idx_3 = (idx_3 + (X * 50u))) {
+    let i_4 : u32 = (idx_3 / 8u);
+    let i_1 : u32 = (idx_3 % 8u);
+    c[i_4].y[i_1] = i32();
+  }
+  for(var idx_4 : u32 = local_idx; (idx_4 < 1600u); idx_4 = (idx_4 + (X * 50u))) {
+    let i_2 : u32 = (idx_4 / 80u);
+    let i : u32 = ((idx_4 % 80u) / 8u);
+    let i_1 : u32 = (idx_4 % 8u);
+    b.z[i_2][i][i_1] = i32();
+  }
+  for(var idx_5 : u32 = local_idx; (idx_5 < 2560u); idx_5 = (idx_5 + (X * 50u))) {
+    let i_3 : u32 = (idx_5 / 80u);
+    let i : u32 = ((idx_5 % 80u) / 8u);
+    let i_1 : u32 = (idx_5 % 8u);
+    c[i_3].x[i][i_1] = i32();
+  }
+  for(var idx_6 : u32 = local_idx; (idx_6 < 51200u); idx_6 = (idx_6 + (X * 50u))) {
+    let i_5 : u32 = (idx_6 / 1600u);
+    let i_2 : u32 = ((idx_6 % 1600u) / 80u);
+    let i : u32 = ((idx_6 % 80u) / 8u);
+    let i_1 : u32 = (idx_6 % 8u);
+    c[i_5].z[i_2][i][i_1] = i32();
   }
   workgroupBarrier();
   ignore(a);
@@ -247,10 +483,22 @@ var<workgroup> c : array<S, 32>;
 
 [[stage(compute), workgroup_size(1)]]
 fn f([[builtin(local_invocation_id)]] local_invocation_id : vec3<u32>, [[builtin(local_invocation_index)]] local_invocation_index : u32) {
-  if ((local_invocation_index == 0u)) {
+  {
     a = i32();
-    b = S();
-    c = array<S, 32>();
+    b.x = i32();
+  }
+  for(var idx : u32 = local_invocation_index; (idx < 8u); idx = (idx + 1u)) {
+    let i : u32 = idx;
+    b.y[i] = i32();
+  }
+  for(var idx_1 : u32 = local_invocation_index; (idx_1 < 32u); idx_1 = (idx_1 + 1u)) {
+    let i_1 : u32 = idx_1;
+    c[i_1].x = i32();
+  }
+  for(var idx_2 : u32 = local_invocation_index; (idx_2 < 256u); idx_2 = (idx_2 + 1u)) {
+    let i_2 : u32 = (idx_2 / 8u);
+    let i : u32 = (idx_2 % 8u);
+    c[i_2].y[i] = i32();
   }
   workgroupBarrier();
   ignore(a);
@@ -283,12 +531,12 @@ fn f1() {
   ignore(c);
 }
 
-[[stage(compute), workgroup_size(1)]]
+[[stage(compute), workgroup_size(1, 2, 3)]]
 fn f2([[builtin(local_invocation_id)]] local_invocation_id : vec3<u32>) {
   ignore(b); // Initialization should be inserted above this statement
 }
 
-[[stage(compute), workgroup_size(1)]]
+[[stage(compute), workgroup_size(4, 5, 6)]]
 fn f3() {
   ignore(c); // Initialization should be inserted above this statement
   ignore(a);
@@ -308,29 +556,49 @@ var<workgroup> c : array<S, 32>;
 
 [[stage(compute), workgroup_size(1)]]
 fn f1([[builtin(local_invocation_index)]] local_invocation_index : u32) {
-  if ((local_invocation_index == 0u)) {
+  {
     a = i32();
-    c = array<S, 32>();
+  }
+  for(var idx : u32 = local_invocation_index; (idx < 32u); idx = (idx + 1u)) {
+    let i : u32 = idx;
+    c[i].x = i32();
+  }
+  for(var idx_1 : u32 = local_invocation_index; (idx_1 < 256u); idx_1 = (idx_1 + 1u)) {
+    let i_1 : u32 = (idx_1 / 8u);
+    let i_2 : u32 = (idx_1 % 8u);
+    c[i_1].y[i_2] = i32();
   }
   workgroupBarrier();
   ignore(a);
   ignore(c);
 }
 
-[[stage(compute), workgroup_size(1)]]
+[[stage(compute), workgroup_size(1, 2, 3)]]
 fn f2([[builtin(local_invocation_id)]] local_invocation_id : vec3<u32>, [[builtin(local_invocation_index)]] local_invocation_index_1 : u32) {
-  if ((local_invocation_index_1 == 0u)) {
-    b = S();
+  if ((local_invocation_index_1 < 1u)) {
+    b.x = i32();
+  }
+  for(var idx_2 : u32 = local_invocation_index_1; (idx_2 < 8u); idx_2 = (idx_2 + 6u)) {
+    let i_3 : u32 = idx_2;
+    b.y[i_3] = i32();
   }
   workgroupBarrier();
   ignore(b);
 }
 
-[[stage(compute), workgroup_size(1)]]
+[[stage(compute), workgroup_size(4, 5, 6)]]
 fn f3([[builtin(local_invocation_index)]] local_invocation_index_2 : u32) {
-  if ((local_invocation_index_2 == 0u)) {
-    c = array<S, 32>();
+  if ((local_invocation_index_2 < 1u)) {
     a = i32();
+  }
+  if ((local_invocation_index_2 < 32u)) {
+    let i_4 : u32 = local_invocation_index_2;
+    c[i_4].x = i32();
+  }
+  for(var idx_3 : u32 = local_invocation_index_2; (idx_3 < 256u); idx_3 = (idx_3 + 120u)) {
+    let i_5 : u32 = (idx_3 / 8u);
+    let i_6 : u32 = (idx_3 % 8u);
+    c[i_5].y[i_6] = i32();
   }
   workgroupBarrier();
   ignore(c);
@@ -356,7 +624,7 @@ fn call_use_v() {
 }
 
 [[stage(compute), workgroup_size(1)]]
-fn f([[builtin(local_invocation_index)]] idx : u32) {
+fn f([[builtin(local_invocation_index)]] local_idx : u32) {
   call_use_v(); // Initialization should be inserted above this statement
 }
 )";
@@ -372,8 +640,8 @@ fn call_use_v() {
 }
 
 [[stage(compute), workgroup_size(1)]]
-fn f([[builtin(local_invocation_index)]] idx : u32) {
-  if ((idx == 0u)) {
+fn f([[builtin(local_invocation_index)]] local_idx : u32) {
+  {
     v = i32();
   }
   workgroupBarrier();
@@ -404,7 +672,7 @@ var<workgroup> u : atomic<u32>;
 
 [[stage(compute), workgroup_size(1)]]
 fn f([[builtin(local_invocation_index)]] local_invocation_index : u32) {
-  if ((local_invocation_index == 0u)) {
+  {
     atomicStore(&(i), i32());
     atomicStore(&(u), u32());
   }
@@ -449,7 +717,7 @@ var<workgroup> w : S;
 
 [[stage(compute), workgroup_size(1)]]
 fn f([[builtin(local_invocation_index)]] local_invocation_index : u32) {
-  if ((local_invocation_index == 0u)) {
+  {
     w.a = i32();
     atomicStore(&(w.i), i32());
     w.b = f32();
@@ -480,11 +748,9 @@ var<workgroup> w : array<atomic<u32>, 4>;
 
 [[stage(compute), workgroup_size(1)]]
 fn f([[builtin(local_invocation_index)]] local_invocation_index : u32) {
-  if ((local_invocation_index == 0u)) {
-    atomicStore(&(w[0u]), u32());
-    atomicStore(&(w[1u]), u32());
-    atomicStore(&(w[2u]), u32());
-    atomicStore(&(w[3u]), u32());
+  for(var idx : u32 = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
+    let i : u32 = idx;
+    atomicStore(&(w[i]), u32());
   }
   workgroupBarrier();
   ignore(w);
@@ -526,27 +792,13 @@ var<workgroup> w : array<S, 4>;
 
 [[stage(compute), workgroup_size(1)]]
 fn f([[builtin(local_invocation_index)]] local_invocation_index : u32) {
-  if ((local_invocation_index == 0u)) {
-    w[0u].a = i32();
-    atomicStore(&(w[0u].i), i32());
-    w[0u].b = f32();
-    atomicStore(&(w[0u].u), u32());
-    w[0u].c = u32();
-    w[1u].a = i32();
-    atomicStore(&(w[1u].i), i32());
-    w[1u].b = f32();
-    atomicStore(&(w[1u].u), u32());
-    w[1u].c = u32();
-    w[2u].a = i32();
-    atomicStore(&(w[2u].i), i32());
-    w[2u].b = f32();
-    atomicStore(&(w[2u].u), u32());
-    w[2u].c = u32();
-    w[3u].a = i32();
-    atomicStore(&(w[3u].i), i32());
-    w[3u].b = f32();
-    atomicStore(&(w[3u].u), u32());
-    w[3u].c = u32();
+  for(var idx : u32 = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
+    let i_1 : u32 = idx;
+    w[i_1].a = i32();
+    atomicStore(&(w[i_1].i), i32());
+    w[i_1].b = f32();
+    atomicStore(&(w[i_1].u), u32());
+    w[i_1].c = u32();
   }
   workgroupBarrier();
   ignore(w);
@@ -554,56 +806,6 @@ fn f([[builtin(local_invocation_index)]] local_invocation_index : u32) {
 )";
 
   auto got = Run<ZeroInitWorkgroupMemory>(src);
-
-  EXPECT_EQ(expect, str(got));
-}
-
-TEST_F(ZeroInitWorkgroupMemoryTest, WorkgroupArray_InitWithLoop) {
-  auto* src = R"(
-struct S {
-  a : array<i32, 3>; // size: 12, less than the loop threshold
-  b : array<i32, 4>; // size: 16, equal to the loop threshold
-  c : array<i32, 5>; // size: 20, greater than the loop threshold
-};
-
-var<workgroup> w : S;
-
-[[stage(compute), workgroup_size(1)]]
-fn f() {
-  ignore(w); // Initialization should be inserted above this statement
-}
-)";
-  auto* expect = R"(
-struct S {
-  a : array<i32, 3>;
-  b : array<i32, 4>;
-  c : array<i32, 5>;
-};
-
-var<workgroup> w : S;
-
-[[stage(compute), workgroup_size(1)]]
-fn f([[builtin(local_invocation_index)]] local_invocation_index : u32) {
-  if ((local_invocation_index == 0u)) {
-    w.a = array<i32, 3>();
-    for(var i : i32; (i < 4); i = (i + 1)) {
-      w.b[i] = i32();
-    }
-    for(var i_1 : i32; (i_1 < 5); i_1 = (i_1 + 1)) {
-      w.c[i_1] = i32();
-    }
-  }
-  workgroupBarrier();
-  ignore(w);
-}
-)";
-
-  ZeroInitWorkgroupMemory::Config cfg;
-  cfg.init_arrays_with_loop_size_threshold = 16;
-
-  DataMap data;
-  data.Add<ZeroInitWorkgroupMemory::Config>(cfg);
-  auto got = Run<ZeroInitWorkgroupMemory>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }

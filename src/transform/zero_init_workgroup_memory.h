@@ -26,27 +26,6 @@ namespace transform {
 class ZeroInitWorkgroupMemory
     : public Castable<ZeroInitWorkgroupMemory, Transform> {
  public:
-  /// Configuration options for the transform
-  struct Config : public Castable<Config, Data> {
-    /// Constructor
-    Config();
-
-    /// Copy constructor
-    Config(const Config&);
-
-    /// Destructor
-    ~Config() override;
-
-    /// Assignment operator
-    /// @returns this Config
-    Config& operator=(const Config&);
-
-    /// If greater than 0, then arrays of at least this size in bytes will be
-    /// zero initialized using a for loop. If 0, then the array is assigned a
-    /// zero initialized array with a single statement.
-    uint32_t init_arrays_with_loop_size_threshold = 0;
-  };
-
   /// Constructor
   ZeroInitWorkgroupMemory();
 

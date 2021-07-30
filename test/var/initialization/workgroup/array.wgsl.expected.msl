@@ -6,13 +6,13 @@ struct tint_array_wrapper {
 };
 
 kernel void tint_symbol(uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  threadgroup tint_array_wrapper tint_symbol_3;
-  if ((local_invocation_index == 0u)) {
-    tint_array_wrapper const tint_symbol_2 = {.arr={}};
-    tint_symbol_3 = tint_symbol_2;
+  threadgroup tint_array_wrapper tint_symbol_2;
+  for(uint idx = local_invocation_index; (idx < 3u); idx = (idx + 1u)) {
+    uint const i = idx;
+    tint_symbol_2.arr[i] = int();
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  (void) tint_symbol_3;
+  (void) tint_symbol_2;
   return;
 }
 

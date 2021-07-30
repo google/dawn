@@ -350,21 +350,16 @@ void main(tint_symbol_1 tint_symbol) {
   const uint3 gl_LocalInvocationID_param = tint_symbol.gl_LocalInvocationID_param;
   const uint3 gl_GlobalInvocationID_param = tint_symbol.gl_GlobalInvocationID_param;
   const uint local_invocation_index = tint_symbol.local_invocation_index;
-  if ((local_invocation_index == 0u)) {
-    {
-      for(int i = 0; (i < 64); i = (i + 1)) {
-        {
-          for(int i_1 = 0; (i_1 < 64); i_1 = (i_1 + 1)) {
-            mm_Asub[i][i_1] = 0.0f;
-          }
-        }
-      }
-    }
-    {
-      for(int i_2 = 0; (i_2 < 64); i_2 = (i_2 + 1)) {
-        const float tint_symbol_6[1] = (float[1])0;
-        mm_Bsub[i_2] = tint_symbol_6;
-      }
+  {
+    const uint i_1 = local_invocation_index;
+    const uint i_2 = (local_invocation_index % 1u);
+    mm_Bsub[i_1][i_2] = 0.0f;
+  }
+  {
+    for(uint idx = local_invocation_index; (idx < 4096u); idx = (idx + 64u)) {
+      const uint i = (idx / 64u);
+      const uint i_1 = (idx % 64u);
+      mm_Asub[i][i_1] = 0.0f;
     }
   }
   GroupMemoryBarrierWithGroupSync();
