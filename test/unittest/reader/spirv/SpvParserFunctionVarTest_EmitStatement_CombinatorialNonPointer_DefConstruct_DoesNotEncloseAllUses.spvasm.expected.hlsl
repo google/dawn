@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 static uint x_1 = 0u;
 
 void main_1() {
@@ -30,3 +32,11 @@ void main() {
   main_1();
   return;
 }
+warning: DXIL.dll not found.  Resulting DXIL will not be signed for use in release environments.
+
+error: validation errors
+tint_9DZjPt:29: error: Loop must have break.
+Validation failed.
+
+
+

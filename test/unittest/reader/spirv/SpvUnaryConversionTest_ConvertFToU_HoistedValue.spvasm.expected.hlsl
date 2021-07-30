@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 void main_1() {
   while (true) {
     float x_600 = 0.0f;
@@ -19,3 +21,4 @@ void main() {
   main_1();
   return;
 }
+

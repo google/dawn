@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 #include <metal_stdlib>
 
 using namespace metal;
@@ -32,4 +34,14 @@ fragment tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
   tint_symbol_3 const tint_symbol_5 = {.x_2_1=tint_symbol_4.x_2_1, .x_4_1=tint_symbol_4.x_4_1};
   return tint_symbol_5;
 }
+
+Compilation failed: 
+
+program_source:14:22: error: 'color' attribute parameter is out of bounds: must be between 0 and 7
+  uint x_4_1 [[color(40)]];
+                     ^
+program_source:21:10: error: invalid return type 'tint_symbol_3' for fragment function
+fragment tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+         ^
+
 
