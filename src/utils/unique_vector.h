@@ -22,7 +22,7 @@ namespace tint {
 
 /// UniqueVector is an ordered container that only contains unique items.
 /// Attempting to add a duplicate is a no-op.
-template <typename T>
+template <typename T, typename HASH = std::hash<T>>
 struct UniqueVector {
   /// The iterator returned by begin() and end()
   using ConstIterator = typename std::vector<T>::const_iterator;
@@ -55,7 +55,7 @@ struct UniqueVector {
 
  private:
   std::vector<T> vector;
-  std::unordered_set<T> set;
+  std::unordered_set<T, HASH> set;
 };
 
 }  // namespace tint
