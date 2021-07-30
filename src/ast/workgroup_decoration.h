@@ -64,9 +64,9 @@ class WorkgroupDecoration : public Castable<WorkgroupDecoration, Decoration> {
   WorkgroupDecoration* Clone(CloneContext* ctx) const override;
 
  private:
-  ast::Expression* x_ = nullptr;
-  ast::Expression* y_ = nullptr;
-  ast::Expression* z_ = nullptr;
+  ast::Expression* const x_ = nullptr;
+  ast::Expression* const y_ = nullptr;
+  ast::Expression* const z_ = nullptr;
 };
 
 }  // namespace ast
