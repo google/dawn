@@ -45,6 +45,9 @@ Program Parse(const std::vector<uint32_t>& input) {
   ProgramBuilder output;
   CloneContext(&output, &program_with_disjoint_ast, false).Clone();
   auto program = Program(std::move(output));
+  if (!program.IsValid()) {
+    return program;
+  }
 
   // If the generated program contains matrices with a custom MatrixStride
   // attribute then we need to decompose these into an array of vectors
