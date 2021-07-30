@@ -19,8 +19,11 @@ set(SRC
     socket.h
 )
 
+find_package (Threads REQUIRED)
+
 add_executable(tint-remote-compile ${SRC})
 
+target_link_libraries (tint-remote-compile Threads::Threads)
 target_include_directories(tint-remote-compile PRIVATE "${TINT_ROOT_SOURCE_DIR}")
 
 # If we're building on mac / ios and we have CoreGraphics, then we can use the
