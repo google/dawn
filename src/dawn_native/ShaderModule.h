@@ -60,6 +60,19 @@ namespace dawn_native {
         Float,
     };
 
+    enum class InterpolationType {
+        Perspective,
+        Linear,
+        Flat,
+    };
+
+    enum class InterpolationSampling {
+        None,
+        Center,
+        Centroid,
+        Sample,
+    };
+
     using PipelineLayoutEntryPointPair = std::pair<PipelineLayoutBase*, std::string>;
     struct PipelineLayoutEntryPointPairHashFunc {
         size_t operator()(const PipelineLayoutEntryPointPair& pair) const;
@@ -169,6 +182,8 @@ namespace dawn_native {
         struct InterStageVariableInfo {
             InterStageComponentType baseType;
             uint32_t componentCount;
+            InterpolationType interpolationType;
+            InterpolationSampling interpolationSampling;
         };
         // Now that we only support vertex and fragment stages, there can't be both inter-stage
         // inputs and outputs in one shader stage.

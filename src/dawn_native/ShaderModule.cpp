@@ -370,6 +370,38 @@ namespace dawn_native {
             }
         }
 
+        ResultOrError<InterpolationType> TintInterpolationTypeToInterpolationType(
+            tint::inspector::InterpolationType type) {
+            switch (type) {
+                case tint::inspector::InterpolationType::kPerspective:
+                    return InterpolationType::Perspective;
+                case tint::inspector::InterpolationType::kLinear:
+                    return InterpolationType::Linear;
+                case tint::inspector::InterpolationType::kFlat:
+                    return InterpolationType::Flat;
+                case tint::inspector::InterpolationType::kUnknown:
+                    return DAWN_VALIDATION_ERROR(
+                        "Attempted to convert 'Unknown' interpolation type from Tint");
+            }
+        }
+
+        ResultOrError<InterpolationSampling> TintInterpolationSamplingToInterpolationSamplingType(
+            tint::inspector::InterpolationSampling type) {
+            switch (type) {
+                case tint::inspector::InterpolationSampling::kNone:
+                    return InterpolationSampling::None;
+                case tint::inspector::InterpolationSampling::kCenter:
+                    return InterpolationSampling::Center;
+                case tint::inspector::InterpolationSampling::kCentroid:
+                    return InterpolationSampling::Centroid;
+                case tint::inspector::InterpolationSampling::kSample:
+                    return InterpolationSampling::Sample;
+                case tint::inspector::InterpolationSampling::kUnknown:
+                    return DAWN_VALIDATION_ERROR(
+                        "Attempted to convert 'Unknown' interpolation sampling type from Tint");
+            }
+        }
+
         MaybeError ValidateSpirv(const uint32_t* code, uint32_t codeSize) {
             spvtools::SpirvTools spirvTools(SPV_ENV_VULKAN_1_1);
 
@@ -1041,6 +1073,13 @@ namespace dawn_native {
                         DAWN_TRY_ASSIGN(metadata->interStageVariables[location].componentCount,
                                         TintCompositionTypeToInterStageComponentCount(
                                             output_var.composition_type));
+                        DAWN_TRY_ASSIGN(metadata->interStageVariables[location].interpolationType,
+                                        TintInterpolationTypeToInterpolationType(
+                                            output_var.interpolation_type));
+                        DAWN_TRY_ASSIGN(
+                            metadata->interStageVariables[location].interpolationSampling,
+                            TintInterpolationSamplingToInterpolationSamplingType(
+                                output_var.interpolation_sampling));
                     }
                 }
 
@@ -1063,6 +1102,13 @@ namespace dawn_native {
                         DAWN_TRY_ASSIGN(metadata->interStageVariables[location].componentCount,
                                         TintCompositionTypeToInterStageComponentCount(
                                             input_var.composition_type));
+                        DAWN_TRY_ASSIGN(
+                            metadata->interStageVariables[location].interpolationType,
+                            TintInterpolationTypeToInterpolationType(input_var.interpolation_type));
+                        DAWN_TRY_ASSIGN(
+                            metadata->interStageVariables[location].interpolationSampling,
+                            TintInterpolationSamplingToInterpolationSamplingType(
+                                input_var.interpolation_sampling));
                     }
 
                     for (const auto& output_var : entryPoint.output_variables) {

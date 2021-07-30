@@ -1087,3 +1087,142 @@ TEST_F(InterStageVariableMatchingValidationTest, DifferentTypeAtSameLocation) {
         }
     }
 }
+
+// Tests that creating render pipeline should fail when the interpolation attribute of a vertex
+// stage output variable doesn't match the type of the fragment stage input variable at the same
+// location.
+TEST_F(InterStageVariableMatchingValidationTest, DifferentInterpolationAttributeAtSameLocation) {
+    enum class InterpolationType : uint8_t {
+        None = 0,
+        Perspective,
+        Linear,
+        Flat,
+        Count,
+    };
+    enum class InterpolationSampling : uint8_t {
+        None = 0,
+        Center,
+        Centroid,
+        Sample,
+        Count,
+    };
+    constexpr std::array<const char*, static_cast<size_t>(InterpolationType::Count)>
+        kInterpolationTypeString = {{"", "perspective", "linear", "flat"}};
+    constexpr std::array<const char*, static_cast<size_t>(InterpolationSampling::Count)>
+        kInterpolationSamplingString = {{"", "center", "centroid", "sample"}};
+
+    struct InterpolationAttribute {
+        InterpolationType interpolationType;
+        InterpolationSampling interpolationSampling;
+    };
+
+    // Interpolation sampling is not used with flat interpolation.
+    constexpr std::array<InterpolationAttribute, 10> validInterpolationAttributes = {{
+        {InterpolationType::None, InterpolationSampling::None},
+        {InterpolationType::Flat, InterpolationSampling::None},
+        {InterpolationType::Linear, InterpolationSampling::None},
+        {InterpolationType::Linear, InterpolationSampling::Center},
+        {InterpolationType::Linear, InterpolationSampling::Centroid},
+        {InterpolationType::Linear, InterpolationSampling::Sample},
+        {InterpolationType::Perspective, InterpolationSampling::None},
+        {InterpolationType::Perspective, InterpolationSampling::Center},
+        {InterpolationType::Perspective, InterpolationSampling::Centroid},
+        {InterpolationType::Perspective, InterpolationSampling::Sample},
+    }};
+
+    std::vector<wgpu::ShaderModule> vertexModules(validInterpolationAttributes.size());
+    std::vector<wgpu::ShaderModule> fragmentModules(validInterpolationAttributes.size());
+    for (uint32_t i = 0; i < validInterpolationAttributes.size(); ++i) {
+        std::string interfaceDeclaration;
+        {
+            const auto& interpolationAttribute = validInterpolationAttributes[i];
+            std::ostringstream sstream;
+            sstream << "struct A { [[location(0)";
+            if (interpolationAttribute.interpolationType != InterpolationType::None) {
+                sstream << ", interpolate("
+                        << kInterpolationTypeString[static_cast<uint8_t>(
+                               interpolationAttribute.interpolationType)];
+                if (interpolationAttribute.interpolationSampling != InterpolationSampling::None) {
+                    sstream << ", "
+                            << kInterpolationSamplingString[static_cast<uint8_t>(
+                                   interpolationAttribute.interpolationSampling)];
+                }
+                sstream << ")";
+            }
+            sstream << " ]] a : vec4<f32>;" << std::endl;
+            interfaceDeclaration = sstream.str();
+        }
+        {
+            std::ostringstream vertexStream;
+            vertexStream << interfaceDeclaration << R"(
+                    [[builtin(position)]] pos: vec4<f32>;
+                };
+                [[stage(vertex)]] fn main() -> A {
+                    var vertexOut: A;
+                    vertexOut.pos = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+                    return vertexOut;
+                })";
+            vertexModules[i] = utils::CreateShaderModule(device, vertexStream.str().c_str());
+        }
+        {
+            std::ostringstream fragmentStream;
+            fragmentStream << interfaceDeclaration << R"(
+                };
+                [[stage(fragment)]] fn main(fragmentIn: A) -> [[location(0)]] vec4<f32> {
+                    return fragmentIn.a;
+                })";
+            fragmentModules[i] = utils::CreateShaderModule(device, fragmentStream.str().c_str());
+        }
+    }
+
+    auto GetAppliedInterpolationAttribute = [](const InterpolationAttribute& attribute) {
+        InterpolationAttribute appliedAttribute = {attribute.interpolationType,
+                                                   attribute.interpolationSampling};
+        switch (attribute.interpolationType) {
+            // If the interpolation attribute is not specified, then
+            // [[interpolate(perspective, center)]] or [[interpolate(perspective)]] is assumed.
+            case InterpolationType::None:
+                appliedAttribute.interpolationType = InterpolationType::Perspective;
+                appliedAttribute.interpolationSampling = InterpolationSampling::Center;
+                break;
+
+            // If the interpolation type is perspective or linear, and the interpolation
+            // sampling is not specified, then 'center' is assumed.
+            case InterpolationType::Perspective:
+            case InterpolationType::Linear:
+                if (appliedAttribute.interpolationSampling == InterpolationSampling::None) {
+                    appliedAttribute.interpolationSampling = InterpolationSampling::Center;
+                }
+                break;
+
+            case InterpolationType::Flat:
+                break;
+            default:
+                UNREACHABLE();
+        }
+        return appliedAttribute;
+    };
+
+    auto InterpolationAttributeMatch = [GetAppliedInterpolationAttribute](
+                                           const InterpolationAttribute& attribute1,
+                                           const InterpolationAttribute& attribute2) {
+        InterpolationAttribute appliedAttribute1 = GetAppliedInterpolationAttribute(attribute1);
+        InterpolationAttribute appliedAttribute2 = GetAppliedInterpolationAttribute(attribute2);
+
+        return appliedAttribute1.interpolationType == appliedAttribute2.interpolationType &&
+               appliedAttribute1.interpolationSampling == appliedAttribute2.interpolationSampling;
+    };
+
+    for (uint32_t vertexModuleIndex = 0; vertexModuleIndex < validInterpolationAttributes.size();
+         ++vertexModuleIndex) {
+        wgpu::ShaderModule vertexModule = vertexModules[vertexModuleIndex];
+        for (uint32_t fragmentModuleIndex = 0;
+             fragmentModuleIndex < validInterpolationAttributes.size(); ++fragmentModuleIndex) {
+            wgpu::ShaderModule fragmentModule = fragmentModules[fragmentModuleIndex];
+            bool shouldSuccess =
+                InterpolationAttributeMatch(validInterpolationAttributes[vertexModuleIndex],
+                                            validInterpolationAttributes[fragmentModuleIndex]);
+            CheckCreatingRenderPipeline(vertexModule, fragmentModule, shouldSuccess);
+        }
+    }
+}

@@ -351,6 +351,13 @@ namespace dawn_native {
                 if (vertexOutputInfo.componentCount != fragmentInputInfo.componentCount) {
                     return DAWN_VALIDATION_ERROR(generateErrorString("componentCount", i));
                 }
+                if (vertexOutputInfo.interpolationType != fragmentInputInfo.interpolationType) {
+                    return DAWN_VALIDATION_ERROR(generateErrorString("interpolation type", i));
+                }
+                if (vertexOutputInfo.interpolationSampling !=
+                    fragmentInputInfo.interpolationSampling) {
+                    return DAWN_VALIDATION_ERROR(generateErrorString("interpolation sampling", i));
+                }
             }
 
             return {};
