@@ -49,9 +49,6 @@ SpirvFuzzMutator::SpirvFuzzMutator(
           std::make_unique<spvtools::fuzz::FactManager>(ir_context.get()),
           validator_options_);
 
-  // The value 'true' is passed for ignore_inapplicable_transformations so that
-  // fuzzing continues even when transformations that should be applicable turn
-  // out to be inapplicable.
   auto fuzzer_context = std::make_unique<spvtools::fuzz::FuzzerContext>(
       std::make_unique<spvtools::fuzz::PseudoRandomGenerator>(seed),
       spvtools::fuzz::FuzzerContext::GetMinFreshId(ir_context.get()), false);
@@ -59,7 +56,7 @@ SpirvFuzzMutator::SpirvFuzzMutator(
       std::move(ir_context), std::move(transformation_context),
       std::move(fuzzer_context), util::GetBufferMessageConsumer(errors_.get()),
       donors, enable_all_passes, repeated_pass_strategy,
-      validate_after_each_pass, validator_options_, true);
+      validate_after_each_pass, validator_options_);
 }
 
 Mutator::Result SpirvFuzzMutator::Mutate() {
