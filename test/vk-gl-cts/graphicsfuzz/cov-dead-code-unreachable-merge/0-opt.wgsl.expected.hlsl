@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: https://github.com/microsoft/DirectXShaderCompiler/issues/3894
 
 static float4 gl_FragCoord = float4(0.0f, 0.0f, 0.0f, 0.0f);
 static float array0[3] = (float[3])0;
@@ -31,6 +31,11 @@ void main_1() {
           }
           array0[c] = 1.0f;
           /* fallthrough */
+          {
+            array1[0] = 1.0f;
+            array1[c] = 1.0f;
+          }
+          break;
         }
         case 61: {
           array1[0] = 1.0f;
@@ -72,13 +77,3 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   const tint_symbol_2 tint_symbol_5 = {tint_symbol_3.x_GLF_color_1};
   return tint_symbol_5;
 }
-C:\src\tint\test\Shader@0x0000026803D7D2F0(15,8-20): warning X3556: integer modulus may be much slower, try using uints if possible.
-C:\src\tint\test\Shader@0x0000026803D7D2F0(24,11-22): warning X3557: loop doesn't seem to do anything, forcing loop to unroll
-C:\src\tint\test\Shader@0x0000026803D7D2F0(24,11-22): warning X3557: loop doesn't seem to do anything, forcing loop to unroll
-C:\src\tint\test\Shader@0x0000026803D7D2F0(24,11-22): warning X3557: loop doesn't seem to do anything, forcing loop to unroll
-C:\src\tint\test\Shader@0x0000026803D7D2F0(24,11-22): warning X3557: loop doesn't seem to do anything, forcing loop to unroll
-C:\src\tint\test\Shader@0x0000026803D7D2F0(24,11-22): warning X3557: loop doesn't seem to do anything, forcing loop to unroll
-C:\src\tint\test\Shader@0x0000026803D7D2F0(24,11-22): warning X3557: loop doesn't seem to do anything, forcing loop to unroll
-C:\src\tint\test\Shader@0x0000026803D7D2F0(23,9): error X3533: non-empty case statements must have break or return
-C:\src\tint\test\Shader@0x0000026803D7D2F0(24,11-22): warning X3557: loop doesn't seem to do anything, forcing loop to unroll
-

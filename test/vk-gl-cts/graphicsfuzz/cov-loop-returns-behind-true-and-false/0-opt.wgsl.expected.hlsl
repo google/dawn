@@ -17,19 +17,52 @@ void main_1() {
         return;
       }
       /* fallthrough */
+      {
+        if (true) {
+          const uint scalar_offset_1 = ((16u * uint(0))) / 4;
+          const int x_40 = asint(x_6[scalar_offset_1 / 4][scalar_offset_1 % 4]);
+          const int x_43 = asint(x_6[1].x);
+          const int x_46 = asint(x_6[1].x);
+          const uint scalar_offset_2 = ((16u * uint(0))) / 4;
+          const int x_49 = asint(x_6[scalar_offset_2 / 4][scalar_offset_2 % 4]);
+          x_GLF_color = float4(float(x_40), float(x_43), float(x_46), float(x_49));
+          if (false) {
+            const uint scalar_offset_3 = ((16u * uint(0))) / 4;
+            const int x_55 = asint(x_6[scalar_offset_3 / 4][scalar_offset_3 % 4]);
+            const float x_56 = float(x_55);
+            x_GLF_color = float4(x_56, x_56, x_56, x_56);
+            while (true) {
+              x_GLF_global_loop_count = (x_GLF_global_loop_count + 1);
+              if (false) {
+                return;
+              }
+              if (true) {
+                return;
+              }
+              {
+                if ((x_GLF_global_loop_count < 100)) {
+                } else {
+                  break;
+                }
+              }
+            }
+          }
+        }
+      }
+      break;
     }
     case 1: {
       if (true) {
-        const uint scalar_offset_1 = ((16u * uint(0))) / 4;
-        const int x_40 = asint(x_6[scalar_offset_1 / 4][scalar_offset_1 % 4]);
+        const uint scalar_offset_4 = ((16u * uint(0))) / 4;
+        const int x_40 = asint(x_6[scalar_offset_4 / 4][scalar_offset_4 % 4]);
         const int x_43 = asint(x_6[1].x);
         const int x_46 = asint(x_6[1].x);
-        const uint scalar_offset_2 = ((16u * uint(0))) / 4;
-        const int x_49 = asint(x_6[scalar_offset_2 / 4][scalar_offset_2 % 4]);
+        const uint scalar_offset_5 = ((16u * uint(0))) / 4;
+        const int x_49 = asint(x_6[scalar_offset_5 / 4][scalar_offset_5 % 4]);
         x_GLF_color = float4(float(x_40), float(x_43), float(x_46), float(x_49));
         if (false) {
-          const uint scalar_offset_3 = ((16u * uint(0))) / 4;
-          const int x_55 = asint(x_6[scalar_offset_3 / 4][scalar_offset_3 % 4]);
+          const uint scalar_offset_6 = ((16u * uint(0))) / 4;
+          const int x_55 = asint(x_6[scalar_offset_6 / 4][scalar_offset_6 % 4]);
           const float x_56 = float(x_55);
           x_GLF_color = float4(x_56, x_56, x_56, x_56);
           while (true) {

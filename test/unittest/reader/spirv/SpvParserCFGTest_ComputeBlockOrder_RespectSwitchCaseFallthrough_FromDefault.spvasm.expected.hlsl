@@ -7,9 +7,18 @@ void main_1() {
     }
     default: {
       /* fallthrough */
+      {
+        /* fallthrough */
+      }
+      {
+      }
+      break;
     }
     case 30u: {
       /* fallthrough */
+      {
+      }
+      break;
     }
     case 40u: {
       break;

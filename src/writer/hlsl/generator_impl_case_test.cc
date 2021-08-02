@@ -31,7 +31,7 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitCase(s->body()[0])) << gen.error();
+  ASSERT_TRUE(gen.EmitCase(s, 0)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  case 5: {
     break;
   }
@@ -46,7 +46,7 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_BreaksByDefault) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitCase(s->body()[0])) << gen.error();
+  ASSERT_TRUE(gen.EmitCase(s, 0)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  case 5: {
     break;
   }
@@ -55,7 +55,9 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_BreaksByDefault) {
 
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case_WithFallthrough) {
   auto* s =
-      Switch(1, Case(Literal(5), Block(create<ast::FallthroughStatement>())),
+      Switch(1,                                                             //
+             Case(Literal(4), Block(create<ast::FallthroughStatement>())),  //
+             Case(Literal(5), Block(create<ast::ReturnStatement>())),       //
              DefaultCase());
   WrapInFunction(s);
 
@@ -63,9 +65,13 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_WithFallthrough) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitCase(s->body()[0])) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  case 5: {
+  ASSERT_TRUE(gen.EmitCase(s, 0)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  case 4: {
     /* fallthrough */
+    {
+      return;
+    }
+    break;
   }
 )");
 }
@@ -80,7 +86,7 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_MultipleSelectors) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitCase(s->body()[0])) << gen.error();
+  ASSERT_TRUE(gen.EmitCase(s, 0)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  case 5:
   case 6: {
     break;
@@ -96,7 +102,7 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_Default) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitCase(s->body()[0])) << gen.error();
+  ASSERT_TRUE(gen.EmitCase(s, 0)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  default: {
     break;
   }

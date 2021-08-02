@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 cbuffer cbuffer_x_6 : register(b0, space0) {
   uint4 x_6[5];
 };
@@ -27,6 +25,10 @@ void main_1() {
       case 1: {
         count0 = (count0 + 1);
         /* fallthrough */
+        {
+          count1 = (count1 + 1);
+        }
+        break;
       }
       case 2:
       case 3: {
@@ -78,6 +80,3 @@ tint_symbol main() {
   const tint_symbol tint_symbol_3 = {tint_symbol_1.x_GLF_color_1};
   return tint_symbol_3;
 }
-C:\src\tint\test\Shader@0x000001CD53C8DD00(24,7): error X3533: non-empty case statements must have break or return
-C:\src\tint\test\Shader@0x000001CD53C8DD00(28,7): error X3537: Fall-throughs in switch statements are not allowed.
-

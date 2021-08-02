@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 cbuffer cbuffer_x_6 : register(b0, space0) {
   uint4 x_6[1];
 };
@@ -31,15 +29,48 @@ void main_1() {
         y = x_54;
         x_55_phi = x_54;
         /* fallthrough */
+        {
+          const float x_47 = clamp(1.0f, 0.5f, x_55_phi);
+          y = x_47;
+          x_46_phi = x_47;
+          /* fallthrough */
+        }
+        {
+          /* fallthrough */
+        }
+        {
+          if ((x_46_phi == 1.0f)) {
+            x_GLF_color = float4(float((x_31 + 1)), 0.0f, 0.0f, 1.0f);
+            return;
+          }
+        }
+        break;
       }
       case 1: {
         const float x_47 = clamp(1.0f, 0.5f, x_55_phi);
         y = x_47;
         x_46_phi = x_47;
         /* fallthrough */
+        {
+          /* fallthrough */
+        }
+        {
+          if ((x_46_phi == 1.0f)) {
+            x_GLF_color = float4(float((x_31 + 1)), 0.0f, 0.0f, 1.0f);
+            return;
+          }
+        }
+        break;
       }
       default: {
         /* fallthrough */
+        {
+          if ((x_46_phi == 1.0f)) {
+            x_GLF_color = float4(float((x_31 + 1)), 0.0f, 0.0f, 1.0f);
+            return;
+          }
+        }
+        break;
       }
       case 2: {
         if ((x_46_phi == 1.0f)) {
@@ -71,10 +102,3 @@ tint_symbol main() {
   const tint_symbol tint_symbol_3 = {tint_symbol_1.x_GLF_color_1};
   return tint_symbol_3;
 }
-C:\src\tint\test\Shader@0x000002EAE8878270(27,7): error X3533: non-empty case statements must have break or return
-C:\src\tint\test\Shader@0x000002EAE8878270(33,7): error X3533: non-empty case statements must have break or return
-C:\src\tint\test\Shader@0x000002EAE8878270(39,7): error X3533: non-empty case statements must have break or return
-C:\src\tint\test\Shader@0x000002EAE8878270(32,7): error X3537: Fall-throughs in switch statements are not allowed.
-C:\src\tint\test\Shader@0x000002EAE8878270(38,7): error X3537: Fall-throughs in switch statements are not allowed.
-C:\src\tint\test\Shader@0x000002EAE8878270(41,7): error X3537: Fall-throughs in switch statements are not allowed.
-

@@ -58,15 +58,6 @@ namespace {
 const char kTempNamePrefix[] = "tint_tmp";
 const char kSpecConstantPrefix[] = "WGSL_SPEC_CONSTANT_";
 
-bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
-  if (stmts->empty()) {
-    return false;
-  }
-
-  return stmts->last()->Is<ast::BreakStatement>() ||
-         stmts->last()->Is<ast::FallthroughStatement>();
-}
-
 const char* image_format_to_rwtexture_type(ast::ImageFormat image_format) {
   switch (image_format) {
     case ast::ImageFormat::kRgba8Unorm:
@@ -2019,7 +2010,8 @@ std::string GeneratorImpl::generate_builtin_name(
   return "";
 }
 
-bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
+bool GeneratorImpl::EmitCase(ast::SwitchStatement* s, size_t case_idx) {
+  auto* stmt = s->body()[case_idx];
   if (stmt->IsDefault()) {
     line() << "default: {";
   } else {
@@ -2036,17 +2028,32 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
     }
   }
 
-  {
-    ScopedIndent si(this);
-    if (!EmitStatements(stmt->body()->statements())) {
+  increment_indent();
+  TINT_DEFER({
+    decrement_indent();
+    line() << "}";
+  });
+
+  // Emit the case statement
+  if (!EmitStatements(stmt->body()->statements())) {
+    return false;
+  }
+
+  // Inline all fallthrough case statements. FXC cannot handle fallthroughs.
+  while (tint::Is<ast::FallthroughStatement>(stmt->body()->last())) {
+    case_idx++;
+    stmt = s->body()[case_idx];
+    // Generate each fallthrough case statement in a new block. This is done to
+    // prevent symbol collision of variables declared in these cases statements.
+    if (!EmitBlock(stmt->body())) {
       return false;
-    }
-    if (!last_is_break_or_fallthrough(stmt->body())) {
-      line() << "break;";
     }
   }
 
-  line() << "}";
+  if (!tint::IsAnyOf<ast::BreakStatement, ast::FallthroughStatement>(
+          stmt->body()->last())) {
+    line() << "break;";
+  }
 
   return true;
 }
@@ -2900,8 +2907,8 @@ bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
 
   {
     ScopedIndent si(this);
-    for (auto* s : stmt->body()) {
-      if (!EmitCase(s)) {
+    for (size_t i = 0; i < stmt->body().size(); i++) {
+      if (!EmitCase(stmt, i)) {
         return false;
       }
     }

@@ -10,6 +10,9 @@ void main_1() {
     }
     default: {
       /* fallthrough */
+      {
+      }
+      break;
     }
     case 30u: {
       break;

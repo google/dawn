@@ -25,6 +25,10 @@ void main_1() {
             while (true) {
             }
             /* fallthrough */
+            {
+              data[0] = 2.0f;
+            }
+            break;
           }
           case 0: {
             data[0] = 2.0f;

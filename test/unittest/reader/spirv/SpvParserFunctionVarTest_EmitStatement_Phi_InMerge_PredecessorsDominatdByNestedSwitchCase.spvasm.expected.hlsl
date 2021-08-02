@@ -7,9 +7,30 @@ void main_1() {
   switch(1u) {
     default: {
       /* fallthrough */
+      {
+        /* fallthrough */
+      }
+      {
+        if (true) {
+        } else {
+          x_41_phi = 0u;
+          break;
+        }
+        x_41_phi = 1u;
+      }
+      break;
     }
     case 0u: {
       /* fallthrough */
+      {
+        if (true) {
+        } else {
+          x_41_phi = 0u;
+          break;
+        }
+        x_41_phi = 1u;
+      }
+      break;
     }
     case 1u: {
       if (true) {

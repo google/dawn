@@ -9,9 +9,22 @@ void main_1() {
         break;
       }
       /* fallthrough */
+      {
+        /* fallthrough */
+      }
+      {
+        if (false) {
+        }
+      }
+      break;
     }
     default: {
       /* fallthrough */
+      {
+        if (false) {
+        }
+      }
+      break;
     }
     case 50u: {
       if (false) {

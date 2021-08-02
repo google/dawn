@@ -6,6 +6,10 @@ void main_1() {
     case 20u: {
       var_1 = 20u;
       /* fallthrough */
+      {
+        var_1 = 30u;
+      }
+      break;
     }
     case 30u: {
       var_1 = 30u;

@@ -196,9 +196,10 @@ class GeneratorImpl : public TextGenerator {
                              ast::CallExpression* expr,
                              const sem::Intrinsic* intrinsic);
   /// Handles a case statement
-  /// @param stmt the statement
+  /// @param s the switch statement
+  /// @param case_idx the index of the switch case in the switch statement
   /// @returns true if the statement was emitted successfully
-  bool EmitCase(ast::CaseStatement* stmt);
+  bool EmitCase(ast::SwitchStatement* s, size_t case_idx);
   /// Handles generating constructor expressions
   /// @param out the output of the expression stream
   /// @param expr the constructor expression

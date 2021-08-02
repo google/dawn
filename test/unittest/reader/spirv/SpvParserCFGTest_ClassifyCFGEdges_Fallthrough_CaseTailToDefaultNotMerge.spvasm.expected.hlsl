@@ -4,6 +4,9 @@ void main_1() {
   switch(42u) {
     case 20u: {
       /* fallthrough */
+      {
+      }
+      break;
     }
     default: {
       break;

@@ -10,6 +10,13 @@ void main_1() {
     }
     default: {
       /* fallthrough */
+      {
+        if (false) {
+        } else {
+          break;
+        }
+      }
+      break;
     }
     case 50u: {
       if (false) {
