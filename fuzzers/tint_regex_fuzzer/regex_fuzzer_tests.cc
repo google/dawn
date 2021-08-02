@@ -25,8 +25,8 @@ namespace {
 
 // Swaps two non-consecutive regions in the edge
 TEST(SwapRegionsTest, SwapIntervalsEdgeNonConsecutive) {
-  std::string R1 = "|region1|", R2 = "; region2;",
-              R3 = "---------region3---------";
+  std::string R1 = ";region1;", R2 = ";regionregion2",
+              R3 = ";regionregionregion3;";
   std::string all_regions = R1 + R2 + R3;
 
   // this call should swap R1 with R3.
@@ -38,9 +38,9 @@ TEST(SwapRegionsTest, SwapIntervalsEdgeNonConsecutive) {
 
 // Swaps two non-consecutive regions not in the edge
 TEST(SwapRegionsTest, SwapIntervalsNonConsecutiveNonEdge) {
-  std::string R1 = "|region1|", R2 = "; region2;",
-              R3 = "---------region3---------", R4 = "++region4++",
-              R5 = "***region5***";
+  std::string R1 = ";region1;", R2 = ";regionregion2;",
+              R3 = ";regionregionregion3;", R4 = ";regionregionregionregion4;",
+              R5 = ";regionregionregionregionregion5;";
   std::string all_regions = R1 + R2 + R3 + R4 + R5;
 
   // this call should swap R2 with R4.
@@ -54,8 +54,9 @@ TEST(SwapRegionsTest, SwapIntervalsNonConsecutiveNonEdge) {
 
 // Swaps two consecutive regions not in the edge (sorrounded by other regions)
 TEST(SwapRegionsTest, SwapIntervalsConsecutiveEdge) {
-  std::string R1 = "|region1|", R2 = "; region2;", R3 = "++++region3++++",
-              R4 = "---------region4---------";
+  std::string R1 = ";region1;", R2 = ";regionregion2;",
+              R3 = ";regionregionregion3;", R4 = ";regionregionregionregion4;",
+              R5 = ";regionregionregionregionregion5;";
   std::string all_regions = R1 + R2 + R3 + R4;
 
   // this call should swap R2 with R3.
@@ -69,9 +70,9 @@ TEST(SwapRegionsTest, SwapIntervalsConsecutiveEdge) {
 // Swaps two consecutive regions not in the edge (not sorrounded by other
 // regions)
 TEST(SwapRegionsTest, SwapIntervalsConsecutiveNonEdge) {
-  std::string R1 = "|region1|", R2 = "; region2;",
-              R3 = "---------region3---------", R4 = "++region4++",
-              R5 = "***region5***";
+  std::string R1 = ";region1;", R2 = ";regionregion2;",
+              R3 = ";regionregionregion3;", R4 = ";regionregionregionregion4;",
+              R5 = ";regionregionregionregionregion5;";
   std::string all_regions = R1 + R2 + R3 + R4 + R5;
 
   // this call should swap R4 with R5.
@@ -87,49 +88,49 @@ TEST(SwapRegionsTest, SwapIntervalsConsecutiveNonEdge) {
 
 // Deletes the first region.
 TEST(DeleteRegionTest, DeleteFirstRegion) {
-  std::string R1 = "|region1|", R2 = "; region2;",
-              R3 = "---------region3---------", R4 = "++region4++",
-              R5 = "***region5***";
+  std::string R1 = ";region1;", R2 = ";regionregion2;",
+              R3 = ";regionregionregion3;", R4 = ";regionregionregionregion4;",
+              R5 = ";regionregionregionregionregion5;";
   std::string all_regions = R1 + R2 + R3 + R4 + R5;
 
   // This call should delete R1.
   DeleteInterval(0, R1.length() - 1, all_regions);
 
-  ASSERT_EQ(R2 + R3 + R4 + R5, all_regions);
+  ASSERT_EQ(";" + R2 + R3 + R4 + R5, all_regions);
 }
 
 // Deletes the last region.
 TEST(DeleteRegionTest, DeleteLastRegion) {
-  std::string R1 = "|region1|", R2 = "; region2;",
-              R3 = "---------region3---------", R4 = "++region4++",
-              R5 = "***region5***";
+  std::string R1 = ";region1;", R2 = ";regionregion2;",
+              R3 = ";regionregionregion3;", R4 = ";regionregionregionregion4;",
+              R5 = ";regionregionregionregionregion5;";
   std::string all_regions = R1 + R2 + R3 + R4 + R5;
 
   // This call should delete R5.
   DeleteInterval(R1.length() + R2.length() + R3.length() + R4.length(),
                  all_regions.length() - 1, all_regions);
 
-  ASSERT_EQ(R1 + R2 + R3 + R4, all_regions);
+  ASSERT_EQ(R1 + R2 + R3 + R4 + ";", all_regions);
 }
 
 // Deletes the middle region.
 TEST(DeleteRegionTest, DeleteMiddleRegion) {
-  std::string R1 = "|region1|", R2 = "; region2;",
-              R3 = "---------region3---------", R4 = "++region4++",
-              R5 = "***region5***";
+  std::string R1 = ";region1;", R2 = ";regionregion2;",
+              R3 = ";regionregionregion3;", R4 = ";regionregionregionregion4;",
+              R5 = ";regionregionregionregionregion5;";
   std::string all_regions = R1 + R2 + R3 + R4 + R5;
 
   // This call should delete R3.
   DeleteInterval(R1.length() + R2.length(),
                  R1.length() + R2.length() + R3.length() - 1, all_regions);
 
-  ASSERT_EQ(R1 + R2 + R4 + R5, all_regions);
+  ASSERT_EQ(R1 + R2 + ";" + R4 + R5, all_regions);
 }
 
 TEST(InsertRegionTest, InsertRegionTest1) {
-  std::string R1 = "|region1|", R2 = "; region2;",
-              R3 = "---------region3---------", R4 = "++region4++",
-              R5 = "***region5***";
+  std::string R1 = ";region1;", R2 = ";regionregion2;",
+              R3 = ";regionregionregion3;", R4 = ";regionregionregionregion4;",
+              R5 = ";regionregionregionregionregion5;";
   std::string all_regions = R1 + R2 + R3 + R4 + R5;
 
   // This call should insert R2 after R4.
@@ -137,13 +138,14 @@ TEST(InsertRegionTest, InsertRegionTest1) {
                     R1.length() + R2.length() + R3.length() + R4.length() - 1,
                     all_regions);
 
-  ASSERT_EQ(R1 + R2 + R3 + R4 + R2 + R5, all_regions);
+  ASSERT_EQ(R1 + R2 + R3 + R4 + R2.substr(1, R2.size() - 1) + R5, all_regions);
 }
 
 TEST(InsertRegionTest, InsertRegionTest2) {
-  std::string R1 = "|region1|", R2 = "; region2;",
-              R3 = "---------region3---------", R4 = "++region4++",
-              R5 = "***region5***";
+  std::string R1 = ";region1;", R2 = ";regionregion2;",
+              R3 = ";regionregionregion3;", R4 = ";regionregionregionregion4;",
+              R5 = ";regionregionregionregionregion5;";
+
   std::string all_regions = R1 + R2 + R3 + R4 + R5;
 
   // This call should insert R3 after R1.
@@ -151,20 +153,23 @@ TEST(InsertRegionTest, InsertRegionTest2) {
                     R1.length() + R2.length() + R3.length() - 1,
                     R1.length() - 1, all_regions);
 
-  ASSERT_EQ(R1 + R3 + R2 + R3 + R4 + R5, all_regions);
+  ASSERT_EQ(R1 + R3.substr(1, R3.length() - 1) + R2 + R3 + R4 + R5,
+            all_regions);
 }
 
 TEST(InsertRegionTest, InsertRegionTest3) {
-  std::string R1 = "|region1|", R2 = "; region2;",
-              R3 = "---------region3---------", R4 = "++region4++",
-              R5 = "***region5***";
+  std::string R1 = ";region1;", R2 = ";regionregion2;",
+              R3 = ";regionregionregion3;", R4 = ";regionregionregionregion4;",
+              R5 = ";regionregionregionregionregion5;";
+
   std::string all_regions = R1 + R2 + R3 + R4 + R5;
 
   // This call should insert R2 after R5.
   DuplicateInterval(R1.length(), R1.length() + R2.length() - 1,
                     all_regions.length() - 1, all_regions);
 
-  ASSERT_EQ(R1 + R2 + R3 + R4 + R5 + R2, all_regions);
+  ASSERT_EQ(R1 + R2 + R3 + R4 + R5 + R2.substr(1, R2.length() - 1),
+            all_regions);
 }
 
 }  // namespace

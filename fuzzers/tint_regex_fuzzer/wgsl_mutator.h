@@ -33,7 +33,7 @@ std::vector<size_t> FindDelimiterIndices(const std::string& delimiter,
                                          const std::string& wgsl_code);
 
 /// Given 4 indices, idx1, idx2, idx3 and idx4 it swaps the regions
-/// in the interval [idx1, idx2] with the region in the interval [idx3, idx4]
+/// in the interval (idx1, idx2] with the region in the interval (idx3, idx4]
 /// in wgsl_text.
 /// @param idx1 - starting index of the first region.
 /// @param idx2 - terminating index of the second region.
@@ -46,7 +46,7 @@ void SwapIntervals(size_t idx1,
                    size_t idx4,
                    std::string& wgsl_code);
 
-/// Given 2 indices, idx1, idx2, it delets the region in the interval [idx1,
+/// Given 2 indices, idx1, idx2, it delets the region in the interval (idx1,
 /// idx2].
 /// @param idx1 - starting index of the first region.
 /// @param idx2 - terminating index of the second region.
@@ -54,7 +54,7 @@ void SwapIntervals(size_t idx1,
 void DeleteInterval(size_t idx1, size_t idx2, std::string& wgsl_code);
 
 /// Given 3 indices, idx1, idx2, and idx3 it inserts the
-/// region in [idx1, idx2] after idx3.
+/// region in (idx1, idx2] after idx3.
 /// @param idx1 - starting index of region.
 /// @param idx2 - terminating index of the region.
 /// @param idx3 - the position where the region will be inserted.

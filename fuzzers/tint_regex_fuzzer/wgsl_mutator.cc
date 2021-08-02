@@ -16,7 +16,6 @@
 
 #include <cassert>
 #include <cstring>
-#include <iostream>
 #include <map>
 #include <random>
 #include <regex>
@@ -24,20 +23,11 @@
 #include <utility>
 #include <vector>
 
+#include "fuzzers/tint_regex_fuzzer/util.h"
+
 namespace tint {
 namespace fuzzers {
 namespace regex_fuzzer {
-
-namespace {
-
-size_t GetRandomIntFromRange(size_t lower_bound,
-                             size_t upper_bound,
-                             std::mt19937& generator) {
-  std::uniform_int_distribution<size_t> dist(lower_bound, upper_bound);
-  return dist(generator);
-}
-
-}  //  namespace
 
 std::vector<size_t> FindDelimiterIndices(const std::string& delimiter,
                                          const std::string& wgsl_code) {
@@ -55,25 +45,25 @@ void SwapIntervals(size_t idx1,
                    size_t idx3,
                    size_t idx4,
                    std::string& wgsl_code) {
-  std::string region_1 = wgsl_code.substr(idx1, idx2 - idx1 + 1);
+  std::string region_1 = wgsl_code.substr(idx1 + 1, idx2 - idx1);
 
-  std::string region_2 = wgsl_code.substr(idx3, idx4 - idx3 + 1);
+  std::string region_2 = wgsl_code.substr(idx3 + 1, idx4 - idx3);
 
   // The second transformation is done first as it doesn't affect ind1 and ind2
-  wgsl_code.replace(idx3, region_2.size(), region_1);
+  wgsl_code.replace(idx3 + 1, region_2.size(), region_1);
 
-  wgsl_code.replace(idx1, region_1.size(), region_2);
+  wgsl_code.replace(idx1 + 1, region_1.size(), region_2);
 }
 
 void DeleteInterval(size_t idx1, size_t idx2, std::string& wgsl_code) {
-  wgsl_code.erase(idx1, idx2 - idx1 + 1);
+  wgsl_code.erase(idx1 + 1, idx2 - idx1);
 }
 
 void DuplicateInterval(size_t idx1,
                        size_t idx2,
                        size_t idx3,
                        std::string& wgsl_code) {
-  std::string region = wgsl_code.substr(idx1, idx2 - idx1 + 1);
+  std::string region = wgsl_code.substr(idx1 + 1, idx2 - idx1);
   wgsl_code.insert(idx3 + 1, region);
 }
 
@@ -148,7 +138,7 @@ bool DuplicateRandomInterval(const std::string& delimiter,
       GetRandomIntFromRange(0, delimiter_positions.size() - 1U, generator);
 
   DuplicateInterval(delimiter_positions[ind1], delimiter_positions[ind2],
-                    delimiter_positions[ind3] + 1, wgsl_code);
+                    delimiter_positions[ind3], wgsl_code);
 
   return true;
 }
