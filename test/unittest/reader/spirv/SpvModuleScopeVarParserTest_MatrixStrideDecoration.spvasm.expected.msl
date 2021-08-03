@@ -1,0 +1,23 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_padded_array_element {
+  /* 0x0000 */ packed_float2 el;
+  /* 0x0008 */ int8_t tint_pad[56];
+};
+struct tint_array_wrapper {
+  /* 0x0000 */ tint_padded_array_element arr[3];
+};
+struct S {
+  /* 0x0000 */ tint_array_wrapper field0;
+};
+
+void main_1() {
+  return;
+}
+
+fragment void tint_symbol() {
+  main_1();
+  return;
+}
+

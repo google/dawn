@@ -27,7 +27,7 @@
                OpDecorate %tint_symbol_1 Location 30
                OpDecorate %tint_symbol_1 Flat
                OpDecorate %tint_symbol_3 Location 0
-               OpDecorate %tint_symbol_4 Location 40
+               OpDecorate %tint_symbol_4 Location 6
                OpMemberDecorate %main_out 0 Offset 0
                OpMemberDecorate %main_out 1 Offset 4
        %uint = OpTypeInt 32 0

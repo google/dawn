@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 static uint x_1 = 0u;
 static uint x_2 = 0u;
 static uint x_3 = 0u;
@@ -19,7 +17,7 @@ struct tint_symbol_1 {
 };
 struct tint_symbol_2 {
   uint x_2_1 : SV_Target0;
-  uint x_4_1 : SV_Target40;
+  uint x_4_1 : SV_Target6;
 };
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {
@@ -32,11 +30,3 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   const tint_symbol_2 tint_symbol_4 = {tint_symbol_3.x_2_1, tint_symbol_3.x_4_1};
   return tint_symbol_4;
 }
-warning: DXIL.dll not found.  Resulting DXIL will not be signed for use in release environments.
-
-error: validation errors
-error: SV_Target semantic index exceeds maximum (7).
-Validation failed.
-
-
-

@@ -12,7 +12,7 @@ OpExecutionMode %5 OriginUpperLeft
 OpDecorate %1 Location 0
 OpDecorate %2 Location 0
 OpDecorate %3 Location 30
-OpDecorate %4 Location 40
+OpDecorate %4 Location 6
 %void = OpTypeVoid
 %7 = OpTypeFunction %void
 %bool = OpTypeBool

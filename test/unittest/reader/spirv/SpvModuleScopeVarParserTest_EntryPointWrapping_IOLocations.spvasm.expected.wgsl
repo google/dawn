@@ -13,7 +13,7 @@ fn main_1() {
 struct main_out {
   [[location(0)]]
   x_2_1 : u32;
-  [[location(40)]]
+  [[location(6)]]
   x_4_1 : u32;
 };
 
