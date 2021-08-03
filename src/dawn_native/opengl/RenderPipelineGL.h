@@ -29,7 +29,9 @@ namespace dawn_native { namespace opengl {
 
     class RenderPipeline final : public RenderPipelineBase, public PipelineGL {
       public:
-        RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor);
+        static ResultOrError<Ref<RenderPipeline>> Create(
+            Device* device,
+            const RenderPipelineDescriptor* descriptor);
 
         GLenum GetGLPrimitiveTopology() const;
         ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes> GetAttributesUsingVertexBuffer(
@@ -38,7 +40,10 @@ namespace dawn_native { namespace opengl {
         void ApplyNow(PersistentPipelineState& persistentPipelineState);
 
       private:
+        RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor);
         ~RenderPipeline() override;
+        MaybeError Initialize();
+
         void CreateVAOForVertexState();
 
         // TODO(yunchao.he@intel.com): vao need to be deduplicated between pipelines.

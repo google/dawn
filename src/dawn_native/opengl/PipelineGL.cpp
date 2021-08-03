@@ -15,7 +15,6 @@
 #include "dawn_native/opengl/PipelineGL.h"
 
 #include "common/BitSetIterator.h"
-#include "common/Log.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/Pipeline.h"
@@ -26,6 +25,7 @@
 #include "dawn_native/opengl/ShaderModuleGL.h"
 
 #include <set>
+#include <sstream>
 
 namespace dawn_native { namespace opengl {
 
@@ -47,11 +47,11 @@ namespace dawn_native { namespace opengl {
     PipelineGL::PipelineGL() = default;
     PipelineGL::~PipelineGL() = default;
 
-    void PipelineGL::Initialize(const OpenGLFunctions& gl,
-                                const PipelineLayout* layout,
-                                const PerStage<ProgrammableStage>& stages) {
+    MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
+                                          const PipelineLayout* layout,
+                                          const PerStage<ProgrammableStage>& stages) {
         auto CreateShader = [](const OpenGLFunctions& gl, GLenum type,
-                               const char* source) -> GLuint {
+                               const char* source) -> ResultOrError<GLuint> {
             GLuint shader = gl.CreateShader(type);
             gl.ShaderSource(shader, 1, &source, nullptr);
             gl.CompileShader(shader);
@@ -65,8 +65,9 @@ namespace dawn_native { namespace opengl {
                 if (infoLogLength > 1) {
                     std::vector<char> buffer(infoLogLength);
                     gl.GetShaderInfoLog(shader, infoLogLength, nullptr, &buffer[0]);
-                    dawn::ErrorLog() << source << "\nProgram compilation failed:\n"
-                                     << buffer.data();
+                    std::stringstream ss;
+                    ss << source << "\nProgram compilation failed:\n" << buffer.data();
+                    return DAWN_VALIDATION_ERROR(ss.str().c_str());
                 }
             }
             return shader;
@@ -87,10 +88,12 @@ namespace dawn_native { namespace opengl {
         bool needsDummySampler = false;
         for (SingleShaderStage stage : IterateStages(activeStages)) {
             const ShaderModule* module = ToBackend(stages[stage].module.Get());
-            std::string glsl =
-                module->TranslateToGLSL(stages[stage].entryPoint.c_str(), stage,
-                                        &combinedSamplers[stage], layout, &needsDummySampler);
-            GLuint shader = CreateShader(gl, GLShaderType(stage), glsl.c_str());
+            std::string glsl;
+            DAWN_TRY_ASSIGN(glsl, module->TranslateToGLSL(stages[stage].entryPoint.c_str(), stage,
+                                                          &combinedSamplers[stage], layout,
+                                                          &needsDummySampler));
+            GLuint shader;
+            DAWN_TRY_ASSIGN(shader, CreateShader(gl, GLShaderType(stage), glsl.c_str()));
             gl.AttachShader(mProgram, shader);
         }
 
@@ -115,7 +118,9 @@ namespace dawn_native { namespace opengl {
             if (infoLogLength > 1) {
                 std::vector<char> buffer(infoLogLength);
                 gl.GetProgramInfoLog(mProgram, infoLogLength, nullptr, &buffer[0]);
-                dawn::ErrorLog() << "Program link failed:\n" << buffer.data();
+                std::stringstream ss;
+                ss << "Program link failed:\n" << buffer.data();
+                return DAWN_VALIDATION_ERROR(ss.str().c_str());
             }
         }
 
@@ -172,6 +177,7 @@ namespace dawn_native { namespace opengl {
 
             textureUnit++;
         }
+        return {};
     }
 
     const std::vector<PipelineGL::SamplerUnit>& PipelineGL::GetTextureUnitsForSampler(

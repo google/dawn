@@ -50,18 +50,17 @@ namespace dawn_native { namespace opengl {
                                                        const ShaderModuleDescriptor* descriptor,
                                                        ShaderModuleParseResult* parseResult);
 
-        std::string TranslateToGLSL(const char* entryPointName,
-                                    SingleShaderStage stage,
-                                    CombinedSamplerInfo* combinedSamplers,
-                                    const PipelineLayout* layout,
-                                    bool* needsDummySampler) const;
+        ResultOrError<std::string> TranslateToGLSL(const char* entryPointName,
+                                                   SingleShaderStage stage,
+                                                   CombinedSamplerInfo* combinedSamplers,
+                                                   const PipelineLayout* layout,
+                                                   bool* needsDummySampler) const;
 
       private:
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModule() override = default;
         MaybeError Initialize(ShaderModuleParseResult* parseResult);
 
-        std::vector<uint32_t> mGLSpirv;
         EntryPointMetadataTable mGLEntryPoints;
     };
 

@@ -262,8 +262,8 @@ fn main(input : FragmentIn) -> [[location(0)]] vec4<f32> {
 
 // Tests that shaders I/O structs can be shared between vertex and fragment shaders.
 TEST_P(ShaderTests, WGSLSharedStructIO) {
-    // TODO(tint:714): Not yet implemeneted in tint yet, but intended to work.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() || IsVulkan() || IsMetal() || IsOpenGL() || IsOpenGLES());
+    // crbug.com/dawn/948: Tint required for multiple entrypoints in a module.
+    DAWN_TEST_UNSUPPORTED_IF(!HasToggleEnabled("use_tint_generator"));
 
     std::string shader = R"(
 struct VertexIn {

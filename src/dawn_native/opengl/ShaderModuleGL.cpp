@@ -94,18 +94,18 @@ namespace dawn_native { namespace opengl {
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
-            mGLSpirv = std::move(result.spirv);
-            DAWN_TRY_ASSIGN(mGLEntryPoints, ReflectShaderUsingSPIRVCross(GetDevice(), mGLSpirv));
+            DAWN_TRY_ASSIGN(mGLEntryPoints,
+                            ReflectShaderUsingSPIRVCross(GetDevice(), result.spirv));
         }
 
         return {};
     }
 
-    std::string ShaderModule::TranslateToGLSL(const char* entryPointName,
-                                              SingleShaderStage stage,
-                                              CombinedSamplerInfo* combinedSamplers,
-                                              const PipelineLayout* layout,
-                                              bool* needsDummySampler) const {
+    ResultOrError<std::string> ShaderModule::TranslateToGLSL(const char* entryPointName,
+                                                             SingleShaderStage stage,
+                                                             CombinedSamplerInfo* combinedSamplers,
+                                                             const PipelineLayout* layout,
+                                                             bool* needsDummySampler) const {
         // If these options are changed, the values in DawnSPIRVCrossGLSLFastFuzzer.cpp need to
         // be updated.
         spirv_cross::CompilerGLSL::Options options;
@@ -125,8 +125,32 @@ namespace dawn_native { namespace opengl {
         options.es = version.IsES();
         options.version = version.GetMajor() * 100 + version.GetMinor() * 10;
 
-        spirv_cross::CompilerGLSL compiler(
-            GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator) ? mGLSpirv : GetSpirv());
+        std::vector<uint32_t> spirv;
+        if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
+            tint::transform::SingleEntryPoint singleEntryPointTransform;
+
+            tint::transform::DataMap transformInputs;
+            transformInputs.Add<tint::transform::SingleEntryPoint::Config>(entryPointName);
+
+            tint::Program program;
+            DAWN_TRY_ASSIGN(program, RunTransforms(&singleEntryPointTransform, GetTintProgram(),
+                                                   transformInputs, nullptr, nullptr));
+
+            tint::writer::spirv::Options options;
+            options.disable_workgroup_init =
+                GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
+            auto result = tint::writer::spirv::Generate(&program, options);
+            if (!result.success) {
+                std::ostringstream errorStream;
+                errorStream << "Generator: " << result.error << std::endl;
+                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
+            }
+
+            spirv = std::move(result.spirv);
+        } else {
+            spirv = GetSpirv();
+        }
+        spirv_cross::CompilerGLSL compiler(std::move(spirv));
         compiler.set_common_options(options);
         compiler.set_entry_point(entryPointName, ShaderStageToExecutionModel(stage));
 

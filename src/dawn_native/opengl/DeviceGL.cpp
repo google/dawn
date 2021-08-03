@@ -129,7 +129,7 @@ namespace dawn_native { namespace opengl {
     }
     ResultOrError<Ref<ComputePipelineBase>> Device::CreateComputePipelineImpl(
         const ComputePipelineDescriptor* descriptor) {
-        return AcquireRef(new ComputePipeline(this, descriptor));
+        return ComputePipeline::Create(this, descriptor);
     }
     ResultOrError<Ref<PipelineLayoutBase>> Device::CreatePipelineLayoutImpl(
         const PipelineLayoutDescriptor* descriptor) {
@@ -141,7 +141,7 @@ namespace dawn_native { namespace opengl {
     }
     ResultOrError<Ref<RenderPipelineBase>> Device::CreateRenderPipelineImpl(
         const RenderPipelineDescriptor* descriptor) {
-        return AcquireRef(new RenderPipeline(this, descriptor));
+        return RenderPipeline::Create(this, descriptor);
     }
     ResultOrError<Ref<SamplerBase>> Device::CreateSamplerImpl(const SamplerDescriptor* descriptor) {
         return AcquireRef(new Sampler(this, descriptor));

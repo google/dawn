@@ -140,6 +140,10 @@ class CopyTextureForBrowserTests : public DawnTest {
 
     void SetUp() override {
         DawnTest::SetUp();
+        // crbug.com/dawn/948: Tint required for multiple entrypoints in a module.
+        // CopyTextureForBrowser uses and internal pipeline with a multi-entrypoint
+        // shader module.
+        DAWN_TEST_UNSUPPORTED_IF(!HasToggleEnabled("use_tint_generator"));
 
         testPipeline = MakeTestPipeline();
 

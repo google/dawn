@@ -28,8 +28,7 @@ namespace dawn_native {
         std::unordered_map<wgpu::TextureFormat, Ref<RenderPipelineBase>>
             copyTextureForBrowserPipelines;
 
-        Ref<ShaderModuleBase> copyTextureForBrowserVS;
-        Ref<ShaderModuleBase> copyTextureForBrowserFS;
+        Ref<ShaderModuleBase> copyTextureForBrowser;
 
         Ref<ComputePipelineBase> timestampComputePipeline;
         Ref<ShaderModuleBase> timestampCS;

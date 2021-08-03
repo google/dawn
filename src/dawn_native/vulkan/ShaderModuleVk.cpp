@@ -104,7 +104,6 @@ namespace dawn_native { namespace vulkan {
             DAWN_TRY_ASSIGN(program,
                             RunTransforms(&transformManager, parseResult->tintProgram.get(),
                                           transformInputs, nullptr, nullptr));
-            // We will miss the messages generated in this RunTransforms.
 
             tint::writer::spirv::Options options;
             options.emit_vertex_point_size = true;
@@ -203,11 +202,14 @@ namespace dawn_native { namespace vulkan {
 
         tint::transform::Manager transformManager;
         transformManager.append(std::make_unique<tint::transform::BindingRemapper>());
+        // Many Vulkan drivers can't handle multi-entrypoint shader modules.
+        transformManager.append(std::make_unique<tint::transform::SingleEntryPoint>());
 
         tint::transform::DataMap transformInputs;
         transformInputs.Add<BindingRemapper::Remappings>(std::move(bindingPoints),
                                                          std::move(accessControls),
                                                          /* mayCollide */ false);
+        transformInputs.Add<tint::transform::SingleEntryPoint::Config>(entryPointName);
 
         tint::Program program;
         DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, GetTintProgram(), transformInputs,
