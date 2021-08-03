@@ -372,6 +372,8 @@ class Token {
   bool IsUninitialized() const { return type_ == Type::kUninitialized; }
   /// @returns true if the token is EOF
   bool IsEof() const { return type_ == Type::kEOF; }
+  /// @returns true if the token is Error
+  bool IsError() const { return type_ == Type::kError; }
   /// @returns true if the token is an identifier
   bool IsIdentifier() const { return type_ == Type::kIdentifier; }
   /// @returns true if the token is a literal

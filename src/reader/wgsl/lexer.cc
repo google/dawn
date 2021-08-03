@@ -17,6 +17,7 @@
 #include <cmath>
 #include <cstring>
 #include <limits>
+#include <utility>
 
 #include "src/debug.h"
 
@@ -309,8 +310,12 @@ Token Lexer::try_hex_float() {
   // `set_next_mantissa_bit_to` sets next `mantissa` bit starting from msb to
   // lsb to value 1 if `set` is true, 0 otherwise
   uint32_t mantissa_next_bit = kTotalMsb;
-  auto set_next_mantissa_bit_to = [&](bool set) -> bool {
-    if (mantissa_next_bit > kTotalMsb) {
+  auto set_next_mantissa_bit_to = [&](bool set, bool integer_part) -> bool {
+    // If adding bits for the integer part, we can overflow whether we set the
+    // bit or not. For the fractional part, we can only overflow when setting
+    // the bit.
+    const bool check_overflow = integer_part || set;
+    if (check_overflow && (mantissa_next_bit > kTotalMsb)) {
       return false;  // Overflowed mantissa
     }
     if (set) {
@@ -320,26 +325,56 @@ Token Lexer::try_hex_float() {
     return true;
   };
 
+  // Collect integer range (if any)
+  auto integer_range = std::make_pair(end, end);
+  while (end < len_ && is_hex(content_->data[end])) {
+    integer_range.second = ++end;
+  }
+
+  // .?
+  if (matches(end, ".")) {
+    end++;
+  }
+
+  // Collect fractional range (if any)
+  auto fractional_range = std::make_pair(end, end);
+  while (end < len_ && is_hex(content_->data[end])) {
+    fractional_range.second = ++end;
+  }
+
+  // Must have at least an integer or fractional part
+  if ((integer_range.first == integer_range.second) &&
+      (fractional_range.first == fractional_range.second)) {
+    return {};
+  }
+
+  // (p|P)
+  if (matches(end, "p") || matches(end, "P")) {
+    end++;
+  } else {
+    return {};
+  }
+
+  // At this point, we know for sure our token is a hex float value.
+
   // Parse integer part
   // [0-9a-fA-F]*
-  bool has_integer = false;
   bool has_zero_integer = true;
   bool leading_bit_seen = false;
-  while (end < len_ && is_hex(content_->data[end])) {
-    has_integer = true;
-
-    const auto nibble = hex_value(content_->data[end]);
+  for (auto i = integer_range.first; i < integer_range.second; ++i) {
+    const auto nibble = hex_value(content_->data[i]);
     if (nibble != 0) {
       has_zero_integer = false;
     }
 
-    for (int32_t i = 3; i >= 0; --i) {
-      auto v = 1 & (nibble >> i);
+    for (int32_t bit = 3; bit >= 0; --bit) {
+      auto v = 1 & (nibble >> bit);
 
       // Skip leading 0s and the first 1
       if (leading_bit_seen) {
-        if (!set_next_mantissa_bit_to(v != 0)) {
-          return {};
+        if (!set_next_mantissa_bit_to(v != 0, true)) {
+          return {Token::Type::kError, source,
+                  "mantissa is too large for hex float"};
         }
         ++exponent;
       } else {
@@ -348,24 +383,15 @@ Token Lexer::try_hex_float() {
         }
       }
     }
-
-    end++;
-  }
-
-  // .?
-  if (matches(end, ".")) {
-    end++;
   }
 
   // Parse fractional part
   // [0-9a-fA-F]*
-  bool has_fractional = false;
   leading_bit_seen = false;
-  while (end < len_ && is_hex(content_->data[end])) {
-    has_fractional = true;
-    auto nibble = hex_value(content_->data[end]);
-    for (int32_t i = 3; i >= 0; --i) {
-      auto v = 1 & (nibble >> i);
+  for (auto i = fractional_range.first; i < fractional_range.second; ++i) {
+    auto nibble = hex_value(content_->data[i]);
+    for (int32_t bit = 3; bit >= 0; --bit) {
+      auto v = 1 & (nibble >> bit);
 
       if (v == 1) {
         leading_bit_seen = true;
@@ -377,24 +403,12 @@ Token Lexer::try_hex_float() {
       if (has_zero_integer && !leading_bit_seen) {
         --exponent;
       } else {
-        if (!set_next_mantissa_bit_to(v != 0)) {
-          return {};
+        if (!set_next_mantissa_bit_to(v != 0, false)) {
+          return {Token::Type::kError, source,
+                  "mantissa is too large for hex float"};
         }
       }
     }
-
-    end++;
-  }
-
-  if (!(has_integer || has_fractional)) {
-    return {};
-  }
-
-  // (p|P)
-  if (matches(end, "p") || matches(end, "P")) {
-    end++;
-  } else {
-    return {};
   }
 
   // (+|-)?
@@ -409,14 +423,20 @@ Token Lexer::try_hex_float() {
   // Parse exponent from input
   // [0-9]+
   bool has_exponent = false;
-  int32_t input_exponent = 0;
+  uint32_t input_exponent = 0;
   while (end < len_ && isdigit(content_->data[end])) {
     has_exponent = true;
+    auto prev_exponent = input_exponent;
     input_exponent = (input_exponent * 10) + dec_value(content_->data[end]);
+    if (prev_exponent > input_exponent) {
+      return {Token::Type::kError, source,
+              "exponent is too large for hex float"};
+    }
     end++;
   }
   if (!has_exponent) {
-    return {};
+    return {Token::Type::kError, source,
+            "expected an exponent value for hex float"};
   }
 
   pos_ = end;
@@ -430,9 +450,12 @@ Token Lexer::try_hex_float() {
   // Note: it's not enough to check mantissa == 0 as we drop initial bit from
   // integer part.
   bool is_zero = has_zero_integer && mantissa == 0;
-  TINT_ASSERT(Reader, !is_zero || (exponent == 0 && mantissa == 0));
+  TINT_ASSERT(Reader, !is_zero || mantissa == 0);
 
-  if (!is_zero) {
+  if (is_zero) {
+    // If value is zero, then ignore the exponent and produce a zero
+    exponent = 0;
+  } else {
     // Bias exponent if non-zero
     // After this, if exponent is <= 0, our value is a denormal
     exponent += kExponentBias;

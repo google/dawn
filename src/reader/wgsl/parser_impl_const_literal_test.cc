@@ -81,7 +81,8 @@ TEST_F(ParserImplTest, ConstLiteral_InvalidFloat) {
   auto p = parser("1.2e+256");
   auto c = p->const_literal();
   EXPECT_FALSE(c.matched);
-  EXPECT_FALSE(c.errored);
+  EXPECT_TRUE(c.errored);
+  EXPECT_EQ(p->error(), "1:1: f32 (1.2e+256) too large");
   ASSERT_EQ(c.value, nullptr);
 }
 
@@ -228,6 +229,13 @@ FloatLiteralTestCase hexfloat_literal_test_cases[] = {
     {"0x0.01p-142", 0.f},
     {"-0x0.01p-142", -0.f},  // Fraction causes additional underflow
 
+    // Zero with non-zero exponent -> Zero
+    {"0x0p+0", 0.f},
+    {"0x0p+1", 0.f},
+    {"0x0p-1", 0.f},
+    {"0x0p+9999999999", 0.f},
+    {"0x0p-9999999999", 0.f},
+
     // Test parsing
     {"0x0p0", 0.f},
     {"0x0p-0", 0.f},
@@ -251,6 +259,59 @@ FloatLiteralTestCase hexfloat_literal_test_cases[] = {
 INSTANTIATE_TEST_SUITE_P(ParserImplFloatLiteralTest_HexFloat,
                          ParserImplFloatLiteralTest,
                          testing::ValuesIn(hexfloat_literal_test_cases));
+
+struct InvalidLiteralTestCase {
+  const char* input;
+  const char* error_msg;
+};
+class ParserImplInvalidLiteralTest
+    : public ParserImplTestWithParam<InvalidLiteralTestCase> {};
+TEST_P(ParserImplInvalidLiteralTest, Parse) {
+  auto params = GetParam();
+  SCOPED_TRACE(params.input);
+  auto p = parser(params.input);
+  auto c = p->const_literal();
+  EXPECT_FALSE(c.matched);
+  EXPECT_TRUE(c.errored);
+  EXPECT_EQ(p->error(), params.error_msg);
+  ASSERT_EQ(c.value, nullptr);
+}
+
+InvalidLiteralTestCase invalid_hexfloat_mantissa_too_large_cases[] = {
+    {"0x1.ffffffff8p0", "1:1: mantissa is too large for hex float"},
+    {"0x1f.fffffff8p0", "1:1: mantissa is too large for hex float"},
+    {"0x1ff.ffffff8p0", "1:1: mantissa is too large for hex float"},
+    {"0x1fff.fffff8p0", "1:1: mantissa is too large for hex float"},
+    {"0x1ffff.ffff8p0", "1:1: mantissa is too large for hex float"},
+    {"0x1fffff.fff8p0", "1:1: mantissa is too large for hex float"},
+    {"0x1ffffff.ff8p0", "1:1: mantissa is too large for hex float"},
+    {"0x1fffffff.f8p0", "1:1: mantissa is too large for hex float"},
+    {"0x1ffffffff.8p0", "1:1: mantissa is too large for hex float"},
+    {"0x1ffffffff8.p0", "1:1: mantissa is too large for hex float"},
+};
+INSTANTIATE_TEST_SUITE_P(
+    ParserImplInvalidLiteralTest_HexFloatMantissaTooLarge,
+    ParserImplInvalidLiteralTest,
+    testing::ValuesIn(invalid_hexfloat_mantissa_too_large_cases));
+
+InvalidLiteralTestCase invalid_hexfloat_exponent_too_large_cases[] = {
+    {"0x0p+4294967296", "1:1: exponent is too large for hex float"},
+    {"0x0p-4294967296", "1:1: exponent is too large for hex float"},
+};
+INSTANTIATE_TEST_SUITE_P(
+    ParserImplInvalidLiteralTest_HexFloatExponentTooLarge,
+    ParserImplInvalidLiteralTest,
+    testing::ValuesIn(invalid_hexfloat_exponent_too_large_cases));
+
+InvalidLiteralTestCase invalid_hexfloat_exponent_missing_cases[] = {
+    {"0x0p", "1:1: expected an exponent value for hex float"},
+    {"0x1.0p", "1:1: expected an exponent value for hex float"},
+    {"0x0.1p", "1:1: expected an exponent value for hex float"},
+};
+INSTANTIATE_TEST_SUITE_P(
+    ParserImplInvalidLiteralTest_HexFloatExponentMissing,
+    ParserImplInvalidLiteralTest,
+    testing::ValuesIn(invalid_hexfloat_exponent_missing_cases));
 
 TEST_F(ParserImplTest, ConstLiteral_FloatHighest) {
   const auto highest = std::numeric_limits<float>::max();

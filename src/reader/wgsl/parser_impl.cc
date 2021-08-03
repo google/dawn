@@ -2819,6 +2819,9 @@ Maybe<ast::AssignmentStatement*> ParserImpl::assignment_stmt() {
 //   | FALSE
 Maybe<ast::Literal*> ParserImpl::const_literal() {
   auto t = peek();
+  if (t.IsError()) {
+    return add_error(t.source(), t.to_str());
+  }
   if (match(Token::Type::kTrue)) {
     return create<ast::BoolLiteral>(t.source(), true);
   }
@@ -2835,7 +2838,8 @@ Maybe<ast::Literal*> ParserImpl::const_literal() {
     auto p = peek();
     if (p.IsIdentifier() && p.to_str() == "f") {
       next();  // Consume 'f'
-      add_error(p.source(), "float literals must not be suffixed with 'f'");
+      return add_error(p.source(),
+                       "float literals must not be suffixed with 'f'");
     }
     return create<ast::FloatLiteral>(t.source(), t.to_f32());
   }

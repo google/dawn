@@ -332,23 +332,23 @@ TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeMissingRParen) {
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeXInvalid) {
-  EXPECT("[[workgroup_size(@)]] fn f() {}",
+  EXPECT("[[workgroup_size()]] fn f() {}",
          "test.wgsl:1:18 error: expected workgroup_size x parameter\n"
-         "[[workgroup_size(@)]] fn f() {}\n"
+         "[[workgroup_size()]] fn f() {}\n"
          "                 ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeYInvalid) {
-  EXPECT("[[workgroup_size(1, @)]] fn f() {}",
+  EXPECT("[[workgroup_size(1, )]] fn f() {}",
          "test.wgsl:1:21 error: expected workgroup_size y parameter\n"
-         "[[workgroup_size(1, @)]] fn f() {}\n"
+         "[[workgroup_size(1, )]] fn f() {}\n"
          "                    ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeZInvalid) {
-  EXPECT("[[workgroup_size(1, 2, @)]] fn f() {}",
+  EXPECT("[[workgroup_size(1, 2, )]] fn f() {}",
          "test.wgsl:1:24 error: expected workgroup_size z parameter\n"
-         "[[workgroup_size(1, 2, @)]] fn f() {}\n"
+         "[[workgroup_size(1, 2, )]] fn f() {}\n"
          "                       ^\n");
 }
 
