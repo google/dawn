@@ -1291,11 +1291,22 @@ TEST_P(BindGroupTests, CreateWithDestroyedResource) {
         textureDesc.size = {1, 1, 1};
         textureDesc.format = wgpu::TextureFormat::BGRA8Unorm;
 
-        wgpu::Texture texture = device.CreateTexture(&textureDesc);
-        wgpu::TextureView textureView = texture.CreateView();
+        // Create view, then destroy.
+        {
+            wgpu::Texture texture = device.CreateTexture(&textureDesc);
+            wgpu::TextureView textureView = texture.CreateView();
 
-        texture.Destroy();
-        wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, textureView}});
+            texture.Destroy();
+            wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, textureView}});
+        }
+        // Destroy, then create view.
+        {
+            wgpu::Texture texture = device.CreateTexture(&textureDesc);
+            texture.Destroy();
+            wgpu::TextureView textureView = texture.CreateView();
+
+            wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, textureView}});
+        }
     }
 
     // Test a storage texture.
@@ -1313,11 +1324,22 @@ TEST_P(BindGroupTests, CreateWithDestroyedResource) {
         textureDesc.size = {1, 1, 1};
         textureDesc.format = wgpu::TextureFormat::R32Uint;
 
-        wgpu::Texture texture = device.CreateTexture(&textureDesc);
-        wgpu::TextureView textureView = texture.CreateView();
+        // Create view, then destroy.
+        {
+            wgpu::Texture texture = device.CreateTexture(&textureDesc);
+            wgpu::TextureView textureView = texture.CreateView();
 
-        texture.Destroy();
-        wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, textureView}});
+            texture.Destroy();
+            wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, textureView}});
+        }
+        // Destroy, then create view.
+        {
+            wgpu::Texture texture = device.CreateTexture(&textureDesc);
+            texture.Destroy();
+            wgpu::TextureView textureView = texture.CreateView();
+
+            wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, textureView}});
+        }
     }
 }
 

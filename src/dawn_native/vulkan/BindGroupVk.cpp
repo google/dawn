@@ -95,7 +95,17 @@ namespace dawn_native { namespace vulkan {
                 case BindingInfoType::Texture: {
                     TextureView* view = ToBackend(GetBindingAsTextureView(bindingIndex));
 
-                    writeImageInfo[numWrites].imageView = view->GetHandle();
+                    VkImageView handle = view->GetHandle();
+                    if (handle == VK_NULL_HANDLE) {
+                        // The Texture was destroyed before the TextureView was created.
+                        // Skip this descriptor write since it would be
+                        // a Vulkan Validation Layers error. This bind group won't be used as it
+                        // is an error to submit a command buffer that references destroyed
+                        // resources.
+                        continue;
+                    }
+                    writeImageInfo[numWrites].imageView = handle;
+
                     // The layout may be GENERAL here because of interactions between the Sampled
                     // and ReadOnlyStorage usages. See the logic in VulkanImageLayout.
                     writeImageInfo[numWrites].imageLayout = VulkanImageLayout(
@@ -108,7 +118,16 @@ namespace dawn_native { namespace vulkan {
                 case BindingInfoType::StorageTexture: {
                     TextureView* view = ToBackend(GetBindingAsTextureView(bindingIndex));
 
-                    writeImageInfo[numWrites].imageView = view->GetHandle();
+                    VkImageView handle = view->GetHandle();
+                    if (handle == VK_NULL_HANDLE) {
+                        // The Texture was destroyed before the TextureView was created.
+                        // Skip this descriptor write since it would be
+                        // a Vulkan Validation Layers error. This bind group won't be used as it
+                        // is an error to submit a command buffer that references destroyed
+                        // resources.
+                        continue;
+                    }
+                    writeImageInfo[numWrites].imageView = handle;
                     writeImageInfo[numWrites].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
                     write.pImageInfo = &writeImageInfo[numWrites];
