@@ -246,9 +246,6 @@ TEST_P(DynamicBufferOffsetTests, SetDynamicOffsetsRenderPipeline) {
 
 // Dynamic offsets are all zero and no effect to result.
 TEST_P(DynamicBufferOffsetTests, BasicComputePipeline) {
-    // TODO(crbug.com/dawn/978): Failing on Windows Vulkan NVIDIA
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsNvidia());
-
     wgpu::ComputePipeline pipeline = CreateComputePipeline();
 
     std::array<uint32_t, 2> offsets = {0, 0};
@@ -268,9 +265,6 @@ TEST_P(DynamicBufferOffsetTests, BasicComputePipeline) {
 
 // Have non-zero dynamic offsets.
 TEST_P(DynamicBufferOffsetTests, SetDynamicOffsetsComputePipeline) {
-    // TODO(crbug.com/dawn/978): Failing on Windows Vulkan NVIDIA
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsNvidia());
-
     wgpu::ComputePipeline pipeline = CreateComputePipeline();
 
     std::array<uint32_t, 2> offsets = {kMinUniformBufferOffsetAlignment,
