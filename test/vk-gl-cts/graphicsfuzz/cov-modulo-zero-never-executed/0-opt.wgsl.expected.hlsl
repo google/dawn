@@ -63,5 +63,5 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   const tint_symbol_2 tint_symbol_7 = {tint_symbol_3.x_GLF_color_1};
   return tint_symbol_7;
 }
-C:\src\tint\test\Shader@0x0000020234C8C230(25,16-23): error X4010: Unsigned integer divide by zero
+O:\src\chrome\src\third_party\dawn\third_party\tint\test\Shader@0x000001EB404C9FC0(25,16-23): error X4010: Unsigned integer divide by zero
 

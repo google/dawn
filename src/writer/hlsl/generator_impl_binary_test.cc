@@ -551,6 +551,32 @@ foo((tint_tmp), (tint_tmp_1), (tint_tmp_2));
 )");
 }
 
+TEST_F(HlslGeneratorImplTest_Binary, DivideByLiteralZero_i32) {
+  Global("a", ty.i32(), ast::StorageClass::kPrivate);
+
+  auto* expr = Div("a", 0);
+  WrapInFunction(expr);
+
+  GeneratorImpl& gen = Build();
+
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), R"((a / 1))");
+}
+
+TEST_F(HlslGeneratorImplTest_Binary, DivideByLiteralZero_u32) {
+  Global("a", ty.u32(), ast::StorageClass::kPrivate);
+
+  auto* expr = Div("a", 0u);
+  WrapInFunction(expr);
+
+  GeneratorImpl& gen = Build();
+
+  std::stringstream out;
+  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+  EXPECT_EQ(out.str(), R"((a / 1u))");
+}
+
 }  // namespace
 }  // namespace hlsl
 }  // namespace writer

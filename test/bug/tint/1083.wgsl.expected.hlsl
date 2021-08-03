@@ -5,5 +5,5 @@ void f() {
   const int c = (1 / 0);
   return;
 }
-C:\src\tint\test\Shader@0x000001BC7A7DD8D0(3,18-22): error X4010: Unsigned integer divide by zero
+O:\src\chrome\src\third_party\dawn\third_party\tint\test\Shader@0x000002477B82F5C0(3,18-22): error X4010: Unsigned integer divide by zero
 

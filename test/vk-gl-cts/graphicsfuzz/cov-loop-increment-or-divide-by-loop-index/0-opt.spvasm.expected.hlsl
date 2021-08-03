@@ -53,6 +53,6 @@ tint_symbol main() {
   const tint_symbol tint_symbol_3 = {tint_symbol_1.x_GLF_color_1};
   return tint_symbol_3;
 }
-C:\src\tint\test\Shader@0x0000021F05CF11C0(19,14-18): error X4010: Unsigned integer divide by zero
-C:\src\tint\test\Shader@0x0000021F05CF11C0(19,14-18): warning X3556: integer divides may be much slower, try using uints if possible.
+O:\src\chrome\src\third_party\dawn\third_party\tint\test\Shader@0x000001481B9B0CA0(19,14-18): error X4010: Unsigned integer divide by zero
+O:\src\chrome\src\third_party\dawn\third_party\tint\test\Shader@0x000001481B9B0CA0(19,14-18): warning X3556: integer divides may be much slower, try using uints if possible.
 

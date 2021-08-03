@@ -364,6 +364,8 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, ast::BinaryExpression* expr) {
   }
 
   out << "(";
+  TINT_DEFER(out << ")");
+
   if (!EmitExpression(out, expr->lhs())) {
     return false;
   }
@@ -425,6 +427,19 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, ast::BinaryExpression* expr) {
       break;
     case ast::BinaryOp::kDivide:
       out << "/";
+
+      if (auto val = program_->Sem().Get(expr->rhs())->ConstantValue()) {
+        // Integer divide by zero is a DXC compile error, and undefined behavior
+        // in WGSL. Replace the 0 with 1.
+        if (val.Type()->Is<sem::I32>() && val.Elements()[0].i32 == 0) {
+          out << " 1";
+          return true;
+        }
+        if (val.Type()->Is<sem::U32>() && val.Elements()[0].u32 == 0u) {
+          out << " 1u";
+          return true;
+        }
+      }
       break;
     case ast::BinaryOp::kModulo:
       out << "%";
@@ -440,7 +455,6 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, ast::BinaryExpression* expr) {
     return false;
   }
 
-  out << ")";
   return true;
 }
 
