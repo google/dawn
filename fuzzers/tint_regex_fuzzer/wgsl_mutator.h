@@ -32,37 +32,57 @@ namespace regex_fuzzer {
 std::vector<size_t> FindDelimiterIndices(const std::string& delimiter,
                                          const std::string& wgsl_code);
 
+/// A function that finds all the identifiers in a WGSL-like string.
+/// @param wgsl_code - the WGSL-like string where the identifiers will be found.
+/// @return a vector with the positions and the length of all the
+/// identifiers in wgsl_code.
+std::vector<std::pair<size_t, size_t>> GetIdentifiers(
+    const std::string& wgsl_code);
+
 /// Given 4 indices, idx1, idx2, idx3 and idx4 it swaps the regions
 /// in the interval (idx1, idx2] with the region in the interval (idx3, idx4]
 /// in wgsl_text.
 /// @param idx1 - starting index of the first region.
-/// @param idx2 - terminating index of the second region.
-/// @param idx3 - starting index of the second region.
-/// @param idx4 - terminating index of the second region.
+/// @param reg1_len - length of the first region.
+/// @param idx2 - starting index of the second region.
+/// @param reg2_len - length of the second region.
 /// @param wgsl_code - the string where the swap will occur.
 void SwapIntervals(size_t idx1,
+                   size_t reg1_len,
                    size_t idx2,
-                   size_t idx3,
-                   size_t idx4,
+                   size_t reg2_len,
                    std::string& wgsl_code);
 
-/// Given 2 indices, idx1, idx2, it delets the region in the interval (idx1,
-/// idx2].
+/// Given index idx1 it delets the region of length interval_len
+/// starting at index idx1;
 /// @param idx1 - starting index of the first region.
-/// @param idx2 - terminating index of the second region.
+/// @param reg_len - terminating index of the second region.
 /// @param wgsl_code - the string where the swap will occur.
-void DeleteInterval(size_t idx1, size_t idx2, std::string& wgsl_code);
+void DeleteInterval(size_t idx1, size_t reg_len, std::string& wgsl_code);
 
-/// Given 3 indices, idx1, idx2, and idx3 it inserts the
-/// region in (idx1, idx2] after idx3.
+/// Given 2 indices, idx1, idx2, it inserts the region of length
+/// reg1_len starting at idx1 after idx2.
 /// @param idx1 - starting index of region.
-/// @param idx2 - terminating index of the region.
-/// @param idx3 - the position where the region will be inserted.
+/// @param reg1_len - length of the region.
+/// @param idx2 - the position where the region will be inserted.
 /// @param wgsl_code - the string where the swap will occur.
 void DuplicateInterval(size_t idx1,
+                       size_t reg1_len,
                        size_t idx2,
-                       size_t idx3,
                        std::string& wgsl_code);
+
+/// Replaces a region of a WGSL-like string of length id2_len starting
+/// at position idx2 with a region of length id1_len starting at
+/// position idx1.
+/// @param idx1    -   starting position of the first region.
+/// @param id1_len -   length of the first region.
+/// @param idx2    -   starting position of the second region.
+/// @param id2_len -   length of the second region.
+void ReplaceRegion(size_t idx1,
+                   size_t id1_len,
+                   size_t idx2,
+                   size_t id2_len,
+                   std::string& wgsl_code);
 
 /// A function that, given WGSL-like string and a delimiter,
 /// generates another WGSL-like string by picking two random regions
@@ -96,6 +116,13 @@ bool DeleteRandomInterval(const std::string& delimiter,
 bool DuplicateRandomInterval(const std::string& delimiter,
                              std::string& wgsl_code,
                              std::mt19937& generator);
+
+/// Replaces a random identifier in wgsl_code.
+/// @param wgsl_code - WGSL-like string where the replacement will occur.
+/// @param generator - the random number generator.
+/// @return true if a replacement happened or false otherwise.
+
+bool ReplaceRandomIdentifier(std::string& wgsl_code, std::mt19937& generator);
 
 }  // namespace regex_fuzzer
 }  // namespace fuzzers
