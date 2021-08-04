@@ -198,10 +198,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
 
   GeneratorImpl& gen = Build();
 
-  TextGenerator::TextBuffer buf;
-  auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
-  ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.error();
-  EXPECT_EQ(buf.String(), "");
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), "RWByteAddressBuffer g : register(u0, space0);\n");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {

@@ -149,6 +149,41 @@ fn tint_symbol() -> [[builtin(position)]] vec4<f32> {
   EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
+TEST_F(RenamerTest, PreserveBuiltinTypes) {
+  auto* src = R"(
+[[stage(compute), workgroup_size(1)]]
+fn entry() {
+  var a = modf(1.0).whole;
+  var b = modf(1.0).fract;
+  var c = frexp(1.0).sig;
+  var d = frexp(1.0).exp;
+}
+)";
+
+  auto* expect = R"(
+[[stage(compute), workgroup_size(1)]]
+fn tint_symbol() {
+  var tint_symbol_1 = modf(1.0).whole;
+  var tint_symbol_2 = modf(1.0).fract;
+  var tint_symbol_3 = frexp(1.0).sig;
+  var tint_symbol_4 = frexp(1.0).exp;
+}
+)";
+
+  auto got = Run<Renamer>(src);
+
+  EXPECT_EQ(expect, str(got));
+
+  auto* data = got.data.Get<Renamer::Data>();
+
+  ASSERT_NE(data, nullptr);
+  Renamer::Data::Remappings expected_remappings = {
+      {"entry", "tint_symbol"}, {"a", "tint_symbol_1"}, {"b", "tint_symbol_2"},
+      {"c", "tint_symbol_3"},   {"d", "tint_symbol_4"},
+  };
+  EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
+}
+
 TEST_F(RenamerTest, AttemptSymbolCollision) {
   auto* src = R"(
 [[stage(vertex)]]

@@ -896,7 +896,8 @@ Output Renamer::Run(const Program* in, const DataMap& inputs) {
   // Disable auto-cloning of symbols, since we want to rename them.
   CloneContext ctx(&out, in, false);
 
-  // Swizzles and intrinsic calls need to keep their symbols preserved.
+  // Swizzles, intrinsic calls and builtin structure members need to keep their
+  // symbols preserved.
   std::unordered_set<ast::IdentifierExpression*> preserve;
   for (auto* node : in->ASTNodes().Objects()) {
     if (auto* member = node->As<ast::MemberAccessorExpression>()) {
@@ -908,6 +909,12 @@ Output Renamer::Run(const Program* in, const DataMap& inputs) {
       }
       if (sem->Is<sem::Swizzle>()) {
         preserve.emplace(member->member());
+      } else if (auto* str_expr = in->Sem().Get(member->structure())) {
+        if (auto* ty = str_expr->Type()->UnwrapRef()->As<sem::Struct>()) {
+          if (ty->Declaration() == nullptr) {  // Builtin structure
+            preserve.emplace(member->member());
+          }
+        }
       }
     } else if (auto* call = node->As<ast::CallExpression>()) {
       auto* sem = in->Sem().Get(call);

@@ -139,8 +139,20 @@ bool GeneratorImpl::Generate() {
         return false;
       }
     } else if (auto* str = decl->As<ast::Struct>()) {
-      if (!EmitStructType(current_buffer_, builder_.Sem().Get(str))) {
-        return false;
+      auto* ty = builder_.Sem().Get(str);
+      auto storage_class_uses = ty->StorageClassUsage();
+      if (storage_class_uses.size() !=
+          (storage_class_uses.count(ast::StorageClass::kStorage) +
+           storage_class_uses.count(ast::StorageClass::kUniform))) {
+        // The structure is used as something other than a storage buffer or
+        // uniform buffer, so it needs to be emitted.
+        // Storage buffer are read and written to via a ByteAddressBuffer
+        // instead of true structure.
+        // Structures used as uniform buffer are read from an array of vectors
+        // instead of true structure.
+        if (!EmitStructType(current_buffer_, ty)) {
+          return false;
+        }
       }
     } else if (auto* func = decl->As<ast::Function>()) {
       if (func->IsEntryPoint()) {
@@ -3135,19 +3147,6 @@ bool GeneratorImpl::EmitTypeAndName(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
-  auto storage_class_uses = str->StorageClassUsage();
-  if (storage_class_uses.size() ==
-      (storage_class_uses.count(ast::StorageClass::kStorage) +
-       storage_class_uses.count(ast::StorageClass::kUniform))) {
-    // The only use of the structure is as a storage buffer and / or uniform
-    // buffer.
-    // Structures used as storage buffer are read and written to via a
-    // ByteAddressBuffer instead of true structure.
-    // Structures used as uniform buffer are read from an array of vectors
-    // instead of true structure.
-    return true;
-  }
-
   line(b) << "struct " << StructName(str) << " {";
   {
     ScopedIndent si(b);
