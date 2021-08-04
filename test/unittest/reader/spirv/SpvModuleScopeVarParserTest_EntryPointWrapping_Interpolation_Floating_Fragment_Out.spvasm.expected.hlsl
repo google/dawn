@@ -26,9 +26,20 @@ struct tint_symbol {
   noperspective sample float x_6_1 : SV_Target6;
 };
 
-tint_symbol main() {
+main_out main_inner() {
   main_1();
   const main_out tint_symbol_1 = {x_1, x_2, x_3, x_4, x_5, x_6};
-  const tint_symbol tint_symbol_2 = {tint_symbol_1.x_1_1, tint_symbol_1.x_2_1, tint_symbol_1.x_3_1, tint_symbol_1.x_4_1, tint_symbol_1.x_5_1, tint_symbol_1.x_6_1};
-  return tint_symbol_2;
+  return tint_symbol_1;
+}
+
+tint_symbol main() {
+  const main_out inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.x_1_1 = inner_result.x_1_1;
+  wrapper_result.x_2_1 = inner_result.x_2_1;
+  wrapper_result.x_3_1 = inner_result.x_3_1;
+  wrapper_result.x_4_1 = inner_result.x_4_1;
+  wrapper_result.x_5_1 = inner_result.x_5_1;
+  wrapper_result.x_6_1 = inner_result.x_6_1;
+  return wrapper_result;
 }

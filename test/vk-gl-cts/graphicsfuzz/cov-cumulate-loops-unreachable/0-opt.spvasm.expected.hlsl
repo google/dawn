@@ -63,8 +63,8 @@ void main_1() {
     const int x_89 = asint(x_6[3].x);
     const int x_91 = asint(x_6[4].x);
     const int x_93 = b;
-    const int tint_symbol_3[2] = {x_89, x_91};
-    indexable = tint_symbol_3;
+    const int tint_symbol_2[2] = {x_89, x_91};
+    indexable = tint_symbol_2;
     const int x_95 = indexable[x_93];
     a = (a + x_95);
     {
@@ -90,9 +90,15 @@ struct tint_symbol {
   float4 x_GLF_color_1 : SV_Target0;
 };
 
-tint_symbol main() {
+main_out main_inner() {
   main_1();
-  const main_out tint_symbol_1 = {x_GLF_color};
-  const tint_symbol tint_symbol_4 = {tint_symbol_1.x_GLF_color_1};
-  return tint_symbol_4;
+  const main_out tint_symbol_3 = {x_GLF_color};
+  return tint_symbol_3;
+}
+
+tint_symbol main() {
+  const main_out inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }

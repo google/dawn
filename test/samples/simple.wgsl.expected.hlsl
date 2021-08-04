@@ -5,9 +5,15 @@ struct tint_symbol {
   float4 value : SV_Target0;
 };
 
-tint_symbol main() {
+float4 main_inner() {
   float2 a = float2(0.0f, 0.0f);
   bar();
-  const tint_symbol tint_symbol_1 = {float4(0.400000006f, 0.400000006f, 0.800000012f, 1.0f)};
-  return tint_symbol_1;
+  return float4(0.400000006f, 0.400000006f, 0.800000012f, 1.0f);
+}
+
+tint_symbol main() {
+  const float4 inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }

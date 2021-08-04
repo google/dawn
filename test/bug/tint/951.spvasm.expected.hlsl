@@ -53,10 +53,13 @@ struct tint_symbol_1 {
   uint3 gl_GlobalInvocationID_param : SV_DispatchThreadID;
 };
 
-[numthreads(128, 1, 1)]
-void main(tint_symbol_1 tint_symbol) {
-  const uint3 gl_GlobalInvocationID_param = tint_symbol.gl_GlobalInvocationID_param;
+void main_inner(uint3 gl_GlobalInvocationID_param) {
   gl_GlobalInvocationID = gl_GlobalInvocationID_param;
   main_1();
+}
+
+[numthreads(128, 1, 1)]
+void main(tint_symbol_1 tint_symbol) {
+  main_inner(tint_symbol.gl_GlobalInvocationID_param);
   return;
 }

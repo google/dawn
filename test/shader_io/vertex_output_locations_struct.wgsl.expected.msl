@@ -16,9 +16,19 @@ struct tint_symbol_1 {
   float4 position [[position]];
 };
 
-vertex tint_symbol_1 tint_symbol() {
+VertexOutputs tint_symbol_inner() {
   VertexOutputs const tint_symbol_2 = {.loc0=1, .loc1=1u, .loc2=1.0f, .loc3=float4(1.0f, 2.0f, 3.0f, 4.0f), .position=float4()};
-  tint_symbol_1 const tint_symbol_3 = {.loc0=tint_symbol_2.loc0, .loc1=tint_symbol_2.loc1, .loc2=tint_symbol_2.loc2, .loc3=tint_symbol_2.loc3, .position=tint_symbol_2.position};
-  return tint_symbol_3;
+  return tint_symbol_2;
+}
+
+vertex tint_symbol_1 tint_symbol() {
+  VertexOutputs const inner_result = tint_symbol_inner();
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.loc0 = inner_result.loc0;
+  wrapper_result.loc1 = inner_result.loc1;
+  wrapper_result.loc2 = inner_result.loc2;
+  wrapper_result.loc3 = inner_result.loc3;
+  wrapper_result.position = inner_result.position;
+  return wrapper_result;
 }
 

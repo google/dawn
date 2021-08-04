@@ -11,8 +11,17 @@ struct tint_symbol {
   float4 loc3 : SV_Target3;
 };
 
-tint_symbol main() {
+FragmentOutputs main_inner() {
   const FragmentOutputs tint_symbol_1 = {1, 1u, 1.0f, float4(1.0f, 2.0f, 3.0f, 4.0f)};
-  const tint_symbol tint_symbol_2 = {tint_symbol_1.loc0, tint_symbol_1.loc1, tint_symbol_1.loc2, tint_symbol_1.loc3};
-  return tint_symbol_2;
+  return tint_symbol_1;
+}
+
+tint_symbol main() {
+  const FragmentOutputs inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.loc0 = inner_result.loc0;
+  wrapper_result.loc1 = inner_result.loc1;
+  wrapper_result.loc2 = inner_result.loc2;
+  wrapper_result.loc3 = inner_result.loc3;
+  return wrapper_result;
 }

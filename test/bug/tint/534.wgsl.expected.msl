@@ -15,15 +15,15 @@ uint ConvertToFp16FloatValue(float fp32) {
   return 1u;
 }
 
-kernel void tint_symbol(texture2d<float, access::sample> tint_symbol_2 [[texture(0)]], texture2d<float, access::sample> tint_symbol_3 [[texture(1)]], uint3 GlobalInvocationID [[thread_position_in_grid]], constant Uniforms& uniforms [[buffer(3)]], device OutputBuf& output [[buffer(2)]]) {
-  int2 size = int2(tint_symbol_2.get_width(), tint_symbol_2.get_height());
+void tint_symbol_inner(constant Uniforms& uniforms, device OutputBuf& output, uint3 GlobalInvocationID, texture2d<float, access::sample> tint_symbol_1, texture2d<float, access::sample> tint_symbol_2) {
+  int2 size = int2(tint_symbol_1.get_width(), tint_symbol_1.get_height());
   int2 dstTexCoord = int2(GlobalInvocationID.xy);
   int2 srcTexCoord = dstTexCoord;
   if ((uniforms.dstTextureFlipY == 1u)) {
     srcTexCoord.y = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(size.y) - as_type<uint>(dstTexCoord.y)))) - as_type<uint>(1)));
   }
-  float4 srcColor = tint_symbol_2.read(uint2(srcTexCoord), 0);
-  float4 dstColor = tint_symbol_3.read(uint2(dstTexCoord), 0);
+  float4 srcColor = tint_symbol_1.read(uint2(srcTexCoord), 0);
+  float4 dstColor = tint_symbol_2.read(uint2(dstTexCoord), 0);
   bool success = true;
   uint4 srcColorBits = 0u;
   uint4 dstColorBits = uint4(dstColor);
@@ -37,6 +37,10 @@ kernel void tint_symbol(texture2d<float, access::sample> tint_symbol_2 [[texture
   } else {
     output.result[outputIndex] = uint(0);
   }
+}
+
+kernel void tint_symbol(texture2d<float, access::sample> tint_symbol_3 [[texture(0)]], texture2d<float, access::sample> tint_symbol_4 [[texture(1)]], uint3 GlobalInvocationID [[thread_position_in_grid]], constant Uniforms& uniforms [[buffer(3)]], device OutputBuf& output [[buffer(2)]]) {
+  tint_symbol_inner(uniforms, output, GlobalInvocationID, tint_symbol_3, tint_symbol_4);
   return;
 }
 

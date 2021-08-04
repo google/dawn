@@ -17,22 +17,22 @@ struct tint_symbol_1 {
   float4 x_GLF_color_1 [[color(0)]];
 };
 
-void swap_i1_i1_(thread int* const i, thread int* const j, thread QuicksortObject* const tint_symbol_4) {
+void swap_i1_i1_(thread int* const i, thread int* const j, thread QuicksortObject* const tint_symbol_3) {
   int temp = 0;
   int const x_92 = *(i);
-  int const x_94 = (*(tint_symbol_4)).numbers.arr[x_92];
+  int const x_94 = (*(tint_symbol_3)).numbers.arr[x_92];
   temp = x_94;
   int const x_95 = *(i);
   int const x_96 = *(j);
-  int const x_98 = (*(tint_symbol_4)).numbers.arr[x_96];
-  (*(tint_symbol_4)).numbers.arr[x_95] = x_98;
+  int const x_98 = (*(tint_symbol_3)).numbers.arr[x_96];
+  (*(tint_symbol_3)).numbers.arr[x_95] = x_98;
   int const x_100 = *(j);
   int const x_101 = temp;
-  (*(tint_symbol_4)).numbers.arr[x_100] = x_101;
+  (*(tint_symbol_3)).numbers.arr[x_100] = x_101;
   return;
 }
 
-int performPartition_i1_i1_(thread int* const l, thread int* const h, thread QuicksortObject* const tint_symbol_5) {
+int performPartition_i1_i1_(thread int* const l, thread int* const h, thread QuicksortObject* const tint_symbol_4) {
   int pivot = 0;
   int i_1 = 0;
   int j_1 = 0;
@@ -41,7 +41,7 @@ int performPartition_i1_i1_(thread int* const l, thread int* const h, thread Qui
   int param_2 = 0;
   int param_3 = 0;
   int const x_104 = *(h);
-  int const x_106 = (*(tint_symbol_5)).numbers.arr[x_104];
+  int const x_106 = (*(tint_symbol_4)).numbers.arr[x_104];
   pivot = x_106;
   int const x_107 = *(l);
   i_1 = as_type<int>((as_type<uint>(x_107) - as_type<uint>(1)));
@@ -55,7 +55,7 @@ int performPartition_i1_i1_(thread int* const l, thread int* const h, thread Qui
       break;
     }
     int const x_119 = j_1;
-    int const x_121 = (*(tint_symbol_5)).numbers.arr[x_119];
+    int const x_121 = (*(tint_symbol_4)).numbers.arr[x_119];
     int const x_122 = pivot;
     if ((x_121 <= x_122)) {
       int const x_126 = i_1;
@@ -64,7 +64,7 @@ int performPartition_i1_i1_(thread int* const l, thread int* const h, thread Qui
       param = x_128;
       int const x_129 = j_1;
       param_1 = x_129;
-      swap_i1_i1_(&(param), &(param_1), tint_symbol_5);
+      swap_i1_i1_(&(param), &(param_1), tint_symbol_4);
     }
     {
       int const x_131 = j_1;
@@ -75,12 +75,12 @@ int performPartition_i1_i1_(thread int* const l, thread int* const h, thread Qui
   param_2 = as_type<int>((as_type<uint>(x_133) + as_type<uint>(1)));
   int const x_135 = *(h);
   param_3 = x_135;
-  swap_i1_i1_(&(param_2), &(param_3), tint_symbol_5);
+  swap_i1_i1_(&(param_2), &(param_3), tint_symbol_4);
   int const x_137 = i_1;
   return as_type<int>((as_type<uint>(x_137) + as_type<uint>(1)));
 }
 
-void quicksort_(thread QuicksortObject* const tint_symbol_6) {
+void quicksort_(thread QuicksortObject* const tint_symbol_5) {
   int l_1 = 0;
   int h_1 = 0;
   int top = 0;
@@ -119,7 +119,7 @@ void quicksort_(thread QuicksortObject* const tint_symbol_6) {
     param_4 = x_163;
     int const x_164 = h_1;
     param_5 = x_164;
-    int const x_165 = performPartition_i1_i1_(&(param_4), &(param_5), tint_symbol_6);
+    int const x_165 = performPartition_i1_i1_(&(param_4), &(param_5), tint_symbol_5);
     p = x_165;
     int const x_166 = p;
     int const x_168 = l_1;
@@ -153,7 +153,7 @@ void quicksort_(thread QuicksortObject* const tint_symbol_6) {
   return;
 }
 
-void main_1(thread QuicksortObject* const tint_symbol_7, thread float4* const tint_symbol_8) {
+void main_1(thread QuicksortObject* const tint_symbol_6, thread float4* const tint_symbol_7) {
   int i_2 = 0;
   i_2 = 0;
   while (true) {
@@ -164,35 +164,41 @@ void main_1(thread QuicksortObject* const tint_symbol_7, thread float4* const ti
     }
     int const x_67 = i_2;
     int const x_68 = i_2;
-    (*(tint_symbol_7)).numbers.arr[x_67] = as_type<int>((as_type<uint>(10) - as_type<uint>(x_68)));
+    (*(tint_symbol_6)).numbers.arr[x_67] = as_type<int>((as_type<uint>(10) - as_type<uint>(x_68)));
     int const x_71 = i_2;
     int const x_72 = i_2;
-    int const x_74 = (*(tint_symbol_7)).numbers.arr[x_72];
+    int const x_74 = (*(tint_symbol_6)).numbers.arr[x_72];
     int const x_75 = i_2;
-    int const x_77 = (*(tint_symbol_7)).numbers.arr[x_75];
-    (*(tint_symbol_7)).numbers.arr[x_71] = as_type<int>((as_type<uint>(x_74) * as_type<uint>(x_77)));
+    int const x_77 = (*(tint_symbol_6)).numbers.arr[x_75];
+    (*(tint_symbol_6)).numbers.arr[x_71] = as_type<int>((as_type<uint>(x_74) * as_type<uint>(x_77)));
     {
       int const x_80 = i_2;
       i_2 = as_type<int>((as_type<uint>(x_80) + as_type<uint>(1)));
     }
   }
-  quicksort_(tint_symbol_7);
-  int const x_84 = (*(tint_symbol_7)).numbers.arr[0];
-  int const x_86 = (*(tint_symbol_7)).numbers.arr[4];
+  quicksort_(tint_symbol_6);
+  int const x_84 = (*(tint_symbol_6)).numbers.arr[0];
+  int const x_86 = (*(tint_symbol_6)).numbers.arr[4];
   if ((x_84 < x_86)) {
-    *(tint_symbol_8) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+    *(tint_symbol_7) = float4(1.0f, 0.0f, 0.0f, 1.0f);
   } else {
-    *(tint_symbol_8) = float4(0.0f, 1.0f, 0.0f, 1.0f);
+    *(tint_symbol_7) = float4(0.0f, 1.0f, 0.0f, 1.0f);
   }
   return;
 }
 
+main_out tint_symbol_inner(thread QuicksortObject* const tint_symbol_8, thread float4* const tint_symbol_9) {
+  main_1(tint_symbol_8, tint_symbol_9);
+  main_out const tint_symbol_2 = {.x_GLF_color_1=*(tint_symbol_9)};
+  return tint_symbol_2;
+}
+
 fragment tint_symbol_1 tint_symbol() {
-  thread QuicksortObject tint_symbol_9 = {};
-  thread float4 tint_symbol_10 = 0.0f;
-  main_1(&(tint_symbol_9), &(tint_symbol_10));
-  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_10};
-  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
-  return tint_symbol_3;
+  thread QuicksortObject tint_symbol_10 = {};
+  thread float4 tint_symbol_11 = 0.0f;
+  main_out const inner_result = tint_symbol_inner(&(tint_symbol_10), &(tint_symbol_11));
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }
 

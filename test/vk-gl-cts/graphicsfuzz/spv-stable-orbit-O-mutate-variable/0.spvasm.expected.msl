@@ -15,11 +15,11 @@ struct tint_array_wrapper {
 struct main_out {
   float4 x_GLF_color_1;
 };
-struct tint_symbol_2 {
+struct tint_symbol_1 {
   float4 x_GLF_color_1 [[color(0)]];
 };
 
-void main_1(constant buf0& x_6, thread float4* const tint_symbol_6, thread float4* const tint_symbol_7) {
+void main_1(constant buf0& x_6, thread float4* const tint_symbol_4, thread float4* const tint_symbol_5) {
   tint_array_wrapper indexable = {};
   int2 x_77 = 0;
   int2 x_110 = 0;
@@ -28,7 +28,7 @@ void main_1(constant buf0& x_6, thread float4* const tint_symbol_6, thread float
   int x_80_phi = 0;
   int2 x_111_phi = 0;
   int2 x_113_phi = 0;
-  float4 const x_56 = *(tint_symbol_6);
+  float4 const x_56 = *(tint_symbol_4);
   float2 const x_59 = x_6.resolution;
   float2 const x_60 = (float2(x_56.x, x_56.y) / x_59);
   int const x_63 = int((x_60.x * 8.0f));
@@ -94,20 +94,26 @@ void main_1(constant buf0& x_6, thread float4* const tint_symbol_6, thread float
       x_113_phi = x_114;
     }
   }
-  tint_array_wrapper const tint_symbol_4 = {.arr={float4(0.0f, 0.0f, 0.0f, 1.0f), float4(0.5f, 0.0f, 0.0f, 1.0f), float4(0.0f, 0.5f, 0.0f, 1.0f), float4(0.5f, 0.5f, 0.0f, 1.0f), float4(0.0f, 0.0f, 0.5f, 1.0f), float4(0.5f, 0.0f, 0.5f, 1.0f), float4(0.0f, 0.5f, 0.5f, 1.0f), float4(0.5f, 0.5f, 0.5f, 1.0f), float4(0.0f, 0.0f, 0.0f, 1.0f), float4(1.0f, 0.0f, 0.0f, 1.0f), float4(0.0f, 1.0f, 0.0f, 1.0f), float4(1.0f, 1.0f, 0.0f, 1.0f), float4(0.0f, 0.0f, 1.0f, 1.0f), float4(1.0f, 0.0f, 1.0f, 1.0f), float4(0.0f, 1.0f, 1.0f, 1.0f), float4(1.0f, 1.0f, 1.0f, 1.0f)}};
-  indexable = tint_symbol_4;
+  tint_array_wrapper const tint_symbol_2 = {.arr={float4(0.0f, 0.0f, 0.0f, 1.0f), float4(0.5f, 0.0f, 0.0f, 1.0f), float4(0.0f, 0.5f, 0.0f, 1.0f), float4(0.5f, 0.5f, 0.0f, 1.0f), float4(0.0f, 0.0f, 0.5f, 1.0f), float4(0.5f, 0.0f, 0.5f, 1.0f), float4(0.0f, 0.5f, 0.5f, 1.0f), float4(0.5f, 0.5f, 0.5f, 1.0f), float4(0.0f, 0.0f, 0.0f, 1.0f), float4(1.0f, 0.0f, 0.0f, 1.0f), float4(0.0f, 1.0f, 0.0f, 1.0f), float4(1.0f, 1.0f, 0.0f, 1.0f), float4(0.0f, 0.0f, 1.0f, 1.0f), float4(1.0f, 0.0f, 1.0f, 1.0f), float4(0.0f, 1.0f, 1.0f, 1.0f), float4(1.0f, 1.0f, 1.0f, 1.0f)}};
+  indexable = tint_symbol_2;
   float4 const x_121 = indexable.arr[x_116];
-  *(tint_symbol_7) = x_121;
+  *(tint_symbol_5) = x_121;
   return;
 }
 
-fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_6 [[buffer(0)]]) {
+main_out tint_symbol_inner(constant buf0& x_6, float4 gl_FragCoord_param, thread float4* const tint_symbol_6, thread float4* const tint_symbol_7) {
+  *(tint_symbol_6) = gl_FragCoord_param;
+  main_1(x_6, tint_symbol_6, tint_symbol_7);
+  main_out const tint_symbol_3 = {.x_GLF_color_1=*(tint_symbol_7)};
+  return tint_symbol_3;
+}
+
+fragment tint_symbol_1 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_6 [[buffer(0)]]) {
   thread float4 tint_symbol_8 = 0.0f;
   thread float4 tint_symbol_9 = 0.0f;
-  tint_symbol_8 = gl_FragCoord_param;
-  main_1(x_6, &(tint_symbol_8), &(tint_symbol_9));
-  main_out const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_9};
-  tint_symbol_2 const tint_symbol_5 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
-  return tint_symbol_5;
+  main_out const inner_result = tint_symbol_inner(x_6, gl_FragCoord_param, &(tint_symbol_8), &(tint_symbol_9));
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }
 

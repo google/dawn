@@ -13,17 +13,21 @@ float tint_modf(float param_0, threadgroup float* param_1) {
   return fract;
 }
 
-void modf_e38ae6(threadgroup float* const tint_symbol_1) {
-  float res = tint_modf(1.0f, tint_symbol_1);
+void modf_e38ae6(threadgroup float* const tint_symbol) {
+  float res = tint_modf(1.0f, tint_symbol);
+}
+
+void compute_main_inner(uint local_invocation_index, threadgroup float* const tint_symbol_1) {
+  {
+    *(tint_symbol_1) = float();
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  modf_e38ae6(tint_symbol_1);
 }
 
 kernel void compute_main(uint local_invocation_index [[thread_index_in_threadgroup]]) {
   threadgroup float tint_symbol_2;
-  {
-    tint_symbol_2 = float();
-  }
-  threadgroup_barrier(mem_flags::mem_threadgroup);
-  modf_e38ae6(&(tint_symbol_2));
+  compute_main_inner(local_invocation_index, &(tint_symbol_2));
   return;
 }
 

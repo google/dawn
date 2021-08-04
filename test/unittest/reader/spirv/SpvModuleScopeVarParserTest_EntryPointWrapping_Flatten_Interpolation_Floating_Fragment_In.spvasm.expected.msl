@@ -22,21 +22,19 @@ void main_1() {
   return;
 }
 
-fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  thread S tint_symbol_3 = {};
-  float const x_1_param = tint_symbol_1.x_1_param;
-  float const x_1_param_1 = tint_symbol_1.x_1_param_1;
-  float const x_1_param_2 = tint_symbol_1.x_1_param_2;
-  float const x_1_param_3 = tint_symbol_1.x_1_param_3;
-  float const x_1_param_4 = tint_symbol_1.x_1_param_4;
-  float const x_1_param_5 = tint_symbol_1.x_1_param_5;
-  tint_symbol_3.field0 = x_1_param;
-  tint_symbol_3.field1 = x_1_param_1;
-  tint_symbol_3.field2 = x_1_param_2;
-  tint_symbol_3.field3 = x_1_param_3;
-  tint_symbol_3.field4 = x_1_param_4;
-  tint_symbol_3.field5 = x_1_param_5;
+void tint_symbol_inner(float x_1_param, float x_1_param_1, float x_1_param_2, float x_1_param_3, float x_1_param_4, float x_1_param_5, thread S* const tint_symbol_3) {
+  (*(tint_symbol_3)).field0 = x_1_param;
+  (*(tint_symbol_3)).field1 = x_1_param_1;
+  (*(tint_symbol_3)).field2 = x_1_param_2;
+  (*(tint_symbol_3)).field3 = x_1_param_3;
+  (*(tint_symbol_3)).field4 = x_1_param_4;
+  (*(tint_symbol_3)).field5 = x_1_param_5;
   main_1();
+}
+
+fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  thread S tint_symbol_4 = {};
+  tint_symbol_inner(tint_symbol_1.x_1_param, tint_symbol_1.x_1_param_1, tint_symbol_1.x_1_param_2, tint_symbol_1.x_1_param_3, tint_symbol_1.x_1_param_4, tint_symbol_1.x_1_param_5, &(tint_symbol_4));
   return;
 }
 

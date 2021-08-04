@@ -9,11 +9,11 @@ struct buf1 {
   /* 0x0000 */ packed_float2 injectionSwitch;
 };
 
-void main_1(constant buf1& x_10, device doesNotMatter& x_7, thread uint3* const tint_symbol_2) {
+void main_1(constant buf1& x_10, device doesNotMatter& x_7, thread uint3* const tint_symbol_1) {
   int lid = 0;
   int val = 0;
   int i = 0;
-  uint const x_40 = (*(tint_symbol_2)).x;
+  uint const x_40 = (*(tint_symbol_1)).x;
   lid = as_type<int>(x_40);
   int const x_43 = x_7.global_seed;
   val = x_43;
@@ -48,10 +48,14 @@ void main_1(constant buf1& x_10, device doesNotMatter& x_7, thread uint3* const 
   return;
 }
 
+void tint_symbol_inner(constant buf1& x_10, device doesNotMatter& x_7, uint3 gl_LocalInvocationID_param, thread uint3* const tint_symbol_2) {
+  *(tint_symbol_2) = gl_LocalInvocationID_param;
+  main_1(x_10, x_7, tint_symbol_2);
+}
+
 kernel void tint_symbol(uint3 gl_LocalInvocationID_param [[thread_position_in_threadgroup]], constant buf1& x_10 [[buffer(1)]], device doesNotMatter& x_7 [[buffer(0)]]) {
   thread uint3 tint_symbol_3 = 0u;
-  tint_symbol_3 = gl_LocalInvocationID_param;
-  main_1(x_10, x_7, &(tint_symbol_3));
+  tint_symbol_inner(x_10, x_7, gl_LocalInvocationID_param, &(tint_symbol_3));
   return;
 }
 

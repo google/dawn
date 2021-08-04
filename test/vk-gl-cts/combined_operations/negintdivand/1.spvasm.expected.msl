@@ -11,27 +11,32 @@ struct tint_symbol_3 {
   float4 color_out_1 [[color(0)]];
 };
 
-void main_1(thread float4* const tint_symbol_6, thread float4* const tint_symbol_7) {
+void main_1(thread float4* const tint_symbol_5, thread float4* const tint_symbol_6) {
   int2 iv = 0;
-  float4 const x_28 = *(tint_symbol_6);
+  float4 const x_28 = *(tint_symbol_5);
   iv = int2((float2(x_28.x, x_28.y) * 256.0f));
   int const x_33 = iv.y;
   if ((((x_33 / 2) & 64) == 64)) {
-    *(tint_symbol_7) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+    *(tint_symbol_6) = float4(1.0f, 0.0f, 0.0f, 1.0f);
   } else {
-    *(tint_symbol_7) = float4(0.0f, 1.0f, 1.0f, 1.0f);
+    *(tint_symbol_6) = float4(0.0f, 1.0f, 1.0f, 1.0f);
   }
   return;
 }
 
+main_out tint_symbol_inner(float4 frag_color_param, thread float4* const tint_symbol_7, thread float4* const tint_symbol_8) {
+  *(tint_symbol_7) = frag_color_param;
+  main_1(tint_symbol_7, tint_symbol_8);
+  main_out const tint_symbol_4 = {.color_out_1=*(tint_symbol_8)};
+  return tint_symbol_4;
+}
+
 fragment tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  thread float4 tint_symbol_8 = 0.0f;
   thread float4 tint_symbol_9 = 0.0f;
-  float4 const frag_color_param = tint_symbol_1.frag_color_param;
-  tint_symbol_8 = frag_color_param;
-  main_1(&(tint_symbol_8), &(tint_symbol_9));
-  main_out const tint_symbol_4 = {.color_out_1=tint_symbol_9};
-  tint_symbol_3 const tint_symbol_5 = {.color_out_1=tint_symbol_4.color_out_1};
-  return tint_symbol_5;
+  thread float4 tint_symbol_10 = 0.0f;
+  main_out const inner_result = tint_symbol_inner(tint_symbol_1.frag_color_param, &(tint_symbol_9), &(tint_symbol_10));
+  tint_symbol_3 wrapper_result = {};
+  wrapper_result.color_out_1 = inner_result.color_out_1;
+  return wrapper_result;
 }
 

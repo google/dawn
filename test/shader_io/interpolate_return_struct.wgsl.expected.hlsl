@@ -21,8 +21,22 @@ struct tint_symbol {
   float4 pos : SV_Position;
 };
 
-tint_symbol main() {
+Out main_inner() {
   const Out tint_symbol_1 = (Out)0;
-  const tint_symbol tint_symbol_2 = {tint_symbol_1.none, tint_symbol_1.flat, tint_symbol_1.perspective_center, tint_symbol_1.perspective_centroid, tint_symbol_1.perspective_sample, tint_symbol_1.linear_center, tint_symbol_1.linear_centroid, tint_symbol_1.linear_sample, tint_symbol_1.pos};
-  return tint_symbol_2;
+  return tint_symbol_1;
+}
+
+tint_symbol main() {
+  const Out inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.pos = inner_result.pos;
+  wrapper_result.none = inner_result.none;
+  wrapper_result.flat = inner_result.flat;
+  wrapper_result.perspective_center = inner_result.perspective_center;
+  wrapper_result.perspective_centroid = inner_result.perspective_centroid;
+  wrapper_result.perspective_sample = inner_result.perspective_sample;
+  wrapper_result.linear_center = inner_result.linear_center;
+  wrapper_result.linear_centroid = inner_result.linear_centroid;
+  wrapper_result.linear_sample = inner_result.linear_sample;
+  return wrapper_result;
 }

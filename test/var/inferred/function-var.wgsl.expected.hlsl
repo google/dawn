@@ -47,7 +47,13 @@ struct tint_symbol {
   float4 value : SV_Target0;
 };
 
+float4 main_inner() {
+  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+}
+
 tint_symbol main() {
-  const tint_symbol tint_symbol_3 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
-  return tint_symbol_3;
+  const float4 inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }

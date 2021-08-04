@@ -34,15 +34,19 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[stage(compute), workgroup_size(1)]]
-fn main([[builtin(local_invocation_index)]] local_invocation_index : u32) {
-  [[internal(disable_validation__ignore_storage_class)]] var<workgroup> tint_symbol_1 : f32;
-  [[internal(disable_validation__ignore_storage_class)]] var<private> tint_symbol_2 : f32;
+fn main_inner(local_invocation_index : u32, tint_symbol : ptr<workgroup, f32>, tint_symbol_1 : ptr<private, f32>) {
   {
-    tint_symbol_1 = f32();
+    *(tint_symbol) = f32();
   }
   workgroupBarrier();
-  tint_symbol_1 = tint_symbol_2;
+  *(tint_symbol) = *(tint_symbol_1);
+}
+
+[[stage(compute), workgroup_size(1)]]
+fn main([[builtin(local_invocation_index)]] local_invocation_index : u32) {
+  [[internal(disable_validation__ignore_storage_class)]] var<workgroup> tint_symbol_2 : f32;
+  [[internal(disable_validation__ignore_storage_class)]] var<private> tint_symbol_3 : f32;
+  main_inner(local_invocation_index, &(tint_symbol_2), &(tint_symbol_3));
 }
 )";
 
@@ -80,26 +84,30 @@ fn main() {
 fn no_uses() {
 }
 
-fn bar(a : f32, b : f32, tint_symbol_1 : ptr<private, f32>, tint_symbol_2 : ptr<workgroup, f32>) {
-  *(tint_symbol_1) = a;
-  *(tint_symbol_2) = b;
+fn bar(a : f32, b : f32, tint_symbol : ptr<private, f32>, tint_symbol_1 : ptr<workgroup, f32>) {
+  *(tint_symbol) = a;
+  *(tint_symbol_1) = b;
 }
 
-fn foo(a : f32, tint_symbol_3 : ptr<private, f32>, tint_symbol_4 : ptr<workgroup, f32>) {
+fn foo(a : f32, tint_symbol_2 : ptr<private, f32>, tint_symbol_3 : ptr<workgroup, f32>) {
   let b : f32 = 2.0;
-  bar(a, b, tint_symbol_3, tint_symbol_4);
+  bar(a, b, tint_symbol_2, tint_symbol_3);
   no_uses();
+}
+
+fn main_inner(local_invocation_index : u32, tint_symbol_4 : ptr<workgroup, f32>, tint_symbol_5 : ptr<private, f32>) {
+  {
+    *(tint_symbol_4) = f32();
+  }
+  workgroupBarrier();
+  foo(1.0, tint_symbol_5, tint_symbol_4);
 }
 
 [[stage(compute), workgroup_size(1)]]
 fn main([[builtin(local_invocation_index)]] local_invocation_index : u32) {
-  [[internal(disable_validation__ignore_storage_class)]] var<workgroup> tint_symbol_5 : f32;
-  [[internal(disable_validation__ignore_storage_class)]] var<private> tint_symbol_6 : f32;
-  {
-    tint_symbol_5 = f32();
-  }
-  workgroupBarrier();
-  foo(1.0, &(tint_symbol_6), &(tint_symbol_5));
+  [[internal(disable_validation__ignore_storage_class)]] var<workgroup> tint_symbol_6 : f32;
+  [[internal(disable_validation__ignore_storage_class)]] var<private> tint_symbol_7 : f32;
+  main_inner(local_invocation_index, &(tint_symbol_6), &(tint_symbol_7));
 }
 )";
 
@@ -148,16 +156,20 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[stage(compute), workgroup_size(1)]]
-fn main([[builtin(local_invocation_index)]] local_invocation_index : u32) {
-  [[internal(disable_validation__ignore_storage_class)]] var<workgroup> tint_symbol_1 : f32;
-  [[internal(disable_validation__ignore_storage_class)]] var<private> tint_symbol_2 : f32;
+fn main_inner(local_invocation_index : u32, tint_symbol : ptr<workgroup, f32>, tint_symbol_1 : ptr<private, f32>) {
   {
-    tint_symbol_1 = f32();
+    *(tint_symbol) = f32();
   }
   workgroupBarrier();
-  let x : f32 = (tint_symbol_2 + tint_symbol_1);
-  tint_symbol_2 = x;
+  let x : f32 = (*(tint_symbol_1) + *(tint_symbol));
+  *(tint_symbol_1) = x;
+}
+
+[[stage(compute), workgroup_size(1)]]
+fn main([[builtin(local_invocation_index)]] local_invocation_index : u32) {
+  [[internal(disable_validation__ignore_storage_class)]] var<workgroup> tint_symbol_2 : f32;
+  [[internal(disable_validation__ignore_storage_class)]] var<private> tint_symbol_3 : f32;
+  main_inner(local_invocation_index, &(tint_symbol_2), &(tint_symbol_3));
 }
 )";
 

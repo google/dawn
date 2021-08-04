@@ -7,8 +7,15 @@ struct tint_symbol {
   uint sample_mask : SV_Coverage;
 };
 
-tint_symbol main() {
+FragmentOutputs main_inner() {
   const FragmentOutputs tint_symbol_1 = {1.0f, 1u};
-  const tint_symbol tint_symbol_2 = {tint_symbol_1.frag_depth, tint_symbol_1.sample_mask};
-  return tint_symbol_2;
+  return tint_symbol_1;
+}
+
+tint_symbol main() {
+  const FragmentOutputs inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.frag_depth = inner_result.frag_depth;
+  wrapper_result.sample_mask = inner_result.sample_mask;
+  return wrapper_result;
 }

@@ -36,10 +36,13 @@ struct tint_symbol_1 {
   uint3 gl_LocalInvocationID_param : SV_GroupThreadID;
 };
 
-[numthreads(16, 1, 1)]
-void main(tint_symbol_1 tint_symbol) {
-  const uint3 gl_LocalInvocationID_param = tint_symbol.gl_LocalInvocationID_param;
+void main_inner(uint3 gl_LocalInvocationID_param) {
   gl_LocalInvocationID = gl_LocalInvocationID_param;
   main_1();
+}
+
+[numthreads(16, 1, 1)]
+void main(tint_symbol_1 tint_symbol) {
+  main_inner(tint_symbol.gl_LocalInvocationID_param);
   return;
 }

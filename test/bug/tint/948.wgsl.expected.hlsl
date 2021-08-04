@@ -164,13 +164,7 @@ struct tint_symbol_2 {
   float4 glFragColor_1 : SV_Target0;
 };
 
-tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  const float2 tUV_param = tint_symbol.tUV_param;
-  const float2 tileID_1_param = tint_symbol.tileID_1_param;
-  const float2 levelUnits_param = tint_symbol.levelUnits_param;
-  const float2 stageUnits_1_param = tint_symbol.stageUnits_1_param;
-  const float3 vPosition_param = tint_symbol.vPosition_param;
-  const float2 vUV_param = tint_symbol.vUV_param;
+main_out main_inner(float2 tUV_param, float2 tileID_1_param, float2 levelUnits_param, float2 stageUnits_1_param, float3 vPosition_param, float2 vUV_param) {
   tUV = tUV_param;
   tileID_1 = tileID_1_param;
   levelUnits = levelUnits_param;
@@ -178,7 +172,13 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   vPosition = vPosition_param;
   vUV = vUV_param;
   main_1();
-  const main_out tint_symbol_3 = {glFragColor};
-  const tint_symbol_2 tint_symbol_7 = {tint_symbol_3.glFragColor_1};
-  return tint_symbol_7;
+  const main_out tint_symbol_6 = {glFragColor};
+  return tint_symbol_6;
+}
+
+tint_symbol_2 main(tint_symbol_1 tint_symbol) {
+  const main_out inner_result = main_inner(tint_symbol.tUV_param, tint_symbol.tileID_1_param, tint_symbol.levelUnits_param, tint_symbol.stageUnits_1_param, tint_symbol.vPosition_param, tint_symbol.vUV_param);
+  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
+  wrapper_result.glFragColor_1 = inner_result.glFragColor_1;
+  return wrapper_result;
 }

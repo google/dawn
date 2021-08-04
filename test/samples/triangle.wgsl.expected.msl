@@ -1,24 +1,36 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol_1 {
+struct tint_symbol {
   float4 value [[position]];
 };
 struct tint_array_wrapper {
   float2 arr[3];
 };
-struct tint_symbol_2 {
+struct tint_symbol_1 {
   float4 value [[color(0)]];
 };
 
-vertex tint_symbol_1 vtx_main(uint VertexIndex [[vertex_id]]) {
+float4 vtx_main_inner(uint VertexIndex) {
   tint_array_wrapper pos = {.arr={float2(0.0f, 0.5f), float2(-0.5f, -0.5f), float2(0.5f, -0.5f)}};
-  tint_symbol_1 const tint_symbol_3 = {.value=float4(pos.arr[VertexIndex], 0.0f, 1.0f)};
-  return tint_symbol_3;
+  return float4(pos.arr[VertexIndex], 0.0f, 1.0f);
 }
 
-fragment tint_symbol_2 frag_main() {
-  tint_symbol_2 const tint_symbol_4 = {.value=float4(1.0f, 0.0f, 0.0f, 1.0f)};
-  return tint_symbol_4;
+vertex tint_symbol vtx_main(uint VertexIndex [[vertex_id]]) {
+  float4 const inner_result = vtx_main_inner(VertexIndex);
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+float4 frag_main_inner() {
+  return float4(1.0f, 0.0f, 0.0f, 1.0f);
+}
+
+fragment tint_symbol_1 frag_main() {
+  float4 const inner_result_1 = frag_main_inner();
+  tint_symbol_1 wrapper_result_1 = {};
+  wrapper_result_1.value = inner_result_1;
+  return wrapper_result_1;
 }
 

@@ -176,8 +176,8 @@ void main_1() {
           const int x_170 = x_91;
           const int x_171 = x_92;
           const int x_173[10] = data;
-          const int tint_symbol_5[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-          data = tint_symbol_5;
+          const int tint_symbol_4[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+          data = tint_symbol_4;
           data = x_173;
           x_89 = ((x_170 + x_171) - 1);
           x_88 = min(((x_91 + (2 * x_92)) - 1), x_93);
@@ -259,13 +259,18 @@ struct tint_symbol_2 {
   float4 x_GLF_color_1 : SV_Target0;
 };
 
-tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  const float4 gl_FragCoord_param = tint_symbol.gl_FragCoord_param;
+main_out main_inner(float4 gl_FragCoord_param) {
   gl_FragCoord = gl_FragCoord_param;
   main_1();
-  const main_out tint_symbol_3 = {x_GLF_color};
-  const tint_symbol_2 tint_symbol_6 = {tint_symbol_3.x_GLF_color_1};
-  return tint_symbol_6;
+  const main_out tint_symbol_5 = {x_GLF_color};
+  return tint_symbol_5;
+}
+
+tint_symbol_2 main(tint_symbol_1 tint_symbol) {
+  const main_out inner_result = main_inner(tint_symbol.gl_FragCoord_param);
+  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }
 
 void mergeSort_() {

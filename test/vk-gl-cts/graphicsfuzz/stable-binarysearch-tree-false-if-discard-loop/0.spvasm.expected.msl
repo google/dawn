@@ -16,7 +16,7 @@ struct tint_symbol_1 {
   float4 x_GLF_color_1 [[color(0)]];
 };
 
-void main_1(thread float4* const tint_symbol_23) {
+void main_1(thread float4* const tint_symbol_22) {
   tint_array_wrapper tree = {};
   int x_356 = 0;
   int x_58_phi = 0;
@@ -24,8 +24,8 @@ void main_1(thread float4* const tint_symbol_23) {
   int x_353_phi = 0;
   int x_356_phi = 0;
   int x_358_phi = 0;
-  BST const tint_symbol_3 = {.data=9, .leftIndex=-1, .rightIndex=-1};
-  tree.arr[0] = tint_symbol_3;
+  BST const tint_symbol_2 = {.data=9, .leftIndex=-1, .rightIndex=-1};
+  tree.arr[0] = tint_symbol_2;
   switch(0u) {
     default: {
       x_58_phi = 0;
@@ -46,8 +46,8 @@ void main_1(thread float4* const tint_symbol_23) {
           int const x_79 = tree.arr[x_78_save].leftIndex;
           if ((x_79 == -1)) {
             tree.arr[x_78_save].leftIndex = 1;
-            BST const tint_symbol_4 = {.data=5, .leftIndex=-1, .rightIndex=-1};
-            tree.arr[1] = tint_symbol_4;
+            BST const tint_symbol_3 = {.data=5, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[1] = tint_symbol_3;
             x_86_phi = true;
             break;
           } else {
@@ -65,8 +65,8 @@ void main_1(thread float4* const tint_symbol_23) {
           int const x_71 = tree.arr[x_70_save].rightIndex;
           if ((x_71 == -1)) {
             tree.arr[x_70_save].rightIndex = 1;
-            BST const tint_symbol_5 = {.data=5, .leftIndex=-1, .rightIndex=-1};
-            tree.arr[1] = tint_symbol_5;
+            BST const tint_symbol_4 = {.data=5, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[1] = tint_symbol_4;
             x_86_phi = true;
             break;
           } else {
@@ -115,8 +115,8 @@ void main_1(thread float4* const tint_symbol_23) {
           int const x_112 = tree.arr[x_111_save].leftIndex;
           if ((x_112 == -1)) {
             tree.arr[x_111_save].leftIndex = 2;
-            BST const tint_symbol_6 = {.data=12, .leftIndex=-1, .rightIndex=-1};
-            tree.arr[2] = tint_symbol_6;
+            BST const tint_symbol_5 = {.data=12, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[2] = tint_symbol_5;
             x_119_phi = true;
             break;
           } else {
@@ -134,8 +134,8 @@ void main_1(thread float4* const tint_symbol_23) {
           int const x_104 = tree.arr[x_103_save].rightIndex;
           if ((x_104 == -1)) {
             tree.arr[x_103_save].rightIndex = 2;
-            BST const tint_symbol_7 = {.data=12, .leftIndex=-1, .rightIndex=-1};
-            tree.arr[2] = tint_symbol_7;
+            BST const tint_symbol_6 = {.data=12, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[2] = tint_symbol_6;
             x_119_phi = true;
             break;
           } else {
@@ -184,8 +184,8 @@ void main_1(thread float4* const tint_symbol_23) {
           int const x_145 = tree.arr[x_144_save].leftIndex;
           if ((x_145 == -1)) {
             tree.arr[x_144_save].leftIndex = 3;
-            BST const tint_symbol_8 = {.data=15, .leftIndex=-1, .rightIndex=-1};
-            tree.arr[3] = tint_symbol_8;
+            BST const tint_symbol_7 = {.data=15, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[3] = tint_symbol_7;
             x_152_phi = true;
             break;
           } else {
@@ -203,8 +203,8 @@ void main_1(thread float4* const tint_symbol_23) {
           int const x_137 = tree.arr[x_136_save].rightIndex;
           if ((x_137 == -1)) {
             tree.arr[x_136_save].rightIndex = 3;
-            BST const tint_symbol_9 = {.data=15, .leftIndex=-1, .rightIndex=-1};
-            tree.arr[3] = tint_symbol_9;
+            BST const tint_symbol_8 = {.data=15, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[3] = tint_symbol_8;
             x_152_phi = true;
             break;
           } else {
@@ -253,8 +253,8 @@ void main_1(thread float4* const tint_symbol_23) {
           int const x_178 = tree.arr[x_177_save].leftIndex;
           if ((x_178 == -1)) {
             tree.arr[x_177_save].leftIndex = 4;
-            BST const tint_symbol_10 = {.data=7, .leftIndex=-1, .rightIndex=-1};
-            tree.arr[4] = tint_symbol_10;
+            BST const tint_symbol_9 = {.data=7, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[4] = tint_symbol_9;
             x_185_phi = true;
             break;
           } else {
@@ -272,8 +272,8 @@ void main_1(thread float4* const tint_symbol_23) {
           int const x_170 = tree.arr[x_169_save].rightIndex;
           if ((x_170 == -1)) {
             tree.arr[x_169_save].rightIndex = 4;
-            BST const tint_symbol_11 = {.data=7, .leftIndex=-1, .rightIndex=-1};
-            tree.arr[4] = tint_symbol_11;
+            BST const tint_symbol_10 = {.data=7, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[4] = tint_symbol_10;
             x_185_phi = true;
             break;
           } else {
@@ -322,8 +322,8 @@ void main_1(thread float4* const tint_symbol_23) {
           int const x_211 = tree.arr[x_210_save].leftIndex;
           if ((x_211 == -1)) {
             tree.arr[x_210_save].leftIndex = 5;
-            BST const tint_symbol_12 = {.data=8, .leftIndex=-1, .rightIndex=-1};
-            tree.arr[5] = tint_symbol_12;
+            BST const tint_symbol_11 = {.data=8, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[5] = tint_symbol_11;
             x_218_phi = true;
             break;
           } else {
@@ -341,8 +341,8 @@ void main_1(thread float4* const tint_symbol_23) {
           int const x_203 = tree.arr[x_202_save].rightIndex;
           if ((x_203 == -1)) {
             tree.arr[x_202_save].rightIndex = 5;
-            BST const tint_symbol_13 = {.data=8, .leftIndex=-1, .rightIndex=-1};
-            tree.arr[5] = tint_symbol_13;
+            BST const tint_symbol_12 = {.data=8, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[5] = tint_symbol_12;
             x_218_phi = true;
             break;
           } else {
@@ -391,8 +391,8 @@ void main_1(thread float4* const tint_symbol_23) {
           int const x_244 = tree.arr[x_243_save].leftIndex;
           if ((x_244 == -1)) {
             tree.arr[x_243_save].leftIndex = 6;
-            BST const tint_symbol_14 = {.data=2, .leftIndex=-1, .rightIndex=-1};
-            tree.arr[6] = tint_symbol_14;
+            BST const tint_symbol_13 = {.data=2, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[6] = tint_symbol_13;
             x_251_phi = true;
             break;
           } else {
@@ -410,8 +410,8 @@ void main_1(thread float4* const tint_symbol_23) {
           int const x_236 = tree.arr[x_235_save].rightIndex;
           if ((x_236 == -1)) {
             tree.arr[x_235_save].rightIndex = 6;
-            BST const tint_symbol_15 = {.data=2, .leftIndex=-1, .rightIndex=-1};
-            tree.arr[6] = tint_symbol_15;
+            BST const tint_symbol_14 = {.data=2, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[6] = tint_symbol_14;
             x_251_phi = true;
             break;
           } else {
@@ -460,8 +460,8 @@ void main_1(thread float4* const tint_symbol_23) {
           int const x_277 = tree.arr[x_276_save].leftIndex;
           if ((x_277 == -1)) {
             tree.arr[x_276_save].leftIndex = 7;
-            BST const tint_symbol_16 = {.data=6, .leftIndex=-1, .rightIndex=-1};
-            tree.arr[7] = tint_symbol_16;
+            BST const tint_symbol_15 = {.data=6, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[7] = tint_symbol_15;
             x_284_phi = true;
             break;
           } else {
@@ -479,8 +479,8 @@ void main_1(thread float4* const tint_symbol_23) {
           int const x_269 = tree.arr[x_268_save].rightIndex;
           if ((x_269 == -1)) {
             tree.arr[x_268_save].rightIndex = 7;
-            BST const tint_symbol_17 = {.data=6, .leftIndex=-1, .rightIndex=-1};
-            tree.arr[7] = tint_symbol_17;
+            BST const tint_symbol_16 = {.data=6, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[7] = tint_symbol_16;
             x_284_phi = true;
             break;
           } else {
@@ -529,8 +529,8 @@ void main_1(thread float4* const tint_symbol_23) {
           int const x_310 = tree.arr[x_309_save].leftIndex;
           if ((x_310 == -1)) {
             tree.arr[x_309_save].leftIndex = 8;
-            BST const tint_symbol_18 = {.data=17, .leftIndex=-1, .rightIndex=-1};
-            tree.arr[8] = tint_symbol_18;
+            BST const tint_symbol_17 = {.data=17, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[8] = tint_symbol_17;
             x_317_phi = true;
             break;
           } else {
@@ -548,8 +548,8 @@ void main_1(thread float4* const tint_symbol_23) {
           int const x_302 = tree.arr[x_301_save].rightIndex;
           if ((x_302 == -1)) {
             tree.arr[x_301_save].rightIndex = 8;
-            BST const tint_symbol_19 = {.data=17, .leftIndex=-1, .rightIndex=-1};
-            tree.arr[8] = tint_symbol_19;
+            BST const tint_symbol_18 = {.data=17, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[8] = tint_symbol_18;
             x_317_phi = true;
             break;
           } else {
@@ -598,8 +598,8 @@ void main_1(thread float4* const tint_symbol_23) {
           int const x_343 = tree.arr[x_342_save].leftIndex;
           if ((x_343 == -1)) {
             tree.arr[x_342_save].leftIndex = 9;
-            BST const tint_symbol_20 = {.data=13, .leftIndex=-1, .rightIndex=-1};
-            tree.arr[9] = tint_symbol_20;
+            BST const tint_symbol_19 = {.data=13, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[9] = tint_symbol_19;
             x_350_phi = true;
             break;
           } else {
@@ -617,8 +617,8 @@ void main_1(thread float4* const tint_symbol_23) {
           int const x_335 = tree.arr[x_334_save].rightIndex;
           if ((x_335 == -1)) {
             tree.arr[x_334_save].rightIndex = 9;
-            BST const tint_symbol_21 = {.data=13, .leftIndex=-1, .rightIndex=-1};
-            tree.arr[9] = tint_symbol_21;
+            BST const tint_symbol_20 = {.data=13, .leftIndex=-1, .rightIndex=-1};
+            tree.arr[9] = tint_symbol_20;
             x_350_phi = true;
             break;
           } else {
@@ -745,18 +745,24 @@ void main_1(thread float4* const tint_symbol_23) {
     }
   }
   if ((x_356 == as_type<int>(20))) {
-    *(tint_symbol_23) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+    *(tint_symbol_22) = float4(1.0f, 0.0f, 0.0f, 1.0f);
   } else {
-    *(tint_symbol_23) = float4(0.0f, 0.0f, 1.0f, 1.0f);
+    *(tint_symbol_22) = float4(0.0f, 0.0f, 1.0f, 1.0f);
   }
   return;
 }
 
+main_out tint_symbol_inner(thread float4* const tint_symbol_23) {
+  main_1(tint_symbol_23);
+  main_out const tint_symbol_21 = {.x_GLF_color_1=*(tint_symbol_23)};
+  return tint_symbol_21;
+}
+
 fragment tint_symbol_1 tint_symbol() {
   thread float4 tint_symbol_24 = 0.0f;
-  main_1(&(tint_symbol_24));
-  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_24};
-  tint_symbol_1 const tint_symbol_22 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
-  return tint_symbol_22;
+  main_out const inner_result = tint_symbol_inner(&(tint_symbol_24));
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }
 

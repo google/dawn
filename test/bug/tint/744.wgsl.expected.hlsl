@@ -9,9 +9,7 @@ struct tint_symbol_1 {
   uint3 global_id : SV_DispatchThreadID;
 };
 
-[numthreads(2, 2, 1)]
-void main(tint_symbol_1 tint_symbol) {
-  const uint3 global_id = tint_symbol.global_id;
+void main_inner(uint3 global_id) {
   const uint2 resultCell = uint2(global_id.y, global_id.x);
   const uint dimInner = uniforms[0].y;
   const uint dimOutter = uniforms[1].y;
@@ -25,5 +23,10 @@ void main(tint_symbol_1 tint_symbol) {
   }
   const uint index = (resultCell.y + (resultCell.x * dimOutter));
   resultMatrix.Store((4u * index), asuint(result));
+}
+
+[numthreads(2, 2, 1)]
+void main(tint_symbol_1 tint_symbol) {
+  main_inner(tint_symbol.global_id);
   return;
 }

@@ -12,9 +12,15 @@ struct tint_symbol {
   float4 out_var_SV_TARGET_1 : SV_Target0;
 };
 
-tint_symbol main() {
+main_out main_inner() {
   main_1();
   const main_out tint_symbol_1 = {out_var_SV_TARGET};
-  const tint_symbol tint_symbol_2 = {tint_symbol_1.out_var_SV_TARGET_1};
-  return tint_symbol_2;
+  return tint_symbol_1;
+}
+
+tint_symbol main() {
+  const main_out inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.out_var_SV_TARGET_1 = inner_result.out_var_SV_TARGET_1;
+  return wrapper_result;
 }

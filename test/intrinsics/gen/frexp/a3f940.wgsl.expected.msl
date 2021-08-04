@@ -13,17 +13,21 @@ float2 tint_frexp(float2 param_0, threadgroup int2* param_1) {
   return sig;
 }
 
-void frexp_a3f940(threadgroup int2* const tint_symbol_1) {
-  float2 res = tint_frexp(float2(), tint_symbol_1);
+void frexp_a3f940(threadgroup int2* const tint_symbol) {
+  float2 res = tint_frexp(float2(), tint_symbol);
+}
+
+void compute_main_inner(uint local_invocation_index, threadgroup int2* const tint_symbol_1) {
+  {
+    *(tint_symbol_1) = int2();
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  frexp_a3f940(tint_symbol_1);
 }
 
 kernel void compute_main(uint local_invocation_index [[thread_index_in_threadgroup]]) {
   threadgroup int2 tint_symbol_2;
-  {
-    tint_symbol_2 = int2();
-  }
-  threadgroup_barrier(mem_flags::mem_threadgroup);
-  frexp_a3f940(&(tint_symbol_2));
+  compute_main_inner(local_invocation_index, &(tint_symbol_2));
   return;
 }
 

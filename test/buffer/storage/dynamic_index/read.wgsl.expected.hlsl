@@ -23,9 +23,7 @@ tint_symbol_11_ret tint_symbol_11(ByteAddressBuffer buffer, uint offset) {
   return arr_1;
 }
 
-[numthreads(1, 1, 1)]
-void main(tint_symbol_1 tint_symbol) {
-  const uint idx = tint_symbol.idx;
+void main_inner(uint idx) {
   const int3 a = asint(s.Load3((176u * idx)));
   const int b = asint(s.Load(((176u * idx) + 12u)));
   const uint3 c = s.Load3(((176u * idx) + 16u));
@@ -35,5 +33,10 @@ void main(tint_symbol_1 tint_symbol) {
   const float2x3 g = tint_symbol_8(s, ((176u * idx) + 48u));
   const float3x2 h = tint_symbol_9(s, ((176u * idx) + 80u));
   const int4 i[4] = tint_symbol_11(s, ((176u * idx) + 112u));
+}
+
+[numthreads(1, 1, 1)]
+void main(tint_symbol_1 tint_symbol) {
+  main_inner(tint_symbol.idx);
   return;
 }

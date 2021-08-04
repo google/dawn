@@ -15,8 +15,8 @@ struct Uniforms {
   /* 0x0010 */ int size;
 };
 
-float getAAtOutCoords_(const device ssbA& x_20, thread uint3* const tint_symbol_3) {
-  uint const x_42 = (*(tint_symbol_3)).x;
+float getAAtOutCoords_(const device ssbA& x_20, thread uint3* const tint_symbol_2) {
+  uint const x_42 = (*(tint_symbol_2)).x;
   float const x_44 = x_20.A[x_42];
   return x_44;
 }
@@ -37,18 +37,18 @@ void setOutput_i1_f1_(device ssbOut& x_16, thread int* const flatIndex, thread f
   return;
 }
 
-void main_1(constant Uniforms& x_24, const device ssbA& x_20, device ssbOut& x_16, thread uint3* const tint_symbol_4) {
+void main_1(constant Uniforms& x_24, const device ssbA& x_20, device ssbOut& x_16, thread uint3* const tint_symbol_3) {
   int index = 0;
   float a_1 = 0.0f;
   float param = 0.0f;
   int param_1 = 0;
   float param_2 = 0.0f;
-  uint const x_61 = (*(tint_symbol_4)).x;
+  uint const x_61 = (*(tint_symbol_3)).x;
   index = as_type<int>(x_61);
   int const x_63 = index;
   int const x_70 = x_24.size;
   if ((x_63 < x_70)) {
-    float const x_75 = getAAtOutCoords_(x_20, tint_symbol_4);
+    float const x_75 = getAAtOutCoords_(x_20, tint_symbol_3);
     a_1 = x_75;
     float const x_77 = a_1;
     param = x_77;
@@ -61,10 +61,14 @@ void main_1(constant Uniforms& x_24, const device ssbA& x_20, device ssbOut& x_1
   return;
 }
 
+void tint_symbol_1_inner(constant Uniforms& x_24, const device ssbA& x_20, device ssbOut& x_16, uint3 gl_GlobalInvocationID_param, thread uint3* const tint_symbol_4) {
+  *(tint_symbol_4) = gl_GlobalInvocationID_param;
+  main_1(x_24, x_20, x_16, tint_symbol_4);
+}
+
 kernel void tint_symbol_1(uint3 gl_GlobalInvocationID_param [[thread_position_in_grid]], constant Uniforms& x_24 [[buffer(2)]], const device ssbA& x_20 [[buffer(1)]], device ssbOut& x_16 [[buffer(0)]]) {
   thread uint3 tint_symbol_5 = 0u;
-  tint_symbol_5 = gl_GlobalInvocationID_param;
-  main_1(x_24, x_20, x_16, &(tint_symbol_5));
+  tint_symbol_1_inner(x_24, x_20, x_16, gl_GlobalInvocationID_param, &(tint_symbol_5));
   return;
 }
 

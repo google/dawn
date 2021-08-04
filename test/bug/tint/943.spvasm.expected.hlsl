@@ -345,11 +345,7 @@ struct tint_symbol_1 {
   uint3 gl_GlobalInvocationID_param : SV_DispatchThreadID;
 };
 
-[numthreads(1, 64, 1)]
-void main(tint_symbol_1 tint_symbol) {
-  const uint3 gl_LocalInvocationID_param = tint_symbol.gl_LocalInvocationID_param;
-  const uint3 gl_GlobalInvocationID_param = tint_symbol.gl_GlobalInvocationID_param;
-  const uint local_invocation_index = tint_symbol.local_invocation_index;
+void main_inner(uint3 gl_LocalInvocationID_param, uint3 gl_GlobalInvocationID_param, uint local_invocation_index) {
   {
     const uint i_1 = local_invocation_index;
     const uint i_2 = (local_invocation_index % 1u);
@@ -366,5 +362,10 @@ void main(tint_symbol_1 tint_symbol) {
   gl_LocalInvocationID = gl_LocalInvocationID_param;
   gl_GlobalInvocationID = gl_GlobalInvocationID_param;
   main_1();
+}
+
+[numthreads(1, 64, 1)]
+void main(tint_symbol_1 tint_symbol) {
+  main_inner(tint_symbol.gl_LocalInvocationID_param, tint_symbol.gl_GlobalInvocationID_param, tint_symbol.local_invocation_index);
   return;
 }

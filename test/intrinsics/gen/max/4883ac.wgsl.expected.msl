@@ -9,10 +9,16 @@ void max_4883ac() {
   float3 res = fmax(float3(), float3());
 }
 
-vertex tint_symbol vertex_main() {
+float4 vertex_main_inner() {
   max_4883ac();
-  tint_symbol const tint_symbol_1 = {.value=float4()};
-  return tint_symbol_1;
+  return float4();
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
 
 fragment void fragment_main() {

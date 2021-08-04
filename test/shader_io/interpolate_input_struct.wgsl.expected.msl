@@ -22,8 +22,12 @@ struct tint_symbol_2 {
   float linear_sample [[user(locn7)]] [[sample_no_perspective]];
 };
 
+void tint_symbol_inner(In in) {
+}
+
 fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  In const in = {.none=tint_symbol_1.none, .flat=tint_symbol_1.flat, .perspective_center=tint_symbol_1.perspective_center, .perspective_centroid=tint_symbol_1.perspective_centroid, .perspective_sample=tint_symbol_1.perspective_sample, .linear_center=tint_symbol_1.linear_center, .linear_centroid=tint_symbol_1.linear_centroid, .linear_sample=tint_symbol_1.linear_sample};
+  In const tint_symbol_3 = {.none=tint_symbol_1.none, .flat=tint_symbol_1.flat, .perspective_center=tint_symbol_1.perspective_center, .perspective_centroid=tint_symbol_1.perspective_centroid, .perspective_sample=tint_symbol_1.perspective_sample, .linear_center=tint_symbol_1.linear_center, .linear_centroid=tint_symbol_1.linear_centroid, .linear_sample=tint_symbol_1.linear_sample};
+  tint_symbol_inner(tint_symbol_3);
   return;
 }
 

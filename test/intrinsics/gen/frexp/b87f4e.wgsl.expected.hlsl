@@ -19,13 +19,16 @@ struct tint_symbol_1 {
   uint local_invocation_index : SV_GroupIndex;
 };
 
-[numthreads(1, 1, 1)]
-void compute_main(tint_symbol_1 tint_symbol) {
-  const uint local_invocation_index = tint_symbol.local_invocation_index;
+void compute_main_inner(uint local_invocation_index) {
   {
     arg_1 = int4(0, 0, 0, 0);
   }
   GroupMemoryBarrierWithGroupSync();
   frexp_b87f4e();
+}
+
+[numthreads(1, 1, 1)]
+void compute_main(tint_symbol_1 tint_symbol) {
+  compute_main_inner(tint_symbol.local_invocation_index);
   return;
 }

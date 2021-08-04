@@ -14,12 +14,18 @@ struct tint_symbol_2 {
   float4 value : SV_Position;
 };
 
-tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  const VertexInputs inputs = {tint_symbol.loc0, tint_symbol.loc1, tint_symbol.loc2, tint_symbol.loc3};
+float4 main_inner(VertexInputs inputs) {
   const int i = inputs.loc0;
   const uint u = inputs.loc1;
   const float f = inputs.loc2;
   const float4 v = inputs.loc3;
-  const tint_symbol_2 tint_symbol_3 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
-  return tint_symbol_3;
+  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+}
+
+tint_symbol_2 main(tint_symbol_1 tint_symbol) {
+  const VertexInputs tint_symbol_3 = {tint_symbol.loc0, tint_symbol.loc1, tint_symbol.loc2, tint_symbol.loc3};
+  const float4 inner_result = main_inner(tint_symbol_3);
+  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }

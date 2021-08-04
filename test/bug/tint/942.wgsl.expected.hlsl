@@ -16,11 +16,7 @@ struct tint_symbol_1 {
   uint3 WorkGroupID : SV_GroupID;
 };
 
-[numthreads(64, 1, 1)]
-void main(tint_symbol_1 tint_symbol) {
-  const uint3 WorkGroupID = tint_symbol.WorkGroupID;
-  const uint3 LocalInvocationID = tint_symbol.LocalInvocationID;
-  const uint local_invocation_index = tint_symbol.local_invocation_index;
+void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint local_invocation_index) {
   {
     for(uint idx = local_invocation_index; (idx < 1024u); idx = (idx + 64u)) {
       const uint i_1 = (idx / 256u);
@@ -79,5 +75,10 @@ void main(tint_symbol_1 tint_symbol) {
       }
     }
   }
+}
+
+[numthreads(64, 1, 1)]
+void main(tint_symbol_1 tint_symbol) {
+  main_inner(tint_symbol.WorkGroupID, tint_symbol.LocalInvocationID, tint_symbol.local_invocation_index);
   return;
 }

@@ -36,7 +36,7 @@ int binarySearch_struct_BinarySearchObject_i1_10_1_(constant buf0& x_8, thread B
   return 1;
 }
 
-void main_1(constant buf0& x_8, thread float4* const tint_symbol_4) {
+void main_1(constant buf0& x_8, thread float4* const tint_symbol_3) {
   int i = 0;
   BinarySearchObject obj_1 = {};
   BinarySearchObject param = {};
@@ -84,15 +84,21 @@ void main_1(constant buf0& x_8, thread float4* const tint_symbol_4) {
   BinarySearchObject const x_84 = obj_1;
   param = x_84;
   int const x_26 = binarySearch_struct_BinarySearchObject_i1_10_1_(x_8, &(param));
-  *(tint_symbol_4) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  *(tint_symbol_3) = float4(1.0f, 0.0f, 0.0f, 1.0f);
   return;
+}
+
+main_out tint_symbol_inner(constant buf0& x_8, thread float4* const tint_symbol_4) {
+  main_1(x_8, tint_symbol_4);
+  main_out const tint_symbol_2 = {.x_GLF_color_1=*(tint_symbol_4)};
+  return tint_symbol_2;
 }
 
 fragment tint_symbol_1 tint_symbol(constant buf0& x_8 [[buffer(0)]]) {
   thread float4 tint_symbol_5 = 0.0f;
-  main_1(x_8, &(tint_symbol_5));
-  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
-  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
-  return tint_symbol_3;
+  main_out const inner_result = tint_symbol_inner(x_8, &(tint_symbol_5));
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }
 

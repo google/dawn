@@ -53,7 +53,7 @@ bool coordsInBounds_vi2_vi2_(thread int2* const coord, thread int2* const shape)
   return x_88;
 }
 
-float mm_readA_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, thread int* const row, thread int* const col, thread int* const tint_symbol_3, thread int* const tint_symbol_4, thread int* const tint_symbol_5) {
+float mm_readA_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, thread int* const row, thread int* const col, thread int* const tint_symbol_2, thread int* const tint_symbol_3, thread int* const tint_symbol_4) {
   int batchASize = 0;
   int2 param_10 = 0;
   int2 param_11 = 0;
@@ -63,16 +63,16 @@ float mm_readA_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, thread 
   batchASize = as_type<int>((as_type<uint>(x_417) * as_type<uint>(x_419)));
   int const x_421 = *(row);
   int const x_422 = *(col);
-  int const x_424 = *(tint_symbol_3);
-  int const x_425 = *(tint_symbol_4);
+  int const x_424 = *(tint_symbol_2);
+  int const x_425 = *(tint_symbol_3);
   param_10 = int2(x_421, x_422);
   param_11 = int2(x_424, x_425);
   bool const x_429 = coordsInBounds_vi2_vi2_(&(param_10), &(param_11));
   if (x_429) {
-    int const x_438 = *(tint_symbol_5);
+    int const x_438 = *(tint_symbol_4);
     int const x_439 = batchASize;
     int const x_441 = *(row);
-    int const x_442 = *(tint_symbol_4);
+    int const x_442 = *(tint_symbol_3);
     int const x_445 = *(col);
     float const x_448 = x_165.A[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_438) * as_type<uint>(x_439)))) + as_type<uint>(as_type<int>((as_type<uint>(x_441) * as_type<uint>(x_442))))))) + as_type<uint>(x_445)))];
     x_430 = x_448;
@@ -83,7 +83,7 @@ float mm_readA_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, thread 
   return x_450;
 }
 
-float mm_readB_i1_i1_(constant Uniforms& x_48, const device ssbB& x_185, thread int* const row_1, thread int* const col_1, thread int* const tint_symbol_6, thread int* const tint_symbol_7, thread int* const tint_symbol_8) {
+float mm_readB_i1_i1_(constant Uniforms& x_48, const device ssbB& x_185, thread int* const row_1, thread int* const col_1, thread int* const tint_symbol_5, thread int* const tint_symbol_6, thread int* const tint_symbol_7) {
   int batchBSize = 0;
   int2 param_12 = 0;
   int2 param_13 = 0;
@@ -93,16 +93,16 @@ float mm_readB_i1_i1_(constant Uniforms& x_48, const device ssbB& x_185, thread 
   batchBSize = as_type<int>((as_type<uint>(x_455) * as_type<uint>(x_457)));
   int const x_459 = *(row_1);
   int const x_460 = *(col_1);
-  int const x_462 = *(tint_symbol_6);
-  int const x_463 = *(tint_symbol_7);
+  int const x_462 = *(tint_symbol_5);
+  int const x_463 = *(tint_symbol_6);
   param_12 = int2(x_459, x_460);
   param_13 = int2(x_462, x_463);
   bool const x_467 = coordsInBounds_vi2_vi2_(&(param_12), &(param_13));
   if (x_467) {
-    int const x_475 = *(tint_symbol_8);
+    int const x_475 = *(tint_symbol_7);
     int const x_476 = batchBSize;
     int const x_478 = *(row_1);
-    int const x_479 = *(tint_symbol_7);
+    int const x_479 = *(tint_symbol_6);
     int const x_482 = *(col_1);
     float const x_485 = x_185.B[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_475) * as_type<uint>(x_476)))) + as_type<uint>(as_type<int>((as_type<uint>(x_478) * as_type<uint>(x_479))))))) + as_type<uint>(x_482)))];
     x_468 = x_485;
@@ -146,17 +146,17 @@ void setOutput_i1_i1_i1_f1_(constant Uniforms& x_48, device ssbOut& x_54, thread
   return;
 }
 
-void mm_write_i1_i1_f1_(constant Uniforms& x_48, device ssbOut& x_54, thread int* const row_2, thread int* const col_2, thread float* const value_2, thread int* const tint_symbol_9) {
+void mm_write_i1_i1_f1_(constant Uniforms& x_48, device ssbOut& x_54, thread int* const row_2, thread int* const col_2, thread float* const value_2, thread int* const tint_symbol_8) {
   int3 outCoord = 0;
   int param_14 = 0;
   int param_15 = 0;
   int param_16 = 0;
   float param_17 = 0.0f;
-  int const x_491 = *(tint_symbol_9);
+  int const x_491 = *(tint_symbol_8);
   int const x_492 = *(row_2);
   int const x_493 = *(col_2);
   outCoord = int3(x_491, x_492, x_493);
-  int const x_496 = *(tint_symbol_9);
+  int const x_496 = *(tint_symbol_8);
   param_14 = x_496;
   int const x_498 = *(row_2);
   param_15 = x_498;
@@ -168,7 +168,7 @@ void mm_write_i1_i1_f1_(constant Uniforms& x_48, device ssbOut& x_54, thread int
   return;
 }
 
-void mm_matMul_i1_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, const device ssbB& x_185, device ssbOut& x_54, thread int* const dimAOuter, thread int* const dimInner, thread int* const dimBOuter, thread uint3* const tint_symbol_10, thread uint3* const tint_symbol_11, thread int* const tint_symbol_12, thread int* const tint_symbol_13, thread int* const tint_symbol_14, threadgroup tint_array_wrapper* const tint_symbol_15, thread int* const tint_symbol_16, threadgroup tint_array_wrapper_2* const tint_symbol_17) {
+void mm_matMul_i1_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, const device ssbB& x_185, device ssbOut& x_54, thread int* const dimAOuter, thread int* const dimInner, thread int* const dimBOuter, thread uint3* const tint_symbol_9, thread uint3* const tint_symbol_10, thread int* const tint_symbol_11, thread int* const tint_symbol_12, thread int* const tint_symbol_13, threadgroup tint_array_wrapper* const tint_symbol_14, thread int* const tint_symbol_15, threadgroup tint_array_wrapper_2* const tint_symbol_16) {
   int tileRow = 0;
   int tileCol = 0;
   int globalRow = 0;
@@ -203,13 +203,13 @@ void mm_matMul_i1_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, cons
   int param_7 = 0;
   int param_8 = 0;
   float param_9 = 0.0f;
-  uint const x_132 = (*(tint_symbol_10)).y;
+  uint const x_132 = (*(tint_symbol_9)).y;
   tileRow = as_type<int>((as_type<uint>(as_type<int>(x_132)) * as_type<uint>(1)));
-  uint const x_137 = (*(tint_symbol_10)).x;
+  uint const x_137 = (*(tint_symbol_9)).x;
   tileCol = as_type<int>((as_type<uint>(as_type<int>(x_137)) * as_type<uint>(1)));
-  uint const x_143 = (*(tint_symbol_11)).y;
+  uint const x_143 = (*(tint_symbol_10)).y;
   globalRow = as_type<int>((as_type<uint>(as_type<int>(x_143)) * as_type<uint>(1)));
-  uint const x_148 = (*(tint_symbol_11)).x;
+  uint const x_148 = (*(tint_symbol_10)).x;
   globalCol = as_type<int>((as_type<uint>(as_type<int>(x_148)) * as_type<uint>(1)));
   int const x_152 = *(dimInner);
   numTiles = as_type<int>((as_type<uint>((as_type<int>((as_type<uint>(x_152) - as_type<uint>(1))) / 64)) + as_type<uint>(1)));
@@ -240,9 +240,9 @@ void mm_matMul_i1_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, cons
       innerRow = as_type<int>((as_type<uint>(x_183) + as_type<uint>(1)));
     }
   }
-  uint const x_187 = (*(tint_symbol_10)).x;
+  uint const x_187 = (*(tint_symbol_9)).x;
   tileColA = as_type<int>((as_type<uint>(as_type<int>(x_187)) * as_type<uint>(64)));
-  uint const x_192 = (*(tint_symbol_10)).y;
+  uint const x_192 = (*(tint_symbol_9)).y;
   tileRowB = as_type<int>((as_type<uint>(as_type<int>(x_192)) * as_type<uint>(1)));
   t = 0;
   while (true) {
@@ -280,8 +280,8 @@ void mm_matMul_i1_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, cons
         int const x_240 = inputCol;
         param_3 = as_type<int>((as_type<uint>(x_235) + as_type<uint>(x_236)));
         param_4 = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_238) * as_type<uint>(64)))) + as_type<uint>(x_240)));
-        float const x_244 = mm_readA_i1_i1_(x_48, x_165, &(param_3), &(param_4), tint_symbol_12, tint_symbol_13, tint_symbol_14);
-        (*(tint_symbol_15)).arr[x_233].arr[x_234] = x_244;
+        float const x_244 = mm_readA_i1_i1_(x_48, x_165, &(param_3), &(param_4), tint_symbol_11, tint_symbol_12, tint_symbol_13);
+        (*(tint_symbol_14)).arr[x_233].arr[x_234] = x_244;
         {
           int const x_247 = innerCol_1;
           innerCol_1 = as_type<int>((as_type<uint>(x_247) + as_type<uint>(1)));
@@ -320,8 +320,8 @@ void mm_matMul_i1_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, cons
         int const x_285 = innerCol_2;
         param_5 = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_280) * as_type<uint>(64)))) + as_type<uint>(x_282)));
         param_6 = as_type<int>((as_type<uint>(x_284) + as_type<uint>(x_285)));
-        float const x_289 = mm_readB_i1_i1_(x_48, x_185, &(param_5), &(param_6), tint_symbol_13, tint_symbol_16, tint_symbol_14);
-        (*(tint_symbol_17)).arr[x_278].arr[x_279] = x_289;
+        float const x_289 = mm_readB_i1_i1_(x_48, x_185, &(param_5), &(param_6), tint_symbol_12, tint_symbol_15, tint_symbol_13);
+        (*(tint_symbol_16)).arr[x_278].arr[x_279] = x_289;
         {
           int const x_291 = innerCol_2;
           innerCol_2 = as_type<int>((as_type<uint>(x_291) + as_type<uint>(1)));
@@ -351,7 +351,7 @@ void mm_matMul_i1_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, cons
         int const x_315 = k;
         int const x_316 = tileCol;
         int const x_317 = inner;
-        float const x_320 = (*(tint_symbol_17)).arr[x_315].arr[as_type<int>((as_type<uint>(x_316) + as_type<uint>(x_317)))];
+        float const x_320 = (*(tint_symbol_16)).arr[x_315].arr[as_type<int>((as_type<uint>(x_316) + as_type<uint>(x_317)))];
         BCached.arr[x_314] = x_320;
         {
           int const x_322 = inner;
@@ -368,7 +368,7 @@ void mm_matMul_i1_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, cons
         int const x_333 = tileRow;
         int const x_334 = innerRow_3;
         int const x_336 = k;
-        float const x_338 = (*(tint_symbol_15)).arr[as_type<int>((as_type<uint>(x_333) + as_type<uint>(x_334)))].arr[x_336];
+        float const x_338 = (*(tint_symbol_14)).arr[as_type<int>((as_type<uint>(x_333) + as_type<uint>(x_334)))].arr[x_336];
         ACached = x_338;
         innerCol_3 = 0;
         while (true) {
@@ -445,7 +445,7 @@ void mm_matMul_i1_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, cons
         param_8 = as_type<int>((as_type<uint>(x_400) + as_type<uint>(x_401)));
         float const x_409 = acc.arr[x_403].arr[x_404];
         param_9 = x_409;
-        mm_write_i1_i1_f1_(x_48, x_54, &(param_7), &(param_8), &(param_9), tint_symbol_14);
+        mm_write_i1_i1_f1_(x_48, x_54, &(param_7), &(param_8), &(param_9), tint_symbol_13);
       }
       {
         int const x_411 = innerCol_4;
@@ -460,51 +460,55 @@ void mm_matMul_i1_i1_i1_(constant Uniforms& x_48, const device ssbA& x_165, cons
   return;
 }
 
-void main_1(constant Uniforms& x_48, const device ssbA& x_165, const device ssbB& x_185, device ssbOut& x_54, thread int* const tint_symbol_18, thread int* const tint_symbol_19, thread int* const tint_symbol_20, thread uint3* const tint_symbol_21, thread int* const tint_symbol_22, thread uint3* const tint_symbol_23, threadgroup tint_array_wrapper* const tint_symbol_24, threadgroup tint_array_wrapper_2* const tint_symbol_25) {
+void main_1(constant Uniforms& x_48, const device ssbA& x_165, const device ssbB& x_185, device ssbOut& x_54, thread int* const tint_symbol_17, thread int* const tint_symbol_18, thread int* const tint_symbol_19, thread uint3* const tint_symbol_20, thread int* const tint_symbol_21, thread uint3* const tint_symbol_22, threadgroup tint_array_wrapper* const tint_symbol_23, threadgroup tint_array_wrapper_2* const tint_symbol_24) {
   int param_18 = 0;
   int param_19 = 0;
   int param_20 = 0;
   int const x_67 = x_48.aShape.y;
-  *(tint_symbol_18) = x_67;
+  *(tint_symbol_17) = x_67;
   int const x_71 = x_48.aShape.z;
-  *(tint_symbol_19) = x_71;
+  *(tint_symbol_18) = x_71;
   int const x_75 = x_48.bShape.z;
-  *(tint_symbol_20) = x_75;
-  uint const x_505 = (*(tint_symbol_21)).z;
-  *(tint_symbol_22) = as_type<int>(x_505);
-  int const x_508 = *(tint_symbol_18);
+  *(tint_symbol_19) = x_75;
+  uint const x_505 = (*(tint_symbol_20)).z;
+  *(tint_symbol_21) = as_type<int>(x_505);
+  int const x_508 = *(tint_symbol_17);
   param_18 = x_508;
-  int const x_510 = *(tint_symbol_19);
+  int const x_510 = *(tint_symbol_18);
   param_19 = x_510;
-  int const x_512 = *(tint_symbol_20);
+  int const x_512 = *(tint_symbol_19);
   param_20 = x_512;
-  mm_matMul_i1_i1_i1_(x_48, x_165, x_185, x_54, &(param_18), &(param_19), &(param_20), tint_symbol_23, tint_symbol_21, tint_symbol_18, tint_symbol_19, tint_symbol_22, tint_symbol_24, tint_symbol_20, tint_symbol_25);
+  mm_matMul_i1_i1_i1_(x_48, x_165, x_185, x_54, &(param_18), &(param_19), &(param_20), tint_symbol_22, tint_symbol_20, tint_symbol_17, tint_symbol_18, tint_symbol_21, tint_symbol_23, tint_symbol_19, tint_symbol_24);
   return;
 }
 
-kernel void tint_symbol_1(uint3 gl_LocalInvocationID_param [[thread_position_in_threadgroup]], uint3 gl_GlobalInvocationID_param [[thread_position_in_grid]], uint local_invocation_index [[thread_index_in_threadgroup]], constant Uniforms& x_48 [[buffer(3)]], const device ssbA& x_165 [[buffer(1)]], const device ssbB& x_185 [[buffer(2)]], device ssbOut& x_54 [[buffer(0)]]) {
-  threadgroup tint_array_wrapper_2 tint_symbol_26;
-  threadgroup tint_array_wrapper tint_symbol_27;
-  thread uint3 tint_symbol_28 = 0u;
-  thread uint3 tint_symbol_29 = 0u;
-  thread int tint_symbol_30 = 0;
-  thread int tint_symbol_31 = 0;
-  thread int tint_symbol_32 = 0;
-  thread int tint_symbol_33 = 0;
+void tint_symbol_1_inner(constant Uniforms& x_48, const device ssbA& x_165, const device ssbB& x_185, device ssbOut& x_54, uint3 gl_LocalInvocationID_param, uint3 gl_GlobalInvocationID_param, uint local_invocation_index, threadgroup tint_array_wrapper_2* const tint_symbol_25, threadgroup tint_array_wrapper* const tint_symbol_26, thread uint3* const tint_symbol_27, thread uint3* const tint_symbol_28, thread int* const tint_symbol_29, thread int* const tint_symbol_30, thread int* const tint_symbol_31, thread int* const tint_symbol_32) {
   {
     uint const i_1 = local_invocation_index;
     uint const i_2 = (local_invocation_index % 1u);
-    tint_symbol_26.arr[i_1].arr[i_2] = float();
+    (*(tint_symbol_25)).arr[i_1].arr[i_2] = float();
   }
   for(uint idx = local_invocation_index; (idx < 4096u); idx = (idx + 64u)) {
     uint const i = (idx / 64u);
     uint const i_1 = (idx % 64u);
-    tint_symbol_27.arr[i].arr[i_1] = float();
+    (*(tint_symbol_26)).arr[i].arr[i_1] = float();
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  tint_symbol_28 = gl_LocalInvocationID_param;
-  tint_symbol_29 = gl_GlobalInvocationID_param;
-  main_1(x_48, x_165, x_185, x_54, &(tint_symbol_30), &(tint_symbol_31), &(tint_symbol_32), &(tint_symbol_29), &(tint_symbol_33), &(tint_symbol_28), &(tint_symbol_27), &(tint_symbol_26));
+  *(tint_symbol_27) = gl_LocalInvocationID_param;
+  *(tint_symbol_28) = gl_GlobalInvocationID_param;
+  main_1(x_48, x_165, x_185, x_54, tint_symbol_29, tint_symbol_30, tint_symbol_31, tint_symbol_28, tint_symbol_32, tint_symbol_27, tint_symbol_26, tint_symbol_25);
+}
+
+kernel void tint_symbol_1(uint3 gl_LocalInvocationID_param [[thread_position_in_threadgroup]], uint3 gl_GlobalInvocationID_param [[thread_position_in_grid]], uint local_invocation_index [[thread_index_in_threadgroup]], constant Uniforms& x_48 [[buffer(3)]], const device ssbA& x_165 [[buffer(1)]], const device ssbB& x_185 [[buffer(2)]], device ssbOut& x_54 [[buffer(0)]]) {
+  threadgroup tint_array_wrapper_2 tint_symbol_33;
+  threadgroup tint_array_wrapper tint_symbol_34;
+  thread uint3 tint_symbol_35 = 0u;
+  thread uint3 tint_symbol_36 = 0u;
+  thread int tint_symbol_37 = 0;
+  thread int tint_symbol_38 = 0;
+  thread int tint_symbol_39 = 0;
+  thread int tint_symbol_40 = 0;
+  tint_symbol_1_inner(x_48, x_165, x_185, x_54, gl_LocalInvocationID_param, gl_GlobalInvocationID_param, local_invocation_index, &(tint_symbol_33), &(tint_symbol_34), &(tint_symbol_35), &(tint_symbol_36), &(tint_symbol_37), &(tint_symbol_38), &(tint_symbol_39), &(tint_symbol_40));
   return;
 }
 

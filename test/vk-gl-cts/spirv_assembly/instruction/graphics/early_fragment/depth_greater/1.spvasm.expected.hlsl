@@ -16,9 +16,16 @@ struct tint_symbol {
   float gl_FragDepth_1 : SV_Depth;
 };
 
-tint_symbol main() {
+main_out main_inner() {
   main_1();
   const main_out tint_symbol_1 = {color_out, gl_FragDepth};
-  const tint_symbol tint_symbol_2 = {tint_symbol_1.color_out_1, tint_symbol_1.gl_FragDepth_1};
-  return tint_symbol_2;
+  return tint_symbol_1;
+}
+
+tint_symbol main() {
+  const main_out inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.color_out_1 = inner_result.color_out_1;
+  wrapper_result.gl_FragDepth_1 = inner_result.gl_FragDepth_1;
+  return wrapper_result;
 }

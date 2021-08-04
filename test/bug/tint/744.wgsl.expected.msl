@@ -10,7 +10,7 @@ struct Matrix {
   /* 0x0000 */ uint numbers[1];
 };
 
-kernel void tint_symbol(uint3 global_id [[thread_position_in_grid]], constant Uniforms& uniforms [[buffer(3)]], const device Matrix& firstMatrix [[buffer(0)]], const device Matrix& secondMatrix [[buffer(1)]], device Matrix& resultMatrix [[buffer(2)]]) {
+void tint_symbol_inner(constant Uniforms& uniforms, const device Matrix& firstMatrix, const device Matrix& secondMatrix, device Matrix& resultMatrix, uint3 global_id) {
   uint2 const resultCell = uint2(global_id.y, global_id.x);
   uint const dimInner = uniforms.aShape.y;
   uint const dimOutter = uniforms.outShape.y;
@@ -22,6 +22,10 @@ kernel void tint_symbol(uint3 global_id [[thread_position_in_grid]], constant Un
   }
   uint const index = (resultCell.y + (resultCell.x * dimOutter));
   resultMatrix.numbers[index] = result;
+}
+
+kernel void tint_symbol(uint3 global_id [[thread_position_in_grid]], constant Uniforms& uniforms [[buffer(3)]], const device Matrix& firstMatrix [[buffer(0)]], const device Matrix& secondMatrix [[buffer(1)]], device Matrix& resultMatrix [[buffer(2)]]) {
+  tint_symbol_inner(uniforms, firstMatrix, secondMatrix, resultMatrix, global_id);
   return;
 }
 

@@ -27,18 +27,30 @@ struct tint_symbol_5 {
   float4 value [[color(0)]];
 };
 
-vertex tint_symbol_2 vtx_main(tint_symbol_1 tint_symbol [[stage_in]], constant Uniforms& uniforms [[buffer(0)]]) {
-  VertexInput const input = {.cur_position=tint_symbol.cur_position, .color=tint_symbol.color};
+VertexOutput vtx_main_inner(constant Uniforms& uniforms, VertexInput input) {
   VertexOutput output = {};
   output.Position = (uniforms.modelViewProjectionMatrix * input.cur_position);
   output.vtxFragColor = input.color;
-  tint_symbol_2 const tint_symbol_6 = {.vtxFragColor=output.vtxFragColor, .Position=output.Position};
-  return tint_symbol_6;
+  return output;
+}
+
+vertex tint_symbol_2 vtx_main(tint_symbol_1 tint_symbol [[stage_in]], constant Uniforms& uniforms [[buffer(0)]]) {
+  VertexInput const tint_symbol_6 = {.cur_position=tint_symbol.cur_position, .color=tint_symbol.color};
+  VertexOutput const inner_result = vtx_main_inner(uniforms, tint_symbol_6);
+  tint_symbol_2 wrapper_result = {};
+  wrapper_result.vtxFragColor = inner_result.vtxFragColor;
+  wrapper_result.Position = inner_result.Position;
+  return wrapper_result;
+}
+
+float4 frag_main_inner(float4 fragColor) {
+  return fragColor;
 }
 
 fragment tint_symbol_5 frag_main(tint_symbol_4 tint_symbol_3 [[stage_in]]) {
-  float4 const fragColor = tint_symbol_3.fragColor;
-  tint_symbol_5 const tint_symbol_7 = {.value=fragColor};
-  return tint_symbol_7;
+  float4 const inner_result_1 = frag_main_inner(tint_symbol_3.fragColor);
+  tint_symbol_5 wrapper_result_1 = {};
+  wrapper_result_1.value = inner_result_1;
+  return wrapper_result_1;
 }
 

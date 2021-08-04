@@ -31,16 +31,16 @@ struct tint_symbol_1 {
   float4 x_GLF_color_1 [[color(0)]];
 };
 
-void main_1(constant buf1& x_5, constant buf2& x_7, constant buf0& x_10, thread float4* const tint_symbol_4) {
+void main_1(constant buf1& x_5, constant buf2& x_7, constant buf0& x_10, thread float4* const tint_symbol_3) {
   int i = 0;
   float const x_38 = x_5.x_GLF_uniform_float_values.arr[0].el;
-  *(tint_symbol_4) = float4(x_38, x_38, x_38, x_38);
+  *(tint_symbol_3) = float4(x_38, x_38, x_38, x_38);
   float const x_41 = x_7.zero;
   float const x_43 = x_5.x_GLF_uniform_float_values.arr[0].el;
   if ((x_41 > x_43)) {
     while (true) {
       float const x_53 = x_5.x_GLF_uniform_float_values.arr[1].el;
-      *(tint_symbol_4) = float4(x_53, x_53, x_53, x_53);
+      *(tint_symbol_3) = float4(x_53, x_53, x_53, x_53);
       {
         if (true) {
         } else {
@@ -68,7 +68,7 @@ void main_1(constant buf1& x_5, constant buf2& x_7, constant buf0& x_10, thread 
           float const x_75 = x_5.x_GLF_uniform_float_values.arr[0].el;
           float const x_77 = x_5.x_GLF_uniform_float_values.arr[0].el;
           float const x_79 = x_5.x_GLF_uniform_float_values.arr[1].el;
-          *(tint_symbol_4) = float4(x_73, x_75, x_77, x_79);
+          *(tint_symbol_3) = float4(x_73, x_75, x_77, x_79);
           {
             int const x_16 = i;
             i = as_type<int>((as_type<uint>(x_16) + as_type<uint>(1)));
@@ -89,11 +89,17 @@ void main_1(constant buf1& x_5, constant buf2& x_7, constant buf0& x_10, thread 
   return;
 }
 
+main_out tint_symbol_inner(constant buf1& x_5, constant buf2& x_7, constant buf0& x_10, thread float4* const tint_symbol_4) {
+  main_1(x_5, x_7, x_10, tint_symbol_4);
+  main_out const tint_symbol_2 = {.x_GLF_color_1=*(tint_symbol_4)};
+  return tint_symbol_2;
+}
+
 fragment tint_symbol_1 tint_symbol(constant buf1& x_5 [[buffer(1)]], constant buf2& x_7 [[buffer(2)]], constant buf0& x_10 [[buffer(0)]]) {
   thread float4 tint_symbol_5 = 0.0f;
-  main_1(x_5, x_7, x_10, &(tint_symbol_5));
-  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
-  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
-  return tint_symbol_3;
+  main_out const inner_result = tint_symbol_inner(x_5, x_7, x_10, &(tint_symbol_5));
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }
 

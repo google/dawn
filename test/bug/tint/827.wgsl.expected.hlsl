@@ -6,9 +6,12 @@ struct tint_symbol_1 {
   uint3 GlobalInvocationId : SV_DispatchThreadID;
 };
 
+void main_inner(uint3 GlobalInvocationId) {
+  result.Store((4u * ((GlobalInvocationId.y * width) + GlobalInvocationId.x)), asuint(tex.Load(int3(int(GlobalInvocationId.x), int(GlobalInvocationId.y), 0)).x));
+}
+
 [numthreads(1, 1, 1)]
 void main(tint_symbol_1 tint_symbol) {
-  const uint3 GlobalInvocationId = tint_symbol.GlobalInvocationId;
-  result.Store((4u * ((GlobalInvocationId.y * width) + GlobalInvocationId.x)), asuint(tex.Load(int3(int(GlobalInvocationId.x), int(GlobalInvocationId.y), 0)).x));
+  main_inner(tint_symbol.GlobalInvocationId);
   return;
 }

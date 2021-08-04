@@ -9,10 +9,16 @@ void ceil_b74c16() {
   float4 res = ceil(float4());
 }
 
-vertex tint_symbol vertex_main() {
+float4 vertex_main_inner() {
   ceil_b74c16();
-  tint_symbol const tint_symbol_1 = {.value=float4()};
-  return tint_symbol_1;
+  return float4();
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
 
 fragment void fragment_main() {

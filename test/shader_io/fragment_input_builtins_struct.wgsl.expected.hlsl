@@ -11,11 +11,15 @@ struct tint_symbol_1 {
   uint sample_mask : SV_Coverage;
 };
 
-void main(tint_symbol_1 tint_symbol) {
-  const FragmentInputs inputs = {tint_symbol.position, tint_symbol.front_facing, tint_symbol.sample_index, tint_symbol.sample_mask};
+void main_inner(FragmentInputs inputs) {
   if (inputs.front_facing) {
     const float4 foo = inputs.position;
     const uint bar = (inputs.sample_index + inputs.sample_mask);
   }
+}
+
+void main(tint_symbol_1 tint_symbol) {
+  const FragmentInputs tint_symbol_2 = {tint_symbol.position, tint_symbol.front_facing, tint_symbol.sample_index, tint_symbol.sample_mask};
+  main_inner(tint_symbol_2);
   return;
 }

@@ -22,10 +22,16 @@ void modf_f90945() {
   float res = tint_modf(1.0f, &(arg_1));
 }
 
-vertex tint_symbol vertex_main() {
+float4 vertex_main_inner() {
   modf_f90945();
-  tint_symbol const tint_symbol_1 = {.value=float4()};
-  return tint_symbol_1;
+  return float4();
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
 
 fragment void fragment_main() {

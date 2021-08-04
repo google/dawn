@@ -16,8 +16,8 @@ void main_1() {
   int x_9_phi = 0;
   StructType x_42_phi = (StructType)0;
   int x_10_phi = 0;
-  const StructType tint_symbol_3 = {float3(0.0f, 0.0f, 0.0f), bool4(false, false, false, false)};
-  x_33_phi = tint_symbol_3;
+  const StructType tint_symbol_2 = {float3(0.0f, 0.0f, 0.0f), bool4(false, false, false, false)};
+  x_33_phi = tint_symbol_2;
   x_9_phi = 0;
   while (true) {
     StructType x_34 = (StructType)0;
@@ -69,9 +69,15 @@ struct tint_symbol {
   float4 x_GLF_color_1 : SV_Target0;
 };
 
-tint_symbol main() {
+main_out main_inner() {
   main_1();
-  const main_out tint_symbol_1 = {x_GLF_color};
-  const tint_symbol tint_symbol_4 = {tint_symbol_1.x_GLF_color_1};
-  return tint_symbol_4;
+  const main_out tint_symbol_3 = {x_GLF_color};
+  return tint_symbol_3;
+}
+
+tint_symbol main() {
+  const main_out inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }

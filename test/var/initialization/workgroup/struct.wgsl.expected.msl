@@ -6,14 +6,18 @@ struct S {
   float b;
 };
 
-kernel void tint_symbol(uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  threadgroup S tint_symbol_3;
+void tint_symbol_inner(uint local_invocation_index, threadgroup S* const tint_symbol_2) {
   {
-    S const tint_symbol_2 = {};
-    tint_symbol_3 = tint_symbol_2;
+    S const tint_symbol_1 = {};
+    *(tint_symbol_2) = tint_symbol_1;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  (void) tint_symbol_3;
+  (void) *(tint_symbol_2);
+}
+
+kernel void tint_symbol(uint local_invocation_index [[thread_index_in_threadgroup]]) {
+  threadgroup S tint_symbol_3;
+  tint_symbol_inner(local_invocation_index, &(tint_symbol_3));
   return;
 }
 

@@ -48,14 +48,20 @@ struct tint_symbol_2 {
   float4 color : SV_Target0;
 };
 
-tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  const FragmentInput fragment = {tint_symbol.position, tint_symbol.view_position, tint_symbol.normal, tint_symbol.uv, tint_symbol.color};
+FragmentOutput main_inner(FragmentInput fragment) {
   FragmentOutput output = (FragmentOutput)0;
   output.color = float4(1.0f, 0.0f, 0.0f, 1.0f);
   uniforms;
   mySampler;
   myTexture;
   pointLights;
-  const tint_symbol_2 tint_symbol_5 = {output.color};
-  return tint_symbol_5;
+  return output;
+}
+
+tint_symbol_2 main(tint_symbol_1 tint_symbol) {
+  const FragmentInput tint_symbol_5 = {tint_symbol.position, tint_symbol.view_position, tint_symbol.normal, tint_symbol.uv, tint_symbol.color};
+  const FragmentOutput inner_result = main_inner(tint_symbol_5);
+  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
+  wrapper_result.color = inner_result.color;
+  return wrapper_result;
 }

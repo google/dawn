@@ -154,40 +154,40 @@ Mat4x3_ _Mat4x3_1(Mat4x4_ m20) {
   return o4;
 }
 
-Mat4x3_ tint_symbol_4(uint4 buffer[96], uint offset) {
+Mat4x3_ tint_symbol_3(uint4 buffer[96], uint offset) {
   const uint scalar_offset = ((offset + 0u)) / 4;
   const uint scalar_offset_1 = ((offset + 16u)) / 4;
   const uint scalar_offset_2 = ((offset + 32u)) / 4;
-  const Mat4x3_ tint_symbol_10 = {asfloat(buffer[scalar_offset / 4]), asfloat(buffer[scalar_offset_1 / 4]), asfloat(buffer[scalar_offset_2 / 4])};
-  return tint_symbol_10;
+  const Mat4x3_ tint_symbol_9 = {asfloat(buffer[scalar_offset / 4]), asfloat(buffer[scalar_offset_1 / 4]), asfloat(buffer[scalar_offset_2 / 4])};
+  return tint_symbol_9;
 }
 
-Mat4x4_ tint_symbol_6(uint4 buffer[4], uint offset) {
+Mat4x4_ tint_symbol_5(uint4 buffer[4], uint offset) {
   const uint scalar_offset_3 = ((offset + 0u)) / 4;
   const uint scalar_offset_4 = ((offset + 16u)) / 4;
   const uint scalar_offset_5 = ((offset + 32u)) / 4;
   const uint scalar_offset_6 = ((offset + 48u)) / 4;
-  const Mat4x4_ tint_symbol_11 = {asfloat(buffer[scalar_offset_3 / 4]), asfloat(buffer[scalar_offset_4 / 4]), asfloat(buffer[scalar_offset_5 / 4]), asfloat(buffer[scalar_offset_6 / 4])};
-  return tint_symbol_11;
+  const Mat4x4_ tint_symbol_10 = {asfloat(buffer[scalar_offset_3 / 4]), asfloat(buffer[scalar_offset_4 / 4]), asfloat(buffer[scalar_offset_5 / 4]), asfloat(buffer[scalar_offset_6 / 4])};
+  return tint_symbol_10;
 }
 
-Mat4x2_ tint_symbol_9(uint4 buffer[3], uint offset) {
+Mat4x2_ tint_symbol_8(uint4 buffer[3], uint offset) {
   const uint scalar_offset_7 = ((offset + 0u)) / 4;
   const uint scalar_offset_8 = ((offset + 16u)) / 4;
-  const Mat4x2_ tint_symbol_12 = {asfloat(buffer[scalar_offset_7 / 4]), asfloat(buffer[scalar_offset_8 / 4])};
-  return tint_symbol_12;
+  const Mat4x2_ tint_symbol_11 = {asfloat(buffer[scalar_offset_7 / 4]), asfloat(buffer[scalar_offset_8 / 4])};
+  return tint_symbol_11;
 }
 
 void main1() {
   Mat4x3_ t_PosMtx = (Mat4x3_)0;
   float2 t_TexSpaceCoord = float2(0.0f, 0.0f);
-  const Mat4x3_ _e18 = tint_symbol_4(global2, (48u * uint(int(a_PosMtxIdx1))));
+  const Mat4x3_ _e18 = tint_symbol_3(global2, (48u * uint(int(a_PosMtxIdx1))));
   t_PosMtx = _e18;
   const Mat4x4_ _e24 = _Mat4x4_1(t_PosMtx);
   const float3 _e25 = a_Position1;
   const Mat4x4_ _e30 = _Mat4x4_1(t_PosMtx);
   const float4 _e34 = Mul(_e30, float4(a_Position1, 1.0f));
-  const Mat4x4_ _e35 = tint_symbol_6(global, 0u);
+  const Mat4x4_ _e35 = tint_symbol_5(global, 0u);
   const Mat4x4_ _e38 = _Mat4x4_1(t_PosMtx);
   const float3 _e39 = a_Position1;
   const Mat4x4_ _e44 = _Mat4x4_1(t_PosMtx);
@@ -199,7 +199,7 @@ void main1() {
   if ((_e52.x == 2.0f)) {
     {
       const float3 _e59 = a_Normal1;
-      const Mat4x2_ _e64 = tint_symbol_9(global1, (32u * uint(0)));
+      const Mat4x2_ _e64 = tint_symbol_8(global1, (32u * uint(0)));
       const float2 _e68 = Mul2(_e64, float4(a_Normal1, 1.0f));
       v_TexCoord = _e68.xy;
       return;
@@ -207,7 +207,7 @@ void main1() {
   } else {
     {
       const float2 _e73 = a_UV1;
-      const Mat4x2_ _e79 = tint_symbol_9(global1, (32u * uint(0)));
+      const Mat4x2_ _e79 = tint_symbol_8(global1, (32u * uint(0)));
       const float2 _e84 = Mul2(_e79, float4(a_UV1, 1.0f, 1.0f));
       v_TexCoord = _e84.xy;
       return;
@@ -228,19 +228,22 @@ struct tint_symbol_2 {
   float4 member : SV_Position;
 };
 
-tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  const float3 a_Position = tint_symbol.a_Position;
-  const float2 a_UV = tint_symbol.a_UV;
-  const float4 a_Color = tint_symbol.a_Color;
-  const float3 a_Normal = tint_symbol.a_Normal;
-  const float a_PosMtxIdx = tint_symbol.a_PosMtxIdx;
+VertexOutput main_inner(float3 a_Position, float2 a_UV, float4 a_Color, float3 a_Normal, float a_PosMtxIdx) {
   a_Position1 = a_Position;
   a_UV1 = a_UV;
   a_Color1 = a_Color;
   a_Normal1 = a_Normal;
   a_PosMtxIdx1 = a_PosMtxIdx;
   main1();
-  const VertexOutput tint_symbol_3 = {v_Color, v_TexCoord, gl_Position};
-  const tint_symbol_2 tint_symbol_13 = {tint_symbol_3.v_Color, tint_symbol_3.v_TexCoord, tint_symbol_3.member};
-  return tint_symbol_13;
+  const VertexOutput tint_symbol_12 = {v_Color, v_TexCoord, gl_Position};
+  return tint_symbol_12;
+}
+
+tint_symbol_2 main(tint_symbol_1 tint_symbol) {
+  const VertexOutput inner_result = main_inner(tint_symbol.a_Position, tint_symbol.a_UV, tint_symbol.a_Color, tint_symbol.a_Normal, tint_symbol.a_PosMtxIdx);
+  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
+  wrapper_result.v_Color = inner_result.v_Color;
+  wrapper_result.v_TexCoord = inner_result.v_TexCoord;
+  wrapper_result.member = inner_result.member;
+  return wrapper_result;
 }

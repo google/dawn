@@ -13,11 +13,11 @@ struct tint_array_wrapper {
 struct main_out {
   float4 x_GLF_color_1;
 };
-struct tint_symbol_2 {
+struct tint_symbol_1 {
   float4 x_GLF_color_1 [[color(0)]];
 };
 
-void main_1(constant buf0& x_9, constant buf1& x_6, thread float4* const tint_symbol_5, thread float4* const tint_symbol_6) {
+void main_1(constant buf0& x_9, constant buf1& x_6, thread float4* const tint_symbol_3, thread float4* const tint_symbol_4) {
   tint_array_wrapper data = {};
   int x_41_phi = 0;
   int x_53_phi = 0;
@@ -67,7 +67,7 @@ void main_1(constant buf0& x_9, constant buf1& x_6, thread float4* const tint_sy
       float const x_71 = data.arr[x_70_save];
       int const x_72_save = x_60;
       float const x_73 = data.arr[x_72_save];
-      float const x_75 = (*(tint_symbol_5)).y;
+      float const x_75 = (*(tint_symbol_3)).y;
       float const x_77 = x_6.resolution.y;
       if ((x_75 < (x_77 * 0.5f))) {
         x_83 = (x_71 > x_73);
@@ -93,29 +93,35 @@ void main_1(constant buf0& x_9, constant buf1& x_6, thread float4* const tint_sy
       x_53_phi = x_54;
     }
   }
-  float const x_91 = (*(tint_symbol_5)).x;
+  float const x_91 = (*(tint_symbol_3)).x;
   float const x_93 = x_6.resolution.x;
   if ((x_91 < (x_93 * 0.5f))) {
     float const x_100 = data.arr[0];
     float const x_103 = data.arr[5];
     float const x_106 = data.arr[9];
-    *(tint_symbol_6) = float4((x_100 * 0.100000001f), (x_103 * 0.100000001f), (x_106 * 0.100000001f), 1.0f);
+    *(tint_symbol_4) = float4((x_100 * 0.100000001f), (x_103 * 0.100000001f), (x_106 * 0.100000001f), 1.0f);
   } else {
     float const x_110 = data.arr[5];
     float const x_113 = data.arr[9];
     float const x_116 = data.arr[0];
-    *(tint_symbol_6) = float4((x_110 * 0.100000001f), (x_113 * 0.100000001f), (x_116 * 0.100000001f), 1.0f);
+    *(tint_symbol_4) = float4((x_110 * 0.100000001f), (x_113 * 0.100000001f), (x_116 * 0.100000001f), 1.0f);
   }
   return;
 }
 
-fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_9 [[buffer(0)]], constant buf1& x_6 [[buffer(1)]]) {
+main_out tint_symbol_inner(constant buf0& x_9, constant buf1& x_6, float4 gl_FragCoord_param, thread float4* const tint_symbol_5, thread float4* const tint_symbol_6) {
+  *(tint_symbol_5) = gl_FragCoord_param;
+  main_1(x_9, x_6, tint_symbol_5, tint_symbol_6);
+  main_out const tint_symbol_2 = {.x_GLF_color_1=*(tint_symbol_6)};
+  return tint_symbol_2;
+}
+
+fragment tint_symbol_1 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_9 [[buffer(0)]], constant buf1& x_6 [[buffer(1)]]) {
   thread float4 tint_symbol_7 = 0.0f;
   thread float4 tint_symbol_8 = 0.0f;
-  tint_symbol_7 = gl_FragCoord_param;
-  main_1(x_9, x_6, &(tint_symbol_7), &(tint_symbol_8));
-  main_out const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_8};
-  tint_symbol_2 const tint_symbol_4 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
-  return tint_symbol_4;
+  main_out const inner_result = tint_symbol_inner(x_9, x_6, gl_FragCoord_param, &(tint_symbol_7), &(tint_symbol_8));
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }
 

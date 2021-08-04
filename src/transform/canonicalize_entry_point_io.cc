@@ -16,14 +16,12 @@
 
 #include <algorithm>
 #include <string>
+#include <unordered_set>
 #include <utility>
+#include <vector>
 
 #include "src/program_builder.h"
-#include "src/sem/block_statement.h"
 #include "src/sem/function.h"
-#include "src/sem/statement.h"
-#include "src/sem/struct.h"
-#include "src/sem/variable.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::CanonicalizeEntryPointIO);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::CanonicalizeEntryPointIO::Config);
@@ -62,7 +60,395 @@ bool StructMemberComparator(const ast::StructMember* a,
   }
 }
 
+// Returns true if `deco` is a shader IO decoration.
+bool IsShaderIODecoration(const ast::Decoration* deco) {
+  return deco->IsAnyOf<ast::BuiltinDecoration, ast::InterpolateDecoration,
+                       ast::InvariantDecoration, ast::LocationDecoration>();
+}
+
 }  // namespace
+
+/// State holds the current transform state for a single entry point.
+struct CanonicalizeEntryPointIO::State {
+  /// OutputValue represents a shader result that the wrapper function produces.
+  struct OutputValue {
+    /// The name of the output value.
+    std::string name;
+    /// The type of the output value.
+    ast::Type* type;
+    /// The shader IO attributes.
+    ast::DecorationList attributes;
+    /// The value itself.
+    ast::Expression* value;
+  };
+
+  /// The clone context.
+  CloneContext& ctx;
+  /// The transform config.
+  CanonicalizeEntryPointIO::Config const cfg;
+  /// The entry point function (AST).
+  ast::Function* func_ast;
+  /// The entry point function (SEM).
+  sem::Function const* func_sem;
+
+  /// The new entry point wrapper function's parameters.
+  ast::VariableList wrapper_ep_parameters;
+  /// The members of the wrapper function's struct parameter.
+  ast::StructMemberList wrapper_struct_param_members;
+  /// The name of the wrapper function's struct parameter.
+  Symbol wrapper_struct_param_name;
+  /// The parameters that will be passed to the original function.
+  ast::ExpressionList inner_call_parameters;
+  /// The members of the wrapper function's struct return type.
+  ast::StructMemberList wrapper_struct_output_members;
+  /// The wrapper function output values.
+  std::vector<OutputValue> wrapper_output_values;
+  /// The body of the wrapper function.
+  ast::StatementList wrapper_body;
+
+  /// Constructor
+  /// @param context the clone context
+  /// @param config the transform config
+  /// @param function the entry point function
+  State(CloneContext& context,
+        const CanonicalizeEntryPointIO::Config& config,
+        ast::Function* function)
+      : ctx(context),
+        cfg(config),
+        func_ast(function),
+        func_sem(ctx.src->Sem().Get(function)) {}
+
+  /// Clones the shader IO decorations from `src`.
+  /// @param src the decorations to clone
+  /// @return the cloned decorations
+  ast::DecorationList CloneShaderIOAttributes(const ast::DecorationList& src) {
+    ast::DecorationList new_decorations;
+    for (auto* deco : src) {
+      if (IsShaderIODecoration(deco)) {
+        new_decorations.push_back(ctx.Clone(deco));
+      }
+    }
+    return new_decorations;
+  }
+
+  /// Create or return a symbol for the wrapper function's struct parameter.
+  /// @returns the symbol for the struct parameter
+  Symbol InputStructSymbol() {
+    if (!wrapper_struct_param_name.IsValid()) {
+      wrapper_struct_param_name = ctx.dst->Sym();
+    }
+    return wrapper_struct_param_name;
+  }
+
+  /// Add a shader input to the entry point.
+  /// @param name the name of the shader input
+  /// @param type the type of the shader input
+  /// @param attributes the attributes to apply to the shader input
+  /// @returns an expression which evaluates to the value of the shader input
+  ast::Expression* AddInput(std::string name,
+                            ast::Type* type,
+                            ast::DecorationList attributes) {
+    if (cfg.builtin_style == BuiltinStyle::kParameter &&
+        ast::HasDecoration<ast::BuiltinDecoration>(attributes)) {
+      // If this input is a builtin and we are emitting those as parameters,
+      // then add it to the parameter list and pass it directly to the inner
+      // function.
+      wrapper_ep_parameters.push_back(
+          ctx.dst->Param(name, type, std::move(attributes)));
+      return ctx.dst->Expr(name);
+    } else {
+      // Otherwise, move it to the new structure member list.
+      wrapper_struct_param_members.push_back(
+          ctx.dst->Member(name, type, std::move(attributes)));
+      return ctx.dst->MemberAccessor(InputStructSymbol(), name);
+    }
+  }
+
+  /// Add a shader output to the entry point.
+  /// @param name the name of the shader output
+  /// @param type the type of the shader output
+  /// @param attributes the attributes to apply to the shader output
+  /// @param value the value of the shader output
+  void AddOutput(std::string name,
+                 ast::Type* type,
+                 ast::DecorationList attributes,
+                 ast::Expression* value) {
+    OutputValue output;
+    output.name = name;
+    output.type = type;
+    output.attributes = std::move(attributes);
+    output.value = value;
+    wrapper_output_values.push_back(output);
+  }
+
+  /// Process a non-struct parameter.
+  /// This creates a new object for the shader input, moving the shader IO
+  /// attributes to it. It also adds an expression to the list of parameters
+  /// that will be passed to the original function.
+  /// @param param the original function parameter
+  void ProcessNonStructParameter(const sem::Parameter* param) {
+    // Remove the shader IO attributes from the inner function parameter, and
+    // attach them to the new object instead.
+    ast::DecorationList attributes;
+    for (auto* deco : param->Declaration()->decorations()) {
+      if (IsShaderIODecoration(deco)) {
+        ctx.Remove(param->Declaration()->decorations(), deco);
+        attributes.push_back(ctx.Clone(deco));
+      }
+    }
+
+    auto name = ctx.src->Symbols().NameFor(param->Declaration()->symbol());
+    auto* type = ctx.Clone(param->Declaration()->type());
+    auto* input_expr = AddInput(name, type, std::move(attributes));
+    inner_call_parameters.push_back(input_expr);
+  }
+
+  /// Process a struct parameter.
+  /// This creates new objects for each struct member, moving the shader IO
+  /// attributes to them. It also creates the structure that will be passed to
+  /// the original function.
+  /// @param param the original function parameter
+  void ProcessStructParameter(const sem::Parameter* param) {
+    auto* str = param->Type()->As<sem::Struct>();
+
+    // Recreate struct members in the outer entry point and build an initializer
+    // list to pass them through to the inner function.
+    ast::ExpressionList inner_struct_values;
+    for (auto* member : str->Members()) {
+      if (member->Type()->Is<sem::Struct>()) {
+        TINT_ICE(Transform, ctx.dst->Diagnostics()) << "nested IO struct";
+        continue;
+      }
+
+      auto* member_ast = member->Declaration();
+      auto name = ctx.src->Symbols().NameFor(member_ast->symbol());
+      auto* type = ctx.Clone(member_ast->type());
+      auto attributes = CloneShaderIOAttributes(member_ast->decorations());
+      auto* input_expr = AddInput(name, type, std::move(attributes));
+      inner_struct_values.push_back(input_expr);
+    }
+
+    // Construct the original structure using the new shader input objects.
+    inner_call_parameters.push_back(ctx.dst->Construct(
+        ctx.Clone(param->Declaration()->type()), inner_struct_values));
+  }
+
+  /// Process the entry point return type.
+  /// This generates a list of output values that are returned by the original
+  /// function.
+  /// @param inner_ret_type the original function return type
+  /// @param original_result the result object produced by the original function
+  void ProcessReturnType(const sem::Type* inner_ret_type,
+                         Symbol original_result) {
+    if (auto* str = inner_ret_type->As<sem::Struct>()) {
+      for (auto* member : str->Members()) {
+        if (member->Type()->Is<sem::Struct>()) {
+          TINT_ICE(Transform, ctx.dst->Diagnostics()) << "nested IO struct";
+          continue;
+        }
+
+        auto* member_ast = member->Declaration();
+        auto name = ctx.src->Symbols().NameFor(member_ast->symbol());
+        auto* type = ctx.Clone(member_ast->type());
+        auto attributes = CloneShaderIOAttributes(member_ast->decorations());
+
+        // Extract the original structure member.
+        AddOutput(name, type, std::move(attributes),
+                  ctx.dst->MemberAccessor(original_result, name));
+      }
+    } else if (!inner_ret_type->Is<sem::Void>()) {
+      auto* type = ctx.Clone(func_ast->return_type());
+      auto attributes =
+          CloneShaderIOAttributes(func_ast->return_type_decorations());
+
+      // Propagate the non-struct return value as is.
+      AddOutput("value", type, std::move(attributes),
+                ctx.dst->Expr(original_result));
+    }
+  }
+
+  /// Add a fixed sample mask to the wrapper function output.
+  /// If there is already a sample mask, bitwise-and it with the fixed mask.
+  /// Otherwise, create a new output value from the fixed mask.
+  void AddFixedSampleMask() {
+    // Check the existing output values for a sample mask builtin.
+    for (auto& outval : wrapper_output_values) {
+      auto* builtin =
+          ast::GetDecoration<ast::BuiltinDecoration>(outval.attributes);
+      if (builtin && builtin->value() == ast::Builtin::kSampleMask) {
+        // Combine the authored sample mask with the fixed mask.
+        outval.value = ctx.dst->And(outval.value, cfg.fixed_sample_mask);
+        return;
+      }
+    }
+
+    // No existing sample mask builtin was found, so create a new output value
+    // using the fixed sample mask.
+    AddOutput("fixed_sample_mask", ctx.dst->ty.u32(),
+              {ctx.dst->Builtin(ast::Builtin::kSampleMask)},
+              ctx.dst->Expr(cfg.fixed_sample_mask));
+  }
+
+  /// Create the wrapper function's struct parameter and type objects.
+  void CreateInputStruct() {
+    // Sort the struct members to satisfy HLSL interfacing matching rules.
+    std::sort(wrapper_struct_param_members.begin(),
+              wrapper_struct_param_members.end(), StructMemberComparator);
+
+    // Create the new struct type.
+    auto struct_name = ctx.dst->Sym();
+    auto* in_struct = ctx.dst->create<ast::Struct>(
+        struct_name, wrapper_struct_param_members, ast::DecorationList{});
+    ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func_ast, in_struct);
+
+    // Create a new function parameter using this struct type.
+    auto* param =
+        ctx.dst->Param(InputStructSymbol(), ctx.dst->ty.type_name(struct_name));
+    wrapper_ep_parameters.push_back(param);
+  }
+
+  /// Create and return the wrapper function's struct result object.
+  /// @returns the struct type
+  ast::Struct* CreateOutputStruct() {
+    ast::StatementList assignments;
+
+    auto wrapper_result = ctx.dst->Symbols().New("wrapper_result");
+
+    // Create the struct members and their corresponding assignment statements.
+    std::unordered_set<std::string> member_names;
+    for (auto& outval : wrapper_output_values) {
+      // Use the original output name, unless that is already taken.
+      Symbol name;
+      if (member_names.count(outval.name)) {
+        name = ctx.dst->Symbols().New(outval.name);
+      } else {
+        name = ctx.dst->Symbols().Register(outval.name);
+      }
+      member_names.insert(ctx.dst->Symbols().NameFor(name));
+
+      wrapper_struct_output_members.push_back(
+          ctx.dst->Member(name, outval.type, std::move(outval.attributes)));
+      assignments.push_back(ctx.dst->Assign(
+          ctx.dst->MemberAccessor(wrapper_result, name), outval.value));
+    }
+
+    // Sort the struct members to satisfy HLSL interfacing matching rules.
+    std::sort(wrapper_struct_output_members.begin(),
+              wrapper_struct_output_members.end(), StructMemberComparator);
+
+    // Create the new struct type.
+    auto* out_struct = ctx.dst->create<ast::Struct>(
+        ctx.dst->Sym(), wrapper_struct_output_members, ast::DecorationList{});
+    ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func_ast, out_struct);
+
+    // Create the output struct object, assign its members, and return it.
+    auto* result_object =
+        ctx.dst->Var(wrapper_result, ctx.dst->ty.type_name(out_struct->name()));
+    wrapper_body.push_back(ctx.dst->Decl(result_object));
+    wrapper_body.insert(wrapper_body.end(), assignments.begin(),
+                        assignments.end());
+    wrapper_body.push_back(ctx.dst->Return(wrapper_result));
+
+    return out_struct;
+  }
+
+  // Recreate the original function without entry point attributes and call it.
+  /// @returns the inner function call expression
+  ast::CallExpression* CallInnerFunction() {
+    // Add a suffix to the function name, as the wrapper function will take the
+    // original entry point name.
+    auto ep_name = ctx.src->Symbols().NameFor(func_ast->symbol());
+    auto inner_name = ctx.dst->Symbols().New(ep_name + "_inner");
+
+    // Clone everything, dropping the function and return type attributes.
+    // The parameter attributes will have already been stripped during
+    // processing.
+    auto* inner_function = ctx.dst->create<ast::Function>(
+        inner_name, ctx.Clone(func_ast->params()),
+        ctx.Clone(func_ast->return_type()), ctx.Clone(func_ast->body()),
+        ast::DecorationList{}, ast::DecorationList{});
+    ctx.Replace(func_ast, inner_function);
+
+    // Call the function.
+    return ctx.dst->Call(inner_function->symbol(), inner_call_parameters);
+  }
+
+  /// Process the entry point function.
+  void Process() {
+    bool needs_fixed_sample_mask = false;
+    if (func_ast->pipeline_stage() == ast::PipelineStage::kFragment &&
+        cfg.fixed_sample_mask != 0xFFFFFFFF) {
+      needs_fixed_sample_mask = true;
+    }
+
+    // Exit early if there is no shader IO to handle.
+    if (func_sem->Parameters().size() == 0 &&
+        func_sem->ReturnType()->Is<sem::Void>() && !needs_fixed_sample_mask) {
+      return;
+    }
+
+    // Process the entry point parameters, collecting those that need to be
+    // aggregated into a single structure.
+    if (!func_sem->Parameters().empty()) {
+      for (auto* param : func_sem->Parameters()) {
+        if (param->Type()->Is<sem::Struct>()) {
+          ProcessStructParameter(param);
+        } else {
+          ProcessNonStructParameter(param);
+        }
+      }
+
+      // Create a structure parameter for the outer entry point if necessary.
+      if (!wrapper_struct_param_members.empty()) {
+        CreateInputStruct();
+      }
+    }
+
+    // Recreate the original function and call it.
+    auto* call_inner = CallInnerFunction();
+
+    // Process the return type, and start building the wrapper function body.
+    std::function<ast::Type*()> wrapper_ret_type = [&] {
+      return ctx.dst->ty.void_();
+    };
+    if (func_sem->ReturnType()->Is<sem::Void>()) {
+      // The function call is just a statement with no result.
+      wrapper_body.push_back(ctx.dst->create<ast::CallStatement>(call_inner));
+    } else {
+      // Capture the result of calling the original function.
+      auto* inner_result = ctx.dst->Const(
+          ctx.dst->Symbols().New("inner_result"), nullptr, call_inner);
+      wrapper_body.push_back(ctx.dst->Decl(inner_result));
+
+      // Process the original return type to determine the outputs that the
+      // outer function needs to produce.
+      ProcessReturnType(func_sem->ReturnType(), inner_result->symbol());
+    }
+
+    // Add a fixed sample mask, if necessary.
+    if (needs_fixed_sample_mask) {
+      AddFixedSampleMask();
+    }
+
+    // Produce the entry point outputs, if necessary.
+    if (!wrapper_output_values.empty()) {
+      auto* output_struct = CreateOutputStruct();
+      wrapper_ret_type = [&, output_struct] {
+        return ctx.dst->ty.type_name(output_struct->name());
+      };
+    }
+
+    // Create the wrapper entry point function.
+    // Take the name of the original entry point function.
+    auto name = ctx.Clone(func_ast->symbol());
+    auto* wrapper_func = ctx.dst->create<ast::Function>(
+        name, wrapper_ep_parameters, wrapper_ret_type(),
+        ctx.dst->Block(wrapper_body), ctx.Clone(func_ast->decorations()),
+        ast::DecorationList{});
+    ctx.InsertAfter(ctx.src->AST().GlobalDeclarations(), func_ast,
+                    wrapper_func);
+  }
+};
 
 void CanonicalizeEntryPointIO::Run(CloneContext& ctx,
                                    const DataMap& inputs,
@@ -75,302 +461,27 @@ void CanonicalizeEntryPointIO::Run(CloneContext& ctx,
     return;
   }
 
-  // Strip entry point IO decorations from struct declarations.
-  // TODO(jrprice): This code is duplicated with the SPIR-V transform.
+  // Remove entry point IO attributes from struct declarations.
+  // New structures will be created for each entry point, as necessary.
   for (auto* ty : ctx.src->AST().TypeDecls()) {
     if (auto* struct_ty = ty->As<ast::Struct>()) {
-      // Build new list of struct members without entry point IO decorations.
-      ast::StructMemberList new_struct_members;
       for (auto* member : struct_ty->members()) {
-        ast::DecorationList new_decorations = RemoveDecorations(
-            ctx, member->decorations(), [](const ast::Decoration* deco) {
-              return deco->IsAnyOf<
-                  ast::BuiltinDecoration, ast::InterpolateDecoration,
-                  ast::InvariantDecoration, ast::LocationDecoration>();
-            });
-        new_struct_members.push_back(
-            ctx.dst->Member(ctx.Clone(member->symbol()),
-                            ctx.Clone(member->type()), new_decorations));
+        for (auto* deco : member->decorations()) {
+          if (IsShaderIODecoration(deco)) {
+            ctx.Remove(member->decorations(), deco);
+          }
+        }
       }
-
-      // Redeclare the struct.
-      auto new_struct_name = ctx.Clone(struct_ty->name());
-      auto* new_struct =
-          ctx.dst->create<ast::Struct>(new_struct_name, new_struct_members,
-                                       ctx.Clone(struct_ty->decorations()));
-      ctx.Replace(struct_ty, new_struct);
     }
   }
-
-  // Returns true if `decos` contains a `sample_mask` builtin.
-  auto has_sample_mask_builtin = [](const ast::DecorationList& decos) {
-    if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(decos)) {
-      return builtin->value() == ast::Builtin::kSampleMask;
-    }
-    return false;
-  };
 
   for (auto* func_ast : ctx.src->AST().Functions()) {
     if (!func_ast->IsEntryPoint()) {
       continue;
     }
 
-    auto* func = ctx.src->Sem().Get(func_ast);
-
-    bool needs_fixed_sample_mask =
-        func_ast->pipeline_stage() == ast::PipelineStage::kFragment &&
-        cfg->fixed_sample_mask != 0xFFFFFFFF;
-
-    ast::VariableList new_parameters;
-
-    if (!func->Parameters().empty()) {
-      // Collect all parameters and build a list of new struct members.
-      auto new_struct_param_symbol = ctx.dst->Sym();
-      ast::StructMemberList new_struct_members;
-      for (auto* param : func->Parameters()) {
-        if (cfg->builtin_style == BuiltinStyle::kParameter &&
-            ast::HasDecoration<ast::BuiltinDecoration>(
-                param->Declaration()->decorations())) {
-          // If this parameter is a builtin and we are emitting those as
-          // parameters, then just clone it as is.
-          new_parameters.push_back(
-              ctx.Clone(const_cast<ast::Variable*>(param->Declaration())));
-          continue;
-        }
-
-        auto param_name = ctx.Clone(param->Declaration()->symbol());
-        auto* param_ty = param->Type();
-        auto* param_declared_ty = param->Declaration()->type();
-
-        ast::Expression* func_const_initializer = nullptr;
-
-        if (auto* str = param_ty->As<sem::Struct>()) {
-          // Pull out all struct members and build initializer list.
-          ast::ExpressionList init_values;
-          for (auto* member : str->Members()) {
-            if (member->Type()->Is<sem::Struct>()) {
-              TINT_ICE(Transform, ctx.dst->Diagnostics())
-                  << "nested pipeline IO struct";
-            }
-
-            ast::DecorationList new_decorations = RemoveDecorations(
-                ctx, member->Declaration()->decorations(),
-                [](const ast::Decoration* deco) {
-                  return !deco->IsAnyOf<
-                      ast::BuiltinDecoration, ast::InterpolateDecoration,
-                      ast::InvariantDecoration, ast::LocationDecoration>();
-                });
-
-            if (cfg->builtin_style == BuiltinStyle::kParameter &&
-                ast::HasDecoration<ast::BuiltinDecoration>(
-                    member->Declaration()->decorations())) {
-              // If this struct member is a builtin and we are emitting those as
-              // parameters, then move it to the parameter list.
-              auto* member_ty = CreateASTTypeFor(ctx, member->Type());
-              auto new_param_name = ctx.dst->Sym();
-              new_parameters.push_back(
-                  ctx.dst->Param(new_param_name, member_ty, new_decorations));
-              init_values.push_back(ctx.dst->Expr(new_param_name));
-              continue;
-            }
-
-            auto member_name = ctx.Clone(member->Declaration()->symbol());
-            auto* member_type = ctx.Clone(member->Declaration()->type());
-            new_struct_members.push_back(
-                ctx.dst->Member(member_name, member_type, new_decorations));
-            init_values.push_back(
-                ctx.dst->MemberAccessor(new_struct_param_symbol, member_name));
-          }
-
-          func_const_initializer =
-              ctx.dst->Construct(ctx.Clone(param_declared_ty), init_values);
-        } else {
-          new_struct_members.push_back(
-              ctx.dst->Member(param_name, ctx.Clone(param_declared_ty),
-                              ctx.Clone(param->Declaration()->decorations())));
-          func_const_initializer =
-              ctx.dst->MemberAccessor(new_struct_param_symbol, param_name);
-        }
-
-        // Create a function-scope const to replace the parameter.
-        // Initialize it with the value extracted from the new struct parameter.
-        auto* func_const = ctx.dst->Const(
-            param_name, ctx.Clone(param_declared_ty), func_const_initializer);
-        ctx.InsertFront(func_ast->body()->statements(),
-                        ctx.dst->WrapInStatement(func_const));
-
-        // Replace all uses of the function parameter with the function const.
-        for (auto* user : param->Users()) {
-          ctx.Replace<ast::Expression>(user->Declaration(),
-                                       ctx.dst->Expr(param_name));
-        }
-      }
-
-      if (!new_struct_members.empty()) {
-        // Sort struct members to satisfy HLSL interfacing matching rules.
-        std::sort(new_struct_members.begin(), new_struct_members.end(),
-                  StructMemberComparator);
-
-        // Create the new struct type.
-        auto in_struct_name = ctx.dst->Sym();
-        auto* in_struct = ctx.dst->create<ast::Struct>(
-            in_struct_name, new_struct_members, ast::DecorationList{});
-        ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func_ast,
-                         in_struct);
-
-        // Create a new function parameter using this struct type.
-        auto* struct_param = ctx.dst->Param(
-            new_struct_param_symbol, ctx.dst->ty.type_name(in_struct_name));
-        new_parameters.push_back(struct_param);
-      }
-    }
-
-    // Handle return type.
-    auto* ret_type = func->ReturnType();
-    std::function<ast::Type*()> new_ret_type;
-    if (ret_type->Is<sem::Void>() && !needs_fixed_sample_mask) {
-      new_ret_type = [&ctx] { return ctx.dst->ty.void_(); };
-    } else {
-      ast::StructMemberList new_struct_members;
-
-      bool has_authored_sample_mask = false;
-
-      if (auto* str = ret_type->As<sem::Struct>()) {
-        // Rebuild struct with only the entry point IO attributes.
-        for (auto* member : str->Members()) {
-          if (member->Type()->Is<sem::Struct>()) {
-            TINT_ICE(Transform, ctx.dst->Diagnostics())
-                << "nested pipeline IO struct";
-          }
-
-          ast::DecorationList new_decorations = RemoveDecorations(
-              ctx, member->Declaration()->decorations(),
-              [](const ast::Decoration* deco) {
-                return !deco->IsAnyOf<
-                    ast::BuiltinDecoration, ast::InterpolateDecoration,
-                    ast::InvariantDecoration, ast::LocationDecoration>();
-              });
-          auto symbol = ctx.Clone(member->Declaration()->symbol());
-          auto* member_ty = ctx.Clone(member->Declaration()->type());
-          new_struct_members.push_back(
-              ctx.dst->Member(symbol, member_ty, new_decorations));
-
-          if (has_sample_mask_builtin(new_decorations)) {
-            has_authored_sample_mask = true;
-          }
-        }
-      } else if (!ret_type->Is<sem::Void>()) {
-        auto* member_ty = ctx.Clone(func->Declaration()->return_type());
-        auto decos = ctx.Clone(func_ast->return_type_decorations());
-        new_struct_members.push_back(
-            ctx.dst->Member("value", member_ty, std::move(decos)));
-
-        if (has_sample_mask_builtin(func_ast->return_type_decorations())) {
-          has_authored_sample_mask = true;
-        }
-      }
-
-      // If a sample mask builtin is required and the shader source did not
-      // contain one, create one now.
-      if (needs_fixed_sample_mask && !has_authored_sample_mask) {
-        new_struct_members.push_back(
-            ctx.dst->Member(ctx.dst->Sym(), ctx.dst->ty.u32(),
-                            {ctx.dst->Builtin(ast::Builtin::kSampleMask)}));
-      }
-
-      // Sort struct members to satisfy HLSL interfacing matching rules.
-      std::sort(new_struct_members.begin(), new_struct_members.end(),
-                StructMemberComparator);
-
-      // Create the new struct type.
-      auto out_struct_name = ctx.dst->Sym();
-      auto* out_struct = ctx.dst->create<ast::Struct>(
-          out_struct_name, new_struct_members, ast::DecorationList{});
-      ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func_ast,
-                       out_struct);
-      new_ret_type = [out_struct_name, &ctx] {
-        return ctx.dst->ty.type_name(out_struct_name);
-      };
-
-      // Replace all return statements.
-      for (auto* ret : func->ReturnStatements()) {
-        auto* ret_sem = ctx.src->Sem().Get(ret);
-        // Reconstruct the return value using the newly created struct.
-        std::function<ast::Expression*()> new_ret_value = [&ctx, ret] {
-          return ctx.Clone(ret->value());
-        };
-
-        ast::ExpressionList ret_values;
-        if (ret_type->Is<sem::Struct>()) {
-          if (!ret->value()->Is<ast::IdentifierExpression>()) {
-            // Create a const to hold the return value expression to avoid
-            // re-evaluating it multiple times.
-            auto temp = ctx.dst->Sym();
-            auto* ty = CreateASTTypeFor(ctx, ret_type);
-            auto* temp_var =
-                ctx.dst->Decl(ctx.dst->Const(temp, ty, new_ret_value()));
-            ctx.InsertBefore(ret_sem->Block()->Declaration()->statements(), ret,
-                             temp_var);
-            new_ret_value = [&ctx, temp] { return ctx.dst->Expr(temp); };
-          }
-
-          for (auto* member : new_struct_members) {
-            ast::Expression* expr = nullptr;
-
-            if (needs_fixed_sample_mask &&
-                has_sample_mask_builtin(member->decorations())) {
-              // Use the fixed sample mask, combining it with the authored value
-              // if there is one.
-              expr = ctx.dst->Expr(cfg->fixed_sample_mask);
-              if (has_authored_sample_mask) {
-                expr = ctx.dst->And(
-                    ctx.dst->MemberAccessor(new_ret_value(), member->symbol()),
-                    expr);
-              }
-            } else {
-              expr = ctx.dst->MemberAccessor(new_ret_value(), member->symbol());
-            }
-            ret_values.push_back(expr);
-          }
-        } else {
-          if (!ret_type->Is<sem::Void>()) {
-            ret_values.push_back(new_ret_value());
-          }
-
-          if (needs_fixed_sample_mask) {
-            // If the original return value was a sample mask, `and` it with the
-            // fixed mask and return the result.
-            // Otherwise, append the fixed mask to the list of return values,
-            // since it will be the last element of the output struct.
-            if (has_authored_sample_mask) {
-              ret_values[0] =
-                  ctx.dst->And(ret_values[0], cfg->fixed_sample_mask);
-            } else {
-              ret_values.push_back(ctx.dst->Expr(cfg->fixed_sample_mask));
-            }
-          }
-        }
-
-        auto* new_ret =
-            ctx.dst->Return(ctx.dst->Construct(new_ret_type(), ret_values));
-        ctx.Replace(ret, new_ret);
-      }
-
-      if (needs_fixed_sample_mask && func->ReturnStatements().empty()) {
-        // There we no return statements but we need to return a fixed sample
-        // mask, so add a return statement that does this.
-        ctx.InsertBack(func_ast->body()->statements(),
-                       ctx.dst->Return(ctx.dst->Construct(
-                           new_ret_type(), cfg->fixed_sample_mask)));
-      }
-    }
-
-    // Rewrite the function header with the new parameters.
-    auto* new_func = ctx.dst->create<ast::Function>(
-        func_ast->source(), ctx.Clone(func_ast->symbol()), new_parameters,
-        new_ret_type(), ctx.Clone(func_ast->body()),
-        ctx.Clone(func_ast->decorations()), ast::DecorationList{});
-    ctx.Replace(func_ast, new_func);
+    State state(ctx, *cfg, func_ast);
+    state.Process();
   }
 
   ctx.Clone();

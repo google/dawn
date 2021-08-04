@@ -7,7 +7,7 @@ struct buf0 {
 struct main_out {
   float4 x_GLF_color_1;
 };
-struct tint_symbol_2 {
+struct tint_symbol_1 {
   float4 x_GLF_color_1 [[color(0)]];
 };
 
@@ -129,13 +129,13 @@ int pointInTriangle_vf2_vf2_vf2_vf2_(constant buf0& x_15, thread float2* const p
   return 1;
 }
 
-void main_1(constant buf0& x_15, thread float4* const tint_symbol_5, thread float4* const tint_symbol_6) {
+void main_1(constant buf0& x_15, thread float4* const tint_symbol_3, thread float4* const tint_symbol_4) {
   float2 pos = 0.0f;
   float2 param_6 = 0.0f;
   float2 param_7 = 0.0f;
   float2 param_8 = 0.0f;
   float2 param_9 = 0.0f;
-  float4 const x_72 = *(tint_symbol_5);
+  float4 const x_72 = *(tint_symbol_3);
   float2 const x_75 = x_15.resolution;
   pos = (float2(x_72.x, x_72.y) / x_75);
   float2 const x_77 = pos;
@@ -145,20 +145,26 @@ void main_1(constant buf0& x_15, thread float4* const tint_symbol_5, thread floa
   param_9 = float2(0.100000001f, 0.400000006f);
   int const x_78 = pointInTriangle_vf2_vf2_vf2_vf2_(x_15, &(param_6), &(param_7), &(param_8), &(param_9));
   if ((x_78 == 1)) {
-    *(tint_symbol_6) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+    *(tint_symbol_4) = float4(1.0f, 0.0f, 0.0f, 1.0f);
   } else {
-    *(tint_symbol_6) = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    *(tint_symbol_4) = float4(0.0f, 0.0f, 0.0f, 1.0f);
   }
   return;
 }
 
-fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_15 [[buffer(0)]]) {
+main_out tint_symbol_inner(constant buf0& x_15, float4 gl_FragCoord_param, thread float4* const tint_symbol_5, thread float4* const tint_symbol_6) {
+  *(tint_symbol_5) = gl_FragCoord_param;
+  main_1(x_15, tint_symbol_5, tint_symbol_6);
+  main_out const tint_symbol_2 = {.x_GLF_color_1=*(tint_symbol_6)};
+  return tint_symbol_2;
+}
+
+fragment tint_symbol_1 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_15 [[buffer(0)]]) {
   thread float4 tint_symbol_7 = 0.0f;
   thread float4 tint_symbol_8 = 0.0f;
-  tint_symbol_7 = gl_FragCoord_param;
-  main_1(x_15, &(tint_symbol_7), &(tint_symbol_8));
-  main_out const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_8};
-  tint_symbol_2 const tint_symbol_4 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
-  return tint_symbol_4;
+  main_out const inner_result = tint_symbol_inner(x_15, gl_FragCoord_param, &(tint_symbol_7), &(tint_symbol_8));
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }
 

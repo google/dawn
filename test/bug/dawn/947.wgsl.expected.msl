@@ -9,21 +9,21 @@ struct VertexOutputs {
   float2 texcoords;
   float4 position;
 };
-struct tint_symbol_1 {
+struct tint_symbol {
   float2 texcoords [[user(locn0)]];
   float4 position [[position]];
 };
 struct tint_array_wrapper {
   float2 arr[3];
 };
-struct tint_symbol_3 {
+struct tint_symbol_2 {
   float2 texcoord [[user(locn0)]];
 };
-struct tint_symbol_4 {
+struct tint_symbol_3 {
   float4 value [[color(0)]];
 };
 
-vertex tint_symbol_1 vs_main(uint VertexIndex [[vertex_id]], constant Uniforms& uniforms [[buffer(0)]]) {
+VertexOutputs vs_main_inner(constant Uniforms& uniforms, uint VertexIndex) {
   tint_array_wrapper texcoord = {.arr={float2(-0.5f, 0.0f), float2(1.5f, 0.0f), float2(0.5f, 2.0f)}};
   VertexOutputs output = {};
   output.position = float4(((texcoord.arr[VertexIndex] * 2.0f) - float2(1.0f, 1.0f)), 0.0f, 1.0f);
@@ -33,18 +33,30 @@ vertex tint_symbol_1 vs_main(uint VertexIndex [[vertex_id]], constant Uniforms& 
   } else {
     output.texcoords = ((((texcoord.arr[VertexIndex] * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f)) * uniforms.u_scale) + uniforms.u_offset);
   }
-  tint_symbol_1 const tint_symbol_5 = {.texcoords=output.texcoords, .position=output.position};
-  return tint_symbol_5;
+  return output;
 }
 
-fragment tint_symbol_4 fs_main(texture2d<float, access::sample> tint_symbol_7 [[texture(2)]], sampler tint_symbol_8 [[sampler(1)]], tint_symbol_3 tint_symbol_2 [[stage_in]]) {
-  float2 const texcoord = tint_symbol_2.texcoord;
+vertex tint_symbol vs_main(uint VertexIndex [[vertex_id]], constant Uniforms& uniforms [[buffer(0)]]) {
+  VertexOutputs const inner_result = vs_main_inner(uniforms, VertexIndex);
+  tint_symbol wrapper_result = {};
+  wrapper_result.texcoords = inner_result.texcoords;
+  wrapper_result.position = inner_result.position;
+  return wrapper_result;
+}
+
+float4 fs_main_inner(float2 texcoord, texture2d<float, access::sample> tint_symbol_4, sampler tint_symbol_5) {
   float2 clampedTexcoord = clamp(texcoord, float2(0.0f, 0.0f), float2(1.0f, 1.0f));
   if (!(all((clampedTexcoord == texcoord)))) {
     discard_fragment();
   }
-  float4 srcColor = tint_symbol_7.sample(tint_symbol_8, texcoord);
-  tint_symbol_4 const tint_symbol_6 = {.value=srcColor};
-  return tint_symbol_6;
+  float4 srcColor = tint_symbol_4.sample(tint_symbol_5, texcoord);
+  return srcColor;
+}
+
+fragment tint_symbol_3 fs_main(texture2d<float, access::sample> tint_symbol_6 [[texture(2)]], sampler tint_symbol_7 [[sampler(1)]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  float4 const inner_result_1 = fs_main_inner(tint_symbol_1.texcoord, tint_symbol_6, tint_symbol_7);
+  tint_symbol_3 wrapper_result_1 = {};
+  wrapper_result_1.value = inner_result_1;
+  return wrapper_result_1;
 }
 

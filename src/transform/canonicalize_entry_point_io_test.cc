@@ -34,6 +34,29 @@ TEST_F(CanonicalizeEntryPointIOTest, Error_MissingTransformData) {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(CanonicalizeEntryPointIOTest, NoShaderIO) {
+  // Test that we do not introduce wrapper functions when there is no shader IO
+  // to process.
+  auto* src = R"(
+[[stage(fragment)]]
+fn frag_main() {
+}
+
+[[stage(compute), workgroup_size(1)]]
+fn comp_main() {
+}
+)";
+
+  auto* expect = src;
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(CanonicalizeEntryPointIOTest, Parameters_BuiltinsAsParameters) {
   auto* src = R"(
 [[stage(fragment)]]
@@ -52,11 +75,13 @@ struct tint_symbol_1 {
   loc2 : vec4<u32>;
 };
 
+fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>) {
+  var col : f32 = (coord.x * loc1);
+}
+
 [[stage(fragment)]]
 fn frag_main([[builtin(position)]] coord : vec4<f32>, tint_symbol : tint_symbol_1) {
-  let loc1 : f32 = tint_symbol.loc1;
-  let loc2 : vec4<u32> = tint_symbol.loc2;
-  var col : f32 = (coord.x * loc1);
+  frag_main_inner(tint_symbol.loc1, tint_symbol.loc2, coord);
 }
 )";
 
@@ -88,12 +113,13 @@ struct tint_symbol_1 {
   coord : vec4<f32>;
 };
 
+fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>) {
+  var col : f32 = (coord.x * loc1);
+}
+
 [[stage(fragment)]]
 fn frag_main(tint_symbol : tint_symbol_1) {
-  let loc1 : f32 = tint_symbol.loc1;
-  let loc2 : vec4<u32> = tint_symbol.loc2;
-  let coord : vec4<f32> = tint_symbol.coord;
-  var col : f32 = (coord.x * loc1);
+  frag_main_inner(tint_symbol.loc1, tint_symbol.loc2, tint_symbol.coord);
 }
 )";
 
@@ -123,10 +149,13 @@ struct tint_symbol_1 {
   loc1 : myf32;
 };
 
+fn frag_main_inner(loc1 : myf32) {
+  var x : myf32 = loc1;
+}
+
 [[stage(fragment)]]
 fn frag_main(tint_symbol : tint_symbol_1) {
-  let loc1 : myf32 = tint_symbol.loc1;
-  var x : myf32 = loc1;
+  frag_main_inner(tint_symbol.loc1);
 }
 )";
 
@@ -156,10 +185,12 @@ struct tint_symbol_1 {
   loc2 : vec4<u32>;
 };
 
+fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>) {
+}
+
 [[stage(fragment)]]
 fn frag_main([[builtin(position)]] coord : vec4<f32>, tint_symbol : tint_symbol_1) {
-  let loc1 : f32 = tint_symbol.loc1;
-  let loc2 : vec4<u32> = tint_symbol.loc2;
+  frag_main_inner(tint_symbol.loc1, tint_symbol.loc2, coord);
 }
 )";
 
@@ -191,11 +222,12 @@ struct tint_symbol_1 {
   coord : vec4<f32>;
 };
 
+fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>) {
+}
+
 [[stage(fragment)]]
 fn frag_main(tint_symbol : tint_symbol_1) {
-  let loc1 : f32 = tint_symbol.loc1;
-  let loc2 : vec4<u32> = tint_symbol.loc2;
-  let coord : vec4<f32> = tint_symbol.coord;
+  frag_main_inner(tint_symbol.loc1, tint_symbol.loc2, tint_symbol.coord);
 }
 )";
 
@@ -235,7 +267,7 @@ struct FragLocations {
   loc2 : vec4<u32>;
 };
 
-struct tint_symbol_2 {
+struct tint_symbol_1 {
   [[location(0)]]
   loc0 : f32;
   [[location(1)]]
@@ -244,12 +276,13 @@ struct tint_symbol_2 {
   loc2 : vec4<u32>;
 };
 
-[[stage(fragment)]]
-fn frag_main([[builtin(position)]] tint_symbol_1 : vec4<f32>, tint_symbol : tint_symbol_2) {
-  let loc0 : f32 = tint_symbol.loc0;
-  let locations : FragLocations = FragLocations(tint_symbol.loc1, tint_symbol.loc2);
-  let builtins : FragBuiltins = FragBuiltins(tint_symbol_1);
+fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins) {
   var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
+}
+
+[[stage(fragment)]]
+fn frag_main([[builtin(position)]] coord : vec4<f32>, tint_symbol : tint_symbol_1) {
+  frag_main_inner(tint_symbol.loc0, FragLocations(tint_symbol.loc1, tint_symbol.loc2), FragBuiltins(coord));
 }
 )";
 
@@ -300,12 +333,13 @@ struct tint_symbol_1 {
   coord : vec4<f32>;
 };
 
+fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins) {
+  var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
+}
+
 [[stage(fragment)]]
 fn frag_main(tint_symbol : tint_symbol_1) {
-  let loc0 : f32 = tint_symbol.loc0;
-  let locations : FragLocations = FragLocations(tint_symbol.loc1, tint_symbol.loc2);
-  let builtins : FragBuiltins = FragBuiltins(tint_symbol.coord);
-  var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
+  frag_main_inner(tint_symbol.loc0, FragLocations(tint_symbol.loc1, tint_symbol.loc2), FragBuiltins(tint_symbol.coord));
 }
 )";
 
@@ -331,9 +365,16 @@ struct tint_symbol {
   value : f32;
 };
 
+fn frag_main_inner() -> f32 {
+  return 1.0;
+}
+
 [[stage(fragment)]]
 fn frag_main() -> tint_symbol {
-  return tint_symbol(1.0);
+  let inner_result = frag_main_inner();
+  var wrapper_result : tint_symbol;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
 )";
 
@@ -379,13 +420,22 @@ struct tint_symbol {
   mask : u32;
 };
 
-[[stage(fragment)]]
-fn frag_main() -> tint_symbol {
+fn frag_main_inner() -> FragOutput {
   var output : FragOutput;
   output.depth = 1.0;
   output.mask = 7u;
   output.color = vec4<f32>(0.5, 0.5, 0.5, 1.0);
-  return tint_symbol(output.color, output.depth, output.mask);
+  return output;
+}
+
+[[stage(fragment)]]
+fn frag_main() -> tint_symbol {
+  let inner_result = frag_main_inner();
+  var wrapper_result : tint_symbol;
+  wrapper_result.color = inner_result.color;
+  wrapper_result.depth = inner_result.depth;
+  wrapper_result.mask = inner_result.mask;
+  return wrapper_result;
 }
 )";
 
@@ -436,10 +486,13 @@ struct tint_symbol_1 {
   mul : f32;
 };
 
+fn frag_main1_inner(inputs : FragmentInput) {
+  var x : f32 = foo(inputs);
+}
+
 [[stage(fragment)]]
 fn frag_main1(tint_symbol : tint_symbol_1) {
-  let inputs : FragmentInput = FragmentInput(tint_symbol.value, tint_symbol.mul);
-  var x : f32 = foo(inputs);
+  frag_main1_inner(FragmentInput(tint_symbol.value, tint_symbol.mul));
 }
 
 struct tint_symbol_3 {
@@ -449,10 +502,13 @@ struct tint_symbol_3 {
   mul : f32;
 };
 
+fn frag_main2_inner(inputs : FragmentInput) {
+  var x : f32 = foo(inputs);
+}
+
 [[stage(fragment)]]
 fn frag_main2(tint_symbol_2 : tint_symbol_3) {
-  let inputs : FragmentInput = FragmentInput(tint_symbol_2.value, tint_symbol_2.mul);
-  var x : f32 = foo(inputs);
+  frag_main2_inner(FragmentInput(tint_symbol_2.value, tint_symbol_2.mul));
 }
 )";
 
@@ -512,12 +568,15 @@ struct tint_symbol_1 {
   col2 : f32;
 };
 
-[[stage(fragment)]]
-fn frag_main1(tint_symbol : tint_symbol_1) {
-  let inputs : FragmentInput = FragmentInput(tint_symbol.col1, tint_symbol.col2);
+fn frag_main1_inner(inputs : FragmentInput) {
   global_inputs = inputs;
   var r : f32 = foo();
   var g : f32 = bar();
+}
+
+[[stage(fragment)]]
+fn frag_main1(tint_symbol : tint_symbol_1) {
+  frag_main1_inner(FragmentInput(tint_symbol.col1, tint_symbol.col2));
 }
 )";
 
@@ -593,12 +652,18 @@ struct tint_symbol_2 {
   col2 : myf32;
 };
 
+fn frag_main_inner(inputs : MyFragmentInput) -> MyFragmentOutput {
+  var x : myf32 = foo(inputs);
+  return MyFragmentOutput(x, inputs.col2);
+}
+
 [[stage(fragment)]]
 fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
-  let inputs : MyFragmentInput = MyFragmentInput(tint_symbol.col1, tint_symbol.col2);
-  var x : myf32 = foo(inputs);
-  let tint_symbol_3 : FragmentOutput = MyFragmentOutput(x, inputs.col2);
-  return tint_symbol_2(tint_symbol_3.col1, tint_symbol_3.col2);
+  let inner_result = frag_main_inner(MyFragmentInput(tint_symbol.col1, tint_symbol.col2));
+  var wrapper_result : tint_symbol_2;
+  wrapper_result.col1 = inner_result.col1;
+  wrapper_result.col2 = inner_result.col2;
+  return wrapper_result;
 }
 )";
 
@@ -660,13 +725,22 @@ struct tint_symbol {
   pos : vec4<f32>;
 };
 
-[[stage(vertex)]]
-fn vert_main() -> tint_symbol {
-  let tint_symbol_1 : VertexOut = VertexOut();
-  return tint_symbol(tint_symbol_1.loc1, tint_symbol_1.loc2, tint_symbol_1.loc3, tint_symbol_1.pos);
+fn vert_main_inner() -> VertexOut {
+  return VertexOut();
 }
 
-struct tint_symbol_3 {
+[[stage(vertex)]]
+fn vert_main() -> tint_symbol {
+  let inner_result = vert_main_inner();
+  var wrapper_result : tint_symbol;
+  wrapper_result.pos = inner_result.pos;
+  wrapper_result.loc1 = inner_result.loc1;
+  wrapper_result.loc2 = inner_result.loc2;
+  wrapper_result.loc3 = inner_result.loc3;
+  return wrapper_result;
+}
+
+struct tint_symbol_2 {
   [[location(1), interpolate(flat)]]
   loc1 : f32;
   [[location(2), interpolate(linear, sample)]]
@@ -675,11 +749,13 @@ struct tint_symbol_3 {
   loc3 : f32;
 };
 
-[[stage(fragment)]]
-fn frag_main(tint_symbol_2 : tint_symbol_3) {
-  let inputs : FragmentIn = FragmentIn(tint_symbol_2.loc1, tint_symbol_2.loc2);
-  let loc3 : f32 = tint_symbol_2.loc3;
+fn frag_main_inner(inputs : FragmentIn, loc3 : f32) {
   let x = ((inputs.loc1 + inputs.loc2) + loc3);
+}
+
+[[stage(fragment)]]
+fn frag_main(tint_symbol_1 : tint_symbol_2) {
+  frag_main_inner(FragmentIn(tint_symbol_1.loc1, tint_symbol_1.loc2), tint_symbol_1.loc3);
 }
 )";
 
@@ -718,20 +794,33 @@ struct tint_symbol {
   pos : vec4<f32>;
 };
 
-[[stage(vertex)]]
-fn main1() -> tint_symbol {
-  let tint_symbol_1 : VertexOut = VertexOut();
-  return tint_symbol(tint_symbol_1.pos);
+fn main1_inner() -> VertexOut {
+  return VertexOut();
 }
 
-struct tint_symbol_2 {
+[[stage(vertex)]]
+fn main1() -> tint_symbol {
+  let inner_result = main1_inner();
+  var wrapper_result : tint_symbol;
+  wrapper_result.pos = inner_result.pos;
+  return wrapper_result;
+}
+
+struct tint_symbol_1 {
   [[builtin(position), invariant]]
   value : vec4<f32>;
 };
 
+fn main2_inner() -> vec4<f32> {
+  return vec4<f32>();
+}
+
 [[stage(vertex)]]
-fn main2() -> tint_symbol_2 {
-  return tint_symbol_2(vec4<f32>());
+fn main2() -> tint_symbol_1 {
+  let inner_result_1 = main2_inner();
+  var wrapper_result_1 : tint_symbol_1;
+  wrapper_result_1.value = inner_result_1;
+  return wrapper_result_1;
 }
 )";
 
@@ -792,11 +881,16 @@ struct tint_symbol_2 {
   value : f32;
 };
 
+fn frag_main_inner(inputs : FragmentInput) -> FragmentOutput {
+  return FragmentOutput(((inputs.coord.x * inputs.value) + inputs.loc0));
+}
+
 [[stage(fragment)]]
 fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
-  let inputs : FragmentInput = FragmentInput(tint_symbol.value, tint_symbol.coord, tint_symbol.loc0);
-  let tint_symbol_3 : FragmentOutput = FragmentOutput(((inputs.coord.x * inputs.value) + inputs.loc0));
-  return tint_symbol_2(tint_symbol_3.value);
+  let inner_result = frag_main_inner(FragmentInput(tint_symbol.value, tint_symbol.coord, tint_symbol.loc0));
+  var wrapper_result : tint_symbol_2;
+  wrapper_result.value = inner_result.value;
+  return wrapper_result;
 }
 )";
 
@@ -865,13 +959,23 @@ struct tint_symbol {
   pos : vec4<f32>;
 };
 
-[[stage(vertex)]]
-fn vert_main() -> tint_symbol {
-  let tint_symbol_1 : VertexOutput = VertexOutput();
-  return tint_symbol(tint_symbol_1.a, tint_symbol_1.b, tint_symbol_1.c, tint_symbol_1.d, tint_symbol_1.pos);
+fn vert_main_inner() -> VertexOutput {
+  return VertexOutput();
 }
 
-struct tint_symbol_3 {
+[[stage(vertex)]]
+fn vert_main() -> tint_symbol {
+  let inner_result = vert_main_inner();
+  var wrapper_result : tint_symbol;
+  wrapper_result.b = inner_result.b;
+  wrapper_result.pos = inner_result.pos;
+  wrapper_result.d = inner_result.d;
+  wrapper_result.a = inner_result.a;
+  wrapper_result.c = inner_result.c;
+  return wrapper_result;
+}
+
+struct tint_symbol_2 {
   [[location(0)]]
   a : f32;
   [[location(1)]]
@@ -886,12 +990,12 @@ struct tint_symbol_3 {
   ff : bool;
 };
 
+fn frag_main_inner(ff : bool, c : i32, inputs : FragmentInputExtra, b : u32) {
+}
+
 [[stage(fragment)]]
-fn frag_main(tint_symbol_2 : tint_symbol_3) {
-  let ff : bool = tint_symbol_2.ff;
-  let c : i32 = tint_symbol_2.c;
-  let inputs : FragmentInputExtra = FragmentInputExtra(tint_symbol_2.d, tint_symbol_2.pos, tint_symbol_2.a);
-  let b : u32 = tint_symbol_2.b;
+fn frag_main(tint_symbol_1 : tint_symbol_2) {
+  frag_main_inner(tint_symbol_1.ff, tint_symbol_1.c, FragmentInputExtra(tint_symbol_1.d, tint_symbol_1.pos, tint_symbol_1.a), tint_symbol_1.b);
 }
 )";
 
@@ -916,9 +1020,12 @@ struct tint_symbol_2 {
   col : f32;
 };
 
+fn tint_symbol_1_inner(col : f32) {
+}
+
 [[stage(fragment)]]
 fn tint_symbol_1(tint_symbol : tint_symbol_2) {
-  let col : f32 = tint_symbol.col;
+  tint_symbol_1_inner(tint_symbol.col);
 }
 )";
 
@@ -938,14 +1045,20 @@ fn frag_main() {
 )";
 
   auto* expect = R"(
-struct tint_symbol_1 {
+struct tint_symbol {
   [[builtin(sample_mask)]]
-  tint_symbol : u32;
+  fixed_sample_mask : u32;
 };
 
+fn frag_main_inner() {
+}
+
 [[stage(fragment)]]
-fn frag_main() -> tint_symbol_1 {
-  return tint_symbol_1(3u);
+fn frag_main() -> tint_symbol {
+  frag_main_inner();
+  var wrapper_result : tint_symbol;
+  wrapper_result.fixed_sample_mask = 3u;
+  return wrapper_result;
 }
 )";
 
@@ -966,14 +1079,21 @@ fn frag_main() {
 )";
 
   auto* expect = R"(
-struct tint_symbol_1 {
+struct tint_symbol {
   [[builtin(sample_mask)]]
-  tint_symbol : u32;
+  fixed_sample_mask : u32;
 };
 
+fn frag_main_inner() {
+  return;
+}
+
 [[stage(fragment)]]
-fn frag_main() -> tint_symbol_1 {
-  return tint_symbol_1(3u);
+fn frag_main() -> tint_symbol {
+  frag_main_inner();
+  var wrapper_result : tint_symbol;
+  wrapper_result.fixed_sample_mask = 3u;
+  return wrapper_result;
 }
 )";
 
@@ -999,9 +1119,16 @@ struct tint_symbol {
   value : u32;
 };
 
+fn frag_main_inner() -> u32 {
+  return 7u;
+}
+
 [[stage(fragment)]]
 fn frag_main() -> tint_symbol {
-  return tint_symbol((7u & 3u));
+  let inner_result = frag_main_inner();
+  var wrapper_result : tint_symbol;
+  wrapper_result.value = (inner_result & 3u);
+  return wrapper_result;
 }
 )";
 
@@ -1022,16 +1149,24 @@ fn frag_main() -> [[location(0)]] f32 {
 )";
 
   auto* expect = R"(
-struct tint_symbol_1 {
+struct tint_symbol {
   [[location(0)]]
   value : f32;
   [[builtin(sample_mask)]]
-  tint_symbol : u32;
+  fixed_sample_mask : u32;
 };
 
+fn frag_main_inner() -> f32 {
+  return 1.0;
+}
+
 [[stage(fragment)]]
-fn frag_main() -> tint_symbol_1 {
-  return tint_symbol_1(1.0, 3u);
+fn frag_main() -> tint_symbol {
+  let inner_result = frag_main_inner();
+  var wrapper_result : tint_symbol;
+  wrapper_result.value = inner_result;
+  wrapper_result.fixed_sample_mask = 3u;
+  return wrapper_result;
 }
 )";
 
@@ -1073,10 +1208,18 @@ struct tint_symbol {
   mask : u32;
 };
 
+fn frag_main_inner() -> Output {
+  return Output(0.5, 7u, 1.0);
+}
+
 [[stage(fragment)]]
 fn frag_main() -> tint_symbol {
-  let tint_symbol_1 : Output = Output(0.5, 7u, 1.0);
-  return tint_symbol(tint_symbol_1.value, tint_symbol_1.depth, (tint_symbol_1.mask & 3u));
+  let inner_result = frag_main_inner();
+  var wrapper_result : tint_symbol;
+  wrapper_result.depth = inner_result.depth;
+  wrapper_result.mask = (inner_result.mask & 3u);
+  wrapper_result.value = inner_result.value;
+  return wrapper_result;
 }
 )";
 
@@ -1108,19 +1251,27 @@ struct Output {
   value : f32;
 };
 
-struct tint_symbol_1 {
+struct tint_symbol {
   [[location(0)]]
   value : f32;
   [[builtin(frag_depth)]]
   depth : f32;
   [[builtin(sample_mask)]]
-  tint_symbol : u32;
+  fixed_sample_mask : u32;
 };
 
+fn frag_main_inner() -> Output {
+  return Output(0.5, 1.0);
+}
+
 [[stage(fragment)]]
-fn frag_main() -> tint_symbol_1 {
-  let tint_symbol_2 : Output = Output(0.5, 1.0);
-  return tint_symbol_1(tint_symbol_2.value, tint_symbol_2.depth, 3u);
+fn frag_main() -> tint_symbol {
+  let inner_result = frag_main_inner();
+  var wrapper_result : tint_symbol;
+  wrapper_result.depth = inner_result.depth;
+  wrapper_result.value = inner_result.value;
+  wrapper_result.fixed_sample_mask = 3u;
+  return wrapper_result;
 }
 )";
 
@@ -1160,31 +1311,53 @@ struct tint_symbol {
   value : u32;
 };
 
-[[stage(fragment)]]
-fn frag_main1() -> tint_symbol {
-  return tint_symbol((7u & 3u));
+fn frag_main1_inner() -> u32 {
+  return 7u;
 }
 
-struct tint_symbol_2 {
+[[stage(fragment)]]
+fn frag_main1() -> tint_symbol {
+  let inner_result = frag_main1_inner();
+  var wrapper_result : tint_symbol;
+  wrapper_result.value = (inner_result & 3u);
+  return wrapper_result;
+}
+
+struct tint_symbol_1 {
   [[location(0)]]
   value : f32;
   [[builtin(sample_mask)]]
-  tint_symbol_1 : u32;
+  fixed_sample_mask : u32;
 };
 
-[[stage(fragment)]]
-fn frag_main2() -> tint_symbol_2 {
-  return tint_symbol_2(1.0, 3u);
+fn frag_main2_inner() -> f32 {
+  return 1.0;
 }
 
-struct tint_symbol_3 {
+[[stage(fragment)]]
+fn frag_main2() -> tint_symbol_1 {
+  let inner_result_1 = frag_main2_inner();
+  var wrapper_result_1 : tint_symbol_1;
+  wrapper_result_1.value = inner_result_1;
+  wrapper_result_1.fixed_sample_mask = 3u;
+  return wrapper_result_1;
+}
+
+struct tint_symbol_2 {
   [[builtin(position)]]
   value : vec4<f32>;
 };
 
+fn vert_main1_inner() -> vec4<f32> {
+  return vec4<f32>();
+}
+
 [[stage(vertex)]]
-fn vert_main1() -> tint_symbol_3 {
-  return tint_symbol_3(vec4<f32>());
+fn vert_main1() -> tint_symbol_2 {
+  let inner_result_2 = vert_main1_inner();
+  var wrapper_result_2 : tint_symbol_2;
+  wrapper_result_2.value = inner_result_2;
+  return wrapper_result_2;
 }
 
 [[stage(compute), workgroup_size(1)]]
@@ -1195,6 +1368,57 @@ fn comp_main1() {
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
       CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0x03u);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_AvoidNameClash) {
+  auto* src = R"(
+struct FragOut {
+  [[location(0)]] fixed_sample_mask : vec4<f32>;
+  [[location(1)]] fixed_sample_mask_1 : vec4<f32>;
+};
+
+[[stage(fragment)]]
+fn frag_main() -> FragOut {
+  return FragOut();
+}
+)";
+
+  auto* expect = R"(
+struct FragOut {
+  fixed_sample_mask : vec4<f32>;
+  fixed_sample_mask_1 : vec4<f32>;
+};
+
+struct tint_symbol {
+  [[location(0)]]
+  fixed_sample_mask : vec4<f32>;
+  [[location(1)]]
+  fixed_sample_mask_1 : vec4<f32>;
+  [[builtin(sample_mask)]]
+  fixed_sample_mask_2 : u32;
+};
+
+fn frag_main_inner() -> FragOut {
+  return FragOut();
+}
+
+[[stage(fragment)]]
+fn frag_main() -> tint_symbol {
+  let inner_result = frag_main_inner();
+  var wrapper_result : tint_symbol;
+  wrapper_result.fixed_sample_mask = inner_result.fixed_sample_mask;
+  wrapper_result.fixed_sample_mask_1 = inner_result.fixed_sample_mask_1;
+  wrapper_result.fixed_sample_mask_2 = 3u;
+  return wrapper_result;
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0x03);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));

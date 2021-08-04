@@ -7,21 +7,21 @@ struct buf0 {
 struct main_out {
   float4 x_GLF_color_1;
 };
-struct tint_symbol_2 {
+struct tint_symbol_1 {
   float4 x_GLF_color_1 [[color(0)]];
 };
 
-void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread float4* const tint_symbol_6) {
+void main_1(constant buf0& x_7, thread float4* const tint_symbol_3, thread float4* const tint_symbol_4) {
   int i = 0;
   int i_1 = 0;
   int i_2 = 0;
-  *(tint_symbol_5) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  *(tint_symbol_3) = float4(1.0f, 0.0f, 0.0f, 1.0f);
   i = 0;
   float const x_35 = x_7.injectionSwitch.y;
   if ((x_35 < 0.0f)) {
   } else {
     bool x_42 = false;
-    float const x_41 = (*(tint_symbol_6)).y;
+    float const x_41 = (*(tint_symbol_4)).y;
     x_42 = (x_41 < -1.0f);
     if (x_42) {
     } else {
@@ -82,13 +82,19 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread float
   return;
 }
 
-fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_7 [[buffer(0)]]) {
+main_out tint_symbol_inner(constant buf0& x_7, float4 gl_FragCoord_param, thread float4* const tint_symbol_5, thread float4* const tint_symbol_6) {
+  *(tint_symbol_5) = gl_FragCoord_param;
+  main_1(x_7, tint_symbol_6, tint_symbol_5);
+  main_out const tint_symbol_2 = {.x_GLF_color_1=*(tint_symbol_6)};
+  return tint_symbol_2;
+}
+
+fragment tint_symbol_1 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_7 [[buffer(0)]]) {
   thread float4 tint_symbol_7 = 0.0f;
   thread float4 tint_symbol_8 = 0.0f;
-  tint_symbol_7 = gl_FragCoord_param;
-  main_1(x_7, &(tint_symbol_8), &(tint_symbol_7));
-  main_out const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_8};
-  tint_symbol_2 const tint_symbol_4 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
-  return tint_symbol_4;
+  main_out const inner_result = tint_symbol_inner(x_7, gl_FragCoord_param, &(tint_symbol_7), &(tint_symbol_8));
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }
 

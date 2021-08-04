@@ -17,9 +17,7 @@ struct tint_symbol_2 {
   uint3 GlobalInvocationID : SV_DispatchThreadID;
 };
 
-[numthreads(1, 1, 1)]
-void main(tint_symbol_2 tint_symbol_1) {
-  const uint3 GlobalInvocationID = tint_symbol_1.GlobalInvocationID;
+void main_inner(uint3 GlobalInvocationID) {
   int2 tint_tmp;
   src.GetDimensions(tint_tmp.x, tint_tmp.y);
   int2 size = tint_tmp;
@@ -49,5 +47,10 @@ void main(tint_symbol_2 tint_symbol_1) {
   } else {
     output.Store((4u * outputIndex), asuint(uint(0)));
   }
+}
+
+[numthreads(1, 1, 1)]
+void main(tint_symbol_2 tint_symbol_1) {
+  main_inner(tint_symbol_1.GlobalInvocationID);
   return;
 }

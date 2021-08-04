@@ -21,7 +21,7 @@ void makeTreeNode_struct_BST_i1_i1_i11_(thread BST* const tree) {
   return;
 }
 
-void main_1(thread float4* const tint_symbol_4) {
+void main_1(thread float4* const tint_symbol_3) {
   tint_array_wrapper tree_1 = {};
   BST param = {};
   tint_array_wrapper const x_37 = tree_1;
@@ -40,15 +40,21 @@ void main_1(thread float4* const tint_symbol_4) {
     return;
   }
   tint_array_wrapper const x_12 = tree_1;
-  *(tint_symbol_4) = float4(float(x_12.arr[0u].rightIndex), 0.0f, 0.0f, 1.0f);
+  *(tint_symbol_3) = float4(float(x_12.arr[0u].rightIndex), 0.0f, 0.0f, 1.0f);
   return;
+}
+
+main_out tint_symbol_inner(thread float4* const tint_symbol_4) {
+  main_1(tint_symbol_4);
+  main_out const tint_symbol_2 = {.x_GLF_color_1=*(tint_symbol_4)};
+  return tint_symbol_2;
 }
 
 fragment tint_symbol_1 tint_symbol() {
   thread float4 tint_symbol_5 = 0.0f;
-  main_1(&(tint_symbol_5));
-  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
-  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
-  return tint_symbol_3;
+  main_out const inner_result = tint_symbol_inner(&(tint_symbol_5));
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }
 

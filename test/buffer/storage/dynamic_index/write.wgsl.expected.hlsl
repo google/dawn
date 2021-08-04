@@ -24,9 +24,7 @@ void tint_symbol_11(RWByteAddressBuffer buffer, uint offset, int4 value[4]) {
   }
 }
 
-[numthreads(1, 1, 1)]
-void main(tint_symbol_1 tint_symbol) {
-  const uint idx = tint_symbol.idx;
+void main_inner(uint idx) {
   s.Store3((176u * idx), asuint(int3(0, 0, 0)));
   s.Store(((176u * idx) + 12u), asuint(0));
   s.Store3(((176u * idx) + 16u), asuint(uint3(0u, 0u, 0u)));
@@ -37,5 +35,10 @@ void main(tint_symbol_1 tint_symbol) {
   tint_symbol_9(s, ((176u * idx) + 80u), float3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
   const int4 tint_symbol_13[4] = (int4[4])0;
   tint_symbol_11(s, ((176u * idx) + 112u), tint_symbol_13);
+}
+
+[numthreads(1, 1, 1)]
+void main(tint_symbol_1 tint_symbol) {
+  main_inner(tint_symbol.idx);
   return;
 }

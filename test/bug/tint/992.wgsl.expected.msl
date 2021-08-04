@@ -5,10 +5,16 @@ struct tint_symbol {
   float4 value [[color(0)]];
 };
 
-fragment tint_symbol frag_main() {
+float4 frag_main_inner() {
   float b = 0.0f;
   float3 v = float3(b);
-  tint_symbol const tint_symbol_1 = {.value=float4(v, 1.0f)};
-  return tint_symbol_1;
+  return float4(v, 1.0f);
+}
+
+fragment tint_symbol frag_main() {
+  float4 const inner_result = frag_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
 

@@ -7,23 +7,32 @@ struct tint_symbol_2 {
   float4 value : SV_Position;
 };
 
-tint_symbol_2 vert_main(tint_symbol_1 tint_symbol) {
-  const float2 a_particlePos = tint_symbol.a_particlePos;
-  const float2 a_particleVel = tint_symbol.a_particleVel;
-  const float2 a_pos = tint_symbol.a_pos;
+float4 vert_main_inner(float2 a_particlePos, float2 a_particleVel, float2 a_pos) {
   float angle = -(atan2(a_particleVel.x, a_particleVel.y));
   float2 pos = float2(((a_pos.x * cos(angle)) - (a_pos.y * sin(angle))), ((a_pos.x * sin(angle)) + (a_pos.y * cos(angle))));
-  const tint_symbol_2 tint_symbol_9 = {float4((pos + a_particlePos), 0.0f, 1.0f)};
-  return tint_symbol_9;
+  return float4((pos + a_particlePos), 0.0f, 1.0f);
+}
+
+tint_symbol_2 vert_main(tint_symbol_1 tint_symbol) {
+  const float4 inner_result = vert_main_inner(tint_symbol.a_particlePos, tint_symbol.a_particleVel, tint_symbol.a_pos);
+  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
 
 struct tint_symbol_3 {
   float4 value : SV_Target0;
 };
 
+float4 frag_main_inner() {
+  return float4(1.0f, 1.0f, 1.0f, 1.0f);
+}
+
 tint_symbol_3 frag_main() {
-  const tint_symbol_3 tint_symbol_10 = {float4(1.0f, 1.0f, 1.0f, 1.0f)};
-  return tint_symbol_10;
+  const float4 inner_result_1 = frag_main_inner();
+  tint_symbol_3 wrapper_result_1 = (tint_symbol_3)0;
+  wrapper_result_1.value = inner_result_1;
+  return wrapper_result_1;
 }
 
 cbuffer cbuffer_params : register(b0, space0) {
@@ -36,9 +45,7 @@ struct tint_symbol_5 {
   uint3 gl_GlobalInvocationID : SV_DispatchThreadID;
 };
 
-[numthreads(1, 1, 1)]
-void comp_main(tint_symbol_5 tint_symbol_4) {
-  const uint3 gl_GlobalInvocationID = tint_symbol_4.gl_GlobalInvocationID;
+void comp_main_inner(uint3 gl_GlobalInvocationID) {
   uint index = gl_GlobalInvocationID.x;
   if ((index >= 5u)) {
     return;
@@ -95,5 +102,10 @@ void comp_main(tint_symbol_5 tint_symbol_4) {
   }
   particlesB.Store2((16u * index), asuint(vPos));
   particlesB.Store2(((16u * index) + 8u), asuint(vVel));
+}
+
+[numthreads(1, 1, 1)]
+void comp_main(tint_symbol_5 tint_symbol_4) {
+  comp_main_inner(tint_symbol_4.gl_GlobalInvocationID);
   return;
 }

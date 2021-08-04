@@ -13,10 +13,13 @@ struct tint_symbol_1 {
   uint3 x_3_param : SV_DispatchThreadID;
 };
 
-[numthreads(1, 1, 1)]
-void main(tint_symbol_1 tint_symbol) {
-  const uint3 x_3_param = tint_symbol.x_3_param;
+void main_inner(uint3 x_3_param) {
   x_3 = x_3_param;
   main_1();
+}
+
+[numthreads(1, 1, 1)]
+void main(tint_symbol_1 tint_symbol) {
+  main_inner(tint_symbol.x_3_param);
   return;
 }

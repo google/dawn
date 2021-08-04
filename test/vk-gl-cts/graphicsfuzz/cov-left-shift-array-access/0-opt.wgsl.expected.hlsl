@@ -17,8 +17,8 @@ void main_1() {
   const uint scalar_offset = ((16u * uint(0))) / 4;
   const int x_32 = asint(x_6[scalar_offset / 4][scalar_offset % 4]);
   const int x_34 = idx;
-  const tint_padded_array_element tint_symbol_3[2] = {{x_30}, {x_32}};
-  indexable = tint_symbol_3;
+  const tint_padded_array_element tint_symbol_2[2] = {{x_30}, {x_32}};
+  indexable = tint_symbol_2;
   const int x_36 = indexable[x_34].el;
   a = x_36;
   const int x_37 = a;
@@ -47,9 +47,15 @@ struct tint_symbol {
   float4 x_GLF_color_1 : SV_Target0;
 };
 
-tint_symbol main() {
+main_out main_inner() {
   main_1();
-  const main_out tint_symbol_1 = {x_GLF_color};
-  const tint_symbol tint_symbol_4 = {tint_symbol_1.x_GLF_color_1};
-  return tint_symbol_4;
+  const main_out tint_symbol_3 = {x_GLF_color};
+  return tint_symbol_3;
+}
+
+tint_symbol main() {
+  const main_out inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }

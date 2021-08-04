@@ -14,9 +14,12 @@ struct tint_symbol_1 {
   uint idx : SV_GroupIndex;
 };
 
+void main_inner(uint idx) {
+  io.Store3(0u, asuint(Bad(io.Load(12u), asfloat(io.Load3(0u)))));
+}
+
 [numthreads(1, 1, 1)]
 void main(tint_symbol_1 tint_symbol) {
-  const uint idx = tint_symbol.idx;
-  io.Store3(0u, asuint(Bad(io.Load(12u), asfloat(io.Load3(0u)))));
+  main_inner(tint_symbol.idx);
   return;
 }

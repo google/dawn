@@ -324,19 +324,20 @@ struct tint_symbol_2 {
   float4 glFragColor_1 : SV_Target0;
 };
 
-tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  const float2 vMainuv_param = tint_symbol.vMainuv_param;
-  const float4 v_output1_param = tint_symbol.v_output1_param;
-  const bool gl_FrontFacing_param = tint_symbol.gl_FrontFacing_param;
-  const float2 v_uv_param = tint_symbol.v_uv_param;
-  const float4 v_output2_param = tint_symbol.v_output2_param;
+main_out main_inner(float2 vMainuv_param, float4 v_output1_param, bool gl_FrontFacing_param, float2 v_uv_param, float4 v_output2_param) {
   vMainuv = vMainuv_param;
   v_output1 = v_output1_param;
   gl_FrontFacing = gl_FrontFacing_param;
   v_uv = v_uv_param;
   v_output2 = v_output2_param;
   main_1();
-  const main_out tint_symbol_3 = {glFragColor};
-  const tint_symbol_2 tint_symbol_9 = {tint_symbol_3.glFragColor_1};
-  return tint_symbol_9;
+  const main_out tint_symbol_8 = {glFragColor};
+  return tint_symbol_8;
+}
+
+tint_symbol_2 main(tint_symbol_1 tint_symbol) {
+  const main_out inner_result = main_inner(tint_symbol.vMainuv_param, tint_symbol.v_output1_param, tint_symbol.gl_FrontFacing_param, tint_symbol.v_uv_param, tint_symbol.v_output2_param);
+  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
+  wrapper_result.glFragColor_1 = inner_result.glFragColor_1;
+  return wrapper_result;
 }

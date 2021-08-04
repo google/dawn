@@ -42,7 +42,7 @@ void func_struct_S_i11_(constant buf1& x_8, constant buf0& x_10, thread S* const
   return;
 }
 
-void main_1(constant buf0& x_10, constant buf1& x_8, thread float4* const tint_symbol_4) {
+void main_1(constant buf0& x_10, constant buf1& x_8, thread float4* const tint_symbol_3) {
   int i = 0;
   tint_array_wrapper_1 arr = {};
   int i_1 = 0;
@@ -149,20 +149,26 @@ void main_1(constant buf0& x_10, constant buf1& x_8, thread float4* const tint_s
     int const x_155 = x_10.x_GLF_uniform_int_values.arr[2].el;
     int const x_158 = x_10.x_GLF_uniform_int_values.arr[2].el;
     int const x_161 = x_10.x_GLF_uniform_int_values.arr[0].el;
-    *(tint_symbol_4) = float4(float(x_152), float(x_155), float(x_158), float(x_161));
+    *(tint_symbol_3) = float4(float(x_152), float(x_155), float(x_158), float(x_161));
   } else {
     int const x_165 = x_10.x_GLF_uniform_int_values.arr[2].el;
     float const x_166 = float(x_165);
-    *(tint_symbol_4) = float4(x_166, x_166, x_166, x_166);
+    *(tint_symbol_3) = float4(x_166, x_166, x_166, x_166);
   }
   return;
 }
 
+main_out tint_symbol_inner(constant buf0& x_10, constant buf1& x_8, thread float4* const tint_symbol_4) {
+  main_1(x_10, x_8, tint_symbol_4);
+  main_out const tint_symbol_2 = {.x_GLF_color_1=*(tint_symbol_4)};
+  return tint_symbol_2;
+}
+
 fragment tint_symbol_1 tint_symbol(constant buf0& x_10 [[buffer(0)]], constant buf1& x_8 [[buffer(1)]]) {
   thread float4 tint_symbol_5 = 0.0f;
-  main_1(x_10, x_8, &(tint_symbol_5));
-  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
-  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
-  return tint_symbol_3;
+  main_out const inner_result = tint_symbol_inner(x_10, x_8, &(tint_symbol_5));
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }
 

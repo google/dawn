@@ -21,13 +21,17 @@ struct tint_symbol_2 {
   float4 x_2_1 : SV_Position;
 };
 
-tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  const float x_1_param = tint_symbol.x_1_param;
-  const float4 x_1_param_1 = tint_symbol.x_1_param_1;
+main_out main_inner(float x_1_param, float4 x_1_param_1) {
   x_1.alice = x_1_param;
   x_1.bob = x_1_param_1;
   main_1();
   const main_out tint_symbol_3 = {x_2};
-  const tint_symbol_2 tint_symbol_4 = {tint_symbol_3.x_2_1};
-  return tint_symbol_4;
+  return tint_symbol_3;
+}
+
+tint_symbol_2 main(tint_symbol_1 tint_symbol) {
+  const main_out inner_result = main_inner(tint_symbol.x_1_param, tint_symbol.x_1_param_1);
+  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
+  wrapper_result.x_2_1 = inner_result.x_2_1;
+  return wrapper_result;
 }

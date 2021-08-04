@@ -18,11 +18,11 @@ struct tint_symbol_1 {
   float4 x_GLF_color_1 [[color(0)]];
 };
 
-void main_1(constant buf0& x_7, thread float4* const tint_symbol_5) {
+void main_1(constant buf0& x_7, thread float4* const tint_symbol_4) {
   S ll = {};
   tint_array_wrapper sums = {};
-  S const tint_symbol_3 = {.f0=0, .f1=bool3(true, true, true)};
-  ll = tint_symbol_3;
+  S const tint_symbol_2 = {.f0=0, .f1=bool3(true, true, true)};
+  ll = tint_symbol_2;
   while (true) {
     S const x_12 = ll;
     float const x_45 = x_7.injectionSwitch.y;
@@ -42,15 +42,21 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5) {
   }
   float const x_53 = sums.arr[0];
   float2 const x_54 = float2(x_53, x_53);
-  *(tint_symbol_5) = float4(1.0f, x_54.x, x_54.y, 1.0f);
+  *(tint_symbol_4) = float4(1.0f, x_54.x, x_54.y, 1.0f);
   return;
+}
+
+main_out tint_symbol_inner(constant buf0& x_7, thread float4* const tint_symbol_5) {
+  main_1(x_7, tint_symbol_5);
+  main_out const tint_symbol_3 = {.x_GLF_color_1=*(tint_symbol_5)};
+  return tint_symbol_3;
 }
 
 fragment tint_symbol_1 tint_symbol(constant buf0& x_7 [[buffer(0)]]) {
   thread float4 tint_symbol_6 = 0.0f;
-  main_1(x_7, &(tint_symbol_6));
-  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_6};
-  tint_symbol_1 const tint_symbol_4 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
-  return tint_symbol_4;
+  main_out const inner_result = tint_symbol_inner(x_7, &(tint_symbol_6));
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }
 

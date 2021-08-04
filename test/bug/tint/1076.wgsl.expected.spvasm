@@ -1,0 +1,82 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 46
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %tint_symbol %tint_symbol_1 %tint_symbol_5 %tint_symbol_6 %tint_symbol_3
+               OpExecutionMode %main OriginUpperLeft
+               OpName %tint_symbol "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %tint_symbol_3 "tint_symbol_3"
+               OpName %tint_symbol_5 "tint_symbol_5"
+               OpName %tint_symbol_6 "tint_symbol_6"
+               OpName %FragIn "FragIn"
+               OpMemberName %FragIn 0 "a"
+               OpMemberName %FragIn 1 "mask"
+               OpName %tint_symbol_7 "tint_symbol_7"
+               OpName %tint_symbol_4 "tint_symbol_4"
+               OpName %main "main"
+               OpDecorate %tint_symbol Location 0
+               OpDecorate %_arr_uint_uint_1 ArrayStride 4
+               OpDecorate %tint_symbol_1 BuiltIn SampleMask
+               OpDecorate %tint_symbol_3 Location 1
+               OpDecorate %tint_symbol_5 Location 0
+               OpDecorate %tint_symbol_6 BuiltIn SampleMask
+               OpMemberDecorate %FragIn 0 Offset 0
+               OpMemberDecorate %FragIn 1 Offset 4
+      %float = OpTypeFloat 32
+%_ptr_Input_float = OpTypePointer Input %float
+%tint_symbol = OpVariable %_ptr_Input_float Input
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+%_arr_uint_uint_1 = OpTypeArray %uint %uint_1
+%_ptr_Input__arr_uint_uint_1 = OpTypePointer Input %_arr_uint_uint_1
+%tint_symbol_1 = OpVariable %_ptr_Input__arr_uint_uint_1 Input
+%tint_symbol_3 = OpVariable %_ptr_Input_float Input
+%_ptr_Output_float = OpTypePointer Output %float
+         %12 = OpConstantNull %float
+%tint_symbol_5 = OpVariable %_ptr_Output_float Output %12
+%_ptr_Output__arr_uint_uint_1 = OpTypePointer Output %_arr_uint_uint_1
+         %15 = OpConstantNull %_arr_uint_uint_1
+%tint_symbol_6 = OpVariable %_ptr_Output__arr_uint_uint_1 Output %15
+       %void = OpTypeVoid
+     %FragIn = OpTypeStruct %float %uint
+         %16 = OpTypeFunction %void %FragIn
+        %int = OpTypeInt 32 1
+      %int_0 = OpConstant %int 0
+%_ptr_Output_uint = OpTypePointer Output %uint
+         %28 = OpTypeFunction %void
+%_ptr_Input_uint = OpTypePointer Input %uint
+     %uint_0 = OpConstant %uint 0
+       %bool = OpTypeBool
+%tint_symbol_7 = OpFunction %void None %16
+%tint_symbol_4 = OpFunctionParameter %FragIn
+         %21 = OpLabel
+         %22 = OpCompositeExtract %float %tint_symbol_4 0
+               OpStore %tint_symbol_5 %22
+         %26 = OpAccessChain %_ptr_Output_uint %tint_symbol_6 %int_0
+         %27 = OpCompositeExtract %uint %tint_symbol_4 1
+               OpStore %26 %27
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %28
+         %30 = OpLabel
+         %31 = OpLoad %float %tint_symbol
+         %33 = OpAccessChain %_ptr_Input_uint %tint_symbol_1 %int_0
+         %34 = OpLoad %uint %33
+         %35 = OpCompositeConstruct %FragIn %31 %34
+         %36 = OpCompositeExtract %uint %35 1
+         %38 = OpIEqual %bool %36 %uint_0
+               OpSelectionMerge %40 None
+               OpBranchConditional %38 %41 %40
+         %41 = OpLabel
+         %42 = OpFunctionCall %void %tint_symbol_7 %35
+               OpReturn
+         %40 = OpLabel
+         %44 = OpLoad %float %tint_symbol_3
+         %45 = OpCompositeConstruct %FragIn %44 %uint_1
+         %43 = OpFunctionCall %void %tint_symbol_7 %45
+               OpReturn
+               OpFunctionEnd

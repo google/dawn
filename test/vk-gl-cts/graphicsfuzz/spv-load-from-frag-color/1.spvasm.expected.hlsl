@@ -14,8 +14,8 @@ void main_1() {
   int x_357_phi = 0;
   int x_360_phi = 0;
   int x_362_phi = 0;
-  const BST tint_symbol_2 = {9, -1, -1};
-  tree[0] = tint_symbol_2;
+  const BST tint_symbol_1 = {9, -1, -1};
+  tree[0] = tint_symbol_1;
   switch(0u) {
     default: {
       x_62_phi = 0;
@@ -36,8 +36,8 @@ void main_1() {
           const int x_83 = tree[x_82_save].leftIndex;
           if ((x_83 == -1)) {
             tree[x_82_save].leftIndex = 1;
-            const BST tint_symbol_3 = {5, -1, -1};
-            tree[1] = tint_symbol_3;
+            const BST tint_symbol_2 = {5, -1, -1};
+            tree[1] = tint_symbol_2;
             x_90_phi = true;
             break;
           } else {
@@ -55,8 +55,8 @@ void main_1() {
           const int x_75 = tree[x_74_save].rightIndex;
           if ((x_75 == -1)) {
             tree[x_74_save].rightIndex = 1;
-            const BST tint_symbol_4 = {5, -1, -1};
-            tree[1] = tint_symbol_4;
+            const BST tint_symbol_3 = {5, -1, -1};
+            tree[1] = tint_symbol_3;
             x_90_phi = true;
             break;
           } else {
@@ -104,8 +104,8 @@ void main_1() {
           const int x_116 = tree[x_115_save].leftIndex;
           if ((x_116 == -1)) {
             tree[x_115_save].leftIndex = 2;
-            const BST tint_symbol_5 = {12, -1, -1};
-            tree[2] = tint_symbol_5;
+            const BST tint_symbol_4 = {12, -1, -1};
+            tree[2] = tint_symbol_4;
             x_123_phi = true;
             break;
           } else {
@@ -123,8 +123,8 @@ void main_1() {
           const int x_108 = tree[x_107_save].rightIndex;
           if ((x_108 == -1)) {
             tree[x_107_save].rightIndex = 2;
-            const BST tint_symbol_6 = {12, -1, -1};
-            tree[2] = tint_symbol_6;
+            const BST tint_symbol_5 = {12, -1, -1};
+            tree[2] = tint_symbol_5;
             x_123_phi = true;
             break;
           } else {
@@ -172,8 +172,8 @@ void main_1() {
           const int x_149 = tree[x_148_save].leftIndex;
           if ((x_149 == -1)) {
             tree[x_148_save].leftIndex = 3;
-            const BST tint_symbol_7 = {15, -1, -1};
-            tree[3] = tint_symbol_7;
+            const BST tint_symbol_6 = {15, -1, -1};
+            tree[3] = tint_symbol_6;
             x_156_phi = true;
             break;
           } else {
@@ -191,8 +191,8 @@ void main_1() {
           const int x_141 = tree[x_140_save].rightIndex;
           if ((x_141 == -1)) {
             tree[x_140_save].rightIndex = 3;
-            const BST tint_symbol_8 = {15, -1, -1};
-            tree[3] = tint_symbol_8;
+            const BST tint_symbol_7 = {15, -1, -1};
+            tree[3] = tint_symbol_7;
             x_156_phi = true;
             break;
           } else {
@@ -240,8 +240,8 @@ void main_1() {
           const int x_182 = tree[x_181_save].leftIndex;
           if ((x_182 == -1)) {
             tree[x_181_save].leftIndex = 4;
-            const BST tint_symbol_9 = {7, -1, -1};
-            tree[4] = tint_symbol_9;
+            const BST tint_symbol_8 = {7, -1, -1};
+            tree[4] = tint_symbol_8;
             x_189_phi = true;
             break;
           } else {
@@ -259,8 +259,8 @@ void main_1() {
           const int x_174 = tree[x_173_save].rightIndex;
           if ((x_174 == -1)) {
             tree[x_173_save].rightIndex = 4;
-            const BST tint_symbol_10 = {7, -1, -1};
-            tree[4] = tint_symbol_10;
+            const BST tint_symbol_9 = {7, -1, -1};
+            tree[4] = tint_symbol_9;
             x_189_phi = true;
             break;
           } else {
@@ -308,8 +308,8 @@ void main_1() {
           const int x_215 = tree[x_214_save].leftIndex;
           if ((x_215 == -1)) {
             tree[x_214_save].leftIndex = 5;
-            const BST tint_symbol_11 = {8, -1, -1};
-            tree[5] = tint_symbol_11;
+            const BST tint_symbol_10 = {8, -1, -1};
+            tree[5] = tint_symbol_10;
             x_222_phi = true;
             break;
           } else {
@@ -327,8 +327,8 @@ void main_1() {
           const int x_207 = tree[x_206_save].rightIndex;
           if ((x_207 == -1)) {
             tree[x_206_save].rightIndex = 5;
-            const BST tint_symbol_12 = {8, -1, -1};
-            tree[5] = tint_symbol_12;
+            const BST tint_symbol_11 = {8, -1, -1};
+            tree[5] = tint_symbol_11;
             x_222_phi = true;
             break;
           } else {
@@ -376,8 +376,8 @@ void main_1() {
           const int x_248 = tree[x_247_save].leftIndex;
           if ((x_248 == -1)) {
             tree[x_247_save].leftIndex = 6;
-            const BST tint_symbol_13 = {2, -1, -1};
-            tree[6] = tint_symbol_13;
+            const BST tint_symbol_12 = {2, -1, -1};
+            tree[6] = tint_symbol_12;
             x_255_phi = true;
             break;
           } else {
@@ -395,8 +395,8 @@ void main_1() {
           const int x_240 = tree[x_239_save].rightIndex;
           if ((x_240 == -1)) {
             tree[x_239_save].rightIndex = 6;
-            const BST tint_symbol_14 = {2, -1, -1};
-            tree[6] = tint_symbol_14;
+            const BST tint_symbol_13 = {2, -1, -1};
+            tree[6] = tint_symbol_13;
             x_255_phi = true;
             break;
           } else {
@@ -444,8 +444,8 @@ void main_1() {
           const int x_281 = tree[x_280_save].leftIndex;
           if ((x_281 == -1)) {
             tree[x_280_save].leftIndex = 7;
-            const BST tint_symbol_15 = {6, -1, -1};
-            tree[7] = tint_symbol_15;
+            const BST tint_symbol_14 = {6, -1, -1};
+            tree[7] = tint_symbol_14;
             x_288_phi = true;
             break;
           } else {
@@ -463,8 +463,8 @@ void main_1() {
           const int x_273 = tree[x_272_save].rightIndex;
           if ((x_273 == -1)) {
             tree[x_272_save].rightIndex = 7;
-            const BST tint_symbol_16 = {6, -1, -1};
-            tree[7] = tint_symbol_16;
+            const BST tint_symbol_15 = {6, -1, -1};
+            tree[7] = tint_symbol_15;
             x_288_phi = true;
             break;
           } else {
@@ -512,8 +512,8 @@ void main_1() {
           const int x_314 = tree[x_313_save].leftIndex;
           if ((x_314 == -1)) {
             tree[x_313_save].leftIndex = 8;
-            const BST tint_symbol_17 = {17, -1, -1};
-            tree[8] = tint_symbol_17;
+            const BST tint_symbol_16 = {17, -1, -1};
+            tree[8] = tint_symbol_16;
             x_321_phi = true;
             break;
           } else {
@@ -531,8 +531,8 @@ void main_1() {
           const int x_306 = tree[x_305_save].rightIndex;
           if ((x_306 == -1)) {
             tree[x_305_save].rightIndex = 8;
-            const BST tint_symbol_18 = {17, -1, -1};
-            tree[8] = tint_symbol_18;
+            const BST tint_symbol_17 = {17, -1, -1};
+            tree[8] = tint_symbol_17;
             x_321_phi = true;
             break;
           } else {
@@ -580,8 +580,8 @@ void main_1() {
           const int x_347 = tree[x_346_save].leftIndex;
           if ((x_347 == -1)) {
             tree[x_346_save].leftIndex = 9;
-            const BST tint_symbol_19 = {13, -1, -1};
-            tree[9] = tint_symbol_19;
+            const BST tint_symbol_18 = {13, -1, -1};
+            tree[9] = tint_symbol_18;
             x_354_phi = true;
             break;
           } else {
@@ -599,8 +599,8 @@ void main_1() {
           const int x_339 = tree[x_338_save].rightIndex;
           if ((x_339 == -1)) {
             tree[x_338_save].rightIndex = 9;
-            const BST tint_symbol_20 = {13, -1, -1};
-            tree[9] = tint_symbol_20;
+            const BST tint_symbol_19 = {13, -1, -1};
+            tree[9] = tint_symbol_19;
             x_354_phi = true;
             break;
           } else {
@@ -742,9 +742,15 @@ struct tint_symbol {
   float4 x_GLF_color_1 : SV_Target0;
 };
 
-tint_symbol main() {
+main_out main_inner() {
   main_1();
-  const main_out tint_symbol_1 = {x_GLF_color};
-  const tint_symbol tint_symbol_21 = {tint_symbol_1.x_GLF_color_1};
-  return tint_symbol_21;
+  const main_out tint_symbol_20 = {x_GLF_color};
+  return tint_symbol_20;
+}
+
+tint_symbol main() {
+  const main_out inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }

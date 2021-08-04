@@ -96,17 +96,23 @@ float makeFrame_(constant buf0& x_6) {
   return x_63;
 }
 
-void main_1(constant buf0& x_6, thread float4* const tint_symbol_4) {
+void main_1(constant buf0& x_6, thread float4* const tint_symbol_3) {
   float const x_34 = makeFrame_(x_6);
-  *(tint_symbol_4) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  *(tint_symbol_3) = float4(1.0f, 0.0f, 0.0f, 1.0f);
   return;
+}
+
+main_out tint_symbol_inner(constant buf0& x_6, thread float4* const tint_symbol_4) {
+  main_1(x_6, tint_symbol_4);
+  main_out const tint_symbol_2 = {.x_GLF_color_1=*(tint_symbol_4)};
+  return tint_symbol_2;
 }
 
 fragment tint_symbol_1 tint_symbol(constant buf0& x_6 [[buffer(0)]]) {
   thread float4 tint_symbol_5 = 0.0f;
-  main_1(x_6, &(tint_symbol_5));
-  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_5};
-  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
-  return tint_symbol_3;
+  main_out const inner_result = tint_symbol_inner(x_6, &(tint_symbol_5));
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }
 

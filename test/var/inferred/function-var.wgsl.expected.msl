@@ -51,8 +51,14 @@ void var_decls() {
   tint_array_wrapper v15 = ret_MyArray();
 }
 
+float4 tint_symbol_inner() {
+  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+}
+
 fragment tint_symbol_1 tint_symbol() {
-  tint_symbol_1 const tint_symbol_4 = {.value=float4(0.0f, 0.0f, 0.0f, 0.0f)};
-  return tint_symbol_4;
+  float4 const inner_result = tint_symbol_inner();
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
 

@@ -28,7 +28,7 @@ struct tint_symbol_1 {
   float4 x_GLF_color_1 [[color(0)]];
 };
 
-void main_1(constant buf0& x_7, constant buf1& x_10, thread int* const tint_symbol_4, thread float4* const tint_symbol_5) {
+void main_1(constant buf0& x_7, constant buf1& x_10, thread int* const tint_symbol_3, thread float4* const tint_symbol_4) {
   float f = 0.0f;
   int i = 0;
   int i_1 = 0;
@@ -47,7 +47,7 @@ void main_1(constant buf0& x_7, constant buf1& x_10, thread int* const tint_symb
   int i_14 = 0;
   float sum = 0.0f;
   int r = 0;
-  *(tint_symbol_4) = 0;
+  *(tint_symbol_3) = 0;
   float const x_53 = x_7.x_GLF_uniform_float_values.arr[1].el;
   f = x_53;
   int const x_55 = x_10.x_GLF_uniform_int_values.arr[1].el;
@@ -186,10 +186,10 @@ void main_1(constant buf0& x_7, constant buf1& x_10, thread int* const tint_symb
                                   break;
                                 }
                                 while (true) {
-                                  int const x_223 = *(tint_symbol_4);
-                                  *(tint_symbol_4) = as_type<int>((as_type<uint>(x_223) + as_type<uint>(1)));
+                                  int const x_223 = *(tint_symbol_3);
+                                  *(tint_symbol_3) = as_type<int>((as_type<uint>(x_223) + as_type<uint>(1)));
                                   {
-                                    int const x_225 = *(tint_symbol_4);
+                                    int const x_225 = *(tint_symbol_3);
                                     int const x_227 = x_10.x_GLF_uniform_int_values.arr[3].el;
                                     if ((x_225 < as_type<int>((as_type<uint>(100) - as_type<uint>(x_227))))) {
                                     } else {
@@ -280,13 +280,13 @@ void main_1(constant buf0& x_7, constant buf1& x_10, thread int* const tint_symb
   int const x_267 = x_10.x_GLF_uniform_int_values.arr[1].el;
   r = x_267;
   while (true) {
-    int const x_272 = *(tint_symbol_4);
+    int const x_272 = *(tint_symbol_3);
     if ((x_272 < 100)) {
     } else {
       break;
     }
-    int const x_275 = *(tint_symbol_4);
-    *(tint_symbol_4) = as_type<int>((as_type<uint>(x_275) + as_type<uint>(1)));
+    int const x_275 = *(tint_symbol_3);
+    *(tint_symbol_3) = as_type<int>((as_type<uint>(x_275) + as_type<uint>(1)));
     float const x_277 = f;
     float const x_278 = sum;
     sum = (x_278 + x_277);
@@ -302,21 +302,27 @@ void main_1(constant buf0& x_7, constant buf1& x_10, thread int* const tint_symb
     int const x_293 = x_10.x_GLF_uniform_int_values.arr[1].el;
     int const x_296 = x_10.x_GLF_uniform_int_values.arr[1].el;
     int const x_299 = x_10.x_GLF_uniform_int_values.arr[0].el;
-    *(tint_symbol_5) = float4(float(x_290), float(x_293), float(x_296), float(x_299));
+    *(tint_symbol_4) = float4(float(x_290), float(x_293), float(x_296), float(x_299));
   } else {
     int const x_303 = x_10.x_GLF_uniform_int_values.arr[1].el;
     float const x_304 = float(x_303);
-    *(tint_symbol_5) = float4(x_304, x_304, x_304, x_304);
+    *(tint_symbol_4) = float4(x_304, x_304, x_304, x_304);
   }
   return;
 }
 
+main_out tint_symbol_inner(constant buf0& x_7, constant buf1& x_10, thread int* const tint_symbol_5, thread float4* const tint_symbol_6) {
+  main_1(x_7, x_10, tint_symbol_5, tint_symbol_6);
+  main_out const tint_symbol_2 = {.x_GLF_color_1=*(tint_symbol_6)};
+  return tint_symbol_2;
+}
+
 fragment tint_symbol_1 tint_symbol(constant buf0& x_7 [[buffer(0)]], constant buf1& x_10 [[buffer(1)]]) {
-  thread int tint_symbol_6 = 0;
-  thread float4 tint_symbol_7 = 0.0f;
-  main_1(x_7, x_10, &(tint_symbol_6), &(tint_symbol_7));
-  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_7};
-  tint_symbol_1 const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
-  return tint_symbol_3;
+  thread int tint_symbol_7 = 0;
+  thread float4 tint_symbol_8 = 0.0f;
+  main_out const inner_result = tint_symbol_inner(x_7, x_10, &(tint_symbol_7), &(tint_symbol_8));
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }
 

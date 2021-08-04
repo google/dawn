@@ -15,11 +15,11 @@ struct tint_array_wrapper {
 struct main_out {
   float4 x_GLF_color_1;
 };
-struct tint_symbol_2 {
+struct tint_symbol_1 {
   float4 x_GLF_color_1 [[color(0)]];
 };
 
-void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_array_wrapper* const tint_symbol_6, thread float2x4* const tint_symbol_7, thread float4* const tint_symbol_8) {
+void main_1(constant buf0& x_7, thread float4* const tint_symbol_3, thread tint_array_wrapper* const tint_symbol_4, thread float2x4* const tint_symbol_5, thread float4* const tint_symbol_6) {
   float2 pos = 0.0f;
   int2 ipos = 0;
   int i = 0;
@@ -29,7 +29,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
   int directions = 0;
   int j = 0;
   int d = 0;
-  float4 const x_63 = *(tint_symbol_5);
+  float4 const x_63 = *(tint_symbol_3);
   float2 const x_67 = x_7.resolution;
   int const x_68 = tint_unary_minus(as_type<int>((as_type<uint>(256) - as_type<uint>(14))));
   pos = (float2(x_63.x, x_63.y) / x_67);
@@ -44,7 +44,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
       break;
     }
     int const x_86 = i;
-    (*(tint_symbol_6)).arr[x_86] = 0;
+    (*(tint_symbol_4)).arr[x_86] = 0;
     {
       int const x_88 = i;
       i = as_type<int>((as_type<uint>(x_88) + as_type<uint>(1)));
@@ -71,7 +71,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
     if (x_98) {
       int const x_102 = p.x;
       int const x_105 = p.y;
-      int const x_109 = (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_102) - as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_105) * as_type<uint>(16))))))];
+      int const x_109 = (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_102) - as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_105) * as_type<uint>(16))))))];
       x_110 = (x_109 == 0);
       x_111_phi = x_110;
     }
@@ -86,7 +86,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
     if (x_118) {
       int const x_122 = p.x;
       int const x_124 = p.y;
-      int const x_129 = (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_122) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_124) - as_type<uint>(2)))) * as_type<uint>(16))))))];
+      int const x_129 = (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(x_122) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_124) - as_type<uint>(2)))) * as_type<uint>(16))))))];
       x_130 = (x_129 == 0);
       x_131_phi = x_130;
     }
@@ -101,7 +101,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
     if (x_138) {
       int const x_142 = p.x;
       int const x_145 = p.y;
-      int const x_149 = (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_142) + as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_145) * as_type<uint>(16))))))];
+      int const x_149 = (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_142) + as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_145) * as_type<uint>(16))))))];
       x_150 = (x_149 == 0);
       x_151_phi = x_150;
     }
@@ -117,7 +117,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
     if (x_159) {
       int const x_163 = p.x;
       int const x_165 = p.y;
-      int const x_170 = (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_163) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_165) + as_type<uint>(2)))) * as_type<uint>(16))))))];
+      int const x_170 = (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(x_163) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_165) + as_type<uint>(2)))) * as_type<uint>(16))))))];
       x_171 = (x_170 == 0);
       x_172_phi = x_171;
     }
@@ -154,7 +154,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
         }
         j = 0;
         int const x_189 = as_type<int>((as_type<uint>(x_156) - as_type<uint>(x_186)));
-        *(tint_symbol_7) = float2x4(float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f));
+        *(tint_symbol_5) = float2x4(float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f));
         if (false) {
           {
             int const x_216 = i;
@@ -170,7 +170,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
           }
           int const x_197 = j;
           int const x_199 = i;
-          int const x_204 = (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_197) * as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_199) * as_type<uint>(2)))) * as_type<uint>(16))))))];
+          int const x_204 = (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_197) * as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_199) * as_type<uint>(2)))) * as_type<uint>(16))))))];
           if ((x_204 == 0)) {
             int const x_208 = j;
             p.x = as_type<int>((as_type<uint>(x_208) * as_type<uint>(2)));
@@ -190,7 +190,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
       }
       int const x_219 = p.x;
       int const x_221 = p.y;
-      (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_219) + as_type<uint>(as_type<int>((as_type<uint>(x_221) * as_type<uint>(16))))))] = 1;
+      (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(x_219) + as_type<uint>(as_type<int>((as_type<uint>(x_221) * as_type<uint>(16))))))] = 1;
     } else {
       int const x_225 = v;
       int const x_226 = directions;
@@ -211,7 +211,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
       if (x_238) {
         int const x_242 = p.x;
         int const x_245 = p.y;
-        int const x_249 = (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_242) - as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_245) * as_type<uint>(16))))))];
+        int const x_249 = (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_242) - as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_245) * as_type<uint>(16))))))];
         x_250 = (x_249 == 0);
         x_251_phi = x_250;
       }
@@ -221,13 +221,13 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
         d = as_type<int>((as_type<uint>(x_254) - as_type<uint>(1)));
         int const x_257 = p.x;
         int const x_259 = p.y;
-        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_257) + as_type<uint>(as_type<int>((as_type<uint>(x_259) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(x_257) + as_type<uint>(as_type<int>((as_type<uint>(x_259) * as_type<uint>(16))))))] = 1;
         int const x_264 = p.x;
         int const x_267 = p.y;
-        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_264) - as_type<uint>(1)))) + as_type<uint>(as_type<int>((as_type<uint>(x_267) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_264) - as_type<uint>(1)))) + as_type<uint>(as_type<int>((as_type<uint>(x_267) * as_type<uint>(16))))))] = 1;
         int const x_272 = p.x;
         int const x_275 = p.y;
-        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_272) - as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_275) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_272) - as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_275) * as_type<uint>(16))))))] = 1;
         int const x_280 = p.x;
         p.x = as_type<int>((as_type<uint>(x_280) - as_type<uint>(2)));
       }
@@ -244,7 +244,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
       if (x_290) {
         int const x_294 = p.x;
         int const x_296 = p.y;
-        int const x_301 = (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_294) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_296) - as_type<uint>(2)))) * as_type<uint>(16))))))];
+        int const x_301 = (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(x_294) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_296) - as_type<uint>(2)))) * as_type<uint>(16))))))];
         x_302 = (x_301 == 0);
         x_303_phi = x_302;
       }
@@ -254,13 +254,13 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
         d = as_type<int>((as_type<uint>(x_306) - as_type<uint>(1)));
         int const x_309 = p.x;
         int const x_311 = p.y;
-        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_309) + as_type<uint>(as_type<int>((as_type<uint>(x_311) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(x_309) + as_type<uint>(as_type<int>((as_type<uint>(x_311) * as_type<uint>(16))))))] = 1;
         int const x_316 = p.x;
         int const x_318 = p.y;
-        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_316) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_318) - as_type<uint>(1)))) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(x_316) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_318) - as_type<uint>(1)))) * as_type<uint>(16))))))] = 1;
         int const x_324 = p.x;
         int const x_326 = p.y;
-        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_324) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_326) - as_type<uint>(2)))) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(x_324) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_326) - as_type<uint>(2)))) * as_type<uint>(16))))))] = 1;
         int const x_332 = p.y;
         p.y = as_type<int>((as_type<uint>(x_332) - as_type<uint>(2)));
       }
@@ -277,7 +277,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
       if (x_342) {
         int const x_346 = p.x;
         int const x_349 = p.y;
-        int const x_353 = (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_346) + as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_349) * as_type<uint>(16))))))];
+        int const x_353 = (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_346) + as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_349) * as_type<uint>(16))))))];
         x_354 = (x_353 == 0);
         x_355_phi = x_354;
       }
@@ -287,13 +287,13 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
         d = as_type<int>((as_type<uint>(x_358) - as_type<uint>(1)));
         int const x_361 = p.x;
         int const x_363 = p.y;
-        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_361) + as_type<uint>(as_type<int>((as_type<uint>(x_363) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(x_361) + as_type<uint>(as_type<int>((as_type<uint>(x_363) * as_type<uint>(16))))))] = 1;
         int const x_368 = p.x;
         int const x_371 = p.y;
-        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_368) + as_type<uint>(1)))) + as_type<uint>(as_type<int>((as_type<uint>(x_371) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_368) + as_type<uint>(1)))) + as_type<uint>(as_type<int>((as_type<uint>(x_371) * as_type<uint>(16))))))] = 1;
         int const x_376 = p.x;
         int const x_379 = p.y;
-        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_376) + as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_379) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_376) + as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_379) * as_type<uint>(16))))))] = 1;
         int const x_384 = p.x;
         p.x = as_type<int>((as_type<uint>(x_384) + as_type<uint>(2)));
       }
@@ -310,7 +310,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
       if (x_394) {
         int const x_398 = p.x;
         int const x_400 = p.y;
-        int const x_405 = (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_398) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_400) + as_type<uint>(2)))) * as_type<uint>(16))))))];
+        int const x_405 = (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(x_398) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_400) + as_type<uint>(2)))) * as_type<uint>(16))))))];
         x_406 = (x_405 == 0);
         x_407_phi = x_406;
       }
@@ -320,22 +320,22 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
         d = as_type<int>((as_type<uint>(x_410) - as_type<uint>(1)));
         int const x_413 = p.x;
         int const x_415 = p.y;
-        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_413) + as_type<uint>(as_type<int>((as_type<uint>(x_415) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(x_413) + as_type<uint>(as_type<int>((as_type<uint>(x_415) * as_type<uint>(16))))))] = 1;
         int const x_420 = p.x;
         int const x_422 = p.y;
-        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_420) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_422) + as_type<uint>(1)))) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(x_420) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_422) + as_type<uint>(1)))) * as_type<uint>(16))))))] = 1;
         int const x_428 = p.x;
         int const x_430 = p.y;
-        (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(x_428) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_430) + as_type<uint>(2)))) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(x_428) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_430) + as_type<uint>(2)))) * as_type<uint>(16))))))] = 1;
         int const x_436 = p.y;
         p.y = as_type<int>((as_type<uint>(x_436) + as_type<uint>(2)));
       }
     }
     int const x_440 = ipos.y;
     int const x_443 = ipos.x;
-    int const x_446 = (*(tint_symbol_6)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_440) * as_type<uint>(16)))) + as_type<uint>(x_443)))];
+    int const x_446 = (*(tint_symbol_4)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_440) * as_type<uint>(16)))) + as_type<uint>(x_443)))];
     if ((x_446 == 1)) {
-      *(tint_symbol_8) = float4(1.0f, 1.0f, 1.0f, 1.0f);
+      *(tint_symbol_6) = float4(1.0f, 1.0f, 1.0f, 1.0f);
       return;
     }
     {
@@ -346,19 +346,25 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5, thread tint_
       }
     }
   }
-  *(tint_symbol_8) = float4(0.0f, 0.0f, 0.0f, 1.0f);
+  *(tint_symbol_6) = float4(0.0f, 0.0f, 0.0f, 1.0f);
   return;
 }
 
-fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_7 [[buffer(0)]]) {
-  thread float4 tint_symbol_9 = 0.0f;
-  thread tint_array_wrapper tint_symbol_10 = {};
-  thread float2x4 tint_symbol_11 = float2x4(float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f));
-  thread float4 tint_symbol_12 = 0.0f;
-  tint_symbol_9 = gl_FragCoord_param;
-  main_1(x_7, &(tint_symbol_9), &(tint_symbol_10), &(tint_symbol_11), &(tint_symbol_12));
-  main_out const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_12};
-  tint_symbol_2 const tint_symbol_4 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
-  return tint_symbol_4;
+main_out tint_symbol_inner(constant buf0& x_7, float4 gl_FragCoord_param, thread float4* const tint_symbol_7, thread tint_array_wrapper* const tint_symbol_8, thread float2x4* const tint_symbol_9, thread float4* const tint_symbol_10) {
+  *(tint_symbol_7) = gl_FragCoord_param;
+  main_1(x_7, tint_symbol_7, tint_symbol_8, tint_symbol_9, tint_symbol_10);
+  main_out const tint_symbol_2 = {.x_GLF_color_1=*(tint_symbol_10)};
+  return tint_symbol_2;
+}
+
+fragment tint_symbol_1 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_7 [[buffer(0)]]) {
+  thread float4 tint_symbol_11 = 0.0f;
+  thread tint_array_wrapper tint_symbol_12 = {};
+  thread float2x4 tint_symbol_13 = float2x4(float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f));
+  thread float4 tint_symbol_14 = 0.0f;
+  main_out const inner_result = tint_symbol_inner(x_7, gl_FragCoord_param, &(tint_symbol_11), &(tint_symbol_12), &(tint_symbol_13), &(tint_symbol_14));
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }
 

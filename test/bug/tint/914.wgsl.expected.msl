@@ -50,14 +50,12 @@ void mm_write(constant Uniforms& uniforms, device Matrix& resultMatrix, uint row
   }
 }
 
-kernel void tint_symbol(uint3 local_id [[thread_position_in_threadgroup]], uint3 global_id [[thread_position_in_grid]], uint local_invocation_index [[thread_index_in_threadgroup]], constant Uniforms& uniforms [[buffer(3)]], const device Matrix& firstMatrix [[buffer(0)]], const device Matrix& secondMatrix [[buffer(1)]], device Matrix& resultMatrix [[buffer(2)]]) {
-  threadgroup tint_array_wrapper tint_symbol_2;
-  threadgroup tint_array_wrapper tint_symbol_3;
+void tint_symbol_inner(constant Uniforms& uniforms, const device Matrix& firstMatrix, const device Matrix& secondMatrix, device Matrix& resultMatrix, uint3 local_id, uint3 global_id, uint local_invocation_index, threadgroup tint_array_wrapper* const tint_symbol_1, threadgroup tint_array_wrapper* const tint_symbol_2) {
   for(uint idx = local_invocation_index; (idx < 4096u); idx = (idx + 256u)) {
     uint const i = (idx / 64u);
     uint const i_1 = (idx % 64u);
-    tint_symbol_2.arr[i].arr[i_1] = float();
-    tint_symbol_3.arr[i].arr[i_1] = float();
+    (*(tint_symbol_1)).arr[i].arr[i_1] = float();
+    (*(tint_symbol_2)).arr[i].arr[i_1] = float();
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
   uint const tileRow = (local_id.y * RowPerThread);
@@ -80,23 +78,23 @@ kernel void tint_symbol(uint3 local_id [[thread_position_in_threadgroup]], uint3
       for(uint innerCol = 0u; (innerCol < ColPerThreadA); innerCol = (innerCol + 1u)) {
         uint const inputRow = (tileRow + innerRow);
         uint const inputCol = (tileColA + innerCol);
-        tint_symbol_2.arr[inputRow].arr[inputCol] = mm_readA(uniforms, firstMatrix, (globalRow + innerRow), ((t * TileInner) + inputCol));
+        (*(tint_symbol_1)).arr[inputRow].arr[inputCol] = mm_readA(uniforms, firstMatrix, (globalRow + innerRow), ((t * TileInner) + inputCol));
       }
     }
     for(uint innerRow = 0u; (innerRow < RowPerThreadB); innerRow = (innerRow + 1u)) {
       for(uint innerCol = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
         uint const inputRow = (tileRowB + innerRow);
         uint const inputCol = (tileCol + innerCol);
-        tint_symbol_3.arr[innerCol].arr[inputCol] = mm_readB(uniforms, secondMatrix, ((t * TileInner) + inputRow), (globalCol + innerCol));
+        (*(tint_symbol_2)).arr[innerCol].arr[inputCol] = mm_readB(uniforms, secondMatrix, ((t * TileInner) + inputRow), (globalCol + innerCol));
       }
     }
     threadgroup_barrier(mem_flags::mem_threadgroup);
     for(uint k = 0u; (k < TileInner); k = (k + 1u)) {
       for(uint inner = 0u; (inner < ColPerThread); inner = (inner + 1u)) {
-        BCached.arr[inner] = tint_symbol_3.arr[k].arr[(tileCol + inner)];
+        BCached.arr[inner] = (*(tint_symbol_2)).arr[k].arr[(tileCol + inner)];
       }
       for(uint innerRow = 0u; (innerRow < RowPerThread); innerRow = (innerRow + 1u)) {
-        ACached = tint_symbol_2.arr[(tileRow + innerRow)].arr[k];
+        ACached = (*(tint_symbol_1)).arr[(tileRow + innerRow)].arr[k];
         for(uint innerCol = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
           uint const index = ((innerRow * ColPerThread) + innerCol);
           acc.arr[index] = (acc.arr[index] + (ACached * BCached.arr[innerCol]));
@@ -111,6 +109,12 @@ kernel void tint_symbol(uint3 local_id [[thread_position_in_threadgroup]], uint3
       mm_write(uniforms, resultMatrix, (globalRow + innerRow), (globalCol + innerCol), acc.arr[index]);
     }
   }
+}
+
+kernel void tint_symbol(uint3 local_id [[thread_position_in_threadgroup]], uint3 global_id [[thread_position_in_grid]], uint local_invocation_index [[thread_index_in_threadgroup]], constant Uniforms& uniforms [[buffer(3)]], const device Matrix& firstMatrix [[buffer(0)]], const device Matrix& secondMatrix [[buffer(1)]], device Matrix& resultMatrix [[buffer(2)]]) {
+  threadgroup tint_array_wrapper tint_symbol_3;
+  threadgroup tint_array_wrapper tint_symbol_4;
+  tint_symbol_inner(uniforms, firstMatrix, secondMatrix, resultMatrix, local_id, global_id, local_invocation_index, &(tint_symbol_3), &(tint_symbol_4));
   return;
 }
 

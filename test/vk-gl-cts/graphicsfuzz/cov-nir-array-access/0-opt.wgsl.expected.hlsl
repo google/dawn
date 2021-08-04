@@ -27,8 +27,8 @@ void main_1() {
   const int x_80 = asint(x_6[2].x);
   const int x_82 = asint(x_6[2].x);
   const int x_84 = asint(x_6[2].x);
-  const int tint_symbol_3[17] = {x_52, x_54, x_56, x_58, x_60, x_62, x_64, x_66, x_68, x_70, x_72, x_74, x_76, x_78, x_80, x_82, x_84};
-  A = tint_symbol_3;
+  const int tint_symbol_2[17] = {x_52, x_54, x_56, x_58, x_60, x_62, x_64, x_66, x_68, x_70, x_72, x_74, x_76, x_78, x_80, x_82, x_84};
+  A = tint_symbol_2;
   const int x_87 = asint(x_6[3].x);
   const int x_89 = asint(x_6[4].x);
   const int x_91 = asint(x_6[5].x);
@@ -46,8 +46,8 @@ void main_1() {
   const int x_115 = asint(x_6[17].x);
   const int x_117 = asint(x_6[18].x);
   const int x_119 = asint(x_6[1].x);
-  const int tint_symbol_4[17] = {x_87, x_89, x_91, x_93, x_95, x_97, x_99, x_101, x_103, x_105, x_107, x_109, x_111, x_113, x_115, x_117, x_119};
-  ref = tint_symbol_4;
+  const int tint_symbol_3[17] = {x_87, x_89, x_91, x_93, x_95, x_97, x_99, x_101, x_103, x_105, x_107, x_109, x_111, x_113, x_115, x_117, x_119};
+  ref = tint_symbol_3;
   const int x_122 = asint(x_6[2].x);
   a = x_122;
   const int x_124 = asint(x_6[2].x);
@@ -112,9 +112,15 @@ struct tint_symbol {
   float4 x_GLF_color_1 : SV_Target0;
 };
 
-tint_symbol main() {
+main_out main_inner() {
   main_1();
-  const main_out tint_symbol_1 = {x_GLF_color};
-  const tint_symbol tint_symbol_5 = {tint_symbol_1.x_GLF_color_1};
-  return tint_symbol_5;
+  const main_out tint_symbol_4 = {x_GLF_color};
+  return tint_symbol_4;
+}
+
+tint_symbol main() {
+  const main_out inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }

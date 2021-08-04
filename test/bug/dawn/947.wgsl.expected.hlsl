@@ -14,8 +14,7 @@ struct tint_symbol_2 {
   float4 position : SV_Position;
 };
 
-tint_symbol_2 vs_main(tint_symbol_1 tint_symbol) {
-  const uint VertexIndex = tint_symbol.VertexIndex;
+VertexOutputs vs_main_inner(uint VertexIndex) {
   float2 texcoord[3] = {float2(-0.5f, 0.0f), float2(1.5f, 0.0f), float2(0.5f, 2.0f)};
   VertexOutputs output = (VertexOutputs)0;
   output.position = float4(((texcoord[VertexIndex] * 2.0f) - float2(1.0f, 1.0f)), 0.0f, 1.0f);
@@ -25,8 +24,15 @@ tint_symbol_2 vs_main(tint_symbol_1 tint_symbol) {
   } else {
     output.texcoords = ((((texcoord[VertexIndex] * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f)) * asfloat(uniforms[0].xy)) + asfloat(uniforms[0].zw));
   }
-  const tint_symbol_2 tint_symbol_8 = {output.texcoords, output.position};
-  return tint_symbol_8;
+  return output;
+}
+
+tint_symbol_2 vs_main(tint_symbol_1 tint_symbol) {
+  const VertexOutputs inner_result = vs_main_inner(tint_symbol.VertexIndex);
+  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
+  wrapper_result.texcoords = inner_result.texcoords;
+  wrapper_result.position = inner_result.position;
+  return wrapper_result;
 }
 
 SamplerState mySampler : register(s1, space0);
@@ -39,13 +45,18 @@ struct tint_symbol_5 {
   float4 value : SV_Target0;
 };
 
-tint_symbol_5 fs_main(tint_symbol_4 tint_symbol_3) {
-  const float2 texcoord = tint_symbol_3.texcoord;
+float4 fs_main_inner(float2 texcoord) {
   float2 clampedTexcoord = clamp(texcoord, float2(0.0f, 0.0f), float2(1.0f, 1.0f));
   if (!(all((clampedTexcoord == texcoord)))) {
     discard;
   }
   float4 srcColor = myTexture.Sample(mySampler, texcoord);
-  const tint_symbol_5 tint_symbol_9 = {srcColor};
-  return tint_symbol_9;
+  return srcColor;
+}
+
+tint_symbol_5 fs_main(tint_symbol_4 tint_symbol_3) {
+  const float4 inner_result_1 = fs_main_inner(tint_symbol_3.texcoord);
+  tint_symbol_5 wrapper_result_1 = (tint_symbol_5)0;
+  wrapper_result_1.value = inner_result_1;
+  return wrapper_result_1;
 }

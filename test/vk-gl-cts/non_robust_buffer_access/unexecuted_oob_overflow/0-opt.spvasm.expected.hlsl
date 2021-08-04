@@ -60,10 +60,13 @@ struct tint_symbol_1 {
   uint3 gl_WorkGroupID_param : SV_GroupID;
 };
 
-[numthreads(4, 1, 1)]
-void main(tint_symbol_1 tint_symbol) {
-  const uint3 gl_WorkGroupID_param = tint_symbol.gl_WorkGroupID_param;
+void main_inner(uint3 gl_WorkGroupID_param) {
   gl_WorkGroupID = gl_WorkGroupID_param;
   main_1();
+}
+
+[numthreads(4, 1, 1)]
+void main(tint_symbol_1 tint_symbol) {
+  main_inner(tint_symbol.gl_WorkGroupID_param);
   return;
 }

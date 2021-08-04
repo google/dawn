@@ -17,15 +17,21 @@ struct tint_symbol {
   float4 value [[position]];
 };
 
-void modf_5e8476(thread float* const tint_symbol_2) {
-  float res = tint_modf(1.0f, tint_symbol_2);
+void modf_5e8476(thread float* const tint_symbol_1) {
+  float res = tint_modf(1.0f, tint_symbol_1);
+}
+
+float4 vertex_main_inner(thread float* const tint_symbol_2) {
+  modf_5e8476(tint_symbol_2);
+  return float4();
 }
 
 vertex tint_symbol vertex_main() {
   thread float tint_symbol_3 = 0.0f;
-  modf_5e8476(&(tint_symbol_3));
-  tint_symbol const tint_symbol_1 = {.value=float4()};
-  return tint_symbol_1;
+  float4 const inner_result = vertex_main_inner(&(tint_symbol_3));
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
 
 fragment void fragment_main() {

@@ -25,7 +25,7 @@ struct tint_array_wrapper_2 {
 struct main_out {
   float4 x_GLF_color_1;
 };
-struct tint_symbol_2 {
+struct tint_symbol_1 {
   float4 x_GLF_color_1 [[color(0)]];
 };
 
@@ -37,7 +37,7 @@ void makeTreeNode_struct_BST_i1_i1_i11_i1_(thread BST* const tree, thread int* c
   return;
 }
 
-void insert_i1_i1_(constant buf0& x_27, thread int* const treeIndex, thread int* const data_1, thread tint_array_wrapper_1* const tint_symbol_5) {
+void insert_i1_i1_(constant buf0& x_27, thread int* const treeIndex, thread int* const data_1, thread tint_array_wrapper_1* const tint_symbol_3) {
   int baseIndex = 0;
   BST param = {};
   int param_1 = 0;
@@ -55,44 +55,44 @@ void insert_i1_i1_(constant buf0& x_27, thread int* const treeIndex, thread int*
     }
     int const x_77 = *(data_1);
     int const x_78 = baseIndex;
-    int const x_79 = (*(tint_symbol_5)).arr[x_78].data;
+    int const x_79 = (*(tint_symbol_3)).arr[x_78].data;
     if ((x_77 <= x_79)) {
       int const x_80 = baseIndex;
-      int const x_81 = (*(tint_symbol_5)).arr[x_80].leftIndex;
+      int const x_81 = (*(tint_symbol_3)).arr[x_80].leftIndex;
       if ((x_81 == -1)) {
         int const x_82 = baseIndex;
         int const x_83 = *(treeIndex);
-        (*(tint_symbol_5)).arr[x_82].leftIndex = x_83;
+        (*(tint_symbol_3)).arr[x_82].leftIndex = x_83;
         int const x_84 = *(treeIndex);
-        BST const x_350 = (*(tint_symbol_5)).arr[x_84];
+        BST const x_350 = (*(tint_symbol_3)).arr[x_84];
         param = x_350;
         int const x_85 = *(data_1);
         param_1 = x_85;
         makeTreeNode_struct_BST_i1_i1_i11_i1_(&(param), &(param_1));
         BST const x_352 = param;
-        (*(tint_symbol_5)).arr[x_84] = x_352;
+        (*(tint_symbol_3)).arr[x_84] = x_352;
         return;
       } else {
         int const x_86 = baseIndex;
-        int const x_87 = (*(tint_symbol_5)).arr[x_86].leftIndex;
+        int const x_87 = (*(tint_symbol_3)).arr[x_86].leftIndex;
         baseIndex = x_87;
         continue;
       }
     } else {
       int const x_88 = baseIndex;
-      int const x_89 = (*(tint_symbol_5)).arr[x_88].rightIndex;
+      int const x_89 = (*(tint_symbol_3)).arr[x_88].rightIndex;
       if ((x_89 == -1)) {
         int const x_90 = baseIndex;
         int const x_91 = *(treeIndex);
-        (*(tint_symbol_5)).arr[x_90].rightIndex = x_91;
+        (*(tint_symbol_3)).arr[x_90].rightIndex = x_91;
         int const x_92 = *(treeIndex);
-        BST const x_362 = (*(tint_symbol_5)).arr[x_92];
+        BST const x_362 = (*(tint_symbol_3)).arr[x_92];
         param_2 = x_362;
         int const x_93 = *(data_1);
         param_3 = x_93;
         makeTreeNode_struct_BST_i1_i1_i11_i1_(&(param_2), &(param_3));
         BST const x_364 = param_2;
-        (*(tint_symbol_5)).arr[x_92] = x_364;
+        (*(tint_symbol_3)).arr[x_92] = x_364;
         return;
       } else {
         GLF_live8i = 1;
@@ -105,7 +105,7 @@ void insert_i1_i1_(constant buf0& x_27, thread int* const treeIndex, thread int*
         GLF_live8A.arr[x_369] = (x_373 + x_371);
         while (true) {
           int const x_97 = baseIndex;
-          int const x_98 = (*(tint_symbol_5)).arr[x_97].rightIndex;
+          int const x_98 = (*(tint_symbol_3)).arr[x_97].rightIndex;
           baseIndex = x_98;
           {
             float const x_382 = x_27.injectionSwitch.x;
@@ -123,7 +123,7 @@ void insert_i1_i1_(constant buf0& x_27, thread int* const treeIndex, thread int*
   return;
 }
 
-int search_i1_(thread int* const target, thread tint_array_wrapper_1* const tint_symbol_6) {
+int search_i1_(thread int* const target, thread tint_array_wrapper_1* const tint_symbol_4) {
   int index = 0;
   BST currentNode = {};
   int x_387 = 0;
@@ -135,7 +135,7 @@ int search_i1_(thread int* const target, thread tint_array_wrapper_1* const tint
       break;
     }
     int const x_100 = index;
-    BST const x_395 = (*(tint_symbol_6)).arr[x_100];
+    BST const x_395 = (*(tint_symbol_4)).arr[x_100];
     currentNode = x_395;
     int const x_101 = currentNode.data;
     int const x_102 = *(target);
@@ -158,7 +158,7 @@ int search_i1_(thread int* const target, thread tint_array_wrapper_1* const tint
   return -1;
 }
 
-float makeFrame_f1_(thread float* const v, thread tint_array_wrapper_1* const tint_symbol_7) {
+float makeFrame_f1_(thread float* const v, thread tint_array_wrapper_1* const tint_symbol_5) {
   int param_5 = 0;
   int param_6 = 0;
   int param_7 = 0;
@@ -167,7 +167,7 @@ float makeFrame_f1_(thread float* const v, thread tint_array_wrapper_1* const ti
   float const x_420 = *(v);
   if ((x_420 < 1.5f)) {
     param_5 = 100;
-    int const x_110 = search_i1_(&(param_5), tint_symbol_7);
+    int const x_110 = search_i1_(&(param_5), tint_symbol_5);
     return float(x_110);
   }
   float const x_425 = *(v);
@@ -176,27 +176,27 @@ float makeFrame_f1_(thread float* const v, thread tint_array_wrapper_1* const ti
   }
   float const x_429 = *(v);
   param_6 = 6;
-  int const x_111 = search_i1_(&(param_6), tint_symbol_7);
+  int const x_111 = search_i1_(&(param_6), tint_symbol_5);
   if ((x_429 < float(x_111))) {
     return 1.0f;
   }
   param_7 = 30;
-  int const x_112 = search_i1_(&(param_7), tint_symbol_7);
+  int const x_112 = search_i1_(&(param_7), tint_symbol_5);
   return (10.0f + float(x_112));
 }
 
-float3 hueColor_f1_(thread float* const angle, thread tint_array_wrapper_1* const tint_symbol_8) {
+float3 hueColor_f1_(thread float* const angle, thread tint_array_wrapper_1* const tint_symbol_6) {
   float nodeData = 0.0f;
   int param_4 = 0;
   param_4 = 15;
-  int const x_109 = search_i1_(&(param_4), tint_symbol_8);
+  int const x_109 = search_i1_(&(param_4), tint_symbol_6);
   nodeData = float(x_109);
   float const x_409 = *(angle);
   float const x_410 = nodeData;
   return ((float3(30.0f, 30.0f, 30.0f) + (float3(1.0f, 5.0f, x_410) * x_409)) / float3(50.0f, 50.0f, 50.0f));
 }
 
-void main_1(constant buf0& x_27, thread tint_array_wrapper_1* const tint_symbol_9, thread float4* const tint_symbol_10, thread float4* const tint_symbol_11) {
+void main_1(constant buf0& x_27, thread tint_array_wrapper_1* const tint_symbol_7, thread float4* const tint_symbol_8, thread float4* const tint_symbol_9) {
   int treeIndex_1 = 0;
   BST param_8 = {};
   int param_9 = 0;
@@ -237,18 +237,18 @@ void main_1(constant buf0& x_27, thread tint_array_wrapper_1* const tint_symbol_
   float3 x_235 = 0.0f;
   float param_31 = 0.0f;
   treeIndex_1 = 0;
-  BST const x_237 = (*(tint_symbol_9)).arr[0];
+  BST const x_237 = (*(tint_symbol_7)).arr[0];
   param_8 = x_237;
   param_9 = 9;
   makeTreeNode_struct_BST_i1_i1_i11_i1_(&(param_8), &(param_9));
   BST const x_239 = param_8;
-  (*(tint_symbol_9)).arr[0] = x_239;
+  (*(tint_symbol_7)).arr[0] = x_239;
   int const x_113 = treeIndex_1;
   treeIndex_1 = as_type<int>((as_type<uint>(x_113) + as_type<uint>(1)));
   int const x_115 = treeIndex_1;
   param_10 = x_115;
   param_11 = 5;
-  insert_i1_i1_(x_27, &(param_10), &(param_11), tint_symbol_9);
+  insert_i1_i1_(x_27, &(param_10), &(param_11), tint_symbol_7);
   int const x_116 = treeIndex_1;
   treeIndex_1 = as_type<int>((as_type<uint>(x_116) + as_type<uint>(1)));
   GLF_live1_looplimiter2 = 0;
@@ -272,37 +272,37 @@ void main_1(constant buf0& x_27, thread tint_array_wrapper_1* const tint_symbol_
   int const x_123 = treeIndex_1;
   param_12 = x_123;
   param_13 = 12;
-  insert_i1_i1_(x_27, &(param_12), &(param_13), tint_symbol_9);
+  insert_i1_i1_(x_27, &(param_12), &(param_13), tint_symbol_7);
   int const x_124 = treeIndex_1;
   treeIndex_1 = as_type<int>((as_type<uint>(x_124) + as_type<uint>(1)));
   int const x_126 = treeIndex_1;
   param_14 = x_126;
   param_15 = 15;
-  insert_i1_i1_(x_27, &(param_14), &(param_15), tint_symbol_9);
+  insert_i1_i1_(x_27, &(param_14), &(param_15), tint_symbol_7);
   int const x_127 = treeIndex_1;
   treeIndex_1 = as_type<int>((as_type<uint>(x_127) + as_type<uint>(1)));
   int const x_129 = treeIndex_1;
   param_16 = x_129;
   param_17 = 7;
-  insert_i1_i1_(x_27, &(param_16), &(param_17), tint_symbol_9);
+  insert_i1_i1_(x_27, &(param_16), &(param_17), tint_symbol_7);
   int const x_130 = treeIndex_1;
   treeIndex_1 = as_type<int>((as_type<uint>(x_130) + as_type<uint>(1)));
   int const x_132 = treeIndex_1;
   param_18 = x_132;
   param_19 = 8;
-  insert_i1_i1_(x_27, &(param_18), &(param_19), tint_symbol_9);
+  insert_i1_i1_(x_27, &(param_18), &(param_19), tint_symbol_7);
   int const x_133 = treeIndex_1;
   treeIndex_1 = as_type<int>((as_type<uint>(x_133) + as_type<uint>(1)));
   int const x_135 = treeIndex_1;
   param_20 = x_135;
   param_21 = 2;
-  insert_i1_i1_(x_27, &(param_20), &(param_21), tint_symbol_9);
+  insert_i1_i1_(x_27, &(param_20), &(param_21), tint_symbol_7);
   int const x_136 = treeIndex_1;
   treeIndex_1 = as_type<int>((as_type<uint>(x_136) + as_type<uint>(1)));
   int const x_138 = treeIndex_1;
   param_22 = x_138;
   param_23 = 6;
-  insert_i1_i1_(x_27, &(param_22), &(param_23), tint_symbol_9);
+  insert_i1_i1_(x_27, &(param_22), &(param_23), tint_symbol_7);
   int const x_139 = treeIndex_1;
   treeIndex_1 = as_type<int>((as_type<uint>(x_139) + as_type<uint>(1)));
   GLF_live4_looplimiter3 = 0;
@@ -336,7 +336,7 @@ void main_1(constant buf0& x_27, thread tint_array_wrapper_1* const tint_symbol_
   int const x_152 = treeIndex_1;
   param_24 = x_152;
   param_25 = 17;
-  insert_i1_i1_(x_27, &(param_24), &(param_25), tint_symbol_9);
+  insert_i1_i1_(x_27, &(param_24), &(param_25), tint_symbol_7);
   float const x_278 = x_27.injectionSwitch.x;
   float const x_280 = x_27.injectionSwitch.y;
   if ((x_278 > x_280)) {
@@ -347,16 +347,16 @@ void main_1(constant buf0& x_27, thread tint_array_wrapper_1* const tint_symbol_
   int const x_155 = treeIndex_1;
   param_26 = x_155;
   param_27 = 13;
-  insert_i1_i1_(x_27, &(param_26), &(param_27), tint_symbol_9);
-  float4 const x_285 = *(tint_symbol_10);
+  insert_i1_i1_(x_27, &(param_26), &(param_27), tint_symbol_7);
+  float4 const x_285 = *(tint_symbol_8);
   z = (float2(x_285.y, x_285.x) / float2(256.0f, 256.0f));
   float const x_289 = z.x;
   param_28 = x_289;
-  float const x_290 = makeFrame_f1_(&(param_28), tint_symbol_9);
+  float const x_290 = makeFrame_f1_(&(param_28), tint_symbol_7);
   x_1 = x_290;
   float const x_292 = z.y;
   param_29 = x_292;
-  float const x_293 = makeFrame_f1_(&(param_29), tint_symbol_9);
+  float const x_293 = makeFrame_f1_(&(param_29), tint_symbol_7);
   y_1 = x_293;
   sum = -100;
   target_1 = 0;
@@ -368,7 +368,7 @@ void main_1(constant buf0& x_27, thread tint_array_wrapper_1* const tint_symbol_
     }
     int const x_157 = target_1;
     param_30 = x_157;
-    int const x_158 = search_i1_(&(param_30), tint_symbol_9);
+    int const x_158 = search_i1_(&(param_30), tint_symbol_7);
     result = x_158;
     int const x_159 = result;
     if ((x_159 > 0)) {
@@ -405,22 +405,28 @@ void main_1(constant buf0& x_27, thread tint_array_wrapper_1* const tint_symbol_
   } else {
     float const x_320 = a;
     param_31 = x_320;
-    float3 const x_321 = hueColor_f1_(&(param_31), tint_symbol_9);
+    float3 const x_321 = hueColor_f1_(&(param_31), tint_symbol_7);
     x_235 = x_321;
   }
   float3 const x_322 = x_235;
-  *(tint_symbol_11) = float4(x_322.x, x_322.y, x_322.z, 1.0f);
+  *(tint_symbol_9) = float4(x_322.x, x_322.y, x_322.z, 1.0f);
   return;
 }
 
-fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_27 [[buffer(0)]]) {
-  thread float4 tint_symbol_12 = 0.0f;
-  thread tint_array_wrapper_1 tint_symbol_13 = {};
-  thread float4 tint_symbol_14 = 0.0f;
-  tint_symbol_12 = gl_FragCoord_param;
-  main_1(x_27, &(tint_symbol_13), &(tint_symbol_12), &(tint_symbol_14));
-  main_out const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_14};
-  tint_symbol_2 const tint_symbol_4 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
-  return tint_symbol_4;
+main_out tint_symbol_inner(constant buf0& x_27, float4 gl_FragCoord_param, thread float4* const tint_symbol_10, thread tint_array_wrapper_1* const tint_symbol_11, thread float4* const tint_symbol_12) {
+  *(tint_symbol_10) = gl_FragCoord_param;
+  main_1(x_27, tint_symbol_11, tint_symbol_10, tint_symbol_12);
+  main_out const tint_symbol_2 = {.x_GLF_color_1=*(tint_symbol_12)};
+  return tint_symbol_2;
+}
+
+fragment tint_symbol_1 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_27 [[buffer(0)]]) {
+  thread float4 tint_symbol_13 = 0.0f;
+  thread tint_array_wrapper_1 tint_symbol_14 = {};
+  thread float4 tint_symbol_15 = 0.0f;
+  main_out const inner_result = tint_symbol_inner(x_27, gl_FragCoord_param, &(tint_symbol_13), &(tint_symbol_14), &(tint_symbol_15));
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }
 

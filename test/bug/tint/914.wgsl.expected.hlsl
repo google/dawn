@@ -54,11 +54,7 @@ struct tint_symbol_1 {
   uint3 global_id : SV_DispatchThreadID;
 };
 
-[numthreads(16, 16, 1)]
-void main(tint_symbol_1 tint_symbol) {
-  const uint3 local_id = tint_symbol.local_id;
-  const uint3 global_id = tint_symbol.global_id;
-  const uint local_invocation_index = tint_symbol.local_invocation_index;
+void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
   {
     for(uint idx = local_invocation_index; (idx < 4096u); idx = (idx + 256u)) {
       const uint i = (idx / 64u);
@@ -143,5 +139,10 @@ void main(tint_symbol_1 tint_symbol) {
       }
     }
   }
+}
+
+[numthreads(16, 16, 1)]
+void main(tint_symbol_1 tint_symbol) {
+  main_inner(tint_symbol.local_id, tint_symbol.global_id, tint_symbol.local_invocation_index);
   return;
 }

@@ -9,25 +9,37 @@ struct tint_symbol {
   int loc0 [[user(locn0)]];
   float4 pos [[position]];
 };
-struct tint_symbol_2 {
+struct tint_symbol_1 {
   int loc0 [[user(locn0)]];
   float4 pos [[position]];
 };
 
 VertexOutput foo(float x) {
-  VertexOutput const tint_symbol_4 = {.pos=float4(x, x, x, 1.0f), .loc0=42};
-  return tint_symbol_4;
+  VertexOutput const tint_symbol_2 = {.pos=float4(x, x, x, 1.0f), .loc0=42};
+  return tint_symbol_2;
+}
+
+VertexOutput vert_main1_inner() {
+  return foo(0.5f);
 }
 
 vertex tint_symbol vert_main1() {
-  VertexOutput const tint_symbol_1 = foo(0.5f);
-  tint_symbol const tint_symbol_5 = {.loc0=tint_symbol_1.loc0, .pos=tint_symbol_1.pos};
-  return tint_symbol_5;
+  VertexOutput const inner_result = vert_main1_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.pos = inner_result.pos;
+  wrapper_result.loc0 = inner_result.loc0;
+  return wrapper_result;
 }
 
-vertex tint_symbol_2 vert_main2() {
-  VertexOutput const tint_symbol_3 = foo(0.25f);
-  tint_symbol_2 const tint_symbol_6 = {.loc0=tint_symbol_3.loc0, .pos=tint_symbol_3.pos};
-  return tint_symbol_6;
+VertexOutput vert_main2_inner() {
+  return foo(0.25f);
+}
+
+vertex tint_symbol_1 vert_main2() {
+  VertexOutput const inner_result_1 = vert_main2_inner();
+  tint_symbol_1 wrapper_result_1 = {};
+  wrapper_result_1.pos = inner_result_1.pos;
+  wrapper_result_1.loc0 = inner_result_1.loc0;
+  return wrapper_result_1;
 }
 

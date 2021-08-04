@@ -11,21 +11,33 @@ struct tint_symbol {
   float col2 [[user(locn2)]];
   float4 pos [[position]];
 };
-struct tint_symbol_4 {
+struct tint_symbol_2 {
   float col1 [[user(locn1)]];
   float col2 [[user(locn2)]];
 };
 
-vertex tint_symbol vert_main() {
-  Interface const tint_symbol_1 = {.col1=0.400000006f, .col2=0.600000024f, .pos=float4()};
-  tint_symbol const tint_symbol_5 = {.col1=tint_symbol_1.col1, .col2=tint_symbol_1.col2, .pos=tint_symbol_1.pos};
-  return tint_symbol_5;
+Interface vert_main_inner() {
+  Interface const tint_symbol_3 = {.col1=0.400000006f, .col2=0.600000024f, .pos=float4()};
+  return tint_symbol_3;
 }
 
-fragment void frag_main(float4 tint_symbol_3 [[position]], tint_symbol_4 tint_symbol_2 [[stage_in]]) {
-  Interface const colors = {.col1=tint_symbol_2.col1, .col2=tint_symbol_2.col2, .pos=tint_symbol_3};
+vertex tint_symbol vert_main() {
+  Interface const inner_result = vert_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.col1 = inner_result.col1;
+  wrapper_result.col2 = inner_result.col2;
+  wrapper_result.pos = inner_result.pos;
+  return wrapper_result;
+}
+
+void frag_main_inner(Interface colors) {
   float const r = colors.col1;
   float const g = colors.col2;
+}
+
+fragment void frag_main(float4 pos [[position]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  Interface const tint_symbol_4 = {.col1=tint_symbol_1.col1, .col2=tint_symbol_1.col2, .pos=pos};
+  frag_main_inner(tint_symbol_4);
   return;
 }
 

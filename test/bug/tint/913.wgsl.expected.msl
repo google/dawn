@@ -16,21 +16,21 @@ bool aboutEqual(float value, float expect) {
   return (fabs((value - expect)) < 0.001f);
 }
 
-kernel void tint_symbol(texture2d<float, access::sample> tint_symbol_2 [[texture(0)]], texture2d<float, access::sample> tint_symbol_3 [[texture(1)]], uint3 GlobalInvocationID [[thread_position_in_grid]], constant Uniforms& uniforms [[buffer(3)]], device OutputBuf& output [[buffer(2)]]) {
-  int2 const srcSize = int2(tint_symbol_2.get_width(), tint_symbol_2.get_height());
-  int2 const dstSize = int2(tint_symbol_3.get_width(), tint_symbol_3.get_height());
+void tint_symbol_inner(constant Uniforms& uniforms, device OutputBuf& output, uint3 GlobalInvocationID, texture2d<float, access::sample> tint_symbol_1, texture2d<float, access::sample> tint_symbol_2) {
+  int2 const srcSize = int2(tint_symbol_1.get_width(), tint_symbol_1.get_height());
+  int2 const dstSize = int2(tint_symbol_2.get_width(), tint_symbol_2.get_height());
   uint2 const dstTexCoord = uint2(GlobalInvocationID.xy);
   float4 const nonCoveredColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
   bool success = true;
   if (((((dstTexCoord.x < uniforms.dstCopyOrigin.x) || (dstTexCoord.y < uniforms.dstCopyOrigin.y)) || (dstTexCoord.x >= (uniforms.dstCopyOrigin.x + uniforms.copySize.x))) || (dstTexCoord.y >= (uniforms.dstCopyOrigin.y + uniforms.copySize.y)))) {
-    success = (success && all((tint_symbol_3.read(uint2(int2(dstTexCoord)), 0) == nonCoveredColor)));
+    success = (success && all((tint_symbol_2.read(uint2(int2(dstTexCoord)), 0) == nonCoveredColor)));
   } else {
     uint2 srcTexCoord = ((dstTexCoord - uniforms.dstCopyOrigin) + uniforms.srcCopyOrigin);
     if ((uniforms.dstTextureFlipY == 1u)) {
       srcTexCoord.y = ((uint(srcSize.y) - srcTexCoord.y) - 1u);
     }
-    float4 const srcColor = tint_symbol_2.read(uint2(int2(srcTexCoord)), 0);
-    float4 const dstColor = tint_symbol_3.read(uint2(int2(dstTexCoord)), 0);
+    float4 const srcColor = tint_symbol_1.read(uint2(int2(srcTexCoord)), 0);
+    float4 const dstColor = tint_symbol_2.read(uint2(int2(dstTexCoord)), 0);
     if ((uniforms.channelCount == 2u)) {
       success = ((success && aboutEqual(dstColor.r, srcColor.r)) && aboutEqual(dstColor.g, srcColor.g));
     } else {
@@ -43,6 +43,10 @@ kernel void tint_symbol(texture2d<float, access::sample> tint_symbol_2 [[texture
   } else {
     output.result[outputIndex] = 0u;
   }
+}
+
+kernel void tint_symbol(texture2d<float, access::sample> tint_symbol_3 [[texture(0)]], texture2d<float, access::sample> tint_symbol_4 [[texture(1)]], uint3 GlobalInvocationID [[thread_position_in_grid]], constant Uniforms& uniforms [[buffer(3)]], device OutputBuf& output [[buffer(2)]]) {
+  tint_symbol_inner(uniforms, output, GlobalInvocationID, tint_symbol_3, tint_symbol_4);
   return;
 }
 

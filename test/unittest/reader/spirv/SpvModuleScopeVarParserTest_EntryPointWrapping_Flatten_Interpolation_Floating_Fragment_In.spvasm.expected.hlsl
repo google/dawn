@@ -22,13 +22,7 @@ struct tint_symbol_1 {
   noperspective sample float x_1_param_5 : TEXCOORD6;
 };
 
-void main(tint_symbol_1 tint_symbol) {
-  const float x_1_param = tint_symbol.x_1_param;
-  const float x_1_param_1 = tint_symbol.x_1_param_1;
-  const float x_1_param_2 = tint_symbol.x_1_param_2;
-  const float x_1_param_3 = tint_symbol.x_1_param_3;
-  const float x_1_param_4 = tint_symbol.x_1_param_4;
-  const float x_1_param_5 = tint_symbol.x_1_param_5;
+void main_inner(float x_1_param, float x_1_param_1, float x_1_param_2, float x_1_param_3, float x_1_param_4, float x_1_param_5) {
   x_1.field0 = x_1_param;
   x_1.field1 = x_1_param_1;
   x_1.field2 = x_1_param_2;
@@ -36,5 +30,9 @@ void main(tint_symbol_1 tint_symbol) {
   x_1.field4 = x_1_param_4;
   x_1.field5 = x_1_param_5;
   main_1();
+}
+
+void main(tint_symbol_1 tint_symbol) {
+  main_inner(tint_symbol.x_1_param, tint_symbol.x_1_param_1, tint_symbol.x_1_param_2, tint_symbol.x_1_param_3, tint_symbol.x_1_param_4, tint_symbol.x_1_param_5);
   return;
 }

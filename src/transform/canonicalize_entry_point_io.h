@@ -21,10 +21,12 @@ namespace tint {
 namespace transform {
 
 /// CanonicalizeEntryPointIO is a transform used to rewrite shader entry point
-/// interfaces into a form that the generators can handle. After the transform,
-/// an entry point's parameters will be aggregated into a single struct, and its
-/// return type will either be a struct or void. All structs in the module that
-/// have entry point IO decorations will have exactly one pipeline stage usage.
+/// interfaces into a form that the generators can handle. Each entry point
+/// function is stripped of all shader IO attributes and wrapped in a function
+/// that provides the shader interface.
+/// The transform config determines how shader IO parameters will be exposed.
+/// Entry point return values are always produced as a structure, and optionally
+/// include additional builtins as per the transform config.
 ///
 /// Before:
 /// ```
@@ -36,12 +38,15 @@ namespace transform {
 /// [[stage(fragment)]]
 /// fn frag_main([[builtin(position)]] coord : vec4<f32>,
 ///              locations : Locations) -> [[location(0)]] f32 {
+///   if (coord.w > 1.0) {
+///     return 0.0;
+///   }
 ///   var col : f32 = (coord.x * locations.loc1);
 ///   return col;
 /// }
 /// ```
 ///
-/// After:
+/// After (using structures for all parameters):
 /// ```
 /// struct Locations{
 ///   loc1 : f32;
@@ -58,14 +63,21 @@ namespace transform {
 ///   [[location(0)]] loc0 : f32;
 /// };
 ///
+/// fn frag_main_inner(coord : vec4<f32>,
+///                    locations : Locations) -> f32 {
+///   if (coord.w > 1.0) {
+///     return 0.0;
+///   }
+///   var col : f32 = (coord.x * locations.loc1);
+///   return col;
+/// }
+///
 /// [[stage(fragment)]]
 /// fn frag_main(in : frag_main_in) -> frag_main_out {
-///   const coord = in.coord;
-///   const locations = Locations(in.loc1, in.loc2);
-///   var col : f32 = (coord.x * locations.loc1);
-///   var retval : frag_main_out;
-///   retval.loc0 = col;
-///   return retval;
+///   let inner_retval = frag_main_inner(in.coord, Locations(in.loc1, in.loc2));
+///   var wrapper_result : frag_main_out;
+///   wrapper_result.loc0 = inner_retval;
+///   return wrapper_result;
 /// }
 /// ```
 class CanonicalizeEntryPointIO
@@ -111,6 +123,8 @@ class CanonicalizeEntryPointIO
   /// @param inputs optional extra transform-specific input data
   /// @param outputs optional extra transform-specific output data
   void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) override;
+
+  struct State;
 };
 
 }  // namespace transform

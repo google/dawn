@@ -130,10 +130,15 @@ struct tint_symbol_2 {
   float value : SV_Target1;
 };
 
+float frag_main_inner(float foo) {
+  return foo;
+}
+
 tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
-  const float foo = tint_symbol.foo;
-  const tint_symbol_2 tint_symbol_3 = {foo};
-  return tint_symbol_3;
+  const float inner_result = frag_main_inner(tint_symbol.foo);
+  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
 )");
 }
@@ -160,10 +165,15 @@ struct tint_symbol_2 {
   float value : SV_Depth;
 };
 
+float frag_main_inner(float4 coord) {
+  return coord.x;
+}
+
 tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
-  const float4 coord = tint_symbol.coord;
-  const tint_symbol_2 tint_symbol_3 = {coord.x};
-  return tint_symbol_3;
+  const float inner_result = frag_main_inner(tint_symbol.coord);
+  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
 )");
 }
@@ -218,23 +228,35 @@ struct tint_symbol {
   float4 pos : SV_Position;
 };
 
-tint_symbol vert_main() {
-  const Interface tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f), 0.5f, 0.25f};
-  const tint_symbol tint_symbol_4 = {tint_symbol_1.col1, tint_symbol_1.col2, tint_symbol_1.pos};
-  return tint_symbol_4;
+Interface vert_main_inner() {
+  const Interface tint_symbol_3 = {float4(0.0f, 0.0f, 0.0f, 0.0f), 0.5f, 0.25f};
+  return tint_symbol_3;
 }
 
-struct tint_symbol_3 {
+tint_symbol vert_main() {
+  const Interface inner_result = vert_main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.pos = inner_result.pos;
+  wrapper_result.col1 = inner_result.col1;
+  wrapper_result.col2 = inner_result.col2;
+  return wrapper_result;
+}
+
+struct tint_symbol_2 {
   float col1 : TEXCOORD1;
   float col2 : TEXCOORD2;
   float4 pos : SV_Position;
 };
 
-void frag_main(tint_symbol_3 tint_symbol_2) {
-  const Interface inputs = {tint_symbol_2.pos, tint_symbol_2.col1, tint_symbol_2.col2};
+void frag_main_inner(Interface inputs) {
   const float r = inputs.col1;
   const float g = inputs.col2;
   const float4 p = inputs.pos;
+}
+
+void frag_main(tint_symbol_2 tint_symbol_1) {
+  const Interface tint_symbol_4 = {tint_symbol_1.pos, tint_symbol_1.col1, tint_symbol_1.col2};
+  frag_main_inner(tint_symbol_4);
   return;
 }
 )");
@@ -278,28 +300,38 @@ TEST_F(HlslGeneratorImplTest_Function,
 };
 
 VertexOutput foo(float x) {
-  const VertexOutput tint_symbol_4 = {float4(x, x, x, 1.0f)};
-  return tint_symbol_4;
+  const VertexOutput tint_symbol_2 = {float4(x, x, x, 1.0f)};
+  return tint_symbol_2;
 }
 
 struct tint_symbol {
   float4 pos : SV_Position;
 };
 
-tint_symbol vert_main1() {
-  const VertexOutput tint_symbol_1 = foo(0.5f);
-  const tint_symbol tint_symbol_5 = {tint_symbol_1.pos};
-  return tint_symbol_5;
+VertexOutput vert_main1_inner() {
+  return foo(0.5f);
 }
 
-struct tint_symbol_2 {
+tint_symbol vert_main1() {
+  const VertexOutput inner_result = vert_main1_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.pos = inner_result.pos;
+  return wrapper_result;
+}
+
+struct tint_symbol_1 {
   float4 pos : SV_Position;
 };
 
-tint_symbol_2 vert_main2() {
-  const VertexOutput tint_symbol_3 = foo(0.25f);
-  const tint_symbol_2 tint_symbol_6 = {tint_symbol_3.pos};
-  return tint_symbol_6;
+VertexOutput vert_main2_inner() {
+  return foo(0.25f);
+}
+
+tint_symbol_1 vert_main2() {
+  const VertexOutput inner_result_1 = vert_main2_inner();
+  tint_symbol_1 wrapper_result_1 = (tint_symbol_1)0;
+  wrapper_result_1.pos = inner_result_1.pos;
+  return wrapper_result_1;
 }
 )");
 }

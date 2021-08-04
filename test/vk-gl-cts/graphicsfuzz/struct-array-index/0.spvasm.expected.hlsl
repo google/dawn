@@ -12,11 +12,11 @@ static float4 x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 void main_1() {
   int index = 0;
+  const struct_base tint_symbol_2 = {1, 1, 1};
   const struct_base tint_symbol_3 = {1, 1, 1};
   const struct_base tint_symbol_4 = {1, 1, 1};
-  const struct_base tint_symbol_5 = {1, 1, 1};
-  const struct_base tint_symbol_6[3] = {tint_symbol_3, tint_symbol_4, tint_symbol_5};
-  struct_array = tint_symbol_6;
+  const struct_base tint_symbol_5[3] = {tint_symbol_2, tint_symbol_3, tint_symbol_4};
+  struct_array = tint_symbol_5;
   index = 1;
   struct_array[1].rightIndex = 1;
   const int x_39 = struct_array[1].leftIndex;
@@ -45,9 +45,15 @@ struct tint_symbol {
   float4 x_GLF_color_1 : SV_Target0;
 };
 
-tint_symbol main() {
+main_out main_inner() {
   main_1();
-  const main_out tint_symbol_1 = {x_GLF_color};
-  const tint_symbol tint_symbol_7 = {tint_symbol_1.x_GLF_color_1};
-  return tint_symbol_7;
+  const main_out tint_symbol_6 = {x_GLF_color};
+  return tint_symbol_6;
+}
+
+tint_symbol main() {
+  const main_out inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }

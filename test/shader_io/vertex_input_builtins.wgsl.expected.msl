@@ -1,13 +1,19 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol_2 {
+struct tint_symbol_1 {
   float4 value [[position]];
 };
 
-vertex tint_symbol_2 tint_symbol(uint vertex_index [[vertex_id]], uint instance_index [[instance_id]]) {
+float4 tint_symbol_inner(uint vertex_index, uint instance_index) {
   uint const foo = (vertex_index + instance_index);
-  tint_symbol_2 const tint_symbol_3 = {.value=float4()};
-  return tint_symbol_3;
+  return float4();
+}
+
+vertex tint_symbol_1 tint_symbol(uint vertex_index [[vertex_id]], uint instance_index [[instance_id]]) {
+  float4 const inner_result = tint_symbol_inner(vertex_index, instance_index);
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
 

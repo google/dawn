@@ -111,10 +111,15 @@ struct tint_symbol_2 {
   float value [[color(1)]];
 };
 
+float frag_main_inner(float foo) {
+  return foo;
+}
+
 fragment tint_symbol_2 frag_main(tint_symbol_1 tint_symbol [[stage_in]]) {
-  float const foo = tint_symbol.foo;
-  tint_symbol_2 const tint_symbol_3 = {.value=foo};
-  return tint_symbol_3;
+  float const inner_result = frag_main_inner(tint_symbol.foo);
+  tint_symbol_2 wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
 
 )");
@@ -137,13 +142,19 @@ TEST_F(MslGeneratorImplTest, Emit_Decoration_EntryPoint_WithInOut_Builtins) {
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol_1 {
+struct tint_symbol {
   float value [[depth(any)]];
 };
 
-fragment tint_symbol_1 frag_main(float4 coord [[position]]) {
-  tint_symbol_1 const tint_symbol_2 = {.value=coord.x};
-  return tint_symbol_2;
+float frag_main_inner(float4 coord) {
+  return coord.x;
+}
+
+fragment tint_symbol frag_main(float4 coord [[position]]) {
+  float const inner_result = frag_main_inner(coord);
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
 
 )");
@@ -201,21 +212,33 @@ struct tint_symbol {
   float col2 [[user(locn2)]];
   float4 pos [[position]];
 };
-struct tint_symbol_4 {
+struct tint_symbol_2 {
   float col1 [[user(locn1)]];
   float col2 [[user(locn2)]];
 };
 
-vertex tint_symbol vert_main() {
-  Interface const tint_symbol_1 = {.col1=0.5f, .col2=0.25f, .pos=float4()};
-  tint_symbol const tint_symbol_5 = {.col1=tint_symbol_1.col1, .col2=tint_symbol_1.col2, .pos=tint_symbol_1.pos};
-  return tint_symbol_5;
+Interface vert_main_inner() {
+  Interface const tint_symbol_3 = {.col1=0.5f, .col2=0.25f, .pos=float4()};
+  return tint_symbol_3;
 }
 
-fragment void frag_main(float4 tint_symbol_3 [[position]], tint_symbol_4 tint_symbol_2 [[stage_in]]) {
-  Interface const colors = {.col1=tint_symbol_2.col1, .col2=tint_symbol_2.col2, .pos=tint_symbol_3};
+vertex tint_symbol vert_main() {
+  Interface const inner_result = vert_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.col1 = inner_result.col1;
+  wrapper_result.col2 = inner_result.col2;
+  wrapper_result.pos = inner_result.pos;
+  return wrapper_result;
+}
+
+void frag_main_inner(Interface colors) {
   float const r = colors.col1;
   float const g = colors.col2;
+}
+
+fragment void frag_main(float4 pos [[position]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  Interface const tint_symbol_4 = {.col1=tint_symbol_1.col1, .col2=tint_symbol_1.col2, .pos=pos};
+  frag_main_inner(tint_symbol_4);
   return;
 }
 
@@ -265,25 +288,35 @@ struct VertexOutput {
 struct tint_symbol {
   float4 pos [[position]];
 };
-struct tint_symbol_2 {
+struct tint_symbol_1 {
   float4 pos [[position]];
 };
 
 VertexOutput foo(float x) {
-  VertexOutput const tint_symbol_4 = {.pos=float4(x, x, x, 1.0f)};
-  return tint_symbol_4;
+  VertexOutput const tint_symbol_2 = {.pos=float4(x, x, x, 1.0f)};
+  return tint_symbol_2;
+}
+
+VertexOutput vert_main1_inner() {
+  return foo(0.5f);
 }
 
 vertex tint_symbol vert_main1() {
-  VertexOutput const tint_symbol_1 = foo(0.5f);
-  tint_symbol const tint_symbol_5 = {.pos=tint_symbol_1.pos};
-  return tint_symbol_5;
+  VertexOutput const inner_result = vert_main1_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.pos = inner_result.pos;
+  return wrapper_result;
 }
 
-vertex tint_symbol_2 vert_main2() {
-  VertexOutput const tint_symbol_3 = foo(0.25f);
-  tint_symbol_2 const tint_symbol_6 = {.pos=tint_symbol_3.pos};
-  return tint_symbol_6;
+VertexOutput vert_main2_inner() {
+  return foo(0.25f);
+}
+
+vertex tint_symbol_1 vert_main2() {
+  VertexOutput const inner_result_1 = vert_main2_inner();
+  tint_symbol_1 wrapper_result_1 = {};
+  wrapper_result_1.pos = inner_result_1.pos;
+  return wrapper_result_1;
 }
 
 )");

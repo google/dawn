@@ -21,12 +21,12 @@ struct tint_symbol_1 {
   float4 x_GLF_color_1 [[color(0)]];
 };
 
-void main_1(constant buf0& x_7, thread float4* const tint_symbol_5) {
+void main_1(constant buf0& x_7, thread float4* const tint_symbol_4) {
   tint_array_wrapper_1 arr = {};
   int a = 0;
   int i = 0;
-  tint_array_wrapper_1 const tint_symbol_3 = {.arr={1, 2, 3, 4, 5, 6, 7, 8, 9, 10}};
-  arr = tint_symbol_3;
+  tint_array_wrapper_1 const tint_symbol_2 = {.arr={1, 2, 3, 4, 5, 6, 7, 8, 9, 10}};
+  arr = tint_symbol_2;
   a = 0;
   int const x_42 = x_7.x_GLF_uniform_int_values.arr[1].el;
   int const x_44 = arr.arr[x_42];
@@ -63,20 +63,26 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_5) {
     int const x_91 = x_7.x_GLF_uniform_int_values.arr[2].el;
     int const x_94 = x_7.x_GLF_uniform_int_values.arr[2].el;
     int const x_97 = x_7.x_GLF_uniform_int_values.arr[1].el;
-    *(tint_symbol_5) = float4(float(x_88), float(x_91), float(x_94), float(x_97));
+    *(tint_symbol_4) = float4(float(x_88), float(x_91), float(x_94), float(x_97));
   } else {
     int const x_101 = x_7.x_GLF_uniform_int_values.arr[2].el;
     float const x_102 = float(x_101);
-    *(tint_symbol_5) = float4(x_102, x_102, x_102, x_102);
+    *(tint_symbol_4) = float4(x_102, x_102, x_102, x_102);
   }
   return;
 }
 
+main_out tint_symbol_inner(constant buf0& x_7, thread float4* const tint_symbol_5) {
+  main_1(x_7, tint_symbol_5);
+  main_out const tint_symbol_3 = {.x_GLF_color_1=*(tint_symbol_5)};
+  return tint_symbol_3;
+}
+
 fragment tint_symbol_1 tint_symbol(constant buf0& x_7 [[buffer(0)]]) {
   thread float4 tint_symbol_6 = 0.0f;
-  main_1(x_7, &(tint_symbol_6));
-  main_out const tint_symbol_2 = {.x_GLF_color_1=tint_symbol_6};
-  tint_symbol_1 const tint_symbol_4 = {.x_GLF_color_1=tint_symbol_2.x_GLF_color_1};
-  return tint_symbol_4;
+  main_out const inner_result = tint_symbol_inner(x_7, &(tint_symbol_6));
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }
 

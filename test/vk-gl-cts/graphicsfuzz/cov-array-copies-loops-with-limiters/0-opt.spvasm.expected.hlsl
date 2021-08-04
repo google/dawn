@@ -30,8 +30,8 @@ void main_1() {
   const uint scalar_offset = ((16u * uint(0))) / 4;
   const int x_75 = asint(x_6[scalar_offset / 4][scalar_offset % 4]);
   const int x_77 = asint(x_6[10].x);
-  const int tint_symbol_3[10] = {x_59, x_61, x_63, x_65, x_67, x_69, x_71, x_73, x_75, x_77};
-  arr0 = tint_symbol_3;
+  const int tint_symbol_2[10] = {x_59, x_61, x_63, x_65, x_67, x_69, x_71, x_73, x_75, x_77};
+  arr0 = tint_symbol_2;
   const int x_80 = asint(x_6[1].x);
   const int x_82 = asint(x_6[12].x);
   const int x_84 = asint(x_6[15].x);
@@ -42,8 +42,8 @@ void main_1() {
   const int x_94 = asint(x_6[11].x);
   const int x_96 = asint(x_6[18].x);
   const int x_98 = asint(x_6[19].x);
-  const int tint_symbol_4[10] = {x_80, x_82, x_84, x_86, x_88, x_90, x_92, x_94, x_96, x_98};
-  arr1 = tint_symbol_4;
+  const int tint_symbol_3[10] = {x_80, x_82, x_84, x_86, x_88, x_90, x_92, x_94, x_96, x_98};
+  arr1 = tint_symbol_3;
   const int x_101 = asint(x_6[8].x);
   a = x_101;
   while (true) {
@@ -137,8 +137,8 @@ void main_1() {
   const uint scalar_offset_2 = ((16u * uint(0))) / 4;
   const int x_212 = asint(x_6[scalar_offset_2 / 4][scalar_offset_2 % 4]);
   const int x_214 = asint(x_6[10].x);
-  const int tint_symbol_5[10] = {x_196, x_198, x_200, x_202, x_204, x_206, x_208, x_210, x_212, x_214};
-  ref0 = tint_symbol_5;
+  const int tint_symbol_4[10] = {x_196, x_198, x_200, x_202, x_204, x_206, x_208, x_210, x_212, x_214};
+  ref0 = tint_symbol_4;
   const int x_217 = asint(x_6[11].x);
   const int x_219 = asint(x_6[12].x);
   const int x_221 = asint(x_6[11].x);
@@ -149,8 +149,8 @@ void main_1() {
   const int x_231 = asint(x_6[11].x);
   const int x_233 = asint(x_6[18].x);
   const int x_235 = asint(x_6[19].x);
-  const int tint_symbol_6[10] = {x_217, x_219, x_221, x_223, x_225, x_227, x_229, x_231, x_233, x_235};
-  ref1 = tint_symbol_6;
+  const int tint_symbol_5[10] = {x_217, x_219, x_221, x_223, x_225, x_227, x_229, x_231, x_233, x_235};
+  ref1 = tint_symbol_5;
   const int x_238 = asint(x_6[2].x);
   const int x_241 = asint(x_6[3].x);
   const int x_244 = asint(x_6[3].x);
@@ -196,9 +196,15 @@ struct tint_symbol {
   float4 x_GLF_color_1 : SV_Target0;
 };
 
-tint_symbol main() {
+main_out main_inner() {
   main_1();
-  const main_out tint_symbol_1 = {x_GLF_color};
-  const tint_symbol tint_symbol_7 = {tint_symbol_1.x_GLF_color_1};
-  return tint_symbol_7;
+  const main_out tint_symbol_6 = {x_GLF_color};
+  return tint_symbol_6;
+}
+
+tint_symbol main() {
+  const main_out inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }

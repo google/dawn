@@ -8,9 +8,15 @@ struct tint_symbol_1 {
   float4 position [[position]];
 };
 
-vertex tint_symbol_1 tint_symbol() {
+VertexOutputs tint_symbol_inner() {
   VertexOutputs const tint_symbol_2 = {.position=float4(1.0f, 2.0f, 3.0f, 4.0f)};
-  tint_symbol_1 const tint_symbol_3 = {.position=tint_symbol_2.position};
-  return tint_symbol_3;
+  return tint_symbol_2;
+}
+
+vertex tint_symbol_1 tint_symbol() {
+  VertexOutputs const inner_result = tint_symbol_inner();
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.position = inner_result.position;
+  return wrapper_result;
 }
 

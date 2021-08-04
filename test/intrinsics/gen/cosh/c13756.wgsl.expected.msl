@@ -9,10 +9,16 @@ void cosh_c13756() {
   float2 res = cosh(float2());
 }
 
-vertex tint_symbol vertex_main() {
+float4 vertex_main_inner() {
   cosh_c13756();
-  tint_symbol const tint_symbol_1 = {.value=float4()};
-  return tint_symbol_1;
+  return float4();
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
 
 fragment void fragment_main() {

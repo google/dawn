@@ -30,8 +30,8 @@ void main_1() {
     int x_64_phi = 0;
     const int x_63 = x_63_phi;
     const int x_68[10] = data;
-    const int tint_symbol_5[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    data = tint_symbol_5;
+    const int tint_symbol_4[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    data = tint_symbol_4;
     data = x_68;
     const int x_69 = (x_63 + 1);
     x_64_phi = x_69;
@@ -338,11 +338,16 @@ struct tint_symbol_2 {
   float4 x_GLF_color_1 : SV_Target0;
 };
 
-tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  const float4 gl_FragCoord_param = tint_symbol.gl_FragCoord_param;
+main_out main_inner(float4 gl_FragCoord_param) {
   gl_FragCoord = gl_FragCoord_param;
   main_1();
-  const main_out tint_symbol_3 = {x_GLF_color};
-  const tint_symbol_2 tint_symbol_6 = {tint_symbol_3.x_GLF_color_1};
-  return tint_symbol_6;
+  const main_out tint_symbol_5 = {x_GLF_color};
+  return tint_symbol_5;
+}
+
+tint_symbol_2 main(tint_symbol_1 tint_symbol) {
+  const main_out inner_result = main_inner(tint_symbol.gl_FragCoord_param);
+  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }

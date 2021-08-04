@@ -10,11 +10,11 @@ struct tint_array_wrapper {
 struct main_out {
   float4 x_GLF_color_1;
 };
-struct tint_symbol_2 {
+struct tint_symbol_1 {
   float4 x_GLF_color_1 [[color(0)]];
 };
 
-void main_1(constant buf0& x_7, thread float4* const tint_symbol_8, thread tint_array_wrapper* const tint_symbol_9, thread float4* const tint_symbol_10) {
+void main_1(constant buf0& x_7, thread float4* const tint_symbol_6, thread tint_array_wrapper* const tint_symbol_7, thread float4* const tint_symbol_8) {
   float2 pos = 0.0f;
   int2 ipos = 0;
   int i = 0;
@@ -24,7 +24,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_8, thread tint_
   int directions = 0;
   int j = 0;
   int d = 0;
-  float4 const x_59 = *(tint_symbol_8);
+  float4 const x_59 = *(tint_symbol_6);
   float2 const x_62 = x_7.resolution;
   pos = (float2(x_59.x, x_59.y) / x_62);
   float const x_65 = pos.x;
@@ -38,7 +38,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_8, thread tint_
       break;
     }
     int const x_80 = i;
-    (*(tint_symbol_9)).arr[x_80] = 0;
+    (*(tint_symbol_7)).arr[x_80] = 0;
     {
       int const x_82 = i;
       i = as_type<int>((as_type<uint>(x_82) + as_type<uint>(1)));
@@ -65,7 +65,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_8, thread tint_
     if (x_92) {
       int const x_96 = p.x;
       int const x_99 = p.y;
-      int const x_103 = (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_96) - as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_99) * as_type<uint>(16))))))];
+      int const x_103 = (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_96) - as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_99) * as_type<uint>(16))))))];
       x_104 = (x_103 == 0);
       x_105_phi = x_104;
     }
@@ -80,7 +80,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_8, thread tint_
     if (x_112) {
       int const x_116 = p.x;
       int const x_118 = p.y;
-      int const x_123 = (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(x_116) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_118) - as_type<uint>(2)))) * as_type<uint>(16))))))];
+      int const x_123 = (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(x_116) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_118) - as_type<uint>(2)))) * as_type<uint>(16))))))];
       x_124 = (x_123 == 0);
       x_125_phi = x_124;
     }
@@ -95,7 +95,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_8, thread tint_
     if (x_132) {
       int const x_136 = p.x;
       int const x_139 = p.y;
-      int const x_143 = (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_136) + as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_139) * as_type<uint>(16))))))];
+      int const x_143 = (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_136) + as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_139) * as_type<uint>(16))))))];
       x_144 = (x_143 == 0);
       x_145_phi = x_144;
     }
@@ -110,7 +110,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_8, thread tint_
     if (x_152) {
       int const x_156 = p.x;
       int const x_158 = p.y;
-      int const x_163 = (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(x_156) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_158) + as_type<uint>(2)))) * as_type<uint>(16))))))];
+      int const x_163 = (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(x_156) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_158) + as_type<uint>(2)))) * as_type<uint>(16))))))];
       x_164 = (x_163 == 0);
       x_165_phi = x_164;
     }
@@ -164,7 +164,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_8, thread tint_
           }
           int const x_189 = j;
           int const x_191 = i;
-          int const x_196 = (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_189) * as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_191) * as_type<uint>(2)))) * as_type<uint>(16))))))];
+          int const x_196 = (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_189) * as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_191) * as_type<uint>(2)))) * as_type<uint>(16))))))];
           if ((x_196 == 0)) {
             int const x_200 = j;
             p.x = as_type<int>((as_type<uint>(x_200) * as_type<uint>(2)));
@@ -184,7 +184,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_8, thread tint_
       }
       int const x_211 = p.x;
       int const x_213 = p.y;
-      (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(x_211) + as_type<uint>(as_type<int>((as_type<uint>(x_213) * as_type<uint>(16))))))] = 1;
+      (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(x_211) + as_type<uint>(as_type<int>((as_type<uint>(x_213) * as_type<uint>(16))))))] = 1;
     } else {
       int const x_217 = v;
       int const x_218 = directions;
@@ -205,7 +205,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_8, thread tint_
       if (x_230) {
         int const x_234 = p.x;
         int const x_237 = p.y;
-        int const x_241 = (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_234) - as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_237) * as_type<uint>(16))))))];
+        int const x_241 = (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_234) - as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_237) * as_type<uint>(16))))))];
         x_242 = (x_241 == 0);
         x_243_phi = x_242;
       }
@@ -215,13 +215,13 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_8, thread tint_
         d = as_type<int>((as_type<uint>(x_246) - as_type<uint>(1)));
         int const x_249 = p.x;
         int const x_251 = p.y;
-        (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(x_249) + as_type<uint>(as_type<int>((as_type<uint>(x_251) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(x_249) + as_type<uint>(as_type<int>((as_type<uint>(x_251) * as_type<uint>(16))))))] = 1;
         int const x_256 = p.x;
         int const x_259 = p.y;
-        (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_256) - as_type<uint>(1)))) + as_type<uint>(as_type<int>((as_type<uint>(x_259) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_256) - as_type<uint>(1)))) + as_type<uint>(as_type<int>((as_type<uint>(x_259) * as_type<uint>(16))))))] = 1;
         int const x_264 = p.x;
         int const x_267 = p.y;
-        (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_264) - as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_267) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_264) - as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_267) * as_type<uint>(16))))))] = 1;
         int const x_272 = p.x;
         p.x = as_type<int>((as_type<uint>(x_272) - as_type<uint>(2)));
       }
@@ -252,23 +252,23 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_8, thread tint_
       int const x_297 = x_297_phi;
       int const x_299 = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_297) - as_type<uint>(2)))) * as_type<uint>(16)));
       if (x_282) {
-        x_303 = *(tint_symbol_9);
+        x_303 = *(tint_symbol_7);
         x_305_phi = x_303;
       } else {
-        tint_array_wrapper const tint_symbol_4 = {.arr={0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
-        x_304 = tint_symbol_4;
+        tint_array_wrapper const tint_symbol_2 = {.arr={0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+        x_304 = tint_symbol_2;
         x_305_phi = x_304;
       }
       tint_array_wrapper const x_305 = x_305_phi;
       if (x_282) {
-        tint_array_wrapper const tint_symbol_5 = {.arr={0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
-        *(tint_symbol_9) = tint_symbol_5;
+        tint_array_wrapper const tint_symbol_3 = {.arr={0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+        *(tint_symbol_7) = tint_symbol_3;
       }
       if (x_282) {
-        *(tint_symbol_9) = x_305;
+        *(tint_symbol_7) = x_305;
       }
       if (x_282) {
-        x_315 = (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(x_290) + as_type<uint>(x_299)))];
+        x_315 = (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(x_290) + as_type<uint>(x_299)))];
         x_317_phi = x_315;
       } else {
         x_316 = 0;
@@ -281,17 +281,17 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_8, thread tint_
         d = as_type<int>((as_type<uint>(x_323) - as_type<uint>(1)));
         int const x_326 = p.x;
         int const x_328 = p.y;
-        (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(x_326) + as_type<uint>(as_type<int>((as_type<uint>(x_328) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(x_326) + as_type<uint>(as_type<int>((as_type<uint>(x_328) * as_type<uint>(16))))))] = 1;
         int const x_333 = p.x;
         int const x_335 = p.y;
-        (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(x_333) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_335) - as_type<uint>(1)))) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(x_333) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_335) - as_type<uint>(1)))) * as_type<uint>(16))))))] = 1;
         int const x_341 = p.x;
         int const x_343 = p.y;
-        tint_array_wrapper const x_345 = *(tint_symbol_9);
-        tint_array_wrapper const tint_symbol_6 = {.arr={0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
-        *(tint_symbol_9) = tint_symbol_6;
-        *(tint_symbol_9) = x_345;
-        (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(x_341) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_343) - as_type<uint>(2)))) * as_type<uint>(16))))))] = 1;
+        tint_array_wrapper const x_345 = *(tint_symbol_7);
+        tint_array_wrapper const tint_symbol_4 = {.arr={0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+        *(tint_symbol_7) = tint_symbol_4;
+        *(tint_symbol_7) = x_345;
+        (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(x_341) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_343) - as_type<uint>(2)))) * as_type<uint>(16))))))] = 1;
         int const x_350 = p.y;
         p.y = as_type<int>((as_type<uint>(x_350) - as_type<uint>(2)));
       }
@@ -308,7 +308,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_8, thread tint_
       if (x_360) {
         int const x_364 = p.x;
         int const x_367 = p.y;
-        int const x_371 = (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_364) + as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_367) * as_type<uint>(16))))))];
+        int const x_371 = (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_364) + as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_367) * as_type<uint>(16))))))];
         x_372 = (x_371 == 0);
         x_373_phi = x_372;
       }
@@ -318,13 +318,13 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_8, thread tint_
         d = as_type<int>((as_type<uint>(x_376) - as_type<uint>(1)));
         int const x_379 = p.x;
         int const x_381 = p.y;
-        (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(x_379) + as_type<uint>(as_type<int>((as_type<uint>(x_381) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(x_379) + as_type<uint>(as_type<int>((as_type<uint>(x_381) * as_type<uint>(16))))))] = 1;
         int const x_386 = p.x;
         int const x_389 = p.y;
-        (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_386) + as_type<uint>(1)))) + as_type<uint>(as_type<int>((as_type<uint>(x_389) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_386) + as_type<uint>(1)))) + as_type<uint>(as_type<int>((as_type<uint>(x_389) * as_type<uint>(16))))))] = 1;
         int const x_394 = p.x;
         int const x_397 = p.y;
-        (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_394) + as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_397) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_394) + as_type<uint>(2)))) + as_type<uint>(as_type<int>((as_type<uint>(x_397) * as_type<uint>(16))))))] = 1;
         int const x_402 = p.x;
         p.x = as_type<int>((as_type<uint>(x_402) + as_type<uint>(2)));
       }
@@ -341,7 +341,7 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_8, thread tint_
       if (x_412) {
         int const x_416 = p.x;
         int const x_418 = p.y;
-        int const x_423 = (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(x_416) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_418) + as_type<uint>(2)))) * as_type<uint>(16))))))];
+        int const x_423 = (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(x_416) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_418) + as_type<uint>(2)))) * as_type<uint>(16))))))];
         x_424 = (x_423 == 0);
         x_425_phi = x_424;
       }
@@ -351,22 +351,22 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_8, thread tint_
         d = as_type<int>((as_type<uint>(x_428) - as_type<uint>(1)));
         int const x_431 = p.x;
         int const x_433 = p.y;
-        (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(x_431) + as_type<uint>(as_type<int>((as_type<uint>(x_433) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(x_431) + as_type<uint>(as_type<int>((as_type<uint>(x_433) * as_type<uint>(16))))))] = 1;
         int const x_438 = p.x;
         int const x_440 = p.y;
-        (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(x_438) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_440) + as_type<uint>(1)))) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(x_438) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_440) + as_type<uint>(1)))) * as_type<uint>(16))))))] = 1;
         int const x_446 = p.x;
         int const x_448 = p.y;
-        (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(x_446) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_448) + as_type<uint>(2)))) * as_type<uint>(16))))))] = 1;
+        (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(x_446) + as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_448) + as_type<uint>(2)))) * as_type<uint>(16))))))] = 1;
         int const x_454 = p.y;
         p.y = as_type<int>((as_type<uint>(x_454) + as_type<uint>(2)));
       }
     }
     int const x_458 = ipos.y;
     int const x_461 = ipos.x;
-    int const x_464 = (*(tint_symbol_9)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_458) * as_type<uint>(16)))) + as_type<uint>(x_461)))];
+    int const x_464 = (*(tint_symbol_7)).arr[as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(x_458) * as_type<uint>(16)))) + as_type<uint>(x_461)))];
     if ((x_464 == 1)) {
-      *(tint_symbol_10) = float4(1.0f, 1.0f, 1.0f, 1.0f);
+      *(tint_symbol_8) = float4(1.0f, 1.0f, 1.0f, 1.0f);
       return;
     }
     {
@@ -377,18 +377,24 @@ void main_1(constant buf0& x_7, thread float4* const tint_symbol_8, thread tint_
       }
     }
   }
-  *(tint_symbol_10) = float4(0.0f, 0.0f, 0.0f, 1.0f);
+  *(tint_symbol_8) = float4(0.0f, 0.0f, 0.0f, 1.0f);
   return;
 }
 
-fragment tint_symbol_2 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_7 [[buffer(0)]]) {
-  thread float4 tint_symbol_11 = 0.0f;
-  thread tint_array_wrapper tint_symbol_12 = {};
-  thread float4 tint_symbol_13 = 0.0f;
-  tint_symbol_11 = gl_FragCoord_param;
-  main_1(x_7, &(tint_symbol_11), &(tint_symbol_12), &(tint_symbol_13));
-  main_out const tint_symbol_3 = {.x_GLF_color_1=tint_symbol_13};
-  tint_symbol_2 const tint_symbol_7 = {.x_GLF_color_1=tint_symbol_3.x_GLF_color_1};
-  return tint_symbol_7;
+main_out tint_symbol_inner(constant buf0& x_7, float4 gl_FragCoord_param, thread float4* const tint_symbol_9, thread tint_array_wrapper* const tint_symbol_10, thread float4* const tint_symbol_11) {
+  *(tint_symbol_9) = gl_FragCoord_param;
+  main_1(x_7, tint_symbol_9, tint_symbol_10, tint_symbol_11);
+  main_out const tint_symbol_5 = {.x_GLF_color_1=*(tint_symbol_11)};
+  return tint_symbol_5;
+}
+
+fragment tint_symbol_1 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf0& x_7 [[buffer(0)]]) {
+  thread float4 tint_symbol_12 = 0.0f;
+  thread tint_array_wrapper tint_symbol_13 = {};
+  thread float4 tint_symbol_14 = 0.0f;
+  main_out const inner_result = tint_symbol_inner(x_7, gl_FragCoord_param, &(tint_symbol_12), &(tint_symbol_13), &(tint_symbol_14));
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }
 

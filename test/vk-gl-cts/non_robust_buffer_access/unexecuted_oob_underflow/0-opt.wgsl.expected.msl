@@ -23,7 +23,7 @@ struct In1 {
   /* 0x0000 */ tint_array_wrapper_2 data_in1;
 };
 
-void main_1(const device In2& x_13, const device In0& x_17, device Out0& x_15, const device In1& x_19, thread uint3* const tint_symbol_2) {
+void main_1(const device In2& x_13, const device In0& x_17, device Out0& x_15, const device In1& x_19, thread uint3* const tint_symbol_1) {
   uint base_index_in = 0u;
   uint base_index_out = 0u;
   int index_in0 = 0;
@@ -34,9 +34,9 @@ void main_1(const device In2& x_13, const device In0& x_17, device Out0& x_15, c
   int i = 0;
   int temp0 = 0;
   int temp1 = 0;
-  uint const x_56 = (*(tint_symbol_2)).x;
+  uint const x_56 = (*(tint_symbol_1)).x;
   base_index_in = (128u * x_56);
-  uint const x_59 = (*(tint_symbol_2)).x;
+  uint const x_59 = (*(tint_symbol_1)).x;
   base_index_out = (256u * x_59);
   index_in0 = 0;
   index_in1 = -128;
@@ -99,10 +99,14 @@ void main_1(const device In2& x_13, const device In0& x_17, device Out0& x_15, c
   return;
 }
 
+void tint_symbol_inner(const device In2& x_13, const device In0& x_17, device Out0& x_15, const device In1& x_19, uint3 gl_WorkGroupID_param, thread uint3* const tint_symbol_2) {
+  *(tint_symbol_2) = gl_WorkGroupID_param;
+  main_1(x_13, x_17, x_15, x_19, tint_symbol_2);
+}
+
 kernel void tint_symbol(uint3 gl_WorkGroupID_param [[threadgroup_position_in_grid]], const device In2& x_13 [[buffer(2)]], const device In0& x_17 [[buffer(0)]], device Out0& x_15 [[buffer(3)]], const device In1& x_19 [[buffer(1)]]) {
   thread uint3 tint_symbol_3 = 0u;
-  tint_symbol_3 = gl_WorkGroupID_param;
-  main_1(x_13, x_17, x_15, x_19, &(tint_symbol_3));
+  tint_symbol_inner(x_13, x_17, x_15, x_19, gl_WorkGroupID_param, &(tint_symbol_3));
   return;
 }
 

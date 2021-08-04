@@ -9,10 +9,13 @@ struct tint_symbol_1 {
   uint3 x_1_param : SV_GroupID;
 };
 
-[numthreads(1, 1, 1)]
-void main(tint_symbol_1 tint_symbol) {
-  const uint3 x_1_param = tint_symbol.x_1_param;
+void main_inner(uint3 x_1_param) {
   x_1 = asint(x_1_param);
   main_1();
+}
+
+[numthreads(1, 1, 1)]
+void main(tint_symbol_1 tint_symbol) {
+  main_inner(tint_symbol.x_1_param);
   return;
 }

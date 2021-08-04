@@ -11,10 +11,10 @@ struct tint_symbol_3 {
   int x_4_1 [[color(0)]];
 };
 
-void main_1(thread float4* const tint_symbol_6, thread int* const tint_symbol_7, thread int* const tint_symbol_8) {
+void main_1(thread float4* const tint_symbol_5, thread int* const tint_symbol_6, thread int* const tint_symbol_7) {
   int x_33_phi = 0;
-  float4 const x_18 = *(tint_symbol_6);
-  int const x_28 = *(tint_symbol_7);
+  float4 const x_18 = *(tint_symbol_5);
+  int const x_28 = *(tint_symbol_6);
   x_33_phi = 0;
   if ((as_type<int>((as_type<uint>(as_type<int>((as_type<uint>((int(x_18.x) & 1)) + as_type<uint>((int(x_18.y) & 1))))) + as_type<uint>(x_28))) == int(x_18.z))) {
     while (true) {
@@ -30,20 +30,25 @@ void main_1(thread float4* const tint_symbol_6, thread int* const tint_symbol_7,
       }
     }
   }
-  *(tint_symbol_8) = 1;
+  *(tint_symbol_7) = 1;
   return;
 }
 
+main_out tint_symbol_inner(float4 x_2_param, int x_3_param, thread float4* const tint_symbol_8, thread int* const tint_symbol_9, thread int* const tint_symbol_10) {
+  *(tint_symbol_8) = x_2_param;
+  *(tint_symbol_9) = x_3_param;
+  main_1(tint_symbol_8, tint_symbol_9, tint_symbol_10);
+  main_out const tint_symbol_4 = {.x_4_1=*(tint_symbol_10)};
+  return tint_symbol_4;
+}
+
 fragment tint_symbol_3 tint_symbol(float4 x_2_param [[position]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  thread float4 tint_symbol_9 = 0.0f;
-  thread int tint_symbol_10 = 0;
-  thread int tint_symbol_11 = 0;
-  int const x_3_param = tint_symbol_1.x_3_param;
-  tint_symbol_9 = x_2_param;
-  tint_symbol_10 = x_3_param;
-  main_1(&(tint_symbol_9), &(tint_symbol_10), &(tint_symbol_11));
-  main_out const tint_symbol_4 = {.x_4_1=tint_symbol_11};
-  tint_symbol_3 const tint_symbol_5 = {.x_4_1=tint_symbol_4.x_4_1};
-  return tint_symbol_5;
+  thread float4 tint_symbol_11 = 0.0f;
+  thread int tint_symbol_12 = 0;
+  thread int tint_symbol_13 = 0;
+  main_out const inner_result = tint_symbol_inner(x_2_param, tint_symbol_1.x_3_param, &(tint_symbol_11), &(tint_symbol_12), &(tint_symbol_13));
+  tint_symbol_3 wrapper_result = {};
+  wrapper_result.x_4_1 = inner_result.x_4_1;
+  return wrapper_result;
 }
 

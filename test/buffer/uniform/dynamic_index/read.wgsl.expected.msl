@@ -25,7 +25,7 @@ struct S {
   /* 0x0000 */ tint_array_wrapper_1 arr;
 };
 
-kernel void tint_symbol(uint idx [[thread_index_in_threadgroup]], constant S& s [[buffer(0)]]) {
+void tint_symbol_inner(constant S& s, uint idx) {
   int3 const a = s.arr.arr[idx].a;
   int const b = s.arr.arr[idx].b;
   uint3 const c = s.arr.arr[idx].c;
@@ -35,6 +35,10 @@ kernel void tint_symbol(uint idx [[thread_index_in_threadgroup]], constant S& s 
   int2 const g = s.arr.arr[idx].g;
   int2 const h = s.arr.arr[idx].h;
   float2x3 const i = s.arr.arr[idx].i;
+}
+
+kernel void tint_symbol(uint idx [[thread_index_in_threadgroup]], constant S& s [[buffer(0)]]) {
+  tint_symbol_inner(s, idx);
   return;
 }
 

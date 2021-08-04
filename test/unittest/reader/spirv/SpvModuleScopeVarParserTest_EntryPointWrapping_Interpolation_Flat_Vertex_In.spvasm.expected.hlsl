@@ -25,13 +25,7 @@ struct tint_symbol_2 {
   float4 x_8_1 : SV_Position;
 };
 
-tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  const uint x_1_param = tint_symbol.x_1_param;
-  const uint2 x_2_param = tint_symbol.x_2_param;
-  const int x_3_param = tint_symbol.x_3_param;
-  const int2 x_4_param = tint_symbol.x_4_param;
-  const float x_5_param = tint_symbol.x_5_param;
-  const float2 x_6_param = tint_symbol.x_6_param;
+main_out main_inner(uint x_1_param, uint2 x_2_param, int x_3_param, int2 x_4_param, float x_5_param, float2 x_6_param) {
   x_1 = x_1_param;
   x_2 = x_2_param;
   x_3 = x_3_param;
@@ -40,6 +34,12 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   x_6 = x_6_param;
   main_1();
   const main_out tint_symbol_3 = {x_8};
-  const tint_symbol_2 tint_symbol_4 = {tint_symbol_3.x_8_1};
-  return tint_symbol_4;
+  return tint_symbol_3;
+}
+
+tint_symbol_2 main(tint_symbol_1 tint_symbol) {
+  const main_out inner_result = main_inner(tint_symbol.x_1_param, tint_symbol.x_2_param, tint_symbol.x_3_param, tint_symbol.x_4_param, tint_symbol.x_5_param, tint_symbol.x_6_param);
+  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
+  wrapper_result.x_8_1 = inner_result.x_8_1;
+  return wrapper_result;
 }

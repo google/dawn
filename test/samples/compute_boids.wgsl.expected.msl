@@ -32,22 +32,31 @@ struct Particles {
   /* 0x0000 */ tint_array_wrapper particles;
 };
 
-vertex tint_symbol_2 vert_main(tint_symbol_1 tint_symbol [[stage_in]]) {
-  float2 const a_particlePos = tint_symbol.a_particlePos;
-  float2 const a_particleVel = tint_symbol.a_particleVel;
-  float2 const a_pos = tint_symbol.a_pos;
+float4 vert_main_inner(float2 a_particlePos, float2 a_particleVel, float2 a_pos) {
   float angle = -(atan2(a_particleVel.x, a_particleVel.y));
   float2 pos = float2(((a_pos.x * cos(angle)) - (a_pos.y * sin(angle))), ((a_pos.x * sin(angle)) + (a_pos.y * cos(angle))));
-  tint_symbol_2 const tint_symbol_5 = {.value=float4((pos + a_particlePos), 0.0f, 1.0f)};
-  return tint_symbol_5;
+  return float4((pos + a_particlePos), 0.0f, 1.0f);
+}
+
+vertex tint_symbol_2 vert_main(tint_symbol_1 tint_symbol [[stage_in]]) {
+  float4 const inner_result = vert_main_inner(tint_symbol.a_particlePos, tint_symbol.a_particleVel, tint_symbol.a_pos);
+  tint_symbol_2 wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+float4 frag_main_inner() {
+  return float4(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 fragment tint_symbol_3 frag_main() {
-  tint_symbol_3 const tint_symbol_6 = {.value=float4(1.0f, 1.0f, 1.0f, 1.0f)};
-  return tint_symbol_6;
+  float4 const inner_result_1 = frag_main_inner();
+  tint_symbol_3 wrapper_result_1 = {};
+  wrapper_result_1.value = inner_result_1;
+  return wrapper_result_1;
 }
 
-kernel void comp_main(uint3 gl_GlobalInvocationID [[thread_position_in_grid]], constant SimParams& params [[buffer(0)]], device Particles& particlesA [[buffer(1)]], device Particles& particlesB [[buffer(2)]]) {
+void comp_main_inner(constant SimParams& params, device Particles& particlesA, device Particles& particlesB, uint3 gl_GlobalInvocationID) {
   uint index = gl_GlobalInvocationID.x;
   if ((index >= 5u)) {
     return;
@@ -102,6 +111,10 @@ kernel void comp_main(uint3 gl_GlobalInvocationID [[thread_position_in_grid]], c
   }
   particlesB.particles.arr[index].pos = vPos;
   particlesB.particles.arr[index].vel = vVel;
+}
+
+kernel void comp_main(uint3 gl_GlobalInvocationID [[thread_position_in_grid]], constant SimParams& params [[buffer(0)]], device Particles& particlesA [[buffer(1)]], device Particles& particlesB [[buffer(2)]]) {
+  comp_main_inner(params, particlesA, particlesB, gl_GlobalInvocationID);
   return;
 }
 

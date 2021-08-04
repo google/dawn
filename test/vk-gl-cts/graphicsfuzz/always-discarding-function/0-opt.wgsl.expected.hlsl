@@ -26,9 +26,9 @@ void main_1() {
     tmp_float = x_75;
     const float3 x_76 = float3(x_75, x_75, x_75);
     color = x_76;
-    const int tint_symbol_3[1] = {0};
-    const tmp_struct tint_symbol_4 = {tint_symbol_3};
-    x_24 = tint_symbol_4.nmb;
+    const int tint_symbol_2[1] = {0};
+    const tmp_struct tint_symbol_3 = {tint_symbol_2};
+    x_24 = tint_symbol_3.nmb;
     x_68 = false;
     x_79_phi = false;
     while (true) {
@@ -104,11 +104,17 @@ struct tint_symbol {
   float4 x_GLF_color_1 : SV_Target0;
 };
 
-tint_symbol main() {
+main_out main_inner() {
   main_1();
-  const main_out tint_symbol_1 = {x_GLF_color};
-  const tint_symbol tint_symbol_5 = {tint_symbol_1.x_GLF_color_1};
-  return tint_symbol_5;
+  const main_out tint_symbol_4 = {x_GLF_color};
+  return tint_symbol_4;
+}
+
+tint_symbol main() {
+  const main_out inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }
 
 int binarySearch_struct_tmp_struct_i1_1_1_(inout tmp_struct obj) {

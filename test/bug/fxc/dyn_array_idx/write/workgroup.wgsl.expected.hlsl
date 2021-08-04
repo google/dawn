@@ -13,9 +13,7 @@ struct tint_symbol_2 {
   uint local_invocation_index : SV_GroupIndex;
 };
 
-[numthreads(1, 1, 1)]
-void f(tint_symbol_2 tint_symbol_1) {
-  const uint local_invocation_index = tint_symbol_1.local_invocation_index;
+void f_inner(uint local_invocation_index) {
   {
     for(uint idx = local_invocation_index; (idx < 64u); idx = (idx + 1u)) {
       const uint i = idx;
@@ -25,5 +23,10 @@ void f(tint_symbol_2 tint_symbol_1) {
   GroupMemoryBarrierWithGroupSync();
   s.data[asint(ubo[0].x)] = 1;
   result.Store(0u, asuint(s.data[3]));
+}
+
+[numthreads(1, 1, 1)]
+void f(tint_symbol_2 tint_symbol_1) {
+  f_inner(tint_symbol_1.local_invocation_index);
   return;
 }

@@ -30,8 +30,8 @@ void main_1() {
   const float x_55 = asfloat(x_7[scalar_offset_7 / 4][scalar_offset_7 % 4]);
   const uint scalar_offset_8 = ((16u * uint(0))) / 4;
   const float x_57 = asfloat(x_7[scalar_offset_8 / 4][scalar_offset_8 % 4]);
-  const float tint_symbol_4[10] = {x_37, x_39, x_41, x_43, x_45, x_47, x_49, pow(x_50, x_52), x_55, x_57};
-  arr = tint_symbol_4;
+  const float tint_symbol_3[10] = {x_37, x_39, x_41, x_43, x_45, x_47, x_49, pow(x_50, x_52), x_55, x_57};
+  arr = tint_symbol_3;
   const uint scalar_offset_9 = ((16u * uint(0))) / 4;
   const int x_60 = asint(x_9[scalar_offset_9 / 4][scalar_offset_9 % 4]);
   const float x_62 = arr[x_60];
@@ -57,9 +57,15 @@ struct tint_symbol {
   float4 x_GLF_color_1 : SV_Target0;
 };
 
-tint_symbol main() {
+main_out main_inner() {
   main_1();
-  const main_out tint_symbol_1 = {x_GLF_color};
-  const tint_symbol tint_symbol_5 = {tint_symbol_1.x_GLF_color_1};
-  return tint_symbol_5;
+  const main_out tint_symbol_4 = {x_GLF_color};
+  return tint_symbol_4;
+}
+
+tint_symbol main() {
+  const main_out inner_result = main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
 }

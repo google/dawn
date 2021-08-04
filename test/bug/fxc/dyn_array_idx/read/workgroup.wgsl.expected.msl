@@ -14,14 +14,18 @@ struct Result {
   /* 0x0000 */ int out;
 };
 
-kernel void f(uint local_invocation_index [[thread_index_in_threadgroup]], constant UBO& ubo [[buffer(0)]], device Result& result [[buffer(1)]]) {
-  threadgroup S tint_symbol_1;
+void f_inner(constant UBO& ubo, device Result& result, uint local_invocation_index, threadgroup S* const tint_symbol) {
   for(uint idx = local_invocation_index; (idx < 64u); idx = (idx + 1u)) {
     uint const i = idx;
-    tint_symbol_1.data.arr[i] = int();
+    (*(tint_symbol)).data.arr[i] = int();
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  result.out = tint_symbol_1.data.arr[ubo.dynamic_idx];
+  result.out = (*(tint_symbol)).data.arr[ubo.dynamic_idx];
+}
+
+kernel void f(uint local_invocation_index [[thread_index_in_threadgroup]], constant UBO& ubo [[buffer(0)]], device Result& result [[buffer(1)]]) {
+  threadgroup S tint_symbol_1;
+  f_inner(ubo, result, local_invocation_index, &(tint_symbol_1));
   return;
 }
 
