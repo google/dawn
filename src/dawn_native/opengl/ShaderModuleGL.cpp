@@ -150,6 +150,21 @@ namespace dawn_native { namespace opengl {
         } else {
             spirv = GetSpirv();
         }
+
+        if (GetDevice()->IsToggleEnabled(Toggle::DumpShaders)) {
+            spvtools::SpirvTools spirvTools(SPV_ENV_VULKAN_1_1);
+            std::ostringstream dumpedMsg;
+            std::string disassembly;
+            if (spirvTools.Disassemble(
+                    spirv, &disassembly,
+                    SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES | SPV_BINARY_TO_TEXT_OPTION_INDENT)) {
+                dumpedMsg << "/* Dumped generated SPIRV disassembly */" << std::endl << disassembly;
+            } else {
+                dumpedMsg << "/* Failed to disassemble generated SPIRV */";
+            }
+            GetDevice()->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());
+        }
+
         spirv_cross::CompilerGLSL compiler(std::move(spirv));
         compiler.set_common_options(options);
         compiler.set_entry_point(entryPointName, ShaderStageToExecutionModel(stage));
@@ -234,7 +249,16 @@ namespace dawn_native { namespace opengl {
             }
         }
 
-        return compiler.compile();
+        std::string glsl = compiler.compile();
+
+        if (GetDevice()->IsToggleEnabled(Toggle::DumpShaders)) {
+            std::ostringstream dumpedMsg;
+            dumpedMsg << "/* Dumped generated GLSL */" << std::endl << glsl;
+
+            GetDevice()->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());
+        }
+
+        return glsl;
     }
 
 }}  // namespace dawn_native::opengl

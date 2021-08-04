@@ -434,7 +434,9 @@ namespace dawn_native {
             if (!spirvTools.Validate(code, codeSize)) {
                 std::string disassembly;
                 if (spirvTools.Disassemble(std::vector<uint32_t>(code, code + codeSize),
-                                           &disassembly)) {
+                                           &disassembly,
+                                           SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES |
+                                               SPV_BINARY_TO_TEXT_OPTION_INDENT)) {
                     errorStream << "disassembly:" << std::endl << disassembly;
                 }
 

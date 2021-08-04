@@ -226,6 +226,20 @@ namespace dawn_native { namespace vulkan {
 
         std::vector<uint32_t> spirv = result.spirv;
 
+        if (GetDevice()->IsToggleEnabled(Toggle::DumpShaders)) {
+            spvtools::SpirvTools spirvTools(SPV_ENV_VULKAN_1_1);
+            std::ostringstream dumpedMsg;
+            std::string disassembly;
+            if (spirvTools.Disassemble(
+                    result.spirv, &disassembly,
+                    SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES | SPV_BINARY_TO_TEXT_OPTION_INDENT)) {
+                dumpedMsg << "/* Dumped generated SPIRV disassembly */" << std::endl << disassembly;
+            } else {
+                dumpedMsg << "/* Failed to disassemble generated SPIRV */";
+            }
+            GetDevice()->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());
+        }
+
         // Don't save the transformedParseResult but just create a VkShaderModule
         VkShaderModuleCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
