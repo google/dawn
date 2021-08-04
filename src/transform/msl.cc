@@ -181,6 +181,23 @@ void Msl::HandleModuleScopeVariables(CloneContext& ctx) const {
     }
   }
 
+  // Build a list of `&ident` expressions. We'll use this later to avoid
+  // generating expressions of the form `&*ident`, which break WGSL validation
+  // rules when this expression is passed to a function.
+  // TODO(jrprice): We should add support for bidirectional SEM tree traversal
+  // so that we can do this on the fly instead.
+  std::unordered_map<ast::IdentifierExpression*, ast::UnaryOpExpression*>
+      ident_to_address_of;
+  for (auto* node : ctx.src->ASTNodes().Objects()) {
+    auto* address_of = node->As<ast::UnaryOpExpression>();
+    if (!address_of || address_of->op() != ast::UnaryOp::kAddressOf) {
+      continue;
+    }
+    if (auto* ident = address_of->expr()->As<ast::IdentifierExpression>()) {
+      ident_to_address_of[ident] = address_of;
+    }
+  }
+
   for (auto* func_ast : functions_to_process) {
     auto* func_sem = ctx.src->Sem().Get(func_ast);
     bool is_entry_point = func_ast->IsEntryPoint();
@@ -241,6 +258,15 @@ void Msl::HandleModuleScopeVariables(CloneContext& ctx) const {
         if (user->Stmt()->Function() == func_ast) {
           ast::Expression* expr = ctx.dst->Expr(new_var_symbol);
           if (!is_entry_point && !store_type->is_handle()) {
+            // If this identifier is used by an address-of operator, just remove
+            // the address-of instead of adding a deref, since we already have a
+            // pointer.
+            auto* ident = user->Declaration()->As<ast::IdentifierExpression>();
+            if (ident_to_address_of.count(ident)) {
+              ctx.Replace(ident_to_address_of[ident], expr);
+              continue;
+            }
+
             expr = ctx.dst->Deref(expr);
           }
           ctx.Replace(user->Declaration(), expr);

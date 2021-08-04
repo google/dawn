@@ -18,7 +18,7 @@ struct tint_symbol {
 };
 
 void frexp_c084e3(thread int2* const tint_symbol_2) {
-  float2 res = tint_frexp(float2(), &(*(tint_symbol_2)));
+  float2 res = tint_frexp(float2(), tint_symbol_2);
 }
 
 vertex tint_symbol vertex_main() {

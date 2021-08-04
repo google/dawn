@@ -2,7 +2,7 @@
 
 using namespace metal;
 void atomicLoad_afcc03(threadgroup atomic_int* const tint_symbol_1) {
-  int res = atomic_load_explicit(&(*(tint_symbol_1)), memory_order_relaxed);
+  int res = atomic_load_explicit(tint_symbol_1, memory_order_relaxed);
 }
 
 kernel void compute_main(uint local_invocation_index [[thread_index_in_threadgroup]]) {

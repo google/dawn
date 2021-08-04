@@ -14,7 +14,7 @@ float tint_frexp(float param_0, threadgroup int* param_1) {
 }
 
 void frexp_0da285(threadgroup int* const tint_symbol_1) {
-  float res = tint_frexp(1.0f, &(*(tint_symbol_1)));
+  float res = tint_frexp(1.0f, tint_symbol_1);
 }
 
 kernel void compute_main(uint local_invocation_index [[thread_index_in_threadgroup]]) {

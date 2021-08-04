@@ -10,7 +10,7 @@ vec<T, 2> atomicCompareExchangeWeak_1(threadgroup A* atomic, T compare, T value)
 }
 
 void atomicCompareExchangeWeak_b2ab2c(threadgroup atomic_uint* const tint_symbol_1) {
-  uint2 res = atomicCompareExchangeWeak_1(&(*(tint_symbol_1)), 1u, 1u);
+  uint2 res = atomicCompareExchangeWeak_1(tint_symbol_1, 1u, 1u);
 }
 
 kernel void compute_main(uint local_invocation_index [[thread_index_in_threadgroup]]) {

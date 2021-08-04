@@ -1,0 +1,17 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void x(thread float* const p) {
+  *(p) = 0.0f;
+}
+
+void g(thread float* const tint_symbol) {
+  x(tint_symbol);
+}
+
+fragment void f() {
+  thread float tint_symbol_1 = 0.0f;
+  g(&(tint_symbol_1));
+  return;
+}
+

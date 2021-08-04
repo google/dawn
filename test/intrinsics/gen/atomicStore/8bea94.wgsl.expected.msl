@@ -2,7 +2,7 @@
 
 using namespace metal;
 void atomicStore_8bea94(threadgroup atomic_int* const tint_symbol_1) {
-  atomic_store_explicit(&(*(tint_symbol_1)), 1, memory_order_relaxed);
+  atomic_store_explicit(tint_symbol_1, 1, memory_order_relaxed);
 }
 
 kernel void compute_main(uint local_invocation_index [[thread_index_in_threadgroup]]) {

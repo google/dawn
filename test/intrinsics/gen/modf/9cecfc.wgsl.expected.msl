@@ -18,7 +18,7 @@ struct tint_symbol {
 };
 
 void modf_9cecfc(thread float3* const tint_symbol_2) {
-  float3 res = tint_modf(float3(), &(*(tint_symbol_2)));
+  float3 res = tint_modf(float3(), tint_symbol_2);
 }
 
 vertex tint_symbol vertex_main() {

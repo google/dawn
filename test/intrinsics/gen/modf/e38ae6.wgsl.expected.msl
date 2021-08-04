@@ -14,7 +14,7 @@ float tint_modf(float param_0, threadgroup float* param_1) {
 }
 
 void modf_e38ae6(threadgroup float* const tint_symbol_1) {
-  float res = tint_modf(1.0f, &(*(tint_symbol_1)));
+  float res = tint_modf(1.0f, tint_symbol_1);
 }
 
 kernel void compute_main(uint local_invocation_index [[thread_index_in_threadgroup]]) {
