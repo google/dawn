@@ -317,7 +317,7 @@ namespace dawn_native { namespace metal {
         // category. -Wunused-variable in particular comes up a lot in generated code, and some
         // (old?) Metal drivers accidentally treat it as a MTLLibraryErrorCompileError instead
         // of a warning.
-        msl = R"(\
+        msl = R"(
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Wall"
 #endif
