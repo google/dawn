@@ -147,6 +147,8 @@ namespace dawn_native { namespace d3d12 {
             mResourceAllocation,
             ToBackend(GetDevice())->AllocateMemory(heapType, resourceDescriptor, bufferUsage));
 
+        DAWN_TRY(mResourceAllocation.SetDebugName("Dawn_Buffer"));
+
         // The buffers with mappedAtCreation == true will be initialized in
         // BufferBase::MapAtCreation().
         if (GetDevice()->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting) &&

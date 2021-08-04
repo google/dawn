@@ -481,6 +481,8 @@ namespace dawn_native { namespace d3d12 {
         // memory management.
         mResourceAllocation = {info, 0, std::move(d3d12Texture), nullptr};
 
+        DAWN_TRY(mResourceAllocation.SetDebugName("Dawn_ExternalTexture"));
+
         return {};
     }
 
@@ -517,6 +519,8 @@ namespace dawn_native { namespace d3d12 {
                             ->AllocateMemory(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor,
                                              D3D12_RESOURCE_STATE_COMMON));
 
+        DAWN_TRY(mResourceAllocation.SetDebugName("Dawn_InternalTexture"));
+
         Device* device = ToBackend(GetDevice());
 
         if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
@@ -537,6 +541,8 @@ namespace dawn_native { namespace d3d12 {
         // texture is owned externally. The texture's owning entity must remain responsible for
         // memory management.
         mResourceAllocation = {info, 0, std::move(d3d12Texture), nullptr};
+
+        DAWN_TRY(mResourceAllocation.SetDebugName("Dawn_SwapChainTexture"));
         return {};
     }
 

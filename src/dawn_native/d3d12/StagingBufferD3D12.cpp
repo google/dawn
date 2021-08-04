@@ -42,6 +42,8 @@ namespace dawn_native { namespace d3d12 {
                         mDevice->AllocateMemory(D3D12_HEAP_TYPE_UPLOAD, resourceDescriptor,
                                                 D3D12_RESOURCE_STATE_GENERIC_READ));
 
+        DAWN_TRY(mUploadHeap.SetDebugName("Dawn_StagingBuffer"));
+
         // The mapped buffer can be accessed at any time, so it must be locked to ensure it is never
         // evicted. This buffer should already have been made resident when it was created.
         DAWN_TRY(mDevice->GetResidencyManager()->LockAllocation(
