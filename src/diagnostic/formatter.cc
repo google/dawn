@@ -112,7 +112,6 @@ Formatter::Formatter(const Style& style) : style_(style) {}
 void Formatter::format(const List& list, Printer* printer) const {
   State state{printer};
 
-  bool please_report_bug = false;
   bool first = true;
   for (auto diag : list) {
     state.set_style({});
@@ -121,21 +120,6 @@ void Formatter::format(const List& list, Printer* printer) const {
     }
     format(diag, state);
     first = false;
-
-    if (static_cast<int>(diag.severity) > static_cast<int>(Severity::Error)) {
-      please_report_bug = true;
-    }
-  }
-  if (please_report_bug) {
-    state.set_style({Color::kRed, true});
-    state << R"(
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
-)";
   }
 
   if (style_.print_newline_at_end) {

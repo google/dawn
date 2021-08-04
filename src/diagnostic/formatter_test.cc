@@ -188,13 +188,6 @@ TEST_F(DiagFormatterTest, ICE) {
 the  snail  says  ???
                   ^^^
 
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
-
 )";
   ASSERT_EQ(expect, got);
 }
@@ -205,13 +198,6 @@ TEST_F(DiagFormatterTest, Fatal) {
   auto* expect = R"(file.name:4:16 fatal: nothing
 the  snail  says  ???
                   ^^^
-
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
 
 )";
   ASSERT_EQ(expect, got);

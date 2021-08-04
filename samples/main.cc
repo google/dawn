@@ -34,6 +34,16 @@ namespace {
     const tint::diag::List& diagnostics) {
   auto printer = tint::diag::Printer::create(stderr, true);
   tint::diag::Formatter{}.format(diagnostics, printer.get());
+  tint::diag::Style bold_red{tint::diag::Color::kRed, true};
+  constexpr const char* please_file_bug = R"(
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
+)";
+  printer->write(please_file_bug, bold_red);
   exit(1);
 }
 
