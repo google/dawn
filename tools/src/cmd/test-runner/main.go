@@ -23,6 +23,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"sort"
 	"strings"
@@ -230,9 +231,11 @@ func run() error {
 	go func() {
 		for i, file := range files { // For each test file...
 			file := filepath.Join(dir, file)
+			flags := parseFlags(file)
 			for _, format := range formats { // For each output format...
 				pendingJobs <- job{
 					file:   file,
+					flags:  flags,
 					format: format,
 					result: results[i][format],
 				}
@@ -472,6 +475,7 @@ type status struct {
 
 type job struct {
 	file   string
+	flags  []string
 	format outputFormat
 	result chan status
 }
@@ -523,6 +527,8 @@ func (j job) run(wd, exe string, fxc bool, dxcPath, xcrunPath string, generateEx
 				validate = true
 			}
 		}
+
+		args = append(args, j.flags...)
 
 		// Invoke the compiler...
 		start := time.Now()
@@ -701,6 +707,24 @@ func invoke(wd, exe string, args ...string) (ok bool, output string) {
 		return false, err.Error()
 	}
 	return true, str
+}
+
+var reFlags = regexp.MustCompile(` *\/\/ *flags:(.*)\n`)
+
+// parseFlags looks for a `// flags:` header at the start of the file with the
+// given path, returning each of the space delimited tokens that follow for the
+// line
+func parseFlags(path string) []string {
+	content, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil
+	}
+	header := strings.SplitN(string(content), "\n", 1)[0]
+	m := reFlags.FindStringSubmatch(header)
+	if len(m) != 2 {
+		return nil
+	}
+	return strings.Split(m[1], " ")
 }
 
 func printDuration(d time.Duration) string {
