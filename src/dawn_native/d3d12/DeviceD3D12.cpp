@@ -288,13 +288,21 @@ namespace dawn_native { namespace d3d12 {
     }
 
     ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
-        ExecutionSerial completeSerial = ExecutionSerial(mFence->GetCompletedValue());
+        ExecutionSerial completedSerial = ExecutionSerial(mFence->GetCompletedValue());
+        if (DAWN_UNLIKELY(completedSerial == ExecutionSerial(UINT64_MAX))) {
+            // GetCompletedValue returns UINT64_MAX if the device was removed.
+            // Try to query the failure reason.
+            DAWN_TRY(CheckHRESULT(mD3d12Device->GetDeviceRemovedReason(),
+                                  "ID3D12Device::GetDeviceRemovedReason"));
+            // Otherwise, return a generic device lost error.
+            return DAWN_DEVICE_LOST_ERROR("Device lost");
+        }
 
-        if (completeSerial <= GetCompletedCommandSerial()) {
+        if (completedSerial <= GetCompletedCommandSerial()) {
             return ExecutionSerial(0);
         }
 
-        return completeSerial;
+        return completedSerial;
     }
 
     void Device::ReferenceUntilUnused(ComPtr<IUnknown> object) {
