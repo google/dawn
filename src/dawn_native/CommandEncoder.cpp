@@ -778,6 +778,19 @@ namespace dawn_native {
     void CommandEncoder::APICopyTextureToTexture(const ImageCopyTexture* source,
                                                  const ImageCopyTexture* destination,
                                                  const Extent3D* copySize) {
+        APICopyTextureToTextureHelper<false>(source, destination, copySize);
+    }
+
+    void CommandEncoder::APICopyTextureToTextureInternal(const ImageCopyTexture* source,
+                                                         const ImageCopyTexture* destination,
+                                                         const Extent3D* copySize) {
+        APICopyTextureToTextureHelper<true>(source, destination, copySize);
+    }
+
+    template <bool Internal>
+    void CommandEncoder::APICopyTextureToTextureHelper(const ImageCopyTexture* source,
+                                                       const ImageCopyTexture* destination,
+                                                       const Extent3D* copySize) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(source->texture));
@@ -792,8 +805,17 @@ namespace dawn_native {
                 DAWN_TRY(ValidateTextureCopyRange(GetDevice(), *source, *copySize));
                 DAWN_TRY(ValidateTextureCopyRange(GetDevice(), *destination, *copySize));
 
-                DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc));
-                DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst));
+                // For internal usages (CopyToCopyInternal) we don't care if the user has added
+                // CopySrc as a usage for this texture, but we will always add it internally.
+                if (Internal) {
+                    DAWN_TRY(
+                        ValidateInternalCanUseAs(source->texture, wgpu::TextureUsage::CopySrc));
+                    DAWN_TRY(ValidateInternalCanUseAs(destination->texture,
+                                                      wgpu::TextureUsage::CopyDst));
+                } else {
+                    DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc));
+                    DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst));
+                }
 
                 mTopLevelTextures.insert(source->texture);
                 mTopLevelTextures.insert(destination->texture);

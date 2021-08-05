@@ -421,6 +421,15 @@ namespace dawn_native {
         return {};
     }
 
+    MaybeError ValidateInternalCanUseAs(const TextureBase* texture, wgpu::TextureUsage usage) {
+        ASSERT(wgpu::HasZeroOrOneBits(usage));
+        if (!(texture->GetInternalUsage() & usage)) {
+            return DAWN_VALIDATION_ERROR("texture doesn't have the required usage.");
+        }
+
+        return {};
+    }
+
     MaybeError ValidateCanUseAs(const BufferBase* buffer, wgpu::BufferUsage usage) {
         ASSERT(wgpu::HasZeroOrOneBits(usage));
         if (!(buffer->GetUsage() & usage)) {

@@ -427,6 +427,14 @@
                 ]
             },
             {
+                "name": "copy texture to texture internal",
+                "args": [
+                    {"name": "source", "type": "image copy texture", "annotation": "const*"},
+                    {"name": "destination", "type": "image copy texture", "annotation": "const*"},
+                    {"name": "copy size", "type": "extent 3D", "annotation": "const*"}
+                ]
+            },
+            {
                 "name": "inject validation error",
                 "args": [
                     {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"}

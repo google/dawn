@@ -71,6 +71,8 @@ namespace dawn_native {
 
     MaybeError ValidateCanUseAs(const TextureBase* texture, wgpu::TextureUsage usage);
 
+    MaybeError ValidateInternalCanUseAs(const TextureBase* texture, wgpu::TextureUsage usage);
+
     MaybeError ValidateCanUseAs(const BufferBase* buffer, wgpu::BufferUsage usage);
 
 }  // namespace dawn_native
