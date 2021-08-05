@@ -108,7 +108,7 @@ TEST_F(ResolverStorageClassValidationTest, NotStorage_AccessMode) {
 
   EXPECT_EQ(
       r()->error(),
-      R"(56:78 error: variables not in <storage> storage class must not declare an access mode)");
+      R"(56:78 error: only variables in <storage> storage class may declare an access mode)");
 }
 
 TEST_F(ResolverStorageClassValidationTest, StorageBufferNoBlockDecoration) {

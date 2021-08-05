@@ -265,12 +265,8 @@ bool Resolver::ResolveInternal() {
   if (!ValidatePipelineStages()) {
     return false;
   }
-  if (!ValidateAtomicUses()) {
-    return false;
-  }
 
   bool result = true;
-
   for (auto* node : builder_->ASTNodes().Objects()) {
     if (marked_.count(node) == 0) {
       TINT_ICE(Resolver, diagnostics_)
@@ -417,34 +413,6 @@ bool Resolver::ValidateAtomic(const ast::Atomic* a, const sem::Atomic* s) {
   if (!s->Type()->IsAnyOf<sem::U32, sem::I32>()) {
     AddError("atomic only supports i32 or u32 types", a->type()->source());
     return false;
-  }
-  return true;
-}
-
-bool Resolver::ValidateAtomicUses() {
-  // https://gpuweb.github.io/gpuweb/wgsl/#atomic-types
-  // Atomic types may only be instantiated by variables in the workgroup storage
-  // class or by storage buffer variables with a read_write access mode.
-  for (auto sm : atomic_members_) {
-    auto* structure = sm.structure;
-    for (auto usage : structure->StorageClassUsage()) {
-      if (usage == ast::StorageClass::kWorkgroup) {
-        continue;
-      }
-      if (usage != ast::StorageClass::kStorage) {
-        // TODO(crbug.com/tint/901): Validate that the access mode is
-        // read_write.
-        auto* member = structure->Members()[sm.index];
-        AddError(
-            "atomic types can only be used in storage classes workgroup or "
-            "storage, but was used by storage class " +
-                std::string(ast::str(usage)),
-            member->Declaration()->type()->source());
-        // TODO(crbug.com/tint/901): Add note pointing at where the usage came
-        // from.
-        return false;
-      }
-    }
   }
   return true;
 }
@@ -979,8 +947,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
   if (info->storage_class != ast::StorageClass::kStorage &&
       info->declaration->declared_access() != ast::Access::kUndefined) {
     AddError(
-        "variables not in <storage> storage class must not declare an access "
-        "mode",
+        "only variables in <storage> storage class may declare an access mode",
         info->declaration->source());
     return false;
   }
@@ -1060,7 +1027,60 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
       break;
   }
 
+  if (!info->declaration->is_const()) {
+    if (!ValidateAtomicVariable(info)) {
+      return false;
+    }
+  }
+
   return ValidateVariable(info);
+}
+
+// https://gpuweb.github.io/gpuweb/wgsl/#atomic-types
+// Atomic types may only be instantiated by variables in the workgroup storage
+// class or by storage buffer variables with a read_write access mode.
+bool Resolver::ValidateAtomicVariable(const VariableInfo* info) {
+  auto sc = info->storage_class;
+  auto access = info->access;
+  auto* type = info->type->UnwrapRef();
+  auto source = info->declaration->type()->source();
+
+  if (type->Is<sem::Atomic>()) {
+    if (sc != ast::StorageClass::kWorkgroup) {
+      AddError(
+          "atomic variables must have <storage> or <workgroup> storage class",
+          info->declaration->type()->source());
+      return false;
+    }
+  } else if (type->IsAnyOf<sem::Struct, sem::Array>()) {
+    auto found = atomic_composite_info_.find(type);
+    if (found != atomic_composite_info_.end()) {
+      if (sc != ast::StorageClass::kStorage &&
+          sc != ast::StorageClass::kWorkgroup) {
+        AddError(
+            "atomic variables must have <storage> or <workgroup> storage class",
+            source);
+        AddNote("atomic sub-type of '" +
+                    type->FriendlyName(builder_->Symbols()) +
+                    "' is declared here",
+                found->second);
+        return false;
+      } else if (sc == ast::StorageClass::kStorage &&
+                 access != ast::Access::kReadWrite) {
+        AddError(
+            "atomic variables in <storage> storage class must have read_write "
+            "access mode",
+            source);
+        AddNote("atomic sub-type of '" +
+                    type->FriendlyName(builder_->Symbols()) +
+                    "' is declared here",
+                found->second);
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 bool Resolver::ValidateVariable(const VariableInfo* info) {
@@ -3738,20 +3758,20 @@ void Resolver::CreateSemanticNodes() const {
 sem::Array* Resolver::Array(const ast::Array* arr) {
   auto source = arr->source();
 
-  auto* el_ty = Type(arr->type());
-  if (!el_ty) {
+  auto* elem_type = Type(arr->type());
+  if (!elem_type) {
     return nullptr;
   }
 
-  if (!IsPlain(el_ty)) {  // Check must come before GetDefaultAlignAndSize()
-    AddError(el_ty->FriendlyName(builder_->Symbols()) +
+  if (!IsPlain(elem_type)) {  // Check must come before GetDefaultAlignAndSize()
+    AddError(elem_type->FriendlyName(builder_->Symbols()) +
                  " cannot be used as an element type of an array",
              source);
     return nullptr;
   }
 
-  uint32_t el_align = el_ty->Align();
-  uint32_t el_size = el_ty->Size();
+  uint32_t el_align = elem_type->Align();
+  uint32_t el_size = elem_type->Size();
 
   if (!ValidateNoDuplicateDecorations(arr->decorations())) {
     return nullptr;
@@ -3781,14 +3801,23 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
   // WebGPU requires runtime arrays have at least one element, but the AST
   // records an element count of 0 for it.
   auto size = std::max<uint32_t>(arr->size(), 1) * stride;
-  auto* sem = builder_->create<sem::Array>(el_ty, arr->size(), el_align, size,
-                                           stride, implicit_stride);
+  auto* out = builder_->create<sem::Array>(elem_type, arr->size(), el_align,
+                                           size, stride, implicit_stride);
 
-  if (!ValidateArray(sem, source)) {
+  if (!ValidateArray(out, source)) {
     return nullptr;
   }
 
-  return sem;
+  if (elem_type->Is<sem::Atomic>()) {
+    atomic_composite_info_.emplace(out, arr->type()->source());
+  } else {
+    auto found = atomic_composite_info_.find(elem_type);
+    if (found != atomic_composite_info_.end()) {
+      atomic_composite_info_.emplace(out, found->second);
+    }
+  }
+
+  return out;
 }
 
 bool Resolver::ValidateArray(const sem::Array* arr, const Source& source) {
@@ -4090,11 +4119,18 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
       builder_->create<sem::Struct>(str, str->name(), sem_members, struct_align,
                                     struct_size, size_no_padding);
 
-  // Keep track of atomic members for validation after all usages have been
-  // determined.
   for (size_t i = 0; i < sem_members.size(); i++) {
-    if (sem_members[i]->Type()->Is<sem::Atomic>()) {
-      atomic_members_.emplace_back(StructMember{out, i});
+    auto* mem_type = sem_members[i]->Type();
+    if (mem_type->Is<sem::Atomic>()) {
+      atomic_composite_info_.emplace(out,
+                                     sem_members[i]->Declaration()->source());
+      break;
+    } else {
+      auto found = atomic_composite_info_.find(mem_type);
+      if (found != atomic_composite_info_.end()) {
+        atomic_composite_info_.emplace(out, found->second);
+        break;
+      }
     }
   }
 
