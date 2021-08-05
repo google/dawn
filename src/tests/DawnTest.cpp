@@ -786,7 +786,7 @@ bool DawnTestBase::IsLinux() const {
 }
 
 bool DawnTestBase::IsMacOS(int32_t majorVersion, int32_t minorVersion) const {
-#ifdef DAWN_PLATFORM_APPLE
+#ifdef DAWN_PLATFORM_MACOS
     if (majorVersion == -1 && minorVersion == -1) {
         return true;
     }
