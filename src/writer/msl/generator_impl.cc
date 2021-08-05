@@ -1531,6 +1531,8 @@ std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
       return "sample_id";
     case ast::Builtin::kSampleMask:
       return "sample_mask";
+    case ast::Builtin::kPointSize:
+      return "point_size";
     default:
       break;
   }

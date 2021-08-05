@@ -40,6 +40,10 @@ struct Options {
   /// Defaults to 0xFFFFFFFF.
   uint32_t fixed_sample_mask = 0xFFFFFFFF;
 
+  /// Set to `true` to generate a [[point_size]] attribute which is set to 1.0
+  /// for all vertex shaders in the module.
+  bool emit_vertex_point_size = false;
+
   /// Set to `true` to disable workgroup memory zero initialization
   bool disable_workgroup_init = false;
 };

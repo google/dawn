@@ -96,7 +96,10 @@ class CanonicalizeEntryPointIO
     /// Constructor
     /// @param builtins the approach to use for emitting builtins.
     /// @param sample_mask an optional sample mask to combine with shader masks
-    explicit Config(BuiltinStyle builtins, uint32_t sample_mask = 0xFFFFFFFF);
+    /// @param emit_vertex_point_size `true` to generate a pointsize builtin
+    explicit Config(BuiltinStyle builtins,
+                    uint32_t sample_mask = 0xFFFFFFFF,
+                    bool emit_vertex_point_size = false);
 
     /// Copy constructor
     Config(const Config&);
@@ -109,6 +112,10 @@ class CanonicalizeEntryPointIO
 
     /// A fixed sample mask to combine into masks produced by fragment shaders.
     uint32_t const fixed_sample_mask;
+
+    /// Set to `true` to generate a pointsize builtin and have it set to 1.0
+    /// from all vertex shaders in the module.
+    bool const emit_vertex_point_size;
   };
 
   /// Constructor

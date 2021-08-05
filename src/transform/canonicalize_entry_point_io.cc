@@ -289,6 +289,13 @@ struct CanonicalizeEntryPointIO::State {
               ctx.dst->Expr(cfg.fixed_sample_mask));
   }
 
+  /// Add a point size builtin to the wrapper function output.
+  void AddVertexPointSize() {
+    // Create a new output value and assign it a literal 1.0 value.
+    AddOutput("vertex_point_size", ctx.dst->ty.f32(),
+              {ctx.dst->Builtin(ast::Builtin::kPointSize)}, ctx.dst->Expr(1.f));
+  }
+
   /// Create the wrapper function's struct parameter and type objects.
   void CreateInputStruct() {
     // Sort the struct members to satisfy HLSL interfacing matching rules.
@@ -376,14 +383,20 @@ struct CanonicalizeEntryPointIO::State {
   /// Process the entry point function.
   void Process() {
     bool needs_fixed_sample_mask = false;
+    bool needs_vertex_point_size = false;
     if (func_ast->pipeline_stage() == ast::PipelineStage::kFragment &&
         cfg.fixed_sample_mask != 0xFFFFFFFF) {
       needs_fixed_sample_mask = true;
     }
+    if (func_ast->pipeline_stage() == ast::PipelineStage::kVertex &&
+        cfg.emit_vertex_point_size) {
+      needs_vertex_point_size = true;
+    }
 
     // Exit early if there is no shader IO to handle.
     if (func_sem->Parameters().size() == 0 &&
-        func_sem->ReturnType()->Is<sem::Void>() && !needs_fixed_sample_mask) {
+        func_sem->ReturnType()->Is<sem::Void>() && !needs_fixed_sample_mask &&
+        !needs_vertex_point_size) {
       return;
     }
 
@@ -428,6 +441,11 @@ struct CanonicalizeEntryPointIO::State {
     // Add a fixed sample mask, if necessary.
     if (needs_fixed_sample_mask) {
       AddFixedSampleMask();
+    }
+
+    // Add the pointsize builtin, if necessary.
+    if (needs_vertex_point_size) {
+      AddVertexPointSize();
     }
 
     // Produce the entry point outputs, if necessary.
@@ -488,8 +506,11 @@ void CanonicalizeEntryPointIO::Run(CloneContext& ctx,
 }
 
 CanonicalizeEntryPointIO::Config::Config(BuiltinStyle builtins,
-                                         uint32_t sample_mask)
-    : builtin_style(builtins), fixed_sample_mask(sample_mask) {}
+                                         uint32_t sample_mask,
+                                         bool emit_point_size)
+    : builtin_style(builtins),
+      fixed_sample_mask(sample_mask),
+      emit_vertex_point_size(emit_point_size) {}
 
 CanonicalizeEntryPointIO::Config::Config(const Config&) = default;
 CanonicalizeEntryPointIO::Config::~Config() = default;

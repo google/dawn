@@ -1424,6 +1424,141 @@ fn frag_main() -> tint_symbol {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_ReturnNonStruct) {
+  auto* src = R"(
+[[stage(vertex)]]
+fn vert_main() -> [[builtin(position)]] vec4<f32> {
+  return vec4<f32>();
+}
+)";
+
+  auto* expect = R"(
+struct tint_symbol {
+  [[builtin(position)]]
+  value : vec4<f32>;
+  [[builtin(pointsize)]]
+  vertex_point_size : f32;
+};
+
+fn vert_main_inner() -> vec4<f32> {
+  return vec4<f32>();
+}
+
+[[stage(vertex)]]
+fn vert_main() -> tint_symbol {
+  let inner_result = vert_main_inner();
+  var wrapper_result : tint_symbol;
+  wrapper_result.value = inner_result;
+  wrapper_result.vertex_point_size = 1.0;
+  return wrapper_result;
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0xFFFFFFFF, true);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_ReturnStruct) {
+  auto* src = R"(
+struct VertOut {
+  [[builtin(position)]] pos : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn vert_main() -> VertOut {
+  return VertOut();
+}
+)";
+
+  auto* expect = R"(
+struct VertOut {
+  pos : vec4<f32>;
+};
+
+struct tint_symbol {
+  [[builtin(position)]]
+  pos : vec4<f32>;
+  [[builtin(pointsize)]]
+  vertex_point_size : f32;
+};
+
+fn vert_main_inner() -> VertOut {
+  return VertOut();
+}
+
+[[stage(vertex)]]
+fn vert_main() -> tint_symbol {
+  let inner_result = vert_main_inner();
+  var wrapper_result : tint_symbol;
+  wrapper_result.pos = inner_result.pos;
+  wrapper_result.vertex_point_size = 1.0;
+  return wrapper_result;
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0xFFFFFFFF, true);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_AvoidNameClash) {
+  auto* src = R"(
+struct VertOut {
+  [[location(0)]] vertex_point_size : vec4<f32>;
+  [[builtin(position)]] vertex_point_size_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn vert_main() -> VertOut {
+  return VertOut();
+}
+)";
+
+  auto* expect = R"(
+struct VertOut {
+  vertex_point_size : vec4<f32>;
+  vertex_point_size_1 : vec4<f32>;
+};
+
+struct tint_symbol {
+  [[location(0)]]
+  vertex_point_size : vec4<f32>;
+  [[builtin(position)]]
+  vertex_point_size_1 : vec4<f32>;
+  [[builtin(pointsize)]]
+  vertex_point_size_2 : f32;
+};
+
+fn vert_main_inner() -> VertOut {
+  return VertOut();
+}
+
+[[stage(vertex)]]
+fn vert_main() -> tint_symbol {
+  let inner_result = vert_main_inner();
+  var wrapper_result : tint_symbol;
+  wrapper_result.vertex_point_size = inner_result.vertex_point_size;
+  wrapper_result.vertex_point_size_1 = inner_result.vertex_point_size_1;
+  wrapper_result.vertex_point_size_2 = 1.0;
+  return wrapper_result;
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0xFFFFFFFF, true);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace transform
 }  // namespace tint

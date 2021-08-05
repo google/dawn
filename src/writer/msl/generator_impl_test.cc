@@ -86,7 +86,8 @@ INSTANTIATE_TEST_SUITE_P(
                     MslBuiltinData{ast::Builtin::kWorkgroupId,
                                    "threadgroup_position_in_grid"},
                     MslBuiltinData{ast::Builtin::kSampleIndex, "sample_id"},
-                    MslBuiltinData{ast::Builtin::kSampleMask, "sample_mask"}));
+                    MslBuiltinData{ast::Builtin::kSampleMask, "sample_mask"},
+                    MslBuiltinData{ast::Builtin::kPointSize, "point_size"}));
 
 TEST_F(MslGeneratorImplTest, HasInvariantAttribute_True) {
   auto* out = Structure(

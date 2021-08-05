@@ -55,14 +55,17 @@ Output Msl::Run(const Program* in, const DataMap& inputs) {
   // Build the configs for the internal transforms.
   uint32_t buffer_size_ubo_index = kDefaultBufferSizeUniformIndex;
   uint32_t fixed_sample_mask = 0xFFFFFFFF;
+  bool emit_point_size = false;
   if (cfg) {
     buffer_size_ubo_index = cfg->buffer_size_ubo_index;
     fixed_sample_mask = cfg->fixed_sample_mask;
+    emit_point_size = cfg->emit_vertex_point_size;
   }
   auto array_length_from_uniform_cfg = ArrayLengthFromUniform::Config(
       sem::BindingPoint{0, buffer_size_ubo_index});
   auto entry_point_io_cfg = CanonicalizeEntryPointIO::Config(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, fixed_sample_mask);
+      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, fixed_sample_mask,
+      emit_point_size);
 
   // Use the SSBO binding numbers as the indices for the buffer size lookups.
   for (auto* var : in->AST().GlobalVariables()) {
@@ -310,9 +313,11 @@ void Msl::HandleModuleScopeVariables(CloneContext& ctx) const {
 
 Msl::Config::Config(uint32_t buffer_size_ubo_idx,
                     uint32_t sample_mask,
+                    bool emit_point_size,
                     bool disable_wi)
     : buffer_size_ubo_index(buffer_size_ubo_idx),
       fixed_sample_mask(sample_mask),
+      emit_vertex_point_size(emit_point_size),
       disable_workgroup_init(disable_wi) {}
 Msl::Config::Config(const Config&) = default;
 Msl::Config::~Config() = default;

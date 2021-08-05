@@ -31,9 +31,9 @@ Result Generate(const Program* program, const Options& options) {
   // Run the MSL sanitizer.
   transform::Msl sanitizer;
   transform::DataMap transform_input;
-  transform_input.Add<transform::Msl::Config>(options.buffer_size_ubo_index,
-                                              options.fixed_sample_mask,
-                                              options.disable_workgroup_init);
+  transform_input.Add<transform::Msl::Config>(
+      options.buffer_size_ubo_index, options.fixed_sample_mask,
+      options.emit_vertex_point_size, options.disable_workgroup_init);
   auto output = sanitizer.Run(program, transform_input);
   if (!output.program.IsValid()) {
     result.success = false;
