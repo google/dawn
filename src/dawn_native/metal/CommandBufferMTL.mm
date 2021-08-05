@@ -359,13 +359,14 @@ namespace dawn_native { namespace metal {
 
             template <typename Encoder>
             void Apply(Encoder encoder) {
+                BeforeApply();
                 for (BindGroupIndex index :
                      IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
                     ApplyBindGroup(encoder, index, ToBackend(mBindGroups[index]),
                                    mDynamicOffsetCounts[index], mDynamicOffsets[index].data(),
                                    ToBackend(mPipelineLayout));
                 }
-                DidApply();
+                AfterApply();
             }
 
           private:

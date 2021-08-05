@@ -130,6 +130,7 @@ namespace dawn_native { namespace vulkan {
             void Apply(Device* device,
                        CommandRecordingContext* recordingContext,
                        VkPipelineBindPoint bindPoint) {
+                BeforeApply();
                 for (BindGroupIndex dirtyIndex :
                      IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
                     VkDescriptorSet set = ToBackend(mBindGroups[dirtyIndex])->GetHandle();
@@ -141,7 +142,7 @@ namespace dawn_native { namespace vulkan {
                         ToBackend(mPipelineLayout)->GetHandle(), static_cast<uint32_t>(dirtyIndex),
                         1, &*set, mDynamicOffsetCounts[dirtyIndex], dynamicOffset);
                 }
-                DidApply();
+                AfterApply();
             }
         };
 

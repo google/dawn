@@ -60,13 +60,16 @@ namespace dawn_native {
 
         void OnSetPipeline(PipelineBase* pipeline) {
             mPipelineLayout = pipeline->GetLayout();
+        }
+
+      protected:
+        // The Derived class should call this before it applies bind groups.
+        void BeforeApply() {
             if (mLastAppliedPipelineLayout == mPipelineLayout) {
                 return;
             }
 
-            // Keep track of the bind group layout mask to avoid marking unused bind groups as
-            // dirty. This also allows us to avoid computing the intersection of the dirty bind
-            // groups and bind group layout mask in Draw or Dispatch which is very hot code.
+            // Use the bind group layout mask to avoid marking unused bind groups as dirty.
             mBindGroupLayoutsMask = mPipelineLayout->GetBindGroupLayoutsMask();
 
             // Changing the pipeline layout sets bind groups as dirty. If CanInheritBindGroups,
@@ -88,13 +91,15 @@ namespace dawn_native {
             }
         }
 
-      protected:
-        // The Derived class should call this when it applies bind groups.
-        void DidApply() {
+        // The Derived class should call this after it applies bind groups.
+        void AfterApply() {
             // Reset all dirty bind groups. Dirty bind groups not in the bind group layout mask
             // will be dirtied again by the next pipeline change.
             mDirtyBindGroups.reset();
             mDirtyBindGroupsObjectChangedOrIsDynamic.reset();
+            // Keep track of the last applied pipeline layout. This allows us to avoid computing
+            // the intersection of the dirty bind groups and bind group layout mask in next Draw
+            // or Dispatch (which is very hot code) until the layout is changed again.
             mLastAppliedPipelineLayout = mPipelineLayout;
         }
 

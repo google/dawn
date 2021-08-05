@@ -338,6 +338,8 @@ namespace dawn_native { namespace d3d12 {
         }
 
         MaybeError Apply(CommandRecordingContext* commandContext) {
+            BeforeApply();
+
             // Bindgroups are allocated in shader-visible descriptor heaps which are managed by a
             // ringbuffer. There can be a single shader-visible descriptor heap of each type bound
             // at any given time. This means that when we switch heaps, all other currently bound
@@ -389,7 +391,7 @@ namespace dawn_native { namespace d3d12 {
                                mDynamicOffsetCounts[index], mDynamicOffsets[index].data());
             }
 
-            DidApply();
+            AfterApply();
 
             return {};
         }
