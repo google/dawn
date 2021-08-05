@@ -39,6 +39,15 @@ std::vector<size_t> FindDelimiterIndices(const std::string& delimiter,
 std::vector<std::pair<size_t, size_t>> GetIdentifiers(
     const std::string& wgsl_code);
 
+/// A function that returns returns the starting position
+/// and the length of all the integer literals in a WGSL-like string.
+/// @param wgsl_code - the WGSL-like string where the int literals
+/// will be found.
+/// @return a vector with the starting positions and the length
+/// of all the integer literals.
+std::vector<std::pair<size_t, size_t>> GetIntLiterals(
+    const std::string& wgsl_code);
+
 /// Given 4 indices, idx1, idx2, idx3 and idx4 it swaps the regions
 /// in the interval (idx1, idx2] with the region in the interval (idx3, idx4]
 /// in wgsl_text.
@@ -74,15 +83,27 @@ void DuplicateInterval(size_t idx1,
 /// Replaces a region of a WGSL-like string of length id2_len starting
 /// at position idx2 with a region of length id1_len starting at
 /// position idx1.
-/// @param idx1    -   starting position of the first region.
-/// @param id1_len -   length of the first region.
-/// @param idx2    -   starting position of the second region.
-/// @param id2_len -   length of the second region.
+/// @param idx1 - starting position of the first region.
+/// @param id1_len - length of the first region.
+/// @param idx2 - starting position of the second region.
+/// @param id2_len - length of the second region.
+/// @param wgsl_code - the string where the replacement will occur.
 void ReplaceRegion(size_t idx1,
                    size_t id1_len,
                    size_t idx2,
                    size_t id2_len,
                    std::string& wgsl_code);
+
+/// Replaces an interval of length interval1_len starting at start_index
+/// with the interval interval2.
+/// @param start_index - starting position of the interval to be replaced.
+/// @param interval1_len - length of the interval to be replaced.
+/// @param replacement_text - the interval that will be used as a replacement.
+/// @param wgsl_code - the WGSL-like string where the replacement will occur.
+void ReplaceInterval(size_t start_index,
+                     size_t length,
+                     std::string replacement_text,
+                     std::string& wgsl_code);
 
 /// A function that, given WGSL-like string and a delimiter,
 /// generates another WGSL-like string by picking two random regions
@@ -117,12 +138,18 @@ bool DuplicateRandomInterval(const std::string& delimiter,
                              std::string& wgsl_code,
                              std::mt19937& generator);
 
-/// Replaces a random identifier in wgsl_code.
+/// Replaces a randomly-chosen identifier in wgsl_code.
 /// @param wgsl_code - WGSL-like string where the replacement will occur.
 /// @param generator - the random number generator.
 /// @return true if a replacement happened or false otherwise.
-
 bool ReplaceRandomIdentifier(std::string& wgsl_code, std::mt19937& generator);
+
+/// Replaces the value of a randomly-chosen integer with one of
+/// the values in the set {INT_MAX, INT_MIN, 0, -1}.
+/// @param wgsl_code - WGSL-like string where the replacement will occur.
+/// @param generator - the random number generator.
+/// @return true if a replacement happened or false otherwise.
+bool ReplaceRandomIntLiteral(std::string& wgsl_code, std::mt19937& generator);
 
 }  // namespace regex_fuzzer
 }  // namespace fuzzers

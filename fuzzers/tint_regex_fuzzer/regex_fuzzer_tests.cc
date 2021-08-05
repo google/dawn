@@ -226,6 +226,40 @@ TEST(GetIdentifierTest, GetIdentifierTest1) {
   ASSERT_EQ(ground_truth, identifiers_pos);
 }
 
+TEST(TestGetLiteralsValues, TestGetLiteralsValues1) {
+  std::string wgsl_code =
+      "fn clamp_0acf8f() {"
+      "var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>());}"
+      "[[stage(vertex)]]"
+      "fn vertex_main() -> [[builtin(position)]] vec4<f32> {"
+      "  clamp_0acf8f();"
+      "var foo_1: i32 = 3;"
+      "  return vec4<f32>();}"
+      "[[stage(fragment)]]"
+      "fn fragment_main() {"
+      "  clamp_0acf8f();}"
+      "[[stage(compute), workgroup_size(1)]]"
+      "fn compute_main() {"
+      "var<private> foo: f32 = 0.0;"
+      "var foo_2: i32 = 10;"
+      "  clamp_0acf8f();}"
+      "foo_1 = 5 + 7;"
+      "var foo_3 : i32 = -20;";
+
+  std::vector<std::pair<size_t, size_t>> literals_pos =
+      GetIntLiterals(wgsl_code);
+
+  std::vector<std::string> ground_truth = {"3", "10", "5", "7", "-20"};
+
+  std::vector<std::string> result;
+
+  for (auto pos : literals_pos) {
+    result.push_back(wgsl_code.substr(pos.first, pos.second));
+  }
+
+  ASSERT_EQ(ground_truth, result);
+}
+
 }  // namespace
 }  // namespace regex_fuzzer
 }  // namespace fuzzers

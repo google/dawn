@@ -67,6 +67,29 @@ std::vector<std::pair<size_t, size_t>> GetIdentifiers(
   return result;
 }
 
+std::vector<std::pair<size_t, size_t>> GetIntLiterals(const std::string& s) {
+  std::vector<std::pair<size_t, size_t>> result;
+
+  // Looks for integer literals in decimal or hexadecimal form.
+  // Regex obtained here: https://www.w3.org/TR/WGSL/#literals
+  std::regex int_literal_regex("-?0x[0-9a-fA-F]+ | 0 | -?[1-9][0-9]*");
+  std::regex uint_literal_regex("0x[0-9a-fA-F]+u | 0u | [1-9][0-9]*u");
+  std::smatch match;
+
+  std::string::const_iterator search_start(s.cbegin());
+  std::string prefix = "";
+
+  while (regex_search(search_start, s.cend(), match, int_literal_regex) ||
+         regex_search(search_start, s.cend(), match, uint_literal_regex)) {
+    prefix += match.prefix();
+    result.push_back(
+        std::make_pair(prefix.size() + 1, match.str(0).size() - 1));
+    prefix += match.str(0);
+    search_start = match.suffix().first;
+  }
+  return result;
+}
+
 void SwapIntervals(size_t idx1,
                    size_t reg1_len,
                    size_t idx2,
@@ -76,7 +99,7 @@ void SwapIntervals(size_t idx1,
 
   std::string region_2 = wgsl_code.substr(idx2 + 1, reg2_len - 1);
 
-  // The second transformation is done first as it doesn't affect ind1 and ind2
+  // The second transformation is done first as it doesn't affect idx2.
   wgsl_code.replace(idx2 + 1, region_2.size(), region_1);
 
   wgsl_code.replace(idx1 + 1, region_1.size(), region_2);
@@ -102,6 +125,14 @@ void ReplaceRegion(size_t idx1,
   std::string region_1 = wgsl_code.substr(idx1, id1_len);
   std::string region_2 = wgsl_code.substr(idx2, id2_len);
   wgsl_code.replace(idx2, region_2.size(), region_1);
+}
+
+void ReplaceInterval(size_t start_index,
+                     size_t length,
+                     std::string replacement_text,
+                     std::string& wgsl_code) {
+  std::string region_1 = wgsl_code.substr(start_index, length);
+  wgsl_code.replace(start_index, length, replacement_text);
 }
 
 bool SwapRandomIntervals(const std::string& delimiter,
@@ -207,6 +238,29 @@ bool ReplaceRandomIdentifier(std::string& wgsl_code, std::mt19937& generator) {
   ReplaceRegion(identifiers[id1_index].first, identifiers[id1_index].second,
                 identifiers[id2_index].first, identifiers[id2_index].second,
                 wgsl_code);
+
+  return true;
+}
+
+bool ReplaceRandomIntLiteral(std::string& wgsl_code, std::mt19937& generator) {
+  std::vector<std::pair<size_t, size_t>> literals = GetIntLiterals(wgsl_code);
+
+  // Need at least one integer literal
+  if (literals.size() < 1) {
+    return false;
+  }
+
+  size_t id1_index = GetRandomIntFromRange(0, literals.size() - 1U, generator);
+
+  // INT_MAX = 2147483647, INT_MIN = -2147483648
+  std::vector<std::string> boundary_values = {
+      "2147483647", "-2147483648", "1", "-1", "0", "4294967295"};
+
+  size_t boundary_index =
+      GetRandomIntFromRange(0, boundary_values.size() - 1U, generator);
+
+  ReplaceInterval(literals[id1_index].first, literals[id1_index].second,
+                  boundary_values[boundary_index], wgsl_code);
 
   return true;
 }
