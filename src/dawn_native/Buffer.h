@@ -54,6 +54,7 @@ namespace dawn_native {
         static BufferBase* MakeError(DeviceBase* device, const BufferDescriptor* descriptor);
 
         uint64_t GetSize() const;
+        uint64_t GetAllocatedSize() const;
         wgpu::BufferUsage GetUsage() const;
 
         MaybeError MapAtCreation();
@@ -88,6 +89,8 @@ namespace dawn_native {
         void DestroyInternal();
 
         MaybeError MapAtCreationInternal();
+
+        uint64_t mAllocatedSize = 0;
 
       private:
         virtual MaybeError MapAtCreationImpl() = 0;

@@ -35,7 +35,8 @@ namespace dawn_native { namespace opengl {
 
     Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
         : BufferBase(device, descriptor) {
-        uint64_t size = GetAppliedSize();
+        // Allocate at least 4 bytes so clamped accesses are always in bounds.
+        mAllocatedSize = std::max(GetSize(), uint64_t(4u));
 
         device->gl.GenBuffers(1, &mBuffer);
         device->gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
@@ -44,10 +45,11 @@ namespace dawn_native { namespace opengl {
         // BufferBase::MapAtCreation().
         if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting) &&
             !descriptor->mappedAtCreation) {
-            std::vector<uint8_t> clearValues(size, 1u);
-            device->gl.BufferData(GL_ARRAY_BUFFER, size, clearValues.data(), GL_STATIC_DRAW);
+            std::vector<uint8_t> clearValues(mAllocatedSize, 1u);
+            device->gl.BufferData(GL_ARRAY_BUFFER, mAllocatedSize, clearValues.data(),
+                                  GL_STATIC_DRAW);
         } else {
-            device->gl.BufferData(GL_ARRAY_BUFFER, size, nullptr, GL_STATIC_DRAW);
+            device->gl.BufferData(GL_ARRAY_BUFFER, mAllocatedSize, nullptr, GL_STATIC_DRAW);
         }
     }
 
@@ -64,10 +66,6 @@ namespace dawn_native { namespace opengl {
 
     GLuint Buffer::GetHandle() const {
         return mBuffer;
-    }
-
-    uint64_t Buffer::GetAppliedSize() const {
-        return std::max(GetSize(), uint64_t(4u));
     }
 
     void Buffer::EnsureDataInitialized() {
@@ -109,7 +107,7 @@ namespace dawn_native { namespace opengl {
         ASSERT(GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse));
         ASSERT(!IsDataInitialized());
 
-        const uint64_t size = GetAppliedSize();
+        const uint64_t size = GetAllocatedSize();
         Device* device = ToBackend(GetDevice());
 
         const std::vector<uint8_t> clearValues(size, 0u);

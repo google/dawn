@@ -102,17 +102,25 @@ namespace dawn_native { namespace d3d12 {
     }
 
     MaybeError Buffer::Initialize(bool mappedAtCreation) {
-        D3D12_RESOURCE_DESC resourceDescriptor;
-        resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-        resourceDescriptor.Alignment = 0;
         // D3D buffers are always resource size aligned to 64KB. However, D3D12's validation forbids
         // binding a CBV to an unaligned size. To prevent, one can always safely align the buffer
         // desc size to the CBV data alignment as other buffer usages ignore it (no size check).
         // The validation will still enforce bound checks with the unaligned size returned by
         // GetSize().
         // https://docs.microsoft.com/en-us/windows/win32/direct3d12/uploading-resources#buffer-alignment
-        resourceDescriptor.Width =
-            Align(std::max(GetSize(), uint64_t(4u)), D3D12BufferSizeAlignment(GetUsage()));
+        // Allocate at least 4 bytes so clamped accesses are always in bounds.
+        uint64_t size = std::max(GetSize(), uint64_t(4u));
+        size_t alignment = D3D12BufferSizeAlignment(GetUsage());
+        if (size > std::numeric_limits<uint64_t>::max() - alignment) {
+            // Alignment would overlow.
+            return DAWN_OUT_OF_MEMORY_ERROR("Buffer allocation is too large");
+        }
+        mAllocatedSize = Align(size, alignment);
+
+        D3D12_RESOURCE_DESC resourceDescriptor;
+        resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+        resourceDescriptor.Alignment = 0;
+        resourceDescriptor.Width = mAllocatedSize;
         resourceDescriptor.Height = 1;
         resourceDescriptor.DepthOrArraySize = 1;
         resourceDescriptor.MipLevels = 1;
@@ -328,7 +336,7 @@ namespace dawn_native { namespace d3d12 {
 
         // The buffers with mappedAtCreation == true will be initialized in
         // BufferBase::MapAtCreation().
-        DAWN_TRY(MapInternal(true, 0, size_t(GetSize()), "D3D12 map at creation"));
+        DAWN_TRY(MapInternal(true, 0, size_t(GetAllocatedSize()), "D3D12 map at creation"));
 
         return {};
     }
@@ -442,22 +450,23 @@ namespace dawn_native { namespace d3d12 {
         // The state of the buffers on UPLOAD heap must always be GENERIC_READ and cannot be
         // changed away, so we can only clear such buffer with buffer mapping.
         if (D3D12HeapType(GetUsage()) == D3D12_HEAP_TYPE_UPLOAD) {
-            DAWN_TRY(MapInternal(true, 0, size_t(GetSize()), "D3D12 map at clear buffer"));
-            memset(mMappedData, clearValue, GetSize());
+            DAWN_TRY(MapInternal(true, 0, size_t(GetAllocatedSize()), "D3D12 map at clear buffer"));
+            memset(mMappedData, clearValue, GetAllocatedSize());
             UnmapImpl();
         } else {
             // TODO(crbug.com/dawn/852): use ClearUnorderedAccessView*() when the buffer usage
             // includes STORAGE.
             DynamicUploader* uploader = device->GetDynamicUploader();
             UploadHandle uploadHandle;
-            DAWN_TRY_ASSIGN(uploadHandle,
-                            uploader->Allocate(GetSize(), device->GetPendingCommandSerial(),
-                                               kCopyBufferToBufferOffsetAlignment));
+            DAWN_TRY_ASSIGN(uploadHandle, uploader->Allocate(GetAllocatedSize(),
+                                                             device->GetPendingCommandSerial(),
+                                                             kCopyBufferToBufferOffsetAlignment));
 
-            memset(uploadHandle.mappedBuffer, clearValue, GetSize());
+            memset(uploadHandle.mappedBuffer, clearValue, GetAllocatedSize());
 
             device->CopyFromStagingToBufferImpl(commandContext, uploadHandle.stagingBuffer,
-                                                uploadHandle.startOffset, this, 0, GetSize());
+                                                uploadHandle.startOffset, this, 0,
+                                                GetAllocatedSize());
         }
 
         return {};

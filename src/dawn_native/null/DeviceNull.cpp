@@ -265,6 +265,7 @@ namespace dawn_native { namespace null {
     Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
         : BufferBase(device, descriptor) {
         mBackingData = std::unique_ptr<uint8_t[]>(new uint8_t[GetSize()]);
+        mAllocatedSize = GetSize();
     }
 
     Buffer::~Buffer() {
