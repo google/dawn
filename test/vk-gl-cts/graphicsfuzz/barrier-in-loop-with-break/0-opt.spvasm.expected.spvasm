@@ -1,12 +1,13 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 81
+; Bound: 86
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %main "main" %tint_symbol
+               OpEntryPoint GLCompute %main "main" %gl_LocalInvocationID_param_1
                OpExecutionMode %main LocalSize 16 1 1
+               OpName %gl_LocalInvocationID_param_1 "gl_LocalInvocationID_param_1"
                OpName %gl_LocalInvocationID "gl_LocalInvocationID"
                OpName %doesNotMatter "doesNotMatter"
                OpMemberName %doesNotMatter 0 "global_seed"
@@ -15,12 +16,14 @@
                OpName %buf1 "buf1"
                OpMemberName %buf1 0 "injectionSwitch"
                OpName %x_10 "x_10"
-               OpName %tint_symbol "tint_symbol"
                OpName %main_1 "main_1"
                OpName %lid "lid"
                OpName %val "val"
                OpName %i "i"
+               OpName %main_inner "main_inner"
+               OpName %gl_LocalInvocationID_param "gl_LocalInvocationID_param"
                OpName %main "main"
+               OpDecorate %gl_LocalInvocationID_param_1 BuiltIn LocalInvocationId
                OpDecorate %doesNotMatter Block
                OpMemberDecorate %doesNotMatter 0 Offset 0
                OpMemberDecorate %doesNotMatter 1 Offset 4
@@ -32,12 +35,13 @@
                OpDecorate %x_10 NonWritable
                OpDecorate %x_10 DescriptorSet 0
                OpDecorate %x_10 Binding 1
-               OpDecorate %tint_symbol BuiltIn LocalInvocationId
        %uint = OpTypeInt 32 0
      %v3uint = OpTypeVector %uint 3
+%_ptr_Input_v3uint = OpTypePointer Input %v3uint
+%gl_LocalInvocationID_param_1 = OpVariable %_ptr_Input_v3uint Input
 %_ptr_Private_v3uint = OpTypePointer Private %v3uint
-          %5 = OpConstantNull %v3uint
-%gl_LocalInvocationID = OpVariable %_ptr_Private_v3uint Private %5
+          %7 = OpConstantNull %v3uint
+%gl_LocalInvocationID = OpVariable %_ptr_Private_v3uint Private %7
         %int = OpTypeInt 32 1
 %_runtimearr_int = OpTypeRuntimeArray %int
 %doesNotMatter = OpTypeStruct %int %_runtimearr_int
@@ -48,8 +52,6 @@
        %buf1 = OpTypeStruct %v2float
 %_ptr_Uniform_buf1 = OpTypePointer Uniform %buf1
        %x_10 = OpVariable %_ptr_Uniform_buf1 Uniform
-%_ptr_Input_v3uint = OpTypePointer Input %v3uint
-%tint_symbol = OpVariable %_ptr_Input_v3uint Input
        %void = OpTypeVoid
          %18 = OpTypeFunction %void
 %_ptr_Function_int = OpTypePointer Function %int
@@ -67,6 +69,7 @@
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
      %int_42 = OpConstant %int 42
+         %77 = OpTypeFunction %void %v3uint
      %main_1 = OpFunction %void None %18
          %21 = OpLabel
         %lid = OpVariable %_ptr_Function_int Function %24
@@ -135,10 +138,16 @@
          %73 = OpLabel
                OpReturn
                OpFunctionEnd
+ %main_inner = OpFunction %void None %77
+%gl_LocalInvocationID_param = OpFunctionParameter %v3uint
+         %80 = OpLabel
+               OpStore %gl_LocalInvocationID %gl_LocalInvocationID_param
+         %81 = OpFunctionCall %void %main_1
+               OpReturn
+               OpFunctionEnd
        %main = OpFunction %void None %18
-         %78 = OpLabel
-         %79 = OpLoad %v3uint %tint_symbol
-               OpStore %gl_LocalInvocationID %79
-         %80 = OpFunctionCall %void %main_1
+         %83 = OpLabel
+         %85 = OpLoad %v3uint %gl_LocalInvocationID_param_1
+         %84 = OpFunctionCall %void %main_inner %85
                OpReturn
                OpFunctionEnd

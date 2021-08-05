@@ -24,9 +24,9 @@ namespace transform {
 /// interfaces into a form that the generators can handle. Each entry point
 /// function is stripped of all shader IO attributes and wrapped in a function
 /// that provides the shader interface.
-/// The transform config determines how shader IO parameters will be exposed.
-/// Entry point return values are always produced as a structure, and optionally
-/// include additional builtins as per the transform config.
+/// The transform config determines whether to use global variables, structures,
+/// or parameters for the shader inputs and outputs, and optionally adds
+/// additional builtins to the shader interface.
 ///
 /// Before:
 /// ```
@@ -83,21 +83,23 @@ namespace transform {
 class CanonicalizeEntryPointIO
     : public Castable<CanonicalizeEntryPointIO, Transform> {
  public:
-  /// BuiltinStyle is an enumerator of different ways to emit builtins.
-  enum class BuiltinStyle {
-    /// Use non-struct function parameters for all builtins.
-    kParameter,
-    /// Use struct members for all builtins.
-    kStructMember,
+  /// ShaderStyle is an enumerator of different ways to emit shader IO.
+  enum class ShaderStyle {
+    /// Target SPIR-V (using global variables).
+    kSpirv,
+    /// Target MSL (using non-struct function parameters for builtins).
+    kMsl,
+    /// Target HLSL (using structures for all IO).
+    kHlsl,
   };
 
   /// Configuration options for the transform.
   struct Config : public Castable<Config, Data> {
     /// Constructor
-    /// @param builtins the approach to use for emitting builtins.
+    /// @param style the approach to use for emitting shader IO.
     /// @param sample_mask an optional sample mask to combine with shader masks
     /// @param emit_vertex_point_size `true` to generate a pointsize builtin
-    explicit Config(BuiltinStyle builtins,
+    explicit Config(ShaderStyle style,
                     uint32_t sample_mask = 0xFFFFFFFF,
                     bool emit_vertex_point_size = false);
 
@@ -107,8 +109,8 @@ class CanonicalizeEntryPointIO
     /// Destructor
     ~Config() override;
 
-    /// The approach to use for emitting builtins.
-    BuiltinStyle const builtin_style;
+    /// The approach to use for emitting shader IO.
+    ShaderStyle const shader_style;
 
     /// A fixed sample mask to combine into masks produced by fragment shaders.
     uint32_t const fixed_sample_mask;

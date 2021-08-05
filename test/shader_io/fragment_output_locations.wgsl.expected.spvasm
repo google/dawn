@@ -1,108 +1,100 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 54
+; Bound: 50
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Fragment %main0 "main0" %tint_symbol_1
-               OpEntryPoint Fragment %main1 "main1" %tint_symbol_4
-               OpEntryPoint Fragment %main2 "main2" %tint_symbol_7
-               OpEntryPoint Fragment %main3 "main3" %tint_symbol_10
+               OpEntryPoint Fragment %main0 "main0" %value
+               OpEntryPoint Fragment %main1 "main1" %value_1
+               OpEntryPoint Fragment %main2 "main2" %value_2
+               OpEntryPoint Fragment %main3 "main3" %value_3
                OpExecutionMode %main0 OriginUpperLeft
                OpExecutionMode %main1 OriginUpperLeft
                OpExecutionMode %main2 OriginUpperLeft
                OpExecutionMode %main3 OriginUpperLeft
-               OpName %tint_symbol_1 "tint_symbol_1"
-               OpName %tint_symbol_4 "tint_symbol_4"
-               OpName %tint_symbol_7 "tint_symbol_7"
-               OpName %tint_symbol_10 "tint_symbol_10"
-               OpName %tint_symbol_2 "tint_symbol_2"
-               OpName %tint_symbol "tint_symbol"
+               OpName %value "value"
+               OpName %value_1 "value_1"
+               OpName %value_2 "value_2"
+               OpName %value_3 "value_3"
+               OpName %main0_inner "main0_inner"
                OpName %main0 "main0"
-               OpName %tint_symbol_5 "tint_symbol_5"
-               OpName %tint_symbol_3 "tint_symbol_3"
+               OpName %main1_inner "main1_inner"
                OpName %main1 "main1"
-               OpName %tint_symbol_8 "tint_symbol_8"
-               OpName %tint_symbol_6 "tint_symbol_6"
+               OpName %main2_inner "main2_inner"
                OpName %main2 "main2"
-               OpName %tint_symbol_11 "tint_symbol_11"
-               OpName %tint_symbol_9 "tint_symbol_9"
+               OpName %main3_inner "main3_inner"
                OpName %main3 "main3"
-               OpDecorate %tint_symbol_1 Location 0
-               OpDecorate %tint_symbol_4 Location 1
-               OpDecorate %tint_symbol_7 Location 2
-               OpDecorate %tint_symbol_10 Location 3
+               OpDecorate %value Location 0
+               OpDecorate %value_1 Location 1
+               OpDecorate %value_2 Location 2
+               OpDecorate %value_3 Location 3
         %int = OpTypeInt 32 1
 %_ptr_Output_int = OpTypePointer Output %int
           %4 = OpConstantNull %int
-%tint_symbol_1 = OpVariable %_ptr_Output_int Output %4
+      %value = OpVariable %_ptr_Output_int Output %4
        %uint = OpTypeInt 32 0
 %_ptr_Output_uint = OpTypePointer Output %uint
           %8 = OpConstantNull %uint
-%tint_symbol_4 = OpVariable %_ptr_Output_uint Output %8
+    %value_1 = OpVariable %_ptr_Output_uint Output %8
       %float = OpTypeFloat 32
 %_ptr_Output_float = OpTypePointer Output %float
          %12 = OpConstantNull %float
-%tint_symbol_7 = OpVariable %_ptr_Output_float Output %12
+    %value_2 = OpVariable %_ptr_Output_float Output %12
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float
          %16 = OpConstantNull %v4float
-%tint_symbol_10 = OpVariable %_ptr_Output_v4float Output %16
-       %void = OpTypeVoid
-         %17 = OpTypeFunction %void %int
-         %22 = OpTypeFunction %void
+    %value_3 = OpVariable %_ptr_Output_v4float Output %16
+         %17 = OpTypeFunction %int
       %int_1 = OpConstant %int 1
-         %27 = OpTypeFunction %void %uint
+       %void = OpTypeVoid
+         %21 = OpTypeFunction %void
+         %26 = OpTypeFunction %uint
      %uint_1 = OpConstant %uint 1
-         %35 = OpTypeFunction %void %float
+         %33 = OpTypeFunction %float
     %float_1 = OpConstant %float 1
-         %43 = OpTypeFunction %void %v4float
+         %40 = OpTypeFunction %v4float
     %float_2 = OpConstant %float 2
     %float_3 = OpConstant %float 3
     %float_4 = OpConstant %float 4
-         %53 = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
-%tint_symbol_2 = OpFunction %void None %17
-%tint_symbol = OpFunctionParameter %int
-         %21 = OpLabel
-               OpStore %tint_symbol_1 %tint_symbol
-               OpReturn
+         %46 = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
+%main0_inner = OpFunction %int None %17
+         %19 = OpLabel
+               OpReturnValue %int_1
                OpFunctionEnd
-      %main0 = OpFunction %void None %22
+      %main0 = OpFunction %void None %21
          %24 = OpLabel
-         %25 = OpFunctionCall %void %tint_symbol_2 %int_1
+         %25 = OpFunctionCall %int %main0_inner
+               OpStore %value %25
                OpReturn
                OpFunctionEnd
-%tint_symbol_5 = OpFunction %void None %27
-%tint_symbol_3 = OpFunctionParameter %uint
-         %30 = OpLabel
-               OpStore %tint_symbol_4 %tint_symbol_3
+%main1_inner = OpFunction %uint None %26
+         %28 = OpLabel
+               OpReturnValue %uint_1
+               OpFunctionEnd
+      %main1 = OpFunction %void None %21
+         %31 = OpLabel
+         %32 = OpFunctionCall %uint %main1_inner
+               OpStore %value_1 %32
                OpReturn
                OpFunctionEnd
-      %main1 = OpFunction %void None %22
-         %32 = OpLabel
-         %33 = OpFunctionCall %void %tint_symbol_5 %uint_1
-               OpReturn
+%main2_inner = OpFunction %float None %33
+         %35 = OpLabel
+               OpReturnValue %float_1
                OpFunctionEnd
-%tint_symbol_8 = OpFunction %void None %35
-%tint_symbol_6 = OpFunctionParameter %float
+      %main2 = OpFunction %void None %21
          %38 = OpLabel
-               OpStore %tint_symbol_7 %tint_symbol_6
+         %39 = OpFunctionCall %float %main2_inner
+               OpStore %value_2 %39
                OpReturn
                OpFunctionEnd
-      %main2 = OpFunction %void None %22
-         %40 = OpLabel
-         %41 = OpFunctionCall %void %tint_symbol_8 %float_1
-               OpReturn
+%main3_inner = OpFunction %v4float None %40
+         %42 = OpLabel
+               OpReturnValue %46
                OpFunctionEnd
-%tint_symbol_11 = OpFunction %void None %43
-%tint_symbol_9 = OpFunctionParameter %v4float
-         %46 = OpLabel
-               OpStore %tint_symbol_10 %tint_symbol_9
-               OpReturn
-               OpFunctionEnd
-      %main3 = OpFunction %void None %22
+      %main3 = OpFunction %void None %21
          %48 = OpLabel
-         %49 = OpFunctionCall %void %tint_symbol_11 %53
+         %49 = OpFunctionCall %v4float %main3_inner
+               OpStore %value_3 %49
                OpReturn
                OpFunctionEnd

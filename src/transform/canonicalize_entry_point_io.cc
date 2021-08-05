@@ -20,6 +20,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/ast/disable_validation_decoration.h"
 #include "src/program_builder.h"
 #include "src/sem/function.h"
 
@@ -148,11 +149,30 @@ struct CanonicalizeEntryPointIO::State {
   ast::Expression* AddInput(std::string name,
                             ast::Type* type,
                             ast::DecorationList attributes) {
-    if (cfg.builtin_style == BuiltinStyle::kParameter &&
-        ast::HasDecoration<ast::BuiltinDecoration>(attributes)) {
-      // If this input is a builtin and we are emitting those as parameters,
-      // then add it to the parameter list and pass it directly to the inner
-      // function.
+    if (cfg.shader_style == ShaderStyle::kSpirv) {
+      // Vulkan requires that integer user-defined fragment inputs are
+      // always decorated with `Flat`.
+      if (type->is_integer_scalar_or_vector() &&
+          ast::HasDecoration<ast::LocationDecoration>(attributes) &&
+          func_ast->pipeline_stage() == ast::PipelineStage::kFragment) {
+        attributes.push_back(ctx.dst->Interpolate(
+            ast::InterpolationType::kFlat, ast::InterpolationSampling::kNone));
+      }
+
+      // Disable validation for use of the `input` storage class.
+      attributes.push_back(
+          ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
+              ctx.dst->ID(), ast::DisabledValidation::kIgnoreStorageClass));
+
+      // Create the global variable and use its value for the shader input.
+      auto var = ctx.dst->Symbols().New(name);
+      ctx.dst->Global(var, type, ast::StorageClass::kInput,
+                      std::move(attributes));
+      return ctx.dst->Expr(var);
+    } else if (cfg.shader_style == ShaderStyle::kMsl &&
+               ast::HasDecoration<ast::BuiltinDecoration>(attributes)) {
+      // If this input is a builtin and we are targeting MSL, then add it to the
+      // parameter list and pass it directly to the inner function.
       wrapper_ep_parameters.push_back(
           ctx.dst->Param(name, type, std::move(attributes)));
       return ctx.dst->Expr(name);
@@ -173,6 +193,16 @@ struct CanonicalizeEntryPointIO::State {
                  ast::Type* type,
                  ast::DecorationList attributes,
                  ast::Expression* value) {
+    // Vulkan requires that integer user-defined vertex outputs are
+    // always decorated with `Flat`.
+    if (cfg.shader_style == ShaderStyle::kSpirv &&
+        type->is_integer_scalar_or_vector() &&
+        ast::HasDecoration<ast::LocationDecoration>(attributes) &&
+        func_ast->pipeline_stage() == ast::PipelineStage::kVertex) {
+      attributes.push_back(ctx.dst->Interpolate(
+          ast::InterpolationType::kFlat, ast::InterpolationSampling::kNone));
+    }
+
     OutputValue output;
     output.name = name;
     output.type = type;
@@ -359,6 +389,23 @@ struct CanonicalizeEntryPointIO::State {
     return out_struct;
   }
 
+  /// Create and assign the wrapper function's output variables.
+  void CreateOutputVariables() {
+    for (auto& outval : wrapper_output_values) {
+      // Disable validation for use of the `output` storage class.
+      ast::DecorationList attributes = std::move(outval.attributes);
+      attributes.push_back(
+          ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
+              ctx.dst->ID(), ast::DisabledValidation::kIgnoreStorageClass));
+
+      // Create the global variable and assign it the output value.
+      auto name = ctx.dst->Symbols().New(outval.name);
+      ctx.dst->Global(name, outval.type, ast::StorageClass::kOutput,
+                      std::move(attributes));
+      wrapper_body.push_back(ctx.dst->Assign(name, outval.value));
+    }
+  }
+
   // Recreate the original function without entry point attributes and call it.
   /// @returns the inner function call expression
   ast::CallExpression* CallInnerFunction() {
@@ -450,10 +497,14 @@ struct CanonicalizeEntryPointIO::State {
 
     // Produce the entry point outputs, if necessary.
     if (!wrapper_output_values.empty()) {
-      auto* output_struct = CreateOutputStruct();
-      wrapper_ret_type = [&, output_struct] {
-        return ctx.dst->ty.type_name(output_struct->name());
-      };
+      if (cfg.shader_style == ShaderStyle::kSpirv) {
+        CreateOutputVariables();
+      } else {
+        auto* output_struct = CreateOutputStruct();
+        wrapper_ret_type = [&, output_struct] {
+          return ctx.dst->ty.type_name(output_struct->name());
+        };
+      }
     }
 
     // Create the wrapper entry point function.
@@ -505,10 +556,10 @@ void CanonicalizeEntryPointIO::Run(CloneContext& ctx,
   ctx.Clone();
 }
 
-CanonicalizeEntryPointIO::Config::Config(BuiltinStyle builtins,
+CanonicalizeEntryPointIO::Config::Config(ShaderStyle style,
                                          uint32_t sample_mask,
                                          bool emit_point_size)
-    : builtin_style(builtins),
+    : shader_style(style),
       fixed_sample_mask(sample_mask),
       emit_vertex_point_size(emit_point_size) {}
 

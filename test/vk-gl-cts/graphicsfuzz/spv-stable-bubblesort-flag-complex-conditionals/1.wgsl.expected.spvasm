@@ -5,8 +5,10 @@
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Fragment %main "main" %tint_symbol %tint_symbol_2
+               OpEntryPoint Fragment %main "main" %gl_FragCoord_param_1 %x_GLF_color_1_1
                OpExecutionMode %main OriginUpperLeft
+               OpName %gl_FragCoord_param_1 "gl_FragCoord_param_1"
+               OpName %x_GLF_color_1_1 "x_GLF_color_1_1"
                OpName %gl_FragCoord "gl_FragCoord"
                OpName %buf1 "buf1"
                OpMemberName %buf1 0 "resolution"
@@ -15,8 +17,6 @@
                OpMemberName %buf0 0 "injectionSwitch"
                OpName %x_13 "x_13"
                OpName %x_GLF_color "x_GLF_color"
-               OpName %tint_symbol "tint_symbol"
-               OpName %tint_symbol_2 "tint_symbol_2"
                OpName %checkSwap_f1_f1_ "checkSwap_f1_f1_"
                OpName %a "a"
                OpName %b "b"
@@ -45,9 +45,11 @@
                OpName %temp "temp"
                OpName %main_out "main_out"
                OpMemberName %main_out 0 "x_GLF_color_1"
-               OpName %tint_symbol_3 "tint_symbol_3"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %main_inner "main_inner"
+               OpName %gl_FragCoord_param "gl_FragCoord_param"
                OpName %main "main"
+               OpDecorate %gl_FragCoord_param_1 BuiltIn FragCoord
+               OpDecorate %x_GLF_color_1_1 Location 0
                OpDecorate %buf1 Block
                OpMemberDecorate %buf1 0 Offset 0
                OpDecorate %x_9 NonWritable
@@ -58,15 +60,17 @@
                OpDecorate %x_13 NonWritable
                OpDecorate %x_13 DescriptorSet 0
                OpDecorate %x_13 Binding 0
-               OpDecorate %tint_symbol BuiltIn FragCoord
-               OpDecorate %tint_symbol_2 Location 0
                OpDecorate %_arr_float_uint_10 ArrayStride 4
                OpMemberDecorate %main_out 0 Offset 0
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
+%_ptr_Input_v4float = OpTypePointer Input %v4float
+%gl_FragCoord_param_1 = OpVariable %_ptr_Input_v4float Input
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %7 = OpConstantNull %v4float
+%x_GLF_color_1_1 = OpVariable %_ptr_Output_v4float Output %7
 %_ptr_Private_v4float = OpTypePointer Private %v4float
-          %5 = OpConstantNull %v4float
-%gl_FragCoord = OpVariable %_ptr_Private_v4float Private %5
+%gl_FragCoord = OpVariable %_ptr_Private_v4float Private %7
     %v2float = OpTypeVector %float 2
        %buf1 = OpTypeStruct %v2float
 %_ptr_Uniform_buf1 = OpTypePointer Uniform %buf1
@@ -74,11 +78,7 @@
        %buf0 = OpTypeStruct %v2float
 %_ptr_Uniform_buf0 = OpTypePointer Uniform %buf0
        %x_13 = OpVariable %_ptr_Uniform_buf0 Uniform
-%x_GLF_color = OpVariable %_ptr_Private_v4float Private %5
-%_ptr_Input_v4float = OpTypePointer Input %v4float
-%tint_symbol = OpVariable %_ptr_Input_v4float Input
-%_ptr_Output_v4float = OpTypePointer Output %v4float
-%tint_symbol_2 = OpVariable %_ptr_Output_v4float Output %5
+%x_GLF_color = OpVariable %_ptr_Private_v4float Private %7
        %bool = OpTypeBool
 %_ptr_Function_float = OpTypePointer Function %float
          %18 = OpTypeFunction %bool %_ptr_Function_float %_ptr_Function_float
@@ -111,7 +111,7 @@
    %float_10 = OpConstant %float 10
     %float_1 = OpConstant %float 1
    %main_out = OpTypeStruct %v4float
-        %234 = OpTypeFunction %void %main_out
+        %234 = OpTypeFunction %main_out %v4float
 %checkSwap_f1_f1_ = OpFunction %bool None %18
           %a = OpFunctionParameter %_ptr_Function_float
           %b = OpFunctionParameter %_ptr_Function_float
@@ -405,20 +405,20 @@
         %208 = OpLabel
                OpReturn
                OpFunctionEnd
-%tint_symbol_3 = OpFunction %void None %234
-%tint_symbol_1 = OpFunctionParameter %main_out
+ %main_inner = OpFunction %main_out None %234
+%gl_FragCoord_param = OpFunctionParameter %v4float
         %238 = OpLabel
-        %239 = OpCompositeExtract %v4float %tint_symbol_1 0
-               OpStore %tint_symbol_2 %239
-               OpReturn
+               OpStore %gl_FragCoord %gl_FragCoord_param
+        %239 = OpFunctionCall %void %main_1
+        %240 = OpLoad %v4float %x_GLF_color
+        %241 = OpCompositeConstruct %main_out %240
+               OpReturnValue %241
                OpFunctionEnd
        %main = OpFunction %void None %109
-        %241 = OpLabel
-        %242 = OpLoad %v4float %tint_symbol
-               OpStore %gl_FragCoord %242
-        %243 = OpFunctionCall %void %main_1
-        %245 = OpLoad %v4float %x_GLF_color
-        %246 = OpCompositeConstruct %main_out %245
-        %244 = OpFunctionCall %void %tint_symbol_3 %246
+        %243 = OpLabel
+        %245 = OpLoad %v4float %gl_FragCoord_param_1
+        %244 = OpFunctionCall %main_out %main_inner %245
+        %246 = OpCompositeExtract %v4float %244 0
+               OpStore %x_GLF_color_1_1 %246
                OpReturn
                OpFunctionEnd

@@ -1,35 +1,44 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 17
+; Bound: 22
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %main "main" %tint_symbol
+               OpEntryPoint GLCompute %main "main" %x_1_param_1
                OpExecutionMode %main LocalSize 1 1 1
+               OpName %x_1_param_1 "x_1_param_1"
                OpName %x_1 "x_1"
-               OpName %tint_symbol "tint_symbol"
                OpName %main_1 "main_1"
+               OpName %main_inner "main_inner"
+               OpName %x_1_param "x_1_param"
                OpName %main "main"
-               OpDecorate %tint_symbol BuiltIn GlobalInvocationId
+               OpDecorate %x_1_param_1 BuiltIn GlobalInvocationId
        %uint = OpTypeInt 32 0
      %v3uint = OpTypeVector %uint 3
-%_ptr_Private_v3uint = OpTypePointer Private %v3uint
-          %5 = OpConstantNull %v3uint
-        %x_1 = OpVariable %_ptr_Private_v3uint Private %5
 %_ptr_Input_v3uint = OpTypePointer Input %v3uint
-%tint_symbol = OpVariable %_ptr_Input_v3uint Input
+%x_1_param_1 = OpVariable %_ptr_Input_v3uint Input
+%_ptr_Private_v3uint = OpTypePointer Private %v3uint
+          %7 = OpConstantNull %v3uint
+        %x_1 = OpVariable %_ptr_Private_v3uint Private %7
        %void = OpTypeVoid
           %8 = OpTypeFunction %void
+         %13 = OpTypeFunction %void %v3uint
      %main_1 = OpFunction %void None %8
          %11 = OpLabel
          %12 = OpLoad %v3uint %x_1
                OpReturn
                OpFunctionEnd
+ %main_inner = OpFunction %void None %13
+  %x_1_param = OpFunctionParameter %v3uint
+         %16 = OpLabel
+               OpStore %x_1 %x_1_param
+         %17 = OpFunctionCall %void %main_1
+               OpReturn
+               OpFunctionEnd
        %main = OpFunction %void None %8
-         %14 = OpLabel
-         %15 = OpLoad %v3uint %tint_symbol
-               OpStore %x_1 %15
-         %16 = OpFunctionCall %void %main_1
+         %19 = OpLabel
+         %21 = OpLoad %v3uint %x_1_param_1
+         %20 = OpFunctionCall %void %main_inner %21
                OpReturn
                OpFunctionEnd

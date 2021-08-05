@@ -1,38 +1,47 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 20
+; Bound: 25
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %main "main" %tint_symbol
+               OpEntryPoint GLCompute %main "main" %x_1_param_1
                OpExecutionMode %main LocalSize 1 1 1
+               OpName %x_1_param_1 "x_1_param_1"
                OpName %x_1 "x_1"
-               OpName %tint_symbol "tint_symbol"
                OpName %main_1 "main_1"
+               OpName %main_inner "main_inner"
+               OpName %x_1_param "x_1_param"
                OpName %main "main"
-               OpDecorate %tint_symbol BuiltIn WorkgroupId
-        %int = OpTypeInt 32 1
-      %v3int = OpTypeVector %int 3
-%_ptr_Private_v3int = OpTypePointer Private %v3int
-          %5 = OpConstantNull %v3int
-        %x_1 = OpVariable %_ptr_Private_v3int Private %5
+               OpDecorate %x_1_param_1 BuiltIn WorkgroupId
        %uint = OpTypeInt 32 0
      %v3uint = OpTypeVector %uint 3
 %_ptr_Input_v3uint = OpTypePointer Input %v3uint
-%tint_symbol = OpVariable %_ptr_Input_v3uint Input
+%x_1_param_1 = OpVariable %_ptr_Input_v3uint Input
+        %int = OpTypeInt 32 1
+      %v3int = OpTypeVector %int 3
+%_ptr_Private_v3int = OpTypePointer Private %v3int
+          %9 = OpConstantNull %v3int
+        %x_1 = OpVariable %_ptr_Private_v3int Private %9
        %void = OpTypeVoid
          %10 = OpTypeFunction %void
+         %15 = OpTypeFunction %void %v3uint
      %main_1 = OpFunction %void None %10
          %13 = OpLabel
          %14 = OpLoad %v3int %x_1
                OpReturn
                OpFunctionEnd
+ %main_inner = OpFunction %void None %15
+  %x_1_param = OpFunctionParameter %v3uint
+         %18 = OpLabel
+         %19 = OpBitcast %v3int %x_1_param
+               OpStore %x_1 %19
+         %20 = OpFunctionCall %void %main_1
+               OpReturn
+               OpFunctionEnd
        %main = OpFunction %void None %10
-         %16 = OpLabel
-         %18 = OpLoad %v3uint %tint_symbol
-         %17 = OpBitcast %v3int %18
-               OpStore %x_1 %17
-         %19 = OpFunctionCall %void %main_1
+         %22 = OpLabel
+         %24 = OpLoad %v3uint %x_1_param_1
+         %23 = OpFunctionCall %void %main_inner %24
                OpReturn
                OpFunctionEnd

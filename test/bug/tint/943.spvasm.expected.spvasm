@@ -1,12 +1,15 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 628
+; Bound: 633
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %main "main" %tint_symbol_2 %tint_symbol %tint_symbol_1
+               OpEntryPoint GLCompute %main "main" %gl_LocalInvocationID_param_1 %gl_GlobalInvocationID_param_1 %local_invocation_index_1
                OpExecutionMode %main LocalSize 1 64 1
+               OpName %gl_LocalInvocationID_param_1 "gl_LocalInvocationID_param_1"
+               OpName %gl_GlobalInvocationID_param_1 "gl_GlobalInvocationID_param_1"
+               OpName %local_invocation_index_1 "local_invocation_index_1"
                OpName %dimAOuter_1 "dimAOuter_1"
                OpName %Uniforms "Uniforms"
                OpMemberName %Uniforms 0 "NAN"
@@ -31,9 +34,6 @@
                OpName %ssbB "ssbB"
                OpMemberName %ssbB 0 "B"
                OpName %x_185 "x_185"
-               OpName %tint_symbol "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
-               OpName %tint_symbol_2 "tint_symbol_2"
                OpName %coordsInBounds_vi2_vi2_ "coordsInBounds_vi2_vi2_"
                OpName %coord "coord"
                OpName %shape "shape"
@@ -120,8 +120,15 @@
                OpName %param_18 "param_18"
                OpName %param_19 "param_19"
                OpName %param_20 "param_20"
-               OpName %main "main"
+               OpName %main_inner "main_inner"
+               OpName %gl_LocalInvocationID_param "gl_LocalInvocationID_param"
+               OpName %gl_GlobalInvocationID_param "gl_GlobalInvocationID_param"
+               OpName %local_invocation_index "local_invocation_index"
                OpName %idx "idx"
+               OpName %main "main"
+               OpDecorate %gl_LocalInvocationID_param_1 BuiltIn LocalInvocationId
+               OpDecorate %gl_GlobalInvocationID_param_1 BuiltIn GlobalInvocationId
+               OpDecorate %local_invocation_index_1 BuiltIn LocalInvocationIndex
                OpDecorate %Uniforms Block
                OpMemberDecorate %Uniforms 0 Offset 0
                OpMemberDecorate %Uniforms 1 Offset 16
@@ -150,32 +157,34 @@
                OpDecorate %x_185 NonWritable
                OpDecorate %x_185 DescriptorSet 0
                OpDecorate %x_185 Binding 2
-               OpDecorate %tint_symbol BuiltIn LocalInvocationId
-               OpDecorate %tint_symbol_1 BuiltIn GlobalInvocationId
-               OpDecorate %tint_symbol_2 BuiltIn LocalInvocationIndex
                OpDecorate %_arr__arr_float_uint_1_uint_1 ArrayStride 4
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Input_v3uint = OpTypePointer Input %v3uint
+%gl_LocalInvocationID_param_1 = OpVariable %_ptr_Input_v3uint Input
+%gl_GlobalInvocationID_param_1 = OpVariable %_ptr_Input_v3uint Input
+%_ptr_Input_uint = OpTypePointer Input %uint
+%local_invocation_index_1 = OpVariable %_ptr_Input_uint Input
         %int = OpTypeInt 32 1
 %_ptr_Private_int = OpTypePointer Private %int
-          %4 = OpConstantNull %int
-%dimAOuter_1 = OpVariable %_ptr_Private_int Private %4
+         %11 = OpConstantNull %int
+%dimAOuter_1 = OpVariable %_ptr_Private_int Private %11
       %float = OpTypeFloat 32
       %v3int = OpTypeVector %int 3
       %v2int = OpTypeVector %int 2
    %Uniforms = OpTypeStruct %float %v3int %v3int %v3int %v2int
 %_ptr_Uniform_Uniforms = OpTypePointer Uniform %Uniforms
        %x_48 = OpVariable %_ptr_Uniform_Uniforms Uniform
- %dimInner_1 = OpVariable %_ptr_Private_int Private %4
-%dimBOuter_1 = OpVariable %_ptr_Private_int Private %4
+ %dimInner_1 = OpVariable %_ptr_Private_int Private %11
+%dimBOuter_1 = OpVariable %_ptr_Private_int Private %11
 %_runtimearr_float = OpTypeRuntimeArray %float
      %ssbOut = OpTypeStruct %_runtimearr_float
 %_ptr_StorageBuffer_ssbOut = OpTypePointer StorageBuffer %ssbOut
        %x_54 = OpVariable %_ptr_StorageBuffer_ssbOut StorageBuffer
-       %uint = OpTypeInt 32 0
-     %v3uint = OpTypeVector %uint 3
 %_ptr_Private_v3uint = OpTypePointer Private %v3uint
-         %21 = OpConstantNull %v3uint
-%gl_LocalInvocationID = OpVariable %_ptr_Private_v3uint Private %21
-%gl_GlobalInvocationID = OpVariable %_ptr_Private_v3uint Private %21
+         %26 = OpConstantNull %v3uint
+%gl_LocalInvocationID = OpVariable %_ptr_Private_v3uint Private %26
+%gl_GlobalInvocationID = OpVariable %_ptr_Private_v3uint Private %26
     %uint_64 = OpConstant %uint 64
 %_arr_float_uint_64 = OpTypeArray %float %uint_64
 %_arr__arr_float_uint_64_uint_64 = OpTypeArray %_arr_float_uint_64 %uint_64
@@ -189,15 +198,10 @@
        %ssbA = OpTypeStruct %_runtimearr_float
 %_ptr_StorageBuffer_ssbA = OpTypePointer StorageBuffer %ssbA
       %x_165 = OpVariable %_ptr_StorageBuffer_ssbA StorageBuffer
-      %batch = OpVariable %_ptr_Private_int Private %4
+      %batch = OpVariable %_ptr_Private_int Private %11
        %ssbB = OpTypeStruct %_runtimearr_float
 %_ptr_StorageBuffer_ssbB = OpTypePointer StorageBuffer %ssbB
       %x_185 = OpVariable %_ptr_StorageBuffer_ssbB StorageBuffer
-%_ptr_Input_v3uint = OpTypePointer Input %v3uint
-%tint_symbol = OpVariable %_ptr_Input_v3uint Input
-%tint_symbol_1 = OpVariable %_ptr_Input_v3uint Input
-%_ptr_Input_uint = OpTypePointer Input %uint
-%tint_symbol_2 = OpVariable %_ptr_Input_uint Input
        %bool = OpTypeBool
 %_ptr_Function_v2int = OpTypePointer Function %v2int
          %45 = OpTypeFunction %bool %_ptr_Function_v2int %_ptr_Function_v2int
@@ -237,8 +241,9 @@
 %_ptr_Workgroup_float = OpTypePointer Workgroup %float
    %uint_264 = OpConstant %uint 264
         %575 = OpTypeFunction %void
+        %597 = OpTypeFunction %void %v3uint %v3uint %uint
 %_ptr_Function_uint = OpTypePointer Function %uint
-        %606 = OpConstantNull %uint
+        %607 = OpConstantNull %uint
   %uint_4096 = OpConstant %uint 4096
 %coordsInBounds_vi2_vi2_ = OpFunction %bool None %45
       %coord = OpFunctionParameter %_ptr_Function_v2int
@@ -269,7 +274,7 @@
         %row = OpFunctionParameter %_ptr_Function_int
         %col = OpFunctionParameter %_ptr_Function_int
          %78 = OpLabel
- %batchASize = OpVariable %_ptr_Function_int Function %4
+ %batchASize = OpVariable %_ptr_Function_int Function %11
    %param_10 = OpVariable %_ptr_Function_v2int Function %81
    %param_11 = OpVariable %_ptr_Function_v2int Function %81
       %x_430 = OpVariable %_ptr_Function_float Function %85
@@ -315,7 +320,7 @@
       %row_1 = OpFunctionParameter %_ptr_Function_int
       %col_1 = OpFunctionParameter %_ptr_Function_int
         %127 = OpLabel
- %batchBSize = OpVariable %_ptr_Function_int Function %4
+ %batchBSize = OpVariable %_ptr_Function_int Function %11
    %param_12 = OpVariable %_ptr_Function_v2int Function %81
    %param_13 = OpVariable %_ptr_Function_v2int Function %81
       %x_468 = OpVariable %_ptr_Function_float Function %85
@@ -388,9 +393,9 @@
          %d2 = OpFunctionParameter %_ptr_Function_int
     %value_1 = OpFunctionParameter %_ptr_Function_float
         %201 = OpLabel
-%flatIndex_1 = OpVariable %_ptr_Function_int Function %4
+%flatIndex_1 = OpVariable %_ptr_Function_int Function %11
       %param = OpVariable %_ptr_Function_v3int Function %204
-    %param_1 = OpVariable %_ptr_Function_int Function %4
+    %param_1 = OpVariable %_ptr_Function_int Function %11
     %param_2 = OpVariable %_ptr_Function_float Function %85
         %208 = OpLoad %int %d0
         %210 = OpLoad %int %d1
@@ -412,9 +417,9 @@
     %value_2 = OpFunctionParameter %_ptr_Function_float
         %227 = OpLabel
    %outCoord = OpVariable %_ptr_Function_v3int Function %204
-   %param_14 = OpVariable %_ptr_Function_int Function %4
-   %param_15 = OpVariable %_ptr_Function_int Function %4
-   %param_16 = OpVariable %_ptr_Function_int Function %4
+   %param_14 = OpVariable %_ptr_Function_int Function %11
+   %param_15 = OpVariable %_ptr_Function_int Function %11
+   %param_16 = OpVariable %_ptr_Function_int Function %11
    %param_17 = OpVariable %_ptr_Function_float Function %85
         %233 = OpLoad %int %batch
         %235 = OpLoad %int %row_2
@@ -437,39 +442,39 @@
    %dimInner = OpFunctionParameter %_ptr_Function_int
   %dimBOuter = OpFunctionParameter %_ptr_Function_int
         %256 = OpLabel
-    %tileRow = OpVariable %_ptr_Function_int Function %4
-    %tileCol = OpVariable %_ptr_Function_int Function %4
-  %globalRow = OpVariable %_ptr_Function_int Function %4
-  %globalCol = OpVariable %_ptr_Function_int Function %4
-   %numTiles = OpVariable %_ptr_Function_int Function %4
-   %innerRow = OpVariable %_ptr_Function_int Function %4
-   %innerCol = OpVariable %_ptr_Function_int Function %4
+    %tileRow = OpVariable %_ptr_Function_int Function %11
+    %tileCol = OpVariable %_ptr_Function_int Function %11
+  %globalRow = OpVariable %_ptr_Function_int Function %11
+  %globalCol = OpVariable %_ptr_Function_int Function %11
+   %numTiles = OpVariable %_ptr_Function_int Function %11
+   %innerRow = OpVariable %_ptr_Function_int Function %11
+   %innerCol = OpVariable %_ptr_Function_int Function %11
         %acc = OpVariable %_ptr_Function__arr__arr_float_uint_1_uint_1 Function %267
-   %tileColA = OpVariable %_ptr_Function_int Function %4
-   %tileRowB = OpVariable %_ptr_Function_int Function %4
-          %t = OpVariable %_ptr_Function_int Function %4
- %innerRow_1 = OpVariable %_ptr_Function_int Function %4
- %innerCol_1 = OpVariable %_ptr_Function_int Function %4
-   %inputRow = OpVariable %_ptr_Function_int Function %4
-   %inputCol = OpVariable %_ptr_Function_int Function %4
-    %param_3 = OpVariable %_ptr_Function_int Function %4
-    %param_4 = OpVariable %_ptr_Function_int Function %4
- %innerRow_2 = OpVariable %_ptr_Function_int Function %4
- %innerCol_2 = OpVariable %_ptr_Function_int Function %4
- %inputRow_1 = OpVariable %_ptr_Function_int Function %4
- %inputCol_1 = OpVariable %_ptr_Function_int Function %4
-    %param_5 = OpVariable %_ptr_Function_int Function %4
-    %param_6 = OpVariable %_ptr_Function_int Function %4
-          %k = OpVariable %_ptr_Function_int Function %4
-      %inner = OpVariable %_ptr_Function_int Function %4
+   %tileColA = OpVariable %_ptr_Function_int Function %11
+   %tileRowB = OpVariable %_ptr_Function_int Function %11
+          %t = OpVariable %_ptr_Function_int Function %11
+ %innerRow_1 = OpVariable %_ptr_Function_int Function %11
+ %innerCol_1 = OpVariable %_ptr_Function_int Function %11
+   %inputRow = OpVariable %_ptr_Function_int Function %11
+   %inputCol = OpVariable %_ptr_Function_int Function %11
+    %param_3 = OpVariable %_ptr_Function_int Function %11
+    %param_4 = OpVariable %_ptr_Function_int Function %11
+ %innerRow_2 = OpVariable %_ptr_Function_int Function %11
+ %innerCol_2 = OpVariable %_ptr_Function_int Function %11
+ %inputRow_1 = OpVariable %_ptr_Function_int Function %11
+ %inputCol_1 = OpVariable %_ptr_Function_int Function %11
+    %param_5 = OpVariable %_ptr_Function_int Function %11
+    %param_6 = OpVariable %_ptr_Function_int Function %11
+          %k = OpVariable %_ptr_Function_int Function %11
+      %inner = OpVariable %_ptr_Function_int Function %11
     %BCached = OpVariable %_ptr_Function__arr_float_uint_1 Function %287
- %innerRow_3 = OpVariable %_ptr_Function_int Function %4
+ %innerRow_3 = OpVariable %_ptr_Function_int Function %11
     %ACached = OpVariable %_ptr_Function_float Function %85
- %innerCol_3 = OpVariable %_ptr_Function_int Function %4
- %innerRow_4 = OpVariable %_ptr_Function_int Function %4
- %innerCol_4 = OpVariable %_ptr_Function_int Function %4
-    %param_7 = OpVariable %_ptr_Function_int Function %4
-    %param_8 = OpVariable %_ptr_Function_int Function %4
+ %innerCol_3 = OpVariable %_ptr_Function_int Function %11
+ %innerRow_4 = OpVariable %_ptr_Function_int Function %11
+ %innerCol_4 = OpVariable %_ptr_Function_int Function %11
+    %param_7 = OpVariable %_ptr_Function_int Function %11
+    %param_8 = OpVariable %_ptr_Function_int Function %11
     %param_9 = OpVariable %_ptr_Function_float Function %85
       %x_393 = OpVariable %_ptr_Function_bool Function %54
   %x_394_phi = OpVariable %_ptr_Function_bool Function %54
@@ -916,9 +921,9 @@
                OpFunctionEnd
      %main_1 = OpFunction %void None %575
         %577 = OpLabel
-   %param_18 = OpVariable %_ptr_Function_int Function %4
-   %param_19 = OpVariable %_ptr_Function_int Function %4
-   %param_20 = OpVariable %_ptr_Function_int Function %4
+   %param_18 = OpVariable %_ptr_Function_int Function %11
+   %param_19 = OpVariable %_ptr_Function_int Function %11
+   %param_20 = OpVariable %_ptr_Function_int Function %11
         %581 = OpAccessChain %_ptr_Uniform_int %x_48 %uint_1 %uint_1
         %582 = OpLoad %int %581
                OpStore %dimAOuter_1 %582
@@ -941,47 +946,53 @@
         %593 = OpFunctionCall %void %mm_matMul_i1_i1_i1_ %param_18 %param_19 %param_20
                OpReturn
                OpFunctionEnd
-       %main = OpFunction %void None %575
-        %598 = OpLabel
-        %idx = OpVariable %_ptr_Function_uint Function %606
-        %599 = OpLoad %uint %tint_symbol_2
-        %600 = OpLoad %uint %tint_symbol_2
-        %601 = OpUMod %uint %600 %uint_1
-        %602 = OpAccessChain %_ptr_Workgroup_float %mm_Bsub %599 %601
-               OpStore %602 %85
-        %603 = OpLoad %uint %tint_symbol_2
-               OpStore %idx %603
-               OpBranch %607
-        %607 = OpLabel
-               OpLoopMerge %608 %609 None
+ %main_inner = OpFunction %void None %597
+%gl_LocalInvocationID_param = OpFunctionParameter %v3uint
+%gl_GlobalInvocationID_param = OpFunctionParameter %v3uint
+%local_invocation_index = OpFunctionParameter %uint
+        %602 = OpLabel
+        %idx = OpVariable %_ptr_Function_uint Function %607
+        %603 = OpUMod %uint %local_invocation_index %uint_1
+        %604 = OpAccessChain %_ptr_Workgroup_float %mm_Bsub %local_invocation_index %603
+               OpStore %604 %85
+               OpStore %idx %local_invocation_index
+               OpBranch %608
+        %608 = OpLabel
+               OpLoopMerge %609 %610 None
+               OpBranch %611
+        %611 = OpLabel
+        %613 = OpLoad %uint %idx
+        %615 = OpULessThan %bool %613 %uint_4096
+        %612 = OpLogicalNot %bool %615
+               OpSelectionMerge %616 None
+               OpBranchConditional %612 %617 %616
+        %617 = OpLabel
+               OpBranch %609
+        %616 = OpLabel
+        %618 = OpLoad %uint %idx
+        %619 = OpUDiv %uint %618 %uint_64
+        %620 = OpLoad %uint %idx
+        %621 = OpUMod %uint %620 %uint_64
+        %622 = OpAccessChain %_ptr_Workgroup_float %mm_Asub %619 %621
+               OpStore %622 %85
                OpBranch %610
         %610 = OpLabel
-        %612 = OpLoad %uint %idx
-        %614 = OpULessThan %bool %612 %uint_4096
-        %611 = OpLogicalNot %bool %614
-               OpSelectionMerge %615 None
-               OpBranchConditional %611 %616 %615
-        %616 = OpLabel
+        %623 = OpLoad %uint %idx
+        %624 = OpIAdd %uint %623 %uint_64
+               OpStore %idx %624
                OpBranch %608
-        %615 = OpLabel
-        %617 = OpLoad %uint %idx
-        %618 = OpUDiv %uint %617 %uint_64
-        %619 = OpLoad %uint %idx
-        %620 = OpUMod %uint %619 %uint_64
-        %621 = OpAccessChain %_ptr_Workgroup_float %mm_Asub %618 %620
-               OpStore %621 %85
-               OpBranch %609
         %609 = OpLabel
-        %622 = OpLoad %uint %idx
-        %623 = OpIAdd %uint %622 %uint_64
-               OpStore %idx %623
-               OpBranch %607
-        %608 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-        %625 = OpLoad %v3uint %tint_symbol
-               OpStore %gl_LocalInvocationID %625
-        %626 = OpLoad %v3uint %tint_symbol_1
-               OpStore %gl_GlobalInvocationID %626
-        %627 = OpFunctionCall %void %main_1
+               OpStore %gl_LocalInvocationID %gl_LocalInvocationID_param
+               OpStore %gl_GlobalInvocationID %gl_GlobalInvocationID_param
+        %626 = OpFunctionCall %void %main_1
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %575
+        %628 = OpLabel
+        %630 = OpLoad %v3uint %gl_LocalInvocationID_param_1
+        %631 = OpLoad %v3uint %gl_GlobalInvocationID_param_1
+        %632 = OpLoad %uint %local_invocation_index_1
+        %629 = OpFunctionCall %void %main_inner %630 %631 %632
                OpReturn
                OpFunctionEnd

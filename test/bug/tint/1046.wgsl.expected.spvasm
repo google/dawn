@@ -5,8 +5,14 @@
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Fragment %main "main" %tint_symbol %tint_symbol_1 %tint_symbol_2 %tint_symbol_3 %tint_symbol_4 %tint_symbol_7
+               OpEntryPoint Fragment %main "main" %position_1 %view_position_1 %normal_1 %uv_1 %color_1 %color_2
                OpExecutionMode %main OriginUpperLeft
+               OpName %position_1 "position_1"
+               OpName %view_position_1 "view_position_1"
+               OpName %normal_1 "normal_1"
+               OpName %uv_1 "uv_1"
+               OpName %color_1 "color_1"
+               OpName %color_2 "color_2"
                OpName %Uniforms "Uniforms"
                OpMemberName %Uniforms 0 "worldView"
                OpMemberName %Uniforms 1 "proj"
@@ -21,12 +27,6 @@
                OpName %pointLights "pointLights"
                OpName %mySampler "mySampler"
                OpName %myTexture "myTexture"
-               OpName %tint_symbol "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
-               OpName %tint_symbol_2 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
-               OpName %tint_symbol_4 "tint_symbol_4"
-               OpName %tint_symbol_7 "tint_symbol_7"
                OpName %FragmentInput "FragmentInput"
                OpMemberName %FragmentInput 0 "position"
                OpMemberName %FragmentInput 1 "view_position"
@@ -38,10 +38,16 @@
                OpName %color "color"
                OpName %FragmentOutput "FragmentOutput"
                OpMemberName %FragmentOutput 0 "color"
-               OpName %tint_symbol_8 "tint_symbol_8"
-               OpName %tint_symbol_6 "tint_symbol_6"
-               OpName %main "main"
+               OpName %main_inner "main_inner"
+               OpName %fragment_0 "fragment"
                OpName %output "output"
+               OpName %main "main"
+               OpDecorate %position_1 BuiltIn FragCoord
+               OpDecorate %view_position_1 Location 0
+               OpDecorate %normal_1 Location 1
+               OpDecorate %uv_1 Location 2
+               OpDecorate %color_1 Location 3
+               OpDecorate %color_2 Location 0
                OpDecorate %Uniforms Block
                OpMemberDecorate %Uniforms 0 Offset 0
                OpMemberDecorate %Uniforms 0 ColMajor
@@ -66,12 +72,6 @@
                OpDecorate %mySampler DescriptorSet 0
                OpDecorate %myTexture Binding 3
                OpDecorate %myTexture DescriptorSet 0
-               OpDecorate %tint_symbol BuiltIn FragCoord
-               OpDecorate %tint_symbol_1 Location 0
-               OpDecorate %tint_symbol_2 Location 1
-               OpDecorate %tint_symbol_3 Location 2
-               OpDecorate %tint_symbol_4 Location 3
-               OpDecorate %tint_symbol_7 Location 0
                OpMemberDecorate %FragmentInput 0 Offset 0
                OpMemberDecorate %FragmentInput 1 Offset 16
                OpMemberDecorate %FragmentInput 2 Offset 32
@@ -80,6 +80,17 @@
                OpMemberDecorate %FragmentOutput 0 Offset 0
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
+%_ptr_Input_v4float = OpTypePointer Input %v4float
+ %position_1 = OpVariable %_ptr_Input_v4float Input
+%view_position_1 = OpVariable %_ptr_Input_v4float Input
+   %normal_1 = OpVariable %_ptr_Input_v4float Input
+    %v2float = OpTypeVector %float 2
+%_ptr_Input_v2float = OpTypePointer Input %v2float
+       %uv_1 = OpVariable %_ptr_Input_v2float Input
+    %color_1 = OpVariable %_ptr_Input_v4float Input
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+         %13 = OpConstantNull %v4float
+    %color_2 = OpVariable %_ptr_Output_v4float Output %13
 %mat4v4float = OpTypeMatrix %v4float 4
        %uint = OpTypeInt 32 0
    %Uniforms = OpTypeStruct %mat4v4float %mat4v4float %uint %uint %v4float
@@ -90,23 +101,12 @@
 %PointLights = OpTypeStruct %_runtimearr_PointLight
 %_ptr_StorageBuffer_PointLights = OpTypePointer StorageBuffer %PointLights
 %pointLights = OpVariable %_ptr_StorageBuffer_PointLights StorageBuffer
-         %15 = OpTypeSampler
-%_ptr_UniformConstant_15 = OpTypePointer UniformConstant %15
-  %mySampler = OpVariable %_ptr_UniformConstant_15 UniformConstant
-         %18 = OpTypeImage %float 2D 0 0 0 1 Unknown
-%_ptr_UniformConstant_18 = OpTypePointer UniformConstant %18
-  %myTexture = OpVariable %_ptr_UniformConstant_18 UniformConstant
-%_ptr_Input_v4float = OpTypePointer Input %v4float
-%tint_symbol = OpVariable %_ptr_Input_v4float Input
-%tint_symbol_1 = OpVariable %_ptr_Input_v4float Input
-%tint_symbol_2 = OpVariable %_ptr_Input_v4float Input
-    %v2float = OpTypeVector %float 2
-%_ptr_Input_v2float = OpTypePointer Input %v2float
-%tint_symbol_3 = OpVariable %_ptr_Input_v2float Input
-%tint_symbol_4 = OpVariable %_ptr_Input_v4float Input
-%_ptr_Output_v4float = OpTypePointer Output %v4float
-         %29 = OpConstantNull %v4float
-%tint_symbol_7 = OpVariable %_ptr_Output_v4float Output %29
+         %26 = OpTypeSampler
+%_ptr_UniformConstant_26 = OpTypePointer UniformConstant %26
+  %mySampler = OpVariable %_ptr_UniformConstant_26 UniformConstant
+         %29 = OpTypeImage %float 2D 0 0 0 1 Unknown
+%_ptr_UniformConstant_29 = OpTypePointer UniformConstant %29
+  %myTexture = OpVariable %_ptr_UniformConstant_29 UniformConstant
 %FragmentInput = OpTypeStruct %v4float %v4float %v4float %v2float %v4float
          %30 = OpTypeFunction %v4float %FragmentInput
 %_ptr_Function_v4float = OpTypePointer Function %v4float
@@ -120,19 +120,19 @@
      %uint_2 = OpConstant %uint 2
      %uint_4 = OpConstant %uint 4
 %_ptr_Uniform_v4float = OpTypePointer Uniform %v4float
-         %78 = OpTypeSampledImage %18
-       %void = OpTypeVoid
+         %78 = OpTypeSampledImage %29
 %FragmentOutput = OpTypeStruct %v4float
-         %82 = OpTypeFunction %void %FragmentOutput
-         %89 = OpTypeFunction %void
+         %82 = OpTypeFunction %FragmentOutput %FragmentInput
 %_ptr_Function_FragmentOutput = OpTypePointer Function %FragmentOutput
-        %100 = OpConstantNull %FragmentOutput
+         %89 = OpConstantNull %FragmentOutput
     %float_0 = OpConstant %float 0
-        %103 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
+         %92 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
+       %void = OpTypeVoid
+        %103 = OpTypeFunction %void
    %getColor = OpFunction %v4float None %30
    %fragment = OpFunctionParameter %FragmentInput
          %34 = OpLabel
-      %color = OpVariable %_ptr_Function_v4float Function %29
+      %color = OpVariable %_ptr_Function_v4float Function %13
          %39 = OpAccessChain %_ptr_Uniform_uint %uniforms %uint_3
          %40 = OpLoad %uint %39
          %42 = OpIEqual %bool %40 %uint_0
@@ -172,8 +172,8 @@
                OpSelectionMerge %73 None
                OpBranchConditional %72 %74 %73
          %74 = OpLabel
-         %76 = OpLoad %15 %mySampler
-         %77 = OpLoad %18 %myTexture
+         %76 = OpLoad %26 %mySampler
+         %77 = OpLoad %29 %myTexture
          %79 = OpSampledImage %78 %77 %76
          %80 = OpCompositeExtract %v2float %fragment 3
          %75 = OpImageSampleImplicitLod %v4float %79 %80
@@ -189,29 +189,29 @@
          %81 = OpLoad %v4float %color
                OpReturnValue %81
                OpFunctionEnd
-%tint_symbol_8 = OpFunction %void None %82
-%tint_symbol_6 = OpFunctionParameter %FragmentOutput
-         %87 = OpLabel
-         %88 = OpCompositeExtract %v4float %tint_symbol_6 0
-               OpStore %tint_symbol_7 %88
-               OpReturn
+ %main_inner = OpFunction %FragmentOutput None %82
+ %fragment_0 = OpFunctionParameter %FragmentInput
+         %86 = OpLabel
+     %output = OpVariable %_ptr_Function_FragmentOutput Function %89
+         %90 = OpAccessChain %_ptr_Function_v4float %output %uint_0
+               OpStore %90 %92
+         %95 = OpLoad %Uniforms %uniforms
+         %97 = OpLoad %26 %mySampler
+         %99 = OpLoad %29 %myTexture
+        %101 = OpLoad %PointLights %pointLights
+        %102 = OpLoad %FragmentOutput %output
+               OpReturnValue %102
                OpFunctionEnd
-       %main = OpFunction %void None %89
-         %91 = OpLabel
-     %output = OpVariable %_ptr_Function_FragmentOutput Function %100
-         %92 = OpLoad %v4float %tint_symbol
-         %93 = OpLoad %v4float %tint_symbol_1
-         %94 = OpLoad %v4float %tint_symbol_2
-         %95 = OpLoad %v2float %tint_symbol_3
-         %96 = OpLoad %v4float %tint_symbol_4
-         %97 = OpCompositeConstruct %FragmentInput %92 %93 %94 %95 %96
-        %101 = OpAccessChain %_ptr_Function_v4float %output %uint_0
-               OpStore %101 %103
-        %105 = OpLoad %Uniforms %uniforms
-        %107 = OpLoad %15 %mySampler
-        %109 = OpLoad %18 %myTexture
-        %111 = OpLoad %PointLights %pointLights
-        %113 = OpLoad %FragmentOutput %output
-        %112 = OpFunctionCall %void %tint_symbol_8 %113
+       %main = OpFunction %void None %103
+        %105 = OpLabel
+        %107 = OpLoad %v4float %position_1
+        %108 = OpLoad %v4float %view_position_1
+        %109 = OpLoad %v4float %normal_1
+        %110 = OpLoad %v2float %uv_1
+        %111 = OpLoad %v4float %color_1
+        %112 = OpCompositeConstruct %FragmentInput %107 %108 %109 %110 %111
+        %106 = OpFunctionCall %FragmentOutput %main_inner %112
+        %113 = OpCompositeExtract %v4float %106 0
+               OpStore %color_2 %113
                OpReturn
                OpFunctionEnd

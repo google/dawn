@@ -1,42 +1,57 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 21
+; Bound: 29
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Fragment %main "main" %tint_symbol %tint_symbol_1 %tint_symbol_2 %tint_symbol_3
+               OpEntryPoint Fragment %main "main" %loc0_1 %loc1_1 %loc2_1 %loc3_1
                OpExecutionMode %main OriginUpperLeft
-               OpName %tint_symbol "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
-               OpName %tint_symbol_2 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
+               OpName %loc0_1 "loc0_1"
+               OpName %loc1_1 "loc1_1"
+               OpName %loc2_1 "loc2_1"
+               OpName %loc3_1 "loc3_1"
+               OpName %main_inner "main_inner"
+               OpName %loc0 "loc0"
+               OpName %loc1 "loc1"
+               OpName %loc2 "loc2"
+               OpName %loc3 "loc3"
                OpName %main "main"
-               OpDecorate %tint_symbol Location 0
-               OpDecorate %tint_symbol Flat
-               OpDecorate %tint_symbol_1 Location 1
-               OpDecorate %tint_symbol_1 Flat
-               OpDecorate %tint_symbol_2 Location 2
-               OpDecorate %tint_symbol_3 Location 3
+               OpDecorate %loc0_1 Location 0
+               OpDecorate %loc0_1 Flat
+               OpDecorate %loc1_1 Location 1
+               OpDecorate %loc1_1 Flat
+               OpDecorate %loc2_1 Location 2
+               OpDecorate %loc3_1 Location 3
         %int = OpTypeInt 32 1
 %_ptr_Input_int = OpTypePointer Input %int
-%tint_symbol = OpVariable %_ptr_Input_int Input
+     %loc0_1 = OpVariable %_ptr_Input_int Input
        %uint = OpTypeInt 32 0
 %_ptr_Input_uint = OpTypePointer Input %uint
-%tint_symbol_1 = OpVariable %_ptr_Input_uint Input
+     %loc1_1 = OpVariable %_ptr_Input_uint Input
       %float = OpTypeFloat 32
 %_ptr_Input_float = OpTypePointer Input %float
-%tint_symbol_2 = OpVariable %_ptr_Input_float Input
+     %loc2_1 = OpVariable %_ptr_Input_float Input
     %v4float = OpTypeVector %float 4
 %_ptr_Input_v4float = OpTypePointer Input %v4float
-%tint_symbol_3 = OpVariable %_ptr_Input_v4float Input
+     %loc3_1 = OpVariable %_ptr_Input_v4float Input
        %void = OpTypeVoid
-         %13 = OpTypeFunction %void
-       %main = OpFunction %void None %13
-         %16 = OpLabel
-         %17 = OpLoad %int %tint_symbol
-         %18 = OpLoad %uint %tint_symbol_1
-         %19 = OpLoad %float %tint_symbol_2
-         %20 = OpLoad %v4float %tint_symbol_3
+         %13 = OpTypeFunction %void %int %uint %float %v4float
+         %21 = OpTypeFunction %void
+ %main_inner = OpFunction %void None %13
+       %loc0 = OpFunctionParameter %int
+       %loc1 = OpFunctionParameter %uint
+       %loc2 = OpFunctionParameter %float
+       %loc3 = OpFunctionParameter %v4float
+         %20 = OpLabel
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %21
+         %23 = OpLabel
+         %25 = OpLoad %int %loc0_1
+         %26 = OpLoad %uint %loc1_1
+         %27 = OpLoad %float %loc2_1
+         %28 = OpLoad %v4float %loc3_1
+         %24 = OpFunctionCall %void %main_inner %25 %26 %27 %28
                OpReturn
                OpFunctionEnd

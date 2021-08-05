@@ -1,52 +1,53 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 62
+; Bound: 63
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Fragment %main "main" %tint_symbol %tint_symbol_1 %tint_symbol_3
+               OpEntryPoint Fragment %main "main" %x_2_param_1 %x_3_param_1 %x_4_1_1
                OpExecutionMode %main OriginUpperLeft
+               OpName %x_2_param_1 "x_2_param_1"
+               OpName %x_3_param_1 "x_3_param_1"
+               OpName %x_4_1_1 "x_4_1_1"
                OpName %x_2 "x_2"
                OpName %x_3 "x_3"
                OpName %x_4 "x_4"
                OpName %x_5 "x_5"
-               OpName %tint_symbol "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
-               OpName %tint_symbol_3 "tint_symbol_3"
                OpName %main_1 "main_1"
                OpName %main_out "main_out"
                OpMemberName %main_out 0 "x_4_1"
-               OpName %tint_symbol_4 "tint_symbol_4"
-               OpName %tint_symbol_2 "tint_symbol_2"
+               OpName %main_inner "main_inner"
+               OpName %x_2_param "x_2_param"
+               OpName %x_3_param "x_3_param"
                OpName %main "main"
+               OpDecorate %x_2_param_1 BuiltIn FragCoord
+               OpDecorate %x_3_param_1 Location 0
+               OpDecorate %x_3_param_1 Flat
+               OpDecorate %x_4_1_1 Location 0
                OpDecorate %x_5 NonReadable
                OpDecorate %x_5 DescriptorSet 0
                OpDecorate %x_5 Binding 0
-               OpDecorate %tint_symbol BuiltIn FragCoord
-               OpDecorate %tint_symbol_1 Location 0
-               OpDecorate %tint_symbol_1 Flat
-               OpDecorate %tint_symbol_3 Location 0
                OpMemberDecorate %main_out 0 Offset 0
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
-%_ptr_Private_v4float = OpTypePointer Private %v4float
-          %5 = OpConstantNull %v4float
-        %x_2 = OpVariable %_ptr_Private_v4float Private %5
-        %int = OpTypeInt 32 1
-%_ptr_Private_int = OpTypePointer Private %int
-          %9 = OpConstantNull %int
-        %x_3 = OpVariable %_ptr_Private_int Private %9
-        %x_4 = OpVariable %_ptr_Private_int Private %9
-         %13 = OpTypeImage %int 2D 0 0 0 2 R32i
-%_ptr_UniformConstant_13 = OpTypePointer UniformConstant %13
-        %x_5 = OpVariable %_ptr_UniformConstant_13 UniformConstant
 %_ptr_Input_v4float = OpTypePointer Input %v4float
-%tint_symbol = OpVariable %_ptr_Input_v4float Input
+%x_2_param_1 = OpVariable %_ptr_Input_v4float Input
+        %int = OpTypeInt 32 1
 %_ptr_Input_int = OpTypePointer Input %int
-%tint_symbol_1 = OpVariable %_ptr_Input_int Input
+%x_3_param_1 = OpVariable %_ptr_Input_int Input
 %_ptr_Output_int = OpTypePointer Output %int
-%tint_symbol_3 = OpVariable %_ptr_Output_int Output %9
+         %10 = OpConstantNull %int
+    %x_4_1_1 = OpVariable %_ptr_Output_int Output %10
+%_ptr_Private_v4float = OpTypePointer Private %v4float
+         %13 = OpConstantNull %v4float
+        %x_2 = OpVariable %_ptr_Private_v4float Private %13
+%_ptr_Private_int = OpTypePointer Private %int
+        %x_3 = OpVariable %_ptr_Private_int Private %10
+        %x_4 = OpVariable %_ptr_Private_int Private %10
+         %19 = OpTypeImage %int 2D 0 0 0 2 R32i
+%_ptr_UniformConstant_19 = OpTypePointer UniformConstant %19
+        %x_5 = OpVariable %_ptr_UniformConstant_19 UniformConstant
        %void = OpTypeVoid
          %20 = OpTypeFunction %void
       %int_1 = OpConstant %int 1
@@ -55,7 +56,7 @@
       %v4int = OpTypeVector %int 4
       %int_0 = OpConstant %int 0
    %main_out = OpTypeStruct %int
-         %48 = OpTypeFunction %void %main_out
+         %48 = OpTypeFunction %main_out %v4float %int
      %main_1 = OpFunction %void None %20
          %23 = OpLabel
                OpStore %x_4 %int_1
@@ -77,28 +78,29 @@
          %40 = OpLabel
                OpBranch %39
          %39 = OpLabel
-         %42 = OpLoad %13 %x_5
+         %42 = OpLoad %19 %x_5
          %44 = OpCompositeConstruct %v2int %26 %28
          %47 = OpCompositeConstruct %v4int %26 %int_0 %int_0 %int_0
                OpImageWrite %42 %44 %47
                OpReturn
                OpFunctionEnd
-%tint_symbol_4 = OpFunction %void None %48
-%tint_symbol_2 = OpFunctionParameter %main_out
-         %52 = OpLabel
-         %53 = OpCompositeExtract %int %tint_symbol_2 0
-               OpStore %tint_symbol_3 %53
-               OpReturn
+ %main_inner = OpFunction %main_out None %48
+  %x_2_param = OpFunctionParameter %v4float
+  %x_3_param = OpFunctionParameter %int
+         %53 = OpLabel
+               OpStore %x_2 %x_2_param
+               OpStore %x_3 %x_3_param
+         %54 = OpFunctionCall %void %main_1
+         %55 = OpLoad %int %x_4
+         %56 = OpCompositeConstruct %main_out %55
+               OpReturnValue %56
                OpFunctionEnd
        %main = OpFunction %void None %20
-         %55 = OpLabel
-         %56 = OpLoad %v4float %tint_symbol
-               OpStore %x_2 %56
-         %57 = OpLoad %int %tint_symbol_1
-               OpStore %x_3 %57
-         %58 = OpFunctionCall %void %main_1
-         %60 = OpLoad %int %x_4
-         %61 = OpCompositeConstruct %main_out %60
-         %59 = OpFunctionCall %void %tint_symbol_4 %61
+         %58 = OpLabel
+         %60 = OpLoad %v4float %x_2_param_1
+         %61 = OpLoad %int %x_3_param_1
+         %59 = OpFunctionCall %main_out %main_inner %60 %61
+         %62 = OpCompositeExtract %int %59 0
+               OpStore %x_4_1_1 %62
                OpReturn
                OpFunctionEnd

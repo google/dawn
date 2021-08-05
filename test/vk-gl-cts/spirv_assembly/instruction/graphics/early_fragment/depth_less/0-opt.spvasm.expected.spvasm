@@ -5,42 +5,42 @@
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Vertex %main "main" %tint_pointsize %tint_symbol %tint_symbol_2
-               OpName %tint_pointsize "tint_pointsize"
+               OpEntryPoint Vertex %main "main" %position_param_1 %gl_Position_1 %vertex_point_size
+               OpName %position_param_1 "position_param_1"
+               OpName %gl_Position_1 "gl_Position_1"
+               OpName %vertex_point_size "vertex_point_size"
                OpName %position "position"
                OpName %gl_Position "gl_Position"
-               OpName %tint_symbol "tint_symbol"
-               OpName %tint_symbol_2 "tint_symbol_2"
                OpName %main_1 "main_1"
                OpName %main_out "main_out"
                OpMemberName %main_out 0 "gl_Position"
-               OpName %tint_symbol_3 "tint_symbol_3"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %main_inner "main_inner"
+               OpName %position_param "position_param"
                OpName %main "main"
-               OpDecorate %tint_pointsize BuiltIn PointSize
-               OpDecorate %tint_symbol Location 0
-               OpDecorate %tint_symbol_2 BuiltIn Position
+               OpDecorate %position_param_1 Location 0
+               OpDecorate %gl_Position_1 BuiltIn Position
+               OpDecorate %vertex_point_size BuiltIn PointSize
                OpMemberDecorate %main_out 0 Offset 0
       %float = OpTypeFloat 32
-%_ptr_Output_float = OpTypePointer Output %float
-          %4 = OpConstantNull %float
-%tint_pointsize = OpVariable %_ptr_Output_float Output %4
     %v4float = OpTypeVector %float 4
-%_ptr_Private_v4float = OpTypePointer Private %v4float
-          %8 = OpConstantNull %v4float
-   %position = OpVariable %_ptr_Private_v4float Private %8
-%gl_Position = OpVariable %_ptr_Private_v4float Private %8
 %_ptr_Input_v4float = OpTypePointer Input %v4float
-%tint_symbol = OpVariable %_ptr_Input_v4float Input
+%position_param_1 = OpVariable %_ptr_Input_v4float Input
 %_ptr_Output_v4float = OpTypePointer Output %v4float
-%tint_symbol_2 = OpVariable %_ptr_Output_v4float Output %8
+          %7 = OpConstantNull %v4float
+%gl_Position_1 = OpVariable %_ptr_Output_v4float Output %7
+%_ptr_Output_float = OpTypePointer Output %float
+         %10 = OpConstantNull %float
+%vertex_point_size = OpVariable %_ptr_Output_float Output %10
+%_ptr_Private_v4float = OpTypePointer Private %v4float
+   %position = OpVariable %_ptr_Private_v4float Private %7
+%gl_Position = OpVariable %_ptr_Private_v4float Private %7
        %void = OpTypeVoid
          %14 = OpTypeFunction %void
     %v2float = OpTypeVector %float 2
 %float_0_400000006 = OpConstant %float 0.400000006
     %float_1 = OpConstant %float 1
    %main_out = OpTypeStruct %v4float
-         %28 = OpTypeFunction %void %main_out
+         %28 = OpTypeFunction %main_out %v4float
      %main_1 = OpFunction %void None %14
          %17 = OpLabel
          %18 = OpLoad %v4float %position
@@ -53,21 +53,21 @@
                OpStore %gl_Position %27
                OpReturn
                OpFunctionEnd
-%tint_symbol_3 = OpFunction %void None %28
-%tint_symbol_1 = OpFunctionParameter %main_out
+ %main_inner = OpFunction %main_out None %28
+%position_param = OpFunctionParameter %v4float
          %32 = OpLabel
-         %33 = OpCompositeExtract %v4float %tint_symbol_1 0
-               OpStore %tint_symbol_2 %33
-               OpReturn
+               OpStore %position %position_param
+         %33 = OpFunctionCall %void %main_1
+         %34 = OpLoad %v4float %gl_Position
+         %35 = OpCompositeConstruct %main_out %34
+               OpReturnValue %35
                OpFunctionEnd
        %main = OpFunction %void None %14
-         %35 = OpLabel
-               OpStore %tint_pointsize %float_1
-         %36 = OpLoad %v4float %tint_symbol
-               OpStore %position %36
-         %37 = OpFunctionCall %void %main_1
-         %39 = OpLoad %v4float %gl_Position
-         %40 = OpCompositeConstruct %main_out %39
-         %38 = OpFunctionCall %void %tint_symbol_3 %40
+         %37 = OpLabel
+         %39 = OpLoad %v4float %position_param_1
+         %38 = OpFunctionCall %main_out %main_inner %39
+         %40 = OpCompositeExtract %v4float %38 0
+               OpStore %gl_Position_1 %40
+               OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd

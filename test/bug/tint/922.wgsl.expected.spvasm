@@ -1,12 +1,20 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 383
+; Bound: 387
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Vertex %main "main" %tint_pointsize %tint_symbol %tint_symbol_1 %tint_symbol_2 %tint_symbol_3 %tint_symbol_4 %tint_symbol_6 %tint_symbol_7 %tint_symbol_8
-               OpName %tint_pointsize "tint_pointsize"
+               OpEntryPoint Vertex %main "main" %a_Position_1 %a_UV_1 %a_Color_1 %a_Normal_1 %a_PosMtxIdx_1 %v_Color_1 %v_TexCoord_1 %member_1 %vertex_point_size
+               OpName %a_Position_1 "a_Position_1"
+               OpName %a_UV_1 "a_UV_1"
+               OpName %a_Color_1 "a_Color_1"
+               OpName %a_Normal_1 "a_Normal_1"
+               OpName %a_PosMtxIdx_1 "a_PosMtxIdx_1"
+               OpName %v_Color_1 "v_Color_1"
+               OpName %v_TexCoord_1 "v_TexCoord_1"
+               OpName %member_1 "member_1"
+               OpName %vertex_point_size "vertex_point_size"
                OpName %ub_SceneParams "ub_SceneParams"
                OpMemberName %ub_SceneParams 0 "u_Projection"
                OpName %Mat4x4_ "Mat4x4_"
@@ -37,14 +45,6 @@
                OpName %v_Color "v_Color"
                OpName %v_TexCoord "v_TexCoord"
                OpName %gl_Position "gl_Position"
-               OpName %tint_symbol "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
-               OpName %tint_symbol_2 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
-               OpName %tint_symbol_4 "tint_symbol_4"
-               OpName %tint_symbol_6 "tint_symbol_6"
-               OpName %tint_symbol_7 "tint_symbol_7"
-               OpName %tint_symbol_8 "tint_symbol_8"
                OpName %Mat4x3GetCol0_ "Mat4x3GetCol0_"
                OpName %m "m"
                OpName %m1 "m1"
@@ -104,10 +104,22 @@
                OpMemberName %VertexOutput 0 "v_Color"
                OpMemberName %VertexOutput 1 "v_TexCoord"
                OpMemberName %VertexOutput 2 "member"
-               OpName %tint_symbol_9 "tint_symbol_9"
-               OpName %tint_symbol_5 "tint_symbol_5"
+               OpName %main_inner "main_inner"
+               OpName %a_Position "a_Position"
+               OpName %a_UV "a_UV"
+               OpName %a_Color "a_Color"
+               OpName %a_Normal "a_Normal"
+               OpName %a_PosMtxIdx "a_PosMtxIdx"
                OpName %main "main"
-               OpDecorate %tint_pointsize BuiltIn PointSize
+               OpDecorate %a_Position_1 Location 0
+               OpDecorate %a_UV_1 Location 1
+               OpDecorate %a_Color_1 Location 2
+               OpDecorate %a_Normal_1 Location 3
+               OpDecorate %a_PosMtxIdx_1 Location 4
+               OpDecorate %v_Color_1 Location 0
+               OpDecorate %v_TexCoord_1 Location 1
+               OpDecorate %member_1 BuiltIn Position
+               OpDecorate %vertex_point_size BuiltIn PointSize
                OpDecorate %ub_SceneParams Block
                OpMemberDecorate %ub_SceneParams 0 Offset 0
                OpMemberDecorate %Mat4x4_ 0 Offset 0
@@ -135,22 +147,32 @@
                OpDecorate %global2 NonWritable
                OpDecorate %global2 DescriptorSet 0
                OpDecorate %global2 Binding 2
-               OpDecorate %tint_symbol Location 0
-               OpDecorate %tint_symbol_1 Location 1
-               OpDecorate %tint_symbol_2 Location 2
-               OpDecorate %tint_symbol_3 Location 3
-               OpDecorate %tint_symbol_4 Location 4
-               OpDecorate %tint_symbol_6 Location 0
-               OpDecorate %tint_symbol_7 Location 1
-               OpDecorate %tint_symbol_8 BuiltIn Position
                OpMemberDecorate %VertexOutput 0 Offset 0
                OpMemberDecorate %VertexOutput 1 Offset 16
                OpMemberDecorate %VertexOutput 2 Offset 32
       %float = OpTypeFloat 32
-%_ptr_Output_float = OpTypePointer Output %float
-          %4 = OpConstantNull %float
-%tint_pointsize = OpVariable %_ptr_Output_float Output %4
+    %v3float = OpTypeVector %float 3
+%_ptr_Input_v3float = OpTypePointer Input %v3float
+%a_Position_1 = OpVariable %_ptr_Input_v3float Input
+    %v2float = OpTypeVector %float 2
+%_ptr_Input_v2float = OpTypePointer Input %v2float
+     %a_UV_1 = OpVariable %_ptr_Input_v2float Input
     %v4float = OpTypeVector %float 4
+%_ptr_Input_v4float = OpTypePointer Input %v4float
+  %a_Color_1 = OpVariable %_ptr_Input_v4float Input
+ %a_Normal_1 = OpVariable %_ptr_Input_v3float Input
+%_ptr_Input_float = OpTypePointer Input %float
+%a_PosMtxIdx_1 = OpVariable %_ptr_Input_float Input
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+         %16 = OpConstantNull %v4float
+  %v_Color_1 = OpVariable %_ptr_Output_v4float Output %16
+%_ptr_Output_v2float = OpTypePointer Output %v2float
+         %19 = OpConstantNull %v2float
+%v_TexCoord_1 = OpVariable %_ptr_Output_v2float Output %19
+   %member_1 = OpVariable %_ptr_Output_v4float Output %16
+%_ptr_Output_float = OpTypePointer Output %float
+         %23 = OpConstantNull %float
+%vertex_point_size = OpVariable %_ptr_Output_float Output %23
     %Mat4x4_ = OpTypeStruct %v4float %v4float %v4float %v4float
 %ub_SceneParams = OpTypeStruct %Mat4x4_
 %_ptr_Uniform_ub_SceneParams = OpTypePointer Uniform %ub_SceneParams
@@ -168,37 +190,19 @@
 %ub_PacketParams = OpTypeStruct %_arr_Mat4x3__uint_32
 %_ptr_Uniform_ub_PacketParams = OpTypePointer Uniform %ub_PacketParams
     %global2 = OpVariable %_ptr_Uniform_ub_PacketParams Uniform
-    %v3float = OpTypeVector %float 3
 %_ptr_Private_v3float = OpTypePointer Private %v3float
-         %26 = OpConstantNull %v3float
-%a_Position1 = OpVariable %_ptr_Private_v3float Private %26
-    %v2float = OpTypeVector %float 2
+         %43 = OpConstantNull %v3float
+%a_Position1 = OpVariable %_ptr_Private_v3float Private %43
 %_ptr_Private_v2float = OpTypePointer Private %v2float
-         %30 = OpConstantNull %v2float
-      %a_UV1 = OpVariable %_ptr_Private_v2float Private %30
+      %a_UV1 = OpVariable %_ptr_Private_v2float Private %19
 %_ptr_Private_v4float = OpTypePointer Private %v4float
-         %33 = OpConstantNull %v4float
-   %a_Color1 = OpVariable %_ptr_Private_v4float Private %33
-  %a_Normal1 = OpVariable %_ptr_Private_v3float Private %26
+   %a_Color1 = OpVariable %_ptr_Private_v4float Private %16
+  %a_Normal1 = OpVariable %_ptr_Private_v3float Private %43
 %_ptr_Private_float = OpTypePointer Private %float
-%a_PosMtxIdx1 = OpVariable %_ptr_Private_float Private %4
-    %v_Color = OpVariable %_ptr_Private_v4float Private %33
- %v_TexCoord = OpVariable %_ptr_Private_v2float Private %30
-%gl_Position = OpVariable %_ptr_Private_v4float Private %33
-%_ptr_Input_v3float = OpTypePointer Input %v3float
-%tint_symbol = OpVariable %_ptr_Input_v3float Input
-%_ptr_Input_v2float = OpTypePointer Input %v2float
-%tint_symbol_1 = OpVariable %_ptr_Input_v2float Input
-%_ptr_Input_v4float = OpTypePointer Input %v4float
-%tint_symbol_2 = OpVariable %_ptr_Input_v4float Input
-%tint_symbol_3 = OpVariable %_ptr_Input_v3float Input
-%_ptr_Input_float = OpTypePointer Input %float
-%tint_symbol_4 = OpVariable %_ptr_Input_float Input
-%_ptr_Output_v4float = OpTypePointer Output %v4float
-%tint_symbol_6 = OpVariable %_ptr_Output_v4float Output %33
-%_ptr_Output_v2float = OpTypePointer Output %v2float
-%tint_symbol_7 = OpVariable %_ptr_Output_v2float Output %30
-%tint_symbol_8 = OpVariable %_ptr_Output_v4float Output %33
+%a_PosMtxIdx1 = OpVariable %_ptr_Private_float Private %23
+    %v_Color = OpVariable %_ptr_Private_v4float Private %16
+ %v_TexCoord = OpVariable %_ptr_Private_v2float Private %19
+%gl_Position = OpVariable %_ptr_Private_v4float Private %16
          %54 = OpTypeFunction %v3float %Mat4x3_
 %_ptr_Function_Mat4x3_ = OpTypePointer Function %Mat4x3_
          %60 = OpConstantNull %Mat4x3_
@@ -235,7 +239,7 @@
       %int_0 = OpConstant %int 0
 %_ptr_Uniform_Mat4x2_ = OpTypePointer Uniform %Mat4x2_
 %VertexOutput = OpTypeStruct %v4float %v2float %v4float
-        %362 = OpTypeFunction %void %VertexOutput
+        %362 = OpTypeFunction %VertexOutput %v3float %v2float %v4float %v3float %float
 %Mat4x3GetCol0_ = OpFunction %v3float None %54
           %m = OpFunctionParameter %Mat4x3_
          %57 = OpLabel
@@ -309,7 +313,7 @@
           %v = OpFunctionParameter %v4float
         %117 = OpLabel
          %m9 = OpVariable %_ptr_Function_Mat4x4_ Function %120
-         %v1 = OpVariable %_ptr_Function_v4float Function %33
+         %v1 = OpVariable %_ptr_Function_v4float Function %16
                OpStore %m9 %m8
                OpStore %v1 %v
         %123 = OpLoad %Mat4x4_ %m9
@@ -336,7 +340,7 @@
          %v2 = OpFunctionParameter %v4float
         %144 = OpLabel
         %m11 = OpVariable %_ptr_Function_Mat4x3_ Function %60
-         %v3 = OpVariable %_ptr_Function_v4float Function %33
+         %v3 = OpVariable %_ptr_Function_v4float Function %16
                OpStore %m11 %m10
                OpStore %v3 %v2
         %147 = OpLoad %Mat4x3_ %m11
@@ -359,7 +363,7 @@
          %v4 = OpFunctionParameter %v4float
         %164 = OpLabel
         %m13 = OpVariable %_ptr_Function_Mat4x2_ Function %167
-         %v5 = OpVariable %_ptr_Function_v4float Function %33
+         %v5 = OpVariable %_ptr_Function_v4float Function %16
                OpStore %m13 %m12
                OpStore %v5 %v4
         %169 = OpLoad %Mat4x2_ %m13
@@ -377,7 +381,7 @@
          %v6 = OpFunctionParameter %v3float
         %m14 = OpFunctionParameter %Mat4x3_
         %182 = OpLabel
-         %v7 = OpVariable %_ptr_Function_v3float Function %26
+         %v7 = OpVariable %_ptr_Function_v3float Function %43
         %m15 = OpVariable %_ptr_Function_Mat4x3_ Function %60
                OpStore %v7 %v6
                OpStore %m15 %m14
@@ -403,7 +407,7 @@
    %_Mat4x4_ = OpFunction %Mat4x4_ None %203
           %n = OpFunctionParameter %float
         %206 = OpLabel
-         %n1 = OpVariable %_ptr_Function_float Function %4
+         %n1 = OpVariable %_ptr_Function_float Function %23
           %o = OpVariable %_ptr_Function_Mat4x4_ Function %120
                OpStore %n1 %n
         %210 = OpLoad %float %n1
@@ -470,7 +474,7 @@
    %_Mat4x3_ = OpFunction %Mat4x3_ None %259
          %n2 = OpFunctionParameter %float
         %262 = OpLabel
-         %n3 = OpVariable %_ptr_Function_float Function %4
+         %n3 = OpVariable %_ptr_Function_float Function %23
          %o3 = OpVariable %_ptr_Function_Mat4x3_ Function %60
                OpStore %n3 %n2
         %265 = OpLoad %float %n3
@@ -512,7 +516,7 @@
       %main1 = OpFunction %void None %291
         %294 = OpLabel
    %t_PosMtx = OpVariable %_ptr_Function_Mat4x3_ Function %60
-%t_TexSpaceCoord = OpVariable %_ptr_Function_v2float Function %30
+%t_TexSpaceCoord = OpVariable %_ptr_Function_v2float Function %19
         %298 = OpLoad %float %a_PosMtxIdx1
         %299 = OpConvertFToS %int %298
         %302 = OpAccessChain %_ptr_Uniform_Mat4x3_ %global2 %uint_0 %299
@@ -580,35 +584,39 @@
         %338 = OpLabel
                OpReturn
                OpFunctionEnd
-%tint_symbol_9 = OpFunction %void None %362
-%tint_symbol_5 = OpFunctionParameter %VertexOutput
-        %366 = OpLabel
-        %367 = OpCompositeExtract %v4float %tint_symbol_5 0
-               OpStore %tint_symbol_6 %367
-        %368 = OpCompositeExtract %v2float %tint_symbol_5 1
-               OpStore %tint_symbol_7 %368
-        %369 = OpCompositeExtract %v4float %tint_symbol_5 2
-               OpStore %tint_symbol_8 %369
-               OpReturn
+ %main_inner = OpFunction %VertexOutput None %362
+ %a_Position = OpFunctionParameter %v3float
+       %a_UV = OpFunctionParameter %v2float
+    %a_Color = OpFunctionParameter %v4float
+   %a_Normal = OpFunctionParameter %v3float
+%a_PosMtxIdx = OpFunctionParameter %float
+        %370 = OpLabel
+               OpStore %a_Position1 %a_Position
+               OpStore %a_UV1 %a_UV
+               OpStore %a_Color1 %a_Color
+               OpStore %a_Normal1 %a_Normal
+               OpStore %a_PosMtxIdx1 %a_PosMtxIdx
+        %371 = OpFunctionCall %void %main1
+        %372 = OpLoad %v4float %v_Color
+        %373 = OpLoad %v2float %v_TexCoord
+        %374 = OpLoad %v4float %gl_Position
+        %375 = OpCompositeConstruct %VertexOutput %372 %373 %374
+               OpReturnValue %375
                OpFunctionEnd
        %main = OpFunction %void None %291
-        %371 = OpLabel
-               OpStore %tint_pointsize %float_1
-        %372 = OpLoad %v3float %tint_symbol
-               OpStore %a_Position1 %372
-        %373 = OpLoad %v2float %tint_symbol_1
-               OpStore %a_UV1 %373
-        %374 = OpLoad %v4float %tint_symbol_2
-               OpStore %a_Color1 %374
-        %375 = OpLoad %v3float %tint_symbol_3
-               OpStore %a_Normal1 %375
-        %376 = OpLoad %float %tint_symbol_4
-               OpStore %a_PosMtxIdx1 %376
-        %377 = OpFunctionCall %void %main1
-        %378 = OpLoad %v4float %v_Color
-        %379 = OpLoad %v2float %v_TexCoord
-        %380 = OpLoad %v4float %gl_Position
-        %382 = OpCompositeConstruct %VertexOutput %378 %379 %380
-        %381 = OpFunctionCall %void %tint_symbol_9 %382
+        %377 = OpLabel
+        %379 = OpLoad %v3float %a_Position_1
+        %380 = OpLoad %v2float %a_UV_1
+        %381 = OpLoad %v4float %a_Color_1
+        %382 = OpLoad %v3float %a_Normal_1
+        %383 = OpLoad %float %a_PosMtxIdx_1
+        %378 = OpFunctionCall %VertexOutput %main_inner %379 %380 %381 %382 %383
+        %384 = OpCompositeExtract %v4float %378 0
+               OpStore %v_Color_1 %384
+        %385 = OpCompositeExtract %v2float %378 1
+               OpStore %v_TexCoord_1 %385
+        %386 = OpCompositeExtract %v4float %378 2
+               OpStore %member_1 %386
+               OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd

@@ -51,13 +51,48 @@ fn comp_main() {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(CanonicalizeEntryPointIOTest, Parameters_BuiltinsAsParameters) {
+TEST_F(CanonicalizeEntryPointIOTest, Parameters_Spirv) {
+  auto* src = R"(
+[[stage(fragment)]]
+fn frag_main([[location(1)]] loc1 : f32,
+             [[location(2)]] loc2 : vec4<u32>,
+             [[builtin(position)]] coord : vec4<f32>) {
+  var col : f32 = (coord.x * loc1);
+}
+)";
+
+  auto* expect = R"(
+[[location(1), internal(disable_validation__ignore_storage_class)]] var<in> loc1_1 : f32;
+
+[[location(2), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<in> loc2_1 : vec4<u32>;
+
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<in> coord_1 : vec4<f32>;
+
+fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>) {
+  var col : f32 = (coord.x * loc1);
+}
+
+[[stage(fragment)]]
+fn frag_main() {
+  frag_main_inner(loc1_1, loc2_1, coord_1);
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::ShaderStyle::kSpirv);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, Parameters_Msl) {
   auto* src = R"(
 [[stage(fragment)]]
 fn frag_main([[location(1)]] loc1 : f32,
@@ -87,13 +122,13 @@ fn frag_main([[builtin(position)]] coord : vec4<f32>, tint_symbol : tint_symbol_
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(CanonicalizeEntryPointIOTest, Parameters_BuiltinsAsStructMembers) {
+TEST_F(CanonicalizeEntryPointIOTest, Parameters_Hlsl) {
   auto* src = R"(
 [[stage(fragment)]]
 fn frag_main([[location(1)]] loc1 : f32,
@@ -125,7 +160,7 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kStructMember);
+      CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -161,85 +196,67 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(CanonicalizeEntryPointIOTest,
-       Parameters_EmptyBody_BuiltinsAsParameters) {
+TEST_F(CanonicalizeEntryPointIOTest, StructParameters_Spirv) {
   auto* src = R"(
-[[stage(fragment)]]
-fn frag_main([[location(1)]] loc1 : f32,
-             [[location(2)]] loc2 : vec4<u32>,
-             [[builtin(position)]] coord : vec4<f32>) {
-}
-)";
-
-  auto* expect = R"(
-struct tint_symbol_1 {
-  [[location(1)]]
-  loc1 : f32;
-  [[location(2)]]
-  loc2 : vec4<u32>;
+struct FragBuiltins {
+  [[builtin(position)]] coord : vec4<f32>;
+};
+struct FragLocations {
+  [[location(1)]] loc1 : f32;
+  [[location(2)]] loc2 : vec4<u32>;
 };
 
-fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>) {
-}
-
 [[stage(fragment)]]
-fn frag_main([[builtin(position)]] coord : vec4<f32>, tint_symbol : tint_symbol_1) {
-  frag_main_inner(tint_symbol.loc1, tint_symbol.loc2, coord);
-}
-)";
-
-  DataMap data;
-  data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
-  auto got = Run<CanonicalizeEntryPointIO>(src, data);
-
-  EXPECT_EQ(expect, str(got));
-}
-
-TEST_F(CanonicalizeEntryPointIOTest,
-       Parameters_EmptyBody_BuiltinsAsStructMembers) {
-  auto* src = R"(
-[[stage(fragment)]]
-fn frag_main([[location(1)]] loc1 : f32,
-             [[location(2)]] loc2 : vec4<u32>,
-             [[builtin(position)]] coord : vec4<f32>) {
+fn frag_main([[location(0)]] loc0 : f32,
+             locations : FragLocations,
+             builtins : FragBuiltins) {
+  var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
 }
 )";
 
   auto* expect = R"(
-struct tint_symbol_1 {
-  [[location(1)]]
-  loc1 : f32;
-  [[location(2)]]
-  loc2 : vec4<u32>;
-  [[builtin(position)]]
+[[location(0), internal(disable_validation__ignore_storage_class)]] var<in> loc0_1 : f32;
+
+[[location(1), internal(disable_validation__ignore_storage_class)]] var<in> loc1_1 : f32;
+
+[[location(2), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<in> loc2_1 : vec4<u32>;
+
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<in> coord_1 : vec4<f32>;
+
+struct FragBuiltins {
   coord : vec4<f32>;
 };
 
-fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>) {
+struct FragLocations {
+  loc1 : f32;
+  loc2 : vec4<u32>;
+};
+
+fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins) {
+  var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
 }
 
 [[stage(fragment)]]
-fn frag_main(tint_symbol : tint_symbol_1) {
-  frag_main_inner(tint_symbol.loc1, tint_symbol.loc2, tint_symbol.coord);
+fn frag_main() {
+  frag_main_inner(loc0_1, FragLocations(loc1_1, loc2_1), FragBuiltins(coord_1));
 }
 )";
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kStructMember);
+      CanonicalizeEntryPointIO::ShaderStyle::kSpirv);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(CanonicalizeEntryPointIOTest, StructParameters_BuiltinsAsParameters) {
+TEST_F(CanonicalizeEntryPointIOTest, StructParameters_kMsl) {
   auto* src = R"(
 struct FragBuiltins {
   [[builtin(position)]] coord : vec4<f32>;
@@ -288,13 +305,13 @@ fn frag_main([[builtin(position)]] coord : vec4<f32>, tint_symbol : tint_symbol_
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(CanonicalizeEntryPointIOTest, StructParameters_BuiltinsAsStructMembers) {
+TEST_F(CanonicalizeEntryPointIOTest, StructParameters_Hlsl) {
   auto* src = R"(
 struct FragBuiltins {
   [[builtin(position)]] coord : vec4<f32>;
@@ -345,13 +362,43 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kStructMember);
+      CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(CanonicalizeEntryPointIOTest, Return_Scalar) {
+TEST_F(CanonicalizeEntryPointIOTest, Return_NonStruct_Spirv) {
+  auto* src = R"(
+[[stage(fragment)]]
+fn frag_main() -> [[builtin(frag_depth)]] f32 {
+  return 1.0;
+}
+)";
+
+  auto* expect = R"(
+[[builtin(frag_depth), internal(disable_validation__ignore_storage_class)]] var<out> value : f32;
+
+fn frag_main_inner() -> f32 {
+  return 1.0;
+}
+
+[[stage(fragment)]]
+fn frag_main() {
+  let inner_result = frag_main_inner();
+  value = inner_result;
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::ShaderStyle::kSpirv);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, Return_NonStruct_Msl) {
   auto* src = R"(
 [[stage(fragment)]]
 fn frag_main() -> [[builtin(frag_depth)]] f32 {
@@ -380,13 +427,104 @@ fn frag_main() -> tint_symbol {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(CanonicalizeEntryPointIOTest, Return_Struct) {
+TEST_F(CanonicalizeEntryPointIOTest, Return_NonStruct_Hlsl) {
+  auto* src = R"(
+[[stage(fragment)]]
+fn frag_main() -> [[builtin(frag_depth)]] f32 {
+  return 1.0;
+}
+)";
+
+  auto* expect = R"(
+struct tint_symbol {
+  [[builtin(frag_depth)]]
+  value : f32;
+};
+
+fn frag_main_inner() -> f32 {
+  return 1.0;
+}
+
+[[stage(fragment)]]
+fn frag_main() -> tint_symbol {
+  let inner_result = frag_main_inner();
+  var wrapper_result : tint_symbol;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, Return_Struct_Spirv) {
+  auto* src = R"(
+struct FragOutput {
+  [[location(0)]] color : vec4<f32>;
+  [[builtin(frag_depth)]] depth : f32;
+  [[builtin(sample_mask)]] mask : u32;
+};
+
+[[stage(fragment)]]
+fn frag_main() -> FragOutput {
+  var output : FragOutput;
+  output.depth = 1.0;
+  output.mask = 7u;
+  output.color = vec4<f32>(0.5, 0.5, 0.5, 1.0);
+  return output;
+}
+)";
+
+  auto* expect = R"(
+[[location(0), internal(disable_validation__ignore_storage_class)]] var<out> color_1 : vec4<f32>;
+
+[[builtin(frag_depth), internal(disable_validation__ignore_storage_class)]] var<out> depth_1 : f32;
+
+[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<out> mask_1 : u32;
+
+struct FragOutput {
+  color : vec4<f32>;
+  depth : f32;
+  mask : u32;
+};
+
+fn frag_main_inner() -> FragOutput {
+  var output : FragOutput;
+  output.depth = 1.0;
+  output.mask = 7u;
+  output.color = vec4<f32>(0.5, 0.5, 0.5, 1.0);
+  return output;
+}
+
+[[stage(fragment)]]
+fn frag_main() {
+  let inner_result = frag_main_inner();
+  color_1 = inner_result.color;
+  depth_1 = inner_result.depth;
+  mask_1 = inner_result.mask;
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::ShaderStyle::kSpirv);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, Return_Struct_Msl) {
   auto* src = R"(
 struct FragOutput {
   [[location(0)]] color : vec4<f32>;
@@ -441,13 +579,143 @@ fn frag_main() -> tint_symbol {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(CanonicalizeEntryPointIOTest, StructParameters_SharedDeviceFunction) {
+TEST_F(CanonicalizeEntryPointIOTest, Return_Struct_Hlsl) {
+  auto* src = R"(
+struct FragOutput {
+  [[location(0)]] color : vec4<f32>;
+  [[builtin(frag_depth)]] depth : f32;
+  [[builtin(sample_mask)]] mask : u32;
+};
+
+[[stage(fragment)]]
+fn frag_main() -> FragOutput {
+  var output : FragOutput;
+  output.depth = 1.0;
+  output.mask = 7u;
+  output.color = vec4<f32>(0.5, 0.5, 0.5, 1.0);
+  return output;
+}
+)";
+
+  auto* expect = R"(
+struct FragOutput {
+  color : vec4<f32>;
+  depth : f32;
+  mask : u32;
+};
+
+struct tint_symbol {
+  [[location(0)]]
+  color : vec4<f32>;
+  [[builtin(frag_depth)]]
+  depth : f32;
+  [[builtin(sample_mask)]]
+  mask : u32;
+};
+
+fn frag_main_inner() -> FragOutput {
+  var output : FragOutput;
+  output.depth = 1.0;
+  output.mask = 7u;
+  output.color = vec4<f32>(0.5, 0.5, 0.5, 1.0);
+  return output;
+}
+
+[[stage(fragment)]]
+fn frag_main() -> tint_symbol {
+  let inner_result = frag_main_inner();
+  var wrapper_result : tint_symbol;
+  wrapper_result.color = inner_result.color;
+  wrapper_result.depth = inner_result.depth;
+  wrapper_result.mask = inner_result.mask;
+  return wrapper_result;
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest,
+       StructParameters_SharedDeviceFunction_Spirv) {
+  auto* src = R"(
+struct FragmentInput {
+  [[location(0)]] value : f32;
+  [[location(1)]] mul : f32;
+};
+
+fn foo(x : FragmentInput) -> f32 {
+  return x.value * x.mul;
+}
+
+[[stage(fragment)]]
+fn frag_main1(inputs : FragmentInput) {
+  var x : f32 = foo(inputs);
+}
+
+[[stage(fragment)]]
+fn frag_main2(inputs : FragmentInput) {
+  var x : f32 = foo(inputs);
+}
+)";
+
+  auto* expect = R"(
+[[location(0), internal(disable_validation__ignore_storage_class)]] var<in> value_1 : f32;
+
+[[location(1), internal(disable_validation__ignore_storage_class)]] var<in> mul_1 : f32;
+
+[[location(0), internal(disable_validation__ignore_storage_class)]] var<in> value_2 : f32;
+
+[[location(1), internal(disable_validation__ignore_storage_class)]] var<in> mul_2 : f32;
+
+struct FragmentInput {
+  value : f32;
+  mul : f32;
+};
+
+fn foo(x : FragmentInput) -> f32 {
+  return (x.value * x.mul);
+}
+
+fn frag_main1_inner(inputs : FragmentInput) {
+  var x : f32 = foo(inputs);
+}
+
+[[stage(fragment)]]
+fn frag_main1() {
+  frag_main1_inner(FragmentInput(value_1, mul_1));
+}
+
+fn frag_main2_inner(inputs : FragmentInput) {
+  var x : f32 = foo(inputs);
+}
+
+[[stage(fragment)]]
+fn frag_main2() {
+  frag_main2_inner(FragmentInput(value_2, mul_2));
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::ShaderStyle::kSpirv);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest,
+       StructParameters_SharedDeviceFunction_Msl) {
   auto* src = R"(
 struct FragmentInput {
   [[location(0)]] value : f32;
@@ -514,7 +782,81 @@ fn frag_main2(tint_symbol_2 : tint_symbol_3) {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest,
+       StructParameters_SharedDeviceFunction_Hlsl) {
+  auto* src = R"(
+struct FragmentInput {
+  [[location(0)]] value : f32;
+  [[location(1)]] mul : f32;
+};
+
+fn foo(x : FragmentInput) -> f32 {
+  return x.value * x.mul;
+}
+
+[[stage(fragment)]]
+fn frag_main1(inputs : FragmentInput) {
+  var x : f32 = foo(inputs);
+}
+
+[[stage(fragment)]]
+fn frag_main2(inputs : FragmentInput) {
+  var x : f32 = foo(inputs);
+}
+)";
+
+  auto* expect = R"(
+struct FragmentInput {
+  value : f32;
+  mul : f32;
+};
+
+fn foo(x : FragmentInput) -> f32 {
+  return (x.value * x.mul);
+}
+
+struct tint_symbol_1 {
+  [[location(0)]]
+  value : f32;
+  [[location(1)]]
+  mul : f32;
+};
+
+fn frag_main1_inner(inputs : FragmentInput) {
+  var x : f32 = foo(inputs);
+}
+
+[[stage(fragment)]]
+fn frag_main1(tint_symbol : tint_symbol_1) {
+  frag_main1_inner(FragmentInput(tint_symbol.value, tint_symbol.mul));
+}
+
+struct tint_symbol_3 {
+  [[location(0)]]
+  value : f32;
+  [[location(1)]]
+  mul : f32;
+};
+
+fn frag_main2_inner(inputs : FragmentInput) {
+  var x : f32 = foo(inputs);
+}
+
+[[stage(fragment)]]
+fn frag_main2(tint_symbol_2 : tint_symbol_3) {
+  frag_main2_inner(FragmentInput(tint_symbol_2.value, tint_symbol_2.mul));
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -582,7 +924,7 @@ fn frag_main1(tint_symbol : tint_symbol_1) {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -669,7 +1011,7 @@ fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -761,7 +1103,138 @@ fn frag_main(tint_symbol_1 : tint_symbol_2) {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kStructMember);
+      CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, InterpolateAttributes_Integers_Spirv) {
+  // Test that we add a Flat attribute to integers that are vertex outputs and
+  // fragment inputs, but not vertex inputs or fragment outputs.
+  auto* src = R"(
+struct VertexIn {
+  [[location(0)]] i : i32;
+  [[location(1)]] u : u32;
+  [[location(2)]] vi : vec4<i32>;
+  [[location(3)]] vu : vec4<u32>;
+};
+
+struct VertexOut {
+  [[location(0)]] i : i32;
+  [[location(1)]] u : u32;
+  [[location(2)]] vi : vec4<i32>;
+  [[location(3)]] vu : vec4<u32>;
+  [[builtin(position)]] pos : vec4<f32>;
+};
+
+struct FragmentInterface {
+  [[location(0)]] i : i32;
+  [[location(1)]] u : u32;
+  [[location(2)]] vi : vec4<i32>;
+  [[location(3)]] vu : vec4<u32>;
+};
+
+[[stage(vertex)]]
+fn vert_main(in : VertexIn) -> VertexOut {
+  return VertexOut(in.i, in.u, in.vi, in.vu, vec4<f32>());
+}
+
+[[stage(fragment)]]
+fn frag_main(inputs : FragmentInterface) -> FragmentInterface {
+  return inputs;
+}
+)";
+
+  auto* expect =
+      R"(
+[[location(0), internal(disable_validation__ignore_storage_class)]] var<in> i_1 : i32;
+
+[[location(1), internal(disable_validation__ignore_storage_class)]] var<in> u_1 : u32;
+
+[[location(2), internal(disable_validation__ignore_storage_class)]] var<in> vi_1 : vec4<i32>;
+
+[[location(3), internal(disable_validation__ignore_storage_class)]] var<in> vu_1 : vec4<u32>;
+
+[[location(0), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<out> i_2 : i32;
+
+[[location(1), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<out> u_2 : u32;
+
+[[location(2), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<out> vi_2 : vec4<i32>;
+
+[[location(3), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<out> vu_2 : vec4<u32>;
+
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<out> pos_1 : vec4<f32>;
+
+[[location(0), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<in> i_3 : i32;
+
+[[location(1), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<in> u_3 : u32;
+
+[[location(2), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<in> vi_3 : vec4<i32>;
+
+[[location(3), interpolate(flat), internal(disable_validation__ignore_storage_class)]] var<in> vu_3 : vec4<u32>;
+
+[[location(0), internal(disable_validation__ignore_storage_class)]] var<out> i_4 : i32;
+
+[[location(1), internal(disable_validation__ignore_storage_class)]] var<out> u_4 : u32;
+
+[[location(2), internal(disable_validation__ignore_storage_class)]] var<out> vi_4 : vec4<i32>;
+
+[[location(3), internal(disable_validation__ignore_storage_class)]] var<out> vu_4 : vec4<u32>;
+
+struct VertexIn {
+  i : i32;
+  u : u32;
+  vi : vec4<i32>;
+  vu : vec4<u32>;
+};
+
+struct VertexOut {
+  i : i32;
+  u : u32;
+  vi : vec4<i32>;
+  vu : vec4<u32>;
+  pos : vec4<f32>;
+};
+
+struct FragmentInterface {
+  i : i32;
+  u : u32;
+  vi : vec4<i32>;
+  vu : vec4<u32>;
+};
+
+fn vert_main_inner(in : VertexIn) -> VertexOut {
+  return VertexOut(in.i, in.u, in.vi, in.vu, vec4<f32>());
+}
+
+[[stage(vertex)]]
+fn vert_main() {
+  let inner_result = vert_main_inner(VertexIn(i_1, u_1, vi_1, vu_1));
+  i_2 = inner_result.i;
+  u_2 = inner_result.u;
+  vi_2 = inner_result.vi;
+  vu_2 = inner_result.vu;
+  pos_1 = inner_result.pos;
+}
+
+fn frag_main_inner(inputs : FragmentInterface) -> FragmentInterface {
+  return inputs;
+}
+
+[[stage(fragment)]]
+fn frag_main() {
+  let inner_result_1 = frag_main_inner(FragmentInterface(i_3, u_3, vi_3, vu_3));
+  i_4 = inner_result_1.i;
+  u_4 = inner_result_1.u;
+  vi_4 = inner_result_1.vi;
+  vu_4 = inner_result_1.vu;
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::ShaderStyle::kSpirv);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -826,7 +1299,7 @@ fn main2() -> tint_symbol_1 {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kStructMember);
+      CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -896,7 +1369,7 @@ fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kStructMember);
+      CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -1001,7 +1474,7 @@ fn frag_main(tint_symbol_1 : tint_symbol_2) {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kStructMember);
+      CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -1031,7 +1504,7 @@ fn tint_symbol_1(tint_symbol : tint_symbol_2) {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter);
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -1064,7 +1537,7 @@ fn frag_main() -> tint_symbol {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0x03u);
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0x03u);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -1099,7 +1572,7 @@ fn frag_main() -> tint_symbol {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0x03u);
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0x03u);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -1134,7 +1607,7 @@ fn frag_main() -> tint_symbol {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0x03u);
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0x03u);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -1172,7 +1645,7 @@ fn frag_main() -> tint_symbol {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0x03u);
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0x03u);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -1225,7 +1698,7 @@ fn frag_main() -> tint_symbol {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0x03u);
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0x03u);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -1277,7 +1750,7 @@ fn frag_main() -> tint_symbol {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0x03u);
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0x03u);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -1367,7 +1840,7 @@ fn comp_main1() {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0x03u);
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0x03u);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
@@ -1418,13 +1891,47 @@ fn frag_main() -> tint_symbol {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0x03);
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0x03);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_ReturnNonStruct) {
+TEST_F(CanonicalizeEntryPointIOTest,
+       EmitVertexPointSize_ReturnNonStruct_Spirv) {
+  auto* src = R"(
+[[stage(vertex)]]
+fn vert_main() -> [[builtin(position)]] vec4<f32> {
+  return vec4<f32>();
+}
+)";
+
+  auto* expect = R"(
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<out> value : vec4<f32>;
+
+[[builtin(pointsize), internal(disable_validation__ignore_storage_class)]] var<out> vertex_point_size : f32;
+
+fn vert_main_inner() -> vec4<f32> {
+  return vec4<f32>();
+}
+
+[[stage(vertex)]]
+fn vert_main() {
+  let inner_result = vert_main_inner();
+  value = inner_result;
+  vertex_point_size = 1.0;
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::ShaderStyle::kSpirv, 0xFFFFFFFF, true);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_ReturnNonStruct_Msl) {
   auto* src = R"(
 [[stage(vertex)]]
 fn vert_main() -> [[builtin(position)]] vec4<f32> {
@@ -1456,13 +1963,54 @@ fn vert_main() -> tint_symbol {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0xFFFFFFFF, true);
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0xFFFFFFFF, true);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_ReturnStruct) {
+TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_ReturnStruct_Spirv) {
+  auto* src = R"(
+struct VertOut {
+  [[builtin(position)]] pos : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn vert_main() -> VertOut {
+  return VertOut();
+}
+)";
+
+  auto* expect = R"(
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<out> pos_1 : vec4<f32>;
+
+[[builtin(pointsize), internal(disable_validation__ignore_storage_class)]] var<out> vertex_point_size : f32;
+
+struct VertOut {
+  pos : vec4<f32>;
+};
+
+fn vert_main_inner() -> VertOut {
+  return VertOut();
+}
+
+[[stage(vertex)]]
+fn vert_main() {
+  let inner_result = vert_main_inner();
+  pos_1 = inner_result.pos;
+  vertex_point_size = 1.0;
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::ShaderStyle::kSpirv, 0xFFFFFFFF, true);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_ReturnStruct_Msl) {
   auto* src = R"(
 struct VertOut {
   [[builtin(position)]] pos : vec4<f32>;
@@ -1502,13 +2050,69 @@ fn vert_main() -> tint_symbol {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0xFFFFFFFF, true);
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0xFFFFFFFF, true);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_AvoidNameClash) {
+TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_AvoidNameClash_Spirv) {
+  auto* src = R"(
+var<private> vertex_point_size : f32;
+var<private> vertex_point_size_1 : f32;
+var<private> vertex_point_size_2 : f32;
+
+struct VertOut {
+  [[location(0)]] vertex_point_size : f32;
+  [[builtin(position)]] vertex_point_size_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn vert_main() -> VertOut {
+  return VertOut();
+}
+)";
+
+  auto* expect = R"(
+[[location(0), internal(disable_validation__ignore_storage_class)]] var<out> vertex_point_size_3 : f32;
+
+[[builtin(position), internal(disable_validation__ignore_storage_class)]] var<out> vertex_point_size_1_1 : vec4<f32>;
+
+[[builtin(pointsize), internal(disable_validation__ignore_storage_class)]] var<out> vertex_point_size_4 : f32;
+
+var<private> vertex_point_size : f32;
+
+var<private> vertex_point_size_1 : f32;
+
+var<private> vertex_point_size_2 : f32;
+
+struct VertOut {
+  vertex_point_size : f32;
+  vertex_point_size_1 : vec4<f32>;
+};
+
+fn vert_main_inner() -> VertOut {
+  return VertOut();
+}
+
+[[stage(vertex)]]
+fn vert_main() {
+  let inner_result = vert_main_inner();
+  vertex_point_size_3 = inner_result.vertex_point_size;
+  vertex_point_size_1_1 = inner_result.vertex_point_size_1;
+  vertex_point_size_4 = 1.0;
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::ShaderStyle::kSpirv, 0xFFFFFFFF, true);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_AvoidNameClash_Msl) {
   auto* src = R"(
 struct VertOut {
   [[location(0)]] vertex_point_size : vec4<f32>;
@@ -1553,7 +2157,7 @@ fn vert_main() -> tint_symbol {
 
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, 0xFFFFFFFF, true);
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0xFFFFFFFF, true);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));

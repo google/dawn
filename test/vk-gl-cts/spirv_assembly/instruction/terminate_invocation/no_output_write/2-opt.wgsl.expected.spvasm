@@ -5,36 +5,36 @@
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Fragment %main "main" %tint_symbol %tint_symbol_2
+               OpEntryPoint Fragment %main "main" %gl_FragCoord_param_1 %out_data_1_1
                OpExecutionMode %main OriginUpperLeft
+               OpName %gl_FragCoord_param_1 "gl_FragCoord_param_1"
+               OpName %out_data_1_1 "out_data_1_1"
                OpName %gl_FragCoord "gl_FragCoord"
                OpName %out_data "out_data"
-               OpName %tint_symbol "tint_symbol"
-               OpName %tint_symbol_2 "tint_symbol_2"
                OpName %main_1 "main_1"
                OpName %x_is_odd "x_is_odd"
                OpName %y_is_odd "y_is_odd"
                OpName %main_out "main_out"
                OpMemberName %main_out 0 "out_data_1"
-               OpName %tint_symbol_3 "tint_symbol_3"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %main_inner "main_inner"
+               OpName %gl_FragCoord_param "gl_FragCoord_param"
                OpName %main "main"
-               OpDecorate %tint_symbol BuiltIn FragCoord
-               OpDecorate %tint_symbol_2 Location 0
+               OpDecorate %gl_FragCoord_param_1 BuiltIn FragCoord
+               OpDecorate %out_data_1_1 Location 0
                OpMemberDecorate %main_out 0 Offset 0
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
-%_ptr_Private_v4float = OpTypePointer Private %v4float
-          %5 = OpConstantNull %v4float
-%gl_FragCoord = OpVariable %_ptr_Private_v4float Private %5
-        %int = OpTypeInt 32 1
-%_ptr_Private_int = OpTypePointer Private %int
-          %9 = OpConstantNull %int
-   %out_data = OpVariable %_ptr_Private_int Private %9
 %_ptr_Input_v4float = OpTypePointer Input %v4float
-%tint_symbol = OpVariable %_ptr_Input_v4float Input
+%gl_FragCoord_param_1 = OpVariable %_ptr_Input_v4float Input
+        %int = OpTypeInt 32 1
 %_ptr_Output_int = OpTypePointer Output %int
-%tint_symbol_2 = OpVariable %_ptr_Output_int Output %9
+          %8 = OpConstantNull %int
+%out_data_1_1 = OpVariable %_ptr_Output_int Output %8
+%_ptr_Private_v4float = OpTypePointer Private %v4float
+         %11 = OpConstantNull %v4float
+%gl_FragCoord = OpVariable %_ptr_Private_v4float Private %11
+%_ptr_Private_int = OpTypePointer Private %int
+   %out_data = OpVariable %_ptr_Private_int Private %8
        %void = OpTypeVoid
          %14 = OpTypeFunction %void
        %bool = OpTypeBool
@@ -47,7 +47,7 @@
      %uint_1 = OpConstant %uint 1
       %int_0 = OpConstant %int 0
    %main_out = OpTypeStruct %int
-         %45 = OpTypeFunction %void %main_out
+         %45 = OpTypeFunction %main_out %v4float
      %main_1 = OpFunction %void None %14
          %17 = OpLabel
    %x_is_odd = OpVariable %_ptr_Function_bool Function %21
@@ -76,20 +76,20 @@
                OpStore %out_data %40
                OpReturn
                OpFunctionEnd
-%tint_symbol_3 = OpFunction %void None %45
-%tint_symbol_1 = OpFunctionParameter %main_out
+ %main_inner = OpFunction %main_out None %45
+%gl_FragCoord_param = OpFunctionParameter %v4float
          %49 = OpLabel
-         %50 = OpCompositeExtract %int %tint_symbol_1 0
-               OpStore %tint_symbol_2 %50
-               OpReturn
+               OpStore %gl_FragCoord %gl_FragCoord_param
+         %50 = OpFunctionCall %void %main_1
+         %51 = OpLoad %int %out_data
+         %52 = OpCompositeConstruct %main_out %51
+               OpReturnValue %52
                OpFunctionEnd
        %main = OpFunction %void None %14
-         %52 = OpLabel
-         %53 = OpLoad %v4float %tint_symbol
-               OpStore %gl_FragCoord %53
-         %54 = OpFunctionCall %void %main_1
-         %56 = OpLoad %int %out_data
-         %57 = OpCompositeConstruct %main_out %56
-         %55 = OpFunctionCall %void %tint_symbol_3 %57
+         %54 = OpLabel
+         %56 = OpLoad %v4float %gl_FragCoord_param_1
+         %55 = OpFunctionCall %main_out %main_inner %56
+         %57 = OpCompositeExtract %int %55 0
+               OpStore %out_data_1_1 %57
                OpReturn
                OpFunctionEnd

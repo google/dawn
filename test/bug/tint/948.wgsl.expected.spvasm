@@ -1,13 +1,20 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 381
+; Bound: 386
 ; Schema: 0
                OpCapability Shader
         %138 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Fragment %main "main" %tint_symbol %tint_symbol_1 %tint_symbol_2 %tint_symbol_3 %tint_symbol_4 %tint_symbol_5 %tint_symbol_7
+               OpEntryPoint Fragment %main "main" %tUV_param_1 %tileID_1_param_1 %levelUnits_param_1 %stageUnits_1_param_1 %vPosition_param_1 %vUV_param_1 %glFragColor_1_1
                OpExecutionMode %main OriginUpperLeft
+               OpName %tUV_param_1 "tUV_param_1"
+               OpName %tileID_1_param_1 "tileID_1_param_1"
+               OpName %levelUnits_param_1 "levelUnits_param_1"
+               OpName %stageUnits_1_param_1 "stageUnits_1_param_1"
+               OpName %vPosition_param_1 "vPosition_param_1"
+               OpName %vUV_param_1 "vUV_param_1"
+               OpName %glFragColor_1_1 "glFragColor_1_1"
                OpName %LeftOver "LeftOver"
                OpMemberName %LeftOver 0 "time"
                OpMemberName %LeftOver 1 "padding"
@@ -36,13 +43,6 @@
                OpName %stageUnits_1 "stageUnits_1"
                OpName %vPosition "vPosition"
                OpName %vUV "vUV"
-               OpName %tint_symbol "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
-               OpName %tint_symbol_2 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
-               OpName %tint_symbol_4 "tint_symbol_4"
-               OpName %tint_symbol_5 "tint_symbol_5"
-               OpName %tint_symbol_7 "tint_symbol_7"
                OpName %getFrameData_f1_ "getFrameData_f1_"
                OpName %frameID "frameID"
                OpName %fX "fX"
@@ -67,9 +67,21 @@
                OpName %mixed "mixed"
                OpName %main_out "main_out"
                OpMemberName %main_out 0 "glFragColor_1"
-               OpName %tint_symbol_8 "tint_symbol_8"
-               OpName %tint_symbol_6 "tint_symbol_6"
+               OpName %main_inner "main_inner"
+               OpName %tUV_param "tUV_param"
+               OpName %tileID_1_param "tileID_1_param"
+               OpName %levelUnits_param "levelUnits_param"
+               OpName %stageUnits_1_param "stageUnits_1_param"
+               OpName %vPosition_param "vPosition_param"
+               OpName %vUV_param "vUV_param"
                OpName %main "main"
+               OpDecorate %tUV_param_1 Location 2
+               OpDecorate %tileID_1_param_1 Location 5
+               OpDecorate %levelUnits_param_1 Location 4
+               OpDecorate %stageUnits_1_param_1 Location 3
+               OpDecorate %vPosition_param_1 Location 0
+               OpDecorate %vUV_param_1 Location 1
+               OpDecorate %glFragColor_1_1 Location 0
                OpDecorate %LeftOver Block
                OpMemberDecorate %LeftOver 0 Offset 0
                OpMemberDecorate %LeftOver 1 Offset 4
@@ -103,67 +115,60 @@
                OpDecorate %spriteSheetTexture Binding 1
                OpDecorate %spriteSheetSampler DescriptorSet 2
                OpDecorate %spriteSheetSampler Binding 0
-               OpDecorate %tint_symbol Location 2
-               OpDecorate %tint_symbol_1 Location 5
-               OpDecorate %tint_symbol_2 Location 4
-               OpDecorate %tint_symbol_3 Location 3
-               OpDecorate %tint_symbol_4 Location 0
-               OpDecorate %tint_symbol_5 Location 1
-               OpDecorate %tint_symbol_7 Location 0
                OpMemberDecorate %main_out 0 Offset 0
       %float = OpTypeFloat 32
-       %uint = OpTypeInt 32 0
-    %v4float = OpTypeVector %float 4
-%mat4v4float = OpTypeMatrix %v4float 4
     %v2float = OpTypeVector %float 2
+%_ptr_Input_v2float = OpTypePointer Input %v2float
+%tUV_param_1 = OpVariable %_ptr_Input_v2float Input
+%tileID_1_param_1 = OpVariable %_ptr_Input_v2float Input
+%levelUnits_param_1 = OpVariable %_ptr_Input_v2float Input
+%stageUnits_1_param_1 = OpVariable %_ptr_Input_v2float Input
     %v3float = OpTypeVector %float 3
+%_ptr_Input_v3float = OpTypePointer Input %v3float
+%vPosition_param_1 = OpVariable %_ptr_Input_v3float Input
+%vUV_param_1 = OpVariable %_ptr_Input_v2float Input
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+         %15 = OpConstantNull %v4float
+%glFragColor_1_1 = OpVariable %_ptr_Output_v4float Output %15
+       %uint = OpTypeInt 32 0
+%mat4v4float = OpTypeMatrix %v4float 4
    %LeftOver = OpTypeStruct %float %uint %mat4v4float %v2float %v2float %v2float %float %float %v3float
 %_ptr_Uniform_LeftOver = OpTypePointer Uniform %LeftOver
        %x_20 = OpVariable %_ptr_Uniform_LeftOver Uniform
-         %12 = OpTypeImage %float 2D 0 0 0 1 Unknown
-%_ptr_UniformConstant_12 = OpTypePointer UniformConstant %12
-%frameMapTexture = OpVariable %_ptr_UniformConstant_12 UniformConstant
-         %15 = OpTypeSampler
-%_ptr_UniformConstant_15 = OpTypePointer UniformConstant %15
-%frameMapSampler = OpVariable %_ptr_UniformConstant_15 UniformConstant
+         %23 = OpTypeImage %float 2D 0 0 0 1 Unknown
+%_ptr_UniformConstant_23 = OpTypePointer UniformConstant %23
+%frameMapTexture = OpVariable %_ptr_UniformConstant_23 UniformConstant
+         %26 = OpTypeSampler
+%_ptr_UniformConstant_26 = OpTypePointer UniformConstant %26
+%frameMapSampler = OpVariable %_ptr_UniformConstant_26 UniformConstant
 %_ptr_Private_v2float = OpTypePointer Private %v2float
-         %18 = OpConstantNull %v2float
-        %tUV = OpVariable %_ptr_Private_v2float Private %18
-%tileMapsTexture0 = OpVariable %_ptr_UniformConstant_12 UniformConstant
-%tileMapsSampler = OpVariable %_ptr_UniformConstant_15 UniformConstant
-%tileMapsTexture1 = OpVariable %_ptr_UniformConstant_12 UniformConstant
-%animationMapTexture = OpVariable %_ptr_UniformConstant_12 UniformConstant
-%animationMapSampler = OpVariable %_ptr_UniformConstant_15 UniformConstant
+         %29 = OpConstantNull %v2float
+        %tUV = OpVariable %_ptr_Private_v2float Private %29
+%tileMapsTexture0 = OpVariable %_ptr_UniformConstant_23 UniformConstant
+%tileMapsSampler = OpVariable %_ptr_UniformConstant_26 UniformConstant
+%tileMapsTexture1 = OpVariable %_ptr_UniformConstant_23 UniformConstant
+%animationMapTexture = OpVariable %_ptr_UniformConstant_23 UniformConstant
+%animationMapSampler = OpVariable %_ptr_UniformConstant_26 UniformConstant
 %_ptr_Private_float = OpTypePointer Private %float
-         %26 = OpConstantNull %float
-         %mt = OpVariable %_ptr_Private_float Private %26
-%spriteSheetTexture = OpVariable %_ptr_UniformConstant_12 UniformConstant
-%spriteSheetSampler = OpVariable %_ptr_UniformConstant_15 UniformConstant
+         %37 = OpConstantNull %float
+         %mt = OpVariable %_ptr_Private_float Private %37
+%spriteSheetTexture = OpVariable %_ptr_UniformConstant_23 UniformConstant
+%spriteSheetSampler = OpVariable %_ptr_UniformConstant_26 UniformConstant
 %_ptr_Private_v4float = OpTypePointer Private %v4float
-         %31 = OpConstantNull %v4float
-%glFragColor = OpVariable %_ptr_Private_v4float Private %31
-   %tileID_1 = OpVariable %_ptr_Private_v2float Private %18
- %levelUnits = OpVariable %_ptr_Private_v2float Private %18
-%stageUnits_1 = OpVariable %_ptr_Private_v2float Private %18
+%glFragColor = OpVariable %_ptr_Private_v4float Private %15
+   %tileID_1 = OpVariable %_ptr_Private_v2float Private %29
+ %levelUnits = OpVariable %_ptr_Private_v2float Private %29
+%stageUnits_1 = OpVariable %_ptr_Private_v2float Private %29
 %_ptr_Private_v3float = OpTypePointer Private %v3float
-         %37 = OpConstantNull %v3float
-  %vPosition = OpVariable %_ptr_Private_v3float Private %37
-        %vUV = OpVariable %_ptr_Private_v2float Private %18
-%_ptr_Input_v2float = OpTypePointer Input %v2float
-%tint_symbol = OpVariable %_ptr_Input_v2float Input
-%tint_symbol_1 = OpVariable %_ptr_Input_v2float Input
-%tint_symbol_2 = OpVariable %_ptr_Input_v2float Input
-%tint_symbol_3 = OpVariable %_ptr_Input_v2float Input
-%_ptr_Input_v3float = OpTypePointer Input %v3float
-%tint_symbol_4 = OpVariable %_ptr_Input_v3float Input
-%tint_symbol_5 = OpVariable %_ptr_Input_v2float Input
-%_ptr_Output_v4float = OpTypePointer Output %v4float
-%tint_symbol_7 = OpVariable %_ptr_Output_v4float Output %31
+         %47 = OpConstantNull %v3float
+  %vPosition = OpVariable %_ptr_Private_v3float Private %47
+        %vUV = OpVariable %_ptr_Private_v2float Private %29
 %_ptr_Function_float = OpTypePointer Function %float
          %49 = OpTypeFunction %mat4v4float %_ptr_Function_float
      %uint_7 = OpConstant %uint 7
 %_ptr_Uniform_float = OpTypePointer Uniform %float
-         %66 = OpTypeSampledImage %12
+         %66 = OpTypeSampledImage %23
     %float_0 = OpConstant %float 0
  %float_0_25 = OpConstant %float 0.25
   %float_0_5 = OpConstant %float 0.5
@@ -197,31 +202,31 @@
      %uint_8 = OpConstant %uint 8
 %_ptr_Uniform_v3float = OpTypePointer Uniform %v3float
    %main_out = OpTypeStruct %v4float
-        %363 = OpTypeFunction %void %main_out
+        %363 = OpTypeFunction %main_out %v2float %v2float %v2float %v2float %v3float %v2float
 %getFrameData_f1_ = OpFunction %mat4v4float None %49
     %frameID = OpFunctionParameter %_ptr_Function_float
          %53 = OpLabel
-         %fX = OpVariable %_ptr_Function_float Function %26
+         %fX = OpVariable %_ptr_Function_float Function %37
          %56 = OpLoad %float %frameID
          %59 = OpAccessChain %_ptr_Uniform_float %x_20 %uint_7
          %60 = OpLoad %float %59
          %61 = OpFDiv %float %56 %60
                OpStore %fX %61
          %62 = OpLoad %float %fX
-         %64 = OpLoad %15 %frameMapSampler
-         %65 = OpLoad %12 %frameMapTexture
+         %64 = OpLoad %26 %frameMapSampler
+         %65 = OpLoad %23 %frameMapTexture
          %67 = OpSampledImage %66 %65 %64
          %69 = OpCompositeConstruct %v2float %62 %float_0
          %63 = OpImageSampleImplicitLod %v4float %67 %69 Bias %float_0
          %70 = OpLoad %float %fX
-         %72 = OpLoad %15 %frameMapSampler
-         %73 = OpLoad %12 %frameMapTexture
+         %72 = OpLoad %26 %frameMapSampler
+         %73 = OpLoad %23 %frameMapTexture
          %74 = OpSampledImage %66 %73 %72
          %76 = OpCompositeConstruct %v2float %70 %float_0_25
          %71 = OpImageSampleImplicitLod %v4float %74 %76 Bias %float_0
          %77 = OpLoad %float %fX
-         %79 = OpLoad %15 %frameMapSampler
-         %80 = OpLoad %12 %frameMapTexture
+         %79 = OpLoad %26 %frameMapSampler
+         %80 = OpLoad %23 %frameMapTexture
          %81 = OpSampledImage %66 %80 %79
          %83 = OpCompositeConstruct %v2float %77 %float_0_5
          %78 = OpImageSampleImplicitLod %v4float %81 %83 Bias %float_0
@@ -250,24 +255,24 @@
                OpFunctionEnd
      %main_1 = OpFunction %void None %106
         %109 = OpLabel
-      %color = OpVariable %_ptr_Function_v4float Function %31
-     %tileUV = OpVariable %_ptr_Function_v2float Function %18
-     %tileID = OpVariable %_ptr_Function_v2float Function %18
- %sheetUnits = OpVariable %_ptr_Function_v2float Function %18
-%spriteUnits = OpVariable %_ptr_Function_float Function %26
- %stageUnits = OpVariable %_ptr_Function_v2float Function %18
+      %color = OpVariable %_ptr_Function_v4float Function %15
+     %tileUV = OpVariable %_ptr_Function_v2float Function %29
+     %tileID = OpVariable %_ptr_Function_v2float Function %29
+ %sheetUnits = OpVariable %_ptr_Function_v2float Function %29
+%spriteUnits = OpVariable %_ptr_Function_float Function %37
+ %stageUnits = OpVariable %_ptr_Function_v2float Function %29
           %i = OpVariable %_ptr_Function_int Function %121
-  %frameID_1 = OpVariable %_ptr_Function_float Function %26
-%animationData = OpVariable %_ptr_Function_v4float Function %31
-          %f = OpVariable %_ptr_Function_float Function %26
+  %frameID_1 = OpVariable %_ptr_Function_float Function %37
+%animationData = OpVariable %_ptr_Function_v4float Function %15
+          %f = OpVariable %_ptr_Function_float Function %37
   %frameData = OpVariable %_ptr_Function_mat4v4float Function %127
-      %param = OpVariable %_ptr_Function_float Function %26
-  %frameSize = OpVariable %_ptr_Function_v2float Function %18
-   %offset_1 = OpVariable %_ptr_Function_v2float Function %18
-      %ratio = OpVariable %_ptr_Function_v2float Function %18
-         %nc = OpVariable %_ptr_Function_v4float Function %31
-      %alpha = OpVariable %_ptr_Function_float Function %26
-      %mixed = OpVariable %_ptr_Function_v3float Function %37
+      %param = OpVariable %_ptr_Function_float Function %37
+  %frameSize = OpVariable %_ptr_Function_v2float Function %29
+   %offset_1 = OpVariable %_ptr_Function_v2float Function %29
+      %ratio = OpVariable %_ptr_Function_v2float Function %29
+         %nc = OpVariable %_ptr_Function_v4float Function %15
+      %alpha = OpVariable %_ptr_Function_float Function %37
+      %mixed = OpVariable %_ptr_Function_v3float Function %47
                OpStore %color %99
         %136 = OpLoad %v2float %tUV
         %137 = OpExtInst %v2float %138 Fract %136
@@ -314,8 +319,8 @@
         %177 = OpLoad %v2float %tileID
         %178 = OpAccessChain %_ptr_Uniform_v2float %x_20 %uint_4
         %179 = OpLoad %v2float %178
-        %181 = OpLoad %15 %tileMapsSampler
-        %182 = OpLoad %12 %tileMapsTexture1
+        %181 = OpLoad %26 %tileMapsSampler
+        %182 = OpLoad %23 %tileMapsTexture1
         %183 = OpSampledImage %66 %182 %181
         %185 = OpFAdd %v2float %177 %184
         %186 = OpFDiv %v2float %185 %179
@@ -327,8 +332,8 @@
         %188 = OpLoad %v2float %tileID
         %189 = OpAccessChain %_ptr_Uniform_v2float %x_20 %uint_4
         %190 = OpLoad %v2float %189
-        %192 = OpLoad %15 %tileMapsSampler
-        %193 = OpLoad %12 %tileMapsTexture0
+        %192 = OpLoad %26 %tileMapsSampler
+        %193 = OpLoad %23 %tileMapsTexture0
         %194 = OpSampledImage %66 %193 %192
         %195 = OpFAdd %v2float %188 %184
         %196 = OpFDiv %v2float %195 %190
@@ -342,8 +347,8 @@
         %198 = OpLoad %float %frameID_1
         %199 = OpAccessChain %_ptr_Uniform_float %x_20 %uint_7
         %200 = OpLoad %float %199
-        %202 = OpLoad %15 %animationMapSampler
-        %203 = OpLoad %12 %animationMapTexture
+        %202 = OpLoad %26 %animationMapSampler
+        %203 = OpLoad %23 %animationMapTexture
         %204 = OpSampledImage %66 %203 %202
         %205 = OpFAdd %float %198 %float_0_5
         %206 = OpFDiv %float %205 %200
@@ -394,8 +399,8 @@
         %240 = OpAccessChain %_ptr_Uniform_float %x_20 %uint_7
         %241 = OpLoad %float %240
         %242 = OpLoad %float %f
-        %244 = OpLoad %15 %animationMapSampler
-        %245 = OpLoad %12 %animationMapTexture
+        %244 = OpLoad %26 %animationMapSampler
+        %245 = OpLoad %23 %animationMapTexture
         %246 = OpSampledImage %66 %245 %244
         %247 = OpFAdd %float %239 %float_0_5
         %248 = OpFDiv %float %247 %241
@@ -467,8 +472,8 @@
         %298 = OpLoad %v2float %tileUV
         %299 = OpLoad %v2float %frameSize
         %300 = OpLoad %v2float %offset_1
-        %302 = OpLoad %15 %spriteSheetSampler
-        %303 = OpLoad %12 %spriteSheetTexture
+        %302 = OpLoad %26 %spriteSheetSampler
+        %303 = OpLoad %23 %spriteSheetTexture
         %304 = OpSampledImage %66 %303 %302
         %305 = OpFMul %v2float %298 %299
         %306 = OpFAdd %v2float %305 %300
@@ -479,8 +484,8 @@
         %307 = OpLoad %v2float %tileUV
         %308 = OpLoad %v2float %frameSize
         %309 = OpLoad %v2float %offset_1
-        %311 = OpLoad %15 %spriteSheetSampler
-        %312 = OpLoad %12 %spriteSheetTexture
+        %311 = OpLoad %26 %spriteSheetSampler
+        %312 = OpLoad %23 %spriteSheetTexture
         %313 = OpSampledImage %66 %312 %311
         %314 = OpFMul %v2float %307 %308
         %315 = OpFAdd %v2float %314 %309
@@ -543,30 +548,35 @@
                OpStore %glFragColor %362
                OpReturn
                OpFunctionEnd
-%tint_symbol_8 = OpFunction %void None %363
-%tint_symbol_6 = OpFunctionParameter %main_out
-        %367 = OpLabel
-        %368 = OpCompositeExtract %v4float %tint_symbol_6 0
-               OpStore %tint_symbol_7 %368
-               OpReturn
+ %main_inner = OpFunction %main_out None %363
+  %tUV_param = OpFunctionParameter %v2float
+%tileID_1_param = OpFunctionParameter %v2float
+%levelUnits_param = OpFunctionParameter %v2float
+%stageUnits_1_param = OpFunctionParameter %v2float
+%vPosition_param = OpFunctionParameter %v3float
+  %vUV_param = OpFunctionParameter %v2float
+        %372 = OpLabel
+               OpStore %tUV %tUV_param
+               OpStore %tileID_1 %tileID_1_param
+               OpStore %levelUnits %levelUnits_param
+               OpStore %stageUnits_1 %stageUnits_1_param
+               OpStore %vPosition %vPosition_param
+               OpStore %vUV %vUV_param
+        %373 = OpFunctionCall %void %main_1
+        %374 = OpLoad %v4float %glFragColor
+        %375 = OpCompositeConstruct %main_out %374
+               OpReturnValue %375
                OpFunctionEnd
        %main = OpFunction %void None %106
-        %370 = OpLabel
-        %371 = OpLoad %v2float %tint_symbol
-               OpStore %tUV %371
-        %372 = OpLoad %v2float %tint_symbol_1
-               OpStore %tileID_1 %372
-        %373 = OpLoad %v2float %tint_symbol_2
-               OpStore %levelUnits %373
-        %374 = OpLoad %v2float %tint_symbol_3
-               OpStore %stageUnits_1 %374
-        %375 = OpLoad %v3float %tint_symbol_4
-               OpStore %vPosition %375
-        %376 = OpLoad %v2float %tint_symbol_5
-               OpStore %vUV %376
-        %377 = OpFunctionCall %void %main_1
-        %379 = OpLoad %v4float %glFragColor
-        %380 = OpCompositeConstruct %main_out %379
-        %378 = OpFunctionCall %void %tint_symbol_8 %380
+        %377 = OpLabel
+        %379 = OpLoad %v2float %tUV_param_1
+        %380 = OpLoad %v2float %tileID_1_param_1
+        %381 = OpLoad %v2float %levelUnits_param_1
+        %382 = OpLoad %v2float %stageUnits_1_param_1
+        %383 = OpLoad %v3float %vPosition_param_1
+        %384 = OpLoad %v2float %vUV_param_1
+        %378 = OpFunctionCall %main_out %main_inner %379 %380 %381 %382 %383 %384
+        %385 = OpCompositeExtract %v4float %378 0
+               OpStore %glFragColor_1_1 %385
                OpReturn
                OpFunctionEnd

@@ -73,7 +73,7 @@ Output Hlsl::Run(const Program* in, const DataMap& inputs) {
   manager.Add<PadArrayElements>();
 
   data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::BuiltinStyle::kStructMember);
+      CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
   auto out = manager.Run(in, data);
   if (!out.program.IsValid()) {
     return out;

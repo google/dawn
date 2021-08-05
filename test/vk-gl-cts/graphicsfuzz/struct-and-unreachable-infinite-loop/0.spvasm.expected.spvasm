@@ -1,14 +1,14 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 73
+; Bound: 72
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Fragment %main "main" %tint_symbol_1
+               OpEntryPoint Fragment %main "main" %x_GLF_color_1_1
                OpExecutionMode %main OriginUpperLeft
+               OpName %x_GLF_color_1_1 "x_GLF_color_1_1"
                OpName %x_GLF_color "x_GLF_color"
-               OpName %tint_symbol_1 "tint_symbol_1"
                OpName %BST "BST"
                OpMemberName %BST 0 "data"
                OpMemberName %BST 1 "leftIndex"
@@ -21,10 +21,9 @@
                OpName %x_42_1 "x_42_1"
                OpName %main_out "main_out"
                OpMemberName %main_out 0 "x_GLF_color_1"
-               OpName %tint_symbol_2 "tint_symbol_2"
-               OpName %tint_symbol "tint_symbol"
+               OpName %main_inner "main_inner"
                OpName %main "main"
-               OpDecorate %tint_symbol_1 Location 0
+               OpDecorate %x_GLF_color_1_1 Location 0
                OpMemberDecorate %BST 0 Offset 0
                OpMemberDecorate %BST 1 Offset 4
                OpMemberDecorate %BST 2 Offset 8
@@ -32,11 +31,11 @@
                OpMemberDecorate %main_out 0 Offset 0
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
-%_ptr_Private_v4float = OpTypePointer Private %v4float
-          %5 = OpConstantNull %v4float
-%x_GLF_color = OpVariable %_ptr_Private_v4float Private %5
 %_ptr_Output_v4float = OpTypePointer Output %v4float
-%tint_symbol_1 = OpVariable %_ptr_Output_v4float Output %5
+          %5 = OpConstantNull %v4float
+%x_GLF_color_1_1 = OpVariable %_ptr_Output_v4float Output %5
+%_ptr_Private_v4float = OpTypePointer Private %v4float
+%x_GLF_color = OpVariable %_ptr_Private_v4float Private %5
        %void = OpTypeVoid
         %int = OpTypeInt 32 1
         %BST = OpTypeStruct %int %int %int
@@ -58,7 +57,7 @@
     %float_0 = OpConstant %float 0
     %float_1 = OpConstant %float 1
    %main_out = OpTypeStruct %v4float
-         %61 = OpTypeFunction %void %main_out
+         %61 = OpTypeFunction %main_out
 %makeTreeNode_struct_BST_i1_i1_i11_ = OpFunction %void None %8
        %tree = OpFunctionParameter %_ptr_Function_BST
          %15 = OpLabel
@@ -108,18 +107,17 @@
                OpStore %x_GLF_color %60
                OpReturn
                OpFunctionEnd
-%tint_symbol_2 = OpFunction %void None %61
-%tint_symbol = OpFunctionParameter %main_out
-         %65 = OpLabel
-         %66 = OpCompositeExtract %v4float %tint_symbol 0
-               OpStore %tint_symbol_1 %66
-               OpReturn
+ %main_inner = OpFunction %main_out None %61
+         %64 = OpLabel
+         %65 = OpFunctionCall %void %main_1
+         %66 = OpLoad %v4float %x_GLF_color
+         %67 = OpCompositeConstruct %main_out %66
+               OpReturnValue %67
                OpFunctionEnd
        %main = OpFunction %void None %22
-         %68 = OpLabel
-         %69 = OpFunctionCall %void %main_1
-         %71 = OpLoad %v4float %x_GLF_color
-         %72 = OpCompositeConstruct %main_out %71
-         %70 = OpFunctionCall %void %tint_symbol_2 %72
+         %69 = OpLabel
+         %70 = OpFunctionCall %main_out %main_inner
+         %71 = OpCompositeExtract %v4float %70 0
+               OpStore %x_GLF_color_1_1 %71
                OpReturn
                OpFunctionEnd

@@ -64,7 +64,7 @@ Output Msl::Run(const Program* in, const DataMap& inputs) {
   auto array_length_from_uniform_cfg = ArrayLengthFromUniform::Config(
       sem::BindingPoint{0, buffer_size_ubo_index});
   auto entry_point_io_cfg = CanonicalizeEntryPointIO::Config(
-      CanonicalizeEntryPointIO::BuiltinStyle::kParameter, fixed_sample_mask,
+      CanonicalizeEntryPointIO::ShaderStyle::kMsl, fixed_sample_mask,
       emit_point_size);
 
   // Use the SSBO binding numbers as the indices for the buffer size lookups.

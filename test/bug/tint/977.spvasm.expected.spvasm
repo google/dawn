@@ -1,13 +1,14 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 98
+; Bound: 103
 ; Schema: 0
                OpCapability Shader
          %43 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %main "main" %tint_symbol
+               OpEntryPoint GLCompute %main "main" %gl_GlobalInvocationID_param_1
                OpExecutionMode %main LocalSize 1 1 1
+               OpName %gl_GlobalInvocationID_param_1 "gl_GlobalInvocationID_param_1"
                OpName %gl_GlobalInvocationID "gl_GlobalInvocationID"
                OpName %ResultMatrix "ResultMatrix"
                OpMemberName %ResultMatrix 0 "numbers"
@@ -23,7 +24,6 @@
                OpMemberName %Uniforms 1 "sizeA"
                OpMemberName %Uniforms 2 "sizeB"
                OpName %x_46 "x_46"
-               OpName %tint_symbol "tint_symbol"
                OpName %binaryOperation_f1_f1_ "binaryOperation_f1_f1_"
                OpName %a "a"
                OpName %b "b"
@@ -33,7 +33,10 @@
                OpName %a_1 "a_1"
                OpName %param "param"
                OpName %param_1 "param_1"
+               OpName %main_inner "main_inner"
+               OpName %gl_GlobalInvocationID_param "gl_GlobalInvocationID_param"
                OpName %main "main"
+               OpDecorate %gl_GlobalInvocationID_param_1 BuiltIn GlobalInvocationId
                OpDecorate %ResultMatrix Block
                OpMemberDecorate %ResultMatrix 0 Offset 0
                OpDecorate %_runtimearr_float ArrayStride 4
@@ -56,12 +59,13 @@
                OpDecorate %x_46 NonWritable
                OpDecorate %x_46 DescriptorSet 0
                OpDecorate %x_46 Binding 3
-               OpDecorate %tint_symbol BuiltIn GlobalInvocationId
        %uint = OpTypeInt 32 0
      %v3uint = OpTypeVector %uint 3
+%_ptr_Input_v3uint = OpTypePointer Input %v3uint
+%gl_GlobalInvocationID_param_1 = OpVariable %_ptr_Input_v3uint Input
 %_ptr_Private_v3uint = OpTypePointer Private %v3uint
-          %5 = OpConstantNull %v3uint
-%gl_GlobalInvocationID = OpVariable %_ptr_Private_v3uint Private %5
+          %7 = OpConstantNull %v3uint
+%gl_GlobalInvocationID = OpVariable %_ptr_Private_v3uint Private %7
       %float = OpTypeFloat 32
 %_runtimearr_float = OpTypeRuntimeArray %float
 %ResultMatrix = OpTypeStruct %_runtimearr_float
@@ -77,8 +81,6 @@
    %Uniforms = OpTypeStruct %float %int %int
 %_ptr_Uniform_Uniforms = OpTypePointer Uniform %Uniforms
        %x_46 = OpVariable %_ptr_Uniform_Uniforms Uniform
-%_ptr_Input_v3uint = OpTypePointer Input %v3uint
-%tint_symbol = OpVariable %_ptr_Input_v3uint Input
 %_ptr_Function_float = OpTypePointer Function %float
          %23 = OpTypeFunction %float %_ptr_Function_float %_ptr_Function_float
          %30 = OpConstantNull %float
@@ -96,6 +98,7 @@
    %float_n4 = OpConstant %float -4
    %float_n3 = OpConstant %float -3
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+         %94 = OpTypeFunction %void %v3uint
 %binaryOperation_f1_f1_ = OpFunction %float None %23
           %a = OpFunctionParameter %_ptr_Function_float
           %b = OpFunctionParameter %_ptr_Function_float
@@ -158,10 +161,16 @@
                OpStore %93 %89
                OpReturn
                OpFunctionEnd
+ %main_inner = OpFunction %void None %94
+%gl_GlobalInvocationID_param = OpFunctionParameter %v3uint
+         %97 = OpLabel
+               OpStore %gl_GlobalInvocationID %gl_GlobalInvocationID_param
+         %98 = OpFunctionCall %void %main_1
+               OpReturn
+               OpFunctionEnd
        %main = OpFunction %void None %70
-         %95 = OpLabel
-         %96 = OpLoad %v3uint %tint_symbol
-               OpStore %gl_GlobalInvocationID %96
-         %97 = OpFunctionCall %void %main_1
+        %100 = OpLabel
+        %102 = OpLoad %v3uint %gl_GlobalInvocationID_param_1
+        %101 = OpFunctionCall %void %main_inner %102
                OpReturn
                OpFunctionEnd

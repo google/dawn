@@ -69,46 +69,10 @@ class Spirv : public Castable<Spirv, Transform> {
   Output Run(const Program* program, const DataMap& data = {}) override;
 
  private:
-  /// Hoist entry point parameters, return values, and struct members out to
-  /// global variables.
-  void HandleEntryPointIOTypes(CloneContext& ctx) const;
   /// Change type of sample mask builtin variables to single element arrays.
   void HandleSampleMaskBuiltins(CloneContext& ctx) const;
-  /// Add a PointSize builtin output to the module and set it to 1.0 from all
-  /// vertex stage entry points.
-  void EmitVertexPointSize(CloneContext& ctx) const;
   /// Add an empty shader entry point if none exist in the module.
   void AddEmptyEntryPoint(CloneContext& ctx) const;
-
-  /// Recursively create module-scope input variables for `ty` and add
-  /// function-scope variables for structs to `func`.
-  ///
-  /// For non-structures, create a module-scope input variable.
-  /// For structures, recurse into members and then create a function-scope
-  /// variable initialized using the variables created for its members.
-  /// Return the symbol for the variable that was created.
-  Symbol HoistToInputVariables(CloneContext& ctx,
-                               const ast::Function* func,
-                               sem::Type* ty,
-                               ast::Type* declared_ty,
-                               const ast::DecorationList& decorations) const;
-
-  /// Recursively create module-scope output variables for `ty` and build a list
-  /// of assignment instructions to write to them from `store_value`.
-  ///
-  /// For non-structures, create a module-scope output variable and generate the
-  /// assignment instruction.
-  /// For structures, recurse into members, tracking the chain of member
-  /// accessors.
-  /// Returns the list of variable assignments in `stores`.
-  void HoistToOutputVariables(CloneContext& ctx,
-                              const ast::Function* func,
-                              sem::Type* ty,
-                              ast::Type* declared_ty,
-                              const ast::DecorationList& decorations,
-                              std::vector<Symbol> member_accesses,
-                              Symbol store_value,
-                              ast::StatementList& stores) const;
 };
 
 }  // namespace transform

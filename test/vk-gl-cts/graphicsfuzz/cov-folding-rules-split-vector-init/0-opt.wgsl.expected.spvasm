@@ -1,30 +1,29 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 55
+; Bound: 54
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Fragment %main "main" %tint_symbol_1
+               OpEntryPoint Fragment %main "main" %x_GLF_color_1_1
                OpExecutionMode %main OriginUpperLeft
+               OpName %x_GLF_color_1_1 "x_GLF_color_1_1"
                OpName %x_GLF_color "x_GLF_color"
-               OpName %tint_symbol_1 "tint_symbol_1"
                OpName %main_1 "main_1"
                OpName %v "v"
                OpName %main_out "main_out"
                OpMemberName %main_out 0 "x_GLF_color_1"
-               OpName %tint_symbol_2 "tint_symbol_2"
-               OpName %tint_symbol "tint_symbol"
+               OpName %main_inner "main_inner"
                OpName %main "main"
-               OpDecorate %tint_symbol_1 Location 0
+               OpDecorate %x_GLF_color_1_1 Location 0
                OpMemberDecorate %main_out 0 Offset 0
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
-%_ptr_Private_v4float = OpTypePointer Private %v4float
-          %5 = OpConstantNull %v4float
-%x_GLF_color = OpVariable %_ptr_Private_v4float Private %5
 %_ptr_Output_v4float = OpTypePointer Output %v4float
-%tint_symbol_1 = OpVariable %_ptr_Output_v4float Output %5
+          %5 = OpConstantNull %v4float
+%x_GLF_color_1_1 = OpVariable %_ptr_Output_v4float Output %5
+%_ptr_Private_v4float = OpTypePointer Private %v4float
+%x_GLF_color = OpVariable %_ptr_Private_v4float Private %5
        %void = OpTypeVoid
           %8 = OpTypeFunction %void
 %_ptr_Function_v4float = OpTypePointer Function %v4float
@@ -40,7 +39,7 @@
          %41 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
          %42 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_0
    %main_out = OpTypeStruct %v4float
-         %43 = OpTypeFunction %void %main_out
+         %43 = OpTypeFunction %main_out
      %main_1 = OpFunction %void None %8
          %11 = OpLabel
           %v = OpVariable %_ptr_Function_v4float Function %5
@@ -72,18 +71,17 @@
          %37 = OpLabel
                OpReturn
                OpFunctionEnd
-%tint_symbol_2 = OpFunction %void None %43
-%tint_symbol = OpFunctionParameter %main_out
-         %47 = OpLabel
-         %48 = OpCompositeExtract %v4float %tint_symbol 0
-               OpStore %tint_symbol_1 %48
-               OpReturn
+ %main_inner = OpFunction %main_out None %43
+         %46 = OpLabel
+         %47 = OpFunctionCall %void %main_1
+         %48 = OpLoad %v4float %x_GLF_color
+         %49 = OpCompositeConstruct %main_out %48
+               OpReturnValue %49
                OpFunctionEnd
        %main = OpFunction %void None %8
-         %50 = OpLabel
-         %51 = OpFunctionCall %void %main_1
-         %53 = OpLoad %v4float %x_GLF_color
-         %54 = OpCompositeConstruct %main_out %53
-         %52 = OpFunctionCall %void %tint_symbol_2 %54
+         %51 = OpLabel
+         %52 = OpFunctionCall %main_out %main_inner
+         %53 = OpCompositeExtract %v4float %52 0
+               OpStore %x_GLF_color_1_1 %53
                OpReturn
                OpFunctionEnd

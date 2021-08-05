@@ -1,14 +1,14 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 147
+; Bound: 146
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Fragment %main "main" %tint_symbol_1
+               OpEntryPoint Fragment %main "main" %x_GLF_color_1_1
                OpExecutionMode %main OriginUpperLeft
+               OpName %x_GLF_color_1_1 "x_GLF_color_1_1"
                OpName %x_GLF_color "x_GLF_color"
-               OpName %tint_symbol_1 "tint_symbol_1"
                OpName %main_1 "main_1"
                OpName %x_29 "x_29"
                OpName %x_30 "x_30"
@@ -24,23 +24,22 @@
                OpName %param_1 "param_1"
                OpName %main_out "main_out"
                OpMemberName %main_out 0 "x_GLF_color_1"
-               OpName %tint_symbol_2 "tint_symbol_2"
-               OpName %tint_symbol "tint_symbol"
+               OpName %main_inner "main_inner"
                OpName %main "main"
                OpName %func_f1_ "func_f1_"
                OpName %x "x"
                OpName %x_93 "x_93"
                OpName %x_94 "x_94"
                OpName %a "a"
-               OpDecorate %tint_symbol_1 Location 0
+               OpDecorate %x_GLF_color_1_1 Location 0
                OpMemberDecorate %main_out 0 Offset 0
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
-%_ptr_Private_v4float = OpTypePointer Private %v4float
-          %5 = OpConstantNull %v4float
-%x_GLF_color = OpVariable %_ptr_Private_v4float Private %5
 %_ptr_Output_v4float = OpTypePointer Output %v4float
-%tint_symbol_1 = OpVariable %_ptr_Output_v4float Output %5
+          %5 = OpConstantNull %v4float
+%x_GLF_color_1_1 = OpVariable %_ptr_Output_v4float Output %5
+%_ptr_Private_v4float = OpTypePointer Private %v4float
+%x_GLF_color = OpVariable %_ptr_Private_v4float Private %5
        %void = OpTypeVoid
           %8 = OpTypeFunction %void
        %bool = OpTypeBool
@@ -57,8 +56,8 @@
          %99 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
         %100 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_0
    %main_out = OpTypeStruct %v4float
-        %101 = OpTypeFunction %void %main_out
-        %113 = OpTypeFunction %float %_ptr_Function_float
+        %101 = OpTypeFunction %main_out
+        %112 = OpTypeFunction %float %_ptr_Function_float
      %main_1 = OpFunction %void None %8
          %11 = OpLabel
        %x_29 = OpVariable %_ptr_Function_bool Function %16
@@ -210,73 +209,72 @@
          %96 = OpLabel
                OpReturn
                OpFunctionEnd
-%tint_symbol_2 = OpFunction %void None %101
-%tint_symbol = OpFunctionParameter %main_out
-        %105 = OpLabel
-        %106 = OpCompositeExtract %v4float %tint_symbol 0
-               OpStore %tint_symbol_1 %106
-               OpReturn
+ %main_inner = OpFunction %main_out None %101
+        %104 = OpLabel
+        %105 = OpFunctionCall %void %main_1
+        %106 = OpLoad %v4float %x_GLF_color
+        %107 = OpCompositeConstruct %main_out %106
+               OpReturnValue %107
                OpFunctionEnd
        %main = OpFunction %void None %8
-        %108 = OpLabel
-        %109 = OpFunctionCall %void %main_1
-        %111 = OpLoad %v4float %x_GLF_color
-        %112 = OpCompositeConstruct %main_out %111
-        %110 = OpFunctionCall %void %tint_symbol_2 %112
+        %109 = OpLabel
+        %110 = OpFunctionCall %main_out %main_inner
+        %111 = OpCompositeExtract %v4float %110 0
+               OpStore %x_GLF_color_1_1 %111
                OpReturn
                OpFunctionEnd
-   %func_f1_ = OpFunction %float None %113
+   %func_f1_ = OpFunction %float None %112
           %x = OpFunctionParameter %_ptr_Function_float
-        %116 = OpLabel
+        %115 = OpLabel
        %x_93 = OpVariable %_ptr_Function_bool Function %16
        %x_94 = OpVariable %_ptr_Function_float Function %19
           %a = OpVariable %_ptr_Function_float Function %19
                OpStore %x_93 %false
-               OpBranch %120
-        %120 = OpLabel
-               OpLoopMerge %121 %122 None
-               OpBranch %123
-        %123 = OpLabel
-        %125 = OpLoad %float %x
-               OpStore %a %125
-               OpBranch %126
-        %126 = OpLabel
-               OpLoopMerge %127 %128 None
-               OpBranch %129
-        %129 = OpLabel
-        %130 = OpLoad %float %a
-        %132 = OpLoad %float %x
-        %133 = OpFOrdEqual %bool %130 %132
-               OpSelectionMerge %134 None
-               OpBranchConditional %133 %135 %134
-        %135 = OpLabel
-        %136 = OpLoad %float %a
-               OpStore %x_93 %true
-               OpStore %x_94 %136
-               OpBranch %127
-        %134 = OpLabel
-        %137 = OpLoad %float %a
-        %138 = OpFAdd %float %137 %float_1
-               OpStore %a %138
+               OpBranch %119
+        %119 = OpLabel
+               OpLoopMerge %120 %121 None
+               OpBranch %122
+        %122 = OpLabel
+        %124 = OpLoad %float %x
+               OpStore %a %124
+               OpBranch %125
+        %125 = OpLabel
+               OpLoopMerge %126 %127 None
                OpBranch %128
         %128 = OpLabel
-        %139 = OpLoad %float %a
-        %141 = OpLoad %float %x
-        %142 = OpFOrdLessThan %bool %139 %141
-               OpBranchConditional %142 %126 %127
+        %129 = OpLoad %float %a
+        %131 = OpLoad %float %x
+        %132 = OpFOrdEqual %bool %129 %131
+               OpSelectionMerge %133 None
+               OpBranchConditional %132 %134 %133
+        %134 = OpLabel
+        %135 = OpLoad %float %a
+               OpStore %x_93 %true
+               OpStore %x_94 %135
+               OpBranch %126
+        %133 = OpLabel
+        %136 = OpLoad %float %a
+        %137 = OpFAdd %float %136 %float_1
+               OpStore %a %137
+               OpBranch %127
         %127 = OpLabel
-        %143 = OpLoad %bool %x_93
-               OpSelectionMerge %144 None
-               OpBranchConditional %143 %145 %144
-        %145 = OpLabel
-               OpBranch %121
+        %138 = OpLoad %float %a
+        %140 = OpLoad %float %x
+        %141 = OpFOrdLessThan %bool %138 %140
+               OpBranchConditional %141 %125 %126
+        %126 = OpLabel
+        %142 = OpLoad %bool %x_93
+               OpSelectionMerge %143 None
+               OpBranchConditional %142 %144 %143
         %144 = OpLabel
+               OpBranch %120
+        %143 = OpLabel
                OpStore %x_93 %true
                OpStore %x_94 %float_0
-               OpBranch %121
-        %122 = OpLabel
                OpBranch %120
         %121 = OpLabel
-        %146 = OpLoad %float %x_94
-               OpReturnValue %146
+               OpBranch %119
+        %120 = OpLabel
+        %145 = OpLoad %float %x_94
+               OpReturnValue %145
                OpFunctionEnd

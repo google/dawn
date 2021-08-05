@@ -1,17 +1,17 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 257
+; Bound: 256
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Fragment %main "main" %tint_symbol_1
+               OpEntryPoint Fragment %main "main" %x_GLF_color_1_1
                OpExecutionMode %main OriginUpperLeft
+               OpName %x_GLF_color_1_1 "x_GLF_color_1_1"
                OpName %buf0 "buf0"
                OpMemberName %buf0 0 "x_GLF_uniform_int_values"
                OpName %x_8 "x_8"
                OpName %x_GLF_color "x_GLF_color"
-               OpName %tint_symbol_1 "tint_symbol_1"
                OpName %f_i1_ "f_i1_"
                OpName %a "a"
                OpName %i "i"
@@ -24,18 +24,22 @@
                OpName %i_2 "i_2"
                OpName %main_out "main_out"
                OpMemberName %main_out 0 "x_GLF_color_1"
-               OpName %tint_symbol_2 "tint_symbol_2"
-               OpName %tint_symbol "tint_symbol"
+               OpName %main_inner "main_inner"
                OpName %main "main"
+               OpDecorate %x_GLF_color_1_1 Location 0
                OpDecorate %buf0 Block
                OpMemberDecorate %buf0 0 Offset 0
                OpDecorate %_arr_int_uint_12 ArrayStride 16
                OpDecorate %x_8 NonWritable
                OpDecorate %x_8 DescriptorSet 0
                OpDecorate %x_8 Binding 0
-               OpDecorate %tint_symbol_1 Location 0
                OpDecorate %_arr_int_uint_10 ArrayStride 4
                OpMemberDecorate %main_out 0 Offset 0
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %5 = OpConstantNull %v4float
+%x_GLF_color_1_1 = OpVariable %_ptr_Output_v4float Output %5
         %int = OpTypeInt 32 1
        %uint = OpTypeInt 32 0
     %uint_12 = OpConstant %uint 12
@@ -43,13 +47,8 @@
        %buf0 = OpTypeStruct %_arr_int_uint_12
 %_ptr_Uniform_buf0 = OpTypePointer Uniform %buf0
         %x_8 = OpVariable %_ptr_Uniform_buf0 Uniform
-      %float = OpTypeFloat 32
-    %v4float = OpTypeVector %float 4
 %_ptr_Private_v4float = OpTypePointer Private %v4float
-         %12 = OpConstantNull %v4float
-%x_GLF_color = OpVariable %_ptr_Private_v4float Private %12
-%_ptr_Output_v4float = OpTypePointer Output %v4float
-%tint_symbol_1 = OpVariable %_ptr_Output_v4float Output %12
+%x_GLF_color = OpVariable %_ptr_Private_v4float Private %5
 %_ptr_Function_int = OpTypePointer Function %int
          %15 = OpTypeFunction %int %_ptr_Function_int
          %21 = OpConstantNull %int
@@ -75,7 +74,7 @@
       %int_9 = OpConstant %int 9
      %int_10 = OpConstant %int 10
    %main_out = OpTypeStruct %v4float
-        %245 = OpTypeFunction %void %main_out
+        %245 = OpTypeFunction %main_out
       %f_i1_ = OpFunction %int None %15
           %a = OpFunctionParameter %_ptr_Function_int
          %19 = OpLabel
@@ -354,18 +353,17 @@
                OpStore %x_GLF_color %244
                OpReturn
                OpFunctionEnd
-%tint_symbol_2 = OpFunction %void None %245
-%tint_symbol = OpFunctionParameter %main_out
-        %249 = OpLabel
-        %250 = OpCompositeExtract %v4float %tint_symbol 0
-               OpStore %tint_symbol_1 %250
-               OpReturn
+ %main_inner = OpFunction %main_out None %245
+        %248 = OpLabel
+        %249 = OpFunctionCall %void %main_1
+        %250 = OpLoad %v4float %x_GLF_color
+        %251 = OpCompositeConstruct %main_out %250
+               OpReturnValue %251
                OpFunctionEnd
        %main = OpFunction %void None %54
-        %252 = OpLabel
-        %253 = OpFunctionCall %void %main_1
-        %255 = OpLoad %v4float %x_GLF_color
-        %256 = OpCompositeConstruct %main_out %255
-        %254 = OpFunctionCall %void %tint_symbol_2 %256
+        %253 = OpLabel
+        %254 = OpFunctionCall %main_out %main_inner
+        %255 = OpCompositeExtract %v4float %254 0
+               OpStore %x_GLF_color_1_1 %255
                OpReturn
                OpFunctionEnd

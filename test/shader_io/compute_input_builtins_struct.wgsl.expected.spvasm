@@ -1,26 +1,28 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 29
+; Bound: 34
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %main "main" %tint_symbol %tint_symbol_1 %tint_symbol_2 %tint_symbol_3
+               OpEntryPoint GLCompute %main "main" %local_invocation_id_1 %local_invocation_index_1 %global_invocation_id_1 %workgroup_id_1
                OpExecutionMode %main LocalSize 1 1 1
-               OpName %tint_symbol "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
-               OpName %tint_symbol_2 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
-               OpName %main "main"
+               OpName %local_invocation_id_1 "local_invocation_id_1"
+               OpName %local_invocation_index_1 "local_invocation_index_1"
+               OpName %global_invocation_id_1 "global_invocation_id_1"
+               OpName %workgroup_id_1 "workgroup_id_1"
                OpName %ComputeInputs "ComputeInputs"
                OpMemberName %ComputeInputs 0 "local_invocation_id"
                OpMemberName %ComputeInputs 1 "local_invocation_index"
                OpMemberName %ComputeInputs 2 "global_invocation_id"
                OpMemberName %ComputeInputs 3 "workgroup_id"
-               OpDecorate %tint_symbol BuiltIn LocalInvocationId
-               OpDecorate %tint_symbol_1 BuiltIn LocalInvocationIndex
-               OpDecorate %tint_symbol_2 BuiltIn GlobalInvocationId
-               OpDecorate %tint_symbol_3 BuiltIn WorkgroupId
+               OpName %main_inner "main_inner"
+               OpName %inputs "inputs"
+               OpName %main "main"
+               OpDecorate %local_invocation_id_1 BuiltIn LocalInvocationId
+               OpDecorate %local_invocation_index_1 BuiltIn LocalInvocationIndex
+               OpDecorate %global_invocation_id_1 BuiltIn GlobalInvocationId
+               OpDecorate %workgroup_id_1 BuiltIn WorkgroupId
                OpMemberDecorate %ComputeInputs 0 Offset 0
                OpMemberDecorate %ComputeInputs 1 Offset 12
                OpMemberDecorate %ComputeInputs 2 Offset 16
@@ -28,30 +30,37 @@
        %uint = OpTypeInt 32 0
      %v3uint = OpTypeVector %uint 3
 %_ptr_Input_v3uint = OpTypePointer Input %v3uint
-%tint_symbol = OpVariable %_ptr_Input_v3uint Input
+%local_invocation_id_1 = OpVariable %_ptr_Input_v3uint Input
 %_ptr_Input_uint = OpTypePointer Input %uint
-%tint_symbol_1 = OpVariable %_ptr_Input_uint Input
-%tint_symbol_2 = OpVariable %_ptr_Input_v3uint Input
-%tint_symbol_3 = OpVariable %_ptr_Input_v3uint Input
+%local_invocation_index_1 = OpVariable %_ptr_Input_uint Input
+%global_invocation_id_1 = OpVariable %_ptr_Input_v3uint Input
+%workgroup_id_1 = OpVariable %_ptr_Input_v3uint Input
        %void = OpTypeVoid
-          %9 = OpTypeFunction %void
 %ComputeInputs = OpTypeStruct %v3uint %uint %v3uint %v3uint
-       %main = OpFunction %void None %9
-         %12 = OpLabel
-         %14 = OpLoad %v3uint %tint_symbol
-         %15 = OpLoad %uint %tint_symbol_1
-         %16 = OpLoad %v3uint %tint_symbol_2
-         %17 = OpLoad %v3uint %tint_symbol_3
-         %18 = OpCompositeConstruct %ComputeInputs %14 %15 %16 %17
-         %19 = OpCompositeExtract %v3uint %18 0
+          %9 = OpTypeFunction %void %ComputeInputs
+         %25 = OpTypeFunction %void
+ %main_inner = OpFunction %void None %9
+     %inputs = OpFunctionParameter %ComputeInputs
+         %14 = OpLabel
+         %15 = OpCompositeExtract %v3uint %inputs 0
+         %16 = OpCompositeExtract %uint %15 0
+         %17 = OpCompositeExtract %uint %inputs 1
+         %18 = OpIAdd %uint %16 %17
+         %19 = OpCompositeExtract %v3uint %inputs 2
          %20 = OpCompositeExtract %uint %19 0
-         %21 = OpCompositeExtract %uint %18 1
-         %22 = OpIAdd %uint %20 %21
-         %23 = OpCompositeExtract %v3uint %18 2
-         %24 = OpCompositeExtract %uint %23 0
-         %25 = OpIAdd %uint %22 %24
-         %26 = OpCompositeExtract %v3uint %18 3
-         %27 = OpCompositeExtract %uint %26 0
-         %28 = OpIAdd %uint %25 %27
+         %21 = OpIAdd %uint %18 %20
+         %22 = OpCompositeExtract %v3uint %inputs 3
+         %23 = OpCompositeExtract %uint %22 0
+         %24 = OpIAdd %uint %21 %23
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %25
+         %27 = OpLabel
+         %29 = OpLoad %v3uint %local_invocation_id_1
+         %30 = OpLoad %uint %local_invocation_index_1
+         %31 = OpLoad %v3uint %global_invocation_id_1
+         %32 = OpLoad %v3uint %workgroup_id_1
+         %33 = OpCompositeConstruct %ComputeInputs %29 %30 %31 %32
+         %28 = OpFunctionCall %void %main_inner %33
                OpReturn
                OpFunctionEnd

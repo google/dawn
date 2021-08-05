@@ -1,13 +1,14 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 114
+; Bound: 113
 ; Schema: 0
                OpCapability Shader
          %62 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Fragment %main "main" %tint_symbol_1
+               OpEntryPoint Fragment %main "main" %x_GLF_color_1_1
                OpExecutionMode %main OriginUpperLeft
+               OpName %x_GLF_color_1_1 "x_GLF_color_1_1"
                OpName %buf0 "buf0"
                OpMemberName %buf0 0 "x_GLF_uniform_float_values"
                OpName %x_6 "x_6"
@@ -15,7 +16,6 @@
                OpMemberName %buf1 0 "x_GLF_uniform_int_values"
                OpName %x_9 "x_9"
                OpName %x_GLF_color "x_GLF_color"
-               OpName %tint_symbol_1 "tint_symbol_1"
                OpName %main_1 "main_1"
                OpName %a "a"
                OpName %i "i"
@@ -26,9 +26,9 @@
                OpName %x_68_phi "x_68_phi"
                OpName %main_out "main_out"
                OpMemberName %main_out 0 "x_GLF_color_1"
-               OpName %tint_symbol_2 "tint_symbol_2"
-               OpName %tint_symbol "tint_symbol"
+               OpName %main_inner "main_inner"
                OpName %main "main"
+               OpDecorate %x_GLF_color_1_1 Location 0
                OpDecorate %buf0 Block
                OpMemberDecorate %buf0 0 Offset 0
                OpDecorate %_arr_float_uint_4 ArrayStride 16
@@ -41,9 +41,12 @@
                OpDecorate %x_9 NonWritable
                OpDecorate %x_9 DescriptorSet 0
                OpDecorate %x_9 Binding 1
-               OpDecorate %tint_symbol_1 Location 0
                OpMemberDecorate %main_out 0 Offset 0
       %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %5 = OpConstantNull %v4float
+%x_GLF_color_1_1 = OpVariable %_ptr_Output_v4float Output %5
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4
 %_arr_float_uint_4 = OpTypeArray %float %uint_4
@@ -56,12 +59,8 @@
        %buf1 = OpTypeStruct %_arr_int_uint_3
 %_ptr_Uniform_buf1 = OpTypePointer Uniform %buf1
         %x_9 = OpVariable %_ptr_Uniform_buf1 Uniform
-    %v4float = OpTypeVector %float 4
 %_ptr_Private_v4float = OpTypePointer Private %v4float
-         %17 = OpConstantNull %v4float
-%x_GLF_color = OpVariable %_ptr_Private_v4float Private %17
-%_ptr_Output_v4float = OpTypePointer Output %v4float
-%tint_symbol_1 = OpVariable %_ptr_Output_v4float Output %17
+%x_GLF_color = OpVariable %_ptr_Private_v4float Private %5
        %void = OpTypeVoid
          %20 = OpTypeFunction %void
 %_ptr_Function_float = OpTypePointer Function %float
@@ -79,7 +78,7 @@
       %int_2 = OpConstant %int 2
       %int_3 = OpConstant %int 3
    %main_out = OpTypeStruct %v4float
-        %102 = OpTypeFunction %void %main_out
+        %102 = OpTypeFunction %main_out
      %main_1 = OpFunction %void None %20
          %23 = OpLabel
           %a = OpVariable %_ptr_Function_float Function %26
@@ -176,18 +175,17 @@
          %82 = OpLabel
                OpReturn
                OpFunctionEnd
-%tint_symbol_2 = OpFunction %void None %102
-%tint_symbol = OpFunctionParameter %main_out
-        %106 = OpLabel
-        %107 = OpCompositeExtract %v4float %tint_symbol 0
-               OpStore %tint_symbol_1 %107
-               OpReturn
+ %main_inner = OpFunction %main_out None %102
+        %105 = OpLabel
+        %106 = OpFunctionCall %void %main_1
+        %107 = OpLoad %v4float %x_GLF_color
+        %108 = OpCompositeConstruct %main_out %107
+               OpReturnValue %108
                OpFunctionEnd
        %main = OpFunction %void None %20
-        %109 = OpLabel
-        %110 = OpFunctionCall %void %main_1
-        %112 = OpLoad %v4float %x_GLF_color
-        %113 = OpCompositeConstruct %main_out %112
-        %111 = OpFunctionCall %void %tint_symbol_2 %113
+        %110 = OpLabel
+        %111 = OpFunctionCall %main_out %main_inner
+        %112 = OpCompositeExtract %v4float %111 0
+               OpStore %x_GLF_color_1_1 %112
                OpReturn
                OpFunctionEnd

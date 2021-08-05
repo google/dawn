@@ -1,15 +1,15 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 633
+; Bound: 632
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Fragment %main "main" %tint_symbol_1
+               OpEntryPoint Fragment %main "main" %x_GLF_color_1_1
                OpExecutionMode %main OriginUpperLeft
+               OpName %x_GLF_color_1_1 "x_GLF_color_1_1"
                OpName %x_GLF_global_loop_count "x_GLF_global_loop_count"
                OpName %x_GLF_color "x_GLF_color"
-               OpName %tint_symbol_1 "tint_symbol_1"
                OpName %main_1 "main_1"
                OpName %m23 "m23"
                OpName %m24 "m24"
@@ -61,22 +61,21 @@
                OpName %r "r"
                OpName %main_out "main_out"
                OpMemberName %main_out 0 "x_GLF_color_1"
-               OpName %tint_symbol_2 "tint_symbol_2"
-               OpName %tint_symbol "tint_symbol"
+               OpName %main_inner "main_inner"
                OpName %main "main"
-               OpDecorate %tint_symbol_1 Location 0
+               OpDecorate %x_GLF_color_1_1 Location 0
                OpMemberDecorate %main_out 0 Offset 0
-        %int = OpTypeInt 32 1
-%_ptr_Private_int = OpTypePointer Private %int
-          %4 = OpConstantNull %int
-%x_GLF_global_loop_count = OpVariable %_ptr_Private_int Private %4
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
-%_ptr_Private_v4float = OpTypePointer Private %v4float
-          %9 = OpConstantNull %v4float
-%x_GLF_color = OpVariable %_ptr_Private_v4float Private %9
 %_ptr_Output_v4float = OpTypePointer Output %v4float
-%tint_symbol_1 = OpVariable %_ptr_Output_v4float Output %9
+          %5 = OpConstantNull %v4float
+%x_GLF_color_1_1 = OpVariable %_ptr_Output_v4float Output %5
+        %int = OpTypeInt 32 1
+%_ptr_Private_int = OpTypePointer Private %int
+          %9 = OpConstantNull %int
+%x_GLF_global_loop_count = OpVariable %_ptr_Private_int Private %9
+%_ptr_Private_v4float = OpTypePointer Private %v4float
+%x_GLF_color = OpVariable %_ptr_Private_v4float Private %5
        %void = OpTypeVoid
          %12 = OpTypeFunction %void
     %v3float = OpTypeVector %float 3
@@ -129,7 +128,7 @@
     %float_8 = OpConstant %float 8
         %620 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
    %main_out = OpTypeStruct %v4float
-        %621 = OpTypeFunction %void %main_out
+        %621 = OpTypeFunction %main_out
      %main_1 = OpFunction %void None %12
          %15 = OpLabel
         %m23 = OpVariable %_ptr_Function_mat2v3float Function %20
@@ -140,46 +139,46 @@
         %m42 = OpVariable %_ptr_Function_mat4v2float Function %41
         %m43 = OpVariable %_ptr_Function_mat4v3float Function %45
         %m44 = OpVariable %_ptr_Function_mat4v4float Function %49
-          %i = OpVariable %_ptr_Function_int Function %4
-        %i_1 = OpVariable %_ptr_Function_int Function %4
-        %i_2 = OpVariable %_ptr_Function_int Function %4
-        %i_3 = OpVariable %_ptr_Function_int Function %4
-        %i_4 = OpVariable %_ptr_Function_int Function %4
-        %i_5 = OpVariable %_ptr_Function_int Function %4
-        %i_6 = OpVariable %_ptr_Function_int Function %4
-        %i_7 = OpVariable %_ptr_Function_int Function %4
-        %i_8 = OpVariable %_ptr_Function_int Function %4
-        %i_9 = OpVariable %_ptr_Function_int Function %4
-       %i_10 = OpVariable %_ptr_Function_int Function %4
-       %i_11 = OpVariable %_ptr_Function_int Function %4
-       %i_12 = OpVariable %_ptr_Function_int Function %4
-       %i_13 = OpVariable %_ptr_Function_int Function %4
-       %i_14 = OpVariable %_ptr_Function_int Function %4
-       %i_15 = OpVariable %_ptr_Function_int Function %4
-       %i_16 = OpVariable %_ptr_Function_int Function %4
-       %i_17 = OpVariable %_ptr_Function_int Function %4
-       %i_18 = OpVariable %_ptr_Function_int Function %4
-       %i_19 = OpVariable %_ptr_Function_int Function %4
-       %i_20 = OpVariable %_ptr_Function_int Function %4
-       %i_21 = OpVariable %_ptr_Function_int Function %4
-       %i_22 = OpVariable %_ptr_Function_int Function %4
-       %i_23 = OpVariable %_ptr_Function_int Function %4
-       %i_24 = OpVariable %_ptr_Function_int Function %4
-       %i_25 = OpVariable %_ptr_Function_int Function %4
-       %i_26 = OpVariable %_ptr_Function_int Function %4
-       %i_27 = OpVariable %_ptr_Function_int Function %4
-       %i_28 = OpVariable %_ptr_Function_int Function %4
-       %i_29 = OpVariable %_ptr_Function_int Function %4
-       %i_30 = OpVariable %_ptr_Function_int Function %4
-       %i_31 = OpVariable %_ptr_Function_int Function %4
-       %i_32 = OpVariable %_ptr_Function_int Function %4
-       %i_33 = OpVariable %_ptr_Function_int Function %4
-       %i_34 = OpVariable %_ptr_Function_int Function %4
-       %i_35 = OpVariable %_ptr_Function_int Function %4
-       %i_36 = OpVariable %_ptr_Function_int Function %4
-       %i_37 = OpVariable %_ptr_Function_int Function %4
+          %i = OpVariable %_ptr_Function_int Function %9
+        %i_1 = OpVariable %_ptr_Function_int Function %9
+        %i_2 = OpVariable %_ptr_Function_int Function %9
+        %i_3 = OpVariable %_ptr_Function_int Function %9
+        %i_4 = OpVariable %_ptr_Function_int Function %9
+        %i_5 = OpVariable %_ptr_Function_int Function %9
+        %i_6 = OpVariable %_ptr_Function_int Function %9
+        %i_7 = OpVariable %_ptr_Function_int Function %9
+        %i_8 = OpVariable %_ptr_Function_int Function %9
+        %i_9 = OpVariable %_ptr_Function_int Function %9
+       %i_10 = OpVariable %_ptr_Function_int Function %9
+       %i_11 = OpVariable %_ptr_Function_int Function %9
+       %i_12 = OpVariable %_ptr_Function_int Function %9
+       %i_13 = OpVariable %_ptr_Function_int Function %9
+       %i_14 = OpVariable %_ptr_Function_int Function %9
+       %i_15 = OpVariable %_ptr_Function_int Function %9
+       %i_16 = OpVariable %_ptr_Function_int Function %9
+       %i_17 = OpVariable %_ptr_Function_int Function %9
+       %i_18 = OpVariable %_ptr_Function_int Function %9
+       %i_19 = OpVariable %_ptr_Function_int Function %9
+       %i_20 = OpVariable %_ptr_Function_int Function %9
+       %i_21 = OpVariable %_ptr_Function_int Function %9
+       %i_22 = OpVariable %_ptr_Function_int Function %9
+       %i_23 = OpVariable %_ptr_Function_int Function %9
+       %i_24 = OpVariable %_ptr_Function_int Function %9
+       %i_25 = OpVariable %_ptr_Function_int Function %9
+       %i_26 = OpVariable %_ptr_Function_int Function %9
+       %i_27 = OpVariable %_ptr_Function_int Function %9
+       %i_28 = OpVariable %_ptr_Function_int Function %9
+       %i_29 = OpVariable %_ptr_Function_int Function %9
+       %i_30 = OpVariable %_ptr_Function_int Function %9
+       %i_31 = OpVariable %_ptr_Function_int Function %9
+       %i_32 = OpVariable %_ptr_Function_int Function %9
+       %i_33 = OpVariable %_ptr_Function_int Function %9
+       %i_34 = OpVariable %_ptr_Function_int Function %9
+       %i_35 = OpVariable %_ptr_Function_int Function %9
+       %i_36 = OpVariable %_ptr_Function_int Function %9
+       %i_37 = OpVariable %_ptr_Function_int Function %9
         %sum = OpVariable %_ptr_Function_float Function %91
-          %r = OpVariable %_ptr_Function_int Function %4
+          %r = OpVariable %_ptr_Function_int Function %9
                OpStore %x_GLF_global_loop_count %int_0
                OpStore %m23 %96
                OpStore %m24 %98
@@ -1158,18 +1157,17 @@
         %617 = OpLabel
                OpReturn
                OpFunctionEnd
-%tint_symbol_2 = OpFunction %void None %621
-%tint_symbol = OpFunctionParameter %main_out
-        %625 = OpLabel
-        %626 = OpCompositeExtract %v4float %tint_symbol 0
-               OpStore %tint_symbol_1 %626
-               OpReturn
+ %main_inner = OpFunction %main_out None %621
+        %624 = OpLabel
+        %625 = OpFunctionCall %void %main_1
+        %626 = OpLoad %v4float %x_GLF_color
+        %627 = OpCompositeConstruct %main_out %626
+               OpReturnValue %627
                OpFunctionEnd
        %main = OpFunction %void None %12
-        %628 = OpLabel
-        %629 = OpFunctionCall %void %main_1
-        %631 = OpLoad %v4float %x_GLF_color
-        %632 = OpCompositeConstruct %main_out %631
-        %630 = OpFunctionCall %void %tint_symbol_2 %632
+        %629 = OpLabel
+        %630 = OpFunctionCall %main_out %main_inner
+        %631 = OpCompositeExtract %v4float %630 0
+               OpStore %x_GLF_color_1_1 %631
                OpReturn
                OpFunctionEnd
