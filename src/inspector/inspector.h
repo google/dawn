@@ -166,11 +166,12 @@ class Inspector {
                                    const ast::DecorationList& decorations,
                                    std::vector<StageVariable>& variables) const;
 
-  /// Recursively determine if the type contains [[builtin(sample_mask)]]
+  /// Recursively determine if the type contains builtin.
   /// If `type` is a struct, recurse into members to check for the decoration.
   /// Otherwise, check `decorations` for the decoration.
-  bool ContainsSampleMaskBuiltin(sem::Type* type,
-                                 const ast::DecorationList& decorations) const;
+  bool ContainsBuiltin(ast::Builtin builtin,
+                       sem::Type* type,
+                       const ast::DecorationList& decorations) const;
 
   /// Gathers all the texture resource bindings of the given type for the given
   /// entry point.

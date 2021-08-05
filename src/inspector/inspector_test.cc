@@ -629,7 +629,7 @@ TEST_F(InspectorGetEntryPointTest, NonOverridableConstantSkipped) {
   EXPECT_EQ(0u, result[0].overridable_constants.size());
 }
 
-TEST_F(InspectorGetEntryPointTest, SampleMaskNotReferenced) {
+TEST_F(InspectorGetEntryPointTest, BuiltinNotReferenced) {
   MakeEmptyBodyFunction("ep_func", {Stage(ast::PipelineStage::kFragment)});
 
   Inspector& inspector = Build();
@@ -638,6 +638,9 @@ TEST_F(InspectorGetEntryPointTest, SampleMaskNotReferenced) {
 
   ASSERT_EQ(1u, result.size());
   EXPECT_FALSE(result[0].sample_mask_used);
+  EXPECT_FALSE(result[0].input_position_used);
+  EXPECT_FALSE(result[0].front_facing_used);
+  EXPECT_FALSE(result[0].sample_index_used);
 }
 
 TEST_F(InspectorGetEntryPointTest, SampleMaskSimpleReferenced) {
@@ -671,6 +674,102 @@ TEST_F(InspectorGetEntryPointTest, SampleMaskStructReferenced) {
 
   ASSERT_EQ(1u, result.size());
   EXPECT_TRUE(result[0].sample_mask_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, InputPositionSimpleReferenced) {
+  auto* in_var =
+      Param("in_var", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)});
+  Func("ep_func", {in_var}, ty.void_(), {Return()},
+       {Stage(ast::PipelineStage::kFragment)}, {});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_TRUE(result[0].input_position_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, InputPositionStructReferenced) {
+  ast::StructMemberList members;
+  members.push_back(Member("inner_position", ty.vec4<f32>(),
+                           {Builtin(ast::Builtin::kPosition)}));
+  Structure("in_struct", members, {});
+  auto* in_var = Param("in_var", ty.type_name("in_struct"), {});
+
+  Func("ep_func", {in_var}, ty.void_(), {Return()},
+       {Stage(ast::PipelineStage::kFragment)}, {});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_TRUE(result[0].input_position_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, FrontFacingSimpleReferenced) {
+  auto* in_var =
+      Param("in_var", ty.bool_(), {Builtin(ast::Builtin::kFrontFacing)});
+  Func("ep_func", {in_var}, ty.void_(), {Return()},
+       {Stage(ast::PipelineStage::kFragment)}, {});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_TRUE(result[0].front_facing_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, FrontFacingStructReferenced) {
+  ast::StructMemberList members;
+  members.push_back(Member("inner_position", ty.bool_(),
+                           {Builtin(ast::Builtin::kFrontFacing)}));
+  Structure("in_struct", members, {});
+  auto* in_var = Param("in_var", ty.type_name("in_struct"), {});
+
+  Func("ep_func", {in_var}, ty.void_(), {Return()},
+       {Stage(ast::PipelineStage::kFragment)}, {});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_TRUE(result[0].front_facing_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, SampleIndexSimpleReferenced) {
+  auto* in_var =
+      Param("in_var", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)});
+  Func("ep_func", {in_var}, ty.void_(), {Return()},
+       {Stage(ast::PipelineStage::kFragment)}, {});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_TRUE(result[0].sample_index_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, SampleIndexStructReferenced) {
+  ast::StructMemberList members;
+  members.push_back(Member("inner_position", ty.u32(),
+                           {Builtin(ast::Builtin::kSampleIndex)}));
+  Structure("in_struct", members, {});
+  auto* in_var = Param("in_var", ty.type_name("in_struct"), {});
+
+  Func("ep_func", {in_var}, ty.void_(), {Return()},
+       {Stage(ast::PipelineStage::kFragment)}, {});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_TRUE(result[0].sample_index_used);
 }
 
 TEST_F(InspectorGetEntryPointTest, ImplicitInterpolate) {

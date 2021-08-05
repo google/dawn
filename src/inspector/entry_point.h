@@ -124,6 +124,13 @@ struct EntryPoint {
   std::vector<OverridableConstant> overridable_constants;
   /// Does the entry point use the sample_mask builtin
   bool sample_mask_used = false;
+  /// Does the entry point use the position builtin as an input builtin
+  /// variable.
+  bool input_position_used = false;
+  /// Does the entry point use the front_facing builtin
+  bool front_facing_used = false;
+  /// Does the entry point use the sample_index builtin
+  bool sample_index_used = false;
 
   /// @returns the size of the workgroup in {x,y,z} format
   std::tuple<uint32_t, uint32_t, uint32_t> workgroup_size() {

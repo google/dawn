@@ -160,16 +160,27 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
           program_->Symbols().NameFor(param->Declaration()->symbol()),
           param->Type(), param->Declaration()->decorations(),
           entry_point.input_variables);
+
+      entry_point.input_position_used |=
+          ContainsBuiltin(ast::Builtin::kPosition, param->Type(),
+                          param->Declaration()->decorations());
+      entry_point.front_facing_used |=
+          ContainsBuiltin(ast::Builtin::kFrontFacing, param->Type(),
+                          param->Declaration()->decorations());
+      entry_point.sample_index_used |=
+          ContainsBuiltin(ast::Builtin::kSampleIndex, param->Type(),
+                          param->Declaration()->decorations());
     }
 
     if (!sem->ReturnType()->Is<sem::Void>()) {
       AddEntryPointInOutVariables("<retval>", sem->ReturnType(),
                                   func->return_type_decorations(),
                                   entry_point.output_variables);
-    }
 
-    entry_point.sample_mask_used = ContainsSampleMaskBuiltin(
-        sem->ReturnType(), func->return_type_decorations());
+      entry_point.sample_mask_used =
+          ContainsBuiltin(ast::Builtin::kSampleMask, sem->ReturnType(),
+                          func->return_type_decorations());
+    }
 
     for (auto* var : sem->ReferencedModuleVariables()) {
       auto* decl = var->Declaration();
@@ -609,25 +620,26 @@ void Inspector::AddEntryPointInOutVariables(
   variables.push_back(stage_variable);
 }
 
-bool Inspector::ContainsSampleMaskBuiltin(
-    sem::Type* type,
-    const ast::DecorationList& decorations) const {
+bool Inspector::ContainsBuiltin(ast::Builtin builtin,
+                                sem::Type* type,
+                                const ast::DecorationList& decorations) const {
   auto* unwrapped_type = type->UnwrapRef();
 
   if (auto* struct_ty = unwrapped_type->As<sem::Struct>()) {
     // Recurse into members.
     for (auto* member : struct_ty->Members()) {
-      if (ContainsSampleMaskBuiltin(member->Type(),
-                                    member->Declaration()->decorations())) {
+      if (ContainsBuiltin(builtin, member->Type(),
+                          member->Declaration()->decorations())) {
         return true;
       }
     }
     return false;
   }
 
-  // Base case: check for [[builtin(sample_mask)]]
-  auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(decorations);
-  if (!builtin || builtin->value() != ast::Builtin::kSampleMask) {
+  // Base case: check for builtin
+  auto* builtin_declaration =
+      ast::GetDecoration<ast::BuiltinDecoration>(decorations);
+  if (!builtin_declaration || builtin_declaration->value() != builtin) {
     return false;
   }
 
