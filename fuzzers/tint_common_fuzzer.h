@@ -121,6 +121,8 @@ class CommonFuzzer {
   }
   void EnableInspector() { inspector_enabled_ = true; }
 
+  void SetDumpInput(bool enabled) { dump_input_ = enabled; }
+
   int Run(const uint8_t* data, size_t size);
 
   const tint::diag::List& Diagnostics() const { return diagnostics_; }
@@ -159,6 +161,7 @@ class CommonFuzzer {
   transform::Manager* transform_manager_;
   transform::DataMap transform_inputs_;
   bool inspector_enabled_;
+  bool dump_input_ = false;
   tint::diag::List diagnostics_;
 
   std::vector<uint32_t> generated_spirv_;

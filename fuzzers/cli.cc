@@ -1,0 +1,107 @@
+// Copyright 2021 The Tint Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include "fuzzers/cli.h"
+
+#include <cstring>
+#include <iostream>
+#include <limits>
+#include <sstream>
+#include <string>
+#include <utility>
+
+namespace tint {
+namespace fuzzers {
+namespace {
+
+const char* const kHelpMessage = R"(
+This is a fuzzer for the Tint compiler that works by mutating the AST.
+
+Below is a list of all supported parameters for this fuzzer. You may want to
+run it with -help=1 to check out libfuzzer parameters.
+
+  -tint_dump_input=
+                       If `true`, the fuzzer will dump input data to a file with
+                       name tint_input_<hash>.spv/wgsl, where the hash is the hash
+                       of the input data.
+
+  -tint_help
+                       Show this message. Note that there is also a -help=1
+                       parameter that will display libfuzzer's help message.
+)";
+
+bool HasPrefix(const char* str, const char* prefix) {
+  return strncmp(str, prefix, strlen(prefix)) == 0;
+}
+
+[[noreturn]] void InvalidParam(const char* param) {
+  std::cout << "Invalid value for " << param << std::endl;
+  std::cout << kHelpMessage << std::endl;
+  exit(1);
+}
+
+bool ParseBool(const char* value, bool* out) {
+  if (!strcmp(value, "true")) {
+    *out = true;
+  } else if (!strcmp(value, "false")) {
+    *out = false;
+  } else {
+    return false;
+  }
+  return true;
+}
+
+}  // namespace
+
+CliParams ParseCliParams(int* argc, char** argv) {
+  CliParams cli_params;
+  auto help = false;
+
+  for (int i = *argc - 1; i > 0; --i) {
+    auto param = argv[i];
+    auto recognized_parameter = true;
+
+    if (HasPrefix(param, "-tint_dump_input=")) {
+      if (!ParseBool(param + sizeof("-tint_dump_input=") - 1,
+                     &cli_params.dump_input)) {
+        InvalidParam(param);
+      }
+    } else if (!strcmp(param, "-tint_help")) {
+      help = true;
+    } else {
+      recognized_parameter = false;
+    }
+
+    if (recognized_parameter) {
+      // Remove the recognized parameter from the list of all parameters by
+      // swapping it with the last one. This will suppress warnings in the
+      // libFuzzer about unrecognized parameters. By default, libFuzzer thinks
+      // that all user-defined parameters start with two dashes. However, we are
+      // forced to use a single one to make the fuzzer compatible with the
+      // ClusterFuzz.
+      std::swap(argv[i], argv[*argc - 1]);
+      *argc -= 1;
+    }
+  }
+
+  if (help) {
+    std::cout << kHelpMessage << std::endl;
+    exit(0);
+  }
+
+  return cli_params;
+}
+
+}  // namespace fuzzers
+}  // namespace tint

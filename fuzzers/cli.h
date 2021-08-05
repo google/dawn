@@ -12,19 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <string>
+#ifndef FUZZERS_CLI_H_
+#define FUZZERS_CLI_H_
 
-#include "fuzzers/tint_common_fuzzer.h"
-#include "fuzzers/tint_init_fuzzer.h"
+#include <cstdint>
 
 namespace tint {
 namespace fuzzers {
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
-  tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kHLSL);
-  fuzzer.SetDumpInput(GetCliParams().dump_input);
-  return fuzzer.Run(data, size);
-}
+/// CLI parameters accepted by the fuzzer. Type -tint_help in the CLI to see the
+/// help message
+struct CliParams {
+  bool dump_input = false;
+};
+
+/// @brief Parses CLI parameters.
+///
+/// This function will exit the process with non-zero return code if some
+/// parameters are invalid. This function will remove recognized parameters from
+/// `argv` and adjust `argc` accordingly.
+///
+/// @param argc - the total number of parameters.
+/// @param argv - array of all CLI parameters.
+/// @return parsed parameters.
+CliParams ParseCliParams(int* argc, char** argv);
 
 }  // namespace fuzzers
 }  // namespace tint
+
+#endif  // FUZZERS_CLI_H_

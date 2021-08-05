@@ -15,7 +15,13 @@
 function(add_tint_fuzzer NAME)
   add_executable(${NAME}
     ${NAME}.cc
-    tint_common_fuzzer.cc)
+    cli.cc
+    cli.h
+    tint_common_fuzzer.cc
+    tint_common_fuzzer.h
+    tint_init_fuzzer.cc
+    tint_init_fuzzer.h
+    )
   target_link_libraries(${NAME} libtint-fuzz)
   tint_default_compile_options(${NAME})
   target_compile_options(${NAME} PRIVATE -Wno-missing-prototypes)

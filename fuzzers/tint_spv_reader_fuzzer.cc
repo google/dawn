@@ -15,12 +15,14 @@
 #include <vector>
 
 #include "fuzzers/tint_common_fuzzer.h"
+#include "fuzzers/tint_init_fuzzer.h"
 
 namespace tint {
 namespace fuzzers {
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kSpv, OutputFormat::kNone);
+  fuzzer.SetDumpInput(GetCliParams().dump_input);
   return fuzzer.Run(data, size);
 }
 

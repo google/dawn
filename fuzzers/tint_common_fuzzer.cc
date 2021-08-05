@@ -15,6 +15,7 @@
 #include "fuzzers/tint_common_fuzzer.h"
 
 #include <cstring>
+#include <fstream>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -28,6 +29,7 @@
 #include "src/ast/module.h"
 #include "src/diagnostic/formatter.h"
 #include "src/program.h"
+#include "src/utils/hash.h"
 
 namespace tint {
 namespace fuzzers {
@@ -202,6 +204,17 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 
 #endif  // TINT_BUILD_SPV_READER
 
+#if TINT_BUILD_WGSL_READER || TINT_BUILD_SPV_READER
+  auto dump_input_data = [&](auto& content, const char* extension) {
+    size_t hash = utils::Hash(content);
+    auto filename = "fuzzer_input_" + std::to_string(hash) + extension;  //
+    std::ofstream fout(filename, std::ios::binary);
+    fout.write(reinterpret_cast<const char*>(data),
+               static_cast<std::streamsize>(size));
+    std::cout << "Dumped input data to " << filename << std::endl;
+  };
+#endif
+
   switch (input_) {
 #if TINT_BUILD_WGSL_READER
     case InputFormat::kWGSL: {
@@ -210,6 +223,9 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
       diagnostics_ = {};
       std::string str(reinterpret_cast<const char*>(data), size);
       file_ = std::make_unique<Source::File>("test.wgsl", str);
+      if (dump_input_) {
+        dump_input_data(str, ".wgsl");
+      }
       program = reader::wgsl::Parse(file_.get());
       break;
     }
@@ -224,6 +240,9 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
                   spirv_input.size() * sizeof(uint32_t));
       if (spirv_input.empty()) {
         return 0;
+      }
+      if (dump_input_) {
+        dump_input_data(spirv_input, ".spv");
       }
       program = reader::spirv::Parse(spirv_input);
       break;

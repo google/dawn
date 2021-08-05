@@ -12,19 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <string>
+#ifndef FUZZERS_TINT_INIT_FUZZER_H_
+#define FUZZERS_TINT_INIT_FUZZER_H_
 
-#include "fuzzers/tint_common_fuzzer.h"
-#include "fuzzers/tint_init_fuzzer.h"
+#include "fuzzers/cli.h"
 
 namespace tint {
 namespace fuzzers {
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
-  tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kHLSL);
-  fuzzer.SetDumpInput(GetCliParams().dump_input);
-  return fuzzer.Run(data, size);
-}
+/// Returns the common CliParams parsed and populated by LLVMFuzzerInitialize()
+const CliParams& GetCliParams();
 
 }  // namespace fuzzers
 }  // namespace tint
+
+#endif  // FUZZERS_TINT_INIT_FUZZER_H_
