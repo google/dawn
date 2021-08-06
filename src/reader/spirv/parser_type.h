@@ -80,7 +80,10 @@ class Type : public Castable<Type> {
   /// @returns true if this type is an unsigned scalar or vector
   bool IsUnsignedScalarOrVector() const;
 
-#ifndef NDEBUG
+#ifdef NDEBUG
+  /// @returns "<no-type-info>", for debug purposes only
+  std::string String() const { return "<no-type-info>"; }
+#else
   /// @returns a string representation of the type, for debug purposes only
   virtual std::string String() const = 0;
 #endif  // NDEBUG

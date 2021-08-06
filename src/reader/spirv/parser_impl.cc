@@ -487,11 +487,22 @@ ast::DecorationList ParserImpl::ConvertMemberDecoration(
         return {};
       }
       uint32_t stride = decoration[1];
-      uint32_t natural_stride = 0;
-      if (auto* mat = member_ty->As<Matrix>()) {
-        natural_stride = (mat->rows == 2) ? 8 : 16;
+      auto* ty = member_ty->UnwrapAlias();
+      while (auto* arr = ty->As<Array>()) {
+        ty = arr->type->UnwrapAlias();
       }
+      auto* mat = ty->As<Matrix>();
+      if (!mat) {
+        Fail() << "MatrixStride cannot be applied to type " << ty->String();
+        return {};
+      }
+      uint32_t natural_stride = (mat->rows == 2) ? 8 : 16;
       if (stride == natural_stride) {
+        return {};  // Decoration matches the natural stride for the matrix
+      }
+      if (!member_ty->Is<Matrix>()) {
+        Fail() << "custom matrix strides not currently supported on array of "
+                  "matrices";
         return {};
       }
       return {
