@@ -153,6 +153,9 @@ namespace dawn_native { namespace metal {
         options.buffer_size_ubo_index = kBufferLengthBufferSlot;
         options.fixed_sample_mask = sampleMask;
         options.disable_workgroup_init = GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
+        options.emit_vertex_point_size =
+            stage == SingleShaderStage::Vertex &&
+            renderPipeline->GetPrimitiveTopology() == wgpu::PrimitiveTopology::PointList;
         auto result = tint::writer::msl::Generate(&program, options);
         if (!result.success) {
             errorStream << "Generator: " << result.error << std::endl;
