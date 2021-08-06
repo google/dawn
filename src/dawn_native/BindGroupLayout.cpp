@@ -336,7 +336,7 @@ namespace dawn_native {
                 case BindingInfoType::ExternalTexture:
                     break;
             }
-            return false;
+            return a.binding < b.binding;
         }
 
         // This is a utility function to help ASSERT that the BGL-binding comparator places buffers
