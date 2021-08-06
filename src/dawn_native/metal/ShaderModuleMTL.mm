@@ -15,18 +15,11 @@
 #include "dawn_native/metal/ShaderModuleMTL.h"
 
 #include "dawn_native/BindGroupLayout.h"
-#include "dawn_native/SpirvUtils.h"
 #include "dawn_native/TintUtils.h"
 #include "dawn_native/metal/DeviceMTL.h"
 #include "dawn_native/metal/PipelineLayoutMTL.h"
 #include "dawn_native/metal/RenderPipelineMTL.h"
 
-#include <spirv_msl.hpp>
-
-// Tint include must be after spirv_msl.hpp, because spirv-cross has its own
-// version of spirv_headers. We also need to undef SPV_REVISION because SPIRV-Cross
-// is at 3 while spirv-headers is at 4.
-#undef SPV_REVISION
 #include <tint/tint.h>
 
 #include <sstream>
@@ -172,116 +165,6 @@ namespace dawn_native { namespace metal {
         return std::move(result.msl);
     }
 
-    ResultOrError<std::string> ShaderModule::TranslateToMSLWithSPIRVCross(
-        const char* entryPointName,
-        SingleShaderStage stage,
-        const PipelineLayout* layout,
-        uint32_t sampleMask,
-        const RenderPipeline* renderPipeline,
-        const VertexState* vertexState,
-        std::string* remappedEntryPointName,
-        bool* needsStorageBufferLength) {
-        const std::vector<uint32_t>* spirv = &GetSpirv();
-        spv::ExecutionModel executionModel = ShaderStageToExecutionModel(stage);
-
-        std::vector<uint32_t> pullingSpirv;
-        if (GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling) &&
-            stage == SingleShaderStage::Vertex) {
-            if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
-                DAWN_TRY_ASSIGN(pullingSpirv,
-                                GeneratePullingSpirv(GetTintProgram(), *vertexState, entryPointName,
-                                                     kPullingBufferBindingSet));
-            } else {
-                DAWN_TRY_ASSIGN(pullingSpirv,
-                                GeneratePullingSpirv(GetSpirv(), *vertexState, entryPointName,
-                                                     kPullingBufferBindingSet));
-            }
-            spirv = &pullingSpirv;
-        }
-
-        // If these options are changed, the values in DawnSPIRVCrossMSLFastFuzzer.cpp need to
-        // be updated.
-        spirv_cross::CompilerMSL::Options options_msl;
-
-        // Disable PointSize builtin for https://bugs.chromium.org/p/dawn/issues/detail?id=146
-        // Because Metal will reject PointSize builtin if the shader is compiled into a render
-        // pipeline that uses a non-point topology.
-        // TODO (hao.x.li@intel.com): Remove this once WebGPU requires there is no
-        // gl_PointSize builtin (https://github.com/gpuweb/gpuweb/issues/332).
-        options_msl.enable_point_size_builtin = false;
-
-        // Always use vertex buffer 30 (the last one in the vertex buffer table) to contain
-        // the shader storage buffer lengths.
-        options_msl.buffer_size_buffer_index = kBufferLengthBufferSlot;
-
-        options_msl.additional_fixed_sample_mask = sampleMask;
-
-        spirv_cross::CompilerMSL compiler(*spirv);
-        compiler.set_msl_options(options_msl);
-        compiler.set_entry_point(entryPointName, executionModel);
-
-        // By default SPIRV-Cross will give MSL resources indices in increasing order.
-        // To make the MSL indices match the indices chosen in the PipelineLayout, we build
-        // a table of MSLResourceBinding to give to SPIRV-Cross.
-
-        // Create one resource binding entry per stage per binding.
-        for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
-            const BindGroupLayoutBase::BindingMap& bindingMap =
-                layout->GetBindGroupLayout(group)->GetBindingMap();
-
-            for (const auto& it : bindingMap) {
-                BindingNumber bindingNumber = it.first;
-                BindingIndex bindingIndex = it.second;
-
-                const BindingInfo& bindingInfo =
-                    layout->GetBindGroupLayout(group)->GetBindingInfo(bindingIndex);
-
-                if (!(bindingInfo.visibility & StageBit(stage))) {
-                    continue;
-                }
-
-                uint32_t shaderIndex = layout->GetBindingIndexInfo(stage)[group][bindingIndex];
-
-                spirv_cross::MSLResourceBinding mslBinding;
-                mslBinding.stage = executionModel;
-                mslBinding.desc_set = static_cast<uint32_t>(group);
-                mslBinding.binding = static_cast<uint32_t>(bindingNumber);
-                mslBinding.msl_buffer = mslBinding.msl_texture = mslBinding.msl_sampler =
-                    shaderIndex;
-
-                compiler.add_msl_resource_binding(mslBinding);
-            }
-        }
-
-        // Add vertex buffers bound as storage buffers
-        if (GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling) &&
-            stage == SingleShaderStage::Vertex) {
-            for (VertexBufferSlot slot :
-                 IterateBitSet(renderPipeline->GetVertexBufferSlotsUsed())) {
-                uint32_t metalIndex = renderPipeline->GetMtlVertexBufferIndex(slot);
-
-                spirv_cross::MSLResourceBinding mslBinding;
-
-                mslBinding.stage = spv::ExecutionModelVertex;
-                mslBinding.desc_set = static_cast<uint32_t>(kPullingBufferBindingSet);
-                mslBinding.binding = static_cast<uint8_t>(slot);
-                mslBinding.msl_buffer = metalIndex;
-                compiler.add_msl_resource_binding(mslBinding);
-            }
-        }
-
-        // SPIRV-Cross also supports re-ordering attributes but it seems to do the correct thing
-        // by default.
-        std::string msl = compiler.compile();
-
-        // Some entry point names are forbidden in MSL so SPIRV-Cross modifies them. Query the
-        // modified entryPointName from it.
-        *remappedEntryPointName = compiler.get_entry_point(entryPointName, executionModel).name;
-        *needsStorageBufferLength = compiler.needs_buffer_size_buffer();
-
-        return std::move(msl);
-    }
-
     MaybeError ShaderModule::CreateFunction(const char* entryPointName,
                                             SingleShaderStage stage,
                                             const PipelineLayout* layout,
@@ -301,17 +184,10 @@ namespace dawn_native { namespace metal {
         std::string remappedEntryPointName;
         std::string msl;
         bool hasInvariantAttribute = false;
-        if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
-            DAWN_TRY_ASSIGN(msl, TranslateToMSLWithTint(
-                                     entryPointName, stage, layout, sampleMask, renderPipeline,
-                                     vertexState, &remappedEntryPointName,
-                                     &out->needsStorageBufferLength, &hasInvariantAttribute));
-        } else {
-            DAWN_TRY_ASSIGN(msl, TranslateToMSLWithSPIRVCross(entryPointName, stage, layout,
-                                                              sampleMask, renderPipeline,
-                                                              vertexState, &remappedEntryPointName,
-                                                              &out->needsStorageBufferLength));
-        }
+        DAWN_TRY_ASSIGN(
+            msl, TranslateToMSLWithTint(entryPointName, stage, layout, sampleMask, renderPipeline,
+                                        vertexState, &remappedEntryPointName,
+                                        &out->needsStorageBufferLength, &hasInvariantAttribute));
 
         // Metal uses Clang to compile the shader as C++14. Disable everything in the -Wall
         // category. -Wunused-variable in particular comes up a lot in generated code, and some

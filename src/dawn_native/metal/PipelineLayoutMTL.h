@@ -23,10 +23,6 @@
 
 #import <Metal/Metal.h>
 
-namespace spirv_cross {
-    class CompilerMSL;
-}
-
 namespace dawn_native { namespace metal {
 
     class Device;

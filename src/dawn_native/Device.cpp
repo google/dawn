@@ -134,6 +134,14 @@ namespace dawn_native {
 
         mFormatTable = BuildFormatTable(this);
         SetDefaultToggles();
+#if defined(DAWN_PLATFORM_MACOS)
+        if (!IsToggleEnabled(Toggle::UseTintGenerator)) {
+            EmitLog(
+                WGPULoggingType_Warning,
+                "Non-tint generator is not available on this platform; toggle disable ignored.\n");
+            ForceSetToggle(Toggle::UseTintGenerator, true);
+        }
+#endif
     }
 
     DeviceBase::~DeviceBase() = default;

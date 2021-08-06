@@ -22,10 +22,6 @@
 
 #import <Metal/Metal.h>
 
-namespace spirv_cross {
-    class CompilerMSL;
-}
-
 namespace dawn_native { namespace metal {
 
     class Device;
@@ -60,16 +56,6 @@ namespace dawn_native { namespace metal {
                                                           std::string* remappedEntryPointName,
                                                           bool* needsStorageBufferLength,
                                                           bool* hasInvariantAttribute);
-        ResultOrError<std::string> TranslateToMSLWithSPIRVCross(
-            const char* entryPointName,
-            SingleShaderStage stage,
-            const PipelineLayout* layout,
-            uint32_t sampleMask,
-            const RenderPipeline* renderPipeline,
-            const VertexState* vertexState,
-            std::string* remappedEntryPointName,
-            bool* needsStorageBufferLength);
-
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModule() override = default;
         MaybeError Initialize(ShaderModuleParseResult* parseResult);
