@@ -762,7 +762,8 @@ class FunctionEmitter {
   /// Makes an expression from a SPIR-V ID.
   /// if the SPIR-V result type is a pointer.
   /// @param id the SPIR-V ID of the value
-  /// @returns true if emission has not yet failed.
+  /// @returns an AST expression for the instruction, or an invalid
+  /// TypedExpression on error.
   TypedExpression MakeExpression(uint32_t id);
 
   /// Creates an expression and supporting statements for a combinatorial

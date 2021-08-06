@@ -4399,6 +4399,10 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
   auto composite_index = 0;
   auto first_index_position = 1;
   TypedExpression current_expr(MakeOperand(inst, composite_index));
+  if (!current_expr) {
+    return {};
+  }
+
   const auto composite_id = inst.GetSingleWordInOperand(composite_index);
   auto current_type_id = def_use_mgr_->GetDef(composite_id)->type_id();
 
@@ -4474,6 +4478,7 @@ TypedExpression FunctionEmitter::MakeCompositeValueDecomposition(
         if (index_val >= kMaxVectorLen) {
           Fail() << "internal error: swizzle index " << index_val
                  << " is too big. Max handled index is " << kMaxVectorLen - 1;
+          return {};
         }
         next_expr = create<ast::MemberAccessorExpression>(
             Source{}, current_expr.expr, Swizzle(index_val));
