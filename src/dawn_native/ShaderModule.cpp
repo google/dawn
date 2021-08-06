@@ -1055,6 +1055,8 @@ namespace dawn_native {
                         metadata->usedVertexInputs.set(location);
                     }
 
+                    // [[position]] must be declared in a vertex shader.
+                    uint32_t totalInterStageShaderComponents = 4;
                     for (const auto& output_var : entryPoint.output_variables) {
                         if (DAWN_UNLIKELY(!output_var.has_location_decoration)) {
                             std::stringstream ss;
@@ -1082,10 +1084,20 @@ namespace dawn_native {
                             metadata->interStageVariables[location].interpolationSampling,
                             TintInterpolationSamplingToInterpolationSamplingType(
                                 output_var.interpolation_sampling));
+
+                        totalInterStageShaderComponents +=
+                            metadata->interStageVariables[location].componentCount;
+                    }
+
+                    if (DAWN_UNLIKELY(totalInterStageShaderComponents >
+                                      kMaxInterStageShaderComponents)) {
+                        return DAWN_VALIDATION_ERROR(
+                            "Total vertex output components count exceeds limits");
                     }
                 }
 
                 if (metadata->stage == SingleShaderStage::Fragment) {
+                    uint32_t totalInterStageShaderComponents = 0;
                     for (const auto& input_var : entryPoint.input_variables) {
                         if (!input_var.has_location_decoration) {
                             return DAWN_VALIDATION_ERROR(
@@ -1111,6 +1123,25 @@ namespace dawn_native {
                             metadata->interStageVariables[location].interpolationSampling,
                             TintInterpolationSamplingToInterpolationSamplingType(
                                 input_var.interpolation_sampling));
+
+                        totalInterStageShaderComponents +=
+                            metadata->interStageVariables[location].componentCount;
+                    }
+                    if (entryPoint.front_facing_used) {
+                        totalInterStageShaderComponents += 1;
+                    }
+                    if (entryPoint.input_sample_mask_used) {
+                        totalInterStageShaderComponents += 1;
+                    }
+                    if (entryPoint.sample_index_used) {
+                        totalInterStageShaderComponents += 1;
+                    }
+                    if (entryPoint.input_position_used) {
+                        totalInterStageShaderComponents += 4;
+                    }
+                    if (totalInterStageShaderComponents > kMaxInterStageShaderComponents) {
+                        return DAWN_VALIDATION_ERROR(
+                            "Total fragment input components count exceeds limits");
                     }
 
                     for (const auto& output_var : entryPoint.output_variables) {
