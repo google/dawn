@@ -858,13 +858,6 @@ namespace dawn_native {
         }
         return result.Detach();
     }
-    RenderPipelineBase* DeviceBase::APICreateRenderPipeline2(
-        const RenderPipelineDescriptor* descriptor) {
-        EmitDeprecationWarning(
-            "CreateRenderPipeline2() has been deprecated. Please begin using "
-            "CreateRenderPipeline() instead.");
-        return APICreateRenderPipeline(descriptor);
-    }
     ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor* descriptor) {
         Ref<ShaderModuleBase> result;
         std::unique_ptr<OwnedCompilationMessages> compilationMessages(
