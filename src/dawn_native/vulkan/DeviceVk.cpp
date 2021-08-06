@@ -565,8 +565,22 @@ namespace dawn_native { namespace vulkan {
         if (!mUnusedCommands.empty()) {
             CommandPoolAndBuffer commands = mUnusedCommands.back();
             mUnusedCommands.pop_back();
-            DAWN_TRY(CheckVkSuccess(fn.ResetCommandPool(mVkDevice, commands.pool, 0),
-                                    "vkResetCommandPool"));
+            DAWN_TRY_WITH_CLEANUP(CheckVkSuccess(fn.ResetCommandPool(mVkDevice, commands.pool, 0),
+                                                 "vkResetCommandPool"),
+                                  {
+                                      // vkResetCommandPool failed (it may return out-of-memory).
+                                      // Free the commands in the cleanup step before returning to
+                                      // reclaim memory.
+
+                                      // The VkCommandBuffer memory should be wholly owned by the
+                                      // pool and freed when it is destroyed, but that's not the
+                                      // case in some drivers and they leak memory. So we call
+                                      // FreeCommandBuffers before DestroyCommandPool to be safe.
+                                      // TODO(enga): Only do this on a known list of bad drivers.
+                                      fn.FreeCommandBuffers(mVkDevice, commands.pool, 1,
+                                                            &commands.commandBuffer);
+                                      fn.DestroyCommandPool(mVkDevice, commands.pool, nullptr);
+                                  });
 
             mRecordingContext.commandBuffer = commands.commandBuffer;
             mRecordingContext.commandPool = commands.pool;
