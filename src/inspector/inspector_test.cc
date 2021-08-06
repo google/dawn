@@ -637,13 +637,46 @@ TEST_F(InspectorGetEntryPointTest, BuiltinNotReferenced) {
   auto result = inspector.GetEntryPoints();
 
   ASSERT_EQ(1u, result.size());
-  EXPECT_FALSE(result[0].sample_mask_used);
+  EXPECT_FALSE(result[0].input_sample_mask_used);
+  EXPECT_FALSE(result[0].output_sample_mask_used);
   EXPECT_FALSE(result[0].input_position_used);
   EXPECT_FALSE(result[0].front_facing_used);
   EXPECT_FALSE(result[0].sample_index_used);
 }
 
-TEST_F(InspectorGetEntryPointTest, SampleMaskSimpleReferenced) {
+TEST_F(InspectorGetEntryPointTest, InputSampleMaskSimpleReferenced) {
+  auto* in_var =
+      Param("in_var", ty.u32(), {Builtin(ast::Builtin::kSampleMask)});
+  Func("ep_func", {in_var}, ty.void_(), {Return()},
+       {Stage(ast::PipelineStage::kFragment)}, {});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_TRUE(result[0].input_sample_mask_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, InputSampleMaskStructReferenced) {
+  ast::StructMemberList members;
+  members.push_back(
+      Member("inner_position", ty.u32(), {Builtin(ast::Builtin::kSampleMask)}));
+  Structure("in_struct", members, {});
+  auto* in_var = Param("in_var", ty.type_name("in_struct"), {});
+
+  Func("ep_func", {in_var}, ty.void_(), {Return()},
+       {Stage(ast::PipelineStage::kFragment)}, {});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_TRUE(result[0].input_sample_mask_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, OutputSampleMaskSimpleReferenced) {
   auto* in_var =
       Param("in_var", ty.u32(), {Builtin(ast::Builtin::kSampleMask)});
   Func("ep_func", {in_var}, ty.u32(), {Return("in_var")},
@@ -655,10 +688,10 @@ TEST_F(InspectorGetEntryPointTest, SampleMaskSimpleReferenced) {
   auto result = inspector.GetEntryPoints();
 
   ASSERT_EQ(1u, result.size());
-  EXPECT_TRUE(result[0].sample_mask_used);
+  EXPECT_TRUE(result[0].output_sample_mask_used);
 }
 
-TEST_F(InspectorGetEntryPointTest, SampleMaskStructReferenced) {
+TEST_F(InspectorGetEntryPointTest, OutputSampleMaskStructReferenced) {
   ast::StructMemberList members;
   members.push_back(Member("inner_sample_mask", ty.u32(),
                            {Builtin(ast::Builtin::kSampleMask)}));
@@ -673,7 +706,7 @@ TEST_F(InspectorGetEntryPointTest, SampleMaskStructReferenced) {
   auto result = inspector.GetEntryPoints();
 
   ASSERT_EQ(1u, result.size());
-  EXPECT_TRUE(result[0].sample_mask_used);
+  EXPECT_TRUE(result[0].output_sample_mask_used);
 }
 
 TEST_F(InspectorGetEntryPointTest, InputPositionSimpleReferenced) {

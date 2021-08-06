@@ -170,6 +170,9 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
       entry_point.sample_index_used |=
           ContainsBuiltin(ast::Builtin::kSampleIndex, param->Type(),
                           param->Declaration()->decorations());
+      entry_point.input_sample_mask_used |=
+          ContainsBuiltin(ast::Builtin::kSampleMask, param->Type(),
+                          param->Declaration()->decorations());
     }
 
     if (!sem->ReturnType()->Is<sem::Void>()) {
@@ -177,7 +180,7 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
                                   func->return_type_decorations(),
                                   entry_point.output_variables);
 
-      entry_point.sample_mask_used =
+      entry_point.output_sample_mask_used =
           ContainsBuiltin(ast::Builtin::kSampleMask, sem->ReturnType(),
                           func->return_type_decorations());
     }

@@ -122,8 +122,12 @@ struct EntryPoint {
   std::vector<StageVariable> output_variables;
   /// List of the pipeline overridable constants accessed via this entry point.
   std::vector<OverridableConstant> overridable_constants;
-  /// Does the entry point use the sample_mask builtin
-  bool sample_mask_used = false;
+  /// Does the entry point use the sample_mask builtin as an input builtin
+  /// variable.
+  bool input_sample_mask_used = false;
+  /// Does the entry point use the sample_mask builtin as an output builtin
+  /// variable.
+  bool output_sample_mask_used = false;
   /// Does the entry point use the position builtin as an input builtin
   /// variable.
   bool input_position_used = false;
