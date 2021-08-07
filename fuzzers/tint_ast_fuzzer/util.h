@@ -19,6 +19,7 @@
 
 #include "src/ast/module.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/castable.h"
 #include "src/program.h"
 #include "src/sem/block_statement.h"
 #include "src/sem/statement.h"
@@ -51,7 +52,8 @@ std::vector<const sem::Variable*> GetAllVarsInScope(
   std::vector<const sem::Variable*> result;
 
   // Walk up the hierarchy of blocks in which `curr_stmt` is contained.
-  for (const auto* block = curr_stmt->Block(); block; block = block->Block()) {
+  for (const auto* block = curr_stmt->Block(); block;
+       block = tint::As<sem::BlockStatement>(block->Parent())) {
     for (const auto* stmt : *block->Declaration()) {
       if (stmt == curr_stmt->Declaration()) {
         // `curr_stmt` was found. This is only possible if `block is the
