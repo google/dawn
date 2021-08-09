@@ -193,6 +193,11 @@ namespace dawn_native { namespace d3d12 {
             return;
         }
 
+        // The device may not exist if this adapter failed to initialize.
+        if (mD3d12Device == nullptr) {
+            return;
+        }
+
         // If the debug layer is not installed, return immediately to avoid crashing the process.
         ComPtr<ID3D12InfoQueue> infoQueue;
         if (FAILED(mD3d12Device.As(&infoQueue))) {
