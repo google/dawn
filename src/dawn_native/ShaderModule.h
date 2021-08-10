@@ -177,8 +177,6 @@ namespace dawn_native {
             fragmentOutputFormatBaseTypes;
         ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> fragmentOutputsWritten;
 
-        // TODO(dawn:802): store InterpolationType and IntepolationSampling when we add the
-        // validations on them.
         struct InterStageVariableInfo {
             InterStageComponentType baseType;
             uint32_t componentCount;
