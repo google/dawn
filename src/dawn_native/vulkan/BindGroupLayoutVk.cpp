@@ -91,16 +91,12 @@ namespace dawn_native { namespace vulkan {
         ityp::vector<BindingIndex, VkDescriptorSetLayoutBinding> bindings;
         bindings.reserve(GetBindingCount());
 
-        bool useBindingIndex = GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator);
-
         for (const auto& it : GetBindingMap()) {
-            BindingNumber bindingNumber = it.first;
             BindingIndex bindingIndex = it.second;
             const BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
 
             VkDescriptorSetLayoutBinding vkBinding;
-            vkBinding.binding = useBindingIndex ? static_cast<uint32_t>(bindingIndex)
-                                                : static_cast<uint32_t>(bindingNumber);
+            vkBinding.binding = static_cast<uint32_t>(bindingIndex);
             // TODO(dawn:728) In the future, special handling will be needed for external textures
             // here because they encompass multiple views.
             vkBinding.descriptorType = VulkanDescriptorType(bindingInfo);

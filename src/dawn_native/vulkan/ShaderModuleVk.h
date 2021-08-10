@@ -33,9 +33,6 @@ namespace dawn_native { namespace vulkan {
                                                        const ShaderModuleDescriptor* descriptor,
                                                        ShaderModuleParseResult* parseResult);
 
-        VkShaderModule GetHandle() const;
-
-        // This is only called when UseTintGenerator is on
         ResultOrError<VkShaderModule> GetTransformedModuleHandle(const char* entryPointName,
                                                                  PipelineLayout* layout);
 

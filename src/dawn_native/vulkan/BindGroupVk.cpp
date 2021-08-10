@@ -48,11 +48,8 @@ namespace dawn_native { namespace vulkan {
         ityp::stack_vec<uint32_t, VkDescriptorImageInfo, kMaxOptimalBindingsPerGroup>
             writeImageInfo(bindingCount);
 
-        bool useBindingIndex = device->IsToggleEnabled(Toggle::UseTintGenerator);
-
         uint32_t numWrites = 0;
         for (const auto& it : GetLayout()->GetBindingMap()) {
-            BindingNumber bindingNumber = it.first;
             BindingIndex bindingIndex = it.second;
             const BindingInfo& bindingInfo = GetLayout()->GetBindingInfo(bindingIndex);
 
@@ -60,8 +57,7 @@ namespace dawn_native { namespace vulkan {
             write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             write.pNext = nullptr;
             write.dstSet = GetHandle();
-            write.dstBinding = useBindingIndex ? static_cast<uint32_t>(bindingIndex)
-                                               : static_cast<uint32_t>(bindingNumber);
+            write.dstBinding = static_cast<uint32_t>(bindingIndex);
             write.dstArrayElement = 0;
             write.descriptorCount = 1;
             write.descriptorType = VulkanDescriptorType(bindingInfo);

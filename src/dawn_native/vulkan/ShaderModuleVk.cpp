@@ -21,12 +21,6 @@
 #include "dawn_native/vulkan/PipelineLayoutVk.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
-#include <spirv_cross.hpp>
-
-// Tint include must be after spirv_hlsl.hpp, because spirv-cross has its own
-// version of spirv_headers. We also need to undef SPV_REVISION because SPIRV-Cross
-// is at 3 while spirv-headers is at 4.
-#undef SPV_REVISION
 #include <tint/tint.h>
 
 namespace dawn_native { namespace vulkan {
@@ -89,44 +83,36 @@ namespace dawn_native { namespace vulkan {
 
         ScopedTintICEHandler scopedICEHandler(GetDevice());
 
-        if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
-            std::ostringstream errorStream;
-            errorStream << "Tint SPIR-V writer failure:" << std::endl;
+        std::ostringstream errorStream;
+        errorStream << "Tint SPIR-V writer failure:" << std::endl;
 
-            tint::transform::Manager transformManager;
-            if (GetDevice()->IsRobustnessEnabled()) {
-                transformManager.Add<tint::transform::BoundArrayAccessors>();
-            }
-
-            tint::transform::DataMap transformInputs;
-
-            tint::Program program;
-            DAWN_TRY_ASSIGN(program,
-                            RunTransforms(&transformManager, parseResult->tintProgram.get(),
-                                          transformInputs, nullptr, nullptr));
-
-            tint::writer::spirv::Options options;
-            options.emit_vertex_point_size = true;
-            options.disable_workgroup_init =
-                GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
-            auto result = tint::writer::spirv::Generate(&program, options);
-            if (!result.success) {
-                errorStream << "Generator: " << result.error << std::endl;
-                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-            }
-
-            spirv = std::move(result.spirv);
-            spirvPtr = &spirv;
-
-            // Rather than use a new ParseResult object, we just reuse the original parseResult
-            parseResult->tintProgram = std::make_unique<tint::Program>(std::move(program));
-            parseResult->spirv = spirv;
-
-            DAWN_TRY(InitializeBase(parseResult));
-        } else {
-            DAWN_TRY(InitializeBase(parseResult));
-            spirvPtr = &GetSpirv();
+        tint::transform::Manager transformManager;
+        if (GetDevice()->IsRobustnessEnabled()) {
+            transformManager.Add<tint::transform::BoundArrayAccessors>();
         }
+
+        tint::transform::DataMap transformInputs;
+
+        tint::Program program;
+        DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, parseResult->tintProgram.get(),
+                                               transformInputs, nullptr, nullptr));
+
+        tint::writer::spirv::Options options;
+        options.emit_vertex_point_size = true;
+        options.disable_workgroup_init = GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
+        auto result = tint::writer::spirv::Generate(&program, options);
+        if (!result.success) {
+            errorStream << "Generator: " << result.error << std::endl;
+            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
+        }
+
+        spirv = std::move(result.spirv);
+        spirvPtr = &spirv;
+
+        // Rather than use a new ParseResult object, we just reuse the original parseResult
+        parseResult->tintProgram = std::make_unique<tint::Program>(std::move(program));
+
+        DAWN_TRY(InitializeBase(parseResult));
 
         VkShaderModuleCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -151,17 +137,10 @@ namespace dawn_native { namespace vulkan {
         }
     }
 
-    VkShaderModule ShaderModule::GetHandle() const {
-        ASSERT(!GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator));
-        return mHandle;
-    }
-
     ResultOrError<VkShaderModule> ShaderModule::GetTransformedModuleHandle(
         const char* entryPointName,
         PipelineLayout* layout) {
         ScopedTintICEHandler scopedICEHandler(GetDevice());
-
-        ASSERT(GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator));
 
         auto cacheKey = std::make_pair(layout, entryPointName);
         VkShaderModule cachedShaderModule =

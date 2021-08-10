@@ -192,7 +192,7 @@ namespace dawn_native { namespace metal {
 
         // Vertex buffer robustness is implemented by using programmable vertex pulling. Enable
         // that code path if it isn't explicitly disabled.
-        if (IsToggleEnabled(Toggle::UseTintGenerator) && IsRobustnessEnabled()) {
+        if (IsRobustnessEnabled()) {
             SetToggle(Toggle::MetalEnableVertexPulling, true);
         }
 

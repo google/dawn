@@ -134,14 +134,14 @@ namespace dawn_native {
 
         mFormatTable = BuildFormatTable(this);
         SetDefaultToggles();
-#if defined(DAWN_PLATFORM_MACOS)
-        if (!IsToggleEnabled(Toggle::UseTintGenerator)) {
+        if ((adapter->GetBackendType() == wgpu::BackendType::Metal ||
+             adapter->GetBackendType() == wgpu::BackendType::Vulkan) &&
+            !IsToggleEnabled(Toggle::UseTintGenerator)) {
             EmitLog(
                 WGPULoggingType_Warning,
-                "Non-tint generator is not available on this platform; toggle disable ignored.\n");
+                "Non-tint generator is not available on this backend; toggle disable ignored.\n");
             ForceSetToggle(Toggle::UseTintGenerator, true);
         }
-#endif
     }
 
     DeviceBase::~DeviceBase() = default;

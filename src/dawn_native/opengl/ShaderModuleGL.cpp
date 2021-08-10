@@ -83,20 +83,16 @@ namespace dawn_native { namespace opengl {
         DAWN_TRY(InitializeBase(parseResult));
         // Tint currently does not support emitting GLSL, so when provided a Tint program need to
         // generate SPIRV and SPIRV-Cross reflection data to be used in this backend.
-        if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
-            tint::writer::spirv::Options options;
-            options.disable_workgroup_init =
-                GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
-            auto result = tint::writer::spirv::Generate(GetTintProgram(), options);
-            if (!result.success) {
-                std::ostringstream errorStream;
-                errorStream << "Generator: " << result.error << std::endl;
-                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-            }
-
-            DAWN_TRY_ASSIGN(mGLEntryPoints,
-                            ReflectShaderUsingSPIRVCross(GetDevice(), result.spirv));
+        tint::writer::spirv::Options options;
+        options.disable_workgroup_init = GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
+        auto result = tint::writer::spirv::Generate(GetTintProgram(), options);
+        if (!result.success) {
+            std::ostringstream errorStream;
+            errorStream << "Generator: " << result.error << std::endl;
+            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
         }
+
+        DAWN_TRY_ASSIGN(mGLEntryPoints, ReflectShaderUsingSPIRVCross(GetDevice(), result.spirv));
 
         return {};
     }
@@ -126,30 +122,26 @@ namespace dawn_native { namespace opengl {
         options.version = version.GetMajor() * 100 + version.GetMinor() * 10;
 
         std::vector<uint32_t> spirv;
-        if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
-            tint::transform::SingleEntryPoint singleEntryPointTransform;
+        tint::transform::SingleEntryPoint singleEntryPointTransform;
 
-            tint::transform::DataMap transformInputs;
-            transformInputs.Add<tint::transform::SingleEntryPoint::Config>(entryPointName);
+        tint::transform::DataMap transformInputs;
+        transformInputs.Add<tint::transform::SingleEntryPoint::Config>(entryPointName);
 
-            tint::Program program;
-            DAWN_TRY_ASSIGN(program, RunTransforms(&singleEntryPointTransform, GetTintProgram(),
-                                                   transformInputs, nullptr, nullptr));
+        tint::Program program;
+        DAWN_TRY_ASSIGN(program, RunTransforms(&singleEntryPointTransform, GetTintProgram(),
+                                               transformInputs, nullptr, nullptr));
 
-            tint::writer::spirv::Options options;
-            options.disable_workgroup_init =
-                GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
-            auto result = tint::writer::spirv::Generate(&program, options);
-            if (!result.success) {
-                std::ostringstream errorStream;
-                errorStream << "Generator: " << result.error << std::endl;
-                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-            }
-
-            spirv = std::move(result.spirv);
-        } else {
-            spirv = GetSpirv();
+        tint::writer::spirv::Options tintOptions;
+        tintOptions.disable_workgroup_init =
+            GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
+        auto result = tint::writer::spirv::Generate(&program, tintOptions);
+        if (!result.success) {
+            std::ostringstream errorStream;
+            errorStream << "Generator: " << result.error << std::endl;
+            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
         }
+
+        spirv = std::move(result.spirv);
 
         if (GetDevice()->IsToggleEnabled(Toggle::DumpShaders)) {
             spvtools::SpirvTools spirvTools(SPV_ENV_VULKAN_1_1);
@@ -204,9 +196,7 @@ namespace dawn_native { namespace opengl {
         }
 
         const EntryPointMetadata::BindingInfoArray& bindingInfo =
-            GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)
-                ? (*mGLEntryPoints.at(entryPointName)).bindings
-                : GetEntryPoint(entryPointName).bindings;
+            (*mGLEntryPoints.at(entryPointName)).bindings;
 
         // Change binding names to be "dawn_binding_<group>_<binding>".
         // Also unsets the SPIRV "Binding" decoration as it outputs "layout(binding=)" which
