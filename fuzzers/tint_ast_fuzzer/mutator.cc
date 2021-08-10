@@ -141,7 +141,7 @@ tint::Program Mutate(tint::Program program,
     // Get all applicable mutations from some mutation finder.
     const auto& mutation_finder =
         finders[probability_context->GetRandomIndex(finders)];
-    auto mutations = mutation_finder->FindMutations(program, node_id_map,
+    auto mutations = mutation_finder->FindMutations(program, &node_id_map,
                                                     probability_context);
 
     const auto old_applied_mutations = applied_mutations;

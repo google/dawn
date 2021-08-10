@@ -29,7 +29,7 @@ namespace ast_fuzzer {
 
 MutationList MutationFinderReplaceIdentifiers::FindMutations(
     const tint::Program& program,
-    const NodeIdMap& node_id_map,
+    NodeIdMap* node_id_map,
     ProbabilityContext* probability_context) const {
   MutationList result;
 
@@ -61,8 +61,8 @@ MutationList MutationFinderReplaceIdentifiers::FindMutations(
               candidate_variables)];
 
       result.push_back(std::make_unique<MutationReplaceIdentifier>(
-          node_id_map.GetId(user->Declaration()),
-          node_id_map.GetId(replacement->Declaration())));
+          node_id_map->GetId(user->Declaration()),
+          node_id_map->GetId(replacement->Declaration())));
     }
   }
 

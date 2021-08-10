@@ -54,7 +54,7 @@ class MutationFinder {
   /// @return all the found mutations.
   virtual MutationList FindMutations(
       const tint::Program& program,
-      const NodeIdMap& node_id_map,
+      NodeIdMap* node_id_map,
       ProbabilityContext* probability_context) const = 0;
 
   /// @brief Compute a probability of applying a single mutation, returned by

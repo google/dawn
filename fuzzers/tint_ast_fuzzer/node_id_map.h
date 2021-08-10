@@ -67,6 +67,13 @@ class NodeIdMap {
   /// @param id - may not be 0 and can't be present in this map.
   void Add(const ast::Node* node, IdType id);
 
+  /// @brief Returns whether the id is fresh by checking if it exists in
+  /// the id map and the id is not 0.
+  /// @param id - an id that is used to check in the map.
+  /// @return true the given id is fresh and valid (non-zero).
+  /// @return false otherwise.
+  bool IdIsFreshAndValid(IdType id);
+
   /// @brief Returns an id that is guaranteed to be unoccupied in this map.
   ///
   /// This will effectively increase the counter. This means that two

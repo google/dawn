@@ -29,7 +29,7 @@ class MutationFinderReplaceIdentifiers : public MutationFinder {
  public:
   MutationList FindMutations(
       const tint::Program& program,
-      const NodeIdMap& node_id_map,
+      NodeIdMap* node_id_map,
       ProbabilityContext* probability_context) const override;
   uint32_t GetChanceOfApplyingMutation(
       ProbabilityContext* probability_context) const override;

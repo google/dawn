@@ -40,15 +40,19 @@ const ast::Node* NodeIdMap::GetNode(IdType id) const {
 
 void NodeIdMap::Add(const ast::Node* node, IdType id) {
   assert(!node_to_id_.count(node) && "The node already exists in the map");
-  assert(!id_to_node_.count(id) && "Id already exists in the map");
+  assert(IdIsFreshAndValid(id) && "Id already exists in the map or Id is zero");
   assert(node && "`node` can't be a nullptr");
-  assert(id && "`id` can't be equal to 0");
 
   node_to_id_[node] = id;
   id_to_node_[id] = node;
+
   if (id >= fresh_id_) {
     fresh_id_ = id + 1;
   }
+}
+
+bool NodeIdMap::IdIsFreshAndValid(IdType id) {
+  return id && !id_to_node_.count(id);
 }
 
 NodeIdMap::IdType NodeIdMap::TakeFreshId() {
