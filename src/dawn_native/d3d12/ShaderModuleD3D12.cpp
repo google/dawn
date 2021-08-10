@@ -28,12 +28,6 @@
 
 #include <d3dcompiler.h>
 
-#include <spirv_hlsl.hpp>
-
-// Tint include must be after spirv_hlsl.hpp, because spirv-cross has its own
-// version of spirv_headers. We also need to undef SPV_REVISION because SPIRV-Cross
-// is at 3 while spirv-headers is at 4.
-#undef SPV_REVISION
 #include <tint/tint.h>
 
 namespace dawn_native { namespace d3d12 {
@@ -320,75 +314,6 @@ namespace dawn_native { namespace d3d12 {
         return std::move(result.hlsl);
     }
 
-    ResultOrError<std::string> ShaderModule::TranslateToHLSLWithSPIRVCross(
-        const char* entryPointName,
-        SingleShaderStage stage,
-        PipelineLayout* layout) const {
-        ASSERT(!IsError());
-
-        // If these options are changed, the values in DawnSPIRVCrossHLSLFastFuzzer.cpp need to
-        // be updated.
-        spirv_cross::CompilerGLSL::Options options_glsl;
-        // Force all uninitialized variables to be 0, otherwise they will fail to compile
-        // by FXC.
-        options_glsl.force_zero_initialized_variables = true;
-
-        spirv_cross::CompilerHLSL::Options options_hlsl;
-        if (GetDevice()->IsToggleEnabled(Toggle::UseDXC)) {
-            options_hlsl.shader_model = ToBackend(GetDevice())->GetDeviceInfo().shaderModel;
-        } else {
-            options_hlsl.shader_model = 51;
-        }
-
-        if (GetDevice()->IsExtensionEnabled(Extension::ShaderFloat16)) {
-            options_hlsl.enable_16bit_types = true;
-        }
-        // PointCoord and PointSize are not supported in HLSL
-        // TODO (hao.x.li@intel.com): The point_coord_compat and point_size_compat are
-        // required temporarily for https://bugs.chromium.org/p/dawn/issues/detail?id=146,
-        // but should be removed once WebGPU requires there is no gl_PointSize builtin.
-        // See https://github.com/gpuweb/gpuweb/issues/332
-        options_hlsl.point_coord_compat = true;
-        options_hlsl.point_size_compat = true;
-        options_hlsl.nonwritable_uav_texture_as_srv = true;
-
-        spirv_cross::CompilerHLSL compiler(GetSpirv());
-        compiler.set_common_options(options_glsl);
-        compiler.set_hlsl_options(options_hlsl);
-        compiler.set_entry_point(entryPointName, ShaderStageToExecutionModel(stage));
-
-        const EntryPointMetadata::BindingInfoArray& moduleBindingInfo =
-            GetEntryPoint(entryPointName).bindings;
-
-        for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
-            const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
-            const auto& bindingOffsets = bgl->GetBindingOffsets();
-            const auto& groupBindingInfo = moduleBindingInfo[group];
-            for (const auto& it : groupBindingInfo) {
-                const EntryPointMetadata::ShaderBindingInfo& bindingInfo = it.second;
-                BindingNumber bindingNumber = it.first;
-                BindingIndex bindingIndex = bgl->GetBindingIndex(bindingNumber);
-
-                // Declaring a read-only storage buffer in HLSL but specifying a storage buffer in
-                // the BGL produces the wrong output. Force read-only storage buffer bindings to
-                // be treated as UAV instead of SRV.
-                const bool forceStorageBufferAsUAV =
-                    (bindingInfo.buffer.type == wgpu::BufferBindingType::ReadOnlyStorage &&
-                     bgl->GetBindingInfo(bindingIndex).buffer.type ==
-                         wgpu::BufferBindingType::Storage);
-
-                uint32_t bindingOffset = bindingOffsets[bindingIndex];
-                compiler.set_decoration(bindingInfo.id, spv::DecorationBinding, bindingOffset);
-                if (forceStorageBufferAsUAV) {
-                    compiler.set_hlsl_force_storage_buffer_as_uav(
-                        static_cast<uint32_t>(group), static_cast<uint32_t>(bindingNumber));
-                }
-            }
-        }
-
-        return compiler.compile();
-    }
-
     ResultOrError<CompiledShader> ShaderModule::Compile(const char* entryPointName,
                                                         SingleShaderStage stage,
                                                         PipelineLayout* layout,
@@ -399,19 +324,10 @@ namespace dawn_native { namespace d3d12 {
         std::string hlslSource;
         std::string remappedEntryPoint;
         CompiledShader compiledShader = {};
-        if (device->IsToggleEnabled(Toggle::UseTintGenerator)) {
-            DAWN_TRY_ASSIGN(hlslSource, TranslateToHLSLWithTint(entryPointName, stage, layout,
-                                                                &remappedEntryPoint,
-                                                                &compiledShader.firstOffsetInfo));
-            entryPointName = remappedEntryPoint.c_str();
-        } else {
-            DAWN_TRY_ASSIGN(hlslSource,
-                            TranslateToHLSLWithSPIRVCross(entryPointName, stage, layout));
-
-            // Note that the HLSL will always use entryPoint "main" under
-            // SPIRV-cross.
-            entryPointName = "main";
-        }
+        DAWN_TRY_ASSIGN(hlslSource,
+                        TranslateToHLSLWithTint(entryPointName, stage, layout, &remappedEntryPoint,
+                                                &compiledShader.firstOffsetInfo));
+        entryPointName = remappedEntryPoint.c_str();
 
         if (device->IsToggleEnabled(Toggle::DumpShaders)) {
             std::ostringstream dumpedMsg;

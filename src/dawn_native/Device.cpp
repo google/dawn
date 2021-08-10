@@ -135,7 +135,8 @@ namespace dawn_native {
         mFormatTable = BuildFormatTable(this);
         SetDefaultToggles();
         if ((adapter->GetBackendType() == wgpu::BackendType::Metal ||
-             adapter->GetBackendType() == wgpu::BackendType::Vulkan) &&
+             adapter->GetBackendType() == wgpu::BackendType::Vulkan ||
+             adapter->GetBackendType() == wgpu::BackendType::D3D12) &&
             !IsToggleEnabled(Toggle::UseTintGenerator)) {
             EmitLog(
                 WGPULoggingType_Warning,
