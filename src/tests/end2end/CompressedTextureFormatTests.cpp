@@ -423,7 +423,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
     static constexpr uint32_t kBCBlockHeightInTexels = 4;
 
     static constexpr wgpu::TextureUsage kDefaultBCFormatTextureUsage =
-        wgpu::TextureUsage::Sampled | wgpu::TextureUsage::CopyDst;
+        wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst;
 
     bool mIsBCFormatSupported = false;
 };
@@ -567,8 +567,8 @@ TEST_P(CompressedTextureBCFormatTest, CopyWholeTextureSubResourceIntoNonZeroMipm
         config.textureDescriptor.format = format;
         // Add the usage bit for both source and destination textures so that we don't need to
         // create two copy configs.
-        config.textureDescriptor.usage =
-            wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled;
+        config.textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
+                                         wgpu::TextureUsage::TextureBinding;
 
         wgpu::Texture bcTextureSrc = CreateTextureWithCompressedData(config);
 

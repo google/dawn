@@ -125,10 +125,10 @@ namespace {
     // Test different mipmap levels
     TEST_F(TextureSubresourceTest, MipmapLevelsTest) {
         // Create texture with 2 mipmap levels and 1 layer
-        wgpu::Texture texture =
-            CreateTexture(2, 1,
-                          wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment |
-                              wgpu::TextureUsage::Storage);
+        wgpu::Texture texture = CreateTexture(2, 1,
+                                              wgpu::TextureUsage::TextureBinding |
+                                                  wgpu::TextureUsage::RenderAttachment |
+                                                  wgpu::TextureUsage::StorageBinding);
 
         // Create two views on different mipmap levels.
         wgpu::TextureView samplerView = CreateTextureView(texture, 0, 0);
@@ -139,10 +139,10 @@ namespace {
     // Test different array layers
     TEST_F(TextureSubresourceTest, ArrayLayersTest) {
         // Create texture with 1 mipmap level and 2 layers
-        wgpu::Texture texture =
-            CreateTexture(1, 2,
-                          wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment |
-                              wgpu::TextureUsage::Storage);
+        wgpu::Texture texture = CreateTexture(1, 2,
+                                              wgpu::TextureUsage::TextureBinding |
+                                                  wgpu::TextureUsage::RenderAttachment |
+                                                  wgpu::TextureUsage::StorageBinding);
 
         // Create two views on different layers.
         wgpu::TextureView samplerView = CreateTextureView(texture, 0, 0);

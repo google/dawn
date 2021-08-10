@@ -71,7 +71,7 @@ class CopyTextureForBrowserTest : public ValidationTest {
 TEST_F(CopyTextureForBrowserTest, Success) {
     wgpu::Texture source =
         Create2DTexture(16, 16, 5, 4, wgpu::TextureFormat::RGBA8Unorm,
-                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::Sampled);
+                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::TextureBinding);
     wgpu::Texture destination =
         Create2DTexture(16, 16, 5, 4, wgpu::TextureFormat::RGBA8Unorm,
                         wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::RenderAttachment);
@@ -127,7 +127,7 @@ TEST_F(CopyTextureForBrowserTest, Success) {
 TEST_F(CopyTextureForBrowserTest, IncorrectUsage) {
     wgpu::Texture validSource =
         Create2DTexture(16, 16, 5, 1, wgpu::TextureFormat::RGBA8Unorm,
-                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::Sampled);
+                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::TextureBinding);
     wgpu::Texture validDestination =
         Create2DTexture(16, 16, 5, 1, wgpu::TextureFormat::RGBA8Unorm,
                         wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::RenderAttachment);
@@ -135,8 +135,8 @@ TEST_F(CopyTextureForBrowserTest, IncorrectUsage) {
         Create2DTexture(16, 16, 5, 1, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::CopySrc);
     wgpu::Texture noRenderAttachmentUsageDestination =
         Create2DTexture(16, 16, 5, 2, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::CopyDst);
-    wgpu::Texture noCopySrcUsageSource =
-        Create2DTexture(16, 16, 5, 1, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::Sampled);
+    wgpu::Texture noCopySrcUsageSource = Create2DTexture(
+        16, 16, 5, 1, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::TextureBinding);
     wgpu::Texture noCopyDstUsageSource = Create2DTexture(
         16, 16, 5, 2, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::RenderAttachment);
 
@@ -161,7 +161,7 @@ TEST_F(CopyTextureForBrowserTest, IncorrectUsage) {
 TEST_F(CopyTextureForBrowserTest, OutOfBounds) {
     wgpu::Texture source =
         Create2DTexture(16, 16, 5, 1, wgpu::TextureFormat::RGBA8Unorm,
-                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::Sampled);
+                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::TextureBinding);
     wgpu::Texture destination =
         Create2DTexture(16, 16, 5, 4, wgpu::TextureFormat::RGBA8Unorm,
                         wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::RenderAttachment);
@@ -221,7 +221,7 @@ TEST_F(CopyTextureForBrowserTest, OutOfBounds) {
 TEST_F(CopyTextureForBrowserTest, InvalidDstFormat) {
     wgpu::Texture source =
         Create2DTexture(16, 16, 5, 1, wgpu::TextureFormat::RGBA8Unorm,
-                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::Sampled);
+                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::TextureBinding);
     wgpu::Texture destination =
         Create2DTexture(16, 16, 5, 2, wgpu::TextureFormat::RG8Uint,
                         wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::RenderAttachment);
@@ -235,13 +235,13 @@ TEST_F(CopyTextureForBrowserTest, InvalidDstFormat) {
 TEST_F(CopyTextureForBrowserTest, InvalidSampleCount) {
     wgpu::Texture sourceMultiSampled1x =
         Create2DTexture(16, 16, 1, 1, wgpu::TextureFormat::RGBA8Unorm,
-                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::Sampled, 1);
+                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::TextureBinding, 1);
     wgpu::Texture destinationMultiSampled1x =
         Create2DTexture(16, 16, 1, 1, wgpu::TextureFormat::RGBA8Unorm,
                         wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::RenderAttachment, 1);
     wgpu::Texture sourceMultiSampled4x =
         Create2DTexture(16, 16, 1, 1, wgpu::TextureFormat::RGBA8Unorm,
-                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::Sampled, 4);
+                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::TextureBinding, 4);
     wgpu::Texture destinationMultiSampled4x =
         Create2DTexture(16, 16, 1, 1, wgpu::TextureFormat::RGBA8Unorm,
                         wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::RenderAttachment, 4);

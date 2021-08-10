@@ -91,7 +91,8 @@ class BufferZeroInitTest : public DawnTest {
         descriptor.size = size;
         descriptor.format = format;
         descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc |
-                           wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::Storage;
+                           wgpu::TextureUsage::RenderAttachment |
+                           wgpu::TextureUsage::StorageBinding;
         wgpu::Texture texture = device.CreateTexture(&descriptor);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();

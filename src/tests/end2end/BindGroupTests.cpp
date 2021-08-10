@@ -289,7 +289,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     descriptor.sampleCount = 1;
     descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled;
+    descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::TextureBinding;
     wgpu::Texture texture = device.CreateTexture(&descriptor);
     wgpu::TextureView textureView = texture.CreateView();
 
@@ -1258,7 +1258,7 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
                   "Please update this test");
     for (uint32_t i = 0; i < kMaxSampledTexturesPerShaderStage; ++i) {
         wgpu::Texture texture = CreateTextureWithRedData(
-            wgpu::TextureFormat::R8Unorm, expectedValue, wgpu::TextureUsage::Sampled);
+            wgpu::TextureFormat::R8Unorm, expectedValue, wgpu::TextureUsage::TextureBinding);
         bgEntries.push_back({nullptr, binding, nullptr, 0, 0, nullptr, texture.CreateView()});
 
         interface << "[[group(0), binding(" << binding++ << ")]] "
@@ -1277,7 +1277,7 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
     }
     for (uint32_t i = 0; i < kMaxStorageTexturesPerShaderStage; ++i) {
         wgpu::Texture texture = CreateTextureWithRedData(
-            wgpu::TextureFormat::R32Uint, expectedValue, wgpu::TextureUsage::Storage);
+            wgpu::TextureFormat::R32Uint, expectedValue, wgpu::TextureUsage::StorageBinding);
         bgEntries.push_back({nullptr, binding, nullptr, 0, 0, nullptr, texture.CreateView()});
 
         interface << "[[group(0), binding(" << binding++ << ")]] "
@@ -1391,7 +1391,7 @@ TEST_P(BindGroupTests, CreateWithDestroyedResource) {
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float}});
 
         wgpu::TextureDescriptor textureDesc;
-        textureDesc.usage = wgpu::TextureUsage::Sampled;
+        textureDesc.usage = wgpu::TextureUsage::TextureBinding;
         textureDesc.size = {1, 1, 1};
         textureDesc.format = wgpu::TextureFormat::BGRA8Unorm;
 
@@ -1424,7 +1424,7 @@ TEST_P(BindGroupTests, CreateWithDestroyedResource) {
                           wgpu::TextureFormat::R32Uint}}));
 
         wgpu::TextureDescriptor textureDesc;
-        textureDesc.usage = wgpu::TextureUsage::Storage;
+        textureDesc.usage = wgpu::TextureUsage::StorageBinding;
         textureDesc.size = {1, 1, 1};
         textureDesc.format = wgpu::TextureFormat::R32Uint;
 

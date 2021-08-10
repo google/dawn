@@ -23,10 +23,10 @@ namespace dawn_native { namespace d3d12 {
     namespace {
         DXGI_USAGE D3D12SwapChainBufferUsage(WGPUTextureUsage allowedUsages) {
             DXGI_USAGE usage = DXGI_CPU_ACCESS_NONE;
-            if (allowedUsages & WGPUTextureUsage_Sampled) {
+            if (allowedUsages & WGPUTextureUsage_TextureBinding) {
                 usage |= DXGI_USAGE_SHADER_INPUT;
             }
-            if (allowedUsages & WGPUTextureUsage_Storage) {
+            if (allowedUsages & WGPUTextureUsage_StorageBinding) {
                 usage |= DXGI_USAGE_UNORDERED_ACCESS;
             }
             if (allowedUsages & WGPUTextureUsage_RenderAttachment) {

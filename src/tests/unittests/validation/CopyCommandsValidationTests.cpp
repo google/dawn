@@ -548,8 +548,8 @@ TEST_F(CopyCommandTest_B2T, IncorrectUsage) {
     wgpu::Buffer vertex = CreateBuffer(16 * 4, wgpu::BufferUsage::Vertex);
     wgpu::Texture destination =
         Create2DTexture(16, 16, 5, 1, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::CopyDst);
-    wgpu::Texture sampled =
-        Create2DTexture(16, 16, 5, 1, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::Sampled);
+    wgpu::Texture sampled = Create2DTexture(16, 16, 5, 1, wgpu::TextureFormat::RGBA8Unorm,
+                                            wgpu::TextureUsage::TextureBinding);
 
     // Incorrect source usage
     TestB2TCopy(utils::Expectation::Failure, vertex, 0, 256, 4, destination, 0, {0, 0, 0},
@@ -1161,8 +1161,8 @@ TEST_F(CopyCommandTest_T2B, IncorrectUsage) {
     uint64_t bufferSize = BufferSizeForTextureCopy(4, 4, 1);
     wgpu::Texture source =
         Create2DTexture(16, 16, 5, 1, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::CopySrc);
-    wgpu::Texture sampled =
-        Create2DTexture(16, 16, 5, 1, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::Sampled);
+    wgpu::Texture sampled = Create2DTexture(16, 16, 5, 1, wgpu::TextureFormat::RGBA8Unorm,
+                                            wgpu::TextureUsage::TextureBinding);
     wgpu::Buffer destination = CreateBuffer(bufferSize, wgpu::BufferUsage::CopyDst);
     wgpu::Buffer vertex = CreateBuffer(bufferSize, wgpu::BufferUsage::Vertex);
 
@@ -2028,8 +2028,9 @@ class CopyCommandTest_CompressedTextureFormats : public CopyCommandTest {
                                   uint32_t mipmapLevels = 1,
                                   uint32_t width = kWidth,
                                   uint32_t height = kHeight) {
-        constexpr wgpu::TextureUsage kUsage =
-            wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::Sampled;
+        constexpr wgpu::TextureUsage kUsage = wgpu::TextureUsage::CopyDst |
+                                              wgpu::TextureUsage::CopySrc |
+                                              wgpu::TextureUsage::TextureBinding;
         constexpr uint32_t kArrayLayers = 1;
         return CopyCommandTest::Create2DTexture(width, height, mipmapLevels, kArrayLayers, format,
                                                 kUsage, 1);

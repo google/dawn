@@ -44,7 +44,8 @@ namespace {
             descriptor.sampleCount = kDefaultSampleCount;
             descriptor.dimension = wgpu::TextureDimension::e2D;
             descriptor.format = kDefaultTextureFormat;
-            descriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::Sampled;
+            descriptor.usage =
+                wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding;
             return descriptor;
         }
 
@@ -133,11 +134,11 @@ namespace {
             ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
         }
 
-        // It is an error to set TextureUsage::Storage when sampleCount > 1.
+        // It is an error to set TextureUsage::StorageBinding when sampleCount > 1.
         {
             wgpu::TextureDescriptor descriptor = defaultDescriptor;
             descriptor.sampleCount = 4;
-            descriptor.usage |= wgpu::TextureUsage::Storage;
+            descriptor.usage |= wgpu::TextureUsage::StorageBinding;
 
             ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
         }
@@ -507,11 +508,11 @@ namespace {
     }
 
     // Test it is an error to create a Storage texture with any format that doesn't support
-    // TextureUsage::Storage texture usages.
+    // TextureUsage::StorageBinding texture usages.
     TEST_F(TextureValidationTest, TextureFormatNotSupportTextureUsageStorage) {
         wgpu::TextureDescriptor descriptor;
         descriptor.size = {1, 1, 1};
-        descriptor.usage = wgpu::TextureUsage::Storage;
+        descriptor.usage = wgpu::TextureUsage::StorageBinding;
 
         for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
             descriptor.format = format;
@@ -554,7 +555,7 @@ namespace {
             wgpu::TextureDescriptor descriptor =
                 TextureValidationTest::CreateDefaultTextureDescriptor();
             descriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
-                               wgpu::TextureUsage::Sampled;
+                               wgpu::TextureUsage::TextureBinding;
             return descriptor;
         }
     };
@@ -601,7 +602,7 @@ namespace {
     TEST_F(CompressedTextureFormatsValidationTests, TextureUsage) {
         wgpu::TextureUsage invalidUsages[] = {
             wgpu::TextureUsage::RenderAttachment,
-            wgpu::TextureUsage::Storage,
+            wgpu::TextureUsage::StorageBinding,
             wgpu::TextureUsage::Present,
         };
         for (wgpu::TextureFormat format : utils::kBCFormats) {

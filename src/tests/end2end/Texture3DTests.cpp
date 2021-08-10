@@ -67,7 +67,7 @@ TEST_P(Texture3DTests, Sampling) {
     descriptor.dimension = wgpu::TextureDimension::e3D;
     descriptor.size = copySize;
     descriptor.format = kFormat;
-    descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled;
+    descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::TextureBinding;
     wgpu::Texture texture = device.CreateTexture(&descriptor);
     wgpu::TextureView textureView = texture.CreateView();
 

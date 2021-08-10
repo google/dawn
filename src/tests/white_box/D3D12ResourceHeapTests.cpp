@@ -58,7 +58,7 @@ TEST_P(D3D12ResourceHeapTests, AlignSmallCompressedTexture) {
     descriptor.sampleCount = 1;
     descriptor.format = wgpu::TextureFormat::BC1RGBAUnorm;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = wgpu::TextureUsage::Sampled;
+    descriptor.usage = wgpu::TextureUsage::TextureBinding;
 
     // Create a smaller one that allows use of the smaller alignment.
     wgpu::Texture texture = device.CreateTexture(&descriptor);

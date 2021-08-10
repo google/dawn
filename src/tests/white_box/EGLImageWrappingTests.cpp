@@ -203,14 +203,14 @@ TEST_P(EGLImageValidationTests, InvalidTextureDimension) {
 // Test an error occurs if the texture usage is not RenderAttachment
 TEST_P(EGLImageValidationTests, InvalidTextureUsage) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    descriptor.usage = wgpu::TextureUsage::Sampled;
+    descriptor.usage = wgpu::TextureUsage::TextureBinding;
 
     ScopedEGLImage image = CreateDefaultEGLImage();
     wgpu::Texture texture;
     ASSERT_DEVICE_ERROR(texture = WrapEGLImage(&descriptor, image.getImage()));
 
     ASSERT_EQ(texture.Get(), nullptr);
-    descriptor.usage = wgpu::TextureUsage::Storage;
+    descriptor.usage = wgpu::TextureUsage::StorageBinding;
 
     ASSERT_DEVICE_ERROR(texture = WrapEGLImage(&descriptor, image.getImage()));
 

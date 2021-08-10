@@ -29,7 +29,8 @@ namespace {
             descriptor.sampleCount = kDefaultSampleCount;
             descriptor.dimension = wgpu::TextureDimension::e2D;
             descriptor.format = kDefaultTextureFormat;
-            descriptor.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment;
+            descriptor.usage =
+                wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment;
             return descriptor;
         }
 
@@ -88,7 +89,8 @@ namespace {
             ASSERT_DEVICE_ERROR(device.CreateExternalTexture(&externalDesc));
         }
 
-        // Creating an external texture from a texture without TextureUsage::Sampled should fail.
+        // Creating an external texture from a texture without TextureUsage::TextureBinding should
+        // fail.
         {
             textureDescriptor.mipLevelCount = 2;
             wgpu::Texture internalTexture = device.CreateTexture(&textureDescriptor);

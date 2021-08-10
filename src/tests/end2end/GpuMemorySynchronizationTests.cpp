@@ -236,8 +236,8 @@ TEST_P(GpuMemorySyncTests, SampledAndROStorageTextureInComputePass) {
     wgpu::TextureDescriptor texDesc;
     texDesc.format = wgpu::TextureFormat::R32Uint;
     texDesc.size = {1, 1, 1};
-    texDesc.usage =
-        wgpu::TextureUsage::Storage | wgpu::TextureUsage::Sampled | wgpu::TextureUsage::CopyDst;
+    texDesc.usage = wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::TextureBinding |
+                    wgpu::TextureUsage::CopyDst;
     wgpu::Texture tex = device.CreateTexture(&texDesc);
 
     wgpu::ImageCopyTexture copyDst;

@@ -401,7 +401,7 @@ namespace dawn_native {
     MaybeError ValidateCopyTextureForBrowserRestrictions(const ImageCopyTexture& src,
                                                          const ImageCopyTexture& dst,
                                                          const Extent3D& copySize) {
-        if (!(src.texture->GetUsage() & wgpu::TextureUsage::Sampled)) {
+        if (!(src.texture->GetUsage() & wgpu::TextureUsage::TextureBinding)) {
             return DAWN_VALIDATION_ERROR("Source texture must have sampled usage");
         }
 

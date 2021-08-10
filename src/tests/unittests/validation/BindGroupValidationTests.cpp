@@ -53,7 +53,8 @@ class BindGroupValidationTest : public ValidationTest {
         }
         { mSampler = device.CreateSampler(); }
         {
-            mSampledTexture = CreateTexture(wgpu::TextureUsage::Sampled, kDefaultTextureFormat, 1);
+            mSampledTexture =
+                CreateTexture(wgpu::TextureUsage::TextureBinding, kDefaultTextureFormat, 1);
             mSampledTextureView = mSampledTexture.CreateView();
 
             wgpu::ExternalTextureDescriptor externalTextureDesc;
@@ -306,7 +307,8 @@ TEST_F(BindGroupValidationTest, BufferBindingType) {
 // Check that an external texture binding must contain exactly an external texture
 TEST_F(BindGroupValidationTest, ExternalTextureBindingType) {
     // Create an external texture
-    wgpu::Texture texture = CreateTexture(wgpu::TextureUsage::Sampled, kDefaultTextureFormat, 1);
+    wgpu::Texture texture =
+        CreateTexture(wgpu::TextureUsage::TextureBinding, kDefaultTextureFormat, 1);
     wgpu::ExternalTextureDescriptor externalDesc;
     externalDesc.plane0 = texture.CreateView();
     externalDesc.format = kDefaultTextureFormat;
@@ -414,7 +416,7 @@ TEST_F(BindGroupValidationTest, StorageTextureUsage) {
     descriptor.size = {16, 16, 1};
     descriptor.sampleCount = 1;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = wgpu::TextureUsage::Storage;
+    descriptor.usage = wgpu::TextureUsage::StorageBinding;
     descriptor.format = wgpu::TextureFormat::RGBA8Uint;
 
     wgpu::TextureView view = device.CreateTexture(&descriptor).CreateView();
@@ -423,7 +425,7 @@ TEST_F(BindGroupValidationTest, StorageTextureUsage) {
     utils::MakeBindGroup(device, layout, {{0, view}});
 
     // Sampled texture is invalid with storage buffer binding
-    descriptor.usage = wgpu::TextureUsage::Sampled;
+    descriptor.usage = wgpu::TextureUsage::TextureBinding;
     descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
     view = device.CreateTexture(&descriptor).CreateView();
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, view}}));
@@ -444,7 +446,7 @@ TEST_F(BindGroupValidationTest, TextureSampleType) {
 
         wgpu::TextureDescriptor descriptor;
         descriptor.size = {4, 4, 1};
-        descriptor.usage = wgpu::TextureUsage::Sampled;
+        descriptor.usage = wgpu::TextureUsage::TextureBinding;
         descriptor.format = format;
 
         wgpu::TextureView view = device.CreateTexture(&descriptor).CreateView();
@@ -502,7 +504,7 @@ TEST_F(BindGroupValidationTest, SamplingDepthStencilTexture) {
 
     wgpu::TextureDescriptor desc;
     desc.size = {1, 1, 1};
-    desc.usage = wgpu::TextureUsage::Sampled;
+    desc.usage = wgpu::TextureUsage::TextureBinding;
 
     // Depth32Float is allowed to be sampled.
     {
@@ -547,7 +549,7 @@ TEST_F(BindGroupValidationTest, TextureDimension) {
 
     // Make a 2DArray texture and try to set it to a 2D binding.
     wgpu::Texture arrayTexture =
-        CreateTexture(wgpu::TextureUsage::Sampled, wgpu::TextureFormat::RGBA8Uint, 2);
+        CreateTexture(wgpu::TextureUsage::TextureBinding, wgpu::TextureFormat::RGBA8Uint, 2);
     wgpu::TextureView arrayTextureView = arrayTexture.CreateView();
 
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, arrayTextureView}}));
@@ -649,7 +651,7 @@ TEST_F(BindGroupValidationTest, MultisampledTexture) {
     // Control case: setting a multisampled 2D texture works
     wgpu::TextureDescriptor textureDesc;
     textureDesc.sampleCount = 4;
-    textureDesc.usage = wgpu::TextureUsage::Sampled;
+    textureDesc.usage = wgpu::TextureUsage::TextureBinding;
     textureDesc.dimension = wgpu::TextureDimension::e2D;
     textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
     textureDesc.size = {1, 1, 1};

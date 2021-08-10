@@ -198,7 +198,7 @@ class TextureFormatTest : public DawnTest {
 
         // Create the texture we will sample from
         wgpu::TextureDescriptor sampleTextureDesc;
-        sampleTextureDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled;
+        sampleTextureDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::TextureBinding;
         sampleTextureDesc.size = {width, 1, 1};
         sampleTextureDesc.format = sampleFormatInfo.format;
         wgpu::Texture sampleTexture = device.CreateTexture(&sampleTextureDesc);

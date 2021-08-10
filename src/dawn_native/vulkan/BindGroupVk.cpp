@@ -105,7 +105,7 @@ namespace dawn_native { namespace vulkan {
                     // The layout may be GENERAL here because of interactions between the Sampled
                     // and ReadOnlyStorage usages. See the logic in VulkanImageLayout.
                     writeImageInfo[numWrites].imageLayout = VulkanImageLayout(
-                        ToBackend(view->GetTexture()), wgpu::TextureUsage::Sampled);
+                        ToBackend(view->GetTexture()), wgpu::TextureUsage::TextureBinding);
 
                     write.pImageInfo = &writeImageInfo[numWrites];
                     break;
@@ -143,7 +143,7 @@ namespace dawn_native { namespace vulkan {
 
                     writeImageInfo[numWrites].imageView = view->GetHandle();
                     writeImageInfo[numWrites].imageLayout = VulkanImageLayout(
-                        ToBackend(view->GetTexture()), wgpu::TextureUsage::Sampled);
+                        ToBackend(view->GetTexture()), wgpu::TextureUsage::TextureBinding);
 
                     write.pImageInfo = &writeImageInfo[numWrites];
                     break;

@@ -398,8 +398,8 @@ DAWN_INSTANTIATE_TEST_P(
     {wgpu::TextureFormat::Depth24PlusStencil8},
     {wgpu::TextureAspect::DepthOnly, wgpu::TextureAspect::StencilOnly},
     {wgpu::TextureUsage(wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc |
-                        wgpu::TextureUsage::Sampled),
-     wgpu::TextureUsage(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::CopySrc)},
+                        wgpu::TextureUsage::TextureBinding),
+     wgpu::TextureUsage(wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc)},
     {wgpu::TextureDimension::e2D},
     {1u, 7u},          // depth or array layers
     {4u},              // mip count
@@ -421,8 +421,8 @@ DAWN_INSTANTIATE_TEST_P(
                    {"lazy_clear_resource_on_first_use"})},
     {wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::RG8Unorm, wgpu::TextureFormat::RGBA8Unorm},
     {wgpu::TextureAspect::All},
-    {wgpu::TextureUsage(wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::Sampled),
-     wgpu::TextureUsage::Sampled},
+    {wgpu::TextureUsage(wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding),
+     wgpu::TextureUsage::TextureBinding},
     {wgpu::TextureDimension::e2D},
     {1u},  // depth or array layers
     {1u},  // mip count

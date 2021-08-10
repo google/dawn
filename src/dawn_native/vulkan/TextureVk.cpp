@@ -67,10 +67,10 @@ namespace dawn_native { namespace vulkan {
             if (usage & wgpu::TextureUsage::CopyDst) {
                 flags |= VK_ACCESS_TRANSFER_WRITE_BIT;
             }
-            if (usage & wgpu::TextureUsage::Sampled) {
+            if (usage & wgpu::TextureUsage::TextureBinding) {
                 flags |= VK_ACCESS_SHADER_READ_BIT;
             }
-            if (usage & wgpu::TextureUsage::Storage) {
+            if (usage & wgpu::TextureUsage::StorageBinding) {
                 flags |= VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
             }
             if (usage & kReadOnlyStorageTexture) {
@@ -119,7 +119,7 @@ namespace dawn_native { namespace vulkan {
             if (usage & (wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst)) {
                 flags |= VK_PIPELINE_STAGE_TRANSFER_BIT;
             }
-            if (usage & (wgpu::TextureUsage::Sampled | kReadOnlyStorageTexture)) {
+            if (usage & (wgpu::TextureUsage::TextureBinding | kReadOnlyStorageTexture)) {
                 // TODO(crbug.com/dawn/851): Only transition to the usage we care about to avoid
                 // introducing FS -> VS dependencies that would prevent parallelization on tiler
                 // GPUs
@@ -127,7 +127,7 @@ namespace dawn_native { namespace vulkan {
                          VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT |
                          VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
             }
-            if (usage & wgpu::TextureUsage::Storage) {
+            if (usage & wgpu::TextureUsage::StorageBinding) {
                 flags |=
                     VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
             }
@@ -355,10 +355,10 @@ namespace dawn_native { namespace vulkan {
         if (usage & wgpu::TextureUsage::CopyDst) {
             flags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
         }
-        if (usage & wgpu::TextureUsage::Sampled) {
+        if (usage & wgpu::TextureUsage::TextureBinding) {
             flags |= VK_IMAGE_USAGE_SAMPLED_BIT;
         }
-        if (usage & (wgpu::TextureUsage::Storage | kReadOnlyStorageTexture)) {
+        if (usage & (wgpu::TextureUsage::StorageBinding | kReadOnlyStorageTexture)) {
             flags |= VK_IMAGE_USAGE_STORAGE_BIT;
         }
         if (usage & wgpu::TextureUsage::RenderAttachment) {
@@ -383,7 +383,7 @@ namespace dawn_native { namespace vulkan {
         if (!wgpu::HasZeroOrOneBits(usage)) {
             // Sampled | ReadOnlyStorage is the only possible multi-bit usage, if more appear  we
             // might need additional special-casing.
-            ASSERT(usage == (wgpu::TextureUsage::Sampled | kReadOnlyStorageTexture));
+            ASSERT(usage == (wgpu::TextureUsage::TextureBinding | kReadOnlyStorageTexture));
             return VK_IMAGE_LAYOUT_GENERAL;
         }
 
@@ -397,8 +397,8 @@ namespace dawn_native { namespace vulkan {
                 // the storage usage. We can't know at bindgroup creation time if that case will
                 // happen so we must prepare for the pessimistic case and always use the GENERAL
                 // layout.
-            case wgpu::TextureUsage::Sampled:
-                if (texture->GetInternalUsage() & wgpu::TextureUsage::Storage) {
+            case wgpu::TextureUsage::TextureBinding:
+                if (texture->GetInternalUsage() & wgpu::TextureUsage::StorageBinding) {
                     return VK_IMAGE_LAYOUT_GENERAL;
                 } else {
                     return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -415,7 +415,7 @@ namespace dawn_native { namespace vulkan {
                 // Read-only and write-only storage textures must use general layout because load
                 // and store operations on storage images can only be done on the images in
                 // VK_IMAGE_LAYOUT_GENERAL layout.
-            case wgpu::TextureUsage::Storage:
+            case wgpu::TextureUsage::StorageBinding:
             case kReadOnlyStorageTexture:
                 return VK_IMAGE_LAYOUT_GENERAL;
 

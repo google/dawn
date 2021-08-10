@@ -57,8 +57,8 @@ class SubresourceTrackingPerf : public DawnPerfTestWithParams<SubresourceTrackin
         materialDesc.size = {1u << (params.mipLevelCount - 1), 1u << (params.mipLevelCount - 1),
                              params.arrayLayerCount};
         materialDesc.mipLevelCount = params.mipLevelCount;
-        materialDesc.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment |
-                             wgpu::TextureUsage::CopyDst;
+        materialDesc.usage = wgpu::TextureUsage::TextureBinding |
+                             wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopyDst;
         materialDesc.format = wgpu::TextureFormat::RGBA8Unorm;
         mMaterials = device.CreateTexture(&materialDesc);
 

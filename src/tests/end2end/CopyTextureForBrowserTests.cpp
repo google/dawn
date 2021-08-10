@@ -301,8 +301,8 @@ class CopyTextureForBrowserTests : public DawnTest {
         srcDescriptor.size = srcSpec.textureSize;
         srcDescriptor.format = srcSpec.format;
         srcDescriptor.mipLevelCount = srcSpec.level + 1;
-        srcDescriptor.usage =
-            wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled;
+        srcDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
+                              wgpu::TextureUsage::TextureBinding;
         wgpu::Texture srcTexture = device.CreateTexture(&srcDescriptor);
 
         const utils::TextureDataCopyLayout srcCopyLayout =
@@ -346,7 +346,7 @@ class CopyTextureForBrowserTests : public DawnTest {
         dstDescriptor.size = dstSpec.textureSize;
         dstDescriptor.format = dstSpec.format;
         dstDescriptor.mipLevelCount = dstSpec.level + 1;
-        dstDescriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled |
+        dstDescriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::TextureBinding |
                               wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
         dstTexture = device.CreateTexture(&dstDescriptor);
 

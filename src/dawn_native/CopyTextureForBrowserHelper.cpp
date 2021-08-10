@@ -289,7 +289,7 @@ namespace dawn_native {
         DAWN_TRY(ValidateTextureCopyRange(device, *destination, *copySize));
 
         DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc));
-        DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::Sampled));
+        DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::TextureBinding));
 
         DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst));
         DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::RenderAttachment));

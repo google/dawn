@@ -287,7 +287,8 @@ namespace {
 TEST_P(D3D12VideoViewsTests, NV12SampleYtoR) {
     wgpu::Texture wgpuTexture;
     CreateVideoTextureForTest(wgpu::TextureFormat::R8BG8Biplanar420Unorm,
-                              wgpu::TextureUsage::Sampled, /*isCheckerboard*/ false, &wgpuTexture);
+                              wgpu::TextureUsage::TextureBinding, /*isCheckerboard*/ false,
+                              &wgpuTexture);
     ASSERT_NE(wgpuTexture.Get(), nullptr);
 
     wgpu::TextureViewDescriptor viewDesc;
@@ -338,7 +339,8 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYtoR) {
 TEST_P(D3D12VideoViewsTests, NV12SampleUVtoRG) {
     wgpu::Texture wgpuTexture;
     CreateVideoTextureForTest(wgpu::TextureFormat::R8BG8Biplanar420Unorm,
-                              wgpu::TextureUsage::Sampled, /*isCheckerboard*/ false, &wgpuTexture);
+                              wgpu::TextureUsage::TextureBinding, /*isCheckerboard*/ false,
+                              &wgpuTexture);
     ASSERT_NE(wgpuTexture.Get(), nullptr);
 
     wgpu::TextureViewDescriptor viewDesc;
@@ -394,7 +396,8 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYUVtoRGB) {
 
     wgpu::Texture wgpuTexture;
     CreateVideoTextureForTest(wgpu::TextureFormat::R8BG8Biplanar420Unorm,
-                              wgpu::TextureUsage::Sampled, /*isCheckerboard*/ true, &wgpuTexture);
+                              wgpu::TextureUsage::TextureBinding, /*isCheckerboard*/ true,
+                              &wgpuTexture);
     ASSERT_NE(wgpuTexture.Get(), nullptr);
 
     wgpu::TextureViewDescriptor lumaViewDesc;

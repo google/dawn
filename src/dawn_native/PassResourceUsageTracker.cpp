@@ -108,7 +108,7 @@ namespace dawn_native {
 
                 case BindingInfoType::Texture: {
                     TextureViewBase* view = group->GetBindingAsTextureView(bindingIndex);
-                    TextureViewUsedAs(view, wgpu::TextureUsage::Sampled);
+                    TextureViewUsedAs(view, wgpu::TextureUsage::TextureBinding);
                     break;
                 }
 
@@ -119,7 +119,7 @@ namespace dawn_native {
                             TextureViewUsedAs(view, kReadOnlyStorageTexture);
                             break;
                         case wgpu::StorageTextureAccess::WriteOnly:
-                            TextureViewUsedAs(view, wgpu::TextureUsage::Storage);
+                            TextureViewUsedAs(view, wgpu::TextureUsage::StorageBinding);
                             break;
                         case wgpu::StorageTextureAccess::Undefined:
                             UNREACHABLE();
@@ -140,7 +140,7 @@ namespace dawn_native {
                     ASSERT(textureViews[2].Get() == nullptr);
 
                     mExternalTextureUsages.insert(externalTexture);
-                    TextureViewUsedAs(textureViews[0].Get(), wgpu::TextureUsage::Sampled);
+                    TextureViewUsedAs(textureViews[0].Get(), wgpu::TextureUsage::TextureBinding);
                     break;
                 }
 

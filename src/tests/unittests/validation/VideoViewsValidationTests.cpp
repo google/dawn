@@ -118,10 +118,10 @@ namespace {
     // Test copying from one multi-planar format into another fails.
     TEST_F(VideoViewsValidation, T2TCopyAllAspectsFails) {
         wgpu::Texture srcTexture = CreateVideoTextureForTest(
-            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::Sampled);
+            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::TextureBinding);
 
         wgpu::Texture dstTexture = CreateVideoTextureForTest(
-            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::Sampled);
+            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::TextureBinding);
 
         wgpu::ImageCopyTexture copySrc = utils::CreateImageCopyTexture(srcTexture, 0, {0, 0, 0});
 
@@ -137,10 +137,10 @@ namespace {
     // Test copying from one multi-planar format into another per plane fails.
     TEST_F(VideoViewsValidation, T2TCopyPlaneAspectFails) {
         wgpu::Texture srcTexture = CreateVideoTextureForTest(
-            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::Sampled);
+            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::TextureBinding);
 
         wgpu::Texture dstTexture = CreateVideoTextureForTest(
-            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::Sampled);
+            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::TextureBinding);
 
         wgpu::ImageCopyTexture copySrc = utils::CreateImageCopyTexture(
             srcTexture, 0, {0, 0, 0}, wgpu::TextureAspect::Plane0Only);
@@ -169,7 +169,7 @@ namespace {
     // Test copying from a multi-planar format to a buffer fails.
     TEST_F(VideoViewsValidation, T2BCopyAllAspectsFails) {
         wgpu::Texture srcTexture = CreateVideoTextureForTest(
-            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::Sampled);
+            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::TextureBinding);
 
         wgpu::BufferDescriptor bufferDescriptor;
         bufferDescriptor.size = 1;
@@ -190,7 +190,7 @@ namespace {
     // Test copying from multi-planar format per plane to a buffer fails.
     TEST_F(VideoViewsValidation, T2BCopyPlaneAspectsFails) {
         wgpu::Texture srcTexture = CreateVideoTextureForTest(
-            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::Sampled);
+            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::TextureBinding);
 
         wgpu::BufferDescriptor bufferDescriptor;
         bufferDescriptor.size = 1;
@@ -228,7 +228,7 @@ namespace {
             device, dummyData.data(), dummyData.size(), wgpu::BufferUsage::CopySrc);
 
         wgpu::Texture dstTexture = CreateVideoTextureForTest(
-            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::Sampled);
+            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::TextureBinding);
 
         wgpu::ImageCopyBuffer copySrc = utils::CreateImageCopyBuffer(srcBuffer, 0, 12, 4);
 
@@ -249,7 +249,7 @@ namespace {
             device, dummyData.data(), dummyData.size(), wgpu::BufferUsage::CopySrc);
 
         wgpu::Texture dstTexture = CreateVideoTextureForTest(
-            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::Sampled);
+            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::TextureBinding);
 
         wgpu::ImageCopyBuffer copySrc = utils::CreateImageCopyBuffer(srcBuffer, 0, 12, 4);
 
@@ -281,7 +281,7 @@ namespace {
 
         // R8BG8Biplanar420Unorm is allowed to be sampled, if plane 0 or plane 1 is selected.
         wgpu::Texture texture = CreateVideoTextureForTest(
-            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::Sampled);
+            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::TextureBinding);
 
         wgpu::TextureViewDescriptor desc = {};
 
@@ -302,7 +302,7 @@ namespace {
     // Tests writing into a multi-planar format fails.
     TEST_F(VideoViewsValidation, WriteTextureAllAspectsFails) {
         wgpu::Texture texture = CreateVideoTextureForTest(
-            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::Sampled);
+            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::TextureBinding);
 
         wgpu::TextureDataLayout textureDataLayout = utils::CreateTextureDataLayout(0, 4, 4);
 
@@ -321,7 +321,7 @@ namespace {
     // Tests writing into a multi-planar format per plane fails.
     TEST_F(VideoViewsValidation, WriteTexturePlaneAspectsFails) {
         wgpu::Texture texture = CreateVideoTextureForTest(
-            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::Sampled);
+            wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::TextureBinding);
 
         wgpu::TextureDataLayout textureDataLayout = utils::CreateTextureDataLayout(0, 12, 4);
         wgpu::ImageCopyTexture imageCopyTexture =

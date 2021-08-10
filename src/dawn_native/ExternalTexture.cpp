@@ -29,11 +29,11 @@ namespace dawn_native {
                 "at least one of the passed texture views.");
         }
 
-        if ((textureView->GetTexture()->GetUsage() & wgpu::TextureUsage::Sampled) !=
-            wgpu::TextureUsage::Sampled) {
+        if ((textureView->GetTexture()->GetUsage() & wgpu::TextureUsage::TextureBinding) !=
+            wgpu::TextureUsage::TextureBinding) {
             return DAWN_VALIDATION_ERROR(
                 "The external texture descriptor specifies a texture that was not created with "
-                "TextureUsage::Sampled.");
+                "TextureUsage::TextureBinding.");
         }
 
         if (textureView->GetDimension() != wgpu::TextureViewDimension::e2D) {

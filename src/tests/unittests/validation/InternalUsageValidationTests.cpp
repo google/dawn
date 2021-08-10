@@ -108,7 +108,7 @@ TEST_F(TextureInternalUsageValidationTest, UsageValidation) {
 
         // Internal usage adds storage usage which is invalid
         // with multisampling.
-        internalDesc.internalUsage = wgpu::TextureUsage::Storage;
+        internalDesc.internalUsage = wgpu::TextureUsage::StorageBinding;
         ASSERT_DEVICE_ERROR(device.CreateTexture(&textureDesc));
     }
 }

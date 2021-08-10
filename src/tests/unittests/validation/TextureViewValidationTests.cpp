@@ -39,7 +39,7 @@ namespace {
         descriptor.sampleCount = sampleCount;
         descriptor.format = kDefaultTextureFormat;
         descriptor.mipLevelCount = mipLevelCount;
-        descriptor.usage = wgpu::TextureUsage::Sampled;
+        descriptor.usage = wgpu::TextureUsage::TextureBinding;
         return device.CreateTexture(&descriptor);
     }
 
@@ -50,7 +50,7 @@ namespace {
         descriptor.sampleCount = 1;
         descriptor.format = kDefaultTextureFormat;
         descriptor.mipLevelCount = kDefaultMipLevels;
-        descriptor.usage = wgpu::TextureUsage::Sampled;
+        descriptor.usage = wgpu::TextureUsage::TextureBinding;
         return device.CreateTexture(&descriptor);
     }
 
@@ -523,7 +523,8 @@ namespace {
     TEST_F(TextureViewValidationTest, AspectMustExist) {
         wgpu::TextureDescriptor descriptor = {};
         descriptor.size = {1, 1, 1};
-        descriptor.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment;
+        descriptor.usage =
+            wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment;
 
         // Can select: All and DepthOnly from Depth32Float, but not StencilOnly
         {

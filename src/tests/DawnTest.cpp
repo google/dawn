@@ -1263,7 +1263,7 @@ std::ostringstream& DawnTestBase::ExpectAttachmentDepthStencilTestData(
         wgpu::TextureDescriptor depthDataDesc = {};
         depthDataDesc.size = {width, height, 1};
         depthDataDesc.format = wgpu::TextureFormat::R32Float;
-        depthDataDesc.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::CopyDst;
+        depthDataDesc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst;
         depthDataTexture = device.CreateTexture(&depthDataDesc);
 
         // Upload the depth data.

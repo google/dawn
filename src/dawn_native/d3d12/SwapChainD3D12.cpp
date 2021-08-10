@@ -58,10 +58,10 @@ namespace dawn_native { namespace d3d12 {
 
         DXGI_USAGE ToDXGIUsage(wgpu::TextureUsage usage) {
             DXGI_USAGE dxgiUsage = DXGI_CPU_ACCESS_NONE;
-            if (usage & wgpu::TextureUsage::Sampled) {
+            if (usage & wgpu::TextureUsage::TextureBinding) {
                 dxgiUsage |= DXGI_USAGE_SHADER_INPUT;
             }
-            if (usage & wgpu::TextureUsage::Storage) {
+            if (usage & wgpu::TextureUsage::StorageBinding) {
                 dxgiUsage |= DXGI_USAGE_UNORDERED_ACCESS;
             }
             if (usage & wgpu::TextureUsage::RenderAttachment) {

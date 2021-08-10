@@ -818,7 +818,7 @@ namespace {
     TEST_F(ResourceUsageTrackingTest, TextureWithMultipleReadUsages) {
         // Create a texture that will be used as both sampled and readonly storage texture
         wgpu::Texture texture =
-            CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::Storage);
+            CreateTexture(wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding);
         wgpu::TextureView view = texture.CreateView();
 
         // Create a bind group to use the texture as sampled and readonly storage bindings
@@ -865,8 +865,8 @@ namespace {
         // Test render pass
         {
             // Create a texture
-            wgpu::Texture texture =
-                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment);
+            wgpu::Texture texture = CreateTexture(wgpu::TextureUsage::TextureBinding |
+                                                  wgpu::TextureUsage::RenderAttachment);
             wgpu::TextureView view = texture.CreateView();
 
             // Create a bind group to use the texture as sampled binding
@@ -888,8 +888,8 @@ namespace {
         // Test compute pass
         {
             // Create a texture
-            wgpu::Texture texture =
-                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::Storage);
+            wgpu::Texture texture = CreateTexture(wgpu::TextureUsage::TextureBinding |
+                                                  wgpu::TextureUsage::StorageBinding);
             wgpu::TextureView view = texture.CreateView();
 
             // Create a bind group to use the texture as sampled and writeonly bindings
@@ -931,8 +931,8 @@ namespace {
         // Test render pass
         {
             // Create a texture
-            wgpu::Texture texture =
-                CreateTexture(wgpu::TextureUsage::Storage | wgpu::TextureUsage::RenderAttachment);
+            wgpu::Texture texture = CreateTexture(wgpu::TextureUsage::StorageBinding |
+                                                  wgpu::TextureUsage::RenderAttachment);
             wgpu::TextureView view = texture.CreateView();
 
             // Create a bind group to use the texture as writeonly storage binding
@@ -971,7 +971,7 @@ namespace {
         // Test compute pass
         {
             // Create a texture
-            wgpu::Texture texture = CreateTexture(wgpu::TextureUsage::Storage);
+            wgpu::Texture texture = CreateTexture(wgpu::TextureUsage::StorageBinding);
             wgpu::TextureView view = texture.CreateView();
 
             // Create a bind group to use the texture as sampled and writeonly bindings
@@ -1066,11 +1066,11 @@ namespace {
         // Test render pass
         {
             // Create textures that will be used as both a sampled texture and a render target
-            wgpu::Texture t0 =
-                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment);
+            wgpu::Texture t0 = CreateTexture(wgpu::TextureUsage::TextureBinding |
+                                             wgpu::TextureUsage::RenderAttachment);
             wgpu::TextureView v0 = t0.CreateView();
-            wgpu::Texture t1 =
-                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment);
+            wgpu::Texture t1 = CreateTexture(wgpu::TextureUsage::TextureBinding |
+                                             wgpu::TextureUsage::RenderAttachment);
             wgpu::TextureView v1 = t1.CreateView();
 
             // Create bind groups to use the texture as sampled
@@ -1100,7 +1100,7 @@ namespace {
         // Test compute pass
         {
             // Create a texture that will be used storage texture
-            wgpu::Texture texture = CreateTexture(wgpu::TextureUsage::Storage);
+            wgpu::Texture texture = CreateTexture(wgpu::TextureUsage::StorageBinding);
             wgpu::TextureView view = texture.CreateView();
 
             // Create bind groups to use the texture as readonly and writeonly bindings
@@ -1134,7 +1134,7 @@ namespace {
         // Test compute pass and render pass mixed together with resource dependency
         {
             // Create a texture that will be used a storage texture
-            wgpu::Texture texture = CreateTexture(wgpu::TextureUsage::Storage);
+            wgpu::Texture texture = CreateTexture(wgpu::TextureUsage::StorageBinding);
             wgpu::TextureView view = texture.CreateView();
 
             // Create bind groups to use the texture as readonly and writeonly bindings
@@ -1174,7 +1174,7 @@ namespace {
     TEST_F(ResourceUsageTrackingTest, TextureWithReadAndWriteUsageOnDifferentDrawsOrDispatches) {
         // Create a texture that will be used both as a sampled texture and a storage texture
         wgpu::Texture texture =
-            CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::Storage);
+            CreateTexture(wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding);
         wgpu::TextureView view = texture.CreateView();
 
         // Test render pass
@@ -1251,7 +1251,7 @@ namespace {
     TEST_F(ResourceUsageTrackingTest, TextureWithReadAndWriteUsageInSingleDrawOrDispatch) {
         // Create a texture that will be used both as a sampled texture and a storage texture
         wgpu::Texture texture =
-            CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::Storage);
+            CreateTexture(wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding);
         wgpu::TextureView view = texture.CreateView();
 
         // Test render pass
@@ -1323,7 +1323,7 @@ namespace {
         // Create textures that will be used as both a sampled texture and a render target
         wgpu::Texture texture0 = CreateTexture(wgpu::TextureUsage::CopySrc);
         wgpu::Texture texture1 =
-            CreateTexture(wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled |
+            CreateTexture(wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::TextureBinding |
                           wgpu::TextureUsage::RenderAttachment);
         wgpu::TextureView view0 = texture0.CreateView();
         wgpu::TextureView view1 = texture1.CreateView();
@@ -1368,11 +1368,11 @@ namespace {
         // Test render pass
         {
             // Create textures that will be used as both a sampled texture and a render target
-            wgpu::Texture texture0 =
-                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment);
+            wgpu::Texture texture0 = CreateTexture(wgpu::TextureUsage::TextureBinding |
+                                                   wgpu::TextureUsage::RenderAttachment);
             wgpu::TextureView view0 = texture0.CreateView();
-            wgpu::Texture texture1 =
-                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment);
+            wgpu::Texture texture1 = CreateTexture(wgpu::TextureUsage::TextureBinding |
+                                                   wgpu::TextureUsage::RenderAttachment);
             wgpu::TextureView view1 = texture1.CreateView();
 
             // Create the bind group to use the texture as sampled
@@ -1411,9 +1411,9 @@ namespace {
         // Test compute pass
         {
             // Create a texture that will be used both as storage texture
-            wgpu::Texture texture0 = CreateTexture(wgpu::TextureUsage::Storage);
+            wgpu::Texture texture0 = CreateTexture(wgpu::TextureUsage::StorageBinding);
             wgpu::TextureView view0 = texture0.CreateView();
-            wgpu::Texture texture1 = CreateTexture(wgpu::TextureUsage::Storage);
+            wgpu::Texture texture1 = CreateTexture(wgpu::TextureUsage::StorageBinding);
             wgpu::TextureView view1 = texture1.CreateView();
 
             // Create the bind group to use the texture as readonly and writeonly bindings
@@ -1472,7 +1472,7 @@ namespace {
     // visible to the programmable pass where it is used.
     TEST_F(ResourceUsageTrackingTest, TextureUsageConflictBetweenInvisibleStagesInBindGroup) {
         // Create texture and texture view
-        wgpu::Texture texture = CreateTexture(wgpu::TextureUsage::Storage);
+        wgpu::Texture texture = CreateTexture(wgpu::TextureUsage::StorageBinding);
         wgpu::TextureView view = texture.CreateView();
 
         // Test render pass for bind group. The conflict of readonly storage and writeonly storage
@@ -1532,8 +1532,8 @@ namespace {
     // visible to the programmable pass where it is used.
     TEST_F(ResourceUsageTrackingTest, TextureUsageConflictWithInvisibleStageInBindGroup) {
         // Create texture and texture view
-        wgpu::Texture texture =
-            CreateTexture(wgpu::TextureUsage::Storage | wgpu::TextureUsage::RenderAttachment);
+        wgpu::Texture texture = CreateTexture(wgpu::TextureUsage::StorageBinding |
+                                              wgpu::TextureUsage::RenderAttachment);
         wgpu::TextureView view = texture.CreateView();
 
         // Test render pass
@@ -1595,7 +1595,7 @@ namespace {
     // used in the pipeline.
     TEST_F(ResourceUsageTrackingTest, TextureUsageConflictWithUnusedPipelineBindings) {
         // Create texture and texture view
-        wgpu::Texture texture = CreateTexture(wgpu::TextureUsage::Storage);
+        wgpu::Texture texture = CreateTexture(wgpu::TextureUsage::StorageBinding);
         wgpu::TextureView view = texture.CreateView();
 
         // Create bind groups.

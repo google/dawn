@@ -225,7 +225,7 @@ namespace {
         const uint64_t dataSize =
             utils::RequiredBytesInCopy(256, 0, {4, 4, 1}, wgpu::TextureFormat::RGBA8Unorm);
         wgpu::Texture sampled = Create2DTexture({16, 16, 1}, 5, wgpu::TextureFormat::RGBA8Unorm,
-                                                wgpu::TextureUsage::Sampled);
+                                                wgpu::TextureUsage::TextureBinding);
 
         // Incorrect destination usage
         ASSERT_DEVICE_ERROR(

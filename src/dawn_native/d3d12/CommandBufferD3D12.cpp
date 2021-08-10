@@ -306,7 +306,7 @@ namespace dawn_native { namespace d3d12 {
             }
 
             return (bufferUsages & wgpu::BufferUsage::Storage ||
-                    textureUsages & wgpu::TextureUsage::Storage);
+                    textureUsages & wgpu::TextureUsage::StorageBinding);
         }
 
     }  // anonymous namespace

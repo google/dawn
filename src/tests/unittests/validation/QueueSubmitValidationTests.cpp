@@ -309,7 +309,7 @@ namespace {
 
         wgpu::TextureDescriptor texDesc;
         texDesc.size = {1, 1, 1};
-        texDesc.usage = wgpu::TextureUsage::Sampled;
+        texDesc.usage = wgpu::TextureUsage::TextureBinding;
         texDesc.format = wgpu::TextureFormat::RGBA8Unorm;
 
         // Test that completely unused bindgroups still have their buffers checked.

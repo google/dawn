@@ -40,7 +40,7 @@ namespace dawn_native {
     bool IsValidSampleCount(uint32_t sampleCount);
 
     static constexpr wgpu::TextureUsage kReadOnlyTextureUsages =
-        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::Sampled | kReadOnlyStorageTexture;
+        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::TextureBinding | kReadOnlyStorageTexture;
 
     class TextureBase : public ObjectBase {
       public:

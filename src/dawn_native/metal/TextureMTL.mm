@@ -30,7 +30,7 @@ namespace dawn_native { namespace metal {
     namespace {
         bool UsageNeedsTextureView(wgpu::TextureUsage usage) {
             constexpr wgpu::TextureUsage kUsageNeedsTextureView =
-                wgpu::TextureUsage::Storage | wgpu::TextureUsage::Sampled;
+                wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::TextureBinding;
             return usage & kUsageNeedsTextureView;
         }
 
@@ -39,11 +39,11 @@ namespace dawn_native { namespace metal {
                                           uint32_t sampleCount) {
             MTLTextureUsage result = MTLTextureUsageUnknown;  // This is 0
 
-            if (usage & (wgpu::TextureUsage::Storage)) {
+            if (usage & (wgpu::TextureUsage::StorageBinding)) {
                 result |= MTLTextureUsageShaderWrite | MTLTextureUsageShaderRead;
             }
 
-            if (usage & (wgpu::TextureUsage::Sampled)) {
+            if (usage & (wgpu::TextureUsage::TextureBinding)) {
                 result |= MTLTextureUsageShaderRead;
 
                 // For sampling stencil aspect of combined depth/stencil. See TextureView

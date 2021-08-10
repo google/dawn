@@ -64,9 +64,9 @@ namespace {
             baseDawnDescriptor.size = {kTestWidth, kTestHeight, 1};
             baseDawnDescriptor.sampleCount = 1;
             baseDawnDescriptor.mipLevelCount = 1;
-            baseDawnDescriptor.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::CopySrc |
-                                       wgpu::TextureUsage::RenderAttachment |
-                                       wgpu::TextureUsage::CopyDst;
+            baseDawnDescriptor.usage =
+                wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc |
+                wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopyDst;
 
             baseD3dDescriptor.Width = kTestWidth;
             baseD3dDescriptor.Height = kTestHeight;
@@ -620,12 +620,12 @@ TEST_P(D3D12SharedHandleUsageTests, ExternalImageUsage) {
                      &externalImage);
     ASSERT_NE(texture.Get(), nullptr);
 
-    externalAccessDesc.usage = WGPUTextureUsage_Storage;
+    externalAccessDesc.usage = WGPUTextureUsage_StorageBinding;
     texture =
         wgpu::Texture::Acquire(externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
     ASSERT_EQ(texture.Get(), nullptr);
 
-    externalAccessDesc.usage = WGPUTextureUsage_Sampled;
+    externalAccessDesc.usage = WGPUTextureUsage_TextureBinding;
     texture =
         wgpu::Texture::Acquire(externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
     ASSERT_NE(texture.Get(), nullptr);

@@ -304,7 +304,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
             textureDescriptor.size = {1, 1, 1};
             textureDescriptor.sampleCount = 1;
             textureDescriptor.mipLevelCount = 1;
-            textureDescriptor.usage = wgpu::TextureUsage::Sampled;
+            textureDescriptor.usage = wgpu::TextureUsage::TextureBinding;
             wgpu::Texture wrappingTexture = WrapIOSurface(&textureDescriptor, ioSurface, 0);
 
             wgpu::TextureView textureView = wrappingTexture.CreateView();

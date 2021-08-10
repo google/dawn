@@ -225,7 +225,8 @@ class DepthStencilSamplingTest : public DawnTest {
 
     wgpu::Texture CreateInputTexture(wgpu::TextureFormat format) {
         wgpu::TextureDescriptor inputTextureDesc;
-        inputTextureDesc.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment;
+        inputTextureDesc.usage =
+            wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment;
         inputTextureDesc.size = {1, 1, 1};
         inputTextureDesc.format = format;
         return device.CreateTexture(&inputTextureDesc);

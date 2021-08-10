@@ -135,7 +135,7 @@ namespace dawn_native {
                 // Compressed formats are not renderable. They cannot support multisample.
                 ASSERT(!format->isCompressed);
 
-                if (usage & wgpu::TextureUsage::Storage) {
+                if (usage & wgpu::TextureUsage::StorageBinding) {
                     return DAWN_VALIDATION_ERROR(
                         "The sample counts of the storage textures must be 1.");
                 }
@@ -225,9 +225,9 @@ namespace dawn_native {
                                         const Format* format) {
             DAWN_TRY(dawn_native::ValidateTextureUsage(usage));
 
-            constexpr wgpu::TextureUsage kValidCompressedUsages = wgpu::TextureUsage::Sampled |
-                                                                  wgpu::TextureUsage::CopySrc |
-                                                                  wgpu::TextureUsage::CopyDst;
+            constexpr wgpu::TextureUsage kValidCompressedUsages =
+                wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc |
+                wgpu::TextureUsage::CopyDst;
             if (format->isCompressed && !IsSubset(usage, kValidCompressedUsages)) {
                 return DAWN_VALIDATION_ERROR(
                     "Compressed texture format is incompatible with the texture usage");
@@ -238,11 +238,12 @@ namespace dawn_native {
                     "Non-renderable format used with RenderAttachment usage");
             }
 
-            if (!format->supportsStorageUsage && (usage & wgpu::TextureUsage::Storage)) {
+            if (!format->supportsStorageUsage && (usage & wgpu::TextureUsage::StorageBinding)) {
                 return DAWN_VALIDATION_ERROR("Format cannot be used in storage textures");
             }
 
-            constexpr wgpu::TextureUsage kValidMultiPlanarUsages = wgpu::TextureUsage::Sampled;
+            constexpr wgpu::TextureUsage kValidMultiPlanarUsages =
+                wgpu::TextureUsage::TextureBinding;
             if (format->IsMultiPlanar() && !IsSubset(usage, kValidMultiPlanarUsages)) {
                 return DAWN_VALIDATION_ERROR("Multi-planar format doesn't have valid usage.");
             }
@@ -453,7 +454,7 @@ namespace dawn_native {
 
         // Add readonly storage usage if the texture has a storage usage. The validation rules in
         // ValidateSyncScopeResourceUsage will make sure we don't use both at the same time.
-        if (mInternalUsage & wgpu::TextureUsage::Storage) {
+        if (mInternalUsage & wgpu::TextureUsage::StorageBinding) {
             mInternalUsage |= kReadOnlyStorageTexture;
         }
     }

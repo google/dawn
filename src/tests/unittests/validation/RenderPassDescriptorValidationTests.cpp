@@ -144,7 +144,7 @@ namespace {
         // Error case: using a texture with Sampled is invalid.
         {
             wgpu::TextureDescriptor texDesc;
-            texDesc.usage = wgpu::TextureUsage::Sampled;
+            texDesc.usage = wgpu::TextureUsage::TextureBinding;
             texDesc.size = {1, 1, 1};
             texDesc.format = wgpu::TextureFormat::RGBA8Unorm;
             wgpu::Texture sampledTex = device.CreateTexture(&texDesc);
@@ -365,7 +365,7 @@ namespace {
         // Error case: using a texture with Sampled is invalid.
         {
             wgpu::TextureDescriptor texDesc;
-            texDesc.usage = wgpu::TextureUsage::Sampled;
+            texDesc.usage = wgpu::TextureUsage::TextureBinding;
             texDesc.size = {1, 1, 1};
             texDesc.format = wgpu::TextureFormat::Depth32Float;
             wgpu::Texture sampledTex = device.CreateTexture(&texDesc);

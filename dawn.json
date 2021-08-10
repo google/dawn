@@ -1995,10 +1995,13 @@
             {"value": 0, "name": "none"},
             {"value": 1, "name": "copy src"},
             {"value": 2, "name": "copy dst"},
-            {"value": 4, "name": "sampled"},
-            {"value": 8, "name": "storage"},
+            {"value": 4, "name": "texture binding"},
+            {"value": 8, "name": "storage binding"},
             {"value": 16, "name": "render attachment"},
-            {"value": 32, "name": "present"}
+            {"value": 32, "name": "present"},
+
+            {"value": 4, "name": "sampled", "deprecated": true},
+            {"value": 8, "name": "storage", "deprecated": true}
         ]
     },
     "texture view descriptor": {

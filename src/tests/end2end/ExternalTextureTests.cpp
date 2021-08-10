@@ -40,7 +40,7 @@ namespace {
         static constexpr uint32_t kWidth = 4;
         static constexpr uint32_t kHeight = 4;
         static constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
-        static constexpr wgpu::TextureUsage kSampledUsage = wgpu::TextureUsage::Sampled;
+        static constexpr wgpu::TextureUsage kSampledUsage = wgpu::TextureUsage::TextureBinding;
     };
 }  // anonymous namespace
 
@@ -87,7 +87,7 @@ TEST_P(ExternalTextureTests, SampleExternalTexture) {
 
     wgpu::Texture sampledTexture =
         Create2DTexture(device, kWidth, kHeight, kFormat,
-                        wgpu::TextureUsage::Sampled | wgpu::TextureUsage::RenderAttachment);
+                        wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
     wgpu::Texture renderTexture =
         Create2DTexture(device, kWidth, kHeight, kFormat,
                         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);

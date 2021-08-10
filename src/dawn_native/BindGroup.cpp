@@ -141,7 +141,7 @@ namespace dawn_native {
                     SampleTypeBit requiredType =
                         SampleTypeToSampleTypeBit(bindingInfo.texture.sampleType);
 
-                    if (!(texture->GetUsage() & wgpu::TextureUsage::Sampled)) {
+                    if (!(texture->GetUsage() & wgpu::TextureUsage::TextureBinding)) {
                         return DAWN_VALIDATION_ERROR("Texture binding usage mismatch");
                     }
 
@@ -167,7 +167,7 @@ namespace dawn_native {
                     break;
                 }
                 case BindingInfoType::StorageTexture: {
-                    if (!(texture->GetUsage() & wgpu::TextureUsage::Storage)) {
+                    if (!(texture->GetUsage() & wgpu::TextureUsage::StorageBinding)) {
                         return DAWN_VALIDATION_ERROR("Storage Texture binding usage mismatch");
                     }
                     ASSERT(!texture->IsMultisampledTexture());

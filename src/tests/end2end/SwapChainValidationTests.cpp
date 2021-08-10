@@ -152,7 +152,7 @@ TEST_P(SwapChainValidationTests, InvalidCreationSize) {
 // Checks that the creation usage must be RenderAttachment
 TEST_P(SwapChainValidationTests, InvalidCreationUsage) {
     wgpu::SwapChainDescriptor desc = goodDescriptor;
-    desc.usage = wgpu::TextureUsage::Sampled;
+    desc.usage = wgpu::TextureUsage::TextureBinding;
     ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &desc));
 }
 

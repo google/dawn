@@ -519,9 +519,9 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
             utils::CreateBufferFromData(device, uploadBufferData.data(), uploadBufferSize,
                                         wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
 
-        wgpu::Texture outputTexture =
-            CreateTexture(format, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopyDst, kWidth,
-                          kHeight, sliceCount, utils::ViewDimensionToTextureDimension(dimension));
+        wgpu::Texture outputTexture = CreateTexture(
+            format, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopyDst, kWidth,
+            kHeight, sliceCount, utils::ViewDimensionToTextureDimension(dimension));
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
@@ -894,7 +894,7 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
 
         // Prepare the write-only storage texture.
         wgpu::Texture writeonlyStorageTexture =
-            CreateTexture(format, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc);
+            CreateTexture(format, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc);
 
         // Write the expected pixel values into the write-only storage texture.
         const std::string computeShader = CommonWriteOnlyTestCode("compute", format);
@@ -932,7 +932,7 @@ TEST_P(StorageTextureTests, ReadWriteDifferentStorageTextureInOneDispatchInCompu
 
         // Prepare the write-only storage texture.
         wgpu::Texture writeonlyStorageTexture =
-            CreateTexture(format, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc);
+            CreateTexture(format, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc);
 
         // Write the expected pixel values into the write-only storage texture.
         const std::string computeShader = CommonReadWriteTestCode(format);
@@ -973,7 +973,7 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
 
         // Prepare the write-only storage texture.
         wgpu::Texture writeonlyStorageTexture =
-            CreateTexture(format, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc);
+            CreateTexture(format, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc);
 
         // Write the expected pixel values into the write-only storage texture.
         const std::string fragmentShader = CommonWriteOnlyTestCode("fragment", format);
@@ -1048,8 +1048,8 @@ TEST_P(StorageTextureTests, Writeonly2DArrayOr3DStorageTexture) {
     // Prepare the write-only storage texture.
     for (wgpu::TextureViewDimension dimension : dimensions) {
         wgpu::Texture writeonlyStorageTexture = CreateTexture(
-            kTextureFormat, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc, kWidth,
-            kHeight, kSliceCount, utils::ViewDimensionToTextureDimension(dimension));
+            kTextureFormat, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc,
+            kWidth, kHeight, kSliceCount, utils::ViewDimensionToTextureDimension(dimension));
 
         // Write the expected pixel values into the write-only storage texture.
         const std::string computeShader =
@@ -1084,8 +1084,8 @@ TEST_P(StorageTextureTests, ReadWrite2DArrayOr3DStorageTexture) {
             CreateTextureWithTestData(initialTextureData, kTextureFormat, dimension);
         // Prepare the write-only storage texture.
         wgpu::Texture writeonlyStorageTexture = CreateTexture(
-            kTextureFormat, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc, kWidth,
-            kHeight, kSliceCount, utils::ViewDimensionToTextureDimension(dimension));
+            kTextureFormat, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc,
+            kWidth, kHeight, kSliceCount, utils::ViewDimensionToTextureDimension(dimension));
 
         // Read values from read-only storage texture and write into the write-only storage texture.
         const std::string computeShader = CommonReadWriteTestCode(kTextureFormat, dimension);
@@ -1109,9 +1109,9 @@ TEST_P(StorageTextureTests, ReadonlyAndWriteonlyStorageTexturePingPong) {
 
     constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::R32Uint;
     wgpu::Texture storageTexture1 = CreateTexture(
-        kTextureFormat, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc, 1u, 1u);
+        kTextureFormat, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc, 1u, 1u);
     wgpu::Texture storageTexture2 = CreateTexture(
-        kTextureFormat, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc, 1u, 1u);
+        kTextureFormat, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc, 1u, 1u);
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
 [[group(0), binding(0)]] var Src : texture_storage_2d<r32uint, read>;
@@ -1183,12 +1183,14 @@ TEST_P(StorageTextureTests, ReadonlyAndWriteonlyStorageTexturePingPong) {
 // a write-only storage texture are synchronized in one pass.
 TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
     constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::R32Uint;
-    wgpu::Texture storageTexture1 = CreateTexture(
-        kTextureFormat,
-        wgpu::TextureUsage::Sampled | wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc, 1u,
-        1u);
+    wgpu::Texture storageTexture1 =
+        CreateTexture(kTextureFormat,
+                      wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding |
+                          wgpu::TextureUsage::CopySrc,
+                      1u, 1u);
     wgpu::Texture storageTexture2 = CreateTexture(
-        kTextureFormat, wgpu::TextureUsage::Sampled | wgpu::TextureUsage::Storage, 1u, 1u);
+        kTextureFormat, wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding, 1u,
+        1u);
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
 [[group(0), binding(0)]] var Src : texture_2d<u32>;
 [[group(0), binding(1)]] var Dst : texture_storage_2d<r32uint, write>;
@@ -1307,7 +1309,7 @@ fn doTest() -> bool {
 // texture in a render pass.
 TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInRenderPass) {
     wgpu::Texture readonlyStorageTexture =
-        CreateTexture(wgpu::TextureFormat::R32Uint, wgpu::TextureUsage::Storage);
+        CreateTexture(wgpu::TextureFormat::R32Uint, wgpu::TextureUsage::StorageBinding);
 
     // Create a rendering pipeline that reads the pixels from the read-only storage texture and uses
     // green as the output color, otherwise uses red instead.
@@ -1331,7 +1333,7 @@ TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInRenderPa
 // texture in a compute pass.
 TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInComputePass) {
     wgpu::Texture readonlyStorageTexture =
-        CreateTexture(wgpu::TextureFormat::R32Uint, wgpu::TextureUsage::Storage);
+        CreateTexture(wgpu::TextureFormat::R32Uint, wgpu::TextureUsage::StorageBinding);
 
     // Create a compute shader that reads the pixels from the read-only storage texture and writes 1
     // to DstBuffer if they all have the expected value.
@@ -1360,8 +1362,9 @@ TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInComputeP
 TEST_P(StorageTextureZeroInitTests, WriteonlyStorageTextureClearsToZeroInRenderPass) {
     // Prepare the write-only storage texture.
     constexpr uint32_t kTexelSizeR32Uint = 4u;
-    wgpu::Texture writeonlyStorageTexture = CreateTexture(
-        wgpu::TextureFormat::R32Uint, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc);
+    wgpu::Texture writeonlyStorageTexture =
+        CreateTexture(wgpu::TextureFormat::R32Uint,
+                      wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc);
 
     WriteIntoStorageTextureInRenderPass(writeonlyStorageTexture, kSimpleVertexShader,
                                         kCommonWriteOnlyZeroInitTestCodeFragment);
@@ -1373,8 +1376,9 @@ TEST_P(StorageTextureZeroInitTests, WriteonlyStorageTextureClearsToZeroInRenderP
 TEST_P(StorageTextureZeroInitTests, WriteonlyStorageTextureClearsToZeroInComputePass) {
     // Prepare the write-only storage texture.
     constexpr uint32_t kTexelSizeR32Uint = 4u;
-    wgpu::Texture writeonlyStorageTexture = CreateTexture(
-        wgpu::TextureFormat::R32Uint, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc);
+    wgpu::Texture writeonlyStorageTexture =
+        CreateTexture(wgpu::TextureFormat::R32Uint,
+                      wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc);
 
     WriteIntoStorageTextureInComputePass(writeonlyStorageTexture,
                                          kCommonWriteOnlyZeroInitTestCodeCompute);

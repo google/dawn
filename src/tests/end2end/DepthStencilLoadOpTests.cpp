@@ -70,7 +70,7 @@ namespace {
             descriptor.format = GetParam().mFormat;
             descriptor.mipLevelCount = kMipLevelCount;
             descriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc |
-                               wgpu::TextureUsage::Sampled;
+                               wgpu::TextureUsage::TextureBinding;
 
             texture = device.CreateTexture(&descriptor);
 

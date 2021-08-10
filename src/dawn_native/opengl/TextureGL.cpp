@@ -81,7 +81,7 @@ namespace dawn_native { namespace opengl {
 
         bool UsageNeedsTextureView(wgpu::TextureUsage usage) {
             constexpr wgpu::TextureUsage kUsageNeedingTextureView =
-                wgpu::TextureUsage::Storage | wgpu::TextureUsage::Sampled;
+                wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::TextureBinding;
             return usage & kUsageNeedingTextureView;
         }
 
@@ -100,7 +100,7 @@ namespace dawn_native { namespace opengl {
             }
 
             if (ToBackend(texture)->GetGLFormat().format == GL_DEPTH_STENCIL &&
-                (texture->GetUsage() & wgpu::TextureUsage::Sampled) != 0 &&
+                (texture->GetUsage() & wgpu::TextureUsage::TextureBinding) != 0 &&
                 textureViewDescriptor->aspect == wgpu::TextureAspect::StencilOnly) {
                 // We need a separate view for one of the depth or stencil planes
                 // because each glTextureView needs it's own handle to set

@@ -182,7 +182,8 @@ namespace dawn_native { namespace opengl {
             return DAWN_VALIDATION_ERROR("EGLImage texture must be 2D");
         }
 
-        if (descriptor->usage & (wgpu::TextureUsage::Sampled | wgpu::TextureUsage::Storage)) {
+        if (descriptor->usage &
+            (wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding)) {
             return DAWN_VALIDATION_ERROR("EGLImage texture cannot have sampled or storage usage");
         }
 
