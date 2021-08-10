@@ -7,7 +7,7 @@ static float2 uv = float2(0.0f, 0.0f);
 static float3 normal = float3(0.0f, 0.0f, 0.0f);
 static float4 gl_Position = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-float4x4 tint_symbol_5(uint4 buffer[17], uint offset) {
+float4x4 tint_symbol_4(uint4 buffer[17], uint offset) {
   const uint scalar_offset = ((offset + 0u)) / 4;
   const uint scalar_offset_1 = ((offset + 16u)) / 4;
   const uint scalar_offset_2 = ((offset + 32u)) / 4;
@@ -31,7 +31,7 @@ void main_1() {
   const float x_55 = p.y;
   const float x_57 = asfloat(x_14[4].x);
   p.y = (x_55 + sin((x_57 + 4.0f)));
-  const float4x4 x_69 = tint_symbol_5(x_14, 0u);
+  const float4x4 x_69 = tint_symbol_4(x_14, 0u);
   const float3 x_70 = p;
   gl_Position = mul(float4(x_70.x, x_70.y, x_70.z, 1.0f), x_69);
   vUV = uv;
@@ -54,15 +54,19 @@ struct tint_symbol_2 {
   float4 gl_Position : SV_Position;
 };
 
-tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  const float3 position_param = tint_symbol.position_param;
-  const float2 uv_param = tint_symbol.uv_param;
-  const float3 normal_param = tint_symbol.normal_param;
+main_out main_inner(float3 position_param, float2 uv_param, float3 normal_param) {
   position = position_param;
   uv = uv_param;
   normal = normal_param;
   main_1();
-  const main_out tint_symbol_3 = {gl_Position, vUV};
-  const tint_symbol_2 tint_symbol_7 = {tint_symbol_3.vUV_1, tint_symbol_3.gl_Position};
-  return tint_symbol_7;
+  const main_out tint_symbol_6 = {gl_Position, vUV};
+  return tint_symbol_6;
+}
+
+tint_symbol_2 main(tint_symbol_1 tint_symbol) {
+  const main_out inner_result = main_inner(tint_symbol.position_param, tint_symbol.uv_param, tint_symbol.normal_param);
+  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
+  wrapper_result.gl_Position = inner_result.gl_Position;
+  wrapper_result.vUV_1 = inner_result.vUV_1;
+  return wrapper_result;
 }
