@@ -20,8 +20,6 @@
 #include "dawn_native/Instance.h"
 #include "dawn_native/Surface.h"
 
-#include <spirv_cross.hpp>
-
 namespace dawn_native { namespace null {
 
     // Implementation of pre-Device objects: the null adapter, null backend connection and Connect()

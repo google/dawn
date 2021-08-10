@@ -104,5 +104,9 @@ declare_args() {
 dawn_supports_glfw_for_windowing =
     (is_win && !dawn_is_winuwp) || (is_linux && !is_chromeos) || is_mac
 
-# Much of the backend code is shared, so define a convenience var.
+# Much of the GL backend code is shared, so define a convenience var.
 dawn_enable_opengl = dawn_enable_opengles || dawn_enable_desktop_gl
+
+# The GL backends are the last to use SPIRV-Cross, so only compile it in
+# if they are enabled.
+dawn_use_spirv_cross = dawn_enable_opengl

@@ -145,11 +145,13 @@ source_set("dawn_native_sources") {
     ":dawn_native_headers",
     ":dawn_native_utils_gen",
     "${dawn_root}/src/common",
-    "${dawn_root}/third_party/gn/spirv_cross:spirv_cross",
     "${dawn_spirv_tools_dir}:spvtools_opt",
     "${dawn_spirv_tools_dir}:spvtools_val",
     "${dawn_tint_dir}/src:libtint",
   ]
+  if (dawn_use_spirv_cross) {
+    deps += [ "${dawn_root}/third_party/gn/spirv_cross:spirv_cross" ]
+  }
   defines = []
   libs = []
   data_deps = []
@@ -282,8 +284,6 @@ source_set("dawn_native_sources") {
     "Sampler.h",
     "ShaderModule.cpp",
     "ShaderModule.h",
-    "SpirvUtils.cpp",
-    "SpirvUtils.h",
     "StagingBuffer.cpp",
     "StagingBuffer.h",
     "Subresource.cpp",
@@ -310,6 +310,13 @@ source_set("dawn_native_sources") {
     sources += [
       "XlibXcbFunctions.cpp",
       "XlibXcbFunctions.h",
+    ]
+  }
+
+  if (dawn_use_spirv_cross) {
+    sources += [
+      "SpirvUtils.cpp",
+      "SpirvUtils.h",
     ]
   }
 

@@ -85,6 +85,10 @@ config("dawn_internal") {
     defines += [ "DAWN_USE_X11" ]
   }
 
+  if (dawn_use_spirv_cross) {
+    defines += [ "DAWN_USE_SPIRV_CROSS" ]
+  }
+
   if (dawn_enable_error_injection) {
     defines += [ "DAWN_ENABLE_ERROR_INJECTION" ]
   }

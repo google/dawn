@@ -18,6 +18,10 @@
 #ifndef DAWNNATIVE_SPIRV_UTILS_H_
 #define DAWNNATIVE_SPIRV_UTILS_H_
 
+#if !defined(DAWN_USE_SPIRV_CROSS)
+#    error "SpirvCross.h should not be included if dawn_use_spirv_cross is false"
+#endif
+
 #include "dawn_native/Format.h"
 #include "dawn_native/PerStage.h"
 #include "dawn_native/VertexFormat.h"

@@ -24,12 +24,16 @@
 #include "dawn_native/Pipeline.h"
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/RenderPipeline.h"
-#include "dawn_native/SpirvUtils.h"
+#if defined(DAWN_USE_SPIRV_CROSS)
+#    include "dawn_native/SpirvUtils.h"
+#endif
 #include "dawn_native/TintUtils.h"
 
 #include <spirv-tools/libspirv.hpp>
 #include <spirv-tools/optimizer.hpp>
-#include <spirv_cross.hpp>
+#if defined(DAWN_USE_SPIRV_CROSS)
+#    include <spirv_cross.hpp>
+#endif
 
 // Tint include must be after spirv_cross.hpp, because spirv-cross has its own
 // version of spirv_headers. We also need to undef SPV_REVISION because SPIRV-Cross
@@ -529,44 +533,6 @@ namespace dawn_native {
             return requiredBufferSizes;
         }
 
-        ResultOrError<std::vector<uint32_t>> RunRobustBufferAccessPass(
-            const std::vector<uint32_t>& spirv) {
-            spvtools::Optimizer opt(SPV_ENV_VULKAN_1_1);
-
-            std::ostringstream errorStream;
-            errorStream << "SPIRV Optimizer failure:" << std::endl;
-            opt.SetMessageConsumer([&errorStream](spv_message_level_t level, const char*,
-                                                  const spv_position_t& position,
-                                                  const char* message) {
-                switch (level) {
-                    case SPV_MSG_FATAL:
-                    case SPV_MSG_INTERNAL_ERROR:
-                    case SPV_MSG_ERROR:
-                        errorStream << "error: line " << position.index << ": " << message
-                                    << std::endl;
-                        break;
-                    case SPV_MSG_WARNING:
-                        errorStream << "warning: line " << position.index << ": " << message
-                                    << std::endl;
-                        break;
-                    case SPV_MSG_INFO:
-                        errorStream << "info: line " << position.index << ": " << message
-                                    << std::endl;
-                        break;
-                    default:
-                        break;
-                }
-            });
-            opt.RegisterPass(spvtools::CreateGraphicsRobustAccessPass());
-
-            std::vector<uint32_t> result;
-            if (!opt.Run(spirv.data(), spirv.size(), &result, spvtools::ValidatorOptions(),
-                         false)) {
-                return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-            }
-            return std::move(result);
-        }
-
         MaybeError ValidateCompatibilityWithBindGroupLayout(DeviceBase* device,
                                                             BindGroupIndex group,
                                                             const EntryPointMetadata& entryPoint,
@@ -713,6 +679,7 @@ namespace dawn_native {
             return {};
         }
 
+#if defined(DAWN_USE_SPIRV_CROSS)
         ResultOrError<std::unique_ptr<EntryPointMetadata>> ExtractSpirvInfo(
             const DeviceBase* device,
             const spirv_cross::Compiler& compiler,
@@ -956,6 +923,7 @@ namespace dawn_native {
 
             return {std::move(metadata)};
         }
+#endif
 
         ResultOrError<EntryPointMetadataTable> ReflectShaderUsingTint(
             DeviceBase*,
@@ -1656,21 +1624,11 @@ namespace dawn_native {
         mTintSource = std::move(parseResult->tintSource);
         mSpirv = std::move(parseResult->spirv);
 
-        if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
-            DAWN_TRY_ASSIGN(mEntryPoints, ReflectShaderUsingTint(GetDevice(), mTintProgram.get()));
-        } else {
-            // If not using Tint to generate backend code, run the robust buffer access pass now
-            // since all backends will use this SPIR-V. If Tint is used, the robustness pass should
-            // be run per-backend.
-            if (GetDevice()->IsRobustnessEnabled()) {
-                DAWN_TRY_ASSIGN(mSpirv, RunRobustBufferAccessPass(mSpirv));
-            }
-            DAWN_TRY_ASSIGN(mEntryPoints, ReflectShaderUsingSPIRVCross(GetDevice(), mSpirv));
-        }
-
+        DAWN_TRY_ASSIGN(mEntryPoints, ReflectShaderUsingTint(GetDevice(), mTintProgram.get()));
         return {};
     }
 
+#if defined(DAWN_USE_SPIRV_CROSS)
     ResultOrError<EntryPointMetadataTable> ShaderModuleBase::ReflectShaderUsingSPIRVCross(
         DeviceBase* device,
         const std::vector<uint32_t>& spirv) {
@@ -1688,6 +1646,7 @@ namespace dawn_native {
         }
         return std::move(result);
     }
+#endif
 
     size_t PipelineLayoutEntryPointPairHashFunc::operator()(
         const PipelineLayoutEntryPointPair& pair) const {
