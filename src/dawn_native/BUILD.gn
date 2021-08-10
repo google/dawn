@@ -313,13 +313,6 @@ source_set("dawn_native_sources") {
     ]
   }
 
-  if (dawn_use_spirv_cross) {
-    sources += [
-      "SpirvUtils.cpp",
-      "SpirvUtils.h",
-    ]
-  }
-
   # Only win32 app needs to link with user32.lib
   # In UWP, all availiable APIs are defined in WindowsApp.lib
   if (is_win && !dawn_is_winuwp) {
@@ -527,6 +520,8 @@ source_set("dawn_native_sources") {
       "opengl/SamplerGL.h",
       "opengl/ShaderModuleGL.cpp",
       "opengl/ShaderModuleGL.h",
+      "opengl/SpirvUtils.cpp",
+      "opengl/SpirvUtils.h",
       "opengl/SwapChainGL.cpp",
       "opengl/SwapChainGL.h",
       "opengl/TextureGL.cpp",

@@ -240,11 +240,6 @@ namespace dawn_native {
 
       protected:
         MaybeError InitializeBase(ShaderModuleParseResult* parseResult);
-#if defined(DAWN_USE_SPIRV_CROSS)
-        static ResultOrError<EntryPointMetadataTable> ReflectShaderUsingSPIRVCross(
-            DeviceBase* device,
-            const std::vector<uint32_t>& spirv);
-#endif
 
       private:
         ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag);

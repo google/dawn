@@ -15,12 +15,8 @@
 // This file contains utilities to convert from-to spirv.hpp datatypes without polluting other
 // headers with spirv.hpp
 
-#ifndef DAWNNATIVE_SPIRV_UTILS_H_
-#define DAWNNATIVE_SPIRV_UTILS_H_
-
-#if !defined(DAWN_USE_SPIRV_CROSS)
-#    error "SpirvCross.h should not be included if dawn_use_spirv_cross is false"
-#endif
+#ifndef DAWNNATIVE_OPENGL_SPIRV_UTILS_H_
+#define DAWNNATIVE_OPENGL_SPIRV_UTILS_H_
 
 #include "dawn_native/Format.h"
 #include "dawn_native/PerStage.h"
@@ -52,4 +48,4 @@ namespace dawn_native {
 
 }  // namespace dawn_native
 
-#endif  // DAWNNATIVE_SPIRV_UTILS_H_
+#endif  // DAWNNATIVE_OPENGL_SPIRV_UTILS_H_
