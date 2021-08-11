@@ -288,8 +288,9 @@ namespace dawn_native { namespace opengl {
 
                 spirv_cross::SPIRType::BaseType shaderFragmentOutputBaseType =
                     compiler.get_type(fragmentOutput.base_type_id).basetype;
-                metadata->fragmentOutputFormatBaseTypes[attachment] =
-                    SpirvBaseTypeToTextureComponentType(shaderFragmentOutputBaseType);
+                // spriv path so temporarily always set to 4u to always pass validation
+                metadata->fragmentOutputVariables[attachment] = {
+                    SpirvBaseTypeToTextureComponentType(shaderFragmentOutputBaseType), 4u};
                 metadata->fragmentOutputsWritten.set(attachment);
             }
         }

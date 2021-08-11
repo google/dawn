@@ -253,10 +253,22 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateColorTargetState(DeviceBase* device,
-                                            const ColorTargetState* descriptor,
-                                            bool fragmentWritten,
-                                            wgpu::TextureComponentType fragmentOutputBaseType) {
+        bool BlendFactorContainsSrcAlpha(const wgpu::BlendFactor& blendFactor) {
+            return blendFactor == wgpu::BlendFactor::SrcAlpha ||
+                   blendFactor == wgpu::BlendFactor::OneMinusSrcAlpha ||
+                   blendFactor == wgpu::BlendFactor::SrcAlphaSaturated;
+        }
+
+        bool BlendFactorContainsSrc(const wgpu::BlendFactor& blendFactor) {
+            return blendFactor == wgpu::BlendFactor::Src ||
+                   blendFactor == wgpu::BlendFactor::OneMinusSrc;
+        }
+
+        MaybeError ValidateColorTargetState(
+            DeviceBase* device,
+            const ColorTargetState* descriptor,
+            bool fragmentWritten,
+            const EntryPointMetadata::FragmentOutputVariableInfo& fragmentOutputVariable) {
             if (descriptor->nextInChain != nullptr) {
                 return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
             }
@@ -278,9 +290,36 @@ namespace dawn_native {
                     "Color format must be blendable when blending is enabled");
             }
             if (fragmentWritten) {
-                if (fragmentOutputBaseType != format->GetAspectInfo(Aspect::Color).baseType) {
+                if (fragmentOutputVariable.baseType !=
+                    format->GetAspectInfo(Aspect::Color).baseType) {
                     return DAWN_VALIDATION_ERROR(
                         "Color format must match the fragment stage output type");
+                }
+
+                if (fragmentOutputVariable.componentCount < format->componentCount) {
+                    return DAWN_VALIDATION_ERROR(
+                        "The fragment stage output components count must be no fewer than the "
+                        "color format channel count");
+                }
+
+                if (descriptor->blend) {
+                    if (fragmentOutputVariable.componentCount < 4u) {
+                        // No alpha channel output
+                        // Make sure there's no alpha involved in the blending operation
+                        if (BlendFactorContainsSrcAlpha(descriptor->blend->color.srcFactor) ||
+                            BlendFactorContainsSrcAlpha(descriptor->blend->color.dstFactor)) {
+                            return DAWN_VALIDATION_ERROR(
+                                "Color blending factor is reading alpha but it is missing from "
+                                "fragment output");
+                        }
+                        if (descriptor->blend->alpha.srcFactor != wgpu::BlendFactor::Zero ||
+                            BlendFactorContainsSrc(descriptor->blend->alpha.dstFactor) ||
+                            BlendFactorContainsSrcAlpha(descriptor->blend->alpha.dstFactor)) {
+                            return DAWN_VALIDATION_ERROR(
+                                "Alpha blending factor is reading alpha but it is missing from "
+                                "fragment output");
+                        }
+                    }
                 }
             } else {
                 if (descriptor->writeMask != wgpu::ColorWriteMask::None) {
@@ -311,10 +350,10 @@ namespace dawn_native {
                 descriptor->module->GetEntryPoint(descriptor->entryPoint);
             for (ColorAttachmentIndex i(uint8_t(0));
                  i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->targetCount)); ++i) {
-                DAWN_TRY(
-                    ValidateColorTargetState(device, &descriptor->targets[static_cast<uint8_t>(i)],
-                                             fragmentMetadata.fragmentOutputsWritten[i],
-                                             fragmentMetadata.fragmentOutputFormatBaseTypes[i]));
+                DAWN_TRY(ValidateColorTargetState(device,
+                                                  &descriptor->targets[static_cast<uint8_t>(i)],
+                                                  fragmentMetadata.fragmentOutputsWritten[i],
+                                                  fragmentMetadata.fragmentOutputVariables[i]));
             }
 
             return {};

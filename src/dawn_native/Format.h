@@ -91,6 +91,8 @@ namespace dawn_native {
         bool isSupported;
         bool supportsStorageUsage;
         Aspect aspects;
+        // Only used for renderable color formats, number of color channels.
+        uint8_t componentCount;
 
         bool IsColor() const;
         bool HasDepth() const;

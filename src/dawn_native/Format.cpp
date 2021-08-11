@@ -158,7 +158,7 @@ namespace dawn_native {
 
         auto AddColorFormat = [&AddFormat](wgpu::TextureFormat format, bool renderable,
                                            bool supportsStorageUsage, uint32_t byteSize,
-                                           SampleTypeBit sampleTypes) {
+                                           SampleTypeBit sampleTypes, uint8_t componentCount) {
             Format internalFormat;
             internalFormat.format = format;
             internalFormat.isRenderable = renderable;
@@ -166,6 +166,7 @@ namespace dawn_native {
             internalFormat.isSupported = true;
             internalFormat.supportsStorageUsage = supportsStorageUsage;
             internalFormat.aspects = Aspect::Color;
+            internalFormat.componentCount = componentCount;
             AspectInfo* firstAspect = internalFormat.aspectInfo.data();
             firstAspect->block.byteSize = byteSize;
             firstAspect->block.width = 1;
@@ -202,6 +203,7 @@ namespace dawn_native {
             internalFormat.isSupported = true;
             internalFormat.supportsStorageUsage = false;
             internalFormat.aspects = Aspect::Depth;
+            internalFormat.componentCount = 1;
             AspectInfo* firstAspect = internalFormat.aspectInfo.data();
             firstAspect->block.byteSize = byteSize;
             firstAspect->block.width = 1;
@@ -220,6 +222,7 @@ namespace dawn_native {
             internalFormat.isSupported = false;
             internalFormat.supportsStorageUsage = false;
             internalFormat.aspects = Aspect::Stencil;
+            internalFormat.componentCount = 1;
             AspectInfo* firstAspect = internalFormat.aspectInfo.data();
             firstAspect->block.byteSize = 1;
             firstAspect->block.width = 1;
@@ -231,7 +234,8 @@ namespace dawn_native {
         };
 
         auto AddCompressedFormat = [&AddFormat](wgpu::TextureFormat format, uint32_t byteSize,
-                                                uint32_t width, uint32_t height, bool isSupported) {
+                                                uint32_t width, uint32_t height, bool isSupported,
+                                                uint8_t componentCount) {
             Format internalFormat;
             internalFormat.format = format;
             internalFormat.isRenderable = false;
@@ -239,6 +243,7 @@ namespace dawn_native {
             internalFormat.isSupported = isSupported;
             internalFormat.supportsStorageUsage = false;
             internalFormat.aspects = Aspect::Color;
+            internalFormat.componentCount = componentCount;
             AspectInfo* firstAspect = internalFormat.aspectInfo.data();
             firstAspect->block.byteSize = byteSize;
             firstAspect->block.width = width;
@@ -249,74 +254,74 @@ namespace dawn_native {
             AddFormat(internalFormat);
         };
 
-        auto AddMultiAspectFormat = [&AddFormat, &table](wgpu::TextureFormat format, Aspect aspects,
-                                                         wgpu::TextureFormat firstFormat,
-                                                         wgpu::TextureFormat secondFormat,
-                                                         bool isRenderable, bool isSupported) {
-            Format internalFormat;
-            internalFormat.format = format;
-            internalFormat.isRenderable = isRenderable;
-            internalFormat.isCompressed = false;
-            internalFormat.isSupported = isSupported;
-            internalFormat.supportsStorageUsage = false;
-            internalFormat.aspects = aspects;
+        auto AddMultiAspectFormat =
+            [&AddFormat, &table](wgpu::TextureFormat format, Aspect aspects,
+                                 wgpu::TextureFormat firstFormat, wgpu::TextureFormat secondFormat,
+                                 bool isRenderable, bool isSupported, uint8_t componentCount) {
+                Format internalFormat;
+                internalFormat.format = format;
+                internalFormat.isRenderable = isRenderable;
+                internalFormat.isCompressed = false;
+                internalFormat.isSupported = isSupported;
+                internalFormat.supportsStorageUsage = false;
+                internalFormat.aspects = aspects;
+                internalFormat.componentCount = componentCount;
+                const size_t firstFormatIndex = ComputeFormatIndex(firstFormat);
+                const size_t secondFormatIndex = ComputeFormatIndex(secondFormat);
 
-            const size_t firstFormatIndex = ComputeFormatIndex(firstFormat);
-            const size_t secondFormatIndex = ComputeFormatIndex(secondFormat);
+                internalFormat.aspectInfo[0] = table[firstFormatIndex].aspectInfo[0];
+                internalFormat.aspectInfo[1] = table[secondFormatIndex].aspectInfo[0];
 
-            internalFormat.aspectInfo[0] = table[firstFormatIndex].aspectInfo[0];
-            internalFormat.aspectInfo[1] = table[secondFormatIndex].aspectInfo[0];
-
-            AddFormat(internalFormat);
-        };
+                AddFormat(internalFormat);
+            };
 
         // clang-format off
         // 1 byte color formats
-        AddColorFormat(wgpu::TextureFormat::R8Unorm, true, false, 1, kAnyFloat);
-        AddColorFormat(wgpu::TextureFormat::R8Snorm, false, false, 1, kAnyFloat);
-        AddColorFormat(wgpu::TextureFormat::R8Uint, true, false, 1, SampleTypeBit::Uint);
-        AddColorFormat(wgpu::TextureFormat::R8Sint, true, false, 1, SampleTypeBit::Sint);
+        AddColorFormat(wgpu::TextureFormat::R8Unorm, true, false, 1, kAnyFloat, 1);
+        AddColorFormat(wgpu::TextureFormat::R8Snorm, false, false, 1, kAnyFloat, 1);
+        AddColorFormat(wgpu::TextureFormat::R8Uint, true, false, 1, SampleTypeBit::Uint, 1);
+        AddColorFormat(wgpu::TextureFormat::R8Sint, true, false, 1, SampleTypeBit::Sint, 1);
 
         // 2 bytes color formats
-        AddColorFormat(wgpu::TextureFormat::R16Uint, true, false, 2, SampleTypeBit::Uint);
-        AddColorFormat(wgpu::TextureFormat::R16Sint, true, false, 2, SampleTypeBit::Sint);
-        AddColorFormat(wgpu::TextureFormat::R16Float, true, false, 2, kAnyFloat);
-        AddColorFormat(wgpu::TextureFormat::RG8Unorm, true, false, 2, kAnyFloat);
-        AddColorFormat(wgpu::TextureFormat::RG8Snorm, false, false, 2, kAnyFloat);
-        AddColorFormat(wgpu::TextureFormat::RG8Uint, true, false, 2, SampleTypeBit::Uint);
-        AddColorFormat(wgpu::TextureFormat::RG8Sint, true, false, 2, SampleTypeBit::Sint);
+        AddColorFormat(wgpu::TextureFormat::R16Uint, true, false, 2, SampleTypeBit::Uint, 1);
+        AddColorFormat(wgpu::TextureFormat::R16Sint, true, false, 2, SampleTypeBit::Sint, 1);
+        AddColorFormat(wgpu::TextureFormat::R16Float, true, false, 2, kAnyFloat, 1);
+        AddColorFormat(wgpu::TextureFormat::RG8Unorm, true, false, 2, kAnyFloat, 2);
+        AddColorFormat(wgpu::TextureFormat::RG8Snorm, false, false, 2, kAnyFloat, 2);
+        AddColorFormat(wgpu::TextureFormat::RG8Uint, true, false, 2, SampleTypeBit::Uint, 2);
+        AddColorFormat(wgpu::TextureFormat::RG8Sint, true, false, 2, SampleTypeBit::Sint, 2);
 
         // 4 bytes color formats
-        AddColorFormat(wgpu::TextureFormat::R32Uint, true, true, 4, SampleTypeBit::Uint);
-        AddColorFormat(wgpu::TextureFormat::R32Sint, true, true, 4, SampleTypeBit::Sint);
-        AddColorFormat(wgpu::TextureFormat::R32Float, true, true, 4, SampleTypeBit::UnfilterableFloat);
-        AddColorFormat(wgpu::TextureFormat::RG16Uint, true, false, 4, SampleTypeBit::Uint);
-        AddColorFormat(wgpu::TextureFormat::RG16Sint, true, false, 4, SampleTypeBit::Sint);
-        AddColorFormat(wgpu::TextureFormat::RG16Float, true, false, 4, kAnyFloat);
-        AddColorFormat(wgpu::TextureFormat::RGBA8Unorm, true, true, 4, kAnyFloat);
-        AddColorFormat(wgpu::TextureFormat::RGBA8UnormSrgb, true, false, 4, kAnyFloat);
-        AddColorFormat(wgpu::TextureFormat::RGBA8Snorm, false, true, 4, kAnyFloat);
-        AddColorFormat(wgpu::TextureFormat::RGBA8Uint, true, true, 4, SampleTypeBit::Uint);
-        AddColorFormat(wgpu::TextureFormat::RGBA8Sint, true, true, 4, SampleTypeBit::Sint);
-        AddColorFormat(wgpu::TextureFormat::BGRA8Unorm, true, false, 4, kAnyFloat);
-        AddColorFormat(wgpu::TextureFormat::BGRA8UnormSrgb, true, false, 4, kAnyFloat);
-        AddColorFormat(wgpu::TextureFormat::RGB10A2Unorm, true, false, 4, kAnyFloat);
+        AddColorFormat(wgpu::TextureFormat::R32Uint, true, true, 4, SampleTypeBit::Uint, 1);
+        AddColorFormat(wgpu::TextureFormat::R32Sint, true, true, 4, SampleTypeBit::Sint, 1);
+        AddColorFormat(wgpu::TextureFormat::R32Float, true, true, 4, SampleTypeBit::UnfilterableFloat, 1);
+        AddColorFormat(wgpu::TextureFormat::RG16Uint, true, false, 4, SampleTypeBit::Uint, 2);
+        AddColorFormat(wgpu::TextureFormat::RG16Sint, true, false, 4, SampleTypeBit::Sint, 2);
+        AddColorFormat(wgpu::TextureFormat::RG16Float, true, false, 4, kAnyFloat, 2);
+        AddColorFormat(wgpu::TextureFormat::RGBA8Unorm, true, true, 4, kAnyFloat, 4);
+        AddColorFormat(wgpu::TextureFormat::RGBA8UnormSrgb, true, false, 4, kAnyFloat, 4);
+        AddColorFormat(wgpu::TextureFormat::RGBA8Snorm, false, true, 4, kAnyFloat, 4);
+        AddColorFormat(wgpu::TextureFormat::RGBA8Uint, true, true, 4, SampleTypeBit::Uint, 4);
+        AddColorFormat(wgpu::TextureFormat::RGBA8Sint, true, true, 4, SampleTypeBit::Sint, 4);
+        AddColorFormat(wgpu::TextureFormat::BGRA8Unorm, true, false, 4, kAnyFloat, 4);
+        AddColorFormat(wgpu::TextureFormat::BGRA8UnormSrgb, true, false, 4, kAnyFloat, 4);
+        AddColorFormat(wgpu::TextureFormat::RGB10A2Unorm, true, false, 4, kAnyFloat, 4);
 
-        AddColorFormat(wgpu::TextureFormat::RG11B10Ufloat, false, false, 4, kAnyFloat);
-        AddColorFormat(wgpu::TextureFormat::RGB9E5Ufloat, false, false, 4, kAnyFloat);
+        AddColorFormat(wgpu::TextureFormat::RG11B10Ufloat, false, false, 4, kAnyFloat, 3);
+        AddColorFormat(wgpu::TextureFormat::RGB9E5Ufloat, false, false, 4, kAnyFloat, 3);
 
         // 8 bytes color formats
-        AddColorFormat(wgpu::TextureFormat::RG32Uint, true, true, 8, SampleTypeBit::Uint);
-        AddColorFormat(wgpu::TextureFormat::RG32Sint, true, true, 8, SampleTypeBit::Sint);
-        AddColorFormat(wgpu::TextureFormat::RG32Float, true, true, 8, SampleTypeBit::UnfilterableFloat);
-        AddColorFormat(wgpu::TextureFormat::RGBA16Uint, true, true, 8, SampleTypeBit::Uint);
-        AddColorFormat(wgpu::TextureFormat::RGBA16Sint, true, true, 8, SampleTypeBit::Sint);
-        AddColorFormat(wgpu::TextureFormat::RGBA16Float, true, true, 8, kAnyFloat);
+        AddColorFormat(wgpu::TextureFormat::RG32Uint, true, true, 8, SampleTypeBit::Uint, 2);
+        AddColorFormat(wgpu::TextureFormat::RG32Sint, true, true, 8, SampleTypeBit::Sint, 2);
+        AddColorFormat(wgpu::TextureFormat::RG32Float, true, true, 8, SampleTypeBit::UnfilterableFloat, 2);
+        AddColorFormat(wgpu::TextureFormat::RGBA16Uint, true, true, 8, SampleTypeBit::Uint, 4);
+        AddColorFormat(wgpu::TextureFormat::RGBA16Sint, true, true, 8, SampleTypeBit::Sint, 4);
+        AddColorFormat(wgpu::TextureFormat::RGBA16Float, true, true, 8, kAnyFloat, 4);
 
         // 16 bytes color formats
-        AddColorFormat(wgpu::TextureFormat::RGBA32Uint, true, true, 16, SampleTypeBit::Uint);
-        AddColorFormat(wgpu::TextureFormat::RGBA32Sint, true, true, 16, SampleTypeBit::Sint);
-        AddColorFormat(wgpu::TextureFormat::RGBA32Float, true, true, 16, SampleTypeBit::UnfilterableFloat);
+        AddColorFormat(wgpu::TextureFormat::RGBA32Uint, true, true, 16, SampleTypeBit::Uint, 4);
+        AddColorFormat(wgpu::TextureFormat::RGBA32Sint, true, true, 16, SampleTypeBit::Sint, 4);
+        AddColorFormat(wgpu::TextureFormat::RGBA32Float, true, true, 16, SampleTypeBit::UnfilterableFloat, 4);
 
         // Depth-stencil formats
         AddDepthFormat(wgpu::TextureFormat::Depth32Float, 4);
@@ -327,30 +332,30 @@ namespace dawn_native {
         // TODO(dawn:666): Implement the stencil8 format
         AddStencilFormat(wgpu::TextureFormat::Stencil8);
         AddMultiAspectFormat(wgpu::TextureFormat::Depth24PlusStencil8,
-                              Aspect::Depth | Aspect::Stencil, wgpu::TextureFormat::Depth24Plus, wgpu::TextureFormat::Stencil8, true, true);
+                              Aspect::Depth | Aspect::Stencil, wgpu::TextureFormat::Depth24Plus, wgpu::TextureFormat::Stencil8, true, true, 2);
         // TODO(dawn:690): Implement Depth16Unorm, Depth24UnormStencil8, Depth32FloatStencil8.
 
         // BC compressed formats
         bool isBCFormatSupported = device->IsExtensionEnabled(Extension::TextureCompressionBC);
-        AddCompressedFormat(wgpu::TextureFormat::BC1RGBAUnorm, 8, 4, 4, isBCFormatSupported);
-        AddCompressedFormat(wgpu::TextureFormat::BC1RGBAUnormSrgb, 8, 4, 4, isBCFormatSupported);
-        AddCompressedFormat(wgpu::TextureFormat::BC4RSnorm, 8, 4, 4, isBCFormatSupported);
-        AddCompressedFormat(wgpu::TextureFormat::BC4RUnorm, 8, 4, 4, isBCFormatSupported);
-        AddCompressedFormat(wgpu::TextureFormat::BC2RGBAUnorm, 16, 4, 4, isBCFormatSupported);
-        AddCompressedFormat(wgpu::TextureFormat::BC2RGBAUnormSrgb, 16, 4, 4, isBCFormatSupported);
-        AddCompressedFormat(wgpu::TextureFormat::BC3RGBAUnorm, 16, 4, 4, isBCFormatSupported);
-        AddCompressedFormat(wgpu::TextureFormat::BC3RGBAUnormSrgb, 16, 4, 4, isBCFormatSupported);
-        AddCompressedFormat(wgpu::TextureFormat::BC5RGSnorm, 16, 4, 4, isBCFormatSupported);
-        AddCompressedFormat(wgpu::TextureFormat::BC5RGUnorm, 16, 4, 4, isBCFormatSupported);
-        AddCompressedFormat(wgpu::TextureFormat::BC6HRGBFloat, 16, 4, 4, isBCFormatSupported);
-        AddCompressedFormat(wgpu::TextureFormat::BC6HRGBUfloat, 16, 4, 4, isBCFormatSupported);
-        AddCompressedFormat(wgpu::TextureFormat::BC7RGBAUnorm, 16, 4, 4, isBCFormatSupported);
-        AddCompressedFormat(wgpu::TextureFormat::BC7RGBAUnormSrgb, 16, 4, 4, isBCFormatSupported);
+        AddCompressedFormat(wgpu::TextureFormat::BC1RGBAUnorm, 8, 4, 4, isBCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::BC1RGBAUnormSrgb, 8, 4, 4, isBCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::BC4RSnorm, 8, 4, 4, isBCFormatSupported, 1);
+        AddCompressedFormat(wgpu::TextureFormat::BC4RUnorm, 8, 4, 4, isBCFormatSupported, 1);
+        AddCompressedFormat(wgpu::TextureFormat::BC2RGBAUnorm, 16, 4, 4, isBCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::BC2RGBAUnormSrgb, 16, 4, 4, isBCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::BC3RGBAUnorm, 16, 4, 4, isBCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::BC3RGBAUnormSrgb, 16, 4, 4, isBCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::BC5RGSnorm, 16, 4, 4, isBCFormatSupported, 2);
+        AddCompressedFormat(wgpu::TextureFormat::BC5RGUnorm, 16, 4, 4, isBCFormatSupported, 2);
+        AddCompressedFormat(wgpu::TextureFormat::BC6HRGBFloat, 16, 4, 4, isBCFormatSupported, 3);
+        AddCompressedFormat(wgpu::TextureFormat::BC6HRGBUfloat, 16, 4, 4, isBCFormatSupported, 3);
+        AddCompressedFormat(wgpu::TextureFormat::BC7RGBAUnorm, 16, 4, 4, isBCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::BC7RGBAUnormSrgb, 16, 4, 4, isBCFormatSupported, 4);
 
         // multi-planar formats
         const bool isMultiPlanarFormatSupported = device->IsExtensionEnabled(Extension::MultiPlanarFormats);
         AddMultiAspectFormat(wgpu::TextureFormat::R8BG8Biplanar420Unorm, Aspect::Plane0 | Aspect::Plane1,
-            wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::RG8Unorm, false, isMultiPlanarFormatSupported);
+            wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::RG8Unorm, false, isMultiPlanarFormatSupported, 3);
 
         // clang-format on
 

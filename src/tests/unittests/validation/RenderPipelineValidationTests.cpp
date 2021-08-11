@@ -47,6 +47,14 @@ class RenderPipelineValidationTest : public ValidationTest {
     wgpu::ShaderModule fsModuleUint;
 };
 
+namespace {
+    bool BlendFactorContainsSrcAlpha(const wgpu::BlendFactor& blendFactor) {
+        return blendFactor == wgpu::BlendFactor::SrcAlpha ||
+               blendFactor == wgpu::BlendFactor::OneMinusSrcAlpha ||
+               blendFactor == wgpu::BlendFactor::SrcAlphaSaturated;
+    }
+}  // namespace
+
 // Test cases where creation should succeed
 TEST_F(RenderPipelineValidationTest, CreationSuccess) {
     {
@@ -216,32 +224,134 @@ TEST_F(RenderPipelineValidationTest, NonBlendableFormat) {
 
 // Tests that the format of the color state descriptor must match the output of the fragment shader.
 TEST_F(RenderPipelineValidationTest, FragmentOutputFormatCompatibility) {
-    constexpr uint32_t kNumTextureFormatBaseType = 3u;
-    std::array<const char*, kNumTextureFormatBaseType> kScalarTypes = {{"f32", "i32", "u32"}};
-    std::array<wgpu::TextureFormat, kNumTextureFormatBaseType> kColorFormats = {
-        {wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureFormat::RGBA8Sint,
-         wgpu::TextureFormat::RGBA8Uint}};
+    std::array<const char*, 3> kScalarTypes = {{"f32", "i32", "u32"}};
+    std::array<wgpu::TextureFormat, 3> kColorFormats = {{wgpu::TextureFormat::RGBA8Unorm,
+                                                         wgpu::TextureFormat::RGBA8Sint,
+                                                         wgpu::TextureFormat::RGBA8Uint}};
 
-    for (size_t i = 0; i < kNumTextureFormatBaseType; ++i) {
-        for (size_t j = 0; j < kNumTextureFormatBaseType; ++j) {
-            utils::ComboRenderPipelineDescriptor descriptor;
-            descriptor.vertex.module = vsModule;
+    for (size_t i = 0; i < kScalarTypes.size(); ++i) {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        std::ostringstream stream;
+        stream << R"(
+            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<)"
+               << kScalarTypes[i] << R"(> {
+                var result : vec4<)"
+               << kScalarTypes[i] << R"(>;
+                return result;
+            })";
+        descriptor.cFragment.module = utils::CreateShaderModule(device, stream.str().c_str());
+
+        for (size_t j = 0; j < kColorFormats.size(); ++j) {
             descriptor.cTargets[0].format = kColorFormats[j];
-
-            std::ostringstream stream;
-            stream << R"(
-                [[stage(fragment)]] fn main() -> [[location(0)]] vec4<)"
-                   << kScalarTypes[i] << R"(> {
-                    var result : vec4<)"
-                   << kScalarTypes[i] << R"(>;
-                    return result;
-                })";
-            descriptor.cFragment.module = utils::CreateShaderModule(device, stream.str().c_str());
-
             if (i == j) {
                 device.CreateRenderPipeline(&descriptor);
             } else {
                 ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+            }
+        }
+    }
+}
+
+// Tests that the component count of the color state target format must be fewer than that of the
+// fragment shader output.
+TEST_F(RenderPipelineValidationTest, FragmentOutputComponentCountCompatibility) {
+    std::array<wgpu::TextureFormat, 3> kColorFormats = {wgpu::TextureFormat::R8Unorm,
+                                                        wgpu::TextureFormat::RG8Unorm,
+                                                        wgpu::TextureFormat::RGBA8Unorm};
+
+    std::array<wgpu::BlendFactor, 8> kBlendFactors = {wgpu::BlendFactor::Zero,
+                                                      wgpu::BlendFactor::One,
+                                                      wgpu::BlendFactor::SrcAlpha,
+                                                      wgpu::BlendFactor::OneMinusSrcAlpha,
+                                                      wgpu::BlendFactor::Src,
+                                                      wgpu::BlendFactor::DstAlpha,
+                                                      wgpu::BlendFactor::OneMinusDstAlpha,
+                                                      wgpu::BlendFactor::Dst};
+
+    for (size_t componentCount = 1; componentCount <= 4; ++componentCount) {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+
+        std::ostringstream stream;
+        stream << R"(
+            [[stage(fragment)]] fn main() -> [[location(0)]] )";
+        switch (componentCount) {
+            case 1:
+                stream << R"(f32 {
+                return 1.0;
+                })";
+                break;
+            case 2:
+                stream << R"(vec2<f32> {
+                return vec2<f32>(1.0, 1.0);
+                })";
+                break;
+            case 3:
+                stream << R"(vec3<f32> {
+                return vec3<f32>(1.0, 1.0, 1.0);
+                })";
+                break;
+            case 4:
+                stream << R"(vec4<f32> {
+                return vec4<f32>(1.0, 1.0, 1.0, 1.0);
+                })";
+                break;
+            default:
+                UNREACHABLE();
+        }
+        descriptor.cFragment.module = utils::CreateShaderModule(device, stream.str().c_str());
+
+        for (auto colorFormat : kColorFormats) {
+            descriptor.cTargets[0].format = colorFormat;
+
+            descriptor.cTargets[0].blend = nullptr;
+            if (componentCount >= utils::GetWGSLRenderableColorTextureComponentCount(colorFormat)) {
+                device.CreateRenderPipeline(&descriptor);
+            } else {
+                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+            }
+
+            descriptor.cTargets[0].blend = &descriptor.cBlends[0];
+
+            for (auto colorSrcFactor : kBlendFactors) {
+                descriptor.cBlends[0].color.srcFactor = colorSrcFactor;
+                for (auto colorDstFactor : kBlendFactors) {
+                    descriptor.cBlends[0].color.dstFactor = colorDstFactor;
+                    for (auto alphaSrcFactor : kBlendFactors) {
+                        descriptor.cBlends[0].alpha.srcFactor = alphaSrcFactor;
+                        for (auto alphaDstFactor : kBlendFactors) {
+                            descriptor.cBlends[0].alpha.dstFactor = alphaDstFactor;
+
+                            bool valid = true;
+                            if (componentCount >=
+                                utils::GetWGSLRenderableColorTextureComponentCount(colorFormat)) {
+                                if (BlendFactorContainsSrcAlpha(
+                                        descriptor.cTargets[0].blend->color.srcFactor) ||
+                                    BlendFactorContainsSrcAlpha(
+                                        descriptor.cTargets[0].blend->color.dstFactor) ||
+                                    descriptor.cTargets[0].blend->alpha.srcFactor !=
+                                        wgpu::BlendFactor::Zero ||
+                                    descriptor.cTargets[0].blend->alpha.dstFactor ==
+                                        wgpu::BlendFactor::Src ||
+                                    descriptor.cTargets[0].blend->alpha.dstFactor ==
+                                        wgpu::BlendFactor::OneMinusSrc ||
+                                    BlendFactorContainsSrcAlpha(
+                                        descriptor.cTargets[0].blend->alpha.dstFactor)) {
+                                    valid = componentCount == 4;
+                                }
+                            } else {
+                                valid = false;
+                            }
+
+                            if (valid) {
+                                device.CreateRenderPipeline(&descriptor);
+                            } else {
+                                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+                            }
+                        }
+                    }
+                }
             }
         }
     }
