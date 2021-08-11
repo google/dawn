@@ -34,6 +34,10 @@ namespace dawn_native { namespace null {
 
     Adapter::~Adapter() = default;
 
+    bool Adapter::SupportsExternalImages() const {
+        return false;
+    }
+
     // Used for the tests that intend to use an adapter without all extensions enabled.
     void Adapter::SetSupportedExtensions(const std::vector<const char*>& requiredExtensions) {
         mSupportedExtensions = GetInstance()->ExtensionNamesToExtensionsSet(requiredExtensions);

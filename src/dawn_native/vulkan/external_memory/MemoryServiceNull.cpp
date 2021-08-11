@@ -24,6 +24,11 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
 
     Service::~Service() = default;
 
+    // static
+    bool Service::CheckSupport(const VulkanDeviceInfo& deviceInfo) {
+        return false;
+    }
+
     bool Service::SupportsImportMemory(VkFormat format,
                                        VkImageType type,
                                        VkImageTiling tiling,

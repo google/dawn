@@ -205,6 +205,12 @@ namespace dawn_native { namespace metal {
             InitializeSupportedExtensions();
         }
 
+        // AdapterBase Implementation
+        bool SupportsExternalImages() const override {
+            // Via dawn_native::metal::WrapIOSurface
+            return true;
+        }
+
       private:
         ResultOrError<DeviceBase*> CreateDeviceImpl(const DeviceDescriptor* descriptor) override {
             return Device::Create(this, mDevice, descriptor);

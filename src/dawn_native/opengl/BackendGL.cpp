@@ -194,6 +194,12 @@ namespace dawn_native { namespace opengl {
 
         ~Adapter() override = default;
 
+        // AdapterBase Implementation
+        bool SupportsExternalImages() const override {
+            // Via dawn_native::opengl::WrapExternalEGLImage
+            return GetBackendType() == wgpu::BackendType::OpenGLES;
+        }
+
       private:
         OpenGLFunctions mFunctions;
 

@@ -24,6 +24,13 @@ namespace dawn_native { namespace vulkan { namespace external_semaphore {
 
     Service::~Service() = default;
 
+    // static
+    bool Service::CheckSupport(const VulkanDeviceInfo& deviceInfo,
+                               VkPhysicalDevice physicalDevice,
+                               const VulkanFunctions& fn) {
+        return false;
+    }
+
     bool Service::Supported() {
         return false;
     }

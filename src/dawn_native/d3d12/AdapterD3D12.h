@@ -30,6 +30,9 @@ namespace dawn_native { namespace d3d12 {
         Adapter(Backend* backend, ComPtr<IDXGIAdapter3> hardwareAdapter);
         ~Adapter() override;
 
+        // AdapterBase Implementation
+        bool SupportsExternalImages() const override;
+
         const D3D12DeviceInfo& GetDeviceInfo() const;
         IDXGIAdapter3* GetHardwareAdapter() const;
         Backend* GetBackend() const;

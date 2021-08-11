@@ -22,6 +22,7 @@
 
 namespace dawn_native { namespace vulkan {
     class Device;
+    struct VulkanDeviceInfo;
 }}  // namespace dawn_native::vulkan
 
 namespace dawn_native { namespace vulkan { namespace external_memory {
@@ -35,6 +36,8 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
       public:
         explicit Service(Device* device);
         ~Service();
+
+        static bool CheckSupport(const VulkanDeviceInfo& deviceInfo);
 
         // True if the device reports it supports importing external memory.
         bool SupportsImportMemory(VkFormat format,

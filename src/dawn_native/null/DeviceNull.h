@@ -169,6 +169,9 @@ namespace dawn_native { namespace null {
         Adapter(InstanceBase* instance);
         ~Adapter() override;
 
+        // AdapterBase Implementation
+        bool SupportsExternalImages() const override;
+
         // Used for the tests that intend to use an adapter without all extensions enabled.
         void SetSupportedExtensions(const std::vector<const char*>& requiredExtensions);
 

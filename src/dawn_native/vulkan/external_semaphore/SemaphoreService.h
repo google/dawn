@@ -30,6 +30,10 @@ namespace dawn_native { namespace vulkan { namespace external_semaphore {
         explicit Service(Device* device);
         ~Service();
 
+        static bool CheckSupport(const VulkanDeviceInfo& deviceInfo,
+                                 VkPhysicalDevice physicalDevice,
+                                 const VulkanFunctions& fn);
+
         // True if the device reports it supports this feature
         bool Supported();
 

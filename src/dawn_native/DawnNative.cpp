@@ -103,6 +103,10 @@ namespace dawn_native {
         return mImpl->GetAdapterProperties();
     }
 
+    bool Adapter::SupportsExternalImages() const {
+        return mImpl->SupportsExternalImages();
+    }
+
     Adapter::operator bool() const {
         return mImpl != nullptr;
     }

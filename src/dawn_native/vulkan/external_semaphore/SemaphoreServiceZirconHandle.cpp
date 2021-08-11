@@ -20,12 +20,21 @@
 
 namespace dawn_native { namespace vulkan { namespace external_semaphore {
 
-    Service::Service(Device* device) : mDevice(device) {
-        mSupported = device->GetDeviceInfo().hasExt(DeviceExt::ExternalSemaphoreZirconHandle);
+    Service::Service(Device* device)
+        : mDevice(device),
+          mSupported(CheckSupport(device->GetDeviceInfo(),
+                                  ToBackend(device->GetAdapter())->GetPhysicalDevice(),
+                                  device->fn)) {
+    }
 
-        // Early out before we try using extension functions
-        if (!mSupported) {
-            return;
+    Service::~Service() = default;
+
+    // static
+    bool Service::CheckSupport(const VulkanDeviceInfo& deviceInfo,
+                               VkPhysicalDevice physicalDevice,
+                               const VulkanFunctions& fn) {
+        if (!deviceInfo.HasExt(DeviceExt::ExternalSemaphoreZirconHandle)) {
+            return false;
         }
 
         VkPhysicalDeviceExternalSemaphoreInfoKHR semaphoreInfo;
@@ -37,17 +46,14 @@ namespace dawn_native { namespace vulkan { namespace external_semaphore {
         semaphoreProperties.sType = VK_STRUCTURE_TYPE_EXTERNAL_SEMAPHORE_PROPERTIES_KHR;
         semaphoreProperties.pNext = nullptr;
 
-        mDevice->fn.GetPhysicalDeviceExternalSemaphoreProperties(
-            ToBackend(mDevice->GetAdapter())->GetPhysicalDevice(), &semaphoreInfo,
-            &semaphoreProperties);
+        fn.GetPhysicalDeviceExternalSemaphoreProperties(physicalDevice, &semaphoreInfo,
+                                                        &semaphoreProperties);
 
         VkFlags requiredFlags = VK_EXTERNAL_SEMAPHORE_FEATURE_EXPORTABLE_BIT_KHR |
                                 VK_EXTERNAL_SEMAPHORE_FEATURE_IMPORTABLE_BIT_KHR;
-        mSupported =
-            mSupported && IsSubset(requiredFlags, semaphoreProperties.externalSemaphoreFeatures);
-    }
 
-    Service::~Service() = default;
+        return IsSubset(requiredFlags, semaphoreProperties.externalSemaphoreFeatures);
+    }
 
     bool Service::Supported() {
         return mSupported;

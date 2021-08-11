@@ -47,6 +47,8 @@ namespace dawn_native {
             const std::vector<const char*>& requestedExtensions) const;
         WGPUDeviceProperties GetAdapterProperties() const;
 
+        virtual bool SupportsExternalImages() const = 0;
+
       protected:
         PCIInfo mPCIInfo = {};
         wgpu::AdapterType mAdapterType = wgpu::AdapterType::Unknown;

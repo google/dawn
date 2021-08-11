@@ -60,14 +60,17 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
 
     }  // anonymous namespace
 
-    Service::Service(Device* device) : mDevice(device) {
-        const VulkanDeviceInfo& deviceInfo = mDevice->GetDeviceInfo();
-
-        mSupported = deviceInfo.HasExt(DeviceExt::ExternalMemoryFD) &&
-                     deviceInfo.HasExt(DeviceExt::ImageDrmFormatModifier);
+    Service::Service(Device* device)
+        : mDevice(device), mSupported(CheckSupport(device->GetDeviceInfo())) {
     }
 
     Service::~Service() = default;
+
+    // static
+    bool Service::CheckSupport(const VulkanDeviceInfo& deviceInfo) {
+        return deviceInfo.HasExt(DeviceExt::ExternalMemoryFD) &&
+               deviceInfo.HasExt(DeviceExt::ImageDrmFormatModifier);
+    }
 
     bool Service::SupportsImportMemory(VkFormat format,
                                        VkImageType type,
