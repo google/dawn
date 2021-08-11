@@ -411,7 +411,8 @@ bool Resolver::ValidateAtomic(const ast::Atomic* a, const sem::Atomic* s) {
   // https://gpuweb.github.io/gpuweb/wgsl/#atomic-types
   // T must be either u32 or i32.
   if (!s->Type()->IsAnyOf<sem::U32, sem::I32>()) {
-    AddError("atomic only supports i32 or u32 types", a->type()->source());
+    AddError("atomic only supports i32 or u32 types",
+             a->type() ? a->type()->source() : a->source());
     return false;
   }
   return true;
@@ -1043,13 +1044,14 @@ bool Resolver::ValidateAtomicVariable(const VariableInfo* info) {
   auto sc = info->storage_class;
   auto access = info->access;
   auto* type = info->type->UnwrapRef();
-  auto source = info->declaration->type()->source();
+  auto source = info->declaration->type() ? info->declaration->type()->source()
+                                          : info->declaration->source();
 
   if (type->Is<sem::Atomic>()) {
     if (sc != ast::StorageClass::kWorkgroup) {
       AddError(
           "atomic variables must have <storage> or <workgroup> storage class",
-          info->declaration->type()->source());
+          source);
       return false;
     }
   } else if (type->IsAnyOf<sem::Struct, sem::Array>()) {
@@ -3382,7 +3384,7 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
                           ast::DisabledValidation::kIgnoreStorageClass)) {
     if (!info->type->UnwrapRef()->IsConstructible()) {
       AddError("function variable must have a constructible type",
-               var->type()->source());
+               var->type() ? var->type()->source() : var->source());
       return false;
     }
     if (info->storage_class != ast::StorageClass::kFunction) {
