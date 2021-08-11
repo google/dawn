@@ -102,5 +102,16 @@ TEST_F(ProgramTest, DiagnosticsMove) {
   EXPECT_EQ(program_b.Diagnostics().begin()->message, "an error message");
 }
 
+TEST_F(ProgramTest, ReuseMovedFromVariable) {
+  Program a(std::move(*this));
+  EXPECT_TRUE(a.IsValid());
+
+  Program b = std::move(a);
+  EXPECT_TRUE(b.IsValid());
+
+  a = std::move(b);
+  EXPECT_TRUE(a.IsValid());
+}
+
 }  // namespace
 }  // namespace tint

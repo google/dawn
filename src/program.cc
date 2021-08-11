@@ -83,6 +83,7 @@ Program::~Program() = default;
 Program& Program::operator=(Program&& program) {
   program.AssertNotMoved();
   program.moved_ = true;
+  moved_ = false;
   id_ = std::move(program.id_);
   types_ = std::move(program.types_);
   ast_nodes_ = std::move(program.ast_nodes_);
