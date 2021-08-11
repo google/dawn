@@ -758,9 +758,6 @@ TEST_P(BindGroupTests, DrawThenChangePipelineAndBindGroup) {
 // Test for crbug.com/dawn/1049, where setting a pipeline without drawing can prevent
 // bind groups from being applied later
 TEST_P(BindGroupTests, DrawThenChangePipelineTwiceAndBindGroup) {
-    // TODO(crbug.com/dawn/1055) find out why this test fails on Windows Intel D3D12 drivers.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsWindows() && IsD3D12());
-
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     // Create a bind group layout which uses a single dynamic uniform buffer.
@@ -810,7 +807,7 @@ TEST_P(BindGroupTests, DrawThenChangePipelineTwiceAndBindGroup) {
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
 
-    // Set the pipeline to (uniform, uniform, storage)
+    // Set the pipeline to (uniform, uniform, uniform)
     pass.SetPipeline(pipeline0);
 
     // Set the first bind group to color0 in the dynamic uniform buffer.
@@ -841,8 +838,9 @@ TEST_P(BindGroupTests, DrawThenChangePipelineTwiceAndBindGroup) {
     // Revert to pipeline 0
     pass.SetPipeline(pipeline0);
 
-    // Internally this will not re-apply the bind groups, because we already
-    // drew with this pipeline (setting pipeline 1 did not dirty the bind groups).
+    // Internally this should re-apply bind group 2. Because we already
+    // drew with this pipeline, and setting pipeline 1 did not dirty the bind groups,
+    // bind groups 0 and 1 should still be valid.
     pass.Draw(3);
 
     pass.EndPass();
