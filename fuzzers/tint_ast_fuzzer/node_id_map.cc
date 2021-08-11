@@ -29,22 +29,26 @@ NodeIdMap::NodeIdMap(const tint::Program& program) : NodeIdMap() {
 }
 
 NodeIdMap::IdType NodeIdMap::GetId(const ast::Node* node) const {
-  auto it = node_to_id_.find(node);
+  // Since node is immutable by default, const_cast won't
+  // modify the node structure.
+  auto it = node_to_id_.find(const_cast<ast::Node*>(node));
   return it == node_to_id_.end() ? 0 : it->second;
 }
 
-const ast::Node* NodeIdMap::GetNode(IdType id) const {
+ast::Node* NodeIdMap::GetNode(IdType id) const {
   auto it = id_to_node_.find(id);
   return it == id_to_node_.end() ? nullptr : it->second;
 }
 
 void NodeIdMap::Add(const ast::Node* node, IdType id) {
-  assert(!node_to_id_.count(node) && "The node already exists in the map");
+  auto* casted_node = const_cast<ast::Node*>(node);
+  assert(!node_to_id_.count(casted_node) &&
+         "The node already exists in the map");
   assert(IdIsFreshAndValid(id) && "Id already exists in the map or Id is zero");
   assert(node && "`node` can't be a nullptr");
 
-  node_to_id_[node] = id;
-  id_to_node_[id] = node;
+  node_to_id_[casted_node] = id;
+  id_to_node_[id] = casted_node;
 
   if (id >= fresh_id_) {
     fresh_id_ = id + 1;

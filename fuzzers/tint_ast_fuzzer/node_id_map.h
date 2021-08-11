@@ -54,7 +54,7 @@ class NodeIdMap {
   /// @param id - any value is accepted.
   /// @return a pointer to some node if `id` exists in this map.
   /// @return `nullptr` otherwise.
-  const ast::Node* GetNode(IdType id) const;
+  ast::Node* GetNode(IdType id) const;
 
   /// @brief Returns an id of the given `node`.
   /// @param node - can be a `nullptr`.
@@ -85,8 +85,8 @@ class NodeIdMap {
  private:
   IdType fresh_id_ = 1;
 
-  std::unordered_map<const ast::Node*, IdType> node_to_id_;
-  std::unordered_map<IdType, const ast::Node*> id_to_node_;
+  std::unordered_map<ast::Node*, IdType> node_to_id_;
+  std::unordered_map<IdType, ast::Node*> id_to_node_;
 };
 
 }  // namespace ast_fuzzer
