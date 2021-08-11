@@ -22,6 +22,7 @@
 #include "dawn_native/vulkan/VulkanError.h"
 
 #include <tint/tint.h>
+#include <spirv-tools/libspirv.hpp>
 
 namespace dawn_native { namespace vulkan {
 

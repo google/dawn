@@ -45,10 +45,6 @@ namespace tint {
 
 }  // namespace tint
 
-namespace spirv_cross {
-    class Compiler;
-}
-
 namespace dawn_native {
 
     struct EntryPointMetadata;
@@ -95,7 +91,6 @@ namespace dawn_native {
 
         std::unique_ptr<tint::Program> tintProgram;
         std::unique_ptr<TintSource> tintSource;
-        std::vector<uint32_t> spirv;
     };
 
     MaybeError ValidateShaderModuleDescriptor(DeviceBase* device,
@@ -220,7 +215,6 @@ namespace dawn_native {
             bool operator()(const ShaderModuleBase* a, const ShaderModuleBase* b) const;
         };
 
-        const std::vector<uint32_t>& GetSpirv() const;
         const tint::Program* GetTintProgram() const;
 
         void APIGetCompilationInfo(wgpu::CompilationInfoCallback callback, void* userdata);
@@ -229,18 +223,6 @@ namespace dawn_native {
             std::unique_ptr<OwnedCompilationMessages> compilationMessages);
 
         OwnedCompilationMessages* GetCompilationMessages() const;
-
-        ResultOrError<std::vector<uint32_t>> GeneratePullingSpirv(
-            const std::vector<uint32_t>& spirv,
-            const VertexState& vertexState,
-            const std::string& entryPoint,
-            BindGroupIndex pullingBufferBindingSet) const;
-
-        ResultOrError<std::vector<uint32_t>> GeneratePullingSpirv(
-            const tint::Program* program,
-            const VertexState& vertexState,
-            const std::string& entryPoint,
-            BindGroupIndex pullingBufferBindingSet) const;
 
       protected:
         MaybeError InitializeBase(ShaderModuleParseResult* parseResult);
@@ -254,10 +236,7 @@ namespace dawn_native {
         std::vector<uint32_t> mOriginalSpirv;
         std::string mWgsl;
 
-        // Data computed from what is in the descriptor. mSpirv is set iff !UseTintGenerator while
-        // mTintProgram is set iff UseTintGenerator.
         EntryPointMetadataTable mEntryPoints;
-        std::vector<uint32_t> mSpirv;
         std::unique_ptr<tint::Program> mTintProgram;
         std::unique_ptr<TintSource> mTintSource;  // Keep the tint::Source::File alive
 

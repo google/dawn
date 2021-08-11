@@ -29,6 +29,7 @@
 // is at 3 while spirv-headers is at 4.
 #undef SPV_REVISION
 #include <tint/tint.h>
+#include <spirv-tools/libspirv.hpp>
 
 #include <sstream>
 
