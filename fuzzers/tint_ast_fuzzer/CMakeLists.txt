@@ -12,10 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if (NOT (${CMAKE_CXX_COMPILER_ID} MATCHES Clang))
-    message(FATAL_ERROR "Libfuzzer is supported only on clang")
-endif ()
-
 set(PROTOBUF_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/protobufs/tint_ast_fuzzer.proto)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/protobufs)

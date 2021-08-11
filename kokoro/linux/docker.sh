@@ -91,6 +91,9 @@ if [ "$BUILD_SYSTEM" == "cmake" ]; then
     if [ "$BUILD_TOOLCHAIN" == "clang" ]; then
         using clang-10.0.0
         COMMON_CMAKE_FLAGS+=" -DTINT_BUILD_FUZZERS=1"
+        COMMON_CMAKE_FLAGS+=" -DTINT_BUILD_SPIRV_TOOLS_FUZZER=1"
+        COMMON_CMAKE_FLAGS+=" -DTINT_BUILD_AST_FUZZER=1"
+        COMMON_CMAKE_FLAGS+=" -DTINT_BUILD_REGEX_FUZZER=1"
     elif [ "$BUILD_TOOLCHAIN" == "gcc" ]; then
         using gcc-9
     fi
@@ -125,6 +128,20 @@ if [ "$BUILD_SYSTEM" == "cmake" ]; then
     show_cmds
         ./tint_unittests
     hide_cmds
+
+    if [ -f ./tint_ast_fuzzer_unittests ]; then
+        status "Running tint_ast_fuzzer_unittests"
+        show_cmds
+            ./tint_ast_fuzzer_unittests
+        hide_cmds
+    fi
+
+    if [ -f ./tint_regex_fuzzer_unittests ]; then
+        status "Running tint_regex_fuzzer_unittests"
+        show_cmds
+            ./tint_regex_fuzzer_unittests
+        hide_cmds
+    fi
 
     status "Testing test/test-all.sh"
     show_cmds

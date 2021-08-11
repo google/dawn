@@ -13,6 +13,7 @@
 # limitations under the License.
 
 set(LIBTINT_REGEX_FUZZER_SOURCES
+        util.h
         wgsl_mutator.cc
         wgsl_mutator.h)
 

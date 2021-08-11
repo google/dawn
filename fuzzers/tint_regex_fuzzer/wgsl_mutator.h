@@ -94,8 +94,8 @@ void ReplaceRegion(size_t idx1,
                    size_t id2_len,
                    std::string& wgsl_code);
 
-/// Replaces an interval of length interval1_len starting at start_index
-/// with the interval interval2.
+/// Replaces an interval of length `length` starting at start_index
+/// with the `replacement_text`.
 /// @param start_index - starting position of the interval to be replaced.
 /// @param length - length of the interval to be replaced.
 /// @param replacement_text - the interval that will be used as a replacement.
