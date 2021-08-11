@@ -97,7 +97,7 @@ void ReplaceRegion(size_t idx1,
 /// Replaces an interval of length interval1_len starting at start_index
 /// with the interval interval2.
 /// @param start_index - starting position of the interval to be replaced.
-/// @param interval1_len - length of the interval to be replaced.
+/// @param length - length of the interval to be replaced.
 /// @param replacement_text - the interval that will be used as a replacement.
 /// @param wgsl_code - the WGSL-like string where the replacement will occur.
 void ReplaceInterval(size_t start_index,
