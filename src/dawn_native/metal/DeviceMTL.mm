@@ -134,7 +134,7 @@ namespace dawn_native { namespace metal {
 
         DAWN_TRY(mCommandContext.PrepareNextCommandBuffer(*mCommandQueue));
 
-        if (GetAdapter()->GetSupportedExtensions().IsEnabled(Extension::TimestampQuery)) {
+        if (IsExtensionEnabled(Extension::TimestampQuery)) {
             // Make a best guess of timestamp period based on device vendor info, and converge it to
             // an accurate value by the following calculations.
             mTimestampPeriod =
