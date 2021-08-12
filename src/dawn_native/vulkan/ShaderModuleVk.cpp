@@ -14,6 +14,7 @@
 
 #include "dawn_native/vulkan/ShaderModuleVk.h"
 
+#include "dawn_native/SpirvValidation.h"
 #include "dawn_native/TintUtils.h"
 #include "dawn_native/vulkan/BindGroupLayoutVk.h"
 #include "dawn_native/vulkan/DeviceVk.h"
@@ -79,64 +80,24 @@ namespace dawn_native { namespace vulkan {
     }
 
     MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
-        std::vector<uint32_t> spirv;
-        const std::vector<uint32_t>* spirvPtr;
-
-        ScopedTintICEHandler scopedICEHandler(GetDevice());
-
-        std::ostringstream errorStream;
-        errorStream << "Tint SPIR-V writer failure:" << std::endl;
-
-        tint::transform::Manager transformManager;
         if (GetDevice()->IsRobustnessEnabled()) {
-            transformManager.Add<tint::transform::BoundArrayAccessors>();
+            ScopedTintICEHandler scopedICEHandler(GetDevice());
+
+            tint::transform::BoundArrayAccessors boundArrayAccessors;
+            tint::transform::DataMap transformInputs;
+
+            tint::Program program;
+            DAWN_TRY_ASSIGN(program,
+                            RunTransforms(&boundArrayAccessors, parseResult->tintProgram.get(),
+                                          transformInputs, nullptr, nullptr));
+            // Rather than use a new ParseResult object, we just reuse the original parseResult
+            parseResult->tintProgram = std::make_unique<tint::Program>(std::move(program));
         }
 
-        tint::transform::DataMap transformInputs;
-
-        tint::Program program;
-        DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, parseResult->tintProgram.get(),
-                                               transformInputs, nullptr, nullptr));
-
-        tint::writer::spirv::Options options;
-        options.emit_vertex_point_size = true;
-        options.disable_workgroup_init = GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
-        auto result = tint::writer::spirv::Generate(&program, options);
-        if (!result.success) {
-            errorStream << "Generator: " << result.error << std::endl;
-            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-        }
-
-        spirv = std::move(result.spirv);
-        spirvPtr = &spirv;
-
-        // Rather than use a new ParseResult object, we just reuse the original parseResult
-        parseResult->tintProgram = std::make_unique<tint::Program>(std::move(program));
-
-        DAWN_TRY(InitializeBase(parseResult));
-
-        VkShaderModuleCreateInfo createInfo;
-        createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-        createInfo.pNext = nullptr;
-        createInfo.flags = 0;
-        std::vector<uint32_t> vulkanSource;
-        createInfo.codeSize = spirvPtr->size() * sizeof(uint32_t);
-        createInfo.pCode = spirvPtr->data();
-
-        Device* device = ToBackend(GetDevice());
-        return CheckVkSuccess(
-            device->fn.CreateShaderModule(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
-            "CreateShaderModule");
+        return InitializeBase(parseResult);
     }
 
-    ShaderModule::~ShaderModule() {
-        Device* device = ToBackend(GetDevice());
-
-        if (mHandle != VK_NULL_HANDLE) {
-            device->GetFencedDeleter()->DeleteWhenUnused(mHandle);
-            mHandle = VK_NULL_HANDLE;
-        }
-    }
+    ShaderModule::~ShaderModule() = default;
 
     ResultOrError<VkShaderModule> ShaderModule::GetTransformedModuleHandle(
         const char* entryPointName,
@@ -204,28 +165,14 @@ namespace dawn_native { namespace vulkan {
             return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
         }
 
-        std::vector<uint32_t> spirv = result.spirv;
+        std::vector<uint32_t> spirv = std::move(result.spirv);
+        DAWN_TRY(
+            ValidateSpirv(GetDevice(), spirv, GetDevice()->IsToggleEnabled(Toggle::DumpShaders)));
 
-        if (GetDevice()->IsToggleEnabled(Toggle::DumpShaders)) {
-            spvtools::SpirvTools spirvTools(SPV_ENV_VULKAN_1_1);
-            std::ostringstream dumpedMsg;
-            std::string disassembly;
-            if (spirvTools.Disassemble(
-                    result.spirv, &disassembly,
-                    SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES | SPV_BINARY_TO_TEXT_OPTION_INDENT)) {
-                dumpedMsg << "/* Dumped generated SPIRV disassembly */" << std::endl << disassembly;
-            } else {
-                dumpedMsg << "/* Failed to disassemble generated SPIRV */";
-            }
-            GetDevice()->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());
-        }
-
-        // Don't save the transformedParseResult but just create a VkShaderModule
         VkShaderModuleCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
-        std::vector<uint32_t> vulkanSource;
         createInfo.codeSize = spirv.size() * sizeof(uint32_t);
         createInfo.pCode = spirv.data();
 

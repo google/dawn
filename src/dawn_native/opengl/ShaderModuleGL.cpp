@@ -17,6 +17,7 @@
 #include "common/Assert.h"
 #include "common/Platform.h"
 #include "dawn_native/BindGroupLayout.h"
+#include "dawn_native/SpirvValidation.h"
 #include "dawn_native/TintUtils.h"
 #include "dawn_native/opengl/DeviceGL.h"
 #include "dawn_native/opengl/PipelineLayoutGL.h"
@@ -364,26 +365,6 @@ namespace dawn_native { namespace opengl {
                                                              CombinedSamplerInfo* combinedSamplers,
                                                              const PipelineLayout* layout,
                                                              bool* needsDummySampler) const {
-        // If these options are changed, the values in DawnSPIRVCrossGLSLFastFuzzer.cpp need to
-        // be updated.
-        spirv_cross::CompilerGLSL::Options options;
-
-        // The range of Z-coordinate in the clipping volume of OpenGL is [-w, w], while it is
-        // [0, w] in D3D12, Metal and Vulkan, so we should normalize it in shaders in all
-        // backends. See the documentation of
-        // spirv_cross::CompilerGLSL::Options::vertex::fixup_clipspace for more details.
-        options.vertex.flip_vert_y = true;
-        options.vertex.fixup_clipspace = true;
-
-        const OpenGLVersion& version = ToBackend(GetDevice())->gl.GetVersion();
-        if (version.IsDesktop()) {
-            // The computation of GLSL version below only works for 3.3 and above.
-            ASSERT(version.IsAtLeast(3, 3));
-        }
-        options.es = version.IsES();
-        options.version = version.GetMajor() * 100 + version.GetMinor() * 10;
-
-        std::vector<uint32_t> spirv;
         tint::transform::SingleEntryPoint singleEntryPointTransform;
 
         tint::transform::DataMap transformInputs;
@@ -403,21 +384,28 @@ namespace dawn_native { namespace opengl {
             return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
         }
 
-        spirv = std::move(result.spirv);
+        std::vector<uint32_t> spirv = std::move(result.spirv);
+        DAWN_TRY(
+            ValidateSpirv(GetDevice(), spirv, GetDevice()->IsToggleEnabled(Toggle::DumpShaders)));
 
-        if (GetDevice()->IsToggleEnabled(Toggle::DumpShaders)) {
-            spvtools::SpirvTools spirvTools(SPV_ENV_VULKAN_1_1);
-            std::ostringstream dumpedMsg;
-            std::string disassembly;
-            if (spirvTools.Disassemble(
-                    spirv, &disassembly,
-                    SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES | SPV_BINARY_TO_TEXT_OPTION_INDENT)) {
-                dumpedMsg << "/* Dumped generated SPIRV disassembly */" << std::endl << disassembly;
-            } else {
-                dumpedMsg << "/* Failed to disassemble generated SPIRV */";
-            }
-            GetDevice()->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());
+        // If these options are changed, the values in DawnSPIRVCrossGLSLFastFuzzer.cpp need to
+        // be updated.
+        spirv_cross::CompilerGLSL::Options options;
+
+        // The range of Z-coordinate in the clipping volume of OpenGL is [-w, w], while it is
+        // [0, w] in D3D12, Metal and Vulkan, so we should normalize it in shaders in all
+        // backends. See the documentation of
+        // spirv_cross::CompilerGLSL::Options::vertex::fixup_clipspace for more details.
+        options.vertex.flip_vert_y = true;
+        options.vertex.fixup_clipspace = true;
+
+        const OpenGLVersion& version = ToBackend(GetDevice())->gl.GetVersion();
+        if (version.IsDesktop()) {
+            // The computation of GLSL version below only works for 3.3 and above.
+            ASSERT(version.IsAtLeast(3, 3));
         }
+        options.es = version.IsES();
+        options.version = version.GetMajor() * 100 + version.GetMinor() * 10;
 
         spirv_cross::CompilerGLSL compiler(std::move(spirv));
         compiler.set_common_options(options);

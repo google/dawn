@@ -194,7 +194,7 @@ if (DAWN_USE_X11)
 endif()
 
 # Only win32 app needs to link with user32.lib
-# In UWP, all availiable APIs are defined in WindowsApp.lib 
+# In UWP, all availiable APIs are defined in WindowsApp.lib
 # and is automatically linked when WINDOWS_STORE set
 if (WIN32 AND NOT WINDOWS_STORE)
     target_link_libraries(dawn_native PRIVATE user32.lib)
@@ -351,6 +351,13 @@ if (DAWN_ENABLE_NULL)
         "${DAWN_INCLUDE_DIR}/dawn_native/NullBackend.h"
         "null/DeviceNull.cpp"
         "null/DeviceNull.h"
+    )
+endif()
+
+if (DAWN_ENABLE_OPENGL OR DAWN_ENABLE_VULKAN)
+    target_sources(dawn_native PRIVATE
+        "SpirvValidation.cpp"
+        "SpirvValidation.h"
     )
 endif()
 

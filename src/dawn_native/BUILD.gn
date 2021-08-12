@@ -474,6 +474,13 @@ source_set("dawn_native_sources") {
     ]
   }
 
+  if (dawn_enable_opengl || dawn_enable_vulkan) {
+    sources += [
+      "SpirvValidation.cpp",
+      "SpirvValidation.h",
+    ]
+  }
+
   if (dawn_enable_opengl) {
     public_deps += [
       ":dawn_native_opengl_loader_gen",

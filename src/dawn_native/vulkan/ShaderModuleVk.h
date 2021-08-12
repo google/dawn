@@ -41,8 +41,6 @@ namespace dawn_native { namespace vulkan {
         ~ShaderModule() override;
         MaybeError Initialize(ShaderModuleParseResult* parseResult);
 
-        VkShaderModule mHandle = VK_NULL_HANDLE;
-
         // New handles created by GetTransformedModuleHandle at pipeline creation time
         class ConcurrentTransformedShaderModuleCache {
           public:
