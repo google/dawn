@@ -480,6 +480,9 @@ TEST_P(CopyTextureForBrowserTests, VerifyCopyOnYDirection) {
 }
 
 TEST_P(CopyTextureForBrowserTests, VerifyCopyFromLargeTexture) {
+    // TODO(crbug.com/dawn/1070): Flaky VK_DEVICE_LOST
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
+
     constexpr uint32_t kWidth = 899;
     constexpr uint32_t kHeight = 999;
 
