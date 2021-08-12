@@ -226,7 +226,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   spv_to_wgsl.Run(data, size);
   if (spv_to_wgsl.HasErrors()) {
     auto error = spv_to_wgsl.Diagnostics().str();
-    util::LogSpvError(error, data, size, context->params.error_dir);
+    util::LogSpvError(error, data, size,
+                      context ? context->params.error_dir : "");
     return 0;
   }
 

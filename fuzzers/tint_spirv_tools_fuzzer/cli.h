@@ -115,7 +115,7 @@ struct FuzzerCliParams {
   FuzzingTarget fuzzing_target = FuzzingTarget::kAll;
 
   /// The path to the directory, that will be used to output buggy shaders.
-  std::string error_dir;
+  std::string error_dir = "";
 
   /// Parameters for various mutators.
   MutatorCliParams mutator_params;
