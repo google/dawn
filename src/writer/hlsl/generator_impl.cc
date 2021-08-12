@@ -993,7 +993,7 @@ bool GeneratorImpl::EmitStorageAtomicCall(
       case Op::kAtomicStore: {
         // HLSL does not have an InterlockedStore, so we emulate it with
         // InterlockedExchange and discard the returned value
-        auto* value_ty = TypeOf(expr->params()[2]);
+        auto* value_ty = TypeOf(expr->params()[2])->UnwrapRef();
         auto name = UniqueIdentifier("atomicStore");
         {
           auto fn = line(&buf);
@@ -1024,7 +1024,7 @@ bool GeneratorImpl::EmitStorageAtomicCall(
         return name;
       }
       case Op::kAtomicCompareExchangeWeak: {
-        auto* value_ty = TypeOf(expr->params()[2]);
+        auto* value_ty = TypeOf(expr->params()[2])->UnwrapRef();
 
         auto name = UniqueIdentifier("atomicCompareExchangeWeak");
         {
@@ -1167,7 +1167,7 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
       // InterlockedExchange and discard the returned value
       {  // T result = 0;
         auto pre = line();
-        auto* value_ty = intrinsic->Parameters()[1]->Type();
+        auto* value_ty = intrinsic->Parameters()[1]->Type()->UnwrapRef();
         if (!EmitTypeAndName(pre, value_ty, ast::StorageClass::kNone,
                              ast::Access::kUndefined, result)) {
           return false;
