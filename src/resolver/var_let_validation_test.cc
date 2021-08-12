@@ -327,6 +327,20 @@ TEST_F(ResolverVarLetValidationTest, NonConstructibleType_Struct_WithAtomic) {
             "error: function variable must have a constructible type");
 }
 
+TEST_F(ResolverVarLetValidationTest, NonConstructibleType_InferredType) {
+  // [[group(0), binding(0)]] var s : sampler;
+  // fn foo() {
+  //   var v = s;
+  // }
+  Global("s", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(0, 0));
+  auto* v = Var(Source{{12, 34}}, "v", nullptr, Expr("s"));
+  WrapInFunction(v);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: function variable must have a constructible type");
+}
+
 }  // namespace
 }  // namespace resolver
 }  // namespace tint
