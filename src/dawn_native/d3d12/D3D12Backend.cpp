@@ -20,6 +20,7 @@
 #include "common/Log.h"
 #include "common/Math.h"
 #include "common/SwapChainUtils.h"
+#include "dawn_native/d3d12/D3D11on12Util.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/NativeSwapChainImplD3D12.h"
 #include "dawn_native/d3d12/ResidencyManagerD3D12.h"
@@ -69,7 +70,10 @@ namespace dawn_native { namespace d3d12 {
                                  descriptor->nextInChain)
                                  ->internalUsage;
         }
+        mD3D11on12ResourceCache = std::make_unique<D3D11on12ResourceCache>();
     }
+
+    ExternalImageDXGI::~ExternalImageDXGI() = default;
 
     WGPUTexture ExternalImageDXGI::ProduceTexture(
         WGPUDevice device,
@@ -97,10 +101,19 @@ namespace dawn_native { namespace d3d12 {
             internalDesc.sType = wgpu::SType::DawnTextureInternalUsageDescriptor;
         }
 
+        Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource =
+            mD3D11on12ResourceCache->GetOrCreateD3D11on12Resource(device, mD3D12Resource.Get());
+        if (d3d11on12Resource == nullptr) {
+            dawn::ErrorLog() << "Unable to create 11on12 resource for external image";
+            return nullptr;
+        }
+
         Ref<TextureBase> texture = backendDevice->CreateExternalTexture(
-            &textureDescriptor, mD3D12Resource, ExternalMutexSerial(descriptor->acquireMutexKey),
+            &textureDescriptor, mD3D12Resource, std::move(d3d11on12Resource),
+            ExternalMutexSerial(descriptor->acquireMutexKey),
             ExternalMutexSerial(descriptor->releaseMutexKey), descriptor->isSwapChainTexture,
             descriptor->isInitialized);
+
         return reinterpret_cast<WGPUTexture>(texture.Detach());
     }
 

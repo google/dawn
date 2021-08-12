@@ -28,6 +28,7 @@ namespace dawn_native { namespace d3d12 {
 
     class CommandRecordingContext;
     class Device;
+    class D3D11on12ResourceCacheEntry;
 
     DXGI_FORMAT D3D12TextureFormat(wgpu::TextureFormat format);
     MaybeError ValidateD3D12TextureCanBeWrapped(ID3D12Resource* d3d12Resource,
@@ -39,13 +40,15 @@ namespace dawn_native { namespace d3d12 {
       public:
         static ResultOrError<Ref<Texture>> Create(Device* device,
                                                   const TextureDescriptor* descriptor);
-        static ResultOrError<Ref<Texture>> CreateExternalImage(Device* device,
-                                                               const TextureDescriptor* descriptor,
-                                                               ComPtr<ID3D12Resource> d3d12Texture,
-                                                               ExternalMutexSerial acquireMutexKey,
-                                                               ExternalMutexSerial releaseMutexKey,
-                                                               bool isSwapChainTexture,
-                                                               bool isInitialized);
+        static ResultOrError<Ref<Texture>> CreateExternalImage(
+            Device* device,
+            const TextureDescriptor* descriptor,
+            ComPtr<ID3D12Resource> d3d12Texture,
+            Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource,
+            ExternalMutexSerial acquireMutexKey,
+            ExternalMutexSerial releaseMutexKey,
+            bool isSwapChainTexture,
+            bool isInitialized);
         static ResultOrError<Ref<Texture>> Create(Device* device,
                                                   const TextureDescriptor* descriptor,
                                                   ComPtr<ID3D12Resource> d3d12Texture);
@@ -89,6 +92,7 @@ namespace dawn_native { namespace d3d12 {
         MaybeError InitializeAsInternalTexture();
         MaybeError InitializeAsExternalTexture(const TextureDescriptor* descriptor,
                                                ComPtr<ID3D12Resource> d3d12Texture,
+                                               Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource,
                                                ExternalMutexSerial acquireMutexKey,
                                                ExternalMutexSerial releaseMutexKey,
                                                bool isSwapChainTexture);
@@ -127,7 +131,7 @@ namespace dawn_native { namespace d3d12 {
 
         ExternalMutexSerial mAcquireMutexKey = ExternalMutexSerial(0);
         ExternalMutexSerial mReleaseMutexKey = ExternalMutexSerial(0);
-        ComPtr<IDXGIKeyedMutex> mDxgiKeyedMutex;
+        Ref<D3D11on12ResourceCacheEntry> mD3D11on12Resource;
     };
 
     class TextureView final : public TextureViewBase {

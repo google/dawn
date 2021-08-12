@@ -232,6 +232,8 @@ if (DAWN_ENABLE_D3D12)
         "d3d12/CommandRecordingContext.h"
         "d3d12/ComputePipelineD3D12.cpp"
         "d3d12/ComputePipelineD3D12.h"
+        "d3d12/D3D11on12Util.cpp"
+        "d3d12/D3D11on12Util.h"
         "d3d12/D3D12Error.cpp"
         "d3d12/D3D12Error.h"
         "d3d12/D3D12Info.cpp"
