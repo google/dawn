@@ -33,11 +33,6 @@ namespace dawn_native { namespace vulkan {
     namespace {
 
         class VulkanImageWrappingTestBase : public DawnTest {
-          protected:
-            std::vector<const char*> GetRequiredExtensions() override {
-                return {"dawn-internal-usages"};
-            }
-
           public:
             void SetUp() override {
                 DAWN_TEST_UNSUPPORTED_IF(UsesWire());
@@ -185,24 +180,10 @@ namespace dawn_native { namespace vulkan {
         IgnoreSignalSemaphore(texture);
     }
 
-    // Test no error occurs if the import is valid with DawnTextureInternalUsageDescriptor
-    TEST_P(VulkanImageWrappingValidationTests, SuccessfulImportWithInternalUsageDescriptor) {
-        wgpu::DawnTextureInternalUsageDescriptor internalDesc = {};
-        defaultDescriptor.nextInChain = &internalDesc;
-        internalDesc.internalUsage = wgpu::TextureUsage::CopySrc;
-        internalDesc.sType = wgpu::SType::DawnTextureInternalUsageDescriptor;
-
-        wgpu::Texture texture = WrapVulkanImage(device, &defaultDescriptor, defaultFd,
-                                                defaultStride, defaultModifier, {}, true, true);
-        EXPECT_NE(texture.Get(), nullptr);
-        IgnoreSignalSemaphore(texture);
-    }
-
-    // Test an error occurs if an invalid sType is the nextInChain
+    // Test an error occurs if the texture descriptor is invalid
     TEST_P(VulkanImageWrappingValidationTests, InvalidTextureDescriptor) {
         wgpu::ChainedStruct chainedDescriptor;
-        chainedDescriptor.sType = wgpu::SType::SurfaceDescriptorFromWindowsSwapChainPanel;
-        descriptor.nextInChain = &chainedDescriptor;
+        defaultDescriptor.nextInChain = &chainedDescriptor;
 
         ASSERT_DEVICE_ERROR(wgpu::Texture texture =
                                 WrapVulkanImage(device, &defaultDescriptor, defaultFd,

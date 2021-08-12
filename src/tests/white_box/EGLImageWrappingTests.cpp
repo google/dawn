@@ -114,11 +114,6 @@ namespace {
 }  // anonymous namespace
 
 class EGLImageTestBase : public DawnTest {
-  protected:
-    std::vector<const char*> GetRequiredExtensions() override {
-        return {"dawn-internal-usages"};
-    }
-
   public:
     ScopedEGLImage CreateEGLImage(uint32_t width,
                                   uint32_t height,
@@ -182,30 +177,15 @@ TEST_P(EGLImageValidationTests, Success) {
     ASSERT_NE(texture.Get(), nullptr);
 }
 
-// Test a successful wrapping of an EGLImage in a texture with DawnTextureInternalUsageDescriptor
-TEST_P(EGLImageValidationTests, SuccessWithInternalUsageDescriptor) {
-    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    wgpu::DawnTextureInternalUsageDescriptor internalDesc = {};
-    descriptor.nextInChain = &internalDesc;
-    internalDesc.internalUsage = wgpu::TextureUsage::CopySrc;
-    internalDesc.sType = wgpu::SType::DawnTextureInternalUsageDescriptor;
-
-    ScopedEGLImage image = CreateDefaultEGLImage();
-    wgpu::Texture texture = WrapEGLImage(&descriptor, image.getImage());
-    ASSERT_NE(texture.Get(), nullptr);
-}
-
-// Test an error occurs if an invalid sType is the nextInChain
+// Test an error occurs if the texture descriptor is invalid
 TEST_P(EGLImageValidationTests, InvalidTextureDescriptor) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
     wgpu::ChainedStruct chainedDescriptor;
-    chainedDescriptor.sType = wgpu::SType::SurfaceDescriptorFromWindowsSwapChainPanel;
     descriptor.nextInChain = &chainedDescriptor;
 
     ScopedEGLImage image = CreateDefaultEGLImage();
     ASSERT_DEVICE_ERROR(wgpu::Texture texture = WrapEGLImage(&descriptor, image.getImage()));
-
     ASSERT_EQ(texture.Get(), nullptr);
 }
 
@@ -311,12 +291,6 @@ class EGLImageUsageTests : public EGLImageTestBase {
         textureDescriptor.sampleCount = 1;
         textureDescriptor.mipLevelCount = 1;
         textureDescriptor.usage = wgpu::TextureUsage::RenderAttachment;
-
-        wgpu::DawnTextureInternalUsageDescriptor internalDesc = {};
-        textureDescriptor.nextInChain = &internalDesc;
-        internalDesc.internalUsage = wgpu::TextureUsage::CopySrc;
-        internalDesc.sType = wgpu::SType::DawnTextureInternalUsageDescriptor;
-
         wgpu::Texture eglImageTexture = WrapEGLImage(&textureDescriptor, eglImage);
         ASSERT_NE(eglImageTexture, nullptr);
 

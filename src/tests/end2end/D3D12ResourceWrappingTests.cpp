@@ -28,11 +28,6 @@ using Microsoft::WRL::ComPtr;
 namespace {
 
     class D3D12ResourceTestBase : public DawnTest {
-      protected:
-        std::vector<const char*> GetRequiredExtensions() override {
-            return {"dawn-internal-usages"};
-        }
-
       public:
         void SetUp() override {
             DawnTest::SetUp();
@@ -166,28 +161,11 @@ TEST_P(D3D12SharedHandleValidation, Success) {
     ASSERT_NE(texture.Get(), nullptr);
 }
 
-// Test a successful wrapping of an D3D12Resource with DawnTextureInternalUsageDescriptor
-TEST_P(D3D12SharedHandleValidation, SuccessWithInternalUsageDescriptor) {
-    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-
-    wgpu::DawnTextureInternalUsageDescriptor internalDesc = {};
-    baseDawnDescriptor.nextInChain = &internalDesc;
-    internalDesc.internalUsage = wgpu::TextureUsage::CopySrc;
-    internalDesc.sType = wgpu::SType::DawnTextureInternalUsageDescriptor;
-
-    wgpu::Texture texture;
-    ComPtr<ID3D11Texture2D> d3d11Texture;
-    WrapSharedHandle(&baseDawnDescriptor, &baseD3dDescriptor, &texture, &d3d11Texture);
-
-    ASSERT_NE(texture.Get(), nullptr);
-}
-
-// Test an error occurs if an invalid sType is the nextInChain
+// Test an error occurs if the texture descriptor is invalid
 TEST_P(D3D12SharedHandleValidation, InvalidTextureDescriptor) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
     wgpu::ChainedStruct chainedDescriptor;
-    chainedDescriptor.sType = wgpu::SType::SurfaceDescriptorFromWindowsSwapChainPanel;
     baseDawnDescriptor.nextInChain = &chainedDescriptor;
 
     wgpu::Texture texture;
