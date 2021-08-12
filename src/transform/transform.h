@@ -185,16 +185,6 @@ class Transform : public Castable<Transform> {
   bool Requires(CloneContext& ctx,
                 std::initializer_list<const ::tint::TypeInfo*> deps);
 
-  /// Clones the decoration list `in`, removing decorations based on a filter.
-  /// @param ctx the clone context
-  /// @param in the decorations to clone
-  /// @param should_remove the function to select which decorations to remove
-  /// @return the cloned decorations
-  static ast::DecorationList RemoveDecorations(
-      CloneContext& ctx,
-      const ast::DecorationList& in,
-      std::function<bool(const ast::Decoration*)> should_remove);
-
   /// Removes the statement `stmt` from the transformed program.
   /// RemoveStatement handles edge cases, like statements in the initializer and
   /// continuing of for-loops.
