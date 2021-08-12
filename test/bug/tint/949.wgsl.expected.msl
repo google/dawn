@@ -425,7 +425,7 @@ main_out tint_symbol_inner(constant LeftOver& x_269, constant Light0& light0, fl
   return tint_symbol_4;
 }
 
-fragment tint_symbol_3 tint_symbol(texture2d<float, access::sample> tint_symbol_36 [[texture(1)]], sampler tint_symbol_37 [[sampler(0)]], texture2d<float, access::sample> tint_symbol_38 [[texture(3)]], sampler tint_symbol_39 [[sampler(2)]], bool gl_FrontFacing_param [[front_facing]], tint_symbol_2 tint_symbol_1 [[stage_in]], constant LeftOver& x_269 [[buffer(6)]], constant Light0& light0 [[buffer(5)]]) {
+fragment tint_symbol_3 tint_symbol(texture2d<float, access::sample> tint_symbol_36 [[texture(0)]], sampler tint_symbol_37 [[sampler(0)]], texture2d<float, access::sample> tint_symbol_38 [[texture(1)]], sampler tint_symbol_39 [[sampler(1)]], bool gl_FrontFacing_param [[front_facing]], tint_symbol_2 tint_symbol_1 [[stage_in]], constant LeftOver& x_269 [[buffer(0)]], constant Light0& light0 [[buffer(1)]]) {
   thread float2 tint_symbol_29 = 0.0f;
   thread float4 tint_symbol_30 = 0.0f;
   thread bool tint_symbol_31 = false;

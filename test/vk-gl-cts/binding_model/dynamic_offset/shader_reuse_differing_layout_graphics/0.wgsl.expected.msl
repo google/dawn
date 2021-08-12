@@ -31,7 +31,7 @@ main_out tint_symbol_inner(constant block0& x_8, float4 position_param, thread f
   return tint_symbol_4;
 }
 
-vertex tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]], constant block0& x_8 [[buffer(1)]]) {
+vertex tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]], constant block0& x_8 [[buffer(0)]]) {
   thread float4 tint_symbol_11 = 0.0f;
   thread float4 tint_symbol_12 = 0.0f;
   thread float4 tint_symbol_13 = 0.0f;

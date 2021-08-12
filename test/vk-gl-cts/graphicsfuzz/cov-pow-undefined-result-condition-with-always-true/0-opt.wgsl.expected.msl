@@ -68,7 +68,7 @@ main_out tint_symbol_inner(constant buf1& x_6, constant buf2& x_8, constant buf0
   return tint_symbol_2;
 }
 
-fragment tint_symbol_1 tint_symbol(constant buf1& x_6 [[buffer(1)]], constant buf2& x_8 [[buffer(2)]], constant buf0& x_10 [[buffer(0)]]) {
+fragment tint_symbol_1 tint_symbol(constant buf1& x_6 [[buffer(0)]], constant buf2& x_8 [[buffer(1)]], constant buf0& x_10 [[buffer(2)]]) {
   thread float4 tint_symbol_5 = 0.0f;
   main_out const inner_result = tint_symbol_inner(x_6, x_8, x_10, &(tint_symbol_5));
   tint_symbol_1 wrapper_result = {};

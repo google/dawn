@@ -58,7 +58,7 @@ void tint_symbol_1_inner(device ResultMatrix& resultMatrix, uint3 gl_GlobalInvoc
   main_1(resultMatrix, tint_symbol_3);
 }
 
-kernel void tint_symbol_1(uint3 gl_GlobalInvocationID_param [[thread_position_in_grid]], device ResultMatrix& resultMatrix [[buffer(2)]]) {
+kernel void tint_symbol_1(uint3 gl_GlobalInvocationID_param [[thread_position_in_grid]], device ResultMatrix& resultMatrix [[buffer(0)]]) {
   thread uint3 tint_symbol_4 = 0u;
   tint_symbol_1_inner(resultMatrix, gl_GlobalInvocationID_param, &(tint_symbol_4));
   return;

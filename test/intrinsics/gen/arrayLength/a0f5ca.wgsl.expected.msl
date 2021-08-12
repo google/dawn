@@ -12,7 +12,7 @@ struct tint_symbol {
 };
 
 void arrayLength_a0f5ca(constant tint_symbol_1& tint_symbol_2) {
-  uint res = ((tint_symbol_2.buffer_size[0u][1u] - 0u) / 4u);
+  uint res = ((tint_symbol_2.buffer_size[0u][0u] - 0u) / 4u);
 }
 
 float4 vertex_main_inner(constant tint_symbol_1& tint_symbol_2) {

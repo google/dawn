@@ -22,7 +22,7 @@ FragmentOutput tint_symbol_inner(FragmentInput fIn, depth2d<float, access::sampl
   return fOut;
 }
 
-fragment tint_symbol_3 tint_symbol(depth2d<float, access::sample> tint_symbol_7 [[texture(5)]], sampler tint_symbol_8 [[sampler(3)]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+fragment tint_symbol_3 tint_symbol(depth2d<float, access::sample> tint_symbol_7 [[texture(0)]], sampler tint_symbol_8 [[sampler(0)]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
   FragmentInput const tint_symbol_4 = {.vUv=tint_symbol_1.vUv};
   FragmentOutput const inner_result = tint_symbol_inner(tint_symbol_4, tint_symbol_7, tint_symbol_8);
   tint_symbol_3 wrapper_result = {};

@@ -686,10 +686,71 @@ bool GenerateWgsl(const tint::Program* program, const Options& options) {
 /// @returns true on success
 bool GenerateMsl(const tint::Program* program, const Options& options) {
 #if TINT_BUILD_MSL_WRITER
+  const tint::Program* input_program = program;
+
+  // Remap resource numbers to a flat namespace.
+  // TODO(crbug.com/tint/1101): Make this more robust for multiple entry points.
+  using BindingPoint = tint::transform::BindingPoint;
+  tint::transform::BindingRemapper::BindingPoints binding_points;
+  uint32_t next_buffer_idx = 0;
+  uint32_t next_sampler_idx = 0;
+  uint32_t next_texture_idx = 0;
+
+  tint::inspector::Inspector inspector(program);
+  auto entry_points = inspector.GetEntryPoints();
+  for (auto& entry_point : entry_points) {
+    auto bindings = inspector.GetResourceBindings(entry_point.name);
+    for (auto& binding : bindings) {
+      BindingPoint src = {binding.bind_group, binding.binding};
+      if (binding_points.count(src)) {
+        continue;
+      }
+      switch (binding.resource_type) {
+        case tint::inspector::ResourceBinding::ResourceType::kUniformBuffer:
+        case tint::inspector::ResourceBinding::ResourceType::kStorageBuffer:
+        case tint::inspector::ResourceBinding::ResourceType::
+            kReadOnlyStorageBuffer:
+          binding_points.emplace(src, BindingPoint{0, next_buffer_idx++});
+          break;
+        case tint::inspector::ResourceBinding::ResourceType::kSampler:
+        case tint::inspector::ResourceBinding::ResourceType::kComparisonSampler:
+          binding_points.emplace(src, BindingPoint{0, next_sampler_idx++});
+          break;
+        case tint::inspector::ResourceBinding::ResourceType::kSampledTexture:
+        case tint::inspector::ResourceBinding::ResourceType::
+            kMultisampledTexture:
+        case tint::inspector::ResourceBinding::ResourceType::
+            kReadOnlyStorageTexture:
+        case tint::inspector::ResourceBinding::ResourceType::
+            kWriteOnlyStorageTexture:
+        case tint::inspector::ResourceBinding::ResourceType::kDepthTexture:
+        case tint::inspector::ResourceBinding::ResourceType::
+            kDepthMultisampledTexture:
+        case tint::inspector::ResourceBinding::ResourceType::kExternalTexture:
+          binding_points.emplace(src, BindingPoint{0, next_texture_idx++});
+          break;
+      }
+    }
+  }
+
+  // Run the binding remapper transform.
+  tint::transform::Output transform_output;
+  if (!binding_points.empty()) {
+    tint::transform::Manager manager;
+    tint::transform::DataMap inputs;
+    inputs.Add<tint::transform::BindingRemapper::Remappings>(
+        std::move(binding_points),
+        tint::transform::BindingRemapper::AccessControls{},
+        /* mayCollide */ true);
+    manager.Add<tint::transform::BindingRemapper>();
+    transform_output = manager.Run(program, inputs);
+    input_program = &transform_output.program;
+  }
+
   // TODO(jrprice): Provide a way for the user to set non-default options.
   tint::writer::msl::Options gen_options;
   gen_options.disable_workgroup_init = options.disable_workgroup_init;
-  auto result = tint::writer::msl::Generate(program, gen_options);
+  auto result = tint::writer::msl::Generate(input_program, gen_options);
   if (!result.success) {
     PrintWGSL(std::cerr, *program);
     std::cerr << "Failed to generate: " << result.error << std::endl;

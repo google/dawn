@@ -205,7 +205,7 @@ main_out tint_symbol_inner(constant LeftOver& x_20, float2 tUV_param, float2 til
   return tint_symbol_4;
 }
 
-fragment tint_symbol_3 tint_symbol(texture2d<float, access::sample> tint_symbol_42 [[texture(6)]], sampler tint_symbol_43 [[sampler(4)]], texture2d<float, access::sample> tint_symbol_44 [[texture(5)]], texture2d<float, access::sample> tint_symbol_45 [[texture(8)]], sampler tint_symbol_46 [[sampler(7)]], texture2d<float, access::sample> tint_symbol_48 [[texture(3)]], sampler tint_symbol_49 [[sampler(2)]], texture2d<float, access::sample> tint_symbol_50 [[texture(1)]], sampler tint_symbol_51 [[sampler(0)]], tint_symbol_2 tint_symbol_1 [[stage_in]], constant LeftOver& x_20 [[buffer(9)]]) {
+fragment tint_symbol_3 tint_symbol(texture2d<float, access::sample> tint_symbol_42 [[texture(0)]], sampler tint_symbol_43 [[sampler(0)]], texture2d<float, access::sample> tint_symbol_44 [[texture(1)]], texture2d<float, access::sample> tint_symbol_45 [[texture(2)]], sampler tint_symbol_46 [[sampler(1)]], texture2d<float, access::sample> tint_symbol_48 [[texture(3)]], sampler tint_symbol_49 [[sampler(2)]], texture2d<float, access::sample> tint_symbol_50 [[texture(4)]], sampler tint_symbol_51 [[sampler(3)]], tint_symbol_2 tint_symbol_1 [[stage_in]], constant LeftOver& x_20 [[buffer(0)]]) {
   thread float2 tint_symbol_36 = 0.0f;
   thread float2 tint_symbol_37 = 0.0f;
   thread float2 tint_symbol_38 = 0.0f;

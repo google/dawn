@@ -263,7 +263,7 @@ main_out tint_symbol_inner(constant buf1& x_34, constant buf0& x_37, float4 x_GL
   return tint_symbol_4;
 }
 
-vertex tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]], constant buf1& x_34 [[buffer(1)]], constant buf0& x_37 [[buffer(0)]]) {
+vertex tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]], constant buf1& x_34 [[buffer(0)]], constant buf0& x_37 [[buffer(1)]]) {
   thread float4 tint_symbol_18 = 0.0f;
   thread float4 tint_symbol_19 = 0.0f;
   thread QuicksortObject tint_symbol_20 = {};

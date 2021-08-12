@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 
 using namespace metal;
@@ -20,15 +18,8 @@ int runTest(constant Constants& constants, device TestData& s) {
   return atomic_load_explicit(&(s.data.arr[(0u + uint(constants.zero))]), memory_order_relaxed);
 }
 
-kernel void tint_symbol(constant Constants& constants [[buffer(0)]], device Result& result [[buffer(1)]], device TestData& s [[buffer(0)]]) {
+kernel void tint_symbol(constant Constants& constants [[buffer(0)]], device Result& result [[buffer(1)]], device TestData& s [[buffer(2)]]) {
   result.value = uint(runTest(constants, s));
   return;
 }
-
-Compilation failed: 
-
-program_source:21:124: error: cannot reserve 'buffer' resource location at index 0
-kernel void tint_symbol(constant Constants& constants [[buffer(0)]], device Result& result [[buffer(1)]], device TestData& s [[buffer(0)]]) {
-                                                                                                                           ^
-
 

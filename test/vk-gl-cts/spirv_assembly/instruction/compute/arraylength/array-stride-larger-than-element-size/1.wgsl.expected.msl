@@ -32,7 +32,7 @@ void main_1(device Buf1& x_4, device Buf0& x_7) {
   return;
 }
 
-kernel void tint_symbol(device Buf1& x_4 [[buffer(1)]], device Buf0& x_7 [[buffer(0)]]) {
+kernel void tint_symbol(device Buf1& x_4 [[buffer(0)]], device Buf0& x_7 [[buffer(1)]]) {
   main_1(x_4, x_7);
   return;
 }

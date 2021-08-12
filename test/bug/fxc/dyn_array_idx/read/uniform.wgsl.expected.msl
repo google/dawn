@@ -16,7 +16,7 @@ struct Result {
   /* 0x0000 */ int out;
 };
 
-kernel void f(constant UBO& ubo [[buffer(0)]], device Result& result [[buffer(2)]]) {
+kernel void f(constant UBO& ubo [[buffer(0)]], device Result& result [[buffer(1)]]) {
   result.out = ubo.data.arr[ubo.dynamic_idx].el;
   return;
 }

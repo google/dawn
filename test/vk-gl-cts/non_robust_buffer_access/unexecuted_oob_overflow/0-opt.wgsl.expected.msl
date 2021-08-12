@@ -104,7 +104,7 @@ void tint_symbol_inner(const device In2& x_13, const device In1& x_17, device Ou
   main_1(x_13, x_17, x_15, x_19, tint_symbol_2);
 }
 
-kernel void tint_symbol(uint3 gl_WorkGroupID_param [[threadgroup_position_in_grid]], const device In2& x_13 [[buffer(2)]], const device In1& x_17 [[buffer(1)]], device Out0& x_15 [[buffer(3)]], const device In0& x_19 [[buffer(0)]]) {
+kernel void tint_symbol(uint3 gl_WorkGroupID_param [[threadgroup_position_in_grid]], const device In2& x_13 [[buffer(1)]], const device In1& x_17 [[buffer(2)]], device Out0& x_15 [[buffer(0)]], const device In0& x_19 [[buffer(3)]]) {
   thread uint3 tint_symbol_3 = 0u;
   tint_symbol_inner(x_13, x_17, x_15, x_19, gl_WorkGroupID_param, &(tint_symbol_3));
   return;

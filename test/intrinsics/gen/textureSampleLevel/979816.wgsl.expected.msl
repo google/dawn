@@ -14,19 +14,19 @@ float4 vertex_main_inner(texture2d<float, access::sample> tint_symbol_3, sampler
   return float4();
 }
 
-vertex tint_symbol vertex_main(texture2d<float, access::sample> tint_symbol_5 [[texture(0)]], sampler tint_symbol_6 [[sampler(1)]]) {
+vertex tint_symbol vertex_main(texture2d<float, access::sample> tint_symbol_5 [[texture(0)]], sampler tint_symbol_6 [[sampler(0)]]) {
   float4 const inner_result = vertex_main_inner(tint_symbol_5, tint_symbol_6);
   tint_symbol wrapper_result = {};
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
 
-fragment void fragment_main(texture2d<float, access::sample> tint_symbol_7 [[texture(0)]], sampler tint_symbol_8 [[sampler(1)]]) {
+fragment void fragment_main(texture2d<float, access::sample> tint_symbol_7 [[texture(0)]], sampler tint_symbol_8 [[sampler(0)]]) {
   textureSampleLevel_979816(tint_symbol_7, tint_symbol_8);
   return;
 }
 
-kernel void compute_main(texture2d<float, access::sample> tint_symbol_9 [[texture(0)]], sampler tint_symbol_10 [[sampler(1)]]) {
+kernel void compute_main(texture2d<float, access::sample> tint_symbol_9 [[texture(0)]], sampler tint_symbol_10 [[sampler(0)]]) {
   textureSampleLevel_979816(tint_symbol_9, tint_symbol_10);
   return;
 }

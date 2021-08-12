@@ -95,7 +95,7 @@ void main_1(constant buf1& x_6, device theSSBO& x_4) {
   return;
 }
 
-kernel void tint_symbol(constant buf1& x_6 [[buffer(1)]], device theSSBO& x_4 [[buffer(0)]]) {
+kernel void tint_symbol(constant buf1& x_6 [[buffer(0)]], device theSSBO& x_4 [[buffer(1)]]) {
   main_1(x_6, x_4);
   return;
 }

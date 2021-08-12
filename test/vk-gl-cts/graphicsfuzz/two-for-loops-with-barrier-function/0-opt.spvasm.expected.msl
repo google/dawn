@@ -82,7 +82,7 @@ void main_1(constant buf0& x_9, device doesNotMatter& x_12, thread float4* const
   return;
 }
 
-kernel void tint_symbol(constant buf0& x_9 [[buffer(1)]], device doesNotMatter& x_12 [[buffer(0)]]) {
+kernel void tint_symbol(constant buf0& x_9 [[buffer(0)]], device doesNotMatter& x_12 [[buffer(1)]]) {
   thread float4 tint_symbol_2 = 0.0f;
   main_1(x_9, x_12, &(tint_symbol_2));
   return;

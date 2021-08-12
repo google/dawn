@@ -10,7 +10,7 @@ void main_1(device block0& x_4) {
   return;
 }
 
-kernel void tint_symbol(device block0& x_4 [[buffer(1)]]) {
+kernel void tint_symbol(device block0& x_4 [[buffer(0)]]) {
   main_1(x_4);
   return;
 }

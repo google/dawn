@@ -283,7 +283,7 @@ VertexOutput tint_symbol_inner(constant ub_PacketParams& global2, constant ub_Sc
   return tint_symbol_4;
 }
 
-vertex tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]], constant ub_PacketParams& global2 [[buffer(2)]], constant ub_SceneParams& global [[buffer(0)]], constant ub_MaterialParams& global1 [[buffer(1)]]) {
+vertex tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]], constant ub_PacketParams& global2 [[buffer(0)]], constant ub_SceneParams& global [[buffer(1)]], constant ub_MaterialParams& global1 [[buffer(2)]]) {
   thread float3 tint_symbol_21 = 0.0f;
   thread float2 tint_symbol_22 = 0.0f;
   thread float4 tint_symbol_23 = 0.0f;

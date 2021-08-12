@@ -10,7 +10,7 @@ void tint_symbol_inner(device Result& result, uint3 GlobalInvocationId, depth2d<
   result.values[((GlobalInvocationId.y * width) + GlobalInvocationId.x)] = tint_symbol_1.read(uint2(int2(int(GlobalInvocationId.x), int(GlobalInvocationId.y))), 0);
 }
 
-kernel void tint_symbol(depth2d<float, access::sample> tint_symbol_2 [[texture(0)]], uint3 GlobalInvocationId [[thread_position_in_grid]], device Result& result [[buffer(1)]]) {
+kernel void tint_symbol(depth2d<float, access::sample> tint_symbol_2 [[texture(0)]], uint3 GlobalInvocationId [[thread_position_in_grid]], device Result& result [[buffer(0)]]) {
   tint_symbol_inner(result, GlobalInvocationId, tint_symbol_2);
   return;
 }

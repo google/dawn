@@ -66,7 +66,7 @@ void tint_symbol_1_inner(constant Uniforms& x_24, const device ssbA& x_20, devic
   main_1(x_24, x_20, x_16, tint_symbol_4);
 }
 
-kernel void tint_symbol_1(uint3 gl_GlobalInvocationID_param [[thread_position_in_grid]], constant Uniforms& x_24 [[buffer(2)]], const device ssbA& x_20 [[buffer(1)]], device ssbOut& x_16 [[buffer(0)]]) {
+kernel void tint_symbol_1(uint3 gl_GlobalInvocationID_param [[thread_position_in_grid]], constant Uniforms& x_24 [[buffer(0)]], const device ssbA& x_20 [[buffer(2)]], device ssbOut& x_16 [[buffer(1)]]) {
   thread uint3 tint_symbol_5 = 0u;
   tint_symbol_1_inner(x_24, x_20, x_16, gl_GlobalInvocationID_param, &(tint_symbol_5));
   return;

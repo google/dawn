@@ -1599,17 +1599,22 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
       if (type->Is<sem::Struct>()) {
         out << " [[stage_in]]";
       } else if (var->type()->is_handle()) {
-        auto* binding =
-            ast::GetDecoration<ast::BindingDecoration>(var->decorations());
-        if (binding == nullptr) {
+        auto bp = var->binding_point();
+        if (bp.group == nullptr || bp.binding == nullptr) {
           TINT_ICE(Writer, diagnostics_)
-              << "missing binding attribute for entry point parameter";
+              << "missing binding attributes for entry point parameter";
+          return false;
+        }
+        if (bp.group->value() != 0) {
+          TINT_ICE(Writer, diagnostics_)
+              << "encountered non-zero resource group index (use "
+                 "BindingRemapper to fix)";
           return false;
         }
         if (var->type()->Is<ast::Sampler>()) {
-          out << " [[sampler(" << binding->value() << ")]]";
+          out << " [[sampler(" << bp.binding->value() << ")]]";
         } else if (var->type()->Is<ast::Texture>()) {
-          out << " [[texture(" << binding->value() << ")]]";
+          out << " [[texture(" << bp.binding->value() << ")]]";
         } else {
           TINT_ICE(Writer, diagnostics_)
               << "invalid handle type entry point parameter";

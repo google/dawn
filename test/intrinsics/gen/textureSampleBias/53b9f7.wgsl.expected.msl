@@ -5,7 +5,7 @@ void textureSampleBias_53b9f7(texturecube<float, access::sample> tint_symbol, sa
   float4 res = tint_symbol.sample(tint_symbol_1, float3(), bias(1.0f));
 }
 
-fragment void fragment_main(texturecube<float, access::sample> tint_symbol_2 [[texture(0)]], sampler tint_symbol_3 [[sampler(1)]]) {
+fragment void fragment_main(texturecube<float, access::sample> tint_symbol_2 [[texture(0)]], sampler tint_symbol_3 [[sampler(0)]]) {
   textureSampleBias_53b9f7(tint_symbol_2, tint_symbol_3);
   return;
 }

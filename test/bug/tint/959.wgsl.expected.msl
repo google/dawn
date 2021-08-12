@@ -1,0 +1,59 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  /* 0x0000 */ float a;
+};
+
+fragment void tint_symbol(texture2d<float, access::sample> tint_symbol_1 [[texture(0)]], texture2d<float, access::sample> tint_symbol_2 [[texture(1)]], texture2d<float, access::sample> tint_symbol_3 [[texture(2)]], texture2d<float, access::sample> tint_symbol_4 [[texture(3)]], texture2d<float, access::sample> tint_symbol_5 [[texture(4)]], texture2d<float, access::sample> tint_symbol_6 [[texture(5)]], texture2d<float, access::sample> tint_symbol_7 [[texture(6)]], texture2d<float, access::sample> tint_symbol_8 [[texture(7)]], depth2d<float, access::sample> tint_symbol_9 [[texture(8)]], depth2d<float, access::sample> tint_symbol_10 [[texture(9)]], depth2d<float, access::sample> tint_symbol_11 [[texture(10)]], depth2d<float, access::sample> tint_symbol_12 [[texture(11)]], depth2d<float, access::sample> tint_symbol_13 [[texture(12)]], depth2d<float, access::sample> tint_symbol_14 [[texture(13)]], depth2d<float, access::sample> tint_symbol_15 [[texture(14)]], depth2d<float, access::sample> tint_symbol_16 [[texture(15)]], sampler tint_symbol_17 [[sampler(0)]], sampler tint_symbol_18 [[sampler(1)]], sampler tint_symbol_19 [[sampler(2)]], sampler tint_symbol_20 [[sampler(3)]], sampler tint_symbol_21 [[sampler(4)]], sampler tint_symbol_22 [[sampler(5)]], sampler tint_symbol_23 [[sampler(6)]], sampler tint_symbol_24 [[sampler(7)]], sampler tint_symbol_25 [[sampler(8)]], sampler tint_symbol_26 [[sampler(9)]], sampler tint_symbol_27 [[sampler(10)]], sampler tint_symbol_28 [[sampler(11)]], sampler tint_symbol_29 [[sampler(12)]], sampler tint_symbol_30 [[sampler(13)]], sampler tint_symbol_31 [[sampler(14)]], sampler tint_symbol_32 [[sampler(15)]], constant S& b8 [[buffer(0)]], constant S& b9 [[buffer(1)]], constant S& b10 [[buffer(2)]], constant S& b11 [[buffer(3)]], constant S& b12 [[buffer(4)]], constant S& b13 [[buffer(5)]], constant S& b14 [[buffer(6)]], constant S& b15 [[buffer(7)]], const device S& b0 [[buffer(8)]], const device S& b1 [[buffer(9)]], const device S& b2 [[buffer(10)]], const device S& b3 [[buffer(11)]], const device S& b4 [[buffer(12)]], const device S& b5 [[buffer(13)]], const device S& b6 [[buffer(14)]], const device S& b7 [[buffer(15)]]) {
+  (void) b0;
+  (void) b1;
+  (void) b2;
+  (void) b3;
+  (void) b4;
+  (void) b5;
+  (void) b6;
+  (void) b7;
+  (void) b8;
+  (void) b9;
+  (void) b10;
+  (void) b11;
+  (void) b12;
+  (void) b13;
+  (void) b14;
+  (void) b15;
+  (void) tint_symbol_1;
+  (void) tint_symbol_2;
+  (void) tint_symbol_3;
+  (void) tint_symbol_4;
+  (void) tint_symbol_5;
+  (void) tint_symbol_6;
+  (void) tint_symbol_7;
+  (void) tint_symbol_8;
+  (void) tint_symbol_9;
+  (void) tint_symbol_10;
+  (void) tint_symbol_11;
+  (void) tint_symbol_12;
+  (void) tint_symbol_13;
+  (void) tint_symbol_14;
+  (void) tint_symbol_15;
+  (void) tint_symbol_16;
+  (void) tint_symbol_17;
+  (void) tint_symbol_18;
+  (void) tint_symbol_19;
+  (void) tint_symbol_20;
+  (void) tint_symbol_21;
+  (void) tint_symbol_22;
+  (void) tint_symbol_23;
+  (void) tint_symbol_24;
+  (void) tint_symbol_25;
+  (void) tint_symbol_26;
+  (void) tint_symbol_27;
+  (void) tint_symbol_28;
+  (void) tint_symbol_29;
+  (void) tint_symbol_30;
+  (void) tint_symbol_31;
+  (void) tint_symbol_32;
+  return;
+}
+

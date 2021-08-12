@@ -24,7 +24,7 @@ void tint_symbol_inner(constant Uniforms& uniforms, const device Matrix& firstMa
   resultMatrix.numbers[index] = result;
 }
 
-kernel void tint_symbol(uint3 global_id [[thread_position_in_grid]], constant Uniforms& uniforms [[buffer(3)]], const device Matrix& firstMatrix [[buffer(0)]], const device Matrix& secondMatrix [[buffer(1)]], device Matrix& resultMatrix [[buffer(2)]]) {
+kernel void tint_symbol(uint3 global_id [[thread_position_in_grid]], constant Uniforms& uniforms [[buffer(0)]], const device Matrix& firstMatrix [[buffer(2)]], const device Matrix& secondMatrix [[buffer(3)]], device Matrix& resultMatrix [[buffer(1)]]) {
   tint_symbol_inner(uniforms, firstMatrix, secondMatrix, resultMatrix, global_id);
   return;
 }

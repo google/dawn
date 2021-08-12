@@ -53,7 +53,7 @@ float4 fs_main_inner(float2 texcoord, texture2d<float, access::sample> tint_symb
   return srcColor;
 }
 
-fragment tint_symbol_3 fs_main(texture2d<float, access::sample> tint_symbol_6 [[texture(2)]], sampler tint_symbol_7 [[sampler(1)]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+fragment tint_symbol_3 fs_main(texture2d<float, access::sample> tint_symbol_6 [[texture(0)]], sampler tint_symbol_7 [[sampler(0)]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
   float4 const inner_result_1 = fs_main_inner(tint_symbol_1.texcoord, tint_symbol_6, tint_symbol_7);
   tint_symbol_3 wrapper_result_1 = {};
   wrapper_result_1.value = inner_result_1;

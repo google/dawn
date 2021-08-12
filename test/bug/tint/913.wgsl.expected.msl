@@ -45,7 +45,7 @@ void tint_symbol_inner(constant Uniforms& uniforms, device OutputBuf& output, ui
   }
 }
 
-kernel void tint_symbol(texture2d<float, access::sample> tint_symbol_3 [[texture(0)]], texture2d<float, access::sample> tint_symbol_4 [[texture(1)]], uint3 GlobalInvocationID [[thread_position_in_grid]], constant Uniforms& uniforms [[buffer(3)]], device OutputBuf& output [[buffer(2)]]) {
+kernel void tint_symbol(texture2d<float, access::sample> tint_symbol_3 [[texture(0)]], texture2d<float, access::sample> tint_symbol_4 [[texture(1)]], uint3 GlobalInvocationID [[thread_position_in_grid]], constant Uniforms& uniforms [[buffer(0)]], device OutputBuf& output [[buffer(1)]]) {
   tint_symbol_inner(uniforms, output, GlobalInvocationID, tint_symbol_3, tint_symbol_4);
   return;
 }

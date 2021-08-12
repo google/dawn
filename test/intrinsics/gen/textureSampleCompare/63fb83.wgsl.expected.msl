@@ -5,7 +5,7 @@ void textureSampleCompare_63fb83(depthcube<float, access::sample> tint_symbol, s
   float res = tint_symbol.sample_compare(tint_symbol_1, float3(), 1.0f);
 }
 
-fragment void fragment_main(depthcube<float, access::sample> tint_symbol_2 [[texture(0)]], sampler tint_symbol_3 [[sampler(1)]]) {
+fragment void fragment_main(depthcube<float, access::sample> tint_symbol_2 [[texture(0)]], sampler tint_symbol_3 [[sampler(0)]]) {
   textureSampleCompare_63fb83(tint_symbol_2, tint_symbol_3);
   return;
 }

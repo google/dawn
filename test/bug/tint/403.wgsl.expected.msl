@@ -1,19 +1,35 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
+using namespace metal;
+struct vertexUniformBuffer1 {
+  /* 0x0000 */ float2x2 transform1;
+};
+struct vertexUniformBuffer2 {
+  /* 0x0000 */ float2x2 transform2;
+};
+struct tint_symbol_1 {
+  float4 value [[position]];
+};
+struct tint_array_wrapper {
+  float2 arr[3];
+};
 
+float4 tint_symbol_inner(constant vertexUniformBuffer1& x_20, constant vertexUniformBuffer2& x_26, uint gl_VertexIndex) {
+  tint_array_wrapper indexable = {};
+  float2x2 const x_23 = x_20.transform1;
+  float2x2 const x_28 = x_26.transform2;
+  uint const x_46 = gl_VertexIndex;
+  tint_array_wrapper const tint_symbol_2 = {.arr={float2(-1.0f, 1.0f), float2(1.0f, 1.0f), float2(-1.0f, -1.0f)}};
+  indexable = tint_symbol_2;
+  float2 const x_51 = indexable.arr[x_46];
+  float2 const x_52 = (float2x2((x_23[0u] + x_28[0u]), (x_23[1u] + x_28[1u])) * x_51);
+  return float4(x_52.x, x_52.y, 0.0f, 1.0f);
+}
 
-Validation Failure:
+vertex tint_symbol_1 tint_symbol(uint gl_VertexIndex [[vertex_id]], constant vertexUniformBuffer1& x_20 [[buffer(0)]], constant vertexUniformBuffer2& x_26 [[buffer(1)]]) {
+  float4 const inner_result = tint_symbol_inner(x_20, x_26, gl_VertexIndex);
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
 
-Compilation failed: 
-
-program_source:17:55: error: type 'int' is not valid for attribute 'vertex_id'
-vertex tint_symbol_2 tint_symbol(int gl_VertexIndex [[vertex_id]], constant vertexUniformBuffer1& x_20 [[buffer(0)]], constant vertexUniformBuffer2& x_26 [[buffer(0)]]) {
-                                                      ^~~~~~~~~
-program_source:18:37: warning: suggest braces around initialization of subobject
-  tint_array_wrapper_0 indexable = {0.0f};
-                                    ^~~~
-                                    {   }
-program_source:22:47: warning: suggest braces around initialization of subobject
-  tint_array_wrapper_0 const tint_symbol_3 = {float2(-1.0f, 1.0f), float2(1.0f, 1.0f), float2(-1.0f, -1.0f)};
-                                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                                              {                                                            }

@@ -128,7 +128,7 @@ main_out tint_symbol_inner(constant buf2& x_10, constant buf0& x_12, constant bu
   return tint_symbol_2;
 }
 
-fragment tint_symbol_1 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf2& x_10 [[buffer(2)]], constant buf0& x_12 [[buffer(0)]], constant buf1& x_16 [[buffer(1)]]) {
+fragment tint_symbol_1 tint_symbol(float4 gl_FragCoord_param [[position]], constant buf2& x_10 [[buffer(0)]], constant buf0& x_12 [[buffer(1)]], constant buf1& x_16 [[buffer(2)]]) {
   thread float4 tint_symbol_12 = 0.0f;
   thread float4x2 tint_symbol_13 = float4x2(0.0f);
   thread float4 tint_symbol_14 = 0.0f;

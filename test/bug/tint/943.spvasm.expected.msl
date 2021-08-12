@@ -499,7 +499,7 @@ void tint_symbol_1_inner(constant Uniforms& x_48, const device ssbA& x_165, cons
   main_1(x_48, x_165, x_185, x_54, tint_symbol_29, tint_symbol_30, tint_symbol_31, tint_symbol_28, tint_symbol_32, tint_symbol_27, tint_symbol_26, tint_symbol_25);
 }
 
-kernel void tint_symbol_1(uint3 gl_LocalInvocationID_param [[thread_position_in_threadgroup]], uint3 gl_GlobalInvocationID_param [[thread_position_in_grid]], uint local_invocation_index [[thread_index_in_threadgroup]], constant Uniforms& x_48 [[buffer(3)]], const device ssbA& x_165 [[buffer(1)]], const device ssbB& x_185 [[buffer(2)]], device ssbOut& x_54 [[buffer(0)]]) {
+kernel void tint_symbol_1(uint3 gl_LocalInvocationID_param [[thread_position_in_threadgroup]], uint3 gl_GlobalInvocationID_param [[thread_position_in_grid]], uint local_invocation_index [[thread_index_in_threadgroup]], constant Uniforms& x_48 [[buffer(0)]], const device ssbA& x_165 [[buffer(2)]], const device ssbB& x_185 [[buffer(3)]], device ssbOut& x_54 [[buffer(1)]]) {
   threadgroup tint_array_wrapper_2 tint_symbol_33;
   threadgroup tint_array_wrapper tint_symbol_34;
   thread uint3 tint_symbol_35 = 0u;

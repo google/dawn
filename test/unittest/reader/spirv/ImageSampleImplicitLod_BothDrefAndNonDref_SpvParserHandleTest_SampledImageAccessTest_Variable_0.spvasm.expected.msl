@@ -24,7 +24,7 @@ void main_1(depth2d<float, access::sample> tint_symbol_1, sampler tint_symbol_2,
   return;
 }
 
-fragment void tint_symbol(depth2d<float, access::sample> tint_symbol_4 [[texture(1)]], sampler tint_symbol_5 [[sampler(0)]], sampler tint_symbol_6 [[sampler(1)]]) {
+fragment void tint_symbol(depth2d<float, access::sample> tint_symbol_4 [[texture(0)]], sampler tint_symbol_5 [[sampler(0)]], sampler tint_symbol_6 [[sampler(1)]]) {
   main_1(tint_symbol_4, tint_symbol_5, tint_symbol_6);
   return;
 }

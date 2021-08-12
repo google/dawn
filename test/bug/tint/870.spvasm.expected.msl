@@ -26,7 +26,7 @@ void main_1(const device x_B4_BuildInformation& sspp962805860buildInformation) {
   return;
 }
 
-fragment void tint_symbol(const device x_B4_BuildInformation& sspp962805860buildInformation [[buffer(2)]]) {
+fragment void tint_symbol(const device x_B4_BuildInformation& sspp962805860buildInformation [[buffer(0)]]) {
   main_1(sspp962805860buildInformation);
   return;
 }

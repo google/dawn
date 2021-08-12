@@ -23,7 +23,7 @@ void main_1(depthcube_array<float, access::sample> tint_symbol_1, sampler tint_s
   return;
 }
 
-fragment void tint_symbol(depthcube_array<float, access::sample> tint_symbol_3 [[texture(1)]], sampler tint_symbol_4 [[sampler(0)]]) {
+fragment void tint_symbol(depthcube_array<float, access::sample> tint_symbol_3 [[texture(0)]], sampler tint_symbol_4 [[sampler(0)]]) {
   main_1(tint_symbol_3, tint_symbol_4);
   return;
 }

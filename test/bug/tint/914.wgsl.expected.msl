@@ -111,7 +111,7 @@ void tint_symbol_inner(constant Uniforms& uniforms, const device Matrix& firstMa
   }
 }
 
-kernel void tint_symbol(uint3 local_id [[thread_position_in_threadgroup]], uint3 global_id [[thread_position_in_grid]], uint local_invocation_index [[thread_index_in_threadgroup]], constant Uniforms& uniforms [[buffer(3)]], const device Matrix& firstMatrix [[buffer(0)]], const device Matrix& secondMatrix [[buffer(1)]], device Matrix& resultMatrix [[buffer(2)]]) {
+kernel void tint_symbol(uint3 local_id [[thread_position_in_threadgroup]], uint3 global_id [[thread_position_in_grid]], uint local_invocation_index [[thread_index_in_threadgroup]], constant Uniforms& uniforms [[buffer(0)]], const device Matrix& firstMatrix [[buffer(2)]], const device Matrix& secondMatrix [[buffer(3)]], device Matrix& resultMatrix [[buffer(1)]]) {
   threadgroup tint_array_wrapper tint_symbol_3;
   threadgroup tint_array_wrapper tint_symbol_4;
   tint_symbol_inner(uniforms, firstMatrix, secondMatrix, resultMatrix, local_id, global_id, local_invocation_index, &(tint_symbol_3), &(tint_symbol_4));

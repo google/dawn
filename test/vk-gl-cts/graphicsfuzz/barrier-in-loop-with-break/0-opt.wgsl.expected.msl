@@ -53,7 +53,7 @@ void tint_symbol_inner(constant buf1& x_10, device doesNotMatter& x_7, uint3 gl_
   main_1(x_10, x_7, tint_symbol_2);
 }
 
-kernel void tint_symbol(uint3 gl_LocalInvocationID_param [[thread_position_in_threadgroup]], constant buf1& x_10 [[buffer(1)]], device doesNotMatter& x_7 [[buffer(0)]]) {
+kernel void tint_symbol(uint3 gl_LocalInvocationID_param [[thread_position_in_threadgroup]], constant buf1& x_10 [[buffer(0)]], device doesNotMatter& x_7 [[buffer(1)]]) {
   thread uint3 tint_symbol_3 = 0u;
   tint_symbol_inner(x_10, x_7, gl_LocalInvocationID_param, &(tint_symbol_3));
   return;
