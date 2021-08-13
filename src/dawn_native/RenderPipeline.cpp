@@ -259,11 +259,6 @@ namespace dawn_native {
                    blendFactor == wgpu::BlendFactor::SrcAlphaSaturated;
         }
 
-        bool BlendFactorContainsSrc(const wgpu::BlendFactor& blendFactor) {
-            return blendFactor == wgpu::BlendFactor::Src ||
-                   blendFactor == wgpu::BlendFactor::OneMinusSrc;
-        }
-
         MaybeError ValidateColorTargetState(
             DeviceBase* device,
             const ColorTargetState* descriptor,
@@ -310,13 +305,6 @@ namespace dawn_native {
                             BlendFactorContainsSrcAlpha(descriptor->blend->color.dstFactor)) {
                             return DAWN_VALIDATION_ERROR(
                                 "Color blending factor is reading alpha but it is missing from "
-                                "fragment output");
-                        }
-                        if (descriptor->blend->alpha.srcFactor != wgpu::BlendFactor::Zero ||
-                            BlendFactorContainsSrc(descriptor->blend->alpha.dstFactor) ||
-                            BlendFactorContainsSrcAlpha(descriptor->blend->alpha.dstFactor)) {
-                            return DAWN_VALIDATION_ERROR(
-                                "Alpha blending factor is reading alpha but it is missing from "
                                 "fragment output");
                         }
                     }

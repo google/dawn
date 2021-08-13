@@ -329,15 +329,7 @@ TEST_F(RenderPipelineValidationTest, FragmentOutputComponentCountCompatibility) 
                                 if (BlendFactorContainsSrcAlpha(
                                         descriptor.cTargets[0].blend->color.srcFactor) ||
                                     BlendFactorContainsSrcAlpha(
-                                        descriptor.cTargets[0].blend->color.dstFactor) ||
-                                    descriptor.cTargets[0].blend->alpha.srcFactor !=
-                                        wgpu::BlendFactor::Zero ||
-                                    descriptor.cTargets[0].blend->alpha.dstFactor ==
-                                        wgpu::BlendFactor::Src ||
-                                    descriptor.cTargets[0].blend->alpha.dstFactor ==
-                                        wgpu::BlendFactor::OneMinusSrc ||
-                                    BlendFactorContainsSrcAlpha(
-                                        descriptor.cTargets[0].blend->alpha.dstFactor)) {
+                                        descriptor.cTargets[0].blend->color.dstFactor)) {
                                     valid = componentCount == 4;
                                 }
                             } else {
