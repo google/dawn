@@ -2148,6 +2148,44 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Struct_Empty) {
 }
 }  // namespace StructConstructor
 
+TEST_F(ResolverTypeConstructorValidationTest, NonConstructibleType_Atomic) {
+  WrapInFunction(
+      Call("ignore", Construct(Source{{12, 34}}, ty.atomic(ty.i32()))));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: type is not constructible");
+}
+
+TEST_F(ResolverTypeConstructorValidationTest,
+       NonConstructibleType_AtomicArray) {
+  WrapInFunction(Call(
+      "ignore", Construct(ty.array(ty.atomic(Source{{12, 34}}, ty.i32()), 4))));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: array constructor has non-constructible element type");
+}
+
+TEST_F(ResolverTypeConstructorValidationTest,
+       NonConstructibleType_AtomicStructMember) {
+  auto* str = Structure("S", {Member("a", ty.atomic(ty.i32()))});
+  WrapInFunction(Call("ignore", Construct(Source{{12, 34}}, ty.Of(str))));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: struct constructor has non-constructible type");
+}
+
+TEST_F(ResolverTypeConstructorValidationTest, NonConstructibleType_Sampler) {
+  WrapInFunction(Call(
+      "ignore",
+      Construct(Source{{12, 34}}, ty.sampler(ast::SamplerKind::kSampler))));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: type is not constructible");
+}
+
 }  // namespace
 }  // namespace resolver
 }  // namespace tint

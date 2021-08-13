@@ -919,7 +919,7 @@ TEST_F(ResolverTest, Expr_Constructor_Cast_Pointer) {
   WrapInFunction(Decl(vf), Decl(ip));
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:34 error: cannot cast to a pointer");
+  EXPECT_EQ(r()->error(), "12:34 error: type is not constructible");
 }
 
 }  // namespace

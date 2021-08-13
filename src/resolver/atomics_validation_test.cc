@@ -327,14 +327,6 @@ TEST_F(ResolverAtomicValidationTest, Local) {
             "12:34 error: function variable must have a constructible type");
 }
 
-TEST_F(ResolverAtomicValidationTest, NoAtomicExpr) {
-  WrapInFunction(Construct(Source{{12, 34}}, ty.atomic<u32>()));
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: an expression must not evaluate to an atomic type");
-}
-
 }  // namespace
 }  // namespace resolver
 }  // namespace tint

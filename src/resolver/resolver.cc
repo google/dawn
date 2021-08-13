@@ -2241,13 +2241,6 @@ bool Resolver::Expression(ast::Expression* expr) {
     return false;
   }
 
-  auto* ty = TypeOf(expr);
-  if (ty->Is<sem::Atomic>()) {
-    AddError("an expression must not evaluate to an atomic type",
-             expr->source());
-    return false;
-  }
-
   return true;
 }
 
@@ -2600,11 +2593,6 @@ bool Resolver::Constructor(ast::ConstructorExpression* expr) {
     // Now that the argument types have been determined, make sure that they
     // obey the constructor type rules laid out in
     // https://gpuweb.github.io/gpuweb/wgsl.html#type-constructor-expr.
-    if (type->Is<sem::Pointer>()) {
-      AddError("cannot cast to a pointer", expr->source());
-      return false;
-    }
-
     bool ok = true;
     if (auto* vec_type = type->As<sem::Vector>()) {
       ok = ValidateVectorConstructor(type_ctor, vec_type, type_name);
@@ -2616,6 +2604,9 @@ bool Resolver::Constructor(ast::ConstructorExpression* expr) {
       ok = ValidateArrayConstructor(type_ctor, arr_type);
     } else if (auto* struct_type = type->As<sem::Struct>()) {
       ok = ValidateStructureConstructor(type_ctor, struct_type);
+    } else {
+      AddError("type is not constructible", type_ctor->source());
+      return false;
     }
     if (!ok) {
       return false;
@@ -2641,6 +2632,11 @@ bool Resolver::Constructor(ast::ConstructorExpression* expr) {
 bool Resolver::ValidateStructureConstructor(
     const ast::TypeConstructorExpression* ctor,
     const sem::Struct* struct_type) {
+  if (!struct_type->IsConstructible()) {
+    AddError("struct constructor has non-constructible type", ctor->source());
+    return false;
+  }
+
   if (ctor->values().size() > 0) {
     if (ctor->values().size() != struct_type->Members().size()) {
       std::string fm = ctor->values().size() < struct_type->Members().size()
@@ -2688,6 +2684,10 @@ bool Resolver::ValidateArrayConstructor(
 
   if (array_type->IsRuntimeSized()) {
     AddError("cannot init a runtime-sized array", ctor->source());
+    return false;
+  } else if (!elem_type->IsConstructible()) {
+    AddError("array constructor has non-constructible element type",
+             ctor->type()->As<ast::Array>()->type()->source());
     return false;
   } else if (!values.empty() && (values.size() != array_type->Count())) {
     std::string fm = values.size() < array_type->Count() ? "few" : "many";
