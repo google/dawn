@@ -4330,6 +4330,10 @@ bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
              a->source());
     return false;
   }
+  if (!storage_type->IsConstructible()) {
+    AddError("storage type of assignment must be constructible", a->source());
+    return false;
+  }
   if (lhs_ref->Access() == ast::Access::kRead) {
     AddError(
         "cannot store into a read-only type '" + TypeNameOf(a->lhs()) + "'",

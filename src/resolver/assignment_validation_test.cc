@@ -177,7 +177,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignToConstant_Fail) {
             "12:34 error: cannot assign to const\nnote: 'a' is declared here:");
 }
 
-TEST_F(ResolverAssignmentValidationTest, AssignNonStorable_Fail) {
+TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Handle) {
   // var a : texture_storage_1d<rgba8unorm, read>;
   // var b : texture_storage_1d<rgba8unorm, read>;
   // a = b;
@@ -203,8 +203,51 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonStorable_Fail) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "56:78 error: cannot store into a read-only type "
-            "'texture_storage_1d<rgba8unorm, read>'");
+            "56:78 error: storage type of assignment must be constructible");
+}
+
+TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Atomic) {
+  // [[block]] struct S { a : atomic<i32>; };
+  // [[group(0), binding(0)]] var<storage, read_write> v : S;
+  // v.a = v.a;
+
+  auto* s = Structure("S", {Member("a", ty.atomic(ty.i32()))},
+                      {create<ast::StructBlockDecoration>()});
+  Global(Source{{12, 34}}, "v", ty.Of(s), ast::StorageClass::kStorage,
+         ast::Access::kReadWrite,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
+
+  WrapInFunction(Assign(Source{{56, 78}}, MemberAccessor("v", "a"),
+                        MemberAccessor("v", "a")));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "56:78 error: storage type of assignment must be constructible");
+}
+
+TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_RuntimeArray) {
+  // [[block]] struct S { a : array<f32>; };
+  // [[group(0), binding(0)]] var<storage, read_write> v : S;
+  // v.a = v.a;
+
+  auto* s = Structure("S", {Member("a", ty.array(ty.f32()))},
+                      {create<ast::StructBlockDecoration>()});
+  Global(Source{{12, 34}}, "v", ty.Of(s), ast::StorageClass::kStorage,
+         ast::Access::kReadWrite,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
+
+  WrapInFunction(Assign(Source{{56, 78}}, MemberAccessor("v", "a"),
+                        MemberAccessor("v", "a")));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "56:78 error: storage type of assignment must be constructible");
 }
 
 }  // namespace
