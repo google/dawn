@@ -69,6 +69,10 @@ if (WIN32)
         "WindowsUtils.h"
         "windows_with_undefs.h"
     )
+elseif(APPLE)
+    target_sources(dawn_common PRIVATE
+        "SystemUtils_mac.mm"
+    )
 endif()
 
 target_link_libraries(dawn_common PUBLIC dawncpp_headers PRIVATE dawn_internal_config)
