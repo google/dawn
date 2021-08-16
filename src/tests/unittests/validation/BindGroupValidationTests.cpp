@@ -472,12 +472,9 @@ TEST_F(BindGroupValidationTest, TextureSampleType) {
     DoTest(false, wgpu::TextureFormat::R32Float, wgpu::TextureSampleType::Uint);
     DoTest(false, wgpu::TextureFormat::R32Float, wgpu::TextureSampleType::Sint);
 
-    // Test that Depth32Float is only compatible with depth. float/unfilterable-float is deprecated.
-    // TODO(crbug.com/dawn/1021): Disallow using float/unfilterable-float with depth textures.
-    EXPECT_DEPRECATION_WARNING(
-        DoTest(true, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::Float));
-    EXPECT_DEPRECATION_WARNING(DoTest(true, wgpu::TextureFormat::Depth32Float,
-                                      wgpu::TextureSampleType::UnfilterableFloat));
+    // Test that Depth32Float is only compatible with depth.
+    DoTest(false, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::Float);
+    DoTest(false, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::UnfilterableFloat);
     DoTest(true, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::Depth);
     DoTest(false, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::Uint);
     DoTest(false, wgpu::TextureFormat::Depth32Float, wgpu::TextureSampleType::Sint);
