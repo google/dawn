@@ -121,8 +121,7 @@ namespace dawn_native { namespace vulkan {
         BindingRemapper::BindingPoints bindingPoints;
         BindingRemapper::AccessControls accessControls;
 
-        const EntryPointMetadata::BindingInfoArray& moduleBindingInfo =
-            GetEntryPoint(entryPointName).bindings;
+        const BindingInfoArray& moduleBindingInfo = GetEntryPoint(entryPointName).bindings;
 
         for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
             const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));

@@ -66,31 +66,19 @@ namespace dawn_native { namespace opengl {
         return o.str();
     }
 
-    ResultOrError<std::unique_ptr<EntryPointMetadata>> ExtractSpirvInfo(
+    ResultOrError<std::unique_ptr<BindingInfoArray>> ExtractSpirvInfo(
         const DeviceBase* device,
         const spirv_cross::Compiler& compiler,
         const std::string& entryPointName,
         SingleShaderStage stage) {
-        std::unique_ptr<EntryPointMetadata> metadata = std::make_unique<EntryPointMetadata>();
-        metadata->stage = stage;
-
         const auto& resources = compiler.get_shader_resources();
-
-        if (resources.push_constant_buffers.size() > 0) {
-            return DAWN_VALIDATION_ERROR("Push constants aren't supported.");
-        }
-
-        if (resources.sampled_images.size() > 0) {
-            return DAWN_VALIDATION_ERROR("Combined images and samplers aren't supported.");
-        }
 
         // Fill in bindingInfo with the SPIRV bindings
         auto ExtractResourcesBinding =
             [](const DeviceBase* device,
                const spirv_cross::SmallVector<spirv_cross::Resource>& resources,
                const spirv_cross::Compiler& compiler, BindingInfoType bindingType,
-               EntryPointMetadata::BindingInfoArray* metadataBindings,
-               bool isStorageBuffer = false) -> MaybeError {
+               BindingInfoArray* bindings, bool isStorageBuffer = false) -> MaybeError {
             for (const auto& resource : resources) {
                 if (!compiler.get_decoration_bitset(resource.id).get(spv::DecorationBinding)) {
                     return DAWN_VALIDATION_ERROR("No Binding decoration set for resource");
@@ -110,13 +98,13 @@ namespace dawn_native { namespace opengl {
                     return DAWN_VALIDATION_ERROR("Bind group index over limits in the SPIRV");
                 }
 
-                const auto& it = (*metadataBindings)[bindGroupIndex].emplace(
-                    bindingNumber, EntryPointMetadata::ShaderBindingInfo{});
+                const auto& it =
+                    (*bindings)[bindGroupIndex].emplace(bindingNumber, ShaderBindingInfo{});
                 if (!it.second) {
                     return DAWN_VALIDATION_ERROR("Shader has duplicate bindings");
                 }
 
-                EntryPointMetadata::ShaderBindingInfo* info = &it.first->second;
+                ShaderBindingInfo* info = &it.first->second;
                 info->id = resource.id;
                 info->base_type_id = resource.base_type_id;
                 info->bindingType = bindingType;
@@ -220,92 +208,21 @@ namespace dawn_native { namespace opengl {
             return {};
         };
 
+        std::unique_ptr<BindingInfoArray> resultBindings = std::make_unique<BindingInfoArray>();
+        BindingInfoArray* bindings = resultBindings.get();
         DAWN_TRY(ExtractResourcesBinding(device, resources.uniform_buffers, compiler,
-                                         BindingInfoType::Buffer, &metadata->bindings));
+                                         BindingInfoType::Buffer, bindings));
         DAWN_TRY(ExtractResourcesBinding(device, resources.separate_images, compiler,
-                                         BindingInfoType::Texture, &metadata->bindings));
+                                         BindingInfoType::Texture, bindings));
         DAWN_TRY(ExtractResourcesBinding(device, resources.separate_samplers, compiler,
-                                         BindingInfoType::Sampler, &metadata->bindings));
+                                         BindingInfoType::Sampler, bindings));
         DAWN_TRY(ExtractResourcesBinding(device, resources.storage_buffers, compiler,
-                                         BindingInfoType::Buffer, &metadata->bindings, true));
+                                         BindingInfoType::Buffer, bindings, true));
         // ReadonlyStorageTexture is used as a tag to do general storage texture handling.
         DAWN_TRY(ExtractResourcesBinding(device, resources.storage_images, compiler,
-                                         BindingInfoType::StorageTexture, &metadata->bindings));
+                                         BindingInfoType::StorageTexture, resultBindings.get()));
 
-        // Extract the vertex attributes
-        if (stage == SingleShaderStage::Vertex) {
-            for (const auto& attrib : resources.stage_inputs) {
-                if (!(compiler.get_decoration_bitset(attrib.id).get(spv::DecorationLocation))) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Unable to find Location decoration for Vertex input");
-                }
-                uint32_t unsanitizedLocation =
-                    compiler.get_decoration(attrib.id, spv::DecorationLocation);
-
-                if (unsanitizedLocation >= kMaxVertexAttributes) {
-                    return DAWN_VALIDATION_ERROR("Attribute location over limits in the SPIRV");
-                }
-                VertexAttributeLocation location(static_cast<uint8_t>(unsanitizedLocation));
-
-                spirv_cross::SPIRType::BaseType inputBaseType =
-                    compiler.get_type(attrib.base_type_id).basetype;
-                metadata->vertexInputBaseTypes[location] =
-                    SpirvBaseTypeToVertexFormatBaseType(inputBaseType);
-                metadata->usedVertexInputs.set(location);
-            }
-
-            // Without a location qualifier on vertex outputs, spirv_cross::CompilerMSL gives
-            // them all the location 0, causing a compile error.
-            for (const auto& attrib : resources.stage_outputs) {
-                if (!compiler.get_decoration_bitset(attrib.id).get(spv::DecorationLocation)) {
-                    return DAWN_VALIDATION_ERROR("Need location qualifier on vertex output");
-                }
-            }
-        }
-
-        if (stage == SingleShaderStage::Fragment) {
-            // Without a location qualifier on vertex inputs, spirv_cross::CompilerMSL gives
-            // them all the location 0, causing a compile error.
-            for (const auto& attrib : resources.stage_inputs) {
-                if (!compiler.get_decoration_bitset(attrib.id).get(spv::DecorationLocation)) {
-                    return DAWN_VALIDATION_ERROR("Need location qualifier on fragment input");
-                }
-            }
-
-            for (const auto& fragmentOutput : resources.stage_outputs) {
-                if (!compiler.get_decoration_bitset(fragmentOutput.id)
-                         .get(spv::DecorationLocation)) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Unable to find Location decoration for Fragment output");
-                }
-                uint32_t unsanitizedAttachment =
-                    compiler.get_decoration(fragmentOutput.id, spv::DecorationLocation);
-
-                if (unsanitizedAttachment >= kMaxColorAttachments) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Fragment output index must be less than max number of color "
-                        "attachments");
-                }
-                ColorAttachmentIndex attachment(static_cast<uint8_t>(unsanitizedAttachment));
-
-                spirv_cross::SPIRType::BaseType shaderFragmentOutputBaseType =
-                    compiler.get_type(fragmentOutput.base_type_id).basetype;
-                // spriv path so temporarily always set to 4u to always pass validation
-                metadata->fragmentOutputVariables[attachment] = {
-                    SpirvBaseTypeToTextureComponentType(shaderFragmentOutputBaseType), 4u};
-                metadata->fragmentOutputsWritten.set(attachment);
-            }
-        }
-
-        if (stage == SingleShaderStage::Compute) {
-            const spirv_cross::SPIREntryPoint& spirEntryPoint =
-                compiler.get_entry_point(entryPointName, spv::ExecutionModelGLCompute);
-            metadata->localWorkgroupSize.x = spirEntryPoint.workgroup_size.x;
-            metadata->localWorkgroupSize.y = spirEntryPoint.workgroup_size.y;
-            metadata->localWorkgroupSize.z = spirEntryPoint.workgroup_size.z;
-        }
-
-        return {std::move(metadata)};
+        return {std::move(resultBindings)};
     }
 
     // static
@@ -322,10 +239,10 @@ namespace dawn_native { namespace opengl {
     }
 
     // static
-    ResultOrError<EntryPointMetadataTable> ShaderModule::ReflectShaderUsingSPIRVCross(
+    ResultOrError<BindingInfoArrayTable> ShaderModule::ReflectShaderUsingSPIRVCross(
         DeviceBase* device,
         const std::vector<uint32_t>& spirv) {
-        EntryPointMetadataTable result;
+        BindingInfoArrayTable result;
         spirv_cross::Compiler compiler(spirv);
         for (const spirv_cross::EntryPoint& entryPoint : compiler.get_entry_points_and_stages()) {
             ASSERT(result.count(entryPoint.name) == 0);
@@ -333,9 +250,9 @@ namespace dawn_native { namespace opengl {
             SingleShaderStage stage = ExecutionModelToShaderStage(entryPoint.execution_model);
             compiler.set_entry_point(entryPoint.name, entryPoint.execution_model);
 
-            std::unique_ptr<EntryPointMetadata> metadata;
-            DAWN_TRY_ASSIGN(metadata, ExtractSpirvInfo(device, compiler, entryPoint.name, stage));
-            result[entryPoint.name] = std::move(metadata);
+            std::unique_ptr<BindingInfoArray> bindings;
+            DAWN_TRY_ASSIGN(bindings, ExtractSpirvInfo(device, compiler, entryPoint.name, stage));
+            result[entryPoint.name] = std::move(bindings);
         }
         return std::move(result);
     }
@@ -355,7 +272,7 @@ namespace dawn_native { namespace opengl {
             return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
         }
 
-        DAWN_TRY_ASSIGN(mGLEntryPoints, ReflectShaderUsingSPIRVCross(GetDevice(), result.spirv));
+        DAWN_TRY_ASSIGN(mGLBindings, ReflectShaderUsingSPIRVCross(GetDevice(), result.spirv));
 
         return {};
     }
@@ -445,8 +362,7 @@ namespace dawn_native { namespace opengl {
             compiler.set_name(combined.combined_id, info->GetName());
         }
 
-        const EntryPointMetadata::BindingInfoArray& bindingInfo =
-            (*mGLEntryPoints.at(entryPointName)).bindings;
+        const BindingInfoArray& bindingInfo = *(mGLBindings.at(entryPointName));
 
         // Change binding names to be "dawn_binding_<group>_<binding>".
         // Also unsets the SPIRV "Binding" decoration as it outputs "layout(binding=)" which

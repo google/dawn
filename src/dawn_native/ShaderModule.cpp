@@ -431,9 +431,8 @@ namespace dawn_native {
             return std::move(program);
         }
 
-        std::vector<uint64_t> GetBindGroupMinBufferSizes(
-            const EntryPointMetadata::BindingGroupInfoMap& shaderBindings,
-            const BindGroupLayoutBase* layout) {
+        std::vector<uint64_t> GetBindGroupMinBufferSizes(const BindingGroupInfoMap& shaderBindings,
+                                                         const BindGroupLayoutBase* layout) {
             std::vector<uint64_t> requiredBufferSizes(layout->GetUnverifiedBufferCount());
             uint32_t packedIdx = 0;
 
@@ -471,7 +470,7 @@ namespace dawn_native {
             // corresponding binding in the BindGroupLayout, if it exists.
             for (const auto& it : entryPoint.bindings[group]) {
                 BindingNumber bindingNumber = it.first;
-                const EntryPointMetadata::ShaderBindingInfo& shaderInfo = it.second;
+                const ShaderBindingInfo& shaderInfo = it.second;
 
                 const auto& bindingIt = layoutBindings.find(bindingNumber);
                 if (bindingIt == layoutBindings.end()) {
@@ -825,12 +824,12 @@ namespace dawn_native {
                     }
 
                     const auto& it = metadata->bindings[bindGroupIndex].emplace(
-                        bindingNumber, EntryPointMetadata::ShaderBindingInfo{});
+                        bindingNumber, ShaderBindingInfo{});
                     if (!it.second) {
                         return DAWN_VALIDATION_ERROR("Shader has duplicate bindings");
                     }
 
-                    EntryPointMetadata::ShaderBindingInfo* info = &it.first->second;
+                    ShaderBindingInfo* info = &it.first->second;
                     info->bindingType = TintResourceTypeToBindingInfoType(resource.resource_type);
 
                     switch (info->bindingType) {

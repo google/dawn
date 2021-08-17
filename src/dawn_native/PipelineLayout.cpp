@@ -144,7 +144,7 @@ namespace dawn_native {
 
         // Does the trivial conversions from a ShaderBindingInfo to a BindGroupLayoutEntry
         auto ConvertMetadataToEntry =
-            [](const EntryPointMetadata::ShaderBindingInfo& shaderBinding,
+            [](const ShaderBindingInfo& shaderBinding,
                const ExternalTextureBindingLayout* externalTextureBindingEntry)
             -> BindGroupLayoutEntry {
             BindGroupLayoutEntry entry = {};
@@ -242,7 +242,7 @@ namespace dawn_native {
             for (BindGroupIndex group(0); group < metadata.bindings.size(); ++group) {
                 for (const auto& bindingIt : metadata.bindings[group]) {
                     BindingNumber bindingNumber = bindingIt.first;
-                    const EntryPointMetadata::ShaderBindingInfo& shaderBinding = bindingIt.second;
+                    const ShaderBindingInfo& shaderBinding = bindingIt.second;
 
                     // Create the BindGroupLayoutEntry
                     BindGroupLayoutEntry entry =

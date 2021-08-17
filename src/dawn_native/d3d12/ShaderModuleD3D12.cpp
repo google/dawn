@@ -195,8 +195,7 @@ namespace dawn_native { namespace d3d12 {
         BindingRemapper::BindingPoints bindingPoints;
         BindingRemapper::AccessControls accessControls;
 
-        const EntryPointMetadata::BindingInfoArray& moduleBindingInfo =
-            GetEntryPoint(entryPointName).bindings;
+        const BindingInfoArray& moduleBindingInfo = GetEntryPoint(entryPointName).bindings;
 
         // d3d12::BindGroupLayout packs the bindings per HLSL register-space.
         // We modify the Tint AST to make the "bindings" decoration match the

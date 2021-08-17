@@ -115,45 +115,46 @@ namespace dawn_native {
                                          BindGroupIndex pullingBufferBindingSet,
                                          tint::transform::DataMap* transformInputs);
 
+    // Mirrors wgpu::SamplerBindingLayout but instead stores a single boolean
+    // for isComparison instead of a wgpu::SamplerBindingType enum.
+    struct ShaderSamplerBindingInfo {
+        bool isComparison;
+    };
+
+    // Mirrors wgpu::TextureBindingLayout but instead has a set of compatible sampleTypes
+    // instead of a single enum.
+    struct ShaderTextureBindingInfo {
+        SampleTypeBit compatibleSampleTypes;
+        wgpu::TextureViewDimension viewDimension;
+        bool multisampled;
+    };
+
+    // Per-binding shader metadata contains some SPIRV specific information in addition to
+    // most of the frontend per-binding information.
+    struct ShaderBindingInfo {
+        // The SPIRV ID of the resource.
+        uint32_t id;
+        uint32_t base_type_id;
+
+        BindingNumber binding;
+        BindingInfoType bindingType;
+
+        BufferBindingLayout buffer;
+        ShaderSamplerBindingInfo sampler;
+        ShaderTextureBindingInfo texture;
+        StorageTextureBindingLayout storageTexture;
+    };
+
+    using BindingGroupInfoMap = std::map<BindingNumber, ShaderBindingInfo>;
+    using BindingInfoArray = ityp::array<BindGroupIndex, BindingGroupInfoMap, kMaxBindGroups>;
+
     // Contains all the reflection data for a valid (ShaderModule, entryPoint, stage). They are
     // stored in the ShaderModuleBase and destroyed only when the shader program is destroyed so
     // pointers to EntryPointMetadata are safe to store as long as you also keep a Ref to the
     // ShaderModuleBase.
     struct EntryPointMetadata {
-        // Mirrors wgpu::SamplerBindingLayout but instead stores a single boolean
-        // for isComparison instead of a wgpu::SamplerBindingType enum.
-        struct ShaderSamplerBindingInfo {
-            bool isComparison;
-        };
-
-        // Mirrors wgpu::TextureBindingLayout but instead has a set of compatible sampleTypes
-        // instead of a single enum.
-        struct ShaderTextureBindingInfo {
-            SampleTypeBit compatibleSampleTypes;
-            wgpu::TextureViewDimension viewDimension;
-            bool multisampled;
-        };
-
-        // Per-binding shader metadata contains some SPIRV specific information in addition to
-        // most of the frontend per-binding information.
-        struct ShaderBindingInfo {
-            // The SPIRV ID of the resource.
-            uint32_t id;
-            uint32_t base_type_id;
-
-            BindingNumber binding;
-            BindingInfoType bindingType;
-
-            BufferBindingLayout buffer;
-            ShaderSamplerBindingInfo sampler;
-            ShaderTextureBindingInfo texture;
-            StorageTextureBindingLayout storageTexture;
-        };
-
         // bindings[G][B] is the reflection data for the binding defined with
         // [[group=G, binding=B]] in WGSL / SPIRV.
-        using BindingGroupInfoMap = std::map<BindingNumber, ShaderBindingInfo>;
-        using BindingInfoArray = ityp::array<BindGroupIndex, BindingGroupInfoMap, kMaxBindGroups>;
         BindingInfoArray bindings;
 
         struct SamplerTexturePair {
