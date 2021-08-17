@@ -3366,8 +3366,11 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
   }
 
   for (auto* deco : var->decorations()) {
-    // TODO(bclayton): Validate decorations
     Mark(deco);
+    if (!deco->Is<ast::InternalDecoration>()) {
+      AddError("decorations are not valid on local variables", deco->source());
+      return false;
+    }
   }
 
   variable_stack_.set(var->symbol(), info);

@@ -864,11 +864,7 @@ TEST_F(ResolverTest, Expr_Identifier_FunctionVariable) {
   auto* my_var_b = Expr("my_var");
   auto* assign = Assign(my_var_a, my_var_b);
 
-  auto* var = Var("my_var", ty.f32(),
-                  ast::DecorationList{
-                      create<ast::BindingDecoration>(0),
-                      create<ast::GroupDecoration>(0),
-                  });
+  auto* var = Var("my_var", ty.f32());
 
   Func("my_func", ast::VariableList{}, ty.void_(),
        {
@@ -1937,11 +1933,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest,
                                          ast::UnaryOp::kNot));
 
 TEST_F(ResolverTest, StorageClass_SetsIfMissing) {
-  auto* var = Var("var", ty.i32(),
-                  ast::DecorationList{
-                      create<ast::BindingDecoration>(0),
-                      create<ast::GroupDecoration>(0),
-                  });
+  auto* var = Var("var", ty.i32());
 
   auto* stmt = Decl(var);
   Func("func", ast::VariableList{}, ty.void_(), {stmt}, ast::DecorationList{});

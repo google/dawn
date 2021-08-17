@@ -778,6 +778,19 @@ TEST_F(VariableDecorationTest, DuplicateDecoration) {
 12:34 note: first decoration declared here)");
 }
 
+TEST_F(VariableDecorationTest, LocalVariable) {
+  auto* v = Var("a", ty.f32(),
+                ast::DecorationList{
+                    create<ast::BindingDecoration>(Source{{12, 34}}, 2),
+                });
+
+  WrapInFunction(v);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: decorations are not valid on local variables");
+}
+
 using ConstantDecorationTest = TestWithParams;
 TEST_P(ConstantDecorationTest, IsValid) {
   auto& params = GetParam();
