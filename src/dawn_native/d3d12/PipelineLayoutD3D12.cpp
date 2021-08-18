@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "dawn_native/d3d12/PipelineLayoutD3D12.h"
+#include <sstream>
 
 #include "common/Assert.h"
 #include "common/BitSetIterator.h"
@@ -195,10 +196,20 @@ namespace dawn_native { namespace d3d12 {
 
         ComPtr<ID3DBlob> signature;
         ComPtr<ID3DBlob> error;
-        DAWN_TRY(CheckHRESULT(
-            device->GetFunctions()->d3d12SerializeRootSignature(
-                &rootSignatureDescriptor, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error),
-            "D3D12 serialize root signature"));
+        HRESULT hr = device->GetFunctions()->d3d12SerializeRootSignature(
+            &rootSignatureDescriptor, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);
+        if (DAWN_UNLIKELY(FAILED(hr))) {
+            std::ostringstream messageStream;
+            if (error) {
+                messageStream << static_cast<const char*>(error->GetBufferPointer());
+
+                // |error| is observed to always end with a \n, but is not
+                // specified to do so, so we add an extra newline just in case.
+                messageStream << std::endl;
+            }
+            messageStream << "D3D12 serialize root signature";
+            DAWN_TRY(CheckHRESULT(hr, messageStream.str().c_str()));
+        }
         DAWN_TRY(CheckHRESULT(device->GetD3D12Device()->CreateRootSignature(
                                   0, signature->GetBufferPointer(), signature->GetBufferSize(),
                                   IID_PPV_ARGS(&mRootSignature)),
