@@ -68,7 +68,10 @@ namespace dawn_native { namespace d3d12 {
                                                   wgpu::BufferUsage newUsage);
 
         MaybeError InitializeToZero(CommandRecordingContext* commandContext);
-        MaybeError ClearBuffer(CommandRecordingContext* commandContext, uint8_t clearValue);
+        MaybeError ClearBuffer(CommandRecordingContext* commandContext,
+                               uint8_t clearValue,
+                               uint64_t offset = 0,
+                               uint64_t size = 0);
 
         ResourceHeapAllocation mResourceAllocation;
         bool mFixedResourceState = false;

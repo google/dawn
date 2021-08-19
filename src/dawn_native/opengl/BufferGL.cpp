@@ -49,6 +49,7 @@ namespace dawn_native { namespace opengl {
             device->gl.BufferData(GL_ARRAY_BUFFER, mAllocatedSize, clearValues.data(),
                                   GL_STATIC_DRAW);
         } else {
+            // Buffers start zeroed if you pass nullptr to glBufferData.
             device->gl.BufferData(GL_ARRAY_BUFFER, mAllocatedSize, nullptr, GL_STATIC_DRAW);
         }
     }

@@ -52,7 +52,10 @@ namespace dawn_native { namespace metal {
         MaybeError MapAtCreationImpl() override;
 
         void InitializeToZero(CommandRecordingContext* commandContext);
-        void ClearBuffer(CommandRecordingContext* commandContext, uint8_t clearValue);
+        void ClearBuffer(CommandRecordingContext* commandContext,
+                         uint8_t clearValue,
+                         uint64_t offset = 0,
+                         uint64_t size = 0);
 
         NSPRef<id<MTLBuffer>> mMtlBuffer;
     };

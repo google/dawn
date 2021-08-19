@@ -2060,6 +2060,84 @@ TEST_P(CompressedTextureZeroInitTest, HalfCopyTextureToTextureMipLevel) {
                                           kViewMipLevel, 0, true);
 }
 
+// Test uploading then reading back from a 2D array compressed texture.
+// This is a regression test for a bug where the final destination buffer
+// was considered fully initialized even though there was a 256-byte
+// stride between images.
+TEST_P(CompressedTextureZeroInitTest, Copy2DArrayCompressedB2T2B) {
+    // TODO(crbug.com/dawn/643): diagnose and fix this failure on OpenGL.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    // create srcTexture with data
+    wgpu::TextureDescriptor textureDescriptor = CreateTextureDescriptor(
+        4, 5, wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst, utils::kBCFormats[0]);
+    textureDescriptor.size = {8, 8, 5};
+    wgpu::Texture srcTexture = device.CreateTexture(&textureDescriptor);
+
+    uint32_t mipLevel = 2;
+    wgpu::Extent3D copyExtent3D = {4, 4, 5};
+
+    uint32_t copyWidthInBlock = copyExtent3D.width / kFormatBlockByteSize;
+    uint32_t copyHeightInBlock = copyExtent3D.height / kFormatBlockByteSize;
+    uint32_t copyRowsPerImage = copyHeightInBlock;
+    uint32_t copyBytesPerRow =
+        Align(copyWidthInBlock * utils::GetTexelBlockSizeInBytes(textureDescriptor.format),
+              kTextureBytesPerRowAlignment);
+
+    // Generate data to upload
+    std::vector<uint8_t> data(utils::RequiredBytesInCopy(copyBytesPerRow, copyRowsPerImage,
+                                                         copyExtent3D, textureDescriptor.format));
+    for (size_t i = 0; i < data.size(); ++i) {
+        data[i] = i % 255;
+    }
+
+    // Copy texture data from a staging buffer to the destination texture.
+    wgpu::Buffer stagingBuffer =
+        utils::CreateBufferFromData(device, data.data(), data.size(), wgpu::BufferUsage::CopySrc);
+    wgpu::ImageCopyBuffer imageCopyBufferSrc =
+        utils::CreateImageCopyBuffer(stagingBuffer, 0, copyBytesPerRow, copyRowsPerImage);
+
+    wgpu::ImageCopyTexture imageCopyTexture =
+        utils::CreateImageCopyTexture(srcTexture, mipLevel, {0, 0, 0});
+
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToTexture(&imageCopyBufferSrc, &imageCopyTexture, &copyExtent3D);
+        wgpu::CommandBuffer copy = encoder.Finish();
+        EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &copy));
+    }
+
+    // Create a buffer to read back the data. It is the same size as the upload buffer.
+    wgpu::BufferDescriptor readbackDesc = {};
+    readbackDesc.size = data.size();
+    readbackDesc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer readbackBuffer = device.CreateBuffer(&readbackDesc);
+
+    // Copy the texture to the readback buffer.
+    wgpu::ImageCopyBuffer imageCopyBufferDst =
+        utils::CreateImageCopyBuffer(readbackBuffer, 0, copyBytesPerRow, copyRowsPerImage);
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBufferDst, &copyExtent3D);
+        wgpu::CommandBuffer copy = encoder.Finish();
+
+        // Expect a lazy clear because the padding in the copy is not touched.
+        EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &copy));
+    }
+
+    // Generate expected data. It is the same as the upload data, but padding is zero.
+    std::vector<uint8_t> expected(data.size(), 0);
+    for (uint32_t z = 0; z < copyExtent3D.depthOrArrayLayers; ++z) {
+        for (uint32_t y = 0; y < copyHeightInBlock; ++y) {
+            memcpy(&expected[copyBytesPerRow * y + copyBytesPerRow * copyRowsPerImage * z],
+                   &data[copyBytesPerRow * y + copyBytesPerRow * copyRowsPerImage * z],
+                   copyWidthInBlock * utils::GetTexelBlockSizeInBytes(textureDescriptor.format));
+        }
+    }
+    // Check final contents
+    EXPECT_BUFFER_U8_RANGE_EQ(expected.data(), readbackBuffer, 0, expected.size());
+}
+
 DAWN_INSTANTIATE_TEST(CompressedTextureZeroInitTest,
                       D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}),
                       MetalBackend({"nonzero_clear_resources_on_creation_for_testing"}),

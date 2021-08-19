@@ -55,7 +55,10 @@ namespace dawn_native { namespace vulkan {
 
         MaybeError Initialize(bool mappedAtCreation);
         void InitializeToZero(CommandRecordingContext* recordingContext);
-        void ClearBuffer(CommandRecordingContext* recordingContext, uint32_t clearValue);
+        void ClearBuffer(CommandRecordingContext* recordingContext,
+                         uint32_t clearValue,
+                         uint64_t offset = 0,
+                         uint64_t size = 0);
 
         MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
         void UnmapImpl() override;

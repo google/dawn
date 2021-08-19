@@ -548,7 +548,8 @@ namespace dawn_native { namespace metal {
                 mVertexBufferOffsets[slot] = offset;
 
                 ASSERT(buffer->GetSize() < std::numeric_limits<uint32_t>::max());
-                mVertexBufferBindingSizes[slot] = static_cast<uint32_t>(buffer->GetSize() - offset);
+                mVertexBufferBindingSizes[slot] =
+                    static_cast<uint32_t>(buffer->GetAllocatedSize() - offset);
                 mDirtyVertexBuffers.set(slot);
             }
 

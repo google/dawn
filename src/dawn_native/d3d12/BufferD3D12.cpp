@@ -168,6 +168,21 @@ namespace dawn_native { namespace d3d12 {
             DAWN_TRY(ClearBuffer(commandRecordingContext, uint8_t(1u)));
         }
 
+        // Initialize the padding bytes to zero.
+        if (GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse) &&
+            !mappedAtCreation) {
+            uint32_t paddingBytes = GetAllocatedSize() - GetSize();
+            if (paddingBytes > 0) {
+                CommandRecordingContext* commandRecordingContext;
+                DAWN_TRY_ASSIGN(commandRecordingContext,
+                                ToBackend(GetDevice())->GetPendingCommandContext());
+
+                uint32_t clearSize = paddingBytes;
+                uint64_t clearOffset = GetSize();
+                DAWN_TRY(ClearBuffer(commandRecordingContext, 0, clearOffset, clearSize));
+            }
+        }
+
         return {};
     }
 
@@ -444,29 +459,33 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-    MaybeError Buffer::ClearBuffer(CommandRecordingContext* commandContext, uint8_t clearValue) {
+    MaybeError Buffer::ClearBuffer(CommandRecordingContext* commandContext,
+                                   uint8_t clearValue,
+                                   uint64_t offset,
+                                   uint64_t size) {
         Device* device = ToBackend(GetDevice());
+        size = size > 0 ? size : GetAllocatedSize();
 
         // The state of the buffers on UPLOAD heap must always be GENERIC_READ and cannot be
         // changed away, so we can only clear such buffer with buffer mapping.
         if (D3D12HeapType(GetUsage()) == D3D12_HEAP_TYPE_UPLOAD) {
-            DAWN_TRY(MapInternal(true, 0, size_t(GetAllocatedSize()), "D3D12 map at clear buffer"));
-            memset(mMappedData, clearValue, GetAllocatedSize());
+            DAWN_TRY(MapInternal(true, static_cast<size_t>(offset), static_cast<size_t>(size),
+                                 "D3D12 map at clear buffer"));
+            memset(mMappedData, clearValue, size);
             UnmapImpl();
         } else {
             // TODO(crbug.com/dawn/852): use ClearUnorderedAccessView*() when the buffer usage
             // includes STORAGE.
             DynamicUploader* uploader = device->GetDynamicUploader();
             UploadHandle uploadHandle;
-            DAWN_TRY_ASSIGN(uploadHandle, uploader->Allocate(GetAllocatedSize(),
-                                                             device->GetPendingCommandSerial(),
-                                                             kCopyBufferToBufferOffsetAlignment));
+            DAWN_TRY_ASSIGN(uploadHandle,
+                            uploader->Allocate(size, device->GetPendingCommandSerial(),
+                                               kCopyBufferToBufferOffsetAlignment));
 
-            memset(uploadHandle.mappedBuffer, clearValue, GetAllocatedSize());
+            memset(uploadHandle.mappedBuffer, clearValue, size);
 
             device->CopyFromStagingToBufferImpl(commandContext, uploadHandle.stagingBuffer,
-                                                uploadHandle.startOffset, this, 0,
-                                                GetAllocatedSize());
+                                                uploadHandle.startOffset, this, offset, size);
         }
 
         return {};

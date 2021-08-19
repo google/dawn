@@ -60,6 +60,8 @@ namespace utils {
     // in it will contain 1 byte of data.
     void UnalignDynamicUploader(wgpu::Device device);
 
+    uint32_t VertexFormatSize(wgpu::VertexFormat format);
+
 }  // namespace utils
 
 #endif  // UTILS_TESTHELPERS_H_
