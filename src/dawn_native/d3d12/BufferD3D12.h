@@ -48,6 +48,8 @@ namespace dawn_native { namespace d3d12 {
                                                       uint64_t size);
         MaybeError EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
                                                       const CopyTextureToBufferCmd* copy);
+        // Dawn API
+        void SetLabelImpl() override;
 
       private:
         Buffer(Device* device, const BufferDescriptor* descriptor);

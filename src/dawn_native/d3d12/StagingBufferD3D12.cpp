@@ -17,6 +17,7 @@
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/HeapD3D12.h"
 #include "dawn_native/d3d12/ResidencyManagerD3D12.h"
+#include "dawn_native/d3d12/UtilsD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
 
@@ -47,7 +48,7 @@ namespace dawn_native { namespace d3d12 {
         DAWN_TRY(mDevice->GetResidencyManager()->LockAllocation(
             ToBackend(mUploadHeap.GetResourceHeap())));
 
-        DAWN_TRY(mUploadHeap.SetDebugName("Dawn_StagingBuffer"));
+        SetDebugName(mDevice, GetResource(), "Dawn_StagingBuffer");
 
         return CheckHRESULT(GetResource()->Map(0, nullptr, &mMappedPointer), "ID3D12Resource::Map");
     }

@@ -24,6 +24,7 @@
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/HeapD3D12.h"
 #include "dawn_native/d3d12/ResidencyManagerD3D12.h"
+#include "dawn_native/d3d12/UtilsD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
 
@@ -155,7 +156,7 @@ namespace dawn_native { namespace d3d12 {
             mResourceAllocation,
             ToBackend(GetDevice())->AllocateMemory(heapType, resourceDescriptor, bufferUsage));
 
-        DAWN_TRY(mResourceAllocation.SetDebugName("Dawn_Buffer"));
+        SetLabelImpl();
 
         // The buffers with mappedAtCreation == true will be initialized in
         // BufferBase::MapAtCreation().
@@ -444,6 +445,11 @@ namespace dawn_native { namespace d3d12 {
         }
 
         return {};
+    }
+
+    void Buffer::SetLabelImpl() {
+        SetDebugName(ToBackend(GetDevice()), mResourceAllocation.GetD3D12Resource(), "Dawn_Buffer",
+                     GetLabel());
     }
 
     MaybeError Buffer::InitializeToZero(CommandRecordingContext* commandContext) {

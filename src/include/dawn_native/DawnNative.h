@@ -248,6 +248,8 @@ namespace dawn_native {
         ExternalImageExportInfo(ExternalImageType type);
     };
 
+    DAWN_NATIVE_EXPORT const char* GetObjectLabelForTesting(void* objectHandle);
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_DAWNNATIVE_H_

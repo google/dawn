@@ -280,6 +280,13 @@
                 ]
             },
             {
+                "name": "set label",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
                 "name": "unmap"
             },
             {
@@ -1862,6 +1869,13 @@
                 "returns": "texture view",
                 "args": [
                     {"name": "descriptor", "type": "texture view descriptor", "annotation": "const*", "optional": true}
+                ]
+            },
+            {
+                "name": "set label",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
             },
             {

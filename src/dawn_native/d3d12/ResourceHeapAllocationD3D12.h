@@ -35,7 +35,6 @@ namespace dawn_native { namespace d3d12 {
         ResourceHeapAllocation& operator=(const ResourceHeapAllocation&) = default;
 
         void Invalidate() override;
-        MaybeError SetDebugName(const char* name);
 
         ID3D12Resource* GetD3D12Resource() const;
         D3D12_GPU_VIRTUAL_ADDRESS GetGPUPointer() const;

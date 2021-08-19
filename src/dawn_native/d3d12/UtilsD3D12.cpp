@@ -18,6 +18,8 @@
 #include "dawn_native/Format.h"
 #include "dawn_native/d3d12/BufferD3D12.h"
 #include "dawn_native/d3d12/CommandRecordingContext.h"
+#include "dawn_native/d3d12/D3D12Error.h"
+#include "dawn_native/d3d12/DeviceD3D12.h"
 
 #include <stringapiset.h>
 
@@ -368,6 +370,18 @@ namespace dawn_native { namespace d3d12 {
             Copy2DTextureToBufferWithCopySplit(commandList, textureCopy, bufferCopy, texture,
                                                buffer, copySize);
         }
+    }
+
+    void SetDebugName(Device* device, ID3D12Object* object, const char* prefix, std::string label) {
+        if (label.empty() || !device->IsToggleEnabled(Toggle::UseUserDefinedLabelsInBackend)) {
+            object->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(prefix), prefix);
+            return;
+        }
+
+        std::string objectName = prefix;
+        objectName += "_";
+        objectName += label;
+        object->SetPrivateData(WKPDID_D3DDebugObjectName, objectName.length(), objectName.c_str());
     }
 
 }}  // namespace dawn_native::d3d12

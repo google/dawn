@@ -22,8 +22,18 @@ namespace dawn_native {
     ObjectBase::ObjectBase(DeviceBase* device) : RefCounted(kNotErrorPayload), mDevice(device) {
     }
 
+    ObjectBase::ObjectBase(DeviceBase* device, const char* label) : ObjectBase(device) {
+        if (label) {
+            mLabel = label;
+        }
+    }
+
     ObjectBase::ObjectBase(DeviceBase* device, ErrorTag)
         : RefCounted(kErrorPayload), mDevice(device) {
+    }
+
+    const std::string& ObjectBase::GetLabel() {
+        return mLabel;
     }
 
     DeviceBase* ObjectBase::GetDevice() const {
@@ -32,6 +42,14 @@ namespace dawn_native {
 
     bool ObjectBase::IsError() const {
         return GetRefCountPayload() == kErrorPayload;
+    }
+
+    void ObjectBase::APISetLabel(const char* label) {
+        mLabel = label;
+        SetLabelImpl();
+    }
+
+    void ObjectBase::SetLabelImpl() {
     }
 
 }  // namespace dawn_native

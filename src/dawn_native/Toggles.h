@@ -58,6 +58,7 @@ namespace dawn_native {
         ForceWGSLStep,
         DisableWorkgroupInit,
         DisableSymbolRenaming,
+        UseUserDefinedLabelsInBackend,
 
         EnumCount,
         InvalidEnum = EnumCount,

@@ -81,6 +81,11 @@ namespace dawn_native { namespace d3d12 {
                                    Buffer* buffer,
                                    const Extent3D& copySize);
 
+    void SetDebugName(Device* device,
+                      ID3D12Object* object,
+                      const char* prefix,
+                      std::string label = "");
+
 }}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_UTILSD3D12_H_

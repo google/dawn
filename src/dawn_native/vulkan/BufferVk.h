@@ -49,6 +49,9 @@ namespace dawn_native { namespace vulkan {
         void EnsureDataInitializedAsDestination(CommandRecordingContext* recordingContext,
                                                 const CopyTextureToBufferCmd* copy);
 
+        // Dawn API
+        void SetLabelImpl() override;
+
       private:
         ~Buffer() override;
         using BufferBase::BufferBase;

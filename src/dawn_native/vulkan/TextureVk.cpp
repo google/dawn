@@ -577,6 +577,8 @@ namespace dawn_native { namespace vulkan {
                                   GetAllSubresources(), TextureBase::ClearValue::NonZero));
         }
 
+        SetLabelImpl();
+
         return {};
     }
 
@@ -611,11 +613,15 @@ namespace dawn_native { namespace vulkan {
         baseCreateInfo.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
         DAWN_TRY_ASSIGN(mHandle, externalMemoryService->CreateImage(descriptor, baseCreateInfo));
+
+        SetLabelHelper("Dawn_ExternalTexture");
+
         return {};
     }
 
     void Texture::InitializeForSwapChain(VkImage nativeImage) {
         mHandle = nativeImage;
+        SetLabelHelper("Dawn_SwapChainTexture");
     }
 
     MaybeError Texture::BindExternalMemory(const ExternalImageDescriptorVk* descriptor,
@@ -718,6 +724,15 @@ namespace dawn_native { namespace vulkan {
 
     Texture::~Texture() {
         DestroyInternal();
+    }
+
+    void Texture::SetLabelHelper(const char* prefix) {
+        SetDebugName(ToBackend(GetDevice()), VK_OBJECT_TYPE_IMAGE,
+                     reinterpret_cast<uint64_t&>(mHandle), prefix, GetLabel());
+    }
+
+    void Texture::SetLabelImpl() {
+        SetLabelHelper("Dawn_InternalTexture");
     }
 
     void Texture::DestroyImpl() {

@@ -17,6 +17,7 @@
 #include "dawn_native/vulkan/FencedDeleter.h"
 #include "dawn_native/vulkan/ResourceHeapVk.h"
 #include "dawn_native/vulkan/ResourceMemoryAllocatorVk.h"
+#include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
 namespace dawn_native { namespace vulkan {
@@ -56,6 +57,9 @@ namespace dawn_native { namespace vulkan {
         if (mMappedPointer == nullptr) {
             return DAWN_INTERNAL_ERROR("Unable to map staging buffer.");
         }
+
+        SetDebugName(mDevice, VK_OBJECT_TYPE_BUFFER, reinterpret_cast<uint64_t&>(mBuffer),
+                     "Dawn_StagingBuffer");
 
         return {};
     }

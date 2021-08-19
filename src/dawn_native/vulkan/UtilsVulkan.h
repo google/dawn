@@ -21,6 +21,8 @@
 
 namespace dawn_native { namespace vulkan {
 
+    class Device;
+
     // A Helper type used to build a pNext chain of extension structs.
     // Usage is:
     //   1) Create instance, passing the address of the first struct in the
@@ -98,6 +100,12 @@ namespace dawn_native { namespace vulkan {
     VkBufferImageCopy ComputeBufferImageCopyRegion(const TextureDataLayout& dataLayout,
                                                    const TextureCopy& textureCopy,
                                                    const Extent3D& copySize);
+
+    void SetDebugName(Device* device,
+                      VkObjectType objectType,
+                      uint64_t objectHandle,
+                      const char* prefix,
+                      std::string label = "");
 
 }}  // namespace dawn_native::vulkan
 

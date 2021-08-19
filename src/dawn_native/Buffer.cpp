@@ -128,7 +128,7 @@ namespace dawn_native {
     // Buffer
 
     BufferBase::BufferBase(DeviceBase* device, const BufferDescriptor* descriptor)
-        : ObjectBase(device),
+        : ObjectBase(device, descriptor->label),
           mSize(descriptor->size),
           mUsage(descriptor->usage),
           mState(BufferState::Unmapped) {

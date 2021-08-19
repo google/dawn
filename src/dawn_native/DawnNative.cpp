@@ -225,4 +225,9 @@ namespace dawn_native {
     ExternalImageExportInfo::ExternalImageExportInfo(ExternalImageType type) : type(type) {
     }
 
+    const char* GetObjectLabelForTesting(void* objectHandle) {
+        ObjectBase* object = reinterpret_cast<ObjectBase*>(objectHandle);
+        return object->GetLabel().c_str();
+    }
+
 }  // namespace dawn_native

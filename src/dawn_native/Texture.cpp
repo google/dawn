@@ -433,7 +433,7 @@ namespace dawn_native {
     TextureBase::TextureBase(DeviceBase* device,
                              const TextureDescriptor* descriptor,
                              TextureState state)
-        : ObjectBase(device),
+        : ObjectBase(device, descriptor->label),
           mDimension(descriptor->dimension),
           mFormat(device->GetValidInternalFormat(descriptor->format)),
           mSize(descriptor->size),
