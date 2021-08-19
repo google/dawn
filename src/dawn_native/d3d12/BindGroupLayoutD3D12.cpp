@@ -22,35 +22,35 @@
 
 namespace dawn_native { namespace d3d12 {
     namespace {
-        BindGroupLayout::DescriptorType WGPUBindingInfoToDescriptorType(
+        D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(
             const BindingInfo& bindingInfo) {
             switch (bindingInfo.bindingType) {
                 case BindingInfoType::Buffer:
                     switch (bindingInfo.buffer.type) {
                         case wgpu::BufferBindingType::Uniform:
-                            return BindGroupLayout::DescriptorType::CBV;
+                            return D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
                         case wgpu::BufferBindingType::Storage:
                         case kInternalStorageBufferBinding:
-                            return BindGroupLayout::DescriptorType::UAV;
+                            return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
                         case wgpu::BufferBindingType::ReadOnlyStorage:
-                            return BindGroupLayout::DescriptorType::SRV;
+                            return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
                         case wgpu::BufferBindingType::Undefined:
                             UNREACHABLE();
                     }
 
                 case BindingInfoType::Sampler:
-                    return BindGroupLayout::DescriptorType::Sampler;
+                    return D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
 
                 case BindingInfoType::Texture:
                 case BindingInfoType::ExternalTexture:
-                    return BindGroupLayout::DescriptorType::SRV;
+                    return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 
                 case BindingInfoType::StorageTexture:
                     switch (bindingInfo.storageTexture.access) {
                         case wgpu::StorageTextureAccess::ReadOnly:
-                            return BindGroupLayout::DescriptorType::SRV;
+                            return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
                         case wgpu::StorageTextureAccess::WriteOnly:
-                            return BindGroupLayout::DescriptorType::UAV;
+                            return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
                         case wgpu::StorageTextureAccess::Undefined:
                             UNREACHABLE();
                     }
@@ -66,82 +66,62 @@ namespace dawn_native { namespace d3d12 {
 
     BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor* descriptor)
         : BindGroupLayoutBase(device, descriptor),
-          mBindingOffsets(GetBindingCount()),
-          mDescriptorCounts{},
+          mDescriptorHeapOffsets(GetBindingCount()),
+          mShaderRegisters(GetBindingCount()),
+          mCbvUavSrvDescriptorCount(0),
+          mSamplerDescriptorCount(0),
           mBindGroupAllocator(MakeFrontendBindGroupAllocator<BindGroup>(4096)) {
-        for (BindingIndex bindingIndex = GetDynamicBufferCount(); bindingIndex < GetBindingCount();
-             ++bindingIndex) {
+        for (BindingIndex bindingIndex{0}; bindingIndex < GetBindingCount(); ++bindingIndex) {
             const BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
 
-            // For dynamic resources, Dawn uses root descriptor in D3D12 backend.
-            // So there is no need to allocate the descriptor from descriptor heap.
-            // This loop starts after the dynamic buffer indices to skip counting
-            // dynamic resources in calculating the size of the descriptor heap.
+            D3D12_DESCRIPTOR_RANGE_TYPE descriptorRangeType =
+                WGPUBindingInfoToDescriptorRangeType(bindingInfo);
+
+            // TODO(dawn:728) In the future, special handling will be needed for external textures
+            // here because they encompass multiple views.
+            mShaderRegisters[bindingIndex] = uint32_t(bindingInfo.binding);
+
+            if (bindingIndex < GetDynamicBufferCount()) {
+                continue;
+            }
+
+            // For dynamic resources, Dawn uses root descriptor in D3D12 backend. So there is no
+            // need to allocate the descriptor from descriptor heap or create descriptor ranges.
             ASSERT(!bindingInfo.buffer.hasDynamicOffset);
 
             // TODO(dawn:728) In the future, special handling will be needed for external textures
             // here because they encompass multiple views.
-            DescriptorType descriptorType = WGPUBindingInfoToDescriptorType(bindingInfo);
-            mBindingOffsets[bindingIndex] = mDescriptorCounts[descriptorType]++;
-        }
+            mDescriptorHeapOffsets[bindingIndex] =
+                descriptorRangeType == D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER
+                    ? mSamplerDescriptorCount++
+                    : mCbvUavSrvDescriptorCount++;
 
-        auto SetDescriptorRange = [&](uint32_t index, uint32_t count, uint32_t* baseRegister,
-                                      D3D12_DESCRIPTOR_RANGE_TYPE type) -> bool {
-            if (count == 0) {
-                return false;
-            }
-
-            auto& range = mRanges[index];
-            range.RangeType = type;
-            range.NumDescriptors = count;
-            range.RegisterSpace = 0;
+            D3D12_DESCRIPTOR_RANGE range;
+            range.RangeType = descriptorRangeType;
+            range.NumDescriptors = 1;
+            range.BaseShaderRegister = GetShaderRegister(bindingIndex);
+            range.RegisterSpace = kRegisterSpacePlaceholder;
             range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-            range.BaseShaderRegister = *baseRegister;
-            *baseRegister += count;
-            // These ranges will be copied and range.BaseShaderRegister will be set in
-            // d3d12::PipelineLayout to account for bind group register offsets
-            return true;
-        };
 
-        uint32_t rangeIndex = 0;
-        uint32_t baseRegister = 0;
+            std::vector<D3D12_DESCRIPTOR_RANGE>& descriptorRanges =
+                descriptorRangeType == D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER
+                    ? mSamplerDescriptorRanges
+                    : mCbvUavSrvDescriptorRanges;
 
-        std::array<uint32_t, DescriptorType::Count> descriptorOffsets;
-        // Ranges 0-2 contain the CBV, UAV, and SRV ranges, if they exist, tightly packed
-        // Range 3 contains the Sampler range, if there is one
-        if (SetDescriptorRange(rangeIndex, mDescriptorCounts[CBV], &baseRegister,
-                               D3D12_DESCRIPTOR_RANGE_TYPE_CBV)) {
-            descriptorOffsets[CBV] = mRanges[rangeIndex++].BaseShaderRegister;
-        }
-        if (SetDescriptorRange(rangeIndex, mDescriptorCounts[UAV], &baseRegister,
-                               D3D12_DESCRIPTOR_RANGE_TYPE_UAV)) {
-            descriptorOffsets[UAV] = mRanges[rangeIndex++].BaseShaderRegister;
-        }
-        if (SetDescriptorRange(rangeIndex, mDescriptorCounts[SRV], &baseRegister,
-                               D3D12_DESCRIPTOR_RANGE_TYPE_SRV)) {
-            descriptorOffsets[SRV] = mRanges[rangeIndex++].BaseShaderRegister;
-        }
-        uint32_t zero = 0;
-        SetDescriptorRange(Sampler, mDescriptorCounts[Sampler], &zero,
-                           D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
-        descriptorOffsets[Sampler] = 0;
-
-        for (BindingIndex bindingIndex{0}; bindingIndex < GetBindingCount(); ++bindingIndex) {
-            const BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
-
-            if (bindingInfo.bindingType == BindingInfoType::Buffer &&
-                bindingInfo.buffer.hasDynamicOffset) {
-                // Dawn is using values in mBindingOffsets to decide register number in HLSL.
-                // Root descriptor needs to set this value to set correct register number in
-                // generated HLSL shader.
-                mBindingOffsets[bindingIndex] = baseRegister++;
-                continue;
+            // Try to join this range with the previous one, if the current range is a continuation
+            // of the previous. This is possible because the binding infos in the base type are
+            // sorted.
+            if (descriptorRanges.size() >= 2) {
+                D3D12_DESCRIPTOR_RANGE& previous = descriptorRanges.back();
+                if (previous.RangeType == range.RangeType &&
+                    previous.BaseShaderRegister + previous.NumDescriptors ==
+                        range.BaseShaderRegister) {
+                    previous.NumDescriptors += range.NumDescriptors;
+                    continue;
+                }
             }
 
-            // TODO(dawn:728) In the future, special handling will be needed here for external
-            // textures because they encompass multiple views.
-            DescriptorType descriptorType = WGPUBindingInfoToDescriptorType(bindingInfo);
-            mBindingOffsets[bindingIndex] += descriptorOffsets[descriptorType];
+            descriptorRanges.push_back(range);
         }
 
         mViewAllocator = device->GetViewStagingDescriptorAllocator(GetCbvUavSrvDescriptorCount());
@@ -181,34 +161,29 @@ namespace dawn_native { namespace d3d12 {
         mBindGroupAllocator.Deallocate(bindGroup);
     }
 
-    ityp::span<BindingIndex, const uint32_t> BindGroupLayout::GetBindingOffsets() const {
-        return {mBindingOffsets.data(), mBindingOffsets.size()};
+    ityp::span<BindingIndex, const uint32_t> BindGroupLayout::GetDescriptorHeapOffsets() const {
+        return {mDescriptorHeapOffsets.data(), mDescriptorHeapOffsets.size()};
     }
 
-    uint32_t BindGroupLayout::GetCbvUavSrvDescriptorTableSize() const {
-        return (static_cast<uint32_t>(mDescriptorCounts[CBV] > 0) +
-                static_cast<uint32_t>(mDescriptorCounts[UAV] > 0) +
-                static_cast<uint32_t>(mDescriptorCounts[SRV] > 0));
-    }
-
-    uint32_t BindGroupLayout::GetSamplerDescriptorTableSize() const {
-        return mDescriptorCounts[Sampler] > 0;
+    uint32_t BindGroupLayout::GetShaderRegister(BindingIndex bindingIndex) const {
+        return mShaderRegisters[bindingIndex];
     }
 
     uint32_t BindGroupLayout::GetCbvUavSrvDescriptorCount() const {
-        return mDescriptorCounts[CBV] + mDescriptorCounts[UAV] + mDescriptorCounts[SRV];
+        return mCbvUavSrvDescriptorCount;
     }
 
     uint32_t BindGroupLayout::GetSamplerDescriptorCount() const {
-        return mDescriptorCounts[Sampler];
+        return mSamplerDescriptorCount;
     }
 
-    const D3D12_DESCRIPTOR_RANGE* BindGroupLayout::GetCbvUavSrvDescriptorRanges() const {
-        return mRanges;
+    const std::vector<D3D12_DESCRIPTOR_RANGE>& BindGroupLayout::GetCbvUavSrvDescriptorRanges()
+        const {
+        return mCbvUavSrvDescriptorRanges;
     }
 
-    const D3D12_DESCRIPTOR_RANGE* BindGroupLayout::GetSamplerDescriptorRanges() const {
-        return &mRanges[Sampler];
+    const std::vector<D3D12_DESCRIPTOR_RANGE>& BindGroupLayout::GetSamplerDescriptorRanges() const {
+        return mSamplerDescriptorRanges;
     }
 
 }}  // namespace dawn_native::d3d12

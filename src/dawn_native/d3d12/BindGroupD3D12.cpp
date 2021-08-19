@@ -40,7 +40,7 @@ namespace dawn_native { namespace d3d12 {
 
         mCPUViewAllocation = viewAllocation;
 
-        const auto& bindingOffsets = bgl->GetBindingOffsets();
+        const auto& descriptorHeapOffsets = bgl->GetDescriptorHeapOffsets();
 
         ID3D12Device* d3d12Device = device->GetD3D12Device();
 
@@ -74,8 +74,8 @@ namespace dawn_native { namespace d3d12 {
                                 ToBackend(binding.buffer)->GetVA() + binding.offset;
 
                             d3d12Device->CreateConstantBufferView(
-                                &desc, viewAllocation.OffsetFrom(viewSizeIncrement,
-                                                                 bindingOffsets[bindingIndex]));
+                                &desc, viewAllocation.OffsetFrom(
+                                           viewSizeIncrement, descriptorHeapOffsets[bindingIndex]));
                             break;
                         }
                         case wgpu::BufferBindingType::Storage:
@@ -99,7 +99,7 @@ namespace dawn_native { namespace d3d12 {
                             d3d12Device->CreateUnorderedAccessView(
                                 resource, nullptr, &desc,
                                 viewAllocation.OffsetFrom(viewSizeIncrement,
-                                                          bindingOffsets[bindingIndex]));
+                                                          descriptorHeapOffsets[bindingIndex]));
                             break;
                         }
                         case wgpu::BufferBindingType::ReadOnlyStorage: {
@@ -118,7 +118,7 @@ namespace dawn_native { namespace d3d12 {
                             d3d12Device->CreateShaderResourceView(
                                 resource, &desc,
                                 viewAllocation.OffsetFrom(viewSizeIncrement,
-                                                          bindingOffsets[bindingIndex]));
+                                                          descriptorHeapOffsets[bindingIndex]));
                             break;
                         }
                         case wgpu::BufferBindingType::Undefined:
@@ -142,7 +142,8 @@ namespace dawn_native { namespace d3d12 {
 
                     d3d12Device->CreateShaderResourceView(
                         resource, &srv,
-                        viewAllocation.OffsetFrom(viewSizeIncrement, bindingOffsets[bindingIndex]));
+                        viewAllocation.OffsetFrom(viewSizeIncrement,
+                                                  descriptorHeapOffsets[bindingIndex]));
                     break;
                 }
 
@@ -165,7 +166,7 @@ namespace dawn_native { namespace d3d12 {
                             d3d12Device->CreateShaderResourceView(
                                 resource, &srv,
                                 viewAllocation.OffsetFrom(viewSizeIncrement,
-                                                          bindingOffsets[bindingIndex]));
+                                                          descriptorHeapOffsets[bindingIndex]));
                             break;
                         }
 
@@ -174,7 +175,7 @@ namespace dawn_native { namespace d3d12 {
                             d3d12Device->CreateUnorderedAccessView(
                                 resource, nullptr, &uav,
                                 viewAllocation.OffsetFrom(viewSizeIncrement,
-                                                          bindingOffsets[bindingIndex]));
+                                                          descriptorHeapOffsets[bindingIndex]));
                             break;
                         }
 
@@ -201,7 +202,8 @@ namespace dawn_native { namespace d3d12 {
 
                     d3d12Device->CreateShaderResourceView(
                         resource, &srv,
-                        viewAllocation.OffsetFrom(viewSizeIncrement, bindingOffsets[bindingIndex]));
+                        viewAllocation.OffsetFrom(viewSizeIncrement,
+                                                  descriptorHeapOffsets[bindingIndex]));
                     break;
                 }
 

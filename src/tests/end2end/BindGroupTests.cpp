@@ -945,6 +945,92 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
     EXPECT_BUFFER_U32_RANGE_EQ(values.data(), outputBuffer, 0, values.size());
 }
 
+// Test that ensures that backends do not remap bindings such that dynamic and non-dynamic bindings
+// conflict. This can happen if the backend treats dynamic bindings separately from non-dynamic
+// bindings.
+TEST_P(BindGroupTests, DynamicAndNonDynamicBindingsDoNotConflictAfterRemapping) {
+    auto RunTestWith = [&](bool dynamicBufferFirst) {
+        uint32_t dynamicBufferBindingNumber = dynamicBufferFirst ? 0 : 1;
+        uint32_t bufferBindingNumber = dynamicBufferFirst ? 1 : 0;
+
+        std::array<uint32_t, 1> offsets{kMinUniformBufferOffsetAlignment};
+        std::array<uint32_t, 2> values = {21, 67};
+
+        // Create three buffers large enough to by offset by the largest offset.
+        wgpu::BufferDescriptor bufferDescriptor;
+        bufferDescriptor.size = 2 * kMinUniformBufferOffsetAlignment + sizeof(uint32_t);
+        bufferDescriptor.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
+
+        wgpu::Buffer dynamicBuffer = device.CreateBuffer(&bufferDescriptor);
+        wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
+
+        // Populate the values
+        queue.WriteBuffer(dynamicBuffer, kMinUniformBufferOffsetAlignment,
+                          &values[dynamicBufferBindingNumber], sizeof(uint32_t));
+        queue.WriteBuffer(buffer, 0, &values[bufferBindingNumber], sizeof(uint32_t));
+
+        wgpu::Buffer outputBuffer = utils::CreateBufferFromData(
+            device, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage, {0, 0});
+
+        // Create a bind group layout which uses a single dynamic uniform buffer.
+        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+            device,
+            {
+                {dynamicBufferBindingNumber, wgpu::ShaderStage::Compute,
+                 wgpu::BufferBindingType::Uniform, true},
+                {bufferBindingNumber, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform},
+                {2, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage},
+            });
+
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(
+            device, bgl,
+            {
+                {dynamicBufferBindingNumber, dynamicBuffer, 0, sizeof(uint32_t)},
+                {bufferBindingNumber, buffer, 0, sizeof(uint32_t)},
+                {2, outputBuffer, 0, 2 * sizeof(uint32_t)},
+            });
+
+        wgpu::ComputePipelineDescriptor pipelineDescriptor;
+        pipelineDescriptor.compute.module = utils::CreateShaderModule(device, R"(
+        [[block]] struct Buffer {
+            value : u32;
+        };
+
+        [[block]] struct OutputBuffer {
+            value : vec2<u32>;
+        };
+
+        [[group(0), binding(0)]] var<uniform> buffer0 : Buffer;
+        [[group(0), binding(1)]] var<uniform> buffer1 : Buffer;
+        [[group(0), binding(2)]] var<storage, read_write> outputBuffer : OutputBuffer;
+
+        [[stage(compute), workgroup_size(1)]] fn main() {
+            outputBuffer.value = vec2<u32>(buffer0.value, buffer1.value);
+        })");
+        pipelineDescriptor.compute.entryPoint = "main";
+        pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
+        wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDescriptor);
+
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
+        computePassEncoder.SetPipeline(pipeline);
+        computePassEncoder.SetBindGroup(0, bindGroup, offsets.size(), offsets.data());
+        computePassEncoder.Dispatch(1);
+        computePassEncoder.EndPass();
+
+        wgpu::CommandBuffer commands = commandEncoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_BUFFER_U32_RANGE_EQ(values.data(), outputBuffer, 0, values.size());
+    };
+
+    // Run the test with the dynamic buffer in index 0 and with the non-dynamic buffer in index 1,
+    // and vice versa. This should cause a conflict at index 0, if the binding remapping is too
+    // aggressive.
+    RunTestWith(true);
+    RunTestWith(false);
+}
+
 // Test that visibility of bindings in BindGroupLayout can be none
 // This test passes by not asserting or crashing.
 TEST_P(BindGroupTests, BindGroupLayoutVisibilityCanBeNone) {
