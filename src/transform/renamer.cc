@@ -745,6 +745,7 @@ const char* kReservedKeywordsMSL[] = {
     "long3",
     "long4",
     "main",
+    "matrix",
     "metal",
     "mutable",
     "namespace",

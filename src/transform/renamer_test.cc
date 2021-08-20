@@ -1045,6 +1045,7 @@ INSTANTIATE_TEST_SUITE_P(
         "long3",
         "long4",
         "main",   // No functions called main
+        "matrix",
         "metal",  // The namespace
         "packed_bool2",
         "packed_bool3",
