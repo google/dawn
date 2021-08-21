@@ -557,7 +557,7 @@ TEST_P(ResolverIntrinsicTest_Barrier, InferType) {
   auto param = GetParam();
 
   auto* call = Call(param.name);
-  WrapInFunction(call);
+  WrapInFunction(create<ast::CallStatement>(call));
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_NE(TypeOf(call), nullptr);
@@ -568,7 +568,7 @@ TEST_P(ResolverIntrinsicTest_Barrier, Error_TooManyParams) {
   auto param = GetParam();
 
   auto* call = Call(param.name, vec4<f32>(1.f, 2.f, 3.f, 4.f), 1.0f);
-  WrapInFunction(call);
+  WrapInFunction(create<ast::CallStatement>(call));
 
   EXPECT_FALSE(r()->Resolve());
 
@@ -2082,8 +2082,10 @@ TEST_P(ResolverIntrinsicTest_Texture, Call) {
   param.buildSamplerVariable(this);
 
   auto* call = Call(param.function, param.args(this));
-  Func("func", {}, ty.void_(), {Ignore(call)},
-       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+  auto* stmt = ast::intrinsic::test::ReturnsVoid(param.overload)
+                   ? create<ast::CallStatement>(call)
+                   : Ignore(call);
+  Func("func", {}, ty.void_(), {stmt}, {Stage(ast::PipelineStage::kFragment)});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 

@@ -23,8 +23,7 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
-  Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
-       ast::DecorationList{});
+  Func("my_func", {}, ty.f32(), {Return(1.23f)});
 
   auto* call = Call("my_func");
   WrapInFunction(call);
@@ -42,7 +41,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithParams) {
            Param(Sym(), ty.f32()),
            Param(Sym(), ty.f32()),
        },
-       ty.void_(), ast::StatementList{}, ast::DecorationList{});
+       ty.f32(), {Return(1.23f)});
   Global("param1", ty.f32(), ast::StorageClass::kPrivate);
   Global("param2", ty.f32(), ast::StorageClass::kPrivate);
 

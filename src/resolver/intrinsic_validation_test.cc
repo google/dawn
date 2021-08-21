@@ -21,6 +21,20 @@ namespace {
 
 using ResolverIntrinsicValidationTest = ResolverTest;
 
+TEST_F(ResolverIntrinsicValidationTest,
+       FunctionTypeMustMatchReturnStatementType_void_fail) {
+  // fn func { return workgroupBarrier(); }
+  Func("func", {}, ty.void_(),
+       {
+           Return(Call(Source{Source::Location{12, 34}}, "workgroupBarrier")),
+       });
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: intrinsic 'workgroupBarrier' does not return a value");
+}
+
 TEST_F(ResolverIntrinsicValidationTest, InvalidPipelineStageDirect) {
   // [[stage(compute), workgroup_size(1)]] fn func { return dpdx(1.0); }
 
@@ -42,16 +56,16 @@ TEST_F(ResolverIntrinsicValidationTest, InvalidPipelineStageIndirect) {
 
   auto* dpdx = create<ast::CallExpression>(Source{{3, 4}}, Expr("dpdx"),
                                            ast::ExpressionList{Expr(1.0f)});
-  Func(Source{{1, 2}}, "f0", ast::VariableList{}, ty.void_(), {Ignore(dpdx)});
+  Func(Source{{1, 2}}, "f0", {}, ty.void_(), {Ignore(dpdx)});
 
-  Func(Source{{3, 4}}, "f1", ast::VariableList{}, ty.void_(),
-       {Ignore(Call("f0"))});
+  Func(Source{{3, 4}}, "f1", {}, ty.void_(),
+       {create<ast::CallStatement>(Call("f0"))});
 
-  Func(Source{{5, 6}}, "f2", ast::VariableList{}, ty.void_(),
-       {Ignore(Call("f1"))});
+  Func(Source{{5, 6}}, "f2", {}, ty.void_(),
+       {create<ast::CallStatement>(Call("f1"))});
 
-  Func(Source{{7, 8}}, "main", ast::VariableList{}, ty.void_(),
-       {Ignore(Call("f2"))},
+  Func(Source{{7, 8}}, "main", {}, ty.void_(),
+       {create<ast::CallStatement>(Call("f2"))},
        {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
   EXPECT_FALSE(r()->Resolve());

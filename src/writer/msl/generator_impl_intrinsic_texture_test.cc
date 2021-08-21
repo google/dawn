@@ -273,14 +273,11 @@ TEST_P(MslGeneratorIntrinsicTextureTest, Call) {
 
   auto* call =
       create<ast::CallExpression>(Expr(param.function), param.args(this));
+  auto* stmt = ast::intrinsic::test::ReturnsVoid(param.overload)
+                   ? create<ast::CallStatement>(call)
+                   : Ignore(call);
 
-  Func("main", ast::VariableList{}, ty.void_(),
-       ast::StatementList{
-           Ignore(call),
-       },
-       ast::DecorationList{
-           Stage(ast::PipelineStage::kFragment),
-       });
+  Func("main", {}, ty.void_(), {stmt}, {Stage(ast::PipelineStage::kFragment)});
 
   GeneratorImpl& gen = Build();
 

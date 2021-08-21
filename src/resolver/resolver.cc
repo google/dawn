@@ -1463,12 +1463,9 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
   };
 
   // Inner lambda that is applied to a type and all of its members.
-  auto validate_entry_point_decorations_inner = [&](const ast::DecorationList&
-                                                        decos,
-                                                    sem::Type* ty,
-                                                    Source source,
-                                                    ParamOrRetType param_or_ret,
-                                                    bool is_struct_member) {
+  auto validate_entry_point_decorations_inner =
+      [&](const ast::DecorationList& decos, sem::Type* ty, Source source,
+          ParamOrRetType param_or_ret, bool is_struct_member) {
         // Scan decorations for pipeline IO attributes.
         // Check for overlap with attributes that have been seen previously.
         ast::Decoration* pipeline_io_attribute = nullptr;
@@ -1478,14 +1475,16 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
           if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
             if (pipeline_io_attribute) {
               AddError("multiple entry point IO attributes", deco->source());
-          AddNote("previously consumed " + deco_to_str(pipeline_io_attribute),
+              AddNote(
+                  "previously consumed " + deco_to_str(pipeline_io_attribute),
                   pipeline_io_attribute->source());
               return false;
             }
             pipeline_io_attribute = deco;
 
             if (builtins.count(builtin->value())) {
-          AddError(deco_to_str(builtin) +
+              AddError(
+                  deco_to_str(builtin) +
                       " attribute appears multiple times as pipeline " +
                       (param_or_ret == ParamOrRetType::kParameter ? "input"
                                                                   : "output"),
@@ -1503,7 +1502,8 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
           } else if (auto* location = deco->As<ast::LocationDecoration>()) {
             if (pipeline_io_attribute) {
               AddError("multiple entry point IO attributes", deco->source());
-          AddNote("previously consumed " + deco_to_str(pipeline_io_attribute),
+              AddNote(
+                  "previously consumed " + deco_to_str(pipeline_io_attribute),
                   pipeline_io_attribute->source());
               return false;
             }
@@ -1514,7 +1514,8 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
                                             is_input)) {
               return false;
             }
-      } else if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
+          } else if (auto* interpolate =
+                         deco->As<ast::InterpolateDecoration>()) {
             if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
               is_invalid_compute_shader_decoration = true;
             } else if (!ValidateInterpolateDecoration(interpolate, ty)) {
@@ -1528,7 +1529,8 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
           }
           if (is_invalid_compute_shader_decoration) {
             std::string input_or_output =
-            param_or_ret == ParamOrRetType::kParameter ? "inputs" : "output";
+                param_or_ret == ParamOrRetType::kParameter ? "inputs"
+                                                           : "output";
             AddError(
                 "decoration is not valid for compute shader " + input_or_output,
                 deco->source());
@@ -1536,13 +1538,13 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
           }
         }
 
-    if (IsValidationEnabled(decos,
-                            ast::DisabledValidation::kEntryPointParameter)) {
+        if (IsValidationEnabled(
+                decos, ast::DisabledValidation::kEntryPointParameter)) {
           if (!ty->Is<sem::Struct>() && !pipeline_io_attribute) {
             std::string err = "missing entry point IO attribute";
             if (!is_struct_member) {
-          err +=
-              (param_or_ret == ParamOrRetType::kParameter ? " on parameter"
+              err += (param_or_ret == ParamOrRetType::kParameter
+                          ? " on parameter"
                           : " on return type");
             }
             AddError(err, source);
@@ -2338,28 +2340,42 @@ bool Resolver::Call(ast::CallExpression* call) {
     }
   }
 
+  return ValidateCall(call);
+}
+
+bool Resolver::ValidateCall(ast::CallExpression* call) {
+  if (TypeOf(call)->Is<sem::Void>()) {
+    bool is_call_statement = false;
+    if (current_statement_) {
+      if (auto* call_stmt =
+              As<ast::CallStatement>(current_statement_->Declaration())) {
+        if (call_stmt->expr() == call) {
+          is_call_statement = true;
+        }
+      }
+    }
+    if (!is_call_statement) {
+      // https://gpuweb.github.io/gpuweb/wgsl/#function-call-expr
+      // If the called function does not return a value, a function call
+      // statement should be used instead.
+      auto* ident = call->func();
+      auto name = builder_->Symbols().NameFor(ident->symbol());
+      // A function call is made to either a user declared function or an
+      // intrinsic. function_calls_ only maps CallExpression to user declared
+      // functions
+      bool is_function = function_calls_.count(call) != 0;
+      AddError((is_function ? "function" : "intrinsic") + std::string(" '") +
+                   name + "' does not return a value",
+               call->source());
+      return false;
+    }
+  }
+
   return true;
 }
 
 bool Resolver::ValidateCallStatement(ast::CallStatement* stmt) {
-  const sem::Type* return_type = nullptr;
-  // A function call is made to either a user declared function or an intrinsic.
-  // function_calls_ only maps CallExpression to user declared functions
-  auto it = function_calls_.find(stmt->expr());
-  if (it != function_calls_.end()) {
-    return_type = it->second.function->return_type;
-  } else {
-    // Must be an intrinsic call
-    auto* target = builder_->Sem().Get(stmt->expr())->Target();
-    if (auto* intrinsic = target->As<sem::Intrinsic>()) {
-      return_type = intrinsic->ReturnType();
-    } else {
-      TINT_ICE(Resolver, diagnostics_)
-          << "call target was not an intrinsic, but a "
-          << intrinsic->TypeInfo().name;
-    }
-  }
-
+  const sem::Type* return_type = TypeOf(stmt->expr());
   if (!return_type->Is<sem::Void>()) {
     // https://gpuweb.github.io/gpuweb/wgsl/#function-call-statement
     // A function call statement executes a function call where the called

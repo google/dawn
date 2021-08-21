@@ -217,6 +217,20 @@ TEST_F(ResolverFunctionValidationTest,
 }
 
 TEST_F(ResolverFunctionValidationTest,
+       FunctionTypeMustMatchReturnStatementType_void_fail) {
+  // fn v { return; }
+  // fn func { return v(); }
+  Func("v", {}, ty.void_(), {Return()});
+  Func("func", {}, ty.void_(),
+       {
+           Return(Call(Source{Source::Location{12, 34}}, "v")),
+       });
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: function 'v' does not return a value");
+}
+
+TEST_F(ResolverFunctionValidationTest,
        FunctionTypeMustMatchReturnStatementTypeMissing_fail) {
   // fn func -> f32 { return; }
   Func("func", ast::VariableList{}, ty.f32(),

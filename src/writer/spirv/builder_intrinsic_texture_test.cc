@@ -3691,9 +3691,10 @@ TEST_P(IntrinsicTextureTest, Call) {
   auto* sampler = param.buildSamplerVariable(this);
 
   auto* call = Call(param.function, param.args(this));
-
-  Func("func", {}, ty.void_(), {Ignore(call)},
-       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+  auto* stmt = ast::intrinsic::test::ReturnsVoid(param.overload)
+                   ? create<ast::CallStatement>(call)
+                   : Ignore(call);
+  Func("func", {}, ty.void_(), {stmt}, {Stage(ast::PipelineStage::kFragment)});
 
   spirv::Builder& b = Build();
 
@@ -3719,13 +3720,10 @@ TEST_P(IntrinsicTextureTest, ValidateSPIRV) {
 
   auto* call = Call(param.function, param.args(this));
 
-  Func("main", ast::VariableList{}, ty.void_(),
-       ast::StatementList{
-           Ignore(call),
-       },
-       ast::DecorationList{
-           Stage(ast::PipelineStage::kFragment),
-       });
+  auto* stmt = ast::intrinsic::test::ReturnsVoid(param.overload)
+                   ? create<ast::CallStatement>(call)
+                   : Ignore(call);
+  Func("main", {}, ty.void_(), {stmt}, {Stage(ast::PipelineStage::kFragment)});
 
   spirv::Builder& b = Build();
 
@@ -3744,7 +3742,10 @@ TEST_P(IntrinsicTextureTest, OutsideFunction_IsError) {
   auto* sampler = param.buildSamplerVariable(this);
 
   auto* call = Call(param.function, param.args(this));
-  Func("func", {}, ty.void_(), {Ignore(call)},
+  auto* stmt = ast::intrinsic::test::ReturnsVoid(param.overload)
+                   ? create<ast::CallStatement>(call)
+                   : Ignore(call);
+  Func("func", {}, ty.void_(), {stmt},
        {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   spirv::Builder& b = Build();

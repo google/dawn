@@ -90,7 +90,7 @@ TEST_F(ResolverCallTest, Valid) {
     args.push_back(p.create_value(*this, 0));
   }
 
-  Func("foo", std::move(params), ty.void_(), {Return()});
+  Func("foo", std::move(params), ty.f32(), {Return(1.23f)});
   auto* call = Call("foo", std::move(args));
   WrapInFunction(call);
 

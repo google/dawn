@@ -185,6 +185,10 @@ enum class ValidTextureOverload {
   kStoreWO3dRgba32float,             // Not permutated for all texel formats
 };
 
+/// @param texture_overload the ValidTextureOverload
+/// @returns true if the ValidTextureOverload intrinsic returns no value.
+bool ReturnsVoid(ValidTextureOverload texture_overload);
+
 /// Describes a texture intrinsic overload
 struct TextureOverloadCase {
   /// Constructor for textureSample...() functions

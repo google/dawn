@@ -94,11 +94,11 @@ TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInFragmentStage) {
   Global("dst", ty.vec4<f32>(), ast::StorageClass::kPrivate);
   auto* stmt = Assign(Expr("dst"), Expr(Source{{3, 4}}, "wg"));
 
-  Func(Source{{5, 6}}, "f2", ast::VariableList{}, ty.void_(), {stmt});
-  Func(Source{{7, 8}}, "f1", ast::VariableList{}, ty.void_(),
-       {Ignore(Call("f2"))});
-  Func(Source{{9, 10}}, "f0", ast::VariableList{}, ty.void_(),
-       {Ignore(Call("f1"))},
+  Func(Source{{5, 6}}, "f2", {}, ty.void_(), {stmt});
+  Func(Source{{7, 8}}, "f1", {}, ty.void_(),
+       {create<ast::CallStatement>(Call("f2"))});
+  Func(Source{{9, 10}}, "f0", {}, ty.void_(),
+       {create<ast::CallStatement>(Call("f1"))},
        ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
 
   EXPECT_FALSE(r()->Resolve());

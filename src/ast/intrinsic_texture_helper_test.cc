@@ -2237,6 +2237,18 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
   };
 }
 
+bool ReturnsVoid(ValidTextureOverload texture_overload) {
+  switch (texture_overload) {
+    case ValidTextureOverload::kStoreWO1dRgba32float:
+    case ValidTextureOverload::kStoreWO2dRgba32float:
+    case ValidTextureOverload::kStoreWO2dArrayRgba32float:
+    case ValidTextureOverload::kStoreWO3dRgba32float:
+      return true;
+    default:
+      return false;
+  }
+}
+
 }  // namespace test
 }  // namespace intrinsic
 }  // namespace ast

@@ -299,7 +299,7 @@ TEST_F(MslGeneratorImplTest, Intrinsic_Call) {
 
 TEST_F(MslGeneratorImplTest, StorageBarrier) {
   auto* call = Call("storageBarrier");
-  WrapInFunction(call);
+  WrapInFunction(create<ast::CallStatement>(call));
 
   GeneratorImpl& gen = Build();
 
@@ -310,7 +310,7 @@ TEST_F(MslGeneratorImplTest, StorageBarrier) {
 
 TEST_F(MslGeneratorImplTest, WorkgroupBarrier) {
   auto* call = Call("workgroupBarrier");
-  WrapInFunction(call);
+  WrapInFunction(create<ast::CallStatement>(call));
 
   GeneratorImpl& gen = Build();
 

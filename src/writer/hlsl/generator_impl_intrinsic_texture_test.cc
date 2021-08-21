@@ -361,14 +361,11 @@ TEST_P(HlslGeneratorIntrinsicTextureTest, Call) {
   param.buildSamplerVariable(this);
 
   auto* call = Call(param.function, param.args(this));
+  auto* stmt = ast::intrinsic::test::ReturnsVoid(param.overload)
+                   ? create<ast::CallStatement>(call)
+                   : Ignore(call);
 
-  Func("main", ast::VariableList{}, ty.void_(),
-       ast::StatementList{
-           Ignore(call),
-       },
-       ast::DecorationList{
-           Stage(ast::PipelineStage::kFragment),
-       });
+  Func("main", {}, ty.void_(), {stmt}, {Stage(ast::PipelineStage::kFragment)});
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
