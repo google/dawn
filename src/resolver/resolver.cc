@@ -1698,6 +1698,11 @@ bool Resolver::Function(ast::Function* func) {
   uint32_t parameter_index = 0;
   for (auto* param : func->params()) {
     Mark(param);
+
+    if (!ValidateNoDuplicateDefinition(param->symbol(), param->source())) {
+      return false;
+    }
+
     auto* param_info =
         Variable(param, VariableKind::kParameter, parameter_index++);
     if (!param_info) {

@@ -28,13 +28,13 @@ class ResolverFunctionValidationTest : public resolver::TestHelper,
 TEST_F(ResolverFunctionValidationTest, FunctionNamesMustBeUnique_fail) {
   // fn func -> i32 { return 2; }
   // fn func -> i32 { return 2; }
-  Func("func", ast::VariableList{}, ty.i32(),
+  Func(Source{{56, 78}}, "func", ast::VariableList{}, ty.i32(),
        ast::StatementList{
            Return(2),
        },
        ast::DecorationList{});
 
-  Func(Source{Source::Location{12, 34}}, "func", ast::VariableList{}, ty.i32(),
+  Func(Source{{12, 34}}, "func", ast::VariableList{}, ty.i32(),
        ast::StatementList{
            Return(2),
        },
@@ -42,8 +42,34 @@ TEST_F(ResolverFunctionValidationTest, FunctionNamesMustBeUnique_fail) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: redefinition of 'func'\nnote: previous definition "
-            "is here");
+            R"(12:34 error: redefinition of 'func'
+56:78 note: previous definition is here)");
+}
+
+TEST_F(ResolverFunctionValidationTest, ParameterNamesMustBeUnique_fail) {
+  // fn func(common_name : f32, x : i32, common_name : u32) { }
+  Func("func",
+       {
+           Param(Source{{56, 78}}, "common_name", ty.f32()),
+           Param("x", ty.i32()),
+           Param(Source{{12, 34}}, "common_name", ty.u32()),
+       },
+       ty.void_(), {});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            R"(12:34 error: redefinition of 'common_name'
+56:78 note: previous definition is here)");
+}
+
+TEST_F(ResolverFunctionValidationTest, ParameterNamesMustBeUnique_pass) {
+  // fn func_a(common_name : f32) { }
+  // fn func_b(common_name : f32) { }
+  Func("func_a", {Param("common_name", ty.f32())}, ty.void_(), {});
+  Func("func_b", {Param("common_name", ty.f32())}, ty.void_(), {});
+
+  EXPECT_TRUE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "");
 }
 
 TEST_F(ResolverFunctionValidationTest,
