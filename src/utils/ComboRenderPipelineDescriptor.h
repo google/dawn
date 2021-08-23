@@ -24,18 +24,18 @@
 namespace utils {
 
     // Primarily used by tests to easily set up the vertex buffer state portion of a RenderPipeline.
-    class ComboVertexStateDescriptor {
+    class ComboVertexState {
       public:
-        ComboVertexStateDescriptor();
+        ComboVertexState();
 
-        ComboVertexStateDescriptor(const ComboVertexStateDescriptor&) = delete;
-        ComboVertexStateDescriptor& operator=(const ComboVertexStateDescriptor&) = delete;
-        ComboVertexStateDescriptor(ComboVertexStateDescriptor&&) = delete;
-        ComboVertexStateDescriptor& operator=(ComboVertexStateDescriptor&&) = delete;
+        ComboVertexState(const ComboVertexState&) = delete;
+        ComboVertexState& operator=(const ComboVertexState&) = delete;
+        ComboVertexState(ComboVertexState&&) = delete;
+        ComboVertexState& operator=(ComboVertexState&&) = delete;
 
         uint32_t vertexBufferCount;
-        std::array<wgpu::VertexBufferLayoutDescriptor, kMaxVertexBuffers> cVertexBuffers;
-        std::array<wgpu::VertexAttributeDescriptor, kMaxVertexAttributes> cAttributes;
+        std::array<wgpu::VertexBufferLayout, kMaxVertexBuffers> cVertexBuffers;
+        std::array<wgpu::VertexAttribute, kMaxVertexAttributes> cAttributes;
     };
 
     class ComboRenderPipelineDescriptor : public wgpu::RenderPipelineDescriptor {

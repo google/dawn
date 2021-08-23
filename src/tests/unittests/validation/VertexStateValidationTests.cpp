@@ -20,7 +20,7 @@
 class VertexStateTest : public ValidationTest {
   protected:
     void CreatePipeline(bool success,
-                        const utils::ComboVertexStateDescriptor& state,
+                        const utils::ComboVertexState& state,
                         const char* vertexSource) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vertexSource);
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -52,13 +52,13 @@ class VertexStateTest : public ValidationTest {
 
 // Check an empty vertex input is valid
 TEST_F(VertexStateTest, EmptyIsOk) {
-    utils::ComboVertexStateDescriptor state;
+    utils::ComboVertexState state;
     CreatePipeline(true, state, kDummyVertexShader);
 }
 
 // Check null buffer is valid
 TEST_F(VertexStateTest, NullBufferIsOk) {
-    utils::ComboVertexStateDescriptor state;
+    utils::ComboVertexState state;
     // One null buffer (buffer[0]) is OK
     state.vertexBufferCount = 1;
     state.cVertexBuffers[0].arrayStride = 0;
@@ -87,7 +87,7 @@ TEST_F(VertexStateTest, NullBufferIsOk) {
 // Check validation that pipeline vertex buffers are backed by attributes in the vertex input
 // Check validation that pipeline vertex buffers are backed by attributes in the vertex input
 TEST_F(VertexStateTest, PipelineCompatibility) {
-    utils::ComboVertexStateDescriptor state;
+    utils::ComboVertexState state;
     state.vertexBufferCount = 1;
     state.cVertexBuffers[0].arrayStride = 2 * sizeof(float);
     state.cVertexBuffers[0].attributeCount = 2;
@@ -127,7 +127,7 @@ TEST_F(VertexStateTest, PipelineCompatibility) {
 // Test that a arrayStride of 0 is valid
 TEST_F(VertexStateTest, StrideZero) {
     // Works ok without attributes
-    utils::ComboVertexStateDescriptor state;
+    utils::ComboVertexState state;
     state.vertexBufferCount = 1;
     state.cVertexBuffers[0].arrayStride = 0;
     state.cVertexBuffers[0].attributeCount = 1;
@@ -142,7 +142,7 @@ TEST_F(VertexStateTest, StrideZero) {
 // if vertex buffer arrayStride is not zero.
 TEST_F(VertexStateTest, SetOffsetOutOfBounds) {
     // Control case, setting correct arrayStride and offset
-    utils::ComboVertexStateDescriptor state;
+    utils::ComboVertexState state;
     state.vertexBufferCount = 1;
     state.cVertexBuffers[0].arrayStride = 2 * sizeof(float);
     state.cVertexBuffers[0].attributeCount = 2;
@@ -163,7 +163,7 @@ TEST_F(VertexStateTest, SetOffsetOutOfBounds) {
 // Check out of bounds condition on total number of vertex buffers
 TEST_F(VertexStateTest, SetVertexBuffersNumLimit) {
     // Control case, setting max vertex buffer number
-    utils::ComboVertexStateDescriptor state;
+    utils::ComboVertexState state;
     state.vertexBufferCount = kMaxVertexBuffers;
     for (uint32_t i = 0; i < kMaxVertexBuffers; ++i) {
         state.cVertexBuffers[i].attributeCount = 1;
@@ -180,7 +180,7 @@ TEST_F(VertexStateTest, SetVertexBuffersNumLimit) {
 // Check out of bounds condition on total number of vertex attributes
 TEST_F(VertexStateTest, SetVertexAttributesNumLimit) {
     // Control case, setting max vertex attribute number
-    utils::ComboVertexStateDescriptor state;
+    utils::ComboVertexState state;
     state.vertexBufferCount = 2;
     state.cVertexBuffers[0].attributeCount = kMaxVertexAttributes;
     for (uint32_t i = 0; i < kMaxVertexAttributes; ++i) {
@@ -197,7 +197,7 @@ TEST_F(VertexStateTest, SetVertexAttributesNumLimit) {
 // Check out of bounds condition on input arrayStride
 TEST_F(VertexStateTest, SetInputStrideOutOfBounds) {
     // Control case, setting max input arrayStride
-    utils::ComboVertexStateDescriptor state;
+    utils::ComboVertexState state;
     state.vertexBufferCount = 1;
     state.cVertexBuffers[0].arrayStride = kMaxVertexBufferArrayStride;
     state.cVertexBuffers[0].attributeCount = 1;
@@ -211,7 +211,7 @@ TEST_F(VertexStateTest, SetInputStrideOutOfBounds) {
 // Check multiple of 4 bytes constraint on input arrayStride
 TEST_F(VertexStateTest, SetInputStrideNotAligned) {
     // Control case, setting input arrayStride 4 bytes.
-    utils::ComboVertexStateDescriptor state;
+    utils::ComboVertexState state;
     state.vertexBufferCount = 1;
     state.cVertexBuffers[0].arrayStride = 4;
     state.cVertexBuffers[0].attributeCount = 1;
@@ -225,7 +225,7 @@ TEST_F(VertexStateTest, SetInputStrideNotAligned) {
 // Test that we cannot set an already set attribute
 TEST_F(VertexStateTest, AlreadySetAttribute) {
     // Control case, setting attribute 0
-    utils::ComboVertexStateDescriptor state;
+    utils::ComboVertexState state;
     state.vertexBufferCount = 1;
     state.cVertexBuffers[0].attributeCount = 1;
     state.cAttributes[0].shaderLocation = 0;
@@ -241,7 +241,7 @@ TEST_F(VertexStateTest, AlreadySetAttribute) {
 // Test that a arrayStride of 0 is valid
 TEST_F(VertexStateTest, SetSameShaderLocation) {
     // Control case, setting different shader locations in two attributes
-    utils::ComboVertexStateDescriptor state;
+    utils::ComboVertexState state;
     state.vertexBufferCount = 1;
     state.cVertexBuffers[0].attributeCount = 2;
     state.cAttributes[0].shaderLocation = 0;
@@ -266,7 +266,7 @@ TEST_F(VertexStateTest, SetSameShaderLocation) {
 // Check out of bounds condition on attribute shader location
 TEST_F(VertexStateTest, SetAttributeLocationOutOfBounds) {
     // Control case, setting last attribute shader location
-    utils::ComboVertexStateDescriptor state;
+    utils::ComboVertexState state;
     state.vertexBufferCount = 1;
     state.cVertexBuffers[0].attributeCount = 1;
     state.cAttributes[0].shaderLocation = kMaxVertexAttributes - 1;
@@ -280,7 +280,7 @@ TEST_F(VertexStateTest, SetAttributeLocationOutOfBounds) {
 // Check attribute offset out of bounds
 TEST_F(VertexStateTest, SetAttributeOffsetOutOfBounds) {
     // Control case, setting max attribute offset for FloatR32 vertex format
-    utils::ComboVertexStateDescriptor state;
+    utils::ComboVertexState state;
     state.vertexBufferCount = 1;
     state.cVertexBuffers[0].attributeCount = 1;
     state.cAttributes[0].offset = kMaxVertexBufferArrayStride - sizeof(wgpu::VertexFormat::Float32);
@@ -294,7 +294,7 @@ TEST_F(VertexStateTest, SetAttributeOffsetOutOfBounds) {
 // Check the min(4, formatSize) alignment constraint for the offset.
 TEST_F(VertexStateTest, SetOffsetNotAligned) {
     // Control case, setting the offset at the correct alignments.
-    utils::ComboVertexStateDescriptor state;
+    utils::ComboVertexState state;
     state.vertexBufferCount = 1;
     state.cVertexBuffers[0].attributeCount = 1;
 
@@ -333,7 +333,7 @@ TEST_F(VertexStateTest, SetOffsetNotAligned) {
 
 // Check attribute offset overflow
 TEST_F(VertexStateTest, SetAttributeOffsetOverflow) {
-    utils::ComboVertexStateDescriptor state;
+    utils::ComboVertexState state;
     state.vertexBufferCount = 1;
     state.cVertexBuffers[0].attributeCount = 1;
     state.cAttributes[0].offset = std::numeric_limits<uint32_t>::max();
@@ -342,7 +342,7 @@ TEST_F(VertexStateTest, SetAttributeOffsetOverflow) {
 
 // Check for some potential underflow in the vertex input validation
 TEST_F(VertexStateTest, VertexFormatLargerThanNonZeroStride) {
-    utils::ComboVertexStateDescriptor state;
+    utils::ComboVertexState state;
     state.vertexBufferCount = 1;
     state.cVertexBuffers[0].arrayStride = 4;
     state.cVertexBuffers[0].attributeCount = 1;
@@ -353,7 +353,7 @@ TEST_F(VertexStateTest, VertexFormatLargerThanNonZeroStride) {
 // Check that the vertex format base type must match the shader's variable base type.
 TEST_F(VertexStateTest, BaseTypeMatching) {
     auto DoTest = [&](wgpu::VertexFormat format, std::string shaderType, bool success) {
-        utils::ComboVertexStateDescriptor state;
+        utils::ComboVertexState state;
         state.vertexBufferCount = 1;
         state.cVertexBuffers[0].arrayStride = 16;
         state.cVertexBuffers[0].attributeCount = 1;
@@ -407,7 +407,7 @@ TEST_F(VertexStateTest, BaseTypeMatching) {
 // Check that we only check base type compatibility for vertex inputs the shader uses.
 TEST_F(VertexStateTest, BaseTypeMatchingForInexistentInput) {
     auto DoTest = [&](wgpu::VertexFormat format) {
-        utils::ComboVertexStateDescriptor state;
+        utils::ComboVertexState state;
         state.vertexBufferCount = 1;
         state.cVertexBuffers[0].arrayStride = 16;
         state.cVertexBuffers[0].attributeCount = 1;

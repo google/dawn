@@ -66,7 +66,7 @@ class VertexStateTest : public DawnTest {
         VertexFormat format;
         VertexStepMode step;
     };
-    wgpu::RenderPipeline MakeTestPipeline(const utils::ComboVertexStateDescriptor& vertexState,
+    wgpu::RenderPipeline MakeTestPipeline(const utils::ComboVertexState& vertexState,
                                           int multiplier,
                                           const std::vector<ShaderTestSpec>& testSpec) {
         std::ostringstream vs;
@@ -166,7 +166,7 @@ class VertexStateTest : public DawnTest {
     };
 
     void MakeVertexState(const std::vector<VertexBufferSpec>& buffers,
-                         utils::ComboVertexStateDescriptor* vertexState) {
+                         utils::ComboVertexState* vertexState) {
         uint32_t vertexBufferCount = 0;
         uint32_t totalNumAttributes = 0;
         for (const VertexBufferSpec& buffer : buffers) {
@@ -248,7 +248,7 @@ class VertexStateTest : public DawnTest {
 
 // Test compilation and usage of the fixture :)
 TEST_P(VertexStateTest, Basic) {
-    utils::ComboVertexStateDescriptor vertexState;
+    utils::ComboVertexState vertexState;
     MakeVertexState(
         {{4 * sizeof(float), VertexStepMode::Vertex, {{0, 0, VertexFormat::Float32x4}}}},
         &vertexState);
@@ -270,7 +270,7 @@ TEST_P(VertexStateTest, ZeroStride) {
     // This test was failing only on AMD but the OpenGL backend doesn't gather PCI info yet.
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsOpenGL());
 
-    utils::ComboVertexStateDescriptor vertexState;
+    utils::ComboVertexState vertexState;
     MakeVertexState({{0, VertexStepMode::Vertex, {{0, 0, VertexFormat::Float32x4}}}}, &vertexState);
     wgpu::RenderPipeline pipeline =
         MakeTestPipeline(vertexState, 0, {{0, VertexFormat::Float32x4, VertexStepMode::Vertex}});
@@ -291,7 +291,7 @@ TEST_P(VertexStateTest, AttributeExpanding) {
 
     // R32F case
     {
-        utils::ComboVertexStateDescriptor vertexState;
+        utils::ComboVertexState vertexState;
         MakeVertexState({{0, VertexStepMode::Vertex, {{0, 0, VertexFormat::Float32}}}},
                         &vertexState);
         wgpu::RenderPipeline pipeline =
@@ -302,7 +302,7 @@ TEST_P(VertexStateTest, AttributeExpanding) {
     }
     // RG32F case
     {
-        utils::ComboVertexStateDescriptor vertexState;
+        utils::ComboVertexState vertexState;
         MakeVertexState({{0, VertexStepMode::Vertex, {{0, 0, VertexFormat::Float32x2}}}},
                         &vertexState);
         wgpu::RenderPipeline pipeline = MakeTestPipeline(
@@ -313,7 +313,7 @@ TEST_P(VertexStateTest, AttributeExpanding) {
     }
     // RGB32F case
     {
-        utils::ComboVertexStateDescriptor vertexState;
+        utils::ComboVertexState vertexState;
         MakeVertexState({{0, VertexStepMode::Vertex, {{0, 0, VertexFormat::Float32x3}}}},
                         &vertexState);
         wgpu::RenderPipeline pipeline = MakeTestPipeline(
@@ -329,7 +329,7 @@ TEST_P(VertexStateTest, StrideLargerThanAttributes) {
     // This test was failing only on AMD but the OpenGL backend doesn't gather PCI info yet.
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsOpenGL());
 
-    utils::ComboVertexStateDescriptor vertexState;
+    utils::ComboVertexState vertexState;
     MakeVertexState(
         {{8 * sizeof(float), VertexStepMode::Vertex, {{0, 0, VertexFormat::Float32x4}}}},
         &vertexState);
@@ -348,7 +348,7 @@ TEST_P(VertexStateTest, StrideLargerThanAttributes) {
 
 // Test two attributes at an offset, vertex version
 TEST_P(VertexStateTest, TwoAttributesAtAnOffsetVertex) {
-    utils::ComboVertexStateDescriptor vertexState;
+    utils::ComboVertexState vertexState;
     MakeVertexState(
         {{8 * sizeof(float),
           VertexStepMode::Vertex,
@@ -369,7 +369,7 @@ TEST_P(VertexStateTest, TwoAttributesAtAnOffsetVertex) {
 
 // Test two attributes at an offset, instance version
 TEST_P(VertexStateTest, TwoAttributesAtAnOffsetInstance) {
-    utils::ComboVertexStateDescriptor vertexState;
+    utils::ComboVertexState vertexState;
     MakeVertexState(
         {{8 * sizeof(float),
           VertexStepMode::Instance,
@@ -390,7 +390,7 @@ TEST_P(VertexStateTest, TwoAttributesAtAnOffsetInstance) {
 
 // Test a pure-instance input state
 TEST_P(VertexStateTest, PureInstance) {
-    utils::ComboVertexStateDescriptor vertexState;
+    utils::ComboVertexState vertexState;
     MakeVertexState(
         {{4 * sizeof(float), VertexStepMode::Instance, {{0, 0, VertexFormat::Float32x4}}}},
         &vertexState);
@@ -411,7 +411,7 @@ TEST_P(VertexStateTest, PureInstance) {
 // Test with mixed everything, vertex vs. instance, different stride and offsets
 // different attribute types
 TEST_P(VertexStateTest, MixedEverything) {
-    utils::ComboVertexStateDescriptor vertexState;
+    utils::ComboVertexState vertexState;
     MakeVertexState(
         {{12 * sizeof(float),
           VertexStepMode::Vertex,
@@ -447,7 +447,7 @@ TEST_P(VertexStateTest, MixedEverything) {
 // Test input state is unaffected by unused vertex slot
 TEST_P(VertexStateTest, UnusedVertexSlot) {
     // Instance input state, using slot 1
-    utils::ComboVertexStateDescriptor instanceVertexState;
+    utils::ComboVertexState instanceVertexState;
     MakeVertexState(
         {{0, VertexStepMode::Vertex, {}},
          {4 * sizeof(float), VertexStepMode::Instance, {{0, 0, VertexFormat::Float32x4}}}},
@@ -488,7 +488,7 @@ TEST_P(VertexStateTest, UnusedVertexSlot) {
 // SetVertexBuffer should be reapplied when the input state changes.
 TEST_P(VertexStateTest, MultiplePipelinesMixedVertexState) {
     // Basic input state, using slot 0
-    utils::ComboVertexStateDescriptor vertexVertexState;
+    utils::ComboVertexState vertexVertexState;
     MakeVertexState(
         {{4 * sizeof(float), VertexStepMode::Vertex, {{0, 0, VertexFormat::Float32x4}}}},
         &vertexVertexState);
@@ -496,7 +496,7 @@ TEST_P(VertexStateTest, MultiplePipelinesMixedVertexState) {
         vertexVertexState, 1, {{0, VertexFormat::Float32x4, VertexStepMode::Vertex}});
 
     // Instance input state, using slot 1
-    utils::ComboVertexStateDescriptor instanceVertexState;
+    utils::ComboVertexState instanceVertexState;
     MakeVertexState(
         {{0, VertexStepMode::Instance, {}},
          {4 * sizeof(float), VertexStepMode::Instance, {{0, 0, VertexFormat::Float32x4}}}},
@@ -538,7 +538,7 @@ TEST_P(VertexStateTest, MultiplePipelinesMixedVertexState) {
 TEST_P(VertexStateTest, LastAllowedVertexBuffer) {
     constexpr uint32_t kBufferIndex = kMaxVertexBuffers - 1;
 
-    utils::ComboVertexStateDescriptor vertexState;
+    utils::ComboVertexState vertexState;
     // All the other vertex buffers default to no attributes
     vertexState.vertexBufferCount = kMaxVertexBuffers;
     vertexState.cVertexBuffers[kBufferIndex].arrayStride = 4 * sizeof(float);
@@ -560,7 +560,7 @@ TEST_P(VertexStateTest, LastAllowedVertexBuffer) {
 TEST_P(VertexStateTest, OverlappingVertexAttributes) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 3, 3);
 
-    utils::ComboVertexStateDescriptor vertexState;
+    utils::ComboVertexState vertexState;
     MakeVertexState({{16,
                       VertexStepMode::Vertex,
                       {

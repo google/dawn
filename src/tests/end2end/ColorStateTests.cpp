@@ -843,7 +843,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
 
     // Blend state intentionally omitted for target 2
 
-    wgpu::BlendDescriptor blendComponent3;
+    wgpu::BlendComponent blendComponent3;
     blendComponent3.operation = wgpu::BlendOperation::Min;
     blendComponent3.srcFactor = wgpu::BlendFactor::One;
     blendComponent3.dstFactor = wgpu::BlendFactor::One;

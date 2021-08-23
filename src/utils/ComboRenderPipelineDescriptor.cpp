@@ -20,11 +20,11 @@ namespace utils {
 
     // For creating deprecated render pipeline descriptors
 
-    ComboVertexStateDescriptor::ComboVertexStateDescriptor() {
+    ComboVertexState::ComboVertexState() {
         vertexBufferCount = 0;
 
         // Fill the default values for vertexBuffers and vertexAttributes in buffers.
-        wgpu::VertexAttributeDescriptor vertexAttribute;
+        wgpu::VertexAttribute vertexAttribute;
         vertexAttribute.shaderLocation = 0;
         vertexAttribute.offset = 0;
         vertexAttribute.format = wgpu::VertexFormat::Float32;

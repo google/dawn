@@ -274,7 +274,7 @@ namespace dawn_native { namespace d3d12 {
             }
         }
 
-        D3D12_DEPTH_STENCILOP_DESC StencilOpDesc(const StencilStateFaceDescriptor descriptor) {
+        D3D12_DEPTH_STENCILOP_DESC StencilOpDesc(const StencilFaceState& descriptor) {
             D3D12_DEPTH_STENCILOP_DESC desc;
 
             desc.StencilFailOp = StencilOp(descriptor.failOp);

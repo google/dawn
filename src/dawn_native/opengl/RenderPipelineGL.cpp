@@ -151,7 +151,7 @@ namespace dawn_native { namespace opengl {
                          state->writeMask & wgpu::ColorWriteMask::Alpha);
         }
 
-        bool Equal(const BlendDescriptor& lhs, const BlendDescriptor& rhs) {
+        bool Equal(const BlendComponent& lhs, const BlendComponent& rhs) {
             return lhs.operation == rhs.operation && lhs.srcFactor == rhs.srcFactor &&
                    lhs.dstFactor == rhs.dstFactor;
         }
