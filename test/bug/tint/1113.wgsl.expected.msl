@@ -1,6 +1,17 @@
 #include <metal_stdlib>
 
 using namespace metal;
+
+template<typename T, int N, int M>
+inline auto operator*(matrix<T, N, M> lhs, packed_vec<T, N> rhs) {
+  return lhs * vec<T, N>(rhs);
+}
+
+template<typename T, int N, int M>
+inline auto operator*(packed_vec<T, M> lhs, matrix<T, N, M> rhs) {
+  return vec<T, M>(lhs) * rhs;
+}
+
 struct Uniforms {
   /* 0x0000 */ uint numTriangles;
   /* 0x0004 */ uint gridSize;

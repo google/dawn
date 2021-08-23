@@ -2310,6 +2310,26 @@ bool GeneratorImpl::EmitPackedType(std::ostream& out,
     if (!EmitType(out, vec, "")) {
       return false;
     }
+
+    if (vec->is_float_vector() && !matrix_packed_vector_overloads_) {
+      // Overload operators for matrix-vector arithmetic where the vector
+      // operand is packed, as these overloads to not exist in the metal
+      // namespace.
+      TextBuffer b;
+      TINT_DEFER(helpers_.Append(b));
+      line(&b) << R"(template<typename T, int N, int M>
+inline auto operator*(matrix<T, N, M> lhs, packed_vec<T, N> rhs) {
+  return lhs * vec<T, N>(rhs);
+}
+
+template<typename T, int N, int M>
+inline auto operator*(packed_vec<T, M> lhs, matrix<T, N, M> rhs) {
+  return vec<T, M>(lhs) * rhs;
+}
+)";
+      matrix_packed_vector_overloads_ = true;
+    }
+
     return true;
   }
 

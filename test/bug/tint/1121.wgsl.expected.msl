@@ -1,0 +1,130 @@
+#include <metal_stdlib>
+
+using namespace metal;
+
+template<typename T, int N, int M>
+inline auto operator*(matrix<T, N, M> lhs, packed_vec<T, N> rhs) {
+  return lhs * vec<T, N>(rhs);
+}
+
+template<typename T, int N, int M>
+inline auto operator*(packed_vec<T, M> lhs, matrix<T, N, M> rhs) {
+  return vec<T, M>(lhs) * rhs;
+}
+
+struct LightData {
+  /* 0x0000 */ float4 position;
+  /* 0x0010 */ packed_float3 color;
+  /* 0x001c */ float radius;
+};
+struct LightsBuffer {
+  /* 0x0000 */ LightData lights[1];
+};
+struct tint_array_wrapper {
+  /* 0x0000 */ uint arr[64];
+};
+struct TileLightIdData {
+  /* 0x0000 */ atomic_uint count;
+  /* 0x0004 */ tint_array_wrapper lightId;
+};
+struct tint_array_wrapper_1 {
+  /* 0x0000 */ TileLightIdData arr[4];
+};
+struct Tiles {
+  /* 0x0000 */ tint_array_wrapper_1 data;
+};
+struct Config {
+  /* 0x0000 */ uint numLights;
+  /* 0x0004 */ uint numTiles;
+  /* 0x0008 */ uint tileCountX;
+  /* 0x000c */ uint tileCountY;
+  /* 0x0010 */ uint numTileLightSlot;
+  /* 0x0014 */ uint tileSize;
+};
+struct Uniforms {
+  /* 0x0000 */ float4 min;
+  /* 0x0010 */ float4 max;
+  /* 0x0020 */ float4x4 viewMatrix;
+  /* 0x0060 */ float4x4 projectionMatrix;
+  /* 0x00a0 */ float4 fullScreenSize;
+};
+struct tint_array_wrapper_2 {
+  float4 arr[6];
+};
+
+void tint_symbol_inner(constant Config& config, constant Uniforms& uniforms, device LightsBuffer& lightsBuffer, device Tiles& tileLightId, uint3 GlobalInvocationID) {
+  uint index = GlobalInvocationID.x;
+  if ((index >= config.numLights)) {
+    return;
+  }
+  lightsBuffer.lights[index].position.y = ((lightsBuffer.lights[index].position.y - 0.100000001f) + (0.001f * (float(index) - (64.0f * floor((float(index) / 64.0f))))));
+  if ((lightsBuffer.lights[index].position.y < uniforms.min.y)) {
+    lightsBuffer.lights[index].position.y = uniforms.max.y;
+  }
+  float4x4 M = uniforms.projectionMatrix;
+  float viewNear = (-(M[3][2]) / (-1.0f + M[2][2]));
+  float viewFar = (-(M[3][2]) / (1.0f + M[2][2]));
+  float4 lightPos = lightsBuffer.lights[index].position;
+  lightPos = (uniforms.viewMatrix * lightPos);
+  lightPos = (lightPos / lightPos.w);
+  float lightRadius = lightsBuffer.lights[index].radius;
+  float4 boxMin = (lightPos - float4(float3(lightRadius), 0.0f));
+  float4 boxMax = (lightPos + float4(float3(lightRadius), 0.0f));
+  tint_array_wrapper_2 frustumPlanes = {};
+  frustumPlanes.arr[4] = float4(0.0f, 0.0f, -1.0f, viewNear);
+  frustumPlanes.arr[5] = float4(0.0f, 0.0f, 1.0f, -(viewFar));
+  int const TILE_SIZE = 16;
+  int const TILE_COUNT_X = 2;
+  int const TILE_COUNT_Y = 2;
+  for(int y_1 = 0; (y_1 < TILE_COUNT_Y); y_1 = as_type<int>((as_type<uint>(y_1) + as_type<uint>(1)))) {
+    for(int x_1 = 0; (x_1 < TILE_COUNT_X); x_1 = as_type<int>((as_type<uint>(x_1) + as_type<uint>(1)))) {
+      int2 tilePixel0Idx = int2(as_type<int>((as_type<uint>(x_1) * as_type<uint>(TILE_SIZE))), as_type<int>((as_type<uint>(y_1) * as_type<uint>(TILE_SIZE))));
+      float2 floorCoord = (((2.0f * float2(tilePixel0Idx)) / uniforms.fullScreenSize.xy) - float2(1.0f));
+      float2 ceilCoord = (((2.0f * float2(as_type<int2>((as_type<uint2>(tilePixel0Idx) + as_type<uint2>(int2(TILE_SIZE)))))) / uniforms.fullScreenSize.xy) - float2(1.0f));
+      float2 viewFloorCoord = float2((((-(viewNear) * floorCoord.x) - (M[2][0] * viewNear)) / M[0][0]), (((-(viewNear) * floorCoord.y) - (M[2][1] * viewNear)) / M[1][1]));
+      float2 viewCeilCoord = float2((((-(viewNear) * ceilCoord.x) - (M[2][0] * viewNear)) / M[0][0]), (((-(viewNear) * ceilCoord.y) - (M[2][1] * viewNear)) / M[1][1]));
+      frustumPlanes.arr[0] = float4(1.0f, 0.0f, (-(viewFloorCoord.x) / viewNear), 0.0f);
+      frustumPlanes.arr[1] = float4(-1.0f, 0.0f, (viewCeilCoord.x / viewNear), 0.0f);
+      frustumPlanes.arr[2] = float4(0.0f, 1.0f, (-(viewFloorCoord.y) / viewNear), 0.0f);
+      frustumPlanes.arr[3] = float4(0.0f, -1.0f, (viewCeilCoord.y / viewNear), 0.0f);
+      float dp = 0.0f;
+      for(uint i = 0u; (i < 6u); i = (i + 1u)) {
+        float4 p = 0.0f;
+        if ((frustumPlanes.arr[i].x > 0.0f)) {
+          p.x = boxMax.x;
+        } else {
+          p.x = boxMin.x;
+        }
+        if ((frustumPlanes.arr[i].y > 0.0f)) {
+          p.y = boxMax.y;
+        } else {
+          p.y = boxMin.y;
+        }
+        if ((frustumPlanes.arr[i].z > 0.0f)) {
+          p.z = boxMax.z;
+        } else {
+          p.z = boxMin.z;
+        }
+        p.w = 1.0f;
+        dp = (dp + fmin(0.0f, dot(p, frustumPlanes.arr[i])));
+      }
+      if ((dp >= 0.0f)) {
+        uint tileId = uint(as_type<int>((as_type<uint>(x_1) + as_type<uint>(as_type<int>((as_type<uint>(y_1) * as_type<uint>(TILE_COUNT_X)))))));
+        if (((tileId < 0u) || (tileId >= config.numTiles))) {
+          continue;
+        }
+        uint offset = atomic_fetch_add_explicit(&(tileLightId.data.arr[tileId].count), 1u, memory_order_relaxed);
+        if ((offset >= config.numTileLightSlot)) {
+          continue;
+        }
+        tileLightId.data.arr[tileId].lightId.arr[offset] = GlobalInvocationID.x;
+      }
+    }
+  }
+}
+
+kernel void tint_symbol(uint3 GlobalInvocationID [[thread_position_in_grid]], constant Config& config [[buffer(0)]], constant Uniforms& uniforms [[buffer(1)]], device LightsBuffer& lightsBuffer [[buffer(2)]], device Tiles& tileLightId [[buffer(3)]]) {
+  tint_symbol_inner(config, uniforms, lightsBuffer, tileLightId, GlobalInvocationID);
+  return;
+}
+

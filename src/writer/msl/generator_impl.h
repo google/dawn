@@ -355,6 +355,9 @@ class GeneratorImpl : public TextGenerator {
   /// True if an invariant attribute has been generated.
   bool has_invariant_ = false;
 
+  /// True if matrix-packed_vector operator overloads have been generated.
+  bool matrix_packed_vector_overloads_ = false;
+
   std::unordered_map<const sem::Intrinsic*, std::string> intrinsics_;
   std::unordered_map<const sem::Type*, std::string> unary_minus_funcs_;
 };
