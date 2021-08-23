@@ -77,13 +77,11 @@ bool Type::is_float_scalar() const {
 }
 
 bool Type::is_float_matrix() const {
-  return Is<Matrix>(
-      [](const Matrix* m) { return m->type()->is_float_scalar(); });
+  return Is([](const Matrix* m) { return m->type()->is_float_scalar(); });
 }
 
 bool Type::is_float_vector() const {
-  return Is<Vector>(
-      [](const Vector* v) { return v->type()->is_float_scalar(); });
+  return Is([](const Vector* v) { return v->type()->is_float_scalar(); });
 }
 
 bool Type::is_float_scalar_or_vector() const {
@@ -107,11 +105,11 @@ bool Type::is_unsigned_integer_scalar() const {
 }
 
 bool Type::is_signed_integer_vector() const {
-  return Is<Vector>([](const Vector* v) { return v->type()->Is<I32>(); });
+  return Is([](const Vector* v) { return v->type()->Is<I32>(); });
 }
 
 bool Type::is_unsigned_integer_vector() const {
-  return Is<Vector>([](const Vector* v) { return v->type()->Is<U32>(); });
+  return Is([](const Vector* v) { return v->type()->Is<U32>(); });
 }
 
 bool Type::is_unsigned_scalar_or_vector() const {
@@ -127,7 +125,7 @@ bool Type::is_integer_scalar_or_vector() const {
 }
 
 bool Type::is_bool_vector() const {
-  return Is<Vector>([](const Vector* v) { return v->type()->Is<Bool>(); });
+  return Is([](const Vector* v) { return v->type()->Is<Bool>(); });
 }
 
 bool Type::is_bool_scalar_or_vector() const {
@@ -135,12 +133,11 @@ bool Type::is_bool_scalar_or_vector() const {
 }
 
 bool Type::is_numeric_vector() const {
-  return Is<Vector>(
-      [](const Vector* v) { return v->type()->is_numeric_scalar(); });
+  return Is([](const Vector* v) { return v->type()->is_numeric_scalar(); });
 }
 
 bool Type::is_scalar_vector() const {
-  return Is<Vector>([](const Vector* v) { return v->type()->is_scalar(); });
+  return Is([](const Vector* v) { return v->type()->is_scalar(); });
 }
 
 bool Type::is_numeric_scalar_or_vector() const {

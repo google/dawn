@@ -367,7 +367,7 @@ bool Type::IsFloatScalarOrVector() const {
 }
 
 bool Type::IsFloatVector() const {
-  return Is<Vector>([](const Vector* v) { return v->type->IsFloatScalar(); });
+  return Is([](const Vector* v) { return v->type->IsFloatScalar(); });
 }
 
 bool Type::IsIntegerScalar() const {
@@ -383,7 +383,7 @@ bool Type::IsScalar() const {
 }
 
 bool Type::IsSignedIntegerVector() const {
-  return Is<Vector>([](const Vector* v) { return v->type->Is<I32>(); });
+  return Is([](const Vector* v) { return v->type->Is<I32>(); });
 }
 
 bool Type::IsSignedScalarOrVector() const {
@@ -391,7 +391,7 @@ bool Type::IsSignedScalarOrVector() const {
 }
 
 bool Type::IsUnsignedIntegerVector() const {
-  return Is<Vector>([](const Vector* v) { return v->type->Is<U32>(); });
+  return Is([](const Vector* v) { return v->type->Is<U32>(); });
 }
 
 bool Type::IsUnsignedScalarOrVector() const {

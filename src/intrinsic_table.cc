@@ -483,7 +483,7 @@ bool match_sampler(const sem::Type* ty) {
   if (ty->Is<Any>()) {
     return true;
   }
-  return ty->Is<sem::Sampler>([](const sem::Sampler* s) {
+  return ty->Is([](const sem::Sampler* s) {
     return s->kind() == ast::SamplerKind::kSampler;
   });
 }
@@ -496,7 +496,7 @@ bool match_sampler_comparison(const sem::Type* ty) {
   if (ty->Is<Any>()) {
     return true;
   }
-  return ty->Is<sem::Sampler>([](const sem::Sampler* s) {
+  return ty->Is([](const sem::Sampler* s) {
     return s->kind() == ast::SamplerKind::kComparisonSampler;
   });
 }
@@ -575,7 +575,7 @@ bool match_texture_depth(const sem::Type* ty, ast::TextureDimension dim) {
   if (ty->Is<Any>()) {
     return true;
   }
-  return ty->Is<sem::DepthTexture>([&](auto t) { return t->dim() == dim; });
+  return ty->Is([&](const sem::DepthTexture* t) { return t->dim() == dim; });
 }
 
 #define DECLARE_DEPTH_TEXTURE(suffix, dim)                       \
@@ -597,8 +597,9 @@ bool match_texture_depth_multisampled_2d(const sem::Type* ty) {
   if (ty->Is<Any>()) {
     return true;
   }
-  return ty->Is<sem::DepthMultisampledTexture>(
-      [&](auto t) { return t->dim() == ast::TextureDimension::k2d; });
+  return ty->Is([&](const sem::DepthMultisampledTexture* t) {
+    return t->dim() == ast::TextureDimension::k2d;
+  });
 }
 
 sem::DepthMultisampledTexture* build_texture_depth_multisampled_2d(

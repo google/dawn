@@ -17,6 +17,8 @@
 
 #include <utility>
 
+#include "src/traits.h"
+
 #if defined(__clang__)
 /// Temporarily disable certain warnings when using Castable API
 #define TINT_CASTABLE_PUSH_DISABLE_WARNINGS()                               \
@@ -298,8 +300,9 @@ class Castable : public BASE {
   /// pred(const TO*) returns true
   /// @param pred predicate function with signature `bool(const TO*)` called iff
   /// object is of, or derives from the class `TO`.
-  template <typename TO, int FLAGS = 0, typename Pred = detail::Infer>
+  template <int FLAGS = 0, typename Pred = detail::Infer>
   inline bool Is(Pred&& pred) const {
+    using TO = typename std::remove_pointer<traits::ParamTypeT<Pred, 0>>::type;
     return tint::Is<TO, FLAGS>(static_cast<const CLASS*>(this),
                                std::forward<Pred>(pred));
   }

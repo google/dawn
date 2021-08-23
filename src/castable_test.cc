@@ -214,17 +214,17 @@ TEST(Castable, Is) {
 TEST(Castable, IsWithPredicate) {
   std::unique_ptr<Animal> frog = std::make_unique<Frog>();
 
-  frog->Is<Animal>([&frog](const Animal* a) {
+  frog->Is([&frog](const Animal* a) {
     EXPECT_EQ(a, frog.get());
     return true;
   });
 
-  ASSERT_TRUE((frog->Is<Animal>([](const Animal*) { return true; })));
-  ASSERT_FALSE((frog->Is<Animal>([](const Animal*) { return false; })));
+  ASSERT_TRUE((frog->Is([](const Animal*) { return true; })));
+  ASSERT_FALSE((frog->Is([](const Animal*) { return false; })));
 
   // Predicate not called if cast is invalid
   auto expect_not_called = [] { FAIL() << "Should not be called"; };
-  ASSERT_FALSE((frog->Is<Bear>([&](const Animal*) {
+  ASSERT_FALSE((frog->Is([&](const Bear*) {
     expect_not_called();
     return true;
   })));
