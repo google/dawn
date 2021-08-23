@@ -2,7 +2,7 @@
 
 using namespace metal;
 struct tint_padded_array_element {
-  /* 0x0000 */ packed_float2 el;
+  /* 0x0000 */ float2 el;
   /* 0x0008 */ int8_t tint_pad[8];
 };
 struct tint_array_wrapper {

@@ -18,10 +18,10 @@ struct buf1 {
   /* 0x0000 */ tint_array_wrapper_1 x_GLF_uniform_float_values;
 };
 struct buf2 {
-  /* 0x0000 */ packed_float2 zeroVec;
+  /* 0x0000 */ float2 zeroVec;
 };
 struct buf3 {
-  /* 0x0000 */ packed_float2 oneVec;
+  /* 0x0000 */ float2 oneVec;
 };
 struct tint_padded_array_element_1 {
   /* 0x0000 */ int el;

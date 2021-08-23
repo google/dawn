@@ -5,7 +5,7 @@ struct S {
   /* 0x0000 */ float f;
   /* 0x0004 */ uint u;
   /* 0x0008 */ int8_t tint_pad[120];
-  /* 0x0080 */ packed_float4 v;
+  /* 0x0080 */ float4 v;
   /* 0x0090 */ int8_t tint_pad_1[112];
 };
 struct tint_symbol_1 {

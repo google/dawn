@@ -2,7 +2,7 @@
 
 using namespace metal;
 struct PointLight {
-  /* 0x0000 */ packed_float4 position;
+  /* 0x0000 */ float4 position;
 };
 struct PointLights {
   /* 0x0000 */ PointLight values[1];
@@ -13,7 +13,7 @@ struct Uniforms {
   /* 0x0080 */ uint numPointLights;
   /* 0x0084 */ uint color_source;
   /* 0x0088 */ int8_t tint_pad[8];
-  /* 0x0090 */ packed_float4 color;
+  /* 0x0090 */ float4 color;
 };
 struct FragmentInput {
   float4 position;

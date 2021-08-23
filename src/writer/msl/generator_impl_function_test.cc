@@ -453,7 +453,7 @@ TEST_F(MslGeneratorImplTest,
 
 using namespace metal;
 struct UBO {
-  /* 0x0000 */ packed_float4 coord;
+  /* 0x0000 */ float4 coord;
 };
 
 float sub_func(constant UBO& ubo, float param) {

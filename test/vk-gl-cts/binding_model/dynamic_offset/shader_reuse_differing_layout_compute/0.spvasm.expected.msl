@@ -2,7 +2,7 @@
 
 using namespace metal;
 struct block0 {
-  /* 0x0000 */ packed_float4 data;
+  /* 0x0000 */ float4 data;
 };
 
 void main_1(device block0& x_4) {

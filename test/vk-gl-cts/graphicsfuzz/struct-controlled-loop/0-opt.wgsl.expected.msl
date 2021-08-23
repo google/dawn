@@ -6,7 +6,7 @@ struct S {
   bool3 f1;
 };
 struct buf0 {
-  /* 0x0000 */ packed_float2 injectionSwitch;
+  /* 0x0000 */ float2 injectionSwitch;
 };
 struct tint_array_wrapper {
   float arr[9];

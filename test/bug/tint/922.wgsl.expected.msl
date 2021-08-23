@@ -2,19 +2,19 @@
 
 using namespace metal;
 struct Mat4x4_ {
-  /* 0x0000 */ packed_float4 mx;
-  /* 0x0010 */ packed_float4 my;
-  /* 0x0020 */ packed_float4 mz;
-  /* 0x0030 */ packed_float4 mw;
+  /* 0x0000 */ float4 mx;
+  /* 0x0010 */ float4 my;
+  /* 0x0020 */ float4 mz;
+  /* 0x0030 */ float4 mw;
 };
 struct Mat4x3_ {
-  /* 0x0000 */ packed_float4 mx;
-  /* 0x0010 */ packed_float4 my;
-  /* 0x0020 */ packed_float4 mz;
+  /* 0x0000 */ float4 mx;
+  /* 0x0010 */ float4 my;
+  /* 0x0020 */ float4 mz;
 };
 struct Mat4x2_ {
-  /* 0x0000 */ packed_float4 mx;
-  /* 0x0010 */ packed_float4 my;
+  /* 0x0000 */ float4 mx;
+  /* 0x0010 */ float4 my;
 };
 struct ub_SceneParams {
   /* 0x0000 */ Mat4x4_ u_Projection;
@@ -24,7 +24,7 @@ struct tint_array_wrapper {
 };
 struct ub_MaterialParams {
   /* 0x0000 */ tint_array_wrapper u_TexMtx;
-  /* 0x0020 */ packed_float4 u_Misc0_;
+  /* 0x0020 */ float4 u_Misc0_;
 };
 struct tint_array_wrapper_1 {
   /* 0x0000 */ Mat4x3_ arr[32];

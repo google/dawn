@@ -2304,12 +2304,12 @@ bool GeneratorImpl::EmitStorageClass(std::ostream& out, ast::StorageClass sc) {
 bool GeneratorImpl::EmitPackedType(std::ostream& out,
                                    const sem::Type* type,
                                    const std::string& name) {
-  if (auto* vec = type->As<sem::Vector>()) {
+  auto* vec = type->As<sem::Vector>();
+  if (vec && vec->Width() == 3) {
     out << "packed_";
-    if (!EmitType(out, vec->type(), "")) {
+    if (!EmitType(out, vec, "")) {
       return false;
     }
-    out << vec->Width();
     return true;
   }
 
@@ -2634,7 +2634,6 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
   return true;
 }
 
-// TODO(crbug.com/tint/898): We need CTS and / or Dawn e2e tests for this logic.
 GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
     const sem::Type* ty) {
   if (ty->IsAnyOf<sem::U32, sem::I32, sem::F32>()) {
@@ -2644,12 +2643,19 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
   }
 
   if (auto* vec = ty->As<sem::Vector>()) {
-    // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
-    // 2.2.3 Packed Vector Types
     auto num_els = vec->Width();
     auto* el_ty = vec->type();
     if (el_ty->IsAnyOf<sem::U32, sem::I32, sem::F32>()) {
-      return SizeAndAlign{num_els * 4, 4};
+      // Use a packed_vec type for 3-element vectors only.
+      if (num_els == 3) {
+        // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
+        // 2.2.3 Packed Vector Types
+        return SizeAndAlign{num_els * 4, 4};
+      } else {
+        // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
+        // 2.2 Vector Data Types
+        return SizeAndAlign{num_els * 4, num_els * 4};
+      }
     }
   }
 

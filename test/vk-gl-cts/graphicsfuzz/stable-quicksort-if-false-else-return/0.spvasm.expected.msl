@@ -8,7 +8,7 @@ struct QuicksortObject {
   tint_array_wrapper numbers;
 };
 struct buf0 {
-  /* 0x0000 */ packed_float2 resolution;
+  /* 0x0000 */ float2 resolution;
 };
 struct main_out {
   float4 frag_color_1;

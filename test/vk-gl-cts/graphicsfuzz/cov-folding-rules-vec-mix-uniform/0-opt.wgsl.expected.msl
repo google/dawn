@@ -2,7 +2,7 @@
 
 using namespace metal;
 struct buf0 {
-  /* 0x0000 */ packed_float2 zeroOne;
+  /* 0x0000 */ float2 zeroOne;
 };
 struct main_out {
   float4 x_GLF_color_1;

@@ -5,7 +5,7 @@ struct S {
   int data;
 };
 struct buf1 {
-  /* 0x0000 */ packed_float2 v1;
+  /* 0x0000 */ float2 v1;
 };
 struct tint_padded_array_element {
   /* 0x0000 */ int el;

@@ -12,7 +12,7 @@ struct buf0 {
   /* 0x0000 */ tint_array_wrapper x_GLF_uniform_float_values;
 };
 struct buf1 {
-  /* 0x0000 */ packed_float2 v1;
+  /* 0x0000 */ float2 v1;
 };
 struct main_out {
   float4 x_GLF_color_1;

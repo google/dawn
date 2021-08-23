@@ -12,7 +12,7 @@ struct buf1 {
   /* 0x0000 */ tint_array_wrapper x_GLF_uniform_float_values;
 };
 struct buf2 {
-  /* 0x0000 */ packed_float2 resolution;
+  /* 0x0000 */ float2 resolution;
 };
 struct tint_padded_array_element_1 {
   /* 0x0000 */ int el;

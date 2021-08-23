@@ -15,16 +15,16 @@ struct LeftOver {
   /* 0x009c */ float u_parallaxScale;
   /* 0x00a0 */ float textureInfoName;
   /* 0x00a4 */ uint padding_1;
-  /* 0x00a8 */ packed_float2 tangentSpaceParameter0;
+  /* 0x00a8 */ float2 tangentSpaceParameter0;
 };
 struct Light0 {
-  /* 0x0000 */ packed_float4 vLightData;
-  /* 0x0010 */ packed_float4 vLightDiffuse;
-  /* 0x0020 */ packed_float4 vLightSpecular;
+  /* 0x0000 */ float4 vLightData;
+  /* 0x0010 */ float4 vLightDiffuse;
+  /* 0x0020 */ float4 vLightSpecular;
   /* 0x0030 */ packed_float3 vLightGround;
   /* 0x003c */ uint padding_2;
-  /* 0x0040 */ packed_float4 shadowsInfo;
-  /* 0x0050 */ packed_float2 depthValues;
+  /* 0x0040 */ float4 shadowsInfo;
+  /* 0x0050 */ float2 depthValues;
   /* 0x0058 */ int8_t tint_pad_1[8];
 };
 struct main_out {

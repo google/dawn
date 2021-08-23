@@ -11,8 +11,8 @@ struct Inner {
   /* 0x001c */ uint d;
   /* 0x0020 */ packed_float3 e;
   /* 0x002c */ float f;
-  /* 0x0030 */ packed_int2 g;
-  /* 0x0038 */ packed_int2 h;
+  /* 0x0030 */ int2 g;
+  /* 0x0038 */ int2 h;
   /* 0x0040 */ float2x3 i;
   /* 0x0060 */ float3x2 j;
   /* 0x0078 */ int8_t tint_pad[8];

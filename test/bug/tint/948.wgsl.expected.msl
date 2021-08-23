@@ -6,9 +6,9 @@ struct LeftOver {
   /* 0x0004 */ uint padding;
   /* 0x0008 */ int8_t tint_pad[8];
   /* 0x0010 */ float4x4 worldViewProjection;
-  /* 0x0050 */ packed_float2 outputSize;
-  /* 0x0058 */ packed_float2 stageSize;
-  /* 0x0060 */ packed_float2 spriteMapSize;
+  /* 0x0050 */ float2 outputSize;
+  /* 0x0058 */ float2 stageSize;
+  /* 0x0060 */ float2 spriteMapSize;
   /* 0x0068 */ float stageScale;
   /* 0x006c */ float spriteCount;
   /* 0x0070 */ packed_float3 colorMul;

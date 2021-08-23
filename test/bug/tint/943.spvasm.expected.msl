@@ -10,7 +10,7 @@ struct Uniforms {
   /* 0x002c */ int8_t tint_pad_2[4];
   /* 0x0030 */ packed_int3 outShape;
   /* 0x003c */ int8_t tint_pad_3[4];
-  /* 0x0040 */ packed_int2 outShapeStrides;
+  /* 0x0040 */ int2 outShapeStrides;
 };
 struct ssbOut {
   /* 0x0000 */ float result[1];

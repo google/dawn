@@ -13,8 +13,8 @@ struct tint_symbol_3 {
   float4 value [[color(0)]];
 };
 struct Particle {
-  /* 0x0000 */ packed_float2 pos;
-  /* 0x0008 */ packed_float2 vel;
+  /* 0x0000 */ float2 pos;
+  /* 0x0008 */ float2 vel;
 };
 struct SimParams {
   /* 0x0000 */ float deltaT;

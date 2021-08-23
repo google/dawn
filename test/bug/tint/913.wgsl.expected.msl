@@ -4,9 +4,9 @@ using namespace metal;
 struct Uniforms {
   /* 0x0000 */ uint dstTextureFlipY;
   /* 0x0004 */ uint channelCount;
-  /* 0x0008 */ packed_uint2 srcCopyOrigin;
-  /* 0x0010 */ packed_uint2 dstCopyOrigin;
-  /* 0x0018 */ packed_uint2 copySize;
+  /* 0x0008 */ uint2 srcCopyOrigin;
+  /* 0x0010 */ uint2 dstCopyOrigin;
+  /* 0x0018 */ uint2 copySize;
 };
 struct OutputBuf {
   /* 0x0000 */ uint result[1];

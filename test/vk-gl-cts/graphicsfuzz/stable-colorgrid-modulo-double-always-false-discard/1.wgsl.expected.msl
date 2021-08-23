@@ -2,10 +2,10 @@
 
 using namespace metal;
 struct buf1 {
-  /* 0x0000 */ packed_float2 injectionSwitch;
+  /* 0x0000 */ float2 injectionSwitch;
 };
 struct buf0 {
-  /* 0x0000 */ packed_float2 resolution;
+  /* 0x0000 */ float2 resolution;
 };
 struct main_out {
   float4 x_GLF_color_1;

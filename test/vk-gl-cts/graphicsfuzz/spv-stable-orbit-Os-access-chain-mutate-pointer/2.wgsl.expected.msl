@@ -7,7 +7,7 @@ int tint_unary_minus(const int v) {
 }
 
 struct buf0 {
-  /* 0x0000 */ packed_float2 resolution;
+  /* 0x0000 */ float2 resolution;
 };
 struct tint_array_wrapper {
   float4 arr[16];

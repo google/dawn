@@ -46,9 +46,9 @@ using ::testing::HasSubstr;
 
 // Size and alignments taken from the MSL spec:
 // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
-DECLARE_TYPE(packed_float2, 8, 4);
+DECLARE_TYPE(float2, 8, 8);
 DECLARE_TYPE(packed_float3, 12, 4);
-DECLARE_TYPE(packed_float4, 16, 4);
+DECLARE_TYPE(float4, 16, 16);
 DECLARE_TYPE(float2x2, 16, 8);
 DECLARE_TYPE(float2x3, 32, 16);
 DECLARE_TYPE(float2x4, 32, 16);
@@ -282,12 +282,12 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
   FIELD(0x0004, int8_t, tint_pad, [124])         \
   FIELD(0x0080, float, b, /*NO SUFFIX*/)         \
   FIELD(0x0084, int8_t, tint_pad_1, [124])       \
-  FIELD(0x0100, packed_float2, c, /*NO SUFFIX*/) \
+  FIELD(0x0100, float2, c, /*NO SUFFIX*/)        \
   FIELD(0x0108, uint, d, /*NO SUFFIX*/)          \
   FIELD(0x010c, int8_t, tint_pad_2, [4])         \
   FIELD(0x0110, packed_float3, e, /*NO SUFFIX*/) \
   FIELD(0x011c, uint, f, /*NO SUFFIX*/)          \
-  FIELD(0x0120, packed_float4, g, /*NO SUFFIX*/) \
+  FIELD(0x0120, float4, g, /*NO SUFFIX*/)        \
   FIELD(0x0130, uint, h, /*NO SUFFIX*/)          \
   FIELD(0x0134, int8_t, tint_pad_3, [4])         \
   FIELD(0x0138, float2x2, i, /*NO SUFFIX*/)      \
@@ -633,12 +633,12 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
   /* 0x0004 */ int8_t tint_pad_10[124];
   /* 0x0080 */ float tint_pad_20;
   /* 0x0084 */ int8_t tint_pad_11[124];
-  /* 0x0100 */ packed_float2 tint_pad_33;
+  /* 0x0100 */ float2 tint_pad_33;
   /* 0x0108 */ uint tint_pad_1;
   /* 0x010c */ int8_t tint_pad_12[4];
   /* 0x0110 */ packed_float3 tint_pad_3;
   /* 0x011c */ uint tint_pad_7;
-  /* 0x0120 */ packed_float4 tint_pad_25;
+  /* 0x0120 */ float4 tint_pad_25;
   /* 0x0130 */ uint tint_pad_5;
   /* 0x0134 */ int8_t tint_pad_13[4];
   /* 0x0138 */ float2x2 tint_pad_27;

@@ -2,8 +2,8 @@
 
 using namespace metal;
 struct Uniforms {
-  /* 0x0000 */ packed_float2 u_scale;
-  /* 0x0008 */ packed_float2 u_offset;
+  /* 0x0000 */ float2 u_scale;
+  /* 0x0008 */ float2 u_offset;
 };
 struct VertexOutputs {
   float2 texcoords;

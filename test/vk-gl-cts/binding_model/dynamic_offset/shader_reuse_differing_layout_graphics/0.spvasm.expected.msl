@@ -2,7 +2,7 @@
 
 using namespace metal;
 struct block0 {
-  /* 0x0000 */ packed_float4 in_color;
+  /* 0x0000 */ float4 in_color;
 };
 struct main_out {
   float4 gl_Position;

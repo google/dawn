@@ -2,7 +2,7 @@
 
 using namespace metal;
 struct S {
-  /* 0x0000 */ packed_float4 field0;
+  /* 0x0000 */ float4 field0;
 };
 struct S_1 {
   float4 field0;
