@@ -130,7 +130,7 @@ namespace dawn_native {
     }
 
     AttachmentState::AttachmentState(DeviceBase* device, const AttachmentStateBlueprint& blueprint)
-        : AttachmentStateBlueprint(blueprint), CachedObject(device) {
+        : AttachmentStateBlueprint(blueprint), CachedObject(device, kLabelNotImplemented) {
     }
 
     AttachmentState::~AttachmentState() {

@@ -112,7 +112,7 @@ namespace dawn_native {
 
     // SwapChainBase
 
-    SwapChainBase::SwapChainBase(DeviceBase* device) : ObjectBase(device) {
+    SwapChainBase::SwapChainBase(DeviceBase* device) : ObjectBase(device, kLabelNotImplemented) {
     }
 
     SwapChainBase::SwapChainBase(DeviceBase* device, ObjectBase::ErrorTag tag)

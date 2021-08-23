@@ -363,7 +363,8 @@ namespace dawn_native {
 
     BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
                                              const BindGroupLayoutDescriptor* descriptor)
-        : CachedObject(device), mBindingInfo(BindingIndex(descriptor->entryCount)) {
+        : CachedObject(device, kLabelNotImplemented),
+          mBindingInfo(BindingIndex(descriptor->entryCount)) {
         std::vector<BindGroupLayoutEntry> sortedBindings(
             descriptor->entries, descriptor->entries + descriptor->entryCount);
 

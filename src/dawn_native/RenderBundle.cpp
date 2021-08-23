@@ -25,7 +25,7 @@ namespace dawn_native {
                                        const RenderBundleDescriptor* descriptor,
                                        Ref<AttachmentState> attachmentState,
                                        RenderPassResourceUsage resourceUsage)
-        : ObjectBase(encoder->GetDevice()),
+        : ObjectBase(encoder->GetDevice(), kLabelNotImplemented),
           mCommands(encoder->AcquireCommands()),
           mAttachmentState(std::move(attachmentState)),
           mResourceUsage(std::move(resourceUsage)) {

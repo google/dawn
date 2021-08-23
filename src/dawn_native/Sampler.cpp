@@ -72,7 +72,7 @@ namespace dawn_native {
     // SamplerBase
 
     SamplerBase::SamplerBase(DeviceBase* device, const SamplerDescriptor* descriptor)
-        : CachedObject(device),
+        : CachedObject(device, kLabelNotImplemented),
           mAddressModeU(descriptor->addressModeU),
           mAddressModeV(descriptor->addressModeV),
           mAddressModeW(descriptor->addressModeW),

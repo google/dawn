@@ -49,7 +49,7 @@ namespace dawn_native {
 
     PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
                                            const PipelineLayoutDescriptor* descriptor)
-        : CachedObject(device) {
+        : CachedObject(device, kLabelNotImplemented) {
         ASSERT(descriptor->bindGroupLayoutCount <= kMaxBindGroups);
         for (BindGroupIndex group(0); group < BindGroupIndex(descriptor->bindGroupLayoutCount);
              ++group) {

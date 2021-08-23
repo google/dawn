@@ -29,7 +29,7 @@ namespace dawn_native {
 
     ProgrammablePassEncoder::ProgrammablePassEncoder(DeviceBase* device,
                                                      EncodingContext* encodingContext)
-        : ObjectBase(device),
+        : ObjectBase(device, kLabelNotImplemented),
           mEncodingContext(encodingContext),
           mValidationEnabled(device->IsValidationEnabled()) {
     }

@@ -27,8 +27,10 @@ namespace dawn_native {
       public:
         struct ErrorTag {};
         static constexpr ErrorTag kError = {};
+        struct LabelNotImplementedTag {};
+        static constexpr LabelNotImplementedTag kLabelNotImplemented = {};
 
-        ObjectBase(DeviceBase* device);
+        ObjectBase(DeviceBase* device, LabelNotImplementedTag tag);
         ObjectBase(DeviceBase* device, const char* label);
         ObjectBase(DeviceBase* device, ErrorTag tag);
 

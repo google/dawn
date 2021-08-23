@@ -309,7 +309,7 @@ namespace dawn_native {
     BindGroupBase::BindGroupBase(DeviceBase* device,
                                  const BindGroupDescriptor* descriptor,
                                  void* bindingDataStart)
-        : ObjectBase(device),
+        : ObjectBase(device, kLabelNotImplemented),
           mLayout(descriptor->layout),
           mBindingData(mLayout->ComputeBindingDataPointers(bindingDataStart)) {
         for (BindingIndex i{0}; i < mLayout->GetBindingCount(); ++i) {

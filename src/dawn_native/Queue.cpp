@@ -161,7 +161,7 @@ namespace dawn_native {
     QueueBase::TaskInFlight::~TaskInFlight() {
     }
 
-    QueueBase::QueueBase(DeviceBase* device) : ObjectBase(device) {
+    QueueBase::QueueBase(DeviceBase* device) : ObjectBase(device, kLabelNotImplemented) {
     }
 
     QueueBase::QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag) : ObjectBase(device, tag) {

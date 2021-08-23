@@ -86,7 +86,7 @@ namespace dawn_native {
 
     ExternalTextureBase::ExternalTextureBase(DeviceBase* device,
                                              const ExternalTextureDescriptor* descriptor)
-        : ObjectBase(device), mState(ExternalTextureState::Alive) {
+        : ObjectBase(device, kLabelNotImplemented), mState(ExternalTextureState::Alive) {
         textureViews[0] = descriptor->plane0;
     }
 
