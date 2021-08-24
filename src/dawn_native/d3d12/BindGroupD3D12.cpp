@@ -69,7 +69,8 @@ namespace dawn_native { namespace d3d12 {
                     switch (bindingInfo.buffer.type) {
                         case wgpu::BufferBindingType::Uniform: {
                             D3D12_CONSTANT_BUFFER_VIEW_DESC desc;
-                            desc.SizeInBytes = Align(binding.size, 256);
+                            desc.SizeInBytes =
+                                Align(binding.size, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
                             desc.BufferLocation =
                                 ToBackend(binding.buffer)->GetVA() + binding.offset;
 

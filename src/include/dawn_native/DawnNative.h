@@ -250,6 +250,8 @@ namespace dawn_native {
 
     DAWN_NATIVE_EXPORT const char* GetObjectLabelForTesting(void* objectHandle);
 
+    DAWN_NATIVE_EXPORT uint64_t GetAllocatedSizeForTesting(WGPUBuffer buffer);
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_DAWNNATIVE_H_

@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "dawn_native/DawnNative.h"
+
+#include "dawn_native/Buffer.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/Texture.h"
@@ -228,6 +230,10 @@ namespace dawn_native {
     const char* GetObjectLabelForTesting(void* objectHandle) {
         ObjectBase* object = reinterpret_cast<ObjectBase*>(objectHandle);
         return object->GetLabel().c_str();
+    }
+
+    uint64_t GetAllocatedSizeForTesting(WGPUBuffer buffer) {
+        return reinterpret_cast<const BufferBase*>(buffer)->GetAllocatedSize();
     }
 
 }  // namespace dawn_native

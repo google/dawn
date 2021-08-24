@@ -82,12 +82,16 @@ namespace dawn_native { namespace d3d12 {
         }
 
         size_t D3D12BufferSizeAlignment(wgpu::BufferUsage usage) {
-            switch (usage) {
-                case wgpu::BufferUsage::Uniform:
-                    return D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
-                default:
-                    return 1;
+            if ((usage & wgpu::BufferUsage::Uniform) != 0) {
+                // D3D buffers are always resource size aligned to 64KB. However, D3D12's validation
+                // forbids binding a CBV to an unaligned size. To prevent, one can always safely
+                // align the buffer size to the CBV data alignment as other buffer usages
+                // ignore it (no size check). The validation will still enforce bound checks with
+                // the unaligned size returned by GetSize().
+                // https://docs.microsoft.com/en-us/windows/win32/direct3d12/uploading-resources#buffer-alignment
+                return D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
             }
+            return 1;
         }
     }  // namespace
 
@@ -103,12 +107,6 @@ namespace dawn_native { namespace d3d12 {
     }
 
     MaybeError Buffer::Initialize(bool mappedAtCreation) {
-        // D3D buffers are always resource size aligned to 64KB. However, D3D12's validation forbids
-        // binding a CBV to an unaligned size. To prevent, one can always safely align the buffer
-        // desc size to the CBV data alignment as other buffer usages ignore it (no size check).
-        // The validation will still enforce bound checks with the unaligned size returned by
-        // GetSize().
-        // https://docs.microsoft.com/en-us/windows/win32/direct3d12/uploading-resources#buffer-alignment
         // Allocate at least 4 bytes so clamped accesses are always in bounds.
         uint64_t size = std::max(GetSize(), uint64_t(4u));
         size_t alignment = D3D12BufferSizeAlignment(GetUsage());
