@@ -539,7 +539,18 @@ func (j job) run(wd, exe string, fxc bool, dxcPath, xcrunPath string, generateEx
 		matched := expected == "" || expected == out
 
 		if ok && generateExpected && (validate || !skipped) {
-			saveExpectedFile(j.file, j.format, out)
+			// Don't generate expected results for certain directories that contain
+			// large corpora of tests for which the generated code is uninteresting.
+			saveResult := true
+			for _, exclude := range []string{"/test/unittest/", "/test/vk-gl-cts/"} {
+				if strings.Contains(j.file, exclude) {
+					saveResult = false
+				}
+			}
+
+			if saveResult {
+				saveExpectedFile(j.file, j.format, out)
+			}
 			matched = true
 		}
 
