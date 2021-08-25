@@ -102,6 +102,10 @@ namespace dawn_native {
 
                 DAWN_TRY(mCommandBufferState.ValidateIndexBufferInRange(indexCount, firstIndex));
 
+                // Although we don't know actual vertex access range in CPU, we still call the
+                // ValidateBufferInRangeForVertexBuffer in order to deal with those vertex step mode
+                // vertex buffer with an array stride of zero.
+                DAWN_TRY(mCommandBufferState.ValidateBufferInRangeForVertexBuffer(0, 0));
                 DAWN_TRY(mCommandBufferState.ValidateBufferInRangeForInstanceBuffer(instanceCount,
                                                                                     firstInstance));
             }
