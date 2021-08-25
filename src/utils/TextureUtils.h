@@ -87,6 +87,10 @@ namespace utils {
         wgpu::TextureFormat::BC6HRGBUfloat, wgpu::TextureFormat::BC6HRGBFloat,
         wgpu::TextureFormat::BC7RGBAUnorm,  wgpu::TextureFormat::BC7RGBAUnormSrgb};
 
+    // TODO(crbug.com/dawn/955) Add formats once implemented.
+    static constexpr std::array<wgpu::TextureFormat, 0> kETC2Formats = {};
+    static constexpr std::array<wgpu::TextureFormat, 0> kASTCFormats = {};
+
     bool TextureFormatSupportsStorageTexture(wgpu::TextureFormat format);
 
     uint32_t GetTexelBlockSizeInBytes(wgpu::TextureFormat textureFormat);

@@ -35,6 +35,18 @@ namespace dawn_native {
               {"texture_compression_bc", "Support Block Compressed (BC) texture formats",
                "https://bugs.chromium.org/p/dawn/issues/detail?id=42"},
               &WGPUDeviceProperties::textureCompressionBC},
+             {Extension::TextureCompressionETC2,
+              {"texture-compression-etc2",
+               "Support Ericsson Texture Compressed (ETC2/EAC) texture "
+               "formats",
+               "https://bugs.chromium.org/p/dawn/issues/detail?id=955"},
+              &WGPUDeviceProperties::textureCompressionETC2},
+             {Extension::TextureCompressionASTC,
+              {"texture-compression-astc",
+               "Support Adaptable Scalable Texture Compressed (ASTC) "
+               "texture formats",
+               "https://bugs.chromium.org/p/dawn/issues/detail?id=955"},
+              &WGPUDeviceProperties::textureCompressionASTC},
              {Extension::ShaderFloat16,
               {"shader_float16",
                "Support 16bit float arithmetic and declarations in uniform and storage buffers",

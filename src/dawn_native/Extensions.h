@@ -25,6 +25,8 @@ namespace dawn_native {
 
     enum class Extension {
         TextureCompressionBC,
+        TextureCompressionETC2,
+        TextureCompressionASTC,
         ShaderFloat16,
         PipelineStatisticsQuery,
         TimestampQuery,

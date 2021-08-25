@@ -88,9 +88,12 @@ namespace dawn_native { namespace vulkan {
             return DAWN_INTERNAL_ERROR("Vulkan robustBufferAccess feature required.");
         }
 
-        // TODO(crbug.com/dawn/955): Require BC || (ETC && ASTC) instead.
-        if (!mDeviceInfo.features.textureCompressionBC) {
-            return DAWN_INTERNAL_ERROR("Vulkan textureCompressionBC feature required.");
+        if (!mDeviceInfo.features.textureCompressionBC &&
+            !(mDeviceInfo.features.textureCompressionETC2 &&
+              mDeviceInfo.features.textureCompressionASTC_LDR)) {
+            return DAWN_INTERNAL_ERROR(
+                "Vulkan textureCompressionBC feature required or both textureCompressionETC2 and "
+                "textureCompressionASTC required.");
         }
 
         // Needed for the respective WebGPU features.
@@ -261,6 +264,14 @@ namespace dawn_native { namespace vulkan {
     void Adapter::InitializeSupportedExtensions() {
         if (mDeviceInfo.features.textureCompressionBC == VK_TRUE) {
             mSupportedExtensions.EnableExtension(Extension::TextureCompressionBC);
+        }
+
+        if (mDeviceInfo.features.textureCompressionETC2 == VK_TRUE) {
+            mSupportedExtensions.EnableExtension(Extension::TextureCompressionETC2);
+        }
+
+        if (mDeviceInfo.features.textureCompressionASTC_LDR == VK_TRUE) {
+            mSupportedExtensions.EnableExtension(Extension::TextureCompressionASTC);
         }
 
         if (mDeviceInfo.features.pipelineStatisticsQuery == VK_TRUE) {

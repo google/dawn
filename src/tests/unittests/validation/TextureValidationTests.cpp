@@ -541,13 +541,34 @@ namespace {
         }
     }
 
+    // Test that the creation of a texture with ETC2 format will fail when the extension
+    // textureCompressionETC2 is not enabled.
+    TEST_F(TextureValidationTest, UseETC2FormatWithoutEnablingExtension) {
+        for (wgpu::TextureFormat format : utils::kETC2Formats) {
+            wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+            descriptor.format = format;
+            ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+        }
+    }
+
+    // Test that the creation of a texture with ASTC format will fail when the extension
+    // textureCompressionASTC is not enabled.
+    TEST_F(TextureValidationTest, UseASTCFormatWithoutEnablingExtension) {
+        for (wgpu::TextureFormat format : utils::kASTCFormats) {
+            wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+            descriptor.format = format;
+            ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+        }
+    }
+
     // TODO(jiawei.shao@intel.com): add tests to verify we cannot create 1D or 3D textures with
     // compressed texture formats.
     class CompressedTextureFormatsValidationTests : public TextureValidationTest {
       protected:
         WGPUDevice CreateTestDevice() override {
             dawn_native::DeviceDescriptor descriptor;
-            descriptor.requiredExtensions = {"texture_compression_bc"};
+            descriptor.requiredExtensions = {"texture_compression_bc", "texture-compression-etc2",
+                                             "texture-compression-astc"};
             return adapter.CreateDevice(&descriptor);
         }
 
@@ -560,9 +581,8 @@ namespace {
         }
     };
 
-    // Test the validation of texture size when creating textures in compressed texture formats.
-    // It is invalid to use a number that is not a multiple of 4 (the compressed block width and
-    // height of all BC formats) as the width or height of textures in BC formats.
+    // Test that it is invalid to use a number that is not a multiple of 4 (the compressed block
+    // width and height of all BC formats) as the width or height in BC formats.
     TEST_F(CompressedTextureFormatsValidationTests, TextureSize) {
         for (wgpu::TextureFormat format : utils::kBCFormats) {
             {
@@ -596,9 +616,7 @@ namespace {
         }
     }
 
-    // Test the validation of texture usages when creating textures in compressed texture formats.
-    // Only CopySrc, CopyDst and Sampled are accepted as the texture usage of the textures in BC
-    // formats.
+    // Test that only CopySrc, CopyDst and Sampled are accepted as usage in compressed formats.
     TEST_F(CompressedTextureFormatsValidationTests, TextureUsage) {
         wgpu::TextureUsage invalidUsages[] = {
             wgpu::TextureUsage::RenderAttachment,
@@ -606,6 +624,22 @@ namespace {
             wgpu::TextureUsage::Present,
         };
         for (wgpu::TextureFormat format : utils::kBCFormats) {
+            for (wgpu::TextureUsage usage : invalidUsages) {
+                wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+                descriptor.format = format;
+                descriptor.usage = usage;
+                ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+            }
+        }
+        for (wgpu::TextureFormat format : utils::kETC2Formats) {
+            for (wgpu::TextureUsage usage : invalidUsages) {
+                wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+                descriptor.format = format;
+                descriptor.usage = usage;
+                ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+            }
+        }
+        for (wgpu::TextureFormat format : utils::kASTCFormats) {
             for (wgpu::TextureUsage usage : invalidUsages) {
                 wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
                 descriptor.format = format;
@@ -626,8 +660,7 @@ namespace {
         }
     }
 
-    // Test the validation of sample count when creating textures in compressed texture formats.
-    // It is invalid to specify SampleCount > 1 when we create a texture in BC formats.
+    // Test that it is invalid to specify SampleCount>1 in BC formats.
     TEST_F(CompressedTextureFormatsValidationTests, SampleCount) {
         for (wgpu::TextureFormat format : utils::kBCFormats) {
             wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();

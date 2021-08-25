@@ -348,6 +348,18 @@ namespace dawn_native { namespace vulkan {
             usedKnobs.features.textureCompressionBC = VK_TRUE;
         }
 
+        if (IsExtensionEnabled(Extension::TextureCompressionETC2)) {
+            ASSERT(ToBackend(GetAdapter())->GetDeviceInfo().features.textureCompressionETC2 ==
+                   VK_TRUE);
+            usedKnobs.features.textureCompressionETC2 = VK_TRUE;
+        }
+
+        if (IsExtensionEnabled(Extension::TextureCompressionASTC)) {
+            ASSERT(ToBackend(GetAdapter())->GetDeviceInfo().features.textureCompressionASTC_LDR ==
+                   VK_TRUE);
+            usedKnobs.features.textureCompressionASTC_LDR = VK_TRUE;
+        }
+
         if (IsExtensionEnabled(Extension::PipelineStatisticsQuery)) {
             ASSERT(ToBackend(GetAdapter())->GetDeviceInfo().features.pipelineStatisticsQuery ==
                    VK_TRUE);
