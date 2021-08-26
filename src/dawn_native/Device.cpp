@@ -265,7 +265,8 @@ namespace dawn_native {
     void DeviceBase::HandleError(InternalErrorType type, const char* message) {
         if (type == InternalErrorType::DeviceLost) {
             // A real device lost happened. Set the state to disconnected as the device cannot be
-            // used.
+            // used. Also tags all commands as completed since the device stopped running.
+            AssumeCommandsComplete();
             mState = State::Disconnected;
         } else if (type == InternalErrorType::Internal) {
             // If we receive an internal error, assume the backend can't recover and proceed with
