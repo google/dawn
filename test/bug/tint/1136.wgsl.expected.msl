@@ -1,0 +1,11 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Buffer {
+  /* 0x0000 */ uint data;
+};
+
+void tint_symbol_1(device Buffer& tint_symbol) {
+  tint_symbol.data = (tint_symbol.data + 1u);
+}
+

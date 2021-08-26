@@ -1696,11 +1696,18 @@ bool Resolver::Function(ast::Function* func) {
 
   variable_stack_.push_scope();
   uint32_t parameter_index = 0;
+  std::unordered_map<Symbol, Source> parameter_names;
   for (auto* param : func->params()) {
     Mark(param);
 
-    if (!ValidateNoDuplicateDefinition(param->symbol(), param->source())) {
-      return false;
+    {  // Check the parameter name is unique for the function
+      auto emplaced = parameter_names.emplace(param->symbol(), param->source());
+      if (!emplaced.second) {
+        auto name = builder_->Symbols().NameFor(param->symbol());
+        AddError("redefinition of parameter '" + name + "'", param->source());
+        AddNote("previous definition is here", emplaced.first->second);
+        return false;
+      }
     }
 
     auto* param_info =

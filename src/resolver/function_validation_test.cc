@@ -58,7 +58,7 @@ TEST_F(ResolverFunctionValidationTest, ParameterNamesMustBeUnique_fail) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            R"(12:34 error: redefinition of 'common_name'
+            R"(12:34 error: redefinition of parameter 'common_name'
 56:78 note: previous definition is here)");
 }
 
@@ -67,6 +67,17 @@ TEST_F(ResolverFunctionValidationTest, ParameterNamesMustBeUnique_pass) {
   // fn func_b(common_name : f32) { }
   Func("func_a", {Param("common_name", ty.f32())}, ty.void_(), {});
   Func("func_b", {Param("common_name", ty.f32())}, ty.void_(), {});
+
+  EXPECT_TRUE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "");
+}
+
+TEST_F(ResolverFunctionValidationTest,
+       ParameterNamesMustBeUniqueShadowsGlobal_pass) {
+  // var<private> common_name : f32;
+  // fn func(common_name : f32) { }
+  Global("common_name", ty.f32(), ast::StorageClass::kPrivate);
+  Func("func", {Param("common_name", ty.f32())}, ty.void_(), {});
 
   EXPECT_TRUE(r()->Resolve());
   EXPECT_EQ(r()->error(), "");
