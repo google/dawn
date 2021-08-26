@@ -18,6 +18,8 @@
 #include "common/vulkan_platform.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/vulkan/ExternalHandle.h"
+#include "dawn_native/vulkan/VulkanFunctions.h"
+#include "dawn_native/vulkan/VulkanInfo.h"
 
 namespace dawn_native { namespace vulkan {
     class Device;
