@@ -869,6 +869,7 @@ bool GeneratorImpl::EmitStorageBufferAccess(
     case Op::kAtomicLoad:
     case Op::kAtomicStore:
     case Op::kAtomicAdd:
+    case Op::kAtomicSub:
     case Op::kAtomicMax:
     case Op::kAtomicMin:
     case Op::kAtomicAnd:
@@ -930,7 +931,14 @@ bool GeneratorImpl::EmitStorageAtomicCall(
         }
         l << " = 0;";
       }
-      line(&buf) << "buffer." << hlsl << "(offset, value, original_value);";
+      {
+        auto l = line(&buf);
+        l << "buffer." << hlsl << "(offset, ";
+        if (intrinsic->op == Op::kAtomicSub) {
+          l << "-";
+        }
+        l << "value, original_value);";
+      }
       line(&buf) << "return original_value;";
       return name;
     };
@@ -938,6 +946,10 @@ bool GeneratorImpl::EmitStorageAtomicCall(
     switch (intrinsic->op) {
       case Op::kAtomicAdd:
         return rmw("atomicAdd", "InterlockedAdd");
+
+      case Op::kAtomicSub:
+        // Use add with the operand negated.
+        return rmw("atomicSub", "InterlockedAdd");
 
       case Op::kAtomicMax:
         return rmw("atomicMax", "InterlockedMax");
@@ -1130,6 +1142,10 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
         if (i > 0) {
           pre << ", ";
         }
+        if (i == 1 && intrinsic->Type() == sem::IntrinsicType::kAtomicSub) {
+          // Sub uses InterlockedAdd with the operand negated.
+          pre << "-";
+        }
         if (!EmitExpression(pre, arg)) {
           return false;
         }
@@ -1240,6 +1256,7 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
     }
 
     case sem::IntrinsicType::kAtomicAdd:
+    case sem::IntrinsicType::kAtomicSub:
       return call("InterlockedAdd");
 
     case sem::IntrinsicType::kAtomicMax:

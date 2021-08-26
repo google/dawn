@@ -634,6 +634,9 @@ bool GeneratorImpl::EmitAtomicCall(std::ostream& out,
     case sem::IntrinsicType::kAtomicAdd:
       return call("atomic_fetch_add_explicit", true);
 
+    case sem::IntrinsicType::kAtomicSub:
+      return call("atomic_fetch_sub_explicit", true);
+
     case sem::IntrinsicType::kAtomicMax:
       return call("atomic_fetch_max_explicit", true);
 

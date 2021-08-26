@@ -1237,6 +1237,7 @@ fn main() {
   atomicStore(&sb.a, 123);
   ignore(atomicLoad(&sb.a));
   ignore(atomicAdd(&sb.a, 123));
+  ignore(atomicSub(&sb.a, 123));
   ignore(atomicMax(&sb.a, 123));
   ignore(atomicMin(&sb.a, 123));
   ignore(atomicAnd(&sb.a, 123));
@@ -1248,6 +1249,7 @@ fn main() {
   atomicStore(&sb.b, 123u);
   ignore(atomicLoad(&sb.b));
   ignore(atomicAdd(&sb.b, 123u));
+  ignore(atomicSub(&sb.b, 123u));
   ignore(atomicMax(&sb.b, 123u));
   ignore(atomicMin(&sb.b, 123u));
   ignore(atomicAnd(&sb.b, 123u));
@@ -1277,56 +1279,62 @@ fn tint_symbol_1([[internal(disable_validation__ignore_constructible_function_pa
 [[internal(intrinsic_atomic_add_storage_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_2([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
 
-[[internal(intrinsic_atomic_max_storage_i32), internal(disable_validation__function_has_no_body)]]
+[[internal(intrinsic_atomic_sub_storage_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_3([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
 
-[[internal(intrinsic_atomic_min_storage_i32), internal(disable_validation__function_has_no_body)]]
+[[internal(intrinsic_atomic_max_storage_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_4([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
 
-[[internal(intrinsic_atomic_and_storage_i32), internal(disable_validation__function_has_no_body)]]
+[[internal(intrinsic_atomic_min_storage_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_5([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
 
-[[internal(intrinsic_atomic_or_storage_i32), internal(disable_validation__function_has_no_body)]]
+[[internal(intrinsic_atomic_and_storage_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_6([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
 
-[[internal(intrinsic_atomic_xor_storage_i32), internal(disable_validation__function_has_no_body)]]
+[[internal(intrinsic_atomic_or_storage_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_7([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
 
-[[internal(intrinsic_atomic_exchange_storage_i32), internal(disable_validation__function_has_no_body)]]
+[[internal(intrinsic_atomic_xor_storage_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_8([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
 
+[[internal(intrinsic_atomic_exchange_storage_i32), internal(disable_validation__function_has_no_body)]]
+fn tint_symbol_9([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : i32) -> i32
+
 [[internal(intrinsic_atomic_compare_exchange_weak_storage_i32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_9([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : i32, param_2 : i32) -> vec2<i32>
+fn tint_symbol_10([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : i32, param_2 : i32) -> vec2<i32>
 
 [[internal(intrinsic_atomic_store_storage_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_10([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32)
+fn tint_symbol_11([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32)
 
 [[internal(intrinsic_atomic_load_storage_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_11([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> u32
+fn tint_symbol_12([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> u32
 
 [[internal(intrinsic_atomic_add_storage_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_12([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
-
-[[internal(intrinsic_atomic_max_storage_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_13([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
 
-[[internal(intrinsic_atomic_min_storage_u32), internal(disable_validation__function_has_no_body)]]
+[[internal(intrinsic_atomic_sub_storage_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_14([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
 
-[[internal(intrinsic_atomic_and_storage_u32), internal(disable_validation__function_has_no_body)]]
+[[internal(intrinsic_atomic_max_storage_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_15([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
 
-[[internal(intrinsic_atomic_or_storage_u32), internal(disable_validation__function_has_no_body)]]
+[[internal(intrinsic_atomic_min_storage_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_16([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
 
-[[internal(intrinsic_atomic_xor_storage_u32), internal(disable_validation__function_has_no_body)]]
+[[internal(intrinsic_atomic_and_storage_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_17([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
 
-[[internal(intrinsic_atomic_exchange_storage_u32), internal(disable_validation__function_has_no_body)]]
+[[internal(intrinsic_atomic_or_storage_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_18([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
 
+[[internal(intrinsic_atomic_xor_storage_u32), internal(disable_validation__function_has_no_body)]]
+fn tint_symbol_19([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
+
+[[internal(intrinsic_atomic_exchange_storage_u32), internal(disable_validation__function_has_no_body)]]
+fn tint_symbol_20([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32) -> u32
+
 [[internal(intrinsic_atomic_compare_exchange_weak_storage_u32), internal(disable_validation__function_has_no_body)]]
-fn tint_symbol_19([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32, param_2 : u32) -> vec2<u32>
+fn tint_symbol_21([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, param_1 : u32, param_2 : u32) -> vec2<u32>
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {
@@ -1339,17 +1347,19 @@ fn main() {
   ignore(tint_symbol_6(sb, 16u, 123));
   ignore(tint_symbol_7(sb, 16u, 123));
   ignore(tint_symbol_8(sb, 16u, 123));
-  ignore(tint_symbol_9(sb, 16u, 123, 345));
-  tint_symbol_10(sb, 20u, 123u);
-  ignore(tint_symbol_11(sb, 20u));
-  ignore(tint_symbol_12(sb, 20u, 123u));
+  ignore(tint_symbol_9(sb, 16u, 123));
+  ignore(tint_symbol_10(sb, 16u, 123, 345));
+  tint_symbol_11(sb, 20u, 123u);
+  ignore(tint_symbol_12(sb, 20u));
   ignore(tint_symbol_13(sb, 20u, 123u));
   ignore(tint_symbol_14(sb, 20u, 123u));
   ignore(tint_symbol_15(sb, 20u, 123u));
   ignore(tint_symbol_16(sb, 20u, 123u));
   ignore(tint_symbol_17(sb, 20u, 123u));
   ignore(tint_symbol_18(sb, 20u, 123u));
-  ignore(tint_symbol_19(sb, 20u, 123u, 345u));
+  ignore(tint_symbol_19(sb, 20u, 123u));
+  ignore(tint_symbol_20(sb, 20u, 123u));
+  ignore(tint_symbol_21(sb, 20u, 123u, 345u));
 }
 )";
 
@@ -1373,6 +1383,7 @@ fn main() {
   atomicStore(&(w.a), 123);
   ignore(atomicLoad(&(w.a)));
   ignore(atomicAdd(&(w.a), 123));
+  ignore(atomicSub(&(w.a), 123));
   ignore(atomicMax(&(w.a), 123));
   ignore(atomicMin(&(w.a), 123));
   ignore(atomicAnd(&(w.a), 123));
@@ -1383,6 +1394,7 @@ fn main() {
   atomicStore(&(w.b), 123u);
   ignore(atomicLoad(&(w.b)));
   ignore(atomicAdd(&(w.b), 123u));
+  ignore(atomicSub(&(w.b), 123u));
   ignore(atomicMax(&(w.b), 123u));
   ignore(atomicMin(&(w.b), 123u));
   ignore(atomicAnd(&(w.b), 123u));

@@ -3151,6 +3151,15 @@ bool Builder::GenerateAtomicIntrinsic(ast::CallExpression* call,
                                                            semantics,
                                                            value,
                                                        });
+    case sem::IntrinsicType::kAtomicSub:
+      return push_function_inst(spv::Op::OpAtomicISub, {
+                                                           result_type,
+                                                           result_id,
+                                                           pointer,
+                                                           memory,
+                                                           semantics,
+                                                           value,
+                                                       });
     case sem::IntrinsicType::kAtomicMax:
       return push_function_inst(
           is_value_signed() ? spv::Op::OpAtomicSMax : spv::Op::OpAtomicUMax,

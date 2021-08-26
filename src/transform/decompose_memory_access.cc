@@ -238,6 +238,9 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicAtomicFor(ProgramBuilder* builder,
     case sem::IntrinsicType::kAtomicAdd:
       op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicAdd;
       break;
+    case sem::IntrinsicType::kAtomicSub:
+      op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicSub;
+      break;
     case sem::IntrinsicType::kAtomicMax:
       op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicMax;
       break;
@@ -722,6 +725,9 @@ std::string DecomposeMemoryAccess::Intrinsic::InternalName() const {
       break;
     case Op::kAtomicAdd:
       ss << "intrinsic_atomic_add_";
+      break;
+    case Op::kAtomicSub:
+      ss << "intrinsic_atomic_sub_";
       break;
     case Op::kAtomicMax:
       ss << "intrinsic_atomic_max_";

@@ -1,0 +1,21 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct SB_RW {
+  /* 0x0000 */ atomic_uint arg_0;
+};
+
+void atomicSub_15bfc9(device SB_RW& sb_rw) {
+  uint res = atomic_fetch_sub_explicit(&(sb_rw.arg_0), 1u, memory_order_relaxed);
+}
+
+fragment void fragment_main(device SB_RW& sb_rw [[buffer(0)]]) {
+  atomicSub_15bfc9(sb_rw);
+  return;
+}
+
+kernel void compute_main(device SB_RW& sb_rw [[buffer(0)]]) {
+  atomicSub_15bfc9(sb_rw);
+  return;
+}
+

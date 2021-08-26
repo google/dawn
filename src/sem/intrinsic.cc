@@ -91,6 +91,7 @@ bool IsAtomicIntrinsic(IntrinsicType i) {
   return i == sem::IntrinsicType::kAtomicLoad ||
          i == sem::IntrinsicType::kAtomicStore ||
          i == sem::IntrinsicType::kAtomicAdd ||
+         i == sem::IntrinsicType::kAtomicSub ||
          i == sem::IntrinsicType::kAtomicMax ||
          i == sem::IntrinsicType::kAtomicMin ||
          i == sem::IntrinsicType::kAtomicAnd ||

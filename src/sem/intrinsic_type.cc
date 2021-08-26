@@ -303,6 +303,9 @@ IntrinsicType ParseIntrinsicType(const std::string& name) {
   if (name == "atomicAdd") {
     return IntrinsicType::kAtomicAdd;
   }
+  if (name == "atomicSub") {
+    return IntrinsicType::kAtomicSub;
+  }
   if (name == "atomicMax") {
     return IntrinsicType::kAtomicMax;
   }
@@ -513,6 +516,8 @@ const char* str(IntrinsicType i) {
       return "atomicStore";
     case IntrinsicType::kAtomicAdd:
       return "atomicAdd";
+    case IntrinsicType::kAtomicSub:
+      return "atomicSub";
     case IntrinsicType::kAtomicMax:
       return "atomicMax";
     case IntrinsicType::kAtomicMin:

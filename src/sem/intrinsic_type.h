@@ -125,6 +125,7 @@ enum class IntrinsicType {
   kAtomicLoad,
   kAtomicStore,
   kAtomicAdd,
+  kAtomicSub,
   kAtomicMax,
   kAtomicMin,
   kAtomicAnd,

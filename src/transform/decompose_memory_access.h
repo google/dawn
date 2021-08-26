@@ -46,6 +46,7 @@ class DecomposeMemoryAccess
       kAtomicLoad,
       kAtomicStore,
       kAtomicAdd,
+      kAtomicSub,
       kAtomicMax,
       kAtomicMin,
       kAtomicAnd,

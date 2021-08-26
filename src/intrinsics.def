@@ -537,6 +537,7 @@ fn textureLoad(texture: texture_external, coords: vec2<i32>) -> vec4<f32>
 [[stage("fragment", "compute")]] fn atomicLoad<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>) -> T
 [[stage("fragment", "compute")]] fn atomicStore<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T)
 [[stage("fragment", "compute")]] fn atomicAdd<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+[[stage("fragment", "compute")]] fn atomicSub<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
 [[stage("fragment", "compute")]] fn atomicMax<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
 [[stage("fragment", "compute")]] fn atomicMin<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
 [[stage("fragment", "compute")]] fn atomicAnd<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
