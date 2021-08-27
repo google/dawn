@@ -543,6 +543,7 @@ Token Lexer::build_token_from_int_if_possible(Source source,
 }
 
 Token Lexer::try_hex_integer() {
+  constexpr size_t kMaxDigits = 8;  // Valid for both 32-bit integer types
   auto start = pos_;
   auto end = pos_;
 
@@ -551,13 +552,23 @@ Token Lexer::try_hex_integer() {
   if (matches(end, "-")) {
     end++;
   }
+
   if (!matches(end, "0x")) {
-    return Token();
+    return {};
   }
   end += 2;
 
+  auto first = end;
   while (!is_eof() && is_hex(content_->data[end])) {
-    end += 1;
+    end++;
+
+    auto digits = end - first;
+    if (digits > kMaxDigits) {
+      return {Token::Type::kError, source,
+              "integer literal (" +
+                  content_->data.substr(start, end - 1 - start) +
+                  "...) has too many digits"};
+    }
   }
 
   pos_ = end;
@@ -567,6 +578,7 @@ Token Lexer::try_hex_integer() {
 }
 
 Token Lexer::try_integer() {
+  constexpr size_t kMaxDigits = 10;  // Valid for both 32-bit integer types
   auto start = pos_;
   auto end = start;
 
@@ -575,6 +587,7 @@ Token Lexer::try_integer() {
   if (matches(end, "-")) {
     end++;
   }
+
   if (end >= len_ || !is_digit(content_->data[end])) {
     return {};
   }
@@ -582,6 +595,14 @@ Token Lexer::try_integer() {
   auto first = end;
   while (end < len_ && is_digit(content_->data[end])) {
     end++;
+
+    auto digits = end - first;
+    if (digits > kMaxDigits) {
+      return {Token::Type::kError, source,
+              "integer literal (" +
+                  content_->data.substr(start, end - 1 - start) +
+                  "...) has too many digits"};
+    }
   }
 
   // If the first digit is a zero this must only be zero as leading zeros

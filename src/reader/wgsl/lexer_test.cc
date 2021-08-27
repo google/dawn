@@ -251,6 +251,27 @@ TEST_F(LexerTest, IntegerTest_HexSignedTooSmall) {
   EXPECT_EQ(t.to_str(), "i32 (-0x8000000F) too small");
 }
 
+TEST_F(LexerTest, IntegerTest_HexSignedTooManyDigits) {
+  {
+    Source::FileContent content("-0x100000000000000000000000");
+    Lexer l("test.wgsl", &content);
+
+    auto t = l.next();
+    ASSERT_TRUE(t.Is(Token::Type::kError));
+    EXPECT_EQ(t.to_str(),
+              "integer literal (-0x10000000...) has too many digits");
+  }
+  {
+    Source::FileContent content("0x100000000000000");
+    Lexer l("test.wgsl", &content);
+
+    auto t = l.next();
+    ASSERT_TRUE(t.Is(Token::Type::kError));
+    EXPECT_EQ(t.to_str(),
+              "integer literal (0x10000000...) has too many digits");
+  }
+}
+
 struct HexUnsignedIntData {
   const char* input;
   uint32_t result;
@@ -287,13 +308,13 @@ INSTANTIATE_TEST_SUITE_P(
                     HexUnsignedIntData{"0xFFFFFFFFu",
                                        std::numeric_limits<uint32_t>::max()}));
 
-TEST_F(LexerTest, IntegerTest_HexUnsignedTooLarge) {
-  Source::FileContent content("0xffffffffffu");
+TEST_F(LexerTest, IntegerTest_HexUnsignedTooManyDigits) {
+  Source::FileContent content("0x1000000000000000000000u");
   Lexer l("test.wgsl", &content);
 
   auto t = l.next();
   ASSERT_TRUE(t.Is(Token::Type::kError));
-  EXPECT_EQ(t.to_str(), "u32 (0xffffffffff) too large");
+  EXPECT_EQ(t.to_str(), "integer literal (0x10000000...) has too many digits");
 }
 
 struct UnsignedIntData {
@@ -324,6 +345,15 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                                          UnsignedIntData{"123u", 123u},
                                          UnsignedIntData{"4294967295u",
                                                          4294967295u}));
+
+TEST_F(LexerTest, IntegerTest_UnsignedTooManyDigits) {
+  Source::FileContent content("10000000000000000000000u");
+  Lexer l("test.wgsl", &content);
+
+  auto t = l.next();
+  ASSERT_TRUE(t.Is(Token::Type::kError));
+  EXPECT_EQ(t.to_str(), "integer literal (1000000000...) has too many digits");
+}
 
 struct SignedIntData {
   const char* input;
@@ -356,6 +386,15 @@ INSTANTIATE_TEST_SUITE_P(
                     SignedIntData{"123", 123},
                     SignedIntData{"2147483647", 2147483647},
                     SignedIntData{"-2147483648", -2147483648LL}));
+
+TEST_F(LexerTest, IntegerTest_SignedTooManyDigits) {
+  Source::FileContent content("-10000000000000000");
+  Lexer l("test.wgsl", &content);
+
+  auto t = l.next();
+  ASSERT_TRUE(t.Is(Token::Type::kError));
+  EXPECT_EQ(t.to_str(), "integer literal (-1000000000...) has too many digits");
+}
 
 using IntegerTest_Invalid = testing::TestWithParam<const char*>;
 TEST_P(IntegerTest_Invalid, Parses) {
