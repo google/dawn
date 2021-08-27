@@ -64,8 +64,6 @@ namespace dawn_wire { namespace client {
                                                  WGPUCreatePipelineAsyncStatus status,
                                                  const char* message);
 
-        // TODO(dawn:22): Remove once the deprecation period is finished.
-        WGPUQueue GetDefaultQueue();
         WGPUQueue GetQueue();
 
         void CancelCallbacksForDisconnect() override;

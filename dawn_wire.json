@@ -167,7 +167,6 @@
             "BufferUnmap",
             "DeviceCreateComputePipeline",
             "DeviceCreateErrorBuffer",
-            "DeviceGetDefaultQueue",
             "DeviceGetQueue",
             "DeviceInjectError",
             "DevicePushErrorScope"

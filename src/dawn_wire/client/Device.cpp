@@ -229,10 +229,6 @@ namespace dawn_wire { namespace client {
         return ToAPI(mQueue);
     }
 
-    WGPUQueue Device::GetDefaultQueue() {
-        return GetQueue();
-    }
-
     // TODO(dawn:800): Once the deprecated computeStage field is removed this method will no longer
     // be needed and DeviceCreateComputePipeline can be removed from client_handwritten_commands in
     // dawn_wire.json
