@@ -1089,6 +1089,11 @@ const Type* ParserImpl::ConvertType(
   // Compute members
   ast::StructMemberList ast_members;
   const auto members = struct_ty->element_types();
+  if (members.empty()) {
+    Fail() << "WGSL does not support empty structures. can't convert type: "
+           << def_use_mgr_->GetDef(type_id)->PrettyPrint();
+    return nullptr;
+  }
   TypeList ast_member_types;
   unsigned num_non_writable_members = 0;
   for (uint32_t member_index = 0; member_index < members.size();

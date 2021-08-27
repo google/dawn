@@ -568,6 +568,19 @@ TEST_F(SpvParserTest, ConvertType_ArrayStride_SpecifiedTwiceIsError) {
               Eq("invalid array type ID 10: multiple ArrayStride decorations"));
 }
 
+TEST_F(SpvParserTest, ConvertType_StructEmpty) {
+  auto p = parser(test::Assemble(Preamble() + R"(
+    %10 = OpTypeStruct
+  )" + MainBody()));
+  EXPECT_TRUE(p->BuildInternalModule());
+
+  auto* type = p->ConvertType(10);
+  EXPECT_EQ(type, nullptr);
+  EXPECT_EQ(p->error(),
+            "WGSL does not support empty structures. can't convert type: %10 = "
+            "OpTypeStruct");
+}
+
 TEST_F(SpvParserTest, ConvertType_StructTwoMembers) {
   auto p = parser(test::Assemble(Preamble() + R"(
     %uint = OpTypeInt 32 0
