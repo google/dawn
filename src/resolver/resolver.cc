@@ -520,15 +520,16 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
   }
 
   auto storage_class = var->declared_storage_class();
-  if (storage_class == ast::StorageClass::kNone) {
-    if (storage_type->UnwrapRef()->is_handle()) {
+  if (storage_class == ast::StorageClass::kNone && !var->is_const()) {
+    // No declared storage class. Infer from usage / type.
+    if (kind == VariableKind::kLocal) {
+      storage_class = ast::StorageClass::kFunction;
+    } else if (storage_type->UnwrapRef()->is_handle()) {
       // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
       // If the store type is a texture type or a sampler type, then the
       // variable declaration must not have a storage class decoration. The
       // storage class will always be handle.
       storage_class = ast::StorageClass::kUniformConstant;
-    } else if (kind == VariableKind::kLocal && !var->is_const()) {
-      storage_class = ast::StorageClass::kFunction;
     }
   }
 
@@ -545,8 +546,9 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
         builder_->create<sem::Reference>(storage_type, storage_class, access);
   }
 
-  if (rhs_type && !ValidateVariableConstructor(var, storage_type, type_name,
-                                               rhs_type, rhs_type_name)) {
+  if (rhs_type &&
+      !ValidateVariableConstructor(var, storage_class, storage_type, type_name,
+                                   rhs_type, rhs_type_name)) {
     return nullptr;
   }
 
@@ -573,6 +575,7 @@ ast::Access Resolver::DefaultAccessForStorageClass(
 }
 
 bool Resolver::ValidateVariableConstructor(const ast::Variable* var,
+                                           ast::StorageClass storage_class,
                                            const sem::Type* storage_type,
                                            const std::string& type_name,
                                            const sem::Type* rhs_type,
@@ -587,6 +590,26 @@ bool Resolver::ValidateVariableConstructor(const ast::Variable* var,
              var->source());
     return false;
   }
+
+  if (!var->is_const()) {
+    switch (storage_class) {
+      case ast::StorageClass::kPrivate:
+      case ast::StorageClass::kFunction:
+        break;  // Allowed an initializer
+      default:
+        // https://gpuweb.github.io/gpuweb/wgsl/#var-and-let
+        // Optionally has an initializer expression, if the variable is in the
+        // private or function storage classes.
+        AddError("var of storage class '" +
+                     std::string(ast::str(storage_class)) +
+                     "' cannot have an initializer. var initializers are only "
+                     "supported for the storage classes "
+                     "'private' and 'function'",
+                 var->source());
+        return false;
+    }
+  }
+
   return true;
 }
 

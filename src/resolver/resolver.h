@@ -306,6 +306,7 @@ class Resolver {
   bool ValidateSwitch(const ast::SwitchStatement* s);
   bool ValidateVariable(const VariableInfo* info);
   bool ValidateVariableConstructor(const ast::Variable* var,
+                                   ast::StorageClass storage_class,
                                    const sem::Type* storage_type,
                                    const std::string& type_name,
                                    const sem::Type* rhs_type,

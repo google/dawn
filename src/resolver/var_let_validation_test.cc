@@ -341,6 +341,18 @@ TEST_F(ResolverVarLetValidationTest, NonConstructibleType_InferredType) {
             "12:34 error: function variable must have a constructible type");
 }
 
+TEST_F(ResolverVarLetValidationTest, InvalidStorageClassForInitializer) {
+  // var<workgroup> v : f32 = 1.23;
+  Global(Source{{12, 34}}, "v", ty.f32(), ast::StorageClass::kWorkgroup,
+         Expr(1.23f));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: var of storage class 'workgroup' cannot have "
+            "an initializer. var initializers are only supported for the "
+            "storage classes 'private' and 'function'");
+}
+
 }  // namespace
 }  // namespace resolver
 }  // namespace tint
