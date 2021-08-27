@@ -3523,6 +3523,9 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
     TypedExpression combinatorial_expr;
     if (def_info->skip == SkipReason::kDontSkip) {
       combinatorial_expr = MaybeEmitCombinatorialValue(inst);
+      if (!success()) {
+        return false;
+      }
     }
     // An access chain or OpCopyObject can generate a skip.
     if (def_info->skip != SkipReason::kDontSkip) {
@@ -3813,8 +3816,14 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
 
   const auto opcode = inst.opcode();
 
-  const Type* ast_type =
-      inst.type_id() != 0 ? parser_impl_.ConvertType(inst.type_id()) : nullptr;
+  const Type* ast_type = nullptr;
+  if (inst.type_id()) {
+    ast_type = parser_impl_.ConvertType(inst.type_id());
+    if (!ast_type) {
+      Fail() << "couldn't convert result type for: " << inst.PrettyPrint();
+      return {};
+    }
+  }
 
   auto binary_op = ConvertBinaryOp(opcode);
   if (binary_op != ast::BinaryOp::kNone) {
