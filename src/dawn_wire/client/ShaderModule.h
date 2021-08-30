@@ -32,6 +32,8 @@ namespace dawn_wire { namespace client {
                                         WGPUCompilationInfoRequestStatus status,
                                         const WGPUCompilationInfo* info);
 
+        void CancelCallbacksForDisconnect() override;
+
       private:
         struct CompilationInfoRequest {
             WGPUCompilationInfoCallback callback = nullptr;

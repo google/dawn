@@ -63,4 +63,14 @@ namespace dawn_wire { namespace client {
         return true;
     }
 
+    void ShaderModule::CancelCallbacksForDisconnect() {
+        for (auto& it : mCompilationInfoRequests) {
+            if (it.second.callback) {
+                it.second.callback(WGPUCompilationInfoRequestStatus_DeviceLost, nullptr,
+                                   it.second.userdata);
+            }
+        }
+        mCompilationInfoRequests.clear();
+    }
+
 }}  // namespace dawn_wire::client

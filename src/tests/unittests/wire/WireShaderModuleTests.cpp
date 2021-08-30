@@ -118,3 +118,34 @@ TEST_F(WireShaderModuleTests, GetCompilationInfo) {
         .Times(1);
     FlushServer();
 }
+
+// Test that calling GetCompilationInfo then disconnecting the wire calls the callback with a device
+// loss.
+TEST_F(WireShaderModuleTests, GetCompilationInfoBeforeDisconnect) {
+    wgpuShaderModuleGetCompilationInfo(shaderModule, ToMockGetCompilationInfoCallback, nullptr);
+
+    WGPUCompilationMessage message = {"Test Message", WGPUCompilationMessageType_Info, 2, 4, 6, 8};
+    WGPUCompilationInfo compilationInfo;
+    compilationInfo.messageCount = 1;
+    compilationInfo.messages = &message;
+
+    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallShaderModuleGetCompilationInfoCallback(
+                apiShaderModule, WGPUCompilationInfoRequestStatus_Success, &compilationInfo);
+        }));
+    FlushClient();
+
+    EXPECT_CALL(*mockCompilationInfoCallback,
+                Call(WGPUCompilationInfoRequestStatus_DeviceLost, nullptr, _));
+    GetWireClient()->Disconnect();
+}
+
+// Test that calling GetCompilationInfo after disconnecting the wire calls the callback with a
+// device loss.
+TEST_F(WireShaderModuleTests, GetCompilationInfoAfterDisconnect) {
+    GetWireClient()->Disconnect();
+    EXPECT_CALL(*mockCompilationInfoCallback,
+                Call(WGPUCompilationInfoRequestStatus_DeviceLost, nullptr, _));
+    wgpuShaderModuleGetCompilationInfo(shaderModule, ToMockGetCompilationInfoCallback, nullptr);
+}
