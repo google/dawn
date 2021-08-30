@@ -935,7 +935,11 @@ namespace dawn_native { namespace vulkan {
         }
         mRecordingContext.signalSemaphores.clear();
 
+        // Some commands might still be marked as in-flight if we shut down because of a device
+        // loss. Recycle them as unused so that we free them below.
+        RecycleCompletedCommands();
         ASSERT(mCommandsInFlight.Empty());
+
         for (const CommandPoolAndBuffer& commands : mUnusedCommands) {
             // The VkCommandBuffer memory should be wholly owned by the pool and freed when it is
             // destroyed, but that's not the case in some drivers and the leak memory.
@@ -945,6 +949,13 @@ namespace dawn_native { namespace vulkan {
             fn.DestroyCommandPool(mVkDevice, commands.pool, nullptr);
         }
         mUnusedCommands.clear();
+
+        // Some fences might still be marked as in-flight if we shut down because of a device loss.
+        // Delete them since at this point all commands are complete.
+        while (!mFencesInFlight.empty()) {
+            fn.DestroyFence(mVkDevice, *mFencesInFlight.front().first, nullptr);
+            mFencesInFlight.pop();
+        }
 
         for (VkFence fence : mUnusedFences) {
             fn.DestroyFence(mVkDevice, fence, nullptr);
