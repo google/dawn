@@ -149,3 +149,78 @@ TEST_F(WireShaderModuleTests, GetCompilationInfoAfterDisconnect) {
                 Call(WGPUCompilationInfoRequestStatus_DeviceLost, nullptr, _));
     wgpuShaderModuleGetCompilationInfo(shaderModule, ToMockGetCompilationInfoCallback, nullptr);
 }
+
+// Hack to pass in test context into user callback
+struct TestData {
+    WireShaderModuleTests* pTest;
+    WGPUShaderModule* pTestShaderModule;
+    size_t numRequests;
+};
+
+static void ToMockBufferMapCallbackWithNewRequests(WGPUCompilationInfoRequestStatus status,
+                                                   const WGPUCompilationInfo* info,
+                                                   void* userdata) {
+    TestData* testData = reinterpret_cast<TestData*>(userdata);
+    // Mimic the user callback is sending new requests
+    ASSERT_NE(testData, nullptr);
+    ASSERT_NE(testData->pTest, nullptr);
+    ASSERT_NE(testData->pTestShaderModule, nullptr);
+
+    mockCompilationInfoCallback->Call(status, info, testData->pTest);
+
+    // Send the requests a number of times
+    for (size_t i = 0; i < testData->numRequests; i++) {
+        wgpuShaderModuleGetCompilationInfo(*(testData->pTestShaderModule),
+                                           ToMockGetCompilationInfoCallback, nullptr);
+    }
+}
+
+// Test that requests inside user callbacks before disconnect are called
+TEST_F(WireShaderModuleTests, GetCompilationInfoInsideCallbackBeforeDisconnect) {
+    TestData testData = {this, &shaderModule, 10};
+
+    wgpuShaderModuleGetCompilationInfo(shaderModule, ToMockBufferMapCallbackWithNewRequests,
+                                       &testData);
+
+    WGPUCompilationMessage message = {"Test Message", WGPUCompilationMessageType_Info, 2, 4, 6, 8};
+    WGPUCompilationInfo compilationInfo;
+    compilationInfo.messageCount = 1;
+    compilationInfo.messages = &message;
+
+    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallShaderModuleGetCompilationInfoCallback(
+                apiShaderModule, WGPUCompilationInfoRequestStatus_Success, &compilationInfo);
+        }));
+    FlushClient();
+
+    EXPECT_CALL(*mockCompilationInfoCallback,
+                Call(WGPUCompilationInfoRequestStatus_DeviceLost, nullptr, _))
+        .Times(1 + testData.numRequests);
+    GetWireClient()->Disconnect();
+}
+
+// Test that requests inside user callbacks before object destruction are called
+TEST_F(WireShaderModuleTests, GetCompilationInfoInsideCallbackBeforeDestruction) {
+    TestData testData = {this, &shaderModule, 10};
+
+    wgpuShaderModuleGetCompilationInfo(shaderModule, ToMockBufferMapCallbackWithNewRequests,
+                                       &testData);
+
+    WGPUCompilationMessage message = {"Test Message", WGPUCompilationMessageType_Info, 2, 4, 6, 8};
+    WGPUCompilationInfo compilationInfo;
+    compilationInfo.messageCount = 1;
+    compilationInfo.messages = &message;
+
+    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallShaderModuleGetCompilationInfoCallback(
+                apiShaderModule, WGPUCompilationInfoRequestStatus_Success, &compilationInfo);
+        }));
+    FlushClient();
+
+    EXPECT_CALL(*mockCompilationInfoCallback,
+                Call(WGPUCompilationInfoRequestStatus_Unknown, nullptr, _))
+        .Times(1 + testData.numRequests);
+    wgpuShaderModuleRelease(shaderModule);
+}

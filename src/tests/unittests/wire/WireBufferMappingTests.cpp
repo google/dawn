@@ -751,3 +751,67 @@ TEST_F(WireBufferMappingTests, MapAfterDisconnect) {
     EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_DeviceLost, this)).Times(1);
     wgpuBufferMapAsync(buffer, WGPUMapMode_Read, 0, kBufferSize, ToMockBufferMapCallback, this);
 }
+
+// Hack to pass in test context into user callback
+struct TestData {
+    WireBufferMappingTests* pTest;
+    WGPUBuffer* pTestBuffer;
+    size_t numRequests;
+};
+
+static void ToMockBufferMapCallbackWithNewRequests(WGPUBufferMapAsyncStatus status,
+                                                   void* userdata) {
+    TestData* testData = reinterpret_cast<TestData*>(userdata);
+    // Mimic the user callback is sending new requests
+    ASSERT_NE(testData, nullptr);
+    ASSERT_NE(testData->pTest, nullptr);
+    ASSERT_NE(testData->pTestBuffer, nullptr);
+
+    mockBufferMapCallback->Call(status, testData->pTest);
+
+    // Send the requests a number of times
+    for (size_t i = 0; i < testData->numRequests; i++) {
+        wgpuBufferMapAsync(*(testData->pTestBuffer), WGPUMapMode_Write, 0, sizeof(uint32_t),
+                           ToMockBufferMapCallback, testData->pTest);
+    }
+}
+
+// Test that requests inside user callbacks before disconnect are called
+TEST_F(WireBufferMappingTests, MapInsideCallbackBeforeDisconnect) {
+    SetupBuffer(WGPUMapMode_Write);
+    TestData testData = {this, &buffer, 10};
+    wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize,
+                       ToMockBufferMapCallbackWithNewRequests, &testData);
+
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
+    EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize)).Times(1);
+
+    FlushClient();
+
+    EXPECT_CALL(*mockBufferMapCallback, Call(WGPUBufferMapAsyncStatus_DeviceLost, this))
+        .Times(1 + testData.numRequests);
+    GetWireClient()->Disconnect();
+}
+
+// Test that requests inside user callbacks before object destruction are called
+TEST_F(WireBufferMappingWriteTests, MapInsideCallbackBeforeDestruction) {
+    TestData testData = {this, &buffer, 10};
+    wgpuBufferMapAsync(buffer, WGPUMapMode_Write, 0, kBufferSize,
+                       ToMockBufferMapCallbackWithNewRequests, &testData);
+
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 0, kBufferSize, _, _))
+        .WillOnce(InvokeWithoutArgs([&]() {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
+        }));
+    EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize)).Times(1);
+
+    FlushClient();
+
+    EXPECT_CALL(*mockBufferMapCallback,
+                Call(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, this))
+        .Times(1 + testData.numRequests);
+    wgpuBufferRelease(buffer);
+}
