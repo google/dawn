@@ -593,9 +593,19 @@ Token Lexer::try_integer() {
   }
 
   auto first = end;
-  while (end < len_ && is_digit(content_->data[end])) {
-    end++;
+  // If the first digit is a zero this must only be zero as leading zeros
+  // are not allowed.
+  auto next = first + 1;
+  if (next < len_) {
+    if (content_->data[first] == '0' && is_digit(content_->data[next])) {
+      return {Token::Type::kError, source,
+              "integer literal (" +
+                  content_->data.substr(start, end - 1 - start) +
+                  "...) has leading 0s"};
+    }
+  }
 
+  while (end < len_ && is_digit(content_->data[end])) {
     auto digits = end - first;
     if (digits > kMaxDigits) {
       return {Token::Type::kError, source,
@@ -603,12 +613,9 @@ Token Lexer::try_integer() {
                   content_->data.substr(start, end - 1 - start) +
                   "...) has too many digits"};
     }
-  }
 
-  // If the first digit is a zero this must only be zero as leading zeros
-  // are not allowed.
-  if (content_->data[first] == '0' && (end - first != 1))
-    return {};
+    end++;
+  }
 
   pos_ = end;
   location_.column += (end - start);

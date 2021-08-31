@@ -407,7 +407,12 @@ TEST_P(IntegerTest_Invalid, Parses) {
 }
 INSTANTIATE_TEST_SUITE_P(LexerTest,
                          IntegerTest_Invalid,
-                         testing::Values("2147483648", "4294967296u"));
+                         testing::Values("2147483648",
+                                         "4294967296u",
+                                         "01234",
+                                         "0000",
+                                         "-00",
+                                         "00u"));
 
 struct TokenData {
   const char* input;
