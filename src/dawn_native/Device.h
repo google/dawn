@@ -124,8 +124,6 @@ namespace dawn_native {
             const PipelineLayoutDescriptor* descriptor);
         void UncachePipelineLayout(PipelineLayoutBase* obj);
 
-        ResultOrError<Ref<RenderPipelineBase>> GetOrCreateRenderPipeline(
-            const RenderPipelineDescriptor* descriptor);
         void UncacheRenderPipeline(RenderPipelineBase* obj);
 
         ResultOrError<Ref<SamplerBase>> GetOrCreateSampler(const SamplerDescriptor* descriptor);
@@ -348,10 +346,12 @@ namespace dawn_native {
 
         ResultOrError<Ref<BindGroupLayoutBase>> CreateEmptyBindGroupLayout();
 
-        ResultOrError<Ref<PipelineLayoutBase>> ValidateAndGetComputePipelineDescriptorWithDefaults(
+        ResultOrError<Ref<PipelineLayoutBase>>
+        ValidateLayoutAndGetComputePipelineDescriptorWithDefaults(
             const ComputePipelineDescriptor& descriptor,
             ComputePipelineDescriptor* outDescriptor);
-        ResultOrError<Ref<PipelineLayoutBase>> ValidateAndGetRenderPipelineDescriptorWithDefaults(
+        ResultOrError<Ref<PipelineLayoutBase>>
+        ValidateLayoutAndGetRenderPipelineDescriptorWithDefaults(
             const RenderPipelineDescriptor& descriptor,
             RenderPipelineDescriptor* outDescriptor);
         std::pair<Ref<ComputePipelineBase>, size_t> GetCachedComputePipeline(
