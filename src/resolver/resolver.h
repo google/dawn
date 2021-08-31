@@ -281,7 +281,7 @@ class Resolver {
   bool ValidateEntryPoint(const ast::Function* func, const FunctionInfo* info);
   bool ValidateFunction(const ast::Function* func, const FunctionInfo* info);
   bool ValidateFunctionCall(const ast::CallExpression* call,
-                            const FunctionInfo* info);
+                            const FunctionInfo* target);
   bool ValidateGlobalVariable(const VariableInfo* var);
   bool ValidateInterpolateDecoration(const ast::InterpolateDecoration* deco,
                                      const sem::Type* storage_type);

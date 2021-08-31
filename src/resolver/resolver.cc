@@ -2553,22 +2553,30 @@ bool Resolver::FunctionCall(const ast::CallExpression* call) {
 }
 
 bool Resolver::ValidateFunctionCall(const ast::CallExpression* call,
-                                    const FunctionInfo* callee_func) {
+                                    const FunctionInfo* target) {
   auto* ident = call->func();
   auto name = builder_->Symbols().NameFor(ident->symbol());
 
-  if (call->params().size() != callee_func->parameters.size()) {
-    bool more = call->params().size() > callee_func->parameters.size();
+  if (target->declaration->IsEntryPoint()) {
+    // https://www.w3.org/TR/WGSL/#function-restriction
+    // An entry point must never be the target of a function call.
+    AddError("entry point functions cannot be the target of a function call",
+             call->source());
+    return false;
+  }
+
+  if (call->params().size() != target->parameters.size()) {
+    bool more = call->params().size() > target->parameters.size();
     AddError("too " + (more ? std::string("many") : std::string("few")) +
                  " arguments in call to '" + name + "', expected " +
-                 std::to_string(callee_func->parameters.size()) + ", got " +
+                 std::to_string(target->parameters.size()) + ", got " +
                  std::to_string(call->params().size()),
              call->source());
     return false;
   }
 
   for (size_t i = 0; i < call->params().size(); ++i) {
-    const VariableInfo* param = callee_func->parameters[i];
+    const VariableInfo* param = target->parameters[i];
     const ast::Expression* arg_expr = call->params()[i];
     auto* arg_type = TypeOf(arg_expr)->UnwrapRef();
 
