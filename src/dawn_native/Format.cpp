@@ -352,6 +352,19 @@ namespace dawn_native {
         AddCompressedFormat(wgpu::TextureFormat::BC7RGBAUnorm, 16, 4, 4, isBCFormatSupported, 4);
         AddCompressedFormat(wgpu::TextureFormat::BC7RGBAUnormSrgb, 16, 4, 4, isBCFormatSupported, 4);
 
+        // ETC2/EAC compressed formats
+        bool isETC2FormatSupported = device->IsExtensionEnabled(Extension::TextureCompressionETC2);
+        AddCompressedFormat(wgpu::TextureFormat::ETC2RGB8Unorm, 8, 4, 4, isETC2FormatSupported, 3);
+        AddCompressedFormat(wgpu::TextureFormat::ETC2RGB8UnormSrgb, 8, 4, 4, isETC2FormatSupported, 3);
+        AddCompressedFormat(wgpu::TextureFormat::ETC2RGB8A1Unorm, 8, 4, 4, isETC2FormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ETC2RGB8A1UnormSrgb, 8, 4, 4, isETC2FormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ETC2RGBA8Unorm, 16, 4, 4, isETC2FormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ETC2RGBA8UnormSrgb, 16, 4, 4, isETC2FormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::EACR11Unorm, 8, 4, 4, isETC2FormatSupported, 1);
+        AddCompressedFormat(wgpu::TextureFormat::EACR11Snorm, 8, 4, 4, isETC2FormatSupported, 1);
+        AddCompressedFormat(wgpu::TextureFormat::EACRG11Unorm, 16, 4, 4, isETC2FormatSupported, 2);
+        AddCompressedFormat(wgpu::TextureFormat::EACRG11Snorm, 16, 4, 4, isETC2FormatSupported, 2);
+
         // multi-planar formats
         const bool isMultiPlanarFormatSupported = device->IsExtensionEnabled(Extension::MultiPlanarFormats);
         AddMultiAspectFormat(wgpu::TextureFormat::R8BG8Biplanar420Unorm, Aspect::Plane0 | Aspect::Plane1,

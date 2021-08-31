@@ -252,9 +252,38 @@ namespace dawn_native { namespace metal {
                 return MTLPixelFormatBC7_RGBAUnorm;
             case wgpu::TextureFormat::BC7RGBAUnormSrgb:
                 return MTLPixelFormatBC7_RGBAUnorm_sRGB;
+#else
+            case wgpu::TextureFormat::BC1RGBAUnorm:
+            case wgpu::TextureFormat::BC1RGBAUnormSrgb:
+            case wgpu::TextureFormat::BC2RGBAUnorm:
+            case wgpu::TextureFormat::BC2RGBAUnormSrgb:
+            case wgpu::TextureFormat::BC3RGBAUnorm:
+            case wgpu::TextureFormat::BC3RGBAUnormSrgb:
+            case wgpu::TextureFormat::BC4RSnorm:
+            case wgpu::TextureFormat::BC4RUnorm:
+            case wgpu::TextureFormat::BC5RGSnorm:
+            case wgpu::TextureFormat::BC5RGUnorm:
+            case wgpu::TextureFormat::BC6HRGBFloat:
+            case wgpu::TextureFormat::BC6HRGBUfloat:
+            case wgpu::TextureFormat::BC7RGBAUnorm:
+            case wgpu::TextureFormat::BC7RGBAUnormSrgb:
 #endif
 
-            default:
+            case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
+
+            case wgpu::TextureFormat::ETC2RGB8Unorm:
+            case wgpu::TextureFormat::ETC2RGB8UnormSrgb:
+            case wgpu::TextureFormat::ETC2RGB8A1Unorm:
+            case wgpu::TextureFormat::ETC2RGB8A1UnormSrgb:
+            case wgpu::TextureFormat::ETC2RGBA8Unorm:
+            case wgpu::TextureFormat::ETC2RGBA8UnormSrgb:
+            case wgpu::TextureFormat::EACR11Unorm:
+            case wgpu::TextureFormat::EACR11Snorm:
+            case wgpu::TextureFormat::EACRG11Unorm:
+            case wgpu::TextureFormat::EACRG11Snorm:
+
+            case wgpu::TextureFormat::Stencil8:
+            case wgpu::TextureFormat::Undefined:
                 UNREACHABLE();
         }
     }

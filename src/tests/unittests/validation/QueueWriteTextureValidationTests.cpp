@@ -558,7 +558,8 @@ namespace {
       protected:
         WGPUDevice CreateTestDevice() override {
             dawn_native::DeviceDescriptor descriptor;
-            descriptor.requiredExtensions = {"texture_compression_bc"};
+            descriptor.requiredExtensions = {"texture_compression_bc", "texture-compression-etc2",
+                                             "texture-compression-astc"};
             return adapter.CreateDevice(&descriptor);
         }
 
@@ -591,18 +592,18 @@ namespace {
 
     // Tests to verify that data offset may not be a multiple of the compressed texture block size
     TEST_F(WriteTextureTest_CompressedTextureFormats, DataOffset) {
-        for (wgpu::TextureFormat bcFormat : utils::kBCFormats) {
-            wgpu::Texture texture = Create2DTexture(bcFormat);
+        for (wgpu::TextureFormat format : utils::kCompressedFormats) {
+            wgpu::Texture texture = Create2DTexture(format);
 
             // Valid if aligned.
             {
-                uint32_t kAlignedOffset = utils::GetTexelBlockSizeInBytes(bcFormat);
+                uint32_t kAlignedOffset = utils::GetTexelBlockSizeInBytes(format);
                 TestWriteTexture(1024, kAlignedOffset, 256, 4, texture, 0, {0, 0, 0}, {4, 16, 1});
             }
 
             // Still valid if not aligned.
             {
-                uint32_t kUnalignedOffset = utils::GetTexelBlockSizeInBytes(bcFormat) - 1;
+                uint32_t kUnalignedOffset = utils::GetTexelBlockSizeInBytes(format) - 1;
                 TestWriteTexture(1024, kUnalignedOffset, 256, 4, texture, 0, {0, 0, 0}, {4, 16, 1});
             }
         }
@@ -618,8 +619,8 @@ namespace {
         // Failures on the BytesPerRow that is not large enough.
         {
             constexpr uint32_t kSmallBytesPerRow = 256;
-            for (wgpu::TextureFormat bcFormat : utils::kBCFormats) {
-                wgpu::Texture texture = Create2DTexture(bcFormat, 1, kTestWidth, kTestHeight);
+            for (wgpu::TextureFormat format : utils::kCompressedFormats) {
+                wgpu::Texture texture = Create2DTexture(format, 1, kTestWidth, kTestHeight);
                 ASSERT_DEVICE_ERROR(TestWriteTexture(1024, 0, kSmallBytesPerRow, 4, texture, 0,
                                                      {0, 0, 0}, {kTestWidth, 4, 1}));
             }
@@ -627,18 +628,18 @@ namespace {
 
         // Test it is valid to use a BytesPerRow that is not a multiple of 256.
         {
-            for (wgpu::TextureFormat bcFormat : utils::kBCFormats) {
-                wgpu::Texture texture = Create2DTexture(bcFormat, 1, kTestWidth, kTestHeight);
+            for (wgpu::TextureFormat format : utils::kCompressedFormats) {
+                wgpu::Texture texture = Create2DTexture(format, 1, kTestWidth, kTestHeight);
                 uint32_t ValidBytesPerRow =
-                    kTestWidth / 4 * utils::GetTexelBlockSizeInBytes(bcFormat);
+                    kTestWidth / 4 * utils::GetTexelBlockSizeInBytes(format);
                 ASSERT_NE(0u, ValidBytesPerRow % 256);
                 TestWriteTexture(1024, 0, ValidBytesPerRow, 4, texture, 0, {0, 0, 0},
                                  {kTestWidth, 4, 1});
             }
         }
 
-        for (wgpu::TextureFormat bcFormat : utils::kBCFormats) {
-            wgpu::Texture texture = Create2DTexture(bcFormat);
+        for (wgpu::TextureFormat format : utils::kCompressedFormats) {
+            wgpu::Texture texture = Create2DTexture(format);
 
             // Valid usage of bytesPerRow in WriteTexture with compressed texture formats.
             {
@@ -657,8 +658,8 @@ namespace {
 
     // rowsPerImage must be >= heightInBlocks.
     TEST_F(WriteTextureTest_CompressedTextureFormats, RowsPerImage) {
-        for (wgpu::TextureFormat bcFormat : utils::kBCFormats) {
-            wgpu::Texture texture = Create2DTexture(bcFormat);
+        for (wgpu::TextureFormat format : utils::kCompressedFormats) {
+            wgpu::Texture texture = Create2DTexture(format);
 
             // Valid usages of rowsPerImage in WriteTexture with compressed texture formats.
             {
@@ -684,9 +685,9 @@ namespace {
     // Tests to verify that ImageOffset.x must be a multiple of the compressed texture block width
     // and ImageOffset.y must be a multiple of the compressed texture block height
     TEST_F(WriteTextureTest_CompressedTextureFormats, ImageOffset) {
-        for (wgpu::TextureFormat bcFormat : utils::kBCFormats) {
-            wgpu::Texture texture = Create2DTexture(bcFormat);
-            wgpu::Texture texture2 = Create2DTexture(bcFormat);
+        for (wgpu::TextureFormat format : utils::kCompressedFormats) {
+            wgpu::Texture texture = Create2DTexture(format);
+            wgpu::Texture texture2 = Create2DTexture(format);
 
             constexpr wgpu::Origin3D kSmallestValidOrigin3D = {4, 4, 0};
 
@@ -718,11 +719,10 @@ namespace {
         constexpr uint32_t kTestWidth = 60;
         constexpr uint32_t kTestHeight = 60;
 
-        for (wgpu::TextureFormat bcFormat : utils::kBCFormats) {
-            wgpu::Texture texture =
-                Create2DTexture(bcFormat, kMipmapLevels, kTestWidth, kTestHeight);
+        for (wgpu::TextureFormat format : utils::kCompressedFormats) {
+            wgpu::Texture texture = Create2DTexture(format, kMipmapLevels, kTestWidth, kTestHeight);
             wgpu::Texture texture2 =
-                Create2DTexture(bcFormat, kMipmapLevels, kTestWidth, kTestHeight);
+                Create2DTexture(format, kMipmapLevels, kTestWidth, kTestHeight);
 
             constexpr wgpu::Extent3D kSmallestValidExtent3D = {4, 4, 1};
 
@@ -761,22 +761,21 @@ namespace {
 
     // Test writes to multiple array layers of a compressed texture
     TEST_F(WriteTextureTest_CompressedTextureFormats, WriteToMultipleArrayLayers) {
-        for (wgpu::TextureFormat bcFormat : utils::kBCFormats) {
+        for (wgpu::TextureFormat format : utils::kCompressedFormats) {
             wgpu::Texture texture = QueueWriteTextureValidationTest::Create2DTexture(
-                {12, 16, 20}, 1, bcFormat,
-                wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc);
+                {12, 16, 20}, 1, format, wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc);
 
             // Write to all array layers
-            TestWriteTextureExactDataSize(256, 4, texture, bcFormat, {0, 0, 0}, {12, 16, 20});
+            TestWriteTextureExactDataSize(256, 4, texture, format, {0, 0, 0}, {12, 16, 20});
 
             // Write to the highest array layer
-            TestWriteTextureExactDataSize(256, 4, texture, bcFormat, {0, 0, 19}, {12, 16, 1});
+            TestWriteTextureExactDataSize(256, 4, texture, format, {0, 0, 19}, {12, 16, 1});
 
             // Write to array layers in the middle
-            TestWriteTextureExactDataSize(256, 4, texture, bcFormat, {0, 0, 1}, {12, 16, 18});
+            TestWriteTextureExactDataSize(256, 4, texture, format, {0, 0, 1}, {12, 16, 18});
 
             // Write touching the texture corners with a non-packed rowsPerImage
-            TestWriteTextureExactDataSize(256, 6, texture, bcFormat, {4, 4, 4}, {8, 12, 16});
+            TestWriteTextureExactDataSize(256, 6, texture, format, {4, 4, 4}, {8, 12, 16});
         }
     }
 

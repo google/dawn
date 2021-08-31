@@ -203,6 +203,17 @@ namespace dawn_native { namespace d3d12 {
                 case wgpu::TextureFormat::BC7RGBAUnormSrgb:
                     return DXGI_FORMAT_BC7_TYPELESS;
 
+                case wgpu::TextureFormat::ETC2RGB8Unorm:
+                case wgpu::TextureFormat::ETC2RGB8UnormSrgb:
+                case wgpu::TextureFormat::ETC2RGB8A1Unorm:
+                case wgpu::TextureFormat::ETC2RGB8A1UnormSrgb:
+                case wgpu::TextureFormat::ETC2RGBA8Unorm:
+                case wgpu::TextureFormat::ETC2RGBA8UnormSrgb:
+                case wgpu::TextureFormat::EACR11Unorm:
+                case wgpu::TextureFormat::EACR11Snorm:
+                case wgpu::TextureFormat::EACRG11Unorm:
+                case wgpu::TextureFormat::EACRG11Snorm:
+
                 case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
                 case wgpu::TextureFormat::Stencil8:
                 case wgpu::TextureFormat::Undefined:
@@ -329,6 +340,17 @@ namespace dawn_native { namespace d3d12 {
 
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
                 return DXGI_FORMAT_NV12;
+
+            case wgpu::TextureFormat::ETC2RGB8Unorm:
+            case wgpu::TextureFormat::ETC2RGB8UnormSrgb:
+            case wgpu::TextureFormat::ETC2RGB8A1Unorm:
+            case wgpu::TextureFormat::ETC2RGB8A1UnormSrgb:
+            case wgpu::TextureFormat::ETC2RGBA8Unorm:
+            case wgpu::TextureFormat::ETC2RGBA8UnormSrgb:
+            case wgpu::TextureFormat::EACR11Unorm:
+            case wgpu::TextureFormat::EACR11Snorm:
+            case wgpu::TextureFormat::EACRG11Unorm:
+            case wgpu::TextureFormat::EACRG11Snorm:
 
             case wgpu::TextureFormat::Stencil8:
             case wgpu::TextureFormat::Undefined:

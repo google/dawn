@@ -130,5 +130,11 @@ auto MakeParamGenerator(std::vector<BackendTestConfig>&& first,
         ::detail::GetAvailableAdapterTestParamsForBackends(first.data(), first.size()),
         std::forward<std::initializer_list<Params>&&>(params)...);
 }
+template <typename Param, typename... Params>
+auto MakeParamGenerator(std::vector<BackendTestConfig>&& first, std::vector<Params>&&... params) {
+    return ParamGenerator<Param, AdapterTestParam, Params...>(
+        ::detail::GetAvailableAdapterTestParamsForBackends(first.data(), first.size()),
+        std::forward<std::vector<Params>&&>(params)...);
+}
 
 #endif  // TESTS_PARAMGENERATOR_H_

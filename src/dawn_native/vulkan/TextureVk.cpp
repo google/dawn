@@ -337,6 +337,28 @@ namespace dawn_native { namespace vulkan {
                 return VK_FORMAT_BC7_UNORM_BLOCK;
             case wgpu::TextureFormat::BC7RGBAUnormSrgb:
                 return VK_FORMAT_BC7_SRGB_BLOCK;
+
+            case wgpu::TextureFormat::ETC2RGB8Unorm:
+                return VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK;
+            case wgpu::TextureFormat::ETC2RGB8UnormSrgb:
+                return VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK;
+            case wgpu::TextureFormat::ETC2RGB8A1Unorm:
+                return VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK;
+            case wgpu::TextureFormat::ETC2RGB8A1UnormSrgb:
+                return VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK;
+            case wgpu::TextureFormat::ETC2RGBA8Unorm:
+                return VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK;
+            case wgpu::TextureFormat::ETC2RGBA8UnormSrgb:
+                return VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK;
+            case wgpu::TextureFormat::EACR11Unorm:
+                return VK_FORMAT_EAC_R11_UNORM_BLOCK;
+            case wgpu::TextureFormat::EACR11Snorm:
+                return VK_FORMAT_EAC_R11_SNORM_BLOCK;
+            case wgpu::TextureFormat::EACRG11Unorm:
+                return VK_FORMAT_EAC_R11G11_UNORM_BLOCK;
+            case wgpu::TextureFormat::EACRG11Snorm:
+                return VK_FORMAT_EAC_R11G11_SNORM_BLOCK;
+
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
             case wgpu::TextureFormat::Stencil8:
             case wgpu::TextureFormat::Undefined:

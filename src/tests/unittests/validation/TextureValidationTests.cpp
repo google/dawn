@@ -581,9 +581,69 @@ namespace {
         }
     };
 
+    // Test that only CopySrc, CopyDst and Sampled are accepted as usage in compressed formats.
+    TEST_F(CompressedTextureFormatsValidationTests, TextureUsage) {
+        wgpu::TextureUsage invalidUsages[] = {
+            wgpu::TextureUsage::RenderAttachment,
+            wgpu::TextureUsage::StorageBinding,
+            wgpu::TextureUsage::Present,
+        };
+        for (wgpu::TextureFormat format : utils::kCompressedFormats) {
+            for (wgpu::TextureUsage usage : invalidUsages) {
+                wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+                descriptor.format = format;
+                descriptor.usage = usage;
+                ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+            }
+        }
+    }
+
+    // Test that using various MipLevelCount is allowed for compressed formats.
+    TEST_F(CompressedTextureFormatsValidationTests, MipLevelCount) {
+        for (wgpu::TextureFormat format : utils::kCompressedFormats) {
+            for (uint32_t mipLevels : {1, 3, 6}) {
+                wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+                descriptor.format = format;
+                descriptor.mipLevelCount = mipLevels;
+                device.CreateTexture(&descriptor);
+            }
+        }
+    }
+
+    // Test that it is invalid to specify SampleCount>1 in compressed formats.
+    TEST_F(CompressedTextureFormatsValidationTests, SampleCount) {
+        for (wgpu::TextureFormat format : utils::kCompressedFormats) {
+            wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+            descriptor.format = format;
+            descriptor.sampleCount = 4;
+            ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+        }
+    }
+
+    // Test that it is allowed to create a 2D texture with depth>1 in compressed formats.
+    TEST_F(CompressedTextureFormatsValidationTests, 2DArrayTexture) {
+        for (wgpu::TextureFormat format : utils::kCompressedFormats) {
+            wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+            descriptor.format = format;
+            descriptor.size.depthOrArrayLayers = 6;
+            device.CreateTexture(&descriptor);
+        }
+    }
+
+    // Test that it is not allowed to create a 3D texture in compressed formats.
+    TEST_F(CompressedTextureFormatsValidationTests, 3DTexture) {
+        for (wgpu::TextureFormat format : utils::kCompressedFormats) {
+            wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+            descriptor.format = format;
+            descriptor.size.depthOrArrayLayers = 4;
+            descriptor.dimension = wgpu::TextureDimension::e3D;
+            ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+        }
+    }
+
     // Test that it is invalid to use a number that is not a multiple of 4 (the compressed block
     // width and height of all BC formats) as the width or height in BC formats.
-    TEST_F(CompressedTextureFormatsValidationTests, TextureSize) {
+    TEST_F(CompressedTextureFormatsValidationTests, BCFormatsTextureSize) {
         for (wgpu::TextureFormat format : utils::kBCFormats) {
             {
                 wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
@@ -595,14 +655,14 @@ namespace {
             {
                 wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
                 descriptor.format = format;
-                descriptor.size.width = 31;
+                descriptor.size.width = 30;
                 ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
             }
 
             {
                 wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
                 descriptor.format = format;
-                descriptor.size.height = 31;
+                descriptor.size.height = 30;
                 ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
             }
 
@@ -616,78 +676,38 @@ namespace {
         }
     }
 
-    // Test that only CopySrc, CopyDst and Sampled are accepted as usage in compressed formats.
-    TEST_F(CompressedTextureFormatsValidationTests, TextureUsage) {
-        wgpu::TextureUsage invalidUsages[] = {
-            wgpu::TextureUsage::RenderAttachment,
-            wgpu::TextureUsage::StorageBinding,
-            wgpu::TextureUsage::Present,
-        };
-        for (wgpu::TextureFormat format : utils::kBCFormats) {
-            for (wgpu::TextureUsage usage : invalidUsages) {
-                wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
-                descriptor.format = format;
-                descriptor.usage = usage;
-                ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
-            }
-        }
+    // Test that it is invalid to use a number that is not a multiple of 4 (the compressed block
+    // width and height of all ETC2 formats) as the width or height in ETC2 formats.
+    TEST_F(CompressedTextureFormatsValidationTests, ETC2FormatsTextureSize) {
         for (wgpu::TextureFormat format : utils::kETC2Formats) {
-            for (wgpu::TextureUsage usage : invalidUsages) {
+            {
                 wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
                 descriptor.format = format;
-                descriptor.usage = usage;
-                ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
-            }
-        }
-        for (wgpu::TextureFormat format : utils::kASTCFormats) {
-            for (wgpu::TextureUsage usage : invalidUsages) {
-                wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
-                descriptor.format = format;
-                descriptor.usage = usage;
-                ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
-            }
-        }
-    }
-
-    TEST_F(CompressedTextureFormatsValidationTests, MipLevelCount) {
-        for (wgpu::TextureFormat format : utils::kBCFormats) {
-            for (uint32_t mipLevels : {1, 3, 6}) {
-                wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
-                descriptor.format = format;
-                descriptor.mipLevelCount = mipLevels;
+                ASSERT_TRUE(descriptor.size.width % 4 == 0 && descriptor.size.height % 4 == 0);
                 device.CreateTexture(&descriptor);
             }
-        }
-    }
 
-    // Test that it is invalid to specify SampleCount>1 in BC formats.
-    TEST_F(CompressedTextureFormatsValidationTests, SampleCount) {
-        for (wgpu::TextureFormat format : utils::kBCFormats) {
-            wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
-            descriptor.format = format;
-            descriptor.sampleCount = 4;
-            ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
-        }
-    }
+            {
+                wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+                descriptor.format = format;
+                descriptor.size.width = 30;
+                ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+            }
 
-    // Test that it is allowed to create a 2D texture with depth>1 in BC formats.
-    TEST_F(CompressedTextureFormatsValidationTests, 2DArrayTexture) {
-        for (wgpu::TextureFormat format : utils::kBCFormats) {
-            wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
-            descriptor.format = format;
-            descriptor.size.depthOrArrayLayers = 6;
-            device.CreateTexture(&descriptor);
-        }
-    }
+            {
+                wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+                descriptor.format = format;
+                descriptor.size.height = 30;
+                ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+            }
 
-    // Test that it is not allowed to create a 3D texture in BC formats.
-    TEST_F(CompressedTextureFormatsValidationTests, 3DTexture) {
-        for (wgpu::TextureFormat format : utils::kBCFormats) {
-            wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
-            descriptor.format = format;
-            descriptor.size.depthOrArrayLayers = 4;
-            descriptor.dimension = wgpu::TextureDimension::e3D;
-            ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+            {
+                wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+                descriptor.format = format;
+                descriptor.size.width = 12;
+                descriptor.size.height = 32;
+                device.CreateTexture(&descriptor);
+            }
         }
     }
 

@@ -1978,7 +1978,18 @@
             {"value": 52, "name": "BC6H RGB float"},
             {"value": 53, "name": "BC7 RGBA unorm"},
             {"value": 54, "name": "BC7 RGBA unorm srgb"},
-            {"value": 55, "name": "R8 BG8 Biplanar 420 unorm"}
+            {"value": 55, "name": "R8 BG8 Biplanar 420 unorm"},
+
+            {"value": 56, "name": "ETC2 RGB8 unorm"},
+            {"value": 57, "name": "ETC2 RGB8 unorm srgb"},
+            {"value": 58, "name": "ETC2 RGB8A1 unorm"},
+            {"value": 59, "name": "ETC2 RGB8A1 unorm srgb"},
+            {"value": 60, "name": "ETC2 RGBA8 unorm"},
+            {"value": 61, "name": "ETC2 RGBA8 unorm srgb"},
+            {"value": 62, "name": "EAC R11 unorm"},
+            {"value": 63, "name": "EAC R11 snorm"},
+            {"value": 64, "name": "EAC RG11 unorm"},
+            {"value": 65, "name": "EAC RG11 snorm"}
         ]
     },
     "texture usage": {

@@ -2020,7 +2020,8 @@ class CopyCommandTest_CompressedTextureFormats : public CopyCommandTest {
   protected:
     WGPUDevice CreateTestDevice() override {
         dawn_native::DeviceDescriptor descriptor;
-        descriptor.requiredExtensions = {"texture_compression_bc"};
+        descriptor.requiredExtensions = {"texture_compression_bc", "texture-compression-etc2",
+                                         "texture-compression-astc"};
         return adapter.CreateDevice(&descriptor);
     }
 
@@ -2046,19 +2047,19 @@ TEST_F(CopyCommandTest_CompressedTextureFormats, BufferOffset) {
     wgpu::Buffer buffer =
         CreateBuffer(512, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
 
-    for (wgpu::TextureFormat bcFormat : utils::kBCFormats) {
-        wgpu::Texture texture = Create2DTexture(bcFormat);
+    for (wgpu::TextureFormat format : utils::kCompressedFormats) {
+        wgpu::Texture texture = Create2DTexture(format);
 
         // Valid usages of BufferOffset in B2T and T2B copies with compressed texture formats.
         {
-            uint32_t validBufferOffset = utils::GetTexelBlockSizeInBytes(bcFormat);
+            uint32_t validBufferOffset = utils::GetTexelBlockSizeInBytes(format);
             TestBothTBCopies(utils::Expectation::Success, buffer, validBufferOffset, 256, 4,
                              texture, 0, {0, 0, 0}, {4, 4, 1});
         }
 
         // Failures on invalid bufferOffset.
         {
-            uint32_t kInvalidBufferOffset = utils::GetTexelBlockSizeInBytes(bcFormat) / 2;
+            uint32_t kInvalidBufferOffset = utils::GetTexelBlockSizeInBytes(format) / 2;
             TestBothTBCopies(utils::Expectation::Failure, buffer, kInvalidBufferOffset, 256, 4,
                              texture, 0, {0, 0, 0}, {4, 4, 1});
         }
@@ -2072,43 +2073,36 @@ TEST_F(CopyCommandTest_CompressedTextureFormats, BytesPerRow) {
     wgpu::Buffer buffer =
         CreateBuffer(1024, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
 
-    {
         constexpr uint32_t kTestWidth = 160;
         constexpr uint32_t kTestHeight = 160;
 
-        // Failures on the BytesPerRow that is not large enough.
-        {
-            constexpr uint32_t kSmallBytesPerRow = 256;
-            for (wgpu::TextureFormat bcFormat : utils::kBCFormats) {
-                wgpu::Texture texture = Create2DTexture(bcFormat, 1, kTestWidth, kTestHeight);
+        for (wgpu::TextureFormat format : utils::kCompressedFormats) {
+            wgpu::Texture texture = Create2DTexture(format, 1, kTestWidth, kTestHeight);
+
+            // Failures on the BytesPerRow that is not large enough.
+            {
+                constexpr uint32_t kSmallBytesPerRow = 256;
                 TestBothTBCopies(utils::Expectation::Failure, buffer, 0, kSmallBytesPerRow, 4,
                                  texture, 0, {0, 0, 0}, {kTestWidth, 4, 1});
             }
-        }
 
-        // Test it is not valid to use a BytesPerRow that is not a multiple of 256.
-        {
-            for (wgpu::TextureFormat bcFormat : utils::kBCFormats) {
-                wgpu::Texture texture = Create2DTexture(bcFormat, 1, kTestWidth, kTestHeight);
+            // Test it is not valid to use a BytesPerRow that is not a multiple of 256.
+            {
                 uint32_t inValidBytesPerRow =
-                    kTestWidth / 4 * utils::GetTexelBlockSizeInBytes(bcFormat);
+                    kTestWidth / 4 * utils::GetTexelBlockSizeInBytes(format);
                 ASSERT_NE(0u, inValidBytesPerRow % 256);
                 TestBothTBCopies(utils::Expectation::Failure, buffer, 0, inValidBytesPerRow, 4,
                                  texture, 0, {0, 0, 0}, {kTestWidth, 4, 1});
             }
-        }
 
-        // Test the smallest valid BytesPerRow should work.
-        {
-            for (wgpu::TextureFormat bcFormat : utils::kBCFormats) {
-                wgpu::Texture texture = Create2DTexture(bcFormat, 1, kTestWidth, kTestHeight);
+            // Test the smallest valid BytesPerRow should work.
+            {
                 uint32_t smallestValidBytesPerRow =
-                    Align(kTestWidth / 4 * utils::GetTexelBlockSizeInBytes(bcFormat), 256);
+                    Align(kTestWidth / 4 * utils::GetTexelBlockSizeInBytes(format), 256);
                 TestBothTBCopies(utils::Expectation::Success, buffer, 0, smallestValidBytesPerRow,
                                  4, texture, 0, {0, 0, 0}, {kTestWidth, 4, 1});
             }
         }
-    }
 }
 
 // rowsPerImage must be >= heightInBlocks.
@@ -2116,8 +2110,8 @@ TEST_F(CopyCommandTest_CompressedTextureFormats, RowsPerImage) {
     wgpu::Buffer buffer =
         CreateBuffer(1024, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
 
-    for (wgpu::TextureFormat bcFormat : utils::kBCFormats) {
-        wgpu::Texture texture = Create2DTexture(bcFormat);
+    for (wgpu::TextureFormat format : utils::kCompressedFormats) {
+        wgpu::Texture texture = Create2DTexture(format);
 
         // Valid usages of rowsPerImage in B2T and T2B copies with compressed texture formats.
         {
@@ -2147,9 +2141,9 @@ TEST_F(CopyCommandTest_CompressedTextureFormats, ImageOffset) {
     wgpu::Buffer buffer =
         CreateBuffer(512, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
 
-    for (wgpu::TextureFormat bcFormat : utils::kBCFormats) {
-        wgpu::Texture texture = Create2DTexture(bcFormat);
-        wgpu::Texture texture2 = Create2DTexture(bcFormat);
+    for (wgpu::TextureFormat format : utils::kCompressedFormats) {
+        wgpu::Texture texture = Create2DTexture(format);
+        wgpu::Texture texture2 = Create2DTexture(format);
 
         constexpr wgpu::Origin3D kSmallestValidOrigin3D = {4, 4, 0};
 
@@ -2194,9 +2188,9 @@ TEST_F(CopyCommandTest_CompressedTextureFormats, ImageExtent) {
     constexpr uint32_t kTestWidth = 60;
     constexpr uint32_t kTestHeight = 60;
 
-    for (wgpu::TextureFormat bcFormat : utils::kBCFormats) {
-        wgpu::Texture texture = Create2DTexture(bcFormat, kMipmapLevels, kTestWidth, kTestHeight);
-        wgpu::Texture texture2 = Create2DTexture(bcFormat, kMipmapLevels, kTestWidth, kTestHeight);
+    for (wgpu::TextureFormat format : utils::kCompressedFormats) {
+        wgpu::Texture texture = Create2DTexture(format, kMipmapLevels, kTestWidth, kTestHeight);
+        wgpu::Texture texture2 = Create2DTexture(format, kMipmapLevels, kTestWidth, kTestHeight);
 
         constexpr wgpu::Extent3D kSmallestValidExtent3D = {4, 4, 1};
 
@@ -2273,20 +2267,20 @@ TEST_F(CopyCommandTest, CopyToMultipleArrayLayers) {
 
 // Test copies between buffer and multiple array layers of a compressed texture
 TEST_F(CopyCommandTest_CompressedTextureFormats, CopyToMultipleArrayLayers) {
-    for (wgpu::TextureFormat bcFormat : utils::kBCFormats) {
+    for (wgpu::TextureFormat format : utils::kCompressedFormats) {
         wgpu::Texture texture = CopyCommandTest::Create2DTexture(
-            12, 16, 1, 20, bcFormat, wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc);
+            12, 16, 1, 20, format, wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc);
 
         // Copy to all array layers
-        TestBothTBCopiesExactBufferSize(256, 4, texture, bcFormat, {0, 0, 0}, {12, 16, 20});
+        TestBothTBCopiesExactBufferSize(256, 4, texture, format, {0, 0, 0}, {12, 16, 20});
 
         // Copy to the highest array layer
-        TestBothTBCopiesExactBufferSize(256, 4, texture, bcFormat, {0, 0, 19}, {12, 16, 1});
+        TestBothTBCopiesExactBufferSize(256, 4, texture, format, {0, 0, 19}, {12, 16, 1});
 
         // Copy to array layers in the middle
-        TestBothTBCopiesExactBufferSize(256, 4, texture, bcFormat, {0, 0, 1}, {12, 16, 18});
+        TestBothTBCopiesExactBufferSize(256, 4, texture, format, {0, 0, 1}, {12, 16, 18});
 
         // Copy touching the texture corners with a non-packed rowsPerImage
-        TestBothTBCopiesExactBufferSize(256, 6, texture, bcFormat, {4, 4, 4}, {8, 12, 16});
+        TestBothTBCopiesExactBufferSize(256, 6, texture, format, {4, 4, 4}, {8, 12, 16});
     }
 }
