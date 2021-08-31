@@ -28,6 +28,7 @@ if (build_with_chromium) {
       "cli.cc",
       "cli.h",
       "fuzzer.cc",
+      "override_cli_params.h",
       "wgsl_mutator.cc",
       "wgsl_mutator.h",
     ]

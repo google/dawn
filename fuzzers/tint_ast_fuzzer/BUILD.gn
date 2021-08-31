@@ -56,6 +56,7 @@ if (build_with_chromium) {
       "mutator.h",
       "node_id_map.cc",
       "node_id_map.h",
+      "override_cli_params.h",
       "probability_context.cc",
       "probability_context.h",
       "protobufs/tint_ast_fuzzer.h",

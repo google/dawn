@@ -18,6 +18,7 @@
 
 #include "fuzzers/tint_common_fuzzer.h"
 #include "fuzzers/tint_regex_fuzzer/cli.h"
+#include "fuzzers/tint_regex_fuzzer/override_cli_params.h"
 #include "fuzzers/tint_regex_fuzzer/util.h"
 #include "fuzzers/tint_regex_fuzzer/wgsl_mutator.h"
 
@@ -44,6 +45,9 @@ extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
   // Parse CLI parameters. `ParseCliParams` will call `exit` if some parameter
   // is invalid.
   cli_params = ParseCliParams(argc, *argv);
+  // For some fuzz targets it is desirable to force the values of certain CLI
+  // parameters after parsing.
+  OverrideCliParams(cli_params);
   return 0;
 }
 

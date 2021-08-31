@@ -12,6 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+function(add_tint_ast_fuzzer NAME)
+  add_executable(${NAME} ${NAME}.cc ${AST_FUZZER_SOURCES})
+  target_link_libraries(${NAME} libtint-fuzz libtint_ast_fuzzer)
+  tint_default_compile_options(${NAME})
+  target_compile_definitions(${NAME} PRIVATE CUSTOM_MUTATOR)
+  target_include_directories(${NAME} PRIVATE ${CMAKE_BINARY_DIR})
+endfunction()
+
 set(PROTOBUF_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/protobufs/tint_ast_fuzzer.proto)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/protobufs)
@@ -64,17 +72,20 @@ set(AST_FUZZER_SOURCES
         cli.cc
         cli.h
         fuzzer.cc
+        override_cli_params.h
         ../tint_common_fuzzer.cc
         ../tint_common_fuzzer.h)
 
 set_source_files_properties(fuzzer.cc PROPERTIES COMPILE_FLAGS -Wno-missing-prototypes)
 
-# Add libfuzzer target.
-add_executable(tint_ast_fuzzer ${AST_FUZZER_SOURCES})
-target_link_libraries(tint_ast_fuzzer libtint-fuzz libtint_ast_fuzzer)
-tint_default_compile_options(tint_ast_fuzzer)
-target_compile_definitions(tint_ast_fuzzer PRIVATE CUSTOM_MUTATOR)
-target_include_directories(tint_ast_fuzzer PRIVATE ${CMAKE_BINARY_DIR})
+# Add libfuzzer targets.
+# Targets back-ends according to command line arguments.
+add_tint_ast_fuzzer(tint_ast_fuzzer)
+# Targets back-ends individually.
+add_tint_ast_fuzzer(tint_ast_hlsl_writer_fuzzer)
+add_tint_ast_fuzzer(tint_ast_msl_writer_fuzzer)
+add_tint_ast_fuzzer(tint_ast_spv_writer_fuzzer)
+add_tint_ast_fuzzer(tint_ast_wgsl_writer_fuzzer)
 
 # Add tests.
 if (${TINT_BUILD_TESTS})

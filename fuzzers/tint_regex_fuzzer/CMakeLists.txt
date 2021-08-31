@@ -12,6 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+function(add_tint_regex_fuzzer NAME)
+  add_executable(${NAME} ${NAME}.cc ${REGEX_FUZZER_SOURCES})
+  target_link_libraries(${NAME} libtint-fuzz libtint_regex_fuzzer)
+  tint_default_compile_options(${NAME})
+  target_compile_definitions(${NAME} PRIVATE CUSTOM_MUTATOR)
+  target_include_directories(${NAME} PRIVATE ${CMAKE_BINARY_DIR})
+endfunction()
+
 set(LIBTINT_REGEX_FUZZER_SOURCES
         util.h
         wgsl_mutator.cc
@@ -25,16 +33,20 @@ set(REGEX_FUZZER_SOURCES
         cli.cc
         cli.h
         fuzzer.cc
+        override_cli_params.h
         ../tint_common_fuzzer.cc
         ../tint_common_fuzzer.h)
 
-# Add libfuzzer target.
-add_executable(tint_regex_fuzzer ${REGEX_FUZZER_SOURCES})
-target_compile_options(tint_regex_fuzzer PRIVATE
-        -Wno-missing-prototypes)
-target_link_libraries(tint_regex_fuzzer libtint-fuzz libtint_regex_fuzzer)
-tint_default_compile_options(tint_regex_fuzzer)
-target_compile_definitions(tint_regex_fuzzer PUBLIC CUSTOM_MUTATOR)
+set_source_files_properties(fuzzer.cc PROPERTIES COMPILE_FLAGS -Wno-missing-prototypes)
+
+# Add libfuzzer targets.
+# Targets back-ends according to command line arguments.
+add_tint_regex_fuzzer(tint_regex_fuzzer)
+# Targets back-ends individually.
+add_tint_regex_fuzzer(tint_regex_hlsl_writer_fuzzer)
+add_tint_regex_fuzzer(tint_regex_msl_writer_fuzzer)
+add_tint_regex_fuzzer(tint_regex_spv_writer_fuzzer)
+add_tint_regex_fuzzer(tint_regex_wgsl_writer_fuzzer)
 
 # Add tests.
 if (${TINT_BUILD_TESTS})
