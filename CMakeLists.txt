@@ -41,6 +41,7 @@ else()
   set(TINT_BUILD_TESTS_DEFAULT ON)
 endif()
 
+option(TINT_BUILD_SAMPLES "Build samples" ON)
 option(TINT_BUILD_DOCS "Build documentation" ${TINT_BUILD_DOCS_DEFAULT})
 option(TINT_DOCS_WARN_AS_ERROR "When building documentation, treat warnings as errors" OFF)
 option(TINT_BUILD_SPV_READER "Build the SPIR-V input reader" ON)
@@ -65,6 +66,7 @@ option(TINT_EMIT_COVERAGE "Emit code coverage information" OFF)
 
 option(TINT_CHECK_CHROMIUM_STYLE "Check for [chromium-style] issues during build" OFF)
 
+message(STATUS "Tint build samples: ${TINT_BUILD_SAMPLES}")
 message(STATUS "Tint build docs: ${TINT_BUILD_DOCS}")
 message(STATUS "Tint build docs with warn as error: ${TINT_DOCS_WARN_AS_ERROR}")
 message(STATUS "Tint build SPIR-V reader: ${TINT_BUILD_SPV_READER}")
@@ -336,9 +338,11 @@ endfunction()
 
 add_subdirectory(third_party)
 add_subdirectory(src)
-add_subdirectory(samples)
+if (TINT_BUILD_SAMPLES)
+  add_subdirectory(samples)
+endif()
 
-if (${TINT_BUILD_FUZZERS})
+if (TINT_BUILD_FUZZERS)
   add_subdirectory(fuzzers)
 endif()
 
@@ -355,7 +359,7 @@ add_custom_target(tint-format
   VERBATIM)
 
 
-if (${TINT_EMIT_COVERAGE} AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+if (TINT_EMIT_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   # Generates a lcov.info file at the project root.
   # This can be used by tools such as VSCode's Coverage Gutters extension to
   # visualize code coverage in the editor.
@@ -369,6 +373,6 @@ if (${TINT_EMIT_COVERAGE} AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     VERBATIM)
 endif()
 
-if (${TINT_BUILD_REMOTE_COMPILE})
-  add_subdirectory("${TINT_ROOT_SOURCE_DIR}/tools/src/cmd/remote-compile")
+if (TINT_BUILD_REMOTE_COMPILE)
+  add_subdirectory(tools/src/cmd/remote-compile)
 endif()
