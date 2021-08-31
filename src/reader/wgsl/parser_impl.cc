@@ -427,27 +427,32 @@ Expect<bool> ParserImpl::expect_global_decl() {
     return Failure::kNoMatch;
   });
 
-  if (decl.errored)
+  if (decl.errored) {
     errored = true;
-  if (decl.matched)
-    return true;
+  }
+  if (decl.matched) {
+    return expect_decorations_consumed(decos.value);
+  }
 
   auto func = function_decl(decos.value);
-  if (func.errored)
+  if (func.errored) {
     errored = true;
+  }
   if (func.matched) {
     builder_.AST().AddFunction(func.value);
     return true;
   }
 
-  if (errored)
+  if (errored) {
     return Failure::kErrored;
+  }
 
   // Invalid syntax found - try and determine the best error message
 
   // We have decorations parsed, but nothing to consume them?
-  if (decos.value.size() > 0)
+  if (decos.value.size() > 0) {
     return add_error(next(), "expected declaration after decorations");
+  }
 
   // We have a statement outside of a function?
   auto t = peek();
