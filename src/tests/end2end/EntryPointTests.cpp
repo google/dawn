@@ -60,6 +60,23 @@ TEST_P(EntryPointTests, FragAndVertexSameModule) {
 
 // Test creating two compute pipelines from the same module.
 TEST_P(EntryPointTests, TwoComputeInModule) {
+    wgpu::BindGroupLayoutEntry binding = {};
+    binding.binding = 0;
+    binding.buffer.type = wgpu::BufferBindingType::Storage;
+    binding.visibility = wgpu::ShaderStage::Compute;
+
+    wgpu::BindGroupLayoutDescriptor desc = {};
+    desc.entryCount = 1;
+    desc.entries = &binding;
+
+    wgpu::BindGroupLayout bindGroupLayout = device.CreateBindGroupLayout(&desc);
+
+    wgpu::PipelineLayoutDescriptor pipelineLayoutDesc = {};
+    pipelineLayoutDesc.bindGroupLayoutCount = 1;
+    pipelineLayoutDesc.bindGroupLayouts = &bindGroupLayout;
+
+    wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&pipelineLayoutDesc);
+
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         [[block]] struct Data {
             data : u32;
@@ -79,6 +96,7 @@ TEST_P(EntryPointTests, TwoComputeInModule) {
 
     // Create both pipelines from the module.
     wgpu::ComputePipelineDescriptor pipelineDesc;
+    pipelineDesc.layout = pipelineLayout;
     pipelineDesc.compute.module = module;
 
     pipelineDesc.compute.entryPoint = "write1";
@@ -93,8 +111,7 @@ TEST_P(EntryPointTests, TwoComputeInModule) {
     bufferDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
 
-    wgpu::BindGroup group =
-        utils::MakeBindGroup(device, write1.GetBindGroupLayout(0), {{0, buffer}});
+    wgpu::BindGroup group = utils::MakeBindGroup(device, bindGroupLayout, {{0, buffer}});
 
     // Use the first pipeline and check it wrote 1.
     {

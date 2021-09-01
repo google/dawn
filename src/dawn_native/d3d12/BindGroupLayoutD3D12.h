@@ -38,7 +38,8 @@ namespace dawn_native { namespace d3d12 {
     class BindGroupLayout final : public BindGroupLayoutBase {
       public:
         static Ref<BindGroupLayout> Create(Device* device,
-                                           const BindGroupLayoutDescriptor* descriptor);
+                                           const BindGroupLayoutDescriptor* descriptor,
+                                           PipelineCompatibilityToken pipelineCompatibilityToken);
 
         ResultOrError<Ref<BindGroup>> AllocateBindGroup(Device* device,
                                                         const BindGroupDescriptor* descriptor);
@@ -60,7 +61,9 @@ namespace dawn_native { namespace d3d12 {
         const std::vector<D3D12_DESCRIPTOR_RANGE>& GetSamplerDescriptorRanges() const;
 
       private:
-        BindGroupLayout(Device* device, const BindGroupLayoutDescriptor* descriptor);
+        BindGroupLayout(Device* device,
+                        const BindGroupLayoutDescriptor* descriptor,
+                        PipelineCompatibilityToken pipelineCompatibilityToken);
         ~BindGroupLayout() override = default;
 
         // Contains the offset into the descriptor heap for the given resource view. Samplers and

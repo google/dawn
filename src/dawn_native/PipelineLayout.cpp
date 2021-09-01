@@ -24,8 +24,10 @@
 
 namespace dawn_native {
 
-    MaybeError ValidatePipelineLayoutDescriptor(DeviceBase* device,
-                                                const PipelineLayoutDescriptor* descriptor) {
+    MaybeError ValidatePipelineLayoutDescriptor(
+        DeviceBase* device,
+        const PipelineLayoutDescriptor* descriptor,
+        PipelineCompatibilityToken pipelineCompatibilityToken) {
         if (descriptor->nextInChain != nullptr) {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
         }
@@ -37,6 +39,12 @@ namespace dawn_native {
         BindingCounts bindingCounts = {};
         for (uint32_t i = 0; i < descriptor->bindGroupLayoutCount; ++i) {
             DAWN_TRY(device->ValidateObject(descriptor->bindGroupLayouts[i]));
+            if (descriptor->bindGroupLayouts[i]->GetPipelineCompatibilityToken() !=
+                pipelineCompatibilityToken) {
+                return DAWN_VALIDATION_ERROR(
+                    "cannot create a pipeline layout using a bind group layout that was created as "
+                    "part of a pipeline's default layout");
+            }
             AccumulateBindingCounts(&bindingCounts,
                                     descriptor->bindGroupLayouts[i]->GetBindingCountInfo());
         }
@@ -203,9 +211,13 @@ namespace dawn_native {
             return entry;
         };
 
+        PipelineCompatibilityToken pipelineCompatibilityToken =
+            device->GetNextPipelineCompatibilityToken();
+
         // Creates the BGL from the entries for a stage, checking it is valid.
-        auto CreateBGL = [](DeviceBase* device,
-                            const EntryMap& entries) -> ResultOrError<Ref<BindGroupLayoutBase>> {
+        auto CreateBGL = [](DeviceBase* device, const EntryMap& entries,
+                            PipelineCompatibilityToken pipelineCompatibilityToken)
+            -> ResultOrError<Ref<BindGroupLayoutBase>> {
             std::vector<BindGroupLayoutEntry> entryVec;
             entryVec.reserve(entries.size());
             for (auto& it : entries) {
@@ -219,7 +231,7 @@ namespace dawn_native {
             if (device->IsValidationEnabled()) {
                 DAWN_TRY(ValidateBindGroupLayoutDescriptor(device, &desc));
             }
-            return device->GetOrCreateBindGroupLayout(&desc);
+            return device->GetOrCreateBindGroupLayout(&desc, pipelineCompatibilityToken);
         };
 
         ASSERT(!stages.empty());
@@ -276,7 +288,8 @@ namespace dawn_native {
         BindGroupIndex pipelineBGLCount = BindGroupIndex(0);
         ityp::array<BindGroupIndex, Ref<BindGroupLayoutBase>, kMaxBindGroups> bindGroupLayouts = {};
         for (BindGroupIndex group(0); group < kMaxBindGroupsTyped; ++group) {
-            DAWN_TRY_ASSIGN(bindGroupLayouts[group], CreateBGL(device, entryData[group]));
+            DAWN_TRY_ASSIGN(bindGroupLayouts[group],
+                            CreateBGL(device, entryData[group], pipelineCompatibilityToken));
             if (entryData[group].size() != 0) {
                 pipelineBGLCount = group + BindGroupIndex(1);
             }
@@ -292,7 +305,7 @@ namespace dawn_native {
         desc.bindGroupLayouts = bgls.data();
         desc.bindGroupLayoutCount = static_cast<uint32_t>(pipelineBGLCount);
 
-        DAWN_TRY(ValidatePipelineLayoutDescriptor(device, &desc));
+        DAWN_TRY(ValidatePipelineLayoutDescriptor(device, &desc, pipelineCompatibilityToken));
 
         Ref<PipelineLayoutBase> result;
         DAWN_TRY_ASSIGN(result, device->GetOrCreatePipelineLayout(&desc));

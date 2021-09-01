@@ -64,6 +64,12 @@ namespace dawn_native {
     using ExecutionSerial = TypedInteger<struct QueueSerialT, uint64_t>;
     constexpr ExecutionSerial kMaxExecutionSerial = ExecutionSerial(~uint64_t(0));
 
+    // An identifier that indicates which Pipeline a BindGroupLayout is compatible with. Pipelines
+    // created with a default layout will produce BindGroupLayouts with a non-zero compatibility
+    // token, which prevents them (and any BindGroups created with them) from being used with any
+    // other pipelines.
+    using PipelineCompatibilityToken = TypedInteger<struct PipelineCompatibilityTokenT, uint64_t>;
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_INTEGERTYPES_H_

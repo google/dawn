@@ -348,7 +348,25 @@ TEST_P(CreatePipelineAsyncTest, CreateSameComputePipelineTwice) {
 // Verify creating compute pipeline with same descriptor and CreateComputePipelineAsync() at the
 // same time works correctly.
 TEST_P(CreatePipelineAsyncTest, CreateSamePipelineTwiceAtSameTime) {
+    wgpu::BindGroupLayoutEntry binding = {};
+    binding.binding = 0;
+    binding.buffer.type = wgpu::BufferBindingType::Storage;
+    binding.visibility = wgpu::ShaderStage::Compute;
+
+    wgpu::BindGroupLayoutDescriptor desc = {};
+    desc.entryCount = 1;
+    desc.entries = &binding;
+
+    wgpu::BindGroupLayout bindGroupLayout = device.CreateBindGroupLayout(&desc);
+
+    wgpu::PipelineLayoutDescriptor pipelineLayoutDesc = {};
+    pipelineLayoutDesc.bindGroupLayoutCount = 1;
+    pipelineLayoutDesc.bindGroupLayouts = &bindGroupLayout;
+
+    wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&pipelineLayoutDesc);
+
     wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.layout = pipelineLayout;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
         [[block]] struct SSBO {
             value : u32;

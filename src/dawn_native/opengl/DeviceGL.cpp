@@ -116,8 +116,9 @@ namespace dawn_native { namespace opengl {
         return BindGroup::Create(this, descriptor);
     }
     ResultOrError<Ref<BindGroupLayoutBase>> Device::CreateBindGroupLayoutImpl(
-        const BindGroupLayoutDescriptor* descriptor) {
-        return AcquireRef(new BindGroupLayout(this, descriptor));
+        const BindGroupLayoutDescriptor* descriptor,
+        PipelineCompatibilityToken pipelineCompatibilityToken) {
+        return AcquireRef(new BindGroupLayout(this, descriptor, pipelineCompatibilityToken));
     }
     ResultOrError<Ref<BufferBase>> Device::CreateBufferImpl(const BufferDescriptor* descriptor) {
         return AcquireRef(new Buffer(this, descriptor));

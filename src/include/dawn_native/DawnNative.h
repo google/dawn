@@ -252,6 +252,9 @@ namespace dawn_native {
 
     DAWN_NATIVE_EXPORT uint64_t GetAllocatedSizeForTesting(WGPUBuffer buffer);
 
+    DAWN_NATIVE_EXPORT bool BindGroupLayoutBindingsEqualForTesting(WGPUBindGroupLayout a,
+                                                                   WGPUBindGroupLayout b);
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_DAWNNATIVE_H_

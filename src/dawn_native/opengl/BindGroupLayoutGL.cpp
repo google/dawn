@@ -19,8 +19,9 @@
 namespace dawn_native { namespace opengl {
 
     BindGroupLayout::BindGroupLayout(DeviceBase* device,
-                                     const BindGroupLayoutDescriptor* descriptor)
-        : BindGroupLayoutBase(device, descriptor),
+                                     const BindGroupLayoutDescriptor* descriptor,
+                                     PipelineCompatibilityToken pipelineCompatibilityToken)
+        : BindGroupLayoutBase(device, descriptor, pipelineCompatibilityToken),
           mBindGroupAllocator(MakeFrontendBindGroupAllocator<BindGroup>(4096)) {
     }
 

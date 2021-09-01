@@ -59,13 +59,17 @@ namespace dawn_native { namespace d3d12 {
     }  // anonymous namespace
 
     // static
-    Ref<BindGroupLayout> BindGroupLayout::Create(Device* device,
-                                                 const BindGroupLayoutDescriptor* descriptor) {
-        return AcquireRef(new BindGroupLayout(device, descriptor));
+    Ref<BindGroupLayout> BindGroupLayout::Create(
+        Device* device,
+        const BindGroupLayoutDescriptor* descriptor,
+        PipelineCompatibilityToken pipelineCompatibilityToken) {
+        return AcquireRef(new BindGroupLayout(device, descriptor, pipelineCompatibilityToken));
     }
 
-    BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor* descriptor)
-        : BindGroupLayoutBase(device, descriptor),
+    BindGroupLayout::BindGroupLayout(Device* device,
+                                     const BindGroupLayoutDescriptor* descriptor,
+                                     PipelineCompatibilityToken pipelineCompatibilityToken)
+        : BindGroupLayoutBase(device, descriptor, pipelineCompatibilityToken),
           mDescriptorHeapOffsets(GetBindingCount()),
           mShaderRegisters(GetBindingCount()),
           mCbvUavSrvDescriptorCount(0),

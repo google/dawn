@@ -108,8 +108,9 @@ namespace dawn_native { namespace vulkan {
         return BindGroup::Create(this, descriptor);
     }
     ResultOrError<Ref<BindGroupLayoutBase>> Device::CreateBindGroupLayoutImpl(
-        const BindGroupLayoutDescriptor* descriptor) {
-        return BindGroupLayout::Create(this, descriptor);
+        const BindGroupLayoutDescriptor* descriptor,
+        PipelineCompatibilityToken pipelineCompatibilityToken) {
+        return BindGroupLayout::Create(this, descriptor, pipelineCompatibilityToken);
     }
     ResultOrError<Ref<BufferBase>> Device::CreateBufferImpl(const BufferDescriptor* descriptor) {
         return Buffer::Create(this, descriptor);

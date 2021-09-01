@@ -125,7 +125,8 @@ namespace dawn_native { namespace null {
         ResultOrError<Ref<BindGroupBase>> CreateBindGroupImpl(
             const BindGroupDescriptor* descriptor) override;
         ResultOrError<Ref<BindGroupLayoutBase>> CreateBindGroupLayoutImpl(
-            const BindGroupLayoutDescriptor* descriptor) override;
+            const BindGroupLayoutDescriptor* descriptor,
+            PipelineCompatibilityToken pipelineCompatibilityToken) override;
         ResultOrError<Ref<BufferBase>> CreateBufferImpl(
             const BufferDescriptor* descriptor) override;
         ResultOrError<Ref<ComputePipelineBase>> CreateComputePipelineImpl(

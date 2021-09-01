@@ -362,9 +362,11 @@ namespace dawn_native {
     // BindGroupLayoutBase
 
     BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
-                                             const BindGroupLayoutDescriptor* descriptor)
+                                             const BindGroupLayoutDescriptor* descriptor,
+                                             PipelineCompatibilityToken pipelineCompatibilityToken)
         : CachedObject(device, kLabelNotImplemented),
-          mBindingInfo(BindingIndex(descriptor->entryCount)) {
+          mBindingInfo(BindingIndex(descriptor->entryCount)),
+          mPipelineCompatibilityToken(pipelineCompatibilityToken) {
         std::vector<BindGroupLayoutEntry> sortedBindings(
             descriptor->entries, descriptor->entries + descriptor->entryCount);
 
@@ -422,6 +424,8 @@ namespace dawn_native {
 
     size_t BindGroupLayoutBase::ComputeContentHash() {
         ObjectContentHasher recorder;
+        recorder.Record(mPipelineCompatibilityToken);
+
         // std::map is sorted by key, so two BGLs constructed in different orders
         // will still record the same.
         for (const auto& it : mBindingMap) {
@@ -441,15 +445,7 @@ namespace dawn_native {
 
     bool BindGroupLayoutBase::EqualityFunc::operator()(const BindGroupLayoutBase* a,
                                                        const BindGroupLayoutBase* b) const {
-        if (a->GetBindingCount() != b->GetBindingCount()) {
-            return false;
-        }
-        for (BindingIndex i{0}; i < a->GetBindingCount(); ++i) {
-            if (a->mBindingInfo[i] != b->mBindingInfo[i]) {
-                return false;
-            }
-        }
-        return a->mBindingMap == b->mBindingMap;
+        return a->IsLayoutEqual(b);
     }
 
     BindingIndex BindGroupLayoutBase::GetBindingCount() const {
@@ -473,6 +469,27 @@ namespace dawn_native {
 
     const BindingCounts& BindGroupLayoutBase::GetBindingCountInfo() const {
         return mBindingCounts;
+    }
+
+    bool BindGroupLayoutBase::IsLayoutEqual(const BindGroupLayoutBase* other,
+                                            bool excludePipelineCompatibiltyToken) const {
+        if (!excludePipelineCompatibiltyToken &&
+            GetPipelineCompatibilityToken() != other->GetPipelineCompatibilityToken()) {
+            return false;
+        }
+        if (GetBindingCount() != other->GetBindingCount()) {
+            return false;
+        }
+        for (BindingIndex i{0}; i < GetBindingCount(); ++i) {
+            if (mBindingInfo[i] != other->mBindingInfo[i]) {
+                return false;
+            }
+        }
+        return mBindingMap == other->mBindingMap;
+    }
+
+    PipelineCompatibilityToken BindGroupLayoutBase::GetPipelineCompatibilityToken() const {
+        return mPipelineCompatibilityToken;
     }
 
     size_t BindGroupLayoutBase::GetBindingDataSize() const {

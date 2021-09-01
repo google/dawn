@@ -126,7 +126,7 @@ namespace dawn_native {
     // DeviceBase
 
     DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor)
-        : mInstance(adapter->GetInstance()), mAdapter(adapter) {
+        : mInstance(adapter->GetInstance()), mAdapter(adapter), mNextPipelineCompatibilityToken(1) {
         if (descriptor != nullptr) {
             ApplyToggleOverrides(descriptor);
             ApplyExtensions(descriptor);
@@ -520,8 +520,9 @@ namespace dawn_native {
     }
 
     ResultOrError<Ref<BindGroupLayoutBase>> DeviceBase::GetOrCreateBindGroupLayout(
-        const BindGroupLayoutDescriptor* descriptor) {
-        BindGroupLayoutBase blueprint(this, descriptor);
+        const BindGroupLayoutDescriptor* descriptor,
+        PipelineCompatibilityToken pipelineCompatibilityToken) {
+        BindGroupLayoutBase blueprint(this, descriptor, pipelineCompatibilityToken);
 
         const size_t blueprintHash = blueprint.ComputeContentHash();
         blueprint.SetContentHash(blueprintHash);
@@ -531,7 +532,8 @@ namespace dawn_native {
         if (iter != mCaches->bindGroupLayouts.end()) {
             result = *iter;
         } else {
-            DAWN_TRY_ASSIGN(result, CreateBindGroupLayoutImpl(descriptor));
+            DAWN_TRY_ASSIGN(result,
+                            CreateBindGroupLayoutImpl(descriptor, pipelineCompatibilityToken));
             result->SetIsCachedReference();
             result->SetContentHash(blueprintHash);
             mCaches->bindGroupLayouts.insert(result.Get());
@@ -1517,6 +1519,10 @@ namespace dawn_native {
         mCallbackTaskManager->AddCallbackTask(
             std::make_unique<CreateComputePipelineAsyncWaitableCallbackTask>(
                 std::move(pipeline), errorMessage, callback, userdata, blueprintHash));
+    }
+
+    PipelineCompatibilityToken DeviceBase::GetNextPipelineCompatibilityToken() {
+        return PipelineCompatibilityToken(mNextPipelineCompatibilityToken++);
     }
 
 }  // namespace dawn_native

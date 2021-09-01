@@ -30,6 +30,10 @@ class ColorStateTest : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
 
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform}});
+        pipelineLayout = utils::MakePipelineLayout(device, {bindGroupLayout});
+
         // TODO(crbug.com/dawn/489): D3D12_Microsoft_Basic_Render_Driver_CPU
         // produces invalid results for these tests.
         DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
@@ -69,6 +73,7 @@ class ColorStateTest : public DawnTest {
             )");
 
         utils::ComboRenderPipelineDescriptor baseDescriptor;
+        baseDescriptor.layout = pipelineLayout;
         baseDescriptor.vertex.module = vsModule;
         baseDescriptor.cFragment.module = fsModule;
         baseDescriptor.cTargets[0].format = renderPass.colorFormat;
@@ -76,6 +81,7 @@ class ColorStateTest : public DawnTest {
         basePipeline = device.CreateRenderPipeline(&baseDescriptor);
 
         utils::ComboRenderPipelineDescriptor testDescriptor;
+        testDescriptor.layout = pipelineLayout;
         testDescriptor.vertex.module = vsModule;
         testDescriptor.cFragment.module = fsModule;
         testDescriptor.cTargets[0] = colorTargetState;
@@ -205,6 +211,7 @@ class ColorStateTest : public DawnTest {
                          alphaFactor, tests);
     }
 
+    wgpu::PipelineLayout pipelineLayout;
     utils::BasicRenderPass renderPass;
     wgpu::RenderPipeline basePipeline;
     wgpu::RenderPipeline testPipeline;
@@ -811,6 +818,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
     )");
 
     utils::ComboRenderPipelineDescriptor baseDescriptor;
+    baseDescriptor.layout = pipelineLayout;
     baseDescriptor.vertex.module = vsModule;
     baseDescriptor.cFragment.module = fsModule;
     baseDescriptor.cFragment.targetCount = 4;
@@ -818,6 +826,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
     basePipeline = device.CreateRenderPipeline(&baseDescriptor);
 
     utils::ComboRenderPipelineDescriptor testDescriptor;
+    testDescriptor.layout = pipelineLayout;
     testDescriptor.vertex.module = vsModule;
     testDescriptor.cFragment.module = fsModule;
     testDescriptor.cFragment.targetCount = 4;
@@ -918,6 +927,7 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
     )");
 
     utils::ComboRenderPipelineDescriptor baseDescriptor;
+    baseDescriptor.layout = pipelineLayout;
     baseDescriptor.vertex.module = vsModule;
     baseDescriptor.cFragment.module = fsModule;
     baseDescriptor.cTargets[0].format = renderPass.colorFormat;
@@ -925,6 +935,7 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
     basePipeline = device.CreateRenderPipeline(&baseDescriptor);
 
     utils::ComboRenderPipelineDescriptor testDescriptor;
+    testDescriptor.layout = pipelineLayout;
     testDescriptor.vertex.module = vsModule;
     testDescriptor.cFragment.module = fsModule;
     testDescriptor.cTargets[0].format = renderPass.colorFormat;
@@ -1042,6 +1053,7 @@ TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
     )");
 
     utils::ComboRenderPipelineDescriptor baseDescriptor;
+    baseDescriptor.layout = pipelineLayout;
     baseDescriptor.vertex.module = vsModule;
     baseDescriptor.cFragment.module = fsModule;
     baseDescriptor.cTargets[0].format = renderPass.colorFormat;
@@ -1049,6 +1061,7 @@ TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
     basePipeline = device.CreateRenderPipeline(&baseDescriptor);
 
     utils::ComboRenderPipelineDescriptor testDescriptor;
+    testDescriptor.layout = pipelineLayout;
     testDescriptor.vertex.module = vsModule;
     testDescriptor.cFragment.module = fsModule;
     testDescriptor.cTargets[0].format = renderPass.colorFormat;
