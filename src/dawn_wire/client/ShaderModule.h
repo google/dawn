@@ -17,8 +17,8 @@
 
 #include <dawn/webgpu.h>
 
-#include "common/SerialMap.h"
 #include "dawn_wire/client/ObjectBase.h"
+#include "dawn_wire/client/RequestTracker.h"
 
 namespace dawn_wire { namespace client {
 
@@ -32,15 +32,15 @@ namespace dawn_wire { namespace client {
                                         WGPUCompilationInfoRequestStatus status,
                                         const WGPUCompilationInfo* info);
 
-        void CancelCallbacksForDisconnect() override;
-
       private:
+        void CancelCallbacksForDisconnect() override;
+        void ClearAllCallbacks(WGPUCompilationInfoRequestStatus status);
+
         struct CompilationInfoRequest {
             WGPUCompilationInfoCallback callback = nullptr;
             void* userdata = nullptr;
         };
-        uint64_t mCompilationInfoRequestSerial = 0;
-        std::map<uint64_t, CompilationInfoRequest> mCompilationInfoRequests;
+        RequestTracker<CompilationInfoRequest> mCompilationInfoRequests;
     };
 
 }}  // namespace dawn_wire::client

@@ -21,8 +21,8 @@
 #include "dawn_wire/WireCmd_autogen.h"
 #include "dawn_wire/client/ApiObjects_autogen.h"
 #include "dawn_wire/client/ObjectBase.h"
+#include "dawn_wire/client/RequestTracker.h"
 
-#include <map>
 #include <memory>
 
 namespace dawn_wire { namespace client {
@@ -75,8 +75,7 @@ namespace dawn_wire { namespace client {
             WGPUErrorCallback callback = nullptr;
             void* userdata = nullptr;
         };
-        std::map<uint64_t, ErrorScopeData> mErrorScopes;
-        uint64_t mErrorScopeRequestSerial = 0;
+        RequestTracker<ErrorScopeData> mErrorScopes;
         uint64_t mErrorScopeStackSize = 0;
 
         struct CreatePipelineAsyncRequest {
@@ -85,8 +84,7 @@ namespace dawn_wire { namespace client {
             void* userdata = nullptr;
             ObjectId pipelineObjectID;
         };
-        std::map<uint64_t, CreatePipelineAsyncRequest> mCreatePipelineAsyncRequests;
-        uint64_t mCreatePipelineAsyncRequestSerial = 0;
+        RequestTracker<CreatePipelineAsyncRequest> mCreatePipelineAsyncRequests;
 
         WGPUErrorCallback mErrorCallback = nullptr;
         WGPUDeviceLostCallback mDeviceLostCallback = nullptr;

@@ -19,15 +19,7 @@
 namespace dawn_wire { namespace client {
 
     ShaderModule::~ShaderModule() {
-        // Callbacks need to be fired in all cases, as they can handle freeing resources. So we call
-        // them with "Unknown" status.
-        for (auto& it : mCompilationInfoRequests) {
-            if (it.second.callback) {
-                it.second.callback(WGPUCompilationInfoRequestStatus_Unknown, nullptr,
-                                   it.second.userdata);
-            }
-        }
-        mCompilationInfoRequests.clear();
+        ClearAllCallbacks(WGPUCompilationInfoRequestStatus_Unknown);
     }
 
     void ShaderModule::GetCompilationInfo(WGPUCompilationInfoCallback callback, void* userdata) {
@@ -36,12 +28,11 @@ namespace dawn_wire { namespace client {
             return;
         }
 
-        uint64_t serial = mCompilationInfoRequestSerial++;
+        uint64_t serial = mCompilationInfoRequests.Add({callback, userdata});
+
         ShaderModuleGetCompilationInfoCmd cmd;
         cmd.shaderModuleId = this->id;
         cmd.requestSerial = serial;
-
-        mCompilationInfoRequests[serial] = {callback, userdata};
 
         client->SerializeCommand(cmd);
     }
@@ -49,28 +40,25 @@ namespace dawn_wire { namespace client {
     bool ShaderModule::GetCompilationInfoCallback(uint64_t requestSerial,
                                                   WGPUCompilationInfoRequestStatus status,
                                                   const WGPUCompilationInfo* info) {
-        auto requestIt = mCompilationInfoRequests.find(requestSerial);
-        if (requestIt == mCompilationInfoRequests.end()) {
+        CompilationInfoRequest request;
+        if (!mCompilationInfoRequests.Acquire(requestSerial, &request)) {
             return false;
         }
-
-        // Remove the request data so that the callback cannot be called again.
-        // ex.) inside the callback: if the shader module is deleted, all callbacks reject.
-        CompilationInfoRequest request = std::move(requestIt->second);
-        mCompilationInfoRequests.erase(requestIt);
 
         request.callback(status, info, request.userdata);
         return true;
     }
 
     void ShaderModule::CancelCallbacksForDisconnect() {
-        for (auto& it : mCompilationInfoRequests) {
-            if (it.second.callback) {
-                it.second.callback(WGPUCompilationInfoRequestStatus_DeviceLost, nullptr,
-                                   it.second.userdata);
+        ClearAllCallbacks(WGPUCompilationInfoRequestStatus_DeviceLost);
+    }
+
+    void ShaderModule::ClearAllCallbacks(WGPUCompilationInfoRequestStatus status) {
+        mCompilationInfoRequests.CloseAll([status](CompilationInfoRequest* request) {
+            if (request->callback != nullptr) {
+                request->callback(status, nullptr, request->userdata);
             }
-        }
-        mCompilationInfoRequests.clear();
+        });
     }
 
 }}  // namespace dawn_wire::client

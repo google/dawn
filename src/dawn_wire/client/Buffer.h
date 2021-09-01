@@ -19,8 +19,7 @@
 
 #include "dawn_wire/WireClient.h"
 #include "dawn_wire/client/ObjectBase.h"
-
-#include <map>
+#include "dawn_wire/client/RequestTracker.h"
 
 namespace dawn_wire { namespace client {
 
@@ -52,6 +51,7 @@ namespace dawn_wire { namespace client {
 
       private:
         void CancelCallbacksForDisconnect() override;
+        void ClearAllCallbacks(WGPUBufferMapAsyncStatus status);
 
         bool IsMappedForReading() const;
         bool IsMappedForWriting() const;
@@ -86,8 +86,7 @@ namespace dawn_wire { namespace client {
 
             MapRequestType type = MapRequestType::None;
         };
-        std::map<uint64_t, MapRequestData> mRequests;
-        uint64_t mRequestSerial = 0;
+        RequestTracker<MapRequestData> mRequests;
         uint64_t mSize = 0;
 
         // Only one mapped pointer can be active at a time because Unmap clears all the in-flight

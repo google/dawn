@@ -140,25 +140,20 @@ namespace dawn_wire { namespace client {
     }
 
     Buffer::~Buffer() {
-        // Callbacks need to be fired in all cases, as they can handle freeing resources
-        // so we call them with "DestroyedBeforeCallback" status.
-        for (auto& it : mRequests) {
-            if (it.second.callback) {
-                it.second.callback(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, it.second.userdata);
-            }
-        }
-        mRequests.clear();
-
+        ClearAllCallbacks(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
         FreeMappedData();
     }
 
     void Buffer::CancelCallbacksForDisconnect() {
-        for (auto& it : mRequests) {
-            if (it.second.callback) {
-                it.second.callback(WGPUBufferMapAsyncStatus_DeviceLost, it.second.userdata);
+        ClearAllCallbacks(WGPUBufferMapAsyncStatus_DeviceLost);
+    }
+
+    void Buffer::ClearAllCallbacks(WGPUBufferMapAsyncStatus status) {
+        mRequests.CloseAll([status](MapRequestData* request) {
+            if (request->callback != nullptr) {
+                request->callback(status, request->userdata);
             }
-        }
-        mRequests.clear();
+        });
     }
 
     void Buffer::MapAsync(WGPUMapModeFlags mode,
@@ -177,10 +172,7 @@ namespace dawn_wire { namespace client {
 
         // Create the request structure that will hold information while this mapping is
         // in flight.
-        uint64_t serial = mRequestSerial++;
-        ASSERT(mRequests.find(serial) == mRequests.end());
-
-        Buffer::MapRequestData request = {};
+        MapRequestData request = {};
         request.callback = callback;
         request.userdata = userdata;
         request.offset = offset;
@@ -191,6 +183,8 @@ namespace dawn_wire { namespace client {
             request.type = MapRequestType::Write;
         }
 
+        uint64_t serial = mRequests.Add(std::move(request));
+
         // Serialize the command to send to the server.
         BufferMapAsyncCmd cmd;
         cmd.bufferId = this->id;
@@ -200,25 +194,16 @@ namespace dawn_wire { namespace client {
         cmd.size = size;
 
         client->SerializeCommand(cmd);
-
-        // Register this request so that we can retrieve it from its serial when the server
-        // sends the callback.
-        mRequests[serial] = std::move(request);
     }
 
     bool Buffer::OnMapAsyncCallback(uint64_t requestSerial,
                                     uint32_t status,
                                     uint64_t readDataUpdateInfoLength,
                                     const uint8_t* readDataUpdateInfo) {
-        auto requestIt = mRequests.find(requestSerial);
-        if (requestIt == mRequests.end()) {
+        MapRequestData request;
+        if (!mRequests.Acquire(requestSerial, &request)) {
             return false;
         }
-
-        auto request = std::move(requestIt->second);
-        // Delete the request before calling the callback otherwise the callback could be fired a
-        // second time. If, for example, buffer.Unmap() is called inside the callback.
-        mRequests.erase(requestIt);
 
         auto FailRequest = [&request]() -> bool {
             if (request.callback != nullptr) {
@@ -352,11 +337,11 @@ namespace dawn_wire { namespace client {
         mMapSize = 0;
 
         // Tag all mapping requests still in flight as unmapped before callback.
-        for (auto& it : mRequests) {
-            if (it.second.clientStatus == WGPUBufferMapAsyncStatus_Success) {
-                it.second.clientStatus = WGPUBufferMapAsyncStatus_UnmappedBeforeCallback;
+        mRequests.ForAll([](MapRequestData* request) {
+            if (request->clientStatus == WGPUBufferMapAsyncStatus_Success) {
+                request->clientStatus = WGPUBufferMapAsyncStatus_UnmappedBeforeCallback;
             }
-        }
+        });
 
         BufferUnmapCmd cmd;
         cmd.self = ToAPI(this);
@@ -368,11 +353,11 @@ namespace dawn_wire { namespace client {
         FreeMappedData();
 
         // Tag all mapping requests still in flight as destroyed before callback.
-        for (auto& it : mRequests) {
-            if (it.second.clientStatus == WGPUBufferMapAsyncStatus_Success) {
-                it.second.clientStatus = WGPUBufferMapAsyncStatus_DestroyedBeforeCallback;
+        mRequests.ForAll([](MapRequestData* request) {
+            if (request->clientStatus == WGPUBufferMapAsyncStatus_Success) {
+                request->clientStatus = WGPUBufferMapAsyncStatus_DestroyedBeforeCallback;
             }
-        }
+        });
 
         BufferDestroyCmd cmd;
         cmd.self = ToAPI(this);
