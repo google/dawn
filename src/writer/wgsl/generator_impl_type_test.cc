@@ -60,7 +60,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_RuntimeArray) {
-  auto* a = ty.array(ty.bool_(), 0);
+  auto* a = ty.array(ty.bool_());
   Alias("make_type_reachable", a);
 
   GeneratorImpl& gen = Build();

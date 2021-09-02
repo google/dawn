@@ -187,7 +187,11 @@ Array::Array(const Type* t, uint32_t sz, uint32_t st)
 Array::Array(const Array&) = default;
 
 ast::Type* Array::Build(ProgramBuilder& b) const {
-  return b.ty.array(type->Build(b), size, stride);
+  if (size > 0) {
+    return b.ty.array(type->Build(b), size, stride);
+  } else {
+    return b.ty.array(type->Build(b), nullptr, stride);
+  }
 }
 
 Sampler::Sampler(ast::SamplerKind k) : kind(k) {}

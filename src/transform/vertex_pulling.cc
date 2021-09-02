@@ -259,7 +259,7 @@ struct State {
         ctx.dst->Symbols().New(kStructName),
         {
             ctx.dst->Member(GetStructBufferName(),
-                            ctx.dst->ty.array<ProgramBuilder::u32, 0>(4)),
+                            ctx.dst->ty.array<ProgramBuilder::u32>(4)),
         },
         {
             ctx.dst->create<ast::StructBlockDecoration>(),

@@ -82,8 +82,14 @@ TEST_F(CreateASTTypeForTest, ArrayImplicitStride) {
   });
   ASSERT_TRUE(arr->Is<ast::Array>());
   ASSERT_TRUE(arr->As<ast::Array>()->type()->Is<ast::F32>());
-  ASSERT_EQ(arr->As<ast::Array>()->size(), 2u);
   ASSERT_EQ(arr->As<ast::Array>()->decorations().size(), 0u);
+
+  auto* size_expr =
+      arr->As<ast::Array>()->Size()->As<ast::ScalarConstructorExpression>();
+  ASSERT_NE(size_expr, nullptr);
+  auto* size = size_expr->literal()->As<ast::IntLiteral>();
+  ASSERT_NE(size, nullptr);
+  EXPECT_EQ(size->value_as_i32(), 2);
 }
 
 TEST_F(CreateASTTypeForTest, ArrayNonImplicitStride) {
@@ -92,7 +98,6 @@ TEST_F(CreateASTTypeForTest, ArrayNonImplicitStride) {
   });
   ASSERT_TRUE(arr->Is<ast::Array>());
   ASSERT_TRUE(arr->As<ast::Array>()->type()->Is<ast::F32>());
-  ASSERT_EQ(arr->As<ast::Array>()->size(), 2u);
   ASSERT_EQ(arr->As<ast::Array>()->decorations().size(), 1u);
   ASSERT_TRUE(
       arr->As<ast::Array>()->decorations()[0]->Is<ast::StrideDecoration>());
@@ -101,6 +106,13 @@ TEST_F(CreateASTTypeForTest, ArrayNonImplicitStride) {
                 ->As<ast::StrideDecoration>()
                 ->stride(),
             64u);
+
+  auto* size_expr =
+      arr->As<ast::Array>()->Size()->As<ast::ScalarConstructorExpression>();
+  ASSERT_NE(size_expr, nullptr);
+  auto* size = size_expr->literal()->As<ast::IntLiteral>();
+  ASSERT_NE(size, nullptr);
+  EXPECT_EQ(size->value_as_i32(), 2);
 }
 
 TEST_F(CreateASTTypeForTest, Struct) {

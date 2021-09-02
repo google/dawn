@@ -54,7 +54,31 @@ struct tint_padded_array_element {
   el : i32;
 };
 
-var<private> arr : array<tint_padded_array_element, 4>;
+var<private> arr : array<tint_padded_array_element, 4u>;
+)";
+
+  auto got = Run<PadArrayElements>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PadArrayElementsTest, RuntimeArray) {
+  auto* src = R"(
+[[block]]
+struct S {
+  rta : [[stride(8)]] array<i32>;
+};
+)";
+  auto* expect = R"(
+struct tint_padded_array_element {
+  [[size(8)]]
+  el : i32;
+};
+
+[[block]]
+struct S {
+  rta : array<tint_padded_array_element>;
+};
 )";
 
   auto got = Run<PadArrayElements>(src);
@@ -78,9 +102,9 @@ struct tint_padded_array_element {
 };
 
 fn f() {
-  var arr : array<tint_padded_array_element, 4>;
-  arr = array<tint_padded_array_element, 4>();
-  arr = array<tint_padded_array_element, 4>(tint_padded_array_element(1), tint_padded_array_element(2), tint_padded_array_element(3), tint_padded_array_element(4));
+  var arr : array<tint_padded_array_element, 4u>;
+  arr = array<tint_padded_array_element, 4u>();
+  arr = array<tint_padded_array_element, 4u>(tint_padded_array_element(1), tint_padded_array_element(2), tint_padded_array_element(3), tint_padded_array_element(4));
   let x = arr[3].el;
 }
 )";
@@ -102,7 +126,7 @@ struct tint_padded_array_element {
   el : i32;
 };
 
-fn f(a : array<tint_padded_array_element, 4>) -> i32 {
+fn f(a : array<tint_padded_array_element, 4u>) -> i32 {
   return a[2].el;
 }
 )";
@@ -155,13 +179,13 @@ struct tint_padded_array_element {
   el : i32;
 };
 
-type Array = array<tint_padded_array_element, 4>;
+type Array = array<tint_padded_array_element, 4u>;
 
 fn f() {
-  var arr : array<tint_padded_array_element, 4>;
-  arr = array<tint_padded_array_element, 4>();
-  arr = array<tint_padded_array_element, 4>(tint_padded_array_element(1), tint_padded_array_element(2), tint_padded_array_element(3), tint_padded_array_element(4));
-  let vals : array<tint_padded_array_element, 4> = array<tint_padded_array_element, 4>(tint_padded_array_element(1), tint_padded_array_element(2), tint_padded_array_element(3), tint_padded_array_element(4));
+  var arr : array<tint_padded_array_element, 4u>;
+  arr = array<tint_padded_array_element, 4u>();
+  arr = array<tint_padded_array_element, 4u>(tint_padded_array_element(1), tint_padded_array_element(2), tint_padded_array_element(3), tint_padded_array_element(4));
+  let vals : array<tint_padded_array_element, 4u> = array<tint_padded_array_element, 4u>(tint_padded_array_element(1), tint_padded_array_element(2), tint_padded_array_element(3), tint_padded_array_element(4));
   arr = vals;
   let x = arr[3].el;
 }
@@ -198,10 +222,10 @@ struct tint_padded_array_element_2 {
 };
 
 struct S {
-  a : array<tint_padded_array_element, 4>;
-  b : array<tint_padded_array_element_1, 8>;
-  c : array<tint_padded_array_element, 4>;
-  d : array<tint_padded_array_element_2, 8>;
+  a : array<tint_padded_array_element, 4u>;
+  b : array<tint_padded_array_element_1, 8u>;
+  c : array<tint_padded_array_element, 4u>;
+  d : array<tint_padded_array_element_2, 8u>;
 };
 )";
 
@@ -231,7 +255,7 @@ struct tint_padded_array_element_2 {
 
 struct tint_padded_array_element_1 {
   [[size(512)]]
-  el : array<tint_padded_array_element_2, 4>;
+  el : array<tint_padded_array_element_2, 4u>;
 };
 
 struct tint_padded_array_element_5 {
@@ -241,18 +265,18 @@ struct tint_padded_array_element_5 {
 
 struct tint_padded_array_element_4 {
   [[size(64)]]
-  el : array<tint_padded_array_element_5, 4>;
+  el : array<tint_padded_array_element_5, 4u>;
 };
 
 struct tint_padded_array_element_3 {
   [[size(512)]]
-  el : array<tint_padded_array_element_4, 4>;
+  el : array<tint_padded_array_element_4, 4u>;
 };
 
 struct S {
-  a : array<tint_padded_array_element, 4>;
-  b : array<tint_padded_array_element_1, 4>;
-  c : array<tint_padded_array_element_3, 4>;
+  a : array<tint_padded_array_element, 4u>;
+  b : array<tint_padded_array_element_1, 4u>;
+  c : array<tint_padded_array_element_3, 4u>;
 };
 )";
 
@@ -286,7 +310,7 @@ struct tint_padded_array_element_2 {
 
 struct tint_padded_array_element_1 {
   [[size(512)]]
-  el : array<tint_padded_array_element_2, 4>;
+  el : array<tint_padded_array_element_2, 4u>;
 };
 
 struct tint_padded_array_element_5 {
@@ -296,18 +320,18 @@ struct tint_padded_array_element_5 {
 
 struct tint_padded_array_element_4 {
   [[size(64)]]
-  el : array<tint_padded_array_element_5, 4>;
+  el : array<tint_padded_array_element_5, 4u>;
 };
 
 struct tint_padded_array_element_3 {
   [[size(512)]]
-  el : array<tint_padded_array_element_4, 4>;
+  el : array<tint_padded_array_element_4, 4u>;
 };
 
 struct S {
-  a : array<tint_padded_array_element, 4>;
-  b : array<tint_padded_array_element_1, 4>;
-  c : array<tint_padded_array_element_3, 4>;
+  a : array<tint_padded_array_element, 4u>;
+  b : array<tint_padded_array_element_1, 4u>;
+  c : array<tint_padded_array_element_3, 4u>;
 };
 
 fn f(s : S) -> i32 {
@@ -345,7 +369,7 @@ struct tint_padded_array_element {
   el : i32;
 };
 
-type T1 = array<tint_padded_array_element, 1>;
+type T1 = array<tint_padded_array_element, 1u>;
 
 type T2 = i32;
 
@@ -354,7 +378,7 @@ struct tint_padded_array_element_1 {
   el : i32;
 };
 
-fn f1(a : array<tint_padded_array_element_1, 2>) {
+fn f1(a : array<tint_padded_array_element_1, 2u>) {
 }
 
 type T3 = i32;
@@ -365,7 +389,7 @@ struct tint_padded_array_element_2 {
 };
 
 fn f2() {
-  var v : array<tint_padded_array_element_2, 3>;
+  var v : array<tint_padded_array_element_2, 3u>;
 }
 )";
 

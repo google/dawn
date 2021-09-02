@@ -180,8 +180,8 @@ fn tint_symbol_20([[internal(disable_validation__ignore_constructible_function_p
   return mat4x4<f32>(tint_symbol_11(buffer, (offset + 0u)), tint_symbol_11(buffer, (offset + 16u)), tint_symbol_11(buffer, (offset + 32u)), tint_symbol_11(buffer, (offset + 48u)));
 }
 
-fn tint_symbol_21([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> array<vec3<f32>, 2> {
-  var arr : array<vec3<f32>, 2>;
+fn tint_symbol_21([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> array<vec3<f32>, 2u> {
+  var arr : array<vec3<f32>, 2u>;
   for(var i_1 = 0u; (i_1 < 2u); i_1 = (i_1 + 1u)) {
     arr[i_1] = tint_symbol_8(buffer, (offset + (i_1 * 16u)));
   }
@@ -378,8 +378,8 @@ fn tint_symbol_20([[internal(disable_validation__ignore_constructible_function_p
   return mat4x4<f32>(tint_symbol_11(buffer, (offset + 0u)), tint_symbol_11(buffer, (offset + 16u)), tint_symbol_11(buffer, (offset + 32u)), tint_symbol_11(buffer, (offset + 48u)));
 }
 
-fn tint_symbol_21([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> array<vec3<f32>, 2> {
-  var arr : array<vec3<f32>, 2>;
+fn tint_symbol_21([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : UB, offset : u32) -> array<vec3<f32>, 2u> {
+  var arr : array<vec3<f32>, 2u>;
   for(var i_1 = 0u; (i_1 < 2u); i_1 = (i_1 + 1u)) {
     arr[i_1] = tint_symbol_8(buffer, (offset + (i_1 * 16u)));
   }
@@ -594,7 +594,7 @@ fn tint_symbol_20([[internal(disable_validation__ignore_constructible_function_p
   tint_symbol_11(buffer, (offset + 48u), value[3u]);
 }
 
-fn tint_symbol_21([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : array<vec3<f32>, 2>) {
+fn tint_symbol_21([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : array<vec3<f32>, 2u>) {
   var array = value;
   for(var i_1 = 0u; (i_1 < 2u); i_1 = (i_1 + 1u)) {
     tint_symbol_8(buffer, (offset + (i_1 * 16u)), array[i_1]);
@@ -770,8 +770,8 @@ fn tint_symbol_21([[internal(disable_validation__ignore_constructible_function_p
   return mat4x4<f32>(tint_symbol_12(buffer, (offset + 0u)), tint_symbol_12(buffer, (offset + 16u)), tint_symbol_12(buffer, (offset + 32u)), tint_symbol_12(buffer, (offset + 48u)));
 }
 
-fn tint_symbol_22([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> array<vec3<f32>, 2> {
-  var arr : array<vec3<f32>, 2>;
+fn tint_symbol_22([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32) -> array<vec3<f32>, 2u> {
+  var arr : array<vec3<f32>, 2u>;
   for(var i_1 = 0u; (i_1 < 2u); i_1 = (i_1 + 1u)) {
     arr[i_1] = tint_symbol_9(buffer, (offset + (i_1 * 16u)));
   }
@@ -948,7 +948,7 @@ fn tint_symbol_21([[internal(disable_validation__ignore_constructible_function_p
   tint_symbol_12(buffer, (offset + 48u), value[3u]);
 }
 
-fn tint_symbol_22([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : array<vec3<f32>, 2>) {
+fn tint_symbol_22([[internal(disable_validation__ignore_constructible_function_parameter)]] buffer : SB, offset : u32, value : array<vec3<f32>, 2u>) {
   var array = value;
   for(var i_1 = 0u; (i_1 < 2u); i_1 = (i_1 + 1u)) {
     tint_symbol_9(buffer, (offset + (i_1 * 16u)), array[i_1]);

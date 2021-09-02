@@ -3868,11 +3868,68 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
 
   auto stride = explicit_stride ? explicit_stride : implicit_stride;
 
-  // WebGPU requires runtime arrays have at least one element, but the AST
-  // records an element count of 0 for it.
-  auto size = std::max<uint32_t>(arr->size(), 1) * stride;
-  auto* out = builder_->create<sem::Array>(elem_type, arr->size(), el_align,
-                                           size, stride, implicit_stride);
+  // Evaluate the constant array size expression.
+  // sem::Array uses a size of 0 for a runtime-sized array.
+  uint32_t count = 0;
+  if (auto* count_expr = arr->Size()) {
+    Mark(count_expr);
+    if (!Expression(count_expr)) {
+      return nullptr;
+    }
+
+    auto size_source = count_expr->source();
+
+    auto* ty = TypeOf(count_expr)->UnwrapRef();
+    if (!ty->is_integer_scalar()) {
+      AddError("array size must be integer scalar", size_source);
+      return nullptr;
+    }
+
+    if (auto* ident = count_expr->As<ast::IdentifierExpression>()) {
+      // Make sure the identifier is a non-overridable module-scope constant.
+      VariableInfo* var = nullptr;
+      bool is_global = false;
+      if (!variable_stack_.get(ident->symbol(), &var, &is_global) ||
+          !is_global || !var->declaration->is_const()) {
+        AddError("array size identifier must be a module-scope constant",
+                 size_source);
+        return nullptr;
+      }
+      if (ast::HasDecoration<ast::OverrideDecoration>(
+              var->declaration->decorations())) {
+        AddError("array size expression must not be pipeline-overridable",
+                 size_source);
+        return nullptr;
+      }
+
+      count_expr = var->declaration->constructor();
+    } else if (!count_expr->Is<ast::ScalarConstructorExpression>()) {
+      AddError(
+          "array size expression must be either a literal or a module-scope "
+          "constant",
+          size_source);
+      return nullptr;
+    }
+
+    auto count_val = ConstantValueOf(count_expr);
+    if (!count_val) {
+      TINT_ICE(Resolver, diagnostics_)
+          << "could not resolve array size expression";
+      return nullptr;
+    }
+
+    if (ty->is_signed_integer_scalar() ? count_val.Elements()[0].i32 < 1
+                                       : count_val.Elements()[0].u32 < 1u) {
+      AddError("array size must be at least 1", size_source);
+      return nullptr;
+    }
+
+    count = count_val.Elements()[0].u32;
+  }
+
+  auto size = std::max<uint32_t>(count, 1) * stride;
+  auto* out = builder_->create<sem::Array>(elem_type, count, el_align, size,
+                                           stride, implicit_stride);
 
   if (!ValidateArray(out, source)) {
     return nullptr;

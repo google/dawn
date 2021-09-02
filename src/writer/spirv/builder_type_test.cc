@@ -27,7 +27,7 @@ namespace {
 using BuilderTest_Type = TestHelper;
 
 TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
-  auto* ary = ty.array(ty.i32(), 0);
+  auto* ary = ty.array(ty.i32());
   auto* str = Structure("S", {Member("x", ary)},
                         {create<ast::StructBlockDecoration>()});
   Global("a", ty.Of(str), ast::StorageClass::kStorage, ast::Access::kRead,
@@ -48,7 +48,7 @@ TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
-  auto* ary = ty.array(ty.i32(), 0);
+  auto* ary = ty.array(ty.i32());
   auto* str = Structure("S", {Member("x", ary)},
                         {create<ast::StructBlockDecoration>()});
   Global("a", ty.Of(str), ast::StorageClass::kStorage, ast::Access::kRead,
@@ -413,7 +413,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
   // in levels of arrays.
   auto* arr_mat2x2 = ty.array(ty.mat2x2<f32>(), 1);      // Singly nested array
   auto* arr_arr_mat2x3 = ty.array(ty.mat2x3<f32>(), 1);  // Doubly nested array
-  auto* rtarr_mat4x4 = ty.array(ty.mat4x4<f32>(), 0);    // Runtime array
+  auto* rtarr_mat4x4 = ty.array(ty.mat4x4<f32>());       // Runtime array
 
   auto* s =
       Structure("S",

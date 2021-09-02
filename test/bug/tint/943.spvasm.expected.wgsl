@@ -50,9 +50,9 @@ var<private> gl_LocalInvocationID : vec3<u32>;
 
 var<private> gl_GlobalInvocationID : vec3<u32>;
 
-var<workgroup> mm_Asub : array<array<f32, 64>, 64>;
+var<workgroup> mm_Asub : array<array<f32, 64u>, 64u>;
 
-var<workgroup> mm_Bsub : array<array<f32, 1>, 64>;
+var<workgroup> mm_Bsub : array<array<f32, 1u>, 64u>;
 
 [[group(0), binding(1)]] var<storage, read> x_165 : ssbA;
 
@@ -199,7 +199,7 @@ fn mm_matMul_i1_i1_i1_(dimAOuter : ptr<function, i32>, dimInner : ptr<function, 
   var numTiles : i32;
   var innerRow : i32;
   var innerCol : i32;
-  var acc : array<array<f32, 1>, 1>;
+  var acc : array<array<f32, 1u>, 1u>;
   var tileColA : i32;
   var tileRowB : i32;
   var t : i32;
@@ -217,7 +217,7 @@ fn mm_matMul_i1_i1_i1_(dimAOuter : ptr<function, i32>, dimInner : ptr<function, 
   var param_6 : i32;
   var k : i32;
   var inner : i32;
-  var BCached : array<f32, 1>;
+  var BCached : array<f32, 1u>;
   var innerRow_3 : i32;
   var ACached : f32;
   var innerCol_3 : i32;

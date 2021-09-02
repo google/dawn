@@ -23,6 +23,9 @@
 namespace tint {
 namespace ast {
 
+// Forward declarations.
+class Expression;
+
 /// An array type. If size is zero then it is a runtime array.
 class Array : public Castable<Array, Type> {
  public:
@@ -30,13 +33,13 @@ class Array : public Castable<Array, Type> {
   /// @param program_id the identifier of the program that owns this node
   /// @param source the source of this node
   /// @param subtype the type of the array elements
-  /// @param size the number of elements in the array. `0` represents a
+  /// @param size the number of elements in the array. nullptr represents a
   /// runtime-sized array.
   /// @param decorations the array decorations
   Array(ProgramID program_id,
         const Source& source,
         Type* subtype,
-        uint32_t size,
+        ast::Expression* size,
         ast::DecorationList decorations);
   /// Move constructor
   Array(Array&&);
@@ -44,15 +47,16 @@ class Array : public Castable<Array, Type> {
 
   /// @returns true if this is a runtime array.
   /// i.e. the size is determined at runtime
-  bool IsRuntimeArray() const { return size_ == 0; }
+  bool IsRuntimeArray() const { return size_ == nullptr; }
 
   /// @returns the array decorations
   const ast::DecorationList& decorations() const { return decos_; }
 
   /// @returns the array type
   Type* type() const { return subtype_; }
-  /// @returns the array size. Size is 0 for a runtime array
-  uint32_t size() const { return size_; }
+
+  /// @returns the array size, or nullptr for a runtime array
+  ast::Expression* Size() const { return size_; }
 
   /// @returns the name for the type
   std::string type_name() const override;
@@ -69,7 +73,7 @@ class Array : public Castable<Array, Type> {
 
  private:
   Type* const subtype_;
-  uint32_t const size_;
+  ast::Expression* const size_;
   ast::DecorationList const decos_;
 };
 

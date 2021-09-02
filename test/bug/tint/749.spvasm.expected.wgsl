@@ -1,5 +1,5 @@
 struct QuicksortObject {
-  numbers : array<i32, 10>;
+  numbers : array<i32, 10u>;
 };
 
 [[block]]
@@ -63,14 +63,14 @@ fn swap_i1_i1_(i : ptr<function, i32>, j : ptr<function, i32>) {
   let x_34 : ptr<private, i32> = &(obj.numbers[x_33]);
   let x_35 : i32 = *(x_34);
   let x_943 : QuicksortObject = obj;
-  obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   obj = x_943;
   let x_527 : vec2<f32> = vec2<f32>(x_526.x, x_526.x);
   let x_36 : ptr<private, i32> = &(obj.numbers[x_32]);
   let x_528 : vec3<f32> = vec3<f32>(x_524.x, x_524.z, x_524.x);
   *(x_36) = x_35;
   let x_944 : QuicksortObject = obj;
-  obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   obj = x_944;
   let x_529 : vec3<f32> = vec3<f32>(x_526.y, x_526.z, x_526.x);
   let x_945 : i32 = *(i);
@@ -93,7 +93,7 @@ fn swap_i1_i1_(i : ptr<function, i32>, j : ptr<function, i32>) {
   *(x_36) = 0;
   *(x_36) = x_949;
   let x_950 : QuicksortObject = obj;
-  obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   obj = x_950;
   let x_532 : vec3<f32> = vec3<f32>(x_528.x, x_528.y, x_528.x);
   let x_951 : i32 = *(x_34);
@@ -149,7 +149,7 @@ fn performPartition_i1_i1_(l : ptr<function, i32>, h : ptr<function, i32>) -> i3
   let x_536 : vec3<f32> = vec3<f32>(x_534.x, x_534.z, x_535.x);
   j_1 = 10;
   let x_960 : QuicksortObject = obj;
-  obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   obj = x_960;
   loop {
     let x_961 : i32 = pivot;
@@ -164,7 +164,7 @@ fn performPartition_i1_i1_(l : ptr<function, i32>, h : ptr<function, i32>) -> i3
     pivot = x_963;
     x_537 = vec2<f32>(vec3<f32>(1.0, 2.0, 3.0).y, vec3<f32>(1.0, 2.0, 3.0).z);
     let x_964 : QuicksortObject = obj;
-    obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
     obj = x_964;
     let x_56 : i32 = *(h);
     let x_965 : i32 = *(h);
@@ -198,7 +198,7 @@ fn performPartition_i1_i1_(l : ptr<function, i32>, h : ptr<function, i32>) -> i3
     param_1 = x_971;
     let x_62 : i32 = *(x_61);
     let x_972 : QuicksortObject = obj;
-    obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
     obj = x_972;
     let x_63 : i32 = pivot;
     let x_540 : vec2<f32> = vec2<f32>(vec3<f32>(1.0, 2.0, 3.0).y, x_534.z);
@@ -257,7 +257,7 @@ fn performPartition_i1_i1_(l : ptr<function, i32>, h : ptr<function, i32>) -> i3
       param_1 = x_985;
     }
     let x_986 : QuicksortObject = obj;
-    obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
     obj = x_986;
 
     continuing {
@@ -291,7 +291,7 @@ fn performPartition_i1_i1_(l : ptr<function, i32>, h : ptr<function, i32>) -> i3
   *(x_42) = x_993;
   let x_549 : vec2<f32> = vec2<f32>(x_534.x, x_534.y);
   let x_994 : QuicksortObject = obj;
-  obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   obj = x_994;
   let x_995 : i32 = *(h);
   *(h) = 0;
@@ -351,15 +351,15 @@ fn quicksort_() {
   var p : i32;
   var l_1 : i32;
   var top : i32;
-  var stack : array<i32, 10>;
+  var stack : array<i32, 10u>;
   var param_5 : i32;
   l_1 = 0;
   let x_1007 : i32 = param_5;
   param_5 = 0;
   param_5 = x_1007;
   h_1 = 9;
-  let x_1008 : array<i32, 10> = stack;
-  stack = array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  let x_1008 : array<i32, 10u> = stack;
+  stack = array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
   stack = x_1008;
   let x_556 : vec2<f32> = vec2<f32>(vec3<f32>(1.0, 2.0, 3.0).y, vec3<f32>(1.0, 2.0, 3.0).y);
   let x_1009 : i32 = param_5;
@@ -392,12 +392,12 @@ fn quicksort_() {
   param_4 = x_1015;
   let x_95 : i32 = l_1;
   let x_1016 : QuicksortObject = obj;
-  obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   obj = x_1016;
   let x_560 : vec3<f32> = vec3<f32>(x_559.y, x_559.x, x_557.x);
   let x_96 : ptr<function, i32> = &(stack[x_94]);
-  let x_1017 : array<i32, 10> = stack;
-  stack = array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  let x_1017 : array<i32, 10u> = stack;
+  stack = array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
   stack = x_1017;
   let x_561 : vec3<f32> = vec3<f32>(x_556.y, x_556.y, x_556.y);
   let x_1018 : i32 = l_1;
@@ -446,12 +446,12 @@ fn quicksort_() {
     let x_1028 : i32 = h_1;
     h_1 = 0;
     h_1 = x_1028;
-    let x_1029 : array<i32, 10> = stack;
-    stack = array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    let x_1029 : array<i32, 10u> = stack;
+    stack = array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     stack = x_1029;
     let x_106 : i32 = top;
-    let x_1030 : array<i32, 10> = stack;
-    stack = array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    let x_1030 : array<i32, 10u> = stack;
+    stack = array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     stack = x_1030;
     let x_567 : vec2<f32> = vec2<f32>(x_558.x, x_564.z);
     let x_1031 : i32 = param_4;
@@ -462,7 +462,7 @@ fn quicksort_() {
       break;
     }
     let x_1032 : QuicksortObject = obj;
-    obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
     obj = x_1032;
     let x_568 : vec3<f32> = vec3<f32>(x_559.y, x_559.x, x_563.y);
     let x_1033 : i32 = param_4;
@@ -486,16 +486,16 @@ fn quicksort_() {
     *(x_96) = 0;
     *(x_96) = x_1037;
     let x_111 : i32 = *(x_110);
-    let x_1038 : array<i32, 10> = stack;
-    stack = array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    let x_1038 : array<i32, 10u> = stack;
+    stack = array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     stack = x_1038;
     let x_571 : vec3<f32> = vec3<f32>(x_559.y, x_559.x, x_564.y);
     let x_1039 : i32 = l_1;
     l_1 = 0;
     l_1 = x_1039;
     h_1 = x_111;
-    let x_1040 : array<i32, 10> = stack;
-    stack = array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    let x_1040 : array<i32, 10u> = stack;
+    stack = array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     stack = x_1040;
     let x_572 : vec2<f32> = vec2<f32>(x_562.y, x_561.y);
     let x_1041 : i32 = p;
@@ -586,8 +586,8 @@ fn quicksort_() {
       let x_1061 : i32 = *(x_100);
       *(x_100) = 0;
       *(x_100) = x_1061;
-      let x_1062 : array<i32, 10> = stack;
-      stack = array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+      let x_1062 : array<i32, 10u> = stack;
+      stack = array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
       stack = x_1062;
       let x_584 : vec2<f32> = vec2<f32>(x_569.z, x_569.y);
       let x_585 : vec3<f32> = vec3<f32>(x_580.y, x_577.x, x_577.x);
@@ -625,8 +625,8 @@ fn quicksort_() {
       h_1 = 0;
       h_1 = x_1070;
       top = x_133;
-      let x_1071 : array<i32, 10> = stack;
-      stack = array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+      let x_1071 : array<i32, 10u> = stack;
+      stack = array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
       stack = x_1071;
       let x_134 : i32 = p;
       let x_590 : vec2<f32> = vec2<f32>(x_576.x, x_573.y);
@@ -651,7 +651,7 @@ fn quicksort_() {
     *(x_96) = x_1076;
     let x_592 : vec2<f32> = vec2<f32>(vec3<f32>(1.0, 2.0, 3.0).x, vec3<f32>(1.0, 2.0, 3.0).y);
     let x_1077 : QuicksortObject = obj;
-    obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
     obj = x_1077;
     let x_137 : i32 = p;
     let x_1078 : i32 = *(x_114);
@@ -715,16 +715,16 @@ fn quicksort_() {
       *(x_110) = x_1092;
       let x_601 : vec2<f32> = vec2<f32>(x_563.x, x_563.y);
       *(x_147) = bitcast<i32>((1u + bitcast<u32>(x_145)));
-      let x_1093 : array<i32, 10> = stack;
-      stack = array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+      let x_1093 : array<i32, 10u> = stack;
+      stack = array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
       stack = x_1093;
       let x_148 : i32 = top;
       let x_1094 : i32 = *(x_114);
       *(x_114) = 0;
       *(x_114) = x_1094;
       let x_602 : vec2<f32> = vec2<f32>(x_565.y, x_599.y);
-      let x_1095 : array<i32, 10> = stack;
-      stack = array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+      let x_1095 : array<i32, 10u> = stack;
+      stack = array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
       stack = x_1095;
       let x_149 : i32 = (x_148 + bitcast<i32>(1u));
       let x_1096 : i32 = *(x_147);
@@ -760,7 +760,7 @@ fn quicksort_() {
       l_1 = x_1103;
       let x_604 : vec2<f32> = vec2<f32>(x_563.z, x_564.x);
       let x_1104 : QuicksortObject = obj;
-      obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+      obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
       obj = x_1104;
     }
   }
@@ -779,11 +779,11 @@ fn main_1() {
   uv = x_717;
   i_2 = 0;
   let x_721 : QuicksortObject = obj;
-  obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   obj = x_721;
   if (true) {
     let x_722 : QuicksortObject = obj;
-    obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
     obj = x_722;
     let x_431 : vec2<f32> = vec2<f32>(vec3<f32>(1.0, 2.0, 3.0).x, vec3<f32>(1.0, 2.0, 3.0).x);
     let x_158 : i32 = i_2;
@@ -795,11 +795,11 @@ fn main_1() {
     color = x_725;
     let x_432 : vec2<f32> = vec2<f32>(x_431.y, x_431.y);
     let x_726 : QuicksortObject = obj;
-    obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
     obj = x_726;
   }
   let x_756 : QuicksortObject = obj;
-  obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   obj = x_756;
   let x_446 : vec2<f32> = vec2<f32>(vec2<f32>(0.0, 0.0).x, vec2<f32>(0.0, 0.0).x);
   let x_757 : i32 = i_2;
@@ -807,7 +807,7 @@ fn main_1() {
   i_2 = x_757;
   quicksort_();
   let x_758 : QuicksortObject = obj;
-  obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   obj = x_758;
   let x_184 : vec4<f32> = gl_FragCoord;
   let x_759 : vec2<f32> = uv;
@@ -820,14 +820,14 @@ fn main_1() {
   let x_185 : vec2<f32> = vec2<f32>(x_184.x, x_184.y);
   let x_448 : vec3<f32> = vec3<f32>(x_185.y, x_446.y, x_446.y);
   let x_761 : QuicksortObject = obj;
-  obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   obj = x_761;
   let x_762 : vec2<f32> = uv;
   uv = vec2<f32>(0.0, 0.0);
   uv = x_762;
   let x_191 : vec2<f32> = x_188.resolution;
   let x_763 : QuicksortObject = obj;
-  obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   obj = x_763;
   let x_449 : vec3<f32> = vec3<f32>(x_184.y, vec3<f32>(1.0, 2.0, 3.0).z, x_184.w);
   let x_764 : vec3<f32> = color;
@@ -835,7 +835,7 @@ fn main_1() {
   color = x_764;
   let x_192 : vec2<f32> = (x_185 / x_191);
   let x_765 : QuicksortObject = obj;
-  obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   obj = x_765;
   let x_450 : vec2<f32> = vec2<f32>(x_447.x, x_185.y);
   let x_766 : vec3<f32> = color;
@@ -851,7 +851,7 @@ fn main_1() {
   color = x_768;
   let x_451 : vec3<f32> = vec3<f32>(x_185.x, x_185.y, x_446.y);
   let x_769 : QuicksortObject = obj;
-  obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   obj = x_769;
   let x_200 : ptr<private, i32> = &(obj.numbers[0u]);
   let x_770 : i32 = *(x_200);
@@ -859,7 +859,7 @@ fn main_1() {
   *(x_200) = x_770;
   let x_201 : i32 = *(x_200);
   let x_771 : QuicksortObject = obj;
-  obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   obj = x_771;
   let x_205 : ptr<function, f32> = &(color.x);
   let x_772 : i32 = *(x_200);
@@ -874,7 +874,7 @@ fn main_1() {
   i_2 = 0;
   i_2 = x_774;
   let x_775 : QuicksortObject = obj;
-  obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   obj = x_775;
   let x_208 : ptr<function, f32> = &(color.x);
   let x_453 : vec3<f32> = vec3<f32>(x_451.x, x_450.x, x_450.y);
@@ -893,7 +893,7 @@ fn main_1() {
   *(x_209) = 0.0;
   *(x_209) = x_778;
   let x_779 : QuicksortObject = obj;
-  obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   obj = x_779;
   if ((x_210 > 0.25)) {
     let x_780 : i32 = i_2;
@@ -908,7 +908,7 @@ fn main_1() {
     *(x_209) = x_782;
     let x_216 : i32 = obj.numbers[1];
     let x_783 : QuicksortObject = obj;
-    obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
     obj = x_783;
     let x_457 : vec2<f32> = vec2<f32>(x_454.x, x_454.x);
     let x_784 : vec2<f32> = uv;
@@ -916,7 +916,7 @@ fn main_1() {
     uv = x_784;
     let x_218 : ptr<function, f32> = &(color[0]);
     let x_785 : QuicksortObject = obj;
-    obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
     obj = x_785;
     let x_458 : vec2<f32> = vec2<f32>(vec3<f32>(1.0, 2.0, 3.0).z, vec2<f32>(0.0, 0.0).y);
     let x_786 : i32 = i_2;
@@ -1038,7 +1038,7 @@ fn main_1() {
     *(x_208) = 0.0;
     *(x_208) = x_816;
     let x_817 : QuicksortObject = obj;
-    obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
     obj = x_817;
     let x_468 : vec3<f32> = vec3<f32>(x_467.x, x_467.x, x_467.x);
     let x_818 : f32 = *(x_237);
@@ -1152,7 +1152,7 @@ fn main_1() {
     *(x_237) = x_844;
     let x_482 : vec3<f32> = vec3<f32>(x_455.x, x_475.y, x_455.y);
     let x_845 : QuicksortObject = obj;
-    obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
     obj = x_845;
     let x_846 : f32 = *(x_260);
     *(x_260) = 0.0;
@@ -1225,7 +1225,7 @@ fn main_1() {
     *(x_279) = x_863;
     let x_490 : vec2<f32> = vec2<f32>(x_480.z, x_480.z);
     let x_864 : QuicksortObject = obj;
-    obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
     obj = x_864;
     color.y = (f32(x_280) + x_283);
     let x_865 : f32 = *(x_208);
@@ -1243,7 +1243,7 @@ fn main_1() {
   let x_286 : ptr<function, f32> = &(uv.y);
   let x_287 : f32 = *(x_286);
   let x_868 : QuicksortObject = obj;
-  obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   obj = x_868;
   let x_493 : vec2<f32> = vec2<f32>(x_475.x, x_475.y);
   let x_869 : f32 = *(x_237);
@@ -1408,7 +1408,7 @@ fn main_1() {
     *(x_209) = 0.0;
     *(x_209) = x_910;
     let x_911 : QuicksortObject = obj;
-    obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
     obj = x_911;
     let x_513 : vec3<f32> = vec3<f32>(x_505.z, x_505.x, x_448.x);
     let x_912 : i32 = *(x_300);
@@ -1461,10 +1461,10 @@ fn main_1() {
   *(x_209) = 0.0;
   *(x_209) = x_923;
   let x_924 : QuicksortObject = obj;
-  obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   obj = x_924;
   let x_925 : QuicksortObject = obj;
-  obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   obj = x_925;
   let x_926 : f32 = *(x_259);
   *(x_259) = 0.0;
@@ -1483,7 +1483,7 @@ fn main_1() {
   *(x_222) = x_929;
   x_GLF_color = x_330;
   let x_930 : QuicksortObject = obj;
-  obj = QuicksortObject(array<i32, 10>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  obj = QuicksortObject(array<i32, 10u>(0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   obj = x_930;
   let x_522 : vec3<f32> = vec3<f32>(x_330.w, x_330.y, x_493.x);
   let x_931 : f32 = *(x_208);

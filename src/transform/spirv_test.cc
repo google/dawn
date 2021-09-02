@@ -35,9 +35,9 @@ fn main([[builtin(sample_index)]] sample_index : u32,
   auto* expect = R"(
 [[builtin(sample_index), internal(disable_validation__ignore_storage_class)]] var<in> sample_index_1 : u32;
 
-[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<in> mask_in_1 : array<u32, 1>;
+[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<in> mask_in_1 : array<u32, 1u>;
 
-[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<out> value : array<u32, 1>;
+[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<out> value : array<u32, 1u>;
 
 fn main_inner(sample_index : u32, mask_in : u32) -> u32 {
   return mask_in;
@@ -73,9 +73,9 @@ fn main([[builtin(sample_mask)]] mask_in : u32
 )";
 
   auto* expect = R"(
-[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<in> mask_in_1 : array<u32, 1>;
+[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<in> mask_in_1 : array<u32, 1u>;
 
-[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<out> value : array<u32, 1>;
+[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<out> value : array<u32, 1u>;
 
 fn filter(mask : u32) -> u32 {
   return (mask & 3u);
@@ -138,9 +138,9 @@ fn frag_main([[builtin(sample_index)]] sample_index : u32,
 
 [[builtin(sample_index), internal(disable_validation__ignore_storage_class)]] var<in> sample_index_1 : u32;
 
-[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<in> mask_in_1 : array<u32, 1>;
+[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<in> mask_in_1 : array<u32, 1u>;
 
-[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<out> value_1 : array<u32, 1>;
+[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<out> value_1 : array<u32, 1u>;
 
 fn vert_main_inner() -> vec4<f32> {
   return vec4<f32>();

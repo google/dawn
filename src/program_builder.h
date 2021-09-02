@@ -622,66 +622,85 @@ class ProgramBuilder {
     }
 
     /// @param subtype the array element type
-    /// @param n the array size. 0 represents a runtime-array
+    /// @param n the array size. nullptr represents a runtime-array
     /// @param decos the optional decorations for the array
     /// @return the tint AST type for a array of size `n` of type `T`
+    template <typename EXPR = ast::Expression*>
     ast::Array* array(ast::Type* subtype,
-                      uint32_t n = 0,
+                      EXPR&& n = nullptr,
                       ast::DecorationList decos = {}) const {
-      return builder->create<ast::Array>(subtype, n, decos);
+      return builder->create<ast::Array>(
+          subtype, builder->Expr(std::forward<EXPR>(n)), decos);
     }
 
     /// @param source the Source of the node
     /// @param subtype the array element type
-    /// @param n the array size. 0 represents a runtime-array
+    /// @param n the array size. nullptr represents a runtime-array
     /// @param decos the optional decorations for the array
     /// @return the tint AST type for a array of size `n` of type `T`
+    template <typename EXPR = ast::Expression*>
     ast::Array* array(const Source& source,
                       ast::Type* subtype,
-                      uint32_t n = 0,
+                      EXPR&& n = nullptr,
                       ast::DecorationList decos = {}) const {
-      return builder->create<ast::Array>(source, subtype, n, decos);
+      return builder->create<ast::Array>(
+          source, subtype, builder->Expr(std::forward<EXPR>(n)), decos);
     }
 
     /// @param subtype the array element type
-    /// @param n the array size. 0 represents a runtime-array
+    /// @param n the array size. nullptr represents a runtime-array
     /// @param stride the array stride. 0 represents implicit stride
     /// @return the tint AST type for a array of size `n` of type `T`
-    ast::Array* array(ast::Type* subtype, uint32_t n, uint32_t stride) const {
+    template <typename EXPR>
+    ast::Array* array(ast::Type* subtype, EXPR&& n, uint32_t stride) const {
       ast::DecorationList decos;
       if (stride) {
         decos.emplace_back(builder->create<ast::StrideDecoration>(stride));
       }
-      return array(subtype, n, std::move(decos));
+      return array(subtype, std::forward<EXPR>(n), std::move(decos));
     }
 
     /// @param source the Source of the node
     /// @param subtype the array element type
-    /// @param n the array size. 0 represents a runtime-array
+    /// @param n the array size. nullptr represents a runtime-array
     /// @param stride the array stride. 0 represents implicit stride
     /// @return the tint AST type for a array of size `n` of type `T`
+    template <typename EXPR>
     ast::Array* array(const Source& source,
                       ast::Type* subtype,
-                      uint32_t n,
+                      EXPR&& n,
                       uint32_t stride) const {
       ast::DecorationList decos;
       if (stride) {
         decos.emplace_back(builder->create<ast::StrideDecoration>(stride));
       }
-      return array(source, subtype, n, std::move(decos));
+      return array(source, subtype, std::forward<EXPR>(n), std::move(decos));
+    }
+
+    /// @return the tint AST type for a runtime-sized array of type `T`
+    template <typename T>
+    ast::Array* array() const {
+      return array(Of<T>(), nullptr);
     }
 
     /// @return the tint AST type for an array of size `N` of type `T`
-    template <typename T, int N = 0>
+    template <typename T, int N>
     ast::Array* array() const {
-      return array(Of<T>(), N);
+      return array(Of<T>(), builder->Expr(N));
+    }
+
+    /// @param stride the array stride
+    /// @return the tint AST type for a runtime-sized array of type `T`
+    template <typename T>
+    ast::Array* array(uint32_t stride) const {
+      return array(Of<T>(), nullptr, stride);
     }
 
     /// @param stride the array stride
     /// @return the tint AST type for an array of size `N` of type `T`
-    template <typename T, int N = 0>
+    template <typename T, int N>
     ast::Array* array(uint32_t stride) const {
-      return array(Of<T>(), N, stride);
+      return array(Of<T>(), builder->Expr(N), stride);
     }
 
     /// Creates a type name
@@ -1273,22 +1292,23 @@ class ProgramBuilder {
 
   /// @param args the arguments for the array constructor
   /// @return an `ast::TypeConstructorExpression` of an array with element type
-  /// `T`, constructed with the values `args`.
-  template <typename T, int N = 0, typename... ARGS>
+  /// `T` and size `N`, constructed with the values `args`.
+  template <typename T, int N, typename... ARGS>
   ast::TypeConstructorExpression* array(ARGS&&... args) {
     return Construct(ty.array<T, N>(), std::forward<ARGS>(args)...);
   }
 
   /// @param subtype the array element type
-  /// @param n the array size. 0 represents a runtime-array.
+  /// @param n the array size. nullptr represents a runtime-array.
   /// @param args the arguments for the array constructor
   /// @return an `ast::TypeConstructorExpression` of an array with element type
   /// `subtype`, constructed with the values `args`.
-  template <typename... ARGS>
+  template <typename EXPR, typename... ARGS>
   ast::TypeConstructorExpression* array(ast::Type* subtype,
-                                        uint32_t n,
+                                        EXPR&& n,
                                         ARGS&&... args) {
-    return Construct(ty.array(subtype, n), std::forward<ARGS>(args)...);
+    return Construct(ty.array(subtype, std::forward<EXPR>(n)),
+                     std::forward<ARGS>(args)...);
   }
 
   /// @param name the variable name

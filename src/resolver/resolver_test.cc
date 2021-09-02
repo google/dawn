@@ -431,6 +431,66 @@ TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
   EXPECT_EQ(VarOf(fn_f32->constructor())->Declaration(), mod_f32);
 }
 
+TEST_F(ResolverTest, ArraySize_UnsignedLiteral) {
+  // var<private> a : array<f32, 10u>;
+  auto* a =
+      Global("a", ty.array(ty.f32(), Expr(10u)), ast::StorageClass::kPrivate);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(a), nullptr);
+  auto* ref = TypeOf(a)->As<sem::Reference>();
+  ASSERT_NE(ref, nullptr);
+  auto* ary = ref->StoreType()->As<sem::Array>();
+  EXPECT_EQ(ary->Count(), 10u);
+}
+
+TEST_F(ResolverTest, ArraySize_SignedLiteral) {
+  // var<private> a : array<f32, 10>;
+  auto* a =
+      Global("a", ty.array(ty.f32(), Expr(10)), ast::StorageClass::kPrivate);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(a), nullptr);
+  auto* ref = TypeOf(a)->As<sem::Reference>();
+  ASSERT_NE(ref, nullptr);
+  auto* ary = ref->StoreType()->As<sem::Array>();
+  EXPECT_EQ(ary->Count(), 10u);
+}
+
+TEST_F(ResolverTest, ArraySize_UnsignedConstant) {
+  // let size = 0u;
+  // var<private> a : array<f32, 10u>;
+  GlobalConst("size", nullptr, Expr(10u));
+  auto* a = Global("a", ty.array(ty.f32(), Expr("size")),
+                   ast::StorageClass::kPrivate);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(a), nullptr);
+  auto* ref = TypeOf(a)->As<sem::Reference>();
+  ASSERT_NE(ref, nullptr);
+  auto* ary = ref->StoreType()->As<sem::Array>();
+  EXPECT_EQ(ary->Count(), 10u);
+}
+
+TEST_F(ResolverTest, ArraySize_SignedConstant) {
+  // let size = 0;
+  // var<private> a : array<f32, 10>;
+  GlobalConst("size", nullptr, Expr(10));
+  auto* a = Global("a", ty.array(ty.f32(), Expr("size")),
+                   ast::StorageClass::kPrivate);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(a), nullptr);
+  auto* ref = TypeOf(a)->As<sem::Reference>();
+  ASSERT_NE(ref, nullptr);
+  auto* ary = ref->StoreType()->As<sem::Array>();
+  EXPECT_EQ(ary->Count(), 10u);
+}
+
 TEST_F(ResolverTest, Expr_ArrayAccessor_Array) {
   auto* idx = Expr(2);
   Global("my_var", ty.array<f32, 3>(), ast::StorageClass::kPrivate);

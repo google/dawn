@@ -80,7 +80,11 @@ ArrayBuilder PadArray(
 
     auto* dst = ctx.dst;
     return [=] {
-      return dst->ty.array(dst->create<ast::TypeName>(name), array->Count());
+      if (array->IsRuntimeSized()) {
+        return dst->ty.array(dst->create<ast::TypeName>(name));
+      } else {
+        return dst->ty.array(dst->create<ast::TypeName>(name), array->Count());
+      }
     };
   });
 }

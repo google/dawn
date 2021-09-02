@@ -681,7 +681,7 @@ using ArrayDecorationTest = TestWithParams;
 TEST_P(ArrayDecorationTest, IsValid) {
   auto& params = GetParam();
 
-  auto* arr = ty.array(ty.f32(), 0,
+  auto* arr = ty.array(ty.f32(), nullptr,
                        createDecorations(Source{{12, 34}}, *this, params.kind));
   Structure("mystruct",
             {

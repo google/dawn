@@ -132,8 +132,7 @@ WrapArraysInStructs::WrappedArrayInfo WrapArraysInStructs::WrapArray(
         decos.emplace_back(
             c.dst->create<ast::StrideDecoration>(array->Stride()));
       }
-      return c.dst->create<ast::Array>(el_type(c), array->Count(),
-                                       std::move(decos));
+      return c.dst->ty.array(el_type(c), array->Count(), std::move(decos));
     };
 
     // Structure() will create and append the ast::Struct to the

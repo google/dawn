@@ -81,7 +81,7 @@ fn main() {
   auto* expect = R"(
 [[block]]
 struct tint_symbol {
-  buffer_size : array<vec4<u32>, 1>;
+  buffer_size : array<vec4<u32>, 1u>;
 };
 
 [[group(0), binding(30)]] var<uniform> tint_symbol_1 : tint_symbol;
@@ -134,7 +134,7 @@ fn main() {
   auto* expect = R"(
 [[block]]
 struct tint_symbol {
-  buffer_size : array<vec4<u32>, 1>;
+  buffer_size : array<vec4<u32>, 1u>;
 };
 
 [[group(0), binding(30)]] var<uniform> tint_symbol_1 : tint_symbol;
@@ -216,7 +216,7 @@ fn main() {
   auto* expect = R"(
 [[block]]
 struct tint_symbol {
-  buffer_size : array<vec4<u32>, 2>;
+  buffer_size : array<vec4<u32>, 2u>;
 };
 
 [[group(0), binding(30)]] var<uniform> tint_symbol_1 : tint_symbol;

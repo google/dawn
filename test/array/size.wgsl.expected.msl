@@ -1,0 +1,19 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  float arr[4];
+};
+
+constant int slen = 4;
+constant uint ulen = 4u;
+fragment void tint_symbol() {
+  tint_array_wrapper signed_literal = {};
+  tint_array_wrapper unsigned_literal = {};
+  tint_array_wrapper signed_constant = {};
+  tint_array_wrapper unsigned_constant = {};
+  signed_literal = unsigned_constant;
+  signed_constant = unsigned_literal;
+  return;
+}
+

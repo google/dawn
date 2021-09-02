@@ -1187,7 +1187,7 @@ Expect<ast::Type*> ParserImpl::expect_type_decl_array(
     ast::DecorationList decos) {
   const char* use = "array declaration";
 
-  uint32_t size = 0;
+  ast::Expression* size = nullptr;
 
   auto subtype = expect_lt_gt_block(use, [&]() -> Expect<ast::Type*> {
     auto type = expect_type(use);
@@ -1195,10 +1195,14 @@ Expect<ast::Type*> ParserImpl::expect_type_decl_array(
       return Failure::kErrored;
 
     if (match(Token::Type::kComma)) {
-      auto val = expect_nonzero_positive_sint("array size");
-      if (val.errored)
+      auto expr = primary_expression();
+      if (expr.errored) {
         return Failure::kErrored;
-      size = val.value;
+      } else if (!expr.matched) {
+        return add_error(peek(), "expected array size expression");
+      }
+
+      size = std::move(expr.value);
     }
 
     return type.value;

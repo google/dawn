@@ -106,12 +106,12 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix) {
 struct S {
   [[size(16)]]
   padding : u32;
-  m : [[stride(32)]] array<vec2<f32>, 2>;
+  m : [[stride(32)]] array<vec2<f32>, 2u>;
 };
 
 [[group(0), binding(0)]] var<uniform> s : S;
 
-fn arr_to_mat2x2_stride_32(arr : [[stride(32)]] array<vec2<f32>, 2>) -> mat2x2<f32> {
+fn arr_to_mat2x2_stride_32(arr : [[stride(32)]] array<vec2<f32>, 2u>) -> mat2x2<f32> {
   return mat2x2<f32>(arr[0u], arr[1u]);
 }
 
@@ -173,7 +173,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformColumn) {
 struct S {
   [[size(16)]]
   padding : u32;
-  m : [[stride(32)]] array<vec2<f32>, 2>;
+  m : [[stride(32)]] array<vec2<f32>, 2u>;
 };
 
 [[group(0), binding(0)]] var<uniform> s : S;
@@ -300,12 +300,12 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageMatrix) {
 struct S {
   [[size(8)]]
   padding : u32;
-  m : [[stride(32)]] array<vec2<f32>, 2>;
+  m : [[stride(32)]] array<vec2<f32>, 2u>;
 };
 
 [[group(0), binding(0)]] var<storage, read_write> s : S;
 
-fn arr_to_mat2x2_stride_32(arr : [[stride(32)]] array<vec2<f32>, 2>) -> mat2x2<f32> {
+fn arr_to_mat2x2_stride_32(arr : [[stride(32)]] array<vec2<f32>, 2u>) -> mat2x2<f32> {
   return mat2x2<f32>(arr[0u], arr[1u]);
 }
 
@@ -367,7 +367,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageColumn) {
 struct S {
   [[size(16)]]
   padding : u32;
-  m : [[stride(32)]] array<vec2<f32>, 2>;
+  m : [[stride(32)]] array<vec2<f32>, 2u>;
 };
 
 [[group(0), binding(0)]] var<storage, read_write> s : S;
@@ -431,13 +431,13 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageMatrix) {
 struct S {
   [[size(8)]]
   padding : u32;
-  m : [[stride(32)]] array<vec2<f32>, 2>;
+  m : [[stride(32)]] array<vec2<f32>, 2u>;
 };
 
 [[group(0), binding(0)]] var<storage, read_write> s : S;
 
-fn mat2x2_stride_32_to_arr(mat : mat2x2<f32>) -> [[stride(32)]] array<vec2<f32>, 2> {
-  return [[stride(32)]] array<vec2<f32>, 2>(mat[0u], mat[1u]);
+fn mat2x2_stride_32_to_arr(mat : mat2x2<f32>) -> [[stride(32)]] array<vec2<f32>, 2u> {
+  return [[stride(32)]] array<vec2<f32>, 2u>(mat[0u], mat[1u]);
 }
 
 [[stage(compute), workgroup_size(1)]]
@@ -498,7 +498,7 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageColumn) {
 struct S {
   [[size(8)]]
   padding : u32;
-  m : [[stride(32)]] array<vec2<f32>, 2>;
+  m : [[stride(32)]] array<vec2<f32>, 2u>;
 };
 
 [[group(0), binding(0)]] var<storage, read_write> s : S;
@@ -576,17 +576,17 @@ TEST_F(DecomposeStridedMatrixTest, ReadWriteViaPointerLets) {
 struct S {
   [[size(8)]]
   padding : u32;
-  m : [[stride(32)]] array<vec2<f32>, 2>;
+  m : [[stride(32)]] array<vec2<f32>, 2u>;
 };
 
 [[group(0), binding(0)]] var<storage, read_write> s : S;
 
-fn arr_to_mat2x2_stride_32(arr : [[stride(32)]] array<vec2<f32>, 2>) -> mat2x2<f32> {
+fn arr_to_mat2x2_stride_32(arr : [[stride(32)]] array<vec2<f32>, 2u>) -> mat2x2<f32> {
   return mat2x2<f32>(arr[0u], arr[1u]);
 }
 
-fn mat2x2_stride_32_to_arr(mat : mat2x2<f32>) -> [[stride(32)]] array<vec2<f32>, 2> {
-  return [[stride(32)]] array<vec2<f32>, 2>(mat[0u], mat[1u]);
+fn mat2x2_stride_32_to_arr(mat : mat2x2<f32>) -> [[stride(32)]] array<vec2<f32>, 2u> {
+  return [[stride(32)]] array<vec2<f32>, 2u>(mat[0u], mat[1u]);
 }
 
 [[stage(compute), workgroup_size(1)]]

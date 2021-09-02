@@ -440,7 +440,7 @@ TEST_F(ParserImplTest, TypeDecl_Atomic_MissingType) {
   ASSERT_EQ(p->error(), "1:8: invalid type for atomic declaration");
 }
 
-TEST_F(ParserImplTest, TypeDecl_Array) {
+TEST_F(ParserImplTest, TypeDecl_Array_SintLiteralSize) {
   auto p = parser("array<f32, 5>");
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
@@ -451,10 +451,57 @@ TEST_F(ParserImplTest, TypeDecl_Array) {
 
   auto* a = t.value->As<ast::Array>();
   ASSERT_FALSE(a->IsRuntimeArray());
-  ASSERT_EQ(a->size(), 5u);
   ASSERT_TRUE(a->type()->Is<ast::F32>());
   EXPECT_EQ(a->decorations().size(), 0u);
   EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 14u}}));
+
+  auto* size_expr = a->Size()->As<ast::ScalarConstructorExpression>();
+  ASSERT_NE(size_expr, nullptr);
+  auto* size = size_expr->literal()->As<ast::SintLiteral>();
+  ASSERT_NE(size, nullptr);
+  EXPECT_EQ(size->value_as_i32(), 5);
+}
+
+TEST_F(ParserImplTest, TypeDecl_Array_UintLiteralSize) {
+  auto p = parser("array<f32, 5u>");
+  auto t = p->type_decl();
+  EXPECT_TRUE(t.matched);
+  EXPECT_FALSE(t.errored);
+  ASSERT_NE(t.value, nullptr) << p->error();
+  ASSERT_FALSE(p->has_error());
+  ASSERT_TRUE(t.value->Is<ast::Array>());
+
+  auto* a = t.value->As<ast::Array>();
+  ASSERT_FALSE(a->IsRuntimeArray());
+  ASSERT_TRUE(a->type()->Is<ast::F32>());
+  EXPECT_EQ(a->decorations().size(), 0u);
+  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 15u}}));
+
+  auto* size_expr = a->Size()->As<ast::ScalarConstructorExpression>();
+  ASSERT_NE(size_expr, nullptr);
+  auto* size = size_expr->literal()->As<ast::UintLiteral>();
+  ASSERT_NE(size, nullptr);
+  EXPECT_EQ(size->value_as_u32(), 5u);
+}
+
+TEST_F(ParserImplTest, TypeDecl_Array_ConstantSize) {
+  auto p = parser("array<f32, size>");
+  auto t = p->type_decl();
+  EXPECT_TRUE(t.matched);
+  EXPECT_FALSE(t.errored);
+  ASSERT_NE(t.value, nullptr) << p->error();
+  ASSERT_FALSE(p->has_error());
+  ASSERT_TRUE(t.value->Is<ast::Array>());
+
+  auto* a = t.value->As<ast::Array>();
+  ASSERT_FALSE(a->IsRuntimeArray());
+  ASSERT_TRUE(a->type()->Is<ast::F32>());
+  EXPECT_EQ(a->decorations().size(), 0u);
+  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 17u}}));
+
+  auto* size_expr = a->Size()->As<ast::IdentifierExpression>();
+  ASSERT_NE(size_expr, nullptr);
+  EXPECT_EQ(p->builder().Symbols().NameFor(size_expr->symbol()), "size");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Stride) {
@@ -468,8 +515,13 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride) {
 
   auto* a = t.value->As<ast::Array>();
   ASSERT_FALSE(a->IsRuntimeArray());
-  ASSERT_EQ(a->size(), 5u);
   ASSERT_TRUE(a->type()->Is<ast::F32>());
+
+  auto* size_expr = a->Size()->As<ast::ScalarConstructorExpression>();
+  ASSERT_NE(size_expr, nullptr);
+  auto* size = size_expr->literal()->As<ast::SintLiteral>();
+  ASSERT_NE(size, nullptr);
+  EXPECT_EQ(size->value_as_i32(), 5);
 
   ASSERT_EQ(a->decorations().size(), 1u);
   auto* stride = a->decorations()[0];
@@ -664,34 +716,24 @@ TEST_F(ParserImplTest, TypeDecl_Array_BadType) {
   ASSERT_EQ(p->error(), "1:7: unknown type 'unknown'");
 }
 
-TEST_F(ParserImplTest, TypeDecl_Array_ZeroSize) {
-  auto p = parser("array<f32, 0>");
-  auto t = p->type_decl();
-  EXPECT_TRUE(t.errored);
-  EXPECT_FALSE(t.matched);
-  ASSERT_EQ(t.value, nullptr);
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:12: array size must be greater than 0");
-}
-
-TEST_F(ParserImplTest, TypeDecl_Array_NegativeSize) {
-  auto p = parser("array<f32, -1>");
-  auto t = p->type_decl();
-  EXPECT_TRUE(t.errored);
-  EXPECT_FALSE(t.matched);
-  ASSERT_EQ(t.value, nullptr);
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:12: array size must be greater than 0");
-}
-
 TEST_F(ParserImplTest, TypeDecl_Array_BadSize) {
-  auto p = parser("array<f32, invalid>");
+  auto p = parser("array<f32, !>");
   auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:12: expected signed integer literal for array size");
+  ASSERT_EQ(p->error(), "1:12: expected array size expression");
+}
+
+TEST_F(ParserImplTest, TypeDecl_Array_MissingSize) {
+  auto p = parser("array<f32,>");
+  auto t = p->type_decl();
+  EXPECT_TRUE(t.errored);
+  EXPECT_FALSE(t.matched);
+  ASSERT_EQ(t.value, nullptr);
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(p->error(), "1:11: expected array size expression");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_MissingLessThan) {

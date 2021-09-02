@@ -584,8 +584,9 @@ TEST_F(ResolverTypeConstructorValidationTest,
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Array_Runtime) {
-  // array<f32>(1);
-  auto* tc = array<i32>(
+  // array<i32>(1);
+  auto* tc = array(
+      ty.i32(), nullptr,
       create<ast::ScalarConstructorExpression>(Source{{12, 34}}, Literal(1)));
   WrapInFunction(tc);
 
@@ -595,8 +596,8 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Array_Runtime) {
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Array_RuntimeZeroValue) {
-  // array<f32>();
-  auto* tc = array<i32>();
+  // array<i32>();
+  auto* tc = array(ty.i32(), nullptr);
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());

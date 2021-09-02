@@ -61,7 +61,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
 // TODO(dsinclair): Is this possible? What order should it output in?
 TEST_F(HlslGeneratorImplTest_Type,
        DISABLED_EmitType_ArrayOfArrayOfRuntimeArray) {
-  auto* arr = ty.array(ty.array(ty.array<bool, 4>(), 5), 0);
+  auto* arr = ty.array(ty.array(ty.array<bool, 4>(), 5));
   Global("G", arr, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();

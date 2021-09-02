@@ -63,6 +63,49 @@ TEST_F(ResolverAssignmentValidationTest, AssignIncompatibleTypes) {
 }
 
 TEST_F(ResolverAssignmentValidationTest,
+       AssignArraysWithDifferentSizeExpressions_Pass) {
+  // let len = 4u;
+  // {
+  //   var a : array<f32, 4>;
+  //   var b : array<f32, len>;
+  //   a = b;
+  // }
+
+  GlobalConst("len", nullptr, Expr(4u));
+
+  auto* a = Var("a", ty.array(ty.f32(), 4));
+  auto* b = Var("b", ty.array(ty.f32(), "len"));
+
+  auto* assign = Assign(Source{{12, 34}}, "a", "b");
+  WrapInFunction(a, b, assign);
+
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverAssignmentValidationTest,
+       AssignArraysWithDifferentSizeExpressions_Fail) {
+  // let len = 5u;
+  // {
+  //   var a : array<f32, 4>;
+  //   var b : array<f32, len>;
+  //   a = b;
+  // }
+
+  GlobalConst("len", nullptr, Expr(5u));
+
+  auto* a = Var("a", ty.array(ty.f32(), 4));
+  auto* b = Var("b", ty.array(ty.f32(), "len"));
+
+  auto* assign = Assign(Source{{12, 34}}, "a", "b");
+  WrapInFunction(a, b, assign);
+
+  ASSERT_FALSE(r()->Resolve());
+
+  EXPECT_EQ(r()->error(),
+            "12:34 error: cannot assign 'array<f32, len>' to 'array<f32, 4>'");
+}
+
+TEST_F(ResolverAssignmentValidationTest,
        AssignCompatibleTypesInBlockStatement_Pass) {
   // {
   //  var a : i32 = 2;

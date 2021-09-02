@@ -698,7 +698,7 @@ TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_StructOfAtomic) {
 }
 
 TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_RuntimeArray) {
-  auto* ret_type = ty.array(Source{{12, 34}}, ty.i32(), 0);
+  auto* ret_type = ty.array(Source{{12, 34}}, ty.i32());
   Func("f", {}, ret_type, {});
 
   EXPECT_FALSE(r()->Resolve());

@@ -862,19 +862,18 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarArrayMissingType) {
          "              ^\n");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarArrayInvalidSize) {
-  EXPECT(
-      "var i : array<u32, x>;",
-      "test.wgsl:1:20 error: expected signed integer literal for array size\n"
-      "var i : array<u32, x>;\n"
-      "                   ^\n");
+TEST_F(ParserImplErrorTest, GlobalDeclVarArrayMissingSize) {
+  EXPECT("var i : array<u32, >;",
+         "test.wgsl:1:20 error: expected array size expression\n"
+         "var i : array<u32, >;\n"
+         "                   ^\n");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarArrayNegativeSize) {
-  EXPECT("var i : array<u32, -3>;",
-         "test.wgsl:1:20 error: array size must be greater than 0\n"
-         "var i : array<u32, -3>;\n"
-         "                   ^^\n");
+TEST_F(ParserImplErrorTest, GlobalDeclVarArrayInvalidSize) {
+  EXPECT("var i : array<u32, !>;",
+         "test.wgsl:1:20 error: expected array size expression\n"
+         "var i : array<u32, !>;\n"
+         "                   ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarDecoListEmpty) {

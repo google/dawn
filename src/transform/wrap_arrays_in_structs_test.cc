@@ -40,7 +40,7 @@ var<private> arr : array<i32, 4>;
 )";
   auto* expect = R"(
 struct tint_array_wrapper {
-  arr : array<i32, 4>;
+  arr : array<i32, 4u>;
 };
 
 var<private> arr : tint_array_wrapper;
@@ -60,7 +60,7 @@ fn f() {
 )";
   auto* expect = R"(
 struct tint_array_wrapper {
-  arr : array<i32, 4>;
+  arr : array<i32, 4u>;
 };
 
 fn f() {
@@ -82,7 +82,7 @@ fn f(a : array<i32, 4>) -> i32 {
 )";
   auto* expect = R"(
 struct tint_array_wrapper {
-  arr : array<i32, 4>;
+  arr : array<i32, 4u>;
 };
 
 fn f(a : tint_array_wrapper) -> i32 {
@@ -103,11 +103,11 @@ fn f() -> array<i32, 4> {
 )";
   auto* expect = R"(
 struct tint_array_wrapper {
-  arr : array<i32, 4>;
+  arr : array<i32, 4u>;
 };
 
 fn f() -> tint_array_wrapper {
-  return tint_array_wrapper(array<i32, 4>(1, 2, 3, 4));
+  return tint_array_wrapper(array<i32, 4u>(1, 2, 3, 4));
 }
 )";
 
@@ -132,22 +132,22 @@ fn f() {
 )";
   auto* expect = R"(
 struct tint_array_wrapper {
-  arr : array<i32, 2>;
+  arr : array<i32, 2u>;
 };
 
 type Inner = tint_array_wrapper;
 
 struct tint_array_wrapper_1 {
-  arr : array<tint_array_wrapper, 2>;
+  arr : array<tint_array_wrapper, 2u>;
 };
 
 type Array = tint_array_wrapper_1;
 
 fn f() {
   var arr : tint_array_wrapper_1;
-  arr = tint_array_wrapper_1(array<tint_array_wrapper, 2>());
-  arr = tint_array_wrapper_1(array<tint_array_wrapper, 2>(tint_array_wrapper(array<i32, 2>(1, 2)), tint_array_wrapper(array<i32, 2>(3, 4))));
-  let vals : tint_array_wrapper_1 = tint_array_wrapper_1(array<tint_array_wrapper, 2>(tint_array_wrapper(array<i32, 2>(1, 2)), tint_array_wrapper(array<i32, 2>(3, 4))));
+  arr = tint_array_wrapper_1(array<tint_array_wrapper, 2u>());
+  arr = tint_array_wrapper_1(array<tint_array_wrapper, 2u>(tint_array_wrapper(array<i32, 2u>(1, 2)), tint_array_wrapper(array<i32, 2u>(3, 4))));
+  let vals : tint_array_wrapper_1 = tint_array_wrapper_1(array<tint_array_wrapper, 2u>(tint_array_wrapper(array<i32, 2u>(1, 2)), tint_array_wrapper(array<i32, 2u>(3, 4))));
   arr = vals;
   let x = arr.arr[3];
 }
@@ -168,11 +168,11 @@ struct S {
 )";
   auto* expect = R"(
 struct tint_array_wrapper {
-  arr : array<i32, 4>;
+  arr : array<i32, 4u>;
 };
 
 struct tint_array_wrapper_1 {
-  arr : array<i32, 8>;
+  arr : array<i32, 8u>;
 };
 
 struct S {
@@ -197,15 +197,15 @@ struct S {
 )";
   auto* expect = R"(
 struct tint_array_wrapper {
-  arr : array<i32, 4>;
+  arr : array<i32, 4u>;
 };
 
 struct tint_array_wrapper_1 {
-  arr : array<tint_array_wrapper, 4>;
+  arr : array<tint_array_wrapper, 4u>;
 };
 
 struct tint_array_wrapper_2 {
-  arr : array<tint_array_wrapper_1, 4>;
+  arr : array<tint_array_wrapper_1, 4u>;
 };
 
 struct S {
@@ -234,15 +234,15 @@ fn f(s : S) -> i32 {
 )";
   auto* expect = R"(
 struct tint_array_wrapper {
-  arr : array<i32, 4>;
+  arr : array<i32, 4u>;
 };
 
 struct tint_array_wrapper_1 {
-  arr : array<tint_array_wrapper, 4>;
+  arr : array<tint_array_wrapper, 4u>;
 };
 
 struct tint_array_wrapper_2 {
-  arr : array<tint_array_wrapper_1, 4>;
+  arr : array<tint_array_wrapper_1, 4u>;
 };
 
 struct S {
@@ -282,7 +282,7 @@ fn f2() {
 type T0 = i32;
 
 struct tint_array_wrapper {
-  arr : array<i32, 1>;
+  arr : array<i32, 1u>;
 };
 
 type T1 = tint_array_wrapper;
@@ -290,7 +290,7 @@ type T1 = tint_array_wrapper;
 type T2 = i32;
 
 struct tint_array_wrapper_1 {
-  arr : array<i32, 2>;
+  arr : array<i32, 2u>;
 };
 
 fn f1(a : tint_array_wrapper_1) {
@@ -299,7 +299,7 @@ fn f1(a : tint_array_wrapper_1) {
 type T3 = i32;
 
 struct tint_array_wrapper_2 {
-  arr : array<i32, 3>;
+  arr : array<i32, 3u>;
 };
 
 fn f2() {

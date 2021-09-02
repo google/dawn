@@ -399,8 +399,12 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
       return false;
     }
 
-    if (!ary->IsRuntimeArray())
-      out << ", " << ary->size();
+    if (!ary->IsRuntimeArray()) {
+      out << ", ";
+      if (!EmitExpression(out, ary->Size())) {
+        return false;
+      }
+    }
 
     out << ">";
   } else if (ty->Is<ast::Bool>()) {
