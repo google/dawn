@@ -28,6 +28,7 @@
 #include "dawn_native/CreatePipelineAsyncTask.h"
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/ErrorData.h"
+#include "dawn_native/ErrorInjector.h"
 #include "dawn_native/ErrorScope.h"
 #include "dawn_native/ExternalTexture.h"
 #include "dawn_native/Instance.h"
@@ -264,10 +265,18 @@ namespace dawn_native {
 
     void DeviceBase::HandleError(InternalErrorType type, const char* message) {
         if (type == InternalErrorType::DeviceLost) {
+            mState = State::Disconnected;
+
+            // If the ErrorInjector is enabled, then the device loss might be fake and the device
+            // still be executing commands. Force a wait for idle in this case, with State being
+            // Disconnected so we can detect this case in WaitForIdleForDestruction.
+            if (ErrorInjectorEnabled()) {
+                IgnoreErrors(WaitForIdleForDestruction());
+            }
+
             // A real device lost happened. Set the state to disconnected as the device cannot be
             // used. Also tags all commands as completed since the device stopped running.
             AssumeCommandsComplete();
-            mState = State::Disconnected;
         } else if (type == InternalErrorType::Internal) {
             // If we receive an internal error, assume the backend can't recover and proceed with
             // device destruction. We first wait for all previous commands to be completed so that

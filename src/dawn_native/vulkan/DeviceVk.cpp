@@ -879,6 +879,16 @@ namespace dawn_native { namespace vulkan {
 
             VkResult result = VkResult::WrapUnsafe(VK_TIMEOUT);
             do {
+                // If WaitForIdleForDesctruction is called while we are Disconnected, it means that
+                // the device lost came from the ErrorInjector and we need to wait without allowing
+                // any more error to be injected. This is because the device lost was "fake" and
+                // commands might still be running.
+                if (GetState() == State::Disconnected) {
+                    result = VkResult::WrapUnsafe(
+                        fn.WaitForFences(mVkDevice, 1, &*fence, true, UINT64_MAX));
+                    continue;
+                }
+
                 result = VkResult::WrapUnsafe(
                     INJECT_ERROR_OR_RUN(fn.WaitForFences(mVkDevice, 1, &*fence, true, UINT64_MAX),
                                         VK_ERROR_DEVICE_LOST));
