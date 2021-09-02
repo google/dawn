@@ -27,7 +27,7 @@ namespace dawn_native {
     class PipelineLayoutBase;
     class RenderPipelineBase;
     class ShaderModuleBase;
-    struct ComputePipelineDescriptor;
+    struct FlatComputePipelineDescriptor;
 
     struct CreatePipelineAsyncCallbackTaskBase : CallbackTask {
         CreatePipelineAsyncCallbackTaskBase(std::string errorMessage, void* userData);
@@ -69,14 +69,10 @@ namespace dawn_native {
 
     // CreateComputePipelineAsyncTask defines all the inputs and outputs of
     // CreateComputePipelineAsync() tasks, which are the same among all the backends.
-    // TODO(crbug.com/dawn/529): Define a "flat descriptor"
-    // (like utils::ComboRenderPipelineDescriptor) in ComputePipeline.h that's reused here and for
-    // caching, etc. ValidateComputePipelineDescriptor() could produce that flat descriptor so that
-    // it is reused in other places.
     class CreateComputePipelineAsyncTask {
       public:
         CreateComputePipelineAsyncTask(Ref<ComputePipelineBase> nonInitializedComputePipeline,
-                                       const ComputePipelineDescriptor* descriptor,
+                                       std::unique_ptr<FlatComputePipelineDescriptor> descriptor,
                                        size_t blueprintHash,
                                        WGPUCreateComputePipelineAsyncCallback callback,
                                        void* userdata);
@@ -92,10 +88,7 @@ namespace dawn_native {
         WGPUCreateComputePipelineAsyncCallback mCallback;
         void* mUserdata;
 
-        std::string mLabel;
-        Ref<PipelineLayoutBase> mLayout;
-        std::string mEntryPoint;
-        Ref<ShaderModuleBase> mComputeShaderModule;
+        std::unique_ptr<FlatComputePipelineDescriptor> mAppliedDescriptor;
     };
 
 }  // namespace dawn_native

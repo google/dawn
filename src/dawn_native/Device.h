@@ -46,6 +46,7 @@ namespace dawn_native {
     class PersistentCache;
     class StagingBufferBase;
     struct CallbackTask;
+    struct FlatComputePipelineDescriptor;
     struct InternalPipelineStore;
     struct ShaderModuleParseResult;
 
@@ -350,10 +351,8 @@ namespace dawn_native {
 
         ResultOrError<Ref<BindGroupLayoutBase>> CreateEmptyBindGroupLayout();
 
-        ResultOrError<Ref<PipelineLayoutBase>>
-        ValidateLayoutAndGetComputePipelineDescriptorWithDefaults(
-            const ComputePipelineDescriptor& descriptor,
-            ComputePipelineDescriptor* outDescriptor);
+        MaybeError ValidateLayoutAndSetDefaultLayout(
+            FlatComputePipelineDescriptor* appliedDescriptor);
         ResultOrError<Ref<PipelineLayoutBase>>
         ValidateLayoutAndGetRenderPipelineDescriptorWithDefaults(
             const RenderPipelineDescriptor& descriptor,
@@ -367,10 +366,11 @@ namespace dawn_native {
             size_t blueprintHash);
         Ref<RenderPipelineBase> AddOrGetCachedRenderPipeline(Ref<RenderPipelineBase> renderPipeline,
                                                              size_t blueprintHash);
-        virtual void CreateComputePipelineAsyncImpl(const ComputePipelineDescriptor* descriptor,
-                                                    size_t blueprintHash,
-                                                    WGPUCreateComputePipelineAsyncCallback callback,
-                                                    void* userdata);
+        virtual void CreateComputePipelineAsyncImpl(
+            std::unique_ptr<FlatComputePipelineDescriptor> descriptor,
+            size_t blueprintHash,
+            WGPUCreateComputePipelineAsyncCallback callback,
+            void* userdata);
         virtual void CreateRenderPipelineAsyncImpl(const RenderPipelineDescriptor* descriptor,
                                                    size_t blueprintHash,
                                                    WGPUCreateRenderPipelineAsyncCallback callback,

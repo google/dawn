@@ -31,7 +31,7 @@ namespace dawn_native { namespace metal {
             Device* device,
             const ComputePipelineDescriptor* descriptor);
         static void CreateAsync(Device* device,
-                                const ComputePipelineDescriptor* descriptor,
+                                std::unique_ptr<FlatComputePipelineDescriptor> descriptor,
                                 size_t blueprintHash,
                                 WGPUCreateComputePipelineAsyncCallback callback,
                                 void* userdata);

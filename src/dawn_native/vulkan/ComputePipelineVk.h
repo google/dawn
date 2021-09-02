@@ -30,7 +30,7 @@ namespace dawn_native { namespace vulkan {
             Device* device,
             const ComputePipelineDescriptor* descriptor);
         static void CreateAsync(Device* device,
-                                const ComputePipelineDescriptor* descriptor,
+                                std::unique_ptr<FlatComputePipelineDescriptor> descriptor,
                                 size_t blueprintHash,
                                 WGPUCreateComputePipelineAsyncCallback callback,
                                 void* userdata);

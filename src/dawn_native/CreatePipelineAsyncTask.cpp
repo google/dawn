@@ -103,7 +103,7 @@ namespace dawn_native {
 
     CreateComputePipelineAsyncTask::CreateComputePipelineAsyncTask(
         Ref<ComputePipelineBase> nonInitializedComputePipeline,
-        const ComputePipelineDescriptor* descriptor,
+        std::unique_ptr<FlatComputePipelineDescriptor> descriptor,
         size_t blueprintHash,
         WGPUCreateComputePipelineAsyncCallback callback,
         void* userdata)
@@ -111,32 +111,21 @@ namespace dawn_native {
           mBlueprintHash(blueprintHash),
           mCallback(callback),
           mUserdata(userdata),
-          mLabel(descriptor->label != nullptr ? descriptor->label : ""),
-          mLayout(descriptor->layout),
-          mEntryPoint(descriptor->compute.entryPoint),
-          mComputeShaderModule(descriptor->compute.module) {
+          mAppliedDescriptor(std::move(descriptor)) {
         ASSERT(mComputePipeline != nullptr);
 
         // TODO(jiawei.shao@intel.com): save nextInChain when it is supported in Dawn.
-        ASSERT(descriptor->nextInChain == nullptr);
+        ASSERT(mAppliedDescriptor->nextInChain == nullptr);
     }
 
     void CreateComputePipelineAsyncTask::Run() {
-        ComputePipelineDescriptor descriptor;
-        if (!mLabel.empty()) {
-            descriptor.label = mLabel.c_str();
-        }
-        descriptor.compute.entryPoint = mEntryPoint.c_str();
-        descriptor.layout = mLayout.Get();
-        descriptor.compute.module = mComputeShaderModule.Get();
-        MaybeError maybeError = mComputePipeline->Initialize(&descriptor);
+        MaybeError maybeError = mComputePipeline->Initialize(mAppliedDescriptor.get());
         std::string errorMessage;
         if (maybeError.IsError()) {
             mComputePipeline = nullptr;
             errorMessage = maybeError.AcquireError()->GetMessage();
         }
 
-        mComputeShaderModule = nullptr;
         mComputePipeline->GetDevice()->AddComputePipelineAsyncCallbackTask(
             mComputePipeline, errorMessage, mCallback, mUserdata, mBlueprintHash);
     }
