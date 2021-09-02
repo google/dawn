@@ -1866,10 +1866,10 @@ bool Resolver::Function(ast::Function* func) {
       }
 
       constexpr const char* kErrBadType =
-          "workgroup_size parameter must be either literal or module-scope "
+          "workgroup_size argument must be either literal or module-scope "
           "constant of type i32 or u32";
       constexpr const char* kErrInconsistentType =
-          "workgroup_size parameters must be of the same type, either i32 "
+          "workgroup_size arguments must be of the same type, either i32 "
           "or u32";
 
       auto* ty = TypeOf(expr);
@@ -1908,6 +1908,12 @@ bool Resolver::Function(ast::Function* func) {
           info->workgroup_size[i].value = 0;
           continue;
         }
+      } else if (!expr->Is<ast::ScalarConstructorExpression>()) {
+        AddError(
+            "workgroup_size argument must be either a literal or a "
+            "module-scope constant",
+            values[i]->source());
+        return false;
       }
 
       auto val = ConstantValueOf(expr);
@@ -1918,7 +1924,7 @@ bool Resolver::Function(ast::Function* func) {
       }
       // Validate and set the default value for this dimension.
       if (is_i32 ? val.Elements()[0].i32 < 1 : val.Elements()[0].u32 < 1) {
-        AddError("workgroup_size parameter must be at least 1",
+        AddError("workgroup_size argument must be at least 1",
                  values[i]->source());
         return false;
       }
