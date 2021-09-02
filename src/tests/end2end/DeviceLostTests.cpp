@@ -506,6 +506,18 @@ TEST_P(DeviceLostTest, FreeBindGroupAfterDeviceLossWithPendingCommands) {
     bg = nullptr;
 }
 
+// Attempting to set an object label after device loss should not cause an error.
+TEST_P(DeviceLostTest, SetLabelAfterDeviceLoss) {
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+    std::string label = "test";
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = wgpu::BufferUsage::Uniform;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+    LoseForTesting();
+    buffer.SetLabel(label.c_str());
+}
+
 DAWN_INSTANTIATE_TEST(DeviceLostTest,
                       D3D12Backend(),
                       MetalBackend(),

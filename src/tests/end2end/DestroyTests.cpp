@@ -152,6 +152,18 @@ TEST_P(DestroyTest, TextureSubmitDestroySubmit) {
     ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
 }
 
+// Attempting to set an object label after it has been destroyed should not cause an error.
+TEST_P(DestroyTest, DestroyThenSetLabel) {
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+    std::string label = "test";
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = wgpu::BufferUsage::Uniform;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+    buffer.Destroy();
+    buffer.SetLabel(label.c_str());
+}
+
 DAWN_INSTANTIATE_TEST(DestroyTest,
                       D3D12Backend(),
                       MetalBackend(),

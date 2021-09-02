@@ -373,6 +373,10 @@ namespace dawn_native { namespace d3d12 {
     }
 
     void SetDebugName(Device* device, ID3D12Object* object, const char* prefix, std::string label) {
+        if (!object) {
+            return;
+        }
+
         if (label.empty() || !device->IsToggleEnabled(Toggle::UseUserDefinedLabelsInBackend)) {
             object->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(prefix), prefix);
             return;

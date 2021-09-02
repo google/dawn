@@ -170,6 +170,10 @@ namespace dawn_native { namespace vulkan {
                       uint64_t objectHandle,
                       const char* prefix,
                       std::string label) {
+        if (!objectHandle) {
+            return;
+        }
+
         if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
             VkDebugUtilsObjectNameInfoEXT objectNameInfo;
             objectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
