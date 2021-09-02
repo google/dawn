@@ -75,7 +75,6 @@ if (${TINT_BUILD_SPV_READER} AND ${TINT_BUILD_MSL_WRITER})
   add_tint_fuzzer(tint_spv_reader_msl_writer_fuzzer)
 endif()
 
-
 if (${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
   add_tint_fuzzer(tint_ast_clone_fuzzer)
 endif()
@@ -90,4 +89,18 @@ endif()
 
 if (${TINT_BUILD_REGEX_FUZZER})
   add_subdirectory(tint_regex_fuzzer)
+endif()
+
+if (${TINT_BUILD_WGSL_READER}
+    AND ${TINT_BUILD_HLSL_WRITER}
+    AND ${TINT_BUILD_MSL_WRITER}
+    AND ${TINT_BUILD_SPV_WRITER}
+    AND ${TINT_BUILD_WGSL_WRITER})
+  add_executable(tint_black_box_fuzz_target
+    tint_black_box_fuzz_target
+    tint_common_fuzzer.cc
+    tint_common_fuzzer.h
+    )
+  target_link_libraries(tint_black_box_fuzz_target libtint)
+  tint_default_compile_options(tint_black_box_fuzz_target)
 endif()
