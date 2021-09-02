@@ -180,7 +180,7 @@ namespace dawn_native { namespace d3d12 {
         return InitializeBase(parseResult);
     }
 
-    ResultOrError<std::string> ShaderModule::TranslateToHLSLWithTint(
+    ResultOrError<std::string> ShaderModule::TranslateToHLSL(
         const char* entryPointName,
         SingleShaderStage stage,
         PipelineLayout* layout,
@@ -322,8 +322,8 @@ namespace dawn_native { namespace d3d12 {
         std::string remappedEntryPoint;
         CompiledShader compiledShader = {};
         DAWN_TRY_ASSIGN(hlslSource,
-                        TranslateToHLSLWithTint(entryPointName, stage, layout, &remappedEntryPoint,
-                                                &compiledShader.firstOffsetInfo));
+                        TranslateToHLSL(entryPointName, stage, layout, &remappedEntryPoint,
+                                        &compiledShader.firstOffsetInfo));
         entryPointName = remappedEntryPoint.c_str();
 
         if (device->IsToggleEnabled(Toggle::DumpShaders)) {

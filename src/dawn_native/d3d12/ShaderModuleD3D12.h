@@ -59,11 +59,11 @@ namespace dawn_native { namespace d3d12 {
         ~ShaderModule() override = default;
         MaybeError Initialize(ShaderModuleParseResult* parseResult);
 
-        ResultOrError<std::string> TranslateToHLSLWithTint(const char* entryPointName,
-                                                           SingleShaderStage stage,
-                                                           PipelineLayout* layout,
-                                                           std::string* remappedEntryPointName,
-                                                           FirstOffsetInfo* firstOffsetInfo) const;
+        ResultOrError<std::string> TranslateToHLSL(const char* entryPointName,
+                                                   SingleShaderStage stage,
+                                                   PipelineLayout* layout,
+                                                   std::string* remappedEntryPointName,
+                                                   FirstOffsetInfo* firstOffsetInfo) const;
 
         ResultOrError<PersistentCacheKey> CreateHLSLKey(const char* entryPointName,
                                                         SingleShaderStage stage,

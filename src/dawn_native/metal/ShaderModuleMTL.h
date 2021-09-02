@@ -47,15 +47,15 @@ namespace dawn_native { namespace metal {
                                   const VertexState* vertexState = nullptr);
 
       private:
-        ResultOrError<std::string> TranslateToMSLWithTint(const char* entryPointName,
-                                                          SingleShaderStage stage,
-                                                          const PipelineLayout* layout,
-                                                          uint32_t sampleMask,
-                                                          const RenderPipeline* renderPipeline,
-                                                          const VertexState* vertexState,
-                                                          std::string* remappedEntryPointName,
-                                                          bool* needsStorageBufferLength,
-                                                          bool* hasInvariantAttribute);
+        ResultOrError<std::string> TranslateToMSL(const char* entryPointName,
+                                                  SingleShaderStage stage,
+                                                  const PipelineLayout* layout,
+                                                  uint32_t sampleMask,
+                                                  const RenderPipeline* renderPipeline,
+                                                  const VertexState* vertexState,
+                                                  std::string* remappedEntryPointName,
+                                                  bool* needsStorageBufferLength,
+                                                  bool* hasInvariantAttribute);
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModule() override = default;
         MaybeError Initialize(ShaderModuleParseResult* parseResult);
