@@ -540,8 +540,18 @@ if (${TINT_BUILD_FUZZERS})
   if (${COMPILER_IS_LIKE_GNU})
     target_compile_options(libtint-fuzz PRIVATE -fvisibility=hidden)
   endif()
-  target_compile_options(libtint-fuzz PUBLIC -fsanitize=fuzzer -fsanitize-coverage=trace-cmp)
-  target_link_options(libtint-fuzz PUBLIC -fsanitize=fuzzer -fsanitize-coverage=trace-cmp)
+
+  if (NOT ${TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS} STREQUAL "")
+    # This is set when the fuzzers are being built by OSS-Fuzz. In this case the
+    # variable provides the necessary linker flags, and OSS-Fuzz will take care
+    # of passing suitable compiler flags.
+    target_link_options(libtint-fuzz PUBLIC ${TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS})
+  else()
+    # When the fuzzers are being built outside of OSS-Fuzz, specific libFuzzer
+    # arguments to enable fuzzing are used.
+    target_compile_options(libtint-fuzz PUBLIC -fsanitize=fuzzer -fsanitize-coverage=trace-cmp)
+    target_link_options(libtint-fuzz PUBLIC -fsanitize=fuzzer -fsanitize-coverage=trace-cmp)
+  endif()
 endif()
 
 if(${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})

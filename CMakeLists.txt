@@ -58,6 +58,8 @@ option(TINT_BUILD_TESTS "Build tests" ${TINT_BUILD_TESTS_DEFAULT})
 option(TINT_BUILD_AS_OTHER_OS "Override OS detection to force building of *_other.cc files" OFF)
 option(TINT_BUILD_REMOTE_COMPILE "Build the remote-compile tool for validating shaders on a remote machine" OFF)
 
+set(TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS "" CACHE STRING "Used by OSS-Fuzz to control, via link options, which fuzzing engine should be used")
+
 option(TINT_ENABLE_MSAN "Enable memory sanitizer" OFF)
 option(TINT_ENABLE_ASAN "Enable address sanitizer" OFF)
 option(TINT_ENABLE_UBSAN "Enable undefined behaviour sanitizer" OFF)
@@ -85,6 +87,10 @@ message(STATUS "Tint build with MSAN: ${TINT_ENABLE_MSAN}")
 message(STATUS "Tint build with UBSAN: ${TINT_ENABLE_UBSAN}")
 message(STATUS "Tint build checking [chromium-style]: ${TINT_CHECK_CHROMIUM_STYLE}")
 message(STATUS "Tint build remote-compile tool: ${TINT_BUILD_REMOTE_COMPILE}")
+
+if (NOT ${TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS} STREQUAL "")
+  message(STATUS "Using provided LIB_FUZZING_ENGINE options: ${TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS}")
+endif()
 
 message(STATUS "Using python3")
 find_package(PythonInterp 3 REQUIRED)
