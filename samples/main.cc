@@ -841,7 +841,7 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
 
   return true;
 #else
-  std::cerr << "MSL writer not enabled in tint build" << std::endl;
+  std::cerr << "HLSL writer not enabled in tint build" << std::endl;
   return false;
 #endif  // TINT_BUILD_HLSL_WRITER
 }
