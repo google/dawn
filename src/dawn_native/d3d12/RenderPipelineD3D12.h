@@ -36,6 +36,9 @@ namespace dawn_native { namespace d3d12 {
 
         const FirstOffsetInfo& GetFirstOffsetInfo() const;
 
+        // Dawn API
+        void SetLabelImpl() override;
+
       private:
         ~RenderPipeline() override;
         using RenderPipelineBase::RenderPipelineBase;

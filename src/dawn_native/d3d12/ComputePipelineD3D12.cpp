@@ -57,6 +57,9 @@ namespace dawn_native { namespace d3d12 {
         DAWN_TRY(CheckHRESULT(
             d3d12Device->CreateComputePipelineState(&d3dDesc, IID_PPV_ARGS(&mPipelineState)),
             "D3D12 creating pipeline state"));
+
+        SetLabelImpl();
+
         return {};
     }
 
@@ -66,6 +69,11 @@ namespace dawn_native { namespace d3d12 {
 
     ID3D12PipelineState* ComputePipeline::GetPipelineState() const {
         return mPipelineState.Get();
+    }
+
+    void ComputePipeline::SetLabelImpl() {
+        SetDebugName(ToBackend(GetDevice()), GetPipelineState(), "Dawn_ComputePipeline",
+                     GetLabel());
     }
 
     void ComputePipeline::CreateAsync(Device* device,

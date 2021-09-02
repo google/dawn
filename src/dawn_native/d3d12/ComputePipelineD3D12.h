@@ -37,6 +37,9 @@ namespace dawn_native { namespace d3d12 {
 
         ID3D12PipelineState* GetPipelineState() const;
 
+        // Dawn API
+        void SetLabelImpl() override;
+
       private:
         ~ComputePipeline() override;
         using ComputePipelineBase::ComputePipelineBase;

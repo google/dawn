@@ -8,12 +8,14 @@
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WvecANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
 #include <string>
 #include "tests/unittests/validation/ValidationTest.h"
+#include "utils/ComboRenderPipelineDescriptor.h"
+#include "utils/WGPUHelpers.h"
 
 class LabelTest : public ValidationTest {};
 
@@ -81,6 +83,122 @@ TEST_F(LabelTest, Texture) {
         descriptor.label = label.c_str();
         wgpu::Texture texture = device.CreateTexture(&descriptor);
         std::string readbackLabel = dawn_native::GetObjectLabelForTesting(texture.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+}
+
+TEST_F(LabelTest, RenderPipeline) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+    std::string label = "test";
+
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+            [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+                return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            })");
+
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+                return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+            })");
+
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+
+    // The label should be empty if one was not set.
+    {
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(pipeline.Get());
+        ASSERT_TRUE(readbackLabel.empty());
+    }
+
+    // Test setting a label through API
+    {
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+        pipeline.SetLabel(label.c_str());
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(pipeline.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+
+    // Test setting a label through the descriptor.
+    {
+        descriptor.label = label.c_str();
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(pipeline.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+}
+
+TEST_F(LabelTest, ComputePipeline) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+    std::string label = "test";
+
+    wgpu::ShaderModule computeModule = utils::CreateShaderModule(device, R"(
+    [[stage(compute), workgroup_size(1)]] fn main() {
+    })");
+    wgpu::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, nullptr);
+    wgpu::ComputePipelineDescriptor descriptor;
+    descriptor.layout = pl;
+    descriptor.compute.module = computeModule;
+    descriptor.compute.entryPoint = "main";
+
+    // The label should be empty if one was not set.
+    {
+        wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(pipeline.Get());
+        ASSERT_TRUE(readbackLabel.empty());
+    }
+
+    // Test setting a label through API
+    {
+        wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&descriptor);
+        pipeline.SetLabel(label.c_str());
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(pipeline.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+
+    // Test setting a label through the descriptor.
+    {
+        descriptor.label = label.c_str();
+        wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(pipeline.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+}
+
+TEST_F(LabelTest, ShaderModule) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+    std::string label = "test";
+
+    const char* source = R"(
+    [[stage(compute), workgroup_size(1)]] fn main() {
+    })";
+
+    wgpu::ShaderModuleWGSLDescriptor wgslDesc;
+    wgslDesc.source = source;
+    wgpu::ShaderModuleDescriptor descriptor;
+    descriptor.nextInChain = &wgslDesc;
+
+    // The label should be empty if one was not set.
+    {
+        wgpu::ShaderModule shaderModule = device.CreateShaderModule(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(shaderModule.Get());
+        ASSERT_TRUE(readbackLabel.empty());
+    }
+
+    // Test setting a label through API
+    {
+        wgpu::ShaderModule shaderModule = device.CreateShaderModule(&descriptor);
+        shaderModule.SetLabel(label.c_str());
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(shaderModule.Get());
+        ASSERT_EQ(label, readbackLabel);
+    }
+
+    // Test setting a label through the descriptor.
+    {
+        descriptor.label = label.c_str();
+        wgpu::ShaderModule shaderModule = device.CreateShaderModule(&descriptor);
+        std::string readbackLabel = dawn_native::GetObjectLabelForTesting(shaderModule.Get());
         ASSERT_EQ(label, readbackLabel);
     }
 }

@@ -515,10 +515,19 @@ namespace dawn_native { namespace vulkan {
         createInfo.basePipelineHandle = VkPipeline{};
         createInfo.basePipelineIndex = -1;
 
-        return CheckVkSuccess(
+        DAWN_TRY(CheckVkSuccess(
             device->fn.CreateGraphicsPipelines(device->GetVkDevice(), VkPipelineCache{}, 1,
                                                &createInfo, nullptr, &*mHandle),
-            "CreateGraphicsPipeline");
+            "CreateGraphicsPipeline"));
+
+        SetLabelImpl();
+
+        return {};
+    }
+
+    void RenderPipeline::SetLabelImpl() {
+        SetDebugName(ToBackend(GetDevice()), VK_OBJECT_TYPE_PIPELINE,
+                     reinterpret_cast<uint64_t&>(mHandle), "Dawn_RenderPipeline", GetLabel());
     }
 
     VkPipelineVertexInputStateCreateInfo RenderPipeline::ComputeVertexInputDesc(

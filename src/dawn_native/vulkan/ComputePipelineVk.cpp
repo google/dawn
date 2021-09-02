@@ -68,10 +68,19 @@ namespace dawn_native { namespace vulkan {
                 VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_REQUIRED_SUBGROUP_SIZE_CREATE_INFO_EXT);
         }
 
-        return CheckVkSuccess(
+        DAWN_TRY(CheckVkSuccess(
             device->fn.CreateComputePipelines(device->GetVkDevice(), ::VK_NULL_HANDLE, 1,
                                               &createInfo, nullptr, &*mHandle),
-            "CreateComputePipeline");
+            "CreateComputePipeline"));
+
+        SetLabelImpl();
+
+        return {};
+    }
+
+    void ComputePipeline::SetLabelImpl() {
+        SetDebugName(ToBackend(GetDevice()), VK_OBJECT_TYPE_PIPELINE,
+                     reinterpret_cast<uint64_t&>(mHandle), "Dawn_ComputePipeline", GetLabel());
     }
 
     ComputePipeline::~ComputePipeline() {

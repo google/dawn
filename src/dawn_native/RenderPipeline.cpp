@@ -473,6 +473,7 @@ namespace dawn_native {
                                            const RenderPipelineDescriptor* descriptor)
         : PipelineBase(device,
                        descriptor->layout,
+                       descriptor->label,
                        {{SingleShaderStage::Vertex, descriptor->vertex.module,
                          descriptor->vertex.entryPoint},
                         {SingleShaderStage::Fragment, descriptor->fragment->module,

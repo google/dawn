@@ -426,6 +426,9 @@ namespace dawn_native { namespace d3d12 {
         DAWN_TRY(CheckHRESULT(device->GetD3D12Device()->CreateGraphicsPipelineState(
                                   &descriptorD3D12, IID_PPV_ARGS(&mPipelineState)),
                               "D3D12 create graphics pipeline state"));
+
+        SetLabelImpl();
+
         return {};
     }
 
@@ -443,6 +446,10 @@ namespace dawn_native { namespace d3d12 {
 
     const FirstOffsetInfo& RenderPipeline::GetFirstOffsetInfo() const {
         return mFirstOffsetInfo;
+    }
+
+    void RenderPipeline::SetLabelImpl() {
+        SetDebugName(ToBackend(GetDevice()), GetPipelineState(), "Dawn_RenderPipeline", GetLabel());
     }
 
     D3D12_INPUT_LAYOUT_DESC RenderPipeline::ComputeInputLayout(

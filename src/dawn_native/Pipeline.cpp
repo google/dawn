@@ -50,8 +50,9 @@ namespace dawn_native {
 
     PipelineBase::PipelineBase(DeviceBase* device,
                                PipelineLayoutBase* layout,
+                               const char* label,
                                std::vector<StageAndDescriptor> stages)
-        : CachedObject(device, kLabelNotImplemented), mLayout(layout) {
+        : CachedObject(device, label), mLayout(layout) {
         ASSERT(!stages.empty());
 
         for (const StageAndDescriptor& stage : stages) {

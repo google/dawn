@@ -1124,7 +1124,7 @@ namespace dawn_native {
     // ShaderModuleBase
 
     ShaderModuleBase::ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor)
-        : CachedObject(device, kLabelNotImplemented), mType(Type::Undefined) {
+        : CachedObject(device, descriptor->label), mType(Type::Undefined) {
         ASSERT(descriptor->nextInChain != nullptr);
         const ShaderModuleSPIRVDescriptor* spirvDesc = nullptr;
         FindInChain(descriptor->nextInChain, &spirvDesc);

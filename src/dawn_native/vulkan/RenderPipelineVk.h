@@ -32,6 +32,9 @@ namespace dawn_native { namespace vulkan {
 
         VkPipeline GetHandle() const;
 
+        // Dawn API
+        void SetLabelImpl() override;
+
       private:
         ~RenderPipeline() override;
         using RenderPipelineBase::RenderPipelineBase;

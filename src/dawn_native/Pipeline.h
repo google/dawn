@@ -62,6 +62,7 @@ namespace dawn_native {
       protected:
         PipelineBase(DeviceBase* device,
                      PipelineLayoutBase* layout,
+                     const char* label,
                      std::vector<StageAndDescriptor> stages);
         PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 

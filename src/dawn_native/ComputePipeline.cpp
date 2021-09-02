@@ -76,6 +76,7 @@ namespace dawn_native {
                                              const ComputePipelineDescriptor* descriptor)
         : PipelineBase(device,
                        descriptor->layout,
+                       descriptor->label,
                        {{SingleShaderStage::Compute, descriptor->compute.module,
                          descriptor->compute.entryPoint}}) {
     }
