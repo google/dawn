@@ -66,6 +66,8 @@ if (build_with_chromium) {
     ]
 
     sources = [
+      "random_generator.cc",
+      "random_generator.h",
       "tint_common_fuzzer.cc",
       "tint_common_fuzzer.h",
     ]

@@ -17,6 +17,8 @@ function(add_tint_fuzzer NAME)
     ${NAME}.cc
     cli.cc
     cli.h
+    random_generator.cc
+    random_generator.h
     tint_common_fuzzer.cc
     tint_common_fuzzer.h
     tint_init_fuzzer.cc

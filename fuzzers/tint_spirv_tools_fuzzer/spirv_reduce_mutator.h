@@ -16,12 +16,12 @@
 #define FUZZERS_TINT_SPIRV_TOOLS_FUZZER_SPIRV_REDUCE_MUTATOR_H_
 
 #include <memory>
-#include <random>
 #include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "fuzzers/random_generator.h"
 #include "fuzzers/tint_spirv_tools_fuzzer/mutator.h"
 
 #include "source/reduce/reduction_opportunity_finder.h"
@@ -65,7 +65,7 @@ class SpirvReduceMutator : public Mutator {
  private:
   template <typename T, typename... Args>
   void MaybeAddFinder(Args&&... args) {
-    if (enable_all_reductions_ || std::uniform_int_distribution<>(0, 1)(rng_)) {
+    if (enable_all_reductions_ || generator_.GetBool()) {
       finders_.push_back(std::make_unique<T>(std::forward<Args>(args)...));
     }
   }
@@ -73,16 +73,14 @@ class SpirvReduceMutator : public Mutator {
   template <typename T>
   T* GetRandomElement(std::vector<T>* arr) {
     assert(!arr->empty() && "Can't get random element from an empty vector");
-    auto index =
-        std::uniform_int_distribution<size_t>(0, arr->size() - 1)(rng_);
+    auto index = generator_.GetUInt64(arr->size());
     return &(*arr)[index];
   }
 
   template <typename T>
   T* GetRandomElement(std::vector<std::unique_ptr<T>>* arr) {
     assert(!arr->empty() && "Can't get random element from an empty vector");
-    auto index =
-        std::uniform_int_distribution<size_t>(0, arr->size() - 1)(rng_);
+    auto index = generator_.GetUInt64(arr->size());
     return (*arr)[index].get();
   }
 
@@ -97,7 +95,7 @@ class SpirvReduceMutator : public Mutator {
       finders_;
 
   // Random number generator initialized with `seed_`.
-  std::mt19937 rng_;
+  RandomGenerator generator_;
 
   // All the errors produced by the reducer.
   std::stringstream errors_;

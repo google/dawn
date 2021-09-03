@@ -15,8 +15,8 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "fuzzers/random_generator.h"
 #include "fuzzers/tint_ast_fuzzer/cli.h"
-#include "fuzzers/tint_ast_fuzzer/mt_rng.h"
 #include "fuzzers/tint_ast_fuzzer/mutator.h"
 #include "fuzzers/tint_ast_fuzzer/override_cli_params.h"
 #include "fuzzers/tint_common_fuzzer.h"
@@ -54,8 +54,8 @@ extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
   }
 
   // Run the mutator.
-  MtRng mt_rng(seed);
-  ProbabilityContext probability_context(&mt_rng);
+  RandomGenerator generator(seed);
+  ProbabilityContext probability_context(&generator);
   program = Mutate(std::move(program), &probability_context,
                    cli_params.enable_all_mutations,
                    cli_params.mutation_batch_size, nullptr);

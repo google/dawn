@@ -42,8 +42,6 @@ if (build_with_chromium) {
       "cli.cc",
       "cli.h",
       "fuzzer.cc",
-      "mt_rng.cc",
-      "mt_rng.h",
       "mutation.cc",
       "mutation.h",
       "mutation_finder.cc",
@@ -60,8 +58,6 @@ if (build_with_chromium) {
       "probability_context.cc",
       "probability_context.h",
       "protobufs/tint_ast_fuzzer.h",
-      "random_number_generator.cc",
-      "random_number_generator.h",
       "util.h",
     ]
   }

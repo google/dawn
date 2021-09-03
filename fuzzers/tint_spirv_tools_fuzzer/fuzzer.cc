@@ -14,10 +14,10 @@
 
 #include <cassert>
 #include <memory>
-#include <random>
 #include <string>
 #include <vector>
 
+#include "fuzzers/random_generator.h"
 #include "fuzzers/tint_common_fuzzer.h"
 #include "fuzzers/tint_spirv_tools_fuzzer/cli.h"
 #include "fuzzers/tint_spirv_tools_fuzzer/mutator_cache.h"
@@ -67,9 +67,8 @@ std::unique_ptr<Mutator> CreateMutator(const std::vector<uint32_t>& binary,
   }
 
   assert(!types.empty() && "At least one mutator type must be specified");
-  std::mt19937 rng(seed);
-  auto mutator_type =
-      types[std::uniform_int_distribution<size_t>(0, types.size() - 1)(rng)];
+  RandomGenerator generator(seed);
+  auto mutator_type = types[generator.GetUInt64(types.size())];
 
   const auto& mutator_params = context->params.mutator_params;
   switch (mutator_type) {

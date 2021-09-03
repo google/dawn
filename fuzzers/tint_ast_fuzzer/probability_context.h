@@ -18,7 +18,7 @@
 #include <utility>
 #include <vector>
 
-#include "fuzzers/tint_ast_fuzzer/random_number_generator.h"
+#include "fuzzers/random_generator.h"
 
 namespace tint {
 namespace fuzzers {
@@ -29,16 +29,21 @@ namespace ast_fuzzer {
 class ProbabilityContext {
  public:
   /// Initializes this instance with a random number generator.
-  /// @param rng - may not be a `nullptr`. Must remain in scope as long as this
+  /// @param generator - must not be a `nullptr`. Must remain in scope as long
+  /// as this
   ///     instance exists.
-  explicit ProbabilityContext(RandomNumberGenerator* rng);
+  explicit ProbabilityContext(RandomGenerator* generator);
 
-  /// @copydoc RandomNumberGenerator::RandomBool
-  bool RandomBool() { return rng_->RandomBool(); }
+  /// Get random bool with even odds
+  /// @returns true 50% of the time and false %50 of time.
+  bool RandomBool() { return generator_->GetBool(); }
 
-  /// @copydoc RandomNumberGenerator::ChoosePercentage
+  /// Get random bool with weighted odds
+  /// @param percentage - likelihood of true being returned
+  /// @returns true |percentage|% of the time, and false (100 - |percentage|)%
+  /// of the time.
   bool ChoosePercentage(uint32_t percentage) {
-    return rng_->ChoosePercentage(percentage);
+    return generator_->GetWeightedBool(percentage);
   }
 
   /// Returns a random value in the range `[0; arr.size())`.
@@ -47,7 +52,7 @@ class ProbabilityContext {
   /// @return the random index in the `arr`.
   template <typename T>
   size_t GetRandomIndex(const std::vector<T>& arr) {
-    return static_cast<size_t>(rng_->RandomUint64(arr.size()));
+    return static_cast<size_t>(generator_->GetUInt64(arr.size()));
   }
 
   /// @return the probability of replacing some identifier with some other one.
@@ -60,7 +65,7 @@ class ProbabilityContext {
   /// @return an random number in the range `[a; b]`.
   uint32_t RandomFromRange(std::pair<uint32_t, uint32_t> range);
 
-  RandomNumberGenerator* rng_;
+  RandomGenerator* generator_;
 
   uint32_t chance_of_replacing_identifiers_;
 };

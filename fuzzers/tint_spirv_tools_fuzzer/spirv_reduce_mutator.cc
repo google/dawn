@@ -44,7 +44,7 @@ SpirvReduceMutator::SpirvReduceMutator(spv_target_env target_env,
                                        bool validate_after_each_reduction)
     : ir_context_(nullptr),
       finders_(),
-      rng_(seed),
+      generator_(seed),
       errors_(),
       is_valid_(true),
       reductions_batch_size_(reductions_batch_size),

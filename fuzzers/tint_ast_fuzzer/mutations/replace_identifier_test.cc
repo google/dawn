@@ -16,7 +16,6 @@
 
 #include "gtest/gtest.h"
 
-#include "fuzzers/tint_ast_fuzzer/mt_rng.h"
 #include "fuzzers/tint_ast_fuzzer/mutations/replace_identifier.h"
 #include "fuzzers/tint_ast_fuzzer/mutator.h"
 #include "fuzzers/tint_ast_fuzzer/probability_context.h"

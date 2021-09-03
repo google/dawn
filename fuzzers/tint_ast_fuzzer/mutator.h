@@ -20,7 +20,6 @@
 #include "fuzzers/tint_ast_fuzzer/node_id_map.h"
 #include "fuzzers/tint_ast_fuzzer/probability_context.h"
 #include "fuzzers/tint_ast_fuzzer/protobufs/tint_ast_fuzzer.h"
-#include "fuzzers/tint_ast_fuzzer/random_number_generator.h"
 
 #include "src/program.h"
 

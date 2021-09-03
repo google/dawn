@@ -13,6 +13,7 @@
 # limitations under the License.
 
 set(FUZZER_SOURCES
+        ../random_generator.cc
         cli.cc
         fuzzer.cc
         mutator.cc
@@ -23,6 +24,7 @@ set(FUZZER_SOURCES
         util.cc)
 
 set(FUZZER_SOURCES ${FUZZER_SOURCES}
+        ../random_generator.h
         cli.h
         mutator.h
         mutator_cache.h
@@ -32,8 +34,8 @@ set(FUZZER_SOURCES ${FUZZER_SOURCES}
         util.h)
 
 set(FUZZER_SOURCES ${FUZZER_SOURCES}
-        ../tint_common_fuzzer.h
-        ../tint_common_fuzzer.cc)
+        ../tint_common_fuzzer.cc
+        ../tint_common_fuzzer.h)
 
 function(configure_spirv_tools_fuzzer_target NAME SOURCES)
     add_executable(${NAME} ${SOURCES})
@@ -61,6 +63,7 @@ target_compile_definitions(tint_spirv_tools_fuzzer PRIVATE TARGET_FUZZER)
 target_link_libraries(tint_spirv_tools_fuzzer libtint-fuzz)
 
 set(DEBUGGER_SOURCES
+        ../random_generator.cc
         cli.cc
         mutator.cc
         mutator_debugger.cc
@@ -70,6 +73,7 @@ set(DEBUGGER_SOURCES
         util.cc)
 
 set(DEBUGGER_SOURCES ${DEBUGGER_SOURCES}
+        ../random_generator.h
         cli.h
         mutator.h
         spirv_fuzz_mutator.h

@@ -15,11 +15,11 @@
 #ifndef FUZZERS_TINT_SPIRV_TOOLS_FUZZER_SPIRV_OPT_MUTATOR_H_
 #define FUZZERS_TINT_SPIRV_TOOLS_FUZZER_SPIRV_OPT_MUTATOR_H_
 
-#include <random>
 #include <sstream>
 #include <string>
 #include <vector>
 
+#include "fuzzers/random_generator.h"
 #include "fuzzers/tint_spirv_tools_fuzzer/mutator.h"
 #include "spirv-tools/libspirv.h"
 
@@ -86,7 +86,7 @@ class SpirvOptMutator : public Mutator {
   std::stringstream errors_;
 
   // The random number generator initialized with `seed_`.
-  std::mt19937 rng_;
+  RandomGenerator generator_;
 };
 
 }  // namespace spvtools_fuzzer

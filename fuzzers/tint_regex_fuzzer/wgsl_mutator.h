@@ -15,10 +15,11 @@
 #ifndef FUZZERS_TINT_REGEX_FUZZER_WGSL_MUTATOR_H_
 #define FUZZERS_TINT_REGEX_FUZZER_WGSL_MUTATOR_H_
 
-#include <random>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "fuzzers/random_generator.h"
 
 namespace tint {
 namespace fuzzers {
@@ -114,7 +115,7 @@ void ReplaceInterval(size_t start_index,
 /// @return true if a swap happened or false otherwise.
 bool SwapRandomIntervals(const std::string& delimiter,
                          std::string& wgsl_code,
-                         std::mt19937& generator);
+                         RandomGenerator& generator);
 
 /// A function that, given a WGSL-like string and a delimiter,
 /// generates another WGSL-like string by deleting a random
@@ -125,7 +126,7 @@ bool SwapRandomIntervals(const std::string& delimiter,
 /// @return true if a deletion happened or false otherwise.
 bool DeleteRandomInterval(const std::string& delimiter,
                           std::string& wgsl_code,
-                          std::mt19937& generator);
+                          RandomGenerator& generator);
 
 /// A function that, given a WGSL-like string and a delimiter,
 /// generates another WGSL-like string by duplicating a random
@@ -136,20 +137,22 @@ bool DeleteRandomInterval(const std::string& delimiter,
 /// @return true if a duplication happened or false otherwise.
 bool DuplicateRandomInterval(const std::string& delimiter,
                              std::string& wgsl_code,
-                             std::mt19937& generator);
+                             RandomGenerator& generator);
 
 /// Replaces a randomly-chosen identifier in wgsl_code.
 /// @param wgsl_code - WGSL-like string where the replacement will occur.
 /// @param generator - the random number generator.
 /// @return true if a replacement happened or false otherwise.
-bool ReplaceRandomIdentifier(std::string& wgsl_code, std::mt19937& generator);
+bool ReplaceRandomIdentifier(std::string& wgsl_code,
+                             RandomGenerator& generator);
 
 /// Replaces the value of a randomly-chosen integer with one of
 /// the values in the set {INT_MAX, INT_MIN, 0, -1}.
 /// @param wgsl_code - WGSL-like string where the replacement will occur.
 /// @param generator - the random number generator.
 /// @return true if a replacement happened or false otherwise.
-bool ReplaceRandomIntLiteral(std::string& wgsl_code, std::mt19937& generator);
+bool ReplaceRandomIntLiteral(std::string& wgsl_code,
+                             RandomGenerator& generator);
 
 }  // namespace regex_fuzzer
 }  // namespace fuzzers

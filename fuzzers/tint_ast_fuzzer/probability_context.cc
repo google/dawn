@@ -14,6 +14,8 @@
 
 #include "fuzzers/tint_ast_fuzzer/probability_context.h"
 
+#include <cassert>
+
 namespace tint {
 namespace fuzzers {
 namespace ast_fuzzer {
@@ -23,15 +25,18 @@ const std::pair<uint32_t, uint32_t> kChanceOfReplacingIdentifiers = {30, 70};
 
 }  // namespace
 
-ProbabilityContext::ProbabilityContext(RandomNumberGenerator* rng)
-    : rng_(rng),
+ProbabilityContext::ProbabilityContext(RandomGenerator* generator)
+    : generator_(generator),
       chance_of_replacing_identifiers_(
-          RandomFromRange(kChanceOfReplacingIdentifiers)) {}
+          RandomFromRange(kChanceOfReplacingIdentifiers)) {
+  assert(generator != nullptr && "generator must not be nullptr");
+}
 
 uint32_t ProbabilityContext::RandomFromRange(
     std::pair<uint32_t, uint32_t> range) {
   assert(range.first <= range.second && "Range must be non-decreasing");
-  return range.first + rng_->RandomUint32(range.second - range.first + 1);
+  return generator_->GetUInt32(
+      range.first, range.second + 1);  // + 1 need since range is inclusive.
 }
 
 }  // namespace ast_fuzzer

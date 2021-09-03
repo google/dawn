@@ -17,13 +17,12 @@
 #include <cassert>
 #include <cstring>
 #include <map>
-#include <random>
 #include <regex>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "fuzzers/tint_regex_fuzzer/util.h"
+#include "fuzzers/random_generator.h"
 
 namespace tint {
 namespace fuzzers {
@@ -137,7 +136,7 @@ void ReplaceInterval(size_t start_index,
 
 bool SwapRandomIntervals(const std::string& delimiter,
                          std::string& wgsl_code,
-                         std::mt19937& generator) {
+                         RandomGenerator& generator) {
   std::vector<size_t> delimiter_positions =
       FindDelimiterIndices(delimiter, wgsl_code);
 
@@ -148,14 +147,10 @@ bool SwapRandomIntervals(const std::string& delimiter,
 
   // When generating the i-th random number, we should make sure that there are
   // at least (3-i) numbers greater than this number.
-  size_t ind1 =
-      GetRandomIntFromRange(0, delimiter_positions.size() - 3U, generator);
-  size_t ind2 = GetRandomIntFromRange(
-      ind1 + 1U, delimiter_positions.size() - 2U, generator);
-  size_t ind3 =
-      GetRandomIntFromRange(ind2, delimiter_positions.size() - 2U, generator);
-  size_t ind4 = GetRandomIntFromRange(
-      ind3 + 1U, delimiter_positions.size() - 1U, generator);
+  size_t ind1 = generator.GetUInt64(delimiter_positions.size() - 3u);
+  size_t ind2 = generator.GetUInt64(ind1 + 1u, delimiter_positions.size() - 2u);
+  size_t ind3 = generator.GetUInt64(ind2, delimiter_positions.size() - 2u);
+  size_t ind4 = generator.GetUInt64(ind3 + 1u, delimiter_positions.size() - 1u);
 
   SwapIntervals(delimiter_positions[ind1],
                 delimiter_positions[ind2] - delimiter_positions[ind1],
@@ -168,7 +163,7 @@ bool SwapRandomIntervals(const std::string& delimiter,
 
 bool DeleteRandomInterval(const std::string& delimiter,
                           std::string& wgsl_code,
-                          std::mt19937& generator) {
+                          RandomGenerator& generator) {
   std::vector<size_t> delimiter_positions =
       FindDelimiterIndices(delimiter, wgsl_code);
 
@@ -177,10 +172,8 @@ bool DeleteRandomInterval(const std::string& delimiter,
     return false;
   }
 
-  size_t ind1 =
-      GetRandomIntFromRange(0, delimiter_positions.size() - 2U, generator);
-  size_t ind2 = GetRandomIntFromRange(
-      ind1 + 1U, delimiter_positions.size() - 1U, generator);
+  size_t ind1 = generator.GetUInt64(delimiter_positions.size() - 2u);
+  size_t ind2 = generator.GetUInt64(ind1 + 1u, delimiter_positions.size() - 1u);
 
   DeleteInterval(delimiter_positions[ind1],
                  delimiter_positions[ind2] - delimiter_positions[ind1],
@@ -191,7 +184,7 @@ bool DeleteRandomInterval(const std::string& delimiter,
 
 bool DuplicateRandomInterval(const std::string& delimiter,
                              std::string& wgsl_code,
-                             std::mt19937& generator) {
+                             RandomGenerator& generator) {
   std::vector<size_t> delimiter_positions =
       FindDelimiterIndices(delimiter, wgsl_code);
 
@@ -200,13 +193,9 @@ bool DuplicateRandomInterval(const std::string& delimiter,
     return false;
   }
 
-  size_t ind1 =
-      GetRandomIntFromRange(0, delimiter_positions.size() - 2U, generator);
-  size_t ind2 = GetRandomIntFromRange(
-      ind1 + 1U, delimiter_positions.size() - 1U, generator);
-
-  size_t ind3 =
-      GetRandomIntFromRange(0, delimiter_positions.size() - 1U, generator);
+  size_t ind1 = generator.GetUInt64(delimiter_positions.size() - 2u);
+  size_t ind2 = generator.GetUInt64(ind1 + 1u, delimiter_positions.size() - 1u);
+  size_t ind3 = generator.GetUInt64(delimiter_positions.size() - 1u);
 
   DuplicateInterval(delimiter_positions[ind1],
                     delimiter_positions[ind2] - delimiter_positions[ind1],
@@ -215,7 +204,8 @@ bool DuplicateRandomInterval(const std::string& delimiter,
   return true;
 }
 
-bool ReplaceRandomIdentifier(std::string& wgsl_code, std::mt19937& generator) {
+bool ReplaceRandomIdentifier(std::string& wgsl_code,
+                             RandomGenerator& generator) {
   std::vector<std::pair<size_t, size_t>> identifiers =
       GetIdentifiers(wgsl_code);
 
@@ -224,15 +214,12 @@ bool ReplaceRandomIdentifier(std::string& wgsl_code, std::mt19937& generator) {
     return false;
   }
 
-  size_t id1_index =
-      GetRandomIntFromRange(0, identifiers.size() - 1U, generator);
-
-  size_t id2_index =
-      GetRandomIntFromRange(0, identifiers.size() - 1U, generator);
+  size_t id1_index = generator.GetUInt64(identifiers.size() - 1u);
+  size_t id2_index = generator.GetUInt64(identifiers.size() - 1u);
 
   // The two identifiers must be different
   while (id1_index == id2_index) {
-    id2_index = GetRandomIntFromRange(0, identifiers.size() - 1U, generator);
+    id2_index = generator.GetUInt64(identifiers.size() - 1u);
   }
 
   ReplaceRegion(identifiers[id1_index].first, identifiers[id1_index].second,
@@ -242,7 +229,8 @@ bool ReplaceRandomIdentifier(std::string& wgsl_code, std::mt19937& generator) {
   return true;
 }
 
-bool ReplaceRandomIntLiteral(std::string& wgsl_code, std::mt19937& generator) {
+bool ReplaceRandomIntLiteral(std::string& wgsl_code,
+                             RandomGenerator& generator) {
   std::vector<std::pair<size_t, size_t>> literals = GetIntLiterals(wgsl_code);
 
   // Need at least one integer literal
@@ -250,14 +238,13 @@ bool ReplaceRandomIntLiteral(std::string& wgsl_code, std::mt19937& generator) {
     return false;
   }
 
-  size_t id1_index = GetRandomIntFromRange(0, literals.size() - 1U, generator);
+  size_t id1_index = generator.GetUInt64(literals.size() - 1u);
 
   // INT_MAX = 2147483647, INT_MIN = -2147483648
   std::vector<std::string> boundary_values = {
       "2147483647", "-2147483648", "1", "-1", "0", "4294967295"};
 
-  size_t boundary_index =
-      GetRandomIntFromRange(0, boundary_values.size() - 1U, generator);
+  size_t boundary_index = generator.GetUInt64(boundary_values.size() - 1u);
 
   ReplaceInterval(literals[id1_index].first, literals[id1_index].second,
                   boundary_values[boundary_index], wgsl_code);

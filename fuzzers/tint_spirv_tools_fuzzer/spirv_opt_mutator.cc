@@ -66,7 +66,7 @@ SpirvOptMutator::SpirvOptMutator(spv_target_env target_env,
       optimized_binary_(),
       validate_after_each_opt_(validate_after_each_opt),
       opt_batch_size_(opt_batch_size),
-      rng_(seed) {
+      generator_(seed) {
   assert(spvtools::SpirvTools(target_env).Validate(original_binary_) &&
          "Initial binary is invalid");
   assert(!opt_passes_.empty() && "Must be at least one pass");
@@ -105,8 +105,7 @@ SpirvOptMutator::Result SpirvOptMutator::Mutate() {
     std::vector<std::string> passes;
 
     while (passes.size() < num_of_passes) {
-      auto idx = std::uniform_int_distribution<size_t>(
-          0, opt_passes_.size() - 1)(rng_);
+      auto idx = generator_.GetUInt64(opt_passes_.size());
       passes.push_back(opt_passes_[idx]);
     }
 

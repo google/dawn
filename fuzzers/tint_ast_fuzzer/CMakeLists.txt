@@ -35,7 +35,7 @@ add_custom_command(
         COMMENT "Generate protobuf sources from proto definition file.")
 
 set(LIBTINT_AST_FUZZER_SOURCES
-        mt_rng.h
+        ../random_generator.h
         mutation.h
         mutation_finder.h
         mutation_finders/replace_identifiers.h
@@ -44,12 +44,11 @@ set(LIBTINT_AST_FUZZER_SOURCES
         node_id_map.h
         probability_context.h
         protobufs/tint_ast_fuzzer.h
-        random_number_generator.h
         util.h
         ${CMAKE_CURRENT_BINARY_DIR}/protobufs/tint_ast_fuzzer.pb.h)
 
 set(LIBTINT_AST_FUZZER_SOURCES ${LIBTINT_AST_FUZZER_SOURCES}
-        mt_rng.cc
+        ../random_generator.cc
         mutation.cc
         mutation_finder.cc
         mutation_finders/replace_identifiers.cc
@@ -57,7 +56,6 @@ set(LIBTINT_AST_FUZZER_SOURCES ${LIBTINT_AST_FUZZER_SOURCES}
         mutator.cc
         node_id_map.cc
         probability_context.cc
-        random_number_generator.cc
         ${CMAKE_CURRENT_BINARY_DIR}/protobufs/tint_ast_fuzzer.pb.cc)
 
 set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/protobufs/tint_ast_fuzzer.pb.cc PROPERTIES COMPILE_FLAGS -w)

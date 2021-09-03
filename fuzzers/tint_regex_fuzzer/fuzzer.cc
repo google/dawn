@@ -16,12 +16,11 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "fuzzers/random_generator.h"
 #include "fuzzers/tint_common_fuzzer.h"
 #include "fuzzers/tint_regex_fuzzer/cli.h"
 #include "fuzzers/tint_regex_fuzzer/override_cli_params.h"
-#include "fuzzers/tint_regex_fuzzer/util.h"
 #include "fuzzers/tint_regex_fuzzer/wgsl_mutator.h"
-
 #include "src/reader/wgsl/parser.h"
 #include "src/writer/wgsl/generator.h"
 
@@ -57,13 +56,13 @@ extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
                                           unsigned seed) {
   std::string wgsl_code(data, data + size);
   const std::vector<std::string> delimiters{";"};
-  std::mt19937 generator(seed);
+  RandomGenerator generator(seed);
 
   std::string delimiter =
-      delimiters[GetRandomIntFromRange(0, delimiters.size() - 1, generator)];
+      delimiters[generator.GetUInt64(delimiters.size() - 1u)];
 
-  MutationKind mutation_kind = static_cast<MutationKind>(GetRandomIntFromRange(
-      0, static_cast<size_t>(MutationKind::kNumMutationKinds) - 1, generator));
+  MutationKind mutation_kind = static_cast<MutationKind>(generator.GetUInt64(
+      static_cast<size_t>(MutationKind::kNumMutationKinds) - 1u));
 
   switch (mutation_kind) {
     case MutationKind::kSwapIntervals:
