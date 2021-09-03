@@ -321,7 +321,8 @@ uint32_t Inspector::GetStorageSize(const std::string& entry_point) {
     }
   }
 
-  if (size > std::numeric_limits<uint32_t>::max()) {
+  if (static_cast<uint64_t>(size) >
+      static_cast<uint64_t>(std::numeric_limits<uint32_t>::max())) {
     return std::numeric_limits<uint32_t>::max();
   }
   return static_cast<uint32_t>(size);
