@@ -223,14 +223,7 @@
             {"value": 9, "name": "one minus dst alpha"},
             {"value": 10, "name": "src alpha saturated"},
             {"value": 11, "name": "constant"},
-            {"value": 12, "name": "one minus constant"},
-
-            {"value": 102, "name": "src color"},
-            {"value": 103, "name": "one minus src color"},
-            {"value": 106, "name": "dst color"},
-            {"value": 107, "name": "one minus dst color"},
-            {"value": 111, "name": "blend color"},
-            {"value": 112, "name": "one minus blend color"}
+            {"value": 12, "name": "one minus constant"}
         ]
     },
     "blend operation": {
@@ -1472,12 +1465,6 @@
                 "name": "set stencil reference",
                 "args": [
                     {"name": "reference", "type": "uint32_t"}
-                ]
-            },
-            {
-                "name": "set blend color",
-                "args": [
-                    {"name": "color", "type": "color", "annotation": "const*"}
                 ]
             },
             {
