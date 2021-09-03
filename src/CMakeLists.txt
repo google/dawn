@@ -639,11 +639,6 @@ if(${TINT_BUILD_TESTS})
     demangler_test.cc
     diagnostic/formatter_test.cc
     diagnostic/printer_test.cc
-    inspector/inspector_test.cc
-    inspector/test_inspector_builder.cc
-    inspector/test_inspector_builder.h
-    inspector/test_inspector_runner.cc
-    inspector/test_inspector_runner.h
     intrinsic_table_test.cc
     program_test.cc
     resolver/assignment_validation_test.cc
@@ -719,6 +714,17 @@ if(${TINT_BUILD_TESTS})
     writer/float_to_string_test.cc
     writer/text_generator_test.cc
   )
+
+  # Inspector tests depend on WGSL reader
+  if(${TINT_BUILD_WGSL_READER})
+    list(APPEND TINT_TEST_SRCS
+      inspector/inspector_test.cc
+      inspector/test_inspector_builder.cc
+      inspector/test_inspector_builder.h
+      inspector/test_inspector_runner.cc
+      inspector/test_inspector_runner.h
+    )
+  endif()
 
   if(${TINT_BUILD_SPV_READER})
     list(APPEND TINT_TEST_SRCS
@@ -839,9 +845,10 @@ if(${TINT_BUILD_TESTS})
   endif()
 
   if(${TINT_BUILD_SPV_WRITER})
+    if(${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
+      list(APPEND TINT_TEST_SRCS transform/spirv_test.cc)
+    endif()
     list(APPEND TINT_TEST_SRCS
-      transform/msl_test.cc
-      transform/spirv_test.cc
       writer/spirv/binary_writer_test.cc
       writer/spirv/builder_accessor_expression_test.cc
       writer/spirv/builder_assign_test.cc
@@ -940,6 +947,9 @@ if(${TINT_BUILD_TESTS})
   endif()
 
   if(${TINT_BUILD_MSL_WRITER})
+    if(${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
+      list(APPEND TINT_TEST_SRCS transform/msl_test.cc)
+    endif()
     list(APPEND TINT_TEST_SRCS
       writer/msl/generator_impl_array_accessor_test.cc
       writer/msl/generator_impl_assign_test.cc
@@ -973,8 +983,10 @@ if(${TINT_BUILD_TESTS})
   endif()
 
   if (${TINT_BUILD_HLSL_WRITER})
+    if(${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
+      list(APPEND TINT_TEST_SRCS transform/hlsl_test.cc)
+    endif()
     list(APPEND TINT_TEST_SRCS
-      transform/hlsl_test.cc
       writer/hlsl/generator_impl_array_accessor_test.cc
       writer/hlsl/generator_impl_assign_test.cc
       writer/hlsl/generator_impl_binary_test.cc

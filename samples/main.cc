@@ -117,16 +117,8 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
   --xcrun                   -- Path to xcrun executable, used to validate MSL output.
                                When specified, automatically enables --validate)";
 
-#ifdef _MSC_VER
-#pragma warning(disable : 4068; suppress : 4100)
-#endif
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter"
 Format parse_format(const std::string& fmt) {
-#pragma clang diagnostic pop
-#ifdef _MSC_VER
-#pragma warning(default : 4068)
-#endif
+  (void)fmt;
 
 #if TINT_BUILD_SPV_WRITER
   if (fmt == "spirv")
@@ -153,6 +145,8 @@ Format parse_format(const std::string& fmt) {
   return Format::kNone;
 }
 
+#if TINT_BUILD_SPV_WRITER || TINT_BUILD_WGSL_WRITER || \
+    TINT_BUILD_MSL_WRITER || TINT_BUILD_HLSL_WRITER
 /// @param input input string
 /// @param suffix potential suffix string
 /// @returns true if input ends with the given suffix.
@@ -163,19 +157,12 @@ bool ends_with(const std::string& input, const std::string& suffix) {
   return (input_len >= suffix_len) &&
          (input_len - suffix_len == input.rfind(suffix));
 }
+#endif
 
 /// @param filename the filename to inspect
 /// @returns the inferred format for the filename suffix
-#ifdef _MSC_VER
-#pragma warning(disable : 4068; suppress : 4100)
-#endif
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter"
 Format infer_format(const std::string& filename) {
-#pragma clang diagnostic pop
-#ifdef _MSC_VER
-#pragma warning(default : 4068)
-#endif
+  (void)filename;
 
 #if TINT_BUILD_SPV_WRITER
   if (ends_with(filename, ".spv")) {
@@ -609,6 +596,9 @@ void PrintWGSL(std::ostream& out, const tint::Program& program) {
   tint::writer::wgsl::Options options;
   auto result = tint::writer::wgsl::Generate(&program, options);
   out << std::endl << result.wgsl << std::endl;
+#else
+  (void)out;
+  (void)program;
 #endif
 }
 
@@ -654,6 +644,8 @@ bool GenerateSpirv(const tint::Program* program, const Options& options) {
 
   return true;
 #else
+  (void)program;
+  (void)options;
   std::cerr << "SPIR-V writer not enabled in tint build" << std::endl;
   return false;
 #endif  // TINT_BUILD_SPV_WRITER
@@ -675,6 +667,8 @@ bool GenerateWgsl(const tint::Program* program, const Options& options) {
 
   return WriteFile(options.output_file, "w", result.wgsl);
 #else
+  (void)program;
+  (void)options;
   std::cerr << "WGSL writer not enabled in tint build" << std::endl;
   return false;
 #endif  // TINT_BUILD_WGSL_WRITER
@@ -788,6 +782,8 @@ bool GenerateMsl(const tint::Program* program, const Options& options) {
 
   return true;
 #else
+  (void)program;
+  (void)options;
   std::cerr << "MSL writer not enabled in tint build" << std::endl;
   return false;
 #endif  // TINT_BUILD_MSL_WRITER
@@ -841,6 +837,8 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
 
   return true;
 #else
+  (void)program;
+  (void)options;
   std::cerr << "HLSL writer not enabled in tint build" << std::endl;
   return false;
 #endif  // TINT_BUILD_HLSL_WRITER
@@ -990,22 +988,22 @@ int main(int argc, const char** argv) {
   }
 
   switch (options.format) {
-#if TINT_BUILD_MSL_WRITER
     case Format::kMsl: {
+#if TINT_BUILD_MSL_WRITER
       transform_inputs.Add<tint::transform::Renamer::Config>(
           tint::transform::Renamer::Target::kMslKeywords);
       transform_manager.Add<tint::transform::Renamer>();
+#endif  // TINT_BUILD_MSL_WRITER
       break;
     }
-#endif  // TINT_BUILD_MSL_WRITER
-#if TINT_BUILD_HLSL_WRITER
     case Format::kHlsl: {
+#if TINT_BUILD_HLSL_WRITER
       transform_inputs.Add<tint::transform::Renamer::Config>(
           tint::transform::Renamer::Target::kHlslKeywords);
       transform_manager.Add<tint::transform::Renamer>();
+#endif  // TINT_BUILD_HLSL_WRITER
       break;
     }
-#endif  // TINT_BUILD_HLSL_WRITER
     default:
       break;
   }

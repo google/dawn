@@ -22,7 +22,10 @@
 #include <utility>
 #include <vector>
 
+#if TINT_BUILD_SPV_READER
 #include "source/opt/ir_context.h"
+#endif
+
 #include "src/program_builder.h"
 #include "src/reader/reader.h"
 #include "src/reader/spirv/entry_point_info.h"

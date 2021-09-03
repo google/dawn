@@ -21,8 +21,11 @@
 #include <utility>
 #include <vector>
 
-#include "gtest/gtest.h"
+#if TINT_BUILD_SPV_READER
 #include "source/opt/ir_context.h"
+#endif
+
+#include "gtest/gtest.h"
 #include "src/demangler.h"
 #include "src/reader/spirv/fail_stream.h"
 #include "src/reader/spirv/function.h"

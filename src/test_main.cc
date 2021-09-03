@@ -14,8 +14,14 @@
 
 #include "gmock/gmock.h"
 #include "src/program.h"
+
+#if TINT_BUILD_SPV_READER
 #include "src/reader/spirv/parser_impl_test_helper.h"
+#endif
+
+#if TINT_BUILD_WGSL_WRITER
 #include "src/writer/wgsl/generator.h"
+#endif
 
 namespace {
 
