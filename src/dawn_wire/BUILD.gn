@@ -83,6 +83,7 @@ dawn_component("dawn_wire") {
     "client/ObjectAllocator.h",
     "client/Queue.cpp",
     "client/Queue.h",
+    "client/RequestTracker.h",
     "client/ShaderModule.cpp",
     "client/ShaderModule.h",
     "server/ObjectStorage.h",
