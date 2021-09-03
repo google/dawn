@@ -305,7 +305,7 @@ Token Lexer::try_hex_float() {
   }
 
   uint32_t mantissa = 0;
-  int32_t exponent = 0;
+  uint32_t exponent = 0;
 
   // `set_next_mantissa_bit_to` sets next `mantissa` bit starting from msb to
   // lsb to value 1 if `set` is true, 0 otherwise
@@ -428,12 +428,23 @@ Token Lexer::try_hex_float() {
     has_exponent = true;
     auto prev_exponent = input_exponent;
     input_exponent = (input_exponent * 10) + dec_value(content_->data[end]);
+    // Check if we've overflowed input_exponent
     if (prev_exponent > input_exponent) {
       return {Token::Type::kError, source,
               "exponent is too large for hex float"};
     }
     end++;
   }
+
+  // Ensure input exponent is not too large; i.e. that it won't overflow when
+  // adding the exponent bias.
+  const uint32_t kIntMax =
+      static_cast<uint32_t>(std::numeric_limits<int32_t>::max());
+  const uint32_t kMaxInputExponent = kIntMax - kExponentBias;
+  if (input_exponent > kMaxInputExponent) {
+    return {Token::Type::kError, source, "exponent is too large for hex float"};
+  }
+
   if (!has_exponent) {
     return {Token::Type::kError, source,
             "expected an exponent value for hex float"};
@@ -444,7 +455,8 @@ Token Lexer::try_hex_float() {
   end_source(source);
 
   // Compute exponent so far
-  exponent = exponent + (input_exponent * exponent_sign);
+  exponent += static_cast<uint32_t>(static_cast<int32_t>(input_exponent) *
+                                    exponent_sign);
 
   // Determine if value is zero
   // Note: it's not enough to check mantissa == 0 as we drop initial bit from
@@ -467,6 +479,10 @@ Token Lexer::try_hex_float() {
     }
   }
 
+  // We can now safely work with exponent as a signed quantity, as there's no
+  // chance to overflow
+  int32_t signed_exponent = static_cast<int32_t>(exponent);
+
   // Shift mantissa to occupy the low 23 bits
   mantissa >>= kMantissaShiftRight;
 
@@ -474,27 +490,27 @@ Token Lexer::try_hex_float() {
   if (!is_zero) {
     // Denorm has exponent 0 and non-zero mantissa. We set the top bit here,
     // then shift the mantissa to make exponent zero.
-    if (exponent <= 0) {
+    if (signed_exponent <= 0) {
       mantissa >>= 1;
       mantissa |= (1 << kMantissaMsb);
     }
 
-    while (exponent < 0) {
+    while (signed_exponent < 0) {
       mantissa >>= 1;
-      ++exponent;
+      ++signed_exponent;
 
       // If underflow, clamp to zero
       if (mantissa == 0) {
-        exponent = 0;
+        signed_exponent = 0;
       }
     }
   }
 
-  if (exponent > kExponentMax) {
+  if (signed_exponent > kExponentMax) {
     // Overflow: set to infinity
-    exponent = kExponentMax;
+    signed_exponent = kExponentMax;
     mantissa = 0;
-  } else if (exponent == kExponentMax && mantissa != 0) {
+  } else if (signed_exponent == kExponentMax && mantissa != 0) {
     // NaN: set to infinity
     mantissa = 0;
   }
@@ -502,7 +518,8 @@ Token Lexer::try_hex_float() {
   // Combine sign, mantissa, and exponent
   uint32_t result_u32 = sign_bit << kSignBit;
   result_u32 |= mantissa;
-  result_u32 |= (exponent & kExponentMask) << kExponentLeftShift;
+  result_u32 |= (static_cast<uint32_t>(signed_exponent) & kExponentMask)
+                << kExponentLeftShift;
 
   // Reinterpret as float and return
   float result;
