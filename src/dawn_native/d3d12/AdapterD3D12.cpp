@@ -109,10 +109,33 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
+    bool Adapter::AreTimestampQueriesSupported() const {
+        D3D12_COMMAND_QUEUE_DESC queueDesc = {};
+        queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+        queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+        ComPtr<ID3D12CommandQueue> d3d12CommandQueue;
+        HRESULT hr = mD3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&d3d12CommandQueue));
+        if (FAILED(hr)) {
+            return false;
+        }
+
+        // GetTimestampFrequency returns an error HRESULT when there are bugs in Windows container
+        // and vGPU implementations.
+        uint64_t timeStampFrequency;
+        hr = d3d12CommandQueue->GetTimestampFrequency(&timeStampFrequency);
+        if (FAILED(hr)) {
+            return false;
+        }
+
+        return true;
+    }
+
     void Adapter::InitializeSupportedExtensions() {
+        if (AreTimestampQueriesSupported()) {
+            mSupportedExtensions.EnableExtension(Extension::TimestampQuery);
+        }
         mSupportedExtensions.EnableExtension(Extension::TextureCompressionBC);
         mSupportedExtensions.EnableExtension(Extension::PipelineStatisticsQuery);
-        mSupportedExtensions.EnableExtension(Extension::TimestampQuery);
         mSupportedExtensions.EnableExtension(Extension::MultiPlanarFormats);
     }
 

@@ -45,6 +45,8 @@ namespace dawn_native { namespace d3d12 {
         ResultOrError<DeviceBase*> CreateDeviceImpl(const DeviceDescriptor* descriptor) override;
         MaybeError ResetInternalDeviceForTestingImpl() override;
 
+        bool AreTimestampQueriesSupported() const;
+
         void InitializeSupportedExtensions();
         MaybeError InitializeDebugLayerFilters();
         void CleanUpDebugLayerFilters();
