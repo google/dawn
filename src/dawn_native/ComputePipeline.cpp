@@ -28,15 +28,15 @@ namespace dawn_native {
 
         // TODO(dawn:800): Remove after deprecation period.
         if (descriptor->compute.module == nullptr && descriptor->computeStage.module != nullptr) {
-            compute.module = descriptor->computeStage.module;
-            compute.entryPoint = descriptor->computeStage.entryPoint;
+            mComputeModule = descriptor->computeStage.module;
+            mEntryPoint = descriptor->computeStage.entryPoint;
         } else {
-            compute.module = descriptor->compute.module;
-            compute.entryPoint = descriptor->compute.entryPoint;
+            mComputeModule = descriptor->compute.module;
+            mEntryPoint = descriptor->compute.entryPoint;
         }
 
-        mComputeModule = compute.module;
-        mEntryPoint = compute.entryPoint;
+        compute.entryPoint = mEntryPoint.c_str();
+        compute.module = mComputeModule.Get();
     }
 
     void FlatComputePipelineDescriptor::SetLayout(Ref<PipelineLayoutBase> appliedLayout) {

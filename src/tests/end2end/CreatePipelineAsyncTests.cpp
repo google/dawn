@@ -101,6 +101,40 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateComputePipelineAsync) {
     ValidateCreateComputePipelineAsync();
 }
 
+// This is a regression test for a bug on the member "entryPoint" of FlatComputePipelineDescriptor.
+TEST_P(CreatePipelineAsyncTest, ReleaseEntryPointAfterCreatComputePipelineAsync) {
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
+        [[block]] struct SSBO {
+            value : u32;
+        };
+        [[group(0), binding(0)]] var<storage, read_write> ssbo : SSBO;
+
+        [[stage(compute), workgroup_size(1)]] fn main() {
+            ssbo.value = 1u;
+        })");
+
+    std::string entryPoint = "main";
+
+    csDesc.compute.entryPoint = entryPoint.c_str();
+
+    device.CreateComputePipelineAsync(
+        &csDesc,
+        [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline returnPipeline,
+           const char* message, void* userdata) {
+            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_Success, status);
+
+            CreatePipelineAsyncTask* task = static_cast<CreatePipelineAsyncTask*>(userdata);
+            task->computePipeline = wgpu::ComputePipeline::Acquire(returnPipeline);
+            task->isCompleted = true;
+            task->message = message;
+        },
+        &task);
+
+    entryPoint = "";
+    ValidateCreateComputePipelineAsync();
+}
+
 // Verify CreateComputePipelineAsync() works as expected when there is any error that happens during
 // the creation of the compute pipeline. The SPEC requires that during the call of
 // CreateComputePipelineAsync() any error won't be forwarded to the error scope / unhandled error
