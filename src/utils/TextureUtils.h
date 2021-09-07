@@ -22,7 +22,7 @@
 #include "common/Assert.h"
 
 namespace utils {
-    static constexpr std::array<wgpu::TextureFormat, 63> kAllTextureFormats = {
+    static constexpr std::array<wgpu::TextureFormat, 91> kAllTextureFormats = {
         wgpu::TextureFormat::R8Unorm,
         wgpu::TextureFormat::R8Snorm,
         wgpu::TextureFormat::R8Uint,
@@ -85,7 +85,35 @@ namespace utils {
         wgpu::TextureFormat::EACR11Unorm,
         wgpu::TextureFormat::EACR11Snorm,
         wgpu::TextureFormat::EACRG11Unorm,
-        wgpu::TextureFormat::EACRG11Snorm};
+        wgpu::TextureFormat::EACRG11Snorm,
+        wgpu::TextureFormat::ASTC4x4Unorm,
+        wgpu::TextureFormat::ASTC4x4UnormSrgb,
+        wgpu::TextureFormat::ASTC5x4Unorm,
+        wgpu::TextureFormat::ASTC5x4UnormSrgb,
+        wgpu::TextureFormat::ASTC5x5Unorm,
+        wgpu::TextureFormat::ASTC5x5UnormSrgb,
+        wgpu::TextureFormat::ASTC6x5Unorm,
+        wgpu::TextureFormat::ASTC6x5UnormSrgb,
+        wgpu::TextureFormat::ASTC6x6Unorm,
+        wgpu::TextureFormat::ASTC6x6UnormSrgb,
+        wgpu::TextureFormat::ASTC8x5Unorm,
+        wgpu::TextureFormat::ASTC8x5UnormSrgb,
+        wgpu::TextureFormat::ASTC8x6Unorm,
+        wgpu::TextureFormat::ASTC8x6UnormSrgb,
+        wgpu::TextureFormat::ASTC8x8Unorm,
+        wgpu::TextureFormat::ASTC8x8UnormSrgb,
+        wgpu::TextureFormat::ASTC10x5Unorm,
+        wgpu::TextureFormat::ASTC10x5UnormSrgb,
+        wgpu::TextureFormat::ASTC10x6Unorm,
+        wgpu::TextureFormat::ASTC10x6UnormSrgb,
+        wgpu::TextureFormat::ASTC10x8Unorm,
+        wgpu::TextureFormat::ASTC10x8UnormSrgb,
+        wgpu::TextureFormat::ASTC10x10Unorm,
+        wgpu::TextureFormat::ASTC10x10UnormSrgb,
+        wgpu::TextureFormat::ASTC12x10Unorm,
+        wgpu::TextureFormat::ASTC12x10UnormSrgb,
+        wgpu::TextureFormat::ASTC12x12Unorm,
+        wgpu::TextureFormat::ASTC12x12UnormSrgb};
 
     static constexpr std::array<wgpu::TextureFormat, 14> kBCFormats = {
         wgpu::TextureFormat::BC1RGBAUnorm,  wgpu::TextureFormat::BC1RGBAUnormSrgb,
@@ -103,10 +131,24 @@ namespace utils {
         wgpu::TextureFormat::EACR11Unorm,     wgpu::TextureFormat::EACR11Snorm,
         wgpu::TextureFormat::EACRG11Unorm,    wgpu::TextureFormat::EACRG11Snorm};
 
-    // TODO(crbug.com/dawn/955) Add formats once implemented.
-    static constexpr std::array<wgpu::TextureFormat, 0> kASTCFormats = {};
+    static constexpr std::array<wgpu::TextureFormat, 28> kASTCFormats = {
+        wgpu::TextureFormat::ASTC4x4Unorm,   wgpu::TextureFormat::ASTC4x4UnormSrgb,
+        wgpu::TextureFormat::ASTC5x4Unorm,   wgpu::TextureFormat::ASTC5x4UnormSrgb,
+        wgpu::TextureFormat::ASTC5x5Unorm,   wgpu::TextureFormat::ASTC5x5UnormSrgb,
+        wgpu::TextureFormat::ASTC6x5Unorm,   wgpu::TextureFormat::ASTC6x5UnormSrgb,
+        wgpu::TextureFormat::ASTC6x6Unorm,   wgpu::TextureFormat::ASTC6x6UnormSrgb,
+        wgpu::TextureFormat::ASTC8x5Unorm,   wgpu::TextureFormat::ASTC8x5UnormSrgb,
+        wgpu::TextureFormat::ASTC8x6Unorm,   wgpu::TextureFormat::ASTC8x6UnormSrgb,
+        wgpu::TextureFormat::ASTC8x8Unorm,   wgpu::TextureFormat::ASTC8x8UnormSrgb,
+        wgpu::TextureFormat::ASTC10x5Unorm,  wgpu::TextureFormat::ASTC10x5UnormSrgb,
+        wgpu::TextureFormat::ASTC10x6Unorm,  wgpu::TextureFormat::ASTC10x6UnormSrgb,
+        wgpu::TextureFormat::ASTC10x8Unorm,  wgpu::TextureFormat::ASTC10x8UnormSrgb,
+        wgpu::TextureFormat::ASTC10x10Unorm, wgpu::TextureFormat::ASTC10x10UnormSrgb,
+        wgpu::TextureFormat::ASTC12x10Unorm, wgpu::TextureFormat::ASTC12x10UnormSrgb,
+        wgpu::TextureFormat::ASTC12x12Unorm, wgpu::TextureFormat::ASTC12x12UnormSrgb,
+    };
 
-    static constexpr std::array<wgpu::TextureFormat, 24> kCompressedFormats = {
+    static constexpr std::array<wgpu::TextureFormat, 52> kCompressedFormats = {
         wgpu::TextureFormat::BC1RGBAUnorm,    wgpu::TextureFormat::BC1RGBAUnormSrgb,
         wgpu::TextureFormat::BC2RGBAUnorm,    wgpu::TextureFormat::BC2RGBAUnormSrgb,
         wgpu::TextureFormat::BC3RGBAUnorm,    wgpu::TextureFormat::BC3RGBAUnormSrgb,
@@ -118,7 +160,21 @@ namespace utils {
         wgpu::TextureFormat::ETC2RGB8A1Unorm, wgpu::TextureFormat::ETC2RGB8A1UnormSrgb,
         wgpu::TextureFormat::ETC2RGBA8Unorm,  wgpu::TextureFormat::ETC2RGBA8UnormSrgb,
         wgpu::TextureFormat::EACR11Unorm,     wgpu::TextureFormat::EACR11Snorm,
-        wgpu::TextureFormat::EACRG11Unorm,    wgpu::TextureFormat::EACRG11Snorm};
+        wgpu::TextureFormat::EACRG11Unorm,    wgpu::TextureFormat::EACRG11Snorm,
+        wgpu::TextureFormat::ASTC4x4Unorm,    wgpu::TextureFormat::ASTC4x4UnormSrgb,
+        wgpu::TextureFormat::ASTC5x4Unorm,    wgpu::TextureFormat::ASTC5x4UnormSrgb,
+        wgpu::TextureFormat::ASTC5x5Unorm,    wgpu::TextureFormat::ASTC5x5UnormSrgb,
+        wgpu::TextureFormat::ASTC6x5Unorm,    wgpu::TextureFormat::ASTC6x5UnormSrgb,
+        wgpu::TextureFormat::ASTC6x6Unorm,    wgpu::TextureFormat::ASTC6x6UnormSrgb,
+        wgpu::TextureFormat::ASTC8x5Unorm,    wgpu::TextureFormat::ASTC8x5UnormSrgb,
+        wgpu::TextureFormat::ASTC8x6Unorm,    wgpu::TextureFormat::ASTC8x6UnormSrgb,
+        wgpu::TextureFormat::ASTC8x8Unorm,    wgpu::TextureFormat::ASTC8x8UnormSrgb,
+        wgpu::TextureFormat::ASTC10x5Unorm,   wgpu::TextureFormat::ASTC10x5UnormSrgb,
+        wgpu::TextureFormat::ASTC10x6Unorm,   wgpu::TextureFormat::ASTC10x6UnormSrgb,
+        wgpu::TextureFormat::ASTC10x8Unorm,   wgpu::TextureFormat::ASTC10x8UnormSrgb,
+        wgpu::TextureFormat::ASTC10x10Unorm,  wgpu::TextureFormat::ASTC10x10UnormSrgb,
+        wgpu::TextureFormat::ASTC12x10Unorm,  wgpu::TextureFormat::ASTC12x10UnormSrgb,
+        wgpu::TextureFormat::ASTC12x12Unorm,  wgpu::TextureFormat::ASTC12x12UnormSrgb};
     static_assert(kCompressedFormats.size() ==
                       kBCFormats.size() + kETC2Formats.size() + kASTCFormats.size(),
                   "Number of compressed format must equal number of BC, ETC2, and ASTC formats.");

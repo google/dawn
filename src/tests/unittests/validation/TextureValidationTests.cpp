@@ -52,8 +52,10 @@ namespace {
         wgpu::Queue queue;
 
       private:
-        static constexpr uint32_t kWidth = 32;
-        static constexpr uint32_t kHeight = 32;
+        // Choose the LCM of all current compressed texture format texel dimensions as the
+        // dimensions of the default texture.
+        static constexpr uint32_t kWidth = 120;
+        static constexpr uint32_t kHeight = 120;
         static constexpr uint32_t kDefaultDepth = 1;
         static constexpr uint32_t kDefaultMipLevels = 1;
         static constexpr uint32_t kDefaultSampleCount = 1;
@@ -577,8 +579,16 @@ namespace {
                 TextureValidationTest::CreateDefaultTextureDescriptor();
             descriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
                                wgpu::TextureUsage::TextureBinding;
+            descriptor.size.width = kWidth;
+            descriptor.size.height = kHeight;
             return descriptor;
         }
+
+      private:
+        // Choose the LCM of all current compressed texture format texel dimensions as the
+        // dimensions of the default texture.
+        static constexpr uint32_t kWidth = 120;
+        static constexpr uint32_t kHeight = 120;
     };
 
     // Test that only CopySrc, CopyDst and Sampled are accepted as usage in compressed formats.
@@ -641,71 +651,51 @@ namespace {
         }
     }
 
-    // Test that it is invalid to use a number that is not a multiple of 4 (the compressed block
-    // width and height of all BC formats) as the width or height in BC formats.
-    TEST_F(CompressedTextureFormatsValidationTests, BCFormatsTextureSize) {
-        for (wgpu::TextureFormat format : utils::kBCFormats) {
+    // Test that it is invalid to use numbers for a texture's width/height that are not multiples
+    // of the compressed block sizes.
+    TEST_F(CompressedTextureFormatsValidationTests, TextureSize) {
+        for (wgpu::TextureFormat format : utils::kCompressedFormats) {
+            uint32_t blockWidth = utils::GetTextureFormatBlockWidth(format);
+            uint32_t blockHeight = utils::GetTextureFormatBlockHeight(format);
+
+            // Test that the default size (120 x 120) is valid for all formats.
             {
                 wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
                 descriptor.format = format;
-                ASSERT_TRUE(descriptor.size.width % 4 == 0 && descriptor.size.height % 4 == 0);
+                ASSERT_TRUE(descriptor.size.width % blockWidth == 0 &&
+                            descriptor.size.height % blockHeight == 0);
                 device.CreateTexture(&descriptor);
             }
 
+            // Test that invalid width should cause an error. Note that if the block width of the
+            // compression type is even, we test that alignment to half the width is not sufficient.
             {
                 wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
                 descriptor.format = format;
-                descriptor.size.width = 30;
+                descriptor.size.width =
+                    blockWidth % 2 == 0 ? blockWidth - (blockWidth / 2) : blockWidth - 1;
                 ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
             }
 
+            // Test that invalid width should cause an error. Note that if the block height of the
+            // compression type is even, we test that alignment to half the height is not
+            // sufficient.
             {
                 wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
                 descriptor.format = format;
-                descriptor.size.height = 30;
+                descriptor.size.height =
+                    blockHeight % 2 == 0 ? blockHeight - (blockHeight / 2) : blockHeight - 1;
                 ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
             }
 
+            // Test a working dimension based on some constant multipliers to the dimensions.
             {
+                constexpr uint32_t kWidthMultiplier = 3;
+                constexpr uint32_t kHeightMultiplier = 8;
                 wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
                 descriptor.format = format;
-                descriptor.size.width = 12;
-                descriptor.size.height = 32;
-                device.CreateTexture(&descriptor);
-            }
-        }
-    }
-
-    // Test that it is invalid to use a number that is not a multiple of 4 (the compressed block
-    // width and height of all ETC2 formats) as the width or height in ETC2 formats.
-    TEST_F(CompressedTextureFormatsValidationTests, ETC2FormatsTextureSize) {
-        for (wgpu::TextureFormat format : utils::kETC2Formats) {
-            {
-                wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
-                descriptor.format = format;
-                ASSERT_TRUE(descriptor.size.width % 4 == 0 && descriptor.size.height % 4 == 0);
-                device.CreateTexture(&descriptor);
-            }
-
-            {
-                wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
-                descriptor.format = format;
-                descriptor.size.width = 30;
-                ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
-            }
-
-            {
-                wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
-                descriptor.format = format;
-                descriptor.size.height = 30;
-                ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
-            }
-
-            {
-                wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
-                descriptor.format = format;
-                descriptor.size.width = 12;
-                descriptor.size.height = 32;
+                descriptor.size.width = kWidthMultiplier * blockWidth;
+                descriptor.size.height = kHeightMultiplier * blockHeight;
                 device.CreateTexture(&descriptor);
             }
         }

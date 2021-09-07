@@ -83,7 +83,40 @@ namespace utils {
     }
 
     bool IsASTCTextureFormat(wgpu::TextureFormat textureFormat) {
-        return false;
+        switch (textureFormat) {
+            case wgpu::TextureFormat::ASTC4x4Unorm:
+            case wgpu::TextureFormat::ASTC4x4UnormSrgb:
+            case wgpu::TextureFormat::ASTC5x4Unorm:
+            case wgpu::TextureFormat::ASTC5x4UnormSrgb:
+            case wgpu::TextureFormat::ASTC5x5Unorm:
+            case wgpu::TextureFormat::ASTC5x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC6x5Unorm:
+            case wgpu::TextureFormat::ASTC6x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC6x6Unorm:
+            case wgpu::TextureFormat::ASTC6x6UnormSrgb:
+            case wgpu::TextureFormat::ASTC8x5Unorm:
+            case wgpu::TextureFormat::ASTC8x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC8x6Unorm:
+            case wgpu::TextureFormat::ASTC8x6UnormSrgb:
+            case wgpu::TextureFormat::ASTC8x8Unorm:
+            case wgpu::TextureFormat::ASTC8x8UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x5Unorm:
+            case wgpu::TextureFormat::ASTC10x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x6Unorm:
+            case wgpu::TextureFormat::ASTC10x6UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x8Unorm:
+            case wgpu::TextureFormat::ASTC10x8UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x10Unorm:
+            case wgpu::TextureFormat::ASTC10x10UnormSrgb:
+            case wgpu::TextureFormat::ASTC12x10Unorm:
+            case wgpu::TextureFormat::ASTC12x10UnormSrgb:
+            case wgpu::TextureFormat::ASTC12x12Unorm:
+            case wgpu::TextureFormat::ASTC12x12UnormSrgb:
+                return true;
+
+            default:
+                return false;
+        }
     }
 
     uint32_t GetTexelBlockSizeInBytes(wgpu::TextureFormat textureFormat) {
@@ -167,6 +200,36 @@ namespace utils {
             case wgpu::TextureFormat::EACRG11Snorm:
                 return 16u;
 
+            case wgpu::TextureFormat::ASTC4x4Unorm:
+            case wgpu::TextureFormat::ASTC4x4UnormSrgb:
+            case wgpu::TextureFormat::ASTC5x4Unorm:
+            case wgpu::TextureFormat::ASTC5x4UnormSrgb:
+            case wgpu::TextureFormat::ASTC5x5Unorm:
+            case wgpu::TextureFormat::ASTC5x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC6x5Unorm:
+            case wgpu::TextureFormat::ASTC6x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC6x6Unorm:
+            case wgpu::TextureFormat::ASTC6x6UnormSrgb:
+            case wgpu::TextureFormat::ASTC8x5Unorm:
+            case wgpu::TextureFormat::ASTC8x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC8x6Unorm:
+            case wgpu::TextureFormat::ASTC8x6UnormSrgb:
+            case wgpu::TextureFormat::ASTC8x8Unorm:
+            case wgpu::TextureFormat::ASTC8x8UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x5Unorm:
+            case wgpu::TextureFormat::ASTC10x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x6Unorm:
+            case wgpu::TextureFormat::ASTC10x6UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x8Unorm:
+            case wgpu::TextureFormat::ASTC10x8UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x10Unorm:
+            case wgpu::TextureFormat::ASTC10x10UnormSrgb:
+            case wgpu::TextureFormat::ASTC12x10Unorm:
+            case wgpu::TextureFormat::ASTC12x10UnormSrgb:
+            case wgpu::TextureFormat::ASTC12x12Unorm:
+            case wgpu::TextureFormat::ASTC12x12UnormSrgb:
+                return 16u;
+
             case wgpu::TextureFormat::Depth24Plus:
             case wgpu::TextureFormat::Depth24PlusStencil8:
 
@@ -248,6 +311,41 @@ namespace utils {
             case wgpu::TextureFormat::EACRG11Snorm:
                 return 4u;
 
+            case wgpu::TextureFormat::ASTC4x4Unorm:
+            case wgpu::TextureFormat::ASTC4x4UnormSrgb:
+                return 4u;
+            case wgpu::TextureFormat::ASTC5x4Unorm:
+            case wgpu::TextureFormat::ASTC5x4UnormSrgb:
+            case wgpu::TextureFormat::ASTC5x5Unorm:
+            case wgpu::TextureFormat::ASTC5x5UnormSrgb:
+                return 5u;
+            case wgpu::TextureFormat::ASTC6x5Unorm:
+            case wgpu::TextureFormat::ASTC6x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC6x6Unorm:
+            case wgpu::TextureFormat::ASTC6x6UnormSrgb:
+                return 6u;
+            case wgpu::TextureFormat::ASTC8x5Unorm:
+            case wgpu::TextureFormat::ASTC8x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC8x6Unorm:
+            case wgpu::TextureFormat::ASTC8x6UnormSrgb:
+            case wgpu::TextureFormat::ASTC8x8Unorm:
+            case wgpu::TextureFormat::ASTC8x8UnormSrgb:
+                return 8u;
+            case wgpu::TextureFormat::ASTC10x5Unorm:
+            case wgpu::TextureFormat::ASTC10x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x6Unorm:
+            case wgpu::TextureFormat::ASTC10x6UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x8Unorm:
+            case wgpu::TextureFormat::ASTC10x8UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x10Unorm:
+            case wgpu::TextureFormat::ASTC10x10UnormSrgb:
+                return 10u;
+            case wgpu::TextureFormat::ASTC12x10Unorm:
+            case wgpu::TextureFormat::ASTC12x10UnormSrgb:
+            case wgpu::TextureFormat::ASTC12x12Unorm:
+            case wgpu::TextureFormat::ASTC12x12UnormSrgb:
+                return 12u;
+
             // Block size of a multi-planar format depends on aspect.
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
 
@@ -325,6 +423,41 @@ namespace utils {
             case wgpu::TextureFormat::EACRG11Unorm:
             case wgpu::TextureFormat::EACRG11Snorm:
                 return 4u;
+
+            case wgpu::TextureFormat::ASTC4x4Unorm:
+            case wgpu::TextureFormat::ASTC4x4UnormSrgb:
+            case wgpu::TextureFormat::ASTC5x4Unorm:
+            case wgpu::TextureFormat::ASTC5x4UnormSrgb:
+                return 4u;
+            case wgpu::TextureFormat::ASTC5x5Unorm:
+            case wgpu::TextureFormat::ASTC5x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC6x5Unorm:
+            case wgpu::TextureFormat::ASTC6x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC8x5Unorm:
+            case wgpu::TextureFormat::ASTC8x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x5Unorm:
+            case wgpu::TextureFormat::ASTC10x5UnormSrgb:
+                return 5u;
+            case wgpu::TextureFormat::ASTC6x6Unorm:
+            case wgpu::TextureFormat::ASTC6x6UnormSrgb:
+            case wgpu::TextureFormat::ASTC8x6Unorm:
+            case wgpu::TextureFormat::ASTC8x6UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x6Unorm:
+            case wgpu::TextureFormat::ASTC10x6UnormSrgb:
+                return 6u;
+            case wgpu::TextureFormat::ASTC8x8Unorm:
+            case wgpu::TextureFormat::ASTC8x8UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x8Unorm:
+            case wgpu::TextureFormat::ASTC10x8UnormSrgb:
+                return 8u;
+            case wgpu::TextureFormat::ASTC10x10Unorm:
+            case wgpu::TextureFormat::ASTC10x10UnormSrgb:
+            case wgpu::TextureFormat::ASTC12x10Unorm:
+            case wgpu::TextureFormat::ASTC12x10UnormSrgb:
+                return 10u;
+            case wgpu::TextureFormat::ASTC12x12Unorm:
+            case wgpu::TextureFormat::ASTC12x12UnormSrgb:
+                return 12u;
 
             // Block size of a multi-planar format depends on aspect.
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:

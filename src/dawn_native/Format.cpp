@@ -365,6 +365,37 @@ namespace dawn_native {
         AddCompressedFormat(wgpu::TextureFormat::EACRG11Unorm, 16, 4, 4, isETC2FormatSupported, 2);
         AddCompressedFormat(wgpu::TextureFormat::EACRG11Snorm, 16, 4, 4, isETC2FormatSupported, 2);
 
+        // ASTC compressed formats
+        bool isASTCFormatSupported = device->IsExtensionEnabled(Extension::TextureCompressionASTC);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC4x4Unorm, 16, 4, 4, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC4x4UnormSrgb, 16, 4, 4, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC5x4Unorm, 16, 5, 4, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC5x4UnormSrgb, 16, 5, 4, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC5x5Unorm, 16, 5, 5, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC5x5UnormSrgb, 16, 5, 5, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC6x5Unorm, 16, 6, 5, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC6x5UnormSrgb, 16, 6, 5, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC6x6Unorm, 16, 6, 6, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC6x6UnormSrgb, 16, 6, 6, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC8x5Unorm, 16, 8, 5, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC8x5UnormSrgb, 16, 8, 5, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC8x6Unorm, 16, 8, 6, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC8x6UnormSrgb, 16, 8, 6, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC8x8Unorm, 16, 8, 8, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC8x8UnormSrgb, 16, 8, 8, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC10x5Unorm, 16, 10, 5, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC10x5UnormSrgb, 16, 10, 5, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC10x6Unorm, 16, 10, 6, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC10x6UnormSrgb, 16, 10, 6, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC10x8Unorm, 16, 10, 8, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC10x8UnormSrgb, 16, 10, 8, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC10x10Unorm, 16, 10, 10, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC10x10UnormSrgb, 16, 10, 10, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC12x10Unorm, 16, 12, 10, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC12x10UnormSrgb, 16, 12, 10, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC12x12Unorm, 16, 12, 12, isASTCFormatSupported, 4);
+        AddCompressedFormat(wgpu::TextureFormat::ASTC12x12UnormSrgb, 16, 12, 12, isASTCFormatSupported, 4);
+
         // multi-planar formats
         const bool isMultiPlanarFormatSupported = device->IsExtensionEnabled(Extension::MultiPlanarFormats);
         AddMultiAspectFormat(wgpu::TextureFormat::R8BG8Biplanar420Unorm, Aspect::Plane0 | Aspect::Plane1,

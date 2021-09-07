@@ -391,6 +391,53 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
                 return {0x2, 0x90, 0xff, 0xff, 0xff, 0x6d, 0xb6, 0xdb,
                         0x2, 0x90, 0x6d, 0xb6, 0xdb, 0xff, 0xff, 0xff};
 
+            // The expected data is a texel block of the corresponding size where the left width / 2
+            // pixels are dark red with an alpha of 0x80 and the remaining (width - width / 2)
+            // pixels are dark green. We specify the same compressed data in both sRGB and non-sRGB
+            // tests, but the rendering result should be different because for sRGB formats, the
+            // red, green, and blue components are converted from an sRGB color space to a linear
+            // color space as part of filtering, and any alpha component is left unchanged.
+            case wgpu::TextureFormat::ASTC4x4Unorm:
+            case wgpu::TextureFormat::ASTC4x4UnormSrgb:
+                return {0x13, 0x80, 0xe9, 0x1, 0x0, 0xe8, 0x1,  0x0,
+                        0x0,  0xff, 0x1,  0x0, 0x0, 0x3f, 0xf0, 0x3};
+            case wgpu::TextureFormat::ASTC5x4Unorm:
+            case wgpu::TextureFormat::ASTC5x4UnormSrgb:
+            case wgpu::TextureFormat::ASTC5x5Unorm:
+            case wgpu::TextureFormat::ASTC5x5UnormSrgb:
+                return {0x83, 0x80, 0xe9, 0x1, 0x0,  0xe8, 0x1,  0x0,
+                        0x0,  0xff, 0x1,  0x0, 0x80, 0x14, 0x90, 0x2};
+            case wgpu::TextureFormat::ASTC6x5Unorm:
+            case wgpu::TextureFormat::ASTC6x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC6x6Unorm:
+            case wgpu::TextureFormat::ASTC6x6UnormSrgb:
+                return {0x2, 0x81, 0xe9, 0x1, 0x0, 0xe8, 0x1,  0x0,
+                        0x0, 0xff, 0x1,  0x0, 0x0, 0x3f, 0xf0, 0x3};
+            case wgpu::TextureFormat::ASTC8x5Unorm:
+            case wgpu::TextureFormat::ASTC8x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC8x6Unorm:
+            case wgpu::TextureFormat::ASTC8x6UnormSrgb:
+            case wgpu::TextureFormat::ASTC8x8Unorm:
+            case wgpu::TextureFormat::ASTC8x8UnormSrgb:
+                return {0x6, 0x80, 0xe9, 0x1, 0x0,  0xe8, 0x1,  0x0,
+                        0x0, 0xff, 0x1,  0x0, 0xff, 0x0,  0xff, 0x0};
+            case wgpu::TextureFormat::ASTC10x5Unorm:
+            case wgpu::TextureFormat::ASTC10x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x6Unorm:
+            case wgpu::TextureFormat::ASTC10x6UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x8Unorm:
+            case wgpu::TextureFormat::ASTC10x8UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x10Unorm:
+            case wgpu::TextureFormat::ASTC10x10UnormSrgb:
+                return {0x6, 0x81, 0xe9, 0x1,  0x0, 0xe8, 0x1,  0x0,
+                        0x0, 0xff, 0x1,  0xff, 0x3, 0xf0, 0x3f, 0x0};
+            case wgpu::TextureFormat::ASTC12x10Unorm:
+            case wgpu::TextureFormat::ASTC12x10UnormSrgb:
+            case wgpu::TextureFormat::ASTC12x12Unorm:
+            case wgpu::TextureFormat::ASTC12x12UnormSrgb:
+                return {0x4, 0x80, 0xe9, 0x1, 0x0, 0xe8, 0x1,  0x0,
+                        0x0, 0xff, 0x1,  0x0, 0x0, 0x3f, 0xf0, 0x3};
+
             default:
                 UNREACHABLE();
                 return {};
@@ -401,6 +448,9 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
     // in RGBA8 formats. Since some compression methods may be lossy, we may use different colors
     // to test different formats.
     std::vector<RGBA8> GetExpectedData(const wgpu::Extent3D& testRegion) {
+        constexpr uint8_t kLeftAlpha = 0x88;
+        constexpr uint8_t kRightAlpha = 0xFF;
+
         constexpr RGBA8 kBCDarkRed(198, 0, 0, 255);
         constexpr RGBA8 kBCDarkGreen(0, 207, 0, 255);
         constexpr RGBA8 kBCDarkRedSRGB(144, 0, 0, 255);
@@ -411,8 +461,10 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
         constexpr RGBA8 kETC2DarkRedSRGB(154, 0, 0, 255);
         constexpr RGBA8 kETC2DarkGreenSRGB(0, 154, 0, 255);
 
-        constexpr uint8_t kLeftAlpha = 0x88;
-        constexpr uint8_t kRightAlpha = 0xFF;
+        constexpr RGBA8 kASTCDarkRed(244, 0, 0, 128);
+        constexpr RGBA8 kASTCDarkGreen(0, 244, 0, 255);
+        constexpr RGBA8 kASTCDarkRedSRGB(231, 0, 0, 128);
+        constexpr RGBA8 kASTCDarkGreenSRGB(0, 231, 0, 255);
 
         switch (GetParam().mTextureFormat) {
             case wgpu::TextureFormat::BC1RGBAUnorm:
@@ -475,6 +527,38 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
             case wgpu::TextureFormat::EACRG11Snorm:
                 return FillExpectedData(testRegion, RGBA8::kRed, RGBA8::kGreen);
 
+            case wgpu::TextureFormat::ASTC4x4Unorm:
+            case wgpu::TextureFormat::ASTC5x4Unorm:
+            case wgpu::TextureFormat::ASTC5x5Unorm:
+            case wgpu::TextureFormat::ASTC6x5Unorm:
+            case wgpu::TextureFormat::ASTC6x6Unorm:
+            case wgpu::TextureFormat::ASTC8x5Unorm:
+            case wgpu::TextureFormat::ASTC8x6Unorm:
+            case wgpu::TextureFormat::ASTC8x8Unorm:
+            case wgpu::TextureFormat::ASTC10x5Unorm:
+            case wgpu::TextureFormat::ASTC10x6Unorm:
+            case wgpu::TextureFormat::ASTC10x8Unorm:
+            case wgpu::TextureFormat::ASTC10x10Unorm:
+            case wgpu::TextureFormat::ASTC12x10Unorm:
+            case wgpu::TextureFormat::ASTC12x12Unorm:
+                return FillExpectedData(testRegion, kASTCDarkRed, kASTCDarkGreen);
+
+            case wgpu::TextureFormat::ASTC4x4UnormSrgb:
+            case wgpu::TextureFormat::ASTC5x4UnormSrgb:
+            case wgpu::TextureFormat::ASTC5x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC6x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC6x6UnormSrgb:
+            case wgpu::TextureFormat::ASTC8x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC8x6UnormSrgb:
+            case wgpu::TextureFormat::ASTC8x8UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x6UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x8UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x10UnormSrgb:
+            case wgpu::TextureFormat::ASTC12x10UnormSrgb:
+            case wgpu::TextureFormat::ASTC12x12UnormSrgb:
+                return FillExpectedData(testRegion, kASTCDarkRedSRGB, kASTCDarkGreenSRGB);
+
             default:
                 UNREACHABLE();
                 return {};
@@ -497,6 +581,55 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
         return expectedData;
     }
 
+    // Returns a texture size given the number of texel blocks that should be tiled. For example,
+    // if a texel block size is 5x4, then GetTextureSizeFromBlocks(2, 2) -> {10, 8, 1}.
+    wgpu::Extent3D GetTextureSizeWithNumBlocks(uint32_t numBlockWidth,
+                                               uint32_t numBlockHeight,
+                                               uint32_t depthOrArrayLayers = 1) const {
+        return {numBlockWidth * BlockWidthInTexels(), numBlockHeight * BlockHeightInTexels(),
+                depthOrArrayLayers};
+    }
+
+    CopyConfig GetDefaultFullConfig(uint32_t depthOrArrayLayers = 1) const {
+        ASSERT(IsFormatSupported());
+
+        CopyConfig config;
+        config.textureDescriptor.format = GetParam().mTextureFormat;
+        config.textureDescriptor.usage = kDefaultFormatTextureUsage;
+        config.textureDescriptor.size = GetTextureSizeWithNumBlocks(
+            kUnalignedBlockSize, kUnalignedBlockSize, depthOrArrayLayers);
+        config.textureDescriptor.mipLevelCount = kMipmapLevelCount;
+        config.viewMipmapLevel = kMipmapLevelCount - 1;
+
+        const wgpu::Extent3D virtualSize = GetVirtualSizeAtLevel(config);
+        ASSERT(virtualSize.width % BlockWidthInTexels() != 0u);
+        ASSERT(virtualSize.height % BlockHeightInTexels() != 0u);
+
+        return config;
+    }
+
+    CopyConfig GetDefaultSmallConfig(uint32_t depthOrArrayLayers = 1) const {
+        ASSERT(IsFormatSupported());
+
+        CopyConfig config;
+        config.textureDescriptor.format = GetParam().mTextureFormat;
+        config.textureDescriptor.usage = kDefaultFormatTextureUsage;
+        config.textureDescriptor.size = GetTextureSizeWithNumBlocks(2, 2, depthOrArrayLayers);
+        return config;
+    }
+
+    CopyConfig GetDefaultSubresourceConfig(uint32_t depthOrArrayLayers = 1) const {
+        ASSERT(IsFormatSupported());
+
+        CopyConfig config;
+        config.textureDescriptor.format = GetParam().mTextureFormat;
+        config.textureDescriptor.usage = kDefaultFormatTextureUsage;
+        config.textureDescriptor.size =
+            GetPhysicalSizeAtLevel(GetDefaultFullConfig(depthOrArrayLayers));
+        config.viewMipmapLevel = config.textureDescriptor.mipLevelCount - 1;
+        return config;
+    }
+
     // Note: Compressed formats are only valid with 2D (array) textures.
     static wgpu::Extent3D GetVirtualSizeAtLevel(const CopyConfig& config) {
         return {config.textureDescriptor.size.width >> config.viewMipmapLevel,
@@ -504,7 +637,7 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
                 config.textureDescriptor.size.depthOrArrayLayers};
     }
 
-    wgpu::Extent3D GetPhysicalSizeAtLevel(const CopyConfig& config) {
+    wgpu::Extent3D GetPhysicalSizeAtLevel(const CopyConfig& config) const {
         wgpu::Extent3D sizeAtLevel = GetVirtualSizeAtLevel(config);
         sizeAtLevel.width = (sizeAtLevel.width + BlockWidthInTexels() - 1) / BlockWidthInTexels() *
                             BlockWidthInTexels();
@@ -516,6 +649,13 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
     static constexpr wgpu::TextureUsage kDefaultFormatTextureUsage =
         wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst;
 
+    // We choose a prime that is greater than the current max texel dimension size as a multiplier
+    // to compute test texture sizes so that we can be certain that its level 2 mipmap (x4)
+    // cannot be a multiple of the dimension. This is useful for testing padding at the edges of
+    // the mipmaps.
+    static constexpr uint32_t kUnalignedBlockSize = 13;
+    static constexpr uint32_t kMipmapLevelCount = 3;
+
     bool mIsFormatSupported = false;
 };
 
@@ -526,12 +666,9 @@ TEST_P(CompressedTextureFormatTest, Basic) {
 
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
-    CopyConfig config;
-    config.textureDescriptor.usage = kDefaultFormatTextureUsage;
-    config.textureDescriptor.size = {8, 8, 1};
+    CopyConfig config = GetDefaultSmallConfig();
     config.copyExtent3D = config.textureDescriptor.size;
 
-    config.textureDescriptor.format = GetParam().mTextureFormat;
     TestCopyRegionIntoFormatTextures(config);
 }
 
@@ -542,16 +679,10 @@ TEST_P(CompressedTextureFormatTest, CopyIntoSubRegion) {
 
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
-    CopyConfig config;
-    config.textureDescriptor.usage = kDefaultFormatTextureUsage;
-    config.textureDescriptor.size = {8, 8, 1};
+    CopyConfig config = GetDefaultSmallConfig();
+    config.copyOrigin3D = {BlockWidthInTexels(), BlockHeightInTexels(), 0};
+    config.copyExtent3D = {BlockWidthInTexels(), BlockHeightInTexels(), 1};
 
-    const wgpu::Origin3D kOrigin = {4, 4, 0};
-    const wgpu::Extent3D kExtent3D = {4, 4, 1};
-    config.copyOrigin3D = kOrigin;
-    config.copyExtent3D = kExtent3D;
-
-    config.textureDescriptor.format = GetParam().mTextureFormat;
     TestCopyRegionIntoFormatTextures(config);
 }
 
@@ -565,16 +696,13 @@ TEST_P(CompressedTextureFormatTest, CopyIntoNonZeroArrayLayer) {
     // This test uses glTextureView() which is not supported in OpenGL ES.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
-    CopyConfig config;
-    config.textureDescriptor.usage = kDefaultFormatTextureUsage;
-    config.textureDescriptor.size = {8, 8, 1};
-    config.copyExtent3D = config.textureDescriptor.size;
-
     constexpr uint32_t kArrayLayerCount = 3;
-    config.textureDescriptor.size.depthOrArrayLayers = kArrayLayerCount;
+
+    CopyConfig config = GetDefaultSmallConfig(kArrayLayerCount);
+    config.copyExtent3D = config.textureDescriptor.size;
+    config.copyExtent3D.depthOrArrayLayers = 1;
     config.copyOrigin3D.z = kArrayLayerCount - 1;
 
-    config.textureDescriptor.format = GetParam().mTextureFormat;
     TestCopyRegionIntoFormatTextures(config);
 }
 
@@ -588,30 +716,11 @@ TEST_P(CompressedTextureFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
     // This test uses glTextureView() which is not supported in OpenGL ES.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
-    CopyConfig config;
-    config.textureDescriptor.usage = kDefaultFormatTextureUsage;
-    config.textureDescriptor.size = {60, 60, 1};
+    CopyConfig config = GetDefaultFullConfig();
+    // The virtual size of the texture at mipmap level == 2 is not a multiple of the texel
+    // dimensions so paddings are required in the copies.
+    config.copyExtent3D = GetPhysicalSizeAtLevel(config);
 
-    constexpr uint32_t kMipmapLevelCount = 3;
-    config.textureDescriptor.mipLevelCount = kMipmapLevelCount;
-    config.viewMipmapLevel = kMipmapLevelCount - 1;
-
-    // The actual size of the texture at mipmap level == 2 is not a multiple of 4, paddings are
-    // required in the copies.
-    const wgpu::Extent3D textureSizeLevel0 = config.textureDescriptor.size;
-    const uint32_t kActualWidthAtLevel = textureSizeLevel0.width >> config.viewMipmapLevel;
-    const uint32_t kActualHeightAtLevel = textureSizeLevel0.height >> config.viewMipmapLevel;
-    ASSERT(kActualWidthAtLevel % BlockWidthInTexels() != 0);
-    ASSERT(kActualHeightAtLevel % BlockHeightInTexels() != 0);
-
-    const uint32_t kCopyWidthAtLevel = (kActualWidthAtLevel + BlockWidthInTexels() - 1) /
-                                       BlockWidthInTexels() * BlockWidthInTexels();
-    const uint32_t kCopyHeightAtLevel = (kActualHeightAtLevel + BlockHeightInTexels() - 1) /
-                                        BlockHeightInTexels() * BlockHeightInTexels();
-
-    config.copyExtent3D = {kCopyWidthAtLevel, kCopyHeightAtLevel, 1};
-
-    config.textureDescriptor.format = GetParam().mTextureFormat;
     TestCopyRegionIntoFormatTextures(config);
 }
 
@@ -629,29 +738,16 @@ TEST_P(CompressedTextureFormatTest, CopyWholeTextureSubResourceIntoNonZeroMipmap
     // black instead of opaque red on Win10 FYI Release (NVIDIA GeForce GTX 1660).
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsNvidia());
 
-    CopyConfig config;
-    config.textureDescriptor.size = {60, 60, 1};
-
-    constexpr uint32_t kMipmapLevelCount = 3;
-    config.textureDescriptor.mipLevelCount = kMipmapLevelCount;
-    config.viewMipmapLevel = kMipmapLevelCount - 1;
-
-    // The actual size of the texture at mipmap level == 2 is not a multiple of 4, paddings are
-    // required in the copies.
-    const wgpu::Extent3D kVirtualSize = GetVirtualSizeAtLevel(config);
-    const wgpu::Extent3D kPhysicalSize = GetPhysicalSizeAtLevel(config);
-    ASSERT_NE(0u, kVirtualSize.width % BlockWidthInTexels());
-    ASSERT_NE(0u, kVirtualSize.height % BlockHeightInTexels());
-
-    config.copyExtent3D = kPhysicalSize;
-
-    // Create textureSrc as the source texture and initialize it with pre-prepared compressed
-    // data.
-    config.textureDescriptor.format = GetParam().mTextureFormat;
+    CopyConfig config = GetDefaultFullConfig();
     // Add the usage bit for both source and destination textures so that we don't need to
     // create two copy configs.
     config.textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
                                      wgpu::TextureUsage::TextureBinding;
+
+    // The virtual size of the texture at mipmap level == 2 is not a multiple of the texel
+    // dimensions so paddings are required in the copies.
+    const wgpu::Extent3D kVirtualSize = GetVirtualSizeAtLevel(config);
+    config.copyExtent3D = GetPhysicalSizeAtLevel(config);
 
     wgpu::Texture textureSrc = CreateTextureWithCompressedData(config);
 
@@ -678,42 +774,24 @@ TEST_P(CompressedTextureFormatTest, CopyIntoSubresourceWithPhysicalSizeNotEqualT
     // subresource and does not fit in another one on OpenGL.
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
-    CopyConfig srcConfig;
-    srcConfig.textureDescriptor.size = {60, 60, 1};
-    srcConfig.viewMipmapLevel = srcConfig.textureDescriptor.mipLevelCount - 1;
+    CopyConfig srcConfig = GetDefaultSubresourceConfig();
+    srcConfig.textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
 
-    const wgpu::Extent3D kSrcVirtualSize = GetVirtualSizeAtLevel(srcConfig);
+    CopyConfig dstConfig = GetDefaultFullConfig();
 
-    CopyConfig dstConfig;
-    dstConfig.textureDescriptor.size = {60, 60, 1};
-    constexpr uint32_t kMipmapLevelCount = 3;
-    dstConfig.textureDescriptor.mipLevelCount = kMipmapLevelCount;
-    dstConfig.viewMipmapLevel = kMipmapLevelCount - 1;
-
-    // The actual size of the texture at mipmap level == 2 is not a multiple of 4, paddings are
-    // required in the copies.
+    // The virtual size of the texture at mipmap level == 2 is not a multiple of the texel
+    // dimensions so paddings are required in the copies.
     const wgpu::Extent3D kDstVirtualSize = GetVirtualSizeAtLevel(dstConfig);
-    ASSERT_NE(0u, kDstVirtualSize.width % BlockWidthInTexels());
-    ASSERT_NE(0u, kDstVirtualSize.height % BlockHeightInTexels());
-
     const wgpu::Extent3D kDstPhysicalSize = GetPhysicalSizeAtLevel(dstConfig);
-
     srcConfig.copyExtent3D = dstConfig.copyExtent3D = kDstPhysicalSize;
-    ASSERT_LT(srcConfig.copyOrigin3D.x + srcConfig.copyExtent3D.width, kSrcVirtualSize.width);
-    ASSERT_LT(srcConfig.copyOrigin3D.y + srcConfig.copyExtent3D.height, kSrcVirtualSize.height);
 
     // Create textureSrc as the source texture and initialize it with pre-prepared compressed
     // data.
-    const wgpu::TextureFormat format = GetParam().mTextureFormat;
-    srcConfig.textureDescriptor.format = format;
-    srcConfig.textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
     wgpu::Texture textureSrc = CreateTextureWithCompressedData(srcConfig);
     wgpu::ImageCopyTexture imageCopyTextureSrc = utils::CreateImageCopyTexture(
         textureSrc, srcConfig.viewMipmapLevel, srcConfig.copyOrigin3D);
 
     // Create textureDst and copy from the content in textureSrc into it.
-    dstConfig.textureDescriptor.format = format;
-    dstConfig.textureDescriptor.usage = kDefaultFormatTextureUsage;
     wgpu::Texture textureDst = CreateTextureFromTexture(textureSrc, srcConfig, dstConfig);
 
     // Verify if we can use texture as sampled textures correctly.
@@ -736,32 +814,19 @@ TEST_P(CompressedTextureFormatTest, CopyFromSubresourceWithPhysicalSizeNotEqualT
     // subresource and does not fit in another one on OpenGL.
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
-    CopyConfig srcConfig;
-    srcConfig.textureDescriptor.size = {60, 60, 1};
-    constexpr uint32_t kMipmapLevelCount = 3;
-    srcConfig.textureDescriptor.mipLevelCount = kMipmapLevelCount;
-    srcConfig.viewMipmapLevel = srcConfig.textureDescriptor.mipLevelCount - 1;
+    CopyConfig srcConfig = GetDefaultFullConfig();
+    srcConfig.textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
 
-    // The actual size of the texture at mipmap level == 2 is not a multiple of 4, paddings are
-    // required in the copies.
+    CopyConfig dstConfig = GetDefaultSubresourceConfig();
+
+    // The virtual size of the texture at mipmap level == 2 is not a multiple of the texel
+    // dimensions so paddings are required in the copies.
     const wgpu::Extent3D kSrcVirtualSize = GetVirtualSizeAtLevel(srcConfig);
-    ASSERT_NE(0u, kSrcVirtualSize.width % BlockWidthInTexels());
-    ASSERT_NE(0u, kSrcVirtualSize.height % BlockHeightInTexels());
-
-    CopyConfig dstConfig;
-    dstConfig.textureDescriptor.size = {16, 16, 1};
-    dstConfig.viewMipmapLevel = dstConfig.textureDescriptor.mipLevelCount - 1;
-
     const wgpu::Extent3D kDstVirtualSize = GetVirtualSizeAtLevel(dstConfig);
     srcConfig.copyExtent3D = dstConfig.copyExtent3D = kDstVirtualSize;
 
     ASSERT_GT(srcConfig.copyOrigin3D.x + srcConfig.copyExtent3D.width, kSrcVirtualSize.width);
     ASSERT_GT(srcConfig.copyOrigin3D.y + srcConfig.copyExtent3D.height, kSrcVirtualSize.height);
-
-    srcConfig.textureDescriptor.format = dstConfig.textureDescriptor.format =
-        GetParam().mTextureFormat;
-    srcConfig.textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
-    dstConfig.textureDescriptor.usage = kDefaultFormatTextureUsage;
 
     // Create textureSrc as the source texture and initialize it with pre-prepared compressed
     // data.
@@ -794,68 +859,52 @@ TEST_P(CompressedTextureFormatTest, MultipleCopiesWithPhysicalSizeNotEqualToVirt
     std::array<CopyConfig, kTotalCopyCount> srcConfigs;
     std::array<CopyConfig, kTotalCopyCount> dstConfigs;
 
-    constexpr uint32_t kSrcMipmapLevelCount0 = 3;
-    srcConfigs[0].textureDescriptor.size = {60, 60, 1};
-    srcConfigs[0].textureDescriptor.mipLevelCount = kSrcMipmapLevelCount0;
-    srcConfigs[0].viewMipmapLevel = srcConfigs[0].textureDescriptor.mipLevelCount - 1;
-    dstConfigs[0].textureDescriptor.size = {16, 16, 1};
-    dstConfigs[0].viewMipmapLevel = dstConfigs[0].textureDescriptor.mipLevelCount - 1;
+    srcConfigs[0] = GetDefaultFullConfig();
+    srcConfigs[0].textureDescriptor.usage =
+        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+    dstConfigs[0] = GetDefaultSubresourceConfig();
     srcConfigs[0].copyExtent3D = dstConfigs[0].copyExtent3D = GetVirtualSizeAtLevel(dstConfigs[0]);
-    const wgpu::Extent3D kSrcVirtualSize0 = GetVirtualSizeAtLevel(srcConfigs[0]);
-    ASSERT_NE(0u, kSrcVirtualSize0.width % BlockWidthInTexels());
-    ASSERT_NE(0u, kSrcVirtualSize0.height % BlockHeightInTexels());
 
-    constexpr uint32_t kDstMipmapLevelCount1 = 4;
-    srcConfigs[1].textureDescriptor.size = {8, 8, 1};
-    srcConfigs[1].viewMipmapLevel = srcConfigs[1].textureDescriptor.mipLevelCount - 1;
-    dstConfigs[1].textureDescriptor.size = {56, 56, 1};
-    dstConfigs[1].textureDescriptor.mipLevelCount = kDstMipmapLevelCount1;
-    dstConfigs[1].viewMipmapLevel = dstConfigs[1].textureDescriptor.mipLevelCount - 1;
+    srcConfigs[1] = GetDefaultSubresourceConfig();
+    srcConfigs[1].textureDescriptor.usage =
+        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+    dstConfigs[1] = GetDefaultFullConfig();
     srcConfigs[1].copyExtent3D = dstConfigs[1].copyExtent3D = GetVirtualSizeAtLevel(srcConfigs[1]);
 
     std::array<wgpu::Extent3D, kTotalCopyCount> dstVirtualSizes;
     for (uint32_t i = 0; i < kTotalCopyCount; ++i) {
         dstVirtualSizes[i] = GetVirtualSizeAtLevel(dstConfigs[i]);
     }
-    ASSERT_NE(0u, dstVirtualSizes[1].width % BlockWidthInTexels());
-    ASSERT_NE(0u, dstVirtualSizes[1].height % BlockHeightInTexels());
 
     std::array<wgpu::Texture, kTotalCopyCount> srcTextures;
     std::array<wgpu::Texture, kTotalCopyCount> dstTextures;
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     for (uint32_t i = 0; i < kTotalCopyCount; ++i) {
-        srcConfigs[i].textureDescriptor.format = dstConfigs[i].textureDescriptor.format =
-            GetParam().mTextureFormat;
-        srcConfigs[i].textureDescriptor.usage =
-            wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
-        dstConfigs[i].textureDescriptor.usage = kDefaultFormatTextureUsage;
-
         // Create srcTextures as the source textures and initialize them with pre-prepared
         // compressed data.
         srcTextures[i] = CreateTextureWithCompressedData(srcConfigs[i]);
         dstTextures[i] = device.CreateTexture(&dstConfigs[i].textureDescriptor);
-
         RecordTextureToTextureCopy(encoder, srcTextures[i], dstTextures[i], srcConfigs[i],
                                    dstConfigs[i]);
     }
 
-        wgpu::CommandBuffer commandBuffer = encoder.Finish();
-        queue.Submit(1, &commandBuffer);
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+    queue.Submit(1, &commandBuffer);
 
-        wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest();
+    wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest();
 
-        for (uint32_t i = 0; i < kTotalCopyCount; ++i) {
-            // Verify if we can use dstTextures as sampled textures correctly.
-            wgpu::BindGroup bindGroup0 =
-                CreateBindGroupForTest(renderPipeline.GetBindGroupLayout(0), dstTextures[i],
-                                       dstConfigs[i].copyOrigin3D.z, dstConfigs[i].viewMipmapLevel);
+    for (uint32_t i = 0; i < kTotalCopyCount; ++i) {
+        // Verify if we can use dstTextures as sampled textures correctly.
+        wgpu::BindGroup bindGroup0 =
+            CreateBindGroupForTest(renderPipeline.GetBindGroupLayout(0), dstTextures[i],
+                                   dstConfigs[i].copyOrigin3D.z, dstConfigs[i].viewMipmapLevel);
 
-            std::vector<RGBA8> expectedData = GetExpectedData(dstVirtualSizes[i]);
-            VerifyCompressedTexturePixelValues(renderPipeline, bindGroup0, dstVirtualSizes[i],
-                                               dstConfigs[i].copyOrigin3D, dstVirtualSizes[i],
-                                               expectedData);
-        }
+        std::vector<RGBA8> expectedData = GetExpectedData(dstVirtualSizes[i]);
+        VerifyCompressedTexturePixelValues(renderPipeline, bindGroup0, dstVirtualSizes[i],
+                                           dstConfigs[i].copyOrigin3D, dstVirtualSizes[i],
+                                           expectedData);
+    }
 }
 
 // A regression test for a bug for the toggle UseTemporaryBufferInCompressedTextureToTextureCopy on
@@ -870,27 +919,18 @@ TEST_P(CompressedTextureFormatTest, CopyWithMultipleLayerAndPhysicalSizeNotEqual
 
     constexpr uint32_t kArrayLayerCount = 5;
 
-    CopyConfig srcConfig;
-    srcConfig.textureDescriptor.size = {60, 60, kArrayLayerCount};
-    constexpr uint32_t kMipmapLevelCount = 3;
-    srcConfig.textureDescriptor.mipLevelCount = kMipmapLevelCount;
-    srcConfig.viewMipmapLevel = srcConfig.textureDescriptor.mipLevelCount - 1;
+    CopyConfig srcConfig = GetDefaultFullConfig(kArrayLayerCount);
     srcConfig.textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
 
-    // The actual size of the texture at mipmap level == 2 is not a multiple of 4, paddings are
-    // required in the copies.
+    CopyConfig dstConfig = GetDefaultSubresourceConfig(kArrayLayerCount);
+
+    // The virtual size of the texture at mipmap level == 2 is not a multiple of the texel
+    // dimensions so paddings are required in the copies.
     const wgpu::Extent3D kSrcVirtualSize = GetVirtualSizeAtLevel(srcConfig);
-    ASSERT_NE(0u, kSrcVirtualSize.width % BlockWidthInTexels());
-    ASSERT_NE(0u, kSrcVirtualSize.height % BlockHeightInTexels());
-
-    CopyConfig dstConfig;
-    dstConfig.textureDescriptor.size = {16, 16, kArrayLayerCount};
-    dstConfig.viewMipmapLevel = dstConfig.textureDescriptor.mipLevelCount - 1;
-
     const wgpu::Extent3D kDstVirtualSize = GetVirtualSizeAtLevel(dstConfig);
+
     srcConfig.copyExtent3D = dstConfig.copyExtent3D = kDstVirtualSize;
     srcConfig.rowsPerImage = srcConfig.copyExtent3D.height / BlockHeightInTexels();
-
     ASSERT_GT(srcConfig.copyOrigin3D.x + srcConfig.copyExtent3D.width, kSrcVirtualSize.width);
     ASSERT_GT(srcConfig.copyOrigin3D.y + srcConfig.copyExtent3D.height, kSrcVirtualSize.height);
 
@@ -936,19 +976,13 @@ TEST_P(CompressedTextureFormatTest, BufferOffsetAndExtentFitRowPitch) {
 
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
-    CopyConfig config;
-    config.textureDescriptor.usage = kDefaultFormatTextureUsage;
-    config.textureDescriptor.size = {8, 8, 1};
+    CopyConfig config = GetDefaultSmallConfig();
     config.copyExtent3D = config.textureDescriptor.size;
 
-    const uint32_t blockCountPerRow = config.textureDescriptor.size.width / BlockWidthInTexels();
-
     const wgpu::TextureFormat format = GetParam().mTextureFormat;
-    config.textureDescriptor.format = format;
-
+    const uint32_t blockCountPerRow = config.textureDescriptor.size.width / BlockWidthInTexels();
     const uint32_t blockSizeInBytes = utils::GetTexelBlockSizeInBytes(format);
     const uint32_t blockCountPerRowPitch = config.bytesPerRowAlignment / blockSizeInBytes;
-
     config.bufferOffset = (blockCountPerRowPitch - blockCountPerRow) * blockSizeInBytes;
 
     TestCopyRegionIntoFormatTextures(config);
@@ -964,22 +998,16 @@ TEST_P(CompressedTextureFormatTest, BufferOffsetExceedsSlicePitch) {
 
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
-    CopyConfig config;
-    config.textureDescriptor.usage = kDefaultFormatTextureUsage;
-    config.textureDescriptor.size = {8, 8, 1};
+    CopyConfig config = GetDefaultSmallConfig();
     config.copyExtent3D = config.textureDescriptor.size;
 
-    const wgpu::Extent3D textureSizeLevel0 = config.textureDescriptor.size;
-    const uint32_t blockCountPerRow = textureSizeLevel0.width / BlockWidthInTexels();
-    const uint32_t slicePitchInBytes =
-        config.bytesPerRowAlignment * (textureSizeLevel0.height / BlockHeightInTexels());
-
     const wgpu::TextureFormat format = GetParam().mTextureFormat;
-    config.textureDescriptor.format = format;
-
+    const wgpu::Extent3D textureSizeLevel = config.textureDescriptor.size;
+    const uint32_t blockCountPerRow = textureSizeLevel.width / BlockWidthInTexels();
+    const uint32_t slicePitchInBytes =
+        config.bytesPerRowAlignment * (textureSizeLevel.height / BlockHeightInTexels());
     const uint32_t blockSizeInBytes = utils::GetTexelBlockSizeInBytes(format);
     const uint32_t blockCountPerRowPitch = config.bytesPerRowAlignment / blockSizeInBytes;
-
     config.bufferOffset = (blockCountPerRowPitch - blockCountPerRow) * blockSizeInBytes +
                           config.bytesPerRowAlignment + slicePitchInBytes;
 
@@ -994,18 +1022,13 @@ TEST_P(CompressedTextureFormatTest, CopyWithBufferOffsetAndExtentExceedRowPitch)
 
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
-    CopyConfig config;
-    config.textureDescriptor.usage = kDefaultFormatTextureUsage;
-    config.textureDescriptor.size = {8, 8, 1};
-    config.copyExtent3D = config.textureDescriptor.size;
-
-    const uint32_t blockCountPerRow = config.textureDescriptor.size.width / BlockWidthInTexels();
-
     constexpr uint32_t kExceedRowBlockCount = 1;
 
-    const wgpu::TextureFormat format = GetParam().mTextureFormat;
-    config.textureDescriptor.format = format;
+    CopyConfig config = GetDefaultSmallConfig();
+    config.copyExtent3D = config.textureDescriptor.size;
 
+    const wgpu::TextureFormat format = GetParam().mTextureFormat;
+    const uint32_t blockCountPerRow = config.textureDescriptor.size.width / BlockWidthInTexels();
     const uint32_t blockSizeInBytes = utils::GetTexelBlockSizeInBytes(format);
     const uint32_t blockCountPerRowPitch = config.bytesPerRowAlignment / blockSizeInBytes;
     config.bufferOffset =
@@ -1020,20 +1043,15 @@ TEST_P(CompressedTextureFormatTest, CopyWithBufferOffsetAndExtentExceedRowPitch)
 TEST_P(CompressedTextureFormatTest, RowPitchEqualToSlicePitch) {
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
-    CopyConfig config;
-    config.textureDescriptor.usage = kDefaultFormatTextureUsage;
-    config.textureDescriptor.size = {8, BlockHeightInTexels(), 1};
+    CopyConfig config = GetDefaultSmallConfig();
+    config.textureDescriptor.size = GetTextureSizeWithNumBlocks(2, 1);
     config.copyExtent3D = config.textureDescriptor.size;
 
+    const wgpu::TextureFormat format = GetParam().mTextureFormat;
     const uint32_t blockCountPerRow = config.textureDescriptor.size.width / BlockWidthInTexels();
     const uint32_t slicePitchInBytes = config.bytesPerRowAlignment;
-
-    const wgpu::TextureFormat format = GetParam().mTextureFormat;
-    config.textureDescriptor.format = format;
-
     const uint32_t blockSizeInBytes = utils::GetTexelBlockSizeInBytes(format);
     const uint32_t blockCountPerRowPitch = config.bytesPerRowAlignment / blockSizeInBytes;
-
     config.bufferOffset =
         (blockCountPerRowPitch - blockCountPerRow) * blockSizeInBytes + slicePitchInBytes;
 
@@ -1049,13 +1067,10 @@ TEST_P(CompressedTextureFormatTest, LargeImageHeight) {
 
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
-    CopyConfig config;
-    config.textureDescriptor.usage = kDefaultFormatTextureUsage;
-    config.textureDescriptor.size = {8, 8, 1};
+    CopyConfig config = GetDefaultSmallConfig();
     config.copyExtent3D = config.textureDescriptor.size;
-
     config.rowsPerImage = config.textureDescriptor.size.height * 2 / BlockHeightInTexels();
-    config.textureDescriptor.format = GetParam().mTextureFormat;
+
     TestCopyRegionIntoFormatTextures(config);
 }
 
@@ -1070,32 +1085,14 @@ TEST_P(CompressedTextureFormatTest, LargeImageHeightAndClampedCopyExtent) {
     // This test uses glTextureView() which is not supported in OpenGL ES.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
-    CopyConfig config;
-    config.textureDescriptor.usage = kDefaultFormatTextureUsage;
-    config.textureDescriptor.size = {56, 56, 1};
+    CopyConfig config = GetDefaultFullConfig();
 
-    constexpr uint32_t kMipmapLevelCount = 3;
-    config.textureDescriptor.mipLevelCount = kMipmapLevelCount;
-    config.viewMipmapLevel = kMipmapLevelCount - 1;
+    // The virtual size of the texture at mipmap level == 2 is not a multiple of the texel
+    // dimensions so paddings are required in the copies.
+    const wgpu::Extent3D kPhysicalSize = GetPhysicalSizeAtLevel(config);
+    config.copyExtent3D = kPhysicalSize;
+    config.rowsPerImage = kPhysicalSize.height * 2 / BlockHeightInTexels();
 
-    // The actual size of the texture at mipmap level == 2 is not a multiple of 4, paddings are
-    // required in the copies.
-    const wgpu::Extent3D textureSizeLevel0 = config.textureDescriptor.size;
-    const uint32_t kActualWidthAtLevel = textureSizeLevel0.width >> config.viewMipmapLevel;
-    const uint32_t kActualHeightAtLevel = textureSizeLevel0.height >> config.viewMipmapLevel;
-    ASSERT(kActualWidthAtLevel % BlockWidthInTexels() != 0);
-    ASSERT(kActualHeightAtLevel % BlockHeightInTexels() != 0);
-
-    const uint32_t kCopyWidthAtLevel = (kActualWidthAtLevel + BlockWidthInTexels() - 1) /
-                                       BlockWidthInTexels() * BlockWidthInTexels();
-    const uint32_t kCopyHeightAtLevel = (kActualHeightAtLevel + BlockHeightInTexels() - 1) /
-                                        BlockHeightInTexels() * BlockHeightInTexels();
-
-    config.copyExtent3D = {kCopyWidthAtLevel, kCopyHeightAtLevel, 1};
-
-    config.rowsPerImage = kCopyHeightAtLevel * 2 / BlockHeightInTexels();
-
-    config.textureDescriptor.format = GetParam().mTextureFormat;
     TestCopyRegionIntoFormatTextures(config);
 }
 
@@ -1112,15 +1109,11 @@ TEST_P(CompressedTextureFormatTest, CopyWhole2DArrayTexture) {
 
     constexpr uint32_t kArrayLayerCount = 3;
 
-    CopyConfig config;
-    config.textureDescriptor.usage = kDefaultFormatTextureUsage;
-    config.textureDescriptor.size = {8, 8, kArrayLayerCount};
+    CopyConfig config = GetDefaultSmallConfig(kArrayLayerCount);
     config.rowsPerImage = 8;
-
     config.copyExtent3D = config.textureDescriptor.size;
     config.copyExtent3D.depthOrArrayLayers = kArrayLayerCount;
 
-    config.textureDescriptor.format = GetParam().mTextureFormat;
     TestCopyRegionIntoFormatTextures(config);
 }
 
@@ -1136,9 +1129,7 @@ TEST_P(CompressedTextureFormatTest, CopyMultiple2DArrayLayers) {
 
     constexpr uint32_t kArrayLayerCount = 3;
 
-    CopyConfig config;
-    config.textureDescriptor.usage = kDefaultFormatTextureUsage;
-    config.textureDescriptor.size = {8, 8, kArrayLayerCount};
+    CopyConfig config = GetDefaultSmallConfig(kArrayLayerCount);
     config.rowsPerImage = 8;
 
     constexpr uint32_t kCopyBaseArrayLayer = 1;
@@ -1147,7 +1138,6 @@ TEST_P(CompressedTextureFormatTest, CopyMultiple2DArrayLayers) {
     config.copyExtent3D = config.textureDescriptor.size;
     config.copyExtent3D.depthOrArrayLayers = kCopyLayerCount;
 
-    config.textureDescriptor.format = GetParam().mTextureFormat;
     TestCopyRegionIntoFormatTextures(config);
 }
 
@@ -1258,15 +1248,25 @@ TEST_P(CompressedTextureWriteTextureTest, Basic) {
     // TODO(crbug.com/dawn/976): Failing on Linux Intel OpenGL drivers.
     DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
 
+    constexpr uint32_t kSizeWidthMultiplier = 5;
+    constexpr uint32_t kSizeHeightMultiplier = 6;
+    constexpr uint32_t kOriginWidthMultiplier = 1;
+    constexpr uint32_t kOriginHeightMultiplier = 2;
+    constexpr uint32_t kExtentWidthMultiplier = 3;
+    constexpr uint32_t kExtentHeightMultiplier = 4;
+
     CopyConfig config;
     config.textureDescriptor.usage = kDefaultFormatTextureUsage;
-    config.textureDescriptor.size = {20, 24, 1};
-
-    config.copyOrigin3D = {4, 8, 0};
-    config.copyExtent3D = {12, 16, 1};
+    config.textureDescriptor.size = {BlockWidthInTexels() * kSizeWidthMultiplier,
+                                     BlockHeightInTexels() * kSizeHeightMultiplier, 1};
+    config.copyOrigin3D = {BlockWidthInTexels() * kOriginWidthMultiplier,
+                           BlockHeightInTexels() * kOriginHeightMultiplier, 0};
+    config.copyExtent3D = {BlockWidthInTexels() * kExtentWidthMultiplier,
+                           BlockHeightInTexels() * kExtentHeightMultiplier, 1};
     config.bytesPerRowAlignment = 511;
     config.rowsPerImage = 5;
     config.textureDescriptor.format = GetParam().mTextureFormat;
+
     TestWriteRegionIntoFormatTextures(config);
 }
 
@@ -1278,15 +1278,26 @@ TEST_P(CompressedTextureWriteTextureTest, WriteMultiple2DArrayLayers) {
     // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGLES.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
+    // TODO(b/198674734): Width multiplier set to 7 because 5 results in square size for ASTC6x5.
+    constexpr uint32_t kSizeWidthMultiplier = 7;
+    constexpr uint32_t kSizeHeightMultiplier = 6;
+    constexpr uint32_t kOriginWidthMultiplier = 1;
+    constexpr uint32_t kOriginHeightMultiplier = 2;
+    constexpr uint32_t kExtentWidthMultiplier = 3;
+    constexpr uint32_t kExtentHeightMultiplier = 4;
+
     CopyConfig config;
     config.textureDescriptor.usage = kDefaultFormatTextureUsage;
-    config.textureDescriptor.size = {20, 24, 9};
-
-    config.copyOrigin3D = {4, 8, 3};
-    config.copyExtent3D = {12, 16, 6};
+    config.textureDescriptor.size = {BlockWidthInTexels() * kSizeWidthMultiplier,
+                                     BlockHeightInTexels() * kSizeHeightMultiplier, 9};
+    config.copyOrigin3D = {BlockWidthInTexels() * kOriginWidthMultiplier,
+                           BlockHeightInTexels() * kOriginHeightMultiplier, 3};
+    config.copyExtent3D = {BlockWidthInTexels() * kExtentWidthMultiplier,
+                           BlockHeightInTexels() * kExtentHeightMultiplier, 6};
     config.bytesPerRowAlignment = 511;
     config.rowsPerImage = 5;
     config.textureDescriptor.format = GetParam().mTextureFormat;
+
     TestWriteRegionIntoFormatTextures(config);
 }
 
@@ -1300,25 +1311,19 @@ TEST_P(CompressedTextureWriteTextureTest,
     // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGLES.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
-    // Texture virtual size at mipLevel 2 will be {15, 15, 1} while the physical
-    // size will be {16, 16, 1}.
-    // Setting copyExtent.width or copyExtent.height to 16 fits in
-    // the texture physical size, but doesn't fit in the virtual size.
-    for (unsigned int w : {12, 16}) {
-        for (unsigned int h : {12, 16}) {
-                CopyConfig config;
-                config.textureDescriptor.usage = kDefaultFormatTextureUsage;
-                config.textureDescriptor.size = {60, 60, 1};
-                config.textureDescriptor.mipLevelCount = 4;
-                config.viewMipmapLevel = 2;
+    CopyConfig config = GetDefaultFullConfig();
 
-                config.copyOrigin3D = {0, 0, 0};
-                config.copyExtent3D = {w, h, 1};
-                config.bytesPerRowAlignment = 256;
-                config.textureDescriptor.format = GetParam().mTextureFormat;
-                TestWriteRegionIntoFormatTextures(config);
-            }
+    // The virtual size of the texture at mipmap level == 2 is not a multiple of the texel
+    // dimensions so paddings are required in the copies. We then test against the expected
+    // physical size and a valid size smaller than the physical size for verification.
+    const wgpu::Extent3D kPhysicalSize = GetPhysicalSizeAtLevel(config);
+    for (unsigned int w : {kPhysicalSize.width - BlockWidthInTexels(), kPhysicalSize.width}) {
+        for (unsigned int h :
+             {kPhysicalSize.height - BlockHeightInTexels(), kPhysicalSize.height}) {
+            config.copyExtent3D = {w, h, 1};
+            TestWriteRegionIntoFormatTextures(config);
         }
+    }
 }
 
 DAWN_INSTANTIATE_TEST_P(CompressedTextureWriteTextureTest,

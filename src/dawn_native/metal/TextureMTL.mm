@@ -282,6 +282,35 @@ namespace dawn_native { namespace metal {
             case wgpu::TextureFormat::EACRG11Unorm:
             case wgpu::TextureFormat::EACRG11Snorm:
 
+            case wgpu::TextureFormat::ASTC4x4Unorm:
+            case wgpu::TextureFormat::ASTC4x4UnormSrgb:
+            case wgpu::TextureFormat::ASTC5x4Unorm:
+            case wgpu::TextureFormat::ASTC5x4UnormSrgb:
+            case wgpu::TextureFormat::ASTC5x5Unorm:
+            case wgpu::TextureFormat::ASTC5x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC6x5Unorm:
+            case wgpu::TextureFormat::ASTC6x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC6x6Unorm:
+            case wgpu::TextureFormat::ASTC6x6UnormSrgb:
+            case wgpu::TextureFormat::ASTC8x5Unorm:
+            case wgpu::TextureFormat::ASTC8x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC8x6Unorm:
+            case wgpu::TextureFormat::ASTC8x6UnormSrgb:
+            case wgpu::TextureFormat::ASTC8x8Unorm:
+            case wgpu::TextureFormat::ASTC8x8UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x5Unorm:
+            case wgpu::TextureFormat::ASTC10x5UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x6Unorm:
+            case wgpu::TextureFormat::ASTC10x6UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x8Unorm:
+            case wgpu::TextureFormat::ASTC10x8UnormSrgb:
+            case wgpu::TextureFormat::ASTC10x10Unorm:
+            case wgpu::TextureFormat::ASTC10x10UnormSrgb:
+            case wgpu::TextureFormat::ASTC12x10Unorm:
+            case wgpu::TextureFormat::ASTC12x10UnormSrgb:
+            case wgpu::TextureFormat::ASTC12x12Unorm:
+            case wgpu::TextureFormat::ASTC12x12UnormSrgb:
+
             case wgpu::TextureFormat::Stencil8:
             case wgpu::TextureFormat::Undefined:
                 UNREACHABLE();
