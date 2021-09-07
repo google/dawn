@@ -641,6 +641,7 @@ if(${TINT_BUILD_TESTS})
     diagnostic/printer_test.cc
     intrinsic_table_test.cc
     program_test.cc
+    resolver/array_accessor_test.cc
     resolver/assignment_validation_test.cc
     resolver/atomics_test.cc
     resolver/atomics_validation_test.cc
