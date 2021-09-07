@@ -158,6 +158,45 @@ fn main() {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(ModuleScopeVarToEntryPointParamTest, FoldAddressOfDeref) {
+  auto* src = R"(
+var<private> v : f32;
+
+fn bar(p : ptr<private, f32>) {
+  (*p) = 0.0;
+}
+
+fn foo() {
+  bar(&v);
+}
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+  foo();
+}
+)";
+
+  auto* expect = R"(
+fn bar(p : ptr<private, f32>) {
+  *(p) = 0.0;
+}
+
+fn foo(tint_symbol : ptr<private, f32>) {
+  bar(tint_symbol);
+}
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+  [[internal(disable_validation__ignore_storage_class)]] var<private> tint_symbol_1 : f32;
+  foo(&(tint_symbol_1));
+}
+)";
+
+  auto got = Run<ModuleScopeVarToEntryPointParam>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(ModuleScopeVarToEntryPointParamTest, UnusedVariables) {
   auto* src = R"(
 var<private> p : f32;
