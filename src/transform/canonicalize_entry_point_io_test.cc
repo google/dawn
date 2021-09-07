@@ -491,7 +491,7 @@ fn frag_main() -> FragOutput {
 
 [[builtin(frag_depth), internal(disable_validation__ignore_storage_class)]] var<out> depth_1 : f32;
 
-[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<out> mask_1 : u32;
+[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<out> mask_1 : array<u32, 1>;
 
 struct FragOutput {
   color : vec4<f32>;
@@ -512,7 +512,7 @@ fn frag_main() {
   let inner_result = frag_main_inner();
   color_1 = inner_result.color;
   depth_1 = inner_result.depth;
-  mask_1 = inner_result.mask;
+  mask_1[0] = inner_result.mask;
 }
 )";
 
@@ -2158,6 +2158,42 @@ fn vert_main() -> tint_symbol {
   DataMap data;
   data.Add<CanonicalizeEntryPointIO::Config>(
       CanonicalizeEntryPointIO::ShaderStyle::kMsl, 0xFFFFFFFF, true);
+  auto got = Run<CanonicalizeEntryPointIO>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, SpirvSampleMaskBuiltins) {
+  auto* src = R"(
+[[stage(fragment)]]
+fn main([[builtin(sample_index)]] sample_index : u32,
+        [[builtin(sample_mask)]] mask_in : u32
+        ) -> [[builtin(sample_mask)]] u32 {
+  return mask_in;
+}
+)";
+
+  auto* expect = R"(
+[[builtin(sample_index), internal(disable_validation__ignore_storage_class)]] var<in> sample_index_1 : u32;
+
+[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<in> mask_in_1 : array<u32, 1>;
+
+[[builtin(sample_mask), internal(disable_validation__ignore_storage_class)]] var<out> value : array<u32, 1>;
+
+fn main_inner(sample_index : u32, mask_in : u32) -> u32 {
+  return mask_in;
+}
+
+[[stage(fragment)]]
+fn main() {
+  let inner_result = main_inner(sample_index_1, mask_in_1[0]);
+  value[0] = inner_result;
+}
+)";
+
+  DataMap data;
+  data.Add<CanonicalizeEntryPointIO::Config>(
+      CanonicalizeEntryPointIO::ShaderStyle::kSpirv);
   auto got = Run<CanonicalizeEntryPointIO>(src, data);
 
   EXPECT_EQ(expect, str(got));

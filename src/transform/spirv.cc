@@ -68,59 +68,11 @@ Output Spirv::Run(const Program* in, const DataMap& data) {
 
   ProgramBuilder builder;
   CloneContext ctx(&builder, &transformedInput.program);
-  HandleSampleMaskBuiltins(ctx);
+  // TODO(jrprice): Move the sanitizer into the backend.
   ctx.Clone();
 
   builder.SetTransformApplied(this);
   return Output{Program(std::move(builder))};
-}
-
-void Spirv::HandleSampleMaskBuiltins(CloneContext& ctx) const {
-  // Find global variables decorated with [[builtin(sample_mask)]] and
-  // change their type from `u32` to `array<u32, 1>`, as required by Vulkan.
-  //
-  // Before:
-  // ```
-  // [[builtin(sample_mask)]] var<out> mask_out : u32;
-  // fn main() {
-  //   mask_out = 1u;
-  // }
-  // ```
-  // After:
-  // ```
-  // [[builtin(sample_mask)]] var<out> mask_out : array<u32, 1>;
-  // fn main() {
-  //   mask_out[0] = 1u;
-  // }
-  // ```
-
-  for (auto* var : ctx.src->AST().GlobalVariables()) {
-    for (auto* deco : var->decorations()) {
-      if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
-        if (builtin->value() != ast::Builtin::kSampleMask) {
-          continue;
-        }
-
-        // Use the same name as the old variable.
-        auto var_name = ctx.Clone(var->symbol());
-        // Use `array<u32, 1>` for the new variable.
-        auto* type = ctx.dst->ty.array(ctx.dst->ty.u32(), 1u);
-        // Create the new variable.
-        auto* var_arr = ctx.dst->Var(var->source(), var_name, type,
-                                     var->declared_storage_class(), nullptr,
-                                     ctx.Clone(var->decorations()));
-        // Replace the variable with the arrayed version.
-        ctx.Replace(var, var_arr);
-
-        // Replace all uses of the old variable with `var_arr[0]`.
-        for (auto* user : ctx.src->Sem().Get(var)->Users()) {
-          auto* new_ident = ctx.dst->IndexAccessor(
-              ctx.dst->Expr(var_arr->symbol()), ctx.dst->Expr(0));
-          ctx.Replace<ast::Expression>(user->Declaration(), new_ident);
-        }
-      }
-    }
-  }
 }
 
 Spirv::Config::Config(bool emit_vps, bool disable_wi)

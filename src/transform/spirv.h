@@ -67,10 +67,6 @@ class Spirv : public Castable<Spirv, Transform> {
   /// @param data optional extra transform-specific input data
   /// @returns the transformation result
   Output Run(const Program* program, const DataMap& data = {}) override;
-
- private:
-  /// Change type of sample mask builtin variables to single element arrays.
-  void HandleSampleMaskBuiltins(CloneContext& ctx) const;
 };
 
 }  // namespace transform
