@@ -316,6 +316,8 @@ set(TINT_LIB_SRCS
   transform/loop_to_for_loop.h
   transform/manager.cc
   transform/manager.h
+  transform/module_scope_var_to_entry_point_param.cc
+  transform/module_scope_var_to_entry_point_param.h
   transform/pad_array_elements.cc
   transform/pad_array_elements.h
   transform/promote_initializers_to_const_var.cc
@@ -937,6 +939,7 @@ if(${TINT_BUILD_TESTS})
       transform/for_loop_to_loop_test.cc
       transform/inline_pointer_lets_test.cc
       transform/loop_to_for_loop_test.cc
+      transform/module_scope_var_to_entry_point_param_test.cc
       transform/pad_array_elements_test.cc
       transform/promote_initializers_to_const_var_test.cc
       transform/renamer_test.cc

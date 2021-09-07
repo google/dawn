@@ -86,12 +86,6 @@ class Msl : public Castable<Msl, Transform> {
   /// @param data optional extra transform-specific input data
   /// @returns the transformation result
   Output Run(const Program* program, const DataMap& data = {}) override;
-
- private:
-  /// Pushes module-scope variables with certain storage classes into the entry
-  /// point function, and passes them as function parameters to any functions
-  /// that need them.
-  void HandleModuleScopeVariables(CloneContext& ctx) const;
 };
 
 }  // namespace transform
