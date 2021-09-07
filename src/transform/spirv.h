@@ -71,8 +71,6 @@ class Spirv : public Castable<Spirv, Transform> {
  private:
   /// Change type of sample mask builtin variables to single element arrays.
   void HandleSampleMaskBuiltins(CloneContext& ctx) const;
-  /// Add an empty shader entry point if none exist in the module.
-  void AddEmptyEntryPoint(CloneContext& ctx) const;
 };
 
 }  // namespace transform

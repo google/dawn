@@ -287,6 +287,7 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/symbol_table_test.cc",
     "../src/symbol_test.cc",
     "../src/traits_test.cc",
+    "../src/transform/add_empty_entry_point_test.cc",
     "../src/transform/array_length_from_uniform_test.cc",
     "../src/transform/binding_remapper_test.cc",
     "../src/transform/calculate_array_length_test.cc",

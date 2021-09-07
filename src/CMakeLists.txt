@@ -286,6 +286,8 @@ set(TINT_LIB_SRCS
   symbol.cc
   symbol.h
   traits.h
+  transform/add_empty_entry_point.cc
+  transform/add_empty_entry_point.h
   transform/array_length_from_uniform.cc
   transform/array_length_from_uniform.h
   transform/binding_remapper.cc
@@ -921,6 +923,7 @@ if(${TINT_BUILD_TESTS})
 
   if(${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
     list(APPEND TINT_TEST_SRCS
+      transform/add_empty_entry_point_test.cc
       transform/array_length_from_uniform_test.cc
       transform/binding_remapper_test.cc
       transform/calculate_array_length_test.cc

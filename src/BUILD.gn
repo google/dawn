@@ -416,6 +416,8 @@ libtint_source_set("libtint_core_all_src") {
     "symbol_table.cc",
     "symbol_table.h",
     "traits.h",
+    "transform/add_empty_entry_point.cc",
+    "transform/add_empty_entry_point.h",
     "transform/array_length_from_uniform.cc",
     "transform/array_length_from_uniform.h",
     "transform/binding_remapper.cc",

@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "src/program_builder.h"
+#include "src/transform/add_empty_entry_point.h"
 #include "src/transform/calculate_array_length.h"
 #include "src/transform/canonicalize_entry_point_io.h"
 #include "src/transform/decompose_memory_access.h"
@@ -71,6 +72,7 @@ Output Hlsl::Run(const Program* in, const DataMap& inputs) {
   manager.Add<ExternalTextureTransform>();
   manager.Add<PromoteInitializersToConstVar>();
   manager.Add<PadArrayElements>();
+  manager.Add<AddEmptyEntryPoint>();
 
   data.Add<CanonicalizeEntryPointIO::Config>(
       CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
@@ -81,22 +83,10 @@ Output Hlsl::Run(const Program* in, const DataMap& inputs) {
 
   ProgramBuilder builder;
   CloneContext ctx(&builder, &out.program);
-  AddEmptyEntryPoint(ctx);
+  // TODO(jrprice): Move the sanitizer into the backend.
   ctx.Clone();
   builder.SetTransformApplied(this);
   return Output{Program(std::move(builder))};
-}
-
-void Hlsl::AddEmptyEntryPoint(CloneContext& ctx) const {
-  for (auto* func : ctx.src->AST().Functions()) {
-    if (func->IsEntryPoint()) {
-      return;
-    }
-  }
-  ctx.dst->Func(ctx.dst->Symbols().New("unused_entry_point"), {},
-                ctx.dst->ty.void_(), {},
-                {ctx.dst->Stage(ast::PipelineStage::kCompute),
-                 ctx.dst->WorkgroupSize(1)});
 }
 
 Hlsl::Config::Config(bool disable_wi) : disable_workgroup_init(disable_wi) {}

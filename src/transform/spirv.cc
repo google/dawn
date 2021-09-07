@@ -20,6 +20,7 @@
 #include "src/ast/stage_decoration.h"
 #include "src/program_builder.h"
 #include "src/sem/variable.h"
+#include "src/transform/add_empty_entry_point.h"
 #include "src/transform/canonicalize_entry_point_io.h"
 #include "src/transform/external_texture_transform.h"
 #include "src/transform/fold_constants.h"
@@ -52,6 +53,7 @@ Output Spirv::Run(const Program* in, const DataMap& data) {
   manager.Add<ExternalTextureTransform>();
   manager.Add<ForLoopToLoop>();  // Must come after ZeroInitWorkgroupMemory
   manager.Add<CanonicalizeEntryPointIO>();
+  manager.Add<AddEmptyEntryPoint>();
 
   internal_inputs.Add<CanonicalizeEntryPointIO::Config>(
       CanonicalizeEntryPointIO::Config(
@@ -67,7 +69,6 @@ Output Spirv::Run(const Program* in, const DataMap& data) {
   ProgramBuilder builder;
   CloneContext ctx(&builder, &transformedInput.program);
   HandleSampleMaskBuiltins(ctx);
-  AddEmptyEntryPoint(ctx);
   ctx.Clone();
 
   builder.SetTransformApplied(this);
@@ -120,17 +121,6 @@ void Spirv::HandleSampleMaskBuiltins(CloneContext& ctx) const {
       }
     }
   }
-}
-
-void Spirv::AddEmptyEntryPoint(CloneContext& ctx) const {
-  for (auto* func : ctx.src->AST().Functions()) {
-    if (func->IsEntryPoint()) {
-      return;
-    }
-  }
-  ctx.dst->Func(ctx.dst->Sym("unused_entry_point"), {}, ctx.dst->ty.void_(), {},
-                {ctx.dst->Stage(ast::PipelineStage::kCompute),
-                 ctx.dst->WorkgroupSize(1)});
 }
 
 Spirv::Config::Config(bool emit_vps, bool disable_wi)

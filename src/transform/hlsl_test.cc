@@ -22,19 +22,7 @@ namespace {
 
 using HlslTest = TransformTest;
 
-TEST_F(HlslTest, AddEmptyEntryPoint) {
-  auto* src = R"()";
-
-  auto* expect = R"(
-[[stage(compute), workgroup_size(1)]]
-fn unused_entry_point() {
-}
-)";
-
-  auto got = Run<Hlsl>(src);
-
-  EXPECT_EQ(expect, str(got));
-}
+// TODO(jrprice): Remove this file when we remove the sanitizer transforms.
 
 }  // namespace
 }  // namespace transform

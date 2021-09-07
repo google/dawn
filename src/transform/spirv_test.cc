@@ -101,20 +101,6 @@ fn main() {
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvTest, AddEmptyEntryPoint) {
-  auto* src = R"()";
-
-  auto* expect = R"(
-[[stage(compute), workgroup_size(1)]]
-fn unused_entry_point() {
-}
-)";
-
-  auto got = Run<Spirv>(src);
-
-  EXPECT_EQ(expect, str(got));
-}
-
 // Test that different transforms within the sanitizer interact correctly.
 TEST_F(SpirvTest, MultipleTransforms) {
   auto* src = R"(
