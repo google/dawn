@@ -92,6 +92,7 @@ class DepthStencilStateTest : public DawnTest {
         float depth;
         uint32_t stencil;
         wgpu::FrontFace frontFace = wgpu::FrontFace::CCW;
+        bool setStencilReference = true;
     };
 
     // Check whether a depth comparison function works as expected
@@ -265,7 +266,8 @@ class DepthStencilStateTest : public DawnTest {
     // expected colors for the frontfaces and backfaces
     void DoTest(const std::vector<TestSpec>& testParams,
                 const RGBA8& expectedFront,
-                const RGBA8& expectedBack) {
+                const RGBA8& expectedBack,
+                bool isSingleEncoderMultiplePass = false) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
         struct TriangleData {
@@ -274,10 +276,31 @@ class DepthStencilStateTest : public DawnTest {
         };
 
         utils::ComboRenderPassDescriptor renderPass({renderTargetView}, depthTextureView);
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        wgpu::RenderPassEncoder pass;
+
+        if (isSingleEncoderMultiplePass) {
+            // The render pass to clear up the depthTextureView (using LoadOp = clear)
+            utils::ComboRenderPassDescriptor clearingPass({renderTargetView}, depthTextureView);
+
+            // The render pass to do the test with depth and stencil result kept
+            renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
+            renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
+
+            // Clear the depthStencilView at the beginning
+            {
+                pass = encoder.BeginRenderPass(&renderPass);
+                pass.EndPass();
+            }
+        } else {
+            pass = encoder.BeginRenderPass(&renderPass);
+        }
 
         for (size_t i = 0; i < testParams.size(); ++i) {
             const TestSpec& test = testParams[i];
+
+            if (isSingleEncoderMultiplePass) {
+                pass = encoder.BeginRenderPass(&renderPass);
+            }
 
             TriangleData data = {
                 {static_cast<float>(test.color.r) / 255.f, static_cast<float>(test.color.g) / 255.f,
@@ -305,12 +328,21 @@ class DepthStencilStateTest : public DawnTest {
                 device, pipeline.GetBindGroupLayout(0), {{0, buffer, 0, sizeof(TriangleData)}});
 
             pass.SetPipeline(pipeline);
-            pass.SetStencilReference(test.stencil);  // Set the stencil reference
+            if (test.setStencilReference) {
+                pass.SetStencilReference(test.stencil);  // Set the stencil reference
+            }
             pass.SetBindGroup(0,
                               bindGroup);  // Set the bind group which contains color and depth data
             pass.Draw(6);
+
+            if (isSingleEncoderMultiplePass) {
+                pass.EndPass();
+            }
         }
-        pass.EndPass();
+
+        if (!isSingleEncoderMultiplePass) {
+            pass.EndPass();
+        }
 
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
@@ -321,8 +353,10 @@ class DepthStencilStateTest : public DawnTest {
             << "Back face check failed";
     }
 
-    void DoTest(const std::vector<TestSpec>& testParams, const RGBA8& expected) {
-        DoTest(testParams, expected, expected);
+    void DoTest(const std::vector<TestSpec>& testParams,
+                const RGBA8& expected,
+                bool isSingleEncoderMultiplePass = false) {
+        DoTest(testParams, expected, expected, isSingleEncoderMultiplePass);
     }
 
     wgpu::Texture renderTarget;
@@ -750,6 +784,51 @@ TEST_P(DepthStencilStateTest, StencilFrontAndBackFace) {
     // The front facing triangle passes the stencil comparison but the back facing one doesn't.
     DoTest({{state, RGBA8::kRed, 0.f, 0u, wgpu::FrontFace::CCW}}, RGBA8::kRed, RGBA8::kZero);
     DoTest({{state, RGBA8::kRed, 0.f, 0u, wgpu::FrontFace::CW}}, RGBA8::kZero, RGBA8::kRed);
+}
+
+// Test that the depth reference of a new render pass is initialized to default value 0
+TEST_P(DepthStencilStateTest, StencilReferenceInitialized) {
+    wgpu::DepthStencilState stencilAlwaysReplaceState;
+    stencilAlwaysReplaceState.stencilFront.compare = wgpu::CompareFunction::Always;
+    stencilAlwaysReplaceState.stencilFront.passOp = wgpu::StencilOperation::Replace;
+    stencilAlwaysReplaceState.stencilBack.compare = wgpu::CompareFunction::Always;
+    stencilAlwaysReplaceState.stencilBack.passOp = wgpu::StencilOperation::Replace;
+
+    wgpu::DepthStencilState stencilEqualKeepState;
+    stencilEqualKeepState.stencilFront.compare = wgpu::CompareFunction::Equal;
+    stencilEqualKeepState.stencilFront.passOp = wgpu::StencilOperation::Keep;
+    stencilEqualKeepState.stencilBack.compare = wgpu::CompareFunction::Equal;
+    stencilEqualKeepState.stencilBack.passOp = wgpu::StencilOperation::Keep;
+
+    // Test that stencil reference is not inherited
+    {
+        // First pass sets the stencil to 0x1, and the second pass tests the stencil
+        // Only set the stencil reference in the first pass, and test that for other pass it should
+        // be default value rather than inherited
+        std::vector<TestSpec> testParams = {
+            {stencilAlwaysReplaceState, RGBA8::kRed, 0.f, 0x1, wgpu::FrontFace::CCW, true},
+            {stencilEqualKeepState, RGBA8::kGreen, 0.f, 0x0, wgpu::FrontFace::CCW, false}};
+
+        // Since the stencil reference is not inherited, second draw won't pass the stencil test
+        std::pair<RGBA8, RGBA8> expectation = {RGBA8::kZero, RGBA8::kZero};
+
+        DoTest(testParams, expectation.first, expectation.second, true);
+    }
+
+    // Test that stencil reference is initialized as zero for new render pass
+    {
+        // First pass sets the stencil to 0x1, the second pass sets the stencil to its default
+        // value, and the third pass tests if the stencil is zero
+        std::vector<TestSpec> testParams = {
+            {stencilAlwaysReplaceState, RGBA8::kRed, 0.f, 0x1, wgpu::FrontFace::CCW, true},
+            {stencilAlwaysReplaceState, RGBA8::kGreen, 0.f, 0x1, wgpu::FrontFace::CCW, false},
+            {stencilEqualKeepState, RGBA8::kBlue, 0.f, 0x0, wgpu::FrontFace::CCW, true}};
+
+        // The third draw should pass the stencil test since the second pass set it to default zero
+        std::pair<RGBA8, RGBA8> expectation = {RGBA8::kBlue, RGBA8::kBlue};
+
+        DoTest(testParams, expectation.first, expectation.second, true);
+    }
 }
 
 DAWN_INSTANTIATE_TEST(DepthStencilStateTest,

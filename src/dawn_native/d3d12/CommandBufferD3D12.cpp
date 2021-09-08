@@ -1304,6 +1304,8 @@ namespace dawn_native { namespace d3d12 {
 
             static constexpr std::array<float, 4> defaultBlendFactor = {0, 0, 0, 0};
             commandList->OMSetBlendFactor(&defaultBlendFactor[0]);
+
+            commandList->OMSetStencilRef(0);
         }
 
         RenderPipeline* lastPipeline = nullptr;
