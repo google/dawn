@@ -244,7 +244,6 @@ class Resolver {
   bool Constructor(ast::ConstructorExpression*);
   bool ElseStatement(ast::ElseStatement*);
   bool Expression(ast::Expression*);
-  bool Expressions(const ast::ExpressionList&);
   bool ForLoopStatement(ast::ForLoopStatement*);
   bool Function(ast::Function*);
   bool FunctionCall(const ast::CallExpression* call);
@@ -261,6 +260,15 @@ class Resolver {
   bool SwitchStatement(ast::SwitchStatement* s);
   bool UnaryOp(ast::UnaryOpExpression*);
   bool VariableDeclStatement(const ast::VariableDeclStatement*);
+
+  /// Performs a depth-first traversal of the expression nodes from `root`,
+  /// collecting all the visited expressions in pre-ordering (root first).
+  /// @param root the root expression node
+  /// @param out the ordered list of visited expression nodes, starting with the
+  ///        root node, and ending with leaf nodes
+  /// @return true on success, false on error
+  bool TraverseExpressions(ast::Expression* root,
+                          std::vector<ast::Expression*>& out);
 
   // AST and Type validation methods
   // Each return true on success, false on failure.

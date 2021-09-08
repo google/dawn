@@ -72,6 +72,7 @@
 #include "src/utils/defer.h"
 #include "src/utils/get_or_create.h"
 #include "src/utils/math.h"
+#include "src/utils/reverse.h"
 #include "src/utils/scoped_assignment.h"
 
 namespace tint {
@@ -2244,60 +2245,94 @@ bool Resolver::ForLoopStatement(ast::ForLoopStatement* stmt) {
   });
 }
 
-bool Resolver::Expressions(const ast::ExpressionList& list) {
-  for (auto* expr : list) {
-    Mark(expr);
-    if (!Expression(expr)) {
+bool Resolver::TraverseExpressions(ast::Expression* root,
+                                   std::vector<ast::Expression*>& out) {
+  std::vector<ast::Expression*> to_visit;
+  to_visit.emplace_back(root);
+
+  auto add = [&](ast::Expression* e) {
+    Mark(e);
+    to_visit.emplace_back(e);
+  };
+
+  while (!to_visit.empty()) {
+    auto* expr = to_visit.back();
+    to_visit.pop_back();
+
+    out.emplace_back(expr);
+
+    if (auto* array = expr->As<ast::ArrayAccessorExpression>()) {
+      add(array->array());
+      add(array->idx_expr());
+    } else if (auto* bin_op = expr->As<ast::BinaryExpression>()) {
+      add(bin_op->lhs());
+      add(bin_op->rhs());
+    } else if (auto* bitcast = expr->As<ast::BitcastExpression>()) {
+      add(bitcast->expr());
+    } else if (auto* call = expr->As<ast::CallExpression>()) {
+      for (auto* arg : call->params()) {
+        add(arg);
+      }
+    } else if (auto* type_ctor = expr->As<ast::TypeConstructorExpression>()) {
+      for (auto* value : type_ctor->values()) {
+        add(value);
+      }
+    } else if (auto* member = expr->As<ast::MemberAccessorExpression>()) {
+      add(member->structure());
+    } else if (auto* unary = expr->As<ast::UnaryOpExpression>()) {
+      add(unary->expr());
+    } else if (expr->IsAnyOf<ast::ScalarConstructorExpression,
+                             ast::IdentifierExpression>()) {
+      // Leaf expression
+    } else {
+      TINT_ICE(Resolver, diagnostics_)
+          << "unhandled expression type: " << expr->TypeInfo().name;
       return false;
     }
   }
+
   return true;
 }
 
-bool Resolver::Expression(ast::Expression* expr) {
-  if (TypeOf(expr)) {
-    return true;  // Already resolved
-  }
-
-  bool ok = false;
-  if (auto* array = expr->As<ast::ArrayAccessorExpression>()) {
-    ok = ArrayAccessor(array);
-  } else if (auto* bin_op = expr->As<ast::BinaryExpression>()) {
-    ok = Binary(bin_op);
-  } else if (auto* bitcast = expr->As<ast::BitcastExpression>()) {
-    ok = Bitcast(bitcast);
-  } else if (auto* call = expr->As<ast::CallExpression>()) {
-    ok = Call(call);
-  } else if (auto* ctor = expr->As<ast::ConstructorExpression>()) {
-    ok = Constructor(ctor);
-  } else if (auto* ident = expr->As<ast::IdentifierExpression>()) {
-    ok = Identifier(ident);
-  } else if (auto* member = expr->As<ast::MemberAccessorExpression>()) {
-    ok = MemberAccessor(member);
-  } else if (auto* unary = expr->As<ast::UnaryOpExpression>()) {
-    ok = UnaryOp(unary);
-  } else {
-    AddError("unknown expression for type determination", expr->source());
-  }
-
-  if (!ok) {
+bool Resolver::Expression(ast::Expression* root) {
+  std::vector<ast::Expression*> sorted;
+  if (!TraverseExpressions(root, sorted)) {
     return false;
+  }
+
+  for (auto* expr : utils::Reverse(sorted)) {
+    bool ok = false;
+    if (auto* array = expr->As<ast::ArrayAccessorExpression>()) {
+      ok = ArrayAccessor(array);
+    } else if (auto* bin_op = expr->As<ast::BinaryExpression>()) {
+      ok = Binary(bin_op);
+    } else if (auto* bitcast = expr->As<ast::BitcastExpression>()) {
+      ok = Bitcast(bitcast);
+    } else if (auto* call = expr->As<ast::CallExpression>()) {
+      ok = Call(call);
+    } else if (auto* ctor = expr->As<ast::ConstructorExpression>()) {
+      ok = Constructor(ctor);
+    } else if (auto* ident = expr->As<ast::IdentifierExpression>()) {
+      ok = Identifier(ident);
+    } else if (auto* member = expr->As<ast::MemberAccessorExpression>()) {
+      ok = MemberAccessor(member);
+    } else if (auto* unary = expr->As<ast::UnaryOpExpression>()) {
+      ok = UnaryOp(unary);
+    } else {
+      TINT_ICE(Resolver, diagnostics_)
+          << "unhandled expression type: " << expr->TypeInfo().name;
+      return false;
+    }
+    if (!ok) {
+      return false;
+    }
   }
 
   return true;
 }
 
 bool Resolver::ArrayAccessor(ast::ArrayAccessorExpression* expr) {
-  Mark(expr->array());
-  if (!Expression(expr->array())) {
-    return false;
-  }
   auto* idx = expr->idx_expr();
-  Mark(idx);
-  if (!Expression(idx)) {
-    return false;
-  }
-
   auto* res = TypeOf(expr->array());
   auto* parent_type = res->UnwrapRef();
   const sem::Type* ret = nullptr;
@@ -2345,10 +2380,6 @@ bool Resolver::ArrayAccessor(ast::ArrayAccessorExpression* expr) {
 }
 
 bool Resolver::Bitcast(ast::BitcastExpression* expr) {
-  Mark(expr->expr());
-  if (!Expression(expr->expr())) {
-    return false;
-  }
   auto* ty = Type(expr->type());
   if (!ty) {
     return false;
@@ -2362,10 +2393,6 @@ bool Resolver::Bitcast(ast::BitcastExpression* expr) {
 }
 
 bool Resolver::Call(ast::CallExpression* call) {
-  if (!Expressions(call->params())) {
-    return false;
-  }
-
   Mark(call->func());
   auto* ident = call->func();
   auto name = builder_->Symbols().NameFor(ident->symbol());
@@ -2641,13 +2668,6 @@ bool Resolver::ValidateFunctionCall(const ast::CallExpression* call,
 
 bool Resolver::Constructor(ast::ConstructorExpression* expr) {
   if (auto* type_ctor = expr->As<ast::TypeConstructorExpression>()) {
-    for (auto* value : type_ctor->values()) {
-      Mark(value);
-      if (!Expression(value)) {
-        return false;
-      }
-    }
-
     auto* type = Type(type_ctor->type());
     if (!type) {
       return false;
@@ -2994,11 +3014,6 @@ bool Resolver::Identifier(ast::IdentifierExpression* expr) {
 }
 
 bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
-  Mark(expr->structure());
-  if (!Expression(expr->structure())) {
-    return false;
-  }
-
   auto* structure = TypeOf(expr->structure());
   auto* storage_type = structure->UnwrapRef();
 
@@ -3118,13 +3133,6 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
 }
 
 bool Resolver::Binary(ast::BinaryExpression* expr) {
-  Mark(expr->lhs());
-  Mark(expr->rhs());
-
-  if (!Expression(expr->lhs()) || !Expression(expr->rhs())) {
-    return false;
-  }
-
   using Bool = sem::Bool;
   using F32 = sem::F32;
   using I32 = sem::I32;
@@ -3330,13 +3338,6 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
 }
 
 bool Resolver::UnaryOp(ast::UnaryOpExpression* unary) {
-  Mark(unary->expr());
-
-  // Resolve the inner expression
-  if (!Expression(unary->expr())) {
-    return false;
-  }
-
   auto* expr_type = TypeOf(unary->expr());
   if (!expr_type) {
     return false;

@@ -15,6 +15,7 @@
 #include "src/resolver/resolver.h"
 
 #include "gmock/gmock.h"
+#include "gtest/gtest-spi.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/break_statement.h"
@@ -56,10 +57,9 @@ class FakeStmt : public ast::Statement {
   }
 };
 
-class FakeExpr : public ast::Expression {
+class FakeExpr : public Castable<FakeExpr, ast::Expression> {
  public:
-  FakeExpr(ProgramID program_id, Source source)
-      : ast::Expression(program_id, source) {}
+  FakeExpr(ProgramID program_id, Source source) : Base(program_id, source) {}
   FakeExpr* Clone(CloneContext*) const override { return nullptr; }
   void to_str(const sem::Info&, std::ostream&, size_t) const override {}
 };
@@ -158,14 +158,15 @@ TEST_F(ResolverValidationTest, Stmt_Else_NonBool) {
             "12:34 error: else statement condition must be bool, got f32");
 }
 
-TEST_F(ResolverValidationTest, Expr_Error_Unknown) {
-  auto* e = create<FakeExpr>(Source{Source::Location{2, 30}});
-  WrapInFunction(e);
-
-  EXPECT_FALSE(r()->Resolve());
-
-  EXPECT_EQ(r()->error(),
-            "2:30 error: unknown expression for type determination");
+TEST_F(ResolverValidationTest, Expr_ErrUnknownExprType) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.WrapInFunction(b.create<FakeExpr>());
+        Resolver(&b).Resolve();
+      },
+      "internal compiler error: unhandled expression type: "
+      "tint::resolver::FakeExpr");
 }
 
 TEST_F(ResolverValidationTest, Expr_DontCall_Function) {
@@ -925,3 +926,5 @@ TEST_F(ResolverTest, Expr_Constructor_Cast_Pointer) {
 }  // namespace
 }  // namespace resolver
 }  // namespace tint
+
+TINT_INSTANTIATE_TYPEINFO(tint::resolver::FakeExpr);

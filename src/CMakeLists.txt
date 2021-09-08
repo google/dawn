@@ -713,6 +713,7 @@ if(${TINT_BUILD_TESTS})
     utils/io/command_test.cc
     utils/io/tmpfile_test.cc
     utils/math_test.cc
+    utils/reverse_test.cc
     utils/scoped_assignment_test.cc
     utils/unique_vector_test.cc
     writer/append_vector_test.cc
