@@ -22,7 +22,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   transform::Manager transform_manager;
   transform_manager.Add<transform::Renamer>();
 
-  fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
+  fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kWGSL);
   fuzzer.SetTransformManager(&transform_manager, {});
   fuzzer.SetDumpInput(GetCliParams().dump_input);
 

@@ -30,7 +30,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
   transform_manager.Add<tint::transform::BindingRemapper>();
 
-  fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
+  fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kWGSL);
   fuzzer.SetTransformManager(&transform_manager, std::move(transform_inputs));
   fuzzer.SetDumpInput(GetCliParams().dump_input);
 

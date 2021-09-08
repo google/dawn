@@ -23,7 +23,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   transform::DataMap transform_inputs;
   transform_manager.Add<transform::Robustness>();
 
-  tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
+  tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kWGSL);
   fuzzer.EnableInspector();
   fuzzer.SetDumpInput(GetCliParams().dump_input);
   fuzzer.SetTransformManager(&transform_manager, std::move(transform_inputs));

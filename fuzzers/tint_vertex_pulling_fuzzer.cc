@@ -30,7 +30,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
   transform_manager.Add<tint::transform::VertexPulling>();
 
-  tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
+  tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kWGSL);
   fuzzer.SetTransformManager(&transform_manager, std::move(transform_inputs));
   fuzzer.SetDumpInput(GetCliParams().dump_input);
 
