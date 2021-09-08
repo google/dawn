@@ -14,7 +14,6 @@
 
 #include "src/writer/msl/generator.h"
 
-#include "src/transform/msl.h"
 #include "src/writer/msl/generator_impl.h"
 
 namespace tint {
@@ -28,24 +27,20 @@ Result::Result(const Result&) = default;
 Result Generate(const Program* program, const Options& options) {
   Result result;
 
-  // Run the MSL sanitizer.
-  transform::Msl sanitizer;
-  transform::DataMap transform_input;
-  transform_input.Add<transform::Msl::Config>(
-      options.buffer_size_ubo_index, options.fixed_sample_mask,
+  // Sanitize the program.
+  auto sanitized_result = Sanitize(
+      program, options.buffer_size_ubo_index, options.fixed_sample_mask,
       options.emit_vertex_point_size, options.disable_workgroup_init);
-  auto output = sanitizer.Run(program, transform_input);
-  if (!output.program.IsValid()) {
+  if (!sanitized_result.program.IsValid()) {
     result.success = false;
-    result.error = output.program.Diagnostics().str();
+    result.error = sanitized_result.program.Diagnostics().str();
     return result;
   }
-  auto* transform_output = output.data.Get<transform::Msl::Result>();
   result.needs_storage_buffer_sizes =
-      transform_output->needs_storage_buffer_sizes;
+      sanitized_result.needs_storage_buffer_sizes;
 
   // Generate the MSL code.
-  auto impl = std::make_unique<GeneratorImpl>(&output.program);
+  auto impl = std::make_unique<GeneratorImpl>(&sanitized_result.program);
   result.success = impl->Generate();
   result.error = impl->error();
   result.msl = impl->result();

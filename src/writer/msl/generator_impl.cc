@@ -55,7 +55,17 @@
 #include "src/sem/variable.h"
 #include "src/sem/vector_type.h"
 #include "src/sem/void_type.h"
-#include "src/transform/msl.h"
+#include "src/transform/array_length_from_uniform.h"
+#include "src/transform/canonicalize_entry_point_io.h"
+#include "src/transform/external_texture_transform.h"
+#include "src/transform/inline_pointer_lets.h"
+#include "src/transform/manager.h"
+#include "src/transform/module_scope_var_to_entry_point_param.h"
+#include "src/transform/pad_array_elements.h"
+#include "src/transform/promote_initializers_to_const_var.h"
+#include "src/transform/simplify.h"
+#include "src/transform/wrap_arrays_in_structs.h"
+#include "src/transform/zero_init_workgroup_memory.h"
 #include "src/utils/defer.h"
 #include "src/utils/get_or_create.h"
 #include "src/utils/scoped_assignment.h"
@@ -103,19 +113,66 @@ class ScopedBitCast {
 };
 }  // namespace
 
+SanitizedResult Sanitize(const Program* in,
+                         uint32_t buffer_size_ubo_index,
+                         uint32_t fixed_sample_mask,
+                         bool emit_vertex_point_size,
+                         bool disable_workgroup_init) {
+  transform::Manager manager;
+  transform::DataMap internal_inputs;
+
+  // Build the configs for the internal transforms.
+  auto array_length_from_uniform_cfg =
+      transform::ArrayLengthFromUniform::Config(
+          sem::BindingPoint{0, buffer_size_ubo_index});
+  auto entry_point_io_cfg = transform::CanonicalizeEntryPointIO::Config(
+      transform::CanonicalizeEntryPointIO::ShaderStyle::kMsl, fixed_sample_mask,
+      emit_vertex_point_size);
+
+  // Use the SSBO binding numbers as the indices for the buffer size lookups.
+  for (auto* var : in->AST().GlobalVariables()) {
+    auto* global = in->Sem().Get<sem::GlobalVariable>(var);
+    if (global && global->StorageClass() == ast::StorageClass::kStorage) {
+      array_length_from_uniform_cfg.bindpoint_to_size_index.emplace(
+          global->BindingPoint(), global->BindingPoint().binding);
+    }
+  }
+
+  if (!disable_workgroup_init) {
+    // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as
+    // ZeroInitWorkgroupMemory may inject new builtin parameters.
+    manager.Add<transform::ZeroInitWorkgroupMemory>();
+  }
+  manager.Add<transform::CanonicalizeEntryPointIO>();
+  manager.Add<transform::ExternalTextureTransform>();
+  manager.Add<transform::PromoteInitializersToConstVar>();
+  manager.Add<transform::WrapArraysInStructs>();
+  manager.Add<transform::PadArrayElements>();
+  manager.Add<transform::ModuleScopeVarToEntryPointParam>();
+  manager.Add<transform::InlinePointerLets>();
+  manager.Add<transform::Simplify>();
+  // ArrayLengthFromUniform must come after InlinePointerLets and Simplify, as
+  // it assumes that the form of the array length argument is &var.array.
+  manager.Add<transform::ArrayLengthFromUniform>();
+  internal_inputs.Add<transform::ArrayLengthFromUniform::Config>(
+      std::move(array_length_from_uniform_cfg));
+  internal_inputs.Add<transform::CanonicalizeEntryPointIO::Config>(
+      std::move(entry_point_io_cfg));
+  auto out = manager.Run(in, internal_inputs);
+  if (!out.program.IsValid()) {
+    return {std::move(out.program)};
+  }
+
+  return {std::move(out.program),
+          out.data.Get<transform::ArrayLengthFromUniform::Result>()
+              ->needs_buffer_sizes};
+}
+
 GeneratorImpl::GeneratorImpl(const Program* program) : TextGenerator(program) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
 
 bool GeneratorImpl::Generate() {
-  if (!program_->HasTransformApplied<transform::Msl>()) {
-    diagnostics_.add_error(
-        diag::System::Writer,
-        "MSL writer requires the transform::Msl sanitizer to have been "
-        "applied to the input program");
-    return false;
-  }
-
   line() << "#include <metal_stdlib>";
   line();
   line() << "using namespace metal;";

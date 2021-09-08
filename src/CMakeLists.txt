@@ -477,8 +477,6 @@ endif()
 
 if(${TINT_BUILD_MSL_WRITER})
   list(APPEND TINT_LIB_SRCS
-    transform/msl.cc
-    transform/msl.h
     writer/msl/generator.cc
     writer/msl/generator.h
     writer/msl/generator_impl.cc
@@ -955,9 +953,6 @@ if(${TINT_BUILD_TESTS})
   endif()
 
   if(${TINT_BUILD_MSL_WRITER})
-    if(${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
-      list(APPEND TINT_TEST_SRCS transform/msl_test.cc)
-    endif()
     list(APPEND TINT_TEST_SRCS
       writer/msl/generator_impl_array_accessor_test.cc
       writer/msl/generator_impl_assign_test.cc

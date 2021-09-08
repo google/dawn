@@ -21,7 +21,6 @@
 
 #include "gtest/gtest.h"
 #include "src/program_builder.h"
-#include "src/transform/msl.h"
 #include "src/writer/msl/generator_impl.h"
 
 namespace tint {
@@ -43,9 +42,6 @@ class TestHelperBase : public BASE, public ProgramBuilder {
     if (gen_) {
       return *gen_;
     }
-    // Fake that the MSL sanitizer has been applied, so that we can unit test
-    // the writer without it erroring.
-    SetTransformApplied<transform::Msl>();
     [&]() {
       ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
                              << diag::Formatter().format(Diagnostics());
@@ -78,7 +74,7 @@ class TestHelperBase : public BASE, public ProgramBuilder {
           << diag::Formatter().format(program->Diagnostics());
     }();
 
-    auto result = transform::Msl().Run(program.get());
+    auto result = Sanitize(program.get(), 30);
     [&]() {
       ASSERT_TRUE(result.program.IsValid())
           << diag::Formatter().format(result.program.Diagnostics());

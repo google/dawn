@@ -50,6 +50,26 @@ class Intrinsic;
 namespace writer {
 namespace msl {
 
+/// The result of sanitizing a program for generation.
+struct SanitizedResult {
+  /// The sanitized program.
+  Program program;
+  /// True if the shader needs a UBO of buffer sizes.
+  bool needs_storage_buffer_sizes = false;
+};
+
+/// Sanitize a program in preparation for generating MSL.
+/// @param buffer_size_ubo_index the index to use for the buffer size UBO
+/// @param fixed_sample_mask the fixed sample mask to use for fragment shaders
+/// @param emit_vertex_point_size `true` to emit a vertex point size builtin
+/// @param disable_workgroup_init `true` to disable workgroup memory zero
+/// @returns the sanitized program and any supplementary information
+SanitizedResult Sanitize(const Program* program,
+                         uint32_t buffer_size_ubo_index,
+                         uint32_t fixed_sample_mask = 0xFFFFFFFF,
+                         bool emit_vertex_point_size = false,
+                         bool disable_workgroup_init = false);
+
 /// Implementation class for MSL generator
 class GeneratorImpl : public TextGenerator {
  public:

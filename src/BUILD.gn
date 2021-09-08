@@ -670,8 +670,6 @@ libtint_source_set("libtint_wgsl_writer_src") {
 
 libtint_source_set("libtint_msl_writer_src") {
   sources = [
-    "transform/msl.cc",
-    "transform/msl.h",
     "writer/msl/generator.cc",
     "writer/msl/generator.h",
     "writer/msl/generator_impl.cc",

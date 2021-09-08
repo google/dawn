@@ -548,7 +548,6 @@ tint_unittests_source_set("tint_unittests_wgsl_writer_src") {
 
 tint_unittests_source_set("tint_unittests_msl_writer_src") {
   sources = [
-    "../src/transform/msl_test.cc",
     "../src/writer/msl/generator_impl_array_accessor_test.cc",
     "../src/writer/msl/generator_impl_assign_test.cc",
     "../src/writer/msl/generator_impl_binary_test.cc",
