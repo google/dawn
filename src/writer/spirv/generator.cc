@@ -14,7 +14,6 @@
 
 #include "src/writer/spirv/generator.h"
 
-#include "src/transform/spirv.h"
 #include "src/writer/spirv/binary_writer.h"
 
 namespace tint {
@@ -28,20 +27,17 @@ Result::Result(const Result&) = default;
 Result Generate(const Program* program, const Options& options) {
   Result result;
 
-  // Run the SPIR-V sanitizer.
-  transform::Spirv sanitizer;
-  transform::DataMap transform_input;
-  transform_input.Add<transform::Spirv::Config>(options.emit_vertex_point_size,
-                                                options.disable_workgroup_init);
-  auto output = sanitizer.Run(program, transform_input);
-  if (!output.program.IsValid()) {
+  // Sanitize the program.
+  auto sanitized_result = Sanitize(program, options.emit_vertex_point_size,
+                                   options.disable_workgroup_init);
+  if (!sanitized_result.program.IsValid()) {
     result.success = false;
-    result.error = output.program.Diagnostics().str();
+    result.error = sanitized_result.program.Diagnostics().str();
     return result;
   }
 
   // Generate the SPIR-V code.
-  auto builder = std::make_unique<Builder>(&output.program);
+  auto builder = std::make_unique<Builder>(&sanitized_result.program);
   auto writer = std::make_unique<BinaryWriter>();
   if (!builder->Build()) {
     result.success = false;

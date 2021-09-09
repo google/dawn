@@ -380,7 +380,6 @@ tint_unittests_source_set("tint_unittests_spv_reader_src") {
 
 tint_unittests_source_set("tint_unittests_spv_writer_src") {
   sources = [
-    "../src/transform/spirv_test.cc",
     "../src/writer/spirv/binary_writer_test.cc",
     "../src/writer/spirv/builder_accessor_expression_test.cc",
     "../src/writer/spirv/builder_assign_test.cc",

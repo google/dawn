@@ -621,8 +621,6 @@ libtint_source_set("libtint_spv_reader_src") {
 
 libtint_source_set("libtint_spv_writer_src") {
   sources = [
-    "transform/spirv.cc",
-    "transform/spirv.h",
     "writer/spirv/binary_writer.cc",
     "writer/spirv/binary_writer.h",
     "writer/spirv/builder.cc",

@@ -36,7 +36,15 @@
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
 #include "src/sem/vector_type.h"
-#include "src/transform/spirv.h"
+#include "src/transform/add_empty_entry_point.h"
+#include "src/transform/canonicalize_entry_point_io.h"
+#include "src/transform/external_texture_transform.h"
+#include "src/transform/fold_constants.h"
+#include "src/transform/for_loop_to_loop.h"
+#include "src/transform/inline_pointer_lets.h"
+#include "src/transform/manager.h"
+#include "src/transform/simplify.h"
+#include "src/transform/zero_init_workgroup_memory.h"
 #include "src/utils/get_or_create.h"
 #include "src/writer/append_vector.h"
 
@@ -260,6 +268,34 @@ const sem::Type* ElementTypeOf(const sem::Type* ty) {
 
 }  // namespace
 
+SanitizedResult Sanitize(const Program* in,
+                         bool emit_vertex_point_size,
+                         bool disable_workgroup_init) {
+  transform::Manager manager;
+  transform::DataMap data;
+
+  if (!disable_workgroup_init) {
+    manager.Add<transform::ZeroInitWorkgroupMemory>();
+  }
+  manager.Add<transform::InlinePointerLets>();  // Required for arrayLength()
+  manager.Add<transform::Simplify>();           // Required for arrayLength()
+  manager.Add<transform::FoldConstants>();
+  manager.Add<transform::ExternalTextureTransform>();
+  manager.Add<transform::ForLoopToLoop>();  // Must come after
+                                            // ZeroInitWorkgroupMemory
+  manager.Add<transform::CanonicalizeEntryPointIO>();
+  manager.Add<transform::AddEmptyEntryPoint>();
+
+  data.Add<transform::CanonicalizeEntryPointIO::Config>(
+      transform::CanonicalizeEntryPointIO::Config(
+          transform::CanonicalizeEntryPointIO::ShaderStyle::kSpirv, 0xFFFFFFFF,
+          emit_vertex_point_size));
+
+  SanitizedResult result;
+  result.program = std::move(manager.Run(in, data).program);
+  return result;
+}
+
 Builder::AccessorInfo::AccessorInfo() : source_id(0), source_type(nullptr) {}
 
 Builder::AccessorInfo::~AccessorInfo() {}
@@ -270,13 +306,6 @@ Builder::Builder(const Program* program)
 Builder::~Builder() = default;
 
 bool Builder::Build() {
-  if (!builder_.HasTransformApplied<transform::Spirv>()) {
-    error_ =
-        "SPIR-V writer requires the transform::Spirv sanitizer to have been "
-        "applied to the input program";
-    return false;
-  }
-
   push_capability(SpvCapabilityShader);
 
   push_memory_model(spv::Op::OpMemoryModel,

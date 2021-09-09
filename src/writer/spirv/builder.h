@@ -51,6 +51,20 @@ class Reference;
 namespace writer {
 namespace spirv {
 
+/// The result of sanitizing a program for generation.
+struct SanitizedResult {
+  /// The sanitized program.
+  Program program;
+};
+
+/// Sanitize a program in preparation for generating SPIR-V.
+/// @param emit_vertex_point_size `true` to emit a vertex point size builtin
+/// @param disable_workgroup_init `true` to disable workgroup memory zero
+/// @returns the sanitized program and any supplementary information
+SanitizedResult Sanitize(const Program* program,
+                         bool emit_vertex_point_size = false,
+                         bool disable_workgroup_init = false);
+
 /// Builder class to create SPIR-V instructions from a module.
 class Builder {
  public:
