@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/ast/discard_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/stage_decoration.h"
 #include "src/resolver/resolver.h"
@@ -172,18 +173,68 @@ TEST_F(ResolverFunctionValidationTest,
 
 TEST_F(ResolverFunctionValidationTest, UnreachableCode_return) {
   // fn func() -> {
+  //  var a : i32;
   //  return;
-  //  var a: i32 = 2;
+  //  a = 2;
   //}
-  auto* decl = Decl(Source{{12, 34}},
-                    Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2)));
 
   Func("func", ast::VariableList{}, ty.void_(),
-       ast::StatementList{
+       {
+           Decl(Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2))),
            Return(),
-           decl,
-       },
-       ast::DecorationList{});
+           Assign(Source{{12, 34}}, "a", 2),
+       });
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
+}
+
+TEST_F(ResolverFunctionValidationTest, UnreachableCode_return_InBlocks) {
+  // fn func() -> {
+  //  var a : i32;
+  //  {{{return;}}}
+  //  a = 2;
+  //}
+
+  Func("func", ast::VariableList{}, ty.void_(),
+       {
+           Decl(Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2))),
+           Block(Block(Block(Return()))),
+           Assign(Source{{12, 34}}, "a", 2),
+       });
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
+}
+
+TEST_F(ResolverFunctionValidationTest, UnreachableCode_discard) {
+  // fn func() -> {
+  //  var a : i32;
+  //  discard;
+  //  a = 2;
+  //}
+
+  Func("func", ast::VariableList{}, ty.void_(),
+       {
+           Decl(Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2))),
+           create<ast::DiscardStatement>(),
+           Assign(Source{{12, 34}}, "a", 2),
+       });
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
+}
+
+TEST_F(ResolverFunctionValidationTest, UnreachableCode_discard_InBlocks) {
+  // fn func() -> {
+  //  var a : i32;
+  //  {{{discard;}}}
+  //  a = 2;
+  //}
+
+  Func("func", ast::VariableList{}, ty.void_(),
+       {
+           Decl(Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2))),
+           Block(Block(Block(create<ast::DiscardStatement>()))),
+           Assign(Source{{12, 34}}, "a", 2),
+       });
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
 }

@@ -476,6 +476,32 @@ TEST_F(ResolverValidationTest,
   EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
 }
 
+TEST_F(
+    ResolverValidationTest,
+    Stmt_Loop_ContinueInLoopBodyBeforeDeclAndAfterDecl_UsageInContinuing_InBlocks) {  // NOLINT - line length
+  // loop  {
+  //     var z : i32;
+  //     {{{continue;}}} // Bypasses z decl
+  //     z = 1;
+  //     continue; // Ok
+  //
+  //     continuing {
+  //         z = 2;
+  //     }
+  // }
+
+  auto* body =
+      Block(Decl(Var("z", ty.i32(), ast::StorageClass::kNone)),
+            Block(Block(Block(create<ast::ContinueStatement>()))),
+            Assign(Source{{12, 34}}, "z", 2), create<ast::ContinueStatement>());
+  auto* continuing = Block(Assign(Expr("z"), 2));
+  auto* loop_stmt = Loop(body, continuing);
+  WrapInFunction(loop_stmt);
+
+  EXPECT_FALSE(r()->Resolve()) << r()->error();
+  EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
+}
+
 TEST_F(ResolverValidationTest,
        Stmt_Loop_ContinueInLoopBodySubscopeBeforeDecl_UsageInContinuing) {
   // loop  {

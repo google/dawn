@@ -1964,15 +1964,23 @@ bool Resolver::Statements(const ast::StatementList& stmts) {
 }
 
 bool Resolver::ValidateStatements(const ast::StatementList& stmts) {
-  auto next_stmt = stmts.begin();
+  bool unreachable = false;
   for (auto* stmt : stmts) {
-    next_stmt++;
-    if (stmt->IsAnyOf<ast::ReturnStatement, ast::BreakStatement,
-                      ast::ContinueStatement>()) {
-      if (stmt != stmts.back()) {
-        AddError("code is unreachable", (*next_stmt)->source());
-        return false;
+    if (unreachable) {
+      AddError("code is unreachable", stmt->source());
+      return false;
+    }
+
+    auto* nested_stmt = stmt;
+    while (auto* block = nested_stmt->As<ast::BlockStatement>()) {
+      if (block->empty()) {
+        break;
       }
+      nested_stmt = block->statements().back();
+    }
+    if (nested_stmt->IsAnyOf<ast::ReturnStatement, ast::BreakStatement,
+                             ast::ContinueStatement, ast::DiscardStatement>()) {
+      unreachable = true;
     }
   }
   return true;

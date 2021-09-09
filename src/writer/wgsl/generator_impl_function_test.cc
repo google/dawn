@@ -28,7 +28,6 @@ using WgslGeneratorImplTest = TestHelper;
 TEST_F(WgslGeneratorImplTest, Emit_Function) {
   auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{
-                        create<ast::DiscardStatement>(),
                         Return(),
                     },
                     ast::DecorationList{});
@@ -39,7 +38,6 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
 
   ASSERT_TRUE(gen.EmitFunction(func));
   EXPECT_EQ(gen.result(), R"(  fn my_func() {
-    discard;
     return;
   }
 )");
@@ -50,7 +48,6 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
       "my_func", ast::VariableList{Param("a", ty.f32()), Param("b", ty.i32())},
       ty.void_(),
       ast::StatementList{
-          create<ast::DiscardStatement>(),
           Return(),
       },
       ast::DecorationList{});
@@ -61,7 +58,6 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
 
   ASSERT_TRUE(gen.EmitFunction(func));
   EXPECT_EQ(gen.result(), R"(  fn my_func(a : f32, b : i32) {
-    discard;
     return;
   }
 )");

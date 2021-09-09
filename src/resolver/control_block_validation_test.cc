@@ -111,21 +111,39 @@ TEST_F(ResolverControlBlockValidationTest, SwitchWithTwoDefault_Fail) {
 
 TEST_F(ResolverControlBlockValidationTest, UnreachableCode_Loop_continue) {
   // loop {
+  //   var z: i32;
   //   continue;
-  //   var z : i32;
+  //   z = 1;
   // }
-  WrapInFunction(Loop(Block(
-      create<ast::ContinueStatement>(),
-      Decl(Source{{12, 34}}, Var("z", ty.i32(), ast::StorageClass::kNone)))));
+  WrapInFunction(Loop(Block(Decl(Var("z", ty.i32(), ast::StorageClass::kNone)),
+                            create<ast::ContinueStatement>(),
+                            Assign(Source{{12, 34}}, "z", 1))));
+
+  EXPECT_FALSE(r()->Resolve()) << r()->error();
+  EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
+}
+
+TEST_F(ResolverControlBlockValidationTest,
+       UnreachableCode_Loop_continue_InBlocks) {
+  // loop {
+  //   var z: i32;
+  //   {{{continue;}}}
+  //   z = 1;
+  // }
+  WrapInFunction(
+      Loop(Block(Decl(Var("z", ty.i32(), ast::StorageClass::kNone)),
+                 Block(Block(Block(create<ast::ContinueStatement>()))),
+                 Assign(Source{{12, 34}}, "z", 1))));
 
   EXPECT_FALSE(r()->Resolve()) << r()->error();
   EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
 }
 
 TEST_F(ResolverControlBlockValidationTest, UnreachableCode_ForLoop_continue) {
-  // for (;;;) {
+  // for (;;) {
+  //   var z: i32;
   //   continue;
-  //   var z : i32;
+  //   z = 1;
   // }
   WrapInFunction(
       For(nullptr, nullptr, nullptr,
@@ -136,6 +154,24 @@ TEST_F(ResolverControlBlockValidationTest, UnreachableCode_ForLoop_continue) {
   EXPECT_FALSE(r()->Resolve()) << r()->error();
   EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
 }
+
+TEST_F(ResolverControlBlockValidationTest,
+       UnreachableCode_ForLoop_continue_InBlocks) {
+  // for (;;) {
+  //   var z: i32;
+  //   {{{continue;}}}
+  //   z = 1;
+  // }
+  WrapInFunction(
+      For(nullptr, nullptr, nullptr,
+          Block(Decl(Var("z", ty.i32(), ast::StorageClass::kNone)),
+                Block(Block(Block(create<ast::ContinueStatement>()))),
+                Assign(Source{{12, 34}}, "z", 1))));
+
+  EXPECT_FALSE(r()->Resolve()) << r()->error();
+  EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
+}
+
 TEST_F(ResolverControlBlockValidationTest, UnreachableCode_break) {
   // switch (a) {
   //   case 1: { break; var a : u32 = 2;}
@@ -146,6 +182,24 @@ TEST_F(ResolverControlBlockValidationTest, UnreachableCode_break) {
 
   WrapInFunction(Loop(Block(Switch(
       Expr(1), Case(Literal(1), Block(create<ast::BreakStatement>(), decl)),
+      DefaultCase()))));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error: code is unreachable");
+}
+
+TEST_F(ResolverControlBlockValidationTest, UnreachableCode_break_InBlocks) {
+  // switch (a) {
+  //   case 1: { {{{break;}}} var a : u32 = 2;}
+  //   default: {}
+  // }
+  auto* decl = Decl(Source{{12, 34}},
+                    Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2)));
+
+  WrapInFunction(Loop(Block(Switch(
+      Expr(1),
+      Case(Literal(1),
+           Block(Block(Block(Block(create<ast::BreakStatement>()))), decl)),
       DefaultCase()))));
 
   EXPECT_FALSE(r()->Resolve());
