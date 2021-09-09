@@ -68,6 +68,23 @@ class CreatePipelineAsyncTest : public DawnTest {
         ValidateCreateComputePipelineAsync(&task);
     }
 
+    void DoCreateRenderPipelineAsync(
+        const utils::ComboRenderPipelineDescriptor& renderPipelineDescriptor) {
+        device.CreateRenderPipelineAsync(
+            &renderPipelineDescriptor,
+            [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline returnPipeline,
+               const char* message, void* userdata) {
+                EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_Success,
+                          status);
+
+                CreatePipelineAsyncTask* task = static_cast<CreatePipelineAsyncTask*>(userdata);
+                task->renderPipeline = wgpu::RenderPipeline::Acquire(returnPipeline);
+                task->isCompleted = true;
+                task->message = message;
+            },
+            &task);
+    }
+
     CreatePipelineAsyncTask task;
 };
 
@@ -193,18 +210,68 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateRenderPipelineAsync) {
     renderPipelineDescriptor.cTargets[0].format = kRenderAttachmentFormat;
     renderPipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
 
-    device.CreateRenderPipelineAsync(
-        &renderPipelineDescriptor,
-        [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline returnPipeline,
-           const char* message, void* userdata) {
-            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_Success, status);
+    DoCreateRenderPipelineAsync(renderPipelineDescriptor);
 
-            CreatePipelineAsyncTask* task = static_cast<CreatePipelineAsyncTask*>(userdata);
-            task->renderPipeline = wgpu::RenderPipeline::Acquire(returnPipeline);
-            task->isCompleted = true;
-            task->message = message;
-        },
-        &task);
+    wgpu::TextureDescriptor textureDescriptor;
+    textureDescriptor.size = {1, 1, 1};
+    textureDescriptor.format = kRenderAttachmentFormat;
+    textureDescriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
+    wgpu::Texture outputTexture = device.CreateTexture(&textureDescriptor);
+
+    utils::ComboRenderPassDescriptor renderPassDescriptor({outputTexture.CreateView()});
+    renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+    renderPassDescriptor.cColorAttachments[0].clearColor = {1.f, 0.f, 0.f, 1.f};
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder renderPassEncoder = encoder.BeginRenderPass(&renderPassDescriptor);
+
+        while (!task.isCompleted) {
+            WaitABit();
+        }
+        ASSERT_TRUE(task.message.empty());
+        ASSERT_NE(nullptr, task.renderPipeline.Get());
+
+        renderPassEncoder.SetPipeline(task.renderPipeline);
+        renderPassEncoder.Draw(1);
+        renderPassEncoder.EndPass();
+        commands = encoder.Finish();
+    }
+
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), outputTexture, 0, 0);
+}
+
+// Verify the render pipeline created with CreateRenderPipelineAsync() still works when the entry
+// points are released after the creation of the render pipeline.
+TEST_P(CreatePipelineAsyncTest, ReleaseEntryPointsAfterCreateRenderPipelineAsync) {
+    constexpr wgpu::TextureFormat kRenderAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
+
+    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+            return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+        })");
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+        [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+            return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+        })");
+    renderPipelineDescriptor.vertex.module = vsModule;
+    renderPipelineDescriptor.cFragment.module = fsModule;
+    renderPipelineDescriptor.cTargets[0].format = kRenderAttachmentFormat;
+    renderPipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
+
+    std::string vertexEntryPoint = "main";
+    std::string fragmentEntryPoint = "main";
+    renderPipelineDescriptor.vertex.entryPoint = vertexEntryPoint.c_str();
+    renderPipelineDescriptor.cFragment.entryPoint = fragmentEntryPoint.c_str();
+
+    DoCreateRenderPipelineAsync(renderPipelineDescriptor);
+
+    vertexEntryPoint = "";
+    fragmentEntryPoint = "";
 
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.size = {1, 1, 1};
@@ -436,6 +503,342 @@ TEST_P(CreatePipelineAsyncTest, CreateSamePipelineTwiceAtSameTime) {
     if (!UsesWire()) {
         EXPECT_EQ(task.computePipeline.Get(), anotherTask.computePipeline.Get());
     }
+}
+
+// Verify calling CreateRenderPipelineAsync() with valid VertexBufferLayouts works on all backends.
+TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncWithVertexBufferLayouts) {
+    wgpu::TextureDescriptor textureDescriptor;
+    textureDescriptor.size = {1, 1, 1};
+    textureDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+    textureDescriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
+    wgpu::Texture renderTarget = device.CreateTexture(&textureDescriptor);
+    wgpu::TextureView renderTargetView = renderTarget.CreateView();
+
+    utils::ComboRenderPassDescriptor renderPass({renderTargetView});
+    {
+        utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
+        renderPipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
+        struct VertexInput {
+            [[location(0)]] input0: u32;
+            [[location(1)]] input1: u32;
+        };
+
+        struct VertexOutput {
+            [[location(0)]] vertexColorOut: vec4<f32>;
+            [[builtin(position)]] position: vec4<f32>;
+        };
+
+        [[stage(vertex)]]
+        fn main(vertexInput : VertexInput) -> VertexOutput {
+            var vertexOutput : VertexOutput;
+            vertexOutput.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            if (vertexInput.input0 == 1u && vertexInput.input1 == 2u) {
+                vertexOutput.vertexColorOut = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+            } else {
+                vertexOutput.vertexColorOut = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+            }
+            return vertexOutput;
+        })");
+        renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
+        [[stage(fragment)]]
+        fn main([[location(0)]] fragColorIn : vec4<f32>) -> [[location(0)]] vec4<f32> {
+            return fragColorIn;
+        })");
+
+        renderPipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
+        renderPipelineDescriptor.cFragment.targetCount = 1;
+        renderPipelineDescriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+
+        // Create a render pipeline with two VertexBufferLayouts
+        renderPipelineDescriptor.vertex.buffers = renderPipelineDescriptor.cBuffers.data();
+        renderPipelineDescriptor.vertex.bufferCount = 2;
+        renderPipelineDescriptor.cBuffers[0].attributeCount = 1;
+        renderPipelineDescriptor.cBuffers[0].attributes = &renderPipelineDescriptor.cAttributes[0];
+        renderPipelineDescriptor.cAttributes[0].format = wgpu::VertexFormat::Uint32;
+        renderPipelineDescriptor.cAttributes[0].shaderLocation = 0;
+        renderPipelineDescriptor.cBuffers[1].attributeCount = 1;
+        renderPipelineDescriptor.cBuffers[1].attributes = &renderPipelineDescriptor.cAttributes[1];
+        renderPipelineDescriptor.cAttributes[1].format = wgpu::VertexFormat::Uint32;
+        renderPipelineDescriptor.cAttributes[1].shaderLocation = 1;
+
+        DoCreateRenderPipelineAsync(renderPipelineDescriptor);
+    }
+
+    wgpu::Buffer vertexBuffer1 = utils::CreateBufferFromData(
+        device, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex, {1u});
+    wgpu::Buffer vertexBuffer2 = utils::CreateBufferFromData(
+        device, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex, {2u});
+
+    // Do the draw call with the render pipeline
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+
+        while (!task.isCompleted) {
+            WaitABit();
+        }
+        ASSERT_TRUE(task.message.empty());
+        ASSERT_NE(nullptr, task.renderPipeline.Get());
+        pass.SetPipeline(task.renderPipeline);
+
+        pass.SetVertexBuffer(0, vertexBuffer1);
+        pass.SetVertexBuffer(1, vertexBuffer2);
+        pass.Draw(1);
+        pass.EndPass();
+    }
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // The color attachment will have the expected color when the vertex attribute values are
+    // fetched correctly.
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 0, 0);
+}
+
+// Verify calling CreateRenderPipelineAsync() with valid depthStencilState works on all backends.
+TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncWithDepthStencilState) {
+    wgpu::TextureDescriptor textureDescriptor;
+    textureDescriptor.size = {1, 1, 1};
+    textureDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+    textureDescriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
+    wgpu::Texture renderTarget = device.CreateTexture(&textureDescriptor);
+    wgpu::TextureView renderTargetView = renderTarget.CreateView();
+
+    textureDescriptor.format = wgpu::TextureFormat::Depth24PlusStencil8;
+    wgpu::Texture depthStencilTarget = device.CreateTexture(&textureDescriptor);
+    wgpu::TextureView depthStencilView = depthStencilTarget.CreateView();
+
+    // Clear the color attachment to green and the stencil aspect of the depth stencil attachment
+    // to 0.
+    utils::ComboRenderPassDescriptor renderPass({renderTargetView}, depthStencilView);
+    renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+    renderPass.cColorAttachments[0].clearColor = {0.0, 1.0, 0.0, 1.0};
+    renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Clear;
+    renderPass.cDepthStencilAttachmentInfo.clearStencil = 0u;
+
+    wgpu::RenderPipeline pipeline;
+    {
+        utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
+        renderPipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
+        [[stage(vertex)]]
+        fn main() -> [[builtin(position)]] vec4<f32> {
+            return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+        })");
+        renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
+        [[stage(fragment)]]
+        fn main() -> [[location(0)]] vec4<f32> {
+            return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+        })");
+
+        renderPipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
+        renderPipelineDescriptor.cFragment.targetCount = 1;
+        renderPipelineDescriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+
+        // Create a render pipeline with stencil compare function "Equal".
+        renderPipelineDescriptor.depthStencil = &renderPipelineDescriptor.cDepthStencil;
+        renderPipelineDescriptor.cDepthStencil.stencilFront.compare = wgpu::CompareFunction::Equal;
+
+        DoCreateRenderPipelineAsync(renderPipelineDescriptor);
+    }
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+
+        while (!task.isCompleted) {
+            WaitABit();
+        }
+        ASSERT_TRUE(task.message.empty());
+        ASSERT_NE(nullptr, task.renderPipeline.Get());
+        pass.SetPipeline(task.renderPipeline);
+
+        // The stencil reference is set to 1, so there should be no pixel that can pass the stencil
+        // test.
+        pass.SetStencilReference(1);
+
+        pass.Draw(1);
+        pass.EndPass();
+    }
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // The color in the color attachment should not be changed after the draw call as no pixel can
+    // pass the stencil test.
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 0, 0);
+}
+
+// Verify calling CreateRenderPipelineAsync() with multisample.Count > 1 works on all backends.
+TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineWithMultisampleState) {
+    wgpu::TextureDescriptor textureDescriptor;
+    textureDescriptor.size = {1, 1, 1};
+    textureDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+    textureDescriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
+    wgpu::Texture resolveTarget = device.CreateTexture(&textureDescriptor);
+    wgpu::TextureView resolveTargetView = resolveTarget.CreateView();
+
+    textureDescriptor.sampleCount = 4;
+    wgpu::Texture renderTarget = device.CreateTexture(&textureDescriptor);
+    wgpu::TextureView renderTargetView = renderTarget.CreateView();
+
+    // Set the multi-sampled render target, its resolve target to render pass and clear color to
+    // (1, 0, 0, 1).
+    utils::ComboRenderPassDescriptor renderPass({renderTargetView});
+    renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+    renderPass.cColorAttachments[0].clearColor = {1.0, 0.0, 0.0, 1.0};
+    renderPass.cColorAttachments[0].resolveTarget = resolveTargetView;
+
+    wgpu::RenderPipeline pipeline;
+    {
+        utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
+        renderPipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
+        [[stage(vertex)]]
+        fn main() -> [[builtin(position)]] vec4<f32> {
+            return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+        })");
+        renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
+        [[stage(fragment)]]
+        fn main() -> [[location(0)]] vec4<f32> {
+            return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+        })");
+
+        renderPipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
+        renderPipelineDescriptor.cFragment.targetCount = 1;
+        renderPipelineDescriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+
+        // Create a render pipeline with multisample.count == 4.
+        renderPipelineDescriptor.multisample.count = 4;
+
+        DoCreateRenderPipelineAsync(renderPipelineDescriptor);
+    }
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+
+        while (!task.isCompleted) {
+            WaitABit();
+        }
+        ASSERT_TRUE(task.message.empty());
+        ASSERT_NE(nullptr, task.renderPipeline.Get());
+        pass.SetPipeline(task.renderPipeline);
+
+        pass.Draw(6);
+        pass.EndPass();
+    }
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // The color in resolveTarget should be the expected color (0, 1, 0, 1).
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), resolveTarget, 0, 0);
+}
+
+// Verify calling CreateRenderPipelineAsync() with valid BlendState works on all backends.
+TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncWithBlendState) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_indexed_draw_buffers"));
+
+    std::array<wgpu::Texture, 2> renderTargets;
+    std::array<wgpu::TextureView, 2> renderTargetViews;
+
+    {
+        wgpu::TextureDescriptor textureDescriptor;
+        textureDescriptor.size = {1, 1, 1};
+        textureDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+        textureDescriptor.usage =
+            wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
+
+        for (uint32_t i = 0; i < renderTargets.size(); ++i) {
+            renderTargets[i] = device.CreateTexture(&textureDescriptor);
+            renderTargetViews[i] = renderTargets[i].CreateView();
+        }
+    }
+
+    // Prepare two color attachments
+    utils::ComboRenderPassDescriptor renderPass({renderTargetViews[0], renderTargetViews[1]});
+    renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+    renderPass.cColorAttachments[0].clearColor = {0.2, 0.0, 0.0, 0.2};
+    renderPass.cColorAttachments[1].loadOp = wgpu::LoadOp::Clear;
+    renderPass.cColorAttachments[1].clearColor = {0.0, 0.2, 0.0, 0.2};
+
+    {
+        utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
+        renderPipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
+        [[stage(vertex)]]
+        fn main() -> [[builtin(position)]] vec4<f32> {
+            return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+        })");
+        renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
+         struct FragmentOut {
+            [[location(0)]] fragColor0 : vec4<f32>;
+            [[location(1)]] fragColor1 : vec4<f32>;
+        };
+
+        [[stage(fragment)]] fn main() -> FragmentOut {
+            var output : FragmentOut;
+            output.fragColor0 = vec4<f32>(0.4, 0.0, 0.0, 0.4);
+            output.fragColor1 = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+            return output;
+        })");
+
+        renderPipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
+
+        // Create a render pipeline with blending states
+        renderPipelineDescriptor.cFragment.targetCount = renderTargets.size();
+
+        // The blend operation for the first render target is "add".
+        wgpu::BlendComponent blendComponent0;
+        blendComponent0.operation = wgpu::BlendOperation::Add;
+        blendComponent0.srcFactor = wgpu::BlendFactor::One;
+        blendComponent0.dstFactor = wgpu::BlendFactor::One;
+
+        wgpu::BlendState blend0;
+        blend0.color = blendComponent0;
+        blend0.alpha = blendComponent0;
+
+        // The blend operation for the first render target is "subtract".
+        wgpu::BlendComponent blendComponent1;
+        blendComponent1.operation = wgpu::BlendOperation::Subtract;
+        blendComponent1.srcFactor = wgpu::BlendFactor::One;
+        blendComponent1.dstFactor = wgpu::BlendFactor::One;
+
+        wgpu::BlendState blend1;
+        blend1.color = blendComponent1;
+        blend1.alpha = blendComponent1;
+
+        renderPipelineDescriptor.cTargets[0].blend = &blend0;
+        renderPipelineDescriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+        renderPipelineDescriptor.cTargets[1].blend = &blend1;
+        renderPipelineDescriptor.cTargets[1].format = wgpu::TextureFormat::RGBA8Unorm;
+
+        DoCreateRenderPipelineAsync(renderPipelineDescriptor);
+    }
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+
+        while (!task.isCompleted) {
+            WaitABit();
+        }
+        ASSERT_TRUE(task.message.empty());
+        ASSERT_NE(nullptr, task.renderPipeline.Get());
+        pass.SetPipeline(task.renderPipeline);
+
+        pass.Draw(1);
+        pass.EndPass();
+    }
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // When the blend states are all set correctly, the color of renderTargets[0] should be
+    // (0.6, 0, 0, 0.6) = colorAttachment0.clearColor + (0.4, 0.0, 0.0, 0.4), and the color of
+    // renderTargets[1] should be (0.8, 0, 0, 0.8) = (1, 0, 0, 1) - colorAttachment1.clearColor.
+    RGBA8 expected0 = {153, 0, 0, 153};
+    RGBA8 expected1 = {0, 204, 0, 204};
+    EXPECT_PIXEL_RGBA8_EQ(expected0, renderTargets[0], 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(expected1, renderTargets[1], 0, 0);
 }
 
 DAWN_INSTANTIATE_TEST(CreatePipelineAsyncTest,

@@ -122,6 +122,40 @@ namespace dawn_native {
             std::string mMessage;
             void* mUserdata;
         };
+
+        MaybeError ValidateLayoutAndSetDefaultLayout(
+            DeviceBase* device,
+            FlatComputePipelineDescriptor* appliedDescriptor) {
+            if (appliedDescriptor->layout == nullptr) {
+                Ref<PipelineLayoutBase> layoutRef;
+                DAWN_TRY_ASSIGN(layoutRef, PipelineLayoutBase::CreateDefault(
+                                               device, {{SingleShaderStage::Compute,
+                                                         appliedDescriptor->compute.module,
+                                                         appliedDescriptor->compute.entryPoint}}));
+                appliedDescriptor->SetLayout(std::move(layoutRef));
+            }
+            return {};
+        }
+
+        ResultOrError<Ref<PipelineLayoutBase>>
+        ValidateLayoutAndGetRenderPipelineDescriptorWithDefaults(
+            DeviceBase* device,
+            const RenderPipelineDescriptor& descriptor,
+            RenderPipelineDescriptor* outDescriptor) {
+            Ref<PipelineLayoutBase> layoutRef;
+            *outDescriptor = descriptor;
+
+            if (descriptor.layout == nullptr) {
+                // Ref will keep the pipeline layout alive until the end of the function where
+                // the pipeline will take another reference.
+                DAWN_TRY_ASSIGN(layoutRef,
+                                PipelineLayoutBase::CreateDefault(device, GetStages(&descriptor)));
+                outDescriptor->layout = layoutRef.Get();
+            }
+
+            return layoutRef;
+        }
+
     }  // anonymous namespace
 
     // DeviceBase
@@ -1096,7 +1130,7 @@ namespace dawn_native {
         }
 
         FlatComputePipelineDescriptor appliedDescriptor(descriptor);
-        DAWN_TRY(ValidateLayoutAndSetDefaultLayout(&appliedDescriptor));
+        DAWN_TRY(ValidateLayoutAndSetDefaultLayout(this, &appliedDescriptor));
 
         auto pipelineAndBlueprintFromCache = GetCachedComputePipeline(&appliedDescriptor);
         if (pipelineAndBlueprintFromCache.first.Get() != nullptr) {
@@ -1120,7 +1154,7 @@ namespace dawn_native {
 
         std::unique_ptr<FlatComputePipelineDescriptor> appliedDescriptor =
             std::make_unique<FlatComputePipelineDescriptor>(descriptor);
-        DAWN_TRY(ValidateLayoutAndSetDefaultLayout(appliedDescriptor.get()));
+        DAWN_TRY(ValidateLayoutAndSetDefaultLayout(this, appliedDescriptor.get()));
 
         // Call the callback directly when we can get a cached compute pipeline object.
         auto pipelineAndBlueprintFromCache = GetCachedComputePipeline(appliedDescriptor.get());
@@ -1138,37 +1172,6 @@ namespace dawn_native {
         }
 
         return {};
-    }
-
-    MaybeError DeviceBase::ValidateLayoutAndSetDefaultLayout(
-        FlatComputePipelineDescriptor* outDescriptor) {
-        if (outDescriptor->layout == nullptr) {
-            Ref<PipelineLayoutBase> layoutRef;
-            DAWN_TRY_ASSIGN(layoutRef,
-                            PipelineLayoutBase::CreateDefault(
-                                this, {{SingleShaderStage::Compute, outDescriptor->compute.module,
-                                        outDescriptor->compute.entryPoint}}));
-            outDescriptor->SetLayout(std::move(layoutRef));
-        }
-        return {};
-    }
-
-    ResultOrError<Ref<PipelineLayoutBase>>
-    DeviceBase::ValidateLayoutAndGetRenderPipelineDescriptorWithDefaults(
-        const RenderPipelineDescriptor& descriptor,
-        RenderPipelineDescriptor* outDescriptor) {
-        Ref<PipelineLayoutBase> layoutRef;
-        *outDescriptor = descriptor;
-
-        if (descriptor.layout == nullptr) {
-            // Ref will keep the pipeline layout alive until the end of the function where
-            // the pipeline will take another reference.
-            DAWN_TRY_ASSIGN(layoutRef,
-                            PipelineLayoutBase::CreateDefault(this, GetStages(&descriptor)));
-            outDescriptor->layout = layoutRef.Get();
-        }
-
-        return layoutRef;
     }
 
     // This function is overwritten with the async version on the backends
@@ -1266,7 +1269,7 @@ namespace dawn_native {
         Ref<PipelineLayoutBase> layoutRef;
         RenderPipelineDescriptor appliedDescriptor;
         DAWN_TRY_ASSIGN(layoutRef, ValidateLayoutAndGetRenderPipelineDescriptorWithDefaults(
-                                       *descriptor, &appliedDescriptor));
+                                       this, *descriptor, &appliedDescriptor));
 
         auto pipelineAndBlueprintFromCache = GetCachedRenderPipeline(&appliedDescriptor);
         if (pipelineAndBlueprintFromCache.first.Get() != nullptr) {
@@ -1290,12 +1293,12 @@ namespace dawn_native {
         // Ref will keep the pipeline layout alive until the end of the function where
         // the pipeline will take another reference.
         Ref<PipelineLayoutBase> layoutRef;
-        RenderPipelineDescriptor appliedDescriptor;
+        RenderPipelineDescriptor descriptorWithPipelineLayout;
         DAWN_TRY_ASSIGN(layoutRef, ValidateLayoutAndGetRenderPipelineDescriptorWithDefaults(
-                                       *descriptor, &appliedDescriptor));
+                                       this, *descriptor, &descriptorWithPipelineLayout));
 
         // Call the callback directly when we can get a cached render pipeline object.
-        auto pipelineAndBlueprintFromCache = GetCachedRenderPipeline(&appliedDescriptor);
+        auto pipelineAndBlueprintFromCache = GetCachedRenderPipeline(&descriptorWithPipelineLayout);
         if (pipelineAndBlueprintFromCache.first.Get() != nullptr) {
             Ref<RenderPipelineBase> result = std::move(pipelineAndBlueprintFromCache.first);
             callback(WGPUCreatePipelineAsyncStatus_Success,
@@ -1304,8 +1307,10 @@ namespace dawn_native {
             // Otherwise we will create the pipeline object in CreateRenderPipelineAsyncImpl(),
             // where the pipeline object may be created asynchronously and the result will be saved
             // to mCreatePipelineAsyncTracker.
+            FlatRenderPipelineDescriptor appliedFlatDescriptor(&descriptorWithPipelineLayout);
             const size_t blueprintHash = pipelineAndBlueprintFromCache.second;
-            CreateRenderPipelineAsyncImpl(&appliedDescriptor, blueprintHash, callback, userdata);
+            CreateRenderPipelineAsyncImpl(&appliedFlatDescriptor, blueprintHash, callback,
+                                          userdata);
         }
 
         return {};

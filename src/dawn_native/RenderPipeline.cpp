@@ -363,6 +363,72 @@ namespace dawn_native {
         }
     }  // anonymous namespace
 
+    // FlatRenderPipelineDescriptor
+    FlatRenderPipelineDescriptor::FlatRenderPipelineDescriptor(
+        const RenderPipelineDescriptor* descriptor)
+        : mLabel(descriptor->label != nullptr ? descriptor->label : ""),
+          mLayout(descriptor->layout),
+          mVertexModule(descriptor->vertex.module),
+          mVertexEntryPoint(descriptor->vertex.entryPoint) {
+        label = mLabel.c_str();
+
+        ASSERT(descriptor->layout != nullptr);
+        layout = mLayout.Get();
+
+        vertex.module = mVertexModule.Get();
+        vertex.entryPoint = mVertexEntryPoint.c_str();
+        vertex.bufferCount = descriptor->vertex.bufferCount;
+        vertex.buffers = mVertexBuffers.data();
+        uint32_t vertexAttributeCount = 0;
+        for (uint32_t vertexBufferIndex = 0; vertexBufferIndex < vertex.bufferCount;
+             ++vertexBufferIndex) {
+            const VertexBufferLayout& vertexLayout = descriptor->vertex.buffers[vertexBufferIndex];
+            mVertexBuffers[vertexBufferIndex] = vertexLayout;
+            mVertexBuffers[vertexBufferIndex].attributes = &mVertexAttributes[vertexAttributeCount];
+            for (uint32_t attributeIndex = 0; attributeIndex < vertexLayout.attributeCount;
+                 ++attributeIndex) {
+                mVertexAttributes[vertexAttributeCount + attributeIndex] =
+                    vertexLayout.attributes[attributeIndex];
+            }
+
+            vertexAttributeCount += vertexLayout.attributeCount;
+        }
+
+        primitive = descriptor->primitive;
+
+        if (descriptor->depthStencil != nullptr) {
+            mDepthStencilState = *(descriptor->depthStencil);
+            depthStencil = &mDepthStencilState;
+        }
+
+        multisample = descriptor->multisample;
+
+        if (descriptor->fragment != nullptr) {
+            mFragmentModule = descriptor->fragment->module;
+            mFragmentState.module = mFragmentModule.Get();
+
+            mFragmentEntryPoint = descriptor->fragment->entryPoint;
+            mFragmentState.entryPoint = mFragmentEntryPoint.c_str();
+
+            mFragmentState.targetCount = descriptor->fragment->targetCount;
+
+            mFragmentState.targets = mColorTargetStates.data();
+            for (uint32_t colorTargetIndex = 0; colorTargetIndex < mFragmentState.targetCount;
+                 ++colorTargetIndex) {
+                mColorTargetStates[colorTargetIndex] =
+                    descriptor->fragment->targets[colorTargetIndex];
+
+                if (descriptor->fragment->targets[colorTargetIndex].blend != nullptr) {
+                    mColorTargetStates[colorTargetIndex].blend = &mBlendStates[colorTargetIndex];
+                    mBlendStates[colorTargetIndex] =
+                        *(descriptor->fragment->targets[colorTargetIndex].blend);
+                }
+            }
+
+            fragment = &mFragmentState;
+        }
+    }
+
     // Helper functions
     size_t IndexFormatSize(wgpu::IndexFormat format) {
         switch (format) {
