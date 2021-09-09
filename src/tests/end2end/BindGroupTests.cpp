@@ -421,6 +421,125 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
     EXPECT_PIXEL_RGBA8_EQ(notFilled, renderPass.color, max, max);
 }
 
+// This is a regression test for crbug.com/dawn/1170 that tests a module that contains multiple
+// entry points, using non-zero binding groups. This has the potential to cause problems when we
+// only remap bindings for one entry point, as the remaining unmapped binding numbers may be invalid
+// for certain backends.
+// This test passes by not asserting or crashing.
+TEST_P(BindGroupTests, MultipleEntryPointsWithMultipleNonZeroGroups) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        [[block]] struct Contents {
+            f : f32;
+        };
+        [[group(0), binding(0)]] var <uniform> contents0: Contents;
+        [[group(1), binding(0)]] var <uniform> contents1: Contents;
+        [[group(2), binding(0)]] var <uniform> contents2: Contents;
+
+        [[stage(compute), workgroup_size(1)]] fn main0() {
+          var a : f32 = contents0.f;
+        }
+
+        [[stage(compute), workgroup_size(1)]] fn main1() {
+          var a : f32 = contents1.f;
+          var b : f32 = contents2.f;
+        }
+
+        [[stage(compute), workgroup_size(1)]] fn main2() {
+          var a : f32 = contents0.f;
+          var b : f32 = contents1.f;
+          var c : f32 = contents2.f;
+        })");
+
+    // main0: bind (0,0)
+    {
+        wgpu::ComputePipelineDescriptor cpDesc;
+        cpDesc.compute.module = module;
+        cpDesc.compute.entryPoint = "main0";
+        wgpu::ComputePipeline cp = device.CreateComputePipeline(&cpDesc);
+
+        wgpu::BufferDescriptor bufferDesc;
+        bufferDesc.size = sizeof(float);
+        bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform;
+        wgpu::Buffer buffer0 = device.CreateBuffer(&bufferDesc);
+        wgpu::BindGroup bindGroup0 =
+            utils::MakeBindGroup(device, cp.GetBindGroupLayout(0), {{0, buffer0}});
+
+        wgpu::CommandBuffer cb;
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(cp);
+        pass.SetBindGroup(0, bindGroup0);
+        pass.Dispatch(1);
+        pass.EndPass();
+        cb = encoder.Finish();
+        queue.Submit(1, &cb);
+    }
+
+    // main1: bind (1,0) and (2,0)
+    {
+        wgpu::ComputePipelineDescriptor cpDesc;
+        cpDesc.compute.module = module;
+        cpDesc.compute.entryPoint = "main1";
+        wgpu::ComputePipeline cp = device.CreateComputePipeline(&cpDesc);
+
+        wgpu::BufferDescriptor bufferDesc;
+        bufferDesc.size = sizeof(float);
+        bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform;
+        wgpu::Buffer buffer1 = device.CreateBuffer(&bufferDesc);
+        wgpu::Buffer buffer2 = device.CreateBuffer(&bufferDesc);
+        wgpu::BindGroup bindGroup0 = utils::MakeBindGroup(device, cp.GetBindGroupLayout(0), {});
+        wgpu::BindGroup bindGroup1 =
+            utils::MakeBindGroup(device, cp.GetBindGroupLayout(1), {{0, buffer1}});
+        wgpu::BindGroup bindGroup2 =
+            utils::MakeBindGroup(device, cp.GetBindGroupLayout(2), {{0, buffer2}});
+
+        wgpu::CommandBuffer cb;
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(cp);
+        pass.SetBindGroup(0, bindGroup0);
+        pass.SetBindGroup(1, bindGroup1);
+        pass.SetBindGroup(2, bindGroup2);
+        pass.Dispatch(1);
+        pass.EndPass();
+        cb = encoder.Finish();
+        queue.Submit(1, &cb);
+    }
+
+    // main2: bind (0,0), (1,0), and (2,0)
+    {
+        wgpu::ComputePipelineDescriptor cpDesc;
+        cpDesc.compute.module = module;
+        cpDesc.compute.entryPoint = "main2";
+        wgpu::ComputePipeline cp = device.CreateComputePipeline(&cpDesc);
+
+        wgpu::BufferDescriptor bufferDesc;
+        bufferDesc.size = sizeof(float);
+        bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform;
+        wgpu::Buffer buffer0 = device.CreateBuffer(&bufferDesc);
+        wgpu::Buffer buffer1 = device.CreateBuffer(&bufferDesc);
+        wgpu::Buffer buffer2 = device.CreateBuffer(&bufferDesc);
+        wgpu::BindGroup bindGroup0 =
+            utils::MakeBindGroup(device, cp.GetBindGroupLayout(0), {{0, buffer0}});
+        wgpu::BindGroup bindGroup1 =
+            utils::MakeBindGroup(device, cp.GetBindGroupLayout(1), {{0, buffer1}});
+        wgpu::BindGroup bindGroup2 =
+            utils::MakeBindGroup(device, cp.GetBindGroupLayout(2), {{0, buffer2}});
+
+        wgpu::CommandBuffer cb;
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(cp);
+        pass.SetBindGroup(0, bindGroup0);
+        pass.SetBindGroup(1, bindGroup1);
+        pass.SetBindGroup(2, bindGroup2);
+        pass.Dispatch(1);
+        pass.EndPass();
+        cb = encoder.Finish();
+        queue.Submit(1, &cb);
+    }
+}
+
 // This test reproduces an out-of-bound bug on D3D12 backends when calling draw command twice with
 // one pipeline that has 4 bind group sets in one render pass.
 TEST_P(BindGroupTests, DrawTwiceInSamePipelineWithFourBindGroupSets) {
