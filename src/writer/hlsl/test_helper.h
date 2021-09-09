@@ -20,7 +20,6 @@
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/transform/hlsl.h"
 #include "src/transform/manager.h"
 #include "src/transform/renamer.h"
 #include "src/writer/hlsl/generator_impl.h"
@@ -44,9 +43,6 @@ class TestHelperBase : public BODY, public ProgramBuilder {
     if (gen_) {
       return *gen_;
     }
-    // Fake that the HLSL sanitizer has been applied, so that we can unit test
-    // the writer without it erroring.
-    SetTransformApplied<transform::Hlsl>();
     [&]() {
       ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
                              << diag::Formatter().format(Diagnostics());
@@ -60,7 +56,7 @@ class TestHelperBase : public BODY, public ProgramBuilder {
     return *gen_;
   }
 
-  /// Builds the program, runs the program through the transform::Hlsl sanitizer
+  /// Builds the program, runs the program through the HLSL sanitizer
   /// and returns a GeneratorImpl from the sanitized program.
   /// @note The generator is only built once. Multiple calls to Build() will
   /// return the same GeneratorImpl without rebuilding.
@@ -80,13 +76,19 @@ class TestHelperBase : public BODY, public ProgramBuilder {
           << formatter.format(program->Diagnostics());
     }();
 
+    auto sanitized_result = Sanitize(program.get());
+    [&]() {
+      ASSERT_TRUE(sanitized_result.program.IsValid())
+          << formatter.format(sanitized_result.program.Diagnostics());
+    }();
+
     transform::Manager transform_manager;
     transform::DataMap transform_data;
     transform_data.Add<transform::Renamer::Config>(
         transform::Renamer::Target::kHlslKeywords);
     transform_manager.Add<tint::transform::Renamer>();
-    transform_manager.Add<tint::transform::Hlsl>();
-    auto result = transform_manager.Run(program.get(), transform_data);
+    auto result =
+        transform_manager.Run(&sanitized_result.program, transform_data);
     [&]() {
       ASSERT_TRUE(result.program.IsValid())
           << formatter.format(result.program.Diagnostics());

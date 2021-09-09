@@ -486,8 +486,6 @@ endif()
 
 if(${TINT_BUILD_HLSL_WRITER})
   list(APPEND TINT_LIB_SRCS
-    transform/hlsl.cc
-    transform/hlsl.h
     writer/hlsl/generator.cc
     writer/hlsl/generator.h
     writer/hlsl/generator_impl.cc
@@ -986,9 +984,6 @@ if(${TINT_BUILD_TESTS})
   endif()
 
   if (${TINT_BUILD_HLSL_WRITER})
-    if(${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
-      list(APPEND TINT_TEST_SRCS transform/hlsl_test.cc)
-    endif()
     list(APPEND TINT_TEST_SRCS
       writer/hlsl/generator_impl_array_accessor_test.cc
       writer/hlsl/generator_impl_assign_test.cc

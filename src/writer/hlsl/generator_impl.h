@@ -48,6 +48,18 @@ class Intrinsic;
 namespace writer {
 namespace hlsl {
 
+/// The result of sanitizing a program for generation.
+struct SanitizedResult {
+  /// The sanitized program.
+  Program program;
+};
+
+/// Sanitize a program in preparation for generating HLSL.
+/// @param disable_workgroup_init `true` to disable workgroup memory zero
+/// @returns the sanitized program and any supplementary information
+SanitizedResult Sanitize(const Program* program,
+                         bool disable_workgroup_init = false);
+
 /// Implementation class for HLSL generator
 class GeneratorImpl : public TextGenerator {
  public:
