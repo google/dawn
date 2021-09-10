@@ -118,6 +118,12 @@ namespace dawn_native {
         return reinterpret_cast<WGPUDevice>(mImpl->CreateDevice(deviceDescriptor));
     }
 
+    void Adapter::RequestDevice(const DeviceDescriptor* descriptor,
+                                WGPURequestDeviceCallback callback,
+                                void* userdata) {
+        mImpl->RequestDevice(descriptor, callback, userdata);
+    }
+
     void Adapter::ResetInternalDeviceForTesting() {
         mImpl->ResetInternalDeviceForTesting();
     }

@@ -40,6 +40,10 @@ namespace dawn_native {
 
         DeviceBase* CreateDevice(const DeviceDescriptor* descriptor = nullptr);
 
+        void RequestDevice(const DeviceDescriptor* descriptor,
+                           WGPURequestDeviceCallback callback,
+                           void* userdata);
+
         void ResetInternalDeviceForTesting();
 
         ExtensionsSet GetSupportedExtensions() const;

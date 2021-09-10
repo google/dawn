@@ -78,6 +78,24 @@ namespace dawn_native {
         return result;
     }
 
+    void AdapterBase::RequestDevice(const DeviceDescriptor* descriptor,
+                                    WGPURequestDeviceCallback callback,
+                                    void* userdata) {
+        DeviceBase* result = nullptr;
+        MaybeError err = CreateDeviceInternal(&result, descriptor);
+        WGPUDevice device = reinterpret_cast<WGPUDevice>(result);
+
+        if (err.IsError()) {
+            std::unique_ptr<ErrorData> errorData = err.AcquireError();
+            callback(WGPURequestDeviceStatus_Error, device, errorData->GetMessage().c_str(),
+                     userdata);
+            return;
+        }
+        WGPURequestDeviceStatus status =
+            device == nullptr ? WGPURequestDeviceStatus_Unknown : WGPURequestDeviceStatus_Success;
+        callback(status, device, nullptr, userdata);
+    }
+
     MaybeError AdapterBase::CreateDeviceInternal(DeviceBase** result,
                                                  const DeviceDescriptor* descriptor) {
         if (descriptor != nullptr) {
