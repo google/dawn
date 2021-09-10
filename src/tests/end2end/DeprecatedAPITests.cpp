@@ -42,7 +42,7 @@ TEST_P(DeprecationTests, SetAttachmentDescriptorAttachment) {
     wgpu::RenderPassEncoder pass;
 
     // Check that using .attachment with color attachments gives the warning.
-    wgpu::RenderPassColorAttachmentDescriptor* colorAttachment =
+    wgpu::RenderPassColorAttachment* colorAttachment =
         &renderPass.renderPassInfo.cColorAttachments[0];
     colorAttachment->attachment = colorAttachment->view;
     colorAttachment->view = nullptr;
@@ -63,7 +63,7 @@ TEST_P(DeprecationTests, SetAttachmentDescriptorAttachment) {
     descriptor.usage = wgpu::TextureUsage::RenderAttachment;
     wgpu::Texture depthStencil = device.CreateTexture(&descriptor);
 
-    wgpu::RenderPassDepthStencilAttachmentDescriptor* depthAttachment =
+    wgpu::RenderPassDepthStencilAttachment* depthAttachment =
         &renderPass.renderPassInfo.cDepthStencilAttachmentInfo;
     renderPass.renderPassInfo.depthStencilAttachment = depthAttachment;
     depthAttachment->attachment = depthStencil.CreateView();
@@ -106,7 +106,7 @@ TEST_P(DeprecationTests, StoreOpClear) {
     descriptor.usage = wgpu::TextureUsage::RenderAttachment;
     wgpu::Texture depthStencil = device.CreateTexture(&descriptor);
 
-    wgpu::RenderPassDepthStencilAttachmentDescriptor* depthAttachment =
+    wgpu::RenderPassDepthStencilAttachment* depthAttachment =
         &renderPass.renderPassInfo.cDepthStencilAttachmentInfo;
     renderPass.renderPassInfo.depthStencilAttachment = depthAttachment;
     depthAttachment->view = depthStencil.CreateView();

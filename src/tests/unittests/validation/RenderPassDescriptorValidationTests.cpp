@@ -101,8 +101,7 @@ namespace {
 
     // Test OOB color attachment indices are handled
     TEST_F(RenderPassDescriptorValidationTest, ColorAttachmentOutOfBounds) {
-        std::array<wgpu::RenderPassColorAttachmentDescriptor, kMaxColorAttachments + 1>
-            colorAttachments;
+        std::array<wgpu::RenderPassColorAttachment, kMaxColorAttachments + 1> colorAttachments;
         for (uint32_t i = 0; i < colorAttachments.size(); i++) {
             colorAttachments[i].view =
                 Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);

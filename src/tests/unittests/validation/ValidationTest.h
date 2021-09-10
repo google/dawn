@@ -91,7 +91,7 @@ class ValidationTest : public testing::Test {
         uint32_t height;
 
       private:
-        wgpu::RenderPassColorAttachmentDescriptor mColorAttachment;
+        wgpu::RenderPassColorAttachment mColorAttachment;
     };
 
     bool HasToggleEnabled(const char* toggle) const;

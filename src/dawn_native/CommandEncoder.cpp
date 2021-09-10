@@ -163,9 +163,8 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateResolveTarget(
-            const DeviceBase* device,
-            const RenderPassColorAttachmentDescriptor& colorAttachment) {
+        MaybeError ValidateResolveTarget(const DeviceBase* device,
+                                         const RenderPassColorAttachment& colorAttachment) {
             if (colorAttachment.resolveTarget == nullptr) {
                 return {};
             }
@@ -217,7 +216,7 @@ namespace dawn_native {
 
         MaybeError ValidateRenderPassColorAttachment(
             DeviceBase* device,
-            const RenderPassColorAttachmentDescriptor& colorAttachment,
+            const RenderPassColorAttachment& colorAttachment,
             uint32_t* width,
             uint32_t* height,
             uint32_t* sampleCount) {
@@ -274,7 +273,7 @@ namespace dawn_native {
 
         MaybeError ValidateRenderPassDepthStencilAttachment(
             DeviceBase* device,
-            const RenderPassDepthStencilAttachmentDescriptor* depthStencilAttachment,
+            const RenderPassDepthStencilAttachment* depthStencilAttachment,
             uint32_t* width,
             uint32_t* height,
             uint32_t* sampleCount) {

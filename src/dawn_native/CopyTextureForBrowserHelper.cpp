@@ -405,7 +405,7 @@ namespace dawn_native {
                         device->CreateTextureView(destination->texture, &dstTextureViewDesc));
 
         // Prepare render pass color attachment descriptor.
-        RenderPassColorAttachmentDescriptor colorAttachmentDesc;
+        RenderPassColorAttachment colorAttachmentDesc;
 
         colorAttachmentDesc.view = dstView.Get();
         colorAttachmentDesc.loadOp = wgpu::LoadOp::Load;

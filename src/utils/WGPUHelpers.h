@@ -66,9 +66,8 @@ namespace utils {
         const ComboRenderPassDescriptor& operator=(
             const ComboRenderPassDescriptor& otherRenderPass);
 
-        std::array<wgpu::RenderPassColorAttachmentDescriptor, kMaxColorAttachments>
-            cColorAttachments;
-        wgpu::RenderPassDepthStencilAttachmentDescriptor cDepthStencilAttachmentInfo = {};
+        std::array<wgpu::RenderPassColorAttachment, kMaxColorAttachments> cColorAttachments;
+        wgpu::RenderPassDepthStencilAttachment cDepthStencilAttachmentInfo = {};
     };
 
     struct BasicRenderPass {

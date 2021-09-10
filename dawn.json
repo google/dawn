@@ -1036,10 +1036,6 @@
             {"name": "attributes", "type": "vertex attribute", "annotation": "const*", "length": "attribute count"}
         ]
     },
-    "input step mode": {
-        "category": "typedef",
-        "type": "vertex step mode"
-    },
     "vertex step mode": {
         "category": "enum",
         "values": [
@@ -1350,11 +1346,6 @@
         ]
     },
 
-    "render pass color attachment descriptor": {
-        "category": "typedef",
-        "type": "render pass color attachment"
-    },
-
     "render pass depth stencil attachment": {
         "category": "structure",
         "members": [
@@ -1369,11 +1360,6 @@
             {"name": "stencil read only", "type": "bool", "default": "false"},
             {"name": "attachment", "type": "texture view", "optional": true}
         ]
-    },
-
-    "render pass depth stencil attachment descriptor": {
-        "category": "typedef",
-        "type": "render pass depth stencil attachment"
     },
 
     "render pass descriptor": {
