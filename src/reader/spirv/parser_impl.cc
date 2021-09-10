@@ -902,10 +902,10 @@ bool ParserImpl::RegisterEntryPoints() {
       }
     }
     // Save the lists, in ID-sorted order.
-    std::vector<uint32_t> sorted_inputs(inputs.begin(), inputs.end());
+    std::vector<uint32_t> sorted_inputs(inputs);
     std::sort(sorted_inputs.begin(), sorted_inputs.end());
-    std::vector<uint32_t> sorted_outputs(outputs.begin(), outputs.end());
-    std::sort(sorted_inputs.begin(), sorted_inputs.end());
+    std::vector<uint32_t> sorted_outputs(outputs);
+    std::sort(sorted_outputs.begin(), sorted_outputs.end());
 
     const auto ast_stage = enum_converter_.ToPipelineStage(stage);
     GridSize wgsize;
