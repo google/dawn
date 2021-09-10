@@ -559,6 +559,9 @@ TEST_P(CopyTextureForBrowserTests, CopySubRect) {
     // Tests skip due to crbug.com/dawn/592.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
+    // Tests skip due to crbug.com/dawn/1104.
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+
     for (wgpu::Origin3D srcOrigin : kOrigins) {
         for (wgpu::Origin3D dstOrigin : kOrigins) {
             for (wgpu::Extent3D copySize : kCopySizes) {
@@ -586,6 +589,9 @@ TEST_P(CopyTextureForBrowserTests, alphaOp) {
     // Skip OpenGLES backend because it fails on using RGBA8Unorm as
     // source texture format.
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
+
+    // Tests skip due to crbug.com/dawn/1104.
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     constexpr uint32_t kWidth = 10;
     constexpr uint32_t kHeight = 10;
