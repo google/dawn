@@ -387,6 +387,11 @@ namespace dawn_native { namespace vulkan {
                               VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES);
         }
 
+        if (IsExtensionEnabled(Extension::DepthClamping)) {
+            ASSERT(ToBackend(GetAdapter())->GetDeviceInfo().features.depthClamp == VK_TRUE);
+            usedKnobs.features.depthClamp = VK_TRUE;
+        }
+
         // Find a universal queue family
         {
             // Note that GRAPHICS and COMPUTE imply TRANSFER so we don't need to check for it.

@@ -278,6 +278,10 @@ namespace dawn_native { namespace vulkan {
             mSupportedExtensions.EnableExtension(Extension::PipelineStatisticsQuery);
         }
 
+        if (mDeviceInfo.features.depthClamp == VK_TRUE) {
+            mSupportedExtensions.EnableExtension(Extension::DepthClamping);
+        }
+
         if (mDeviceInfo.properties.limits.timestampComputeAndGraphics == VK_TRUE) {
             mSupportedExtensions.EnableExtension(Extension::TimestampQuery);
         }

@@ -395,7 +395,7 @@ namespace dawn_native { namespace vulkan {
         rasterization.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
         rasterization.pNext = nullptr;
         rasterization.flags = 0;
-        rasterization.depthClampEnable = VK_FALSE;
+        rasterization.depthClampEnable = ShouldClampDepth() ? VK_TRUE : VK_FALSE;
         rasterization.rasterizerDiscardEnable = VK_FALSE;
         rasterization.polygonMode = VK_POLYGON_MODE_FILL;
         rasterization.cullMode = VulkanCullMode(GetCullMode());
