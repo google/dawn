@@ -15,12 +15,17 @@
 #ifndef DAWNNATIVE_D3D12_PIPELINELAYOUTD3D12_H_
 #define DAWNNATIVE_D3D12_PIPELINELAYOUTD3D12_H_
 
+#include "common/Constants.h"
 #include "common/ityp_array.h"
 #include "dawn_native/BindingInfo.h"
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 namespace dawn_native { namespace d3d12 {
+
+    // We reserve a register space that a user cannot use.
+    static constexpr uint32_t kReservedRegisterSpace = kMaxBindGroups + 1;
+    static constexpr uint32_t kFirstOffsetInfoBaseRegister = 0;
 
     class Device;
 
@@ -53,8 +58,6 @@ namespace dawn_native { namespace d3d12 {
                     ityp::array<BindingIndex, uint32_t, kMaxDynamicBuffersPerPipelineLayout>,
                     kMaxBindGroups>
             mDynamicRootParameterIndices;
-        uint32_t mFirstIndexOffsetRegisterSpace;
-        uint32_t mFirstIndexOffsetShaderRegister;
         uint32_t mFirstIndexOffsetParameterIndex;
         ComPtr<ID3D12RootSignature> mRootSignature;
     };

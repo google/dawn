@@ -160,27 +160,6 @@ namespace dawn_native { namespace d3d12 {
         // |ranges| will have resized and the pointers in the |rootParameter|s will be invalid.
         ASSERT(rangeIndex == rangesCount);
 
-        // Since Tint's HLSL writer doesn't currently map sets to spaces, we use the default space
-        // (0).
-        mFirstIndexOffsetRegisterSpace = 0;
-        BindGroupIndex firstOffsetGroup{mFirstIndexOffsetRegisterSpace};
-        if (GetBindGroupLayoutsMask()[firstOffsetGroup]) {
-            // Find the last register used on firstOffsetGroup.
-            auto bgl = ToBackend(GetBindGroupLayout(firstOffsetGroup));
-            uint32_t maxRegister = 0;
-            for (BindingIndex bindingIndex{0}; bindingIndex < bgl->GetBindingCount();
-                 ++bindingIndex) {
-                uint32_t shaderRegister = bgl->GetShaderRegister(bindingIndex);
-                if (shaderRegister > maxRegister) {
-                    maxRegister = shaderRegister;
-                }
-            }
-            mFirstIndexOffsetShaderRegister = maxRegister + 1;
-        } else {
-            // firstOffsetGroup is not in use, we can use the first register.
-            mFirstIndexOffsetShaderRegister = 0;
-        }
-
         D3D12_ROOT_PARAMETER indexOffsetConstants{};
         indexOffsetConstants.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
         indexOffsetConstants.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
@@ -188,8 +167,8 @@ namespace dawn_native { namespace d3d12 {
         // NOTE: We should consider delaying root signature creation until we know how many values
         // we need
         indexOffsetConstants.Constants.Num32BitValues = 2;
-        indexOffsetConstants.Constants.RegisterSpace = mFirstIndexOffsetRegisterSpace;
-        indexOffsetConstants.Constants.ShaderRegister = mFirstIndexOffsetShaderRegister;
+        indexOffsetConstants.Constants.RegisterSpace = kReservedRegisterSpace;
+        indexOffsetConstants.Constants.ShaderRegister = kFirstOffsetInfoBaseRegister;
         mFirstIndexOffsetParameterIndex = rootParameters.size();
         // NOTE: We should consider moving this entry to earlier in the root signature since offsets
         // would need to be updated often
@@ -251,11 +230,11 @@ namespace dawn_native { namespace d3d12 {
     }
 
     uint32_t PipelineLayout::GetFirstIndexOffsetRegisterSpace() const {
-        return mFirstIndexOffsetRegisterSpace;
+        return kReservedRegisterSpace;
     }
 
     uint32_t PipelineLayout::GetFirstIndexOffsetShaderRegister() const {
-        return mFirstIndexOffsetShaderRegister;
+        return kFirstOffsetInfoBaseRegister;
     }
 
     uint32_t PipelineLayout::GetFirstIndexOffsetParameterIndex() const {
