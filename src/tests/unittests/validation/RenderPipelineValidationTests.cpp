@@ -990,8 +990,7 @@ TEST_F(RenderPipelineValidationTest, UnwrittenFragmentOutputsMask0) {
 }
 
 // Test that fragment output validation is for the correct entryPoint
-// TODO(dawn:216): Re-enable when we correctly reflect which bindings are used for an entryPoint.
-TEST_F(RenderPipelineValidationTest, DISABLED_BindingsFromCorrectEntryPoint) {
+TEST_F(RenderPipelineValidationTest, BindingsFromCorrectEntryPoint) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         [[block]] struct Uniforms {
             data : vec4<f32>;

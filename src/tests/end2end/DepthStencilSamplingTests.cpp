@@ -757,28 +757,6 @@ TEST_P(DepthStencilSamplingTest, CompareFunctionsRender) {
     }
 }
 
-// Test that sampling in a render pipeline with all of the compare functions works.
-// WGSL disallows |textureSampleCompare| in compute stages.
-TEST_P(DepthStencilSamplingTest, DISABLED_CompareFunctionsCompute) {
-    // Initialization via renderPass loadOp doesn't work on Mac Intel.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
-
-    // Depends on Tint's shader reflection
-    DAWN_TEST_UNSUPPORTED_IF(!HasToggleEnabled("use_tint_generator"));
-
-    wgpu::ComputePipeline pipeline = CreateComparisonComputePipeline();
-
-    for (wgpu::TextureFormat format : kDepthFormats) {
-        // Test a "normal" ref value between 0 and 1; as well as negative and > 1 refs.
-        for (float compareRef : kCompareRefs) {
-            // Test 0, below the ref, equal to, above the ref, and 1.
-            for (wgpu::CompareFunction f : kCompareFunctions) {
-                DoDepthCompareRefTest(pipeline, format, compareRef, f, kNormalizedTextureValues);
-            }
-        }
-    }
-}
-
 DAWN_INSTANTIATE_TEST(DepthStencilSamplingTest,
                       D3D12Backend(),
                       MetalBackend(),
