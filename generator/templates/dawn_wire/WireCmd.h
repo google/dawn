@@ -66,8 +66,8 @@ namespace dawn_wire {
     class ObjectIdProvider {
         public:
             {% for type in by_category["object"] %}
-                virtual ObjectId GetId({{as_cType(type.name)}} object) const = 0;
-                virtual ObjectId GetOptionalId({{as_cType(type.name)}} object) const = 0;
+                virtual WireResult GetId({{as_cType(type.name)}} object, ObjectId* out) const = 0;
+                virtual WireResult GetOptionalId({{as_cType(type.name)}} object, ObjectId* out) const = 0;
             {% endfor %}
     };
 
@@ -98,11 +98,17 @@ namespace dawn_wire {
 
         //* Serialize the structure and everything it points to into serializeBuffer which must be
         //* big enough to contain all the data (as queried from GetRequiredSize).
-        WireResult Serialize(size_t commandSize, SerializeBuffer* serializeBuffer
-            {%- if not is_return_command -%}
-                , const ObjectIdProvider& objectIdProvider
-            {%- endif -%}
-        ) const;
+        {% if command.may_have_dawn_object %}
+            WireResult Serialize(size_t commandSize, SerializeBuffer* serializeBuffer, const ObjectIdProvider& objectIdProvider) const;
+        {% else %}
+            WireResult Serialize(size_t commandSize, SerializeBuffer* serializeBuffer) const;
+            // Override which drops the provider if it's not needed.
+            WireResult Serialize(size_t commandSize,
+                                 SerializeBuffer* serializeBuffer,
+                                 const ObjectIdProvider&) const {
+                return Serialize(commandSize, serializeBuffer);
+            }
+        {% endif %}
 
         //* Deserializes the structure from a buffer, consuming a maximum of *size bytes. When this
         //* function returns, buffer and size will be updated by the number of bytes consumed to

@@ -21,7 +21,7 @@ class WireWGPUDevicePropertiesTests : public testing::Test {};
 
 // Test that the serialization and deserialization of WGPUDeviceProperties can work correctly.
 TEST_F(WireWGPUDevicePropertiesTests, SerializeWGPUDeviceProperties) {
-    WGPUDeviceProperties sentWGPUDeviceProperties;
+    WGPUDeviceProperties sentWGPUDeviceProperties = {};
     sentWGPUDeviceProperties.textureCompressionBC = true;
     // Set false to test that the serialization can handle both true and false correctly.
     sentWGPUDeviceProperties.pipelineStatisticsQuery = false;
