@@ -166,11 +166,13 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
     }
 
     // Write-only storage textures cannot be declared in a vertex shader.
-    if ((false) /* TODO(https://crbug.com/tint/449) */) {
+    {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var image0 : texture_storage_2d<rgba8unorm, write>;
-            [[stage(vertex)]] fn main([[builtin(vertex_index)]] vertex_index : u32) {
+            [[stage(vertex)]]
+            fn main([[builtin(vertex_index)]] vertex_index : u32) -> [[builtin(position)]] vec4<f32> {
                 textureStore(image0, vec2<i32>(i32(vertex_index), 0), vec4<f32>(1.0, 0.0, 0.0, 1.0));
+                return vec4<f32>(0.0);
             })");
 
         utils::ComboRenderPipelineDescriptor descriptor;
