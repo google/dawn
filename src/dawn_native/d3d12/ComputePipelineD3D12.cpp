@@ -28,11 +28,11 @@ namespace dawn_native { namespace d3d12 {
         Device* device,
         const ComputePipelineDescriptor* descriptor) {
         Ref<ComputePipeline> pipeline = AcquireRef(new ComputePipeline(device, descriptor));
-        DAWN_TRY(pipeline->Initialize(descriptor));
+        DAWN_TRY(pipeline->Initialize());
         return pipeline;
     }
 
-    MaybeError ComputePipeline::Initialize(const ComputePipelineDescriptor* descriptor) {
+    MaybeError ComputePipeline::Initialize() {
         Device* device = ToBackend(GetDevice());
         uint32_t compileFlags = 0;
 
@@ -43,14 +43,15 @@ namespace dawn_native { namespace d3d12 {
         // SPRIV-cross does matrix multiplication expecting row major matrices
         compileFlags |= D3DCOMPILE_PACK_MATRIX_ROW_MAJOR;
 
-        ShaderModule* module = ToBackend(descriptor->compute.module);
+        const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
+        ShaderModule* module = ToBackend(computeStage.module.Get());
 
         D3D12_COMPUTE_PIPELINE_STATE_DESC d3dDesc = {};
         d3dDesc.pRootSignature = ToBackend(GetLayout())->GetRootSignature();
 
         CompiledShader compiledShader;
         DAWN_TRY_ASSIGN(compiledShader,
-                        module->Compile(descriptor->compute.entryPoint, SingleShaderStage::Compute,
+                        module->Compile(computeStage.entryPoint.c_str(), SingleShaderStage::Compute,
                                         ToBackend(GetLayout()), compileFlags));
         d3dDesc.CS = compiledShader.GetD3D12ShaderBytecode();
         auto* d3d12Device = device->GetD3D12Device();
@@ -77,14 +78,14 @@ namespace dawn_native { namespace d3d12 {
     }
 
     void ComputePipeline::CreateAsync(Device* device,
-                                      std::unique_ptr<FlatComputePipelineDescriptor> descriptor,
+                                      const ComputePipelineDescriptor* descriptor,
                                       size_t blueprintHash,
                                       WGPUCreateComputePipelineAsyncCallback callback,
                                       void* userdata) {
-        Ref<ComputePipeline> pipeline = AcquireRef(new ComputePipeline(device, descriptor.get()));
+        Ref<ComputePipeline> pipeline = AcquireRef(new ComputePipeline(device, descriptor));
         std::unique_ptr<CreateComputePipelineAsyncTask> asyncTask =
-            std::make_unique<CreateComputePipelineAsyncTask>(pipeline, std::move(descriptor),
-                                                             blueprintHash, callback, userdata);
+            std::make_unique<CreateComputePipelineAsyncTask>(pipeline, blueprintHash, callback,
+                                                             userdata);
         CreateComputePipelineAsyncTask::RunAsync(std::move(asyncTask));
     }
 

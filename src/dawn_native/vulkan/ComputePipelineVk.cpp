@@ -29,16 +29,16 @@ namespace dawn_native { namespace vulkan {
         Device* device,
         const ComputePipelineDescriptor* descriptor) {
         Ref<ComputePipeline> pipeline = AcquireRef(new ComputePipeline(device, descriptor));
-        DAWN_TRY(pipeline->Initialize(descriptor));
+        DAWN_TRY(pipeline->Initialize());
         return pipeline;
     }
 
-    MaybeError ComputePipeline::Initialize(const ComputePipelineDescriptor* descriptor) {
+    MaybeError ComputePipeline::Initialize() {
         VkComputePipelineCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
-        createInfo.layout = ToBackend(descriptor->layout)->GetHandle();
+        createInfo.layout = ToBackend(GetLayout())->GetHandle();
         createInfo.basePipelineHandle = ::VK_NULL_HANDLE;
         createInfo.basePipelineIndex = -1;
 
@@ -47,11 +47,12 @@ namespace dawn_native { namespace vulkan {
         createInfo.stage.flags = 0;
         createInfo.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
         // Generate a new VkShaderModule with BindingRemapper tint transform for each pipeline
+        const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
         DAWN_TRY_ASSIGN(createInfo.stage.module,
-                        ToBackend(descriptor->compute.module)
-                            ->GetTransformedModuleHandle(descriptor->compute.entryPoint,
+                        ToBackend(computeStage.module.Get())
+                            ->GetTransformedModuleHandle(computeStage.entryPoint.c_str(),
                                                          ToBackend(GetLayout())));
-        createInfo.stage.pName = descriptor->compute.entryPoint;
+        createInfo.stage.pName = computeStage.entryPoint.c_str();
         createInfo.stage.pSpecializationInfo = nullptr;
 
         Device* device = ToBackend(GetDevice());
@@ -95,14 +96,14 @@ namespace dawn_native { namespace vulkan {
     }
 
     void ComputePipeline::CreateAsync(Device* device,
-                                      std::unique_ptr<FlatComputePipelineDescriptor> descriptor,
+                                      const ComputePipelineDescriptor* descriptor,
                                       size_t blueprintHash,
                                       WGPUCreateComputePipelineAsyncCallback callback,
                                       void* userdata) {
-        Ref<ComputePipeline> pipeline = AcquireRef(new ComputePipeline(device, descriptor.get()));
+        Ref<ComputePipeline> pipeline = AcquireRef(new ComputePipeline(device, descriptor));
         std::unique_ptr<CreateComputePipelineAsyncTask> asyncTask =
-            std::make_unique<CreateComputePipelineAsyncTask>(pipeline, std::move(descriptor),
-                                                             blueprintHash, callback, userdata);
+            std::make_unique<CreateComputePipelineAsyncTask>(pipeline, blueprintHash, callback,
+                                                             userdata);
         CreateComputePipelineAsyncTask::RunAsync(std::move(asyncTask));
     }
 

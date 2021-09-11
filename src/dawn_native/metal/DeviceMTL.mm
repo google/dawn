@@ -267,13 +267,11 @@ namespace dawn_native { namespace metal {
         const TextureViewDescriptor* descriptor) {
         return TextureView::Create(texture, descriptor);
     }
-    void Device::CreateComputePipelineAsyncImpl(
-        std::unique_ptr<FlatComputePipelineDescriptor> descriptor,
-        size_t blueprintHash,
-        WGPUCreateComputePipelineAsyncCallback callback,
-        void* userdata) {
-        ComputePipeline::CreateAsync(this, std::move(descriptor), blueprintHash, callback,
-                                     userdata);
+    void Device::CreateComputePipelineAsyncImpl(const ComputePipelineDescriptor* descriptor,
+                                                size_t blueprintHash,
+                                                WGPUCreateComputePipelineAsyncCallback callback,
+                                                void* userdata) {
+        ComputePipeline::CreateAsync(this, descriptor, blueprintHash, callback, userdata);
     }
 
     ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {

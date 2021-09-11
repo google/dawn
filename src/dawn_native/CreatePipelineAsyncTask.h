@@ -72,7 +72,6 @@ namespace dawn_native {
     class CreateComputePipelineAsyncTask {
       public:
         CreateComputePipelineAsyncTask(Ref<ComputePipelineBase> nonInitializedComputePipeline,
-                                       std::unique_ptr<FlatComputePipelineDescriptor> descriptor,
                                        size_t blueprintHash,
                                        WGPUCreateComputePipelineAsyncCallback callback,
                                        void* userdata);
@@ -87,8 +86,6 @@ namespace dawn_native {
         size_t mBlueprintHash;
         WGPUCreateComputePipelineAsyncCallback mCallback;
         void* mUserdata;
-
-        std::unique_ptr<FlatComputePipelineDescriptor> mAppliedDescriptor;
     };
 
 }  // namespace dawn_native

@@ -31,7 +31,7 @@ namespace dawn_native { namespace metal {
             Device* device,
             const ComputePipelineDescriptor* descriptor);
         static void CreateAsync(Device* device,
-                                std::unique_ptr<FlatComputePipelineDescriptor> descriptor,
+                                const ComputePipelineDescriptor* descriptor,
                                 size_t blueprintHash,
                                 WGPUCreateComputePipelineAsyncCallback callback,
                                 void* userdata);
@@ -42,7 +42,7 @@ namespace dawn_native { namespace metal {
 
       private:
         using ComputePipelineBase::ComputePipelineBase;
-        MaybeError Initialize(const ComputePipelineDescriptor* descriptor) override;
+        MaybeError Initialize() override;
 
         NSPRef<id<MTLComputePipelineState>> mMtlComputePipelineState;
         MTLSize mLocalWorkgroupSize;

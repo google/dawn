@@ -25,15 +25,16 @@ namespace dawn_native { namespace metal {
         Device* device,
         const ComputePipelineDescriptor* descriptor) {
         Ref<ComputePipeline> pipeline = AcquireRef(new ComputePipeline(device, descriptor));
-        DAWN_TRY(pipeline->Initialize(descriptor));
+        DAWN_TRY(pipeline->Initialize());
         return pipeline;
     }
 
-    MaybeError ComputePipeline::Initialize(const ComputePipelineDescriptor* descriptor) {
+    MaybeError ComputePipeline::Initialize() {
         auto mtlDevice = ToBackend(GetDevice())->GetMTLDevice();
 
-        ShaderModule* computeModule = ToBackend(descriptor->compute.module);
-        const char* computeEntryPoint = descriptor->compute.entryPoint;
+        const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
+        ShaderModule* computeModule = ToBackend(computeStage.module.Get());
+        const char* computeEntryPoint = computeStage.entryPoint.c_str();
         ShaderModule::MetalFunctionData computeData;
         DAWN_TRY(computeModule->CreateFunction(computeEntryPoint, SingleShaderStage::Compute,
                                                ToBackend(GetLayout()), &computeData));
@@ -69,14 +70,14 @@ namespace dawn_native { namespace metal {
     }
 
     void ComputePipeline::CreateAsync(Device* device,
-                                      std::unique_ptr<FlatComputePipelineDescriptor> descriptor,
+                                      const ComputePipelineDescriptor* descriptor,
                                       size_t blueprintHash,
                                       WGPUCreateComputePipelineAsyncCallback callback,
                                       void* userdata) {
-        Ref<ComputePipeline> pipeline = AcquireRef(new ComputePipeline(device, descriptor.get()));
+        Ref<ComputePipeline> pipeline = AcquireRef(new ComputePipeline(device, descriptor));
         std::unique_ptr<CreateComputePipelineAsyncTask> asyncTask =
-            std::make_unique<CreateComputePipelineAsyncTask>(pipeline, std::move(descriptor),
-                                                             blueprintHash, callback, userdata);
+            std::make_unique<CreateComputePipelineAsyncTask>(pipeline, blueprintHash, callback,
+                                                             userdata);
         CreateComputePipelineAsyncTask::RunAsync(std::move(asyncTask));
     }
 

@@ -103,23 +103,18 @@ namespace dawn_native {
 
     CreateComputePipelineAsyncTask::CreateComputePipelineAsyncTask(
         Ref<ComputePipelineBase> nonInitializedComputePipeline,
-        std::unique_ptr<FlatComputePipelineDescriptor> descriptor,
         size_t blueprintHash,
         WGPUCreateComputePipelineAsyncCallback callback,
         void* userdata)
         : mComputePipeline(nonInitializedComputePipeline),
           mBlueprintHash(blueprintHash),
           mCallback(callback),
-          mUserdata(userdata),
-          mAppliedDescriptor(std::move(descriptor)) {
+          mUserdata(userdata) {
         ASSERT(mComputePipeline != nullptr);
-
-        // TODO(jiawei.shao@intel.com): save nextInChain when it is supported in Dawn.
-        ASSERT(mAppliedDescriptor->nextInChain == nullptr);
     }
 
     void CreateComputePipelineAsyncTask::Run() {
-        MaybeError maybeError = mComputePipeline->Initialize(mAppliedDescriptor.get());
+        MaybeError maybeError = mComputePipeline->Initialize();
         std::string errorMessage;
         if (maybeError.IsError()) {
             mComputePipeline = nullptr;

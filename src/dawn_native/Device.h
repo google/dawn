@@ -46,7 +46,6 @@ namespace dawn_native {
     class PersistentCache;
     class StagingBufferBase;
     struct CallbackTask;
-    struct FlatComputePipelineDescriptor;
     struct InternalPipelineStore;
     struct ShaderModuleParseResult;
 
@@ -360,11 +359,10 @@ namespace dawn_native {
             size_t blueprintHash);
         Ref<RenderPipelineBase> AddOrGetCachedRenderPipeline(Ref<RenderPipelineBase> renderPipeline,
                                                              size_t blueprintHash);
-        virtual void CreateComputePipelineAsyncImpl(
-            std::unique_ptr<FlatComputePipelineDescriptor> descriptor,
-            size_t blueprintHash,
-            WGPUCreateComputePipelineAsyncCallback callback,
-            void* userdata);
+        virtual void CreateComputePipelineAsyncImpl(const ComputePipelineDescriptor* descriptor,
+                                                    size_t blueprintHash,
+                                                    WGPUCreateComputePipelineAsyncCallback callback,
+                                                    void* userdata);
         virtual void CreateRenderPipelineAsyncImpl(const RenderPipelineDescriptor* descriptor,
                                                    size_t blueprintHash,
                                                    WGPUCreateRenderPipelineAsyncCallback callback,

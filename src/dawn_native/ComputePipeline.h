@@ -23,22 +23,6 @@ namespace dawn_native {
     class DeviceBase;
     struct EntryPointMetadata;
 
-    // We use FlatComputePipelineDescriptor to keep all the members of ComputePipelineDescriptor
-    // (especially the members in pointers) valid in CreateComputePipelineAsyncTask when the
-    // creation of the compute pipeline is executed asynchronously.
-    struct FlatComputePipelineDescriptor : public ComputePipelineDescriptor, public NonMovable {
-      public:
-        explicit FlatComputePipelineDescriptor(const ComputePipelineDescriptor* descriptor);
-
-        void SetLayout(Ref<PipelineLayoutBase> appliedLayout);
-
-      private:
-        std::string mLabel;
-        Ref<PipelineLayoutBase> mLayout;
-        std::string mEntryPoint;
-        Ref<ShaderModuleBase> mComputeModule;
-    };
-
     MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
                                                  const ComputePipelineDescriptor* descriptor);
 
@@ -60,7 +44,7 @@ namespace dawn_native {
         // CreateComputePipelineAsyncTask is declared as a friend of ComputePipelineBase as it
         // needs to call the private member function ComputePipelineBase::Initialize().
         friend class CreateComputePipelineAsyncTask;
-        virtual MaybeError Initialize(const ComputePipelineDescriptor* descriptor);
+        virtual MaybeError Initialize();
     };
 
 }  // namespace dawn_native
