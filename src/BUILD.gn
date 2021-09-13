@@ -143,10 +143,10 @@ template("libtint_source_set") {
       "${tint_spirv_headers_dir}:spv_headers",
       "${tint_spirv_tools_dir}:spvtools_core_enums_unified1",
       "${tint_spirv_tools_dir}:spvtools_core_tables_unified1",
-      "${tint_spirv_tools_dir}:spvtools_language_header_cldebuginfo100",
-      "${tint_spirv_tools_dir}:spvtools_language_header_vkdebuginfo100",
-      "${tint_spirv_tools_dir}:spvtools_language_header_debuginfo",
       "${tint_spirv_tools_dir}:spvtools_headers",
+      "${tint_spirv_tools_dir}:spvtools_language_header_cldebuginfo100",
+      "${tint_spirv_tools_dir}:spvtools_language_header_debuginfo",
+      "${tint_spirv_tools_dir}:spvtools_language_header_vkdebuginfo100",
     ]
 
     if (defined(invoker.configs)) {
@@ -369,8 +369,8 @@ libtint_source_set("libtint_core_all_src") {
     "reader/reader.cc",
     "reader/reader.h",
     "resolver/resolver.cc",
-    "resolver/resolver_constants.cc",
     "resolver/resolver.h",
+    "resolver/resolver_constants.cc",
     "scope_stack.h",
     "sem/array.h",
     "sem/atomic_type.h",
@@ -448,6 +448,8 @@ libtint_source_set("libtint_core_all_src") {
     "transform/manager.h",
     "transform/module_scope_var_to_entry_point_param.cc",
     "transform/module_scope_var_to_entry_point_param.h",
+    "transform/num_workgroups_from_uniform.cc",
+    "transform/num_workgroups_from_uniform.h",
     "transform/pad_array_elements.cc",
     "transform/pad_array_elements.h",
     "transform/promote_initializers_to_const_var.cc",
@@ -614,9 +616,7 @@ libtint_source_set("libtint_spv_reader_src") {
     "${tint_spirv_tools_dir}/:spvtools_opt",
   ]
 
-  public_configs = [
-    "${tint_spirv_tools_dir}/:spvtools_internal_config"
-  ]
+  public_configs = [ "${tint_spirv_tools_dir}/:spvtools_internal_config" ]
 }
 
 libtint_source_set("libtint_spv_writer_src") {
