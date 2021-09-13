@@ -128,6 +128,16 @@ static constexpr Params cases[] = {
                          ast::PipelineStage::kCompute,
                          true),
 
+    ParamsFor<vec3<u32>>(ast::Builtin::kNumWorkgroups,
+                         ast::PipelineStage::kVertex,
+                         false),
+    ParamsFor<vec3<u32>>(ast::Builtin::kNumWorkgroups,
+                         ast::PipelineStage::kFragment,
+                         false),
+    ParamsFor<vec3<u32>>(ast::Builtin::kNumWorkgroups,
+                         ast::PipelineStage::kCompute,
+                         true),
+
     ParamsFor<u32>(ast::Builtin::kSampleIndex,
                    ast::PipelineStage::kVertex,
                    false),
@@ -480,6 +490,7 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_Pass) {
   //   [[builtin(local_invocationIndex)]] li_index: u32,
   //   [[builtin(global_invocationId)]] gi: vec3<u32>,
   //   [[builtin(workgroup_id)]] wi: vec3<u32>,
+  //   [[builtin(num_workgroups)]] nwgs: vec3<u32>,
   // ) {}
 
   auto* li_id =
@@ -493,8 +504,11 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_Pass) {
             ast::DecorationList{Builtin(ast::Builtin::kGlobalInvocationId)});
   auto* wi = Param("wi", ty.vec3<u32>(),
                    ast::DecorationList{Builtin(ast::Builtin::kWorkgroupId)});
+  auto* nwgs =
+      Param("nwgs", ty.vec3<u32>(),
+            ast::DecorationList{Builtin(ast::Builtin::kNumWorkgroups)});
 
-  Func("main", ast::VariableList{li_id, li_index, gi, wi}, ty.void_(), {},
+  Func("main", ast::VariableList{li_id, li_index, gi, wi, nwgs}, ty.void_(), {},
        ast::DecorationList{
            Stage(ast::PipelineStage::kCompute),
            WorkgroupSize(Expr(Source{Source::Location{12, 34}}, 2))});
@@ -514,6 +528,21 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_WorkGroupIdNotVec3U32) {
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
             "12:34 error: store type of builtin(workgroup_id) must be "
+            "'vec3<u32>'");
+}
+
+TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_NumWorkgroupsNotVec3U32) {
+  auto* nwgs = Param("nwgs", ty.f32(),
+                     ast::DecorationList{Builtin(
+                         Source{{12, 34}}, ast::Builtin::kNumWorkgroups)});
+  Func("main", ast::VariableList{nwgs}, ty.void_(), {},
+       ast::DecorationList{
+           Stage(ast::PipelineStage::kCompute),
+           WorkgroupSize(Expr(Source{Source::Location{12, 34}}, 2))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: store type of builtin(num_workgroups) must be "
             "'vec3<u32>'");
 }
 

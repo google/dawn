@@ -1259,6 +1259,7 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
       break;
     case ast::Builtin::kGlobalInvocationId:
     case ast::Builtin::kLocalInvocationId:
+    case ast::Builtin::kNumWorkgroups:
     case ast::Builtin::kWorkgroupId:
       if (stage != ast::PipelineStage::kNone &&
           !(stage == ast::PipelineStage::kCompute && is_input)) {
@@ -1338,10 +1339,6 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
         return false;
       }
       break;
-    case ast::Builtin::kNumWorkgroups:
-      // TODO(crbug.com/tint/752): Backend support (needs extra work for HLSL).
-      AddError("num_workgroups builtin is not yet implemented", deco->source());
-      return false;
     default:
       break;
   }
