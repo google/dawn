@@ -46,26 +46,25 @@ import (
 )
 
 const (
-	toolName                             = "get-test-plan"
-	specPath                             = "https://www.w3.org/TR/WGSL/"
-	specVersionUsedtoDevelopmentThisTool = "https://www.w3.org/TR/2021/WD-WGSL-20210831"
+	toolName        = "get-test-plan"
+	specPath        = "https://www.w3.org/TR/WGSL/"
+	specVersionUsed = "https://www.w3.org/TR/2021/WD-WGSL-20210910/"
 )
 
 var (
-	errInvalidArg      = errors.New("invalid arguments")
-	finalSpecURL       = ""
-	markedNodesSet     = make(map[*html.Node]bool)
-	testNamesSet       = make(map[string]bool)
-	visitedBuiltinsSet = make(map[string]int)
-	sha1sSet           = make(map[string]bool)
-	keywords           = []string{
+	errInvalidArg  = errors.New("invalid arguments")
+	headURL        = specVersionUsed
+	markedNodesSet = make(map[*html.Node]bool)
+	testNamesSet   = make(map[string]bool)
+	sha1sSet       = make(map[string]bool)
+	keywords       = []string{
 		"MUST ", "MUST NOT ", "REQUIRED ", "SHALL ",
 		"SHALL NOT ", "SHOULD ", "SHOULD NOT ",
 		"RECOMMENDED ", "MAY ", "OPTIONAL ",
 	}
-	globalSection     = ""
-	globalPrevSection = ""
-	globalCounter     = 0
+	globalSection      = ""
+	globalPrevSectionX = -1
+	globalRuleCounter  = 0
 )
 
 // Holds all the information about a wgsl rule
@@ -92,7 +91,7 @@ func main() {
 		fmt.Fprintf(out, "spec is an optional local file or a URL to the WGSL specification.\n")
 		fmt.Fprintf(out, "If spec is omitted then the specification is fetched from %v\n\n", specPath)
 
-		fmt.Fprintf(out, "this tools is developed based on: %v\n", specVersionUsedtoDevelopmentThisTool)
+		fmt.Fprintf(out, "this tools is developed based on: %v\n", specVersionUsed)
 		fmt.Fprintf(out, "flags may be any combination of:\n")
 		flag.PrintDefaults()
 	}
@@ -152,8 +151,8 @@ if omitted, a human readable version of the rules is written to stdout`)
 	if *ctsDir != "" {
 		getUnimplementedTestPlan(*parser, *ctsDir)
 	}
-	txt, tsv := concatRules(rules)
 
+	txt, tsv := concatRules(rules)
 	// if no output then write rules to stdout
 	if *output == "" {
 		fmt.Println(txt)
@@ -179,8 +178,8 @@ if omitted, a human readable version of the rules is written to stdout`)
 // example: section = [x, y, z] ie. x.y.z(.w)* it returns (start = min(w),end = max(w))
 // if there are no rules extracted from x.y.z it returns (-1, -1)
 func getSectionRange(rules []rule, s []int) (start, end int, err error) {
-	start = 1
-	end = 1
+	start = -1
+	end = -1
 	for _, r := range rules {
 		sectionDims, err := parseSection(r.SubSection)
 		if err != nil {
@@ -250,10 +249,10 @@ func concatRules(rules []rule) (string, string) {
 			"Rule Number " + strconv.Itoa(r.Number) + ":",
 			"Unique Id: " + r.Sha,
 			"Section: " + r.SubSection,
-			"URL: " + r.URL,
 			"Keyword: " + r.Keyword,
 			"testName: " + r.TestName,
-			"Description: " + r.Description,
+			"URL: " + r.URL,
+			r.Description,
 			"---------------------------------------------------"}, "\n"))
 
 		tsvLines = append(tsvLines, strings.Join([]string{
@@ -280,31 +279,6 @@ func writeFile(path, content string) error {
 		return fmt.Errorf("failed to write file '%v': %w", path, err)
 	}
 	return nil
-}
-
-// getBetween returns all the substrings of 'in' that are between 'begins[i]' and 'end'
-// in other words for input of ".*[begin][middle][end].*"
-// output will be []"cleanUpString([begin][middle][end])"
-// example:
-// in: `T is f32 or vecN<f32>
-//    clamp(e1: T ,e2: T ,e3: T) -> T
-//    Returns min(max(e1,e2),e3). Component-wise when T is a vector.
-//    (GLSLstd450NClamp)`
-// begins: []string{"\n", ""}
-// end: "("
-// middles: "clamp(", "Returns min(max(", "(", "clamp(", "Returns min(max(", "("
-func getBetween(in string, begins []string, end string) []string {
-	middles := []string{}
-	for _, right := range begins {
-		re := regexp.MustCompile(regexp.QuoteMeta(right) +
-			`.*` +
-			regexp.QuoteMeta(end) + `|$^`)
-
-		for _, m := range re.FindAllString(in, -1) {
-			middles = append(middles, cleanUpString(m))
-		}
-	}
-	return middles
 }
 
 // parseSpec reads the spec from a local file, or the URL to WGSL spec
@@ -380,7 +354,6 @@ func parseSpec(args []string) (*html.Node, error) {
 		return nil, fmt.Errorf("unsupported URL scheme: %v", specURL.Scheme)
 	}
 	defer specContent.Close()
-	finalSpecURL = specURL.String()
 
 	// Parse spec
 	spec, err := html.Parse(specContent)
@@ -486,19 +459,14 @@ func (p *Parser) getKeywordRule(node *html.Node, section int, subSection string)
 	}
 
 	id := getID(node)
-	url := finalSpecURL + "#" + id
 	desc := cleanUpString(getNodeData(node))
 
-	title := ""
-	if index := strings.Index(desc, "."); index > -1 {
-		title = desc[0:index]
-	}
-	t, _, err := testName(id, desc, title, subSection)
+	t, _, err := testName(id, desc, subSection)
 	if err != nil {
 		return err
 	}
 
-	sha, err := getSha1(desc, subSection)
+	sha, err := getSha1(desc, id)
 	if err != nil {
 		return err
 	}
@@ -508,7 +476,7 @@ func (p *Parser) getKeywordRule(node *html.Node, section int, subSection string)
 		Number:      len(p.rules) + 1,
 		Section:     section,
 		SubSection:  subSection,
-		URL:         url,
+		URL:         headURL + "#" + id,
 		Description: desc,
 		TestName:    t,
 		Keyword:     keyword,
@@ -546,14 +514,14 @@ func (p *Parser) getAlgorithmRule(node *html.Node, section int, subSection strin
 	sb := strings.Builder{}
 	printNodeText(node, &sb)
 	title := cleanUpStartEnd(getNodeAttrValue(node, "data-algorithm"))
-	desc := title + ":\n" + cleanUpStartEnd(sb.String())
+	desc := title + ":\n" + cleanUpString(sb.String())
 	id := getID(node)
-	testName, builtinName, err := testName(id, desc, title, subSection)
+	testName, _, err := testName(id, desc, subSection)
 	if err != nil {
 		return err
 	}
 
-	sha, err := getSha1(desc, "")
+	sha, err := getSha1(desc, id)
 	if err != nil {
 		return err
 	}
@@ -563,27 +531,11 @@ func (p *Parser) getAlgorithmRule(node *html.Node, section int, subSection strin
 		Number:      len(p.rules) + 1,
 		Section:     section,
 		SubSection:  subSection,
-		URL:         finalSpecURL + "#" + id,
+		URL:         headURL + "#" + id,
 		Description: desc,
 		TestName:    testName,
 		Keyword:     "ALGORITHM",
 	}
-	if strings.Contains(id, "builtin-functions") {
-		prevRuleIndex, builtinExist := visitedBuiltinsSet[builtinName]
-		if builtinExist {
-			// TODO(sarahM0): https://bugs.c/tint/1159
-			// Overloads of a builtin function is merged to the previous rule
-			// depending on what we decide to choose as key sha1, this might change
-			(p.rules)[prevRuleIndex].Description += ("\nNext overload:" +
-				"\nURL:" + r.URL + "\nDescription: " + r.Description)
-			r.Desc = append(r.Desc, desc)
-			return nil
-		} else {
-			visitedBuiltinsSet[builtinName] = len(p.rules)
-
-		}
-	}
-
 	p.rules = append(p.rules, r)
 	return nil
 }
@@ -603,13 +555,12 @@ func (p *Parser) getNowrapRule(node *html.Node, section int, subSection string) 
 	desc := cleanUpStartEnd(getNodeData(node))
 	id := getID(node)
 
-	url := finalSpecURL + "#" + id
-	t, _, err := testName(id, desc, "", subSection)
+	t, _, err := testName(id, desc, subSection)
 	if err != nil {
 		return err
 	}
 
-	sha, err := getSha1(desc, subSection)
+	sha, err := getSha1(desc, id)
 	if err != nil {
 		return err
 	}
@@ -619,7 +570,7 @@ func (p *Parser) getNowrapRule(node *html.Node, section int, subSection string) 
 		Number:      len(p.rules) + 1,
 		SubSection:  subSection,
 		Section:     section,
-		URL:         url,
+		URL:         headURL + "#" + id,
 		Description: desc,
 		TestName:    t,
 		Keyword:     "Nowrap",
@@ -701,19 +652,32 @@ func getID(node *html.Node) string {
 }
 
 var (
-	reCleanUpString = regexp.MustCompile(`\s+|\t|\n`)
-	// regex for starts with spaces
+	reCleanUpString       = regexp.MustCompile(`\n(\n|\s|\t)+|(\s|\t)+\n`)
+	reSpacePlusTwo        = regexp.MustCompile(`\t|\s{2,}`)
 	reBeginOrEndWithSpace = regexp.MustCompile(`^\s|\s$`)
+	reIrregularWhiteSpace = regexp.MustCompile(`§.`)
 )
 
 // cleanUpString creates a string by removing  all extra spaces, newlines and tabs
 // form input string 'in' and returns it
+// This is done so that the uniqueID does not change because of a change in white spaces
+//
+// example in:
+// ` float abs:
+// T is f32 or vecN<f32>
+// 		abs(e: T ) -> 	T
+// 	  Returns the absolute value of e (e.g. e  with a positive sign bit). Component-wise when T is a vector.
+//   (GLSLstd450Fabs)`
+//
+// example out:
+// `float abs:
+// T is f32 or vecN<f32> abs(e: T ) -> T Returns the absolute value of e (e.g. e with a positive sign bit). Component-wise when T is a vector. (GLSLstd450Fabs)`
 func cleanUpString(in string) string {
-	// regex for more than one space, newlines or a tabs
-	out := reCleanUpString.ReplaceAllString(in, " ")
+	out := reCleanUpString.ReplaceAllString(in, "\n")
+	out = reSpacePlusTwo.ReplaceAllString(out, " ")
 	//`§.` is not a valid character for a cts description
 	// ie. this is invalid: g.test().desc(`§.`)
-	out = strings.ReplaceAll(out, "§.", "section ")
+	out = reIrregularWhiteSpace.ReplaceAllString(out, "section ")
 	out = reBeginOrEndWithSpace.ReplaceAllString(out, "")
 	return out
 }
@@ -736,73 +700,73 @@ func cleanUpStartEnd(in string) string {
 
 var (
 	name         = "^[a-zA-Z0-9_]+$"
-	reName       = regexp.MustCompile(`^[a-zA-Z0-9_]+$`)
-	reUnderScore = regexp.MustCompile(`[-]+|\s+`)
-	reDoNotBegin = regexp.MustCompile(`^[0-9_]+|[_]+$`)
+	reName       = regexp.MustCompile(`[^a-zA-Z0-9_]`)
+	reUnderScore = regexp.MustCompile(`[_]+`)
+	reDoNotBegin = regexp.MustCompile(`^[0-9_]+|[_]$`)
 )
 
-// testName proposes a test name for the CTS implementation of this rule
-// TODO(crbug.com/tint/1158): update this function to just use section x.y then a number:w
-func testName(id string, desc string, title string, section string) (fileName, builtinName string, err error) {
+// testName creates a test name given a rule id (ie. section name), description and section
+// returns for a builtin rule:
+// 		testName: ${builtin name} + "_" + ${section name}
+// 		builtinName: ${builtin name}
+//		err: nil
+// returns for a other rules:
+//		testName: ${section name} + "_rule_ + " + ${string(counter)}
+//		builtinName: ""
+//		err: nil
+// if it cannot create a unique name it returns "", "", err.
+func testName(id string, desc string, section string) (testName, builtinName string, err error) {
 	// regex for every thing other than letters and numbers
-	if len(desc) == 0 {
-		return "", "", fmt.Errorf("unable to generate a test name for empty description")
+	if desc == "" || section == "" || id == "" {
+		return "", "", fmt.Errorf("cannot generate test name")
 	}
-	fileName = ""
-
-	title = reName.ReplaceAllString(title, "_")
+	// avoid any characters other than letters, numbers and underscore
 	id = reName.ReplaceAllString(id, "_")
-
 	// avoid underscore repeats
-	title = reUnderScore.ReplaceAllString(title, "_")
 	id = reUnderScore.ReplaceAllString(id, "_")
-
 	// test name must not start with underscore or a number
 	// nor end with and underscore
-	title = reDoNotBegin.ReplaceAllString(title, "")
 	id = reDoNotBegin.ReplaceAllString(id, "")
 
+	sectionX, err := parseSection(section)
+	if err != nil {
+		return "", "", err
+	}
+
 	builtinName = ""
-	if strings.Contains(id, "builtin_functions") {
-		n := getBetween(desc, []string{"\n", "\t", " ", ""}, "(")
-		if len(n) > 0 {
-			builtinName = n[0][:len(n[0])-1]
-			match, _ := regexp.MatchString(name, builtinName)
-			if match {
-				fileName = builtinName
-				// no need to check, it's an overload
-				testNamesSet[fileName] = true
-				return fileName, builtinName, nil
+	index := strings.Index(desc, ":")
+	if strings.Contains(id, "builtin_functions") && index > -1 {
+		builtinName = reName.ReplaceAllString(desc[:index], "_")
+		builtinName = reDoNotBegin.ReplaceAllString(builtinName, "")
+		builtinName = reUnderScore.ReplaceAllString(builtinName, "_")
+		match, _ := regexp.MatchString(name, builtinName)
+		if match {
+			testName = builtinName + "," + id
+			for i := 1; testNamesSet[testName]; i++ {
+				testName = builtinName + "_" + id + "_" + strconv.Itoa(i)
 			}
+			testNamesSet[testName] = true
+			return testName, builtinName, nil
 		}
-	}
-
-	if title != "" {
-		fileName = id + "," + title
-		if !testNamesSet[fileName] && len(fileName) < 32 {
-			testNamesSet[fileName] = true
-			return fileName, "", nil
-		}
-	}
-
-	if section != "" {
-		section = reName.ReplaceAllString(section, "_")
-		if section == globalPrevSection {
-			globalCounter++
-		} else {
-			globalCounter = 0
-			globalPrevSection = section
-		}
-		fileName = "section_" + section + "_rule_" + strconv.Itoa(globalCounter)
-		return fileName, "", nil
 
 	}
-	fileName = "error-unable-to-generate-unique-file-name"
-	return fileName, "", fmt.Errorf("unable to generate unique test name\n" + desc)
+
+	if sectionX[0] == globalPrevSectionX {
+		globalRuleCounter++
+	} else {
+		globalRuleCounter = 0
+		globalPrevSectionX = sectionX[0]
+	}
+	testName = "section" + strconv.Itoa(sectionX[0]) + "_rule" + strconv.Itoa(globalRuleCounter)
+	if testNamesSet[testName] {
+		testName = "error-unable-to-generate-unique-file-name"
+		return testName, "", fmt.Errorf("unable to generate unique test name\n" + desc)
+	}
+	testNamesSet[testName] = true
+	return testName, "", nil
 }
 
-// printNodeText traverses node and its children, writing the Data of all
-// TextNodes to sb.
+// printNodeText traverses node and its children, writing the Data of all TextNodes to sb.
 func printNodeText(node *html.Node, sb *strings.Builder) {
 	// mark this node as seen
 	markedNodesSet[node] = true
@@ -992,13 +956,15 @@ func getBuiltinSectionNum(rules []rule) (int, error) {
 }
 
 func isBuiltinFunctionRule(r rule) bool {
-	_, builtinName, _ := testName(r.URL, r.Description, "", r.SubSection)
-	return builtinName != ""
+	_, builtinName, _ := testName(r.URL, r.Description, r.SubSection)
+	return builtinName != "" || strings.Contains(r.URL, "builtin-functions")
 }
 
 func testPlan(r rule) string {
 	sb := strings.Builder{}
-	sb.WriteString(fmt.Sprintf(unImplementedTestTemplate, r.TestName, r.Sha, "`\n"+r.Description+"\n`"))
+	sb.WriteString(fmt.Sprintf(unImplementedTestTemplate, r.TestName,
+		r.Sha, "`\n"+r.URL+"\n"+r.Description+"\n`"))
+
 	return sb.String()
 }
 
