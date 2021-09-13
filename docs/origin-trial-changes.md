@@ -4,6 +4,7 @@
 
 ### New Features
 * The size of an array can now be defined using a non-overridable module-scope constant
+* The `num_workgroups` builtin is now supported.
 
 ### Fixes
 * Hex floats: issue an error when the magnitude is non-zero, and the exponent would cause

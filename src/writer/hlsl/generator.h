@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "src/ast/pipeline_stage.h"
+#include "src/sem/binding_point.h"
 #include "src/writer/text.h"
 
 namespace tint {
@@ -36,6 +37,8 @@ class GeneratorImpl;
 
 /// Configuration options used for generating HLSL.
 struct Options {
+  /// The binding point to use for information passed via root constants.
+  sem::BindingPoint root_constant_binding_point;
   /// Set to `true` to disable workgroup memory zero initialization
   bool disable_workgroup_init = false;
 };

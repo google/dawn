@@ -75,6 +75,8 @@ INSTANTIATE_TEST_SUITE_P(
                                    "thread_position_in_grid"},
                     MslBuiltinData{ast::Builtin::kWorkgroupId,
                                    "threadgroup_position_in_grid"},
+                    MslBuiltinData{ast::Builtin::kNumWorkgroups,
+                                   "threadgroups_per_grid"},
                     MslBuiltinData{ast::Builtin::kSampleIndex, "sample_id"},
                     MslBuiltinData{ast::Builtin::kSampleMask, "sample_mask"},
                     MslBuiltinData{ast::Builtin::kPointSize, "point_size"}));

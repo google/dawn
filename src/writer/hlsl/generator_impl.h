@@ -33,6 +33,7 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/program_builder.h"
 #include "src/scope_stack.h"
+#include "src/sem/binding_point.h"
 #include "src/transform/decompose_memory_access.h"
 #include "src/utils/hash.h"
 #include "src/writer/text_generator.h"
@@ -55,9 +56,12 @@ struct SanitizedResult {
 };
 
 /// Sanitize a program in preparation for generating HLSL.
+/// @param root_constant_binding_point the binding point to use for information
+/// that will be passed via root constants
 /// @param disable_workgroup_init `true` to disable workgroup memory zero
 /// @returns the sanitized program and any supplementary information
 SanitizedResult Sanitize(const Program* program,
+                         sem::BindingPoint root_constant_binding_point = {},
                          bool disable_workgroup_init = false);
 
 /// Implementation class for HLSL generator

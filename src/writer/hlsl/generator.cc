@@ -28,7 +28,8 @@ Result Generate(const Program* program, const Options& options) {
   Result result;
 
   // Sanitize the program.
-  auto sanitized_result = Sanitize(program, options.disable_workgroup_init);
+  auto sanitized_result = Sanitize(program, options.root_constant_binding_point,
+                                   options.disable_workgroup_init);
   if (!sanitized_result.program.IsValid()) {
     result.success = false;
     result.error = sanitized_result.program.Diagnostics().str();

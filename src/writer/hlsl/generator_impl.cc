@@ -51,6 +51,7 @@
 #include "src/transform/inline_pointer_lets.h"
 #include "src/transform/loop_to_for_loop.h"
 #include "src/transform/manager.h"
+#include "src/transform/num_workgroups_from_uniform.h"
 #include "src/transform/pad_array_elements.h"
 #include "src/transform/promote_initializers_to_const_var.h"
 #include "src/transform/simplify.h"
@@ -113,7 +114,9 @@ std::ostream& operator<<(std::ostream& s, const RegisterAndSpace& rs) {
 
 }  // namespace
 
-SanitizedResult Sanitize(const Program* in, bool disable_workgroup_init) {
+SanitizedResult Sanitize(const Program* in,
+                         sem::BindingPoint root_constant_binding_point,
+                         bool disable_workgroup_init) {
   transform::Manager manager;
   transform::DataMap data;
 
@@ -128,6 +131,10 @@ SanitizedResult Sanitize(const Program* in, bool disable_workgroup_init) {
     manager.Add<transform::ZeroInitWorkgroupMemory>();
   }
   manager.Add<transform::CanonicalizeEntryPointIO>();
+  // NumWorkgroupsFromUniform must come after CanonicalizeEntryPointIO, as it
+  // assumes that num_workgroups builtins only appear as struct members and are
+  // only accessed directly via member accessors.
+  manager.Add<transform::NumWorkgroupsFromUniform>();
   manager.Add<transform::InlinePointerLets>();
   // Simplify cleans up messy `*(&(expr))` expressions from InlinePointerLets.
   manager.Add<transform::Simplify>();
@@ -147,6 +154,8 @@ SanitizedResult Sanitize(const Program* in, bool disable_workgroup_init) {
 
   data.Add<transform::CanonicalizeEntryPointIO::Config>(
       transform::CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
+  data.Add<transform::NumWorkgroupsFromUniform::Config>(
+      root_constant_binding_point);
 
   SanitizedResult result;
   result.program = std::move(manager.Run(in, data).program);

@@ -1587,6 +1587,8 @@ std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
       return "thread_position_in_grid";
     case ast::Builtin::kWorkgroupId:
       return "threadgroup_position_in_grid";
+    case ast::Builtin::kNumWorkgroups:
+      return "threadgroups_per_grid";
     case ast::Builtin::kSampleIndex:
       return "sample_id";
     case ast::Builtin::kSampleMask:
