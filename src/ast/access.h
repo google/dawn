@@ -24,13 +24,15 @@ namespace ast {
 /// The access control settings
 enum Access {
   /// Not declared in the source
-  kUndefined,
+  kUndefined = 0,
   /// Read only
   kRead,
   /// Write only
   kWrite,
   /// Read write
-  kReadWrite
+  kReadWrite,
+  // Last valid access mode
+  kLastValid = kReadWrite,
 };
 
 /// @param out the std::ostream to write to
