@@ -106,6 +106,10 @@ namespace dawn_native {
         return mImpl->GetAdapterProperties();
     }
 
+    bool Adapter::GetLimits(WGPULimits* limits) const {
+        return mImpl->GetLimits(reinterpret_cast<wgpu::Limits*>(limits));
+    }
+
     bool Adapter::SupportsExternalImages() const {
         return mImpl->SupportsExternalImages();
     }

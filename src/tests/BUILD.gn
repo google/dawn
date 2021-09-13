@@ -214,6 +214,7 @@ test("dawn_unittests") {
     "unittests/validation/RenderBundleValidationTests.cpp",
     "unittests/validation/RenderPassDescriptorValidationTests.cpp",
     "unittests/validation/RenderPipelineValidationTests.cpp",
+    "unittests/validation/RequestDeviceValidationTests.cpp",
     "unittests/validation/ResourceUsageTrackingTests.cpp",
     "unittests/validation/SamplerValidationTests.cpp",
     "unittests/validation/ShaderModuleValidationTests.cpp",

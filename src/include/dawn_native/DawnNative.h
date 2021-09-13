@@ -66,6 +66,8 @@ namespace dawn_native {
         std::vector<const char*> requiredExtensions;
         std::vector<const char*> forceEnabledToggles;
         std::vector<const char*> forceDisabledToggles;
+
+        const WGPULimits* requiredLimits = nullptr;
     };
 
     // A struct to record the information of a toggle. A toggle is a code path in Dawn device that
@@ -108,6 +110,7 @@ namespace dawn_native {
 
         std::vector<const char*> GetSupportedExtensions() const;
         WGPUDeviceProperties GetAdapterProperties() const;
+        bool GetLimits(WGPULimits* limits) const;
 
         // Check that the Adapter is able to support importing external images. This is necessary
         // to implement the swapchain and interop APIs in Chromium.

@@ -19,6 +19,7 @@
 
 #include "dawn_native/Error.h"
 #include "dawn_native/Extensions.h"
+#include "dawn_native/Limits.h"
 #include "dawn_native/dawn_platform.h"
 
 #include <string>
@@ -51,6 +52,8 @@ namespace dawn_native {
             const std::vector<const char*>& requestedExtensions) const;
         WGPUDeviceProperties GetAdapterProperties() const;
 
+        bool GetLimits(wgpu::Limits* limits) const;
+
         virtual bool SupportsExternalImages() const = 0;
 
       protected:
@@ -67,6 +70,7 @@ namespace dawn_native {
         virtual MaybeError ResetInternalDeviceForTestingImpl();
         InstanceBase* mInstance = nullptr;
         wgpu::BackendType mBackend;
+        CombinedLimits mLimits;
     };
 
 }  // namespace dawn_native

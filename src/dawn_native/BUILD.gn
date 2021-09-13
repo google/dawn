@@ -239,6 +239,8 @@ source_set("dawn_native_sources") {
     "Instance.h",
     "IntegerTypes.h",
     "InternalPipelineStore.h",
+    "Limits.cpp",
+    "Limits.h",
     "ObjectBase.cpp",
     "ObjectBase.h",
     "ObjectContentHasher.cpp",

@@ -77,6 +77,8 @@
 // TODO(crbug.com/dawn/520): Remove WGPU_STRIDE_UNDEFINED in favor of WGPU_COPY_STRIDE_UNDEFINED.
 #define WGPU_STRIDE_UNDEFINED (0xffffffffUL)
 #define WGPU_COPY_STRIDE_UNDEFINED (0xffffffffUL)
+#define WGPU_LIMIT_U32_UNDEFINED (0xffffffffUL)
+#define WGPU_LIMIT_U64_UNDEFINED (0xffffffffffffffffULL)
 
 typedef uint32_t WGPUFlags;
 

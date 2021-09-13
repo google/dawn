@@ -883,7 +883,8 @@
             {"name": "multi planar formats", "type": "bool", "default": "false"},
             {"name": "depth clamping", "type": "bool", "default": "false"},
             {"name": "invalid extension", "type": "bool", "default": "false"},
-            {"name": "dawn internal usages", "type": "bool", "default": "false"}
+            {"name": "dawn internal usages", "type": "bool", "default": "false"},
+            {"name": "limits", "type": "limits"}
         ]
     },
     "double": {
@@ -895,6 +896,38 @@
             {"name": "type", "type": "error type"},
             {"name": "message", "type": "char", "annotation": "const*"},
             {"name": "userdata", "type": "void", "annotation": "*"}
+        ]
+    },
+    "limits": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "max texture dimension 1D", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max texture dimension 2D", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max texture dimension 3D", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max texture array layers", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max bind groups", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max dynamic uniform buffers per pipeline layout", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max dynamic storage buffers per pipeline layout", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max sampled textures per shader stage", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max samplers per shader stage", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max storage buffers per shader stage", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max storage textures per shader stage", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max uniform buffers per shader stage", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max uniform buffer binding size", "type": "uint64_t", "default": "WGPU_LIMIT_U64_UNDEFINED"},
+            {"name": "max storage buffer binding size", "type": "uint64_t", "default": "WGPU_LIMIT_U64_UNDEFINED"},
+            {"name": "min uniform buffer offset alignment", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "min storage buffer offset alignment", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max vertex buffers", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max vertex attributes", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max vertex buffer array stride", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max inter stage shader components", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max compute workgroup storage size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max compute invocations per workgroup", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max compute workgroup size x", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max compute workgroup size y", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max compute workgroup size z", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max compute workgroups per dimension", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
         ]
     },
     "logging callback": {

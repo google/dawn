@@ -711,7 +711,8 @@ namespace dawn_wire {
             WireResult result = serializeBuffer.Next(&transfer);
             ASSERT(result == WireResult::Success);
 
-            result = WGPUDevicePropertiesSerialize(*deviceProperties, transfer, &serializeBuffer);
+            ErrorObjectIdProvider provider;
+            result = WGPUDevicePropertiesSerialize(*deviceProperties, transfer, &serializeBuffer, provider);
             ASSERT(result == WireResult::Success);
         }
 
@@ -724,8 +725,9 @@ namespace dawn_wire {
                 return false;
             }
 
+            ErrorObjectIdResolver resolver;
             return WGPUDevicePropertiesDeserialize(deviceProperties, transfer, &deserializeBuffer,
-                                                   nullptr) == WireResult::Success;
+                                                   nullptr, resolver) == WireResult::Success;
         }
 
 }  // namespace dawn_wire

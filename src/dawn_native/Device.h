@@ -20,6 +20,7 @@
 #include "dawn_native/Extensions.h"
 #include "dawn_native/Format.h"
 #include "dawn_native/Forward.h"
+#include "dawn_native/Limits.h"
 #include "dawn_native/ObjectBase.h"
 #include "dawn_native/Toggles.h"
 
@@ -447,6 +448,7 @@ namespace dawn_native {
         size_t mLazyClearCountForTesting = 0;
         std::atomic_uint64_t mNextPipelineCompatibilityToken;
 
+        CombinedLimits mLimits;
         ExtensionsSet mEnabledExtensions;
 
         std::unique_ptr<InternalPipelineStore> mInternalPipelineStore;
