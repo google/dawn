@@ -244,6 +244,9 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearIntegerFormatsToLargeValues) {
     // to large values on D3D12.
     DAWN_SUPPRESS_TEST_IF(IsD3D12());
 
+    // TODO(crbug.com/dawn/1109): Re-enable once fixed on Mac Mini 8,1s w/ 11.5.
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(11, 5));
+
     constexpr double kUint32MaxDouble = 4294967295.0;
     constexpr uint32_t kUint32Max = static_cast<uint32_t>(kUint32MaxDouble);
     // RGBA32Uint for UINT32_MAX
