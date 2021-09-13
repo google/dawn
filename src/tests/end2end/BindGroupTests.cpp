@@ -1068,6 +1068,9 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
 // conflict. This can happen if the backend treats dynamic bindings separately from non-dynamic
 // bindings.
 TEST_P(BindGroupTests, DynamicAndNonDynamicBindingsDoNotConflictAfterRemapping) {
+    // // TODO(crbug.com/dawn/1106): Test output is wrong on D3D12 using WARP.
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+
     auto RunTestWith = [&](bool dynamicBufferFirst) {
         uint32_t dynamicBufferBindingNumber = dynamicBufferFirst ? 0 : 1;
         uint32_t bufferBindingNumber = dynamicBufferFirst ? 1 : 0;
