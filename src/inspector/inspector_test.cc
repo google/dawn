@@ -642,6 +642,7 @@ TEST_F(InspectorGetEntryPointTest, BuiltinNotReferenced) {
   EXPECT_FALSE(result[0].input_position_used);
   EXPECT_FALSE(result[0].front_facing_used);
   EXPECT_FALSE(result[0].sample_index_used);
+  EXPECT_FALSE(result[0].num_workgroups_used);
 }
 
 TEST_F(InspectorGetEntryPointTest, InputSampleMaskSimpleReferenced) {
@@ -803,6 +804,38 @@ TEST_F(InspectorGetEntryPointTest, SampleIndexStructReferenced) {
 
   ASSERT_EQ(1u, result.size());
   EXPECT_TRUE(result[0].sample_index_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, NumWorkgroupsSimpleReferenced) {
+  auto* in_var =
+      Param("in_var", ty.vec3<u32>(), {Builtin(ast::Builtin::kNumWorkgroups)});
+  Func("ep_func", {in_var}, ty.void_(), {Return()},
+       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)}, {});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_TRUE(result[0].num_workgroups_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, NumWorkgroupsStructReferenced) {
+  ast::StructMemberList members;
+  members.push_back(Member("inner_position", ty.vec3<u32>(),
+                           {Builtin(ast::Builtin::kNumWorkgroups)}));
+  Structure("in_struct", members, {});
+  auto* in_var = Param("in_var", ty.type_name("in_struct"), {});
+
+  Func("ep_func", {in_var}, ty.void_(), {Return()},
+       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)}, {});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_TRUE(result[0].num_workgroups_used);
 }
 
 TEST_F(InspectorGetEntryPointTest, ImplicitInterpolate) {

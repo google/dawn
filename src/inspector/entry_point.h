@@ -135,6 +135,8 @@ struct EntryPoint {
   bool front_facing_used = false;
   /// Does the entry point use the sample_index builtin
   bool sample_index_used = false;
+  /// Does the entry point use the num_workgroups builtin
+  bool num_workgroups_used = false;
 
   /// @returns the size of the workgroup in {x,y,z} format
   std::tuple<uint32_t, uint32_t, uint32_t> workgroup_size() {

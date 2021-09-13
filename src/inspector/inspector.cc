@@ -173,6 +173,9 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
       entry_point.input_sample_mask_used |=
           ContainsBuiltin(ast::Builtin::kSampleMask, param->Type(),
                           param->Declaration()->decorations());
+      entry_point.num_workgroups_used |=
+          ContainsBuiltin(ast::Builtin::kNumWorkgroups, param->Type(),
+                          param->Declaration()->decorations());
     }
 
     if (!sem->ReturnType()->Is<sem::Void>()) {
