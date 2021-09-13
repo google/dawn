@@ -1634,13 +1634,14 @@ std::string GeneratorImpl::interpolation_to_attribute(
 
 bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
   auto* func_sem = program_->Sem().Get(func);
+  auto func_name = program_->Symbols().NameFor(func->symbol());
 
   {
     auto out = line();
 
     EmitStage(out, func->pipeline_stage());
     out << " " << func->return_type()->FriendlyName(program_->Symbols());
-    out << " " << program_->Symbols().NameFor(func->symbol()) << "(";
+    out << " " << func_name << "(";
 
     // Emit entry point parameters.
     bool first = true;
@@ -1652,11 +1653,14 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
 
       auto* type = program_->Sem().Get(var)->Type()->UnwrapRef();
 
-      if (!EmitType(out, type, "")) {
+      auto param_name = program_->Symbols().NameFor(var->symbol());
+      if (!EmitType(out, type, param_name)) {
         return false;
       }
-
-      out << " " << program_->Symbols().NameFor(var->symbol());
+      // Parameter name is output as part of the type for arrays and pointers.
+      if (!type->Is<sem::Array>() && !type->Is<sem::Pointer>()) {
+        out << " " << param_name;
+      }
 
       if (type->Is<sem::Struct>()) {
         out << " [[stage_in]]";
@@ -1680,6 +1684,16 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
         } else {
           TINT_ICE(Writer, diagnostics_)
               << "invalid handle type entry point parameter";
+          return false;
+        }
+      } else if (auto* ptr = var->type()->As<ast::Pointer>()) {
+        if (ptr->storage_class() == ast::StorageClass::kWorkgroup) {
+          auto& allocations = workgroup_allocations_[func_name];
+          out << " [[threadgroup(" << allocations.size() << ")]]";
+          allocations.push_back(program_->Sem().Get(ptr->type())->Size());
+        } else {
+          TINT_ICE(Writer, diagnostics_)
+              << "invalid pointer storage class for entry point parameter";
           return false;
         }
       } else {

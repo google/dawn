@@ -45,6 +45,7 @@ Result Generate(const Program* program, const Options& options) {
   result.error = impl->error();
   result.msl = impl->result();
   result.has_invariant_attribute = impl->HasInvariant();
+  result.workgroup_allocations = impl->DynamicWorkgroupAllocations();
 
   return result;
 }

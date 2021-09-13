@@ -329,6 +329,64 @@ fn main([[group(0), binding(0), internal(disable_validation__entry_point_paramet
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(ModuleScopeVarToEntryPointParamTest, Matrix) {
+  auto* src = R"(
+var<workgroup> m : mat2x2<f32>;
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+  let x = m;
+}
+)";
+
+  auto* expect = R"(
+[[stage(compute), workgroup_size(1)]]
+fn main([[internal(disable_validation__entry_point_parameter)]] tint_symbol : ptr<workgroup, mat2x2<f32>>) {
+  let x = *(tint_symbol);
+}
+)";
+
+  auto got = Run<ModuleScopeVarToEntryPointParam>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ModuleScopeVarToEntryPointParamTest, NestedMatrix) {
+  auto* src = R"(
+struct S1 {
+  m : mat2x2<f32>;
+};
+struct S2 {
+  s : S1;
+};
+var<workgroup> m : array<S2, 4>;
+
+[[stage(compute), workgroup_size(1)]]
+fn main() {
+  let x = m;
+}
+)";
+
+  auto* expect = R"(
+struct S1 {
+  m : mat2x2<f32>;
+};
+
+struct S2 {
+  s : S1;
+};
+
+[[stage(compute), workgroup_size(1)]]
+fn main([[internal(disable_validation__entry_point_parameter)]] tint_symbol : ptr<workgroup, array<S2, 4u>>) {
+  let x = *(tint_symbol);
+}
+)";
+
+  auto got = Run<ModuleScopeVarToEntryPointParam>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(ModuleScopeVarToEntryPointParamTest, EmtpyModule) {
   auto* src = "";
 

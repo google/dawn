@@ -17,6 +17,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
@@ -83,6 +84,12 @@ class GeneratorImpl : public TextGenerator {
 
   /// @returns true if an invariant attribute was generated
   bool HasInvariant() { return has_invariant_; }
+
+  /// @returns a map from entry point to list of required workgroup allocations
+  const std::unordered_map<std::string, std::vector<uint32_t>>&
+  DynamicWorkgroupAllocations() const {
+    return workgroup_allocations_;
+  }
 
   /// Handles generating a declared type
   /// @param ty the declared type to generate
@@ -377,6 +384,11 @@ class GeneratorImpl : public TextGenerator {
 
   /// True if matrix-packed_vector operator overloads have been generated.
   bool matrix_packed_vector_overloads_ = false;
+
+  /// A map from entry point name to a list of dynamic workgroup allocations.
+  /// Each entry in the vector is the size of the workgroup allocation that
+  /// should be created for that index.
+  std::unordered_map<std::string, std::vector<uint32_t>> workgroup_allocations_;
 
   std::unordered_map<const sem::Intrinsic*, std::string> intrinsics_;
   std::unordered_map<const sem::Type*, std::string> unary_minus_funcs_;

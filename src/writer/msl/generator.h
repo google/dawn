@@ -17,6 +17,8 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 #include "src/writer/text.h"
 
@@ -73,6 +75,11 @@ struct Result {
 
   /// True if the generated shader uses the invariant attribute.
   bool has_invariant_attribute = false;
+
+  /// A map from entry point name to a list of dynamic workgroup allocations.
+  /// Each entry in the vector is the size of the workgroup allocation that
+  /// should be created for that index.
+  std::unordered_map<std::string, std::vector<uint32_t>> workgroup_allocations;
 };
 
 /// Generate MSL for a program, according to a set of configuration options. The
