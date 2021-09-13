@@ -2348,8 +2348,7 @@ bool Resolver::ArrayAccessor(ast::ArrayAccessorExpression* expr) {
   } else if (auto* mat = parent_type->As<sem::Matrix>()) {
     ret = builder_->create<sem::Vector>(mat->type(), mat->rows());
   } else {
-    AddError("invalid parent type (" + parent_type->type_name() +
-                 ") in array accessor",
+    AddError("cannot index type '" + TypeNameOf(expr->array()) + "'",
              expr->source());
     return false;
   }
@@ -3126,9 +3125,10 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
         expr, builder_->create<sem::Swizzle>(expr, ret, current_statement_,
                                              std::move(swizzle)));
   } else {
-    AddError("invalid use of member accessor on a non-vector/non-struct " +
-                 TypeNameOf(expr->structure()),
-             expr->source());
+    AddError(
+        "invalid member accessor expression. Expected vector or struct, got '" +
+            TypeNameOf(expr->structure()) + "'",
+        expr->structure()->source());
     return false;
   }
 

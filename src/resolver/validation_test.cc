@@ -451,6 +451,64 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadIndex) {
   EXPECT_EQ(r()->error(), "3:3 error: invalid vector swizzle member");
 }
 
+TEST_F(ResolverValidationTest, Expr_MemberAccessor_BadParent) {
+  // var param: vec4<f32>
+  // let ret: f32 = *(&param).x;
+  auto* param = Var("param", ty.vec4<f32>());
+  auto* x = create<ast::IdentifierExpression>(
+      Source{{Source::Location{3, 3}, Source::Location{3, 8}}},
+      Symbols().Register("x"));
+
+  auto* addressOf_expr = AddressOf(Source{{12, 34}}, param);
+  auto* accessor_expr = MemberAccessor(addressOf_expr, x);
+  auto* star_p = Deref(accessor_expr);
+  auto* ret = Var("r", ty.f32(), star_p);
+  WrapInFunction(Decl(param), Decl(ret));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: invalid member accessor expression. Expected vector "
+            "or struct, got 'ptr<function, vec4<f32>, read_write>'");
+}
+
+TEST_F(ResolverValidationTest, EXpr_MemberAccessor_FuncGoodParent) {
+  // fn func(p: ptr<function, vec4<f32>>) -> f32 {
+  //     let x: f32 = (*p).z;
+  //     return x;
+  // }
+  auto* p =
+      Param("p", ty.pointer(ty.vec4<f32>(), ast::StorageClass::kFunction));
+  auto* star_p = Deref(p);
+  auto* z = create<ast::IdentifierExpression>(
+      Source{{Source::Location{3, 3}, Source::Location{3, 8}}},
+      Symbols().Register("z"));
+  auto* accessor_expr = MemberAccessor(star_p, z);
+  auto* x = Var("x", ty.f32(), accessor_expr);
+  Func("func", {p}, ty.f32(), {Decl(x), Return(x)});
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverValidationTest, EXpr_MemberAccessor_FuncBadParent) {
+  // fn func(p: ptr<function, vec4<f32>>) -> f32 {
+  //     let x: f32 = *p.z;
+  //     return x;
+  // }
+  auto* p =
+      Param("p", ty.pointer(ty.vec4<f32>(), ast::StorageClass::kFunction));
+  auto* z = create<ast::IdentifierExpression>(
+      Source{{Source::Location{3, 3}, Source::Location{3, 8}}},
+      Symbols().Register("z"));
+  auto* accessor_expr = MemberAccessor(p, z);
+  auto* star_p = Deref(accessor_expr);
+  auto* x = Var("x", ty.f32(), star_p);
+  Func("func", {p}, ty.f32(), {Decl(x), Return(x)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "error: invalid member accessor expression. Expected vector or "
+            "struct, got 'ptr<function, vec4<f32>>'");
+}
+
 TEST_F(ResolverValidationTest,
        Stmt_Loop_ContinueInLoopBodyBeforeDeclAndAfterDecl_UsageInContinuing) {
   // loop  {

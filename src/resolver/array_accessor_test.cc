@@ -257,6 +257,59 @@ TEST_F(ResolverArrayAccessorTest, Array_Literal_I32) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverArrayAccessorTest, EXpr_Deref_FuncGoodParent) {
+  // fn func(p: ptr<function, vec4<f32>>) -> f32 {
+  //     let idx: u32 = u32();
+  //     let x: f32 = (*p)[idx];
+  //     return x;
+  // }
+  auto* p =
+      Param("p", ty.pointer(ty.vec4<f32>(), ast::StorageClass::kFunction));
+  auto* idx = Const("idx", ty.u32(), Construct(ty.u32()));
+  auto* star_p = Deref(p);
+  auto* accessor_expr = IndexAccessor(Source{{12, 34}}, star_p, idx);
+  auto* x = Var("x", ty.f32(), accessor_expr);
+  Func("func", {p}, ty.f32(), {Decl(idx), Decl(x), Return(x)});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverArrayAccessorTest, EXpr_Deref_FuncBadParent) {
+  // fn func(p: ptr<function, vec4<f32>>) -> f32 {
+  //     let idx: u32 = u32();
+  //     let x: f32 = *p[idx];
+  //     return x;
+  // }
+  auto* p =
+      Param("p", ty.pointer(ty.vec4<f32>(), ast::StorageClass::kFunction));
+  auto* idx = Const("idx", ty.u32(), Construct(ty.u32()));
+  auto* accessor_expr = IndexAccessor(Source{{12, 34}}, p, idx);
+  auto* star_p = Deref(accessor_expr);
+  auto* x = Var("x", ty.f32(), star_p);
+  Func("func", {p}, ty.f32(), {Decl(idx), Decl(x), Return(x)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: cannot index type 'ptr<function, vec4<f32>>'");
+}
+
+TEST_F(ResolverArrayAccessorTest, Exr_Deref_BadParent) {
+  // var param: vec4<f32>
+  // let x: f32 = *(&param)[0];
+  auto* param = Var("param", ty.vec4<f32>());
+  auto* idx = Var("idx", ty.u32(), Construct(ty.u32()));
+  auto* addressOf_expr = AddressOf(param);
+  auto* accessor_expr = IndexAccessor(Source{{12, 34}}, addressOf_expr, idx);
+  auto* star_p = Deref(accessor_expr);
+  auto* x = Var("x", ty.f32(), star_p);
+  WrapInFunction(param, idx, x);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: cannot index type 'ptr<function, vec4<f32>, read_write>'");
+}
+
 }  // namespace
 }  // namespace resolver
 }  // namespace tint
