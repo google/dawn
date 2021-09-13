@@ -89,7 +89,7 @@ bool LastIsFallthrough(const ast::BlockStatement* stmts) {
   return !stmts->empty() && stmts->last()->Is<ast::FallthroughStatement>();
 }
 
-// A terminator is anything which will case a SPIR-V terminator to be emitted.
+// A terminator is anything which will cause a SPIR-V terminator to be emitted.
 // This means things like breaks, fallthroughs and continues which all emit an
 // OpBranch or return for the OpReturn emission.
 bool LastIsTerminator(const ast::BlockStatement* stmts) {
