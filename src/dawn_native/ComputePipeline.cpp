@@ -29,20 +29,9 @@ namespace dawn_native {
             DAWN_TRY(device->ValidateObject(descriptor->layout));
         }
 
-        if (descriptor->compute.module != nullptr) {
-            DAWN_TRY(ValidateProgrammableStage(device, descriptor->compute.module,
-                                               descriptor->compute.entryPoint, descriptor->layout,
-                                               SingleShaderStage::Compute));
-        } else {
-            // TODO(dawn:800): Remove after deprecation period.
-            device->EmitDeprecationWarning(
-                "computeStage has been deprecated. Please begin using compute instead.");
-            DAWN_TRY(ValidateProgrammableStage(device, descriptor->computeStage.module,
-                                               descriptor->computeStage.entryPoint,
-                                               descriptor->layout, SingleShaderStage::Compute));
-        }
-
-        return {};
+        return ValidateProgrammableStage(device, descriptor->compute.module,
+                                         descriptor->compute.entryPoint, descriptor->layout,
+                                         SingleShaderStage::Compute);
     }
 
     // ComputePipelineBase

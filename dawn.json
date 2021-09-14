@@ -627,8 +627,7 @@
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "layout", "type": "pipeline layout", "optional": true},
-            {"name": "compute", "type": "programmable stage descriptor"},
-            {"name": "compute stage", "type": "programmable stage descriptor"}
+            {"name": "compute", "type": "programmable stage descriptor"}
         ]
     },
     "alpha op": {

@@ -34,18 +34,6 @@ class DeprecationTests : public DawnTest {
     }
 };
 
-// Test that setting computeStage in a ComputePipelineDescriptor is deprecated.
-TEST_P(DeprecationTests, ComputeStage) {
-    wgpu::ComputePipelineDescriptor csDesc;
-    csDesc.computeStage.module = utils::CreateShaderModule(device, R"(
-        [[stage(compute), workgroup_size(1)]] fn main() {
-        })");
-    csDesc.computeStage.entryPoint = "main";
-
-    wgpu::ComputePipeline pipeline;
-    EXPECT_DEPRECATION_WARNING(pipeline = device.CreateComputePipeline(&csDesc));
-}
-
 // Test that StoreOp::Clear is deprecated.
 TEST_P(DeprecationTests, StoreOpClear) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
