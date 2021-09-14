@@ -2074,10 +2074,7 @@
             {"value": 4, "name": "texture binding"},
             {"value": 8, "name": "storage binding"},
             {"value": 16, "name": "render attachment"},
-            {"value": 32, "name": "present"},
-
-            {"value": 4, "name": "sampled", "deprecated": true},
-            {"value": 8, "name": "storage", "deprecated": true}
+            {"value": 32, "name": "present"}
         ]
     },
     "texture view descriptor": {
