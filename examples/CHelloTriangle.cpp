@@ -110,7 +110,7 @@ void frame() {
     WGPURenderPassDescriptor renderpassInfo = {};
     WGPURenderPassColorAttachment colorAttachment = {};
     {
-        colorAttachment.attachment = backbufferView;
+        colorAttachment.view = backbufferView;
         colorAttachment.resolveTarget = nullptr;
         colorAttachment.clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
         colorAttachment.loadOp = WGPULoadOp_Clear;

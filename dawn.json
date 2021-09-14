@@ -1370,19 +1370,18 @@
     "render pass color attachment": {
         "category": "structure",
         "members": [
-            {"name": "view", "type": "texture view", "optional": true},
+            {"name": "view", "type": "texture view"},
             {"name": "resolve target", "type": "texture view", "optional": true},
             {"name": "load op", "type": "load op"},
             {"name": "store op", "type": "store op"},
-            {"name": "clear color", "type": "color"},
-            {"name": "attachment", "type": "texture view", "optional": true}
+            {"name": "clear color", "type": "color"}
         ]
     },
 
     "render pass depth stencil attachment": {
         "category": "structure",
         "members": [
-            {"name": "view", "type": "texture view", "optional": true},
+            {"name": "view", "type": "texture view"},
             {"name": "depth load op", "type": "load op"},
             {"name": "depth store op", "type": "store op"},
             {"name": "clear depth", "type": "float"},
@@ -1390,8 +1389,7 @@
             {"name": "stencil load op", "type": "load op"},
             {"name": "stencil store op", "type": "store op"},
             {"name": "clear stencil", "type": "uint32_t", "default": "0"},
-            {"name": "stencil read only", "type": "bool", "default": "false"},
-            {"name": "attachment", "type": "texture view", "optional": true}
+            {"name": "stencil read only", "type": "bool", "default": "false"}
         ]
     },
 
