@@ -59,6 +59,7 @@ namespace dawn_native {
         DisableWorkgroupInit,
         DisableSymbolRenaming,
         UseUserDefinedLabelsInBackend,
+        DisableR8RG8Mipmaps,
 
         EnumCount,
         InvalidEnum = EnumCount,

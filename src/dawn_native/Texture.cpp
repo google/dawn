@@ -311,6 +311,14 @@ namespace dawn_native {
                 "disabled on Metal.");
         }
 
+        if (device->IsToggleEnabled(Toggle::DisableR8RG8Mipmaps) && descriptor->mipLevelCount > 1 &&
+            (descriptor->format == wgpu::TextureFormat::R8Unorm ||
+             descriptor->format == wgpu::TextureFormat::RG8Unorm)) {
+            return DAWN_VALIDATION_ERROR(
+                "https://crbug.com/dawn/1071: r8unorm and rg8unorm textures with more than one mip "
+                "level are disabled on Metal.");
+        }
+
         return {};
     }
 

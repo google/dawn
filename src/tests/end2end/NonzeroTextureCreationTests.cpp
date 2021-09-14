@@ -104,6 +104,12 @@ namespace {
                  GetParam().mFormat == wgpu::TextureFormat::Depth24PlusStencil8) &&
                 IsMetal() && IsIntel() && GetParam().mMip != 0);
 
+            // TODO(crbug.com/dawn/1071): Implement a workaround on Intel/Metal backends.
+            DAWN_SUPPRESS_TEST_IF((GetParam().mFormat == wgpu::TextureFormat::R8Unorm ||
+                                   GetParam().mFormat == wgpu::TextureFormat::RG8Unorm) &&
+                                  GetParam().mMipCount > 1 &&
+                                  HasToggleEnabled("disable_r8_rg8_mipmaps"));
+
             // Copies from depth textures not fully supported on the OpenGL backend right now.
             DAWN_SUPPRESS_TEST_IF(GetParam().mFormat == wgpu::TextureFormat::Depth32Float &&
                                   (IsOpenGL() || IsOpenGLES()));
