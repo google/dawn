@@ -1094,8 +1094,7 @@
         "category": "enum",
         "values": [
             {"value": 0, "name": "store"},
-            {"value": 1, "name": "discard"},
-            {"value": 2, "name": "clear"}
+            {"value": 1, "name": "discard"}
         ]
     },
     "origin 3D": {

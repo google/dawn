@@ -1055,8 +1055,7 @@ namespace dawn_native { namespace opengl {
                     }
                 }
 
-                if (attachmentInfo->storeOp == wgpu::StoreOp::Discard ||
-                    attachmentInfo->storeOp == wgpu::StoreOp::Clear) {
+                if (attachmentInfo->storeOp == wgpu::StoreOp::Discard) {
                     // TODO(natlee@microsoft.com): call glDiscard to do optimization
                 }
             }

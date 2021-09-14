@@ -127,7 +127,6 @@ namespace dawn_native {
                     break;
 
                 case wgpu::StoreOp::Discard:
-                case wgpu::StoreOp::Clear:
                     view->GetTexture()->SetIsSubresourceContentInitialized(false, range);
                     break;
             }

@@ -101,7 +101,6 @@ namespace dawn_native { namespace metal {
                                 kMTLStoreActionStoreAndMultisampleResolve;
                             break;
                         case wgpu::StoreOp::Discard:
-                        case wgpu::StoreOp::Clear:
                             descriptor.colorAttachments[i].storeAction =
                                 MTLStoreActionMultisampleResolve;
                             break;
@@ -112,7 +111,6 @@ namespace dawn_native { namespace metal {
                             descriptor.colorAttachments[i].storeAction = MTLStoreActionStore;
                             break;
                         case wgpu::StoreOp::Discard:
-                        case wgpu::StoreOp::Clear:
                             descriptor.colorAttachments[i].storeAction = MTLStoreActionDontCare;
                             break;
                     }
@@ -137,7 +135,6 @@ namespace dawn_native { namespace metal {
                             break;
 
                         case wgpu::StoreOp::Discard:
-                        case wgpu::StoreOp::Clear:
                             descriptor.depthAttachment.storeAction = MTLStoreActionDontCare;
                             break;
                     }
@@ -165,7 +162,6 @@ namespace dawn_native { namespace metal {
                             break;
 
                         case wgpu::StoreOp::Discard:
-                        case wgpu::StoreOp::Clear:
                             descriptor.stencilAttachment.storeAction = MTLStoreActionDontCare;
                             break;
                     }
