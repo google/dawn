@@ -9,6 +9,21 @@ vars = {
   'swiftshader_git': 'https://swiftshader.googlesource.com',
 
   'dawn_standalone': True,
+
+  # Current revision of googletest.
+  # Note: this dep cannot be auto-rolled b/c of nesting.
+  'googletest_revision': '2d924d7a971e9667d76ad09727fb2402b4f8a1e3',
+
+  # Current revision of Chrome's third_party googletest directory. This
+  # repository is mirrored as a separate repository, with separate git hashes
+  # that don't match the external googletest repository or Chrome. Mirrored
+  # patches will have a different git hash associated with them.
+  # To roll, first get the new hash for chromium_googletest_revision from the
+  # mirror of third_party/googletest located here:
+  # https://chromium.googlesource.com/chromium/src/third_party/googletest/
+  # Then get the new hash for googletest_revision from the root Chrome DEPS
+  # file: https://source.chromium.org/chromium/chromium/src/+/main:DEPS
+  'chromium_googletest_revision': '17bbed2084d3127bd7bcd27283f18d7a5861bea8',
 }
 
 deps = {
@@ -80,7 +95,7 @@ deps = {
     'condition': 'dawn_standalone',
   },
   'third_party/googletest': {
-    'url': '{chromium_git}/external/github.com/google/googletest@2828773179fa425ee406df61890a150577178ea2',
+    'url': '{chromium_git}/chromium/src/third_party/googletest@{chromium_googletest_revision}',
     'condition': 'dawn_standalone',
   },
 
@@ -133,6 +148,11 @@ deps = {
 
   'third_party/zlib': {
     'url': '{chromium_git}/chromium/src/third_party/zlib@c29ee8c9c3824ca013479bf8115035527967fe02',
+    'condition': 'dawn_standalone',
+  },
+
+  'third_party/abseil-cpp': {
+    'url': '{chromium_git}/chromium/src/third_party/abseil-cpp@789af048b388657987c59d4da406859034fe310f',
     'condition': 'dawn_standalone',
   },
 }
@@ -232,5 +252,6 @@ hooks = [
 ]
 
 recursedeps = [
+  'third_party/googletest',
   'third_party/vulkan-deps',
 ]

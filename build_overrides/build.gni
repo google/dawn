@@ -23,6 +23,10 @@ declare_args() {
   # Android 32-bit non-component, non-clang builds cannot have symbol_level=2
   # due to 4GiB file size limit, see https://crbug.com/648948.
   ignore_elf32_limitations = false
+
+  # If true, it assumes that //third_party/abseil-cpp is an available
+  # dependency for googletest.
+  gtest_enable_absl_printers = false
 }
 
 # Detect whether we can use the hermetic XCode like in Chromium and do so if

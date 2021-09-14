@@ -39,7 +39,7 @@ group("dawn_tests") {
 if (!build_with_chromium) {
   # When we aren't in Chromium we define out own targets based on the location
   # of the googletest repo.
-  googletest_dir = dawn_googletest_dir
+  googletest_dir = "${dawn_googletest_dir}/src"
 
   config("gtest_config") {
     include_dirs = [
