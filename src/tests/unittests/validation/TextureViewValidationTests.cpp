@@ -72,6 +72,13 @@ namespace {
         wgpu::TextureViewDescriptor base2DTextureViewDescriptor =
             CreateDefaultViewDescriptor(wgpu::TextureViewDimension::e2D);
 
+        // It is an error to create a view with zero 'arrayLayerCount'.
+        {
+            wgpu::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
+            descriptor.arrayLayerCount = 0;
+            ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
+        }
+
         // It is OK to create a 2D texture view on a 2D texture.
         {
             wgpu::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
@@ -144,6 +151,14 @@ namespace {
         wgpu::TextureViewDescriptor base2DArrayTextureViewDescriptor =
             CreateDefaultViewDescriptor(wgpu::TextureViewDimension::e2DArray);
 
+        // It is an error to create a view with zero 'arrayLayerCount'.
+        {
+            wgpu::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
+            descriptor.dimension = wgpu::TextureViewDimension::e2D;
+            descriptor.arrayLayerCount = 0;
+            ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
+        }
+
         // It is OK to create a 2D texture view on a 2D array texture.
         {
             wgpu::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
@@ -167,10 +182,11 @@ namespace {
             ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
         }
 
-        // baseArrayLayer == k && arrayLayerCount == 0 means to use layers k..end.
+        // baseArrayLayer == k && arrayLayerCount == wgpu::kArrayLayerCountUndefined means to use
+        // layers k..end.
         {
             wgpu::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
-            descriptor.arrayLayerCount = 0;
+            descriptor.arrayLayerCount = wgpu::kArrayLayerCountUndefined;
 
             descriptor.baseArrayLayer = 0;
             texture.CreateView(&descriptor);
@@ -206,6 +222,13 @@ namespace {
 
         wgpu::TextureViewDescriptor base3DTextureViewDescriptor =
             CreateDefaultViewDescriptor(wgpu::TextureViewDimension::e3D);
+
+        // It is an error to create a view with zero 'arrayLayerCount'.
+        {
+            wgpu::TextureViewDescriptor descriptor = base3DTextureViewDescriptor;
+            descriptor.arrayLayerCount = 0;
+            ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
+        }
 
         // It is OK to create a 3D texture view on a 3D texture.
         {
@@ -264,11 +287,12 @@ namespace {
             ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
         }
 
-        // baseArrayLayer == k && arrayLayerCount == 0 means to use layers k..end. But
-        // baseArrayLayer must be 0, and arrayLayerCount must be 1 at most for 3D texture view.
+        // baseArrayLayer == k && arrayLayerCount == wgpu::kArrayLayerCountUndefined means to use
+        // layers k..end. But baseArrayLayer must be 0, and arrayLayerCount must be 1 at most for 3D
+        // texture view.
         {
             wgpu::TextureViewDescriptor descriptor = base3DTextureViewDescriptor;
-            descriptor.arrayLayerCount = 0;
+            descriptor.arrayLayerCount = wgpu::kArrayLayerCountUndefined;
             descriptor.baseArrayLayer = 0;
             texture.CreateView(&descriptor);
             descriptor.baseArrayLayer = 1;
@@ -371,7 +395,7 @@ namespace {
         }
         {
             wgpu::TextureViewDescriptor descriptor;
-            descriptor.arrayLayerCount = 0;
+            descriptor.arrayLayerCount = wgpu::kArrayLayerCountUndefined;
             texture.CreateView(&descriptor);
             descriptor.arrayLayerCount = 1;
             texture.CreateView(&descriptor);
@@ -416,7 +440,7 @@ namespace {
         }
         {
             wgpu::TextureViewDescriptor descriptor;
-            descriptor.arrayLayerCount = 0;
+            descriptor.arrayLayerCount = wgpu::kArrayLayerCountUndefined;
             texture.CreateView(&descriptor);
             descriptor.arrayLayerCount = 1;
             texture.CreateView(&descriptor);
@@ -440,6 +464,14 @@ namespace {
 
         wgpu::TextureViewDescriptor base2DArrayTextureViewDescriptor =
             CreateDefaultViewDescriptor(wgpu::TextureViewDimension::e2DArray);
+
+        // It is an error to create a view with zero 'arrayLayerCount'.
+        {
+            wgpu::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
+            descriptor.dimension = wgpu::TextureViewDimension::Cube;
+            descriptor.arrayLayerCount = 0;
+            ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
+        }
 
         // It is OK to create a cube map texture view with arrayLayerCount == 6.
         {

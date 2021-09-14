@@ -397,7 +397,7 @@ namespace dawn_native {
             // TODO(dawn:682): Use GetAspectInfo(aspect).
             desc.format = texture->GetFormat().format;
         }
-        if (desc.arrayLayerCount == 0) {
+        if (desc.arrayLayerCount == wgpu::kArrayLayerCountUndefined) {
             switch (desc.dimension) {
                 case wgpu::TextureViewDimension::e1D:
                 case wgpu::TextureViewDimension::e2D:
