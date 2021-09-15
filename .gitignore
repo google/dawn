@@ -7,7 +7,6 @@
 build
 buildtools
 testing
-third_party/abseil-cpp/
 third_party/angle/
 third_party/clang-format/
 third_party/glfw/

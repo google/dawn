@@ -53,32 +53,6 @@ if (dawn_enable_vulkan) {
       dawn_enable_vulkan_loader && dawn_vulkan_loader_dir != ""
 }
 
-config("dawn_abseil_config") {
-  if (dawn_standalone && is_clang) {
-    cflags = [
-      # Allow the use of enable_if()
-      "-Wno-gcc-compat",
-    ]
-  }
-
-  configs = [
-    "$dawn_abseil_dir:absl_define_config",
-    "$dawn_abseil_dir:absl_include_config",
-  ]
-}
-
-group("dawn_abseil") {
-  # When build_with_chromium=true we need to include "//third_party/abseil-cpp:absl" while
-  # we can be more specific when building standalone Dawn.
-  if (build_with_chromium) {
-    public_deps = [ "$dawn_abseil_dir:absl" ]
-  } else {
-    public_deps = [ "$dawn_abseil_dir/absl/strings:str_format" ]
-  }
-
-  public_configs = [ ":dawn_abseil_config" ]
-}
-
 config("dawn_native_internal") {
   configs = [ "${dawn_root}/src/common:dawn_internal" ]
 
@@ -168,7 +142,6 @@ source_set("dawn_native_headers") {
 # except those that define exported symbols.
 source_set("dawn_native_sources") {
   deps = [
-    ":dawn_abseil",
     ":dawn_native_headers",
     ":dawn_native_utils_gen",
     "${dawn_root}/src/common",
