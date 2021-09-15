@@ -336,6 +336,11 @@ if (build_with_chromium) {
         ":tint_wgsl_reader_msl_writer_fuzzer",
       ]
     }
+    if (tint_build_wgsl_reader && tint_build_hlsl_writer &&
+        tint_build_msl_writer && tint_build_spv_writer &&
+        tint_build_wgsl_writer) {
+      deps += [ ":tint_black_box_fuzz_target" ]
+    }
   }
 } else {
   group("fuzzers") {
