@@ -42,7 +42,7 @@ namespace dawn_native { namespace d3d12 {
       private:
         ~RenderPipeline() override;
         using RenderPipelineBase::RenderPipelineBase;
-        MaybeError Initialize(const RenderPipelineDescriptor* descriptor);
+        MaybeError Initialize();
         D3D12_INPUT_LAYOUT_DESC ComputeInputLayout(
             std::array<D3D12_INPUT_ELEMENT_DESC, kMaxVertexAttributes>* inputElementDescriptors);
 

@@ -323,38 +323,40 @@ namespace dawn_native { namespace vulkan {
         Device* device,
         const RenderPipelineDescriptor* descriptor) {
         Ref<RenderPipeline> pipeline = AcquireRef(new RenderPipeline(device, descriptor));
-        DAWN_TRY(pipeline->Initialize(descriptor));
+        DAWN_TRY(pipeline->Initialize());
         return pipeline;
     }
 
-    MaybeError RenderPipeline::Initialize(const RenderPipelineDescriptor* descriptor) {
+    MaybeError RenderPipeline::Initialize() {
         Device* device = ToBackend(GetDevice());
 
         VkPipelineShaderStageCreateInfo shaderStages[2];
         {
             // Generate a new VkShaderModule with BindingRemapper tint transform for each
             // pipeline
+            const ProgrammableStage& vertexStage = GetStage(SingleShaderStage::Vertex);
             DAWN_TRY_ASSIGN(shaderStages[0].module,
-                            ToBackend(descriptor->vertex.module)
-                                ->GetTransformedModuleHandle(descriptor->vertex.entryPoint,
+                            ToBackend(vertexStage.module.Get())
+                                ->GetTransformedModuleHandle(vertexStage.entryPoint.c_str(),
                                                              ToBackend(GetLayout())));
+            const ProgrammableStage& fragmentStage = GetStage(SingleShaderStage::Fragment);
             DAWN_TRY_ASSIGN(shaderStages[1].module,
-                            ToBackend(descriptor->fragment->module)
-                                ->GetTransformedModuleHandle(descriptor->fragment->entryPoint,
+                            ToBackend(fragmentStage.module.Get())
+                                ->GetTransformedModuleHandle(fragmentStage.entryPoint.c_str(),
                                                              ToBackend(GetLayout())));
             shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
             shaderStages[0].pNext = nullptr;
             shaderStages[0].flags = 0;
             shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
             shaderStages[0].pSpecializationInfo = nullptr;
-            shaderStages[0].pName = descriptor->vertex.entryPoint;
+            shaderStages[0].pName = vertexStage.entryPoint.c_str();
 
             shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
             shaderStages[1].pNext = nullptr;
             shaderStages[1].flags = 0;
             shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
             shaderStages[1].pSpecializationInfo = nullptr;
-            shaderStages[1].pName = descriptor->fragment->entryPoint;
+            shaderStages[1].pName = fragmentStage.entryPoint.c_str();
         }
 
         PipelineVertexInputStateCreateInfoTemporaryAllocations tempAllocations;

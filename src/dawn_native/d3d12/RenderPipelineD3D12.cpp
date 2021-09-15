@@ -319,11 +319,11 @@ namespace dawn_native { namespace d3d12 {
         Device* device,
         const RenderPipelineDescriptor* descriptor) {
         Ref<RenderPipeline> pipeline = AcquireRef(new RenderPipeline(device, descriptor));
-        DAWN_TRY(pipeline->Initialize(descriptor));
+        DAWN_TRY(pipeline->Initialize());
         return pipeline;
     }
 
-    MaybeError RenderPipeline::Initialize(const RenderPipelineDescriptor* descriptor) {
+    MaybeError RenderPipeline::Initialize() {
         Device* device = ToBackend(GetDevice());
         uint32_t compileFlags = 0;
 
@@ -340,13 +340,16 @@ namespace dawn_native { namespace d3d12 {
 
         D3D12_GRAPHICS_PIPELINE_STATE_DESC descriptorD3D12 = {};
 
+        const ProgrammableStage& vertexStage = GetStage(SingleShaderStage::Vertex);
+        const ProgrammableStage& fragmentStage = GetStage(SingleShaderStage::Fragment);
+
         PerStage<const char*> entryPoints;
-        entryPoints[SingleShaderStage::Vertex] = descriptor->vertex.entryPoint;
-        entryPoints[SingleShaderStage::Fragment] = descriptor->fragment->entryPoint;
+        entryPoints[SingleShaderStage::Vertex] = vertexStage.entryPoint.c_str();
+        entryPoints[SingleShaderStage::Fragment] = fragmentStage.entryPoint.c_str();
 
         PerStage<ShaderModule*> modules;
-        modules[SingleShaderStage::Vertex] = ToBackend(descriptor->vertex.module);
-        modules[SingleShaderStage::Fragment] = ToBackend(descriptor->fragment->module);
+        modules[SingleShaderStage::Vertex] = ToBackend(vertexStage.module.Get());
+        modules[SingleShaderStage::Fragment] = ToBackend(fragmentStage.module.Get());
 
         PerStage<D3D12_SHADER_BYTECODE*> shaders;
         shaders[SingleShaderStage::Vertex] = &descriptorD3D12.VS;

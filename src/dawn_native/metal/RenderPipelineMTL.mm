@@ -314,11 +314,11 @@ namespace dawn_native { namespace metal {
         Device* device,
         const RenderPipelineDescriptor* descriptor) {
         Ref<RenderPipeline> pipeline = AcquireRef(new RenderPipeline(device, descriptor));
-        DAWN_TRY(pipeline->Initialize(descriptor));
+        DAWN_TRY(pipeline->Initialize());
         return pipeline;
     }
 
-    MaybeError RenderPipeline::Initialize(const RenderPipelineDescriptor* descriptor) {
+    MaybeError RenderPipeline::Initialize() {
         mMtlPrimitiveTopology = MTLPrimitiveTopology(GetPrimitiveTopology());
         mMtlFrontFace = MTLFrontFace(GetFrontFace());
         mMtlCullMode = ToMTLCullMode(GetCullMode());
@@ -338,8 +338,9 @@ namespace dawn_native { namespace metal {
         }
         descriptorMTL.vertexDescriptor = vertexDesc.Get();
 
-        ShaderModule* vertexModule = ToBackend(descriptor->vertex.module);
-        const char* vertexEntryPoint = descriptor->vertex.entryPoint;
+        const ProgrammableStage& vertexStage = GetStage(SingleShaderStage::Vertex);
+        ShaderModule* vertexModule = ToBackend(vertexStage.module.Get());
+        const char* vertexEntryPoint = vertexStage.entryPoint.c_str();
         ShaderModule::MetalFunctionData vertexData;
         DAWN_TRY(vertexModule->CreateFunction(vertexEntryPoint, SingleShaderStage::Vertex,
                                               ToBackend(GetLayout()), &vertexData, 0xFFFFFFFF,
@@ -350,8 +351,9 @@ namespace dawn_native { namespace metal {
             mStagesRequiringStorageBufferLength |= wgpu::ShaderStage::Vertex;
         }
 
-        ShaderModule* fragmentModule = ToBackend(descriptor->fragment->module);
-        const char* fragmentEntryPoint = descriptor->fragment->entryPoint;
+        const ProgrammableStage& fragmentStage = GetStage(SingleShaderStage::Fragment);
+        ShaderModule* fragmentModule = ToBackend(fragmentStage.module.Get());
+        const char* fragmentEntryPoint = fragmentStage.entryPoint.c_str();
         ShaderModule::MetalFunctionData fragmentData;
         DAWN_TRY(fragmentModule->CreateFunction(fragmentEntryPoint, SingleShaderStage::Fragment,
                                                 ToBackend(GetLayout()), &fragmentData,

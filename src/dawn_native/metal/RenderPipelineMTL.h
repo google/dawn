@@ -47,7 +47,7 @@ namespace dawn_native { namespace metal {
 
       private:
         using RenderPipelineBase::RenderPipelineBase;
-        MaybeError Initialize(const RenderPipelineDescriptor* descriptor);
+        MaybeError Initialize();
 
         MTLVertexDescriptor* MakeVertexDesc();
 
