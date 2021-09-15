@@ -417,7 +417,10 @@ namespace dawn_native {
                     break;
             }
         }
-        if (desc.mipLevelCount == 0) {
+
+        // TODO(jie.a.chen@intel.com): Remove 'desc.mipLevelCount == 0' once the WebGPU change is
+        // landed.
+        if (desc.mipLevelCount == 0 || desc.mipLevelCount == wgpu::kMipLevelCountUndefined) {
             desc.mipLevelCount = texture->GetNumMipLevels() - desc.baseMipLevel;
         }
         return desc;

@@ -109,10 +109,11 @@ namespace {
             ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
         }
 
-        // baseMipLevel == k && mipLevelCount == 0 means to use levels k..end.
+        // baseMipLevel == k && mipLevelCount == WGPU_MIP_LEVEL_COUNT_UNDEFINED means to use levels
+        // k..end.
         {
             wgpu::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
-            descriptor.mipLevelCount = 0;
+            descriptor.mipLevelCount = WGPU_MIP_LEVEL_COUNT_UNDEFINED;
 
             descriptor.baseMipLevel = 0;
             texture.CreateView(&descriptor);
@@ -255,10 +256,11 @@ namespace {
             }
         }
 
-        // baseMipLevel == k && mipLevelCount == 0 means to use levels k..end.
+        // baseMipLevel == k && mipLevelCount == WGPU_MIP_LEVEL_COUNT_UNDEFINED means to use levels
+        // k..end.
         {
             wgpu::TextureViewDescriptor descriptor = base3DTextureViewDescriptor;
-            descriptor.mipLevelCount = 0;
+            descriptor.mipLevelCount = WGPU_MIP_LEVEL_COUNT_UNDEFINED;
 
             descriptor.baseMipLevel = 0;
             texture.CreateView(&descriptor);

@@ -80,6 +80,7 @@
 #define WGPU_LIMIT_U32_UNDEFINED (0xffffffffUL)
 #define WGPU_LIMIT_U64_UNDEFINED (0xffffffffffffffffULL)
 #define WGPU_ARRAY_LAYER_COUNT_UNDEFINED (0xffffffffUL)
+#define WGPU_MIP_LEVEL_COUNT_UNDEFINED (0xffffffffUL)
 
 typedef uint32_t WGPUFlags;
 
