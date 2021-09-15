@@ -1043,29 +1043,28 @@ namespace dawn_native {
         cfg.entry_point_name = entryPoint;
         cfg.pulling_group = static_cast<uint32_t>(pullingBufferBindingSet);
 
-        const auto& vertexBufferSlotUsed = renderPipeline.GetVertexBufferSlotsUsed();
         cfg.vertex_state.resize(renderPipeline.GetVertexBufferCount());
-        for (uint8_t vertexBufferSlot = 0;
-             vertexBufferSlot < static_cast<uint8_t>(cfg.vertex_state.size()); ++vertexBufferSlot) {
-            if (vertexBufferSlotUsed[static_cast<VertexBufferSlot>(vertexBufferSlot)]) {
-                const auto& vertexBuffer =
-                    renderPipeline.GetVertexBuffer(static_cast<VertexBufferSlot>(vertexBufferSlot));
-                cfg.vertex_state[vertexBufferSlot].array_stride = vertexBuffer.arrayStride;
-                cfg.vertex_state[vertexBufferSlot].step_mode =
-                    ToTintVertexStepMode(vertexBuffer.stepMode);
-            }
+        for (VertexBufferSlot slot : IterateBitSet(renderPipeline.GetVertexBufferSlotsUsed())) {
+            const VertexBufferInfo& dawnInfo = renderPipeline.GetVertexBuffer(slot);
+            tint::transform::VertexBufferLayoutDescriptor* tintInfo =
+                &cfg.vertex_state[static_cast<uint8_t>(slot)];
+
+            tintInfo->array_stride = dawnInfo.arrayStride;
+            tintInfo->step_mode = ToTintVertexStepMode(dawnInfo.stepMode);
         }
+
         for (VertexAttributeLocation location :
              IterateBitSet(renderPipeline.GetAttributeLocationsUsed())) {
-            const auto& attribute = renderPipeline.GetAttribute(location);
-            tint::transform::VertexAttributeDescriptor attr;
-            attr.format = ToTintVertexFormat(attribute.format);
-            attr.offset = attribute.offset;
-            attr.shader_location = static_cast<uint32_t>(static_cast<uint8_t>(location));
-            ASSERT(vertexBufferSlotUsed[attribute.vertexBufferSlot]);
-            uint8_t vertexBufferSlot = static_cast<uint8_t>(attribute.vertexBufferSlot);
-            cfg.vertex_state[vertexBufferSlot].attributes.push_back(attr);
+            const VertexAttributeInfo& dawnInfo = renderPipeline.GetAttribute(location);
+            tint::transform::VertexAttributeDescriptor tintInfo;
+            tintInfo.format = ToTintVertexFormat(dawnInfo.format);
+            tintInfo.offset = dawnInfo.offset;
+            tintInfo.shader_location = static_cast<uint32_t>(static_cast<uint8_t>(location));
+
+            uint8_t vertexBufferSlot = static_cast<uint8_t>(dawnInfo.vertexBufferSlot);
+            cfg.vertex_state[vertexBufferSlot].attributes.push_back(tintInfo);
         }
+
         transformInputs->Add<tint::transform::VertexPulling::Config>(cfg);
     }
 
