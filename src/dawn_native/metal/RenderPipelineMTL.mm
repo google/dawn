@@ -341,17 +341,9 @@ namespace dawn_native { namespace metal {
         ShaderModule* vertexModule = ToBackend(descriptor->vertex.module);
         const char* vertexEntryPoint = descriptor->vertex.entryPoint;
         ShaderModule::MetalFunctionData vertexData;
-
-        const VertexState* vertexStatePtr = &descriptor->vertex;
-        VertexState vertexState;
-        if (vertexStatePtr == nullptr) {
-            vertexState = {};
-            vertexStatePtr = &vertexState;
-        }
-
         DAWN_TRY(vertexModule->CreateFunction(vertexEntryPoint, SingleShaderStage::Vertex,
-                                              ToBackend(GetLayout()), &vertexData, 0xFFFFFFFF, this,
-                                              vertexStatePtr));
+                                              ToBackend(GetLayout()), &vertexData, 0xFFFFFFFF,
+                                              this));
 
         descriptorMTL.vertexFunction = vertexData.function.Get();
         if (vertexData.needsStorageBufferLength) {

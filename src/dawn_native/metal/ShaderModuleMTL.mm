@@ -49,7 +49,6 @@ namespace dawn_native { namespace metal {
                                                             const PipelineLayout* layout,
                                                             uint32_t sampleMask,
                                                             const RenderPipeline* renderPipeline,
-                                                            const VertexState* vertexState,
                                                             std::string* remappedEntryPointName,
                                                             bool* needsStorageBufferLength,
                                                             bool* hasInvariantAttribute) {
@@ -100,8 +99,8 @@ namespace dawn_native { namespace metal {
         if (stage == SingleShaderStage::Vertex &&
             GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling)) {
             transformManager.Add<tint::transform::VertexPulling>();
-            AddVertexPullingTransformConfig(*vertexState, entryPointName, kPullingBufferBindingSet,
-                                            &transformInputs);
+            AddVertexPullingTransformConfig(*renderPipeline, entryPointName,
+                                            kPullingBufferBindingSet, &transformInputs);
 
             for (VertexBufferSlot slot :
                  IterateBitSet(renderPipeline->GetVertexBufferSlotsUsed())) {
@@ -176,15 +175,13 @@ namespace dawn_native { namespace metal {
                                             const PipelineLayout* layout,
                                             ShaderModule::MetalFunctionData* out,
                                             uint32_t sampleMask,
-                                            const RenderPipeline* renderPipeline,
-                                            const VertexState* vertexState) {
+                                            const RenderPipeline* renderPipeline) {
         ASSERT(!IsError());
         ASSERT(out);
 
-        // Vertex stages must specify a renderPipeline and vertexState
+        // Vertex stages must specify a renderPipeline
         if (stage == SingleShaderStage::Vertex) {
             ASSERT(renderPipeline != nullptr);
-            ASSERT(vertexState != nullptr);
         }
 
         std::string remappedEntryPointName;
@@ -192,8 +189,8 @@ namespace dawn_native { namespace metal {
         bool hasInvariantAttribute = false;
         DAWN_TRY_ASSIGN(msl,
                         TranslateToMSL(entryPointName, stage, layout, sampleMask, renderPipeline,
-                                       vertexState, &remappedEntryPointName,
-                                       &out->needsStorageBufferLength, &hasInvariantAttribute));
+                                       &remappedEntryPointName, &out->needsStorageBufferLength,
+                                       &hasInvariantAttribute));
 
         // Metal uses Clang to compile the shader as C++14. Disable everything in the -Wall
         // category. -Wunused-variable in particular comes up a lot in generated code, and some

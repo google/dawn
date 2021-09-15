@@ -110,7 +110,7 @@ namespace dawn_native {
                                                OwnedCompilationMessages* messages);
 
     /// Creates and adds the tint::transform::VertexPulling::Config to transformInputs.
-    void AddVertexPullingTransformConfig(const VertexState& vertexState,
+    void AddVertexPullingTransformConfig(const RenderPipelineBase& renderPipeline,
                                          const std::string& entryPoint,
                                          BindGroupIndex pullingBufferBindingSet,
                                          tint::transform::DataMap* transformInputs);
