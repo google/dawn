@@ -47,6 +47,7 @@ namespace dawn_native { namespace metal {
         NSPRef<id<MTLComputePipelineState>> mMtlComputePipelineState;
         MTLSize mLocalWorkgroupSize;
         bool mRequiresStorageBufferLength;
+        std::vector<uint32_t> mWorkgroupAllocations;
     };
 
 }}  // namespace dawn_native::metal

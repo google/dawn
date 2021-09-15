@@ -54,11 +54,18 @@ namespace dawn_native { namespace metal {
         mLocalWorkgroupSize = MTLSizeMake(localSize.x, localSize.y, localSize.z);
 
         mRequiresStorageBufferLength = computeData.needsStorageBufferLength;
+        mWorkgroupAllocations = std::move(computeData.workgroupAllocations);
         return {};
     }
 
     void ComputePipeline::Encode(id<MTLComputeCommandEncoder> encoder) {
         [encoder setComputePipelineState:mMtlComputePipelineState.Get()];
+        for (size_t i = 0; i < mWorkgroupAllocations.size(); ++i) {
+            if (mWorkgroupAllocations[i] == 0) {
+                continue;
+            }
+            [encoder setThreadgroupMemoryLength:mWorkgroupAllocations[i] atIndex:i];
+        }
     }
 
     MTLSize ComputePipeline::GetLocalWorkGroupSize() const {
