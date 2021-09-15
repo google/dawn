@@ -325,6 +325,26 @@ TEST_F(ResolverTypeValidationTest, ArraySize_IVecConstant) {
   EXPECT_EQ(r()->error(), "12:34 error: array size must be integer scalar");
 }
 
+TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ImplicitStride) {
+  // var<private> a : array<f32, 0x40000000>;
+  Global("a", ty.array(Source{{12, 34}}, ty.f32(), 0x40000000),
+         ast::StorageClass::kPrivate);
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: array size in bytes must not exceed 0xffffffff, but "
+            "is 0x100000000");
+}
+
+TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ExplicitStride) {
+  // var<private> a : [[stride(8)]] array<f32, 0x20000000>;
+  Global("a", ty.array(Source{{12, 34}}, ty.f32(), 0x20000000, 8),
+         ast::StorageClass::kPrivate);
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: array size in bytes must not exceed 0xffffffff, but "
+            "is 0x100000000");
+}
+
 TEST_F(ResolverTypeValidationTest, ArraySize_OverridableConstant) {
   // [[override]] let size = 10;
   // var<private> a : array<f32, size>;
@@ -396,8 +416,49 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInFunction_Fail) {
             "a struct");
 }
 
+TEST_F(ResolverTypeValidationTest, Struct_TooBig) {
+  // struct Foo {
+  //   a: array<f32, 0x20000000>;
+  //   b: array<f32, 0x20000000>;
+  // };
+
+  Structure(Source{{12, 34}}, "Foo",
+            {
+                Member("a", ty.array<f32, 0x20000000>()),
+                Member("b", ty.array<f32, 0x20000000>()),
+            });
+
+  WrapInFunction();
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: struct size in bytes must not exceed 0xffffffff, but "
+            "is 0x100000000");
+}
+
+TEST_F(ResolverTypeValidationTest, Struct_MemberOffset_TooBig) {
+  // struct Foo {
+  //   a: array<f32, 0x3fffffff>;
+  //   b: f32;
+  //   c: f32;
+  // };
+
+  Structure("Foo", {
+                       Member("a", ty.array<f32, 0x3fffffff>()),
+                       Member("b", ty.f32()),
+                       Member(Source{{12, 34}}, "c", ty.f32()),
+                   });
+
+  WrapInFunction();
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: struct member has byte offset 0x100000000, but must "
+            "not exceed 0xffffffff");
+}
+
 TEST_F(ResolverTypeValidationTest, RuntimeArrayIsLast_Pass) {
-  // [[Block]]
+  // [[block]]
   // struct Foo {
   //   vf: f32;
   //   rt: array<f32>;
@@ -435,7 +496,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayIsLastNoBlock_Fail) {
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayIsNotLast_Fail) {
-  // [[Block]]
+  // [[block]]
   // struct Foo {
   //   rt: array<f32>;
   //   vf: f32;
@@ -504,7 +565,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayAsParameter_Fail) {
 }
 
 TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsNotLast_Fail) {
-  // [[Block]]
+  // [[block]]
   // type RTArr = array<u32>;
   // struct s {
   //  b: RTArr;
@@ -528,7 +589,7 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsNotLast_Fail) {
 }
 
 TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsLast_Pass) {
-  // [[Block]]
+  // [[block]]
   // type RTArr = array<u32>;
   // struct s {
   //  a: u32;

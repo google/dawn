@@ -170,7 +170,9 @@ fn f() {
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(RobustnessTest, LargeArrays_Idx) {
+// TODO(crbug.com/tint/1177) - Validation currently forbids arrays larger than
+// 0xffffffff. If WGSL supports 64-bit indexing, re-enable this test.
+TEST_F(RobustnessTest, DISABLED_LargeArrays_Idx) {
   auto* src = R"(
 [[block]]
 struct S {
