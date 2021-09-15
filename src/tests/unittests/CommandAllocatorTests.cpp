@@ -428,7 +428,7 @@ TEST(CommandAllocator, AllocateDefaultInitializes) {
     iterator.MakeEmptyAsDataWasDestroyed();
 }
 
-// Test that the allcator correctly defaults initalizes data for AllocateData
+// Test that the allocator correctly default-initalizes data for AllocateData
 TEST(CommandAllocator, AllocateDataDefaultInitializes) {
     CommandAllocator allocator;
 
@@ -445,5 +445,59 @@ TEST(CommandAllocator, AllocateDataDefaultInitializes) {
     ASSERT_EQ(int35[2].value, 35);
 
     CommandIterator iterator(std::move(allocator));
+    iterator.MakeEmptyAsDataWasDestroyed();
+}
+
+// Tests flattening of multiple CommandAllocators into a single CommandIterator using
+// AcquireCommandBlocks.
+TEST(CommandAllocator, AcquireCommandBlocks) {
+    constexpr size_t kNumAllocators = 2;
+    constexpr size_t kNumCommandsPerAllocator = 2;
+    const uint64_t pipelines[kNumAllocators][kNumCommandsPerAllocator] = {
+        {0xDEADBEEFBEEFDEAD, 0xC0FFEEF00DC0FFEE},
+        {0x1337C0DE1337C0DE, 0xCAFEFACEFACECAFE},
+    };
+    const uint32_t attachmentPoints[kNumAllocators][kNumCommandsPerAllocator] = {{1, 2}, {3, 4}};
+    const uint32_t firsts[kNumAllocators][kNumCommandsPerAllocator] = {{42, 43}, {5, 6}};
+    const uint32_t counts[kNumAllocators][kNumCommandsPerAllocator] = {{16, 32}, {4, 8}};
+
+    std::vector<CommandAllocator> allocators(kNumAllocators);
+    for (size_t j = 0; j < kNumAllocators; ++j) {
+        CommandAllocator& allocator = allocators[j];
+        for (size_t i = 0; i < kNumCommandsPerAllocator; ++i) {
+            CommandPipeline* pipeline = allocator.Allocate<CommandPipeline>(CommandType::Pipeline);
+            pipeline->pipeline = pipelines[j][i];
+            pipeline->attachmentPoint = attachmentPoints[j][i];
+
+            CommandDraw* draw = allocator.Allocate<CommandDraw>(CommandType::Draw);
+            draw->first = firsts[j][i];
+            draw->count = counts[j][i];
+        }
+    }
+
+    CommandIterator iterator;
+    iterator.AcquireCommandBlocks(std::move(allocators));
+    for (size_t j = 0; j < kNumAllocators; ++j) {
+        for (size_t i = 0; i < kNumCommandsPerAllocator; ++i) {
+            CommandType type;
+            bool hasNext = iterator.NextCommandId(&type);
+            ASSERT_TRUE(hasNext);
+            ASSERT_EQ(type, CommandType::Pipeline);
+
+            CommandPipeline* pipeline = iterator.NextCommand<CommandPipeline>();
+            ASSERT_EQ(pipeline->pipeline, pipelines[j][i]);
+            ASSERT_EQ(pipeline->attachmentPoint, attachmentPoints[j][i]);
+
+            hasNext = iterator.NextCommandId(&type);
+            ASSERT_TRUE(hasNext);
+            ASSERT_EQ(type, CommandType::Draw);
+
+            CommandDraw* draw = iterator.NextCommand<CommandDraw>();
+            ASSERT_EQ(draw->first, firsts[j][i]);
+            ASSERT_EQ(draw->count, counts[j][i]);
+        }
+    }
+    CommandType type;
+    ASSERT_FALSE(iterator.NextCommandId(&type));
     iterator.MakeEmptyAsDataWasDestroyed();
 }

@@ -48,7 +48,7 @@ namespace dawn_native {
 
     void EncodingContext::MoveToIterator() {
         if (!mWasMovedToIterator) {
-            mIterator = std::move(mAllocator);
+            mIterator = CommandIterator(std::move(mAllocator));
             mWasMovedToIterator = true;
         }
     }

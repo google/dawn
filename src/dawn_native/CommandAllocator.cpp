@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <climits>
 #include <cstdlib>
+#include <utility>
 
 namespace dawn_native {
 
@@ -43,22 +44,32 @@ namespace dawn_native {
 
     CommandIterator& CommandIterator::operator=(CommandIterator&& other) {
         ASSERT(IsEmpty());
-        mBlocks = std::move(other.mBlocks);
-        other.Reset();
+        if (!other.IsEmpty()) {
+            mBlocks = std::move(other.mBlocks);
+            other.Reset();
+        }
         Reset();
         return *this;
     }
 
-    CommandIterator::CommandIterator(CommandAllocator&& allocator)
+    CommandIterator::CommandIterator(CommandAllocator allocator)
         : mBlocks(allocator.AcquireBlocks()) {
         Reset();
     }
 
-    CommandIterator& CommandIterator::operator=(CommandAllocator&& allocator) {
+    void CommandIterator::AcquireCommandBlocks(std::vector<CommandAllocator> allocators) {
         ASSERT(IsEmpty());
-        mBlocks = allocator.AcquireBlocks();
+        mBlocks.clear();
+        for (CommandAllocator& allocator : allocators) {
+            CommandBlocks blocks = allocator.AcquireBlocks();
+            if (!blocks.empty()) {
+                mBlocks.reserve(mBlocks.size() + blocks.size());
+                for (BlockDef& block : blocks) {
+                    mBlocks.push_back(std::move(block));
+                }
+            }
+        }
         Reset();
-        return *this;
     }
 
     bool CommandIterator::NextCommandIdInNewBlock(uint32_t* commandId) {
@@ -92,7 +103,7 @@ namespace dawn_native {
             return;
         }
 
-        for (auto& block : mBlocks) {
+        for (BlockDef& block : mBlocks) {
             free(block.block);
         }
         mBlocks.clear();
@@ -114,13 +125,49 @@ namespace dawn_native {
     //  - Better block allocation, maybe have Dawn API to say command buffer is going to have size
     //    close to another
 
-    CommandAllocator::CommandAllocator()
-        : mCurrentPtr(reinterpret_cast<uint8_t*>(&mDummyEnum[0])),
-          mEndPtr(reinterpret_cast<uint8_t*>(&mDummyEnum[1])) {
+    CommandAllocator::CommandAllocator() {
+        ResetPointers();
     }
 
     CommandAllocator::~CommandAllocator() {
-        ASSERT(mBlocks.empty());
+        Reset();
+    }
+
+    CommandAllocator::CommandAllocator(CommandAllocator&& other)
+        : mBlocks(std::move(other.mBlocks)), mLastAllocationSize(other.mLastAllocationSize) {
+        other.mBlocks.clear();
+        if (!other.IsEmpty()) {
+            mCurrentPtr = other.mCurrentPtr;
+            mEndPtr = other.mEndPtr;
+        } else {
+            ResetPointers();
+        }
+        other.Reset();
+    }
+
+    CommandAllocator& CommandAllocator::operator=(CommandAllocator&& other) {
+        Reset();
+        if (!other.IsEmpty()) {
+            std::swap(mBlocks, other.mBlocks);
+            mLastAllocationSize = other.mLastAllocationSize;
+            mCurrentPtr = other.mCurrentPtr;
+            mEndPtr = other.mEndPtr;
+        }
+        other.Reset();
+        return *this;
+    }
+
+    void CommandAllocator::Reset() {
+        for (BlockDef& block : mBlocks) {
+            free(block.block);
+        }
+        mBlocks.clear();
+        mLastAllocationSize = kDefaultBaseAllocationSize;
+        ResetPointers();
+    }
+
+    bool CommandAllocator::IsEmpty() const {
+        return mCurrentPtr == reinterpret_cast<const uint8_t*>(&mDummyEnum[0]);
     }
 
     CommandBlocks&& CommandAllocator::AcquireBlocks() {
@@ -171,6 +218,11 @@ namespace dawn_native {
         mCurrentPtr = AlignPtr(block, alignof(uint32_t));
         mEndPtr = block + mLastAllocationSize;
         return true;
+    }
+
+    void CommandAllocator::ResetPointers() {
+        mCurrentPtr = reinterpret_cast<uint8_t*>(&mDummyEnum[0]);
+        mEndPtr = reinterpret_cast<uint8_t*>(&mDummyEnum[1]);
     }
 
 }  // namespace dawn_native
