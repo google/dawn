@@ -340,27 +340,19 @@ namespace dawn_native { namespace d3d12 {
 
         D3D12_GRAPHICS_PIPELINE_STATE_DESC descriptorD3D12 = {};
 
-        const ProgrammableStage& vertexStage = GetStage(SingleShaderStage::Vertex);
-        const ProgrammableStage& fragmentStage = GetStage(SingleShaderStage::Fragment);
-
-        PerStage<const char*> entryPoints;
-        entryPoints[SingleShaderStage::Vertex] = vertexStage.entryPoint.c_str();
-        entryPoints[SingleShaderStage::Fragment] = fragmentStage.entryPoint.c_str();
-
-        PerStage<ShaderModule*> modules;
-        modules[SingleShaderStage::Vertex] = ToBackend(vertexStage.module.Get());
-        modules[SingleShaderStage::Fragment] = ToBackend(fragmentStage.module.Get());
+        PerStage<ProgrammableStage> pipelineStages = GetAllStages();
 
         PerStage<D3D12_SHADER_BYTECODE*> shaders;
         shaders[SingleShaderStage::Vertex] = &descriptorD3D12.VS;
         shaders[SingleShaderStage::Fragment] = &descriptorD3D12.PS;
 
         PerStage<CompiledShader> compiledShader;
-        wgpu::ShaderStage renderStages = wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment;
-        for (auto stage : IterateStages(renderStages)) {
+
+        for (auto stage : IterateStages(GetStageMask())) {
             DAWN_TRY_ASSIGN(compiledShader[stage],
-                            modules[stage]->Compile(entryPoints[stage], stage,
-                                                    ToBackend(GetLayout()), compileFlags));
+                            ToBackend(pipelineStages[stage].module)
+                                ->Compile(pipelineStages[stage].entryPoint.c_str(), stage,
+                                          ToBackend(GetLayout()), compileFlags));
             *shaders[stage] = compiledShader[stage].GetD3D12ShaderBytecode();
         }
 

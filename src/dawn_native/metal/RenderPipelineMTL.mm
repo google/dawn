@@ -338,8 +338,9 @@ namespace dawn_native { namespace metal {
         }
         descriptorMTL.vertexDescriptor = vertexDesc.Get();
 
-        const ProgrammableStage& vertexStage = GetStage(SingleShaderStage::Vertex);
-        ShaderModule* vertexModule = ToBackend(vertexStage.module.Get());
+        const PerStage<ProgrammableStage>& allStages = GetAllStages();
+        const ProgrammableStage& vertexStage = allStages[wgpu::ShaderStage::Vertex];
+        ShaderModule* vertexModule = ToBackend(vertexStage.module).Get();
         const char* vertexEntryPoint = vertexStage.entryPoint.c_str();
         ShaderModule::MetalFunctionData vertexData;
         DAWN_TRY(vertexModule->CreateFunction(vertexEntryPoint, SingleShaderStage::Vertex,
@@ -351,17 +352,28 @@ namespace dawn_native { namespace metal {
             mStagesRequiringStorageBufferLength |= wgpu::ShaderStage::Vertex;
         }
 
-        const ProgrammableStage& fragmentStage = GetStage(SingleShaderStage::Fragment);
-        ShaderModule* fragmentModule = ToBackend(fragmentStage.module.Get());
-        const char* fragmentEntryPoint = fragmentStage.entryPoint.c_str();
-        ShaderModule::MetalFunctionData fragmentData;
-        DAWN_TRY(fragmentModule->CreateFunction(fragmentEntryPoint, SingleShaderStage::Fragment,
-                                                ToBackend(GetLayout()), &fragmentData,
-                                                GetSampleMask()));
+        if (GetStageMask() & wgpu::ShaderStage::Fragment) {
+            const ProgrammableStage& fragmentStage = allStages[wgpu::ShaderStage::Fragment];
+            ShaderModule* fragmentModule = ToBackend(fragmentStage.module).Get();
+            const char* fragmentEntryPoint = fragmentStage.entryPoint.c_str();
+            ShaderModule::MetalFunctionData fragmentData;
+            DAWN_TRY(fragmentModule->CreateFunction(fragmentEntryPoint, SingleShaderStage::Fragment,
+                                                    ToBackend(GetLayout()), &fragmentData,
+                                                    GetSampleMask()));
 
-        descriptorMTL.fragmentFunction = fragmentData.function.Get();
-        if (fragmentData.needsStorageBufferLength) {
-            mStagesRequiringStorageBufferLength |= wgpu::ShaderStage::Fragment;
+            descriptorMTL.fragmentFunction = fragmentData.function.Get();
+            if (fragmentData.needsStorageBufferLength) {
+                mStagesRequiringStorageBufferLength |= wgpu::ShaderStage::Fragment;
+            }
+
+            const auto& fragmentOutputsWritten = fragmentStage.metadata->fragmentOutputsWritten;
+            for (ColorAttachmentIndex i : IterateBitSet(GetColorAttachmentsMask())) {
+                descriptorMTL.colorAttachments[static_cast<uint8_t>(i)].pixelFormat =
+                    MetalPixelFormat(GetColorAttachmentFormat(i));
+                const ColorTargetState* descriptor = GetColorTargetState(i);
+                ComputeBlendDesc(descriptorMTL.colorAttachments[static_cast<uint8_t>(i)],
+                                 descriptor, fragmentOutputsWritten[i]);
+            }
         }
 
         if (HasDepthStencilAttachment()) {
@@ -375,16 +387,6 @@ namespace dawn_native { namespace metal {
             if (internalFormat.HasStencil()) {
                 descriptorMTL.stencilAttachmentPixelFormat = metalFormat;
             }
-        }
-
-        const auto& fragmentOutputsWritten =
-            GetStage(SingleShaderStage::Fragment).metadata->fragmentOutputsWritten;
-        for (ColorAttachmentIndex i : IterateBitSet(GetColorAttachmentsMask())) {
-            descriptorMTL.colorAttachments[static_cast<uint8_t>(i)].pixelFormat =
-                MetalPixelFormat(GetColorAttachmentFormat(i));
-            const ColorTargetState* descriptor = GetColorTargetState(i);
-            ComputeBlendDesc(descriptorMTL.colorAttachments[static_cast<uint8_t>(i)], descriptor,
-                             fragmentOutputsWritten[i]);
         }
 
         descriptorMTL.inputPrimitiveTopology = MTLInputPrimitiveTopology(GetPrimitiveTopology());

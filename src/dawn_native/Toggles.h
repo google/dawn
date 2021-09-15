@@ -60,6 +60,7 @@ namespace dawn_native {
         DisableSymbolRenaming,
         UseUserDefinedLabelsInBackend,
         DisableR8RG8Mipmaps,
+        UseDummyFragmentInVertexOnlyPipeline,
 
         EnumCount,
         InvalidEnum = EnumCount,

@@ -116,6 +116,10 @@ namespace dawn_native {
         return mStages;
     }
 
+    wgpu::ShaderStage PipelineBase::GetStageMask() const {
+        return mStageMask;
+    }
+
     MaybeError PipelineBase::ValidateGetBindGroupLayout(uint32_t groupIndex) {
         DAWN_TRY(GetDevice()->ValidateIsAlive());
         DAWN_TRY(GetDevice()->ValidateObject(this));

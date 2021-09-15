@@ -154,7 +154,8 @@ namespace dawn_native {
                 // Ref will keep the pipeline layout alive until the end of the function where
                 // the pipeline will take another reference.
                 DAWN_TRY_ASSIGN(layoutRef,
-                                PipelineLayoutBase::CreateDefault(device, GetStages(&descriptor)));
+                                PipelineLayoutBase::CreateDefault(
+                                    device, GetRenderStagesAndSetDummyShader(device, &descriptor)));
                 outDescriptor->layout = layoutRef.Get();
             }
 
@@ -236,6 +237,21 @@ namespace dawn_native {
         mState = State::Alive;
 
         DAWN_TRY_ASSIGN(mEmptyBindGroupLayout, CreateEmptyBindGroupLayout());
+
+        // If dummy fragment shader module is needed, initialize it
+        if (IsToggleEnabled(Toggle::UseDummyFragmentInVertexOnlyPipeline)) {
+            // The empty fragment shader, used as a work around for vertex-only render pipeline
+            constexpr char kEmptyFragmentShader[] = R"(
+                [[stage(fragment)]] fn fs_empty_main() {}
+            )";
+            ShaderModuleDescriptor descriptor;
+            ShaderModuleWGSLDescriptor wgslDesc;
+            wgslDesc.source = kEmptyFragmentShader;
+            descriptor.nextInChain = reinterpret_cast<ChainedStruct*>(&wgslDesc);
+
+            DAWN_TRY_ASSIGN(mInternalPipelineStore->dummyFragmentShader,
+                            CreateShaderModule(&descriptor));
+        }
 
         return {};
     }

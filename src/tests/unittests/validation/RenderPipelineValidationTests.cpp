@@ -497,13 +497,97 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
         wgpu::TextureDescriptor textureDescriptor = baseTextureDescriptor;
         textureDescriptor.sampleCount = 1;
         textureDescriptor.format = kDepthStencilFormat;
-        wgpu::Texture multisampledDepthStencilTexture = device.CreateTexture(&textureDescriptor);
+        wgpu::Texture nonMultisampledDepthStencilTexture = device.CreateTexture(&textureDescriptor);
         utils::ComboRenderPassDescriptor renderPassDescriptor(
-            {}, multisampledDepthStencilTexture.CreateView());
+            {}, nonMultisampledDepthStencilTexture.CreateView());
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
         renderPass.SetPipeline(multisampledPipelineWithDepthStencilOnly);
+        renderPass.EndPass();
+
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
+
+// Tests that the vertex only pipeline must be used with a depth-stencil attachment only render pass
+TEST_F(RenderPipelineValidationTest, VertexOnlyPipelineRequireDepthStencilAttachment) {
+    constexpr wgpu::TextureFormat kColorFormat = wgpu::TextureFormat::RGBA8Unorm;
+    constexpr wgpu::TextureFormat kDepthStencilFormat = wgpu::TextureFormat::Depth24PlusStencil8;
+
+    wgpu::TextureDescriptor baseTextureDescriptor;
+    baseTextureDescriptor.size = {4, 4};
+    baseTextureDescriptor.mipLevelCount = 1;
+    baseTextureDescriptor.dimension = wgpu::TextureDimension::e2D;
+    baseTextureDescriptor.usage = wgpu::TextureUsage::RenderAttachment;
+
+    wgpu::TextureDescriptor colorTextureDescriptor = baseTextureDescriptor;
+    colorTextureDescriptor.format = kColorFormat;
+    colorTextureDescriptor.sampleCount = 1;
+    wgpu::Texture colorTexture = device.CreateTexture(&colorTextureDescriptor);
+
+    wgpu::TextureDescriptor depthStencilTextureDescriptor = baseTextureDescriptor;
+    depthStencilTextureDescriptor.sampleCount = 1;
+    depthStencilTextureDescriptor.format = kDepthStencilFormat;
+    wgpu::Texture depthStencilTexture = device.CreateTexture(&depthStencilTextureDescriptor);
+    utils::ComboRenderPassDescriptor renderPassDescriptor({}, depthStencilTexture.CreateView());
+
+    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
+    renderPipelineDescriptor.multisample.count = 1;
+    renderPipelineDescriptor.vertex.module = vsModule;
+
+    renderPipelineDescriptor.fragment = nullptr;
+
+    renderPipelineDescriptor.EnableDepthStencil(kDepthStencilFormat);
+
+    wgpu::RenderPipeline vertexOnlyPipeline =
+        device.CreateRenderPipeline(&renderPipelineDescriptor);
+
+    // Vertex-only render pipeline can work with depth stencil attachment and no color target
+    {
+        utils::ComboRenderPassDescriptor renderPassDescriptor({}, depthStencilTexture.CreateView());
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPass.SetPipeline(vertexOnlyPipeline);
+        renderPass.EndPass();
+
+        encoder.Finish();
+    }
+
+    // Vertex-only render pipeline must have a depth stencil attachment
+    {
+        utils::ComboRenderPassDescriptor renderPassDescriptor({});
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPass.SetPipeline(vertexOnlyPipeline);
+        renderPass.EndPass();
+
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Vertex-only render pipeline can not work with color target
+    {
+        utils::ComboRenderPassDescriptor renderPassDescriptor({colorTexture.CreateView()},
+                                                              depthStencilTexture.CreateView());
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPass.SetPipeline(vertexOnlyPipeline);
+        renderPass.EndPass();
+
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Vertex-only render pipeline can not work with color target, and must have a depth stencil
+    // attachment
+    {
+        utils::ComboRenderPassDescriptor renderPassDescriptor({colorTexture.CreateView()});
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPass.SetPipeline(vertexOnlyPipeline);
         renderPass.EndPass();
 
         ASSERT_DEVICE_ERROR(encoder.Finish());

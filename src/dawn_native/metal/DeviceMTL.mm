@@ -214,6 +214,16 @@ namespace dawn_native { namespace metal {
         if (gpu_info::IsIntel(pciInfo.vendorId)) {
             SetToggle(Toggle::DisableR8RG8Mipmaps, true);
         }
+
+        // On some Intel GPU vertex only render pipeline get wrong depth result if no fragment
+        // shader provided. Create a dummy fragment shader module to work around this issue.
+        if (gpu_info::IsIntel(this->GetAdapter()->GetPCIInfo().vendorId)) {
+            bool useDummyFragmentShader = true;
+            if (gpu_info::IsSkylake(this->GetAdapter()->GetPCIInfo().deviceId)) {
+                useDummyFragmentShader = false;
+            }
+            SetToggle(Toggle::UseDummyFragmentInVertexOnlyPipeline, useDummyFragmentShader);
+        }
     }
 
     ResultOrError<Ref<BindGroupBase>> Device::CreateBindGroupImpl(
