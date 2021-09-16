@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 160
+; Bound: 112
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -235,53 +235,5 @@
          %60 = OpTypeFunction %void
        %main = OpFunction %void None %60
          %63 = OpLabel
-         %65 = OpLoad %S %b0
-         %67 = OpLoad %S %b1
-         %69 = OpLoad %S %b2
-         %71 = OpLoad %S %b3
-         %73 = OpLoad %S %b4
-         %75 = OpLoad %S %b5
-         %77 = OpLoad %S %b6
-         %79 = OpLoad %S %b7
-         %81 = OpLoad %S %b8
-         %83 = OpLoad %S %b9
-         %85 = OpLoad %S %b10
-         %87 = OpLoad %S %b11
-         %89 = OpLoad %S %b12
-         %91 = OpLoad %S %b13
-         %93 = OpLoad %S %b14
-         %95 = OpLoad %S %b15
-         %97 = OpLoad %23 %t0
-         %99 = OpLoad %23 %t1
-        %101 = OpLoad %23 %t2
-        %103 = OpLoad %23 %t3
-        %105 = OpLoad %23 %t4
-        %107 = OpLoad %23 %t5
-        %109 = OpLoad %23 %t6
-        %111 = OpLoad %23 %t7
-        %113 = OpLoad %33 %t8
-        %115 = OpLoad %33 %t9
-        %117 = OpLoad %33 %t10
-        %119 = OpLoad %33 %t11
-        %121 = OpLoad %33 %t12
-        %123 = OpLoad %33 %t13
-        %125 = OpLoad %33 %t14
-        %127 = OpLoad %33 %t15
-        %129 = OpLoad %43 %s0
-        %131 = OpLoad %43 %s1
-        %133 = OpLoad %43 %s2
-        %135 = OpLoad %43 %s3
-        %137 = OpLoad %43 %s4
-        %139 = OpLoad %43 %s5
-        %141 = OpLoad %43 %s6
-        %143 = OpLoad %43 %s7
-        %145 = OpLoad %43 %s8
-        %147 = OpLoad %43 %s9
-        %149 = OpLoad %43 %s10
-        %151 = OpLoad %43 %s11
-        %153 = OpLoad %43 %s12
-        %155 = OpLoad %43 %s13
-        %157 = OpLoad %43 %s14
-        %159 = OpLoad %43 %s15
                OpReturn
                OpFunctionEnd

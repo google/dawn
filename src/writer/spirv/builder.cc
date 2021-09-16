@@ -2322,7 +2322,8 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
 
   // Generates the SPIR-V ID for the expression for the indexed call parameter,
   // and loads it if necessary. Returns 0 on error.
-  auto get_param_as_value_id = [&](size_t i) -> uint32_t {
+  auto get_param_as_value_id = [&](size_t i,
+                                   bool generate_load = true) -> uint32_t {
     auto* arg = call->params()[i];
     auto* param = intrinsic->Parameters()[i];
     auto val_id = GenerateExpression(arg);
@@ -2330,7 +2331,7 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
       return 0;
     }
 
-    if (!param->Type()->Is<sem::Pointer>()) {
+    if (generate_load && !param->Type()->Is<sem::Pointer>()) {
       val_id = GenerateLoadIfNeeded(TypeOf(arg), val_id);
     }
     return val_id;
@@ -2427,7 +2428,7 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
       // Evaluate the single argument, return the non-zero result_id which isn't
       // associated with any op (ignore returns void, so this cannot be used in
       // an expression).
-      if (!get_param_as_value_id(0)) {
+      if (!get_param_as_value_id(0, false)) {
         return 0;
       }
       return result_id;

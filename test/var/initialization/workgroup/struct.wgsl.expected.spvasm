@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 25
+; Bound: 24
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -31,18 +31,17 @@
          %14 = OpConstantNull %S
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
-         %20 = OpTypeFunction %void
+         %19 = OpTypeFunction %void
  %main_inner = OpFunction %void None %9
 %local_invocation_index = OpFunctionParameter %uint
          %13 = OpLabel
                OpStore %v %14
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %19 = OpLoad %S %v
                OpReturn
                OpFunctionEnd
-       %main = OpFunction %void None %20
-         %22 = OpLabel
-         %24 = OpLoad %uint %local_invocation_index_1
-         %23 = OpFunctionCall %void %main_inner %24
+       %main = OpFunction %void None %19
+         %21 = OpLabel
+         %23 = OpLoad %uint %local_invocation_index_1
+         %22 = OpFunctionCall %void %main_inner %23
                OpReturn
                OpFunctionEnd

@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 114
+; Bound: 110
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -128,7 +128,7 @@
     %float_0 = OpConstant %float 0
          %92 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
        %void = OpTypeVoid
-        %103 = OpTypeFunction %void
+         %99 = OpTypeFunction %void
    %getColor = OpFunction %v4float None %30
    %fragment = OpFunctionParameter %FragmentInput
          %34 = OpLabel
@@ -195,23 +195,19 @@
      %output = OpVariable %_ptr_Function_FragmentOutput Function %89
          %90 = OpAccessChain %_ptr_Function_v4float %output %uint_0
                OpStore %90 %92
-         %95 = OpLoad %Uniforms %uniforms
-         %97 = OpLoad %26 %mySampler
-         %99 = OpLoad %29 %myTexture
-        %101 = OpLoad %PointLights %pointLights
-        %102 = OpLoad %FragmentOutput %output
-               OpReturnValue %102
+         %98 = OpLoad %FragmentOutput %output
+               OpReturnValue %98
                OpFunctionEnd
-       %main = OpFunction %void None %103
-        %105 = OpLabel
-        %107 = OpLoad %v4float %position_1
-        %108 = OpLoad %v4float %view_position_1
-        %109 = OpLoad %v4float %normal_1
-        %110 = OpLoad %v2float %uv_1
-        %111 = OpLoad %v4float %color_1
-        %112 = OpCompositeConstruct %FragmentInput %107 %108 %109 %110 %111
-        %106 = OpFunctionCall %FragmentOutput %main_inner %112
-        %113 = OpCompositeExtract %v4float %106 0
-               OpStore %color_2 %113
+       %main = OpFunction %void None %99
+        %101 = OpLabel
+        %103 = OpLoad %v4float %position_1
+        %104 = OpLoad %v4float %view_position_1
+        %105 = OpLoad %v4float %normal_1
+        %106 = OpLoad %v2float %uv_1
+        %107 = OpLoad %v4float %color_1
+        %108 = OpCompositeConstruct %FragmentInput %103 %104 %105 %106 %107
+        %102 = OpFunctionCall %FragmentOutput %main_inner %108
+        %109 = OpCompositeExtract %v4float %102 0
+               OpStore %color_2 %109
                OpReturn
                OpFunctionEnd
