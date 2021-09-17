@@ -12,11 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This file contains test for deprecated parts of Dawn's API while following WebGPU's evolution.
-// It contains test for the "old" behavior that will be deleted once users are migrated, tests that
-// a deprecation warning is emitted when the "old" behavior is used, and tests that an error is
-// emitted when both the old and the new behavior are used (when applicable).
-
 #include "tests/DawnTest.h"
 
 #include "common/Math.h"

@@ -75,19 +75,6 @@ namespace dawn_native { namespace vulkan {
     ExternalImageExportInfoDmaBuf::ExternalImageExportInfoDmaBuf()
         : ExternalImageExportInfoFD(ExternalImageType::DmaBuf) {
     }
-
-    int ExportSignalSemaphoreOpaqueFD(WGPUDevice cDevice, WGPUTexture cTexture) {
-        // Doesn't actually matter if we use OpaqueFD or DmaBuf since these paths are the same right
-        // now. This function will be removed.
-        Device* device = reinterpret_cast<Device*>(cDevice);
-        device->EmitDeprecationWarning(
-            "ExportSignalSemaphoreOpaqueFD is deprecated. Please use ExportVulkanImage instead.");
-        ExternalImageExportInfoOpaqueFD info;
-        if (!ExportVulkanImage(cTexture, VK_IMAGE_LAYOUT_GENERAL, &info)) {
-            return -1;
-        }
-        return info.semaphoreHandles[0];
-    }
 #endif  // DAWN_PLATFORM_LINUX
 
     WGPUTexture WrapVulkanImage(WGPUDevice cDevice, const ExternalImageDescriptorVk* descriptor) {

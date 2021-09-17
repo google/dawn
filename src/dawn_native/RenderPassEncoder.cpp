@@ -125,12 +125,6 @@ namespace dawn_native {
         });
     }
 
-    void RenderPassEncoder::APISetBlendColor(const Color* color) {
-        GetDevice()->EmitDeprecationWarning(
-            "SetBlendColor has been deprecated in favor of SetBlendConstant.");
-        APISetBlendConstant(color);
-    }
-
     void RenderPassEncoder::APISetViewport(float x,
                                            float y,
                                            float width,

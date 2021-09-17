@@ -41,7 +41,6 @@ namespace dawn_native {
 
         void APISetStencilReference(uint32_t reference);
         void APISetBlendConstant(const Color* color);
-        void APISetBlendColor(const Color* color);  // Deprecated
         void APISetViewport(float x,
                             float y,
                             float width,

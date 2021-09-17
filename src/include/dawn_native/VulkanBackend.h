@@ -114,12 +114,6 @@ namespace dawn_native { namespace vulkan {
 
 #endif  // __linux__
 
-        // Exports a signal semaphore from a wrapped texture. This must be called on wrapped
-        // textures before they are destroyed. On failure, returns -1
-        // TODO(enga): Remove after updating Chromium to use ExportVulkanImage.
-        DAWN_NATIVE_EXPORT int ExportSignalSemaphoreOpaqueFD(WGPUDevice cDevice,
-                                                             WGPUTexture cTexture);
-
         // Imports external memory into a Vulkan image. Internally, this uses external memory /
         // semaphore extensions to import the image and wait on the provided synchronizaton
         // primitives before the texture can be used.

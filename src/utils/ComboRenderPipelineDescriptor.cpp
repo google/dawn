@@ -18,8 +18,6 @@
 
 namespace utils {
 
-    // For creating deprecated render pipeline descriptors
-
     ComboVertexState::ComboVertexState() {
         vertexBufferCount = 0;
 
