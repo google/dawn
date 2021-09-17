@@ -112,6 +112,8 @@ namespace dawn_native {
         WGPUDeviceProperties GetAdapterProperties() const;
         bool GetLimits(WGPUSupportedLimits* limits) const;
 
+        void SetUseTieredLimits(bool useTieredLimits);
+
         // Check that the Adapter is able to support importing external images. This is necessary
         // to implement the swapchain and interop APIs in Chromium.
         bool SupportsExternalImages() const;

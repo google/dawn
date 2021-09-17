@@ -54,6 +54,8 @@ namespace dawn_native {
 
         bool GetLimits(SupportedLimits* limits) const;
 
+        void SetUseTieredLimits(bool useTieredLimits);
+
         virtual bool SupportsExternalImages() const = 0;
 
       protected:
@@ -71,6 +73,7 @@ namespace dawn_native {
         InstanceBase* mInstance = nullptr;
         wgpu::BackendType mBackend;
         CombinedLimits mLimits;
+        bool mUseTieredLimits = false;
     };
 
 }  // namespace dawn_native

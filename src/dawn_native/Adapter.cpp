@@ -82,7 +82,14 @@ namespace dawn_native {
         if (limits->nextInChain != nullptr) {
             return false;
         }
-        limits->limits = mLimits.v1;
+        if (mUseTieredLimits) {
+            // TODO(crbug.com/dawn/685): Apply limit tiers.
+            // For now, set all limits to the defaults until tiers are
+            // defined.
+            GetDefaultLimits(&limits->limits);
+        } else {
+            limits->limits = mLimits.v1;
+        }
         return true;
     }
 
@@ -134,6 +141,10 @@ namespace dawn_native {
 
         DAWN_TRY_ASSIGN(*result, CreateDeviceImpl(descriptor));
         return {};
+    }
+
+    void AdapterBase::SetUseTieredLimits(bool useTieredLimits) {
+        mUseTieredLimits = useTieredLimits;
     }
 
     void AdapterBase::ResetInternalDeviceForTesting() {

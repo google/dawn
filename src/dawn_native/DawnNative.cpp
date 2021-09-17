@@ -110,6 +110,10 @@ namespace dawn_native {
         return mImpl->GetLimits(reinterpret_cast<SupportedLimits*>(limits));
     }
 
+    void Adapter::SetUseTieredLimits(bool useTieredLimits) {
+        mImpl->SetUseTieredLimits(useTieredLimits);
+    }
+
     bool Adapter::SupportsExternalImages() const {
         return mImpl->SupportsExternalImages();
     }
