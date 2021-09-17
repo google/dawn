@@ -209,6 +209,7 @@ namespace dawn_native {
 
         QueueBase* APIGetQueue();
 
+        bool APIGetLimits(SupportedLimits* limits);
         void APIInjectError(wgpu::ErrorType type, const char* message);
         bool APITick();
 

@@ -20,6 +20,7 @@
     "adapter properties": {
         "category": "structure",
         "extensible": true,
+        "output": true,
         "members": [
             {"name": "device ID", "type": "uint32_t"},
             {"name": "vendor ID", "type": "uint32_t"},
@@ -735,6 +736,13 @@
                 ]
             },
             {
+                "name": "create external texture",
+                "returns": "external texture",
+                "args": [
+                    {"name": "external texture descriptor", "type": "external texture descriptor", "annotation": "const*"}
+                ]
+            },
+            {
                 "name": "create pipeline layout",
                 "returns": "pipeline layout",
                 "args": [
@@ -801,15 +809,15 @@
                 ]
             },
             {
-                "name": "get queue",
-                "returns": "queue"
+                "name": "get limits",
+                "returns": "bool",
+                "args": [
+                    {"name": "limits", "type": "supported limits", "annotation": "*"}
+                ]
             },
             {
-                "name": "create external texture",
-                "returns": "external texture",
-                "args": [
-                    {"name": "external texture descriptor", "type": "external texture descriptor", "annotation": "const*"}
-                ]
+                "name": "get queue",
+                "returns": "queue"
             },
             {
                 "name": "inject error",
@@ -885,7 +893,7 @@
             {"name": "depth clamping", "type": "bool", "default": "false"},
             {"name": "invalid extension", "type": "bool", "default": "false"},
             {"name": "dawn internal usages", "type": "bool", "default": "false"},
-            {"name": "limits", "type": "limits"}
+            {"name": "limits", "type": "supported limits"}
         ]
     },
     "double": {
@@ -901,7 +909,6 @@
     },
     "limits": {
         "category": "structure",
-        "extensible": true,
         "members": [
             {"name": "max texture dimension 1D", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
             {"name": "max texture dimension 2D", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
@@ -929,6 +936,21 @@
             {"name": "max compute workgroup size y", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
             {"name": "max compute workgroup size z", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
             {"name": "max compute workgroups per dimension", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
+        ]
+    },
+    "required limits": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "limits", "type": "limits"}
+        ]
+    },
+    "supported limits": {
+        "category": "structure",
+        "extensible": true,
+        "output": true,
+        "members": [
+            {"name": "limits", "type": "limits"}
         ]
     },
     "logging callback": {

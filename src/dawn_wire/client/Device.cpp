@@ -196,6 +196,12 @@ namespace dawn_wire { namespace client {
         return Buffer::CreateError(this);
     }
 
+    bool Device::GetLimits(WGPUSupportedLimits* limits) {
+        // Not implemented in the wire.
+        UNREACHABLE();
+        return false;
+    }
+
     WGPUQueue Device::GetQueue() {
         // The queue is lazily created because if a Device is created by
         // Reserve/Inject, we cannot send the GetQueue message until

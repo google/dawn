@@ -29,6 +29,10 @@ class RequestDeviceValidationTest : public ValidationTest {
         EXPECT_EQ(status, WGPURequestDeviceStatus_Success);
         EXPECT_NE(device, nullptr);
         EXPECT_STREQ(message, nullptr);
+        if (userdata != nullptr) {
+            CallCheckDevice(static_cast<std::function<void(wgpu::Device)>*>(userdata),
+                            std::move(device));
+        }
     }
 
     static void ExpectRequestDeviceError(WGPURequestDeviceStatus status,
@@ -40,73 +44,136 @@ class RequestDeviceValidationTest : public ValidationTest {
         EXPECT_EQ(device, nullptr);
         EXPECT_STRNE(message, nullptr);
     }
+
+    template <typename F>
+    static void* CheckDevice(F&& f) {
+        return new std::function<void(wgpu::Device)>(f);
+    }
+
+    static void CallCheckDevice(std::function<void(wgpu::Device)>* f, wgpu::Device d) {
+        (*f)(std::move(d));
+        delete f;
+    }
 };
 
 // Test that requesting a device without specifying limits is valid.
 TEST_F(RequestDeviceValidationTest, NoRequiredLimits) {
     dawn_native::DeviceDescriptor descriptor;
-    adapter.RequestDevice(&descriptor, ExpectRequestDeviceSuccess, nullptr);
+    adapter.RequestDevice(&descriptor, ExpectRequestDeviceSuccess,
+                          CheckDevice([](wgpu::Device device) {
+                              // Check one of the default limits.
+                              wgpu::SupportedLimits limits;
+                              device.GetLimits(&limits);
+                              EXPECT_EQ(limits.limits.maxBindGroups, 4u);
+                          }));
 }
 
 // Test that requesting a device with the default limits is valid.
 TEST_F(RequestDeviceValidationTest, DefaultLimits) {
-    wgpu::Limits limits = {};
+    wgpu::RequiredLimits limits = {};
     dawn_native::DeviceDescriptor descriptor;
-    descriptor.requiredLimits = reinterpret_cast<const WGPULimits*>(&limits);
-    adapter.RequestDevice(&descriptor, ExpectRequestDeviceSuccess, nullptr);
+    descriptor.requiredLimits = reinterpret_cast<const WGPURequiredLimits*>(&limits);
+    adapter.RequestDevice(&descriptor, ExpectRequestDeviceSuccess,
+                          CheckDevice([](wgpu::Device device) {
+                              // Check one of the default limits.
+                              wgpu::SupportedLimits limits;
+                              device.GetLimits(&limits);
+                              EXPECT_EQ(limits.limits.maxTextureArrayLayers, 256u);
+                          }));
 }
 
 // Test that requesting a device where a required limit is above the maximum value.
 TEST_F(RequestDeviceValidationTest, HigherIsBetter) {
-    wgpu::Limits limits = {};
+    wgpu::RequiredLimits limits = {};
     dawn_native::DeviceDescriptor descriptor;
-    descriptor.requiredLimits = reinterpret_cast<const WGPULimits*>(&limits);
+    descriptor.requiredLimits = reinterpret_cast<const WGPURequiredLimits*>(&limits);
 
-    wgpu::Limits supportedLimits;
-    EXPECT_TRUE(adapter.GetLimits(reinterpret_cast<WGPULimits*>(&supportedLimits)));
+    wgpu::SupportedLimits supportedLimits;
+    EXPECT_TRUE(adapter.GetLimits(reinterpret_cast<WGPUSupportedLimits*>(&supportedLimits)));
 
     // Test below the max.
-    limits.maxBindGroups = supportedLimits.maxBindGroups - 1;
-    adapter.RequestDevice(&descriptor, ExpectRequestDeviceSuccess, nullptr);
+    limits.limits.maxBindGroups = supportedLimits.limits.maxBindGroups - 1;
+    adapter.RequestDevice(
+        &descriptor, ExpectRequestDeviceSuccess, CheckDevice([&](wgpu::Device device) {
+            wgpu::SupportedLimits limits;
+            device.GetLimits(&limits);
+
+            // Check we got exactly the request.
+            EXPECT_EQ(limits.limits.maxBindGroups, supportedLimits.limits.maxBindGroups - 1);
+            // Check another default limit.
+            EXPECT_EQ(limits.limits.maxTextureArrayLayers, 256u);
+        }));
 
     // Test the max.
-    limits.maxBindGroups = supportedLimits.maxBindGroups;
-    adapter.RequestDevice(&descriptor, ExpectRequestDeviceSuccess, nullptr);
+    limits.limits.maxBindGroups = supportedLimits.limits.maxBindGroups;
+    adapter.RequestDevice(
+        &descriptor, ExpectRequestDeviceSuccess, CheckDevice([&](wgpu::Device device) {
+            wgpu::SupportedLimits limits;
+            device.GetLimits(&limits);
+
+            // Check we got exactly the request.
+            EXPECT_EQ(limits.limits.maxBindGroups, supportedLimits.limits.maxBindGroups);
+            // Check another default limit.
+            EXPECT_EQ(limits.limits.maxTextureArrayLayers, 256u);
+        }));
 
     // Test above the max.
-    limits.maxBindGroups = supportedLimits.maxBindGroups + 1;
+    limits.limits.maxBindGroups = supportedLimits.limits.maxBindGroups + 1;
     adapter.RequestDevice(&descriptor, ExpectRequestDeviceError, nullptr);
 }
 
 // Test that requesting a device where a required limit is below the minimum value.
 TEST_F(RequestDeviceValidationTest, LowerIsBetter) {
-    wgpu::Limits limits = {};
+    wgpu::RequiredLimits limits = {};
     dawn_native::DeviceDescriptor descriptor;
-    descriptor.requiredLimits = reinterpret_cast<const WGPULimits*>(&limits);
+    descriptor.requiredLimits = reinterpret_cast<const WGPURequiredLimits*>(&limits);
 
-    wgpu::Limits supportedLimits;
-    EXPECT_TRUE(adapter.GetLimits(reinterpret_cast<WGPULimits*>(&supportedLimits)));
+    wgpu::SupportedLimits supportedLimits;
+    EXPECT_TRUE(adapter.GetLimits(reinterpret_cast<WGPUSupportedLimits*>(&supportedLimits)));
 
     // Test below the min.
-    limits.minUniformBufferOffsetAlignment = supportedLimits.minUniformBufferOffsetAlignment / 2;
+    limits.limits.minUniformBufferOffsetAlignment =
+        supportedLimits.limits.minUniformBufferOffsetAlignment / 2;
     adapter.RequestDevice(&descriptor, ExpectRequestDeviceError, nullptr);
 
     // Test the min.
-    limits.minUniformBufferOffsetAlignment = supportedLimits.minUniformBufferOffsetAlignment;
-    adapter.RequestDevice(&descriptor, ExpectRequestDeviceSuccess, nullptr);
+    limits.limits.minUniformBufferOffsetAlignment =
+        supportedLimits.limits.minUniformBufferOffsetAlignment;
+    adapter.RequestDevice(&descriptor, ExpectRequestDeviceSuccess,
+                          CheckDevice([&](wgpu::Device device) {
+                              wgpu::SupportedLimits limits;
+                              device.GetLimits(&limits);
+
+                              // Check we got exactly the request.
+                              EXPECT_EQ(limits.limits.minUniformBufferOffsetAlignment,
+                                        supportedLimits.limits.minUniformBufferOffsetAlignment);
+                              // Check another default limit.
+                              EXPECT_EQ(limits.limits.maxTextureArrayLayers, 256u);
+                          }));
 
     // Test above the min.
-    limits.minUniformBufferOffsetAlignment = supportedLimits.minUniformBufferOffsetAlignment * 2;
-    adapter.RequestDevice(&descriptor, ExpectRequestDeviceSuccess, nullptr);
+    limits.limits.minUniformBufferOffsetAlignment =
+        supportedLimits.limits.minUniformBufferOffsetAlignment * 2;
+    adapter.RequestDevice(&descriptor, ExpectRequestDeviceSuccess,
+                          CheckDevice([&](wgpu::Device device) {
+                              wgpu::SupportedLimits limits;
+                              device.GetLimits(&limits);
+
+                              // Check we got exactly the request.
+                              EXPECT_EQ(limits.limits.minUniformBufferOffsetAlignment,
+                                        supportedLimits.limits.minUniformBufferOffsetAlignment * 2);
+                              // Check another default limit.
+                              EXPECT_EQ(limits.limits.maxTextureArrayLayers, 256u);
+                          }));
 }
 
 // Test that it is an error to request limits with an invalid chained struct
 TEST_F(RequestDeviceValidationTest, InvalidChainedStruct) {
     wgpu::PrimitiveDepthClampingState depthClamp = {};
-    wgpu::Limits limits = {};
+    wgpu::RequiredLimits limits = {};
     limits.nextInChain = &depthClamp;
 
     dawn_native::DeviceDescriptor descriptor;
-    descriptor.requiredLimits = reinterpret_cast<const WGPULimits*>(&limits);
+    descriptor.requiredLimits = reinterpret_cast<const WGPURequiredLimits*>(&limits);
     adapter.RequestDevice(&descriptor, ExpectRequestDeviceError, nullptr);
 }

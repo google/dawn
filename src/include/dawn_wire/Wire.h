@@ -61,6 +61,16 @@ namespace dawn_wire {
                                                           const volatile char* deserializeBuffer,
                                                           size_t deserializeBufferSize);
 
+    DAWN_WIRE_EXPORT size_t
+    SerializedWGPUSupportedLimitsSize(const WGPUSupportedLimits* supportedLimits);
+
+    DAWN_WIRE_EXPORT void SerializeWGPUSupportedLimits(const WGPUSupportedLimits* supportedLimits,
+                                                       char* serializeBuffer);
+
+    DAWN_WIRE_EXPORT bool DeserializeWGPUSupportedLimits(WGPUSupportedLimits* supportedLimits,
+                                                         const volatile char* deserializeBuffer,
+                                                         size_t deserializeBufferSize);
+
 }  // namespace dawn_wire
 
 #endif  // DAWNWIRE_WIRE_H_

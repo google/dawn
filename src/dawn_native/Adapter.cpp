@@ -20,7 +20,6 @@ namespace dawn_native {
 
     AdapterBase::AdapterBase(InstanceBase* instance, wgpu::BackendType backend)
         : mInstance(instance), mBackend(backend) {
-        mLimits.v1.nextInChain = nullptr;
         GetDefaultLimits(&mLimits.v1);
         mSupportedExtensions.EnableExtension(Extension::DawnInternalUsages);
     }
@@ -74,16 +73,16 @@ namespace dawn_native {
         // to store them (ex. by calling GetLimits directly instead). Currently,
         // we keep this function as it's only used internally in Chromium to
         // send the adapter properties across the wire.
-        GetLimits(reinterpret_cast<wgpu::Limits*>(&adapterProperties.limits));
+        GetLimits(reinterpret_cast<SupportedLimits*>(&adapterProperties.limits));
         return adapterProperties;
     }
 
-    bool AdapterBase::GetLimits(wgpu::Limits* limits) const {
+    bool AdapterBase::GetLimits(SupportedLimits* limits) const {
         ASSERT(limits != nullptr);
         if (limits->nextInChain != nullptr) {
             return false;
         }
-        *limits = mLimits.v1;
+        limits->limits = mLimits.v1;
         return true;
     }
 
@@ -125,7 +124,8 @@ namespace dawn_native {
 
         if (descriptor != nullptr && descriptor->requiredLimits != nullptr) {
             DAWN_TRY(ValidateLimits(
-                mLimits.v1, *reinterpret_cast<const wgpu::Limits*>(descriptor->requiredLimits)));
+                mLimits.v1,
+                reinterpret_cast<const RequiredLimits*>(descriptor->requiredLimits)->limits));
 
             if (descriptor->requiredLimits->nextInChain != nullptr) {
                 return DAWN_VALIDATION_ERROR("Unsupported limit extension struct");

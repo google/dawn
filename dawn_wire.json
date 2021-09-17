@@ -153,6 +153,7 @@
             "DeviceCreateBuffer",
             "DeviceCreateComputePipelineAsync",
             "DeviceCreateRenderPipelineAsync",
+            "DeviceGetLimits",
             "DevicePopErrorScope",
             "DeviceSetDeviceLostCallback",
             "DeviceSetUncapturedErrorCallback",

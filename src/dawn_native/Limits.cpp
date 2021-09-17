@@ -94,15 +94,15 @@ namespace dawn_native {
 
     }  // namespace
 
-    void GetDefaultLimits(wgpu::Limits* limits) {
+    void GetDefaultLimits(Limits* limits) {
         ASSERT(limits != nullptr);
 #define X(Better, limitName, defaultValue) limits->limitName = defaultValue;
         LIMITS(X)
 #undef X
     }
 
-    wgpu::Limits ReifyDefaultLimits(const wgpu::Limits& limits) {
-        wgpu::Limits out;
+    Limits ReifyDefaultLimits(const Limits& limits) {
+        Limits out;
 #define X(Better, limitName, defaultValue)     \
     if (!IsLimitUndefined(limits.limitName)) { \
         out.limitName = limits.limitName;      \
@@ -114,8 +114,7 @@ namespace dawn_native {
         return out;
     }
 
-    MaybeError ValidateLimits(const wgpu::Limits& supportedLimits,
-                              const wgpu::Limits& requiredLimits) {
+    MaybeError ValidateLimits(const Limits& supportedLimits, const Limits& requiredLimits) {
 #define X(Better, limitName, defaultValue)                                                    \
     if (!IsLimitUndefined(requiredLimits.limitName)) {                                        \
         DAWN_TRY(CheckLimit<LimitBetterDirection::Better>::Invoke(supportedLimits.limitName,  \

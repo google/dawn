@@ -496,13 +496,22 @@ namespace dawn_wire {
         }
 
         size_t GetChainedStructExtraRequiredSize(const WGPUChainedStruct* chainedStruct);
-        DAWN_NO_DISCARD WireResult SerializeChainedStruct(WGPUChainedStruct const* chainedStruct,
+        DAWN_NO_DISCARD WireResult SerializeChainedStruct(const WGPUChainedStruct* chainedStruct,
                                                           SerializeBuffer* buffer,
                                                           const ObjectIdProvider& provider);
         WireResult DeserializeChainedStruct(const WGPUChainedStruct** outChainNext,
-                                                   DeserializeBuffer* deserializeBuffer,
-                                                   DeserializeAllocator* allocator,
-                                                   const ObjectIdResolver& resolver);
+                                            DeserializeBuffer* deserializeBuffer,
+                                            DeserializeAllocator* allocator,
+                                            const ObjectIdResolver& resolver);
+
+        size_t GetChainedStructExtraRequiredSize(WGPUChainedStructOut* chainedStruct);
+        DAWN_NO_DISCARD WireResult SerializeChainedStruct(WGPUChainedStructOut* chainedStruct,
+                                                          SerializeBuffer* buffer,
+                                                          const ObjectIdProvider& provider);
+        WireResult DeserializeChainedStruct(WGPUChainedStructOut** outChainNext,
+                                            DeserializeBuffer* deserializeBuffer,
+                                            DeserializeAllocator* allocator,
+                                            const ObjectIdResolver& resolver);
 
         //* Output structure [de]serialization first because it is used by commands.
         {% for type in by_category["structure"] %}
@@ -513,12 +522,19 @@ namespace dawn_wire {
             {% endif %}
         {% endfor %}
 
-        size_t GetChainedStructExtraRequiredSize(const WGPUChainedStruct* chainedStruct) {
+{% macro make_chained_struct_serialization_helpers(out) %}
+        {% set ChainedStructPtr = "WGPUChainedStructOut*" if out else "const WGPUChainedStruct*" %}
+        {% set ChainedStruct = "WGPUChainedStructOut" if out else "WGPUChainedStruct" %}
+        size_t GetChainedStructExtraRequiredSize({{ChainedStructPtr}} chainedStruct) {
             ASSERT(chainedStruct != nullptr);
             size_t result = 0;
             while (chainedStruct != nullptr) {
                 switch (chainedStruct->sType) {
-                    {% for sType in types["s type"].values if sType.valid and sType.name.CamelCase() not in client_side_structures %}
+                    {% for sType in types["s type"].values if (
+                            sType.valid and
+                            (sType.name.CamelCase() not in client_side_structures) and
+                            (types[sType.name.get()].output == out)
+                    ) %}
                         case {{as_cEnum(types["s type"].name, sType.name)}}: {
                             const auto& typedStruct = *reinterpret_cast<{{as_cType(sType.name)}} const *>(chainedStruct);
                             result += sizeof({{as_cType(sType.name)}}Transfer);
@@ -527,6 +543,8 @@ namespace dawn_wire {
                             break;
                         }
                     {% endfor %}
+                    // Explicitly list the Invalid enum. MSVC complains about no case labels.
+                    case WGPUSType_Invalid:
                     default:
                         // Invalid enum. Reserve space just for the transfer header (sType and hasNext).
                         result += sizeof(WGPUChainedStructTransfer);
@@ -537,14 +555,18 @@ namespace dawn_wire {
             return result;
         }
 
-        DAWN_NO_DISCARD WireResult SerializeChainedStruct(WGPUChainedStruct const* chainedStruct,
+        DAWN_NO_DISCARD WireResult SerializeChainedStruct({{ChainedStructPtr}} chainedStruct,
                                                           SerializeBuffer* buffer,
                                                           const ObjectIdProvider& provider) {
             ASSERT(chainedStruct != nullptr);
             ASSERT(buffer != nullptr);
             do {
                 switch (chainedStruct->sType) {
-                    {% for sType in types["s type"].values if sType.valid and sType.name.CamelCase() not in client_side_structures %}
+                    {% for sType in types["s type"].values if (
+                            sType.valid and
+                            (sType.name.CamelCase() not in client_side_structures) and
+                            (types[sType.name.get()].output == out)
+                    ) %}
                         {% set CType = as_cType(sType.name) %}
                         case {{as_cEnum(types["s type"].name, sType.name)}}: {
 
@@ -562,6 +584,8 @@ namespace dawn_wire {
                             chainedStruct = chainedStruct->next;
                         } break;
                     {% endfor %}
+                    // Explicitly list the Invalid enum. MSVC complains about no case labels.
+                    case WGPUSType_Invalid:
                     default: {
                         // Invalid enum. Serialize just the transfer header with Invalid as the sType.
                         // TODO(crbug.com/dawn/369): Unknown sTypes are silently discarded.
@@ -583,17 +607,21 @@ namespace dawn_wire {
             return WireResult::Success;
         }
 
-        WireResult DeserializeChainedStruct(const WGPUChainedStruct** outChainNext,
-                                                   DeserializeBuffer* deserializeBuffer,
-                                                   DeserializeAllocator* allocator,
-                                                   const ObjectIdResolver& resolver) {
+        WireResult DeserializeChainedStruct({{ChainedStructPtr}}* outChainNext,
+                                            DeserializeBuffer* deserializeBuffer,
+                                            DeserializeAllocator* allocator,
+                                            const ObjectIdResolver& resolver) {
             bool hasNext;
             do {
                 const volatile WGPUChainedStructTransfer* header;
                 WIRE_TRY(deserializeBuffer->Peek(&header));
                 WGPUSType sType = header->sType;
                 switch (sType) {
-                    {% for sType in types["s type"].values if sType.valid and sType.name.CamelCase() not in client_side_structures %}
+                    {% for sType in types["s type"].values if (
+                            sType.valid and
+                            (sType.name.CamelCase() not in client_side_structures) and
+                            (types[sType.name.get()].output == out)
+                    ) %}
                         {% set CType = as_cType(sType.name) %}
                         case {{as_cEnum(types["s type"].name, sType.name)}}: {
                             const volatile {{CType}}Transfer* transfer;
@@ -616,6 +644,8 @@ namespace dawn_wire {
                             hasNext = transfer->chain.hasNext;
                         } break;
                     {% endfor %}
+                    // Explicitly list the Invalid enum. MSVC complains about no case labels.
+                    case WGPUSType_Invalid:
                     default: {
                         // Invalid enum. Deserialize just the transfer header with Invalid as the sType.
                         // TODO(crbug.com/dawn/369): Unknown sTypes are silently discarded.
@@ -626,8 +656,8 @@ namespace dawn_wire {
                         const volatile WGPUChainedStructTransfer* transfer;
                         WIRE_TRY(deserializeBuffer->Read(&transfer));
 
-                        WGPUChainedStruct* outStruct;
-                        WIRE_TRY(GetSpace(allocator, sizeof(WGPUChainedStruct), &outStruct));
+                        {{ChainedStruct}}* outStruct;
+                        WIRE_TRY(GetSpace(allocator, sizeof({{ChainedStruct}}), &outStruct));
                         outStruct->sType = WGPUSType_Invalid;
                         outStruct->next = nullptr;
 
@@ -642,6 +672,10 @@ namespace dawn_wire {
 
             return WireResult::Success;
         }
+{% endmacro %}
+
+{{ make_chained_struct_serialization_helpers(False) }}
+{{ make_chained_struct_serialization_helpers(True) }}
 
         //* Output [de]serialization helpers for commands
         {% for command in cmd_records["command"] %}
@@ -728,6 +762,40 @@ namespace dawn_wire {
             ErrorObjectIdResolver resolver;
             return WGPUDevicePropertiesDeserialize(deviceProperties, transfer, &deserializeBuffer,
                                                    nullptr, resolver) == WireResult::Success;
+        }
+
+        size_t SerializedWGPUSupportedLimitsSize(const WGPUSupportedLimits* supportedLimits) {
+            return sizeof(WGPUSupportedLimits) +
+                   WGPUSupportedLimitsGetExtraRequiredSize(*supportedLimits);
+        }
+
+        void SerializeWGPUSupportedLimits(
+            const WGPUSupportedLimits* supportedLimits,
+            char* buffer) {
+            SerializeBuffer serializeBuffer(buffer, SerializedWGPUSupportedLimitsSize(supportedLimits));
+
+            WGPUSupportedLimitsTransfer* transfer;
+
+            WireResult result = serializeBuffer.Next(&transfer);
+            ASSERT(result == WireResult::Success);
+
+            ErrorObjectIdProvider provider;
+            result = WGPUSupportedLimitsSerialize(*supportedLimits, transfer, &serializeBuffer, provider);
+            ASSERT(result == WireResult::Success);
+        }
+
+        bool DeserializeWGPUSupportedLimits(WGPUSupportedLimits* supportedLimits,
+                                            const volatile char* buffer,
+                                            size_t size) {
+            const volatile WGPUSupportedLimitsTransfer* transfer;
+            DeserializeBuffer deserializeBuffer(buffer, size);
+            if (deserializeBuffer.Read(&transfer) != WireResult::Success) {
+                return false;
+            }
+
+            ErrorObjectIdResolver resolver;
+            return WGPUSupportedLimitsDeserialize(supportedLimits, transfer, &deserializeBuffer,
+                                                  nullptr, resolver) == WireResult::Success;
         }
 
 }  // namespace dawn_wire

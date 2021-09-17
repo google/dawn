@@ -52,7 +52,7 @@ namespace dawn_native {
             const std::vector<const char*>& requestedExtensions) const;
         WGPUDeviceProperties GetAdapterProperties() const;
 
-        bool GetLimits(wgpu::Limits* limits) const;
+        bool GetLimits(SupportedLimits* limits) const;
 
         virtual bool SupportsExternalImages() const = 0;
 

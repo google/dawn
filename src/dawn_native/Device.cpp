@@ -175,7 +175,7 @@ namespace dawn_native {
 
         if (descriptor != nullptr && descriptor->requiredLimits != nullptr) {
             mLimits.v1 = ReifyDefaultLimits(
-                *reinterpret_cast<const wgpu::Limits*>(descriptor->requiredLimits));
+                reinterpret_cast<const RequiredLimits*>(descriptor->requiredLimits)->limits);
         } else {
             GetDefaultLimits(&mLimits.v1);
         }
@@ -1091,6 +1091,15 @@ namespace dawn_native {
                                                       mLoggingUserdata);
             mCallbackTaskManager->AddCallbackTask(std::move(callbackTask));
         }
+    }
+
+    bool DeviceBase::APIGetLimits(SupportedLimits* limits) {
+        ASSERT(limits != nullptr);
+        if (limits->nextInChain != nullptr) {
+            return false;
+        }
+        limits->limits = mLimits.v1;
+        return true;
     }
 
     void DeviceBase::APIInjectError(wgpu::ErrorType type, const char* message) {

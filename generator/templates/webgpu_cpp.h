@@ -206,9 +206,16 @@ namespace wgpu {
         SType sType = SType::Invalid;
     };
 
+    struct ChainedStructOut {
+        ChainedStruct * nextInChain = nullptr;
+        SType sType = SType::Invalid;
+    };
+
     {% for type in by_category["structure"] %}
+        {% set Out = "Out" if type.output else "" %}
+        {% set const = "const" if not type.output else "" %}
         {% if type.chained %}
-            struct {{as_cppType(type.name)}} : ChainedStruct {
+            struct {{as_cppType(type.name)}} : ChainedStruct{{Out}} {
                 {{as_cppType(type.name)}}() {
                     sType = SType::{{type.name.CamelCase()}};
                 }
@@ -216,13 +223,13 @@ namespace wgpu {
             struct {{as_cppType(type.name)}} {
         {% endif %}
             {% if type.extensible %}
-                ChainedStruct const * nextInChain = nullptr;
+                ChainedStruct{{Out}} {{const}} * nextInChain = nullptr;
             {% endif %}
             {% for member in type.members %}
                 {% set member_declaration = as_annotated_cppType(member) + render_cpp_default_value(member) %}
                 {% if type.chained and loop.first %}
                     //* Align the first member to ChainedStruct to match the C struct layout.
-                    alignas(ChainedStruct) {{member_declaration}};
+                    alignas(ChainedStruct{{Out}}) {{member_declaration}};
                 {% else %}
                     {{member_declaration}};
                 {% endif %}

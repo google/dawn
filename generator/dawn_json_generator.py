@@ -206,6 +206,7 @@ class StructureType(Record, Type):
         Type.__init__(self, name, json_data)
         self.chained = json_data.get("chained", False)
         self.extensible = json_data.get("extensible", False)
+        self.output = json_data.get("output", False)
         # Chained structs inherit from wgpu::ChainedStruct, which has
         # nextInChain, so setting both extensible and chained would result in
         # two nextInChain members.

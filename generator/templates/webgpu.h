@@ -106,13 +106,20 @@ typedef struct WGPUChainedStruct {
     WGPUSType sType;
 } WGPUChainedStruct;
 
+typedef struct WGPUChainedStructOut {
+    struct WGPUChainedStructOut * next;
+    WGPUSType sType;
+} WGPUChainedStructOut;
+
 {% for type in by_category["structure"] %}
     typedef struct {{as_cType(type.name)}} {
+        {% set Out = "Out" if type.output else "" %}
+        {% set const = "const" if not type.output else "" %}
         {% if type.extensible %}
-            WGPUChainedStruct const * nextInChain;
+            WGPUChainedStruct{{Out}} {{const}} * nextInChain;
         {% endif %}
         {% if type.chained %}
-            WGPUChainedStruct chain;
+            WGPUChainedStruct{{Out}} chain;
         {% endif %}
         {% for member in type.members %}
             {{as_annotated_cType(member)}};

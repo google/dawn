@@ -21,19 +21,18 @@
 namespace dawn_native {
 
     struct CombinedLimits {
-        wgpu::Limits v1;
+        Limits v1;
     };
 
     // Populate |limits| with the default limits.
-    void GetDefaultLimits(wgpu::Limits* limits);
+    void GetDefaultLimits(Limits* limits);
 
     // Returns a copy of |limits| where all undefined values are replaced
     // with their defaults.
-    wgpu::Limits ReifyDefaultLimits(const wgpu::Limits& limits);
+    Limits ReifyDefaultLimits(const Limits& limits);
 
     // Validate that |requiredLimits| are no better than |supportedLimits|.
-    MaybeError ValidateLimits(const wgpu::Limits& supportedLimits,
-                              const wgpu::Limits& requiredLimits);
+    MaybeError ValidateLimits(const Limits& supportedLimits, const Limits& requiredLimits);
 
 }  // namespace dawn_native
 
