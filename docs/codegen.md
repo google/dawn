@@ -10,10 +10,10 @@ Most of the code generation is done from [`dawn.json`](../dawn.json) which is a 
 
 At this time it is used to generate:
 
- - the `webgpu.h` C header
- - the `webgpu_cpp.cpp/h` C++ wrapper over the C header
+ - the Dawn, Emscripten, and upstream webgpu-native `webgpu.h` C header
+ - the Dawn and Emscripten `webgpu_cpp.cpp/h` C++ wrapper over the C header
  - libraries that implements `webgpu.h` by calling in a static or `thread_local` proc table
- - parts of the [Emscripten](https://emscripten.org/) WebGPU implementation
+ - other parts of the [Emscripten](https://emscripten.org/) WebGPU implementation
  - a GMock version of the API with its proc table for testing
  - validation helper functions for dawn_native
  - the definition of dawn_native's proc table
@@ -24,6 +24,8 @@ At this time it is used to generate:
 Internally `dawn.json` is a dictionary from the "canonical name" of things to their definition. The "canonical name" is a space-separated (mostly) lower-case version of the name that's parsed into a `Name` Python object. Then that name can be turned into various casings with `.CamelCase()` `.SNAKE_CASE()`, etc. When `dawn.json` things reference each other, it is always via these "canonical names".
 
 The basic schema is that every entry is a thing with a `"category"` key what determines the sub-schema to apply to that thing. Categories and their sub-shema are defined below. Several parts of the schema use the concept of "record" which is a list of "record members" which are a combination of a type, a name and other metadata. For example the list of arguments of a function is a record. The list of structure members is a record. This combined concept is useful for the dawn_wire generator to generate code for structure and function calls in a very similar way.
+
+Most items and sub-items can include a list of `"tags"`, which, if specified, conditionally includes the item if any of its tags appears in the `enabled_tags` configuration passed to `parse_json`. This is used to include and exclude various items for Dawn, Emscripten, or upstream header variants. Tags are applied in the "parse_json" step ([rather than later](https://docs.google.com/document/d/1fBniVOxx3-hQbxHMugEPcQsaXaKBZYVO8yG9iXJp-fU/edit?usp=sharing)): this has the benefit of automatically catching when, for a particular tag configuration, an included item references an excluded item.
 
 A **record** is a list of **record members**, each of which is a dictionary with the following schema:
  - `"name"` a string
@@ -44,6 +46,7 @@ A **record** is a list of **record members**, each of which is a dictionary with
    - `"value"` a number that can be decimal or hexadecimal
    - `"jsrepr"` (optional) a string to allow overriding how this value map to Javascript for the Emscripten bits
    - `"valid"` (defaults to true) a boolean that controls whether the dawn_native validation utilities will consider this enum value valid.
+ - `"emscripten_no_enum_table"` (optional) if true, skips generating an enum table in `library_webgpu_enum_tables.js`
 
 **`"bitmask"`** an `uint32_t`-based bitmask. It is similar to **`"enum"`** but can be output differently.
 

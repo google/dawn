@@ -87,3 +87,29 @@ if(BUILD_SHARED_LIBS)
 endif()
 target_sources(dawn_proc PRIVATE ${DAWNPROC_GEN_SOURCES})
 target_link_libraries(dawn_proc PUBLIC dawn_headers)
+
+###############################################################################
+# Other generated files (upstream header, emscripten header, emscripten bits)
+###############################################################################
+
+DawnJSONGenerator(
+    TARGET "webgpu_headers"
+    PRINT_NAME "WebGPU headers"
+    RESULT_VARIABLE "WEBGPU_HEADERS_GEN_SOURCES"
+)
+
+add_library(webgpu_headers STATIC ${DAWN_DUMMY_FILE})
+target_sources(webgpu_headers PRIVATE
+    ${WEBGPU_HEADERS_GEN_SOURCES}
+)
+
+DawnJSONGenerator(
+    TARGET "emscripten_bits"
+    PRINT_NAME "Emscripten WebGPU bits"
+    RESULT_VARIABLE "EMSCRIPTEN_BITS_GEN_SOURCES"
+)
+
+add_library(emscripten_bits STATIC ${DAWN_DUMMY_FILE})
+target_sources(emscripten_bits PRIVATE
+    ${EMSCRIPTEN_BITS_GEN_SOURCES}
+)

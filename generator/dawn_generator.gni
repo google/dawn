@@ -45,6 +45,8 @@ dawn_allowed_gen_output_dirs = [
   "src/dawn_wire/server/",
   "src/dawn_wire/",
   "src/include/dawn/",
+  "emscripten-bits/",
+  "webgpu-headers/",
 ]
 
 # Template to help invoking Dawn code generators based on generator_lib

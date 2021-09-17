@@ -22,8 +22,8 @@
         "extensible": true,
         "output": true,
         "members": [
-            {"name": "device ID", "type": "uint32_t"},
             {"name": "vendor ID", "type": "uint32_t"},
+            {"name": "device ID", "type": "uint32_t"},
             {"name": "name", "type": "char", "annotation": "const*"},
             {"name": "driver description", "type": "char", "annotation": "const*"},
             {"name": "adapter type", "type": "adapter type"},
@@ -32,7 +32,7 @@
     },
     "adapter type": {
         "category": "enum",
-        "javascript": false,
+        "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "discrete GPU"},
             {"value": 1, "name": "integrated GPU"},
@@ -50,7 +50,7 @@
     },
     "backend type": {
         "category": "enum",
-        "javascript": false,
+        "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "null"},
             {"value": 1, "name": "D3D11"},
@@ -150,6 +150,7 @@
     "external texture binding entry": {
         "category": "structure",
         "chained": true,
+        "tags": ["dawn"],
         "members": [
             {"name": "external texture", "type": "external texture"}
         ]
@@ -158,6 +159,7 @@
     "external texture binding layout": {
         "category": "structure",
         "chained": true,
+        "tags": ["dawn"],
         "members": []
     },
 
@@ -165,7 +167,7 @@
         "category": "enum",
         "values": [
             {"value": 0, "name": "undefined", "jsrepr": "undefined", "valid": false},
-            {"value": 1, "name": "write only", "jsrepr": "writeonly"}
+            {"value": 1, "name": "write only"}
         ]
     },
     "storage texture binding layout": {
@@ -271,6 +273,8 @@
             {
                 "name": "set label",
                 "returns": "void",
+                "tags": ["dawn"],
+                "_TODO": "needs an upstream equivalent",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
@@ -302,6 +306,7 @@
     },
     "buffer map async status": {
         "category": "enum",
+        "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "success"},
             {"value": 1, "name": "error"},
@@ -420,6 +425,7 @@
             },
             {
                 "name": "copy texture to texture internal",
+                "tags": ["dawn"],
                 "args": [
                     {"name": "source", "type": "image copy texture", "annotation": "const*"},
                     {"name": "destination", "type": "image copy texture", "annotation": "const*"},
@@ -428,10 +434,10 @@
             },
             {
                 "name": "inject validation error",
+                "tags": ["dawn"],
                 "args": [
                     {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"}
-                ],
-                "TODO": "enga@: Make this a Dawn extension"
+                ]
             },
             {
                 "name": "insert debug marker",
@@ -499,6 +505,7 @@
     },
     "compilation info callback": {
         "category": "callback",
+        "tags": ["dawn"],
         "args": [
             {"name": "status", "type": "compilation info request status"},
             {"name": "compilation info", "type": "compilation info", "annotation": "const*"},
@@ -507,6 +514,7 @@
     },
     "compilation info request status": {
         "category": "enum",
+        "tags": ["dawn"],
         "values": [
             {"value": 0, "name": "success"},
             {"value": 1, "name": "error"},
@@ -528,6 +536,7 @@
     },
     "compilation message type": {
         "category": "enum",
+        "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "error"},
             {"value": 1, "name": "warning"},
@@ -632,6 +641,7 @@
     },
     "alpha op": {
         "category": "enum",
+        "tags": ["dawn"],
         "values": [
             {"value": 0, "name": "dont change"},
             {"value": 1, "name": "premultiply"},
@@ -641,6 +651,7 @@
     "copy texture for browser options": {
         "category": "structure",
         "extensible": true,
+        "tags": ["dawn"],
         "members": [
             {"name": "flipY", "type": "bool", "default": "false"},
             {"name": "alphaOp", "type": "alpha op", "default": "dont change"}
@@ -657,6 +668,7 @@
     },
     "create pipeline async status": {
         "category": "enum",
+        "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "success"},
             {"value": 1, "name": "error"},
@@ -709,7 +721,7 @@
             {
                 "name": "create error buffer",
                 "returns": "buffer",
-                "TODO": "enga@: Make this part of a dawn_wire extension"
+                "tags": ["dawn"]
             },
             {
                 "name": "create command encoder",
@@ -737,6 +749,7 @@
             {
                 "name": "create external texture",
                 "returns": "external texture",
+                "tags": ["dawn"],
                 "args": [
                     {"name": "external texture descriptor", "type": "external texture descriptor", "annotation": "const*"}
                 ]
@@ -824,13 +837,15 @@
                     {"name": "type", "type": "error type"},
                     {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"}
                 ],
-                "TODO": "enga@: Make this a Dawn extension"
+                "tags": ["dawn"]
             },
             {
-                "name": "lose for testing"
+                "name": "lose for testing",
+                "tags": ["dawn"]
             },
             {
-                "name": "tick"
+                "name": "tick",
+                "tags": ["dawn"]
             },
             {
                 "name": "set uncaptured error callback",
@@ -841,6 +856,7 @@
             },
             {
                 "name": "set logging callback",
+                "tags": ["dawn"],
                 "args": [
                     {"name": "callback", "type": "logging callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
@@ -879,6 +895,7 @@
     "device properties": {
         "category": "structure",
         "extensible": false,
+        "tags": ["dawn"],
         "members": [
             {"name": "device ID", "type": "uint32_t"},
             {"name": "vendor ID", "type": "uint32_t"},
@@ -954,6 +971,7 @@
     },
     "logging callback": {
         "category": "callback",
+        "tags": ["dawn"],
         "args": [
             {"name": "type", "type": "logging type"},
             {"name": "message", "type": "char", "annotation": "const*"},
@@ -970,6 +988,7 @@
     },
     "error type": {
         "category": "enum",
+        "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "no error"},
             {"value": 1, "name": "validation"},
@@ -980,6 +999,7 @@
     },
     "logging type": {
         "category": "enum",
+        "tags": ["dawn"],
         "values": [
             {"value": 0, "name": "verbose"},
             {"value": 1, "name": "info"},
@@ -997,6 +1017,7 @@
     },
     "external texture": {
         "category": "object",
+        "tags": ["dawn"],
         "methods": [
             {
                 "name": "destroy",
@@ -1007,6 +1028,7 @@
     "external texture descriptor": {
         "category": "structure",
         "extensible": true,
+        "tags": ["dawn"],
         "members": [
             {"name": "plane 0", "type": "texture view"},
             {"name": "format", "type": "texture format"}
@@ -1100,6 +1122,7 @@
     },
     "load op": {
         "category": "enum",
+        "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "clear"},
             {"value": 1, "name": "load"}
@@ -1152,6 +1175,7 @@
     },
     "present mode": {
         "category": "enum",
+        "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "immediate"},
             {"value": 1, "name": "mailbox"},
@@ -1243,6 +1267,7 @@
             {
                 "name": "copy texture for browser",
                 "extensible": true,
+                "tags": ["dawn"],
                 "args": [
                     {"name": "source", "type": "image copy texture", "annotation": "const*"},
                     {"name": "destination", "type": "image copy texture", "annotation": "const*"},
@@ -1261,6 +1286,7 @@
     },
     "queue work done status": {
         "category": "enum",
+        "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "success"},
             {"value": 1, "name": "error"},
@@ -1603,6 +1629,7 @@
 
     "request device status": {
         "category": "enum",
+        "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "success"},
             {"value": 1, "name": "error"},
@@ -1734,6 +1761,7 @@
         "methods": [
             {
                 "name": "get compilation info",
+                "tags": ["dawn"],
                 "args": [
                     {"name": "callback", "type": "compilation info callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
@@ -1822,7 +1850,7 @@
     "surface descriptor from metal layer": {
         "category": "structure",
         "chained": true,
-        "javascript": false,
+        "tags": ["native"],
         "members": [
             {"name": "layer", "type": "void", "annotation": "*"}
         ]
@@ -1830,7 +1858,7 @@
     "surface descriptor from windows HWND": {
         "category": "structure",
         "chained": true,
-        "javascript": false,
+        "tags": ["native"],
         "members": [
             {"name": "hinstance", "type": "void", "annotation": "*"},
             {"name": "hwnd", "type": "void", "annotation": "*"}
@@ -1839,7 +1867,7 @@
     "surface descriptor from xlib": {
         "category": "structure",
         "chained": true,
-        "javascript": false,
+        "tags": ["native"],
         "members": [
             {"name": "display", "type": "void", "annotation": "*"},
             {"name": "window", "type": "uint32_t"}
@@ -1848,7 +1876,7 @@
     "surface descriptor from windows core window": {
         "category": "structure",
         "chained": true,
-        "javascript": false,
+        "tags": ["dawn"],
         "members": [
             {"name": "core window", "type": "void", "annotation": "*"}
         ]
@@ -1856,7 +1884,7 @@
     "surface descriptor from windows swap chain panel": {
         "category": "structure",
         "chained": true,
-        "javascript": false,
+        "tags": ["dawn"],
         "members": [
             {"name": "swap chain panel", "type": "void", "annotation": "*"}
         ]
@@ -1866,6 +1894,7 @@
         "methods": [
             {
                 "name": "configure",
+                "tags": ["dawn"],
                 "args": [
                     {"name": "format", "type": "texture format"},
                     {"name": "allowed usage", "type": "texture usage"},
@@ -1887,26 +1916,26 @@
             {"name": "width", "type": "uint32_t"},
             {"name": "height", "type": "uint32_t"},
             {"name": "present mode", "type": "present mode"},
-            {"name": "implementation", "type": "uint64_t", "default": 0}
+            {"name": "implementation", "type": "uint64_t", "default": 0, "tags": ["deprecated"]}
         ]
     },
     "s type": {
         "category": "enum",
-        "javascript": false,
+        "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "invalid", "valid": false},
-            {"value": 1, "name": "surface descriptor from metal layer"},
-            {"value": 2, "name": "surface descriptor from windows HWND"},
-            {"value": 3, "name": "surface descriptor from xlib"},
+            {"value": 1, "name": "surface descriptor from metal layer", "tags": ["native"]},
+            {"value": 2, "name": "surface descriptor from windows HWND", "tags": ["native"]},
+            {"value": 3, "name": "surface descriptor from xlib", "tags": ["native"]},
             {"value": 4, "name": "surface descriptor from canvas HTML selector"},
             {"value": 5, "name": "shader module SPIRV descriptor"},
             {"value": 6, "name": "shader module WGSL descriptor"},
             {"value": 7, "name": "primitive depth clamping state"},
-            {"value": 8, "name": "surface descriptor from windows core window"},
-            {"value": 9, "name": "external texture binding entry"},
-            {"value": 10, "name": "external texture binding layout"},
-            {"value": 11, "name": "surface descriptor from windows swap chain panel"},
-            {"value": 1000, "name": "dawn texture internal usage descriptor"}
+            {"value": 8, "name": "surface descriptor from windows core window", "tags": ["dawn"]},
+            {"value": 9, "name": "external texture binding entry", "tags": ["dawn"]},
+            {"value": 10, "name": "external texture binding layout", "tags": ["dawn"]},
+            {"value": 11, "name": "surface descriptor from windows swap chain panel", "tags": ["dawn"]},
+            {"value": 1000, "name": "dawn texture internal usage descriptor", "tags": ["dawn"]}
         ]
     },
     "texture": {
@@ -1922,6 +1951,8 @@
             {
                 "name": "set label",
                 "returns": "void",
+                "tags": ["dawn"],
+                "_TODO": "needs an upstream equivalent",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
@@ -1937,8 +1968,8 @@
             {"value": 0, "name": "all"},
             {"value": 1, "name": "stencil only"},
             {"value": 2, "name": "depth only"},
-            {"value": 3, "name": "plane 0 only"},
-            {"value": 4, "name": "plane 1 only"}
+            {"value": 3, "name": "plane 0 only", "tags": ["dawn"]},
+            {"value": 4, "name": "plane 1 only", "tags": ["dawn"]}
         ]
     },
     "texture component type": {
@@ -1984,6 +2015,7 @@
         "category": "enum",
         "values": [
             {"value": 0, "name": "undefined", "valid": false, "jsrepr": "undefined"},
+
             {"value": 1, "name": "R8 unorm"},
             {"value": 2, "name": "R8 snorm"},
             {"value": 3, "name": "R8 uint"},
@@ -2086,7 +2118,7 @@
             {"value": 92, "name": "ASTC 12x12 unorm"},
             {"value": 93, "name": "ASTC 12x12 unorm srgb"},
 
-            {"value": 94, "name": "R8 BG8 Biplanar 420 unorm"}
+            {"value": 94, "name": "R8 BG8 Biplanar 420 unorm", "tags": ["dawn"]}
         ]
     },
     "texture usage": {
@@ -2098,7 +2130,7 @@
             {"value": 4, "name": "texture binding"},
             {"value": 8, "name": "storage binding"},
             {"value": 16, "name": "render attachment"},
-            {"value": 32, "name": "present"}
+            {"value": 32, "name": "present", "tags": ["dawn"]}
         ]
     },
     "texture view descriptor": {
@@ -2208,6 +2240,7 @@
     "dawn texture internal usage descriptor": {
         "category": "structure",
         "chained": true,
+        "tags": ["dawn"],
         "members": [
             {"name": "internal usage", "type": "texture usage", "default": "none"}
         ]

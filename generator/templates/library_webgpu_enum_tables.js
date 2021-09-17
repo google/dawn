@@ -17,7 +17,7 @@
 //* Emscripten's library_webgpu.js.
 //* https://github.com/emscripten-core/emscripten/blob/master/src/library_webgpu.js
 //*
-    {% for type in by_category["enum"] if type.javascript %}
+    {% for type in by_category["enum"] if not type.json_data.get("emscripten_no_enum_table") %}
         {{type.name.CamelCase()}}: {% if type.contiguousFromZero -%}
             [
                 {% for value in type.values %}

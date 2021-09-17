@@ -74,8 +74,10 @@
 #include <stdbool.h>
 
 #define WGPU_WHOLE_SIZE (0xffffffffffffffffULL)
-// TODO(crbug.com/dawn/520): Remove WGPU_STRIDE_UNDEFINED in favor of WGPU_COPY_STRIDE_UNDEFINED.
-#define WGPU_STRIDE_UNDEFINED (0xffffffffUL)
+{% if 'deprecated' in enabled_tags %}
+    // TODO(crbug.com/dawn/520): Remove WGPU_STRIDE_UNDEFINED in favor of WGPU_COPY_STRIDE_UNDEFINED.
+    #define WGPU_STRIDE_UNDEFINED (0xffffffffUL)
+{% endif %}
 #define WGPU_COPY_STRIDE_UNDEFINED (0xffffffffUL)
 #define WGPU_LIMIT_U32_UNDEFINED (0xffffffffUL)
 #define WGPU_LIMIT_U64_UNDEFINED (0xffffffffffffffffULL)
@@ -99,7 +101,7 @@ typedef uint32_t WGPUFlags;
         typedef WGPUFlags {{as_cType(type.name)}}Flags;
     {% endif %}
 
-{% endfor %}
+{% endfor -%}
 
 typedef struct WGPUChainedStruct {
     struct WGPUChainedStruct const * next;
@@ -127,19 +129,19 @@ typedef struct WGPUChainedStructOut {
     } {{as_cType(type.name)}};
 
 {% endfor %}
-
 {% for typeDef in by_category["typedef"] %}
     // {{as_cType(typeDef.name)}} is deprecated.
     // Use {{as_cType(typeDef.type.name)}} instead.
     typedef {{as_cType(typeDef.type.name)}} {{as_cType(typeDef.name)}};
 
 {% endfor %}
+{% if 'deprecated' in enabled_tags %}
+    // TODO(crbug.com/dawn/1023): Remove after the deprecation period.
+    #define WGPUInputStepMode_Vertex WGPUVertexStepMode_Vertex
+    #define WGPUInputStepMode_Instance WGPUVertexStepMode_Instance
+    #define WGPUInputStepMode_Force32 WGPUVertexStepMode_Force32
 
-// TODO(crbug.com/dawn/1023): Remove after the deprecation period.
-#define WGPUInputStepMode_Vertex WGPUVertexStepMode_Vertex
-#define WGPUInputStepMode_Instance WGPUVertexStepMode_Instance
-#define WGPUInputStepMode_Force32 WGPUVertexStepMode_Force32
-
+{% endif %}
 #ifdef __cplusplus
 extern "C" {
 #endif

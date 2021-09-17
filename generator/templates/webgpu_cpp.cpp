@@ -11,7 +11,11 @@
 //* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
-#include "dawn/webgpu_cpp.h"
+{% if 'dawn' in enabled_tags %}
+    #include "dawn/webgpu_cpp.h"
+{% else %}
+    #include "webgpu/webgpu_cpp.h"
+{% endif %}
 
 namespace wgpu {
     {% for type in by_category["enum"] %}

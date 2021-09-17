@@ -26,7 +26,7 @@
                 "next",
                 "sType"
             ],
-            {% for type in by_category["structure"] if type.javascript %}
+            {% for type in by_category["structure"] %}
                 "{{as_cType(type.name)}}": [
                     {% if type.chained %}
                         "chain"
