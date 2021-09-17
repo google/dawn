@@ -76,6 +76,7 @@ namespace dawn_native {
                 return BackendType::OpenGLES;
 
             case wgpu::BackendType::D3D11:
+            case wgpu::BackendType::WebGPU:
                 UNREACHABLE();
         }
     }

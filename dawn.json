@@ -17,6 +17,56 @@
 
     "_doc": "See docs/codegen.md",
 
+    "request adapter options": {
+        "category": "structure",
+        "extensible": true,
+        "tags": ["upstream"],
+        "members": [
+            {"name": "compatible surface", "type": "surface"}
+        ]
+    },
+    "request adapter status": {
+        "category": "enum",
+        "tags": ["upstream"],
+        "emscripten_no_enum_table": true,
+        "values": [
+            {"value": 0, "name": "success"},
+            {"value": 1, "name": "unavailable"},
+            {"value": 2, "name": "error"},
+            {"value": 3, "name": "unknown"}
+        ]
+    },
+    "request adapter callback": {
+        "category": "callback",
+        "tags": ["upstream"],
+        "args": [
+            {"name": "status", "type": "request adapter status"},
+            {"name": "adapter", "type": "adapter"},
+            {"name": "message", "type": "char", "annotation": "const*"},
+            {"name": "userdata", "type": "void", "annotation": "*"}
+        ]
+    },
+    "adapter": {
+        "category": "object",
+        "tags": ["upstream"],
+        "methods": [
+            {
+                "name": "get properties",
+                "tags": ["upstream"],
+                "args": [
+                    {"name": "properties", "type": "adapter properties", "annotation": "*"}
+                ]
+            },
+            {
+                "name": "request device",
+                "args": [
+                    {"name": "descriptor", "type": "device descriptor", "annotation": "const*"},
+                    {"name": "callback", "type": "request device callback"},
+                    {"name": "userdata", "type": "void", "annotation": "*"}
+                ]
+            }
+        ]
+    },
     "adapter properties": {
         "category": "structure",
         "extensible": true,
@@ -40,6 +90,13 @@
             {"value": 3, "name": "unknown"}
         ]
     },
+    "device descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "tags": ["upstream"],
+        "_TODO": "Add requiredFeatures and requiredLimits support",
+        "members": []
+    },
     "address mode": {
         "category": "enum",
         "values": [
@@ -53,12 +110,13 @@
         "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "null"},
-            {"value": 1, "name": "D3D11"},
-            {"value": 2, "name": "D3D12"},
-            {"value": 3, "name": "metal"},
-            {"value": 4, "name": "vulkan"},
-            {"value": 5, "name": "openGL"},
-            {"value": 6, "name": "openGLES"}
+            {"value": 1, "name": "WebGPU"},
+            {"value": 2, "name": "D3D11"},
+            {"value": 3, "name": "D3D12"},
+            {"value": 4, "name": "metal"},
+            {"value": 5, "name": "vulkan"},
+            {"value": 6, "name": "openGL"},
+            {"value": 7, "name": "openGLES"}
         ]
     },
     "bind group": {
@@ -96,7 +154,7 @@
             {"value": 0, "name": "undefined", "jsrepr": "undefined", "valid": false},
             {"value": 1, "name": "uniform"},
             {"value": 2, "name": "storage"},
-            {"value": 3, "name": "read only storage", "jsrepr": "readonly-storage"}
+            {"value": 3, "name": "read only storage"}
         ]
     },
     "buffer binding layout": {
@@ -498,6 +556,7 @@
     "compilation info": {
         "category": "structure",
         "extensible": false,
+        "_TODO": "should be extensible, but need to make that work in wire: https://github.com/webgpu-native/webgpu-headers/issues/82",
         "members": [
             {"name": "message count", "type": "uint32_t"},
             {"name": "messages", "type": "compilation message", "annotation": "const*", "length": "message count"}
@@ -525,6 +584,7 @@
     "compilation message": {
         "category": "structure",
         "extensible": false,
+        "_TODO": "should be extensible, but need to make that work in wire: https://github.com/webgpu-native/webgpu-headers/issues/82",
         "members": [
             {"name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "type", "type": "compilation message type"},
@@ -592,6 +652,14 @@
                 ]
             },
             {
+                "name": "begin pipeline statistics query",
+                "tags": ["upstream"],
+                "args": [
+                    {"name": "query set", "type": "query set"},
+                    {"name": "query index", "type": "uint32_t"}
+                ]
+            },
+            {
                 "name": "dispatch",
                 "args": [
                     {"name": "x", "type": "uint32_t"},
@@ -608,6 +676,10 @@
             },
             {
                 "name": "end pass"
+            },
+            {
+                "name": "end pipeline statistics query",
+                "tags": ["upstream"]
             }
         ]
     },
@@ -821,6 +893,11 @@
                 ]
             },
             {
+                "name": "destroy",
+                "_TODO": "crbug.com/dawn/628: Implement in Dawn",
+                "tags": ["upstream"]
+            },
+            {
                 "name": "get limits",
                 "returns": "bool",
                 "args": [
@@ -890,6 +967,14 @@
         "args": [
             {"name": "message", "type": "char", "annotation": "const*"},
             {"name": "userdata", "type": "void", "annotation": "*"}
+        ]
+    },
+    "device lost reason": {
+        "category": "enum",
+        "emscripten_no_enum_table": true,
+        "values": [
+            {"name": "undefined", "value": 0, "jsrepr": "undefined"},
+            {"name": "destroyed", "value": 1}
         ]
     },
     "device properties": {
@@ -1085,6 +1170,19 @@
                 "returns": "surface",
                 "args": [
                     {"name": "descriptor", "type": "surface descriptor", "annotation": "const*"}
+                ]
+            },
+            {
+                "name": "process events",
+                "tags": ["upstream"]
+            },
+            {
+                "name": "request adapter",
+                "tags": ["upstream"],
+                "args": [
+                    {"name": "options", "type": "request adapter options", "annotation": "const*"},
+                    {"name": "callback", "type": "request adapter callback"},
+                    {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             }
         ]
@@ -1582,6 +1680,14 @@
                 ]
             },
             {
+                "name": "begin pipeline statistics query",
+                "tags": ["upstream"],
+                "args": [
+                    {"name": "query set", "type": "query set"},
+                    {"name": "query index", "type": "uint32_t"}
+                ]
+            },
+            {
                 "name": "end occlusion query"
             },
             {
@@ -1593,6 +1699,10 @@
             },
             {
                 "name": "end pass"
+            },
+            {
+                "name": "end pipeline statistics query",
+                "tags": ["upstream"]
             }
         ]
     },
@@ -1831,7 +1941,17 @@
         ]
     },
     "surface": {
-        "category": "object"
+        "category": "object",
+        "methods": [
+            {
+                "name": "get preferred format",
+                "returns": "texture format",
+                "tags": ["upstream"],
+                "args": [
+                    {"name": "adapter", "type": "adapter"}
+                ]
+            }
+        ]
     },
     "surface descriptor": {
         "category": "structure",
