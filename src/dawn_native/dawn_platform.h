@@ -23,12 +23,9 @@
 #include <dawn_native/wgpu_structs_autogen.h>
 
 namespace dawn_native {
-    // Add an extra buffer usage (readonly storage buffer usage) and an extra texture usage
-    // (readonly storage texture usage) for render pass resource tracking
+    // Add an extra buffer usage (readonly storage buffer usage) for render pass resource tracking
     static constexpr wgpu::BufferUsage kReadOnlyStorageBuffer =
         static_cast<wgpu::BufferUsage>(0x80000000);
-    static constexpr wgpu::TextureUsage kReadOnlyStorageTexture =
-        static_cast<wgpu::TextureUsage>(0x80000000);
 
     // Internal usage to help tracking when a subresource is used as render attachment usage
     // more than once in a render pass.

@@ -165,8 +165,7 @@
         "category": "enum",
         "values": [
             {"value": 0, "name": "undefined", "jsrepr": "undefined", "valid": false},
-            {"value": 1, "name": "read only", "jsrepr": "readonly"},
-            {"value": 2, "name": "write only", "jsrepr": "writeonly"}
+            {"value": 1, "name": "write only", "jsrepr": "writeonly"}
         ]
     },
     "storage texture binding layout": {

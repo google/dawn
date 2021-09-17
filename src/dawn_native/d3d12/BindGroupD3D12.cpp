@@ -160,17 +160,6 @@ namespace dawn_native { namespace d3d12 {
                     }
 
                     switch (bindingInfo.storageTexture.access) {
-                        case wgpu::StorageTextureAccess::ReadOnly: {
-                            // Readonly storage is implemented as SRV so it can be used at the same
-                            // time as a sampled texture.
-                            auto& srv = view->GetSRVDescriptor();
-                            d3d12Device->CreateShaderResourceView(
-                                resource, &srv,
-                                viewAllocation.OffsetFrom(viewSizeIncrement,
-                                                          descriptorHeapOffsets[bindingIndex]));
-                            break;
-                        }
-
                         case wgpu::StorageTextureAccess::WriteOnly: {
                             D3D12_UNORDERED_ACCESS_VIEW_DESC uav = view->GetUAVDescriptor();
                             d3d12Device->CreateUnorderedAccessView(

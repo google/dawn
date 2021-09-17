@@ -319,8 +319,6 @@ namespace dawn_native {
         ResultOrError<wgpu::StorageTextureAccess> TintResourceTypeToStorageTextureAccess(
             tint::inspector::ResourceBinding::ResourceType resource_type) {
             switch (resource_type) {
-                case tint::inspector::ResourceBinding::ResourceType::kReadOnlyStorageTexture:
-                    return wgpu::StorageTextureAccess::ReadOnly;
                 case tint::inspector::ResourceBinding::ResourceType::kWriteOnlyStorageTexture:
                     return wgpu::StorageTextureAccess::WriteOnly;
                 default:

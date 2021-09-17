@@ -339,9 +339,6 @@ namespace dawn_native { namespace opengl {
 
                             GLenum access;
                             switch (bindingInfo.storageTexture.access) {
-                                case wgpu::StorageTextureAccess::ReadOnly:
-                                    access = GL_READ_ONLY;
-                                    break;
                                 case wgpu::StorageTextureAccess::WriteOnly:
                                     access = GL_WRITE_ONLY;
                                     break;

@@ -70,9 +70,6 @@ class StorageTextureValidationTests : public ValidationTest {
         const char* imageTypeDeclaration = "texture_storage_2d") {
         const char* access = "";
         switch (storageTextureBindingType) {
-            case wgpu::StorageTextureAccess::ReadOnly:
-                access = "read";
-                break;
             case wgpu::StorageTextureAccess::WriteOnly:
                 access = "write";
                 break;
@@ -110,61 +107,13 @@ class StorageTextureValidationTests : public ValidationTest {
     wgpu::ShaderModule mDefaultVSModule;
     wgpu::ShaderModule mDefaultFSModule;
 
-    const std::array<wgpu::StorageTextureAccess, 2> kSupportedStorageTextureAccess = {
-        // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is
-        // passed.
-        wgpu::StorageTextureAccess::ReadOnly, wgpu::StorageTextureAccess::WriteOnly};
+    const std::array<wgpu::StorageTextureAccess, 1> kSupportedStorageTextureAccess = {
+        wgpu::StorageTextureAccess::WriteOnly};
 };
-
-// TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is passed.
-#define WARNING_IF_READONLY(statement, access)                \
-    do {                                                      \
-        if (access == wgpu::StorageTextureAccess::ReadOnly) { \
-            EXPECT_DEPRECATION_WARNING(statement);            \
-        } else {                                              \
-            statement;                                        \
-        }                                                     \
-    } while (0)
 
 // Validate read-only storage textures can be declared in vertex and fragment shaders, while
 // writeonly storage textures cannot be used in vertex shaders.
 TEST_F(StorageTextureValidationTests, RenderPipeline) {
-    // Readonly storage texture can be declared in a vertex shader.
-    // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is passed.
-    {
-        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-            [[group(0), binding(0)]] var image0 : texture_storage_2d<rgba8unorm, read>;
-            [[stage(vertex)]] fn main(
-                [[builtin(vertex_index)]] VertexIndex : u32
-            ) -> [[builtin(position)]] vec4<f32> {
-                return textureLoad(image0, vec2<i32>(i32(VertexIndex), 0));
-            })");
-
-        utils::ComboRenderPipelineDescriptor descriptor;
-        descriptor.layout = nullptr;
-        descriptor.vertex.module = vsModule;
-        descriptor.cFragment.module = mDefaultFSModule;
-        EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline(&descriptor));
-    }
-
-    // Read-only storage textures can be declared in a fragment shader.
-    // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is passed.
-    {
-        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-            [[group(0), binding(0)]] var image0 : texture_storage_2d<rgba8unorm, read>;
-            [[stage(fragment)]] fn main(
-                [[builtin(position)]] FragCoord : vec4<f32>
-            ) -> [[location(0)]] vec4<f32> {
-                return textureLoad(image0, vec2<i32>(FragCoord.xy));
-            })");
-
-        utils::ComboRenderPipelineDescriptor descriptor;
-        descriptor.layout = nullptr;
-        descriptor.vertex.module = mDefaultVSModule;
-        descriptor.cFragment.module = fsModule;
-        EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline(&descriptor));
-    }
-
     // Write-only storage textures cannot be declared in a vertex shader.
     {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
@@ -202,29 +151,6 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
 // Validate both read-only and write-only storage textures can be declared in
 // compute shaders.
 TEST_F(StorageTextureValidationTests, ComputePipeline) {
-    // Read-only storage textures can be declared in a compute shader.
-    // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is passed.
-    {
-        wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
-            [[group(0), binding(0)]] var image0 : texture_storage_2d<rgba8unorm, read>;
-
-            [[block]] struct Buf {
-                data : f32;
-            };
-            [[group(0), binding(1)]] var<storage, read_write> buf : Buf;
-
-            [[stage(compute), workgroup_size(1)]] fn main([[builtin(local_invocation_id)]] LocalInvocationID : vec3<u32>) {
-                 buf.data = textureLoad(image0, vec2<i32>(LocalInvocationID.xy)).x;
-            })");
-
-        wgpu::ComputePipelineDescriptor descriptor;
-        descriptor.layout = nullptr;
-        descriptor.compute.module = csModule;
-        descriptor.compute.entryPoint = "main";
-
-        EXPECT_DEPRECATION_WARNING(device.CreateComputePipeline(&descriptor));
-    }
-
     // Write-only storage textures can be declared in a compute shader.
     {
         wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
@@ -282,11 +208,8 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutWithStorageTextureBindingTy
         bool valid;
     };
     constexpr std::array<TestSpec, 6> kTestSpecs = {
-        {{wgpu::ShaderStage::Vertex, wgpu::StorageTextureAccess::ReadOnly, true},
-         {wgpu::ShaderStage::Vertex, wgpu::StorageTextureAccess::WriteOnly, false},
-         {wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::ReadOnly, true},
+        {{wgpu::ShaderStage::Vertex, wgpu::StorageTextureAccess::WriteOnly, false},
          {wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::WriteOnly, true},
-         {wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadOnly, true},
          {wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::WriteOnly, true}}};
 
     for (const auto& testSpec : kTestSpecs) {
@@ -298,10 +221,9 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutWithStorageTextureBindingTy
         descriptor.entries = &entry;
 
         if (testSpec.valid) {
-            WARNING_IF_READONLY(device.CreateBindGroupLayout(&descriptor), testSpec.type);
+            device.CreateBindGroupLayout(&descriptor);
         } else {
-            WARNING_IF_READONLY(ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor)),
-                                testSpec.type);
+            ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor));
         }
     }
 }
@@ -409,8 +331,6 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutEntryTypeMatchesShaderDecla
         {0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::ReadOnlyStorage},
         {0, wgpu::ShaderStage::Compute, wgpu::SamplerBindingType::Filtering},
         {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float},
-        {0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadOnly,
-         kStorageTextureFormat},
         {0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::WriteOnly,
          kStorageTextureFormat}};
 
@@ -431,10 +351,8 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutEntryTypeMatchesShaderDecla
                 defaultComputePipelineDescriptor;
 
             // Create bind group layout with different binding types.
-            wgpu::BindGroupLayout bindGroupLayout;
-            WARNING_IF_READONLY(
-                bindGroupLayout = utils::MakeBindGroupLayout(device, {bindingLayoutEntry}),
-                bindingLayoutEntry.storageTexture.access);
+            wgpu::BindGroupLayout bindGroupLayout =
+                utils::MakeBindGroupLayout(device, {bindingLayoutEntry});
             computePipelineDescriptor.layout =
                 utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
 
@@ -476,8 +394,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureFormatInBindGroupLayout) {
             bindGroupLayoutBinding.storageTexture.access = bindingType;
             bindGroupLayoutBinding.storageTexture.format = textureFormat;
             if (utils::TextureFormatSupportsStorageTexture(textureFormat)) {
-                WARNING_IF_READONLY(utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding}),
-                                    bindingType);
+                utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});
             } else {
                 ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding}));
             }
@@ -519,10 +436,8 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutStorageTextureFormatMatches
                 wgpu::BindGroupLayoutEntry bindGroupLayoutBinding = defaultBindGroupLayoutEntry;
                 bindGroupLayoutBinding.storageTexture.format =
                     storageTextureFormatInBindGroupLayout;
-                wgpu::BindGroupLayout bindGroupLayout;
-                WARNING_IF_READONLY(
-                    bindGroupLayout = utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding}),
-                    bindingType);
+                wgpu::BindGroupLayout bindGroupLayout =
+                    utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});
 
                 // Create the compute pipeline with the bind group layout.
                 wgpu::ComputePipelineDescriptor computePipelineDescriptor =
@@ -570,10 +485,8 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutViewDimensionMatchesShaderD
                 // Create the bind group layout with the given texture view dimension.
                 wgpu::BindGroupLayoutEntry bindGroupLayoutBinding = defaultBindGroupLayoutEntry;
                 bindGroupLayoutBinding.storageTexture.viewDimension = dimensionInBindGroupLayout;
-                wgpu::BindGroupLayout bindGroupLayout;
-                WARNING_IF_READONLY(
-                    bindGroupLayout = utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding}),
-                    bindingType);
+                wgpu::BindGroupLayout bindGroupLayout =
+                    utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});
 
                 // Create the compute pipeline with the bind group layout.
                 wgpu::ComputePipelineDescriptor computePipelineDescriptor =
@@ -604,10 +517,8 @@ TEST_F(StorageTextureValidationTests, StorageTextureBindingTypeInBindGroup) {
         bindGroupLayoutBinding.visibility = wgpu::ShaderStage::Compute;
         bindGroupLayoutBinding.storageTexture.access = storageBindingType;
         bindGroupLayoutBinding.storageTexture.format = kStorageTextureFormat;
-        wgpu::BindGroupLayout bindGroupLayout;
-        WARNING_IF_READONLY(
-            bindGroupLayout = utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding}),
-            storageBindingType);
+        wgpu::BindGroupLayout bindGroupLayout =
+            utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});
 
         // Buffers are not allowed to be used as storage textures in a bind group.
         {
@@ -650,10 +561,8 @@ TEST_F(StorageTextureValidationTests, StorageTextureUsageInBindGroup) {
         bindGroupLayoutBinding.visibility = wgpu::ShaderStage::Compute;
         bindGroupLayoutBinding.storageTexture.access = storageBindingType;
         bindGroupLayoutBinding.storageTexture.format = wgpu::TextureFormat::R32Float;
-        wgpu::BindGroupLayout bindGroupLayout;
-        WARNING_IF_READONLY(
-            bindGroupLayout = utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding}),
-            storageBindingType);
+        wgpu::BindGroupLayout bindGroupLayout =
+            utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});
 
         for (wgpu::TextureUsage usage : kTextureUsages) {
             // Create texture views with different texture usages
@@ -689,10 +598,8 @@ TEST_F(StorageTextureValidationTests, StorageTextureFormatInBindGroup) {
             // Create a bind group layout with given storage texture format.
             wgpu::BindGroupLayoutEntry bindGroupLayoutBinding = defaultBindGroupLayoutEntry;
             bindGroupLayoutBinding.storageTexture.format = formatInBindGroupLayout;
-            wgpu::BindGroupLayout bindGroupLayout;
-            WARNING_IF_READONLY(
-                bindGroupLayout = utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding}),
-                storageBindingType);
+            wgpu::BindGroupLayout bindGroupLayout =
+                utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});
 
             for (wgpu::TextureFormat textureViewFormat : utils::kAllTextureFormats) {
                 if (!utils::TextureFormatSupportsStorageTexture(textureViewFormat)) {
@@ -747,10 +654,8 @@ TEST_F(StorageTextureValidationTests, StorageTextureViewDimensionInBindGroup) {
             // Create a bind group layout with given texture view dimension.
             wgpu::BindGroupLayoutEntry bindGroupLayoutBinding = defaultBindGroupLayoutEntry;
             bindGroupLayoutBinding.storageTexture.viewDimension = dimensionInBindGroupLayout;
-            wgpu::BindGroupLayout bindGroupLayout;
-            WARNING_IF_READONLY(
-                bindGroupLayout = utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding}),
-                storageBindingType);
+            wgpu::BindGroupLayout bindGroupLayout =
+                utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});
 
             for (wgpu::TextureViewDimension dimensionOfTextureView : kSupportedDimensions) {
                 // Create a texture view with given texture view dimension.
@@ -796,11 +701,8 @@ TEST_F(StorageTextureValidationTests, StorageTextureInRenderPass) {
 
     for (wgpu::StorageTextureAccess storageTextureType : kSupportedStorageTextureAccess) {
         // Create a bind group that contains a storage texture.
-        wgpu::BindGroupLayout bindGroupLayout;
-        WARNING_IF_READONLY(
-            bindGroupLayout = utils::MakeBindGroupLayout(
-                device, {{0, wgpu::ShaderStage::Fragment, storageTextureType, kFormat}}),
-            storageTextureType);
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, storageTextureType, kFormat}});
 
         wgpu::BindGroup bindGroupWithStorageTexture =
             utils::MakeBindGroup(device, bindGroupLayout, {{0, storageTexture.CreateView()}});
@@ -830,12 +732,9 @@ TEST_F(StorageTextureValidationTests, StorageTextureAndSampledTextureInOneRender
     for (wgpu::StorageTextureAccess storageTextureType : kSupportedStorageTextureAccess) {
         // Create a bind group that binds the same texture as both storage texture and sampled
         // texture.
-        wgpu::BindGroupLayout bindGroupLayout;
-        WARNING_IF_READONLY(
-            bindGroupLayout = utils::MakeBindGroupLayout(
-                device, {{0, wgpu::ShaderStage::Fragment, storageTextureType, kFormat},
-                         {1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float}}),
-            storageTextureType);
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, storageTextureType, kFormat},
+                     {1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float}});
         wgpu::BindGroup bindGroup = utils::MakeBindGroup(
             device, bindGroupLayout,
             {{0, storageTexture.CreateView()}, {1, storageTexture.CreateView()}});
@@ -848,9 +747,6 @@ TEST_F(StorageTextureValidationTests, StorageTextureAndSampledTextureInOneRender
         renderPassEncoder.SetBindGroup(0, bindGroup);
         renderPassEncoder.EndPass();
         switch (storageTextureType) {
-            case wgpu::StorageTextureAccess::ReadOnly:
-                encoder.Finish();
-                break;
             case wgpu::StorageTextureAccess::WriteOnly:
                 ASSERT_DEVICE_ERROR(encoder.Finish());
                 break;
@@ -871,11 +767,8 @@ TEST_F(StorageTextureValidationTests, StorageTextureAndRenderAttachmentInOneRend
 
     for (wgpu::StorageTextureAccess storageTextureType : kSupportedStorageTextureAccess) {
         // Create a bind group that contains a storage texture.
-        wgpu::BindGroupLayout bindGroupLayout;
-        WARNING_IF_READONLY(
-            bindGroupLayout = utils::MakeBindGroupLayout(
-                device, {{0, wgpu::ShaderStage::Fragment, storageTextureType, kFormat}}),
-            storageTextureType);
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, storageTextureType, kFormat}});
         wgpu::BindGroup bindGroupWithStorageTexture =
             utils::MakeBindGroup(device, bindGroupLayout, {{0, storageTexture.CreateView()}});
 
@@ -889,36 +782,6 @@ TEST_F(StorageTextureValidationTests, StorageTextureAndRenderAttachmentInOneRend
     }
 }
 
-// Verify it is invalid to use a a texture as both read-only storage texture and write-only storage
-// texture in one render pass.
-TEST_F(StorageTextureValidationTests, ReadOnlyAndWriteOnlyStorageTextureInOneRenderPass) {
-    constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
-    wgpu::Texture storageTexture = CreateTexture(wgpu::TextureUsage::StorageBinding, kFormat);
-
-    // Create a bind group that uses the same texture as both read-only and write-only storage
-    // texture.
-    wgpu::BindGroupLayout bindGroupLayout;
-    // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is passed.
-    EXPECT_DEPRECATION_WARNING(
-        bindGroupLayout = utils::MakeBindGroupLayout(
-            device,
-            {{0, wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::ReadOnly, kFormat},
-             {1, wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::WriteOnly, kFormat}}));
-    wgpu::BindGroup bindGroup =
-        utils::MakeBindGroup(device, bindGroupLayout,
-                             {{0, storageTexture.CreateView()}, {1, storageTexture.CreateView()}});
-
-    // It is invalid to use a texture as both read-only storage texture and write-only storage
-    // texture in one render pass.
-    wgpu::Texture outputAttachment = CreateTexture(wgpu::TextureUsage::RenderAttachment, kFormat);
-    utils::ComboRenderPassDescriptor renderPassDescriptor({outputAttachment.CreateView()});
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    wgpu::RenderPassEncoder renderPassEncoder = encoder.BeginRenderPass(&renderPassDescriptor);
-    renderPassEncoder.SetBindGroup(0, bindGroup);
-    renderPassEncoder.EndPass();
-    ASSERT_DEVICE_ERROR(encoder.Finish());
-}
-
 // Verify it is valid to use a texture as both storage texture (read-only or write-only) and
 // sampled texture in one compute pass.
 TEST_F(StorageTextureValidationTests, StorageTextureAndSampledTextureInOneComputePass) {
@@ -929,12 +792,9 @@ TEST_F(StorageTextureValidationTests, StorageTextureAndSampledTextureInOneComput
     for (wgpu::StorageTextureAccess storageTextureType : kSupportedStorageTextureAccess) {
         // Create a bind group that binds the same texture as both storage texture and sampled
         // texture.
-        wgpu::BindGroupLayout bindGroupLayout;
-        WARNING_IF_READONLY(
-            bindGroupLayout = utils::MakeBindGroupLayout(
-                device, {{0, wgpu::ShaderStage::Compute, storageTextureType, kFormat},
-                         {1, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float}}),
-            storageTextureType);
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Compute, storageTextureType, kFormat},
+                     {1, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float}});
         wgpu::BindGroup bindGroup = utils::MakeBindGroup(
             device, bindGroupLayout,
             {{0, storageTexture.CreateView()}, {1, storageTexture.CreateView()}});
@@ -947,32 +807,4 @@ TEST_F(StorageTextureValidationTests, StorageTextureAndSampledTextureInOneComput
         computePassEncoder.EndPass();
         encoder.Finish();
     }
-}
-
-// Verify it is valid to use a texture as both read-only storage texture and write-only storage
-// texture in one compute pass.
-TEST_F(StorageTextureValidationTests, ReadOnlyAndWriteOnlyStorageTextureInOneComputePass) {
-    constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
-    wgpu::Texture storageTexture = CreateTexture(wgpu::TextureUsage::StorageBinding, kFormat);
-
-    // Create a bind group that uses the same texture as both read-only and write-only storage
-    // texture.
-    wgpu::BindGroupLayout bindGroupLayout;
-    // TODO(crbug.com/dawn/1025): Remove once ReadOnly storage texture deprecation period is passed.
-    EXPECT_DEPRECATION_WARNING(
-        bindGroupLayout = utils::MakeBindGroupLayout(
-            device,
-            {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadOnly, kFormat},
-             {1, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::WriteOnly, kFormat}}));
-    wgpu::BindGroup bindGroup =
-        utils::MakeBindGroup(device, bindGroupLayout,
-                             {{0, storageTexture.CreateView()}, {1, storageTexture.CreateView()}});
-
-    // It is valid to use a texture as both read-only storage texture and write-only storage
-    // texture in one compute pass.
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    wgpu::ComputePassEncoder computePassEncoder = encoder.BeginComputePass();
-    computePassEncoder.SetBindGroup(0, bindGroup);
-    computePassEncoder.EndPass();
-    encoder.Finish();
 }

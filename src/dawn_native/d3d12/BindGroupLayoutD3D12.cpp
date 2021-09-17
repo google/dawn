@@ -47,8 +47,6 @@ namespace dawn_native { namespace d3d12 {
 
                 case BindingInfoType::StorageTexture:
                     switch (bindingInfo.storageTexture.access) {
-                        case wgpu::StorageTextureAccess::ReadOnly:
-                            return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
                         case wgpu::StorageTextureAccess::WriteOnly:
                             return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
                         case wgpu::StorageTextureAccess::Undefined:

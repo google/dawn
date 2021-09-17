@@ -460,12 +460,6 @@ namespace dawn_native {
         if (internalUsageDesc != nullptr) {
             mInternalUsage |= internalUsageDesc->internalUsage;
         }
-
-        // Add readonly storage usage if the texture has a storage usage. The validation rules in
-        // ValidateSyncScopeResourceUsage will make sure we don't use both at the same time.
-        if (mInternalUsage & wgpu::TextureUsage::StorageBinding) {
-            mInternalUsage |= kReadOnlyStorageTexture;
-        }
     }
 
     static Format kUnusedFormat;

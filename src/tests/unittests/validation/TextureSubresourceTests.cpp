@@ -67,26 +67,8 @@ namespace {
                 encoder.Finish();
             }
 
-            // It is valid to has multiple read from a subresource and one single write into another
-            // subresource
-            {
-                wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {{0, samplerView}});
-
-                wgpu::BindGroupLayout bgl1;
-                EXPECT_DEPRECATION_WARNING(
-                    bgl1 = utils::MakeBindGroupLayout(
-                        device, {{0, wgpu::ShaderStage::Fragment,
-                                  wgpu::StorageTextureAccess::ReadOnly, kFormat}}));
-
-                wgpu::BindGroup bindGroup1 = utils::MakeBindGroup(device, bgl1, {{0, samplerView}});
-
-                wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-                wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
-                pass.SetBindGroup(0, bindGroup);
-                pass.SetBindGroup(1, bindGroup1);
-                pass.EndPass();
-                encoder.Finish();
-            }
+            // It is not currently possible to test that it is valid to have multiple reads from a
+            // subresource while there is a single write in another subresource.
 
             // It is invalid to read and write into the same subresources
             {

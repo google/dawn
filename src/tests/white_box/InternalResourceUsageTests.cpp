@@ -37,18 +37,6 @@ TEST_P(InternalResourceUsageTests, InternalBufferUsage) {
     ASSERT_DEVICE_ERROR(CreateBuffer(dawn_native::kInternalStorageBuffer));
 }
 
-// Verify it is an error to create a texture with a texture usage that should only be used
-// internally.
-TEST_P(InternalResourceUsageTests, InternalTextureUsage) {
-    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
-
-    wgpu::TextureDescriptor descriptor;
-    descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
-    descriptor.size = {1, 1, 1};
-    descriptor.usage = dawn_native::kReadOnlyStorageTexture;
-    ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
-}
-
 DAWN_INSTANTIATE_TEST(InternalResourceUsageTests, NullBackend());
 
 class InternalBindingTypeTests : public DawnTest {};

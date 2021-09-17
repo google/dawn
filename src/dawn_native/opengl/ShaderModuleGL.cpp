@@ -164,8 +164,6 @@ namespace dawn_native { namespace opengl {
                         spirv_cross::Bitset flags = compiler.get_decoration_bitset(resource.id);
                         if (flags.get(spv::DecorationNonReadable)) {
                             info->storageTexture.access = wgpu::StorageTextureAccess::WriteOnly;
-                        } else if (flags.get(spv::DecorationNonWritable)) {
-                            info->storageTexture.access = wgpu::StorageTextureAccess::ReadOnly;
                         } else {
                             return DAWN_VALIDATION_ERROR(
                                 "Read-write storage textures are not supported");
