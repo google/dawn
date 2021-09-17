@@ -52,6 +52,16 @@ def main():
     if os.path.exists(corpus_dir):
         shutil.rmtree(corpus_dir)
     os.makedirs(corpus_dir)
+
+    # It might be that some of the attempts to convert SPIR-V assembly shaders
+    # into SPIR-V binaries go wrong. It is sensible to tolerate a small number
+    # of such errors, to avoid fuzzer preparation failing due to bugs in
+    # spirv-as. But it is important to know when a large number of failures
+    # occur, in case something is more deeply wrong.
+    num_errors = 0
+    max_tolerated_errors = 10
+    logged_errors = ""
+
     for in_file in list_spvasm_files(input_dir):
         if in_file.endswith(".expected.spvasm"):
             continue
@@ -69,8 +79,13 @@ def main():
                                 stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
         if proc.returncode != 0:
-            print("Error running " + " ".join(cmd) + ": " + stdout, stderr)
-            return 1
+            num_errors += 1
+            logged_errors += "Error running " + " ".join(cmd) + ": " + stdout.decode('utf-8') + stderr.decode('utf-8')
+
+    if num_errors > max_tolerated_errors:
+        print("Too many (" + str(num_errors) + ") errors occured while generating the SPIR-V corpus.")
+        print(logged_errors)
+        return 1
 
 
 if __name__ == "__main__":
