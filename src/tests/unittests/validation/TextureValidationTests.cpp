@@ -415,9 +415,9 @@ namespace {
 
         // TODO(dawn:690): Uncomment these depth/stencil formats after we implement them in Dawn.
         wgpu::TextureFormat depthStencilFormats[] = {
-            wgpu::TextureFormat::Depth32Float, wgpu::TextureFormat::Depth24Plus,
-            wgpu::TextureFormat::Stencil8, wgpu::TextureFormat::Depth24PlusStencil8,
-            // wgpu::TextureFormat::Depth16Unorm,
+            wgpu::TextureFormat::Stencil8,     wgpu::TextureFormat::Depth16Unorm,
+            wgpu::TextureFormat::Depth24Plus,  wgpu::TextureFormat::Depth24PlusStencil8,
+            wgpu::TextureFormat::Depth32Float,
             // wgpu::TextureFormat::Depth24UnormStencil8,
             // wgpu::TextureFormat::Depth32FloatStencil8,
         };

@@ -77,7 +77,7 @@ namespace dawn_native {
 
     // The number of formats Dawn knows about. Asserts in BuildFormatTable ensure that this is the
     // exact number of known format.
-    static constexpr size_t kKnownFormatCount = 93;
+    static constexpr size_t kKnownFormatCount = 94;
 
     struct Format;
     using FormatTable = std::array<Format, kKnownFormatCount>;

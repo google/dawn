@@ -311,7 +311,10 @@ namespace dawn_native { namespace metal {
             case wgpu::TextureFormat::ASTC12x12Unorm:
             case wgpu::TextureFormat::ASTC12x12UnormSrgb:
 
+            // TODO(dawn:666): implement stencil8
             case wgpu::TextureFormat::Stencil8:
+            // TODO(dawn:570): implement depth16unorm
+            case wgpu::TextureFormat::Depth16Unorm:
             case wgpu::TextureFormat::Undefined:
                 UNREACHABLE();
         }

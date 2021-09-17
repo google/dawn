@@ -195,12 +195,13 @@ namespace dawn_native {
             AddFormat(internalFormat);
         };
 
-        auto AddDepthFormat = [&AddFormat](wgpu::TextureFormat format, uint32_t byteSize) {
+        auto AddDepthFormat = [&AddFormat](wgpu::TextureFormat format, uint32_t byteSize,
+                                           bool isSupported) {
             Format internalFormat;
             internalFormat.format = format;
             internalFormat.isRenderable = true;
             internalFormat.isCompressed = false;
-            internalFormat.isSupported = true;
+            internalFormat.isSupported = isSupported;
             internalFormat.supportsStorageUsage = false;
             internalFormat.aspects = Aspect::Depth;
             internalFormat.componentCount = 1;
@@ -214,12 +215,12 @@ namespace dawn_native {
             AddFormat(internalFormat);
         };
 
-        auto AddStencilFormat = [&AddFormat](wgpu::TextureFormat format) {
+        auto AddStencilFormat = [&AddFormat](wgpu::TextureFormat format, bool isSupported) {
             Format internalFormat;
             internalFormat.format = format;
             internalFormat.isRenderable = true;
             internalFormat.isCompressed = false;
-            internalFormat.isSupported = false;
+            internalFormat.isSupported = isSupported;
             internalFormat.supportsStorageUsage = false;
             internalFormat.aspects = Aspect::Stencil;
             internalFormat.componentCount = 1;
@@ -324,16 +325,18 @@ namespace dawn_native {
         AddColorFormat(wgpu::TextureFormat::RGBA32Float, true, true, 16, SampleTypeBit::UnfilterableFloat, 4);
 
         // Depth-stencil formats
-        AddDepthFormat(wgpu::TextureFormat::Depth32Float, 4);
+        // TODO(dawn:666): Implement the stencil8 format
+        AddStencilFormat(wgpu::TextureFormat::Stencil8, false);
+        // TODO(dawn:570): Implement the depth16unorm format
+        AddDepthFormat(wgpu::TextureFormat::Depth16Unorm, 2, false);
         // TODO(crbug.com/dawn/843): This is 4 because we read this to perform zero initialization,
         // and textures are always use depth32float. We should improve this to be more robust. Perhaps,
         // using 0 here to mean "unsized" and adding a backend-specific query for the block size.
-        AddDepthFormat(wgpu::TextureFormat::Depth24Plus, 4);
-        // TODO(dawn:666): Implement the stencil8 format
-        AddStencilFormat(wgpu::TextureFormat::Stencil8);
+        AddDepthFormat(wgpu::TextureFormat::Depth24Plus, 4, true);
         AddMultiAspectFormat(wgpu::TextureFormat::Depth24PlusStencil8,
                               Aspect::Depth | Aspect::Stencil, wgpu::TextureFormat::Depth24Plus, wgpu::TextureFormat::Stencil8, true, true, 2);
-        // TODO(dawn:690): Implement Depth16Unorm, Depth24UnormStencil8, Depth32FloatStencil8.
+        AddDepthFormat(wgpu::TextureFormat::Depth32Float, 4, true);
+        // TODO(dawn:690): Implement Depth24UnormStencil8, Depth32FloatStencil8.
 
         // BC compressed formats
         bool isBCFormatSupported = device->IsExtensionEnabled(Extension::TextureCompressionBC);

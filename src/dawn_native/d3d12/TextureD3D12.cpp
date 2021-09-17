@@ -244,7 +244,10 @@ namespace dawn_native { namespace d3d12 {
                 case wgpu::TextureFormat::ASTC12x12UnormSrgb:
 
                 case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
+                // TODO(dawn:666): implement stencil8
                 case wgpu::TextureFormat::Stencil8:
+                // TODO(dawn:570): implement depth16unorm
+                case wgpu::TextureFormat::Depth16Unorm:
                 case wgpu::TextureFormat::Undefined:
                     UNREACHABLE();
             }
@@ -410,7 +413,10 @@ namespace dawn_native { namespace d3d12 {
             case wgpu::TextureFormat::ASTC12x12Unorm:
             case wgpu::TextureFormat::ASTC12x12UnormSrgb:
 
+            // TODO(dawn:666): implement stencil8
             case wgpu::TextureFormat::Stencil8:
+            // TODO(dawn:570): implement depth16unorm
+            case wgpu::TextureFormat::Depth16Unorm:
             case wgpu::TextureFormat::Undefined:
                 UNREACHABLE();
         }
