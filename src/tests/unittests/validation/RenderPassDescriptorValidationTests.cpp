@@ -637,7 +637,7 @@ namespace {
 
     // Tests on the size of the resolve target.
     TEST_F(MultisampledRenderPassDescriptorValidationTest,
-           ColorAttachmentResolveTargetCompatibility) {
+           ColorAttachmentResolveTargetDimensionMismatch) {
         constexpr uint32_t kSize2 = kSize * 2;
         wgpu::Texture resolveTexture =
             CreateTexture(device, wgpu::TextureDimension::e2D, kColorFormat, kSize2, kSize2,
@@ -793,6 +793,9 @@ namespace {
             renderPass.cDepthStencilAttachmentInfo.clearDepth = INFINITY;
             AssertBeginRenderPassSuccess(&renderPass);
         }
+
+        // TODO(https://crbug.com/dawn/666): Add a test case for clearStencil for stencilOnly
+        // once stencil8 is supported.
     }
 
     TEST_F(RenderPassDescriptorValidationTest, ValidateDepthStencilReadOnly) {
@@ -828,6 +831,9 @@ namespace {
             AssertBeginRenderPassSuccess(&renderPass);
         }
 
+        // TODO(https://crbug.com/dawn/666): Add a test case for stencil-only once stencil8 is
+        // supported (depthReadOnly and stencilReadOnly mismatch but no depth component).
+
         // Tests that a pass with mismatched depthReadOnly and stencilReadOnly values fails when
         // both depth and stencil components exist.
         {
@@ -853,7 +859,7 @@ namespace {
             AssertBeginRenderPassError(&renderPass);
         }
 
-        // Tests that a pass with storeOp set to clear and readOnly set to true fails.
+        // Tests that a pass with storeOp set to discard and readOnly set to true fails.
         {
             utils::ComboRenderPassDescriptor renderPass({colorView}, depthStencilView);
             renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
@@ -908,7 +914,7 @@ namespace {
             AssertBeginRenderPassError(&renderPass);
         }
 
-        // Using DepthOnly of a depth only texture us allowed.
+        // Using DepthOnly of a depth only texture is allowed.
         {
             texDesc.format = wgpu::TextureFormat::Depth24Plus;
             viewDesc.aspect = wgpu::TextureAspect::DepthOnly;
