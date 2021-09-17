@@ -16,6 +16,8 @@
 
 #include "common/Assert.h"
 #include "common/Log.h"
+#include "dawn_native/AsyncTask.h"
+#include "dawn_native/CreatePipelineAsyncTask.h"
 #include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/PipelineLayoutD3D12.h"
@@ -469,6 +471,18 @@ namespace dawn_native { namespace d3d12 {
         inputLayoutDescriptor.pInputElementDescs = &(*inputElementDescriptors)[0];
         inputLayoutDescriptor.NumElements = count;
         return inputLayoutDescriptor;
+    }
+
+    void RenderPipeline::CreateAsync(Device* device,
+                                     const RenderPipelineDescriptor* descriptor,
+                                     size_t blueprintHash,
+                                     WGPUCreateRenderPipelineAsyncCallback callback,
+                                     void* userdata) {
+        Ref<RenderPipeline> pipeline = AcquireRef(new RenderPipeline(device, descriptor));
+        std::unique_ptr<CreateRenderPipelineAsyncTask> asyncTask =
+            std::make_unique<CreateRenderPipelineAsyncTask>(pipeline, blueprintHash, callback,
+                                                            userdata);
+        CreateRenderPipelineAsyncTask::RunAsync(std::move(asyncTask));
     }
 
 }}  // namespace dawn_native::d3d12

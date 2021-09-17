@@ -29,6 +29,11 @@ namespace dawn_native { namespace d3d12 {
         static ResultOrError<Ref<RenderPipeline>> Create(
             Device* device,
             const RenderPipelineDescriptor* descriptor);
+        static void CreateAsync(Device* device,
+                                const RenderPipelineDescriptor* descriptor,
+                                size_t blueprintHash,
+                                WGPUCreateRenderPipelineAsyncCallback callback,
+                                void* userdata);
         RenderPipeline() = delete;
 
         D3D12_PRIMITIVE_TOPOLOGY GetD3D12PrimitiveTopology() const;
@@ -42,7 +47,7 @@ namespace dawn_native { namespace d3d12 {
       private:
         ~RenderPipeline() override;
         using RenderPipelineBase::RenderPipelineBase;
-        MaybeError Initialize();
+        MaybeError Initialize() override;
         D3D12_INPUT_LAYOUT_DESC ComputeInputLayout(
             std::array<D3D12_INPUT_ELEMENT_DESC, kMaxVertexAttributes>* inputElementDescriptors);
 

@@ -299,6 +299,11 @@ namespace dawn_native {
                                                  WGPUCreateComputePipelineAsyncCallback callback,
                                                  void* userdata,
                                                  size_t blueprintHash);
+        void AddRenderPipelineAsyncCallbackTask(Ref<RenderPipelineBase> pipeline,
+                                                std::string errorMessage,
+                                                WGPUCreateRenderPipelineAsyncCallback callback,
+                                                void* userdata,
+                                                size_t blueprintHash);
 
         PipelineCompatibilityToken GetNextPipelineCompatibilityToken();
 

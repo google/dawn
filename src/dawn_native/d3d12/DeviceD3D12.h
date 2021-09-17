@@ -177,6 +177,10 @@ namespace dawn_native { namespace d3d12 {
                                             size_t blueprintHash,
                                             WGPUCreateComputePipelineAsyncCallback callback,
                                             void* userdata) override;
+        void CreateRenderPipelineAsyncImpl(const RenderPipelineDescriptor* descriptor,
+                                           size_t blueprintHash,
+                                           WGPUCreateRenderPipelineAsyncCallback callback,
+                                           void* userdata) override;
 
         void ShutDownImpl() override;
         MaybeError WaitForIdleForDestruction() override;

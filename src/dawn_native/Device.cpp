@@ -1338,9 +1338,8 @@ namespace dawn_native {
             // Otherwise we will create the pipeline object in CreateRenderPipelineAsyncImpl(),
             // where the pipeline object may be created asynchronously and the result will be saved
             // to mCreatePipelineAsyncTracker.
-            FlatRenderPipelineDescriptor appliedFlatDescriptor(&descriptorWithPipelineLayout);
             const size_t blueprintHash = pipelineAndBlueprintFromCache.second;
-            CreateRenderPipelineAsyncImpl(&appliedFlatDescriptor, blueprintHash, callback,
+            CreateRenderPipelineAsyncImpl(&descriptorWithPipelineLayout, blueprintHash, callback,
                                           userdata);
         }
 
@@ -1530,8 +1529,8 @@ namespace dawn_native {
             }
 
             void Finish() final {
-                // TODO(jiawei.shao@intel.com): call AddOrGetCachedComputePipeline() asynchronously
-                // in CreateComputePipelineAsyncTaskImpl::Run() when the front-end pipeline cache is
+                // TODO(dawn:529): call AddOrGetCachedComputePipeline() asynchronously in
+                // CreateComputePipelineAsyncTaskImpl::Run() when the front-end pipeline cache is
                 // thread-safe.
                 if (mPipeline.Get() != nullptr) {
                     mPipeline = mPipeline->GetDevice()->AddOrGetCachedComputePipeline(
@@ -1547,6 +1546,50 @@ namespace dawn_native {
 
         mCallbackTaskManager->AddCallbackTask(
             std::make_unique<CreateComputePipelineAsyncWaitableCallbackTask>(
+                std::move(pipeline), errorMessage, callback, userdata, blueprintHash));
+    }
+
+    void DeviceBase::AddRenderPipelineAsyncCallbackTask(
+        Ref<RenderPipelineBase> pipeline,
+        std::string errorMessage,
+        WGPUCreateRenderPipelineAsyncCallback callback,
+        void* userdata,
+        size_t blueprintHash) {
+        // CreateRenderPipelineAsyncWaitableCallbackTask is declared as an internal class as it
+        // needs to call the private member function DeviceBase::AddOrGetCachedRenderPipeline().
+        struct CreateRenderPipelineAsyncWaitableCallbackTask final
+            : CreateRenderPipelineAsyncCallbackTask {
+            CreateRenderPipelineAsyncWaitableCallbackTask(
+                Ref<RenderPipelineBase> pipeline,
+                std::string errorMessage,
+                WGPUCreateRenderPipelineAsyncCallback callback,
+                void* userdata,
+                size_t blueprintHash)
+                : CreateRenderPipelineAsyncCallbackTask(std::move(pipeline),
+                                                        errorMessage,
+                                                        callback,
+                                                        userdata),
+                  mBlueprintHash(blueprintHash) {
+            }
+
+            void Finish() final {
+                // TODO(dawn:529): call AddOrGetCachedRenderPipeline() asynchronously in
+                // CreateRenderPipelineAsyncTaskImpl::Run() when the front-end pipeline cache is
+                // thread-safe.
+                if (mPipeline.Get() != nullptr) {
+                    mPipeline = mPipeline->GetDevice()->AddOrGetCachedRenderPipeline(
+                        mPipeline, mBlueprintHash);
+                }
+
+                CreateRenderPipelineAsyncCallbackTask::Finish();
+            }
+
+          private:
+            size_t mBlueprintHash;
+        };
+
+        mCallbackTaskManager->AddCallbackTask(
+            std::make_unique<CreateRenderPipelineAsyncWaitableCallbackTask>(
                 std::move(pipeline), errorMessage, callback, userdata, blueprintHash));
     }
 

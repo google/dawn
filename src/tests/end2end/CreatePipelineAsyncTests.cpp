@@ -68,6 +68,47 @@ class CreatePipelineAsyncTest : public DawnTest {
         ValidateCreateComputePipelineAsync(&task);
     }
 
+    void ValidateCreateRenderPipelineAsync(CreatePipelineAsyncTask* currentTask) {
+        constexpr wgpu::TextureFormat kRenderAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
+
+        wgpu::TextureDescriptor textureDescriptor;
+        textureDescriptor.size = {1, 1, 1};
+        textureDescriptor.format = kRenderAttachmentFormat;
+        textureDescriptor.usage =
+            wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
+        wgpu::Texture outputTexture = device.CreateTexture(&textureDescriptor);
+
+        utils::ComboRenderPassDescriptor renderPassDescriptor({outputTexture.CreateView()});
+        renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+        renderPassDescriptor.cColorAttachments[0].clearColor = {1.f, 0.f, 0.f, 1.f};
+
+        wgpu::CommandBuffer commands;
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder renderPassEncoder =
+                encoder.BeginRenderPass(&renderPassDescriptor);
+
+            while (!currentTask->isCompleted) {
+                WaitABit();
+            }
+            ASSERT_TRUE(currentTask->message.empty());
+            ASSERT_NE(nullptr, currentTask->renderPipeline.Get());
+
+            renderPassEncoder.SetPipeline(currentTask->renderPipeline);
+            renderPassEncoder.Draw(1);
+            renderPassEncoder.EndPass();
+            commands = encoder.Finish();
+        }
+
+        queue.Submit(1, &commands);
+
+        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), outputTexture, 0, 0);
+    }
+
+    void ValidateCreateRenderPipelineAsync() {
+        ValidateCreateRenderPipelineAsync(&task);
+    }
+
     void DoCreateRenderPipelineAsync(
         const utils::ComboRenderPipelineDescriptor& renderPipelineDescriptor) {
         device.CreateRenderPipelineAsync(
@@ -212,36 +253,7 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateRenderPipelineAsync) {
 
     DoCreateRenderPipelineAsync(renderPipelineDescriptor);
 
-    wgpu::TextureDescriptor textureDescriptor;
-    textureDescriptor.size = {1, 1, 1};
-    textureDescriptor.format = kRenderAttachmentFormat;
-    textureDescriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
-    wgpu::Texture outputTexture = device.CreateTexture(&textureDescriptor);
-
-    utils::ComboRenderPassDescriptor renderPassDescriptor({outputTexture.CreateView()});
-    renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
-    renderPassDescriptor.cColorAttachments[0].clearColor = {1.f, 0.f, 0.f, 1.f};
-
-    wgpu::CommandBuffer commands;
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder renderPassEncoder = encoder.BeginRenderPass(&renderPassDescriptor);
-
-        while (!task.isCompleted) {
-            WaitABit();
-        }
-        ASSERT_TRUE(task.message.empty());
-        ASSERT_NE(nullptr, task.renderPipeline.Get());
-
-        renderPassEncoder.SetPipeline(task.renderPipeline);
-        renderPassEncoder.Draw(1);
-        renderPassEncoder.EndPass();
-        commands = encoder.Finish();
-    }
-
-    queue.Submit(1, &commands);
-
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), outputTexture, 0, 0);
+    ValidateCreateRenderPipelineAsync();
 }
 
 // Verify the render pipeline created with CreateRenderPipelineAsync() still works when the entry
@@ -448,7 +460,7 @@ TEST_P(CreatePipelineAsyncTest, CreateSameComputePipelineTwice) {
 
 // Verify creating compute pipeline with same descriptor and CreateComputePipelineAsync() at the
 // same time works correctly.
-TEST_P(CreatePipelineAsyncTest, CreateSamePipelineTwiceAtSameTime) {
+TEST_P(CreatePipelineAsyncTest, CreateSameComputePipelineTwiceAtSameTime) {
     wgpu::BindGroupLayoutEntry binding = {};
     binding.binding = 0;
     binding.buffer.type = wgpu::BufferBindingType::Storage;
@@ -502,6 +514,50 @@ TEST_P(CreatePipelineAsyncTest, CreateSamePipelineTwiceAtSameTime) {
     // object.
     if (!UsesWire()) {
         EXPECT_EQ(task.computePipeline.Get(), anotherTask.computePipeline.Get());
+    }
+}
+
+// Verify the basic use of CreateRenderPipelineAsync() works on all backends.
+TEST_P(CreatePipelineAsyncTest, CreateSameRenderPipelineTwiceAtSameTime) {
+    constexpr wgpu::TextureFormat kRenderAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
+
+    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+            return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+        })");
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+        [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+            return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+        })");
+    renderPipelineDescriptor.vertex.module = vsModule;
+    renderPipelineDescriptor.cFragment.module = fsModule;
+    renderPipelineDescriptor.cTargets[0].format = kRenderAttachmentFormat;
+    renderPipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
+
+    auto callback = [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline returnPipeline,
+                       const char* message, void* userdata) {
+        EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_Success, status);
+
+        CreatePipelineAsyncTask* task = static_cast<CreatePipelineAsyncTask*>(userdata);
+        task->renderPipeline = wgpu::RenderPipeline::Acquire(returnPipeline);
+        task->isCompleted = true;
+        task->message = message;
+    };
+
+    // Create two render pipelines with same descriptor.
+    CreatePipelineAsyncTask anotherTask;
+    device.CreateRenderPipelineAsync(&renderPipelineDescriptor, callback, &task);
+    device.CreateRenderPipelineAsync(&renderPipelineDescriptor, callback, &anotherTask);
+
+    // Verify task.renderPipeline and anotherTask.renderPipeline are both created correctly.
+    ValidateCreateRenderPipelineAsync(&task);
+    ValidateCreateRenderPipelineAsync(&anotherTask);
+
+    // Verify task.renderPipeline and anotherTask.renderPipeline are pointing to the same Dawn
+    // object.
+    if (!UsesWire()) {
+        EXPECT_EQ(task.renderPipeline.Get(), anotherTask.renderPipeline.Get());
     }
 }
 
