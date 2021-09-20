@@ -186,6 +186,8 @@ source_set("dawn_native_sources") {
     "BuddyMemoryAllocator.h",
     "Buffer.cpp",
     "Buffer.h",
+    "BufferLocation.cpp",
+    "BufferLocation.h",
     "CachedObject.cpp",
     "CachedObject.h",
     "CallbackTaskManager.cpp",

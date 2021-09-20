@@ -17,6 +17,7 @@
 #include "common/Constants.h"
 #include "common/Log.h"
 #include "dawn_native/Buffer.h"
+#include "dawn_native/BufferLocation.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/CommandValidation.h"
 #include "dawn_native/Commands.h"
@@ -178,8 +179,7 @@ namespace dawn_native {
 
             DrawIndexedIndirectCmd* cmd =
                 allocator->Allocate<DrawIndexedIndirectCmd>(Command::DrawIndexedIndirect);
-            cmd->indirectBuffer = indirectBuffer;
-            cmd->indirectOffset = indirectOffset;
+            cmd->indirectBufferLocation = BufferLocation::New(indirectBuffer, indirectOffset);
 
             mUsageTracker.BufferUsedAs(indirectBuffer, wgpu::BufferUsage::Indirect);
 

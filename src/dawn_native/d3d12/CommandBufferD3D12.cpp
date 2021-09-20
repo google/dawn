@@ -1383,14 +1383,16 @@ namespace dawn_native { namespace d3d12 {
 
                 case Command::DrawIndexedIndirect: {
                     DrawIndexedIndirectCmd* draw = iter->NextCommand<DrawIndexedIndirectCmd>();
+                    ASSERT(!draw->indirectBufferLocation->IsNull());
 
                     DAWN_TRY(bindingTracker->Apply(commandContext));
                     vertexBufferTracker.Apply(commandList, lastPipeline);
-                    Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
+                    Buffer* buffer = ToBackend(draw->indirectBufferLocation->GetBuffer());
                     ComPtr<ID3D12CommandSignature> signature =
                         ToBackend(GetDevice())->GetDrawIndexedIndirectSignature();
                     commandList->ExecuteIndirect(signature.Get(), 1, buffer->GetD3D12Resource(),
-                                                 draw->indirectOffset, nullptr, 0);
+                                                 draw->indirectBufferLocation->GetOffset(), nullptr,
+                                                 0);
                     break;
                 }
 

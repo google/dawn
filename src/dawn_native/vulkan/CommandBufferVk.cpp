@@ -1079,13 +1079,15 @@ namespace dawn_native { namespace vulkan {
                 }
 
                 case Command::DrawIndexedIndirect: {
-                    DrawIndirectCmd* draw = iter->NextCommand<DrawIndirectCmd>();
-                    VkBuffer indirectBuffer = ToBackend(draw->indirectBuffer)->GetHandle();
+                    DrawIndexedIndirectCmd* draw = iter->NextCommand<DrawIndexedIndirectCmd>();
+                    ASSERT(!draw->indirectBufferLocation->IsNull());
+                    VkBuffer indirectBuffer =
+                        ToBackend(draw->indirectBufferLocation->GetBuffer())->GetHandle();
 
                     descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_GRAPHICS);
                     device->fn.CmdDrawIndexedIndirect(
-                        commands, indirectBuffer, static_cast<VkDeviceSize>(draw->indirectOffset),
-                        1, 0);
+                        commands, indirectBuffer,
+                        static_cast<VkDeviceSize>(draw->indirectBufferLocation->GetOffset()), 1, 0);
                     break;
                 }
 
