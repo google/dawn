@@ -19,7 +19,7 @@
 
     "request adapter options": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "tags": ["upstream"],
         "members": [
             {"name": "compatible surface", "type": "surface"}
@@ -91,7 +91,7 @@
     },
     "device descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "tags": ["upstream"],
         "_TODO": "Add requiredFeatures and requiredLimits support",
         "members": []
