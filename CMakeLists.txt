@@ -41,6 +41,14 @@ else()
   set(TINT_BUILD_TESTS_DEFAULT ON)
 endif()
 
+function (set_if_not_defined name value description)
+    if(NOT DEFINED ${name})
+        set(${name} ${value} PARENT_SCOPE)
+    endif()
+endfunction()
+
+set_if_not_defined(TINT_THIRD_PARTY_DIR "${tint_SOURCE_DIR}/third_party" "Directory in which to find third-party dependencies.")
+
 option(TINT_BUILD_SAMPLES "Build samples" ON)
 option(TINT_BUILD_DOCS "Build documentation" ${TINT_BUILD_DOCS_DEFAULT})
 option(TINT_DOCS_WARN_AS_ERROR "When building documentation, treat warnings as errors" OFF)
