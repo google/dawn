@@ -77,23 +77,23 @@
                OpName %m14 "m14"
                OpName %v7 "v7"
                OpName %m15 "m15"
-               OpName %_Mat4x4_ "_Mat4x4_"
+               OpName %x_Mat4x4_ "x_Mat4x4_"
                OpName %n "n"
                OpName %n1 "n1"
                OpName %o "o"
-               OpName %_Mat4x4_1 "_Mat4x4_1"
+               OpName %x_Mat4x4_1 "x_Mat4x4_1"
                OpName %m16 "m16"
                OpName %m17 "m17"
                OpName %o1 "o1"
-               OpName %_Mat4x4_2 "_Mat4x4_2"
+               OpName %x_Mat4x4_2 "x_Mat4x4_2"
                OpName %m18 "m18"
                OpName %m19 "m19"
                OpName %o2 "o2"
-               OpName %_Mat4x3_ "_Mat4x3_"
+               OpName %x_Mat4x3_ "x_Mat4x3_"
                OpName %n2 "n2"
                OpName %n3 "n3"
                OpName %o3 "o3"
-               OpName %_Mat4x3_1 "_Mat4x3_1"
+               OpName %x_Mat4x3_1 "x_Mat4x3_1"
                OpName %m20 "m20"
                OpName %m21 "m21"
                OpName %o4 "o4"
@@ -404,7 +404,7 @@
         %202 = OpCompositeConstruct %v4float %198 %199 %200 %201
                OpReturnValue %202
                OpFunctionEnd
-   %_Mat4x4_ = OpFunction %Mat4x4_ None %203
+  %x_Mat4x4_ = OpFunction %Mat4x4_ None %203
           %n = OpFunctionParameter %float
         %206 = OpLabel
          %n1 = OpVariable %_ptr_Function_float Function %23
@@ -429,13 +429,13 @@
         %226 = OpLoad %Mat4x4_ %o
                OpReturnValue %226
                OpFunctionEnd
-  %_Mat4x4_1 = OpFunction %Mat4x4_ None %227
+ %x_Mat4x4_1 = OpFunction %Mat4x4_ None %227
         %m16 = OpFunctionParameter %Mat4x3_
         %230 = OpLabel
         %m17 = OpVariable %_ptr_Function_Mat4x3_ Function %60
          %o1 = OpVariable %_ptr_Function_Mat4x4_ Function %120
                OpStore %m17 %m16
-        %233 = OpFunctionCall %Mat4x4_ %_Mat4x4_ %float_1
+        %233 = OpFunctionCall %Mat4x4_ %x_Mat4x4_ %float_1
                OpStore %o1 %233
         %235 = OpLoad %Mat4x3_ %m17
         %236 = OpAccessChain %_ptr_Function_v4float %o1 %uint_0
@@ -452,13 +452,13 @@
         %244 = OpLoad %Mat4x4_ %o1
                OpReturnValue %244
                OpFunctionEnd
-  %_Mat4x4_2 = OpFunction %Mat4x4_ None %245
+ %x_Mat4x4_2 = OpFunction %Mat4x4_ None %245
         %m18 = OpFunctionParameter %Mat4x2_
         %248 = OpLabel
         %m19 = OpVariable %_ptr_Function_Mat4x2_ Function %167
          %o2 = OpVariable %_ptr_Function_Mat4x4_ Function %120
                OpStore %m19 %m18
-        %251 = OpFunctionCall %Mat4x4_ %_Mat4x4_ %float_1
+        %251 = OpFunctionCall %Mat4x4_ %x_Mat4x4_ %float_1
                OpStore %o2 %251
         %252 = OpLoad %Mat4x2_ %m19
         %253 = OpAccessChain %_ptr_Function_v4float %o2 %uint_0
@@ -471,7 +471,7 @@
         %258 = OpLoad %Mat4x4_ %o2
                OpReturnValue %258
                OpFunctionEnd
-   %_Mat4x3_ = OpFunction %Mat4x3_ None %259
+  %x_Mat4x3_ = OpFunction %Mat4x3_ None %259
          %n2 = OpFunctionParameter %float
         %262 = OpLabel
          %n3 = OpVariable %_ptr_Function_float Function %23
@@ -492,7 +492,7 @@
         %274 = OpLoad %Mat4x3_ %o3
                OpReturnValue %274
                OpFunctionEnd
-  %_Mat4x3_1 = OpFunction %Mat4x3_ None %275
+ %x_Mat4x3_1 = OpFunction %Mat4x3_ None %275
         %m20 = OpFunctionParameter %Mat4x4_
         %278 = OpLabel
         %m21 = OpVariable %_ptr_Function_Mat4x4_ Function %120
@@ -523,10 +523,10 @@
         %303 = OpLoad %Mat4x3_ %302
                OpStore %t_PosMtx %303
         %304 = OpLoad %Mat4x3_ %t_PosMtx
-        %305 = OpFunctionCall %Mat4x4_ %_Mat4x4_1 %304
+        %305 = OpFunctionCall %Mat4x4_ %x_Mat4x4_1 %304
         %306 = OpLoad %v3float %a_Position1
         %307 = OpLoad %Mat4x3_ %t_PosMtx
-        %308 = OpFunctionCall %Mat4x4_ %_Mat4x4_1 %307
+        %308 = OpFunctionCall %Mat4x4_ %x_Mat4x4_1 %307
         %309 = OpLoad %v3float %a_Position1
         %311 = OpCompositeExtract %float %309 0
         %312 = OpCompositeExtract %float %309 1
@@ -536,10 +536,10 @@
         %316 = OpAccessChain %_ptr_Uniform_Mat4x4_ %global %uint_0
         %317 = OpLoad %Mat4x4_ %316
         %318 = OpLoad %Mat4x3_ %t_PosMtx
-        %319 = OpFunctionCall %Mat4x4_ %_Mat4x4_1 %318
+        %319 = OpFunctionCall %Mat4x4_ %x_Mat4x4_1 %318
         %320 = OpLoad %v3float %a_Position1
         %321 = OpLoad %Mat4x3_ %t_PosMtx
-        %322 = OpFunctionCall %Mat4x4_ %_Mat4x4_1 %321
+        %322 = OpFunctionCall %Mat4x4_ %x_Mat4x4_1 %321
         %323 = OpLoad %v3float %a_Position1
         %325 = OpCompositeExtract %float %323 0
         %326 = OpCompositeExtract %float %323 1

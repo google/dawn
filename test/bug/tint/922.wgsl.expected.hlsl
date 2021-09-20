@@ -90,17 +90,17 @@ float4 Mul3(float3 v6, Mat4x3_ m14) {
   Mat4x3_ m15 = (Mat4x3_)0;
   v7 = v6;
   m15 = m14;
-  const float3 _e6 = Mat4x3GetCol0_(m15);
-  const float3 _e7 = v7;
-  const float3 _e11 = Mat4x3GetCol1_(m15);
-  const float3 _e12 = v7;
-  const float3 _e16 = Mat4x3GetCol2_(m15);
-  const float3 _e17 = v7;
-  const float3 _e21 = Mat4x3GetCol3_(m15);
-  return float4(dot(_e6, _e7), dot(_e11, _e12), dot(_e16, _e17), dot(_e21, v7));
+  const float3 x_e6 = Mat4x3GetCol0_(m15);
+  const float3 x_e7 = v7;
+  const float3 x_e11 = Mat4x3GetCol1_(m15);
+  const float3 x_e12 = v7;
+  const float3 x_e16 = Mat4x3GetCol2_(m15);
+  const float3 x_e17 = v7;
+  const float3 x_e21 = Mat4x3GetCol3_(m15);
+  return float4(dot(x_e6, x_e7), dot(x_e11, x_e12), dot(x_e16, x_e17), dot(x_e21, v7));
 }
 
-Mat4x4_ _Mat4x4_(float n) {
+Mat4x4_ x_Mat4x4_(float n) {
   float n1 = 0.0f;
   Mat4x4_ o = (Mat4x4_)0;
   n1 = n;
@@ -111,30 +111,30 @@ Mat4x4_ _Mat4x4_(float n) {
   return o;
 }
 
-Mat4x4_ _Mat4x4_1(Mat4x3_ m16) {
+Mat4x4_ x_Mat4x4_1(Mat4x3_ m16) {
   Mat4x3_ m17 = (Mat4x3_)0;
   Mat4x4_ o1 = (Mat4x4_)0;
   m17 = m16;
-  const Mat4x4_ _e4 = _Mat4x4_(1.0f);
-  o1 = _e4;
+  const Mat4x4_ x_e4 = x_Mat4x4_(1.0f);
+  o1 = x_e4;
   o1.mx = m17.mx;
   o1.my = m17.my;
   o1.mz = m17.mz;
   return o1;
 }
 
-Mat4x4_ _Mat4x4_2(Mat4x2_ m18) {
+Mat4x4_ x_Mat4x4_2(Mat4x2_ m18) {
   Mat4x2_ m19 = (Mat4x2_)0;
   Mat4x4_ o2 = (Mat4x4_)0;
   m19 = m18;
-  const Mat4x4_ _e4 = _Mat4x4_(1.0f);
-  o2 = _e4;
+  const Mat4x4_ x_e4 = x_Mat4x4_(1.0f);
+  o2 = x_e4;
   o2.mx = m19.mx;
   o2.my = m19.my;
   return o2;
 }
 
-Mat4x3_ _Mat4x3_(float n2) {
+Mat4x3_ x_Mat4x3_(float n2) {
   float n3 = 0.0f;
   Mat4x3_ o3 = (Mat4x3_)0;
   n3 = n2;
@@ -144,7 +144,7 @@ Mat4x3_ _Mat4x3_(float n2) {
   return o3;
 }
 
-Mat4x3_ _Mat4x3_1(Mat4x4_ m20) {
+Mat4x3_ x_Mat4x3_1(Mat4x4_ m20) {
   Mat4x4_ m21 = (Mat4x4_)0;
   Mat4x3_ o4 = (Mat4x3_)0;
   m21 = m20;
@@ -181,35 +181,35 @@ Mat4x2_ tint_symbol_8(uint4 buffer[3], uint offset) {
 void main1() {
   Mat4x3_ t_PosMtx = (Mat4x3_)0;
   float2 t_TexSpaceCoord = float2(0.0f, 0.0f);
-  const Mat4x3_ _e18 = tint_symbol_3(global2, (48u * uint(int(a_PosMtxIdx1))));
-  t_PosMtx = _e18;
-  const Mat4x4_ _e24 = _Mat4x4_1(t_PosMtx);
-  const float3 _e25 = a_Position1;
-  const Mat4x4_ _e30 = _Mat4x4_1(t_PosMtx);
-  const float4 _e34 = Mul(_e30, float4(a_Position1, 1.0f));
-  const Mat4x4_ _e35 = tint_symbol_5(global, 0u);
-  const Mat4x4_ _e38 = _Mat4x4_1(t_PosMtx);
-  const float3 _e39 = a_Position1;
-  const Mat4x4_ _e44 = _Mat4x4_1(t_PosMtx);
-  const float4 _e48 = Mul(_e44, float4(a_Position1, 1.0f));
-  const float4 _e49 = Mul(_e35, _e48);
-  gl_Position = _e49;
+  const Mat4x3_ x_e18 = tint_symbol_3(global2, (48u * uint(int(a_PosMtxIdx1))));
+  t_PosMtx = x_e18;
+  const Mat4x4_ x_e24 = x_Mat4x4_1(t_PosMtx);
+  const float3 x_e25 = a_Position1;
+  const Mat4x4_ x_e30 = x_Mat4x4_1(t_PosMtx);
+  const float4 x_e34 = Mul(x_e30, float4(a_Position1, 1.0f));
+  const Mat4x4_ x_e35 = tint_symbol_5(global, 0u);
+  const Mat4x4_ x_e38 = x_Mat4x4_1(t_PosMtx);
+  const float3 x_e39 = a_Position1;
+  const Mat4x4_ x_e44 = x_Mat4x4_1(t_PosMtx);
+  const float4 x_e48 = Mul(x_e44, float4(a_Position1, 1.0f));
+  const float4 x_e49 = Mul(x_e35, x_e48);
+  gl_Position = x_e49;
   v_Color = a_Color1;
-  const float4 _e52 = asfloat(global1[2]);
-  if ((_e52.x == 2.0f)) {
+  const float4 x_e52 = asfloat(global1[2]);
+  if ((x_e52.x == 2.0f)) {
     {
-      const float3 _e59 = a_Normal1;
-      const Mat4x2_ _e64 = tint_symbol_8(global1, (32u * uint(0)));
-      const float2 _e68 = Mul2(_e64, float4(a_Normal1, 1.0f));
-      v_TexCoord = _e68.xy;
+      const float3 x_e59 = a_Normal1;
+      const Mat4x2_ x_e64 = tint_symbol_8(global1, (32u * uint(0)));
+      const float2 x_e68 = Mul2(x_e64, float4(a_Normal1, 1.0f));
+      v_TexCoord = x_e68.xy;
       return;
     }
   } else {
     {
-      const float2 _e73 = a_UV1;
-      const Mat4x2_ _e79 = tint_symbol_8(global1, (32u * uint(0)));
-      const float2 _e84 = Mul2(_e79, float4(a_UV1, 1.0f, 1.0f));
-      v_TexCoord = _e84.xy;
+      const float2 x_e73 = a_UV1;
+      const Mat4x2_ x_e79 = tint_symbol_8(global1, (32u * uint(0)));
+      const float2 x_e84 = Mul2(x_e79, float4(a_UV1, 1.0f, 1.0f));
+      v_TexCoord = x_e84.xy;
       return;
     }
   }

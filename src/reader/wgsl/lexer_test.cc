@@ -186,10 +186,26 @@ TEST_P(IdentifierTest, Parse) {
   EXPECT_EQ(t.source().range.end.column, 1u + strlen(GetParam()));
   EXPECT_EQ(t.to_str(), GetParam());
 }
-INSTANTIATE_TEST_SUITE_P(
-    LexerTest,
-    IdentifierTest,
-    testing::Values("test01", "_test_", "test_", "_test", "_01", "_test01"));
+INSTANTIATE_TEST_SUITE_P(LexerTest,
+                         IdentifierTest,
+                         testing::Values("a",
+                                         "test",
+                                         "test01",
+                                         "test_",
+                                         "test_01",
+                                         "ALLCAPS",
+                                         "MiXeD_CaSe",
+                                         "abcdefghijklmnopqrstuvwxyz",
+                                         "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+                                         "alldigits_0123456789"));
+
+TEST_F(LexerTest, IdentifierTest_DoesNotStartWithUnderscore) {
+  Source::FileContent content("_test");
+  Lexer l("test.wgsl", &content);
+
+  auto t = l.next();
+  EXPECT_FALSE(t.IsIdentifier());
+}
 
 TEST_F(LexerTest, IdentifierTest_DoesNotStartWithNumber) {
   Source::FileContent content("01test");

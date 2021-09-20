@@ -9,4 +9,5 @@
 ### Fixes
 * Hex floats: issue an error when the magnitude is non-zero, and the exponent would cause
     overflow. https://crbug.com/tint/1150 https://crbug.com/tint/1166
+* Reject identifiers beginning with an underscore.  https://crbug.com/tint/1179
 

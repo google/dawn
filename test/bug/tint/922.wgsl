@@ -57,40 +57,40 @@ fn Mat4x3GetCol0_(m: Mat4x3_) -> vec3<f32> {
     var m1: Mat4x3_;
 
     m1 = m;
-    let _e2: Mat4x3_ = m1;
-    let _e5: Mat4x3_ = m1;
-    let _e8: Mat4x3_ = m1;
-    return vec3<f32>(_e2.mx.x, _e5.my.x, _e8.mz.x);
+    let x_e2: Mat4x3_ = m1;
+    let x_e5: Mat4x3_ = m1;
+    let x_e8: Mat4x3_ = m1;
+    return vec3<f32>(x_e2.mx.x, x_e5.my.x, x_e8.mz.x);
 }
 
 fn Mat4x3GetCol1_(m2: Mat4x3_) -> vec3<f32> {
     var m3: Mat4x3_;
 
     m3 = m2;
-    let _e2: Mat4x3_ = m3;
-    let _e5: Mat4x3_ = m3;
-    let _e8: Mat4x3_ = m3;
-    return vec3<f32>(_e2.mx.y, _e5.my.y, _e8.mz.y);
+    let x_e2: Mat4x3_ = m3;
+    let x_e5: Mat4x3_ = m3;
+    let x_e8: Mat4x3_ = m3;
+    return vec3<f32>(x_e2.mx.y, x_e5.my.y, x_e8.mz.y);
 }
 
 fn Mat4x3GetCol2_(m4: Mat4x3_) -> vec3<f32> {
     var m5: Mat4x3_;
 
     m5 = m4;
-    let _e2: Mat4x3_ = m5;
-    let _e5: Mat4x3_ = m5;
-    let _e8: Mat4x3_ = m5;
-    return vec3<f32>(_e2.mx.z, _e5.my.z, _e8.mz.z);
+    let x_e2: Mat4x3_ = m5;
+    let x_e5: Mat4x3_ = m5;
+    let x_e8: Mat4x3_ = m5;
+    return vec3<f32>(x_e2.mx.z, x_e5.my.z, x_e8.mz.z);
 }
 
 fn Mat4x3GetCol3_(m6: Mat4x3_) -> vec3<f32> {
     var m7: Mat4x3_;
 
     m7 = m6;
-    let _e2: Mat4x3_ = m7;
-    let _e5: Mat4x3_ = m7;
-    let _e8: Mat4x3_ = m7;
-    return vec3<f32>(_e2.mx.w, _e5.my.w, _e8.mz.w);
+    let x_e2: Mat4x3_ = m7;
+    let x_e5: Mat4x3_ = m7;
+    let x_e8: Mat4x3_ = m7;
+    return vec3<f32>(x_e2.mx.w, x_e5.my.w, x_e8.mz.w);
 }
 
 fn Mul(m8: Mat4x4_, v: vec4<f32>) -> vec4<f32> {
@@ -99,15 +99,15 @@ fn Mul(m8: Mat4x4_, v: vec4<f32>) -> vec4<f32> {
 
     m9 = m8;
     v1 = v;
-    let _e4: Mat4x4_ = m9;
-    let _e6: vec4<f32> = v1;
-    let _e8: Mat4x4_ = m9;
-    let _e10: vec4<f32> = v1;
-    let _e12: Mat4x4_ = m9;
-    let _e14: vec4<f32> = v1;
-    let _e16: Mat4x4_ = m9;
-    let _e18: vec4<f32> = v1;
-    return vec4<f32>(dot(_e4.mx, _e6), dot(_e8.my, _e10), dot(_e12.mz, _e14), dot(_e16.mw, _e18));
+    let x_e4: Mat4x4_ = m9;
+    let x_e6: vec4<f32> = v1;
+    let x_e8: Mat4x4_ = m9;
+    let x_e10: vec4<f32> = v1;
+    let x_e12: Mat4x4_ = m9;
+    let x_e14: vec4<f32> = v1;
+    let x_e16: Mat4x4_ = m9;
+    let x_e18: vec4<f32> = v1;
+    return vec4<f32>(dot(x_e4.mx, x_e6), dot(x_e8.my, x_e10), dot(x_e12.mz, x_e14), dot(x_e16.mw, x_e18));
 }
 
 fn Mul1(m10: Mat4x3_, v2: vec4<f32>) -> vec3<f32> {
@@ -116,13 +116,13 @@ fn Mul1(m10: Mat4x3_, v2: vec4<f32>) -> vec3<f32> {
 
     m11 = m10;
     v3 = v2;
-    let _e4: Mat4x3_ = m11;
-    let _e6: vec4<f32> = v3;
-    let _e8: Mat4x3_ = m11;
-    let _e10: vec4<f32> = v3;
-    let _e12: Mat4x3_ = m11;
-    let _e14: vec4<f32> = v3;
-    return vec3<f32>(dot(_e4.mx, _e6), dot(_e8.my, _e10), dot(_e12.mz, _e14));
+    let x_e4: Mat4x3_ = m11;
+    let x_e6: vec4<f32> = v3;
+    let x_e8: Mat4x3_ = m11;
+    let x_e10: vec4<f32> = v3;
+    let x_e12: Mat4x3_ = m11;
+    let x_e14: vec4<f32> = v3;
+    return vec3<f32>(dot(x_e4.mx, x_e6), dot(x_e8.my, x_e10), dot(x_e12.mz, x_e14));
 }
 
 fn Mul2(m12: Mat4x2_, v4: vec4<f32>) -> vec2<f32> {
@@ -131,11 +131,11 @@ fn Mul2(m12: Mat4x2_, v4: vec4<f32>) -> vec2<f32> {
 
     m13 = m12;
     v5 = v4;
-    let _e4: Mat4x2_ = m13;
-    let _e6: vec4<f32> = v5;
-    let _e8: Mat4x2_ = m13;
-    let _e10: vec4<f32> = v5;
-    return vec2<f32>(dot(_e4.mx, _e6), dot(_e8.my, _e10));
+    let x_e4: Mat4x2_ = m13;
+    let x_e6: vec4<f32> = v5;
+    let x_e8: Mat4x2_ = m13;
+    let x_e10: vec4<f32> = v5;
+    return vec2<f32>(dot(x_e4.mx, x_e6), dot(x_e8.my, x_e10));
 }
 
 fn Mul3(v6: vec3<f32>, m14: Mat4x3_) -> vec4<f32> {
@@ -144,143 +144,143 @@ fn Mul3(v6: vec3<f32>, m14: Mat4x3_) -> vec4<f32> {
 
     v7 = v6;
     m15 = m14;
-    let _e5: Mat4x3_ = m15;
-    let _e6: vec3<f32> = Mat4x3GetCol0_(_e5);
-    let _e7: vec3<f32> = v7;
-    let _e10: Mat4x3_ = m15;
-    let _e11: vec3<f32> = Mat4x3GetCol1_(_e10);
-    let _e12: vec3<f32> = v7;
-    let _e15: Mat4x3_ = m15;
-    let _e16: vec3<f32> = Mat4x3GetCol2_(_e15);
-    let _e17: vec3<f32> = v7;
-    let _e20: Mat4x3_ = m15;
-    let _e21: vec3<f32> = Mat4x3GetCol3_(_e20);
-    let _e22: vec3<f32> = v7;
-    return vec4<f32>(dot(_e6, _e7), dot(_e11, _e12), dot(_e16, _e17), dot(_e21, _e22));
+    let x_e5: Mat4x3_ = m15;
+    let x_e6: vec3<f32> = Mat4x3GetCol0_(x_e5);
+    let x_e7: vec3<f32> = v7;
+    let x_e10: Mat4x3_ = m15;
+    let x_e11: vec3<f32> = Mat4x3GetCol1_(x_e10);
+    let x_e12: vec3<f32> = v7;
+    let x_e15: Mat4x3_ = m15;
+    let x_e16: vec3<f32> = Mat4x3GetCol2_(x_e15);
+    let x_e17: vec3<f32> = v7;
+    let x_e20: Mat4x3_ = m15;
+    let x_e21: vec3<f32> = Mat4x3GetCol3_(x_e20);
+    let x_e22: vec3<f32> = v7;
+    return vec4<f32>(dot(x_e6, x_e7), dot(x_e11, x_e12), dot(x_e16, x_e17), dot(x_e21, x_e22));
 }
 
-fn _Mat4x4_(n: f32) -> Mat4x4_ {
+fn x_Mat4x4_(n: f32) -> Mat4x4_ {
     var n1: f32;
     var o: Mat4x4_;
 
     n1 = n;
-    let _e4: f32 = n1;
-    o.mx = vec4<f32>(_e4, 0.0, 0.0, 0.0);
-    let _e11: f32 = n1;
-    o.my = vec4<f32>(0.0, _e11, 0.0, 0.0);
-    let _e18: f32 = n1;
-    o.mz = vec4<f32>(0.0, 0.0, _e18, 0.0);
-    let _e25: f32 = n1;
-    o.mw = vec4<f32>(0.0, 0.0, 0.0, _e25);
-    let _e27: Mat4x4_ = o;
-    return _e27;
+    let x_e4: f32 = n1;
+    o.mx = vec4<f32>(x_e4, 0.0, 0.0, 0.0);
+    let x_e11: f32 = n1;
+    o.my = vec4<f32>(0.0, x_e11, 0.0, 0.0);
+    let x_e18: f32 = n1;
+    o.mz = vec4<f32>(0.0, 0.0, x_e18, 0.0);
+    let x_e25: f32 = n1;
+    o.mw = vec4<f32>(0.0, 0.0, 0.0, x_e25);
+    let x_e27: Mat4x4_ = o;
+    return x_e27;
 }
 
-fn _Mat4x4_1(m16: Mat4x3_) -> Mat4x4_ {
+fn x_Mat4x4_1(m16: Mat4x3_) -> Mat4x4_ {
     var m17: Mat4x3_;
     var o1: Mat4x4_;
 
     m17 = m16;
-    let _e4: Mat4x4_ = _Mat4x4_(1.0);
-    o1 = _e4;
-    let _e7: Mat4x3_ = m17;
-    o1.mx = _e7.mx;
-    let _e10: Mat4x3_ = m17;
-    o1.my = _e10.my;
-    let _e13: Mat4x3_ = m17;
-    o1.mz = _e13.mz;
-    let _e15: Mat4x4_ = o1;
-    return _e15;
+    let x_e4: Mat4x4_ = x_Mat4x4_(1.0);
+    o1 = x_e4;
+    let x_e7: Mat4x3_ = m17;
+    o1.mx = x_e7.mx;
+    let x_e10: Mat4x3_ = m17;
+    o1.my = x_e10.my;
+    let x_e13: Mat4x3_ = m17;
+    o1.mz = x_e13.mz;
+    let x_e15: Mat4x4_ = o1;
+    return x_e15;
 }
 
-fn _Mat4x4_2(m18: Mat4x2_) -> Mat4x4_ {
+fn x_Mat4x4_2(m18: Mat4x2_) -> Mat4x4_ {
     var m19: Mat4x2_;
     var o2: Mat4x4_;
 
     m19 = m18;
-    let _e4: Mat4x4_ = _Mat4x4_(1.0);
-    o2 = _e4;
-    let _e7: Mat4x2_ = m19;
-    o2.mx = _e7.mx;
-    let _e10: Mat4x2_ = m19;
-    o2.my = _e10.my;
-    let _e12: Mat4x4_ = o2;
-    return _e12;
+    let x_e4: Mat4x4_ = x_Mat4x4_(1.0);
+    o2 = x_e4;
+    let x_e7: Mat4x2_ = m19;
+    o2.mx = x_e7.mx;
+    let x_e10: Mat4x2_ = m19;
+    o2.my = x_e10.my;
+    let x_e12: Mat4x4_ = o2;
+    return x_e12;
 }
 
-fn _Mat4x3_(n2: f32) -> Mat4x3_ {
+fn x_Mat4x3_(n2: f32) -> Mat4x3_ {
     var n3: f32;
     var o3: Mat4x3_;
 
     n3 = n2;
-    let _e4: f32 = n3;
-    o3.mx = vec4<f32>(_e4, 0.0, 0.0, 0.0);
-    let _e11: f32 = n3;
-    o3.my = vec4<f32>(0.0, _e11, 0.0, 0.0);
-    let _e18: f32 = n3;
-    o3.mz = vec4<f32>(0.0, 0.0, _e18, 0.0);
-    let _e21: Mat4x3_ = o3;
-    return _e21;
+    let x_e4: f32 = n3;
+    o3.mx = vec4<f32>(x_e4, 0.0, 0.0, 0.0);
+    let x_e11: f32 = n3;
+    o3.my = vec4<f32>(0.0, x_e11, 0.0, 0.0);
+    let x_e18: f32 = n3;
+    o3.mz = vec4<f32>(0.0, 0.0, x_e18, 0.0);
+    let x_e21: Mat4x3_ = o3;
+    return x_e21;
 }
 
-fn _Mat4x3_1(m20: Mat4x4_) -> Mat4x3_ {
+fn x_Mat4x3_1(m20: Mat4x4_) -> Mat4x3_ {
     var m21: Mat4x4_;
     var o4: Mat4x3_;
 
     m21 = m20;
-    let _e4: Mat4x4_ = m21;
-    o4.mx = _e4.mx;
-    let _e7: Mat4x4_ = m21;
-    o4.my = _e7.my;
-    let _e10: Mat4x4_ = m21;
-    o4.mz = _e10.mz;
-    let _e12: Mat4x3_ = o4;
-    return _e12;
+    let x_e4: Mat4x4_ = m21;
+    o4.mx = x_e4.mx;
+    let x_e7: Mat4x4_ = m21;
+    o4.my = x_e7.my;
+    let x_e10: Mat4x4_ = m21;
+    o4.mz = x_e10.mz;
+    let x_e12: Mat4x3_ = o4;
+    return x_e12;
 }
 
 fn main1() {
     var t_PosMtx: Mat4x3_;
     var t_TexSpaceCoord: vec2<f32>;
 
-    let _e15: f32 = a_PosMtxIdx1;
-    let _e18: Mat4x3_ = global2.u_PosMtx[i32(_e15)];
-    t_PosMtx = _e18;
-    let _e23: Mat4x3_ = t_PosMtx;
-    let _e24: Mat4x4_ = _Mat4x4_1(_e23);
-    let _e25: vec3<f32> = a_Position1;
-    let _e29: Mat4x3_ = t_PosMtx;
-    let _e30: Mat4x4_ = _Mat4x4_1(_e29);
-    let _e31: vec3<f32> = a_Position1;
-    let _e34: vec4<f32> = Mul(_e30, vec4<f32>(_e31, 1.0));
-    let _e35: Mat4x4_ = global.u_Projection;
-    let _e37: Mat4x3_ = t_PosMtx;
-    let _e38: Mat4x4_ = _Mat4x4_1(_e37);
-    let _e39: vec3<f32> = a_Position1;
-    let _e43: Mat4x3_ = t_PosMtx;
-    let _e44: Mat4x4_ = _Mat4x4_1(_e43);
-    let _e45: vec3<f32> = a_Position1;
-    let _e48: vec4<f32> = Mul(_e44, vec4<f32>(_e45, 1.0));
-    let _e49: vec4<f32> = Mul(_e35, _e48);
-    gl_Position = _e49;
-    let _e50: vec4<f32> = a_Color1;
-    v_Color = _e50;
-    let _e52: vec4<f32> = global1.u_Misc0_;
-    if ((_e52.x == 2.0)) {
+    let x_e15: f32 = a_PosMtxIdx1;
+    let x_e18: Mat4x3_ = global2.u_PosMtx[i32(x_e15)];
+    t_PosMtx = x_e18;
+    let x_e23: Mat4x3_ = t_PosMtx;
+    let x_e24: Mat4x4_ = x_Mat4x4_1(x_e23);
+    let x_e25: vec3<f32> = a_Position1;
+    let x_e29: Mat4x3_ = t_PosMtx;
+    let x_e30: Mat4x4_ = x_Mat4x4_1(x_e29);
+    let x_e31: vec3<f32> = a_Position1;
+    let x_e34: vec4<f32> = Mul(x_e30, vec4<f32>(x_e31, 1.0));
+    let x_e35: Mat4x4_ = global.u_Projection;
+    let x_e37: Mat4x3_ = t_PosMtx;
+    let x_e38: Mat4x4_ = x_Mat4x4_1(x_e37);
+    let x_e39: vec3<f32> = a_Position1;
+    let x_e43: Mat4x3_ = t_PosMtx;
+    let x_e44: Mat4x4_ = x_Mat4x4_1(x_e43);
+    let x_e45: vec3<f32> = a_Position1;
+    let x_e48: vec4<f32> = Mul(x_e44, vec4<f32>(x_e45, 1.0));
+    let x_e49: vec4<f32> = Mul(x_e35, x_e48);
+    gl_Position = x_e49;
+    let x_e50: vec4<f32> = a_Color1;
+    v_Color = x_e50;
+    let x_e52: vec4<f32> = global1.u_Misc0_;
+    if ((x_e52.x == 2.0)) {
         {
-            let _e59: vec3<f32> = a_Normal1;
-            let _e64: Mat4x2_ = global1.u_TexMtx[0];
-            let _e65: vec3<f32> = a_Normal1;
-            let _e68: vec2<f32> = Mul2(_e64, vec4<f32>(_e65, 1.0));
-            v_TexCoord = _e68.xy;
+            let x_e59: vec3<f32> = a_Normal1;
+            let x_e64: Mat4x2_ = global1.u_TexMtx[0];
+            let x_e65: vec3<f32> = a_Normal1;
+            let x_e68: vec2<f32> = Mul2(x_e64, vec4<f32>(x_e65, 1.0));
+            v_TexCoord = x_e68.xy;
             return;
         }
     } else {
         {
-            let _e73: vec2<f32> = a_UV1;
-            let _e79: Mat4x2_ = global1.u_TexMtx[0];
-            let _e80: vec2<f32> = a_UV1;
-            let _e84: vec2<f32> = Mul2(_e79, vec4<f32>(_e80, 1.0, 1.0));
-            v_TexCoord = _e84.xy;
+            let x_e73: vec2<f32> = a_UV1;
+            let x_e79: Mat4x2_ = global1.u_TexMtx[0];
+            let x_e80: vec2<f32> = a_UV1;
+            let x_e84: vec2<f32> = Mul2(x_e79, vec4<f32>(x_e80, 1.0, 1.0));
+            v_TexCoord = x_e84.xy;
             return;
         }
     }
@@ -294,8 +294,8 @@ fn main([[location(0)]] a_Position: vec3<f32>, [[location(1)]] a_UV: vec2<f32>, 
     a_Normal1 = a_Normal;
     a_PosMtxIdx1 = a_PosMtxIdx;
     main1();
-    let _e11: vec4<f32> = v_Color;
-    let _e13: vec2<f32> = v_TexCoord;
-    let _e15: vec4<f32> = gl_Position;
-    return VertexOutput(_e11, _e13, _e15);
+    let x_e11: vec4<f32> = v_Color;
+    let x_e13: vec2<f32> = v_TexCoord;
+    let x_e15: vec4<f32> = gl_Position;
+    return VertexOutput(x_e11, x_e13, x_e15);
 }

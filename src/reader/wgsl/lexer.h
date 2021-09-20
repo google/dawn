@@ -56,10 +56,19 @@ class Lexer {
   void end_source(Source&) const;
 
   bool is_eof() const;
+  /// @param ch a character
+  /// @returns true if 'ch' is an alphabetic character
   bool is_alpha(char ch) const;
+  /// @param ch a character
+  /// @returns true if 'ch' is a decimal digit
   bool is_digit(char ch) const;
+  /// @param ch a character
+  /// @returns true if 'ch' is a hexadecimal digit
   bool is_hex(char ch) const;
-  bool is_alphanum(char ch) const;
+  /// @param ch a character
+  /// @returns true if 'ch' is a digit, an alphabetic character,
+  /// or an underscore.
+  bool is_alphanum_underscore(char ch) const;
   bool matches(size_t pos, const std::string& substr);
 
   /// The source file path

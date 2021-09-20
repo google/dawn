@@ -119,15 +119,15 @@ bool Lexer::is_eof() const {
 }
 
 bool Lexer::is_alpha(char ch) const {
-  return std::isalpha(ch) || ch == '_';
+  return std::isalpha(ch);
 }
 
 bool Lexer::is_digit(char ch) const {
   return std::isdigit(ch);
 }
 
-bool Lexer::is_alphanum(char ch) const {
-  return is_alpha(ch) || is_digit(ch);
+bool Lexer::is_alphanum_underscore(char ch) const {
+  return is_alpha(ch) || is_digit(ch) || ch == '_';
 }
 
 bool Lexer::is_hex(char ch) const {
@@ -660,7 +660,7 @@ Token Lexer::try_integer() {
 }
 
 Token Lexer::try_ident() {
-  // Must begin with an a-zA-Z_
+  // Must begin with an a-zA-Z
   if (!is_alpha(content_->data[pos_])) {
     return {};
   }
@@ -668,7 +668,7 @@ Token Lexer::try_ident() {
   auto source = begin_source();
 
   auto s = pos_;
-  while (!is_eof() && is_alphanum(content_->data[pos_])) {
+  while (!is_eof() && is_alphanum_underscore(content_->data[pos_])) {
     pos_++;
     location_.column++;
   }
