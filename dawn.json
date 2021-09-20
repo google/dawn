@@ -69,8 +69,7 @@
     },
     "adapter properties": {
         "category": "structure",
-        "extensible": true,
-        "output": true,
+        "extensible": "out",
         "members": [
             {"name": "vendor ID", "type": "uint32_t"},
             {"name": "device ID", "type": "uint32_t"},
@@ -124,7 +123,7 @@
     },
     "bind group entry": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "binding", "type": "uint32_t"},
             {"name": "buffer", "type": "buffer", "optional": true},
@@ -136,7 +135,7 @@
     },
     "bind group descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "layout", "type": "bind group layout"},
@@ -159,7 +158,7 @@
     },
     "buffer binding layout": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "type", "type": "buffer binding type", "default": "undefined"},
             {"name": "has dynamic offset", "type": "bool", "default": "false"},
@@ -178,7 +177,7 @@
     },
     "sampler binding layout": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "type", "type": "sampler binding type", "default": "undefined"}
         ]
@@ -197,7 +196,7 @@
     },
     "texture binding layout": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "sample type", "type": "texture sample type", "default": "undefined"},
             {"name": "view dimension", "type": "texture view dimension", "default": "undefined"},
@@ -207,7 +206,7 @@
 
     "external texture binding entry": {
         "category": "structure",
-        "chained": true,
+        "chained": "in",
         "tags": ["dawn"],
         "members": [
             {"name": "external texture", "type": "external texture"}
@@ -216,7 +215,7 @@
 
     "external texture binding layout": {
         "category": "structure",
-        "chained": true,
+        "chained": "in",
         "tags": ["dawn"],
         "members": []
     },
@@ -230,7 +229,7 @@
     },
     "storage texture binding layout": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "access", "type": "storage texture access", "default": "undefined"},
             {"name": "format", "type": "texture format", "default": "undefined"},
@@ -240,7 +239,7 @@
 
     "bind group layout entry": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "binding", "type": "uint32_t"},
             {"name": "visibility", "type": "shader stage"},
@@ -252,7 +251,7 @@
     },
     "bind group layout descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "entry count", "type": "uint32_t"},
@@ -347,7 +346,7 @@
     },
     "buffer descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "usage", "type": "buffer usage"},
@@ -418,7 +417,7 @@
     },
     "command buffer descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true}
         ]
@@ -534,7 +533,7 @@
     },
     "command encoder descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true}
         ]
@@ -605,7 +604,7 @@
     },
     "compute pass descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true}
         ]
@@ -704,7 +703,7 @@
     },
     "compute pipeline descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "layout", "type": "pipeline layout", "optional": true},
@@ -722,7 +721,7 @@
     },
     "copy texture for browser options": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "tags": ["dawn"],
         "members": [
             {"name": "flipY", "type": "bool", "default": "false"},
@@ -1041,15 +1040,14 @@
     },
     "required limits": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "limits", "type": "limits"}
         ]
     },
     "supported limits": {
         "category": "structure",
-        "extensible": true,
-        "output": true,
+        "extensible": "out",
         "members": [
             {"name": "limits", "type": "limits"}
         ]
@@ -1112,7 +1110,7 @@
     },
     "external texture descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "tags": ["dawn"],
         "members": [
             {"name": "plane 0", "type": "texture view"},
@@ -1138,7 +1136,7 @@
     },
     "image copy buffer": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "layout", "type": "texture data layout"},
             {"name": "buffer", "type": "buffer"}
@@ -1146,7 +1144,7 @@
     },
     "image copy texture": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "texture", "type": "texture"},
             {"name": "mip level", "type": "uint32_t", "default": "0"},
@@ -1189,7 +1187,7 @@
     },
     "instance descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": []
     },
     "vertex attribute": {
@@ -1254,7 +1252,7 @@
     },
     "pipeline layout descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "bind group layout count", "type": "uint32_t"},
@@ -1282,7 +1280,7 @@
     },
     "programmable stage descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "module", "type": "shader module"},
             {"name": "entry point", "type": "char", "annotation": "const*", "length": "strlen"}
@@ -1308,7 +1306,7 @@
     },
     "query set descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "type", "type": "query type"},
@@ -1364,7 +1362,7 @@
             },
             {
                 "name": "copy texture for browser",
-                "extensible": true,
+                "extensible": "in",
                 "tags": ["dawn"],
                 "args": [
                     {"name": "source", "type": "image copy texture", "annotation": "const*"},
@@ -1494,7 +1492,7 @@
 
     "render bundle descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true}
         ]
@@ -1502,7 +1500,7 @@
 
     "render bundle encoder descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "color formats count", "type": "uint32_t"},
@@ -1540,7 +1538,7 @@
 
     "render pass descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "color attachment count", "type": "uint32_t"},
@@ -1749,7 +1747,7 @@
 
     "vertex state": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "module", "type": "shader module"},
             {"name": "entry point", "type": "char", "annotation": "const*", "length": "strlen"},
@@ -1760,7 +1758,7 @@
 
     "primitive state": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "topology", "type": "primitive topology", "default": "triangle list"},
             {"name": "strip index format", "type": "index format", "default": "undefined"},
@@ -1771,7 +1769,7 @@
 
     "primitive depth clamping state": {
         "category": "structure",
-        "chained": true,
+        "chained": "in",
         "members": [
             {"name": "clamp depth", "type": "bool", "default": "false"}
         ]
@@ -1779,7 +1777,7 @@
 
     "depth stencil state": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "format", "type": "texture format"},
             {"name": "depth write enabled", "type": "bool", "default": "false"},
@@ -1796,7 +1794,7 @@
 
     "multisample state": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "count", "type": "uint32_t", "default": "1"},
             {"name": "mask", "type": "uint32_t", "default": "0xFFFFFFFF"},
@@ -1806,7 +1804,7 @@
 
     "fragment state": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "module", "type": "shader module"},
             {"name": "entry point", "type": "char", "annotation": "const*", "length": "strlen"},
@@ -1816,7 +1814,7 @@
     },
     "color target state": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "format", "type": "texture format"},
             {"name": "blend", "type": "blend state", "annotation": "const*", "optional": true},
@@ -1834,7 +1832,7 @@
 
     "render pipeline descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "layout", "type": "pipeline layout", "optional": true},
@@ -1851,7 +1849,7 @@
     },
     "sampler descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "address mode u", "type": "address mode", "default": "clamp to edge"},
@@ -1888,14 +1886,14 @@
     },
     "shader module descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true}
         ]
     },
     "shader module SPIRV descriptor": {
         "category": "structure",
-        "chained": true,
+        "chained": "in",
         "members": [
             {"name": "code size", "type": "uint32_t"},
             {"name": "code", "type": "uint32_t", "annotation": "const*", "length": "code size"}
@@ -1903,7 +1901,7 @@
     },
     "shader module WGSL descriptor": {
         "category": "structure",
-        "chained": true,
+        "chained": "in",
         "members": [
             {"name": "source", "type": "char", "annotation": "const*", "length": "strlen"}
         ]
@@ -1955,21 +1953,21 @@
     },
     "surface descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true}
         ]
     },
     "surface descriptor from canvas HTML selector": {
         "category": "structure",
-        "chained": true,
+        "chained": "in",
         "members": [
             {"name": "selector", "type": "char", "annotation": "const*", "length": "strlen"}
         ]
     },
     "surface descriptor from metal layer": {
         "category": "structure",
-        "chained": true,
+        "chained": "in",
         "tags": ["native"],
         "members": [
             {"name": "layer", "type": "void", "annotation": "*"}
@@ -1977,7 +1975,7 @@
     },
     "surface descriptor from windows HWND": {
         "category": "structure",
-        "chained": true,
+        "chained": "in",
         "tags": ["native"],
         "members": [
             {"name": "hinstance", "type": "void", "annotation": "*"},
@@ -1986,7 +1984,7 @@
     },
     "surface descriptor from xlib": {
         "category": "structure",
-        "chained": true,
+        "chained": "in",
         "tags": ["native"],
         "members": [
             {"name": "display", "type": "void", "annotation": "*"},
@@ -1995,7 +1993,7 @@
     },
     "surface descriptor from windows core window": {
         "category": "structure",
-        "chained": true,
+        "chained": "in",
         "tags": ["dawn"],
         "members": [
             {"name": "core window", "type": "void", "annotation": "*"}
@@ -2003,7 +2001,7 @@
     },
     "surface descriptor from windows swap chain panel": {
         "category": "structure",
-        "chained": true,
+        "chained": "in",
         "tags": ["dawn"],
         "members": [
             {"name": "swap chain panel", "type": "void", "annotation": "*"}
@@ -2028,7 +2026,7 @@
     },
     "swap chain descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "usage", "type": "texture usage"},
@@ -2103,7 +2101,7 @@
     },
     "texture data layout": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "offset", "type": "uint64_t", "default": 0},
             {"name": "bytes per row", "type": "uint32_t", "default": "WGPU_COPY_STRIDE_UNDEFINED"},
@@ -2112,7 +2110,7 @@
     },
     "texture descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "usage", "type": "texture usage"},
@@ -2255,7 +2253,7 @@
     },
     "texture view descriptor": {
         "category": "structure",
-        "extensible": true,
+        "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "format", "type": "texture format", "default": "undefined"},
@@ -2359,7 +2357,7 @@
     },
     "dawn texture internal usage descriptor": {
         "category": "structure",
-        "chained": true,
+        "chained": "in",
         "tags": ["dawn"],
         "members": [
             {"name": "internal usage", "type": "texture usage", "default": "none"}

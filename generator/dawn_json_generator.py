@@ -215,13 +215,20 @@ class StructureType(Record, Type):
                 m for m in json_data['members'] if is_enabled(m)
             ]
         Type.__init__(self, name, dict(json_data, **json_data_override))
-        self.chained = json_data.get("chained", False)
-        self.extensible = json_data.get("extensible", False)
-        self.output = json_data.get("output", False)
+        self.chained = json_data.get("chained", None)
+        self.extensible = json_data.get("extensible", None)
+        if self.chained:
+            assert (self.chained == "in" or self.chained == "out")
+        if self.extensible:
+            assert (self.extensible == "in" or self.extensible == "out")
         # Chained structs inherit from wgpu::ChainedStruct, which has
         # nextInChain, so setting both extensible and chained would result in
         # two nextInChain members.
         assert not (self.extensible and self.chained)
+
+    @property
+    def output(self):
+        return self.chained == "out" or self.extensible == "out"
 
 
 class Command(Record):
