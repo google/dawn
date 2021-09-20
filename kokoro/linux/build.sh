@@ -19,10 +19,24 @@ set -e # Fail on any error.
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )"
 ROOT_DIR="$( cd "${SCRIPT_DIR}/../.." >/dev/null 2>&1 && pwd )"
 
+# Inside the docker VM, we clone the project to a new directory.
+# We do this so that the docker script can be tested in a local development
+# checkout, without having the build litter the local checkout with artifacts.
+# This directory is mapped to the host temporary directory.
+# Kokoro uses a '/tmpfs' root, where as most linux enviroments just have '/tmp'
+if [ -d "/tmpfs" ]; then
+    TMP_DIR=/tmpfs
+else
+    TMP_DIR=/tmp
+fi
+
+
 docker run --rm -i \
   --volume "${ROOT_DIR}:${ROOT_DIR}" \
+  --volume "${TMP_DIR}:/src" \
   --volume "${KOKORO_ARTIFACTS_DIR}:/mnt/artifacts" \
   --workdir "${ROOT_DIR}" \
+  --env SRC_DIR="/src/tint" \
   --env BUILD_TYPE=$BUILD_TYPE \
   --env BUILD_SYSTEM=$BUILD_SYSTEM \
   --env BUILD_SANITIZER=$BUILD_SANITIZER \

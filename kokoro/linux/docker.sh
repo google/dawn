@@ -54,7 +54,7 @@ function with_retry {
   done
 }
 
-ORIGINAL_SRC_DIR="$(pwd)"
+CLONE_SRC_DIR="$(pwd)"
 
 . /bin/using.sh # Declare the bash `using` function for configuring toolchains.
 
@@ -62,13 +62,11 @@ using depot_tools
 using go-1.14.4      # Speeds up ./tools/lint
 using doxygen-1.8.18
 
-status "Cloning to clean source directory"
-# We do this so that the docker script can be tested in a local development
-# checkout, without having the build litter the local checkout with artifacts
-SRC_DIR=/tmp/tint-src
+status "Cloning to clean source directory at '${SRC_DIR}'"
+
 mkdir -p ${SRC_DIR}
 cd ${SRC_DIR}
-git clone ${ORIGINAL_SRC_DIR} .
+git clone ${CLONE_SRC_DIR} .
 
 status "Fetching dependencies"
 cp standalone.gclient .gclient
