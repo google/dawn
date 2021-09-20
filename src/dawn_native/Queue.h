@@ -92,9 +92,6 @@ namespace dawn_native {
         MaybeError ValidateSubmit(uint32_t commandCount, CommandBufferBase* const* commands) const;
         MaybeError ValidateOnSubmittedWorkDone(uint64_t signalValue,
                                                WGPUQueueWorkDoneStatus* status) const;
-        MaybeError ValidateWriteBuffer(const BufferBase* buffer,
-                                       uint64_t bufferOffset,
-                                       size_t size) const;
         MaybeError ValidateWriteTexture(const ImageCopyTexture* destination,
                                         size_t dataSize,
                                         const TextureDataLayout& dataLayout,

@@ -244,7 +244,10 @@ namespace dawn_native {
                                       uint64_t bufferOffset,
                                       const void* data,
                                       size_t size) {
-        DAWN_TRY(ValidateWriteBuffer(buffer, bufferOffset, size));
+        DAWN_TRY(GetDevice()->ValidateIsAlive());
+        DAWN_TRY(GetDevice()->ValidateObject(this));
+        DAWN_TRY(ValidateWriteBuffer(GetDevice(), buffer, bufferOffset, size));
+        DAWN_TRY(buffer->ValidateCanUseOnQueueNow());
         return WriteBufferImpl(buffer, bufferOffset, data, size);
     }
 
@@ -426,34 +429,6 @@ namespace dawn_native {
         if (signalValue != 0) {
             return DAWN_VALIDATION_ERROR("SignalValue must currently be 0.");
         }
-
-        return {};
-    }
-
-    MaybeError QueueBase::ValidateWriteBuffer(const BufferBase* buffer,
-                                              uint64_t bufferOffset,
-                                              size_t size) const {
-        DAWN_TRY(GetDevice()->ValidateIsAlive());
-        DAWN_TRY(GetDevice()->ValidateObject(this));
-        DAWN_TRY(GetDevice()->ValidateObject(buffer));
-
-        if (bufferOffset % 4 != 0) {
-            return DAWN_VALIDATION_ERROR("Queue::WriteBuffer bufferOffset must be a multiple of 4");
-        }
-        if (size % 4 != 0) {
-            return DAWN_VALIDATION_ERROR("Queue::WriteBuffer size must be a multiple of 4");
-        }
-
-        uint64_t bufferSize = buffer->GetSize();
-        if (bufferOffset > bufferSize || size > (bufferSize - bufferOffset)) {
-            return DAWN_VALIDATION_ERROR("Queue::WriteBuffer out of range");
-        }
-
-        if (!(buffer->GetUsage() & wgpu::BufferUsage::CopyDst)) {
-            return DAWN_VALIDATION_ERROR("Buffer needs the CopyDst usage bit");
-        }
-
-        DAWN_TRY(buffer->ValidateCanUseOnQueueNow());
 
         return {};
     }

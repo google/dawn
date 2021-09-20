@@ -18,6 +18,7 @@
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/CommandValidation.h"
 #include "dawn_native/Commands.h"
+#include "dawn_native/DynamicUploader.h"
 #include "dawn_native/EnumMaskIterator.h"
 #include "dawn_native/RenderBundle.h"
 #include "dawn_native/vulkan/BindGroupVk.h"
@@ -30,6 +31,7 @@
 #include "dawn_native/vulkan/QuerySetVk.h"
 #include "dawn_native/vulkan/RenderPassCache.h"
 #include "dawn_native/vulkan/RenderPipelineVk.h"
+#include "dawn_native/vulkan/StagingBufferVk.h"
 #include "dawn_native/vulkan/TextureVk.h"
 #include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
@@ -819,6 +821,40 @@ namespace dawn_native { namespace vulkan {
                     } else {
                         SkipCommand(&mCommands, Command::PushDebugGroup);
                     }
+                    break;
+                }
+
+                case Command::WriteBuffer: {
+                    WriteBufferCmd* write = mCommands.NextCommand<WriteBufferCmd>();
+                    const uint64_t offset = write->offset;
+                    const uint64_t size = write->size;
+                    if (size == 0) {
+                        continue;
+                    }
+
+                    Buffer* dstBuffer = ToBackend(write->buffer.Get());
+                    uint8_t* data = mCommands.NextData<uint8_t>(size);
+                    Device* device = ToBackend(GetDevice());
+
+                    UploadHandle uploadHandle;
+                    DAWN_TRY_ASSIGN(uploadHandle, device->GetDynamicUploader()->Allocate(
+                                                      size, device->GetPendingCommandSerial(),
+                                                      kCopyBufferToBufferOffsetAlignment));
+                    ASSERT(uploadHandle.mappedBuffer != nullptr);
+                    memcpy(uploadHandle.mappedBuffer, data, size);
+
+                    dstBuffer->EnsureDataInitializedAsDestination(recordingContext, offset, size);
+
+                    dstBuffer->TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopyDst);
+
+                    VkBufferCopy copy;
+                    copy.srcOffset = uploadHandle.startOffset;
+                    copy.dstOffset = offset;
+                    copy.size = size;
+
+                    device->fn.CmdCopyBuffer(
+                        commands, ToBackend(uploadHandle.stagingBuffer)->GetBufferHandle(),
+                        dstBuffer->GetHandle(), 1, &copy);
                     break;
                 }
 

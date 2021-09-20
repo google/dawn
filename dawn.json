@@ -523,6 +523,15 @@
                 ]
             },
             {
+                "name": "write buffer",
+                "args": [
+                    {"name": "buffer", "type": "buffer"},
+                    {"name": "buffer offset", "type": "uint64_t"},
+                    {"name": "data", "type": "uint8_t", "annotation": "const*", "length": "size"},
+                    {"name": "size", "type": "uint64_t"}
+                ]
+            },
+            {
                 "name": "write timestamp",
                 "args": [
                     {"name": "query set", "type": "query set"},

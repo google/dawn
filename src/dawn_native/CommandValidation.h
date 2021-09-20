@@ -31,6 +31,11 @@ namespace dawn_native {
 
     MaybeError ValidateTimestampQuery(QuerySetBase* querySet, uint32_t queryIndex);
 
+    MaybeError ValidateWriteBuffer(const DeviceBase* device,
+                                   const BufferBase* buffer,
+                                   uint64_t bufferOffset,
+                                   uint64_t size);
+
     ResultOrError<uint64_t> ComputeRequiredBytesInCopy(const TexelBlockInfo& blockInfo,
                                                        const Extent3D& copySize,
                                                        uint32_t bytesPerRow,

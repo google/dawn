@@ -63,6 +63,7 @@ namespace dawn_native {
         SetBindGroup,
         SetIndexBuffer,
         SetVertexBuffer,
+        WriteBuffer,
         WriteTimestamp,
     };
 
@@ -250,6 +251,12 @@ namespace dawn_native {
 
     struct SetVertexBufferCmd {
         VertexBufferSlot slot;
+        Ref<BufferBase> buffer;
+        uint64_t offset;
+        uint64_t size;
+    };
+
+    struct WriteBufferCmd {
         Ref<BufferBase> buffer;
         uint64_t offset;
         uint64_t size;

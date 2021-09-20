@@ -68,6 +68,10 @@ namespace dawn_native {
                                 uint32_t queryCount,
                                 BufferBase* destination,
                                 uint64_t destinationOffset);
+        void APIWriteBuffer(BufferBase* buffer,
+                            uint64_t bufferOffset,
+                            const uint8_t* data,
+                            uint64_t size);
         void APIWriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex);
 
         CommandBufferBase* APIFinish(const CommandBufferDescriptor* descriptor = nullptr);

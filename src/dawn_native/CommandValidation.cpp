@@ -72,6 +72,31 @@ namespace dawn_native {
         return {};
     }
 
+    MaybeError ValidateWriteBuffer(const DeviceBase* device,
+                                   const BufferBase* buffer,
+                                   uint64_t bufferOffset,
+                                   uint64_t size) {
+        DAWN_TRY(device->ValidateObject(buffer));
+
+        if (bufferOffset % 4 != 0) {
+            return DAWN_VALIDATION_ERROR("WriteBuffer bufferOffset must be a multiple of 4");
+        }
+        if (size % 4 != 0) {
+            return DAWN_VALIDATION_ERROR("WriteBuffer size must be a multiple of 4");
+        }
+
+        uint64_t bufferSize = buffer->GetSize();
+        if (bufferOffset > bufferSize || size > (bufferSize - bufferOffset)) {
+            return DAWN_VALIDATION_ERROR("WriteBuffer out of range");
+        }
+
+        if (!(buffer->GetUsage() & wgpu::BufferUsage::CopyDst)) {
+            return DAWN_VALIDATION_ERROR("Buffer needs the CopyDst usage bit");
+        }
+
+        return {};
+    }
+
     bool IsRangeOverlapped(uint32_t startA, uint32_t startB, uint32_t length) {
         uint32_t maxStart = std::max(startA, startB);
         uint32_t minStart = std::min(startA, startB);
