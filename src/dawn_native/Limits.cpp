@@ -57,8 +57,13 @@ namespace dawn_native {
         template <>
         struct CheckLimit<LimitBetterDirection::Lower> {
             template <typename T>
-            static MaybeError Invoke(T supported, T required) {
-                if (required < supported) {
+            static bool IsBetter(T lhs, T rhs) {
+                return lhs < rhs;
+            }
+
+            template <typename T>
+            static MaybeError Validate(T supported, T required) {
+                if (IsBetter(required, supported)) {
                     return DAWN_VALIDATION_ERROR("requiredLimit lower than supported limit");
                 }
                 return {};
@@ -68,8 +73,13 @@ namespace dawn_native {
         template <>
         struct CheckLimit<LimitBetterDirection::Higher> {
             template <typename T>
-            static MaybeError Invoke(T supported, T required) {
-                if (required > supported) {
+            static bool IsBetter(T lhs, T rhs) {
+                return lhs > rhs;
+            }
+
+            template <typename T>
+            static MaybeError Validate(T supported, T required) {
+                if (IsBetter(required, supported)) {
                     return DAWN_VALIDATION_ERROR("requiredLimit greater than supported limit");
                 }
                 return {};
@@ -103,11 +113,14 @@ namespace dawn_native {
 
     Limits ReifyDefaultLimits(const Limits& limits) {
         Limits out;
-#define X(Better, limitName, defaultValue)     \
-    if (!IsLimitUndefined(limits.limitName)) { \
-        out.limitName = limits.limitName;      \
-    } else {                                   \
-        out.limitName = defaultValue;          \
+#define X(Better, limitName, defaultValue)                                              \
+    if (IsLimitUndefined(limits.limitName) ||                                           \
+        CheckLimit<LimitBetterDirection::Better>::IsBetter(                             \
+            static_cast<decltype(limits.limitName)>(defaultValue), limits.limitName)) { \
+        /* If the limit is undefined or the default is better, use the default */       \
+        out.limitName = defaultValue;                                                   \
+    } else {                                                                            \
+        out.limitName = limits.limitName;                                               \
     }
         LIMITS(X)
 #undef X
@@ -115,10 +128,10 @@ namespace dawn_native {
     }
 
     MaybeError ValidateLimits(const Limits& supportedLimits, const Limits& requiredLimits) {
-#define X(Better, limitName, defaultValue)                                                    \
-    if (!IsLimitUndefined(requiredLimits.limitName)) {                                        \
-        DAWN_TRY(CheckLimit<LimitBetterDirection::Better>::Invoke(supportedLimits.limitName,  \
-                                                                  requiredLimits.limitName)); \
+#define X(Better, limitName, defaultValue)                                                      \
+    if (!IsLimitUndefined(requiredLimits.limitName)) {                                          \
+        DAWN_TRY(CheckLimit<LimitBetterDirection::Better>::Validate(supportedLimits.limitName,  \
+                                                                    requiredLimits.limitName)); \
     }
         LIMITS(X)
 #undef X

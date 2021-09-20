@@ -91,18 +91,20 @@ TEST_F(RequestDeviceValidationTest, HigherIsBetter) {
     wgpu::SupportedLimits supportedLimits;
     EXPECT_TRUE(adapter.GetLimits(reinterpret_cast<WGPUSupportedLimits*>(&supportedLimits)));
 
-    // Test below the max.
-    limits.limits.maxBindGroups = supportedLimits.limits.maxBindGroups - 1;
-    adapter.RequestDevice(
-        &descriptor, ExpectRequestDeviceSuccess, CheckDevice([&](wgpu::Device device) {
-            wgpu::SupportedLimits limits;
-            device.GetLimits(&limits);
+    // If we can support better than the default, test below the max.
+    if (supportedLimits.limits.maxBindGroups > 4u) {
+        limits.limits.maxBindGroups = supportedLimits.limits.maxBindGroups - 1;
+        adapter.RequestDevice(
+            &descriptor, ExpectRequestDeviceSuccess, CheckDevice([&](wgpu::Device device) {
+                wgpu::SupportedLimits limits;
+                device.GetLimits(&limits);
 
-            // Check we got exactly the request.
-            EXPECT_EQ(limits.limits.maxBindGroups, supportedLimits.limits.maxBindGroups - 1);
-            // Check another default limit.
-            EXPECT_EQ(limits.limits.maxTextureArrayLayers, 256u);
-        }));
+                // Check we got exactly the request.
+                EXPECT_EQ(limits.limits.maxBindGroups, supportedLimits.limits.maxBindGroups - 1);
+                // Check another default limit.
+                EXPECT_EQ(limits.limits.maxTextureArrayLayers, 256u);
+            }));
+    }
 
     // Test the max.
     limits.limits.maxBindGroups = supportedLimits.limits.maxBindGroups;
@@ -120,6 +122,17 @@ TEST_F(RequestDeviceValidationTest, HigherIsBetter) {
     // Test above the max.
     limits.limits.maxBindGroups = supportedLimits.limits.maxBindGroups + 1;
     adapter.RequestDevice(&descriptor, ExpectRequestDeviceError, nullptr);
+
+    // Test worse than the default
+    limits.limits.maxBindGroups = 3u;
+    adapter.RequestDevice(&descriptor, ExpectRequestDeviceSuccess,
+                          CheckDevice([&](wgpu::Device device) {
+                              wgpu::SupportedLimits limits;
+                              device.GetLimits(&limits);
+
+                              // Check we got the default.
+                              EXPECT_EQ(limits.limits.maxBindGroups, 4u);
+                          }));
 }
 
 // Test that requesting a device where a required limit is below the minimum value.
@@ -151,19 +164,32 @@ TEST_F(RequestDeviceValidationTest, LowerIsBetter) {
                               EXPECT_EQ(limits.limits.maxTextureArrayLayers, 256u);
                           }));
 
-    // Test above the min.
-    limits.limits.minUniformBufferOffsetAlignment =
-        supportedLimits.limits.minUniformBufferOffsetAlignment * 2;
+    // IF we can support better than the default, test above the min.
+    if (supportedLimits.limits.minUniformBufferOffsetAlignment > 256u) {
+        limits.limits.minUniformBufferOffsetAlignment =
+            supportedLimits.limits.minUniformBufferOffsetAlignment * 2;
+        adapter.RequestDevice(
+            &descriptor, ExpectRequestDeviceSuccess, CheckDevice([&](wgpu::Device device) {
+                wgpu::SupportedLimits limits;
+                device.GetLimits(&limits);
+
+                // Check we got exactly the request.
+                EXPECT_EQ(limits.limits.minUniformBufferOffsetAlignment,
+                          supportedLimits.limits.minUniformBufferOffsetAlignment * 2);
+                // Check another default limit.
+                EXPECT_EQ(limits.limits.maxTextureArrayLayers, 256u);
+            }));
+    }
+
+    // Test worse than the default
+    limits.limits.minUniformBufferOffsetAlignment = 2u * 256u;
     adapter.RequestDevice(&descriptor, ExpectRequestDeviceSuccess,
                           CheckDevice([&](wgpu::Device device) {
                               wgpu::SupportedLimits limits;
                               device.GetLimits(&limits);
 
-                              // Check we got exactly the request.
-                              EXPECT_EQ(limits.limits.minUniformBufferOffsetAlignment,
-                                        supportedLimits.limits.minUniformBufferOffsetAlignment * 2);
-                              // Check another default limit.
-                              EXPECT_EQ(limits.limits.maxTextureArrayLayers, 256u);
+                              // Check we got the default.
+                              EXPECT_EQ(limits.limits.minUniformBufferOffsetAlignment, 256u);
                           }));
 }
 
