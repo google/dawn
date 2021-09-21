@@ -145,17 +145,24 @@ bool SwapRandomIntervals(const std::string& delimiter,
     return false;
   }
 
-  // When generating the i-th random number, we should make sure that there are
-  // at least (3-i) numbers greater than this number.
-  size_t ind1 = generator.GetUInt64(delimiter_positions.size() - 3u);
-  size_t ind2 = generator.GetUInt64(ind1 + 1u, delimiter_positions.size() - 2u);
-  size_t ind3 = generator.GetUInt64(ind2, delimiter_positions.size() - 2u);
-  size_t ind4 = generator.GetUInt64(ind3 + 1u, delimiter_positions.size() - 1u);
+  // Choose indices:
+  //   interval_1_start < interval_1_end <= interval_2_start < interval_2_end
+  uint32_t interval_1_start = generator.GetUInt32(
+      static_cast<uint32_t>(delimiter_positions.size()) - 2u);
+  uint32_t interval_1_end = generator.GetUInt32(
+      interval_1_start + 1u,
+      static_cast<uint32_t>(delimiter_positions.size()) - 1u);
+  uint32_t interval_2_start = generator.GetUInt32(
+      interval_1_end, static_cast<uint32_t>(delimiter_positions.size()) - 1u);
+  uint32_t interval_2_end = generator.GetUInt32(
+      interval_2_start + 1u, static_cast<uint32_t>(delimiter_positions.size()));
 
-  SwapIntervals(delimiter_positions[ind1],
-                delimiter_positions[ind2] - delimiter_positions[ind1],
-                delimiter_positions[ind3],
-                delimiter_positions[ind4] - delimiter_positions[ind3],
+  SwapIntervals(delimiter_positions[interval_1_start],
+                delimiter_positions[interval_1_end] -
+                    delimiter_positions[interval_1_start],
+                delimiter_positions[interval_2_start],
+                delimiter_positions[interval_2_end] -
+                    delimiter_positions[interval_2_start],
                 wgsl_code);
 
   return true;
@@ -172,12 +179,15 @@ bool DeleteRandomInterval(const std::string& delimiter,
     return false;
   }
 
-  size_t ind1 = generator.GetUInt64(delimiter_positions.size() - 2u);
-  size_t ind2 = generator.GetUInt64(ind1 + 1u, delimiter_positions.size() - 1u);
+  uint32_t interval_start = generator.GetUInt32(
+      static_cast<uint32_t>(delimiter_positions.size()) - 1u);
+  uint32_t interval_end = generator.GetUInt32(
+      interval_start + 1u, static_cast<uint32_t>(delimiter_positions.size()));
 
-  DeleteInterval(delimiter_positions[ind1],
-                 delimiter_positions[ind2] - delimiter_positions[ind1],
-                 wgsl_code);
+  DeleteInterval(
+      delimiter_positions[interval_start],
+      delimiter_positions[interval_end] - delimiter_positions[interval_start],
+      wgsl_code);
 
   return true;
 }
@@ -193,13 +203,17 @@ bool DuplicateRandomInterval(const std::string& delimiter,
     return false;
   }
 
-  size_t ind1 = generator.GetUInt64(delimiter_positions.size() - 2u);
-  size_t ind2 = generator.GetUInt64(ind1 + 1u, delimiter_positions.size() - 1u);
-  size_t ind3 = generator.GetUInt64(delimiter_positions.size() - 1u);
+  uint32_t interval_start = generator.GetUInt32(
+      static_cast<uint32_t>(delimiter_positions.size()) - 1u);
+  uint32_t interval_end = generator.GetUInt32(
+      interval_start + 1u, static_cast<uint32_t>(delimiter_positions.size()));
+  uint32_t duplication_point =
+      generator.GetUInt32(static_cast<uint32_t>(delimiter_positions.size()));
 
-  DuplicateInterval(delimiter_positions[ind1],
-                    delimiter_positions[ind2] - delimiter_positions[ind1],
-                    delimiter_positions[ind3], wgsl_code);
+  DuplicateInterval(
+      delimiter_positions[interval_start],
+      delimiter_positions[interval_end] - delimiter_positions[interval_start],
+      delimiter_positions[duplication_point], wgsl_code);
 
   return true;
 }
@@ -214,12 +228,14 @@ bool ReplaceRandomIdentifier(std::string& wgsl_code,
     return false;
   }
 
-  size_t id1_index = generator.GetUInt64(identifiers.size() - 1u);
-  size_t id2_index = generator.GetUInt64(identifiers.size() - 1u);
+  uint32_t id1_index =
+      generator.GetUInt32(static_cast<uint32_t>(identifiers.size()));
+  uint32_t id2_index =
+      generator.GetUInt32(static_cast<uint32_t>(identifiers.size()));
 
   // The two identifiers must be different
   while (id1_index == id2_index) {
-    id2_index = generator.GetUInt64(identifiers.size() - 1u);
+    id2_index = generator.GetUInt32(static_cast<uint32_t>(identifiers.size()));
   }
 
   ReplaceRegion(identifiers[id1_index].first, identifiers[id1_index].second,
@@ -238,15 +254,17 @@ bool ReplaceRandomIntLiteral(std::string& wgsl_code,
     return false;
   }
 
-  size_t id1_index = generator.GetUInt64(literals.size() - 1u);
+  uint32_t literal_index =
+      generator.GetUInt32(static_cast<uint32_t>(literals.size()));
 
   // INT_MAX = 2147483647, INT_MIN = -2147483648
   std::vector<std::string> boundary_values = {
       "2147483647", "-2147483648", "1", "-1", "0", "4294967295"};
 
-  size_t boundary_index = generator.GetUInt64(boundary_values.size() - 1u);
+  uint32_t boundary_index =
+      generator.GetUInt32(static_cast<uint32_t>(boundary_values.size()));
 
-  ReplaceInterval(literals[id1_index].first, literals[id1_index].second,
+  ReplaceInterval(literals[literal_index].first, literals[literal_index].second,
                   boundary_values[boundary_index], wgsl_code);
 
   return true;

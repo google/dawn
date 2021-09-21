@@ -59,10 +59,10 @@ extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
   RandomGenerator generator(seed);
 
   std::string delimiter =
-      delimiters[generator.GetUInt64(delimiters.size() - 1u)];
+      delimiters[generator.GetUInt32(static_cast<uint32_t>(delimiters.size()))];
 
-  MutationKind mutation_kind = static_cast<MutationKind>(generator.GetUInt64(
-      static_cast<size_t>(MutationKind::kNumMutationKinds) - 1u));
+  MutationKind mutation_kind = static_cast<MutationKind>(generator.GetUInt32(
+      static_cast<uint32_t>(MutationKind::kNumMutationKinds)));
 
   switch (mutation_kind) {
     case MutationKind::kSwapIntervals:
