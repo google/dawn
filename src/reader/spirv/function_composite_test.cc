@@ -248,6 +248,61 @@ TEST_F(SpvParserTest_Composite_Construct, Struct) {
   })"));
 }
 
+TEST_F(SpvParserTest_Composite_Construct,
+       ConstantComposite_Struct_NoDeduplication) {
+  const auto assembly = Preamble() + R"(
+     %200 = OpTypeStruct %uint
+     %300 = OpTypeStruct %uint ; isomorphic structures
+
+     %201 = OpConstantComposite %200 %uint_10
+     %301 = OpConstantComposite %300 %uint_10  ; isomorphic constants
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %2 = OpCopyObject %200 %201
+     %3 = OpCopyObject %300 %301
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto got = ToString(p->builder(), fe.ast_body());
+  const auto expected = std::string(
+      R"(VariableDeclStatement{
+  VariableConst{
+    x_2
+    none
+    undefined
+    __type_name_S_1
+    {
+      TypeConstructor[not set]{
+        __type_name_S_1
+        ScalarConstructor[not set]{10u}
+      }
+    }
+  }
+}
+VariableDeclStatement{
+  VariableConst{
+    x_3
+    none
+    undefined
+    __type_name_S_2
+    {
+      TypeConstructor[not set]{
+        __type_name_S_2
+        ScalarConstructor[not set]{10u}
+      }
+    }
+  }
+}
+Return{}
+)");
+  EXPECT_EQ(got, expected) << got;
+}
+
 using SpvParserTest_CompositeExtract = SpvParserTest;
 
 TEST_F(SpvParserTest_CompositeExtract, Vector) {

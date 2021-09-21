@@ -443,12 +443,12 @@ class ParserImpl : Reader {
   /// @returns a new expression
   TypedExpression MakeConstantExpression(uint32_t id);
 
-  /// Creates an AST expression node for a SPIR-V constant.
+  /// Creates an AST expression node for a scalar SPIR-V constant.
   /// @param source the source location
   /// @param ast_type the AST type for the value
   /// @param spirv_const the internal representation of the SPIR-V constant.
   /// @returns a new expression
-  TypedExpression MakeConstantExpressionForSpirvConstant(
+  TypedExpression MakeConstantExpressionForScalarSpirvConstant(
       Source source,
       const Type* ast_type,
       const spvtools::opt::analysis::Constant* spirv_const);

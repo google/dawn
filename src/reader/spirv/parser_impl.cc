@@ -1890,19 +1890,19 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
                           Source{}, ast_type->Build(builder_),
                           ast::ExpressionList{x.expr, y.expr, z.expr})};
   } else if (id == workgroup_size_builtin_.x_id) {
-    return MakeConstantExpressionForSpirvConstant(
+    return MakeConstantExpressionForScalarSpirvConstant(
         Source{}, ConvertType(workgroup_size_builtin_.component_type_id),
         constant_mgr_->GetConstant(
             type_mgr_->GetType(workgroup_size_builtin_.component_type_id),
             {workgroup_size_builtin_.x_value}));
   } else if (id == workgroup_size_builtin_.y_id) {
-    return MakeConstantExpressionForSpirvConstant(
+    return MakeConstantExpressionForScalarSpirvConstant(
         Source{}, ConvertType(workgroup_size_builtin_.component_type_id),
         constant_mgr_->GetConstant(
             type_mgr_->GetType(workgroup_size_builtin_.component_type_id),
             {workgroup_size_builtin_.y_value}));
   } else if (id == workgroup_size_builtin_.z_id) {
-    return MakeConstantExpressionForSpirvConstant(
+    return MakeConstantExpressionForScalarSpirvConstant(
         Source{}, ConvertType(workgroup_size_builtin_.component_type_id),
         constant_mgr_->GetConstant(
             type_mgr_->GetType(workgroup_size_builtin_.component_type_id),
@@ -1916,29 +1916,59 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
     Fail() << "ID " << id << " is not a registered instruction";
     return {};
   }
+  auto source = GetSourceForInst(inst);
+
+  // TODO(dneto): Handle spec constants too?
+
   auto* original_ast_type = ConvertType(inst->type_id());
   if (original_ast_type == nullptr) {
     return {};
   }
 
-  if (inst->opcode() == SpvOpUndef) {
-    // Remap undef to null.
-    return {original_ast_type, MakeNullValue(original_ast_type)};
-  }
+  switch (inst->opcode()) {
+    case SpvOpUndef:  // Remap undef to null.
+    case SpvOpConstantNull:
+      return {original_ast_type, MakeNullValue(original_ast_type)};
+    case SpvOpConstantTrue:
+    case SpvOpConstantFalse:
+    case SpvOpConstant: {
+      const auto* spirv_const = constant_mgr_->FindDeclaredConstant(id);
+      if (spirv_const == nullptr) {
+        Fail() << "ID " << id << " is not a constant";
+        return {};
+      }
+      return MakeConstantExpressionForScalarSpirvConstant(
+          source, original_ast_type, spirv_const);
+    }
+    case SpvOpConstantComposite: {
+      // Handle vector, matrix, array, and struct
 
-  // TODO(dneto): Handle spec constants too?
-  const auto* spirv_const = constant_mgr_->FindDeclaredConstant(id);
-  if (spirv_const == nullptr) {
-    Fail() << "ID " << id << " is not a constant";
-    return {};
+      // Generate a composite from explicit components.
+      ast::ExpressionList ast_components;
+      if (!inst->WhileEachInId([&](const uint32_t* id_ref) -> bool {
+            auto component = MakeConstantExpression(*id_ref);
+            if (!component) {
+              this->Fail() << "invalid constant with ID " << *id_ref;
+              return false;
+            }
+            ast_components.emplace_back(component.expr);
+            return true;
+          })) {
+        // We've already emitted a diagnostic.
+        return {};
+      }
+      return {original_ast_type, create<ast::TypeConstructorExpression>(
+                                     source, original_ast_type->Build(builder_),
+                                     std::move(ast_components))};
+    }
+    default:
+      break;
   }
-
-  auto source = GetSourceForInst(inst);
-  return MakeConstantExpressionForSpirvConstant(source, original_ast_type,
-                                                spirv_const);
+  Fail() << "unhandled constant instruction " << inst->PrettyPrint();
+  return {};
 }
 
-TypedExpression ParserImpl::MakeConstantExpressionForSpirvConstant(
+TypedExpression ParserImpl::MakeConstantExpressionForScalarSpirvConstant(
     Source source,
     const Type* original_ast_type,
     const spvtools::opt::analysis::Constant* spirv_const) {
@@ -1970,37 +2000,7 @@ TypedExpression ParserImpl::MakeConstantExpressionForSpirvConstant(
     return {ty_.Bool(), create<ast::ScalarConstructorExpression>(
                             Source{}, create<ast::BoolLiteral>(source, value))};
   }
-  auto* spirv_composite_const = spirv_const->AsCompositeConstant();
-  if (spirv_composite_const != nullptr) {
-    // Handle vector, matrix, array, and struct
-
-    // TODO(dneto): Handle the spirv_composite_const->IsZero() case specially.
-    // See https://github.com/gpuweb/gpuweb/issues/685
-
-    // Generate a composite from explicit components.
-    ast::ExpressionList ast_components;
-    for (const auto* component : spirv_composite_const->GetComponents()) {
-      auto* def = constant_mgr_->GetDefiningInstruction(component);
-      if (def == nullptr) {
-        Fail() << "internal error: SPIR-V constant doesn't have defining "
-                  "instruction";
-        return {};
-      }
-      auto ast_component = MakeConstantExpression(def->result_id());
-      if (!success_) {
-        // We've already emitted a diagnostic.
-        return {};
-      }
-      ast_components.emplace_back(ast_component.expr);
-    }
-    return {original_ast_type, create<ast::TypeConstructorExpression>(
-                                   Source{}, original_ast_type->Build(builder_),
-                                   std::move(ast_components))};
-  }
-  if (spirv_const->AsNullConstant()) {
-    return {original_ast_type, MakeNullValue(original_ast_type)};
-  }
-  Fail() << "Unhandled constant type ";
+  Fail() << "expected scalar constant";
   return {};
 }
 
