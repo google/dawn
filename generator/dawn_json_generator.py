@@ -309,7 +309,7 @@ def link_typedef(typedef, types):
 # similar to the original order (though the sort isn't technically stable).
 #
 # It works by computing for each struct type what is the depth of its DAG of
-# dependents, then resorting based on that depth using Python's stable sort.
+# dependents, then re-sorting based on that depth using Python's stable sort.
 # This makes a toposort because if A depends on B then its depth will be bigger
 # than B's. It is also nice because all nodes with the same depth are kept in
 # the input order.

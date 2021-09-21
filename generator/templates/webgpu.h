@@ -116,9 +116,9 @@ typedef struct WGPUChainedStructOut {
 {% for type in by_category["structure"] %}
     typedef struct {{as_cType(type.name)}} {
         {% set Out = "Out" if type.output else "" %}
-        {% set const = "const" if not type.output else "" %}
+        {% set const = "const " if not type.output else "" %}
         {% if type.extensible %}
-            WGPUChainedStruct{{Out}} {{const}} * nextInChain;
+            WGPUChainedStruct{{Out}} {{const}}* nextInChain;
         {% endif %}
         {% if type.chained %}
             WGPUChainedStruct{{Out}} chain;
