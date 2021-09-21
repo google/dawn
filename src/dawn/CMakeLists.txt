@@ -97,10 +97,8 @@ DawnJSONGenerator(
     PRINT_NAME "WebGPU headers"
     RESULT_VARIABLE "WEBGPU_HEADERS_GEN_SOURCES"
 )
-
-add_library(webgpu_headers STATIC ${DAWN_DUMMY_FILE})
-target_sources(webgpu_headers PRIVATE
-    ${WEBGPU_HEADERS_GEN_SOURCES}
+add_custom_target(webgpu_headers_gen
+    DEPENDS ${WEBGPU_HEADERS_GEN_SOURCES}
 )
 
 DawnJSONGenerator(
@@ -108,8 +106,6 @@ DawnJSONGenerator(
     PRINT_NAME "Emscripten WebGPU bits"
     RESULT_VARIABLE "EMSCRIPTEN_BITS_GEN_SOURCES"
 )
-
-add_library(emscripten_bits STATIC ${DAWN_DUMMY_FILE})
-target_sources(emscripten_bits PRIVATE
-    ${EMSCRIPTEN_BITS_GEN_SOURCES}
+add_custom_target(emscripten_bits_gen
+    DEPENDS ${EMSCRIPTEN_BITS_GEN_SOURCES}
 )
