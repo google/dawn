@@ -92,6 +92,17 @@ InterpolationSampling ASTToInspectorInterpolationSampling(
 struct OverridableConstant {
   /// Name of the constant
   std::string name;
+
+  /// Type of the scalar
+  enum class Type {
+    kBool,
+    kFloat32,
+    kUint32,
+    kInt32,
+  };
+
+  /// Type of the scalar
+  Type type;
 };
 
 /// Reflection data for an entry point in the shader.
