@@ -266,7 +266,7 @@ struct Array : public Castable<Array, Type> {
   /// @param el the element type
   /// @param sz the number of elements in the array. 0 represents runtime-sized
   /// array.
-  /// @param st the byte stride of the array
+  /// @param st the byte stride of the array. 0 means use implicit stride.
   Array(const Type* el, uint32_t sz, uint32_t st);
 
   /// Copy constructor

@@ -343,36 +343,27 @@ const Type* ParserImpl::ConvertType(uint32_t type_id, PtrAs ptr_as) {
     return nullptr;
   }
 
-  auto maybe_generate_alias = [this, type_id,
-                               spirv_type](const Type* type) -> const Type* {
-    if (type != nullptr) {
-      return MaybeGenerateAlias(type_id, spirv_type, type);
-    }
-    return type;
-  };
-
   switch (spirv_type->kind()) {
     case spvtools::opt::analysis::Type::kVoid:
-      return maybe_generate_alias(ty_.Void());
+      return ty_.Void();
     case spvtools::opt::analysis::Type::kBool:
-      return maybe_generate_alias(ty_.Bool());
+      return ty_.Bool();
     case spvtools::opt::analysis::Type::kInteger:
-      return maybe_generate_alias(ConvertType(spirv_type->AsInteger()));
+      return ConvertType(spirv_type->AsInteger());
     case spvtools::opt::analysis::Type::kFloat:
-      return maybe_generate_alias(ConvertType(spirv_type->AsFloat()));
+      return ConvertType(spirv_type->AsFloat());
     case spvtools::opt::analysis::Type::kVector:
-      return maybe_generate_alias(ConvertType(spirv_type->AsVector()));
+      return ConvertType(spirv_type->AsVector());
     case spvtools::opt::analysis::Type::kMatrix:
-      return maybe_generate_alias(ConvertType(spirv_type->AsMatrix()));
+      return ConvertType(spirv_type->AsMatrix());
     case spvtools::opt::analysis::Type::kRuntimeArray:
-      return maybe_generate_alias(ConvertType(spirv_type->AsRuntimeArray()));
+      return ConvertType(type_id, spirv_type->AsRuntimeArray());
     case spvtools::opt::analysis::Type::kArray:
-      return maybe_generate_alias(ConvertType(spirv_type->AsArray()));
+      return ConvertType(type_id, spirv_type->AsArray());
     case spvtools::opt::analysis::Type::kStruct:
-      return maybe_generate_alias(ConvertType(type_id, spirv_type->AsStruct()));
+      return ConvertType(type_id, spirv_type->AsStruct());
     case spvtools::opt::analysis::Type::kPointer:
-      return maybe_generate_alias(
-          ConvertType(type_id, ptr_as, spirv_type->AsPointer()));
+      return ConvertType(type_id, ptr_as, spirv_type->AsPointer());
     case spvtools::opt::analysis::Type::kFunction:
       // Tint doesn't have a Function type.
       // We need to convert the result type and parameter types.
@@ -384,7 +375,7 @@ const Type* ParserImpl::ConvertType(uint32_t type_id, PtrAs ptr_as) {
     case spvtools::opt::analysis::Type::kImage:
       // Fake it for sampler and texture types.  These are handled in an
       // entirely different way.
-      return maybe_generate_alias(ty_.Void());
+      return ty_.Void();
     default:
       break;
   }
@@ -978,6 +969,7 @@ const Type* ParserImpl::ConvertType(
 }
 
 const Type* ParserImpl::ConvertType(
+    uint32_t type_id,
     const spvtools::opt::analysis::RuntimeArray* rtarr_ty) {
   auto* ast_elem_ty = ConvertType(type_mgr_->GetId(rtarr_ty->element_type()));
   if (ast_elem_ty == nullptr) {
@@ -987,10 +979,12 @@ const Type* ParserImpl::ConvertType(
   if (!ParseArrayDecorations(rtarr_ty, &array_stride)) {
     return nullptr;
   }
-  return ty_.Array(ast_elem_ty, 0, array_stride);
+  const Type* result = ty_.Array(ast_elem_ty, 0, array_stride);
+  return MaybeGenerateAlias(type_id, rtarr_ty, result);
 }
 
 const Type* ParserImpl::ConvertType(
+    uint32_t type_id,
     const spvtools::opt::analysis::Array* arr_ty) {
   const auto elem_type_id = type_mgr_->GetId(arr_ty->element_type());
   auto* ast_elem_ty = ConvertType(elem_type_id);
@@ -1031,13 +1025,16 @@ const Type* ParserImpl::ConvertType(
   if (remap_buffer_block_type_.count(elem_type_id)) {
     remap_buffer_block_type_.insert(type_mgr_->GetId(arr_ty));
   }
-  return ty_.Array(ast_elem_ty, static_cast<uint32_t>(num_elem), array_stride);
+  const Type* result =
+      ty_.Array(ast_elem_ty, static_cast<uint32_t>(num_elem), array_stride);
+  return MaybeGenerateAlias(type_id, arr_ty, result);
 }
 
 bool ParserImpl::ParseArrayDecorations(
     const spvtools::opt::analysis::Type* spv_type,
     uint32_t* array_stride) {
   bool has_array_stride = false;
+  *array_stride = 0;  // Implicit stride case.
   const auto type_id = type_mgr_->GetId(spv_type);
   for (auto& decoration : this->GetDecorationsFor(type_id)) {
     if (decoration.size() == 2 && decoration[0] == SpvDecorationArrayStride) {
