@@ -28,6 +28,7 @@ set(FUZZER_SOURCES ${FUZZER_SOURCES}
         cli.h
         mutator.h
         mutator_cache.h
+        override_cli_params.h
         spirv_fuzz_mutator.h
         spirv_opt_mutator.h
         spirv_reduce_mutator.h
@@ -57,10 +58,22 @@ function(configure_spirv_tools_fuzzer_target NAME SOURCES)
             ${spirv-tools_BINARY_DIR})
 endfunction()
 
-configure_spirv_tools_fuzzer_target(tint_spirv_tools_fuzzer "${FUZZER_SOURCES}")
-target_compile_definitions(tint_spirv_tools_fuzzer PUBLIC CUSTOM_MUTATOR)
-target_compile_definitions(tint_spirv_tools_fuzzer PRIVATE TARGET_FUZZER)
-target_link_libraries(tint_spirv_tools_fuzzer libtint-fuzz)
+function(add_tint_spirv_tools_fuzzer NAME)
+  set(FUZZER_TARGET_SOURCES ${NAME}.cc ${FUZZER_SOURCES})
+  configure_spirv_tools_fuzzer_target(${NAME} "${FUZZER_TARGET_SOURCES}")
+  target_link_libraries(${NAME} libtint-fuzz)
+  target_compile_definitions(tint_spirv_tools_fuzzer PUBLIC CUSTOM_MUTATOR)
+  target_compile_definitions(tint_spirv_tools_fuzzer PRIVATE TARGET_FUZZER)
+endfunction()
+
+# Add libfuzzer targets.
+# Targets back-ends according to command line arguments.
+add_tint_spirv_tools_fuzzer(tint_spirv_tools_fuzzer)
+# Targets back-ends individually.
+add_tint_spirv_tools_fuzzer(tint_spirv_tools_hlsl_writer_fuzzer)
+add_tint_spirv_tools_fuzzer(tint_spirv_tools_msl_writer_fuzzer)
+add_tint_spirv_tools_fuzzer(tint_spirv_tools_spv_writer_fuzzer)
+add_tint_spirv_tools_fuzzer(tint_spirv_tools_wgsl_writer_fuzzer)
 
 set(DEBUGGER_SOURCES
         ../random_generator.cc
