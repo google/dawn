@@ -986,11 +986,17 @@ const Type* ParserImpl::ConvertType(
 const Type* ParserImpl::ConvertType(
     uint32_t type_id,
     const spvtools::opt::analysis::Array* arr_ty) {
-  const auto elem_type_id = type_mgr_->GetId(arr_ty->element_type());
+  // Get the element type. The SPIR-V optimizer's types representation
+  // deduplicates array types that have the same parameterization.
+  // We don't want that deduplication, so get the element type from
+  // the SPIR-V type directly.
+  const auto* inst = def_use_mgr_->GetDef(type_id);
+  const auto elem_type_id = inst->GetSingleWordInOperand(0);
   auto* ast_elem_ty = ConvertType(elem_type_id);
   if (ast_elem_ty == nullptr) {
     return nullptr;
   }
+  // Get the length.
   const auto& length_info = arr_ty->length_info();
   if (length_info.words.empty()) {
     // The internal representation is invalid. The discriminant vector

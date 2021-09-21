@@ -639,6 +639,100 @@ TEST_F(SpvParserTest, ConvertType_StructWithMemberDecorations) {
   EXPECT_THAT(program.str(str), Eq(R"(__type_name_S)"));
 }
 
+TEST_F(SpvParserTest, ConvertType_Struct_NoDeduplication) {
+  // Prove that distinct SPIR-V structs map to distinct WGSL types.
+  auto p = parser(test::Assemble(Preamble() + R"(
+    %uint = OpTypeInt 32 0
+    %10 = OpTypeStruct %uint
+    %11 = OpTypeStruct %uint
+  )" + MainBody()));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+
+  auto* type10 = p->ConvertType(10);
+  ASSERT_NE(type10, nullptr);
+  EXPECT_TRUE(type10->Is<Struct>());
+  auto* struct_type10 = type10->As<Struct>();
+  ASSERT_NE(struct_type10, nullptr);
+  EXPECT_EQ(struct_type10->members.size(), 1u);
+  EXPECT_TRUE(struct_type10->members[0]->Is<U32>());
+
+  auto* type11 = p->ConvertType(11);
+  ASSERT_NE(type11, nullptr);
+  EXPECT_TRUE(type11->Is<Struct>());
+  auto* struct_type11 = type11->As<Struct>();
+  ASSERT_NE(struct_type11, nullptr);
+  EXPECT_EQ(struct_type11->members.size(), 1u);
+  EXPECT_TRUE(struct_type11->members[0]->Is<U32>());
+
+  // They map to distinct types in WGSL
+  EXPECT_NE(type11, type10);
+}
+
+TEST_F(SpvParserTest, ConvertType_Array_NoDeduplication) {
+  // Prove that distinct SPIR-V arrays map to distinct WGSL types.
+  auto assembly = Preamble() + R"(
+    %uint = OpTypeInt 32 0
+    %10 = OpTypeStruct %uint
+    %11 = OpTypeStruct %uint
+    %uint_1 = OpConstant %uint 1
+    %20 = OpTypeArray %10 %uint_1
+    %21 = OpTypeArray %11 %uint_1
+  )" + MainBody();
+  auto p = parser(test::Assemble(assembly));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+
+  auto* type20 = p->ConvertType(20);
+  ASSERT_NE(type20, nullptr);
+  EXPECT_TRUE(type20->Is<Array>());
+
+  auto* type21 = p->ConvertType(21);
+  ASSERT_NE(type21, nullptr);
+  EXPECT_TRUE(type21->Is<Array>());
+
+  // They map to distinct types in WGSL
+  EXPECT_NE(type21, type20);
+}
+
+TEST_F(SpvParserTest, ConvertType_RuntimeArray_NoDeduplication) {
+  // Prove that distinct SPIR-V runtime arrays map to distinct WGSL types.
+  // The implementation already deduplciates them because it knows
+  // runtime-arrays normally have stride decorations.
+  auto assembly = Preamble() + R"(
+    %uint = OpTypeInt 32 0
+    %10 = OpTypeStruct %uint
+    %11 = OpTypeStruct %uint
+    %20 = OpTypeRuntimeArray %10
+    %21 = OpTypeRuntimeArray %11
+    %22 = OpTypeRuntimeArray %10
+  )" + MainBody();
+  auto p = parser(test::Assemble(assembly));
+  std::cout << assembly << std::endl;
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+
+  auto* type20 = p->ConvertType(20);
+  ASSERT_NE(type20, nullptr);
+  EXPECT_TRUE(type20->Is<Alias>());
+  EXPECT_TRUE(type20->UnwrapAll()->Is<Array>());
+  EXPECT_EQ(type20->UnwrapAll()->As<Array>()->size, 0u);
+
+  auto* type21 = p->ConvertType(21);
+  ASSERT_NE(type21, nullptr);
+  EXPECT_TRUE(type21->Is<Alias>());
+  EXPECT_TRUE(type21->UnwrapAll()->Is<Array>());
+  EXPECT_EQ(type21->UnwrapAll()->As<Array>()->size, 0u);
+
+  auto* type22 = p->ConvertType(22);
+  ASSERT_NE(type22, nullptr);
+  EXPECT_TRUE(type22->Is<Alias>());
+  EXPECT_TRUE(type22->UnwrapAll()->Is<Array>());
+  EXPECT_EQ(type22->UnwrapAll()->As<Array>()->size, 0u);
+
+  // They map to distinct types in WGSL
+  EXPECT_NE(type21, type20);
+  EXPECT_NE(type22, type21);
+  EXPECT_NE(type22, type20);
+}
+
 // TODO(dneto): Demonstrate other member decorations. Blocked on
 // crbug.com/tint/30
 // TODO(dneto): Demonstrate multiple member deocrations. Blocked on
