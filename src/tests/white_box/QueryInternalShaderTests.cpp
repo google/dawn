@@ -71,7 +71,101 @@ namespace {
 
 }  // anonymous namespace
 
-class QueryInternalShaderTests : public DawnTest {};
+constexpr static uint64_t kSentinelValue = ~uint64_t(0u);
+
+// A gpu frequency on Intel D3D12 (ticks/second)
+constexpr uint64_t kGPUFrequency = 12000048u;
+constexpr uint64_t kNsPerSecond = 1000000000u;
+// Timestamp period in nanoseconds
+constexpr float kPeriod = static_cast<float>(kNsPerSecond) / kGPUFrequency;
+
+class QueryInternalShaderTests : public DawnTest {
+  protected:
+    // Original timestamp values in query set for testing
+    const std::vector<uint64_t> querySetValues = {
+        kSentinelValue,  // garbage data which is not written at beginning
+        10079569507,     // t0
+        10394415012,     // t1
+        kSentinelValue,  // garbage data which is not written between timestamps
+        11713454943,     // t2
+        38912556941,     // t3 (big value)
+        10080295766,     // t4 (reset)
+        12159966783,     // t5 (after reset)
+        12651224612,     // t6
+        39872473956,     // t7
+    };
+
+    const uint32_t kQueryCount = querySetValues.size();
+
+    // Timestamps available state
+    const std::vector<uint32_t> availabilities = {0, 1, 1, 0, 1, 1, 1, 1, 1, 1};
+
+    const std::vector<uint64_t> GetExpectedResults(const std::vector<uint64_t>& origin,
+                                                   uint32_t start,
+                                                   uint32_t firstQuery,
+                                                   uint32_t queryCount) {
+        std::vector<uint64_t> expected(origin.begin(), origin.end());
+        for (size_t i = 0; i < queryCount; i++) {
+            if (availabilities[firstQuery + i] == 0) {
+                // Not a available timestamp, write 0
+                expected[start + i] = 0u;
+            } else {
+                // Maybe the timestamp * period is larger than the maximum of uint64, so cast the
+                // delta value to double (higher precision than float)
+                expected[start + i] =
+                    static_cast<uint64_t>(static_cast<double>(origin[start + i]) * kPeriod);
+            }
+        }
+        return expected;
+    }
+
+    void RunTest(uint32_t firstQuery, uint32_t queryCount, uint32_t destinationOffset) {
+        ASSERT(destinationOffset % 256 == 0);
+
+        uint64_t size = queryCount * sizeof(uint64_t) + destinationOffset;
+
+        // The resolve buffer storing original timestamps and the converted values
+        wgpu::BufferDescriptor timestampsDesc;
+        timestampsDesc.size = size;
+        timestampsDesc.usage = wgpu::BufferUsage::QueryResolve | wgpu::BufferUsage::CopySrc |
+                               wgpu::BufferUsage::CopyDst;
+        wgpu::Buffer timestampsBuffer = device.CreateBuffer(&timestampsDesc);
+
+        // Set sentinel values to check the slots before the destination offset should not be
+        // converted
+        std::vector<uint64_t> timestampValues(size / sizeof(uint64_t), 1u);
+        uint32_t start = destinationOffset / sizeof(uint64_t);
+        for (uint32_t i = 0; i < queryCount; i++) {
+            timestampValues[start + i] = querySetValues[firstQuery + 1];
+        }
+        // Write sentinel values and orignal timestamps to timestamps buffer
+        queue.WriteBuffer(timestampsBuffer, 0, timestampValues.data(), size);
+
+        // The buffer indicating which values are available timestamps
+        wgpu::Buffer availabilityBuffer =
+            utils::CreateBufferFromData(device, availabilities.data(),
+                                        kQueryCount * sizeof(uint32_t), wgpu::BufferUsage::Storage);
+
+        // The params uniform buffer
+        dawn_native::TimestampParams params = {firstQuery, queryCount, destinationOffset, kPeriod};
+        wgpu::Buffer paramsBuffer = utils::CreateBufferFromData(device, &params, sizeof(params),
+                                                                wgpu::BufferUsage::Uniform);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EncodeConvertTimestampsToNanoseconds(encoder, timestampsBuffer, availabilityBuffer,
+                                             paramsBuffer);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        const std::vector<uint64_t> expected =
+            GetExpectedResults(timestampValues, start, firstQuery, queryCount);
+
+        EXPECT_BUFFER(timestampsBuffer, 0, size,
+                      new InternalShaderExpectation(expected.data(), size / sizeof(uint64_t)));
+    }
+
+  private:
+};
 
 // Test the accuracy of timestamp compute shader which uses unsigned 32-bit integers to simulate
 // unsigned 64-bit integers (timestamps) multiplied by float (period).
@@ -91,146 +185,17 @@ TEST_P(QueryInternalShaderTests, TimestampComputeShader) {
 
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
-    constexpr uint32_t kTimestampCount = 10u;
-    // A gpu frequency on Intel D3D12 (ticks/second)
-    constexpr uint64_t kGPUFrequency = 12000048u;
-    constexpr uint64_t kNsPerSecond = 1000000000u;
-    // Timestamp period in nanoseconds
-    constexpr float kPeriod = static_cast<float>(kNsPerSecond) / kGPUFrequency;
-
-    // Original timestamp values for testing
-    std::vector<uint64_t> timestamps = {
-        1,            // garbage data which is not written at beginning
-        10079569507,  // t0
-        10394415012,  // t1
-        1,            // garbage data which is not written between timestamps
-        11713454943,  // t2
-        38912556941,  // t3 (big value)
-        10080295766,  // t4 (reset)
-        12159966783,  // t5 (after reset)
-        12651224612,  // t6
-        39872473956,  // t7
-    };
-
-    // The buffer indicating which values are available timestamps
-    std::vector<uint32_t> availabilities = {0, 1, 1, 0, 1, 1, 1, 1, 1, 1};
-    wgpu::Buffer availabilityBuffer =
-        utils::CreateBufferFromData(device, availabilities.data(),
-                                    kTimestampCount * sizeof(uint32_t), wgpu::BufferUsage::Storage);
-
-    // The resolve buffer storing original timestamps and the converted values
-    wgpu::BufferDescriptor timestampsDesc;
-    timestampsDesc.size = kTimestampCount * sizeof(uint64_t);
-    timestampsDesc.usage =
-        wgpu::BufferUsage::QueryResolve | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
-    wgpu::Buffer timestampsBuffer = device.CreateBuffer(&timestampsDesc);
-
-    auto PrepareExpectedResults = [&](uint32_t first, uint32_t count,
-                                      uint32_t offset) -> std::vector<uint64_t> {
-        ASSERT(offset % sizeof(uint64_t) == 0);
-        std::vector<uint64_t> expected;
-        for (size_t i = 0; i < kTimestampCount; i++) {
-            // The data out of the rang [first, first + count] remains as it is
-            if (i < first || i >= first + count) {
-                expected.push_back(timestamps[i]);
-                continue;
-            }
-
-            if (availabilities[i] == 0) {
-                // Not a available timestamp, write 0
-                expected.push_back(0u);
-            } else {
-                // Maybe the timestamp * period is larger than the maximum of uint64, so cast the
-                // delta value to double (higher precision than float)
-                expected.push_back(
-                    static_cast<uint64_t>(static_cast<double>(timestamps[i]) * kPeriod));
-            }
-        }
-        return expected;
-    };
-
     // Convert timestamps in timestamps buffer with offset 0
-    // Test for ResolveQuerySet(querySet, 0, kTimestampCount, timestampsBuffer, 0)
-    {
-        constexpr uint32_t kFirst = 0u;
-        constexpr uint32_t kOffset = 0u;
+    // Test for ResolveQuerySet(querySet, 0, kQueryCount, timestampsBuffer, 0)
+    RunTest(0, kQueryCount, 0);
 
-        // Write orignal timestamps to timestamps buffer
-        queue.WriteBuffer(timestampsBuffer, 0, timestamps.data(),
-                          kTimestampCount * sizeof(uint64_t));
+    // Convert timestamps in timestamps buffer with offset 256
+    // Test for ResolveQuerySet(querySet, 1, kQueryCount - 1, timestampsBuffer, 256)
+    RunTest(1, kQueryCount - 1, 256);
 
-        // The params uniform buffer
-        dawn_native::TimestampParams params = {kFirst, kTimestampCount, kOffset, kPeriod};
-        wgpu::Buffer paramsBuffer = utils::CreateBufferFromData(device, &params, sizeof(params),
-                                                                wgpu::BufferUsage::Uniform);
-
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        EncodeConvertTimestampsToNanoseconds(encoder, timestampsBuffer, availabilityBuffer,
-                                             paramsBuffer);
-        wgpu::CommandBuffer commands = encoder.Finish();
-        queue.Submit(1, &commands);
-
-        // Expected results: Timestamp * period
-        std::vector<uint64_t> expected = PrepareExpectedResults(0, kTimestampCount, kOffset);
-        EXPECT_BUFFER(timestampsBuffer, 0, kTimestampCount * sizeof(uint64_t),
-                      new InternalShaderExpectation(expected.data(), kTimestampCount));
-    }
-
-    // Convert timestamps in timestamps buffer with offset 8
-    // Test for ResolveQuerySet(querySet, 1, kTimestampCount - 1, timestampsBuffer, 8)
-    {
-        constexpr uint32_t kFirst = 1u;
-        constexpr uint32_t kOffset = 8u;
-
-        // Write orignal timestamps to timestamps buffer
-        queue.WriteBuffer(timestampsBuffer, 0, timestamps.data(),
-                          kTimestampCount * sizeof(uint64_t));
-
-        // The params uniform buffer
-        dawn_native::TimestampParams params = {kFirst, kTimestampCount - kFirst, kOffset, kPeriod};
-        wgpu::Buffer paramsBuffer = utils::CreateBufferFromData(device, &params, sizeof(params),
-                                                                wgpu::BufferUsage::Uniform);
-
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        EncodeConvertTimestampsToNanoseconds(encoder, timestampsBuffer, availabilityBuffer,
-                                             paramsBuffer);
-        wgpu::CommandBuffer commands = encoder.Finish();
-        queue.Submit(1, &commands);
-
-        // Expected results: Timestamp * period
-        std::vector<uint64_t> expected =
-            PrepareExpectedResults(kFirst, kTimestampCount - kFirst, kOffset);
-        EXPECT_BUFFER(timestampsBuffer, 0, kTimestampCount * sizeof(uint64_t),
-                      new InternalShaderExpectation(expected.data(), kTimestampCount));
-    }
-
-    // Convert partial timestamps in timestamps buffer with offset 8
-    // Test for ResolveQuerySet(querySet, 1, 3, timestampsBuffer, 8)
-    {
-        constexpr uint32_t kFirst = 1u;
-        constexpr uint32_t kCount = 3u;
-        constexpr uint32_t kOffset = 8u;
-
-        // Write orignal timestamps to timestamps buffer
-        queue.WriteBuffer(timestampsBuffer, 0, timestamps.data(),
-                          kTimestampCount * sizeof(uint64_t));
-
-        // The params uniform buffer
-        dawn_native::TimestampParams params = {kFirst, kCount, kOffset, kPeriod};
-        wgpu::Buffer paramsBuffer = utils::CreateBufferFromData(device, &params, sizeof(params),
-                                                                wgpu::BufferUsage::Uniform);
-
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        EncodeConvertTimestampsToNanoseconds(encoder, timestampsBuffer, availabilityBuffer,
-                                             paramsBuffer);
-        wgpu::CommandBuffer commands = encoder.Finish();
-        queue.Submit(1, &commands);
-
-        // Expected results: Timestamp * period
-        std::vector<uint64_t> expected = PrepareExpectedResults(kFirst, kCount, kOffset);
-        EXPECT_BUFFER(timestampsBuffer, 0, kTimestampCount * sizeof(uint64_t),
-                      new InternalShaderExpectation(expected.data(), kTimestampCount));
-    }
+    // Convert partial timestamps in timestamps buffer with offset 256
+    // Test for ResolveQuerySet(querySet, 1, 4, timestampsBuffer, 256)
+    RunTest(1, 4, 256);
 }
 
 DAWN_INSTANTIATE_TEST(QueryInternalShaderTests, D3D12Backend(), MetalBackend(), VulkanBackend());

@@ -1362,9 +1362,9 @@ TEST_P(BufferZeroInitTest, ResolveQuerySet) {
     // destinationOffset > 0 and destinationOffset + 8 * queryCount <= kBufferSize
     {
         constexpr uint32_t kQueryCount = 1;
-        constexpr uint64_t kDestinationOffset = 8u;
+        constexpr uint64_t kDestinationOffset = 256u;
 
-        wgpu::Buffer destination = CreateBuffer(kBufferSize, kBufferUsage);
+        wgpu::Buffer destination = CreateBuffer(kBufferSize + kDestinationOffset, kBufferUsage);
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.WriteTimestamp(querySet, 0);
         encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, kDestinationOffset);
