@@ -135,8 +135,8 @@ test("dawn_unittests") {
     "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawn_proc",
     "${dawn_root}/src/dawn:dawncpp",
-    "${dawn_root}/src/dawn_native",
     "${dawn_root}/src/dawn_native:dawn_native_sources",
+    "${dawn_root}/src/dawn_native:dawn_native_static",
     "${dawn_root}/src/dawn_wire",
     "${dawn_root}/src/utils:dawn_utils",
   ]
@@ -169,6 +169,7 @@ test("dawn_unittests") {
     "unittests/ITypBitsetTests.cpp",
     "unittests/ITypSpanTests.cpp",
     "unittests/ITypVectorTests.cpp",
+    "unittests/LimitsTests.cpp",
     "unittests/LinkedListTests.cpp",
     "unittests/MathTests.cpp",
     "unittests/ObjectBaseTests.cpp",
