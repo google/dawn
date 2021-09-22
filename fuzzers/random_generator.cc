@@ -38,6 +38,22 @@ I RandomUInt(std::mt19937* engine, I lower, I upper) {
   return std::uniform_int_distribution<I>(lower, upper - 1)(*engine);
 }
 
+/// Calculate the hash for the contents of a c-style data buffer
+/// This is intentionally not implemented as a generic override of HashCombine
+/// in "src/utils/hash.h", because it conflicts with the vardiac override for
+/// the case where a pointer and an integer are being hashed.
+/// @param data - pointer to buffer to be hashed
+/// @param size - number of elements in buffer
+/// @returns hash of the data in the buffer
+size_t HashBuffer(const uint8_t* data, const size_t size) {
+  size_t hash = 102931;
+  utils::HashCombine(&hash, size);
+  for (size_t i = 0; i < size; i++) {
+    utils::HashCombine(&hash, data[i]);
+  }
+  return hash;
+}
+
 }  // namespace
 
 RandomGenerator::RandomGenerator(uint64_t seed) : engine_(seed) {}
@@ -107,9 +123,7 @@ uint64_t RandomGenerator::CalculateSeed(const uint8_t* data, size_t size) {
       std::max(hash_begin_i64 + kHashDesiredMaxBytes, size_i64);
   size_t hash_begin = static_cast<size_t>(hash_begin_i64);
   size_t hash_size = static_cast<size_t>(hash_end_i64) - hash_begin;
-  std::vector<uint8_t> hash_portion(data + hash_begin,
-                                    data + hash_begin + hash_size + 1);
-  return tint::utils::Hash(hash_portion);
+  return HashBuffer(data + hash_begin, hash_size);
 }
 
 }  // namespace fuzzers
