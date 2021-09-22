@@ -570,15 +570,15 @@ namespace dawn_native { namespace vulkan {
         }
 
         // Build the create info
-        VkPipelineVertexInputStateCreateInfo mCreateInfo;
-        mCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        mCreateInfo.pNext = nullptr;
-        mCreateInfo.flags = 0;
-        mCreateInfo.vertexBindingDescriptionCount = bindingCount;
-        mCreateInfo.pVertexBindingDescriptions = tempAllocations->bindings.data();
-        mCreateInfo.vertexAttributeDescriptionCount = attributeCount;
-        mCreateInfo.pVertexAttributeDescriptions = tempAllocations->attributes.data();
-        return mCreateInfo;
+        VkPipelineVertexInputStateCreateInfo createInfo;
+        createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+        createInfo.pNext = nullptr;
+        createInfo.flags = 0;
+        createInfo.vertexBindingDescriptionCount = bindingCount;
+        createInfo.pVertexBindingDescriptions = tempAllocations->bindings.data();
+        createInfo.vertexAttributeDescriptionCount = attributeCount;
+        createInfo.pVertexAttributeDescriptions = tempAllocations->attributes.data();
+        return createInfo;
     }
 
     RenderPipeline::~RenderPipeline() {
