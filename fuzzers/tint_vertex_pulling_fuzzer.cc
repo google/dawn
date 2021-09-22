@@ -21,20 +21,16 @@ namespace fuzzers {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   tint::transform::Manager transform_manager;
   tint::transform::DataMap transform_inputs;
-  Reader r(data, size);
+  DataBuilder b(data, size);
 
-  ExtractVertexPullingInputs(&r, &transform_inputs);
-  if (r.failed()) {
-    return 0;
-  }
-
+  GenerateVertexPullingInputs(&b, &transform_inputs);
   transform_manager.Add<tint::transform::VertexPulling>();
 
   tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kWGSL);
   fuzzer.SetTransformManager(&transform_manager, std::move(transform_inputs));
   fuzzer.SetDumpInput(GetCliParams().dump_input);
 
-  return fuzzer.Run(r.data(), r.size());
+  return fuzzer.Run(data, size);
 }
 
 }  // namespace fuzzers

@@ -14,6 +14,7 @@
 
 #include "fuzzers/tint_common_fuzzer.h"
 
+#include <cassert>
 #include <cstring>
 #include <fstream>
 #include <memory>
@@ -51,23 +52,23 @@ namespace {
   FatalError(diagnostics);
 }
 
-transform::VertexAttributeDescriptor ExtractVertexAttributeDescriptor(
-    Reader* r) {
+transform::VertexAttributeDescriptor GenerateVertexAttributeDescriptor(
+    DataBuilder* b) {
   transform::VertexAttributeDescriptor desc{};
-  desc.format = r->enum_class<transform::VertexFormat>(
+  desc.format = b->enum_class<transform::VertexFormat>(
       static_cast<uint8_t>(transform::VertexFormat::kLastEntry) + 1);
-  desc.offset = r->read<uint32_t>();
-  desc.shader_location = r->read<uint32_t>();
+  desc.offset = b->build<uint32_t>();
+  desc.shader_location = b->build<uint32_t>();
   return desc;
 }
 
-transform::VertexBufferLayoutDescriptor ExtractVertexBufferLayoutDescriptor(
-    Reader* r) {
+transform::VertexBufferLayoutDescriptor GenerateVertexBufferLayoutDescriptor(
+    DataBuilder* b) {
   transform::VertexBufferLayoutDescriptor desc;
-  desc.array_stride = r->read<uint32_t>();
-  desc.step_mode = r->enum_class<transform::VertexStepMode>(
+  desc.array_stride = b->build<uint32_t>();
+  desc.step_mode = b->enum_class<transform::VertexStepMode>(
       static_cast<uint8_t>(transform::VertexStepMode::kLastEntry) + 1);
-  desc.attributes = r->vector(ExtractVertexAttributeDescriptor);
+  desc.attributes = b->vector(GenerateVertexAttributeDescriptor);
   return desc;
 }
 
@@ -93,36 +94,28 @@ bool SPIRVToolsValidationCheck(const tint::Program& program,
 
 }  // namespace
 
-Reader::Reader(const uint8_t* data, size_t size) : data_(data), size_(size) {}
+DataBuilder::DataBuilder(const uint8_t* data, size_t size)
+    : generator_(RandomGenerator::CalculateSeed(data, size)) {}
 
-std::string Reader::string() {
-  auto count = read<uint8_t>();
-  if (failed_ || size_ < count) {
-    mark_failed();
+std::string DataBuilder::string() {
+  auto count = build<uint8_t>();
+  if (count == 0) {
     return "";
   }
-  std::string out(data_, data_ + count);
-  data_ += count;
-  size_ -= count;
-  return out;
+  std::vector<uint8_t> source(count);
+  build(source.data(), count);
+  return std::string(source.begin(), source.end());
 }
 
-void Reader::mark_failed() {
-  size_ = 0;
-  failed_ = true;
+void DataBuilder::build(void* out, size_t n) {
+  assert(out != nullptr && "|out| cannot be nullptr");
+  assert(n > 0 && "|n| must be > 0");
+
+  generator_.GetNBytes(reinterpret_cast<uint8_t*>(out), n);
 }
 
-void Reader::read(void* out, size_t n) {
-  if (n > size_) {
-    mark_failed();
-    return;
-  }
-  memcpy(out, data_, n);
-  data_ += n;
-  size_ -= n;
-}
-
-void ExtractBindingRemapperInputs(Reader* r, tint::transform::DataMap* inputs) {
+void GenerateBindingRemapperInputs(DataBuilder* b,
+                                   tint::transform::DataMap* inputs) {
   struct Config {
     uint8_t old_group;
     uint8_t old_binding;
@@ -131,7 +124,7 @@ void ExtractBindingRemapperInputs(Reader* r, tint::transform::DataMap* inputs) {
     ast::Access new_access;
   };
 
-  std::vector<Config> configs = r->vector<Config>();
+  std::vector<Config> configs = b->vector<Config>();
   transform::BindingRemapper::BindingPoints binding_points;
   transform::BindingRemapper::AccessControls accesses;
   for (const auto& config : configs) {
@@ -143,47 +136,48 @@ void ExtractBindingRemapperInputs(Reader* r, tint::transform::DataMap* inputs) {
   inputs->Add<transform::BindingRemapper::Remappings>(binding_points, accesses);
 }
 
-void ExtractFirstIndexOffsetInputs(Reader* r,
-                                   tint::transform::DataMap* inputs) {
+void GenerateFirstIndexOffsetInputs(DataBuilder* b,
+                                    tint::transform::DataMap* inputs) {
   struct Config {
     uint32_t group;
     uint32_t binding;
   };
 
-  Config config = r->read<Config>();
+  Config config = b->build<Config>();
   inputs->Add<tint::transform::FirstIndexOffset::BindingPoint>(config.binding,
                                                                config.group);
 }
 
-void ExtractSingleEntryPointInputs(Reader* r,
-                                   tint::transform::DataMap* inputs) {
-  std::string input = r->string();
+void GenerateSingleEntryPointInputs(DataBuilder* b,
+                                    tint::transform::DataMap* inputs) {
+  std::string input = b->string();
   transform::SingleEntryPoint::Config cfg(input);
   inputs->Add<transform::SingleEntryPoint::Config>(cfg);
 }
 
-void ExtractVertexPullingInputs(Reader* r, tint::transform::DataMap* inputs) {
+void GenerateVertexPullingInputs(DataBuilder* b,
+                                 tint::transform::DataMap* inputs) {
   transform::VertexPulling::Config cfg;
-  cfg.entry_point_name = r->string();
-  cfg.vertex_state = r->vector(ExtractVertexBufferLayoutDescriptor);
-  cfg.pulling_group = r->read<uint32_t>();
+  cfg.entry_point_name = b->string();
+  cfg.vertex_state = b->vector(GenerateVertexBufferLayoutDescriptor);
+  cfg.pulling_group = b->build<uint32_t>();
   inputs->Add<transform::VertexPulling::Config>(cfg);
 }
 
-void ExtractSpirvOptions(Reader* r, writer::spirv::Options* options) {
-  *options = r->read<writer::spirv::Options>();
+void GenerateSpirvOptions(DataBuilder* b, writer::spirv::Options* options) {
+  *options = b->build<writer::spirv::Options>();
 }
 
-void ExtractWgslOptions(Reader* r, writer::wgsl::Options* options) {
-  *options = r->read<writer::wgsl::Options>();
+void GenerateWgslOptions(DataBuilder* b, writer::wgsl::Options* options) {
+  *options = b->build<writer::wgsl::Options>();
 }
 
-void ExtractHlslOptions(Reader* r, writer::hlsl::Options* options) {
-  *options = r->read<writer::hlsl::Options>();
+void GenerateHlslOptions(DataBuilder* b, writer::hlsl::Options* options) {
+  *options = b->build<writer::hlsl::Options>();
 }
 
-void ExtractMslOptions(Reader* r, writer::msl::Options* options) {
-  *options = r->read<writer::msl::Options>();
+void GenerateMslOptions(DataBuilder* b, writer::msl::Options* options) {
+  *options = b->build<writer::msl::Options>();
 }
 
 CommonFuzzer::CommonFuzzer(InputFormat input, OutputFormat output)

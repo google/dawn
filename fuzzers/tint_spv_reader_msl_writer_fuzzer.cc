@@ -21,13 +21,13 @@ namespace tint {
 namespace fuzzers {
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
-  Reader reader(data, size);
+  DataBuilder b(data, size);
   writer::msl::Options options;
-  ExtractMslOptions(&reader, &options);
+  GenerateMslOptions(&b, &options);
   tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kSpv, OutputFormat::kMSL);
   fuzzer.SetOptionsMsl(options);
   fuzzer.SetDumpInput(GetCliParams().dump_input);
-  return fuzzer.Run(reader.data(), reader.size());
+  return fuzzer.Run(data, size);
 }
 
 }  // namespace fuzzers

@@ -47,7 +47,7 @@ bool ReadFile(const std::string& input_file, std::vector<T>* buffer) {
   }
 
   fseek(file, 0, SEEK_END);
-  uint64_t tell_file_size = static_cast<uint64_t>(ftell(file));
+  auto tell_file_size = ftell(file);
   if (tell_file_size <= 0) {
     std::cerr << "Input file of incorrect size: " << input_file << std::endl;
     fclose(file);
@@ -99,21 +99,21 @@ int main(int argc, const char** argv) {
                                        tint::fuzzers::OutputFormat::kHLSL);
     return fuzzer.Run(data.data(), data.size());
   } else if (target_format == "msl") {
-    tint::fuzzers::Reader reader(data.data(), data.size());
+    tint::fuzzers::DataBuilder builder(data.data(), data.size());
     tint::writer::msl::Options options;
-    ExtractMslOptions(&reader, &options);
+    GenerateMslOptions(&builder, &options);
     tint::fuzzers::CommonFuzzer fuzzer(tint::fuzzers::InputFormat::kWGSL,
                                        tint::fuzzers::OutputFormat::kMSL);
     fuzzer.SetOptionsMsl(options);
-    return fuzzer.Run(reader.data(), reader.size());
+    return fuzzer.Run(data.data(), data.size());
   } else if (target_format == "spv") {
-    tint::fuzzers::Reader reader(data.data(), data.size());
+    tint::fuzzers::DataBuilder builder(data.data(), data.size());
     tint::writer::spirv::Options options;
-    ExtractSpirvOptions(&reader, &options);
+    GenerateSpirvOptions(&builder, &options);
     tint::fuzzers::CommonFuzzer fuzzer(tint::fuzzers::InputFormat::kWGSL,
                                        tint::fuzzers::OutputFormat::kSpv);
     fuzzer.SetOptionsSpirv(options);
-    return fuzzer.Run(reader.data(), reader.size());
+    return fuzzer.Run(data.data(), data.size());
   } else if (target_format == "wgsl") {
     tint::fuzzers::CommonFuzzer fuzzer(tint::fuzzers::InputFormat::kWGSL,
                                        tint::fuzzers::OutputFormat::kWGSL);

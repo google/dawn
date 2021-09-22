@@ -18,6 +18,8 @@
 #include <cassert>
 #include <vector>
 
+#include "src/utils/hash.h"
+
 namespace tint {
 namespace fuzzers {
 
@@ -38,7 +40,7 @@ I RandomUInt(std::mt19937* engine, I lower, I upper) {
 
 }  // namespace
 
-RandomGenerator::RandomGenerator(uint32_t seed) : engine_(seed) {}
+RandomGenerator::RandomGenerator(uint64_t seed) : engine_(seed) {}
 
 uint32_t RandomGenerator::GetUInt32(uint32_t lower, uint32_t upper) {
   return RandomUInt(&engine_, lower, upper);
@@ -66,12 +68,11 @@ uint32_t RandomGenerator::Get4Bytes() {
   return std::independent_bits_engine<std::mt19937, 32, uint32_t>(engine_)();
 }
 
-std::vector<uint8_t> RandomGenerator::GetNBytes(size_t n) {
-  std::vector<uint8_t> result(n);
+void RandomGenerator::GetNBytes(uint8_t* dest, size_t n) {
+  assert(dest && "|dest| must not be nullptr");
   std::generate(
-      std::begin(result), std::end(result),
+      dest, dest + n,
       std::independent_bits_engine<std::mt19937, 8, uint8_t>(engine_));
-  return result;
 }
 
 bool RandomGenerator::GetBool() {
@@ -83,6 +84,32 @@ bool RandomGenerator::GetWeightedBool(uint32_t percentage) {
   assert(percentage <= kMaxPercentage &&
          "|percentage| needs to be within [0, 100]");
   return RandomUInt(&engine_, 0u, kMaxPercentage) < percentage;
+}
+
+uint64_t RandomGenerator::CalculateSeed(const uint8_t* data, size_t size) {
+  assert(data != nullptr && "|data| must be !nullptr");
+  assert(size > 0 && "|size| must be > 0");
+
+  // Number of bytes we want to skip at the start of data for the hash.
+  // Fewer bytes may be skipped when `size` is small.
+  // Has lower precedence than kHashDesiredMinBytes.
+  static const int64_t kHashDesiredLeadingSkipBytes = 5;
+  // Minimum number of bytes we want to use in the hash.
+  // Used for short buffers.
+  static const int64_t kHashDesiredMinBytes = 4;
+  // Maximum number of bytes we want to use in the hash.
+  static const int64_t kHashDesiredMaxBytes = 32;
+  int64_t size_i64 = static_cast<int64_t>(size);
+  int64_t hash_begin_i64 =
+      std::min(kHashDesiredLeadingSkipBytes,
+               std::max<int64_t>(size_i64 - kHashDesiredMinBytes, 0));
+  int64_t hash_end_i64 =
+      std::max(hash_begin_i64 + kHashDesiredMaxBytes, size_i64);
+  size_t hash_begin = static_cast<size_t>(hash_begin_i64);
+  size_t hash_size = static_cast<size_t>(hash_end_i64) - hash_begin;
+  std::vector<uint8_t> hash_portion(data + hash_begin,
+                                    data + hash_begin + hash_size + 1);
+  return tint::utils::Hash(hash_portion);
 }
 
 }  // namespace fuzzers

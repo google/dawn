@@ -99,6 +99,8 @@ if (${TINT_BUILD_WGSL_READER}
     AND ${TINT_BUILD_SPV_WRITER}
     AND ${TINT_BUILD_WGSL_WRITER})
   add_executable(tint_black_box_fuzz_target
+    random_generator.cc
+    random_generator.h
     tint_black_box_fuzz_target
     tint_common_fuzzer.cc
     tint_common_fuzzer.h

@@ -21,23 +21,20 @@
 #include <utility>
 #include <vector>
 
+#include "fuzzers/random_generator.h"
 #include "include/tint/tint.h"
 
 namespace tint {
 namespace fuzzers {
 
-class Reader {
+class DataBuilder {
  public:
-  Reader(const uint8_t* data, size_t size);
-
-  bool failed() const { return failed_; }
-  const uint8_t* data() { return data_; }
-  size_t size() const { return size_; }
+  DataBuilder(const uint8_t* data, size_t size);
 
   template <typename T>
-  T read() {
+  T build() {
     T out{};
-    read(&out, sizeof(T));
+    build(&out, sizeof(T));
     return out;
   }
 
@@ -45,66 +42,48 @@ class Reader {
 
   template <typename T>
   std::vector<T> vector() {
-    auto count = read<uint8_t>();
-    auto size = static_cast<size_t>(count) * sizeof(T);
-    if (failed_ || size_ < size) {
-      mark_failed();
-      return {};
-    }
+    auto count = build<uint8_t>();
     std::vector<T> out(count);
-    if (!out.empty()) {
-      memcpy(out.data(), data_, size);
-      data_ += size;
-      size_ -= size;
+    for (uint8_t i = 0; i < count; i++) {
+      out[i] = build<T>();
     }
     return out;
   }
 
   template <typename T>
-  std::vector<T> vector(T (*extract)(Reader*)) {
-    auto count = read<uint8_t>();
-    if (failed_) {
-      return {};
-    }
+  std::vector<T> vector(T (*generate)(DataBuilder*)) {
+    auto count = build<uint8_t>();
     std::vector<T> out(count);
     for (uint8_t i = 0; i < count; i++) {
-      out[i] = extract(this);
-      if (failed_) {
-        return {};
-      }
+      out[i] = generate(this);
     }
     return out;
   }
+
   template <typename T>
   T enum_class(uint8_t count) {
-    auto val = read<uint8_t>();
+    auto val = build<uint8_t>();
     return static_cast<T>(val % count);
   }
 
  private:
-  void mark_failed();
-  void read(void* out, size_t n);
+  void build(void* out, size_t n);
 
-  const uint8_t* data_;
-  size_t size_;
-  bool failed_ = false;
+  RandomGenerator generator_;
 };
 
-void ExtractBindingRemapperInputs(Reader* r, tint::transform::DataMap* inputs);
-
-void ExtractFirstIndexOffsetInputs(Reader* r, tint::transform::DataMap* inputs);
-
-void ExtractSingleEntryPointInputs(Reader* r, tint::transform::DataMap* inputs);
-
-void ExtractVertexPullingInputs(Reader* r, tint::transform::DataMap* inputs);
-
-void ExtractSpirvOptions(Reader* r, writer::spirv::Options* options);
-
-void ExtractWgslOptions(Reader* r, writer::wgsl::Options* options);
-
-void ExtractHlslOptions(Reader* r, writer::hlsl::Options* options);
-
-void ExtractMslOptions(Reader* r, writer::msl::Options* options);
+void GenerateBindingRemapperInputs(DataBuilder* b,
+                                   tint::transform::DataMap* inputs);
+void GenerateFirstIndexOffsetInputs(DataBuilder* b,
+                                    tint::transform::DataMap* inputs);
+void GenerateSingleEntryPointInputs(DataBuilder* b,
+                                    tint::transform::DataMap* inputs);
+void GenerateVertexPullingInputs(DataBuilder* b,
+                                 tint::transform::DataMap* inputs);
+void GenerateSpirvOptions(DataBuilder* b, writer::spirv::Options* options);
+void GenerateWgslOptions(DataBuilder* b, writer::wgsl::Options* options);
+void GenerateHlslOptions(DataBuilder* b, writer::hlsl::Options* options);
+void GenerateMslOptions(DataBuilder* b, writer::msl::Options* options);
 
 enum class InputFormat { kWGSL, kSpv, kNone };
 
