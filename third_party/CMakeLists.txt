@@ -38,16 +38,16 @@ if (NOT TARGET SPIRV-Tools)
     add_subdirectory(${DAWN_SPIRV_TOOLS_DIR})
 endif()
 
+if (NOT TARGET glfw)
+    set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
+    message(STATUS "Dawn: using GLFW at ${DAWN_GLFW_DIR}")
+    add_subdirectory(${DAWN_GLFW_DIR})
+endif()
+
 if (DAWN_BUILD_EXAMPLES)
-    if (NOT TARGET glfw)
-        set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-        set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-        set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-
-        message(STATUS "Dawn: using GLFW at ${DAWN_GLFW_DIR}")
-        add_subdirectory(${DAWN_GLFW_DIR})
-    endif()
-
     if (NOT TARGET glm)
         message(STATUS "Dawn: using GLM at ${DAWN_GLM_DIR}")
         add_subdirectory(${DAWN_GLM_DIR})
