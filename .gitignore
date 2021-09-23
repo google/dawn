@@ -1,28 +1,28 @@
 *.pyc
 
 # Directories added by gclient sync and the GN build
-.cipd
-.gclient
-.gclient_entries
-build
-buildtools
-testing
-third_party/angle/
-third_party/clang-format/
-third_party/glfw/
-third_party/glm/
-third_party/googletest/
-third_party/jinja2/
-third_party/jsoncpp/
-third_party/llvm-build
-third_party/markupsafe/
-third_party/swiftshader/
-third_party/tint/
-third_party/vulkan-deps/
-third_party/vulkan_memory_allocator/
-third_party/zlib/
-tools
-out
+/.cipd
+/.gclient
+/.gclient_entries
+/build
+/buildtools
+/testing
+/third_party/angle
+/third_party/clang-format
+/third_party/glfw
+/third_party/glm
+/third_party/googletest
+/third_party/jinja2
+/third_party/jsoncpp
+/third_party/llvm-build
+/third_party/markupsafe
+/third_party/swiftshader
+/third_party/tint
+/third_party/vulkan-deps
+/third_party/vulkan_memory_allocator
+/third_party/zlib
+/tools
+/out
 
 # Modified from https://www.gitignore.io/api/vim,macos,linux,emacs,windows,sublimetext,visualstudio,visualstudiocode
 
