@@ -107,6 +107,12 @@ if (${DAWN_ENABLE_DESKTOP_GL} OR ${DAWN_ENABLE_OPENGLES})
     set(DAWN_ENABLE_OPENGL ON)
 endif()
 
+# OpenGL backend requires SPIRV-Cross
+set(DAWN_REQUIRES_SPIRV_CROSS OFF)
+if (DAWN_ENABLE_OPENGL)
+    set(DAWN_REQUIRES_SPIRV_CROSS ON)
+endif()
+
 ################################################################################
 # Dawn's public and internal "configs"
 ################################################################################

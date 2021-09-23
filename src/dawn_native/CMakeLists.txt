@@ -185,12 +185,15 @@ target_link_libraries(dawn_native
             dawn_platform
             dawn_internal_config
             libtint
-            spirv-cross-core
-            spirv-cross-glsl
-            spirv-cross-hlsl
-            spirv-cross-msl
             SPIRV-Tools-opt
 )
+
+if (DAWN_REQUIRES_SPIRV_CROSS)
+    target_link_libraries(dawn_native PRIVATE spirv-cross-core)
+    if (DAWN_ENABLE_OPENGL)
+        target_link_libraries(dawn_native PRIVATE spirv-cross-glsl)
+    endif()
+endif()
 
 if (DAWN_USE_X11)
     find_package(X11 REQUIRED)
