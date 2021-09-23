@@ -130,7 +130,8 @@ namespace dawn_native {
             DAWN_TRY(ValidateFinish(usages));
         }
 
-        return new RenderBundleBase(this, descriptor, AcquireAttachmentState(), std::move(usages));
+        return new RenderBundleBase(this, descriptor, AcquireAttachmentState(), std::move(usages),
+                                    std::move(mIndirectDrawMetadata));
     }
 
     MaybeError RenderBundleEncoder::ValidateFinish(const RenderPassResourceUsage& usages) const {

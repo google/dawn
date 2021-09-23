@@ -843,6 +843,10 @@ namespace dawn_native { namespace opengl {
                     break;
                 }
 
+                case Command::SetValidatedBufferLocationsInternal:
+                    DoNextSetValidatedBufferLocationsInternal();
+                    break;
+
                 case Command::WriteBuffer: {
                     WriteBufferCmd* write = mCommands.NextCommand<WriteBufferCmd>();
                     uint64_t offset = write->offset;

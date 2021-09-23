@@ -38,6 +38,14 @@ namespace dawn_native {
         Destroy();
     }
 
+    void CommandBufferBase::DoNextSetValidatedBufferLocationsInternal() {
+        SetValidatedBufferLocationsInternalCmd* cmd =
+            mCommands.NextCommand<SetValidatedBufferLocationsInternalCmd>();
+        for (const DeferredBufferLocationUpdate& update : cmd->updates) {
+            update.location->Set(update.buffer.Get(), update.offset);
+        }
+    }
+
     // static
     CommandBufferBase* CommandBufferBase::MakeError(DeviceBase* device) {
         return new CommandBufferBase(device, ObjectBase::kError);

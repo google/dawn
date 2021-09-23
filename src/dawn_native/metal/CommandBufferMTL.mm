@@ -987,6 +987,10 @@ namespace dawn_native { namespace metal {
                     break;
                 }
 
+                case Command::SetValidatedBufferLocationsInternal:
+                    DoNextSetValidatedBufferLocationsInternal();
+                    break;
+
                 case Command::WriteBuffer: {
                     WriteBufferCmd* write = mCommands.NextCommand<WriteBufferCmd>();
                     const uint64_t offset = write->offset;

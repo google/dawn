@@ -99,9 +99,11 @@ namespace dawn_native {
                 }
 
                 allocator->Allocate<EndRenderPassCmd>(Command::EndRenderPass);
+                DAWN_TRY(mEncodingContext->ExitRenderPass(this, std::move(mUsageTracker),
+                                                          mCommandEncoder.Get(),
+                                                          std::move(mIndirectDrawMetadata)));
                 return {};
             })) {
-            mEncodingContext->ExitPass(this, mUsageTracker.AcquireResourceUsage());
         }
     }
 
@@ -223,6 +225,10 @@ namespace dawn_native {
                 for (uint32_t i = 0; i < usages.textures.size(); ++i) {
                     mUsageTracker.AddRenderBundleTextureUsage(usages.textures[i],
                                                               usages.textureUsages[i]);
+                }
+
+                if (IsValidationEnabled()) {
+                    mIndirectDrawMetadata.AddBundle(renderBundles[i]);
                 }
             }
 

@@ -24,9 +24,11 @@ namespace dawn_native {
     RenderBundleBase::RenderBundleBase(RenderBundleEncoder* encoder,
                                        const RenderBundleDescriptor* descriptor,
                                        Ref<AttachmentState> attachmentState,
-                                       RenderPassResourceUsage resourceUsage)
+                                       RenderPassResourceUsage resourceUsage,
+                                       IndirectDrawMetadata indirectDrawMetadata)
         : ObjectBase(encoder->GetDevice(), kLabelNotImplemented),
           mCommands(encoder->AcquireCommands()),
+          mIndirectDrawMetadata(std::move(indirectDrawMetadata)),
           mAttachmentState(std::move(attachmentState)),
           mResourceUsage(std::move(resourceUsage)) {
     }
@@ -56,6 +58,10 @@ namespace dawn_native {
     const RenderPassResourceUsage& RenderBundleBase::GetResourceUsage() const {
         ASSERT(!IsError());
         return mResourceUsage;
+    }
+
+    const IndirectDrawMetadata& RenderBundleBase::GetIndirectDrawMetadata() {
+        return mIndirectDrawMetadata;
     }
 
 }  // namespace dawn_native

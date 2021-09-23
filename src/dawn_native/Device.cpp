@@ -225,7 +225,7 @@ namespace dawn_native {
         mDynamicUploader = std::make_unique<DynamicUploader>(this);
         mCallbackTaskManager = std::make_unique<CallbackTaskManager>();
         mDeprecationWarnings = std::make_unique<DeprecationWarnings>();
-        mInternalPipelineStore = std::make_unique<InternalPipelineStore>();
+        mInternalPipelineStore = std::make_unique<InternalPipelineStore>(this);
         mPersistentCache = std::make_unique<PersistentCache>(this);
 
         ASSERT(GetPlatform() != nullptr);

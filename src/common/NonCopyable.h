@@ -21,6 +21,9 @@ class NonCopyable {
     constexpr NonCopyable() = default;
     ~NonCopyable() = default;
 
+    NonCopyable(NonCopyable&&) = default;
+    NonCopyable& operator=(NonCopyable&&) = default;
+
   private:
     NonCopyable(const NonCopyable&) = delete;
     void operator=(const NonCopyable&) = delete;

@@ -19,6 +19,7 @@
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/ErrorData.h"
+#include "dawn_native/IndirectDrawValidationEncoder.h"
 #include "dawn_native/RenderBundleEncoder.h"
 
 namespace dawn_native {
@@ -47,8 +48,9 @@ namespace dawn_native {
     }
 
     void EncodingContext::MoveToIterator() {
+        CommitCommands(std::move(mPendingCommands));
         if (!mWasMovedToIterator) {
-            mIterator = CommandIterator(std::move(mAllocator));
+            mIterator.AcquireCommandBlocks(std::move(mAllocators));
             mWasMovedToIterator = true;
         }
     }
@@ -67,6 +69,18 @@ namespace dawn_native {
         }
     }
 
+    void EncodingContext::WillBeginRenderPass() {
+        ASSERT(mCurrentEncoder == mTopLevelEncoder);
+        if (mDevice->IsValidationEnabled()) {
+            // When validation is enabled, we are going to want to capture all commands encoded
+            // between and including BeginRenderPassCmd and EndRenderPassCmd, and defer their
+            // sequencing util after we have a chance to insert any necessary validation
+            // commands. To support this we commit any current commands now, so that the
+            // impending BeginRenderPassCmd starts in a fresh CommandAllocator.
+            CommitCommands(std::move(mPendingCommands));
+        }
+    }
+
     void EncodingContext::EnterPass(const ObjectBase* passEncoder) {
         // Assert we're at the top level.
         ASSERT(mCurrentEncoder == mTopLevelEncoder);
@@ -75,15 +89,34 @@ namespace dawn_native {
         mCurrentEncoder = passEncoder;
     }
 
-    void EncodingContext::ExitPass(const ObjectBase* passEncoder, RenderPassResourceUsage usages) {
+    MaybeError EncodingContext::ExitRenderPass(const ObjectBase* passEncoder,
+                                               RenderPassResourceUsageTracker usageTracker,
+                                               CommandEncoder* commandEncoder,
+                                               IndirectDrawMetadata indirectDrawMetadata) {
         ASSERT(mCurrentEncoder != mTopLevelEncoder);
         ASSERT(mCurrentEncoder == passEncoder);
 
         mCurrentEncoder = mTopLevelEncoder;
-        mRenderPassUsages.push_back(std::move(usages));
+
+        if (mDevice->IsValidationEnabled()) {
+            // With validation enabled, commands were committed just before BeginRenderPassCmd was
+            // encoded by our RenderPassEncoder (see WillBeginRenderPass above). This means
+            // mPendingCommands contains only the commands from BeginRenderPassCmd to
+            // EndRenderPassCmd, inclusive. Now we swap out this allocator with a fresh one to give
+            // the validation encoder a chance to insert its commands first.
+            CommandAllocator renderCommands = std::move(mPendingCommands);
+            DAWN_TRY(EncodeIndirectDrawValidationCommands(mDevice, commandEncoder, &usageTracker,
+                                                          &indirectDrawMetadata));
+            CommitCommands(std::move(mPendingCommands));
+            CommitCommands(std::move(renderCommands));
+        }
+
+        mRenderPassUsages.push_back(usageTracker.AcquireResourceUsage());
+        return {};
     }
 
-    void EncodingContext::ExitPass(const ObjectBase* passEncoder, ComputePassResourceUsage usages) {
+    void EncodingContext::ExitComputePass(const ObjectBase* passEncoder,
+                                          ComputePassResourceUsage usages) {
         ASSERT(mCurrentEncoder != mTopLevelEncoder);
         ASSERT(mCurrentEncoder == passEncoder);
 
@@ -126,6 +159,7 @@ namespace dawn_native {
         // if Finish() has been called.
         mCurrentEncoder = nullptr;
         mTopLevelEncoder = nullptr;
+        CommitCommands(std::move(mPendingCommands));
 
         if (mError != nullptr) {
             return std::move(mError);
@@ -134,6 +168,12 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Command buffer recording ended mid-pass");
         }
         return {};
+    }
+
+    void EncodingContext::CommitCommands(CommandAllocator allocator) {
+        if (!allocator.IsEmpty()) {
+            mAllocators.push_back(std::move(allocator));
+        }
     }
 
     bool EncodingContext::IsFinished() const {

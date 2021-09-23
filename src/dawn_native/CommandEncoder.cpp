@@ -508,6 +508,7 @@ namespace dawn_native {
         uint32_t width = 0;
         uint32_t height = 0;
         Ref<AttachmentState> attachmentState;
+        mEncodingContext.WillBeginRenderPass();
         bool success =
             mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
                 uint32_t sampleCount = 0;
@@ -920,6 +921,18 @@ namespace dawn_native {
         }
         ASSERT(!IsError());
         return commandBuffer.Detach();
+    }
+
+    void CommandEncoder::EncodeSetValidatedBufferLocationsInternal(
+        std::vector<DeferredBufferLocationUpdate> updates) {
+        ASSERT(GetDevice()->IsValidationEnabled());
+        mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+            SetValidatedBufferLocationsInternalCmd* cmd =
+                allocator->Allocate<SetValidatedBufferLocationsInternalCmd>(
+                    Command::SetValidatedBufferLocationsInternal);
+            cmd->updates = std::move(updates);
+            return {};
+        });
     }
 
     ResultOrError<Ref<CommandBufferBase>> CommandEncoder::FinishInternal(

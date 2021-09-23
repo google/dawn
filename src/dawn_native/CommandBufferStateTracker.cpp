@@ -308,4 +308,13 @@ namespace dawn_native {
     PipelineLayoutBase* CommandBufferStateTracker::GetPipelineLayout() const {
         return mLastPipelineLayout;
     }
+
+    wgpu::IndexFormat CommandBufferStateTracker::GetIndexFormat() const {
+        return mIndexFormat;
+    }
+
+    uint64_t CommandBufferStateTracker::GetIndexBufferSize() const {
+        return mIndexBufferSize;
+    }
+
 }  // namespace dawn_native

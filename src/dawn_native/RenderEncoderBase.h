@@ -18,6 +18,7 @@
 #include "dawn_native/AttachmentState.h"
 #include "dawn_native/CommandBufferStateTracker.h"
 #include "dawn_native/Error.h"
+#include "dawn_native/IndirectDrawMetadata.h"
 #include "dawn_native/PassResourceUsageTracker.h"
 #include "dawn_native/ProgrammablePassEncoder.h"
 
@@ -64,6 +65,7 @@ namespace dawn_native {
 
         CommandBufferStateTracker mCommandBufferState;
         RenderPassResourceUsageTracker mUsageTracker;
+        IndirectDrawMetadata mIndirectDrawMetadata;
 
       private:
         Ref<AttachmentState> mAttachmentState;

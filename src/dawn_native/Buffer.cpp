@@ -147,6 +147,12 @@ namespace dawn_native {
         if (mUsage & wgpu::BufferUsage::QueryResolve) {
             mUsage |= kInternalStorageBuffer;
         }
+
+        // We also add internal storage usage for Indirect buffers if validation is enabled, since
+        // validation involves binding them as storage buffers for use in a compute pass.
+        if ((mUsage & wgpu::BufferUsage::Indirect) && device->IsValidationEnabled()) {
+            mUsage |= kInternalStorageBuffer;
+        }
     }
 
     BufferBase::BufferBase(DeviceBase* device,

@@ -47,6 +47,8 @@ namespace dawn_native {
 
         BindGroupBase* GetBindGroup(BindGroupIndex index) const;
         PipelineLayoutBase* GetPipelineLayout() const;
+        wgpu::IndexFormat GetIndexFormat() const;
+        uint64_t GetIndexBufferSize() const;
 
       private:
         MaybeError ValidateOperation(ValidationAspects requiredAspects);

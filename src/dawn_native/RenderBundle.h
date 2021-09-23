@@ -19,6 +19,7 @@
 #include "dawn_native/AttachmentState.h"
 #include "dawn_native/CommandAllocator.h"
 #include "dawn_native/Error.h"
+#include "dawn_native/IndirectDrawMetadata.h"
 #include "dawn_native/ObjectBase.h"
 #include "dawn_native/PassResourceUsage.h"
 
@@ -36,7 +37,8 @@ namespace dawn_native {
         RenderBundleBase(RenderBundleEncoder* encoder,
                          const RenderBundleDescriptor* descriptor,
                          Ref<AttachmentState> attachmentState,
-                         RenderPassResourceUsage resourceUsage);
+                         RenderPassResourceUsage resourceUsage,
+                         IndirectDrawMetadata indirectDrawMetadata);
 
         static RenderBundleBase* MakeError(DeviceBase* device);
 
@@ -44,6 +46,7 @@ namespace dawn_native {
 
         const AttachmentState* GetAttachmentState() const;
         const RenderPassResourceUsage& GetResourceUsage() const;
+        const IndirectDrawMetadata& GetIndirectDrawMetadata();
 
       protected:
         ~RenderBundleBase() override;
@@ -52,6 +55,7 @@ namespace dawn_native {
         RenderBundleBase(DeviceBase* device, ErrorTag errorTag);
 
         CommandIterator mCommands;
+        IndirectDrawMetadata mIndirectDrawMetadata;
         Ref<AttachmentState> mAttachmentState;
         RenderPassResourceUsage mResourceUsage;
     };
