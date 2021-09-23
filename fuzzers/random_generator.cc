@@ -104,7 +104,6 @@ bool RandomGenerator::GetWeightedBool(uint32_t percentage) {
 
 uint64_t RandomGenerator::CalculateSeed(const uint8_t* data, size_t size) {
   assert(data != nullptr && "|data| must be !nullptr");
-  assert(size > 0 && "|size| must be > 0");
 
   // Number of bytes we want to skip at the start of data for the hash.
   // Fewer bytes may be skipped when `size` is small.
@@ -120,7 +119,7 @@ uint64_t RandomGenerator::CalculateSeed(const uint8_t* data, size_t size) {
       std::min(kHashDesiredLeadingSkipBytes,
                std::max<int64_t>(size_i64 - kHashDesiredMinBytes, 0));
   int64_t hash_end_i64 =
-      std::max(hash_begin_i64 + kHashDesiredMaxBytes, size_i64);
+      std::min(hash_begin_i64 + kHashDesiredMaxBytes, size_i64);
   size_t hash_begin = static_cast<size_t>(hash_begin_i64);
   size_t hash_size = static_cast<size_t>(hash_end_i64) - hash_begin;
   return HashBuffer(data + hash_begin, hash_size);
