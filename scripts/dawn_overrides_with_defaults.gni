@@ -76,3 +76,7 @@ if (!defined(dawn_tint_dir)) {
   # Default to Tint being Dawn's DEPS
   dawn_tint_dir = "${dawn_root}/third_party/tint"
 }
+
+if (!defined(dawn_abseil_dir)) {
+  dawn_abseil_dir = "//third_party/abseil-cpp"
+}

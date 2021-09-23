@@ -135,6 +135,11 @@ deps = {
     'url': '{chromium_git}/chromium/src/third_party/zlib@c29ee8c9c3824ca013479bf8115035527967fe02',
     'condition': 'dawn_standalone',
   },
+
+  'third_party/abseil-cpp': {
+    'url': '{chromium_git}/chromium/src/third_party/abseil-cpp@789af048b388657987c59d4da406859034fe310f',
+    'condition': 'dawn_standalone',
+  },
 }
 
 hooks = [

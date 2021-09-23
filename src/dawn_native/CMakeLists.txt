@@ -186,6 +186,8 @@ target_link_libraries(dawn_native
             dawn_internal_config
             libtint
             SPIRV-Tools-opt
+            absl_strings
+            absl_str_format_internal
 )
 
 if (DAWN_REQUIRES_SPIRV_CROSS)
@@ -194,6 +196,8 @@ if (DAWN_REQUIRES_SPIRV_CROSS)
         target_link_libraries(dawn_native PRIVATE spirv-cross-glsl)
     endif()
 endif()
+
+target_include_directories(dawn_native PRIVATE ${DAWN_ABSEIL_DIR})
 
 if (DAWN_USE_X11)
     find_package(X11 REQUIRED)

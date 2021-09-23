@@ -14,6 +14,7 @@
 
 #include "dawn_native/ShaderModule.h"
 
+#include "absl/strings/str_format.h"
 #include "common/Constants.h"
 #include "common/HashUtils.h"
 #include "dawn_native/BindGroupLayout.h"
@@ -35,10 +36,8 @@ namespace dawn_native {
     namespace {
 
         std::string GetShaderDeclarationString(BindGroupIndex group, BindingNumber binding) {
-            std::ostringstream ostream;
-            ostream << "the shader module declaration at set " << static_cast<uint32_t>(group)
-                    << " binding " << static_cast<uint32_t>(binding);
-            return ostream.str();
+            return absl::StrFormat("the shader module declaration at set %u, binding %u",
+                                   static_cast<uint32_t>(group), static_cast<uint32_t>(binding));
         }
 
         tint::transform::VertexFormat ToTintVertexFormat(wgpu::VertexFormat format) {

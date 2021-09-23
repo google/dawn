@@ -53,6 +53,17 @@ if (dawn_enable_vulkan) {
       dawn_enable_vulkan_loader && dawn_vulkan_loader_dir != ""
 }
 
+group("dawn_abseil") {
+  # When build_with_chromium=true we need to include "//third_party/abseil-cpp:absl" while
+  # it's beneficial to be more specific with standalone Dawn, especially when it comes to
+  # including it as a dependency in other projects (such as Skia).
+  if (build_with_chromium) {
+    public_deps = [ "$dawn_abseil_dir:absl" ]
+  } else {
+    public_deps = [ "${dawn_root}/third_party/gn/abseil-cpp:str_format" ]
+  }
+}
+
 config("dawn_native_internal") {
   configs = [ "${dawn_root}/src/common:dawn_internal" ]
 
@@ -142,6 +153,7 @@ source_set("dawn_native_headers") {
 # except those that define exported symbols.
 source_set("dawn_native_sources") {
   deps = [
+    ":dawn_abseil",
     ":dawn_native_headers",
     ":dawn_native_utils_gen",
     "${dawn_root}/src/common",

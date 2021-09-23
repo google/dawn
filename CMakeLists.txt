@@ -94,6 +94,10 @@ option(DAWN_BUILD_EXAMPLES "Enables building Dawn's exmaples" ${BUILD_EXAMPLE})
 
 set(DAWN_THIRD_PARTY_DIR "${Dawn_SOURCE_DIR}/third_party" CACHE STRING "Directory in which to find third-party dependencies.")
 
+# Recommended setting for compability with future abseil releases.
+set(ABSL_PROPAGATE_CXX_STD ON)
+set(DAWN_ABSEIL_DIR "${DAWN_THIRD_PARTY_DIR}/abseil-cpp" CACHE STRING "Directory in which to find Abseil")
+
 set(DAWN_GLFW_DIR "${DAWN_THIRD_PARTY_DIR}/glfw" CACHE STRING "Directory in which to find GLFW")
 set(DAWN_GLM_DIR "${DAWN_THIRD_PARTY_DIR}/glm" CACHE STRING "Directory in which to find GLM")
 set(DAWN_JINJA2_DIR "${DAWN_THIRD_PARTY_DIR}/jinja2" CACHE STRING "Directory in which to find Jinja2")
