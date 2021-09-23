@@ -40,6 +40,7 @@ namespace dawn_native { namespace opengl {
                 case SingleShaderStage::Compute:
                     return GL_COMPUTE_SHADER;
             }
+            UNREACHABLE();
         }
 
     }  // namespace

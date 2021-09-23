@@ -173,8 +173,9 @@ namespace utils {
             case wgpu::VertexFormat::Sint32x4:
                 return 16;
             case wgpu::VertexFormat::Undefined:
-                UNREACHABLE();
+                break;
         }
+        UNREACHABLE();
     }
 
 }  // namespace utils

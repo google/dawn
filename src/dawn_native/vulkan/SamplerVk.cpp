@@ -31,6 +31,7 @@ namespace dawn_native { namespace vulkan {
                 case wgpu::AddressMode::ClampToEdge:
                     return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
             }
+            UNREACHABLE();
         }
 
         VkFilter VulkanSamplerFilter(wgpu::FilterMode filter) {
@@ -40,6 +41,7 @@ namespace dawn_native { namespace vulkan {
                 case wgpu::FilterMode::Nearest:
                     return VK_FILTER_NEAREST;
             }
+            UNREACHABLE();
         }
 
         VkSamplerMipmapMode VulkanMipMapMode(wgpu::FilterMode filter) {
@@ -49,6 +51,7 @@ namespace dawn_native { namespace vulkan {
                 case wgpu::FilterMode::Nearest:
                     return VK_SAMPLER_MIPMAP_MODE_NEAREST;
             }
+            UNREACHABLE();
         }
     }  // anonymous namespace
 

@@ -44,8 +44,9 @@ namespace dawn_native { namespace vulkan {
                 return VK_COMPARE_OP_ALWAYS;
 
             case wgpu::CompareFunction::Undefined:
-                UNREACHABLE();
+                break;
         }
+        UNREACHABLE();
     }
 
     // Convert Dawn texture aspects to  Vulkan texture aspect flags

@@ -45,8 +45,9 @@ namespace dawn_native { namespace opengl {
                 case wgpu::IndexFormat::Uint32:
                     return GL_UNSIGNED_INT;
                 case wgpu::IndexFormat::Undefined:
-                    UNREACHABLE();
+                    break;
             }
+            UNREACHABLE();
         }
 
         GLenum VertexFormatType(wgpu::VertexFormat format) {

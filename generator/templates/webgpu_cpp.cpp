@@ -17,6 +17,11 @@
     #include "webgpu/webgpu_cpp.h"
 {% endif %}
 
+#ifdef __GNUC__
+// error: 'offsetof' within non-standard-layout type 'wgpu::XXX' is conditionally-supported
+#pragma GCC diagnostic ignored "-Winvalid-offsetof"
+#endif
+
 namespace wgpu {
     {% for type in by_category["enum"] %}
         {% set CppType = as_cppType(type.name) %}

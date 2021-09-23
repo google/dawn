@@ -29,6 +29,7 @@ namespace dawn_native {
                 case wgpu::ErrorFilter::OutOfMemory:
                     return wgpu::ErrorType::OutOfMemory;
             }
+            UNREACHABLE();
         }
 
     }  // namespace

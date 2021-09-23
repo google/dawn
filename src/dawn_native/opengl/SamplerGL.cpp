@@ -28,6 +28,7 @@ namespace dawn_native { namespace opengl {
                 case wgpu::FilterMode::Linear:
                     return GL_LINEAR;
             }
+            UNREACHABLE();
         }
 
         GLenum MinFilterMode(wgpu::FilterMode minFilter, wgpu::FilterMode mipMapFilter) {
@@ -47,6 +48,7 @@ namespace dawn_native { namespace opengl {
                             return GL_LINEAR_MIPMAP_LINEAR;
                     }
             }
+            UNREACHABLE();
         }
 
         GLenum WrapMode(wgpu::AddressMode mode) {
@@ -58,6 +60,7 @@ namespace dawn_native { namespace opengl {
                 case wgpu::AddressMode::ClampToEdge:
                     return GL_CLAMP_TO_EDGE;
             }
+            UNREACHABLE();
         }
 
     }  // namespace

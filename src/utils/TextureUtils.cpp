@@ -241,8 +241,9 @@ namespace utils {
             // TODO(dawn:570): implement depth16unorm
             case wgpu::TextureFormat::Depth16Unorm:
             case wgpu::TextureFormat::Undefined:
-                UNREACHABLE();
+                break;
         }
+        UNREACHABLE();
     }
 
     uint32_t GetTextureFormatBlockWidth(wgpu::TextureFormat textureFormat) {
@@ -357,8 +358,9 @@ namespace utils {
             // TODO(dawn:570): implement depth16unorm
             case wgpu::TextureFormat::Depth16Unorm:
             case wgpu::TextureFormat::Undefined:
-                UNREACHABLE();
+                break;
         }
+        UNREACHABLE();
     }
 
     uint32_t GetTextureFormatBlockHeight(wgpu::TextureFormat textureFormat) {
@@ -473,8 +475,9 @@ namespace utils {
             // TODO(dawn:570): implement depth16unorm
             case wgpu::TextureFormat::Depth16Unorm:
             case wgpu::TextureFormat::Undefined:
-                UNREACHABLE();
+                break;
         }
+        UNREACHABLE();
     }
 
     const char* GetWGSLColorTextureComponentType(wgpu::TextureFormat textureFormat) {

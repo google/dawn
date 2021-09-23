@@ -267,6 +267,7 @@ namespace dawn_native {
             case BufferState::Unmapped:
                 return {};
         }
+        UNREACHABLE();
     }
 
     void BufferBase::CallMapCallback(MapRequestID mapID, WGPUBufferMapAsyncStatus status) {
@@ -549,6 +550,7 @@ namespace dawn_native {
             case BufferState::Destroyed:
                 return false;
         }
+        UNREACHABLE();
     }
 
     MaybeError BufferBase::ValidateUnmap() const {
@@ -566,6 +568,7 @@ namespace dawn_native {
             case BufferState::Destroyed:
                 return DAWN_VALIDATION_ERROR("Buffer is destroyed");
         }
+        UNREACHABLE();
     }
 
     MaybeError BufferBase::ValidateDestroy() const {

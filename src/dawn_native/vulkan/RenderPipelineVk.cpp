@@ -34,6 +34,7 @@ namespace dawn_native { namespace vulkan {
                 case wgpu::VertexStepMode::Instance:
                     return VK_VERTEX_INPUT_RATE_INSTANCE;
             }
+            UNREACHABLE();
         }
 
         VkFormat VulkanVertexFormat(wgpu::VertexFormat format) {
@@ -116,6 +117,7 @@ namespace dawn_native { namespace vulkan {
                 case wgpu::PrimitiveTopology::TriangleStrip:
                     return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
             }
+            UNREACHABLE();
         }
 
         bool ShouldEnablePrimitiveRestart(wgpu::PrimitiveTopology topology) {
@@ -130,6 +132,7 @@ namespace dawn_native { namespace vulkan {
                 case wgpu::PrimitiveTopology::TriangleStrip:
                     return true;
             }
+            UNREACHABLE();
         }
 
         VkFrontFace VulkanFrontFace(wgpu::FrontFace face) {
@@ -139,6 +142,7 @@ namespace dawn_native { namespace vulkan {
                 case wgpu::FrontFace::CW:
                     return VK_FRONT_FACE_CLOCKWISE;
             }
+            UNREACHABLE();
         }
 
         VkCullModeFlagBits VulkanCullMode(wgpu::CullMode mode) {
@@ -150,6 +154,7 @@ namespace dawn_native { namespace vulkan {
                 case wgpu::CullMode::Back:
                     return VK_CULL_MODE_BACK_BIT;
             }
+            UNREACHABLE();
         }
 
         VkBlendFactor VulkanBlendFactor(wgpu::BlendFactor factor) {
@@ -181,6 +186,7 @@ namespace dawn_native { namespace vulkan {
                 case wgpu::BlendFactor::OneMinusConstant:
                     return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
             }
+            UNREACHABLE();
         }
 
         VkBlendOp VulkanBlendOperation(wgpu::BlendOperation operation) {
@@ -196,6 +202,7 @@ namespace dawn_native { namespace vulkan {
                 case wgpu::BlendOperation::Max:
                     return VK_BLEND_OP_MAX;
             }
+            UNREACHABLE();
         }
 
         VkColorComponentFlags VulkanColorWriteMask(wgpu::ColorWriteMask mask,
@@ -267,6 +274,7 @@ namespace dawn_native { namespace vulkan {
                 case wgpu::StencilOperation::DecrementWrap:
                     return VK_STENCIL_OP_DECREMENT_AND_WRAP;
             }
+            UNREACHABLE();
         }
 
         VkPipelineDepthStencilStateCreateInfo ComputeDepthStencilDesc(

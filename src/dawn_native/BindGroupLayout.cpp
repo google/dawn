@@ -56,8 +56,9 @@ namespace dawn_native {
                     return {};
 
                 case wgpu::TextureViewDimension::Undefined:
-                    UNREACHABLE();
+                    break;
             }
+            UNREACHABLE();
         }
     }  // anonymous namespace
 
@@ -179,7 +180,6 @@ namespace dawn_native {
 
     namespace {
 
-
         bool operator!=(const BindingInfo& a, const BindingInfo& b) {
             if (a.visibility != b.visibility || a.bindingType != b.bindingType) {
                 return true;
@@ -203,6 +203,7 @@ namespace dawn_native {
                 case BindingInfoType::ExternalTexture:
                     return false;
             }
+            UNREACHABLE();
         }
 
         bool IsBufferBinding(const BindGroupLayoutEntry& binding) {

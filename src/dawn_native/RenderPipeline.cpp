@@ -372,8 +372,9 @@ namespace dawn_native {
             case wgpu::IndexFormat::Uint32:
                 return sizeof(uint32_t);
             case wgpu::IndexFormat::Undefined:
-                UNREACHABLE();
+                break;
         }
+        UNREACHABLE();
     }
 
     bool IsStripPrimitiveTopology(wgpu::PrimitiveTopology primitiveTopology) {

@@ -31,6 +31,7 @@ namespace dawn_native { namespace vulkan {
                 case wgpu::QueryType::Timestamp:
                     return VK_QUERY_TYPE_TIMESTAMP;
             }
+            UNREACHABLE();
         }
 
         VkQueryPipelineStatisticFlags VulkanQueryPipelineStatisticFlags(

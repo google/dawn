@@ -14,6 +14,11 @@
 
 #include "dawn_native/wgpu_structs_autogen.h"
 
+#ifdef __GNUC__
+// error: 'offsetof' within non-standard-layout type 'wgpu::XXX' is conditionally-supported
+#pragma GCC diagnostic ignored "-Winvalid-offsetof"
+#endif
+
 namespace dawn_native {
 
     static_assert(sizeof(ChainedStruct) == sizeof(WGPUChainedStruct),

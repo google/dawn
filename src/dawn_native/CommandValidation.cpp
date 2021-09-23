@@ -359,8 +359,9 @@ namespace dawn_native {
                 return Aspect::Stencil;
             case wgpu::TextureAspect::Plane0Only:
             case wgpu::TextureAspect::Plane1Only:
-                UNREACHABLE();
+                break;
         }
+        UNREACHABLE();
     }
 
     MaybeError ValidateLinearToDepthStencilCopyRestrictions(const ImageCopyTexture& dst) {

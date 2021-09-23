@@ -62,8 +62,9 @@ namespace dawn_native {
 
                 case wgpu::TextureViewDimension::e1D:
                 case wgpu::TextureViewDimension::Undefined:
-                    UNREACHABLE();
+                    break;
             }
+            UNREACHABLE();
         }
 
         // TODO(crbug.com/dawn/814): Implement for 1D texture.
@@ -83,8 +84,9 @@ namespace dawn_native {
 
                 case wgpu::TextureViewDimension::e1D:
                 case wgpu::TextureViewDimension::Undefined:
-                    UNREACHABLE();
+                    break;
             }
+            UNREACHABLE();
         }
 
         bool IsTextureSizeValidForTextureViewDimension(
@@ -101,8 +103,9 @@ namespace dawn_native {
 
                 case wgpu::TextureViewDimension::e1D:
                 case wgpu::TextureViewDimension::Undefined:
-                    UNREACHABLE();
+                    break;
             }
+            UNREACHABLE();
         }
 
         MaybeError ValidateSampleCount(const TextureDescriptor* descriptor,

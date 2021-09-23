@@ -77,8 +77,9 @@ namespace dawn_native {
 
             case wgpu::BackendType::D3D11:
             case wgpu::BackendType::WebGPU:
-                UNREACHABLE();
+                break;
         }
+        UNREACHABLE();
     }
 
     DeviceType Adapter::GetDeviceType() const {
@@ -92,6 +93,7 @@ namespace dawn_native {
             case wgpu::AdapterType::Unknown:
                 return DeviceType::Unknown;
         }
+        UNREACHABLE();
     }
 
     const PCIInfo& Adapter::GetPCIInfo() const {

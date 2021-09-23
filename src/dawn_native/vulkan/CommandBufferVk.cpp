@@ -49,8 +49,9 @@ namespace dawn_native { namespace vulkan {
                 case wgpu::IndexFormat::Uint32:
                     return VK_INDEX_TYPE_UINT32;
                 case wgpu::IndexFormat::Undefined:
-                    UNREACHABLE();
+                    break;
             }
+            UNREACHABLE();
         }
 
         bool HasSameTextureCopyExtent(const TextureCopy& srcCopy,

@@ -38,8 +38,9 @@ namespace dawn_native { namespace opengl {
                 return GL_ALWAYS;
 
             case wgpu::CompareFunction::Undefined:
-                UNREACHABLE();
+                break;
         }
+        UNREACHABLE();
     }
 
     GLint GetStencilMaskFromStencilFormat(wgpu::TextureFormat depthStencilFormat) {

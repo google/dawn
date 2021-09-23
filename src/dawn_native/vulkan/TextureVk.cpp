@@ -51,8 +51,9 @@ namespace dawn_native { namespace vulkan {
 
                 case wgpu::TextureViewDimension::e1D:
                 case wgpu::TextureViewDimension::Undefined:
-                    UNREACHABLE();
+                    break;
             }
+            UNREACHABLE();
         }
 
         // Computes which vulkan access type could be required for the given Dawn usage.
@@ -419,8 +420,9 @@ namespace dawn_native { namespace vulkan {
             // TODO(dawn:570): implement depth16unorm
             case wgpu::TextureFormat::Depth16Unorm:
             case wgpu::TextureFormat::Undefined:
-                UNREACHABLE();
+                break;
         }
+        UNREACHABLE();
     }
 
     // Converts the Dawn usage flags to Vulkan usage flags. Also needs the format to choose
@@ -508,8 +510,9 @@ namespace dawn_native { namespace vulkan {
                 return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
             case wgpu::TextureUsage::None:
-                UNREACHABLE();
+                break;
         }
+        UNREACHABLE();
     }
 
     VkSampleCountFlagBits VulkanSampleCount(uint32_t sampleCount) {
@@ -518,9 +521,8 @@ namespace dawn_native { namespace vulkan {
                 return VK_SAMPLE_COUNT_1_BIT;
             case 4:
                 return VK_SAMPLE_COUNT_4_BIT;
-            default:
-                UNREACHABLE();
         }
+        UNREACHABLE();
     }
 
     MaybeError ValidateVulkanImageCanBeWrapped(const DeviceBase*,
@@ -853,8 +855,9 @@ namespace dawn_native { namespace vulkan {
                 return VulkanAspectMask(Aspect::Stencil);
             case wgpu::TextureAspect::Plane0Only:
             case wgpu::TextureAspect::Plane1Only:
-                UNREACHABLE();
+                break;
         }
+        UNREACHABLE();
     }
 
     void Texture::TweakTransitionForExternalUsage(CommandRecordingContext* recordingContext,

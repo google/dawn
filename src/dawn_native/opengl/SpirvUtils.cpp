@@ -25,6 +25,7 @@ namespace dawn_native {
             case SingleShaderStage::Compute:
                 return spv::ExecutionModelGLCompute;
         }
+        UNREACHABLE();
     }
 
     SingleShaderStage ExecutionModelToShaderStage(spv::ExecutionModel model) {

@@ -37,6 +37,7 @@ namespace dawn_native {
             case wgpu::TextureComponentType::DepthComparison:
                 return SampleTypeBit::Depth;
         }
+        UNREACHABLE();
     }
 
     SampleTypeBit SampleTypeToSampleTypeBit(wgpu::TextureSampleType sampleType) {

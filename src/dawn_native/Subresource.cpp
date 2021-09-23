@@ -59,6 +59,7 @@ namespace dawn_native {
             case wgpu::TextureAspect::Plane1Only:
                 return format.aspects & Aspect::Plane1;
         }
+        UNREACHABLE();
     }
 
     uint8_t GetAspectIndex(Aspect aspect) {

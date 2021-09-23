@@ -194,6 +194,7 @@ namespace dawn_native { namespace vulkan {
                 case wgpu::PresentMode::Mailbox:
                     return VK_PRESENT_MODE_MAILBOX_KHR;
             }
+            UNREACHABLE();
         }
 
         uint32_t MinImageCountForPresentMode(VkPresentModeKHR mode) {
@@ -204,8 +205,9 @@ namespace dawn_native { namespace vulkan {
                 case VK_PRESENT_MODE_MAILBOX_KHR:
                     return 3;
                 default:
-                    UNREACHABLE();
+                    break;
             }
+            UNREACHABLE();
         }
 
     }  // anonymous namespace

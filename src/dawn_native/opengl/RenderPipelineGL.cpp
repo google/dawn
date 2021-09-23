@@ -36,6 +36,7 @@ namespace dawn_native { namespace opengl {
                 case wgpu::PrimitiveTopology::TriangleStrip:
                     return GL_TRIANGLE_STRIP;
             }
+            UNREACHABLE();
         }
 
         void ApplyFrontFaceAndCulling(const OpenGLFunctions& gl,
@@ -85,6 +86,7 @@ namespace dawn_native { namespace opengl {
                 case wgpu::BlendFactor::OneMinusConstant:
                     return alpha ? GL_ONE_MINUS_CONSTANT_ALPHA : GL_ONE_MINUS_CONSTANT_COLOR;
             }
+            UNREACHABLE();
         }
 
         GLenum GLBlendMode(wgpu::BlendOperation operation) {
@@ -100,6 +102,7 @@ namespace dawn_native { namespace opengl {
                 case wgpu::BlendOperation::Max:
                     return GL_MAX;
             }
+            UNREACHABLE();
         }
 
         void ApplyColorState(const OpenGLFunctions& gl,
@@ -166,6 +169,7 @@ namespace dawn_native { namespace opengl {
                 case wgpu::StencilOperation::DecrementWrap:
                     return GL_DECR_WRAP;
             }
+            UNREACHABLE();
         }
 
         void ApplyDepthStencilState(const OpenGLFunctions& gl,

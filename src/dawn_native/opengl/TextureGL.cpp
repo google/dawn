@@ -44,8 +44,9 @@ namespace dawn_native { namespace opengl {
                     return GL_TEXTURE_3D;
 
                 case wgpu::TextureDimension::e1D:
-                    UNREACHABLE();
+                    break;
             }
+            UNREACHABLE();
         }
 
         GLenum TargetForTextureViewDimension(wgpu::TextureViewDimension dimension,
@@ -69,8 +70,9 @@ namespace dawn_native { namespace opengl {
 
                 case wgpu::TextureViewDimension::e1D:
                 case wgpu::TextureViewDimension::Undefined:
-                    UNREACHABLE();
+                    break;
             }
+            UNREACHABLE();
         }
 
         GLuint GenTexture(const OpenGLFunctions& gl) {

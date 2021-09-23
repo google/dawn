@@ -23,6 +23,11 @@
 #include <cstring>
 #include <limits>
 
+#ifdef __GNUC__
+// error: 'offsetof' within non-standard-layout type 'wgpu::XXX' is conditionally-supported
+#pragma GCC diagnostic ignored "-Winvalid-offsetof"
+#endif
+
 //* Helper macros so that the main [de]serialization functions can be written in a generic manner.
 
 //* Outputs an rvalue that's the number of elements a pointer member points to.

@@ -117,6 +117,7 @@ namespace dawn_native {
                 case wgpu::VertexStepMode::Instance:
                     return tint::transform::VertexStepMode::kInstance;
             }
+            UNREACHABLE();
         }
 
         ResultOrError<SingleShaderStage> TintPipelineStageToShaderStage(
@@ -129,8 +130,9 @@ namespace dawn_native {
                 case tint::ast::PipelineStage::kCompute:
                     return SingleShaderStage::Compute;
                 case tint::ast::PipelineStage::kNone:
-                    UNREACHABLE();
+                    break;
             }
+            UNREACHABLE();
         }
 
         BindingInfoType TintResourceTypeToBindingInfoType(
@@ -236,6 +238,7 @@ namespace dawn_native {
                 case tint::inspector::ResourceBinding::ImageFormat::kNone:
                     return wgpu::TextureFormat::Undefined;
             }
+            UNREACHABLE();
         }
 
         wgpu::TextureViewDimension TintTextureDimensionToTextureViewDimension(
@@ -256,6 +259,7 @@ namespace dawn_native {
                 case tint::inspector::ResourceBinding::TextureDimension::kNone:
                     return wgpu::TextureViewDimension::Undefined;
             }
+            UNREACHABLE();
         }
 
         SampleTypeBit TintSampledKindToSampleTypeBit(
@@ -270,6 +274,7 @@ namespace dawn_native {
                 case tint::inspector::ResourceBinding::SampledKind::kUnknown:
                     return SampleTypeBit::None;
             }
+            UNREACHABLE();
         }
 
         ResultOrError<wgpu::TextureComponentType> TintComponentTypeToTextureComponentType(
@@ -285,6 +290,7 @@ namespace dawn_native {
                     return DAWN_VALIDATION_ERROR(
                         "Attempted to convert 'Unknown' component type from Tint");
             }
+            UNREACHABLE();
         }
 
         ResultOrError<VertexFormatBaseType> TintComponentTypeToVertexFormatBaseType(
@@ -300,6 +306,7 @@ namespace dawn_native {
                     return DAWN_VALIDATION_ERROR(
                         "Attempted to convert 'Unknown' component type from Tint");
             }
+            UNREACHABLE();
         }
 
         ResultOrError<wgpu::BufferBindingType> TintResourceTypeToBufferBindingType(
@@ -314,6 +321,7 @@ namespace dawn_native {
                 default:
                     return DAWN_VALIDATION_ERROR("Attempted to convert non-buffer resource type");
             }
+            UNREACHABLE();
         }
 
         ResultOrError<wgpu::StorageTextureAccess> TintResourceTypeToStorageTextureAccess(
@@ -325,6 +333,7 @@ namespace dawn_native {
                     return DAWN_VALIDATION_ERROR(
                         "Attempted to convert non-storage texture resource type");
             }
+            UNREACHABLE();
         }
 
         ResultOrError<InterStageComponentType> TintComponentTypeToInterStageComponentType(
@@ -340,6 +349,7 @@ namespace dawn_native {
                     return DAWN_VALIDATION_ERROR(
                         "Attempted to convert 'Unknown' component type from Tint");
             }
+            UNREACHABLE();
         }
 
         ResultOrError<uint32_t> TintCompositionTypeToInterStageComponentCount(
@@ -357,6 +367,7 @@ namespace dawn_native {
                     return DAWN_VALIDATION_ERROR(
                         "Attempt to convert 'Unknown' composition type from Tint");
             }
+            UNREACHABLE();
         }
 
         ResultOrError<InterpolationType> TintInterpolationTypeToInterpolationType(
@@ -372,6 +383,7 @@ namespace dawn_native {
                     return DAWN_VALIDATION_ERROR(
                         "Attempted to convert 'Unknown' interpolation type from Tint");
             }
+            UNREACHABLE();
         }
 
         ResultOrError<InterpolationSampling> TintInterpolationSamplingToInterpolationSamplingType(
@@ -389,6 +401,7 @@ namespace dawn_native {
                     return DAWN_VALIDATION_ERROR(
                         "Attempted to convert 'Unknown' interpolation sampling type from Tint");
             }
+            UNREACHABLE();
         }
 
         ResultOrError<tint::Program> ParseWGSL(const tint::Source::File* file,

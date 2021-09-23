@@ -73,6 +73,7 @@ namespace dawn_native { namespace vulkan {
             case BindingInfoType::StorageTexture:
                 return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
         }
+        UNREACHABLE();
     }
 
     // static
