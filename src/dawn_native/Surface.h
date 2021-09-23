@@ -100,6 +100,9 @@ namespace dawn_native {
         uint32_t mXWindow = 0;
     };
 
+    // For the benefit of template generation.
+    using SurfaceBase = Surface;
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_SURFACE_H_

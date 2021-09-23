@@ -77,6 +77,9 @@ namespace dawn_native {
         bool mOcclusionQueryActive = false;
     };
 
+    // For the benefit of template generation.
+    using RenderPassEncoderBase = RenderPassEncoder;
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_RENDERPASSENCODER_H_

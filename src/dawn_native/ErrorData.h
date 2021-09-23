@@ -48,15 +48,18 @@ namespace dawn_native {
             int line;
         };
         void AppendBacktrace(const char* file, const char* function, int line);
+        void AppendContext(std::string context);
 
         InternalErrorType GetType() const;
         const std::string& GetMessage() const;
         const std::vector<BacktraceRecord>& GetBacktrace() const;
+        const std::vector<std::string>& GetContexts() const;
 
       private:
         InternalErrorType mType;
         std::string mMessage;
         std::vector<BacktraceRecord> mBacktrace;
+        std::vector<std::string> mContexts;
     };
 
 }  // namespace dawn_native

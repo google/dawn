@@ -109,6 +109,8 @@ dawn_json_generator("dawn_native_utils_gen") {
     "src/dawn_native/wgpu_structs_autogen.cpp",
     "src/dawn_native/ValidationUtils_autogen.h",
     "src/dawn_native/ValidationUtils_autogen.cpp",
+    "src/dawn_native/webgpu_absl_format_autogen.h",
+    "src/dawn_native/webgpu_absl_format_autogen.cpp",
   ]
 }
 
@@ -153,7 +155,6 @@ source_set("dawn_native_headers") {
 # except those that define exported symbols.
 source_set("dawn_native_sources") {
   deps = [
-    ":dawn_abseil",
     ":dawn_native_headers",
     ":dawn_native_utils_gen",
     "${dawn_root}/src/common",
@@ -173,7 +174,10 @@ source_set("dawn_native_sources") {
   # Dependencies that are needed to compile dawn_native entry points in
   # FooBackend.cpp need to be public deps so they are propagated to the
   # dawn_native target
-  public_deps = [ "${dawn_root}/src/dawn_platform" ]
+  public_deps = [
+    ":dawn_abseil",
+    "${dawn_root}/src/dawn_platform",
+  ]
 
   sources = get_target_outputs(":dawn_native_utils_gen")
   sources += [

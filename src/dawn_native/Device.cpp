@@ -396,9 +396,17 @@ namespace dawn_native {
         ASSERT(error != nullptr);
         std::ostringstream ss;
         ss << error->GetMessage();
-        for (const auto& callsite : error->GetBacktrace()) {
-            ss << "\n    at " << callsite.function << " (" << callsite.file << ":" << callsite.line
-               << ")";
+
+        const std::vector<std::string>& contexts = error->GetContexts();
+        if (!contexts.empty()) {
+            for (auto context : contexts) {
+                ss << "\n - While " << context;
+            }
+        } else {
+            for (const auto& callsite : error->GetBacktrace()) {
+                ss << "\n    at " << callsite.function << " (" << callsite.file << ":"
+                   << callsite.line << ")";
+            }
         }
         HandleError(error->GetType(), ss.str().c_str());
     }
@@ -463,12 +471,12 @@ namespace dawn_native {
 
     MaybeError DeviceBase::ValidateObject(const ObjectBase* object) const {
         ASSERT(object != nullptr);
-        if (DAWN_UNLIKELY(object->GetDevice() != this)) {
-            return DAWN_VALIDATION_ERROR("Object from a different device.");
-        }
-        if (DAWN_UNLIKELY(object->IsError())) {
-            return DAWN_VALIDATION_ERROR("Object is an error.");
-        }
+        DAWN_INVALID_IF(object->GetDevice() != this,
+                        "%s is associated with %s, and cannot be used with %s.", object,
+                        object->GetDevice(), this);
+
+        DAWN_INVALID_IF(object->IsError(), "%s is an error.", object);
+
         return {};
     }
 
@@ -1128,7 +1136,8 @@ namespace dawn_native {
         const BindGroupDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
         if (IsValidationEnabled()) {
-            DAWN_TRY(ValidateBindGroupDescriptor(this, descriptor));
+            DAWN_TRY_CONTEXT(ValidateBindGroupDescriptor(this, descriptor),
+                             "validating %s against %s", descriptor, descriptor->layout);
         }
         return CreateBindGroupImpl(descriptor);
     }
@@ -1604,6 +1613,18 @@ namespace dawn_native {
 
     PipelineCompatibilityToken DeviceBase::GetNextPipelineCompatibilityToken() {
         return PipelineCompatibilityToken(mNextPipelineCompatibilityToken++);
+    }
+
+    const std::string& DeviceBase::GetLabel() const {
+        return mLabel;
+    }
+
+    void DeviceBase::APISetLabel(const char* label) {
+        mLabel = label;
+        SetLabelImpl();
+    }
+
+    void DeviceBase::SetLabelImpl() {
     }
 
 }  // namespace dawn_native

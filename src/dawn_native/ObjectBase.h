@@ -35,7 +35,7 @@ namespace dawn_native {
         ObjectBase(DeviceBase* device, ErrorTag tag);
 
         DeviceBase* GetDevice() const;
-        const std::string& GetLabel();
+        const std::string& GetLabel() const;
         bool IsError() const;
 
         // Dawn API

@@ -35,6 +35,7 @@ Developer documentation:
  - [Testing Dawn](docs/testing.md)
  - [Debugging Dawn](docs/debugging.md)
  - [Dawn's infrastructure](docs/infra.md)
+ - [Dawn errors](docs/errors.md)
 
 User documentation: (TODO, figure out what overlaps with the webgpu.h docs)
 

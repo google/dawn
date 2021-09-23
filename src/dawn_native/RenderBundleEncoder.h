@@ -45,6 +45,10 @@ namespace dawn_native {
 
         EncodingContext mBundleEncodingContext;
     };
+
+    // For the benefit of template generation.
+    using RenderBundleEncoderBase = RenderBundleEncoder;
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_RENDERBUNDLEENCODER_H_

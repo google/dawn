@@ -33,7 +33,7 @@ namespace dawn_native {
         : RefCounted(kNotErrorPayload), mDevice(device) {
     }
 
-    const std::string& ObjectBase::GetLabel() {
+    const std::string& ObjectBase::GetLabel() const {
         return mLabel;
     }
 

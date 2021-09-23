@@ -15,6 +15,7 @@
 #include "dawn_native/ErrorData.h"
 
 #include "dawn_native/Error.h"
+#include "dawn_native/ObjectBase.h"
 #include "dawn_native/dawn_platform.h"
 
 namespace dawn_native {
@@ -42,6 +43,10 @@ namespace dawn_native {
         mBacktrace.push_back(std::move(record));
     }
 
+    void ErrorData::AppendContext(std::string context) {
+        mContexts.push_back(std::move(context));
+    }
+
     InternalErrorType ErrorData::GetType() const {
         return mType;
     }
@@ -52,6 +57,10 @@ namespace dawn_native {
 
     const std::vector<ErrorData::BacktraceRecord>& ErrorData::GetBacktrace() const {
         return mBacktrace;
+    }
+
+    const std::vector<std::string>& ErrorData::GetContexts() const {
+        return mContexts;
     }
 
 }  // namespace dawn_native

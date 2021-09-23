@@ -101,6 +101,9 @@ namespace dawn_native {
         uint64_t mDebugGroupStackSize = 0;
     };
 
+    // For the benefit of template generation.
+    using CommandEncoderBase = CommandEncoder;
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_COMMANDENCODER_H_
