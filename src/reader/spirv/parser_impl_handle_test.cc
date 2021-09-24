@@ -3170,6 +3170,864 @@ INSTANTIATE_TEST_SUITE_P(
             ScalarConstructor[not set]{0.000000}
           })"}}));
 
+/////
+// Projection sampling
+/////
+
+// Test matrix for projection sampling:
+// sampling
+//   Dimensions: 1D, 2D, 3D, 2DShadow
+//   Variations: Proj { ImplicitLod { | Bias } | ExplicitLod { Lod | Grad | } }
+//   x { | ConstOffset }
+// depth-compare sampling
+//   Dimensions: 2D
+//   Variations: Proj Dref { ImplicitLod { | Bias } | ExplicitLod { Lod | Grad |
+//   } } x { | ConstOffset }
+//
+// Expanded:
+//    ImageSampleProjImplicitLod        // { | ConstOffset }
+//    ImageSampleProjImplicitLod_Bias   // { | ConstOffset }
+//    ImageSampleProjExplicitLod_Lod    // { | ConstOffset }
+//    ImageSampleProjExplicitLod_Grad   // { | ConstOffset }
+//
+//    ImageSampleProjImplicitLod_DepthTexture
+//
+//    ImageSampleProjDrefImplicitLod        // { | ConstOffset }
+//    ImageSampleProjDrefExplicitLod_Lod    // { | ConstOffset }
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageSampleProjImplicitLod,
+    SpvParserHandleTest_SampledImageAccessTest,
+    ::testing::Values(
+
+        // OpImageSampleProjImplicitLod 1D
+        ImageAccessCase{"%float 1D 0 0 0 1 Unknown",
+                        "%result = OpImageSampleProjImplicitLod "
+                        "%v4float %sampled_image %coords12",
+                        R"(
+  Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    none
+    undefined
+    __sampler_sampler
+  }
+  Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    none
+    undefined
+    __sampled_texture_1d__f32
+  })",
+                        R"(
+          Call[not set]{
+            Identifier[not set]{textureSample}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Binary[not set]{
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords12}
+                  Identifier[not set]{x}
+                }
+                divide
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords12}
+                  Identifier[not set]{y}
+                }
+              }
+            )
+          })"},
+
+        // OpImageSampleProjImplicitLod 2D
+        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
+                        "%result = OpImageSampleProjImplicitLod "
+                        "%v4float %sampled_image %coords123",
+                        R"(
+  Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    none
+    undefined
+    __sampler_sampler
+  }
+  Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    none
+    undefined
+    __sampled_texture_2d__f32
+  })",
+                        R"(
+          Call[not set]{
+            Identifier[not set]{textureSample}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Binary[not set]{
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{xy}
+                }
+                divide
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{z}
+                }
+              }
+            )
+          })"},
+
+        // OpImageSampleProjImplicitLod 3D
+        ImageAccessCase{"%float 3D 0 0 0 1 Unknown",
+                        "%result = OpImageSampleProjImplicitLod "
+                        "%v4float %sampled_image %coords1234",
+                        R"(
+  Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    none
+    undefined
+    __sampler_sampler
+  }
+  Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    none
+    undefined
+    __sampled_texture_3d__f32
+  })",
+                        R"(
+          Call[not set]{
+            Identifier[not set]{textureSample}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Binary[not set]{
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords1234}
+                  Identifier[not set]{xyz}
+                }
+                divide
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords1234}
+                  Identifier[not set]{w}
+                }
+              }
+            )
+          })"},
+
+        // OpImageSampleProjImplicitLod 2D with ConstOffset
+        // (Don't need to test with 1D or 3D, as the hard part was the splatted
+        // division.) This case tests handling of the ConstOffset
+        ImageAccessCase{
+            "%float 2D 0 0 0 1 Unknown",
+            "%result = OpImageSampleProjImplicitLod "
+            "%v4float %sampled_image %coords123 ConstOffset %offsets2d",
+            R"(
+  Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    none
+    undefined
+    __sampler_sampler
+  }
+  Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    none
+    undefined
+    __sampled_texture_2d__f32
+  })",
+            R"(
+          Call[not set]{
+            Identifier[not set]{textureSample}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Binary[not set]{
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{xy}
+                }
+                divide
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{z}
+                }
+              }
+              TypeConstructor[not set]{
+                __vec_2__i32
+                ScalarConstructor[not set]{3}
+                ScalarConstructor[not set]{4}
+              }
+            )
+          })"}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageSampleProjImplicitLod_Bias,
+    SpvParserHandleTest_SampledImageAccessTest,
+    ::testing::Values(
+
+        // OpImageSampleProjImplicitLod with Bias
+        // Only testing 2D
+        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
+                        "%result = OpImageSampleProjImplicitLod "
+                        "%v4float %sampled_image %coords123 Bias %float_7",
+                        R"(
+  Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    none
+    undefined
+    __sampler_sampler
+  }
+  Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    none
+    undefined
+    __sampled_texture_2d__f32
+  })",
+                        R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleBias}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Binary[not set]{
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{xy}
+                }
+                divide
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{z}
+                }
+              }
+              ScalarConstructor[not set]{7.000000}
+            )
+          })"},
+
+        // OpImageSampleProjImplicitLod with Bias and signed ConstOffset
+        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
+                        "%result = OpImageSampleProjImplicitLod "
+                        "%v4float %sampled_image %coords123 Bias|ConstOffset "
+                        "%float_7 %offsets2d",
+                        R"(
+  Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    none
+    undefined
+    __sampler_sampler
+  }
+  Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    none
+    undefined
+    __sampled_texture_2d__f32
+  })",
+                        R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleBias}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Binary[not set]{
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{xy}
+                }
+                divide
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{z}
+                }
+              }
+              ScalarConstructor[not set]{7.000000}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                ScalarConstructor[not set]{3}
+                ScalarConstructor[not set]{4}
+              }
+            )
+          })"},
+
+        // OpImageSampleProjImplicitLod with Bias and unsigned ConstOffset
+        // Convert ConstOffset to signed
+        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
+                        "%result = OpImageSampleProjImplicitLod "
+                        "%v4float %sampled_image %coords123 Bias|ConstOffset "
+                        "%float_7 %u_offsets2d",
+                        R"(
+  Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    none
+    undefined
+    __sampler_sampler
+  }
+  Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    none
+    undefined
+    __sampled_texture_2d__f32
+  })",
+                        R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleBias}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Binary[not set]{
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{xy}
+                }
+                divide
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{z}
+                }
+              }
+              ScalarConstructor[not set]{7.000000}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                TypeConstructor[not set]{
+                  __vec_2__u32
+                  ScalarConstructor[not set]{3u}
+                  ScalarConstructor[not set]{4u}
+                }
+              }
+            )
+          })"}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageSampleProjExplicitLod_Lod,
+    SpvParserHandleTest_SampledImageAccessTest,
+    ::testing::Values(
+        // OpImageSampleProjExplicitLod 2D
+        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
+                        "%result = OpImageSampleProjExplicitLod "
+                        "%v4float %sampled_image %coords123 Lod %f1",
+                        R"(
+  Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    none
+    undefined
+    __sampler_sampler
+  }
+  Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    none
+    undefined
+    __sampled_texture_2d__f32
+  })",
+                        R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleLevel}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Binary[not set]{
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{xy}
+                }
+                divide
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{z}
+                }
+              }
+              Identifier[not set]{f1}
+            )
+          })"},
+
+        // OpImageSampleProjExplicitLod 2D Lod with ConstOffset
+        ImageAccessCase{
+            "%float 2D 0 0 0 1 Unknown",
+            "%result = OpImageSampleProjExplicitLod "
+            "%v4float %sampled_image %coords123 Lod|ConstOffset %f1 %offsets2d",
+            R"(
+  Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    none
+    undefined
+    __sampler_sampler
+  }
+  Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    none
+    undefined
+    __sampled_texture_2d__f32
+  })",
+            R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleLevel}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Binary[not set]{
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{xy}
+                }
+                divide
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{z}
+                }
+              }
+              Identifier[not set]{f1}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                ScalarConstructor[not set]{3}
+                ScalarConstructor[not set]{4}
+              }
+            )
+          })"}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageSampleProjExplicitLod_Grad,
+    SpvParserHandleTest_SampledImageAccessTest,
+    ::testing::Values(
+        // OpImageSampleProjExplicitLod 2D Grad
+        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
+                        "%result = OpImageSampleProjExplicitLod "
+                        "%v4float %sampled_image %coords123 Grad %vf12 %vf21",
+                        R"(
+  Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    none
+    undefined
+    __sampler_sampler
+  }
+  Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    none
+    undefined
+    __sampled_texture_2d__f32
+  })",
+                        R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleGrad}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Binary[not set]{
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{xy}
+                }
+                divide
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{z}
+                }
+              }
+              Identifier[not set]{vf12}
+              Identifier[not set]{vf21}
+            )
+          })"},
+
+        // OpImageSampleProjExplicitLod 2D Lod Grad ConstOffset
+        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
+                        "%result = OpImageSampleProjExplicitLod "
+                        "%v4float %sampled_image %coords123 Grad|ConstOffset "
+                        "%vf12 %vf21 %offsets2d",
+                        R"(
+  Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    none
+    undefined
+    __sampler_sampler
+  }
+  Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    none
+    undefined
+    __sampled_texture_2d__f32
+  })",
+                        R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleGrad}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Binary[not set]{
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{xy}
+                }
+                divide
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{z}
+                }
+              }
+              Identifier[not set]{vf12}
+              Identifier[not set]{vf21}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                ScalarConstructor[not set]{3}
+                ScalarConstructor[not set]{4}
+              }
+            )
+          })"}));
+
+INSTANTIATE_TEST_SUITE_P(
+    // Ordinary (non-comparison) sampling on a depth texture.
+    ImageSampleProjImplicitLod_DepthTexture,
+    SpvParserHandleTest_SampledImageAccessTest,
+    ::testing::Values(
+        // OpImageSampleProjImplicitLod 2D depth
+        ImageAccessCase{"%float 2D 1 0 0 1 Unknown",
+                        "%result = OpImageSampleProjImplicitLod "
+                        "%v4float %sampled_image %coords123",
+                        R"(
+  Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    none
+    undefined
+    __sampler_sampler
+  }
+  Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    none
+    undefined
+    __depth_texture_2d
+  })",
+                        // Sampling the depth texture yields an f32, but the
+                        // SPIR-V operation yiedls vec4<f32>, so fill out the
+                        // remaining components with 0.
+                        R"(
+          TypeConstructor[not set]{
+            __vec_4__f32
+            Call[not set]{
+              Identifier[not set]{textureSample}
+              (
+                Identifier[not set]{x_20}
+                Identifier[not set]{x_10}
+                Binary[not set]{
+                  MemberAccessor[not set]{
+                    Identifier[not set]{coords123}
+                    Identifier[not set]{xy}
+                  }
+                  divide
+                  MemberAccessor[not set]{
+                    Identifier[not set]{coords123}
+                    Identifier[not set]{z}
+                  }
+                }
+              )
+            }
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
+          })"}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageSampleProjDrefImplicitLod,
+    SpvParserHandleTest_SampledImageAccessTest,
+    ::testing::Values(
+
+        // OpImageSampleProjDrefImplicitLod 2D depth-texture
+        ImageAccessCase{"%float 2D 1 0 0 1 Unknown",
+                        "%result = OpImageSampleProjDrefImplicitLod "
+                        "%float %sampled_image %coords123 %f1",
+                        R"(
+  Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    none
+    undefined
+    __sampler_comparison
+  }
+  Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    none
+    undefined
+    __depth_texture_2d
+  })",
+                        R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleCompare}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Binary[not set]{
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{xy}
+                }
+                divide
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{z}
+                }
+              }
+              Identifier[not set]{f1}
+            )
+          })"},
+
+        // OpImageSampleProjDrefImplicitLod 2D depth-texture, ConstOffset
+        ImageAccessCase{
+            "%float 2D 1 0 0 1 Unknown",
+            "%result = OpImageSampleProjDrefImplicitLod "
+            "%float %sampled_image %coords123 %f1 ConstOffset %offsets2d",
+            R"(
+  Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    none
+    undefined
+    __sampler_comparison
+  }
+  Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    none
+    undefined
+    __depth_texture_2d
+  })",
+            R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleCompare}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Binary[not set]{
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{xy}
+                }
+                divide
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{z}
+                }
+              }
+              Identifier[not set]{f1}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                ScalarConstructor[not set]{3}
+                ScalarConstructor[not set]{4}
+              }
+            )
+          })"}));
+
+INSTANTIATE_TEST_SUITE_P(
+    DISABLED_ImageSampleProjDrefExplicitLod_Lod,
+    SpvParserHandleTest_SampledImageAccessTest,
+    ::testing::Values(
+
+        // Lod must be float constant 0 due to a Metal constraint.
+        // Another test checks cases where the Lod is not float constant 0.
+
+        // OpImageSampleProjDrefExplicitLod 2D depth-texture Lod
+        ImageAccessCase{"%float 2D 1 0 0 1 Unknown",
+                        "%result = OpImageSampleProjDrefExplicitLod "
+                        "%float %sampled_image %coords123 %depth Lod %float_0",
+                        R"(
+  Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    none
+    undefined
+    __sampler_comparison
+  }
+  Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    none
+    undefined
+    __depth_texture_2d
+  })",
+                        R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleCompare}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Binary[not set]{
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{xy}
+                }
+                divide
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{z}
+                }
+              }
+              ScalarConstructor[not set]{0.200000}
+              ScalarConstructor[not set]{0.000000}
+            )
+          })"},
+
+        // OpImageSampleProjDrefImplicitLod 2D depth-texture, Lod ConstOffset
+        ImageAccessCase{"%float 2D 1 0 0 1 Unknown",
+                        "%result = OpImageSampleProjDrefExplicitLod "
+                        "%float %sampled_image %coords123 %depth "
+                        "Lod|ConstOffset %float_0 %offsets2d",
+                        R"(
+  Variable{
+    Decorations{
+      GroupDecoration{0}
+      BindingDecoration{0}
+    }
+    x_10
+    none
+    undefined
+    __sampler_comparison
+  }
+  Variable{
+    Decorations{
+      GroupDecoration{2}
+      BindingDecoration{1}
+    }
+    x_20
+    none
+    undefined
+    __depth_texture_2d
+  })",
+                        R"(
+          Call[not set]{
+            Identifier[not set]{textureSampleCompareLevel}
+            (
+              Identifier[not set]{x_20}
+              Identifier[not set]{x_10}
+              Binary[not set]{
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{xy}
+                }
+                divide
+                MemberAccessor[not set]{
+                  Identifier[not set]{coords123}
+                  Identifier[not set]{z}
+                }
+              }
+              ScalarConstructor[not set]{0.200000}
+              ScalarConstructor[not set]{0.000000}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                ScalarConstructor[not set]{3}
+                ScalarConstructor[not set]{4}
+              }
+            )
+          })"}));
+
+/////
+// End projection sampling
+/////
+
 using SpvParserHandleTest_ImageAccessTest =
     SpvParserTestBase<::testing::TestWithParam<ImageAccessCase>>;
 
@@ -6363,6 +7221,59 @@ INSTANTIATE_TEST_SUITE_P(
         {"%float 2D 1 0 0 1 Unknown",
          "%result = OpImageSampleDrefExplicitLod %float %sampled_image %vf1234 "
          "%depth Lod %float_1",
+         "WGSL comparison sampling without derivatives requires "
+         "level-of-detail "
+         "0.0",
+         {}}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageSampleProjDrefExplicitLod_CheckForLod0,
+    // This is like the previous test, but for Projection sampling.
+    //
+    // Metal requires comparison sampling with explicit Level-of-detail to use
+    // Lod 0.  The SPIR-V reader requires the operand to be parsed as a constant
+    // 0 value. SPIR-V validation requires the Lod parameter to be a floating
+    // point value for non-fetch operations. So only test float values.
+    SpvParserHandleTest_ImageCoordsTest,
+    ::testing::ValuesIn(std::vector<ImageCoordsCase>{
+        // float 0.0 works
+        {"%float 2D 1 0 0 1 Unknown",
+         "%result = OpImageSampleProjDrefExplicitLod %float %sampled_image "
+         "%vf1234 %depth Lod %float_0",
+         "",
+         {R"(Binary[not set]{
+  MemberAccessor[not set]{
+    Identifier[not set]{vf1234}
+    Identifier[not set]{xy}
+  }
+  divide
+  MemberAccessor[not set]{
+    Identifier[not set]{vf1234}
+    Identifier[not set]{z}
+  }
+}
+)"}},
+        // float null works
+        {"%float 2D 1 0 0 1 Unknown",
+         "%result = OpImageSampleProjDrefExplicitLod %float %sampled_image "
+         "%vf1234 %depth Lod %float_0",
+         "",
+         {R"(Binary[not set]{
+  MemberAccessor[not set]{
+    Identifier[not set]{vf1234}
+    Identifier[not set]{xy}
+  }
+  divide
+  MemberAccessor[not set]{
+    Identifier[not set]{vf1234}
+    Identifier[not set]{z}
+  }
+}
+)"}},
+        // float 1.0 fails.
+        {"%float 2D 1 0 0 1 Unknown",
+         "%result = OpImageSampleProjDrefExplicitLod %float %sampled_image "
+         "%vf1234 %depth Lod %float_1",
          "WGSL comparison sampling without derivatives requires "
          "level-of-detail "
          "0.0",

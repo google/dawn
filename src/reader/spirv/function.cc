@@ -478,12 +478,16 @@ bool IsSampledImageAccess(SpvOp opcode) {
     case SpvOpImageSampleExplicitLod:
     case SpvOpImageSampleDrefImplicitLod:
     case SpvOpImageSampleDrefExplicitLod:
+    // WGSL doesn't have *Proj* texturing; spirv reader emulates it.
+    case SpvOpImageSampleProjImplicitLod:
+    case SpvOpImageSampleProjExplicitLod:
+    case SpvOpImageSampleProjDrefImplicitLod:
+    case SpvOpImageSampleProjDrefExplicitLod:
     case SpvOpImageGather:
     case SpvOpImageDrefGather:
     case SpvOpImageQueryLod:
       return true;
     default:
-      // WGSL doesn't have *Proj* texturing.
       break;
   }
   return false;
@@ -497,9 +501,13 @@ bool IsImageSampling(SpvOp opcode) {
     case SpvOpImageSampleExplicitLod:
     case SpvOpImageSampleDrefImplicitLod:
     case SpvOpImageSampleDrefExplicitLod:
+      // WGSL doesn't have *Proj* texturing; spirv reader emulates it.
+    case SpvOpImageSampleProjImplicitLod:
+    case SpvOpImageSampleProjExplicitLod:
+    case SpvOpImageSampleProjDrefImplicitLod:
+    case SpvOpImageSampleProjDrefExplicitLod:
       return true;
     default:
-      // WGSL doesn't have *Proj* texturing.
       break;
   }
   return false;
@@ -5256,11 +5264,15 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   switch (opcode) {
     case SpvOpImageSampleImplicitLod:
     case SpvOpImageSampleExplicitLod:
+    case SpvOpImageSampleProjImplicitLod:
+    case SpvOpImageSampleProjExplicitLod:
       is_non_dref_sample = true;
       builtin_name = "textureSample";
       break;
     case SpvOpImageSampleDrefImplicitLod:
     case SpvOpImageSampleDrefExplicitLod:
+    case SpvOpImageSampleProjDrefImplicitLod:
+    case SpvOpImageSampleProjDrefExplicitLod:
       is_dref_sample = true;
       builtin_name = "textureSampleCompare";
       if (arg_index < num_args) {
@@ -5304,7 +5316,8 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
       }
       break;
     default:
-      return Fail() << "internal error: sampled image access";
+      return Fail() << "internal error: unrecognized image access: "
+                    << inst.PrettyPrint();
   }
 
   // Loop over the image operands, looking for extra operands to the builtin.
@@ -5601,7 +5614,20 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
            << texture_type->TypeInfo().name << " prompted by "
            << inst.PrettyPrint();
   }
-  const auto num_coords_required = num_axes + (is_arrayed ? 1 : 0);
+  bool is_proj = false;
+  switch (inst.opcode()) {
+    case SpvOpImageSampleProjImplicitLod:
+    case SpvOpImageSampleProjExplicitLod:
+    case SpvOpImageSampleProjDrefImplicitLod:
+    case SpvOpImageSampleProjDrefExplicitLod:
+      is_proj = true;
+      break;
+    default:
+      break;
+  }
+
+  const auto num_coords_required =
+      num_axes + (is_arrayed ? 1 : 0) + (is_proj ? 1 : 0);
   uint32_t num_coords_supplied = 0;
   auto* component_type = raw_coords.type;
   if (component_type->IsFloatScalar() || component_type->IsIntegerScalar()) {
@@ -5629,13 +5655,20 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
   // it to a signed value of the same shape (scalar or vector).
   // Use a lambda to make it easy to only generate the expressions when we
   // will actually use them.
-  auto prefix_swizzle_expr = [this, num_axes, component_type,
+  auto prefix_swizzle_expr = [this, num_axes, component_type, is_proj,
                               raw_coords]() -> ast::Expression* {
     auto* swizzle_type =
         (num_axes == 1) ? component_type : ty_.Vector(component_type, num_axes);
     auto* swizzle = create<ast::MemberAccessorExpression>(
         Source{}, raw_coords.expr, PrefixSwizzle(num_axes));
-    return ToSignedIfUnsigned({swizzle_type, swizzle}).expr;
+    if (is_proj) {
+      auto* q = create<ast::MemberAccessorExpression>(Source{}, raw_coords.expr,
+                                                      Swizzle(num_axes));
+      auto* proj_div = builder_.Div(swizzle, q);
+      return ToSignedIfUnsigned({swizzle_type, proj_div}).expr;
+    } else {
+      return ToSignedIfUnsigned({swizzle_type, swizzle}).expr;
+    }
   };
 
   if (is_arrayed) {
@@ -5650,7 +5683,7 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
     // Convert it to a signed integer type, if needed
     result.push_back(ToI32({component_type, array_index}).expr);
   } else {
-    if (num_coords_supplied == num_coords_required) {
+    if (num_coords_supplied == num_coords_required && !is_proj) {
       // Pass the value through, with possible unsigned->signed conversion.
       result.push_back(ToSignedIfUnsigned(raw_coords).expr);
     } else {
