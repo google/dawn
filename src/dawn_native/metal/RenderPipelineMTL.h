@@ -30,6 +30,11 @@ namespace dawn_native { namespace metal {
         static ResultOrError<Ref<RenderPipeline>> Create(
             Device* device,
             const RenderPipelineDescriptor* descriptor);
+        static void CreateAsync(Device* device,
+                                const RenderPipelineDescriptor* descriptor,
+                                size_t blueprintHash,
+                                WGPUCreateRenderPipelineAsyncCallback callback,
+                                void* userdata);
 
         MTLPrimitiveType GetMTLPrimitiveTopology() const;
         MTLWinding GetMTLFrontFace() const;

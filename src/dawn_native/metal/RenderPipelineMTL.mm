@@ -14,6 +14,7 @@
 
 #include "dawn_native/metal/RenderPipelineMTL.h"
 
+#include "dawn_native/CreatePipelineAsyncTask.h"
 #include "dawn_native/VertexFormat.h"
 #include "dawn_native/metal/DeviceMTL.h"
 #include "dawn_native/metal/PipelineLayoutMTL.h"
@@ -499,6 +500,18 @@ namespace dawn_native { namespace metal {
         }
 
         return mtlVertexDescriptor;
+    }
+
+    void RenderPipeline::CreateAsync(Device* device,
+                                     const RenderPipelineDescriptor* descriptor,
+                                     size_t blueprintHash,
+                                     WGPUCreateRenderPipelineAsyncCallback callback,
+                                     void* userdata) {
+        Ref<RenderPipeline> pipeline = AcquireRef(new RenderPipeline(device, descriptor));
+        std::unique_ptr<CreateRenderPipelineAsyncTask> asyncTask =
+            std::make_unique<CreateRenderPipelineAsyncTask>(pipeline, blueprintHash, callback,
+                                                            userdata);
+        CreateRenderPipelineAsyncTask::RunAsync(std::move(asyncTask));
     }
 
 }}  // namespace dawn_native::metal

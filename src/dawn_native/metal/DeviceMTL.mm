@@ -291,6 +291,12 @@ namespace dawn_native { namespace metal {
                                                 void* userdata) {
         ComputePipeline::CreateAsync(this, descriptor, blueprintHash, callback, userdata);
     }
+    void Device::CreateRenderPipelineAsyncImpl(const RenderPipelineDescriptor* descriptor,
+                                               size_t blueprintHash,
+                                               WGPUCreateRenderPipelineAsyncCallback callback,
+                                               void* userdata) {
+        RenderPipeline::CreateAsync(this, descriptor, blueprintHash, callback, userdata);
+    }
 
     ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
         uint64_t frontendCompletedSerial{GetCompletedCommandSerial()};
