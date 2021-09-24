@@ -47,6 +47,30 @@ set(DAWN_DUMMY_FILE "${DAWN_SRC_DIR}/Dummy.cpp")
 # Configuration options
 ################################################################################
 
+# option_if_not_defined(name description default)
+# Behaves like:
+#   option(name description default)
+# If a variable is not already defined with the given name, otherwise the
+# function does nothing.
+# Simplifies customization by projects that use Dawn as a dependency.
+function (option_if_not_defined name description default)
+    if(NOT DEFINED ${name})
+        option(${name} ${description} ${default})
+    endif()
+endfunction()
+
+# set_if_not_defined(name value description)
+# Behaves like:
+#   set(${name} ${value} CACHE STRING ${description})
+# If a variable is not already defined with the given name, otherwise the
+# function does nothing.
+# Simplifies customization by projects that use Dawn as a dependency.
+function (set_if_not_defined name value description)
+    if(NOT DEFINED ${name})
+        set(${name} ${value} CACHE STRING ${description})
+    endif()
+endfunction()
+
 # Default values for the backend-enabling options
 set(ENABLE_D3D12 OFF)
 set(ENABLE_METAL OFF)
@@ -81,30 +105,30 @@ if (DAWN_SUPPORTS_GLFW_FOR_WINDOWING)
     set(BUILD_EXAMPLE ON)
 endif()
 
-option(DAWN_ENABLE_D3D12 "Enable compilation of the D3D12 backend" ${ENABLE_D3D12})
-option(DAWN_ENABLE_METAL "Enable compilation of the Metal backend" ${ENABLE_METAL})
-option(DAWN_ENABLE_NULL "Enable compilation of the Null backend" ON)
-option(DAWN_ENABLE_DESKTOP_GL "Enable compilation of the OpenGL backend" ${ENABLE_DESKTOP_GL})
-option(DAWN_ENABLE_OPENGLES "Enable compilation of the OpenGL ES backend" ${ENABLE_OPENGLES})
-option(DAWN_ENABLE_VULKAN "Enable compilation of the Vulkan backend" ${ENABLE_VULKAN})
-option(DAWN_ALWAYS_ASSERT "Enable assertions on all build types" OFF)
-option(DAWN_USE_X11 "Enable support for X11 surface" ${USE_X11})
+option_if_not_defined(DAWN_ENABLE_D3D12 "Enable compilation of the D3D12 backend" ${ENABLE_D3D12})
+option_if_not_defined(DAWN_ENABLE_METAL "Enable compilation of the Metal backend" ${ENABLE_METAL})
+option_if_not_defined(DAWN_ENABLE_NULL "Enable compilation of the Null backend" ON)
+option_if_not_defined(DAWN_ENABLE_DESKTOP_GL "Enable compilation of the OpenGL backend" ${ENABLE_DESKTOP_GL})
+option_if_not_defined(DAWN_ENABLE_OPENGLES "Enable compilation of the OpenGL ES backend" ${ENABLE_OPENGLES})
+option_if_not_defined(DAWN_ENABLE_VULKAN "Enable compilation of the Vulkan backend" ${ENABLE_VULKAN})
+option_if_not_defined(DAWN_ALWAYS_ASSERT "Enable assertions on all build types" OFF)
+option_if_not_defined(DAWN_USE_X11 "Enable support for X11 surface" ${USE_X11})
 
-option(DAWN_BUILD_EXAMPLES "Enables building Dawn's exmaples" ${BUILD_EXAMPLE})
+option_if_not_defined(DAWN_BUILD_EXAMPLES "Enables building Dawn's exmaples" ${BUILD_EXAMPLE})
 
-set(DAWN_THIRD_PARTY_DIR "${Dawn_SOURCE_DIR}/third_party" CACHE STRING "Directory in which to find third-party dependencies.")
+set_if_not_defined(DAWN_THIRD_PARTY_DIR "${Dawn_SOURCE_DIR}/third_party" "Directory in which to find third-party dependencies.")
 
 # Recommended setting for compability with future abseil releases.
 set(ABSL_PROPAGATE_CXX_STD ON)
-set(DAWN_ABSEIL_DIR "${DAWN_THIRD_PARTY_DIR}/abseil-cpp" CACHE STRING "Directory in which to find Abseil")
 
-set(DAWN_GLFW_DIR "${DAWN_THIRD_PARTY_DIR}/glfw" CACHE STRING "Directory in which to find GLFW")
-set(DAWN_GLM_DIR "${DAWN_THIRD_PARTY_DIR}/glm" CACHE STRING "Directory in which to find GLM")
-set(DAWN_JINJA2_DIR "${DAWN_THIRD_PARTY_DIR}/jinja2" CACHE STRING "Directory in which to find Jinja2")
-set(DAWN_SPIRV_CROSS_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-deps/spirv-cross/src" CACHE STRING "Directory in which to find SPIRV-Cross")
-set(DAWN_SPIRV_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-deps/spirv-headers/src" CACHE STRING "Directory in which to find SPIRV-Headers")
-set(DAWN_SPIRV_TOOLS_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-deps/spirv-tools/src" CACHE STRING "Directory in which to find SPIRV-Tools")
-set(DAWN_TINT_DIR "${DAWN_THIRD_PARTY_DIR}/tint" CACHE STRING "Directory in which to find Tint")
+set_if_not_defined(DAWN_ABSEIL_DIR "${DAWN_THIRD_PARTY_DIR}/abseil-cpp" "Directory in which to find Abseil")
+set_if_not_defined(DAWN_GLFW_DIR "${DAWN_THIRD_PARTY_DIR}/glfw" "Directory in which to find GLFW")
+set_if_not_defined(DAWN_GLM_DIR "${DAWN_THIRD_PARTY_DIR}/glm" "Directory in which to find GLM")
+set_if_not_defined(DAWN_JINJA2_DIR "${DAWN_THIRD_PARTY_DIR}/jinja2" "Directory in which to find Jinja2")
+set_if_not_defined(DAWN_SPIRV_CROSS_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-deps/spirv-cross/src" "Directory in which to find SPIRV-Cross")
+set_if_not_defined(DAWN_SPIRV_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-deps/spirv-headers/src" "Directory in which to find SPIRV-Headers")
+set_if_not_defined(DAWN_SPIRV_TOOLS_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-deps/spirv-tools/src" "Directory in which to find SPIRV-Tools")
+set_if_not_defined(DAWN_TINT_DIR "${DAWN_THIRD_PARTY_DIR}/tint" "Directory in which to find Tint")
 
 # Much of the backend code is shared among desktop OpenGL and OpenGL ES
 if (${DAWN_ENABLE_DESKTOP_GL} OR ${DAWN_ENABLE_OPENGLES})
