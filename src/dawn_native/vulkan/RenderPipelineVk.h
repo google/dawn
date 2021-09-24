@@ -29,6 +29,11 @@ namespace dawn_native { namespace vulkan {
         static ResultOrError<Ref<RenderPipeline>> Create(
             Device* device,
             const RenderPipelineDescriptor* descriptor);
+        static void CreateAsync(Device* device,
+                                const RenderPipelineDescriptor* descriptor,
+                                size_t blueprintHash,
+                                WGPUCreateRenderPipelineAsyncCallback callback,
+                                void* userdata);
 
         VkPipeline GetHandle() const;
 

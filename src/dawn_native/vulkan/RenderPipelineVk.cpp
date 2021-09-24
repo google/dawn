@@ -14,6 +14,7 @@
 
 #include "dawn_native/vulkan/RenderPipelineVk.h"
 
+#include "dawn_native/CreatePipelineAsyncTask.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
 #include "dawn_native/vulkan/PipelineLayoutVk.h"
@@ -598,6 +599,18 @@ namespace dawn_native { namespace vulkan {
 
     VkPipeline RenderPipeline::GetHandle() const {
         return mHandle;
+    }
+
+    void RenderPipeline::CreateAsync(Device* device,
+                                     const RenderPipelineDescriptor* descriptor,
+                                     size_t blueprintHash,
+                                     WGPUCreateRenderPipelineAsyncCallback callback,
+                                     void* userdata) {
+        Ref<RenderPipeline> pipeline = AcquireRef(new RenderPipeline(device, descriptor));
+        std::unique_ptr<CreateRenderPipelineAsyncTask> asyncTask =
+            std::make_unique<CreateRenderPipelineAsyncTask>(pipeline, blueprintHash, callback,
+                                                            userdata);
+        CreateRenderPipelineAsyncTask::RunAsync(std::move(asyncTask));
     }
 
 }}  // namespace dawn_native::vulkan

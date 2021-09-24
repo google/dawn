@@ -25,6 +25,7 @@
 
 #include <array>
 #include <bitset>
+#include <mutex>
 #include <unordered_map>
 
 namespace dawn_native { namespace vulkan {
@@ -63,6 +64,7 @@ namespace dawn_native { namespace vulkan {
     // render pass. We always arrange the order of attachments in "color-depthstencil-resolve" order
     // when creating render pass and framebuffer so that we can always make sure the order of
     // attachments in the rendering pipeline matches the one of the framebuffer.
+    // All the operations on RenderPassCache are guaranteed to be thread-safe.
     // TODO(cwallez@chromium.org): Make it an LRU cache somehow?
     class RenderPassCache {
       public:
@@ -86,6 +88,8 @@ namespace dawn_native { namespace vulkan {
             std::unordered_map<RenderPassCacheQuery, VkRenderPass, CacheFuncs, CacheFuncs>;
 
         Device* mDevice = nullptr;
+
+        std::mutex mMutex;
         Cache mCache;
     };
 

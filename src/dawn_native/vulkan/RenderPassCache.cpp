@@ -65,13 +65,16 @@ namespace dawn_native { namespace vulkan {
     }
 
     RenderPassCache::~RenderPassCache() {
+        std::lock_guard<std::mutex> lock(mMutex);
         for (auto it : mCache) {
             mDevice->fn.DestroyRenderPass(mDevice->GetVkDevice(), it.second, nullptr);
         }
+
         mCache.clear();
     }
 
     ResultOrError<VkRenderPass> RenderPassCache::GetRenderPass(const RenderPassCacheQuery& query) {
+        std::lock_guard<std::mutex> lock(mMutex);
         auto it = mCache.find(query);
         if (it != mCache.end()) {
             return VkRenderPass(it->second);

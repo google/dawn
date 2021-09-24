@@ -168,6 +168,12 @@ namespace dawn_native { namespace vulkan {
                                                 void* userdata) {
         ComputePipeline::CreateAsync(this, descriptor, blueprintHash, callback, userdata);
     }
+    void Device::CreateRenderPipelineAsyncImpl(const RenderPipelineDescriptor* descriptor,
+                                               size_t blueprintHash,
+                                               WGPUCreateRenderPipelineAsyncCallback callback,
+                                               void* userdata) {
+        RenderPipeline::CreateAsync(this, descriptor, blueprintHash, callback, userdata);
+    }
 
     MaybeError Device::TickImpl() {
         RecycleCompletedCommands();

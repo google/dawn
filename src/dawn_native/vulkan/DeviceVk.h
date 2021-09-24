@@ -141,6 +141,10 @@ namespace dawn_native { namespace vulkan {
                                             size_t blueprintHash,
                                             WGPUCreateComputePipelineAsyncCallback callback,
                                             void* userdata) override;
+        void CreateRenderPipelineAsyncImpl(const RenderPipelineDescriptor* descriptor,
+                                           size_t blueprintHash,
+                                           WGPUCreateRenderPipelineAsyncCallback callback,
+                                           void* userdata) override;
 
         ResultOrError<VulkanDeviceKnobs> CreateDevice(VkPhysicalDevice physicalDevice);
         void GatherQueueFromDevice();
