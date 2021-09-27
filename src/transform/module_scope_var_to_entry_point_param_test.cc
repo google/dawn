@@ -78,12 +78,12 @@ fn main() {
 fn no_uses() {
 }
 
-fn bar(a : f32, b : f32, [[internal(disable_validation__ignore_invalid_pointer_argument)]] tint_symbol : ptr<private, f32>, [[internal(disable_validation__ignore_invalid_pointer_argument)]] tint_symbol_1 : ptr<workgroup, f32>) {
+fn bar(a : f32, b : f32, tint_symbol : ptr<private, f32>, tint_symbol_1 : ptr<workgroup, f32>) {
   *(tint_symbol) = a;
   *(tint_symbol_1) = b;
 }
 
-fn foo(a : f32, [[internal(disable_validation__ignore_invalid_pointer_argument)]] tint_symbol_2 : ptr<private, f32>, [[internal(disable_validation__ignore_invalid_pointer_argument)]] tint_symbol_3 : ptr<workgroup, f32>) {
+fn foo(a : f32, tint_symbol_2 : ptr<private, f32>, tint_symbol_3 : ptr<workgroup, f32>) {
   let b : f32 = 2.0;
   bar(a, b, tint_symbol_2, tint_symbol_3);
   no_uses();
@@ -181,7 +181,7 @@ fn bar(p : ptr<private, f32>) {
   *(p) = 0.0;
 }
 
-fn foo([[internal(disable_validation__ignore_invalid_pointer_argument)]] tint_symbol : ptr<private, f32>) {
+fn foo(tint_symbol : ptr<private, f32>) {
   bar(tint_symbol);
 }
 
@@ -340,13 +340,8 @@ fn main() {
 )";
 
   auto* expect = R"(
-struct tint_symbol_2 {
-  m : mat2x2<f32>;
-};
-
 [[stage(compute), workgroup_size(1)]]
-fn main([[internal(disable_validation__entry_point_parameter)]] tint_symbol_1 : ptr<workgroup, tint_symbol_2>) {
-  let tint_symbol : ptr<workgroup, mat2x2<f32>> = &((*(tint_symbol_1)).m);
+fn main([[internal(disable_validation__entry_point_parameter)]] tint_symbol : ptr<workgroup, mat2x2<f32>>) {
   let x = *(tint_symbol);
 }
 )";
@@ -381,13 +376,8 @@ struct S2 {
   s : S1;
 };
 
-struct tint_symbol_2 {
-  m : array<S2, 4u>;
-};
-
 [[stage(compute), workgroup_size(1)]]
-fn main([[internal(disable_validation__entry_point_parameter)]] tint_symbol_1 : ptr<workgroup, tint_symbol_2>) {
-  let tint_symbol : ptr<workgroup, array<S2, 4u>> = &((*(tint_symbol_1)).m);
+fn main([[internal(disable_validation__entry_point_parameter)]] tint_symbol : ptr<workgroup, array<S2, 4u>>) {
   let x = *(tint_symbol);
 }
 )";
