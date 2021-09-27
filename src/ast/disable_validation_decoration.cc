@@ -42,6 +42,8 @@ std::string DisableValidationDecoration::InternalName() const {
       return "disable_validation__ignore_constructible_function_parameter";
     case DisabledValidation::kIgnoreStrideDecoration:
       return "disable_validation__ignore_stride";
+    case DisabledValidation::kIgnoreInvalidPointerArgument:
+      return "disable_validation__ignore_invalid_pointer_argument";
   }
   return "<invalid>";
 }

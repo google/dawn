@@ -43,6 +43,10 @@ enum class DisabledValidation {
   /// When applied to a member decoration, a stride decoration may be applied to
   /// non-array types.
   kIgnoreStrideDecoration,
+  /// When applied to a pointer function parameter, the validator will not
+  /// require a function call argument passed for that parameter to have a
+  /// certain form.
+  kIgnoreInvalidPointerArgument,
 };
 
 /// An internal decoration used to tell the validator to ignore specific

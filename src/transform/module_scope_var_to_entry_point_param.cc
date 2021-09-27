@@ -47,6 +47,27 @@ bool ContainsMatrix(const sem::Type* type) {
   }
   return false;
 }
+
+// Clone any struct types that are contained in `ty` (including `ty` itself),
+// and add it to the global declarations now, so that they precede new global
+// declarations that need to reference them.
+void CloneStructTypes(const sem::Type* ty, CloneContext& ctx) {
+  if (auto* str = ty->As<sem::Struct>()) {
+    // Recurse into members.
+    for (auto* member : str->Members()) {
+      CloneStructTypes(member->Type(), ctx);
+    }
+
+    // Clone the struct and add it to the global declaration list.
+    // Remove the old declaration.
+    auto* ast_str = str->Declaration();
+    ctx.dst->AST().AddTypeDecl(ctx.Clone(const_cast<ast::Struct*>(ast_str)));
+    ctx.Remove(ctx.src->AST().GlobalDeclarations(), ast_str);
+  } else if (auto* arr = ty->As<sem::Array>()) {
+    CloneStructTypes(arr->ElemType(), ctx);
+  }
+}
+
 }  // namespace
 
 ModuleScopeVarToEntryPointParam::ModuleScopeVarToEntryPointParam() = default;
@@ -112,6 +133,17 @@ void ModuleScopeVarToEntryPointParam::Run(CloneContext& ctx,
     // Map module-scope variables onto their function-scope replacement.
     std::unordered_map<const sem::Variable*, Symbol> var_to_symbol;
 
+    // We aggregate all workgroup variables into a struct to avoid hitting MSL's
+    // limit for threadgroup memory arguments.
+    Symbol workgroup_parameter_symbol;
+    ast::StructMemberList workgroup_parameter_members;
+    auto workgroup_param = [&]() {
+      if (!workgroup_parameter_symbol.IsValid()) {
+        workgroup_parameter_symbol = ctx.dst->Sym();
+      }
+      return workgroup_parameter_symbol;
+    };
+
     for (auto* var : func_sem->ReferencedModuleVariables()) {
       if (var->StorageClass() != ast::StorageClass::kPrivate &&
           var->StorageClass() != ast::StorageClass::kWorkgroup &&
@@ -122,13 +154,16 @@ void ModuleScopeVarToEntryPointParam::Run(CloneContext& ctx,
       // This is the symbol for the variable that replaces the module-scope var.
       auto new_var_symbol = ctx.dst->Sym();
 
-      auto* store_type = CreateASTTypeFor(ctx, var->Type()->UnwrapRef());
+      // Helper to create an AST node for the store type of the variable.
+      auto store_type = [&]() {
+        return CreateASTTypeFor(ctx, var->Type()->UnwrapRef());
+      };
 
       // Track whether the new variable is a pointer or not.
       bool is_pointer = false;
 
       if (is_entry_point) {
-        if (store_type->is_handle()) {
+        if (var->Type()->UnwrapRef()->is_handle()) {
           // For a texture or sampler variable, redeclare it as an entry point
           // parameter. Disable entry point parameter validation.
           auto* disable_validation =
@@ -136,7 +171,7 @@ void ModuleScopeVarToEntryPointParam::Run(CloneContext& ctx,
                   ctx.dst->ID(), ast::DisabledValidation::kEntryPointParameter);
           auto decos = ctx.Clone(var->Declaration()->decorations());
           decos.push_back(disable_validation);
-          auto* param = ctx.dst->Param(new_var_symbol, store_type, decos);
+          auto* param = ctx.dst->Param(new_var_symbol, store_type(), decos);
           ctx.InsertFront(func_ast->params(), param);
         } else {
           if (var->StorageClass() == ast::StorageClass::kWorkgroup &&
@@ -144,15 +179,24 @@ void ModuleScopeVarToEntryPointParam::Run(CloneContext& ctx,
             // Due to a bug in the MSL compiler, we use a threadgroup memory
             // argument for any workgroup allocation that contains a matrix.
             // See crbug.com/tint/938.
-            auto* disable_validation =
-                ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
-                    ctx.dst->ID(),
-                    ast::DisabledValidation::kEntryPointParameter);
-            auto* param_type =
-                ctx.dst->ty.pointer(store_type, var->StorageClass());
-            auto* param = ctx.dst->Param(new_var_symbol, param_type,
-                                         {disable_validation});
-            ctx.InsertFront(func_ast->params(), param);
+            // TODO(jrprice): Do this for all other workgroup variables too.
+
+            // Create a member in the workgroup parameter struct.
+            auto member = ctx.Clone(var->Declaration()->symbol());
+            workgroup_parameter_members.push_back(
+                ctx.dst->Member(member, store_type()));
+            CloneStructTypes(var->Type()->UnwrapRef(), ctx);
+
+            // Create a function-scope variable that is a pointer to the member.
+            auto* member_ptr = ctx.dst->AddressOf(ctx.dst->MemberAccessor(
+                ctx.dst->Deref(workgroup_param()), member));
+            auto* local_var =
+                ctx.dst->Const(new_var_symbol,
+                               ctx.dst->ty.pointer(
+                                   store_type(), ast::StorageClass::kWorkgroup),
+                               member_ptr);
+            ctx.InsertFront(func_ast->body()->statements(),
+                            ctx.dst->Decl(local_var));
             is_pointer = true;
           } else {
             // For any other private or workgroup variable, redeclare it at
@@ -164,7 +208,7 @@ void ModuleScopeVarToEntryPointParam::Run(CloneContext& ctx,
                     ast::DisabledValidation::kIgnoreStorageClass);
             auto* constructor = ctx.Clone(var->Declaration()->constructor());
             auto* local_var = ctx.dst->Var(
-                new_var_symbol, store_type, var->StorageClass(), constructor,
+                new_var_symbol, store_type(), var->StorageClass(), constructor,
                 ast::DecorationList{disable_validation});
             ctx.InsertFront(func_ast->body()->statements(),
                             ctx.dst->Decl(local_var));
@@ -173,13 +217,21 @@ void ModuleScopeVarToEntryPointParam::Run(CloneContext& ctx,
       } else {
         // For a regular function, redeclare the variable as a parameter.
         // Use a pointer for non-handle types.
-        auto* param_type = store_type;
-        if (!store_type->is_handle()) {
+        auto* param_type = store_type();
+        ast::DecorationList attributes;
+        if (!param_type->is_handle()) {
           param_type = ctx.dst->ty.pointer(param_type, var->StorageClass());
           is_pointer = true;
+
+          // Disable validation of arguments passed to this pointer parameter,
+          // as we will sometimes pass pointers to struct members.
+          attributes.push_back(
+              ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
+                  ctx.dst->ID(),
+                  ast::DisabledValidation::kIgnoreInvalidPointerArgument));
         }
         ctx.InsertBack(func_ast->params(),
-                       ctx.dst->Param(new_var_symbol, param_type));
+                       ctx.dst->Param(new_var_symbol, param_type, attributes));
       }
 
       // Replace all uses of the module-scope variable.
@@ -204,6 +256,22 @@ void ModuleScopeVarToEntryPointParam::Run(CloneContext& ctx,
       }
 
       var_to_symbol[var] = new_var_symbol;
+    }
+
+    if (!workgroup_parameter_members.empty()) {
+      // Create the workgroup memory parameter.
+      // The parameter is a struct that contains members for each workgroup
+      // variable.
+      auto* str = ctx.dst->Structure(ctx.dst->Sym(),
+                                     std::move(workgroup_parameter_members));
+      auto* param_type = ctx.dst->ty.pointer(ctx.dst->ty.Of(str),
+                                             ast::StorageClass::kWorkgroup);
+      auto* disable_validation =
+          ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
+              ctx.dst->ID(), ast::DisabledValidation::kEntryPointParameter);
+      auto* param =
+          ctx.dst->Param(workgroup_param(), param_type, {disable_validation});
+      ctx.InsertFront(func_ast->params(), param);
     }
 
     // Pass the variables as pointers to any functions that need them.
