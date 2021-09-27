@@ -934,11 +934,6 @@ TEST_P(SpvParserHandleTest_RegisterHandleUsage_SampledImage, Variable) {
     // So don't emit them as part of a "passing" corpus.
     p->DeliberatelyInvalidSpirv();
   }
-  if (inst.find("Proj") != std::string::npos) {
-    // WGSL does not support Projection variants of image sampling.
-    // So don't emit them as part of a "passing" corpus.
-    p->DeliberatelyInvalidSpirv();
-  }
   if (inst.find("ImageQueryLod") != std::string::npos) {
     // WGSL does not support querying image level of detail.
     // So don't emit them as part of a "passing" corpus.
@@ -993,11 +988,6 @@ TEST_P(SpvParserHandleTest_RegisterHandleUsage_SampledImage, FunctionParam) {
 
   if (inst.find("Gather") != std::string::npos) {
     // WGSL does not support Gather instructions yet.
-    // So don't emit them as part of a "passing" corpus.
-    p->DeliberatelyInvalidSpirv();
-  }
-  if (inst.find("Proj") != std::string::npos) {
-    // WGSL does not support Projection variants of image sampling.
     // So don't emit them as part of a "passing" corpus.
     p->DeliberatelyInvalidSpirv();
   }
