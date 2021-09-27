@@ -17,6 +17,8 @@
 /third_party/jsoncpp
 /third_party/llvm-build
 /third_party/markupsafe
+/third_party/node-addon-api
+/third_party/node-api-headers
 /third_party/swiftshader
 /third_party/tint
 /third_party/vulkan-deps
