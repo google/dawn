@@ -112,6 +112,8 @@ struct CanonicalizeEntryPointIO::State {
   std::vector<OutputValue> wrapper_output_values;
   /// The body of the wrapper function.
   ast::StatementList wrapper_body;
+  /// Input names used by the entrypoint
+  std::unordered_set<std::string> input_names;
 
   /// Constructor
   /// @param context the clone context
@@ -171,29 +173,35 @@ struct CanonicalizeEntryPointIO::State {
               ctx.dst->ID(), ast::DisabledValidation::kIgnoreStorageClass));
 
       // Create the global variable and use its value for the shader input.
-      auto var = ctx.dst->Symbols().New(name);
-      ast::Expression* value = ctx.dst->Expr(var);
+      auto symbol = ctx.dst->Symbols().New(name);
+      ast::Expression* value = ctx.dst->Expr(symbol);
       if (HasSampleMask(attributes)) {
         // Vulkan requires the type of a SampleMask builtin to be an array.
         // Declare it as array<u32, 1> and then load the first element.
         type = ctx.dst->ty.array(type, 1);
         value = ctx.dst->IndexAccessor(value, 0);
       }
-      ctx.dst->Global(var, type, ast::StorageClass::kInput,
+      ctx.dst->Global(symbol, type, ast::StorageClass::kInput,
                       std::move(attributes));
       return value;
     } else if (cfg.shader_style == ShaderStyle::kMsl &&
                ast::HasDecoration<ast::BuiltinDecoration>(attributes)) {
       // If this input is a builtin and we are targeting MSL, then add it to the
       // parameter list and pass it directly to the inner function.
+      Symbol symbol = input_names.emplace(name).second
+                          ? ctx.dst->Symbols().Register(name)
+                          : ctx.dst->Symbols().New(name);
       wrapper_ep_parameters.push_back(
-          ctx.dst->Param(name, type, std::move(attributes)));
-      return ctx.dst->Expr(name);
+          ctx.dst->Param(symbol, type, std::move(attributes)));
+      return ctx.dst->Expr(symbol);
     } else {
       // Otherwise, move it to the new structure member list.
+      Symbol symbol = input_names.emplace(name).second
+                          ? ctx.dst->Symbols().Register(name)
+                          : ctx.dst->Symbols().New(name);
       wrapper_struct_param_members.push_back(
-          ctx.dst->Member(name, type, std::move(attributes)));
-      return ctx.dst->MemberAccessor(InputStructSymbol(), name);
+          ctx.dst->Member(symbol, type, std::move(attributes)));
+      return ctx.dst->MemberAccessor(InputStructSymbol(), symbol);
     }
   }
 
