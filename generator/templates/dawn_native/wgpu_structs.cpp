@@ -14,6 +14,8 @@
 
 #include "dawn_native/wgpu_structs_autogen.h"
 
+#include <tuple>
+
 #ifdef __GNUC__
 // error: 'offsetof' within non-standard-layout type 'wgpu::XXX' is conditionally-supported
 #pragma GCC diagnostic ignored "-Winvalid-offsetof"
@@ -46,6 +48,22 @@ namespace dawn_native {
             static_assert(offsetof({{CppType}}, {{memberName}}) == offsetof({{CType}}, {{memberName}}),
                     "offsetof mismatch for {{CppType}}::{{memberName}}");
         {% endfor %}
+
+        bool {{CppType}}::operator==(const {{as_cppType(type.name)}}& rhs) const {
+            return {% if type.extensible or type.chained -%}
+                (nextInChain == rhs.nextInChain) &&
+            {%- endif %} std::tie(
+                {% for member in type.members %}
+                    {{member.name.camelCase()-}}
+                    {{ "," if not loop.last else "" }}
+                {% endfor %}
+            ) == std::tie(
+                {% for member in type.members %}
+                    rhs.{{member.name.camelCase()-}}
+                    {{ "," if not loop.last else "" }}
+                {% endfor %}
+            );
+        }
 
     {% endfor %}
 }

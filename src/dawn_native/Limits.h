@@ -35,6 +35,9 @@ namespace dawn_native {
     // Validate that |requiredLimits| are no better than |supportedLimits|.
     MaybeError ValidateLimits(const Limits& supportedLimits, const Limits& requiredLimits);
 
+    // Returns a copy of |limits| where limit tiers are applied.
+    Limits ApplyLimitTiers(Limits limits);
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_LIMITS_H_

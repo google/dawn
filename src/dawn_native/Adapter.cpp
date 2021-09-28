@@ -83,10 +83,7 @@ namespace dawn_native {
             return false;
         }
         if (mUseTieredLimits) {
-            // TODO(crbug.com/dawn/685): Apply limit tiers.
-            // For now, set all limits to the defaults until tiers are
-            // defined.
-            GetDefaultLimits(&limits->limits);
+            limits->limits = ApplyLimitTiers(mLimits.v1);
         } else {
             limits->limits = mLimits.v1;
         }
@@ -131,7 +128,7 @@ namespace dawn_native {
 
         if (descriptor != nullptr && descriptor->requiredLimits != nullptr) {
             DAWN_TRY(ValidateLimits(
-                mLimits.v1,
+                mUseTieredLimits ? ApplyLimitTiers(mLimits.v1) : mLimits.v1,
                 reinterpret_cast<const RequiredLimits*>(descriptor->requiredLimits)->limits));
 
             if (descriptor->requiredLimits->nextInChain != nullptr) {

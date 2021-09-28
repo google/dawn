@@ -110,3 +110,91 @@ TEST(Limits, ValidateLimits) {
         EXPECT_TRUE(ValidateLimits(defaults, required).IsSuccess());
     }
 }
+
+// Test that |ApplyLimitTiers| degrades limits to the next best tier.
+TEST(Limits, ApplyLimitTiers) {
+    auto SetLimitsStorageBufferBindingSizeTier2 = [](dawn_native::Limits* limits) {
+        limits->maxStorageBufferBindingSize = 1073741824;
+    };
+    dawn_native::Limits limitsStorageBufferBindingSizeTier2;
+    dawn_native::GetDefaultLimits(&limitsStorageBufferBindingSizeTier2);
+    SetLimitsStorageBufferBindingSizeTier2(&limitsStorageBufferBindingSizeTier2);
+
+    auto SetLimitsStorageBufferBindingSizeTier3 = [](dawn_native::Limits* limits) {
+        limits->maxStorageBufferBindingSize = 2147483647;
+    };
+    dawn_native::Limits limitsStorageBufferBindingSizeTier3;
+    dawn_native::GetDefaultLimits(&limitsStorageBufferBindingSizeTier3);
+    SetLimitsStorageBufferBindingSizeTier3(&limitsStorageBufferBindingSizeTier3);
+
+    auto SetLimitsComputeWorkgroupStorageSizeTier1 = [](dawn_native::Limits* limits) {
+        limits->maxComputeWorkgroupStorageSize = 16352;
+    };
+    dawn_native::Limits limitsComputeWorkgroupStorageSizeTier1;
+    dawn_native::GetDefaultLimits(&limitsComputeWorkgroupStorageSizeTier1);
+    SetLimitsComputeWorkgroupStorageSizeTier1(&limitsComputeWorkgroupStorageSizeTier1);
+
+    auto SetLimitsComputeWorkgroupStorageSizeTier3 = [](dawn_native::Limits* limits) {
+        limits->maxComputeWorkgroupStorageSize = 65536;
+    };
+    dawn_native::Limits limitsComputeWorkgroupStorageSizeTier3;
+    dawn_native::GetDefaultLimits(&limitsComputeWorkgroupStorageSizeTier3);
+    SetLimitsComputeWorkgroupStorageSizeTier3(&limitsComputeWorkgroupStorageSizeTier3);
+
+    // Test that applying tiers to limits that are exactly
+    // equal to a tier returns the same values.
+    {
+        dawn_native::Limits limits = limitsStorageBufferBindingSizeTier2;
+        EXPECT_EQ(ApplyLimitTiers(limits), limits);
+
+        limits = limitsStorageBufferBindingSizeTier3;
+        EXPECT_EQ(ApplyLimitTiers(limits), limits);
+    }
+
+    // Test all limits slightly worse than tier 3.
+    {
+        dawn_native::Limits limits = limitsStorageBufferBindingSizeTier3;
+        limits.maxStorageBufferBindingSize -= 1;
+        EXPECT_EQ(ApplyLimitTiers(limits), limitsStorageBufferBindingSizeTier2);
+    }
+
+    // Test that limits may match one tier exactly and be degraded in another tier.
+    // Degrading to one tier does not affect the other tier.
+    {
+        dawn_native::Limits limits = limitsComputeWorkgroupStorageSizeTier3;
+        // Set tier 3 and change one limit to be insufficent.
+        SetLimitsStorageBufferBindingSizeTier3(&limits);
+        limits.maxStorageBufferBindingSize -= 1;
+
+        dawn_native::Limits tiered = ApplyLimitTiers(limits);
+
+        // Check that |tiered| has the limits of memorySize tier 2
+        dawn_native::Limits tieredWithMemorySizeTier2 = tiered;
+        SetLimitsStorageBufferBindingSizeTier2(&tieredWithMemorySizeTier2);
+        EXPECT_EQ(tiered, tieredWithMemorySizeTier2);
+
+        // Check that |tiered| has the limits of bindingSpace tier 3
+        dawn_native::Limits tieredWithBindingSpaceTier3 = tiered;
+        SetLimitsComputeWorkgroupStorageSizeTier3(&tieredWithBindingSpaceTier3);
+        EXPECT_EQ(tiered, tieredWithBindingSpaceTier3);
+    }
+
+    // Test that limits may be simultaneously degraded in two tiers independently.
+    {
+        dawn_native::Limits limits;
+        dawn_native::GetDefaultLimits(&limits);
+        SetLimitsComputeWorkgroupStorageSizeTier3(&limits);
+        SetLimitsStorageBufferBindingSizeTier3(&limits);
+        limits.maxComputeWorkgroupStorageSize =
+            limitsComputeWorkgroupStorageSizeTier1.maxComputeWorkgroupStorageSize + 1;
+        limits.maxStorageBufferBindingSize =
+            limitsStorageBufferBindingSizeTier2.maxStorageBufferBindingSize + 1;
+
+        dawn_native::Limits tiered = ApplyLimitTiers(limits);
+
+        dawn_native::Limits expected = tiered;
+        SetLimitsComputeWorkgroupStorageSizeTier1(&expected);
+        SetLimitsStorageBufferBindingSizeTier2(&expected);
+        EXPECT_EQ(tiered, expected);
+    }
+}
