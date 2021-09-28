@@ -279,8 +279,8 @@ namespace wgpu { namespace interop {
                 auto arr = value.As<Napi::TypedArrayOf<T>>();
                 if (arr.TypedArrayType() == element_type) {
                     out = arr;
+                    return true;
                 }
-                return true;
             }
             return false;
         };
