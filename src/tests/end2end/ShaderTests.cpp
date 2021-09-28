@@ -17,18 +17,37 @@
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
+#include <numeric>
 #include <vector>
 
-class ShaderTests : public DawnTest {};
+class ShaderTests : public DawnTest {
+  public:
+    wgpu::Buffer CreateBuffer(const uint32_t count) {
+        std::vector<uint32_t> data(count, 0);
+        uint64_t bufferSize = static_cast<uint64_t>(data.size() * sizeof(uint32_t));
+        return utils::CreateBufferFromData(device, data.data(), bufferSize,
+                                           wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
+    }
+    wgpu::ComputePipeline CreateComputePipeline(
+        const std::string& shader,
+        const char* entryPoint,
+        const std::vector<wgpu::ConstantEntry>* constants = nullptr) {
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.compute.module = utils::CreateShaderModule(device, shader.c_str());
+        csDesc.compute.entryPoint = entryPoint;
+        if (constants) {
+            csDesc.compute.constants = constants->data();
+            csDesc.compute.constantCount = constants->size();
+        }
+        return device.CreateComputePipeline(&csDesc);
+    }
+};
 
 // Test that log2 is being properly calculated, base on crbug.com/1046622
 TEST_P(ShaderTests, ComputeLog2) {
     uint32_t const kSteps = 19;
-    std::vector<uint32_t> data(kSteps, 0);
     std::vector<uint32_t> expected{0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 32};
-    uint64_t bufferSize = static_cast<uint64_t>(data.size() * sizeof(uint32_t));
-    wgpu::Buffer buffer = utils::CreateBufferFromData(
-        device, data.data(), bufferSize, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
+    wgpu::Buffer buffer = CreateBuffer(kSteps);
 
     std::string shader = R"(
 [[block]] struct Buf {
@@ -61,10 +80,7 @@ TEST_P(ShaderTests, ComputeLog2) {
     buf.data[18] = u32(log2(4294967295.0 * factor));
 })";
 
-    wgpu::ComputePipelineDescriptor csDesc;
-    csDesc.compute.module = utils::CreateShaderModule(device, shader.c_str());
-    csDesc.compute.entryPoint = "main";
-    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+    wgpu::ComputePipeline pipeline = CreateComputePipeline(shader, "main");
 
     wgpu::BindGroup bindGroup =
         utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buffer}});
@@ -305,23 +321,6 @@ fn fragmentMain(input : VertexOut) -> [[location(0)]] vec4<f32> {
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
 }
 
-// Feature currently not implemented in Tint, so should fail validation.
-TEST_P(ShaderTests, PipelineOverridableUsed) {
-    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
-    DAWN_TEST_UNSUPPORTED_IF(!HasToggleEnabled("use_tint_generator"));
-
-    std::string shader = R"(
-[[override]] let foo : f32;
-
-[[stage(compute), workgroup_size(1)]]
-fn ep_func() {
-  var local_foo : f32;
-  local_foo = foo;
-  return;
-})";
-    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, shader.c_str()));
-}
-
 // This is a regression test for an issue caused by the FirstIndexOffset transfrom being done before
 // the BindingRemapper, causing an intermediate AST to be invalid (and fail the overall
 // compilation).
@@ -392,6 +391,299 @@ fn main([[location(0)]] pos : vec4<f32>) -> [[builtin(position)]] vec4<f32> {
 
     device.CreateRenderPipeline(&descriptor);
 }
+
+// Test overridable constants without numeric identifiers
+// TODO(tint:1155): Implicit numeric ID is undetermined in tint
+TEST_P(ShaderTests, DISABLED_OverridableConstants) {
+    // TODO(dawn:1041): Only Vulkan backend is implemented
+    DAWN_TEST_UNSUPPORTED_IF(!IsVulkan());
+
+    uint32_t const kCount = 15;
+    std::vector<uint32_t> expected(kCount);
+    std::iota(expected.begin(), expected.end(), 0);
+    // Test last entry with unspecified default value
+    expected[kCount - 1] = 0u;
+    expected[kCount - 2] = 0u;
+    expected[kCount - 3] = 0u;
+    expected[kCount - 4] = 0u;
+    wgpu::Buffer buffer = CreateBuffer(kCount);
+
+    std::string shader = R"(
+[[override]] let c0: bool;              // type: bool
+[[override]] let c1: bool = false;      // default override
+[[override]] let c2: f32;               // type: float32
+[[override]] let c3: f32 = 0.0;         // default override
+[[override]] let c4: f32 = 4.0;         // default
+[[override]] let c5: i32;               // type: int32
+[[override]] let c6: i32 = 0;           // default override
+[[override]] let c7: i32 = 7;           // default
+[[override]] let c8: u32;               // type: uint32
+[[override]] let c9: u32 = 0u;          // default override
+[[override]] let c10: u32 = 10u;        // default
+[[override]] let c11: bool;             // default unspecified
+[[override]] let c12: f32;              // default unspecified
+[[override]] let c13: i32;              // default unspecified
+[[override]] let c14: u32;              // default unspecified
+
+[[block]] struct Buf {
+    data : array<u32, 15>;
+};
+
+[[group(0), binding(0)]] var<storage, read_write> buf : Buf;
+
+[[stage(compute), workgroup_size(1)]] fn main() {
+    buf.data[0] = u32(c0);
+    buf.data[1] = u32(c1);
+    buf.data[2] = u32(c2);
+    buf.data[3] = u32(c3);
+    buf.data[4] = u32(c4);
+    buf.data[5] = u32(c5);
+    buf.data[6] = u32(c6);
+    buf.data[7] = u32(c7);
+    buf.data[8] = u32(c8);
+    buf.data[9] = u32(c9);
+    buf.data[10] = u32(c10);
+    buf.data[11] = u32(c11);
+    buf.data[12] = u32(c12);
+    buf.data[13] = u32(c13);
+    buf.data[14] = u32(c14);
+})";
+
+    std::vector<wgpu::ConstantEntry> constants;
+    constants.push_back({nullptr, "c0", 0});
+    constants.push_back({nullptr, "c1", 1});
+    constants.push_back({nullptr, "c2", 2});
+    constants.push_back({nullptr, "c3", 3});
+    // c4 is not assigned, testing default value
+    constants.push_back({nullptr, "c5", 5});
+    constants.push_back({nullptr, "c6", 6});
+    // c7 is not assigned, testing default value
+    constants.push_back({nullptr, "c8", 8});
+    constants.push_back({nullptr, "c9", 9});
+    // c10 is not assigned, testing default value
+    // c11 is not assigned, testing unspecified default value
+    // c12 is not assigned, testing unspecified default value
+    // c13 is not assigned, testing unspecified default value
+    // c14 is not assigned, testing unspecified default value
+
+    wgpu::ComputePipeline pipeline = CreateComputePipeline(shader, "main", &constants);
+
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buffer}});
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.Dispatch(1);
+        pass.EndPass();
+
+        commands = encoder.Finish();
+    }
+
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), buffer, 0, kCount);
+}
+
+// Test overridable constants with numeric identifiers
+TEST_P(ShaderTests, OverridableConstantsNumericIdentifiers) {
+    // TODO(dawn:1041): Only Vulkan backend is implemented
+    DAWN_TEST_UNSUPPORTED_IF(!IsVulkan());
+
+    uint32_t const kCount = 4;
+    std::vector<uint32_t> expected{1u, 2u, 3u, 0u};
+    wgpu::Buffer buffer = CreateBuffer(kCount);
+
+    std::string shader = R"(
+[[override(1001)]] let c1: u32;            // some big numeric id
+[[override(1)]] let c2: u32 = 0u;          // id == 1 might collide with some generated constant id
+[[override(1003)]] let c3: u32 = 3u;       // default
+[[override(1004)]] let c4: u32;            // default unspecified
+
+[[block]] struct Buf {
+    data : array<u32, 4>;
+};
+
+[[group(0), binding(0)]] var<storage, read_write> buf : Buf;
+
+[[stage(compute), workgroup_size(1)]] fn main() {
+    buf.data[0] = c1;
+    buf.data[1] = c2;
+    buf.data[2] = c3;
+    buf.data[3] = c4;
+})";
+
+    std::vector<wgpu::ConstantEntry> constants;
+    constants.push_back({nullptr, "1001", 1});
+    constants.push_back({nullptr, "1", 2});
+    // c3 is not assigned, testing default value
+    // c4 is not assigned, testing unspecified default value
+
+    wgpu::ComputePipeline pipeline = CreateComputePipeline(shader, "main", &constants);
+
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buffer}});
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.Dispatch(1);
+        pass.EndPass();
+
+        commands = encoder.Finish();
+    }
+
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), buffer, 0, kCount);
+}
+
+// Test overridable constants for different entry points
+TEST_P(ShaderTests, OverridableConstantsMultipleEntryPoints) {
+    // TODO(dawn:1041): Only Vulkan backend is implemented
+    DAWN_TEST_UNSUPPORTED_IF(!IsVulkan());
+
+    uint32_t const kCount = 1;
+    std::vector<uint32_t> expected1{1u};
+    std::vector<uint32_t> expected2{2u};
+
+    wgpu::Buffer buffer1 = CreateBuffer(kCount);
+    wgpu::Buffer buffer2 = CreateBuffer(kCount);
+
+    std::string shader = R"(
+[[override(1001)]] let c1: u32;
+[[override(1002)]] let c2: u32;
+
+[[block]] struct Buf {
+    data : array<u32, 1>;
+};
+
+[[group(0), binding(0)]] var<storage, read_write> buf : Buf;
+
+[[stage(compute), workgroup_size(1)]] fn main1() {
+    buf.data[0] = c1;
+}
+
+[[stage(compute), workgroup_size(1)]] fn main2() {
+    buf.data[0] = c2;
+}
+)";
+
+    std::vector<wgpu::ConstantEntry> constants1;
+    constants1.push_back({nullptr, "1001", 1});
+    std::vector<wgpu::ConstantEntry> constants2;
+    constants2.push_back({nullptr, "1002", 2});
+
+    wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader.c_str());
+
+    wgpu::ComputePipelineDescriptor csDesc1;
+    csDesc1.compute.module = shaderModule;
+    csDesc1.compute.entryPoint = "main1";
+    csDesc1.compute.constants = constants1.data();
+    csDesc1.compute.constantCount = constants1.size();
+    wgpu::ComputePipeline pipeline1 = device.CreateComputePipeline(&csDesc1);
+
+    wgpu::ComputePipelineDescriptor csDesc2;
+    csDesc2.compute.module = shaderModule;
+    csDesc2.compute.entryPoint = "main2";
+    csDesc2.compute.constants = constants2.data();
+    csDesc2.compute.constantCount = constants2.size();
+    wgpu::ComputePipeline pipeline2 = device.CreateComputePipeline(&csDesc2);
+
+    wgpu::BindGroup bindGroup1 =
+        utils::MakeBindGroup(device, pipeline1.GetBindGroupLayout(0), {{0, buffer1}});
+    wgpu::BindGroup bindGroup2 =
+        utils::MakeBindGroup(device, pipeline2.GetBindGroupLayout(0), {{0, buffer2}});
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline1);
+        pass.SetBindGroup(0, bindGroup1);
+        pass.Dispatch(1);
+
+        pass.SetPipeline(pipeline2);
+        pass.SetBindGroup(0, bindGroup2);
+        pass.Dispatch(1);
+
+        pass.EndPass();
+
+        commands = encoder.Finish();
+    }
+
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_RANGE_EQ(expected1.data(), buffer1, 0, kCount);
+    EXPECT_BUFFER_U32_RANGE_EQ(expected2.data(), buffer2, 0, kCount);
+}
+
+// Test overridable constants with render pipeline
+// Draw a triangle covering the render target, with vertex position and color values from
+// overridable constants
+TEST_P(ShaderTests, OverridableConstantsRenderPipeline) {
+    // TODO(dawn:1041): Only Vulkan backend is implemented
+    DAWN_TEST_UNSUPPORTED_IF(!IsVulkan());
+
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+[[override(1111)]] let xright: f32;
+[[override(2222)]] let ytop: f32;
+[[stage(vertex)]]
+fn main([[builtin(vertex_index)]] VertexIndex : u32)
+     -> [[builtin(position)]] vec4<f32> {
+  var pos = array<vec2<f32>, 3>(
+      vec2<f32>(-1.0, ytop),
+      vec2<f32>(-1.0, -ytop),
+      vec2<f32>(xright, 0.0));
+
+  return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+})");
+
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+[[override(1000)]] let intensity: f32 = 0.0;
+[[stage(fragment)]] fn main()
+    -> [[location(0)]] vec4<f32> {
+    return vec4<f32>(intensity, intensity, intensity, 1.0);
+})");
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
+
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+    descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+    descriptor.cTargets[0].format = renderPass.colorFormat;
+
+    std::vector<wgpu::ConstantEntry> vertexConstants;
+    vertexConstants.push_back({nullptr, "1111", 3.0});  // x right
+    vertexConstants.push_back({nullptr, "2222", 3.0});  // y top
+    descriptor.vertex.constants = vertexConstants.data();
+    descriptor.vertex.constantCount = vertexConstants.size();
+    std::vector<wgpu::ConstantEntry> fragmentConstants;
+    fragmentConstants.push_back({nullptr, "1000", 1.0});  // color intensity
+    descriptor.cFragment.constants = fragmentConstants.data();
+    descriptor.cFragment.constantCount = fragmentConstants.size();
+
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.Draw(3);
+    pass.EndPass();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(255, 255, 255, 255), renderPass.color, 0, 0);
+}
+
+// TODO(tint:1155): Test overridable constants used for workgroup size
 
 DAWN_INSTANTIATE_TEST(ShaderTests,
                       D3D12Backend(),

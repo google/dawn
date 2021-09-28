@@ -493,3 +493,22 @@ TEST_F(ShaderModuleValidationTest, ComputeWorkgroupStorageSizeLimits) {
     ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupStorage(0, kMaxMat4Count + 1));
     ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupStorage(4, kMaxMat4Count));
 }
+
+// Test that numeric ID must be unique
+TEST_F(ShaderModuleValidationTest, OverridableConstantsNumericIDConflicts) {
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
+[[override(1234)]] let c0: u32;
+[[override(1234)]] let c1: u32;
+
+[[block]] struct Buf {
+    data : array<u32, 2>;
+};
+
+[[group(0), binding(0)]] var<storage, read_write> buf : Buf;
+
+[[stage(compute), workgroup_size(1)]] fn main() {
+    // make sure the overridable constants are not optimized out
+    buf.data[0] = c0;
+    buf.data[1] = c1;
+})"));
+}

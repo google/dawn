@@ -341,21 +341,25 @@ namespace dawn_native { namespace vulkan {
 
         // There are at most 2 shader stages in render pipeline, i.e. vertex and fragment
         std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
+        std::array<std::vector<SpecializationDataEntry>, 2> specializationDataEntriesPerStages;
+        std::array<std::vector<VkSpecializationMapEntry>, 2> specializationMapEntriesPerStages;
+        std::array<VkSpecializationInfo, 2> specializationInfoPerStages;
         uint32_t stageCount = 0;
 
         for (auto stage : IterateStages(this->GetStageMask())) {
             VkPipelineShaderStageCreateInfo shaderStage;
 
+            const ProgrammableStage& programmableStage = GetStage(stage);
             DAWN_TRY_ASSIGN(shaderStage.module,
-                            ToBackend(GetStage(stage).module)
-                                ->GetTransformedModuleHandle(GetStage(stage).entryPoint.c_str(),
+                            ToBackend(programmableStage.module)
+                                ->GetTransformedModuleHandle(programmableStage.entryPoint.c_str(),
                                                              ToBackend(GetLayout())));
 
             shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
             shaderStage.pNext = nullptr;
             shaderStage.flags = 0;
             shaderStage.pSpecializationInfo = nullptr;
-            shaderStage.pName = GetStage(stage).entryPoint.c_str();
+            shaderStage.pName = programmableStage.entryPoint.c_str();
 
             switch (stage) {
                 case dawn_native::SingleShaderStage::Vertex: {
@@ -372,6 +376,11 @@ namespace dawn_native { namespace vulkan {
                     break;
                 }
             }
+
+            shaderStage.pSpecializationInfo =
+                GetVkSpecializationInfo(programmableStage, &specializationInfoPerStages[stageCount],
+                                        &specializationDataEntriesPerStages[stageCount],
+                                        &specializationMapEntriesPerStages[stageCount]);
 
             DAWN_ASSERT(stageCount < 2);
             shaderStages[stageCount] = shaderStage;

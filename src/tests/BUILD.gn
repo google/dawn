@@ -207,6 +207,7 @@ test("dawn_unittests") {
     "unittests/validation/LabelTests.cpp",
     "unittests/validation/MinimumBufferSizeValidationTests.cpp",
     "unittests/validation/MultipleDeviceTests.cpp",
+    "unittests/validation/OverridableConstantsValidationTests.cpp",
     "unittests/validation/QueryValidationTests.cpp",
     "unittests/validation/QueueOnSubmittedWorkDoneValidationTests.cpp",
     "unittests/validation/QueueSubmitValidationTests.cpp",

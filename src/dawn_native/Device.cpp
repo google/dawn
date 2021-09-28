@@ -135,9 +135,13 @@ namespace dawn_native {
 
             if (outDescriptor->layout == nullptr) {
                 DAWN_TRY_ASSIGN(layoutRef, PipelineLayoutBase::CreateDefault(
-                                               device, {{SingleShaderStage::Compute,
-                                                         outDescriptor->compute.module,
-                                                         outDescriptor->compute.entryPoint}}));
+                                               device, {{
+                                                           SingleShaderStage::Compute,
+                                                           outDescriptor->compute.module,
+                                                           outDescriptor->compute.entryPoint,
+                                                           outDescriptor->compute.constantCount,
+                                                           outDescriptor->compute.constants,
+                                                       }}));
                 outDescriptor->layout = layoutRef.Get();
             }
 

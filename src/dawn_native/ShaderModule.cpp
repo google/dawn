@@ -33,6 +33,22 @@
 
 namespace dawn_native {
 
+    EntryPointMetadata::OverridableConstant::Type GetDawnOverridableConstantType(
+        tint::inspector::OverridableConstant::Type type) {
+        switch (type) {
+            case tint::inspector::OverridableConstant::Type::kBool:
+                return EntryPointMetadata::OverridableConstant::Type::Boolean;
+            case tint::inspector::OverridableConstant::Type::kFloat32:
+                return EntryPointMetadata::OverridableConstant::Type::Float32;
+            case tint::inspector::OverridableConstant::Type::kInt32:
+                return EntryPointMetadata::OverridableConstant::Type::Int32;
+            case tint::inspector::OverridableConstant::Type::kUint32:
+                return EntryPointMetadata::OverridableConstant::Type::Uint32;
+            default:
+                UNREACHABLE();
+        }
+    }
+
     namespace {
 
         std::string GetShaderDeclarationString(BindGroupIndex group, BindingNumber binding) {
@@ -629,12 +645,21 @@ namespace dawn_native {
             for (auto& entryPoint : entryPoints) {
                 ASSERT(result.count(entryPoint.name) == 0);
 
-                if (!entryPoint.overridable_constants.empty()) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Pipeline overridable constants are not implemented yet");
-                }
-
                 auto metadata = std::make_unique<EntryPointMetadata>();
+
+                if (!entryPoint.overridable_constants.empty()) {
+                    const auto& name2Id = inspector.GetConstantNameToIdMap();
+
+                    for (auto& c : entryPoint.overridable_constants) {
+                        EntryPointMetadata::OverridableConstant constant = {
+                            name2Id.at(c.name), GetDawnOverridableConstantType(c.type)};
+                        metadata->overridableConstants[c.name] = constant;
+                        // TODO(tint:1155) tint needs ways to differentiate whether a pipeline
+                        // constant id is specified explicitly. Now we just store numeric id and
+                        // variable name in the index at the same time
+                        metadata->overridableConstants[std::to_string(constant.id)] = constant;
+                    }
+                }
 
                 DAWN_TRY_ASSIGN(metadata->stage, TintPipelineStageToShaderStage(entryPoint.stage));
 

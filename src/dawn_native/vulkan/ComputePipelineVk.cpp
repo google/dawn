@@ -52,8 +52,15 @@ namespace dawn_native { namespace vulkan {
                         ToBackend(computeStage.module.Get())
                             ->GetTransformedModuleHandle(computeStage.entryPoint.c_str(),
                                                          ToBackend(GetLayout())));
+
         createInfo.stage.pName = computeStage.entryPoint.c_str();
-        createInfo.stage.pSpecializationInfo = nullptr;
+
+        std::vector<SpecializationDataEntry> specializationDataEntries;
+        std::vector<VkSpecializationMapEntry> specializationMapEntries;
+        VkSpecializationInfo specializationInfo{};
+        createInfo.stage.pSpecializationInfo =
+            GetVkSpecializationInfo(computeStage, &specializationInfo, &specializationDataEntries,
+                                    &specializationMapEntries);
 
         Device* device = ToBackend(GetDevice());
 

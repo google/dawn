@@ -114,6 +114,7 @@ namespace dawn_native {
             }
 
             DAWN_TRY(ValidateProgrammableStage(device, descriptor->module, descriptor->entryPoint,
+                                               descriptor->constantCount, descriptor->constants,
                                                layout, SingleShaderStage::Vertex));
             const EntryPointMetadata& vertexMetadata =
                 descriptor->module->GetEntryPoint(descriptor->entryPoint);
@@ -302,6 +303,7 @@ namespace dawn_native {
             }
 
             DAWN_TRY(ValidateProgrammableStage(device, descriptor->module, descriptor->entryPoint,
+                                               descriptor->constantCount, descriptor->constants,
                                                layout, SingleShaderStage::Fragment));
 
             if (descriptor->targetCount > kMaxColorAttachments) {
@@ -422,17 +424,20 @@ namespace dawn_native {
         DeviceBase* device,
         const RenderPipelineDescriptor* descriptor) {
         std::vector<StageAndDescriptor> stages;
-        stages.push_back(
-            {SingleShaderStage::Vertex, descriptor->vertex.module, descriptor->vertex.entryPoint});
+        stages.push_back({SingleShaderStage::Vertex, descriptor->vertex.module,
+                          descriptor->vertex.entryPoint, descriptor->vertex.constantCount,
+                          descriptor->vertex.constants});
         if (descriptor->fragment != nullptr) {
             stages.push_back({SingleShaderStage::Fragment, descriptor->fragment->module,
-                              descriptor->fragment->entryPoint});
+                              descriptor->fragment->entryPoint, descriptor->fragment->constantCount,
+                              descriptor->fragment->constants});
         } else if (device->IsToggleEnabled(Toggle::UseDummyFragmentInVertexOnlyPipeline)) {
             InternalPipelineStore* store = device->GetInternalPipelineStore();
             // The dummy fragment shader module should already be initialized
             DAWN_ASSERT(store->dummyFragmentShader != nullptr);
             ShaderModuleBase* dummyFragmentShader = store->dummyFragmentShader.Get();
-            stages.push_back({SingleShaderStage::Fragment, dummyFragmentShader, "fs_empty_main"});
+            stages.push_back(
+                {SingleShaderStage::Fragment, dummyFragmentShader, "fs_empty_main", 0, nullptr});
         }
         return stages;
     }

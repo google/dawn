@@ -32,15 +32,20 @@ namespace dawn_native {
     MaybeError ValidateProgrammableStage(DeviceBase* device,
                                          const ShaderModuleBase* module,
                                          const std::string& entryPoint,
+                                         uint32_t constantCount,
+                                         const ConstantEntry* constants,
                                          const PipelineLayoutBase* layout,
                                          SingleShaderStage stage);
 
+    using PipelineConstantEntry = std::pair<std::string, double>;
     struct ProgrammableStage {
         Ref<ShaderModuleBase> module;
         std::string entryPoint;
 
         // The metadata lives as long as module, that's ref-ed in the same structure.
         const EntryPointMetadata* metadata = nullptr;
+
+        std::vector<PipelineConstantEntry> constants;
     };
 
     class PipelineBase : public ApiObjectBase, public CachedObject {

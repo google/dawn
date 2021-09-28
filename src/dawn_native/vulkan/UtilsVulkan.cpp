@@ -17,6 +17,8 @@
 #include "common/Assert.h"
 #include "dawn_native/EnumMaskIterator.h"
 #include "dawn_native/Format.h"
+#include "dawn_native/Pipeline.h"
+#include "dawn_native/ShaderModule.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/Forward.h"
 #include "dawn_native/vulkan/TextureVk.h"
@@ -195,4 +197,63 @@ namespace dawn_native { namespace vulkan {
             device->fn.SetDebugUtilsObjectNameEXT(device->GetVkDevice(), &objectNameInfo);
         }
     }
+
+    VkSpecializationInfo* GetVkSpecializationInfo(
+        const ProgrammableStage& programmableStage,
+        VkSpecializationInfo* specializationInfo,
+        std::vector<SpecializationDataEntry>* specializationDataEntries,
+        std::vector<VkSpecializationMapEntry>* specializationMapEntries) {
+        ASSERT(specializationInfo);
+        ASSERT(specializationDataEntries);
+        ASSERT(specializationMapEntries);
+
+        if (programmableStage.constants.size() == 0) {
+            return nullptr;
+        }
+
+        const EntryPointMetadata& entryPointMetaData =
+            programmableStage.module->GetEntryPoint(programmableStage.entryPoint);
+
+        for (const auto& pipelineConstant : programmableStage.constants) {
+            const std::string& name = pipelineConstant.first;
+            double value = pipelineConstant.second;
+
+            // This is already validated so `name` must exist
+            const auto& moduleConstant = entryPointMetaData.overridableConstants.at(name);
+
+            specializationMapEntries->push_back(
+                VkSpecializationMapEntry{moduleConstant.id,
+                                         static_cast<uint32_t>(specializationDataEntries->size() *
+                                                               sizeof(SpecializationDataEntry)),
+                                         sizeof(SpecializationDataEntry)});
+
+            SpecializationDataEntry entry;
+            switch (moduleConstant.type) {
+                case EntryPointMetadata::OverridableConstant::Type::Boolean:
+                    entry.b = static_cast<bool>(value);
+                    break;
+                case EntryPointMetadata::OverridableConstant::Type::Float32:
+                    entry.f32 = static_cast<float>(value);
+                    break;
+                case EntryPointMetadata::OverridableConstant::Type::Int32:
+                    entry.i32 = static_cast<int32_t>(value);
+                    break;
+                case EntryPointMetadata::OverridableConstant::Type::Uint32:
+                    entry.u32 = static_cast<uint32_t>(value);
+                    break;
+                default:
+                    UNREACHABLE();
+            }
+            specializationDataEntries->push_back(entry);
+        }
+
+        specializationInfo->mapEntryCount = static_cast<uint32_t>(specializationMapEntries->size());
+        specializationInfo->pMapEntries = specializationMapEntries->data();
+        specializationInfo->dataSize =
+            specializationDataEntries->size() * sizeof(SpecializationDataEntry);
+        specializationInfo->pData = specializationDataEntries->data();
+
+        return specializationInfo;
+    }
+
 }}  // namespace dawn_native::vulkan
