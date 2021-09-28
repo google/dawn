@@ -45,6 +45,7 @@ add_library(dawn_node_binding STATIC
     "GPUQueue.h"
     "GPURenderBundle.cpp"
     "GPURenderBundle.h"
+    "GPURenderBundleEncoder.cpp"
     "GPURenderBundleEncoder.h"
     "GPURenderPassEncoder.cpp"
     "GPURenderPassEncoder.h"
