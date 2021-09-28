@@ -15,6 +15,8 @@
 add_library(dawn_node_binding STATIC
     "AsyncRunner.cpp"
     "AsyncRunner.h"
+    "Converter.cpp"
+    "Converter.h"
     "Errors.cpp"
     "Errors.h"
     "GPU.h"
