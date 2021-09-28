@@ -49,6 +49,7 @@ add_library(dawn_node_binding STATIC
     "GPUShaderModule.h"
     "GPUSupportedLimits.cpp"
     "GPUSupportedLimits.h"
+    "GPUTexture.cpp"
     "GPUTexture.h"
     "GPUTextureView.cpp"
     "GPUTextureView.h"
