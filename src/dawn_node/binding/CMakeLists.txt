@@ -29,6 +29,7 @@ add_library(dawn_node_binding STATIC
     "GPUBuffer.h"
     "GPUCommandBuffer.cpp"
     "GPUCommandBuffer.h"
+    "GPUCommandEncoder.cpp"
     "GPUCommandEncoder.h"
     "GPUComputePassEncoder.cpp"
     "GPUComputePassEncoder.h"
