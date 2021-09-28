@@ -513,7 +513,6 @@ namespace dawn_native {
         uint32_t width = 0;
         uint32_t height = 0;
         Ref<AttachmentState> attachmentState;
-        mEncodingContext.WillBeginRenderPass();
         bool success =
             mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
                 uint32_t sampleCount = 0;
@@ -523,6 +522,7 @@ namespace dawn_native {
 
                 ASSERT(width > 0 && height > 0 && sampleCount > 0);
 
+                mEncodingContext.WillBeginRenderPass();
                 BeginRenderPassCmd* cmd =
                     allocator->Allocate<BeginRenderPassCmd>(Command::BeginRenderPass);
 

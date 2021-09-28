@@ -146,6 +146,31 @@ TEST_F(CommandBufferValidationTest, BeginComputePassBeforeEndPreviousPass) {
     }
 }
 
+// Test that beginning a render pass before ending the previous pass causes an error.
+TEST_F(CommandBufferValidationTest, BeginRenderPassBeforeEndPreviousPass) {
+    DummyRenderPass dummyRenderPass(device);
+
+    // Beginning a render pass before ending the render pass causes an error.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder renderPass1 = encoder.BeginRenderPass(&dummyRenderPass);
+        wgpu::RenderPassEncoder renderPass2 = encoder.BeginRenderPass(&dummyRenderPass);
+        renderPass2.EndPass();
+        renderPass1.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Beginning a compute pass before ending a compute pass causes an error.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&dummyRenderPass);
+        renderPass.EndPass();
+        computePass.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
+
 // Test that encoding command after a successful finish produces an error
 TEST_F(CommandBufferValidationTest, CallsAfterASuccessfulFinish) {
     // A buffer that can be used in CopyBufferToBuffer
