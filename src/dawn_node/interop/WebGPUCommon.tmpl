@@ -1,0 +1,126 @@
+{{/*
+ Copyright 2021 The Dawn Authors
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+*/}}
+
+{{- /*
+--------------------------------------------------------------------------------
+Template file for use with src/dawn_node/tools/cmd/idlgen/main.go.
+This file provides common template definitions and is included by WebGPU.h.tmpl
+and WebGPU.cpp.tmpl.
+
+See:
+* https://github.com/ben-clayton/webidlparser/blob/main/ast/ast.go for the AST
+  types used by this template
+* src/dawn_node/tools/cmd/idlgen/main.go for additional structures and functions
+  used by this template
+* https://golang.org/pkg/text/template/ for documentation on the template syntax
+--------------------------------------------------------------------------------
+*/ -}}
+
+
+{{- /*
+--------------------------------------------------------------------------------
+-- Type generates the C++ type for the given ast.Type
+--------------------------------------------------------------------------------
+*/ -}}
+{{- define "Type" -}}
+{{-        if IsUndefinedType $}}void
+{{-   else if IsTypeName      $}}
+{{-          if eq $.Name "boolean"             }}bool
+{{-     else if eq $.Name "long"                }}int32_t
+{{-     else if eq $.Name "unsigned long"       }}uint32_t
+{{-     else if eq $.Name "long long"           }}int64_t
+{{-     else if eq $.Name "unsigned long long"  }}uint64_t
+{{-     else if eq $.Name "object"              }}Object
+{{-     else if eq $.Name "DOMString"           }}std::string
+{{-     else if eq $.Name "USVString"           }}std::string
+{{-     else if eq $.Name "ArrayBuffer"         }}ArrayBuffer
+{{-     else if IsInterface (Lookup $.Name)     }}Interface<{{$.Name}}>
+{{-     else                                    }}{{$.Name}}
+{{-     end                                     }}
+{{-   else if IsParametrizedType $}}{{$.Name}}<{{template "TypeList" $.Elems}}>
+{{-   else if IsNullableType     $}}std::optional<{{template "Type" $.Type}}>
+{{-   else if IsUnionType        $}}std::variant<{{template "VariantTypeList" $.Types}}>
+{{-   else if IsSequenceType     $}}std::vector<{{template "Type" $.Elem}}>
+{{-   else if IsRecordType       $}}std::unordered_map<{{template "Type" $.Key}}, {{template "Type" $.Elem}}>
+{{-   else                        }} /* Unhandled Type {{printf "%T" $}} */
+{{-   end -}}
+{{- end }}
+
+
+{{- /*
+--------------------------------------------------------------------------------
+-- AttributeType generates the C++ type for the given ast.Member
+--------------------------------------------------------------------------------
+*/ -}}
+{{- define "AttributeType" -}}
+{{-   if      $.Required }}{{template "Type" $.Type}}
+{{-   else if $.Init     }}{{template "Type" $.Type}}
+{{-   else               }}std::optional<{{template "Type" $.Type}}>
+{{-   end}}
+{{- end }}
+
+
+{{- /*
+--------------------------------------------------------------------------------
+-- Literal generates a C++ literal value using the following arguments:
+--   Value - the ast.Literal
+--   Type  - the ast.Type of the literal
+--------------------------------------------------------------------------------
+*/ -}}
+{{- define "Literal" -}}
+{{-   if      IsDefaultDictionaryLiteral $.Value}}{{template "Type" $.Type}}{}
+{{-   else if IsTypeName                 $.Type }}
+{{-     $ty := Lookup $.Type.Name}}
+{{-     if      IsEnum         $ty     }}{{$.Type.Name}}::{{EnumEntryName $.Value.Value}}
+{{-     else if IsBasicLiteral $.Value }}{{$.Value.Value}}
+{{-     else                           }}/* Unhandled Type {{printf "ty: %v $.Type.Name: %T $.Value: %T" $ty $.Type.Name $.Value}} */
+{{-     end                            }}
+{{-   else if IsSequenceType $.Type  }}{{template "Type" $.Type}}{} {{- /* TODO: Assumes the initialiser is empty */}}
+{{-   else if IsBasicLiteral $.Value }}{{$.Value.Value}}
+{{-   else }} /* Unhandled Type {{printf "%T %T" $.Type $.Value}} */
+{{-   end}}
+{{- end }}
+
+
+{{- /*
+--------------------------------------------------------------------------------
+-- TypeList generates a C++ comma separated list of types from the given
+-- []ast.Type
+--------------------------------------------------------------------------------
+*/ -}}
+{{- define "TypeList" -}}
+{{-   range $i, $ty := $}}
+{{-     if $i }}, {{end}}
+{{-     template "Type" $ty}}
+{{-   end}}
+{{- end }}
+
+
+{{- /*
+--------------------------------------------------------------------------------
+-- VariantTypeList generates a C++ comma separated list of types from the given
+-- []ast.Type, skipping any 'undefined' types
+--------------------------------------------------------------------------------
+*/ -}}
+{{- define "VariantTypeList" -}}
+{{-   range $i, $ty := $}}
+{{-     if not (IsUndefinedType $ty)}}
+{{-       if $i }}, {{end}}
+{{-       template "Type" $ty}}
+{{-     end}}
+{{-   end}}
+{{- end }}
+

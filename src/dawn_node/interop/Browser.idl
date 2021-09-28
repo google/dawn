@@ -1,0 +1,84 @@
+// Copyright 2021 The Dawn Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// An IDL file that provides stub definitions for dictionaries and interfaces
+// used by the webgpu.idl file
+
+dictionary EventInit {
+  boolean bubbles = false;
+  boolean cancelable = false;
+  boolean composed = false;
+};
+
+interface Navigator {
+  readonly attribute DOMString vendorSub;
+  readonly attribute DOMString productSub;
+  readonly attribute DOMString vendor;
+};
+
+interface Event {
+  readonly attribute boolean bubbles;
+  readonly attribute boolean cancelable;
+  attribute boolean returnValue;
+};
+
+interface WorkerNavigator{};
+
+interface EventListener {
+  undefined handleEvent(Event event);
+};
+
+interface EventTarget {
+  undefined addEventListener(DOMString type, EventListener? callback, optional (AddEventListenerOptions or boolean) options);
+  undefined removeEventListener(DOMString type, EventListener? callback, optional (EventListenerOptions or boolean) options);
+  boolean dispatchEvent(Event event);
+};
+
+dictionary EventListenerOptions { boolean capture = false; };
+
+dictionary AddEventListenerOptions : EventListenerOptions {
+  boolean passive = false;
+  boolean once = false;
+};
+
+interface HTMLVideoElement {
+  attribute unsigned long width;
+  attribute unsigned long height;
+  readonly attribute unsigned long videoWidth;
+  readonly attribute unsigned long videoHeight;
+  attribute DOMString poster;
+};
+
+typedef(Int8Array or Int16Array or Int32Array or Uint8Array or Uint16Array or
+        Uint32Array or Float32Array or Float64Array or
+        DataView) ArrayBufferView;
+
+typedef(ArrayBufferView or ArrayBuffer) BufferSource;
+
+interface ImageBitmap {
+  readonly attribute unsigned long width;
+  readonly attribute unsigned long height;
+};
+
+interface HTMLCanvasElement {
+  attribute unsigned long width;
+  attribute unsigned long height;
+};
+
+interface OffscreenCanvas {
+  attribute unsigned long width;
+  attribute unsigned long height;
+};
+
+interface EventHandler{};
