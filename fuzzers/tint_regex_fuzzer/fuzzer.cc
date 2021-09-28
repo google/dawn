@@ -37,6 +37,7 @@ enum class MutationKind {
   kDuplicateInterval,
   kReplaceIdentifier,
   kReplaceLiteral,
+  kInsertReturnStatement,
   kNumMutationKinds
 };
 
@@ -91,6 +92,12 @@ extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
 
     case MutationKind::kReplaceLiteral:
       if (!ReplaceRandomIntLiteral(wgsl_code, generator)) {
+        return 0;
+      }
+      break;
+
+    case MutationKind::kInsertReturnStatement:
+      if (!InsertReturnStatement(wgsl_code, generator)) {
         return 0;
       }
       break;

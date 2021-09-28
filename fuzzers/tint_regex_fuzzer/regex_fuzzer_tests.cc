@@ -195,56 +195,64 @@ TEST(ReplaceIdentifierTest, ReplaceIdentifierTest2) {
 
 TEST(GetIdentifierTest, GetIdentifierTest1) {
   std::string wgsl_code =
-      "fn clamp_0acf8f() {"
-      "var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>());}"
-      "[[stage(vertex)]]"
-      "fn vertex_main() -> [[builtin(position)]] vec4<f32> {"
-      "  clamp_0acf8f();"
-      "  return vec4<f32>();}"
-      "[[stage(fragment)]]"
-      "fn fragment_main() {"
-      "  clamp_0acf8f();}"
-      "[[stage(compute), workgroup_size(1)]]"
-      "fn compute_main() {"
-      "var<private> foo: f32 = 0.0;"
-      "  clamp_0acf8f();}";
+      R"(fn clamp_0acf8f() {
+        var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>());
+      }
+      [[stage(vertex)]]
+      fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+         clamp_0acf8f();"
+         return vec4<f32>();
+      }
+      [[stage(fragment)]]
+      fn fragment_main() {
+        clamp_0acf8f();
+      }
+      [[stage(compute), workgroup_size(1)]]
+      fn compute_main() {"
+        var<private> foo: f32 = 0.0;
+        clamp_0acf8f();
+      })";
 
   std::vector<std::pair<size_t, size_t>> identifiers_pos =
       GetIdentifiers(wgsl_code);
 
   std::vector<std::pair<size_t, size_t>> ground_truth = {
-      std::make_pair(3, 12),   std::make_pair(19, 3),  std::make_pair(28, 4),
-      std::make_pair(40, 5),   std::make_pair(51, 3),  std::make_pair(59, 4),
-      std::make_pair(72, 4),   std::make_pair(88, 5),  std::make_pair(103, 2),
-      std::make_pair(113, 4),  std::make_pair(125, 7), std::make_pair(145, 4),
-      std::make_pair(158, 12), std::make_pair(175, 6), std::make_pair(187, 3),
-      std::make_pair(197, 5),  std::make_pair(214, 2), std::make_pair(226, 4),
-      std::make_pair(236, 12), std::make_pair(254, 5), std::make_pair(270, 14),
-      std::make_pair(289, 2),  std::make_pair(300, 4), std::make_pair(308, 3),
-      std::make_pair(321, 3),  std::make_pair(326, 3), std::make_pair(338, 12)};
+      std::make_pair(3, 12),   std::make_pair(28, 3),  std::make_pair(37, 4),
+      std::make_pair(49, 5),   std::make_pair(60, 3),  std::make_pair(68, 4),
+      std::make_pair(81, 4),   std::make_pair(111, 5), std::make_pair(133, 2),
+      std::make_pair(143, 4),  std::make_pair(155, 7), std::make_pair(175, 4),
+      std::make_pair(196, 12), std::make_pair(222, 6), std::make_pair(234, 3),
+      std::make_pair(258, 5),  std::make_pair(282, 2), std::make_pair(294, 4),
+      std::make_pair(311, 12), std::make_pair(343, 5), std::make_pair(359, 14),
+      std::make_pair(385, 2),  std::make_pair(396, 4), std::make_pair(414, 3),
+      std::make_pair(427, 3),  std::make_pair(432, 3), std::make_pair(451, 12)};
 
   ASSERT_EQ(ground_truth, identifiers_pos);
 }
 
 TEST(TestGetLiteralsValues, TestGetLiteralsValues1) {
   std::string wgsl_code =
-      "fn clamp_0acf8f() {"
-      "var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>());}"
-      "[[stage(vertex)]]"
-      "fn vertex_main() -> [[builtin(position)]] vec4<f32> {"
-      "  clamp_0acf8f();"
-      "var foo_1: i32 = 3;"
-      "  return vec4<f32>();}"
-      "[[stage(fragment)]]"
-      "fn fragment_main() {"
-      "  clamp_0acf8f();}"
-      "[[stage(compute), workgroup_size(1)]]"
-      "fn compute_main() {"
-      "var<private> foo: f32 = 0.0;"
-      "var foo_2: i32 = 10;"
-      "  clamp_0acf8f();}"
-      "foo_1 = 5 + 7;"
-      "var foo_3 : i32 = -20;";
+      R"(fn clamp_0acf8f() {
+        var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>());
+      } 
+      [[stage(vertex)]]
+      fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+        clamp_0acf8f();
+        var foo_1: i32 = 3;
+        return vec4<f32>();
+      }
+      [[stage(fragment)]]
+      fn fragment_main() {
+        clamp_0acf8f();
+      }
+      [[stage(compute), workgroup_size(1)]]
+      fn compute_main() {
+        var<private> foo: f32 = 0.0;
+        var foo_2: i32 = 10;
+        clamp_0acf8f();
+      }
+      foo_1 = 5 + 7;
+      var foo_3 : i32 = -20;)";
 
   std::vector<std::pair<size_t, size_t>> literals_pos =
       GetIntLiterals(wgsl_code);
@@ -258,6 +266,253 @@ TEST(TestGetLiteralsValues, TestGetLiteralsValues1) {
   }
 
   ASSERT_EQ(ground_truth, result);
+}
+
+TEST(InsertReturnTest, FindClosingBrace) {
+  std::string wgsl_code =
+      R"(fn clamp_0acf8f() {
+        if(false){
+
+        } else{
+          var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>());
+          }
+        }
+        [[stage(vertex)]]
+        fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+          clamp_0acf8f();
+          var foo_1: i32 = 3;
+          return vec4<f32>();
+        }
+        [[stage(fragment)]]
+        fn fragment_main() {
+          clamp_0acf8f();
+        }
+        [[stage(compute), workgroup_size(1)]]
+        fn compute_main() {
+          var<private> foo: f32 = 0.0;
+          var foo_2: i32 = 10;
+          clamp_0acf8f();
+        }
+        foo_1 = 5 + 7;
+        var foo_3 : i32 = -20;
+      )";
+  size_t opening_bracket_pos = 18;
+  size_t closing_bracket_pos = FindClosingBrace(opening_bracket_pos, wgsl_code);
+
+  // The -1 is needed since the function body starts after the left bracket.
+  std::string function_body = wgsl_code.substr(
+      opening_bracket_pos + 1, closing_bracket_pos - opening_bracket_pos - 1);
+  std::string expected =
+      R"(
+        if(false){
+
+        } else{
+          var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>());
+          }
+        )";
+  ASSERT_EQ(expected, function_body);
+}
+
+TEST(InsertReturnTest, FindClosingBraceFailing) {
+  std::string wgsl_code =
+      R"(fn clamp_0acf8f() {
+      // This comment } causes the test to fail.
+      "if(false){
+
+      } else{
+        var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>());
+        }
+      }
+      [[stage(vertex)]]
+      fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+        clamp_0acf8f();
+        var foo_1: i32 = 3;
+        return vec4<f32>();
+      }
+      [[stage(fragment)]]
+      fn fragment_main() {
+        clamp_0acf8f();
+      }
+      [[stage(compute), workgroup_size(1)]]
+      fn compute_main() {
+        var<private> foo: f32 = 0.0;
+        var foo_2: i32 = 10;
+        clamp_0acf8f();
+      }
+      foo_1 = 5 + 7;
+      var foo_3 : i32 = -20;)";
+  size_t opening_bracket_pos = 18;
+  size_t closing_bracket_pos = FindClosingBrace(opening_bracket_pos, wgsl_code);
+
+  // The -1 is needed since the function body starts after the left bracket.
+  std::string function_body = wgsl_code.substr(
+      opening_bracket_pos + 1, closing_bracket_pos - opening_bracket_pos - 1);
+  std::string expected =
+      R"(// This comment } causes the test to fail.
+      "if(false){
+
+      } else{
+        var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>());
+        })";
+  ASSERT_NE(expected, function_body);
+}
+
+TEST(TestInsertReturn, TestInsertReturn1) {
+  std::string wgsl_code =
+      R"(fn clamp_0acf8f() {
+        var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>());
+      }
+      [[stage(vertex)]]
+      fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+        clamp_0acf8f();
+        var foo_1: i32 = 3;
+        return vec4<f32>();
+      }
+      [[stage(fragment)]]
+      fn fragment_main() {
+        clamp_0acf8f();
+      }
+      [[stage(compute), workgroup_size(1)]]
+      fn compute_main() {
+        var<private> foo: f32 = 0.0;
+        var foo_2: i32 = 10;
+        clamp_0acf8f();
+      }
+      foo_1 = 5 + 7;
+      var foo_3 : i32 = -20;)";
+
+  std::vector<size_t> semicolon_pos;
+  for (size_t pos = wgsl_code.find(";", 0); pos != std::string::npos;
+       pos = wgsl_code.find(";", pos + 1)) {
+    semicolon_pos.push_back(pos);
+  }
+
+  // should insert a return true statement after the first semicolon of the
+  // first function the the WGSL-like string above.
+  wgsl_code.insert(semicolon_pos[0] + 1, "return true;");
+
+  std::string expected_wgsl_code =
+      R"(fn clamp_0acf8f() {
+        var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>());return true;
+      }
+      [[stage(vertex)]]
+      fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+        clamp_0acf8f();
+        var foo_1: i32 = 3;
+        return vec4<f32>();
+      }
+      [[stage(fragment)]]
+      fn fragment_main() {
+        clamp_0acf8f();
+      }
+      [[stage(compute), workgroup_size(1)]]
+      fn compute_main() {
+        var<private> foo: f32 = 0.0;
+        var foo_2: i32 = 10;
+        clamp_0acf8f();
+      }
+      foo_1 = 5 + 7;
+      var foo_3 : i32 = -20;)";
+
+  ASSERT_EQ(expected_wgsl_code, wgsl_code);
+}
+
+TEST(TestInsertReturn, TestFunctionPositions) {
+  std::string wgsl_code =
+      R"(fn clamp_0acf8f() {
+          var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>());
+        }
+        [[stage(vertex)]]
+        fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+          clamp_0acf8f();
+          var foo_1: i32 = 3;
+          return vec4<f32>();
+        }
+        [[stage(fragment)]]
+        fn fragment_main() {
+          clamp_0acf8f();
+        }
+        [[stage(compute), workgroup_size(1)]]
+        fn compute_main() {
+          var<private> foo: f32 = 0.0;
+          var foo_2: i32 = 10;
+          clamp_0acf8f();
+        }
+        fn vert_main() -> [[builtin(position)]] vec4<f32> {
+          clamp_0acf8f();
+          var foo_1: i32 = 3;
+          return vec4<f32>();
+        }
+        foo_1 = 5 + 7;
+        var foo_3 : i32 = -20;)";
+
+  std::vector<size_t> function_positions = GetFunctionBodyPositions(wgsl_code);
+  std::vector<size_t> expected_positions = {193, 622};
+  ASSERT_EQ(expected_positions, function_positions);
+}
+
+TEST(TestInsertReturn, TestMissingSemicolon) {
+  std::string wgsl_code =
+      R"(fn clamp_0acf8f() {
+          var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>())
+        }
+        [[stage(vertex)]]
+        fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+          clamp_0acf8f()
+          var foo_1: i32 = 3
+          return vec4<f32>()
+        }
+        [[stage(fragment)]]
+        fn fragment_main() {
+          clamp_0acf8f();
+        }
+        [[stage(compute), workgroup_size(1)]]
+        fn compute_main() {
+          var<private> foo: f32 = 0.0;
+          var foo_2: i32 = 10;
+          clamp_0acf8f();
+        }
+        fn vert_main() -> [[builtin(position)]] vec4<f32> {
+          clamp_0acf8f()
+          var foo_1: i32 = 3
+          return vec4<f32>()
+        }
+        foo_1 = 5 + 7;
+        var foo_3 : i32 = -20;)";
+
+  RandomGenerator generator(0);
+  InsertReturnStatement(wgsl_code, generator);
+
+  // No semicolons found in the function's body, so wgsl_code
+  // should remain unchanged.
+  std::string expected_wgsl_code =
+      R"(fn clamp_0acf8f() {
+          var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>())
+        }
+        [[stage(vertex)]]
+        fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+          clamp_0acf8f()
+          var foo_1: i32 = 3
+          return vec4<f32>()
+        }
+        [[stage(fragment)]]
+        fn fragment_main() {
+          clamp_0acf8f();
+        }
+        [[stage(compute), workgroup_size(1)]]
+        fn compute_main() {
+          var<private> foo: f32 = 0.0;
+          var foo_2: i32 = 10;
+          clamp_0acf8f();
+        }
+        fn vert_main() -> [[builtin(position)]] vec4<f32> {
+          clamp_0acf8f()
+          var foo_1: i32 = 3
+          return vec4<f32>()
+        }
+        foo_1 = 5 + 7;
+        var foo_3 : i32 = -20;)";
+  ASSERT_EQ(expected_wgsl_code, wgsl_code);
 }
 
 }  // namespace

@@ -89,6 +89,89 @@ std::vector<std::pair<size_t, size_t>> GetIntLiterals(const std::string& s) {
   return result;
 }
 
+size_t FindClosingBrace(size_t opening_bracket_pos,
+                        const std::string& wgsl_code) {
+  size_t open_bracket_count = 1;
+  size_t pos = opening_bracket_pos + 1;
+  while (open_bracket_count >= 1 && pos < wgsl_code.size()) {
+    if (wgsl_code[pos] == '{') {
+      ++open_bracket_count;
+    } else if (wgsl_code[pos] == '}') {
+      --open_bracket_count;
+    }
+    ++pos;
+  }
+  return (pos == wgsl_code.size() && open_bracket_count >= 1) ? 0 : pos - 1;
+}
+
+std::vector<size_t> GetFunctionBodyPositions(const std::string& wgsl_code) {
+  // Finds all the functions with a non-void return value.
+  std::regex function_regex("fn.*?->.*?\\{");
+  std::smatch match;
+  std::vector<size_t> result;
+
+  auto search_start(wgsl_code.cbegin());
+  std::string prefix = "";
+
+  while (std::regex_search(search_start, wgsl_code.cend(), match,
+                           function_regex)) {
+    result.push_back(
+        static_cast<size_t>(match.suffix().first - wgsl_code.cbegin() - 1L));
+    search_start = match.suffix().first;
+  }
+  return result;
+}
+
+bool InsertReturnStatement(std::string& wgsl_code, RandomGenerator& generator) {
+  std::vector<size_t> function_body_positions =
+      GetFunctionBodyPositions(wgsl_code);
+
+  // No function was found in wgsl_code.
+  if (function_body_positions.empty()) {
+    return false;
+  }
+
+  // Pick a random function's opening bracket, find the corresponding closing
+  // bracket, and find a semi-colon within the function body.
+  size_t left_bracket_pos = generator.GetRandomElement(function_body_positions);
+
+  size_t right_bracket_pos = FindClosingBrace(left_bracket_pos, wgsl_code);
+
+  if (right_bracket_pos == 0) {
+    return false;
+  }
+
+  std::vector<size_t> semicolon_positions;
+  for (size_t pos = wgsl_code.find(";", left_bracket_pos + 1);
+       pos < right_bracket_pos; pos = wgsl_code.find(";", pos + 1)) {
+    semicolon_positions.push_back(pos);
+  }
+
+  if (semicolon_positions.empty()) {
+    return false;
+  }
+
+  size_t semicolon_position = generator.GetRandomElement(semicolon_positions);
+
+  // Get all identifiers and integer literals to use as potential return values.
+  std::vector<std::pair<size_t, size_t>> identifiers =
+      GetIdentifiers(wgsl_code);
+  auto return_values = identifiers;
+  std::vector<std::pair<size_t, size_t>> int_literals =
+      GetIntLiterals(wgsl_code);
+  return_values.insert(return_values.end(), int_literals.begin(),
+                       int_literals.end());
+  std::pair<size_t, size_t> return_value =
+      generator.GetRandomElement(return_values);
+  std::string return_statement =
+      "return " + wgsl_code.substr(return_value.first, return_value.second) +
+      ";";
+
+  // Insert the return statement immediately after the semicolon.
+  wgsl_code.insert(semicolon_position + 1, return_statement);
+  return true;
+}
+
 void SwapIntervals(size_t idx1,
                    size_t reg1_len,
                    size_t idx2,
@@ -140,7 +223,7 @@ bool SwapRandomIntervals(const std::string& delimiter,
   std::vector<size_t> delimiter_positions =
       FindDelimiterIndices(delimiter, wgsl_code);
 
-  // Need to have at least 3 indices
+  // Need to have at least 3 indices.
   if (delimiter_positions.size() < 3) {
     return false;
   }
@@ -174,7 +257,7 @@ bool DeleteRandomInterval(const std::string& delimiter,
   std::vector<size_t> delimiter_positions =
       FindDelimiterIndices(delimiter, wgsl_code);
 
-  // Need to have at least 2 indices
+  // Need to have at least 2 indices.
   if (delimiter_positions.size() < 2) {
     return false;
   }

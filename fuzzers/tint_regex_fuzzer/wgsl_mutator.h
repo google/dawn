@@ -49,6 +49,24 @@ std::vector<std::pair<size_t, size_t>> GetIdentifiers(
 std::vector<std::pair<size_t, size_t>> GetIntLiterals(
     const std::string& wgsl_code);
 
+/// Finds a possible closing brace corresponding to the opening
+/// brace at position opening_bracket_pos.
+/// @param opening_bracket_pos - the position of the opening brace.
+/// @param wgsl_code - the WGSL-like string where the closing brace.
+/// @return the position of the closing bracket or 0 if there is no closing
+/// brace.
+size_t FindClosingBrace(size_t opening_bracket_pos,
+                        const std::string& wgsl_code);
+
+/// Returns the starting_position of the bodies of the functions
+/// that follow the regular expression: fn.*?->.*?\\{, which searches for the
+/// keyword fn followed by the function name, its return type and opening brace.
+/// @param wgsl_code - the WGSL-like string where the functions will be
+/// searched.
+/// @return a vector with the starting position of the function bodies in
+/// wgsl_code.
+std::vector<size_t> GetFunctionBodyPositions(const std::string& wgsl_code);
+
 /// Given 4 indices, idx1, idx2, idx3 and idx4 it swaps the regions
 /// in the interval (idx1, idx2] with the region in the interval (idx3, idx4]
 /// in wgsl_text.
@@ -154,6 +172,13 @@ bool ReplaceRandomIdentifier(std::string& wgsl_code,
 bool ReplaceRandomIntLiteral(std::string& wgsl_code,
                              RandomGenerator& generator);
 
+/// Inserts a return statement in a randomly chosen function of a
+/// WGSL-like string. The return value is a randomly-chosen identifier
+/// or literal in the string.
+/// @param wgsl_code - WGSL-like string that will be mutated.
+/// @param generator - the random number generator.
+/// @return true if the mutation was succesful or false otherwise.
+bool InsertReturnStatement(std::string& wgsl_code, RandomGenerator& generator);
 }  // namespace regex_fuzzer
 }  // namespace fuzzers
 }  // namespace tint

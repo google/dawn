@@ -83,6 +83,14 @@ class RandomGenerator {
   /// @param size - number of elements in |data|, must be > 0
   static uint64_t CalculateSeed(const uint8_t* data, size_t size);
 
+  /// Returns a randomly-chosen element from vector v.
+  /// @param v - the vector from which the random element will be selected.
+  /// @return a random element of vector v.
+  template <typename T>
+  inline T GetRandomElement(const std::vector<T>& v) {
+    return v[GetUInt64(0, v.size() - 1)];
+  }
+
  private:
   std::mt19937 engine_;
 
