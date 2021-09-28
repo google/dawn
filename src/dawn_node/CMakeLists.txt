@@ -55,4 +55,5 @@ function(idlgen)
     )
 endfunction()
 
+add_subdirectory(binding)
 add_subdirectory(interop)
