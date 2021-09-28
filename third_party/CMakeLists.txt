@@ -12,13 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Don't build testing in third_party dependencies
+set(BUILD_TESTING OFF)
+
 if (DAWN_REQUIRES_SPIRV_CROSS AND NOT TARGET spirv-cross)
     set(SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS ON CACHE BOOL "" FORCE)
     set(SPIRV_CROSS_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
     set(SPIRV_CROSS_SKIP_INSTALL ON CACHE BOOL "" FORCE)
 
     message(STATUS "Dawn: using spirv-cross at ${DAWN_SPIRV_CROSS_DIR}")
-    add_subdirectory(${DAWN_SPIRV_CROSS_DIR} "${CMAKE_BINARY_DIR}/third_party/spirv-cross")
+    add_subdirectory(${DAWN_SPIRV_CROSS_DIR} "${CMAKE_CURRENT_BINARY_DIR}/spirv-cross")
 endif()
 
 if (NOT TARGET SPIRV-Headers)
@@ -26,7 +29,7 @@ if (NOT TARGET SPIRV-Headers)
     set(SPIRV_HEADERS_SKIP_INSTALL ON CACHE BOOL "" FORCE)
 
     message(STATUS "Dawn: using SPIRV-Headers at ${DAWN_SPIRV_HEADERS_DIR}")
-    add_subdirectory(${DAWN_SPIRV_HEADERS_DIR} "${CMAKE_BINARY_DIR}/third_party/spirv-headers")
+    add_subdirectory(${DAWN_SPIRV_HEADERS_DIR} "${CMAKE_CURRENT_BINARY_DIR}/spirv-headers")
 endif()
 
 if (NOT TARGET SPIRV-Tools)
@@ -35,7 +38,7 @@ if (NOT TARGET SPIRV-Tools)
     set(SKIP_SPIRV_TOOLS_INSTALL ON CACHE BOOL "" FORCE)
 
     message(STATUS "Dawn: using SPIRV-Tools at ${DAWN_SPIRV_TOOLS_DIR}")
-    add_subdirectory(${DAWN_SPIRV_TOOLS_DIR} "${CMAKE_BINARY_DIR}/third_party/spirv-tools")
+    add_subdirectory(${DAWN_SPIRV_TOOLS_DIR} "${CMAKE_CURRENT_BINARY_DIR}/spirv-tools")
 endif()
 
 if (NOT TARGET glfw)
@@ -44,24 +47,24 @@ if (NOT TARGET glfw)
     set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
     message(STATUS "Dawn: using GLFW at ${DAWN_GLFW_DIR}")
-    add_subdirectory(${DAWN_GLFW_DIR} "${CMAKE_BINARY_DIR}/third_party/glfw")
+    add_subdirectory(${DAWN_GLFW_DIR} "${CMAKE_CURRENT_BINARY_DIR}/glfw")
 endif()
 
 if (DAWN_BUILD_EXAMPLES)
     if (NOT TARGET glm)
         message(STATUS "Dawn: using GLM at ${DAWN_GLM_DIR}")
-        add_subdirectory(${DAWN_GLM_DIR} "${CMAKE_BINARY_DIR}/third_party/glm")
+        add_subdirectory(${DAWN_GLM_DIR} "${CMAKE_CURRENT_BINARY_DIR}/glm")
     endif()
 endif()
 
 if (NOT TARGET libtint)
     message(STATUS "Dawn: using Tint at ${DAWN_TINT_DIR}")
-    add_subdirectory(${DAWN_TINT_DIR} "${CMAKE_BINARY_DIR}/third_party/tint")
+    add_subdirectory(${DAWN_TINT_DIR} "${CMAKE_CURRENT_BINARY_DIR}/tint")
 endif()
 
 if (NOT TARGET libabsl)
     message(STATUS "Dawn: using Abseil at ${DAWN_ABSEIL_DIR}")
-    add_subdirectory(${DAWN_ABSEIL_DIR} "${CMAKE_BINARY_DIR}/third_party/abseil")
+    add_subdirectory(${DAWN_ABSEIL_DIR} "${CMAKE_CURRENT_BINARY_DIR}/abseil")
 endif()
 
 # Header-only library for khrplatform.h
