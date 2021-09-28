@@ -41,6 +41,7 @@ add_library(dawn_node_binding STATIC
     "GPURenderBundle.cpp"
     "GPURenderBundle.h"
     "GPURenderBundleEncoder.h"
+    "GPURenderPassEncoder.cpp"
     "GPURenderPassEncoder.h"
     "GPURenderPipeline.cpp"
     "GPURenderPipeline.h"
