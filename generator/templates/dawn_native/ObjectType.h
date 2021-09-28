@@ -17,6 +17,8 @@
 
 #include "common/ityp_array.h"
 
+#include <cstdint>
+
 namespace dawn_native {
 
     enum class ObjectType : uint32_t {
