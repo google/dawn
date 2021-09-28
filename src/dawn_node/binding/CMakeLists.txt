@@ -27,6 +27,7 @@ add_library(dawn_node_binding STATIC
     "GPUBindGroup.h"
     "GPUBindGroupLayout.cpp"
     "GPUBindGroupLayout.h"
+    "GPUBuffer.cpp"
     "GPUBuffer.h"
     "GPUCommandBuffer.cpp"
     "GPUCommandBuffer.h"
