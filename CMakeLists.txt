@@ -115,6 +115,9 @@ option_if_not_defined(DAWN_ALWAYS_ASSERT "Enable assertions on all build types" 
 option_if_not_defined(DAWN_USE_X11 "Enable support for X11 surface" ${USE_X11})
 
 option_if_not_defined(DAWN_BUILD_EXAMPLES "Enables building Dawn's exmaples" ${BUILD_EXAMPLE})
+option_if_not_defined(DAWN_BUILD_NODE_BINDINGS "Enables building Dawn's NodeJS bindings" OFF)
+
+option_if_not_defined(DAWN_ENABLE_PIC "Build with Position-Independent-Code enabled" OFF)
 
 set_if_not_defined(DAWN_THIRD_PARTY_DIR "${Dawn_SOURCE_DIR}/third_party" "Directory in which to find third-party dependencies.")
 
@@ -130,6 +133,11 @@ set_if_not_defined(DAWN_SPIRV_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-deps/s
 set_if_not_defined(DAWN_SPIRV_TOOLS_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-deps/spirv-tools/src" "Directory in which to find SPIRV-Tools")
 set_if_not_defined(DAWN_TINT_DIR "${DAWN_THIRD_PARTY_DIR}/tint" "Directory in which to find Tint")
 
+# Dependencies for DAWN_BUILD_NODE_BINDINGS
+set_if_not_defined(NODE_ADDON_API_DIR "${DAWN_THIRD_PARTY_DIR}/node-addon-api" "Directory in which to find node-addon-api")
+set_if_not_defined(NODE_API_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/node-api-headers/include" "Directory in which to find node-api-headers")
+set_if_not_defined(WEBGPU_IDL_PATH "${DAWN_THIRD_PARTY_DIR}/gpuweb/webgpu.idl" "Path to the webgpu.idl definition file")
+
 # Much of the backend code is shared among desktop OpenGL and OpenGL ES
 if (${DAWN_ENABLE_DESKTOP_GL} OR ${DAWN_ENABLE_OPENGLES})
     set(DAWN_ENABLE_OPENGL ON)
@@ -139,6 +147,10 @@ endif()
 set(DAWN_REQUIRES_SPIRV_CROSS OFF)
 if (DAWN_ENABLE_OPENGL)
     set(DAWN_REQUIRES_SPIRV_CROSS ON)
+endif()
+
+if(DAWN_ENABLE_PIC)
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
 ################################################################################
@@ -212,4 +224,26 @@ if (DAWN_BUILD_EXAMPLES)
     #TODO(dawn:269): Add this once implementation-based swapchains are removed.
     #add_subdirectory(src/utils)
     add_subdirectory(examples)
+endif()
+
+if (DAWN_BUILD_NODE_BINDINGS)
+    set(NODE_BINDING_DEPS
+        ${NODE_ADDON_API_DIR}
+        ${NODE_API_HEADERS_DIR}
+        ${WEBGPU_IDL_PATH}
+    )
+    foreach(DEP ${NODE_BINDING_DEPS})
+        if (NOT EXISTS ${DEP})
+            message(FATAL_ERROR
+                "DAWN_BUILD_NODE_BINDINGS requires missing dependency '${DEP}'\n"
+                "Try running:\n"
+                "gclient sync --gclientfile=scripts/standalone-with-node.gclient"
+            )
+        endif()
+    endforeach()
+    if (NOT CMAKE_POSITION_INDEPENDENT_CODE)
+        message(FATAL_ERROR "DAWN_BUILD_NODE_BINDINGS requires building with DAWN_ENABLE_PIC")
+    endif()
+
+    add_subdirectory(src/dawn_node)
 endif()
