@@ -209,7 +209,7 @@ namespace dawn_native {
             }
         };
 
-        mDeviceLostCallback = [](char const*, void*) {
+        mDeviceLostCallback = [](WGPUDeviceLostReason, char const*, void*) {
             static bool calledOnce = false;
             if (!calledOnce) {
                 calledOnce = true;
@@ -365,7 +365,9 @@ namespace dawn_native {
         if (type == InternalErrorType::DeviceLost) {
             // The device was lost, call the application callback.
             if (mDeviceLostCallback != nullptr) {
-                mDeviceLostCallback(message, mDeviceLostUserdata);
+                // TODO(crbug.com/dawn/628): Make sure the "Destroyed" reason is passed if
+                // the device was destroyed.
+                mDeviceLostCallback(WGPUDeviceLostReason_Undefined, message, mDeviceLostUserdata);
                 mDeviceLostCallback = nullptr;
             }
 

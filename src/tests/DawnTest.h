@@ -492,7 +492,7 @@ class DawnTestBase {
 
     // Tracking for validation errors
     static void OnDeviceError(WGPUErrorType type, const char* message, void* userdata);
-    static void OnDeviceLost(const char* message, void* userdata);
+    static void OnDeviceLost(WGPUDeviceLostReason reason, const char* message, void* userdata);
     bool mExpectError = false;
     bool mError = false;
 

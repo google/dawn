@@ -138,7 +138,8 @@ namespace dawn_wire { namespace client {
         {
             for (LinkNode<ObjectBase>* device = deviceList.head(); device != deviceList.end();
                  device = device->next()) {
-                static_cast<Device*>(device->value())->HandleDeviceLost("GPU connection lost");
+                static_cast<Device*>(device->value())
+                    ->HandleDeviceLost(WGPUDeviceLostReason_Undefined, "GPU connection lost");
             }
         }
         for (auto& objectList : mObjects) {

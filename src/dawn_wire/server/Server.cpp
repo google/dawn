@@ -144,9 +144,9 @@ namespace dawn_wire { namespace server {
             data->info.get());
         mProcs.deviceSetDeviceLostCallback(
             device,
-            [](const char* message, void* userdata) {
+            [](WGPUDeviceLostReason reason, const char* message, void* userdata) {
                 DeviceInfo* info = static_cast<DeviceInfo*>(userdata);
-                info->server->OnDeviceLost(info->self, message);
+                info->server->OnDeviceLost(info->self, reason, message);
             },
             data->info.get());
 

@@ -1010,7 +1010,7 @@ void DawnTestBase::OnDeviceError(WGPUErrorType type, const char* message, void* 
     self->mError = true;
 }
 
-void DawnTestBase::OnDeviceLost(const char* message, void* userdata) {
+void DawnTestBase::OnDeviceLost(WGPUDeviceLostReason reason, const char* message, void* userdata) {
     // Using ADD_FAILURE + ASSERT instead of FAIL to prevent the current test from continuing with a
     // corrupt state.
     ADD_FAILURE() << "Device Lost during test: " << message;

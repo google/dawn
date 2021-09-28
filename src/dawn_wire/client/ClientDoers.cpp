@@ -52,12 +52,14 @@ namespace dawn_wire { namespace client {
         return true;
     }
 
-    bool Client::DoDeviceLostCallback(Device* device, char const* message) {
+    bool Client::DoDeviceLostCallback(Device* device,
+                                      WGPUDeviceLostReason reason,
+                                      char const* message) {
         if (device == nullptr) {
             // The device might have been deleted or recreated so this isn't an error.
             return true;
         }
-        device->HandleDeviceLost(message);
+        device->HandleDeviceLost(reason, message);
         return true;
     }
 

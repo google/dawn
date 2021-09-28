@@ -25,12 +25,14 @@ using namespace testing;
 
 class MockDeviceLostCallback {
   public:
-    MOCK_METHOD(void, Call, (const char* message, void* userdata));
+    MOCK_METHOD(void, Call, (WGPUDeviceLostReason reason, const char* message, void* userdata));
 };
 
 static std::unique_ptr<MockDeviceLostCallback> mockDeviceLostCallback;
-static void ToMockDeviceLostCallback(const char* message, void* userdata) {
-    mockDeviceLostCallback->Call(message, userdata);
+static void ToMockDeviceLostCallback(WGPUDeviceLostReason reason,
+                                     const char* message,
+                                     void* userdata) {
+    mockDeviceLostCallback->Call(reason, message, userdata);
     DawnTestBase* self = static_cast<DawnTestBase*>(userdata);
     self->StartExpectDeviceError();
 }
@@ -67,7 +69,8 @@ class DeviceLostTest : public DawnTest {
     }
 
     void LoseForTesting() {
-        EXPECT_CALL(*mockDeviceLostCallback, Call(_, this)).Times(1);
+        EXPECT_CALL(*mockDeviceLostCallback, Call(WGPUDeviceLostReason_Undefined, _, this))
+            .Times(1);
         device.LoseForTesting();
     }
 
@@ -427,13 +430,13 @@ TEST_P(DeviceLostTest, QueueOnSubmittedWorkDoneBeforeLossFails) {
 // Test that LostForTesting can only be called on one time
 TEST_P(DeviceLostTest, LoseForTestingOnce) {
     // First LoseForTesting call should occur normally. The callback is already set in SetUp.
-    EXPECT_CALL(*mockDeviceLostCallback, Call(_, this)).Times(1);
+    EXPECT_CALL(*mockDeviceLostCallback, Call(WGPUDeviceLostReason_Undefined, _, this)).Times(1);
     device.LoseForTesting();
 
     // Second LoseForTesting call should result in no callbacks. The LoseForTesting will return
     // without doing anything when it sees that device has already been lost.
     device.SetDeviceLostCallback(ToMockDeviceLostCallback, this);
-    EXPECT_CALL(*mockDeviceLostCallback, Call(_, this)).Times(0);
+    EXPECT_CALL(*mockDeviceLostCallback, Call(_, _, this)).Times(0);
     device.LoseForTesting();
 }
 

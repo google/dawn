@@ -59,9 +59,12 @@ namespace dawn_wire { namespace server {
         SerializeCommand(cmd);
     }
 
-    void Server::OnDeviceLost(ObjectHandle device, const char* message) {
+    void Server::OnDeviceLost(ObjectHandle device,
+                              WGPUDeviceLostReason reason,
+                              const char* message) {
         ReturnDeviceLostCallbackCmd cmd;
         cmd.device = device;
+        cmd.reason = reason;
         cmd.message = message;
 
         SerializeCommand(cmd);

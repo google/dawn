@@ -319,7 +319,9 @@ TEST_P(SwapChainValidationTests, SwapChainIsInvalidAfterSurfaceDestruction_After
 }
 
 // Test that after Device is Lost, all swap chain operations fail
-static void ToMockDeviceLostCallback(const char* message, void* userdata) {
+static void ToMockDeviceLostCallback(WGPUDeviceLostReason reason,
+                                     const char* message,
+                                     void* userdata) {
     DawnTest* self = static_cast<DawnTest*>(userdata);
     self->StartExpectDeviceError();
 }

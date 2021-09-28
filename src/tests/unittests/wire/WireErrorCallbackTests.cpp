@@ -56,12 +56,14 @@ namespace {
 
     class MockDeviceLostCallback {
       public:
-        MOCK_METHOD(void, Call, (const char* message, void* userdata));
+        MOCK_METHOD(void, Call, (WGPUDeviceLostReason reason, const char* message, void* userdata));
     };
 
     std::unique_ptr<StrictMock<MockDeviceLostCallback>> mockDeviceLostCallback;
-    void ToMockDeviceLostCallback(const char* message, void* userdata) {
-        mockDeviceLostCallback->Call(message, userdata);
+    void ToMockDeviceLostCallback(WGPUDeviceLostReason reason,
+                                  const char* message,
+                                  void* userdata) {
+        mockDeviceLostCallback->Call(reason, message, userdata);
     }
 
 }  // anonymous namespace
@@ -319,9 +321,12 @@ TEST_F(WireErrorCallbackTests, DeviceLostCallback) {
 
     // Calling the callback on the server side will result in the callback being called on the
     // client side
-    api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, "Some error message");
+    api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Undefined,
+                                                "Some error message");
 
-    EXPECT_CALL(*mockDeviceLostCallback, Call(StrEq("Some error message"), this)).Times(1);
+    EXPECT_CALL(*mockDeviceLostCallback,
+                Call(WGPUDeviceLostReason_Undefined, StrEq("Some error message"), this))
+        .Times(1);
 
     FlushServer();
 }

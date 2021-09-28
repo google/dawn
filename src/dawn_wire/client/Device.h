@@ -53,7 +53,7 @@ namespace dawn_wire { namespace client {
 
         void HandleError(WGPUErrorType errorType, const char* message);
         void HandleLogging(WGPULoggingType loggingType, const char* message);
-        void HandleDeviceLost(const char* message);
+        void HandleDeviceLost(WGPUDeviceLostReason reason, const char* message);
         bool OnPopErrorScopeCallback(uint64_t requestSerial,
                                      WGPUErrorType type,
                                      const char* message);

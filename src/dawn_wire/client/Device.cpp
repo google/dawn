@@ -35,7 +35,7 @@ namespace dawn_wire { namespace client {
             }
         };
 
-        mDeviceLostCallback = [](char const*, void*) {
+        mDeviceLostCallback = [](WGPUDeviceLostReason, char const*, void*) {
             static bool calledOnce = false;
             if (!calledOnce) {
                 calledOnce = true;
@@ -80,10 +80,10 @@ namespace dawn_wire { namespace client {
         }
     }
 
-    void Device::HandleDeviceLost(const char* message) {
+    void Device::HandleDeviceLost(WGPUDeviceLostReason reason, const char* message) {
         if (mDeviceLostCallback && !mDidRunLostCallback) {
             mDidRunLostCallback = true;
-            mDeviceLostCallback(message, mDeviceLostUserdata);
+            mDeviceLostCallback(reason, message, mDeviceLostUserdata);
         }
     }
 
