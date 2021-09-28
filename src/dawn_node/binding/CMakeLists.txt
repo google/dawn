@@ -37,6 +37,7 @@ add_library(dawn_node_binding STATIC
     "GPUPipelineLayout.h"
     "GPUQuerySet.cpp"
     "GPUQuerySet.h"
+    "GPUQueue.cpp"
     "GPUQueue.h"
     "GPURenderBundle.cpp"
     "GPURenderBundle.h"
