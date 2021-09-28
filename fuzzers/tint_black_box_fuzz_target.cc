@@ -97,7 +97,11 @@ int main(int argc, const char** argv) {
   if (target_format == "hlsl") {
     tint::fuzzers::CommonFuzzer fuzzer(tint::fuzzers::InputFormat::kWGSL,
                                        tint::fuzzers::OutputFormat::kHLSL);
-    return fuzzer.Run(data.data(), data.size());
+    int result = fuzzer.Run(data.data(), data.size());
+    assert(false &&
+           "Deliberate temporary assertion failure to check that ClusterFuzz "
+           "black box fuzzer target is working.");
+    return result;
   } else if (target_format == "msl") {
     tint::fuzzers::DataBuilder builder(data.data(), data.size());
     tint::writer::msl::Options options;
