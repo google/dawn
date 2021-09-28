@@ -34,6 +34,43 @@ class DeprecationTests : public DawnTest {
     }
 };
 
+// Test that using size=0 to indicate default size in setVertexBuffer and setIndexBuffer is
+// deprecated.
+TEST_P(DeprecationTests, SetBufferWithZeroSizeAsDefault) {
+    wgpu::BufferDescriptor bufferDesc;
+    bufferDesc.size = 128;
+    bufferDesc.usage = wgpu::BufferUsage::Index | wgpu::BufferUsage::Vertex;
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass;
+
+    {
+        // Control case, use wgpu::kWholeSize to indicate default size.
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 0, wgpu::kWholeSize);
+        pass.SetVertexBuffer(0, buffer, 0, wgpu::kWholeSize);
+        pass.EndPass();
+    }
+
+    {
+        // Control case, omitting size parameter to indicate default size.
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 0);
+        pass.SetVertexBuffer(0, buffer, 0);
+        pass.EndPass();
+    }
+
+    {
+        // Error case, use 0 to indicate default size will cause deprecated warning.
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        EXPECT_DEPRECATION_WARNING(pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32, 0, 0));
+        EXPECT_DEPRECATION_WARNING(pass.SetVertexBuffer(0, buffer, 0, 0));
+        pass.EndPass();
+    }
+}
+
 DAWN_INSTANTIATE_TEST(DeprecationTests,
                       D3D12Backend(),
                       MetalBackend(),

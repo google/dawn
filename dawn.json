@@ -1533,7 +1533,7 @@
                     {"name": "slot", "type": "uint32_t"},
                     {"name": "buffer", "type": "buffer"},
                     {"name": "offset", "type": "uint64_t", "default": "0"},
-                    {"name": "size", "type": "uint64_t", "default": "0"}
+                    {"name": "size", "type": "uint64_t", "default": "WGPU_WHOLE_SIZE"}
                 ]
             },
             {
@@ -1542,7 +1542,7 @@
                     {"name": "buffer", "type": "buffer"},
                     {"name": "format", "type": "index format"},
                     {"name": "offset", "type": "uint64_t", "default": "0"},
-                    {"name": "size", "type": "uint64_t", "default": "0"}
+                    {"name": "size", "type": "uint64_t", "default": "WGPU_WHOLE_SIZE"}
                 ]
             },
             {
@@ -1724,7 +1724,7 @@
                     {"name": "slot", "type": "uint32_t"},
                     {"name": "buffer", "type": "buffer"},
                     {"name": "offset", "type": "uint64_t", "default": "0"},
-                    {"name": "size", "type": "uint64_t", "default": "0"}
+                    {"name": "size", "type": "uint64_t", "default": "WGPU_WHOLE_SIZE"}
                 ]
             },
             {
@@ -1733,7 +1733,7 @@
                     {"name": "buffer", "type": "buffer"},
                     {"name": "format", "type": "index format"},
                     {"name": "offset", "type": "uint64_t", "default": "0"},
-                    {"name": "size", "type": "uint64_t", "default": "0"}
+                    {"name": "size", "type": "uint64_t", "default": "WGPU_WHOLE_SIZE"}
                 ]
             },
             {

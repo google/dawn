@@ -28,9 +28,9 @@ namespace {
         // Parameters for testing index buffer
         struct IndexBufferParams {
             wgpu::IndexFormat indexFormat;
-            uint32_t indexBufferSize;              // Size for creating index buffer
-            uint32_t indexBufferOffsetForEncoder;  // Offset for SetIndexBuffer in encoder
-            uint32_t indexBufferSizeForEncoder;    // Size for SetIndexBuffer in encoder
+            uint64_t indexBufferSize;              // Size for creating index buffer
+            uint64_t indexBufferOffsetForEncoder;  // Offset for SetIndexBuffer in encoder
+            uint64_t indexBufferSizeForEncoder;    // Size for SetIndexBuffer in encoder
             uint32_t maxValidIndexNumber;  // max number of {indexCount + firstIndex} for this set
                                            // of parameters
         };
@@ -38,9 +38,9 @@ namespace {
         // Parameters for testing vertex-step-mode and instance-step-mode vertex buffer
         struct VertexBufferParams {
             uint32_t bufferStride;
-            uint32_t bufferSize;              // Size for creating vertex buffer
-            uint32_t bufferOffsetForEncoder;  // Offset for SetVertexBuffer in encoder
-            uint32_t bufferSizeForEncoder;    // Size for SetVertexBuffer in encoder
+            uint64_t bufferSize;              // Size for creating vertex buffer
+            uint64_t bufferOffsetForEncoder;  // Offset for SetVertexBuffer in encoder
+            uint64_t bufferSizeForEncoder;    // Size for SetVertexBuffer in encoder
             uint32_t maxValidAccessNumber;    // max number of valid access time for this set of
                                               // parameters, i.e. {vertexCount + firstVertex} for
             // vertex-step-mode, and {instanceCount + firstInstance}
@@ -52,7 +52,7 @@ namespace {
             const wgpu::Buffer buffer;
             wgpu::IndexFormat indexFormat;
             uint64_t offset = 0;
-            uint64_t size = 0;
+            uint64_t size = wgpu::kWholeSize;
         };
 
         // Parameters for setVertexBuffer
@@ -60,7 +60,7 @@ namespace {
             uint32_t slot;
             const wgpu::Buffer buffer;
             uint64_t offset = 0;
-            uint64_t size = 0;
+            uint64_t size = wgpu::kWholeSize;
         };
         using VertexBufferList = std::vector<VertexBufferSpec>;
 
@@ -273,14 +273,16 @@ namespace {
         // Parameters list for index buffer. Should cover all IndexFormat, and the zero/non-zero
         // offset and size case in SetIndexBuffer
         const std::vector<IndexBufferParams> kIndexParamsList = {
-            {wgpu::IndexFormat::Uint32, 12 * sizeof(uint32_t), 0, 0, 12},
-            {wgpu::IndexFormat::Uint32, 13 * sizeof(uint32_t), sizeof(uint32_t), 0, 12},
+            {wgpu::IndexFormat::Uint32, 12 * sizeof(uint32_t), 0, wgpu::kWholeSize, 12},
+            {wgpu::IndexFormat::Uint32, 13 * sizeof(uint32_t), sizeof(uint32_t), wgpu::kWholeSize,
+             12},
             {wgpu::IndexFormat::Uint32, 13 * sizeof(uint32_t), 0, 12 * sizeof(uint32_t), 12},
             {wgpu::IndexFormat::Uint32, 14 * sizeof(uint32_t), sizeof(uint32_t),
              12 * sizeof(uint32_t), 12},
 
-            {wgpu::IndexFormat::Uint16, 12 * sizeof(uint16_t), 0, 0, 12},
-            {wgpu::IndexFormat::Uint16, 13 * sizeof(uint16_t), sizeof(uint16_t), 0, 12},
+            {wgpu::IndexFormat::Uint16, 12 * sizeof(uint16_t), 0, wgpu::kWholeSize, 12},
+            {wgpu::IndexFormat::Uint16, 13 * sizeof(uint16_t), sizeof(uint16_t), wgpu::kWholeSize,
+             12},
             {wgpu::IndexFormat::Uint16, 13 * sizeof(uint16_t), 0, 12 * sizeof(uint16_t), 12},
             {wgpu::IndexFormat::Uint16, 14 * sizeof(uint16_t), sizeof(uint16_t),
              12 * sizeof(uint16_t), 12},
@@ -289,18 +291,19 @@ namespace {
         // stride, buffer size, SetVertexBuffer size and offset.
         const std::vector<VertexBufferParams> kVertexParamsList = {
             // For stride = kFloat32x4Stride
-            {kFloat32x4Stride, 3 * kFloat32x4Stride, 0, 0, 3},
+            {kFloat32x4Stride, 3 * kFloat32x4Stride, 0, wgpu::kWholeSize, 3},
             // Non-zero offset
-            {kFloat32x4Stride, 4 * kFloat32x4Stride, kFloat32x4Stride, 0, 3},
-            // Non-zero size
+            {kFloat32x4Stride, 4 * kFloat32x4Stride, kFloat32x4Stride, wgpu::kWholeSize, 3},
+            // Non-default size
             {kFloat32x4Stride, 4 * kFloat32x4Stride, 0, 3 * kFloat32x4Stride, 3},
             // Non-zero offset and size
             {kFloat32x4Stride, 5 * kFloat32x4Stride, kFloat32x4Stride, 3 * kFloat32x4Stride, 3},
             // For stride = 2 * kFloat32x4Stride
-            {(2 * kFloat32x4Stride), 3 * (2 * kFloat32x4Stride), 0, 0, 3},
+            {(2 * kFloat32x4Stride), 3 * (2 * kFloat32x4Stride), 0, wgpu::kWholeSize, 3},
             // Non-zero offset
-            {(2 * kFloat32x4Stride), 4 * (2 * kFloat32x4Stride), (2 * kFloat32x4Stride), 0, 3},
-            // Non-zero size
+            {(2 * kFloat32x4Stride), 4 * (2 * kFloat32x4Stride), (2 * kFloat32x4Stride),
+             wgpu::kWholeSize, 3},
+            // Non-default size
             {(2 * kFloat32x4Stride), 4 * (2 * kFloat32x4Stride), 0, 3 * (2 * kFloat32x4Stride), 3},
             // Non-zero offset and size
             {(2 * kFloat32x4Stride), 5 * (2 * kFloat32x4Stride), (2 * kFloat32x4Stride),
@@ -309,18 +312,19 @@ namespace {
         // Parameters list for instance-step-mode buffer.
         const std::vector<VertexBufferParams> kInstanceParamsList = {
             // For stride = kFloat32x2Stride
-            {kFloat32x2Stride, 5 * kFloat32x2Stride, 0, 0, 5},
+            {kFloat32x2Stride, 5 * kFloat32x2Stride, 0, wgpu::kWholeSize, 5},
             // Non-zero offset
-            {kFloat32x2Stride, 6 * kFloat32x2Stride, kFloat32x2Stride, 0, 5},
-            // Non-zero size
+            {kFloat32x2Stride, 6 * kFloat32x2Stride, kFloat32x2Stride, wgpu::kWholeSize, 5},
+            // Non-default size
             {kFloat32x2Stride, 6 * kFloat32x2Stride, 0, 5 * kFloat32x2Stride, 5},
             // Non-zero offset and size
             {kFloat32x2Stride, 7 * kFloat32x2Stride, kFloat32x2Stride, 5 * kFloat32x2Stride, 5},
             // For stride = 3 * kFloat32x2Stride
-            {(3 * kFloat32x2Stride), 5 * (3 * kFloat32x2Stride), 0, 0, 5},
+            {(3 * kFloat32x2Stride), 5 * (3 * kFloat32x2Stride), 0, wgpu::kWholeSize, 5},
             // Non-zero offset
-            {(3 * kFloat32x2Stride), 6 * (3 * kFloat32x2Stride), (3 * kFloat32x2Stride), 0, 5},
-            // Non-zero size
+            {(3 * kFloat32x2Stride), 6 * (3 * kFloat32x2Stride), (3 * kFloat32x2Stride),
+             wgpu::kWholeSize, 5},
+            // Non-default size
             {(3 * kFloat32x2Stride), 6 * (3 * kFloat32x2Stride), 0, 5 * (3 * kFloat32x2Stride), 5},
             // Non-zero offset and size
             {(3 * kFloat32x2Stride), 7 * (3 * kFloat32x2Stride), (3 * kFloat32x2Stride),
@@ -338,8 +342,20 @@ namespace {
 
         wgpu::Buffer vertexBuffer = CreateBuffer(3 * kFloat32x4Stride);
 
-        VertexBufferList vertexBufferList = {{0, vertexBuffer, 0, 0}};
-        TestRenderPassDraw(pipeline, vertexBufferList, 3, 1, 0, 0, true);
+        {
+            // Implicit size
+            VertexBufferList vertexBufferList = {{0, vertexBuffer, 0, wgpu::kWholeSize}};
+            TestRenderPassDraw(pipeline, vertexBufferList, 3, 1, 0, 0, true);
+        }
+
+        {
+            // Explicit zero size
+            VertexBufferList vertexBufferList = {{0, vertexBuffer, 0, 0}};
+            // size=0 used as default size is deprecated but still avaliable.
+            // TODO(dawn:1058): Change the expectation when size=0 special case is removed.
+            EXPECT_DEPRECATION_WARNING(
+                TestRenderPassDraw(pipeline, vertexBufferList, 3, 1, 0, 0, true));
+        }
     }
 
     // Verify vertex buffer OOB for non-instanced Draw are caught in command encoder
@@ -419,7 +435,7 @@ namespace {
 
         // Build vertex buffer for 3 vertices
         wgpu::Buffer vertexBuffer = CreateBuffer(3 * kFloat32x4Stride);
-        VertexBufferList vertexBufferList = {{0, vertexBuffer, 0, 0}};
+        VertexBufferList vertexBufferList = {{0, vertexBuffer, 0, wgpu::kWholeSize}};
 
         IndexBufferDesc indexBufferDesc = {indexBuffer, wgpu::IndexFormat::Uint32};
 
@@ -440,8 +456,8 @@ namespace {
             // Build vertex buffer for 5 instances
             wgpu::Buffer instanceBuffer = CreateBuffer(5 * kFloat32x2Stride);
 
-            VertexBufferList vertexBufferList = {{0, vertexBuffer, 0, 0},
-                                                 {1, instanceBuffer, 0, 0}};
+            VertexBufferList vertexBufferList = {{0, vertexBuffer, 0, wgpu::kWholeSize},
+                                                 {1, instanceBuffer, 0, wgpu::kWholeSize}};
 
             IndexBufferDesc indexBufferDesc = {indexBuffer, params.indexFormat,
                                                params.indexBufferOffsetForEncoder,
@@ -528,33 +544,33 @@ namespace {
         // indicate that such buffer parameter will cause OOB.
         const std::vector<VertexBufferParams> kVertexParamsListForZeroStride = {
             // Control case
-            {0, 28, 0, 0, 1},
+            {0, 28, 0, wgpu::kWholeSize, 1},
             // Non-zero offset
-            {0, 28, 4, 0, 0},
-            {0, 28, 28, 0, 0},
-            // Non-zero size
+            {0, 28, 4, wgpu::kWholeSize, 0},
+            {0, 28, 28, wgpu::kWholeSize, 0},
+            // Non-default size
             {0, 28, 0, 28, 1},
             {0, 28, 0, 27, 0},
             // Non-zero offset and size
             {0, 32, 4, 28, 1},
             {0, 31, 4, 27, 0},
-            {0, 31, 4, 0, 0},
+            {0, 31, 4, wgpu::kWholeSize, 0},
         };
 
         const std::vector<VertexBufferParams> kInstanceParamsListForZeroStride = {
             // Control case
-            {0, 20, 0, 0, 1},
+            {0, 20, 0, wgpu::kWholeSize, 1},
             // Non-zero offset
-            {0, 24, 4, 0, 1},
-            {0, 20, 4, 0, 0},
-            {0, 20, 20, 0, 0},
-            // Non-zero size
+            {0, 24, 4, wgpu::kWholeSize, 1},
+            {0, 23, 4, wgpu::kWholeSize, 0},
+            {0, 20, 4, wgpu::kWholeSize, 0},
+            {0, 20, 20, wgpu::kWholeSize, 0},
+            // Non-default size
             {0, 21, 0, 20, 1},
             {0, 20, 0, 19, 0},
             // Non-zero offset and size
             {0, 30, 4, 20, 1},
             {0, 30, 4, 19, 0},
-            {0, 23, 4, 0, 0},
         };
 
         // Build a pipeline that require a vertex step mode vertex buffer no smaller than 28 bytes
@@ -617,10 +633,10 @@ namespace {
             wgpu::RenderPipeline pipeline = CreateBasicRenderPipelineWithInstance();
 
             // Set to vertexBuffer3 and instanceBuffer5 at last
-            VertexBufferList vertexBufferList = {{0, vertexBuffer2, 0, 0},
-                                                 {1, instanceBuffer4, 0, 0},
-                                                 {1, instanceBuffer5, 0, 0},
-                                                 {0, vertexBuffer3, 0, 0}};
+            VertexBufferList vertexBufferList = {{0, vertexBuffer2, 0, wgpu::kWholeSize},
+                                                 {1, instanceBuffer4, 0, wgpu::kWholeSize},
+                                                 {1, instanceBuffer5, 0, wgpu::kWholeSize},
+                                                 {0, vertexBuffer3, 0, wgpu::kWholeSize}};
 
             // For Draw, the max vertexCount is 3 and the max instanceCount is 5
             TestRenderPassDraw(pipeline, vertexBufferList, 3, 5, 0, 0, true);
@@ -633,10 +649,10 @@ namespace {
                                       6, 0, 0, 0, false);
 
             // Set to vertexBuffer2 and instanceBuffer4 at last
-            vertexBufferList = VertexBufferList{{0, vertexBuffer3, 0, 0},
-                                                {1, instanceBuffer5, 0, 0},
-                                                {0, vertexBuffer2, 0, 0},
-                                                {1, instanceBuffer4, 0, 0}};
+            vertexBufferList = VertexBufferList{{0, vertexBuffer3, 0, wgpu::kWholeSize},
+                                                {1, instanceBuffer5, 0, wgpu::kWholeSize},
+                                                {0, vertexBuffer2, 0, wgpu::kWholeSize},
+                                                {1, instanceBuffer4, 0, wgpu::kWholeSize}};
 
             // For Draw, the max vertexCount is 2 and the max instanceCount is 4
             TestRenderPassDraw(pipeline, vertexBufferList, 2, 4, 0, 0, true);
@@ -653,8 +669,6 @@ namespace {
         {
             wgpu::RenderPipeline pipeline = CreateBasicRenderPipeline();
 
-            VertexBufferList vertexBufferList = {{0, vertexBuffer3, 0, 0}};
-
             {
                 wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
                 wgpu::RenderPassEncoder renderPassEncoder =
@@ -665,7 +679,7 @@ namespace {
                 renderPassEncoder.SetIndexBuffer(indexBuffer11, indexFormat);
                 renderPassEncoder.SetIndexBuffer(indexBuffer12, indexFormat);
 
-                renderPassEncoder.SetVertexBuffer(0, vertexBuffer3, 0, 0);
+                renderPassEncoder.SetVertexBuffer(0, vertexBuffer3);
                 // It should be ok to draw 12 index
                 renderPassEncoder.DrawIndexed(12, 1, 0, 0, 0);
                 renderPassEncoder.EndPass();
@@ -684,7 +698,7 @@ namespace {
                 renderPassEncoder.SetIndexBuffer(indexBuffer11, indexFormat);
                 renderPassEncoder.SetIndexBuffer(indexBuffer12, indexFormat);
 
-                renderPassEncoder.SetVertexBuffer(0, vertexBuffer3, 0, 0);
+                renderPassEncoder.SetVertexBuffer(0, vertexBuffer3);
                 // It should be index buffer OOB to draw 13 index
                 renderPassEncoder.DrawIndexed(13, 1, 0, 0, 0);
                 renderPassEncoder.EndPass();
@@ -703,7 +717,7 @@ namespace {
                 renderPassEncoder.SetIndexBuffer(indexBuffer12, indexFormat);
                 renderPassEncoder.SetIndexBuffer(indexBuffer11, indexFormat);
 
-                renderPassEncoder.SetVertexBuffer(0, vertexBuffer3, 0, 0);
+                renderPassEncoder.SetVertexBuffer(0, vertexBuffer3);
                 // It should be ok to draw 11 index
                 renderPassEncoder.DrawIndexed(11, 1, 0, 0, 0);
                 renderPassEncoder.EndPass();
@@ -722,7 +736,7 @@ namespace {
                 renderPassEncoder.SetIndexBuffer(indexBuffer12, indexFormat);
                 renderPassEncoder.SetIndexBuffer(indexBuffer11, indexFormat);
 
-                renderPassEncoder.SetVertexBuffer(0, vertexBuffer3, 0, 0);
+                renderPassEncoder.SetVertexBuffer(0, vertexBuffer3);
                 // It should be index buffer OOB to draw 12 index
                 renderPassEncoder.DrawIndexed(12, 1, 0, 0, 0);
                 renderPassEncoder.EndPass();
