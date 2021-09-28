@@ -65,9 +65,8 @@ namespace dawn_native {
             if (IsValidationEnabled()) {
                 DAWN_TRY(mCommandBufferState.ValidateCanDraw());
 
-                if (mDisableBaseInstance && firstInstance != 0) {
-                    return DAWN_VALIDATION_ERROR("Non-zero first instance not supported");
-                }
+                DAWN_INVALID_IF(mDisableBaseInstance && firstInstance != 0,
+                                "First instance (%u) must be zero.", firstInstance);
 
                 DAWN_TRY(mCommandBufferState.ValidateBufferInRangeForVertexBuffer(vertexCount,
                                                                                   firstVertex));
@@ -94,12 +93,11 @@ namespace dawn_native {
             if (IsValidationEnabled()) {
                 DAWN_TRY(mCommandBufferState.ValidateCanDrawIndexed());
 
-                if (mDisableBaseInstance && firstInstance != 0) {
-                    return DAWN_VALIDATION_ERROR("Non-zero first instance not supported");
-                }
-                if (mDisableBaseVertex && baseVertex != 0) {
-                    return DAWN_VALIDATION_ERROR("Non-zero base vertex not supported");
-                }
+                DAWN_INVALID_IF(mDisableBaseInstance && firstInstance != 0,
+                                "First instance (%u) must be zero.", firstInstance);
+
+                DAWN_INVALID_IF(mDisableBaseVertex && baseVertex != 0,
+                                "Base vertex (%u) must be zero.", baseVertex);
 
                 DAWN_TRY(mCommandBufferState.ValidateIndexBufferInRange(indexCount, firstIndex));
 
@@ -129,14 +127,14 @@ namespace dawn_native {
                 DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
                 DAWN_TRY(mCommandBufferState.ValidateCanDraw());
 
-                if (indirectOffset % 4 != 0) {
-                    return DAWN_VALIDATION_ERROR("Indirect offset must be a multiple of 4");
-                }
+                DAWN_INVALID_IF(indirectOffset % 4 != 0,
+                                "Indirect offset (%u) is not a multiple of 4.", indirectOffset);
 
-                if (indirectOffset >= indirectBuffer->GetSize() ||
-                    kDrawIndirectSize > indirectBuffer->GetSize() - indirectOffset) {
-                    return DAWN_VALIDATION_ERROR("Indirect offset out of bounds");
-                }
+                DAWN_INVALID_IF(
+                    indirectOffset >= indirectBuffer->GetSize() ||
+                        kDrawIndirectSize > indirectBuffer->GetSize() - indirectOffset,
+                    "Indirect offset (%u) is out of bounds of indirect buffer %s size (%u).",
+                    indirectOffset, indirectBuffer, indirectBuffer->GetSize());
             }
 
             DrawIndirectCmd* cmd = allocator->Allocate<DrawIndirectCmd>(Command::DrawIndirect);
@@ -157,14 +155,14 @@ namespace dawn_native {
                 DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
                 DAWN_TRY(mCommandBufferState.ValidateCanDrawIndexed());
 
-                if (indirectOffset % 4 != 0) {
-                    return DAWN_VALIDATION_ERROR("Indirect offset must be a multiple of 4");
-                }
+                DAWN_INVALID_IF(indirectOffset % 4 != 0,
+                                "Indirect offset (%u) is not a multiple of 4.", indirectOffset);
 
-                if ((indirectOffset >= indirectBuffer->GetSize() ||
-                     kDrawIndexedIndirectSize > indirectBuffer->GetSize() - indirectOffset)) {
-                    return DAWN_VALIDATION_ERROR("Indirect offset out of bounds");
-                }
+                DAWN_INVALID_IF(
+                    (indirectOffset >= indirectBuffer->GetSize() ||
+                     kDrawIndexedIndirectSize > indirectBuffer->GetSize() - indirectOffset),
+                    "Indirect offset (%u) is out of bounds of indirect buffer %s size (%u).",
+                    indirectOffset, indirectBuffer, indirectBuffer->GetSize());
             }
 
             DrawIndexedIndirectCmd* cmd =
@@ -189,11 +187,11 @@ namespace dawn_native {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(pipeline));
 
-                if (pipeline->GetAttachmentState() != mAttachmentState.Get()) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Pipeline attachment state is not compatible with render encoder "
-                        "attachment state");
-                }
+                // TODO(dawn:563): More detail about why the states are incompatible would be nice.
+                DAWN_INVALID_IF(
+                    pipeline->GetAttachmentState() != mAttachmentState.Get(),
+                    "Attachment state of %s is not compatible with the attachment state of %s",
+                    pipeline, this);
             }
 
             mCommandBufferState.SetRenderPipeline(pipeline);
@@ -215,20 +213,19 @@ namespace dawn_native {
                 DAWN_TRY(GetDevice()->ValidateObject(buffer));
                 DAWN_TRY(ValidateCanUseAs(buffer, wgpu::BufferUsage::Index));
 
-                DAWN_TRY(ValidateIndexFormat(format));
-                if (format == wgpu::IndexFormat::Undefined) {
-                    return DAWN_VALIDATION_ERROR("Index format must be specified");
-                }
+                DAWN_INVALID_IF(format == wgpu::IndexFormat::Undefined,
+                                "Index format must be specified");
 
-                if (offset % uint64_t(IndexFormatSize(format)) != 0) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Offset must be a multiple of the index format size");
-                }
+                DAWN_INVALID_IF(offset % uint64_t(IndexFormatSize(format)) != 0,
+                                "Index buffer offset (%u) is not a multiple of the size (%u)"
+                                "of %s.",
+                                offset, IndexFormatSize(format), format);
 
                 uint64_t bufferSize = buffer->GetSize();
-                if (offset > bufferSize) {
-                    return DAWN_VALIDATION_ERROR("Offset larger than the buffer size");
-                }
+                DAWN_INVALID_IF(offset > bufferSize,
+                                "Index buffer offset (%u) is larger than the size (%u) of %s.",
+                                offset, bufferSize, buffer);
+
                 uint64_t remainingSize = bufferSize - offset;
 
                 // Temporarily treat 0 as undefined for size, and give a warning
@@ -244,9 +241,11 @@ namespace dawn_native {
                 if (size == wgpu::kWholeSize) {
                     size = remainingSize;
                 } else {
-                    if (size > remainingSize) {
-                        return DAWN_VALIDATION_ERROR("Size + offset larger than the buffer size");
-                    }
+                    DAWN_INVALID_IF(
+                        size > remainingSize,
+                        "Index buffer range (offset: %u, size: %u) doesn't fit in the size (%u) of "
+                        "%s.",
+                        offset, size, bufferSize, buffer);
                 }
             } else {
                 if (size == wgpu::kWholeSize) {
@@ -279,18 +278,18 @@ namespace dawn_native {
                 DAWN_TRY(GetDevice()->ValidateObject(buffer));
                 DAWN_TRY(ValidateCanUseAs(buffer, wgpu::BufferUsage::Vertex));
 
-                if (slot >= kMaxVertexBuffers) {
-                    return DAWN_VALIDATION_ERROR("Vertex buffer slot out of bounds");
-                }
+                DAWN_INVALID_IF(slot >= kMaxVertexBuffers,
+                                "Vertex buffer slot (%u) is larger the maximum (%u)", slot,
+                                kMaxVertexBuffers - 1);
 
-                if (offset % 4 != 0) {
-                    return DAWN_VALIDATION_ERROR("Offset must be a multiple of 4");
-                }
+                DAWN_INVALID_IF(offset % 4 != 0, "Vertex buffer offset (%u) is not a multiple of 4",
+                                offset);
 
                 uint64_t bufferSize = buffer->GetSize();
-                if (offset > bufferSize) {
-                    return DAWN_VALIDATION_ERROR("Offset larger than the buffer size");
-                }
+                DAWN_INVALID_IF(offset > bufferSize,
+                                "Vertex buffer offset (%u) is larger than the size (%u) of %s.",
+                                offset, bufferSize, buffer);
+
                 uint64_t remainingSize = bufferSize - offset;
 
                 // Temporarily treat 0 as undefined for size, and give a warning
@@ -306,9 +305,11 @@ namespace dawn_native {
                 if (size == wgpu::kWholeSize) {
                     size = remainingSize;
                 } else {
-                    if (size > remainingSize) {
-                        return DAWN_VALIDATION_ERROR("Size + offset larger than the buffer size");
-                    }
+                    DAWN_INVALID_IF(
+                        size > remainingSize,
+                        "Vertex buffer range (offset: %u, size: %u) doesn't fit in the size (%u) "
+                        "of %s.",
+                        offset, size, bufferSize, buffer);
                 }
             } else {
                 if (size == wgpu::kWholeSize) {

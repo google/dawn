@@ -405,6 +405,7 @@ namespace dawn_native {
         std::ostringstream ss;
         ss << error->GetMessage();
 
+        // TODO(dawn:563): Print debug groups when avaialble.
         const std::vector<std::string>& contexts = error->GetContexts();
         if (!contexts.empty()) {
             for (auto context : contexts) {

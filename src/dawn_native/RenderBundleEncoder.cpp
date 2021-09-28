@@ -31,10 +31,8 @@ namespace dawn_native {
         DAWN_TRY(ValidateTextureFormat(textureFormat));
         const Format* format = nullptr;
         DAWN_TRY_ASSIGN(format, device->GetInternalFormat(textureFormat));
-        if (!format->IsColor() || !format->isRenderable) {
-            return DAWN_VALIDATION_ERROR(
-                "The color attachment texture format is not color renderable");
-        }
+        DAWN_INVALID_IF(!format->IsColor() || !format->isRenderable,
+                        "Texture format %s is not color renderable.", textureFormat);
         return {};
     }
 
@@ -43,36 +41,35 @@ namespace dawn_native {
         DAWN_TRY(ValidateTextureFormat(textureFormat));
         const Format* format = nullptr;
         DAWN_TRY_ASSIGN(format, device->GetInternalFormat(textureFormat));
-        if (!format->HasDepthOrStencil() || !format->isRenderable) {
-            return DAWN_VALIDATION_ERROR(
-                "The depth stencil attachment texture format is not a renderable depth/stencil "
-                "format");
-        }
+        DAWN_INVALID_IF(!format->HasDepthOrStencil() || !format->isRenderable,
+                        "Texture format %s is not depth/stencil renderable.", textureFormat);
         return {};
     }
 
     MaybeError ValidateRenderBundleEncoderDescriptor(
         const DeviceBase* device,
         const RenderBundleEncoderDescriptor* descriptor) {
-        if (!IsValidSampleCount(descriptor->sampleCount)) {
-            return DAWN_VALIDATION_ERROR("Sample count is not supported");
-        }
+        DAWN_INVALID_IF(!IsValidSampleCount(descriptor->sampleCount),
+                        "Sample count (%u) is not supported.", descriptor->sampleCount);
 
-        if (descriptor->colorFormatsCount > kMaxColorAttachments) {
-            return DAWN_VALIDATION_ERROR("Color formats count exceeds maximum");
-        }
+        DAWN_INVALID_IF(
+            descriptor->colorFormatsCount > kMaxColorAttachments,
+            "Color formats count (%u) exceeds maximum number of color attachements (%u).",
+            descriptor->colorFormatsCount, kMaxColorAttachments);
 
-        if (descriptor->colorFormatsCount == 0 &&
-            descriptor->depthStencilFormat == wgpu::TextureFormat::Undefined) {
-            return DAWN_VALIDATION_ERROR("Should have at least one attachment format");
-        }
+        DAWN_INVALID_IF(descriptor->colorFormatsCount == 0 &&
+                            descriptor->depthStencilFormat == wgpu::TextureFormat::Undefined,
+                        "No color or depth/stencil attachment formats specified.");
 
         for (uint32_t i = 0; i < descriptor->colorFormatsCount; ++i) {
-            DAWN_TRY(ValidateColorAttachmentFormat(device, descriptor->colorFormats[i]));
+            DAWN_TRY_CONTEXT(ValidateColorAttachmentFormat(device, descriptor->colorFormats[i]),
+                             "validating colorFormats[%u]", i);
         }
 
         if (descriptor->depthStencilFormat != wgpu::TextureFormat::Undefined) {
-            DAWN_TRY(ValidateDepthStencilAttachmentFormat(device, descriptor->depthStencilFormat));
+            DAWN_TRY_CONTEXT(
+                ValidateDepthStencilAttachmentFormat(device, descriptor->depthStencilFormat),
+                "validating depthStencilFormat");
         }
 
         return {};

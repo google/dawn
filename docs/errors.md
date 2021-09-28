@@ -1,6 +1,6 @@
 # Dawn Errors
 
-Dawn produces errors for several reasons. The most common is validation errors, indicatin that a
+Dawn produces errors for several reasons. The most common is validation errors, indicating that a
 given descriptor, configuration, state, or action is not valid according to the WebGPU spec. Errors
 can also be produced during exceptional circumstances such as the system running out of GPU memory
 or the device being lost.
@@ -44,6 +44,10 @@ Errors returned from `DAWN_INVALID_IF()` or `DAWN_VALIDATION_ERROR()` should fol
  * Example: `Command encoding has already finished.`
  * Instead of: `encoder finished`
 
+**Error messages should be in the present tense.**
+ * Example: `Buffer is not large enough...`
+ * Instead of: `Buffer was not large enough...`
+
 **When possible any values mentioned should be immediately followed in parentheses by the given value.**
  * Example: `("Array stride (%u) is not...", stride)`
  * Output: `Array stride (16) is not...`
@@ -59,7 +63,7 @@ Errors returned from `DAWN_INVALID_IF()` or `DAWN_VALIDATION_ERROR()` should fol
 **When possible state both the given value and the expected value or limit.**
  * Example: `("Offset (%u) is larger than the size (%u) of %s.", offset, buffer.size, buffer)`
  * Output: `Offset (256) is larger than the size (144) of [Buffer "Label"].`
-  
+
 **State errors in terms of what failed, rather than how to satisfy the rule.**
  * Example: `Binding size (3) is less than the minimum binding size (32).`
  * Instead of: `Binding size (3) must not be less than the minimum binding size (32).`
