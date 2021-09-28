@@ -25,6 +25,7 @@
 #include "dawn_native/ComputePassEncoder.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/ErrorData.h"
+#include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/QueryHelper.h"
 #include "dawn_native/QuerySet.h"
 #include "dawn_native/Queue.h"
@@ -447,7 +448,11 @@ namespace dawn_native {
     }  // namespace
 
     CommandEncoder::CommandEncoder(DeviceBase* device, const CommandEncoderDescriptor*)
-        : ObjectBase(device, kLabelNotImplemented), mEncodingContext(device, this) {
+        : ApiObjectBase(device, kLabelNotImplemented), mEncodingContext(device, this) {
+    }
+
+    ObjectType CommandEncoder::GetType() const {
+        return ObjectType::CommandEncoder;
     }
 
     CommandBufferResourceUsage CommandEncoder::AcquireResourceUsages() {

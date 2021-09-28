@@ -24,6 +24,7 @@
 #include "dawn_native/Format.h"
 #include "dawn_native/Forward.h"
 #include "dawn_native/IntegerTypes.h"
+#include "dawn_native/ObjectBase.h"
 #include "dawn_native/PerStage.h"
 #include "dawn_native/VertexFormat.h"
 #include "dawn_native/dawn_platform.h"
@@ -195,12 +196,14 @@ namespace dawn_native {
         SingleShaderStage stage;
     };
 
-    class ShaderModuleBase : public CachedObject {
+    class ShaderModuleBase : public ApiObjectBase, public CachedObject {
       public:
         ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModuleBase() override;
 
         static Ref<ShaderModuleBase> MakeError(DeviceBase* device);
+
+        ObjectType GetType() const override;
 
         // Return true iff the program has an entrypoint called `entryPoint`.
         bool HasEntryPoint(const std::string& entryPoint) const;

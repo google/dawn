@@ -20,6 +20,7 @@
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/ObjectContentHasher.h"
+#include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/ShaderModule.h"
 
 namespace dawn_native {
@@ -57,7 +58,7 @@ namespace dawn_native {
 
     PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
                                            const PipelineLayoutDescriptor* descriptor)
-        : CachedObject(device, kLabelNotImplemented) {
+        : ApiObjectBase(device, kLabelNotImplemented) {
         ASSERT(descriptor->bindGroupLayoutCount <= kMaxBindGroups);
         for (BindGroupIndex group(0); group < BindGroupIndex(descriptor->bindGroupLayoutCount);
              ++group) {
@@ -67,7 +68,7 @@ namespace dawn_native {
     }
 
     PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-        : CachedObject(device, tag) {
+        : ApiObjectBase(device, tag) {
     }
 
     PipelineLayoutBase::~PipelineLayoutBase() {
@@ -320,6 +321,10 @@ namespace dawn_native {
         }
 
         return std::move(result);
+    }
+
+    ObjectType PipelineLayoutBase::GetType() const {
+        return ObjectType::PipelineLayout;
     }
 
     const BindGroupLayoutBase* PipelineLayoutBase::GetBindGroupLayout(BindGroupIndex group) const {

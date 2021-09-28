@@ -25,7 +25,7 @@
 
 namespace dawn_native {
 
-    class QueueBase : public ObjectBase {
+    class QueueBase : public ApiObjectBase {
       public:
         struct TaskInFlight {
             virtual ~TaskInFlight();
@@ -33,8 +33,11 @@ namespace dawn_native {
             virtual void HandleDeviceLoss() = 0;
         };
 
-        static QueueBase* MakeError(DeviceBase* device);
         ~QueueBase() override;
+
+        static QueueBase* MakeError(DeviceBase* device);
+
+        ObjectType GetType() const override;
 
         // Dawn API
         void APISubmit(uint32_t commandCount, CommandBufferBase* const* commands);

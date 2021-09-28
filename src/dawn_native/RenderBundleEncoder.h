@@ -17,6 +17,7 @@
 
 #include "dawn_native/EncodingContext.h"
 #include "dawn_native/Error.h"
+#include "dawn_native/Forward.h"
 #include "dawn_native/RenderBundle.h"
 #include "dawn_native/RenderEncoderBase.h"
 
@@ -31,6 +32,8 @@ namespace dawn_native {
         static Ref<RenderBundleEncoder> Create(DeviceBase* device,
                                                const RenderBundleEncoderDescriptor* descriptor);
         static RenderBundleEncoder* MakeError(DeviceBase* device);
+
+        ObjectType GetType() const override;
 
         RenderBundleBase* APIFinish(const RenderBundleDescriptor* descriptor);
 

@@ -22,6 +22,8 @@ class Ref;
 
 namespace dawn_native {
 
+    enum class ObjectType : uint32_t;
+
     class AdapterBase;
     class BindGroupBase;
     class BindGroupLayoutBase;

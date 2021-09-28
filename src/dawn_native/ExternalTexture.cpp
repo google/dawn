@@ -15,6 +15,7 @@
 #include "dawn_native/ExternalTexture.h"
 
 #include "dawn_native/Device.h"
+#include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/Texture.h"
 
 #include "dawn_native/dawn_platform.h"
@@ -86,12 +87,12 @@ namespace dawn_native {
 
     ExternalTextureBase::ExternalTextureBase(DeviceBase* device,
                                              const ExternalTextureDescriptor* descriptor)
-        : ObjectBase(device, kLabelNotImplemented), mState(ExternalTextureState::Alive) {
+        : ApiObjectBase(device, kLabelNotImplemented), mState(ExternalTextureState::Alive) {
         textureViews[0] = descriptor->plane0;
     }
 
     ExternalTextureBase::ExternalTextureBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-        : ObjectBase(device, tag) {
+        : ApiObjectBase(device, tag) {
     }
 
     const std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat>&
@@ -118,6 +119,10 @@ namespace dawn_native {
     // static
     ExternalTextureBase* ExternalTextureBase::MakeError(DeviceBase* device) {
         return new ExternalTextureBase(device, ObjectBase::kError);
+    }
+
+    ObjectType ExternalTextureBase::GetType() const {
+        return ObjectType::ExternalTexture;
     }
 
 }  // namespace dawn_native

@@ -20,6 +20,7 @@
 #include "common/ityp_bitset.h"
 #include "dawn_native/CachedObject.h"
 #include "dawn_native/IntegerTypes.h"
+#include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -59,7 +60,9 @@ namespace dawn_native {
         uint32_t mSampleCount = 0;
     };
 
-    class AttachmentState final : public AttachmentStateBlueprint, public CachedObject {
+    class AttachmentState final : public AttachmentStateBlueprint,
+                                  public ObjectBase,
+                                  public CachedObject {
       public:
         AttachmentState(DeviceBase* device, const AttachmentStateBlueprint& blueprint);
 

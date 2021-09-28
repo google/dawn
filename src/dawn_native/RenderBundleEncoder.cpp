@@ -18,6 +18,7 @@
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/Format.h"
+#include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/RenderPipeline.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 #include "dawn_platform/DawnPlatform.h"
@@ -100,6 +101,10 @@ namespace dawn_native {
     // static
     RenderBundleEncoder* RenderBundleEncoder::MakeError(DeviceBase* device) {
         return new RenderBundleEncoder(device, ObjectBase::kError);
+    }
+
+    ObjectType RenderBundleEncoder::GetType() const {
+        return ObjectType::RenderBundleEncoder;
     }
 
     CommandIterator RenderBundleEncoder::AcquireCommands() {

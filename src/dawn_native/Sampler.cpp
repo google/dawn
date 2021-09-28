@@ -72,7 +72,7 @@ namespace dawn_native {
     // SamplerBase
 
     SamplerBase::SamplerBase(DeviceBase* device, const SamplerDescriptor* descriptor)
-        : CachedObject(device, kLabelNotImplemented),
+        : ApiObjectBase(device, kLabelNotImplemented),
           mAddressModeU(descriptor->addressModeU),
           mAddressModeV(descriptor->addressModeV),
           mAddressModeW(descriptor->addressModeW),
@@ -86,7 +86,7 @@ namespace dawn_native {
     }
 
     SamplerBase::SamplerBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-        : CachedObject(device, tag) {
+        : ApiObjectBase(device, tag) {
     }
 
     SamplerBase::~SamplerBase() {
@@ -98,6 +98,10 @@ namespace dawn_native {
     // static
     SamplerBase* SamplerBase::MakeError(DeviceBase* device) {
         return new SamplerBase(device, ObjectBase::kError);
+    }
+
+    ObjectType SamplerBase::GetType() const {
+        return ObjectType::Sampler;
     }
 
     bool SamplerBase::IsComparison() const {

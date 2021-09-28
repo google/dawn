@@ -33,6 +33,7 @@
 #include "dawn_native/ExternalTexture.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/InternalPipelineStore.h"
+#include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/PersistentCache.h"
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/QuerySet.h"
@@ -47,6 +48,7 @@
 #include "dawn_native/ValidationUtils_autogen.h"
 #include "dawn_platform/DawnPlatform.h"
 
+#include <mutex>
 #include <unordered_set>
 
 namespace dawn_native {
@@ -471,7 +473,7 @@ namespace dawn_native {
         return mPersistentCache.get();
     }
 
-    MaybeError DeviceBase::ValidateObject(const ObjectBase* object) const {
+    MaybeError DeviceBase::ValidateObject(const ApiObjectBase* object) const {
         ASSERT(object != nullptr);
         DAWN_INVALID_IF(object->GetDevice() != this,
                         "%s is associated with %s, and cannot be used with %s.", object,
@@ -504,6 +506,10 @@ namespace dawn_native {
     bool DeviceBase::IsLost() const {
         ASSERT(mState != State::BeingCreated);
         return mState != State::Alive;
+    }
+
+    std::mutex* DeviceBase::GetObjectListMutex(ObjectType type) {
+        return &mObjectLists[type].mutex;
     }
 
     AdapterBase* DeviceBase::GetAdapter() const {

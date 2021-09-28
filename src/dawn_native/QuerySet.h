@@ -25,11 +25,13 @@ namespace dawn_native {
 
     MaybeError ValidateQuerySetDescriptor(DeviceBase* device, const QuerySetDescriptor* descriptor);
 
-    class QuerySetBase : public ObjectBase {
+    class QuerySetBase : public ApiObjectBase {
       public:
         QuerySetBase(DeviceBase* device, const QuerySetDescriptor* descriptor);
 
         static QuerySetBase* MakeError(DeviceBase* device);
+
+        ObjectType GetType() const override;
 
         wgpu::QueryType GetQueryType() const;
         uint32_t GetQueryCount() const;

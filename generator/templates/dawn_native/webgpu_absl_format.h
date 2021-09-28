@@ -21,29 +21,29 @@
 
 namespace dawn_native {
 
-    {% set skip_types = ["instance", "surface"] %}
-    {% set pure_frontend_types = ["command encoder", "compute pass encoder", "render pass encoder", "render bundle encoder"] %}
-
     //
     // Objects
     //
 
-    class ObjectBase;
+    class DeviceBase;
     absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
-    AbslFormatConvert(const ObjectBase* value,
-                    const absl::FormatConversionSpec& spec,
-                    absl::FormatSink* s);
+    AbslFormatConvert(const DeviceBase* value,
+                      const absl::FormatConversionSpec& spec,
+                      absl::FormatSink* s);
 
-    {% for type in by_category["object"] %}
-        {% set Base = "" if type.name.canonical_case() in pure_frontend_types else "Base" %}
-        {% if type.name.canonical_case() not in skip_types %}
-            class {{type.name.CamelCase()}}{{Base}};
-            absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
-            AbslFormatConvert(const {{type.name.CamelCase()}}{{Base}}* value,
-                                const absl::FormatConversionSpec& spec,
-                                absl::FormatSink* s);
-        {% endif %}
-    {% endfor %}
+    class ApiObjectBase;
+    absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
+    AbslFormatConvert(const ApiObjectBase* value,
+                      const absl::FormatConversionSpec& spec,
+                      absl::FormatSink* s);
+
+    // Special case for TextureViews, since frequently the texture will be the
+    // thing that's labeled.
+    class TextureViewBase;
+    absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
+    AbslFormatConvert(const TextureViewBase* value,
+                      const absl::FormatConversionSpec& spec,
+                      absl::FormatSink* s);
 
     //
     // Descriptors
@@ -55,8 +55,8 @@ namespace dawn_native {
             {% if member.name.canonical_case() == "label" %}
                 absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
                 AbslFormatConvert(const {{as_cppType(type.name)}}* value,
-                                    const absl::FormatConversionSpec& spec,
-                                    absl::FormatSink* s);
+                                  const absl::FormatConversionSpec& spec,
+                                  absl::FormatSink* s);
             {% endif %}
         {% endfor %}
     {% endfor %}
@@ -71,8 +71,8 @@ namespace wgpu {
     {% for type in by_category["enum"] %}
         absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
         AbslFormatConvert({{as_cppType(type.name)}} value,
-                            const absl::FormatConversionSpec& spec,
-                            absl::FormatSink* s);
+                          const absl::FormatConversionSpec& spec,
+                          absl::FormatSink* s);
     {% endfor %}
 
     //
@@ -82,8 +82,8 @@ namespace wgpu {
     {% for type in by_category["bitmask"] %}
         absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
         AbslFormatConvert({{as_cppType(type.name)}} value,
-                            const absl::FormatConversionSpec& spec,
-                            absl::FormatSink* s);
+                          const absl::FormatConversionSpec& spec,
+                          absl::FormatSink* s);
     {% endfor %}
 
 }  // namespace dawn_native

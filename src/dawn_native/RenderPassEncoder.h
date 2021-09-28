@@ -16,6 +16,7 @@
 #define DAWNNATIVE_RENDERPASSENCODER_H_
 
 #include "dawn_native/Error.h"
+#include "dawn_native/Forward.h"
 #include "dawn_native/RenderEncoderBase.h"
 
 namespace dawn_native {
@@ -36,6 +37,8 @@ namespace dawn_native {
         static RenderPassEncoder* MakeError(DeviceBase* device,
                                             CommandEncoder* commandEncoder,
                                             EncodingContext* encodingContext);
+
+        ObjectType GetType() const override;
 
         void APIEndPass();
 

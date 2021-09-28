@@ -22,11 +22,14 @@
 #include "dawn_native/Forward.h"
 #include "dawn_native/Limits.h"
 #include "dawn_native/ObjectBase.h"
+#include "dawn_native/ObjectType_autogen.h"
+#include "dawn_native/StagingBuffer.h"
 #include "dawn_native/Toggles.h"
 
 #include "dawn_native/DawnNative.h"
 #include "dawn_native/dawn_platform.h"
 
+#include <mutex>
 #include <utility>
 
 namespace dawn_platform {
@@ -75,7 +78,7 @@ namespace dawn_native {
             return false;
         }
 
-        MaybeError ValidateObject(const ObjectBase* object) const;
+        MaybeError ValidateObject(const ApiObjectBase* object) const;
 
         AdapterBase* GetAdapter() const;
         dawn_platform::Platform* GetPlatform() const;
@@ -257,6 +260,7 @@ namespace dawn_native {
         };
         State GetState() const;
         bool IsLost() const;
+        std::mutex* GetObjectListMutex(ObjectType type);
 
         std::vector<const char*> GetEnabledExtensions() const;
         std::vector<const char*> GetTogglesUsed() const;
@@ -450,6 +454,14 @@ namespace dawn_native {
         std::unique_ptr<DeprecationWarnings> mDeprecationWarnings;
 
         State mState = State::BeingCreated;
+
+        // Encompasses the mutex and the actual list that contains all live objects "owned" by the
+        // device.
+        struct ApiObjectList {
+            std::mutex mutex;
+            LinkedList<ApiObjectBase> objects;
+        };
+        PerObjectType<ApiObjectList> mObjectLists;
 
         FormatTable mFormatTable;
 

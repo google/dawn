@@ -26,9 +26,11 @@
 
 namespace dawn_native {
 
-    class CommandEncoder final : public ObjectBase {
+    class CommandEncoder final : public ApiObjectBase {
       public:
         CommandEncoder(DeviceBase* device, const CommandEncoderDescriptor* descriptor);
+
+        ObjectType GetType() const;
 
         CommandIterator AcquireCommands();
         CommandBufferResourceUsage AcquireResourceUsages();

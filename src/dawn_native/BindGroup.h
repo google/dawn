@@ -39,9 +39,11 @@ namespace dawn_native {
         uint64_t size;
     };
 
-    class BindGroupBase : public ObjectBase {
+    class BindGroupBase : public ApiObjectBase {
       public:
         static BindGroupBase* MakeError(DeviceBase* device);
+
+        ObjectType GetType() const override;
 
         BindGroupLayoutBase* GetLayout();
         const BindGroupLayoutBase* GetLayout() const;

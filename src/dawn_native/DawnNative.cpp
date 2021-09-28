@@ -246,7 +246,7 @@ namespace dawn_native {
     }
 
     const char* GetObjectLabelForTesting(void* objectHandle) {
-        ObjectBase* object = reinterpret_cast<ObjectBase*>(objectHandle);
+        ApiObjectBase* object = reinterpret_cast<ApiObjectBase*>(objectHandle);
         return object->GetLabel().c_str();
     }
 

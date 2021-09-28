@@ -20,18 +20,19 @@
 #include "dawn_native/CommandValidation.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Format.h"
+#include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/Texture.h"
 
 namespace dawn_native {
 
     CommandBufferBase::CommandBufferBase(CommandEncoder* encoder, const CommandBufferDescriptor*)
-        : ObjectBase(encoder->GetDevice(), kLabelNotImplemented),
+        : ApiObjectBase(encoder->GetDevice(), kLabelNotImplemented),
           mCommands(encoder->AcquireCommands()),
           mResourceUsages(encoder->AcquireResourceUsages()) {
     }
 
     CommandBufferBase::CommandBufferBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-        : ObjectBase(device, tag) {
+        : ApiObjectBase(device, tag) {
     }
 
     CommandBufferBase::~CommandBufferBase() {
@@ -49,6 +50,10 @@ namespace dawn_native {
     // static
     CommandBufferBase* CommandBufferBase::MakeError(DeviceBase* device) {
         return new CommandBufferBase(device, ObjectBase::kError);
+    }
+
+    ObjectType CommandBufferBase::GetType() const {
+        return ObjectType::CommandBuffer;
     }
 
     MaybeError CommandBufferBase::ValidateCanUseInSubmitNow() const {

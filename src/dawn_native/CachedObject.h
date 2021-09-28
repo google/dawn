@@ -15,8 +15,6 @@
 #ifndef DAWNNATIVE_CACHED_OBJECT_H_
 #define DAWNNATIVE_CACHED_OBJECT_H_
 
-#include "dawn_native/ObjectBase.h"
-
 #include <cstddef>
 
 namespace dawn_native {
@@ -25,10 +23,8 @@ namespace dawn_native {
     // we increase the refcount of an existing object.
     // When an object is successfully created, the device should call
     // SetIsCachedReference() and insert the object into the cache.
-    class CachedObject : public ObjectBase {
+    class CachedObject {
       public:
-        using ObjectBase::ObjectBase;
-
         bool IsCachedReference() const;
 
         // Functor necessary for the unordered_set<CachedObject*>-based cache.

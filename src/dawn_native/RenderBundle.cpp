@@ -17,6 +17,7 @@
 #include "common/BitSetIterator.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/RenderBundleEncoder.h"
 
 namespace dawn_native {
@@ -26,7 +27,7 @@ namespace dawn_native {
                                        Ref<AttachmentState> attachmentState,
                                        RenderPassResourceUsage resourceUsage,
                                        IndirectDrawMetadata indirectDrawMetadata)
-        : ObjectBase(encoder->GetDevice(), kLabelNotImplemented),
+        : ApiObjectBase(encoder->GetDevice(), kLabelNotImplemented),
           mCommands(encoder->AcquireCommands()),
           mIndirectDrawMetadata(std::move(indirectDrawMetadata)),
           mAttachmentState(std::move(attachmentState)),
@@ -43,7 +44,11 @@ namespace dawn_native {
     }
 
     RenderBundleBase::RenderBundleBase(DeviceBase* device, ErrorTag errorTag)
-        : ObjectBase(device, errorTag) {
+        : ApiObjectBase(device, errorTag) {
+    }
+
+    ObjectType RenderBundleBase::GetType() const {
+        return ObjectType::RenderBundle;
     }
 
     CommandIterator* RenderBundleBase::GetCommands() {

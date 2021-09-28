@@ -17,6 +17,8 @@
 
 #include "dawn_native/CachedObject.h"
 #include "dawn_native/Error.h"
+#include "dawn_native/Forward.h"
+#include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -26,12 +28,14 @@ namespace dawn_native {
 
     MaybeError ValidateSamplerDescriptor(DeviceBase* device, const SamplerDescriptor* descriptor);
 
-    class SamplerBase : public CachedObject {
+    class SamplerBase : public ApiObjectBase, public CachedObject {
       public:
         SamplerBase(DeviceBase* device, const SamplerDescriptor* descriptor);
         ~SamplerBase() override;
 
         static SamplerBase* MakeError(DeviceBase* device);
+
+        ObjectType GetType() const override;
 
         bool IsComparison() const;
         bool IsFiltering() const;

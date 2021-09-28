@@ -21,6 +21,7 @@
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
 #include <cstring>
@@ -29,7 +30,7 @@ namespace dawn_native {
 
     ProgrammablePassEncoder::ProgrammablePassEncoder(DeviceBase* device,
                                                      EncodingContext* encodingContext)
-        : ObjectBase(device, kLabelNotImplemented),
+        : ApiObjectBase(device, kLabelNotImplemented),
           mEncodingContext(encodingContext),
           mValidationEnabled(device->IsValidationEnabled()) {
     }
@@ -37,7 +38,7 @@ namespace dawn_native {
     ProgrammablePassEncoder::ProgrammablePassEncoder(DeviceBase* device,
                                                      EncodingContext* encodingContext,
                                                      ErrorTag errorTag)
-        : ObjectBase(device, errorTag),
+        : ApiObjectBase(device, errorTag),
           mEncodingContext(encodingContext),
           mValidationEnabled(device->IsValidationEnabled()) {
     }

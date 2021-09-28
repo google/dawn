@@ -20,6 +20,7 @@
 #include "dawn_native/CommandValidation.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/QuerySet.h"
 #include "dawn_native/RenderBundle.h"
 #include "dawn_native/RenderPipeline.h"
@@ -75,6 +76,10 @@ namespace dawn_native {
                                                     CommandEncoder* commandEncoder,
                                                     EncodingContext* encodingContext) {
         return new RenderPassEncoder(device, commandEncoder, encodingContext, ObjectBase::kError);
+    }
+
+    ObjectType RenderPassEncoder::GetType() const {
+        return ObjectType::RenderPassEncoder;
     }
 
     void RenderPassEncoder::TrackQueryAvailability(QuerySetBase* querySet, uint32_t queryIndex) {

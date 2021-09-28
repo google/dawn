@@ -30,11 +30,13 @@ namespace dawn_native {
     struct CopyTextureToBufferCmd;
     struct TextureCopy;
 
-    class CommandBufferBase : public ObjectBase {
+    class CommandBufferBase : public ApiObjectBase {
       public:
         CommandBufferBase(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
 
         static CommandBufferBase* MakeError(DeviceBase* device);
+
+        ObjectType GetType() const override;
 
         MaybeError ValidateCanUseInSubmitNow() const;
         void Destroy();
@@ -42,7 +44,7 @@ namespace dawn_native {
         const CommandBufferResourceUsage& GetResourceUsages() const;
 
       protected:
-        ~CommandBufferBase();
+        ~CommandBufferBase() override;
 
         void DoNextSetValidatedBufferLocationsInternal();
 

@@ -42,13 +42,15 @@ namespace dawn_native {
     static constexpr wgpu::TextureUsage kReadOnlyTextureUsages =
         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::TextureBinding;
 
-    class TextureBase : public ObjectBase {
+    class TextureBase : public ApiObjectBase {
       public:
         enum class TextureState { OwnedInternal, OwnedExternal, Destroyed };
         enum class ClearValue { Zero, NonZero };
         TextureBase(DeviceBase* device, const TextureDescriptor* descriptor, TextureState state);
 
         static TextureBase* MakeError(DeviceBase* device);
+
+        ObjectType GetType() const override;
 
         wgpu::TextureDimension GetDimension() const;
         const Format& GetFormat() const;
@@ -113,11 +115,13 @@ namespace dawn_native {
         std::vector<bool> mIsSubresourceContentInitializedAtIndex;
     };
 
-    class TextureViewBase : public ObjectBase {
+    class TextureViewBase : public ApiObjectBase {
       public:
         TextureViewBase(TextureBase* texture, const TextureViewDescriptor* descriptor);
 
         static TextureViewBase* MakeError(DeviceBase* device);
+
+        ObjectType GetType() const override;
 
         const TextureBase* GetTexture() const;
         TextureBase* GetTexture();

@@ -22,6 +22,7 @@
 #include "dawn_native/CachedObject.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
+#include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -45,7 +46,7 @@ namespace dawn_native {
         std::string entryPoint;
     };
 
-    class PipelineLayoutBase : public CachedObject {
+    class PipelineLayoutBase : public ApiObjectBase, public CachedObject {
       public:
         PipelineLayoutBase(DeviceBase* device, const PipelineLayoutDescriptor* descriptor);
         ~PipelineLayoutBase() override;
@@ -54,6 +55,8 @@ namespace dawn_native {
         static ResultOrError<Ref<PipelineLayoutBase>> CreateDefault(
             DeviceBase* device,
             std::vector<StageAndDescriptor> stages);
+
+        ObjectType GetType() const override;
 
         const BindGroupLayoutBase* GetBindGroupLayout(BindGroupIndex group) const;
         BindGroupLayoutBase* GetBindGroupLayout(BindGroupIndex group);

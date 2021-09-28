@@ -24,6 +24,7 @@
 #include "dawn_native/CachedObject.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
+#include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -39,7 +40,7 @@ namespace dawn_native {
     // Bindings are specified as a |BindingNumber| in the BindGroupLayoutDescriptor.
     // These numbers may be arbitrary and sparse. Internally, Dawn packs these numbers
     // into a packed range of |BindingIndex| integers.
-    class BindGroupLayoutBase : public CachedObject {
+    class BindGroupLayoutBase : public ApiObjectBase, public CachedObject {
       public:
         BindGroupLayoutBase(DeviceBase* device,
                             const BindGroupLayoutDescriptor* descriptor,
@@ -47,6 +48,8 @@ namespace dawn_native {
         ~BindGroupLayoutBase() override;
 
         static BindGroupLayoutBase* MakeError(DeviceBase* device);
+
+        ObjectType GetType() const override;
 
         // A map from the BindingNumber to its packed BindingIndex.
         using BindingMap = std::map<BindingNumber, BindingIndex>;

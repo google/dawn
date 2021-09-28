@@ -18,7 +18,9 @@
 
 #include "dawn_native/ChainUtils_autogen.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ObjectBase.h"
 #include "dawn_native/ObjectContentHasher.h"
+#include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/PerStage.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
@@ -359,7 +361,7 @@ namespace dawn_native {
     BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
                                              const BindGroupLayoutDescriptor* descriptor,
                                              PipelineCompatibilityToken pipelineCompatibilityToken)
-        : CachedObject(device, kLabelNotImplemented),
+        : ApiObjectBase(device, kLabelNotImplemented),
           mBindingInfo(BindingIndex(descriptor->entryCount)),
           mPipelineCompatibilityToken(pipelineCompatibilityToken) {
         std::vector<BindGroupLayoutEntry> sortedBindings(
@@ -386,7 +388,7 @@ namespace dawn_native {
     }
 
     BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-        : CachedObject(device, tag) {
+        : ApiObjectBase(device, tag) {
     }
 
     BindGroupLayoutBase::~BindGroupLayoutBase() {
@@ -399,6 +401,10 @@ namespace dawn_native {
     // static
     BindGroupLayoutBase* BindGroupLayoutBase::MakeError(DeviceBase* device) {
         return new BindGroupLayoutBase(device, ObjectBase::kError);
+    }
+
+    ObjectType BindGroupLayoutBase::GetType() const {
+        return ObjectType::BindGroupLayout;
     }
 
     const BindGroupLayoutBase::BindingMap& BindGroupLayoutBase::GetBindingMap() const {

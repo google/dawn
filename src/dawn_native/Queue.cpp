@@ -24,6 +24,7 @@
 #include "dawn_native/Device.h"
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/ExternalTexture.h"
+#include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/QuerySet.h"
 #include "dawn_native/RenderPassEncoder.h"
 #include "dawn_native/RenderPipeline.h"
@@ -161,10 +162,11 @@ namespace dawn_native {
     QueueBase::TaskInFlight::~TaskInFlight() {
     }
 
-    QueueBase::QueueBase(DeviceBase* device) : ObjectBase(device, kLabelNotImplemented) {
+    QueueBase::QueueBase(DeviceBase* device) : ApiObjectBase(device, kLabelNotImplemented) {
     }
 
-    QueueBase::QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag) : ObjectBase(device, tag) {
+    QueueBase::QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag)
+        : ApiObjectBase(device, tag) {
     }
 
     QueueBase::~QueueBase() {
@@ -174,6 +176,10 @@ namespace dawn_native {
     // static
     QueueBase* QueueBase::MakeError(DeviceBase* device) {
         return new ErrorQueue(device);
+    }
+
+    ObjectType QueueBase::GetType() const {
+        return ObjectType::Queue;
     }
 
     void QueueBase::APISubmit(uint32_t commandCount, CommandBufferBase* const* commands) {

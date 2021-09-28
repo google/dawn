@@ -16,6 +16,7 @@
 #define DAWNNATIVE_COMPUTEPIPELINE_H_
 
 #include "common/NonCopyable.h"
+#include "dawn_native/Forward.h"
 #include "dawn_native/Pipeline.h"
 
 namespace dawn_native {
@@ -32,6 +33,8 @@ namespace dawn_native {
         ~ComputePipelineBase() override;
 
         static ComputePipelineBase* MakeError(DeviceBase* device);
+
+        ObjectType GetType() const override;
 
         // Functors necessary for the unordered_set<ComputePipelineBase*>-based cache.
         struct EqualityFunc {

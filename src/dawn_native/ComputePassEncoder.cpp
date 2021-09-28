@@ -20,6 +20,7 @@
 #include "dawn_native/Commands.h"
 #include "dawn_native/ComputePipeline.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/PassResourceUsageTracker.h"
 #include "dawn_native/QuerySet.h"
 
@@ -55,6 +56,10 @@ namespace dawn_native {
                                                       CommandEncoder* commandEncoder,
                                                       EncodingContext* encodingContext) {
         return new ComputePassEncoder(device, commandEncoder, encodingContext, ObjectBase::kError);
+    }
+
+    ObjectType ComputePassEncoder::GetType() const {
+        return ObjectType::ComputePassEncoder;
     }
 
     void ComputePassEncoder::APIEndPass() {

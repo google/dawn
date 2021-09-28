@@ -17,6 +17,7 @@
 #include "common/Constants.h"
 #include "dawn_native/Adapter.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/Surface.h"
 #include "dawn_native/Texture.h"
 #include "dawn_native/ValidationUtils_autogen.h"
@@ -112,11 +113,11 @@ namespace dawn_native {
 
     // SwapChainBase
 
-    SwapChainBase::SwapChainBase(DeviceBase* device) : ObjectBase(device, kLabelNotImplemented) {
+    SwapChainBase::SwapChainBase(DeviceBase* device) : ApiObjectBase(device, kLabelNotImplemented) {
     }
 
     SwapChainBase::SwapChainBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-        : ObjectBase(device, tag) {
+        : ApiObjectBase(device, tag) {
     }
 
     SwapChainBase::~SwapChainBase() {
@@ -125,6 +126,10 @@ namespace dawn_native {
     // static
     SwapChainBase* SwapChainBase::MakeError(DeviceBase* device) {
         return new ErrorSwapChain(device);
+    }
+
+    ObjectType SwapChainBase::GetType() const {
+        return ObjectType::SwapChain;
     }
 
     // OldSwapChainBase

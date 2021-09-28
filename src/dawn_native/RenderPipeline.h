@@ -17,6 +17,7 @@
 
 #include "common/TypedInteger.h"
 #include "dawn_native/AttachmentState.h"
+#include "dawn_native/Forward.h"
 #include "dawn_native/IntegerTypes.h"
 #include "dawn_native/Pipeline.h"
 
@@ -61,6 +62,8 @@ namespace dawn_native {
         ~RenderPipelineBase() override;
 
         static RenderPipelineBase* MakeError(DeviceBase* device);
+
+        ObjectType GetType() const override;
 
         const ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>&
         GetAttributeLocationsUsed() const;

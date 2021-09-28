@@ -16,6 +16,7 @@
 
 #include "dawn_native/Device.h"
 #include "dawn_native/ObjectContentHasher.h"
+#include "dawn_native/ObjectType_autogen.h"
 
 namespace dawn_native {
 
@@ -63,6 +64,10 @@ namespace dawn_native {
     // static
     ComputePipelineBase* ComputePipelineBase::MakeError(DeviceBase* device) {
         return new ComputePipelineBase(device, ObjectBase::kError);
+    }
+
+    ObjectType ComputePipelineBase::GetType() const {
+        return ObjectType::ComputePipeline;
     }
 
     bool ComputePipelineBase::EqualityFunc::operator()(const ComputePipelineBase* a,

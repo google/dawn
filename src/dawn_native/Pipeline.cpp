@@ -16,6 +16,7 @@
 
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ObjectBase.h"
 #include "dawn_native/ObjectContentHasher.h"
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/ShaderModule.h"
@@ -52,7 +53,7 @@ namespace dawn_native {
                                PipelineLayoutBase* layout,
                                const char* label,
                                std::vector<StageAndDescriptor> stages)
-        : CachedObject(device, label), mLayout(layout) {
+        : ApiObjectBase(device, label), mLayout(layout) {
         ASSERT(!stages.empty());
 
         for (const StageAndDescriptor& stage : stages) {
@@ -89,7 +90,7 @@ namespace dawn_native {
     }
 
     PipelineBase::PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-        : CachedObject(device, tag) {
+        : ApiObjectBase(device, tag) {
     }
 
     PipelineLayoutBase* PipelineBase::GetLayout() {

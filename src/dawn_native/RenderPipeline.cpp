@@ -20,6 +20,7 @@
 #include "dawn_native/Device.h"
 #include "dawn_native/InternalPipelineStore.h"
 #include "dawn_native/ObjectContentHasher.h"
+#include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 #include "dawn_native/VertexFormat.h"
 
@@ -557,6 +558,10 @@ namespace dawn_native {
     // static
     RenderPipelineBase* RenderPipelineBase::MakeError(DeviceBase* device) {
         return new RenderPipelineBase(device, ObjectBase::kError);
+    }
+
+    ObjectType RenderPipelineBase::GetType() const {
+        return ObjectType::RenderPipeline;
     }
 
     RenderPipelineBase::~RenderPipelineBase() {

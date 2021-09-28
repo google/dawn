@@ -16,6 +16,7 @@
 
 #include "dawn_native/Device.h"
 #include "dawn_native/Extensions.h"
+#include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
 #include <set>
@@ -114,7 +115,7 @@ namespace dawn_native {
     }
 
     QuerySetBase::QuerySetBase(DeviceBase* device, const QuerySetDescriptor* descriptor)
-        : ObjectBase(device, kLabelNotImplemented),
+        : ApiObjectBase(device, kLabelNotImplemented),
           mQueryType(descriptor->type),
           mQueryCount(descriptor->count),
           mState(QuerySetState::Available) {
@@ -126,7 +127,7 @@ namespace dawn_native {
     }
 
     QuerySetBase::QuerySetBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-        : ObjectBase(device, tag) {
+        : ApiObjectBase(device, tag) {
     }
 
     QuerySetBase::~QuerySetBase() {
@@ -137,6 +138,10 @@ namespace dawn_native {
     // static
     QuerySetBase* QuerySetBase::MakeError(DeviceBase* device) {
         return new ErrorQuerySet(device);
+    }
+
+    ObjectType QuerySetBase::GetType() const {
+        return ObjectType::QuerySet;
     }
 
     wgpu::QueryType QuerySetBase::GetQueryType() const {

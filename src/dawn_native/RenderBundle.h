@@ -19,6 +19,7 @@
 #include "dawn_native/AttachmentState.h"
 #include "dawn_native/CommandAllocator.h"
 #include "dawn_native/Error.h"
+#include "dawn_native/Forward.h"
 #include "dawn_native/IndirectDrawMetadata.h"
 #include "dawn_native/ObjectBase.h"
 #include "dawn_native/PassResourceUsage.h"
@@ -32,7 +33,7 @@ namespace dawn_native {
     struct RenderBundleDescriptor;
     class RenderBundleEncoder;
 
-    class RenderBundleBase : public ObjectBase {
+    class RenderBundleBase : public ApiObjectBase {
       public:
         RenderBundleBase(RenderBundleEncoder* encoder,
                          const RenderBundleDescriptor* descriptor,
@@ -41,6 +42,8 @@ namespace dawn_native {
                          IndirectDrawMetadata indirectDrawMetadata);
 
         static RenderBundleBase* MakeError(DeviceBase* device);
+
+        ObjectType GetType() const override;
 
         CommandIterator* GetCommands();
 

@@ -30,11 +30,13 @@ namespace dawn_native {
 
     TextureDescriptor GetSwapChainBaseTextureDescriptor(NewSwapChainBase* swapChain);
 
-    class SwapChainBase : public ObjectBase {
+    class SwapChainBase : public ApiObjectBase {
       public:
         SwapChainBase(DeviceBase* device);
 
         static SwapChainBase* MakeError(DeviceBase* device);
+
+        ObjectType GetType() const override;
 
         // Dawn API
         virtual void APIConfigure(wgpu::TextureFormat format,

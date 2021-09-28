@@ -17,6 +17,7 @@
 
 #include "dawn_native/CommandBufferStateTracker.h"
 #include "dawn_native/Error.h"
+#include "dawn_native/Forward.h"
 #include "dawn_native/PassResourceUsageTracker.h"
 #include "dawn_native/ProgrammablePassEncoder.h"
 
@@ -33,6 +34,8 @@ namespace dawn_native {
         static ComputePassEncoder* MakeError(DeviceBase* device,
                                              CommandEncoder* commandEncoder,
                                              EncodingContext* encodingContext);
+
+        ObjectType GetType() const override;
 
         void APIEndPass();
 
