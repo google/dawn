@@ -13,6 +13,8 @@
 # limitations under the License.
 
 add_library(dawn_node_binding STATIC
+    "AsyncRunner.cpp"
+    "AsyncRunner.h"
     "Errors.cpp"
     "Errors.h"
 )
