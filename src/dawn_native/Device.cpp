@@ -484,6 +484,7 @@ namespace dawn_native {
                         "%s is associated with %s, and cannot be used with %s.", object,
                         object->GetDevice(), this);
 
+        // TODO(dawn:563): Preserve labels for error objects.
         DAWN_INVALID_IF(object->IsError(), "%s is an error.", object);
 
         return {};
@@ -852,7 +853,8 @@ namespace dawn_native {
 
     BindGroupBase* DeviceBase::APICreateBindGroup(const BindGroupDescriptor* descriptor) {
         Ref<BindGroupBase> result;
-        if (ConsumedError(CreateBindGroup(descriptor), &result)) {
+        if (ConsumedError(CreateBindGroup(descriptor), &result, "calling CreateBindGroup(%s).",
+                          descriptor)) {
             return BindGroupBase::MakeError(this);
         }
         return result.Detach();
@@ -860,14 +862,16 @@ namespace dawn_native {
     BindGroupLayoutBase* DeviceBase::APICreateBindGroupLayout(
         const BindGroupLayoutDescriptor* descriptor) {
         Ref<BindGroupLayoutBase> result;
-        if (ConsumedError(CreateBindGroupLayout(descriptor), &result)) {
+        if (ConsumedError(CreateBindGroupLayout(descriptor), &result,
+                          "calling CreateBindGroupLayout(%s).", descriptor)) {
             return BindGroupLayoutBase::MakeError(this);
         }
         return result.Detach();
     }
     BufferBase* DeviceBase::APICreateBuffer(const BufferDescriptor* descriptor) {
         Ref<BufferBase> result = nullptr;
-        if (ConsumedError(CreateBuffer(descriptor), &result)) {
+        if (ConsumedError(CreateBuffer(descriptor), &result, "calling CreateBuffer(%s).",
+                          descriptor)) {
             ASSERT(result == nullptr);
             return BufferBase::MakeError(this, descriptor);
         }
@@ -880,7 +884,8 @@ namespace dawn_native {
     ComputePipelineBase* DeviceBase::APICreateComputePipeline(
         const ComputePipelineDescriptor* descriptor) {
         Ref<ComputePipelineBase> result;
-        if (ConsumedError(CreateComputePipeline(descriptor), &result)) {
+        if (ConsumedError(CreateComputePipeline(descriptor), &result,
+                          "calling CreateComputePipeline(%s).", descriptor)) {
             return ComputePipelineBase::MakeError(this);
         }
         return result.Detach();
@@ -902,21 +907,24 @@ namespace dawn_native {
     PipelineLayoutBase* DeviceBase::APICreatePipelineLayout(
         const PipelineLayoutDescriptor* descriptor) {
         Ref<PipelineLayoutBase> result;
-        if (ConsumedError(CreatePipelineLayout(descriptor), &result)) {
+        if (ConsumedError(CreatePipelineLayout(descriptor), &result,
+                          "calling CreatePipelineLayout(%s).", descriptor)) {
             return PipelineLayoutBase::MakeError(this);
         }
         return result.Detach();
     }
     QuerySetBase* DeviceBase::APICreateQuerySet(const QuerySetDescriptor* descriptor) {
         Ref<QuerySetBase> result;
-        if (ConsumedError(CreateQuerySet(descriptor), &result)) {
+        if (ConsumedError(CreateQuerySet(descriptor), &result, "calling CreateQuerySet(%s).",
+                          descriptor)) {
             return QuerySetBase::MakeError(this);
         }
         return result.Detach();
     }
     SamplerBase* DeviceBase::APICreateSampler(const SamplerDescriptor* descriptor) {
         Ref<SamplerBase> result;
-        if (ConsumedError(CreateSampler(descriptor), &result)) {
+        if (ConsumedError(CreateSampler(descriptor), &result, "calling CreateSampler(%s).",
+                          descriptor)) {
             return SamplerBase::MakeError(this);
         }
         return result.Detach();
@@ -924,6 +932,7 @@ namespace dawn_native {
     void DeviceBase::APICreateRenderPipelineAsync(const RenderPipelineDescriptor* descriptor,
                                                   WGPUCreateRenderPipelineAsyncCallback callback,
                                                   void* userdata) {
+        // TODO(dawn:563): Add validation error context.
         MaybeError maybeResult = CreateRenderPipelineAsync(descriptor, callback, userdata);
 
         // Call the callback directly when a validation error has been found in the front-end
@@ -938,7 +947,8 @@ namespace dawn_native {
     RenderBundleEncoder* DeviceBase::APICreateRenderBundleEncoder(
         const RenderBundleEncoderDescriptor* descriptor) {
         Ref<RenderBundleEncoder> result;
-        if (ConsumedError(CreateRenderBundleEncoder(descriptor), &result)) {
+        if (ConsumedError(CreateRenderBundleEncoder(descriptor), &result,
+                          "calling CreateRenderBundleEncoder(%s).", descriptor)) {
             return RenderBundleEncoder::MakeError(this);
         }
         return result.Detach();
@@ -946,7 +956,8 @@ namespace dawn_native {
     RenderPipelineBase* DeviceBase::APICreateRenderPipeline(
         const RenderPipelineDescriptor* descriptor) {
         Ref<RenderPipelineBase> result;
-        if (ConsumedError(CreateRenderPipeline(descriptor), &result)) {
+        if (ConsumedError(CreateRenderPipeline(descriptor), &result,
+                          "calling CreateRenderPipeline(%s).", descriptor)) {
             return RenderPipelineBase::MakeError(this);
         }
         return result.Detach();
@@ -955,7 +966,8 @@ namespace dawn_native {
         Ref<ShaderModuleBase> result;
         std::unique_ptr<OwnedCompilationMessages> compilationMessages(
             std::make_unique<OwnedCompilationMessages>());
-        if (ConsumedError(CreateShaderModule(descriptor, compilationMessages.get()), &result)) {
+        if (ConsumedError(CreateShaderModule(descriptor, compilationMessages.get()), &result,
+                          "calling CreateShaderModule(%s).", descriptor)) {
             DAWN_ASSERT(result == nullptr);
             result = ShaderModuleBase::MakeError(this);
         }
@@ -968,14 +980,16 @@ namespace dawn_native {
     SwapChainBase* DeviceBase::APICreateSwapChain(Surface* surface,
                                                   const SwapChainDescriptor* descriptor) {
         Ref<SwapChainBase> result;
-        if (ConsumedError(CreateSwapChain(surface, descriptor), &result)) {
+        if (ConsumedError(CreateSwapChain(surface, descriptor), &result,
+                          "calling CreateSwapChain(%s).", descriptor)) {
             return SwapChainBase::MakeError(this);
         }
         return result.Detach();
     }
     TextureBase* DeviceBase::APICreateTexture(const TextureDescriptor* descriptor) {
         Ref<TextureBase> result;
-        if (ConsumedError(CreateTexture(descriptor), &result)) {
+        if (ConsumedError(CreateTexture(descriptor), &result, "calling CreateTexture(%s).",
+                          descriptor)) {
             return TextureBase::MakeError(this);
         }
         return result.Detach();
@@ -1042,7 +1056,8 @@ namespace dawn_native {
     ExternalTextureBase* DeviceBase::APICreateExternalTexture(
         const ExternalTextureDescriptor* descriptor) {
         Ref<ExternalTextureBase> result = nullptr;
-        if (ConsumedError(CreateExternalTexture(descriptor), &result)) {
+        if (ConsumedError(CreateExternalTexture(descriptor), &result,
+                          "calling CreateExternalTexture(%s).", descriptor)) {
             return ExternalTextureBase::MakeError(this);
         }
 

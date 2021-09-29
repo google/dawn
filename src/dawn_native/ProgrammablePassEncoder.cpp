@@ -55,45 +55,55 @@ namespace dawn_native {
     }
 
     void ProgrammablePassEncoder::APIInsertDebugMarker(const char* groupLabel) {
-        mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            InsertDebugMarkerCmd* cmd =
-                allocator->Allocate<InsertDebugMarkerCmd>(Command::InsertDebugMarker);
-            cmd->length = strlen(groupLabel);
+        mEncodingContext->TryEncode(
+            this,
+            [&](CommandAllocator* allocator) -> MaybeError {
+                InsertDebugMarkerCmd* cmd =
+                    allocator->Allocate<InsertDebugMarkerCmd>(Command::InsertDebugMarker);
+                cmd->length = strlen(groupLabel);
 
-            char* label = allocator->AllocateData<char>(cmd->length + 1);
-            memcpy(label, groupLabel, cmd->length + 1);
+                char* label = allocator->AllocateData<char>(cmd->length + 1);
+                memcpy(label, groupLabel, cmd->length + 1);
 
-            return {};
-        });
+                return {};
+            },
+            "encoding InsertDebugMarker(\"%s\")", groupLabel);
     }
 
     void ProgrammablePassEncoder::APIPopDebugGroup() {
-        mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            if (IsValidationEnabled()) {
-                if (mDebugGroupStackSize == 0) {
-                    return DAWN_VALIDATION_ERROR("Pop must be balanced by a corresponding Push.");
+        mEncodingContext->TryEncode(
+            this,
+            [&](CommandAllocator* allocator) -> MaybeError {
+                if (IsValidationEnabled()) {
+                    if (mDebugGroupStackSize == 0) {
+                        return DAWN_VALIDATION_ERROR(
+                            "Pop must be balanced by a corresponding Push.");
+                    }
                 }
-            }
-            allocator->Allocate<PopDebugGroupCmd>(Command::PopDebugGroup);
-            mDebugGroupStackSize--;
+                allocator->Allocate<PopDebugGroupCmd>(Command::PopDebugGroup);
+                mDebugGroupStackSize--;
 
-            return {};
-        });
+                return {};
+            },
+            "encoding PopDebugGroup()");
     }
 
     void ProgrammablePassEncoder::APIPushDebugGroup(const char* groupLabel) {
-        mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            PushDebugGroupCmd* cmd =
-                allocator->Allocate<PushDebugGroupCmd>(Command::PushDebugGroup);
-            cmd->length = strlen(groupLabel);
+        mEncodingContext->TryEncode(
+            this,
+            [&](CommandAllocator* allocator) -> MaybeError {
+                PushDebugGroupCmd* cmd =
+                    allocator->Allocate<PushDebugGroupCmd>(Command::PushDebugGroup);
+                cmd->length = strlen(groupLabel);
 
-            char* label = allocator->AllocateData<char>(cmd->length + 1);
-            memcpy(label, groupLabel, cmd->length + 1);
+                char* label = allocator->AllocateData<char>(cmd->length + 1);
+                memcpy(label, groupLabel, cmd->length + 1);
 
-            mDebugGroupStackSize++;
+                mDebugGroupStackSize++;
 
-            return {};
-        });
+                return {};
+            },
+            "encoding PushDebugGroup(\"%s\")", groupLabel);
     }
 
     MaybeError ProgrammablePassEncoder::ValidateSetBindGroup(

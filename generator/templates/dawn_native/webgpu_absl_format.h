@@ -22,6 +22,22 @@
 namespace dawn_native {
 
     //
+    // Structs (Manually written)
+    //
+
+    struct Color;
+    absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
+    AbslFormatConvert(const Color* value,
+                      const absl::FormatConversionSpec& spec,
+                      absl::FormatSink* s);
+
+    struct Extent3D;
+    absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
+    AbslFormatConvert(const Extent3D* value,
+                      const absl::FormatConversionSpec& spec,
+                      absl::FormatSink* s);
+
+    //
     // Objects
     //
 

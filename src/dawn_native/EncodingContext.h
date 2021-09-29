@@ -51,6 +51,25 @@ namespace dawn_native {
             return false;
         }
 
+        template <typename... Args>
+        inline bool ConsumedError(MaybeError maybeError,
+                                  const char* formatStr,
+                                  const Args&... args) {
+            if (DAWN_UNLIKELY(maybeError.IsError())) {
+                std::unique_ptr<ErrorData> error = maybeError.AcquireError();
+                if (error->GetType() == InternalErrorType::Validation) {
+                    std::string out;
+                    absl::UntypedFormatSpec format(formatStr);
+                    if (absl::FormatUntyped(&out, format, {absl::FormatArg(args)...})) {
+                        error->AppendContext(std::move(out));
+                    }
+                }
+                HandleError(std::move(error));
+                return true;
+            }
+            return false;
+        }
+
         inline bool CheckCurrentEncoder(const ObjectBase* encoder) {
             if (DAWN_UNLIKELY(encoder != mCurrentEncoder)) {
                 if (mCurrentEncoder != mTopLevelEncoder) {
@@ -72,6 +91,18 @@ namespace dawn_native {
             }
             ASSERT(!mWasMovedToIterator);
             return !ConsumedError(encodeFunction(&mPendingCommands));
+        }
+
+        template <typename EncodeFunction, typename... Args>
+        inline bool TryEncode(const ObjectBase* encoder,
+                              EncodeFunction&& encodeFunction,
+                              const char* formatStr,
+                              const Args&... args) {
+            if (!CheckCurrentEncoder(encoder)) {
+                return false;
+            }
+            ASSERT(!mWasMovedToIterator);
+            return !ConsumedError(encodeFunction(&mPendingCommands), formatStr, args...);
         }
 
         // Must be called prior to encoding a BeginRenderPassCmd. Note that it's OK to call this

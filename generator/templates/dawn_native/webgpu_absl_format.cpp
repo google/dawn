@@ -22,6 +22,36 @@
 namespace dawn_native {
 
     //
+    // Structs (Manually written)
+    //
+
+    absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
+    AbslFormatConvert(const Color* value,
+                      const absl::FormatConversionSpec& spec,
+                      absl::FormatSink* s) {
+        if (value == nullptr) {
+            s->Append("[null]");
+            return {true};
+        }
+        s->Append(absl::StrFormat("[Color r:%f, g:%f, b:%f, a:%f]",
+            value->r, value->g, value->b, value->a));
+        return {true};
+    }
+
+    absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
+    AbslFormatConvert(const Extent3D* value,
+                      const absl::FormatConversionSpec& spec,
+                      absl::FormatSink* s) {
+        if (value == nullptr) {
+            s->Append("[null]");
+            return {true};
+        }
+        s->Append(absl::StrFormat("[Extent3D width:%u, height:%u, depthOrArrayLayers:%u]",
+            value->width, value->height, value->depthOrArrayLayers));
+        return {true};
+    }
+
+    //
     // Objects
     //
 
@@ -29,6 +59,10 @@ namespace dawn_native {
     AbslFormatConvert(const DeviceBase* value,
                       const absl::FormatConversionSpec& spec,
                       absl::FormatSink* s) {
+        if (value == nullptr) {
+            s->Append("[null]");
+            return {true};
+        }
         s->Append("[Device");
         const std::string& label = value->GetLabel();
         if (!label.empty()) {
@@ -42,6 +76,10 @@ namespace dawn_native {
     AbslFormatConvert(const ApiObjectBase* value,
                       const absl::FormatConversionSpec& spec,
                       absl::FormatSink* s) {
+        if (value == nullptr) {
+            s->Append("[null]");
+            return {true};
+        }
         s->Append("[");
         s->Append(ObjectTypeAsString(value->GetType()));
         const std::string& label = value->GetLabel();
@@ -56,6 +94,10 @@ namespace dawn_native {
     AbslFormatConvert(const TextureViewBase* value,
                       const absl::FormatConversionSpec& spec,
                       absl::FormatSink* s) {
+        if (value == nullptr) {
+            s->Append("[null]");
+            return {true};
+        }
         s->Append("[");
         s->Append(ObjectTypeAsString(value->GetType()));
         const std::string& label = value->GetLabel();
@@ -81,6 +123,10 @@ namespace dawn_native {
                 AbslFormatConvert(const {{as_cppType(type.name)}}* value,
                                     const absl::FormatConversionSpec& spec,
                                     absl::FormatSink* s) {
+                    if (value == nullptr) {
+                        s->Append("[null]");
+                        return {true};
+                    }
                     s->Append("[{{as_cppType(type.name)}}");
                     if (value->label != nullptr) {
                         s->Append(absl::StrFormat(" \"%s\"", value->label));
