@@ -47,6 +47,10 @@ namespace dawn_native {
         mContexts.push_back(std::move(context));
     }
 
+    void ErrorData::AppendDebugGroup(std::string label) {
+        mDebugGroups.push_back(std::move(label));
+    }
+
     InternalErrorType ErrorData::GetType() const {
         return mType;
     }
@@ -61,6 +65,35 @@ namespace dawn_native {
 
     const std::vector<std::string>& ErrorData::GetContexts() const {
         return mContexts;
+    }
+
+    const std::vector<std::string>& ErrorData::GetDebugGroups() const {
+        return mDebugGroups;
+    }
+
+    std::string ErrorData::GetFormattedMessage() const {
+        std::ostringstream ss;
+        ss << mMessage;
+
+        if (!mContexts.empty()) {
+            for (auto context : mContexts) {
+                ss << "\n - While " << context;
+            }
+        } else {
+            for (const auto& callsite : mBacktrace) {
+                ss << "\n    at " << callsite.function << " (" << callsite.file << ":"
+                   << callsite.line << ")";
+            }
+        }
+
+        if (!mDebugGroups.empty()) {
+            ss << "\n\nDebug group stack: ";
+            for (auto label : mDebugGroups) {
+                ss << "\n > \"" << label << "\"";
+            }
+        }
+
+        return ss.str();
     }
 
 }  // namespace dawn_native

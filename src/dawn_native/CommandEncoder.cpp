@@ -848,6 +848,7 @@ namespace dawn_native {
                 }
                 allocator->Allocate<PopDebugGroupCmd>(Command::PopDebugGroup);
                 mDebugGroupStackSize--;
+                mEncodingContext.PopDebugGroupLabel();
 
                 return {};
             },
@@ -866,6 +867,7 @@ namespace dawn_native {
                 memcpy(label, groupLabel, cmd->length + 1);
 
                 mDebugGroupStackSize++;
+                mEncodingContext.PushDebugGroupLabel(groupLabel);
 
                 return {};
             },

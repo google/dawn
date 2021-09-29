@@ -56,6 +56,12 @@ namespace dawn_native {
     }
 
     void EncodingContext::HandleError(std::unique_ptr<ErrorData> error) {
+        // Append in reverse so that the most recently set debug group is printed first, like a
+        // call stack.
+        for (auto iter = mDebugGroupLabels.rbegin(); iter != mDebugGroupLabels.rend(); ++iter) {
+            error->AppendDebugGroup(*iter);
+        }
+
         if (!IsFinished()) {
             // Encoding should only generate validation errors.
             ASSERT(error->GetType() == InternalErrorType::Validation);
@@ -65,7 +71,7 @@ namespace dawn_native {
                 mError = std::move(error);
             }
         } else {
-            mDevice->HandleError(error->GetType(), error->GetMessage().c_str());
+            mDevice->HandleError(error->GetType(), error->GetFormattedMessage().c_str());
         }
     }
 
@@ -144,6 +150,14 @@ namespace dawn_native {
         ASSERT(!mWereComputePassUsagesAcquired);
         mWereComputePassUsagesAcquired = true;
         return std::move(mComputePassUsages);
+    }
+
+    void EncodingContext::PushDebugGroupLabel(const char* groupLabel) {
+        mDebugGroupLabels.emplace_back(groupLabel);
+    }
+
+    void EncodingContext::PopDebugGroupLabel() {
+        mDebugGroupLabels.pop_back();
     }
 
     MaybeError EncodingContext::Finish() {

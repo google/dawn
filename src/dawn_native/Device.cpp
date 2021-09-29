@@ -402,22 +402,7 @@ namespace dawn_native {
 
     void DeviceBase::ConsumeError(std::unique_ptr<ErrorData> error) {
         ASSERT(error != nullptr);
-        std::ostringstream ss;
-        ss << error->GetMessage();
-
-        // TODO(dawn:563): Print debug groups when avaialble.
-        const std::vector<std::string>& contexts = error->GetContexts();
-        if (!contexts.empty()) {
-            for (auto context : contexts) {
-                ss << "\n - While " << context;
-            }
-        } else {
-            for (const auto& callsite : error->GetBacktrace()) {
-                ss << "\n    at " << callsite.function << " (" << callsite.file << ":"
-                   << callsite.line << ")";
-            }
-        }
-        HandleError(error->GetType(), ss.str().c_str());
+        HandleError(error->GetType(), error->GetFormattedMessage().c_str());
     }
 
     void DeviceBase::APISetLoggingCallback(wgpu::LoggingCallback callback, void* userdata) {
