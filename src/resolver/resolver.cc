@@ -2659,7 +2659,10 @@ bool Resolver::ValidateFunctionCall(const ast::CallExpression* call,
         }
       }
 
-      if (!is_valid) {
+      if (!is_valid &&
+          IsValidationEnabled(
+              param->declaration->decorations(),
+              ast::DisabledValidation::kIgnoreInvalidPointerArgument)) {
         AddError(
             "expected an address-of expression of a variable identifier "
             "expression or a function parameter",
