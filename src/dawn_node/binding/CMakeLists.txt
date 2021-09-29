@@ -37,6 +37,7 @@ add_library(dawn_node_binding STATIC
     "GPUComputePassEncoder.h"
     "GPUComputePipeline.cpp"
     "GPUComputePipeline.h"
+    "GPUDevice.cpp"
     "GPUDevice.h"
     "GPUPipelineLayout.cpp"
     "GPUPipelineLayout.h"
