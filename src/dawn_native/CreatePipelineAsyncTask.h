@@ -92,7 +92,6 @@ namespace dawn_native {
     class CreateRenderPipelineAsyncTask {
       public:
         CreateRenderPipelineAsyncTask(Ref<RenderPipelineBase> nonInitializedRenderPipeline,
-                                      size_t blueprintHash,
                                       WGPUCreateRenderPipelineAsyncCallback callback,
                                       void* userdata);
 
@@ -102,7 +101,6 @@ namespace dawn_native {
 
       private:
         Ref<RenderPipelineBase> mRenderPipeline;
-        size_t mBlueprintHash;
         WGPUCreateRenderPipelineAsyncCallback mCallback;
         void* mUserdata;
     };

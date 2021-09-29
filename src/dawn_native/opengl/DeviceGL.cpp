@@ -142,9 +142,9 @@ namespace dawn_native { namespace opengl {
         const QuerySetDescriptor* descriptor) {
         return AcquireRef(new QuerySet(this, descriptor));
     }
-    ResultOrError<Ref<RenderPipelineBase>> Device::CreateRenderPipelineImpl(
+    Ref<RenderPipelineBase> Device::CreateUninitializedRenderPipelineImpl(
         const RenderPipelineDescriptor* descriptor) {
-        return RenderPipeline::Create(this, descriptor);
+        return RenderPipeline::CreateUninitialized(this, descriptor);
     }
     ResultOrError<Ref<SamplerBase>> Device::CreateSamplerImpl(const SamplerDescriptor* descriptor) {
         return AcquireRef(new Sampler(this, descriptor));

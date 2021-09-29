@@ -316,12 +316,10 @@ namespace dawn_native { namespace d3d12 {
 
     }  // anonymous namespace
 
-    ResultOrError<Ref<RenderPipeline>> RenderPipeline::Create(
+    Ref<RenderPipeline> RenderPipeline::CreateUninitialized(
         Device* device,
         const RenderPipelineDescriptor* descriptor) {
-        Ref<RenderPipeline> pipeline = AcquireRef(new RenderPipeline(device, descriptor));
-        DAWN_TRY(pipeline->Initialize());
-        return pipeline;
+        return AcquireRef(new RenderPipeline(device, descriptor));
     }
 
     MaybeError RenderPipeline::Initialize() {
@@ -472,14 +470,11 @@ namespace dawn_native { namespace d3d12 {
         return inputLayoutDescriptor;
     }
 
-    void RenderPipeline::CreateAsync(Device* device,
-                                     const RenderPipelineDescriptor* descriptor,
-                                     size_t blueprintHash,
-                                     WGPUCreateRenderPipelineAsyncCallback callback,
-                                     void* userdata) {
-        Ref<RenderPipeline> pipeline = AcquireRef(new RenderPipeline(device, descriptor));
+    void RenderPipeline::InitializeAsync(Ref<RenderPipelineBase> renderPipeline,
+                                         WGPUCreateRenderPipelineAsyncCallback callback,
+                                         void* userdata) {
         std::unique_ptr<CreateRenderPipelineAsyncTask> asyncTask =
-            std::make_unique<CreateRenderPipelineAsyncTask>(pipeline, blueprintHash, callback,
+            std::make_unique<CreateRenderPipelineAsyncTask>(std::move(renderPipeline), callback,
                                                             userdata);
         CreateRenderPipelineAsyncTask::RunAsync(std::move(asyncTask));
     }

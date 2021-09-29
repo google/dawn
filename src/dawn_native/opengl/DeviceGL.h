@@ -97,7 +97,7 @@ namespace dawn_native { namespace opengl {
             const PipelineLayoutDescriptor* descriptor) override;
         ResultOrError<Ref<QuerySetBase>> CreateQuerySetImpl(
             const QuerySetDescriptor* descriptor) override;
-        ResultOrError<Ref<RenderPipelineBase>> CreateRenderPipelineImpl(
+        Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
             const RenderPipelineDescriptor* descriptor) override;
         ResultOrError<Ref<SamplerBase>> CreateSamplerImpl(
             const SamplerDescriptor* descriptor) override;

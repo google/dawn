@@ -29,9 +29,8 @@ namespace dawn_native { namespace opengl {
 
     class RenderPipeline final : public RenderPipelineBase, public PipelineGL {
       public:
-        static ResultOrError<Ref<RenderPipeline>> Create(
-            Device* device,
-            const RenderPipelineDescriptor* descriptor);
+        static Ref<RenderPipeline> CreateUninitialized(Device* device,
+                                                       const RenderPipelineDescriptor* descriptor);
 
         GLenum GetGLPrimitiveTopology() const;
         ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes> GetAttributesUsingVertexBuffer(
@@ -39,10 +38,11 @@ namespace dawn_native { namespace opengl {
 
         void ApplyNow(PersistentPipelineState& persistentPipelineState);
 
+        MaybeError Initialize() override;
+
       private:
         RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor);
         ~RenderPipeline() override;
-        MaybeError Initialize() override;
 
         void CreateVAOForVertexState();
 

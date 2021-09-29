@@ -141,11 +141,9 @@ namespace dawn_native {
 
     CreateRenderPipelineAsyncTask::CreateRenderPipelineAsyncTask(
         Ref<RenderPipelineBase> nonInitializedRenderPipeline,
-        size_t blueprintHash,
         WGPUCreateRenderPipelineAsyncCallback callback,
         void* userdata)
         : mRenderPipeline(std::move(nonInitializedRenderPipeline)),
-          mBlueprintHash(blueprintHash),
           mCallback(callback),
           mUserdata(userdata) {
         ASSERT(mRenderPipeline != nullptr);
@@ -160,7 +158,7 @@ namespace dawn_native {
         }
 
         mRenderPipeline->GetDevice()->AddRenderPipelineAsyncCallbackTask(
-            mRenderPipeline, errorMessage, mCallback, mUserdata, mBlueprintHash);
+            mRenderPipeline, errorMessage, mCallback, mUserdata);
     }
 
     void CreateRenderPipelineAsyncTask::RunAsync(

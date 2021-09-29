@@ -307,8 +307,7 @@ namespace dawn_native {
         void AddRenderPipelineAsyncCallbackTask(Ref<RenderPipelineBase> pipeline,
                                                 std::string errorMessage,
                                                 WGPUCreateRenderPipelineAsyncCallback callback,
-                                                void* userdata,
-                                                size_t blueprintHash);
+                                                void* userdata);
 
         PipelineCompatibilityToken GetNextPipelineCompatibilityToken();
 
@@ -339,7 +338,7 @@ namespace dawn_native {
             const PipelineLayoutDescriptor* descriptor) = 0;
         virtual ResultOrError<Ref<QuerySetBase>> CreateQuerySetImpl(
             const QuerySetDescriptor* descriptor) = 0;
-        virtual ResultOrError<Ref<RenderPipelineBase>> CreateRenderPipelineImpl(
+        virtual Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
             const RenderPipelineDescriptor* descriptor) = 0;
         virtual ResultOrError<Ref<SamplerBase>> CreateSamplerImpl(
             const SamplerDescriptor* descriptor) = 0;
@@ -367,21 +366,23 @@ namespace dawn_native {
 
         std::pair<Ref<ComputePipelineBase>, size_t> GetCachedComputePipeline(
             const ComputePipelineDescriptor* descriptor);
-        std::pair<Ref<RenderPipelineBase>, size_t> GetCachedRenderPipeline(
-            const RenderPipelineDescriptor* descriptor);
+        Ref<RenderPipelineBase> GetCachedRenderPipeline(
+            RenderPipelineBase* uninitializedRenderPipeline);
         Ref<ComputePipelineBase> AddOrGetCachedComputePipeline(
             Ref<ComputePipelineBase> computePipeline,
             size_t blueprintHash);
-        Ref<RenderPipelineBase> AddOrGetCachedRenderPipeline(Ref<RenderPipelineBase> renderPipeline,
-                                                             size_t blueprintHash);
+        Ref<RenderPipelineBase> AddOrGetCachedRenderPipeline(
+            Ref<RenderPipelineBase> renderPipeline);
         virtual void CreateComputePipelineAsyncImpl(const ComputePipelineDescriptor* descriptor,
                                                     size_t blueprintHash,
                                                     WGPUCreateComputePipelineAsyncCallback callback,
                                                     void* userdata);
-        virtual void CreateRenderPipelineAsyncImpl(const RenderPipelineDescriptor* descriptor,
-                                                   size_t blueprintHash,
-                                                   WGPUCreateRenderPipelineAsyncCallback callback,
-                                                   void* userdata);
+        Ref<RenderPipelineBase> CreateUninitializedRenderPipeline(
+            const RenderPipelineDescriptor* descriptor);
+        virtual void InitializeRenderPipelineAsyncImpl(
+            Ref<RenderPipelineBase> renderPipeline,
+            WGPUCreateRenderPipelineAsyncCallback callback,
+            void* userdata);
 
         void ApplyToggleOverrides(const DeviceDescriptor* deviceDescriptor);
         void ApplyExtensions(const DeviceDescriptor* deviceDescriptor);

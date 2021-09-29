@@ -48,7 +48,7 @@ namespace dawn_native { namespace null {
     using PipelineLayout = PipelineLayoutBase;
     class QuerySet;
     class Queue;
-    using RenderPipeline = RenderPipelineBase;
+    class RenderPipeline;
     using Sampler = SamplerBase;
     class ShaderModule;
     class SwapChain;
@@ -135,7 +135,7 @@ namespace dawn_native { namespace null {
             const PipelineLayoutDescriptor* descriptor) override;
         ResultOrError<Ref<QuerySetBase>> CreateQuerySetImpl(
             const QuerySetDescriptor* descriptor) override;
-        ResultOrError<Ref<RenderPipelineBase>> CreateRenderPipelineImpl(
+        Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
             const RenderPipelineDescriptor* descriptor) override;
         ResultOrError<Ref<SamplerBase>> CreateSamplerImpl(
             const SamplerDescriptor* descriptor) override;
@@ -249,6 +249,13 @@ namespace dawn_native { namespace null {
                                    uint64_t bufferOffset,
                                    const void* data,
                                    size_t size) override;
+    };
+
+    class RenderPipeline final : public RenderPipelineBase {
+      public:
+        using RenderPipelineBase::RenderPipelineBase;
+
+        MaybeError Initialize() override;
     };
 
     class ShaderModule final : public ShaderModuleBase {

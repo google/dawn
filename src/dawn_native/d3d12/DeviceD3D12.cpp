@@ -346,9 +346,9 @@ namespace dawn_native { namespace d3d12 {
         const QuerySetDescriptor* descriptor) {
         return QuerySet::Create(this, descriptor);
     }
-    ResultOrError<Ref<RenderPipelineBase>> Device::CreateRenderPipelineImpl(
+    Ref<RenderPipelineBase> Device::CreateUninitializedRenderPipelineImpl(
         const RenderPipelineDescriptor* descriptor) {
-        return RenderPipeline::Create(this, descriptor);
+        return RenderPipeline::CreateUninitialized(this, descriptor);
     }
     ResultOrError<Ref<SamplerBase>> Device::CreateSamplerImpl(const SamplerDescriptor* descriptor) {
         return Sampler::Create(this, descriptor);
@@ -382,11 +382,10 @@ namespace dawn_native { namespace d3d12 {
                                                 void* userdata) {
         ComputePipeline::CreateAsync(this, descriptor, blueprintHash, callback, userdata);
     }
-    void Device::CreateRenderPipelineAsyncImpl(const RenderPipelineDescriptor* descriptor,
-                                               size_t blueprintHash,
-                                               WGPUCreateRenderPipelineAsyncCallback callback,
-                                               void* userdata) {
-        RenderPipeline::CreateAsync(this, descriptor, blueprintHash, callback, userdata);
+    void Device::InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> renderPipeline,
+                                                   WGPUCreateRenderPipelineAsyncCallback callback,
+                                                   void* userdata) {
+        RenderPipeline::InitializeAsync(renderPipeline, callback, userdata);
     }
 
     ResultOrError<std::unique_ptr<StagingBufferBase>> Device::CreateStagingBuffer(size_t size) {

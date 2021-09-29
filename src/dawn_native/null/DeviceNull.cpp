@@ -124,7 +124,7 @@ namespace dawn_native { namespace null {
         const QuerySetDescriptor* descriptor) {
         return AcquireRef(new QuerySet(this, descriptor));
     }
-    ResultOrError<Ref<RenderPipelineBase>> Device::CreateRenderPipelineImpl(
+    Ref<RenderPipelineBase> Device::CreateUninitializedRenderPipelineImpl(
         const RenderPipelineDescriptor* descriptor) {
         return AcquireRef(new RenderPipeline(this, descriptor));
     }
@@ -356,6 +356,11 @@ namespace dawn_native { namespace null {
                                       const void* data,
                                       size_t size) {
         ToBackend(buffer)->DoWriteBuffer(bufferOffset, data, size);
+        return {};
+    }
+
+    // RenderPipeline
+    MaybeError RenderPipeline::Initialize() {
         return {};
     }
 
