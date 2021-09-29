@@ -35,7 +35,7 @@ namespace dawn_native { namespace opengl {
 
       private:
         using ComputePipelineBase::ComputePipelineBase;
-        ~ComputePipeline() override;
+        ~ComputePipeline() override = default;
         MaybeError Initialize() override;
     };
 
