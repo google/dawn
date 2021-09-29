@@ -13,7 +13,7 @@ vars = {
   'gpuweb_cts_revision': 'b0291fd966b55a5efc496772555b94842bde1085',
   'protobuf_revision': 'fde7cf7358ec7cd69e8db9be4f1fa6a5c431386a',
   'spirv_headers_revision': 'ae217c17809fadb232ec94b29304b4afcd417bb4',
-  'spirv_tools_revision': 'c3adcb034fe4dcf77749ea6db2ad0ba91a6fc01a',
+  'spirv_tools_revision': 'ba4b390c367e09edaad36f0376a87aa03620fd4b',
   'testing_revision': '2691851e49de541c3fe42fa8692ddcdee938162f',
 }
 
