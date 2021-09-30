@@ -13,7 +13,7 @@
 # limitations under the License.
 
 set(GEN_DIR         "${CMAKE_CURRENT_BINARY_DIR}/gen")
-set(IDLGEN_TOOL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmd/idlgen")
+set(IDLGEN_TOOL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tools/src/cmd/idlgen")
 
 # idlgen() is a function that uses the tools/cmd/idlgen/main.go tool to generate
 # code from an IDL file and template.
