@@ -151,10 +151,6 @@ namespace dawn_native { namespace vulkan {
         }
         if (limits.maxPerStageDescriptorSampledImages < kMaxSampledTexturesPerShaderStage) {
             return DAWN_INTERNAL_ERROR(
-                "Insufficient Vulkan limits for maxDynamicStorageBuffersPerPipelineLayout");
-        }
-        if (limits.maxPerStageDescriptorSampledImages < kMaxSampledTexturesPerShaderStage) {
-            return DAWN_INTERNAL_ERROR(
                 "Insufficient Vulkan limits for maxSampledTexturesPerShaderStage");
         }
         if (limits.maxPerStageDescriptorSamplers < kMaxSamplersPerShaderStage) {
