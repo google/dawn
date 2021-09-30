@@ -169,6 +169,14 @@ namespace dawn_native {
                     DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
                     DAWN_TRY(mCommandBufferState.ValidateCanDrawIndexed());
 
+                    // Disallow draw indexed indirect until the validation is correctly implemented.
+                    if (GetDevice()->IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
+                        return DAWN_VALIDATION_ERROR(
+                            "DrawIndexedIndirect is disallowed because it doesn't correctly "
+                            "validate that "
+                            "the index range is valid yet.");
+                    }
+
                     DAWN_INVALID_IF(indirectOffset % 4 != 0,
                                     "Indirect offset (%u) is not a multiple of 4.", indirectOffset);
 
