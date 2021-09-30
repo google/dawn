@@ -19,6 +19,51 @@
 
 namespace wgpu { namespace binding {
 
+    namespace {
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // wgpu::binding::<anon>::Features
+        // Implements interop::GPUSupportedFeatures
+        ////////////////////////////////////////////////////////////////////////////////
+        class Features : public interop::GPUSupportedFeatures {
+          public:
+            Features(WGPUDeviceProperties properties) : properties_(std::move(properties)) {
+            }
+
+            bool has(interop::GPUFeatureName feature) {
+                switch (feature) {
+                    case interop::GPUFeatureName::kDepthClamping:
+                        return properties_.depthClamping;
+                    case interop::GPUFeatureName::kDepth24UnormStencil8:
+                        return false;  // TODO(crbug.com/dawn/1130)
+                    case interop::GPUFeatureName::kDepth32FloatStencil8:
+                        return false;  // TODO(crbug.com/dawn/1130)
+                    case interop::GPUFeatureName::kPipelineStatisticsQuery:
+                        return properties_.pipelineStatisticsQuery;
+                    case interop::GPUFeatureName::kTextureCompressionBc:
+                        return properties_.textureCompressionBC;
+                    case interop::GPUFeatureName::kTimestampQuery:
+                        return properties_.timestampQuery;
+                }
+                UNIMPLEMENTED("feature: ", feature);
+                return false;
+            }
+
+            // interop::GPUSupportedFeatures compliance
+            bool has(Napi::Env, std::string name) override {
+                interop::GPUFeatureName feature;
+                if (interop::Converter<interop::GPUFeatureName>::FromString(name, feature)) {
+                    return has(feature);
+                }
+                return false;
+            }
+
+          private:
+            WGPUDeviceProperties properties_;
+        };
+
+    }  // namespace
+
     ////////////////////////////////////////////////////////////////////////////////
     // wgpu::bindings::GPUAdapter
     // TODO(crbug.com/dawn/1133): This is a stub implementation. Properly implement.
@@ -31,8 +76,8 @@ namespace wgpu { namespace binding {
     }
 
     interop::Interface<interop::GPUSupportedFeatures> GPUAdapter::getFeatures(Napi::Env env) {
-        class Features : public interop::GPUSupportedFeatures {};
-        return interop::GPUSupportedFeatures::Create<Features>(env);
+        return interop::GPUSupportedFeatures::Create<Features>(env,
+                                                               adapter_.GetAdapterProperties());
     }
 
     interop::Interface<interop::GPUSupportedLimits> GPUAdapter::getLimits(Napi::Env env) {
@@ -49,6 +94,30 @@ namespace wgpu { namespace binding {
         dawn_native::DeviceDescriptor desc{};  // TODO(crbug.com/dawn/1133): Fill in.
         interop::Promise<interop::Interface<interop::GPUDevice>> promise(env);
 
+        if (descriptor.has_value()) {
+            // See src/dawn_native/Extensions.cpp for feature <-> extension mappings.
+            for (auto required : descriptor->requiredFeatures) {
+                switch (required) {
+                    case interop::GPUFeatureName::kDepthClamping:
+                        desc.requiredExtensions.emplace_back("depth_clamping");
+                        continue;
+                    case interop::GPUFeatureName::kPipelineStatisticsQuery:
+                        desc.requiredExtensions.emplace_back("pipeline_statistics_query");
+                        continue;
+                    case interop::GPUFeatureName::kTextureCompressionBc:
+                        desc.requiredExtensions.emplace_back("texture_compression_bc");
+                        continue;
+                    case interop::GPUFeatureName::kTimestampQuery:
+                        desc.requiredExtensions.emplace_back("timestamp_query");
+                        continue;
+                    case interop::GPUFeatureName::kDepth24UnormStencil8:
+                    case interop::GPUFeatureName::kDepth32FloatStencil8:
+                        continue;  // TODO(crbug.com/dawn/1130)
+                }
+                UNIMPLEMENTED("required: ", required);
+            }
+        }
+
         auto wgpu_device = adapter_.CreateDevice(&desc);
         if (wgpu_device) {
             promise.Resolve(interop::GPUDevice::Create<GPUDevice>(env, env, wgpu_device));
@@ -57,5 +126,4 @@ namespace wgpu { namespace binding {
         }
         return promise;
     }
-
 }}  // namespace wgpu::binding

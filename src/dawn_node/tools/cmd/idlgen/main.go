@@ -128,6 +128,7 @@ func run() error {
 		"IsUnionType":                is(ast.UnionType{}),
 		"Lookup":                     g.lookup,
 		"MethodsOf":                  methodsOf,
+		"SetlikeOf":                  setlikeOf,
 		"Title":                      strings.Title,
 	}
 	t, err := g.t.
@@ -567,6 +568,20 @@ func constantsOf(obj interface{}) []*ast.Member {
 		return nil
 	}
 	return out
+}
+
+// setlikeOf returns the setlike ast.Pattern, if obj is a setlike interface.
+func setlikeOf(obj interface{}) *ast.Pattern {
+	iface, ok := obj.(*ast.Interface)
+	if !ok {
+		return nil
+	}
+	for _, pattern := range iface.Patterns {
+		if pattern.Type == ast.Setlike {
+			return pattern
+		}
+	}
+	return nil
 }
 
 // pascalCase returns the snake-case string s transformed into 'PascalCase',

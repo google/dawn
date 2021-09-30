@@ -123,6 +123,9 @@ public:
 
   virtual ~{{$.Name}}();
   {{$.Name}}();
+{{-  if $s := SetlikeOf $}}
+{{-    template "InterfaceSetlike" $s}}
+{{-  end}}
 {{-  range $m := MethodsOf $}}
 {{-    template "InterfaceMethod" $m}}
 {{-  end}}
@@ -165,6 +168,7 @@ class Converter<{{$.Name}}> {
 public:
   static bool FromJS(Napi::Env, Napi::Value, {{$.Name}}&);
   static Napi::Value ToJS(Napi::Env, {{$.Name}});
+  static bool FromString(std::string, {{$.Name}}&);
 };
 
 std::ostream& operator<<(std::ostream& o, {{$.Name}});
@@ -181,6 +185,20 @@ std::ostream& operator<<(std::ostream& o, {{$.Name}});
 {{-     if $.Init}} = {{Eval "Literal" "Value" $.Init "Type" $.Type}}{{end}};
 {{-   else          }}{{template "Type" $.Type}} {{$.Name}}({{template "Parameters" $.Parameters}});
 {{-   end }}
+{{- end }}
+
+
+{{- /*
+--------------------------------------------------------------------------------
+-- InterfaceSetlike emits the C++ methods for a setlike interface
+--------------------------------------------------------------------------------
+*/ -}}
+{{- define "InterfaceSetlike"}}
+  virtual bool has(Napi::Env, {{template "Type" $.Elem}}) = 0;
+{{- /* TODO(crbug.com/dawn/1143):
+       entries, forEach, keys, size, values
+       read-write: add, clear, or delete
+*/}}
 {{- end }}
 
 

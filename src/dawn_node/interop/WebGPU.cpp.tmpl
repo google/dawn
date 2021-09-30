@@ -141,6 +141,9 @@ Wrappers* Wrappers::instance = nullptr;
 {{-  end}}
     static Napi::Function Class(Napi::Env env) {
       return DefineClass(env, "{{$.Name}}", {
+{{   if $s := SetlikeOf $}}
+        InstanceMethod("has", &W{{$.Name}}::has),
+{{-  end}}
 {{-  range $m := MethodsOf $}}
         InstanceMethod("{{$m.Name}}", &W{{$.Name}}::{{$m.Name}}),
 {{-  end}}
@@ -156,6 +159,17 @@ Wrappers* Wrappers::instance = nullptr;
     }
 
     W{{$.Name}}(const Napi::CallbackInfo& info) : ObjectWrap(info) {}
+
+{{   if $s := SetlikeOf $}}
+    Napi::Value has(const Napi::CallbackInfo& info) {
+      std::tuple<{{template "Type" $s.Elem}}> args;
+      if (FromJS(info, args)) {
+          return ToJS(info.Env(), impl->has(info.Env(), std::get<0>(args)));
+      }
+      Napi::Error::New(info.Env(), "invalid arguments to has()").ThrowAsJavaScriptException();
+      return {};
+    }
+{{-  end}}
 {{-  range $m := MethodsOf $}}
     Napi::Value {{$m.Name}}(const Napi::CallbackInfo& info) {
 {{-    range $overload_idx, $o := $m.Overloads}}
@@ -307,8 +321,7 @@ Interface<{{$.Name}}> {{$.Name}}::Bind(Napi::Env env, std::unique_ptr<{{$.Name}}
 --------------------------------------------------------------------------------
 */ -}}
 {{- define "Enum"}}
-bool Converter<{{$.Name}}>::FromJS(Napi::Env env, Napi::Value value, {{$.Name}}& out) {
-  std::string str = value.ToString();
+bool Converter<{{$.Name}}>::FromString(std::string str, {{$.Name}}& out) {
 {{-  range $e := $.Values}}
   if (str == {{$e.Value}}) {
     out = {{$.Name}}::{{EnumEntryName $e.Value}};
@@ -316,6 +329,9 @@ bool Converter<{{$.Name}}>::FromJS(Napi::Env env, Napi::Value value, {{$.Name}}&
   }
 {{-  end}}
   return false;
+}
+bool Converter<{{$.Name}}>::FromJS(Napi::Env env, Napi::Value value, {{$.Name}}& out) {
+  return FromString(value.ToString(), out);
 }
 Napi::Value Converter<{{$.Name}}>::ToJS(Napi::Env env, {{$.Name}} value) {
   switch (value) {

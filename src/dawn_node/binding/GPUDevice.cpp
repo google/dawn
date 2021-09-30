@@ -109,7 +109,12 @@ namespace wgpu { namespace binding {
     }
 
     interop::Interface<interop::GPUSupportedFeatures> GPUDevice::getFeatures(Napi::Env env) {
-        class Features : public interop::GPUSupportedFeatures {};
+        class Features : public interop::GPUSupportedFeatures {
+          public:
+            bool has(Napi::Env, std::string feature) override {
+                UNIMPLEMENTED();
+            }
+        };
         return interop::GPUSupportedFeatures::Create<Features>(env);
     }
 
