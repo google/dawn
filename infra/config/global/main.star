@@ -193,11 +193,6 @@ def get_default_properties(os, clang, debug, cpu):
             goma_props["enable_ats"] = True
         properties["$build/goma"] = goma_props
 
-    if os.category == os_category.MAC:
-        properties["$depot_tools/osx_sdk"] = {
-            "sdk_version": "11b52",
-        }
-
     return properties
 
 def add_ci_builder(name, os, clang, debug, cpu):
