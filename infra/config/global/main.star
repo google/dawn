@@ -64,6 +64,14 @@ luci.bucket(
     ],
 )
 
+# Allow LED users to trigger swarming tasks directly when debugging ci
+# builders.
+luci.binding(
+    realm = "ci",
+    roles = "role/swarming.taskTriggerer",
+    groups = "flex-ci-led-users",
+)
+
 luci.bucket(
     name = "try",
     acls = [
@@ -75,6 +83,14 @@ luci.bucket(
             ],
         ),
     ],
+)
+
+# Allow LED users to trigger swarming tasks directly when debugging try
+# builders.
+luci.binding(
+    realm = "try",
+    roles = "role/swarming.taskTriggerer",
+    groups = "flex-try-led-users",
 )
 
 os_category = struct(
