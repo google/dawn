@@ -55,10 +55,22 @@ function(idlgen)
     )
 endfunction()
 
+# Generate the NapiSymbols.h file from the ${NODE_API_HEADERS_DIR}/symbols.js symbol list
+set(NAPI_SYMBOLS_H "${GEN_DIR}/NapiSymbols.h")
+file(READ "${NODE_API_HEADERS_DIR}/symbols.js" NAPI_SYMBOLS_JS_CONTENT)
+string(REGEX MATCHALL "napi_[a-z0-9_]*" NAPI_SYMBOLS "${NAPI_SYMBOLS_JS_CONTENT}")
+list(TRANSFORM NAPI_SYMBOLS PREPEND "NAPI_SYMBOL(")
+list(TRANSFORM NAPI_SYMBOLS APPEND ")\n")
+string(REPLACE ";" "" NAPI_SYMBOLS "${NAPI_SYMBOLS}")
+file(GENERATE OUTPUT "${NAPI_SYMBOLS_H}" CONTENT "${NAPI_SYMBOLS}")
+
 add_subdirectory(binding)
 add_subdirectory(interop)
 
-add_library(dawn_node SHARED "Module.cpp")
+add_library(dawn_node SHARED
+    "Module.cpp"
+    "NapiSymbols.cpp"
+)
 set_target_properties(dawn_node PROPERTIES
     PREFIX ""
     OUTPUT_NAME "dawn"
@@ -67,10 +79,10 @@ set_target_properties(dawn_node PROPERTIES
 )
 target_link_libraries(dawn_node dawn_node_binding dawn_node_interop dawn_native dawncpp dawn_proc)
 target_include_directories(dawn_node PRIVATE
-    ${CMAKE_SOURCE_DIR}
-    ${NODE_API_HEADERS_DIR}
-    ${NODE_ADDON_API_DIR}
-    ${GEN_DIR}
+    "${CMAKE_SOURCE_DIR}"
+    "${NODE_API_HEADERS_DIR}/include"
+    "${NODE_ADDON_API_DIR}"
+    "${GEN_DIR}"
 )
 
 # dawn_node targets require C++17

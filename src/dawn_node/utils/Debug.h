@@ -101,19 +101,18 @@ namespace wgpu { namespace utils {
         return out;
     }
 
-    // Unimplemented() prints an 'UNIMPLEMENTED' message to stdout with the given
-    // file, line, function and optional message, then calls abort().
-    // Unimplemented() is usually not called directly, but by the UNIMPLEMENTED()
-    // macro below.
+    // Fatal() prints a message to stdout with the given file, line, function and optional message,
+    // then calls abort(). Fatal() is usually not called directly, but by the UNREACHABLE() and
+    // UNIMPLEMENTED() macro below.
     template <typename... MSG_ARGS>
-    [[noreturn]] inline void Unimplemented(const char* file,
-                                           int line,
-                                           const char* function,
-                                           MSG_ARGS&&... msg_args) {
+    [[noreturn]] inline void Fatal(const char* reason,
+                                   const char* file,
+                                   int line,
+                                   const char* function,
+                                   MSG_ARGS&&... msg_args) {
         std::stringstream msg;
-        msg << file << ":" << line << ": "
-            << "UNIMPLEMENTED: " << function << "()";
-        if constexpr (sizeof...(msg_args)) {
+        msg << file << ":" << line << ": " << reason << ": " << function << "()";
+        if constexpr (sizeof...(msg_args) > 0) {
             msg << " ";
             Write(msg, std::forward<MSG_ARGS>(msg_args)...);
         }
@@ -130,10 +129,17 @@ namespace wgpu { namespace utils {
 
 // UNIMPLEMENTED() prints 'UNIMPLEMENTED' with the current file, line and
 // function to stdout, along with the optional message, then calls abort().
-// The macro calls Unimplemented(), which is annotated with [[noreturn]].
+// The macro calls Fatal(), which is annotated with [[noreturn]].
 // Used to stub code that has not yet been implemented.
 #define UNIMPLEMENTED(...) \
-    ::wgpu::utils::Unimplemented(__FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+    ::wgpu::utils::Fatal("UNIMPLEMENTED", __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+
+// UNREACHABLE() prints 'UNREACHABLE' with the current file, line and
+// function to stdout, along with the optional message, then calls abort().
+// The macro calls Fatal(), which is annotated with [[noreturn]].
+// Used to stub code that has not yet been implemented.
+#define UNREACHABLE(...) \
+    ::wgpu::utils::Fatal("UNREACHABLE", __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
 
 }}  // namespace wgpu::utils
 

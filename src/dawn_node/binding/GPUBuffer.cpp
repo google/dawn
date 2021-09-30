@@ -79,19 +79,22 @@ namespace wgpu { namespace binding {
 
                 c->state = State::Unmapped;
                 switch (status) {
-                    case WGPUBufferMapAsyncStatus::WGPUBufferMapAsyncStatus_Success:
+                    case WGPUBufferMapAsyncStatus_Force32:
+                        UNREACHABLE("WGPUBufferMapAsyncStatus_Force32");
+                        break;
+                    case WGPUBufferMapAsyncStatus_Success:
                         c->promise.Resolve();
                         c->state = State::Mapped;
                         break;
-                    case WGPUBufferMapAsyncStatus::WGPUBufferMapAsyncStatus_Error:
+                    case WGPUBufferMapAsyncStatus_Error:
                         c->promise.Reject(Errors::OperationError(c->env));
                         break;
-                    case WGPUBufferMapAsyncStatus::WGPUBufferMapAsyncStatus_UnmappedBeforeCallback:
+                    case WGPUBufferMapAsyncStatus_UnmappedBeforeCallback:
+                    case WGPUBufferMapAsyncStatus_DestroyedBeforeCallback:
                         c->promise.Reject(Errors::AbortError(c->env));
                         break;
-                    case WGPUBufferMapAsyncStatus::WGPUBufferMapAsyncStatus_Unknown:
-                    case WGPUBufferMapAsyncStatus::WGPUBufferMapAsyncStatus_DeviceLost:
-                    case WGPUBufferMapAsyncStatus::WGPUBufferMapAsyncStatus_DestroyedBeforeCallback:
+                    case WGPUBufferMapAsyncStatus_Unknown:
+                    case WGPUBufferMapAsyncStatus_DeviceLost:
                         // TODO: The spec is a bit vague around what the promise should do
                         // here.
                         c->promise.Reject(Errors::UnknownError(c->env));

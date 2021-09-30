@@ -50,10 +50,10 @@ add_library(dawn_node_interop STATIC
 
 target_include_directories(dawn_node_interop
     PRIVATE
-        ${CMAKE_SOURCE_DIR}
-        ${NODE_API_HEADERS_DIR}
-        ${NODE_ADDON_API_DIR}
-        ${GEN_DIR}
+        "${CMAKE_SOURCE_DIR}"
+        "${NODE_API_HEADERS_DIR}/include"
+        "${NODE_ADDON_API_DIR}"
+        "${GEN_DIR}"
 )
 
 target_link_libraries(dawn_node_interop

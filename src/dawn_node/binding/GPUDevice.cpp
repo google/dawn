@@ -92,7 +92,11 @@ namespace wgpu { namespace binding {
             [](WGPUDeviceLostReason reason, char const* message, void* userdata) {
                 auto r = interop::GPUDeviceLostReason::kDestroyed;
                 switch (reason) {
+                    case WGPUDeviceLostReason_Force32:
+                        UNREACHABLE("WGPUDeviceLostReason_Force32");
+                        break;
                     case WGPUDeviceLostReason_Destroyed:
+                    case WGPUDeviceLostReason_Undefined:
                         r = interop::GPUDeviceLostReason::kDestroyed;
                         break;
                 }
