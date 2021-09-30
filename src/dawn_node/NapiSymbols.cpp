@@ -16,10 +16,14 @@
 
 // To reduce the build dependencies for compiling the dawn.node targets, we do
 // not use cmake-js for building, but instead just depend on node_api_headers.
-// As the name suggests, node_api_headers contains just the *headers* of the
-// Napi, and does not provide a library to link against. Fortunately
-// node_api_headers provides a list of symbols exported by Node, which we can
-// stub here to keep the linker happy.
+// As the name suggests, node_api_headers contains just the *headers* of Napi,
+// and does not provide a library to link against.
+// Fortunately node_api_headers provides a list of Napi symbols exported by Node,
+// which we can use to produce weak-symbol stubs.
+
+#ifdef _WIN32
+#    error "NapiSymbols.cpp is not used on Windows"
+#endif
 
 #define NAPI_SYMBOL(NAME)                                                              \
     __attribute__((weak)) void NAME() {                                                \

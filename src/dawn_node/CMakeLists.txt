@@ -55,27 +55,19 @@ function(idlgen)
     )
 endfunction()
 
-# Generate the NapiSymbols.h file from the ${NODE_API_HEADERS_DIR}/symbols.js symbol list
-set(NAPI_SYMBOLS_H "${GEN_DIR}/NapiSymbols.h")
-file(READ "${NODE_API_HEADERS_DIR}/symbols.js" NAPI_SYMBOLS_JS_CONTENT)
-string(REGEX MATCHALL "napi_[a-z0-9_]*" NAPI_SYMBOLS "${NAPI_SYMBOLS_JS_CONTENT}")
-list(TRANSFORM NAPI_SYMBOLS PREPEND "NAPI_SYMBOL(")
-list(TRANSFORM NAPI_SYMBOLS APPEND ")\n")
-string(REPLACE ";" "" NAPI_SYMBOLS "${NAPI_SYMBOLS}")
-file(GENERATE OUTPUT "${NAPI_SYMBOLS_H}" CONTENT "${NAPI_SYMBOLS}")
-
 add_subdirectory(binding)
 add_subdirectory(interop)
 
 add_library(dawn_node SHARED
     "Module.cpp"
-    "NapiSymbols.cpp"
 )
 set_target_properties(dawn_node PROPERTIES
     PREFIX ""
     OUTPUT_NAME "dawn"
     SUFFIX ".node"
+    RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}"
     LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}"
+    CXX_STANDARD 17
 )
 target_link_libraries(dawn_node dawn_node_binding dawn_node_interop dawn_native dawncpp dawn_proc)
 target_include_directories(dawn_node PRIVATE
@@ -85,8 +77,48 @@ target_include_directories(dawn_node PRIVATE
     "${GEN_DIR}"
 )
 
-# dawn_node targets require C++17
-set_property(
-    TARGET dawn_node
-    PROPERTY CXX_STANDARD 17
-)
+# To reduce the build dependencies for compiling the dawn.node targets, we do
+# not use cmake-js for building, but instead just depend on node_api_headers.
+# As the name suggests, node_api_headers contains just the *headers* of Napi,
+# and does not provide a library to link against.
+# Fortunately node_api_headers provides a list of Napi symbols exported by Node,
+# which we can use to either produce weak-symbol stubs (unix) or generate a .lib
+# (Windows).
+
+# Parse the Napi symbols from ${NODE_API_HEADERS_DIR}/symbols.js
+file(READ "${NODE_API_HEADERS_DIR}/symbols.js" NAPI_SYMBOLS_JS_CONTENT)
+string(REGEX MATCHALL "napi_[a-z0-9_]*" NAPI_SYMBOLS "${NAPI_SYMBOLS_JS_CONTENT}")
+
+if (WIN32)
+    # Generate the NapiSymbols.def file from the Napi symbol list
+    set(NAPI_SYMBOLS_DEF "${GEN_DIR}/NapiSymbols.def")
+    list(TRANSFORM NAPI_SYMBOLS PREPEND "  ")
+    list(TRANSFORM NAPI_SYMBOLS APPEND "\n")
+    string(REPLACE ";" "" NAPI_SYMBOLS "${NAPI_SYMBOLS}")
+    string(PREPEND NAPI_SYMBOLS "LIBRARY node.exe\nEXPORTS\n")
+    file(GENERATE OUTPUT "${NAPI_SYMBOLS_DEF}" CONTENT "${NAPI_SYMBOLS}")
+    # Generate the NapiSymbols.lib from the NapiSymbols.def file
+    set(NAPI_SYMBOLS_LIB "${GEN_DIR}/NapiSymbols.lib")
+    # Resolve path to lib.exe
+    get_filename_component(VS_BIN_DIR "${CMAKE_LINKER}" DIRECTORY)
+    set(LIB_EXE "${VS_BIN_DIR}/lib.exe")
+    add_custom_command(
+        COMMAND "${LIB_EXE}"
+                "/DEF:${NAPI_SYMBOLS_DEF}"
+                "/OUT:${NAPI_SYMBOLS_LIB}"
+        DEPENDS "${NAPI_SYMBOLS_DEF}"
+        OUTPUT  "${NAPI_SYMBOLS_LIB}"
+        COMMENT "Generating ${NAPI_SYMBOLS_LIB}"
+    )
+    add_custom_target(napi-symbols DEPENDS "${NAPI_SYMBOLS_LIB}")
+    add_dependencies(dawn_node napi-symbols)
+    target_link_libraries(dawn_node "${NAPI_SYMBOLS_LIB}")
+else()
+    # Generate the NapiSymbols.h file from the Napi symbol list
+    set(NAPI_SYMBOLS_H "${GEN_DIR}/NapiSymbols.h")
+    list(TRANSFORM NAPI_SYMBOLS PREPEND "NAPI_SYMBOL(")
+    list(TRANSFORM NAPI_SYMBOLS APPEND ")\n")
+    string(REPLACE ";" "" NAPI_SYMBOLS "${NAPI_SYMBOLS}")
+    file(GENERATE OUTPUT "${NAPI_SYMBOLS_H}" CONTENT "${NAPI_SYMBOLS}")
+    target_sources(dawn_node PRIVATE "NapiSymbols.cpp")
+endif()
