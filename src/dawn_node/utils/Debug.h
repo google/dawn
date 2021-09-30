@@ -41,7 +41,7 @@ namespace wgpu { namespace utils {
     template <typename... TYS>
     inline std::ostream& Write(std::ostream& out, const std::variant<TYS...>& value);
     template <typename VALUE>
-    inline std::ostream& Write(std::ostream& out, const VALUE& value);
+    std::ostream& Write(std::ostream& out, VALUE&& value);
 
     // Write() implementations
     template <typename T>
@@ -89,8 +89,8 @@ namespace wgpu { namespace utils {
     }
 
     template <typename VALUE>
-    std::ostream& Write(std::ostream& out, const VALUE& value) {
-        return out << value;
+    std::ostream& Write(std::ostream& out, VALUE&& value) {
+        return out << std::forward<VALUE>(value);
     }
 
     template <typename FIRST, typename... REST>
