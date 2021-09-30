@@ -52,26 +52,6 @@ namespace {
   FatalError(diagnostics);
 }
 
-transform::VertexAttributeDescriptor GenerateVertexAttributeDescriptor(
-    DataBuilder* b) {
-  transform::VertexAttributeDescriptor desc{};
-  desc.format = b->enum_class<transform::VertexFormat>(
-      static_cast<uint8_t>(transform::VertexFormat::kLastEntry) + 1);
-  desc.offset = b->build<uint32_t>();
-  desc.shader_location = b->build<uint32_t>();
-  return desc;
-}
-
-transform::VertexBufferLayoutDescriptor GenerateVertexBufferLayoutDescriptor(
-    DataBuilder* b) {
-  transform::VertexBufferLayoutDescriptor desc;
-  desc.array_stride = b->build<uint32_t>();
-  desc.step_mode = b->enum_class<transform::VertexStepMode>(
-      static_cast<uint8_t>(transform::VertexStepMode::kLastEntry) + 1);
-  desc.attributes = b->vector(GenerateVertexAttributeDescriptor);
-  return desc;
-}
-
 bool SPIRVToolsValidationCheck(const tint::Program& program,
                                const std::vector<uint32_t>& spirv) {
   spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_1);
@@ -94,76 +74,6 @@ bool SPIRVToolsValidationCheck(const tint::Program& program,
 
 }  // namespace
 
-DataBuilder::DataBuilder(const uint8_t* data, size_t size)
-    : generator_(RandomGenerator::CalculateSeed(data, size)) {}
-
-std::string DataBuilder::string() {
-  auto count = build<uint8_t>();
-  if (count == 0) {
-    return "";
-  }
-  std::vector<uint8_t> source(count);
-  build(source.data(), count);
-  return std::string(source.begin(), source.end());
-}
-
-void DataBuilder::build(void* out, size_t n) {
-  assert(out != nullptr && "|out| cannot be nullptr");
-  assert(n > 0 && "|n| must be > 0");
-
-  generator_.GetNBytes(reinterpret_cast<uint8_t*>(out), n);
-}
-
-void GenerateBindingRemapperInputs(DataBuilder* b,
-                                   tint::transform::DataMap* inputs) {
-  struct Config {
-    uint8_t old_group;
-    uint8_t old_binding;
-    uint8_t new_group;
-    uint8_t new_binding;
-    ast::Access new_access;
-  };
-
-  std::vector<Config> configs = b->vector<Config>();
-  transform::BindingRemapper::BindingPoints binding_points;
-  transform::BindingRemapper::AccessControls accesses;
-  for (const auto& config : configs) {
-    binding_points[{config.old_binding, config.old_group}] = {
-        config.new_binding, config.new_group};
-    accesses[{config.old_binding, config.old_group}] = config.new_access;
-  }
-
-  inputs->Add<transform::BindingRemapper::Remappings>(binding_points, accesses);
-}
-
-void GenerateFirstIndexOffsetInputs(DataBuilder* b,
-                                    tint::transform::DataMap* inputs) {
-  struct Config {
-    uint32_t group;
-    uint32_t binding;
-  };
-
-  Config config = b->build<Config>();
-  inputs->Add<tint::transform::FirstIndexOffset::BindingPoint>(config.binding,
-                                                               config.group);
-}
-
-void GenerateSingleEntryPointInputs(DataBuilder* b,
-                                    tint::transform::DataMap* inputs) {
-  std::string input = b->string();
-  transform::SingleEntryPoint::Config cfg(input);
-  inputs->Add<transform::SingleEntryPoint::Config>(cfg);
-}
-
-void GenerateVertexPullingInputs(DataBuilder* b,
-                                 tint::transform::DataMap* inputs) {
-  transform::VertexPulling::Config cfg;
-  cfg.entry_point_name = b->string();
-  cfg.vertex_state = b->vector(GenerateVertexBufferLayoutDescriptor);
-  cfg.pulling_group = b->build<uint32_t>();
-  inputs->Add<transform::VertexPulling::Config>(cfg);
-}
-
 void GenerateSpirvOptions(DataBuilder* b, writer::spirv::Options* options) {
   *options = b->build<writer::spirv::Options>();
 }
@@ -181,10 +91,7 @@ void GenerateMslOptions(DataBuilder* b, writer::msl::Options* options) {
 }
 
 CommonFuzzer::CommonFuzzer(InputFormat input, OutputFormat output)
-    : input_(input),
-      output_(output),
-      transform_manager_(nullptr),
-      inspector_enabled_(false) {}
+    : input_(input), output_(output) {}
 
 CommonFuzzer::~CommonFuzzer() = default;
 
@@ -345,7 +252,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
   }
 
   if (transform_manager_) {
-    auto out = transform_manager_->Run(&program, transform_inputs_);
+    auto out = transform_manager_->Run(&program, *transform_inputs_);
     if (!out.program.IsValid()) {
       // Transforms can produce error messages for bad input.
       // Catch ICEs and errors from non transform systems.

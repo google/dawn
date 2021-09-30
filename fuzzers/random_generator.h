@@ -27,6 +27,12 @@ class RandomGenerator {
   /// @brief Initializes the internal engine
   /// @param seed - seed value passed to engine
   explicit RandomGenerator(uint64_t seed);
+
+  /// @brief Wrapper that invokes CalculateSeed for caller
+  /// @param data - data fuzzer to calculate seed from
+  /// @param size - size of data buffer
+  explicit RandomGenerator(const uint8_t* data, size_t size);
+
   ~RandomGenerator() {}
 
   /// Get uint32_t value from uniform distribution.

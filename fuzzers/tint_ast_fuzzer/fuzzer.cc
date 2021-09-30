@@ -115,7 +115,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
     CommonFuzzer fuzzer(InputFormat::kWGSL, target.output_format);
     fuzzer.EnableInspector();
-    fuzzer.SetTransformManager(&transform_manager, std::move(transform_inputs));
+    fuzzer.SetTransformManager(&transform_manager, &transform_inputs);
 
     fuzzer.Run(data, size);
     if (fuzzer.HasErrors()) {

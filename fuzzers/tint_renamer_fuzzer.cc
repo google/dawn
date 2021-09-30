@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "fuzzers/fuzzer_init.h"
 #include "fuzzers/tint_common_fuzzer.h"
-#include "fuzzers/tint_init_fuzzer.h"
 
 namespace tint {
 namespace fuzzers {

@@ -12,21 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "fuzzers/fuzzer_init.h"
 #include "fuzzers/tint_common_fuzzer.h"
-#include "fuzzers/tint_init_fuzzer.h"
+#include "fuzzers/transform_builder.h"
 
 namespace tint {
 namespace fuzzers {
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
-  transform::Manager transform_manager;
-  transform::DataMap transform_inputs;
-  transform_manager.Add<transform::Robustness>();
+  TransformBuilder tb(data, size);
+  tb.AddTransform<transform::Robustness>();
 
-  tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kWGSL);
+  fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kWGSL);
   fuzzer.EnableInspector();
+  fuzzer.SetTransformManager(tb.manager(), tb.data_map());
   fuzzer.SetDumpInput(GetCliParams().dump_input);
-  fuzzer.SetTransformManager(&transform_manager, std::move(transform_inputs));
 
   return fuzzer.Run(data, size);
 }

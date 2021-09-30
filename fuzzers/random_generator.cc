@@ -58,6 +58,9 @@ size_t HashBuffer(const uint8_t* data, const size_t size) {
 
 RandomGenerator::RandomGenerator(uint64_t seed) : engine_(seed) {}
 
+RandomGenerator::RandomGenerator(const uint8_t* data, size_t size)
+    : engine_(RandomGenerator::CalculateSeed(data, size)) {}
+
 uint32_t RandomGenerator::GetUInt32(uint32_t lower, uint32_t upper) {
   return RandomUInt(&engine_, lower, upper);
 }

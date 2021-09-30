@@ -15,71 +15,20 @@
 #ifndef FUZZERS_TINT_COMMON_FUZZER_H_
 #define FUZZERS_TINT_COMMON_FUZZER_H_
 
+#include <cassert>
 #include <cstring>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "fuzzers/random_generator.h"
 #include "include/tint/tint.h"
+
+#include "fuzzers/data_builder.h"
 
 namespace tint {
 namespace fuzzers {
 
-class DataBuilder {
- public:
-  DataBuilder(const uint8_t* data, size_t size);
-
-  template <typename T>
-  T build() {
-    T out{};
-    build(&out, sizeof(T));
-    return out;
-  }
-
-  std::string string();
-
-  template <typename T>
-  std::vector<T> vector() {
-    auto count = build<uint8_t>();
-    std::vector<T> out(count);
-    for (uint8_t i = 0; i < count; i++) {
-      out[i] = build<T>();
-    }
-    return out;
-  }
-
-  template <typename T>
-  std::vector<T> vector(T (*generate)(DataBuilder*)) {
-    auto count = build<uint8_t>();
-    std::vector<T> out(count);
-    for (uint8_t i = 0; i < count; i++) {
-      out[i] = generate(this);
-    }
-    return out;
-  }
-
-  template <typename T>
-  T enum_class(uint8_t count) {
-    auto val = build<uint8_t>();
-    return static_cast<T>(val % count);
-  }
-
- private:
-  void build(void* out, size_t n);
-
-  RandomGenerator generator_;
-};
-
-void GenerateBindingRemapperInputs(DataBuilder* b,
-                                   tint::transform::DataMap* inputs);
-void GenerateFirstIndexOffsetInputs(DataBuilder* b,
-                                    tint::transform::DataMap* inputs);
-void GenerateSingleEntryPointInputs(DataBuilder* b,
-                                    tint::transform::DataMap* inputs);
-void GenerateVertexPullingInputs(DataBuilder* b,
-                                 tint::transform::DataMap* inputs);
 void GenerateSpirvOptions(DataBuilder* b, writer::spirv::Options* options);
 void GenerateWgslOptions(DataBuilder* b, writer::wgsl::Options* options);
 void GenerateHlslOptions(DataBuilder* b, writer::hlsl::Options* options);
@@ -94,9 +43,10 @@ class CommonFuzzer {
   explicit CommonFuzzer(InputFormat input, OutputFormat output);
   ~CommonFuzzer();
 
-  void SetTransformManager(transform::Manager* tm, transform::DataMap inputs) {
+  void SetTransformManager(transform::Manager* tm, transform::DataMap* inputs) {
+    assert((!tm || inputs) && "DataMap must be !nullptr if Manager !nullptr");
     transform_manager_ = tm;
-    transform_inputs_ = std::move(inputs);
+    transform_inputs_ = inputs;
   }
   void EnableInspector() { inspector_enabled_ = true; }
 
@@ -137,9 +87,9 @@ class CommonFuzzer {
  private:
   InputFormat input_;
   OutputFormat output_;
-  transform::Manager* transform_manager_;
-  transform::DataMap transform_inputs_;
-  bool inspector_enabled_;
+  transform::Manager* transform_manager_ = nullptr;
+  transform::DataMap* transform_inputs_ = nullptr;
+  bool inspector_enabled_ = false;
   bool dump_input_ = false;
   tint::diag::List diagnostics_;
 

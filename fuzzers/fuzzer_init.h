@@ -12,24 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "fuzzers/tint_init_fuzzer.h"
+#ifndef FUZZERS_FUZZER_INIT_H_
+#define FUZZERS_FUZZER_INIT_H_
+
 #include "fuzzers/cli.h"
 
 namespace tint {
 namespace fuzzers {
 
-namespace {
-CliParams cli_params;
-}
-
-const CliParams& GetCliParams() {
-  return cli_params;
-}
-
-extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
-  cli_params = ParseCliParams(argc, *argv);
-  return 0;
-}
+/// Returns the common CliParams parsed and populated by LLVMFuzzerInitialize()
+const CliParams& GetCliParams();
 
 }  // namespace fuzzers
 }  // namespace tint
+
+#endif  // FUZZERS_FUZZER_INIT_H_
