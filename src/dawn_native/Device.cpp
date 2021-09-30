@@ -1297,7 +1297,8 @@ namespace dawn_native {
         const QuerySetDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
         if (IsValidationEnabled()) {
-            DAWN_TRY(ValidateQuerySetDescriptor(this, descriptor));
+            DAWN_TRY_CONTEXT(ValidateQuerySetDescriptor(this, descriptor), "validating %s",
+                             descriptor);
         }
         return CreateQuerySetImpl(descriptor);
     }
