@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <optional>
+#include <sstream>
 #include <unordered_map>
 #include <variant>
 #include <vector>
@@ -101,12 +102,22 @@ namespace wgpu { namespace utils {
     }
 
     // Unimplemented() prints an 'UNIMPLEMENTED' message to stdout with the given
-    // file, line and function, then calls abort().
+    // file, line, function and optional message, then calls abort().
     // Unimplemented() is usually not called directly, but by the UNIMPLEMENTED()
     // macro below.
-    [[noreturn]] inline void Unimplemented(const char* file, int line, const char* function) {
-        std::cout << file << ":" << line << ": "
-                  << "UNIMPLEMENTED : " << function << std::endl;
+    template <typename... MSG_ARGS>
+    [[noreturn]] inline void Unimplemented(const char* file,
+                                           int line,
+                                           const char* function,
+                                           MSG_ARGS&&... msg_args) {
+        std::stringstream msg;
+        msg << file << ":" << line << ": "
+            << "UNIMPLEMENTED: " << function << "()";
+        if constexpr (sizeof...(msg_args)) {
+            msg << " ";
+            Write(msg, std::forward<MSG_ARGS>(msg_args)...);
+        }
+        std::cout << msg.str() << std::endl;
         abort();
     }
 
@@ -118,10 +129,11 @@ namespace wgpu { namespace utils {
         << std::endl
 
 // UNIMPLEMENTED() prints 'UNIMPLEMENTED' with the current file, line and
-// function to stdout, then calls abort().
+// function to stdout, along with the optional message, then calls abort().
 // The macro calls Unimplemented(), which is annotated with [[noreturn]].
 // Used to stub code that has not yet been implemented.
-#define UNIMPLEMENTED() ::wgpu::utils::Unimplemented(__FILE__, __LINE__, __FUNCTION__)
+#define UNIMPLEMENTED(...) \
+    ::wgpu::utils::Unimplemented(__FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
 
 }}  // namespace wgpu::utils
 
