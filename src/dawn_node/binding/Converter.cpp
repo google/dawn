@@ -507,7 +507,7 @@ namespace wgpu { namespace binding {
 
     bool Converter::Convert(wgpu::BlendState& out, const interop::GPUBlendState& in) {
         out = {};
-        return Convert(out.alpha, in.alpha) && Convert(out.color, in.alpha);
+        return Convert(out.alpha, in.alpha) && Convert(out.color, in.color);
     }
 
     bool Converter::Convert(wgpu::PrimitiveState& out, const interop::GPUPrimitiveState& in) {
