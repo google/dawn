@@ -264,6 +264,8 @@ bool Resolver::ResolveInternal() {
     }
   }
 
+  AllocateOverridableConstantIds();
+
   if (!ValidatePipelineStages()) {
     return false;
   }
@@ -574,6 +576,46 @@ ast::Access Resolver::DefaultAccessForStorageClass(
       break;
   }
   return ast::Access::kReadWrite;
+}
+
+void Resolver::AllocateOverridableConstantIds() {
+  // The next pipeline constant ID to try to allocate.
+  uint16_t next_constant_id = 0;
+
+  // Allocate constant IDs in global declaration order, so that they are
+  // deterministic.
+  // TODO(crbug.com/tint/1192): If a transform changes the order or removes an
+  // unused constant, the allocation may change on the next Resolver pass.
+  for (auto* decl : builder_->AST().GlobalDeclarations()) {
+    auto* var = decl->As<ast::Variable>();
+    if (!var) {
+      continue;
+    }
+    auto* override_deco =
+        ast::GetDecoration<ast::OverrideDecoration>(var->decorations());
+    if (!override_deco) {
+      continue;
+    }
+
+    uint16_t constant_id;
+    if (override_deco->HasValue()) {
+      constant_id = static_cast<uint16_t>(override_deco->value());
+    } else {
+      // No ID was specified, so allocate the next available ID.
+      constant_id = next_constant_id;
+      while (constant_ids_.count(constant_id)) {
+        if (constant_id == UINT16_MAX) {
+          TINT_ICE(Resolver, builder_->Diagnostics())
+              << "no more pipeline constant IDs available";
+          return;
+        }
+        constant_id++;
+      }
+      next_constant_id = constant_id + 1;
+    }
+
+    variable_to_info_[var]->constant_id = constant_id;
+  }
 }
 
 bool Resolver::ValidateVariableConstructor(const ast::Variable* var,
@@ -3709,9 +3751,6 @@ void Resolver::CreateSemanticNodes() const {
     }
   }
 
-  // The next pipeline constant ID to try to allocate.
-  uint16_t next_constant_id = 0;
-
   // Create semantic nodes for all ast::Variables
   std::unordered_map<const tint::ast::Variable*, sem::Parameter*> sem_params;
   for (auto it : variable_to_info_) {
@@ -3720,28 +3759,10 @@ void Resolver::CreateSemanticNodes() const {
 
     sem::Variable* sem_var = nullptr;
 
-    if (auto* override_deco =
-            ast::GetDecoration<ast::OverrideDecoration>(var->decorations())) {
+    if (ast::HasDecoration<ast::OverrideDecoration>(var->decorations())) {
       // Create a pipeline overridable constant.
-      uint16_t constant_id;
-      if (override_deco->HasValue()) {
-        constant_id = static_cast<uint16_t>(override_deco->value());
-      } else {
-        // No ID was specified, so allocate the next available ID.
-        constant_id = next_constant_id;
-        while (constant_ids_.count(constant_id)) {
-          if (constant_id == UINT16_MAX) {
-            TINT_ICE(Resolver, builder_->Diagnostics())
-                << "no more pipeline constant IDs available";
-            return;
-          }
-          constant_id++;
-        }
-        next_constant_id = constant_id + 1;
-      }
-
-      sem_var =
-          builder_->create<sem::GlobalVariable>(var, info->type, constant_id);
+      sem_var = builder_->create<sem::GlobalVariable>(var, info->type,
+                                                      info->constant_id);
     } else {
       switch (info->kind) {
         case VariableKind::kGlobal:

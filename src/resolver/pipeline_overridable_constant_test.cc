@@ -14,16 +14,26 @@
 
 #include "src/resolver/resolver.h"
 
-#include "gmock/gmock.h"
 #include "src/resolver/resolver_test_helper.h"
-
-using ::testing::UnorderedElementsAre;
 
 namespace tint {
 namespace resolver {
 namespace {
 
-using ResolverPipelineOverridableConstantTest = ResolverTest;
+class ResolverPipelineOverridableConstantTest : public ResolverTest {
+ protected:
+  /// Verify that the AST node `var` was resolved to an overridable constant
+  /// with an ID equal to `id`.
+  /// @param var the overridable constant AST node
+  /// @param id the expected constant ID
+  void ExpectConstantId(const ast::Variable* var, uint16_t id) {
+    auto* sem = Sem().Get<sem::GlobalVariable>(var);
+    ASSERT_NE(sem, nullptr);
+    EXPECT_EQ(sem->Declaration(), var);
+    EXPECT_TRUE(sem->IsPipelineConstant());
+    EXPECT_EQ(sem->ConstantId(), id);
+  }
+};
 
 TEST_F(ResolverPipelineOverridableConstantTest, NonOverridable) {
   auto* a = GlobalConst("a", ty.f32(), Construct(ty.f32()));
@@ -41,11 +51,7 @@ TEST_F(ResolverPipelineOverridableConstantTest, WithId) {
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-  auto* sem_a = Sem().Get<sem::GlobalVariable>(a);
-  ASSERT_NE(sem_a, nullptr);
-  EXPECT_EQ(sem_a->Declaration(), a);
-  EXPECT_TRUE(sem_a->IsPipelineConstant());
-  EXPECT_EQ(sem_a->ConstantId(), 7u);
+  ExpectConstantId(a, 7u);
 }
 
 TEST_F(ResolverPipelineOverridableConstantTest, WithoutId) {
@@ -53,37 +59,27 @@ TEST_F(ResolverPipelineOverridableConstantTest, WithoutId) {
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-  auto* sem_a = Sem().Get<sem::GlobalVariable>(a);
-  ASSERT_NE(sem_a, nullptr);
-  EXPECT_EQ(sem_a->Declaration(), a);
-  EXPECT_TRUE(sem_a->IsPipelineConstant());
-  EXPECT_EQ(sem_a->ConstantId(), 0u);
+  ExpectConstantId(a, 0u);
 }
 
 TEST_F(ResolverPipelineOverridableConstantTest, WithAndWithoutIds) {
   std::vector<ast::Variable*> variables;
-  variables.push_back(
-      GlobalConst("a", ty.f32(), Construct(ty.f32()), {Override()}));
-  variables.push_back(
-      GlobalConst("b", ty.f32(), Construct(ty.f32()), {Override()}));
-  variables.push_back(
-      GlobalConst("c", ty.f32(), Construct(ty.f32()), {Override(2u)}));
-  variables.push_back(
-      GlobalConst("d", ty.f32(), Construct(ty.f32()), {Override(4u)}));
-  variables.push_back(
-      GlobalConst("e", ty.f32(), Construct(ty.f32()), {Override()}));
-  variables.push_back(
-      GlobalConst("f", ty.f32(), Construct(ty.f32()), {Override(1u)}));
+  auto* a = GlobalConst("a", ty.f32(), Construct(ty.f32()), {Override()});
+  auto* b = GlobalConst("b", ty.f32(), Construct(ty.f32()), {Override()});
+  auto* c = GlobalConst("c", ty.f32(), Construct(ty.f32()), {Override(2u)});
+  auto* d = GlobalConst("d", ty.f32(), Construct(ty.f32()), {Override(4u)});
+  auto* e = GlobalConst("e", ty.f32(), Construct(ty.f32()), {Override()});
+  auto* f = GlobalConst("f", ty.f32(), Construct(ty.f32()), {Override(1u)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-  std::vector<uint16_t> constant_ids;
-  for (auto* var : variables) {
-    auto* sem = Sem().Get<sem::GlobalVariable>(var);
-    ASSERT_NE(sem, nullptr);
-    constant_ids.push_back(static_cast<uint16_t>(sem->ConstantId()));
-  }
-  EXPECT_THAT(constant_ids, UnorderedElementsAre(0u, 3u, 2u, 4u, 5u, 1u));
+  // Verify that constant id allocation order is deterministic.
+  ExpectConstantId(a, 0u);
+  ExpectConstantId(b, 3u);
+  ExpectConstantId(c, 2u);
+  ExpectConstantId(d, 4u);
+  ExpectConstantId(e, 5u);
+  ExpectConstantId(f, 1u);
 }
 
 TEST_F(ResolverPipelineOverridableConstantTest, DuplicateIds) {
