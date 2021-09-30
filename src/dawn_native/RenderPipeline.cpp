@@ -28,9 +28,91 @@
 #include <sstream>
 
 namespace dawn_native {
+    absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+        VertexFormatBaseType value,
+        const absl::FormatConversionSpec& spec,
+        absl::FormatSink* s) {
+        switch (value) {
+            case VertexFormatBaseType::Float:
+                s->Append("Float");
+                break;
+            case VertexFormatBaseType::Uint:
+                s->Append("Uint");
+                break;
+            case VertexFormatBaseType::Sint:
+                s->Append("Sint");
+                break;
+            default:
+                UNREACHABLE();
+        }
+        return {true};
+    }
+
+    absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+        InterStageComponentType value,
+        const absl::FormatConversionSpec& spec,
+        absl::FormatSink* s) {
+        switch (value) {
+            case InterStageComponentType::Float:
+                s->Append("Float");
+                break;
+            case InterStageComponentType::Uint:
+                s->Append("Uint");
+                break;
+            case InterStageComponentType::Sint:
+                s->Append("Sint");
+                break;
+            default:
+                UNREACHABLE();
+        }
+        return {true};
+    }
+
+    absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+        InterpolationType value,
+        const absl::FormatConversionSpec& spec,
+        absl::FormatSink* s) {
+        switch (value) {
+            case InterpolationType::Perspective:
+                s->Append("Perspective");
+                break;
+            case InterpolationType::Linear:
+                s->Append("Linear");
+                break;
+            case InterpolationType::Flat:
+                s->Append("Flat");
+                break;
+            default:
+                UNREACHABLE();
+        }
+        return {true};
+    }
+
+    absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+        InterpolationSampling value,
+        const absl::FormatConversionSpec& spec,
+        absl::FormatSink* s) {
+        switch (value) {
+            case InterpolationSampling::None:
+                s->Append("None");
+                break;
+            case InterpolationSampling::Center:
+                s->Append("Center");
+                break;
+            case InterpolationSampling::Centroid:
+                s->Append("Centroid");
+                break;
+            case InterpolationSampling::Sample:
+                s->Append("Sample");
+                break;
+            default:
+                UNREACHABLE();
+        }
+        return {true};
+    }
+
     // Helper functions
     namespace {
-
         MaybeError ValidateVertexAttribute(
             DeviceBase* device,
             const VertexAttribute* attribute,
@@ -40,40 +122,48 @@ namespace dawn_native {
             DAWN_TRY(ValidateVertexFormat(attribute->format));
             const VertexFormatInfo& formatInfo = GetVertexFormatInfo(attribute->format);
 
-            if (attribute->shaderLocation >= kMaxVertexAttributes) {
-                return DAWN_VALIDATION_ERROR("Setting attribute out of bounds");
-            }
+            DAWN_INVALID_IF(
+                attribute->shaderLocation >= kMaxVertexAttributes,
+                "Attribute shader location (%u) exceeds the maximum number of vertex attributes "
+                "(%u).",
+                attribute->shaderLocation, kMaxVertexAttributes);
+
             VertexAttributeLocation location(static_cast<uint8_t>(attribute->shaderLocation));
 
             // No underflow is possible because the max vertex format size is smaller than
             // kMaxVertexBufferArrayStride.
             ASSERT(kMaxVertexBufferArrayStride >= formatInfo.byteSize);
-            if (attribute->offset > kMaxVertexBufferArrayStride - formatInfo.byteSize) {
-                return DAWN_VALIDATION_ERROR("Setting attribute offset out of bounds");
-            }
+            DAWN_INVALID_IF(
+                attribute->offset > kMaxVertexBufferArrayStride - formatInfo.byteSize,
+                "Attribute offset (%u) with format %s (size: %u) doesn't fit in the maximum vertex "
+                "buffer stride (%u).",
+                attribute->offset, attribute->format, formatInfo.byteSize,
+                kMaxVertexBufferArrayStride);
 
             // No overflow is possible because the offset is already validated to be less
             // than kMaxVertexBufferArrayStride.
             ASSERT(attribute->offset < kMaxVertexBufferArrayStride);
-            if (vertexBufferStride > 0 &&
-                attribute->offset + formatInfo.byteSize > vertexBufferStride) {
-                return DAWN_VALIDATION_ERROR("Setting attribute offset out of bounds");
-            }
+            DAWN_INVALID_IF(
+                vertexBufferStride > 0 &&
+                    attribute->offset + formatInfo.byteSize > vertexBufferStride,
+                "Attribute offset (%u) with format %s (size: %u) doesn't fit in the vertex buffer "
+                "stride (%u).",
+                attribute->offset, attribute->format, formatInfo.byteSize, vertexBufferStride);
 
-            if (attribute->offset % std::min(4u, formatInfo.byteSize) != 0) {
-                return DAWN_VALIDATION_ERROR(
-                    "Attribute offset needs to be a multiple of min(4, formatSize)");
-            }
+            DAWN_INVALID_IF(attribute->offset % std::min(4u, formatInfo.byteSize) != 0,
+                            "Attribute offset (%u) in not a multiple of %u.", attribute->offset,
+                            std::min(4u, formatInfo.byteSize));
 
-            if (metadata.usedVertexInputs[location] &&
-                formatInfo.baseType != metadata.vertexInputBaseTypes[location]) {
-                return DAWN_VALIDATION_ERROR(
-                    "Attribute base type must match the base type in the shader.");
-            }
+            DAWN_INVALID_IF(metadata.usedVertexInputs[location] &&
+                                formatInfo.baseType != metadata.vertexInputBaseTypes[location],
+                            "Attribute base type (%s) does not match the "
+                            "shader's base type (%s) in location (%u).",
+                            formatInfo.baseType, metadata.vertexInputBaseTypes[location],
+                            attribute->shaderLocation);
 
-            if ((*attributesSetMask)[location]) {
-                return DAWN_VALIDATION_ERROR("Setting already set attribute");
-            }
+            DAWN_INVALID_IF((*attributesSetMask)[location],
+                            "Attribute shader location (%u) is used more than once.",
+                            attribute->shaderLocation);
 
             attributesSetMask->set(location);
             return {};
@@ -85,18 +175,19 @@ namespace dawn_native {
             const EntryPointMetadata& metadata,
             ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>* attributesSetMask) {
             DAWN_TRY(ValidateVertexStepMode(buffer->stepMode));
-            if (buffer->arrayStride > kMaxVertexBufferArrayStride) {
-                return DAWN_VALIDATION_ERROR("Setting arrayStride out of bounds");
-            }
+            DAWN_INVALID_IF(
+                buffer->arrayStride > kMaxVertexBufferArrayStride,
+                "Vertex buffer arrayStride (%u) is larger than the maximum array stride (%u).",
+                buffer->arrayStride, kMaxVertexBufferArrayStride);
 
-            if (buffer->arrayStride % 4 != 0) {
-                return DAWN_VALIDATION_ERROR(
-                    "arrayStride of Vertex buffer needs to be a multiple of 4 bytes");
-            }
+            DAWN_INVALID_IF(buffer->arrayStride % 4 != 0,
+                            "Vertex buffer arrayStride (%u) is not a multiple of 4.",
+                            buffer->arrayStride);
 
             for (uint32_t i = 0; i < buffer->attributeCount; ++i) {
-                DAWN_TRY(ValidateVertexAttribute(device, &buffer->attributes[i], metadata,
-                                                 buffer->arrayStride, attributesSetMask));
+                DAWN_TRY_CONTEXT(ValidateVertexAttribute(device, &buffer->attributes[i], metadata,
+                                                         buffer->arrayStride, attributesSetMask),
+                                 "validating attributes[%u].", i);
             }
 
             return {};
@@ -105,25 +196,28 @@ namespace dawn_native {
         MaybeError ValidateVertexState(DeviceBase* device,
                                        const VertexState* descriptor,
                                        const PipelineLayoutBase* layout) {
-            if (descriptor->nextInChain != nullptr) {
-                return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
-            }
+            DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr.");
 
-            if (descriptor->bufferCount > kMaxVertexBuffers) {
-                return DAWN_VALIDATION_ERROR("Vertex buffer count exceeds maximum");
-            }
+            DAWN_INVALID_IF(
+                descriptor->bufferCount > kMaxVertexBuffers,
+                "Vertex buffer count (%u) exceeds the maximum number of vertex buffers (%u).",
+                descriptor->bufferCount, kMaxVertexBuffers);
 
-            DAWN_TRY(ValidateProgrammableStage(device, descriptor->module, descriptor->entryPoint,
-                                               descriptor->constantCount, descriptor->constants,
-                                               layout, SingleShaderStage::Vertex));
+            DAWN_TRY_CONTEXT(
+                ValidateProgrammableStage(device, descriptor->module, descriptor->entryPoint,
+                                          descriptor->constantCount, descriptor->constants, layout,
+                                          SingleShaderStage::Vertex),
+                "validating vertex stage (module: %s, entryPoint: %s).", descriptor->module,
+                descriptor->entryPoint);
             const EntryPointMetadata& vertexMetadata =
                 descriptor->module->GetEntryPoint(descriptor->entryPoint);
 
             ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes> attributesSetMask;
             uint32_t totalAttributesNum = 0;
             for (uint32_t i = 0; i < descriptor->bufferCount; ++i) {
-                DAWN_TRY(ValidateVertexBufferLayout(device, &descriptor->buffers[i], vertexMetadata,
-                                                    &attributesSetMask));
+                DAWN_TRY_CONTEXT(ValidateVertexBufferLayout(device, &descriptor->buffers[i],
+                                                            vertexMetadata, &attributesSetMask),
+                                 "validating buffers[%u].", i);
                 totalAttributesNum += descriptor->buffers[i].attributeCount;
             }
 
@@ -133,10 +227,9 @@ namespace dawn_native {
             // attribute number never exceed kMaxVertexAttributes.
             ASSERT(totalAttributesNum <= kMaxVertexAttributes);
 
-            if (!IsSubset(vertexMetadata.usedVertexInputs, attributesSetMask)) {
-                return DAWN_VALIDATION_ERROR(
-                    "Pipeline vertex stage uses vertex buffers not in the vertex state");
-            }
+            // TODO(dawn:563): Specify which inputs were not used in error message.
+            DAWN_INVALID_IF(!IsSubset(vertexMetadata.usedVertexInputs, attributesSetMask),
+                            "Pipeline vertex stage uses vertex buffers not in the vertex state");
 
             return {};
         }
@@ -158,14 +251,16 @@ namespace dawn_native {
             // Pipeline descriptors must have stripIndexFormat != undefined IFF they are using strip
             // topologies.
             if (IsStripPrimitiveTopology(descriptor->topology)) {
-                if (descriptor->stripIndexFormat == wgpu::IndexFormat::Undefined) {
-                    return DAWN_VALIDATION_ERROR(
-                        "stripIndexFormat must not be undefined when using strip primitive "
-                        "topologies");
-                }
-            } else if (descriptor->stripIndexFormat != wgpu::IndexFormat::Undefined) {
-                return DAWN_VALIDATION_ERROR(
-                    "stripIndexFormat must be undefined when using non-strip primitive topologies");
+                DAWN_INVALID_IF(
+                    descriptor->stripIndexFormat == wgpu::IndexFormat::Undefined,
+                    "StripIndexFormat is undefined when using a strip primitive topology (%s).",
+                    descriptor->topology);
+            } else {
+                DAWN_INVALID_IF(
+                    descriptor->stripIndexFormat != wgpu::IndexFormat::Undefined,
+                    "StripIndexFormat (%s) is not undefined when using a non-strip primitive "
+                    "topology (%s).",
+                    descriptor->stripIndexFormat, descriptor->topology);
             }
 
             return {};
@@ -189,31 +284,27 @@ namespace dawn_native {
 
             const Format* format;
             DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->format));
-            if (!format->HasDepthOrStencil() || !format->isRenderable) {
-                return DAWN_VALIDATION_ERROR(
-                    "Depth stencil format must be depth-stencil renderable");
-            }
+            DAWN_INVALID_IF(!format->HasDepthOrStencil() || !format->isRenderable,
+                            "Depth stencil format (%s) is not depth-stencil renderable.",
+                            descriptor->format);
 
-            if (std::isnan(descriptor->depthBiasSlopeScale) ||
-                std::isnan(descriptor->depthBiasClamp)) {
-                return DAWN_VALIDATION_ERROR("Depth bias parameters must not be NaN.");
-            }
+            DAWN_INVALID_IF(std::isnan(descriptor->depthBiasSlopeScale) ||
+                                std::isnan(descriptor->depthBiasClamp),
+                            "Either depthBiasSlopeScale (%f) or depthBiasClamp (%f) is NaN.",
+                            descriptor->depthBiasSlopeScale, descriptor->depthBiasClamp);
 
             return {};
         }
 
         MaybeError ValidateMultisampleState(const MultisampleState* descriptor) {
-            if (descriptor->nextInChain != nullptr) {
-                return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
-            }
+            DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr.");
 
-            if (!IsValidSampleCount(descriptor->count)) {
-                return DAWN_VALIDATION_ERROR("Multisample count is not supported");
-            }
+            DAWN_INVALID_IF(!IsValidSampleCount(descriptor->count),
+                            "Multisample count (%u) is not supported.", descriptor->count);
 
-            if (descriptor->alphaToCoverageEnabled && descriptor->count <= 1) {
-                return DAWN_VALIDATION_ERROR("Enabling alphaToCoverage requires sample count > 1");
-            }
+            DAWN_INVALID_IF(descriptor->alphaToCoverageEnabled && descriptor->count <= 1,
+                            "Multisample count (%u) must be > 1 when alphaToCoverage is enabled.",
+                            descriptor->count);
 
             return {};
         }
@@ -239,57 +330,58 @@ namespace dawn_native {
             const ColorTargetState* descriptor,
             bool fragmentWritten,
             const EntryPointMetadata::FragmentOutputVariableInfo& fragmentOutputVariable) {
-            if (descriptor->nextInChain != nullptr) {
-                return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
-            }
+            DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr.");
 
             if (descriptor->blend) {
-                DAWN_TRY(ValidateBlendState(device, descriptor->blend));
+                DAWN_TRY_CONTEXT(ValidateBlendState(device, descriptor->blend),
+                                 "validating blend state.");
             }
 
             DAWN_TRY(ValidateColorWriteMask(descriptor->writeMask));
 
             const Format* format;
             DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->format));
-            if (!format->IsColor() || !format->isRenderable) {
-                return DAWN_VALIDATION_ERROR("Color format must be color renderable");
-            }
-            if (descriptor->blend && !(format->GetAspectInfo(Aspect::Color).supportedSampleTypes &
-                                       SampleTypeBit::Float)) {
-                return DAWN_VALIDATION_ERROR(
-                    "Color format must be blendable when blending is enabled");
-            }
-            if (fragmentWritten) {
-                if (fragmentOutputVariable.baseType !=
-                    format->GetAspectInfo(Aspect::Color).baseType) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Color format must match the fragment stage output type");
-                }
+            DAWN_INVALID_IF(!format->IsColor() || !format->isRenderable,
+                            "Color format (%s) is not color renderable.", descriptor->format);
 
-                if (fragmentOutputVariable.componentCount < format->componentCount) {
-                    return DAWN_VALIDATION_ERROR(
-                        "The fragment stage output components count must be no fewer than the "
-                        "color format channel count");
-                }
+            DAWN_INVALID_IF(
+                descriptor->blend && !(format->GetAspectInfo(Aspect::Color).supportedSampleTypes &
+                                       SampleTypeBit::Float),
+                "Blending is enabled but color format (%s) is not blendable.", descriptor->format);
+
+            if (fragmentWritten) {
+                DAWN_INVALID_IF(fragmentOutputVariable.baseType !=
+                                    format->GetAspectInfo(Aspect::Color).baseType,
+                                "Color format (%s) base type (%s) doesn't match the fragment "
+                                "module output type (%s).",
+                                descriptor->format, format->GetAspectInfo(Aspect::Color).baseType,
+                                fragmentOutputVariable.baseType);
+
+                DAWN_INVALID_IF(
+                    fragmentOutputVariable.componentCount < format->componentCount,
+                    "The fragment stage has fewer output components (%u) than the color format "
+                    "(%s) component count (%u).",
+                    fragmentOutputVariable.componentCount, descriptor->format,
+                    format->componentCount);
 
                 if (descriptor->blend) {
                     if (fragmentOutputVariable.componentCount < 4u) {
                         // No alpha channel output
                         // Make sure there's no alpha involved in the blending operation
-                        if (BlendFactorContainsSrcAlpha(descriptor->blend->color.srcFactor) ||
-                            BlendFactorContainsSrcAlpha(descriptor->blend->color.dstFactor)) {
-                            return DAWN_VALIDATION_ERROR(
-                                "Color blending factor is reading alpha but it is missing from "
-                                "fragment output");
-                        }
+                        DAWN_INVALID_IF(
+                            BlendFactorContainsSrcAlpha(descriptor->blend->color.srcFactor) ||
+                                BlendFactorContainsSrcAlpha(descriptor->blend->color.dstFactor),
+                            "Color blending srcfactor (%s) or dstFactor (%s) is reading alpha "
+                            "but it is missing from fragment output.",
+                            descriptor->blend->color.srcFactor, descriptor->blend->color.dstFactor);
                     }
                 }
             } else {
-                if (descriptor->writeMask != wgpu::ColorWriteMask::None) {
-                    return DAWN_VALIDATION_ERROR(
-                        "writeMask must be zero for color targets with no corresponding fragment "
-                        "stage output");
-                }
+                DAWN_INVALID_IF(
+                    descriptor->writeMask != wgpu::ColorWriteMask::None,
+                    "Color target has no corresponding fragment stage output but writeMask (%s) is "
+                    "not zero.",
+                    descriptor->writeMask);
             }
 
             return {};
@@ -298,26 +390,28 @@ namespace dawn_native {
         MaybeError ValidateFragmentState(DeviceBase* device,
                                          const FragmentState* descriptor,
                                          const PipelineLayoutBase* layout) {
-            if (descriptor->nextInChain != nullptr) {
-                return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
-            }
+            DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr.");
 
-            DAWN_TRY(ValidateProgrammableStage(device, descriptor->module, descriptor->entryPoint,
-                                               descriptor->constantCount, descriptor->constants,
-                                               layout, SingleShaderStage::Fragment));
+            DAWN_TRY_CONTEXT(
+                ValidateProgrammableStage(device, descriptor->module, descriptor->entryPoint,
+                                          descriptor->constantCount, descriptor->constants, layout,
+                                          SingleShaderStage::Fragment),
+                "validating fragment stage (module: %s, entryPoint: %s).", descriptor->module,
+                descriptor->entryPoint);
 
-            if (descriptor->targetCount > kMaxColorAttachments) {
-                return DAWN_VALIDATION_ERROR("Number of color targets exceeds maximum");
-            }
+            DAWN_INVALID_IF(descriptor->targetCount > kMaxColorAttachments,
+                            "Number of targets (%u) exceeds the maximum (%u).",
+                            descriptor->targetCount, kMaxColorAttachments);
 
             const EntryPointMetadata& fragmentMetadata =
                 descriptor->module->GetEntryPoint(descriptor->entryPoint);
             for (ColorAttachmentIndex i(uint8_t(0));
                  i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->targetCount)); ++i) {
-                DAWN_TRY(ValidateColorTargetState(device,
-                                                  &descriptor->targets[static_cast<uint8_t>(i)],
-                                                  fragmentMetadata.fragmentOutputsWritten[i],
-                                                  fragmentMetadata.fragmentOutputVariables[i]));
+                DAWN_TRY_CONTEXT(
+                    ValidateColorTargetState(device, &descriptor->targets[static_cast<uint8_t>(i)],
+                                             fragmentMetadata.fragmentOutputsWritten[i],
+                                             fragmentMetadata.fragmentOutputVariables[i]),
+                    "validating targets[%u].", static_cast<uint8_t>(i));
             }
 
             return {};
@@ -331,36 +425,41 @@ namespace dawn_native {
             const EntryPointMetadata& fragmentMetadata =
                 fragmentState.module->GetEntryPoint(fragmentState.entryPoint);
 
-            if (vertexMetadata.usedInterStageVariables !=
-                fragmentMetadata.usedInterStageVariables) {
-                return DAWN_VALIDATION_ERROR(
-                    "One or more fragment inputs and vertex outputs are not one-to-one matching");
-            }
+            // TODO(dawn:563): Can this message give more details?
+            DAWN_INVALID_IF(
+                vertexMetadata.usedInterStageVariables != fragmentMetadata.usedInterStageVariables,
+                "One or more fragment inputs and vertex outputs are not one-to-one matching");
 
-            auto generateErrorString = [](const char* interStageAttribute, size_t location) {
-                std::ostringstream stream;
-                stream << "The " << interStageAttribute << " of the vertex output at location "
-                       << location
-                       << " is different from the one of the fragment input at the same location";
-                return stream.str();
-            };
             // TODO(dawn:802): Validate interpolation types and interpolition sampling types
             for (size_t i : IterateBitSet(vertexMetadata.usedInterStageVariables)) {
                 const auto& vertexOutputInfo = vertexMetadata.interStageVariables[i];
                 const auto& fragmentInputInfo = fragmentMetadata.interStageVariables[i];
-                if (vertexOutputInfo.baseType != fragmentInputInfo.baseType) {
-                    return DAWN_VALIDATION_ERROR(generateErrorString("base type", i));
-                }
-                if (vertexOutputInfo.componentCount != fragmentInputInfo.componentCount) {
-                    return DAWN_VALIDATION_ERROR(generateErrorString("componentCount", i));
-                }
-                if (vertexOutputInfo.interpolationType != fragmentInputInfo.interpolationType) {
-                    return DAWN_VALIDATION_ERROR(generateErrorString("interpolation type", i));
-                }
-                if (vertexOutputInfo.interpolationSampling !=
-                    fragmentInputInfo.interpolationSampling) {
-                    return DAWN_VALIDATION_ERROR(generateErrorString("interpolation sampling", i));
-                }
+                DAWN_INVALID_IF(
+                    vertexOutputInfo.baseType != fragmentInputInfo.baseType,
+                    "The base type (%s) of the vertex output at location %u is different from the "
+                    "base type (%s) of the fragment input at location %u.",
+                    vertexOutputInfo.baseType, i, fragmentInputInfo.baseType, i);
+
+                DAWN_INVALID_IF(
+                    vertexOutputInfo.componentCount != fragmentInputInfo.componentCount,
+                    "The component count (%u) of the vertex output at location %u is different "
+                    "from the component count (%u) of the fragment input at location %u.",
+                    vertexOutputInfo.componentCount, i, fragmentInputInfo.componentCount, i);
+
+                DAWN_INVALID_IF(
+                    vertexOutputInfo.interpolationType != fragmentInputInfo.interpolationType,
+                    "The interpolation type (%s) of the vertex output at location %u is different "
+                    "from the interpolation type (%s) of the fragment input at location %u.",
+                    vertexOutputInfo.interpolationType, i, fragmentInputInfo.interpolationType, i);
+
+                DAWN_INVALID_IF(
+                    vertexOutputInfo.interpolationSampling !=
+                        fragmentInputInfo.interpolationSampling,
+                    "The interpolation sampling (%s) of the vertex output at location %u is "
+                    "different from the interpolation sampling (%s) of the fragment input at "
+                    "location %u.",
+                    vertexOutputInfo.interpolationSampling, i,
+                    fragmentInputInfo.interpolationSampling, i);
             }
 
             return {};
@@ -387,31 +486,33 @@ namespace dawn_native {
 
     MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
                                                 const RenderPipelineDescriptor* descriptor) {
-        if (descriptor->nextInChain != nullptr) {
-            return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
-        }
+        DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr.");
 
         if (descriptor->layout != nullptr) {
             DAWN_TRY(device->ValidateObject(descriptor->layout));
         }
 
-        DAWN_TRY(ValidateVertexState(device, &descriptor->vertex, descriptor->layout));
+        DAWN_TRY_CONTEXT(ValidateVertexState(device, &descriptor->vertex, descriptor->layout),
+                         "validating vertex state.");
 
-        DAWN_TRY(ValidatePrimitiveState(device, &descriptor->primitive));
+        DAWN_TRY_CONTEXT(ValidatePrimitiveState(device, &descriptor->primitive),
+                         "validating primitive state.");
 
         if (descriptor->depthStencil) {
-            DAWN_TRY(ValidateDepthStencilState(device, descriptor->depthStencil));
+            DAWN_TRY_CONTEXT(ValidateDepthStencilState(device, descriptor->depthStencil),
+                             "validating depthStencil state.");
         }
 
-        DAWN_TRY(ValidateMultisampleState(&descriptor->multisample));
+        DAWN_TRY_CONTEXT(ValidateMultisampleState(&descriptor->multisample),
+                         "validating multisample state.");
 
         if (descriptor->fragment != nullptr) {
-            DAWN_TRY(ValidateFragmentState(device, descriptor->fragment, descriptor->layout));
+            DAWN_TRY_CONTEXT(
+                ValidateFragmentState(device, descriptor->fragment, descriptor->layout),
+                "validating fragment state.");
 
-            if (descriptor->fragment->targetCount == 0 && !descriptor->depthStencil) {
-                return DAWN_VALIDATION_ERROR(
-                    "Should have at least one color target or a depthStencil");
-            }
+            DAWN_INVALID_IF(descriptor->fragment->targetCount == 0 && !descriptor->depthStencil,
+                            "Must have at least one color or depthStencil target.");
 
             DAWN_TRY(
                 ValidateInterStageMatching(device, descriptor->vertex, *(descriptor->fragment)));
