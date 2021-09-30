@@ -616,6 +616,36 @@ TEST_F(
 }
 
 TEST_F(ResolverValidationTest,
+       Stmt_Loop_ContinueInLoopBodySubscopeBeforeDecl_UsageOutsideBlock) {
+  // loop  {
+  //     if (true) {
+  //         continue; // bypasses z decl (if we reach here)
+  //     }
+  //     var z : i32;
+  //     continuing {
+  //         // Must fail even if z is used in an expression that isn't
+  //         // directly contained inside a block.
+  //         if (z < 2) {
+  //         }
+  //     }
+  // }
+
+  auto error_loc = Source{Source::Location{12, 34}};
+  auto* body = Block(If(Expr(true), Block(create<ast::ContinueStatement>())),
+                     Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
+  auto* compare = create<ast::BinaryExpression>(ast::BinaryOp::kLessThan,
+                                                Expr(error_loc, "z"), Expr(2));
+  auto* continuing = Block(If(compare, Block()));
+  auto* loop_stmt = Loop(body, continuing);
+  WrapInFunction(loop_stmt);
+
+  EXPECT_FALSE(r()->Resolve()) << r()->error();
+  EXPECT_EQ(r()->error(),
+            "12:34 error: continue statement bypasses declaration of 'z' in "
+            "continuing block");
+}
+
+TEST_F(ResolverValidationTest,
        Stmt_Loop_ContinueInLoopBodySubscopeBeforeDecl_UsageInContinuingLoop) {
   // loop  {
   //     if (true) {

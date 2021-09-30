@@ -2971,12 +2971,12 @@ bool Resolver::Identifier(ast::IdentifierExpression* expr) {
     var->users.push_back(expr);
     set_referenced_from_function_if_needed(var, true);
 
-    if (current_block_) {
+    if (current_statement_) {
       // If identifier is part of a loop continuing block, make sure it
       // doesn't refer to a variable that is bypassed by a continue statement
       // in the loop's body block.
       if (auto* continuing_block =
-              current_block_
+              current_statement_
                   ->FindFirstParent<sem::LoopContinuingBlockStatement>()) {
         auto* loop_block =
             continuing_block->FindFirstParent<sem::LoopBlockStatement>();
