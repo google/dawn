@@ -572,17 +572,21 @@ TEST_F(ResolverValidationTest,
   //     }
   // }
 
-  auto error_loc = Source{Source::Location{12, 34}};
-  auto* body = Block(If(Expr(true), Block(create<ast::ContinueStatement>())),
-                     Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
-  auto* continuing = Block(Assign(Expr(error_loc, "z"), 2));
+  auto cont_loc = Source{Source::Location{12, 34}};
+  auto decl_loc = Source{Source::Location{56, 78}};
+  auto ref_loc = Source{Source::Location{90, 12}};
+  auto* body =
+      Block(If(Expr(true), Block(create<ast::ContinueStatement>(cont_loc))),
+            Decl(Var(decl_loc, "z", ty.i32(), ast::StorageClass::kNone)));
+  auto* continuing = Block(Assign(Expr(ref_loc, "z"), 2));
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
   EXPECT_FALSE(r()->Resolve()) << r()->error();
   EXPECT_EQ(r()->error(),
-            "12:34 error: continue statement bypasses declaration of 'z' in "
-            "continuing block");
+            R"(12:34 error: continue statement bypasses declaration of 'z'
+56:78 note: identifier 'z' declared here
+90:12 note: identifier 'z' referenced in continuing block here)");
 }
 
 TEST_F(
@@ -600,19 +604,23 @@ TEST_F(
   //     }
   // }
 
-  auto error_loc = Source{Source::Location{12, 34}};
-  auto* body = Block(If(Expr(true), Block(create<ast::ContinueStatement>())),
-                     Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
+  auto cont_loc = Source{Source::Location{12, 34}};
+  auto decl_loc = Source{Source::Location{56, 78}};
+  auto ref_loc = Source{Source::Location{90, 12}};
+  auto* body =
+      Block(If(Expr(true), Block(create<ast::ContinueStatement>(cont_loc))),
+            Decl(Var(decl_loc, "z", ty.i32(), ast::StorageClass::kNone)));
 
   auto* continuing =
-      Block(If(Expr(true), Block(Assign(Expr(error_loc, "z"), 2))));
+      Block(If(Expr(true), Block(Assign(Expr(ref_loc, "z"), 2))));
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
   EXPECT_FALSE(r()->Resolve()) << r()->error();
   EXPECT_EQ(r()->error(),
-            "12:34 error: continue statement bypasses declaration of 'z' in "
-            "continuing block");
+            R"(12:34 error: continue statement bypasses declaration of 'z'
+56:78 note: identifier 'z' declared here
+90:12 note: identifier 'z' referenced in continuing block here)");
 }
 
 TEST_F(ResolverValidationTest,
@@ -630,19 +638,23 @@ TEST_F(ResolverValidationTest,
   //     }
   // }
 
-  auto error_loc = Source{Source::Location{12, 34}};
-  auto* body = Block(If(Expr(true), Block(create<ast::ContinueStatement>())),
-                     Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
+  auto cont_loc = Source{Source::Location{12, 34}};
+  auto decl_loc = Source{Source::Location{56, 78}};
+  auto ref_loc = Source{Source::Location{90, 12}};
+  auto* body =
+      Block(If(Expr(true), Block(create<ast::ContinueStatement>(cont_loc))),
+            Decl(Var(decl_loc, "z", ty.i32(), ast::StorageClass::kNone)));
   auto* compare = create<ast::BinaryExpression>(ast::BinaryOp::kLessThan,
-                                                Expr(error_loc, "z"), Expr(2));
+                                                Expr(ref_loc, "z"), Expr(2));
   auto* continuing = Block(If(compare, Block()));
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
   EXPECT_FALSE(r()->Resolve()) << r()->error();
   EXPECT_EQ(r()->error(),
-            "12:34 error: continue statement bypasses declaration of 'z' in "
-            "continuing block");
+            R"(12:34 error: continue statement bypasses declaration of 'z'
+56:78 note: identifier 'z' declared here
+90:12 note: identifier 'z' referenced in continuing block here)");
 }
 
 TEST_F(ResolverValidationTest,
@@ -659,18 +671,22 @@ TEST_F(ResolverValidationTest,
   //     }
   // }
 
-  auto error_loc = Source{Source::Location{12, 34}};
-  auto* body = Block(If(Expr(true), Block(create<ast::ContinueStatement>())),
-                     Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
+  auto cont_loc = Source{Source::Location{12, 34}};
+  auto decl_loc = Source{Source::Location{56, 78}};
+  auto ref_loc = Source{Source::Location{90, 12}};
+  auto* body =
+      Block(If(Expr(true), Block(create<ast::ContinueStatement>(cont_loc))),
+            Decl(Var(decl_loc, "z", ty.i32(), ast::StorageClass::kNone)));
 
-  auto* continuing = Block(Loop(Block(Assign(Expr(error_loc, "z"), 2))));
+  auto* continuing = Block(Loop(Block(Assign(Expr(ref_loc, "z"), 2))));
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
   EXPECT_FALSE(r()->Resolve()) << r()->error();
   EXPECT_EQ(r()->error(),
-            "12:34 error: continue statement bypasses declaration of 'z' in "
-            "continuing block");
+            R"(12:34 error: continue statement bypasses declaration of 'z'
+56:78 note: identifier 'z' declared here
+90:12 note: identifier 'z' referenced in continuing block here)");
 }
 
 TEST_F(ResolverValidationTest,

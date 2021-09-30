@@ -2043,15 +2043,15 @@ bool Resolver::Statement(ast::Statement* stmt) {
     }
     return true;
   }
-  if (stmt->Is<ast::ContinueStatement>()) {
+  if (auto* c = stmt->As<ast::ContinueStatement>()) {
     // Set if we've hit the first continue statement in our parent loop
     if (auto* block =
             current_block_->FindFirstParent<
                 sem::LoopBlockStatement, sem::LoopContinuingBlockStatement>()) {
       if (auto* loop_block = block->As<sem::LoopBlockStatement>()) {
-        if (loop_block->FirstContinue() == size_t(~0)) {
+        if (!loop_block->FirstContinue()) {
           const_cast<sem::LoopBlockStatement*>(loop_block)
-              ->SetFirstContinue(loop_block->Decls().size());
+              ->SetFirstContinue(c, loop_block->Decls().size());
         }
       } else {
         AddError("continuing blocks must not contain a continue statement",
@@ -2980,7 +2980,7 @@ bool Resolver::Identifier(ast::IdentifierExpression* expr) {
                   ->FindFirstParent<sem::LoopContinuingBlockStatement>()) {
         auto* loop_block =
             continuing_block->FindFirstParent<sem::LoopBlockStatement>();
-        if (loop_block->FirstContinue() != size_t(~0)) {
+        if (loop_block->FirstContinue()) {
           auto& decls = loop_block->Decls();
           // If our identifier is in loop_block->decls, make sure its index is
           // less than first_continue
@@ -2990,11 +2990,16 @@ bool Resolver::Identifier(ast::IdentifierExpression* expr) {
           if (iter != decls.end()) {
             auto var_decl_index =
                 static_cast<size_t>(std::distance(decls.begin(), iter));
-            if (var_decl_index >= loop_block->FirstContinue()) {
+            if (var_decl_index >= loop_block->NumDeclsAtFirstContinue()) {
               AddError("continue statement bypasses declaration of '" +
-                           builder_->Symbols().NameFor(symbol) +
-                           "' in continuing block",
-                       expr->source());
+                           builder_->Symbols().NameFor(symbol) + "'",
+                       loop_block->FirstContinue()->source());
+              AddNote("identifier '" + builder_->Symbols().NameFor(symbol) +
+                          "' declared here",
+                      (*iter)->source());
+              AddNote("identifier '" + builder_->Symbols().NameFor(symbol) +
+                          "' referenced in continuing block here",
+                      expr->source());
               return false;
             }
           }

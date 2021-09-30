@@ -51,8 +51,11 @@ LoopBlockStatement::LoopBlockStatement(const ast::BlockStatement* declaration,
 }
 LoopBlockStatement::~LoopBlockStatement() = default;
 
-void LoopBlockStatement::SetFirstContinue(size_t first_continue) {
+void LoopBlockStatement::SetFirstContinue(
+    const ast::ContinueStatement* first_continue,
+    size_t num_decls) {
   first_continue_ = first_continue;
+  num_decls_at_first_continue_ = num_decls;
 }
 
 }  // namespace sem

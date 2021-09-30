@@ -24,6 +24,7 @@
 namespace tint {
 namespace ast {
 class BlockStatement;
+class ContinueStatement;
 class Function;
 class Variable;
 }  // namespace ast
@@ -90,21 +91,31 @@ class LoopBlockStatement : public Castable<LoopBlockStatement, BlockStatement> {
   /// Destructor
   ~LoopBlockStatement() override;
 
-  /// @returns the index of the first variable declared after the first continue
-  /// statement
-  size_t FirstContinue() const { return first_continue_; }
+  /// @returns the first continue statement in this loop block, or nullptr if
+  /// there are no continue statements in the block
+  const ast::ContinueStatement* FirstContinue() const {
+    return first_continue_;
+  }
 
-  /// Requires that this is a loop block.
-  /// Allows the resolver to set the index of the first variable declared after
-  /// the first continue statement.
-  /// @param first_continue index of the relevant variable
-  void SetFirstContinue(size_t first_continue);
+  /// @returns the number of variables declared before the first continue
+  /// statement
+  size_t NumDeclsAtFirstContinue() const {
+    return num_decls_at_first_continue_;
+  }
+
+  /// Allows the resolver to record the first continue statement in the block
+  /// and the number of variables declared prior to that statement.
+  /// @param first_continue the first continue statement in the block
+  /// @param num_decls the number of variable declarations before that continue
+  void SetFirstContinue(const ast::ContinueStatement* first_continue,
+                        size_t num_decls);
 
  private:
-  // first_continue is set to the index of the first variable in decls
-  // declared after the first continue statement in a loop block, if any.
-  constexpr static size_t kNoContinue = size_t(~0);
-  size_t first_continue_ = kNoContinue;
+  /// The first continue statement in this loop block.
+  const ast::ContinueStatement* first_continue_ = nullptr;
+
+  /// The number of variables declared before the first continue statement.
+  size_t num_decls_at_first_continue_ = 0;
 };
 
 }  // namespace sem
