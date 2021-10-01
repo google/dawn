@@ -165,7 +165,6 @@ namespace dawn_native {
                 case tint::inspector::ResourceBinding::ResourceType::kDepthTexture:
                 case tint::inspector::ResourceBinding::ResourceType::kDepthMultisampledTexture:
                     return BindingInfoType::Texture;
-                case tint::inspector::ResourceBinding::ResourceType::kReadOnlyStorageTexture:
                 case tint::inspector::ResourceBinding::ResourceType::kWriteOnlyStorageTexture:
                     return BindingInfoType::StorageTexture;
                 case tint::inspector::ResourceBinding::ResourceType::kExternalTexture:
