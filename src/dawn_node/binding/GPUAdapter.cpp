@@ -14,6 +14,8 @@
 
 #include "src/dawn_node/binding/GPUAdapter.h"
 
+#include <unordered_set>
+
 #include "src/dawn_node/binding/GPUDevice.h"
 #include "src/dawn_node/binding/GPUSupportedLimits.h"
 
@@ -27,26 +29,27 @@ namespace wgpu { namespace binding {
         ////////////////////////////////////////////////////////////////////////////////
         class Features : public interop::GPUSupportedFeatures {
           public:
-            Features(WGPUDeviceProperties properties) : properties_(std::move(properties)) {
+            Features(WGPUDeviceProperties properties) {
+                if (properties.depthClamping) {
+                    enabled_.emplace(interop::GPUFeatureName::kDepthClamping);
+                }
+                if (properties.pipelineStatisticsQuery) {
+                    enabled_.emplace(interop::GPUFeatureName::kPipelineStatisticsQuery);
+                }
+                if (properties.textureCompressionBC) {
+                    enabled_.emplace(interop::GPUFeatureName::kTextureCompressionBc);
+                }
+                if (properties.timestampQuery) {
+                    enabled_.emplace(interop::GPUFeatureName::kTimestampQuery);
+                }
+
+                // TODO(crbug.com/dawn/1130)
+                // interop::GPUFeatureName::kDepth24UnormStencil8:
+                // interop::GPUFeatureName::kDepth32FloatStencil8:
             }
 
             bool has(interop::GPUFeatureName feature) {
-                switch (feature) {
-                    case interop::GPUFeatureName::kDepthClamping:
-                        return properties_.depthClamping;
-                    case interop::GPUFeatureName::kDepth24UnormStencil8:
-                        return false;  // TODO(crbug.com/dawn/1130)
-                    case interop::GPUFeatureName::kDepth32FloatStencil8:
-                        return false;  // TODO(crbug.com/dawn/1130)
-                    case interop::GPUFeatureName::kPipelineStatisticsQuery:
-                        return properties_.pipelineStatisticsQuery;
-                    case interop::GPUFeatureName::kTextureCompressionBc:
-                        return properties_.textureCompressionBC;
-                    case interop::GPUFeatureName::kTimestampQuery:
-                        return properties_.timestampQuery;
-                }
-                UNIMPLEMENTED("feature: ", feature);
-                return false;
+                return enabled_.count(feature) != 0;
             }
 
             // interop::GPUSupportedFeatures compliance
@@ -57,9 +60,17 @@ namespace wgpu { namespace binding {
                 }
                 return false;
             }
+            std::vector<std::string> keys(Napi::Env) override {
+                std::vector<std::string> out;
+                out.reserve(enabled_.size());
+                for (auto feature : enabled_) {
+                    out.push_back(interop::Converter<interop::GPUFeatureName>::ToString(feature));
+                }
+                return out;
+            }
 
           private:
-            WGPUDeviceProperties properties_;
+            std::unordered_set<interop::GPUFeatureName> enabled_;
         };
 
     }  // namespace

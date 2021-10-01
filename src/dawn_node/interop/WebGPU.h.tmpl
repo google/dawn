@@ -169,6 +169,7 @@ public:
   static bool FromJS(Napi::Env, Napi::Value, {{$.Name}}&);
   static Napi::Value ToJS(Napi::Env, {{$.Name}});
   static bool FromString(std::string, {{$.Name}}&);
+  static const char* ToString({{$.Name}});
 };
 
 std::ostream& operator<<(std::ostream& o, {{$.Name}});
@@ -195,8 +196,9 @@ std::ostream& operator<<(std::ostream& o, {{$.Name}});
 */ -}}
 {{- define "InterfaceSetlike"}}
   virtual bool has(Napi::Env, {{template "Type" $.Elem}}) = 0;
+  virtual std::vector<{{template "Type" $.Elem}}> keys(Napi::Env) = 0;
 {{- /* TODO(crbug.com/dawn/1143):
-       entries, forEach, keys, size, values
+       entries, forEach, size, values
        read-write: add, clear, or delete
 */}}
 {{- end }}

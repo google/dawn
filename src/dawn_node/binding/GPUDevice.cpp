@@ -118,6 +118,9 @@ namespace wgpu { namespace binding {
             bool has(Napi::Env, std::string feature) override {
                 UNIMPLEMENTED();
             }
+            std::vector<std::string> keys(Napi::Env) override {
+                UNIMPLEMENTED();
+            }
         };
         return interop::GPUSupportedFeatures::Create<Features>(env);
     }

@@ -143,6 +143,7 @@ Wrappers* Wrappers::instance = nullptr;
       return DefineClass(env, "{{$.Name}}", {
 {{   if $s := SetlikeOf $}}
         InstanceMethod("has", &W{{$.Name}}::has),
+        InstanceMethod("keys", &W{{$.Name}}::keys),
 {{-  end}}
 {{-  range $m := MethodsOf $}}
         InstanceMethod("{{$m.Name}}", &W{{$.Name}}::{{$m.Name}}),
@@ -168,6 +169,9 @@ Wrappers* Wrappers::instance = nullptr;
       }
       Napi::Error::New(info.Env(), "invalid arguments to has()").ThrowAsJavaScriptException();
       return {};
+    }
+    Napi::Value keys(const Napi::CallbackInfo& info) {
+      return ToJS(info.Env(), impl->keys(info.Env()));
     }
 {{-  end}}
 {{-  range $m := MethodsOf $}}
@@ -330,26 +334,34 @@ bool Converter<{{$.Name}}>::FromString(std::string str, {{$.Name}}& out) {
 {{-  end}}
   return false;
 }
+
+const char* Converter<{{$.Name}}>::ToString({{$.Name}} value) {
+  switch (value) {
+{{-  range $e := $.Values}}
+  case {{$.Name}}::{{EnumEntryName $e.Value}}:
+    return {{$e.Value}};
+{{-  end}}
+  }
+  return nullptr;
+}
+
 bool Converter<{{$.Name}}>::FromJS(Napi::Env env, Napi::Value value, {{$.Name}}& out) {
   return FromString(value.ToString(), out);
 }
+
 Napi::Value Converter<{{$.Name}}>::ToJS(Napi::Env env, {{$.Name}} value) {
   switch (value) {
 {{-  range $e := $.Values}}
   case {{$.Name}}::{{EnumEntryName $e.Value}}:
     return Napi::String::New(env, {{$e.Value}});
-    break;
 {{-  end}}
   }
   return env.Undefined();
 }
 
 std::ostream& operator<<(std::ostream& o, {{$.Name}} value) {
-  switch (value) {
-{{-  range $e := $.Values}}
-    case {{$.Name}}::{{EnumEntryName $e.Value}}:
-      return o << {{$e.Value}};
-{{-  end}}
+  if (auto* s = Converter<{{$.Name}}>::ToString(value)) {
+    return o << s;
   }
   return o << "undefined<{{$.Name}}>";
 }
