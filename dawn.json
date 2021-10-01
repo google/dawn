@@ -1154,6 +1154,7 @@
         "extensible": "in",
         "tags": ["dawn"],
         "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "plane 0", "type": "texture view"},
             {"name": "format", "type": "texture format"}
         ]

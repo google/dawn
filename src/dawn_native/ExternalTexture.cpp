@@ -30,23 +30,22 @@ namespace dawn_native {
                 "at least one of the passed texture views.");
         }
 
-        if ((textureView->GetTexture()->GetUsage() & wgpu::TextureUsage::TextureBinding) !=
-            wgpu::TextureUsage::TextureBinding) {
-            return DAWN_VALIDATION_ERROR(
-                "The external texture descriptor specifies a texture that was not created with "
-                "TextureUsage::TextureBinding.");
-        }
+        DAWN_INVALID_IF(
+            (textureView->GetTexture()->GetUsage() & wgpu::TextureUsage::TextureBinding) == 0,
+            "The external texture plane (%s) usage (%s) doesn't include the required usage (%s)",
+            textureView, textureView->GetTexture()->GetUsage(), wgpu::TextureUsage::TextureBinding);
 
-        if (textureView->GetDimension() != wgpu::TextureViewDimension::e2D) {
-            return DAWN_VALIDATION_ERROR(
-                "The external texture descriptor contains a texture view with a non-2D dimension.");
-        }
+        DAWN_INVALID_IF(textureView->GetDimension() != wgpu::TextureViewDimension::e2D,
+                        "The external texture plane (%s) dimension (%s) is not 2D.", textureView,
+                        textureView->GetDimension());
 
-        if (textureView->GetLevelCount() > 1) {
-            return DAWN_VALIDATION_ERROR(
-                "The external texture descriptor contains a texture view with a level count "
-                "greater than 1.");
-        }
+        DAWN_INVALID_IF(textureView->GetLevelCount() > 1,
+                        "The external texture plane (%s) mip level count (%u) is not 1.",
+                        textureView, textureView->GetLevelCount());
+
+        DAWN_INVALID_IF(textureView->GetTexture()->GetSampleCount() != 1,
+                        "The external texture plane (%s) sample count (%u) is not one.",
+                        textureView, textureView->GetTexture()->GetSampleCount());
 
         return {};
     }
@@ -66,11 +65,14 @@ namespace dawn_native {
             case wgpu::TextureFormat::RGBA8Unorm:
             case wgpu::TextureFormat::BGRA8Unorm:
             case wgpu::TextureFormat::RGBA16Float:
-                DAWN_TRY(ValidateExternalTexturePlane(descriptor->plane0, descriptor->format));
+                DAWN_TRY_CONTEXT(
+                    ValidateExternalTexturePlane(descriptor->plane0, descriptor->format),
+                    "validating plane0 against the external texture format (%s)",
+                    descriptor->format);
                 break;
             default:
-                return DAWN_VALIDATION_ERROR(
-                    "The external texture descriptor specifies an unsupported format.");
+                return DAWN_FORMAT_VALIDATION_ERROR(
+                    "Format (%s) is not a supported external texture format.", descriptor->format);
         }
 
         return {};
@@ -102,9 +104,8 @@ namespace dawn_native {
 
     MaybeError ExternalTextureBase::ValidateCanUseInSubmitNow() const {
         ASSERT(!IsError());
-        if (mState == ExternalTextureState::Destroyed) {
-            return DAWN_VALIDATION_ERROR("Destroyed external texture used in a submit");
-        }
+        DAWN_INVALID_IF(mState == ExternalTextureState::Destroyed,
+                        "Destroyed external texture %s is used in a submit.", this);
         return {};
     }
 

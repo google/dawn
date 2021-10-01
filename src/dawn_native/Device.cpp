@@ -1287,7 +1287,8 @@ namespace dawn_native {
     ResultOrError<Ref<ExternalTextureBase>> DeviceBase::CreateExternalTexture(
         const ExternalTextureDescriptor* descriptor) {
         if (IsValidationEnabled()) {
-            DAWN_TRY(ValidateExternalTextureDescriptor(this, descriptor));
+            DAWN_TRY_CONTEXT(ValidateExternalTextureDescriptor(this, descriptor), "validating %s",
+                             descriptor);
         }
 
         return ExternalTextureBase::Create(this, descriptor);

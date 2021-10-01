@@ -54,37 +54,49 @@ namespace {
     };
 
     TEST_F(ExternalTextureTest, CreateExternalTextureValidation) {
-        wgpu::TextureDescriptor textureDescriptor = CreateDefaultTextureDescriptor();
-        wgpu::ExternalTextureDescriptor externalDesc;
-        externalDesc.format = kDefaultTextureFormat;
-
         // Creating an external texture from a 2D, single-subresource texture should succeed.
         {
+            wgpu::TextureDescriptor textureDescriptor = CreateDefaultTextureDescriptor();
             wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
+
+            wgpu::ExternalTextureDescriptor externalDesc;
+            externalDesc.format = kDefaultTextureFormat;
             externalDesc.plane0 = texture.CreateView();
             device.CreateExternalTexture(&externalDesc);
         }
 
         // Creating an external texture with a mismatched texture view format should fail.
         {
+            wgpu::TextureDescriptor textureDescriptor = CreateDefaultTextureDescriptor();
             textureDescriptor.format = wgpu::TextureFormat::RGBA8Uint;
             wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
+
+            wgpu::ExternalTextureDescriptor externalDesc;
+            externalDesc.format = kDefaultTextureFormat;
             externalDesc.plane0 = texture.CreateView();
             ASSERT_DEVICE_ERROR(device.CreateExternalTexture(&externalDesc));
         }
 
         // Creating an external texture from a non-2D texture should fail.
         {
+            wgpu::TextureDescriptor textureDescriptor = CreateDefaultTextureDescriptor();
             textureDescriptor.dimension = wgpu::TextureDimension::e3D;
             wgpu::Texture internalTexture = device.CreateTexture(&textureDescriptor);
+
+            wgpu::ExternalTextureDescriptor externalDesc;
+            externalDesc.format = kDefaultTextureFormat;
             externalDesc.plane0 = internalTexture.CreateView();
             ASSERT_DEVICE_ERROR(device.CreateExternalTexture(&externalDesc));
         }
 
         // Creating an external texture from a texture with mip count > 1 should fail.
         {
+            wgpu::TextureDescriptor textureDescriptor = CreateDefaultTextureDescriptor();
             textureDescriptor.mipLevelCount = 2;
             wgpu::Texture internalTexture = device.CreateTexture(&textureDescriptor);
+
+            wgpu::ExternalTextureDescriptor externalDesc;
+            externalDesc.format = kDefaultTextureFormat;
             externalDesc.plane0 = internalTexture.CreateView();
             ASSERT_DEVICE_ERROR(device.CreateExternalTexture(&externalDesc));
         }
@@ -92,25 +104,45 @@ namespace {
         // Creating an external texture from a texture without TextureUsage::TextureBinding should
         // fail.
         {
+            wgpu::TextureDescriptor textureDescriptor = CreateDefaultTextureDescriptor();
             textureDescriptor.mipLevelCount = 2;
             wgpu::Texture internalTexture = device.CreateTexture(&textureDescriptor);
+
+            wgpu::ExternalTextureDescriptor externalDesc;
+            externalDesc.format = kDefaultTextureFormat;
             externalDesc.plane0 = internalTexture.CreateView();
             ASSERT_DEVICE_ERROR(device.CreateExternalTexture(&externalDesc));
         }
 
         // Creating an external texture with an unsupported format should fail.
         {
-            constexpr wgpu::TextureFormat kUnsupportedFormat = wgpu::TextureFormat::R8Uint;
-            textureDescriptor.format = kUnsupportedFormat;
+            wgpu::TextureDescriptor textureDescriptor = CreateDefaultTextureDescriptor();
+            textureDescriptor.format = wgpu::TextureFormat::R8Uint;
             wgpu::Texture internalTexture = device.CreateTexture(&textureDescriptor);
+
+            wgpu::ExternalTextureDescriptor externalDesc;
             externalDesc.plane0 = internalTexture.CreateView();
-            externalDesc.format = kUnsupportedFormat;
+            externalDesc.format = textureDescriptor.format;
+            ASSERT_DEVICE_ERROR(device.CreateExternalTexture(&externalDesc));
+        }
+
+        // Creating an external texture with an multisampled texture should fail.
+        {
+            wgpu::TextureDescriptor textureDescriptor = CreateDefaultTextureDescriptor();
+            textureDescriptor.sampleCount = 4;
+            wgpu::Texture internalTexture = device.CreateTexture(&textureDescriptor);
+
+            wgpu::ExternalTextureDescriptor externalDesc;
+            externalDesc.format = kDefaultTextureFormat;
+            externalDesc.plane0 = internalTexture.CreateView();
             ASSERT_DEVICE_ERROR(device.CreateExternalTexture(&externalDesc));
         }
 
         // Creating an external texture with an error texture view should fail.
         {
+            wgpu::TextureDescriptor textureDescriptor = CreateDefaultTextureDescriptor();
             wgpu::Texture internalTexture = device.CreateTexture(&textureDescriptor);
+
             wgpu::TextureViewDescriptor errorViewDescriptor;
             errorViewDescriptor.format = kDefaultTextureFormat;
             errorViewDescriptor.dimension = wgpu::TextureViewDimension::e2D;
@@ -119,6 +151,8 @@ namespace {
             ASSERT_DEVICE_ERROR(wgpu::TextureView errorTextureView =
                                     internalTexture.CreateView(&errorViewDescriptor));
 
+            wgpu::ExternalTextureDescriptor externalDesc;
+            externalDesc.format = kDefaultTextureFormat;
             externalDesc.plane0 = errorTextureView;
             externalDesc.format = kDefaultTextureFormat;
             ASSERT_DEVICE_ERROR(device.CreateExternalTexture(&externalDesc));
