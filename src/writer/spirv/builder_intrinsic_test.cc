@@ -1133,12 +1133,10 @@ INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                          Intrinsic_Builtin_SingleParam_Sint_Test,
                          testing::Values(IntrinsicData{"abs", "SAbs"}));
 
-using Intrinsic_Builtin_SingleParam_Uint_Test =
-    IntrinsicBuilderTestWithParam<IntrinsicData>;
-TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Scalar) {
-  auto param = GetParam();
-
-  auto* expr = Call(param.name, 1u);
+// Calling abs() on an unsigned integer scalar / vector is a no-op.
+using Intrinsic_Builtin_Abs_Uint_Test = IntrinsicBuilderTest;
+TEST_F(Intrinsic_Builtin_Abs_Uint_Test, Call_Scalar) {
+  auto* expr = Call("abs", 1u);
   WrapInFunction(expr);
 
   auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
@@ -1148,26 +1146,21 @@ TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Scalar) {
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
-  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
-OpName %3 "a_func"
+  EXPECT_EQ(b.GenerateCallExpression(expr), 7u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %6 = OpTypeInt 32 0
-%8 = OpConstant %6 1
+%7 = OpConstant %6 1
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %7 )" + param.op +
-                                R"( %8
 OpReturn
 OpFunctionEnd
 )");
 }
 
-TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Vector) {
-  auto param = GetParam();
-
-  auto* expr = Call(param.name, vec2<u32>(1u, 1u));
+TEST_F(Intrinsic_Builtin_Abs_Uint_Test, Call_Vector) {
+  auto* expr = Call("abs", vec2<u32>(1u, 1u));
   WrapInFunction(expr);
 
   auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
@@ -1177,26 +1170,20 @@ TEST_P(Intrinsic_Builtin_SingleParam_Uint_Test, Call_Vector) {
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
-  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
-OpName %3 "a_func"
+  EXPECT_EQ(b.GenerateCallExpression(expr), 9u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %7 = OpTypeInt 32 0
 %6 = OpTypeVector %7 2
-%9 = OpConstant %7 1
-%10 = OpConstantComposite %6 %9 %9
+%8 = OpConstant %7 1
+%9 = OpConstantComposite %6 %8 %8
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %8 )" + param.op +
-                                R"( %10
 OpReturn
 OpFunctionEnd
 )");
 }
-INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
-                         Intrinsic_Builtin_SingleParam_Uint_Test,
-                         testing::Values(IntrinsicData{"abs", "SAbs"}));
 
 using Intrinsic_Builtin_DualParam_SInt_Test =
     IntrinsicBuilderTestWithParam<IntrinsicData>;

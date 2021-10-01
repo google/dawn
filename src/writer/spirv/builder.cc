@@ -124,12 +124,6 @@ const sem::Matrix* GetNestedMatrixType(const sem::Type* type) {
 
 uint32_t intrinsic_to_glsl_method(const sem::Intrinsic* intrinsic) {
   switch (intrinsic->Type()) {
-    case IntrinsicType::kAbs:
-      if (intrinsic->ReturnType()->is_float_scalar_or_vector()) {
-        return GLSLstd450FAbs;
-      } else {
-        return GLSLstd450SAbs;
-      }
     case IntrinsicType::kAcos:
       return GLSLstd450Acos;
     case IntrinsicType::kAsin:
@@ -2338,8 +2332,17 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
   };
 
   OperandList params = {Operand::Int(result_type_id), result};
-
   spv::Op op = spv::Op::OpNop;
+
+  // Pushes the parameters for a GlslStd450 extended instruction, and sets op
+  // to OpExtInst.
+  auto glsl_std450 = [&](uint32_t inst_id) {
+    auto set_id = GetGLSLstd450Import();
+    params.push_back(Operand::Int(set_id));
+    params.push_back(Operand::Int(inst_id));
+    op = spv::Op::OpExtInst;
+  };
+
   switch (intrinsic->Type()) {
     case IntrinsicType::kAny:
       op = spv::Op::OpAny;
@@ -2611,18 +2614,25 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
     case IntrinsicType::kTranspose:
       op = spv::Op::OpTranspose;
       break;
+    case IntrinsicType::kAbs:
+      if (intrinsic->ReturnType()->is_unsigned_scalar_or_vector()) {
+        // abs() only operates on *signed* integers.
+        // This is a no-op for unsigned integers.
+        return get_param_as_value_id(0);
+      }
+      if (intrinsic->ReturnType()->is_float_scalar_or_vector()) {
+        glsl_std450(GLSLstd450FAbs);
+      } else {
+        glsl_std450(GLSLstd450SAbs);
+      }
+      break;
     default: {
-      auto set_id = GetGLSLstd450Import();
       auto inst_id = intrinsic_to_glsl_method(intrinsic);
       if (inst_id == 0) {
         error_ = "unknown method " + std::string(intrinsic->str());
         return 0;
       }
-
-      params.push_back(Operand::Int(set_id));
-      params.push_back(Operand::Int(inst_id));
-
-      op = spv::Op::OpExtInst;
+      glsl_std450(inst_id);
       break;
     }
   }
