@@ -29,14 +29,15 @@ namespace {
             return device.CreateBuffer(&descriptor);
         }
 
-        wgpu::Texture CreateTexture(wgpu::TextureUsage usage) {
+        wgpu::Texture CreateTexture(wgpu::TextureUsage usage,
+                                    wgpu::TextureFormat format = wgpu::TextureFormat::RGBA8Unorm) {
             wgpu::TextureDescriptor descriptor;
             descriptor.dimension = wgpu::TextureDimension::e2D;
             descriptor.size = {1, 1, 1};
             descriptor.sampleCount = 1;
             descriptor.mipLevelCount = 1;
             descriptor.usage = usage;
-            descriptor.format = kFormat;
+            descriptor.format = format;
 
             return device.CreateTexture(&descriptor);
         }
@@ -878,6 +879,50 @@ namespace {
                 pass.EndPass();
                 ASSERT_DEVICE_ERROR(encoder.Finish());
             }
+        }
+    }
+
+    // Test that it is invalid to use the same texture as both readable and writable depth/stencil
+    // attachment in the same render pass. But it is valid to use it as both readable and readonly
+    // depth/stencil attachment in the same render pass.
+    // Note that depth/stencil attachment is a special render attachment, it can be readonly.
+    TEST_F(ResourceUsageTrackingTest, TextureWithSamplingAndDepthStencilAttachment) {
+        // Create a texture
+        wgpu::Texture texture =
+            CreateTexture(wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment,
+                          wgpu::TextureFormat::Depth32Float);
+        wgpu::TextureView view = texture.CreateView();
+
+        // Create a bind group to use the texture as sampled binding
+        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Depth}});
+        wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, view}});
+
+        // Create a render pass to use the texture as a render target
+        utils::ComboRenderPassDescriptor passDescriptor({}, view);
+        passDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
+        passDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
+
+        // It is invalid to use the texture as both sampled and writeable depth/stencil attachment
+        // in the same pass
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
+            pass.SetBindGroup(0, bg);
+            pass.EndPass();
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+
+        // It is valid to use the texture as both sampled and readonly depth/stencil attachment in
+        // the same pass
+        {
+            passDescriptor.cDepthStencilAttachmentInfo.depthReadOnly = true;
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
+            pass.SetBindGroup(0, bg);
+            pass.EndPass();
+            encoder.Finish();
         }
     }
 

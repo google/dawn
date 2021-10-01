@@ -26,6 +26,8 @@ namespace dawn_native {
     // Add an extra buffer usage (readonly storage buffer usage) for render pass resource tracking
     static constexpr wgpu::BufferUsage kReadOnlyStorageBuffer =
         static_cast<wgpu::BufferUsage>(0x80000000);
+    static constexpr wgpu::TextureUsage kReadOnlyRenderAttachment =
+        static_cast<wgpu::TextureUsage>(0x40000000);
 
     // Internal usage to help tracking when a subresource is used as render attachment usage
     // more than once in a render pass.

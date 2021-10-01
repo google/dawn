@@ -445,6 +445,21 @@ namespace dawn_native {
                 encoder, destination, availabilityBuffer.Get(), paramsBuffer.Get());
         }
 
+        bool IsReadOnlyDepthStencilAttachment(
+            const RenderPassDepthStencilAttachment* depthStencilAttachment) {
+            DAWN_ASSERT(depthStencilAttachment != nullptr);
+            Aspect aspects = depthStencilAttachment->view->GetAspects();
+            DAWN_ASSERT(IsSubset(aspects, Aspect::Depth | Aspect::Stencil));
+
+            if ((aspects & Aspect::Depth) && !depthStencilAttachment->depthReadOnly) {
+                return false;
+            }
+            if (aspects & Aspect::Stencil && !depthStencilAttachment->stencilReadOnly) {
+                return false;
+            }
+            return true;
+        }
+
     }  // namespace
 
     CommandEncoder::CommandEncoder(DeviceBase* device, const CommandEncoderDescriptor*)
@@ -570,7 +585,19 @@ namespace dawn_native {
                     cmd->depthStencilAttachment.stencilStoreOp =
                         descriptor->depthStencilAttachment->stencilStoreOp;
 
-                    usageTracker.TextureViewUsedAs(view, wgpu::TextureUsage::RenderAttachment);
+                    if (IsReadOnlyDepthStencilAttachment(descriptor->depthStencilAttachment)) {
+                        // TODO(dawn:485): Readonly depth/stencil attachment is not fully
+                        // implemented. Disallow it as unsafe until the implementaion is completed.
+                        if (device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
+                            return DAWN_VALIDATION_ERROR(
+                                "Readonly depth/stencil attachment is disallowed because it's not "
+                                "fully implemented");
+                        }
+
+                        usageTracker.TextureViewUsedAs(view, kReadOnlyRenderAttachment);
+                    } else {
+                        usageTracker.TextureViewUsedAs(view, wgpu::TextureUsage::RenderAttachment);
+                    }
                 }
 
                 cmd->width = width;
