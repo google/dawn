@@ -99,29 +99,28 @@ namespace dawn_native {
     }  // anonymous namespace
 
     MaybeError ValidateBufferDescriptor(DeviceBase*, const BufferDescriptor* descriptor) {
-        if (descriptor->nextInChain != nullptr) {
-            return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
-        }
-
+        DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr");
         DAWN_TRY(ValidateBufferUsage(descriptor->usage));
 
         wgpu::BufferUsage usage = descriptor->usage;
 
         const wgpu::BufferUsage kMapWriteAllowedUsages =
             wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
-        if (usage & wgpu::BufferUsage::MapWrite && (usage & kMapWriteAllowedUsages) != usage) {
-            return DAWN_VALIDATION_ERROR("Only CopySrc is allowed with MapWrite");
-        }
+        DAWN_INVALID_IF(
+            usage & wgpu::BufferUsage::MapWrite && !IsSubset(usage, kMapWriteAllowedUsages),
+            "Buffer usages (%s) contains %s but is not a subset of %s.", usage,
+            wgpu::BufferUsage::MapWrite, kMapWriteAllowedUsages);
 
         const wgpu::BufferUsage kMapReadAllowedUsages =
             wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
-        if (usage & wgpu::BufferUsage::MapRead && (usage & kMapReadAllowedUsages) != usage) {
-            return DAWN_VALIDATION_ERROR("Only CopyDst is allowed with MapRead");
-        }
+        DAWN_INVALID_IF(
+            usage & wgpu::BufferUsage::MapRead && !IsSubset(usage, kMapReadAllowedUsages),
+            "Buffer usages (%s) contains %s but is not a subset of %s.", usage,
+            wgpu::BufferUsage::MapRead, kMapReadAllowedUsages);
 
-        if (descriptor->mappedAtCreation && descriptor->size % 4 != 0) {
-            return DAWN_VALIDATION_ERROR("size must be aligned to 4 when mappedAtCreation is true");
-        }
+        DAWN_INVALID_IF(descriptor->mappedAtCreation && descriptor->size % 4 != 0,
+                        "Buffer is mapped at creation but its size (%u) is not a multiple of 4.",
+                        descriptor->size);
 
         return {};
     }
@@ -265,10 +264,10 @@ namespace dawn_native {
 
         switch (mState) {
             case BufferState::Destroyed:
-                return DAWN_VALIDATION_ERROR("Destroyed buffer used in a submit");
+                return DAWN_FORMAT_VALIDATION_ERROR("%s used in submit while destroyed.", this);
             case BufferState::Mapped:
             case BufferState::MappedAtCreation:
-                return DAWN_VALIDATION_ERROR("Buffer used in a submit while mapped");
+                return DAWN_FORMAT_VALIDATION_ERROR("%s used in submit while mapped.", this);
             case BufferState::Unmapped:
                 return {};
         }
@@ -304,7 +303,9 @@ namespace dawn_native {
         }
 
         WGPUBufferMapAsyncStatus status;
-        if (GetDevice()->ConsumedError(ValidateMapAsync(mode, offset, size, &status))) {
+        if (GetDevice()->ConsumedError(ValidateMapAsync(mode, offset, size, &status),
+                                       "calling %s.MapAsync(%s, %u, %u, ...)", this, mode, offset,
+                                       size)) {
             if (callback) {
                 callback(status, userdata);
             }
@@ -360,7 +361,7 @@ namespace dawn_native {
             static_cast<ErrorBuffer*>(this)->ClearMappedData();
             mState = BufferState::Destroyed;
         }
-        if (GetDevice()->ConsumedError(ValidateDestroy())) {
+        if (GetDevice()->ConsumedError(ValidateDestroy(), "calling %s.Destroy()", this)) {
             return;
         }
         ASSERT(!IsError());
@@ -411,7 +412,7 @@ namespace dawn_native {
             static_cast<ErrorBuffer*>(this)->ClearMappedData();
             mState = BufferState::Unmapped;
         }
-        if (GetDevice()->ConsumedError(ValidateUnmap())) {
+        if (GetDevice()->ConsumedError(ValidateUnmap(), "calling %s.Unmap()", this)) {
             return;
         }
         ASSERT(!IsError());
@@ -439,32 +440,6 @@ namespace dawn_native {
         mState = BufferState::Unmapped;
     }
 
-    MaybeError BufferBase::ValidateMap(wgpu::BufferUsage requiredUsage,
-                                       WGPUBufferMapAsyncStatus* status) const {
-        *status = WGPUBufferMapAsyncStatus_DeviceLost;
-        DAWN_TRY(GetDevice()->ValidateIsAlive());
-
-        *status = WGPUBufferMapAsyncStatus_Error;
-        DAWN_TRY(GetDevice()->ValidateObject(this));
-
-        switch (mState) {
-            case BufferState::Mapped:
-            case BufferState::MappedAtCreation:
-                return DAWN_VALIDATION_ERROR("Buffer is already mapped");
-            case BufferState::Destroyed:
-                return DAWN_VALIDATION_ERROR("Buffer is destroyed");
-            case BufferState::Unmapped:
-                break;
-        }
-
-        if (!(mUsage & requiredUsage)) {
-            return DAWN_VALIDATION_ERROR("Buffer needs the correct map usage bit");
-        }
-
-        *status = WGPUBufferMapAsyncStatus_Success;
-        return {};
-    }
-
     MaybeError BufferBase::ValidateMapAsync(wgpu::MapMode mode,
                                             size_t offset,
                                             size_t size,
@@ -475,44 +450,37 @@ namespace dawn_native {
         *status = WGPUBufferMapAsyncStatus_Error;
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
-        if (offset % 8 != 0) {
-            return DAWN_VALIDATION_ERROR("offset must be a multiple of 8");
-        }
+        DAWN_INVALID_IF(offset % 8 != 0, "Offset (%u) must be a multiple of 8.", offset);
+        DAWN_INVALID_IF(size % 4 != 0, "Size (%u) must be a multiple of 4.", size);
 
-        if (size % 4 != 0) {
-            return DAWN_VALIDATION_ERROR("size must be a multiple of 4");
-        }
-
-        if (uint64_t(offset) > mSize || uint64_t(size) > mSize - uint64_t(offset)) {
-            return DAWN_VALIDATION_ERROR("size + offset must fit in the buffer");
-        }
+        DAWN_INVALID_IF(uint64_t(offset) > mSize || uint64_t(size) > mSize - uint64_t(offset),
+                        "Mapping range (offset:%u, size: %u) doesn't fit in the size (%u) of %s.",
+                        offset, size, mSize, this);
 
         switch (mState) {
             case BufferState::Mapped:
             case BufferState::MappedAtCreation:
-                return DAWN_VALIDATION_ERROR("Buffer is already mapped");
+                return DAWN_FORMAT_VALIDATION_ERROR("%s is already mapped.", this);
             case BufferState::Destroyed:
-                return DAWN_VALIDATION_ERROR("Buffer is destroyed");
+                return DAWN_FORMAT_VALIDATION_ERROR("%s is destroyed.", this);
             case BufferState::Unmapped:
                 break;
         }
 
         bool isReadMode = mode & wgpu::MapMode::Read;
         bool isWriteMode = mode & wgpu::MapMode::Write;
-        if (!(isReadMode ^ isWriteMode)) {
-            return DAWN_VALIDATION_ERROR("Exactly one of Read or Write mode must be set");
-        }
+        DAWN_INVALID_IF(!(isReadMode ^ isWriteMode), "Map mode (%s) is not one of %s or %s.", mode,
+                        wgpu::MapMode::Write, wgpu::MapMode::Read);
 
         if (mode & wgpu::MapMode::Read) {
-            if (!(mUsage & wgpu::BufferUsage::MapRead)) {
-                return DAWN_VALIDATION_ERROR("The buffer must have the MapRead usage");
-            }
+            DAWN_INVALID_IF(!(mUsage & wgpu::BufferUsage::MapRead),
+                            "The buffer usages (%s) do not contain %s.", mUsage,
+                            wgpu::BufferUsage::MapRead);
         } else {
             ASSERT(mode & wgpu::MapMode::Write);
-
-            if (!(mUsage & wgpu::BufferUsage::MapWrite)) {
-                return DAWN_VALIDATION_ERROR("The buffer must have the MapWrite usage");
-            }
+            DAWN_INVALID_IF(!(mUsage & wgpu::BufferUsage::MapWrite),
+                            "The buffer usages (%s) do not contain %s.", mUsage,
+                            wgpu::BufferUsage::MapWrite);
         }
 
         *status = WGPUBufferMapAsyncStatus_Success;
@@ -569,9 +537,9 @@ namespace dawn_native {
                 // even if it did not have a mappable usage.
                 return {};
             case BufferState::Unmapped:
-                return DAWN_VALIDATION_ERROR("Buffer is unmapped");
+                return DAWN_FORMAT_VALIDATION_ERROR("%s is unmapped.", this);
             case BufferState::Destroyed:
-                return DAWN_VALIDATION_ERROR("Buffer is destroyed");
+                return DAWN_FORMAT_VALIDATION_ERROR("%s is destroyed.", this);
         }
         UNREACHABLE();
     }

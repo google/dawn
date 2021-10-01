@@ -105,8 +105,6 @@ namespace dawn_native {
         MaybeError CopyFromStagingBuffer();
         void CallMapCallback(MapRequestID mapID, WGPUBufferMapAsyncStatus status);
 
-        MaybeError ValidateMap(wgpu::BufferUsage requiredUsage,
-                               WGPUBufferMapAsyncStatus* status) const;
         MaybeError ValidateMapAsync(wgpu::MapMode mode,
                                     size_t offset,
                                     size_t size,

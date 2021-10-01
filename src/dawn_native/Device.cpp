@@ -1160,7 +1160,8 @@ namespace dawn_native {
     ResultOrError<Ref<BufferBase>> DeviceBase::CreateBuffer(const BufferDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
         if (IsValidationEnabled()) {
-            DAWN_TRY(ValidateBufferDescriptor(this, descriptor));
+            DAWN_TRY_CONTEXT(ValidateBufferDescriptor(this, descriptor), "validating %s",
+                             descriptor);
         }
 
         Ref<BufferBase> buffer;

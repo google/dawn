@@ -78,6 +78,23 @@ namespace dawn_native {
             return false;
         }
 
+        template <typename... Args>
+        bool ConsumedError(MaybeError maybeError, const char* formatStr, const Args&... args) {
+            if (DAWN_UNLIKELY(maybeError.IsError())) {
+                std::unique_ptr<ErrorData> error = maybeError.AcquireError();
+                if (error->GetType() == InternalErrorType::Validation) {
+                    std::string out;
+                    absl::UntypedFormatSpec format(formatStr);
+                    if (absl::FormatUntyped(&out, format, {absl::FormatArg(args)...})) {
+                        error->AppendContext(std::move(out));
+                    }
+                }
+                ConsumeError(std::move(error));
+                return true;
+            }
+            return false;
+        }
+
         template <typename T, typename... Args>
         bool ConsumedError(ResultOrError<T> resultOrError,
                            T* result,
