@@ -90,59 +90,42 @@ namespace dawn_native {
             UNREACHABLE();
         }
 
-        bool IsTextureSizeValidForTextureViewDimension(
-            wgpu::TextureViewDimension textureViewDimension,
-            const Extent3D& textureSize) {
-            switch (textureViewDimension) {
-                case wgpu::TextureViewDimension::Cube:
-                case wgpu::TextureViewDimension::CubeArray:
-                    return textureSize.width == textureSize.height;
-                case wgpu::TextureViewDimension::e2D:
-                case wgpu::TextureViewDimension::e2DArray:
-                case wgpu::TextureViewDimension::e3D:
-                    return true;
-
-                case wgpu::TextureViewDimension::e1D:
-                case wgpu::TextureViewDimension::Undefined:
-                    break;
-            }
-            UNREACHABLE();
-        }
-
         MaybeError ValidateSampleCount(const TextureDescriptor* descriptor,
                                        wgpu::TextureUsage usage,
                                        const Format* format) {
-            if (!IsValidSampleCount(descriptor->sampleCount)) {
-                return DAWN_VALIDATION_ERROR("The sample count of the texture is not supported.");
-            }
+            DAWN_INVALID_IF(!IsValidSampleCount(descriptor->sampleCount),
+                            "The sample count (%u) of the texture is not supported.",
+                            descriptor->sampleCount);
 
             if (descriptor->sampleCount > 1) {
-                if (descriptor->mipLevelCount > 1) {
-                    return DAWN_VALIDATION_ERROR(
-                        "The mipmap level count of a multisampled texture must be 1.");
-                }
+                DAWN_INVALID_IF(descriptor->mipLevelCount > 1,
+                                "The mip level count (%u) of a multisampled texture is not 1.",
+                                descriptor->mipLevelCount);
 
                 // Multisampled 1D and 3D textures are not supported in D3D12/Metal/Vulkan.
                 // Multisampled 2D array texture is not supported because on Metal it requires the
                 // version of macOS be greater than 10.14.
-                if (descriptor->dimension != wgpu::TextureDimension::e2D ||
-                    descriptor->size.depthOrArrayLayers > 1) {
-                    return DAWN_VALIDATION_ERROR("Multisampled texture must be 2D with depth=1");
-                }
+                DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D,
+                                "The dimension (%s) of a multisampled texture is not 2D.",
+                                descriptor->dimension);
+
+                DAWN_INVALID_IF(descriptor->size.depthOrArrayLayers > 1,
+                                "The depthOrArrayLayers (%u) of a multisampled texture is not 1.",
+                                descriptor->size.depthOrArrayLayers);
 
                 // If a format can support multisample, it must be renderable. Because Vulkan
                 // requires that if the format is not color-renderable or depth/stencil renderable,
                 // sampleCount must be 1.
-                if (!format->isRenderable) {
-                    return DAWN_VALIDATION_ERROR("This format cannot support multisample.");
-                }
+                DAWN_INVALID_IF(!format->isRenderable,
+                                "The texture format (%s) does not support multisampling.",
+                                format->format);
+
                 // Compressed formats are not renderable. They cannot support multisample.
                 ASSERT(!format->isCompressed);
 
-                if (usage & wgpu::TextureUsage::StorageBinding) {
-                    return DAWN_VALIDATION_ERROR(
-                        "The sample counts of the storage textures must be 1.");
-                }
+                DAWN_INVALID_IF(usage & wgpu::TextureUsage::StorageBinding,
+                                "The sample count (%u) of a storage textures is not 1.",
+                                descriptor->sampleCount);
             }
 
             return {};
@@ -151,24 +134,40 @@ namespace dawn_native {
         MaybeError ValidateTextureViewDimensionCompatibility(
             const TextureBase* texture,
             const TextureViewDescriptor* descriptor) {
-            if (!IsArrayLayerValidForTextureViewDimension(descriptor->dimension,
-                                                          descriptor->arrayLayerCount)) {
-                return DAWN_VALIDATION_ERROR(
-                    "The dimension of the texture view is not compatible with the layer count");
-            }
+            DAWN_INVALID_IF(
+                !IsArrayLayerValidForTextureViewDimension(descriptor->dimension,
+                                                          descriptor->arrayLayerCount),
+                "The dimension (%s) of the texture view is not compatible with the layer count "
+                "(%u) of %s.",
+                descriptor->dimension, descriptor->arrayLayerCount, texture);
 
-            if (!IsTextureViewDimensionCompatibleWithTextureDimension(descriptor->dimension,
-                                                                      texture->GetDimension())) {
-                return DAWN_VALIDATION_ERROR(
-                    "The dimension of the texture view is not compatible with the dimension of the"
-                    "original texture");
-            }
+            DAWN_INVALID_IF(
+                !IsTextureViewDimensionCompatibleWithTextureDimension(descriptor->dimension,
+                                                                      texture->GetDimension()),
+                "The dimension (%s) of the texture view is not compatible with the dimension (%s) "
+                "of %s.",
+                descriptor->dimension, texture->GetDimension(), texture);
 
-            if (!IsTextureSizeValidForTextureViewDimension(descriptor->dimension,
-                                                           texture->GetSize())) {
-                return DAWN_VALIDATION_ERROR(
-                    "The dimension of the texture view is not compatible with the size of the"
-                    "original texture");
+            switch (descriptor->dimension) {
+                case wgpu::TextureViewDimension::Cube:
+                case wgpu::TextureViewDimension::CubeArray:
+                    DAWN_INVALID_IF(
+                        texture->GetSize().width != texture->GetSize().height,
+                        "A %s texture view is not compatible with %s because the texture's width "
+                        "(%u) and height (%u) are not equal.",
+                        descriptor->dimension, texture, texture->GetSize().width,
+                        texture->GetSize().height);
+                    break;
+
+                case wgpu::TextureViewDimension::e2D:
+                case wgpu::TextureViewDimension::e2DArray:
+                case wgpu::TextureViewDimension::e3D:
+                    break;
+
+                case wgpu::TextureViewDimension::e1D:
+                case wgpu::TextureViewDimension::Undefined:
+                    UNREACHABLE();
+                    break;
             }
 
             return {};
@@ -192,11 +191,11 @@ namespace dawn_native {
                 default:
                     UNREACHABLE();
             }
-            if (descriptor->size.width > maxExtent.width ||
-                descriptor->size.height > maxExtent.height ||
-                descriptor->size.depthOrArrayLayers > maxExtent.depthOrArrayLayers) {
-                return DAWN_VALIDATION_ERROR("Texture dimension (width, height or depth) exceeded");
-            }
+            DAWN_INVALID_IF(descriptor->size.width > maxExtent.width ||
+                                descriptor->size.height > maxExtent.height ||
+                                descriptor->size.depthOrArrayLayers > maxExtent.depthOrArrayLayers,
+                            "Texture size (%s) exceeded maximum texture size (%s).",
+                            &descriptor->size, &maxExtent);
 
             uint32_t maxMippedDimension = descriptor->size.width;
             if (descriptor->dimension != wgpu::TextureDimension::e1D) {
@@ -206,19 +205,22 @@ namespace dawn_native {
                 maxMippedDimension =
                     std::max(maxMippedDimension, descriptor->size.depthOrArrayLayers);
             }
-            if (Log2(maxMippedDimension) + 1 < descriptor->mipLevelCount) {
-                return DAWN_VALIDATION_ERROR("Texture has too many mip levels");
-            }
+            DAWN_INVALID_IF(
+                Log2(maxMippedDimension) + 1 < descriptor->mipLevelCount,
+                "Texture mip level count (%u) exceeds the maximum (%u) for its size (%s).",
+                descriptor->mipLevelCount, Log2(maxMippedDimension) + 1, &descriptor->size);
+
             ASSERT(descriptor->mipLevelCount <= kMaxTexture2DMipLevels);
 
             if (format->isCompressed) {
                 const TexelBlockInfo& blockInfo =
                     format->GetAspectInfo(wgpu::TextureAspect::All).block;
-                if (descriptor->size.width % blockInfo.width != 0 ||
-                    descriptor->size.height % blockInfo.height != 0) {
-                    return DAWN_VALIDATION_ERROR(
-                        "The size of the texture is incompatible with the texture format");
-                }
+                DAWN_INVALID_IF(
+                    descriptor->size.width % blockInfo.width != 0 ||
+                        descriptor->size.height % blockInfo.height != 0,
+                    "The size (%s) of the texture is not a multiple of the block width (%u) and "
+                    "height (%u) of the texture format (%s).",
+                    &descriptor->size, blockInfo.width, blockInfo.height, format->format);
             }
 
             return {};
@@ -232,25 +234,28 @@ namespace dawn_native {
             constexpr wgpu::TextureUsage kValidCompressedUsages =
                 wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc |
                 wgpu::TextureUsage::CopyDst;
-            if (format->isCompressed && !IsSubset(usage, kValidCompressedUsages)) {
-                return DAWN_VALIDATION_ERROR(
-                    "Compressed texture format is incompatible with the texture usage");
-            }
+            DAWN_INVALID_IF(
+                format->isCompressed && !IsSubset(usage, kValidCompressedUsages),
+                "The texture usage (%s) is incompatible with the compressed texture format (%s).",
+                usage, format->format);
 
-            if (!format->isRenderable && (usage & wgpu::TextureUsage::RenderAttachment)) {
-                return DAWN_VALIDATION_ERROR(
-                    "Non-renderable format used with RenderAttachment usage");
-            }
+            DAWN_INVALID_IF(
+                !format->isRenderable && (usage & wgpu::TextureUsage::RenderAttachment),
+                "The texture usage (%s) includes %s, which is incompatible with the non-renderable "
+                "format (%s).",
+                usage, wgpu::TextureUsage::RenderAttachment, format->format);
 
-            if (!format->supportsStorageUsage && (usage & wgpu::TextureUsage::StorageBinding)) {
-                return DAWN_VALIDATION_ERROR("Format cannot be used in storage textures");
-            }
+            DAWN_INVALID_IF(
+                !format->supportsStorageUsage && (usage & wgpu::TextureUsage::StorageBinding),
+                "The texture usage (%s) includes %s, which is incompatible with the format (%s).",
+                usage, wgpu::TextureUsage::StorageBinding, format->format);
 
             constexpr wgpu::TextureUsage kValidMultiPlanarUsages =
                 wgpu::TextureUsage::TextureBinding;
-            if (format->IsMultiPlanar() && !IsSubset(usage, kValidMultiPlanarUsages)) {
-                return DAWN_VALIDATION_ERROR("Multi-planar format doesn't have valid usage.");
-            }
+            DAWN_INVALID_IF(
+                format->IsMultiPlanar() && !IsSubset(usage, kValidMultiPlanarUsages),
+                "The texture usage (%s) is incompatible with the multi-planar format (%s).", usage,
+                format->format);
 
             return {};
         }
@@ -265,14 +270,12 @@ namespace dawn_native {
         const DawnTextureInternalUsageDescriptor* internalUsageDesc = nullptr;
         FindInChain(descriptor->nextInChain, &internalUsageDesc);
 
-        if (descriptor->dimension == wgpu::TextureDimension::e1D) {
-            return DAWN_VALIDATION_ERROR("1D textures aren't supported (yet).");
-        }
+        DAWN_INVALID_IF(descriptor->dimension == wgpu::TextureDimension::e1D,
+                        "1D textures aren't supported (yet).");
 
-        if (internalUsageDesc != nullptr &&
-            !device->IsExtensionEnabled(Extension::DawnInternalUsages)) {
-            return DAWN_VALIDATION_ERROR("The dawn-internal-usages feature is not enabled");
-        }
+        DAWN_INVALID_IF(internalUsageDesc != nullptr &&
+                            !device->IsExtensionEnabled(Extension::DawnInternalUsages),
+                        "The dawn-internal-usages feature is not enabled");
 
         const Format* format;
         DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->format));
@@ -286,42 +289,42 @@ namespace dawn_native {
         DAWN_TRY(ValidateTextureDimension(descriptor->dimension));
         DAWN_TRY(ValidateSampleCount(descriptor, usage, format));
 
-        if (descriptor->size.width == 0 || descriptor->size.height == 0 ||
-            descriptor->size.depthOrArrayLayers == 0 || descriptor->mipLevelCount == 0) {
-            return DAWN_VALIDATION_ERROR("Cannot create an empty texture");
-        }
+        DAWN_INVALID_IF(descriptor->size.width == 0 || descriptor->size.height == 0 ||
+                            descriptor->size.depthOrArrayLayers == 0 ||
+                            descriptor->mipLevelCount == 0,
+                        "The texture size (%s) or mipLevelCount (%u) is empty.", &descriptor->size,
+                        descriptor->mipLevelCount);
 
-        if (descriptor->dimension != wgpu::TextureDimension::e2D && format->isCompressed) {
-            return DAWN_VALIDATION_ERROR("Compressed texture must be 2D");
-        }
+        DAWN_INVALID_IF(
+            descriptor->dimension != wgpu::TextureDimension::e2D && format->isCompressed,
+            "The dimension (%s) of a texture with a compressed format (%s) is not 2D.",
+            descriptor->dimension, format->format);
 
         // Depth/stencil formats are valid for 2D textures only. Metal has this limit. And D3D12
         // doesn't support depth/stencil formats on 3D textures.
-        if (descriptor->dimension != wgpu::TextureDimension::e2D &&
-            (format->aspects & (Aspect::Depth | Aspect::Stencil)) != 0) {
-            return DAWN_VALIDATION_ERROR("Depth/stencil formats are valid for 2D textures only");
-        }
+        DAWN_INVALID_IF(
+            descriptor->dimension != wgpu::TextureDimension::e2D &&
+                (format->aspects & (Aspect::Depth | Aspect::Stencil)) != 0,
+            "The dimension (%s) of a texture with a depth/stencil format (%s) is not 2D.",
+            descriptor->dimension, format->format);
 
         DAWN_TRY(ValidateTextureSize(descriptor, format));
 
-        if (device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs) && format->HasStencil() &&
-            descriptor->mipLevelCount > 1 &&
-            device->GetAdapter()->GetBackendType() == wgpu::BackendType::Metal) {
-            // TODO(crbug.com/dawn/838): Implement a workaround for this issue.
-            // Readbacks from the non-zero mip of a stencil texture may contain
-            // garbage data.
-            return DAWN_VALIDATION_ERROR(
-                "crbug.com/dawn/838: Stencil textures with more than one mip level are "
-                "disabled on Metal.");
-        }
+        // TODO(crbug.com/dawn/838): Implement a workaround for this issue.
+        // Readbacks from the non-zero mip of a stencil texture may contain garbage data.
+        DAWN_INVALID_IF(
+            device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs) && format->HasStencil() &&
+                descriptor->mipLevelCount > 1 &&
+                device->GetAdapter()->GetBackendType() == wgpu::BackendType::Metal,
+            "https://crbug.com/dawn/838: Stencil textures with more than one mip level are "
+            "disabled on Metal.");
 
-        if (device->IsToggleEnabled(Toggle::DisableR8RG8Mipmaps) && descriptor->mipLevelCount > 1 &&
-            (descriptor->format == wgpu::TextureFormat::R8Unorm ||
-             descriptor->format == wgpu::TextureFormat::RG8Unorm)) {
-            return DAWN_VALIDATION_ERROR(
-                "https://crbug.com/dawn/1071: r8unorm and rg8unorm textures with more than one mip "
-                "level are disabled on Metal.");
-        }
+        DAWN_INVALID_IF(
+            device->IsToggleEnabled(Toggle::DisableR8RG8Mipmaps) && descriptor->mipLevelCount > 1 &&
+                (descriptor->format == wgpu::TextureFormat::R8Unorm ||
+                 descriptor->format == wgpu::TextureFormat::RG8Unorm),
+            "https://crbug.com/dawn/1071: r8unorm and rg8unorm textures with more than one mip "
+            "level are disabled on Metal.");
 
         return {};
     }
@@ -329,39 +332,41 @@ namespace dawn_native {
     MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
                                              const TextureBase* texture,
                                              const TextureViewDescriptor* descriptor) {
-        if (descriptor->nextInChain != nullptr) {
-            return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
-        }
+        DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr.");
 
         // Parent texture should have been already validated.
         ASSERT(texture);
         ASSERT(!texture->IsError());
 
         DAWN_TRY(ValidateTextureViewDimension(descriptor->dimension));
-        if (descriptor->dimension == wgpu::TextureViewDimension::e1D) {
-            return DAWN_VALIDATION_ERROR("1D texture views aren't supported (yet).");
-        }
+        DAWN_INVALID_IF(descriptor->dimension == wgpu::TextureViewDimension::e1D,
+                        "1D texture views aren't supported (yet).");
 
         DAWN_TRY(ValidateTextureFormat(descriptor->format));
 
         DAWN_TRY(ValidateTextureAspect(descriptor->aspect));
-        if (SelectFormatAspects(texture->GetFormat(), descriptor->aspect) == Aspect::None) {
-            return DAWN_VALIDATION_ERROR("Texture does not have selected aspect for texture view.");
-        }
+        DAWN_INVALID_IF(
+            SelectFormatAspects(texture->GetFormat(), descriptor->aspect) == Aspect::None,
+            "Texture format (%s) does not have the texture view's selected aspect (%s).",
+            texture->GetFormat().format, descriptor->aspect);
 
-        if (descriptor->arrayLayerCount == 0 || descriptor->mipLevelCount == 0) {
-            return DAWN_VALIDATION_ERROR("Cannot create an empty texture view");
-        }
+        DAWN_INVALID_IF(descriptor->arrayLayerCount == 0 || descriptor->mipLevelCount == 0,
+                        "The texture view's arrayLayerCount (%u) or mipLevelCount (%u) is zero.",
+                        descriptor->arrayLayerCount, descriptor->mipLevelCount);
 
-        if (uint64_t(descriptor->baseArrayLayer) + uint64_t(descriptor->arrayLayerCount) >
-            uint64_t(texture->GetArrayLayers())) {
-            return DAWN_VALIDATION_ERROR("Texture view array-layer out of range");
-        }
+        DAWN_INVALID_IF(
+            uint64_t(descriptor->baseArrayLayer) + uint64_t(descriptor->arrayLayerCount) >
+                uint64_t(texture->GetArrayLayers()),
+            "Texture view array layer range (baseArrayLayer: %u, arrayLayerCount: %u) exceeds the "
+            "texture's array layer count (%u).",
+            descriptor->baseArrayLayer, descriptor->arrayLayerCount, texture->GetArrayLayers());
 
-        if (uint64_t(descriptor->baseMipLevel) + uint64_t(descriptor->mipLevelCount) >
-            uint64_t(texture->GetNumMipLevels())) {
-            return DAWN_VALIDATION_ERROR("Texture view mip-level out of range");
-        }
+        DAWN_INVALID_IF(
+            uint64_t(descriptor->baseMipLevel) + uint64_t(descriptor->mipLevelCount) >
+                uint64_t(texture->GetNumMipLevels()),
+            "Texture view mip level range (baseMipLevel: %u, mipLevelCount: %u) exceeds the "
+            "texture's mip level count (%u).",
+            descriptor->baseMipLevel, descriptor->mipLevelCount, texture->GetNumMipLevels());
 
         DAWN_TRY(ValidateTextureViewFormatCompatibility(texture, descriptor));
         DAWN_TRY(ValidateTextureViewDimensionCompatibility(texture, descriptor));
@@ -596,9 +601,8 @@ namespace dawn_native {
 
     MaybeError TextureBase::ValidateCanUseInSubmitNow() const {
         ASSERT(!IsError());
-        if (mState == TextureState::Destroyed) {
-            return DAWN_VALIDATION_ERROR("Destroyed texture used in a submit");
-        }
+        DAWN_INVALID_IF(mState == TextureState::Destroyed, "Destroyed texture %s used in a submit.",
+                        this);
         return {};
     }
 
@@ -659,14 +663,15 @@ namespace dawn_native {
         DeviceBase* device = GetDevice();
 
         Ref<TextureViewBase> result;
-        if (device->ConsumedError(device->CreateTextureView(this, descriptor), &result)) {
+        if (device->ConsumedError(device->CreateTextureView(this, descriptor), &result,
+                                  "calling %s.CreateView(%s).", this, descriptor)) {
             return TextureViewBase::MakeError(device);
         }
         return result.Detach();
     }
 
     void TextureBase::APIDestroy() {
-        if (GetDevice()->ConsumedError(ValidateDestroy())) {
+        if (GetDevice()->ConsumedError(ValidateDestroy(), "calling %s.Destroy().", this)) {
             return;
         }
         ASSERT(!IsError());
