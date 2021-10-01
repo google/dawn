@@ -421,23 +421,6 @@ namespace dawn_native {
         return ValidateTextureToTextureCopyCommonRestrictions(src, dst, copySize);
     }
 
-    // CopyTextureForBrowser could handle color conversion during the copy and it
-    // requires the source must be sampleable and the destination must be writable
-    // using a render pass
-    MaybeError ValidateCopyTextureForBrowserRestrictions(const ImageCopyTexture& src,
-                                                         const ImageCopyTexture& dst,
-                                                         const Extent3D& copySize) {
-        if (!(src.texture->GetUsage() & wgpu::TextureUsage::TextureBinding)) {
-            return DAWN_VALIDATION_ERROR("Source texture must have sampled usage");
-        }
-
-        if (!(dst.texture->GetUsage() & wgpu::TextureUsage::RenderAttachment)) {
-            return DAWN_VALIDATION_ERROR("Dest texture must have RenderAttachment usage");
-        }
-
-        return ValidateTextureToTextureCopyCommonRestrictions(src, dst, copySize);
-    }
-
     MaybeError ValidateCanUseAs(const TextureBase* texture, wgpu::TextureUsage usage) {
         ASSERT(wgpu::HasZeroOrOneBits(usage));
         if (!(texture->GetUsage() & usage)) {

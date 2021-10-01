@@ -366,8 +366,10 @@ namespace dawn_native {
         const Extent3D* copySize,
         const CopyTextureForBrowserOptions* options) {
         if (GetDevice()->IsValidationEnabled()) {
-            DAWN_TRY(
-                ValidateCopyTextureForBrowser(GetDevice(), source, destination, copySize, options));
+            DAWN_TRY_CONTEXT(
+                ValidateCopyTextureForBrowser(GetDevice(), source, destination, copySize, options),
+                "validating CopyTextureForBrowser from %s to %s", source->texture,
+                destination->texture);
         }
 
         return DoCopyTextureForBrowser(GetDevice(), source, destination, copySize, options);

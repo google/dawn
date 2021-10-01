@@ -147,8 +147,8 @@ namespace dawn_native {
                 case wgpu::TextureFormat::RGBA8Unorm:
                     break;
                 default:
-                    return DAWN_VALIDATION_ERROR(
-                        "Unsupported src texture format for CopyTextureForBrowser.");
+                    return DAWN_FORMAT_VALIDATION_ERROR(
+                        "Source texture format (%s) is not supported.", srcFormat);
             }
 
             switch (dstFormat) {
@@ -161,44 +161,8 @@ namespace dawn_native {
                 case wgpu::TextureFormat::RGB10A2Unorm:
                     break;
                 default:
-                    return DAWN_VALIDATION_ERROR(
-                        "Unsupported dst texture format for CopyTextureForBrowser.");
-            }
-
-            return {};
-        }
-
-        MaybeError ValidateCopyTextureForBrowserOptions(
-            const CopyTextureForBrowserOptions* options) {
-            if (options->nextInChain != nullptr) {
-                return DAWN_VALIDATION_ERROR(
-                    "CopyTextureForBrowserOptions: nextInChain must be nullptr");
-            }
-
-            DAWN_TRY(ValidateAlphaOp(options->alphaOp));
-
-            return {};
-        }
-
-        MaybeError ValidateSourceOriginAndCopyExtent(const ImageCopyTexture source,
-                                                     const Extent3D copySize) {
-            if (source.origin.z > 0) {
-                return DAWN_VALIDATION_ERROR("Source origin cannot have non-zero z value");
-            }
-
-            if (copySize.depthOrArrayLayers > 1) {
-                return DAWN_VALIDATION_ERROR("Cannot copy to multiple slices");
-            }
-
-            return {};
-        }
-
-        MaybeError ValidateSourceAndDestinationTextureSampleCount(
-            const ImageCopyTexture source,
-            const ImageCopyTexture destination) {
-            if (source.texture->GetSampleCount() > 1 || destination.texture->GetSampleCount() > 1) {
-                return DAWN_VALIDATION_ERROR(
-                    "Source and destiantion textures cannot be multisampled");
+                    return DAWN_FORMAT_VALIDATION_ERROR(
+                        "Destination texture format (%s) is not supported.", dstFormat);
             }
 
             return {};
@@ -278,15 +242,28 @@ namespace dawn_native {
         DAWN_TRY(device->ValidateObject(source->texture));
         DAWN_TRY(device->ValidateObject(destination->texture));
 
-        DAWN_TRY(ValidateImageCopyTexture(device, *source, *copySize));
-        DAWN_TRY(ValidateImageCopyTexture(device, *destination, *copySize));
+        DAWN_TRY_CONTEXT(ValidateImageCopyTexture(device, *source, *copySize),
+                         "validating the ImageCopyTexture for the source");
+        DAWN_TRY_CONTEXT(ValidateImageCopyTexture(device, *destination, *copySize),
+                         "validating the ImageCopyTexture for the destination");
 
-        DAWN_TRY(ValidateSourceOriginAndCopyExtent(*source, *copySize));
-        DAWN_TRY(ValidateCopyTextureForBrowserRestrictions(*source, *destination, *copySize));
-        DAWN_TRY(ValidateSourceAndDestinationTextureSampleCount(*source, *destination));
+        DAWN_TRY_CONTEXT(ValidateTextureCopyRange(device, *source, *copySize),
+                         "validating that the copy fits in the source");
+        DAWN_TRY_CONTEXT(ValidateTextureCopyRange(device, *destination, *copySize),
+                         "validating that the copy fits in the destination");
 
-        DAWN_TRY(ValidateTextureCopyRange(device, *source, *copySize));
-        DAWN_TRY(ValidateTextureCopyRange(device, *destination, *copySize));
+        DAWN_TRY(ValidateTextureToTextureCopyCommonRestrictions(*source, *destination, *copySize));
+
+        DAWN_INVALID_IF(source->origin.z > 0, "Source has a non-zero z origin (%u).",
+                        source->origin.z);
+        DAWN_INVALID_IF(copySize->depthOrArrayLayers > 1,
+                        "Copy is for more than one array layer (%u)", copySize->depthOrArrayLayers);
+
+        DAWN_INVALID_IF(
+            source->texture->GetSampleCount() > 1 || destination->texture->GetSampleCount() > 1,
+            "The source texture sample count (%u) or the destination texture sample count (%u) is "
+            "not 1.",
+            source->texture->GetSampleCount(), destination->texture->GetSampleCount());
 
         DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc));
         DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::TextureBinding));
@@ -297,7 +274,8 @@ namespace dawn_native {
         DAWN_TRY(ValidateCopyTextureFormatConversion(source->texture->GetFormat().format,
                                                      destination->texture->GetFormat().format));
 
-        DAWN_TRY(ValidateCopyTextureForBrowserOptions(options));
+        DAWN_INVALID_IF(options->nextInChain != nullptr, "nextInChain must be nullptr");
+        DAWN_TRY(ValidateAlphaOp(options->alphaOp));
 
         return {};
     }
