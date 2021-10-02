@@ -244,6 +244,8 @@ namespace dawn_native {
                     DAWN_TRY(GetDevice()->ValidateObject(buffer));
                     DAWN_TRY(ValidateCanUseAs(buffer, wgpu::BufferUsage::Index));
 
+                    DAWN_TRY(ValidateIndexFormat(format));
+
                     DAWN_INVALID_IF(format == wgpu::IndexFormat::Undefined,
                                     "Index format must be specified");
 

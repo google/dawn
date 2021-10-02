@@ -58,6 +58,21 @@ TEST_F(IndexBufferValidationTest, UndefinedIndexFormat) {
     ASSERT_DEVICE_ERROR(encoder.Finish());
 }
 
+// Test that an invalid index format is disallowed.
+TEST_F(IndexBufferValidationTest, InvalidIndexFormat) {
+    wgpu::BufferDescriptor bufferDesc;
+    bufferDesc.usage = wgpu::BufferUsage::Index;
+    bufferDesc.size = 256;
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+
+    DummyRenderPass renderPass(device);
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+    pass.SetIndexBuffer(buffer, static_cast<wgpu::IndexFormat>(404));
+    pass.EndPass();
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
 // Test that for OOB validation of index buffer offset and size.
 TEST_F(IndexBufferValidationTest, IndexBufferOffsetOOBValidation) {
     wgpu::BufferDescriptor bufferDesc;
