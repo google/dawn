@@ -238,6 +238,7 @@ namespace dawn_native { namespace opengl {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
         gl.DeleteVertexArrays(1, &mVertexArrayObject);
         gl.BindVertexArray(0);
+        DeleteProgram(gl);
     }
 
     GLenum RenderPipeline::GetGLPrimitiveTopology() const {

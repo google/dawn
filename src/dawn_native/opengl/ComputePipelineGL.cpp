@@ -27,6 +27,10 @@ namespace dawn_native { namespace opengl {
         return pipeline;
     }
 
+    ComputePipeline::~ComputePipeline() {
+        DeleteProgram(ToBackend(GetDevice())->gl);
+    }
+
     MaybeError ComputePipeline::Initialize() {
         DAWN_TRY(
             InitializeBase(ToBackend(GetDevice())->gl, ToBackend(GetLayout()), GetAllStages()));

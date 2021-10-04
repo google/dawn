@@ -47,12 +47,12 @@ namespace dawn_native { namespace opengl {
         const std::vector<GLuint>& GetTextureUnitsForTextureView(GLuint index) const;
         GLuint GetProgramHandle() const;
 
-        void ApplyNow(const OpenGLFunctions& gl);
-
       protected:
+        void ApplyNow(const OpenGLFunctions& gl);
         MaybeError InitializeBase(const OpenGLFunctions& gl,
                                   const PipelineLayout* layout,
                                   const PerStage<ProgrammableStage>& stages);
+        void DeleteProgram(const OpenGLFunctions& gl);
 
       private:
         GLuint mProgram;
