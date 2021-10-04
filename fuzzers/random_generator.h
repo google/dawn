@@ -98,7 +98,7 @@ class RandomGenerator {
   }
 
  private:
-  std::mt19937 engine_;
+  std::mt19937_64 engine_;
 
 };  // class RandomGenerator
 

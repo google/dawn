@@ -32,7 +32,7 @@ namespace {
 /// @param upper - Upper bound of integer generated
 /// @returns i, where lower <= i < upper
 template <typename I>
-I RandomUInt(std::mt19937* engine, I lower, I upper) {
+I RandomUInt(std::mt19937_64* engine, I lower, I upper) {
   assert(lower < upper && "|lower| must be stictly less than |upper|");
 
   return std::uniform_int_distribution<I>(lower, upper - 1)(*engine);
@@ -80,18 +80,18 @@ uint64_t RandomGenerator::GetUInt64(uint64_t bound) {
 }
 
 uint8_t RandomGenerator::GetByte() {
-  return std::independent_bits_engine<std::mt19937, 8, uint8_t>(engine_)();
+  return std::independent_bits_engine<std::mt19937_64, 8, uint8_t>(engine_)();
 }
 
 uint32_t RandomGenerator::Get4Bytes() {
-  return std::independent_bits_engine<std::mt19937, 32, uint32_t>(engine_)();
+  return std::independent_bits_engine<std::mt19937_64, 32, uint32_t>(engine_)();
 }
 
 void RandomGenerator::GetNBytes(uint8_t* dest, size_t n) {
   assert(dest && "|dest| must not be nullptr");
   std::generate(
       dest, dest + n,
-      std::independent_bits_engine<std::mt19937, 8, uint8_t>(engine_));
+      std::independent_bits_engine<std::mt19937_64, 8, uint8_t>(engine_));
 }
 
 bool RandomGenerator::GetBool() {
