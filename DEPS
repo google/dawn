@@ -10,9 +10,6 @@ vars = {
 
   'dawn_standalone': True,
   'dawn_node': False, # Also fetches dependencies required for building NodeJS bindings.
-  'cmake_version': 'version:3.13.5',
-  'cmake_win32_sha1': 'b106d66bcdc8a71ea2cdf5446091327bfdb1bcd7',
-  'go_version': 'version:1.16',
 }
 
 deps = {
@@ -158,24 +155,6 @@ deps = {
     'url': '{github_git}/gpuweb/gpuweb.git@67edc187f5305a72456663c34d51153601b79f3b',
     'condition': 'dawn_node',
   },
-
-  'tools/golang': {
-    'condition': 'dawn_node',
-    'packages': [{
-      'package': 'infra/3pp/tools/go/${{platform}}',
-      'version': Var('go_version'),
-    }],
-    'dep_type': 'cipd',
-  },
-
-  'tools/cmake': {
-    'condition': 'dawn_node and (host_os == "mac" or host_os == "linux")',
-    'packages': [{
-      'package': 'infra/3pp/tools/cmake/${{platform}}',
-      'version': Var('cmake_version'),
-    }],
-    'dep_type': 'cipd',
-  },
 }
 
 hooks = [
@@ -269,30 +248,6 @@ hooks = [
     'condition': 'dawn_standalone',
     'action': ['python', 'build/util/lastchange.py',
                '-o', 'build/util/LASTCHANGE'],
-  },
-  # TODO(https://crbug.com/1180257): Use CIPD for CMake on Windows.
-  {
-    'name': 'cmake_win32',
-    'pattern': '.',
-    'condition': 'dawn_node and host_os == "win"',
-    'action': [ 'download_from_google_storage',
-                '--no_resume',
-                '--platform=win32',
-                '--no_auth',
-                '--bucket', 'chromium-tools',
-                Var('cmake_win32_sha1'),
-                '-o', 'tools/cmake-win32.zip'
-    ],
-  },
-  {
-    'name': 'cmake_win32_extract',
-    'pattern': '.',
-    'condition': 'dawn_node and host_os == "win"',
-    'action': [ 'python',
-                'scripts/extract.py',
-                'tools/cmake-win32.zip',
-                'tools/cmake-win32/',
-    ],
   },
 ]
 

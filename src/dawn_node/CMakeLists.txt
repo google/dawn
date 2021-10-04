@@ -41,7 +41,7 @@ function(idlgen)
         message(FATAL_ERROR "idlgen() missing IDLS argument(s)")
     endif()
     add_custom_command(
-        COMMAND ${GO_EXECUTABLE} "run" "main.go"
+        COMMAND "go" "run" "main.go"
                 "--template" "${IDLGEN_TEMPLATE}"
                 "--output"   "${IDLGEN_OUTPUT}"
                 ${IDLGEN_IDLS}
