@@ -48,7 +48,7 @@ import (
 const (
 	toolName        = "get-test-plan"
 	specPath        = "https://www.w3.org/TR/WGSL/"
-	specVersionUsed = "https://www.w3.org/TR/2021/WD-WGSL-20210910/"
+	specVersionUsed = "https://www.w3.org/TR/2021/WD-WGSL-20210929/"
 )
 
 var (
@@ -673,7 +673,7 @@ var (
 // `float abs:
 // T is f32 or vecN<f32> abs(e: T ) -> T Returns the absolute value of e (e.g. e with a positive sign bit). Component-wise when T is a vector. (GLSLstd450Fabs)`
 func cleanUpString(in string) string {
-	out := reCleanUpString.ReplaceAllString(in, "\n")
+	out := reCleanUpString.ReplaceAllString(in, " ")
 	out = reSpacePlusTwo.ReplaceAllString(out, " ")
 	//`§.` is not a valid character for a cts description
 	// ie. this is invalid: g.test().desc(`§.`)
@@ -963,7 +963,7 @@ func isBuiltinFunctionRule(r rule) bool {
 func testPlan(r rule) string {
 	sb := strings.Builder{}
 	sb.WriteString(fmt.Sprintf(unImplementedTestTemplate, r.TestName,
-		r.Sha, "`\n"+r.URL+"\n"+r.Description+"\n`"))
+		r.Sha, "`\n"+r.URL+"\n"+r.Description+"\n"+howToContribute+"`"))
 
 	return sb.String()
 }
@@ -980,17 +980,20 @@ export const g = makeTestGroup(ShaderValidationTest);
 	executionTestHeader = `export const description = %v;
 
 import { makeTestGroup } from '../../../../common/framework/test_group.js';
-
-import { GPUTest } from '../../../gpu_test.js'
+import { GPUTest } from '../../../gpu_test.js';
 
 export const g = makeTestGroup(GPUTest);
 `
 	unImplementedTestTemplate = `g.test('%v')
-  .uniqueId(0x%v)
+  .uniqueId('%v')
   .desc(
     %v
   )
   .params(u => u.combine('placeHolder1', ['placeHolder2', 'placeHolder3']))
   .unimplemented();
+`
+	howToContribute = `
+Please read the following guidelines before contributing:
+https://github.com/gpuweb/cts/blob/main/docs/plan_autogen.md
 `
 )
