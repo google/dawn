@@ -41,21 +41,27 @@ namespace dawn_native { namespace vulkan {
         void SetColor(ColorAttachmentIndex index,
                       wgpu::TextureFormat format,
                       wgpu::LoadOp loadOp,
+                      wgpu::StoreOp storeOp,
                       bool hasResolveTarget);
         void SetDepthStencil(wgpu::TextureFormat format,
                              wgpu::LoadOp depthLoadOp,
-                             wgpu::LoadOp stencilLoadOp);
+                             wgpu::StoreOp depthStoreOp,
+                             wgpu::LoadOp stencilLoadOp,
+                             wgpu::StoreOp stencilStoreOp);
         void SetSampleCount(uint32_t sampleCount);
 
         ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> colorMask;
         ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> resolveTargetMask;
         ityp::array<ColorAttachmentIndex, wgpu::TextureFormat, kMaxColorAttachments> colorFormats;
         ityp::array<ColorAttachmentIndex, wgpu::LoadOp, kMaxColorAttachments> colorLoadOp;
+        ityp::array<ColorAttachmentIndex, wgpu::StoreOp, kMaxColorAttachments> colorStoreOp;
 
         bool hasDepthStencil = false;
         wgpu::TextureFormat depthStencilFormat;
         wgpu::LoadOp depthLoadOp;
+        wgpu::StoreOp depthStoreOp;
         wgpu::LoadOp stencilLoadOp;
+        wgpu::StoreOp stencilStoreOp;
 
         uint32_t sampleCount;
     };

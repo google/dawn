@@ -496,19 +496,21 @@ namespace dawn_native { namespace vulkan {
         dynamic.dynamicStateCount = sizeof(dynamicStates) / sizeof(dynamicStates[0]);
         dynamic.pDynamicStates = dynamicStates;
 
-        // Get a VkRenderPass that matches the attachment formats for this pipeline, load ops don't
-        // matter so set them all to LoadOp::Load
+        // Get a VkRenderPass that matches the attachment formats for this pipeline, load/store ops
+        // don't matter so set them all to LoadOp::Load / StoreOp::Store
         VkRenderPass renderPass = VK_NULL_HANDLE;
         {
             RenderPassCacheQuery query;
 
             for (ColorAttachmentIndex i : IterateBitSet(GetColorAttachmentsMask())) {
-                query.SetColor(i, GetColorAttachmentFormat(i), wgpu::LoadOp::Load, false);
+                query.SetColor(i, GetColorAttachmentFormat(i), wgpu::LoadOp::Load,
+                               wgpu::StoreOp::Store, false);
             }
 
             if (HasDepthStencilAttachment()) {
                 query.SetDepthStencil(GetDepthStencilFormat(), wgpu::LoadOp::Load,
-                                      wgpu::LoadOp::Load);
+                                      wgpu::StoreOp::Store, wgpu::LoadOp::Load,
+                                      wgpu::StoreOp::Store);
             }
 
             query.SetSampleCount(GetSampleCount());

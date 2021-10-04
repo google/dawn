@@ -209,17 +209,18 @@ namespace dawn_native { namespace vulkan {
                     const auto& attachmentInfo = renderPass->colorAttachments[i];
 
                     bool hasResolveTarget = attachmentInfo.resolveTarget != nullptr;
-                    wgpu::LoadOp loadOp = attachmentInfo.loadOp;
 
-                    query.SetColor(i, attachmentInfo.view->GetFormat().format, loadOp,
-                                   hasResolveTarget);
+                    query.SetColor(i, attachmentInfo.view->GetFormat().format,
+                                   attachmentInfo.loadOp, attachmentInfo.storeOp, hasResolveTarget);
                 }
 
                 if (renderPass->attachmentState->HasDepthStencilAttachment()) {
                     const auto& attachmentInfo = renderPass->depthStencilAttachment;
 
                     query.SetDepthStencil(attachmentInfo.view->GetTexture()->GetFormat().format,
-                                          attachmentInfo.depthLoadOp, attachmentInfo.stencilLoadOp);
+                                          attachmentInfo.depthLoadOp, attachmentInfo.depthStoreOp,
+                                          attachmentInfo.stencilLoadOp,
+                                          attachmentInfo.stencilStoreOp);
                 }
 
                 query.SetSampleCount(renderPass->attachmentState->GetSampleCount());

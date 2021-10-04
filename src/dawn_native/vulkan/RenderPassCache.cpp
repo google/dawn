@@ -32,6 +32,16 @@ namespace dawn_native { namespace vulkan {
             }
             UNREACHABLE();
         }
+
+        VkAttachmentStoreOp VulkanAttachmentStoreOp(wgpu::StoreOp op) {
+            switch (op) {
+                case wgpu::StoreOp::Store:
+                    return VK_ATTACHMENT_STORE_OP_STORE;
+                case wgpu::StoreOp::Discard:
+                    return VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            }
+            UNREACHABLE();
+        }
     }  // anonymous namespace
 
     // RenderPassCacheQuery
@@ -39,20 +49,26 @@ namespace dawn_native { namespace vulkan {
     void RenderPassCacheQuery::SetColor(ColorAttachmentIndex index,
                                         wgpu::TextureFormat format,
                                         wgpu::LoadOp loadOp,
+                                        wgpu::StoreOp storeOp,
                                         bool hasResolveTarget) {
         colorMask.set(index);
         colorFormats[index] = format;
         colorLoadOp[index] = loadOp;
+        colorStoreOp[index] = storeOp;
         resolveTargetMask[index] = hasResolveTarget;
     }
 
     void RenderPassCacheQuery::SetDepthStencil(wgpu::TextureFormat format,
-                                               wgpu::LoadOp depthLoadOp,
-                                               wgpu::LoadOp stencilLoadOp) {
+                                               wgpu::LoadOp depthLoadOpIn,
+                                               wgpu::StoreOp depthStoreOpIn,
+                                               wgpu::LoadOp stencilLoadOpIn,
+                                               wgpu::StoreOp stencilStoreOpIn) {
         hasDepthStencil = true;
         depthStencilFormat = format;
-        this->depthLoadOp = depthLoadOp;
-        this->stencilLoadOp = stencilLoadOp;
+        depthLoadOp = depthLoadOpIn;
+        depthStoreOp = depthStoreOpIn;
+        stencilLoadOp = stencilLoadOpIn;
+        stencilStoreOp = stencilStoreOpIn;
     }
 
     void RenderPassCacheQuery::SetSampleCount(uint32_t sampleCount) {
@@ -113,7 +129,7 @@ namespace dawn_native { namespace vulkan {
             attachmentDesc.format = VulkanImageFormat(mDevice, query.colorFormats[i]);
             attachmentDesc.samples = vkSampleCount;
             attachmentDesc.loadOp = VulkanAttachmentLoadOp(query.colorLoadOp[i]);
-            attachmentDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+            attachmentDesc.storeOp = VulkanAttachmentStoreOp(query.colorStoreOp[i]);
             attachmentDesc.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             attachmentDesc.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
@@ -134,9 +150,9 @@ namespace dawn_native { namespace vulkan {
             attachmentDesc.format = VulkanImageFormat(mDevice, query.depthStencilFormat);
             attachmentDesc.samples = vkSampleCount;
             attachmentDesc.loadOp = VulkanAttachmentLoadOp(query.depthLoadOp);
-            attachmentDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+            attachmentDesc.storeOp = VulkanAttachmentStoreOp(query.depthStoreOp);
             attachmentDesc.stencilLoadOp = VulkanAttachmentLoadOp(query.stencilLoadOp);
-            attachmentDesc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
+            attachmentDesc.stencilStoreOp = VulkanAttachmentStoreOp(query.stencilStoreOp);
             attachmentDesc.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
             attachmentDesc.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
