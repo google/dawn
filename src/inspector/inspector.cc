@@ -211,6 +211,9 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
           TINT_UNREACHABLE(Inspector, diagnostics_);
         }
 
+        overridable_constant.is_initialized =
+            global->Declaration()->has_constructor();
+
         entry_point.overridable_constants.push_back(overridable_constant);
       }
     }

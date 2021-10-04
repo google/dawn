@@ -101,18 +101,13 @@ class InspectorBuilder : public ProgramBuilder {
   /// @param name name of the variable to add
   /// @param id id number for the constant id
   /// @param type type of the variable
-  /// @param val value to initialize the variable with, if NULL no initializer
-  ///            will be added.
+  /// @param constructor val to initialize the constant with, if NULL no
+  ///             constructor will be added.
   /// @returns the constant that was created
-  template <class T>
   ast::Variable* AddOverridableConstantWithID(std::string name,
                                               uint32_t id,
                                               ast::Type* type,
-                                              T* val) {
-    ast::Expression* constructor = nullptr;
-    if (val) {
-      constructor = Expr(*val);
-    }
+                                              ast::Expression* constructor) {
     return GlobalConst(name, type, constructor,
                        ast::DecorationList{
                            Override(id),
@@ -122,17 +117,12 @@ class InspectorBuilder : public ProgramBuilder {
   /// Add a pipeline constant to the global variables, without a specific ID.
   /// @param name name of the variable to add
   /// @param type type of the variable
-  /// @param val value to initialize the variable with, if NULL no initializer
-  ///            will be added.
+  /// @param constructor val to initialize the constant with, if NULL no
+  ///             constructor will be added.
   /// @returns the constant that was created
-  template <class T>
   ast::Variable* AddOverridableConstantWithoutID(std::string name,
                                                  ast::Type* type,
-                                                 T* val) {
-    ast::Expression* constructor = nullptr;
-    if (val) {
-      constructor = Expr(*val);
-    }
+                                                 ast::Expression* constructor) {
     return GlobalConst(name, type, constructor,
                        ast::DecorationList{
                            Override(),

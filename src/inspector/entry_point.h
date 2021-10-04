@@ -103,6 +103,9 @@ struct OverridableConstant {
 
   /// Type of the scalar
   Type type;
+
+  /// Does this pipeline overridable constant have an initializer?
+  bool is_initialized = false;
 };
 
 /// Reflection data for an entry point in the shader.

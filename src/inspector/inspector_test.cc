@@ -554,7 +554,7 @@ TEST_F(InspectorGetEntryPointTest, MixInOutVariablesAndStruct) {
 }
 
 TEST_F(InspectorGetEntryPointTest, OverridableConstantUnreferenced) {
-  AddOverridableConstantWithoutID<float>("foo", ty.f32(), nullptr);
+  AddOverridableConstantWithoutID("foo", ty.f32(), nullptr);
   MakeEmptyBodyFunction(
       "ep_func", {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
@@ -567,7 +567,7 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantUnreferenced) {
 }
 
 TEST_F(InspectorGetEntryPointTest, OverridableConstantReferencedByEntryPoint) {
-  AddOverridableConstantWithoutID<float>("foo", ty.f32(), nullptr);
+  AddOverridableConstantWithoutID("foo", ty.f32(), nullptr);
   MakePlainGlobalReferenceBodyFunction(
       "ep_func", "foo", ty.f32(),
       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
@@ -582,7 +582,7 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantReferencedByEntryPoint) {
 }
 
 TEST_F(InspectorGetEntryPointTest, OverridableConstantReferencedByCallee) {
-  AddOverridableConstantWithoutID<float>("foo", ty.f32(), nullptr);
+  AddOverridableConstantWithoutID("foo", ty.f32(), nullptr);
   MakePlainGlobalReferenceBodyFunction("callee_func", "foo", ty.f32(), {});
   MakeCallerBodyFunction(
       "ep_func", {"callee_func"},
@@ -598,8 +598,8 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantReferencedByCallee) {
 }
 
 TEST_F(InspectorGetEntryPointTest, OverridableConstantSomeReferenced) {
-  AddOverridableConstantWithID<float>("foo", 1, ty.f32(), nullptr);
-  AddOverridableConstantWithID<float>("bar", 2, ty.f32(), nullptr);
+  AddOverridableConstantWithID("foo", 1, ty.f32(), nullptr);
+  AddOverridableConstantWithID("bar", 2, ty.f32(), nullptr);
   MakePlainGlobalReferenceBodyFunction("callee_func", "foo", ty.f32(), {});
   MakeCallerBodyFunction(
       "ep_func", {"callee_func"},
@@ -612,6 +612,74 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantSomeReferenced) {
   ASSERT_EQ(1u, result.size());
   ASSERT_EQ(1u, result[0].overridable_constants.size());
   EXPECT_EQ("foo", result[0].overridable_constants[0].name);
+}
+
+TEST_F(InspectorGetEntryPointTest, OverridableConstantTypes) {
+  AddOverridableConstantWithoutID("bool_var", ty.bool_(), nullptr);
+  AddOverridableConstantWithoutID("float_var", ty.f32(), nullptr);
+  AddOverridableConstantWithoutID("u32_var", ty.u32(), nullptr);
+  AddOverridableConstantWithoutID("i32_var", ty.i32(), nullptr);
+
+  MakePlainGlobalReferenceBodyFunction("bool_func", "bool_var", ty.bool_(), {});
+  MakePlainGlobalReferenceBodyFunction("float_func", "float_var", ty.f32(), {});
+  MakePlainGlobalReferenceBodyFunction("u32_func", "u32_var", ty.u32(), {});
+  MakePlainGlobalReferenceBodyFunction("i32_func", "i32_var", ty.i32(), {});
+
+  MakeCallerBodyFunction(
+      "ep_func", {"bool_func", "float_func", "u32_func", "i32_func"},
+      {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  ASSERT_EQ(4u, result[0].overridable_constants.size());
+  EXPECT_EQ("bool_var", result[0].overridable_constants[0].name);
+  EXPECT_EQ(inspector::OverridableConstant::Type::kBool,
+            result[0].overridable_constants[0].type);
+  EXPECT_EQ("float_var", result[0].overridable_constants[1].name);
+  EXPECT_EQ(inspector::OverridableConstant::Type::kFloat32,
+            result[0].overridable_constants[1].type);
+  EXPECT_EQ("u32_var", result[0].overridable_constants[2].name);
+  EXPECT_EQ(inspector::OverridableConstant::Type::kUint32,
+            result[0].overridable_constants[2].type);
+  EXPECT_EQ("i32_var", result[0].overridable_constants[3].name);
+  EXPECT_EQ(inspector::OverridableConstant::Type::kInt32,
+            result[0].overridable_constants[3].type);
+}
+
+TEST_F(InspectorGetEntryPointTest, OverridableConstantInitialized) {
+  AddOverridableConstantWithoutID("foo", ty.f32(), Expr(0.0f));
+  MakePlainGlobalReferenceBodyFunction(
+      "ep_func", "foo", ty.f32(),
+      {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  ASSERT_EQ(1u, result[0].overridable_constants.size());
+  EXPECT_EQ("foo", result[0].overridable_constants[0].name);
+  EXPECT_TRUE(result[0].overridable_constants[0].is_initialized);
+}
+
+TEST_F(InspectorGetEntryPointTest, OverridableConstantUninitialized) {
+  AddOverridableConstantWithoutID("foo", ty.f32(), nullptr);
+  MakePlainGlobalReferenceBodyFunction(
+      "ep_func", "foo", ty.f32(),
+      {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+
+  ASSERT_EQ(1u, result.size());
+  ASSERT_EQ(1u, result[0].overridable_constants.size());
+  EXPECT_EQ("foo", result[0].overridable_constants[0].name);
+
+  EXPECT_FALSE(result[0].overridable_constants[0].is_initialized);
 }
 
 TEST_F(InspectorGetEntryPointTest, NonOverridableConstantSkipped) {
@@ -991,11 +1059,9 @@ TEST_F(InspectorGetRemappedNameForEntryPointTest,
 }
 
 TEST_F(InspectorGetConstantIDsTest, Bool) {
-  bool val_true = true;
-  bool val_false = false;
-  AddOverridableConstantWithID<bool>("foo", 1, ty.bool_(), nullptr);
-  AddOverridableConstantWithID<bool>("bar", 20, ty.bool_(), &val_true);
-  AddOverridableConstantWithID<bool>("baz", 300, ty.bool_(), &val_false);
+  AddOverridableConstantWithID("foo", 1, ty.bool_(), nullptr);
+  AddOverridableConstantWithID("bar", 20, ty.bool_(), Expr(true));
+  AddOverridableConstantWithID("baz", 300, ty.bool_(), Expr(false));
 
   Inspector& inspector = Build();
 
@@ -1015,9 +1081,8 @@ TEST_F(InspectorGetConstantIDsTest, Bool) {
 }
 
 TEST_F(InspectorGetConstantIDsTest, U32) {
-  uint32_t val = 42;
-  AddOverridableConstantWithID<uint32_t>("foo", 1, ty.u32(), nullptr);
-  AddOverridableConstantWithID<uint32_t>("bar", 20, ty.u32(), &val);
+  AddOverridableConstantWithID("foo", 1, ty.u32(), nullptr);
+  AddOverridableConstantWithID("bar", 20, ty.u32(), Expr(42u));
 
   Inspector& inspector = Build();
 
@@ -1033,11 +1098,9 @@ TEST_F(InspectorGetConstantIDsTest, U32) {
 }
 
 TEST_F(InspectorGetConstantIDsTest, I32) {
-  int32_t val_neg = -42;
-  int32_t val_pos = 42;
-  AddOverridableConstantWithID<int32_t>("foo", 1, ty.i32(), nullptr);
-  AddOverridableConstantWithID<int32_t>("bar", 20, ty.i32(), &val_neg);
-  AddOverridableConstantWithID<int32_t>("baz", 300, ty.i32(), &val_pos);
+  AddOverridableConstantWithID("foo", 1, ty.i32(), nullptr);
+  AddOverridableConstantWithID("bar", 20, ty.i32(), Expr(-42));
+  AddOverridableConstantWithID("baz", 300, ty.i32(), Expr(42));
 
   Inspector& inspector = Build();
 
@@ -1057,13 +1120,10 @@ TEST_F(InspectorGetConstantIDsTest, I32) {
 }
 
 TEST_F(InspectorGetConstantIDsTest, Float) {
-  float val_zero = 0.0f;
-  float val_neg = -10.0f;
-  float val_pos = 15.0f;
-  AddOverridableConstantWithID<float>("foo", 1, ty.f32(), nullptr);
-  AddOverridableConstantWithID<float>("bar", 20, ty.f32(), &val_zero);
-  AddOverridableConstantWithID<float>("baz", 300, ty.f32(), &val_neg);
-  AddOverridableConstantWithID<float>("x", 4000, ty.f32(), &val_pos);
+  AddOverridableConstantWithID("foo", 1, ty.f32(), nullptr);
+  AddOverridableConstantWithID("bar", 20, ty.f32(), Expr(0.0f));
+  AddOverridableConstantWithID("baz", 300, ty.f32(), Expr(-10.0f));
+  AddOverridableConstantWithID("x", 4000, ty.f32(), Expr(15.0f));
 
   Inspector& inspector = Build();
 
@@ -1087,12 +1147,12 @@ TEST_F(InspectorGetConstantIDsTest, Float) {
 }
 
 TEST_F(InspectorGetConstantNameToIdMapTest, WithAndWithoutIds) {
-  AddOverridableConstantWithID<float>("v1", 1, ty.f32(), nullptr);
-  AddOverridableConstantWithID<float>("v20", 20, ty.f32(), nullptr);
-  AddOverridableConstantWithID<float>("v300", 300, ty.f32(), nullptr);
-  auto* a = AddOverridableConstantWithoutID<float>("a", ty.f32(), nullptr);
-  auto* b = AddOverridableConstantWithoutID<float>("b", ty.f32(), nullptr);
-  auto* c = AddOverridableConstantWithoutID<float>("c", ty.f32(), nullptr);
+  AddOverridableConstantWithID("v1", 1, ty.f32(), nullptr);
+  AddOverridableConstantWithID("v20", 20, ty.f32(), nullptr);
+  AddOverridableConstantWithID("v300", 300, ty.f32(), nullptr);
+  auto* a = AddOverridableConstantWithoutID("a", ty.f32(), nullptr);
+  auto* b = AddOverridableConstantWithoutID("b", ty.f32(), nullptr);
+  auto* c = AddOverridableConstantWithoutID("c", ty.f32(), nullptr);
 
   Inspector& inspector = Build();
 
