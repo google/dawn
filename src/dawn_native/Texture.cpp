@@ -273,9 +273,9 @@ namespace dawn_native {
         DAWN_INVALID_IF(descriptor->dimension == wgpu::TextureDimension::e1D,
                         "1D textures aren't supported (yet).");
 
-        DAWN_INVALID_IF(internalUsageDesc != nullptr &&
-                            !device->IsExtensionEnabled(Extension::DawnInternalUsages),
-                        "The dawn-internal-usages feature is not enabled");
+        DAWN_INVALID_IF(
+            internalUsageDesc != nullptr && !device->IsFeatureEnabled(Feature::DawnInternalUsages),
+            "The dawn-internal-usages feature is not enabled");
 
         const Format* format;
         DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->format));
@@ -434,7 +434,7 @@ namespace dawn_native {
     }
 
     // WebGPU only supports sample counts of 1 and 4. We could expand to more based on
-    // platform support, but it would probably be an extension.
+    // platform support, but it would probably be a feature.
     bool IsValidSampleCount(uint32_t sampleCount) {
         switch (sampleCount) {
             case 1:

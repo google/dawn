@@ -73,7 +73,7 @@ namespace dawn_native { namespace d3d12 {
             CheckHRESULT(mD3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&mCommandQueue)),
                          "D3D12 create command queue"));
 
-        if (IsExtensionEnabled(Extension::TimestampQuery)) {
+        if (IsFeatureEnabled(Feature::TimestampQuery)) {
             // Get GPU timestamp counter frequency (in ticks/second). This fails if the specified
             // command queue doesn't support timestamps. D3D12_COMMAND_LIST_TYPE_DIRECT queues
             // always support timestamps except where there are bugs in Windows container and vGPU
@@ -203,7 +203,7 @@ namespace dawn_native { namespace d3d12 {
     MaybeError Device::ApplyUseDxcToggle() {
         if (!ToBackend(GetAdapter())->GetBackend()->GetFunctions()->IsDXCAvailable()) {
             ForceSetToggle(Toggle::UseDXC, false);
-        } else if (IsExtensionEnabled(Extension::ShaderFloat16)) {
+        } else if (IsFeatureEnabled(Feature::ShaderFloat16)) {
             // Currently we can only use DXC to compile HLSL shaders using float16.
             ForceSetToggle(Toggle::UseDXC, true);
         }

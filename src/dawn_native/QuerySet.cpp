@@ -15,7 +15,7 @@
 #include "dawn_native/QuerySet.h"
 
 #include "dawn_native/Device.h"
-#include "dawn_native/Extensions.h"
+#include "dawn_native/Features.h"
 #include "dawn_native/ObjectType_autogen.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
@@ -63,8 +63,8 @@ namespace dawn_native {
                                 "fully implemented");
 
                 DAWN_INVALID_IF(
-                    !device->IsExtensionEnabled(Extension::PipelineStatisticsQuery),
-                    "Pipeline statistics query set created without the extension being enabled.");
+                    !device->IsFeatureEnabled(Feature::PipelineStatisticsQuery),
+                    "Pipeline statistics query set created without the feature being enabled.");
 
                 DAWN_INVALID_IF(descriptor->pipelineStatisticsCount == 0,
                                 "Pipeline statistics query set created with 0 statistics.");
@@ -85,8 +85,8 @@ namespace dawn_native {
                                 "Timestamp queries are disallowed because they may expose precise "
                                 "timing information.");
 
-                DAWN_INVALID_IF(!device->IsExtensionEnabled(Extension::TimestampQuery),
-                                "Timestamp query set created without the extension being enabled.");
+                DAWN_INVALID_IF(!device->IsFeatureEnabled(Feature::TimestampQuery),
+                                "Timestamp query set created without the feature being enabled.");
 
                 DAWN_INVALID_IF(descriptor->pipelineStatisticsCount != 0,
                                 "Pipeline statistics specified for a query of type %s.",

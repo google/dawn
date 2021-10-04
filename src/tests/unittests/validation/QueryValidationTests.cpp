@@ -36,12 +36,12 @@ class QuerySetValidationTest : public ValidationTest {
     }
 };
 
-// Test creating query set without extensions
-TEST_F(QuerySetValidationTest, CreationWithoutExtensions) {
-    // Creating a query set for occlusion queries succeeds without any extensions enabled.
+// Test creating query set without features
+TEST_F(QuerySetValidationTest, CreationWithoutFeatures) {
+    // Creating a query set for occlusion queries succeeds without any features enabled.
     CreateQuerySet(device, wgpu::QueryType::Occlusion, 1);
 
-    // Creating a query set for other types of queries fails without extensions enabled.
+    // Creating a query set for other types of queries fails without features enabled.
     ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::PipelineStatistics, 1,
                                        {wgpu::PipelineStatisticName::VertexShaderInvocations}));
     ASSERT_DEVICE_ERROR(CreateQuerySet(device, wgpu::QueryType::Timestamp, 1));
@@ -226,13 +226,13 @@ class TimestampQueryValidationTest : public QuerySetValidationTest {
   protected:
     WGPUDevice CreateTestDevice() override {
         dawn_native::DeviceDescriptor descriptor;
-        descriptor.requiredExtensions.push_back("timestamp_query");
+        descriptor.requiredFeatures.push_back("timestamp_query");
         descriptor.forceDisabledToggles.push_back("disallow_unsafe_apis");
         return adapter.CreateDevice(&descriptor);
     }
 };
 
-// Test creating query set with only the timestamp extension enabled.
+// Test creating query set with only the timestamp feature enabled.
 TEST_F(TimestampQueryValidationTest, Creation) {
     // Creating a query set for occlusion queries succeeds.
     CreateQuerySet(device, wgpu::QueryType::Occlusion, 1);
@@ -430,7 +430,7 @@ class PipelineStatisticsQueryValidationTest : public QuerySetValidationTest {
   protected:
     WGPUDevice CreateTestDevice() override {
         dawn_native::DeviceDescriptor descriptor;
-        descriptor.requiredExtensions.push_back("pipeline_statistics_query");
+        descriptor.requiredFeatures.push_back("pipeline_statistics_query");
         // TODO(crbug.com/1177506): Pipeline statistic query is an unsafe API, disable disallowing
         // unsafe APIs to test it.
         descriptor.forceDisabledToggles.push_back("disallow_unsafe_apis");
@@ -438,7 +438,7 @@ class PipelineStatisticsQueryValidationTest : public QuerySetValidationTest {
     }
 };
 
-// Test creating query set with only the pipeline statistics extension enabled.
+// Test creating query set with only the pipeline statistics feature enabled.
 TEST_F(PipelineStatisticsQueryValidationTest, Creation) {
     // Creating a query set for occlusion queries succeeds.
     CreateQuerySet(device, wgpu::QueryType::Occlusion, 1);

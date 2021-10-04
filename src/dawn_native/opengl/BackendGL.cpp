@@ -187,7 +187,7 @@ namespace dawn_native { namespace opengl {
                 mAdapterType = wgpu::AdapterType::CPU;
             }
 
-            InitializeSupportedExtensions();
+            InitializeSupportedFeatures();
 
             return {};
         }
@@ -209,7 +209,7 @@ namespace dawn_native { namespace opengl {
             return Device::Create(this, descriptor, mFunctions);
         }
 
-        void InitializeSupportedExtensions() {
+        void InitializeSupportedFeatures() {
             // TextureCompressionBC
             {
                 // BC1, BC2 and BC3 are not supported in OpenGL or OpenGL ES core features.
@@ -249,8 +249,7 @@ namespace dawn_native { namespace opengl {
 
                 if (supportsS3TC && (supportsTextureSRGB || supportsS3TCSRGB) && supportsRGTC &&
                     supportsBPTC) {
-                    mSupportedExtensions.EnableExtension(
-                        dawn_native::Extension::TextureCompressionBC);
+                    mSupportedFeatures.EnableFeature(dawn_native::Feature::TextureCompressionBC);
                 }
             }
         }

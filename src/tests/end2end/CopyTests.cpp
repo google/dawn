@@ -331,7 +331,7 @@ namespace {
 
 class CopyTests_T2T : public CopyTests, public DawnTestWithParams<CopyTestsParams> {
   protected:
-    std::vector<const char*> GetRequiredExtensions() override {
+    std::vector<const char*> GetRequiredFeatures() override {
         return {"dawn-internal-usages"};
     }
 

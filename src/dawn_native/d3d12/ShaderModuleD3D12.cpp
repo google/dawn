@@ -116,7 +116,7 @@ namespace dawn_native { namespace d3d12 {
             // DXC inputs
             uint64_t dxcVersion;
             const D3D12DeviceInfo* deviceInfo;
-            bool hasShaderFloat16Extension;
+            bool hasShaderFloat16Feature;
 
             static ResultOrError<ShaderCompilationRequest> Create(
                 const char* entryPointName,
@@ -192,8 +192,7 @@ namespace dawn_native { namespace d3d12 {
                 request.fxcVersion = compiler == Compiler::FXC ? GetD3DCompilerVersion() : 0;
                 request.dxcVersion = compiler == Compiler::DXC ? dxcVersion : 0;
                 request.deviceInfo = &device->GetDeviceInfo();
-                request.hasShaderFloat16Extension =
-                    device->IsExtensionEnabled(Extension::ShaderFloat16);
+                request.hasShaderFloat16Feature = device->IsFeatureEnabled(Feature::ShaderFloat16);
                 return std::move(request);
             }
 
@@ -240,7 +239,7 @@ namespace dawn_native { namespace d3d12 {
                 stream << " isRobustnessEnabled=" << isRobustnessEnabled;
                 stream << " fxcVersion=" << fxcVersion;
                 stream << " dxcVersion=" << dxcVersion;
-                stream << " hasShaderFloat16Extension=" << hasShaderFloat16Extension;
+                stream << " hasShaderFloat16Feature=" << hasShaderFloat16Feature;
                 stream << ")";
                 stream << "\n";
 
@@ -314,7 +313,7 @@ namespace dawn_native { namespace d3d12 {
             DAWN_TRY_ASSIGN(entryPointW, ConvertStringToWstring(request.entryPointName));
 
             std::vector<const wchar_t*> arguments =
-                GetDXCArguments(request.compileFlags, request.hasShaderFloat16Extension);
+                GetDXCArguments(request.compileFlags, request.hasShaderFloat16Feature);
 
             ComPtr<IDxcOperationResult> result;
             DAWN_TRY(CheckHRESULT(

@@ -40,19 +40,17 @@ namespace {
 
 class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureFormatTestParams> {
   protected:
-    std::vector<const char*> GetRequiredExtensions() override {
+    std::vector<const char*> GetRequiredFeatures() override {
         const wgpu::TextureFormat format = GetParam().mTextureFormat;
-        if (utils::IsBCTextureFormat(format) && SupportsExtensions({"texture_compression_bc"})) {
+        if (utils::IsBCTextureFormat(format) && SupportsFeatures({"texture_compression_bc"})) {
             mIsFormatSupported = true;
             return {"texture_compression_bc"};
         }
-        if (utils::IsETC2TextureFormat(format) &&
-            SupportsExtensions({"texture-compression-etc2"})) {
+        if (utils::IsETC2TextureFormat(format) && SupportsFeatures({"texture-compression-etc2"})) {
             mIsFormatSupported = true;
             return {"texture-compression-etc2"};
         }
-        if (utils::IsASTCTextureFormat(format) &&
-            SupportsExtensions({"texture-compression-astc"})) {
+        if (utils::IsASTCTextureFormat(format) && SupportsFeatures({"texture-compression-astc"})) {
             mIsFormatSupported = true;
             return {"texture-compression-astc"};
         }
@@ -1151,14 +1149,14 @@ DAWN_INSTANTIATE_TEST_P(CompressedTextureFormatTest,
 // Suite of regression tests that target specific compression types.
 class CompressedTextureFormatSpecificTest : public DawnTest {
   protected:
-    std::vector<const char*> GetRequiredExtensions() override {
-        mIsBCFormatSupported = SupportsExtensions({"texture_compression_bc"});
+    std::vector<const char*> GetRequiredFeatures() override {
+        mIsBCFormatSupported = SupportsFeatures({"texture_compression_bc"});
 
-        std::vector<const char*> extensions;
+        std::vector<const char*> features;
         if (mIsBCFormatSupported) {
-            extensions.emplace_back("texture_compression_bc");
+            features.emplace_back("texture_compression_bc");
         }
-        return extensions;
+        return features;
     }
 
     bool IsBCFormatSupported() const {

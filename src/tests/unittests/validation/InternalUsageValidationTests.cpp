@@ -18,8 +18,8 @@
 
 class TextureInternalUsageValidationDisabledTest : public ValidationTest {};
 
-// Test that using the extension is an error if it is not enabled
-TEST_F(TextureInternalUsageValidationDisabledTest, RequiresExtension) {
+// Test that using the feature is an error if it is not enabled
+TEST_F(TextureInternalUsageValidationDisabledTest, RequiresFeature) {
     wgpu::TextureDescriptor textureDesc = {};
     textureDesc.size = {1, 1};
     textureDesc.usage = wgpu::TextureUsage::CopySrc;
@@ -31,7 +31,7 @@ TEST_F(TextureInternalUsageValidationDisabledTest, RequiresExtension) {
     wgpu::DawnTextureInternalUsageDescriptor internalDesc = {};
     textureDesc.nextInChain = &internalDesc;
 
-    // Error with chained extension struct.
+    // Error with chained feature struct.
     ASSERT_DEVICE_ERROR(device.CreateTexture(&textureDesc));
 
     // Also does not work with various internal usages.
@@ -45,7 +45,7 @@ TEST_F(TextureInternalUsageValidationDisabledTest, RequiresExtension) {
 class TextureInternalUsageValidationTest : public ValidationTest {
     WGPUDevice CreateTestDevice() override {
         dawn_native::DeviceDescriptor descriptor;
-        descriptor.requiredExtensions.push_back("dawn-internal-usages");
+        descriptor.requiredFeatures.push_back("dawn-internal-usages");
 
         return adapter.CreateDevice(&descriptor);
     }

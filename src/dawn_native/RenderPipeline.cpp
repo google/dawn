@@ -240,7 +240,7 @@ namespace dawn_native {
                 wgpu::SType::PrimitiveDepthClampingState));
             const PrimitiveDepthClampingState* clampInfo = nullptr;
             FindInChain(descriptor->nextInChain, &clampInfo);
-            if (clampInfo && !device->IsExtensionEnabled(Extension::DepthClamping)) {
+            if (clampInfo && !device->IsFeatureEnabled(Feature::DepthClamping)) {
                 return DAWN_VALIDATION_ERROR("The depth clamping feature is not supported");
             }
             DAWN_TRY(ValidatePrimitiveTopology(descriptor->topology));

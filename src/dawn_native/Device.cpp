@@ -176,7 +176,7 @@ namespace dawn_native {
         : mInstance(adapter->GetInstance()), mAdapter(adapter), mNextPipelineCompatibilityToken(1) {
         if (descriptor != nullptr) {
             ApplyToggleOverrides(descriptor);
-            ApplyExtensions(descriptor);
+            ApplyFeatures(descriptor);
         }
 
         if (descriptor != nullptr && descriptor->requiredLimits != nullptr) {
@@ -1049,20 +1049,26 @@ namespace dawn_native {
         return result.Detach();
     }
 
-    void DeviceBase::ApplyExtensions(const DeviceDescriptor* deviceDescriptor) {
+    void DeviceBase::ApplyFeatures(const DeviceDescriptor* deviceDescriptor) {
         ASSERT(deviceDescriptor);
-        ASSERT(GetAdapter()->SupportsAllRequestedExtensions(deviceDescriptor->requiredExtensions));
+        // TODO(dawn:1149): remove once requiredExtensions is no longer used.
+        ASSERT(GetAdapter()->SupportsAllRequestedFeatures(deviceDescriptor->requiredExtensions));
+        ASSERT(GetAdapter()->SupportsAllRequestedFeatures(deviceDescriptor->requiredFeatures));
 
-        mEnabledExtensions = GetAdapter()->GetInstance()->ExtensionNamesToExtensionsSet(
+        // TODO(dawn:1149): remove once requiredExtensions is no longer used.
+        mEnabledExtensions = GetAdapter()->GetInstance()->FeatureNamesToFeaturesSet(
             deviceDescriptor->requiredExtensions);
+        mEnabledFeatures = GetAdapter()->GetInstance()->FeatureNamesToFeaturesSet(
+            deviceDescriptor->requiredFeatures);
     }
 
-    std::vector<const char*> DeviceBase::GetEnabledExtensions() const {
-        return mEnabledExtensions.GetEnabledExtensionNames();
+    std::vector<const char*> DeviceBase::GetEnabledFeatures() const {
+        return mEnabledFeatures.GetEnabledFeatureNames();
     }
 
-    bool DeviceBase::IsExtensionEnabled(Extension extension) const {
-        return mEnabledExtensions.IsEnabled(extension);
+    bool DeviceBase::IsFeatureEnabled(Feature feature) const {
+        // TODO(dawn:1149): remove mEnabledExtensions once it is no longer used.
+        return mEnabledFeatures.IsEnabled(feature) || mEnabledExtensions.IsEnabled(feature);
     }
 
     bool DeviceBase::IsValidationEnabled() const {

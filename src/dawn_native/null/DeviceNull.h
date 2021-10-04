@@ -173,8 +173,8 @@ namespace dawn_native { namespace null {
         // AdapterBase Implementation
         bool SupportsExternalImages() const override;
 
-        // Used for the tests that intend to use an adapter without all extensions enabled.
-        void SetSupportedExtensions(const std::vector<const char*>& requiredExtensions);
+        // Used for the tests that intend to use an adapter without all features enabled.
+        void SetSupportedFeatures(const std::vector<const char*>& requiredFeatures);
 
       private:
         ResultOrError<DeviceBase*> CreateDeviceImpl(const DeviceDescriptor* descriptor) override;

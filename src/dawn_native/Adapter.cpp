@@ -21,7 +21,7 @@ namespace dawn_native {
     AdapterBase::AdapterBase(InstanceBase* instance, wgpu::BackendType backend)
         : mInstance(instance), mBackend(backend) {
         GetDefaultLimits(&mLimits.v1);
-        mSupportedExtensions.EnableExtension(Extension::DawnInternalUsages);
+        mSupportedFeatures.EnableFeature(Feature::DawnInternalUsages);
     }
 
     wgpu::BackendType AdapterBase::GetBackendType() const {
@@ -44,18 +44,18 @@ namespace dawn_native {
         return mInstance;
     }
 
-    ExtensionsSet AdapterBase::GetSupportedExtensions() const {
-        return mSupportedExtensions;
+    FeaturesSet AdapterBase::GetSupportedFeatures() const {
+        return mSupportedFeatures;
     }
 
-    bool AdapterBase::SupportsAllRequestedExtensions(
-        const std::vector<const char*>& requestedExtensions) const {
-        for (const char* extensionStr : requestedExtensions) {
-            Extension extensionEnum = mInstance->ExtensionNameToEnum(extensionStr);
-            if (extensionEnum == Extension::InvalidEnum) {
+    bool AdapterBase::SupportsAllRequestedFeatures(
+        const std::vector<const char*>& requestedFeatures) const {
+        for (const char* featureStr : requestedFeatures) {
+            Feature featureEnum = mInstance->FeatureNameToEnum(featureStr);
+            if (featureEnum == Feature::InvalidEnum) {
                 return false;
             }
-            if (!mSupportedExtensions.IsEnabled(extensionEnum)) {
+            if (!mSupportedFeatures.IsEnabled(featureEnum)) {
                 return false;
             }
         }
@@ -67,8 +67,8 @@ namespace dawn_native {
         adapterProperties.deviceID = mPCIInfo.deviceId;
         adapterProperties.vendorID = mPCIInfo.vendorId;
 
-        mSupportedExtensions.InitializeDeviceProperties(&adapterProperties);
-        // This is OK for now because there are no limit extension structs.
+        mSupportedFeatures.InitializeDeviceProperties(&adapterProperties);
+        // This is OK for now because there are no limit feature structs.
         // If we add additional structs, the caller will need to provide memory
         // to store them (ex. by calling GetLimits directly instead). Currently,
         // we keep this function as it's only used internally in Chromium to
@@ -121,12 +121,20 @@ namespace dawn_native {
     MaybeError AdapterBase::CreateDeviceInternal(DeviceBase** result,
                                                  const DeviceDescriptor* descriptor) {
         if (descriptor != nullptr) {
+            // TODO(dawn:1149): remove once requiredExtensions is no longer used.
             for (const char* extensionStr : descriptor->requiredExtensions) {
-                Extension extensionEnum = mInstance->ExtensionNameToEnum(extensionStr);
-                DAWN_INVALID_IF(extensionEnum == Extension::InvalidEnum,
+                Feature extensionEnum = mInstance->FeatureNameToEnum(extensionStr);
+                DAWN_INVALID_IF(extensionEnum == Feature::InvalidEnum,
                                 "Requested feature %s is unknown.", extensionStr);
-                DAWN_INVALID_IF(!mSupportedExtensions.IsEnabled(extensionEnum),
+                DAWN_INVALID_IF(!mSupportedFeatures.IsEnabled(extensionEnum),
                                 "Requested feature %s is disabled.", extensionStr);
+            }
+            for (const char* featureStr : descriptor->requiredFeatures) {
+                Feature featureEnum = mInstance->FeatureNameToEnum(featureStr);
+                DAWN_INVALID_IF(featureEnum == Feature::InvalidEnum,
+                                "Requested feature %s is unknown.", featureStr);
+                DAWN_INVALID_IF(!mSupportedFeatures.IsEnabled(featureEnum),
+                                "Requested feature %s is disabled.", featureStr);
             }
         }
 

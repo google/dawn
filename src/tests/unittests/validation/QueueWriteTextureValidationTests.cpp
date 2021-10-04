@@ -558,8 +558,8 @@ namespace {
       protected:
         WGPUDevice CreateTestDevice() override {
             dawn_native::DeviceDescriptor descriptor;
-            descriptor.requiredExtensions = {"texture_compression_bc", "texture-compression-etc2",
-                                             "texture-compression-astc"};
+            descriptor.requiredFeatures = {"texture_compression_bc", "texture-compression-etc2",
+                                           "texture-compression-astc"};
             return adapter.CreateDevice(&descriptor);
         }
 

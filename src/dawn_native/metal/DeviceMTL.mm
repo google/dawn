@@ -134,7 +134,7 @@ namespace dawn_native { namespace metal {
 
         DAWN_TRY(mCommandContext.PrepareNextCommandBuffer(*mCommandQueue));
 
-        if (IsExtensionEnabled(Extension::TimestampQuery)) {
+        if (IsFeatureEnabled(Feature::TimestampQuery)) {
             // Make a best guess of timestamp period based on device vendor info, and converge it to
             // an accurate value by the following calculations.
             mTimestampPeriod =
@@ -312,8 +312,8 @@ namespace dawn_native { namespace metal {
     MaybeError Device::TickImpl() {
         DAWN_TRY(SubmitPendingCommandBuffer());
 
-        // Just run timestamp period calculation when timestamp extension is enabled.
-        if (IsExtensionEnabled(Extension::TimestampQuery)) {
+        // Just run timestamp period calculation when timestamp feature is enabled.
+        if (IsFeatureEnabled(Feature::TimestampQuery)) {
             if (@available(macos 10.15, iOS 14.0, *)) {
                 UpdateTimestampPeriod(GetMTLDevice(), mKalmanInfo.get(), &mCpuTimestamp,
                                       &mGpuTimestamp, &mTimestampPeriod);

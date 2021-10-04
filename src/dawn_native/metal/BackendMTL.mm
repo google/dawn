@@ -264,7 +264,7 @@ namespace dawn_native { namespace metal {
             mDriverDescription =
                 "Metal driver on " + std::string(systemName) + [osVersion UTF8String];
 
-            InitializeSupportedExtensions();
+            InitializeSupportedFeatures();
         }
 
         // AdapterBase Implementation
@@ -278,10 +278,10 @@ namespace dawn_native { namespace metal {
             return Device::Create(this, mDevice, descriptor);
         }
 
-        void InitializeSupportedExtensions() {
+        void InitializeSupportedFeatures() {
 #if defined(DAWN_PLATFORM_MACOS)
             if ([*mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v1]) {
-                mSupportedExtensions.EnableExtension(Extension::TextureCompressionBC);
+                mSupportedFeatures.EnableFeature(Feature::TextureCompressionBC);
             }
 #endif
 
@@ -291,7 +291,7 @@ namespace dawn_native { namespace metal {
                         {MTLCommonCounterVertexInvocations, MTLCommonCounterClipperInvocations,
                          MTLCommonCounterClipperPrimitivesOut, MTLCommonCounterFragmentInvocations,
                          MTLCommonCounterComputeKernelInvocations})) {
-                    mSupportedExtensions.EnableExtension(Extension::PipelineStatisticsQuery);
+                    mSupportedFeatures.EnableFeature(Feature::PipelineStatisticsQuery);
                 }
 
                 if (IsGPUCounterSupported(*mDevice, MTLCommonCounterSetTimestamp,
@@ -306,13 +306,13 @@ namespace dawn_native { namespace metal {
                     enableTimestampQuery &= !IsMacOSVersionAtLeast(11);
 #endif
                     if (enableTimestampQuery) {
-                        mSupportedExtensions.EnableExtension(Extension::TimestampQuery);
+                        mSupportedFeatures.EnableFeature(Feature::TimestampQuery);
                     }
                 }
             }
 
             if (@available(macOS 10.11, iOS 11.0, *)) {
-                mSupportedExtensions.EnableExtension(Extension::DepthClamping);
+                mSupportedFeatures.EnableFeature(Feature::DepthClamping);
             }
         }
 

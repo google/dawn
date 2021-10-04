@@ -53,7 +53,7 @@ namespace dawn_native { namespace vulkan {
                 "Vulkan driver version: " + std::to_string(mDeviceInfo.properties.driverVersion);
         }
 
-        InitializeSupportedExtensions();
+        InitializeSupportedFeatures();
 
         mPCIInfo.deviceId = mDeviceInfo.properties.deviceID;
         mPCIInfo.vendorId = mDeviceInfo.properties.vendorID;
@@ -257,29 +257,29 @@ namespace dawn_native { namespace vulkan {
                                                          mBackend->GetFunctions());
     }
 
-    void Adapter::InitializeSupportedExtensions() {
+    void Adapter::InitializeSupportedFeatures() {
         if (mDeviceInfo.features.textureCompressionBC == VK_TRUE) {
-            mSupportedExtensions.EnableExtension(Extension::TextureCompressionBC);
+            mSupportedFeatures.EnableFeature(Feature::TextureCompressionBC);
         }
 
         if (mDeviceInfo.features.textureCompressionETC2 == VK_TRUE) {
-            mSupportedExtensions.EnableExtension(Extension::TextureCompressionETC2);
+            mSupportedFeatures.EnableFeature(Feature::TextureCompressionETC2);
         }
 
         if (mDeviceInfo.features.textureCompressionASTC_LDR == VK_TRUE) {
-            mSupportedExtensions.EnableExtension(Extension::TextureCompressionASTC);
+            mSupportedFeatures.EnableFeature(Feature::TextureCompressionASTC);
         }
 
         if (mDeviceInfo.features.pipelineStatisticsQuery == VK_TRUE) {
-            mSupportedExtensions.EnableExtension(Extension::PipelineStatisticsQuery);
+            mSupportedFeatures.EnableFeature(Feature::PipelineStatisticsQuery);
         }
 
         if (mDeviceInfo.features.depthClamp == VK_TRUE) {
-            mSupportedExtensions.EnableExtension(Extension::DepthClamping);
+            mSupportedFeatures.EnableFeature(Feature::DepthClamping);
         }
 
         if (mDeviceInfo.properties.limits.timestampComputeAndGraphics == VK_TRUE) {
-            mSupportedExtensions.EnableExtension(Extension::TimestampQuery);
+            mSupportedFeatures.EnableFeature(Feature::TimestampQuery);
         }
     }
 

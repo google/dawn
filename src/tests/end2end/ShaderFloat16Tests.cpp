@@ -19,8 +19,8 @@
 
 class ShaderFloat16Tests : public DawnTest {
   protected:
-    std::vector<const char*> GetRequiredExtensions() override {
-        mIsShaderFloat16Supported = SupportsExtensions({"shader_float16"});
+    std::vector<const char*> GetRequiredFeatures() override {
+        mIsShaderFloat16Supported = SupportsFeatures({"shader_float16"});
         if (!mIsShaderFloat16Supported) {
             return {};
         }

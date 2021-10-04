@@ -453,17 +453,17 @@ class PipelineStatisticsQueryTests : public QueryTests {
     void SetUp() override {
         DawnTest::SetUp();
 
-        // Skip all tests if pipeline statistics extension is not supported
-        DAWN_TEST_UNSUPPORTED_IF(!SupportsExtensions({"pipeline_statistics_query"}));
+        // Skip all tests if pipeline statistics feature is not supported
+        DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({"pipeline_statistics_query"}));
     }
 
-    std::vector<const char*> GetRequiredExtensions() override {
-        std::vector<const char*> requiredExtensions = {};
-        if (SupportsExtensions({"pipeline_statistics_query"})) {
-            requiredExtensions.push_back("pipeline_statistics_query");
+    std::vector<const char*> GetRequiredFeatures() override {
+        std::vector<const char*> requiredFeatures = {};
+        if (SupportsFeatures({"pipeline_statistics_query"})) {
+            requiredFeatures.push_back("pipeline_statistics_query");
         }
 
-        return requiredExtensions;
+        return requiredFeatures;
     }
 
     wgpu::QuerySet CreateQuerySetForPipelineStatistics(
@@ -522,16 +522,16 @@ class TimestampQueryTests : public QueryTests {
     void SetUp() override {
         DawnTest::SetUp();
 
-        // Skip all tests if timestamp extension is not supported
-        DAWN_TEST_UNSUPPORTED_IF(!SupportsExtensions({"timestamp_query"}));
+        // Skip all tests if timestamp feature is not supported
+        DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({"timestamp_query"}));
     }
 
-    std::vector<const char*> GetRequiredExtensions() override {
-        std::vector<const char*> requiredExtensions = {};
-        if (SupportsExtensions({"timestamp_query"})) {
-            requiredExtensions.push_back("timestamp_query");
+    std::vector<const char*> GetRequiredFeatures() override {
+        std::vector<const char*> requiredFeatures = {};
+        if (SupportsFeatures({"timestamp_query"})) {
+            requiredFeatures.push_back("timestamp_query");
         }
-        return requiredExtensions;
+        return requiredFeatures;
     }
 
     wgpu::QuerySet CreateQuerySetForTimestamp(uint32_t queryCount) {

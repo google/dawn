@@ -75,9 +75,9 @@ namespace {
       protected:
         constexpr static uint32_t kSize = 128;
 
-        std::vector<const char*> GetRequiredExtensions() override {
+        std::vector<const char*> GetRequiredFeatures() override {
             if (GetParam().mFormat == wgpu::TextureFormat::BC1RGBAUnorm &&
-                SupportsExtensions({"texture_compression_bc"})) {
+                SupportsFeatures({"texture_compression_bc"})) {
                 return {"texture_compression_bc"};
             }
             return {};
@@ -85,7 +85,7 @@ namespace {
 
         void Run() {
             DAWN_TEST_UNSUPPORTED_IF(GetParam().mFormat == wgpu::TextureFormat::BC1RGBAUnorm &&
-                                     !SupportsExtensions({"texture_compression_bc"}));
+                                     !SupportsFeatures({"texture_compression_bc"}));
 
             // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support
             // reading from Snorm textures.
@@ -129,7 +129,7 @@ namespace {
                                   GetParam().mAspect == wgpu::TextureAspect::DepthOnly &&
                                   IsOpenGL() && IsLinux());
 
-            // GL may support the extension, but reading data back is not implemented.
+            // GL may support the feature, but reading data back is not implemented.
             DAWN_TEST_UNSUPPORTED_IF(GetParam().mFormat == wgpu::TextureFormat::BC1RGBAUnorm &&
                                      (IsOpenGL() || IsOpenGLES()));
 

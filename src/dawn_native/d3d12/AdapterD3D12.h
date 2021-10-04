@@ -47,7 +47,7 @@ namespace dawn_native { namespace d3d12 {
 
         bool AreTimestampQueriesSupported() const;
 
-        void InitializeSupportedExtensions();
+        void InitializeSupportedFeatures();
         MaybeError InitializeDebugLayerFilters();
         void CleanUpDebugLayerFilters();
 

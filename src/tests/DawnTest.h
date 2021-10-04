@@ -475,13 +475,13 @@ class DawnTestBase {
     void FlushWire();
     void WaitForAllOperations();
 
-    bool SupportsExtensions(const std::vector<const char*>& extensions);
+    bool SupportsFeatures(const std::vector<const char*>& features);
 
-    // Called in SetUp() to get the extensions required to be enabled in the tests. The tests must
-    // check if the required extensions are supported by the adapter in this function and guarantee
-    // the returned extensions are all supported by the adapter. The tests may provide different
-    // code path to handle the situation when not all extensions are supported.
-    virtual std::vector<const char*> GetRequiredExtensions();
+    // Called in SetUp() to get the features required to be enabled in the tests. The tests must
+    // check if the required features are supported by the adapter in this function and guarantee
+    // the returned features are all supported by the adapter. The tests may provide different
+    // code path to handle the situation when not all features are supported.
+    virtual std::vector<const char*> GetRequiredFeatures();
 
     const wgpu::AdapterProperties& GetAdapterProperties() const;
 
@@ -568,7 +568,7 @@ class DawnTestBase {
         }                                                 \
     } while (0)
 
-// Skip a test which requires an extension or a toggle to be present / not present or some WIP
+// Skip a test which requires a feature or a toggle to be present / not present or some WIP
 // features.
 #define DAWN_TEST_UNSUPPORTED_IF(condition) \
     DAWN_SKIP_TEST_IF_BASE(condition, "unsupported", condition)

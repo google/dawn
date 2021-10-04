@@ -115,7 +115,7 @@ namespace {
 
 class EGLImageTestBase : public DawnTest {
   protected:
-    std::vector<const char*> GetRequiredExtensions() override {
+    std::vector<const char*> GetRequiredFeatures() override {
         return {"dawn-internal-usages"};
     }
 

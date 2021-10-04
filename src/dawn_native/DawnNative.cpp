@@ -100,9 +100,14 @@ namespace dawn_native {
         return mImpl->GetPCIInfo();
     }
 
+    // TODO(dawn:1149): remove once GetSupportedExtensions() is no longer used.
     std::vector<const char*> Adapter::GetSupportedExtensions() const {
-        ExtensionsSet supportedExtensionsSet = mImpl->GetSupportedExtensions();
-        return supportedExtensionsSet.GetEnabledExtensionNames();
+        return GetSupportedFeatures();
+    }
+
+    std::vector<const char*> Adapter::GetSupportedFeatures() const {
+        FeaturesSet supportedFeaturesSet = mImpl->GetSupportedFeatures();
+        return supportedFeaturesSet.GetEnabledFeatureNames();
     }
 
     WGPUDeviceProperties Adapter::GetAdapterProperties() const {

@@ -782,7 +782,7 @@ TEST_F(RenderPipelineValidationTest, StripIndexFormatRequired) {
 }
 
 // Test that specifying a clampDepth value results in an error if the feature is not enabled.
-TEST_F(RenderPipelineValidationTest, ClampDepthWithoutExtension) {
+TEST_F(RenderPipelineValidationTest, ClampDepthWithoutFeature) {
     {
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
@@ -1125,12 +1125,12 @@ class DepthClampingValidationTest : public RenderPipelineValidationTest {
   protected:
     WGPUDevice CreateTestDevice() override {
         dawn_native::DeviceDescriptor descriptor;
-        descriptor.requiredExtensions = {"depth_clamping"};
+        descriptor.requiredFeatures = {"depth_clamping"};
         return adapter.CreateDevice(&descriptor);
     }
 };
 
-// Tests that specifying a clampDepth value succeeds if the extension is enabled.
+// Tests that specifying a clampDepth value succeeds if the feature is enabled.
 TEST_F(DepthClampingValidationTest, Success) {
     {
         utils::ComboRenderPipelineDescriptor descriptor;

@@ -104,7 +104,7 @@ namespace dawn_native { namespace d3d12 {
             mDriverDescription = o.str();
         }
 
-        InitializeSupportedExtensions();
+        InitializeSupportedFeatures();
 
         return {};
     }
@@ -130,13 +130,13 @@ namespace dawn_native { namespace d3d12 {
         return true;
     }
 
-    void Adapter::InitializeSupportedExtensions() {
+    void Adapter::InitializeSupportedFeatures() {
         if (AreTimestampQueriesSupported()) {
-            mSupportedExtensions.EnableExtension(Extension::TimestampQuery);
+            mSupportedFeatures.EnableFeature(Feature::TimestampQuery);
         }
-        mSupportedExtensions.EnableExtension(Extension::TextureCompressionBC);
-        mSupportedExtensions.EnableExtension(Extension::PipelineStatisticsQuery);
-        mSupportedExtensions.EnableExtension(Extension::MultiPlanarFormats);
+        mSupportedFeatures.EnableFeature(Feature::TextureCompressionBC);
+        mSupportedFeatures.EnableFeature(Feature::PipelineStatisticsQuery);
+        mSupportedFeatures.EnableFeature(Feature::MultiPlanarFormats);
     }
 
     MaybeError Adapter::InitializeDebugLayerFilters() {

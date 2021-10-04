@@ -16,7 +16,7 @@
 
 #include "dawn_native/Device.h"
 #include "dawn_native/EnumMaskIterator.h"
-#include "dawn_native/Extensions.h"
+#include "dawn_native/Features.h"
 #include "dawn_native/Texture.h"
 
 #include <bitset>
@@ -122,7 +122,7 @@ namespace dawn_native {
 
     // Implementation details of the format table of the DeviceBase
 
-    // For the enum for formats are packed but this might change when we have a broader extension
+    // For the enum for formats are packed but this might change when we have a broader feature
     // mechanism for webgpu.h. Formats start at 1 because 0 is the undefined format.
     size_t ComputeFormatIndex(wgpu::TextureFormat format) {
         // This takes advantage of overflows to make the index of TextureFormat::Undefined outside
@@ -340,7 +340,7 @@ namespace dawn_native {
         // TODO(dawn:690): Implement Depth24UnormStencil8, Depth32FloatStencil8.
 
         // BC compressed formats
-        bool isBCFormatSupported = device->IsExtensionEnabled(Extension::TextureCompressionBC);
+        bool isBCFormatSupported = device->IsFeatureEnabled(Feature::TextureCompressionBC);
         AddCompressedFormat(wgpu::TextureFormat::BC1RGBAUnorm, 8, 4, 4, isBCFormatSupported, 4);
         AddCompressedFormat(wgpu::TextureFormat::BC1RGBAUnormSrgb, 8, 4, 4, isBCFormatSupported, 4);
         AddCompressedFormat(wgpu::TextureFormat::BC4RSnorm, 8, 4, 4, isBCFormatSupported, 1);
@@ -357,7 +357,7 @@ namespace dawn_native {
         AddCompressedFormat(wgpu::TextureFormat::BC7RGBAUnormSrgb, 16, 4, 4, isBCFormatSupported, 4);
 
         // ETC2/EAC compressed formats
-        bool isETC2FormatSupported = device->IsExtensionEnabled(Extension::TextureCompressionETC2);
+        bool isETC2FormatSupported = device->IsFeatureEnabled(Feature::TextureCompressionETC2);
         AddCompressedFormat(wgpu::TextureFormat::ETC2RGB8Unorm, 8, 4, 4, isETC2FormatSupported, 3);
         AddCompressedFormat(wgpu::TextureFormat::ETC2RGB8UnormSrgb, 8, 4, 4, isETC2FormatSupported, 3);
         AddCompressedFormat(wgpu::TextureFormat::ETC2RGB8A1Unorm, 8, 4, 4, isETC2FormatSupported, 4);
@@ -370,7 +370,7 @@ namespace dawn_native {
         AddCompressedFormat(wgpu::TextureFormat::EACRG11Snorm, 16, 4, 4, isETC2FormatSupported, 2);
 
         // ASTC compressed formats
-        bool isASTCFormatSupported = device->IsExtensionEnabled(Extension::TextureCompressionASTC);
+        bool isASTCFormatSupported = device->IsFeatureEnabled(Feature::TextureCompressionASTC);
         AddCompressedFormat(wgpu::TextureFormat::ASTC4x4Unorm, 16, 4, 4, isASTCFormatSupported, 4);
         AddCompressedFormat(wgpu::TextureFormat::ASTC4x4UnormSrgb, 16, 4, 4, isASTCFormatSupported, 4);
         AddCompressedFormat(wgpu::TextureFormat::ASTC5x4Unorm, 16, 5, 4, isASTCFormatSupported, 4);
@@ -401,7 +401,7 @@ namespace dawn_native {
         AddCompressedFormat(wgpu::TextureFormat::ASTC12x12UnormSrgb, 16, 12, 12, isASTCFormatSupported, 4);
 
         // multi-planar formats
-        const bool isMultiPlanarFormatSupported = device->IsExtensionEnabled(Extension::MultiPlanarFormats);
+        const bool isMultiPlanarFormatSupported = device->IsFeatureEnabled(Feature::MultiPlanarFormats);
         AddMultiAspectFormat(wgpu::TextureFormat::R8BG8Biplanar420Unorm, Aspect::Plane0 | Aspect::Plane1,
             wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::RG8Unorm, false, isMultiPlanarFormatSupported, 3);
 

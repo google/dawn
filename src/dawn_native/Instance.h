@@ -18,7 +18,7 @@
 #include "common/RefCounted.h"
 #include "dawn_native/Adapter.h"
 #include "dawn_native/BackendConnection.h"
-#include "dawn_native/Extensions.h"
+#include "dawn_native/Features.h"
 #include "dawn_native/Toggles.h"
 #include "dawn_native/dawn_platform.h"
 
@@ -55,12 +55,11 @@ namespace dawn_native {
         const ToggleInfo* GetToggleInfo(const char* toggleName);
         Toggle ToggleNameToEnum(const char* toggleName);
 
-        // Used to query the details of an extension. Return nullptr if extensionName is not a valid
-        // name of an extension supported in Dawn.
-        const ExtensionInfo* GetExtensionInfo(const char* extensionName);
-        Extension ExtensionNameToEnum(const char* extensionName);
-        ExtensionsSet ExtensionNamesToExtensionsSet(
-            const std::vector<const char*>& requiredExtensions);
+        // Used to query the details of an feature. Return nullptr if featureName is not a valid
+        // name of an feature supported in Dawn.
+        const FeatureInfo* GetFeatureInfo(const char* featureName);
+        Feature FeatureNameToEnum(const char* featureName);
+        FeaturesSet FeatureNamesToFeaturesSet(const std::vector<const char*>& requiredFeatures);
 
         bool IsBackendValidationEnabled() const;
         void SetBackendValidationLevel(BackendValidationLevel level);
@@ -104,7 +103,7 @@ namespace dawn_native {
         std::vector<std::unique_ptr<BackendConnection>> mBackends;
         std::vector<std::unique_ptr<AdapterBase>> mAdapters;
 
-        ExtensionsInfo mExtensionsInfo;
+        FeaturesInfo mFeaturesInfo;
         TogglesInfo mTogglesInfo;
 
 #if defined(DAWN_USE_X11)

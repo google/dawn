@@ -1719,8 +1719,8 @@ class CompressedTextureZeroInitTest : public TextureZeroInitTest {
         DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
     }
 
-    std::vector<const char*> GetRequiredExtensions() override {
-        mIsBCFormatSupported = SupportsExtensions({"texture_compression_bc"});
+    std::vector<const char*> GetRequiredFeatures() override {
+        mIsBCFormatSupported = SupportsFeatures({"texture_compression_bc"});
         if (!mIsBCFormatSupported) {
             return {};
         }

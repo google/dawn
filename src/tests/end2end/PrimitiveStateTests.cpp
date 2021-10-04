@@ -24,7 +24,7 @@ class DepthClampingTest : public DawnTest {
   protected:
     void SetUp() override {
         DawnTest::SetUp();
-        DAWN_TEST_UNSUPPORTED_IF(!SupportsExtensions({"depth_clamping"}));
+        DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({"depth_clamping"}));
 
         wgpu::TextureDescriptor renderTargetDescriptor;
         renderTargetDescriptor.size = {kRTSize, kRTSize};
@@ -67,12 +67,12 @@ class DepthClampingTest : public DawnTest {
             })");
     }
 
-    std::vector<const char*> GetRequiredExtensions() override {
-        std::vector<const char*> requiredExtensions = {};
-        if (SupportsExtensions({"depth_clamping"})) {
-            requiredExtensions.push_back("depth_clamping");
+    std::vector<const char*> GetRequiredFeatures() override {
+        std::vector<const char*> requiredFeatures = {};
+        if (SupportsFeatures({"depth_clamping"})) {
+            requiredFeatures.push_back("depth_clamping");
         }
-        return requiredExtensions;
+        return requiredFeatures;
     }
 
     struct TestSpec {
