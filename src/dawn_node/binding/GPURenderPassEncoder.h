@@ -61,11 +61,10 @@ namespace wgpu { namespace binding {
             Napi::Env,
             std::vector<interop::Interface<interop::GPURenderBundle>> bundles) override;
         void endPass(Napi::Env) override;
-        void setBindGroup(
-            Napi::Env,
-            interop::GPUIndex32 index,
-            interop::Interface<interop::GPUBindGroup> bindGroup,
-            std::optional<std::vector<interop::GPUBufferDynamicOffset>> dynamicOffsets) override;
+        void setBindGroup(Napi::Env,
+                          interop::GPUIndex32 index,
+                          interop::Interface<interop::GPUBindGroup> bindGroup,
+                          std::vector<interop::GPUBufferDynamicOffset> dynamicOffsets) override;
         void setBindGroup(Napi::Env,
                           interop::GPUIndex32 index,
                           interop::Interface<interop::GPUBindGroup> bindGroup,
@@ -80,24 +79,24 @@ namespace wgpu { namespace binding {
         void setIndexBuffer(Napi::Env,
                             interop::Interface<interop::GPUBuffer> buffer,
                             interop::GPUIndexFormat indexFormat,
-                            std::optional<interop::GPUSize64> offset,
+                            interop::GPUSize64 offset,
                             std::optional<interop::GPUSize64> size) override;
         void setVertexBuffer(Napi::Env,
                              interop::GPUIndex32 slot,
                              interop::Interface<interop::GPUBuffer> buffer,
-                             std::optional<interop::GPUSize64> offset,
+                             interop::GPUSize64 offset,
                              std::optional<interop::GPUSize64> size) override;
         void draw(Napi::Env,
                   interop::GPUSize32 vertexCount,
-                  std::optional<interop::GPUSize32> instanceCount,
-                  std::optional<interop::GPUSize32> firstVertex,
-                  std::optional<interop::GPUSize32> firstInstance) override;
+                  interop::GPUSize32 instanceCount,
+                  interop::GPUSize32 firstVertex,
+                  interop::GPUSize32 firstInstance) override;
         void drawIndexed(Napi::Env,
                          interop::GPUSize32 indexCount,
-                         std::optional<interop::GPUSize32> instanceCount,
-                         std::optional<interop::GPUSize32> firstIndex,
-                         std::optional<interop::GPUSignedOffset32> baseVertex,
-                         std::optional<interop::GPUSize32> firstInstance) override;
+                         interop::GPUSize32 instanceCount,
+                         interop::GPUSize32 firstIndex,
+                         interop::GPUSignedOffset32 baseVertex,
+                         interop::GPUSize32 firstInstance) override;
         void drawIndirect(Napi::Env,
                           interop::Interface<interop::GPUBuffer> indirectBuffer,
                           interop::GPUSize64 indirectOffset) override;

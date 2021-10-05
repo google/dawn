@@ -275,9 +275,8 @@ std::ostream& operator<<(std::ostream& o, {{$.Name}});
 --------------------------------------------------------------------------------
 */ -}}
 {{- define "Parameter" -}}
-{{-   if $.Optional -}}
-std::optional<{{template "Type" $.Type}}> {{$.Name}}
-{{-   else}}
-{{-     template "Type" $.Type}} {{$.Name}}
-{{-   end}}
+{{-   if      $.Init    }}{{template "Type" $.Type}} {{$.Name}}
+{{-   else if $.Optional}}std::optional<{{template "Type" $.Type}}> {{$.Name}}
+{{-   else              }}{{template "Type" $.Type}} {{$.Name}}
+{{-   end               }}
 {{- end}}

@@ -54,11 +54,11 @@ namespace wgpu { namespace binding {
 
     interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> GPU::requestAdapter(
         Napi::Env env,
-        std::optional<interop::GPURequestAdapterOptions> options) {
+        interop::GPURequestAdapterOptions options) {
         auto promise =
             interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>>(env);
 
-        if (options.has_value() && options->forceFallbackAdapter) {
+        if (options.forceFallbackAdapter) {
             // Software adapters are not currently supported.
             promise.Resolve({});
             return promise;

@@ -35,7 +35,7 @@ namespace wgpu { namespace binding {
         // interop::GPUTexture interface compliance
         interop::Interface<interop::GPUTextureView> createView(
             Napi::Env,
-            std::optional<interop::GPUTextureViewDescriptor> descriptor) override;
+            interop::GPUTextureViewDescriptor descriptor) override;
         void destroy(Napi::Env) override;
         std::optional<std::string> getLabel(Napi::Env) override;
         void setLabel(Napi::Env, std::optional<std::string> value) override;

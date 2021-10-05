@@ -64,7 +64,6 @@ To test against SwiftShader instead of the default Vulkan device, prefix `./src/
 
 ## Remaining work
 
-- Have the IDL interop generator produce default values for parameters (instead of std::optional). [discussion](https://dawn-review.googlesource.com/c/dawn/+/64912/5/src/dawn_node/binding/GPURenderBundleEncoder.cpp#166)
 - Investigate CTS failures that are not expected to fail.
 - Generated includes live in `src/` for `dawn_node`, but outside for Dawn. [discussion](https://dawn-review.googlesource.com/c/dawn/+/64903/9/src/dawn_node/interop/CMakeLists.txt#56)
 - Hook up to presubmit bots (CQ / Kokoro)

@@ -117,21 +117,17 @@ namespace wgpu { namespace binding {
         Napi::Env env,
         interop::GPUIndex32 index,
         interop::Interface<interop::GPUBindGroup> bindGroup,
-        std::optional<std::vector<interop::GPUBufferDynamicOffset>> dynamicOffsets) {
+        std::vector<interop::GPUBufferDynamicOffset> dynamicOffsets) {
         Converter conv(env);
 
         wgpu::BindGroup bg{};
-        if (!conv(bg, bindGroup)) {
+        uint32_t* offsets = nullptr;
+        uint32_t num_offsets = 0;
+        if (!conv(bg, bindGroup) || !conv(offsets, num_offsets, dynamicOffsets)) {
             return;
         }
-        uint32_t* offsets = nullptr;
-        uint32_t offset_count = 0;
-        if (dynamicOffsets.has_value() && dynamicOffsets->size() > 0) {
-            if (!conv(offsets, offset_count, dynamicOffsets.value())) {
-                return;
-            }
-        }
-        enc_.SetBindGroup(index, bg, offset_count, offsets);
+
+        enc_.SetBindGroup(index, bg, num_offsets, offsets);
     }
 
     void GPURenderPassEncoder::setBindGroup(Napi::Env env,
@@ -177,85 +173,51 @@ namespace wgpu { namespace binding {
     void GPURenderPassEncoder::setIndexBuffer(Napi::Env env,
                                               interop::Interface<interop::GPUBuffer> buffer,
                                               interop::GPUIndexFormat indexFormat,
-                                              std::optional<interop::GPUSize64> offset,
+                                              interop::GPUSize64 offset,
                                               std::optional<interop::GPUSize64> size) {
         Converter conv(env);
 
         wgpu::Buffer b{};
         wgpu::IndexFormat f;
-        uint64_t o = 0;
         uint64_t s = wgpu::kWholeSize;
         if (!conv(b, buffer) ||       //
             !conv(f, indexFormat) ||  //
-            !conv(o, offset) ||       //
             !conv(s, size)) {
             return;
         }
-        enc_.SetIndexBuffer(b, f, o, s);
+        enc_.SetIndexBuffer(b, f, offset, s);
     }
 
     void GPURenderPassEncoder::setVertexBuffer(Napi::Env env,
                                                interop::GPUIndex32 slot,
                                                interop::Interface<interop::GPUBuffer> buffer,
-                                               std::optional<interop::GPUSize64> offset,
+                                               interop::GPUSize64 offset,
                                                std::optional<interop::GPUSize64> size) {
         Converter conv(env);
 
         wgpu::Buffer b{};
-        uint64_t o = 0;
         uint64_t s = wgpu::kWholeSize;
-        if (!conv(b, buffer) ||  //
-            !conv(o, offset) ||  //
-            !conv(s, size)) {
+        if (!conv(b, buffer) || !conv(s, size)) {
             return;
         }
-        enc_.SetVertexBuffer(slot, b, o, s);
+        enc_.SetVertexBuffer(slot, b, offset, s);
     }
 
     void GPURenderPassEncoder::draw(Napi::Env env,
                                     interop::GPUSize32 vertexCount,
-                                    std::optional<interop::GPUSize32> instanceCount,
-                                    std::optional<interop::GPUSize32> firstVertex,
-                                    std::optional<interop::GPUSize32> firstInstance) {
-        Converter conv(env);
-
-        uint32_t vc = 0;
-        uint32_t ic = 1;
-        uint32_t fv = 0;
-        uint32_t fi = 0;
-        if (!conv(vc, vertexCount) ||    //
-            !conv(ic, instanceCount) ||  //
-            !conv(fv, firstVertex) ||    //
-            !conv(fi, firstInstance)) {
-            return;
-        }
-
-        enc_.Draw(vc, ic, fv, fi);
+                                    interop::GPUSize32 instanceCount,
+                                    interop::GPUSize32 firstVertex,
+                                    interop::GPUSize32 firstInstance) {
+        enc_.Draw(vertexCount, instanceCount, firstVertex, firstInstance);
     }
 
     void GPURenderPassEncoder::drawIndexed(Napi::Env env,
                                            interop::GPUSize32 indexCount,
-                                           std::optional<interop::GPUSize32> instanceCount,
-                                           std::optional<interop::GPUSize32> firstIndex,
-                                           std::optional<interop::GPUSignedOffset32> baseVertex,
-                                           std::optional<interop::GPUSize32> firstInstance) {
-        Converter conv(env);
-
-        uint32_t idx_c = 0;
-        uint32_t ins_c = 1;
-        uint32_t f_idx = 0;
-        int32_t bv = 0;
-        uint32_t f_ins = 0;
-
-        if (!conv(idx_c, indexCount) ||     //
-            !conv(ins_c, instanceCount) ||  //
-            !conv(f_idx, firstIndex) ||     //
-            !conv(bv, baseVertex) ||        //
-            !conv(f_ins, firstInstance)) {
-            return;
-        }
-
-        enc_.DrawIndexed(idx_c, ins_c, f_idx, bv, f_ins);
+                                           interop::GPUSize32 instanceCount,
+                                           interop::GPUSize32 firstIndex,
+                                           interop::GPUSignedOffset32 baseVertex,
+                                           interop::GPUSize32 firstInstance) {
+        enc_.DrawIndexed(indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
     }
 
     void GPURenderPassEncoder::drawIndirect(Napi::Env env,

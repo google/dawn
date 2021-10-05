@@ -550,16 +550,60 @@ namespace wgpu { namespace interop {
             env, std::forward<T>(value));
     }
 
+    // DefaultedParameter can be used in the tuple parameter types passed to
+    // FromJS(const Napi::CallbackInfo& info, PARAM_TYPES& args), for parameters
+    // that have a default value. If the argument is omitted in the call, then
+    // DefaultedParameter::default_value will be assigned to
+    // DefaultedParameter::value.
+    template <typename T>
+    struct DefaultedParameter {
+        T value;          // The argument value assigned by FromJS()
+        T default_value;  // The default value if no argument supplied
+
+        // Implicit conversion operator. Returns value.
+        inline operator const T&() const {
+            return value;
+        }
+    };
+
+    // IsDefaultedParameter<T>::value is true iff T is of type DefaultedParameter.
+    template <typename T>
+    struct IsDefaultedParameter {
+        static constexpr bool value = false;
+    };
+    template <typename T>
+    struct IsDefaultedParameter<DefaultedParameter<T>> {
+        static constexpr bool value = true;
+    };
+
     // FromJS() is a helper function for bulk converting the arguments of 'info'.
     // PARAM_TYPES is a std::tuple<> describing the C++ function parameter types.
+    // Parameters may be of the templated DefaultedParameter type, in which case
+    // the parameter will default to the default-value if omitted.
     // Returns true on success, false on failure.
     template <typename PARAM_TYPES, int BASE_INDEX = 0>
     inline bool FromJS(const Napi::CallbackInfo& info, PARAM_TYPES& args) {
         if constexpr (BASE_INDEX < std::tuple_size_v<PARAM_TYPES>) {
             using T = std::tuple_element_t<BASE_INDEX, PARAM_TYPES>;
-            if (!FromJS<T>(info.Env(), info[BASE_INDEX], std::get<BASE_INDEX>(args))) {
-                return false;
+            auto& value = info[BASE_INDEX];
+            auto& out = std::get<BASE_INDEX>(args);
+            if constexpr (IsDefaultedParameter<T>::value) {
+                // Parameter has a default value.
+                // Check whether the argument was provided.
+                if (value.IsNull() || value.IsUndefined()) {
+                    // Use default value for this parameter
+                    out.value = out.default_value;
+                } else if (!FromJS(info.Env(), value, out.value)) {
+                    // Argument was provided, but failed to convert.
+                    return false;
+                }
+            } else {
+                // Parameter does not have a default value.
+                if (!FromJS(info.Env(), value, out)) {
+                    return false;
+                }
             }
+            // Convert the rest of the arguments
             return FromJS<PARAM_TYPES, BASE_INDEX + 1>(info, args);
         } else {
             return true;

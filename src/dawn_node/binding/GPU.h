@@ -30,7 +30,7 @@ namespace wgpu { namespace binding {
         // interop::GPU interface compliance
         interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> requestAdapter(
             Napi::Env env,
-            std::optional<interop::GPURequestAdapterOptions> options) override;
+            interop::GPURequestAdapterOptions options) override;
 
       private:
         dawn_native::Instance instance_;

@@ -44,10 +44,10 @@ namespace wgpu { namespace binding {
         // interop::GPUBuffer interface compliance
         interop::Promise<void> mapAsync(Napi::Env env,
                                         interop::GPUMapModeFlags mode,
-                                        std::optional<interop::GPUSize64> offset,
+                                        interop::GPUSize64 offset,
                                         std::optional<interop::GPUSize64> size) override;
         interop::ArrayBuffer getMappedRange(Napi::Env env,
-                                            std::optional<interop::GPUSize64> offset,
+                                            interop::GPUSize64 offset,
                                             std::optional<interop::GPUSize64> size) override;
         void unmap(Napi::Env) override;
         void destroy(Napi::Env) override;

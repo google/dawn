@@ -42,7 +42,7 @@ namespace wgpu { namespace binding {
 
     interop::Promise<void> GPUBuffer::mapAsync(Napi::Env env,
                                                interop::GPUMapModeFlags mode,
-                                               std::optional<interop::GPUSize64> offset,
+                                               interop::GPUSize64 offset,
                                                std::optional<interop::GPUSize64> size) {
         wgpu::MapMode md{};
         Converter conv(env);
@@ -67,16 +67,14 @@ namespace wgpu { namespace binding {
         auto ctx = new Context{env, interop::Promise<void>(env), async_, state_};
         auto promise = ctx->promise;
 
-        uint64_t o = offset.has_value() ? offset.value() : 0;
-        uint64_t s = size.has_value() ? size.value() : (desc_.size - o);
+        uint64_t s = size.has_value() ? size.value() : (desc_.size - offset);
 
         state_ = State::MappingPending;
 
         buffer_.MapAsync(
-            md, o, s,
+            md, offset, s,
             [](WGPUBufferMapAsyncStatus status, void* userdata) {
                 auto c = std::unique_ptr<Context>(static_cast<Context*>(userdata));
-
                 c->state = State::Unmapped;
                 switch (status) {
                     case WGPUBufferMapAsyncStatus_Force32:
@@ -107,18 +105,17 @@ namespace wgpu { namespace binding {
     }
 
     interop::ArrayBuffer GPUBuffer::getMappedRange(Napi::Env env,
-                                                   std::optional<interop::GPUSize64> offset,
+                                                   interop::GPUSize64 offset,
                                                    std::optional<interop::GPUSize64> size) {
         if (state_ != State::Mapped && state_ != State::MappedAtCreation) {
             Errors::OperationError(env).ThrowAsJavaScriptException();
             return {};
         }
 
-        uint64_t o = offset.has_value() ? offset.value() : 0;
-        uint64_t s = size.has_value() ? size.value() : (desc_.size - o);
+        uint64_t s = size.has_value() ? size.value() : (desc_.size - offset);
 
-        uint64_t start = o;
-        uint64_t end = o + s;
+        uint64_t start = offset;
+        uint64_t end = offset + s;
         for (auto& mapping : mapped_) {
             if (mapping.Intersects(start, end)) {
                 Errors::OperationError(env).ThrowAsJavaScriptException();
@@ -127,8 +124,8 @@ namespace wgpu { namespace binding {
         }
 
         auto* ptr = (desc_.usage & wgpu::BufferUsage::MapWrite)
-                        ? buffer_.GetMappedRange(o, s)
-                        : const_cast<void*>(buffer_.GetConstMappedRange(o, s));
+                        ? buffer_.GetMappedRange(offset, s)
+                        : const_cast<void*>(buffer_.GetConstMappedRange(offset, s));
         if (!ptr) {
             Errors::OperationError(env).ThrowAsJavaScriptException();
             return {};

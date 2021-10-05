@@ -328,6 +328,11 @@ namespace wgpu { namespace binding {
         // vector -> raw pointer + count
         template <typename OUT, typename IN>
         inline bool Convert(OUT*& out_els, uint32_t& out_count, const std::vector<IN>& in) {
+            if (in.size() == 0) {
+                out_els = nullptr;
+                out_count = 0;
+                return true;
+            }
             auto* els = Allocate<std::remove_const_t<OUT>>(in.size());
             for (size_t i = 0; i < in.size(); i++) {
                 if (!Convert(els[i], in[i])) {

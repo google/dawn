@@ -181,10 +181,18 @@ Wrappers* Wrappers::instance = nullptr;
         std::tuple<
 {{-        range $i, $p := $o.Parameters}}
 {{-          if $i}}, {{end}}
-{{-          if $p.Optional}}std::optional<{{template "Type" $p.Type}}>
-{{-          else          }}{{template "Type" $p.Type}}
+{{-          if      $p.Init    }}DefaultedParameter<{{template "Type" $p.Type}}>
+{{-          else if $p.Optional}}std::optional<{{template "Type" $p.Type}}>
+{{-          else               }}{{template "Type" $p.Type}}
 {{-          end}}
 {{-        end}}> args;
+
+{{-        range $i, $p := $o.Parameters}}
+{{-          if $p.Init}}
+        std::get<{{$i}} /* {{$p.Name}} */>(args).default_value = {{Eval "Literal" "Value" $p.Init "Type" $p.Type}};
+{{-          end}}
+{{-        end}}
+
         if (FromJS(info, args)) {
           {{/* indent */}}INTEROP_LOG(
 {{-        range $i, $p := $o.Parameters}}

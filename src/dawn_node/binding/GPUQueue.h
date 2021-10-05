@@ -37,7 +37,7 @@ namespace wgpu { namespace binding {
                          interop::Interface<interop::GPUBuffer> buffer,
                          interop::GPUSize64 bufferOffset,
                          interop::BufferSource data,
-                         std::optional<interop::GPUSize64> dataOffset,
+                         interop::GPUSize64 dataOffset,
                          std::optional<interop::GPUSize64> size) override;
         void writeTexture(Napi::Env,
                           interop::GPUImageCopyTexture destination,

@@ -34,7 +34,7 @@ namespace wgpu { namespace binding {
         bool getIsFallbackAdapter(Napi::Env) override;
         interop::Promise<interop::Interface<interop::GPUDevice>> requestDevice(
             Napi::Env env,
-            std::optional<interop::GPUDeviceDescriptor> descriptor) override;
+            interop::GPUDeviceDescriptor descriptor) override;
 
       private:
         dawn_native::Adapter adapter_;

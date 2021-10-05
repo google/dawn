@@ -38,9 +38,9 @@ namespace wgpu { namespace binding {
 
     void GPUComputePassEncoder::dispatch(Napi::Env,
                                          interop::GPUSize32 x,
-                                         std::optional<interop::GPUSize32> y,
-                                         std::optional<interop::GPUSize32> z) {
-        enc_.Dispatch(x, y.value_or(1), z.value_or(1));
+                                         interop::GPUSize32 y,
+                                         interop::GPUSize32 z) {
+        enc_.Dispatch(x, y, z);
     }
 
     void GPUComputePassEncoder::dispatchIndirect(
@@ -82,29 +82,17 @@ namespace wgpu { namespace binding {
         Napi::Env env,
         interop::GPUIndex32 index,
         interop::Interface<interop::GPUBindGroup> bindGroup,
-        std::optional<std::vector<interop::GPUBufferDynamicOffset>> dynamicOffsets) {
+        std::vector<interop::GPUBufferDynamicOffset> dynamicOffsets) {
         Converter conv(env);
 
         wgpu::BindGroup bg{};
-        if (!conv(bg, bindGroup)) {
+        uint32_t* offsets = nullptr;
+        uint32_t num_offsets = 0;
+        if (!conv(bg, bindGroup) || !conv(offsets, num_offsets, dynamicOffsets)) {
             return;
         }
-        std::vector<uint32_t> offsets;
-        if (dynamicOffsets.has_value() && dynamicOffsets->size() > 0) {
-            offsets.resize(dynamicOffsets->size());
-            for (size_t i = 0; i < offsets.size(); i++) {
-                if (!conv(offsets[i], dynamicOffsets.value()[i])) {
-                    return;
-                }
-            }
-            uint32_t offsets_size;
-            if (!conv(offsets_size, offsets.size())) {
-                return;
-            }
-            enc_.SetBindGroup(index, bg, offsets_size, offsets.data());
-        } else {
-            enc_.SetBindGroup(index, bg);
-        }
+
+        enc_.SetBindGroup(index, bg, num_offsets, offsets);
     }
 
     void GPUComputePassEncoder::setBindGroup(Napi::Env env,

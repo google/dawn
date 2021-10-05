@@ -73,7 +73,7 @@ namespace wgpu { namespace binding {
                                interop::Interface<interop::GPUBuffer> buffer,
                                interop::GPUSize64 bufferOffset,
                                interop::BufferSource data,
-                               std::optional<interop::GPUSize64> dataOffset,
+                               interop::GPUSize64 dataOffset,
                                std::optional<interop::GPUSize64> size) {
         wgpu::Buffer buf = *buffer.As<GPUBuffer>();
         Converter::BufferSource src{};
@@ -83,12 +83,10 @@ namespace wgpu { namespace binding {
         }
 
         // TODO(crbug.com/dawn/1132): Bounds check
-        if (dataOffset.has_value()) {
-            if (src.data) {
-                src.data = reinterpret_cast<uint8_t*>(src.data) + dataOffset.value();
-            }
-            src.size -= dataOffset.value();
+        if (src.data) {
+            src.data = reinterpret_cast<uint8_t*>(src.data) + dataOffset;
         }
+        src.size -= dataOffset;
         if (size.has_value()) {
             src.size = size.value();
         }

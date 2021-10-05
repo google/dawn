@@ -40,7 +40,7 @@ namespace wgpu { namespace binding {
             interop::GPUTextureDescriptor descriptor) override;
         interop::Interface<interop::GPUSampler> createSampler(
             Napi::Env,
-            std::optional<interop::GPUSamplerDescriptor> descriptor) override;
+            interop::GPUSamplerDescriptor descriptor) override;
         interop::Interface<interop::GPUExternalTexture> importExternalTexture(
             Napi::Env,
             interop::GPUExternalTextureDescriptor descriptor) override;
@@ -70,7 +70,7 @@ namespace wgpu { namespace binding {
             interop::GPURenderPipelineDescriptor descriptor) override;
         interop::Interface<interop::GPUCommandEncoder> createCommandEncoder(
             Napi::Env env,
-            std::optional<interop::GPUCommandEncoderDescriptor> descriptor) override;
+            interop::GPUCommandEncoderDescriptor descriptor) override;
         interop::Interface<interop::GPURenderBundleEncoder> createRenderBundleEncoder(
             Napi::Env,
             interop::GPURenderBundleEncoderDescriptor descriptor) override;

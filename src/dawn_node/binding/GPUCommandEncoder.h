@@ -34,7 +34,7 @@ namespace wgpu { namespace binding {
             interop::GPURenderPassDescriptor descriptor) override;
         interop::Interface<interop::GPUComputePassEncoder> beginComputePass(
             Napi::Env,
-            std::optional<interop::GPUComputePassDescriptor> descriptor) override;
+            interop::GPUComputePassDescriptor descriptor) override;
         void copyBufferToBuffer(Napi::Env,
                                 interop::Interface<interop::GPUBuffer> source,
                                 interop::GPUSize64 sourceOffset,
@@ -67,7 +67,7 @@ namespace wgpu { namespace binding {
                              interop::GPUSize64 destinationOffset) override;
         interop::Interface<interop::GPUCommandBuffer> finish(
             Napi::Env env,
-            std::optional<interop::GPUCommandBufferDescriptor> descriptor) override;
+            interop::GPUCommandBufferDescriptor descriptor) override;
         std::optional<std::string> getLabel(Napi::Env) override;
         void setLabel(Napi::Env, std::optional<std::string> value) override;
 

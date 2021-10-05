@@ -38,8 +38,8 @@ namespace wgpu { namespace binding {
                          interop::Interface<interop::GPUComputePipeline> pipeline) override;
         void dispatch(Napi::Env,
                       interop::GPUSize32 x,
-                      std::optional<interop::GPUSize32> y,
-                      std::optional<interop::GPUSize32> z) override;
+                      interop::GPUSize32 y,
+                      interop::GPUSize32 z) override;
         void dispatchIndirect(Napi::Env,
                               interop::Interface<interop::GPUBuffer> indirectBuffer,
                               interop::GPUSize64 indirectOffset) override;
@@ -51,11 +51,10 @@ namespace wgpu { namespace binding {
                             interop::Interface<interop::GPUQuerySet> querySet,
                             interop::GPUSize32 queryIndex) override;
         void endPass(Napi::Env) override;
-        void setBindGroup(
-            Napi::Env,
-            interop::GPUIndex32 index,
-            interop::Interface<interop::GPUBindGroup> bindGroup,
-            std::optional<std::vector<interop::GPUBufferDynamicOffset>> dynamicOffsets) override;
+        void setBindGroup(Napi::Env,
+                          interop::GPUIndex32 index,
+                          interop::Interface<interop::GPUBindGroup> bindGroup,
+                          std::vector<interop::GPUBufferDynamicOffset> dynamicOffsets) override;
         void setBindGroup(Napi::Env,
                           interop::GPUIndex32 index,
                           interop::Interface<interop::GPUBindGroup> bindGroup,

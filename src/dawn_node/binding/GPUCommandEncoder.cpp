@@ -50,7 +50,7 @@ namespace wgpu { namespace binding {
 
     interop::Interface<interop::GPUComputePassEncoder> GPUCommandEncoder::beginComputePass(
         Napi::Env env,
-        std::optional<interop::GPUComputePassDescriptor> descriptor) {
+        interop::GPUComputePassDescriptor descriptor) {
         wgpu::ComputePassDescriptor desc{};
         return interop::GPUComputePassEncoder::Create<GPUComputePassEncoder>(
             env, enc_.BeginComputePass(&desc));
@@ -180,7 +180,7 @@ namespace wgpu { namespace binding {
 
     interop::Interface<interop::GPUCommandBuffer> GPUCommandEncoder::finish(
         Napi::Env env,
-        std::optional<interop::GPUCommandBufferDescriptor> descriptor) {
+        interop::GPUCommandBufferDescriptor descriptor) {
         wgpu::CommandBufferDescriptor desc{};
         return interop::GPUCommandBuffer::Create<GPUCommandBuffer>(env, enc_.Finish(&desc));
     }

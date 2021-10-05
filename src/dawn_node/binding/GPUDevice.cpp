@@ -172,28 +172,24 @@ namespace wgpu { namespace binding {
 
     interop::Interface<interop::GPUSampler> GPUDevice::createSampler(
         Napi::Env env,
-        std::optional<interop::GPUSamplerDescriptor> descriptor) {
+        interop::GPUSamplerDescriptor descriptor) {
         Converter conv(env);
 
-        if (descriptor.has_value()) {
-            wgpu::SamplerDescriptor desc{};
-            if (!conv(desc.label, descriptor->label) ||                //
-                !conv(desc.addressModeU, descriptor->addressModeU) ||  //
-                !conv(desc.addressModeV, descriptor->addressModeV) ||  //
-                !conv(desc.addressModeW, descriptor->addressModeW) ||  //
-                !conv(desc.magFilter, descriptor->magFilter) ||        //
-                !conv(desc.minFilter, descriptor->minFilter) ||        //
-                !conv(desc.mipmapFilter, descriptor->mipmapFilter) ||  //
-                !conv(desc.lodMinClamp, descriptor->lodMinClamp) ||    //
-                !conv(desc.lodMaxClamp, descriptor->lodMaxClamp) ||    //
-                !conv(desc.compare, descriptor->compare) ||            //
-                !conv(desc.maxAnisotropy, descriptor->maxAnisotropy)) {
-                return {};
-            }
-            return interop::GPUSampler::Create<GPUSampler>(env, device_.CreateSampler(&desc));
+        wgpu::SamplerDescriptor desc{};
+        if (!conv(desc.label, descriptor.label) ||                //
+            !conv(desc.addressModeU, descriptor.addressModeU) ||  //
+            !conv(desc.addressModeV, descriptor.addressModeV) ||  //
+            !conv(desc.addressModeW, descriptor.addressModeW) ||  //
+            !conv(desc.magFilter, descriptor.magFilter) ||        //
+            !conv(desc.minFilter, descriptor.minFilter) ||        //
+            !conv(desc.mipmapFilter, descriptor.mipmapFilter) ||  //
+            !conv(desc.lodMinClamp, descriptor.lodMinClamp) ||    //
+            !conv(desc.lodMaxClamp, descriptor.lodMaxClamp) ||    //
+            !conv(desc.compare, descriptor.compare) ||            //
+            !conv(desc.maxAnisotropy, descriptor.maxAnisotropy)) {
+            return {};
         }
-
-        return interop::GPUSampler::Create<GPUSampler>(env, device_.CreateSampler());
+        return interop::GPUSampler::Create<GPUSampler>(env, device_.CreateSampler(&desc));
     }
 
     interop::Interface<interop::GPUExternalTexture> GPUDevice::importExternalTexture(
@@ -374,7 +370,7 @@ namespace wgpu { namespace binding {
 
     interop::Interface<interop::GPUCommandEncoder> GPUDevice::createCommandEncoder(
         Napi::Env env,
-        std::optional<interop::GPUCommandEncoderDescriptor> descriptor) {
+        interop::GPUCommandEncoderDescriptor descriptor) {
         wgpu::CommandEncoderDescriptor desc{};
         return interop::GPUCommandEncoder::Create<GPUCommandEncoder>(
             env, device_.CreateCommandEncoder(&desc));
