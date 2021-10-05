@@ -37,6 +37,12 @@ namespace dawn_native {
                       const absl::FormatConversionSpec& spec,
                       absl::FormatSink* s);
 
+    struct Origin3D;
+    absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
+    AbslFormatConvert(const Origin3D* value,
+                      const absl::FormatConversionSpec& spec,
+                      absl::FormatSink* s);
+
     //
     // Objects
     //
