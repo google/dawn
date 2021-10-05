@@ -69,6 +69,7 @@ func run() error {
 
 	var dawnNode, cts, node, npx string
 	var verbose, build bool
+	var numRunners int
 	flag.StringVar(&dawnNode, "dawn-node", "", "path to dawn.node module")
 	flag.StringVar(&cts, "cts", "", "root directory of WebGPU CTS")
 	flag.StringVar(&node, "node", "", "path to node executable")
@@ -76,6 +77,7 @@ func run() error {
 	flag.BoolVar(&verbose, "verbose", false, "print extra information while testing")
 	flag.BoolVar(&build, "build", true, "attempt to build the CTS before running")
 	flag.BoolVar(&colors, "colors", colors, "enable / disable colors")
+	flag.IntVar(&numRunners, "j", runtime.NumCPU(), "number of concurrent runners")
 	flag.Parse()
 
 	if colors {
@@ -128,11 +130,12 @@ func run() error {
 	}
 
 	r := runner{
-		verbose:  verbose,
-		node:     node,
-		npx:      npx,
-		dawnNode: dawnNode,
-		cts:      cts,
+		numRunners: numRunners,
+		verbose:    verbose,
+		node:       node,
+		npx:        npx,
+		dawnNode:   dawnNode,
+		cts:        cts,
 		evalScript: `require('./src/common/tools/setup-ts-in-node.js');
 		  require('./src/common/runtime/cmdline.ts');`,
 	}
@@ -161,6 +164,7 @@ func run() error {
 }
 
 type runner struct {
+	numRunners               int
 	verbose                  bool
 	node, npx, dawnNode, cts string
 	evalScript               string
@@ -206,7 +210,7 @@ func (r *runner) gatherTestCases(queries []string) error {
 }
 
 // run() calls the CTS test runner to run each testcase in a separate process.
-// Up to runtime.NumCPU() tests will be run concurrently.
+// Up to r.numRunners tests will be run concurrently.
 func (r *runner) run() error {
 	// Create a chan of test indices.
 	// This will be read by the test runner goroutines.
@@ -223,7 +227,7 @@ func (r *runner) run() error {
 	// Spin up the test runner goroutines
 	start := time.Now()
 	wg := sync.WaitGroup{}
-	for i := 0; i < runtime.NumCPU(); i++ {
+	for i := 0; i < r.numRunners; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
