@@ -217,7 +217,7 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInput_Fail) {
             "fragment pipeline stage");
 }
 
-TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInputStruct_Ignored) {
+TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInputStruct_Fail) {
   // struct MyInputs {
   //   [[builtin(frag_depth)]] ff: f32;
   // };
@@ -231,8 +231,28 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInputStruct_Ignored) {
 
   Func("fragShader", {Param("arg", ty.Of(s))}, ty.f32(), {Return(1.0f)},
        {Stage(ast::PipelineStage::kFragment)}, {Location(0)});
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: builtin(frag_depth) cannot be used in input of "
+            "fragment pipeline stage\n"
+            "note: while analysing entry point 'fragShader'");
+}
+
+TEST_F(ResolverBuiltinsValidationTest, StructBuiltinInsideEntryPoint_Ignored) {
+  // struct S {
+  //   [[builtin(vertex_index)]] idx: u32;
+  // };
+  // [[stage(fragment)]]
+  // fn fragShader() { var s : S; }
+
+  Structure("S",
+            {Member("idx", ty.u32(), {Builtin(ast::Builtin::kVertexIndex)})});
+
+  Func("fragShader", {}, ty.void_(), {Decl(Var("s", ty.type_name("S")))},
+       {Stage(ast::PipelineStage::kFragment)});
   EXPECT_TRUE(r()->Resolve());
 }
+
 }  // namespace StageTest
 
 TEST_F(ResolverBuiltinsValidationTest, PositionNotF32_Struct_Fail) {

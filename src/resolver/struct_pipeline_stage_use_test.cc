@@ -140,8 +140,8 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedMultipleStages) {
   auto* s = Structure(
       "S", {Member("a", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)})});
 
-  Func("vert_main", {Param("param", ty.Of(s))}, ty.Of(s),
-       {Return(Construct(ty.Of(s)))}, {Stage(ast::PipelineStage::kVertex)});
+  Func("vert_main", {}, ty.Of(s), {Return(Construct(ty.Of(s)))},
+       {Stage(ast::PipelineStage::kVertex)});
 
   Func("frag_main", {Param("param", ty.Of(s))}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
@@ -151,8 +151,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedMultipleStages) {
   auto* sem = TypeOf(s)->As<sem::Struct>();
   ASSERT_NE(sem, nullptr);
   EXPECT_THAT(sem->PipelineStageUses(),
-              UnorderedElementsAre(sem::PipelineStageUsage::kVertexInput,
-                                   sem::PipelineStageUsage::kVertexOutput,
+              UnorderedElementsAre(sem::PipelineStageUsage::kVertexOutput,
                                    sem::PipelineStageUsage::kFragmentInput));
 }
 

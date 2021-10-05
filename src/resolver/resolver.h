@@ -283,8 +283,7 @@ class Resolver {
   bool ValidateAssignment(const ast::AssignmentStatement* a);
   bool ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
                                  const sem::Type* storage_type,
-                                 const bool is_input,
-                                 const bool is_struct_member);
+                                 const bool is_input);
   bool ValidateCall(ast::CallExpression* call);
   bool ValidateCallStatement(ast::CallStatement* stmt);
   bool ValidateEntryPoint(const ast::Function* func, const FunctionInfo* info);

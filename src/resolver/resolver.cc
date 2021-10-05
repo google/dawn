@@ -1277,8 +1277,7 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
 
 bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
                                          const sem::Type* storage_type,
-                                         const bool is_input,
-                                         const bool is_struct_member) {
+                                         const bool is_input) {
   auto* type = storage_type->UnwrapRef();
   const auto stage = current_function_
                          ? current_function_->declaration->pipeline_stage()
@@ -1386,16 +1385,12 @@ bool Resolver::ValidateBuiltinDecoration(const ast::BuiltinDecoration* deco,
       break;
   }
 
-  // ignore builtin attribute on struct members to facillate data movement
-  // between stages
-  if (!is_struct_member) {
-    if (is_stage_mismatch) {
-      AddError(deco_to_str(deco) + " cannot be used in " +
-                   (is_input ? "input of " : "output of ") + stage_name.str() +
-                   " pipeline stage",
-               deco->source());
-      return false;
-    }
+  if (is_stage_mismatch) {
+    AddError(deco_to_str(deco) + " cannot be used in " +
+                 (is_input ? "input of " : "output of ") + stage_name.str() +
+                 " pipeline stage",
+             deco->source());
+    return false;
   }
 
   return true;
@@ -1556,10 +1551,9 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
               return false;
             }
 
-            if (!ValidateBuiltinDecoration(
-                    builtin, ty,
-                    /* is_input */ param_or_ret == ParamOrRetType::kParameter,
-                    /* is_struct_member */ is_struct_member)) {
+            if (!ValidateBuiltinDecoration(builtin, ty,
+                                           /* is_input */ param_or_ret ==
+                                               ParamOrRetType::kParameter)) {
               return false;
             }
             builtins.emplace(builtin->value());
@@ -4098,8 +4092,7 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
         }
       } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
         if (!ValidateBuiltinDecoration(builtin, member->Type(),
-                                       /* is_input */ false,
-                                       /* is_struct_member */ true)) {
+                                       /* is_input */ false)) {
           return false;
         }
         if (builtin->value() == ast::Builtin::kPosition) {
