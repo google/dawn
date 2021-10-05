@@ -1388,7 +1388,8 @@ namespace dawn_native {
         DAWN_TRY(ValidateIsAlive());
         descriptor = descriptor != nullptr ? descriptor : &defaultDescriptor;
         if (IsValidationEnabled()) {
-            DAWN_TRY(ValidateSamplerDescriptor(this, descriptor));
+            DAWN_TRY_CONTEXT(ValidateSamplerDescriptor(this, descriptor), "validating %s",
+                             descriptor);
         }
         return GetOrCreateSampler(descriptor);
     }

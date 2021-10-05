@@ -23,33 +23,31 @@
 namespace dawn_native {
 
     MaybeError ValidateSamplerDescriptor(DeviceBase*, const SamplerDescriptor* descriptor) {
-        if (descriptor->nextInChain != nullptr) {
-            return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
-        }
+        DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr");
 
-        if (std::isnan(descriptor->lodMinClamp) || std::isnan(descriptor->lodMaxClamp)) {
-            return DAWN_VALIDATION_ERROR("LOD clamp bounds must not be NaN");
-        }
+        DAWN_INVALID_IF(std::isnan(descriptor->lodMinClamp) || std::isnan(descriptor->lodMaxClamp),
+                        "LOD clamp bounds [%f, %f] contain a NaN.", descriptor->lodMinClamp,
+                        descriptor->lodMaxClamp);
 
-        if (descriptor->lodMinClamp < 0 || descriptor->lodMaxClamp < 0) {
-            return DAWN_VALIDATION_ERROR("LOD clamp bounds must be positive");
-        }
+        DAWN_INVALID_IF(descriptor->lodMinClamp < 0 || descriptor->lodMaxClamp < 0,
+                        "LOD clamp bounds [%f, %f] contain contain a negative number.",
+                        descriptor->lodMinClamp, descriptor->lodMaxClamp);
 
-        if (descriptor->lodMinClamp > descriptor->lodMaxClamp) {
-            return DAWN_VALIDATION_ERROR(
-                "Min lod clamp value cannot greater than max lod clamp value");
-        }
+        DAWN_INVALID_IF(descriptor->lodMinClamp > descriptor->lodMaxClamp,
+                        "LOD min clamp (%f) is larger than the max clamp (%f).",
+                        descriptor->lodMinClamp, descriptor->lodMaxClamp);
 
         if (descriptor->maxAnisotropy > 1) {
-            if (descriptor->minFilter != wgpu::FilterMode::Linear ||
-                descriptor->magFilter != wgpu::FilterMode::Linear ||
-                descriptor->mipmapFilter != wgpu::FilterMode::Linear) {
-                return DAWN_VALIDATION_ERROR(
-                    "min, mag, and mipmap filter should be linear when using anisotropic "
-                    "filtering");
-            }
+            DAWN_INVALID_IF(descriptor->minFilter != wgpu::FilterMode::Linear ||
+                                descriptor->magFilter != wgpu::FilterMode::Linear ||
+                                descriptor->mipmapFilter != wgpu::FilterMode::Linear,
+                            "One of minFilter (%s), magFilter (%s) or mipmapFilter (%s) is not %s "
+                            "while using anisotropic filter (maxAnisotropy is %f)",
+                            descriptor->magFilter, descriptor->minFilter, descriptor->mipmapFilter,
+                            wgpu::FilterMode::Linear, descriptor->maxAnisotropy);
         } else if (descriptor->maxAnisotropy == 0u) {
-            return DAWN_VALIDATION_ERROR("max anisotropy cannot be set to 0");
+            return DAWN_FORMAT_VALIDATION_ERROR("Max anisotropy (%f) is less than 1.",
+                                                descriptor->maxAnisotropy);
         }
 
         DAWN_TRY(ValidateFilterMode(descriptor->minFilter));
