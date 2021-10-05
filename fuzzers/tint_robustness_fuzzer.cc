@@ -14,16 +14,17 @@
 
 #include "fuzzers/fuzzer_init.h"
 #include "fuzzers/tint_common_fuzzer.h"
+#include "fuzzers/transform_builder.h"
 
 namespace tint {
 namespace fuzzers {
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
-  tint::transform::Manager transform_manager;
-  transform_manager.Add<tint::transform::Robustness>();
+  TransformBuilder tb(data, size);
+  tb.AddTransform<tint::transform::Robustness>();
 
   tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kWGSL);
-  fuzzer.SetTransformManager(&transform_manager, {});
+  fuzzer.SetTransformManager(tb.manager(), tb.data_map());
   fuzzer.SetDumpInput(GetCliParams().dump_input);
 
   return fuzzer.Run(data, size);

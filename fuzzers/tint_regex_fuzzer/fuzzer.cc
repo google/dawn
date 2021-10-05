@@ -21,6 +21,7 @@
 #include "fuzzers/tint_regex_fuzzer/cli.h"
 #include "fuzzers/tint_regex_fuzzer/override_cli_params.h"
 #include "fuzzers/tint_regex_fuzzer/wgsl_mutator.h"
+#include "fuzzers/transform_builder.h"
 #include "src/reader/wgsl/parser.h"
 #include "src/writer/wgsl/generator.h"
 
@@ -137,13 +138,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
       continue;
     }
 
-    transform::Manager transform_manager;
-    transform::DataMap transform_inputs;
-    transform_manager.Add<transform::Robustness>();
+    TransformBuilder tb(data, size);
+    tb.AddTransform<tint::transform::Robustness>();
 
     CommonFuzzer fuzzer(InputFormat::kWGSL, target.output_format);
     fuzzer.EnableInspector();
-    fuzzer.SetTransformManager(&transform_manager, &transform_inputs);
+    fuzzer.SetTransformManager(tb.manager(), tb.data_map());
 
     fuzzer.Run(data, size);
   }
