@@ -59,6 +59,42 @@ namespace wgpu { namespace interop {
     using FrozenArray = std::vector<T>;
 
     ////////////////////////////////////////////////////////////////////////////////
+    // Result
+    ////////////////////////////////////////////////////////////////////////////////
+
+    // Result is used to hold an success / error state by functions that perform JS <-> C++
+    // conversion
+    struct [[nodiscard]] Result {
+        // Returns true if the operation succeeded, false if there was an error
+        inline operator bool() const {
+            return error.empty();
+        }
+
+        // If Result is an error, then a new Error is returned with the
+        // stringified values append to the error message.
+        // If Result is a success, then a success Result is returned.
+        template <typename... VALUES>
+        Result Append(VALUES && ... values) {
+            if (*this) {
+                return *this;
+            }
+            std::stringstream ss;
+            ss << error << "\n";
+            utils::Write(ss, std::forward<VALUES>(values)...);
+            return {ss.str()};
+        }
+
+        // The error message, if the operation failed.
+        std::string error;
+    };
+
+    // A successful result
+    extern Result Success;
+
+    // Returns a Result with the given error message
+    Result Error(std::string msg);
+
+    ////////////////////////////////////////////////////////////////////////////////
     // Interface<T>
     ////////////////////////////////////////////////////////////////////////////////
 
@@ -200,8 +236,7 @@ namespace wgpu { namespace interop {
     // with the signatures:
     //
     //  // FromJS() converts the JavaScript value 'in' to the C++ value 'out'.
-    //  // Returns true on success, false on failure.
-    //  static bool FromJS(Napi::Env, Napi::Value in, T& out);
+    //  static Result FromJS(Napi::Env, Napi::Value in, T& out);
     //
     //  // ToJS() converts the C++ value 'in' to a JavaScript value, and returns
     //  // this value.
@@ -212,12 +247,12 @@ namespace wgpu { namespace interop {
     template <>
     class Converter<Napi::Object> {
       public:
-        static inline bool FromJS(Napi::Env, Napi::Value value, Napi::Object& out) {
+        static inline Result FromJS(Napi::Env, Napi::Value value, Napi::Object& out) {
             if (value.IsObject()) {
                 out = value.ToObject();
-                return true;
+                return Success;
             }
-            return false;
+            return Error("value is not an object");
         }
         static inline Napi::Value ToJS(Napi::Env, Napi::Object value) {
             return value;
@@ -227,12 +262,12 @@ namespace wgpu { namespace interop {
     template <>
     class Converter<ArrayBuffer> {
       public:
-        static inline bool FromJS(Napi::Env, Napi::Value value, ArrayBuffer& out) {
+        static inline Result FromJS(Napi::Env, Napi::Value value, ArrayBuffer& out) {
             if (value.IsArrayBuffer()) {
                 out = value.As<ArrayBuffer>();
-                return true;
+                return Success;
             }
-            return false;
+            return Error("value is not a ArrayBuffer");
         };
         static inline Napi::Value ToJS(Napi::Env, ArrayBuffer value) {
             return value;
@@ -242,12 +277,12 @@ namespace wgpu { namespace interop {
     template <>
     class Converter<Napi::TypedArray> {
       public:
-        static inline bool FromJS(Napi::Env, Napi::Value value, Napi::TypedArray& out) {
+        static inline Result FromJS(Napi::Env, Napi::Value value, Napi::TypedArray& out) {
             if (value.IsTypedArray()) {
                 out = value.As<Napi::TypedArray>();
-                return true;
+                return Success;
             }
-            return false;
+            return Error("value is not a TypedArray");
         };
         static inline Napi::Value ToJS(Napi::Env, ArrayBuffer value) {
             return value;
@@ -274,15 +309,16 @@ namespace wgpu { namespace interop {
         // clang-format on
         static_assert(static_cast<int>(element_type) >= 0,
                       "unsupported T type for Napi::TypedArrayOf<T>");
-        static inline bool FromJS(Napi::Env, Napi::Value value, Napi::TypedArrayOf<T>& out) {
+        static inline Result FromJS(Napi::Env, Napi::Value value, Napi::TypedArrayOf<T>& out) {
             if (value.IsTypedArray()) {
                 auto arr = value.As<Napi::TypedArrayOf<T>>();
                 if (arr.TypedArrayType() == element_type) {
                     out = arr;
-                    return true;
+                    return Success;
                 }
+                return Error("value is not a TypedArray of the correct element type");
             }
-            return false;
+            return Error("value is not a TypedArray");
         };
         static inline Napi::Value ToJS(Napi::Env, ArrayBuffer value) {
             return value;
@@ -292,99 +328,100 @@ namespace wgpu { namespace interop {
     template <>
     class Converter<std::string> {
       public:
-        static bool FromJS(Napi::Env, Napi::Value, std::string&);
+        static Result FromJS(Napi::Env, Napi::Value, std::string&);
         static Napi::Value ToJS(Napi::Env, std::string);
     };
 
     template <>
     class Converter<bool> {
       public:
-        static bool FromJS(Napi::Env, Napi::Value, bool&);
+        static Result FromJS(Napi::Env, Napi::Value, bool&);
         static Napi::Value ToJS(Napi::Env, bool);
     };
 
     template <>
     class Converter<int8_t> {
       public:
-        static bool FromJS(Napi::Env, Napi::Value, int8_t&);
+        static Result FromJS(Napi::Env, Napi::Value, int8_t&);
         static Napi::Value ToJS(Napi::Env, int8_t);
     };
 
     template <>
     class Converter<uint8_t> {
       public:
-        static bool FromJS(Napi::Env, Napi::Value, uint8_t&);
+        static Result FromJS(Napi::Env, Napi::Value, uint8_t&);
         static Napi::Value ToJS(Napi::Env, uint8_t);
     };
 
     template <>
     class Converter<int16_t> {
       public:
-        static bool FromJS(Napi::Env, Napi::Value, int16_t&);
+        static Result FromJS(Napi::Env, Napi::Value, int16_t&);
         static Napi::Value ToJS(Napi::Env, int16_t);
     };
 
     template <>
     class Converter<uint16_t> {
       public:
-        static bool FromJS(Napi::Env, Napi::Value, uint16_t&);
+        static Result FromJS(Napi::Env, Napi::Value, uint16_t&);
         static Napi::Value ToJS(Napi::Env, uint16_t);
     };
 
     template <>
     class Converter<int32_t> {
       public:
-        static bool FromJS(Napi::Env, Napi::Value, int32_t&);
+        static Result FromJS(Napi::Env, Napi::Value, int32_t&);
         static Napi::Value ToJS(Napi::Env, int32_t);
     };
 
     template <>
     class Converter<uint32_t> {
       public:
-        static bool FromJS(Napi::Env, Napi::Value, uint32_t&);
+        static Result FromJS(Napi::Env, Napi::Value, uint32_t&);
         static Napi::Value ToJS(Napi::Env, uint32_t);
     };
 
     template <>
     class Converter<int64_t> {
       public:
-        static bool FromJS(Napi::Env, Napi::Value, int64_t&);
+        static Result FromJS(Napi::Env, Napi::Value, int64_t&);
         static Napi::Value ToJS(Napi::Env, int64_t);
     };
 
     template <>
     class Converter<uint64_t> {
       public:
-        static bool FromJS(Napi::Env, Napi::Value, uint64_t&);
+        static Result FromJS(Napi::Env, Napi::Value, uint64_t&);
         static Napi::Value ToJS(Napi::Env, uint64_t);
     };
 
     template <>
     class Converter<float> {
       public:
-        static bool FromJS(Napi::Env, Napi::Value, float&);
+        static Result FromJS(Napi::Env, Napi::Value, float&);
         static Napi::Value ToJS(Napi::Env, float);
     };
 
     template <>
     class Converter<double> {
       public:
-        static bool FromJS(Napi::Env, Napi::Value, double&);
+        static Result FromJS(Napi::Env, Napi::Value, double&);
         static Napi::Value ToJS(Napi::Env, double);
     };
 
     template <typename T>
     class Converter<Interface<T>> {
       public:
-        static bool FromJS(Napi::Env env, Napi::Value value, Interface<T>& out) {
-            if (value.IsObject()) {
-                auto obj = value.As<Napi::Object>();
-                if (T::Unwrap(obj)) {
-                    out = Interface<T>(obj);
-                    return true;
-                }
+        static Result FromJS(Napi::Env env, Napi::Value value, Interface<T>& out) {
+            if (!value.IsObject()) {
+                return Error("value is not object");
             }
-            return false;
+            auto obj = value.As<Napi::Object>();
+            if (!T::Unwrap(obj)) {
+                return Error("object is not of the correct interface type");
+            }
+            out = Interface<T>(obj);
+            return Success;
         }
         static Napi::Value ToJS(Napi::Env env, const Interface<T>& value) {
             return {env, value};
@@ -394,17 +431,18 @@ namespace wgpu { namespace interop {
     template <typename T>
     class Converter<std::optional<T>> {
       public:
-        static bool FromJS(Napi::Env env, Napi::Value value, std::optional<T>& out) {
+        static Result FromJS(Napi::Env env, Napi::Value value, std::optional<T>& out) {
             if (value.IsNull() || value.IsUndefined()) {
                 out.reset();
-                return true;
+                return Success;
             }
             T v{};
-            if (!Converter<T>::FromJS(env, value, v)) {
-                return false;
+            auto res = Converter<T>::FromJS(env, value, v);
+            if (!res) {
+                return res;
             }
             out = std::move(v);
-            return true;
+            return Success;
         }
         static Napi::Value ToJS(Napi::Env env, std::optional<T> value) {
             if (value.has_value()) {
@@ -417,19 +455,20 @@ namespace wgpu { namespace interop {
     template <typename T>
     class Converter<std::vector<T>> {
       public:
-        static inline bool FromJS(Napi::Env env, Napi::Value value, std::vector<T>& out) {
+        static inline Result FromJS(Napi::Env env, Napi::Value value, std::vector<T>& out) {
             if (!value.IsArray()) {
-                return false;
+                return Error("value is not an array");
             }
             auto arr = value.As<Napi::Array>();
             std::vector<T> vec(arr.Length());
             for (size_t i = 0; i < vec.size(); i++) {
-                if (!Converter<T>::FromJS(env, arr[static_cast<uint32_t>(i)], vec[i])) {
-                    return false;
+                auto res = Converter<T>::FromJS(env, arr[i], vec[i]);
+                if (!res) {
+                    return res.Append("for array element ", i);
                 }
             }
             out = std::move(vec);
-            return true;
+            return Success;
         }
         static inline Napi::Value ToJS(Napi::Env env, const std::vector<T>& vec) {
             auto arr = Napi::Array::New(env, vec.size());
@@ -443,9 +482,11 @@ namespace wgpu { namespace interop {
     template <typename K, typename V>
     class Converter<std::unordered_map<K, V>> {
       public:
-        static inline bool FromJS(Napi::Env env, Napi::Value value, std::unordered_map<K, V>& out) {
+        static inline Result FromJS(Napi::Env env,
+                                    Napi::Value value,
+                                    std::unordered_map<K, V>& out) {
             if (!value.IsObject()) {
-                return false;
+                return Error("value is not an object");
             }
             auto obj = value.ToObject();
             auto keys = obj.GetPropertyNames();
@@ -453,14 +494,18 @@ namespace wgpu { namespace interop {
             for (uint32_t i = 0; i < static_cast<uint32_t>(map.size()); i++) {
                 K key{};
                 V value{};
-                if (!Converter<K>::FromJS(env, keys[i], key) ||
-                    !Converter<V>::FromJS(env, obj.Get(keys[i]), value)) {
-                    return false;
+                auto key_res = Converter<K>::FromJS(env, keys[i], key);
+                if (!key_res) {
+                    return key_res.Append("for object key");
+                }
+                auto value_res = Converter<V>::FromJS(env, obj.Get(keys[i]), value);
+                if (!value_res) {
+                    return value_res.Append("for object value of key: ", key);
                 }
                 map[key] = value;
             }
             out = std::move(map);
-            return true;
+            return Success;
         }
         static inline Napi::Value ToJS(Napi::Env env, std::unordered_map<K, V> value) {
             auto obj = Napi::Object::New(env);
@@ -474,29 +519,30 @@ namespace wgpu { namespace interop {
     template <typename... TYPES>
     class Converter<std::variant<TYPES...>> {
         template <typename TY>
-        static inline bool TryFromJS(Napi::Env env,
-                                     Napi::Value value,
-                                     std::variant<TYPES...>& out) {
+        static inline Result TryFromJS(Napi::Env env,
+                                       Napi::Value value,
+                                       std::variant<TYPES...>& out) {
             TY v{};
-            if (Converter<TY>::FromJS(env, value, v)) {
-                out = std::move(v);
-                return true;
+            auto res = Converter<TY>::FromJS(env, value, v);
+            if (!res) {
+                return Error("no possible types matched");
             }
-            return false;
+            out = std::move(v);
+            return Success;
         }
 
         template <typename T0, typename T1, typename... TN>
-        static inline bool TryFromJS(Napi::Env env,
-                                     Napi::Value value,
-                                     std::variant<TYPES...>& out) {
+        static inline Result TryFromJS(Napi::Env env,
+                                       Napi::Value value,
+                                       std::variant<TYPES...>& out) {
             if (TryFromJS<T0>(env, value, out)) {
-                return true;
+                return Success;
             }
             return TryFromJS<T1, TN...>(env, value, out);
         }
 
       public:
-        static inline bool FromJS(Napi::Env env, Napi::Value value, std::variant<TYPES...>& out) {
+        static inline Result FromJS(Napi::Env env, Napi::Value value, std::variant<TYPES...>& out) {
             return TryFromJS<TYPES...>(env, value, out);
         }
         static inline Napi::Value ToJS(Napi::Env env, std::variant<TYPES...> value) {
@@ -512,7 +558,7 @@ namespace wgpu { namespace interop {
     template <typename T>
     class Converter<Promise<T>> {
       public:
-        static inline bool FromJS(Napi::Env, Napi::Value, Promise<T>&) {
+        static inline Result FromJS(Napi::Env, Napi::Value, Promise<T>&) {
             UNIMPLEMENTED();
         }
         static inline Napi::Value ToJS(Napi::Env, Promise<T> promise) {
@@ -527,18 +573,16 @@ namespace wgpu { namespace interop {
     // FromJS() is a helper function which delegates to
     // Converter<T>::FromJS()
     template <typename T>
-    inline bool FromJS(Napi::Env env, Napi::Value value, T& out) {
+    inline Result FromJS(Napi::Env env, Napi::Value value, T& out) {
         return Converter<T>::FromJS(env, value, out);
     }
 
     // FromJSOptional() is similar to FromJS(), but if 'value' is either null
-    // or undefined then FromJSOptional() returns true and 'out' is left
-    // unassigned.
-    // Returns true on success, false on failure.
+    // or undefined then 'out' is left unassigned.
     template <typename T>
-    inline bool FromJSOptional(Napi::Env env, Napi::Value value, T& out) {
+    inline Result FromJSOptional(Napi::Env env, Napi::Value value, T& out) {
         if (value.IsNull() || value.IsUndefined()) {
-            return true;
+            return Success;
         }
         return Converter<T>::FromJS(env, value, out);
     }
@@ -580,9 +624,8 @@ namespace wgpu { namespace interop {
     // PARAM_TYPES is a std::tuple<> describing the C++ function parameter types.
     // Parameters may be of the templated DefaultedParameter type, in which case
     // the parameter will default to the default-value if omitted.
-    // Returns true on success, false on failure.
     template <typename PARAM_TYPES, int BASE_INDEX = 0>
-    inline bool FromJS(const Napi::CallbackInfo& info, PARAM_TYPES& args) {
+    inline Result FromJS(const Napi::CallbackInfo& info, PARAM_TYPES& args) {
         if constexpr (BASE_INDEX < std::tuple_size_v<PARAM_TYPES>) {
             using T = std::tuple_element_t<BASE_INDEX, PARAM_TYPES>;
             auto& value = info[BASE_INDEX];
@@ -593,20 +636,24 @@ namespace wgpu { namespace interop {
                 if (value.IsNull() || value.IsUndefined()) {
                     // Use default value for this parameter
                     out.value = out.default_value;
-                } else if (!FromJS(info.Env(), value, out.value)) {
-                    // Argument was provided, but failed to convert.
-                    return false;
+                } else {
+                    // Argument was provided
+                    auto res = FromJS(info.Env(), value, out.value);
+                    if (!res) {
+                        return res;
+                    }
                 }
             } else {
                 // Parameter does not have a default value.
-                if (!FromJS(info.Env(), value, out)) {
-                    return false;
+                auto res = FromJS(info.Env(), value, out);
+                if (!res) {
+                    return res;
                 }
             }
             // Convert the rest of the arguments
             return FromJS<PARAM_TYPES, BASE_INDEX + 1>(info, args);
         } else {
-            return true;
+            return Success;
         }
     }
 

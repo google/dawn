@@ -16,136 +16,142 @@
 
 namespace wgpu { namespace interop {
 
-    bool Converter<bool>::FromJS(Napi::Env env, Napi::Value value, bool& out) {
+    Result Success;
+
+    Result Error(std::string msg) {
+        return {msg};
+    }
+
+    Result Converter<bool>::FromJS(Napi::Env env, Napi::Value value, bool& out) {
         if (value.IsBoolean()) {
             out = value.ToBoolean();
-            return true;
+            return Success;
         }
-        return false;
+        return Error("value is not a boolean");
     }
     Napi::Value Converter<bool>::ToJS(Napi::Env env, bool value) {
         return Napi::Value::From(env, value);
     }
 
-    bool Converter<std::string>::FromJS(Napi::Env env, Napi::Value value, std::string& out) {
+    Result Converter<std::string>::FromJS(Napi::Env env, Napi::Value value, std::string& out) {
         if (value.IsString()) {
             out = value.ToString();
-            return true;
+            return Success;
         }
-        return false;
+        return Error("value is not a string");
     }
     Napi::Value Converter<std::string>::ToJS(Napi::Env env, std::string value) {
         return Napi::Value::From(env, value);
     }
 
-    bool Converter<int8_t>::FromJS(Napi::Env env, Napi::Value value, int8_t& out) {
+    Result Converter<int8_t>::FromJS(Napi::Env env, Napi::Value value, int8_t& out) {
         if (value.IsNumber()) {
             out = value.ToNumber().Int32Value();
-            return true;
+            return Success;
         }
-        return false;
+        return Error("value is not a number");
     }
     Napi::Value Converter<int8_t>::ToJS(Napi::Env env, int8_t value) {
         return Napi::Value::From(env, value);
     }
 
-    bool Converter<uint8_t>::FromJS(Napi::Env env, Napi::Value value, uint8_t& out) {
+    Result Converter<uint8_t>::FromJS(Napi::Env env, Napi::Value value, uint8_t& out) {
         if (value.IsNumber()) {
             out = value.ToNumber().Uint32Value();
-            return true;
+            return Success;
         }
-        return false;
+        return Error("value is not a number");
     }
     Napi::Value Converter<uint8_t>::ToJS(Napi::Env env, uint8_t value) {
         return Napi::Value::From(env, value);
     }
 
-    bool Converter<int16_t>::FromJS(Napi::Env env, Napi::Value value, int16_t& out) {
+    Result Converter<int16_t>::FromJS(Napi::Env env, Napi::Value value, int16_t& out) {
         if (value.IsNumber()) {
             out = value.ToNumber().Int32Value();
-            return true;
+            return Success;
         }
-        return false;
+        return Error("value is not a number");
     }
     Napi::Value Converter<int16_t>::ToJS(Napi::Env env, int16_t value) {
         return Napi::Value::From(env, value);
     }
 
-    bool Converter<uint16_t>::FromJS(Napi::Env env, Napi::Value value, uint16_t& out) {
+    Result Converter<uint16_t>::FromJS(Napi::Env env, Napi::Value value, uint16_t& out) {
         if (value.IsNumber()) {
             out = value.ToNumber().Uint32Value();
-            return true;
+            return Success;
         }
-        return false;
+        return Error("value is not a number");
     }
     Napi::Value Converter<uint16_t>::ToJS(Napi::Env env, uint16_t value) {
         return Napi::Value::From(env, value);
     }
 
-    bool Converter<int32_t>::FromJS(Napi::Env env, Napi::Value value, int32_t& out) {
+    Result Converter<int32_t>::FromJS(Napi::Env env, Napi::Value value, int32_t& out) {
         if (value.IsNumber()) {
             out = value.ToNumber().Int32Value();
-            return true;
+            return Success;
         }
-        return false;
+        return Error("value is not a number");
     }
     Napi::Value Converter<int32_t>::ToJS(Napi::Env env, int32_t value) {
         return Napi::Value::From(env, value);
     }
 
-    bool Converter<uint32_t>::FromJS(Napi::Env env, Napi::Value value, uint32_t& out) {
+    Result Converter<uint32_t>::FromJS(Napi::Env env, Napi::Value value, uint32_t& out) {
         if (value.IsNumber()) {
             out = value.ToNumber().Uint32Value();
-            return true;
+            return Success;
         }
-        return false;
+        return Error("value is not a number");
     }
     Napi::Value Converter<uint32_t>::ToJS(Napi::Env env, uint32_t value) {
         return Napi::Value::From(env, value);
     }
 
-    bool Converter<int64_t>::FromJS(Napi::Env env, Napi::Value value, int64_t& out) {
+    Result Converter<int64_t>::FromJS(Napi::Env env, Napi::Value value, int64_t& out) {
         if (value.IsNumber()) {
             out = value.ToNumber().Int64Value();
-            return true;
+            return Success;
         }
-        return false;
+        return Error("value is not a number");
     }
     Napi::Value Converter<int64_t>::ToJS(Napi::Env env, int64_t value) {
         return Napi::Value::From(env, value);
     }
 
-    bool Converter<uint64_t>::FromJS(Napi::Env env, Napi::Value value, uint64_t& out) {
+    Result Converter<uint64_t>::FromJS(Napi::Env env, Napi::Value value, uint64_t& out) {
         if (value.IsNumber()) {
             // Note that the JS Number type only stores doubles, so the max integer
             // range of values without precision loss is -2^53 to 2^53 (52 bit mantissa
             // with 1 implicit bit). This is why there's no UInt64Value() function.
             out = static_cast<uint64_t>(value.ToNumber().Int64Value());
-            return true;
+            return Success;
         }
-        return false;
+        return Error("value is not a number");
     }
     Napi::Value Converter<uint64_t>::ToJS(Napi::Env env, uint64_t value) {
         return Napi::Value::From(env, value);
     }
 
-    bool Converter<float>::FromJS(Napi::Env env, Napi::Value value, float& out) {
+    Result Converter<float>::FromJS(Napi::Env env, Napi::Value value, float& out) {
         if (value.IsNumber()) {
             out = value.ToNumber().FloatValue();
-            return true;
+            return Success;
         }
-        return false;
+        return Error("value is not a number");
     }
     Napi::Value Converter<float>::ToJS(Napi::Env env, float value) {
         return Napi::Value::From(env, value);
     }
 
-    bool Converter<double>::FromJS(Napi::Env env, Napi::Value value, double& out) {
+    Result Converter<double>::FromJS(Napi::Env env, Napi::Value value, double& out) {
         if (value.IsNumber()) {
             out = value.ToNumber().DoubleValue();
-            return true;
+            return Success;
         }
-        return false;
+        return Error("value is not a number");
     }
     Napi::Value Converter<double>::ToJS(Napi::Env env, double value) {
         return Napi::Value::From(env, value);

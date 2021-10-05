@@ -164,10 +164,11 @@ Wrappers* Wrappers::instance = nullptr;
 {{   if $s := SetlikeOf $}}
     Napi::Value has(const Napi::CallbackInfo& info) {
       std::tuple<{{template "Type" $s.Elem}}> args;
-      if (FromJS(info, args)) {
+      auto res = FromJS(info, args);
+      if (res) {
           return ToJS(info.Env(), impl->has(info.Env(), std::get<0>(args)));
       }
-      Napi::Error::New(info.Env(), "invalid arguments to has()").ThrowAsJavaScriptException();
+      Napi::Error::New(info.Env(), res.error).ThrowAsJavaScriptException();
       return {};
     }
     Napi::Value keys(const Napi::CallbackInfo& info) {
@@ -176,8 +177,10 @@ Wrappers* Wrappers::instance = nullptr;
 {{-  end}}
 {{-  range $m := MethodsOf $}}
     Napi::Value {{$m.Name}}(const Napi::CallbackInfo& info) {
+      std::string error;
 {{-    range $overload_idx, $o := $m.Overloads}}
-      { // Overload {{$overload_idx}}
+{{- $overloaded := gt (len $m.Overloads) 1}}
+      { {{if $overloaded}}// Overload {{$overload_idx}}{{end}}
         std::tuple<
 {{-        range $i, $p := $o.Parameters}}
 {{-          if $i}}, {{end}}
@@ -193,7 +196,8 @@ Wrappers* Wrappers::instance = nullptr;
 {{-          end}}
 {{-        end}}
 
-        if (FromJS(info, args)) {
+        auto res = FromJS(info, args);
+        if (res) {
           {{/* indent */}}INTEROP_LOG(
 {{-        range $i, $p := $o.Parameters}}
 {{-          if $i}}, ", {{$p.Name}}: "{{else}}"{{$p.Name}}: "{{end}}, std::get<{{$i}}>(args)
@@ -206,9 +210,10 @@ Wrappers* Wrappers::instance = nullptr;
 {{-      else                        }}return ToJS(info.Env(), result);
 {{-      end                         }}
         }
+        error = {{if $overloaded}}"\noverload {{$overload_idx}} failed to match:\n" + {{end}}res.error;
       }
 {{-    end}}
-      Napi::Error::New(info.Env(), "invalid arguments to {{$m.Name}}").ThrowAsJavaScriptException();
+      Napi::Error::New(info.Env(), "no overload matched for {{$m.Name}}:\n" + error).ThrowAsJavaScriptException();
       return {};
     }
 {{-  end}}
@@ -220,10 +225,12 @@ Wrappers* Wrappers::instance = nullptr;
 {{-   if not $a.Readonly}}
     void set{{Title $a.Name}}(const Napi::CallbackInfo& info, const Napi::Value& value) {
       {{template "Type" $a.Type}} v{};
-      if (FromJS(info.Env(), value, v)) {
+      auto res = FromJS(info.Env(), value, v);
+      if (res) {
         impl->set{{Title $a.Name}}(info.Env(), std::move(v));
       } else {
-        Napi::Error::New(info.Env(), "invalid value to {{$a.Name}}").ThrowAsJavaScriptException();
+        res = res.Append("invalid value to {{$a.Name}}");
+        Napi::Error::New(info.Env(), res.error).ThrowAsJavaScriptException();
       }
     }
 {{-   end }}
@@ -239,9 +246,11 @@ Wrappers* Wrappers::instance = nullptr;
 --------------------------------------------------------------------------------
 */ -}}
 {{- define "Dictionary"}}
-bool Converter<{{$.Name}}>::FromJS(Napi::Env env, Napi::Value value, {{$.Name}}& out) {
+Result Converter<{{$.Name}}>::FromJS(Napi::Env env, Napi::Value value, {{$.Name}}& out) {
   auto object = value.ToObject();
-  return true{{template "DictionaryMembersFromJS" $}};
+  Result res;
+{{- template "DictionaryMembersFromJS" $}};
+  return Success;
 }
 
 Napi::Value Converter<{{$.Name}}>::ToJS(Napi::Env env, {{$.Name}} value) {
@@ -265,18 +274,21 @@ std::ostream& operator<<(std::ostream& o, const {{$.Name}}& dict) {
 {{- /*
 --------------------------------------------------------------------------------
 -- DictionaryMembersFromJS emits the C++ logic to convert each of the
--- dictionary ast.Member fields from JavaScript to C++. Each call to FromJS() is
--- prefixed with '&&' so that the combined expression is true iff all members
--- are converted succesfully
+-- dictionary ast.Member fields from JavaScript to C++. Each call to ToJS() is
+-- emitted as a separate statement, and requires a 'Result res' local to be
+-- declared
 --------------------------------------------------------------------------------
 */ -}}
 {{- define "DictionaryMembersFromJS"}}
 {{-    if $.Inherits}}{{template "DictionaryMembersFromJS" (Lookup $.Inherits)}}{{end}}
-{{-    range $i, $m := $.Members}} &&
-    {{/* indent */}}
-{{-      if   $m.Init }}interop::FromJSOptional(env, object.Get("{{$m.Name}}"), out.{{$m.Name}})
-{{-      else         }}interop::FromJS(env, object.Get("{{$m.Name}}"), out.{{$m.Name}})
+{{-    range $i, $m := $.Members}}
+  {{/* indent */}}
+{{-      if   $m.Init }}res = interop::FromJSOptional(env, object.Get("{{$m.Name}}"), out.{{$m.Name}});
+{{-      else         }}res = interop::FromJS(env, object.Get("{{$m.Name}}"), out.{{$m.Name}});
 {{-      end          }}
+  if (!res) {
+    return res.Append("while converting member '{{$.Name}}'");
+  }
 {{-    end}}
 {{- end}}
 
@@ -353,8 +365,12 @@ const char* Converter<{{$.Name}}>::ToString({{$.Name}} value) {
   return nullptr;
 }
 
-bool Converter<{{$.Name}}>::FromJS(Napi::Env env, Napi::Value value, {{$.Name}}& out) {
-  return FromString(value.ToString(), out);
+Result Converter<{{$.Name}}>::FromJS(Napi::Env env, Napi::Value value, {{$.Name}}& out) {
+  std::string str = value.ToString();
+  if (FromString(str, out)) {
+    return Success;
+  }
+  return Error(str + " is not a valid enum value of {{$.Name}}");
 }
 
 Napi::Value Converter<{{$.Name}}>::ToJS(Napi::Env env, {{$.Name}} value) {
