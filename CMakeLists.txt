@@ -236,8 +236,8 @@ if (DAWN_BUILD_NODE_BINDINGS)
         if (NOT EXISTS ${DEP})
             message(FATAL_ERROR
                 "DAWN_BUILD_NODE_BINDINGS requires missing dependency '${DEP}'\n"
-                "Try running:\n"
-                "gclient sync --gclientfile=scripts/standalone-with-node.gclient"
+                "Please follow the 'Fetch dependencies' instructions at:\n"
+                "./src/dawn_node/README.md"
             )
         endif()
     endforeach()
