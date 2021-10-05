@@ -154,7 +154,7 @@ Wrappers* Wrappers::instance = nullptr;
         ),
 {{-  end}}
 {{-  range $c := ConstantsOf $}}
-        StaticValue("{{$c.Name}}", ToJS(env, {{$.Name}}::{{$c.Name}})),
+        StaticValue("{{$c.Name}}", ToJS(env, {{$.Name}}::{{$c.Name}}), napi_default_jsproperty),
 {{-  end}}
       });
     }
