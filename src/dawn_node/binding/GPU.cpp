@@ -16,6 +16,26 @@
 
 #include "src/dawn_node/binding/GPUAdapter.h"
 
+#include <cstdlib>
+
+namespace {
+    std::string getEnvVar(const char* varName) {
+#if defined(_WIN32)
+        // Use _dupenv_s to avoid unsafe warnings about std::getenv
+        char* value = nullptr;
+        _dupenv_s(&value, nullptr, varName);
+        if (value) {
+            std::string result = value;
+            free(value);
+            return result;
+        }
+        return "";
+#else
+        return std::getenv(varName);
+#endif
+    }
+}  // namespace
+
 namespace wgpu { namespace binding {
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -47,7 +67,51 @@ namespace wgpu { namespace binding {
             return promise;
         }
 
-        auto adapter = GPUAdapter::Create<GPUAdapter>(env, adapters[0]);
+#if defined(_WIN32)
+        constexpr auto defaultBackendType = wgpu::BackendType::D3D12;
+#elif defined(__linux__)
+        constexpr auto defaultBackendType = wgpu::BackendType::Vulkan;
+#elif defined(__APPLE__)
+        constexpr auto defaultBackendType = wgpu::BackendType::Metal;
+#else
+#    error "Unsupported platform"
+#endif
+
+        auto targetBackendType = defaultBackendType;
+
+        // Check for override from env var
+        std::string envVar = getEnvVar("DAWNNODE_BACKEND");
+        std::transform(envVar.begin(), envVar.end(), envVar.begin(), std::tolower);
+        if (envVar == "null") {
+            targetBackendType = wgpu::BackendType::Null;
+        } else if (envVar == "webgpu") {
+            targetBackendType = wgpu::BackendType::WebGPU;
+        } else if (envVar == "d3d11") {
+            targetBackendType = wgpu::BackendType::D3D11;
+        } else if (envVar == "d3d12" || envVar == "d3d") {
+            targetBackendType = wgpu::BackendType::D3D12;
+        } else if (envVar == "metal") {
+            targetBackendType = wgpu::BackendType::Metal;
+        } else if (envVar == "vulkan" || envVar == "vk") {
+            targetBackendType = wgpu::BackendType::Vulkan;
+        } else if (envVar == "opengl" || envVar == "gl") {
+            targetBackendType = wgpu::BackendType::OpenGL;
+        } else if (envVar == "opengles" || envVar == "gles") {
+            targetBackendType = wgpu::BackendType::OpenGLES;
+        }
+
+        // Default to first adapter if we don't find a match
+        size_t adapterIndex = 0;
+        for (size_t i = 0; i < adapters.size(); ++i) {
+            wgpu::AdapterProperties props;
+            adapters[i].GetProperties(&props);
+            if (props.backendType == targetBackendType) {
+                adapterIndex = i;
+                break;
+            }
+        }
+
+        auto adapter = GPUAdapter::Create<GPUAdapter>(env, adapters[adapterIndex]);
         promise.Resolve(std::optional<interop::Interface<interop::GPUAdapter>>(adapter));
         return promise;
     }
