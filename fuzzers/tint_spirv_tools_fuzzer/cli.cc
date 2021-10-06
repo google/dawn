@@ -191,8 +191,8 @@ void PrintHelpMessage(const char* help_message) {
 }
 
 bool ParseUint32(const char* param, uint32_t* out) {
-  auto value = strtoul(param, nullptr, 10);
-  if (value > std::numeric_limits<uint32_t>::max()) {
+  uint64_t value = static_cast<uint64_t>(strtoul(param, nullptr, 10));
+  if (value > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max())) {
     return false;
   }
   *out = static_cast<uint32_t>(value);

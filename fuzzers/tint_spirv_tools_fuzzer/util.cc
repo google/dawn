@@ -129,7 +129,7 @@ bool ReadBinary(const std::string& path, std::vector<uint32_t>* out) {
     return false;
   }
 
-  auto size = file.tellg();
+  size_t size = static_cast<size_t>(file.tellg());
   if (!file) {
     return false;
   }
@@ -139,7 +139,7 @@ bool ReadBinary(const std::string& path, std::vector<uint32_t>* out) {
     return false;
   }
 
-  std::vector<char> binary(static_cast<size_t>(size));
+  std::vector<char> binary(size);
   if (!file.read(binary.data(), size)) {
     return false;
   }

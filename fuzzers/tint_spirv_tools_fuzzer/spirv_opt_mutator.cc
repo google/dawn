@@ -105,7 +105,8 @@ SpirvOptMutator::Result SpirvOptMutator::Mutate() {
     std::vector<std::string> passes;
 
     while (passes.size() < num_of_passes) {
-      auto idx = generator_.GetUInt64(opt_passes_.size());
+      auto idx =
+          generator_.GetUInt32(static_cast<uint32_t>(opt_passes_.size()));
       passes.push_back(opt_passes_[idx]);
     }
 

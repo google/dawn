@@ -73,14 +73,14 @@ class SpirvReduceMutator : public Mutator {
   template <typename T>
   T* GetRandomElement(std::vector<T>* arr) {
     assert(!arr->empty() && "Can't get random element from an empty vector");
-    auto index = generator_.GetUInt64(arr->size());
+    auto index = generator_.GetUInt32(static_cast<uint32_t>(arr->size()));
     return &(*arr)[index];
   }
 
   template <typename T>
   T* GetRandomElement(std::vector<std::unique_ptr<T>>* arr) {
     assert(!arr->empty() && "Can't get random element from an empty vector");
-    auto index = generator_.GetUInt64(arr->size());
+    auto index = generator_.GetUInt32(static_cast<uint32_t>(arr->size()));
     return (*arr)[index].get();
   }
 
