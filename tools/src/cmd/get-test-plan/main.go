@@ -707,7 +707,7 @@ var (
 
 // testName creates a test name given a rule id (ie. section name), description and section
 // returns for a builtin rule:
-// 		testName: ${builtin name} + "_" + ${section name}
+// 		testName:${section name} + "," + ${builtin name}
 // 		builtinName: ${builtin name}
 //		err: nil
 // returns for a other rules:
@@ -741,9 +741,12 @@ func testName(id string, desc string, section string) (testName, builtinName str
 		builtinName = reUnderScore.ReplaceAllString(builtinName, "_")
 		match, _ := regexp.MatchString(name, builtinName)
 		if match {
-			testName = builtinName + "," + id
-			for i := 1; testNamesSet[testName]; i++ {
-				testName = builtinName + "_" + id + "_" + strconv.Itoa(i)
+			testName = id + "," + builtinName
+			// in case there is more than one builtin functions
+			// with the same name in one section:
+			// "id,builtin", "id,builtin2", "id,builtin3", ...
+			for i := 2; testNamesSet[testName]; i++ {
+				testName = id + "," + builtinName + strconv.Itoa(i)
 			}
 			testNamesSet[testName] = true
 			return testName, builtinName, nil
@@ -757,7 +760,7 @@ func testName(id string, desc string, section string) (testName, builtinName str
 		globalRuleCounter = 0
 		globalPrevSectionX = sectionX[0]
 	}
-	testName = "section" + strconv.Itoa(sectionX[0]) + "_rule" + strconv.Itoa(globalRuleCounter)
+	testName = id + ",rule" + strconv.Itoa(globalRuleCounter)
 	if testNamesSet[testName] {
 		testName = "error-unable-to-generate-unique-file-name"
 		return testName, "", fmt.Errorf("unable to generate unique test name\n" + desc)
@@ -962,8 +965,8 @@ func isBuiltinFunctionRule(r rule) bool {
 
 func testPlan(r rule) string {
 	sb := strings.Builder{}
-	sb.WriteString(fmt.Sprintf(unImplementedTestTemplate, r.TestName,
-		r.Sha, "`\n"+r.URL+"\n"+r.Description+"\n"+howToContribute+"`"))
+	sb.WriteString(fmt.Sprintf(unImplementedTestTemplate, r.TestName, r.Sha, r.URL,
+		"`\n"+r.Description+"\n"+howToContribute+"\n`"))
 
 	return sb.String()
 }
@@ -986,6 +989,7 @@ export const g = makeTestGroup(GPUTest);
 `
 	unImplementedTestTemplate = `g.test('%v')
   .uniqueId('%v')
+  .specURL('%v')
   .desc(
     %v
   )
@@ -994,6 +998,5 @@ export const g = makeTestGroup(GPUTest);
 `
 	howToContribute = `
 Please read the following guidelines before contributing:
-https://github.com/gpuweb/cts/blob/main/docs/plan_autogen.md
-`
+https://github.com/gpuweb/cts/blob/main/docs/plan_autogen.md`
 )
