@@ -66,4 +66,9 @@ declare_args() {
   if (!defined(tint_build_hlsl_writer)) {
     tint_build_hlsl_writer = true
   }
+
+  # Build the GLSL output writer
+  if (!defined(tint_build_glsl_writer)) {
+    tint_build_glsl_writer = true
+  }
 }

@@ -59,4 +59,9 @@
 #include "src/writer/hlsl/generator.h"
 #endif  // TINT_BUILD_HLSL_WRITER
 
+#if TINT_BUILD_GLSL_WRITER
+#include "src/transform/glsl.h"
+#include "src/writer/glsl/generator.h"
+#endif  // TINT_BUILD_GLSL_WRITER
+
 #endif  // INCLUDE_TINT_TINT_H_

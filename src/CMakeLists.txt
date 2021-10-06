@@ -310,6 +310,8 @@ set(TINT_LIB_SRCS
   transform/fold_trivial_single_use_lets.h
   transform/for_loop_to_loop.cc
   transform/for_loop_to_loop.h
+  transform/glsl.cc
+  transform/glsl.h
   transform/inline_pointer_lets.cc
   transform/inline_pointer_lets.h
   transform/loop_to_for_loop.cc
@@ -481,6 +483,15 @@ if(${TINT_BUILD_MSL_WRITER})
     writer/msl/generator.h
     writer/msl/generator_impl.cc
     writer/msl/generator_impl.h
+  )
+endif()
+
+if(${TINT_BUILD_GLSL_WRITER})
+  list(APPEND TINT_LIB_SRCS
+    writer/glsl/generator.cc
+    writer/glsl/generator.h
+    writer/glsl/generator_impl.cc
+    writer/glsl/generator_impl.h
   )
 endif()
 
@@ -978,6 +989,41 @@ if(${TINT_BUILD_TESTS})
       writer/msl/generator_impl_unary_op_test.cc
       writer/msl/generator_impl_variable_decl_statement_test.cc
       writer/msl/test_helper.h
+    )
+  endif()
+
+  if (${TINT_BUILD_GLSL_WRITER})
+    list(APPEND TINT_TEST_SRCS
+      writer/glsl/generator_impl_array_accessor_test.cc
+      writer/glsl/generator_impl_assign_test.cc
+      writer/glsl/generator_impl_binary_test.cc
+      writer/glsl/generator_impl_bitcast_test.cc
+      writer/glsl/generator_impl_block_test.cc
+      writer/glsl/generator_impl_break_test.cc
+      writer/glsl/generator_impl_call_test.cc
+      writer/glsl/generator_impl_case_test.cc
+      writer/glsl/generator_impl_cast_test.cc
+      writer/glsl/generator_impl_constructor_test.cc
+      writer/glsl/generator_impl_continue_test.cc
+      writer/glsl/generator_impl_discard_test.cc
+      writer/glsl/generator_impl_function_test.cc
+      writer/glsl/generator_impl_identifier_test.cc
+      writer/glsl/generator_impl_if_test.cc
+      writer/glsl/generator_impl_intrinsic_test.cc
+      writer/glsl/generator_impl_intrinsic_texture_test.cc
+      writer/glsl/generator_impl_import_test.cc
+      writer/glsl/generator_impl_loop_test.cc
+      writer/glsl/generator_impl_member_accessor_test.cc
+      writer/glsl/generator_impl_module_constant_test.cc
+      writer/glsl/generator_impl_return_test.cc
+      writer/glsl/generator_impl_sanitizer_test.cc
+      writer/glsl/generator_impl_switch_test.cc
+      writer/glsl/generator_impl_test.cc
+      writer/glsl/generator_impl_type_test.cc
+      writer/glsl/generator_impl_unary_op_test.cc
+      writer/glsl/generator_impl_variable_decl_statement_test.cc
+      writer/glsl/generator_impl_workgroup_var_test.cc
+      writer/glsl/test_helper.h
     )
   endif()
 

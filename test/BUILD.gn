@@ -624,6 +624,47 @@ tint_unittests_source_set("tint_unittests_hlsl_writer_src") {
   ]
 }
 
+tint_unittests_source_set("tint_unittests_glsl_writer_src") {
+  sources = [
+    "../src/transform/glsl_test.cc",
+    "../src/writer/glsl/generator_impl_array_accessor_test.cc",
+    "../src/writer/glsl/generator_impl_assign_test.cc",
+    "../src/writer/glsl/generator_impl_binary_test.cc",
+    "../src/writer/glsl/generator_impl_bitcast_test.cc",
+    "../src/writer/glsl/generator_impl_block_test.cc",
+    "../src/writer/glsl/generator_impl_break_test.cc",
+    "../src/writer/glsl/generator_impl_call_test.cc",
+    "../src/writer/glsl/generator_impl_case_test.cc",
+    "../src/writer/glsl/generator_impl_cast_test.cc",
+    "../src/writer/glsl/generator_impl_constructor_test.cc",
+    "../src/writer/glsl/generator_impl_continue_test.cc",
+    "../src/writer/glsl/generator_impl_discard_test.cc",
+    "../src/writer/glsl/generator_impl_function_test.cc",
+    "../src/writer/glsl/generator_impl_identifier_test.cc",
+    "../src/writer/glsl/generator_impl_if_test.cc",
+    "../src/writer/glsl/generator_impl_import_test.cc",
+    "../src/writer/glsl/generator_impl_intrinsic_test.cc",
+    "../src/writer/glsl/generator_impl_intrinsic_texture_test.cc",
+    "../src/writer/glsl/generator_impl_loop_test.cc",
+    "../src/writer/glsl/generator_impl_member_accessor_test.cc",
+    "../src/writer/glsl/generator_impl_module_constant_test.cc",
+    "../src/writer/glsl/generator_impl_return_test.cc",
+    "../src/writer/glsl/generator_impl_sanitizer_test.cc",
+    "../src/writer/glsl/generator_impl_switch_test.cc",
+    "../src/writer/glsl/generator_impl_test.cc",
+    "../src/writer/glsl/generator_impl_type_test.cc",
+    "../src/writer/glsl/generator_impl_unary_op_test.cc",
+    "../src/writer/glsl/generator_impl_variable_decl_statement_test.cc",
+    "../src/writer/glsl/generator_impl_workgroup_var_test.cc",
+    "../src/writer/glsl/test_helper.h",
+  ]
+
+  deps = [
+    ":tint_unittests_core_src",
+    "${tint_root_dir}/src:libtint_glsl_writer_src",
+  ]
+}
+
 source_set("tint_unittests_src") {
   testonly = true
 
@@ -651,6 +692,10 @@ source_set("tint_unittests_src") {
 
   if (tint_build_hlsl_writer) {
     deps += [ ":tint_unittests_hlsl_writer_src" ]
+  }
+
+  if (tint_build_glsl_writer) {
+    deps += [ ":tint_unittests_glsl_writer_src" ]
   }
 
   configs += [ ":tint_unittests_config" ]

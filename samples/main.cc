@@ -54,6 +54,7 @@ enum class Format {
   kWgsl,
   kMsl,
   kHlsl,
+  kGlsl,
 };
 
 struct Options {
@@ -141,6 +142,11 @@ Format parse_format(const std::string& fmt) {
   if (fmt == "hlsl")
     return Format::kHlsl;
 #endif  // TINT_BUILD_HLSL_WRITER
+
+#if TINT_BUILD_GLSL_WRITER
+  if (fmt == "glsl")
+    return Format::kGlsl;
+#endif  // TINT_BUILD_GLSL_WRITER
 
   return Format::kNone;
 }
@@ -844,6 +850,33 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
 #endif  // TINT_BUILD_HLSL_WRITER
 }
 
+/// Generate GLSL code for a program.
+/// @param program the program to generate
+/// @param options the options that Tint was invoked with
+/// @returns true on success
+bool GenerateGlsl(const tint::Program* program, const Options& options) {
+#if TINT_BUILD_GLSL_WRITER
+  tint::writer::glsl::Options gen_options;
+  auto result = tint::writer::glsl::Generate(program, gen_options);
+  if (!result.success) {
+    PrintWGSL(std::cerr, *program);
+    std::cerr << "Failed to generate: " << result.error << std::endl;
+    return false;
+  }
+
+  if (!WriteFile(options.output_file, "w", result.glsl)) {
+    return false;
+  }
+
+  // TODO(senorblanco): implement GLSL validation
+
+  return true;
+#else
+  std::cerr << "GLSL writer not enabled in tint build" << std::endl;
+  return false;
+#endif  // TINT_BUILD_GLSL_WRITER
+}
+
 }  // namespace
 
 int main(int argc, const char** argv) {
@@ -996,6 +1029,14 @@ int main(int argc, const char** argv) {
 #endif  // TINT_BUILD_MSL_WRITER
       break;
     }
+#if TINT_BUILD_GLSL_WRITER
+    case Format::kGlsl: {
+      transform_inputs.Add<tint::transform::Renamer::Config>(
+          tint::transform::Renamer::Target::kGlslKeywords);
+      transform_manager.Add<tint::transform::Renamer>();
+      break;
+    }
+#endif  // TINT_BUILD_GLSL_WRITER
     case Format::kHlsl: {
 #if TINT_BUILD_HLSL_WRITER
       transform_inputs.Add<tint::transform::Renamer::Config>(
@@ -1065,6 +1106,9 @@ int main(int argc, const char** argv) {
       break;
     case Format::kHlsl:
       success = GenerateHlsl(program.get(), options);
+      break;
+    case Format::kGlsl:
+      success = GenerateGlsl(program.get(), options);
       break;
     default:
       std::cerr << "Unknown output format specified" << std::endl;

@@ -54,6 +54,7 @@ option(TINT_BUILD_DOCS "Build documentation" ${TINT_BUILD_DOCS_DEFAULT})
 option(TINT_DOCS_WARN_AS_ERROR "When building documentation, treat warnings as errors" OFF)
 option(TINT_BUILD_SPV_READER "Build the SPIR-V input reader" ON)
 option(TINT_BUILD_WGSL_READER "Build the WGSL input reader" ON)
+option(TINT_BUILD_GLSL_WRITER "Build the GLSL output writer" ON)
 option(TINT_BUILD_HLSL_WRITER "Build the HLSL output writer" ON)
 option(TINT_BUILD_MSL_WRITER "Build the MSL output writer" ON)
 option(TINT_BUILD_SPV_WRITER "Build the SPIR-V output writer" ON)
@@ -81,6 +82,7 @@ message(STATUS "Tint build docs: ${TINT_BUILD_DOCS}")
 message(STATUS "Tint build docs with warn as error: ${TINT_DOCS_WARN_AS_ERROR}")
 message(STATUS "Tint build SPIR-V reader: ${TINT_BUILD_SPV_READER}")
 message(STATUS "Tint build WGSL reader: ${TINT_BUILD_WGSL_READER}")
+message(STATUS "Tint build GLSL writer: ${TINT_BUILD_GLSL_WRITER}")
 message(STATUS "Tint build HLSL writer: ${TINT_BUILD_HLSL_WRITER}")
 message(STATUS "Tint build MSL writer: ${TINT_BUILD_MSL_WRITER}")
 message(STATUS "Tint build SPIR-V writer: ${TINT_BUILD_SPV_WRITER}")
@@ -110,6 +112,7 @@ if (${TINT_BUILD_SPIRV_TOOLS_FUZZER})
       TINT_BUILD_SPV_WRITER
       TINT_BUILD_WGSL_READER
       TINT_BUILD_WGSL_WRITER
+      TINT_BUILD_GLSL_WRITER
       TINT_BUILD_HLSL_WRITER
       TINT_BUILD_MSL_WRITER to ON")
   set(TINT_BUILD_FUZZERS ON CACHE BOOL "Build tint fuzzers" FORCE)
@@ -117,6 +120,7 @@ if (${TINT_BUILD_SPIRV_TOOLS_FUZZER})
   set(TINT_BUILD_SPV_WRITER ON CACHE BOOL "Build SPIR-V writer" FORCE)
   set(TINT_BUILD_WGSL_READER ON CACHE BOOL "Build WGSL reader" FORCE)
   set(TINT_BUILD_WGSL_WRITER ON CACHE BOOL "Build WGSL writer" FORCE)
+  set(TINT_BUILD_GLSL_WRITER ON CACHE BOOL "Build HLSL writer" FORCE)
   set(TINT_BUILD_HLSL_WRITER ON CACHE BOOL "Build HLSL writer" FORCE)
   set(TINT_BUILD_MSL_WRITER ON CACHE BOOL "Build MSL writer" FORCE)
 endif()
@@ -128,12 +132,14 @@ if (${TINT_BUILD_AST_FUZZER})
       TINT_BUILD_WGSL_WRITER
       TINT_BUILD_SPV_WRITER
       TINT_BUILD_MSL_WRITER
+      TINT_BUILD_GLSL_WRITER
       TINT_BUILD_HLSL_WRITER to ON")
   set(TINT_BUILD_FUZZERS ON CACHE BOOL "Build tint fuzzers" FORCE)
   set(TINT_BUILD_WGSL_READER ON CACHE BOOL "Build WGSL reader" FORCE)
   set(TINT_BUILD_WGSL_WRITER ON CACHE BOOL "Build WGSL writer" FORCE)
   set(TINT_BUILD_SPV_WRITER ON CACHE BOOL "Build SPIR-V writer" FORCE)
   set(TINT_BUILD_MSL_WRITER ON CACHE BOOL "Build MSL writer" FORCE)
+  set(TINT_BUILD_GLSL_WRITER ON CACHE BOOL "Build GLSL writer" FORCE)
   set(TINT_BUILD_HLSL_WRITER ON CACHE BOOL "Build HLSL writer" FORCE)
 endif()
 
@@ -144,12 +150,14 @@ if (${TINT_BUILD_REGEX_FUZZER})
       TINT_BUILD_WGSL_WRITER
       TINT_BUILD_SPV_WRITER
       TINT_BUILD_MSL_WRITER
+      TINT_BUILD_GLSL_WRITER
       TINT_BUILD_HLSL_WRITER to ON")
       set(TINT_BUILD_FUZZERS ON CACHE BOOL "Build tint fuzzers" FORCE)
       set(TINT_BUILD_WGSL_READER ON CACHE BOOL "Build WGSL reader" FORCE)
       set(TINT_BUILD_WGSL_WRITER ON CACHE BOOL "Build WGSL writer" FORCE)
       set(TINT_BUILD_SPV_WRITER ON CACHE BOOL "Build SPIR-V writer" FORCE)
       set(TINT_BUILD_MSL_WRITER ON CACHE BOOL "Build MSL writer" FORCE)
+      set(TINT_BUILD_GLSL_WRITER ON CACHE BOOL "Build GLSL writer" FORCE)
       set(TINT_BUILD_HLSL_WRITER ON CACHE BOOL "Build HLSL writer" FORCE)
 endif()
 
@@ -239,6 +247,8 @@ function(tint_default_compile_options TARGET)
       -DTINT_BUILD_SPV_READER=$<BOOL:${TINT_BUILD_SPV_READER}>)
   target_compile_definitions(${TARGET} PUBLIC
       -DTINT_BUILD_WGSL_READER=$<BOOL:${TINT_BUILD_WGSL_READER}>)
+  target_compile_definitions(${TARGET} PUBLIC
+      -DTINT_BUILD_GLSL_WRITER=$<BOOL:${TINT_BUILD_GLSL_WRITER}>)
   target_compile_definitions(${TARGET} PUBLIC
       -DTINT_BUILD_HLSL_WRITER=$<BOOL:${TINT_BUILD_HLSL_WRITER}>)
   target_compile_definitions(${TARGET} PUBLIC
