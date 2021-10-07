@@ -52,8 +52,6 @@ class Robustness : public Castable<Robustness, Transform> {
   struct State;
 };
 
-using BoundArrayAccessors = Robustness;
-
 }  // namespace transform
 }  // namespace tint
 
