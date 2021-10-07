@@ -380,7 +380,7 @@ namespace dawn_native { namespace d3d12 {
             tint::transform::DataMap transformInputs;
 
             if (request.isRobustnessEnabled) {
-                transformManager.Add<tint::transform::BoundArrayAccessors>();
+                transformManager.Add<tint::transform::Robustness>();
             }
             transformManager.Add<tint::transform::BindingRemapper>();
 

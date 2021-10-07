@@ -118,7 +118,7 @@ namespace dawn_native { namespace metal {
             }
         }
         if (GetDevice()->IsRobustnessEnabled()) {
-            transformManager.Add<tint::transform::BoundArrayAccessors>();
+            transformManager.Add<tint::transform::Robustness>();
         }
         transformManager.Add<tint::transform::BindingRemapper>();
         transformManager.Add<tint::transform::Renamer>();

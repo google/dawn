@@ -84,13 +84,12 @@ namespace dawn_native { namespace vulkan {
         if (GetDevice()->IsRobustnessEnabled()) {
             ScopedTintICEHandler scopedICEHandler(GetDevice());
 
-            tint::transform::BoundArrayAccessors boundArrayAccessors;
+            tint::transform::Robustness robustness;
             tint::transform::DataMap transformInputs;
 
             tint::Program program;
-            DAWN_TRY_ASSIGN(program,
-                            RunTransforms(&boundArrayAccessors, parseResult->tintProgram.get(),
-                                          transformInputs, nullptr, nullptr));
+            DAWN_TRY_ASSIGN(program, RunTransforms(&robustness, parseResult->tintProgram.get(),
+                                                   transformInputs, nullptr, nullptr));
             // Rather than use a new ParseResult object, we just reuse the original parseResult
             parseResult->tintProgram = std::make_unique<tint::Program>(std::move(program));
         }
