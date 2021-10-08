@@ -310,7 +310,7 @@ TEST_P(OcclusionQueryTests, ResolveSparseQueries) {
     // TODO(hao.x.li@intel.com): Investigate why it's failed on D3D12 on Nvidia when running with
     // the previous occlusion tests. Expect resolve to 0 for these unwritten queries but the
     // occlusion result of the previous tests is got.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() & IsNvidia());
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
 
     constexpr uint32_t kQueryCount = 7;
 
@@ -370,7 +370,7 @@ TEST_P(OcclusionQueryTests, ResolveWithoutWritten) {
     // TODO(hao.x.li@intel.com): Investigate why it's failed on D3D12 on Nvidia when running with
     // the previous occlusion tests. Expect resolve to 0 but the occlusion result of the previous
     // tests is got.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() & IsNvidia());
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
 
     constexpr uint32_t kQueryCount = 1;
 
