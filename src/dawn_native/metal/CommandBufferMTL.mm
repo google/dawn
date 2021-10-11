@@ -933,8 +933,7 @@ namespace dawn_native { namespace metal {
                         if (@available(macos 10.15, iOS 14.0, *)) {
                             [commandContext->EnsureBlit()
                                   resolveCounters:querySet->GetCounterSampleBuffer()
-                                          inRange:NSMakeRange(cmd->firstQuery,
-                                                              cmd->firstQuery + cmd->queryCount)
+                                          inRange:NSMakeRange(cmd->firstQuery, cmd->queryCount)
                                 destinationBuffer:destination->GetMTLBuffer()
                                 destinationOffset:NSUInteger(cmd->destinationOffset)];
                         } else {
