@@ -126,7 +126,11 @@ namespace wgpu { namespace binding {
     }
 
     interop::Interface<interop::GPUSupportedLimits> GPUDevice::getLimits(Napi::Env env) {
-        return interop::GPUSupportedLimits::Create<GPUSupportedLimits>(env);
+        wgpu::SupportedLimits limits{};
+        if (!device_.GetLimits(&limits)) {
+            Napi::Error::New(env, "failed to get device limits").ThrowAsJavaScriptException();
+        }
+        return interop::GPUSupportedLimits::Create<GPUSupportedLimits>(env, limits);
     }
 
     interop::Interface<interop::GPUQueue> GPUDevice::getQueue(Napi::Env env) {

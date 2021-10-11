@@ -92,7 +92,43 @@ namespace wgpu { namespace binding {
     }
 
     interop::Interface<interop::GPUSupportedLimits> GPUAdapter::getLimits(Napi::Env env) {
-        return interop::GPUSupportedLimits::Create<GPUSupportedLimits>(env);
+        WGPUSupportedLimits limits{};
+        if (!adapter_.GetLimits(&limits)) {
+            Napi::Error::New(env, "failed to get adapter limits").ThrowAsJavaScriptException();
+        }
+
+        wgpu::SupportedLimits wgpuLimits{};
+
+#define COPY_LIMIT(LIMIT) wgpuLimits.limits.LIMIT = limits.limits.LIMIT
+        COPY_LIMIT(maxTextureDimension1D);
+        COPY_LIMIT(maxTextureDimension2D);
+        COPY_LIMIT(maxTextureDimension3D);
+        COPY_LIMIT(maxTextureArrayLayers);
+        COPY_LIMIT(maxBindGroups);
+        COPY_LIMIT(maxDynamicUniformBuffersPerPipelineLayout);
+        COPY_LIMIT(maxDynamicStorageBuffersPerPipelineLayout);
+        COPY_LIMIT(maxSampledTexturesPerShaderStage);
+        COPY_LIMIT(maxSamplersPerShaderStage);
+        COPY_LIMIT(maxStorageBuffersPerShaderStage);
+        COPY_LIMIT(maxStorageTexturesPerShaderStage);
+        COPY_LIMIT(maxUniformBuffersPerShaderStage);
+        COPY_LIMIT(maxUniformBufferBindingSize);
+        COPY_LIMIT(maxStorageBufferBindingSize);
+        COPY_LIMIT(minUniformBufferOffsetAlignment);
+        COPY_LIMIT(minStorageBufferOffsetAlignment);
+        COPY_LIMIT(maxVertexBuffers);
+        COPY_LIMIT(maxVertexAttributes);
+        COPY_LIMIT(maxVertexBufferArrayStride);
+        COPY_LIMIT(maxInterStageShaderComponents);
+        COPY_LIMIT(maxComputeWorkgroupStorageSize);
+        COPY_LIMIT(maxComputeInvocationsPerWorkgroup);
+        COPY_LIMIT(maxComputeWorkgroupSizeX);
+        COPY_LIMIT(maxComputeWorkgroupSizeY);
+        COPY_LIMIT(maxComputeWorkgroupSizeZ);
+        COPY_LIMIT(maxComputeWorkgroupsPerDimension);
+#undef COPY_LIMIT
+
+        return interop::GPUSupportedLimits::Create<GPUSupportedLimits>(env, wgpuLimits);
     }
 
     bool GPUAdapter::getIsFallbackAdapter(Napi::Env) {

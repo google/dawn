@@ -25,6 +25,8 @@ namespace wgpu { namespace binding {
     // GPUSupportedLimits is an implementation of interop::GPUSupportedLimits.
     class GPUSupportedLimits final : public interop::GPUSupportedLimits {
       public:
+        GPUSupportedLimits(wgpu::SupportedLimits);
+
         // interop::GPUSupportedLimits interface compliance
         uint32_t getMaxTextureDimension1D(Napi::Env) override;
         uint32_t getMaxTextureDimension2D(Napi::Env) override;
@@ -52,6 +54,9 @@ namespace wgpu { namespace binding {
         uint32_t getMaxComputeWorkgroupSizeY(Napi::Env) override;
         uint32_t getMaxComputeWorkgroupSizeZ(Napi::Env) override;
         uint32_t getMaxComputeWorkgroupsPerDimension(Napi::Env) override;
+
+      private:
+        wgpu::SupportedLimits limits_;
     };
 
 }}  // namespace wgpu::binding
