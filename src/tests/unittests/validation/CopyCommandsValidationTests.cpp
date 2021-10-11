@@ -2047,7 +2047,7 @@ class CopyCommandTest_CompressedTextureFormats : public CopyCommandTest {
   protected:
     WGPUDevice CreateTestDevice() override {
         dawn_native::DeviceDescriptor descriptor;
-        descriptor.requiredFeatures = {"texture_compression_bc", "texture-compression-etc2",
+        descriptor.requiredFeatures = {"texture-compression-bc", "texture-compression-etc2",
                                        "texture-compression-astc"};
         return adapter.CreateDevice(&descriptor);
     }

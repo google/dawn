@@ -26,7 +26,7 @@
 
 // About multi-planar formats.
 //
-// Dawn supports additional multi-planar formats when the multiplanar_formats extension is enabled.
+// Dawn supports additional multi-planar formats when the multiplanar-formats extension is enabled.
 // When enabled, Dawn treats planar data as sub-resources (ie. 1 sub-resource == 1 view == 1 plane).
 // A multi-planar format name encodes the channel mapping and order of planes. For example,
 // R8BG8Biplanar420Unorm is YUV 4:2:0 where Plane 0 = R8, and Plane 1 = BG8.

@@ -69,12 +69,12 @@ namespace {
         }
 
         std::vector<const char*> GetRequiredFeatures() override {
-            mIsMultiPlanarFormatsSupported = SupportsFeatures({"multiplanar_formats"});
+            mIsMultiPlanarFormatsSupported = SupportsFeatures({"multiplanar-formats"});
             if (!mIsMultiPlanarFormatsSupported) {
                 return {};
             }
 
-            return {"multiplanar_formats"};
+            return {"multiplanar-formats"};
         }
 
         bool IsMultiPlanarFormatsSupported() const {

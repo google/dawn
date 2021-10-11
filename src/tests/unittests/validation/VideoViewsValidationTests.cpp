@@ -22,7 +22,7 @@ namespace {
       protected:
         WGPUDevice CreateTestDevice() override {
             dawn_native::DeviceDescriptor descriptor;
-            descriptor.requiredFeatures = {"multiplanar_formats"};
+            descriptor.requiredFeatures = {"multiplanar-formats"};
             return adapter.CreateDevice(&descriptor);
         }
 

@@ -42,9 +42,9 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
   protected:
     std::vector<const char*> GetRequiredFeatures() override {
         const wgpu::TextureFormat format = GetParam().mTextureFormat;
-        if (utils::IsBCTextureFormat(format) && SupportsFeatures({"texture_compression_bc"})) {
+        if (utils::IsBCTextureFormat(format) && SupportsFeatures({"texture-compression-bc"})) {
             mIsFormatSupported = true;
-            return {"texture_compression_bc"};
+            return {"texture-compression-bc"};
         }
         if (utils::IsETC2TextureFormat(format) && SupportsFeatures({"texture-compression-etc2"})) {
             mIsFormatSupported = true;
@@ -1150,11 +1150,11 @@ DAWN_INSTANTIATE_TEST_P(CompressedTextureFormatTest,
 class CompressedTextureFormatSpecificTest : public DawnTest {
   protected:
     std::vector<const char*> GetRequiredFeatures() override {
-        mIsBCFormatSupported = SupportsFeatures({"texture_compression_bc"});
+        mIsBCFormatSupported = SupportsFeatures({"texture-compression-bc"});
 
         std::vector<const char*> features;
         if (mIsBCFormatSupported) {
-            features.emplace_back("texture_compression_bc");
+            features.emplace_back("texture-compression-bc");
         }
         return features;
     }

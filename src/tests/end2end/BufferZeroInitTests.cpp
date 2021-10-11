@@ -48,8 +48,8 @@ class BufferZeroInitTest : public DawnTest {
   protected:
     std::vector<const char*> GetRequiredFeatures() override {
         std::vector<const char*> requiredFeatures = {};
-        if (SupportsFeatures({"timestamp_query"})) {
-            requiredFeatures.push_back("timestamp_query");
+        if (SupportsFeatures({"timestamp-query"})) {
+            requiredFeatures.push_back("timestamp-query");
         }
         return requiredFeatures;
     }
@@ -1315,7 +1315,7 @@ TEST_P(BufferZeroInitTest, ResolveQuerySet) {
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsAMD());
 
     // Skip if timestamp feature is not supported on device
-    DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({"timestamp_query"}));
+    DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({"timestamp-query"}));
 
     // crbug.com/dawn/940: Does not work on Mac 11.0+. Backend validation changed.
     DAWN_TEST_UNSUPPORTED_IF(IsMacOS() && !IsMacOS(10));

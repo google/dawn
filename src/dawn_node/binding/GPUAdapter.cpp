@@ -109,16 +109,16 @@ namespace wgpu { namespace binding {
         for (auto required : descriptor.requiredFeatures) {
             switch (required) {
                 case interop::GPUFeatureName::kDepthClamping:
-                    desc.requiredFeatures.emplace_back("depth_clamping");
+                    desc.requiredFeatures.emplace_back("depth-clamping");
                     continue;
                 case interop::GPUFeatureName::kPipelineStatisticsQuery:
-                    desc.requiredFeatures.emplace_back("pipeline_statistics_query");
+                    desc.requiredFeatures.emplace_back("pipeline-statistics-query");
                     continue;
                 case interop::GPUFeatureName::kTextureCompressionBc:
-                    desc.requiredFeatures.emplace_back("texture_compression_bc");
+                    desc.requiredFeatures.emplace_back("texture-compression-bc");
                     continue;
                 case interop::GPUFeatureName::kTimestampQuery:
-                    desc.requiredFeatures.emplace_back("timestamp_query");
+                    desc.requiredFeatures.emplace_back("timestamp-query");
                     continue;
                 case interop::GPUFeatureName::kDepth24UnormStencil8:
                 case interop::GPUFeatureName::kDepth32FloatStencil8:

@@ -77,15 +77,15 @@ namespace {
 
         std::vector<const char*> GetRequiredFeatures() override {
             if (GetParam().mFormat == wgpu::TextureFormat::BC1RGBAUnorm &&
-                SupportsFeatures({"texture_compression_bc"})) {
-                return {"texture_compression_bc"};
+                SupportsFeatures({"texture-compression-bc"})) {
+                return {"texture-compression-bc"};
             }
             return {};
         }
 
         void Run() {
             DAWN_TEST_UNSUPPORTED_IF(GetParam().mFormat == wgpu::TextureFormat::BC1RGBAUnorm &&
-                                     !SupportsFeatures({"texture_compression_bc"}));
+                                     !SupportsFeatures({"texture-compression-bc"}));
 
             // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support
             // reading from Snorm textures.

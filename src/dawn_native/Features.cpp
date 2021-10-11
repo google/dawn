@@ -32,7 +32,7 @@ namespace dawn_native {
 
         static constexpr FeatureEnumAndInfoList kFeatureNameAndInfoList = {
             {{Feature::TextureCompressionBC,
-              {"texture_compression_bc", "Support Block Compressed (BC) texture formats",
+              {"texture-compression-bc", "Support Block Compressed (BC) texture formats",
                "https://bugs.chromium.org/p/dawn/issues/detail?id=42"},
               &WGPUDeviceProperties::textureCompressionBC},
              {Feature::TextureCompressionETC2,
@@ -48,20 +48,20 @@ namespace dawn_native {
                "https://bugs.chromium.org/p/dawn/issues/detail?id=955"},
               &WGPUDeviceProperties::textureCompressionASTC},
              {Feature::ShaderFloat16,
-              {"shader_float16",
+              {"shader-float16",
                "Support 16bit float arithmetic and declarations in uniform and storage buffers",
                "https://bugs.chromium.org/p/dawn/issues/detail?id=426"},
               &WGPUDeviceProperties::shaderFloat16},
              {Feature::PipelineStatisticsQuery,
-              {"pipeline_statistics_query", "Support Pipeline Statistics Query",
+              {"pipeline-statistics-query", "Support Pipeline Statistics Query",
                "https://bugs.chromium.org/p/dawn/issues/detail?id=434"},
               &WGPUDeviceProperties::pipelineStatisticsQuery},
              {Feature::TimestampQuery,
-              {"timestamp_query", "Support Timestamp Query",
+              {"timestamp-query", "Support Timestamp Query",
                "https://bugs.chromium.org/p/dawn/issues/detail?id=434"},
               &WGPUDeviceProperties::timestampQuery},
              {Feature::DepthClamping,
-              {"depth_clamping", "Clamp depth to [0, 1] in NDC space instead of clipping",
+              {"depth-clamping", "Clamp depth to [0, 1] in NDC space instead of clipping",
                "https://bugs.chromium.org/p/dawn/issues/detail?id=716"},
               &WGPUDeviceProperties::depthClamping},
              {Feature::DawnInternalUsages,
@@ -72,7 +72,7 @@ namespace dawn_native {
                "dawn_internal_usages.md"},
               &WGPUDeviceProperties::dawnInternalUsages},
              {Feature::MultiPlanarFormats,
-              {"multiplanar_formats",
+              {"multiplanar-formats",
                "Import and use multi-planar texture formats with per plane views",
                "https://bugs.chromium.org/p/dawn/issues/detail?id=551"},
               &WGPUDeviceProperties::multiPlanarFormats}}};
@@ -145,6 +145,23 @@ namespace dawn_native {
         if (iter != mFeatureNameToEnumMap.cend()) {
             return kFeatureNameAndInfoList[static_cast<size_t>(iter->second)].feature;
         }
+
+        // TODO(dawn:550): Remove this fallback logic when Chromium is updated.
+        constexpr std::array<std::pair<const char*, const char*>, 6>
+            kReplacementsForDeprecatedNames = {{
+                {"texture_compression_bc", "texture-compression-bc"},
+                {"depth_clamping", "depth-clamping"},
+                {"pipeline_statistics_query", "pipeline-statistics-query"},
+                {"shader_float16", "shader-float16"},
+                {"timestamp_query", "timestamp-query"},
+                {"multiplanar_formats", "multiplanar-formats"},
+            }};
+        for (const auto& replacement : kReplacementsForDeprecatedNames) {
+            if (strcmp(featureName, replacement.first) == 0) {
+                return FeatureNameToEnum(replacement.second);
+            }
+        }
+
         return Feature::InvalidEnum;
     }
 

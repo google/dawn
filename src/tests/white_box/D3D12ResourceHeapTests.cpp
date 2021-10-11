@@ -27,12 +27,12 @@ class D3D12ResourceHeapTests : public DawnTest {
     }
 
     std::vector<const char*> GetRequiredFeatures() override {
-        mIsBCFormatSupported = SupportsFeatures({"texture_compression_bc"});
+        mIsBCFormatSupported = SupportsFeatures({"texture-compression-bc"});
         if (!mIsBCFormatSupported) {
             return {};
         }
 
-        return {"texture_compression_bc"};
+        return {"texture-compression-bc"};
     }
 
     bool IsBCFormatSupported() const {

@@ -110,8 +110,8 @@ class UnsafeQueryAPIValidationTest : public ValidationTest {
   protected:
     WGPUDevice CreateTestDevice() override {
         dawn_native::DeviceDescriptor descriptor;
-        descriptor.requiredFeatures.push_back("pipeline_statistics_query");
-        descriptor.requiredFeatures.push_back("timestamp_query");
+        descriptor.requiredFeatures.push_back("pipeline-statistics-query");
+        descriptor.requiredFeatures.push_back("timestamp-query");
         descriptor.forceEnabledToggles.push_back("disallow_unsafe_apis");
         return adapter.CreateDevice(&descriptor);
     }
