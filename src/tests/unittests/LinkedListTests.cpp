@@ -19,6 +19,10 @@ class Node : public LinkNode<Node> {
         return id_;
     }
 
+    void set_id(int id) {
+        id_ = id;
+    }
+
   private:
     int id_;
 };
@@ -360,6 +364,27 @@ TEST(LinkedList, IsInList) {
     EXPECT_FALSE(n.IsInList());
     list.Append(&n);
     EXPECT_TRUE(n.IsInList());
-    n.RemoveFromList();
+    EXPECT_TRUE(n.RemoveFromList());
     EXPECT_FALSE(n.IsInList());
+    EXPECT_FALSE(n.RemoveFromList());
+}
+
+TEST(LinkedList, RangeBasedModify) {
+    LinkedList<Node> list;
+
+    Node n1(1);
+    Node n2(2);
+    list.Append(&n1);
+    list.Append(&n2);
+
+    for (LinkNode<Node>* node : list) {
+        node->value()->set_id(node->value()->id() + 1);
+    }
+    const int expected[] = {2, 3};
+    ExpectListContents(list, 2, expected);
+}
+
+TEST(LinkedList, RangeBasedEndIsEnd) {
+    LinkedList<Node> list;
+    EXPECT_EQ(list.end(), *end(list));
 }
