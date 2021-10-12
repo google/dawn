@@ -169,7 +169,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     Device::~Device() {
-        ShutDownBase();
+        Destroy();
     }
 
     ID3D12Device* Device::GetD3D12Device() const {
@@ -601,7 +601,7 @@ namespace dawn_native { namespace d3d12 {
         return DAWN_INTERNAL_ERROR(messages.str());
     }
 
-    void Device::ShutDownImpl() {
+    void Device::DestroyImpl() {
         ASSERT(GetState() == State::Disconnected);
 
         // Immediately forget about all pending commands for the case where device is lost on its

@@ -39,7 +39,7 @@ namespace dawn_native { namespace d3d12 {
     } while (0)
 
     // Definition of backend types
-    class Device : public DeviceBase {
+    class Device final : public DeviceBase {
       public:
         static ResultOrError<Device*> Create(Adapter* adapter, const DeviceDescriptor* descriptor);
         ~Device() override;
@@ -181,7 +181,7 @@ namespace dawn_native { namespace d3d12 {
                                                WGPUCreateRenderPipelineAsyncCallback callback,
                                                void* userdata) override;
 
-        void ShutDownImpl() override;
+        void DestroyImpl() override;
         MaybeError WaitForIdleForDestruction() override;
 
         MaybeError CheckDebugLayerAndGenerateErrors();

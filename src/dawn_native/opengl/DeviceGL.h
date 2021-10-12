@@ -35,7 +35,7 @@ typedef void* EGLImage;
 
 namespace dawn_native { namespace opengl {
 
-    class Device : public DeviceBase {
+    class Device final : public DeviceBase {
       public:
         static ResultOrError<Device*> Create(AdapterBase* adapter,
                                              const DeviceDescriptor* descriptor,
@@ -118,7 +118,7 @@ namespace dawn_native { namespace opengl {
 
         void InitTogglesFromDriver();
         ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
-        void ShutDownImpl() override;
+        void DestroyImpl() override;
         MaybeError WaitForIdleForDestruction() override;
 
         std::queue<std::pair<GLsync, ExecutionSerial>> mFencesInFlight;

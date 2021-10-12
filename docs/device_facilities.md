@@ -43,7 +43,7 @@ After this the device is set in the `Disconnected` state.
 If an `Alive` device is destroyed, then a similar flow to `LoseForTesting happens`.
 
 All this ensures that during destruction or forceful disconnect of the device, it properly gets to the `Disconnected` state with no commands executing on the GPU.
-After disconnecting, frontend will call `backend::Device::ShutDownImpl` so that it can properly free driver objects.
+After disconnecting, frontend will call `backend::Device::DestroyImpl` so that it can properly free driver objects.
 
 ### Toggles
 

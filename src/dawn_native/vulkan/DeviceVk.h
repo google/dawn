@@ -40,7 +40,7 @@ namespace dawn_native { namespace vulkan {
     class RenderPassCache;
     class ResourceMemoryAllocator;
 
-    class Device : public DeviceBase {
+    class Device final : public DeviceBase {
       public:
         static ResultOrError<Device*> Create(Adapter* adapter, const DeviceDescriptor* descriptor);
         ~Device() override;
@@ -152,7 +152,7 @@ namespace dawn_native { namespace vulkan {
         void InitTogglesFromDriver();
         void ApplyDepth24PlusS8Toggle();
 
-        void ShutDownImpl() override;
+        void DestroyImpl() override;
         MaybeError WaitForIdleForDestruction() override;
 
         // To make it easier to use fn it is a public const member. However

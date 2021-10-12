@@ -67,7 +67,7 @@ namespace dawn_native { namespace vulkan {
         // Two things are crucial if device initialization fails: the function pointers to destroy
         // objects, and the fence deleter that calls these functions. Do not do anything before
         // these two are set up, so that a failed initialization doesn't cause a crash in
-        // ShutDownImpl()
+        // DestroyImpl()
         {
             VkPhysicalDevice physicalDevice = ToBackend(GetAdapter())->GetPhysicalDevice();
 
@@ -100,7 +100,7 @@ namespace dawn_native { namespace vulkan {
     }
 
     Device::~Device() {
-        ShutDownBase();
+        Destroy();
     }
 
     ResultOrError<Ref<BindGroupBase>> Device::CreateBindGroupImpl(
@@ -912,7 +912,7 @@ namespace dawn_native { namespace vulkan {
         return {};
     }
 
-    void Device::ShutDownImpl() {
+    void Device::DestroyImpl() {
         ASSERT(GetState() == State::Disconnected);
 
         // We failed during initialization so early that we don't even have a VkDevice. There is

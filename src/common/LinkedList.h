@@ -6,6 +6,7 @@
 // modifications:
 //   - Added iterators for ranged based iterations
 //   - Added in list check before removing node to prevent segfault, now returns true iff removed
+//   - Added MoveInto functionality for moving list elements to another list
 
 #ifndef COMMON_LINKED_LIST_H
 #define COMMON_LINKED_LIST_H
@@ -89,6 +90,12 @@
 //    needs to glue on the "next" and "previous" pointers using
 //    some internal node type.
 
+// Forward declarations of the types in order for recursive referencing and friending.
+template <typename T>
+class LinkNode;
+template <typename T>
+class LinkedList;
+
 template <typename T>
 class LinkNode {
   public:
@@ -165,6 +172,7 @@ class LinkNode {
     }
 
   private:
+    friend class LinkedList<T>;
     LinkNode<T>* previous_;
     LinkNode<T>* next_;
 };
@@ -188,6 +196,20 @@ class LinkedList {
     // Appends |e| to the end of the linked list.
     void Append(LinkNode<T>* e) {
         e->InsertBefore(&root_);
+    }
+
+    // Moves all elements (in order) of the list and appends them into |l| leaving the list empty.
+    void MoveInto(LinkedList<T>* l) {
+        if (empty()) {
+            return;
+        }
+        l->root_.previous_->next_ = root_.next_;
+        root_.next_->previous_ = l->root_.previous_;
+        l->root_.previous_ = root_.previous_;
+        root_.previous_->next_ = &l->root_;
+
+        root_.next_ = &root_;
+        root_.previous_ = &root_;
     }
 
     LinkNode<T>* head() const {

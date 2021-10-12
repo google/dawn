@@ -36,7 +36,7 @@ namespace dawn_native { namespace metal {
         struct KalmanInfo;
     }
 
-    class Device : public DeviceBase {
+    class Device final : public DeviceBase {
       public:
         static ResultOrError<Device*> Create(AdapterBase* adapter,
                                              NSPRef<id<MTLDevice>> mtlDevice,
@@ -122,7 +122,7 @@ namespace dawn_native { namespace metal {
                                                void* userdata) override;
 
         void InitTogglesFromDriver();
-        void ShutDownImpl() override;
+        void DestroyImpl() override;
         MaybeError WaitForIdleForDestruction() override;
         ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
 

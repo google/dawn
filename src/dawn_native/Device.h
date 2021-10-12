@@ -298,6 +298,7 @@ namespace dawn_native {
         };
         State GetState() const;
         bool IsLost() const;
+        void TrackObject(ApiObjectBase* object);
         std::mutex* GetObjectListMutex(ObjectType type);
 
         std::vector<const char*> GetEnabledFeatures() const;
@@ -357,7 +358,8 @@ namespace dawn_native {
         void ForceSetToggle(Toggle toggle, bool isEnabled);
 
         MaybeError Initialize(QueueBase* defaultQueue);
-        void ShutDownBase();
+        void DestroyObjects();
+        void Destroy();
 
         // Incrememt mLastSubmittedSerial when we submit the next serial
         void IncrementLastSubmittedCommandSerial();
@@ -450,9 +452,9 @@ namespace dawn_native {
         ExecutionSerial mLastSubmittedSerial = ExecutionSerial(0);
         ExecutionSerial mFutureSerial = ExecutionSerial(0);
 
-        // ShutDownImpl is used to clean up and release resources used by device, does not wait for
+        // DestroyImpl is used to clean up and release resources used by device, does not wait for
         // GPU or check errors.
-        virtual void ShutDownImpl() = 0;
+        virtual void DestroyImpl() = 0;
 
         // WaitForIdleForDestruction waits for GPU to finish, checks errors and gets ready for
         // destruction. This is only used when properly destructing the device. For a real

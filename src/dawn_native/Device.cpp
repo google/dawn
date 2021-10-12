@@ -48,6 +48,7 @@
 #include "dawn_native/ValidationUtils_autogen.h"
 #include "dawn_platform/DawnPlatform.h"
 
+#include <array>
 #include <mutex>
 #include <unordered_set>
 
@@ -262,7 +263,30 @@ namespace dawn_native {
         return {};
     }
 
-    void DeviceBase::ShutDownBase() {
+    void DeviceBase::DestroyObjects() {
+        // List of object types in reverse "dependency" order so we can iterate and delete the
+        // objects safely starting at leaf objects. We define dependent here such that if B has
+        // a ref to A, then B depends on A. We therefore try to destroy B before destroying A. Note
+        // that this only considers the immediate frontend dependencies, while backend objects could
+        // add complications and extra dependencies.
+        // TODO(dawn/628) Add types into the array as they are implemented.
+        static constexpr std::array<ObjectType, 0> kObjectTypeDependencyOrder = {};
+
+        // We first move all objects out from the tracking list into a separate list so that we can
+        // avoid locking the same mutex twice. We can then iterate across the separate list to call
+        // the actual destroy function.
+        LinkedList<ApiObjectBase> objects;
+        for (ObjectType type : kObjectTypeDependencyOrder) {
+            ApiObjectList& objList = mObjectLists[type];
+            const std::lock_guard<std::mutex> lock(objList.mutex);
+            objList.objects.MoveInto(&objects);
+        }
+        for (LinkNode<ApiObjectBase>* node : objects) {
+            node->value()->DestroyApiObject();
+        }
+    }
+
+    void DeviceBase::Destroy() {
         // Skip handling device facilities if they haven't even been created (or failed doing so)
         if (mState != State::BeingCreated) {
             // Call all the callbacks immediately as the device is about to shut down.
@@ -304,8 +328,8 @@ namespace dawn_native {
         if (mState != State::BeingCreated) {
             // The GPU timeline is finished.
             // Tick the queue-related tasks since they should be complete. This must be done before
-            // ShutDownImpl() it may relinquish resources that will be freed by backends in the
-            // ShutDownImpl() call.
+            // DestroyImpl() it may relinquish resources that will be freed by backends in the
+            // DestroyImpl() call.
             mQueue->Tick(GetCompletedCommandSerial());
             // Call TickImpl once last time to clean up resources
             // Ignore errors so that we can continue with destruction
@@ -319,14 +343,15 @@ namespace dawn_native {
         mCallbackTaskManager = nullptr;
         mAsyncTaskManager = nullptr;
         mPersistentCache = nullptr;
-
         mEmptyBindGroupLayout = nullptr;
-
         mInternalPipelineStore = nullptr;
 
         AssumeCommandsComplete();
-        // Tell the backend that it can free all the objects now that the GPU timeline is empty.
-        ShutDownImpl();
+
+        // Now that the GPU timeline is empty, destroy all objects owned by the device, and then the
+        // backend device.
+        DestroyObjects();
+        DestroyImpl();
 
         mCaches = nullptr;
     }
@@ -497,6 +522,12 @@ namespace dawn_native {
     bool DeviceBase::IsLost() const {
         ASSERT(mState != State::BeingCreated);
         return mState != State::Alive;
+    }
+
+    void DeviceBase::TrackObject(ApiObjectBase* object) {
+        ApiObjectList& objectList = mObjectLists[object->GetType()];
+        std::lock_guard<std::mutex> lock(objectList.mutex);
+        object->InsertBefore(objectList.objects.head());
     }
 
     std::mutex* DeviceBase::GetObjectListMutex(ObjectType type) {

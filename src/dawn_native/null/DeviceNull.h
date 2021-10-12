@@ -84,7 +84,7 @@ namespace dawn_native { namespace null {
         virtual void Execute() = 0;
     };
 
-    class Device : public DeviceBase {
+    class Device final : public DeviceBase {
       public:
         static ResultOrError<Device*> Create(Adapter* adapter, const DeviceDescriptor* descriptor);
         ~Device() override;
@@ -156,7 +156,7 @@ namespace dawn_native { namespace null {
 
         ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
 
-        void ShutDownImpl() override;
+        void DestroyImpl() override;
         MaybeError WaitForIdleForDestruction() override;
 
         std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;
