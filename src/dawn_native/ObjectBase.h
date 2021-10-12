@@ -45,6 +45,8 @@ namespace dawn_native {
       public:
         struct LabelNotImplementedTag {};
         static constexpr LabelNotImplementedTag kLabelNotImplemented = {};
+        struct UntrackedByDeviceTag {};
+        static constexpr UntrackedByDeviceTag kUntrackedByDevice = {};
 
         ApiObjectBase(DeviceBase* device, LabelNotImplementedTag tag);
         ApiObjectBase(DeviceBase* device, const char* label);

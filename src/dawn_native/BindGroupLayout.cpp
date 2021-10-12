@@ -360,7 +360,8 @@ namespace dawn_native {
 
     BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
                                              const BindGroupLayoutDescriptor* descriptor,
-                                             PipelineCompatibilityToken pipelineCompatibilityToken)
+                                             PipelineCompatibilityToken pipelineCompatibilityToken,
+                                             ApiObjectBase::UntrackedByDeviceTag tag)
         : ApiObjectBase(device, kLabelNotImplemented),
           mBindingInfo(BindingIndex(descriptor->entryCount)),
           mPipelineCompatibilityToken(pipelineCompatibilityToken) {
@@ -387,15 +388,31 @@ namespace dawn_native {
         ASSERT(mBindingInfo.size() <= kMaxBindingsPerPipelineLayoutTyped);
     }
 
+    BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
+                                             const BindGroupLayoutDescriptor* descriptor,
+                                             PipelineCompatibilityToken pipelineCompatibilityToken)
+        : BindGroupLayoutBase(device, descriptor, pipelineCompatibilityToken, kUntrackedByDevice) {
+        TrackInDevice();
+    }
+
     BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag)
         : ApiObjectBase(device, tag) {
     }
 
-    BindGroupLayoutBase::~BindGroupLayoutBase() {
-        // Do not uncache the actual cached object if we are a blueprint
-        if (IsCachedReference()) {
-            GetDevice()->UncacheBindGroupLayout(this);
+    BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device)
+        : ApiObjectBase(device, kLabelNotImplemented) {
+        TrackInDevice();
+    }
+
+    bool BindGroupLayoutBase::DestroyApiObject() {
+        bool wasDestroyed = ApiObjectBase::DestroyApiObject();
+        if (wasDestroyed) {
+            // Do not uncache the actual cached object if we are a blueprint
+            if (IsCachedReference()) {
+                GetDevice()->UncacheBindGroupLayout(this);
+            }
         }
+        return wasDestroyed;
     }
 
     // static

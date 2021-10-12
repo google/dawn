@@ -33,7 +33,7 @@ namespace dawn_native { namespace opengl {
         void DeallocateBindGroup(BindGroup* bindGroup);
 
       private:
-        ~BindGroupLayout() override = default;
+        ~BindGroupLayout() override;
         SlabAllocator<BindGroup> mBindGroupAllocator;
     };
 

@@ -161,6 +161,7 @@ namespace dawn_native { namespace vulkan {
             device->fn.DestroyDescriptorSetLayout(device->GetVkDevice(), mHandle, nullptr);
             mHandle = VK_NULL_HANDLE;
         }
+        DestroyApiObject();
     }
 
     VkDescriptorSetLayout BindGroupLayout::GetHandle() const {

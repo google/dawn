@@ -200,6 +200,10 @@ namespace dawn_native {
         }
     }
 
+    DeviceBase::DeviceBase() : mState(State::Alive) {
+        mCaches = std::make_unique<DeviceBase::Caches>();
+    }
+
     DeviceBase::~DeviceBase() = default;
 
     MaybeError DeviceBase::Initialize(QueueBase* defaultQueue) {
@@ -270,7 +274,9 @@ namespace dawn_native {
         // that this only considers the immediate frontend dependencies, while backend objects could
         // add complications and extra dependencies.
         // TODO(dawn/628) Add types into the array as they are implemented.
-        static constexpr std::array<ObjectType, 0> kObjectTypeDependencyOrder = {};
+        static constexpr std::array<ObjectType, 1> kObjectTypeDependencyOrder = {
+            ObjectType::BindGroupLayout,
+        };
 
         // We first move all objects out from the tracking list into a separate list so that we can
         // avoid locking the same mutex twice. We can then iterate across the separate list to call
@@ -631,7 +637,8 @@ namespace dawn_native {
     ResultOrError<Ref<BindGroupLayoutBase>> DeviceBase::GetOrCreateBindGroupLayout(
         const BindGroupLayoutDescriptor* descriptor,
         PipelineCompatibilityToken pipelineCompatibilityToken) {
-        BindGroupLayoutBase blueprint(this, descriptor, pipelineCompatibilityToken);
+        BindGroupLayoutBase blueprint(this, descriptor, pipelineCompatibilityToken,
+                                      ApiObjectBase::kUntrackedByDevice);
 
         const size_t blueprintHash = blueprint.ComputeContentHash();
         blueprint.SetContentHash(blueprintHash);

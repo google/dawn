@@ -40,7 +40,7 @@ namespace dawn_native { namespace null {
 
     class Adapter;
     class BindGroup;
-    using BindGroupLayout = BindGroupLayoutBase;
+    class BindGroupLayout;
     class Buffer;
     class CommandBuffer;
     using ComputePipeline = ComputePipelineBase;
@@ -198,6 +198,16 @@ namespace dawn_native { namespace null {
 
       private:
         ~BindGroup() override = default;
+    };
+
+    class BindGroupLayout final : public BindGroupLayoutBase {
+      public:
+        BindGroupLayout(DeviceBase* device,
+                        const BindGroupLayoutDescriptor* descriptor,
+                        PipelineCompatibilityToken pipelineCompatibilityToken);
+
+      private:
+        ~BindGroupLayout() override;
     };
 
     class Buffer final : public BufferBase {

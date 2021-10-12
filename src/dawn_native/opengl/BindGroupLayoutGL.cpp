@@ -25,6 +25,10 @@ namespace dawn_native { namespace opengl {
           mBindGroupAllocator(MakeFrontendBindGroupAllocator<BindGroup>(4096)) {
     }
 
+    BindGroupLayout::~BindGroupLayout() {
+        DestroyApiObject();
+    }
+
     Ref<BindGroup> BindGroupLayout::AllocateBindGroup(Device* device,
                                                       const BindGroupDescriptor* descriptor) {
         return AcquireRef(mBindGroupAllocator.Allocate(device, descriptor));

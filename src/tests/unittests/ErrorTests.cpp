@@ -243,6 +243,78 @@ namespace {
         ASSERT_EQ(errorData->GetMessage(), dummyErrorMessage);
     }
 
+    // Check DAWN_TRY_ASSIGN handles successes correctly.
+    TEST(ErrorTests, TRY_RESULT_CLEANUP_Success) {
+        auto ReturnSuccess = []() -> ResultOrError<int*> { return &dummySuccess; };
+
+        // We need to check that DAWN_TRY_ASSIGN_WITH_CLEANUP doesn't return on successes and the
+        // cleanup is not called.
+        bool tryReturned = true;
+        bool tryCleanup = false;
+
+        auto Try = [ReturnSuccess, &tryReturned, &tryCleanup]() -> ResultOrError<int*> {
+            int* result = nullptr;
+            DAWN_TRY_ASSIGN_WITH_CLEANUP(result, ReturnSuccess(), { tryCleanup = true; });
+            tryReturned = false;
+
+            EXPECT_EQ(result, &dummySuccess);
+            return result;
+        };
+
+        ResultOrError<int*> result = Try();
+        ASSERT_TRUE(result.IsSuccess());
+        ASSERT_FALSE(tryReturned);
+        ASSERT_FALSE(tryCleanup);
+        ASSERT_EQ(result.AcquireSuccess(), &dummySuccess);
+    }
+
+    // Check DAWN_TRY_ASSIGN handles cleanups.
+    TEST(ErrorTests, TRY_RESULT_CLEANUP_Cleanup) {
+        auto ReturnError = []() -> ResultOrError<int*> {
+            return DAWN_VALIDATION_ERROR(dummyErrorMessage);
+        };
+
+        // We need to check that DAWN_TRY_ASSIGN_WITH_CLEANUP calls cleanup when error.
+        bool tryCleanup = false;
+
+        auto Try = [ReturnError, &tryCleanup]() -> ResultOrError<int*> {
+            int* result = nullptr;
+            DAWN_TRY_ASSIGN_WITH_CLEANUP(result, ReturnError(), { tryCleanup = true; });
+            DAWN_UNUSED(result);
+
+            // DAWN_TRY_ASSIGN_WITH_CLEANUP should return before this point
+            EXPECT_FALSE(true);
+            return &dummySuccess;
+        };
+
+        ResultOrError<int*> result = Try();
+        ASSERT_TRUE(result.IsError());
+
+        std::unique_ptr<ErrorData> errorData = result.AcquireError();
+        ASSERT_EQ(errorData->GetMessage(), dummyErrorMessage);
+        ASSERT_TRUE(tryCleanup);
+    }
+
+    // Check DAWN_TRY_ASSIGN can override return value when needed.
+    TEST(ErrorTests, TRY_RESULT_CLEANUP_OverrideReturn) {
+        auto ReturnError = []() -> ResultOrError<int*> {
+            return DAWN_VALIDATION_ERROR(dummyErrorMessage);
+        };
+
+        auto Try = [ReturnError]() -> bool {
+            int* result = nullptr;
+            DAWN_TRY_ASSIGN_WITH_CLEANUP(result, ReturnError(), {}, true);
+            DAWN_UNUSED(result);
+
+            // DAWN_TRY_ASSIGN_WITH_CLEANUP should return before this point
+            EXPECT_FALSE(true);
+            return false;
+        };
+
+        bool result = Try();
+        ASSERT_TRUE(result);
+    }
+
     // Check a MaybeError can be DAWN_TRIED in a function that returns an ResultOrError
     // Check DAWN_TRY handles errors correctly.
     TEST(ErrorTests, TRY_ConversionToErrorOrResult) {

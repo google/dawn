@@ -64,7 +64,7 @@ namespace dawn_native { namespace d3d12 {
         BindGroupLayout(Device* device,
                         const BindGroupLayoutDescriptor* descriptor,
                         PipelineCompatibilityToken pipelineCompatibilityToken);
-        ~BindGroupLayout() override = default;
+        ~BindGroupLayout() override;
 
         // Contains the offset into the descriptor heap for the given resource view. Samplers and
         // non-samplers are stored in separate descriptor heaps, so the offsets should be unique

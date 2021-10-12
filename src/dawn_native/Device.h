@@ -23,6 +23,7 @@
 #include "dawn_native/Limits.h"
 #include "dawn_native/ObjectBase.h"
 #include "dawn_native/ObjectType_autogen.h"
+#include "dawn_native/RenderPipeline.h"
 #include "dawn_native/StagingBuffer.h"
 #include "dawn_native/Toggles.h"
 
@@ -354,6 +355,9 @@ namespace dawn_native {
         void APISetLabel(const char* label);
 
       protected:
+        // Constructor used only for mocking and testing.
+        DeviceBase();
+
         void SetToggle(Toggle toggle, bool isEnabled);
         void ForceSetToggle(Toggle toggle, bool isEnabled);
 
