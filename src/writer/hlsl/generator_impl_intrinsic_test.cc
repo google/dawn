@@ -298,72 +298,104 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Select_Vector) {
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Modf_Scalar) {
-  auto* res = Var("res", ty.f32());
-  auto* call = Call("modf", 1.0f, AddressOf(res));
-  WrapInFunction(res, call);
+  auto* call = Call("modf", 1.0f);
+  WrapInFunction(call);
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("modf(1.0f, res)"));
-}
-
-TEST_F(HlslGeneratorImplTest_Intrinsic, Modf_Vector) {
-  auto* res = Var("res", ty.vec3<f32>());
-  auto* call = Call("modf", vec3<f32>(), AddressOf(res));
-  WrapInFunction(res, call);
-
-  GeneratorImpl& gen = SanitizeAndBuild();
-
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("modf(float3(0.0f, 0.0f, 0.0f), res)"));
-}
-
-TEST_F(HlslGeneratorImplTest_Intrinsic, Frexp_Scalar_i32) {
-  auto* exp = Var("exp", ty.i32());
-  auto* call = Call("frexp", 1.0f, AddressOf(exp));
-  WrapInFunction(exp, call);
-
-  GeneratorImpl& gen = SanitizeAndBuild();
-
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(),
-            R"(float tint_frexp(float param_0, inout int param_1) {
-  float float_exp;
-  float significand = frexp(param_0, float_exp);
-  param_1 = int(float_exp);
-  return significand;
+  EXPECT_EQ(gen.result(), R"(struct modf_result {
+  float fract;
+  float whole;
+};
+modf_result tint_modf(float param_0) {
+  float whole;
+  float fract = modf(param_0, whole);
+  modf_result result = {fract, whole};
+  return result;
 }
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  int exp = 0;
-  tint_frexp(1.0f, exp);
+  tint_modf(1.0f);
+  return;
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Intrinsic, Modf_Vector) {
+  auto* call = Call("modf", vec3<f32>());
+  WrapInFunction(call);
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct modf_result_vec3 {
+  float3 fract;
+  float3 whole;
+};
+modf_result_vec3 tint_modf(float3 param_0) {
+  float3 whole;
+  float3 fract = modf(param_0, whole);
+  modf_result_vec3 result = {fract, whole};
+  return result;
+}
+
+[numthreads(1, 1, 1)]
+void test_function() {
+  tint_modf(float3(0.0f, 0.0f, 0.0f));
+  return;
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Intrinsic, Frexp_Scalar_i32) {
+  auto* call = Call("frexp", 1.0f);
+  WrapInFunction(call);
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct frexp_result {
+  float sig;
+  int exp;
+};
+frexp_result tint_frexp(float param_0) {
+  float exp;
+  float sig = frexp(param_0, exp);
+  frexp_result result = {sig, int(exp)};
+  return result;
+}
+
+[numthreads(1, 1, 1)]
+void test_function() {
+  tint_frexp(1.0f);
   return;
 }
 )");
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Frexp_Vector_i32) {
-  auto* res = Var("res", ty.vec3<i32>());
-  auto* call = Call("frexp", vec3<f32>(), AddressOf(res));
-  WrapInFunction(res, call);
+  auto* call = Call("frexp", vec3<f32>());
+  WrapInFunction(call);
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(),
-            R"(float3 tint_frexp(float3 param_0, inout int3 param_1) {
-  float3 float_exp;
-  float3 significand = frexp(param_0, float_exp);
-  param_1 = int3(float_exp);
-  return significand;
+  EXPECT_EQ(gen.result(), R"(struct frexp_result_vec3 {
+  float3 sig;
+  int3 exp;
+};
+frexp_result_vec3 tint_frexp(float3 param_0) {
+  float3 exp;
+  float3 sig = frexp(param_0, exp);
+  frexp_result_vec3 result = {sig, int3(exp)};
+  return result;
 }
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  int3 res = int3(0, 0, 0);
-  tint_frexp(float3(0.0f, 0.0f, 0.0f), res);
+  tint_frexp(float3(0.0f, 0.0f, 0.0f));
   return;
 }
 )");

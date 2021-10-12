@@ -1034,48 +1034,27 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
 bool GeneratorImpl::EmitModfCall(std::ostream& out,
                                  ast::CallExpression* expr,
                                  const sem::Intrinsic* intrinsic) {
-  if (expr->params().size() == 1) {
-    return CallIntrinsicHelper(
-        out, expr, intrinsic,
-        [&](TextBuffer* b, const std::vector<std::string>& params) {
-          auto* ty = intrinsic->Parameters()[0]->Type();
-          auto in = params[0];
-
-          std::string width;
-          if (auto* vec = ty->As<sem::Vector>()) {
-            width = std::to_string(vec->Width());
-          }
-
-          // Emit the builtin return type unique to this overload. This does not
-          // exist in the AST, so it will not be generated in Generate().
-          if (!EmitStructType(&helpers_,
-                              intrinsic->ReturnType()->As<sem::Struct>())) {
-            return false;
-          }
-
-          line(b) << "float" << width << " whole;";
-          line(b) << "float" << width << " fract = modf(" << in << ", whole);";
-          line(b) << "return {fract, whole};";
-          return true;
-        });
-  }
-  // DEPRECATED
   return CallIntrinsicHelper(
       out, expr, intrinsic,
       [&](TextBuffer* b, const std::vector<std::string>& params) {
         auto* ty = intrinsic->Parameters()[0]->Type();
         auto in = params[0];
-        auto out_whole = params[1];
 
         std::string width;
         if (auto* vec = ty->As<sem::Vector>()) {
           width = std::to_string(vec->Width());
         }
 
+        // Emit the builtin return type unique to this overload. This does not
+        // exist in the AST, so it will not be generated in Generate().
+        if (!EmitStructType(&helpers_,
+                            intrinsic->ReturnType()->As<sem::Struct>())) {
+          return false;
+        }
+
         line(b) << "float" << width << " whole;";
         line(b) << "float" << width << " fract = modf(" << in << ", whole);";
-        line(b) << "*" << out_whole << " = whole;";
-        line(b) << "return fract;";
+        line(b) << "return {fract, whole};";
         return true;
       });
 }
@@ -1083,49 +1062,27 @@ bool GeneratorImpl::EmitModfCall(std::ostream& out,
 bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
                                   ast::CallExpression* expr,
                                   const sem::Intrinsic* intrinsic) {
-  if (expr->params().size() == 1) {
-    return CallIntrinsicHelper(
-        out, expr, intrinsic,
-        [&](TextBuffer* b, const std::vector<std::string>& params) {
-          auto* ty = intrinsic->Parameters()[0]->Type();
-          auto in = params[0];
-
-          std::string width;
-          if (auto* vec = ty->As<sem::Vector>()) {
-            width = std::to_string(vec->Width());
-          }
-
-          // Emit the builtin return type unique to this overload. This does not
-          // exist in the AST, so it will not be generated in Generate().
-          if (!EmitStructType(&helpers_,
-                              intrinsic->ReturnType()->As<sem::Struct>())) {
-            return false;
-          }
-
-          line(b) << "int" << width << " exp;";
-          line(b) << "float" << width << " sig = frexp(" << in << ", exp);";
-          line(b) << "return {sig, exp};";
-          return true;
-        });
-  }
-
-  // DEPRECATED
   return CallIntrinsicHelper(
       out, expr, intrinsic,
       [&](TextBuffer* b, const std::vector<std::string>& params) {
         auto* ty = intrinsic->Parameters()[0]->Type();
         auto in = params[0];
-        auto out_exp = params[1];
 
         std::string width;
         if (auto* vec = ty->As<sem::Vector>()) {
           width = std::to_string(vec->Width());
         }
 
+        // Emit the builtin return type unique to this overload. This does not
+        // exist in the AST, so it will not be generated in Generate().
+        if (!EmitStructType(&helpers_,
+                            intrinsic->ReturnType()->As<sem::Struct>())) {
+          return false;
+        }
+
         line(b) << "int" << width << " exp;";
         line(b) << "float" << width << " sig = frexp(" << in << ", exp);";
-        line(b) << "*" << out_exp << " = exp;";
-        line(b) << "return sig;";
+        line(b) << "return {sig, exp};";
         return true;
       });
 }

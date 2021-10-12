@@ -297,6 +297,7 @@ TEST_F(GlslGeneratorImplTest_Intrinsic, Select_Vector) {
   EXPECT_EQ(out.str(), "(bvec2(true, false) ? ivec2(3, 4) : ivec2(1, 2))");
 }
 
+#if 0
 TEST_F(GlslGeneratorImplTest_Intrinsic, Modf_Scalar) {
   auto* res = Var("res", ty.f32());
   auto* call = Call("modf", 1.0f, AddressOf(res));
@@ -319,7 +320,6 @@ TEST_F(GlslGeneratorImplTest_Intrinsic, Modf_Vector) {
   EXPECT_THAT(gen.result(), HasSubstr("modf(vec3(0.0f, 0.0f, 0.0f), res)"));
 }
 
-#if 0
 TEST_F(GlslGeneratorImplTest_Intrinsic, Frexp_Scalar_i32) {
   auto* exp = Var("exp", ty.i32());
   auto* call = Call("frexp", 1.0f, AddressOf(exp));

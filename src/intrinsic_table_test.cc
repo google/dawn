@@ -16,6 +16,7 @@
 
 #include "gmock/gmock.h"
 #include "src/program_builder.h"
+#include "src/sem/atomic_type.h"
 #include "src/sem/depth_multisampled_texture_type.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/external_texture_type.h"
@@ -211,22 +212,24 @@ TEST_F(IntrinsicTableTest, MismatchBool) {
 }
 
 TEST_F(IntrinsicTableTest, MatchPointer) {
-  auto* f32 = create<sem::F32>();
-  auto* ptr = create<sem::Pointer>(f32, ast::StorageClass::kFunction,
+  auto* i32 = create<sem::I32>();
+  auto* atomicI32 = create<sem::Atomic>(i32);
+  auto* ptr = create<sem::Pointer>(atomicI32, ast::StorageClass::kWorkgroup,
                                    ast::Access::kReadWrite);
-  auto* result = table->Lookup(IntrinsicType::kModf, {f32, ptr}, Source{});
+  auto* result = table->Lookup(IntrinsicType::kAtomicLoad, {ptr}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
-  EXPECT_THAT(result->Type(), IntrinsicType::kModf);
-  EXPECT_THAT(result->ReturnType(), f32);
-  ASSERT_EQ(result->Parameters().size(), 2u);
-  EXPECT_EQ(result->Parameters()[0]->Type(), f32);
-  EXPECT_EQ(result->Parameters()[1]->Type(), ptr);
+  EXPECT_THAT(result->Type(), IntrinsicType::kAtomicLoad);
+  EXPECT_THAT(result->ReturnType(), i32);
+  ASSERT_EQ(result->Parameters().size(), 1u);
+  EXPECT_EQ(result->Parameters()[0]->Type(), ptr);
 }
 
 TEST_F(IntrinsicTableTest, MismatchPointer) {
-  auto* f32 = create<sem::F32>();
-  auto* result = table->Lookup(IntrinsicType::kModf, {f32, f32}, Source{});
+  auto* i32 = create<sem::I32>();
+  auto* atomicI32 = create<sem::Atomic>(i32);
+  auto* result =
+      table->Lookup(IntrinsicType::kAtomicLoad, {atomicI32}, Source{});
   ASSERT_EQ(result, nullptr);
   ASSERT_THAT(Diagnostics().str(), HasSubstr("no matching call"));
 }

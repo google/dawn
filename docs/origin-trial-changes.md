@@ -1,5 +1,11 @@
 # Tint changes during Origin Trial
 
+## Changes for M96
+
+### Breaking Changes
+
+* Deprecated `modf()` and `frexp()` builtin overloads that take a pointer second parameter have been removed.
+
 ## Changes for M95
 
 ### New Features
@@ -10,5 +16,5 @@
 ### Fixes
 
 * Hex floats: now correctly errors when the magnitude is non-zero, and the exponent would cause overflow. [tint:1150](https://crbug.com/tint/1150), [tint:1166](https://crbug.com/tint/1166)
-* Identifers beginning with an underscore are now correctly rejected.  [tint:1179](https://crbug.com/tint/1179)
+* Identifiers beginning with an underscore are now correctly rejected.  [tint:1179](https://crbug.com/tint/1179)
 * `abs()` fixed for unsigned integers on SPIR-V backend   [tint:1179](https://crbug.com/tint/1194)

@@ -1366,120 +1366,71 @@ bool GeneratorImpl::EmitSelectCall(std::ostream& out,
 bool GeneratorImpl::EmitModfCall(std::ostream& out,
                                  ast::CallExpression* expr,
                                  const sem::Intrinsic* intrinsic) {
-  if (expr->params().size() == 1) {
-    return CallIntrinsicHelper(
-        out, expr, intrinsic,
-        [&](TextBuffer* b, const std::vector<std::string>& params) {
-          auto* ty = intrinsic->Parameters()[0]->Type();
-          auto in = params[0];
+  return CallIntrinsicHelper(
+      out, expr, intrinsic,
+      [&](TextBuffer* b, const std::vector<std::string>& params) {
+        auto* ty = intrinsic->Parameters()[0]->Type();
+        auto in = params[0];
 
-          std::string width;
-          if (auto* vec = ty->As<sem::Vector>()) {
-            width = std::to_string(vec->Width());
-          }
+        std::string width;
+        if (auto* vec = ty->As<sem::Vector>()) {
+          width = std::to_string(vec->Width());
+        }
 
-          // Emit the builtin return type unique to this overload. This does not
-          // exist in the AST, so it will not be generated in Generate().
-          if (!EmitStructType(&helpers_,
-                              intrinsic->ReturnType()->As<sem::Struct>())) {
+        // Emit the builtin return type unique to this overload. This does not
+        // exist in the AST, so it will not be generated in Generate().
+        if (!EmitStructType(&helpers_,
+                            intrinsic->ReturnType()->As<sem::Struct>())) {
+          return false;
+        }
+
+        line(b) << "float" << width << " whole;";
+        line(b) << "float" << width << " fract = modf(" << in << ", whole);";
+        {
+          auto l = line(b);
+          if (!EmitType(l, intrinsic->ReturnType(), ast::StorageClass::kNone,
+                        ast::Access::kUndefined, "")) {
             return false;
           }
-
-          line(b) << "float" << width << " whole;";
-          line(b) << "float" << width << " fract = modf(" << in << ", whole);";
-          {
-            auto l = line(b);
-            if (!EmitType(l, intrinsic->ReturnType(), ast::StorageClass::kNone,
-                          ast::Access::kUndefined, "")) {
-              return false;
-            }
-            l << " result = {fract, whole};";
-          }
-          line(b) << "return result;";
-          return true;
-        });
-  }
-
-  // DEPRECATED
-  out << "modf";
-  ScopedParen sp(out);
-  if (!EmitExpression(out, expr->params()[0])) {
-    return false;
-  }
-  out << ", ";
-  if (!EmitExpression(out, expr->params()[1])) {
-    return false;
-  }
-  return true;
+          l << " result = {fract, whole};";
+        }
+        line(b) << "return result;";
+        return true;
+      });
 }
 
 bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
                                   ast::CallExpression* expr,
                                   const sem::Intrinsic* intrinsic) {
-  if (expr->params().size() == 1) {
-    return CallIntrinsicHelper(
-        out, expr, intrinsic,
-        [&](TextBuffer* b, const std::vector<std::string>& params) {
-          auto* ty = intrinsic->Parameters()[0]->Type();
-          auto in = params[0];
-
-          std::string width;
-          if (auto* vec = ty->As<sem::Vector>()) {
-            width = std::to_string(vec->Width());
-          }
-
-          // Emit the builtin return type unique to this overload. This does not
-          // exist in the AST, so it will not be generated in Generate().
-          if (!EmitStructType(&helpers_,
-                              intrinsic->ReturnType()->As<sem::Struct>())) {
-            return false;
-          }
-
-          line(b) << "float" << width << " exp;";
-          line(b) << "float" << width << " sig = frexp(" << in << ", exp);";
-          {
-            auto l = line(b);
-            if (!EmitType(l, intrinsic->ReturnType(), ast::StorageClass::kNone,
-                          ast::Access::kUndefined, "")) {
-              return false;
-            }
-            l << " result = {sig, int" << width << "(exp)};";
-          }
-          line(b) << "return result;";
-          return true;
-        });
-  }
-  // DEPRECATED
-  // Exponent is an integer in WGSL, but HLSL wants a float.
-  // We need to make the call with a temporary float, and then cast.
   return CallIntrinsicHelper(
       out, expr, intrinsic,
       [&](TextBuffer* b, const std::vector<std::string>& params) {
-        auto* significand_ty = intrinsic->Parameters()[0]->Type();
-        auto significand = params[0];
-        auto* exponent_ty = intrinsic->Parameters()[1]->Type();
-        auto exponent = params[1];
+        auto* ty = intrinsic->Parameters()[0]->Type();
+        auto in = params[0];
 
         std::string width;
-        if (auto* vec = significand_ty->As<sem::Vector>()) {
+        if (auto* vec = ty->As<sem::Vector>()) {
           width = std::to_string(vec->Width());
         }
 
-        // Exponent is an integer, which HLSL does not have an overload for.
-        // We need to cast from a float.
-        line(b) << "float" << width << " float_exp;";
-        line(b) << "float" << width << " significand = frexp(" << significand
-                << ", float_exp);";
+        // Emit the builtin return type unique to this overload. This does not
+        // exist in the AST, so it will not be generated in Generate().
+        if (!EmitStructType(&helpers_,
+                            intrinsic->ReturnType()->As<sem::Struct>())) {
+          return false;
+        }
+
+        line(b) << "float" << width << " exp;";
+        line(b) << "float" << width << " sig = frexp(" << in << ", exp);";
         {
           auto l = line(b);
-          l << exponent << " = ";
-          if (!EmitType(l, exponent_ty->UnwrapPtr(), ast::StorageClass::kNone,
+          if (!EmitType(l, intrinsic->ReturnType(), ast::StorageClass::kNone,
                         ast::Access::kUndefined, "")) {
             return false;
           }
-          l << "(float_exp);";
+          l << " result = {sig, int" << width << "(exp)};";
         }
-        line(b) << "return significand;";
+        line(b) << "return result;";
         return true;
       });
 }

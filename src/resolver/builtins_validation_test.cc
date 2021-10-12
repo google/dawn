@@ -766,87 +766,131 @@ TEST_F(ResolverBuiltinsValidationTest, Determinant_Mat4x4) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Frexp_Scalar) {
-  auto* a = Var("a", ty.i32());
-  auto* builtin = Call("frexp", 1.0f, AddressOf(Expr("a")));
-  WrapInFunction(Decl(a), builtin);
+  auto* builtin = Call("frexp", 1.0f);
+  WrapInFunction(builtin);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
-  EXPECT_TRUE(TypeOf(builtin)->Is<sem::F32>());
-  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<sem::Pointer>());
+  auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
+  ASSERT_TRUE(res_ty != nullptr);
+  auto& members = res_ty->Members();
+  ASSERT_EQ(members.size(), 2u);
+  EXPECT_TRUE(members[0]->Type()->Is<sem::F32>());
+  EXPECT_TRUE(members[1]->Type()->Is<sem::I32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec2) {
-  auto* a = Var("a", ty.vec2<int>());
-  auto* builtin = Call("frexp", vec2<f32>(1.0f, 1.0f), AddressOf(Expr("a")));
-  WrapInFunction(Decl(a), builtin);
+  auto* builtin = Call("frexp", vec2<f32>(1.0f, 1.0f));
+  WrapInFunction(builtin);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
-  EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
-  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<sem::Pointer>());
+  auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
+  ASSERT_TRUE(res_ty != nullptr);
+  auto& members = res_ty->Members();
+  ASSERT_EQ(members.size(), 2u);
+  ASSERT_TRUE(members[0]->Type()->Is<sem::Vector>());
+  ASSERT_TRUE(members[1]->Type()->Is<sem::Vector>());
+  EXPECT_EQ(members[0]->Type()->As<sem::Vector>()->Width(), 2u);
+  EXPECT_TRUE(members[0]->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(members[1]->Type()->As<sem::Vector>()->Width(), 2u);
+  EXPECT_TRUE(members[1]->Type()->As<sem::Vector>()->type()->Is<sem::I32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec3) {
-  auto* a = Var("a", ty.vec3<int>());
-  auto* builtin =
-      Call("frexp", vec3<f32>(1.0f, 1.0f, 1.0f), AddressOf(Expr("a")));
-  WrapInFunction(Decl(a), builtin);
+  auto* builtin = Call("frexp", vec3<f32>(1.0f, 1.0f, 1.0f));
+  WrapInFunction(builtin);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
-  EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
-  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<sem::Pointer>());
+  auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
+  ASSERT_TRUE(res_ty != nullptr);
+  auto& members = res_ty->Members();
+  ASSERT_EQ(members.size(), 2u);
+  ASSERT_TRUE(members[0]->Type()->Is<sem::Vector>());
+  ASSERT_TRUE(members[1]->Type()->Is<sem::Vector>());
+  EXPECT_EQ(members[0]->Type()->As<sem::Vector>()->Width(), 3u);
+  EXPECT_TRUE(members[0]->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(members[1]->Type()->As<sem::Vector>()->Width(), 3u);
+  EXPECT_TRUE(members[1]->Type()->As<sem::Vector>()->type()->Is<sem::I32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec4) {
-  auto* a = Var("a", ty.vec4<int>());
-  auto* builtin =
-      Call("frexp", vec4<f32>(1.0f, 1.0f, 1.0f, 1.0f), AddressOf(Expr("a")));
-  WrapInFunction(Decl(a), builtin);
+  auto* builtin = Call("frexp", vec4<f32>(1.0f, 1.0f, 1.0f, 1.0f));
+  WrapInFunction(builtin);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
-  EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
-  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<sem::Pointer>());
+  auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
+  ASSERT_TRUE(res_ty != nullptr);
+  auto& members = res_ty->Members();
+  ASSERT_EQ(members.size(), 2u);
+  ASSERT_TRUE(members[0]->Type()->Is<sem::Vector>());
+  ASSERT_TRUE(members[1]->Type()->Is<sem::Vector>());
+  EXPECT_EQ(members[0]->Type()->As<sem::Vector>()->Width(), 4u);
+  EXPECT_TRUE(members[0]->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(members[1]->Type()->As<sem::Vector>()->Width(), 4u);
+  EXPECT_TRUE(members[1]->Type()->As<sem::Vector>()->type()->Is<sem::I32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Modf_Scalar) {
-  auto* a = Var("a", ty.f32());
-  auto* builtin = Call("modf", 1.0f, AddressOf(Expr("a")));
-  WrapInFunction(Decl(a), builtin);
+  auto* builtin = Call("modf", 1.0f);
+  WrapInFunction(builtin);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
-  EXPECT_TRUE(TypeOf(builtin)->Is<sem::F32>());
-  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<sem::Pointer>());
+  auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
+  ASSERT_TRUE(res_ty != nullptr);
+  auto& members = res_ty->Members();
+  ASSERT_EQ(members.size(), 2u);
+  EXPECT_TRUE(members[0]->Type()->Is<sem::F32>());
+  EXPECT_TRUE(members[1]->Type()->Is<sem::F32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Modf_Vec2) {
-  auto* a = Var("a", ty.vec2<f32>());
-  auto* builtin = Call("modf", vec2<f32>(1.0f, 1.0f), AddressOf(Expr("a")));
-  WrapInFunction(Decl(a), builtin);
+  auto* builtin = Call("modf", vec2<f32>(1.0f, 1.0f));
+  WrapInFunction(builtin);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
-  EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
-  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<sem::Pointer>());
+  auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
+  ASSERT_TRUE(res_ty != nullptr);
+  auto& members = res_ty->Members();
+  ASSERT_EQ(members.size(), 2u);
+  ASSERT_TRUE(members[0]->Type()->Is<sem::Vector>());
+  ASSERT_TRUE(members[1]->Type()->Is<sem::Vector>());
+  EXPECT_EQ(members[0]->Type()->As<sem::Vector>()->Width(), 2u);
+  EXPECT_TRUE(members[0]->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(members[1]->Type()->As<sem::Vector>()->Width(), 2u);
+  EXPECT_TRUE(members[1]->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Modf_Vec3) {
-  auto* a = Var("a", ty.vec3<f32>());
-  auto* builtin =
-      Call("modf", vec3<f32>(1.0f, 1.0f, 1.0f), AddressOf(Expr("a")));
-  WrapInFunction(Decl(a), builtin);
+  auto* builtin = Call("modf", vec3<f32>(1.0f, 1.0f, 1.0f));
+  WrapInFunction(builtin);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
-  EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
-  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<sem::Pointer>());
+  auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
+  ASSERT_TRUE(res_ty != nullptr);
+  auto& members = res_ty->Members();
+  ASSERT_EQ(members.size(), 2u);
+  ASSERT_TRUE(members[0]->Type()->Is<sem::Vector>());
+  ASSERT_TRUE(members[1]->Type()->Is<sem::Vector>());
+  EXPECT_EQ(members[0]->Type()->As<sem::Vector>()->Width(), 3u);
+  EXPECT_TRUE(members[0]->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(members[1]->Type()->As<sem::Vector>()->Width(), 3u);
+  EXPECT_TRUE(members[1]->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Modf_Vec4) {
-  auto* a = Var("a", ty.vec4<f32>());
-  auto* builtin =
-      Call("modf", vec4<f32>(1.0f, 1.0f, 1.0f, 1.0f), AddressOf(Expr("a")));
-  WrapInFunction(Decl(a), builtin);
+  auto* builtin = Call("modf", vec4<f32>(1.0f, 1.0f, 1.0f, 1.0f));
+  WrapInFunction(builtin);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
-  EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
-  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<sem::Pointer>());
+  auto* res_ty = TypeOf(builtin)->As<sem::Struct>();
+  ASSERT_TRUE(res_ty != nullptr);
+  auto& members = res_ty->Members();
+  ASSERT_EQ(members.size(), 2u);
+  ASSERT_TRUE(members[0]->Type()->Is<sem::Vector>());
+  ASSERT_TRUE(members[1]->Type()->Is<sem::Vector>());
+  EXPECT_EQ(members[0]->Type()->As<sem::Vector>()->Width(), 4u);
+  EXPECT_TRUE(members[0]->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(members[1]->Type()->As<sem::Vector>()->Width(), 4u);
+  EXPECT_TRUE(members[1]->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Cross_Float_Vec3) {

@@ -165,8 +165,7 @@ uint32_t intrinsic_to_glsl_method(const sem::Intrinsic* intrinsic) {
     case IntrinsicType::kFract:
       return GLSLstd450Fract;
     case IntrinsicType::kFrexp:
-      return (intrinsic->Parameters().size() == 1) ? GLSLstd450FrexpStruct
-                                                   : GLSLstd450Frexp;
+      return GLSLstd450FrexpStruct;
     case IntrinsicType::kInverseSqrt:
       return GLSLstd450InverseSqrt;
     case IntrinsicType::kLdexp:
@@ -196,8 +195,7 @@ uint32_t intrinsic_to_glsl_method(const sem::Intrinsic* intrinsic) {
     case IntrinsicType::kMix:
       return GLSLstd450FMix;
     case IntrinsicType::kModf:
-      return (intrinsic->Parameters().size() == 1) ? GLSLstd450ModfStruct
-                                                   : GLSLstd450Modf;
+      return GLSLstd450ModfStruct;
     case IntrinsicType::kNormalize:
       return GLSLstd450Normalize;
     case IntrinsicType::kPack4x8snorm:
