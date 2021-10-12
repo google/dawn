@@ -706,7 +706,6 @@ TEST_F(SpvParserTest, ConvertType_RuntimeArray_NoDeduplication) {
     %22 = OpTypeRuntimeArray %10
   )" + MainBody();
   auto p = parser(test::Assemble(assembly));
-  std::cout << assembly << std::endl;
   EXPECT_TRUE(p->BuildAndParseInternalModule());
 
   auto* type20 = p->ConvertType(20);
