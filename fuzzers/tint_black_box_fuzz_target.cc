@@ -23,6 +23,15 @@
 
 namespace {
 
+/// Controls the target language in which code will be generated.
+enum class TargetLanguage {
+  kHlsl,
+  kMsl,
+  kSpv,
+  kWgsl,
+  kTargetLanguageMax,
+};
+
 /// Copies the content from the file named `input_file` to `buffer`,
 /// assuming each element in the file is of type `T`.  If any error occurs,
 /// writes error messages to the standard error stream and returns false.
@@ -80,45 +89,75 @@ bool ReadFile(const std::string& input_file, std::vector<T>* buffer) {
 }  // namespace
 
 int main(int argc, const char** argv) {
-  if (argc != 3) {
-    std::cerr << "Usage: " << argv[0] << " <input file> <hlsl|msl|spv|wgsl>"
+  if (argc < 2 || argc > 3) {
+    std::cerr << "Usage: " << argv[0] << " <input file> [hlsl|msl|spv|wgsl]"
               << std::endl;
     return 1;
   }
 
   std::string input_filename(argv[1]);
-  std::string target_format(argv[2]);
 
   std::vector<uint8_t> data;
   if (!ReadFile<uint8_t>(input_filename, &data)) {
     return 1;
   }
 
-  if (target_format == "hlsl") {
-    tint::fuzzers::CommonFuzzer fuzzer(tint::fuzzers::InputFormat::kWGSL,
-                                       tint::fuzzers::OutputFormat::kHLSL);
-    return fuzzer.Run(data.data(), data.size());
-  } else if (target_format == "msl") {
-    tint::fuzzers::DataBuilder builder(data.data(), data.size());
-    tint::writer::msl::Options options;
-    GenerateMslOptions(&builder, &options);
-    tint::fuzzers::CommonFuzzer fuzzer(tint::fuzzers::InputFormat::kWGSL,
-                                       tint::fuzzers::OutputFormat::kMSL);
-    fuzzer.SetOptionsMsl(options);
-    return fuzzer.Run(data.data(), data.size());
-  } else if (target_format == "spv") {
-    tint::fuzzers::DataBuilder builder(data.data(), data.size());
-    tint::writer::spirv::Options options;
-    GenerateSpirvOptions(&builder, &options);
-    tint::fuzzers::CommonFuzzer fuzzer(tint::fuzzers::InputFormat::kWGSL,
-                                       tint::fuzzers::OutputFormat::kSpv);
-    fuzzer.SetOptionsSpirv(options);
-    return fuzzer.Run(data.data(), data.size());
-  } else if (target_format == "wgsl") {
-    tint::fuzzers::CommonFuzzer fuzzer(tint::fuzzers::InputFormat::kWGSL,
-                                       tint::fuzzers::OutputFormat::kWGSL);
-    return fuzzer.Run(data.data(), data.size());
+  if (data.empty()) {
+    return 0;
   }
-  assert(false && "Fuzzer configuration problem: unknown target format.");
-  return 1;
+
+  tint::fuzzers::DataBuilder builder(data.data(), data.size());
+
+  TargetLanguage target_language;
+
+  if (argc == 3) {
+    std::string target_language_string = argv[2];
+    if (target_language_string == "hlsl") {
+      target_language = TargetLanguage::kHlsl;
+    } else if (target_language_string == "msl") {
+      target_language = TargetLanguage::kMsl;
+    } else if (target_language_string == "spv") {
+      target_language = TargetLanguage::kSpv;
+    } else {
+      assert(target_language_string == "wgsl" && "Unknown target language.");
+      target_language = TargetLanguage::kWgsl;
+    }
+  } else {
+    target_language = builder.enum_class<TargetLanguage>(
+        static_cast<uint32_t>(TargetLanguage::kTargetLanguageMax));
+  }
+
+  switch (target_language) {
+    case TargetLanguage::kHlsl: {
+      tint::fuzzers::CommonFuzzer fuzzer(tint::fuzzers::InputFormat::kWGSL,
+                                         tint::fuzzers::OutputFormat::kHLSL);
+      return fuzzer.Run(data.data(), data.size());
+    }
+    case TargetLanguage::kMsl: {
+      tint::writer::msl::Options options;
+      GenerateMslOptions(&builder, &options);
+      tint::fuzzers::CommonFuzzer fuzzer(tint::fuzzers::InputFormat::kWGSL,
+                                         tint::fuzzers::OutputFormat::kMSL);
+      fuzzer.SetOptionsMsl(options);
+      return fuzzer.Run(data.data(), data.size());
+    }
+    case TargetLanguage::kSpv: {
+      tint::writer::spirv::Options options;
+      GenerateSpirvOptions(&builder, &options);
+      tint::fuzzers::CommonFuzzer fuzzer(tint::fuzzers::InputFormat::kWGSL,
+                                         tint::fuzzers::OutputFormat::kSpv);
+      fuzzer.SetOptionsSpirv(options);
+      return fuzzer.Run(data.data(), data.size());
+    }
+    case TargetLanguage::kWgsl: {
+      tint::fuzzers::CommonFuzzer fuzzer(tint::fuzzers::InputFormat::kWGSL,
+                                         tint::fuzzers::OutputFormat::kWGSL);
+      return fuzzer.Run(data.data(), data.size());
+    }
+    default:
+      std::cerr << "Aborting due to unknown target language; fuzzer must be "
+                   "misconfigured."
+                << std::endl;
+      abort();
+  }
 }
