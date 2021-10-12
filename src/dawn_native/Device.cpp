@@ -1051,13 +1051,8 @@ namespace dawn_native {
 
     void DeviceBase::ApplyFeatures(const DeviceDescriptor* deviceDescriptor) {
         ASSERT(deviceDescriptor);
-        // TODO(dawn:1149): remove once requiredExtensions is no longer used.
-        ASSERT(GetAdapter()->SupportsAllRequestedFeatures(deviceDescriptor->requiredExtensions));
         ASSERT(GetAdapter()->SupportsAllRequestedFeatures(deviceDescriptor->requiredFeatures));
 
-        // TODO(dawn:1149): remove once requiredExtensions is no longer used.
-        mEnabledExtensions = GetAdapter()->GetInstance()->FeatureNamesToFeaturesSet(
-            deviceDescriptor->requiredExtensions);
         mEnabledFeatures = GetAdapter()->GetInstance()->FeatureNamesToFeaturesSet(
             deviceDescriptor->requiredFeatures);
     }
@@ -1067,8 +1062,7 @@ namespace dawn_native {
     }
 
     bool DeviceBase::IsFeatureEnabled(Feature feature) const {
-        // TODO(dawn:1149): remove mEnabledExtensions once it is no longer used.
-        return mEnabledFeatures.IsEnabled(feature) || mEnabledExtensions.IsEnabled(feature);
+        return mEnabledFeatures.IsEnabled(feature);
     }
 
     bool DeviceBase::IsValidationEnabled() const {

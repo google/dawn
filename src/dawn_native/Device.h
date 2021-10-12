@@ -510,7 +510,6 @@ namespace dawn_native {
         std::atomic_uint64_t mNextPipelineCompatibilityToken;
 
         CombinedLimits mLimits;
-        FeaturesSet mEnabledExtensions;
         FeaturesSet mEnabledFeatures;
 
         std::unique_ptr<InternalPipelineStore> mInternalPipelineStore;

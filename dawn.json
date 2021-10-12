@@ -1021,7 +1021,6 @@
         "category": "structure",
         "extensible": false,
         "tags": ["dawn"],
-        "_comment": "TODO(dawn:1149): remove 'invalid extension' once it's no longer used.",
         "members": [
             {"name": "device ID", "type": "uint32_t"},
             {"name": "vendor ID", "type": "uint32_t"},
@@ -1033,7 +1032,6 @@
             {"name": "timestamp query", "type": "bool", "default": "false"},
             {"name": "multi planar formats", "type": "bool", "default": "false"},
             {"name": "depth clamping", "type": "bool", "default": "false"},
-            {"name": "invalid extension", "type": "bool", "default": "false"},
             {"name": "invalid feature", "type": "bool", "default": "false"},
             {"name": "dawn internal usages", "type": "bool", "default": "false"},
             {"name": "limits", "type": "supported limits"}

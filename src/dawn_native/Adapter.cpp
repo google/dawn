@@ -121,14 +121,6 @@ namespace dawn_native {
     MaybeError AdapterBase::CreateDeviceInternal(DeviceBase** result,
                                                  const DeviceDescriptor* descriptor) {
         if (descriptor != nullptr) {
-            // TODO(dawn:1149): remove once requiredExtensions is no longer used.
-            for (const char* extensionStr : descriptor->requiredExtensions) {
-                Feature extensionEnum = mInstance->FeatureNameToEnum(extensionStr);
-                DAWN_INVALID_IF(extensionEnum == Feature::InvalidEnum,
-                                "Requested feature %s is unknown.", extensionStr);
-                DAWN_INVALID_IF(!mSupportedFeatures.IsEnabled(extensionEnum),
-                                "Requested feature %s is disabled.", extensionStr);
-            }
             for (const char* featureStr : descriptor->requiredFeatures) {
                 Feature featureEnum = mInstance->FeatureNameToEnum(featureStr);
                 DAWN_INVALID_IF(featureEnum == Feature::InvalidEnum,
