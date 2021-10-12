@@ -71,6 +71,7 @@ if (build_with_chromium) {
       "random_generator.h",
       "tint_common_fuzzer.cc",
       "tint_common_fuzzer.h",
+      "tint_reader_writer_fuzzer.h",
       "transform_builder.h",
     ]
   }
@@ -85,6 +86,7 @@ if (build_with_chromium) {
       "fuzzer_init.h",
     ]
   }
+
   if (tint_build_wgsl_reader) {
     fuzzer_test("tint_wgsl_reader_fuzzer") {
       sources = [ "tint_wgsl_reader_fuzzer.cc" ]

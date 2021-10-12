@@ -24,6 +24,7 @@ function(add_tint_fuzzer NAME)
     random_generator.h
     tint_common_fuzzer.cc
     tint_common_fuzzer.h
+    tint_reader_writer_fuzzer.h
     transform_builder.h
     )
   target_link_libraries(${NAME} libtint-fuzz)

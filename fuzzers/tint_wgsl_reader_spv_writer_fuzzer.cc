@@ -15,7 +15,7 @@
 #include <string>
 
 #include "fuzzers/fuzzer_init.h"
-#include "fuzzers/tint_common_fuzzer.h"
+#include "fuzzers/tint_reader_writer_fuzzer.h"
 
 namespace tint {
 namespace fuzzers {
@@ -24,7 +24,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   DataBuilder b(data, size);
   writer::spirv::Options options;
   GenerateSpirvOptions(&b, &options);
-  tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
+  tint::fuzzers::ReaderWriterFuzzer fuzzer(InputFormat::kWGSL,
+                                           OutputFormat::kSpv);
   fuzzer.SetOptionsSpirv(options);
   fuzzer.SetDumpInput(GetCliParams().dump_input);
   return fuzzer.Run(data, size);
