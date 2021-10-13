@@ -96,6 +96,11 @@ class ValidationTest : public testing::Test {
 
     bool HasToggleEnabled(const char* toggle) const;
 
+    // TODO(crbug.com/dawn/689): Use limits returned from the wire
+    // This is implemented here because tests need to always query
+    // the |backendDevice| since limits are not implemented in the wire.
+    wgpu::SupportedLimits GetSupportedLimits();
+
   protected:
     virtual WGPUDevice CreateTestDevice();
 

@@ -27,14 +27,6 @@ static constexpr uint32_t kTextureBytesPerRowAlignment = 256u;
 static constexpr uint32_t kMaxInterStageShaderComponents = 60u;
 static constexpr uint32_t kMaxInterStageShaderVariables = kMaxInterStageShaderComponents / 4;
 
-// Compute constants
-static constexpr uint32_t kMaxComputeWorkgroupStorageSize = 16352u;
-static constexpr uint32_t kMaxComputeWorkgroupInvocations = 256u;
-static constexpr uint32_t kMaxComputePerDimensionDispatchSize = 65535u;
-static constexpr uint32_t kMaxComputeWorkgroupSizeX = 256;
-static constexpr uint32_t kMaxComputeWorkgroupSizeY = 256;
-static constexpr uint32_t kMaxComputeWorkgroupSizeZ = 64;
-
 // Per stage limits
 static constexpr uint32_t kMaxSampledTexturesPerShaderStage = 16;
 static constexpr uint32_t kMaxSamplersPerShaderStage = 16;
@@ -46,12 +38,6 @@ static constexpr uint32_t kMaxUniformBuffersPerShaderStage = 12;
 static constexpr uint32_t kMaxDynamicUniformBuffersPerPipelineLayout = 8u;
 static constexpr uint32_t kMaxDynamicStorageBuffersPerPipelineLayout = 4u;
 
-// Buffer binding constraints
-static constexpr uint64_t kMaxUniformBufferBindingSize = 16384u;
-static constexpr uint64_t kMaxStorageBufferBindingSize = 134217728u;
-static constexpr uint64_t kMinUniformBufferOffsetAlignment = 256u;
-static constexpr uint64_t kMinStorageBufferOffsetAlignment = 256u;
-
 // Indirect command sizes
 static constexpr uint64_t kDispatchIndirectSize = 3 * sizeof(uint32_t);
 static constexpr uint64_t kDrawIndirectSize = 4 * sizeof(uint32_t);
@@ -60,15 +46,6 @@ static constexpr uint64_t kDrawIndexedIndirectSize = 5 * sizeof(uint32_t);
 // Non spec defined constants.
 static constexpr float kLodMin = 0.0;
 static constexpr float kLodMax = 1000.0;
-
-// Max texture size constants
-static constexpr uint32_t kMaxTextureDimension1D = 8192u;
-static constexpr uint32_t kMaxTextureDimension2D = 8192u;
-static constexpr uint32_t kMaxTextureDimension3D = 2048u;
-static constexpr uint32_t kMaxTextureArrayLayers = 256u;
-static constexpr uint32_t kMaxTexture2DMipLevels = 14u;
-static_assert(1 << (kMaxTexture2DMipLevels - 1) == kMaxTextureDimension2D,
-              "kMaxTexture2DMipLevels and kMaxTextureDimension2D size mismatch");
 
 // Offset alignment for CopyB2B. Strictly speaking this alignment is required only
 // on macOS, but we decide to do it on all platforms.

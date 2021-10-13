@@ -18,8 +18,6 @@
 #include "utils/WGPUHelpers.h"
 
 constexpr uint32_t kRTSize = 400;
-constexpr uint32_t kBufferElementsCount = kMinUniformBufferOffsetAlignment / sizeof(uint32_t) + 2;
-constexpr uint32_t kBufferSize = kBufferElementsCount * sizeof(uint32_t);
 constexpr uint32_t kBindingSize = 8;
 
 class DynamicBufferOffsetTests : public DawnTest {
@@ -27,24 +25,29 @@ class DynamicBufferOffsetTests : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
 
+        mMinUniformBufferOffsetAlignment =
+            GetSupportedLimits().limits.minUniformBufferOffsetAlignment;
+
         // Mix up dynamic and non dynamic resources in one bind group and using not continuous
         // binding number to cover more cases.
-        std::array<uint32_t, kBufferElementsCount> uniformData = {0};
+        std::vector<uint32_t> uniformData(mMinUniformBufferOffsetAlignment / sizeof(uint32_t) + 2);
         uniformData[0] = 1;
         uniformData[1] = 2;
 
-        mUniformBuffers[0] = utils::CreateBufferFromData(device, uniformData.data(), kBufferSize,
+        mUniformBuffers[0] = utils::CreateBufferFromData(device, uniformData.data(),
+                                                         sizeof(uint32_t) * uniformData.size(),
                                                          wgpu::BufferUsage::Uniform);
 
         uniformData[uniformData.size() - 2] = 5;
         uniformData[uniformData.size() - 1] = 6;
 
         // Dynamic uniform buffer
-        mUniformBuffers[1] = utils::CreateBufferFromData(device, uniformData.data(), kBufferSize,
+        mUniformBuffers[1] = utils::CreateBufferFromData(device, uniformData.data(),
+                                                         sizeof(uint32_t) * uniformData.size(),
                                                          wgpu::BufferUsage::Uniform);
 
         wgpu::BufferDescriptor storageBufferDescriptor;
-        storageBufferDescriptor.size = kBufferSize;
+        storageBufferDescriptor.size = sizeof(uint32_t) * uniformData.size();
         storageBufferDescriptor.usage =
             wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
 
@@ -72,7 +75,8 @@ class DynamicBufferOffsetTests : public DawnTest {
                                                {4, mStorageBuffers[1], 0, kBindingSize}});
 
         // Extra uniform buffer for inheriting test
-        mUniformBuffers[2] = utils::CreateBufferFromData(device, uniformData.data(), kBufferSize,
+        mUniformBuffers[2] = utils::CreateBufferFromData(device, uniformData.data(),
+                                                         sizeof(uint32_t) * uniformData.size(),
                                                          wgpu::BufferUsage::Uniform);
 
         // Bind group layout for inheriting test
@@ -86,6 +90,7 @@ class DynamicBufferOffsetTests : public DawnTest {
     }
     // Create objects to use as resources inside test bind groups.
 
+    uint32_t mMinUniformBufferOffsetAlignment;
     wgpu::BindGroup mBindGroups[2];
     wgpu::BindGroupLayout mBindGroupLayouts[2];
     wgpu::Buffer mUniformBuffers[3];
@@ -227,8 +232,8 @@ TEST_P(DynamicBufferOffsetTests, SetDynamicOffsetsRenderPipeline) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-    std::array<uint32_t, 2> offsets = {kMinUniformBufferOffsetAlignment,
-                                       kMinUniformBufferOffsetAlignment};
+    std::array<uint32_t, 2> offsets = {mMinUniformBufferOffsetAlignment,
+                                       mMinUniformBufferOffsetAlignment};
     wgpu::RenderPassEncoder renderPassEncoder =
         commandEncoder.BeginRenderPass(&renderPass.renderPassInfo);
     renderPassEncoder.SetPipeline(pipeline);
@@ -241,7 +246,7 @@ TEST_P(DynamicBufferOffsetTests, SetDynamicOffsetsRenderPipeline) {
     std::vector<uint32_t> expectedData = {6, 8};
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(5, 6, 255, 255), renderPass.color, 0, 0);
     EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), mStorageBuffers[1],
-                               kMinUniformBufferOffsetAlignment, expectedData.size());
+                               mMinUniformBufferOffsetAlignment, expectedData.size());
 }
 
 // Dynamic offsets are all zero and no effect to result.
@@ -267,8 +272,8 @@ TEST_P(DynamicBufferOffsetTests, BasicComputePipeline) {
 TEST_P(DynamicBufferOffsetTests, SetDynamicOffsetsComputePipeline) {
     wgpu::ComputePipeline pipeline = CreateComputePipeline();
 
-    std::array<uint32_t, 2> offsets = {kMinUniformBufferOffsetAlignment,
-                                       kMinUniformBufferOffsetAlignment};
+    std::array<uint32_t, 2> offsets = {mMinUniformBufferOffsetAlignment,
+                                       mMinUniformBufferOffsetAlignment};
 
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
@@ -281,7 +286,7 @@ TEST_P(DynamicBufferOffsetTests, SetDynamicOffsetsComputePipeline) {
 
     std::vector<uint32_t> expectedData = {6, 8};
     EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), mStorageBuffers[1],
-                               kMinUniformBufferOffsetAlignment, expectedData.size());
+                               mMinUniformBufferOffsetAlignment, expectedData.size());
 }
 
 // Test inherit dynamic offsets on render pipeline
@@ -293,8 +298,8 @@ TEST_P(DynamicBufferOffsetTests, InheritDynamicOffsetsRenderPipeline) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-    std::array<uint32_t, 2> offsets = {kMinUniformBufferOffsetAlignment,
-                                       kMinUniformBufferOffsetAlignment};
+    std::array<uint32_t, 2> offsets = {mMinUniformBufferOffsetAlignment,
+                                       mMinUniformBufferOffsetAlignment};
     wgpu::RenderPassEncoder renderPassEncoder =
         commandEncoder.BeginRenderPass(&renderPass.renderPassInfo);
     renderPassEncoder.SetPipeline(pipeline);
@@ -310,7 +315,7 @@ TEST_P(DynamicBufferOffsetTests, InheritDynamicOffsetsRenderPipeline) {
     std::vector<uint32_t> expectedData = {12, 16};
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(5, 6, 255, 255), renderPass.color, 0, 0);
     EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), mStorageBuffers[1],
-                               kMinUniformBufferOffsetAlignment, expectedData.size());
+                               mMinUniformBufferOffsetAlignment, expectedData.size());
 }
 
 // Test inherit dynamic offsets on compute pipeline
@@ -322,8 +327,8 @@ TEST_P(DynamicBufferOffsetTests, InheritDynamicOffsetsComputePipeline) {
     wgpu::ComputePipeline pipeline = CreateComputePipeline();
     wgpu::ComputePipeline testPipeline = CreateComputePipeline(true);
 
-    std::array<uint32_t, 2> offsets = {kMinUniformBufferOffsetAlignment,
-                                       kMinUniformBufferOffsetAlignment};
+    std::array<uint32_t, 2> offsets = {mMinUniformBufferOffsetAlignment,
+                                       mMinUniformBufferOffsetAlignment};
 
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
@@ -339,7 +344,7 @@ TEST_P(DynamicBufferOffsetTests, InheritDynamicOffsetsComputePipeline) {
 
     std::vector<uint32_t> expectedData = {12, 16};
     EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), mStorageBuffers[1],
-                               kMinUniformBufferOffsetAlignment, expectedData.size());
+                               mMinUniformBufferOffsetAlignment, expectedData.size());
 }
 
 // Setting multiple dynamic offsets for the same bindgroup in one render pass.
@@ -350,8 +355,8 @@ TEST_P(DynamicBufferOffsetTests, UpdateDynamicOffsetsMultipleTimesRenderPipeline
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-    std::array<uint32_t, 2> offsets = {kMinUniformBufferOffsetAlignment,
-                                       kMinUniformBufferOffsetAlignment};
+    std::array<uint32_t, 2> offsets = {mMinUniformBufferOffsetAlignment,
+                                       mMinUniformBufferOffsetAlignment};
     std::array<uint32_t, 2> testOffsets = {0, 0};
 
     wgpu::RenderPassEncoder renderPassEncoder =
@@ -374,8 +379,8 @@ TEST_P(DynamicBufferOffsetTests, UpdateDynamicOffsetsMultipleTimesRenderPipeline
 TEST_P(DynamicBufferOffsetTests, UpdateDynamicOffsetsMultipleTimesComputePipeline) {
     wgpu::ComputePipeline pipeline = CreateComputePipeline();
 
-    std::array<uint32_t, 2> offsets = {kMinUniformBufferOffsetAlignment,
-                                       kMinUniformBufferOffsetAlignment};
+    std::array<uint32_t, 2> offsets = {mMinUniformBufferOffsetAlignment,
+                                       mMinUniformBufferOffsetAlignment};
     std::array<uint32_t, 2> testOffsets = {0, 0};
 
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();

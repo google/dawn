@@ -115,6 +115,7 @@ TEST_P(SwapChainValidationTests, CreationSuccess) {
 
 // Checks that the creation size must be a valid 2D texture size.
 TEST_P(SwapChainValidationTests, InvalidCreationSize) {
+    wgpu::Limits supportedLimits = GetSupportedLimits().limits;
     // A width of 0 is invalid.
     {
         wgpu::SwapChainDescriptor desc = goodDescriptor;
@@ -128,23 +129,23 @@ TEST_P(SwapChainValidationTests, InvalidCreationSize) {
         ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &desc));
     }
 
-    // A width of kMaxTextureDimension2D is valid but kMaxTextureDimension2D + 1 isn't.
+    // A width of maxTextureDimension2D is valid but maxTextureDimension2D + 1 isn't.
     {
         wgpu::SwapChainDescriptor desc = goodDescriptor;
-        desc.width = kMaxTextureDimension2D;
+        desc.width = supportedLimits.maxTextureDimension2D;
         device.CreateSwapChain(surface, &desc);
 
-        desc.width = kMaxTextureDimension2D + 1;
+        desc.width = supportedLimits.maxTextureDimension2D + 1;
         ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &desc));
     }
 
-    // A height of kMaxTextureDimension2D is valid but kMaxTextureDimension2D + 1 isn't.
+    // A height of maxTextureDimension2D is valid but maxTextureDimension2D + 1 isn't.
     {
         wgpu::SwapChainDescriptor desc = goodDescriptor;
-        desc.height = kMaxTextureDimension2D;
+        desc.height = supportedLimits.maxTextureDimension2D;
         device.CreateSwapChain(surface, &desc);
 
-        desc.height = kMaxTextureDimension2D + 1;
+        desc.height = supportedLimits.maxTextureDimension2D + 1;
         ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &desc));
     }
 }

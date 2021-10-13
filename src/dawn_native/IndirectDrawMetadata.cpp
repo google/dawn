@@ -17,6 +17,7 @@
 #include "common/Constants.h"
 #include "common/RefCounted.h"
 #include "dawn_native/IndirectDrawValidationEncoder.h"
+#include "dawn_native/Limits.h"
 #include "dawn_native/RenderBundle.h"
 
 #include <algorithm>
@@ -24,15 +25,10 @@
 
 namespace dawn_native {
 
-    namespace {
-
-        // In the unlikely scenario that indirect offsets used over a single buffer span more than
-        // this length of the buffer, we split the validation work into multiple batches.
-        constexpr uint64_t kMaxBatchOffsetRange = kMaxStorageBufferBindingSize -
-                                                  kMinStorageBufferOffsetAlignment -
-                                                  kDrawIndexedIndirectSize;
-
-    }  // namespace
+    uint32_t ComputeMaxIndirectValidationBatchOffsetRange(const CombinedLimits& limits) {
+        return limits.v1.maxStorageBufferBindingSize - limits.v1.minStorageBufferOffsetAlignment -
+               kDrawIndexedIndirectSize;
+    }
 
     IndirectDrawMetadata::IndexedIndirectBufferValidationInfo::IndexedIndirectBufferValidationInfo(
         BufferBase* indirectBuffer)
@@ -40,12 +36,14 @@ namespace dawn_native {
     }
 
     void IndirectDrawMetadata::IndexedIndirectBufferValidationInfo::AddIndexedIndirectDraw(
+        uint32_t maxDrawCallsPerIndirectValidationBatch,
+        uint32_t maxBatchOffsetRange,
         IndexedIndirectDraw draw) {
         const uint64_t newOffset = draw.clientBufferOffset;
         auto it = mBatches.begin();
         while (it != mBatches.end()) {
             IndexedIndirectValidationBatch& batch = *it;
-            if (batch.draws.size() >= kMaxDrawCallsPerIndirectValidationBatch) {
+            if (batch.draws.size() >= maxDrawCallsPerIndirectValidationBatch) {
                 // This batch is full. If its minOffset is to the right of the new offset, we can
                 // just insert a new batch here.
                 if (newOffset < batch.minOffset) {
@@ -62,16 +60,14 @@ namespace dawn_native {
                 return;
             }
 
-            if (newOffset < batch.minOffset &&
-                batch.maxOffset - newOffset <= kMaxBatchOffsetRange) {
+            if (newOffset < batch.minOffset && batch.maxOffset - newOffset <= maxBatchOffsetRange) {
                 // We can extend this batch to the left in order to fit the new offset.
                 batch.minOffset = newOffset;
                 batch.draws.push_back(std::move(draw));
                 return;
             }
 
-            if (newOffset > batch.maxOffset &&
-                newOffset - batch.minOffset <= kMaxBatchOffsetRange) {
+            if (newOffset > batch.maxOffset && newOffset - batch.minOffset <= maxBatchOffsetRange) {
                 // We can extend this batch to the right in order to fit the new offset.
                 batch.maxOffset = newOffset;
                 batch.draws.push_back(std::move(draw));
@@ -95,14 +91,16 @@ namespace dawn_native {
     }
 
     void IndirectDrawMetadata::IndexedIndirectBufferValidationInfo::AddBatch(
+        uint32_t maxDrawCallsPerIndirectValidationBatch,
+        uint32_t maxBatchOffsetRange,
         const IndexedIndirectValidationBatch& newBatch) {
         auto it = mBatches.begin();
         while (it != mBatches.end()) {
             IndexedIndirectValidationBatch& batch = *it;
             uint64_t min = std::min(newBatch.minOffset, batch.minOffset);
             uint64_t max = std::max(newBatch.maxOffset, batch.maxOffset);
-            if (max - min <= kMaxBatchOffsetRange && batch.draws.size() + newBatch.draws.size() <=
-                                                         kMaxDrawCallsPerIndirectValidationBatch) {
+            if (max - min <= maxBatchOffsetRange && batch.draws.size() + newBatch.draws.size() <=
+                                                        maxDrawCallsPerIndirectValidationBatch) {
                 // This batch fits within the limits of an existing batch. Merge it.
                 batch.minOffset = min;
                 batch.maxOffset = max;
@@ -124,7 +122,10 @@ namespace dawn_native {
         return mBatches;
     }
 
-    IndirectDrawMetadata::IndirectDrawMetadata() = default;
+    IndirectDrawMetadata::IndirectDrawMetadata(const CombinedLimits& limits)
+        : mMaxDrawCallsPerBatch(ComputeMaxDrawCallsPerIndirectValidationBatch(limits)),
+          mMaxBatchOffsetRange(ComputeMaxIndirectValidationBatchOffsetRange(limits)) {
+    }
 
     IndirectDrawMetadata::~IndirectDrawMetadata() = default;
 
@@ -150,7 +151,7 @@ namespace dawn_native {
             if (it != mIndexedIndirectBufferValidationInfo.end() && it->first == config) {
                 // We already have batches for the same config. Merge the new ones in.
                 for (const IndexedIndirectValidationBatch& batch : entry.second.GetBatches()) {
-                    it->second.AddBatch(batch);
+                    it->second.AddBatch(mMaxDrawCallsPerBatch, mMaxBatchOffsetRange, batch);
                 }
             } else {
                 mIndexedIndirectBufferValidationInfo.emplace_hint(it, config, entry.second);
@@ -187,7 +188,8 @@ namespace dawn_native {
         IndexedIndirectDraw draw;
         draw.clientBufferOffset = indirectOffset;
         draw.bufferLocation = drawCmdIndirectBufferLocation;
-        it->second.AddIndexedIndirectDraw(std::move(draw));
+        it->second.AddIndexedIndirectDraw(mMaxDrawCallsPerBatch, mMaxBatchOffsetRange,
+                                          std::move(draw));
     }
 
 }  // namespace dawn_native

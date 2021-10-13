@@ -57,27 +57,30 @@ TEST_F(ComputeValidationTest, PerDimensionDispatchSizeLimits_SmallestValid) {
 
 // Check that the largest allowed dispatch is OK.
 TEST_F(ComputeValidationTest, PerDimensionDispatchSizeLimits_LargestValid) {
-    constexpr uint32_t kMax = kMaxComputePerDimensionDispatchSize;
-    TestDispatch(kMax, kMax, kMax);
+    const uint32_t max = GetSupportedLimits().limits.maxComputeWorkgroupsPerDimension;
+    TestDispatch(max, max, max);
 }
 
 // Check that exceeding the maximum on the X dimension results in validation failure.
 TEST_F(ComputeValidationTest, PerDimensionDispatchSizeLimits_InvalidX) {
-    ASSERT_DEVICE_ERROR(TestDispatch(kMaxComputePerDimensionDispatchSize + 1, 1, 1));
+    const uint32_t max = GetSupportedLimits().limits.maxComputeWorkgroupsPerDimension;
+    ASSERT_DEVICE_ERROR(TestDispatch(max + 1, 1, 1));
 }
 
 // Check that exceeding the maximum on the Y dimension results in validation failure.
 TEST_F(ComputeValidationTest, PerDimensionDispatchSizeLimits_InvalidY) {
-    ASSERT_DEVICE_ERROR(TestDispatch(1, kMaxComputePerDimensionDispatchSize + 1, 1));
+    const uint32_t max = GetSupportedLimits().limits.maxComputeWorkgroupsPerDimension;
+    ASSERT_DEVICE_ERROR(TestDispatch(1, max + 1, 1));
 }
 
 // Check that exceeding the maximum on the Z dimension results in validation failure.
 TEST_F(ComputeValidationTest, PerDimensionDispatchSizeLimits_InvalidZ) {
-    ASSERT_DEVICE_ERROR(TestDispatch(1, 1, kMaxComputePerDimensionDispatchSize + 1));
+    const uint32_t max = GetSupportedLimits().limits.maxComputeWorkgroupsPerDimension;
+    ASSERT_DEVICE_ERROR(TestDispatch(1, 1, max + 1));
 }
 
 // Check that exceeding the maximum on all dimensions results in validation failure.
 TEST_F(ComputeValidationTest, PerDimensionDispatchSizeLimits_InvalidAll) {
-    constexpr uint32_t kMax = kMaxComputePerDimensionDispatchSize;
-    ASSERT_DEVICE_ERROR(TestDispatch(kMax + 1, kMax + 1, kMax + 1));
+    const uint32_t max = GetSupportedLimits().limits.maxComputeWorkgroupsPerDimension;
+    ASSERT_DEVICE_ERROR(TestDispatch(max + 1, max + 1, max + 1));
 }

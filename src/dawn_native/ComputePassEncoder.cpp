@@ -28,8 +28,8 @@ namespace dawn_native {
 
     namespace {
 
-        MaybeError ValidatePerDimensionDispatchSizeLimit(uint32_t size) {
-            if (size > kMaxComputePerDimensionDispatchSize) {
+        MaybeError ValidatePerDimensionDispatchSizeLimit(const DeviceBase* device, uint32_t size) {
+            if (size > device->GetLimits().v1.maxComputeWorkgroupsPerDimension) {
                 return DAWN_VALIDATION_ERROR("Dispatch size exceeds defined limits");
             }
 
@@ -85,9 +85,9 @@ namespace dawn_native {
             [&](CommandAllocator* allocator) -> MaybeError {
                 if (IsValidationEnabled()) {
                     DAWN_TRY(mCommandBufferState.ValidateCanDispatch());
-                    DAWN_TRY(ValidatePerDimensionDispatchSizeLimit(x));
-                    DAWN_TRY(ValidatePerDimensionDispatchSizeLimit(y));
-                    DAWN_TRY(ValidatePerDimensionDispatchSizeLimit(z));
+                    DAWN_TRY(ValidatePerDimensionDispatchSizeLimit(GetDevice(), x));
+                    DAWN_TRY(ValidatePerDimensionDispatchSizeLimit(GetDevice(), y));
+                    DAWN_TRY(ValidatePerDimensionDispatchSizeLimit(GetDevice(), z));
                 }
 
                 // Record the synchronization scope for Dispatch, which is just the current

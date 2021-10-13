@@ -23,6 +23,11 @@ constexpr static uint32_t kRTSize = 8;
 
 class BindGroupTests : public DawnTest {
   protected:
+    void SetUp() override {
+        DawnTest::SetUp();
+        mMinUniformBufferOffsetAlignment =
+            GetSupportedLimits().limits.minUniformBufferOffsetAlignment;
+    }
     wgpu::CommandBuffer CreateSimpleComputeCommandBuffer(const wgpu::ComputePipeline& pipeline,
                                                          const wgpu::BindGroup& bindGroup) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -116,6 +121,8 @@ class BindGroupTests : public DawnTest {
 
         return device.CreateRenderPipeline(&pipelineDescriptor);
     }
+
+    uint32_t mMinUniformBufferOffsetAlignment;
 };
 
 // Test a bindgroup reused in two command buffers in the same call to queue.Submit().
@@ -649,7 +656,7 @@ TEST_P(BindGroupTests, SetDynamicBindGroupBeforePipeline) {
     std::array<float, 4> color0 = {1, 0, 0, 0.501};
     std::array<float, 4> color1 = {0, 1, 0, 0.501};
 
-    size_t color1Offset = Align(sizeof(color0), kMinUniformBufferOffsetAlignment);
+    size_t color1Offset = Align(sizeof(color0), mMinUniformBufferOffsetAlignment);
 
     std::vector<uint8_t> data(color1Offset + sizeof(color1));
     memcpy(data.data(), color0.data(), sizeof(color0));
@@ -719,7 +726,7 @@ TEST_P(BindGroupTests, BindGroupsPersistAfterPipelineChange) {
     std::array<float, 4> color0 = {1, 0, 0, 0.5};
     std::array<float, 4> color1 = {0, 1, 0, 0.5};
 
-    size_t color1Offset = Align(sizeof(color0), kMinUniformBufferOffsetAlignment);
+    size_t color1Offset = Align(sizeof(color0), mMinUniformBufferOffsetAlignment);
 
     std::vector<uint8_t> data(color1Offset + sizeof(color1));
     memcpy(data.data(), color0.data(), sizeof(color0));
@@ -806,9 +813,9 @@ TEST_P(BindGroupTests, DrawThenChangePipelineAndBindGroup) {
     std::array<float, 4> color2 = {0, 0, 0, 0.501};
     std::array<float, 4> color3 = {0, 0, 1, 0};
 
-    size_t color1Offset = Align(sizeof(color0), kMinUniformBufferOffsetAlignment);
-    size_t color2Offset = Align(color1Offset + sizeof(color1), kMinUniformBufferOffsetAlignment);
-    size_t color3Offset = Align(color2Offset + sizeof(color2), kMinUniformBufferOffsetAlignment);
+    size_t color1Offset = Align(sizeof(color0), mMinUniformBufferOffsetAlignment);
+    size_t color2Offset = Align(color1Offset + sizeof(color1), mMinUniformBufferOffsetAlignment);
+    size_t color3Offset = Align(color2Offset + sizeof(color2), mMinUniformBufferOffsetAlignment);
 
     std::vector<uint8_t> data(color3Offset + sizeof(color3), 0);
     memcpy(data.data(), color0.data(), sizeof(color0));
@@ -906,9 +913,9 @@ TEST_P(BindGroupTests, DrawThenChangePipelineTwiceAndBindGroup) {
     std::array<float, 4> color3 = {0, 0, 0, 1};
 
     size_t color0Offset = 0;
-    size_t color1Offset = Align(color0Offset + sizeof(color0), kMinUniformBufferOffsetAlignment);
-    size_t color2Offset = Align(color1Offset + sizeof(color1), kMinUniformBufferOffsetAlignment);
-    size_t color3Offset = Align(color2Offset + sizeof(color2), kMinUniformBufferOffsetAlignment);
+    size_t color1Offset = Align(color0Offset + sizeof(color0), mMinUniformBufferOffsetAlignment);
+    size_t color2Offset = Align(color1Offset + sizeof(color1), mMinUniformBufferOffsetAlignment);
+    size_t color3Offset = Align(color2Offset + sizeof(color2), mMinUniformBufferOffsetAlignment);
 
     std::vector<uint8_t> data(color3Offset + sizeof(color3), 0);
     memcpy(data.data(), color0.data(), sizeof(color0));
@@ -985,14 +992,14 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
     // We will put the following values and the respective offsets into a buffer.
     // The test will ensure that the correct dynamic offset is applied to each buffer by reading the
     // value from an offset binding.
-    std::array<uint32_t, 3> offsets = {3 * kMinUniformBufferOffsetAlignment,
-                                       1 * kMinUniformBufferOffsetAlignment,
-                                       2 * kMinUniformBufferOffsetAlignment};
+    std::array<uint32_t, 3> offsets = {3 * mMinUniformBufferOffsetAlignment,
+                                       1 * mMinUniformBufferOffsetAlignment,
+                                       2 * mMinUniformBufferOffsetAlignment};
     std::array<uint32_t, 3> values = {21, 67, 32};
 
     // Create three buffers large enough to by offset by the largest offset.
     wgpu::BufferDescriptor bufferDescriptor;
-    bufferDescriptor.size = 3 * kMinUniformBufferOffsetAlignment + sizeof(uint32_t);
+    bufferDescriptor.size = 3 * mMinUniformBufferOffsetAlignment + sizeof(uint32_t);
     bufferDescriptor.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst;
 
     wgpu::Buffer buffer0 = device.CreateBuffer(&bufferDescriptor);
@@ -1075,19 +1082,19 @@ TEST_P(BindGroupTests, DynamicAndNonDynamicBindingsDoNotConflictAfterRemapping) 
         uint32_t dynamicBufferBindingNumber = dynamicBufferFirst ? 0 : 1;
         uint32_t bufferBindingNumber = dynamicBufferFirst ? 1 : 0;
 
-        std::array<uint32_t, 1> offsets{kMinUniformBufferOffsetAlignment};
+        std::array<uint32_t, 1> offsets{mMinUniformBufferOffsetAlignment};
         std::array<uint32_t, 2> values = {21, 67};
 
         // Create three buffers large enough to by offset by the largest offset.
         wgpu::BufferDescriptor bufferDescriptor;
-        bufferDescriptor.size = 2 * kMinUniformBufferOffsetAlignment + sizeof(uint32_t);
+        bufferDescriptor.size = 2 * mMinUniformBufferOffsetAlignment + sizeof(uint32_t);
         bufferDescriptor.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
 
         wgpu::Buffer dynamicBuffer = device.CreateBuffer(&bufferDescriptor);
         wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
         // Populate the values
-        queue.WriteBuffer(dynamicBuffer, kMinUniformBufferOffsetAlignment,
+        queue.WriteBuffer(dynamicBuffer, mMinUniformBufferOffsetAlignment,
                           &values[dynamicBufferBindingNumber], sizeof(uint32_t));
         queue.WriteBuffer(buffer, 0, &values[bufferBindingNumber], sizeof(uint32_t));
 

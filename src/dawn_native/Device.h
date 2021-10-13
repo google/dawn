@@ -336,6 +336,8 @@ namespace dawn_native {
 
         virtual float GetTimestampPeriodInNS() const = 0;
 
+        const CombinedLimits& GetLimits() const;
+
         AsyncTaskManager* GetAsyncTaskManager() const;
         CallbackTaskManager* GetCallbackTaskManager() const;
         dawn_platform::WorkerTaskPool* GetWorkerTaskPool() const;

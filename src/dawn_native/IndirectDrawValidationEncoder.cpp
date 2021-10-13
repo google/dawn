@@ -188,12 +188,15 @@ namespace dawn_native {
 
     }  // namespace
 
-    const uint32_t kBatchDrawCallLimitByDispatchSize =
-        kMaxComputePerDimensionDispatchSize * kWorkgroupSize;
-    const uint32_t kBatchDrawCallLimitByStorageBindingSize =
-        (kMaxStorageBufferBindingSize - sizeof(BatchInfo)) / sizeof(uint32_t);
-    const uint32_t kMaxDrawCallsPerIndirectValidationBatch =
-        std::min(kBatchDrawCallLimitByDispatchSize, kBatchDrawCallLimitByStorageBindingSize);
+    uint32_t ComputeMaxDrawCallsPerIndirectValidationBatch(const CombinedLimits& limits) {
+        const uint64_t batchDrawCallLimitByDispatchSize =
+            static_cast<uint64_t>(limits.v1.maxComputeWorkgroupsPerDimension) * kWorkgroupSize;
+        const uint64_t batchDrawCallLimitByStorageBindingSize =
+            (limits.v1.maxStorageBufferBindingSize - sizeof(BatchInfo)) / sizeof(uint32_t);
+        return static_cast<uint32_t>(
+            std::min({batchDrawCallLimitByDispatchSize, batchDrawCallLimitByStorageBindingSize,
+                      uint64_t(std::numeric_limits<uint32_t>::max())}));
+    }
 
     MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
                                                     CommandEncoder* commandEncoder,
@@ -232,13 +235,18 @@ namespace dawn_native {
             return {};
         }
 
+        const uint32_t maxStorageBufferBindingSize =
+            device->GetLimits().v1.maxStorageBufferBindingSize;
+        const uint32_t minStorageBufferOffsetAlignment =
+            device->GetLimits().v1.minStorageBufferOffsetAlignment;
+
         for (auto& entry : bufferInfoMap) {
             const IndirectDrawMetadata::IndexedIndirectConfig& config = entry.first;
             BufferBase* clientIndirectBuffer = config.first;
             for (const IndirectDrawMetadata::IndexedIndirectValidationBatch& batch :
                  entry.second.GetBatches()) {
                 const uint64_t minOffsetFromAlignedBoundary =
-                    batch.minOffset % kMinStorageBufferOffsetAlignment;
+                    batch.minOffset % minStorageBufferOffsetAlignment;
                 const uint64_t minOffsetAlignedDown =
                     batch.minOffset - minOffsetFromAlignedBoundary;
 
@@ -253,18 +261,18 @@ namespace dawn_native {
 
                 newBatch.validatedParamsSize = batch.draws.size() * kDrawIndexedIndirectSize;
                 newBatch.validatedParamsOffset =
-                    Align(validatedParamsSize, kMinStorageBufferOffsetAlignment);
+                    Align(validatedParamsSize, minStorageBufferOffsetAlignment);
                 validatedParamsSize = newBatch.validatedParamsOffset + newBatch.validatedParamsSize;
-                if (validatedParamsSize > kMaxStorageBufferBindingSize) {
+                if (validatedParamsSize > maxStorageBufferBindingSize) {
                     return DAWN_INTERNAL_ERROR("Too many drawIndexedIndirect calls to validate");
                 }
 
                 Pass* currentPass = passes.empty() ? nullptr : &passes.back();
                 if (currentPass && currentPass->clientIndirectBuffer == clientIndirectBuffer) {
                     uint64_t nextBatchDataOffset =
-                        Align(currentPass->batchDataSize, kMinStorageBufferOffsetAlignment);
+                        Align(currentPass->batchDataSize, minStorageBufferOffsetAlignment);
                     uint64_t newPassBatchDataSize = nextBatchDataOffset + newBatch.dataSize;
-                    if (newPassBatchDataSize <= kMaxStorageBufferBindingSize) {
+                    if (newPassBatchDataSize <= maxStorageBufferBindingSize) {
                         // We can fit this batch in the current pass.
                         newBatch.dataBufferOffset = nextBatchDataOffset;
                         currentPass->batchDataSize = newPassBatchDataSize;

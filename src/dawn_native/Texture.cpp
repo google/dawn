@@ -173,19 +173,21 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateTextureSize(const TextureDescriptor* descriptor, const Format* format) {
+        MaybeError ValidateTextureSize(const DeviceBase* device,
+                                       const TextureDescriptor* descriptor,
+                                       const Format* format) {
             ASSERT(descriptor->size.width != 0 && descriptor->size.height != 0 &&
                    descriptor->size.depthOrArrayLayers != 0);
-
+            const CombinedLimits& limits = device->GetLimits();
             Extent3D maxExtent;
             switch (descriptor->dimension) {
                 case wgpu::TextureDimension::e2D:
-                    maxExtent = {kMaxTextureDimension2D, kMaxTextureDimension2D,
-                                 kMaxTextureArrayLayers};
+                    maxExtent = {limits.v1.maxTextureDimension2D, limits.v1.maxTextureDimension2D,
+                                 limits.v1.maxTextureArrayLayers};
                     break;
                 case wgpu::TextureDimension::e3D:
-                    maxExtent = {kMaxTextureDimension3D, kMaxTextureDimension3D,
-                                 kMaxTextureDimension3D};
+                    maxExtent = {limits.v1.maxTextureDimension3D, limits.v1.maxTextureDimension3D,
+                                 limits.v1.maxTextureDimension3D};
                     break;
                 case wgpu::TextureDimension::e1D:
                 default:
@@ -209,8 +211,6 @@ namespace dawn_native {
                 Log2(maxMippedDimension) + 1 < descriptor->mipLevelCount,
                 "Texture mip level count (%u) exceeds the maximum (%u) for its size (%s).",
                 descriptor->mipLevelCount, Log2(maxMippedDimension) + 1, &descriptor->size);
-
-            ASSERT(descriptor->mipLevelCount <= kMaxTexture2DMipLevels);
 
             if (format->isCompressed) {
                 const TexelBlockInfo& blockInfo =
@@ -308,7 +308,7 @@ namespace dawn_native {
             "The dimension (%s) of a texture with a depth/stencil format (%s) is not 2D.",
             descriptor->dimension, format->format);
 
-        DAWN_TRY(ValidateTextureSize(descriptor, format));
+        DAWN_TRY(ValidateTextureSize(device, descriptor, format));
 
         // TODO(crbug.com/dawn/838): Implement a workaround for this issue.
         // Readbacks from the non-zero mip of a stencil texture may contain garbage data.
@@ -555,12 +555,7 @@ namespace dawn_native {
     uint32_t TextureBase::GetSubresourceIndex(uint32_t mipLevel,
                                               uint32_t arraySlice,
                                               Aspect aspect) const {
-        ASSERT(arraySlice <= kMaxTextureArrayLayers);
-        ASSERT(mipLevel <= kMaxTexture2DMipLevels);
         ASSERT(HasOneBit(aspect));
-        static_assert(
-            kMaxTexture2DMipLevels <= std::numeric_limits<uint32_t>::max() / kMaxTextureArrayLayers,
-            "texture size overflows uint32_t");
         return mipLevel +
                GetNumMipLevels() * (arraySlice + GetArrayLayers() * GetAspectIndex(aspect));
     }

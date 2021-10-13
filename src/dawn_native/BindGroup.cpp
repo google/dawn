@@ -50,19 +50,22 @@ namespace dawn_native {
             switch (bindingInfo.buffer.type) {
                 case wgpu::BufferBindingType::Uniform:
                     requiredUsage = wgpu::BufferUsage::Uniform;
-                    maxBindingSize = kMaxUniformBufferBindingSize;
-                    requiredBindingAlignment = kMinUniformBufferOffsetAlignment;
+                    maxBindingSize = device->GetLimits().v1.maxUniformBufferBindingSize;
+                    requiredBindingAlignment =
+                        device->GetLimits().v1.minUniformBufferOffsetAlignment;
                     break;
                 case wgpu::BufferBindingType::Storage:
                 case wgpu::BufferBindingType::ReadOnlyStorage:
                     requiredUsage = wgpu::BufferUsage::Storage;
-                    maxBindingSize = kMaxStorageBufferBindingSize;
-                    requiredBindingAlignment = kMinStorageBufferOffsetAlignment;
+                    maxBindingSize = device->GetLimits().v1.maxStorageBufferBindingSize;
+                    requiredBindingAlignment =
+                        device->GetLimits().v1.minStorageBufferOffsetAlignment;
                     break;
                 case kInternalStorageBufferBinding:
                     requiredUsage = kInternalStorageBuffer;
-                    maxBindingSize = kMaxStorageBufferBindingSize;
-                    requiredBindingAlignment = kMinStorageBufferOffsetAlignment;
+                    maxBindingSize = device->GetLimits().v1.maxStorageBufferBindingSize;
+                    requiredBindingAlignment =
+                        device->GetLimits().v1.minStorageBufferOffsetAlignment;
                     break;
                 case wgpu::BufferBindingType::Undefined:
                     UNREACHABLE();

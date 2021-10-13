@@ -34,6 +34,7 @@ namespace dawn_native {
                                          EncodingContext* encodingContext,
                                          Ref<AttachmentState> attachmentState)
         : ProgrammablePassEncoder(device, encodingContext),
+          mIndirectDrawMetadata(device->GetLimits()),
           mAttachmentState(std::move(attachmentState)),
           mDisableBaseVertex(device->IsToggleEnabled(Toggle::DisableBaseVertex)),
           mDisableBaseInstance(device->IsToggleEnabled(Toggle::DisableBaseInstance)) {
@@ -43,6 +44,7 @@ namespace dawn_native {
                                          EncodingContext* encodingContext,
                                          ErrorTag errorTag)
         : ProgrammablePassEncoder(device, encodingContext, errorTag),
+          mIndirectDrawMetadata(device->GetLimits()),
           mDisableBaseVertex(device->IsToggleEnabled(Toggle::DisableBaseVertex)),
           mDisableBaseInstance(device->IsToggleEnabled(Toggle::DisableBaseInstance)) {
     }

@@ -609,9 +609,11 @@ namespace dawn_native {
         }
 
         ResultOrError<EntryPointMetadataTable> ReflectShaderUsingTint(
-            DeviceBase*,
+            const DeviceBase* device,
             const tint::Program* program) {
             ASSERT(program->IsValid());
+
+            const CombinedLimits& limits = device->GetLimits();
 
             EntryPointMetadataTable result;
 
@@ -645,36 +647,32 @@ namespace dawn_native {
                 DAWN_TRY_ASSIGN(metadata->stage, TintPipelineStageToShaderStage(entryPoint.stage));
 
                 if (metadata->stage == SingleShaderStage::Compute) {
-                    DAWN_INVALID_IF(entryPoint.workgroup_size_x > kMaxComputeWorkgroupSizeX ||
-                                        entryPoint.workgroup_size_y > kMaxComputeWorkgroupSizeY ||
-                                        entryPoint.workgroup_size_z > kMaxComputeWorkgroupSizeZ,
-                                    "Entry-point uses workgroup_size(%u, %u, %u) that exceeds the "
-                                    "maximum allowed (%u, %u, %u).",
-                                    entryPoint.workgroup_size_x, entryPoint.workgroup_size_y,
-                                    entryPoint.workgroup_size_z, kMaxComputeWorkgroupSizeX,
-                                    kMaxComputeWorkgroupSizeY, kMaxComputeWorkgroupSizeZ);
+                    DAWN_INVALID_IF(
+                        entryPoint.workgroup_size_x > limits.v1.maxComputeWorkgroupSizeX ||
+                            entryPoint.workgroup_size_y > limits.v1.maxComputeWorkgroupSizeY ||
+                            entryPoint.workgroup_size_z > limits.v1.maxComputeWorkgroupSizeZ,
+                        "Entry-point uses workgroup_size(%u, %u, %u) that exceeds the "
+                        "maximum allowed (%u, %u, %u).",
+                        entryPoint.workgroup_size_x, entryPoint.workgroup_size_y,
+                        entryPoint.workgroup_size_z, limits.v1.maxComputeWorkgroupSizeX,
+                        limits.v1.maxComputeWorkgroupSizeY, limits.v1.maxComputeWorkgroupSizeZ);
 
                     // Dimensions have already been validated against their individual limits above.
-                    // This assertion ensures that the product of such limited dimensions cannot
-                    // possibly overflow a uint32_t.
-                    static_assert(static_cast<uint64_t>(kMaxComputeWorkgroupSizeX) *
-                                          kMaxComputeWorkgroupSizeY * kMaxComputeWorkgroupSizeZ <=
-                                      std::numeric_limits<uint32_t>::max(),
-                                  "Per-dimension workgroup size limits are too high");
-                    uint32_t numInvocations = entryPoint.workgroup_size_x *
+                    // Cast to uint64_t to avoid overflow in this multiplication.
+                    uint64_t numInvocations = static_cast<uint64_t>(entryPoint.workgroup_size_x) *
                                               entryPoint.workgroup_size_y *
                                               entryPoint.workgroup_size_z;
-                    DAWN_INVALID_IF(numInvocations > kMaxComputeWorkgroupInvocations,
+                    DAWN_INVALID_IF(numInvocations > limits.v1.maxComputeInvocationsPerWorkgroup,
                                     "The total number of workgroup invocations (%u) exceeds the "
                                     "maximum allowed (%u).",
-                                    numInvocations, kMaxComputeWorkgroupInvocations);
+                                    numInvocations, limits.v1.maxComputeInvocationsPerWorkgroup);
 
                     const size_t workgroupStorageSize =
                         inspector.GetWorkgroupStorageSize(entryPoint.name);
-                    DAWN_INVALID_IF(workgroupStorageSize > kMaxComputeWorkgroupStorageSize,
+                    DAWN_INVALID_IF(workgroupStorageSize > limits.v1.maxComputeWorkgroupStorageSize,
                                     "The total use of workgroup storage (%u bytes) is larger than "
                                     "the maximum allowed (%u bytes).",
-                                    workgroupStorageSize, kMaxComputeWorkgroupStorageSize);
+                                    workgroupStorageSize, limits.v1.maxComputeWorkgroupStorageSize);
 
                     metadata->localWorkgroupSize.x = entryPoint.workgroup_size_x;
                     metadata->localWorkgroupSize.y = entryPoint.workgroup_size_y;

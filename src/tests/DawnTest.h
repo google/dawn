@@ -485,6 +485,11 @@ class DawnTestBase {
 
     const wgpu::AdapterProperties& GetAdapterProperties() const;
 
+    // TODO(crbug.com/dawn/689): Use limits returned from the wire
+    // This is implemented here because tests need to always query
+    // the |backendDevice| since limits are not implemented in the wire.
+    wgpu::SupportedLimits GetSupportedLimits();
+
   private:
     utils::ScopedAutoreleasePool mObjCAutoreleasePool;
     AdapterTestParam mParam;

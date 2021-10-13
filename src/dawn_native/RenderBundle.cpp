@@ -44,7 +44,7 @@ namespace dawn_native {
     }
 
     RenderBundleBase::RenderBundleBase(DeviceBase* device, ErrorTag errorTag)
-        : ApiObjectBase(device, errorTag) {
+        : ApiObjectBase(device, errorTag), mIndirectDrawMetadata(device->GetLimits()) {
     }
 
     ObjectType RenderBundleBase::GetType() const {

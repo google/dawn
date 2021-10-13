@@ -179,6 +179,13 @@ bool ValidationTest::HasToggleEnabled(const char* toggle) const {
            }) != toggles.end();
 }
 
+wgpu::SupportedLimits ValidationTest::GetSupportedLimits() {
+    WGPUSupportedLimits supportedLimits;
+    supportedLimits.nextInChain = nullptr;
+    dawn_native::GetProcs().deviceGetLimits(backendDevice, &supportedLimits);
+    return *reinterpret_cast<wgpu::SupportedLimits*>(&supportedLimits);
+}
+
 WGPUDevice ValidationTest::CreateTestDevice() {
     // Disabled disallowing unsafe APIs so we can test them.
     dawn_native::DeviceDescriptor deviceDescriptor;

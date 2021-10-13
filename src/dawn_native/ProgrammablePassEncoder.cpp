@@ -139,13 +139,12 @@ namespace dawn_native {
             uint64_t requiredAlignment;
             switch (bindingInfo.buffer.type) {
                 case wgpu::BufferBindingType::Uniform:
-                    requiredAlignment = kMinUniformBufferOffsetAlignment;
+                    requiredAlignment = GetDevice()->GetLimits().v1.minUniformBufferOffsetAlignment;
                     break;
                 case wgpu::BufferBindingType::Storage:
                 case wgpu::BufferBindingType::ReadOnlyStorage:
                 case kInternalStorageBufferBinding:
-                    requiredAlignment = kMinStorageBufferOffsetAlignment;
-                    requiredAlignment = kMinStorageBufferOffsetAlignment;
+                    requiredAlignment = GetDevice()->GetLimits().v1.minStorageBufferOffsetAlignment;
                     break;
                 case wgpu::BufferBindingType::Undefined:
                     UNREACHABLE();

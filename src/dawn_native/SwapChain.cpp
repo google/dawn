@@ -90,8 +90,8 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("Swapchain size can't be empty");
             }
 
-            if (descriptor->width > kMaxTextureDimension2D ||
-                descriptor->height > kMaxTextureDimension2D) {
+            if (descriptor->width > device->GetLimits().v1.maxTextureDimension2D ||
+                descriptor->height > device->GetLimits().v1.maxTextureDimension2D) {
                 return DAWN_VALIDATION_ERROR("Swapchain size too big");
             }
         }

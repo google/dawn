@@ -444,29 +444,37 @@ TEST_F(ShaderModuleValidationTest, ComputeWorkgroupSizeLimits) {
         utils::CreateShaderModule(device, ss.str().c_str());
     };
 
-    MakeShaderWithWorkgroupSize(1, 1, 1);
-    MakeShaderWithWorkgroupSize(kMaxComputeWorkgroupSizeX, 1, 1);
-    MakeShaderWithWorkgroupSize(1, kMaxComputeWorkgroupSizeY, 1);
-    MakeShaderWithWorkgroupSize(1, 1, kMaxComputeWorkgroupSizeZ);
+    wgpu::Limits supportedLimits = GetSupportedLimits().limits;
 
-    ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupSize(kMaxComputeWorkgroupSizeX + 1, 1, 1));
-    ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupSize(1, kMaxComputeWorkgroupSizeY + 1, 1));
-    ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupSize(1, 1, kMaxComputeWorkgroupSizeZ + 1));
+    MakeShaderWithWorkgroupSize(1, 1, 1);
+    MakeShaderWithWorkgroupSize(supportedLimits.maxComputeWorkgroupSizeX, 1, 1);
+    MakeShaderWithWorkgroupSize(1, supportedLimits.maxComputeWorkgroupSizeY, 1);
+    MakeShaderWithWorkgroupSize(1, 1, supportedLimits.maxComputeWorkgroupSizeZ);
+
+    ASSERT_DEVICE_ERROR(
+        MakeShaderWithWorkgroupSize(supportedLimits.maxComputeWorkgroupSizeX + 1, 1, 1));
+    ASSERT_DEVICE_ERROR(
+        MakeShaderWithWorkgroupSize(1, supportedLimits.maxComputeWorkgroupSizeY + 1, 1));
+    ASSERT_DEVICE_ERROR(
+        MakeShaderWithWorkgroupSize(1, 1, supportedLimits.maxComputeWorkgroupSizeZ + 1));
 
     // No individual dimension exceeds its limit, but the combined size should definitely exceed the
     // total invocation limit.
-    ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupSize(
-        kMaxComputeWorkgroupSizeX, kMaxComputeWorkgroupSizeY, kMaxComputeWorkgroupSizeZ));
+    ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupSize(supportedLimits.maxComputeWorkgroupSizeX,
+                                                    supportedLimits.maxComputeWorkgroupSizeY,
+                                                    supportedLimits.maxComputeWorkgroupSizeZ));
 }
 
 // Tests that we validate workgroup storage size limits.
 TEST_F(ShaderModuleValidationTest, ComputeWorkgroupStorageSizeLimits) {
     DAWN_SKIP_TEST_IF(!HasToggleEnabled("use_tint_generator"));
 
+    wgpu::Limits supportedLimits = GetSupportedLimits().limits;
+
     constexpr uint32_t kVec4Size = 16;
-    constexpr uint32_t kMaxVec4Count = kMaxComputeWorkgroupStorageSize / kVec4Size;
+    const uint32_t maxVec4Count = supportedLimits.maxComputeWorkgroupStorageSize / kVec4Size;
     constexpr uint32_t kMat4Size = 64;
-    constexpr uint32_t kMaxMat4Count = kMaxComputeWorkgroupStorageSize / kMat4Size;
+    const uint32_t maxMat4Count = supportedLimits.maxComputeWorkgroupStorageSize / kMat4Size;
 
     auto MakeShaderWithWorkgroupStorage = [this](uint32_t vec4_count, uint32_t mat4_count) {
         std::ostringstream ss;
@@ -484,14 +492,14 @@ TEST_F(ShaderModuleValidationTest, ComputeWorkgroupStorageSizeLimits) {
     };
 
     MakeShaderWithWorkgroupStorage(1, 1);
-    MakeShaderWithWorkgroupStorage(kMaxVec4Count, 0);
-    MakeShaderWithWorkgroupStorage(0, kMaxMat4Count);
-    MakeShaderWithWorkgroupStorage(kMaxVec4Count - 4, 1);
-    MakeShaderWithWorkgroupStorage(4, kMaxMat4Count - 1);
-    ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupStorage(kMaxVec4Count + 1, 0));
-    ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupStorage(kMaxVec4Count - 3, 1));
-    ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupStorage(0, kMaxMat4Count + 1));
-    ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupStorage(4, kMaxMat4Count));
+    MakeShaderWithWorkgroupStorage(maxVec4Count, 0);
+    MakeShaderWithWorkgroupStorage(0, maxMat4Count);
+    MakeShaderWithWorkgroupStorage(maxVec4Count - 4, 1);
+    MakeShaderWithWorkgroupStorage(4, maxMat4Count - 1);
+    ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupStorage(maxVec4Count + 1, 0));
+    ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupStorage(maxVec4Count - 3, 1));
+    ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupStorage(0, maxMat4Count + 1));
+    ASSERT_DEVICE_ERROR(MakeShaderWithWorkgroupStorage(4, maxMat4Count));
 }
 
 // Test that numeric ID must be unique
