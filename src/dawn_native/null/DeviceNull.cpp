@@ -112,7 +112,7 @@ namespace dawn_native { namespace null {
         const CommandBufferDescriptor* descriptor) {
         return AcquireRef(new CommandBuffer(encoder, descriptor));
     }
-    ResultOrError<Ref<ComputePipelineBase>> Device::CreateComputePipelineImpl(
+    Ref<ComputePipelineBase> Device::CreateUninitializedComputePipelineImpl(
         const ComputePipelineDescriptor* descriptor) {
         return AcquireRef(new ComputePipeline(this, descriptor));
     }
@@ -368,6 +368,11 @@ namespace dawn_native { namespace null {
                                       const void* data,
                                       size_t size) {
         ToBackend(buffer)->DoWriteBuffer(bufferOffset, data, size);
+        return {};
+    }
+
+    // ComputePipeline
+    MaybeError ComputePipeline::Initialize() {
         return {};
     }
 

@@ -130,9 +130,9 @@ namespace dawn_native { namespace opengl {
         const CommandBufferDescriptor* descriptor) {
         return AcquireRef(new CommandBuffer(encoder, descriptor));
     }
-    ResultOrError<Ref<ComputePipelineBase>> Device::CreateComputePipelineImpl(
+    Ref<ComputePipelineBase> Device::CreateUninitializedComputePipelineImpl(
         const ComputePipelineDescriptor* descriptor) {
-        return ComputePipeline::Create(this, descriptor);
+        return ComputePipeline::CreateUninitialized(this, descriptor);
     }
     ResultOrError<Ref<PipelineLayoutBase>> Device::CreatePipelineLayoutImpl(
         const PipelineLayoutDescriptor* descriptor) {

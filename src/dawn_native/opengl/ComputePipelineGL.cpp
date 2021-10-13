@@ -19,12 +19,10 @@
 namespace dawn_native { namespace opengl {
 
     // static
-    ResultOrError<Ref<ComputePipeline>> ComputePipeline::Create(
+    Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
         Device* device,
         const ComputePipelineDescriptor* descriptor) {
-        Ref<ComputePipeline> pipeline = AcquireRef(new ComputePipeline(device, descriptor));
-        DAWN_TRY(pipeline->Initialize());
-        return pipeline;
+        return AcquireRef(new ComputePipeline(device, descriptor));
     }
 
     ComputePipeline::~ComputePipeline() {

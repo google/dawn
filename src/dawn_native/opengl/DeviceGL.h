@@ -91,14 +91,10 @@ namespace dawn_native { namespace opengl {
             PipelineCompatibilityToken pipelineCompatibilityToken) override;
         ResultOrError<Ref<BufferBase>> CreateBufferImpl(
             const BufferDescriptor* descriptor) override;
-        ResultOrError<Ref<ComputePipelineBase>> CreateComputePipelineImpl(
-            const ComputePipelineDescriptor* descriptor) override;
         ResultOrError<Ref<PipelineLayoutBase>> CreatePipelineLayoutImpl(
             const PipelineLayoutDescriptor* descriptor) override;
         ResultOrError<Ref<QuerySetBase>> CreateQuerySetImpl(
             const QuerySetDescriptor* descriptor) override;
-        Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
-            const RenderPipelineDescriptor* descriptor) override;
         ResultOrError<Ref<SamplerBase>> CreateSamplerImpl(
             const SamplerDescriptor* descriptor) override;
         ResultOrError<Ref<ShaderModuleBase>> CreateShaderModuleImpl(
@@ -115,6 +111,10 @@ namespace dawn_native { namespace opengl {
         ResultOrError<Ref<TextureViewBase>> CreateTextureViewImpl(
             TextureBase* texture,
             const TextureViewDescriptor* descriptor) override;
+        Ref<ComputePipelineBase> CreateUninitializedComputePipelineImpl(
+            const ComputePipelineDescriptor* descriptor) override;
+        Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
+            const RenderPipelineDescriptor* descriptor) override;
 
         void InitTogglesFromDriver();
         ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;

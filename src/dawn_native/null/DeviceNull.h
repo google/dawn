@@ -43,7 +43,7 @@ namespace dawn_native { namespace null {
     class BindGroupLayout;
     class Buffer;
     class CommandBuffer;
-    using ComputePipeline = ComputePipelineBase;
+    class ComputePipeline;
     class Device;
     using PipelineLayout = PipelineLayoutBase;
     class QuerySet;
@@ -129,7 +129,7 @@ namespace dawn_native { namespace null {
             PipelineCompatibilityToken pipelineCompatibilityToken) override;
         ResultOrError<Ref<BufferBase>> CreateBufferImpl(
             const BufferDescriptor* descriptor) override;
-        ResultOrError<Ref<ComputePipelineBase>> CreateComputePipelineImpl(
+        Ref<ComputePipelineBase> CreateUninitializedComputePipelineImpl(
             const ComputePipelineDescriptor* descriptor) override;
         ResultOrError<Ref<PipelineLayoutBase>> CreatePipelineLayoutImpl(
             const PipelineLayoutDescriptor* descriptor) override;
@@ -259,6 +259,13 @@ namespace dawn_native { namespace null {
                                    uint64_t bufferOffset,
                                    const void* data,
                                    size_t size) override;
+    };
+
+    class ComputePipeline final : public ComputePipelineBase {
+      public:
+        using ComputePipelineBase::ComputePipelineBase;
+
+        MaybeError Initialize() override;
     };
 
     class RenderPipeline final : public RenderPipelineBase {

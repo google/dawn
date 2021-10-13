@@ -89,14 +89,10 @@ namespace dawn_native { namespace metal {
         ResultOrError<Ref<CommandBufferBase>> CreateCommandBuffer(
             CommandEncoder* encoder,
             const CommandBufferDescriptor* descriptor) override;
-        ResultOrError<Ref<ComputePipelineBase>> CreateComputePipelineImpl(
-            const ComputePipelineDescriptor* descriptor) override;
         ResultOrError<Ref<PipelineLayoutBase>> CreatePipelineLayoutImpl(
             const PipelineLayoutDescriptor* descriptor) override;
         ResultOrError<Ref<QuerySetBase>> CreateQuerySetImpl(
             const QuerySetDescriptor* descriptor) override;
-        Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
-            const RenderPipelineDescriptor* descriptor) override;
         ResultOrError<Ref<SamplerBase>> CreateSamplerImpl(
             const SamplerDescriptor* descriptor) override;
         ResultOrError<Ref<ShaderModuleBase>> CreateShaderModuleImpl(
@@ -113,10 +109,13 @@ namespace dawn_native { namespace metal {
         ResultOrError<Ref<TextureViewBase>> CreateTextureViewImpl(
             TextureBase* texture,
             const TextureViewDescriptor* descriptor) override;
-        void CreateComputePipelineAsyncImpl(const ComputePipelineDescriptor* descriptor,
-                                            size_t blueprintHash,
-                                            WGPUCreateComputePipelineAsyncCallback callback,
-                                            void* userdata) override;
+        Ref<ComputePipelineBase> CreateUninitializedComputePipelineImpl(
+            const ComputePipelineDescriptor* descriptor) override;
+        Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
+            const RenderPipelineDescriptor* descriptor) override;
+        void InitializeComputePipelineAsyncImpl(Ref<ComputePipelineBase> computePipeline,
+                                                WGPUCreateComputePipelineAsyncCallback callback,
+                                                void* userdata) override;
         void InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> renderPipeline,
                                                WGPUCreateRenderPipelineAsyncCallback callback,
                                                void* userdata) override;

@@ -46,6 +46,7 @@ namespace dawn_native {
                        {{SingleShaderStage::Compute, descriptor->compute.module,
                          descriptor->compute.entryPoint, descriptor->compute.constantCount,
                          descriptor->compute.constants}}) {
+        SetContentHash(ComputeContentHash());
     }
 
     ComputePipelineBase::ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)
@@ -59,13 +60,21 @@ namespace dawn_native {
         }
     }
 
-    MaybeError ComputePipelineBase::Initialize() {
-        return {};
-    }
-
     // static
     ComputePipelineBase* ComputePipelineBase::MakeError(DeviceBase* device) {
-        return new ComputePipelineBase(device, ObjectBase::kError);
+        class ErrorComputePipeline final : public ComputePipelineBase {
+          public:
+            ErrorComputePipeline(DeviceBase* device)
+                : ComputePipelineBase(device, ObjectBase::kError) {
+            }
+
+            MaybeError Initialize() override {
+                UNREACHABLE();
+                return {};
+            }
+        };
+
+        return new ErrorComputePipeline(device);
     }
 
     ObjectType ComputePipelineBase::GetType() const {

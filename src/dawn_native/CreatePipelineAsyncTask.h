@@ -72,7 +72,6 @@ namespace dawn_native {
     class CreateComputePipelineAsyncTask {
       public:
         CreateComputePipelineAsyncTask(Ref<ComputePipelineBase> nonInitializedComputePipeline,
-                                       size_t blueprintHash,
                                        WGPUCreateComputePipelineAsyncCallback callback,
                                        void* userdata);
 
@@ -82,7 +81,6 @@ namespace dawn_native {
 
       private:
         Ref<ComputePipelineBase> mComputePipeline;
-        size_t mBlueprintHash;
         WGPUCreateComputePipelineAsyncCallback mCallback;
         void* mUserdata;
     };

@@ -105,9 +105,6 @@ namespace dawn_native {
             bool operator()(const RenderPipelineBase* a, const RenderPipelineBase* b) const;
         };
 
-        // Initialize() should only be called once by the frontend.
-        virtual MaybeError Initialize() = 0;
-
       private:
         RenderPipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 

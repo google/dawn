@@ -25,12 +25,10 @@
 namespace dawn_native { namespace vulkan {
 
     // static
-    ResultOrError<Ref<ComputePipeline>> ComputePipeline::Create(
+    Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
         Device* device,
         const ComputePipelineDescriptor* descriptor) {
-        Ref<ComputePipeline> pipeline = AcquireRef(new ComputePipeline(device, descriptor));
-        DAWN_TRY(pipeline->Initialize());
-        return pipeline;
+        return AcquireRef(new ComputePipeline(device, descriptor));
     }
 
     MaybeError ComputePipeline::Initialize() {
@@ -102,14 +100,11 @@ namespace dawn_native { namespace vulkan {
         return mHandle;
     }
 
-    void ComputePipeline::CreateAsync(Device* device,
-                                      const ComputePipelineDescriptor* descriptor,
-                                      size_t blueprintHash,
-                                      WGPUCreateComputePipelineAsyncCallback callback,
-                                      void* userdata) {
-        Ref<ComputePipeline> pipeline = AcquireRef(new ComputePipeline(device, descriptor));
+    void ComputePipeline::InitializeAsync(Ref<ComputePipelineBase> computePipeline,
+                                          WGPUCreateComputePipelineAsyncCallback callback,
+                                          void* userdata) {
         std::unique_ptr<CreateComputePipelineAsyncTask> asyncTask =
-            std::make_unique<CreateComputePipelineAsyncTask>(pipeline, blueprintHash, callback,
+            std::make_unique<CreateComputePipelineAsyncTask>(std::move(computePipeline), callback,
                                                              userdata);
         CreateComputePipelineAsyncTask::RunAsync(std::move(asyncTask));
     }

@@ -342,8 +342,7 @@ namespace dawn_native {
         void AddComputePipelineAsyncCallbackTask(Ref<ComputePipelineBase> pipeline,
                                                  std::string errorMessage,
                                                  WGPUCreateComputePipelineAsyncCallback callback,
-                                                 void* userdata,
-                                                 size_t blueprintHash);
+                                                 void* userdata);
         void AddRenderPipelineAsyncCallbackTask(Ref<RenderPipelineBase> pipeline,
                                                 std::string errorMessage,
                                                 WGPUCreateRenderPipelineAsyncCallback callback,
@@ -376,14 +375,10 @@ namespace dawn_native {
             PipelineCompatibilityToken pipelineCompatibilityToken) = 0;
         virtual ResultOrError<Ref<BufferBase>> CreateBufferImpl(
             const BufferDescriptor* descriptor) = 0;
-        virtual ResultOrError<Ref<ComputePipelineBase>> CreateComputePipelineImpl(
-            const ComputePipelineDescriptor* descriptor) = 0;
         virtual ResultOrError<Ref<PipelineLayoutBase>> CreatePipelineLayoutImpl(
             const PipelineLayoutDescriptor* descriptor) = 0;
         virtual ResultOrError<Ref<QuerySetBase>> CreateQuerySetImpl(
             const QuerySetDescriptor* descriptor) = 0;
-        virtual Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
-            const RenderPipelineDescriptor* descriptor) = 0;
         virtual ResultOrError<Ref<SamplerBase>> CreateSamplerImpl(
             const SamplerDescriptor* descriptor) = 0;
         virtual ResultOrError<Ref<ShaderModuleBase>> CreateShaderModuleImpl(
@@ -401,6 +396,10 @@ namespace dawn_native {
         virtual ResultOrError<Ref<TextureViewBase>> CreateTextureViewImpl(
             TextureBase* texture,
             const TextureViewDescriptor* descriptor) = 0;
+        virtual Ref<ComputePipelineBase> CreateUninitializedComputePipelineImpl(
+            const ComputePipelineDescriptor* descriptor) = 0;
+        virtual Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
+            const RenderPipelineDescriptor* descriptor) = 0;
         virtual void SetLabelImpl();
 
         virtual MaybeError TickImpl() = 0;
@@ -408,21 +407,18 @@ namespace dawn_native {
 
         ResultOrError<Ref<BindGroupLayoutBase>> CreateEmptyBindGroupLayout();
 
-        std::pair<Ref<ComputePipelineBase>, size_t> GetCachedComputePipeline(
-            const ComputePipelineDescriptor* descriptor);
+        Ref<ComputePipelineBase> GetCachedComputePipeline(
+            ComputePipelineBase* uninitializedComputePipeline);
         Ref<RenderPipelineBase> GetCachedRenderPipeline(
             RenderPipelineBase* uninitializedRenderPipeline);
         Ref<ComputePipelineBase> AddOrGetCachedComputePipeline(
-            Ref<ComputePipelineBase> computePipeline,
-            size_t blueprintHash);
+            Ref<ComputePipelineBase> computePipeline);
         Ref<RenderPipelineBase> AddOrGetCachedRenderPipeline(
             Ref<RenderPipelineBase> renderPipeline);
-        virtual void CreateComputePipelineAsyncImpl(const ComputePipelineDescriptor* descriptor,
-                                                    size_t blueprintHash,
-                                                    WGPUCreateComputePipelineAsyncCallback callback,
-                                                    void* userdata);
-        Ref<RenderPipelineBase> CreateUninitializedRenderPipeline(
-            const RenderPipelineDescriptor* descriptor);
+        virtual void InitializeComputePipelineAsyncImpl(
+            Ref<ComputePipelineBase> computePipeline,
+            WGPUCreateComputePipelineAsyncCallback callback,
+            void* userdata);
         virtual void InitializeRenderPipelineAsyncImpl(
             Ref<RenderPipelineBase> renderPipeline,
             WGPUCreateRenderPipelineAsyncCallback callback,

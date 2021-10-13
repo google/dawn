@@ -66,6 +66,9 @@ namespace dawn_native {
         // Implementation of the API entrypoint. Do not use in a reentrant manner.
         BindGroupLayoutBase* APIGetBindGroupLayout(uint32_t groupIndex);
 
+        // Initialize() should only be called once by the frontend.
+        virtual MaybeError Initialize() = 0;
+
       protected:
         PipelineBase(DeviceBase* device,
                      PipelineLayoutBase* layout,

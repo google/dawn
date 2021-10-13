@@ -103,11 +103,9 @@ namespace dawn_native {
 
     CreateComputePipelineAsyncTask::CreateComputePipelineAsyncTask(
         Ref<ComputePipelineBase> nonInitializedComputePipeline,
-        size_t blueprintHash,
         WGPUCreateComputePipelineAsyncCallback callback,
         void* userdata)
         : mComputePipeline(std::move(nonInitializedComputePipeline)),
-          mBlueprintHash(blueprintHash),
           mCallback(callback),
           mUserdata(userdata) {
         ASSERT(mComputePipeline != nullptr);
@@ -122,7 +120,7 @@ namespace dawn_native {
         }
 
         mComputePipeline->GetDevice()->AddComputePipelineAsyncCallbackTask(
-            mComputePipeline, errorMessage, mCallback, mUserdata, mBlueprintHash);
+            mComputePipeline, errorMessage, mCallback, mUserdata);
     }
 
     void CreateComputePipelineAsyncTask::RunAsync(
