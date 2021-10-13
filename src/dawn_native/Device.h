@@ -16,6 +16,7 @@
 #define DAWNNATIVE_DEVICE_H_
 
 #include "dawn_native/Commands.h"
+#include "dawn_native/ComputePipeline.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Features.h"
 #include "dawn_native/Format.h"

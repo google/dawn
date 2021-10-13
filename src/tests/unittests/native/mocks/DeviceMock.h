@@ -63,8 +63,8 @@ namespace dawn_native {
                     CreateBufferImpl,
                     (const BufferDescriptor*),
                     (override));
-        MOCK_METHOD(ResultOrError<Ref<ComputePipelineBase>>,
-                    CreateComputePipelineImpl,
+        MOCK_METHOD(Ref<ComputePipelineBase>,
+                    CreateUninitializedComputePipelineImpl,
                     (const ComputePipelineDescriptor*),
                     (override));
         MOCK_METHOD(ResultOrError<Ref<PipelineLayoutBase>>,
