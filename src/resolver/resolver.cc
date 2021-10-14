@@ -4279,7 +4279,9 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
 
     auto* sem_member = builder_->create<sem::StructMember>(
         member, member->symbol(), const_cast<sem::Type*>(type),
-        static_cast<uint32_t>(sem_members.size()), offset, align, size);
+        static_cast<uint32_t>(sem_members.size()),
+        static_cast<uint32_t>(offset), static_cast<uint32_t>(align),
+        static_cast<uint32_t>(size));
     builder_->Sem().Add(member, sem_member);
     sem_members.emplace_back(sem_member);
 
