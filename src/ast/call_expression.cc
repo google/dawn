@@ -24,13 +24,13 @@ namespace ast {
 CallExpression::CallExpression(ProgramID program_id,
                                const Source& source,
                                IdentifierExpression* func,
-                               ExpressionList params)
-    : Base(program_id, source), func_(func), params_(params) {
+                               ExpressionList args)
+    : Base(program_id, source), func_(func), args_(args) {
   TINT_ASSERT(AST, func_);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, func_, program_id);
-  for (auto* param : params_) {
-    TINT_ASSERT(AST, param);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, param, program_id);
+  for (auto* arg : args_) {
+    TINT_ASSERT(AST, arg);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, arg, program_id);
   }
 }
 
@@ -42,7 +42,7 @@ CallExpression* CallExpression::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());
   auto* fn = ctx->Clone(func_);
-  auto p = ctx->Clone(params_);
+  auto p = ctx->Clone(args_);
   return ctx->dst->create<CallExpression>(src, fn, p);
 }
 
@@ -55,8 +55,8 @@ void CallExpression::to_str(const sem::Info& sem,
 
   make_indent(out, indent + 2);
   out << "(" << std::endl;
-  for (auto* param : params_)
-    param->to_str(sem, out, indent + 4);
+  for (auto* arg : args_)
+    arg->to_str(sem, out, indent + 4);
 
   make_indent(out, indent + 2);
   out << ")" << std::endl;

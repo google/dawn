@@ -215,14 +215,14 @@ bool GeneratorImpl::EmitCall(std::ostream& out, ast::CallExpression* expr) {
   out << "(";
 
   bool first = true;
-  const auto& params = expr->params();
-  for (auto* param : params) {
+  const auto& args = expr->args();
+  for (auto* arg : args) {
     if (!first) {
       out << ", ";
     }
     first = false;
 
-    if (!EmitExpression(out, param)) {
+    if (!EmitExpression(out, arg)) {
       return false;
     }
   }

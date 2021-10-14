@@ -30,19 +30,19 @@ class CallExpression : public Castable<CallExpression, Expression> {
   /// @param program_id the identifier of the program that owns this node
   /// @param source the call expression source
   /// @param func the function
-  /// @param params the parameters
+  /// @param args the arguments
   CallExpression(ProgramID program_id,
                  const Source& source,
                  IdentifierExpression* func,
-                 ExpressionList params);
+                 ExpressionList args);
   /// Move constructor
   CallExpression(CallExpression&&);
   ~CallExpression() override;
 
   /// @returns the func
   IdentifierExpression* func() const { return func_; }
-  /// @returns the parameters
-  const ExpressionList& params() const { return params_; }
+  /// @returns the arguments
+  const ExpressionList& args() const { return args_; }
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
@@ -62,7 +62,7 @@ class CallExpression : public Castable<CallExpression, Expression> {
   CallExpression(const CallExpression&) = delete;
 
   IdentifierExpression* const func_;
-  ExpressionList const params_;
+  ExpressionList const args_;
 };
 
 }  // namespace ast

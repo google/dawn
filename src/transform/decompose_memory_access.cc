@@ -927,8 +927,8 @@ void DecomposeMemoryAccess::Run(CloneContext& ctx, const DataMap&, DataMap&) {
           // may refer to a structure holding a runtime array, which cannot be
           // loaded. Instead replace X with the underlying storage / uniform
           // buffer variable.
-          if (auto access = state.TakeAccess(call_expr->params()[0])) {
-            ctx.Replace(call_expr->params()[0], [=, &ctx] {
+          if (auto access = state.TakeAccess(call_expr->args()[0])) {
+            ctx.Replace(call_expr->args()[0], [=, &ctx] {
               return ctx.CloneWithoutTransform(access.var->Declaration());
             });
           }
@@ -938,11 +938,11 @@ void DecomposeMemoryAccess::Run(CloneContext& ctx, const DataMap&, DataMap&) {
           // arrayLength(X)
           // Don't convert X into a load, this intrinsic actually requires the
           // real pointer.
-          state.TakeAccess(call_expr->params()[0]);
+          state.TakeAccess(call_expr->args()[0]);
           continue;
         }
         if (intrinsic->IsAtomic()) {
-          if (auto access = state.TakeAccess(call_expr->params()[0])) {
+          if (auto access = state.TakeAccess(call_expr->args()[0])) {
             // atomic___(X)
             ctx.Replace(call_expr, [=, &ctx, &state] {
               auto* buf = access.var->Declaration();
@@ -954,8 +954,8 @@ void DecomposeMemoryAccess::Run(CloneContext& ctx, const DataMap&, DataMap&) {
                                    access.var->As<sem::VariableUser>());
 
               ast::ExpressionList args{ctx.Clone(buf), offset};
-              for (size_t i = 1; i < call_expr->params().size(); i++) {
-                auto* arg = call_expr->params()[i];
+              for (size_t i = 1; i < call_expr->args().size(); i++) {
+                auto* arg = call_expr->args()[i];
                 args.emplace_back(ctx.Clone(arg));
               }
               return ctx.dst->Call(func, args);

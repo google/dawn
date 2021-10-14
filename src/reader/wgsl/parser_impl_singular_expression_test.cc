@@ -102,7 +102,7 @@ TEST_F(ParserImplTest, SingularExpression_Call_Empty) {
 
   EXPECT_EQ(c->func()->symbol(), p->builder().Symbols().Get("a"));
 
-  EXPECT_EQ(c->params().size(), 0u);
+  EXPECT_EQ(c->args().size(), 0u);
 }
 
 TEST_F(ParserImplTest, SingularExpression_Call_WithArgs) {
@@ -118,10 +118,10 @@ TEST_F(ParserImplTest, SingularExpression_Call_WithArgs) {
 
   EXPECT_EQ(c->func()->symbol(), p->builder().Symbols().Get("test"));
 
-  EXPECT_EQ(c->params().size(), 3u);
-  EXPECT_TRUE(c->params()[0]->Is<ast::ConstructorExpression>());
-  EXPECT_TRUE(c->params()[1]->Is<ast::IdentifierExpression>());
-  EXPECT_TRUE(c->params()[2]->Is<ast::BinaryExpression>());
+  EXPECT_EQ(c->args().size(), 3u);
+  EXPECT_TRUE(c->args()[0]->Is<ast::ConstructorExpression>());
+  EXPECT_TRUE(c->args()[1]->Is<ast::IdentifierExpression>());
+  EXPECT_TRUE(c->args()[2]->Is<ast::BinaryExpression>());
 }
 
 TEST_F(ParserImplTest, SingularExpression_Call_TrailingComma) {
@@ -133,7 +133,7 @@ TEST_F(ParserImplTest, SingularExpression_Call_TrailingComma) {
 
   ASSERT_TRUE(e->Is<ast::CallExpression>());
   auto* c = e->As<ast::CallExpression>();
-  EXPECT_EQ(c->params().size(), 1u);
+  EXPECT_EQ(c->args().size(), 1u);
 }
 
 TEST_F(ParserImplTest, SingularExpression_Call_InvalidArg) {

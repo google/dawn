@@ -106,7 +106,7 @@ void ArrayLengthFromUniform::Run(CloneContext& ctx,
     // We assume that the argument to `arrayLength` has the form
     // `&resource.array`, which requires that `InlinePointerLets` and
     // `Simplify` have been run before this transform.
-    auto* param = call_expr->params()[0]->As<ast::UnaryOpExpression>();
+    auto* param = call_expr->args()[0]->As<ast::UnaryOpExpression>();
     if (!param || param->op() != ast::UnaryOp::kAddressOf) {
       TINT_ICE(Transform, ctx.dst->Diagnostics())
           << "expected form of arrayLength argument to be "

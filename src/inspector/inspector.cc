@@ -842,8 +842,8 @@ void Inspector::GenerateSamplerTargets() {
       continue;
     }
 
-    auto* t = c->params()[texture_index];
-    auto* s = c->params()[sampler_index];
+    auto* t = c->args()[texture_index];
+    auto* s = c->args()[sampler_index];
 
     GetOriginatingResources(
         std::array<const ast::Expression*, 2>{t, s},
@@ -959,7 +959,7 @@ void Inspector::GetOriginatingResources(
       // Patch all the parameter expressions with their argument
       for (size_t i = 0; i < N; i++) {
         if (auto* param = parameters[i]) {
-          call_exprs[i] = call_expr->params()[param->Index()];
+          call_exprs[i] = call_expr->args()[param->Index()];
         }
       }
       // Now call GetOriginatingResources() with from the callsite

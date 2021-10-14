@@ -2251,7 +2251,7 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
   ops.push_back(Operand::Int(func_id));
 
   size_t arg_idx = 0;
-  for (auto* arg : expr->params()) {
+  for (auto* arg : expr->args()) {
     auto id = GenerateExpression(arg);
     if (id == 0) {
       return 0;
@@ -2316,7 +2316,7 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
   // and loads it if necessary. Returns 0 on error.
   auto get_param_as_value_id = [&](size_t i,
                                    bool generate_load = true) -> uint32_t {
-    auto* arg = call->params()[i];
+    auto* arg = call->args()[i];
     auto* param = intrinsic->Parameters()[i];
     auto val_id = GenerateExpression(arg);
     if (val_id == 0) {
@@ -2349,11 +2349,11 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
       op = spv::Op::OpAll;
       break;
     case IntrinsicType::kArrayLength: {
-      if (call->params().empty()) {
+      if (call->args().empty()) {
         error_ = "missing param for runtime array length";
         return 0;
       }
-      auto* arg = call->params()[0];
+      auto* arg = call->args()[0];
 
       auto* address_of = arg->As<ast::UnaryOpExpression>();
       if (!address_of || address_of->op() != ast::UnaryOp::kAddressOf) {
@@ -2641,7 +2641,7 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
     return 0;
   }
 
-  for (size_t i = 0; i < call->params().size(); i++) {
+  for (size_t i = 0; i < call->args().size(); i++) {
     if (auto val_id = get_param_as_value_id(i)) {
       params.emplace_back(Operand::Int(val_id));
     } else {
@@ -2663,7 +2663,7 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
   using Usage = sem::ParameterUsage;
 
   auto parameters = intrinsic->Parameters();
-  auto arguments = call->params();
+  auto arguments = call->args();
 
   // Generates the given expression, returning the operand ID
   auto gen = [&](ast::Expression* expr) {
@@ -3139,18 +3139,18 @@ bool Builder::GenerateAtomicIntrinsic(ast::CallExpression* call,
     return false;
   }
 
-  uint32_t pointer_id = GenerateExpression(call->params()[0]);
+  uint32_t pointer_id = GenerateExpression(call->args()[0]);
   if (pointer_id == 0) {
     return false;
   }
 
   uint32_t value_id = 0;
-  if (call->params().size() > 1) {
-    value_id = GenerateExpression(call->params().back());
+  if (call->args().size() > 1) {
+    value_id = GenerateExpression(call->args().back());
     if (value_id == 0) {
       return false;
     }
-    value_id = GenerateLoadIfNeeded(TypeOf(call->params().back()), value_id);
+    value_id = GenerateLoadIfNeeded(TypeOf(call->args().back()), value_id);
     if (value_id == 0) {
       return false;
     }
@@ -3254,12 +3254,12 @@ bool Builder::GenerateAtomicIntrinsic(ast::CallExpression* call,
                                                                value,
                                                            });
     case sem::IntrinsicType::kAtomicCompareExchangeWeak: {
-      auto comparator = GenerateExpression(call->params()[1]);
+      auto comparator = GenerateExpression(call->args()[1]);
       if (comparator == 0) {
         return false;
       }
 
-      auto* value_sem_type = TypeOf(call->params()[2]);
+      auto* value_sem_type = TypeOf(call->args()[2]);
 
       auto value_type = GenerateTypeIfNeeded(value_sem_type);
       if (value_type == 0) {

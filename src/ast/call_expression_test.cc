@@ -30,7 +30,7 @@ TEST_F(CallExpressionTest, Creation) {
   auto* stmt = create<CallExpression>(func, params);
   EXPECT_EQ(stmt->func(), func);
 
-  const auto& vec = stmt->params();
+  const auto& vec = stmt->args();
   ASSERT_EQ(vec.size(), 2u);
   EXPECT_EQ(vec[0], params[0]);
   EXPECT_EQ(vec[1], params[1]);

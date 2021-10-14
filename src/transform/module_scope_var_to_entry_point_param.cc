@@ -305,7 +305,7 @@ struct ModuleScopeVarToEntryPointParam::State {
             if (is_entry_point && !is_handle && !is_workgroup_matrix) {
               arg = ctx.dst->AddressOf(arg);
             }
-            ctx.InsertBack(call->params(), arg);
+            ctx.InsertBack(call->args(), arg);
           }
         }
       }

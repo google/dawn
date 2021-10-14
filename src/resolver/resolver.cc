@@ -2312,7 +2312,7 @@ bool Resolver::TraverseExpressions(ast::Expression* root,
     } else if (auto* bitcast = expr->As<ast::BitcastExpression>()) {
       add(bitcast->expr());
     } else if (auto* call = expr->As<ast::CallExpression>()) {
-      for (auto* arg : call->params()) {
+      for (auto* arg : call->args()) {
         add(arg);
       }
     } else if (auto* type_ctor = expr->As<ast::TypeConstructorExpression>()) {
@@ -2504,8 +2504,8 @@ bool Resolver::ValidateCallStatement(ast::CallStatement* stmt) {
 bool Resolver::IntrinsicCall(ast::CallExpression* call,
                              sem::IntrinsicType intrinsic_type) {
   std::vector<const sem::Type*> arg_tys;
-  arg_tys.reserve(call->params().size());
-  for (auto* expr : call->params()) {
+  arg_tys.reserve(call->args().size());
+  for (auto* expr : call->args()) {
     arg_tys.emplace_back(TypeOf(expr));
   }
 
@@ -2545,7 +2545,7 @@ bool Resolver::ValidateTextureIntrinsicFunction(
   auto index =
       sem::IndexOf(intrinsic->Parameters(), sem::ParameterUsage::kOffset);
   if (index > -1) {
-    auto* param = ast_call->params()[index];
+    auto* param = ast_call->args()[index];
     if (param->Is<ast::TypeConstructorExpression>()) {
       auto values = ConstantValueOf(param);
       if (!values.IsValid()) {
@@ -2639,19 +2639,19 @@ bool Resolver::ValidateFunctionCall(const ast::CallExpression* call,
     return false;
   }
 
-  if (call->params().size() != target->parameters.size()) {
-    bool more = call->params().size() > target->parameters.size();
+  if (call->args().size() != target->parameters.size()) {
+    bool more = call->args().size() > target->parameters.size();
     AddError("too " + (more ? std::string("many") : std::string("few")) +
                  " arguments in call to '" + name + "', expected " +
                  std::to_string(target->parameters.size()) + ", got " +
-                 std::to_string(call->params().size()),
+                 std::to_string(call->args().size()),
              call->source());
     return false;
   }
 
-  for (size_t i = 0; i < call->params().size(); ++i) {
+  for (size_t i = 0; i < call->args().size(); ++i) {
     const VariableInfo* param = target->parameters[i];
-    const ast::Expression* arg_expr = call->params()[i];
+    const ast::Expression* arg_expr = call->args()[i];
     auto* arg_type = TypeOf(arg_expr)->UnwrapRef();
 
     if (param->type != arg_type) {

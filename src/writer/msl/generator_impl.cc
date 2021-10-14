@@ -538,14 +538,14 @@ bool GeneratorImpl::EmitCall(std::ostream& out, ast::CallExpression* expr) {
     out << program_->Symbols().NameFor(var->Declaration()->symbol());
   }
 
-  const auto& params = expr->params();
-  for (auto* param : params) {
+  const auto& args = expr->args();
+  for (auto* arg : args) {
     if (!first) {
       out << ", ";
     }
     first = false;
 
-    if (!EmitExpression(out, param)) {
+    if (!EmitExpression(out, arg)) {
       return false;
     }
   }
@@ -580,7 +580,7 @@ bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
       } else {
         out << "float2(as_type<half2>(";
       }
-      if (!EmitExpression(out, expr->params()[0])) {
+      if (!EmitExpression(out, expr->args()[0])) {
         return false;
       }
       out << "))";
@@ -598,14 +598,14 @@ bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
     }
     case sem::IntrinsicType::kIgnore: {
       out << "(void) ";
-      if (!EmitExpression(out, expr->params()[0])) {
+      if (!EmitExpression(out, expr->args()[0])) {
         return false;
       }
       return true;
     }
 
     case sem::IntrinsicType::kLength: {
-      auto* sem = builder_.Sem().Get(expr->params()[0]);
+      auto* sem = builder_.Sem().Get(expr->args()[0]);
       if (sem->Type()->UnwrapRef()->is_scalar()) {
         // Emulate scalar overload using fabs(x).
         name = "fabs";
@@ -614,16 +614,16 @@ bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
     }
 
     case sem::IntrinsicType::kDistance: {
-      auto* sem = builder_.Sem().Get(expr->params()[0]);
+      auto* sem = builder_.Sem().Get(expr->args()[0]);
       if (sem->Type()->UnwrapRef()->is_scalar()) {
         // Emulate scalar overload using fabs(x - y);
         out << "fabs";
         ScopedParen sp(out);
-        if (!EmitExpression(out, expr->params()[0])) {
+        if (!EmitExpression(out, expr->args()[0])) {
           return false;
         }
         out << " - ";
-        if (!EmitExpression(out, expr->params()[1])) {
+        if (!EmitExpression(out, expr->args()[1])) {
           return false;
         }
         return true;
@@ -642,14 +642,14 @@ bool GeneratorImpl::EmitIntrinsicCall(std::ostream& out,
   out << name << "(";
 
   bool first = true;
-  const auto& params = expr->params();
-  for (auto* param : params) {
+  const auto& args = expr->args();
+  for (auto* arg : args) {
     if (!first) {
       out << ", ";
     }
     first = false;
 
-    if (!EmitExpression(out, param)) {
+    if (!EmitExpression(out, arg)) {
       return false;
     }
   }
@@ -665,8 +665,8 @@ bool GeneratorImpl::EmitAtomicCall(std::ostream& out,
     out << name;
     {
       ScopedParen sp(out);
-      for (size_t i = 0; i < expr->params().size(); i++) {
-        auto* arg = expr->params()[i];
+      for (size_t i = 0; i < expr->args().size(); i++) {
+        auto* arg = expr->args()[i];
         if (i > 0) {
           out << ", ";
         }
@@ -713,7 +713,7 @@ bool GeneratorImpl::EmitAtomicCall(std::ostream& out,
       return call("atomic_exchange_explicit", true);
 
     case sem::IntrinsicType::kAtomicCompareExchangeWeak: {
-      auto* ptr_ty = TypeOf(expr->params()[0])->UnwrapRef()->As<sem::Pointer>();
+      auto* ptr_ty = TypeOf(expr->args()[0])->UnwrapRef()->As<sem::Pointer>();
       auto sc = ptr_ty->StorageClass();
 
       auto func = utils::GetOrCreate(
@@ -765,7 +765,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
   using Usage = sem::ParameterUsage;
 
   auto parameters = intrinsic->Parameters();
-  auto arguments = expr->params();
+  auto arguments = expr->args();
 
   // Returns the argument with the given usage
   auto arg = [&](Usage usage) {
@@ -2815,7 +2815,7 @@ bool GeneratorImpl::CallIntrinsicHelper(std::ostream& out,
   {
     ScopedParen sp(out);
     bool first = true;
-    for (auto* arg : call->params()) {
+    for (auto* arg : call->args()) {
       if (!first) {
         out << ", ";
       }

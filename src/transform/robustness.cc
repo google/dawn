@@ -217,8 +217,8 @@ struct Robustness::State {
     auto level_idx =
         sem::IndexOf(intrinsic->Parameters(), sem::ParameterUsage::kLevel);
 
-    auto* texture_arg = expr->params()[texture_idx];
-    auto* coords_arg = expr->params()[coords_idx];
+    auto* texture_arg = expr->args()[texture_idx];
+    auto* coords_arg = expr->args()[coords_idx];
     auto* coords_ty = intrinsic->Parameters()[coords_idx]->Type();
 
     // If the level is provided, then we need to clamp this. As the level is
@@ -229,7 +229,7 @@ struct Robustness::State {
     std::function<ast::Expression*()> level_arg;
     if (level_idx >= 0) {
       level_arg = [&] {
-        auto* arg = expr->params()[level_idx];
+        auto* arg = expr->args()[level_idx];
         auto* num_levels = b.Call("textureNumLevels", ctx.Clone(texture_arg));
         auto* zero = b.Expr(0);
         auto* max = ctx.dst->Sub(num_levels, 1);
@@ -253,7 +253,7 @@ struct Robustness::State {
 
     // Clamp the array_index argument, if provided
     if (array_idx >= 0) {
-      auto* arg = expr->params()[array_idx];
+      auto* arg = expr->args()[array_idx];
       auto* num_layers = b.Call("textureNumLayers", ctx.Clone(texture_arg));
       auto* zero = b.Expr(0);
       auto* max = ctx.dst->Sub(num_layers, 1);
@@ -263,7 +263,7 @@ struct Robustness::State {
 
     // Clamp the level argument, if provided
     if (level_idx >= 0) {
-      auto* arg = expr->params()[level_idx];
+      auto* arg = expr->args()[level_idx];
       ctx.Replace(arg, level_arg ? level_arg() : ctx.dst->Expr(0));
     }
 

@@ -38,7 +38,7 @@ TEST_F(ParserImplTest, Statement_Call) {
 
   EXPECT_EQ(c->func()->symbol(), p->builder().Symbols().Get("a"));
 
-  EXPECT_EQ(c->params().size(), 0u);
+  EXPECT_EQ(c->args().size(), 0u);
 }
 
 TEST_F(ParserImplTest, Statement_Call_WithParams) {
@@ -54,10 +54,10 @@ TEST_F(ParserImplTest, Statement_Call_WithParams) {
 
   EXPECT_EQ(c->func()->symbol(), p->builder().Symbols().Get("a"));
 
-  EXPECT_EQ(c->params().size(), 3u);
-  EXPECT_TRUE(c->params()[0]->Is<ast::ConstructorExpression>());
-  EXPECT_TRUE(c->params()[1]->Is<ast::IdentifierExpression>());
-  EXPECT_TRUE(c->params()[2]->Is<ast::BinaryExpression>());
+  EXPECT_EQ(c->args().size(), 3u);
+  EXPECT_TRUE(c->args()[0]->Is<ast::ConstructorExpression>());
+  EXPECT_TRUE(c->args()[1]->Is<ast::IdentifierExpression>());
+  EXPECT_TRUE(c->args()[2]->Is<ast::BinaryExpression>());
 }
 
 TEST_F(ParserImplTest, Statement_Call_WithParams_TrailingComma) {
@@ -73,9 +73,9 @@ TEST_F(ParserImplTest, Statement_Call_WithParams_TrailingComma) {
 
   EXPECT_EQ(c->func()->symbol(), p->builder().Symbols().Get("a"));
 
-  EXPECT_EQ(c->params().size(), 2u);
-  EXPECT_TRUE(c->params()[0]->Is<ast::ConstructorExpression>());
-  EXPECT_TRUE(c->params()[1]->Is<ast::IdentifierExpression>());
+  EXPECT_EQ(c->args().size(), 2u);
+  EXPECT_TRUE(c->args()[0]->Is<ast::ConstructorExpression>());
+  EXPECT_TRUE(c->args()[1]->Is<ast::IdentifierExpression>());
 }
 
 TEST_F(ParserImplTest, Statement_Call_Missing_RightParen) {
