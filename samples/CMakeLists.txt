@@ -25,4 +25,15 @@ if(${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
   target_link_libraries(tint SPIRV-Tools)
 endif()
 
-
+if(${TINT_BUILD_GLSL_WRITER})
+  target_link_libraries(tint glslang)
+  target_link_libraries(tint glslang-default-resource-limits)
+  if(NOT MSVC)
+    target_compile_options(tint PRIVATE
+      -Wno-reserved-id-macro
+      -Wno-shadow-field-in-constructor
+      -Wno-shadow
+      -Wno-weak-vtables
+    )
+  endif()
+endif()

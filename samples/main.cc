@@ -20,6 +20,11 @@
 #include <string>
 #include <vector>
 
+#if TINT_BUILD_GLSL_WRITER
+#include "StandAlone/ResourceLimits.h"
+#include "glslang/Public/ShaderLang.h"
+#endif
+
 #if TINT_BUILD_SPV_READER
 #include "spirv-tools/libspirv.hpp"
 #endif  // TINT_BUILD_SPV_READER
@@ -845,25 +850,65 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
 #endif  // TINT_BUILD_HLSL_WRITER
 }
 
+#if TINT_BUILD_GLSL_WRITER
+EShLanguage pipeline_stage_to_esh_language(tint::ast::PipelineStage stage) {
+  switch (stage) {
+    case tint::ast::PipelineStage::kFragment:
+      return EShLangFragment;
+    case tint::ast::PipelineStage::kVertex:
+      return EShLangVertex;
+    case tint::ast::PipelineStage::kCompute:
+      return EShLangCompute;
+    default:
+      TINT_ASSERT(AST, false);
+      return EShLangVertex;
+  }
+}
+#endif
+
 /// Generate GLSL code for a program.
 /// @param program the program to generate
 /// @param options the options that Tint was invoked with
 /// @returns true on success
 bool GenerateGlsl(const tint::Program* program, const Options& options) {
 #if TINT_BUILD_GLSL_WRITER
+  if (options.validate) {
+    glslang::InitializeProcess();
+  }
   tint::writer::glsl::Options gen_options;
-  auto result = tint::writer::glsl::Generate(program, gen_options);
-  if (!result.success) {
-    PrintWGSL(std::cerr, *program);
-    std::cerr << "Failed to generate: " << result.error << std::endl;
-    return false;
-  }
+  tint::inspector::Inspector inspector(program);
+  for (auto& entry_point : inspector.GetEntryPoints()) {
+    auto result =
+        tint::writer::glsl::Generate(program, gen_options, entry_point.name);
+    if (!result.success) {
+      PrintWGSL(std::cerr, *program);
+      std::cerr << "Failed to generate: " << result.error << std::endl;
+      return false;
+    }
 
-  if (!WriteFile(options.output_file, "w", result.glsl)) {
-    return false;
-  }
+    if (!WriteFile(options.output_file, "w", result.glsl)) {
+      return false;
+    }
 
-  // TODO(senorblanco): implement GLSL validation
+    if (options.validate) {
+      for (auto entry_pt : result.entry_points) {
+        EShLanguage lang = pipeline_stage_to_esh_language(entry_pt.second);
+        glslang::TShader shader(lang);
+        const char* strings[1] = {result.glsl.c_str()};
+        int lengths[1] = {static_cast<int>(result.glsl.length())};
+        shader.setStringsWithLengths(strings, lengths, 1);
+        shader.setEntryPoint("main");
+        bool glslang_result =
+            shader.parse(&glslang::DefaultTBuiltInResource, 310, EEsProfile,
+                         false, false, EShMsgDefault);
+        if (!glslang_result) {
+          std::cerr << "Error parsing GLSL shader:\n"
+                    << shader.getInfoLog() << "\n"
+                    << shader.getInfoDebugLog() << "\n";
+        }
+      }
+    }
+  }
 
   return true;
 #else

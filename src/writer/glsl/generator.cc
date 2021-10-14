@@ -25,12 +25,16 @@ Result::Result() = default;
 Result::~Result() = default;
 Result::Result(const Result&) = default;
 
-Result Generate(const Program* program, const Options&) {
+Result Generate(const Program* program,
+                const Options&,
+                const std::string& entry_point) {
   Result result;
 
   // Run the GLSL sanitizer.
+  transform::DataMap data;
+  data.Add<transform::Glsl::Config>(entry_point);
   transform::Glsl sanitizer;
-  auto output = sanitizer.Run(program);
+  auto output = sanitizer.Run(program, data);
   if (!output.program.IsValid()) {
     result.success = false;
     result.error = output.program.Diagnostics().str();

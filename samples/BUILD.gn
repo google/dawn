@@ -25,6 +25,13 @@ executable("tint") {
     "${tint_spirv_tools_dir}/:spvtools_val",
   ]
 
+  if (tint_build_glsl_writer) {
+    deps += [
+      "${tint_root_dir}/third_party/glslang:glslang_default_resource_limits_sources",
+      "${tint_root_dir}/third_party/glslang:glslang_lib_sources",
+    ]
+  }
+
   configs += [
     "${tint_root_dir}/src:tint_common_config",
     "${tint_root_dir}/src:tint_config",

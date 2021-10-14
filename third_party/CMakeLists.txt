@@ -39,3 +39,8 @@ if(${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
     add_subdirectory("${TINT_THIRD_PARTY_DIR}/spirv-tools" "${CMAKE_BINARY_DIR}/third_party/spirv-tools" EXCLUDE_FROM_ALL)
   endif()
 endif()
+
+if(${TINT_BUILD_GLSL_WRITER})
+  set(SPIRV-Headers_SOURCE_DIR "${TINT_THIRD_PARTY_DIR}/glslang")
+  add_subdirectory("${TINT_THIRD_PARTY_DIR}/glslang" "${CMAKE_BINARY_DIR}/third_party/glslang" EXCLUDE_FROM_ALL)
+endif()

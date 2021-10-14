@@ -28,6 +28,7 @@
 #include "src/transform/pad_array_elements.h"
 #include "src/transform/promote_initializers_to_const_var.h"
 #include "src/transform/simplify.h"
+#include "src/transform/single_entry_point.h"
 #include "src/transform/zero_init_workgroup_memory.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Glsl);
@@ -69,6 +70,10 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) {
   // variables directly.
   data.Add<CanonicalizeEntryPointIO::Config>(
       CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
+  if (cfg) {
+    manager.Add<SingleEntryPoint>();
+    data.Add<SingleEntryPoint::Config>(cfg->entry_point);
+  }
   auto out = manager.Run(in, data);
   if (!out.program.IsValid()) {
     return out;
@@ -94,7 +99,8 @@ void Glsl::AddEmptyEntryPoint(CloneContext& ctx) const {
                  ctx.dst->WorkgroupSize(1)});
 }
 
-Glsl::Config::Config(bool disable_wi) : disable_workgroup_init(disable_wi) {}
+Glsl::Config::Config(const std::string& ep, bool disable_wi)
+    : entry_point(ep), disable_workgroup_init(disable_wi) {}
 Glsl::Config::Config(const Config&) = default;
 Glsl::Config::~Config() = default;
 

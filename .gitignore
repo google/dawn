@@ -16,6 +16,7 @@ out
 testing
 third_party/cpplint
 third_party/binutils
+third_party/glslang
 third_party/googletest
 third_party/gpuweb-cts
 third_party/llvm-build

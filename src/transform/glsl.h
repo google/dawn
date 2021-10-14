@@ -15,6 +15,8 @@
 #ifndef SRC_TRANSFORM_GLSL_H_
 #define SRC_TRANSFORM_GLSL_H_
 
+#include <string>
+
 #include "src/transform/transform.h"
 
 namespace tint {
@@ -32,15 +34,20 @@ class Glsl : public Castable<Glsl, Transform> {
   /// Configuration options for the Glsl sanitizer transform.
   struct Config : public Castable<Data, transform::Data> {
     /// Constructor
+    /// @param entry_point the root entry point function to generate
     /// @param disable_workgroup_init `true` to disable workgroup memory zero
     ///        initialization
-    explicit Config(bool disable_workgroup_init = false);
+    explicit Config(const std::string& entry_point,
+                    bool disable_workgroup_init = false);
 
     /// Copy constructor
     Config(const Config&);
 
     /// Destructor
     ~Config() override;
+
+    /// GLSL generator wraps a single entry point in a main() function.
+    std::string entry_point;
 
     /// Set to `true` to disable workgroup memory zero initialization
     bool disable_workgroup_init = false;

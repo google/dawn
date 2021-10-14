@@ -67,7 +67,9 @@ struct Result {
 /// @param program the program to translate to GLSL
 /// @param options the configuration options to use when generating GLSL
 /// @returns the resulting GLSL and supplementary information
-Result Generate(const Program* program, const Options& options);
+Result Generate(const Program* program,
+                const Options& options,
+                const std::string& entry_point);
 
 }  // namespace glsl
 }  // namespace writer
