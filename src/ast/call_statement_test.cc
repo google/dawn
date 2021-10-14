@@ -55,18 +55,6 @@ TEST_F(CallStatementTest, Assert_DifferentProgramID_Call) {
       "internal compiler error");
 }
 
-TEST_F(CallStatementTest, ToStr) {
-  auto* c = create<CallStatement>(
-      create<CallExpression>(Expr("func"), ExpressionList{}));
-
-  EXPECT_EQ(str(c), R"(Call[not set]{
-  Identifier[not set]{func}
-  (
-  )
-}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

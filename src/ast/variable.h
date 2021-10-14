@@ -157,30 +157,6 @@ class Variable : public Castable<Variable, Node> {
   /// @return the newly cloned node
   Variable* Clone(CloneContext* ctx) const override;
 
-  /// Writes a representation of the node to the output stream
-  /// @param sem the semantic info for the program
-  /// @param out the stream to write to
-  /// @param indent number of spaces to indent the node when writing
-  void to_str(const sem::Info& sem,
-              std::ostream& out,
-              size_t indent) const override;
-
- protected:
-  /// Output information for this variable.
-  /// @param sem the semantic info for the program
-  /// @param out the stream to write to
-  /// @param indent number of spaces to indent the node when writing
-  void info_to_str(const sem::Info& sem,
-                   std::ostream& out,
-                   size_t indent) const;
-  /// Output constructor for this variable.
-  /// @param sem the semantic info for the program
-  /// @param out the stream to write to
-  /// @param indent number of spaces to indent the node when writing
-  void constructor_to_str(const sem::Info& sem,
-                          std::ostream& out,
-                          size_t indent) const;
-
  private:
   Variable(const Variable&) = delete;
 

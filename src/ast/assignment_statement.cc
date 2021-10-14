@@ -44,16 +44,5 @@ AssignmentStatement* AssignmentStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<AssignmentStatement>(src, l, r);
 }
 
-void AssignmentStatement::to_str(const sem::Info& sem,
-                                 std::ostream& out,
-                                 size_t indent) const {
-  make_indent(out, indent);
-  out << "Assignment{" << std::endl;
-  lhs_->to_str(sem, out, indent + 2);
-  rhs_->to_str(sem, out, indent + 2);
-  make_indent(out, indent);
-  out << "}" << std::endl;
-}
-
 }  // namespace ast
 }  // namespace tint

@@ -35,13 +35,6 @@ std::string StructMemberAlignDecoration::name() const {
   return "align";
 }
 
-void StructMemberAlignDecoration::to_str(const sem::Info&,
-                                         std::ostream& out,
-                                         size_t indent) const {
-  make_indent(out, indent);
-  out << "align " << std::to_string(align_);
-}
-
 StructMemberAlignDecoration* StructMemberAlignDecoration::Clone(
     CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering

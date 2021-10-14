@@ -51,16 +51,12 @@ class FakeStmt : public Castable<FakeStmt, ast::Statement> {
  public:
   FakeStmt(ProgramID program_id, Source source) : Base(program_id, source) {}
   FakeStmt* Clone(CloneContext*) const override { return nullptr; }
-  void to_str(const sem::Info&, std::ostream& out, size_t) const override {
-    out << "Fake";
-  }
 };
 
 class FakeExpr : public Castable<FakeExpr, ast::Expression> {
  public:
   FakeExpr(ProgramID program_id, Source source) : Base(program_id, source) {}
   FakeExpr* Clone(CloneContext*) const override { return nullptr; }
-  void to_str(const sem::Info&, std::ostream&, size_t) const override {}
 };
 
 TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInVertexStage) {

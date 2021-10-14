@@ -94,34 +94,6 @@ TEST_F(CallExpressionTest, Assert_DifferentProgramID_Param) {
       "internal compiler error");
 }
 
-TEST_F(CallExpressionTest, ToStr_NoParams) {
-  auto* func = Expr("func");
-  auto* stmt = create<CallExpression>(func, ExpressionList{});
-  EXPECT_EQ(str(stmt), R"(Call[not set]{
-  Identifier[not set]{func}
-  (
-  )
-}
-)");
-}
-
-TEST_F(CallExpressionTest, ToStr_WithParams) {
-  auto* func = Expr("func");
-  ExpressionList params;
-  params.push_back(Expr("param1"));
-  params.push_back(Expr("param2"));
-
-  auto* stmt = create<CallExpression>(func, params);
-  EXPECT_EQ(str(stmt), R"(Call[not set]{
-  Identifier[not set]{func}
-  (
-    Identifier[not set]{param1}
-    Identifier[not set]{param2}
-  )
-}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

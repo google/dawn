@@ -27,11 +27,6 @@ TEST_F(AstDepthMultisampledTextureTest, Dim) {
   EXPECT_EQ(d->dim(), TextureDimension::k2d);
 }
 
-TEST_F(AstDepthMultisampledTextureTest, TypeName) {
-  auto* d = create<DepthMultisampledTexture>(TextureDimension::k2d);
-  EXPECT_EQ(d->type_name(), "__depth_multisampled_texture_2d");
-}
-
 TEST_F(AstDepthMultisampledTextureTest, FriendlyName) {
   auto* d = create<DepthMultisampledTexture>(TextureDimension::k2d);
   EXPECT_EQ(d->FriendlyName(Symbols()), "texture_depth_multisampled_2d");

@@ -34,13 +34,6 @@ std::string GroupDecoration::name() const {
   return "group";
 }
 
-void GroupDecoration::to_str(const sem::Info&,
-                             std::ostream& out,
-                             size_t indent) const {
-  make_indent(out, indent);
-  out << "GroupDecoration{" << value_ << "}" << std::endl;
-}
-
 GroupDecoration* GroupDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());

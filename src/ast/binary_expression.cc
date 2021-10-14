@@ -46,20 +46,5 @@ BinaryExpression* BinaryExpression::Clone(CloneContext* ctx) const {
   return ctx->dst->create<BinaryExpression>(src, op_, l, r);
 }
 
-void BinaryExpression::to_str(const sem::Info& sem,
-                              std::ostream& out,
-                              size_t indent) const {
-  make_indent(out, indent);
-  out << "Binary[" << result_type_str(sem) << "]{" << std::endl;
-  lhs_->to_str(sem, out, indent + 2);
-
-  make_indent(out, indent + 2);
-  out << op_ << std::endl;
-
-  rhs_->to_str(sem, out, indent + 2);
-  make_indent(out, indent);
-  out << "}" << std::endl;
-}
-
 }  // namespace ast
 }  // namespace tint

@@ -38,17 +38,6 @@ std::string OverrideDecoration::name() const {
   return "override";
 }
 
-void OverrideDecoration::to_str(const sem::Info&,
-                                std::ostream& out,
-                                size_t indent) const {
-  make_indent(out, indent);
-  out << "OverrideDecoration";
-  if (has_value_) {
-    out << "{" << value_ << "}";
-  }
-  out << std::endl;
-}
-
 OverrideDecoration* OverrideDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());

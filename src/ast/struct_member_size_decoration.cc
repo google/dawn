@@ -35,13 +35,6 @@ std::string StructMemberSizeDecoration::name() const {
   return "size";
 }
 
-void StructMemberSizeDecoration::to_str(const sem::Info&,
-                                        std::ostream& out,
-                                        size_t indent) const {
-  make_indent(out, indent);
-  out << "size " << std::to_string(size_);
-}
-
 StructMemberSizeDecoration* StructMemberSizeDecoration::Clone(
     CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering

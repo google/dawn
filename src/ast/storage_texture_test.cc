@@ -48,14 +48,6 @@ TEST_F(AstStorageTextureTest, Format) {
   EXPECT_EQ(s->image_format(), ImageFormat::kRgba32Float);
 }
 
-TEST_F(AstStorageTextureTest, TypeName) {
-  auto* subtype = StorageTexture::SubtypeFor(ImageFormat::kRgba32Float, *this);
-  auto* s =
-      create<StorageTexture>(TextureDimension::k2dArray,
-                             ImageFormat::kRgba32Float, subtype, Access::kRead);
-  EXPECT_EQ(s->type_name(), "__storage_texture_2d_array_rgba32float_read");
-}
-
 TEST_F(AstStorageTextureTest, FriendlyName) {
   auto* subtype = StorageTexture::SubtypeFor(ImageFormat::kRgba32Float, *this);
   auto* s =

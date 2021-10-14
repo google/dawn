@@ -26,11 +26,6 @@ TEST_F(UintLiteralTest, Value) {
   EXPECT_EQ(u->value(), 47u);
 }
 
-TEST_F(UintLiteralTest, ToStr) {
-  auto* u = create<UintLiteral>(42u);
-  EXPECT_EQ(str(u), "42u");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

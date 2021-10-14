@@ -84,16 +84,6 @@ TEST_F(MemberAccessorExpressionTest, Assert_DifferentProgramID_Member) {
       "internal compiler error");
 }
 
-TEST_F(MemberAccessorExpressionTest, ToStr) {
-  auto* stmt =
-      create<MemberAccessorExpression>(Expr("structure"), Expr("member"));
-  EXPECT_EQ(str(stmt), R"(MemberAccessor[not set]{
-  Identifier[not set]{structure}
-  Identifier[not set]{member}
-}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

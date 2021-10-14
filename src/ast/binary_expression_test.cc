@@ -90,19 +90,6 @@ TEST_F(BinaryExpressionTest, Assert_DifferentProgramID_RHS) {
       "internal compiler error");
 }
 
-TEST_F(BinaryExpressionTest, ToStr) {
-  auto* lhs = Expr("lhs");
-  auto* rhs = Expr("rhs");
-
-  auto* r = create<BinaryExpression>(BinaryOp::kEqual, lhs, rhs);
-  EXPECT_EQ(str(r), R"(Binary[not set]{
-  Identifier[not set]{lhs}
-  equal
-  Identifier[not set]{rhs}
-}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

@@ -89,36 +89,6 @@ TEST_F(ElseStatementTest, Assert_DifferentProgramID_Body) {
       "internal compiler error");
 }
 
-TEST_F(ElseStatementTest, ToStr) {
-  auto* cond = Expr(true);
-  auto* body = create<BlockStatement>(StatementList{
-      create<DiscardStatement>(),
-  });
-  auto* e = create<ElseStatement>(cond, body);
-  EXPECT_EQ(str(e), R"(Else{
-  (
-    ScalarConstructor[not set]{true}
-  )
-  {
-    Discard{}
-  }
-}
-)");
-}
-
-TEST_F(ElseStatementTest, ToStr_NoCondition) {
-  auto* body = create<BlockStatement>(StatementList{
-      create<DiscardStatement>(),
-  });
-  auto* e = create<ElseStatement>(nullptr, body);
-  EXPECT_EQ(str(e), R"(Else{
-  {
-    Discard{}
-  }
-}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

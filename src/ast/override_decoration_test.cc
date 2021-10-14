@@ -33,12 +33,6 @@ TEST_F(OverrideDecorationTest, Creation_WithoutValue) {
   EXPECT_FALSE(d->HasValue());
 }
 
-TEST_F(OverrideDecorationTest, ToStr) {
-  auto* d = create<OverrideDecoration>(1200);
-  EXPECT_EQ(str(d), R"(OverrideDecoration{1200}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

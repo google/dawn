@@ -24,6 +24,7 @@
 #include "src/ast/texture.h"
 #include "src/ast/u32.h"
 #include "src/ast/vector.h"
+#include "src/symbol_table.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Type);
 
@@ -107,11 +108,6 @@ bool Type::is_bool_scalar_or_vector() const {
 
 bool Type::is_handle() const {
   return IsAnyOf<Sampler, Texture>();
-}
-
-void Type::to_str(const sem::Info&, std::ostream& out, size_t indent) const {
-  make_indent(out, indent);
-  out << type_name();
 }
 
 }  // namespace ast

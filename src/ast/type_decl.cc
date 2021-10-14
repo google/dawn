@@ -30,12 +30,5 @@ TypeDecl::TypeDecl(TypeDecl&&) = default;
 
 TypeDecl::~TypeDecl() = default;
 
-void TypeDecl::to_str(const sem::Info&,
-                      std::ostream& out,
-                      size_t indent) const {
-  make_indent(out, indent);
-  out << type_name();
-}
-
 }  // namespace ast
 }  // namespace tint

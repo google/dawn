@@ -81,56 +81,6 @@ Function* Function::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Function>(src, sym, p, ret, b, decos, ret_decos);
 }
 
-void Function::to_str(const sem::Info& sem,
-                      std::ostream& out,
-                      size_t indent) const {
-  make_indent(out, indent);
-  out << "Function " << symbol_.to_str() << " -> " << return_type_->type_name()
-      << std::endl;
-
-  for (auto* deco : decorations()) {
-    deco->to_str(sem, out, indent);
-  }
-
-  make_indent(out, indent);
-  out << "(";
-
-  if (params_.size() > 0) {
-    out << std::endl;
-
-    for (auto* param : params_)
-      param->to_str(sem, out, indent + 2);
-
-    make_indent(out, indent);
-  }
-  out << ")" << std::endl;
-
-  make_indent(out, indent);
-  out << "{" << std::endl;
-
-  if (body_ != nullptr) {
-    for (auto* stmt : *body_) {
-      stmt->to_str(sem, out, indent + 2);
-    }
-  }
-
-  make_indent(out, indent);
-  out << "}" << std::endl;
-}
-
-std::string Function::type_name() const {
-  std::ostringstream out;
-
-  out << "__func" + return_type_->type_name();
-  for (auto* param : params_) {
-    // No need for the sem::Variable here, functions params must have a
-    // type
-    out << param->type()->type_name();
-  }
-
-  return out.str();
-}
-
 Function* FunctionList::Find(Symbol sym) const {
   for (auto* func : *this) {
     if (func->symbol() == sym) {

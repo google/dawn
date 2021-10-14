@@ -118,35 +118,5 @@ void Module::Copy(CloneContext* ctx, const Module* src) {
   }
 }
 
-void Module::to_str(const sem::Info& sem,
-                    std::ostream& out,
-                    size_t indent) const {
-  make_indent(out, indent);
-  out << "Module{" << std::endl;
-  indent += 2;
-  for (auto* ty : type_decls_) {
-    make_indent(out, indent);
-    if (auto* alias = ty->As<ast::Alias>()) {
-      out << alias->symbol().to_str() << " -> " << alias->type()->type_name()
-          << std::endl;
-    } else if (auto* str = ty->As<ast::Struct>()) {
-      str->to_str(sem, out, indent);
-    }
-  }
-  for (auto* var : global_variables_) {
-    var->to_str(sem, out, indent);
-  }
-  for (auto* func : functions_) {
-    func->to_str(sem, out, indent);
-  }
-  out << "}" << std::endl;
-}
-
-std::string Module::to_str(const sem::Info& sem) const {
-  std::ostringstream out;
-  to_str(sem, out, 0);
-  return out.str();
-}
-
 }  // namespace ast
 }  // namespace tint

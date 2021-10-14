@@ -34,12 +34,5 @@ ContinueStatement* ContinueStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<ContinueStatement>(src);
 }
 
-void ContinueStatement::to_str(const sem::Info&,
-                               std::ostream& out,
-                               size_t indent) const {
-  make_indent(out, indent);
-  out << "Continue{}" << std::endl;
-}
-
 }  // namespace ast
 }  // namespace tint

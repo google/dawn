@@ -34,12 +34,6 @@ TEST_F(ScalarConstructorExpressionTest, Creation_WithSource) {
   EXPECT_EQ(src.range.begin.column, 2u);
 }
 
-TEST_F(ScalarConstructorExpressionTest, ToStr) {
-  auto* c = Expr(true);
-  EXPECT_EQ(str(c), R"(ScalarConstructor[not set]{true}
-)");
-}
-
 TEST_F(ScalarConstructorExpressionTest, Assert_DifferentProgramID_Literal) {
   EXPECT_FATAL_FAILURE(
       {

@@ -46,16 +46,5 @@ MemberAccessorExpression* MemberAccessorExpression::Clone(
   return ctx->dst->create<MemberAccessorExpression>(src, str, mem);
 }
 
-void MemberAccessorExpression::to_str(const sem::Info& sem,
-                                      std::ostream& out,
-                                      size_t indent) const {
-  make_indent(out, indent);
-  out << "MemberAccessor[" << result_type_str(sem) << "]{" << std::endl;
-  struct_->to_str(sem, out, indent + 2);
-  member_->to_str(sem, out, indent + 2);
-  make_indent(out, indent);
-  out << "}" << std::endl;
-}
-
 }  // namespace ast
 }  // namespace tint

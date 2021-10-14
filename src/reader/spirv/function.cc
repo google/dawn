@@ -725,12 +725,6 @@ DefInfo::~DefInfo() = default;
 ast::Node* StatementBuilder::Clone(CloneContext*) const {
   return nullptr;
 }
-void StatementBuilder::to_str(const sem::Info&,
-                              std::ostream& out,
-                              size_t indent) const {
-  make_indent(out, indent);
-  out << "StatementBuilder" << std::endl;
-}
 
 FunctionEmitter::FunctionEmitter(ParserImpl* pi,
                                  const spvtools::opt::Function& function,

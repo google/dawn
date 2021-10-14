@@ -34,13 +34,6 @@ std::string BindingDecoration::name() const {
   return "binding";
 }
 
-void BindingDecoration::to_str(const sem::Info&,
-                               std::ostream& out,
-                               size_t indent) const {
-  make_indent(out, indent);
-  out << "BindingDecoration{" << value_ << "}" << std::endl;
-}
-
 BindingDecoration* BindingDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());

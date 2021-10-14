@@ -46,16 +46,5 @@ ArrayAccessorExpression* ArrayAccessorExpression::Clone(
   return ctx->dst->create<ArrayAccessorExpression>(src, arr, idx);
 }
 
-void ArrayAccessorExpression::to_str(const sem::Info& sem,
-                                     std::ostream& out,
-                                     size_t indent) const {
-  make_indent(out, indent);
-  out << "ArrayAccessor[" << result_type_str(sem) << "]{" << std::endl;
-  array_->to_str(sem, out, indent + 2);
-  idx_expr_->to_str(sem, out, indent + 2);
-  make_indent(out, indent);
-  out << "}" << std::endl;
-}
-
 }  // namespace ast
 }  // namespace tint

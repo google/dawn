@@ -47,20 +47,5 @@ TypeConstructorExpression* TypeConstructorExpression::Clone(
   return ctx->dst->create<TypeConstructorExpression>(src, ty, vals);
 }
 
-void TypeConstructorExpression::to_str(const sem::Info& sem,
-                                       std::ostream& out,
-                                       size_t indent) const {
-  make_indent(out, indent);
-  out << "TypeConstructor[" << result_type_str(sem) << "]{" << std::endl;
-  make_indent(out, indent + 2);
-  out << type_->type_name() << std::endl;
-
-  for (auto* val : values_) {
-    val->to_str(sem, out, indent + 2);
-  }
-  make_indent(out, indent);
-  out << "}" << std::endl;
-}
-
 }  // namespace ast
 }  // namespace tint

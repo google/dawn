@@ -46,35 +46,5 @@ CaseStatement* CaseStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<CaseStatement>(src, sel, b);
 }
 
-void CaseStatement::to_str(const sem::Info& sem,
-                           std::ostream& out,
-                           size_t indent) const {
-  make_indent(out, indent);
-
-  if (IsDefault()) {
-    out << "Default{" << std::endl;
-  } else {
-    out << "Case ";
-    bool first = true;
-    for (auto* selector : selectors_) {
-      if (!first)
-        out << ", ";
-
-      first = false;
-      out << selector->to_str(sem);
-    }
-    out << "{" << std::endl;
-  }
-
-  if (body_ != nullptr) {
-    for (auto* stmt : *body_) {
-      stmt->to_str(sem, out, indent + 2);
-    }
-  }
-
-  make_indent(out, indent);
-  out << "}" << std::endl;
-}
-
 }  // namespace ast
 }  // namespace tint

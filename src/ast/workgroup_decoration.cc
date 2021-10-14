@@ -36,22 +36,6 @@ std::string WorkgroupDecoration::name() const {
   return "workgroup_size";
 }
 
-void WorkgroupDecoration::to_str(const sem::Info& sem,
-                                 std::ostream& out,
-                                 size_t indent) const {
-  make_indent(out, indent);
-  out << "WorkgroupDecoration{" << std::endl;
-  x_->to_str(sem, out, indent + 2);
-  if (y_) {
-    y_->to_str(sem, out, indent + 2);
-    if (z_) {
-      z_->to_str(sem, out, indent + 2);
-    }
-  }
-  make_indent(out, indent);
-  out << "}" << std::endl;
-}
-
 WorkgroupDecoration* WorkgroupDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());

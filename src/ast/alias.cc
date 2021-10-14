@@ -25,19 +25,13 @@ Alias::Alias(ProgramID program_id,
              const Source& source,
              const Symbol& name,
              Type* subtype)
-    : Base(program_id, source, name),
-      subtype_(subtype),
-      type_name_("__alias_" + name.to_str() + subtype->type_name()) {
+    : Base(program_id, source, name), subtype_(subtype) {
   TINT_ASSERT(AST, subtype_);
 }
 
 Alias::Alias(Alias&&) = default;
 
 Alias::~Alias() = default;
-
-std::string Alias::type_name() const {
-  return type_name_;
-}
 
 Alias* Alias::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering

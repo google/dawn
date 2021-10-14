@@ -42,13 +42,5 @@ ScalarConstructorExpression* ScalarConstructorExpression::Clone(
   return ctx->dst->create<ScalarConstructorExpression>(src, lit);
 }
 
-void ScalarConstructorExpression::to_str(const sem::Info& sem,
-                                         std::ostream& out,
-                                         size_t indent) const {
-  make_indent(out, indent);
-  out << "ScalarConstructor[" << result_type_str(sem) << "]{"
-      << literal_->to_str(sem) << "}" << std::endl;
-}
-
 }  // namespace ast
 }  // namespace tint

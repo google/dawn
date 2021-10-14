@@ -40,11 +40,6 @@ Sampler::Sampler(Sampler&&) = default;
 
 Sampler::~Sampler() = default;
 
-std::string Sampler::type_name() const {
-  return std::string("__sampler_") +
-         (kind_ == SamplerKind::kSampler ? "sampler" : "comparison");
-}
-
 std::string Sampler::FriendlyName(const SymbolTable&) const {
   return kind_ == SamplerKind::kSampler ? "sampler" : "sampler_comparison";
 }

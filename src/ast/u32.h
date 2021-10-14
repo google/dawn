@@ -33,9 +33,6 @@ class U32 : public Castable<U32, Type> {
   U32(U32&&);
   ~U32() override;
 
-  /// @returns the name for th type
-  std::string type_name() const override;
-
   /// @param symbols the program's symbol table
   /// @returns the name for this type that closely resembles how it would be
   /// declared in WGSL.

@@ -113,37 +113,6 @@ TEST_F(SwitchStatementTest, Assert_DifferentProgramID_CaseStatement) {
       "internal compiler error");
 }
 
-TEST_F(SwitchStatementTest, ToStr_Empty) {
-  auto* ident = Expr("ident");
-
-  auto* stmt = create<SwitchStatement>(ident, CaseStatementList{});
-  EXPECT_EQ(str(stmt), R"(Switch{
-  Identifier[not set]{ident}
-  {
-  }
-}
-)");
-}
-
-TEST_F(SwitchStatementTest, ToStr) {
-  CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(2));
-
-  auto* ident = Expr("ident");
-  CaseStatementList body;
-  body.push_back(create<CaseStatement>(lit, Block()));
-
-  auto* stmt = create<SwitchStatement>(ident, body);
-  EXPECT_EQ(str(stmt), R"(Switch{
-  Identifier[not set]{ident}
-  {
-    Case 2{
-    }
-  }
-}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

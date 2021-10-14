@@ -69,7 +69,6 @@ struct Options {
   std::string output_file = "-";  // Default to stdout
 
   bool parse_only = false;
-  bool dump_ast = false;
   bool disable_workgroup_init = false;
   bool validate = false;
   bool demangle = false;
@@ -409,8 +408,6 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
       opts->transforms = split_transform_names(args[i]);
     } else if (arg == "--parse-only") {
       opts->parse_only = true;
-    } else if (arg == "--dump-ast") {
-      opts->dump_ast = true;
     } else if (arg == "--disable-workgroup-init") {
       opts->disable_workgroup_init = true;
     } else if (arg == "--demangle") {
@@ -1019,10 +1016,6 @@ int main(int argc, const char** argv) {
   }
   if (program->Diagnostics().count() > 0) {
     diag_formatter.format(program->Diagnostics(), diag_printer.get());
-  }
-
-  if (options.dump_ast) {
-    std::cout << std::endl << program->to_str(options.demangle) << std::endl;
   }
 
   if (!program->IsValid()) {

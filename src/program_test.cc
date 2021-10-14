@@ -31,13 +31,6 @@ TEST_F(ProgramTest, Creation) {
   EXPECT_EQ(program.AST().Functions().size(), 0u);
 }
 
-TEST_F(ProgramTest, ToStrEmitsPreambleAndPostamble) {
-  Program program(std::move(*this));
-  const auto str = program.to_str();
-  auto* const expected = "Module{\n}\n";
-  EXPECT_EQ(str, expected);
-}
-
 TEST_F(ProgramTest, EmptyIsValid) {
   Program program(std::move(*this));
   EXPECT_TRUE(program.IsValid());

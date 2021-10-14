@@ -38,9 +38,6 @@ class TypeName : public Castable<TypeName, Type> {
   /// @return the type name
   const Symbol& name() const { return name_; }
 
-  /// @returns the name for th type
-  std::string type_name() const override;
-
   /// @param symbols the program's symbol table
   /// @returns the name for this type that closely resembles how it would be
   /// declared in WGSL.
@@ -53,7 +50,6 @@ class TypeName : public Castable<TypeName, Type> {
 
  private:
   Symbol name_;
-  std::string const type_name_;
 };
 
 }  // namespace ast

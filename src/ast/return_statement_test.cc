@@ -53,23 +53,6 @@ TEST_F(ReturnStatementTest, HasValue_WithValue) {
   EXPECT_TRUE(r->has_value());
 }
 
-TEST_F(ReturnStatementTest, ToStr_WithValue) {
-  auto* expr = Expr("expr");
-  auto* r = create<ReturnStatement>(expr);
-  EXPECT_EQ(str(r), R"(Return{
-  {
-    Identifier[not set]{expr}
-  }
-}
-)");
-}
-
-TEST_F(ReturnStatementTest, ToStr_WithoutValue) {
-  auto* r = create<ReturnStatement>();
-  EXPECT_EQ(str(r), R"(Return{}
-)");
-}
-
 TEST_F(ReturnStatementTest, Assert_DifferentProgramID_Expr) {
   EXPECT_FATAL_FAILURE(
       {

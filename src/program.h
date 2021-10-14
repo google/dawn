@@ -164,28 +164,6 @@ class Program {
   /// the type declaration has no resolved type.
   const sem::Type* TypeOf(const ast::TypeDecl* type_decl) const;
 
-  /// @param demangle whether to automatically demangle the symbols in the
-  /// returned string
-  /// @returns a string describing this program.
-  std::string to_str(bool demangle) const;
-
-  /// @returns a demangled string describing this program.
-  std::string to_str() const { return to_str(true); }
-
-  /// Writes a representation of the node to the output stream
-  /// @note unlike str(), to_str() does not automatically demangle the string.
-  /// @param node the AST node
-  /// @param out the stream to write to
-  /// @param indent number of spaces to indent the node when writing
-  void to_str(const ast::Node* node, std::ostream& out, size_t indent) const {
-    node->to_str(Sem(), out, indent);
-  }
-
-  /// Returns a demangled, string representation of `node`.
-  /// @param node the AST node
-  /// @returns a string representation of the node
-  std::string str(const ast::Node* node) const;
-
   /// A function that can be used to print a program
   using Printer = std::string (*)(const Program*);
 

@@ -128,8 +128,8 @@ let declaration_order_check_3 : i32 = 1;
 
   ASSERT_TRUE(dst.IsValid()) << diag::Formatter().format(dst.Diagnostics());
 
-  // Expect the AST printed with to_str() to match
-  EXPECT_EQ(src.to_str(), dst.to_str());
+  // Expect the printed strings to match
+  EXPECT_EQ(Program::printer(&src), Program::printer(&dst));
 
   // Check that none of the AST nodes or type pointers in dst are found in src
   std::unordered_set<ast::Node*> src_nodes;
@@ -141,10 +141,10 @@ let declaration_order_check_3 : i32 = 1;
     src_types.emplace(src_type);
   }
   for (auto* dst_node : dst.ASTNodes().Objects()) {
-    ASSERT_EQ(src_nodes.count(dst_node), 0u) << dst.str(dst_node);
+    ASSERT_EQ(src_nodes.count(dst_node), 0u);
   }
   for (auto* dst_type : dst.Types()) {
-    ASSERT_EQ(src_types.count(dst_type), 0u) << dst_type->type_name();
+    ASSERT_EQ(src_types.count(dst_type), 0u);
   }
 
   // Regenerate the wgsl for the src program. We use this instead of the

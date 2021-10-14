@@ -68,26 +68,5 @@ Struct* Struct::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Struct>(src, n, mem, decos);
 }
 
-void Struct::to_str(const sem::Info& sem,
-                    std::ostream& out,
-                    size_t indent) const {
-  out << "Struct " << name().to_str() << " {" << std::endl;
-  for (auto* deco : decorations_) {
-    make_indent(out, indent + 2);
-    out << "[[";
-    deco->to_str(sem, out, 0);
-    out << "]]" << std::endl;
-  }
-  for (auto* member : members_) {
-    member->to_str(sem, out, indent + 2);
-  }
-  make_indent(out, indent);
-  out << "}" << std::endl;
-}
-
-std::string Struct::type_name() const {
-  return "__struct_" + name().to_str();
-}
-
 }  // namespace ast
 }  // namespace tint

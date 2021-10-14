@@ -31,19 +31,6 @@ TEST_F(AstPointerTest, Creation) {
   EXPECT_EQ(p->access(), Access::kRead);
 }
 
-TEST_F(AstPointerTest, TypeName) {
-  auto* i32 = create<I32>();
-  auto* p =
-      create<Pointer>(i32, ast::StorageClass::kWorkgroup, Access::kUndefined);
-  EXPECT_EQ(p->type_name(), "__ptr_workgroup__i32");
-}
-
-TEST_F(AstPointerTest, TypeNameWithAccess) {
-  auto* i32 = create<I32>();
-  auto* p = create<Pointer>(i32, ast::StorageClass::kWorkgroup, Access::kRead);
-  EXPECT_EQ(p->type_name(), "__ptr_workgroup__i32_read");
-}
-
 TEST_F(AstPointerTest, FriendlyName) {
   auto* i32 = create<I32>();
   auto* p =

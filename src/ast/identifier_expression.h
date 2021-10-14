@@ -41,14 +41,6 @@ class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
   /// @return the newly cloned node
   IdentifierExpression* Clone(CloneContext* ctx) const override;
 
-  /// Writes a representation of the node to the output stream
-  /// @param sem the semantic info for the program
-  /// @param out the stream to write to
-  /// @param indent number of spaces to indent the node when writing
-  void to_str(const sem::Info& sem,
-              std::ostream& out,
-              size_t indent) const override;
-
  private:
   IdentifierExpression(const IdentifierExpression&) = delete;
 

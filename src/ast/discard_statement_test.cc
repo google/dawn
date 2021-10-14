@@ -44,12 +44,6 @@ TEST_F(DiscardStatementTest, IsDiscard) {
   EXPECT_TRUE(stmt->Is<DiscardStatement>());
 }
 
-TEST_F(DiscardStatementTest, ToStr) {
-  auto* stmt = create<DiscardStatement>();
-  EXPECT_EQ(str(stmt), R"(Discard{}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

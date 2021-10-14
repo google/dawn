@@ -34,12 +34,6 @@ TEST_F(ContinueStatementTest, IsContinue) {
   EXPECT_TRUE(stmt->Is<ContinueStatement>());
 }
 
-TEST_F(ContinueStatementTest, ToStr) {
-  auto* stmt = create<ContinueStatement>();
-  EXPECT_EQ(str(stmt), R"(Continue{}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

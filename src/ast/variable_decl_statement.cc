@@ -40,15 +40,5 @@ VariableDeclStatement* VariableDeclStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<VariableDeclStatement>(src, var);
 }
 
-void VariableDeclStatement::to_str(const sem::Info& sem,
-                                   std::ostream& out,
-                                   size_t indent) const {
-  make_indent(out, indent);
-  out << "VariableDeclStatement{" << std::endl;
-  variable_->to_str(sem, out, indent + 2);
-  make_indent(out, indent);
-  out << "}" << std::endl;
-}
-
 }  // namespace ast
 }  // namespace tint

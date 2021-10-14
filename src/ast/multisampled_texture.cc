@@ -33,12 +33,6 @@ MultisampledTexture::MultisampledTexture(MultisampledTexture&&) = default;
 
 MultisampledTexture::~MultisampledTexture() = default;
 
-std::string MultisampledTexture::type_name() const {
-  std::ostringstream out;
-  out << "__multisampled_texture_" << dim() << type_->type_name();
-  return out.str();
-}
-
 std::string MultisampledTexture::FriendlyName(
     const SymbolTable& symbols) const {
   std::ostringstream out;

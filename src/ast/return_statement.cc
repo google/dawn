@@ -42,27 +42,5 @@ ReturnStatement* ReturnStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<ReturnStatement>(src, ret);
 }
 
-void ReturnStatement::to_str(const sem::Info& sem,
-                             std::ostream& out,
-                             size_t indent) const {
-  make_indent(out, indent);
-  out << "Return{";
-
-  if (value_) {
-    out << std::endl;
-
-    make_indent(out, indent + 2);
-    out << "{" << std::endl;
-
-    value_->to_str(sem, out, indent + 4);
-
-    make_indent(out, indent + 2);
-    out << "}" << std::endl;
-
-    make_indent(out, indent);
-  }
-  out << "}" << std::endl;
-}
-
 }  // namespace ast
 }  // namespace tint

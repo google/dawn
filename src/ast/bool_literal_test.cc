@@ -34,14 +34,6 @@ TEST_F(BoolLiteralTest, False) {
   ASSERT_TRUE(b->IsFalse());
 }
 
-TEST_F(BoolLiteralTest, ToStr) {
-  auto* t = create<BoolLiteral>(true);
-  auto* f = create<BoolLiteral>(false);
-
-  EXPECT_EQ(str(t), "true");
-  EXPECT_EQ(str(f), "false");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

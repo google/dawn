@@ -100,31 +100,6 @@ TEST_F(LoopStatementTest, Assert_DifferentProgramID_Continuing) {
       "internal compiler error");
 }
 
-TEST_F(LoopStatementTest, ToStr) {
-  auto* body = Block(create<DiscardStatement>());
-
-  auto* l = create<LoopStatement>(body, nullptr);
-  EXPECT_EQ(str(l), R"(Loop{
-  Discard{}
-}
-)");
-}
-
-TEST_F(LoopStatementTest, ToStr_WithContinuing) {
-  auto* body = Block(create<DiscardStatement>());
-
-  auto* continuing = Block(create<DiscardStatement>());
-
-  auto* l = create<LoopStatement>(body, continuing);
-  EXPECT_EQ(str(l), R"(Loop{
-  Discard{}
-  continuing {
-    Discard{}
-  }
-}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

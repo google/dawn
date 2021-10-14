@@ -59,12 +59,6 @@ TEST_F(AstMultisampledTextureTest, Type) {
   EXPECT_EQ(s->type(), f32);
 }
 
-TEST_F(AstMultisampledTextureTest, TypeName) {
-  auto* f32 = create<F32>();
-  auto* s = create<MultisampledTexture>(TextureDimension::k3d, f32);
-  EXPECT_EQ(s->type_name(), "__multisampled_texture_3d__f32");
-}
-
 TEST_F(AstMultisampledTextureTest, FriendlyName) {
   auto* f32 = create<F32>();
   auto* s = create<MultisampledTexture>(TextureDimension::k3d, f32);

@@ -28,10 +28,6 @@ Void::Void(Void&&) = default;
 
 Void::~Void() = default;
 
-std::string Void::type_name() const {
-  return "__void";
-}
-
 std::string Void::FriendlyName(const SymbolTable&) const {
   return "void";
 }

@@ -101,60 +101,6 @@ TEST_F(IfStatementTest, Assert_DifferentProgramID_ElseStatement) {
       "internal compiler error");
 }
 
-TEST_F(IfStatementTest, ToStr) {
-  auto* cond = Expr("cond");
-  auto* stmt = create<IfStatement>(cond, Block(create<DiscardStatement>()),
-                                   ElseStatementList{});
-
-  EXPECT_EQ(str(stmt), R"(If{
-  (
-    Identifier[not set]{cond}
-  )
-  {
-    Discard{}
-  }
-}
-)");
-}
-
-TEST_F(IfStatementTest, ToStr_WithElseStatements) {
-  auto* cond = Expr("cond");
-  auto* body = Block(create<DiscardStatement>());
-  auto* else_if_body = Block(create<DiscardStatement>());
-  auto* else_body =
-      Block(create<DiscardStatement>(), create<DiscardStatement>());
-  auto* stmt = create<IfStatement>(
-      cond, body,
-      ElseStatementList{
-          create<ElseStatement>(Expr("ident"), else_if_body),
-          create<ElseStatement>(nullptr, else_body),
-      });
-
-  EXPECT_EQ(str(stmt), R"(If{
-  (
-    Identifier[not set]{cond}
-  )
-  {
-    Discard{}
-  }
-}
-Else{
-  (
-    Identifier[not set]{ident}
-  )
-  {
-    Discard{}
-  }
-}
-Else{
-  {
-    Discard{}
-    Discard{}
-  }
-}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

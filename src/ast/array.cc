@@ -30,10 +30,10 @@ std::string SizeExprToString(const ast::Expression* size,
   if (auto* ident = size->As<ast::IdentifierExpression>()) {
     if (symbols) {
       return symbols->NameFor(ident->symbol());
-    } else {
-      return ident->symbol().to_str();
     }
-  } else if (auto* scalar = size->As<ast::ScalarConstructorExpression>()) {
+    return "<unknown>";
+  }
+  if (auto* scalar = size->As<ast::ScalarConstructorExpression>()) {
     auto* literal = scalar->literal()->As<ast::IntLiteral>();
     if (literal) {
       return std::to_string(literal->value_as_u32());
@@ -58,22 +58,6 @@ Array::Array(ProgramID program_id,
 Array::Array(Array&&) = default;
 
 Array::~Array() = default;
-
-std::string Array::type_name() const {
-  TINT_ASSERT(AST, subtype_);
-
-  std::string type_name = "__array" + subtype_->type_name();
-  if (!IsRuntimeArray()) {
-    type_name += "_" + SizeExprToString(size_);
-  }
-  for (auto* deco : decos_) {
-    if (auto* stride = deco->As<ast::StrideDecoration>()) {
-      type_name += "_stride_" + std::to_string(stride->stride());
-    }
-  }
-
-  return type_name;
-}
 
 std::string Array::FriendlyName(const SymbolTable& symbols) const {
   std::ostringstream out;

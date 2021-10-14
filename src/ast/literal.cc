@@ -24,12 +24,5 @@ Literal::Literal(ProgramID program_id, const Source& source)
 
 Literal::~Literal() = default;
 
-void Literal::to_str(const sem::Info& sem,
-                     std::ostream& out,
-                     size_t indent) const {
-  make_indent(out, indent);
-  out << to_str(sem);
-}
-
 }  // namespace ast
 }  // namespace tint

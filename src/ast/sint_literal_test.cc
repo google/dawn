@@ -26,11 +26,6 @@ TEST_F(SintLiteralTest, Value) {
   EXPECT_EQ(i->value(), 47);
 }
 
-TEST_F(SintLiteralTest, ToStr) {
-  auto* i = create<SintLiteral>(-42);
-  EXPECT_EQ(str(i), "-42");
-}
-
 TEST_F(SintLiteralTest, Name_I32) {
   auto* i = create<SintLiteral>(2);
   EXPECT_EQ("__sint_2", i->name());

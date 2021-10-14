@@ -42,12 +42,6 @@ TEST_F(FallthroughStatementTest, IsFallthrough) {
   EXPECT_TRUE(stmt->Is<FallthroughStatement>());
 }
 
-TEST_F(FallthroughStatementTest, ToStr) {
-  auto* stmt = create<FallthroughStatement>();
-  EXPECT_EQ(str(stmt), R"(Fallthrough{}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

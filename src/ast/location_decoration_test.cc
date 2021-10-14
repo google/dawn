@@ -26,12 +26,6 @@ TEST_F(LocationDecorationTest, Creation) {
   EXPECT_EQ(2u, d->value());
 }
 
-TEST_F(LocationDecorationTest, ToStr) {
-  auto* d = create<LocationDecoration>(2);
-  EXPECT_EQ(str(d), R"(LocationDecoration{2}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

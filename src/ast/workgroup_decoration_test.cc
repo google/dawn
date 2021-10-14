@@ -96,15 +96,6 @@ TEST_F(WorkgroupDecorationTest, Creation_WithIdentifier) {
   EXPECT_EQ(Symbols().NameFor(z_ident->symbol()), "depth");
 }
 
-TEST_F(WorkgroupDecorationTest, ToStr) {
-  auto* d = WorkgroupSize(2, "height");
-  EXPECT_EQ(str(d), R"(WorkgroupDecoration{
-  ScalarConstructor[not set]{2}
-  Identifier[not set]{height}
-}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

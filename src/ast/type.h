@@ -35,9 +35,6 @@ class Type : public Castable<Type, Node> {
   Type(Type&&);
   ~Type() override;
 
-  /// @returns the name for this type. The type name is unique over all types.
-  virtual std::string type_name() const = 0;
-
   /// @param symbols the program's symbol table
   /// @returns the name for this type that closely resembles how it would be
   /// declared in WGSL.
@@ -79,14 +76,6 @@ class Type : public Castable<Type, Node> {
   bool is_bool_scalar_or_vector() const;
   /// @returns true if this type is a handle type
   bool is_handle() const;
-
-  /// Writes a representation of the node to the output stream
-  /// @param sem the semantic info for the program
-  /// @param out the stream to write to
-  /// @param indent number of spaces to indent the node when writing
-  void to_str(const sem::Info& sem,
-              std::ostream& out,
-              size_t indent) const override;
 
  protected:
   /// Constructor

@@ -28,10 +28,6 @@ Bool::Bool(Bool&&) = default;
 
 Bool::~Bool() = default;
 
-std::string Bool::type_name() const {
-  return "__bool";
-}
-
 std::string Bool::FriendlyName(const SymbolTable&) const {
   return "bool";
 }

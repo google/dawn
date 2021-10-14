@@ -40,12 +40,6 @@ DepthMultisampledTexture::DepthMultisampledTexture(DepthMultisampledTexture&&) =
 
 DepthMultisampledTexture::~DepthMultisampledTexture() = default;
 
-std::string DepthMultisampledTexture::type_name() const {
-  std::ostringstream out;
-  out << "__depth_multisampled_texture_" << dim();
-  return out.str();
-}
-
 std::string DepthMultisampledTexture::FriendlyName(const SymbolTable&) const {
   std::ostringstream out;
   out << "texture_depth_multisampled_" << dim();

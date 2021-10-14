@@ -34,12 +34,6 @@ TEST_F(BreakStatementTest, IsBreak) {
   EXPECT_TRUE(stmt->Is<BreakStatement>());
 }
 
-TEST_F(BreakStatementTest, ToStr) {
-  auto* stmt = create<BreakStatement>();
-  EXPECT_EQ(str(stmt), R"(Break{}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

@@ -69,8 +69,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   // Clone the src program to dst
   tint::Program dst(src.Clone());
 
-  // Expect the demangled AST printed with to_str() to match
-  ASSERT_EQ(src.to_str(), dst.to_str());
+  // Expect the printed strings to match
+  ASSERT_EQ(tint::Program::printer(&src), tint::Program::printer(&dst));
 
   // Check that none of the AST nodes or type pointers in dst are found in src
   std::unordered_set<tint::ast::Node*> src_nodes;

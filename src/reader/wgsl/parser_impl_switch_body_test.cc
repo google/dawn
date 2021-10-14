@@ -131,8 +131,8 @@ TEST_F(ParserImplTest, SwitchBody_Case_MultipleSelectors) {
   EXPECT_FALSE(e->IsDefault());
   ASSERT_EQ(e->body()->size(), 0u);
   ASSERT_EQ(e->selectors().size(), 2u);
-  ASSERT_EQ(e->selectors()[0]->to_str(Sem()), "1");
-  ASSERT_EQ(e->selectors()[1]->to_str(Sem()), "2");
+  ASSERT_EQ(e->selectors()[0]->value_as_i32(), 1);
+  ASSERT_EQ(e->selectors()[1]->value_as_i32(), 2);
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_MultipleSelectorsMissingColon) {

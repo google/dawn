@@ -26,11 +26,6 @@ TEST_F(FloatLiteralTest, Value) {
   EXPECT_EQ(f->value(), 47.2f);
 }
 
-TEST_F(FloatLiteralTest, ToStr) {
-  auto* f = create<FloatLiteral>(42.1f);
-  EXPECT_EQ(str(f), "42.099998");
-}
-
 TEST_F(FloatLiteralTest, ToName) {
   auto* f = create<FloatLiteral>(42.1f);
   EXPECT_EQ(f->name(), "__float42.0999985");

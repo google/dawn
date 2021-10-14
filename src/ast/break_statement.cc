@@ -34,12 +34,5 @@ BreakStatement* BreakStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<BreakStatement>(src);
 }
 
-void BreakStatement::to_str(const sem::Info&,
-                            std::ostream& out,
-                            size_t indent) const {
-  make_indent(out, indent);
-  out << "Break{}" << std::endl;
-}
-
 }  // namespace ast
 }  // namespace tint

@@ -31,13 +31,6 @@ std::string InvariantDecoration::name() const {
   return "invariant";
 }
 
-void InvariantDecoration::to_str(const sem::Info&,
-                                 std::ostream& out,
-                                 size_t indent) const {
-  make_indent(out, indent);
-  out << "InvariantDecoration";
-}
-
 InvariantDecoration* InvariantDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());

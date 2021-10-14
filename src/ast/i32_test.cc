@@ -22,11 +22,6 @@ namespace {
 
 using AstI32Test = TestHelper;
 
-TEST_F(AstI32Test, TypeName) {
-  auto* i = create<I32>();
-  EXPECT_EQ(i->type_name(), "__i32");
-}
-
 TEST_F(AstI32Test, FriendlyName) {
   auto* i = create<I32>();
   EXPECT_EQ(i->FriendlyName(Symbols()), "i32");

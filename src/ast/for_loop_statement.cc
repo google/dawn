@@ -55,38 +55,5 @@ ForLoopStatement* ForLoopStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<ForLoopStatement>(src, init, cond, cont, b);
 }
 
-void ForLoopStatement::to_str(const sem::Info& sem,
-                              std::ostream& out,
-                              size_t indent) const {
-  make_indent(out, indent);
-  out << "ForLoop {" << std::endl;
-
-  if (initializer_) {
-    make_indent(out, indent + 2);
-    out << "initializer:" << std::endl;
-    initializer_->to_str(sem, out, indent + 4);
-  }
-
-  if (condition_) {
-    make_indent(out, indent + 2);
-    out << "condition:" << std::endl;
-    condition_->to_str(sem, out, indent + 4);
-  }
-
-  if (continuing_) {
-    make_indent(out, indent + 2);
-    out << "continuing:" << std::endl;
-    continuing_->to_str(sem, out, indent + 4);
-  }
-
-  make_indent(out, indent + 2);
-  out << "body:" << std::endl;
-  for (auto* stmt : *body_) {
-    stmt->to_str(sem, out, indent + 4);
-  }
-
-  out << "}" << std::endl;
-}
-
 }  // namespace ast
 }  // namespace tint

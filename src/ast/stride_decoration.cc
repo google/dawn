@@ -34,13 +34,6 @@ std::string StrideDecoration::name() const {
   return "stride";
 }
 
-void StrideDecoration::to_str(const sem::Info&,
-                              std::ostream& out,
-                              size_t indent) const {
-  make_indent(out, indent);
-  out << "stride " << stride_;
-}
-
 StrideDecoration* StrideDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());

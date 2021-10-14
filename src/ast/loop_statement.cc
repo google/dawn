@@ -43,33 +43,5 @@ LoopStatement* LoopStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<LoopStatement>(src, b, cont);
 }
 
-void LoopStatement::to_str(const sem::Info& sem,
-                           std::ostream& out,
-                           size_t indent) const {
-  make_indent(out, indent);
-  out << "Loop{" << std::endl;
-
-  if (body_ != nullptr) {
-    for (auto* stmt : *body_) {
-      stmt->to_str(sem, out, indent + 2);
-    }
-  }
-
-  if (continuing_ != nullptr && continuing_->size() > 0) {
-    make_indent(out, indent + 2);
-    out << "continuing {" << std::endl;
-
-    for (auto* stmt : *continuing_) {
-      stmt->to_str(sem, out, indent + 4);
-    }
-
-    make_indent(out, indent + 2);
-    out << "}" << std::endl;
-  }
-
-  make_indent(out, indent);
-  out << "}" << std::endl;
-}
-
 }  // namespace ast
 }  // namespace tint

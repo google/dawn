@@ -29,10 +29,6 @@ ExternalTexture::ExternalTexture(ExternalTexture&&) = default;
 
 ExternalTexture::~ExternalTexture() = default;
 
-std::string ExternalTexture::type_name() const {
-  return "__external_texture";
-}
-
 std::string ExternalTexture::FriendlyName(const SymbolTable&) const {
   return "texture_external";
 }

@@ -26,13 +26,6 @@ TEST_F(GroupDecorationTest, Creation) {
   EXPECT_EQ(2u, d->value());
 }
 
-
-TEST_F(GroupDecorationTest, ToStr) {
-  auto* d = create<GroupDecoration>(2);
-  EXPECT_EQ(str(d), R"(GroupDecoration{2}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

@@ -28,10 +28,6 @@ I32::I32(I32&&) = default;
 
 I32::~I32() = default;
 
-std::string I32::type_name() const {
-  return "__i32";
-}
-
 std::string I32::FriendlyName(const SymbolTable&) const {
   return "i32";
 }

@@ -40,12 +40,6 @@ DepthTexture::DepthTexture(DepthTexture&&) = default;
 
 DepthTexture::~DepthTexture() = default;
 
-std::string DepthTexture::type_name() const {
-  std::ostringstream out;
-  out << "__depth_texture_" << dim();
-  return out.str();
-}
-
 std::string DepthTexture::FriendlyName(const SymbolTable&) const {
   std::ostringstream out;
   out << "texture_depth_" << dim();

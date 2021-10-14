@@ -67,22 +67,6 @@ TEST_F(VariableDeclStatementTest, Assert_DifferentProgramID_Variable) {
       "internal compiler error");
 }
 
-TEST_F(VariableDeclStatementTest, ToStr) {
-  auto* var = Var("a", ty.f32(), StorageClass::kNone);
-
-  auto* stmt =
-      create<VariableDeclStatement>(Source{Source::Location{20, 2}}, var);
-  EXPECT_EQ(str(stmt), R"(VariableDeclStatement{
-  Variable{
-    a
-    none
-    undefined
-    __f32
-  }
-}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

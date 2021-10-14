@@ -37,9 +37,6 @@ class Atomic : public Castable<Atomic, Type> {
   /// @returns the pointee type
   Type* type() const { return const_cast<Type*>(subtype_); }
 
-  /// @returns the name for this type
-  std::string type_name() const override;
-
   /// @param symbols the program's symbol table
   /// @returns the name for this type that closely resembles how it would be
   /// declared in WGSL.

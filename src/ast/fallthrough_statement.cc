@@ -35,12 +35,5 @@ FallthroughStatement* FallthroughStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<FallthroughStatement>(src);
 }
 
-void FallthroughStatement::to_str(const sem::Info&,
-                                  std::ostream& out,
-                                  size_t indent) const {
-  make_indent(out, indent);
-  out << "Fallthrough{}" << std::endl;
-}
-
 }  // namespace ast
 }  // namespace tint

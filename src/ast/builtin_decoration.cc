@@ -34,13 +34,6 @@ std::string BuiltinDecoration::name() const {
   return "builtin";
 }
 
-void BuiltinDecoration::to_str(const sem::Info&,
-                               std::ostream& out,
-                               size_t indent) const {
-  make_indent(out, indent);
-  out << "BuiltinDecoration{" << builtin_ << "}" << std::endl;
-}
-
 BuiltinDecoration* BuiltinDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());

@@ -77,10 +77,6 @@ bool ProgramBuilder::IsValid() const {
   return !diagnostics_.contains_errors();
 }
 
-std::string ProgramBuilder::str(const ast::Node* node) const {
-  return Demangler().Demangle(Symbols(), node->str(Sem()));
-}
-
 void ProgramBuilder::MarkAsMoved() {
   AssertNotMoved();
   moved_ = true;

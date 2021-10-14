@@ -46,26 +46,5 @@ SwitchStatement* SwitchStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<SwitchStatement>(src, cond, b);
 }
 
-void SwitchStatement::to_str(const sem::Info& sem,
-                             std::ostream& out,
-                             size_t indent) const {
-  make_indent(out, indent);
-  out << "Switch{" << std::endl;
-  condition_->to_str(sem, out, indent + 2);
-
-  make_indent(out, indent + 2);
-  out << "{" << std::endl;
-
-  for (auto* stmt : body_) {
-    stmt->to_str(sem, out, indent + 4);
-  }
-
-  make_indent(out, indent + 2);
-  out << "}" << std::endl;
-
-  make_indent(out, indent);
-  out << "}" << std::endl;
-}
-
 }  // namespace ast
 }  // namespace tint

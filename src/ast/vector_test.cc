@@ -30,12 +30,6 @@ TEST_F(AstVectorTest, Creation) {
   EXPECT_EQ(v->size(), 2u);
 }
 
-TEST_F(AstVectorTest, TypeName) {
-  auto* i32 = create<I32>();
-  auto* v = create<Vector>(i32, 3);
-  EXPECT_EQ(v->type_name(), "__vec_3__i32");
-}
-
 TEST_F(AstVectorTest, FriendlyName) {
   auto* f32 = create<F32>();
   auto* v = create<Vector>(f32, 3);

@@ -42,16 +42,5 @@ BitcastExpression* BitcastExpression::Clone(CloneContext* ctx) const {
   return ctx->dst->create<BitcastExpression>(src, ty, e);
 }
 
-void BitcastExpression::to_str(const sem::Info& sem,
-                               std::ostream& out,
-                               size_t indent) const {
-  make_indent(out, indent);
-  out << "Bitcast[" << result_type_str(sem) << "]<" << type_->type_name()
-      << ">{" << std::endl;
-  expr_->to_str(sem, out, indent + 2);
-  make_indent(out, indent);
-  out << "}" << std::endl;
-}
-
 }  // namespace ast
 }  // namespace tint

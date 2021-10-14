@@ -33,13 +33,6 @@ std::string StructBlockDecoration::name() const {
   return "block";
 }
 
-void StructBlockDecoration::to_str(const sem::Info&,
-                                   std::ostream& out,
-                                   size_t indent) const {
-  make_indent(out, indent);
-  out << "block";
-}
-
 StructBlockDecoration* StructBlockDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());

@@ -64,20 +64,5 @@ StructMember* StructMember::Clone(CloneContext* ctx) const {
   return ctx->dst->create<StructMember>(src, sym, ty, decos);
 }
 
-void StructMember::to_str(const sem::Info& sem,
-                          std::ostream& out,
-                          size_t indent) const {
-  make_indent(out, indent);
-  out << "StructMember{";
-  if (decorations_.size() > 0) {
-    out << "[[ ";
-    for (auto* deco : decorations_)
-      out << deco->str(sem) << " ";
-    out << "]] ";
-  }
-
-  out << symbol_.to_str() << ": " << type_->type_name() << "}" << std::endl;
-}
-
 }  // namespace ast
 }  // namespace tint

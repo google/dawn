@@ -22,11 +22,6 @@ namespace {
 
 using InvariantDecorationTest = TestHelper;
 
-TEST_F(InvariantDecorationTest, ToStr) {
-  auto* d = create<InvariantDecoration>();
-  EXPECT_EQ(str(d), "InvariantDecoration");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

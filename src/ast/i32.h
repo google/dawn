@@ -33,9 +33,6 @@ class I32 : public Castable<I32, Type> {
   I32(I32&&);
   ~I32() override;
 
-  /// @returns the name for this type
-  std::string type_name() const override;
-
   /// @param symbols the program's symbol table
   /// @returns the name for this type that closely resembles how it would be
   /// declared in WGSL.

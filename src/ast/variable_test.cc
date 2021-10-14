@@ -91,18 +91,6 @@ TEST_F(VariableTest, Assert_DifferentProgramID_Constructor) {
       "internal compiler error");
 }
 
-TEST_F(VariableTest, to_str) {
-  auto* v =
-      Var("my_var", ty.f32(), StorageClass::kFunction, ast::Access::kReadWrite);
-  EXPECT_EQ(str(v), R"(Variable{
-  my_var
-  function
-  read_write
-  __f32
-}
-)");
-}
-
 TEST_F(VariableTest, WithDecorations) {
   auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
                   DecorationList{
@@ -160,30 +148,6 @@ TEST_F(VariableTest, BindingPointMissingBindingDecoration) {
   ASSERT_NE(var->binding_point().group, nullptr);
   EXPECT_EQ(var->binding_point().group->value(), 1u);
   EXPECT_EQ(var->binding_point().binding, nullptr);
-}
-
-TEST_F(VariableTest, Decorated_to_str) {
-  auto* var = Var("my_var", ty.f32(), StorageClass::kFunction,
-                  ast::Access::kRead, Expr("expr"),
-                  DecorationList{
-                      create<BindingDecoration>(2),
-                      create<GroupDecoration>(1),
-                  });
-
-  EXPECT_EQ(str(var), R"(Variable{
-  Decorations{
-    BindingDecoration{2}
-    GroupDecoration{1}
-  }
-  my_var
-  function
-  read
-  __f32
-  {
-    Identifier[not set]{expr}
-  }
-}
-)");
 }
 
 }  // namespace

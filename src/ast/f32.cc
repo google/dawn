@@ -28,10 +28,6 @@ F32::F32(F32&&) = default;
 
 F32::~F32() = default;
 
-std::string F32::type_name() const {
-  return "__f32";
-}
-
 std::string F32::FriendlyName(const SymbolTable&) const {
   return "f32";
 }

@@ -53,44 +53,5 @@ IfStatement* IfStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<IfStatement>(src, cond, b, el);
 }
 
-void IfStatement::to_str(const sem::Info& sem,
-                         std::ostream& out,
-                         size_t indent) const {
-  make_indent(out, indent);
-  out << "If{" << std::endl;
-
-  // Open if conditional
-  make_indent(out, indent + 2);
-  out << "(" << std::endl;
-
-  condition_->to_str(sem, out, indent + 4);
-
-  // Close if conditional
-  make_indent(out, indent + 2);
-  out << ")" << std::endl;
-
-  // Open if body
-  make_indent(out, indent + 2);
-  out << "{" << std::endl;
-
-  if (body_ != nullptr) {
-    for (auto* stmt : *body_) {
-      stmt->to_str(sem, out, indent + 4);
-    }
-  }
-
-  // Close the if body
-  make_indent(out, indent + 2);
-  out << "}" << std::endl;
-
-  // Close the If
-  make_indent(out, indent);
-  out << "}" << std::endl;
-
-  for (auto* e : else_statements_) {
-    e->to_str(sem, out, indent);
-  }
-}
-
 }  // namespace ast
 }  // namespace tint

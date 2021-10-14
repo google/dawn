@@ -29,13 +29,6 @@ TEST_F(InterpolateDecorationTest, Creation) {
   EXPECT_EQ(InterpolationSampling::kCenter, d->sampling());
 }
 
-TEST_F(InterpolateDecorationTest, ToStr) {
-  auto* d = create<InterpolateDecoration>(InterpolationType::kPerspective,
-                                          InterpolationSampling::kSample);
-  EXPECT_EQ(str(d), R"(InterpolateDecoration{perspective sample}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

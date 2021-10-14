@@ -93,16 +93,6 @@ TEST_F(StructMemberTest, Assert_DifferentProgramID_Decoration) {
       "internal compiler error");
 }
 
-TEST_F(StructMemberTest, ToStr) {
-  auto* st = Member("a", ty.i32(), {MemberSize(4)});
-  EXPECT_EQ(str(st), "StructMember{[[ size 4 ]] a: __i32}\n");
-}
-
-TEST_F(StructMemberTest, ToStrNoDecorations) {
-  auto* st = Member("a", ty.i32());
-  EXPECT_EQ(str(st), "StructMember{a: __i32}\n");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

@@ -34,13 +34,6 @@ std::string StructMemberOffsetDecoration::name() const {
   return "offset";
 }
 
-void StructMemberOffsetDecoration::to_str(const sem::Info&,
-                                          std::ostream& out,
-                                          size_t indent) const {
-  make_indent(out, indent);
-  out << "offset " << std::to_string(offset_);
-}
-
 StructMemberOffsetDecoration* StructMemberOffsetDecoration::Clone(
     CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering

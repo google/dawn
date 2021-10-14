@@ -126,24 +126,6 @@ TEST_F(AstStructTest, Assert_DifferentProgramID_Decoration) {
       "internal compiler error");
 }
 
-TEST_F(AstStructTest, ToStr) {
-  auto* s = create<Struct>(Sym("S"), StructMemberList{Member("a", ty.i32())},
-                           DecorationList{create<StructBlockDecoration>()});
-
-  EXPECT_EQ(str(s), R"(Struct S {
-  [[block]]
-  StructMember{a: __i32}
-}
-)");
-}
-
-TEST_F(AstStructTest, TypeName) {
-  auto name = Sym("my_struct");
-  auto* s =
-      create<ast::Struct>(name, ast::StructMemberList{}, ast::DecorationList{});
-  EXPECT_EQ(s->type_name(), "__struct_$1");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

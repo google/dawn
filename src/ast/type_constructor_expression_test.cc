@@ -80,22 +80,6 @@ TEST_F(TypeConstructorExpressionTest, Assert_DifferentProgramID_Value) {
       "internal compiler error");
 }
 
-TEST_F(TypeConstructorExpressionTest, ToStr) {
-  ExpressionList expr;
-  expr.push_back(Expr("expr_1"));
-  expr.push_back(Expr("expr_2"));
-  expr.push_back(Expr("expr_3"));
-
-  auto* t = create<TypeConstructorExpression>(ty.vec3<f32>(), expr);
-  EXPECT_EQ(str(t), R"(TypeConstructor[not set]{
-  __vec_3__f32
-  Identifier[not set]{expr_1}
-  Identifier[not set]{expr_2}
-  Identifier[not set]{expr_3}
-}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

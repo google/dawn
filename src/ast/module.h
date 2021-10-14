@@ -102,18 +102,6 @@ class Module : public Castable<Module, Node> {
   /// @param src the module to copy into this module
   void Copy(CloneContext* ctx, const Module* src);
 
-  /// Writes a representation of the node to the output stream
-  /// @param sem the semantic info for the program
-  /// @param out the stream to write to
-  /// @param indent number of spaces to indent the node when writing
-  void to_str(const sem::Info& sem,
-              std::ostream& out,
-              size_t indent) const override;
-
-  /// @param sem the semantic info for the program
-  /// @returns a string representation of the Builder
-  std::string to_str(const sem::Info& sem) const;
-
  private:
   std::vector<ast::Node*> global_declarations_;
   std::vector<ast::TypeDecl*> type_decls_;

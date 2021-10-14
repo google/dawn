@@ -107,9 +107,6 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
   /// @returns true if the access control is read/write
   bool is_read_write() const { return access_ == Access::kReadWrite; }
 
-  /// @returns the name for this type
-  std::string type_name() const override;
-
   /// @param symbols the program's symbol table
   /// @returns the name for this type that closely resembles how it would be
   /// declared in WGSL.

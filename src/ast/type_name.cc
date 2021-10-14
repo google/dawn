@@ -22,17 +22,11 @@ namespace tint {
 namespace ast {
 
 TypeName::TypeName(ProgramID program_id, const Source& source, Symbol name)
-    : Base(program_id, source),
-      name_(name),
-      type_name_("__type_name_" + name.to_str()) {}
+    : Base(program_id, source), name_(name) {}
 
 TypeName::~TypeName() = default;
 
 TypeName::TypeName(TypeName&&) = default;
-
-std::string TypeName::type_name() const {
-  return type_name_;
-}
 
 std::string TypeName::FriendlyName(const SymbolTable& symbols) const {
   return symbols.NameFor(name_);

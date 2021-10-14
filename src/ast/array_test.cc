@@ -41,12 +41,6 @@ TEST_F(AstArrayTest, CreateRuntimeArray) {
   EXPECT_TRUE(arr->IsRuntimeArray());
 }
 
-TEST_F(AstArrayTest, TypeName) {
-  auto* i32 = create<I32>();
-  auto* arr = create<Array>(i32, nullptr, DecorationList{});
-  EXPECT_EQ(arr->type_name(), "__array__i32");
-}
-
 TEST_F(AstArrayTest, FriendlyName_RuntimeSized) {
   auto* i32 = create<I32>();
   auto* arr = create<Array>(i32, nullptr, DecorationList{});
@@ -70,31 +64,6 @@ TEST_F(AstArrayTest, FriendlyName_WithStride) {
   auto* arr =
       create<Array>(i32, Expr(5), DecorationList{create<StrideDecoration>(32)});
   EXPECT_EQ(arr->FriendlyName(Symbols()), "[[stride(32)]] array<i32, 5>");
-}
-
-TEST_F(AstArrayTest, TypeName_RuntimeSized) {
-  auto* i32 = create<I32>();
-  auto* arr = create<Array>(i32, nullptr, DecorationList{});
-  EXPECT_EQ(arr->type_name(), "__array__i32");
-}
-
-TEST_F(AstArrayTest, TypeName_LiteralSized) {
-  auto* i32 = create<I32>();
-  auto* arr = create<Array>(i32, Expr(3), DecorationList{});
-  EXPECT_EQ(arr->type_name(), "__array__i32_3");
-}
-
-TEST_F(AstArrayTest, TypeName_ConstantSized) {
-  auto* i32 = create<I32>();
-  auto* arr = create<Array>(i32, Expr("size"), DecorationList{});
-  EXPECT_EQ(arr->type_name(), "__array__i32_$1");
-}
-
-TEST_F(AstArrayTest, TypeName_WithStride) {
-  auto* i32 = create<I32>();
-  auto* arr =
-      create<Array>(i32, Expr(3), DecorationList{create<StrideDecoration>(16)});
-  EXPECT_EQ(arr->type_name(), "__array__i32_3_stride_16");
 }
 
 }  // namespace

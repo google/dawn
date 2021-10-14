@@ -29,12 +29,6 @@ TEST_F(AstAtomicTest, Creation) {
   EXPECT_EQ(p->type(), i32);
 }
 
-TEST_F(AstAtomicTest, TypeName) {
-  auto* i32 = create<I32>();
-  auto* p = create<Atomic>(i32);
-  EXPECT_EQ(p->type_name(), "__atomic__i32");
-}
-
 TEST_F(AstAtomicTest, FriendlyName) {
   auto* i32 = create<I32>();
   auto* p = create<Atomic>(i32);

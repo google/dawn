@@ -45,9 +45,6 @@ class Alias : public Castable<Alias, TypeDecl> {
   /// @returns the alias type
   Type* type() const { return subtype_; }
 
-  /// @returns the type_name for this type
-  std::string type_name() const override;
-
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type
@@ -55,7 +52,6 @@ class Alias : public Castable<Alias, TypeDecl> {
 
  private:
   Type* const subtype_;
-  std::string const type_name_;
 };
 
 }  // namespace ast

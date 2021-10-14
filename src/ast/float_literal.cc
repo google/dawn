@@ -30,10 +30,6 @@ FloatLiteral::FloatLiteral(ProgramID program_id,
 
 FloatLiteral::~FloatLiteral() = default;
 
-std::string FloatLiteral::to_str(const sem::Info&) const {
-  return std::to_string(value_);
-}
-
 std::string FloatLiteral::name() const {
   std::ostringstream out;
   out.flags(out.flags() | std::ios_base::showpoint);

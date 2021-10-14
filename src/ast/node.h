@@ -44,19 +44,6 @@ class Node : public Castable<Node, Cloneable> {
   /// @returns the node source data
   const Source& source() const { return source_; }
 
-  /// Writes a representation of the node to the output stream
-  /// @param sem the semantic info for the program
-  /// @param out the stream to write to
-  /// @param indent number of spaces to indent the node when writing
-  virtual void to_str(const sem::Info& sem,
-                      std::ostream& out,
-                      size_t indent) const = 0;
-
-  /// Convenience wrapper around the to_str() method.
-  /// @param sem the semantic info for the program
-  /// @returns the node as a string
-  std::string str(const sem::Info& sem) const;
-
  protected:
   /// Create a new node
   /// @param program_id the identifier of the program that owns this node

@@ -66,17 +66,6 @@ TEST_F(BlockStatementTest, Assert_DifferentProgramID_Statement) {
       "internal compiler error");
 }
 
-TEST_F(BlockStatementTest, ToStr) {
-  auto* b = create<BlockStatement>(ast::StatementList{
-      create<DiscardStatement>(),
-  });
-
-  EXPECT_EQ(str(b), R"(Block{
-  Discard{}
-}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

@@ -41,17 +41,5 @@ UnaryOpExpression* UnaryOpExpression::Clone(CloneContext* ctx) const {
   return ctx->dst->create<UnaryOpExpression>(src, op_, e);
 }
 
-void UnaryOpExpression::to_str(const sem::Info& sem,
-                               std::ostream& out,
-                               size_t indent) const {
-  make_indent(out, indent);
-  out << "UnaryOp[" << result_type_str(sem) << "]{" << std::endl;
-  make_indent(out, indent + 2);
-  out << op_ << std::endl;
-  expr_->to_str(sem, out, indent + 2);
-  make_indent(out, indent);
-  out << "}" << std::endl;
-}
-
 }  // namespace ast
 }  // namespace tint

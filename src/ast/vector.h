@@ -43,9 +43,6 @@ class Vector : public Castable<Vector, Type> {
   /// @returns the size of the vector
   uint32_t size() const { return size_; }
 
-  /// @returns the name for th type
-  std::string type_name() const override;
-
   /// @param symbols the program's symbol table
   /// @returns the name for this type that closely resembles how it would be
   /// declared in WGSL.

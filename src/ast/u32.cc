@@ -28,10 +28,6 @@ U32::~U32() = default;
 
 U32::U32(U32&&) = default;
 
-std::string U32::type_name() const {
-  return "__u32";
-}
-
 std::string U32::FriendlyName(const SymbolTable&) const {
   return "u32";
 }

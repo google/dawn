@@ -59,12 +59,6 @@ TEST_F(IdentifierExpressionTest, Assert_DifferentProgramID_Symbol) {
       "internal compiler error");
 }
 
-TEST_F(IdentifierExpressionTest, ToStr) {
-  auto* i = Expr("ident");
-  EXPECT_EQ(str(i), R"(Identifier[not set]{ident}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

@@ -87,18 +87,6 @@ TEST_F(ArrayAccessorExpressionTest, Assert_DifferentProgramID_Index) {
       "internal compiler error");
 }
 
-TEST_F(ArrayAccessorExpressionTest, ToStr) {
-  auto* ary = Expr("ary");
-  auto* idx = Expr("idx");
-
-  auto* exp = create<ArrayAccessorExpression>(ary, idx);
-  EXPECT_EQ(str(exp), R"(ArrayAccessor[not set]{
-  Identifier[not set]{ary}
-  Identifier[not set]{idx}
-}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

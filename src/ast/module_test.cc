@@ -26,12 +26,6 @@ TEST_F(ModuleTest, Creation) {
   EXPECT_EQ(Program(std::move(*this)).AST().Functions().size(), 0u);
 }
 
-TEST_F(ModuleTest, ToStrEmitsPreambleAndPostamble) {
-  const auto str = Program(std::move(*this)).to_str();
-  auto* const expected = "Module{\n}\n";
-  EXPECT_EQ(str, expected);
-}
-
 TEST_F(ModuleTest, LookupFunction) {
   auto* func = Func("main", VariableList{}, ty.f32(), StatementList{},
                     ast::DecorationList{});

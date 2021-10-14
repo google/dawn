@@ -28,12 +28,6 @@ TEST_F(StageDecorationTest, Creation_1param) {
   EXPECT_EQ(d->value(), PipelineStage::kFragment);
 }
 
-TEST_F(StageDecorationTest, ToStr) {
-  auto* d = create<StageDecoration>(PipelineStage::kFragment);
-  EXPECT_EQ(str(d), R"(StageDecoration{fragment}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

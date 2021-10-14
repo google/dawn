@@ -26,10 +26,6 @@ BoolLiteral::BoolLiteral(ProgramID program_id, const Source& source, bool value)
 
 BoolLiteral::~BoolLiteral() = default;
 
-std::string BoolLiteral::to_str(const sem::Info&) const {
-  return value_ ? "true" : "false";
-}
-
 std::string BoolLiteral::name() const {
   return value_ ? "__bool_true" : "__bool_false";
 }

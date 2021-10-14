@@ -89,18 +89,6 @@ TEST_F(AssignmentStatementTest, Assert_DifferentProgramID_RHS) {
       "internal compiler error");
 }
 
-TEST_F(AssignmentStatementTest, ToStr) {
-  auto* lhs = Expr("lhs");
-  auto* rhs = Expr("rhs");
-
-  auto* stmt = create<AssignmentStatement>(lhs, rhs);
-  EXPECT_EQ(str(stmt), R"(Assignment{
-  Identifier[not set]{lhs}
-  Identifier[not set]{rhs}
-}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

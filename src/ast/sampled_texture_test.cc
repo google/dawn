@@ -43,12 +43,6 @@ TEST_F(AstSampledTextureTest, Type) {
   EXPECT_EQ(s->type(), f32);
 }
 
-TEST_F(AstSampledTextureTest, TypeName) {
-  auto* f32 = create<F32>();
-  auto* s = create<SampledTexture>(TextureDimension::k3d, f32);
-  EXPECT_EQ(s->type_name(), "__sampled_texture_3d__f32");
-}
-
 TEST_F(AstSampledTextureTest, FriendlyName) {
   auto* f32 = create<F32>();
   auto* s = create<SampledTexture>(TextureDimension::k3d, f32);

@@ -26,12 +26,6 @@ TEST_F(BindingDecorationTest, Creation) {
   EXPECT_EQ(2u, d->value());
 }
 
-TEST_F(BindingDecorationTest, ToStr) {
-  auto* d = create<BindingDecoration>(2);
-  EXPECT_EQ(str(d), R"(BindingDecoration{2}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

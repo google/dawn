@@ -294,20 +294,6 @@ class ProgramBuilder {
   /// information
   bool IsValid() const;
 
-  /// Writes a representation of the node to the output stream
-  /// @note unlike str(), to_str() does not automatically demangle the string.
-  /// @param node the AST node
-  /// @param out the stream to write to
-  /// @param indent number of spaces to indent the node when writing
-  void to_str(const ast::Node* node, std::ostream& out, size_t indent) const {
-    node->to_str(Sem(), out, indent);
-  }
-
-  /// Returns a demangled, string representation of `node`.
-  /// @param node the AST node
-  /// @returns a string representation of the node
-  std::string str(const ast::Node* node) const;
-
   /// Creates a new ast::Node owned by the ProgramBuilder. When the
   /// ProgramBuilder is destructed, the ast::Node will also be destructed.
   /// @param source the Source of the node

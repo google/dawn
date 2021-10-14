@@ -38,10 +38,6 @@ class FloatLiteral : public Castable<FloatLiteral, Literal> {
   /// @returns the name for this literal. This name is unique to this value.
   std::string name() const override;
 
-  /// @param sem the semantic info for the program
-  /// @returns the literal as a string
-  std::string to_str(const sem::Info& sem) const override;
-
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @param ctx the clone context

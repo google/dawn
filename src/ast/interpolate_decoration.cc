@@ -35,14 +35,6 @@ std::string InterpolateDecoration::name() const {
   return "interpolate";
 }
 
-void InterpolateDecoration::to_str(const sem::Info&,
-                                   std::ostream& out,
-                                   size_t indent) const {
-  make_indent(out, indent);
-  out << "InterpolateDecoration{" << type_ << " " << sampling_ << "}"
-      << std::endl;
-}
-
 InterpolateDecoration* InterpolateDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());

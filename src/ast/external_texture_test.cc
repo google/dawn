@@ -36,11 +36,6 @@ TEST_F(AstExternalTextureTest, Dim) {
   EXPECT_EQ(ty->dim(), ast::TextureDimension::k2d);
 }
 
-TEST_F(AstExternalTextureTest, TypeName) {
-  auto* ty = create<ExternalTexture>();
-  EXPECT_EQ(ty->type_name(), "__external_texture");
-}
-
 TEST_F(AstExternalTextureTest, FriendlyName) {
   auto* ty = create<ExternalTexture>();
   EXPECT_EQ(ty->FriendlyName(Symbols()), "texture_external");

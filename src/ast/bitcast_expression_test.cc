@@ -76,16 +76,6 @@ TEST_F(BitcastExpressionTest, Assert_DifferentProgramID_Expr) {
       "internal compiler error");
 }
 
-TEST_F(BitcastExpressionTest, ToStr) {
-  auto* expr = Expr("expr");
-
-  auto* exp = create<BitcastExpression>(ty.f32(), expr);
-  EXPECT_EQ(str(exp), R"(Bitcast[not set]<__f32>{
-  Identifier[not set]{expr}
-}
-)");
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

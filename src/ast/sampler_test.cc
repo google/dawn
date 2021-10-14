@@ -33,16 +33,6 @@ TEST_F(AstSamplerTest, Creation_ComparisonSampler) {
   EXPECT_TRUE(s->IsComparison());
 }
 
-TEST_F(AstSamplerTest, TypeName_Sampler) {
-  auto* s = create<Sampler>(SamplerKind::kSampler);
-  EXPECT_EQ(s->type_name(), "__sampler_sampler");
-}
-
-TEST_F(AstSamplerTest, TypeName_Comparison) {
-  auto* s = create<Sampler>(SamplerKind::kComparisonSampler);
-  EXPECT_EQ(s->type_name(), "__sampler_comparison");
-}
-
 TEST_F(AstSamplerTest, FriendlyNameSampler) {
   auto* s = create<Sampler>(SamplerKind::kSampler);
   EXPECT_EQ(s->FriendlyName(Symbols()), "sampler");

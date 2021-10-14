@@ -28,10 +28,6 @@ SintLiteral::SintLiteral(ProgramID program_id,
 
 SintLiteral::~SintLiteral() = default;
 
-std::string SintLiteral::to_str(const sem::Info&) const {
-  return std::to_string(value());
-}
-
 std::string SintLiteral::name() const {
   return "__sint_" + std::to_string(value());
 }

@@ -40,13 +40,5 @@ IdentifierExpression* IdentifierExpression::Clone(CloneContext* ctx) const {
   return ctx->dst->create<IdentifierExpression>(src, sym);
 }
 
-void IdentifierExpression::to_str(const sem::Info& sem,
-                                  std::ostream& out,
-                                  size_t indent) const {
-  make_indent(out, indent);
-  out << "Identifier[" << result_type_str(sem) << "]{" << sym_.to_str() << "}"
-      << std::endl;
-}
-
 }  // namespace ast
 }  // namespace tint
