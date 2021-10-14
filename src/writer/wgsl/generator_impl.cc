@@ -524,8 +524,9 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
   } else if (auto* tn = ty->As<ast::TypeName>()) {
     out << program_->Symbols().NameFor(tn->name());
   } else {
-    diagnostics_.add_error(diag::System::Writer,
-                           "unknown type in EmitType: " + ty->type_name());
+    diagnostics_.add_error(
+        diag::System::Writer,
+        "unknown type in EmitType: " + std::string(ty->TypeInfo().name));
     return false;
   }
   return true;
@@ -869,8 +870,9 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
     return EmitVariable(line(), v->variable());
   }
 
-  diagnostics_.add_error(diag::System::Writer,
-                         "unknown statement type: " + program_->str(stmt));
+  diagnostics_.add_error(
+      diag::System::Writer,
+      "unknown statement type: " + std::string(stmt->TypeInfo().name));
   return false;
 }
 

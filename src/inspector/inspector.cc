@@ -806,13 +806,13 @@ void Inspector::GenerateSamplerTargets() {
       continue;
     }
 
-    const auto& params = i->Parameters();
-    int sampler_index = sem::IndexOf(params, sem::ParameterUsage::kSampler);
+    const auto& signature = i->Signature();
+    int sampler_index = signature.IndexOf(sem::ParameterUsage::kSampler);
     if (sampler_index == -1) {
       continue;
     }
 
-    int texture_index = sem::IndexOf(params, sem::ParameterUsage::kTexture);
+    int texture_index = signature.IndexOf(sem::ParameterUsage::kTexture);
     if (texture_index == -1) {
       continue;
     }

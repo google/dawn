@@ -84,7 +84,7 @@ bool InspectorBuilder::ContainsName(const std::vector<StageVariable>& vec,
 }
 
 std::string InspectorBuilder::StructMemberName(size_t idx, ast::Type* type) {
-  return std::to_string(idx) + type->type_name();
+  return std::to_string(idx) + type->FriendlyName(Symbols());
 }
 
 ast::Struct* InspectorBuilder::MakeStructType(

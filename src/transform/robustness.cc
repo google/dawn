@@ -208,14 +208,11 @@ struct Robustness::State {
 
     // Indices of the mandatory texture and coords parameters, and the optional
     // array and level parameters.
-    auto texture_idx =
-        sem::IndexOf(intrinsic->Parameters(), sem::ParameterUsage::kTexture);
-    auto coords_idx =
-        sem::IndexOf(intrinsic->Parameters(), sem::ParameterUsage::kCoords);
-    auto array_idx =
-        sem::IndexOf(intrinsic->Parameters(), sem::ParameterUsage::kArrayIndex);
-    auto level_idx =
-        sem::IndexOf(intrinsic->Parameters(), sem::ParameterUsage::kLevel);
+    auto& signature = intrinsic->Signature();
+    auto texture_idx = signature.IndexOf(sem::ParameterUsage::kTexture);
+    auto coords_idx = signature.IndexOf(sem::ParameterUsage::kCoords);
+    auto array_idx = signature.IndexOf(sem::ParameterUsage::kArrayIndex);
+    auto level_idx = signature.IndexOf(sem::ParameterUsage::kLevel);
 
     auto* texture_arg = expr->args()[texture_idx];
     auto* coords_arg = expr->args()[coords_idx];

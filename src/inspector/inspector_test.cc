@@ -1495,7 +1495,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
   // with elem stride of 16, and that is 16-byte aligned within the struct)
   ast::Struct* foo_struct_type = Structure(
       "foo_type",
-      {Member("0__i32", ty.i32()),
+      {Member("0i32", ty.i32()),
        Member("b", ty.array(ty.u32(), 4, /*stride*/ 16), {MemberAlign(16)})},
       {create<ast::StructBlockDecoration>()});
 

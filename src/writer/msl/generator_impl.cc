@@ -764,12 +764,12 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
                                     const sem::Intrinsic* intrinsic) {
   using Usage = sem::ParameterUsage;
 
-  auto parameters = intrinsic->Parameters();
+  auto& signature = intrinsic->Signature();
   auto arguments = expr->args();
 
   // Returns the argument with the given usage
   auto arg = [&](Usage usage) {
-    int idx = sem::IndexOf(parameters, usage);
+    int idx = signature.IndexOf(usage);
     return (idx >= 0) ? arguments[idx] : nullptr;
   };
 
@@ -1427,8 +1427,9 @@ bool GeneratorImpl::EmitExpression(std::ostream& out, ast::Expression* expr) {
     return EmitUnaryOp(out, u);
   }
 
-  diagnostics_.add_error(diag::System::Writer,
-                         "unknown expression type: " + program_->str(expr));
+  diagnostics_.add_error(
+      diag::System::Writer,
+      "unknown expression type: " + std::string(expr->TypeInfo().name));
   return false;
 }
 
@@ -2052,8 +2053,9 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
     return EmitVariable(var);
   }
 
-  diagnostics_.add_error(diag::System::Writer,
-                         "unknown statement type: " + program_->str(stmt));
+  diagnostics_.add_error(
+      diag::System::Writer,
+      "unknown statement type: " + std::string(stmt->TypeInfo().name));
   return false;
 }
 

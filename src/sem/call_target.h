@@ -27,11 +27,34 @@ namespace sem {
 // Forward declarations
 class Type;
 
-/// @param parameters the list of parameters
-/// @param usage the parameter usage to find
-/// @returns the index of the parameter with the given usage, or -1 if no
-/// parameter with the given usage exists.
-int IndexOf(const ParameterList& parameters, ParameterUsage usage);
+/// CallTargetSignature holds the return type and parameters for a call target
+struct CallTargetSignature {
+  /// Constructor
+  /// @param ret_ty the call target return type
+  /// @param params the call target parameters
+  CallTargetSignature(sem::Type* ret_ty, const ParameterList& params);
+
+  /// Copy constructor
+  CallTargetSignature(const CallTargetSignature&);
+
+  /// Destructor
+  ~CallTargetSignature();
+
+  /// The type of the call target return value
+  sem::Type* const return_type = nullptr;
+  /// The parameters of the call target
+  ParameterList const parameters;
+
+  /// Equality operator
+  /// @param other the signature to compare this to
+  /// @returns true if this signature is equal to other
+  bool operator==(const CallTargetSignature& other) const;
+
+  /// @param usage the parameter usage to find
+  /// @returns the index of the parameter with the given usage, or -1 if no
+  /// parameter with the given usage exists.
+  int IndexOf(ParameterUsage usage) const;
+};
 
 /// CallTarget is the base for callable functions
 class CallTarget : public Castable<CallTarget, Node> {
@@ -44,21 +67,38 @@ class CallTarget : public Castable<CallTarget, Node> {
   /// Copy constructor
   CallTarget(const CallTarget&);
 
-  /// @return the return type of the call target
-  sem::Type* ReturnType() const { return return_type_; }
-
   /// Destructor
   ~CallTarget() override;
 
+  /// @return the return type of the call target
+  sem::Type* ReturnType() const { return signature_.return_type; }
+
   /// @return the parameters of the call target
-  const ParameterList& Parameters() const { return parameters_; }
+  const ParameterList& Parameters() const { return signature_.parameters; }
+
+  /// @return the signature of the call target
+  const CallTargetSignature& Signature() const { return signature_; }
 
  private:
-  sem::Type* const return_type_;
-  ParameterList const parameters_;
+  CallTargetSignature signature_;
 };
 
 }  // namespace sem
 }  // namespace tint
+
+namespace std {
+
+/// Custom std::hash specialization for tint::sem::CallTargetSignature so
+/// CallTargetSignature can be used as keys for std::unordered_map and
+/// std::unordered_set.
+template <>
+class hash<tint::sem::CallTargetSignature> {
+ public:
+  /// @param sig the CallTargetSignature to hash
+  /// @return the hash value
+  std::size_t operator()(const tint::sem::CallTargetSignature& sig) const;
+};
+
+}  // namespace std
 
 #endif  // SRC_SEM_CALL_TARGET_H_

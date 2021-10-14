@@ -2538,8 +2538,8 @@ bool Resolver::ValidateTextureIntrinsicFunction(
     return false;
   }
   std::string func_name = intrinsic->str();
-  auto index =
-      sem::IndexOf(intrinsic->Parameters(), sem::ParameterUsage::kOffset);
+  auto& signature = intrinsic->Signature();
+  auto index = signature.IndexOf(sem::ParameterUsage::kOffset);
   if (index > -1) {
     auto* param = ast_call->args()[index];
     if (param->Is<ast::TypeConstructorExpression>()) {

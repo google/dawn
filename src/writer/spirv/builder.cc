@@ -584,7 +584,7 @@ uint32_t Builder::GenerateExpression(ast::Expression* expr) {
     return GenerateUnaryOpExpression(u);
   }
 
-  error_ = "unknown expression type: " + builder_.str(expr);
+  error_ = "unknown expression type: " + std::string(expr->TypeInfo().name);
   return 0;
 }
 
@@ -659,32 +659,28 @@ bool Builder::GenerateFunction(ast::Function* func_ast) {
 }
 
 uint32_t Builder::GenerateFunctionTypeIfNeeded(const sem::Function* func) {
-  auto val = type_name_to_id_.find(func->Declaration()->type_name());
-  if (val != type_name_to_id_.end()) {
-    return val->second;
-  }
+  return utils::GetOrCreate(
+      func_sig_to_id_, func->Signature(), [&]() -> uint32_t {
+        auto func_op = result_op();
+        auto func_type_id = func_op.to_i();
 
-  auto func_op = result_op();
-  auto func_type_id = func_op.to_i();
+        auto ret_id = GenerateTypeIfNeeded(func->ReturnType());
+        if (ret_id == 0) {
+          return 0;
+        }
 
-  auto ret_id = GenerateTypeIfNeeded(func->ReturnType());
-  if (ret_id == 0) {
-    return 0;
-  }
+        OperandList ops = {func_op, Operand::Int(ret_id)};
+        for (auto* param : func->Parameters()) {
+          auto param_type_id = GenerateTypeIfNeeded(param->Type());
+          if (param_type_id == 0) {
+            return 0;
+          }
+          ops.push_back(Operand::Int(param_type_id));
+        }
 
-  OperandList ops = {func_op, Operand::Int(ret_id)};
-  for (auto* param : func->Parameters()) {
-    auto param_type_id = GenerateTypeIfNeeded(param->Type());
-    if (param_type_id == 0) {
-      return 0;
-    }
-    ops.push_back(Operand::Int(param_type_id));
-  }
-
-  push_type(spv::Op::OpTypeFunction, std::move(ops));
-
-  type_name_to_id_[func->Declaration()->type_name()] = func_type_id;
-  return func_type_id;
+        push_type(spv::Op::OpTypeFunction, std::move(ops));
+        return func_type_id;
+      });
 }
 
 bool Builder::GenerateFunctionVariable(ast::Variable* var) {
@@ -1139,7 +1135,8 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
       }
 
     } else {
-      error_ = "invalid accessor in list: " + builder_.str(accessor);
+      error_ =
+          "invalid accessor in list: " + std::string(accessor->TypeInfo().name);
       return 0;
     }
   }
@@ -2662,7 +2659,7 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
                                        Operand result_id) {
   using Usage = sem::ParameterUsage;
 
-  auto parameters = intrinsic->Parameters();
+  auto& signature = intrinsic->Signature();
   auto arguments = call->args();
 
   // Generates the given expression, returning the operand ID
@@ -2678,7 +2675,7 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
 
   // Returns the argument with the given usage
   auto arg = [&](Usage usage) {
-    int idx = sem::IndexOf(parameters, usage);
+    int idx = signature.IndexOf(usage);
     return (idx >= 0) ? arguments[idx] : nullptr;
   };
 
@@ -3785,7 +3782,7 @@ bool Builder::GenerateStatement(ast::Statement* stmt) {
     return GenerateVariableDeclStatement(v);
   }
 
-  error_ = "Unknown statement: " + builder_.str(stmt);
+  error_ = "Unknown statement: " + std::string(stmt->TypeInfo().name);
   return false;
 }
 
