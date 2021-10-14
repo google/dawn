@@ -1252,82 +1252,48 @@ TEST_P(SpvParserHandleTest_DeclUnderspecifiedHandle, Variable) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty()) << p->error();
-  const auto program = p->program().to_str();
+  const auto program = test::ToString(p->program());
   EXPECT_THAT(program, HasSubstr(GetParam().var_decl)) << program;
 }
 
-INSTANTIATE_TEST_SUITE_P(Samplers,
-                         SpvParserHandleTest_DeclUnderspecifiedHandle,
-                         ::testing::Values(
+INSTANTIATE_TEST_SUITE_P(
+    Samplers,
+    SpvParserHandleTest_DeclUnderspecifiedHandle,
+    ::testing::Values(
 
-                             DeclUnderspecifiedHandleCase{"", R"(
+        DeclUnderspecifiedHandleCase{
+            "", R"(
          %ptr = OpTypePointer UniformConstant %sampler
          %10 = OpVariable %ptr UniformConstant
 )",
-                                                          R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  })"}));
+            R"([[group(0), binding(0)]] var x_10 : sampler;)"}));
 
-INSTANTIATE_TEST_SUITE_P(Images,
-                         SpvParserHandleTest_DeclUnderspecifiedHandle,
-                         ::testing::Values(
+INSTANTIATE_TEST_SUITE_P(
+    Images,
+    SpvParserHandleTest_DeclUnderspecifiedHandle,
+    ::testing::Values(
 
-                             DeclUnderspecifiedHandleCase{"", R"(
+        DeclUnderspecifiedHandleCase{
+            "", R"(
          %10 = OpVariable %ptr_f_texture_1d UniformConstant
 )",
-                                                          R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampled_texture_1d__f32
-  })"},
-                             DeclUnderspecifiedHandleCase{R"(
+            R"([[group(0), binding(0)]] var x_10 : texture_1d<f32>;)"},
+        DeclUnderspecifiedHandleCase{
+            R"(
          OpDecorate %10 NonWritable
 )",
-                                                          R"(
+            R"(
          %10 = OpVariable %ptr_f_storage_1d UniformConstant
 )",
-                                                          R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampled_texture_1d__f32
-  })"},
-                             DeclUnderspecifiedHandleCase{R"(
+            R"([[group(0), binding(0)]] var x_10 : texture_1d<f32>;)"},
+        DeclUnderspecifiedHandleCase{
+            R"(
          OpDecorate %10 NonReadable
 )",
-                                                          R"(
+            R"(
          %10 = OpVariable %ptr_f_storage_1d UniformConstant
 )",
-                                                          R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __storage_texture_1d_rg32float_write
-  })"}));
+            R"([[group(0), binding(0)]] var x_10 : texture_storage_1d<rg32float, write>;)"}));
 
 // Test handle declaration or error, when there is an image access.
 
@@ -1434,7 +1400,7 @@ TEST_P(SpvParserHandleTest_ImageDeclTest, DeclareAndUseHandle) {
   const bool succeeded = p->BuildAndParseInternalModule();
   if (succeeded) {
     EXPECT_TRUE(GetParam().expected_error.empty());
-    const auto got = p->program().to_str();
+    const auto got = test::ToString(p->program());
     EXPECT_THAT(got, HasSubstr(GetParam().expected_decl));
   } else {
     EXPECT_FALSE(GetParam().expected_error.empty());
@@ -1451,18 +1417,8 @@ INSTANTIATE_TEST_SUITE_P(
         {"%float 1D 0 1 1 1 Unknown", "%result = OpImageQuerySamples %uint %im",
          "WGSL arrayed textures must be 2d_array or cube_array: ", ""},
         {"%float 2D 0 0 1 1 Unknown", "%result = OpImageQuerySamples %uint %im",
-         "", R"(
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __multisampled_texture_2d__f32
-  }
-)"},
+         "",
+         "[[group(2), binding(1)]] var x_20 : texture_multisampled_2d<f32>;"},
         {"%float 2D 0 1 1 1 Unknown", "%result = OpImageQuerySamples %uint %im",
          "WGSL multisampled textures must be 2d and non-arrayed: ", ""},
         {"%float 3D 0 0 1 1 Unknown", "%result = OpImageQuerySamples %uint %im",
@@ -1588,7 +1544,7 @@ TEST_P(SpvParserHandleTest_SampledImageAccessTest, Variable) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty()) << p->error();
-  const auto program = p->program().to_str();
+  const auto program = test::ToString(p->program());
   EXPECT_THAT(program, HasSubstr(GetParam().var_decl))
       << "DECLARATIONS ARE BAD " << program;
   EXPECT_THAT(program, HasSubstr(GetParam().texture_builtin))
@@ -1638,394 +1594,92 @@ INSTANTIATE_TEST_SUITE_P(
         ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
                         "%result = OpImageSampleImplicitLod "
                         "%v4float %sampled_image %coords12",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSample}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{coords12}
-            )
-          })"},
+                        R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+                        "textureSample(x_20, x_10, coords12)"},
 
         // OpImageSampleImplicitLod arrayed
-        ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
-                        "%result = OpImageSampleImplicitLod "
-                        "%v4float %sampled_image %coords123",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d_array__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSample}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              MemberAccessor[not set]{
-                Identifier[not set]{coords123}
-                Identifier[not set]{xy}
-              }
-              TypeConstructor[not set]{
-                __i32
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 0 1 0 1 Unknown",
+            "%result = OpImageSampleImplicitLod "
+            "%v4float %sampled_image %coords123",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+            "textureSample(x_20, x_10, coords123.xy, i32(coords123.z))"},
 
         // OpImageSampleImplicitLod with ConstOffset
         ImageAccessCase{
             "%float 2D 0 0 0 1 Unknown",
             "%result = OpImageSampleImplicitLod "
             "%v4float %sampled_image %coords12 ConstOffset %offsets2d",
-            R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-            R"(
-          Call[not set]{
-            Identifier[not set]{textureSample}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{coords12}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
-            )
-          })"},
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+            "textureSample(x_20, x_10, coords12, vec2<i32>(3, 4))"},
 
         // OpImageSampleImplicitLod arrayed with ConstOffset
         ImageAccessCase{
             "%float 2D 0 1 0 1 Unknown",
             "%result = OpImageSampleImplicitLod "
             "%v4float %sampled_image %coords123 ConstOffset %offsets2d",
-            R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d_array__f32
-  })",
-            R"(
-          Call[not set]{
-            Identifier[not set]{textureSample}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              MemberAccessor[not set]{
-                Identifier[not set]{coords123}
-                Identifier[not set]{xy}
-              }
-              TypeConstructor[not set]{
-                __i32
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
-            )
-          })"},
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+            R"(textureSample(x_20, x_10, coords123.xy, i32(coords123.z), vec2<i32>(3, 4)))"},
 
         // OpImageSampleImplicitLod with Bias
         ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
                         "%result = OpImageSampleImplicitLod "
                         "%v4float %sampled_image %coords12 Bias %float_7",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleBias}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{coords12}
-              ScalarConstructor[not set]{7.000000}
-            )
-          })"},
+                        R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+                        "textureSampleBias(x_20, x_10, coords12, 7.0)"},
 
         // OpImageSampleImplicitLod arrayed with Bias
-        ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
-                        "%result = OpImageSampleImplicitLod "
-                        "%v4float %sampled_image %coords123 Bias %float_7",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d_array__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleBias}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              MemberAccessor[not set]{
-                Identifier[not set]{coords123}
-                Identifier[not set]{xy}
-              }
-              TypeConstructor[not set]{
-                __i32
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              ScalarConstructor[not set]{7.000000}
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 0 1 0 1 Unknown",
+            "%result = OpImageSampleImplicitLod "
+            "%v4float %sampled_image %coords123 Bias %float_7",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+            R"(textureSampleBias(x_20, x_10, coords123.xy, i32(coords123.z), 7.0))"},
 
         // OpImageSampleImplicitLod with Bias and signed ConstOffset
-        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
-                        "%result = OpImageSampleImplicitLod "
-                        "%v4float %sampled_image %coords12 Bias|ConstOffset "
-                        "%float_7 %offsets2d",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleBias}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{coords12}
-              ScalarConstructor[not set]{7.000000}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 0 0 0 1 Unknown",
+            "%result = OpImageSampleImplicitLod "
+            "%v4float %sampled_image %coords12 Bias|ConstOffset "
+            "%float_7 %offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+            R"(textureSampleBias(x_20, x_10, coords12, 7.0, vec2<i32>(3, 4))"},
 
         // OpImageSampleImplicitLod with Bias and unsigned ConstOffset
         // Convert ConstOffset to signed
-        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
-                        "%result = OpImageSampleImplicitLod "
-                        "%v4float %sampled_image %coords12 Bias|ConstOffset "
-                        "%float_7 %u_offsets2d",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleBias}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{coords12}
-              ScalarConstructor[not set]{7.000000}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                TypeConstructor[not set]{
-                  __vec_2__u32
-                  ScalarConstructor[not set]{3u}
-                  ScalarConstructor[not set]{4u}
-                }
-              }
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 0 0 0 1 Unknown",
+            "%result = OpImageSampleImplicitLod "
+            "%v4float %sampled_image %coords12 Bias|ConstOffset "
+            "%float_7 %u_offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+            R"(textureSampleBias(x_20, x_10, coords12, 7.0, vec2<i32>(vec2<u32>(3u, 4u)))"},
         // OpImageSampleImplicitLod arrayed with Bias
-        ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
-                        "%result = OpImageSampleImplicitLod "
-                        "%v4float %sampled_image %coords123 Bias|ConstOffset "
-                        "%float_7 %offsets2d",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d_array__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleBias}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              MemberAccessor[not set]{
-                Identifier[not set]{coords123}
-                Identifier[not set]{xy}
-              }
-              TypeConstructor[not set]{
-                __i32
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              ScalarConstructor[not set]{7.000000}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
-            )
-          })"}));
+        ImageAccessCase{
+            "%float 2D 0 1 0 1 Unknown",
+            "%result = OpImageSampleImplicitLod "
+            "%v4float %sampled_image %coords123 Bias|ConstOffset "
+            "%float_7 %offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+            R"(textureSampleBias(x_20, x_10, coords123.xy, i32(coords123.z), 7.0, vec2<i32>(3, 4))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     // This test shows the use of a sampled image used with both regular
@@ -2043,258 +1697,59 @@ INSTANTIATE_TEST_SUITE_P(
      %200 = OpImageSampleImplicitLod %v4float %sampled_image %coords12
      %210 = OpImageSampleDrefImplicitLod %float %sampled_dref_image %coords12 %depth
 )",
+                        R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+
+[[group(0), binding(1)]] var x_30 : sampler_comparison;
+)",
                         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{1}
-    }
-    x_30
-    none
-    undefined
-    __sampler_comparison
-  })",
-                        R"(
-    VariableDeclStatement{
-      VariableConst{
-        x_200
-        none
-        undefined
-        __vec_4__f32
-        {
-          TypeConstructor[not set]{
-            __vec_4__f32
-            Call[not set]{
-              Identifier[not set]{textureSample}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{x_10}
-                Identifier[not set]{coords12}
-              )
-            }
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
-          }
-        }
-      }
-    }
-    VariableDeclStatement{
-      VariableConst{
-        x_210
-        none
-        undefined
-        __f32
-        {
-          Call[not set]{
-            Identifier[not set]{textureSampleCompare}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_30}
-              Identifier[not set]{coords12}
-              ScalarConstructor[not set]{0.200000}
-            )
-          }
-        }
-      }
-    })"}));
+  let x_200 : vec4<f32> = vec4<f32>(textureSample(x_20, x_10, coords12), 0.0, 0.0, 0.0);
+  let x_210 : f32 = textureSampleCompare(x_20, x_30, coords12, 0.200000003);
+)"}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleDrefImplicitLod,
     SpvParserHandleTest_SampledImageAccessTest,
     ::testing::Values(
         // ImageSampleDrefImplicitLod
-        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
-                        "%result = OpImageSampleDrefImplicitLod "
-                        "%float %sampled_image %coords12 %depth",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_comparison
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleCompare}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{coords12}
-              ScalarConstructor[not set]{0.200000}
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 0 0 0 1 Unknown",
+            "%result = OpImageSampleDrefImplicitLod "
+            "%float %sampled_image %coords12 %depth",
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+)",
+            R"(textureSampleCompare(x_20, x_10, coords12, 0.200000003))"},
         // ImageSampleDrefImplicitLod - arrayed
-        ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
-                        "%result = OpImageSampleDrefImplicitLod "
-                        "%float %sampled_image %coords123 %depth",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_comparison
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d_array
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleCompare}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              MemberAccessor[not set]{
-                Identifier[not set]{coords123}
-                Identifier[not set]{xy}
-              }
-              TypeConstructor[not set]{
-                __i32
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              ScalarConstructor[not set]{0.200000}
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 0 1 0 1 Unknown",
+            "%result = OpImageSampleDrefImplicitLod "
+            "%float %sampled_image %coords123 %depth",
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+            R"(textureSampleCompare(x_20, x_10, coords123.xy, i32(coords123.z), 0.200000003))"},
         // ImageSampleDrefImplicitLod with ConstOffset
         ImageAccessCase{
             "%float 2D 0 0 0 1 Unknown",
             "%result = OpImageSampleDrefImplicitLod %float "
             "%sampled_image %coords12 %depth ConstOffset %offsets2d",
-            R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_comparison
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d
-  })",
-            R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleCompare}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{coords12}
-              ScalarConstructor[not set]{0.200000}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
-            )
-          })"},
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+)",
+            R"(textureSampleCompare(x_20, x_10, coords12, 0.200000003, vec2<i32>(3, 4)))"},
         // ImageSampleDrefImplicitLod arrayed with ConstOffset
         ImageAccessCase{
             "%float 2D 0 1 0 1 Unknown",
             "%result = OpImageSampleDrefImplicitLod %float "
             "%sampled_image %coords123 %depth ConstOffset %offsets2d",
-            R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_comparison
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d_array
-  })",
-            R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleCompare}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              MemberAccessor[not set]{
-                Identifier[not set]{coords123}
-                Identifier[not set]{xy}
-              }
-              TypeConstructor[not set]{
-                __i32
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              ScalarConstructor[not set]{0.200000}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
-            )
-          })"}));
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+            R"(textureSampleCompare(x_20, x_10, coords123.xy, i32(coords123.z), 0.200000003, vec2<i32>(3, 4)))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleDrefExplicitLod,
@@ -2303,257 +1758,63 @@ INSTANTIATE_TEST_SUITE_P(
     // Another test checks cases where the Lod is not float constant 0.
     ::testing::Values(
         // 2D
-        ImageAccessCase{"%float 2D 1 0 0 1 Unknown",
-                        "%result = OpImageSampleDrefExplicitLod "
-                        "%float %sampled_image %coords12 %depth Lod %float_0",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_comparison
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleCompareLevel}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{coords12}
-              ScalarConstructor[not set]{0.200000}
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 1 0 0 1 Unknown",
+            "%result = OpImageSampleDrefExplicitLod "
+            "%float %sampled_image %coords12 %depth Lod %float_0",
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+)",
+            R"(textureSampleCompareLevel(x_20, x_10, coords12, 0.200000003))"},
         // 2D array
-        ImageAccessCase{"%float 2D 1 1 0 1 Unknown",
-                        "%result = OpImageSampleDrefExplicitLod "
-                        "%float %sampled_image %coords123 %depth Lod %float_0",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_comparison
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d_array
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleCompareLevel}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              MemberAccessor[not set]{
-                Identifier[not set]{coords123}
-                Identifier[not set]{xy}
-              }
-              TypeConstructor[not set]{
-                __i32
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              ScalarConstructor[not set]{0.200000}
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 1 1 0 1 Unknown",
+            "%result = OpImageSampleDrefExplicitLod "
+            "%float %sampled_image %coords123 %depth Lod %float_0",
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+            R"(textureSampleCompareLevel(x_20, x_10, coords123.xy, i32(coords123.z), 0.200000003))"},
         // 2D, ConstOffset
-        ImageAccessCase{"%float 2D 1 0 0 1 Unknown",
-                        "%result = OpImageSampleDrefExplicitLod %float "
-                        "%sampled_image %coords12 %depth Lod|ConstOffset "
-                        "%float_0 %offsets2d",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_comparison
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleCompareLevel}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{coords12}
-              ScalarConstructor[not set]{0.200000}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 1 0 0 1 Unknown",
+            "%result = OpImageSampleDrefExplicitLod %float "
+            "%sampled_image %coords12 %depth Lod|ConstOffset "
+            "%float_0 %offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+)",
+            R"(textureSampleCompareLevel(x_20, x_10, coords12, 0.200000003, vec2<i32>(3, 4)))"},
         // 2D array, ConstOffset
-        ImageAccessCase{"%float 2D 1 1 0 1 Unknown",
-                        "%result = OpImageSampleDrefExplicitLod %float "
-                        "%sampled_image %coords123 %depth Lod|ConstOffset "
-                        "%float_0 %offsets2d",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_comparison
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d_array
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleCompareLevel}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              MemberAccessor[not set]{
-                Identifier[not set]{coords123}
-                Identifier[not set]{xy}
-              }
-              TypeConstructor[not set]{
-                __i32
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              ScalarConstructor[not set]{0.200000}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 1 1 0 1 Unknown",
+            "%result = OpImageSampleDrefExplicitLod %float "
+            "%sampled_image %coords123 %depth Lod|ConstOffset "
+            "%float_0 %offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+            R"(textureSampleCompareLevel(x_20, x_10, coords123.xy, i32(coords123.z), 0.200000003, vec2<i32>(3, 4)))"},
         // Cube
-        ImageAccessCase{"%float Cube 1 0 0 1 Unknown",
-                        "%result = OpImageSampleDrefExplicitLod "
-                        "%float %sampled_image %coords123 %depth Lod %float_0",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_comparison
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_cube
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleCompareLevel}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{coords123}
-              ScalarConstructor[not set]{0.200000}
-            )
-          })"},
+        ImageAccessCase{
+            "%float Cube 1 0 0 1 Unknown",
+            "%result = OpImageSampleDrefExplicitLod "
+            "%float %sampled_image %coords123 %depth Lod %float_0",
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_cube;)",
+            R"(textureSampleCompareLevel(x_20, x_10, coords123, 0.200000003))"},
         // Cube array
-        ImageAccessCase{"%float Cube 1 1 0 1 Unknown",
-                        "%result = OpImageSampleDrefExplicitLod "
-                        "%float %sampled_image %coords1234 %depth Lod %float_0",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_comparison
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_cube_array
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleCompareLevel}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              MemberAccessor[not set]{
-                Identifier[not set]{coords1234}
-                Identifier[not set]{xyz}
-              }
-              TypeConstructor[not set]{
-                __i32
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords1234}
-                  Identifier[not set]{w}
-                }
-              }
-              ScalarConstructor[not set]{0.200000}
-            )
-          })"}));
+        ImageAccessCase{
+            "%float Cube 1 1 0 1 Unknown",
+            "%result = OpImageSampleDrefExplicitLod "
+            "%float %sampled_image %coords1234 %depth Lod %float_0",
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_cube_array;)",
+            R"(textureSampleCompareLevel(x_20, x_10, coords1234.xyz, i32(coords1234.w), 0.200000003))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleExplicitLod_UsingLod,
@@ -2564,223 +1825,54 @@ INSTANTIATE_TEST_SUITE_P(
         ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
                         "%result = OpImageSampleExplicitLod "
                         "%v4float %sampled_image %coords12 Lod %float_null",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleLevel}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{coords12}
-              ScalarConstructor[not set]{0.000000}
-            )
-          })"},
+                        R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+                        R"(textureSampleLevel(x_20, x_10, coords12, 0.0))"},
 
         // OpImageSampleExplicitLod arrayed - using Lod
-        ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
-                        "%result = OpImageSampleExplicitLod "
-                        "%v4float %sampled_image %coords123 Lod %float_null",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d_array__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleLevel}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              MemberAccessor[not set]{
-                Identifier[not set]{coords123}
-                Identifier[not set]{xy}
-              }
-              TypeConstructor[not set]{
-                __i32
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              ScalarConstructor[not set]{0.000000}
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 0 1 0 1 Unknown",
+            "%result = OpImageSampleExplicitLod "
+            "%v4float %sampled_image %coords123 Lod %float_null",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+            R"(textureSampleLevel(x_20, x_10, coords123.xy, i32(coords123.z), 0.0))"},
 
         // OpImageSampleExplicitLod - using Lod and ConstOffset
-        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
-                        "%result = OpImageSampleExplicitLod "
-                        "%v4float %sampled_image %coords12 Lod|ConstOffset "
-                        "%float_null %offsets2d",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleLevel}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{coords12}
-              ScalarConstructor[not set]{0.000000}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 0 0 0 1 Unknown",
+            "%result = OpImageSampleExplicitLod "
+            "%v4float %sampled_image %coords12 Lod|ConstOffset "
+            "%float_null %offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+            R"(textureSampleLevel(x_20, x_10, coords12, 0.0, vec2<i32>(3, 4)))"},
 
         // OpImageSampleExplicitLod - using Lod and unsigned ConstOffset
         // Convert the ConstOffset operand to signed
-        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
-                        "%result = OpImageSampleExplicitLod "
-                        "%v4float %sampled_image %coords12 Lod|ConstOffset "
-                        "%float_null %u_offsets2d",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleLevel}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{coords12}
-              ScalarConstructor[not set]{0.000000}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                TypeConstructor[not set]{
-                  __vec_2__u32
-                  ScalarConstructor[not set]{3u}
-                  ScalarConstructor[not set]{4u}
-                }
-              }
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 0 0 0 1 Unknown",
+            "%result = OpImageSampleExplicitLod "
+            "%v4float %sampled_image %coords12 Lod|ConstOffset "
+            "%float_null %u_offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+            R"(textureSampleLevel(x_20, x_10, coords12, 0.0, vec2<i32>(vec2<u32>(3u, 4u)))"},
 
         // OpImageSampleExplicitLod arrayed - using Lod and ConstOffset
-        ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
-                        "%result = OpImageSampleExplicitLod "
-                        "%v4float %sampled_image %coords123 Lod|ConstOffset "
-                        "%float_null %offsets2d",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d_array__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleLevel}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              MemberAccessor[not set]{
-                Identifier[not set]{coords123}
-                Identifier[not set]{xy}
-              }
-              TypeConstructor[not set]{
-                __i32
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              ScalarConstructor[not set]{0.000000}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
-            )
-          })"}));
+        ImageAccessCase{
+            "%float 2D 0 1 0 1 Unknown",
+            "%result = OpImageSampleExplicitLod "
+            "%v4float %sampled_image %coords123 Lod|ConstOffset "
+            "%float_null %offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+            R"(textureSampleLevel(x_20, x_10, coords123.xy, i32(coords123.z), 0.0, vec2<i32>(3, 4)))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleExplicitLod_UsingGrad,
@@ -2788,287 +1880,69 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
 
         // OpImageSampleExplicitLod - using Grad
-        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
-                        "%result = OpImageSampleExplicitLod "
-                        "%v4float %sampled_image %coords12 Grad %vf12 %vf21",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleGrad}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{coords12}
-              Identifier[not set]{vf12}
-              Identifier[not set]{vf21}
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 0 0 0 1 Unknown",
+            "%result = OpImageSampleExplicitLod "
+            "%v4float %sampled_image %coords12 Grad %vf12 %vf21",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+            R"(textureSampleGrad(x_20, x_10, coords12, vf12, vf21))"},
 
         // OpImageSampleExplicitLod arrayed - using Grad
-        ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
-                        "%result = OpImageSampleExplicitLod "
-                        "%v4float %sampled_image %coords123 Grad %vf12 %vf21",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d_array__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleGrad}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              MemberAccessor[not set]{
-                Identifier[not set]{coords123}
-                Identifier[not set]{xy}
-              }
-              TypeConstructor[not set]{
-                __i32
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              Identifier[not set]{vf12}
-              Identifier[not set]{vf21}
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 0 1 0 1 Unknown",
+            "%result = OpImageSampleExplicitLod "
+            "%v4float %sampled_image %coords123 Grad %vf12 %vf21",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+            R"(textureSampleGrad(x_20, x_10, coords123.xy, i32(coords123.z), vf12, vf21))"},
 
         // OpImageSampleExplicitLod - using Grad and ConstOffset
-        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
-                        "%result = OpImageSampleExplicitLod "
-                        "%v4float %sampled_image %coords12 Grad|ConstOffset "
-                        "%vf12 %vf21 %offsets2d",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleGrad}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{coords12}
-              Identifier[not set]{vf12}
-              Identifier[not set]{vf21}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 0 0 0 1 Unknown",
+            "%result = OpImageSampleExplicitLod "
+            "%v4float %sampled_image %coords12 Grad|ConstOffset "
+            "%vf12 %vf21 %offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+            R"(textureSampleGrad(x_20, x_10, coords12, vf12, vf21, vec2<i32>(3, 4)))"},
 
         // OpImageSampleExplicitLod - using Grad and unsigned ConstOffset
-        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
-                        "%result = OpImageSampleExplicitLod "
-                        "%v4float %sampled_image %coords12 Grad|ConstOffset "
-                        "%vf12 %vf21 %u_offsets2d",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleGrad}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{coords12}
-              Identifier[not set]{vf12}
-              Identifier[not set]{vf21}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                TypeConstructor[not set]{
-                  __vec_2__u32
-                  ScalarConstructor[not set]{3u}
-                  ScalarConstructor[not set]{4u}
-                }
-              }
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 0 0 0 1 Unknown",
+            "%result = OpImageSampleExplicitLod "
+            "%v4float %sampled_image %coords12 Grad|ConstOffset "
+            "%vf12 %vf21 %u_offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+            R"(textureSampleGrad(x_20, x_10, coords12, vf12, vf21, vec2<i32>(vec2<u32>(3u, 4u)))"},
 
         // OpImageSampleExplicitLod arrayed - using Grad and ConstOffset
-        ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
-                        "%result = OpImageSampleExplicitLod "
-                        "%v4float %sampled_image %coords123 Grad|ConstOffset "
-                        "%vf12 %vf21 %offsets2d",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d_array__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleGrad}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              MemberAccessor[not set]{
-                Identifier[not set]{coords123}
-                Identifier[not set]{xy}
-              }
-              TypeConstructor[not set]{
-                __i32
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              Identifier[not set]{vf12}
-              Identifier[not set]{vf21}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 0 1 0 1 Unknown",
+            "%result = OpImageSampleExplicitLod "
+            "%v4float %sampled_image %coords123 Grad|ConstOffset "
+            "%vf12 %vf21 %offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+            R"(textureSampleGrad(x_20, x_10, coords123.xy, i32(coords123.z), vf12, vf21, vec2<i32>(3, 4)))"},
 
         // OpImageSampleExplicitLod arrayed - using Grad and unsigned
         // ConstOffset
-        ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
-                        "%result = OpImageSampleExplicitLod "
-                        "%v4float %sampled_image %coords123 Grad|ConstOffset "
-                        "%vf12 %vf21 %u_offsets2d",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d_array__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleGrad}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              MemberAccessor[not set]{
-                Identifier[not set]{coords123}
-                Identifier[not set]{xy}
-              }
-              TypeConstructor[not set]{
-                __i32
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              Identifier[not set]{vf12}
-              Identifier[not set]{vf21}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                TypeConstructor[not set]{
-                  __vec_2__u32
-                  ScalarConstructor[not set]{3u}
-                  ScalarConstructor[not set]{4u}
-                }
-              }
-            )
-          })"}));
+        ImageAccessCase{
+            "%float 2D 0 1 0 1 Unknown",
+            "%result = OpImageSampleExplicitLod "
+            "%v4float %sampled_image %coords123 Grad|ConstOffset "
+            "%vf12 %vf21 %u_offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+            R"(textureSampleGrad(x_20, x_10, coords123.xy, i32(coords123.z), vf12, vf21, vec2<i32>(vec2<u32>(3u, 4u))))"}));
 
 // Test crbug.com/378:
 // In WGSL, sampling from depth texture with explicit level of detail
@@ -3084,81 +1958,19 @@ INSTANTIATE_TEST_SUITE_P(
         {"%float 2D 0 0 0 1 Unknown",
          "%result = OpImageSampleExplicitLod %v4float "
          "%sampled_image %vf12 Lod %f1",
-         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-         R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleLevel}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{vf12}
-              Identifier[not set]{f1}
-            )
-          })"},
+         R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+         R"(textureSampleLevel(x_20, x_10, vf12, f1))"},
         // Test a depth case
         {"%float 2D 1 0 0 1 Unknown",
          "%result = OpImageSampleExplicitLod %v4float "
          "%sampled_image %vf12 Lod %f1",
-         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d
-  })",
-         R"(
-          TypeConstructor[not set]{
-            __vec_4__f32
-            Call[not set]{
-              Identifier[not set]{textureSampleLevel}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{x_10}
-                Identifier[not set]{vf12}
-                TypeConstructor[not set]{
-                  __i32
-                  Identifier[not set]{f1}
-                }
-              )
-            }
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
-          })"}}));
+         R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+)",
+         R"(vec4<f32>(textureSampleLevel(x_20, x_10, vf12, i32(f1)), 0.0, 0.0, 0.0))"}}));
 
 /////
 // Projection sampling
@@ -3191,139 +2003,34 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
 
         // OpImageSampleProjImplicitLod 1D
-        ImageAccessCase{"%float 1D 0 0 0 1 Unknown",
-                        "%result = OpImageSampleProjImplicitLod "
-                        "%v4float %sampled_image %coords12",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_1d__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSample}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Binary[not set]{
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords12}
-                  Identifier[not set]{x}
-                }
-                divide
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords12}
-                  Identifier[not set]{y}
-                }
-              }
-            )
-          })"},
+        ImageAccessCase{
+            "%float 1D 0 0 0 1 Unknown",
+            "%result = OpImageSampleProjImplicitLod "
+            "%v4float %sampled_image %coords12",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_1d<f32>;)",
+            R"(textureSample(x_20, x_10, (coords12.x / coords12.y)))"},
 
         // OpImageSampleProjImplicitLod 2D
-        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
-                        "%result = OpImageSampleProjImplicitLod "
-                        "%v4float %sampled_image %coords123",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSample}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Binary[not set]{
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{xy}
-                }
-                divide
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 0 0 0 1 Unknown",
+            "%result = OpImageSampleProjImplicitLod "
+            "%v4float %sampled_image %coords123",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+            R"(textureSample(x_20, x_10, (coords123.xy / coords123.z)))"},
 
         // OpImageSampleProjImplicitLod 3D
-        ImageAccessCase{"%float 3D 0 0 0 1 Unknown",
-                        "%result = OpImageSampleProjImplicitLod "
-                        "%v4float %sampled_image %coords1234",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_3d__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSample}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Binary[not set]{
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords1234}
-                  Identifier[not set]{xyz}
-                }
-                divide
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords1234}
-                  Identifier[not set]{w}
-                }
-              }
-            )
-          })"},
+        ImageAccessCase{
+            "%float 3D 0 0 0 1 Unknown",
+            "%result = OpImageSampleProjImplicitLod "
+            "%v4float %sampled_image %coords1234",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_3d<f32>;)",
+            R"(textureSample(x_20, x_10, (coords1234.xyz / coords1234.w)))"},
 
         // OpImageSampleProjImplicitLod 2D with ConstOffset
         // (Don't need to test with 1D or 3D, as the hard part was the splatted
@@ -3332,51 +2039,10 @@ INSTANTIATE_TEST_SUITE_P(
             "%float 2D 0 0 0 1 Unknown",
             "%result = OpImageSampleProjImplicitLod "
             "%v4float %sampled_image %coords123 ConstOffset %offsets2d",
-            R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-            R"(
-          Call[not set]{
-            Identifier[not set]{textureSample}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Binary[not set]{
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{xy}
-                }
-                divide
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
-            )
-          })"}));
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+            R"(textureSample(x_20, x_10, (coords123.xy / coords123.z), vec2<i32>(3, 4)))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleProjImplicitLod_Bias,
@@ -3385,364 +2051,86 @@ INSTANTIATE_TEST_SUITE_P(
 
         // OpImageSampleProjImplicitLod with Bias
         // Only testing 2D
-        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
-                        "%result = OpImageSampleProjImplicitLod "
-                        "%v4float %sampled_image %coords123 Bias %float_7",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleBias}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Binary[not set]{
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{xy}
-                }
-                divide
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              ScalarConstructor[not set]{7.000000}
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 0 0 0 1 Unknown",
+            "%result = OpImageSampleProjImplicitLod "
+            "%v4float %sampled_image %coords123 Bias %float_7",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+            R"(textureSampleBias(x_20, x_10, (coords123.xy / coords123.z), 7.0))"},
 
         // OpImageSampleProjImplicitLod with Bias and signed ConstOffset
-        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
-                        "%result = OpImageSampleProjImplicitLod "
-                        "%v4float %sampled_image %coords123 Bias|ConstOffset "
-                        "%float_7 %offsets2d",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleBias}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Binary[not set]{
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{xy}
-                }
-                divide
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              ScalarConstructor[not set]{7.000000}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 0 0 0 1 Unknown",
+            "%result = OpImageSampleProjImplicitLod "
+            "%v4float %sampled_image %coords123 Bias|ConstOffset "
+            "%float_7 %offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+            R"(textureSampleBias(x_20, x_10, (coords123.xy / coords123.z), 7.0, vec2<i32>(3, 4)))"},
 
         // OpImageSampleProjImplicitLod with Bias and unsigned ConstOffset
         // Convert ConstOffset to signed
-        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
-                        "%result = OpImageSampleProjImplicitLod "
-                        "%v4float %sampled_image %coords123 Bias|ConstOffset "
-                        "%float_7 %u_offsets2d",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleBias}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Binary[not set]{
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{xy}
-                }
-                divide
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              ScalarConstructor[not set]{7.000000}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                TypeConstructor[not set]{
-                  __vec_2__u32
-                  ScalarConstructor[not set]{3u}
-                  ScalarConstructor[not set]{4u}
-                }
-              }
-            )
-          })"}));
+        ImageAccessCase{
+            "%float 2D 0 0 0 1 Unknown",
+            "%result = OpImageSampleProjImplicitLod "
+            "%v4float %sampled_image %coords123 Bias|ConstOffset "
+            "%float_7 %u_offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+            R"(textureSampleBias(x_20, x_10, (coords123.xy / coords123.z), 7.0, vec2<i32>(vec2<u32>(3u, 4u))))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleProjExplicitLod_Lod,
     SpvParserHandleTest_SampledImageAccessTest,
     ::testing::Values(
         // OpImageSampleProjExplicitLod 2D
-        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
-                        "%result = OpImageSampleProjExplicitLod "
-                        "%v4float %sampled_image %coords123 Lod %f1",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleLevel}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Binary[not set]{
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{xy}
-                }
-                divide
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              Identifier[not set]{f1}
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 0 0 0 1 Unknown",
+            "%result = OpImageSampleProjExplicitLod "
+            "%v4float %sampled_image %coords123 Lod %f1",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+            R"(textureSampleLevel(x_20, x_10, (coords123.xy / coords123.z), f1))"},
 
         // OpImageSampleProjExplicitLod 2D Lod with ConstOffset
         ImageAccessCase{
             "%float 2D 0 0 0 1 Unknown",
             "%result = OpImageSampleProjExplicitLod "
             "%v4float %sampled_image %coords123 Lod|ConstOffset %f1 %offsets2d",
-            R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-            R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleLevel}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Binary[not set]{
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{xy}
-                }
-                divide
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              Identifier[not set]{f1}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
-            )
-          })"}));
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+            R"(textureSampleLevel(x_20, x_10, (coords123.xy / coords123.z), f1, vec2<i32>(3, 4)))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleProjExplicitLod_Grad,
     SpvParserHandleTest_SampledImageAccessTest,
     ::testing::Values(
         // OpImageSampleProjExplicitLod 2D Grad
-        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
-                        "%result = OpImageSampleProjExplicitLod "
-                        "%v4float %sampled_image %coords123 Grad %vf12 %vf21",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleGrad}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Binary[not set]{
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{xy}
-                }
-                divide
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              Identifier[not set]{vf12}
-              Identifier[not set]{vf21}
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 0 0 0 1 Unknown",
+            "%result = OpImageSampleProjExplicitLod "
+            "%v4float %sampled_image %coords123 Grad %vf12 %vf21",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+            R"(textureSampleGrad(x_20, x_10, (coords123.xy / coords123.z), vf12, vf21))"},
 
         // OpImageSampleProjExplicitLod 2D Lod Grad ConstOffset
-        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
-                        "%result = OpImageSampleProjExplicitLod "
-                        "%v4float %sampled_image %coords123 Grad|ConstOffset "
-                        "%vf12 %vf21 %offsets2d",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleGrad}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Binary[not set]{
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{xy}
-                }
-                divide
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              Identifier[not set]{vf12}
-              Identifier[not set]{vf21}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
-            )
-          })"}));
+        ImageAccessCase{
+            "%float 2D 0 0 0 1 Unknown",
+            "%result = OpImageSampleProjExplicitLod "
+            "%v4float %sampled_image %coords123 Grad|ConstOffset "
+            "%vf12 %vf21 %offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+            R"(textureSampleGrad(x_20, x_10, (coords123.xy / coords123.z), vf12, vf21, vec2<i32>(3, 4)))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     // Ordinary (non-comparison) sampling on a depth texture.
@@ -3750,58 +2138,18 @@ INSTANTIATE_TEST_SUITE_P(
     SpvParserHandleTest_SampledImageAccessTest,
     ::testing::Values(
         // OpImageSampleProjImplicitLod 2D depth
-        ImageAccessCase{"%float 2D 1 0 0 1 Unknown",
-                        "%result = OpImageSampleProjImplicitLod "
-                        "%v4float %sampled_image %coords123",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d
-  })",
-                        // Sampling the depth texture yields an f32, but the
-                        // SPIR-V operation yiedls vec4<f32>, so fill out the
-                        // remaining components with 0.
-                        R"(
-          TypeConstructor[not set]{
-            __vec_4__f32
-            Call[not set]{
-              Identifier[not set]{textureSample}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{x_10}
-                Binary[not set]{
-                  MemberAccessor[not set]{
-                    Identifier[not set]{coords123}
-                    Identifier[not set]{xy}
-                  }
-                  divide
-                  MemberAccessor[not set]{
-                    Identifier[not set]{coords123}
-                    Identifier[not set]{z}
-                  }
-                }
-              )
-            }
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
-          })"}));
+        ImageAccessCase{
+            "%float 2D 1 0 0 1 Unknown",
+            "%result = OpImageSampleProjImplicitLod "
+            "%v4float %sampled_image %coords123",
+            R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+)",
+            // Sampling the depth texture yields an f32, but the
+            // SPIR-V operation yiedls vec4<f32>, so fill out the
+            // remaining components with 0.
+            R"(vec4<f32>(textureSample(x_20, x_10, (coords123.xy / coords123.z)), 0.0, 0.0, 0.0))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleProjDrefImplicitLod,
@@ -3809,102 +2157,26 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
 
         // OpImageSampleProjDrefImplicitLod 2D depth-texture
-        ImageAccessCase{"%float 2D 1 0 0 1 Unknown",
-                        "%result = OpImageSampleProjDrefImplicitLod "
-                        "%float %sampled_image %coords123 %f1",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_comparison
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleCompare}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Binary[not set]{
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{xy}
-                }
-                divide
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              Identifier[not set]{f1}
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 1 0 0 1 Unknown",
+            "%result = OpImageSampleProjDrefImplicitLod "
+            "%float %sampled_image %coords123 %f1",
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+)",
+            R"(textureSampleCompare(x_20, x_10, (coords123.xy / coords123.z), f1))"},
 
         // OpImageSampleProjDrefImplicitLod 2D depth-texture, ConstOffset
         ImageAccessCase{
             "%float 2D 1 0 0 1 Unknown",
             "%result = OpImageSampleProjDrefImplicitLod "
             "%float %sampled_image %coords123 %f1 ConstOffset %offsets2d",
-            R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_comparison
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d
-  })",
-            R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleCompare}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Binary[not set]{
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{xy}
-                }
-                divide
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              Identifier[not set]{f1}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
-            )
-          })"}));
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+)",
+            R"(textureSampleCompare(x_20, x_10, (coords123.xy / coords123.z), f1, vec2<i32>(3, 4)))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     DISABLED_ImageSampleProjDrefExplicitLod_Lod,
@@ -3915,104 +2187,27 @@ INSTANTIATE_TEST_SUITE_P(
         // Another test checks cases where the Lod is not float constant 0.
 
         // OpImageSampleProjDrefExplicitLod 2D depth-texture Lod
-        ImageAccessCase{"%float 2D 1 0 0 1 Unknown",
-                        "%result = OpImageSampleProjDrefExplicitLod "
-                        "%float %sampled_image %coords123 %depth Lod %float_0",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_comparison
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleCompare}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Binary[not set]{
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{xy}
-                }
-                divide
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              ScalarConstructor[not set]{0.200000}
-              ScalarConstructor[not set]{0.000000}
-            )
-          })"},
+        ImageAccessCase{
+            "%float 2D 1 0 0 1 Unknown",
+            "%result = OpImageSampleProjDrefExplicitLod "
+            "%float %sampled_image %coords123 %depth Lod %float_0",
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+)",
+            R"(textureSampleCompare(x_20, x_10, (coords123.xy / coords123.z), 0.200000003, 0.0))"},
 
         // OpImageSampleProjDrefImplicitLod 2D depth-texture, Lod ConstOffset
-        ImageAccessCase{"%float 2D 1 0 0 1 Unknown",
-                        "%result = OpImageSampleProjDrefExplicitLod "
-                        "%float %sampled_image %coords123 %depth "
-                        "Lod|ConstOffset %float_0 %offsets2d",
-                        R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_comparison
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d
-  })",
-                        R"(
-          Call[not set]{
-            Identifier[not set]{textureSampleCompareLevel}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Binary[not set]{
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{xy}
-                }
-                divide
-                MemberAccessor[not set]{
-                  Identifier[not set]{coords123}
-                  Identifier[not set]{z}
-                }
-              }
-              ScalarConstructor[not set]{0.200000}
-              ScalarConstructor[not set]{0.000000}
-              TypeConstructor[not set]{
-                __vec_2__i32
-                ScalarConstructor[not set]{3}
-                ScalarConstructor[not set]{4}
-              }
-            )
-          })"}));
+        ImageAccessCase{
+            "%float 2D 1 0 0 1 Unknown",
+            "%result = OpImageSampleProjDrefExplicitLod "
+            "%float %sampled_image %coords123 %depth "
+            "Lod|ConstOffset %float_0 %offsets2d",
+            R"([[group(0), binding(0)]] var x_10 : sampler_comparison;
+
+[[group(2), binding(1)]] var x_20 : texture_depth_2d;
+)",
+            R"(textureSampleCompareLevel(x_20, x_10, (coords123.xy / coords123.z), 0.200000003, 0.0, vec2<i32>(3, 4)))"}));
 
 /////
 // End projection sampling
@@ -4078,7 +2273,7 @@ TEST_P(SpvParserHandleTest_ImageAccessTest, Variable) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty()) << p->error();
-  const auto program = p->program().to_str();
+  const auto program = test::ToString(p->program());
   EXPECT_THAT(program, HasSubstr(GetParam().var_decl))
       << "DECLARATIONS ARE BAD " << program;
   EXPECT_THAT(program, HasSubstr(GetParam().texture_builtin))
@@ -4091,25 +2286,9 @@ INSTANTIATE_TEST_SUITE_P(ImageWrite_OptionalParams,
                              // OpImageWrite with no extra params
                              {"%float 2D 0 0 0 2 Rgba32f",
                               "OpImageWrite %im %vi12 %vf1234",
-                              R"(
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __storage_texture_2d_rgba32float_write
-  })",
-                              R"(Call[not set]{
-      Identifier[not set]{textureStore}
-      (
-        Identifier[not set]{x_20}
-        Identifier[not set]{vi12}
-        Identifier[not set]{vf1234}
-      )
-    })"}}));
+                              "[[group(2), binding(1)]] var x_20 : "
+                              "texture_storage_2d<rgba32float, write>;",
+                              "textureStore(x_20, vi12, vf1234);"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     // SPIR-V's texel parameter is a scalar or vector with at least as many
@@ -4122,197 +2301,38 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // Source 1 component
         {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vi12 %f1",
-         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __storage_texture_2d_r32float_write
-  })",
-         R"(Call[not set]{
-      Identifier[not set]{textureStore}
-      (
-        Identifier[not set]{x_20}
-        Identifier[not set]{vi12}
-        TypeConstructor[not set]{
-          __vec_4__f32
-          Identifier[not set]{f1}
-          ScalarConstructor[not set]{0.000000}
-          ScalarConstructor[not set]{0.000000}
-          ScalarConstructor[not set]{0.000000}
-        }
-      )
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<r32float, write>;)",
+         "textureStore(x_20, vi12, vec4<f32>(f1, 0.0, 0.0, 0.0));"},
         // Source 2 component, dest 1 component
         {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vi12 %vf12",
-         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __storage_texture_2d_r32float_write
-  })",
-         R"(Call[not set]{
-      Identifier[not set]{textureStore}
-      (
-        Identifier[not set]{x_20}
-        Identifier[not set]{vi12}
-        TypeConstructor[not set]{
-          __vec_4__f32
-          Identifier[not set]{vf12}
-          ScalarConstructor[not set]{0.000000}
-          ScalarConstructor[not set]{0.000000}
-        }
-      )
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<r32float, write>;)",
+         "textureStore(x_20, vi12, vec4<f32>(vf12, 0.0, 0.0));"},
         // Source 3 component, dest 1 component
         {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vi12 %vf123",
-         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __storage_texture_2d_r32float_write
-  })",
-         R"(Call[not set]{
-      Identifier[not set]{textureStore}
-      (
-        Identifier[not set]{x_20}
-        Identifier[not set]{vi12}
-        TypeConstructor[not set]{
-          __vec_4__f32
-          Identifier[not set]{vf123}
-          ScalarConstructor[not set]{0.000000}
-        }
-      )
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<r32float, write>;)",
+         "textureStore(x_20, vi12, vec4<f32>(vf123, 0.0));"},
         // Source 4 component, dest 1 component
         {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vi12 %vf1234",
-         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __storage_texture_2d_r32float_write
-  })",
-         R"(Call[not set]{
-      Identifier[not set]{textureStore}
-      (
-        Identifier[not set]{x_20}
-        Identifier[not set]{vi12}
-        Identifier[not set]{vf1234}
-      )
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<r32float, write>;)",
+         "textureStore(x_20, vi12, vf1234);"},
         // Source 2 component, dest 2 component
         {"%float 2D 0 0 0 2 Rg32f", "OpImageWrite %im %vi12 %vf12",
-         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __storage_texture_2d_rg32float_write
-  })",
-         R"(Call[not set]{
-      Identifier[not set]{textureStore}
-      (
-        Identifier[not set]{x_20}
-        Identifier[not set]{vi12}
-        TypeConstructor[not set]{
-          __vec_4__f32
-          Identifier[not set]{vf12}
-          ScalarConstructor[not set]{0.000000}
-          ScalarConstructor[not set]{0.000000}
-        }
-      )
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rg32float, write>;)",
+         "textureStore(x_20, vi12, vec4<f32>(vf12, 0.0, 0.0));"},
         // Source 3 component, dest 2 component
         {"%float 2D 0 0 0 2 Rg32f", "OpImageWrite %im %vi12 %vf123",
-         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __storage_texture_2d_rg32float_write
-  })",
-         R"(Call[not set]{
-      Identifier[not set]{textureStore}
-      (
-        Identifier[not set]{x_20}
-        Identifier[not set]{vi12}
-        TypeConstructor[not set]{
-          __vec_4__f32
-          Identifier[not set]{vf123}
-          ScalarConstructor[not set]{0.000000}
-        }
-      )
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rg32float, write>;)",
+         "textureStore(x_20, vi12, vec4<f32>(vf123, 0.0));"},
         // Source 4 component, dest 2 component
         {"%float 2D 0 0 0 2 Rg32f", "OpImageWrite %im %vi12 %vf1234",
-         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __storage_texture_2d_rg32float_write
-  })",
-         R"(Call[not set]{
-      Identifier[not set]{textureStore}
-      (
-        Identifier[not set]{x_20}
-        Identifier[not set]{vi12}
-        Identifier[not set]{vf1234}
-      )
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rg32float, write>;)",
+         "textureStore(x_20, vi12, vf1234);"},
         // WGSL does not support 3-component storage textures.
         // Source 4 component, dest 4 component
         {"%float 2D 0 0 0 2 Rgba32f", "OpImageWrite %im %vi12 %vf1234",
-         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __storage_texture_2d_rgba32float_write
-  })",
-         R"(Call[not set]{
-      Identifier[not set]{textureStore}
-      (
-        Identifier[not set]{x_20}
-        Identifier[not set]{vi12}
-        Identifier[not set]{vf1234}
-      )
-    })"}}));
+         "[[group(2), binding(1)]] var x_20 : "
+         "texture_storage_2d<rgba32float, write>;",
+         "textureStore(x_20, vi12, vf1234);"}}));
 
 TEST_F(SpvParserHandleTest, ImageWrite_TooFewSrcTexelComponents_1_vs_4) {
   const auto assembly = Preamble() + R"(
@@ -4391,46 +2411,12 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // Sampled type is unsigned int, texel is unsigned int
         {"%uint 2D 0 0 0 2 Rgba32ui", "OpImageWrite %im %vi12 %vu1234",
-         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __storage_texture_2d_rgba32uint_write
-  })",
-         R"(Call[not set]{
-      Identifier[not set]{textureStore}
-      (
-        Identifier[not set]{x_20}
-        Identifier[not set]{vi12}
-        Identifier[not set]{vu1234}
-      )
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rgba32uint, write>;)",
+         R"(textureStore(x_20, vi12, vu1234))"},
         // Sampled type is signed int, texel is signed int
         {"%int 2D 0 0 0 2 Rgba32i", "OpImageWrite %im %vi12 %vi1234",
-         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __storage_texture_2d_rgba32sint_write
-  })",
-         R"(Call[not set]{
-      Identifier[not set]{textureStore}
-      (
-        Identifier[not set]{x_20}
-        Identifier[not set]{vi12}
-        Identifier[not set]{vi1234}
-      )
-    })"}}));
+         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rgba32sint, write>;)",
+         R"(textureStore(x_20, vi12, vi1234))"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     // Error out when OpImageWrite write texel differ in float vs. integral
@@ -4443,64 +2429,25 @@ INSTANTIATE_TEST_SUITE_P(
          "invalid texel type for storage texture write: component must be "
          "float, signed integer, or unsigned integer to match the texture "
          "channel type: OpImageWrite",
-         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __storage_texture_2d_rgba32float_write
-  })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rgba32float, write>;)"},
         // Sampled type is float, texel is unsigned int
         {"%int 2D 0 0 0 2 Rgba32f", "OpImageWrite %im %vi12 %vu1234",
          "invalid texel type for storage texture write: component must be "
          "float, signed integer, or unsigned integer to match the texture "
          "channel type: OpImageWrite",
-         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __storage_texture_2d_rgba32float_write
-  })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rgba32float, write>;)"},
         // Sampled type is unsigned int, texel is float
         {"%uint 2D 0 0 0 2 Rgba32ui", "OpImageWrite %im %vi12 %vf1234",
          "invalid texel type for storage texture write: component must be "
          "float, signed integer, or unsigned integer to match the texture "
          "channel type: OpImageWrite",
-         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __storage_texture_2d_rgba32uint_write
-  })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rgba32uint, write>;)"},
         // Sampled type is signed int, texel is float
         {"%int 2D 0 0 0 2 Rgba32i", "OpImageWrite %im %vi12 %vf1234",
          "invalid texel type for storage texture write: component must be "
          "float, signed integer, or unsigned integer to match the texture "
          "channel type: OpImageWrite",
-         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __storage_texture_2d_rgba32sint_write
+         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rgba32sint, write>;
   })"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -4514,32 +2461,13 @@ INSTANTIATE_TEST_SUITE_P(
          "invalid texel type for storage texture write: component must be "
          "float, signed integer, or unsigned integer to match the texture "
          "channel type: OpImageWrite",
-         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __storage_texture_2d_rgba32uint_write
-  })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rgba32uint, write>;)"},
         // Sampled type is signed int, texel is unsigned int
         {"%int 2D 0 0 0 2 Rgba32i", "OpImageWrite %im %vi12 %vu1234",
          "invalid texel type for storage texture write: component must be "
          "float, signed integer, or unsigned integer to match the texture "
          "channel type: OpImageWrite",
-         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __storage_texture_2d_rgba32sint_write
+         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<rgba32sint, write>;
   })"}}));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -4550,91 +2478,12 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // Source unsigned, dest unsigned
         {"%uint 2D 0 0 0 2 R32ui", "OpImageWrite %im %vi12 %vu12",
-         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __storage_texture_2d_r32uint_write
-  })",
-         R"(Call[not set]{
-      Identifier[not set]{textureStore}
-      (
-        Identifier[not set]{x_20}
-        Identifier[not set]{vi12}
-        TypeConstructor[not set]{
-          __vec_4__u32
-          Identifier[not set]{vu12}
-          ScalarConstructor[not set]{0u}
-          ScalarConstructor[not set]{0u}
-        }
-      )
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<r32uint, write>;)",
+         R"(textureStore(x_20, vi12, vec4<u32>(vu12, 0u, 0u)))"},
         // Source signed, dest signed
         {"%int 2D 0 0 0 2 R32i", "OpImageWrite %im %vi12 %vi12",
-         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __storage_texture_2d_r32sint_write
-  })",
-         R"(Call[not set]{
-      Identifier[not set]{textureStore}
-      (
-        Identifier[not set]{x_20}
-        Identifier[not set]{vi12}
-        TypeConstructor[not set]{
-          __vec_4__i32
-          Identifier[not set]{vi12}
-          ScalarConstructor[not set]{0}
-          ScalarConstructor[not set]{0}
-        }
-      )
-    })"}}));
-
-INSTANTIATE_TEST_SUITE_P(ImageRead_OptionalParams,
-                         SpvParserHandleTest_ImageAccessTest,
-                         ::testing::ValuesIn(std::vector<ImageAccessCase>{
-                             // OpImageRead with no extra params
-                             {"%float 2D 0 0 0 2 Rgba32f",
-                              "%99 = OpImageRead %v4float %im %vi12",
-                              R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-                              R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_4__f32
-        {
-          Call[not set]{
-            Identifier[not set]{textureLoad}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{vi12}
-              ScalarConstructor[not set]{0}
-            )
-          }
-        }
-      }
-    })"}}));
+         R"([[group(2), binding(1)]] var x_20 : texture_storage_2d<r32sint, write>;)",
+         R"(textureStore(x_20, vi12, vec4<i32>(vi12, 0, 0)))"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageFetch_OptionalParams,
@@ -4643,184 +2492,36 @@ INSTANTIATE_TEST_SUITE_P(
         // OpImageFetch with no extra params, on sampled texture
         // Level of detail is injected for sampled texture
         {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4float %im %vi12",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_4__f32
-        {
-          Call[not set]{
-            Identifier[not set]{textureLoad}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{vi12}
-              ScalarConstructor[not set]{0}
-            )
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+         R"(let x_99 : vec4<f32> = textureLoad(x_20, vi12, 0);)"},
         // OpImageFetch with explicit level, on sampled texture
         {"%float 2D 0 0 0 1 Unknown",
          "%99 = OpImageFetch %v4float %im %vi12 Lod %int_3",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_4__f32
-        {
-          Call[not set]{
-            Identifier[not set]{textureLoad}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{vi12}
-              ScalarConstructor[not set]{3}
-            )
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+         R"(let x_99 : vec4<f32> = textureLoad(x_20, vi12, 3);)"},
         // OpImageFetch with no extra params, on depth texture
         // Level of detail is injected for depth texture
         {"%float 2D 1 0 0 1 Unknown", "%99 = OpImageFetch %v4float %im %vi12",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_4__f32
-        {
-          TypeConstructor[not set]{
-            __vec_4__f32
-            Call[not set]{
-              Identifier[not set]{textureLoad}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{vi12}
-                ScalarConstructor[not set]{0}
-              )
-            }
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+         R"(let x_99 : vec4<f32> = vec4<f32>(textureLoad(x_20, vi12, 0), 0.0, 0.0, 0.0);)"},
         // OpImageFetch with extra params, on depth texture
         {"%float 2D 1 0 0 1 Unknown",
          "%99 = OpImageFetch %v4float %im %vi12 Lod %int_3",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_4__f32
-        {
-          TypeConstructor[not set]{
-            __vec_4__f32
-            Call[not set]{
-              Identifier[not set]{textureLoad}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{vi12}
-                ScalarConstructor[not set]{3}
-              )
-            }
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
-          }
-        }
-      }
-    })"}}));
+         R"([[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+         R"(let x_99 : vec4<f32> = vec4<f32>(textureLoad(x_20, vi12, 3), 0.0, 0.0, 0.0);)"}}));
 
-INSTANTIATE_TEST_SUITE_P(ImageFetch_Depth,
-                         // In SPIR-V OpImageFetch always yields a vector of 4
-                         // elements, even for depth images.  But in WGSL,
-                         // textureLoad on a depth image yields f32.
-                         // crbug.com/tint/439
-                         SpvParserHandleTest_ImageAccessTest,
-                         ::testing::ValuesIn(std::vector<ImageAccessCase>{
-                             // ImageFetch on depth image.
-                             {"%float 2D 1 0 0 1 Unknown",
-                              "%99 = OpImageFetch %v4float %im %vi12 ",
-                              R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d
-  })",
-                              R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_4__f32
-        {
-          TypeConstructor[not set]{
-            __vec_4__f32
-            Call[not set]{
-              Identifier[not set]{textureLoad}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{vi12}
-                ScalarConstructor[not set]{0}
-              )
-            }
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
-          }
-        }
-      }
-    })"}}));
+INSTANTIATE_TEST_SUITE_P(
+    ImageFetch_Depth,
+    // In SPIR-V OpImageFetch always yields a vector of 4
+    // elements, even for depth images.  But in WGSL,
+    // textureLoad on a depth image yields f32.
+    // crbug.com/tint/439
+    SpvParserHandleTest_ImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+        // ImageFetch on depth image.
+        {"%float 2D 1 0 0 1 Unknown", "%99 = OpImageFetch %v4float %im %vi12 ",
+         R"([[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+         R"(let x_99 : vec4<f32> = vec4<f32>(textureLoad(x_20, vi12, 0), 0.0, 0.0, 0.0);)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageFetch_DepthMultisampled,
@@ -4833,40 +2534,8 @@ INSTANTIATE_TEST_SUITE_P(
         // ImageFetch on multisampled depth image.
         {"%float 2D 1 0 1 1 Unknown",
          "%99 = OpImageFetch %v4float %im %vi12 Sample %i1",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_multisampled_texture_2d
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_4__f32
-        {
-          TypeConstructor[not set]{
-            __vec_4__f32
-            Call[not set]{
-              Identifier[not set]{textureLoad}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{vi12}
-                Identifier[not set]{i1}
-              )
-            }
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
-          }
-        }
-      }
-    })"}}));
+         R"([[group(2), binding(1)]] var x_20 : texture_depth_multisampled_2d;)",
+         R"(let x_99 : vec4<f32> = vec4<f32>(textureLoad(x_20, vi12, i1), 0.0, 0.0, 0.0);)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageFetch_Multisampled,
@@ -4881,34 +2550,8 @@ INSTANTIATE_TEST_SUITE_P(
         // ImageFetch non-arrayed
         {"%float 2D 0 0 1 1 Unknown",
          "%99 = OpImageFetch %v4float %im %vi12 Sample %i1",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __multisampled_texture_2d__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_4__f32
-        {
-          Call[not set]{
-            Identifier[not set]{textureLoad}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{vi12}
-              Identifier[not set]{i1}
-            )
-          }
-        }
-      }
-    })"}}));
+         R"([[group(2), binding(1)]] var x_20 : texture_multisampled_2d<f32>;)",
+         R"(let x_99 : vec4<f32> = textureLoad(x_20, vi12, i1);)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageFetch_Multisampled_ConvertSampleOperand,
@@ -4916,37 +2559,8 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         {"%float 2D 0 0 1 1 Unknown",
          "%99 = OpImageFetch %v4float %im %vi12 Sample %u1",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __multisampled_texture_2d__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_4__f32
-        {
-          Call[not set]{
-            Identifier[not set]{textureLoad}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{vi12}
-              TypeConstructor[not set]{
-                __i32
-                Identifier[not set]{u1}
-              }
-            )
-          }
-        }
-      }
-    })"}}));
+         R"([[group(2), binding(1)]] var x_20 : texture_multisampled_2d<f32>;)",
+         R"(let x_99 : vec4<f32> = textureLoad(x_20, vi12, i32(u1));)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     ConvertResultSignedness,
@@ -4968,64 +2582,12 @@ INSTANTIATE_TEST_SUITE_P(
 
         // OpImageFetch requires no conversion, float -> v4float
         {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4float %im %vi12",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_4__f32
-        {
-          Call[not set]{
-            Identifier[not set]{textureLoad}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{vi12}
-              ScalarConstructor[not set]{0}
-            )
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+         R"(let x_99 : vec4<f32> = textureLoad(x_20, vi12, 0);)"},
         // OpImageFetch requires no conversion, uint -> v4uint
         {"%uint 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4uint %im %vi12",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__u32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_4__u32
-        {
-          Call[not set]{
-            Identifier[not set]{textureLoad}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{vi12}
-              ScalarConstructor[not set]{0}
-            )
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_2d<u32>;)",
+         R"(let x_99 : vec4<u32> = textureLoad(x_20, vi12, 0);)"},
         // OpImageFetch requires conversion, uint -> v4int
         // is invalid SPIR-V:
         // "Expected Image 'Sampled Type' to be the same as Result Type
@@ -5033,34 +2595,8 @@ INSTANTIATE_TEST_SUITE_P(
 
         // OpImageFetch requires no conversion, int -> v4int
         {"%int 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4int %im %vi12",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__i32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_4__i32
-        {
-          Call[not set]{
-            Identifier[not set]{textureLoad}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{vi12}
-              ScalarConstructor[not set]{0}
-            )
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_2d<i32>;)",
+         R"(let x_99 : vec4<i32> = textureLoad(x_20, vi12, 0);)"},
         // OpImageFetch requires conversion, int -> v4uint
         // is invalid SPIR-V:
         // "Expected Image 'Sampled Type' to be the same as Result Type
@@ -5072,64 +2608,12 @@ INSTANTIATE_TEST_SUITE_P(
 
         // OpImageRead requires no conversion, float -> v4float
         {"%float 2D 0 0 0 2 Rgba32f", "%99 = OpImageRead %v4float %im %vi12",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_4__f32
-        {
-          Call[not set]{
-            Identifier[not set]{textureLoad}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{vi12}
-              ScalarConstructor[not set]{0}
-            )
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+         R"(let x_99 : vec4<f32> = textureLoad(x_20, vi12, 0);)"},
         // OpImageRead requires no conversion, uint -> v4uint
         {"%uint 2D 0 0 0 2 Rgba32ui", "%99 = OpImageRead %v4uint %im %vi12",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__u32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_4__u32
-        {
-          Call[not set]{
-            Identifier[not set]{textureLoad}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{vi12}
-              ScalarConstructor[not set]{0}
-            )
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_2d<u32>;)",
+         R"(let x_99 : vec4<u32> = textureLoad(x_20, vi12, 0);)"},
 
         // OpImageRead requires conversion, uint -> v4int
         // is invalid SPIR-V:
@@ -5138,34 +2622,8 @@ INSTANTIATE_TEST_SUITE_P(
 
         // OpImageRead requires no conversion, int -> v4int
         {"%int 2D 0 0 0 2 Rgba32i", "%99 = OpImageRead %v4int %im %vi12",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__i32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_4__i32
-        {
-          Call[not set]{
-            Identifier[not set]{textureLoad}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{vi12}
-              ScalarConstructor[not set]{0}
-            )
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_2d<i32>;)",
+         R"(let x_99 : vec4<i32> = textureLoad(x_20, vi12, 0);)"},
 
         // OpImageRead requires conversion, int -> v4uint
         // is invalid SPIR-V:
@@ -5181,45 +2639,10 @@ INSTANTIATE_TEST_SUITE_P(
         // OpImageSampleImplicitLod requires no conversion, float -> v4float
         {"%float 2D 0 0 0 1 Unknown",
          "%99 = OpImageSampleImplicitLod %v4float %sampled_image %vf12",
-         R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_10
-    none
-    undefined
-    __sampler_sampler
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_4__f32
-        {
-          Call[not set]{
-            Identifier[not set]{textureSample}
-            (
-              Identifier[not set]{x_20}
-              Identifier[not set]{x_10}
-              Identifier[not set]{vf12}
-            )
-          }
-        }
-      }
-    })"}}));
+         R"([[group(0), binding(0)]] var x_10 : sampler;
+
+[[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+         R"(let x_99 : vec4<f32> = textureSample(x_20, x_10, vf12);)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageQuerySize_NonArrayed_SignedResult,
@@ -5233,135 +2656,27 @@ INSTANTIATE_TEST_SUITE_P(
          "%99 = OpImageQuerySize %int %im \n"
          "%98 = OpImageRead %v4float %im %i1\n",  // Implicitly mark as
                                                   // NonWritable
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_1d__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __i32
-        {
-          TypeConstructor[not set]{
-            __i32
-            Call[not set]{
-              Identifier[not set]{textureDimensions}
-              (
-                Identifier[not set]{x_20}
-              )
-            }
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_1d<f32>;)",
+         R"(let x_99 : i32 = i32(textureDimensions(x_20));)"},
         // 2D storage image
         {"%float 2D 0 0 0 2 Rgba32f",
          "%99 = OpImageQuerySize %v2int %im \n"
          "%98 = OpImageRead %v4float %im %vi12\n",  // Implicitly mark as
                                                     // NonWritable
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_2__i32
-        {
-          TypeConstructor[not set]{
-            __vec_2__i32
-            Call[not set]{
-              Identifier[not set]{textureDimensions}
-              (
-                Identifier[not set]{x_20}
-              )
-            }
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+         R"(let x_99 : vec2<i32> = vec2<i32>(textureDimensions(x_20))"},
         // 3D storage image
         {"%float 3D 0 0 0 2 Rgba32f",
          "%99 = OpImageQuerySize %v3int %im \n"
          "%98 = OpImageRead %v4float %im %vi123\n",  // Implicitly mark as
                                                      // NonWritable
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_3d__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_3__i32
-        {
-          TypeConstructor[not set]{
-            __vec_3__i32
-            Call[not set]{
-              Identifier[not set]{textureDimensions}
-              (
-                Identifier[not set]{x_20}
-              )
-            }
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_3d<f32>;)",
+         R"(let x_99 : vec3<i32> = vec3<i32>(textureDimensions(x_20));)"},
 
         // Multisampled
         {"%float 2D 0 0 1 1 Unknown", "%99 = OpImageQuerySize %v2int %im \n",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __multisampled_texture_2d__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_2__i32
-        {
-          TypeConstructor[not set]{
-            __vec_2__i32
-            Call[not set]{
-              Identifier[not set]{textureDimensions}
-              (
-                Identifier[not set]{x_20}
-              )
-            }
-          }
-        }
-      }
-    })"}}));
+         R"([[group(2), binding(1)]] var x_20 : texture_multisampled_2d<f32>;)",
+         R"(let x_99 : vec2<i32> = vec2<i32>(textureDimensions(x_20));)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageQuerySize_Arrayed_SignedResult,
@@ -5376,261 +2691,55 @@ INSTANTIATE_TEST_SUITE_P(
         {"%float 2D 0 1 0 2 Rgba32f",
          "%99 = OpImageQuerySize %v3int %im \n"
          "%98 = OpImageRead %v4float %im %vi123\n",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d_array__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_3__i32
-        {
-          TypeConstructor[not set]{
-            __vec_3__i32
-            Call[not set]{
-              Identifier[not set]{textureDimensions}
-              (
-                Identifier[not set]{x_20}
-              )
-            }
-            Call[not set]{
-              Identifier[not set]{textureNumLayers}
-              (
-                Identifier[not set]{x_20}
-              )
-            }
-          }
-        }
-      }
-    })"}
+         R"([[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+         R"(let x_99 : vec3<i32> = vec3<i32>(textureDimensions(x_20), textureNumLayers(x_20));)"}
         // 3D array storage image doesn't exist.
 
         // Multisampled array
         // Not in WebGPU
     }));
 
-INSTANTIATE_TEST_SUITE_P(ImageQuerySizeLod_NonArrayed_SignedResult_SignedLevel,
-                         // From VUID-StandaloneSpirv-OpImageQuerySizeLod-04659:
-                         //  ImageQuerySizeLod requires Sampled=1
-                         SpvParserHandleTest_SampledImageAccessTest,
-                         ::testing::ValuesIn(std::vector<ImageAccessCase>{
-                             // 1D
-                             {"%float 1D 0 0 0 1 Unknown",
-                              "%99 = OpImageQuerySizeLod %int %im %i1\n",
-                              R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_1d__f32
-  })",
-                              R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __i32
-        {
-          TypeConstructor[not set]{
-            __i32
-            Call[not set]{
-              Identifier[not set]{textureDimensions}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{i1}
-              )
-            }
-          }
-        }
-      }
-    })"},
+INSTANTIATE_TEST_SUITE_P(
+    ImageQuerySizeLod_NonArrayed_SignedResult_SignedLevel,
+    // From VUID-StandaloneSpirv-OpImageQuerySizeLod-04659:
+    //  ImageQuerySizeLod requires Sampled=1
+    SpvParserHandleTest_SampledImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+        // 1D
+        {"%float 1D 0 0 0 1 Unknown",
+         "%99 = OpImageQuerySizeLod %int %im %i1\n",
+         R"([[group(2), binding(1)]] var x_20 : texture_1d<f32>;)",
+         R"(let x_99 : i32 = i32(textureDimensions(x_20, i1)))"},
 
-                             // 2D
-                             {"%float 2D 0 0 0 1 Unknown",
-                              "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
-                              R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-                              R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_2__i32
-        {
-          TypeConstructor[not set]{
-            __vec_2__i32
-            Call[not set]{
-              Identifier[not set]{textureDimensions}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{i1}
-              )
-            }
-          }
-        }
-      }
-    })"},
+        // 2D
+        {"%float 2D 0 0 0 1 Unknown",
+         "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
+         R"([[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+         R"(let x_99 : vec2<i32> = vec2<i32>(textureDimensions(x_20, i1));)"},
 
-                             // 3D
-                             {"%float 3D 0 0 0 1 Unknown",
-                              "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
-                              R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_3d__f32
-  })",
-                              R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_3__i32
-        {
-          TypeConstructor[not set]{
-            __vec_3__i32
-            Call[not set]{
-              Identifier[not set]{textureDimensions}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{i1}
-              )
-            }
-          }
-        }
-      }
-    })"},
+        // 3D
+        {"%float 3D 0 0 0 1 Unknown",
+         "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
+         R"([[group(2), binding(1)]] var x_20 : texture_3d<f32>;)",
+         R"(let x_99 : vec3<i32> = vec3<i32>(textureDimensions(x_20, i1));)"},
 
-                             // Cube
-                             {"%float Cube 0 0 0 1 Unknown",
-                              "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
-                              R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_cube__f32
-  })",
-                              R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_2__i32
-        {
-          TypeConstructor[not set]{
-            __vec_2__i32
-            MemberAccessor[not set]{
-              Call[not set]{
-                Identifier[not set]{textureDimensions}
-                (
-                  Identifier[not set]{x_20}
-                  Identifier[not set]{i1}
-                )
-              }
-              Identifier[not set]{xy}
-            }
-          }
-        }
-      }
-    })"},
+        // Cube
+        {"%float Cube 0 0 0 1 Unknown",
+         "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
+         R"([[group(2), binding(1)]] var x_20 : texture_cube<f32>;)",
+         R"(let x_99 : vec2<i32> = vec2<i32>(textureDimensions(x_20, i1).xy);)"},
 
-                             // Depth 2D
-                             {"%float 2D 1 0 0 1 Unknown",
-                              "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
-                              R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d
-  })",
-                              R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_2__i32
-        {
-          TypeConstructor[not set]{
-            __vec_2__i32
-            Call[not set]{
-              Identifier[not set]{textureDimensions}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{i1}
-              )
-            }
-          }
-        }
-      }
-    })"},
+        // Depth 2D
+        {"%float 2D 1 0 0 1 Unknown",
+         "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
+         R"([[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+         R"(let x_99 : vec2<i32> = vec2<i32>(textureDimensions(x_20, i1));)"},
 
-                             // Depth Cube
-                             {"%float Cube 1 0 0 1 Unknown",
-                              "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
-                              R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_cube
-  })",
-                              R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_2__i32
-        {
-          TypeConstructor[not set]{
-            __vec_2__i32
-            MemberAccessor[not set]{
-              Call[not set]{
-                Identifier[not set]{textureDimensions}
-                (
-                  Identifier[not set]{x_20}
-                  Identifier[not set]{i1}
-                )
-              }
-              Identifier[not set]{xy}
-            }
-          }
-        }
-      }
-    })"}}));
+        // Depth Cube
+        {"%float Cube 1 0 0 1 Unknown",
+         "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
+         R"([[group(2), binding(1)]] var x_20 : texture_depth_cube;)",
+         R"(let x_99 : vec2<i32> = vec2<i32>(textureDimensions(x_20, i1).xy);)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageQuerySizeLod_Arrayed_SignedResult_SignedLevel,
@@ -5645,42 +2754,8 @@ INSTANTIATE_TEST_SUITE_P(
         // 2D array
         {"%float 2D 0 1 0 1 Unknown",
          "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d_array__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_3__i32
-        {
-          TypeConstructor[not set]{
-            __vec_3__i32
-            Call[not set]{
-              Identifier[not set]{textureDimensions}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{i1}
-              )
-            }
-            Call[not set]{
-              Identifier[not set]{textureNumLayers}
-              (
-                Identifier[not set]{x_20}
-              )
-            }
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+         R"(let x_99 : vec3<i32> = vec3<i32>(textureDimensions(x_20, i1), textureNumLayers(x_20));)"},
 
         // There is no 3D array
 
@@ -5691,85 +2766,14 @@ INSTANTIATE_TEST_SUITE_P(
         // https://github.com/gpuweb/gpuweb/issues/1345
         {"%float Cube 0 1 0 1 Unknown",
          "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_cube_array__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_3__i32
-        {
-          TypeConstructor[not set]{
-            __vec_3__i32
-            MemberAccessor[not set]{
-              Call[not set]{
-                Identifier[not set]{textureDimensions}
-                (
-                  Identifier[not set]{x_20}
-                  Identifier[not set]{i1}
-                )
-              }
-              Identifier[not set]{xy}
-            }
-            Call[not set]{
-              Identifier[not set]{textureNumLayers}
-              (
-                Identifier[not set]{x_20}
-              )
-            }
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_cube_array<f32>;)",
+         R"(let x_99 : vec3<i32> = vec3<i32>(textureDimensions(x_20, i1).xy, textureNumLayers(x_20));)"},
 
         // Depth 2D array
         {"%float 2D 1 1 0 1 Unknown",
          "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d_array
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_3__i32
-        {
-          TypeConstructor[not set]{
-            __vec_3__i32
-            Call[not set]{
-              Identifier[not set]{textureDimensions}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{i1}
-              )
-            }
-            Call[not set]{
-              Identifier[not set]{textureNumLayers}
-              (
-                Identifier[not set]{x_20}
-              )
-            }
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+         R"(let x_99 : vec3<i32> = vec3<i32>(textureDimensions(x_20, i1), textureNumLayers(x_20));)"},
 
         // Depth Cube Array
         //
@@ -5778,45 +2782,8 @@ INSTANTIATE_TEST_SUITE_P(
         // https://github.com/gpuweb/gpuweb/issues/1345
         {"%float Cube 1 1 0 1 Unknown",
          "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_cube_array
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __vec_3__i32
-        {
-          TypeConstructor[not set]{
-            __vec_3__i32
-            MemberAccessor[not set]{
-              Call[not set]{
-                Identifier[not set]{textureDimensions}
-                (
-                  Identifier[not set]{x_20}
-                  Identifier[not set]{i1}
-                )
-              }
-              Identifier[not set]{xy}
-            }
-            Call[not set]{
-              Identifier[not set]{textureNumLayers}
-              (
-                Identifier[not set]{x_20}
-              )
-            }
-          }
-        }
-      }
-    })"}}));
+         R"([[group(2), binding(1)]] var x_20 : texture_depth_cube_array;)",
+         R"(let x_99 : vec3<i32> = vec3<i32>(textureDimensions(x_20, i1).xy, textureNumLayers(x_20));)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     // When the level-of-detail value is given as an unsigned
@@ -5828,39 +2795,8 @@ INSTANTIATE_TEST_SUITE_P(
 
         {"%float 1D 0 0 0 1 Unknown",
          "%99 = OpImageQuerySizeLod %int %im %u1\n",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_1d__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __i32
-        {
-          TypeConstructor[not set]{
-            __i32
-            Call[not set]{
-              Identifier[not set]{textureDimensions}
-              (
-                Identifier[not set]{x_20}
-                TypeConstructor[not set]{
-                  __i32
-                  Identifier[not set]{u1}
-                }
-              )
-            }
-          }
-        }
-      }
-    })"}}));
+         R"([[group(2), binding(1)]] var x_20 : texture_1d<f32>;)",
+         R"(let x_99 : i32 = i32(textureDimensions(x_20, i32(u1)));)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     // When SPIR-V wants the result type to be unsigned, we have to
@@ -5873,36 +2809,8 @@ INSTANTIATE_TEST_SUITE_P(
 
         {"%float 1D 0 0 0 1 Unknown",
          "%99 = OpImageQuerySizeLod %uint %im %i1\n",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_1d__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __u32
-        {
-          TypeConstructor[not set]{
-            __u32
-            Call[not set]{
-              Identifier[not set]{textureDimensions}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{i1}
-              )
-            }
-          }
-        }
-      }
-    })"}}));
+         R"([[group(2), binding(1)]] var x_20 : texture_1d<f32>;)",
+         R"(let x_99 : u32 = u32(textureDimensions(x_20, i1));)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageQueryLevels_SignedResult,
@@ -5915,264 +2823,48 @@ INSTANTIATE_TEST_SUITE_P(
 
         // 2D
         {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __i32
-        {
-          Call[not set]{
-            Identifier[not set]{textureNumLevels}
-            (
-              Identifier[not set]{x_20}
-            )
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+         R"(let x_99 : i32 = textureNumLevels(x_20);)"},
 
         // 2D array
         {"%float 2D 0 1 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d_array__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __i32
-        {
-          Call[not set]{
-            Identifier[not set]{textureNumLevels}
-            (
-              Identifier[not set]{x_20}
-            )
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_2d_array<f32>;)",
+         R"(let x_99 : i32 = textureNumLevels(x_20);)"},
 
         // 3D
         {"%float 3D 0 0 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_3d__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __i32
-        {
-          Call[not set]{
-            Identifier[not set]{textureNumLevels}
-            (
-              Identifier[not set]{x_20}
-            )
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_3d<f32>;)",
+         R"(let x_99 : i32 = textureNumLevels(x_20);)"},
 
         // Cube
         {"%float Cube 0 0 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_cube__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __i32
-        {
-          Call[not set]{
-            Identifier[not set]{textureNumLevels}
-            (
-              Identifier[not set]{x_20}
-            )
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_cube<f32>;)",
+         R"(let x_99 : i32 = textureNumLevels(x_20);)"},
 
         // Cube array
         {"%float Cube 0 1 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_cube_array__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __i32
-        {
-          Call[not set]{
-            Identifier[not set]{textureNumLevels}
-            (
-              Identifier[not set]{x_20}
-            )
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_cube_array<f32>;)",
+         R"(let x_99 : i32 = textureNumLevels(x_20);)"},
 
         // depth 2d
         {"%float 2D 1 0 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __i32
-        {
-          Call[not set]{
-            Identifier[not set]{textureNumLevels}
-            (
-              Identifier[not set]{x_20}
-            )
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_depth_2d;)",
+         R"(let x_99 : i32 = textureNumLevels(x_20);)"},
 
         // depth 2d array
         {"%float 2D 1 1 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_2d_array
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __i32
-        {
-          Call[not set]{
-            Identifier[not set]{textureNumLevels}
-            (
-              Identifier[not set]{x_20}
-            )
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_depth_2d_array;)",
+         R"(let x_99 : i32 = textureNumLevels(x_20);)"},
 
         // depth cube
         {"%float Cube 1 0 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_cube
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __i32
-        {
-          Call[not set]{
-            Identifier[not set]{textureNumLevels}
-            (
-              Identifier[not set]{x_20}
-            )
-          }
-        }
-      }
-    })"},
+         R"([[group(2), binding(1)]] var x_20 : texture_depth_cube;)",
+         R"(let x_99 : i32 = textureNumLevels(x_20);)"},
 
         // depth cube array
         {"%float Cube 1 1 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __depth_texture_cube_array
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __i32
-        {
-          Call[not set]{
-            Identifier[not set]{textureNumLevels}
-            (
-              Identifier[not set]{x_20}
-            )
-          }
-        }
-      }
-    })"}}));
+         R"([[group(2), binding(1)]] var x_20 : texture_depth_cube_array;)",
+         R"(let x_99 : i32 = textureNumLevels(x_20);)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     // Spot check that a type conversion is inserted when SPIR-V asks for
@@ -6181,72 +2873,21 @@ INSTANTIATE_TEST_SUITE_P(
     SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageQueryLevels %uint %im\n",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __sampled_texture_2d__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __u32
-        {
-          TypeConstructor[not set]{
-            __u32
-            Call[not set]{
-              Identifier[not set]{textureNumLevels}
-              (
-                Identifier[not set]{x_20}
-              )
-            }
-          }
-        }
-      }
-    })"}}));
+         R"([[group(2), binding(1)]] var x_20 : texture_2d<f32>;)",
+         R"(let x_99 : u32 = u32(textureNumLevels(x_20));)"}}));
 
-INSTANTIATE_TEST_SUITE_P(ImageQuerySamples_SignedResult,
-                         SpvParserHandleTest_SampledImageAccessTest,
-                         ::testing::ValuesIn(std::vector<ImageAccessCase>{
-                             // Multsample 2D
-                             {"%float 2D 0 0 1 1 Unknown",
-                              "%99 = OpImageQuerySamples %int %im\n",
-                              R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __multisampled_texture_2d__f32
-  })",
-                              R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __i32
-        {
-          Call[not set]{
-            Identifier[not set]{textureNumSamples}
-            (
-              Identifier[not set]{x_20}
-            )
-          }
-        }
-      }
-    })"}
+INSTANTIATE_TEST_SUITE_P(
+    ImageQuerySamples_SignedResult,
+    SpvParserHandleTest_SampledImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+        // Multsample 2D
+        {"%float 2D 0 0 1 1 Unknown", "%99 = OpImageQuerySamples %int %im\n",
+         R"([[group(2), binding(1)]] var x_20 : texture_multisampled_2d<f32>;)",
+         R"(let x_99 : i32 = textureNumSamples(x_20);)"}  // namespace
 
-                             // Multisample 2D array
-                             // Not in WebGPU
-                         }));
+        // Multisample 2D array
+        // Not in WebGPU
+    }));
 
 INSTANTIATE_TEST_SUITE_P(
     // Translation must inject a type coersion from signed to unsigned.
@@ -6255,35 +2896,8 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // Multsample 2D
         {"%float 2D 0 0 1 1 Unknown", "%99 = OpImageQuerySamples %uint %im\n",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    none
-    undefined
-    __multisampled_texture_2d__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        undefined
-        __u32
-        {
-          TypeConstructor[not set]{
-            __u32
-            Call[not set]{
-              Identifier[not set]{textureNumSamples}
-              (
-                Identifier[not set]{x_20}
-              )
-            }
-          }
-        }
-      }
-    })"}
+         R"([[group(2), binding(1)]] var x_20 : texture_multisampled_2d<f32>;)",
+         R"(let x_99 : u32 = u32(textureNumSamples(x_20));)"}
 
         // Multisample 2D array
         // Not in WebGPU
@@ -6416,7 +3030,7 @@ TEST_P(SpvParserHandleTest_ImageCoordsTest,
       Program program = p->program();
       for (auto* expr : result) {
         ASSERT_NE(expr, nullptr);
-        result_strings.push_back(program.str(expr));
+        result_strings.push_back(test::ToString(program, expr));
       }
       EXPECT_THAT(result_strings,
                   ::testing::ContainerEq(GetParam().expected_expressions));
@@ -6450,34 +3064,22 @@ INSTANTIATE_TEST_SUITE_P(Good_1D,
                               "%result = OpImageSampleImplicitLod %v4float "
                               "%sampled_image %f1",
                               "",
-                              {"Identifier[not set]{f1}\n"}},
+                              {"f1"}},
                              {"%float 1D 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
                               "%sampled_image %vf12",  // one excess arg
                               "",
-                              {R"(MemberAccessor[not set]{
-  Identifier[not set]{vf12}
-  Identifier[not set]{x}
-}
-)"}},
+                              {"vf12.x"}},
                              {"%float 1D 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
                               "%sampled_image %vf123",  // two excess args
                               "",
-                              {R"(MemberAccessor[not set]{
-  Identifier[not set]{vf123}
-  Identifier[not set]{x}
-}
-)"}},
+                              {"vf123.x"}},
                              {"%float 1D 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
                               "%sampled_image %vf1234",  // three excess args
                               "",
-                              {R"(MemberAccessor[not set]{
-  Identifier[not set]{vf1234}
-  Identifier[not set]{x}
-}
-)"}}}));
+                              {"vf1234.x"}}}));
 
 INSTANTIATE_TEST_SUITE_P(Good_1DArray,
                          SpvParserHandleTest_ImageCoordsTest,
@@ -6486,56 +3088,17 @@ INSTANTIATE_TEST_SUITE_P(Good_1DArray,
                               "%result = OpImageSampleImplicitLod %v4float "
                               "%sampled_image %vf12",
                               "",
-                              {
-                                  R"(MemberAccessor[not set]{
-  Identifier[not set]{vf12}
-  Identifier[not set]{x}
-}
-)",
-                                  R"(TypeConstructor[not set]{
-  __i32
-  MemberAccessor[not set]{
-    Identifier[not set]{vf12}
-    Identifier[not set]{y}
-  }
-}
-)"}},
+                              {"vf12.x", "i32(vf12.y)"}},
                              {"%float 1D 0 1 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
                               "%sampled_image %vf123",  // one excess arg
                               "",
-                              {
-                                  R"(MemberAccessor[not set]{
-  Identifier[not set]{vf123}
-  Identifier[not set]{x}
-}
-)",
-                                  R"(TypeConstructor[not set]{
-  __i32
-  MemberAccessor[not set]{
-    Identifier[not set]{vf123}
-    Identifier[not set]{y}
-  }
-}
-)"}},
+                              {"vf123.x", "i32(vf123.y)"}},
                              {"%float 1D 0 1 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
                               "%sampled_image %vf1234",  // two excess args
                               "",
-                              {
-                                  R"(MemberAccessor[not set]{
-  Identifier[not set]{vf1234}
-  Identifier[not set]{x}
-}
-)",
-                                  R"(TypeConstructor[not set]{
-  __i32
-  MemberAccessor[not set]{
-    Identifier[not set]{vf1234}
-    Identifier[not set]{y}
-  }
-}
-)"}}}));
+                              {"vf1234.x", "i32(vf1234.y)"}}}));
 
 INSTANTIATE_TEST_SUITE_P(Good_2D,
                          SpvParserHandleTest_ImageCoordsTest,
@@ -6544,25 +3107,17 @@ INSTANTIATE_TEST_SUITE_P(Good_2D,
                               "%result = OpImageSampleImplicitLod %v4float "
                               "%sampled_image %vf12",
                               "",
-                              {"Identifier[not set]{vf12}\n"}},
+                              {"vf12"}},
                              {"%float 2D 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
                               "%sampled_image %vf123",  // one excess arg
                               "",
-                              {R"(MemberAccessor[not set]{
-  Identifier[not set]{vf123}
-  Identifier[not set]{xy}
-}
-)"}},
+                              {"vf123.xy"}},
                              {"%float 2D 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
                               "%sampled_image %vf1234",  // two excess args
                               "",
-                              {R"(MemberAccessor[not set]{
-  Identifier[not set]{vf1234}
-  Identifier[not set]{xy}
-}
-)"}}}));
+                              {"vf1234.xy"}}}));
 
 INSTANTIATE_TEST_SUITE_P(Good_2DArray,
                          SpvParserHandleTest_ImageCoordsTest,
@@ -6571,38 +3126,12 @@ INSTANTIATE_TEST_SUITE_P(Good_2DArray,
                               "%result = OpImageSampleImplicitLod %v4float "
                               "%sampled_image %vf123",
                               "",
-                              {
-                                  R"(MemberAccessor[not set]{
-  Identifier[not set]{vf123}
-  Identifier[not set]{xy}
-}
-)",
-                                  R"(TypeConstructor[not set]{
-  __i32
-  MemberAccessor[not set]{
-    Identifier[not set]{vf123}
-    Identifier[not set]{z}
-  }
-}
-)"}},
+                              {"vf123.xy", "i32(vf123.z)"}},
                              {"%float 2D 0 1 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
                               "%sampled_image %vf1234",  // one excess arg
                               "",
-                              {
-                                  R"(MemberAccessor[not set]{
-  Identifier[not set]{vf1234}
-  Identifier[not set]{xy}
-}
-)",
-                                  R"(TypeConstructor[not set]{
-  __i32
-  MemberAccessor[not set]{
-    Identifier[not set]{vf1234}
-    Identifier[not set]{z}
-  }
-}
-)"}}}));
+                              {"vf1234.xy", "i32(vf1234.z)"}}}));
 
 INSTANTIATE_TEST_SUITE_P(Good_3D,
                          SpvParserHandleTest_ImageCoordsTest,
@@ -6612,18 +3141,14 @@ INSTANTIATE_TEST_SUITE_P(Good_3D,
                               "%v4float "
                               "%sampled_image %vf123",
                               "",
-                              {"Identifier[not set]{vf123}\n"}},
+                              {"vf123"}},
                              {"%float 3D 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod "
                               "%v4float "
                               "%sampled_image %vf1234",  // one excess
                                                          // arg
                               "",
-                              {R"(MemberAccessor[not set]{
-  Identifier[not set]{vf1234}
-  Identifier[not set]{xyz}
-}
-)"}}}));
+                              {"vf1234.xyz"}}}));
 
 INSTANTIATE_TEST_SUITE_P(Good_Cube,
                          SpvParserHandleTest_ImageCoordsTest,
@@ -6633,18 +3158,14 @@ INSTANTIATE_TEST_SUITE_P(Good_Cube,
                               "%v4float "
                               "%sampled_image %vf123",
                               "",
-                              {"Identifier[not set]{vf123}\n"}},
+                              {"vf123"}},
                              {"%float Cube 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod "
                               "%v4float "
                               "%sampled_image %vf1234",  // one excess
                                                          // arg
                               "",
-                              {R"(MemberAccessor[not set]{
-  Identifier[not set]{vf1234}
-  Identifier[not set]{xyz}
-}
-)"}}}));
+                              {"vf1234.xyz"}}}));
 
 INSTANTIATE_TEST_SUITE_P(Good_CubeArray,
                          SpvParserHandleTest_ImageCoordsTest,
@@ -6654,19 +3175,7 @@ INSTANTIATE_TEST_SUITE_P(Good_CubeArray,
                               "%v4float "
                               "%sampled_image %vf1234",
                               "",
-                              {R"(MemberAccessor[not set]{
-  Identifier[not set]{vf1234}
-  Identifier[not set]{xyz}
-}
-)",
-                               R"(TypeConstructor[not set]{
-  __i32
-  MemberAccessor[not set]{
-    Identifier[not set]{vf1234}
-    Identifier[not set]{w}
-  }
-}
-)"}}}));
+                              {"vf1234.xyz", "i32(vf1234.w)"}}}));
 
 INSTANTIATE_TEST_SUITE_P(
     PreserveFloatCoords_NonArrayed,
@@ -6679,33 +3188,33 @@ INSTANTIATE_TEST_SUITE_P(
         {"%float 1D 0 0 0 1 Unknown",
          "%result = OpImageSampleImplicitLod %v4float %sampled_image %f1",
          "",
-         {"Identifier[not set]{f1}\n"}},
+         {"f1"}},
         {"%float 1D 0 0 0 1 Unknown",
          "%result = OpImageSampleExplicitLod %v4float %sampled_image %f1 Lod "
          "%f1",
          "",
-         {"Identifier[not set]{f1}\n"}},
+         {"f1"}},
         // WGSL does not support depth textures with 1D coordinates
         // Vector cases
         {"%float 2D 0 0 0 1 Unknown",
          "%result = OpImageSampleImplicitLod %v4float %sampled_image %vf12",
          "",
-         {"Identifier[not set]{vf12}\n"}},
+         {"vf12"}},
         {"%float 2D 0 0 0 1 Unknown",
          "%result = OpImageSampleExplicitLod %v4float %sampled_image %vf12 Lod "
          "%f1",
          "",
-         {"Identifier[not set]{vf12}\n"}},
+         {"vf12"}},
         {"%float 2D 1 0 0 1 Unknown",
          "%result = OpImageSampleDrefImplicitLod %float %sampled_image %vf12 "
          "%depth",
          "",
-         {"Identifier[not set]{vf12}\n"}},
+         {"vf12"}},
         {"%float 2D 1 0 0 1 Unknown",
          "%result = OpImageSampleDrefExplicitLod %float %sampled_image %vf12 "
          "%depth Lod %float_0",
          "",
-         {"Identifier[not set]{vf12}\n"}},
+         {"vf12"}},
     }));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -6719,75 +3228,23 @@ INSTANTIATE_TEST_SUITE_P(
         {"%float 2D 0 1 0 1 Unknown",
          "%result = OpImageSampleImplicitLod %v4float %sampled_image %vf123",
          "",
-         {
-             R"(MemberAccessor[not set]{
-  Identifier[not set]{vf123}
-  Identifier[not set]{xy}
-}
-)",
-             R"(TypeConstructor[not set]{
-  __i32
-  MemberAccessor[not set]{
-    Identifier[not set]{vf123}
-    Identifier[not set]{z}
-  }
-}
-)"}},
+         {"vf123.xy", "i32(vf123.z)"}},
 
         {"%float 2D 0 1 0 1 Unknown",
          "%result = OpImageSampleExplicitLod %v4float %sampled_image %vf123 "
          "Lod %f1",
          "",
-         {
-             R"(MemberAccessor[not set]{
-  Identifier[not set]{vf123}
-  Identifier[not set]{xy}
-}
-)",
-             R"(TypeConstructor[not set]{
-  __i32
-  MemberAccessor[not set]{
-    Identifier[not set]{vf123}
-    Identifier[not set]{z}
-  }
-}
-)"}},
+         {"vf123.xy", "i32(vf123.z)"}},
         {"%float 2D 1 1 0 1 Unknown",
          "%result = OpImageSampleDrefImplicitLod %float %sampled_image "
          "%vf123 %depth",
          "",
-         {
-             R"(MemberAccessor[not set]{
-  Identifier[not set]{vf123}
-  Identifier[not set]{xy}
-}
-)",
-             R"(TypeConstructor[not set]{
-  __i32
-  MemberAccessor[not set]{
-    Identifier[not set]{vf123}
-    Identifier[not set]{z}
-  }
-}
-)"}},
+         {"vf123.xy", "i32(vf123.z)"}},
         {"%float 2D 1 1 0 1 Unknown",
          "%result = OpImageSampleDrefExplicitLod %float %sampled_image "
          "%vf123 %depth Lod %float_0",
          "",
-         {
-             R"(MemberAccessor[not set]{
-  Identifier[not set]{vf123}
-  Identifier[not set]{xy}
-}
-)",
-             R"(TypeConstructor[not set]{
-  __i32
-  MemberAccessor[not set]{
-    Identifier[not set]{vf123}
-    Identifier[not set]{z}
-  }
-}
-)"}}}));
+         {"vf123.xy", "i32(vf123.z)"}}}));
 
 INSTANTIATE_TEST_SUITE_P(
     PreserveIntCoords_NonArrayed,
@@ -6799,28 +3256,25 @@ INSTANTIATE_TEST_SUITE_P(
         {"%float 1D 0 0 0 1 Unknown",
          "%result = OpImageFetch %v4float %im %i1",
          "",
-         {"Identifier[not set]{i1}\n"}},
+         {"i1"}},
         {"%float 1D 0 0 0 2 R32f",
          "%result = OpImageRead %v4float %im %i1",
          "",
-         {"Identifier[not set]{i1}\n"}},
-        {"%float 1D 0 0 0 2 R32f",
-         "OpImageWrite %im %i1 %vf1234",
-         "",
-         {"Identifier[not set]{i1}\n"}},
+         {"i1"}},
+        {"%float 1D 0 0 0 2 R32f", "OpImageWrite %im %i1 %vf1234", "", {"i1"}},
         // Vector cases
         {"%float 2D 0 0 0 1 Unknown",
          "%result = OpImageFetch %v4float %im %vi12",
          "",
-         {"Identifier[not set]{vi12}\n"}},
+         {"vi12"}},
         {"%float 2D 0 0 0 2 R32f",
          "%result = OpImageRead %v4float %im %vi12",
          "",
-         {"Identifier[not set]{vi12}\n"}},
+         {"vi12"}},
         {"%float 2D 0 0 0 2 R32f",
          "OpImageWrite %im %vi12 %vf1234",
          "",
-         {"Identifier[not set]{vi12}\n"}}}));
+         {"vi12"}}}));
 
 INSTANTIATE_TEST_SUITE_P(
     PreserveIntCoords_Arrayed,
@@ -6831,45 +3285,15 @@ INSTANTIATE_TEST_SUITE_P(
         {"%float 2D 0 1 0 1 Unknown",
          "%result = OpImageFetch %v4float %im %vi123",
          "",
-         {
-             R"(MemberAccessor[not set]{
-  Identifier[not set]{vi123}
-  Identifier[not set]{xy}
-}
-)",
-             R"(MemberAccessor[not set]{
-  Identifier[not set]{vi123}
-  Identifier[not set]{z}
-}
-)"}},
+         {"vi123.xy", "vi123.z"}},
         {"%float 2D 0 1 0 2 R32f",
          "%result = OpImageRead %v4float %im %vi123",
          "",
-         {
-             R"(MemberAccessor[not set]{
-  Identifier[not set]{vi123}
-  Identifier[not set]{xy}
-}
-)",
-             R"(MemberAccessor[not set]{
-  Identifier[not set]{vi123}
-  Identifier[not set]{z}
-}
-)"}},
+         {"vi123.xy", "vi123.z"}},
         {"%float 2D 0 1 0 2 R32f",
          "OpImageWrite %im %vi123 %vf1234",
          "",
-         {
-             R"(MemberAccessor[not set]{
-  Identifier[not set]{vi123}
-  Identifier[not set]{xy}
-}
-)",
-             R"(MemberAccessor[not set]{
-  Identifier[not set]{vi123}
-  Identifier[not set]{z}
-}
-)"}}}));
+         {"vi123.xy", "vi123.z"}}}));
 
 INSTANTIATE_TEST_SUITE_P(
     ConvertUintCoords_NonArrayed,
@@ -6881,52 +3305,28 @@ INSTANTIATE_TEST_SUITE_P(
         {"%float 1D 0 0 0 1 Unknown",
          "%result = OpImageFetch %v4float %im %u1",
          "",
-         {R"(TypeConstructor[not set]{
-  __i32
-  Identifier[not set]{u1}
-}
-)"}},
+         {"i32(u1)"}},
         {"%float 1D 0 0 0 2 R32f",
          "%result = OpImageRead %v4float %im %u1",
          "",
-         {R"(TypeConstructor[not set]{
-  __i32
-  Identifier[not set]{u1}
-}
-)"}},
+         {"i32(u1)"}},
         {"%float 1D 0 0 0 2 R32f",
          "OpImageWrite %im %u1 %vf1234",
          "",
-         {R"(TypeConstructor[not set]{
-  __i32
-  Identifier[not set]{u1}
-}
-)"}},
+         {"i32(u1)"}},
         // Vector cases
         {"%float 2D 0 0 0 1 Unknown",
          "%result = OpImageFetch %v4float %im %vu12",
          "",
-         {R"(TypeConstructor[not set]{
-  __vec_2__i32
-  Identifier[not set]{vu12}
-}
-)"}},
+         {"vec2<i32>(vu12)"}},
         {"%float 2D 0 0 0 2 R32f",
          "%result = OpImageRead %v4float %im %vu12",
          "",
-         {R"(TypeConstructor[not set]{
-  __vec_2__i32
-  Identifier[not set]{vu12}
-}
-)"}},
+         {"vec2<i32>(vu12)"}},
         {"%float 2D 0 0 0 2 R32f",
          "OpImageWrite %im %vu12 %vf1234",
          "",
-         {R"(TypeConstructor[not set]{
-  __vec_2__i32
-  Identifier[not set]{vu12}
-}
-)"}}}));
+         {"vec2<i32>(vu12)"}}}));
 
 INSTANTIATE_TEST_SUITE_P(
     ConvertUintCoords_Arrayed,
@@ -6937,63 +3337,15 @@ INSTANTIATE_TEST_SUITE_P(
         {"%float 2D 0 1 0 1 Unknown",
          "%result = OpImageFetch %v4float %im %vu123",
          "",
-         {
-             R"(TypeConstructor[not set]{
-  __vec_2__i32
-  MemberAccessor[not set]{
-    Identifier[not set]{vu123}
-    Identifier[not set]{xy}
-  }
-}
-)",
-             R"(TypeConstructor[not set]{
-  __i32
-  MemberAccessor[not set]{
-    Identifier[not set]{vu123}
-    Identifier[not set]{z}
-  }
-}
-)"}},
+         {"vec2<i32>(vu123.xy)", "i32(vu123.z)"}},
         {"%float 2D 0 1 0 2 R32f",
          "%result = OpImageRead %v4float %im %vu123",
          "",
-         {
-             R"(TypeConstructor[not set]{
-  __vec_2__i32
-  MemberAccessor[not set]{
-    Identifier[not set]{vu123}
-    Identifier[not set]{xy}
-  }
-}
-)",
-             R"(TypeConstructor[not set]{
-  __i32
-  MemberAccessor[not set]{
-    Identifier[not set]{vu123}
-    Identifier[not set]{z}
-  }
-}
-)"}},
+         {"vec2<i32>(vu123.xy)", "i32(vu123.z)"}},
         {"%float 2D 0 1 0 2 R32f",
          "OpImageWrite %im %vu123 %vf1234",
          "",
-         {
-             R"(TypeConstructor[not set]{
-  __vec_2__i32
-  MemberAccessor[not set]{
-    Identifier[not set]{vu123}
-    Identifier[not set]{xy}
-  }
-}
-)",
-             R"(TypeConstructor[not set]{
-  __i32
-  MemberAccessor[not set]{
-    Identifier[not set]{vu123}
-    Identifier[not set]{z}
-  }
-}
-)"}}}));
+         {"vec2<i32>(vu123.xy)", "i32(vu123.z)"}}}));
 
 INSTANTIATE_TEST_SUITE_P(
     BadInstructions,
@@ -7196,21 +3548,13 @@ INSTANTIATE_TEST_SUITE_P(
          "%result = OpImageSampleDrefExplicitLod %float %sampled_image %vf1234 "
          "%depth Lod %float_0",
          "",
-         {R"(MemberAccessor[not set]{
-  Identifier[not set]{vf1234}
-  Identifier[not set]{xy}
-}
-)"}},
+         {"vf1234.xy"}},
         // float null works
         {"%float 2D 1 0 0 1 Unknown",
          "%result = OpImageSampleDrefExplicitLod %float %sampled_image %vf1234 "
          "%depth Lod %float_0",
          "",
-         {R"(MemberAccessor[not set]{
-  Identifier[not set]{vf1234}
-  Identifier[not set]{xy}
-}
-)"}},
+         {"vf1234.xy"}},
         // float 1.0 fails.
         {"%float 2D 1 0 0 1 Unknown",
          "%result = OpImageSampleDrefExplicitLod %float %sampled_image %vf1234 "
@@ -7235,35 +3579,13 @@ INSTANTIATE_TEST_SUITE_P(
          "%result = OpImageSampleProjDrefExplicitLod %float %sampled_image "
          "%vf1234 %depth Lod %float_0",
          "",
-         {R"(Binary[not set]{
-  MemberAccessor[not set]{
-    Identifier[not set]{vf1234}
-    Identifier[not set]{xy}
-  }
-  divide
-  MemberAccessor[not set]{
-    Identifier[not set]{vf1234}
-    Identifier[not set]{z}
-  }
-}
-)"}},
+         {"(vf1234.xy / vf1234.z)"}},
         // float null works
         {"%float 2D 1 0 0 1 Unknown",
          "%result = OpImageSampleProjDrefExplicitLod %float %sampled_image "
          "%vf1234 %depth Lod %float_0",
          "",
-         {R"(Binary[not set]{
-  MemberAccessor[not set]{
-    Identifier[not set]{vf1234}
-    Identifier[not set]{xy}
-  }
-  divide
-  MemberAccessor[not set]{
-    Identifier[not set]{vf1234}
-    Identifier[not set]{z}
-  }
-}
-)"}},
+         {"(vf1234.xy / vf1234.z)"}},
         // float 1.0 fails.
         {"%float 2D 1 0 0 1 Unknown",
          "%result = OpImageSampleProjDrefExplicitLod %float %sampled_image "
@@ -7371,68 +3693,13 @@ TEST_F(SpvParserHandleTest,
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_TRUE(p->error().empty()) << p->error();
-  const auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(VariableDeclStatement{
-  Variable{
-    var_1
-    none
-    undefined
-    __vec_4__f32
-  }
-}
-VariableDeclStatement{
-  VariableConst{
-    x_22
-    none
-    undefined
-    __vec_4__f32
-    {
-      Call[not set]{
-        Identifier[not set]{textureSample}
-        (
-          Identifier[not set]{x_2}
-          Identifier[not set]{x_3}
-          TypeConstructor[not set]{
-            __vec_2__f32
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
-          }
-        )
-      }
-    }
-  }
-}
-VariableDeclStatement{
-  VariableConst{
-    x_26
-    none
-    undefined
-    __vec_4__f32
-    {
-      Call[not set]{
-        Identifier[not set]{textureSample}
-        (
-          Identifier[not set]{x_2}
-          Identifier[not set]{x_3}
-          TypeConstructor[not set]{
-            __vec_2__f32
-            ScalarConstructor[not set]{0.000000}
-            ScalarConstructor[not set]{0.000000}
-          }
-        )
-      }
-    }
-  }
-}
-Assignment{
-  Identifier[not set]{var_1}
-  Binary[not set]{
-    Identifier[not set]{x_22}
-    add
-    Identifier[not set]{x_26}
-  }
-}
-Return{}
+  auto ast_body = fe.ast_body();
+  const auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var var_1 : vec4<f32>;
+let x_22 : vec4<f32> = textureSample(x_2, x_3, vec2<f32>(0.0, 0.0));
+let x_26 : vec4<f32> = textureSample(x_2, x_3, vec2<f32>(0.0, 0.0));
+var_1 = (x_22 + x_26);
+return;
 )";
   ASSERT_EQ(expect, got);
 }

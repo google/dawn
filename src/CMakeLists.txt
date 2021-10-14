@@ -741,7 +741,7 @@ if(${TINT_BUILD_TESTS})
     )
   endif()
 
-  if(${TINT_BUILD_SPV_READER})
+  if(${TINT_BUILD_SPV_READER} AND ${TINT_BUILD_WGSL_WRITER})
     list(APPEND TINT_TEST_SRCS
       reader/spirv/enum_converter_test.cc
       reader/spirv/fail_stream_test.cc

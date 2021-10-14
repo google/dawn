@@ -33,7 +33,7 @@ TEST_F(SpvParserImportTest, Import_NoImport) {
   auto p = parser(test::Assemble("%1 = OpTypeVoid"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto program_ast = p->program().to_str();
+  const auto program_ast = test::ToString(p->program());
   EXPECT_THAT(program_ast, Not(HasSubstr("Import")));
 
   p->DeliberatelyInvalidSpirv();

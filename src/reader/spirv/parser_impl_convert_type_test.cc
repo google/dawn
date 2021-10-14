@@ -596,7 +596,7 @@ TEST_F(SpvParserTest, ConvertType_StructTwoMembers) {
 
   auto* str = type->Build(p->builder());
   Program program = p->program();
-  EXPECT_THAT(program.str(str), Eq(R"(__type_name_S)"));
+  EXPECT_EQ(test::ToString(program, str), "S");
 }
 
 TEST_F(SpvParserTest, ConvertType_StructWithBlockDecoration) {
@@ -614,7 +614,7 @@ TEST_F(SpvParserTest, ConvertType_StructWithBlockDecoration) {
 
   auto* str = type->Build(p->builder());
   Program program = p->program();
-  EXPECT_THAT(program.str(str), Eq(R"(__type_name_S)"));
+  EXPECT_EQ(test::ToString(program, str), "S");
 }
 
 TEST_F(SpvParserTest, ConvertType_StructWithMemberDecorations) {
@@ -636,7 +636,7 @@ TEST_F(SpvParserTest, ConvertType_StructWithMemberDecorations) {
 
   auto* str = type->Build(p->builder());
   Program program = p->program();
-  EXPECT_THAT(program.str(str), Eq(R"(__type_name_S)"));
+  EXPECT_EQ(test::ToString(program, str), "S");
 }
 
 TEST_F(SpvParserTest, ConvertType_Struct_NoDeduplication) {

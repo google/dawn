@@ -73,13 +73,9 @@ TEST_F(SpvParserTest, Emit_VoidFunctionWithoutParams) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.Emit());
-  auto got = p->program().to_str();
-  std::string expect = R"(Module{
-  Function x_100 -> __void
-  ()
-  {
-    Return{}
-  }
+  auto got = test::ToString(p->program());
+  std::string expect = R"(fn x_100() {
+  return;
 }
 )";
   EXPECT_EQ(got, expect);
@@ -97,17 +93,9 @@ TEST_F(SpvParserTest, Emit_NonVoidResultType) {
   auto fe = p->function_emitter(200);
   EXPECT_TRUE(fe.Emit());
 
-  auto got = p->program().to_str();
-  std::string expect = R"(Module{
-  Function x_200 -> __f32
-  ()
-  {
-    Return{
-      {
-        ScalarConstructor[not set]{0.000000}
-      }
-    }
-  }
+  auto got = test::ToString(p->program());
+  std::string expect = R"(fn x_200() -> f32 {
+  return 0.0;
 }
 )";
   EXPECT_THAT(got, HasSubstr(expect));
@@ -130,32 +118,9 @@ TEST_F(SpvParserTest, Emit_MixedParamTypes) {
   auto fe = p->function_emitter(200);
   EXPECT_TRUE(fe.Emit());
 
-  auto got = p->program().to_str();
-  std::string expect = R"(Module{
-  Function x_200 -> __void
-  (
-    VariableConst{
-      a
-      none
-      undefined
-      __u32
-    }
-    VariableConst{
-      b
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      c
-      none
-      undefined
-      __i32
-    }
-  )
-  {
-    Return{}
-  }
+  auto got = test::ToString(p->program());
+  std::string expect = R"(fn x_200(a : u32, b : f32, c : i32) {
+  return;
 }
 )";
   EXPECT_THAT(got, HasSubstr(expect));
@@ -177,32 +142,9 @@ TEST_F(SpvParserTest, Emit_GenerateParamNames) {
   auto fe = p->function_emitter(200);
   EXPECT_TRUE(fe.Emit());
 
-  auto got = p->program().to_str();
-  std::string expect = R"(Module{
-  Function x_200 -> __void
-  (
-    VariableConst{
-      x_14
-      none
-      undefined
-      __u32
-    }
-    VariableConst{
-      x_15
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      x_16
-      none
-      undefined
-      __i32
-    }
-  )
-  {
-    Return{}
-  }
+  auto got = test::ToString(p->program());
+  std::string expect = R"(fn x_200(x_14 : u32, x_15 : f32, x_16 : i32) {
+  return;
 }
 )";
   EXPECT_THAT(got, HasSubstr(expect));

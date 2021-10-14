@@ -7901,83 +7901,27 @@ TEST_F(SpvParserCFGTest, EmitBody_IfBreak_FromThen_ForwardWithinThen) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-VariableDeclStatement{
-  Variable{
-    guard10
-    none
-    undefined
-    __bool
-    {
-      ScalarConstructor[not set]{true}
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+var guard10 : bool = true;
+if (false) {
+  var_1 = 2u;
+  if (true) {
+    guard10 = false;
+  }
+  if (guard10) {
+    var_1 = 3u;
+    guard10 = false;
+  }
+} else {
+  if (guard10) {
+    var_1 = 4u;
+    guard10 = false;
   }
 }
-If{
-  (
-    ScalarConstructor[not set]{false}
-  )
-  {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2u}
-    }
-    If{
-      (
-        ScalarConstructor[not set]{true}
-      )
-      {
-        Assignment{
-          Identifier[not set]{guard10}
-          ScalarConstructor[not set]{false}
-        }
-      }
-    }
-    If{
-      (
-        Identifier[not set]{guard10}
-      )
-      {
-        Assignment{
-          Identifier[not set]{var_1}
-          ScalarConstructor[not set]{3u}
-        }
-        Assignment{
-          Identifier[not set]{guard10}
-          ScalarConstructor[not set]{false}
-        }
-      }
-    }
-  }
-}
-Else{
-  {
-    If{
-      (
-        Identifier[not set]{guard10}
-      )
-      {
-        Assignment{
-          Identifier[not set]{var_1}
-          ScalarConstructor[not set]{4u}
-        }
-        Assignment{
-          Identifier[not set]{guard10}
-          ScalarConstructor[not set]{false}
-        }
-      }
-    }
-  }
-}
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5u}
-}
-Return{}
+var_1 = 5u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -8014,83 +7958,27 @@ TEST_F(SpvParserCFGTest, EmitBody_IfBreak_FromElse_ForwardWithinElse) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-VariableDeclStatement{
-  Variable{
-    guard10
-    none
-    undefined
-    __bool
-    {
-      ScalarConstructor[not set]{true}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+var guard10 : bool = true;
+if (false) {
+  var_1 = 2u;
+  guard10 = false;
+} else {
+  if (guard10) {
+    var_1 = 3u;
+    if (true) {
+      guard10 = false;
+    }
+    if (guard10) {
+      var_1 = 4u;
+      guard10 = false;
     }
   }
 }
-If{
-  (
-    ScalarConstructor[not set]{false}
-  )
-  {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2u}
-    }
-    Assignment{
-      Identifier[not set]{guard10}
-      ScalarConstructor[not set]{false}
-    }
-  }
-}
-Else{
-  {
-    If{
-      (
-        Identifier[not set]{guard10}
-      )
-      {
-        Assignment{
-          Identifier[not set]{var_1}
-          ScalarConstructor[not set]{3u}
-        }
-        If{
-          (
-            ScalarConstructor[not set]{true}
-          )
-          {
-            Assignment{
-              Identifier[not set]{guard10}
-              ScalarConstructor[not set]{false}
-            }
-          }
-        }
-        If{
-          (
-            Identifier[not set]{guard10}
-          )
-          {
-            Assignment{
-              Identifier[not set]{var_1}
-              ScalarConstructor[not set]{4u}
-            }
-            Assignment{
-              Identifier[not set]{guard10}
-              ScalarConstructor[not set]{false}
-            }
-          }
-        }
-      }
-    }
-  }
-}
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5u}
-}
-Return{}
+var_1 = 5u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -8142,142 +8030,43 @@ TEST_F(SpvParserCFGTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error() << assembly;
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-VariableDeclStatement{
-  Variable{
-    guard10
-    none
-    undefined
-    __bool
-    {
-      ScalarConstructor[not set]{true}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+var guard10 : bool = true;
+if (false) {
+  var_1 = 2u;
+  if (true) {
+  } else {
+    guard10 = false;
+  }
+  if (guard10) {
+    var_1 = 3u;
+  }
+} else {
+  if (guard10) {
+    var_1 = 4u;
+    if (true) {
+      guard10 = false;
+    }
+    if (guard10) {
+      var_1 = 5u;
     }
   }
 }
-If{
-  (
-    ScalarConstructor[not set]{false}
-  )
-  {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2u}
-    }
-    If{
-      (
-        ScalarConstructor[not set]{true}
-      )
-      {
-      }
-    }
-    Else{
-      {
-        Assignment{
-          Identifier[not set]{guard10}
-          ScalarConstructor[not set]{false}
-        }
-      }
-    }
-    If{
-      (
-        Identifier[not set]{guard10}
-      )
-      {
-        Assignment{
-          Identifier[not set]{var_1}
-          ScalarConstructor[not set]{3u}
-        }
-      }
-    }
+if (guard10) {
+  var_1 = 6u;
+  if (false) {
+  } else {
+    guard10 = false;
+  }
+  if (guard10) {
+    var_1 = 7u;
+    guard10 = false;
   }
 }
-Else{
-  {
-    If{
-      (
-        Identifier[not set]{guard10}
-      )
-      {
-        Assignment{
-          Identifier[not set]{var_1}
-          ScalarConstructor[not set]{4u}
-        }
-        If{
-          (
-            ScalarConstructor[not set]{true}
-          )
-          {
-            Assignment{
-              Identifier[not set]{guard10}
-              ScalarConstructor[not set]{false}
-            }
-          }
-        }
-        If{
-          (
-            Identifier[not set]{guard10}
-          )
-          {
-            Assignment{
-              Identifier[not set]{var_1}
-              ScalarConstructor[not set]{5u}
-            }
-          }
-        }
-      }
-    }
-  }
-}
-If{
-  (
-    Identifier[not set]{guard10}
-  )
-  {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{6u}
-    }
-    If{
-      (
-        ScalarConstructor[not set]{false}
-      )
-      {
-      }
-    }
-    Else{
-      {
-        Assignment{
-          Identifier[not set]{guard10}
-          ScalarConstructor[not set]{false}
-        }
-      }
-    }
-    If{
-      (
-        Identifier[not set]{guard10}
-      )
-      {
-        Assignment{
-          Identifier[not set]{var_1}
-          ScalarConstructor[not set]{7u}
-        }
-        Assignment{
-          Identifier[not set]{guard10}
-          ScalarConstructor[not set]{false}
-        }
-      }
-    }
-  }
-}
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{8u}
-}
-Return{}
+var_1 = 8u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -8334,15 +8123,11 @@ TEST_F(SpvParserCFGTest, EmitBody_If_Empty) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(If{
-  (
-    ScalarConstructor[not set]{false}
-  )
-  {
-  }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(if (false) {
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -8370,27 +8155,14 @@ TEST_F(SpvParserCFGTest, EmitBody_If_Then_NoElse) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+if (false) {
+  var_1 = 1u;
 }
-If{
-  (
-    ScalarConstructor[not set]{false}
-  )
-  {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1u}
-    }
-  }
-}
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999u}
-}
-Return{}
+var_1 = 999u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -8418,31 +8190,15 @@ TEST_F(SpvParserCFGTest, EmitBody_If_NoThen_Else) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+if (false) {
+} else {
+  var_1 = 1u;
 }
-If{
-  (
-    ScalarConstructor[not set]{false}
-  )
-  {
-  }
-}
-Else{
-  {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1u}
-    }
-  }
-}
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999u}
-}
-Return{}
+var_1 = 999u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -8474,35 +8230,16 @@ TEST_F(SpvParserCFGTest, EmitBody_If_Then_Else) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+if (false) {
+  var_1 = 1u;
+} else {
+  var_1 = 2u;
 }
-If{
-  (
-    ScalarConstructor[not set]{false}
-  )
-  {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1u}
-    }
-  }
-}
-Else{
-  {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2u}
-    }
-  }
-}
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999u}
-}
-Return{}
+var_1 = 999u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -8541,46 +8278,19 @@ TEST_F(SpvParserCFGTest, EmitBody_If_Then_Else_Premerge) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+if (false) {
+  var_1 = 1u;
+} else {
+  var_1 = 2u;
 }
-If{
-  (
-    ScalarConstructor[not set]{false}
-  )
-  {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1u}
-    }
-  }
+if (true) {
+  var_1 = 3u;
 }
-Else{
-  {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2u}
-    }
-  }
-}
-If{
-  (
-    ScalarConstructor[not set]{true}
-  )
-  {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3u}
-    }
-  }
-}
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999u}
-}
-Return{}
+var_1 = 999u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -8613,38 +8323,17 @@ TEST_F(SpvParserCFGTest, EmitBody_If_Then_Premerge) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+if (false) {
+  var_1 = 1u;
 }
-If{
-  (
-    ScalarConstructor[not set]{false}
-  )
-  {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1u}
-    }
-  }
+if (true) {
+  var_1 = 3u;
 }
-If{
-  (
-    ScalarConstructor[not set]{true}
-  )
-  {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3u}
-    }
-  }
-}
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999u}
-}
-Return{}
+var_1 = 999u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -8677,42 +8366,18 @@ TEST_F(SpvParserCFGTest, EmitBody_If_Else_Premerge) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+if (false) {
+} else {
+  var_1 = 1u;
 }
-If{
-  (
-    ScalarConstructor[not set]{false}
-  )
-  {
-  }
+if (true) {
+  var_1 = 3u;
 }
-Else{
-  {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1u}
-    }
-  }
-}
-If{
-  (
-    ScalarConstructor[not set]{true}
-  )
-  {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3u}
-    }
-  }
-}
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999u}
-}
-Return{}
+var_1 = 999u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -8762,69 +8427,25 @@ TEST_F(SpvParserCFGTest, EmitBody_If_Nest_If) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-If{
-  (
-    ScalarConstructor[not set]{false}
-  )
-  {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1u}
-    }
-    If{
-      (
-        ScalarConstructor[not set]{true}
-      )
-      {
-        Assignment{
-          Identifier[not set]{var_1}
-          ScalarConstructor[not set]{2u}
-        }
-      }
-    }
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3u}
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+if (false) {
+  var_1 = 1u;
+  if (true) {
+    var_1 = 2u;
   }
-}
-Else{
-  {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4u}
-    }
-    If{
-      (
-        ScalarConstructor[not set]{true}
-      )
-      {
-      }
-    }
-    Else{
-      {
-        Assignment{
-          Identifier[not set]{var_1}
-          ScalarConstructor[not set]{5u}
-        }
-      }
-    }
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{6u}
-    }
+  var_1 = 3u;
+} else {
+  var_1 = 4u;
+  if (true) {
+  } else {
+    var_1 = 5u;
   }
+  var_1 = 6u;
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999u}
-}
-Return{}
+var_1 = 999u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -8852,34 +8473,18 @@ TEST_F(SpvParserCFGTest, EmitBody_Loop_SingleBlock_TrueBackedge) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-    }
-  }
-  Else{
-    {
-      Break{}
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  if (false) {
+  } else {
+    break;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999u}
-}
-Return{}
+var_1 = 999u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -8907,30 +8512,17 @@ TEST_F(SpvParserCFGTest, EmitBody_Loop_SingleBlock_FalseBackedge) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-      Break{}
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  if (false) {
+    break;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999u}
-}
-Return{}
+var_1 = 999u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -8958,22 +8550,14 @@ TEST_F(SpvParserCFGTest, EmitBody_Loop_SingleBlock_BothBackedge) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
 }
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-}
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999u}
-}
-Return{}
+var_1 = 999u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -9001,22 +8585,14 @@ TEST_F(SpvParserCFGTest, EmitBody_Loop_SingleBlock_UnconditionalBackege) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
 }
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-}
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999u}
-}
-Return{}
+var_1 = 999u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -9052,32 +8628,19 @@ TEST_F(SpvParserCFGTest, EmitBody_Loop_Unconditional_Body_SingleBlockContinue) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  var_1 = 2u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3u}
-    }
+    var_1 = 3u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999u}
-}
-Return{}
+var_1 = 999u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -9117,36 +8680,20 @@ TEST_F(SpvParserCFGTest, EmitBody_Loop_Unconditional_Body_MultiBlockContinue) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  var_1 = 2u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3u}
-    }
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4u}
-    }
+    var_1 = 3u;
+    var_1 = 4u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999u}
-}
-Return{}
+var_1 = 999u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -9191,47 +8738,23 @@ TEST_F(SpvParserCFGTest, EmitBody_Loop_Unconditional_Body_ContinueNestIf) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  var_1 = 2u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3u}
+    var_1 = 3u;
+    if (true) {
+      var_1 = 4u;
     }
-    If{
-      (
-        ScalarConstructor[not set]{true}
-      )
-      {
-        Assignment{
-          Identifier[not set]{var_1}
-          ScalarConstructor[not set]{4u}
-        }
-      }
-    }
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{5u}
-    }
+    var_1 = 5u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999u}
-}
-Return{}
+var_1 = 999u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -9263,34 +8786,18 @@ TEST_F(SpvParserCFGTest, EmitBody_Loop_MultiBlockContinueIsEntireLoop) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-      Break{}
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  var_1 = 2u;
+  if (false) {
+    break;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{3u}
-}
-Return{}
+var_1 = 3u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -9321,25 +8828,18 @@ TEST_F(SpvParserCFGTest, EmitBody_Loop_Never) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-  Break{}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+  var_1 = 1u;
+  break;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2u}
-    }
+    var_1 = 2u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{3u}
-}
-Return{}
+var_1 = 3u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -9381,40 +8881,22 @@ TEST_F(SpvParserCFGTest, EmitBody_Loop_TrueToBody_FalseBreaks) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+  var_1 = 1u;
+  if (false) {
+  } else {
+    break;
   }
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-    }
-  }
-  Else{
-    {
-      Break{}
-    }
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
+  var_1 = 2u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3u}
-    }
+    var_1 = 3u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{4u}
-}
-Return{}
+var_1 = 4u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -9448,40 +8930,22 @@ TEST_F(SpvParserCFGTest, EmitBody_Loop_FalseToBody_TrueBreaks) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+  var_1 = 1u;
+  if (false) {
+  } else {
+    break;
   }
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-    }
-  }
-  Else{
-    {
-      Break{}
-    }
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
+  var_1 = 2u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3u}
-    }
+    var_1 = 3u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{4u}
-}
-Return{}
+var_1 = 4u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -9522,32 +8986,20 @@ TEST_F(SpvParserCFGTest, EmitBody_Loop_NestedIfContinue) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{1u}
-      }
-      Continue{}
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+  if (false) {
+    var_1 = 1u;
+    continue;
   }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
+  var_1 = 2u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3u}
-    }
+    var_1 = 3u;
   }
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -9580,21 +9032,17 @@ TEST_F(SpvParserCFGTest, EmitBody_Loop_BodyAlwaysBreaks) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-  Break{}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+  var_1 = 1u;
+  break;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2u}
-    }
+    var_1 = 2u;
   }
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -9629,28 +9077,19 @@ TEST_F(SpvParserCFGTest, EmitBody_Loop_BodyConditionallyBreaks_FromTrue) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+  var_1 = 1u;
+  if (false) {
+    break;
   }
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-      Break{}
-    }
-  }
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2u}
-    }
+    var_1 = 2u;
   }
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -9685,32 +9124,20 @@ TEST_F(SpvParserCFGTest, EmitBody_Loop_BodyConditionallyBreaks_FromFalse) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+  var_1 = 1u;
+  if (false) {
+  } else {
+    break;
   }
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-    }
-  }
-  Else{
-    {
-      Break{}
-    }
-  }
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2u}
-    }
+    var_1 = 2u;
   }
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -9747,32 +9174,20 @@ TEST_F(SpvParserCFGTest, EmitBody_Loop_BodyConditionallyBreaks_FromTrue_Early) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+  var_1 = 1u;
+  if (false) {
+    break;
   }
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-      Break{}
-    }
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3u}
-  }
+  var_1 = 3u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2u}
-    }
+    var_1 = 2u;
   }
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -9810,36 +9225,21 @@ TEST_F(SpvParserCFGTest,
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+  var_1 = 1u;
+  if (false) {
+  } else {
+    break;
   }
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-    }
-  }
-  Else{
-    {
-      Break{}
-    }
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3u}
-  }
+  var_1 = 3u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2u}
-    }
+    var_1 = 2u;
   }
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -9863,23 +9263,15 @@ TEST_F(SpvParserCFGTest, EmitBody_Switch_DefaultIsMerge_NoCases) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Switch{
-  ScalarConstructor[not set]{42u}
-  {
-    Default{
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+switch(42u) {
+  default: {
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7u}
-}
-Return{}
+var_1 = 7u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -9908,29 +9300,18 @@ TEST_F(SpvParserCFGTest, EmitBody_Switch_DefaultIsMerge_OneCase) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Switch{
-  ScalarConstructor[not set]{42u}
-  {
-    Case 20u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20u}
-      }
-    }
-    Default{
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+switch(42u) {
+  case 20u: {
+    var_1 = 20u;
+  }
+  default: {
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7u}
-}
-Return{}
+var_1 = 7u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -9962,35 +9343,21 @@ TEST_F(SpvParserCFGTest, EmitBody_Switch_DefaultIsMerge_TwoCases) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Switch{
-  ScalarConstructor[not set]{42u}
-  {
-    Case 30u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30u}
-      }
-    }
-    Case 20u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20u}
-      }
-    }
-    Default{
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+switch(42u) {
+  case 30u: {
+    var_1 = 30u;
+  }
+  case 20u: {
+    var_1 = 20u;
+  }
+  default: {
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7u}
-}
-Return{}
+var_1 = 7u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10022,35 +9389,21 @@ TEST_F(SpvParserCFGTest, EmitBody_Switch_DefaultIsMerge_CasesWithDup) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Switch{
-  ScalarConstructor[not set]{42u}
-  {
-    Case 30u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30u}
-      }
-    }
-    Case 20u, 40u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20u}
-      }
-    }
-    Default{
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+switch(42u) {
+  case 30u: {
+    var_1 = 30u;
+  }
+  case 20u, 40u: {
+    var_1 = 20u;
+  }
+  default: {
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7u}
-}
-Return{}
+var_1 = 7u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10088,39 +9441,22 @@ TEST_F(SpvParserCFGTest, EmitBody_Switch_DefaultIsCase_NoDupCases) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Switch{
-  ScalarConstructor[not set]{42u}
-  {
-    Case 40u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{40u}
-      }
-    }
-    Case 20u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20u}
-      }
-    }
-    Default{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30u}
-      }
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+switch(42u) {
+  case 40u: {
+    var_1 = 40u;
+  }
+  case 20u: {
+    var_1 = 20u;
+  }
+  default: {
+    var_1 = 30u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7u}
-}
-Return{}
+var_1 = 7u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10159,42 +9495,25 @@ TEST_F(SpvParserCFGTest, EmitBody_Switch_DefaultIsCase_WithDupCase) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Switch{
-  ScalarConstructor[not set]{42u}
-  {
-    Case 40u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{40u}
-      }
-    }
-    Case 20u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20u}
-      }
-    }
-    Default{
-      Fallthrough{}
-    }
-    Case 30u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30u}
-      }
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+switch(42u) {
+  case 40u: {
+    var_1 = 40u;
+  }
+  case 20u: {
+    var_1 = 20u;
+  }
+  default: {
+    fallthrough;
+  }
+  case 30u: {
+    var_1 = 30u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7u}
-}
-Return{}
+var_1 = 7u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10231,41 +9550,24 @@ TEST_F(SpvParserCFGTest, EmitBody_Switch_Case_SintValue) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Switch{
-  ScalarConstructor[not set]{42}
-  {
-    Case -294967296{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{40u}
-      }
-    }
-    Case 2000000000{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30u}
-      }
-    }
-    Case 20{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20u}
-      }
-    }
-    Default{
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+switch(42) {
+  case -294967296: {
+    var_1 = 40u;
+  }
+  case 2000000000: {
+    var_1 = 30u;
+  }
+  case 20: {
+    var_1 = 20u;
+  }
+  default: {
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7u}
-}
-Return{}
+var_1 = 7u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10301,41 +9603,24 @@ TEST_F(SpvParserCFGTest, EmitBody_Switch_Case_UintValue) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Switch{
-  ScalarConstructor[not set]{42u}
-  {
-    Case 50u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{40u}
-      }
-    }
-    Case 2000000000u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30u}
-      }
-    }
-    Case 20u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20u}
-      }
-    }
-    Default{
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+switch(42u) {
+  case 50u: {
+    var_1 = 40u;
+  }
+  case 2000000000u: {
+    var_1 = 30u;
+  }
+  case 20u: {
+    var_1 = 20u;
+  }
+  default: {
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7u}
-}
-Return{}
+var_1 = 7u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10353,8 +9638,9 @@ TEST_F(SpvParserCFGTest, EmitBody_Return_TopLevel) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Return{}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10379,16 +9665,12 @@ TEST_F(SpvParserCFGTest, EmitBody_Return_InsideIf) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(If{
-  (
-    ScalarConstructor[not set]{false}
-  )
-  {
-    Return{}
-  }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(if (false) {
+  return;
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10419,11 +9701,12 @@ TEST_F(SpvParserCFGTest, EmitBody_Return_InsideLoop) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
-  Return{}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+  return;
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10449,12 +9732,9 @@ TEST_F(SpvParserCFGTest, EmitBody_ReturnValue_TopLevel) {
   auto fe = p->function_emitter(200);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Return{
-  {
-    ScalarConstructor[not set]{2u}
-  }
-}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(return 2u;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10488,24 +9768,12 @@ TEST_F(SpvParserCFGTest, EmitBody_ReturnValue_InsideIf) {
   auto fe = p->function_emitter(200);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(If{
-  (
-    ScalarConstructor[not set]{false}
-  )
-  {
-    Return{
-      {
-        ScalarConstructor[not set]{2u}
-      }
-    }
-  }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(if (false) {
+  return 2u;
 }
-Return{
-  {
-    ScalarConstructor[not set]{3u}
-  }
-}
+return 3u;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10545,19 +9813,12 @@ TEST_F(SpvParserCFGTest, EmitBody_ReturnValue_Loop) {
   auto fe = p->function_emitter(200);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
-  Return{
-    {
-      ScalarConstructor[not set]{2u}
-    }
-  }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+  return 2u;
 }
-Return{
-  {
-    ScalarConstructor[not set]{3u}
-  }
-}
+return 3u;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10575,8 +9836,9 @@ TEST_F(SpvParserCFGTest, EmitBody_Kill_TopLevel) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Discard{}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(discard;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10601,16 +9863,12 @@ TEST_F(SpvParserCFGTest, EmitBody_Kill_InsideIf) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(If{
-  (
-    ScalarConstructor[not set]{false}
-  )
-  {
-    Discard{}
-  }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(if (false) {
+  discard;
 }
-Discard{}
+discard;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10641,11 +9899,12 @@ TEST_F(SpvParserCFGTest, EmitBody_Kill_InsideLoop) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
-  Discard{}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+  discard;
 }
-Discard{}
+discard;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10663,8 +9922,9 @@ TEST_F(SpvParserCFGTest, EmitBody_Unreachable_TopLevel) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Return{}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10689,16 +9949,12 @@ TEST_F(SpvParserCFGTest, EmitBody_Unreachable_InsideIf) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(If{
-  (
-    ScalarConstructor[not set]{false}
-  )
-  {
-    Return{}
-  }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(if (false) {
+  return;
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10729,11 +9985,12 @@ TEST_F(SpvParserCFGTest, EmitBody_Unreachable_InsideLoop) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
-  Return{}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+  return;
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10759,12 +10016,9 @@ TEST_F(SpvParserCFGTest, EmitBody_Unreachable_InNonVoidFunction) {
   auto fe = p->function_emitter(200);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Return{
-  {
-    ScalarConstructor[not set]{0u}
-  }
-}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(return 0u;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10793,16 +10047,15 @@ TEST_F(SpvParserCFGTest, EmitBody_Branch_BackEdge_MultiBlockLoop) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1u}
-    }
+    var_1 = 1u;
   }
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10828,14 +10081,12 @@ TEST_F(SpvParserCFGTest, EmitBody_Branch_BackEdge_SingleBlockLoop) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+  var_1 = 1u;
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10865,29 +10116,18 @@ TEST_F(SpvParserCFGTest, EmitBody_Branch_SwitchBreak_LastInCase) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Switch{
-  ScalarConstructor[not set]{42u}
-  {
-    Case 20u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20u}
-      }
-    }
-    Default{
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+switch(42u) {
+  case 20u: {
+    var_1 = 20u;
+  }
+  default: {
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7u}
-}
-Return{}
+var_1 = 7u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10925,45 +10165,23 @@ TEST_F(SpvParserCFGTest, EmitBody_Branch_SwitchBreak_NotLastInCase) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Switch{
-  ScalarConstructor[not set]{42u}
-  {
-    Case 20u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20u}
-      }
-      If{
-        (
-          ScalarConstructor[not set]{false}
-        )
-        {
-          Assignment{
-            Identifier[not set]{var_1}
-            ScalarConstructor[not set]{40u}
-          }
-          Break{}
-        }
-      }
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{50u}
-      }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+switch(42u) {
+  case 20u: {
+    var_1 = 20u;
+    if (false) {
+      var_1 = 40u;
+      break;
     }
-    Default{
-    }
+    var_1 = 50u;
+  }
+  default: {
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7u}
-}
-Return{}
+var_1 = 7u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -10996,21 +10214,17 @@ TEST_F(SpvParserCFGTest, EmitBody_Branch_LoopBreak_MultiBlockLoop_FromBody) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-  Break{}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+  var_1 = 1u;
+  break;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2u}
-    }
+    var_1 = 2u;
   }
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -11085,17 +10299,16 @@ TEST_F(
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1u}
-    }
-    Break{}
+    var_1 = 1u;
+    break;
   }
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -11125,28 +10338,19 @@ TEST_F(
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1u}
-    }
-    If{
-      (
-        ScalarConstructor[not set]{false}
-      )
-      {
-      }
-    }
-    Else{
-      {
-        Break{}
-      }
+    var_1 = 1u;
+    if (false) {
+    } else {
+      break;
     }
   }
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -11178,20 +10382,16 @@ TEST_F(SpvParserCFGTest, EmitBody_Branch_LoopContinue_LastInLoopConstruct) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+  var_1 = 1u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2u}
-    }
+    var_1 = 2u;
   }
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -11232,32 +10432,20 @@ TEST_F(SpvParserCFGTest, EmitBody_Branch_LoopContinue_BeforeLast) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{1u}
-      }
-      Continue{}
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+  if (false) {
+    var_1 = 1u;
+    continue;
   }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
+  var_1 = 2u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3u}
-    }
+    var_1 = 3u;
   }
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -11301,50 +10489,28 @@ TEST_F(SpvParserCFGTest, EmitBody_Branch_LoopContinue_FromSwitch) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3u}
-  }
-  Switch{
-    ScalarConstructor[not set]{42u}
-    {
-      Case 40u{
-        Assignment{
-          Identifier[not set]{var_1}
-          ScalarConstructor[not set]{4u}
-        }
-        Continue{}
-      }
-      Default{
-      }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+loop {
+  var_1 = 2u;
+  var_1 = 3u;
+  switch(42u) {
+    case 40u: {
+      var_1 = 4u;
+      continue;
+    }
+    default: {
     }
   }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{5u}
-  }
+  var_1 = 5u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{6u}
-    }
+    var_1 = 6u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7u}
-}
-Return{}
+var_1 = 7u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -11371,23 +10537,13 @@ TEST_F(SpvParserCFGTest, EmitBody_Branch_IfBreak_FromThen) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(If{
-  (
-    ScalarConstructor[not set]{false}
-  )
-  {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1u}
-    }
-  }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(if (false) {
+  var_1 = 1u;
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{2u}
-}
-Return{}
+var_1 = 2u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -11414,27 +10570,14 @@ TEST_F(SpvParserCFGTest, EmitBody_Branch_IfBreak_FromElse) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(If{
-  (
-    ScalarConstructor[not set]{false}
-  )
-  {
-  }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(if (false) {
+} else {
+  var_1 = 1u;
 }
-Else{
-  {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1u}
-    }
-  }
-}
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{2u}
-}
-Return{}
+var_1 = 2u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -11466,36 +10609,22 @@ TEST_F(SpvParserCFGTest, EmitBody_Branch_Fallthrough) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Switch{
-  ScalarConstructor[not set]{42u}
-  {
-    Case 20u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20u}
-      }
-      Fallthrough{}
-    }
-    Case 30u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30u}
-      }
-    }
-    Default{
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+switch(42u) {
+  case 20u: {
+    var_1 = 20u;
+    fallthrough;
+  }
+  case 30u: {
+    var_1 = 30u;
+  }
+  default: {
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7u}
-}
-Return{}
+var_1 = 7u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -11517,16 +10646,11 @@ TEST_F(SpvParserCFGTest, EmitBody_Branch_Forward) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{2u}
-}
-Return{}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+var_1 = 2u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -11621,22 +10745,14 @@ TEST_F(SpvParserCFGTest, EmitBody_BranchConditional_Back_SingleBlock_Back) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
 }
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-}
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5u}
-}
-Return{}
+var_1 = 5u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -11664,30 +10780,17 @@ TEST_F(SpvParserCFGTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-      Break{}
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  if (false) {
+    break;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5u}
-}
-Return{}
+var_1 = 5u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -11715,34 +10818,18 @@ TEST_F(SpvParserCFGTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-    }
-  }
-  Else{
-    {
-      Break{}
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  if (false) {
+  } else {
+    break;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5u}
-}
-Return{}
+var_1 = 5u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -11773,32 +10860,20 @@ TEST_F(SpvParserCFGTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+
   continuing {
-    If{
-      (
-        ScalarConstructor[not set]{false}
-      )
-      {
-        Break{}
-      }
+    if (false) {
+      break;
     }
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5u}
-}
-Return{}
+var_1 = 5u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -11829,36 +10904,21 @@ TEST_F(SpvParserCFGTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+
   continuing {
-    If{
-      (
-        ScalarConstructor[not set]{false}
-      )
-      {
-      }
-    }
-    Else{
-      {
-        Break{}
-      }
+    if (false) {
+    } else {
+      break;
     }
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5u}
-}
-Return{}
+var_1 = 5u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -11889,29 +10949,18 @@ TEST_F(SpvParserCFGTest,
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Switch{
-  ScalarConstructor[not set]{42u}
-  {
-    Case 20u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20u}
-      }
-    }
-    Default{
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+switch(42u) {
+  case 20u: {
+    var_1 = 20u;
+  }
+  default: {
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7u}
-}
-Return{}
+var_1 = 7u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -11950,45 +10999,23 @@ TEST_F(SpvParserCFGTest,
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Switch{
-  ScalarConstructor[not set]{42u}
-  {
-    Case 20u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20u}
-      }
-      If{
-        (
-          ScalarConstructor[not set]{false}
-        )
-        {
-          Assignment{
-            Identifier[not set]{var_1}
-            ScalarConstructor[not set]{40u}
-          }
-          Break{}
-        }
-      }
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{50u}
-      }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+switch(42u) {
+  case 20u: {
+    var_1 = 20u;
+    if (false) {
+      var_1 = 40u;
+      break;
     }
-    Default{
-    }
+    var_1 = 50u;
+  }
+  default: {
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7u}
-}
-Return{}
+var_1 = 7u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -12034,57 +11061,30 @@ TEST_F(SpvParserCFGTest,
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3u}
-  }
-  Switch{
-    ScalarConstructor[not set]{42u}
-    {
-      Case 40u{
-        Assignment{
-          Identifier[not set]{var_1}
-          ScalarConstructor[not set]{40u}
-        }
-        If{
-          (
-            ScalarConstructor[not set]{false}
-          )
-          {
-            Continue{}
-          }
-        }
-      }
-      Default{
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+loop {
+  var_1 = 2u;
+  var_1 = 3u;
+  switch(42u) {
+    case 40u: {
+      var_1 = 40u;
+      if (false) {
+        continue;
       }
     }
+    default: {
+    }
   }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{6u}
-  }
+  var_1 = 6u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{7u}
-    }
+    var_1 = 7u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{8u}
-}
-Return{}
+var_1 = 8u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -12130,61 +11130,31 @@ TEST_F(SpvParserCFGTest,
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3u}
-  }
-  Switch{
-    ScalarConstructor[not set]{42u}
-    {
-      Case 40u{
-        Assignment{
-          Identifier[not set]{var_1}
-          ScalarConstructor[not set]{40u}
-        }
-        If{
-          (
-            ScalarConstructor[not set]{false}
-          )
-          {
-          }
-        }
-        Else{
-          {
-            Continue{}
-          }
-        }
-      }
-      Default{
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+loop {
+  var_1 = 2u;
+  var_1 = 3u;
+  switch(42u) {
+    case 40u: {
+      var_1 = 40u;
+      if (false) {
+      } else {
+        continue;
       }
     }
+    default: {
+    }
   }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{6u}
-  }
+  var_1 = 6u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{7u}
-    }
+    var_1 = 7u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{8u}
-}
-Return{}
+var_1 = 8u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -12216,45 +11186,23 @@ TEST_F(SpvParserCFGTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Switch{
-  ScalarConstructor[not set]{42u}
-  {
-    Case 20u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20u}
-      }
-      If{
-        (
-          ScalarConstructor[not set]{false}
-        )
-        {
-        }
-      }
-      Else{
-        {
-          Break{}
-        }
-      }
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30u}
-      }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+switch(42u) {
+  case 20u: {
+    var_1 = 20u;
+    if (false) {
+    } else {
+      break;
     }
-    Default{
-    }
+    var_1 = 30u;
+  }
+  default: {
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{8u}
-}
-Return{}
+var_1 = 8u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -12286,41 +11234,22 @@ TEST_F(SpvParserCFGTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Switch{
-  ScalarConstructor[not set]{42u}
-  {
-    Case 20u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20u}
-      }
-      If{
-        (
-          ScalarConstructor[not set]{false}
-        )
-        {
-          Break{}
-        }
-      }
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30u}
-      }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+switch(42u) {
+  case 20u: {
+    var_1 = 20u;
+    if (false) {
+      break;
     }
-    Default{
-    }
+    var_1 = 30u;
+  }
+  default: {
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{8u}
-}
-Return{}
+var_1 = 8u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -12353,48 +11282,26 @@ TEST_F(SpvParserCFGTest,
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Switch{
-  ScalarConstructor[not set]{42u}
-  {
-    Case 20u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20u}
-      }
-      If{
-        (
-          ScalarConstructor[not set]{false}
-        )
-        {
-        }
-      }
-      Else{
-        {
-          Break{}
-        }
-      }
-      Fallthrough{}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+switch(42u) {
+  case 20u: {
+    var_1 = 20u;
+    if (false) {
+    } else {
+      break;
     }
-    Case 30u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30u}
-      }
-    }
-    Default{
-    }
+    fallthrough;
+  }
+  case 30u: {
+    var_1 = 30u;
+  }
+  default: {
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7u}
-}
-Return{}
+var_1 = 7u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -12427,44 +11334,25 @@ TEST_F(SpvParserCFGTest,
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Switch{
-  ScalarConstructor[not set]{42u}
-  {
-    Case 20u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20u}
-      }
-      If{
-        (
-          ScalarConstructor[not set]{false}
-        )
-        {
-          Break{}
-        }
-      }
-      Fallthrough{}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+switch(42u) {
+  case 20u: {
+    var_1 = 20u;
+    if (false) {
+      break;
     }
-    Case 30u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30u}
-      }
-    }
-    Default{
-    }
+    fallthrough;
+  }
+  case 30u: {
+    var_1 = 30u;
+  }
+  default: {
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7u}
-}
-Return{}
+var_1 = 7u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -12496,29 +11384,19 @@ TEST_F(SpvParserCFGTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-  Break{}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  break;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4u}
-    }
+    var_1 = 4u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5u}
-}
-Return{}
+var_1 = 5u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -12554,33 +11432,20 @@ TEST_F(SpvParserCFGTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
-  Break{}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  var_1 = 2u;
+  break;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4u}
-    }
+    var_1 = 4u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5u}
-}
-Return{}
+var_1 = 5u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -12627,56 +11492,27 @@ TEST_F(SpvParserCFGTest, EmitBody_BranchConditional_LoopBreak_Continue_OnTrue) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-  If{
-    (
-      ScalarConstructor[not set]{true}
-    )
-    {
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{2u}
-      }
-      If{
-        (
-          ScalarConstructor[not set]{false}
-        )
-        {
-          Continue{}
-        }
-      }
-      Else{
-        {
-          Break{}
-        }
-      }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  if (true) {
+    var_1 = 2u;
+    if (false) {
+      continue;
+    } else {
+      break;
     }
   }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3u}
-  }
+  var_1 = 3u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4u}
-    }
+    var_1 = 4u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5u}
-}
-Return{}
+var_1 = 5u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -12724,56 +11560,27 @@ TEST_F(SpvParserCFGTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-  If{
-    (
-      ScalarConstructor[not set]{true}
-    )
-    {
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{2u}
-      }
-      If{
-        (
-          ScalarConstructor[not set]{false}
-        )
-        {
-          Break{}
-        }
-      }
-      Else{
-        {
-          Continue{}
-        }
-      }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  if (true) {
+    var_1 = 2u;
+    if (false) {
+      break;
+    } else {
+      continue;
     }
   }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3u}
-  }
+  var_1 = 3u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4u}
-    }
+    var_1 = 4u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5u}
-}
-Return{}
+var_1 = 5u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -12863,48 +11670,24 @@ TEST_F(SpvParserCFGTest, EmitBody_BranchConditional_LoopBreak_Forward_OnTrue) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  var_1 = 2u;
+  if (false) {
+  } else {
+    break;
   }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-    }
-  }
-  Else{
-    {
-      Break{}
-    }
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3u}
-  }
+  var_1 = 3u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4u}
-    }
+    var_1 = 4u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5u}
-}
-Return{}
+var_1 = 5u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -12944,44 +11727,23 @@ TEST_F(SpvParserCFGTest, EmitBody_BranchConditional_LoopBreak_Forward_OnFalse) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  var_1 = 2u;
+  if (false) {
+    break;
   }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-      Break{}
-    }
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3u}
-  }
+  var_1 = 3u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4u}
-    }
+    var_1 = 4u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5u}
-}
-Return{}
+var_1 = 5u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -13013,28 +11775,18 @@ TEST_F(SpvParserCFGTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4u}
-    }
+    var_1 = 4u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5u}
-}
-Return{}
+var_1 = 5u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -13070,32 +11822,19 @@ TEST_F(SpvParserCFGTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  var_1 = 2u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4u}
-    }
+    var_1 = 4u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5u}
-}
-Return{}
+var_1 = 5u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -13142,48 +11881,24 @@ TEST_F(SpvParserCFGTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  var_1 = 2u;
+  if (true) {
+    var_1 = 3u;
+    continue;
   }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
-  If{
-    (
-      ScalarConstructor[not set]{true}
-    )
-    {
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{3u}
-      }
-      Continue{}
-    }
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{4u}
-  }
+  var_1 = 4u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{5u}
-    }
+    var_1 = 5u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{6u}
-}
-Return{}
+var_1 = 6u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -13230,42 +11945,20 @@ TEST_F(
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  var_1 = 2u;
+  if (true) {
+    var_1 = 3u;
+    continue;
+  }
+  var_1 = 4u;
 }
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
-  If{
-    (
-      ScalarConstructor[not set]{true}
-    )
-    {
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{3u}
-      }
-      Continue{}
-    }
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{4u}
-  }
-}
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{6u}
-}
-Return{}
+var_1 = 6u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -13309,50 +12002,28 @@ TEST_F(SpvParserCFGTest, EmitBody_BranchConditional_LoopContinue_FromSwitch) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3u}
-  }
-  Switch{
-    ScalarConstructor[not set]{42u}
-    {
-      Case 40u{
-        Assignment{
-          Identifier[not set]{var_1}
-          ScalarConstructor[not set]{4u}
-        }
-        Continue{}
-      }
-      Default{
-      }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+loop {
+  var_1 = 2u;
+  var_1 = 3u;
+  switch(42u) {
+    case 40u: {
+      var_1 = 4u;
+      continue;
+    }
+    default: {
     }
   }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{5u}
-  }
+  var_1 = 5u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{6u}
-    }
+    var_1 = 6u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7u}
-}
-Return{}
+var_1 = 7u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -13397,59 +12068,27 @@ TEST_F(SpvParserCFGTest, EmitBody_BranchConditional_Continue_IfBreak_OnTrue) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
-  If{
-    (
-      ScalarConstructor[not set]{true}
-    )
-    {
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{3u}
-      }
-      If{
-        (
-          ScalarConstructor[not set]{false}
-        )
-        {
-        }
-      }
-      Else{
-        {
-          Continue{}
-        }
-      }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  var_1 = 2u;
+  if (true) {
+    var_1 = 3u;
+    if (false) {
+    } else {
+      continue;
     }
   }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{4u}
-  }
+  var_1 = 4u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{5u}
-    }
+    var_1 = 5u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{6u}
-}
-Return{}
+var_1 = 6u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -13494,55 +12133,26 @@ TEST_F(SpvParserCFGTest, EmitBody_BranchConditional_Continue_IfBreak_OnFalse) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
-  If{
-    (
-      ScalarConstructor[not set]{true}
-    )
-    {
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{3u}
-      }
-      If{
-        (
-          ScalarConstructor[not set]{false}
-        )
-        {
-          Continue{}
-        }
-      }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  var_1 = 2u;
+  if (true) {
+    var_1 = 3u;
+    if (false) {
+      continue;
     }
   }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{4u}
-  }
+  var_1 = 4u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{5u}
-    }
+    var_1 = 5u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{6u}
-}
-Return{}
+var_1 = 6u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -13591,68 +12201,35 @@ TEST_F(SpvParserCFGTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
-  Switch{
-    ScalarConstructor[not set]{42u}
-    {
-      Case 40u{
-        Assignment{
-          Identifier[not set]{var_1}
-          ScalarConstructor[not set]{40u}
-        }
-        If{
-          (
-            ScalarConstructor[not set]{false}
-          )
-          {
-          }
-        }
-        Else{
-          {
-            Continue{}
-          }
-        }
-        Fallthrough{}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  var_1 = 2u;
+  switch(42u) {
+    case 40u: {
+      var_1 = 40u;
+      if (false) {
+      } else {
+        continue;
       }
-      Case 50u{
-        Assignment{
-          Identifier[not set]{var_1}
-          ScalarConstructor[not set]{50u}
-        }
-      }
-      Default{
-      }
+      fallthrough;
+    }
+    case 50u: {
+      var_1 = 50u;
+    }
+    default: {
     }
   }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3u}
-  }
+  var_1 = 3u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4u}
-    }
+    var_1 = 4u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5u}
-}
-Return{}
+var_1 = 5u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -13701,64 +12278,34 @@ TEST_F(SpvParserCFGTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
-  Switch{
-    ScalarConstructor[not set]{42u}
-    {
-      Case 40u{
-        Assignment{
-          Identifier[not set]{var_1}
-          ScalarConstructor[not set]{40u}
-        }
-        If{
-          (
-            ScalarConstructor[not set]{false}
-          )
-          {
-            Continue{}
-          }
-        }
-        Fallthrough{}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  var_1 = 2u;
+  switch(42u) {
+    case 40u: {
+      var_1 = 40u;
+      if (false) {
+        continue;
       }
-      Case 50u{
-        Assignment{
-          Identifier[not set]{var_1}
-          ScalarConstructor[not set]{50u}
-        }
-      }
-      Default{
-      }
+      fallthrough;
+    }
+    case 50u: {
+      var_1 = 50u;
+    }
+    default: {
     }
   }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3u}
-  }
+  var_1 = 3u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4u}
-    }
+    var_1 = 4u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5u}
-}
-Return{}
+var_1 = 5u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -13798,48 +12345,24 @@ TEST_F(SpvParserCFGTest, EmitBody_BranchConditional_Continue_Forward_OnTrue) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  var_1 = 2u;
+  if (false) {
+  } else {
+    continue;
   }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-    }
-  }
-  Else{
-    {
-      Continue{}
-    }
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3u}
-  }
+  var_1 = 3u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4u}
-    }
+    var_1 = 4u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5u}
-}
-Return{}
+var_1 = 5u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -13879,44 +12402,23 @@ TEST_F(SpvParserCFGTest, EmitBody_BranchConditional_Continue_Forward_OnFalse) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+loop {
+  var_1 = 1u;
+  var_1 = 2u;
+  if (false) {
+    continue;
   }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2u}
-  }
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-      Continue{}
-    }
-  }
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3u}
-  }
+  var_1 = 3u;
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4u}
-    }
+    var_1 = 4u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5u}
-}
-Return{}
+var_1 = 5u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -13943,23 +12445,13 @@ TEST_F(SpvParserCFGTest, EmitBody_BranchConditional_IfBreak_IfBreak_Same) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 0u;
+if (false) {
 }
-If{
-  (
-    ScalarConstructor[not set]{false}
-  )
-  {
-  }
-}
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5u}
-}
-Return{}
+var_1 = 5u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -14029,36 +12521,22 @@ TEST_F(SpvParserCFGTest,
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Switch{
-  ScalarConstructor[not set]{42u}
-  {
-    Case 20u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20u}
-      }
-      Fallthrough{}
-    }
-    Case 30u{
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30u}
-      }
-    }
-    Default{
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+switch(42u) {
+  case 20u: {
+    var_1 = 20u;
+    fallthrough;
+  }
+  case 30u: {
+    var_1 = 30u;
+  }
+  default: {
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7u}
-}
-Return{}
+var_1 = 7u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -14120,16 +12598,11 @@ TEST_F(SpvParserCFGTest, EmitBody_BranchConditional_Forward_Forward_Same) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1u}
-}
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{2u}
-}
-Return{}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 1u;
+var_1 = 2u;
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -14401,18 +12874,14 @@ TEST_F(SpvParserCFGTest, EmitBody_IfSelection_TrueBranch_LoopBreak) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-      Break{}
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+  if (false) {
+    break;
   }
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -14451,18 +12920,14 @@ TEST_F(SpvParserCFGTest, EmitBody_TrueBranch_LoopContinue) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-      Continue{}
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+  if (false) {
+    continue;
   }
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -14495,25 +12960,18 @@ TEST_F(SpvParserCFGTest, EmitBody_TrueBranch_SwitchBreak) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Switch{
-  ScalarConstructor[not set]{20u}
-  {
-    Case 20u{
-      If{
-        (
-          ScalarConstructor[not set]{false}
-        )
-        {
-          Break{}
-        }
-      }
-    }
-    Default{
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(switch(20u) {
+  case 20u: {
+    if (false) {
+      break;
     }
   }
+  default: {
+  }
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -14552,22 +13010,15 @@ TEST_F(SpvParserCFGTest, EmitBody_FalseBranch_LoopBreak) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-    }
-  }
-  Else{
-    {
-      Break{}
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+  if (false) {
+  } else {
+    break;
   }
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -14606,22 +13057,15 @@ TEST_F(SpvParserCFGTest, EmitBody_FalseBranch_LoopContinue) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Loop{
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-    }
-  }
-  Else{
-    {
-      Continue{}
-    }
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(loop {
+  if (false) {
+  } else {
+    continue;
   }
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got) << p->error();
 }
@@ -14654,29 +13098,19 @@ TEST_F(SpvParserCFGTest, EmitBody_FalseBranch_SwitchBreak) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Switch{
-  ScalarConstructor[not set]{20u}
-  {
-    Case 20u{
-      If{
-        (
-          ScalarConstructor[not set]{false}
-        )
-        {
-        }
-      }
-      Else{
-        {
-          Break{}
-        }
-      }
-    }
-    Default{
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(switch(20u) {
+  case 20u: {
+    if (false) {
+    } else {
+      break;
     }
   }
+  default: {
+  }
 }
-Return{}
+return;
 )";
   ASSERT_EQ(expect, got);
 }
@@ -14716,48 +13150,24 @@ TEST_F(SpvParserCFGTest, EmitBody_LoopInternallyDiverge_Simple) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = R"(Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{10u}
-}
-Loop{
-  Assignment{
-    Identifier[not set]{var_1}
-    ScalarConstructor[not set]{20u}
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
+  auto* expect = R"(var_1 = 10u;
+loop {
+  var_1 = 20u;
+  if (false) {
+    var_1 = 30u;
+    continue;
+  } else {
+    var_1 = 40u;
   }
-  If{
-    (
-      ScalarConstructor[not set]{false}
-    )
-    {
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30u}
-      }
-      Continue{}
-    }
-  }
-  Else{
-    {
-      Assignment{
-        Identifier[not set]{var_1}
-        ScalarConstructor[not set]{40u}
-      }
-    }
-  }
+
   continuing {
-    Assignment{
-      Identifier[not set]{var_1}
-      ScalarConstructor[not set]{90u}
-    }
+    var_1 = 90u;
   }
 }
-Assignment{
-  Identifier[not set]{var_1}
-  ScalarConstructor[not set]{99u}
-}
-Return{}
+var_1 = 99u;
+return;
 )";
   ASSERT_EQ(expect, got) << got;
 }

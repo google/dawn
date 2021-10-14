@@ -16,6 +16,7 @@
 #include "src/reader/spirv/function.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
 #include "src/reader/spirv/spirv_tools_helpers_test.h"
+#include "src/utils/string.h"
 
 namespace tint {
 namespace reader {
@@ -116,7 +117,7 @@ TEST_F(SpvModuleScopeVarParserTest, NoVar) {
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule()) << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_ast = p->program().to_str();
+  const auto module_ast = test::ToString(p->program());
   EXPECT_THAT(module_ast, Not(HasSubstr("Variable"))) << module_ast;
 }
 
@@ -199,14 +200,8 @@ TEST_F(SpvModuleScopeVarParserTest, AnonWorkgroupVar) {
 
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Variable{
-    x_52
-    workgroup
-    undefined
-    __f32
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str, HasSubstr("var<workgroup> x_52 : f32;"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, NamedWorkgroupVar) {
@@ -221,14 +216,8 @@ TEST_F(SpvModuleScopeVarParserTest, NamedWorkgroupVar) {
 
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Variable{
-    the_counter
-    workgroup
-    undefined
-    __f32
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str, HasSubstr("var<workgroup> the_counter : f32;"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, PrivateVar) {
@@ -243,14 +232,9 @@ TEST_F(SpvModuleScopeVarParserTest, PrivateVar) {
 
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Variable{
-    my_own_private_idaho
-    private
-    undefined
-    __f32
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str,
+              HasSubstr("var<private> my_own_private_idaho : f32;"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, BuiltinVertexIndex) {
@@ -276,14 +260,8 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinVertexIndex) {
 
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Variable{
-    x_52
-    private
-    undefined
-    __u32
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str, HasSubstr("var<private> x_52 : u32;"));
 }
 
 std::string PerVertexPreamble() {
@@ -377,18 +355,9 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_StorePosition) {
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-    Assignment{
-      Identifier[not set]{gl_Position}
-      TypeConstructor[not set]{
-        __vec_4__f32
-        ScalarConstructor[not set]{0.000000}
-        ScalarConstructor[not set]{0.000000}
-        ScalarConstructor[not set]{0.000000}
-        ScalarConstructor[not set]{0.000000}
-      }
-    })"))
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str,
+              HasSubstr("gl_Position = vec4<f32>(0.0, 0.0, 0.0, 0.0);"))
       << module_str;
 }
 
@@ -430,18 +399,9 @@ TEST_F(SpvModuleScopeVarParserTest,
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-    Assignment{
-      Identifier[not set]{gl_Position}
-      TypeConstructor[not set]{
-        __vec_4__f32
-        ScalarConstructor[not set]{0.000000}
-        ScalarConstructor[not set]{0.000000}
-        ScalarConstructor[not set]{0.000000}
-        ScalarConstructor[not set]{0.000000}
-      }
-    })"))
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str,
+              HasSubstr("gl_Position = vec4<f32>(0.0, 0.0, 0.0, 0.0);"))
       << module_str;
 }
 
@@ -461,16 +421,8 @@ TEST_F(SpvModuleScopeVarParserTest,
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-    Assignment{
-      MemberAccessor[not set]{
-        Identifier[not set]{gl_Position}
-        Identifier[not set]{y}
-      }
-      ScalarConstructor[not set]{0.000000}
-    })"))
-      << module_str;
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str, HasSubstr("gl_Position.y = 0.0;")) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest,
@@ -492,19 +444,8 @@ TEST_F(SpvModuleScopeVarParserTest,
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  {
-    Assignment{
-      MemberAccessor[not set]{
-        Identifier[not set]{gl_Position}
-        Identifier[not set]{y}
-      }
-      ScalarConstructor[not set]{0.000000}
-    }
-    Return{}
-  })"))
-      << module_str;
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str, HasSubstr("gl_Position.y = 0.0;")) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Write1_IsErased) {
@@ -522,41 +463,22 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Write1_IsErased) {
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_EQ(module_str, R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] gl_Position: __vec_4__f32}
-  }
-  Variable{
-    gl_Position
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{gl_Position}
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  EXPECT_EQ(module_str, R"(var<private> gl_Position : vec4<f32>;
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  gl_Position : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(gl_Position);
 }
 )") << module_str;
 }
@@ -598,51 +520,25 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_ReadReplaced) {
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_EQ(module_str, R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] gl_Position: __vec_4__f32}
-  }
-  Variable{
-    x_900
-    private
-    undefined
-    __f32
-  }
-  Variable{
-    gl_Position
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Assignment{
-      Identifier[not set]{x_900}
-      ScalarConstructor[not set]{1.000000}
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{gl_Position}
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  EXPECT_EQ(module_str, R"(var<private> x_900 : f32;
+
+var<private> gl_Position : vec4<f32>;
+
+fn main_1() {
+  x_900 = 1.0;
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  gl_Position : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(gl_Position);
 }
 )") << module_str;
 }
@@ -686,41 +582,22 @@ TEST_F(SpvModuleScopeVarParserTest,
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_EQ(module_str, R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] gl_Position: __vec_4__f32}
-  }
-  Variable{
-    gl_Position
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{gl_Position}
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  EXPECT_EQ(module_str, R"(var<private> gl_Position : vec4<f32>;
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  gl_Position : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(gl_Position);
 }
 )") << module_str;
 }
@@ -764,41 +641,22 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Loose_Write1_IsErased) {
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_EQ(module_str, R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_2_1: __vec_4__f32}
-  }
-  Variable{
-    x_2
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_2}
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  EXPECT_EQ(module_str, R"(var<private> x_2 : vec4<f32>;
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  x_2_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(x_2);
 }
 )") << module_str;
 }
@@ -838,51 +696,25 @@ TEST_F(SpvModuleScopeVarParserTest,
 
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_EQ(module_str, R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_2_1: __vec_4__f32}
-  }
-  Variable{
-    x_2
-    private
-    undefined
-    __vec_4__f32
-  }
-  Variable{
-    x_900
-    private
-    undefined
-    __f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Assignment{
-      Identifier[not set]{x_900}
-      ScalarConstructor[not set]{1.000000}
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_2}
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  EXPECT_EQ(module_str, R"(var<private> x_2 : vec4<f32>;
+
+var<private> x_900 : f32;
+
+fn main_1() {
+  x_900 = 1.0;
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  x_2_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(x_2);
 }
 )") << module_str;
 }
@@ -925,41 +757,22 @@ TEST_F(SpvModuleScopeVarParserTest,
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_EQ(module_str, R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_2_1: __vec_4__f32}
-  }
-  Variable{
-    x_2
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_2}
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  EXPECT_EQ(module_str, R"(var<private> x_2 : vec4<f32>;
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  x_2_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(x_2);
 }
 )") << module_str;
 }
@@ -980,41 +793,22 @@ TEST_F(SpvModuleScopeVarParserTest,
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
   EXPECT_TRUE(p->error().empty()) << p->error();
-  const auto module_str = p->program().to_str();
-  EXPECT_EQ(module_str, R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_2_1: __vec_4__f32}
-  }
-  Variable{
-    x_2
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_2}
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  EXPECT_EQ(module_str, R"(var<private> x_2 : vec4<f32>;
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  x_2_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(x_2);
 }
 )") << module_str;
 }
@@ -1112,52 +906,17 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarInitializers) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
-    x_1
-    private
-    undefined
-    __bool
-    {
-      ScalarConstructor[not set]{true}
-    }
-  }
-  Variable{
-    x_2
-    private
-    undefined
-    __bool
-    {
-      ScalarConstructor[not set]{false}
-    }
-  }
-  Variable{
-    x_3
-    private
-    undefined
-    __i32
-    {
-      ScalarConstructor[not set]{-1}
-    }
-  }
-  Variable{
-    x_4
-    private
-    undefined
-    __u32
-    {
-      ScalarConstructor[not set]{1u}
-    }
-  }
-  Variable{
-    x_5
-    private
-    undefined
-    __f32
-    {
-      ScalarConstructor[not set]{1.500000}
-    }
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str, HasSubstr(R"(var<private> x_1 : bool = true;
+
+var<private> x_2 : bool = false;
+
+var<private> x_3 : i32 = -1;
+
+var<private> x_4 : u32 = 1u;
+
+var<private> x_5 : f32 = 1.5;
+)"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarNullInitializers) {
@@ -1174,43 +933,15 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarNullInitializers) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
-    x_1
-    private
-    undefined
-    __bool
-    {
-      ScalarConstructor[not set]{false}
-    }
-  }
-  Variable{
-    x_2
-    private
-    undefined
-    __i32
-    {
-      ScalarConstructor[not set]{0}
-    }
-  }
-  Variable{
-    x_3
-    private
-    undefined
-    __u32
-    {
-      ScalarConstructor[not set]{0u}
-    }
-  }
-  Variable{
-    x_4
-    private
-    undefined
-    __f32
-    {
-      ScalarConstructor[not set]{0.000000}
-    }
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str, HasSubstr(R"(var<private> x_1 : bool = false;
+
+var<private> x_2 : i32 = 0;
+
+var<private> x_3 : u32 = 0u;
+
+var<private> x_4 : f32 = 0.0;
+)"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarUndefInitializers) {
@@ -1227,43 +958,15 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarUndefInitializers) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
-    x_1
-    private
-    undefined
-    __bool
-    {
-      ScalarConstructor[not set]{false}
-    }
-  }
-  Variable{
-    x_2
-    private
-    undefined
-    __i32
-    {
-      ScalarConstructor[not set]{0}
-    }
-  }
-  Variable{
-    x_3
-    private
-    undefined
-    __u32
-    {
-      ScalarConstructor[not set]{0u}
-    }
-  }
-  Variable{
-    x_4
-    private
-    undefined
-    __f32
-    {
-      ScalarConstructor[not set]{0.000000}
-    }
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str, HasSubstr(R"(var<private> x_1 : bool = false;
+
+var<private> x_2 : i32 = 0;
+
+var<private> x_3 : u32 = 0u;
+
+var<private> x_4 : f32 = 0.0;
+)"));
 
   // This example module emits ok, but is not valid SPIR-V in the first place.
   p->DeliberatelyInvalidSpirv();
@@ -1278,20 +981,10 @@ TEST_F(SpvModuleScopeVarParserTest, VectorInitializer) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
-    x_200
-    private
-    undefined
-    __vec_2__f32
-    {
-      TypeConstructor[not set]{
-        __vec_2__f32
-        ScalarConstructor[not set]{1.500000}
-        ScalarConstructor[not set]{2.000000}
-      }
-    }
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(
+      module_str,
+      HasSubstr("var<private> x_200 : vec2<f32> = vec2<f32>(1.5, 2.0);"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VectorBoolNullInitializer) {
@@ -1302,20 +995,10 @@ TEST_F(SpvModuleScopeVarParserTest, VectorBoolNullInitializer) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
-    x_200
-    private
-    undefined
-    __vec_2__bool
-    {
-      TypeConstructor[not set]{
-        __vec_2__bool
-        ScalarConstructor[not set]{false}
-        ScalarConstructor[not set]{false}
-      }
-    }
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(
+      module_str,
+      HasSubstr("var<private> x_200 : vec2<bool> = vec2<bool>(false, false);"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VectorBoolUndefInitializer) {
@@ -1326,20 +1009,10 @@ TEST_F(SpvModuleScopeVarParserTest, VectorBoolUndefInitializer) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
-    x_200
-    private
-    undefined
-    __vec_2__bool
-    {
-      TypeConstructor[not set]{
-        __vec_2__bool
-        ScalarConstructor[not set]{false}
-        ScalarConstructor[not set]{false}
-      }
-    }
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(
+      module_str,
+      HasSubstr("var<private> x_200 : vec2<bool> = vec2<bool>(false, false);"));
 
   // This example module emits ok, but is not valid SPIR-V in the first place.
   p->DeliberatelyInvalidSpirv();
@@ -1353,20 +1026,9 @@ TEST_F(SpvModuleScopeVarParserTest, VectorUintNullInitializer) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
-    x_200
-    private
-    undefined
-    __vec_2__u32
-    {
-      TypeConstructor[not set]{
-        __vec_2__u32
-        ScalarConstructor[not set]{0u}
-        ScalarConstructor[not set]{0u}
-      }
-    }
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str,
+              HasSubstr("var<private> x_200 : vec2<u32> = vec2<u32>(0u, 0u);"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VectorUintUndefInitializer) {
@@ -1377,20 +1039,9 @@ TEST_F(SpvModuleScopeVarParserTest, VectorUintUndefInitializer) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
-    x_200
-    private
-    undefined
-    __vec_2__u32
-    {
-      TypeConstructor[not set]{
-        __vec_2__u32
-        ScalarConstructor[not set]{0u}
-        ScalarConstructor[not set]{0u}
-      }
-    }
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str,
+              HasSubstr("var<private> x_200 : vec2<u32> = vec2<u32>(0u, 0u);"));
 
   // This example module emits ok, but is not valid SPIR-V in the first place.
   p->DeliberatelyInvalidSpirv();
@@ -1404,20 +1055,9 @@ TEST_F(SpvModuleScopeVarParserTest, VectorIntNullInitializer) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
-    x_200
-    private
-    undefined
-    __vec_2__i32
-    {
-      TypeConstructor[not set]{
-        __vec_2__i32
-        ScalarConstructor[not set]{0}
-        ScalarConstructor[not set]{0}
-      }
-    }
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str,
+              HasSubstr("var<private> x_200 : vec2<i32> = vec2<i32>(0, 0);"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VectorIntUndefInitializer) {
@@ -1428,20 +1068,9 @@ TEST_F(SpvModuleScopeVarParserTest, VectorIntUndefInitializer) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
-    x_200
-    private
-    undefined
-    __vec_2__i32
-    {
-      TypeConstructor[not set]{
-        __vec_2__i32
-        ScalarConstructor[not set]{0}
-        ScalarConstructor[not set]{0}
-      }
-    }
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str,
+              HasSubstr("var<private> x_200 : vec2<i32> = vec2<i32>(0, 0);"));
 
   // This example module emits ok, but is not valid SPIR-V in the first place.
   p->DeliberatelyInvalidSpirv();
@@ -1455,20 +1084,10 @@ TEST_F(SpvModuleScopeVarParserTest, VectorFloatNullInitializer) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
-    x_200
-    private
-    undefined
-    __vec_2__f32
-    {
-      TypeConstructor[not set]{
-        __vec_2__f32
-        ScalarConstructor[not set]{0.000000}
-        ScalarConstructor[not set]{0.000000}
-      }
-    }
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(
+      module_str,
+      HasSubstr("var<private> x_200 : vec2<f32> = vec2<f32>(0.0, 0.0);"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VectorFloatUndefInitializer) {
@@ -1479,20 +1098,10 @@ TEST_F(SpvModuleScopeVarParserTest, VectorFloatUndefInitializer) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
-    x_200
-    private
-    undefined
-    __vec_2__f32
-    {
-      TypeConstructor[not set]{
-        __vec_2__f32
-        ScalarConstructor[not set]{0.000000}
-        ScalarConstructor[not set]{0.000000}
-      }
-    }
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(
+      module_str,
+      HasSubstr("var<private> x_200 : vec2<f32> = vec2<f32>(0.0, 0.0);"));
 
   // This example module emits ok, but is not valid SPIR-V in the first place.
   p->DeliberatelyInvalidSpirv();
@@ -1512,33 +1121,12 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixInitializer) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
-    x_200
-    private
-    undefined
-    __mat_2_3__f32
-    {
-      TypeConstructor[not set]{
-        __mat_2_3__f32
-        TypeConstructor[not set]{
-          __vec_2__f32
-          ScalarConstructor[not set]{1.500000}
-          ScalarConstructor[not set]{2.000000}
-        }
-        TypeConstructor[not set]{
-          __vec_2__f32
-          ScalarConstructor[not set]{2.000000}
-          ScalarConstructor[not set]{3.000000}
-        }
-        TypeConstructor[not set]{
-          __vec_2__f32
-          ScalarConstructor[not set]{3.000000}
-          ScalarConstructor[not set]{4.000000}
-        }
-      }
-    }
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str,
+              HasSubstr("var<private> x_200 : mat3x2<f32> = mat3x2<f32>("
+                        "vec2<f32>(1.5, 2.0), "
+                        "vec2<f32>(2.0, 3.0), "
+                        "vec2<f32>(3.0, 4.0));"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, MatrixNullInitializer) {
@@ -1549,33 +1137,12 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixNullInitializer) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
-    x_200
-    private
-    undefined
-    __mat_2_3__f32
-    {
-      TypeConstructor[not set]{
-        __mat_2_3__f32
-        TypeConstructor[not set]{
-          __vec_2__f32
-          ScalarConstructor[not set]{0.000000}
-          ScalarConstructor[not set]{0.000000}
-        }
-        TypeConstructor[not set]{
-          __vec_2__f32
-          ScalarConstructor[not set]{0.000000}
-          ScalarConstructor[not set]{0.000000}
-        }
-        TypeConstructor[not set]{
-          __vec_2__f32
-          ScalarConstructor[not set]{0.000000}
-          ScalarConstructor[not set]{0.000000}
-        }
-      }
-    }
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str,
+              HasSubstr("var<private> x_200 : mat3x2<f32> = mat3x2<f32>("
+                        "vec2<f32>(0.0, 0.0), "
+                        "vec2<f32>(0.0, 0.0), "
+                        "vec2<f32>(0.0, 0.0));"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, MatrixUndefInitializer) {
@@ -1586,33 +1153,12 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixUndefInitializer) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
-    x_200
-    private
-    undefined
-    __mat_2_3__f32
-    {
-      TypeConstructor[not set]{
-        __mat_2_3__f32
-        TypeConstructor[not set]{
-          __vec_2__f32
-          ScalarConstructor[not set]{0.000000}
-          ScalarConstructor[not set]{0.000000}
-        }
-        TypeConstructor[not set]{
-          __vec_2__f32
-          ScalarConstructor[not set]{0.000000}
-          ScalarConstructor[not set]{0.000000}
-        }
-        TypeConstructor[not set]{
-          __vec_2__f32
-          ScalarConstructor[not set]{0.000000}
-          ScalarConstructor[not set]{0.000000}
-        }
-      }
-    }
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str,
+              HasSubstr("var<private> x_200 : mat3x2<f32> = mat3x2<f32>("
+                        "vec2<f32>(0.0, 0.0), "
+                        "vec2<f32>(0.0, 0.0), "
+                        "vec2<f32>(0.0, 0.0));"));
 
   // This example module emits ok, but is not valid SPIR-V in the first place.
   p->DeliberatelyInvalidSpirv();
@@ -1627,20 +1173,11 @@ TEST_F(SpvModuleScopeVarParserTest, ArrayInitializer) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
-    x_200
-    private
-    undefined
-    __array__u32_2
-    {
-      TypeConstructor[not set]{
-        __array__u32_2
-        ScalarConstructor[not set]{1u}
-        ScalarConstructor[not set]{2u}
-      }
-    }
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(
+      module_str,
+      HasSubstr(
+          "var<private> x_200 : array<u32, 2u> = array<u32, 2u>(1u, 2u);"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ArrayNullInitializer) {
@@ -1651,20 +1188,11 @@ TEST_F(SpvModuleScopeVarParserTest, ArrayNullInitializer) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
-    x_200
-    private
-    undefined
-    __array__u32_2
-    {
-      TypeConstructor[not set]{
-        __array__u32_2
-        ScalarConstructor[not set]{0u}
-        ScalarConstructor[not set]{0u}
-      }
-    }
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(
+      module_str,
+      HasSubstr(
+          "var<private> x_200 : array<u32, 2u> = array<u32, 2u>(0u, 0u);"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ArrayUndefInitializer) {
@@ -1675,20 +1203,11 @@ TEST_F(SpvModuleScopeVarParserTest, ArrayUndefInitializer) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
-    x_200
-    private
-    undefined
-    __array__u32_2
-    {
-      TypeConstructor[not set]{
-        __array__u32_2
-        ScalarConstructor[not set]{0u}
-        ScalarConstructor[not set]{0u}
-      }
-    }
-  })"));
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(
+      module_str,
+      HasSubstr(
+          "var<private> x_200 : array<u32, 2u> = array<u32, 2u>(0u, 0u);"));
 
   // This example module emits ok, but is not valid SPIR-V in the first place.
   p->DeliberatelyInvalidSpirv();
@@ -1705,25 +1224,10 @@ TEST_F(SpvModuleScopeVarParserTest, StructInitializer) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
-    x_200
-    private
-    undefined
-    __type_name_S
-    {
-      TypeConstructor[not set]{
-        __type_name_S
-        ScalarConstructor[not set]{1u}
-        ScalarConstructor[not set]{1.500000}
-        TypeConstructor[not set]{
-          __array__u32_2
-          ScalarConstructor[not set]{1u}
-          ScalarConstructor[not set]{2u}
-        }
-      }
-    }
-  })"))
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(
+      module_str,
+      HasSubstr("var<private> x_200 : S = S(1u, 1.5, array<u32, 2u>(1u, 2u));"))
       << module_str;
 }
 
@@ -1736,25 +1240,10 @@ TEST_F(SpvModuleScopeVarParserTest, StructNullInitializer) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
-    x_200
-    private
-    undefined
-    __type_name_S
-    {
-      TypeConstructor[not set]{
-        __type_name_S
-        ScalarConstructor[not set]{0u}
-        ScalarConstructor[not set]{0.000000}
-        TypeConstructor[not set]{
-          __array__u32_2
-          ScalarConstructor[not set]{0u}
-          ScalarConstructor[not set]{0u}
-        }
-      }
-    }
-  })"))
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(
+      module_str,
+      HasSubstr("var<private> x_200 : S = S(0u, 0.0, array<u32, 2u>(0u, 0u));"))
       << module_str;
 }
 
@@ -1766,28 +1255,12 @@ TEST_F(SpvModuleScopeVarParserTest, StructUndefInitializer) {
      %200 = OpVariable %ptr Private %const
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
 
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
-    x_200
-    private
-    undefined
-    __type_name_S
-    {
-      TypeConstructor[not set]{
-        __type_name_S
-        ScalarConstructor[not set]{0u}
-        ScalarConstructor[not set]{0.000000}
-        TypeConstructor[not set]{
-          __array__u32_2
-          ScalarConstructor[not set]{0u}
-          ScalarConstructor[not set]{0u}
-        }
-      }
-    }
-  })"))
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(
+      module_str,
+      HasSubstr("var<private> x_200 : S = S(0u, 0.0, array<u32, 2u>(0u, 0u));"))
       << module_str;
 
   // This example module emits ok, but is not valid SPIR-V in the first place.
@@ -1834,18 +1307,10 @@ TEST_F(SpvModuleScopeVarParserTest, DescriptorGroupDecoration_Valid) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Variable{
-    Decorations{
-      GroupDecoration{3}
-      BindingDecoration{9}
-    }
-    x_1
-    storage
-    read_write
-    __type_name_S
-  })"))
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(
+      module_str,
+      HasSubstr("[[group(3), binding(9)]] var<storage, read_write> x_1 : S;"))
       << module_str;
 }
 
@@ -1893,18 +1358,10 @@ TEST_F(SpvModuleScopeVarParserTest, BindingDecoration_Valid) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{3}
-    }
-    x_1
-    storage
-    read_write
-    __type_name_S
-  })"))
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(
+      module_str,
+      HasSubstr("[[group(0), binding(3)]] var<storage, read_write> x_1 : S;"))
       << module_str;
 }
 
@@ -1953,25 +1410,17 @@ TEST_F(SpvModuleScopeVarParserTest,
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Arr -> __array__u32_2_stride_4
-  Struct S {
-    [[block]]
-    StructMember{[[ offset 0 ]] field0: __u32}
-    StructMember{[[ offset 4 ]] field1: __f32}
-    StructMember{[[ offset 8 ]] field2: __type_name_Arr}
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_1
-    storage
-    read_write
-    __type_name_S
-  }
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str, HasSubstr(R"(type Arr = [[stride(4)]] array<u32, 2u>;
+
+[[block]]
+struct S {
+  field0 : u32;
+  field1 : f32;
+  field2 : Arr;
+};
+
+[[group(0), binding(0)]] var<storage, read_write> x_1 : S;
 )")) << module_str;
 }
 
@@ -1996,23 +1445,14 @@ TEST_F(SpvModuleScopeVarParserTest, ColMajorDecoration_Dropped) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Struct S {
-    [[block]]
-    StructMember{[[ offset 0 ]] field0: __mat_2_3__f32}
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    myvar
-    storage
-    read_write
-    __type_name_S
-  }
-})")) << module_str;
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str, HasSubstr(R"([[block]]
+struct S {
+  field0 : mat3x2<f32>;
+};
+
+[[group(0), binding(0)]] var<storage, read_write> myvar : S;
+)")) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Natural_Dropped) {
@@ -2035,23 +1475,14 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Natural_Dropped) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Struct S {
-    [[block]]
-    StructMember{[[ offset 0 ]] field0: __mat_2_3__f32}
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    myvar
-    storage
-    read_write
-    __type_name_S
-  }
-})")) << module_str;
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str, HasSubstr(R"([[block]]
+struct S {
+  field0 : mat3x2<f32>;
+};
+
+[[group(0), binding(0)]] var<storage, read_write> myvar : S;
+)")) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration) {
@@ -2074,23 +1505,15 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Struct S {
-    [[block]]
-    StructMember{[[ stride 64 tint_internal(disable_validation__ignore_stride) offset 0 ]] field0: __mat_2_3__f32}
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    myvar
-    storage
-    read_write
-    __type_name_S
-  }
-})")) << module_str;
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str, HasSubstr(R"([[block]]
+struct S {
+  [[stride(64), internal(disable_validation__ignore_stride)]]
+  field0 : mat3x2<f32>;
+};
+
+[[group(0), binding(0)]] var<storage, read_write> myvar : S;
+)")) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, RowMajorDecoration_IsError) {
@@ -2136,24 +1559,15 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_AllMembers) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Struct S {
-    [[block]]
-    StructMember{[[ offset 0 ]] field0: __f32}
-    StructMember{[[ offset 4 ]] field1: __f32}
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_1
-    storage
-    read
-    __type_name_S
-  }
-})")) << module_str;
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str, HasSubstr(R"([[block]]
+struct S {
+  field0 : f32;
+  field1 : f32;
+};
+
+[[group(0), binding(0)]] var<storage, read> x_1 : S;
+)")) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_NotAllMembers) {
@@ -2175,24 +1589,15 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_NotAllMembers) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Struct S {
-    [[block]]
-    StructMember{[[ offset 0 ]] field0: __f32}
-    StructMember{[[ offset 4 ]] field1: __f32}
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_1
-    storage
-    read_write
-    __type_name_S
-  }
-})")) << module_str;
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str, HasSubstr(R"([[block]]
+struct S {
+  field0 : f32;
+  field1 : f32;
+};
+
+[[group(0), binding(0)]] var<storage, read_write> x_1 : S;
+)")) << module_str;
 }
 
 TEST_F(
@@ -2217,24 +1622,15 @@ TEST_F(
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Struct S {
-    [[block]]
-    StructMember{[[ offset 0 ]] field0: __f32}
-    StructMember{[[ offset 4 ]] field1: __f32}
-  }
-  Variable{
-    Decorations{
-      GroupDecoration{0}
-      BindingDecoration{0}
-    }
-    x_1
-    storage
-    read_write
-    __type_name_S
-  }
-})")) << module_str;
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str, HasSubstr(R"([[block]]
+struct S {
+  field0 : f32;
+  field1 : f32;
+};
+
+[[group(0), binding(0)]] var<storage, read_write> x_1 : S;
+)")) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_Id_TooBig) {
@@ -2277,21 +1673,10 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_True) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  VariableConst{
-    Decorations{
-      OverrideDecoration{12}
-    }
-    myconst
-    none
-    undefined
-    __bool
-    {
-      ScalarConstructor[not set]{true}
-    }
-  }
-})")) << module_str;
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str,
+              HasSubstr("[[override(12)]] let myconst : bool = true;"))
+      << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_False) {
@@ -2305,21 +1690,10 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_False) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  VariableConst{
-    Decorations{
-      OverrideDecoration{12}
-    }
-    myconst
-    none
-    undefined
-    __bool
-    {
-      ScalarConstructor[not set]{false}
-    }
-  }
-})")) << module_str;
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str,
+              HasSubstr("[[override(12)]] let myconst : bool = false;"))
+      << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_U32) {
@@ -2333,21 +1707,10 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_U32) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  VariableConst{
-    Decorations{
-      OverrideDecoration{12}
-    }
-    myconst
-    none
-    undefined
-    __u32
-    {
-      ScalarConstructor[not set]{42u}
-    }
-  }
-})")) << module_str;
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str,
+              HasSubstr("[[override(12)]] let myconst : u32 = 42u;"))
+      << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_I32) {
@@ -2361,21 +1724,9 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_I32) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  VariableConst{
-    Decorations{
-      OverrideDecoration{12}
-    }
-    myconst
-    none
-    undefined
-    __i32
-    {
-      ScalarConstructor[not set]{42}
-    }
-  }
-})")) << module_str;
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str, HasSubstr("[[override(12)]] let myconst : i32 = 42;"))
+      << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_F32) {
@@ -2389,21 +1740,10 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_F32) {
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  VariableConst{
-    Decorations{
-      OverrideDecoration{12}
-    }
-    myconst
-    none
-    undefined
-    __f32
-    {
-      ScalarConstructor[not set]{2.500000}
-    }
-  }
-})")) << module_str;
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str,
+              HasSubstr("[[override(12)]] let myconst : f32 = 2.5;"))
+      << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest,
@@ -2418,18 +1758,8 @@ TEST_F(SpvModuleScopeVarParserTest,
   )" + MainBody()));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  VariableConst{
-    myconst
-    none
-    undefined
-    __f32
-    {
-      ScalarConstructor[not set]{2.500000}
-    }
-  }
-})")) << module_str;
+  const auto module_str = test::ToString(p->program());
+  EXPECT_THAT(module_str, HasSubstr("let myconst : f32 = 2.5;")) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_UsedInFunction) {
@@ -2453,17 +1783,9 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_UsedInFunction) {
   EXPECT_TRUE(p->error().empty());
 
   Program program = p->program();
-  const auto got = ToString(program, fe.ast_body());
+  const auto got = test::ToString(program, fe.ast_body());
 
-  EXPECT_THAT(got, HasSubstr(R"(Return{
-  {
-    Binary[not set]{
-      Identifier[not set]{myconst}
-      add
-      Identifier[not set]{myconst}
-    }
-  }
-})")) << got;
+  EXPECT_THAT(got, HasSubstr("return (myconst + myconst);")) << got;
 }
 
 // Returns the start of a shader for testing SampleId,
@@ -2498,57 +1820,19 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_Direct) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
+  const auto module_str = test::ToString(p->program());
   const std::string expected =
-      R"(Module{
-  Variable{
-    x_1
-    private
-    undefined
-    __i32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        __i32
-        {
-          Identifier[not set]{x_1}
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __void
-  StageDecoration{fragment}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{sample_index}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Bitcast[not set]<__i32>{
-        Identifier[not set]{x_1_param}
-      }
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-  }
+      R"(var<private> x_1 : i32;
+
+fn main_1() {
+  let x_2 : i32 = x_1;
+  return;
+}
+
+[[stage(fragment)]]
+fn main([[builtin(sample_index)]] x_1_param : u32) {
+  x_1 = bitcast<i32>(x_1_param);
+  main_1();
 }
 )";
   EXPECT_EQ(module_str, expected) << module_str;
@@ -2566,7 +1850,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_CopyObject) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
+  const auto module_str = test::ToString(p->program());
   const std::string expected =
       R"(Module{
   Variable{
@@ -2650,55 +1934,21 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_AccessChain) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : i32;
 
-  // Correct declaration
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Variable{
-    x_1
-    private
-    undefined
-    __i32
-  })"))
-      << module_str;
+fn main_1() {
+  let x_2 : i32 = x_1;
+  return;
+}
 
-  // Correct creation of value
-  EXPECT_THAT(module_str, HasSubstr(R"(
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        __i32
-        {
-          Identifier[not set]{x_1}
-        }
-      }
-    })"));
-
-  // Correct parameter on entry point
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Function main -> __void
-  StageDecoration{fragment}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{sample_index}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Bitcast[not set]<__i32>{
-        Identifier[not set]{x_1_param}
-      }
-    })"))
-      << module_str;
+[[stage(fragment)]]
+fn main([[builtin(sample_index)]] x_1_param : u32) {
+  x_1 = bitcast<i32>(x_1_param);
+  main_1();
+}
+)";
+  EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_FunctParam) {
@@ -2738,54 +1988,18 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_Direct) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Variable{
-    x_1
-    private
-    undefined
-    __u32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        __u32
-        {
-          Identifier[not set]{x_1}
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __void
-  StageDecoration{fragment}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{sample_index}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Identifier[not set]{x_1_param}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : u32;
+
+fn main_1() {
+  let x_2 : u32 = x_1;
+  return;
+}
+
+[[stage(fragment)]]
+fn main([[builtin(sample_index)]] x_1_param : u32) {
+  x_1 = x_1_param;
+  main_1();
 }
 )";
   EXPECT_EQ(module_str, expected) << module_str;
@@ -2803,71 +2017,19 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_CopyObject) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Variable{
-    x_1
-    private
-    undefined
-    __u32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_11
-        none
-        undefined
-        __ptr_private__u32
-        {
-          UnaryOp[not set]{
-            address-of
-            Identifier[not set]{x_1}
-          }
-        }
-      }
-    }
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        __u32
-        {
-          UnaryOp[not set]{
-            indirection
-            Identifier[not set]{x_11}
-          }
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __void
-  StageDecoration{fragment}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{sample_index}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Identifier[not set]{x_1_param}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : u32;
+
+fn main_1() {
+  let x_11 : ptr<private, u32> = &(x_1);
+  let x_2 : u32 = *(x_11);
+  return;
+}
+
+[[stage(fragment)]]
+fn main([[builtin(sample_index)]] x_1_param : u32) {
+  x_1 = x_1_param;
+  main_1();
 }
 )";
   EXPECT_EQ(module_str, expected) << module_str;
@@ -2885,54 +2047,18 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_AccessChain) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Variable{
-    x_1
-    private
-    undefined
-    __u32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        __u32
-        {
-          Identifier[not set]{x_1}
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __void
-  StageDecoration{fragment}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{sample_index}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Identifier[not set]{x_1_param}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : u32;
+
+fn main_1() {
+  let x_2 : u32 = x_1;
+  return;
+}
+
+[[stage(fragment)]]
+fn main([[builtin(sample_index)]] x_1_param : u32) {
+  x_1 = x_1_param;
+  main_1();
 }
 )";
   EXPECT_EQ(module_str, expected) << module_str;
@@ -3037,59 +2163,21 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_Direct) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
 
-  // Correct declaration
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Variable{
-    x_1
-    private
-    undefined
-    __array__u32_1
-  })"))
-      << module_str;
+fn main_1() {
+  let x_3 : u32 = x_1[0];
+  return;
+}
 
-  // Correct creation of value
-  EXPECT_THAT(module_str, HasSubstr(R"(
-    VariableDeclStatement{
-      VariableConst{
-        x_3
-        none
-        undefined
-        __u32
-        {
-          ArrayAccessor[not set]{
-            Identifier[not set]{x_1}
-            ScalarConstructor[not set]{0}
-          }
-        }
-      }
-    })"));
-
-  // Correct parameter on entry point
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Function main -> __void
-  StageDecoration{fragment}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{sample_mask}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{0}
-      }
-      Identifier[not set]{x_1_param}
-    })"))
-      << module_str;
+[[stage(fragment)]]
+fn main([[builtin(sample_mask)]] x_1_param : u32) {
+  x_1[0] = x_1_param;
+  main_1();
+}
+)";
+  EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_CopyObject) {
@@ -3107,60 +2195,18 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_CopyObject) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Variable{
-    x_1
-    private
-    undefined
-    __array__u32_1
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_4
-        none
-        undefined
-        __u32
-        {
-          ArrayAccessor[not set]{
-            Identifier[not set]{x_1}
-            ScalarConstructor[not set]{0}
-          }
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __void
-  StageDecoration{fragment}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{sample_mask}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{0}
-      }
-      Identifier[not set]{x_1_param}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
+
+fn main_1() {
+  let x_4 : u32 = x_1[0];
+  return;
+}
+
+[[stage(fragment)]]
+fn main([[builtin(sample_mask)]] x_1_param : u32) {
+  x_1[0] = x_1_param;
+  main_1();
 }
 )";
   EXPECT_EQ(module_str, expected) << module_str;
@@ -3181,59 +2227,21 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_AccessChain) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
 
-  // Correct declaration
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Variable{
-    x_1
-    private
-    undefined
-    __array__u32_1
-  })"))
-      << module_str;
+fn main_1() {
+  let x_4 : u32 = x_1[0];
+  return;
+}
 
-  // Correct creation of value
-  EXPECT_THAT(module_str, HasSubstr(R"(
-    VariableDeclStatement{
-      VariableConst{
-        x_4
-        none
-        undefined
-        __u32
-        {
-          ArrayAccessor[not set]{
-            Identifier[not set]{x_1}
-            ScalarConstructor[not set]{0}
-          }
-        }
-      }
-    })"));
-
-  // Correct parameter on entry point
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Function main -> __void
-  StageDecoration{fragment}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{sample_mask}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{0}
-      }
-      Identifier[not set]{x_1_param}
-    })"))
-      << module_str;
+[[stage(fragment)]]
+fn main([[builtin(sample_mask)]] x_1_param : u32) {
+  x_1[0] = x_1_param;
+  main_1();
+}
+)";
+  EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_Direct) {
@@ -3250,62 +2258,18 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_Direct) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Variable{
-    x_1
-    private
-    undefined
-    __array__i32_1
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_3
-        none
-        undefined
-        __i32
-        {
-          ArrayAccessor[not set]{
-            Identifier[not set]{x_1}
-            ScalarConstructor[not set]{0}
-          }
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __void
-  StageDecoration{fragment}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{sample_mask}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{0}
-      }
-      Bitcast[not set]<__i32>{
-        Identifier[not set]{x_1_param}
-      }
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
+
+fn main_1() {
+  let x_3 : i32 = x_1[0];
+  return;
+}
+
+[[stage(fragment)]]
+fn main([[builtin(sample_mask)]] x_1_param : u32) {
+  x_1[0] = bitcast<i32>(x_1_param);
+  main_1();
 }
 )";
   EXPECT_EQ(module_str, expected) << module_str;
@@ -3326,62 +2290,18 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_CopyObject) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Variable{
-    x_1
-    private
-    undefined
-    __array__i32_1
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_4
-        none
-        undefined
-        __i32
-        {
-          ArrayAccessor[not set]{
-            Identifier[not set]{x_1}
-            ScalarConstructor[not set]{0}
-          }
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __void
-  StageDecoration{fragment}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{sample_mask}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{0}
-      }
-      Bitcast[not set]<__i32>{
-        Identifier[not set]{x_1_param}
-      }
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
+
+fn main_1() {
+  let x_4 : i32 = x_1[0];
+  return;
+}
+
+[[stage(fragment)]]
+fn main([[builtin(sample_mask)]] x_1_param : u32) {
+  x_1[0] = bitcast<i32>(x_1_param);
+  main_1();
 }
 )";
   EXPECT_EQ(module_str, expected) << module_str;
@@ -3402,62 +2322,18 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_AccessChain) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Variable{
-    x_1
-    private
-    undefined
-    __array__i32_1
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_4
-        none
-        undefined
-        __i32
-        {
-          ArrayAccessor[not set]{
-            Identifier[not set]{x_1}
-            ScalarConstructor[not set]{0}
-          }
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __void
-  StageDecoration{fragment}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{sample_mask}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{0}
-      }
-      Bitcast[not set]<__i32>{
-        Identifier[not set]{x_1_param}
-      }
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
+
+fn main_1() {
+  let x_4 : i32 = x_1[0];
+  return;
+}
+
+[[stage(fragment)]]
+fn main([[builtin(sample_mask)]] x_1_param : u32) {
+  x_1[0] = bitcast<i32>(x_1_param);
+  main_1();
 }
 )";
   EXPECT_EQ(module_str, expected) << module_str;
@@ -3496,51 +2372,23 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_U32_Direct) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{sample_mask}
- ]] x_1_1: __u32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __array__u32_1
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{0}
-      }
-      ScalarConstructor[not set]{0u}
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{fragment}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          ArrayAccessor[not set]{
-            Identifier[not set]{x_1}
-            ScalarConstructor[not set]{0}
-          }
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
+
+fn main_1() {
+  x_1[0] = 0u;
+  return;
+}
+
+struct main_out {
+  [[builtin(sample_mask)]]
+  x_1_1 : u32;
+};
+
+[[stage(fragment)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(x_1[0]);
 }
 )";
   EXPECT_EQ(module_str, expected);
@@ -3561,51 +2409,23 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_U32_CopyObject) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{sample_mask}
- ]] x_1_1: __u32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __array__u32_1
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{0}
-      }
-      ScalarConstructor[not set]{0u}
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{fragment}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          ArrayAccessor[not set]{
-            Identifier[not set]{x_1}
-            ScalarConstructor[not set]{0}
-          }
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
+
+fn main_1() {
+  x_1[0] = 0u;
+  return;
+}
+
+struct main_out {
+  [[builtin(sample_mask)]]
+  x_1_1 : u32;
+};
+
+[[stage(fragment)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(x_1[0]);
 }
 )";
   EXPECT_EQ(module_str, expected);
@@ -3626,51 +2446,23 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_U32_AccessChain) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{sample_mask}
- ]] x_1_1: __u32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __array__u32_1
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{0}
-      }
-      ScalarConstructor[not set]{0u}
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{fragment}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          ArrayAccessor[not set]{
-            Identifier[not set]{x_1}
-            ScalarConstructor[not set]{0}
-          }
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
+
+fn main_1() {
+  x_1[0] = 0u;
+  return;
+}
+
+struct main_out {
+  [[builtin(sample_mask)]]
+  x_1_1 : u32;
+};
+
+[[stage(fragment)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(x_1[0]);
 }
 )";
   EXPECT_EQ(module_str, expected);
@@ -3690,53 +2482,23 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_I32_Direct) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{sample_mask}
- ]] x_1_1: __u32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __array__i32_1
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{0}
-      }
-      ScalarConstructor[not set]{12}
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{fragment}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Bitcast[not set]<__u32>{
-            ArrayAccessor[not set]{
-              Identifier[not set]{x_1}
-              ScalarConstructor[not set]{0}
-            }
-          }
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
+
+fn main_1() {
+  x_1[0] = 12;
+  return;
+}
+
+struct main_out {
+  [[builtin(sample_mask)]]
+  x_1_1 : u32;
+};
+
+[[stage(fragment)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(bitcast<u32>(x_1[0]));
 }
 )";
   EXPECT_EQ(module_str, expected);
@@ -3757,53 +2519,23 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_I32_CopyObject) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{sample_mask}
- ]] x_1_1: __u32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __array__i32_1
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{0}
-      }
-      ScalarConstructor[not set]{12}
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{fragment}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Bitcast[not set]<__u32>{
-            ArrayAccessor[not set]{
-              Identifier[not set]{x_1}
-              ScalarConstructor[not set]{0}
-            }
-          }
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
+
+fn main_1() {
+  x_1[0] = 12;
+  return;
+}
+
+struct main_out {
+  [[builtin(sample_mask)]]
+  x_1_1 : u32;
+};
+
+[[stage(fragment)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(bitcast<u32>(x_1[0]));
 }
 )";
   EXPECT_EQ(module_str, expected);
@@ -3824,53 +2556,23 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_I32_AccessChain) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{sample_mask}
- ]] x_1_1: __u32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __array__i32_1
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{0}
-      }
-      ScalarConstructor[not set]{12}
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{fragment}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Bitcast[not set]<__u32>{
-            ArrayAccessor[not set]{
-              Identifier[not set]{x_1}
-              ScalarConstructor[not set]{0}
-            }
-          }
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
+
+fn main_1() {
+  x_1[0] = 12;
+  return;
+}
+
+struct main_out {
+  [[builtin(sample_mask)]]
+  x_1_1 : u32;
+};
+
+[[stage(fragment)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(bitcast<u32>(x_1[0]));
 }
 )";
   EXPECT_EQ(module_str, expected);
@@ -3890,63 +2592,29 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_WithStride) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(type Arr = [[stride(4)]] array<u32, 1u>;
 
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Arr -> __array__u32_1_stride_4
-)")) << module_str;
+type Arr_1 = [[stride(4)]] array<u32, 2u>;
 
-  // Correct declaration
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Variable{
-    x_1
-    private
-    undefined
-    __type_name_Arr
-  })"))
-      << module_str;
+type Arr_2 = [[stride(4)]] array<i32, 1u>;
 
-  // Correct creation of value
-  EXPECT_THAT(module_str, HasSubstr(R"(
-    VariableDeclStatement{
-      VariableConst{
-        x_3
-        none
-        undefined
-        __u32
-        {
-          ArrayAccessor[not set]{
-            Identifier[not set]{x_1}
-            ScalarConstructor[not set]{0}
-          }
-        }
-      }
-    })"));
+type Arr_3 = [[stride(4)]] array<i32, 2u>;
 
-  // Correct parameter on entry point
-  EXPECT_THAT(module_str, HasSubstr(R"(
-  Function main -> __void
-  StageDecoration{fragment}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{sample_mask}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{0}
-      }
-      Identifier[not set]{x_1_param}
-    })"))
-      << module_str;
+var<private> x_1 : Arr;
+
+fn main_1() {
+  let x_3 : u32 = x_1[0];
+  return;
+}
+
+[[stage(fragment)]]
+fn main([[builtin(sample_mask)]] x_1_param : u32) {
+  x_1[0] = x_1_param;
+  main_1();
+}
+)";
+  EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_WithStride) {
@@ -3963,55 +2631,31 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_WithStride) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Arr -> __array__u32_1_stride_4
-  Arr_1 -> __array__u32_2_stride_4
-  Arr_2 -> __array__i32_1_stride_4
-  Arr_3 -> __array__i32_2_stride_4
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{sample_mask}
- ]] x_1_1: __u32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __type_name_Arr
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{0}
-      }
-      ScalarConstructor[not set]{0u}
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{fragment}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          ArrayAccessor[not set]{
-            Identifier[not set]{x_1}
-            ScalarConstructor[not set]{0}
-          }
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(type Arr = [[stride(4)]] array<u32, 1u>;
+
+type Arr_1 = [[stride(4)]] array<u32, 2u>;
+
+type Arr_2 = [[stride(4)]] array<i32, 1u>;
+
+type Arr_3 = [[stride(4)]] array<i32, 2u>;
+
+var<private> x_1 : Arr;
+
+fn main_1() {
+  x_1[0] = 0u;
+  return;
+}
+
+struct main_out {
+  [[builtin(sample_mask)]]
+  x_1_1 : u32;
+};
+
+[[stage(fragment)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(x_1[0]);
 }
 )";
   EXPECT_EQ(module_str, expected);
@@ -4051,74 +2695,26 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_Direct) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_4_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __i32
-  }
-  Variable{
-    x_4
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        __i32
-        {
-          Identifier[not set]{x_1}
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{vertex_index}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Bitcast[not set]<__i32>{
-        Identifier[not set]{x_1_param}
-      }
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_4}
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : i32;
+
+var<private> x_4 : vec4<f32>;
+
+fn main_1() {
+  let x_2 : i32 = x_1;
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  x_4_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main([[builtin(vertex_index)]] x_1_param : u32) -> main_out {
+  x_1 = bitcast<i32>(x_1_param);
+  main_1();
+  return main_out(x_4);
 }
 )";
   EXPECT_EQ(module_str, expected) << module_str;
@@ -4136,91 +2732,27 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_CopyObject) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_4_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __i32
-  }
-  Variable{
-    x_4
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_14
-        none
-        undefined
-        __ptr_private__i32
-        {
-          UnaryOp[not set]{
-            address-of
-            Identifier[not set]{x_1}
-          }
-        }
-      }
-    }
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        __i32
-        {
-          UnaryOp[not set]{
-            indirection
-            Identifier[not set]{x_14}
-          }
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{vertex_index}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Bitcast[not set]<__i32>{
-        Identifier[not set]{x_1_param}
-      }
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_4}
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : i32;
+
+var<private> x_4 : vec4<f32>;
+
+fn main_1() {
+  let x_14 : ptr<private, i32> = &(x_1);
+  let x_2 : i32 = *(x_14);
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  x_4_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main([[builtin(vertex_index)]] x_1_param : u32) -> main_out {
+  x_1 = bitcast<i32>(x_1_param);
+  main_1();
+  return main_out(x_4);
 }
 )";
   EXPECT_EQ(module_str, expected);
@@ -4238,74 +2770,26 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_AccessChain) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_4_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __i32
-  }
-  Variable{
-    x_4
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        __i32
-        {
-          Identifier[not set]{x_1}
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{vertex_index}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Bitcast[not set]<__i32>{
-        Identifier[not set]{x_1_param}
-      }
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_4}
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : i32;
+
+var<private> x_4 : vec4<f32>;
+
+fn main_1() {
+  let x_2 : i32 = x_1;
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  x_4_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main([[builtin(vertex_index)]] x_1_param : u32) -> main_out {
+  x_1 = bitcast<i32>(x_1_param);
+  main_1();
+  return main_out(x_4);
 }
 )";
   EXPECT_EQ(module_str, expected);
@@ -4322,72 +2806,26 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_Direct) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_4_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __u32
-  }
-  Variable{
-    x_4
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        __u32
-        {
-          Identifier[not set]{x_1}
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{vertex_index}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Identifier[not set]{x_1_param}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_4}
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : u32;
+
+var<private> x_4 : vec4<f32>;
+
+fn main_1() {
+  let x_2 : u32 = x_1;
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  x_4_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main([[builtin(vertex_index)]] x_1_param : u32) -> main_out {
+  x_1 = x_1_param;
+  main_1();
+  return main_out(x_4);
 }
 )";
   EXPECT_EQ(module_str, expected);
@@ -4405,89 +2843,27 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_CopyObject) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_4_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __u32
-  }
-  Variable{
-    x_4
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_14
-        none
-        undefined
-        __ptr_private__u32
-        {
-          UnaryOp[not set]{
-            address-of
-            Identifier[not set]{x_1}
-          }
-        }
-      }
-    }
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        __u32
-        {
-          UnaryOp[not set]{
-            indirection
-            Identifier[not set]{x_14}
-          }
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{vertex_index}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Identifier[not set]{x_1_param}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_4}
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : u32;
+
+var<private> x_4 : vec4<f32>;
+
+fn main_1() {
+  let x_14 : ptr<private, u32> = &(x_1);
+  let x_2 : u32 = *(x_14);
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  x_4_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main([[builtin(vertex_index)]] x_1_param : u32) -> main_out {
+  x_1 = x_1_param;
+  main_1();
+  return main_out(x_4);
 }
 )";
   EXPECT_EQ(module_str, expected);
@@ -4505,72 +2881,26 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_AccessChain) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_4_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __u32
-  }
-  Variable{
-    x_4
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        __u32
-        {
-          Identifier[not set]{x_1}
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{vertex_index}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Identifier[not set]{x_1_param}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_4}
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : u32;
+
+var<private> x_4 : vec4<f32>;
+
+fn main_1() {
+  let x_2 : u32 = x_1;
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  x_4_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main([[builtin(vertex_index)]] x_1_param : u32) -> main_out {
+  x_1 = x_1_param;
+  main_1();
+  return main_out(x_4);
 }
 )";
   EXPECT_EQ(module_str, expected);
@@ -4636,74 +2966,26 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_Direct) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] position_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __i32
-  }
-  Variable{
-    position
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        __i32
-        {
-          Identifier[not set]{x_1}
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{instance_index}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Bitcast[not set]<__i32>{
-        Identifier[not set]{x_1_param}
-      }
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{position}
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : i32;
+
+var<private> position : vec4<f32>;
+
+fn main_1() {
+  let x_2 : i32 = x_1;
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  position_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main([[builtin(instance_index)]] x_1_param : u32) -> main_out {
+  x_1 = bitcast<i32>(x_1_param);
+  main_1();
+  return main_out(position);
 }
 )";
   EXPECT_EQ(module_str, expected) << module_str;
@@ -4721,91 +3003,27 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_CopyObject) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] position_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __i32
-  }
-  Variable{
-    position
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_14
-        none
-        undefined
-        __ptr_private__i32
-        {
-          UnaryOp[not set]{
-            address-of
-            Identifier[not set]{x_1}
-          }
-        }
-      }
-    }
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        __i32
-        {
-          UnaryOp[not set]{
-            indirection
-            Identifier[not set]{x_14}
-          }
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{instance_index}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Bitcast[not set]<__i32>{
-        Identifier[not set]{x_1_param}
-      }
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{position}
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : i32;
+
+var<private> position : vec4<f32>;
+
+fn main_1() {
+  let x_14 : ptr<private, i32> = &(x_1);
+  let x_2 : i32 = *(x_14);
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  position_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main([[builtin(instance_index)]] x_1_param : u32) -> main_out {
+  x_1 = bitcast<i32>(x_1_param);
+  main_1();
+  return main_out(position);
 }
 )";
   EXPECT_EQ(module_str, expected) << module_str;
@@ -4823,74 +3041,26 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_AccessChain) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] position_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __i32
-  }
-  Variable{
-    position
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        __i32
-        {
-          Identifier[not set]{x_1}
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{instance_index}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Bitcast[not set]<__i32>{
-        Identifier[not set]{x_1_param}
-      }
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{position}
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : i32;
+
+var<private> position : vec4<f32>;
+
+fn main_1() {
+  let x_2 : i32 = x_1;
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  position_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main([[builtin(instance_index)]] x_1_param : u32) -> main_out {
+  x_1 = bitcast<i32>(x_1_param);
+  main_1();
+  return main_out(position);
 }
 )";
   EXPECT_EQ(module_str, expected) << module_str;
@@ -4931,72 +3101,26 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_Direct) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] position_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __u32
-  }
-  Variable{
-    position
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        __u32
-        {
-          Identifier[not set]{x_1}
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{instance_index}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Identifier[not set]{x_1_param}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{position}
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : u32;
+
+var<private> position : vec4<f32>;
+
+fn main_1() {
+  let x_2 : u32 = x_1;
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  position_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main([[builtin(instance_index)]] x_1_param : u32) -> main_out {
+  x_1 = x_1_param;
+  main_1();
+  return main_out(position);
 }
 )";
   EXPECT_EQ(module_str, expected);
@@ -5014,89 +3138,27 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_CopyObject) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] position_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __u32
-  }
-  Variable{
-    position
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_14
-        none
-        undefined
-        __ptr_private__u32
-        {
-          UnaryOp[not set]{
-            address-of
-            Identifier[not set]{x_1}
-          }
-        }
-      }
-    }
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        __u32
-        {
-          UnaryOp[not set]{
-            indirection
-            Identifier[not set]{x_14}
-          }
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{instance_index}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Identifier[not set]{x_1_param}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{position}
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : u32;
+
+var<private> position : vec4<f32>;
+
+fn main_1() {
+  let x_14 : ptr<private, u32> = &(x_1);
+  let x_2 : u32 = *(x_14);
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  position_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main([[builtin(instance_index)]] x_1_param : u32) -> main_out {
+  x_1 = x_1_param;
+  main_1();
+  return main_out(position);
 }
 )";
   EXPECT_EQ(module_str, expected);
@@ -5114,72 +3176,26 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_AccessChain) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] position_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __u32
-  }
-  Variable{
-    position
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        __u32
-        {
-          Identifier[not set]{x_1}
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{instance_index}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Identifier[not set]{x_1_param}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{position}
-        }
-      }
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : u32;
+
+var<private> position : vec4<f32>;
+
+fn main_1() {
+  let x_2 : u32 = x_1;
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  position_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main([[builtin(instance_index)]] x_1_param : u32) -> main_out {
+  x_1 = x_1_param;
+  main_1();
+  return main_out(position);
 }
 )";
   EXPECT_EQ(module_str, expected);
@@ -5245,48 +3261,48 @@ inline std::ostream& operator<<(std::ostream& o, ComputeBuiltinInputCase c) {
 
 std::string WgslType(std::string spirv_type) {
   if (spirv_type == "%uint") {
-    return "__u32";
+    return "u32";
   }
   if (spirv_type == "%int") {
-    return "__i32";
+    return "i32";
   }
   if (spirv_type == "%v3uint") {
-    return "__vec_3__u32";
+    return "vec3<u32>";
   }
   if (spirv_type == "%v3int") {
-    return "__vec_3__i32";
+    return "vec3<i32>";
   }
   return "error";
 }
 
 std::string UnsignedWgslType(std::string wgsl_type) {
-  if (wgsl_type == "__u32") {
-    return "__u32";
+  if (wgsl_type == "u32") {
+    return "u32";
   }
-  if (wgsl_type == "__i32") {
-    return "__u32";
+  if (wgsl_type == "i32") {
+    return "u32";
   }
-  if (wgsl_type == "__vec_3__u32") {
-    return "__vec_3__u32";
+  if (wgsl_type == "vec3<u32>") {
+    return "vec3<u32>";
   }
-  if (wgsl_type == "__vec_3__i32") {
-    return "__vec_3__u32";
+  if (wgsl_type == "vec3<i32>") {
+    return "vec3<u32>";
   }
   return "error";
 }
 
 std::string SignedWgslType(std::string wgsl_type) {
-  if (wgsl_type == "__u32") {
-    return "__i32";
+  if (wgsl_type == "u32") {
+    return "i32";
   }
-  if (wgsl_type == "__i32") {
-    return "__i32";
+  if (wgsl_type == "i32") {
+    return "i32";
   }
-  if (wgsl_type == "__vec_3__u32") {
-    return "__vec_3__i32";
+  if (wgsl_type == "vec3<u32>") {
+    return "vec3<i32>";
   }
-  if (wgsl_type == "__vec_3__i32") {
-    return "__vec_3__i32";
+  if (wgsl_type == "vec3<i32>") {
+    return "vec3<i32>";
   }
   return "error";
 }
@@ -5296,6 +3312,7 @@ using SpvModuleScopeVarParserTest_ComputeBuiltin =
 
 TEST_P(SpvModuleScopeVarParserTest_ComputeBuiltin, Load_Direct) {
   const auto wgsl_type = WgslType(GetParam().spirv_store_type);
+  const auto wgsl_builtin = GetParam().wgsl_builtin;
   const auto unsigned_wgsl_type = UnsignedWgslType(wgsl_type);
   const auto signed_wgsl_type = SignedWgslType(wgsl_type);
   const std::string assembly =
@@ -5312,74 +3329,37 @@ TEST_P(SpvModuleScopeVarParserTest_ComputeBuiltin, Load_Direct) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Variable{
-    x_1
-    private
-    undefined
-    )" + wgsl_type + R"(
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        )" + wgsl_type + R"(
-        {
-          Identifier[not set]{x_1}
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __void
-  StageDecoration{compute}
-  WorkgroupDecoration{
-    ScalarConstructor[not set]{1}
-    ScalarConstructor[not set]{1}
-    ScalarConstructor[not set]{1}
-  }
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{)" + GetParam().wgsl_builtin +
-                               R"(}
-      }
-      x_1_param
-      none
-      undefined
-      )" + unsigned_wgsl_type + R"(
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1})" +
-                               (wgsl_type == unsigned_wgsl_type ?
-                                                                R"(
-      Identifier[not set]{x_1_param})"
-                                                                :
-                                                                R"(
-      Bitcast[not set]<)" + signed_wgsl_type + R"(>{
-        Identifier[not set]{x_1_param}
-      })") + R"(
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  std::string expected = R"(var<private> x_1 : ${wgsl_type};
+
+fn main_1() {
+  let x_2 : ${wgsl_type} = x_1;
+  return;
+}
+
+[[stage(compute), workgroup_size(1, 1, 1)]]
+fn main([[builtin(${wgsl_builtin})]] x_1_param : ${unsigned_wgsl_type}) {
+  x_1 = ${assignment_value};
+  main_1();
 }
 )";
+
+  expected = utils::ReplaceAll(expected, "${wgsl_type}", wgsl_type);
+  expected =
+      utils::ReplaceAll(expected, "${unsigned_wgsl_type}", unsigned_wgsl_type);
+  expected = utils::ReplaceAll(expected, "${wgsl_builtin}", wgsl_builtin);
+  expected =
+      utils::ReplaceAll(expected, "${assignment_value}",
+                        (wgsl_type == unsigned_wgsl_type)
+                            ? "x_1_param"
+                            : "bitcast<" + signed_wgsl_type + ">(x_1_param)");
+
   EXPECT_EQ(module_str, expected) << module_str;
 }
 
 TEST_P(SpvModuleScopeVarParserTest_ComputeBuiltin, Load_CopyObject) {
   const auto wgsl_type = WgslType(GetParam().spirv_store_type);
+  const auto wgsl_builtin = GetParam().wgsl_builtin;
   const auto unsigned_wgsl_type = UnsignedWgslType(wgsl_type);
   const auto signed_wgsl_type = SignedWgslType(wgsl_type);
   const std::string assembly =
@@ -5397,92 +3377,38 @@ TEST_P(SpvModuleScopeVarParserTest_ComputeBuiltin, Load_CopyObject) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Variable{
-    x_1
-    private
-    undefined
-    )" + wgsl_type + R"(
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_13
-        none
-        undefined
-        __ptr_private)" + wgsl_type +
-                               R"(
-        {
-          UnaryOp[not set]{
-            address-of
-            Identifier[not set]{x_1}
-          }
-        }
-      }
-    }
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        )" + wgsl_type + R"(
-        {
-          UnaryOp[not set]{
-            indirection
-            Identifier[not set]{x_13}
-          }
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __void
-  StageDecoration{compute}
-  WorkgroupDecoration{
-    ScalarConstructor[not set]{1}
-    ScalarConstructor[not set]{1}
-    ScalarConstructor[not set]{1}
-  }
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{)" + GetParam().wgsl_builtin +
-                               R"(}
-      }
-      x_1_param
-      none
-      undefined
-      )" + unsigned_wgsl_type + R"(
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1})" +
-                               (wgsl_type == unsigned_wgsl_type ?
-                                                                R"(
-      Identifier[not set]{x_1_param})"
-                                                                :
-                                                                R"(
-      Bitcast[not set]<)" + signed_wgsl_type + R"(>{
-        Identifier[not set]{x_1_param}
-      })") + R"(
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  std::string expected = R"(var<private> x_1 : ${wgsl_type};
+
+fn main_1() {
+  let x_13 : ptr<private, ${wgsl_type}> = &(x_1);
+  let x_2 : ${wgsl_type} = *(x_13);
+  return;
+}
+
+[[stage(compute), workgroup_size(1, 1, 1)]]
+fn main([[builtin(${wgsl_builtin})]] x_1_param : ${unsigned_wgsl_type}) {
+  x_1 = ${assignment_value};
+  main_1();
 }
 )";
+
+  expected = utils::ReplaceAll(expected, "${wgsl_type}", wgsl_type);
+  expected =
+      utils::ReplaceAll(expected, "${unsigned_wgsl_type}", unsigned_wgsl_type);
+  expected = utils::ReplaceAll(expected, "${wgsl_builtin}", wgsl_builtin);
+  expected =
+      utils::ReplaceAll(expected, "${assignment_value}",
+                        (wgsl_type == unsigned_wgsl_type)
+                            ? "x_1_param"
+                            : "bitcast<" + signed_wgsl_type + ">(x_1_param)");
+
   EXPECT_EQ(module_str, expected) << module_str;
 }
 
 TEST_P(SpvModuleScopeVarParserTest_ComputeBuiltin, Load_AccessChain) {
   const auto wgsl_type = WgslType(GetParam().spirv_store_type);
+  const auto wgsl_builtin = GetParam().wgsl_builtin;
   const auto unsigned_wgsl_type = UnsignedWgslType(wgsl_type);
   const auto signed_wgsl_type = SignedWgslType(wgsl_type);
   const std::string assembly =
@@ -5500,69 +3426,31 @@ TEST_P(SpvModuleScopeVarParserTest_ComputeBuiltin, Load_AccessChain) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto module_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Variable{
-    x_1
-    private
-    undefined
-    )" + wgsl_type + R"(
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        )" + wgsl_type + R"(
-        {
-          Identifier[not set]{x_1}
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __void
-  StageDecoration{compute}
-  WorkgroupDecoration{
-    ScalarConstructor[not set]{1}
-    ScalarConstructor[not set]{1}
-    ScalarConstructor[not set]{1}
-  }
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{)" + GetParam().wgsl_builtin +
-                               R"(}
-      }
-      x_1_param
-      none
-      undefined
-      )" + unsigned_wgsl_type + R"(
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1})" +
-                               (wgsl_type == unsigned_wgsl_type ?
-                                                                R"(
-      Identifier[not set]{x_1_param})"
-                                                                :
-                                                                R"(
-      Bitcast[not set]<)" + signed_wgsl_type + R"(>{
-        Identifier[not set]{x_1_param}
-      })") + R"(
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-  }
+  const auto module_str = test::ToString(p->program());
+  std::string expected = R"(var<private> x_1 : ${wgsl_type};
+
+fn main_1() {
+  let x_2 : ${wgsl_type} = x_1;
+  return;
+}
+
+[[stage(compute), workgroup_size(1, 1, 1)]]
+fn main([[builtin(${wgsl_builtin})]] x_1_param : ${unsigned_wgsl_type}) {
+  x_1 = ${assignment_value};
+  main_1();
 }
 )";
+
+  expected = utils::ReplaceAll(expected, "${wgsl_type}", wgsl_type);
+  expected =
+      utils::ReplaceAll(expected, "${unsigned_wgsl_type}", unsigned_wgsl_type);
+  expected = utils::ReplaceAll(expected, "${wgsl_builtin}", wgsl_builtin);
+  expected =
+      utils::ReplaceAll(expected, "${assignment_value}",
+                        (wgsl_type == unsigned_wgsl_type)
+                            ? "x_1_param"
+                            : "bitcast<" + signed_wgsl_type + ">(x_1_param)");
+
   EXPECT_EQ(module_str, expected) << module_str;
 }
 
@@ -5708,15 +3596,8 @@ TEST_F(SpvModuleScopeVarParserTest, InputVarsConvertedToPrivate) {
 
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
-  const std::string expected =
-      R"(Variable{
-    x_1
-    private
-    undefined
-    __u32
-  }
-)";
+  const auto got = test::ToString(p->program());
+  const std::string expected = "var<private> x_1 : u32;";
   EXPECT_THAT(got, HasSubstr(expected)) << got;
 }
 
@@ -5729,15 +3610,8 @@ TEST_F(SpvModuleScopeVarParserTest, OutputVarsConvertedToPrivate) {
 
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
-  const std::string expected =
-      R"(Variable{
-    x_1
-    private
-    undefined
-    __u32
-  }
-)";
+  const auto got = test::ToString(p->program());
+  const std::string expected = "var<private> x_1 : u32;";
   EXPECT_THAT(got, HasSubstr(expected)) << got;
 }
 
@@ -5751,18 +3625,8 @@ TEST_F(SpvModuleScopeVarParserTest,
 
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
-  const std::string expected =
-      R"(Variable{
-    x_1
-    private
-    undefined
-    __u32
-    {
-      ScalarConstructor[not set]{1u}
-    }
-  }
-)";
+  const auto got = test::ToString(p->program());
+  const std::string expected = "var<private> x_1 : u32 = 1u;";
   EXPECT_THAT(got, HasSubstr(expected)) << got;
 }
 
@@ -5782,21 +3646,9 @@ TEST_F(SpvModuleScopeVarParserTest,
 
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
+  const auto got = test::ToString(p->program());
   const std::string expected =
-      R"(Variable{
-    x_1
-    private
-    undefined
-    __array__u32_1
-    {
-      TypeConstructor[not set]{
-        __array__u32_1
-        ScalarConstructor[not set]{2u}
-      }
-    }
-  }
-)";
+      "var<private> x_1 : array<u32, 1u> = array<u32, 1u>(2u);";
   EXPECT_THAT(got, HasSubstr(expected)) << got;
 }
 
@@ -5816,21 +3668,9 @@ TEST_F(SpvModuleScopeVarParserTest,
 
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
+  const auto got = test::ToString(p->program());
   const std::string expected =
-      R"(Variable{
-    x_1
-    private
-    undefined
-    __array__i32_1
-    {
-      TypeConstructor[not set]{
-        __array__i32_1
-        ScalarConstructor[not set]{14}
-      }
-    }
-  }
-)";
+      "var<private> x_1 : array<i32, 1u> = array<i32, 1u>(14);";
   EXPECT_THAT(got, HasSubstr(expected)) << got;
 }
 
@@ -5846,15 +3686,8 @@ TEST_F(SpvModuleScopeVarParserTest, Builtin_Input_SameSignednessAsWGSL) {
 
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
-  const std::string expected =
-      R"(Variable{
-    x_1
-    private
-    undefined
-    __u32
-  }
-)";
+  const auto got = test::ToString(p->program());
+  const std::string expected = "var<private> x_1 : u32;";
   EXPECT_THAT(got, HasSubstr(expected)) << got;
 }
 
@@ -5870,15 +3703,8 @@ TEST_F(SpvModuleScopeVarParserTest, Builtin_Input_OppositeSignednessAsWGSL) {
 
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
-  const std::string expected =
-      R"(Variable{
-    x_1
-    private
-    undefined
-    __i32
-  }
-)";
+  const auto got = test::ToString(p->program());
+  const std::string expected = "var<private> x_1 : i32;";
   EXPECT_THAT(got, HasSubstr(expected)) << got;
 }
 
@@ -5908,90 +3734,33 @@ TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_IOLocations) {
 
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
+  const auto got = test::ToString(p->program());
   const std::string expected =
-      R"(
-  Struct main_out {
-    StructMember{[[ LocationDecoration{0}
- ]] x_2_1: __u32}
-    StructMember{[[ LocationDecoration{6}
- ]] x_4_1: __u32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __u32
-  }
-  Variable{
-    x_2
-    private
-    undefined
-    __u32
-  }
-  Variable{
-    x_3
-    private
-    undefined
-    __u32
-  }
-  Variable{
-    x_4
-    private
-    undefined
-    __u32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{fragment}
-  (
-    VariableConst{
-      Decorations{
-        LocationDecoration{0}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{30}
-      }
-      x_3_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Identifier[not set]{x_1_param}
-    }
-    Assignment{
-      Identifier[not set]{x_3}
-      Identifier[not set]{x_3_param}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_2}
-          Identifier[not set]{x_4}
-        }
-      }
-    }
-  }
+      R"(var<private> x_1 : u32;
+
+var<private> x_2 : u32;
+
+var<private> x_3 : u32;
+
+var<private> x_4 : u32;
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[location(0)]]
+  x_2_1 : u32;
+  [[location(6)]]
+  x_4_1 : u32;
+};
+
+[[stage(fragment)]]
+fn main([[location(0)]] x_1_param : u32, [[location(30)]] x_3_param : u32) -> main_out {
+  x_1 = x_1_param;
+  x_3 = x_3_param;
+  main_1();
+  return main_out(x_2, x_4);
 }
 )";
   EXPECT_THAT(got, HasSubstr(expected)) << got;
@@ -6023,72 +3792,26 @@ TEST_F(SpvModuleScopeVarParserTest,
 
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_4_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __u32
-  }
-  Variable{
-    x_4
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        __u32
-        {
-          Identifier[not set]{x_1}
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{instance_index}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Identifier[not set]{x_1_param}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_4}
-        }
-      }
-    }
-  }
+  const auto got = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : u32;
+
+var<private> x_4 : vec4<f32>;
+
+fn main_1() {
+  let x_2 : u32 = x_1;
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  x_4_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main([[builtin(instance_index)]] x_1_param : u32) -> main_out {
+  x_1 = x_1_param;
+  main_1();
+  return main_out(x_4);
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -6119,74 +3842,26 @@ TEST_F(SpvModuleScopeVarParserTest,
 
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_4_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __i32
-  }
-  Variable{
-    x_4
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_2
-        none
-        undefined
-        __i32
-        {
-          Identifier[not set]{x_1}
-        }
-      }
-    }
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{instance_index}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Bitcast[not set]<__i32>{
-        Identifier[not set]{x_1_param}
-      }
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_4}
-        }
-      }
-    }
-  }
+  const auto got = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : i32;
+
+var<private> x_4 : vec4<f32>;
+
+fn main_1() {
+  let x_2 : i32 = x_1;
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  x_4_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main([[builtin(instance_index)]] x_1_param : u32) -> main_out {
+  x_1 = bitcast<i32>(x_1_param);
+  main_1();
+  return main_out(x_4);
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -6216,46 +3891,17 @@ TEST_F(SpvModuleScopeVarParserTest,
 
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
-  const std::string expected = R"(Module{
-  Variable{
-    x_1
-    private
-    undefined
-    __array__u32_1
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __void
-  StageDecoration{fragment}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{sample_mask}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{0}
-      }
-      Identifier[not set]{x_1_param}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-  }
+  const auto got = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
+
+fn main_1() {
+  return;
+}
+
+[[stage(fragment)]]
+fn main([[builtin(sample_mask)]] x_1_param : u32) {
+  x_1[0] = x_1_param;
+  main_1();
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -6284,48 +3930,17 @@ TEST_F(SpvModuleScopeVarParserTest,
 
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
-  const std::string expected = R"(Module{
-  Variable{
-    x_1
-    private
-    undefined
-    __array__i32_1
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __void
-  StageDecoration{fragment}
-  (
-    VariableConst{
-      Decorations{
-        BuiltinDecoration{sample_mask}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{0}
-      }
-      Bitcast[not set]<__i32>{
-        Identifier[not set]{x_1_param}
-      }
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-  }
+  const auto got = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
+
+fn main_1() {
+  return;
+}
+
+[[stage(fragment)]]
+fn main([[builtin(sample_mask)]] x_1_param : u32) {
+  x_1[0] = bitcast<i32>(x_1_param);
+  main_1();
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -6355,50 +3970,23 @@ TEST_F(SpvModuleScopeVarParserTest,
 
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{sample_mask}
- ]] x_1_1: __u32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __array__u32_1
-    {
-      TypeConstructor[not set]{
-        __array__u32_1
-        ScalarConstructor[not set]{0u}
-      }
-    }
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{fragment}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          ArrayAccessor[not set]{
-            Identifier[not set]{x_1}
-            ScalarConstructor[not set]{0}
-          }
-        }
-      }
-    }
-  }
+  const auto got = test::ToString(p->program());
+  const std::string expected =
+      R"(var<private> x_1 : array<u32, 1u> = array<u32, 1u>(0u);
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[builtin(sample_mask)]]
+  x_1_1 : u32;
+};
+
+[[stage(fragment)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(x_1[0]);
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -6428,52 +4016,23 @@ TEST_F(SpvModuleScopeVarParserTest,
 
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{sample_mask}
- ]] x_1_1: __u32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __array__i32_1
-    {
-      TypeConstructor[not set]{
-        __array__i32_1
-        ScalarConstructor[not set]{0}
-      }
-    }
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{fragment}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Bitcast[not set]<__u32>{
-            ArrayAccessor[not set]{
-              Identifier[not set]{x_1}
-              ScalarConstructor[not set]{0}
-            }
-          }
-        }
-      }
-    }
-  }
+  const auto got = test::ToString(p->program());
+  const std::string expected =
+      R"(var<private> x_1 : array<i32, 1u> = array<i32, 1u>(0);
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[builtin(sample_mask)]]
+  x_1_1 : u32;
+};
+
+[[stage(fragment)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(bitcast<u32>(x_1[0]));
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -6502,44 +4061,22 @@ TEST_F(SpvModuleScopeVarParserTest,
 
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{frag_depth}
- ]] x_1_1: __f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __f32
-    {
-      ScalarConstructor[not set]{0.000000}
-    }
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{fragment}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_1}
-        }
-      }
-    }
-  }
+  const auto got = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : f32 = 0.0;
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[builtin(frag_depth)]]
+  x_1_1 : f32;
+};
+
+[[stage(fragment)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(x_1);
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -6558,41 +4095,22 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_BuiltIn_Position) {
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
 
-  const auto got = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] gl_Position: __vec_4__f32}
-  }
-  Variable{
-    gl_Position
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{gl_Position}
-        }
-      }
-    }
-  }
+  const auto got = test::ToString(p->program());
+  const std::string expected = R"(var<private> gl_Position : vec4<f32>;
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  gl_Position : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(gl_Position);
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -6645,50 +4163,23 @@ TEST_F(SpvModuleScopeVarParserTest,
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
 
-  const auto got = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] gl_Position: __vec_4__f32}
-  }
-  Variable{
-    gl_Position
-    private
-    undefined
-    __vec_4__f32
-    {
-      TypeConstructor[not set]{
-        __vec_4__f32
-        ScalarConstructor[not set]{1.000000}
-        ScalarConstructor[not set]{2.000000}
-        ScalarConstructor[not set]{3.000000}
-        ScalarConstructor[not set]{4.000000}
-      }
-    }
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{gl_Position}
-        }
-      }
-    }
-  }
+  const auto got = test::ToString(p->program());
+  const std::string expected =
+      R"(var<private> gl_Position : vec4<f32> = vec4<f32>(1.0, 2.0, 3.0, 4.0);
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  gl_Position : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(gl_Position);
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -6728,96 +4219,27 @@ TEST_F(SpvModuleScopeVarParserTest, Input_FlattenArray_OneLevel) {
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
 
-  const auto got = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_2_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __array__f32_3
-  }
-  Variable{
-    x_2
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  (
-    VariableConst{
-      Decorations{
-        LocationDecoration{4}
-      }
-      x_1_param
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{5}
-      }
-      x_1_param_1
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{6}
-      }
-      x_1_param_2
-      none
-      undefined
-      __f32
-    }
-  )
-  {
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{0}
-      }
-      Identifier[not set]{x_1_param}
-    }
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{1}
-      }
-      Identifier[not set]{x_1_param_1}
-    }
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{2}
-      }
-      Identifier[not set]{x_1_param_2}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_2}
-        }
-      }
-    }
-  }
+  const auto got = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : array<f32, 3u>;
+
+var<private> x_2 : vec4<f32>;
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  x_2_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main([[location(4)]] x_1_param : f32, [[location(5)]] x_1_param_1 : f32, [[location(6)]] x_1_param_2 : f32) -> main_out {
+  x_1[0] = x_1_param;
+  x_1[1] = x_1_param_1;
+  x_1[2] = x_1_param_2;
+  main_1();
+  return main_out(x_2);
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -6855,80 +4277,26 @@ TEST_F(SpvModuleScopeVarParserTest, Input_FlattenMatrix) {
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
 
-  const auto got = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_2_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __mat_4_2__f32
-  }
-  Variable{
-    x_2
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  (
-    VariableConst{
-      Decorations{
-        LocationDecoration{9}
-      }
-      x_1_param
-      none
-      undefined
-      __vec_4__f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{10}
-      }
-      x_1_param_1
-      none
-      undefined
-      __vec_4__f32
-    }
-  )
-  {
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{0}
-      }
-      Identifier[not set]{x_1_param}
-    }
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{1}
-      }
-      Identifier[not set]{x_1_param_1}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_2}
-        }
-      }
-    }
-  }
+  const auto got = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : mat2x4<f32>;
+
+var<private> x_2 : vec4<f32>;
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  x_2_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main([[location(9)]] x_1_param : vec4<f32>, [[location(10)]] x_1_param_1 : vec4<f32>) -> main_out {
+  x_1[0] = x_1_param;
+  x_1[1] = x_1_param_1;
+  main_1();
+  return main_out(x_2);
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -6971,84 +4339,31 @@ TEST_F(SpvModuleScopeVarParserTest, Input_FlattenStruct_LocOnVariable) {
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
 
-  const auto got = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct Communicators {
-    StructMember{alice: __f32}
-    StructMember{bob: __vec_4__f32}
-  }
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_2_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __type_name_Communicators
-  }
-  Variable{
-    x_2
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  (
-    VariableConst{
-      Decorations{
-        LocationDecoration{9}
-      }
-      x_1_param
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{10}
-      }
-      x_1_param_1
-      none
-      undefined
-      __vec_4__f32
-    }
-  )
-  {
-    Assignment{
-      MemberAccessor[not set]{
-        Identifier[not set]{x_1}
-        Identifier[not set]{alice}
-      }
-      Identifier[not set]{x_1_param}
-    }
-    Assignment{
-      MemberAccessor[not set]{
-        Identifier[not set]{x_1}
-        Identifier[not set]{bob}
-      }
-      Identifier[not set]{x_1_param_1}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_2}
-        }
-      }
-    }
-  }
+  const auto got = test::ToString(p->program());
+  const std::string expected = R"(struct Communicators {
+  alice : f32;
+  bob : vec4<f32>;
+};
+
+var<private> x_1 : Communicators;
+
+var<private> x_2 : vec4<f32>;
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  x_2_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main([[location(9)]] x_1_param : f32, [[location(10)]] x_1_param_1 : vec4<f32>) -> main_out {
+  x_1.alice = x_1_param;
+  x_1.bob = x_1_param_1;
+  main_1();
+  return main_out(x_2);
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -7088,124 +4403,28 @@ TEST_F(SpvModuleScopeVarParserTest, Input_FlattenNested) {
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
 
-  const auto got = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_2_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __array__mat_4_2__f32_2
-  }
-  Variable{
-    x_2
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  (
-    VariableConst{
-      Decorations{
-        LocationDecoration{7}
-      }
-      x_1_param
-      none
-      undefined
-      __vec_4__f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{8}
-      }
-      x_1_param_1
-      none
-      undefined
-      __vec_4__f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{9}
-      }
-      x_1_param_2
-      none
-      undefined
-      __vec_4__f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{10}
-      }
-      x_1_param_3
-      none
-      undefined
-      __vec_4__f32
-    }
-  )
-  {
-    Assignment{
-      ArrayAccessor[not set]{
-        ArrayAccessor[not set]{
-          Identifier[not set]{x_1}
-          ScalarConstructor[not set]{0}
-        }
-        ScalarConstructor[not set]{0}
-      }
-      Identifier[not set]{x_1_param}
-    }
-    Assignment{
-      ArrayAccessor[not set]{
-        ArrayAccessor[not set]{
-          Identifier[not set]{x_1}
-          ScalarConstructor[not set]{0}
-        }
-        ScalarConstructor[not set]{1}
-      }
-      Identifier[not set]{x_1_param_1}
-    }
-    Assignment{
-      ArrayAccessor[not set]{
-        ArrayAccessor[not set]{
-          Identifier[not set]{x_1}
-          ScalarConstructor[not set]{1}
-        }
-        ScalarConstructor[not set]{0}
-      }
-      Identifier[not set]{x_1_param_2}
-    }
-    Assignment{
-      ArrayAccessor[not set]{
-        ArrayAccessor[not set]{
-          Identifier[not set]{x_1}
-          ScalarConstructor[not set]{1}
-        }
-        ScalarConstructor[not set]{1}
-      }
-      Identifier[not set]{x_1_param_3}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_2}
-        }
-      }
-    }
-  }
+  const auto got = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : array<mat2x4<f32>, 2u>;
+
+var<private> x_2 : vec4<f32>;
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  x_2_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main([[location(7)]] x_1_param : vec4<f32>, [[location(8)]] x_1_param_1 : vec4<f32>, [[location(9)]] x_1_param_2 : vec4<f32>, [[location(10)]] x_1_param_3 : vec4<f32>) -> main_out {
+  x_1[0][0] = x_1_param;
+  x_1[0][1] = x_1_param_1;
+  x_1[1][0] = x_1_param_2;
+  x_1[1][1] = x_1_param_3;
+  main_1();
+  return main_out(x_2);
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -7245,65 +4464,30 @@ TEST_F(SpvModuleScopeVarParserTest, Output_FlattenArray_OneLevel) {
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
 
-  const auto got = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ LocationDecoration{4}
- ]] x_1_1: __f32}
-    StructMember{[[ LocationDecoration{5}
- ]] x_1_2: __f32}
-    StructMember{[[ LocationDecoration{6}
- ]] x_1_3: __f32}
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_2_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __array__f32_3
-  }
-  Variable{
-    x_2
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          ArrayAccessor[not set]{
-            Identifier[not set]{x_1}
-            ScalarConstructor[not set]{0}
-          }
-          ArrayAccessor[not set]{
-            Identifier[not set]{x_1}
-            ScalarConstructor[not set]{1}
-          }
-          ArrayAccessor[not set]{
-            Identifier[not set]{x_1}
-            ScalarConstructor[not set]{2}
-          }
-          Identifier[not set]{x_2}
-        }
-      }
-    }
-  }
+  const auto got = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : array<f32, 3u>;
+
+var<private> x_2 : vec4<f32>;
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[location(4)]]
+  x_1_1 : f32;
+  [[location(5)]]
+  x_1_2 : f32;
+  [[location(6)]]
+  x_1_3 : f32;
+  [[builtin(position)]]
+  x_2_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(x_1[0], x_1[1], x_1[2], x_2);
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -7341,59 +4525,28 @@ TEST_F(SpvModuleScopeVarParserTest, Output_FlattenMatrix) {
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
 
-  const auto got = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct main_out {
-    StructMember{[[ LocationDecoration{9}
- ]] x_1_1: __vec_4__f32}
-    StructMember{[[ LocationDecoration{10}
- ]] x_1_2: __vec_4__f32}
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_2_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __mat_4_2__f32
-  }
-  Variable{
-    x_2
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          ArrayAccessor[not set]{
-            Identifier[not set]{x_1}
-            ScalarConstructor[not set]{0}
-          }
-          ArrayAccessor[not set]{
-            Identifier[not set]{x_1}
-            ScalarConstructor[not set]{1}
-          }
-          Identifier[not set]{x_2}
-        }
-      }
-    }
-  }
+  const auto got = test::ToString(p->program());
+  const std::string expected = R"(var<private> x_1 : mat2x4<f32>;
+
+var<private> x_2 : vec4<f32>;
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[location(9)]]
+  x_1_1 : vec4<f32>;
+  [[location(10)]]
+  x_1_2 : vec4<f32>;
+  [[builtin(position)]]
+  x_2_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(x_1[0], x_1[1], x_2);
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -7436,63 +4589,33 @@ TEST_F(SpvModuleScopeVarParserTest, Output_FlattenStruct_LocOnVariable) {
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
 
-  const auto got = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct Communicators {
-    StructMember{alice: __f32}
-    StructMember{bob: __vec_4__f32}
-  }
-  Struct main_out {
-    StructMember{[[ LocationDecoration{9}
- ]] x_1_1: __f32}
-    StructMember{[[ LocationDecoration{10}
- ]] x_1_2: __vec_4__f32}
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_2_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __type_name_Communicators
-  }
-  Variable{
-    x_2
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          MemberAccessor[not set]{
-            Identifier[not set]{x_1}
-            Identifier[not set]{alice}
-          }
-          MemberAccessor[not set]{
-            Identifier[not set]{x_1}
-            Identifier[not set]{bob}
-          }
-          Identifier[not set]{x_2}
-        }
-      }
-    }
-  }
+  const auto got = test::ToString(p->program());
+  const std::string expected = R"(struct Communicators {
+  alice : f32;
+  bob : vec4<f32>;
+};
+
+var<private> x_1 : Communicators;
+
+var<private> x_2 : vec4<f32>;
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[location(9)]]
+  x_1_1 : f32;
+  [[location(10)]]
+  x_1_2 : vec4<f32>;
+  [[builtin(position)]]
+  x_2_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(x_1.alice, x_1.bob, x_2);
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -7539,102 +4662,37 @@ TEST_F(SpvModuleScopeVarParserTest, FlattenStruct_LocOnMembers) {
   ASSERT_TRUE(p->Parse()) << p->error() << assembly;
   EXPECT_TRUE(p->error().empty());
 
-  const auto got = p->program().to_str();
-  const std::string expected = R"(Module{
-  Struct Communicators {
-    StructMember{alice: __f32}
-    StructMember{bob: __vec_4__f32}
-  }
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_2_1: __vec_4__f32}
-    StructMember{[[ LocationDecoration{9}
- ]] x_3_1: __f32}
-    StructMember{[[ LocationDecoration{11}
- ]] x_3_2: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __type_name_Communicators
-  }
-  Variable{
-    x_3
-    private
-    undefined
-    __type_name_Communicators
-  }
-  Variable{
-    x_2
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  (
-    VariableConst{
-      Decorations{
-        LocationDecoration{9}
-      }
-      x_1_param
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{11}
-      }
-      x_1_param_1
-      none
-      undefined
-      __vec_4__f32
-    }
-  )
-  {
-    Assignment{
-      MemberAccessor[not set]{
-        Identifier[not set]{x_1}
-        Identifier[not set]{alice}
-      }
-      Identifier[not set]{x_1_param}
-    }
-    Assignment{
-      MemberAccessor[not set]{
-        Identifier[not set]{x_1}
-        Identifier[not set]{bob}
-      }
-      Identifier[not set]{x_1_param_1}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_2}
-          MemberAccessor[not set]{
-            Identifier[not set]{x_3}
-            Identifier[not set]{alice}
-          }
-          MemberAccessor[not set]{
-            Identifier[not set]{x_3}
-            Identifier[not set]{bob}
-          }
-        }
-      }
-    }
-  }
+  const auto got = test::ToString(p->program());
+  const std::string expected = R"(struct Communicators {
+  alice : f32;
+  bob : vec4<f32>;
+};
+
+var<private> x_1 : Communicators;
+
+var<private> x_3 : Communicators;
+
+var<private> x_2 : vec4<f32>;
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  x_2_1 : vec4<f32>;
+  [[location(9)]]
+  x_3_1 : f32;
+  [[location(11)]]
+  x_3_2 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main([[location(9)]] x_1_param : f32, [[location(11)]] x_1_param_1 : vec4<f32>) -> main_out {
+  x_1.alice = x_1_param;
+  x_1.bob = x_1_param_1;
+  main_1();
+  return main_out(x_2, x_3.alice, x_3.bob);
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -7729,159 +4787,41 @@ TEST_F(SpvModuleScopeVarParserTest,
 
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
+  const auto got = test::ToString(p->program());
   const std::string expected =
-      R"(Module{
-  Struct main_out {
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_10_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __u32
-  }
-  Variable{
-    x_2
-    private
-    undefined
-    __vec_2__u32
-  }
-  Variable{
-    x_3
-    private
-    undefined
-    __i32
-  }
-  Variable{
-    x_4
-    private
-    undefined
-    __vec_2__i32
-  }
-  Variable{
-    x_5
-    private
-    undefined
-    __f32
-  }
-  Variable{
-    x_6
-    private
-    undefined
-    __vec_2__f32
-  }
-  Variable{
-    x_10
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  (
-    VariableConst{
-      Decorations{
-        LocationDecoration{1}
-      }
-      x_1_param
-      none
-      undefined
-      __u32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{2}
-      }
-      x_2_param
-      none
-      undefined
-      __vec_2__u32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{3}
-      }
-      x_3_param
-      none
-      undefined
-      __i32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{4}
-      }
-      x_4_param
-      none
-      undefined
-      __vec_2__i32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{5}
-        InterpolateDecoration{flat none}
-      }
-      x_5_param
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{6}
-        InterpolateDecoration{flat none}
-      }
-      x_6_param
-      none
-      undefined
-      __vec_2__f32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Identifier[not set]{x_1_param}
-    }
-    Assignment{
-      Identifier[not set]{x_2}
-      Identifier[not set]{x_2_param}
-    }
-    Assignment{
-      Identifier[not set]{x_3}
-      Identifier[not set]{x_3_param}
-    }
-    Assignment{
-      Identifier[not set]{x_4}
-      Identifier[not set]{x_4_param}
-    }
-    Assignment{
-      Identifier[not set]{x_5}
-      Identifier[not set]{x_5_param}
-    }
-    Assignment{
-      Identifier[not set]{x_6}
-      Identifier[not set]{x_6_param}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_10}
-        }
-      }
-    }
-  }
+      R"(var<private> x_1 : u32;
+
+var<private> x_2 : vec2<u32>;
+
+var<private> x_3 : i32;
+
+var<private> x_4 : vec2<i32>;
+
+var<private> x_5 : f32;
+
+var<private> x_6 : vec2<f32>;
+
+var<private> x_10 : vec4<f32>;
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[builtin(position)]]
+  x_10_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main([[location(1)]] x_1_param : u32, [[location(2)]] x_2_param : vec2<u32>, [[location(3)]] x_3_param : i32, [[location(4)]] x_4_param : vec2<i32>, [[location(5), interpolate(flat)]] x_5_param : f32, [[location(6), interpolate(flat)]] x_6_param : vec2<f32>) -> main_out {
+  x_1 = x_1_param;
+  x_2 = x_2_param;
+  x_3 = x_3_param;
+  x_4 = x_4_param;
+  x_5 = x_5_param;
+  x_6 = x_6_param;
+  main_1();
+  return main_out(x_10);
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -7932,98 +4872,47 @@ TEST_F(SpvModuleScopeVarParserTest,
 
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
+  const auto got = test::ToString(p->program());
   const std::string expected =
-      R"(Module{
-  Struct main_out {
-    StructMember{[[ LocationDecoration{1}
- ]] x_1_1: __u32}
-    StructMember{[[ LocationDecoration{2}
- ]] x_2_1: __vec_2__u32}
-    StructMember{[[ LocationDecoration{3}
- ]] x_3_1: __i32}
-    StructMember{[[ LocationDecoration{4}
- ]] x_4_1: __vec_2__i32}
-    StructMember{[[ LocationDecoration{5}
- InterpolateDecoration{flat none}
- ]] x_5_1: __f32}
-    StructMember{[[ LocationDecoration{6}
- InterpolateDecoration{flat none}
- ]] x_6_1: __vec_2__f32}
-    StructMember{[[ BuiltinDecoration{position}
- ]] x_10_1: __vec_4__f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __u32
-  }
-  Variable{
-    x_2
-    private
-    undefined
-    __vec_2__u32
-  }
-  Variable{
-    x_3
-    private
-    undefined
-    __i32
-  }
-  Variable{
-    x_4
-    private
-    undefined
-    __vec_2__i32
-  }
-  Variable{
-    x_5
-    private
-    undefined
-    __f32
-  }
-  Variable{
-    x_6
-    private
-    undefined
-    __vec_2__f32
-  }
-  Variable{
-    x_10
-    private
-    undefined
-    __vec_4__f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{vertex}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_1}
-          Identifier[not set]{x_2}
-          Identifier[not set]{x_3}
-          Identifier[not set]{x_4}
-          Identifier[not set]{x_5}
-          Identifier[not set]{x_6}
-          Identifier[not set]{x_10}
-        }
-      }
-    }
-  }
+      R"(var<private> x_1 : u32;
+
+var<private> x_2 : vec2<u32>;
+
+var<private> x_3 : i32;
+
+var<private> x_4 : vec2<i32>;
+
+var<private> x_5 : f32;
+
+var<private> x_6 : vec2<f32>;
+
+var<private> x_10 : vec4<f32>;
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[location(1)]]
+  x_1_1 : u32;
+  [[location(2)]]
+  x_2_1 : vec2<u32>;
+  [[location(3)]]
+  x_3_1 : i32;
+  [[location(4)]]
+  x_4_1 : vec2<i32>;
+  [[location(5), interpolate(flat)]]
+  x_5_1 : f32;
+  [[location(6), interpolate(flat)]]
+  x_6_1 : vec2<f32>;
+  [[builtin(position)]]
+  x_10_1 : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(x_1, x_2, x_3, x_4, x_5, x_6, x_10);
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -8057,109 +4946,28 @@ TEST_F(SpvModuleScopeVarParserTest,
 
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
+  const auto got = test::ToString(p->program());
   const std::string expected =
-      R"(Module{
-  Struct S {
-    StructMember{field0: __f32}
-    StructMember{field1: __f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __array__f32_2
-  }
-  Variable{
-    x_2
-    private
-    undefined
-    __type_name_S
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __void
-  StageDecoration{fragment}
-  (
-    VariableConst{
-      Decorations{
-        LocationDecoration{1}
-        InterpolateDecoration{flat none}
-      }
-      x_1_param
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{2}
-        InterpolateDecoration{flat none}
-      }
-      x_1_param_1
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{5}
-        InterpolateDecoration{flat none}
-      }
-      x_2_param
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{6}
-        InterpolateDecoration{flat none}
-      }
-      x_2_param_1
-      none
-      undefined
-      __f32
-    }
-  )
-  {
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{0}
-      }
-      Identifier[not set]{x_1_param}
-    }
-    Assignment{
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{1}
-      }
-      Identifier[not set]{x_1_param_1}
-    }
-    Assignment{
-      MemberAccessor[not set]{
-        Identifier[not set]{x_2}
-        Identifier[not set]{field0}
-      }
-      Identifier[not set]{x_2_param}
-    }
-    Assignment{
-      MemberAccessor[not set]{
-        Identifier[not set]{x_2}
-        Identifier[not set]{field1}
-      }
-      Identifier[not set]{x_2_param_1}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-  }
+      R"(struct S {
+  field0 : f32;
+  field1 : f32;
+};
+
+var<private> x_1 : array<f32, 2u>;
+
+var<private> x_2 : S;
+
+fn main_1() {
+  return;
+}
+
+[[stage(fragment)]]
+fn main([[location(1), interpolate(flat)]] x_1_param : f32, [[location(2), interpolate(flat)]] x_1_param_1 : f32, [[location(5), interpolate(flat)]] x_2_param : f32, [[location(6), interpolate(flat)]] x_2_param_1 : f32) {
+  x_1[0] = x_1_param;
+  x_1[1] = x_1_param_1;
+  x_2.field0 = x_2_param;
+  x_2.field1 = x_2_param_1;
+  main_1();
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -8211,144 +5019,33 @@ TEST_F(SpvModuleScopeVarParserTest,
 
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
+  const auto got = test::ToString(p->program());
   const std::string expected =
-      R"(Module{
-  Variable{
-    x_1
-    private
-    undefined
-    __f32
-  }
-  Variable{
-    x_2
-    private
-    undefined
-    __f32
-  }
-  Variable{
-    x_3
-    private
-    undefined
-    __f32
-  }
-  Variable{
-    x_4
-    private
-    undefined
-    __f32
-  }
-  Variable{
-    x_5
-    private
-    undefined
-    __f32
-  }
-  Variable{
-    x_6
-    private
-    undefined
-    __f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __void
-  StageDecoration{fragment}
-  (
-    VariableConst{
-      Decorations{
-        LocationDecoration{1}
-      }
-      x_1_param
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{2}
-        InterpolateDecoration{perspective centroid}
-      }
-      x_2_param
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{3}
-        InterpolateDecoration{perspective sample}
-      }
-      x_3_param
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{4}
-        InterpolateDecoration{linear none}
-      }
-      x_4_param
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{5}
-        InterpolateDecoration{linear centroid}
-      }
-      x_5_param
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{6}
-        InterpolateDecoration{linear sample}
-      }
-      x_6_param
-      none
-      undefined
-      __f32
-    }
-  )
-  {
-    Assignment{
-      Identifier[not set]{x_1}
-      Identifier[not set]{x_1_param}
-    }
-    Assignment{
-      Identifier[not set]{x_2}
-      Identifier[not set]{x_2_param}
-    }
-    Assignment{
-      Identifier[not set]{x_3}
-      Identifier[not set]{x_3_param}
-    }
-    Assignment{
-      Identifier[not set]{x_4}
-      Identifier[not set]{x_4_param}
-    }
-    Assignment{
-      Identifier[not set]{x_5}
-      Identifier[not set]{x_5_param}
-    }
-    Assignment{
-      Identifier[not set]{x_6}
-      Identifier[not set]{x_6_param}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-  }
+      R"(var<private> x_1 : f32;
+
+var<private> x_2 : f32;
+
+var<private> x_3 : f32;
+
+var<private> x_4 : f32;
+
+var<private> x_5 : f32;
+
+var<private> x_6 : f32;
+
+fn main_1() {
+  return;
+}
+
+[[stage(fragment)]]
+fn main([[location(1)]] x_1_param : f32, [[location(2), interpolate(perspective, centroid)]] x_2_param : f32, [[location(3), interpolate(perspective, sample)]] x_3_param : f32, [[location(4), interpolate(linear)]] x_4_param : f32, [[location(5), interpolate(linear, centroid)]] x_5_param : f32, [[location(6), interpolate(linear, sample)]] x_6_param : f32) {
+  x_1 = x_1_param;
+  x_2 = x_2_param;
+  x_3 = x_3_param;
+  x_4 = x_4_param;
+  x_5 = x_5_param;
+  x_6 = x_6_param;
+  main_1();
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -8391,140 +5088,32 @@ TEST_F(SpvModuleScopeVarParserTest,
 
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
+  const auto got = test::ToString(p->program());
   const std::string expected =
-      R"(Module{
-  Struct S {
-    StructMember{field0: __f32}
-    StructMember{field1: __f32}
-    StructMember{field2: __f32}
-    StructMember{field3: __f32}
-    StructMember{field4: __f32}
-    StructMember{field5: __f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __type_name_S
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __void
-  StageDecoration{fragment}
-  (
-    VariableConst{
-      Decorations{
-        LocationDecoration{1}
-      }
-      x_1_param
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{2}
-        InterpolateDecoration{perspective centroid}
-      }
-      x_1_param_1
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{3}
-        InterpolateDecoration{perspective sample}
-      }
-      x_1_param_2
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{4}
-        InterpolateDecoration{linear none}
-      }
-      x_1_param_3
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{5}
-        InterpolateDecoration{linear centroid}
-      }
-      x_1_param_4
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      Decorations{
-        LocationDecoration{6}
-        InterpolateDecoration{linear sample}
-      }
-      x_1_param_5
-      none
-      undefined
-      __f32
-    }
-  )
-  {
-    Assignment{
-      MemberAccessor[not set]{
-        Identifier[not set]{x_1}
-        Identifier[not set]{field0}
-      }
-      Identifier[not set]{x_1_param}
-    }
-    Assignment{
-      MemberAccessor[not set]{
-        Identifier[not set]{x_1}
-        Identifier[not set]{field1}
-      }
-      Identifier[not set]{x_1_param_1}
-    }
-    Assignment{
-      MemberAccessor[not set]{
-        Identifier[not set]{x_1}
-        Identifier[not set]{field2}
-      }
-      Identifier[not set]{x_1_param_2}
-    }
-    Assignment{
-      MemberAccessor[not set]{
-        Identifier[not set]{x_1}
-        Identifier[not set]{field3}
-      }
-      Identifier[not set]{x_1_param_3}
-    }
-    Assignment{
-      MemberAccessor[not set]{
-        Identifier[not set]{x_1}
-        Identifier[not set]{field4}
-      }
-      Identifier[not set]{x_1_param_4}
-    }
-    Assignment{
-      MemberAccessor[not set]{
-        Identifier[not set]{x_1}
-        Identifier[not set]{field5}
-      }
-      Identifier[not set]{x_1_param_5}
-    }
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-  }
+      R"(struct S {
+  field0 : f32;
+  field1 : f32;
+  field2 : f32;
+  field3 : f32;
+  field4 : f32;
+  field5 : f32;
+};
+
+var<private> x_1 : S;
+
+fn main_1() {
+  return;
+}
+
+[[stage(fragment)]]
+fn main([[location(1)]] x_1_param : f32, [[location(2), interpolate(perspective, centroid)]] x_1_param_1 : f32, [[location(3), interpolate(perspective, sample)]] x_1_param_2 : f32, [[location(4), interpolate(linear)]] x_1_param_3 : f32, [[location(5), interpolate(linear, centroid)]] x_1_param_4 : f32, [[location(6), interpolate(linear, sample)]] x_1_param_5 : f32) {
+  x_1.field0 = x_1_param;
+  x_1.field1 = x_1_param_1;
+  x_1.field2 = x_1_param_2;
+  x_1.field3 = x_1_param_3;
+  x_1.field4 = x_1_param_4;
+  x_1.field5 = x_1_param_5;
+  main_1();
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -8576,92 +5165,43 @@ TEST_F(SpvModuleScopeVarParserTest,
 
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
+  const auto got = test::ToString(p->program());
   const std::string expected =
-      R"(Module{
-  Struct main_out {
-    StructMember{[[ LocationDecoration{1}
- ]] x_1_1: __f32}
-    StructMember{[[ LocationDecoration{2}
- InterpolateDecoration{perspective centroid}
- ]] x_2_1: __f32}
-    StructMember{[[ LocationDecoration{3}
- InterpolateDecoration{perspective sample}
- ]] x_3_1: __f32}
-    StructMember{[[ LocationDecoration{4}
- InterpolateDecoration{linear none}
- ]] x_4_1: __f32}
-    StructMember{[[ LocationDecoration{5}
- InterpolateDecoration{linear centroid}
- ]] x_5_1: __f32}
-    StructMember{[[ LocationDecoration{6}
- InterpolateDecoration{linear sample}
- ]] x_6_1: __f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __f32
-  }
-  Variable{
-    x_2
-    private
-    undefined
-    __f32
-  }
-  Variable{
-    x_3
-    private
-    undefined
-    __f32
-  }
-  Variable{
-    x_4
-    private
-    undefined
-    __f32
-  }
-  Variable{
-    x_5
-    private
-    undefined
-    __f32
-  }
-  Variable{
-    x_6
-    private
-    undefined
-    __f32
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{fragment}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          Identifier[not set]{x_1}
-          Identifier[not set]{x_2}
-          Identifier[not set]{x_3}
-          Identifier[not set]{x_4}
-          Identifier[not set]{x_5}
-          Identifier[not set]{x_6}
-        }
-      }
-    }
-  }
+      R"(var<private> x_1 : f32;
+
+var<private> x_2 : f32;
+
+var<private> x_3 : f32;
+
+var<private> x_4 : f32;
+
+var<private> x_5 : f32;
+
+var<private> x_6 : f32;
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[location(1)]]
+  x_1_1 : f32;
+  [[location(2), interpolate(perspective, centroid)]]
+  x_2_1 : f32;
+  [[location(3), interpolate(perspective, sample)]]
+  x_3_1 : f32;
+  [[location(4), interpolate(linear)]]
+  x_4_1 : f32;
+  [[location(5), interpolate(linear, centroid)]]
+  x_5_1 : f32;
+  [[location(6), interpolate(linear, sample)]]
+  x_6_1 : f32;
+};
+
+[[stage(fragment)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(x_1, x_2, x_3, x_4, x_5, x_6);
 }
 )";
   EXPECT_EQ(got, expected) << got;
@@ -8705,88 +5245,42 @@ TEST_F(SpvModuleScopeVarParserTest,
 
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
-  const auto got = p->program().to_str();
+  const auto got = test::ToString(p->program());
   const std::string expected =
-      R"(Module{
-  Struct S {
-    StructMember{field0: __f32}
-    StructMember{field1: __f32}
-    StructMember{field2: __f32}
-    StructMember{field3: __f32}
-    StructMember{field4: __f32}
-    StructMember{field5: __f32}
-  }
-  Struct main_out {
-    StructMember{[[ LocationDecoration{1}
- ]] x_1_1: __f32}
-    StructMember{[[ LocationDecoration{2}
- InterpolateDecoration{perspective centroid}
- ]] x_1_2: __f32}
-    StructMember{[[ LocationDecoration{3}
- InterpolateDecoration{perspective sample}
- ]] x_1_3: __f32}
-    StructMember{[[ LocationDecoration{4}
- InterpolateDecoration{linear none}
- ]] x_1_4: __f32}
-    StructMember{[[ LocationDecoration{5}
- InterpolateDecoration{linear centroid}
- ]] x_1_5: __f32}
-    StructMember{[[ LocationDecoration{6}
- InterpolateDecoration{linear sample}
- ]] x_1_6: __f32}
-  }
-  Variable{
-    x_1
-    private
-    undefined
-    __type_name_S
-  }
-  Function main_1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function main -> __type_name_main_out
-  StageDecoration{fragment}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{main_1}
-      (
-      )
-    }
-    Return{
-      {
-        TypeConstructor[not set]{
-          __type_name_main_out
-          MemberAccessor[not set]{
-            Identifier[not set]{x_1}
-            Identifier[not set]{field0}
-          }
-          MemberAccessor[not set]{
-            Identifier[not set]{x_1}
-            Identifier[not set]{field1}
-          }
-          MemberAccessor[not set]{
-            Identifier[not set]{x_1}
-            Identifier[not set]{field2}
-          }
-          MemberAccessor[not set]{
-            Identifier[not set]{x_1}
-            Identifier[not set]{field3}
-          }
-          MemberAccessor[not set]{
-            Identifier[not set]{x_1}
-            Identifier[not set]{field4}
-          }
-          MemberAccessor[not set]{
-            Identifier[not set]{x_1}
-            Identifier[not set]{field5}
-          }
-        }
-      }
-    }
-  }
+      R"(struct S {
+  field0 : f32;
+  field1 : f32;
+  field2 : f32;
+  field3 : f32;
+  field4 : f32;
+  field5 : f32;
+};
+
+var<private> x_1 : S;
+
+fn main_1() {
+  return;
+}
+
+struct main_out {
+  [[location(1)]]
+  x_1_1 : f32;
+  [[location(2), interpolate(perspective, centroid)]]
+  x_1_2 : f32;
+  [[location(3), interpolate(perspective, sample)]]
+  x_1_3 : f32;
+  [[location(4), interpolate(linear)]]
+  x_1_4 : f32;
+  [[location(5), interpolate(linear, centroid)]]
+  x_1_5 : f32;
+  [[location(6), interpolate(linear, sample)]]
+  x_1_6 : f32;
+};
+
+[[stage(fragment)]]
+fn main() -> main_out {
+  main_1();
+  return main_out(x_1.field0, x_1.field1, x_1.field2, x_1.field3, x_1.field4, x_1.field5);
 }
 )";
   EXPECT_EQ(got, expected) << got;

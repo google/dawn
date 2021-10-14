@@ -51,33 +51,19 @@ TEST_F(SpvParserTest, EmitStatement_VoidCallNoParams) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error();
-  const auto got = p->program().to_str(false);
-  const char* expect = R"(Module{
-  Function $1 -> __void
-  ()
-  {
-    Return{}
-  }
-  Function $2 -> __void
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{$1}
-      (
-      )
-    }
-    Return{}
-  }
-  Function $3 -> __void
-  StageDecoration{fragment}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{$2}
-      (
-      )
-    }
-  }
+  const auto got = test::ToString(p->program());
+  const char* expect = R"(fn x_50() {
+  return;
+}
+
+fn x_100_1() {
+  x_50();
+  return;
+}
+
+[[stage(fragment)]]
+fn x_100() {
+  x_100_1();
 }
 )";
   EXPECT_EQ(expect, got);
@@ -103,37 +89,22 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParams) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  ast::StatementList f100;
   {
     auto fe = p->function_emitter(100);
-    EXPECT_TRUE(fe.EmitBody());
-    EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
-                HasSubstr(R"(VariableDeclStatement{
-  VariableConst{
-    x_1
-    none
-    undefined
-    __u32
-    {
-      Call[not set]{
-        Identifier[not set]{x_50}
-        (
-        )
-      }
-    }
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    f100 = fe.ast_body();
   }
-}
-Return{})"));
-  }
-
+  ast::StatementList f50;
   {
     auto fe = p->function_emitter(50);
-    EXPECT_TRUE(fe.EmitBody());
-    EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(Return{
-  {
-    ScalarConstructor[not set]{42u}
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    f50 = fe.ast_body();
   }
-})"));
-  }
+  auto program = p->program();
+  EXPECT_THAT(test::ToString(program, f100),
+              HasSubstr("let x_1 : u32 = x_50();\nreturn;"));
+  EXPECT_THAT(test::ToString(program, f50), HasSubstr("return 42u;"));
 }
 
 TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParamsUsedTwice) {
@@ -160,55 +131,26 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParamsUsedTwice) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  ast::StatementList f100;
   {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
-    const auto got = ToString(p->builder(), fe.ast_body());
-    const std::string expected =
-        R"(VariableDeclStatement{
-  Variable{
-    x_10
-    none
-    undefined
-    __u32
+    f100 = fe.ast_body();
   }
-}
-VariableDeclStatement{
-  VariableConst{
-    x_1
-    none
-    undefined
-    __u32
-    {
-      Call[not set]{
-        Identifier[not set]{x_50}
-        (
-        )
-      }
-    }
-  }
-}
-Assignment{
-  Identifier[not set]{x_10}
-  Identifier[not set]{x_1}
-}
-Assignment{
-  Identifier[not set]{x_10}
-  Identifier[not set]{x_1}
-}
-Return{}
-)";
-    EXPECT_EQ(got, expected);
-  }
+  ast::StatementList f50;
   {
     auto fe = p->function_emitter(50);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
-    EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(Return{
-  {
-    ScalarConstructor[not set]{42u}
+    f50 = fe.ast_body();
   }
-})"));
-  }
+  auto program = p->program();
+  EXPECT_EQ(test::ToString(program, f100), R"(var x_10 : u32;
+let x_1 : u32 = x_50();
+x_10 = x_1;
+x_10 = x_1;
+return;
+)");
+  EXPECT_THAT(test::ToString(program, f50), HasSubstr("return 42u;"));
 }
 
 TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
@@ -236,66 +178,19 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error();
   EXPECT_TRUE(p->error().empty());
-  const auto program_ast_str = p->program().to_str();
-  const std::string expected = R"(Module{
-  Function x_50 -> __u32
-  (
-    VariableConst{
-      x_51
-      none
-      undefined
-      __u32
-    }
-    VariableConst{
-      x_52
-      none
-      undefined
-      __u32
-    }
-  )
-  {
-    Return{
-      {
-        Binary[not set]{
-          Identifier[not set]{x_51}
-          add
-          Identifier[not set]{x_52}
-        }
-      }
-    }
-  }
-  Function x_100_1 -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        x_1
-        none
-        undefined
-        __u32
-        {
-          Call[not set]{
-            Identifier[not set]{x_50}
-            (
-              ScalarConstructor[not set]{42u}
-              ScalarConstructor[not set]{84u}
-            )
-          }
-        }
-      }
-    }
-    Return{}
-  }
-  Function x_100 -> __void
-  StageDecoration{fragment}
-  ()
-  {
-    Call[not set]{
-      Identifier[not set]{x_100_1}
-      (
-      )
-    }
-  }
+  const auto program_ast_str = test::ToString(p->program());
+  const std::string expected = R"(fn x_50(x_51 : u32, x_52 : u32) -> u32 {
+  return (x_51 + x_52);
+}
+
+fn x_100_1() {
+  let x_1 : u32 = x_50(42u, 84u);
+  return;
+}
+
+[[stage(fragment)]]
+fn x_100() {
+  x_100_1();
 }
 )";
   EXPECT_EQ(program_ast_str, expected);

@@ -269,6 +269,23 @@ inline void DumpSuccessfullyConvertedSpirv() {
   ParserImplWrapperForTest::DumpSuccessfullyConvertedSpirv();
 }
 
+/// Returns the WGSL printed string of a program.
+/// @param program the Program
+/// @returns the WGSL printed string the program.
+std::string ToString(const Program& program);
+
+/// Returns the WGSL printed string of a statement list.
+/// @param program the Program
+/// @param stmts the statement list
+/// @returns the WGSL printed string of a statement list.
+std::string ToString(const Program& program, const ast::StatementList& stmts);
+
+/// Returns the WGSL printed string of an AST node.
+/// @param program the Program
+/// @param node the AST node
+/// @returns the WGSL printed string of the AST node.
+std::string ToString(const Program& program, const ast::Node* node);
+
 }  // namespace test
 
 /// SPIR-V Parser test class
@@ -294,32 +311,6 @@ class SpvParserTestBase : public T {
 
 // Use this form when you don't need to template any further.
 using SpvParserTest = SpvParserTestBase<::testing::Test>;
-
-/// Returns the string dump of a statement list.
-/// @param program the Program
-/// @param stmts the statement list
-/// @returns the string dump of a statement list.
-inline std::string ToString(const Program& program,
-                            const ast::StatementList& stmts) {
-  std::ostringstream outs;
-  for (const auto* stmt : stmts) {
-    program.to_str(stmt, outs, 0);
-  }
-  return Demangler().Demangle(program.Symbols(), outs.str());
-}
-
-/// Returns the string dump of a statement list.
-/// @param builder the ProgramBuilder
-/// @param stmts the statement list
-/// @returns the string dump of a statement list.
-inline std::string ToString(ProgramBuilder& builder,
-                            const ast::StatementList& stmts) {
-  std::ostringstream outs;
-  for (const auto* stmt : stmts) {
-    builder.to_str(stmt, outs, 0);
-  }
-  return Demangler().Demangle(builder.Symbols(), outs.str());
-}
 
 }  // namespace spirv
 }  // namespace reader

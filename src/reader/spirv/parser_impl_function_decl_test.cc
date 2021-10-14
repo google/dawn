@@ -88,7 +88,7 @@ TEST_F(SpvParserTest, EmitFunctions_NoFunctions) {
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   Program program = p->program();
-  const auto program_ast = program.to_str(false);
+  const auto program_ast = test::ToString(program);
   EXPECT_THAT(program_ast, Not(HasSubstr("Function{")));
   p->SkipDumpingPending("Not valid for Vulkan: needs an entry point");
 }
@@ -102,7 +102,7 @@ TEST_F(SpvParserTest, EmitFunctions_FunctionWithoutBody) {
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   Program program = p->program();
-  const auto program_ast = program.to_str(false);
+  const auto program_ast = test::ToString(program);
   EXPECT_THAT(program_ast, Not(HasSubstr("Function{")));
   p->SkipDumpingPending("Missing an entry point body requires Linkage");
 }
@@ -121,19 +121,18 @@ OpFunctionEnd)";
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   ASSERT_TRUE(p->error().empty()) << p->error();
   Program program = p->program();
-  const auto program_ast = program.to_str(false);
+  const auto program_ast = test::ToString(program);
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Struct $3 {
-    StructMember{[[ BuiltinDecoration{position}
- ]] $4: __vec_4__f32})"))
-      << program_ast;
+struct main_out {
+  [[builtin(position)]]
+  x_2_1 : vec4<f32>;
+};
+)")) << program_ast;
 
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + program.Symbols().Get("main").to_str() +
-                                     R"( -> __type_name_$3
-  StageDecoration{vertex}
-  ()
-  {)"));
+[[stage(vertex)]]
+fn main() -> main_out {
+)"));
 }
 
 TEST_F(SpvParserTest, EmitFunctions_Function_EntryPoint_Fragment) {
@@ -147,13 +146,11 @@ TEST_F(SpvParserTest, EmitFunctions_Function_EntryPoint_Fragment) {
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   ASSERT_TRUE(p->error().empty()) << p->error();
   Program program = p->program();
-  const auto program_ast = program.to_str(false);
+  const auto program_ast = test::ToString(program);
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + program.Symbols().Get("main").to_str() +
-                                     R"( -> __void
-  StageDecoration{fragment}
-  ()
-  {)"));
+[[stage(fragment)]]
+fn main() {
+)"));
 }
 
 TEST_F(SpvParserTest, EmitFunctions_Function_EntryPoint_GLCompute) {
@@ -167,18 +164,11 @@ TEST_F(SpvParserTest, EmitFunctions_Function_EntryPoint_GLCompute) {
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   ASSERT_TRUE(p->error().empty()) << p->error();
   Program program = p->program();
-  const auto program_ast = program.to_str(false);
+  const auto program_ast = test::ToString(program);
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + program.Symbols().Get("main").to_str() +
-                                     R"( -> __void
-  StageDecoration{compute}
-  WorkgroupDecoration{
-    ScalarConstructor[not set]{1}
-    ScalarConstructor[not set]{1}
-    ScalarConstructor[not set]{1}
-  }
-  ()
-  {)"));
+[[stage(compute), workgroup_size(1, 1, 1)]]
+fn main() {
+)"));
 }
 
 TEST_F(SpvParserTest, EmitFunctions_Function_EntryPoint_MultipleEntryPoints) {
@@ -194,19 +184,15 @@ OpExecutionMode %main OriginUpperLeft
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   ASSERT_TRUE(p->error().empty()) << p->error();
   Program program = p->program();
-  const auto program_ast = program.to_str(false);
+  const auto program_ast = test::ToString(program);
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + program.Symbols().Get("first_shader").to_str() +
-                                     R"( -> __void
-  StageDecoration{fragment}
-  ()
-  {)"));
+[[stage(fragment)]]
+fn first_shader() {
+)"));
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + program.Symbols().Get("second_shader").to_str() +
-                                     R"( -> __void
-  StageDecoration{fragment}
-  ()
-  {)"));
+[[stage(fragment)]]
+fn second_shader() {
+)"));
 }
 
 TEST_F(SpvParserTest,
@@ -225,19 +211,11 @@ OpFunctionEnd)";
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   ASSERT_TRUE(p->error().empty()) << p->error();
   Program program = p->program();
-  const auto program_ast = program.to_str(false);
+  const auto program_ast = test::ToString(program);
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + program.Symbols().Get("comp_main").to_str() +
-                                     R"( -> __void
-  StageDecoration{compute}
-  WorkgroupDecoration{
-    ScalarConstructor[not set]{2}
-    ScalarConstructor[not set]{4}
-    ScalarConstructor[not set]{8}
-  }
-  ()
-  {)"))
-      << program_ast;
+[[stage(compute), workgroup_size(2, 4, 8)]]
+fn comp_main() {
+)")) << program_ast;
 }
 
 TEST_F(SpvParserTest,
@@ -259,19 +237,11 @@ OpFunctionEnd)";
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   ASSERT_TRUE(p->error().empty()) << p->error();
   Program program = p->program();
-  const auto program_ast = program.to_str(false);
+  const auto program_ast = test::ToString(program);
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + program.Symbols().Get("comp_main").to_str() +
-                                     R"( -> __void
-  StageDecoration{compute}
-  WorkgroupDecoration{
-    ScalarConstructor[not set]{3}
-    ScalarConstructor[not set]{5}
-    ScalarConstructor[not set]{7}
-  }
-  ()
-  {)"))
-      << program_ast;
+[[stage(compute), workgroup_size(3, 5, 7)]]
+fn comp_main() {
+)")) << program_ast;
 }
 
 TEST_F(
@@ -298,19 +268,11 @@ OpFunctionEnd)";
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   ASSERT_TRUE(p->error().empty()) << p->error();
   Program program = p->program();
-  const auto program_ast = program.to_str(false);
+  const auto program_ast = test::ToString(program);
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + program.Symbols().Get("comp_main").to_str() +
-                                     R"( -> __void
-  StageDecoration{compute}
-  WorkgroupDecoration{
-    ScalarConstructor[not set]{3}
-    ScalarConstructor[not set]{5}
-    ScalarConstructor[not set]{7}
-  }
-  ()
-  {)"))
-      << program_ast;
+[[stage(compute), workgroup_size(3, 5, 7)]]
+fn comp_main() {
+)")) << program_ast;
 }
 
 TEST_F(
@@ -336,19 +298,11 @@ OpFunctionEnd)";
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   ASSERT_TRUE(p->error().empty()) << p->error();
   Program program = p->program();
-  const auto program_ast = program.to_str(false);
+  const auto program_ast = test::ToString(program);
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + program.Symbols().Get("comp_main").to_str() +
-                                     R"( -> __void
-  StageDecoration{compute}
-  WorkgroupDecoration{
-    ScalarConstructor[not set]{3}
-    ScalarConstructor[not set]{5}
-    ScalarConstructor[not set]{7}
-  }
-  ()
-  {)"))
-      << program_ast;
+[[stage(compute), workgroup_size(3, 5, 7)]]
+fn comp_main() {
+)")) << program_ast;
 }
 
 TEST_F(
@@ -378,19 +332,11 @@ OpFunctionEnd)";
   ASSERT_TRUE(p->BuildAndParseInternalModule());
   ASSERT_TRUE(p->error().empty()) << p->error();
   Program program = p->program();
-  const auto program_ast = program.to_str(false);
+  const auto program_ast = test::ToString(program);
   EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + program.Symbols().Get("comp_main").to_str() +
-                                     R"( -> __void
-  StageDecoration{compute}
-  WorkgroupDecoration{
-    ScalarConstructor[not set]{3}
-    ScalarConstructor[not set]{5}
-    ScalarConstructor[not set]{7}
-  }
-  ()
-  {)"))
-      << program_ast;
+[[stage(compute), workgroup_size(3, 5, 7)]]
+fn comp_main() {
+)")) << program_ast;
 }
 
 TEST_F(SpvParserTest, EmitFunctions_VoidFunctionWithoutParams) {
@@ -404,12 +350,9 @@ TEST_F(SpvParserTest, EmitFunctions_VoidFunctionWithoutParams) {
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   Program program = p->program();
-  const auto program_ast = program.to_str(false);
-  EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function )" + program.Symbols().Get("another_function").to_str() +
-                                     R"( -> __void
-  ()
-  {)"));
+  const auto program_ast = test::ToString(program);
+  EXPECT_THAT(program_ast, HasSubstr(R"(fn another_function() {
+)"));
 }
 
 TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
@@ -440,61 +383,21 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   Program program = p->program();
-  const auto program_ast = program.to_str();
-  EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function leaf -> __u32
-  ()
-  {
-    Return{
-      {
-        ScalarConstructor[not set]{0u}
-      }
-    }
-  }
-  Function branch -> __u32
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        leaf_result
-        none
-        undefined
-        __u32
-        {
-          Call[not set]{
-            Identifier[not set]{leaf}
-            (
-            )
-          }
-        }
-      }
-    }
-    Return{
-      {
-        Identifier[not set]{leaf_result}
-      }
-    }
-  }
-  Function root -> __void
-  ()
-  {
-    VariableDeclStatement{
-      VariableConst{
-        branch_result
-        none
-        undefined
-        __u32
-        {
-          Call[not set]{
-            Identifier[not set]{branch}
-            (
-            )
-          }
-        }
-      }
-    }
-    Return{}
-  })")) << program_ast;
+  const auto program_ast = test::ToString(program);
+  EXPECT_THAT(program_ast, HasSubstr(R"(fn leaf() -> u32 {
+  return 0u;
+}
+
+fn branch() -> u32 {
+  let leaf_result : u32 = leaf();
+  return leaf_result;
+}
+
+fn root() {
+  let branch_result : u32 = branch();
+  return;
+}
+)")) << program_ast;
 }
 
 TEST_F(SpvParserTest, EmitFunctions_NonVoidResultType) {
@@ -511,18 +414,11 @@ TEST_F(SpvParserTest, EmitFunctions_NonVoidResultType) {
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   Program program = p->program();
-  const auto program_ast = program.to_str();
-  EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function ret_float -> __f32
-  ()
-  {
-    Return{
-      {
-        ScalarConstructor[not set]{0.000000}
-      }
-    }
-  })"))
-      << program_ast;
+  const auto program_ast = test::ToString(program);
+  EXPECT_THAT(program_ast, HasSubstr(R"(fn ret_float() -> f32 {
+  return 0.0;
+}
+)")) << program_ast;
 }
 
 TEST_F(SpvParserTest, EmitFunctions_MixedParamTypes) {
@@ -541,32 +437,12 @@ TEST_F(SpvParserTest, EmitFunctions_MixedParamTypes) {
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   Program program = p->program();
-  const auto program_ast = program.to_str();
-  EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function mixed_params -> __void
-  (
-    VariableConst{
-      a
-      none
-      undefined
-      __u32
-    }
-    VariableConst{
-      b
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      c
-      none
-      undefined
-      __i32
-    }
-  )
-  {
-    Return{}
-  })"));
+  const auto program_ast = test::ToString(program);
+  EXPECT_THAT(program_ast,
+              HasSubstr(R"(fn mixed_params(a : u32, b : f32, c : i32) {
+  return;
+}
+)"));
 }
 
 TEST_F(SpvParserTest, EmitFunctions_GenerateParamNames) {
@@ -585,33 +461,12 @@ TEST_F(SpvParserTest, EmitFunctions_GenerateParamNames) {
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   Program program = p->program();
-  const auto program_ast = program.to_str();
-  EXPECT_THAT(program_ast, HasSubstr(R"(
-  Function mixed_params -> __void
-  (
-    VariableConst{
-      x_14
-      none
-      undefined
-      __u32
-    }
-    VariableConst{
-      x_15
-      none
-      undefined
-      __f32
-    }
-    VariableConst{
-      x_16
-      none
-      undefined
-      __i32
-    }
-  )
-  {
-    Return{}
-  })"))
-      << program_ast;
+  const auto program_ast = test::ToString(program);
+  EXPECT_THAT(program_ast,
+              HasSubstr(R"(fn mixed_params(x_14 : u32, x_15 : f32, x_16 : i32) {
+  return;
+}
+)")) << program_ast;
 }
 
 }  // namespace

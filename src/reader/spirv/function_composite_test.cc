@@ -95,52 +95,12 @@ TEST_F(SpvParserTest_Composite_Construct, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
-              HasSubstr(R"(VariableDeclStatement{
-  VariableConst{
-    x_1
-    none
-    undefined
-    __vec_2__u32
-    {
-      TypeConstructor[not set]{
-        __vec_2__u32
-        ScalarConstructor[not set]{10u}
-        ScalarConstructor[not set]{20u}
-      }
-    }
-  }
-}
-VariableDeclStatement{
-  VariableConst{
-    x_2
-    none
-    undefined
-    __vec_2__i32
-    {
-      TypeConstructor[not set]{
-        __vec_2__i32
-        ScalarConstructor[not set]{30}
-        ScalarConstructor[not set]{40}
-      }
-    }
-  }
-}
-VariableDeclStatement{
-  VariableConst{
-    x_3
-    none
-    undefined
-    __vec_2__f32
-    {
-      TypeConstructor[not set]{
-        __vec_2__f32
-        ScalarConstructor[not set]{50.000000}
-        ScalarConstructor[not set]{60.000000}
-      }
-    }
-  }
-})"));
+  auto ast_body = fe.ast_body();
+  EXPECT_THAT(test::ToString(p->program(), ast_body),
+              HasSubstr(R"(let x_1 : vec2<u32> = vec2<u32>(10u, 20u);
+let x_2 : vec2<i32> = vec2<i32>(30, 40);
+let x_3 : vec2<f32> = vec2<f32>(50.0, 60.0);
+)"));
 }
 
 TEST_F(SpvParserTest_Composite_Construct, Matrix) {
@@ -155,33 +115,12 @@ TEST_F(SpvParserTest_Composite_Construct, Matrix) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __mat_2_3__f32
-    {
-      TypeConstructor[not set]{
-        __mat_2_3__f32
-        TypeConstructor[not set]{
-          __vec_2__f32
-          ScalarConstructor[not set]{50.000000}
-          ScalarConstructor[not set]{60.000000}
-        }
-        TypeConstructor[not set]{
-          __vec_2__f32
-          ScalarConstructor[not set]{60.000000}
-          ScalarConstructor[not set]{50.000000}
-        }
-        TypeConstructor[not set]{
-          __vec_2__f32
-          ScalarConstructor[not set]{70.000000}
-          ScalarConstructor[not set]{70.000000}
-        }
-      }
-    }
-  })"));
+  auto ast_body = fe.ast_body();
+  EXPECT_THAT(test::ToString(p->program(), ast_body),
+              HasSubstr("let x_1 : mat3x2<f32> = mat3x2<f32>("
+                        "vec2<f32>(50.0, 60.0), "
+                        "vec2<f32>(60.0, 50.0), "
+                        "vec2<f32>(70.0, 70.0));"));
 }
 
 TEST_F(SpvParserTest_Composite_Construct, Array) {
@@ -196,23 +135,11 @@ TEST_F(SpvParserTest_Composite_Construct, Array) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __array__u32_5
-    {
-      TypeConstructor[not set]{
-        __array__u32_5
-        ScalarConstructor[not set]{10u}
-        ScalarConstructor[not set]{20u}
-        ScalarConstructor[not set]{3u}
-        ScalarConstructor[not set]{4u}
-        ScalarConstructor[not set]{5u}
-      }
-    }
-  })"));
+  auto ast_body = fe.ast_body();
+  EXPECT_THAT(
+      test::ToString(p->program(), ast_body),
+      HasSubstr(
+          "let x_1 : array<u32, 5u> = array<u32, 5u>(10u, 20u, 3u, 4u, 5u);"));
 }
 
 TEST_F(SpvParserTest_Composite_Construct, Struct) {
@@ -227,25 +154,9 @@ TEST_F(SpvParserTest_Composite_Construct, Struct) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __type_name_S
-    {
-      TypeConstructor[not set]{
-        __type_name_S
-        TypeConstructor[not set]{
-          __vec_2__f32
-          ScalarConstructor[not set]{50.000000}
-          ScalarConstructor[not set]{60.000000}
-        }
-        ScalarConstructor[not set]{5u}
-        ScalarConstructor[not set]{30}
-      }
-    }
-  })"));
+  auto ast_body = fe.ast_body();
+  EXPECT_THAT(test::ToString(p->program(), ast_body),
+              HasSubstr("let x_1 : S = S(vec2<f32>(50.0, 60.0), 5u, 30);"));
 }
 
 TEST_F(SpvParserTest_Composite_Construct,
@@ -268,37 +179,12 @@ TEST_F(SpvParserTest_Composite_Construct,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto got = ToString(p->builder(), fe.ast_body());
+  auto ast_body = fe.ast_body();
+  const auto got = test::ToString(p->program(), ast_body);
   const auto expected = std::string(
-      R"(VariableDeclStatement{
-  VariableConst{
-    x_2
-    none
-    undefined
-    __type_name_S_1
-    {
-      TypeConstructor[not set]{
-        __type_name_S_1
-        ScalarConstructor[not set]{10u}
-      }
-    }
-  }
-}
-VariableDeclStatement{
-  VariableConst{
-    x_3
-    none
-    undefined
-    __type_name_S_2
-    {
-      TypeConstructor[not set]{
-        __type_name_S_2
-        ScalarConstructor[not set]{10u}
-      }
-    }
-  }
-}
-Return{}
+      R"(let x_2 : S_1 = S_1(10u);
+let x_3 : S_2 = S_2(10u);
+return;
 )");
   EXPECT_EQ(got, expected) << got;
 }
@@ -317,23 +203,9 @@ TEST_F(SpvParserTest_CompositeExtract, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __f32
-    {
-      MemberAccessor[not set]{
-        TypeConstructor[not set]{
-          __vec_2__f32
-          ScalarConstructor[not set]{50.000000}
-          ScalarConstructor[not set]{60.000000}
-        }
-        Identifier[not set]{y}
-      }
-    }
-  })"));
+  auto ast_body = fe.ast_body();
+  EXPECT_THAT(test::ToString(p->program(), ast_body),
+              HasSubstr("let x_1 : f32 = vec2<f32>(50.0, 60.0).y;"));
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Vector_IndexTooBigError) {
@@ -368,19 +240,9 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
-  VariableConst{
-    x_2
-    none
-    undefined
-    __vec_2__f32
-    {
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{2u}
-      }
-    }
-  })"));
+  auto ast_body = fe.ast_body();
+  EXPECT_THAT(test::ToString(p->program(), ast_body),
+              HasSubstr("let x_2 : vec2<f32> = x_1[2u];"));
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Matrix_IndexTooBigError) {
@@ -419,22 +281,9 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
-  VariableConst{
-    x_2
-    none
-    undefined
-    __f32
-    {
-      MemberAccessor[not set]{
-        ArrayAccessor[not set]{
-          Identifier[not set]{x_1}
-          ScalarConstructor[not set]{2u}
-        }
-        Identifier[not set]{y}
-      }
-    }
-  })"));
+  auto ast_body = fe.ast_body();
+  EXPECT_THAT(test::ToString(p->program(), ast_body),
+              HasSubstr("let x_2 : f32 = x_1[2u].y;"));
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Array) {
@@ -453,19 +302,9 @@ TEST_F(SpvParserTest_CompositeExtract, Array) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
-  VariableConst{
-    x_2
-    none
-    undefined
-    __u32
-    {
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        ScalarConstructor[not set]{3u}
-      }
-    }
-  })"));
+  auto ast_body = fe.ast_body();
+  EXPECT_THAT(test::ToString(p->program(), ast_body),
+              HasSubstr("let x_2 : u32 = x_1[3u];"));
 }
 
 TEST_F(SpvParserTest_CompositeExtract, RuntimeArray_IsError) {
@@ -505,19 +344,9 @@ TEST_F(SpvParserTest_CompositeExtract, Struct) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
-  VariableConst{
-    x_2
-    none
-    undefined
-    __i32
-    {
-      MemberAccessor[not set]{
-        Identifier[not set]{x_1}
-        Identifier[not set]{field2}
-      }
-    }
-  })"));
+  auto ast_body = fe.ast_body();
+  EXPECT_THAT(test::ToString(p->program(), ast_body),
+              HasSubstr("let x_2 : i32 = x_1.field2;"));
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
@@ -556,34 +385,13 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto got = fe.ast_body();
-  EXPECT_THAT(ToString(p->builder(), got), HasSubstr(R"(
-  VariableConst{
-    x_2
-    none
-    undefined
-    __u32
-    {
-      MemberAccessor[not set]{
-        Identifier[not set]{x_1}
-        Identifier[not set]{algo}
-      }
-    }
-  })"))
-      << ToString(p->builder(), got);
-  EXPECT_THAT(ToString(p->builder(), got), HasSubstr(R"(
-  VariableConst{
-    x_4
-    none
-    undefined
-    __u32
-    {
-      MemberAccessor[not set]{
-        Identifier[not set]{x_3}
-        Identifier[not set]{rithm}
-      }
-    }
-  })"))
-      << ToString(p->builder(), got);
+  auto program = p->program();
+  EXPECT_THAT(test::ToString(program, got),
+              HasSubstr("let x_2 : u32 = x_1.algo;"))
+      << test::ToString(program, got);
+  EXPECT_THAT(test::ToString(program, got),
+              HasSubstr("let x_4 : u32 = x_3.rithm;"))
+      << test::ToString(program, got);
   p->SkipDumpingPending("crbug.com/tint/863");
 }
 
@@ -625,28 +433,9 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_Array_Matrix_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
-  VariableConst{
-    x_2
-    none
-    undefined
-    __f32
-    {
-      MemberAccessor[not set]{
-        ArrayAccessor[not set]{
-          ArrayAccessor[not set]{
-            MemberAccessor[not set]{
-              Identifier[not set]{x_1}
-              Identifier[not set]{field1}
-            }
-            ScalarConstructor[not set]{2u}
-          }
-          ScalarConstructor[not set]{0u}
-        }
-        Identifier[not set]{y}
-      }
-    }
-  })"));
+  auto ast_body = fe.ast_body();
+  EXPECT_THAT(test::ToString(p->program(), ast_body),
+              HasSubstr("let x_2 : f32 = x_1.field1[2u][0u].y;"));
 }
 
 using SpvParserTest_CompositeInsert = SpvParserTest;
@@ -663,42 +452,13 @@ TEST_F(SpvParserTest_CompositeInsert, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
+  auto ast_body = fe.ast_body();
+  auto got = test::ToString(p->program(), ast_body);
   const auto* expected =
-      R"(VariableDeclStatement{
-  Variable{
-    x_1_1
-    none
-    undefined
-    __vec_2__f32
-    {
-      TypeConstructor[not set]{
-        __vec_2__f32
-        ScalarConstructor[not set]{50.000000}
-        ScalarConstructor[not set]{60.000000}
-      }
-    }
-  }
-}
-Assignment{
-  MemberAccessor[not set]{
-    Identifier[not set]{x_1_1}
-    Identifier[not set]{y}
-  }
-  ScalarConstructor[not set]{70.000000}
-}
-VariableDeclStatement{
-  VariableConst{
-    x_1
-    none
-    undefined
-    __vec_2__f32
-    {
-      Identifier[not set]{x_1_1}
-    }
-  }
-}
-Return{}
+      R"(var x_1_1 : vec2<f32> = vec2<f32>(50.0, 60.0);
+x_1_1.y = 70.0;
+let x_1 : vec2<f32> = x_1_1;
+return;
 )";
   EXPECT_EQ(got, expected);
 }
@@ -735,40 +495,12 @@ TEST_F(SpvParserTest_CompositeInsert, Matrix) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto body_str = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
-  Variable{
-    x_2_1
-    none
-    undefined
-    __mat_2_3__f32
-    {
-      Identifier[not set]{x_1}
-    }
-  }
-}
-Assignment{
-  ArrayAccessor[not set]{
-    Identifier[not set]{x_2_1}
-    ScalarConstructor[not set]{2u}
-  }
-  TypeConstructor[not set]{
-    __vec_2__f32
-    ScalarConstructor[not set]{50.000000}
-    ScalarConstructor[not set]{60.000000}
-  }
-}
-VariableDeclStatement{
-  VariableConst{
-    x_2
-    none
-    undefined
-    __mat_2_3__f32
-    {
-      Identifier[not set]{x_2_1}
-    }
-  }
-})")) << body_str;
+  auto ast_body = fe.ast_body();
+  auto body_str = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body_str, HasSubstr(R"(var x_2_1 : mat3x2<f32> = x_1;
+x_2_1[2u] = vec2<f32>(50.0, 60.0);
+let x_2 : mat3x2<f32> = x_2_1;
+)")) << body_str;
 }
 
 TEST_F(SpvParserTest_CompositeInsert, Matrix_IndexTooBigError) {
@@ -807,40 +539,13 @@ TEST_F(SpvParserTest_CompositeInsert, Matrix_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto body_str = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
-  Variable{
-    x_2_1
-    none
-    undefined
-    __mat_2_3__f32
-    {
-      Identifier[not set]{x_1}
-    }
-  }
-}
-Assignment{
-  ArrayAccessor[not set]{
-    Identifier[not set]{x_2_1}
-    ScalarConstructor[not set]{2u}
-  }
-  TypeConstructor[not set]{
-    __vec_2__f32
-    ScalarConstructor[not set]{50.000000}
-    ScalarConstructor[not set]{60.000000}
-  }
-}
-VariableDeclStatement{
-  VariableConst{
-    x_2
-    none
-    undefined
-    __mat_2_3__f32
-    {
-      Identifier[not set]{x_2_1}
-    }
-  }
-})")) << body_str;
+  auto ast_body = fe.ast_body();
+  auto body_str = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body_str, HasSubstr(R"(var x_2_1 : mat3x2<f32> = x_1;
+x_2_1[2u] = vec2<f32>(50.0, 60.0);
+let x_2 : mat3x2<f32> = x_2_1;
+return;
+)")) << body_str;
 }
 
 TEST_F(SpvParserTest_CompositeInsert, Array) {
@@ -859,36 +564,12 @@ TEST_F(SpvParserTest_CompositeInsert, Array) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto body_str = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
-  Variable{
-    x_2_1
-    none
-    undefined
-    __array__u32_5
-    {
-      Identifier[not set]{x_1}
-    }
-  }
-}
-Assignment{
-  ArrayAccessor[not set]{
-    Identifier[not set]{x_2_1}
-    ScalarConstructor[not set]{3u}
-  }
-  ScalarConstructor[not set]{20u}
-}
-VariableDeclStatement{
-  VariableConst{
-    x_2
-    none
-    undefined
-    __array__u32_5
-    {
-      Identifier[not set]{x_2_1}
-    }
-  }
-})")) << body_str;
+  auto ast_body = fe.ast_body();
+  auto body_str = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body_str, HasSubstr(R"(var x_2_1 : array<u32, 5u> = x_1;
+x_2_1[3u] = 20u;
+let x_2 : array<u32, 5u> = x_2_1;
+)")) << body_str;
 }
 
 TEST_F(SpvParserTest_CompositeInsert, RuntimeArray_IsError) {
@@ -928,55 +609,14 @@ TEST_F(SpvParserTest_CompositeInsert, Struct) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto body_str = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
-  Variable{
-    x_35
-    none
-    undefined
-    __type_name_S
-  }
-}
-VariableDeclStatement{
-  VariableConst{
-    x_1
-    none
-    undefined
-    __type_name_S
-    {
-      Identifier[not set]{x_35}
-    }
-  }
-}
-VariableDeclStatement{
-  Variable{
-    x_2_1
-    none
-    undefined
-    __type_name_S
-    {
-      Identifier[not set]{x_1}
-    }
-  }
-}
-Assignment{
-  MemberAccessor[not set]{
-    Identifier[not set]{x_2_1}
-    Identifier[not set]{field2}
-  }
-  ScalarConstructor[not set]{30}
-}
-VariableDeclStatement{
-  VariableConst{
-    x_2
-    none
-    undefined
-    __type_name_S
-    {
-      Identifier[not set]{x_2_1}
-    }
-  }
-})")) << body_str;
+  auto ast_body = fe.ast_body();
+  auto body_str = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body_str, HasSubstr(R"(var x_35 : S;
+let x_1 : S = x_35;
+var x_2_1 : S = x_1;
+x_2_1.field2 = 30;
+let x_2 : S = x_2_1;
+)")) << body_str;
 }
 
 TEST_F(SpvParserTest_CompositeInsert, Struct_DifferOnlyInMemberName) {
@@ -1018,104 +658,19 @@ TEST_F(SpvParserTest_CompositeInsert, Struct_DifferOnlyInMemberName) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto got = ToString(p->builder(), fe.ast_body());
-  const std::string expected = R"(VariableDeclStatement{
-  Variable{
-    var0
-    none
-    undefined
-    __type_name_S
-  }
-}
-VariableDeclStatement{
-  Variable{
-    var1
-    none
-    undefined
-    __type_name_S_1
-  }
-}
-VariableDeclStatement{
-  VariableConst{
-    x_1
-    none
-    undefined
-    __type_name_S
-    {
-      Identifier[not set]{var0}
-    }
-  }
-}
-VariableDeclStatement{
-  Variable{
-    x_2_1
-    none
-    undefined
-    __type_name_S
-    {
-      Identifier[not set]{x_1}
-    }
-  }
-}
-Assignment{
-  MemberAccessor[not set]{
-    Identifier[not set]{x_2_1}
-    Identifier[not set]{algo}
-  }
-  ScalarConstructor[not set]{10u}
-}
-VariableDeclStatement{
-  VariableConst{
-    x_2
-    none
-    undefined
-    __type_name_S
-    {
-      Identifier[not set]{x_2_1}
-    }
-  }
-}
-VariableDeclStatement{
-  VariableConst{
-    x_3
-    none
-    undefined
-    __type_name_S_1
-    {
-      Identifier[not set]{var1}
-    }
-  }
-}
-VariableDeclStatement{
-  Variable{
-    x_4_1
-    none
-    undefined
-    __type_name_S_1
-    {
-      Identifier[not set]{x_3}
-    }
-  }
-}
-Assignment{
-  MemberAccessor[not set]{
-    Identifier[not set]{x_4_1}
-    Identifier[not set]{rithm}
-  }
-  ScalarConstructor[not set]{11u}
-}
-VariableDeclStatement{
-  VariableConst{
-    x_4
-    none
-    undefined
-    __type_name_S_1
-    {
-      Identifier[not set]{x_4_1}
-    }
-  }
-}
-Return{}
+  auto ast_body = fe.ast_body();
+  const auto got = test::ToString(p->program(), ast_body);
+  const std::string expected = R"(var var0 : S;
+var var1 : S_1;
+let x_1 : S = var0;
+var x_2_1 : S = x_1;
+x_2_1.algo = 10u;
+let x_2 : S = x_2_1;
+let x_3 : S_1 = var1;
+var x_4_1 : S_1 = x_3;
+x_4_1.rithm = 11u;
+let x_4 : S_1 = x_4_1;
+return;
 )";
   EXPECT_EQ(got, expected) << got;
 }
@@ -1158,64 +713,14 @@ TEST_F(SpvParserTest_CompositeInsert, Struct_Array_Matrix_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto body_str = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
-  Variable{
-    x_37
-    none
-    undefined
-    __type_name_S_1
-  }
-}
-VariableDeclStatement{
-  VariableConst{
-    x_1
-    none
-    undefined
-    __type_name_S_1
-    {
-      Identifier[not set]{x_37}
-    }
-  }
-}
-VariableDeclStatement{
-  Variable{
-    x_2_1
-    none
-    undefined
-    __type_name_S_1
-    {
-      Identifier[not set]{x_1}
-    }
-  }
-}
-Assignment{
-  MemberAccessor[not set]{
-    ArrayAccessor[not set]{
-      ArrayAccessor[not set]{
-        MemberAccessor[not set]{
-          Identifier[not set]{x_2_1}
-          Identifier[not set]{field1}
-        }
-        ScalarConstructor[not set]{2u}
-      }
-      ScalarConstructor[not set]{0u}
-    }
-    Identifier[not set]{y}
-  }
-  ScalarConstructor[not set]{70.000000}
-}
-VariableDeclStatement{
-  VariableConst{
-    x_2
-    none
-    undefined
-    __type_name_S_1
-    {
-      Identifier[not set]{x_2_1}
-    }
-  }
-})")) << body_str;
+  auto ast_body = fe.ast_body();
+  auto body_str = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body_str, HasSubstr(R"(var x_37 : S_1;
+let x_1 : S_1 = x_37;
+var x_2_1 : S_1 = x_1;
+x_2_1.field1[2u][0u].y = 70.0;
+let x_2 : S_1 = x_2_1;
+)")) << body_str;
 }
 
 using SpvParserTest_CopyObject = SpvParserTest;
@@ -1233,29 +738,11 @@ TEST_F(SpvParserTest_CopyObject, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
-              HasSubstr(R"(VariableDeclStatement{
-  VariableConst{
-    x_1
-    none
-    undefined
-    __u32
-    {
-      ScalarConstructor[not set]{3u}
-    }
-  }
-}
-VariableDeclStatement{
-  VariableConst{
-    x_2
-    none
-    undefined
-    __u32
-    {
-      Identifier[not set]{x_1}
-    }
-  }
-})"));
+  auto ast_body = fe.ast_body();
+  EXPECT_THAT(test::ToString(p->program(), ast_body),
+              HasSubstr(R"(let x_1 : u32 = 3u;
+let x_2 : u32 = x_1;
+)"));
 }
 
 TEST_F(SpvParserTest_CopyObject, Pointer) {
@@ -1274,32 +761,11 @@ TEST_F(SpvParserTest_CopyObject, Pointer) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
-              HasSubstr(R"(VariableDeclStatement{
-  VariableConst{
-    x_1
-    none
-    undefined
-    __ptr_function__u32
-    {
-      UnaryOp[not set]{
-        address-of
-        Identifier[not set]{x_10}
-      }
-    }
-  }
-}
-VariableDeclStatement{
-  VariableConst{
-    x_2
-    none
-    undefined
-    __ptr_function__u32
-    {
-      Identifier[not set]{x_1}
-    }
-  }
-})"));
+  auto ast_body = fe.ast_body();
+  EXPECT_THAT(test::ToString(p->program(), ast_body),
+              HasSubstr(R"(let x_1 : ptr<function, u32> = &(x_10);
+let x_2 : ptr<function, u32> = x_1;
+)"));
 }
 
 using SpvParserTest_VectorShuffle = SpvParserTest;
@@ -1320,34 +786,11 @@ TEST_F(SpvParserTest_VectorShuffle, FunctionScopeOperands_UseBoth) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
-    x_10
-    none
-    undefined
-    __vec_4__u32
-    {
-      TypeConstructor[not set]{
-        __vec_4__u32
-        MemberAccessor[not set]{
-          Identifier[not set]{x_2}
-          Identifier[not set]{y}
-        }
-        MemberAccessor[not set]{
-          Identifier[not set]{x_2}
-          Identifier[not set]{x}
-        }
-        MemberAccessor[not set]{
-          Identifier[not set]{x_1}
-          Identifier[not set]{y}
-        }
-        MemberAccessor[not set]{
-          Identifier[not set]{x_1}
-          Identifier[not set]{x}
-        }
-      }
-    }
-  }
-})"));
+  auto ast_body = fe.ast_body();
+  EXPECT_THAT(
+      test::ToString(p->program(), ast_body),
+      HasSubstr(
+          "let x_10 : vec4<u32> = vec4<u32>(x_2.y, x_2.x, x_1.y, x_1.x);"));
 }
 
 TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_UseBoth) {
@@ -1363,49 +806,13 @@ TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_UseBoth) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
-    x_10
-    none
-    undefined
-    __vec_4__u32
-    {
-      TypeConstructor[not set]{
-        __vec_4__u32
-        MemberAccessor[not set]{
-          TypeConstructor[not set]{
-            __vec_2__u32
-            ScalarConstructor[not set]{4u}
-            ScalarConstructor[not set]{3u}
-          }
-          Identifier[not set]{y}
-        }
-        MemberAccessor[not set]{
-          TypeConstructor[not set]{
-            __vec_2__u32
-            ScalarConstructor[not set]{4u}
-            ScalarConstructor[not set]{3u}
-          }
-          Identifier[not set]{x}
-        }
-        MemberAccessor[not set]{
-          TypeConstructor[not set]{
-            __vec_2__u32
-            ScalarConstructor[not set]{3u}
-            ScalarConstructor[not set]{4u}
-          }
-          Identifier[not set]{y}
-        }
-        MemberAccessor[not set]{
-          TypeConstructor[not set]{
-            __vec_2__u32
-            ScalarConstructor[not set]{3u}
-            ScalarConstructor[not set]{4u}
-          }
-          Identifier[not set]{x}
-        }
-      }
-    }
-  })"));
+  auto ast_body = fe.ast_body();
+  EXPECT_THAT(test::ToString(p->program(), ast_body),
+              HasSubstr("let x_10 : vec4<u32> = vec4<u32>("
+                        "vec2<u32>(4u, 3u).y, "
+                        "vec2<u32>(4u, 3u).x, "
+                        "vec2<u32>(3u, 4u).y, "
+                        "vec2<u32>(3u, 4u).x);"));
 }
 
 TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_AllOnesMapToNull) {
@@ -1422,22 +829,9 @@ TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_AllOnesMapToNull) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
-    x_10
-    none
-    undefined
-    __vec_2__u32
-    {
-      TypeConstructor[not set]{
-        __vec_2__u32
-        ScalarConstructor[not set]{0u}
-        MemberAccessor[not set]{
-          Identifier[not set]{x_1}
-          Identifier[not set]{y}
-        }
-      }
-    }
-  })"));
+  auto ast_body = fe.ast_body();
+  EXPECT_THAT(test::ToString(p->program(), ast_body),
+              HasSubstr("let x_10 : vec2<u32> = vec2<u32>(0u, x_1.y);"));
 }
 
 TEST_F(SpvParserTest_VectorShuffle, IndexTooBig_IsError) {
@@ -1474,20 +868,9 @@ TEST_F(SpvParserTest_VectorExtractDynamic, SignedIndex) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto got = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(got, HasSubstr(R"(VariableConst{
-    x_10
-    none
-    undefined
-    __u32
-    {
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        Identifier[not set]{x_2}
-      }
-    }
-  }
-})")) << got;
+  auto ast_body = fe.ast_body();
+  const auto got = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(got, HasSubstr("let x_10 : u32 = x_1[x_2];")) << got;
 }
 
 TEST_F(SpvParserTest_VectorExtractDynamic, UnsignedIndex) {
@@ -1505,20 +888,9 @@ TEST_F(SpvParserTest_VectorExtractDynamic, UnsignedIndex) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto got = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(got, HasSubstr(R"(VariableConst{
-    x_10
-    none
-    undefined
-    __u32
-    {
-      ArrayAccessor[not set]{
-        Identifier[not set]{x_1}
-        Identifier[not set]{x_2}
-      }
-    }
-  }
-})")) << got;
+  auto ast_body = fe.ast_body();
+  const auto got = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(got, HasSubstr("let x_10 : u32 = x_1[x_2];")) << got;
 }
 
 using SpvParserTest_VectorInsertDynamic = SpvParserTest;
@@ -1539,38 +911,13 @@ TEST_F(SpvParserTest_VectorInsertDynamic, Sample) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto got = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(got, HasSubstr(R"(
-VariableDeclStatement{
-  Variable{
-    x_10_1
-    none
-    undefined
-    __vec_2__u32
-    {
-      Identifier[not set]{x_1}
-    }
-  }
-}
-Assignment{
-  ArrayAccessor[not set]{
-    Identifier[not set]{x_10_1}
-    Identifier[not set]{x_3}
-  }
-  Identifier[not set]{x_2}
-}
-VariableDeclStatement{
-  VariableConst{
-    x_10
-    none
-    undefined
-    __vec_2__u32
-    {
-      Identifier[not set]{x_10_1}
-    }
-  }
-})")) << got
-      << assembly;
+  auto ast_body = fe.ast_body();
+  const auto got = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(got, HasSubstr(R"(var x_10_1 : vec2<u32> = x_1;
+x_10_1[x_3] = x_2;
+let x_10 : vec2<u32> = x_10_1;
+)")) << got
+     << assembly;
 }
 
 TEST_F(SpvParserTest, DISABLED_WorkgroupSize_Overridable) {
@@ -1607,7 +954,7 @@ TEST_F(SpvParserTest, DISABLED_WorkgroupSize_Overridable) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.Emit()) << p->error();
-  const auto got = p->program().to_str();
+  const auto got = test::ToString(p->program());
   EXPECT_THAT(got, HasSubstr(R"(
   VariableConst{
     Decorations{

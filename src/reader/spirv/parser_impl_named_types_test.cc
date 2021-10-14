@@ -29,7 +29,7 @@ TEST_F(SpvParserTest, NamedTypes_AnonStruct) {
     %s = OpTypeStruct %uint %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->program().to_str(), HasSubstr("Struct S"));
+  EXPECT_THAT(test::ToString(p->program()), HasSubstr("struct S"));
 
   p->DeliberatelyInvalidSpirv();
 }
@@ -41,7 +41,7 @@ TEST_F(SpvParserTest, NamedTypes_NamedStruct) {
     %s = OpTypeStruct %uint %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->program().to_str(), HasSubstr("Struct mystruct"));
+  EXPECT_THAT(test::ToString(p->program()), HasSubstr("struct mystruct"));
 
   p->DeliberatelyInvalidSpirv();
 }
@@ -53,14 +53,15 @@ TEST_F(SpvParserTest, NamedTypes_Dup_EmitBoth) {
     %s2 = OpTypeStruct %uint %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
-  EXPECT_THAT(p->program().to_str(), HasSubstr(R"(Struct S {
-    StructMember{field0: __u32}
-    StructMember{field1: __u32}
-  }
-  Struct S_1 {
-    StructMember{field0: __u32}
-    StructMember{field1: __u32}
-  })"));
+  EXPECT_THAT(test::ToString(p->program()), HasSubstr(R"(struct S {
+  field0 : u32;
+  field1 : u32;
+};
+
+struct S_1 {
+  field0 : u32;
+  field1 : u32;
+})"));
 
   p->DeliberatelyInvalidSpirv();
 }
@@ -76,8 +77,8 @@ TEST_F(SpvParserTest, NamedTypes_AnonRTArrayWithDecoration) {
     %arr = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->program().to_str(),
-              HasSubstr("RTArr -> __array__u32_stride_8\n"));
+  EXPECT_THAT(test::ToString(p->program()),
+              HasSubstr("RTArr = [[stride(8)]] array<u32>;\n"));
 
   p->DeliberatelyInvalidSpirv();
 }
@@ -91,9 +92,11 @@ TEST_F(SpvParserTest, NamedTypes_AnonRTArray_Dup_EmitBoth) {
     %arr2 = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->program().to_str(),
-              HasSubstr("RTArr -> __array__u32_stride_8\n  RTArr_1 -> "
-                        "__array__u32_stride_8\n"));
+  EXPECT_THAT(test::ToString(p->program()),
+              HasSubstr(R"(type RTArr = [[stride(8)]] array<u32>;
+
+type RTArr_1 = [[stride(8)]] array<u32>;
+)"));
 
   p->DeliberatelyInvalidSpirv();
 }
@@ -106,8 +109,8 @@ TEST_F(SpvParserTest, NamedTypes_NamedRTArray) {
     %arr = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->program().to_str(),
-              HasSubstr("myrtarr -> __array__u32_stride_8\n"));
+  EXPECT_THAT(test::ToString(p->program()),
+              HasSubstr("myrtarr = [[stride(8)]] array<u32>;\n"));
 
   p->DeliberatelyInvalidSpirv();
 }
@@ -122,8 +125,8 @@ TEST_F(SpvParserTest, NamedTypes_NamedArray) {
     %arr2 = OpTypeArray %uint %uint_5
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->program().to_str(),
-              HasSubstr("myarr -> __array__u32_5_stride_8"));
+  EXPECT_THAT(test::ToString(p->program()),
+              HasSubstr("myarr = [[stride(8)]] array<u32, 5u>;"));
 
   p->DeliberatelyInvalidSpirv();
 }
@@ -138,9 +141,11 @@ TEST_F(SpvParserTest, NamedTypes_AnonArray_Dup_EmitBoth) {
     %arr2 = OpTypeArray %uint %uint_5
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->program().to_str(),
-              HasSubstr("Arr -> __array__u32_5_stride_8\n  Arr_1 -> "
-                        "__array__u32_5_stride_8"));
+  EXPECT_THAT(test::ToString(p->program()),
+              HasSubstr(R"(type Arr = [[stride(8)]] array<u32, 5u>;
+
+type Arr_1 = [[stride(8)]] array<u32, 5u>;
+)"));
 
   p->DeliberatelyInvalidSpirv();
 }

@@ -183,24 +183,10 @@ TEST_P(SpvParserTest_GlslStd450_Float_Floating, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __f32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{f1}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body,
+              HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func + "(f1);"))
       << body;
 }
 
@@ -215,24 +201,10 @@ TEST_P(SpvParserTest_GlslStd450_Float_Floating, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __f32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{v2f1}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body,
+              HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func + "(v2f1);"))
       << body;
 }
 
@@ -247,25 +219,10 @@ TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __f32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{f1}
-          Identifier[not set]{f2}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(
+      body, HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func + "(f1, f2);"))
       << body;
 }
 
@@ -280,25 +237,10 @@ TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __f32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{v2f1}
-          Identifier[not set]{v2f2}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body, HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func +
+                              "(v2f1, v2f2);"))
       << body;
 }
 
@@ -313,24 +255,10 @@ TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __f32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{f1}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body,
+              HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func + "(f1);"))
       << body;
 }
 
@@ -345,24 +273,10 @@ TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __vec_2__f32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{v2f1}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body, HasSubstr("let x_1 : vec2<f32> = " + GetParam().wgsl_func +
+                              "(v2f1);"))
       << body;
 }
 
@@ -377,25 +291,10 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __f32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{f1}
-          Identifier[not set]{f2}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(
+      body, HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func + "(f1, f2);"))
       << body;
 }
 
@@ -410,25 +309,10 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __vec_2__f32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{v2f1}
-          Identifier[not set]{v2f2}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body, HasSubstr("let x_1 : vec2<f32> = " + GetParam().wgsl_func +
+                              "(v2f1, v2f2);"))
       << body;
 }
 
@@ -443,26 +327,10 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __f32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{f1}
-          Identifier[not set]{f2}
-          Identifier[not set]{f3}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body, HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func +
+                              "(f1, f2, f3);"))
       << body;
 }
 
@@ -478,26 +346,10 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __vec_2__f32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{v2f1}
-          Identifier[not set]{v2f2}
-          Identifier[not set]{v2f3}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body, HasSubstr("let x_1 : vec2<f32> = " + GetParam().wgsl_func +
+                              "(v2f1, v2f2, v2f3);"))
       << body;
 }
 
@@ -512,25 +364,10 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingInting, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __f32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{f1}
-          Identifier[not set]{i1}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(
+      body, HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func + "(f1, i1);"))
       << body;
 }
 
@@ -546,25 +383,10 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingInting, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __vec_2__f32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{v2f1}
-          Identifier[not set]{v2i1}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body, HasSubstr("let x_1 : vec2<f32> = " + GetParam().wgsl_func +
+                              "(v2f1, v2i1);"))
       << body;
 }
 
@@ -580,25 +402,10 @@ TEST_P(SpvParserTest_GlslStd450_Float3_Float3Float3, Samples) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __vec_3__f32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{v3f1}
-          Identifier[not set]{v3f2}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body, HasSubstr("let x_1 : vec3<f32> = " + GetParam().wgsl_func +
+                              "(v3f1, v3f2);"))
       << body;
 }
 
@@ -682,24 +489,10 @@ TEST_P(SpvParserTest_GlslStd450_Inting_Inting, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __i32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{i1}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body,
+              HasSubstr("let x_1 : i32 = " + GetParam().wgsl_func + "(i1);"))
       << body;
 }
 
@@ -715,24 +508,10 @@ TEST_P(SpvParserTest_GlslStd450_Inting_Inting, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __vec_2__i32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{v2i1}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = " + GetParam().wgsl_func +
+                              "(v2i1);"))
       << body;
 }
 
@@ -748,25 +527,10 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingInting, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __i32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{i1}
-          Identifier[not set]{i2}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(
+      body, HasSubstr("let x_1 : i32 = " + GetParam().wgsl_func + "(i1, i2);"))
       << body;
 }
 
@@ -782,25 +546,10 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingInting, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __vec_2__i32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{v2i1}
-          Identifier[not set]{v2i2}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = " + GetParam().wgsl_func +
+                              "(v2i1, v2i2);"))
       << body;
 }
 
@@ -816,26 +565,10 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __i32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{i1}
-          Identifier[not set]{i2}
-          Identifier[not set]{i3}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body, HasSubstr("let x_1 : i32 = " + GetParam().wgsl_func +
+                              "(i1, i2, i3);"))
       << body;
 }
 
@@ -851,26 +584,10 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __vec_2__i32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{v2i1}
-          Identifier[not set]{v2i2}
-          Identifier[not set]{v2i3}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = " + GetParam().wgsl_func +
+                              "(v2i1, v2i2, v2i3);"))
       << body;
 }
 
@@ -898,25 +615,10 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUinting, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __u32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{u1}
-          Identifier[not set]{u2}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(
+      body, HasSubstr("let x_1 : u32 = " + GetParam().wgsl_func + "(u1, u2);"))
       << body;
 }
 
@@ -932,25 +634,10 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUinting, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __vec_2__u32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{v2u1}
-          Identifier[not set]{v2u2}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body, HasSubstr("let x_1 : vec2<u32> = " + GetParam().wgsl_func +
+                              "(v2u1, v2u2);"))
       << body;
 }
 
@@ -965,26 +652,10 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __u32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{u1}
-          Identifier[not set]{u2}
-          Identifier[not set]{u3}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body, HasSubstr("let x_1 : u32 = " + GetParam().wgsl_func +
+                              "(u1, u2, u3);"))
       << body;
 }
 
@@ -1000,26 +671,10 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __vec_2__u32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              GetParam().wgsl_func +
-                              R"(}
-        (
-          Identifier[not set]{v2u1}
-          Identifier[not set]{v2u2}
-          Identifier[not set]{v2u3}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body, HasSubstr("let x_1 : vec2<u32> = " + GetParam().wgsl_func +
+                              "(v2u1, v2u2, v2u3);"))
       << body;
 }
 
@@ -1047,18 +702,9 @@ TEST_F(SpvParserTest, Normalize_Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __f32
-    {
-      ScalarConstructor[not set]{1.000000}
-    }
-  })"))
-      << body;
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body, HasSubstr("let x_1 : f32 = 1.0;")) << body;
 }
 
 TEST_F(SpvParserTest, Normalize_Vector2) {
@@ -1072,22 +718,9 @@ TEST_F(SpvParserTest, Normalize_Vector2) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __vec_2__f32
-    {
-      Call[not set]{
-        Identifier[not set]{normalize}
-        (
-          Identifier[not set]{v2f1}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body, HasSubstr("let x_1 : vec2<f32> = normalize(v2f1);"))
       << body;
 }
 
@@ -1102,22 +735,9 @@ TEST_F(SpvParserTest, Normalize_Vector3) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __vec_3__f32
-    {
-      Call[not set]{
-        Identifier[not set]{normalize}
-        (
-          Identifier[not set]{v3f1}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body, HasSubstr("let x_1 : vec3<f32> = normalize(v3f1);"))
       << body;
 }
 
@@ -1132,22 +752,9 @@ TEST_F(SpvParserTest, Normalize_Vector4) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __vec_4__f32
-    {
-      Call[not set]{
-        Identifier[not set]{normalize}
-        (
-          Identifier[not set]{v4f1}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body, HasSubstr("let x_1 : vec4<f32> = normalize(v4f1);"))
       << body;
 }
 
@@ -1165,46 +772,16 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SAbs) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __u32
-    {
-      Bitcast[not set]<__u32>{
-        Call[not set]{
-          Identifier[not set]{abs}
-          (
-            Bitcast[not set]<__i32>{
-              Identifier[not set]{u1}
-            }
-          )
-        }
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(
+      body,
+      HasSubstr(R"(let x_1 : u32 = bitcast<u32>(abs(bitcast<i32>(u1)));)"))
       << body;
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_2
-    none
-    undefined
-    __vec_2__u32
-    {
-      Bitcast[not set]<__vec_2__u32>{
-        Call[not set]{
-          Identifier[not set]{abs}
-          (
-            Bitcast[not set]<__vec_2__i32>{
-              Identifier[not set]{v2u1}
-            }
-          )
-        }
-      }
-    }
-  })"))
+  EXPECT_THAT(
+      body,
+      HasSubstr(
+          R"(let x_2 : vec2<u32> = bitcast<vec2<u32>>(abs(bitcast<vec2<i32>>(v2u1)));)"))
       << body;
 }
 
@@ -1219,52 +796,17 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SMax) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __u32
-    {
-      Bitcast[not set]<__u32>{
-        Call[not set]{
-          Identifier[not set]{max}
-          (
-            Bitcast[not set]<__i32>{
-              Identifier[not set]{u1}
-            }
-            Bitcast[not set]<__i32>{
-              Identifier[not set]{u2}
-            }
-          )
-        }
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(
+      body,
+      HasSubstr(
+          R"(let x_1 : u32 = bitcast<u32>(max(bitcast<i32>(u1), bitcast<i32>(u2)));)"))
       << body;
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_2
-    none
-    undefined
-    __vec_2__u32
-    {
-      Bitcast[not set]<__vec_2__u32>{
-        Call[not set]{
-          Identifier[not set]{max}
-          (
-            Bitcast[not set]<__vec_2__i32>{
-              Identifier[not set]{v2u1}
-            }
-            Bitcast[not set]<__vec_2__i32>{
-              Identifier[not set]{v2u2}
-            }
-          )
-        }
-      }
-    }
-  })"))
+  EXPECT_THAT(
+      body,
+      HasSubstr(
+          R"(let x_2 : vec2<u32> = bitcast<vec2<u32>>(max(bitcast<vec2<i32>>(v2u1), bitcast<vec2<i32>>(v2u2)));)"))
       << body;
 }
 
@@ -1279,52 +821,17 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SMin) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __u32
-    {
-      Bitcast[not set]<__u32>{
-        Call[not set]{
-          Identifier[not set]{min}
-          (
-            Bitcast[not set]<__i32>{
-              Identifier[not set]{u1}
-            }
-            Bitcast[not set]<__i32>{
-              Identifier[not set]{u2}
-            }
-          )
-        }
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(
+      body,
+      HasSubstr(
+          R"(let x_1 : u32 = bitcast<u32>(min(bitcast<i32>(u1), bitcast<i32>(u2)));)"))
       << body;
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_2
-    none
-    undefined
-    __vec_2__u32
-    {
-      Bitcast[not set]<__vec_2__u32>{
-        Call[not set]{
-          Identifier[not set]{min}
-          (
-            Bitcast[not set]<__vec_2__i32>{
-              Identifier[not set]{v2u1}
-            }
-            Bitcast[not set]<__vec_2__i32>{
-              Identifier[not set]{v2u2}
-            }
-          )
-        }
-      }
-    }
-  })"))
+  EXPECT_THAT(
+      body,
+      HasSubstr(
+          R"(let x_2 : vec2<u32> = bitcast<vec2<u32>>(min(bitcast<vec2<i32>>(v2u1), bitcast<vec2<i32>>(v2u2)));)"))
       << body;
 }
 
@@ -1339,54 +846,17 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SClamp) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __u32
-    {
-      Bitcast[not set]<__u32>{
-        Call[not set]{
-          Identifier[not set]{clamp}
-          (
-            Bitcast[not set]<__i32>{
-              Identifier[not set]{u1}
-            }
-            Identifier[not set]{i2}
-            Bitcast[not set]<__i32>{
-              Identifier[not set]{u3}
-            }
-          )
-        }
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(
+      body,
+      HasSubstr(
+          R"(let x_1 : u32 = bitcast<u32>(clamp(bitcast<i32>(u1), i2, bitcast<i32>(u3)));)"))
       << body;
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_2
-    none
-    undefined
-    __vec_2__u32
-    {
-      Bitcast[not set]<__vec_2__u32>{
-        Call[not set]{
-          Identifier[not set]{clamp}
-          (
-            Bitcast[not set]<__vec_2__i32>{
-              Identifier[not set]{v2u1}
-            }
-            Identifier[not set]{v2i2}
-            Bitcast[not set]<__vec_2__i32>{
-              Identifier[not set]{v2u3}
-            }
-          )
-        }
-      }
-    }
-  })"))
+  EXPECT_THAT(
+      body,
+      HasSubstr(
+          R"(let x_2 : vec2<u32> = bitcast<vec2<u32>>(clamp(bitcast<vec2<i32>>(v2u1), v2i2, bitcast<vec2<i32>>(v2u3)));)"))
       << body;
 }
 
@@ -1401,52 +871,17 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_UMax) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __i32
-    {
-      Bitcast[not set]<__i32>{
-        Call[not set]{
-          Identifier[not set]{max}
-          (
-            Bitcast[not set]<__u32>{
-              Identifier[not set]{i1}
-            }
-            Bitcast[not set]<__u32>{
-              Identifier[not set]{i2}
-            }
-          )
-        }
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(
+      body,
+      HasSubstr(
+          R"(let x_1 : i32 = bitcast<i32>(max(bitcast<u32>(i1), bitcast<u32>(i2)));)"))
       << body;
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_2
-    none
-    undefined
-    __vec_2__i32
-    {
-      Bitcast[not set]<__vec_2__i32>{
-        Call[not set]{
-          Identifier[not set]{max}
-          (
-            Bitcast[not set]<__vec_2__u32>{
-              Identifier[not set]{v2i1}
-            }
-            Bitcast[not set]<__vec_2__u32>{
-              Identifier[not set]{v2i2}
-            }
-          )
-        }
-      }
-    }
-  })"))
+  EXPECT_THAT(
+      body,
+      HasSubstr(
+          R"(let x_2 : vec2<i32> = bitcast<vec2<i32>>(max(bitcast<vec2<u32>>(v2i1), bitcast<vec2<u32>>(v2i2)));)"))
       << body;
 }
 
@@ -1461,52 +896,17 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_UMin) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __i32
-    {
-      Bitcast[not set]<__i32>{
-        Call[not set]{
-          Identifier[not set]{min}
-          (
-            Bitcast[not set]<__u32>{
-              Identifier[not set]{i1}
-            }
-            Bitcast[not set]<__u32>{
-              Identifier[not set]{i2}
-            }
-          )
-        }
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(
+      body,
+      HasSubstr(
+          R"(let x_1 : i32 = bitcast<i32>(min(bitcast<u32>(i1), bitcast<u32>(i2)));)"))
       << body;
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_2
-    none
-    undefined
-    __vec_2__i32
-    {
-      Bitcast[not set]<__vec_2__i32>{
-        Call[not set]{
-          Identifier[not set]{min}
-          (
-            Bitcast[not set]<__vec_2__u32>{
-              Identifier[not set]{v2i1}
-            }
-            Bitcast[not set]<__vec_2__u32>{
-              Identifier[not set]{v2i2}
-            }
-          )
-        }
-      }
-    }
-  })"))
+  EXPECT_THAT(
+      body,
+      HasSubstr(
+          R"(let x_2 : vec2<i32> = bitcast<vec2<i32>>(min(bitcast<vec2<u32>>(v2i1), bitcast<vec2<u32>>(v2i2)));)"))
       << body;
 }
 
@@ -1521,54 +921,17 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_UClamp) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __i32
-    {
-      Bitcast[not set]<__i32>{
-        Call[not set]{
-          Identifier[not set]{clamp}
-          (
-            Bitcast[not set]<__u32>{
-              Identifier[not set]{i1}
-            }
-            Identifier[not set]{u2}
-            Bitcast[not set]<__u32>{
-              Identifier[not set]{i3}
-            }
-          )
-        }
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(
+      body,
+      HasSubstr(
+          R"(let x_1 : i32 = bitcast<i32>(clamp(bitcast<u32>(i1), u2, bitcast<u32>(i3)));)"))
       << body;
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_2
-    none
-    undefined
-    __vec_2__i32
-    {
-      Bitcast[not set]<__vec_2__i32>{
-        Call[not set]{
-          Identifier[not set]{clamp}
-          (
-            Bitcast[not set]<__vec_2__u32>{
-              Identifier[not set]{v2i1}
-            }
-            Identifier[not set]{v2u2}
-            Bitcast[not set]<__vec_2__u32>{
-              Identifier[not set]{v2i3}
-            }
-          )
-        }
-      }
-    }
-  })"))
+  EXPECT_THAT(
+      body,
+      HasSubstr(
+          R"(let x_2 : vec2<i32> = bitcast<vec2<i32>>(clamp(bitcast<vec2<u32>>(v2i1), v2u2, bitcast<vec2<u32>>(v2i3)));)"))
       << body;
 }
 
@@ -1599,24 +962,10 @@ TEST_P(SpvParserTest_GlslStd450_DataPacking, Valid) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    __u32
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              param.wgsl_func + R"(}
-        (
-          Identifier[not set]{v)" +
-                              std::to_string(param.vec_size) + R"(f1}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body, HasSubstr("let x_1 : u32 = " + param.wgsl_func + "(v" +
+                              std::to_string(param.vec_size) + "f1);"))
       << body;
 }
 
@@ -1644,24 +993,13 @@ TEST_P(SpvParserTest_GlslStd450_DataUnpacking, Valid) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    undefined
-    )" + std::string(param.vec_size == 2 ? "__vec_2__f32" : "__vec_4__f32") +
-                              R"(
-    {
-      Call[not set]{
-        Identifier[not set]{)" +
-                              param.wgsl_func + R"(}
-        (
-          Identifier[not set]{u1}
-        )
-      }
-    }
-  })"))
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  EXPECT_THAT(body, HasSubstr("let x_1 : " +
+                              std::string(param.vec_size == 2 ? "vec2<f32>"
+                                                              : "vec4<f32>") +
+
+                              +" = " + param.wgsl_func + "(u1);"))
       << body;
 }
 
@@ -1684,34 +1022,10 @@ TEST_F(SpvParserTest, GlslStd450_Refract_Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  const auto* expected = R"(VariableConst{
-    x_1
-    none
-    undefined
-    __f32
-    {
-      MemberAccessor[not set]{
-        Call[not set]{
-          Identifier[not set]{refract}
-          (
-            TypeConstructor[not set]{
-              __vec_2__f32
-              Identifier[not set]{f1}
-              ScalarConstructor[not set]{0.000000}
-            }
-            TypeConstructor[not set]{
-              __vec_2__f32
-              Identifier[not set]{f2}
-              ScalarConstructor[not set]{0.000000}
-            }
-            Identifier[not set]{f3}
-          )
-        }
-        Identifier[not set]{x}
-      }
-    }
-  })";
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  const auto* expected =
+      R"(let x_1 : f32 = refract(vec2<f32>(f1, 0.0), vec2<f32>(f2, 0.0), f3).x;)";
 
   EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
@@ -1726,24 +1040,11 @@ TEST_F(SpvParserTest, GlslStd450_Refract_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  const auto* expected = R"(VariableConst{
-    x_1
-    none
-    undefined
-    __vec_2__f32
-    {
-      Call[not set]{
-        Identifier[not set]{refract}
-        (
-          Identifier[not set]{v2f1}
-          Identifier[not set]{v2f2}
-          Identifier[not set]{f3}
-        )
-      }
-    })";
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  const auto* expected = R"(let x_1 : vec2<f32> = refract(v2f1, v2f2, f3);)";
 
-  EXPECT_THAT(body, HasSubstr(expected));
+  EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
 
 TEST_F(SpvParserTest, GlslStd450_FaceForward_Scalar) {
@@ -1757,54 +1058,13 @@ TEST_F(SpvParserTest, GlslStd450_FaceForward_Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
   // The %99 sum only has one use.  Ensure it is evaluated only once by
   // making a let-declaration for it, since it is the normal operand to
   // the builtin function, and code generation uses it twice.
-  const auto* expected = R"(VariableDeclStatement{
-  VariableConst{
-    x_99
-    none
-    undefined
-    __f32
-    {
-      Binary[not set]{
-        Identifier[not set]{f1}
-        add
-        Identifier[not set]{f1}
-      }
-    }
-  }
-}
-VariableDeclStatement{
-  VariableConst{
-    x_1
-    none
-    undefined
-    __f32
-    {
-      Call[not set]{
-        Identifier[not set]{select}
-        (
-          UnaryOp[not set]{
-            negation
-            Identifier[not set]{x_99}
-          }
-          Identifier[not set]{x_99}
-          Binary[not set]{
-            Binary[not set]{
-              Identifier[not set]{f2}
-              multiply
-              Identifier[not set]{f3}
-            }
-            less_than
-            ScalarConstructor[not set]{0.000000}
-          }
-        )
-      }
-    }
-  }
-})";
+  const auto* expected =
+      R"(let x_1 : f32 = select(-(x_99), x_99, ((f2 * f3) < 0.0));)";
 
   EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
@@ -1820,24 +1080,12 @@ TEST_F(SpvParserTest, GlslStd450_FaceForward_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  const auto* expected = R"(VariableConst{
-    x_1
-    none
-    undefined
-    __vec_2__f32
-    {
-      Call[not set]{
-        Identifier[not set]{faceForward}
-        (
-          Identifier[not set]{v2f1}
-          Identifier[not set]{v2f2}
-          Identifier[not set]{v2f3}
-        )
-      }
-    })";
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  const auto* expected =
+      R"(let x_1 : vec2<f32> = faceForward(v2f1, v2f2, v2f3);)";
 
-  EXPECT_THAT(body, HasSubstr(expected));
+  EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
 
 TEST_F(SpvParserTest, GlslStd450_Reflect_Scalar) {
@@ -1852,67 +1100,13 @@ TEST_F(SpvParserTest, GlslStd450_Reflect_Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
   // The %99 sum only has one use.  Ensure it is evaluated only once by
   // making a let-declaration for it, since it is the normal operand to
   // the builtin function, and code generation uses it twice.
-  const auto* expected = R"(VariableDeclStatement{
-  VariableConst{
-    x_98
-    none
-    undefined
-    __f32
-    {
-      Binary[not set]{
-        Identifier[not set]{f1}
-        add
-        Identifier[not set]{f1}
-      }
-    }
-  }
-}
-VariableDeclStatement{
-  VariableConst{
-    x_99
-    none
-    undefined
-    __f32
-    {
-      Binary[not set]{
-        Identifier[not set]{f2}
-        add
-        Identifier[not set]{f2}
-      }
-    }
-  }
-}
-VariableDeclStatement{
-  VariableConst{
-    x_1
-    none
-    undefined
-    __f32
-    {
-      Binary[not set]{
-        Identifier[not set]{x_98}
-        subtract
-        Binary[not set]{
-          ScalarConstructor[not set]{2.000000}
-          multiply
-          Binary[not set]{
-            Identifier[not set]{x_99}
-            multiply
-            Binary[not set]{
-              Identifier[not set]{x_99}
-              multiply
-              Identifier[not set]{x_98}
-            }
-          }
-        }
-      }
-    }
-  }
-})";
+  const auto* expected =
+      R"(let x_1 : f32 = (x_98 - (2.0 * (x_99 * (x_99 * x_98))));)";
 
   EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
@@ -1929,52 +1123,13 @@ TEST_F(SpvParserTest, GlslStd450_Reflect_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  const auto* expected = R"(VariableDeclStatement{
-  VariableConst{
-    x_98
-    none
-    undefined
-    __vec_2__f32
-    {
-      Binary[not set]{
-        Identifier[not set]{v2f1}
-        add
-        Identifier[not set]{v2f1}
-      }
-    }
-  }
-}
-VariableDeclStatement{
-  VariableConst{
-    x_99
-    none
-    undefined
-    __vec_2__f32
-    {
-      Binary[not set]{
-        Identifier[not set]{v2f2}
-        add
-        Identifier[not set]{v2f2}
-      }
-    }
-  }
-}
-VariableDeclStatement{
-  VariableConst{
-    x_1
-    none
-    undefined
-    __vec_2__f32
-    {
-      Call[not set]{
-        Identifier[not set]{reflect}
-        (
-          Identifier[not set]{x_98}
-          Identifier[not set]{x_99}
-        )
-      }
-    })";
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  const auto* expected = R"(
+let x_98 : vec2<f32> = (v2f1 + v2f1);
+let x_99 : vec2<f32> = (v2f2 + v2f2);
+let x_1 : vec2<f32> = reflect(x_98, x_99);
+)";
 
   EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
@@ -1989,22 +1144,9 @@ TEST_F(SpvParserTest, GlslStd450_Degrees_Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  const auto* expected = R"(VariableDeclStatement{
-  VariableConst{
-    x_1
-    none
-    undefined
-    __f32
-    {
-      Binary[not set]{
-        ScalarConstructor[not set]{50.000000}
-        multiply
-        ScalarConstructor[not set]{57.295780}
-      }
-    }
-  }
-})";
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  const auto* expected = "let x_1 : f32 = (50.0 * 57.295780182);";
 
   EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
@@ -2019,30 +1161,10 @@ TEST_F(SpvParserTest, GlslStd450_Degrees_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  const auto* expected = R"(VariableDeclStatement{
-  VariableConst{
-    x_1
-    none
-    undefined
-    __vec_3__f32
-    {
-      Binary[not set]{
-        TypeConstructor[not set]{
-          __vec_3__f32
-          ScalarConstructor[not set]{60.000000}
-          ScalarConstructor[not set]{70.000000}
-          ScalarConstructor[not set]{50.000000}
-        }
-        multiply
-        TypeConstructor[not set]{
-          __vec_3__f32
-          ScalarConstructor[not set]{57.295780}
-        }
-      }
-    }
-  }
-})";
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  const auto* expected =
+      R"(let x_1 : vec3<f32> = (vec3<f32>(60.0, 70.0, 50.0) * vec3<f32>(57.295780182));)";
 
   EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
@@ -2057,22 +1179,9 @@ TEST_F(SpvParserTest, GlslStd450_Radians_Scalar) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  const auto* expected = R"(VariableDeclStatement{
-  VariableConst{
-    x_1
-    none
-    undefined
-    __f32
-    {
-      Binary[not set]{
-        ScalarConstructor[not set]{50.000000}
-        multiply
-        ScalarConstructor[not set]{0.017453}
-      }
-    }
-  }
-})";
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  const auto* expected = "let x_1 : f32 = (50.0 * 0.017453292);";
 
   EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
@@ -2087,30 +1196,10 @@ TEST_F(SpvParserTest, GlslStd450_Radians_Vector) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  const auto* expected = R"(VariableDeclStatement{
-  VariableConst{
-    x_1
-    none
-    undefined
-    __vec_3__f32
-    {
-      Binary[not set]{
-        TypeConstructor[not set]{
-          __vec_3__f32
-          ScalarConstructor[not set]{60.000000}
-          ScalarConstructor[not set]{70.000000}
-          ScalarConstructor[not set]{50.000000}
-        }
-        multiply
-        TypeConstructor[not set]{
-          __vec_3__f32
-          ScalarConstructor[not set]{0.017453}
-        }
-      }
-    }
-  }
-})";
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  const auto* expected =
+      R"(let x_1 : vec3<f32> = (vec3<f32>(60.0, 70.0, 50.0) * vec3<f32>(0.017453292));)";
 
   EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
@@ -2126,27 +1215,9 @@ TEST_F(SpvParserTest, GlslStd450_Ldexp_Scalar_Float_Uint) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  const auto* expected = R"(VariableDeclStatement{
-  VariableConst{
-    x_1
-    none
-    undefined
-    __f32
-    {
-      Call[not set]{
-        Identifier[not set]{ldexp}
-        (
-          Identifier[not set]{f1}
-          TypeConstructor[not set]{
-            __i32
-            Identifier[not set]{u1}
-          }
-        )
-      }
-    }
-  }
-})";
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  const auto* expected = "let x_1 : f32 = ldexp(f1, i32(u1));";
 
   EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
@@ -2161,27 +1232,9 @@ TEST_F(SpvParserTest, GlslStd450_Ldexp_Vector_Floatvec_Uintvec) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  const auto* expected = R"(VariableDeclStatement{
-  VariableConst{
-    x_1
-    none
-    undefined
-    __vec_2__f32
-    {
-      Call[not set]{
-        Identifier[not set]{ldexp}
-        (
-          Identifier[not set]{v2f1}
-          TypeConstructor[not set]{
-            __vec_2__i32
-            Identifier[not set]{v2u1}
-          }
-        )
-      }
-    }
-  }
-})";
+  auto ast_body = fe.ast_body();
+  const auto body = test::ToString(p->program(), ast_body);
+  const auto* expected = "let x_1 : vec2<f32> = ldexp(v2f1, vec2<i32>(v2u1));";
 
   EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
