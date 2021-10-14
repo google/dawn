@@ -912,6 +912,8 @@ bool GenerateGlsl(const tint::Program* program, const Options& options) {
 
   return true;
 #else
+  (void)program;
+  (void)options;
   std::cerr << "GLSL writer not enabled in tint build" << std::endl;
   return false;
 #endif  // TINT_BUILD_GLSL_WRITER
