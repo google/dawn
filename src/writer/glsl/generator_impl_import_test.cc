@@ -145,7 +145,7 @@ TEST_P(GlslImportData_DualParam_ScalarTest, Float) {
 }
 INSTANTIATE_TEST_SUITE_P(GlslGeneratorImplTest_Import,
                          GlslImportData_DualParam_ScalarTest,
-                         testing::Values(GlslImportData{"atan2", "atan2"},
+                         testing::Values(GlslImportData{"atan2", "atan"},
                                          GlslImportData{"distance", "distance"},
                                          GlslImportData{"max", "max"},
                                          GlslImportData{"min", "min"},
@@ -169,7 +169,7 @@ TEST_P(GlslImportData_DualParam_VectorTest, Float) {
 }
 INSTANTIATE_TEST_SUITE_P(GlslGeneratorImplTest_Import,
                          GlslImportData_DualParam_VectorTest,
-                         testing::Values(GlslImportData{"atan2", "atan2"},
+                         testing::Values(GlslImportData{"atan2", "atan"},
                                          GlslImportData{"cross", "cross"},
                                          GlslImportData{"distance", "distance"},
                                          GlslImportData{"max", "max"},

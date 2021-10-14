@@ -1174,7 +1174,6 @@ std::string GeneratorImpl::generate_builtin_name(
     case sem::IntrinsicType::kAny:
     case sem::IntrinsicType::kAsin:
     case sem::IntrinsicType::kAtan:
-    case sem::IntrinsicType::kAtan2:
     case sem::IntrinsicType::kCeil:
     case sem::IntrinsicType::kClamp:
     case sem::IntrinsicType::kCos:
@@ -1209,6 +1208,8 @@ std::string GeneratorImpl::generate_builtin_name(
     case sem::IntrinsicType::kTranspose:
     case sem::IntrinsicType::kTrunc:
       return intrinsic->str();
+    case sem::IntrinsicType::kAtan2:
+      return "atan";
     case sem::IntrinsicType::kCountOneBits:
       return "countbits";
     case sem::IntrinsicType::kDpdx:

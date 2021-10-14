@@ -192,7 +192,7 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{IntrinsicType::kAny, ParamType::kBool, "any"},
         IntrinsicData{IntrinsicType::kAsin, ParamType::kF32, "asin"},
         IntrinsicData{IntrinsicType::kAtan, ParamType::kF32, "atan"},
-        IntrinsicData{IntrinsicType::kAtan2, ParamType::kF32, "atan2"},
+        IntrinsicData{IntrinsicType::kAtan2, ParamType::kF32, "atan"},
         IntrinsicData{IntrinsicType::kCeil, ParamType::kF32, "ceil"},
         IntrinsicData{IntrinsicType::kClamp, ParamType::kF32, "clamp"},
         IntrinsicData{IntrinsicType::kClamp, ParamType::kU32, "clamp"},
