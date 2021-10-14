@@ -134,7 +134,7 @@ typedef std::tuple<ast::ImageFormat,
                    ResourceBinding::ImageFormat,
                    ResourceBinding::SampledKind>
     ImageFormatParams;
-typedef std::tuple<bool, DimensionParams, ImageFormatParams>
+typedef std::tuple<DimensionParams, ImageFormatParams>
     GetStorageTextureTestParams;
 class InspectorGetStorageTextureResourceBindingsTestWithParam
     : public InspectorBuilder,
@@ -1267,18 +1267,13 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
   Func("depth_ms_func", {}, ty.void_(), {Ignore("depth_ms_texture")});
 
   auto* st_type = MakeStorageTextureTypes(ast::TextureDimension::k2d,
-                                          ast::ImageFormat::kR32Uint, false);
+                                          ast::ImageFormat::kR32Uint);
   AddStorageTexture("st_var", st_type, 4, 0);
   MakeStorageTextureBodyFunction("st_func", "st_var", ty.vec2<i32>(), {});
 
-  auto* rost_type = MakeStorageTextureTypes(ast::TextureDimension::k2d,
-                                            ast::ImageFormat::kR32Uint, true);
-  AddStorageTexture("rost_var", rost_type, 4, 1);
-  MakeStorageTextureBodyFunction("rost_func", "rost_var", ty.vec2<i32>(), {});
-
   MakeCallerBodyFunction("ep_func",
                          {"ub_func", "sb_func", "rosb_func", "s_func",
-                          "cs_func", "depth_ms_func", "st_func", "rost_func"},
+                          "cs_func", "depth_ms_func", "st_func"},
                          ast::DecorationList{
                              Stage(ast::PipelineStage::kFragment),
                          });
@@ -1287,7 +1282,7 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
 
   auto result = inspector.GetResourceBindings("ep_func");
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
-  ASSERT_EQ(10u, result.size());
+  ASSERT_EQ(9u, result.size());
 
   EXPECT_EQ(ResourceBinding::ResourceType::kUniformBuffer,
             result[0].resource_type);
@@ -1318,25 +1313,20 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
   EXPECT_EQ(2u, result[5].bind_group);
   EXPECT_EQ(0u, result[5].binding);
 
-  EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageTexture,
+  EXPECT_EQ(ResourceBinding::ResourceType::kWriteOnlyStorageTexture,
             result[6].resource_type);
   EXPECT_EQ(4u, result[6].bind_group);
-  EXPECT_EQ(1u, result[6].binding);
-
-  EXPECT_EQ(ResourceBinding::ResourceType::kWriteOnlyStorageTexture,
-            result[7].resource_type);
-  EXPECT_EQ(4u, result[7].bind_group);
-  EXPECT_EQ(0u, result[7].binding);
+  EXPECT_EQ(0u, result[6].binding);
 
   EXPECT_EQ(ResourceBinding::ResourceType::kDepthTexture,
-            result[8].resource_type);
-  EXPECT_EQ(3u, result[8].bind_group);
-  EXPECT_EQ(1u, result[8].binding);
+            result[7].resource_type);
+  EXPECT_EQ(3u, result[7].bind_group);
+  EXPECT_EQ(1u, result[7].binding);
 
   EXPECT_EQ(ResourceBinding::ResourceType::kDepthMultisampledTexture,
-            result[9].resource_type);
-  EXPECT_EQ(3u, result[9].bind_group);
-  EXPECT_EQ(3u, result[9].binding);
+            result[8].resource_type);
+  EXPECT_EQ(3u, result[8].bind_group);
+  EXPECT_EQ(3u, result[8].binding);
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingEntryPoint) {
@@ -2358,20 +2348,15 @@ TEST_F(InspectorGetStorageTextureResourceBindingsTest, Empty) {
 
   Inspector& inspector = Build();
 
-  auto result = inspector.GetReadOnlyStorageTextureResourceBindings("ep");
-  ASSERT_FALSE(inspector.has_error()) << inspector.error();
-  EXPECT_EQ(0u, result.size());
-
-  result = inspector.GetWriteOnlyStorageTextureResourceBindings("ep");
+  auto result = inspector.GetWriteOnlyStorageTextureResourceBindings("ep");
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
   EXPECT_EQ(0u, result.size());
 }
 
 TEST_P(InspectorGetStorageTextureResourceBindingsTestWithParam, Simple) {
-  bool read_only;
   DimensionParams dim_params;
   ImageFormatParams format_params;
-  std::tie(read_only, dim_params, format_params) = GetParam();
+  std::tie(dim_params, format_params) = GetParam();
 
   ast::TextureDimension dim;
   ResourceBinding::TextureDimension expected_dim;
@@ -2382,7 +2367,7 @@ TEST_P(InspectorGetStorageTextureResourceBindingsTestWithParam, Simple) {
   ResourceBinding::SampledKind expected_kind;
   std::tie(format, expected_format, expected_kind) = format_params;
 
-  auto* st_type = MakeStorageTextureTypes(dim, format, read_only);
+  auto* st_type = MakeStorageTextureTypes(dim, format);
   AddStorageTexture("st_var", st_type, 0, 0);
 
   ast::Type* dim_type = nullptr;
@@ -2409,33 +2394,23 @@ TEST_P(InspectorGetStorageTextureResourceBindingsTestWithParam, Simple) {
 
   Inspector& inspector = Build();
 
-  auto result =
-      read_only ? inspector.GetReadOnlyStorageTextureResourceBindings("ep")
-                : inspector.GetWriteOnlyStorageTextureResourceBindings("ep");
+  auto result = inspector.GetWriteOnlyStorageTextureResourceBindings("ep");
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
-  EXPECT_EQ(read_only ? ResourceBinding::ResourceType::kReadOnlyStorageTexture
-                      : ResourceBinding::ResourceType::kWriteOnlyStorageTexture,
+  EXPECT_EQ(ResourceBinding::ResourceType::kWriteOnlyStorageTexture,
             result[0].resource_type);
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(expected_dim, result[0].dim);
   EXPECT_EQ(expected_format, result[0].image_format);
   EXPECT_EQ(expected_kind, result[0].sampled_kind);
-
-  result = read_only
-               ? inspector.GetWriteOnlyStorageTextureResourceBindings("ep")
-               : inspector.GetReadOnlyStorageTextureResourceBindings("ep");
-  ASSERT_FALSE(inspector.has_error()) << inspector.error();
-  ASSERT_EQ(0u, result.size());
 }
 
 INSTANTIATE_TEST_SUITE_P(
     InspectorGetStorageTextureResourceBindingsTest,
     InspectorGetStorageTextureResourceBindingsTestWithParam,
     testing::Combine(
-        testing::Bool(),
         testing::Values(
             std::make_tuple(ast::TextureDimension::k1d,
                             ResourceBinding::TextureDimension::k1d),

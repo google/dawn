@@ -2436,10 +2436,8 @@ bool GeneratorImpl::EmitHandleVariable(const sem::Variable* var) {
 
   if (unwrapped_type->Is<sem::Texture>()) {
     register_space = "t";
-    if (auto* storage_tex = unwrapped_type->As<sem::StorageTexture>()) {
-      if (storage_tex->access() != ast::Access::kRead) {
-        register_space = "u";
-      }
+    if (unwrapped_type->Is<sem::StorageTexture>()) {
+      register_space = "u";
     }
   } else if (unwrapped_type->Is<sem::Sampler>()) {
     register_space = "s";

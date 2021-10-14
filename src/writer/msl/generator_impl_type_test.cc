@@ -843,20 +843,17 @@ TEST_F(MslGeneratorImplTest, Emit_TypeMultisampledTexture) {
 
 struct MslStorageTextureData {
   ast::TextureDimension dim;
-  bool ro;
   std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, MslStorageTextureData data) {
-  out << data.dim << (data.ro ? "ReadOnly" : "WriteOnly");
-  return out;
+  return out << data.dim;
 }
 using MslStorageTexturesTest = TestParamHelper<MslStorageTextureData>;
 TEST_P(MslStorageTexturesTest, Emit) {
   auto params = GetParam();
 
-  auto* s =
-      ty.storage_texture(params.dim, ast::ImageFormat::kR32Float,
-                         params.ro ? ast::Access::kRead : ast::Access::kWrite);
+  auto* s = ty.storage_texture(params.dim, ast::ImageFormat::kR32Float,
+                               ast::Access::kWrite);
   Global("test_var", s,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
@@ -872,23 +869,15 @@ TEST_P(MslStorageTexturesTest, Emit) {
 INSTANTIATE_TEST_SUITE_P(
     MslGeneratorImplTest,
     MslStorageTexturesTest,
-    testing::Values(
-        MslStorageTextureData{ast::TextureDimension::k1d, true,
-                              "texture1d<float, access::read>"},
-        MslStorageTextureData{ast::TextureDimension::k2d, true,
-                              "texture2d<float, access::read>"},
-        MslStorageTextureData{ast::TextureDimension::k2dArray, true,
-                              "texture2d_array<float, access::read>"},
-        MslStorageTextureData{ast::TextureDimension::k3d, true,
-                              "texture3d<float, access::read>"},
-        MslStorageTextureData{ast::TextureDimension::k1d, false,
-                              "texture1d<float, access::write>"},
-        MslStorageTextureData{ast::TextureDimension::k2d, false,
-                              "texture2d<float, access::write>"},
-        MslStorageTextureData{ast::TextureDimension::k2dArray, false,
-                              "texture2d_array<float, access::write>"},
-        MslStorageTextureData{ast::TextureDimension::k3d, false,
-                              "texture3d<float, access::write>"}));
+    testing::Values(MslStorageTextureData{ast::TextureDimension::k1d,
+                                          "texture1d<float, access::write>"},
+                    MslStorageTextureData{ast::TextureDimension::k2d,
+                                          "texture2d<float, access::write>"},
+                    MslStorageTextureData{
+                        ast::TextureDimension::k2dArray,
+                        "texture2d_array<float, access::write>"},
+                    MslStorageTextureData{ast::TextureDimension::k3d,
+                                          "texture3d<float, access::write>"}));
 
 }  // namespace
 }  // namespace msl

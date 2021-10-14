@@ -698,10 +698,7 @@ TEST_P(MultisampledTextureDimensionTest, All) {
   auto& params = GetParam();
   Global(Source{{12, 34}}, "a", ty.multisampled_texture(params.dim, ty.i32()),
          ast::StorageClass::kNone, nullptr,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
-         });
+         ast::DecorationList{GroupAndBinding(0, 0)});
 
   if (params.is_valid) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -750,10 +747,7 @@ TEST_P(MultisampledTextureTypeTest, All) {
          ty.multisampled_texture(ast::TextureDimension::k2d,
                                  params.type_func(*this)),
          ast::StorageClass::kNone, nullptr,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
-         });
+         ast::DecorationList{GroupAndBinding(0, 0)});
 
   if (params.is_valid) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -787,17 +781,15 @@ static constexpr DimensionParams Dimension_cases[] = {
 using StorageTextureDimensionTest = ResolverTestWithParam<DimensionParams>;
 TEST_P(StorageTextureDimensionTest, All) {
   // [[group(0), binding(0)]]
-  // var a : texture_storage_*<ru32int, read>;
+  // var a : texture_storage_*<ru32int, write>;
   auto& params = GetParam();
 
-  auto* st = ty.storage_texture(Source{{12, 34}}, params.dim,
-                                ast::ImageFormat::kR32Uint, ast::Access::kRead);
+  auto* st =
+      ty.storage_texture(Source{{12, 34}}, params.dim,
+                         ast::ImageFormat::kR32Uint, ast::Access::kWrite);
 
   Global("a", st, ast::StorageClass::kNone,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
-         });
+         ast::DecorationList{GroupAndBinding(0, 0)});
 
   if (params.is_valid) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -858,45 +850,33 @@ using StorageTextureFormatTest = ResolverTestWithParam<FormatParams>;
 TEST_P(StorageTextureFormatTest, All) {
   auto& params = GetParam();
   // [[group(0), binding(0)]]
-  // var a : texture_storage_1d<*, read>;
+  // var a : texture_storage_1d<*, write>;
   // [[group(0), binding(1)]]
-  // var b : texture_storage_2d<*, read>;
+  // var b : texture_storage_2d<*, write>;
   // [[group(0), binding(2)]]
-  // var c : texture_storage_2d_array<*, read>;
+  // var c : texture_storage_2d_array<*, write>;
   // [[group(0), binding(3)]]
-  // var d : texture_storage_3d<*, read>;
+  // var d : texture_storage_3d<*, write>;
 
   auto* st_a = ty.storage_texture(Source{{12, 34}}, ast::TextureDimension::k1d,
-                                  params.format, ast::Access::kRead);
+                                  params.format, ast::Access::kWrite);
   Global("a", st_a, ast::StorageClass::kNone,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
-         });
+         ast::DecorationList{GroupAndBinding(0, 0)});
 
   auto* st_b = ty.storage_texture(ast::TextureDimension::k2d, params.format,
-                                  ast::Access::kRead);
+                                  ast::Access::kWrite);
   Global("b", st_b, ast::StorageClass::kNone,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(1),
-         });
+         ast::DecorationList{GroupAndBinding(0, 1)});
 
   auto* st_c = ty.storage_texture(ast::TextureDimension::k2dArray,
-                                  params.format, ast::Access::kRead);
+                                  params.format, ast::Access::kWrite);
   Global("c", st_c, ast::StorageClass::kNone,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(2),
-         });
+         ast::DecorationList{GroupAndBinding(0, 2)});
 
   auto* st_d = ty.storage_texture(ast::TextureDimension::k3d, params.format,
-                                  ast::Access::kRead);
+                                  ast::Access::kWrite);
   Global("d", st_d, ast::StorageClass::kNone,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(3),
-         });
+         ast::DecorationList{GroupAndBinding(0, 3)});
 
   if (params.is_valid) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -923,14 +903,11 @@ TEST_F(StorageTextureAccessTest, MissingAccess_Fail) {
                          ast::ImageFormat::kR32Uint, ast::Access::kUndefined);
 
   Global("a", st, ast::StorageClass::kNone,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
-         });
+         ast::DecorationList{GroupAndBinding(0, 0)});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: storage textures must have access control");
+            "12:34 error: storage texture missing access control");
 }
 
 TEST_F(StorageTextureAccessTest, RWAccess_Fail) {
@@ -942,31 +919,28 @@ TEST_F(StorageTextureAccessTest, RWAccess_Fail) {
                          ast::ImageFormat::kR32Uint, ast::Access::kReadWrite);
 
   Global("a", st, ast::StorageClass::kNone, nullptr,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
-         });
+         ast::DecorationList{GroupAndBinding(0, 0)});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: storage textures only support read-only and "
-            "write-only access");
+            "12:34 error: storage textures currently only support 'write' "
+            "access control");
 }
 
-TEST_F(StorageTextureAccessTest, ReadOnlyAccess_Pass) {
+TEST_F(StorageTextureAccessTest, ReadOnlyAccess_Fail) {
   // [[group(0), binding(0)]]
   // var a : texture_storage_1d<ru32int, read>;
 
-  auto* st = ty.storage_texture(ast::TextureDimension::k1d,
+  auto* st = ty.storage_texture(Source{{12, 34}}, ast::TextureDimension::k1d,
                                 ast::ImageFormat::kR32Uint, ast::Access::kRead);
 
   Global("a", st, ast::StorageClass::kNone, nullptr,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
-         });
+         ast::DecorationList{GroupAndBinding(0, 0)});
 
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: storage textures currently only support 'write' "
+            "access control");
 }
 
 TEST_F(StorageTextureAccessTest, WriteOnlyAccess_Pass) {
@@ -978,10 +952,7 @@ TEST_F(StorageTextureAccessTest, WriteOnlyAccess_Pass) {
                          ast::Access::kWrite);
 
   Global("a", st, ast::StorageClass::kNone, nullptr,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
-         });
+         ast::DecorationList{GroupAndBinding(0, 0)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }

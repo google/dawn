@@ -318,10 +318,8 @@ ast::Type* InspectorBuilder::GetCoordsType(ast::TextureDimension dim,
 }
 
 ast::Type* InspectorBuilder::MakeStorageTextureTypes(ast::TextureDimension dim,
-                                                     ast::ImageFormat format,
-                                                     bool read_only) {
-  auto access = read_only ? ast::Access::kRead : ast::Access::kWrite;
-  return ty.storage_texture(dim, format, access);
+                                                     ast::ImageFormat format) {
+  return ty.storage_texture(dim, format, ast::Access::kWrite);
 }
 
 void InspectorBuilder::AddStorageTexture(const std::string& name,

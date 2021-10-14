@@ -1,4 +1,3 @@
-warning: use of deprecated intrinsic
 Texture2D<uint4> Src : register(t0, space0);
 RWTexture2D<uint4> Dst : register(u1, space0);
 

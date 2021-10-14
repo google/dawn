@@ -268,71 +268,6 @@ class ResolverIntrinsicTest_TextureOperation
   }
 };
 
-using ResolverIntrinsicTest_StorageTextureOperation =
-    ResolverIntrinsicTest_TextureOperation;
-TEST_P(ResolverIntrinsicTest_StorageTextureOperation, TextureLoadRo) {
-  auto dim = GetParam().dim;
-  auto type = GetParam().type;
-  auto format = GetParam().format;
-
-  auto* coords_type = GetCoordsType(dim, ty.i32());
-  auto* texture_type = ty.storage_texture(dim, format, ast::Access::kRead);
-
-  ast::ExpressionList call_params;
-
-  add_call_param("texture", texture_type, &call_params);
-  add_call_param("coords", coords_type, &call_params);
-
-  if (ast::IsTextureArray(dim)) {
-    add_call_param("array_index", ty.i32(), &call_params);
-  }
-
-  auto* expr = Call("textureLoad", call_params);
-  WrapInFunction(expr);
-
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
-
-  ASSERT_NE(TypeOf(expr), nullptr);
-  ASSERT_TRUE(TypeOf(expr)->Is<sem::Vector>());
-  if (type == Texture::kF32) {
-    EXPECT_TRUE(TypeOf(expr)->As<sem::Vector>()->type()->Is<sem::F32>());
-  } else if (type == Texture::kI32) {
-    EXPECT_TRUE(TypeOf(expr)->As<sem::Vector>()->type()->Is<sem::I32>());
-  } else {
-    EXPECT_TRUE(TypeOf(expr)->As<sem::Vector>()->type()->Is<sem::U32>());
-  }
-  EXPECT_EQ(TypeOf(expr)->As<sem::Vector>()->Width(), 4u);
-}
-
-INSTANTIATE_TEST_SUITE_P(
-    ResolverTest,
-    ResolverIntrinsicTest_StorageTextureOperation,
-    testing::Values(
-        TextureTestParams{ast::TextureDimension::k1d, Texture::kF32,
-                          ast::ImageFormat::kR32Float},
-        TextureTestParams{ast::TextureDimension::k1d, Texture::kI32,
-                          ast::ImageFormat::kR32Sint},
-        TextureTestParams{ast::TextureDimension::k1d, Texture::kF32,
-                          ast::ImageFormat::kRgba8Unorm},
-        TextureTestParams{ast::TextureDimension::k2d, Texture::kF32,
-                          ast::ImageFormat::kR32Float},
-        TextureTestParams{ast::TextureDimension::k2d, Texture::kI32,
-                          ast::ImageFormat::kR32Sint},
-        TextureTestParams{ast::TextureDimension::k2d, Texture::kF32,
-                          ast::ImageFormat::kRgba8Unorm},
-        TextureTestParams{ast::TextureDimension::k2dArray, Texture::kF32,
-                          ast::ImageFormat::kR32Float},
-        TextureTestParams{ast::TextureDimension::k2dArray, Texture::kI32,
-                          ast::ImageFormat::kR32Sint},
-        TextureTestParams{ast::TextureDimension::k2dArray, Texture::kF32,
-                          ast::ImageFormat::kRgba8Unorm},
-        TextureTestParams{ast::TextureDimension::k3d, Texture::kF32,
-                          ast::ImageFormat::kR32Float},
-        TextureTestParams{ast::TextureDimension::k3d, Texture::kI32,
-                          ast::ImageFormat::kR32Sint},
-        TextureTestParams{ast::TextureDimension::k3d, Texture::kF32,
-                          ast::ImageFormat::kRgba8Unorm}));
-
 using ResolverIntrinsicTest_SampledTextureOperation =
     ResolverIntrinsicTest_TextureOperation;
 TEST_P(ResolverIntrinsicTest_SampledTextureOperation, TextureLoadSampled) {
@@ -1806,10 +1741,6 @@ const char* expected_texture_overload(
     case ValidTextureOverload::kDimensionsDepthCube:
     case ValidTextureOverload::kDimensionsDepthCubeArray:
     case ValidTextureOverload::kDimensionsDepthMultisampled2d:
-    case ValidTextureOverload::kDimensionsStorageRO1d:
-    case ValidTextureOverload::kDimensionsStorageRO2d:
-    case ValidTextureOverload::kDimensionsStorageRO2dArray:
-    case ValidTextureOverload::kDimensionsStorageRO3d:
     case ValidTextureOverload::kDimensionsStorageWO1d:
     case ValidTextureOverload::kDimensionsStorageWO2d:
     case ValidTextureOverload::kDimensionsStorageWO2dArray:
@@ -1981,28 +1912,6 @@ const char* expected_texture_overload(
       return R"(textureLoad(texture, coords, sample_index))";
     case ValidTextureOverload::kLoadDepth2dArrayLevelF32:
       return R"(textureLoad(texture, coords, array_index, level))";
-    case ValidTextureOverload::kLoadStorageRO1dRgba32float:
-    case ValidTextureOverload::kLoadStorageRO2dRgba8unorm:
-    case ValidTextureOverload::kLoadStorageRO2dRgba8snorm:
-    case ValidTextureOverload::kLoadStorageRO2dRgba8uint:
-    case ValidTextureOverload::kLoadStorageRO2dRgba8sint:
-    case ValidTextureOverload::kLoadStorageRO2dRgba16uint:
-    case ValidTextureOverload::kLoadStorageRO2dRgba16sint:
-    case ValidTextureOverload::kLoadStorageRO2dRgba16float:
-    case ValidTextureOverload::kLoadStorageRO2dR32uint:
-    case ValidTextureOverload::kLoadStorageRO2dR32sint:
-    case ValidTextureOverload::kLoadStorageRO2dR32float:
-    case ValidTextureOverload::kLoadStorageRO2dRg32uint:
-    case ValidTextureOverload::kLoadStorageRO2dRg32sint:
-    case ValidTextureOverload::kLoadStorageRO2dRg32float:
-    case ValidTextureOverload::kLoadStorageRO2dRgba32uint:
-    case ValidTextureOverload::kLoadStorageRO2dRgba32sint:
-    case ValidTextureOverload::kLoadStorageRO2dRgba32float:
-      return R"(textureLoad(texture, coords))";
-    case ValidTextureOverload::kLoadStorageRO2dArrayRgba32float:
-      return R"(textureLoad(texture, coords, array_index))";
-    case ValidTextureOverload::kLoadStorageRO3dRgba32float:
-      return R"(textureLoad(texture, coords))";
     case ValidTextureOverload::kStoreWO1dRgba32float:
     case ValidTextureOverload::kStoreWO2dRgba32float:
     case ValidTextureOverload::kStoreWO3dRgba32float:

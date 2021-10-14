@@ -329,11 +329,9 @@ class InspectorBuilder : public ProgramBuilder {
   /// Generates appropriate types for a Read-Only StorageTexture
   /// @param dim the texture dimension of the storage texture
   /// @param format the image format of the storage texture
-  /// @param read_only should the access type be read only, otherwise write only
   /// @returns the storage texture type
   ast::Type* MakeStorageTextureTypes(ast::TextureDimension dim,
-                                     ast::ImageFormat format,
-                                     bool read_only);
+                                     ast::ImageFormat format);
 
   /// Adds a storage texture variable to the program
   /// @param name the name of the variable

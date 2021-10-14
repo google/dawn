@@ -695,7 +695,7 @@ TEST_F(SpvParserTest, ConvertType_Array_NoDeduplication) {
 
 TEST_F(SpvParserTest, ConvertType_RuntimeArray_NoDeduplication) {
   // Prove that distinct SPIR-V runtime arrays map to distinct WGSL types.
-  // The implementation already deduplciates them because it knows
+  // The implementation already de-duplicates them because it knows
   // runtime-arrays normally have stride decorations.
   auto assembly = Preamble() + R"(
     %uint = OpTypeInt 32 0

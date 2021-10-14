@@ -38,7 +38,6 @@ ExpectedResult expected_texture_overload(
   using ValidTextureOverload = ast::intrinsic::test::ValidTextureOverload;
   switch (overload) {
     case ValidTextureOverload::kDimensions1d:
-    case ValidTextureOverload::kDimensionsStorageRO1d:
     case ValidTextureOverload::kDimensionsStorageWO1d:
       return {
           R"(int tint_tmp;
@@ -48,7 +47,6 @@ ExpectedResult expected_texture_overload(
       };
     case ValidTextureOverload::kDimensions2d:
     case ValidTextureOverload::kDimensionsDepth2d:
-    case ValidTextureOverload::kDimensionsStorageRO2d:
     case ValidTextureOverload::kDimensionsStorageWO2d:
       return {
           R"(int2 tint_tmp;
@@ -67,7 +65,6 @@ ExpectedResult expected_texture_overload(
 
     case ValidTextureOverload::kDimensions2dArray:
     case ValidTextureOverload::kDimensionsDepth2dArray:
-    case ValidTextureOverload::kDimensionsStorageRO2dArray:
     case ValidTextureOverload::kDimensionsStorageWO2dArray:
       return {
           R"(int3 tint_tmp;
@@ -76,7 +73,6 @@ ExpectedResult expected_texture_overload(
           "tint_tmp.xy;",
       };
     case ValidTextureOverload::kDimensions3d:
-    case ValidTextureOverload::kDimensionsStorageRO3d:
     case ValidTextureOverload::kDimensionsStorageWO3d:
       return {
           R"(int3 tint_tmp;
@@ -317,28 +313,6 @@ ExpectedResult expected_texture_overload(
       return R"(tint_symbol.Load(int3(1, 2, 3)).x;)";
     case ValidTextureOverload::kLoadDepth2dArrayLevelF32:
       return R"(tint_symbol.Load(int4(1, 2, 3, 4)).x;)";
-    case ValidTextureOverload::kLoadStorageRO1dRgba32float:
-      return R"(tint_symbol.Load(int2(1, 0));)";
-    case ValidTextureOverload::kLoadStorageRO2dRgba8unorm:
-    case ValidTextureOverload::kLoadStorageRO2dRgba8snorm:
-    case ValidTextureOverload::kLoadStorageRO2dRgba8uint:
-    case ValidTextureOverload::kLoadStorageRO2dRgba8sint:
-    case ValidTextureOverload::kLoadStorageRO2dRgba16uint:
-    case ValidTextureOverload::kLoadStorageRO2dRgba16sint:
-    case ValidTextureOverload::kLoadStorageRO2dRgba16float:
-    case ValidTextureOverload::kLoadStorageRO2dR32uint:
-    case ValidTextureOverload::kLoadStorageRO2dR32sint:
-    case ValidTextureOverload::kLoadStorageRO2dR32float:
-    case ValidTextureOverload::kLoadStorageRO2dRg32uint:
-    case ValidTextureOverload::kLoadStorageRO2dRg32sint:
-    case ValidTextureOverload::kLoadStorageRO2dRg32float:
-    case ValidTextureOverload::kLoadStorageRO2dRgba32uint:
-    case ValidTextureOverload::kLoadStorageRO2dRgba32sint:
-    case ValidTextureOverload::kLoadStorageRO2dRgba32float:
-      return R"(tint_symbol.Load(int3(1, 2, 0));)";
-    case ValidTextureOverload::kLoadStorageRO2dArrayRgba32float:
-    case ValidTextureOverload::kLoadStorageRO3dRgba32float:
-      return R"(tint_symbol.Load(int4(1, 2, 3, 0));)";
     case ValidTextureOverload::kStoreWO1dRgba32float:
       return R"(tint_symbol[1] = float4(2.0f, 3.0f, 4.0f, 5.0f);)";
     case ValidTextureOverload::kStoreWO2dRgba32float:

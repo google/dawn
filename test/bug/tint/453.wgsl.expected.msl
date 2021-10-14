@@ -1,13 +1,9 @@
-bug/tint/453.wgsl:7:26 warning: use of deprecated intrinsic
-  let x_22 : vec4<u32> = textureLoad(Src, vec2<i32>(0, 0));
-                         ^^^^^^^^^^^
-
 #include <metal_stdlib>
 
 using namespace metal;
-kernel void tint_symbol(texture2d<uint, access::read> tint_symbol_1 [[texture(0)]], texture2d<uint, access::write> tint_symbol_2 [[texture(1)]]) {
+kernel void tint_symbol(texture2d<uint, access::sample> tint_symbol_1 [[texture(0)]], texture2d<uint, access::write> tint_symbol_2 [[texture(1)]]) {
   uint4 srcValue = 0u;
-  uint4 const x_22 = tint_symbol_1.read(uint2(int2(0, 0)));
+  uint4 const x_22 = tint_symbol_1.read(uint2(int2(0, 0)), 0);
   srcValue = x_22;
   uint const x_24 = srcValue.x;
   uint const x_25 = (x_24 + 1u);

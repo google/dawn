@@ -347,9 +347,6 @@ std::string ResourceTypeToString(
     case tint::inspector::ResourceBinding::ResourceType::kMultisampledTexture:
       return "MultisampledTexture";
     case tint::inspector::ResourceBinding::ResourceType::
-        kReadOnlyStorageTexture:
-      return "ReadOnlyStorageTexture";
-    case tint::inspector::ResourceBinding::ResourceType::
         kWriteOnlyStorageTexture:
       return "WriteOnlyStorageTexture";
     case tint::inspector::ResourceBinding::ResourceType::kDepthTexture:
@@ -719,8 +716,6 @@ bool GenerateMsl(const tint::Program* program, const Options& options) {
         case tint::inspector::ResourceBinding::ResourceType::kSampledTexture:
         case tint::inspector::ResourceBinding::ResourceType::
             kMultisampledTexture:
-        case tint::inspector::ResourceBinding::ResourceType::
-            kReadOnlyStorageTexture:
         case tint::inspector::ResourceBinding::ResourceType::
             kWriteOnlyStorageTexture:
         case tint::inspector::ResourceBinding::ResourceType::kDepthTexture:

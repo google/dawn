@@ -221,14 +221,14 @@ TEST_F(ResolverAssignmentValidationTest, AssignToConstant_Fail) {
 }
 
 TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Handle) {
-  // var a : texture_storage_1d<rgba8unorm, read>;
-  // var b : texture_storage_1d<rgba8unorm, read>;
+  // var a : texture_storage_1d<rgba8unorm, write>;
+  // var b : texture_storage_1d<rgba8unorm, write>;
   // a = b;
 
   auto make_type = [&] {
     return ty.storage_texture(ast::TextureDimension::k1d,
                               ast::ImageFormat::kRgba8Unorm,
-                              ast::Access::kRead);
+                              ast::Access::kWrite);
   };
 
   Global("a", make_type(), ast::StorageClass::kNone,

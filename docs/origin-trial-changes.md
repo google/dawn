@@ -5,6 +5,8 @@
 ### Breaking Changes
 
 * Deprecated `modf()` and `frexp()` builtin overloads that take a pointer second parameter have been removed.
+* Deprecated texture builtin functions that accepted a `read` access controlled storage texture have been removed.
+* Storage textures must now only use the `write` access control.
 
 ## Changes for M95
 

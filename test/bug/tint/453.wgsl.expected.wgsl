@@ -1,15 +1,11 @@
-bug/tint/453.wgsl:7:26 warning: use of deprecated intrinsic
-  let x_22 : vec4<u32> = textureLoad(Src, vec2<i32>(0, 0));
-                         ^^^^^^^^^^^
-
-[[group(0), binding(0)]] var Src : texture_storage_2d<r32uint, read>;
+[[group(0), binding(0)]] var Src : texture_2d<u32>;
 
 [[group(0), binding(1)]] var Dst : texture_storage_2d<r32uint, write>;
 
 [[stage(compute), workgroup_size(1)]]
 fn main() {
   var srcValue : vec4<u32>;
-  let x_22 : vec4<u32> = textureLoad(Src, vec2<i32>(0, 0));
+  let x_22 : vec4<u32> = textureLoad(Src, vec2<i32>(0, 0), 0);
   srcValue = x_22;
   let x_23 : ptr<function, u32> = &(srcValue.x);
   let x_24 : u32 = *(x_23);

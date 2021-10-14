@@ -2537,7 +2537,7 @@ const Pointer* ParserImpl::GetTypeForHandleVar(
 
     // WGSL textures are always formatted.  Unformatted textures are always
     // sampled.
-    if (usage.IsSampledTexture() ||
+    if (usage.IsSampledTexture() || usage.IsStorageReadTexture() ||
         (image_type->format() == SpvImageFormatUnknown)) {
       // Make a sampled texture type.
       auto* ast_sampled_component_type =
@@ -2566,8 +2566,7 @@ const Pointer* ParserImpl::GetTypeForHandleVar(
         ast_store_type = ty_.SampledTexture(dim, ast_sampled_component_type);
       }
     } else {
-      const auto access = usage.IsStorageReadTexture() ? ast::Access::kRead
-                                                       : ast::Access::kWrite;
+      const auto access = ast::Access::kWrite;
       const auto format = enum_converter_.ToImageFormat(image_type->format());
       if (format == ast::ImageFormat::kNone) {
         return nullptr;

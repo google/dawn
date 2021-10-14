@@ -61,10 +61,6 @@ enum class ValidTextureOverload {
   kDimensionsDepthCubeArray,
   kDimensionsDepthCubeArrayLevel,
   kDimensionsDepthMultisampled2d,
-  kDimensionsStorageRO1d,
-  kDimensionsStorageRO2d,
-  kDimensionsStorageRO2dArray,
-  kDimensionsStorageRO3d,
   kDimensionsStorageWO1d,
   kDimensionsStorageWO2d,
   kDimensionsStorageWO2dArray,
@@ -160,29 +156,10 @@ enum class ValidTextureOverload {
   kLoadDepth2dLevelF32,
   kLoadDepth2dArrayLevelF32,
   kLoadDepthMultisampled2dF32,
-  kLoadStorageRO1dRgba32float,  // Not permutated for all texel formats
-  kLoadStorageRO2dRgba8unorm,
-  kLoadStorageRO2dRgba8snorm,
-  kLoadStorageRO2dRgba8uint,
-  kLoadStorageRO2dRgba8sint,
-  kLoadStorageRO2dRgba16uint,
-  kLoadStorageRO2dRgba16sint,
-  kLoadStorageRO2dRgba16float,
-  kLoadStorageRO2dR32uint,
-  kLoadStorageRO2dR32sint,
-  kLoadStorageRO2dR32float,
-  kLoadStorageRO2dRg32uint,
-  kLoadStorageRO2dRg32sint,
-  kLoadStorageRO2dRg32float,
-  kLoadStorageRO2dRgba32uint,
-  kLoadStorageRO2dRgba32sint,
-  kLoadStorageRO2dRgba32float,
-  kLoadStorageRO2dArrayRgba32float,  // Not permutated for all texel formats
-  kLoadStorageRO3dRgba32float,       // Not permutated for all texel formats
-  kStoreWO1dRgba32float,             // Not permutated for all texel formats
-  kStoreWO2dRgba32float,             // Not permutated for all texel formats
-  kStoreWO2dArrayRgba32float,        // Not permutated for all texel formats
-  kStoreWO3dRgba32float,             // Not permutated for all texel formats
+  kStoreWO1dRgba32float,       // Not permutated for all texel formats
+  kStoreWO2dRgba32float,       // Not permutated for all texel formats
+  kStoreWO2dArrayRgba32float,  // Not permutated for all texel formats
+  kStoreWO3dRgba32float,       // Not permutated for all texel formats
 };
 
 /// @param texture_overload the ValidTextureOverload

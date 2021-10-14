@@ -364,7 +364,6 @@ std::vector<ResourceBinding> Inspector::GetResourceBindings(
            &Inspector::GetComparisonSamplerResourceBindings,
            &Inspector::GetSampledTextureResourceBindings,
            &Inspector::GetMultisampledTextureResourceBindings,
-           &Inspector::GetReadOnlyStorageTextureResourceBindings,
            &Inspector::GetWriteOnlyStorageTextureResourceBindings,
            &Inspector::GetDepthTextureResourceBindings,
            &Inspector::GetDepthMultisampledTextureResourceBindings,
@@ -482,15 +481,9 @@ std::vector<ResourceBinding> Inspector::GetMultisampledTextureResourceBindings(
 }
 
 std::vector<ResourceBinding>
-Inspector::GetReadOnlyStorageTextureResourceBindings(
-    const std::string& entry_point) {
-  return GetStorageTextureResourceBindingsImpl(entry_point, true);
-}
-
-std::vector<ResourceBinding>
 Inspector::GetWriteOnlyStorageTextureResourceBindings(
     const std::string& entry_point) {
-  return GetStorageTextureResourceBindingsImpl(entry_point, false);
+  return GetStorageTextureResourceBindingsImpl(entry_point);
 }
 
 std::vector<ResourceBinding> Inspector::GetTextureResourceBindings(
@@ -751,8 +744,7 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
 }
 
 std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
-    const std::string& entry_point,
-    bool read_only) {
+    const std::string& entry_point) {
   auto* func = FindEntryPointByName(entry_point);
   if (!func) {
     return {};
@@ -766,14 +758,9 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
 
     auto* texture_type = var->Type()->UnwrapRef()->As<sem::StorageTexture>();
 
-    if (read_only != (texture_type->access() == ast::Access::kRead)) {
-      continue;
-    }
-
     ResourceBinding entry;
     entry.resource_type =
-        read_only ? ResourceBinding::ResourceType::kReadOnlyStorageTexture
-                  : ResourceBinding::ResourceType::kWriteOnlyStorageTexture;
+        ResourceBinding::ResourceType::kWriteOnlyStorageTexture;
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 

@@ -37,20 +37,16 @@ ExpectedResult expected_texture_overload(
   using ValidTextureOverload = ast::intrinsic::test::ValidTextureOverload;
   switch (overload) {
     case ValidTextureOverload::kDimensions1d:
-    case ValidTextureOverload::kDimensionsStorageRO1d:
     case ValidTextureOverload::kDimensionsStorageWO1d:
     case ValidTextureOverload::kDimensions2d:
     case ValidTextureOverload::kDimensionsDepth2d:
-    case ValidTextureOverload::kDimensionsStorageRO2d:
     case ValidTextureOverload::kDimensionsStorageWO2d:
     case ValidTextureOverload::kDimensionsDepthMultisampled2d:
     case ValidTextureOverload::kDimensionsMultisampled2d:
     case ValidTextureOverload::kDimensions2dArray:
     case ValidTextureOverload::kDimensionsDepth2dArray:
-    case ValidTextureOverload::kDimensionsStorageRO2dArray:
     case ValidTextureOverload::kDimensionsStorageWO2dArray:
     case ValidTextureOverload::kDimensions3d:
-    case ValidTextureOverload::kDimensionsStorageRO3d:
     case ValidTextureOverload::kDimensionsStorageWO3d:
     case ValidTextureOverload::kDimensionsCube:
     case ValidTextureOverload::kDimensionsDepthCube:
@@ -222,28 +218,6 @@ ExpectedResult expected_texture_overload(
       return R"(texture.Load(ivec3(1, 2, 3)).x;)";
     case ValidTextureOverload::kLoadDepth2dArrayLevelF32:
       return R"(texture.Load(ivec4(1, 2, 3, 4)).x;)";
-    case ValidTextureOverload::kLoadStorageRO1dRgba32float:
-      return R"(texture.Load(ivec2(1, 0));)";
-    case ValidTextureOverload::kLoadStorageRO2dRgba8unorm:
-    case ValidTextureOverload::kLoadStorageRO2dRgba8snorm:
-    case ValidTextureOverload::kLoadStorageRO2dRgba8uint:
-    case ValidTextureOverload::kLoadStorageRO2dRgba8sint:
-    case ValidTextureOverload::kLoadStorageRO2dRgba16uint:
-    case ValidTextureOverload::kLoadStorageRO2dRgba16sint:
-    case ValidTextureOverload::kLoadStorageRO2dRgba16float:
-    case ValidTextureOverload::kLoadStorageRO2dR32uint:
-    case ValidTextureOverload::kLoadStorageRO2dR32sint:
-    case ValidTextureOverload::kLoadStorageRO2dR32float:
-    case ValidTextureOverload::kLoadStorageRO2dRg32uint:
-    case ValidTextureOverload::kLoadStorageRO2dRg32sint:
-    case ValidTextureOverload::kLoadStorageRO2dRg32float:
-    case ValidTextureOverload::kLoadStorageRO2dRgba32uint:
-    case ValidTextureOverload::kLoadStorageRO2dRgba32sint:
-    case ValidTextureOverload::kLoadStorageRO2dRgba32float:
-      return R"(texture.Load(ivec3(1, 2, 0));)";
-    case ValidTextureOverload::kLoadStorageRO2dArrayRgba32float:
-    case ValidTextureOverload::kLoadStorageRO3dRgba32float:
-      return R"(texture.Load(ivec4(1, 2, 3, 0));)";
     case ValidTextureOverload::kStoreWO1dRgba32float:
       return R"(texture[1] = vec4(2.0f, 3.0f, 4.0f, 5.0f);)";
     case ValidTextureOverload::kStoreWO2dRgba32float:

@@ -5288,12 +5288,8 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     case SpvOpImageDrefGather:
       return Fail() << " image gather is not yet supported";
     case SpvOpImageFetch:
-      // Read a single texel from a sampled image.
-      builtin_name = "textureLoad";
-      use_level_of_detail_suffix = false;
-      break;
     case SpvOpImageRead:
-      // Read a single texel from a storage image.
+      // Read a single texel from a sampled or storage image.
       builtin_name = "textureLoad";
       use_level_of_detail_suffix = false;
       break;
@@ -5365,11 +5361,11 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
 
     image_operands_mask ^= SpvImageOperandsLodMask;
     arg_index++;
-  } else if ((opcode == SpvOpImageFetch) &&
-             (texture_type->Is<SampledTexture>() ||
-              texture_type->Is<DepthTexture>())) {
-    // textureLoad on sampled texture and depth texture requires an explicit
-    // level-of-detail parameter.
+  } else if ((opcode == SpvOpImageFetch || opcode == SpvOpImageRead) &&
+             !texture_type
+                  ->IsAnyOf<DepthMultisampledTexture, MultisampledTexture>()) {
+    // textureLoad requires an explicit level-of-detail parameter for
+    // non-multisampled texture types.
     params.push_back(parser_impl_.MakeNullValue(ty_.I32()));
   }
   if (arg_index + 1 < num_args &&

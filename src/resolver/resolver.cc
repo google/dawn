@@ -424,17 +424,15 @@ bool Resolver::ValidateAtomic(const ast::Atomic* a, const sem::Atomic* s) {
 
 bool Resolver::ValidateStorageTexture(const ast::StorageTexture* t) {
   switch (t->access()) {
-    case ast::Access::kUndefined:
-      AddError("storage textures must have access control", t->source());
-      return false;
-    case ast::Access::kReadWrite:
-      AddError("storage textures only support read-only and write-only access",
-               t->source());
-      return false;
-
-    case ast::Access::kRead:
     case ast::Access::kWrite:
       break;
+    case ast::Access::kUndefined:
+      AddError("storage texture missing access control", t->source());
+      return false;
+    default:
+      AddError("storage textures currently only support 'write' access control",
+               t->source());
+      return false;
   }
 
   if (!IsValidStorageTextureDimension(t->dim())) {

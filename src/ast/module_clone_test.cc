@@ -48,10 +48,10 @@ type t1 = array<vec4<f32>>;
 var<private> g0 : u32 = 20u;
 var<private> g1 : f32 = 123.0;
 [[group(0), binding(0)]] var g2 : texture_2d<f32>;
-[[group(1), binding(0)]] var g3 : texture_storage_2d<r32uint, read>;
+[[group(1), binding(0)]] var g3 : texture_depth_2d;
 [[group(2), binding(0)]] var g4 : texture_storage_2d<rg32float, write>;
-[[group(3), binding(0)]] var g5 : texture_storage_2d<r32uint, read>;
-[[group(4), binding(0)]] var g6 : texture_storage_2d<rg32float, write>;
+[[group(3), binding(0)]] var g5 : texture_depth_cube_array;
+[[group(4), binding(0)]] var g6 : texture_external;
 
 var<private> g7 : vec3<f32>;
 [[group(0), binding(1)]] var<storage, write> g8 : S0;
