@@ -95,6 +95,8 @@ namespace dawn_native {
         uint32_t GetSampleCount() const;
         uint32_t GetSampleMask() const;
         bool IsAlphaToCoverageEnabled() const;
+        bool WritesDepth() const;
+        bool WritesStencil() const;
 
         const AttachmentState* GetAttachmentState() const;
 
@@ -128,6 +130,8 @@ namespace dawn_native {
         DepthStencilState mDepthStencil;
         MultisampleState mMultisample;
         bool mClampDepth = false;
+        bool mWritesDepth = false;
+        bool mWritesStencil = false;
     };
 
 }  // namespace dawn_native

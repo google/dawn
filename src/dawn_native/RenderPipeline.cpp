@@ -619,6 +619,19 @@ namespace dawn_native {
 
         if (mAttachmentState->HasDepthStencilAttachment()) {
             mDepthStencil = *descriptor->depthStencil;
+            mWritesDepth = mDepthStencil.depthWriteEnabled;
+            if (mDepthStencil.stencilWriteMask) {
+                if ((mPrimitive.cullMode != wgpu::CullMode::Front &&
+                     (mDepthStencil.stencilFront.failOp != wgpu::StencilOperation::Keep ||
+                      mDepthStencil.stencilFront.depthFailOp != wgpu::StencilOperation::Keep ||
+                      mDepthStencil.stencilFront.passOp != wgpu::StencilOperation::Keep)) ||
+                    (mPrimitive.cullMode != wgpu::CullMode::Back &&
+                     (mDepthStencil.stencilBack.failOp != wgpu::StencilOperation::Keep ||
+                      mDepthStencil.stencilBack.depthFailOp != wgpu::StencilOperation::Keep ||
+                      mDepthStencil.stencilBack.passOp != wgpu::StencilOperation::Keep))) {
+                    mWritesStencil = true;
+                }
+            }
         } else {
             // These default values below are useful for backends to fill information.
             // The values indicate that depth and stencil test are disabled when backends
@@ -831,6 +844,18 @@ namespace dawn_native {
         ASSERT(!IsError());
 
         return mAttachmentState.Get();
+    }
+
+    bool RenderPipelineBase::WritesDepth() const {
+        ASSERT(!IsError());
+
+        return mWritesDepth;
+    }
+
+    bool RenderPipelineBase::WritesStencil() const {
+        ASSERT(!IsError());
+
+        return mWritesStencil;
     }
 
     size_t RenderPipelineBase::ComputeContentHash() {

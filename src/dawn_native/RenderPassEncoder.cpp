@@ -55,8 +55,14 @@ namespace dawn_native {
                                          Ref<AttachmentState> attachmentState,
                                          QuerySetBase* occlusionQuerySet,
                                          uint32_t renderTargetWidth,
-                                         uint32_t renderTargetHeight)
-        : RenderEncoderBase(device, encodingContext, std::move(attachmentState)),
+                                         uint32_t renderTargetHeight,
+                                         bool depthReadOnly,
+                                         bool stencilReadOnly)
+        : RenderEncoderBase(device,
+                            encodingContext,
+                            std::move(attachmentState),
+                            depthReadOnly,
+                            stencilReadOnly),
           mCommandEncoder(commandEncoder),
           mRenderTargetWidth(renderTargetWidth),
           mRenderTargetHeight(renderTargetHeight),

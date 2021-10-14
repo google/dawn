@@ -532,6 +532,8 @@ namespace dawn_native {
 
         uint32_t width = 0;
         uint32_t height = 0;
+        bool depthReadOnly = false;
+        bool stencilReadOnly = false;
         Ref<AttachmentState> attachmentState;
         bool success = mEncodingContext.TryEncode(
             this,
@@ -600,6 +602,9 @@ namespace dawn_native {
                     } else {
                         usageTracker.TextureViewUsedAs(view, wgpu::TextureUsage::RenderAttachment);
                     }
+
+                    depthReadOnly = descriptor->depthStencilAttachment->depthReadOnly;
+                    stencilReadOnly = descriptor->depthStencilAttachment->stencilReadOnly;
                 }
 
                 cmd->width = width;
@@ -612,9 +617,10 @@ namespace dawn_native {
             "encoding BeginRenderPass(%s).", descriptor);
 
         if (success) {
-            RenderPassEncoder* passEncoder = new RenderPassEncoder(
-                device, this, &mEncodingContext, std::move(usageTracker),
-                std::move(attachmentState), descriptor->occlusionQuerySet, width, height);
+            RenderPassEncoder* passEncoder =
+                new RenderPassEncoder(device, this, &mEncodingContext, std::move(usageTracker),
+                                      std::move(attachmentState), descriptor->occlusionQuerySet,
+                                      width, height, depthReadOnly, stencilReadOnly);
             mEncodingContext.EnterPass(passEncoder);
             return passEncoder;
         }

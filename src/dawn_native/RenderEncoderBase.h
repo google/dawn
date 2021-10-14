@@ -28,7 +28,9 @@ namespace dawn_native {
       public:
         RenderEncoderBase(DeviceBase* device,
                           EncodingContext* encodingContext,
-                          Ref<AttachmentState> attachmentState);
+                          Ref<AttachmentState> attachmentState,
+                          bool depthReadOnly,
+                          bool stencilReadOnly);
 
         void APIDraw(uint32_t vertexCount,
                      uint32_t instanceCount = 1,
@@ -71,6 +73,8 @@ namespace dawn_native {
         Ref<AttachmentState> mAttachmentState;
         const bool mDisableBaseVertex;
         const bool mDisableBaseInstance;
+        bool mDepthReadOnly = false;
+        bool mStencilReadOnly = false;
     };
 
 }  // namespace dawn_native

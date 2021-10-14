@@ -79,7 +79,9 @@ namespace dawn_native {
                                              const RenderBundleEncoderDescriptor* descriptor)
         : RenderEncoderBase(device,
                             &mBundleEncodingContext,
-                            device->GetOrCreateAttachmentState(descriptor)),
+                            device->GetOrCreateAttachmentState(descriptor),
+                            false,
+                            false),
           mBundleEncodingContext(device, this) {
     }
 
