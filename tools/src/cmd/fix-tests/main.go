@@ -144,9 +144,9 @@ var (
 	// Regular expression to match a test declaration
 	reTests = regexp.MustCompile(`TEST(?:_[FP])?\([ \n]*(\w+),[ \n]*(\w+)\)`)
 	// Regular expression to match a `EXPECT_EQ(a, b)` failure for strings
-	reExpectEq = regexp.MustCompile(`([./\\a-z_-]*):(\d+).*\nExpected equality of these values:\n(?:.|\n)*?(?:Which is: |  )"((?:.|\n)*?[^\\])"\n(?:.|\n)*?(?:Which is: |  )"((?:.|\n)*?[^\\])"`)
+	reExpectEq = regexp.MustCompile(`([./\\\w_-]*):(\d+).*\nExpected equality of these values:\n(?:.|\n)*?(?:Which is: |  )"((?:.|\n)*?[^\\])"\n(?:.|\n)*?(?:Which is: |  )"((?:.|\n)*?[^\\])"`)
 	// Regular expression to match a `EXPECT_THAT(a, HasSubstr(b))` failure for strings
-	reExpectHasSubstr = regexp.MustCompile(`([./\\a-z_-]*):(\d+).*\nValue of: .*\nExpected: has substring "((?:.|\n)*?[^\\])"\n  Actual: "((?:.|\n)*?[^\\])"`)
+	reExpectHasSubstr = regexp.MustCompile(`([./\\\w_-]*):(\d+).*\nValue of: .*\nExpected: has substring "((?:.|\n)*?[^\\])"\n  Actual: "((?:.|\n)*?[^\\])"`)
 )
 
 func processFailure(test, wd, failure string) error {
