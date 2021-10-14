@@ -1,6 +1,6 @@
 # Tint changes during Origin Trial
 
-## Changes for M96
+## Changes for M97
 
 ### Breaking Changes
 
