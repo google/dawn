@@ -136,6 +136,7 @@ const char* kReservedKeywordsGLSL[] = {
     "layout",
     "long",
     "lowp",
+    "main",
     "mat2",
     "mat2x2",
     "mat2x3",

@@ -545,7 +545,7 @@ TEST_F(GlslGeneratorImplTest_Intrinsic, StorageBarrier) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"([numthreads(1, 1, 1)]
+  EXPECT_EQ(gen.result(), R"(layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   DeviceMemoryBarrierWithGroupSync();
   return;
@@ -564,7 +564,7 @@ TEST_F(GlslGeneratorImplTest_Intrinsic, WorkgroupBarrier) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"([numthreads(1, 1, 1)]
+  EXPECT_EQ(gen.result(), R"(layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   GroupMemoryBarrierWithGroupSync();
   return;
@@ -590,7 +590,7 @@ TEST_F(GlslGeneratorImplTest_Intrinsic, Ignore) {
   return ((a + b) * c);
 }
 
-[numthreads(1, 1, 1)]
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   f(1, 2, 3);
   return;

@@ -29,8 +29,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
-  EXPECT_EQ(gen.result(),
-            "static const float pos[3] = float[3](1.0f, 2.0f, 3.0f);\n");
+  EXPECT_EQ(gen.result(), "const float pos[3] = float[3](1.0f, 2.0f, 3.0f);\n");
 }
 
 TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
@@ -45,7 +44,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
   EXPECT_EQ(gen.result(), R"(#ifndef WGSL_SPEC_CONSTANT_23
 #define WGSL_SPEC_CONSTANT_23 3.0f
 #endif
-static const float pos = WGSL_SPEC_CONSTANT_23;
+const float pos = WGSL_SPEC_CONSTANT_23;
 )");
 }
 
@@ -61,7 +60,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoConstructor) {
   EXPECT_EQ(gen.result(), R"(#ifndef WGSL_SPEC_CONSTANT_23
 #error spec constant required for constant id 23
 #endif
-static const float pos = WGSL_SPEC_CONSTANT_23;
+const float pos = WGSL_SPEC_CONSTANT_23;
 )");
 }
 
@@ -82,11 +81,11 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoId) {
   EXPECT_EQ(gen.result(), R"(#ifndef WGSL_SPEC_CONSTANT_0
 #define WGSL_SPEC_CONSTANT_0 3.0f
 #endif
-static const float a = WGSL_SPEC_CONSTANT_0;
+const float a = WGSL_SPEC_CONSTANT_0;
 #ifndef WGSL_SPEC_CONSTANT_1
 #define WGSL_SPEC_CONSTANT_1 2.0f
 #endif
-static const float b = WGSL_SPEC_CONSTANT_1;
+const float b = WGSL_SPEC_CONSTANT_1;
 )");
 }
 

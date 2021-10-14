@@ -93,22 +93,6 @@ const char* image_format_to_rwtexture_type(ast::ImageFormat image_format) {
   }
 }
 
-// Helper for writing " : register(RX, spaceY)", where R is the register, X is
-// the binding point binding value, and Y is the binding point group value.
-struct RegisterAndSpace {
-  RegisterAndSpace(char r, ast::Variable::BindingPoint bp)
-      : reg(r), binding_point(bp) {}
-
-  char const reg;
-  ast::Variable::BindingPoint const binding_point;
-};
-
-std::ostream& operator<<(std::ostream& s, const RegisterAndSpace& rs) {
-  s << " : register(" << rs.reg << rs.binding_point.binding->value()
-    << ", space" << rs.binding_point.group->value() << ")";
-  return s;
-}
-
 }  // namespace
 
 GeneratorImpl::GeneratorImpl(const Program* program) : TextGenerator(program) {}
@@ -1591,41 +1575,19 @@ bool GeneratorImpl::EmitStorageVariable(const sem::Variable* var) {
     return false;
   }
 
-  out << RegisterAndSpace(var->Access() == ast::Access::kRead ? 't' : 'u',
-                          decl->binding_point())
-      << ";";
+  out << ";";
 
   return true;
 }
 
 bool GeneratorImpl::EmitHandleVariable(const sem::Variable* var) {
   auto* decl = var->Declaration();
-  auto* unwrapped_type = var->Type()->UnwrapRef();
   auto out = line();
 
   auto name = builder_.Symbols().NameFor(decl->symbol());
   auto* type = var->Type()->UnwrapRef();
   if (!EmitTypeAndName(out, type, var->StorageClass(), var->Access(), name)) {
     return false;
-  }
-
-  const char* register_space = nullptr;
-
-  if (unwrapped_type->Is<sem::Texture>()) {
-    register_space = "t";
-    if (auto* storage_tex = unwrapped_type->As<sem::StorageTexture>()) {
-      if (storage_tex->access() != ast::Access::kRead) {
-        register_space = "u";
-      }
-    }
-  } else if (unwrapped_type->Is<sem::Sampler>()) {
-    register_space = "s";
-  }
-
-  if (register_space) {
-    auto bp = decl->binding_point();
-    out << " : register(" << register_space << bp.binding->value() << ", space"
-        << bp.group->value() << ")";
   }
 
   out << ";";
@@ -1635,8 +1597,6 @@ bool GeneratorImpl::EmitHandleVariable(const sem::Variable* var) {
 bool GeneratorImpl::EmitPrivateVariable(const sem::Variable* var) {
   auto* decl = var->Declaration();
   auto out = line();
-
-  out << "static ";
 
   auto name = builder_.Symbols().NameFor(decl->symbol());
   auto* type = var->Type()->UnwrapRef();
@@ -1778,13 +1738,14 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
   {
     auto out = line();
     if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
-      // Emit the workgroup_size attribute.
+      // Emit the layout(local_size) attributes.
       auto wgsize = func_sem->workgroup_size();
-      out << "[numthreads(";
+      out << "layout(";
       for (int i = 0; i < 3; i++) {
         if (i > 0) {
           out << ", ";
         }
+        out << "local_size_" << (i == 0 ? "x" : i == 1 ? "y" : "z") << " = ";
 
         if (wgsize[i].overridable_const) {
           auto* global = builder_.Sem().Get<sem::GlobalVariable>(
@@ -1798,7 +1759,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
           out << std::to_string(wgsize[i].value);
         }
       }
-      out << ")]" << std::endl;
+      out << ") in;" << std::endl;
     }
 
     out << func->return_type()->FriendlyName(builder_.Symbols());
@@ -2641,7 +2602,7 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
     line() << "#endif";
     {
       auto out = line();
-      out << "static const ";
+      out << "const ";
       if (!EmitTypeAndName(out, type, sem->StorageClass(), sem->Access(),
                            builder_.Symbols().NameFor(var->symbol()))) {
         return false;
@@ -2650,7 +2611,7 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
     }
   } else {
     auto out = line();
-    out << "static const ";
+    out << "const ";
     if (!EmitTypeAndName(out, type, sem->StorageClass(), sem->Access(),
                          builder_.Symbols().NameFor(var->symbol()))) {
       return false;

@@ -76,7 +76,7 @@ TEST_F(GlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("  static float a = 0.0f;\n"));
+  EXPECT_THAT(gen.result(), HasSubstr("  float a = 0.0f;\n"));
 }
 
 TEST_F(GlslGeneratorImplTest_VariableDecl,
