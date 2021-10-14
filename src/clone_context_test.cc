@@ -844,7 +844,7 @@ TEST_F(CloneContextTest, ProgramIDs_Clone_ObjectNotOwnedBySrc) {
         Allocator allocator;
         ctx.Clone(allocator.Create<ProgramNode>(ProgramID::New(), dst.ID()));
       },
-      R"(internal compiler error: TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, a))");
+      R"(internal compiler error: TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, object))");
 }
 
 TEST_F(CloneContextTest, ProgramIDs_Clone_ObjectNotOwnedByDst) {

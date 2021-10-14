@@ -24,6 +24,7 @@
 
 #include "src/castable.h"
 #include "src/debug.h"
+#include "src/program_id.h"
 #include "src/symbol.h"
 #include "src/traits.h"
 
@@ -39,7 +40,7 @@ class Node;
 }  // namespace ast
 
 ProgramID ProgramIDOf(const Program*);
-ProgramID ProgramIDOf(const ast::Node*);
+ProgramID ProgramIDOf(const ProgramBuilder*);
 
 /// Cloneable is the base class for all objects that can be cloned
 class Cloneable : public Castable<Cloneable> {
@@ -93,50 +94,19 @@ class CloneContext {
   /// If the CloneContext is cloning from a Program to a ProgramBuilder, then
   /// the Node or sem::Type `a` must be owned by the Program #src.
   ///
-  /// @param a the `Node` or `sem::Type` to clone
+  /// @param object the type deriving from Cloneable to clone
   /// @return the cloned node
   template <typename T>
-  T* Clone(T* a) {
-    // If the input is nullptr, there's nothing to clone - just return nullptr.
-    if (a == nullptr) {
-      return nullptr;
-    }
-
+  T* Clone(T* object) {
     if (src) {
-      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, a);
+      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, object);
     }
-
-    // Was Replace() called for this object?
-    auto it = replacements_.find(a);
-    if (it != replacements_.end()) {
-      auto* replacement = it->second();
-      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, replacement);
-      return CheckedCast<T>(replacement);
+    if (auto* cloned = CloneCloneable(object)) {
+      auto* out = CheckedCast<T>(cloned);
+      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, out);
+      return out;
     }
-
-    Cloneable* cloned = nullptr;
-
-    // Attempt to clone using the registered replacer functions.
-    auto& typeinfo = a->TypeInfo();
-    for (auto& transform : transforms_) {
-      if (!typeinfo.Is(*transform.typeinfo)) {
-        continue;
-      }
-      cloned = transform.function(a);
-      break;
-    }
-
-    if (!cloned) {
-      // No transform for this type, or the transform returned nullptr.
-      // Clone with T::Clone().
-      cloned = a->Clone(this);
-    }
-
-    auto* out = CheckedCast<T>(cloned);
-
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, out);
-
-    return out;
+    return nullptr;
   }
 
   /// Clones the Node or sem::Type `a` into the ProgramBuilder #dst if `a` is
@@ -148,7 +118,7 @@ class CloneContext {
   /// If the CloneContext is cloning from a Program to a ProgramBuilder, then
   /// the Node or sem::Type `a` must be owned by the Program #src.
   ///
-  /// @param a the `Node` or `sem::Type` to clone
+  /// @param a the type deriving from Cloneable to clone
   /// @return the cloned node
   template <typename T>
   T* CloneWithoutTransform(T* a) {
@@ -519,12 +489,17 @@ class CloneContext {
     if (TO* cast = obj->template As<TO>()) {
       return cast;
     }
-    TINT_ICE(Clone, Diagnostics())
-        << "Cloned object was not of the expected type\n"
-        << "got:      " << obj->TypeInfo().name << "\n"
-        << "expected: " << TypeInfo::Of<TO>().name;
+    CheckedCastFailure(obj, TypeInfo::Of<TO>());
     return nullptr;
   }
+
+  /// Clones a Cloneable object, using any replacements or transforms that have
+  /// been configured.
+  tint::Cloneable* CloneCloneable(Cloneable* object);
+
+  /// Adds an error diagnostic to Diagnostics() that the cloned object was not
+  /// of the expected type.
+  void CheckedCastFailure(Cloneable* got, const TypeInfo& expected);
 
   /// @returns the diagnostic list of #dst
   diag::List& Diagnostics() const;
@@ -532,7 +507,7 @@ class CloneContext {
   /// A vector of Cloneable*
   using CloneableList = std::vector<Cloneable*>;
 
-  // Transformations to be applied to a list (vector)
+  /// Transformations to be applied to a list (vector)
   struct ListTransforms {
     /// Constructor
     ListTransforms();
