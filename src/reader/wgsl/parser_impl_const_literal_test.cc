@@ -275,6 +275,14 @@ FloatLiteralTestCase hexfloat_literal_test_cases[] = {
     {"-0x123Ep+1", -9340.f},
     {"0x1a2b3cP12", 7.024656e+09f},
     {"-0x1a2b3cP12", -7.024656e+09f},
+
+    // Examples without a binary exponent part.
+    {"0x1.", 1.0f},
+    {"0x.8", 0.5f},
+    {"0x1.8", 1.5f},
+    {"-0x1.", -1.0f},
+    {"-0x.8", -0.5f},
+    {"-0x1.8", -1.5f},
 };
 INSTANTIATE_TEST_SUITE_P(ParserImplFloatLiteralTest_HexFloat,
                          ParserImplFloatLiteralTest,
@@ -326,9 +334,18 @@ INSTANTIATE_TEST_SUITE_P(
     testing::ValuesIn(invalid_hexfloat_exponent_too_large_cases));
 
 InvalidLiteralTestCase invalid_hexfloat_exponent_missing_cases[] = {
+    // Lower case p
     {"0x0p", "1:1: expected an exponent value for hex float"},
+    {"0x0p+", "1:1: expected an exponent value for hex float"},
+    {"0x0p-", "1:1: expected an exponent value for hex float"},
     {"0x1.0p", "1:1: expected an exponent value for hex float"},
     {"0x0.1p", "1:1: expected an exponent value for hex float"},
+    // Upper case p
+    {"0x0P", "1:1: expected an exponent value for hex float"},
+    {"0x0P+", "1:1: expected an exponent value for hex float"},
+    {"0x0P-", "1:1: expected an exponent value for hex float"},
+    {"0x1.0P", "1:1: expected an exponent value for hex float"},
+    {"0x0.1P", "1:1: expected an exponent value for hex float"},
 };
 INSTANTIATE_TEST_SUITE_P(
     ParserImplInvalidLiteralTest_HexFloatExponentMissing,

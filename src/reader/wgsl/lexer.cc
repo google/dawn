@@ -343,7 +343,9 @@ Token Lexer::try_hex_float() {
   }
 
   // .?
+  bool hex_point = false;
   if (matches(end, ".")) {
+    hex_point = true;
     end++;
   }
 
@@ -359,14 +361,18 @@ Token Lexer::try_hex_float() {
     return {};
   }
 
-  // (p|P)
-  if (matches(end, "p") || matches(end, "P")) {
+  // Is the binary exponent present?  It's optional.
+  const bool has_exponent = (matches(end, "p") || matches(end, "P"));
+  if (has_exponent) {
     end++;
-  } else {
+  }
+  if (!has_exponent && !hex_point) {
+    // It's not a hex float. At best it's a hex integer.
     return {};
   }
 
-  // At this point, we know for sure our token is a hex float value.
+  // At this point, we know for sure our token is a hex float value,
+  // or an invalid token.
 
   // Parse integer part
   // [0-9a-fA-F]*
@@ -423,42 +429,48 @@ Token Lexer::try_hex_float() {
     }
   }
 
-  // (+|-)?
-  int32_t exponent_sign = 1;
-  if (matches(end, "+")) {
-    end++;
-  } else if (matches(end, "-")) {
-    exponent_sign = -1;
-    end++;
-  }
-
-  // Determine if the value is zero.
+  // Determine if the value of the mantissa is zero.
   // Note: it's not enough to check mantissa == 0 as we drop the initial bit,
   // whether it's in the integer part or the fractional part.
   const bool is_zero = !seen_prior_one_bits;
   TINT_ASSERT(Reader, !is_zero || mantissa == 0);
 
-  // Parse exponent from input
-  // [0-9]+
-  // Allow overflow (in uint32_t) when the floating point value magnitude is
-  // zero.
-  bool has_exponent = false;
-  uint32_t input_exponent = 0;
-  while (end < len_ && isdigit(content_->data[end])) {
-    has_exponent = true;
-    auto prev_exponent = input_exponent;
-    input_exponent = (input_exponent * 10) + dec_value(content_->data[end]);
-    // Check if we've overflowed input_exponent. This only matters when
-    // the mantissa is non-zero.
-    if (!is_zero && (prev_exponent > input_exponent)) {
-      return {Token::Type::kError, source,
-              "exponent is too large for hex float"};
+  // Parse the optional exponent.
+  // ((p|P)(\+|-)?[0-9]+)?
+  uint32_t input_exponent = 0;  // Defaults to 0 if not present
+  int32_t exponent_sign = 1;
+  // If the 'p' part is present, the rest of the exponent must exist.
+  if (has_exponent) {
+    // Parse the rest of the exponent.
+    // (+|-)?
+    if (matches(end, "+")) {
+      end++;
+    } else if (matches(end, "-")) {
+      exponent_sign = -1;
+      end++;
     }
-    end++;
-  }
-  if (!has_exponent) {
-    return {Token::Type::kError, source,
-            "expected an exponent value for hex float"};
+
+    // Parse exponent from input
+    // [0-9]+
+    // Allow overflow (in uint32_t) when the floating point value magnitude is
+    // zero.
+    bool has_exponent_digits = false;
+    while (end < len_ && isdigit(content_->data[end])) {
+      has_exponent_digits = true;
+      auto prev_exponent = input_exponent;
+      input_exponent = (input_exponent * 10) + dec_value(content_->data[end]);
+      // Check if we've overflowed input_exponent. This only matters when
+      // the mantissa is non-zero.
+      if (!is_zero && (prev_exponent > input_exponent)) {
+        return {Token::Type::kError, source,
+                "exponent is too large for hex float"};
+      }
+      end++;
+    }
+    if (!has_exponent_digits) {
+      return {Token::Type::kError, source,
+              "expected an exponent value for hex float"};
+    }
   }
 
   pos_ = end;
