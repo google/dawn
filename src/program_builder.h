@@ -1105,17 +1105,45 @@ class ProgramBuilder {
   /// @return `list`
   ast::ExpressionList ExprList(ast::ExpressionList list) { return list; }
 
+  /// @param source the source location for the literal
+  /// @param val the boolan value
+  /// @return a boolean literal with the given value
+  ast::BoolLiteral* Literal(const Source& source, bool val) {
+    return create<ast::BoolLiteral>(source, val);
+  }
+
   /// @param val the boolan value
   /// @return a boolean literal with the given value
   ast::BoolLiteral* Literal(bool val) { return create<ast::BoolLiteral>(val); }
+
+  /// @param source the source location for the literal
+  /// @param val the float value
+  /// @return a float literal with the given value
+  ast::FloatLiteral* Literal(const Source& source, f32 val) {
+    return create<ast::FloatLiteral>(source, val);
+  }
 
   /// @param val the float value
   /// @return a float literal with the given value
   ast::FloatLiteral* Literal(f32 val) { return create<ast::FloatLiteral>(val); }
 
+  /// @param source the source location for the literal
+  /// @param val the unsigned int value
+  /// @return a ast::UintLiteral with the given value
+  ast::UintLiteral* Literal(const Source& source, u32 val) {
+    return create<ast::UintLiteral>(source, val);
+  }
+
   /// @param val the unsigned int value
   /// @return a ast::UintLiteral with the given value
   ast::UintLiteral* Literal(u32 val) { return create<ast::UintLiteral>(val); }
+
+  /// @param source the source location for the literal
+  /// @param val the integer value
+  /// @return the ast::SintLiteral with the given value
+  ast::SintLiteral* Literal(const Source& source, i32 val) {
+    return create<ast::SintLiteral>(source, val);
+  }
 
   /// @param val the integer value
   /// @return the ast::SintLiteral with the given value
@@ -2071,14 +2099,42 @@ class ProgramBuilder {
   }
 
   /// Creates a ast::SwitchStatement with input expression and cases
+  /// @param source the source information
   /// @param condition the condition expression initializer
   /// @param cases case statements
   /// @returns the switch statement pointer
   template <typename ExpressionInit, typename... Cases>
+  ast::SwitchStatement* Switch(const Source& source,
+                               ExpressionInit&& condition,
+                               Cases&&... cases) {
+    return create<ast::SwitchStatement>(
+        source, Expr(std::forward<ExpressionInit>(condition)),
+        ast::CaseStatementList{std::forward<Cases>(cases)...});
+  }
+
+  /// Creates a ast::SwitchStatement with input expression and cases
+  /// @param condition the condition expression initializer
+  /// @param cases case statements
+  /// @returns the switch statement pointer
+  template <typename ExpressionInit,
+            typename... Cases,
+            typename = DisableIfSource<ExpressionInit>>
   ast::SwitchStatement* Switch(ExpressionInit&& condition, Cases&&... cases) {
     return create<ast::SwitchStatement>(
         Expr(std::forward<ExpressionInit>(condition)),
         ast::CaseStatementList{std::forward<Cases>(cases)...});
+  }
+
+  /// Creates a ast::CaseStatement with input list of selectors, and body
+  /// @param source the source information
+  /// @param selectors list of selectors
+  /// @param body the case body
+  /// @returns the case statement pointer
+  ast::CaseStatement* Case(const Source& source,
+                           ast::CaseSelectorList selectors,
+                           ast::BlockStatement* body = nullptr) {
+    return create<ast::CaseStatement>(source, std::move(selectors),
+                                      body ? body : Block());
   }
 
   /// Creates a ast::CaseStatement with input list of selectors, and body
@@ -2098,6 +2154,15 @@ class ProgramBuilder {
   ast::CaseStatement* Case(ast::IntLiteral* selector,
                            ast::BlockStatement* body = nullptr) {
     return Case(ast::CaseSelectorList{selector}, body);
+  }
+
+  /// Convenience function that creates a 'default' ast::CaseStatement
+  /// @param source the source information
+  /// @param body the case body
+  /// @returns the case statement pointer
+  ast::CaseStatement* DefaultCase(const Source& source,
+                                  ast::BlockStatement* body = nullptr) {
+    return Case(source, ast::CaseSelectorList{}, body);
   }
 
   /// Convenience function that creates a 'default' ast::CaseStatement

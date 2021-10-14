@@ -273,12 +273,10 @@ bool Resolver::ResolveInternal() {
   bool result = true;
   for (auto* node : builder_->ASTNodes().Objects()) {
     if (marked_.count(node) == 0) {
-      TINT_ICE(Resolver, diagnostics_)
-          << "AST node '" << node->TypeInfo().name
-          << "' was not reached by the resolver\n"
-          << "At: " << node->source() << "\n"
-          << "Content: " << builder_->str(node) << "\n"
-          << "Pointer: " << node;
+      TINT_ICE(Resolver, diagnostics_) << "AST node '" << node->TypeInfo().name
+                                       << "' was not reached by the resolver\n"
+                                       << "At: " << node->source() << "\n"
+                                       << "Pointer: " << node;
       result = false;
     }
   }
@@ -2123,9 +2121,9 @@ bool Resolver::Statement(ast::Statement* stmt) {
     return VariableDeclStatement(v);
   }
 
-  AddError(
-      "unknown statement type for type determination: " + builder_->str(stmt),
-      stmt->source());
+  AddError("unknown statement type for type determination: " +
+               std::string(stmt->TypeInfo().name),
+           stmt->source());
   return false;
 }
 
@@ -4389,7 +4387,7 @@ bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
   }
 
   bool has_default = false;
-  std::unordered_set<uint32_t> selector_set;
+  std::unordered_map<uint32_t, Source> selectors;
 
   for (auto* case_stmt : s->body()) {
     if (case_stmt->IsDefault()) {
@@ -4412,15 +4410,16 @@ bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
       }
 
       auto v = selector->value_as_u32();
-      if (selector_set.find(v) != selector_set.end()) {
-        AddError(
-            "a literal value must not appear more than once in "
-            "the case selectors for a switch statement: '" +
-                builder_->str(selector) + "'",
-            case_stmt->source());
+      auto it = selectors.find(v);
+      if (it != selectors.end()) {
+        auto val = selector->Is<ast::IntLiteral>()
+                       ? std::to_string(selector->value_as_i32())
+                       : std::to_string(selector->value_as_u32());
+        AddError("duplicate switch case '" + val + "'", selector->source());
+        AddNote("previous case declared here", it->second);
         return false;
       }
-      selector_set.emplace(v);
+      selectors.emplace(v, selector->source());
     }
   }
 
@@ -4659,7 +4658,6 @@ void Resolver::Mark(const ast::Node* node) {
       << "AST node '" << node->TypeInfo().name
       << "' was encountered twice in the same AST of a Program\n"
       << "At: " << node->source() << "\n"
-      << "Content: " << builder_->str(node) << "\n"
       << "Pointer: " << node;
 }
 
