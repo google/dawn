@@ -391,6 +391,7 @@ set(TINT_LIB_SRCS
   utils/hash.h
   utils/math.h
   utils/scoped_assignment.h
+  utils/string.h
   utils/unique_vector.h
   writer/append_vector.cc
   writer/append_vector.h
@@ -722,6 +723,7 @@ if(${TINT_BUILD_TESTS})
     utils/math_test.cc
     utils/reverse_test.cc
     utils/scoped_assignment_test.cc
+    utils/string_test.cc
     utils/unique_vector_test.cc
     writer/append_vector_test.cc
     writer/float_to_string_test.cc

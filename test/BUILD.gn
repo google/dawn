@@ -323,6 +323,7 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/utils/math_test.cc",
     "../src/utils/reverse_test.cc",
     "../src/utils/scoped_assignment_test.cc",
+    "../src/utils/string_test.cc",
     "../src/utils/unique_vector_test.cc",
     "../src/writer/append_vector_test.cc",
     "../src/writer/float_to_string_test.cc",
