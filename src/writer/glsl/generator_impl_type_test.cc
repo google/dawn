@@ -183,27 +183,6 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_StructDecl) {
 )");
 }
 
-TEST_F(GlslGeneratorImplTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
-  auto* s = Structure("S",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32()),
-                      },
-                      {create<ast::StructBlockDecoration>()});
-  Global("g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
-         });
-
-  GeneratorImpl& gen = Build();
-
-  TextGenerator::TextBuffer buf;
-  auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
-  ASSERT_TRUE(gen.EmitStructType(&buf, sem_s)) << gen.error();
-  EXPECT_EQ(buf.String(), "");
-}
-
 TEST_F(GlslGeneratorImplTest_Type, EmitType_Struct) {
   auto* s = Structure("S", {
                                Member("a", ty.i32()),

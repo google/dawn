@@ -51,6 +51,9 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength) {
   auto* expect = R"(#version 310 es
 precision mediump float;
 
+struct my_struct {
+  float a[0];
+};
 
 my_struct b;
 
@@ -100,6 +103,10 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
   auto* expect = R"(#version 310 es
 precision mediump float;
 
+struct my_struct {
+  float z;
+  float a[0];
+};
 
 my_struct b;
 
@@ -151,6 +158,9 @@ TEST_F(GlslSanitizerTest, Call_ArrayLength_ViaLets) {
   auto* expect = R"(#version 310 es
 precision mediump float;
 
+struct my_struct {
+  float a[0];
+};
 
 my_struct b;
 

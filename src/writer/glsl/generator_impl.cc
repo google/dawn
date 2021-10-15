@@ -2290,12 +2290,6 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     const sem::Type* base_type = ary;
     std::vector<uint32_t> sizes;
     while (auto* arr = base_type->As<sem::Array>()) {
-      if (arr->IsRuntimeSized()) {
-        TINT_ICE(Writer, diagnostics_)
-            << "Runtime arrays may only exist in storage buffers, which should "
-               "have been transformed into a ByteAddressBuffer";
-        return false;
-      }
       sizes.push_back(arr->Count());
       base_type = arr->ElemType();
     }
@@ -2449,14 +2443,6 @@ bool GeneratorImpl::EmitTypeAndName(std::ostream& out,
 
 bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
   auto storage_class_uses = str->StorageClassUsage();
-  if (storage_class_uses.size() ==
-      (storage_class_uses.count(ast::StorageClass::kStorage))) {
-    // The only use of the structure is as a storage buffer.
-    // Structures used as storage buffer are read and written to via a
-    // ByteAddressBuffer instead of true structure.
-    return true;
-  }
-
   line(b) << "struct " << StructName(str) << " {";
   {
     ScopedIndent si(b);
@@ -2471,14 +2457,7 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
 
       if (auto* decl = mem->Declaration()) {
         for (auto* deco : decl->decorations) {
-          if (deco->As<ast::LocationDecoration>()) {
-            auto& pipeline_stage_uses = str->PipelineStageUses();
-            if (pipeline_stage_uses.size() != 1) {
-              TINT_ICE(Writer, diagnostics_)
-                  << "invalid entry point IO struct uses";
-            }
-          } else if (auto* interpolate =
-                         deco->As<ast::InterpolateDecoration>()) {
+          if (auto* interpolate = deco->As<ast::InterpolateDecoration>()) {
             auto mod = interpolation_to_modifiers(interpolate->type,
                                                   interpolate->sampling);
             if (mod.empty()) {

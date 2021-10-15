@@ -296,6 +296,10 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_Matrix_Empty) {
       R"(#version 310 es
 precision mediump float;
 
+struct Data {
+  int a;
+  mat2x3 b;
+};
 
 Data data;
 
@@ -339,6 +343,10 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
       R"(#version 310 es
 precision mediump float;
 
+struct Data {
+  float z;
+  mat4x3 a;
+};
 
 Data data;
 
@@ -380,6 +388,10 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
       R"(#version 310 es
 precision mediump float;
 
+struct Data {
+  float z;
+  int a[5];
+};
 
 Data data;
 
@@ -422,6 +434,10 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
       R"(#version 310 es
 precision mediump float;
 
+struct Data {
+  float z;
+  int a[5];
+};
 
 Data data;
 
@@ -461,6 +477,10 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_ToArray) {
       R"(#version 310 es
 precision mediump float;
 
+struct Data {
+  float z;
+  int a[5];
+};
 
 Data data;
 
@@ -511,6 +531,13 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel) {
       R"(#version 310 es
 precision mediump float;
 
+struct Inner {
+  vec3 a;
+  vec3 b;
+};
+struct Data {
+  Inner c[4];
+};
 
 Data data;
 
@@ -564,6 +591,13 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
       R"(#version 310 es
 precision mediump float;
 
+struct Inner {
+  vec3 a;
+  vec3 b;
+};
+struct Data {
+  Inner c[4];
+};
 
 Data data;
 
@@ -617,6 +651,13 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
       R"(#version 310 es
 precision mediump float;
 
+struct Inner {
+  vec3 a;
+  vec3 b;
+};
+struct Data {
+  Inner c[4];
+};
 
 Data data;
 
@@ -670,6 +711,13 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
       R"(#version 310 es
 precision mediump float;
 
+struct Inner {
+  vec3 a;
+  vec3 b;
+};
+struct Data {
+  Inner c[4];
+};
 
 Data data;
 
@@ -719,6 +767,13 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_MultiLevel) {
       R"(#version 310 es
 precision mediump float;
 
+struct Inner {
+  vec3 a;
+  vec3 b;
+};
+struct Data {
+  Inner c[4];
+};
 
 Data data;
 
@@ -772,6 +827,13 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
       R"(#version 310 es
 precision mediump float;
 
+struct Inner {
+  ivec3 a;
+  vec3 b;
+};
+struct Data {
+  Inner c[4];
+};
 
 Data data;
 

@@ -536,6 +536,10 @@ TEST_F(GlslGeneratorImplTest_Function,
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
+struct Data {
+  int a;
+  float b;
+};
 
 Data coord;
 
@@ -585,6 +589,10 @@ TEST_F(GlslGeneratorImplTest_Function,
             R"(#version 310 es
 precision mediump float;
 
+struct Data {
+  int a;
+  float b;
+};
 
 Data coord;
 
@@ -630,6 +638,10 @@ TEST_F(GlslGeneratorImplTest_Function,
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
+struct Data {
+  int a;
+  float b;
+};
 
 Data coord;
 
@@ -676,6 +688,10 @@ TEST_F(GlslGeneratorImplTest_Function,
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
+struct Data {
+  int a;
+  float b;
+};
 
 Data coord;
 
@@ -781,6 +797,9 @@ TEST_F(GlslGeneratorImplTest_Function,
             R"(#version 310 es
 precision mediump float;
 
+struct S {
+  float x;
+};
 
 S coord;
 
@@ -1046,6 +1065,9 @@ TEST_F(GlslGeneratorImplTest_Function,
   EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
+struct Data {
+  float d;
+};
 
 Data data;
 
