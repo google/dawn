@@ -41,41 +41,59 @@ else()
   set(TINT_BUILD_TESTS_DEFAULT ON)
 endif()
 
+# option_if_not_defined(name description default)
+# Behaves like:
+#   option(name description default)
+# If a variable is not already defined with the given name, otherwise the
+# function does nothing.
+# Simplifies customization by projects that use Dawn as a dependency.
+function (option_if_not_defined name description default)
+    if(NOT DEFINED ${name})
+        option(${name} ${description} ${default})
+    endif()
+endfunction()
+
+# set_if_not_defined(name value description)
+# Behaves like:
+#   set(${name} ${value} CACHE STRING ${description})
+# If a variable is not already defined with the given name, otherwise the
+# function does nothing.
+# Simplifies customization by projects that use Dawn as a dependency.
 function (set_if_not_defined name value description)
     if(NOT DEFINED ${name})
-        set(${name} ${value} PARENT_SCOPE)
+        set(${name} ${value} CACHE STRING ${description})
     endif()
 endfunction()
 
 set_if_not_defined(TINT_THIRD_PARTY_DIR "${tint_SOURCE_DIR}/third_party" "Directory in which to find third-party dependencies.")
 
-option(TINT_BUILD_SAMPLES "Build samples" ON)
-option(TINT_BUILD_DOCS "Build documentation" ${TINT_BUILD_DOCS_DEFAULT})
-option(TINT_DOCS_WARN_AS_ERROR "When building documentation, treat warnings as errors" OFF)
-option(TINT_BUILD_SPV_READER "Build the SPIR-V input reader" ON)
-option(TINT_BUILD_WGSL_READER "Build the WGSL input reader" ON)
-option(TINT_BUILD_GLSL_WRITER "Build the GLSL output writer" ON)
-option(TINT_BUILD_HLSL_WRITER "Build the HLSL output writer" ON)
-option(TINT_BUILD_MSL_WRITER "Build the MSL output writer" ON)
-option(TINT_BUILD_SPV_WRITER "Build the SPIR-V output writer" ON)
-option(TINT_BUILD_WGSL_WRITER "Build the WGSL output writer" ON)
-option(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
-option(TINT_BUILD_SPIRV_TOOLS_FUZZER "Build SPIRV-Tools fuzzer" OFF)
-option(TINT_BUILD_AST_FUZZER "Build AST fuzzer" OFF)
-option(TINT_BUILD_REGEX_FUZZER "Build regex fuzzer" OFF)
-option(TINT_BUILD_TESTS "Build tests" ${TINT_BUILD_TESTS_DEFAULT})
-option(TINT_BUILD_AS_OTHER_OS "Override OS detection to force building of *_other.cc files" OFF)
-option(TINT_BUILD_REMOTE_COMPILE "Build the remote-compile tool for validating shaders on a remote machine" OFF)
+option_if_not_defined(TINT_BUILD_SAMPLES "Build samples" ON)
+option_if_not_defined(TINT_BUILD_DOCS "Build documentation" ${TINT_BUILD_DOCS_DEFAULT})
+option_if_not_defined(TINT_DOCS_WARN_AS_ERROR "When building documentation, treat warnings as errors" OFF)
+option_if_not_defined(TINT_BUILD_SPV_READER "Build the SPIR-V input reader" ON)
+option_if_not_defined(TINT_BUILD_WGSL_READER "Build the WGSL input reader" ON)
+option_if_not_defined(TINT_BUILD_GLSL_WRITER "Build the GLSL output writer" ON)
+option_if_not_defined(TINT_BUILD_HLSL_WRITER "Build the HLSL output writer" ON)
+option_if_not_defined(TINT_BUILD_MSL_WRITER "Build the MSL output writer" ON)
+option_if_not_defined(TINT_BUILD_SPV_WRITER "Build the SPIR-V output writer" ON)
+option_if_not_defined(TINT_BUILD_WGSL_WRITER "Build the WGSL output writer" ON)
+option_if_not_defined(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
+option_if_not_defined(TINT_BUILD_SPIRV_TOOLS_FUZZER "Build SPIRV-Tools fuzzer" OFF)
+option_if_not_defined(TINT_BUILD_AST_FUZZER "Build AST fuzzer" OFF)
+option_if_not_defined(TINT_BUILD_REGEX_FUZZER "Build regex fuzzer" OFF)
+option_if_not_defined(TINT_BUILD_TESTS "Build tests" ${TINT_BUILD_TESTS_DEFAULT})
+option_if_not_defined(TINT_BUILD_AS_OTHER_OS "Override OS detection to force building of *_other.cc files" OFF)
+option_if_not_defined(TINT_BUILD_REMOTE_COMPILE "Build the remote-compile tool for validating shaders on a remote machine" OFF)
 
 set(TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS "" CACHE STRING "Used by OSS-Fuzz to control, via link options, which fuzzing engine should be used")
 
-option(TINT_ENABLE_MSAN "Enable memory sanitizer" OFF)
-option(TINT_ENABLE_ASAN "Enable address sanitizer" OFF)
-option(TINT_ENABLE_UBSAN "Enable undefined behaviour sanitizer" OFF)
+option_if_not_defined(TINT_ENABLE_MSAN "Enable memory sanitizer" OFF)
+option_if_not_defined(TINT_ENABLE_ASAN "Enable address sanitizer" OFF)
+option_if_not_defined(TINT_ENABLE_UBSAN "Enable undefined behaviour sanitizer" OFF)
 
-option(TINT_EMIT_COVERAGE "Emit code coverage information" OFF)
+option_if_not_defined(TINT_EMIT_COVERAGE "Emit code coverage information" OFF)
 
-option(TINT_CHECK_CHROMIUM_STYLE "Check for [chromium-style] issues during build" OFF)
+option_if_not_defined(TINT_CHECK_CHROMIUM_STYLE "Check for [chromium-style] issues during build" OFF)
 
 message(STATUS "Tint build samples: ${TINT_BUILD_SAMPLES}")
 message(STATUS "Tint build docs: ${TINT_BUILD_DOCS}")
