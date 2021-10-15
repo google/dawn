@@ -1622,7 +1622,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
 
       if (type->Is<sem::Struct>()) {
         out << " [[stage_in]]";
-      } else if (var->type()->is_handle()) {
+      } else if (type->is_handle()) {
         auto bp = var->binding_point();
         if (bp.group == nullptr || bp.binding == nullptr) {
           TINT_ICE(Writer, diagnostics_)

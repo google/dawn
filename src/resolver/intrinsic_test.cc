@@ -244,7 +244,7 @@ class ResolverIntrinsicTest_TextureOperation
   void add_call_param(std::string name,
                       const ast::Type* type,
                       ast::ExpressionList* call_params) {
-    if (type->UnwrapAll()->is_handle()) {
+    if (type->IsAnyOf<ast::Texture, ast::Sampler>()) {
       Global(name, type,
              ast::DecorationList{
                  create<ast::BindingDecoration>(0),

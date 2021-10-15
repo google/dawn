@@ -228,7 +228,7 @@ struct ModuleScopeVarToEntryPointParam::State {
           // Use a pointer for non-handle types.
           auto* param_type = store_type();
           ast::DecorationList attributes;
-          if (!param_type->is_handle()) {
+          if (!var->Type()->UnwrapRef()->is_handle()) {
             param_type = ctx.dst->ty.pointer(param_type, var->StorageClass());
             is_pointer = true;
 

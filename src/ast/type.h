@@ -40,43 +40,6 @@ class Type : public Castable<Type, Node> {
   /// declared in WGSL.
   virtual std::string FriendlyName(const SymbolTable& symbols) const = 0;
 
-  /// @returns the type with all aliasing, access control and pointers removed
-  Type* UnwrapAll();
-
-  /// @returns the type with all aliasing, access control and pointers removed
-  const Type* UnwrapAll() const { return const_cast<Type*>(this)->UnwrapAll(); }
-
-  /// @returns true if this type is a scalar
-  bool is_scalar() const;
-  /// @returns true if this type is a float scalar
-  bool is_float_scalar() const;
-  /// @returns true if this type is a float matrix
-  bool is_float_matrix() const;
-  /// @returns true if this type is a float vector
-  bool is_float_vector() const;
-  /// @returns true if this type is a float scalar or vector
-  bool is_float_scalar_or_vector() const;
-  /// @returns true if this type is a float scalar or vector or matrix
-  bool is_float_scalar_or_vector_or_matrix() const;
-  /// @returns true if this type is an integer scalar
-  bool is_integer_scalar() const;
-  /// @returns true if this type is a signed integer vector
-  bool is_signed_integer_vector() const;
-  /// @returns true if this type is an unsigned vector
-  bool is_unsigned_integer_vector() const;
-  /// @returns true if this type is an unsigned scalar or vector
-  bool is_unsigned_scalar_or_vector() const;
-  /// @returns true if this type is a signed scalar or vector
-  bool is_signed_scalar_or_vector() const;
-  /// @returns true if this type is an integer scalar or vector
-  bool is_integer_scalar_or_vector() const;
-  /// @returns true if this type is a boolean vector
-  bool is_bool_vector() const;
-  /// @returns true if this type is boolean scalar or vector
-  bool is_bool_scalar_or_vector() const;
-  /// @returns true if this type is a handle type
-  bool is_handle() const;
-
  protected:
   /// Constructor
   /// @param program_id the identifier of the program that owns this node

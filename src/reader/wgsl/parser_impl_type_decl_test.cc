@@ -702,7 +702,9 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Vec) {
 
   auto* a = t.value->As<ast::Array>();
   ASSERT_TRUE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->is_unsigned_integer_vector());
+  ASSERT_TRUE(a->type()->Is<ast::Vector>());
+  EXPECT_EQ(a->type()->As<ast::Vector>()->size(), 4u);
+  EXPECT_TRUE(a->type()->As<ast::Vector>()->type()->Is<ast::U32>());
   EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 17u}}));
 }
 

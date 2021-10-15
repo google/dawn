@@ -181,7 +181,7 @@ type myf32 = f32;
 
 struct tint_symbol_1 {
   [[location(1)]]
-  loc1 : myf32;
+  loc1 : f32;
 };
 
 fn frag_main_inner(loc1 : myf32) {
@@ -982,16 +982,16 @@ fn foo(x : MyFragmentInput) -> myf32 {
 
 struct tint_symbol_1 {
   [[location(0)]]
-  col1 : myf32;
+  col1 : f32;
   [[location(1)]]
-  col2 : myf32;
+  col2 : f32;
 };
 
 struct tint_symbol_2 {
   [[location(0)]]
-  col1 : myf32;
+  col1 : f32;
   [[location(1)]]
-  col2 : myf32;
+  col2 : f32;
 };
 
 fn frag_main_inner(inputs : MyFragmentInput) -> MyFragmentOutput {

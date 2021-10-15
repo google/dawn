@@ -155,8 +155,9 @@ struct CanonicalizeEntryPointIO::State {
   /// @param attributes the attributes to apply to the shader input
   /// @returns an expression which evaluates to the value of the shader input
   ast::Expression* AddInput(std::string name,
-                            ast::Type* type,
+                            sem::Type* type,
                             ast::DecorationList attributes) {
+    auto* ast_type = CreateASTTypeFor(ctx, type);
     if (cfg.shader_style == ShaderStyle::kSpirv) {
       // Vulkan requires that integer user-defined fragment inputs are
       // always decorated with `Flat`.
@@ -178,10 +179,10 @@ struct CanonicalizeEntryPointIO::State {
       if (HasSampleMask(attributes)) {
         // Vulkan requires the type of a SampleMask builtin to be an array.
         // Declare it as array<u32, 1> and then load the first element.
-        type = ctx.dst->ty.array(type, 1);
+        ast_type = ctx.dst->ty.array(ast_type, 1);
         value = ctx.dst->IndexAccessor(value, 0);
       }
-      ctx.dst->Global(symbol, type, ast::StorageClass::kInput,
+      ctx.dst->Global(symbol, ast_type, ast::StorageClass::kInput,
                       std::move(attributes));
       return value;
     } else if (cfg.shader_style == ShaderStyle::kMsl &&
@@ -192,7 +193,7 @@ struct CanonicalizeEntryPointIO::State {
                           ? ctx.dst->Symbols().Register(name)
                           : ctx.dst->Symbols().New(name);
       wrapper_ep_parameters.push_back(
-          ctx.dst->Param(symbol, type, std::move(attributes)));
+          ctx.dst->Param(symbol, ast_type, std::move(attributes)));
       return ctx.dst->Expr(symbol);
     } else {
       // Otherwise, move it to the new structure member list.
@@ -200,7 +201,7 @@ struct CanonicalizeEntryPointIO::State {
                           ? ctx.dst->Symbols().Register(name)
                           : ctx.dst->Symbols().New(name);
       wrapper_struct_param_members.push_back(
-          ctx.dst->Member(symbol, type, std::move(attributes)));
+          ctx.dst->Member(symbol, ast_type, std::move(attributes)));
       return ctx.dst->MemberAccessor(InputStructSymbol(), symbol);
     }
   }
@@ -211,7 +212,7 @@ struct CanonicalizeEntryPointIO::State {
   /// @param attributes the attributes to apply to the shader output
   /// @param value the value of the shader output
   void AddOutput(std::string name,
-                 ast::Type* type,
+                 sem::Type* type,
                  ast::DecorationList attributes,
                  ast::Expression* value) {
     // Vulkan requires that integer user-defined vertex outputs are
@@ -226,7 +227,7 @@ struct CanonicalizeEntryPointIO::State {
 
     OutputValue output;
     output.name = name;
-    output.type = type;
+    output.type = CreateASTTypeFor(ctx, type);
     output.attributes = std::move(attributes);
     output.value = value;
     wrapper_output_values.push_back(output);
@@ -249,8 +250,7 @@ struct CanonicalizeEntryPointIO::State {
     }
 
     auto name = ctx.src->Symbols().NameFor(param->Declaration()->symbol());
-    auto* type = ctx.Clone(param->Declaration()->type());
-    auto* input_expr = AddInput(name, type, std::move(attributes));
+    auto* input_expr = AddInput(name, param->Type(), std::move(attributes));
     inner_call_parameters.push_back(input_expr);
   }
 
@@ -273,9 +273,8 @@ struct CanonicalizeEntryPointIO::State {
 
       auto* member_ast = member->Declaration();
       auto name = ctx.src->Symbols().NameFor(member_ast->symbol());
-      auto* type = ctx.Clone(member_ast->type());
       auto attributes = CloneShaderIOAttributes(member_ast->decorations());
-      auto* input_expr = AddInput(name, type, std::move(attributes));
+      auto* input_expr = AddInput(name, member->Type(), std::move(attributes));
       inner_struct_values.push_back(input_expr);
     }
 
@@ -300,20 +299,18 @@ struct CanonicalizeEntryPointIO::State {
 
         auto* member_ast = member->Declaration();
         auto name = ctx.src->Symbols().NameFor(member_ast->symbol());
-        auto* type = ctx.Clone(member_ast->type());
         auto attributes = CloneShaderIOAttributes(member_ast->decorations());
 
         // Extract the original structure member.
-        AddOutput(name, type, std::move(attributes),
+        AddOutput(name, member->Type(), std::move(attributes),
                   ctx.dst->MemberAccessor(original_result, name));
       }
     } else if (!inner_ret_type->Is<sem::Void>()) {
-      auto* type = ctx.Clone(func_ast->return_type());
       auto attributes =
           CloneShaderIOAttributes(func_ast->return_type_decorations());
 
       // Propagate the non-struct return value as is.
-      AddOutput("value", type, std::move(attributes),
+      AddOutput("value", func_sem->ReturnType(), std::move(attributes),
                 ctx.dst->Expr(original_result));
     }
   }
@@ -333,7 +330,7 @@ struct CanonicalizeEntryPointIO::State {
 
     // No existing sample mask builtin was found, so create a new output value
     // using the fixed sample mask.
-    AddOutput("fixed_sample_mask", ctx.dst->ty.u32(),
+    AddOutput("fixed_sample_mask", ctx.dst->create<sem::U32>(),
               {ctx.dst->Builtin(ast::Builtin::kSampleMask)},
               ctx.dst->Expr(cfg.fixed_sample_mask));
   }
@@ -341,7 +338,7 @@ struct CanonicalizeEntryPointIO::State {
   /// Add a point size builtin to the wrapper function output.
   void AddVertexPointSize() {
     // Create a new output value and assign it a literal 1.0 value.
-    AddOutput("vertex_point_size", ctx.dst->ty.f32(),
+    AddOutput("vertex_point_size", ctx.dst->create<sem::F32>(),
               {ctx.dst->Builtin(ast::Builtin::kPointSize)}, ctx.dst->Expr(1.f));
   }
 

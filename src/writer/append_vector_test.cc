@@ -84,7 +84,10 @@ TEST_F(AppendVectorTest, Vec2i32FromVec2u32_u32) {
   auto* v2u32_to_v2i32 =
       vec_123->values()[0]->As<ast::TypeConstructorExpression>();
   ASSERT_NE(v2u32_to_v2i32, nullptr);
-  EXPECT_TRUE(v2u32_to_v2i32->type()->is_signed_integer_vector());
+  ASSERT_TRUE(v2u32_to_v2i32->type()->Is<ast::Vector>());
+  EXPECT_EQ(v2u32_to_v2i32->type()->As<ast::Vector>()->size(), 2u);
+  EXPECT_TRUE(
+      v2u32_to_v2i32->type()->As<ast::Vector>()->type()->Is<ast::I32>());
   EXPECT_EQ(v2u32_to_v2i32->values().size(), 1u);
   EXPECT_EQ(v2u32_to_v2i32->values()[0], uvec_12);
 
